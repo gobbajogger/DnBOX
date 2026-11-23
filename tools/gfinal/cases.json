@@ -1,0 +1,9214 @@
+[
+  {
+    "glyph": "LEVEL",
+    "case": "v000",
+    "value": 0,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "LEVEL",
+    "case": "v032",
+    "value": 32,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "LEVEL",
+    "case": "v064",
+    "value": 64,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "LEVEL",
+    "case": "v096",
+    "value": 96,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "LEVEL",
+    "case": "v127",
+    "value": 127,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "LEVEL",
+    "case": "live00",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 1.0,
+      "env": 1.0,
+      "filter_env": 1.0,
+      "phase": 0.0,
+      "progress": 0.0,
+      "mod": 0.0,
+      "tape_phase": 0.0,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.0
+    }
+  },
+  {
+    "glyph": "LEVEL",
+    "case": "live01",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.8777380818906038,
+      "env": 0.8777380818906038,
+      "filter_env": 0.8777380818906038,
+      "phase": 0.041666666666666664,
+      "progress": 0.043478260869565216,
+      "mod": 0.25882975260416663,
+      "tape_phase": 0.041666666666666664,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.041666666666666664
+    }
+  },
+  {
+    "glyph": "LEVEL",
+    "case": "live02",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.7704013326893682,
+      "env": 0.7704013326893682,
+      "filter_env": 0.7704013326893682,
+      "phase": 0.08333333333333333,
+      "progress": 0.08695652173913043,
+      "mod": 0.5,
+      "tape_phase": 0.08333333333333333,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.08333333333333333
+    }
+  },
+  {
+    "glyph": "LEVEL",
+    "case": "live05",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.5209244437839674,
+      "env": 0.5209244437839674,
+      "filter_env": 0.5209244437839674,
+      "phase": 0.20833333333333334,
+      "progress": 0.21739130434782608,
+      "mod": 0.9659220377604166,
+      "tape_phase": 0.20833333333333334,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.20833333333333334
+    }
+  },
+  {
+    "glyph": "LEVEL",
+    "case": "live10",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.2713576607082201,
+      "env": 0.2713576607082201,
+      "filter_env": 0.2713576607082201,
+      "phase": 0.4166666666666667,
+      "progress": 0.43478260869565216,
+      "mod": 0.4999999999999999,
+      "tape_phase": 0.4166666666666667,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.4166666666666667
+    }
+  },
+  {
+    "glyph": "LEVEL",
+    "case": "live18",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.09557918880296788,
+      "env": 0.09557918880296788,
+      "filter_env": 0.09557918880296788,
+      "phase": 0.75,
+      "progress": 0.782608695652174,
+      "mod": -1.0,
+      "tape_phase": 0.75,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.75
+    }
+  },
+  {
+    "glyph": "LEVEL",
+    "case": "live23",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.04978752136230469,
+      "env": 0.04978752136230469,
+      "filter_env": 0.04978752136230469,
+      "phase": 0.9583333333333334,
+      "progress": 1.0,
+      "mod": -0.25882975260416646,
+      "tape_phase": 0.9583333333333334,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.9583333333333334
+    }
+  },
+  {
+    "glyph": "PAN",
+    "case": "v000",
+    "value": 0,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "PAN",
+    "case": "v032",
+    "value": 32,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "PAN",
+    "case": "v064",
+    "value": 64,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "PAN",
+    "case": "v096",
+    "value": 96,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "PAN",
+    "case": "v127",
+    "value": 127,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "STEREO",
+    "case": "v000",
+    "value": 0,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "STEREO",
+    "case": "v032",
+    "value": 32,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "STEREO",
+    "case": "v064",
+    "value": 64,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "STEREO",
+    "case": "v096",
+    "value": 96,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "STEREO",
+    "case": "v127",
+    "value": 127,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "STEREO",
+    "case": "live00",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 1.0,
+      "env": 1.0,
+      "filter_env": 1.0,
+      "phase": 0.0,
+      "progress": 0.0,
+      "mod": 0.0,
+      "tape_phase": 0.0,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.0
+    }
+  },
+  {
+    "glyph": "STEREO",
+    "case": "live01",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.8777380818906038,
+      "env": 0.8777380818906038,
+      "filter_env": 0.8777380818906038,
+      "phase": 0.041666666666666664,
+      "progress": 0.043478260869565216,
+      "mod": 0.25882975260416663,
+      "tape_phase": 0.041666666666666664,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.041666666666666664
+    }
+  },
+  {
+    "glyph": "STEREO",
+    "case": "live02",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.7704013326893682,
+      "env": 0.7704013326893682,
+      "filter_env": 0.7704013326893682,
+      "phase": 0.08333333333333333,
+      "progress": 0.08695652173913043,
+      "mod": 0.5,
+      "tape_phase": 0.08333333333333333,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.08333333333333333
+    }
+  },
+  {
+    "glyph": "STEREO",
+    "case": "live05",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.5209244437839674,
+      "env": 0.5209244437839674,
+      "filter_env": 0.5209244437839674,
+      "phase": 0.20833333333333334,
+      "progress": 0.21739130434782608,
+      "mod": 0.9659220377604166,
+      "tape_phase": 0.20833333333333334,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.20833333333333334
+    }
+  },
+  {
+    "glyph": "STEREO",
+    "case": "live10",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.2713576607082201,
+      "env": 0.2713576607082201,
+      "filter_env": 0.2713576607082201,
+      "phase": 0.4166666666666667,
+      "progress": 0.43478260869565216,
+      "mod": 0.4999999999999999,
+      "tape_phase": 0.4166666666666667,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.4166666666666667
+    }
+  },
+  {
+    "glyph": "STEREO",
+    "case": "live18",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.09557918880296788,
+      "env": 0.09557918880296788,
+      "filter_env": 0.09557918880296788,
+      "phase": 0.75,
+      "progress": 0.782608695652174,
+      "mod": -1.0,
+      "tape_phase": 0.75,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.75
+    }
+  },
+  {
+    "glyph": "STEREO",
+    "case": "live23",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.04978752136230469,
+      "env": 0.04978752136230469,
+      "filter_env": 0.04978752136230469,
+      "phase": 0.9583333333333334,
+      "progress": 1.0,
+      "mod": -0.25882975260416646,
+      "tape_phase": 0.9583333333333334,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.9583333333333334
+    }
+  },
+  {
+    "glyph": "WAVE",
+    "case": "v000",
+    "value": 0,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "WAVE",
+    "case": "v032",
+    "value": 32,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "WAVE",
+    "case": "v064",
+    "value": 64,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "WAVE",
+    "case": "v096",
+    "value": 96,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "WAVE",
+    "case": "v127",
+    "value": 127,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "WAVE",
+    "case": "live00",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 1.0,
+      "env": 1.0,
+      "filter_env": 1.0,
+      "phase": 0.0,
+      "progress": 0.0,
+      "mod": 0.0,
+      "tape_phase": 0.0,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.0
+    }
+  },
+  {
+    "glyph": "WAVE",
+    "case": "live01",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.8777380818906038,
+      "env": 0.8777380818906038,
+      "filter_env": 0.8777380818906038,
+      "phase": 0.041666666666666664,
+      "progress": 0.043478260869565216,
+      "mod": 0.25882975260416663,
+      "tape_phase": 0.041666666666666664,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.041666666666666664
+    }
+  },
+  {
+    "glyph": "WAVE",
+    "case": "live02",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.7704013326893682,
+      "env": 0.7704013326893682,
+      "filter_env": 0.7704013326893682,
+      "phase": 0.08333333333333333,
+      "progress": 0.08695652173913043,
+      "mod": 0.5,
+      "tape_phase": 0.08333333333333333,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.08333333333333333
+    }
+  },
+  {
+    "glyph": "WAVE",
+    "case": "live05",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.5209244437839674,
+      "env": 0.5209244437839674,
+      "filter_env": 0.5209244437839674,
+      "phase": 0.20833333333333334,
+      "progress": 0.21739130434782608,
+      "mod": 0.9659220377604166,
+      "tape_phase": 0.20833333333333334,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.20833333333333334
+    }
+  },
+  {
+    "glyph": "WAVE",
+    "case": "live10",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.2713576607082201,
+      "env": 0.2713576607082201,
+      "filter_env": 0.2713576607082201,
+      "phase": 0.4166666666666667,
+      "progress": 0.43478260869565216,
+      "mod": 0.4999999999999999,
+      "tape_phase": 0.4166666666666667,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.4166666666666667
+    }
+  },
+  {
+    "glyph": "WAVE",
+    "case": "live18",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.09557918880296788,
+      "env": 0.09557918880296788,
+      "filter_env": 0.09557918880296788,
+      "phase": 0.75,
+      "progress": 0.782608695652174,
+      "mod": -1.0,
+      "tape_phase": 0.75,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.75
+    }
+  },
+  {
+    "glyph": "WAVE",
+    "case": "live23",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.04978752136230469,
+      "env": 0.04978752136230469,
+      "filter_env": 0.04978752136230469,
+      "phase": 0.9583333333333334,
+      "progress": 1.0,
+      "mod": -0.25882975260416646,
+      "tape_phase": 0.9583333333333334,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.9583333333333334
+    }
+  },
+  {
+    "glyph": "WAVE_SHAPE",
+    "case": "v000",
+    "value": 0,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "WAVE_SHAPE",
+    "case": "v032",
+    "value": 32,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "WAVE_SHAPE",
+    "case": "v064",
+    "value": 64,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "WAVE_SHAPE",
+    "case": "v096",
+    "value": 96,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "WAVE_SHAPE",
+    "case": "v127",
+    "value": 127,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "WAVE_SHAPE",
+    "case": "s00",
+    "value": 64,
+    "state": 0,
+    "live": {}
+  },
+  {
+    "glyph": "WAVE_SHAPE",
+    "case": "s01",
+    "value": 64,
+    "state": 1,
+    "live": {}
+  },
+  {
+    "glyph": "WAVE_SHAPE",
+    "case": "s02",
+    "value": 64,
+    "state": 2,
+    "live": {}
+  },
+  {
+    "glyph": "WAVE_SHAPE",
+    "case": "s03",
+    "value": 64,
+    "state": 3,
+    "live": {}
+  },
+  {
+    "glyph": "SUB",
+    "case": "v000",
+    "value": 0,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "SUB",
+    "case": "v032",
+    "value": 32,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "SUB",
+    "case": "v064",
+    "value": 64,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "SUB",
+    "case": "v096",
+    "value": 96,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "SUB",
+    "case": "v127",
+    "value": 127,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "SUB",
+    "case": "live00",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 1.0,
+      "env": 1.0,
+      "filter_env": 1.0,
+      "phase": 0.0,
+      "progress": 0.0,
+      "mod": 0.0,
+      "tape_phase": 0.0,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.0
+    }
+  },
+  {
+    "glyph": "SUB",
+    "case": "live01",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.8777380818906038,
+      "env": 0.8777380818906038,
+      "filter_env": 0.8777380818906038,
+      "phase": 0.041666666666666664,
+      "progress": 0.043478260869565216,
+      "mod": 0.25882975260416663,
+      "tape_phase": 0.041666666666666664,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.041666666666666664
+    }
+  },
+  {
+    "glyph": "SUB",
+    "case": "live02",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.7704013326893682,
+      "env": 0.7704013326893682,
+      "filter_env": 0.7704013326893682,
+      "phase": 0.08333333333333333,
+      "progress": 0.08695652173913043,
+      "mod": 0.5,
+      "tape_phase": 0.08333333333333333,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.08333333333333333
+    }
+  },
+  {
+    "glyph": "SUB",
+    "case": "live05",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.5209244437839674,
+      "env": 0.5209244437839674,
+      "filter_env": 0.5209244437839674,
+      "phase": 0.20833333333333334,
+      "progress": 0.21739130434782608,
+      "mod": 0.9659220377604166,
+      "tape_phase": 0.20833333333333334,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.20833333333333334
+    }
+  },
+  {
+    "glyph": "SUB",
+    "case": "live10",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.2713576607082201,
+      "env": 0.2713576607082201,
+      "filter_env": 0.2713576607082201,
+      "phase": 0.4166666666666667,
+      "progress": 0.43478260869565216,
+      "mod": 0.4999999999999999,
+      "tape_phase": 0.4166666666666667,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.4166666666666667
+    }
+  },
+  {
+    "glyph": "SUB",
+    "case": "live18",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.09557918880296788,
+      "env": 0.09557918880296788,
+      "filter_env": 0.09557918880296788,
+      "phase": 0.75,
+      "progress": 0.782608695652174,
+      "mod": -1.0,
+      "tape_phase": 0.75,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.75
+    }
+  },
+  {
+    "glyph": "SUB",
+    "case": "live23",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.04978752136230469,
+      "env": 0.04978752136230469,
+      "filter_env": 0.04978752136230469,
+      "phase": 0.9583333333333334,
+      "progress": 1.0,
+      "mod": -0.25882975260416646,
+      "tape_phase": 0.9583333333333334,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.9583333333333334
+    }
+  },
+  {
+    "glyph": "NOISE",
+    "case": "v000",
+    "value": 0,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "NOISE",
+    "case": "v032",
+    "value": 32,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "NOISE",
+    "case": "v064",
+    "value": 64,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "NOISE",
+    "case": "v096",
+    "value": 96,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "NOISE",
+    "case": "v127",
+    "value": 127,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "NOISE",
+    "case": "live00",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 1.0,
+      "env": 1.0,
+      "filter_env": 1.0,
+      "phase": 0.0,
+      "progress": 0.0,
+      "mod": 0.0,
+      "tape_phase": 0.0,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.0
+    }
+  },
+  {
+    "glyph": "NOISE",
+    "case": "live01",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.8777380818906038,
+      "env": 0.8777380818906038,
+      "filter_env": 0.8777380818906038,
+      "phase": 0.041666666666666664,
+      "progress": 0.043478260869565216,
+      "mod": 0.25882975260416663,
+      "tape_phase": 0.041666666666666664,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.041666666666666664
+    }
+  },
+  {
+    "glyph": "NOISE",
+    "case": "live02",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.7704013326893682,
+      "env": 0.7704013326893682,
+      "filter_env": 0.7704013326893682,
+      "phase": 0.08333333333333333,
+      "progress": 0.08695652173913043,
+      "mod": 0.5,
+      "tape_phase": 0.08333333333333333,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.08333333333333333
+    }
+  },
+  {
+    "glyph": "NOISE",
+    "case": "live05",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.5209244437839674,
+      "env": 0.5209244437839674,
+      "filter_env": 0.5209244437839674,
+      "phase": 0.20833333333333334,
+      "progress": 0.21739130434782608,
+      "mod": 0.9659220377604166,
+      "tape_phase": 0.20833333333333334,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.20833333333333334
+    }
+  },
+  {
+    "glyph": "NOISE",
+    "case": "live10",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.2713576607082201,
+      "env": 0.2713576607082201,
+      "filter_env": 0.2713576607082201,
+      "phase": 0.4166666666666667,
+      "progress": 0.43478260869565216,
+      "mod": 0.4999999999999999,
+      "tape_phase": 0.4166666666666667,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.4166666666666667
+    }
+  },
+  {
+    "glyph": "NOISE",
+    "case": "live18",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.09557918880296788,
+      "env": 0.09557918880296788,
+      "filter_env": 0.09557918880296788,
+      "phase": 0.75,
+      "progress": 0.782608695652174,
+      "mod": -1.0,
+      "tape_phase": 0.75,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.75
+    }
+  },
+  {
+    "glyph": "NOISE",
+    "case": "live23",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.04978752136230469,
+      "env": 0.04978752136230469,
+      "filter_env": 0.04978752136230469,
+      "phase": 0.9583333333333334,
+      "progress": 1.0,
+      "mod": -0.25882975260416646,
+      "tape_phase": 0.9583333333333334,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.9583333333333334
+    }
+  },
+  {
+    "glyph": "TUNE",
+    "case": "v000",
+    "value": 0,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "TUNE",
+    "case": "v032",
+    "value": 32,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "TUNE",
+    "case": "v064",
+    "value": 64,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "TUNE",
+    "case": "v096",
+    "value": 96,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "TUNE",
+    "case": "v127",
+    "value": 127,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "TUNE",
+    "case": "live00",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 1.0,
+      "env": 1.0,
+      "filter_env": 1.0,
+      "phase": 0.0,
+      "progress": 0.0,
+      "mod": 0.0,
+      "tape_phase": 0.0,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.0
+    }
+  },
+  {
+    "glyph": "TUNE",
+    "case": "live01",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.8777380818906038,
+      "env": 0.8777380818906038,
+      "filter_env": 0.8777380818906038,
+      "phase": 0.041666666666666664,
+      "progress": 0.043478260869565216,
+      "mod": 0.25882975260416663,
+      "tape_phase": 0.041666666666666664,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.041666666666666664
+    }
+  },
+  {
+    "glyph": "TUNE",
+    "case": "live02",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.7704013326893682,
+      "env": 0.7704013326893682,
+      "filter_env": 0.7704013326893682,
+      "phase": 0.08333333333333333,
+      "progress": 0.08695652173913043,
+      "mod": 0.5,
+      "tape_phase": 0.08333333333333333,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.08333333333333333
+    }
+  },
+  {
+    "glyph": "TUNE",
+    "case": "live05",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.5209244437839674,
+      "env": 0.5209244437839674,
+      "filter_env": 0.5209244437839674,
+      "phase": 0.20833333333333334,
+      "progress": 0.21739130434782608,
+      "mod": 0.9659220377604166,
+      "tape_phase": 0.20833333333333334,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.20833333333333334
+    }
+  },
+  {
+    "glyph": "TUNE",
+    "case": "live10",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.2713576607082201,
+      "env": 0.2713576607082201,
+      "filter_env": 0.2713576607082201,
+      "phase": 0.4166666666666667,
+      "progress": 0.43478260869565216,
+      "mod": 0.4999999999999999,
+      "tape_phase": 0.4166666666666667,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.4166666666666667
+    }
+  },
+  {
+    "glyph": "TUNE",
+    "case": "live18",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.09557918880296788,
+      "env": 0.09557918880296788,
+      "filter_env": 0.09557918880296788,
+      "phase": 0.75,
+      "progress": 0.782608695652174,
+      "mod": -1.0,
+      "tape_phase": 0.75,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.75
+    }
+  },
+  {
+    "glyph": "TUNE",
+    "case": "live23",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.04978752136230469,
+      "env": 0.04978752136230469,
+      "filter_env": 0.04978752136230469,
+      "phase": 0.9583333333333334,
+      "progress": 1.0,
+      "mod": -0.25882975260416646,
+      "tape_phase": 0.9583333333333334,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.9583333333333334
+    }
+  },
+  {
+    "glyph": "GLIDE",
+    "case": "v000",
+    "value": 0,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "GLIDE",
+    "case": "v032",
+    "value": 32,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "GLIDE",
+    "case": "v064",
+    "value": 64,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "GLIDE",
+    "case": "v096",
+    "value": 96,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "GLIDE",
+    "case": "v127",
+    "value": 127,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "GLIDE",
+    "case": "live00",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 1.0,
+      "env": 1.0,
+      "filter_env": 1.0,
+      "phase": 0.0,
+      "progress": 0.0,
+      "mod": 0.0,
+      "tape_phase": 0.0,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.0
+    }
+  },
+  {
+    "glyph": "GLIDE",
+    "case": "live01",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.8777380818906038,
+      "env": 0.8777380818906038,
+      "filter_env": 0.8777380818906038,
+      "phase": 0.041666666666666664,
+      "progress": 0.043478260869565216,
+      "mod": 0.25882975260416663,
+      "tape_phase": 0.041666666666666664,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.041666666666666664
+    }
+  },
+  {
+    "glyph": "GLIDE",
+    "case": "live02",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.7704013326893682,
+      "env": 0.7704013326893682,
+      "filter_env": 0.7704013326893682,
+      "phase": 0.08333333333333333,
+      "progress": 0.08695652173913043,
+      "mod": 0.5,
+      "tape_phase": 0.08333333333333333,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.08333333333333333
+    }
+  },
+  {
+    "glyph": "GLIDE",
+    "case": "live05",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.5209244437839674,
+      "env": 0.5209244437839674,
+      "filter_env": 0.5209244437839674,
+      "phase": 0.20833333333333334,
+      "progress": 0.21739130434782608,
+      "mod": 0.9659220377604166,
+      "tape_phase": 0.20833333333333334,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.20833333333333334
+    }
+  },
+  {
+    "glyph": "GLIDE",
+    "case": "live10",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.2713576607082201,
+      "env": 0.2713576607082201,
+      "filter_env": 0.2713576607082201,
+      "phase": 0.4166666666666667,
+      "progress": 0.43478260869565216,
+      "mod": 0.4999999999999999,
+      "tape_phase": 0.4166666666666667,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.4166666666666667
+    }
+  },
+  {
+    "glyph": "GLIDE",
+    "case": "live18",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.09557918880296788,
+      "env": 0.09557918880296788,
+      "filter_env": 0.09557918880296788,
+      "phase": 0.75,
+      "progress": 0.782608695652174,
+      "mod": -1.0,
+      "tape_phase": 0.75,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.75
+    }
+  },
+  {
+    "glyph": "GLIDE",
+    "case": "live23",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.04978752136230469,
+      "env": 0.04978752136230469,
+      "filter_env": 0.04978752136230469,
+      "phase": 0.9583333333333334,
+      "progress": 1.0,
+      "mod": -0.25882975260416646,
+      "tape_phase": 0.9583333333333334,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.9583333333333334
+    }
+  },
+  {
+    "glyph": "PWM",
+    "case": "v000",
+    "value": 0,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "PWM",
+    "case": "v032",
+    "value": 32,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "PWM",
+    "case": "v064",
+    "value": 64,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "PWM",
+    "case": "v096",
+    "value": 96,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "PWM",
+    "case": "v127",
+    "value": 127,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "PWM",
+    "case": "live00",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 1.0,
+      "env": 1.0,
+      "filter_env": 1.0,
+      "phase": 0.0,
+      "progress": 0.0,
+      "mod": 0.0,
+      "tape_phase": 0.0,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.0
+    }
+  },
+  {
+    "glyph": "PWM",
+    "case": "live01",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.8777380818906038,
+      "env": 0.8777380818906038,
+      "filter_env": 0.8777380818906038,
+      "phase": 0.041666666666666664,
+      "progress": 0.043478260869565216,
+      "mod": 0.25882975260416663,
+      "tape_phase": 0.041666666666666664,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.041666666666666664
+    }
+  },
+  {
+    "glyph": "PWM",
+    "case": "live02",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.7704013326893682,
+      "env": 0.7704013326893682,
+      "filter_env": 0.7704013326893682,
+      "phase": 0.08333333333333333,
+      "progress": 0.08695652173913043,
+      "mod": 0.5,
+      "tape_phase": 0.08333333333333333,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.08333333333333333
+    }
+  },
+  {
+    "glyph": "PWM",
+    "case": "live05",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.5209244437839674,
+      "env": 0.5209244437839674,
+      "filter_env": 0.5209244437839674,
+      "phase": 0.20833333333333334,
+      "progress": 0.21739130434782608,
+      "mod": 0.9659220377604166,
+      "tape_phase": 0.20833333333333334,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.20833333333333334
+    }
+  },
+  {
+    "glyph": "PWM",
+    "case": "live10",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.2713576607082201,
+      "env": 0.2713576607082201,
+      "filter_env": 0.2713576607082201,
+      "phase": 0.4166666666666667,
+      "progress": 0.43478260869565216,
+      "mod": 0.4999999999999999,
+      "tape_phase": 0.4166666666666667,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.4166666666666667
+    }
+  },
+  {
+    "glyph": "PWM",
+    "case": "live18",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.09557918880296788,
+      "env": 0.09557918880296788,
+      "filter_env": 0.09557918880296788,
+      "phase": 0.75,
+      "progress": 0.782608695652174,
+      "mod": -1.0,
+      "tape_phase": 0.75,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.75
+    }
+  },
+  {
+    "glyph": "PWM",
+    "case": "live23",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.04978752136230469,
+      "env": 0.04978752136230469,
+      "filter_env": 0.04978752136230469,
+      "phase": 0.9583333333333334,
+      "progress": 1.0,
+      "mod": -0.25882975260416646,
+      "tape_phase": 0.9583333333333334,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.9583333333333334
+    }
+  },
+  {
+    "glyph": "FM",
+    "case": "v000",
+    "value": 0,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "FM",
+    "case": "v032",
+    "value": 32,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "FM",
+    "case": "v064",
+    "value": 64,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "FM",
+    "case": "v096",
+    "value": 96,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "FM",
+    "case": "v127",
+    "value": 127,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "FM",
+    "case": "live00",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 1.0,
+      "env": 1.0,
+      "filter_env": 1.0,
+      "phase": 0.0,
+      "progress": 0.0,
+      "mod": 0.0,
+      "tape_phase": 0.0,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.0
+    }
+  },
+  {
+    "glyph": "FM",
+    "case": "live01",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.8777380818906038,
+      "env": 0.8777380818906038,
+      "filter_env": 0.8777380818906038,
+      "phase": 0.041666666666666664,
+      "progress": 0.043478260869565216,
+      "mod": 0.25882975260416663,
+      "tape_phase": 0.041666666666666664,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.041666666666666664
+    }
+  },
+  {
+    "glyph": "FM",
+    "case": "live02",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.7704013326893682,
+      "env": 0.7704013326893682,
+      "filter_env": 0.7704013326893682,
+      "phase": 0.08333333333333333,
+      "progress": 0.08695652173913043,
+      "mod": 0.5,
+      "tape_phase": 0.08333333333333333,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.08333333333333333
+    }
+  },
+  {
+    "glyph": "FM",
+    "case": "live05",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.5209244437839674,
+      "env": 0.5209244437839674,
+      "filter_env": 0.5209244437839674,
+      "phase": 0.20833333333333334,
+      "progress": 0.21739130434782608,
+      "mod": 0.9659220377604166,
+      "tape_phase": 0.20833333333333334,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.20833333333333334
+    }
+  },
+  {
+    "glyph": "FM",
+    "case": "live10",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.2713576607082201,
+      "env": 0.2713576607082201,
+      "filter_env": 0.2713576607082201,
+      "phase": 0.4166666666666667,
+      "progress": 0.43478260869565216,
+      "mod": 0.4999999999999999,
+      "tape_phase": 0.4166666666666667,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.4166666666666667
+    }
+  },
+  {
+    "glyph": "FM",
+    "case": "live18",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.09557918880296788,
+      "env": 0.09557918880296788,
+      "filter_env": 0.09557918880296788,
+      "phase": 0.75,
+      "progress": 0.782608695652174,
+      "mod": -1.0,
+      "tape_phase": 0.75,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.75
+    }
+  },
+  {
+    "glyph": "FM",
+    "case": "live23",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.04978752136230469,
+      "env": 0.04978752136230469,
+      "filter_env": 0.04978752136230469,
+      "phase": 0.9583333333333334,
+      "progress": 1.0,
+      "mod": -0.25882975260416646,
+      "tape_phase": 0.9583333333333334,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.9583333333333334
+    }
+  },
+  {
+    "glyph": "DRIVE",
+    "case": "v000",
+    "value": 0,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "DRIVE",
+    "case": "v032",
+    "value": 32,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "DRIVE",
+    "case": "v064",
+    "value": 64,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "DRIVE",
+    "case": "v096",
+    "value": 96,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "DRIVE",
+    "case": "v127",
+    "value": 127,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "DRIVE",
+    "case": "live00",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 1.0,
+      "env": 1.0,
+      "filter_env": 1.0,
+      "phase": 0.0,
+      "progress": 0.0,
+      "mod": 0.0,
+      "tape_phase": 0.0,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.0
+    }
+  },
+  {
+    "glyph": "DRIVE",
+    "case": "live01",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.8777380818906038,
+      "env": 0.8777380818906038,
+      "filter_env": 0.8777380818906038,
+      "phase": 0.041666666666666664,
+      "progress": 0.043478260869565216,
+      "mod": 0.25882975260416663,
+      "tape_phase": 0.041666666666666664,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.041666666666666664
+    }
+  },
+  {
+    "glyph": "DRIVE",
+    "case": "live02",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.7704013326893682,
+      "env": 0.7704013326893682,
+      "filter_env": 0.7704013326893682,
+      "phase": 0.08333333333333333,
+      "progress": 0.08695652173913043,
+      "mod": 0.5,
+      "tape_phase": 0.08333333333333333,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.08333333333333333
+    }
+  },
+  {
+    "glyph": "DRIVE",
+    "case": "live05",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.5209244437839674,
+      "env": 0.5209244437839674,
+      "filter_env": 0.5209244437839674,
+      "phase": 0.20833333333333334,
+      "progress": 0.21739130434782608,
+      "mod": 0.9659220377604166,
+      "tape_phase": 0.20833333333333334,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.20833333333333334
+    }
+  },
+  {
+    "glyph": "DRIVE",
+    "case": "live10",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.2713576607082201,
+      "env": 0.2713576607082201,
+      "filter_env": 0.2713576607082201,
+      "phase": 0.4166666666666667,
+      "progress": 0.43478260869565216,
+      "mod": 0.4999999999999999,
+      "tape_phase": 0.4166666666666667,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.4166666666666667
+    }
+  },
+  {
+    "glyph": "DRIVE",
+    "case": "live18",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.09557918880296788,
+      "env": 0.09557918880296788,
+      "filter_env": 0.09557918880296788,
+      "phase": 0.75,
+      "progress": 0.782608695652174,
+      "mod": -1.0,
+      "tape_phase": 0.75,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.75
+    }
+  },
+  {
+    "glyph": "DRIVE",
+    "case": "live23",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.04978752136230469,
+      "env": 0.04978752136230469,
+      "filter_env": 0.04978752136230469,
+      "phase": 0.9583333333333334,
+      "progress": 1.0,
+      "mod": -0.25882975260416646,
+      "tape_phase": 0.9583333333333334,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.9583333333333334
+    }
+  },
+  {
+    "glyph": "FOLD",
+    "case": "v000",
+    "value": 0,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "FOLD",
+    "case": "v032",
+    "value": 32,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "FOLD",
+    "case": "v064",
+    "value": 64,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "FOLD",
+    "case": "v096",
+    "value": 96,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "FOLD",
+    "case": "v127",
+    "value": 127,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "FOLD",
+    "case": "live00",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 1.0,
+      "env": 1.0,
+      "filter_env": 1.0,
+      "phase": 0.0,
+      "progress": 0.0,
+      "mod": 0.0,
+      "tape_phase": 0.0,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.0
+    }
+  },
+  {
+    "glyph": "FOLD",
+    "case": "live01",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.8777380818906038,
+      "env": 0.8777380818906038,
+      "filter_env": 0.8777380818906038,
+      "phase": 0.041666666666666664,
+      "progress": 0.043478260869565216,
+      "mod": 0.25882975260416663,
+      "tape_phase": 0.041666666666666664,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.041666666666666664
+    }
+  },
+  {
+    "glyph": "FOLD",
+    "case": "live02",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.7704013326893682,
+      "env": 0.7704013326893682,
+      "filter_env": 0.7704013326893682,
+      "phase": 0.08333333333333333,
+      "progress": 0.08695652173913043,
+      "mod": 0.5,
+      "tape_phase": 0.08333333333333333,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.08333333333333333
+    }
+  },
+  {
+    "glyph": "FOLD",
+    "case": "live05",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.5209244437839674,
+      "env": 0.5209244437839674,
+      "filter_env": 0.5209244437839674,
+      "phase": 0.20833333333333334,
+      "progress": 0.21739130434782608,
+      "mod": 0.9659220377604166,
+      "tape_phase": 0.20833333333333334,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.20833333333333334
+    }
+  },
+  {
+    "glyph": "FOLD",
+    "case": "live10",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.2713576607082201,
+      "env": 0.2713576607082201,
+      "filter_env": 0.2713576607082201,
+      "phase": 0.4166666666666667,
+      "progress": 0.43478260869565216,
+      "mod": 0.4999999999999999,
+      "tape_phase": 0.4166666666666667,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.4166666666666667
+    }
+  },
+  {
+    "glyph": "FOLD",
+    "case": "live18",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.09557918880296788,
+      "env": 0.09557918880296788,
+      "filter_env": 0.09557918880296788,
+      "phase": 0.75,
+      "progress": 0.782608695652174,
+      "mod": -1.0,
+      "tape_phase": 0.75,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.75
+    }
+  },
+  {
+    "glyph": "FOLD",
+    "case": "live23",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.04978752136230469,
+      "env": 0.04978752136230469,
+      "filter_env": 0.04978752136230469,
+      "phase": 0.9583333333333334,
+      "progress": 1.0,
+      "mod": -0.25882975260416646,
+      "tape_phase": 0.9583333333333334,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.9583333333333334
+    }
+  },
+  {
+    "glyph": "BITS",
+    "case": "v000",
+    "value": 0,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "BITS",
+    "case": "v032",
+    "value": 32,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "BITS",
+    "case": "v064",
+    "value": 64,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "BITS",
+    "case": "v096",
+    "value": 96,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "BITS",
+    "case": "v127",
+    "value": 127,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "BITS",
+    "case": "live00",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 1.0,
+      "env": 1.0,
+      "filter_env": 1.0,
+      "phase": 0.0,
+      "progress": 0.0,
+      "mod": 0.0,
+      "tape_phase": 0.0,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.0
+    }
+  },
+  {
+    "glyph": "BITS",
+    "case": "live01",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.8777380818906038,
+      "env": 0.8777380818906038,
+      "filter_env": 0.8777380818906038,
+      "phase": 0.041666666666666664,
+      "progress": 0.043478260869565216,
+      "mod": 0.25882975260416663,
+      "tape_phase": 0.041666666666666664,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.041666666666666664
+    }
+  },
+  {
+    "glyph": "BITS",
+    "case": "live02",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.7704013326893682,
+      "env": 0.7704013326893682,
+      "filter_env": 0.7704013326893682,
+      "phase": 0.08333333333333333,
+      "progress": 0.08695652173913043,
+      "mod": 0.5,
+      "tape_phase": 0.08333333333333333,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.08333333333333333
+    }
+  },
+  {
+    "glyph": "BITS",
+    "case": "live05",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.5209244437839674,
+      "env": 0.5209244437839674,
+      "filter_env": 0.5209244437839674,
+      "phase": 0.20833333333333334,
+      "progress": 0.21739130434782608,
+      "mod": 0.9659220377604166,
+      "tape_phase": 0.20833333333333334,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.20833333333333334
+    }
+  },
+  {
+    "glyph": "BITS",
+    "case": "live10",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.2713576607082201,
+      "env": 0.2713576607082201,
+      "filter_env": 0.2713576607082201,
+      "phase": 0.4166666666666667,
+      "progress": 0.43478260869565216,
+      "mod": 0.4999999999999999,
+      "tape_phase": 0.4166666666666667,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.4166666666666667
+    }
+  },
+  {
+    "glyph": "BITS",
+    "case": "live18",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.09557918880296788,
+      "env": 0.09557918880296788,
+      "filter_env": 0.09557918880296788,
+      "phase": 0.75,
+      "progress": 0.782608695652174,
+      "mod": -1.0,
+      "tape_phase": 0.75,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.75
+    }
+  },
+  {
+    "glyph": "BITS",
+    "case": "live23",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.04978752136230469,
+      "env": 0.04978752136230469,
+      "filter_env": 0.04978752136230469,
+      "phase": 0.9583333333333334,
+      "progress": 1.0,
+      "mod": -0.25882975260416646,
+      "tape_phase": 0.9583333333333334,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.9583333333333334
+    }
+  },
+  {
+    "glyph": "SAMPLE_RATE",
+    "case": "v000",
+    "value": 0,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "SAMPLE_RATE",
+    "case": "v032",
+    "value": 32,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "SAMPLE_RATE",
+    "case": "v064",
+    "value": 64,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "SAMPLE_RATE",
+    "case": "v096",
+    "value": 96,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "SAMPLE_RATE",
+    "case": "v127",
+    "value": 127,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "SAMPLE_RATE",
+    "case": "live00",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 1.0,
+      "env": 1.0,
+      "filter_env": 1.0,
+      "phase": 0.0,
+      "progress": 0.0,
+      "mod": 0.0,
+      "tape_phase": 0.0,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.0
+    }
+  },
+  {
+    "glyph": "SAMPLE_RATE",
+    "case": "live01",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.8777380818906038,
+      "env": 0.8777380818906038,
+      "filter_env": 0.8777380818906038,
+      "phase": 0.041666666666666664,
+      "progress": 0.043478260869565216,
+      "mod": 0.25882975260416663,
+      "tape_phase": 0.041666666666666664,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.041666666666666664
+    }
+  },
+  {
+    "glyph": "SAMPLE_RATE",
+    "case": "live02",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.7704013326893682,
+      "env": 0.7704013326893682,
+      "filter_env": 0.7704013326893682,
+      "phase": 0.08333333333333333,
+      "progress": 0.08695652173913043,
+      "mod": 0.5,
+      "tape_phase": 0.08333333333333333,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.08333333333333333
+    }
+  },
+  {
+    "glyph": "SAMPLE_RATE",
+    "case": "live05",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.5209244437839674,
+      "env": 0.5209244437839674,
+      "filter_env": 0.5209244437839674,
+      "phase": 0.20833333333333334,
+      "progress": 0.21739130434782608,
+      "mod": 0.9659220377604166,
+      "tape_phase": 0.20833333333333334,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.20833333333333334
+    }
+  },
+  {
+    "glyph": "SAMPLE_RATE",
+    "case": "live10",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.2713576607082201,
+      "env": 0.2713576607082201,
+      "filter_env": 0.2713576607082201,
+      "phase": 0.4166666666666667,
+      "progress": 0.43478260869565216,
+      "mod": 0.4999999999999999,
+      "tape_phase": 0.4166666666666667,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.4166666666666667
+    }
+  },
+  {
+    "glyph": "SAMPLE_RATE",
+    "case": "live18",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.09557918880296788,
+      "env": 0.09557918880296788,
+      "filter_env": 0.09557918880296788,
+      "phase": 0.75,
+      "progress": 0.782608695652174,
+      "mod": -1.0,
+      "tape_phase": 0.75,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.75
+    }
+  },
+  {
+    "glyph": "SAMPLE_RATE",
+    "case": "live23",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.04978752136230469,
+      "env": 0.04978752136230469,
+      "filter_env": 0.04978752136230469,
+      "phase": 0.9583333333333334,
+      "progress": 1.0,
+      "mod": -0.25882975260416646,
+      "tape_phase": 0.9583333333333334,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.9583333333333334
+    }
+  },
+  {
+    "glyph": "DISTORTION",
+    "case": "v000",
+    "value": 0,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "DISTORTION",
+    "case": "v032",
+    "value": 32,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "DISTORTION",
+    "case": "v064",
+    "value": 64,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "DISTORTION",
+    "case": "v096",
+    "value": 96,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "DISTORTION",
+    "case": "v127",
+    "value": 127,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "DISTORTION",
+    "case": "s00",
+    "value": 64,
+    "state": 0,
+    "live": {}
+  },
+  {
+    "glyph": "DISTORTION",
+    "case": "s01",
+    "value": 64,
+    "state": 1,
+    "live": {}
+  },
+  {
+    "glyph": "DISTORTION",
+    "case": "s02",
+    "value": 64,
+    "state": 2,
+    "live": {}
+  },
+  {
+    "glyph": "DISTORTION",
+    "case": "s03",
+    "value": 64,
+    "state": 3,
+    "live": {}
+  },
+  {
+    "glyph": "DISTORTION",
+    "case": "s04",
+    "value": 64,
+    "state": 4,
+    "live": {}
+  },
+  {
+    "glyph": "DISTORTION",
+    "case": "s05",
+    "value": 64,
+    "state": 5,
+    "live": {}
+  },
+  {
+    "glyph": "DISTORTION",
+    "case": "s06",
+    "value": 64,
+    "state": 6,
+    "live": {}
+  },
+  {
+    "glyph": "DISTORTION",
+    "case": "s07",
+    "value": 64,
+    "state": 7,
+    "live": {}
+  },
+  {
+    "glyph": "CUTOFF",
+    "case": "v000",
+    "value": 0,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "CUTOFF",
+    "case": "v032",
+    "value": 32,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "CUTOFF",
+    "case": "v064",
+    "value": 64,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "CUTOFF",
+    "case": "v096",
+    "value": 96,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "CUTOFF",
+    "case": "v127",
+    "value": 127,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "CUTOFF",
+    "case": "live00",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 1.0,
+      "env": 1.0,
+      "filter_env": 1.0,
+      "phase": 0.0,
+      "progress": 0.0,
+      "mod": 0.0,
+      "tape_phase": 0.0,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.0
+    }
+  },
+  {
+    "glyph": "CUTOFF",
+    "case": "live01",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.8777380818906038,
+      "env": 0.8777380818906038,
+      "filter_env": 0.8777380818906038,
+      "phase": 0.041666666666666664,
+      "progress": 0.043478260869565216,
+      "mod": 0.25882975260416663,
+      "tape_phase": 0.041666666666666664,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.041666666666666664
+    }
+  },
+  {
+    "glyph": "CUTOFF",
+    "case": "live02",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.7704013326893682,
+      "env": 0.7704013326893682,
+      "filter_env": 0.7704013326893682,
+      "phase": 0.08333333333333333,
+      "progress": 0.08695652173913043,
+      "mod": 0.5,
+      "tape_phase": 0.08333333333333333,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.08333333333333333
+    }
+  },
+  {
+    "glyph": "CUTOFF",
+    "case": "live05",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.5209244437839674,
+      "env": 0.5209244437839674,
+      "filter_env": 0.5209244437839674,
+      "phase": 0.20833333333333334,
+      "progress": 0.21739130434782608,
+      "mod": 0.9659220377604166,
+      "tape_phase": 0.20833333333333334,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.20833333333333334
+    }
+  },
+  {
+    "glyph": "CUTOFF",
+    "case": "live10",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.2713576607082201,
+      "env": 0.2713576607082201,
+      "filter_env": 0.2713576607082201,
+      "phase": 0.4166666666666667,
+      "progress": 0.43478260869565216,
+      "mod": 0.4999999999999999,
+      "tape_phase": 0.4166666666666667,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.4166666666666667
+    }
+  },
+  {
+    "glyph": "CUTOFF",
+    "case": "live18",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.09557918880296788,
+      "env": 0.09557918880296788,
+      "filter_env": 0.09557918880296788,
+      "phase": 0.75,
+      "progress": 0.782608695652174,
+      "mod": -1.0,
+      "tape_phase": 0.75,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.75
+    }
+  },
+  {
+    "glyph": "CUTOFF",
+    "case": "live23",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.04978752136230469,
+      "env": 0.04978752136230469,
+      "filter_env": 0.04978752136230469,
+      "phase": 0.9583333333333334,
+      "progress": 1.0,
+      "mod": -0.25882975260416646,
+      "tape_phase": 0.9583333333333334,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.9583333333333334
+    }
+  },
+  {
+    "glyph": "HIGHPASS",
+    "case": "v000",
+    "value": 0,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "HIGHPASS",
+    "case": "v032",
+    "value": 32,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "HIGHPASS",
+    "case": "v064",
+    "value": 64,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "HIGHPASS",
+    "case": "v096",
+    "value": 96,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "HIGHPASS",
+    "case": "v127",
+    "value": 127,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "HIGHPASS",
+    "case": "live00",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 1.0,
+      "env": 1.0,
+      "filter_env": 1.0,
+      "phase": 0.0,
+      "progress": 0.0,
+      "mod": 0.0,
+      "tape_phase": 0.0,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.0
+    }
+  },
+  {
+    "glyph": "HIGHPASS",
+    "case": "live01",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.8777380818906038,
+      "env": 0.8777380818906038,
+      "filter_env": 0.8777380818906038,
+      "phase": 0.041666666666666664,
+      "progress": 0.043478260869565216,
+      "mod": 0.25882975260416663,
+      "tape_phase": 0.041666666666666664,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.041666666666666664
+    }
+  },
+  {
+    "glyph": "HIGHPASS",
+    "case": "live02",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.7704013326893682,
+      "env": 0.7704013326893682,
+      "filter_env": 0.7704013326893682,
+      "phase": 0.08333333333333333,
+      "progress": 0.08695652173913043,
+      "mod": 0.5,
+      "tape_phase": 0.08333333333333333,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.08333333333333333
+    }
+  },
+  {
+    "glyph": "HIGHPASS",
+    "case": "live05",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.5209244437839674,
+      "env": 0.5209244437839674,
+      "filter_env": 0.5209244437839674,
+      "phase": 0.20833333333333334,
+      "progress": 0.21739130434782608,
+      "mod": 0.9659220377604166,
+      "tape_phase": 0.20833333333333334,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.20833333333333334
+    }
+  },
+  {
+    "glyph": "HIGHPASS",
+    "case": "live10",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.2713576607082201,
+      "env": 0.2713576607082201,
+      "filter_env": 0.2713576607082201,
+      "phase": 0.4166666666666667,
+      "progress": 0.43478260869565216,
+      "mod": 0.4999999999999999,
+      "tape_phase": 0.4166666666666667,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.4166666666666667
+    }
+  },
+  {
+    "glyph": "HIGHPASS",
+    "case": "live18",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.09557918880296788,
+      "env": 0.09557918880296788,
+      "filter_env": 0.09557918880296788,
+      "phase": 0.75,
+      "progress": 0.782608695652174,
+      "mod": -1.0,
+      "tape_phase": 0.75,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.75
+    }
+  },
+  {
+    "glyph": "HIGHPASS",
+    "case": "live23",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.04978752136230469,
+      "env": 0.04978752136230469,
+      "filter_env": 0.04978752136230469,
+      "phase": 0.9583333333333334,
+      "progress": 1.0,
+      "mod": -0.25882975260416646,
+      "tape_phase": 0.9583333333333334,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.9583333333333334
+    }
+  },
+  {
+    "glyph": "RESONANCE",
+    "case": "v000",
+    "value": 0,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "RESONANCE",
+    "case": "v032",
+    "value": 32,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "RESONANCE",
+    "case": "v064",
+    "value": 64,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "RESONANCE",
+    "case": "v096",
+    "value": 96,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "RESONANCE",
+    "case": "v127",
+    "value": 127,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "RESONANCE",
+    "case": "live00",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 1.0,
+      "env": 1.0,
+      "filter_env": 1.0,
+      "phase": 0.0,
+      "progress": 0.0,
+      "mod": 0.0,
+      "tape_phase": 0.0,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.0
+    }
+  },
+  {
+    "glyph": "RESONANCE",
+    "case": "live01",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.8777380818906038,
+      "env": 0.8777380818906038,
+      "filter_env": 0.8777380818906038,
+      "phase": 0.041666666666666664,
+      "progress": 0.043478260869565216,
+      "mod": 0.25882975260416663,
+      "tape_phase": 0.041666666666666664,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.041666666666666664
+    }
+  },
+  {
+    "glyph": "RESONANCE",
+    "case": "live02",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.7704013326893682,
+      "env": 0.7704013326893682,
+      "filter_env": 0.7704013326893682,
+      "phase": 0.08333333333333333,
+      "progress": 0.08695652173913043,
+      "mod": 0.5,
+      "tape_phase": 0.08333333333333333,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.08333333333333333
+    }
+  },
+  {
+    "glyph": "RESONANCE",
+    "case": "live05",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.5209244437839674,
+      "env": 0.5209244437839674,
+      "filter_env": 0.5209244437839674,
+      "phase": 0.20833333333333334,
+      "progress": 0.21739130434782608,
+      "mod": 0.9659220377604166,
+      "tape_phase": 0.20833333333333334,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.20833333333333334
+    }
+  },
+  {
+    "glyph": "RESONANCE",
+    "case": "live10",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.2713576607082201,
+      "env": 0.2713576607082201,
+      "filter_env": 0.2713576607082201,
+      "phase": 0.4166666666666667,
+      "progress": 0.43478260869565216,
+      "mod": 0.4999999999999999,
+      "tape_phase": 0.4166666666666667,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.4166666666666667
+    }
+  },
+  {
+    "glyph": "RESONANCE",
+    "case": "live18",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.09557918880296788,
+      "env": 0.09557918880296788,
+      "filter_env": 0.09557918880296788,
+      "phase": 0.75,
+      "progress": 0.782608695652174,
+      "mod": -1.0,
+      "tape_phase": 0.75,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.75
+    }
+  },
+  {
+    "glyph": "RESONANCE",
+    "case": "live23",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.04978752136230469,
+      "env": 0.04978752136230469,
+      "filter_env": 0.04978752136230469,
+      "phase": 0.9583333333333334,
+      "progress": 1.0,
+      "mod": -0.25882975260416646,
+      "tape_phase": 0.9583333333333334,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.9583333333333334
+    }
+  },
+  {
+    "glyph": "FILTER_MODE",
+    "case": "v000",
+    "value": 0,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "FILTER_MODE",
+    "case": "v032",
+    "value": 32,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "FILTER_MODE",
+    "case": "v064",
+    "value": 64,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "FILTER_MODE",
+    "case": "v096",
+    "value": 96,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "FILTER_MODE",
+    "case": "v127",
+    "value": 127,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "FILTER_MODE",
+    "case": "s00",
+    "value": 64,
+    "state": 0,
+    "live": {}
+  },
+  {
+    "glyph": "FILTER_MODE",
+    "case": "s01",
+    "value": 64,
+    "state": 1,
+    "live": {}
+  },
+  {
+    "glyph": "FILTER_MODE",
+    "case": "s02",
+    "value": 64,
+    "state": 2,
+    "live": {}
+  },
+  {
+    "glyph": "FILTER_MODE",
+    "case": "s03",
+    "value": 64,
+    "state": 3,
+    "live": {}
+  },
+  {
+    "glyph": "BANDWIDTH",
+    "case": "v000",
+    "value": 0,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "BANDWIDTH",
+    "case": "v032",
+    "value": 32,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "BANDWIDTH",
+    "case": "v064",
+    "value": 64,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "BANDWIDTH",
+    "case": "v096",
+    "value": 96,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "BANDWIDTH",
+    "case": "v127",
+    "value": 127,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "ENV_AMOUNT",
+    "case": "v000",
+    "value": 0,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "ENV_AMOUNT",
+    "case": "v032",
+    "value": 32,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "ENV_AMOUNT",
+    "case": "v064",
+    "value": 64,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "ENV_AMOUNT",
+    "case": "v096",
+    "value": 96,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "ENV_AMOUNT",
+    "case": "v127",
+    "value": 127,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "ENV_AMOUNT",
+    "case": "live00",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 1.0,
+      "env": 1.0,
+      "filter_env": 1.0,
+      "phase": 0.0,
+      "progress": 0.0,
+      "mod": 0.0,
+      "tape_phase": 0.0,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.0
+    }
+  },
+  {
+    "glyph": "ENV_AMOUNT",
+    "case": "live01",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.8777380818906038,
+      "env": 0.8777380818906038,
+      "filter_env": 0.8777380818906038,
+      "phase": 0.041666666666666664,
+      "progress": 0.043478260869565216,
+      "mod": 0.25882975260416663,
+      "tape_phase": 0.041666666666666664,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.041666666666666664
+    }
+  },
+  {
+    "glyph": "ENV_AMOUNT",
+    "case": "live02",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.7704013326893682,
+      "env": 0.7704013326893682,
+      "filter_env": 0.7704013326893682,
+      "phase": 0.08333333333333333,
+      "progress": 0.08695652173913043,
+      "mod": 0.5,
+      "tape_phase": 0.08333333333333333,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.08333333333333333
+    }
+  },
+  {
+    "glyph": "ENV_AMOUNT",
+    "case": "live05",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.5209244437839674,
+      "env": 0.5209244437839674,
+      "filter_env": 0.5209244437839674,
+      "phase": 0.20833333333333334,
+      "progress": 0.21739130434782608,
+      "mod": 0.9659220377604166,
+      "tape_phase": 0.20833333333333334,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.20833333333333334
+    }
+  },
+  {
+    "glyph": "ENV_AMOUNT",
+    "case": "live10",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.2713576607082201,
+      "env": 0.2713576607082201,
+      "filter_env": 0.2713576607082201,
+      "phase": 0.4166666666666667,
+      "progress": 0.43478260869565216,
+      "mod": 0.4999999999999999,
+      "tape_phase": 0.4166666666666667,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.4166666666666667
+    }
+  },
+  {
+    "glyph": "ENV_AMOUNT",
+    "case": "live18",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.09557918880296788,
+      "env": 0.09557918880296788,
+      "filter_env": 0.09557918880296788,
+      "phase": 0.75,
+      "progress": 0.782608695652174,
+      "mod": -1.0,
+      "tape_phase": 0.75,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.75
+    }
+  },
+  {
+    "glyph": "ENV_AMOUNT",
+    "case": "live23",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.04978752136230469,
+      "env": 0.04978752136230469,
+      "filter_env": 0.04978752136230469,
+      "phase": 0.9583333333333334,
+      "progress": 1.0,
+      "mod": -0.25882975260416646,
+      "tape_phase": 0.9583333333333334,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.9583333333333334
+    }
+  },
+  {
+    "glyph": "ATTACK",
+    "case": "v000",
+    "value": 0,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "ATTACK",
+    "case": "v032",
+    "value": 32,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "ATTACK",
+    "case": "v064",
+    "value": 64,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "ATTACK",
+    "case": "v096",
+    "value": 96,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "ATTACK",
+    "case": "v127",
+    "value": 127,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "ATTACK",
+    "case": "live00",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 1.0,
+      "env": 1.0,
+      "filter_env": 1.0,
+      "phase": 0.0,
+      "progress": 0.0,
+      "mod": 0.0,
+      "tape_phase": 0.0,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.0
+    }
+  },
+  {
+    "glyph": "ATTACK",
+    "case": "live01",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.8777380818906038,
+      "env": 0.8777380818906038,
+      "filter_env": 0.8777380818906038,
+      "phase": 0.041666666666666664,
+      "progress": 0.043478260869565216,
+      "mod": 0.25882975260416663,
+      "tape_phase": 0.041666666666666664,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.041666666666666664
+    }
+  },
+  {
+    "glyph": "ATTACK",
+    "case": "live02",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.7704013326893682,
+      "env": 0.7704013326893682,
+      "filter_env": 0.7704013326893682,
+      "phase": 0.08333333333333333,
+      "progress": 0.08695652173913043,
+      "mod": 0.5,
+      "tape_phase": 0.08333333333333333,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.08333333333333333
+    }
+  },
+  {
+    "glyph": "ATTACK",
+    "case": "live05",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.5209244437839674,
+      "env": 0.5209244437839674,
+      "filter_env": 0.5209244437839674,
+      "phase": 0.20833333333333334,
+      "progress": 0.21739130434782608,
+      "mod": 0.9659220377604166,
+      "tape_phase": 0.20833333333333334,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.20833333333333334
+    }
+  },
+  {
+    "glyph": "ATTACK",
+    "case": "live10",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.2713576607082201,
+      "env": 0.2713576607082201,
+      "filter_env": 0.2713576607082201,
+      "phase": 0.4166666666666667,
+      "progress": 0.43478260869565216,
+      "mod": 0.4999999999999999,
+      "tape_phase": 0.4166666666666667,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.4166666666666667
+    }
+  },
+  {
+    "glyph": "ATTACK",
+    "case": "live18",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.09557918880296788,
+      "env": 0.09557918880296788,
+      "filter_env": 0.09557918880296788,
+      "phase": 0.75,
+      "progress": 0.782608695652174,
+      "mod": -1.0,
+      "tape_phase": 0.75,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.75
+    }
+  },
+  {
+    "glyph": "ATTACK",
+    "case": "live23",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.04978752136230469,
+      "env": 0.04978752136230469,
+      "filter_env": 0.04978752136230469,
+      "phase": 0.9583333333333334,
+      "progress": 1.0,
+      "mod": -0.25882975260416646,
+      "tape_phase": 0.9583333333333334,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.9583333333333334
+    }
+  },
+  {
+    "glyph": "DECAY",
+    "case": "v000",
+    "value": 0,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "DECAY",
+    "case": "v032",
+    "value": 32,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "DECAY",
+    "case": "v064",
+    "value": 64,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "DECAY",
+    "case": "v096",
+    "value": 96,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "DECAY",
+    "case": "v127",
+    "value": 127,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "DECAY",
+    "case": "live00",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 1.0,
+      "env": 1.0,
+      "filter_env": 1.0,
+      "phase": 0.0,
+      "progress": 0.0,
+      "mod": 0.0,
+      "tape_phase": 0.0,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.0
+    }
+  },
+  {
+    "glyph": "DECAY",
+    "case": "live01",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.8777380818906038,
+      "env": 0.8777380818906038,
+      "filter_env": 0.8777380818906038,
+      "phase": 0.041666666666666664,
+      "progress": 0.043478260869565216,
+      "mod": 0.25882975260416663,
+      "tape_phase": 0.041666666666666664,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.041666666666666664
+    }
+  },
+  {
+    "glyph": "DECAY",
+    "case": "live02",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.7704013326893682,
+      "env": 0.7704013326893682,
+      "filter_env": 0.7704013326893682,
+      "phase": 0.08333333333333333,
+      "progress": 0.08695652173913043,
+      "mod": 0.5,
+      "tape_phase": 0.08333333333333333,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.08333333333333333
+    }
+  },
+  {
+    "glyph": "DECAY",
+    "case": "live05",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.5209244437839674,
+      "env": 0.5209244437839674,
+      "filter_env": 0.5209244437839674,
+      "phase": 0.20833333333333334,
+      "progress": 0.21739130434782608,
+      "mod": 0.9659220377604166,
+      "tape_phase": 0.20833333333333334,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.20833333333333334
+    }
+  },
+  {
+    "glyph": "DECAY",
+    "case": "live10",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.2713576607082201,
+      "env": 0.2713576607082201,
+      "filter_env": 0.2713576607082201,
+      "phase": 0.4166666666666667,
+      "progress": 0.43478260869565216,
+      "mod": 0.4999999999999999,
+      "tape_phase": 0.4166666666666667,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.4166666666666667
+    }
+  },
+  {
+    "glyph": "DECAY",
+    "case": "live18",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.09557918880296788,
+      "env": 0.09557918880296788,
+      "filter_env": 0.09557918880296788,
+      "phase": 0.75,
+      "progress": 0.782608695652174,
+      "mod": -1.0,
+      "tape_phase": 0.75,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.75
+    }
+  },
+  {
+    "glyph": "DECAY",
+    "case": "live23",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.04978752136230469,
+      "env": 0.04978752136230469,
+      "filter_env": 0.04978752136230469,
+      "phase": 0.9583333333333334,
+      "progress": 1.0,
+      "mod": -0.25882975260416646,
+      "tape_phase": 0.9583333333333334,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.9583333333333334
+    }
+  },
+  {
+    "glyph": "SUSTAIN",
+    "case": "v000",
+    "value": 0,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "SUSTAIN",
+    "case": "v032",
+    "value": 32,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "SUSTAIN",
+    "case": "v064",
+    "value": 64,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "SUSTAIN",
+    "case": "v096",
+    "value": 96,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "SUSTAIN",
+    "case": "v127",
+    "value": 127,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "SUSTAIN",
+    "case": "live00",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 1.0,
+      "env": 1.0,
+      "filter_env": 1.0,
+      "phase": 0.0,
+      "progress": 0.0,
+      "mod": 0.0,
+      "tape_phase": 0.0,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.0
+    }
+  },
+  {
+    "glyph": "SUSTAIN",
+    "case": "live01",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.8777380818906038,
+      "env": 0.8777380818906038,
+      "filter_env": 0.8777380818906038,
+      "phase": 0.041666666666666664,
+      "progress": 0.043478260869565216,
+      "mod": 0.25882975260416663,
+      "tape_phase": 0.041666666666666664,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.041666666666666664
+    }
+  },
+  {
+    "glyph": "SUSTAIN",
+    "case": "live02",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.7704013326893682,
+      "env": 0.7704013326893682,
+      "filter_env": 0.7704013326893682,
+      "phase": 0.08333333333333333,
+      "progress": 0.08695652173913043,
+      "mod": 0.5,
+      "tape_phase": 0.08333333333333333,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.08333333333333333
+    }
+  },
+  {
+    "glyph": "SUSTAIN",
+    "case": "live05",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.5209244437839674,
+      "env": 0.5209244437839674,
+      "filter_env": 0.5209244437839674,
+      "phase": 0.20833333333333334,
+      "progress": 0.21739130434782608,
+      "mod": 0.9659220377604166,
+      "tape_phase": 0.20833333333333334,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.20833333333333334
+    }
+  },
+  {
+    "glyph": "SUSTAIN",
+    "case": "live10",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.2713576607082201,
+      "env": 0.2713576607082201,
+      "filter_env": 0.2713576607082201,
+      "phase": 0.4166666666666667,
+      "progress": 0.43478260869565216,
+      "mod": 0.4999999999999999,
+      "tape_phase": 0.4166666666666667,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.4166666666666667
+    }
+  },
+  {
+    "glyph": "SUSTAIN",
+    "case": "live18",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.09557918880296788,
+      "env": 0.09557918880296788,
+      "filter_env": 0.09557918880296788,
+      "phase": 0.75,
+      "progress": 0.782608695652174,
+      "mod": -1.0,
+      "tape_phase": 0.75,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.75
+    }
+  },
+  {
+    "glyph": "SUSTAIN",
+    "case": "live23",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.04978752136230469,
+      "env": 0.04978752136230469,
+      "filter_env": 0.04978752136230469,
+      "phase": 0.9583333333333334,
+      "progress": 1.0,
+      "mod": -0.25882975260416646,
+      "tape_phase": 0.9583333333333334,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.9583333333333334
+    }
+  },
+  {
+    "glyph": "RELEASE",
+    "case": "v000",
+    "value": 0,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "RELEASE",
+    "case": "v032",
+    "value": 32,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "RELEASE",
+    "case": "v064",
+    "value": 64,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "RELEASE",
+    "case": "v096",
+    "value": 96,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "RELEASE",
+    "case": "v127",
+    "value": 127,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "RELEASE",
+    "case": "live00",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 1.0,
+      "env": 1.0,
+      "filter_env": 1.0,
+      "phase": 0.0,
+      "progress": 0.0,
+      "mod": 0.0,
+      "tape_phase": 0.0,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.0
+    }
+  },
+  {
+    "glyph": "RELEASE",
+    "case": "live01",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.8777380818906038,
+      "env": 0.8777380818906038,
+      "filter_env": 0.8777380818906038,
+      "phase": 0.041666666666666664,
+      "progress": 0.043478260869565216,
+      "mod": 0.25882975260416663,
+      "tape_phase": 0.041666666666666664,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.041666666666666664
+    }
+  },
+  {
+    "glyph": "RELEASE",
+    "case": "live02",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.7704013326893682,
+      "env": 0.7704013326893682,
+      "filter_env": 0.7704013326893682,
+      "phase": 0.08333333333333333,
+      "progress": 0.08695652173913043,
+      "mod": 0.5,
+      "tape_phase": 0.08333333333333333,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.08333333333333333
+    }
+  },
+  {
+    "glyph": "RELEASE",
+    "case": "live05",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.5209244437839674,
+      "env": 0.5209244437839674,
+      "filter_env": 0.5209244437839674,
+      "phase": 0.20833333333333334,
+      "progress": 0.21739130434782608,
+      "mod": 0.9659220377604166,
+      "tape_phase": 0.20833333333333334,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.20833333333333334
+    }
+  },
+  {
+    "glyph": "RELEASE",
+    "case": "live10",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.2713576607082201,
+      "env": 0.2713576607082201,
+      "filter_env": 0.2713576607082201,
+      "phase": 0.4166666666666667,
+      "progress": 0.43478260869565216,
+      "mod": 0.4999999999999999,
+      "tape_phase": 0.4166666666666667,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.4166666666666667
+    }
+  },
+  {
+    "glyph": "RELEASE",
+    "case": "live18",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.09557918880296788,
+      "env": 0.09557918880296788,
+      "filter_env": 0.09557918880296788,
+      "phase": 0.75,
+      "progress": 0.782608695652174,
+      "mod": -1.0,
+      "tape_phase": 0.75,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.75
+    }
+  },
+  {
+    "glyph": "RELEASE",
+    "case": "live23",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.04978752136230469,
+      "env": 0.04978752136230469,
+      "filter_env": 0.04978752136230469,
+      "phase": 0.9583333333333334,
+      "progress": 1.0,
+      "mod": -0.25882975260416646,
+      "tape_phase": 0.9583333333333334,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.9583333333333334
+    }
+  },
+  {
+    "glyph": "GATE_MODE",
+    "case": "v000",
+    "value": 0,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "GATE_MODE",
+    "case": "v032",
+    "value": 32,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "GATE_MODE",
+    "case": "v064",
+    "value": 64,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "GATE_MODE",
+    "case": "v096",
+    "value": 96,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "GATE_MODE",
+    "case": "v127",
+    "value": 127,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "GATE_MODE",
+    "case": "s00",
+    "value": 64,
+    "state": 0,
+    "live": {}
+  },
+  {
+    "glyph": "GATE_MODE",
+    "case": "s01",
+    "value": 64,
+    "state": 1,
+    "live": {}
+  },
+  {
+    "glyph": "TRANSIENT",
+    "case": "v000",
+    "value": 0,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "TRANSIENT",
+    "case": "v032",
+    "value": 32,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "TRANSIENT",
+    "case": "v064",
+    "value": 64,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "TRANSIENT",
+    "case": "v096",
+    "value": 96,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "TRANSIENT",
+    "case": "v127",
+    "value": 127,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "TRANSIENT",
+    "case": "live00",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 1.0,
+      "env": 1.0,
+      "filter_env": 1.0,
+      "phase": 0.0,
+      "progress": 0.0,
+      "mod": 0.0,
+      "tape_phase": 0.0,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.0
+    }
+  },
+  {
+    "glyph": "TRANSIENT",
+    "case": "live01",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.8777380818906038,
+      "env": 0.8777380818906038,
+      "filter_env": 0.8777380818906038,
+      "phase": 0.041666666666666664,
+      "progress": 0.043478260869565216,
+      "mod": 0.25882975260416663,
+      "tape_phase": 0.041666666666666664,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.041666666666666664
+    }
+  },
+  {
+    "glyph": "TRANSIENT",
+    "case": "live02",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.7704013326893682,
+      "env": 0.7704013326893682,
+      "filter_env": 0.7704013326893682,
+      "phase": 0.08333333333333333,
+      "progress": 0.08695652173913043,
+      "mod": 0.5,
+      "tape_phase": 0.08333333333333333,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.08333333333333333
+    }
+  },
+  {
+    "glyph": "TRANSIENT",
+    "case": "live05",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.5209244437839674,
+      "env": 0.5209244437839674,
+      "filter_env": 0.5209244437839674,
+      "phase": 0.20833333333333334,
+      "progress": 0.21739130434782608,
+      "mod": 0.9659220377604166,
+      "tape_phase": 0.20833333333333334,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.20833333333333334
+    }
+  },
+  {
+    "glyph": "TRANSIENT",
+    "case": "live10",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.2713576607082201,
+      "env": 0.2713576607082201,
+      "filter_env": 0.2713576607082201,
+      "phase": 0.4166666666666667,
+      "progress": 0.43478260869565216,
+      "mod": 0.4999999999999999,
+      "tape_phase": 0.4166666666666667,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.4166666666666667
+    }
+  },
+  {
+    "glyph": "TRANSIENT",
+    "case": "live18",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.09557918880296788,
+      "env": 0.09557918880296788,
+      "filter_env": 0.09557918880296788,
+      "phase": 0.75,
+      "progress": 0.782608695652174,
+      "mod": -1.0,
+      "tape_phase": 0.75,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.75
+    }
+  },
+  {
+    "glyph": "TRANSIENT",
+    "case": "live23",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.04978752136230469,
+      "env": 0.04978752136230469,
+      "filter_env": 0.04978752136230469,
+      "phase": 0.9583333333333334,
+      "progress": 1.0,
+      "mod": -0.25882975260416646,
+      "tape_phase": 0.9583333333333334,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.9583333333333334
+    }
+  },
+  {
+    "glyph": "PITCH_DECAY",
+    "case": "v000",
+    "value": 0,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "PITCH_DECAY",
+    "case": "v032",
+    "value": 32,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "PITCH_DECAY",
+    "case": "v064",
+    "value": 64,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "PITCH_DECAY",
+    "case": "v096",
+    "value": 96,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "PITCH_DECAY",
+    "case": "v127",
+    "value": 127,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "PITCH_DECAY",
+    "case": "live00",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 1.0,
+      "env": 1.0,
+      "filter_env": 1.0,
+      "phase": 0.0,
+      "progress": 0.0,
+      "mod": 0.0,
+      "tape_phase": 0.0,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.0
+    }
+  },
+  {
+    "glyph": "PITCH_DECAY",
+    "case": "live01",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.8777380818906038,
+      "env": 0.8777380818906038,
+      "filter_env": 0.8777380818906038,
+      "phase": 0.041666666666666664,
+      "progress": 0.043478260869565216,
+      "mod": 0.25882975260416663,
+      "tape_phase": 0.041666666666666664,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.041666666666666664
+    }
+  },
+  {
+    "glyph": "PITCH_DECAY",
+    "case": "live02",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.7704013326893682,
+      "env": 0.7704013326893682,
+      "filter_env": 0.7704013326893682,
+      "phase": 0.08333333333333333,
+      "progress": 0.08695652173913043,
+      "mod": 0.5,
+      "tape_phase": 0.08333333333333333,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.08333333333333333
+    }
+  },
+  {
+    "glyph": "PITCH_DECAY",
+    "case": "live05",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.5209244437839674,
+      "env": 0.5209244437839674,
+      "filter_env": 0.5209244437839674,
+      "phase": 0.20833333333333334,
+      "progress": 0.21739130434782608,
+      "mod": 0.9659220377604166,
+      "tape_phase": 0.20833333333333334,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.20833333333333334
+    }
+  },
+  {
+    "glyph": "PITCH_DECAY",
+    "case": "live10",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.2713576607082201,
+      "env": 0.2713576607082201,
+      "filter_env": 0.2713576607082201,
+      "phase": 0.4166666666666667,
+      "progress": 0.43478260869565216,
+      "mod": 0.4999999999999999,
+      "tape_phase": 0.4166666666666667,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.4166666666666667
+    }
+  },
+  {
+    "glyph": "PITCH_DECAY",
+    "case": "live18",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.09557918880296788,
+      "env": 0.09557918880296788,
+      "filter_env": 0.09557918880296788,
+      "phase": 0.75,
+      "progress": 0.782608695652174,
+      "mod": -1.0,
+      "tape_phase": 0.75,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.75
+    }
+  },
+  {
+    "glyph": "PITCH_DECAY",
+    "case": "live23",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.04978752136230469,
+      "env": 0.04978752136230469,
+      "filter_env": 0.04978752136230469,
+      "phase": 0.9583333333333334,
+      "progress": 1.0,
+      "mod": -0.25882975260416646,
+      "tape_phase": 0.9583333333333334,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.9583333333333334
+    }
+  },
+  {
+    "glyph": "PITCH_DEPTH",
+    "case": "v000",
+    "value": 0,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "PITCH_DEPTH",
+    "case": "v032",
+    "value": 32,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "PITCH_DEPTH",
+    "case": "v064",
+    "value": 64,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "PITCH_DEPTH",
+    "case": "v096",
+    "value": 96,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "PITCH_DEPTH",
+    "case": "v127",
+    "value": 127,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "PITCH_DEPTH",
+    "case": "live00",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 1.0,
+      "env": 1.0,
+      "filter_env": 1.0,
+      "phase": 0.0,
+      "progress": 0.0,
+      "mod": 0.0,
+      "tape_phase": 0.0,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.0
+    }
+  },
+  {
+    "glyph": "PITCH_DEPTH",
+    "case": "live01",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.8777380818906038,
+      "env": 0.8777380818906038,
+      "filter_env": 0.8777380818906038,
+      "phase": 0.041666666666666664,
+      "progress": 0.043478260869565216,
+      "mod": 0.25882975260416663,
+      "tape_phase": 0.041666666666666664,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.041666666666666664
+    }
+  },
+  {
+    "glyph": "PITCH_DEPTH",
+    "case": "live02",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.7704013326893682,
+      "env": 0.7704013326893682,
+      "filter_env": 0.7704013326893682,
+      "phase": 0.08333333333333333,
+      "progress": 0.08695652173913043,
+      "mod": 0.5,
+      "tape_phase": 0.08333333333333333,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.08333333333333333
+    }
+  },
+  {
+    "glyph": "PITCH_DEPTH",
+    "case": "live05",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.5209244437839674,
+      "env": 0.5209244437839674,
+      "filter_env": 0.5209244437839674,
+      "phase": 0.20833333333333334,
+      "progress": 0.21739130434782608,
+      "mod": 0.9659220377604166,
+      "tape_phase": 0.20833333333333334,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.20833333333333334
+    }
+  },
+  {
+    "glyph": "PITCH_DEPTH",
+    "case": "live10",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.2713576607082201,
+      "env": 0.2713576607082201,
+      "filter_env": 0.2713576607082201,
+      "phase": 0.4166666666666667,
+      "progress": 0.43478260869565216,
+      "mod": 0.4999999999999999,
+      "tape_phase": 0.4166666666666667,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.4166666666666667
+    }
+  },
+  {
+    "glyph": "PITCH_DEPTH",
+    "case": "live18",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.09557918880296788,
+      "env": 0.09557918880296788,
+      "filter_env": 0.09557918880296788,
+      "phase": 0.75,
+      "progress": 0.782608695652174,
+      "mod": -1.0,
+      "tape_phase": 0.75,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.75
+    }
+  },
+  {
+    "glyph": "PITCH_DEPTH",
+    "case": "live23",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.04978752136230469,
+      "env": 0.04978752136230469,
+      "filter_env": 0.04978752136230469,
+      "phase": 0.9583333333333334,
+      "progress": 1.0,
+      "mod": -0.25882975260416646,
+      "tape_phase": 0.9583333333333334,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.9583333333333334
+    }
+  },
+  {
+    "glyph": "PITCH_BASE",
+    "case": "v000",
+    "value": 0,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "PITCH_BASE",
+    "case": "v032",
+    "value": 32,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "PITCH_BASE",
+    "case": "v064",
+    "value": 64,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "PITCH_BASE",
+    "case": "v096",
+    "value": 96,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "PITCH_BASE",
+    "case": "v127",
+    "value": 127,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "PITCH_BASE",
+    "case": "live00",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 1.0,
+      "env": 1.0,
+      "filter_env": 1.0,
+      "phase": 0.0,
+      "progress": 0.0,
+      "mod": 0.0,
+      "tape_phase": 0.0,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.0
+    }
+  },
+  {
+    "glyph": "PITCH_BASE",
+    "case": "live01",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.8777380818906038,
+      "env": 0.8777380818906038,
+      "filter_env": 0.8777380818906038,
+      "phase": 0.041666666666666664,
+      "progress": 0.043478260869565216,
+      "mod": 0.25882975260416663,
+      "tape_phase": 0.041666666666666664,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.041666666666666664
+    }
+  },
+  {
+    "glyph": "PITCH_BASE",
+    "case": "live02",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.7704013326893682,
+      "env": 0.7704013326893682,
+      "filter_env": 0.7704013326893682,
+      "phase": 0.08333333333333333,
+      "progress": 0.08695652173913043,
+      "mod": 0.5,
+      "tape_phase": 0.08333333333333333,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.08333333333333333
+    }
+  },
+  {
+    "glyph": "PITCH_BASE",
+    "case": "live05",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.5209244437839674,
+      "env": 0.5209244437839674,
+      "filter_env": 0.5209244437839674,
+      "phase": 0.20833333333333334,
+      "progress": 0.21739130434782608,
+      "mod": 0.9659220377604166,
+      "tape_phase": 0.20833333333333334,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.20833333333333334
+    }
+  },
+  {
+    "glyph": "PITCH_BASE",
+    "case": "live10",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.2713576607082201,
+      "env": 0.2713576607082201,
+      "filter_env": 0.2713576607082201,
+      "phase": 0.4166666666666667,
+      "progress": 0.43478260869565216,
+      "mod": 0.4999999999999999,
+      "tape_phase": 0.4166666666666667,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.4166666666666667
+    }
+  },
+  {
+    "glyph": "PITCH_BASE",
+    "case": "live18",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.09557918880296788,
+      "env": 0.09557918880296788,
+      "filter_env": 0.09557918880296788,
+      "phase": 0.75,
+      "progress": 0.782608695652174,
+      "mod": -1.0,
+      "tape_phase": 0.75,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.75
+    }
+  },
+  {
+    "glyph": "PITCH_BASE",
+    "case": "live23",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.04978752136230469,
+      "env": 0.04978752136230469,
+      "filter_env": 0.04978752136230469,
+      "phase": 0.9583333333333334,
+      "progress": 1.0,
+      "mod": -0.25882975260416646,
+      "tape_phase": 0.9583333333333334,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.9583333333333334
+    }
+  },
+  {
+    "glyph": "SNAPPY",
+    "case": "v000",
+    "value": 0,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "SNAPPY",
+    "case": "v032",
+    "value": 32,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "SNAPPY",
+    "case": "v064",
+    "value": 64,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "SNAPPY",
+    "case": "v096",
+    "value": 96,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "SNAPPY",
+    "case": "v127",
+    "value": 127,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "SNAPPY",
+    "case": "live00",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 1.0,
+      "env": 1.0,
+      "filter_env": 1.0,
+      "phase": 0.0,
+      "progress": 0.0,
+      "mod": 0.0,
+      "tape_phase": 0.0,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.0
+    }
+  },
+  {
+    "glyph": "SNAPPY",
+    "case": "live01",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.8777380818906038,
+      "env": 0.8777380818906038,
+      "filter_env": 0.8777380818906038,
+      "phase": 0.041666666666666664,
+      "progress": 0.043478260869565216,
+      "mod": 0.25882975260416663,
+      "tape_phase": 0.041666666666666664,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.041666666666666664
+    }
+  },
+  {
+    "glyph": "SNAPPY",
+    "case": "live02",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.7704013326893682,
+      "env": 0.7704013326893682,
+      "filter_env": 0.7704013326893682,
+      "phase": 0.08333333333333333,
+      "progress": 0.08695652173913043,
+      "mod": 0.5,
+      "tape_phase": 0.08333333333333333,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.08333333333333333
+    }
+  },
+  {
+    "glyph": "SNAPPY",
+    "case": "live05",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.5209244437839674,
+      "env": 0.5209244437839674,
+      "filter_env": 0.5209244437839674,
+      "phase": 0.20833333333333334,
+      "progress": 0.21739130434782608,
+      "mod": 0.9659220377604166,
+      "tape_phase": 0.20833333333333334,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.20833333333333334
+    }
+  },
+  {
+    "glyph": "SNAPPY",
+    "case": "live10",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.2713576607082201,
+      "env": 0.2713576607082201,
+      "filter_env": 0.2713576607082201,
+      "phase": 0.4166666666666667,
+      "progress": 0.43478260869565216,
+      "mod": 0.4999999999999999,
+      "tape_phase": 0.4166666666666667,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.4166666666666667
+    }
+  },
+  {
+    "glyph": "SNAPPY",
+    "case": "live18",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.09557918880296788,
+      "env": 0.09557918880296788,
+      "filter_env": 0.09557918880296788,
+      "phase": 0.75,
+      "progress": 0.782608695652174,
+      "mod": -1.0,
+      "tape_phase": 0.75,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.75
+    }
+  },
+  {
+    "glyph": "SNAPPY",
+    "case": "live23",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.04978752136230469,
+      "env": 0.04978752136230469,
+      "filter_env": 0.04978752136230469,
+      "phase": 0.9583333333333334,
+      "progress": 1.0,
+      "mod": -0.25882975260416646,
+      "tape_phase": 0.9583333333333334,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.9583333333333334
+    }
+  },
+  {
+    "glyph": "LFO_RATE",
+    "case": "v000",
+    "value": 0,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "LFO_RATE",
+    "case": "v032",
+    "value": 32,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "LFO_RATE",
+    "case": "v064",
+    "value": 64,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "LFO_RATE",
+    "case": "v096",
+    "value": 96,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "LFO_RATE",
+    "case": "v127",
+    "value": 127,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "LFO_RATE",
+    "case": "live00",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 1.0,
+      "env": 1.0,
+      "filter_env": 1.0,
+      "phase": 0.0,
+      "progress": 0.0,
+      "mod": 0.0,
+      "tape_phase": 0.0,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.0
+    }
+  },
+  {
+    "glyph": "LFO_RATE",
+    "case": "live01",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.8777380818906038,
+      "env": 0.8777380818906038,
+      "filter_env": 0.8777380818906038,
+      "phase": 0.041666666666666664,
+      "progress": 0.043478260869565216,
+      "mod": 0.25882975260416663,
+      "tape_phase": 0.041666666666666664,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.041666666666666664
+    }
+  },
+  {
+    "glyph": "LFO_RATE",
+    "case": "live02",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.7704013326893682,
+      "env": 0.7704013326893682,
+      "filter_env": 0.7704013326893682,
+      "phase": 0.08333333333333333,
+      "progress": 0.08695652173913043,
+      "mod": 0.5,
+      "tape_phase": 0.08333333333333333,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.08333333333333333
+    }
+  },
+  {
+    "glyph": "LFO_RATE",
+    "case": "live05",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.5209244437839674,
+      "env": 0.5209244437839674,
+      "filter_env": 0.5209244437839674,
+      "phase": 0.20833333333333334,
+      "progress": 0.21739130434782608,
+      "mod": 0.9659220377604166,
+      "tape_phase": 0.20833333333333334,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.20833333333333334
+    }
+  },
+  {
+    "glyph": "LFO_RATE",
+    "case": "live10",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.2713576607082201,
+      "env": 0.2713576607082201,
+      "filter_env": 0.2713576607082201,
+      "phase": 0.4166666666666667,
+      "progress": 0.43478260869565216,
+      "mod": 0.4999999999999999,
+      "tape_phase": 0.4166666666666667,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.4166666666666667
+    }
+  },
+  {
+    "glyph": "LFO_RATE",
+    "case": "live18",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.09557918880296788,
+      "env": 0.09557918880296788,
+      "filter_env": 0.09557918880296788,
+      "phase": 0.75,
+      "progress": 0.782608695652174,
+      "mod": -1.0,
+      "tape_phase": 0.75,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.75
+    }
+  },
+  {
+    "glyph": "LFO_RATE",
+    "case": "live23",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.04978752136230469,
+      "env": 0.04978752136230469,
+      "filter_env": 0.04978752136230469,
+      "phase": 0.9583333333333334,
+      "progress": 1.0,
+      "mod": -0.25882975260416646,
+      "tape_phase": 0.9583333333333334,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.9583333333333334
+    }
+  },
+  {
+    "glyph": "LFO_DEPTH",
+    "case": "v000",
+    "value": 0,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "LFO_DEPTH",
+    "case": "v032",
+    "value": 32,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "LFO_DEPTH",
+    "case": "v064",
+    "value": 64,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "LFO_DEPTH",
+    "case": "v096",
+    "value": 96,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "LFO_DEPTH",
+    "case": "v127",
+    "value": 127,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "LFO_DEPTH",
+    "case": "live00",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 1.0,
+      "env": 1.0,
+      "filter_env": 1.0,
+      "phase": 0.0,
+      "progress": 0.0,
+      "mod": 0.0,
+      "tape_phase": 0.0,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.0
+    }
+  },
+  {
+    "glyph": "LFO_DEPTH",
+    "case": "live01",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.8777380818906038,
+      "env": 0.8777380818906038,
+      "filter_env": 0.8777380818906038,
+      "phase": 0.041666666666666664,
+      "progress": 0.043478260869565216,
+      "mod": 0.25882975260416663,
+      "tape_phase": 0.041666666666666664,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.041666666666666664
+    }
+  },
+  {
+    "glyph": "LFO_DEPTH",
+    "case": "live02",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.7704013326893682,
+      "env": 0.7704013326893682,
+      "filter_env": 0.7704013326893682,
+      "phase": 0.08333333333333333,
+      "progress": 0.08695652173913043,
+      "mod": 0.5,
+      "tape_phase": 0.08333333333333333,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.08333333333333333
+    }
+  },
+  {
+    "glyph": "LFO_DEPTH",
+    "case": "live05",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.5209244437839674,
+      "env": 0.5209244437839674,
+      "filter_env": 0.5209244437839674,
+      "phase": 0.20833333333333334,
+      "progress": 0.21739130434782608,
+      "mod": 0.9659220377604166,
+      "tape_phase": 0.20833333333333334,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.20833333333333334
+    }
+  },
+  {
+    "glyph": "LFO_DEPTH",
+    "case": "live10",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.2713576607082201,
+      "env": 0.2713576607082201,
+      "filter_env": 0.2713576607082201,
+      "phase": 0.4166666666666667,
+      "progress": 0.43478260869565216,
+      "mod": 0.4999999999999999,
+      "tape_phase": 0.4166666666666667,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.4166666666666667
+    }
+  },
+  {
+    "glyph": "LFO_DEPTH",
+    "case": "live18",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.09557918880296788,
+      "env": 0.09557918880296788,
+      "filter_env": 0.09557918880296788,
+      "phase": 0.75,
+      "progress": 0.782608695652174,
+      "mod": -1.0,
+      "tape_phase": 0.75,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.75
+    }
+  },
+  {
+    "glyph": "LFO_DEPTH",
+    "case": "live23",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.04978752136230469,
+      "env": 0.04978752136230469,
+      "filter_env": 0.04978752136230469,
+      "phase": 0.9583333333333334,
+      "progress": 1.0,
+      "mod": -0.25882975260416646,
+      "tape_phase": 0.9583333333333334,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.9583333333333334
+    }
+  },
+  {
+    "glyph": "LFO_DELAY",
+    "case": "v000",
+    "value": 0,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "LFO_DELAY",
+    "case": "v032",
+    "value": 32,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "LFO_DELAY",
+    "case": "v064",
+    "value": 64,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "LFO_DELAY",
+    "case": "v096",
+    "value": 96,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "LFO_DELAY",
+    "case": "v127",
+    "value": 127,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "LFO_DELAY",
+    "case": "live00",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 1.0,
+      "env": 1.0,
+      "filter_env": 1.0,
+      "phase": 0.0,
+      "progress": 0.0,
+      "mod": 0.0,
+      "tape_phase": 0.0,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.0
+    }
+  },
+  {
+    "glyph": "LFO_DELAY",
+    "case": "live01",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.8777380818906038,
+      "env": 0.8777380818906038,
+      "filter_env": 0.8777380818906038,
+      "phase": 0.041666666666666664,
+      "progress": 0.043478260869565216,
+      "mod": 0.25882975260416663,
+      "tape_phase": 0.041666666666666664,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.041666666666666664
+    }
+  },
+  {
+    "glyph": "LFO_DELAY",
+    "case": "live02",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.7704013326893682,
+      "env": 0.7704013326893682,
+      "filter_env": 0.7704013326893682,
+      "phase": 0.08333333333333333,
+      "progress": 0.08695652173913043,
+      "mod": 0.5,
+      "tape_phase": 0.08333333333333333,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.08333333333333333
+    }
+  },
+  {
+    "glyph": "LFO_DELAY",
+    "case": "live05",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.5209244437839674,
+      "env": 0.5209244437839674,
+      "filter_env": 0.5209244437839674,
+      "phase": 0.20833333333333334,
+      "progress": 0.21739130434782608,
+      "mod": 0.9659220377604166,
+      "tape_phase": 0.20833333333333334,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.20833333333333334
+    }
+  },
+  {
+    "glyph": "LFO_DELAY",
+    "case": "live10",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.2713576607082201,
+      "env": 0.2713576607082201,
+      "filter_env": 0.2713576607082201,
+      "phase": 0.4166666666666667,
+      "progress": 0.43478260869565216,
+      "mod": 0.4999999999999999,
+      "tape_phase": 0.4166666666666667,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.4166666666666667
+    }
+  },
+  {
+    "glyph": "LFO_DELAY",
+    "case": "live18",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.09557918880296788,
+      "env": 0.09557918880296788,
+      "filter_env": 0.09557918880296788,
+      "phase": 0.75,
+      "progress": 0.782608695652174,
+      "mod": -1.0,
+      "tape_phase": 0.75,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.75
+    }
+  },
+  {
+    "glyph": "LFO_DELAY",
+    "case": "live23",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.04978752136230469,
+      "env": 0.04978752136230469,
+      "filter_env": 0.04978752136230469,
+      "phase": 0.9583333333333334,
+      "progress": 1.0,
+      "mod": -0.25882975260416646,
+      "tape_phase": 0.9583333333333334,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.9583333333333334
+    }
+  },
+  {
+    "glyph": "CHORUS",
+    "case": "v000",
+    "value": 0,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "CHORUS",
+    "case": "v032",
+    "value": 32,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "CHORUS",
+    "case": "v064",
+    "value": 64,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "CHORUS",
+    "case": "v096",
+    "value": 96,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "CHORUS",
+    "case": "v127",
+    "value": 127,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "CHORUS",
+    "case": "live00",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 1.0,
+      "env": 1.0,
+      "filter_env": 1.0,
+      "phase": 0.0,
+      "progress": 0.0,
+      "mod": 0.0,
+      "tape_phase": 0.0,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.0
+    }
+  },
+  {
+    "glyph": "CHORUS",
+    "case": "live01",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.8777380818906038,
+      "env": 0.8777380818906038,
+      "filter_env": 0.8777380818906038,
+      "phase": 0.041666666666666664,
+      "progress": 0.043478260869565216,
+      "mod": 0.25882975260416663,
+      "tape_phase": 0.041666666666666664,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.041666666666666664
+    }
+  },
+  {
+    "glyph": "CHORUS",
+    "case": "live02",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.7704013326893682,
+      "env": 0.7704013326893682,
+      "filter_env": 0.7704013326893682,
+      "phase": 0.08333333333333333,
+      "progress": 0.08695652173913043,
+      "mod": 0.5,
+      "tape_phase": 0.08333333333333333,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.08333333333333333
+    }
+  },
+  {
+    "glyph": "CHORUS",
+    "case": "live05",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.5209244437839674,
+      "env": 0.5209244437839674,
+      "filter_env": 0.5209244437839674,
+      "phase": 0.20833333333333334,
+      "progress": 0.21739130434782608,
+      "mod": 0.9659220377604166,
+      "tape_phase": 0.20833333333333334,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.20833333333333334
+    }
+  },
+  {
+    "glyph": "CHORUS",
+    "case": "live10",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.2713576607082201,
+      "env": 0.2713576607082201,
+      "filter_env": 0.2713576607082201,
+      "phase": 0.4166666666666667,
+      "progress": 0.43478260869565216,
+      "mod": 0.4999999999999999,
+      "tape_phase": 0.4166666666666667,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.4166666666666667
+    }
+  },
+  {
+    "glyph": "CHORUS",
+    "case": "live18",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.09557918880296788,
+      "env": 0.09557918880296788,
+      "filter_env": 0.09557918880296788,
+      "phase": 0.75,
+      "progress": 0.782608695652174,
+      "mod": -1.0,
+      "tape_phase": 0.75,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.75
+    }
+  },
+  {
+    "glyph": "CHORUS",
+    "case": "live23",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.04978752136230469,
+      "env": 0.04978752136230469,
+      "filter_env": 0.04978752136230469,
+      "phase": 0.9583333333333334,
+      "progress": 1.0,
+      "mod": -0.25882975260416646,
+      "tape_phase": 0.9583333333333334,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.9583333333333334
+    }
+  },
+  {
+    "glyph": "PHASER",
+    "case": "v000",
+    "value": 0,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "PHASER",
+    "case": "v032",
+    "value": 32,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "PHASER",
+    "case": "v064",
+    "value": 64,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "PHASER",
+    "case": "v096",
+    "value": 96,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "PHASER",
+    "case": "v127",
+    "value": 127,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "PHASER",
+    "case": "live00",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 1.0,
+      "env": 1.0,
+      "filter_env": 1.0,
+      "phase": 0.0,
+      "progress": 0.0,
+      "mod": 0.0,
+      "tape_phase": 0.0,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.0
+    }
+  },
+  {
+    "glyph": "PHASER",
+    "case": "live01",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.8777380818906038,
+      "env": 0.8777380818906038,
+      "filter_env": 0.8777380818906038,
+      "phase": 0.041666666666666664,
+      "progress": 0.043478260869565216,
+      "mod": 0.25882975260416663,
+      "tape_phase": 0.041666666666666664,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.041666666666666664
+    }
+  },
+  {
+    "glyph": "PHASER",
+    "case": "live02",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.7704013326893682,
+      "env": 0.7704013326893682,
+      "filter_env": 0.7704013326893682,
+      "phase": 0.08333333333333333,
+      "progress": 0.08695652173913043,
+      "mod": 0.5,
+      "tape_phase": 0.08333333333333333,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.08333333333333333
+    }
+  },
+  {
+    "glyph": "PHASER",
+    "case": "live05",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.5209244437839674,
+      "env": 0.5209244437839674,
+      "filter_env": 0.5209244437839674,
+      "phase": 0.20833333333333334,
+      "progress": 0.21739130434782608,
+      "mod": 0.9659220377604166,
+      "tape_phase": 0.20833333333333334,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.20833333333333334
+    }
+  },
+  {
+    "glyph": "PHASER",
+    "case": "live10",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.2713576607082201,
+      "env": 0.2713576607082201,
+      "filter_env": 0.2713576607082201,
+      "phase": 0.4166666666666667,
+      "progress": 0.43478260869565216,
+      "mod": 0.4999999999999999,
+      "tape_phase": 0.4166666666666667,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.4166666666666667
+    }
+  },
+  {
+    "glyph": "PHASER",
+    "case": "live18",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.09557918880296788,
+      "env": 0.09557918880296788,
+      "filter_env": 0.09557918880296788,
+      "phase": 0.75,
+      "progress": 0.782608695652174,
+      "mod": -1.0,
+      "tape_phase": 0.75,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.75
+    }
+  },
+  {
+    "glyph": "PHASER",
+    "case": "live23",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.04978752136230469,
+      "env": 0.04978752136230469,
+      "filter_env": 0.04978752136230469,
+      "phase": 0.9583333333333334,
+      "progress": 1.0,
+      "mod": -0.25882975260416646,
+      "tape_phase": 0.9583333333333334,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.9583333333333334
+    }
+  },
+  {
+    "glyph": "RINGMOD",
+    "case": "v000",
+    "value": 0,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "RINGMOD",
+    "case": "v032",
+    "value": 32,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "RINGMOD",
+    "case": "v064",
+    "value": 64,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "RINGMOD",
+    "case": "v096",
+    "value": 96,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "RINGMOD",
+    "case": "v127",
+    "value": 127,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "RINGMOD",
+    "case": "live00",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 1.0,
+      "env": 1.0,
+      "filter_env": 1.0,
+      "phase": 0.0,
+      "progress": 0.0,
+      "mod": 0.0,
+      "tape_phase": 0.0,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.0
+    }
+  },
+  {
+    "glyph": "RINGMOD",
+    "case": "live01",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.8777380818906038,
+      "env": 0.8777380818906038,
+      "filter_env": 0.8777380818906038,
+      "phase": 0.041666666666666664,
+      "progress": 0.043478260869565216,
+      "mod": 0.25882975260416663,
+      "tape_phase": 0.041666666666666664,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.041666666666666664
+    }
+  },
+  {
+    "glyph": "RINGMOD",
+    "case": "live02",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.7704013326893682,
+      "env": 0.7704013326893682,
+      "filter_env": 0.7704013326893682,
+      "phase": 0.08333333333333333,
+      "progress": 0.08695652173913043,
+      "mod": 0.5,
+      "tape_phase": 0.08333333333333333,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.08333333333333333
+    }
+  },
+  {
+    "glyph": "RINGMOD",
+    "case": "live05",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.5209244437839674,
+      "env": 0.5209244437839674,
+      "filter_env": 0.5209244437839674,
+      "phase": 0.20833333333333334,
+      "progress": 0.21739130434782608,
+      "mod": 0.9659220377604166,
+      "tape_phase": 0.20833333333333334,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.20833333333333334
+    }
+  },
+  {
+    "glyph": "RINGMOD",
+    "case": "live10",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.2713576607082201,
+      "env": 0.2713576607082201,
+      "filter_env": 0.2713576607082201,
+      "phase": 0.4166666666666667,
+      "progress": 0.43478260869565216,
+      "mod": 0.4999999999999999,
+      "tape_phase": 0.4166666666666667,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.4166666666666667
+    }
+  },
+  {
+    "glyph": "RINGMOD",
+    "case": "live18",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.09557918880296788,
+      "env": 0.09557918880296788,
+      "filter_env": 0.09557918880296788,
+      "phase": 0.75,
+      "progress": 0.782608695652174,
+      "mod": -1.0,
+      "tape_phase": 0.75,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.75
+    }
+  },
+  {
+    "glyph": "RINGMOD",
+    "case": "live23",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.04978752136230469,
+      "env": 0.04978752136230469,
+      "filter_env": 0.04978752136230469,
+      "phase": 0.9583333333333334,
+      "progress": 1.0,
+      "mod": -0.25882975260416646,
+      "tape_phase": 0.9583333333333334,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.9583333333333334
+    }
+  },
+  {
+    "glyph": "DELAY_TIME",
+    "case": "v000",
+    "value": 0,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "DELAY_TIME",
+    "case": "v032",
+    "value": 32,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "DELAY_TIME",
+    "case": "v064",
+    "value": 64,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "DELAY_TIME",
+    "case": "v096",
+    "value": 96,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "DELAY_TIME",
+    "case": "v127",
+    "value": 127,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "DELAY_TIME",
+    "case": "live00",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 1.0,
+      "env": 1.0,
+      "filter_env": 1.0,
+      "phase": 0.0,
+      "progress": 0.0,
+      "mod": 0.0,
+      "tape_phase": 0.0,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.0
+    }
+  },
+  {
+    "glyph": "DELAY_TIME",
+    "case": "live01",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.8777380818906038,
+      "env": 0.8777380818906038,
+      "filter_env": 0.8777380818906038,
+      "phase": 0.041666666666666664,
+      "progress": 0.043478260869565216,
+      "mod": 0.25882975260416663,
+      "tape_phase": 0.041666666666666664,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.041666666666666664
+    }
+  },
+  {
+    "glyph": "DELAY_TIME",
+    "case": "live02",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.7704013326893682,
+      "env": 0.7704013326893682,
+      "filter_env": 0.7704013326893682,
+      "phase": 0.08333333333333333,
+      "progress": 0.08695652173913043,
+      "mod": 0.5,
+      "tape_phase": 0.08333333333333333,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.08333333333333333
+    }
+  },
+  {
+    "glyph": "DELAY_TIME",
+    "case": "live05",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.5209244437839674,
+      "env": 0.5209244437839674,
+      "filter_env": 0.5209244437839674,
+      "phase": 0.20833333333333334,
+      "progress": 0.21739130434782608,
+      "mod": 0.9659220377604166,
+      "tape_phase": 0.20833333333333334,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.20833333333333334
+    }
+  },
+  {
+    "glyph": "DELAY_TIME",
+    "case": "live10",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.2713576607082201,
+      "env": 0.2713576607082201,
+      "filter_env": 0.2713576607082201,
+      "phase": 0.4166666666666667,
+      "progress": 0.43478260869565216,
+      "mod": 0.4999999999999999,
+      "tape_phase": 0.4166666666666667,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.4166666666666667
+    }
+  },
+  {
+    "glyph": "DELAY_TIME",
+    "case": "live18",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.09557918880296788,
+      "env": 0.09557918880296788,
+      "filter_env": 0.09557918880296788,
+      "phase": 0.75,
+      "progress": 0.782608695652174,
+      "mod": -1.0,
+      "tape_phase": 0.75,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.75
+    }
+  },
+  {
+    "glyph": "DELAY_TIME",
+    "case": "live23",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.04978752136230469,
+      "env": 0.04978752136230469,
+      "filter_env": 0.04978752136230469,
+      "phase": 0.9583333333333334,
+      "progress": 1.0,
+      "mod": -0.25882975260416646,
+      "tape_phase": 0.9583333333333334,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.9583333333333334
+    }
+  },
+  {
+    "glyph": "FEEDBACK",
+    "case": "v000",
+    "value": 0,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "FEEDBACK",
+    "case": "v032",
+    "value": 32,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "FEEDBACK",
+    "case": "v064",
+    "value": 64,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "FEEDBACK",
+    "case": "v096",
+    "value": 96,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "FEEDBACK",
+    "case": "v127",
+    "value": 127,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "FEEDBACK",
+    "case": "live00",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 1.0,
+      "env": 1.0,
+      "filter_env": 1.0,
+      "phase": 0.0,
+      "progress": 0.0,
+      "mod": 0.0,
+      "tape_phase": 0.0,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.0
+    }
+  },
+  {
+    "glyph": "FEEDBACK",
+    "case": "live01",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.8777380818906038,
+      "env": 0.8777380818906038,
+      "filter_env": 0.8777380818906038,
+      "phase": 0.041666666666666664,
+      "progress": 0.043478260869565216,
+      "mod": 0.25882975260416663,
+      "tape_phase": 0.041666666666666664,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.041666666666666664
+    }
+  },
+  {
+    "glyph": "FEEDBACK",
+    "case": "live02",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.7704013326893682,
+      "env": 0.7704013326893682,
+      "filter_env": 0.7704013326893682,
+      "phase": 0.08333333333333333,
+      "progress": 0.08695652173913043,
+      "mod": 0.5,
+      "tape_phase": 0.08333333333333333,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.08333333333333333
+    }
+  },
+  {
+    "glyph": "FEEDBACK",
+    "case": "live05",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.5209244437839674,
+      "env": 0.5209244437839674,
+      "filter_env": 0.5209244437839674,
+      "phase": 0.20833333333333334,
+      "progress": 0.21739130434782608,
+      "mod": 0.9659220377604166,
+      "tape_phase": 0.20833333333333334,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.20833333333333334
+    }
+  },
+  {
+    "glyph": "FEEDBACK",
+    "case": "live10",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.2713576607082201,
+      "env": 0.2713576607082201,
+      "filter_env": 0.2713576607082201,
+      "phase": 0.4166666666666667,
+      "progress": 0.43478260869565216,
+      "mod": 0.4999999999999999,
+      "tape_phase": 0.4166666666666667,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.4166666666666667
+    }
+  },
+  {
+    "glyph": "FEEDBACK",
+    "case": "live18",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.09557918880296788,
+      "env": 0.09557918880296788,
+      "filter_env": 0.09557918880296788,
+      "phase": 0.75,
+      "progress": 0.782608695652174,
+      "mod": -1.0,
+      "tape_phase": 0.75,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.75
+    }
+  },
+  {
+    "glyph": "FEEDBACK",
+    "case": "live23",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.04978752136230469,
+      "env": 0.04978752136230469,
+      "filter_env": 0.04978752136230469,
+      "phase": 0.9583333333333334,
+      "progress": 1.0,
+      "mod": -0.25882975260416646,
+      "tape_phase": 0.9583333333333334,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.9583333333333334
+    }
+  },
+  {
+    "glyph": "DELAY_SEND",
+    "case": "v000",
+    "value": 0,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "DELAY_SEND",
+    "case": "v032",
+    "value": 32,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "DELAY_SEND",
+    "case": "v064",
+    "value": 64,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "DELAY_SEND",
+    "case": "v096",
+    "value": 96,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "DELAY_SEND",
+    "case": "v127",
+    "value": 127,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "DELAY_SEND",
+    "case": "live00",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 1.0,
+      "env": 1.0,
+      "filter_env": 1.0,
+      "phase": 0.0,
+      "progress": 0.0,
+      "mod": 0.0,
+      "tape_phase": 0.0,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.0
+    }
+  },
+  {
+    "glyph": "DELAY_SEND",
+    "case": "live01",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.8777380818906038,
+      "env": 0.8777380818906038,
+      "filter_env": 0.8777380818906038,
+      "phase": 0.041666666666666664,
+      "progress": 0.043478260869565216,
+      "mod": 0.25882975260416663,
+      "tape_phase": 0.041666666666666664,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.041666666666666664
+    }
+  },
+  {
+    "glyph": "DELAY_SEND",
+    "case": "live02",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.7704013326893682,
+      "env": 0.7704013326893682,
+      "filter_env": 0.7704013326893682,
+      "phase": 0.08333333333333333,
+      "progress": 0.08695652173913043,
+      "mod": 0.5,
+      "tape_phase": 0.08333333333333333,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.08333333333333333
+    }
+  },
+  {
+    "glyph": "DELAY_SEND",
+    "case": "live05",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.5209244437839674,
+      "env": 0.5209244437839674,
+      "filter_env": 0.5209244437839674,
+      "phase": 0.20833333333333334,
+      "progress": 0.21739130434782608,
+      "mod": 0.9659220377604166,
+      "tape_phase": 0.20833333333333334,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.20833333333333334
+    }
+  },
+  {
+    "glyph": "DELAY_SEND",
+    "case": "live10",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.2713576607082201,
+      "env": 0.2713576607082201,
+      "filter_env": 0.2713576607082201,
+      "phase": 0.4166666666666667,
+      "progress": 0.43478260869565216,
+      "mod": 0.4999999999999999,
+      "tape_phase": 0.4166666666666667,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.4166666666666667
+    }
+  },
+  {
+    "glyph": "DELAY_SEND",
+    "case": "live18",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.09557918880296788,
+      "env": 0.09557918880296788,
+      "filter_env": 0.09557918880296788,
+      "phase": 0.75,
+      "progress": 0.782608695652174,
+      "mod": -1.0,
+      "tape_phase": 0.75,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.75
+    }
+  },
+  {
+    "glyph": "DELAY_SEND",
+    "case": "live23",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.04978752136230469,
+      "env": 0.04978752136230469,
+      "filter_env": 0.04978752136230469,
+      "phase": 0.9583333333333334,
+      "progress": 1.0,
+      "mod": -0.25882975260416646,
+      "tape_phase": 0.9583333333333334,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.9583333333333334
+    }
+  },
+  {
+    "glyph": "REVERB_SEND",
+    "case": "v000",
+    "value": 0,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "REVERB_SEND",
+    "case": "v032",
+    "value": 32,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "REVERB_SEND",
+    "case": "v064",
+    "value": 64,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "REVERB_SEND",
+    "case": "v096",
+    "value": 96,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "REVERB_SEND",
+    "case": "v127",
+    "value": 127,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "REVERB_SEND",
+    "case": "live00",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 1.0,
+      "env": 1.0,
+      "filter_env": 1.0,
+      "phase": 0.0,
+      "progress": 0.0,
+      "mod": 0.0,
+      "tape_phase": 0.0,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.0
+    }
+  },
+  {
+    "glyph": "REVERB_SEND",
+    "case": "live01",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.8777380818906038,
+      "env": 0.8777380818906038,
+      "filter_env": 0.8777380818906038,
+      "phase": 0.041666666666666664,
+      "progress": 0.043478260869565216,
+      "mod": 0.25882975260416663,
+      "tape_phase": 0.041666666666666664,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.041666666666666664
+    }
+  },
+  {
+    "glyph": "REVERB_SEND",
+    "case": "live02",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.7704013326893682,
+      "env": 0.7704013326893682,
+      "filter_env": 0.7704013326893682,
+      "phase": 0.08333333333333333,
+      "progress": 0.08695652173913043,
+      "mod": 0.5,
+      "tape_phase": 0.08333333333333333,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.08333333333333333
+    }
+  },
+  {
+    "glyph": "REVERB_SEND",
+    "case": "live05",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.5209244437839674,
+      "env": 0.5209244437839674,
+      "filter_env": 0.5209244437839674,
+      "phase": 0.20833333333333334,
+      "progress": 0.21739130434782608,
+      "mod": 0.9659220377604166,
+      "tape_phase": 0.20833333333333334,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.20833333333333334
+    }
+  },
+  {
+    "glyph": "REVERB_SEND",
+    "case": "live10",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.2713576607082201,
+      "env": 0.2713576607082201,
+      "filter_env": 0.2713576607082201,
+      "phase": 0.4166666666666667,
+      "progress": 0.43478260869565216,
+      "mod": 0.4999999999999999,
+      "tape_phase": 0.4166666666666667,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.4166666666666667
+    }
+  },
+  {
+    "glyph": "REVERB_SEND",
+    "case": "live18",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.09557918880296788,
+      "env": 0.09557918880296788,
+      "filter_env": 0.09557918880296788,
+      "phase": 0.75,
+      "progress": 0.782608695652174,
+      "mod": -1.0,
+      "tape_phase": 0.75,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.75
+    }
+  },
+  {
+    "glyph": "REVERB_SEND",
+    "case": "live23",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.04978752136230469,
+      "env": 0.04978752136230469,
+      "filter_env": 0.04978752136230469,
+      "phase": 0.9583333333333334,
+      "progress": 1.0,
+      "mod": -0.25882975260416646,
+      "tape_phase": 0.9583333333333334,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.9583333333333334
+    }
+  },
+  {
+    "glyph": "TONE",
+    "case": "v000",
+    "value": 0,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "TONE",
+    "case": "v032",
+    "value": 32,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "TONE",
+    "case": "v064",
+    "value": 64,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "TONE",
+    "case": "v096",
+    "value": 96,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "TONE",
+    "case": "v127",
+    "value": 127,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "TAPE",
+    "case": "v000",
+    "value": 0,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "TAPE",
+    "case": "v032",
+    "value": 32,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "TAPE",
+    "case": "v064",
+    "value": 64,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "TAPE",
+    "case": "v096",
+    "value": 96,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "TAPE",
+    "case": "v127",
+    "value": 127,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "TAPE",
+    "case": "live00",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 1.0,
+      "env": 1.0,
+      "filter_env": 1.0,
+      "phase": 0.0,
+      "progress": 0.0,
+      "mod": 0.0,
+      "tape_phase": 0.0,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.0
+    }
+  },
+  {
+    "glyph": "TAPE",
+    "case": "live01",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.8777380818906038,
+      "env": 0.8777380818906038,
+      "filter_env": 0.8777380818906038,
+      "phase": 0.041666666666666664,
+      "progress": 0.043478260869565216,
+      "mod": 0.25882975260416663,
+      "tape_phase": 0.041666666666666664,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.041666666666666664
+    }
+  },
+  {
+    "glyph": "TAPE",
+    "case": "live02",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.7704013326893682,
+      "env": 0.7704013326893682,
+      "filter_env": 0.7704013326893682,
+      "phase": 0.08333333333333333,
+      "progress": 0.08695652173913043,
+      "mod": 0.5,
+      "tape_phase": 0.08333333333333333,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.08333333333333333
+    }
+  },
+  {
+    "glyph": "TAPE",
+    "case": "live05",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.5209244437839674,
+      "env": 0.5209244437839674,
+      "filter_env": 0.5209244437839674,
+      "phase": 0.20833333333333334,
+      "progress": 0.21739130434782608,
+      "mod": 0.9659220377604166,
+      "tape_phase": 0.20833333333333334,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.20833333333333334
+    }
+  },
+  {
+    "glyph": "TAPE",
+    "case": "live10",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.2713576607082201,
+      "env": 0.2713576607082201,
+      "filter_env": 0.2713576607082201,
+      "phase": 0.4166666666666667,
+      "progress": 0.43478260869565216,
+      "mod": 0.4999999999999999,
+      "tape_phase": 0.4166666666666667,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.4166666666666667
+    }
+  },
+  {
+    "glyph": "TAPE",
+    "case": "live18",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.09557918880296788,
+      "env": 0.09557918880296788,
+      "filter_env": 0.09557918880296788,
+      "phase": 0.75,
+      "progress": 0.782608695652174,
+      "mod": -1.0,
+      "tape_phase": 0.75,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.75
+    }
+  },
+  {
+    "glyph": "TAPE",
+    "case": "live23",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.04978752136230469,
+      "env": 0.04978752136230469,
+      "filter_env": 0.04978752136230469,
+      "phase": 0.9583333333333334,
+      "progress": 1.0,
+      "mod": -0.25882975260416646,
+      "tape_phase": 0.9583333333333334,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.9583333333333334
+    }
+  },
+  {
+    "glyph": "WEAR",
+    "case": "v000",
+    "value": 0,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "WEAR",
+    "case": "v032",
+    "value": 32,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "WEAR",
+    "case": "v064",
+    "value": 64,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "WEAR",
+    "case": "v096",
+    "value": 96,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "WEAR",
+    "case": "v127",
+    "value": 127,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "DELAY_TYPE",
+    "case": "v000",
+    "value": 0,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "DELAY_TYPE",
+    "case": "v032",
+    "value": 32,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "DELAY_TYPE",
+    "case": "v064",
+    "value": 64,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "DELAY_TYPE",
+    "case": "v096",
+    "value": 96,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "DELAY_TYPE",
+    "case": "v127",
+    "value": 127,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "DELAY_TYPE",
+    "case": "s00",
+    "value": 64,
+    "state": 0,
+    "live": {}
+  },
+  {
+    "glyph": "DELAY_TYPE",
+    "case": "s01",
+    "value": 64,
+    "state": 1,
+    "live": {}
+  },
+  {
+    "glyph": "PINGPONG",
+    "case": "v000",
+    "value": 0,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "PINGPONG",
+    "case": "v032",
+    "value": 32,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "PINGPONG",
+    "case": "v064",
+    "value": 64,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "PINGPONG",
+    "case": "v096",
+    "value": 96,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "PINGPONG",
+    "case": "v127",
+    "value": 127,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "PINGPONG",
+    "case": "s00",
+    "value": 64,
+    "state": 0,
+    "live": {}
+  },
+  {
+    "glyph": "PINGPONG",
+    "case": "s01",
+    "value": 64,
+    "state": 1,
+    "live": {}
+  },
+  {
+    "glyph": "THRESHOLD",
+    "case": "v000",
+    "value": 0,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "THRESHOLD",
+    "case": "v032",
+    "value": 32,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "THRESHOLD",
+    "case": "v064",
+    "value": 64,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "THRESHOLD",
+    "case": "v096",
+    "value": 96,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "THRESHOLD",
+    "case": "v127",
+    "value": 127,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "RATIO",
+    "case": "v000",
+    "value": 0,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "RATIO",
+    "case": "v032",
+    "value": 32,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "RATIO",
+    "case": "v064",
+    "value": 64,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "RATIO",
+    "case": "v096",
+    "value": 96,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "RATIO",
+    "case": "v127",
+    "value": 127,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "MAKEUP",
+    "case": "v000",
+    "value": 0,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "MAKEUP",
+    "case": "v032",
+    "value": 32,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "MAKEUP",
+    "case": "v064",
+    "value": 64,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "MAKEUP",
+    "case": "v096",
+    "value": 96,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "MAKEUP",
+    "case": "v127",
+    "value": 127,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "BLEND",
+    "case": "v000",
+    "value": 0,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "BLEND",
+    "case": "v032",
+    "value": 32,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "BLEND",
+    "case": "v064",
+    "value": 64,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "BLEND",
+    "case": "v096",
+    "value": 96,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "BLEND",
+    "case": "v127",
+    "value": 127,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "COMPRESSOR",
+    "case": "v000",
+    "value": 0,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "COMPRESSOR",
+    "case": "v032",
+    "value": 32,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "COMPRESSOR",
+    "case": "v064",
+    "value": 64,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "COMPRESSOR",
+    "case": "v096",
+    "value": 96,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "COMPRESSOR",
+    "case": "v127",
+    "value": 127,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "COMPRESSOR",
+    "case": "live00",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 1.0,
+      "env": 1.0,
+      "filter_env": 1.0,
+      "phase": 0.0,
+      "progress": 0.0,
+      "mod": 0.0,
+      "tape_phase": 0.0,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.0
+    }
+  },
+  {
+    "glyph": "COMPRESSOR",
+    "case": "live01",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.8777380818906038,
+      "env": 0.8777380818906038,
+      "filter_env": 0.8777380818906038,
+      "phase": 0.041666666666666664,
+      "progress": 0.043478260869565216,
+      "mod": 0.25882975260416663,
+      "tape_phase": 0.041666666666666664,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.041666666666666664
+    }
+  },
+  {
+    "glyph": "COMPRESSOR",
+    "case": "live02",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.7704013326893682,
+      "env": 0.7704013326893682,
+      "filter_env": 0.7704013326893682,
+      "phase": 0.08333333333333333,
+      "progress": 0.08695652173913043,
+      "mod": 0.5,
+      "tape_phase": 0.08333333333333333,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.08333333333333333
+    }
+  },
+  {
+    "glyph": "COMPRESSOR",
+    "case": "live05",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.5209244437839674,
+      "env": 0.5209244437839674,
+      "filter_env": 0.5209244437839674,
+      "phase": 0.20833333333333334,
+      "progress": 0.21739130434782608,
+      "mod": 0.9659220377604166,
+      "tape_phase": 0.20833333333333334,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.20833333333333334
+    }
+  },
+  {
+    "glyph": "COMPRESSOR",
+    "case": "live10",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.2713576607082201,
+      "env": 0.2713576607082201,
+      "filter_env": 0.2713576607082201,
+      "phase": 0.4166666666666667,
+      "progress": 0.43478260869565216,
+      "mod": 0.4999999999999999,
+      "tape_phase": 0.4166666666666667,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.4166666666666667
+    }
+  },
+  {
+    "glyph": "COMPRESSOR",
+    "case": "live18",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.09557918880296788,
+      "env": 0.09557918880296788,
+      "filter_env": 0.09557918880296788,
+      "phase": 0.75,
+      "progress": 0.782608695652174,
+      "mod": -1.0,
+      "tape_phase": 0.75,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.75
+    }
+  },
+  {
+    "glyph": "COMPRESSOR",
+    "case": "live23",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.04978752136230469,
+      "env": 0.04978752136230469,
+      "filter_env": 0.04978752136230469,
+      "phase": 0.9583333333333334,
+      "progress": 1.0,
+      "mod": -0.25882975260416646,
+      "tape_phase": 0.9583333333333334,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.9583333333333334
+    }
+  },
+  {
+    "glyph": "LIMITER",
+    "case": "v000",
+    "value": 0,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "LIMITER",
+    "case": "v032",
+    "value": 32,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "LIMITER",
+    "case": "v064",
+    "value": 64,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "LIMITER",
+    "case": "v096",
+    "value": 96,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "LIMITER",
+    "case": "v127",
+    "value": 127,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "LIMITER",
+    "case": "s00",
+    "value": 64,
+    "state": 0,
+    "live": {}
+  },
+  {
+    "glyph": "LIMITER",
+    "case": "s01",
+    "value": 64,
+    "state": 1,
+    "live": {}
+  },
+  {
+    "glyph": "PUMP",
+    "case": "v000",
+    "value": 0,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "PUMP",
+    "case": "v032",
+    "value": 32,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "PUMP",
+    "case": "v064",
+    "value": 64,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "PUMP",
+    "case": "v096",
+    "value": 96,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "PUMP",
+    "case": "v127",
+    "value": 127,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "PUMP",
+    "case": "live00",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 1.0,
+      "env": 1.0,
+      "filter_env": 1.0,
+      "phase": 0.0,
+      "progress": 0.0,
+      "mod": 0.0,
+      "tape_phase": 0.0,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.0
+    }
+  },
+  {
+    "glyph": "PUMP",
+    "case": "live01",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.8777380818906038,
+      "env": 0.8777380818906038,
+      "filter_env": 0.8777380818906038,
+      "phase": 0.041666666666666664,
+      "progress": 0.043478260869565216,
+      "mod": 0.25882975260416663,
+      "tape_phase": 0.041666666666666664,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.041666666666666664
+    }
+  },
+  {
+    "glyph": "PUMP",
+    "case": "live02",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.7704013326893682,
+      "env": 0.7704013326893682,
+      "filter_env": 0.7704013326893682,
+      "phase": 0.08333333333333333,
+      "progress": 0.08695652173913043,
+      "mod": 0.5,
+      "tape_phase": 0.08333333333333333,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.08333333333333333
+    }
+  },
+  {
+    "glyph": "PUMP",
+    "case": "live05",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.5209244437839674,
+      "env": 0.5209244437839674,
+      "filter_env": 0.5209244437839674,
+      "phase": 0.20833333333333334,
+      "progress": 0.21739130434782608,
+      "mod": 0.9659220377604166,
+      "tape_phase": 0.20833333333333334,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.20833333333333334
+    }
+  },
+  {
+    "glyph": "PUMP",
+    "case": "live10",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.2713576607082201,
+      "env": 0.2713576607082201,
+      "filter_env": 0.2713576607082201,
+      "phase": 0.4166666666666667,
+      "progress": 0.43478260869565216,
+      "mod": 0.4999999999999999,
+      "tape_phase": 0.4166666666666667,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.4166666666666667
+    }
+  },
+  {
+    "glyph": "PUMP",
+    "case": "live18",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.09557918880296788,
+      "env": 0.09557918880296788,
+      "filter_env": 0.09557918880296788,
+      "phase": 0.75,
+      "progress": 0.782608695652174,
+      "mod": -1.0,
+      "tape_phase": 0.75,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.75
+    }
+  },
+  {
+    "glyph": "PUMP",
+    "case": "live23",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.04978752136230469,
+      "env": 0.04978752136230469,
+      "filter_env": 0.04978752136230469,
+      "phase": 0.9583333333333334,
+      "progress": 1.0,
+      "mod": -0.25882975260416646,
+      "tape_phase": 0.9583333333333334,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.9583333333333334
+    }
+  },
+  {
+    "glyph": "SOURCE",
+    "case": "v000",
+    "value": 0,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "SOURCE",
+    "case": "v032",
+    "value": 32,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "SOURCE",
+    "case": "v064",
+    "value": 64,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "SOURCE",
+    "case": "v096",
+    "value": 96,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "SOURCE",
+    "case": "v127",
+    "value": 127,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "SOURCE",
+    "case": "s00",
+    "value": 64,
+    "state": 0,
+    "live": {}
+  },
+  {
+    "glyph": "SOURCE",
+    "case": "s01",
+    "value": 64,
+    "state": 1,
+    "live": {}
+  },
+  {
+    "glyph": "SOURCE",
+    "case": "s02",
+    "value": 64,
+    "state": 2,
+    "live": {}
+  },
+  {
+    "glyph": "TEMPO",
+    "case": "v000",
+    "value": 0,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "TEMPO",
+    "case": "v032",
+    "value": 32,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "TEMPO",
+    "case": "v064",
+    "value": 64,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "TEMPO",
+    "case": "v096",
+    "value": 96,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "TEMPO",
+    "case": "v127",
+    "value": 127,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "TEMPO",
+    "case": "live00",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 1.0,
+      "env": 1.0,
+      "filter_env": 1.0,
+      "phase": 0.0,
+      "progress": 0.0,
+      "mod": 0.0,
+      "tape_phase": 0.0,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.0
+    }
+  },
+  {
+    "glyph": "TEMPO",
+    "case": "live01",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.8777380818906038,
+      "env": 0.8777380818906038,
+      "filter_env": 0.8777380818906038,
+      "phase": 0.041666666666666664,
+      "progress": 0.043478260869565216,
+      "mod": 0.25882975260416663,
+      "tape_phase": 0.041666666666666664,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.041666666666666664
+    }
+  },
+  {
+    "glyph": "TEMPO",
+    "case": "live02",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.7704013326893682,
+      "env": 0.7704013326893682,
+      "filter_env": 0.7704013326893682,
+      "phase": 0.08333333333333333,
+      "progress": 0.08695652173913043,
+      "mod": 0.5,
+      "tape_phase": 0.08333333333333333,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.08333333333333333
+    }
+  },
+  {
+    "glyph": "TEMPO",
+    "case": "live05",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.5209244437839674,
+      "env": 0.5209244437839674,
+      "filter_env": 0.5209244437839674,
+      "phase": 0.20833333333333334,
+      "progress": 0.21739130434782608,
+      "mod": 0.9659220377604166,
+      "tape_phase": 0.20833333333333334,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.20833333333333334
+    }
+  },
+  {
+    "glyph": "TEMPO",
+    "case": "live10",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.2713576607082201,
+      "env": 0.2713576607082201,
+      "filter_env": 0.2713576607082201,
+      "phase": 0.4166666666666667,
+      "progress": 0.43478260869565216,
+      "mod": 0.4999999999999999,
+      "tape_phase": 0.4166666666666667,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.4166666666666667
+    }
+  },
+  {
+    "glyph": "TEMPO",
+    "case": "live18",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.09557918880296788,
+      "env": 0.09557918880296788,
+      "filter_env": 0.09557918880296788,
+      "phase": 0.75,
+      "progress": 0.782608695652174,
+      "mod": -1.0,
+      "tape_phase": 0.75,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.75
+    }
+  },
+  {
+    "glyph": "TEMPO",
+    "case": "live23",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.04978752136230469,
+      "env": 0.04978752136230469,
+      "filter_env": 0.04978752136230469,
+      "phase": 0.9583333333333334,
+      "progress": 1.0,
+      "mod": -0.25882975260416646,
+      "tape_phase": 0.9583333333333334,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.9583333333333334
+    }
+  },
+  {
+    "glyph": "SWING",
+    "case": "v000",
+    "value": 0,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "SWING",
+    "case": "v032",
+    "value": 32,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "SWING",
+    "case": "v064",
+    "value": 64,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "SWING",
+    "case": "v096",
+    "value": 96,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "SWING",
+    "case": "v127",
+    "value": 127,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "LENGTH",
+    "case": "v000",
+    "value": 0,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "LENGTH",
+    "case": "v032",
+    "value": 32,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "LENGTH",
+    "case": "v064",
+    "value": 64,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "LENGTH",
+    "case": "v096",
+    "value": 96,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "LENGTH",
+    "case": "v127",
+    "value": 127,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "REPEAT",
+    "case": "v000",
+    "value": 0,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "REPEAT",
+    "case": "v032",
+    "value": 32,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "REPEAT",
+    "case": "v064",
+    "value": 64,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "REPEAT",
+    "case": "v096",
+    "value": 96,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "REPEAT",
+    "case": "v127",
+    "value": 127,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "RATE",
+    "case": "v000",
+    "value": 0,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "RATE",
+    "case": "v032",
+    "value": 32,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "RATE",
+    "case": "v064",
+    "value": 64,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "RATE",
+    "case": "v096",
+    "value": 96,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "RATE",
+    "case": "v127",
+    "value": 127,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "DIRECTION",
+    "case": "v000",
+    "value": 0,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "DIRECTION",
+    "case": "v032",
+    "value": 32,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "DIRECTION",
+    "case": "v064",
+    "value": 64,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "DIRECTION",
+    "case": "v096",
+    "value": 96,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "DIRECTION",
+    "case": "v127",
+    "value": 127,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "DIRECTION",
+    "case": "s00",
+    "value": 64,
+    "state": 0,
+    "live": {}
+  },
+  {
+    "glyph": "DIRECTION",
+    "case": "s01",
+    "value": 64,
+    "state": 1,
+    "live": {}
+  },
+  {
+    "glyph": "DIRECTION",
+    "case": "s02",
+    "value": 64,
+    "state": 2,
+    "live": {}
+  },
+  {
+    "glyph": "DIRECTION",
+    "case": "s03",
+    "value": 64,
+    "state": 3,
+    "live": {}
+  },
+  {
+    "glyph": "SLOT",
+    "case": "v000",
+    "value": 0,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "SLOT",
+    "case": "v032",
+    "value": 32,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "SLOT",
+    "case": "v064",
+    "value": 64,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "SLOT",
+    "case": "v096",
+    "value": 96,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "SLOT",
+    "case": "v127",
+    "value": 127,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "NOTE",
+    "case": "v000",
+    "value": 0,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "NOTE",
+    "case": "v032",
+    "value": 32,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "NOTE",
+    "case": "v064",
+    "value": 64,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "NOTE",
+    "case": "v096",
+    "value": 96,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "NOTE",
+    "case": "v127",
+    "value": 127,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "NOTE",
+    "case": "live00",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 1.0,
+      "env": 1.0,
+      "filter_env": 1.0,
+      "phase": 0.0,
+      "progress": 0.0,
+      "mod": 0.0,
+      "tape_phase": 0.0,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.0
+    }
+  },
+  {
+    "glyph": "NOTE",
+    "case": "live01",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.8777380818906038,
+      "env": 0.8777380818906038,
+      "filter_env": 0.8777380818906038,
+      "phase": 0.041666666666666664,
+      "progress": 0.043478260869565216,
+      "mod": 0.25882975260416663,
+      "tape_phase": 0.041666666666666664,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.041666666666666664
+    }
+  },
+  {
+    "glyph": "NOTE",
+    "case": "live02",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.7704013326893682,
+      "env": 0.7704013326893682,
+      "filter_env": 0.7704013326893682,
+      "phase": 0.08333333333333333,
+      "progress": 0.08695652173913043,
+      "mod": 0.5,
+      "tape_phase": 0.08333333333333333,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.08333333333333333
+    }
+  },
+  {
+    "glyph": "NOTE",
+    "case": "live05",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.5209244437839674,
+      "env": 0.5209244437839674,
+      "filter_env": 0.5209244437839674,
+      "phase": 0.20833333333333334,
+      "progress": 0.21739130434782608,
+      "mod": 0.9659220377604166,
+      "tape_phase": 0.20833333333333334,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.20833333333333334
+    }
+  },
+  {
+    "glyph": "NOTE",
+    "case": "live10",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.2713576607082201,
+      "env": 0.2713576607082201,
+      "filter_env": 0.2713576607082201,
+      "phase": 0.4166666666666667,
+      "progress": 0.43478260869565216,
+      "mod": 0.4999999999999999,
+      "tape_phase": 0.4166666666666667,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.4166666666666667
+    }
+  },
+  {
+    "glyph": "NOTE",
+    "case": "live18",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.09557918880296788,
+      "env": 0.09557918880296788,
+      "filter_env": 0.09557918880296788,
+      "phase": 0.75,
+      "progress": 0.782608695652174,
+      "mod": -1.0,
+      "tape_phase": 0.75,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.75
+    }
+  },
+  {
+    "glyph": "NOTE",
+    "case": "live23",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.04978752136230469,
+      "env": 0.04978752136230469,
+      "filter_env": 0.04978752136230469,
+      "phase": 0.9583333333333334,
+      "progress": 1.0,
+      "mod": -0.25882975260416646,
+      "tape_phase": 0.9583333333333334,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.9583333333333334
+    }
+  },
+  {
+    "glyph": "GATE",
+    "case": "v000",
+    "value": 0,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "GATE",
+    "case": "v032",
+    "value": 32,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "GATE",
+    "case": "v064",
+    "value": 64,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "GATE",
+    "case": "v096",
+    "value": 96,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "GATE",
+    "case": "v127",
+    "value": 127,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "GATE",
+    "case": "live00",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 1.0,
+      "env": 1.0,
+      "filter_env": 1.0,
+      "phase": 0.0,
+      "progress": 0.0,
+      "mod": 0.0,
+      "tape_phase": 0.0,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.0
+    }
+  },
+  {
+    "glyph": "GATE",
+    "case": "live01",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.8777380818906038,
+      "env": 0.8777380818906038,
+      "filter_env": 0.8777380818906038,
+      "phase": 0.041666666666666664,
+      "progress": 0.043478260869565216,
+      "mod": 0.25882975260416663,
+      "tape_phase": 0.041666666666666664,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.041666666666666664
+    }
+  },
+  {
+    "glyph": "GATE",
+    "case": "live02",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.7704013326893682,
+      "env": 0.7704013326893682,
+      "filter_env": 0.7704013326893682,
+      "phase": 0.08333333333333333,
+      "progress": 0.08695652173913043,
+      "mod": 0.5,
+      "tape_phase": 0.08333333333333333,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.08333333333333333
+    }
+  },
+  {
+    "glyph": "GATE",
+    "case": "live05",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.5209244437839674,
+      "env": 0.5209244437839674,
+      "filter_env": 0.5209244437839674,
+      "phase": 0.20833333333333334,
+      "progress": 0.21739130434782608,
+      "mod": 0.9659220377604166,
+      "tape_phase": 0.20833333333333334,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.20833333333333334
+    }
+  },
+  {
+    "glyph": "GATE",
+    "case": "live10",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.2713576607082201,
+      "env": 0.2713576607082201,
+      "filter_env": 0.2713576607082201,
+      "phase": 0.4166666666666667,
+      "progress": 0.43478260869565216,
+      "mod": 0.4999999999999999,
+      "tape_phase": 0.4166666666666667,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.4166666666666667
+    }
+  },
+  {
+    "glyph": "GATE",
+    "case": "live18",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.09557918880296788,
+      "env": 0.09557918880296788,
+      "filter_env": 0.09557918880296788,
+      "phase": 0.75,
+      "progress": 0.782608695652174,
+      "mod": -1.0,
+      "tape_phase": 0.75,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.75
+    }
+  },
+  {
+    "glyph": "GATE",
+    "case": "live23",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.04978752136230469,
+      "env": 0.04978752136230469,
+      "filter_env": 0.04978752136230469,
+      "phase": 0.9583333333333334,
+      "progress": 1.0,
+      "mod": -0.25882975260416646,
+      "tape_phase": 0.9583333333333334,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.9583333333333334
+    }
+  },
+  {
+    "glyph": "CHANCE",
+    "case": "v000",
+    "value": 0,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "CHANCE",
+    "case": "v032",
+    "value": 32,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "CHANCE",
+    "case": "v064",
+    "value": 64,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "CHANCE",
+    "case": "v096",
+    "value": 96,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "CHANCE",
+    "case": "v127",
+    "value": 127,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "SLIDE",
+    "case": "v000",
+    "value": 0,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "SLIDE",
+    "case": "v032",
+    "value": 32,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "SLIDE",
+    "case": "v064",
+    "value": 64,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "SLIDE",
+    "case": "v096",
+    "value": 96,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "SLIDE",
+    "case": "v127",
+    "value": 127,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "LINK",
+    "case": "v000",
+    "value": 0,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "LINK",
+    "case": "v032",
+    "value": 32,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "LINK",
+    "case": "v064",
+    "value": 64,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "LINK",
+    "case": "v096",
+    "value": 96,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "LINK",
+    "case": "v127",
+    "value": 127,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "LINK",
+    "case": "s00",
+    "value": 64,
+    "state": 0,
+    "live": {}
+  },
+  {
+    "glyph": "LINK",
+    "case": "s01",
+    "value": 64,
+    "state": 1,
+    "live": {}
+  },
+  {
+    "glyph": "OCTAVE",
+    "case": "v000",
+    "value": 0,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "OCTAVE",
+    "case": "v032",
+    "value": 32,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "OCTAVE",
+    "case": "v064",
+    "value": 64,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "OCTAVE",
+    "case": "v096",
+    "value": 96,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "OCTAVE",
+    "case": "v127",
+    "value": 127,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "OCTAVE",
+    "case": "s00",
+    "value": 64,
+    "state": 0,
+    "live": {}
+  },
+  {
+    "glyph": "OCTAVE",
+    "case": "s01",
+    "value": 64,
+    "state": 1,
+    "live": {}
+  },
+  {
+    "glyph": "OCTAVE",
+    "case": "s02",
+    "value": 64,
+    "state": 2,
+    "live": {}
+  },
+  {
+    "glyph": "OCTAVE",
+    "case": "s03",
+    "value": 64,
+    "state": 3,
+    "live": {}
+  },
+  {
+    "glyph": "KEY_RANGE",
+    "case": "v000",
+    "value": 0,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "KEY_RANGE",
+    "case": "v032",
+    "value": 32,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "KEY_RANGE",
+    "case": "v064",
+    "value": 64,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "KEY_RANGE",
+    "case": "v096",
+    "value": 96,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "KEY_RANGE",
+    "case": "v127",
+    "value": 127,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "TRACKING",
+    "case": "v000",
+    "value": 0,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "TRACKING",
+    "case": "v032",
+    "value": 32,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "TRACKING",
+    "case": "v064",
+    "value": 64,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "TRACKING",
+    "case": "v096",
+    "value": 96,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "TRACKING",
+    "case": "v127",
+    "value": 127,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "TRACKING",
+    "case": "live00",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 1.0,
+      "env": 1.0,
+      "filter_env": 1.0,
+      "phase": 0.0,
+      "progress": 0.0,
+      "mod": 0.0,
+      "tape_phase": 0.0,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.0
+    }
+  },
+  {
+    "glyph": "TRACKING",
+    "case": "live01",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.8777380818906038,
+      "env": 0.8777380818906038,
+      "filter_env": 0.8777380818906038,
+      "phase": 0.041666666666666664,
+      "progress": 0.043478260869565216,
+      "mod": 0.25882975260416663,
+      "tape_phase": 0.041666666666666664,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.041666666666666664
+    }
+  },
+  {
+    "glyph": "TRACKING",
+    "case": "live02",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.7704013326893682,
+      "env": 0.7704013326893682,
+      "filter_env": 0.7704013326893682,
+      "phase": 0.08333333333333333,
+      "progress": 0.08695652173913043,
+      "mod": 0.5,
+      "tape_phase": 0.08333333333333333,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.08333333333333333
+    }
+  },
+  {
+    "glyph": "TRACKING",
+    "case": "live05",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.5209244437839674,
+      "env": 0.5209244437839674,
+      "filter_env": 0.5209244437839674,
+      "phase": 0.20833333333333334,
+      "progress": 0.21739130434782608,
+      "mod": 0.9659220377604166,
+      "tape_phase": 0.20833333333333334,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.20833333333333334
+    }
+  },
+  {
+    "glyph": "TRACKING",
+    "case": "live10",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.2713576607082201,
+      "env": 0.2713576607082201,
+      "filter_env": 0.2713576607082201,
+      "phase": 0.4166666666666667,
+      "progress": 0.43478260869565216,
+      "mod": 0.4999999999999999,
+      "tape_phase": 0.4166666666666667,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.4166666666666667
+    }
+  },
+  {
+    "glyph": "TRACKING",
+    "case": "live18",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.09557918880296788,
+      "env": 0.09557918880296788,
+      "filter_env": 0.09557918880296788,
+      "phase": 0.75,
+      "progress": 0.782608695652174,
+      "mod": -1.0,
+      "tape_phase": 0.75,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.75
+    }
+  },
+  {
+    "glyph": "TRACKING",
+    "case": "live23",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.04978752136230469,
+      "env": 0.04978752136230469,
+      "filter_env": 0.04978752136230469,
+      "phase": 0.9583333333333334,
+      "progress": 1.0,
+      "mod": -0.25882975260416646,
+      "tape_phase": 0.9583333333333334,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.9583333333333334
+    }
+  },
+  {
+    "glyph": "PEDAL",
+    "case": "v000",
+    "value": 0,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "PEDAL",
+    "case": "v032",
+    "value": 32,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "PEDAL",
+    "case": "v064",
+    "value": 64,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "PEDAL",
+    "case": "v096",
+    "value": 96,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "PEDAL",
+    "case": "v127",
+    "value": 127,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "PEDAL",
+    "case": "s00",
+    "value": 64,
+    "state": 0,
+    "live": {}
+  },
+  {
+    "glyph": "PEDAL",
+    "case": "s01",
+    "value": 64,
+    "state": 1,
+    "live": {}
+  },
+  {
+    "glyph": "PEDAL",
+    "case": "live00",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 1.0,
+      "env": 1.0,
+      "filter_env": 1.0,
+      "phase": 0.0,
+      "progress": 0.0,
+      "mod": 0.0,
+      "tape_phase": 0.0,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.0
+    }
+  },
+  {
+    "glyph": "PEDAL",
+    "case": "live01",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.8777380818906038,
+      "env": 0.8777380818906038,
+      "filter_env": 0.8777380818906038,
+      "phase": 0.041666666666666664,
+      "progress": 0.043478260869565216,
+      "mod": 0.25882975260416663,
+      "tape_phase": 0.041666666666666664,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.041666666666666664
+    }
+  },
+  {
+    "glyph": "PEDAL",
+    "case": "live02",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.7704013326893682,
+      "env": 0.7704013326893682,
+      "filter_env": 0.7704013326893682,
+      "phase": 0.08333333333333333,
+      "progress": 0.08695652173913043,
+      "mod": 0.5,
+      "tape_phase": 0.08333333333333333,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.08333333333333333
+    }
+  },
+  {
+    "glyph": "PEDAL",
+    "case": "live05",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.5209244437839674,
+      "env": 0.5209244437839674,
+      "filter_env": 0.5209244437839674,
+      "phase": 0.20833333333333334,
+      "progress": 0.21739130434782608,
+      "mod": 0.9659220377604166,
+      "tape_phase": 0.20833333333333334,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.20833333333333334
+    }
+  },
+  {
+    "glyph": "PEDAL",
+    "case": "live10",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.2713576607082201,
+      "env": 0.2713576607082201,
+      "filter_env": 0.2713576607082201,
+      "phase": 0.4166666666666667,
+      "progress": 0.43478260869565216,
+      "mod": 0.4999999999999999,
+      "tape_phase": 0.4166666666666667,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.4166666666666667
+    }
+  },
+  {
+    "glyph": "PEDAL",
+    "case": "live18",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.09557918880296788,
+      "env": 0.09557918880296788,
+      "filter_env": 0.09557918880296788,
+      "phase": 0.75,
+      "progress": 0.782608695652174,
+      "mod": -1.0,
+      "tape_phase": 0.75,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.75
+    }
+  },
+  {
+    "glyph": "PEDAL",
+    "case": "live23",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.04978752136230469,
+      "env": 0.04978752136230469,
+      "filter_env": 0.04978752136230469,
+      "phase": 0.9583333333333334,
+      "progress": 1.0,
+      "mod": -0.25882975260416646,
+      "tape_phase": 0.9583333333333334,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.9583333333333334
+    }
+  },
+  {
+    "glyph": "ENABLE",
+    "case": "v000",
+    "value": 0,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "ENABLE",
+    "case": "v032",
+    "value": 32,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "ENABLE",
+    "case": "v064",
+    "value": 64,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "ENABLE",
+    "case": "v096",
+    "value": 96,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "ENABLE",
+    "case": "v127",
+    "value": 127,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "ENABLE",
+    "case": "s00",
+    "value": 64,
+    "state": 0,
+    "live": {}
+  },
+  {
+    "glyph": "ENABLE",
+    "case": "s01",
+    "value": 64,
+    "state": 1,
+    "live": {}
+  },
+  {
+    "glyph": "DESTINATION",
+    "case": "v000",
+    "value": 0,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "DESTINATION",
+    "case": "v032",
+    "value": 32,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "DESTINATION",
+    "case": "v064",
+    "value": 64,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "DESTINATION",
+    "case": "v096",
+    "value": 96,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "DESTINATION",
+    "case": "v127",
+    "value": 127,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "DESTINATION",
+    "case": "s00",
+    "value": 64,
+    "state": 0,
+    "live": {}
+  },
+  {
+    "glyph": "DESTINATION",
+    "case": "s01",
+    "value": 64,
+    "state": 1,
+    "live": {}
+  },
+  {
+    "glyph": "DESTINATION",
+    "case": "s02",
+    "value": 64,
+    "state": 2,
+    "live": {}
+  },
+  {
+    "glyph": "SCALE",
+    "case": "v000",
+    "value": 0,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "SCALE",
+    "case": "v032",
+    "value": 32,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "SCALE",
+    "case": "v064",
+    "value": 64,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "SCALE",
+    "case": "v096",
+    "value": 96,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "SCALE",
+    "case": "v127",
+    "value": 127,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "ROOT",
+    "case": "v000",
+    "value": 0,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "ROOT",
+    "case": "v032",
+    "value": 32,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "ROOT",
+    "case": "v064",
+    "value": 64,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "ROOT",
+    "case": "v096",
+    "value": 96,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "ROOT",
+    "case": "v127",
+    "value": 127,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "UNISON",
+    "case": "v000",
+    "value": 0,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "UNISON",
+    "case": "v032",
+    "value": 32,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "UNISON",
+    "case": "v064",
+    "value": 64,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "UNISON",
+    "case": "v096",
+    "value": 96,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "UNISON",
+    "case": "v127",
+    "value": 127,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "MOD_BASE",
+    "case": "v000",
+    "value": 0,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "MOD_BASE",
+    "case": "v032",
+    "value": 32,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "MOD_BASE",
+    "case": "v064",
+    "value": 64,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "MOD_BASE",
+    "case": "v096",
+    "value": 96,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "MOD_BASE",
+    "case": "v127",
+    "value": 127,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "MOD_BASE",
+    "case": "live00",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 1.0,
+      "env": 1.0,
+      "filter_env": 1.0,
+      "phase": 0.0,
+      "progress": 0.0,
+      "mod": 0.0,
+      "tape_phase": 0.0,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.0
+    }
+  },
+  {
+    "glyph": "MOD_BASE",
+    "case": "live01",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.8777380818906038,
+      "env": 0.8777380818906038,
+      "filter_env": 0.8777380818906038,
+      "phase": 0.041666666666666664,
+      "progress": 0.043478260869565216,
+      "mod": 0.25882975260416663,
+      "tape_phase": 0.041666666666666664,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.041666666666666664
+    }
+  },
+  {
+    "glyph": "MOD_BASE",
+    "case": "live02",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.7704013326893682,
+      "env": 0.7704013326893682,
+      "filter_env": 0.7704013326893682,
+      "phase": 0.08333333333333333,
+      "progress": 0.08695652173913043,
+      "mod": 0.5,
+      "tape_phase": 0.08333333333333333,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.08333333333333333
+    }
+  },
+  {
+    "glyph": "MOD_BASE",
+    "case": "live05",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.5209244437839674,
+      "env": 0.5209244437839674,
+      "filter_env": 0.5209244437839674,
+      "phase": 0.20833333333333334,
+      "progress": 0.21739130434782608,
+      "mod": 0.9659220377604166,
+      "tape_phase": 0.20833333333333334,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.20833333333333334
+    }
+  },
+  {
+    "glyph": "MOD_BASE",
+    "case": "live10",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.2713576607082201,
+      "env": 0.2713576607082201,
+      "filter_env": 0.2713576607082201,
+      "phase": 0.4166666666666667,
+      "progress": 0.43478260869565216,
+      "mod": 0.4999999999999999,
+      "tape_phase": 0.4166666666666667,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.4166666666666667
+    }
+  },
+  {
+    "glyph": "MOD_BASE",
+    "case": "live18",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.09557918880296788,
+      "env": 0.09557918880296788,
+      "filter_env": 0.09557918880296788,
+      "phase": 0.75,
+      "progress": 0.782608695652174,
+      "mod": -1.0,
+      "tape_phase": 0.75,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.75
+    }
+  },
+  {
+    "glyph": "MOD_BASE",
+    "case": "live23",
+    "value": 96,
+    "state": null,
+    "live": {
+      "active": true,
+      "amp": 0.04978752136230469,
+      "env": 0.04978752136230469,
+      "filter_env": 0.04978752136230469,
+      "phase": 0.9583333333333334,
+      "progress": 1.0,
+      "mod": -0.25882975260416646,
+      "tape_phase": 0.9583333333333334,
+      "tape_active": true,
+      "playing": true,
+      "clock_phase": 0.9583333333333334
+    }
+  },
+  {
+    "glyph": "MOD_MODE",
+    "case": "v000",
+    "value": 0,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "MOD_MODE",
+    "case": "v032",
+    "value": 32,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "MOD_MODE",
+    "case": "v064",
+    "value": 64,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "MOD_MODE",
+    "case": "v096",
+    "value": 96,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "MOD_MODE",
+    "case": "v127",
+    "value": 127,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "MOD_MODE",
+    "case": "s00",
+    "value": 64,
+    "state": 0,
+    "live": {}
+  },
+  {
+    "glyph": "MOD_MODE",
+    "case": "s01",
+    "value": 64,
+    "state": 1,
+    "live": {}
+  },
+  {
+    "glyph": "MOD_MODE",
+    "case": "s02",
+    "value": 64,
+    "state": 2,
+    "live": {}
+  },
+  {
+    "glyph": "LEGATO",
+    "case": "v000",
+    "value": 0,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "LEGATO",
+    "case": "v032",
+    "value": 32,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "LEGATO",
+    "case": "v064",
+    "value": 64,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "LEGATO",
+    "case": "v096",
+    "value": 96,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "LEGATO",
+    "case": "v127",
+    "value": 127,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "LEGATO",
+    "case": "s00",
+    "value": 64,
+    "state": 0,
+    "live": {}
+  },
+  {
+    "glyph": "LEGATO",
+    "case": "s01",
+    "value": 64,
+    "state": 1,
+    "live": {}
+  },
+  {
+    "glyph": "LOOP",
+    "case": "v000",
+    "value": 0,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "LOOP",
+    "case": "v032",
+    "value": 32,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "LOOP",
+    "case": "v064",
+    "value": 64,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "LOOP",
+    "case": "v096",
+    "value": 96,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "LOOP",
+    "case": "v127",
+    "value": 127,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "LOOP",
+    "case": "s00",
+    "value": 64,
+    "state": 0,
+    "live": {}
+  },
+  {
+    "glyph": "LOOP",
+    "case": "s01",
+    "value": 64,
+    "state": 1,
+    "live": {}
+  },
+  {
+    "glyph": "DENSITY",
+    "case": "v000",
+    "value": 0,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "DENSITY",
+    "case": "v032",
+    "value": 32,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "DENSITY",
+    "case": "v064",
+    "value": 64,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "DENSITY",
+    "case": "v096",
+    "value": 96,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "DENSITY",
+    "case": "v127",
+    "value": 127,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "MUTATE",
+    "case": "v000",
+    "value": 0,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "MUTATE",
+    "case": "v032",
+    "value": 32,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "MUTATE",
+    "case": "v064",
+    "value": 64,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "MUTATE",
+    "case": "v096",
+    "value": 96,
+    "state": null,
+    "live": {}
+  },
+  {
+    "glyph": "MUTATE",
+    "case": "v127",
+    "value": 127,
+    "state": null,
+    "live": {}
+  }
+]

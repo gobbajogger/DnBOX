@@ -796,6 +796,7 @@ run ui-drum-mix-selected python3 tests/host/ui_drum_mix_selected_voice_test.py
 run ui-glyph-storage python3 -m unittest discover -s tests -p "test_*packing.py"
 run ui-fx-feedback-context python3 tests/host/ui_fx_feedback_context_test.py
 run ui-owner-copy python3 tests/host/ui_owner_copy_test.py
+run gfinal-parity python3 tests/host/gfinal_parity_test.py
 run ui-home-r22 sh tests/host/ui_home_r22_test.sh
 run ui-owner-units sh tests/host/ui_owner_units_test.sh
 run ui-drum-shared-glyph sh tests/host/ui_drum_shared_glyph_test.sh
