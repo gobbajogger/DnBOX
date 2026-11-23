@@ -39,6 +39,17 @@ the ALNK0/TIMER5 ISRs, RAM/CPU1 code and every address-taken function (linked ca
 image). Nothing on the audio path changes. XIP free: Elite 11,268 -> 11,876 B, Pro 11,280 -> 11,888 B
 (+608 B each); pool and RAM unchanged.
 
+`tools/build.py` ORIGINAL_SYNTH_OZ_UNITS builds `original_runtime.c` (per-block dispatch, preset/arp
+control, views; no per-sample loop) at -Oz instead of -O2; the per-sample DSP in the backends stays -O2
+(Orchestrator approval, option 1). XIP free: Elite 11,876 -> 12,020 B, Pro 11,888 -> 12,032 B (+144 B;
++864 B with the Synths arp hooks on); pool and RAM unchanged. Test `render-timing`
+(`tests/host/render_timing_regression_test.sh`, about 30 s): 240+16 blocks per run, pairs Chicago+Miami
+(factory 18) and Synth One+SuperJ6, drums and FX on, thread CPU time; 0 blocks over 11,609 us / 3, and
+engine mean and block max over the rest of the block within +30 % / +100 % of the -O2 baseline in
+`tests/host/render_timing_baseline.json` (`tools/render_timing_check.py --write-baseline` rewrites it).
+-O2 vs -Oz block mean: Chicago+Miami 591.9-617.1 vs 572.1-601.2 us, Synth One+SuperJ6 533.2-537.4 vs
+512.5-533.5 us, late 0.
+
 ## Row 3: the owner's 5 BREAK zones as default slot contents (owner choice 18:29: "2 is better")
 `assets/default-breaks/` holds the 5 original encoded zones (pinned sha256, same bytes as DnBOX-nightly
 web/product-site/assets/starting-breaks). `tools/default_breaks.py` builds the default slot images:

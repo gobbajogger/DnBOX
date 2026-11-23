@@ -152,10 +152,14 @@ ORIGINAL_SYNTH_O2_UNITS = {
     "chicago_smallfx", "chicago_output", "chicago_engine_output", "chicago_full_mg", "chicago_global_mg",
     "chicago_global_stage", "chicago_modulation",
     "miami_decimator_component", "miami_decimator_adapter", "miami_fx_conversion",
-    "original_chicago_backend", "original_miami_backend", "original_runtime",
+    "original_chicago_backend", "original_miami_backend",
     "fused_reference", "chicago_selector", "miami_geometry",
     "chicago_scheduler", "chicago_voice_owner", "chicago_packed", "lossless_table", "chicago_arp_control", "chicago_note_context", "control_math",
 }
+# Per-block dispatch, preset/arp control and views (no per-sample loop): -Oz, like OZ_UNITS.
+# The per-sample DSP stays in the backends at -O2. Perf lane: +864 B XIP with the arp hooks on;
+# tests/host/render_timing_regression_test.sh pins the per-block render timing.
+ORIGINAL_SYNTH_OZ_UNITS = {"original_runtime"}
 ORIGINAL_SYNTH_FLAGS = ["-fno-fast-math", "-ffp-contract=off", "-DNDEBUG",
                         "-DORIGINAL_USE_SOFT_FMA", "-DMIAMI_FX_NO_HOST_FENV",
                         "-DX0X_FAST_FMA"]   # device: mul+add for the soft FMA (docs/perf/engine-load-20261031.md)
@@ -467,6 +471,8 @@ def app_compile_commands(flags, original_synth, wobble):
         for u in (*ORIGINAL_SYNTH_UNITS, *ORIGINAL_SYNTH_BACKENDS):
             o = OUT / "original" / (Path(u).stem + ".o")
             uf = original_o2 if Path(u).stem in ORIGINAL_SYNTH_O2_UNITS else original_flags
+            if Path(u).stem in ORIGINAL_SYNTH_OZ_UNITS:
+                uf = ["-Oz" if flag == "-Os" else flag for flag in original_flags]
             if Path(u).stem in {"chicago_dynamics", "chicago_modulation", "original_runtime"}:
                 uf = [f for f in uf if f != "-flto"]
             if BOARD == "smk37" and MODEL in ("elite", "pro") and Path(u).stem == "chicago_packed":
