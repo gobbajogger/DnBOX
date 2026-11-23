@@ -69,11 +69,12 @@ static void test_synth_motion(int part){
  pref_t r=PR(R_ENG,T_303,voice,control);int page=-1,slot=-1;
  for(int p=0;p<pg.n;p++)for(int k=0;k<4;k++)if(pg.r[p][k].kind==R_ENG && pg.r[p][k].c==control){page=p;slot=k;}
  CHECK(page>=0);*page_of(V_PART)=page;build_pages();drain_ms(300);ui_frame();
- int x,y;uint32_t idle=polish_glyph(r,matrix_value(r),&x,&y),sig=knobs_sig();
+ int x,y;uint32_t idle=polish_glyph(r,matrix_value(r),&x,&y);
  int row=page%4,gy=MAIN_Y+4+row*50+22,gx=4+slot*59+3;
  uint32_t cached=pixels(fb,gx,gy,26,19);
  engine_bass_on_velocity(voice,48,0,0,120);drain_ms(36);ui_frame();
- CHECK(polish_glyph(r,matrix_value(r),&x,&y)!=idle);CHECK(knobs_sig()!=sig);CHECK(pixels(fb,gx,gy,26,19)!=cached);
+ /* The real PART matrix bypasses knobs_sig; verify the cached frame itself. */
+ CHECK(polish_glyph(r,matrix_value(r),&x,&y)!=idle);CHECK(pixels(fb,gx,gy,26,19)!=cached);
  uint32_t live=polish_glyph(r,matrix_value(r),&x,&y);ui_frame();CHECK(polish_glyph(r,matrix_value(r),&x,&y)==live);
  engine_bass_off(voice);drain_ms(6000);ui_frame();CHECK(polish_glyph(r,matrix_value(r),&x,&y)==idle);
  printf("PASS synth %d direct glyph and framebuffer cache updates; idle stable\n",part);

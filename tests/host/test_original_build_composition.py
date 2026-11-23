@@ -357,6 +357,20 @@ class OriginalBuildCompositionTests(unittest.TestCase):
         self.assertIn("MIXIN(div_owner);", knobs)
         self.assertIn("if (div_owner) MIXIN(division_pad_index());", knobs)
 
+    def test_matrix_footer_does_not_use_legacy_knob_signature(self):
+        ui = (ROOT / "firmware/src/app/ui.c").read_text()
+        signature = ui.split("static UI_DRAW uint32_t knobs_sig(void)", 1)[1]
+        signature = signature.split("#include \"ui_chance_probe.h\"", 1)[0]
+        draw = ui.split("static UI_DRAW void draw_knobs(void)", 1)[1]
+        call = draw.index("sig = knobs_sig();")
+        matrix = draw.index("if (ui.view == V_PART && (is_drum() || is_303()))")
+        self.assertLess(matrix, call)
+        self.assertIn("draw_part_sound(2);", draw[matrix:call])
+        self.assertIn("return;", draw[matrix:call])
+        self.assertNotIn("engine_bass_voice_view", signature)
+        self.assertNotIn("engine_bass_motion_view", signature)
+        self.assertNotIn("engine_bass_filter_view", signature)
+
     def test_host_build_allows_original_rate_pad_flag_without_legacy_sources(self):
         # The host app should accept the same UI-only build flag as firmware.
         host = (ROOT / "host/build_host.sh").read_text()

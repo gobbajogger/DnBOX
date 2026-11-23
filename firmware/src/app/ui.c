@@ -9096,20 +9096,7 @@ static UI_DRAW uint32_t knobs_sig(void)
     uint32_t h = 2166136261u, i;
     int pgi = cur_page();
 #define MIXIN(v) (h = (h ^ (uint32_t)(v)) * 16777619u)
-    if (ui.view == V_PART && is_303()) {
-        const uint8_t *cell=proj.sound.v[T_303][bidx()];
-        for (unsigned byte=0; byte<ORIGINAL_SOUND_BYTES; byte++) MIXIN(cell[byte]);
-        MIXIN(engine_bass_status(bidx()));
-        { float eg=0,dd=0; if(engine_bass_filter_view(bidx(),&eg,&dd)) MIXIN(env_knee_x(0,eg*dd*(eg>0))); } /* ENV glyph motion: one step per knee pixel */
-        { float a=0,m=0;unsigned s=6,key=0;
-          if(engine_bass_voice_view(bidx(),&a,&m,&s,&key)) {
-              MIXIN((int)(a*32.0f)); MIXIN((int)(m*24.0f)); MIXIN(s); MIXIN(key);
-          }
-        }
-        { float ph=0,bi=0,cu=0,tg=0; int on=0; if(engine_bass_motion_view(bidx(),&ph,&bi,&cu,&tg,&on)) { MIXIN((int)(ph*64.0f)); MIXIN((int)((tg-cu)*16.0f)); } } /* wobble / glide motion */
-        MIXIN(engine_bass_preset_pending(bidx()));
-        MIXIN(engine_bass_requested_bank(bidx())); MIXIN(engine_bass_requested_preset(bidx()));
-    }
+    /* PART drum/bass matrices render and return before using this signature. */
     MIXIN(ui_ease_sig());
     int mix_kit=drum_mix_page();
     if(mix_kit>=0) {
