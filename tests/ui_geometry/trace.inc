@@ -28,3 +28,4 @@ static void geo_blit(int x,int y) {
 
 
 static unsigned pan_format_checks,pan_format_bad;
+static unsigned r22_roll_bands,r22_roll_screens,r22_roll_missing;

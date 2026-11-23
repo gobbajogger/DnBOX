@@ -231,6 +231,16 @@ static void required_battery(const char *screen) {
  battery_checks++;battery_level_seen[bars]++;
  if(bad){battery_missing++;printf("BATTERY_MISSING screen=%s level=%d pixels=%d\n",screen,level,bad);}
 }
+/* Row 7: every reached synth-sequencer screen is the R22 piano roll: both
+ * main bands drawn by the roll and its note area inked in the final frame. */
+static void required_r22_roll(const char *screen) {
+ unsigned bands=r22_roll_bands;r22_roll_bands=0;
+ if(ui.view!=V_SEQ||!is_303()||ui.overlay!=O_NONE||ui.help)return;
+ unsigned ink=0;
+ for(int y=HDR_H+4;y<HDR_H+2*BAND_H-4;y++)for(int x=0;x<240;x++)ink+=fb[y*240+x]!=swap16(C_BLACK);
+ r22_roll_screens++;
+ if(bands!=2||ink<200){r22_roll_missing++;printf("R22_ROLL_MISSING screen=%s bands=%u ink=%u\n",screen,bands,ink);}
+}
 static unsigned audit_frames;
 static void geo_audit(const char *screen) {
  static unsigned calls;
@@ -241,6 +251,7 @@ static void geo_audit(const char *screen) {
  required_other_content(screen);
  required_drum_content(screen);
  required_battery(screen);
+ required_r22_roll(screen);
  geo_enabled=0;
  for(unsigned i=0;i<geo_nframe;i++) {
   geo_label e=geo_frame[i];unsigned expected=0,missing=0;
@@ -398,5 +409,6 @@ int main(void)
     printf("STRIP_PRESENCE checks=%u\n",strip_presence_checks);printf("FAMILY_PRESENCE list=%u synth=%u\n",list_presence_checks,synth_presence_checks);printf("PRESENCE checks=%u missing=%u\n",presence_checks,presence_missing);printf("GLYPH_PIXELS checks=%u missing=%u damaged=%u\n",pixel_checks,pixel_missing,pixel_damaged);
     printf("BATTERY checks=%u missing=%u levels=%u,%u,%u,%u\n",battery_checks,battery_missing,battery_level_seen[0],battery_level_seen[1],battery_level_seen[2],battery_level_seen[3]);
     printf("PAN_FORMAT checks=%u bad=%u\n",pan_format_checks,pan_format_bad);
-    return geo_findings||presence_missing||pixel_missing||pixel_damaged||battery_missing||pan_format_bad||!pan_format_checks?1:0;
+    printf("R22_ROLL screens=%u missing=%u\n",r22_roll_screens,r22_roll_missing);
+    return geo_findings||presence_missing||pixel_missing||pixel_damaged||battery_missing||pan_format_bad||!pan_format_checks||r22_roll_missing||r22_roll_screens<8?1:0;
 }

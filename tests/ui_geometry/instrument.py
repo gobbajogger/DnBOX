@@ -129,3 +129,17 @@ def instrument(root):
     p=root/'firmware/src/app/ui_drum_voice.inc';s=p.read_text()
     a='static void dv_header_battery(int x, int y)\n{'
     s=once(s,a,a+'\n    if(getenv("BATTERY_MUTATE"))return;');p.write_text(s)
+    # Row 7: the synth sequencer (303A/303B, every engine) stays on the R22
+    # piano roll. R22_MUTATE drops the roll from SEQ, as an R23 step page would.
+    p=root/'firmware/src/app/ui.c';s=p.read_text()
+    sig='static UI_DRAW void draw_303(int band, int gen)'
+    wrapper=sig+"""
+{
+    if(geo_enabled && !gen && ui.view==V_SEQ) {
+        if(getenv("R22_MUTATE"))return;
+        r22_roll_bands++;
+    }
+    first_original_draw_303(band,gen);
+}
+"""
+    s=module.wrap(s,sig,'draw_303',wrapper);p.write_text(s)
