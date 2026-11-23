@@ -1,9 +1,9 @@
 /* SPDX-License-Identifier: GPL-3.0-only */
 #include "chicago_voice.h"
 #include "binary32_classify.h"
-#include "binary32_math.h"
 #include <math.h>
 #include <string.h>
+static inline uint32_t cv_bits(float x){uint32_t u;memcpy(&u,&x,4);return u;}
 #ifdef ORIGINAL_USE_SOFT_FMA
 /* exact: its FMA feeds a recursion; fast FMA moved the output by -78 dBFS (docs/perf) */
 #define X0X_EXACT_FMA_HERE 1
@@ -12,8 +12,9 @@
  * significands fit in 24 bits and the product is normal), the fused result
  * is the single rounding of p+c, which is the float add. Else the exact
  * software FMA. Same bits as original_rne_fmaf for all finite inputs. */
+static inline float cv_float(uint32_t u){float x;memcpy(&x,&u,4);return x;}
 static inline float cv_fma(float a,float b,float c){
- uint32_t ua=original_math_bits(a),ub=original_math_bits(b),uc=original_math_bits(c);
+ uint32_t ua=cv_bits(a),ub=cv_bits(b),uc=cv_bits(c);
  uint32_t ea=(ua>>23)&255u,eb=(ub>>23)&255u,ec=(uc>>23)&255u;
  if(ec!=255u&&ea!=255u&&eb!=255u){
   if(!(ua<<1)||!(ub<<1))return a*b+c;
@@ -26,13 +27,13 @@ static inline float cv_fma(float a,float b,float c){
   if(ea&&eb){
    uint32_t ma=(ua&0x7fffffu)|0x800000u,mb=(ub&0x7fffffu)|0x800000u;
    if((24u-(unsigned)__builtin_ctz(ma))+(24u-(unsigned)__builtin_ctz(mb))<=24u){
-    float p=a*b;uint32_t ep=(original_math_bits(p)>>23)&255u;
+    float p=a*b;uint32_t ep=(cv_bits(p)>>23)&255u;
     if(ep&&ep!=255u)return p+c;
    }
   }
   uint32_t out;
-  if(original_fma_compact_bits(ua,ub,uc,&out))return original_math_float(out);
-  if(original_fma_finite_bits_reference(ua,ub,uc,&out))return original_math_float(out);
+  if(original_fma_compact_bits(ua,ub,uc,&out))return cv_float(out);
+  if(original_fma_finite_bits_reference(ua,ub,uc,&out))return cv_float(out);
  }
  return original_rne_fmaf(a,b,c);
 }
@@ -43,6 +44,7 @@ static inline float cv_fma(float a,float b,float c){
 #define TABLE_READY 0x43565431u
 #define CONTROL_READY 0x43564331u
 #define VOICE_READY 0x73u
+static float fl(uint32_t u){float f;memcpy(&f,&u,4);return f;}
 static float clamp(float x,float a,float b){return x<a?a:x>b?b:x;}
 static float bipolar(float x){return ref_fma(x,2,-1);}
 static unsigned Q(float x,unsigned n){unsigned q=(unsigned)ref_fma(x,(float)(n-1),.5f);return q<n?q:n-1;}
@@ -69,7 +71,7 @@ int original_chicago_voice_compile(original_chicago_voice_controls *out,const or
  c.gain.output=native(p,94);c.gain.output=c.gain.output*c.gain.output;c.gain.pan=bipolar(native(p,93));c.gain.curve=2;c.gain.ms20=0;c.gain.unison_flag=255;
  c.cutoff=native(p,24);c.resonance=native(p,25);c.env_depth=bipolar(native(p,26));c.noise=native(p,23);c.pw_intensity=native(p,21);c.pw_width=native(p,22);c.vco_gain=ref_fma(native(p,102),3,1);
  for(unsigned i=0;i<4;i++)if(!original_pw_width(c.shape[i],c.pw_intensity,0,c.pw_width,0,0,&c.wave_width[i]))return 0;
- float track=native(p,104);c.keyboard_track=(track>original_math_float(0x3f2a3d71)&&track<original_math_float(0x3f2ac083))?1:track*1.5f;
+ float track=native(p,104);c.keyboard_track=(track>fl(0x3f2a3d71)&&track<fl(0x3f2ac083))?1:track*1.5f;
  if(!original_xmod_coefficient(native(p,39),0,&c.xmod))return 0;
  c.patch_cutoff=bipolar(native(p,80));c.patch_gain=bipolar(native(p,81));c.patch_slave=bipolar(native(p,82));
  static const float base[10]={96,48,36,24,16,12,8,6,4,3};
@@ -81,21 +83,11 @@ int original_chicago_voice_compile(original_chicago_voice_controls *out,const or
  * Any other macro or uncertain cache takes the complete compiler above. */
 int original_chicago_voice_recompile(original_chicago_voice_controls *out,const original_chicago_program *p,unsigned macro){
  if(!out||!p)return 0;
- if((macro!=20&&macro!=2&&macro!=0)||out->ready!=CONTROL_READY||p->revision!=out->revision+UINT32_C(1))
+ if((macro!=20&&macro!=2)||out->ready!=CONTROL_READY||p->revision!=out->revision+UINT32_C(1))
   return original_chicago_voice_compile(out,p);
  if(!program_valid(p))return 0;
- if(macro==0){
-  if(!original_chicago_program_osc_mix(p,&out->gain.level[0],&out->gain.level[2]))
-   return original_chicago_voice_compile(out,p);
- }else if(macro==20)out->routing.bend_bipolar=bipolar(native(p,105));
+ if(macro==20)out->routing.bend_bipolar=bipolar(native(p,105));
  else out->cutoff=native(p,24);
- out->revision=p->revision;return 1;
-}
-int original_chicago_voice_recompile_unchanged(original_chicago_voice_controls *out,const original_chicago_program *p){
- if(!out||!p)return 0;
- if(out->ready!=CONTROL_READY||p->revision!=out->revision+UINT32_C(1))
-  return original_chicago_voice_compile(out,p);
- if(!program_valid(p))return 0;
  out->revision=p->revision;return 1;
 }
 static int mg_output(original_chicago_voice_mg *m,unsigned shape){if(!original_miami_mg_shape(shape,m->phase,&m->bipolar,&m->unipolar))return 0;m->wrapped=0;return 1;}
@@ -104,11 +96,11 @@ static int mg_advance(original_chicago_voice_mg *m,original_chicago_voice_mg_coe
  float delta;
 #ifdef CHICAGO_COEF_CACHE_REFERENCE
  (void)cache;
- if(c->mg_tempo[i]){float numerator=(bpm*original_math_float(0x3f4ccccd))*(float)D;float denominator=(44100.0f*c->mg_base[i])*c->mg_times[i];delta=numerator/denominator;if(delta>1)delta=1;}
- else {float f=clamp(c->mg_frequency[i]+0.0f,0,1),f2=f*f;f=f*f2;f=ref_fma(f,original_math_float(0x4347e666),original_math_float(0x3c23d70a));delta=((float)D*f)/44100.0f;}
+ if(c->mg_tempo[i]){float numerator=(bpm*fl(0x3f4ccccd))*(float)D;float denominator=(44100.0f*c->mg_base[i])*c->mg_times[i];delta=numerator/denominator;if(delta>1)delta=1;}
+ else {float f=clamp(c->mg_frequency[i]+0.0f,0,1),f2=f*f;f=f*f2;f=ref_fma(f,fl(0x4347e666),fl(0x3c23d70a));delta=((float)D*f)/44100.0f;}
 #else
  if(c->mg_tempo[i]){
-  uint32_t base_bits=original_math_bits(c->mg_base[i]),times_bits=original_math_bits(c->mg_times[i]),bpm_bits=original_math_bits(bpm);
+  uint32_t base_bits=cv_bits(c->mg_base[i]),times_bits=cv_bits(c->mg_times[i]),bpm_bits=cv_bits(bpm);
   int changed=!cache->tempo_valid||cache->base_bits!=base_bits||cache->times_bits!=times_bits;
   if(changed){
    cache->tempo_den=(44100.0f*c->mg_base[i])*c->mg_times[i];
@@ -116,17 +108,17 @@ static int mg_advance(original_chicago_voice_mg *m,original_chicago_voice_mg_coe
   }
   if(!cache->delta_valid||changed||cache->mode!=c->mg_tempo[i]||
      cache->bpm_bits!=bpm_bits||cache->duration!=D){
-   float numerator=(bpm*original_math_float(0x3f4ccccd))*(float)D;
+   float numerator=(bpm*fl(0x3f4ccccd))*(float)D;
    delta=numerator/cache->tempo_den;if(delta>1)delta=1;
    cache->delta=delta;cache->mode=c->mg_tempo[i];cache->bpm_bits=bpm_bits;
    cache->duration=D;cache->delta_valid=1;
   }else delta=cache->delta;
  }else{
-  uint32_t frequency_bits=original_math_bits(c->mg_frequency[i]);
+  uint32_t frequency_bits=cv_bits(c->mg_frequency[i]);
   int changed=!cache->free_valid||cache->frequency_bits!=frequency_bits;
   if(changed){
    float f=clamp(c->mg_frequency[i]+0.0f,0,1),f2=f*f;
-   f=f*f2;f=ref_fma(f,original_math_float(0x4347e666),original_math_float(0x3c23d70a));
+   f=f*f2;f=ref_fma(f,fl(0x4347e666),fl(0x3c23d70a));
    cache->free_f=f;cache->frequency_bits=frequency_bits;cache->free_valid=1;
   }
   if(!cache->delta_valid||changed||cache->mode!=c->mg_tempo[i]||cache->duration!=D){
@@ -148,11 +140,11 @@ static void vcf_tick(original_chicago_voice *v,const float c[4],uint32_t D){
  if(s->state==0){
   float numerator=(float)D*(1.2999999523162842f-e),den;
 #ifdef CHICAGO_COEF_CACHE_REFERENCE
-  den=44100.0f*ref_fma(fourth(c[0]),13,original_math_float(0x3a83126f));
+  den=44100.0f*ref_fma(fourth(c[0]),13,fl(0x3a83126f));
 #else
-  uint32_t bits=original_math_bits(c[0]);
+  uint32_t bits=cv_bits(c[0]);
   if(!cache->attack_valid||cache->attack_bits!=bits){
-   cache->attack_den=44100.0f*ref_fma(fourth(c[0]),13,original_math_float(0x3a83126f));
+   cache->attack_den=44100.0f*ref_fma(fourth(c[0]),13,fl(0x3a83126f));
    cache->attack_bits=bits;cache->attack_valid=1;
   }
   den=cache->attack_den;
@@ -163,11 +155,11 @@ static void vcf_tick(original_chicago_voice *v,const float c[4],uint32_t D){
   if(e<c[2])e=c[2];else {
    float numerator=(float)D*(c[2]-e),den;
 #ifdef CHICAGO_COEF_CACHE_REFERENCE
-   den=ref_fma(fourth(c[1]),25,original_math_float(0x3a83126f))*44100.0f;
+   den=ref_fma(fourth(c[1]),25,fl(0x3a83126f))*44100.0f;
 #else
-   uint32_t bits=original_math_bits(c[1]);
+   uint32_t bits=cv_bits(c[1]);
    if(!cache->decay_valid||cache->decay_bits!=bits){
-    cache->decay_den=ref_fma(fourth(c[1]),25,original_math_float(0x3a83126f))*44100.0f;
+    cache->decay_den=ref_fma(fourth(c[1]),25,fl(0x3a83126f))*44100.0f;
     cache->decay_bits=bits;cache->decay_valid=1;
    }
    den=cache->decay_den;
@@ -176,14 +168,14 @@ static void vcf_tick(original_chicago_voice *v,const float c[4],uint32_t D){
   }
  }
  else if(s->state==3){
-  if(e>=original_math_float(0x3727c5ac)){
+  if(e>=fl(0x3727c5ac)){
 #ifdef CHICAGO_COEF_CACHE_REFERENCE
-   float den=ref_fma(fourth(c[3]),25,original_math_float(0x3b03126f))*44100.0f;
+   float den=ref_fma(fourth(c[3]),25,fl(0x3b03126f))*44100.0f;
    e=e*(1.0f-(float)D/den);
 #else
-   uint32_t bits=original_math_bits(c[3]);
+   uint32_t bits=cv_bits(c[3]);
    if(!cache->release_valid||cache->release_bits!=bits){
-    cache->release_den=ref_fma(fourth(c[3]),25,original_math_float(0x3b03126f))*44100.0f;
+    cache->release_den=ref_fma(fourth(c[3]),25,fl(0x3b03126f))*44100.0f;
     cache->release_bits=bits;cache->release_valid=1;cache->release_ratio_valid=0;
    }
    if(!cache->release_ratio_valid||cache->release_duration!=D){
@@ -214,12 +206,12 @@ static int pitch_prepare(original_chicago_voice *s,const original_chicago_voice_
  float common=p->master_tune+0.0f;common=ref_fma(s->unison_coordinate,p->unison_detune,common);common=ref_fma(0,48,common);common=common+(float)p->transpose;common=ref_fma(p->bend_range,c->routing.bend_bipolar,common);
  float alpha;
 #ifdef CHICAGO_COEF_CACHE_REFERENCE
- float porta=clamp(p->portamento+0.0f,0,1);alpha=porta*porta;alpha=ref_fma(alpha,original_math_float(0x49f42400),original_math_float(0x3a83126f));alpha=44100.0f*alpha;alpha=(float)D/alpha;alpha=alpha*original_math_float(0x4a8ab75d);if(alpha>1)alpha=1;
+ float porta=clamp(p->portamento+0.0f,0,1);alpha=porta*porta;alpha=ref_fma(alpha,fl(0x49f42400),fl(0x3a83126f));alpha=44100.0f*alpha;alpha=(float)D/alpha;alpha=alpha*fl(0x4a8ab75d);if(alpha>1)alpha=1;
 #else
  original_chicago_voice_glide_coefficients *cache=&s->coefficients.glide;
- uint32_t bits=original_math_bits(p->portamento);
+ uint32_t bits=cv_bits(p->portamento);
  if(!cache->valid||cache->portamento_bits!=bits||cache->duration!=D){
-  float porta=clamp(p->portamento+0.0f,0,1);alpha=porta*porta;alpha=ref_fma(alpha,original_math_float(0x49f42400),original_math_float(0x3a83126f));alpha=44100.0f*alpha;alpha=(float)D/alpha;alpha=alpha*original_math_float(0x4a8ab75d);if(alpha>1)alpha=1;
+  float porta=clamp(p->portamento+0.0f,0,1);alpha=porta*porta;alpha=ref_fma(alpha,fl(0x49f42400),fl(0x3a83126f));alpha=44100.0f*alpha;alpha=(float)D/alpha;alpha=alpha*fl(0x4a8ab75d);if(alpha>1)alpha=1;
   cache->alpha=alpha;cache->portamento_bits=bits;cache->duration=D;cache->valid=1;
  }else alpha=cache->alpha;
 #endif
@@ -238,9 +230,10 @@ static int tail(original_chicago_voice *s,const original_chicago_voice_controls 
  original_osc_controls oc;memset(&oc,0,sizeof oc);if(!pitch_prepare(s,c,t,D,oc.increment))return 0;
  for(unsigned i=0;i<4;i++){oc.shape[i]=c->shape[i];oc.width[i]=c->wave_width[i];}oc.xmod=c->xmod;
  if(!s->prepared.ready||memcmp(&s->prepared.controls,&oc,sizeof oc)){if(!original_oscillator_prepare(&s->prepared,&oc))return 0;s->wave_preparations++;}
- float ng=clamp(c->noise+0.0f,0,1);ng=ng*ng+original_math_float(0x3727c5ac);stage(&s->noise_gain,ng,1.0f/(float)D);
+ float ng=clamp(c->noise+0.0f,0,1);ng=ng*ng+fl(0x3727c5ac);stage(&s->noise_gain,ng,1.0f/(float)D);
  if(!mp4_prepare(s,c,t,D,kick))return 0;
- if(!original_voice_gain_prepare_chicago(&s->gain,&c->gain,s->activation,D,s->vca.level,s->mod_gain,s->velocity,s->filter_postgain))return 0;
+ original_voice_gain_controls gain;memset(&gain,0,sizeof gain);memcpy(gain.level,c->gain.level,sizeof gain.level);gain.output=c->gain.output;gain.pan=c->gain.pan;gain.curve=c->gain.curve;gain.unison_flag=c->gain.unison_flag;gain.ms20=c->gain.ms20;gain.envelope=s->vca.level;gain.mod_gain=s->mod_gain;gain.velocity=s->velocity;gain.filter_gain=s->filter_postgain;
+ if(!original_voice_gain_prepare(&s->gain,&gain,s->activation,D))return 0;
  for(unsigned i=0;i<4;i++)if(s->activation[i]>0)s->activation[i]--;
  s->last_duration=D;s->control_updates++;return 1;
 }

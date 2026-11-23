@@ -229,8 +229,7 @@ if __name__ == "__main__":
     parser.add_argument("dnbox", type=Path)
     source = parser.add_mutually_exclusive_group()
     source.add_argument("--inputs", type=Path, help="factory.py matrix output")
-    source.add_argument("--release-ipa", "--release-app", type=Path, dest="release_ipa",
-                        help="authenticate inputs from the original build-9 IPA or installed .app directory")
+    source.add_argument("--release-ipa", type=Path, help="authenticate inputs directly from the original build-9 IPA")
     parser.add_argument("--candidate-image", type=Path, help="independently identified DnBOX production executable")
     parser.add_argument("--candidate-commit", help="full source commit for that executable")
     args = parser.parse_args()

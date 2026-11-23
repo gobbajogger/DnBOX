@@ -84,7 +84,6 @@ def main():
         parser.error("the dated A/B comparison requires --historical")
     out.mkdir(parents=True, exist_ok=True)
     header = ["#pragma once", "#include <stdint.h>"]
-    histories = {}
     for c, fn in CYM:
         pcm, _ = gds.read_wav(gds.ASSETS / fn)
         n = len(pcm)
@@ -92,7 +91,6 @@ def main():
             data, _ = sio.ima_encode(pcm, 0)
             if hashlib.sha256(data).hexdigest() != HISTORICAL[c]:
                 sys.exit(f"{c}: historical A/B encoder drifted")
-            histories[c] = data
             header.extend([f"#define X0X_SMP_{c.upper()}_LEN {n}u",
                            gds.arr("uint8_t", f"x0x_smp_{c}", data, per=24)])
         else:
@@ -110,13 +108,6 @@ def main():
         (out / f"{c}.ref").write_bytes(struct.pack(f"<{n}h", *ref))
         (out / f"{c}.pcm").write_bytes(struct.pack(f"<{n}h", *pcm))
     if args.historical:
-        codes, lookup = gds.cymbal_codes(histories.values())
-        header.extend([f"#define X0X_CYMBAL_HEAD {gds.CYMBAL_HEAD}u",
-                       f"#define X0X_CYMBAL_MASK {len(lookup)-1}u",
-                       gds.arr("uint8_t", "x0x_cymbal_prefix", lookup, per=24)])
-        for name, data in histories.items():
-            header.append(gds.arr("uint8_t", f"x0x_smp_{name}_packed",
-                                  gds.pack_cymbal(data, codes, lookup), per=24))
         (out / "x0x_drum_samples.h").write_text("\n".join(header))
         print("Historical A/B stream digests matched.", f"External decode: {ab or 'unavailable'}")
     else:

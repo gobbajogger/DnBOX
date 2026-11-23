@@ -9,6 +9,10 @@ This tree contains the supplied RULES.md v2 start-file/removal payload for PR #9
 
 Broad unmerged work is retained at `backup/integ-before-start-split-20261116`, exact tip `246ea3718c6c72ba80bbd1aafcd5356f871c78c8`. Gate/environment corrections move to an independent follow-up; other product work remains in the backup and its original lane branches. No unique history is deleted.
 
+## Firmware UI integration
+
+On 21 November 2026, Integ merged [PR #975](https://github.com/gobbajogger/DnBOX/pull/975) from `lane/fwui` into `integration/dnbox-consolidated`. The merge `3e307cfa455d22dfca5e4ef439080816b4e4f859` contains the tested head `9dd6f2df020340f7a82ab241ef07c6ec16195ebc` and the prior consolidated tip `1c82772bac9a33f030bf954ec6151987aef2cbb8`. The 37 focused registrations, both stock builds and the independent 10/10 screen review passed. The firmware lane tracks the combined hold-GLOBE and pad/LED checks. [Merge](https://github.com/gobbajogger/DnBOX/commit/3e307cfa455d22dfca5e4ef439080816b4e4f859) · [FWUI checklist](docs/lanes/fwui.md)
+
 ## Machine-readable roadmap state
 
 ```json

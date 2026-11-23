@@ -1,0 +1,194 @@
+{
+  "status": "PASS",
+  "scope": "Stock Elite and Pro target instructions after the modeled SPL handoff, with timed SPI/LCD and emulated IRQ, audio and SPI flash. Does not measure physical hardware.",
+  "inputCommit": "11bc3f3a0e9c361dcfb51a95bbc03eef9fec7a75",
+  "inputTree": "a4b3def06dbf610286bc78f71284e0ec40d489db",
+  "runner": "../../../../../tests/ui_inventory/stock_boot_fixture.py",
+  "emulator": "fm1-live",
+  "procedure": "Six fresh processes per model: create a package-derived seed, capture the two splashes separately, run to ordinary UI with each initial image, cold-boot from the recovered result. The fixture compiles the same sample_sector/seed_splash C bodies as the seven-case replay. FM1_STRICT=1, empty FM1_BENCH_KEYS, --mhz 360 --lcd-only, no device connection.",
+  "checks": "Compare every panel-order RGB565 value against the existing host splash or ordinary screen. Compare all 1 MiB of flash before and after accounting for only the specified live/shadow sectors. Read boot/IRQ counters, zone and published loop count at their supplied ELF symbols.",
+  "artwork": [
+    "stock-splash.png",
+    "stock-ordinary.png"
+  ],
+  "results": {
+    "elite": {
+      "model": "elite",
+      "emulatorSha256": "04c795b1961298cbd10d4bd9881ab97fde5eef7ff179f49a6b953dab78d43dc8",
+      "fwscSha256": "f486c916a626c435d82dcc047ef00d6b0315acf2ce6d648fa71995455f6227de",
+      "elfSha256": "6d1345679819c68862ee7c6081f2f48d72e23e9d1b9590edc7ead3508be07463",
+      "clockMHz": 360,
+      "strict": true,
+      "cases": {
+        "package": {
+          "ms": 1,
+          "flashOperations": 0,
+          "finalFlashSha256": "a18a9a4dca77a315b300e2c4a1344189e37f0c6e544446fef2ed1bc1782925c4",
+          "rgbSha256": "53853188f83a941e2f45ec1383293ae935106c5721918079000dcb2254fc550b",
+          "rgb565Sha256": "d8b443032200e143b1c49820b6d78c32d519553a3f63a38f48e8bc31da084f0a"
+        },
+        "recover-splash": {
+          "ms": 448,
+          "flashOperations": 18,
+          "finalFlashSha256": "e87d207d04faa533532302d950686fd7f5a39ae0a047fd6895b3a59490a1f829",
+          "rgbSha256": "17230dfccf677511bd4806d81e0580ae3ace8c16a781933009e20fcdec65b3df",
+          "rgb565Sha256": "3f3295b59fadf90714afffd3760db7ecced667ac52e82e5352e9849e4f0b546a",
+          "inputFlashSha256": "ffab62ea9d49bc217fa95194079da40fde783607421f3369dcfc45f2882de15d"
+        },
+        "recover": {
+          "ms": 1500,
+          "flashOperations": 18,
+          "finalFlashSha256": "e87d207d04faa533532302d950686fd7f5a39ae0a047fd6895b3a59490a1f829",
+          "rgbSha256": "2f2c92d0a5ba1b7844026294020f79f3097a8a7a0fe3bf151b0ad6015f725209",
+          "rgb565Sha256": "fea68b14ad5a085ebb63340cd24e05f2fecdda9ddcee79872ceceb51dd11f688",
+          "inputFlashSha256": "ffab62ea9d49bc217fa95194079da40fde783607421f3369dcfc45f2882de15d",
+          "audioHalves": 89,
+          "timerIRQs": 10261,
+          "uiFrames": 31,
+          "boots": 1,
+          "crashSeen": 0,
+          "slotZeroZones": 1,
+          "loopCount": 1
+        },
+        "already-live-splash": {
+          "ms": 448,
+          "flashOperations": 1,
+          "finalFlashSha256": "e87d207d04faa533532302d950686fd7f5a39ae0a047fd6895b3a59490a1f829",
+          "rgbSha256": "17230dfccf677511bd4806d81e0580ae3ace8c16a781933009e20fcdec65b3df",
+          "rgb565Sha256": "3f3295b59fadf90714afffd3760db7ecced667ac52e82e5352e9849e4f0b546a",
+          "inputFlashSha256": "05e2904ada87055a4bb79a8c2e637b99b5a5ab701d501ae926b9e3b637e703c5"
+        },
+        "already-live": {
+          "ms": 1500,
+          "flashOperations": 1,
+          "finalFlashSha256": "e87d207d04faa533532302d950686fd7f5a39ae0a047fd6895b3a59490a1f829",
+          "rgbSha256": "2f2c92d0a5ba1b7844026294020f79f3097a8a7a0fe3bf151b0ad6015f725209",
+          "rgb565Sha256": "fea68b14ad5a085ebb63340cd24e05f2fecdda9ddcee79872ceceb51dd11f688",
+          "inputFlashSha256": "05e2904ada87055a4bb79a8c2e637b99b5a5ab701d501ae926b9e3b637e703c5",
+          "audioHalves": 89,
+          "timerIRQs": 10267,
+          "uiFrames": 32,
+          "boots": 1,
+          "crashSeen": 0,
+          "slotZeroZones": 1,
+          "loopCount": 1
+        },
+        "restart": {
+          "ms": 1500,
+          "flashOperations": 0,
+          "finalFlashSha256": "e87d207d04faa533532302d950686fd7f5a39ae0a047fd6895b3a59490a1f829",
+          "rgbSha256": "2f2c92d0a5ba1b7844026294020f79f3097a8a7a0fe3bf151b0ad6015f725209",
+          "rgb565Sha256": "fea68b14ad5a085ebb63340cd24e05f2fecdda9ddcee79872ceceb51dd11f688",
+          "inputFlashSha256": "e87d207d04faa533532302d950686fd7f5a39ae0a047fd6895b3a59490a1f829",
+          "audioHalves": 89,
+          "timerIRQs": 10268,
+          "uiFrames": 32,
+          "boots": 1,
+          "crashSeen": 0,
+          "slotZeroZones": 1,
+          "loopCount": 1
+        }
+      },
+      "hostSplashMatchingPixels": 57600,
+      "hostOrdinaryMatchingPixels": 57600
+    },
+    "pro": {
+      "model": "pro",
+      "emulatorSha256": "04c795b1961298cbd10d4bd9881ab97fde5eef7ff179f49a6b953dab78d43dc8",
+      "fwscSha256": "511b0adc2f0222f740027a62bc3173d7b2dc7777c2045c0d60aa4300335359e0",
+      "elfSha256": "e02adf021b45f4d493888ac4386b4b3780dee0b7367ac65b6ec5bbe530bab5ac",
+      "clockMHz": 360,
+      "strict": true,
+      "cases": {
+        "package": {
+          "ms": 1,
+          "flashOperations": 0,
+          "finalFlashSha256": "78e96f3313ec964fb85f0c75f3a5d2e338f6dbdac80391695dee1741e69aba40",
+          "rgbSha256": "53853188f83a941e2f45ec1383293ae935106c5721918079000dcb2254fc550b",
+          "rgb565Sha256": "d8b443032200e143b1c49820b6d78c32d519553a3f63a38f48e8bc31da084f0a"
+        },
+        "recover-splash": {
+          "ms": 448,
+          "flashOperations": 18,
+          "finalFlashSha256": "099c289f94d1abfbce01f3970acef483af3713f7815c087121446157c5e10839",
+          "rgbSha256": "17230dfccf677511bd4806d81e0580ae3ace8c16a781933009e20fcdec65b3df",
+          "rgb565Sha256": "3f3295b59fadf90714afffd3760db7ecced667ac52e82e5352e9849e4f0b546a",
+          "inputFlashSha256": "ae4b24ad2766ce7b5c20d8fd1cacb025f4eac5a2ff66877159ce4850fd2f32bf"
+        },
+        "recover": {
+          "ms": 1500,
+          "flashOperations": 18,
+          "finalFlashSha256": "099c289f94d1abfbce01f3970acef483af3713f7815c087121446157c5e10839",
+          "rgbSha256": "2f2c92d0a5ba1b7844026294020f79f3097a8a7a0fe3bf151b0ad6015f725209",
+          "rgb565Sha256": "fea68b14ad5a085ebb63340cd24e05f2fecdda9ddcee79872ceceb51dd11f688",
+          "inputFlashSha256": "ae4b24ad2766ce7b5c20d8fd1cacb025f4eac5a2ff66877159ce4850fd2f32bf",
+          "audioHalves": 89,
+          "timerIRQs": 10261,
+          "uiFrames": 31,
+          "boots": 1,
+          "crashSeen": 0,
+          "slotZeroZones": 1,
+          "loopCount": 1
+        },
+        "already-live-splash": {
+          "ms": 448,
+          "flashOperations": 1,
+          "finalFlashSha256": "099c289f94d1abfbce01f3970acef483af3713f7815c087121446157c5e10839",
+          "rgbSha256": "17230dfccf677511bd4806d81e0580ae3ace8c16a781933009e20fcdec65b3df",
+          "rgb565Sha256": "3f3295b59fadf90714afffd3760db7ecced667ac52e82e5352e9849e4f0b546a",
+          "inputFlashSha256": "fba1308df4ebaa28b5b5741be2c0fbba11b4d2620760e2c29a577fb7ce009776"
+        },
+        "already-live": {
+          "ms": 1500,
+          "flashOperations": 1,
+          "finalFlashSha256": "099c289f94d1abfbce01f3970acef483af3713f7815c087121446157c5e10839",
+          "rgbSha256": "2f2c92d0a5ba1b7844026294020f79f3097a8a7a0fe3bf151b0ad6015f725209",
+          "rgb565Sha256": "fea68b14ad5a085ebb63340cd24e05f2fecdda9ddcee79872ceceb51dd11f688",
+          "inputFlashSha256": "fba1308df4ebaa28b5b5741be2c0fbba11b4d2620760e2c29a577fb7ce009776",
+          "audioHalves": 89,
+          "timerIRQs": 10267,
+          "uiFrames": 32,
+          "boots": 1,
+          "crashSeen": 0,
+          "slotZeroZones": 1,
+          "loopCount": 1
+        },
+        "restart": {
+          "ms": 1500,
+          "flashOperations": 0,
+          "finalFlashSha256": "099c289f94d1abfbce01f3970acef483af3713f7815c087121446157c5e10839",
+          "rgbSha256": "2f2c92d0a5ba1b7844026294020f79f3097a8a7a0fe3bf151b0ad6015f725209",
+          "rgb565Sha256": "fea68b14ad5a085ebb63340cd24e05f2fecdda9ddcee79872ceceb51dd11f688",
+          "inputFlashSha256": "099c289f94d1abfbce01f3970acef483af3713f7815c087121446157c5e10839",
+          "audioHalves": 89,
+          "timerIRQs": 10268,
+          "uiFrames": 32,
+          "boots": 1,
+          "crashSeen": 0,
+          "slotZeroZones": 1,
+          "loopCount": 1
+        }
+      },
+      "hostSplashMatchingPixels": 57600,
+      "hostOrdinaryMatchingPixels": 57600
+    }
+  },
+  "stdout": {
+    "elite": {
+      "already-live-splash": "irq levels at the end: [], ie true, skipped 0 cycles\nlast 40 ms: 0% of instructions in ISRs = 0.0 M ISR instructions per second (clock 5760 MHz)\nLCD: on the wire 37% of the run (164 ms of 448 ms)\nLED on-fractions: \nSMK-37 pads (0 frames): 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000\nwork/lcd.ppm at 448 ms; LEDs lit: []; audio peak over the last 0.5 s: 0\nflash: 1 erases / programs\n",
+      "already-live": "irq levels at the end: [], ie true, skipped 0 cycles\nlast 40 ms: 19% of instructions in ISRs = 21.4 M ISR instructions per second (clock 5760 MHz)\nLCD: on the wire 21% of the run (319 ms of 1500 ms)\nLED on-fractions: \nSMK-37 pads (1 frames): 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000\nwork/lcd.ppm at 1500 ms; LEDs lit: []; audio peak over the last 0.5 s: 0\nflash: 1 erases / programs\n",
+      "package": "irq levels at the end: [], ie false, skipped 0 cycles\nlast 40 ms: 0% of instructions in ISRs = 0.0 M ISR instructions per second (clock 5760 MHz)\nLCD: on the wire 0% of the run (0 ms of 1 ms)\nLED on-fractions: \nSMK-37 pads (0 frames): 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000\nwork/lcd.ppm at 1 ms; LEDs lit: []; audio peak over the last 0.5 s: 0\nflash: 0 erases / programs\n",
+      "recover-splash": "irq levels at the end: [], ie true, skipped 0 cycles\nlast 40 ms: 0% of instructions in ISRs = 0.0 M ISR instructions per second (clock 5760 MHz)\nLCD: on the wire 37% of the run (164 ms of 448 ms)\nLED on-fractions: \nSMK-37 pads (0 frames): 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000\nwork/lcd.ppm at 448 ms; LEDs lit: []; audio peak over the last 0.5 s: 0\nflash: 18 erases / programs\n",
+      "recover": "irq levels at the end: [4], ie true, skipped 0 cycles\nlast 40 ms: 20% of instructions in ISRs = 21.4 M ISR instructions per second (clock 5760 MHz)\nLCD: on the wire 21% of the run (319 ms of 1500 ms)\nLED on-fractions: \nSMK-37 pads (1 frames): 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000\nwork/lcd.ppm at 1500 ms; LEDs lit: []; audio peak over the last 0.5 s: 0\nflash: 18 erases / programs\n",
+      "restart": "irq levels at the end: [], ie true, skipped 0 cycles\nlast 40 ms: 19% of instructions in ISRs = 21.4 M ISR instructions per second (clock 5760 MHz)\nLCD: on the wire 21% of the run (319 ms of 1500 ms)\nLED on-fractions: \nSMK-37 pads (1 frames): 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000\nwork/lcd.ppm at 1500 ms; LEDs lit: []; audio peak over the last 0.5 s: 0\nflash: 0 erases / programs\n"
+    },
+    "pro": {
+      "already-live-splash": "irq levels at the end: [], ie true, skipped 0 cycles\nlast 40 ms: 0% of instructions in ISRs = 0.0 M ISR instructions per second (clock 5760 MHz)\nLCD: on the wire 37% of the run (164 ms of 448 ms)\nLED on-fractions: \nSMK-37 pads (0 frames): 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000\nwork/lcd.ppm at 448 ms; LEDs lit: []; audio peak over the last 0.5 s: 0\nflash: 1 erases / programs\n",
+      "already-live": "irq levels at the end: [3, 4], ie true, skipped 0 cycles\nlast 40 ms: 20% of instructions in ISRs = 21.4 M ISR instructions per second (clock 5760 MHz)\nLCD: on the wire 21% of the run (319 ms of 1500 ms)\nLED on-fractions: \nSMK-37 pads (1 frames): 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000\nwork/lcd.ppm at 1500 ms; LEDs lit: []; audio peak over the last 0.5 s: 0\nflash: 1 erases / programs\n",
+      "package": "irq levels at the end: [], ie false, skipped 0 cycles\nlast 40 ms: 0% of instructions in ISRs = 0.0 M ISR instructions per second (clock 5760 MHz)\nLCD: on the wire 0% of the run (0 ms of 1 ms)\nLED on-fractions: \nSMK-37 pads (0 frames): 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000\nwork/lcd.ppm at 1 ms; LEDs lit: []; audio peak over the last 0.5 s: 0\nflash: 0 erases / programs\n",
+      "recover-splash": "irq levels at the end: [], ie true, skipped 0 cycles\nlast 40 ms: 0% of instructions in ISRs = 0.0 M ISR instructions per second (clock 5760 MHz)\nLCD: on the wire 37% of the run (164 ms of 448 ms)\nLED on-fractions: \nSMK-37 pads (0 frames): 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000\nwork/lcd.ppm at 448 ms; LEDs lit: []; audio peak over the last 0.5 s: 0\nflash: 18 erases / programs\n",
+      "recover": "irq levels at the end: [3], ie true, skipped 0 cycles\nlast 40 ms: 21% of instructions in ISRs = 21.2 M ISR instructions per second (clock 5760 MHz)\nLCD: on the wire 21% of the run (319 ms of 1500 ms)\nLED on-fractions: \nSMK-37 pads (1 frames): 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000\nwork/lcd.ppm at 1500 ms; LEDs lit: []; audio peak over the last 0.5 s: 0\nflash: 18 erases / programs\n",
+      "restart": "irq levels at the end: [], ie true, skipped 0 cycles\nlast 40 ms: 20% of instructions in ISRs = 21.4 M ISR instructions per second (clock 5760 MHz)\nLCD: on the wire 21% of the run (319 ms of 1500 ms)\nLED on-fractions: \nSMK-37 pads (1 frames): 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000\nwork/lcd.ppm at 1500 ms; LEDs lit: []; audio peak over the last 0.5 s: 0\nflash: 0 erases / programs\n"
+    }
+  }
+}

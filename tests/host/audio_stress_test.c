@@ -47,10 +47,10 @@ int original_runtime_all_off(original_runtime_part *p)
 int stress_real_original_runtime_retire(original_runtime_part *);
 int original_runtime_retire(original_runtime_part *p)
 { uint64_t t=cpu_ns(); int rc=stress_real_original_runtime_retire(p); charge(p,t,rc); return rc; }
-int stress_real_original_runtime_render_owned(original_runtime_part *,original_runtime_workspace *,uint32_t);
-int original_runtime_render_owned(original_runtime_part *p,original_runtime_workspace *w,uint32_t n)
+int stress_real_original_runtime_render(original_runtime_part *,original_runtime_workspace *,float *,float *,uint32_t);
+int original_runtime_render(original_runtime_part *p,original_runtime_workspace *w,float *l,float *r,uint32_t n)
 {
-    uint64_t t=cpu_ns(); int rc=stress_real_original_runtime_render_owned(p,w,n); charge(p,t,rc);
+    uint64_t t=cpu_ns(); int rc=stress_real_original_runtime_render(p,w,l,r,n); charge(p,t,rc);
     unsigned active=0;
     if(p->kind==ORIGINAL_SOUND_CHICAGO) active=p->dsp.chicago.voice.active!=0;
     else for(unsigned i=0;i<ORIGINAL_MIAMI_BACKEND_VOICES;i++) active+=p->dsp.miami.voices[i].active!=0;

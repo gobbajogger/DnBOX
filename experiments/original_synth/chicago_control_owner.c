@@ -1,6 +1,5 @@
 /* SPDX-License-Identifier: GPL-3.0-only */
 #include "chicago_control_owner.h"
-#include <string.h>
 int original_chicago_control_owner_bind(original_chicago_control_owner *s,original_chicago_program *p,original_chicago_voice_controls *v,original_chicago_engine_output *o,original_chicago_scheduler *scheduler,original_chicago_global_mg_input *global){
  if(!s||!p||!v||!o||!scheduler||!scheduler->allocator||!scheduler->control_input||!global)return 0;
  *s=(original_chicago_control_owner){p,v,o,scheduler,global,1};return 1;
@@ -8,10 +7,7 @@ int original_chicago_control_owner_bind(original_chicago_control_owner *s,origin
 int original_chicago_control_owner_edit(original_chicago_control_owner *s,unsigned macro,float normalized){
  if(!s||!s->status)return 0;
  original_chicago_program next=*s->program;original_chicago_voice_controls compiled=*s->voice;
- if(!original_chicago_program_set(&next,macro,normalized))return 0;
- if(macro!=20&&macro!=2&&macro!=0&&!memcmp(s->program->target,next.target,sizeof next.target)){
-  if(!original_chicago_voice_recompile_unchanged(&compiled,&next))return 0;
- }else if(!original_chicago_voice_recompile(&compiled,&next,macro))return 0;
+ if(!original_chicago_program_set(&next,macro,normalized)||!original_chicago_voice_recompile(&compiled,&next,macro))return 0;
  const original_chicago_routing *r=&compiled.routing;
  if(!original_chicago_fx2_wrapper_supports(&s->output->fx2,r->fx[1][0]))return 0;
  /* Publish before immediate native108 callbacks: they can inspect the newly

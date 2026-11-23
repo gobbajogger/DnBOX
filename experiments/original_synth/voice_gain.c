@@ -41,61 +41,39 @@ static float advance(original_ramp *r){
 }
 void original_voice_gain_init(original_voice_gain *s){if(s)memset(s,0,sizeof *s);}
 void original_voice_gain_miami_full_note(original_voice_gain *s){if(s)memset(s->stereo,0,sizeof s->stereo);}
-/* Chicago builds a zero-modulation oscillator/pan view; Miami supplies its
- * stored modulation controls. Live envelope, gain and velocity are per voice. */
-static inline __attribute__((always_inline)) int prepare_gain(original_voice_gain *s,
- const original_voice_gain_controls *c,const int32_t active[4],uint32_t D,int chicago,
- const float level[4],float output,float pan,uint8_t curve,uint8_t ms20,
- float envelope,float mod_gain,float velocity,float filter_gain,uint8_t unison_flag){
- const float mod_level=chicago?0.0f:c->mod_level;
- const float mod_pan=chicago?0.0f:c->mod_pan;
- const float spread=chicago?0.0f:c->spread;
- if(curve>2||ms20>1)return 0;
- if(!original_binary32_isfinite(mod_level)||!original_binary32_isfinite(mod_gain)||!original_binary32_isfinite(pan)||!original_binary32_isfinite(mod_pan))return 0;
- if(!(envelope>=-1&&envelope<=1&&output>=0&&output<=1&&velocity>=0&&velocity<=1&&spread>=0&&spread<=1&&filter_gain>=1&&filter_gain<=4)|| (ms20&&filter_gain!=1))return 0;
- for(unsigned i=0;i<4;i++)if(!original_binary32_isfinite(level[i])||(!chicago&&!original_binary32_isfinite(c->mod_specific[i]))||!(s->oscillator[i].current>=0&&s->oscillator[i].current<=ORIGINAL_OSCILLATOR_GAIN_MAX))return 0;
- for(unsigned i=0;i<2;i++)if(!(s->stereo[i].current>=0&&s->stereo[i].current<=4))return 0;
- float inverse=duration_inverse(D);
+int original_voice_gain_prepare(original_voice_gain *s,const original_voice_gain_controls *c,const int32_t active[4],uint32_t D){
+ if(!s||!c||!active||!D||D>2147482880u||c->curve>2||c->ms20>1)return 0;
+ const float values[]={c->mod_level,c->envelope,c->mod_gain,c->output,c->velocity,c->pan,c->mod_pan,c->spread,c->filter_gain};
+ for(unsigned i=0;i<sizeof values/sizeof values[0];i++)if(!original_binary32_isfinite(values[i]))return 0;
+ if(c->envelope< -1||c->envelope>1||c->output<0||c->output>1||c->velocity<0||c->velocity>1||c->spread<0||c->spread>1||c->filter_gain<1||c->filter_gain>4||(c->ms20&&c->filter_gain!=1))return 0;
+ for(unsigned i=0;i<4;i++)if(!original_binary32_isfinite(c->level[i])||!original_binary32_isfinite(c->mod_specific[i])||!original_binary32_isfinite(s->oscillator[i].current)||s->oscillator[i].current<0||s->oscillator[i].current>ORIGINAL_OSCILLATOR_GAIN_MAX)return 0;
+ for(unsigned i=0;i<2;i++)if(!original_binary32_isfinite(s->stereo[i].current)||s->stereo[i].current<0||s->stereo[i].current>4)return 0;
+ original_voice_gain n=*s;float inverse=duration_inverse(D);
  for(unsigned i=0;i<4;i++) {
-  if(!active[i]) {s->oscillator[i].target=0;s->oscillator[i].delta=(-s->oscillator[i].current)*inverse;continue;}
-  float q=level[i]+mod_level;q=q+(chicago?0.0f:c->mod_specific[i]);q=clamp(q,0,1);
-  if(curve==0)q=q*q;
-  else if(curve==2){float u=1-q;q=ref_fma(-u,u,1);}
+  if(!active[i]) {n.oscillator[i].target=0;n.oscillator[i].delta=(-n.oscillator[i].current)*inverse;continue;}
+  float q=c->level[i]+c->mod_level;q=q+c->mod_specific[i];q=clamp(q,0,1);
+  if(c->curve==0)q=q*q;
+  else if(c->curve==2){float u=1-q;q=ref_fma(-u,u,1);}
   /* Chicago's inverted-quadratic curve reaches unity. The 1.3333
    * normalization belongs to the other route, including Miami curve 0. */
-  float volume=curve==2?q:q*ORIGINAL_OSCILLATOR_GAIN_MAX;
-  target(&s->oscillator[i],volume,inverse);
+  float level=c->curve==2?q:q*ORIGINAL_OSCILLATOR_GAIN_MAX;
+  target(&n.oscillator[i],level,inverse);
  }
- float a=clamp(ref_fma(mod_gain,.5f,.5f),0,1),g=filter_gain*(a*a);
- g=(envelope*envelope)*g;g=output*g;g=g*(velocity*velocity);g=clamp(g,0,2);
- float p=clamp(ref_fma(mod_pan,2,pan),-1,1),u=p+1,v=2-u;
+ float a=clamp(ref_fma(c->mod_gain,.5f,.5f),0,1),g=c->filter_gain*(a*a);
+ g=(c->envelope*c->envelope)*g;g=c->output*g;g=g*(c->velocity*c->velocity);g=clamp(g,0,2);
+ float p=clamp(ref_fma(c->mod_pan,2,c->pan),-1,1),u=p+1,v=2-u;
  float left=g*original_binary32_min_one_finite(v*v),right=g*original_binary32_min_one_finite(u*u);
  /* Miami unison split. Chicago selected mono uses flag1 and no split;
   * callers pass ms20=0, flag255 to retain its original full L/R weights. */
- if(unison_flag!=255) {
+ if(c->unison_flag!=255) {
   float l=.5f,r=.5f;
-  if(unison_flag==0){l=ref_fma(-spread,.5f,.5f);r=1-l;}
-  else if(unison_flag==2){r=ref_fma(-spread,.5f,.5f);l=1-r;}
+  if(c->unison_flag==0){l=ref_fma(-c->spread,.5f,.5f);r=1-l;}
+  else if(c->unison_flag==2){r=ref_fma(-c->spread,.5f,.5f);l=1-r;}
   left=l*left;right=r*right;
  }
- if(ms20){left=left+left;right=right+right;}
- target(&s->stereo[0],left,inverse);target(&s->stereo[1],right,inverse);return 1;
+ if(c->ms20){left=left+left;right=right+right;}
+ target(&n.stereo[0],left,inverse);target(&n.stereo[1],right,inverse);*s=n;return 1;
 }
-int original_voice_gain_prepare(original_voice_gain *s,const original_voice_gain_controls *c,const int32_t active[4],uint32_t D){
- if(!s||!c||!active||!D||D>2147482880u)return 0;
- return prepare_gain(s,c,active,D,0,c->level,c->output,c->pan,c->curve,c->ms20,c->envelope,c->mod_gain,c->velocity,c->filter_gain,c->unison_flag);
-}
-int original_voice_gain_prepare_chicago(original_voice_gain *s,const original_chicago_voice_gain_controls *c,const int32_t active[4],uint32_t D,
-                                       float envelope,float mod_gain,float velocity,float filter_gain){
- if(!s||!c||!active||!D||D>2147482880u)return 0;
- return prepare_gain(s,0,active,D,1,c->level,c->output,c->pan,c->curve,c->ms20,envelope,mod_gain,velocity,filter_gain,c->unison_flag);
-}
-int original_voice_gain_prepare_miami(original_voice_gain *s,const original_voice_gain_controls *c,const int32_t active[4],uint32_t D,
-                                     float envelope,float mod_gain,float velocity,uint8_t unison_flag){
- if(!s||!c||!active||!D||D>2147482880u)return 0;
- return prepare_gain(s,c,active,D,0,c->level,c->output,c->pan,c->curve,c->ms20,envelope,mod_gain,velocity,c->filter_gain,unison_flag);
-}
-
 int original_voice_gain_oscillator(original_voice_gain *s,original_oscillators *phase,const original_prepared_oscillators *p,unsigned sync,float *out){
  if(!s)return 0;
  float gain[4];for(unsigned i=0;i<4;i++)gain[i]=s->oscillator[i].current;

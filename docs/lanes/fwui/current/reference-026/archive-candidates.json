@@ -1,0 +1,167 @@
+{
+  "schema": "dnbox-fwui-reference-candidate-checkpoint-v1",
+  "status": "WORKING_UNMATCHED_NOT_FINAL",
+  "analyzed_at_utc": "2026-11-22T00:41:49Z",
+  "branch": "lane/fwui-verified-regressions-resume",
+  "source_commit": "f1786ebec2616477163b62b029c7e77405a9c3de",
+  "production_firmware_commit": "199f0444a4cf27374112a5fdf48f82005b070bbc",
+  "original_comparator": {
+    "version": "0.0.26",
+    "source_commit": "94197fc839b00aff47b98ca02f3c6396e4a6eabf",
+    "source_path": "firmware/src/app/ui.c",
+    "blob_sha": "eb911f58db83e417c67dd71576331803fa6c829e",
+    "source_lines": "5836-5883",
+    "runtime_or_gif_comparison": "NOT_RUN"
+  },
+  "current_comparator": [
+    {
+      "path": "firmware/src/app/ui_break_layout_main.h",
+      "blob_sha": "d0483470a18f45cd14147c0f9fac545e9a271467",
+      "source_lines": "90-110"
+    },
+    {
+      "path": "firmware/src/app/ui_step_lane.inc",
+      "blob_sha": "b6ee1efe352f8f77e8edb72f0ce507ca41fc6621",
+      "source_lines": "138-171"
+    }
+  ],
+  "prior_report": "https://github.com/gobbajogger/DnBOX/pull/987#issuecomment-7065118335",
+  "archive": {
+    "name": "DnBOX-975-all-GIFs.zip",
+    "size_bytes": 14222261,
+    "sha256": "2c35210da618125088494bf6aac1c1fd21b855970d7cb0fc337df7af4e6e8e2f",
+    "capture_commit_reported_in_archive": "61827a714ca7b240c01a55ed347b5fd7b847c7c2",
+    "gif_count": 1880,
+    "groups": {
+      "01-firmware-checklist": 1712,
+      "02-native-supplement": 40,
+      "03-startup-loop": 16,
+      "04-synth-one-opt-in": 88,
+      "05-linked-stock-guard": 10,
+      "06-renderer-motion": 6,
+      "07-smc-pickup": 8
+    },
+    "archive_is_original_026": false,
+    "archive_is_current_199f": false
+  },
+  "candidate_renderers": [
+    {
+      "role": "battery/R22/header/4-level",
+      "archive_member": "06-renderer-motion/checklist-battery.gif",
+      "frames": 5,
+      "dimensions": [
+        240,
+        240
+      ],
+      "sha256": "e64295b4fa758f50cdde74784973f14907f3ddc5c74e5a9c7796383dc4df1cbd",
+      "acceptance": "HISTORICAL_MOTION_CANDIDATE"
+    },
+    {
+      "role": "battery/level/0",
+      "archive_member": "01-firmware-checklist/battery-level-0.gif",
+      "frames": 1,
+      "dimensions": [
+        240,
+        240
+      ],
+      "sha256": "fc4edbd10875fdc255d37a976eb921f41ee95ed672457e3e83fd793eb32af0e7",
+      "acceptance": "HISTORICAL_STATIC_CANDIDATE"
+    },
+    {
+      "role": "battery/level/1",
+      "archive_member": "01-firmware-checklist/battery-level-1.gif",
+      "frames": 1,
+      "dimensions": [
+        240,
+        240
+      ],
+      "sha256": "19baa8d884d74c3a397c8f38571bf21ebba54f613a64baa8ac494c36ea9754b6",
+      "acceptance": "HISTORICAL_STATIC_CANDIDATE"
+    },
+    {
+      "role": "battery/level/2",
+      "archive_member": "01-firmware-checklist/battery-level-2.gif",
+      "frames": 1,
+      "dimensions": [
+        240,
+        240
+      ],
+      "sha256": "56e7b3766d423098d877f2e64b4db66bf895505bf0bdaf8b8d1e5d4ccd2ba124",
+      "acceptance": "HISTORICAL_STATIC_CANDIDATE"
+    },
+    {
+      "role": "battery/level/3",
+      "archive_member": "01-firmware-checklist/battery-level-3.gif",
+      "frames": 1,
+      "dimensions": [
+        240,
+        240
+      ],
+      "sha256": "547d45a0a986b935c85747b76f82b87ec296e850b0488fc32fdb13d6c9bcc392",
+      "acceptance": "HISTORICAL_STATIC_CANDIDATE"
+    },
+    {
+      "role": "playhead/bass-A",
+      "archive_member": "06-renderer-motion/checklist-play--2.gif",
+      "frames": 11,
+      "dimensions": [
+        240,
+        240
+      ],
+      "sha256": "26195d6079fbe04c92bff129f56954e3ec1f45a980b8a2c7bade8255908144c1",
+      "acceptance": "HISTORICAL_MOTION_CANDIDATE_NOT_BREAK"
+    },
+    {
+      "role": "smc-pickup/seq",
+      "archive_member": "07-smc-pickup/seq.gif",
+      "frames": 17,
+      "dimensions": [
+        240,
+        240
+      ],
+      "sha256": "644f437be7efe0d39f439546b479b4491aec1337e1d55c3335e0ea2808409e09",
+      "acceptance": "HISTORICAL_OVERLAY_CANDIDATE"
+    }
+  ],
+  "reference_selections": [
+    {
+      "screen": "BREAK/SEQ/rest-playhead",
+      "original_reference": "0.0.26 source-renderer baseline only",
+      "reference_full_page_gif": "UNMATCHED",
+      "current_199f_gif": "NOT_CAPTURED",
+      "reason": "No independent authenticated 0.0.26 full-page motion GIF for this screen was accessible; existing historical archive does not include an identified BREAK SEQ motion renderer."
+    },
+    {
+      "screen": "BATTERY/header/4-level",
+      "reference_full_page_gif": "UNMATCHED",
+      "candidate_from_older_archive": true,
+      "reason": "Older archive has a battery animation and four static levels, but not revision-matched originals."
+    },
+    {
+      "screen": "PLAYHEAD/non-BREAK",
+      "reference_full_page_gif": "UNMATCHED",
+      "candidate_from_older_archive": true,
+      "reason": "Older bass motion cannot substitute for BREAK rest-phase cue."
+    },
+    {
+      "screen": "SMC/pickup/SEQ",
+      "reference_full_page_gif": "UNMATCHED",
+      "candidate_from_older_archive": true,
+      "reason": "Older SMC popup animation is distinct from the transport phase and requires separate entry/expiry comparison."
+    }
+  ],
+  "checks": {
+    "archived_zip_sha256": "PASS",
+    "archived_zip_member_group_counts": "PASS",
+    "selected_gif_frame_counts_and_dimensions": "PASS",
+    "github_exact_source_blob_reads": "PASS",
+    "original_026_runtime": "NOT_RUN",
+    "current_exact_head_host": "NOT_RUN",
+    "elite_stock_build": "NOT_RUN",
+    "pro_stock_build": "NOT_RUN",
+    "full_page_reference_gif_set": "NOT_PRODUCED",
+    "independent_four_size_review": "NOT_RUN"
+  },
+  "blocker": "Original 0.0.26 GIF/reference ZIP is a Space Page-linked binary unavailable to the reading interface; no current repo checkout or full SDK was accessible in the isolated execution container, and the dedicated remote build devices were offline.",
+  "next_action": "Restore exact source and reference bytes, render original 0.0.26 and production with empty BREAK pattern under four lane modes, repair only with RED/GREEN check and Elite/Pro builds, then complete independent whole-route GIF selection."
+}

@@ -33,6 +33,29 @@ def compile_plan(env):
 
 
 class OriginalBuildCompositionTests(unittest.TestCase):
+    def test_synthone_editor_and_provider_use_the_same_model_default(self):
+        targets = (("smk37", "elite", "0", "1"), ("smk37", "pro", "0", "1"),
+                   ("smk37", "mke", "0", "0"), ("fm1", "pro", "0", "0"),
+                   ("smk37", "pro", "1", "0"))
+        for board, model, factory, default in targets:
+            for override in (None, "0", "1"):
+                env = dict(os.environ)
+                env.pop("X0X_SYNTHONE_PATCH", None)
+                if override is not None:
+                    env["X0X_SYNTHONE_PATCH"] = override
+                with self.subTest(board=board, model=model, factory=factory, override=override), \
+                     mock.patch.object(build, "BOARD", board), mock.patch.object(build, "MODEL", model), \
+                     mock.patch.object(build, "SUPERJ6_FACTORY", factory), mock.patch.dict(os.environ, env, clear=True):
+                    _, _, sources = compile_plan({})
+                    expected = "-DX0X_SYNTHONE_PATCH=" + (override or default)
+                    for source, command in sources.items():
+                        if source.endswith(".c"):
+                            defines = [flag for flag in command if str(flag).startswith("-DX0X_SYNTHONE_PATCH=")]
+                            self.assertEqual(defines, [expected], source)
+        with mock.patch.dict(os.environ, {"X0X_SYNTHONE_PATCH": "invalid"}):
+            with self.assertRaisesRegex(SystemExit, "X0X_SYNTHONE_PATCH: 0 or 1"):
+                compile_plan({})
+
     def test_compact_chicago_preserves_hot_unrolling_and_other_boards(self):
         for board, model, compact in (("smk37", "elite", True),
                                       ("smk37", "pro", True),

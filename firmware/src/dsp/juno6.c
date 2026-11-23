@@ -1,5 +1,6 @@
 /* SPDX-License-Identifier: GPL-3.0-only */
 #include "juno6.h"
+#include "juno6_controls.h"
 #include <math.h>
 #include "fastmath.h"
 #include <string.h>
@@ -14,7 +15,7 @@ static float clampf(float x,float a,float b){return x<a?a:x>b?b:x;}
 #define JUNO6_LEGACY(result, name) result juno6_##name
 #endif
 static float midi_hz(unsigned n){return 440.0f*fm_exp2f(((float)n-69.0f)*(1.0f/12.0f));}
-static inline __attribute__((always_inline)) float blep(float t,float dt){if(t<dt){t/=dt;return t+t-t*t-1.0f;}if(t>1.0f-dt){t=(t-1.0f)/dt;return t*t+t+t+1.0f;}return 0.0f;}
+static float blep(float t,float dt){if(t<dt){t/=dt;return t+t-t*t-1.0f;}if(t>1.0f-dt){t=(t-1.0f)/dt;return t*t+t+t+1.0f;}return 0.0f;}
 JUNO6_LEGACY(void, init)(juno6_t*s,float sr){memset(s,0,sizeof *s);s->sample_rate=sr>8000?sr:44100;s->attack=.008f;s->decay=.28f;s->sustain=.72f;s->release=.24f;s->cutoff=.68f;s->resonance=.12f;s->pulse_width=.5f;s->sub_level=.22f;s->macro[0]=.35f;s->macro[4]=.35f;s->macro[10]=.12f;s->macro[15]=1.0f;s->macro[16]=.5f;}
 /* Re-key the sounding pitch even after key-up, while pedal or release keeps it alive. */
 JUNO6_LEGACY(int, note_on)(juno6_t*s,uint8_t note,uint8_t vel){unsigned i,chosen=0;uint32_t oldest;if(!vel){juno6_note_off(s,note);return 1;}for(i=0;i<6;i++)if(s->voice[i].stage&&s->voice[i].note==note){chosen=i;goto assign;}for(i=0;i<6;i++)if(!s->voice[i].gate&&s->voice[i].envelope<.0001f){chosen=i;goto assign;}for(i=0;i<6;i++)if(!s->voice[i].gate){chosen=i;goto assign;}oldest=s->voice[0].age;for(i=1;i<6;i++)if(s->voice[i].age<oldest){oldest=s->voice[i].age;chosen=i;}assign:{juno6_voice_t*v=&s->voice[chosen];v->note=note;v->gate=1;v->stage=1;v->age=++s->age;v->increment=midi_hz(note)/s->sample_rate*fm_exp2f(s->bend*(1.0f/12.0f));v->velocity=(float)vel/127.0f;if(v->envelope<.0001f)v->phase=0;}return 1;}
@@ -30,10 +31,10 @@ JUNO6_LEGACY(void, render)(juno6_t *s, float *out, unsigned n)
  const float attack=1.0f/fm_maxf(1,s->attack*sr);
  const float decay=(1-s->sustain)/fm_maxf(1,s->decay*sr);
  const float release=1.0f/fm_maxf(1,s->release*sr);
- const float base=35+s->cutoff*s->cutoff*12000;
- const float env=7000*s->macro[4];
- const float hp=1.0f/(1.0f+TWO_PI*(15+2000*s->hpf*s->hpf)/sr);
- const float rate=(.1f+8*s->macro[10]*s->macro[10])/sr;
+ const float base=juno6_control_physical(2,s->cutoff);
+ const float env=juno6_control_physical(4,s->macro[4]);
+ const float hp=1.0f/(1.0f+TWO_PI*juno6_control_physical(9,s->hpf)/sr);
+ const float rate=juno6_control_physical(10,s->macro[10])/sr;
  /* Each voice is independent up to its addition to the mono mix. Render in
   * slot order so rounding is unchanged, and skip idle/released voices once
   * per block instead of testing six slots at each output sample. */
@@ -47,7 +48,7 @@ JUNO6_LEGACY(void, render)(juno6_t *s, float *out, unsigned n)
    float lfo = 1 - 4 * fm_fabsf(s->lfo_phase - .5f);
    s->lfo_phase += rate;
    if (s->lfo_phase >= 1) s->lfo_phase -= 1;
-   widths[k] = clampf(s->pulse_width + lfo * pwm * .2f, .05f, .95f);
+   widths[k] = clampf(s->pulse_width + lfo * pwm * JUNO6_PWM_DEPTH_MAX, .05f, .95f);
    mix[k] = 0;
   }
   for (unsigned i = 0; i < JUNO6_VOICES; ++i) {
@@ -134,15 +135,15 @@ JUNO6_LEGACY(int, set)(juno6_t *s,unsigned id,float x) {
  s->macro[id]=x;
  switch(id) {
  case 0:s->waveform=(uint8_t)(x*2.99f);break;
- case 1:s->sub_level=x*.5f;break;
+ case 1:s->sub_level=juno6_control_physical(1,x);break;
  case 2:s->cutoff=x;break;
  case 3:s->resonance=x;break;
- case 5:s->attack=.002f+x*x*3;break;
- case 6:s->decay=.01f+x*x*3;break;
+ case 5:s->attack=juno6_control_physical(5,x);break;
+ case 6:s->decay=juno6_control_physical(6,x);break;
  case 7:s->sustain=x;break;
- case 8:s->release=.01f+x*x*4;break;
+ case 8:s->release=juno6_control_physical(8,x);break;
  case 9:s->hpf=x;break;
- case 12:s->pulse_width=.1f+x*.8f;break;
+ case 12:s->pulse_width=juno6_control_physical(12,x);break;
  case 16:s->bend=(x-.5f)*4;for(unsigned i=0;i<6;i++) if(s->voice[i].stage) s->voice[i].increment=midi_hz(s->voice[i].note)/s->sample_rate*fm_exp2f(s->bend*(1.0f/12.0f));break;
  case 17:s->damper=x>=.5f;if(!s->damper)for(unsigned i=0;i<6;i++)if(!s->voice[i].gate&&s->voice[i].stage)s->voice[i].stage=4;break;
  default:break;

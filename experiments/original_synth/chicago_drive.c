@@ -1,9 +1,6 @@
 /* SPDX-License-Identifier: GPL-3.0-only */
 #include "chicago_drive.h"
 #include "chicago_drive_private.h"
-#include "linear_control.h"
-#define drive_value(value) original_linear_control(value)
-#define drive_gain(value) original_drive_gain(value)
 #include <limits.h>
 #include <string.h>
 static int32_t si(uint32_t u){return u<=INT32_MAX?(int32_t)u:(int32_t)((int64_t)u-4294967296LL);}
@@ -19,8 +16,8 @@ void original_chicago_drive_init(original_chicago_drive *s){if(!s)return;memset(
 void original_chicago_drive_reset(original_chicago_drive *s){if(!s)return;s->drive=shl(s->target_drive,15);s->gain=shl(s->target_gain,15);s->threshold=0;memset(s->previous_driven,0,sizeof s->previous_driven);memset(s->previous_nonlinear,0,sizeof s->previous_nonlinear);}
 int original_chicago_drive_set(original_chicago_drive *s,unsigned parameter,unsigned value){
  if(!s||value>127||(parameter!=2&&parameter!=3))return 0;
- if(parameter==2){s->edit1=(uint8_t)value;s->target_drive=drive_value(value);}
- else{s->edit2=(uint8_t)value;s->target_gain=1279+asr(mul(drive_gain(value),31489),15);}
+ if(parameter==2){s->edit1=(uint8_t)value;s->target_drive=original_drive_table[value];}
+ else{s->edit2=(uint8_t)value;s->target_gain=1279+asr(mul(original_drive_gain_table[value],31489),15);}
  return 1;
 }
 int original_chicago_drive_activity(original_chicago_drive *s,unsigned activity){if(!s||activity>255)return 0;s->activity=(uint8_t)activity;return 1;}

@@ -1,10 +1,5 @@
 /* SPDX-License-Identifier: GPL-3.0-only */
 #include "oscillator_motion.h"
-#include "motion_tables_private.h"
-const int32_t *original_factory_pitch_table(void)
-{
-    return original_pitch44100;
-}
 #include "binary32_classify.h"
 #include "miami_fx_conversion.h"
 #include <math.h>

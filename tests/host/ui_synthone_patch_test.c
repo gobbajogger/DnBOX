@@ -1,0 +1,311 @@
+/* SPDX-License-Identifier: GPL-3.0-only */
+/* Real SMK input roles, production UI, project storage and both audio owners. */
+#define SMC_UI_MAIN existing_smc_fixture_main
+#include "smc_ui_test.c"
+
+static void select_bank(unsigned part, unsigned bank)
+{
+    CHECK(engine_bass_select_preset(part, bank, 0, &proj.sound) == 0);
+    for (unsigned n = 0; n < 1000 && engine_bass_preset_pending(part); n++)
+        audio_block();
+    CHECK(!engine_bass_preset_pending(part));
+    CHECK(engine_bass_bank(part) == (int)bank);
+}
+
+static void capture(unsigned part, int page, int knob, const char *stage)
+{
+    char file[72];
+    snprintf(file, sizeof file, "bass-%c-page-%d-k%d-%s", 'A' + part,
+             page + 1, knob < 0 ? 0 : UI_FIRST_KNOB + knob, stage);
+    draw_header();
+    draw_main();
+    draw_knobs();
+    shot(file);
+}
+
+static void check_readout(pref_t ref, const s1_patch_descriptor *d, float physical)
+{
+    char n[24], u[12], expected[24] = {0}, unit[12] = {0};
+    unit_value(d->unit, s1_patch_display(d, physical), expected, unit);
+    pref_value(ref, n, u);
+    CHECK(!strcmp(n, expected) && !strcmp(u, unit));
+    CHECK(!strcmp(pref_name(ref), d->label));
+}
+
+static int turn_crush(pref_t r, int encoder, int delta)
+{
+    unsigned owner = r.b;
+    CHECK(r.kind == R_ENG && r.a == T_303 && r.c == ORIGINAL_SYNTHONE_CRUSH);
+    CHECK(!strcmp(pref_name(r), "CRUSH RATE") && !pref_read_only(r));
+    const pref_t other = PR(R_ENG,T_303,1-owner,ORIGINAL_SYNTHONE_CRUSH);
+    int before = pref_get(r), peer = pref_get(other);
+    s1_patch_snapshot patch_before, patch_after;
+    CHECK(engine_s1_patch_snapshot(owner, &patch_before));
+    for (int n = 0; n < abs(delta); ++n) {
+        now_ms += 128;
+        enc_acc[encoder] = delta > 0 ? 1 : -1;
+        ui_input_only();
+        audio_block();
+    }
+    int position = before + delta;
+    CHECK(pref_get(r) == position && pref_get(other) == peer);
+    CHECK(proj.sound.v[T_303][owner][ORIGINAL_SYNTHONE_CRUSH] == position);
+    CHECK(engine_s1_patch_snapshot(owner, &patch_after));
+    CHECK(!memcmp(patch_before.physical, patch_after.physical, sizeof patch_before.physical));
+    float hz;
+    CHECK(engine_param_si(T_303, owner, ORIGINAL_SYNTHONE_CRUSH, position, &hz) == X0X_U_HZ);
+    char num[16], unit[8], expected[16];
+    snprintf(expected, sizeof expected, "%d", (int)(hz + .5f));
+    pref_value(r, num, unit);
+    CHECK(!strcmp(num, expected) && !strcmp(unit, "Hz"));
+    return position;
+}
+
+static void check_part(unsigned owner)
+{
+    static const unsigned ids[] = {2,5,16,17,19,22,23,24,25,26,27,28,29};
+    static const char *const titles[] = {"OSCILLATOR", "FILTER", "FILTER ADSR", "AMP ADSR", "EFFECT", "SOUND"};
+    int visited = 0;
+    ui.part = (uint8_t)(PART_303A + owner);
+    set_view(V_PART);
+    ui_input_only(); /* Observe current bank before turning a physical control. */
+    CHECK(pg.n == 6);
+    for (int p = 0; p < pg.n; ++p) {
+        *page_of(V_PART) = (uint8_t)p;
+        CHECK(!strcmp(pg.title[p], titles[p]));
+        ui.touched = -1;
+        ui.msg_until = 0;
+        capture(owner, p, -1, "overview");
+        for (int k = 0; k < 4; ++k) {
+            pref_t ref = pg.r[p][k];
+            if (ref.kind == R_NONE) continue;
+            if (p == 4) {
+                CHECK(k == 0 && ref.b == owner && pref_get(ref) == 0);
+                capture(owner, p, k, "before");
+                CHECK(turn_crush(ref, EN_K1, 12) == 12);
+                capture(owner, p, k, "touched");
+                now_ms += 1200;
+                capture(owner, p, k, "applied");
+                continue;
+            }
+            if (p == 5) {
+                CHECK(k < 3 && ref.b == owner);
+                CHECK(ref.kind == (k == 0 ? R_BENGINE : k == 1 ? R_BPRESET : R_BSTATUS));
+                continue;
+            }
+            CHECK(ref.kind == R_S1PATCH && ref.b == owner && ref.c == visited);
+            const s1_patch_descriptor *d = s1_patch_at(ref.c);
+            CHECK(d && d->factory_id == ids[visited++]);
+            CHECK(pref_desc(ref)->max == S1_PATCH_STEPS && !pref_read_only(ref));
+            if (p < 2) CHECK(tw(&FONT_T, matrix_name(ref)) <= 55);
+            s1_patch_value before, peer, after, peer_after;
+            CHECK(engine_s1_patch_read(owner, d->factory_id, &before));
+            CHECK(engine_s1_patch_read(1-owner, d->factory_id, &peer));
+            check_readout(ref, d, before.physical);
+            sound_t saved = proj.sound;
+            ui.touched = -1;
+            now_ms += 1000;
+            capture(owner, p, k, "before");
+            /* Use multiple slow physical detents so the displayed scale moves
+             * visibly even where one q127 increment rounds to the same label. */
+            int delta = before.position < 64 ? 12 : -12;
+            for (int i = 0; i < 12; ++i) {
+                now_ms += 100;
+                enc_acc[EN_K1 + k] = delta < 0 ? -1 : 1;
+                ui_input_only();
+                CHECK(engine_s1_patch_pending());
+                if (!i) {
+                    CHECK(engine_s1_patch_read(owner, d->factory_id, &after));
+                    CHECK(after.physical == before.physical);
+                    CHECK(project_save() == -8);
+                }
+                audio_block();
+            }
+            CHECK(engine_s1_patch_read(owner, d->factory_id, &after));
+            CHECK(after.revision == before.revision && after.position == before.position + delta);
+            CHECK(after.physical == s1_patch_physical(d, after.position));
+            CHECK(engine_s1_patch_read(1-owner, d->factory_id, &peer_after));
+            CHECK(peer_after.physical == peer.physical && peer_after.revision == peer.revision);
+            CHECK(!memcmp(saved.v[T_303][1-owner], proj.sound.v[T_303][1-owner], ORIGINAL_SOUND_BYTES));
+            CHECK(!memcmp(&saved.bass[1-owner], &proj.sound.bass[1-owner], sizeof saved.bass[0]));
+            check_readout(ref, d, after.physical);
+            capture(owner, p, k, "touched");
+            now_ms += 1200;
+            capture(owner, p, k, "applied");
+        }
+    }
+    CHECK(visited == S1_PATCH_COUNT);
+    *page_of(V_PART) = 0;
+    button_tap(B_SEL);
+    CHECK(ui.overlay == O_LIST);
+    int seen = 0;
+    /* Follow the selector through the real list, including group headings and
+     * scrolling. Capture each selected control after the complete panel frame. */
+    for (;;) {
+        unsigned row = ui.list_sel;
+        pref_t r = list_rows[row];
+        if (r.kind == R_S1PATCH) {
+            CHECK(r.b == owner && r.c == seen++);
+            CHECK(row >= ui.list_top && row < (unsigned)ui.list_top + 9);
+            s1_patch_value v;
+            CHECK(s1_read(r, &v));
+            const s1_patch_descriptor *d = s1_patch_at(r.c);
+            check_readout(r, d, v.physical);
+            char name[64];
+            snprintf(name, sizeof name, "list-%c-factory-id-%02u", 'A' + owner, d->factory_id);
+            ui_frame();
+            shot(name);
+        } else if (r.kind == R_ENG) {
+            CHECK(r.b == owner && r.c == ORIGINAL_SYNTHONE_CRUSH);
+            ui_frame();
+            shot(owner ? "list-B-crush-rate" : "list-A-crush-rate");
+        }
+        now_ms += 100;
+        enc_acc[EN_SELECT] = 1;
+        ui_input_only();
+        CHECK(ui.overlay == O_LIST);
+        if (ui.list_sel == row) break;
+        CHECK(ui.list_sel > row);
+    }
+    CHECK(seen == S1_PATCH_COUNT);
+    CHECK(ui.list_sel + 1 == ui.list_n && list_rows[ui.list_sel].kind == R_BSTATUS);
+    ui_frame();
+    shot(owner ? "list-B-last" : "list-A-last");
+    button_tap(B_HOME);
+}
+
+/* K2 selects a row and K3 edits it through the part list on SMK-37. */
+static void edit_part_list(unsigned owner, uint8_t positions[S1_PATCH_COUNT])
+{
+    ui.part = (uint8_t)(PART_303A + owner);
+    set_view(V_PART);
+    ui_input_only();
+    *page_of(V_PART) = 0;
+    button_tap(B_SEL);
+    CHECK(ui.overlay == O_LIST);
+    unsigned edited = 0, crush_edits = 0;
+    for (;;) {
+        unsigned row = ui.list_sel;
+        pref_t ref = list_rows[row];
+        if (ref.kind == R_S1PATCH) {
+            CHECK(ref.b == owner && ref.c == edited++);
+            const s1_patch_descriptor *d = s1_patch_at(ref.c);
+            s1_patch_value before, after, peer, peer_after;
+            CHECK(s1_read(ref, &before));
+            CHECK(engine_s1_patch_read(1-owner, d->factory_id, &peer));
+            int step = before.position < 64 ? 1 : -1;
+            now_ms += 128;
+            enc_acc[EN_ALGO] = step;
+            ui_input_only();
+            CHECK(ui.overlay == O_LIST && ui.list_sel == row && engine_s1_patch_pending());
+            audio_block();
+            CHECK(s1_read(ref, &after) && after.position == before.position + step);
+            CHECK(after.physical == s1_patch_physical(d, after.position));
+            check_readout(ref, d, after.physical);
+            CHECK(engine_s1_patch_read(1-owner, d->factory_id, &peer_after));
+            CHECK(peer_after.revision == peer.revision && peer_after.physical == peer.physical);
+            positions[ref.c] = after.position;
+        } else if (ref.kind == R_ENG) {
+            CHECK(ref.b == owner && turn_crush(ref, EN_ALGO, owner ? -1 : 1) == (owner ? 11 : 13));
+            ++crush_edits;
+        }
+        now_ms += 128;
+        enc_acc[EN_SELECT] = 1;
+        ui_input_only();
+        if (ui.list_sel == row) break;
+        CHECK(ui.list_sel > row);
+    }
+    CHECK(edited == S1_PATCH_COUNT && crush_edits == 1);
+    button_tap(B_HOME);
+}
+
+static void simultaneous_detents(void)
+{
+    ui.part = PART_303A;
+    set_view(V_PART);
+    ui_input_only();
+    *page_of(V_PART) = 0;
+    const pref_t left = pg.r[0][0], right = pg.r[0][1];
+    s1_patch_value a, b, peer, value;
+    CHECK(s1_read(left, &a) && s1_read(right, &b));
+    CHECK(engine_s1_patch_read(1, 2, &peer));
+    now_ms += 1000;
+    enc_acc[EN_K1] = 1;
+    enc_acc[EN_K1+1] = -1;
+    ui_input_only();
+    CHECK(!strcmp(ui.msg, "EDIT BUSY - RETRY"));
+    CHECK(s1_read(left, &value) && value.physical == a.physical);
+    CHECK(s1_read(right, &value) && value.physical == b.physical);
+    pref_set(PR(R_S1PATCH,T_303,1,0), peer.position - 1);
+    audio_block();
+    CHECK(s1_read(left, &value) && value.position == a.position + 1);
+    CHECK(s1_read(right, &value) && value.physical == b.physical);
+    CHECK(engine_s1_patch_read(1, 2, &value) && value.position == peer.position - 1);
+    now_ms += 100;
+    enc_acc[EN_K1+1] = -1;
+    ui_input_only();
+    audio_block();
+    CHECK(s1_read(right, &value) && value.position == b.position - 1);
+}
+
+int main(void)
+{
+    setup(V_PART, PART_303A);
+    /* The SMC-only fixture replaces the BT byte. Keep its role and restore
+     * the shipping clock-input bit before exercising complete project I/O. */
+    proj.set.bt |= PROJ_BT_CLK_IN;
+    CHECK(project_validate_for(&proj) == 0);
+    select_bank(0, ORIGINAL_SOUND_SYNTHONE);
+    select_bank(1, ORIGINAL_SOUND_SYNTHONE);
+    simultaneous_detents();
+    check_part(0);
+    check_part(1);
+    uint8_t list_positions[2][S1_PATCH_COUNT];
+    edit_part_list(0, list_positions[0]);
+    edit_part_list(1, list_positions[1]);
+    CHECK(project_validate_for(&proj) == 0);
+    CHECK(project_save() == 0);
+    sound_t saved = proj.sound;
+    s1_patch_value original, fresh;
+    CHECK(engine_s1_patch_read(0, 16, &original));
+    CHECK(engine_s1_patch_set(0, original.revision, 16, 0) == S1_EDIT_QUEUED);
+    select_bank(0, ORIGINAL_SOUND_SYNTHONE);
+    CHECK(engine_s1_patch_read(0, 16, &fresh) && fresh.physical == 2000.f);
+    CHECK(fresh.revision != original.revision);
+    CHECK(engine_s1_patch_set(0, original.revision, 16, 0) == S1_EDIT_REJECTED);
+    check_readout(PR(R_S1PATCH,T_303,0,2), s1_patch_at(2), 2000.f);
+    CHECK(engine_s1_patch_set(0, fresh.revision, 16, 0) == S1_EDIT_QUEUED);
+    CHECK(project_load() == 0);
+    engine_apply_sound(&proj.sound);
+    audio_block();
+    CHECK(!memcmp(&saved, &proj.sound, sizeof saved));
+    CHECK(engine_s1_patch_set(0, fresh.revision, 16, 0) == S1_EDIT_REJECTED);
+    for (unsigned part = 0; part < 2; ++part)
+        for (unsigned i = 0; i < S1_PATCH_COUNT; ++i) {
+            pref_t ref = PR(R_S1PATCH, T_303, part, i);
+            s1_patch_value v;
+            CHECK(s1_read(ref,&v));
+            CHECK(v.position == list_positions[part][i]);
+            check_readout(ref,s1_patch_at(i),v.physical);
+        }
+    for (unsigned part = 0; part < 2; ++part) {
+        pref_t crush = PR(R_ENG, T_303, part, ORIGINAL_SYNTHONE_CRUSH);
+        CHECK(pref_get(crush) == (part ? 11 : 13));
+    }
+    select_bank(0, ORIGINAL_SOUND_MIAMI);
+    pref_t stale = PR(R_S1PATCH,T_303,0,2);
+    CHECK(!s1_read(stale, &fresh));
+    char number[24], unit[12];
+    pref_value(stale, number, unit);
+    CHECK(!strcmp(number, "--") && !*unit);
+    sound_t switched = proj.sound;
+    pref_set(stale, 0);
+    CHECK(!engine_s1_patch_pending() && !memcmp(&switched, &proj.sound, sizeof switched));
+    CHECK(original_sound_factories(ORIGINAL_SOUND_SYNTHONE) == 1);
+    CHECK(engine_bass_select_preset(0, ORIGINAL_SOUND_SYNTHONE, 1, &proj.sound) == -1);
+    CHECK(engine_bass_bank(0) == ORIGINAL_SOUND_MIAMI && !engine_bass_preset_pending(0));
+    CHECK(engine_s1_patch_read(1, 16, &fresh));
+    CHECK(pref_read_only(PR(R_BPRESET,0,1,0)));
+    printf("Synth One INIT F7: %u checks, two owners, 13 patch controls and CRUSH RATE each, 96 matrix captures\n", checks);
+    return 0;
+}

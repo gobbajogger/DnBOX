@@ -107,7 +107,6 @@ struct drum909 {
     float nz_buf[DR_NZ_BUF];      /* noise, linear; the block plus >= DR_NZ_HIST before it */
     int32_t nz_pos;               /* where the next block's noise starts */
     uint8_t pots[DR_NUM + 1][DR_MAX_PARAMS];
-    uint32_t prefix_cursor[4];    /* one independent lossless ADPCM bit cursor per cymbal */
 };
 typedef struct drum909 drum909_t;
 
@@ -121,9 +120,6 @@ void drum909_render(drum909_t *d, float *dry, float *rev, float *dly, int n);
 void drum909_render_st(drum909_t *d, float *dry_l, float *dry_r, float *rev, float *dly, int n);
 /* Only selected tracks reach dry/send buses; every voice still advances normally. */
 void drum909_render_st_masked(drum909_t *d, float *dry_l, float *dry_r, float *rev, float *dly,
-                             int n, uint16_t audible_tracks);
-/* Distinct cleared dry buffers, as in the 909 engine job. */
-void drum909_render_st_cleared(drum909_t *d, float *dry_l, float *dry_r, float *rev, float *dly,
                              int n, uint16_t audible_tracks);
 void drum909_pan_settle(drum909_t *d);   /* every pan to its target at once (the kit is silent: no zipper) */
 int drum909_nparams(int voice);

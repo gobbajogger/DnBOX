@@ -10,10 +10,6 @@ typedef struct {
  uint8_t curve,unison_flag,ms20;
  float filter_gain;
 } original_voice_gain_controls;
-typedef struct {
- float level[4],output,pan;
- uint8_t curve,unison_flag,ms20;
-} original_chicago_voice_gain_controls;
 /* Construct/reset only: clears all gains. A Miami full note clears stereo
  * gains but retains oscillator currents. A partial note retains both. */
 void original_voice_gain_init(original_voice_gain *s);
@@ -24,13 +20,6 @@ void original_voice_gain_miami_full_note(original_voice_gain *s);
  * Explicit effective controls, no guessed native modes.
  * duration comes from the actual original voice clock, not fixed64. */
 int original_voice_gain_prepare(original_voice_gain *s,const original_voice_gain_controls *controls,const int32_t activation[4],uint32_t duration);
-/* Per-voice note preparation overlays the moving envelope/gain/velocity on
- * immutable compiled program controls. Chicago has no oscillator modulation,
- * pan modulation or unison spread in this path. */
-int original_voice_gain_prepare_chicago(original_voice_gain *,const original_chicago_voice_gain_controls *,const int32_t [4],uint32_t,
-                                       float envelope,float mod_gain,float velocity,float filter_gain);
-int original_voice_gain_prepare_miami(original_voice_gain *,const original_voice_gain_controls *,const int32_t [4],uint32_t,
-                                     float envelope,float mod_gain,float velocity,uint8_t unison_flag);
 /* Connect current ramps to the prepared four-oscillator renderer, then advance
  * oscillator gain state AFTER mixing for the next sample. Stereo gains advance
  * separately BEFORE multiplying the current filtered sample. */

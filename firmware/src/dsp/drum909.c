@@ -9,7 +9,6 @@
 #include "drum909.h"
 #include "x0x_drum_samples.h"
 #include "ima_adpcm.h"
-#include <stddef.h>
 #include "../x0x_cold.h"          /* X0X_COLD: init/set/get are boot/UI/MIDI — not d9_render */
 
 #define D9_VCA_VT 0.0002f
@@ -31,28 +30,8 @@ D9_INLINE float d9_vca(float x)
 
 /* 9W9's back-to-back diode rounding at the two fixed drives the circuits use */
 /* inline with their tanh: they run per sample in the voice loops (no call) */
-/* These two callers take only d9_tri: its rounded integer fold gives [-1,1].
- * Both fixed drives therefore stay inside the real interpolation table. */
-_Static_assert(2 * ((int)X0X_TANH_SCALE + 1) <= X0X_TANH_N, "fixed triangle drives must fit the tanh table");
-D9_INLINE float d9_triangle_diode(float x, float drive, float gain)
-{
-    const float u = drive * x;
-    const float t = d9_tanh_table(fm_fabsf(u) * X0X_TANH_SCALE);
-    return (u < 0.0f ? -t : t) * gain;
-}
-D9_INLINE float d9_diode16(float x) { return d9_triangle_diode(x, 1.6f, D9_INV_TANH_1_6); }
-/* A fold is nonnegative and at most 2^31-1. Scaling the triangle
- * subtraction by 256 is exact throughout binary32's normal range.
- * This is the fixed 2x diode lookup coordinate, before sign/magnitude. */
-D9_INLINE float d9_triangle20(uint32_t phase)
-{
-    if (X0X_TANH_SCALE != 128.0f)
-        return d9_triangle_diode(d9_tri(phase), 2.0f, D9_INV_TANH_2_0);
-    const uint32_t folded = phase ^ (uint32_t)((int32_t)phase >> 31);
-    const float coordinate = (float)(int32_t)folded * 0x1p-22f - 256.0f;
-    const float result = d9_tanh_table(fm_fabsf(coordinate));
-    return (coordinate < 0.0f ? -result : result) * D9_INV_TANH_2_0;
-}
+D9_INLINE float d9_diode16(float x) { return d9_tanh_inline(1.6f * x) * D9_INV_TANH_1_6; }
+D9_INLINE float d9_diode20(float x) { return d9_tanh_inline(2.0f * x) * D9_INV_TANH_2_0; }
 /* d9_shape with the diode (every voice's default type) inline, tanh included */
 D9_INLINE float d9_shape_v(const d9_shape_t *s, float x, float *st)
 {
@@ -540,9 +519,9 @@ X0X_COLD void drum909_init(drum909_t *d)
         d9_smp_rate(s);
         d9_env_set(&s->out, 0.0f);
         d9_shape_prep(&s->shape, s->drive, s->dist_type);
-        if (i == 2) { s->adpcm = x0x_smp_crash_packed; s->len = X0X_SMP_CRASH_LEN; }
-        else if (i == 3) { s->adpcm = x0x_smp_ride_packed; s->len = X0X_SMP_RIDE_LEN; }
-        else { s->adpcm = x0x_smp_hh_packed; s->len = X0X_SMP_HH_LEN; }
+        if (i == 2) { s->adpcm = x0x_smp_crash; s->len = X0X_SMP_CRASH_LEN; }
+        else if (i == 3) { s->adpcm = x0x_smp_ride; s->len = X0X_SMP_RIDE_LEN; }
+        else { s->adpcm = x0x_smp_hh; s->len = X0X_SMP_HH_LEN; }
     }
 
     d->accent = 2.0f;
@@ -556,20 +535,6 @@ X0X_COLD void drum909_init(drum909_t *d)
 /* ===================================================================== */
 /* Triggers (er99_engine_trigger and the voices' *_trigger)                */
 /* ===================================================================== */
-/* A completed setup retains all coefficients for this ramp. Ticks change
- * only its current values and remaining count. A changed parameter falls
- * through to the same complete ramp initialization. */
-__attribute__((noinline)) static void d9_retrigger_ramp(d9_env_t *e, float start, float end, float samples)
-{
-    if (start == e->v0 && end == e->v1 && samples == e->t1 && samples > 1.0f) {
-        e->v = e->cur = start;
-        e->left = e->k;
-        return;
-    }
-    d9_env_set(e, start);
-    d9_env_exp(e, end, samples);
-}
-
 static void d9_bt_trigger(d9_bt_t *v, int bd, float accent)
 {
     if (v->click_stale && v->mute > 0)
@@ -587,13 +552,15 @@ static void d9_bt_trigger(d9_bt_t *v, int bd, float accent)
         v->bd_phold = (int32_t)(D9_BD_PHOLD_MS * D9_MS);
         d9_env_set(&v->pitch, v->bd_base);
     } else {
-        d9_retrigger_ramp(&v->pitch, v->tune * v->sweep_depth, v->tune, v->sweep_time * D9_MS);
+        d9_env_set(&v->pitch, v->tune * v->sweep_depth);
+        d9_env_exp(&v->pitch, v->tune, v->sweep_time * D9_MS);
     }
     d9_env_set(&v->amp, 1.0f);
     v->amp_hold_left = (int32_t)(v->amp_hold * D9_MS);
     if (v->amp_hold_left <= 0)
         d9_env_exp(&v->amp, 0.00001f, v->decay * D9_MS);
-    d9_retrigger_ramp(&v->click_env, 1.0f, 0.00001f, 3.0f * D9_MS);
+    d9_env_set(&v->click_env, 1.0f);
+    d9_env_exp(&v->click_env, 0.00001f, 3.0f * D9_MS);
     if (v->snappy > 0.0f) {
         d9_env_set(&v->noise_env, 1.0f);
         v->noise_hold = (int32_t)(24.0f * D9_MS);
@@ -613,13 +580,18 @@ __attribute__((noinline)) static void d9_tom_trigger(d9_tom_t *t, const d9_bt_t 
     for (int i = 0; i < 3; ++i)
         t->ph[i] = D9_PH_QUARTER;
     d9_biquad_reset(&t->dc_block);
-    d9_retrigger_ramp(&t->pitch, p->tune * p->sweep_depth, p->tune, p->sweep_time * D9_MS);
+    d9_env_set(&t->pitch, p->tune * p->sweep_depth);
+    d9_env_exp(&t->pitch, p->tune, p->sweep_time * D9_MS);
     const float d1 = p->decay;
-    d9_retrigger_ramp(&t->env[0], 1.0f, 0.00001f, d1 * D9_MS);
-    d9_retrigger_ramp(&t->env[1], 0.55f, 0.00001f, 110.0f * D9_MS);
-    d9_retrigger_ramp(&t->env[2], 0.45f, 0.00001f, 70.0f * D9_MS);
+    d9_env_set(&t->env[0], 1.0f);
+    d9_env_exp(&t->env[0], 0.00001f, d1 * D9_MS);
+    d9_env_set(&t->env[1], 0.55f);
+    d9_env_exp(&t->env[1], 0.00001f, 110.0f * D9_MS);
+    d9_env_set(&t->env[2], 0.45f);
+    d9_env_exp(&t->env[2], 0.00001f, 70.0f * D9_MS);
     t->noise_level = p->attack;
-    d9_retrigger_ramp(&t->noise_env, 1.0f, 0.00001f, 8.0f * D9_MS);
+    d9_env_set(&t->noise_env, 1.0f);
+    d9_env_exp(&t->noise_env, 0.00001f, 8.0f * D9_MS);
     t->out_gain = p->level * accent;
     t->mute = d9_ceil((d1 + 60.0f) * D9_MS);
 }
@@ -667,7 +639,8 @@ void drum909_trigger(drum909_t *d, int voice, float vel)
         }
         r->noise_mix = 0.35f;
         r->decay = 200.0f;
-        d9_retrigger_ramp(&r->amp, 1.0f, 0.00001f, r->decay * D9_MS);
+        d9_env_set(&r->amp, 1.0f);
+        d9_env_exp(&r->amp, 0.00001f, r->decay * D9_MS);
         r->impulse = 2;
         r->accent = vgain;
         r->mute = d9_ceil((r->decay + 20.0f) * D9_MS);
@@ -690,7 +663,8 @@ void drum909_trigger(drum909_t *d, int voice, float vel)
             d9_env_exp(&o->out, 0.00001f, 3.0f * 0.001f * D9_SR);
             o->mute = d9_ceil(6.0f * 0.001f * D9_SR);
         }
-        d9_retrigger_ramp(&s->out, s->volume * vgain, 0.00001f, s->decay * 0.001f * D9_SR);
+        d9_env_set(&s->out, s->volume * vgain);
+        d9_env_exp(&s->out, 0.00001f, s->decay * 0.001f * D9_SR);
         s->pos = 0;
         s->frac = 0;
         s->dk = 0;                                 /* decode again from the start */
@@ -712,7 +686,6 @@ typedef struct {
     float *dry_r, pl, pr;     /* X0X stereo: dry_r 0 = mono (dry gets y as 9W9's) */
     float dpl, dpr;           /* the pans' glide per sample this block (0 settled) */
     float *y;                 /* the voice's samples this block, mixed after its loop (d9_emit_block) */
-    uint32_t *prefix_cursor;  /* null when a fixture supplies ordinary raw nibbles */
 } d9_bus_t;
 
 /* a voice's block into the buses, after its sample loop: per sample the same products and
@@ -752,14 +725,9 @@ __attribute__((noinline)) static void d9_emit_block(const d9_bus_t *b, int m)
  * sample the filter should have seen; the DR_NZ_HIST before it are readable. */
 __attribute__((noinline)) static void d9_warm(d9_biquad_t *f, const float *end)
 {
-    d9_biquad_t state = *f;
-    d9_biquad_reset(&state);
-#ifdef __clang__
-#pragma clang loop unroll_count(4)
-#endif
+    d9_biquad_reset(f);
     for (int i = -DR_NZ_HIST; i < 0; ++i)
-        d9_biquad_tick(&state, end[i]);
-    *f = state;
+        d9_biquad_tick(f, end[i]);
 }
 
 /* Kick (er99_bt_render with the stock sweep, one shell) */
@@ -826,8 +794,8 @@ static void d9_render_sd(d9_bt_t *v, const float *nz, const d9_bus_t *bus, int n
 
         v->ph += d9_inc(f);
         v->ph2 += d9_inc(f * ratio);
-        float o = d9_triangle20(v->ph);
-        o += d9_triangle20(v->ph2) * mix2;
+        float o = d9_diode20(d9_tri(v->ph));
+        o += d9_diode20(d9_tri(v->ph2)) * mix2;
         o *= inv_mix;
         float y = d9_shape_v(&v->shape, o, v->crush_st) * amp;
 
@@ -849,54 +817,10 @@ static void d9_render_sd(d9_bt_t *v, const float *nz, const d9_bus_t *bus, int n
     d9_emit_block(bus, m);
 }
 
-/* Each value uses the same binary32 recurrence as d9_env_tick().  The last
- * tick of a ramp installs its exact target before the next sample. */
-__attribute__((noinline)) static void d9_env_values(d9_env_t *e, float *out, int n)
-{
-    if (!n) return;
-    int moving = e->left < n ? e->left : n;
-    const float ratio = e->r;
-    float v = e->v;
-    for (int i = 0; i < moving; ++i) {
-        out[i] = v;
-        v *= ratio;
-    }
-    if (moving && !(e->left -= moving)) v = e->v1;
-    for (int i = moving; i < n; ++i) out[i] = v;
-    e->cur = out[n - 1];
-    e->v = v;
-}
-
-/* A warmed filter starts with all four histories reset. Filters with
- * identical coefficient bits warmed against the same noise history are
- * identical even when the voices had different states before the reset. */
-static int d9_same_coefficients(const d9_biquad_t *a, const d9_biquad_t *b)
-{
-    return __builtin_memcmp(a, b, offsetof(d9_biquad_t, x1)) == 0;
-}
-
-static void d9_warm_toms(d9_tom_t *first, d9_tom_t *end, const float *nz)
-{
-    d9_warm(&first->noise_bp, nz);
-    first->stick_warm = 0;
-    for (d9_tom_t *next = first + 1; next < end; ++next) {
-        if (next->mute > 0 && next->stick_warm &&
-            d9_same_coefficients(&first->noise_bp, &next->noise_bp)) {
-            next->noise_bp = first->noise_bp;
-            next->stick_warm = 0;
-        }
-    }
-}
-
 /* Toms (er99_tom909_render): three VCOs on their own envelopes + stick noise.
  * The two upper partials and the stick are attack features (110 / 70 / 8 ms);
  * once their envelopes have run out (-100 dB) they are skipped. */
-typedef struct {
-    const float *end;
-    const d9_biquad_t *filter;
-} d9_warmed_end_t;
-
-static void d9_render_tom(d9_tom_t *t, const d9_bt_t *p, const float *nz, const d9_bus_t *bus, int n, d9_warmed_end_t *warmed)
+static void d9_render_tom(d9_tom_t *t, const d9_bt_t *p, const float *nz, const d9_bus_t *bus, int n)
 {
     const int m = n < t->mute ? n : t->mute;
     t->mute -= m;
@@ -906,44 +830,36 @@ static void d9_render_tom(d9_tom_t *t, const d9_bt_t *p, const float *nz, const 
     d9_env_anchor(&t->env[2]);
     d9_env_anchor(&t->noise_env);
     const float stick_g = t->noise_level * 1.5f;
-    static const float ratio[3] = {1.0f, 1.5f, 2.75f};
-    enum { span = 32 };
-    float pitch[span], amp[span];
-    for (int k = 0; k < m; k += span) {
-        int count = m - k < span ? m - k : span;
-        float *y = bus->y + k;
-        d9_env_values(&t->pitch, pitch, count);
-        for (int i = 0; i < count; ++i) y[i] = 0.0f;
-        for (int j = 0; j < 3; ++j) {
-            const int active = j && t->env[j].left < count ? t->env[j].left : count;
-            uint32_t phase = t->ph[j];
-            d9_env_values(&t->env[j], amp, active);
-            for (int i = 0; i < active; ++i) {
-                phase += d9_inc(pitch[i] * ratio[j]);
-                y[i] += d9_triangle20(phase) * amp[i];
-            }
-            t->ph[j] = phase;
+    if (t->stick_warm) {
+        d9_warm(&t->noise_bp, nz);
+        t->stick_warm = 0;
+    }
+    for (int i = 0; i < m; ++i) {
+        const float f = d9_env_tick(&t->pitch);
+        float o = 0.0f;
+        t->ph[0] += d9_inc(f);
+        o += d9_diode20(d9_tri(t->ph[0])) * d9_env_tick(&t->env[0]);
+        if (t->env[1].left) {
+            t->ph[1] += d9_inc(f * 1.50f);
+            o += d9_diode20(d9_tri(t->ph[1])) * d9_env_tick(&t->env[1]);
         }
-        const int stick_count = t->noise_env.left < count ? t->noise_env.left : count;
-        d9_env_values(&t->noise_env, amp, stick_count);
-        for (int i = 0; i < stick_count; ++i)
-            amp[i] = d9_biquad_tick(&t->noise_bp, nz[k+i]) * amp[i] * stick_g;
-        for (int i = stick_count; i < count; ++i) amp[i] = 0.0f;
-        for (int i = 0; i < count; ++i) {
-            float sample = d9_shape_v(&p->shape, y[i] * 0.55f + amp[i], t->crush_st);
-            y[i] = d9_biquad_tick(&t->dc_block, sample) * t->out_gain;
+        if (t->env[2].left) {
+            t->ph[2] += d9_inc(f * 2.75f);
+            o += d9_diode20(d9_tri(t->ph[2])) * d9_env_tick(&t->env[2]);
         }
+        o *= 0.55f;
+        float stick = 0.0f;
+        if (t->noise_env.left)
+            stick = d9_biquad_tick(&t->noise_bp, nz[i]) * d9_env_tick(&t->noise_env) * stick_g;
+        float y = d9_shape_v(&p->shape, o + stick, t->crush_st);
+        y = d9_biquad_tick(&t->dc_block, y);
+        bus->y[i] = y * t->out_gain;
     }
     d9_emit_block(bus, m);
     if (!t->noise_env.left)
         t->stick_stale = 1;
     if (t->stick_stale && t->mute == 0) {
-        if (warmed->end == nz + m && d9_same_coefficients(warmed->filter, &t->noise_bp))
-            t->noise_bp = *warmed->filter;
-        else
-            d9_warm(&t->noise_bp, nz + m);
-        warmed->end = nz + m;
-        warmed->filter = &t->noise_bp;
+        d9_warm(&t->noise_bp, nz + m);
         t->stick_stale = 0;
     }
 }
@@ -1022,27 +938,6 @@ __attribute__((noinline)) static void d9_render_clap(d9_clap_t *v, const float *
     d9_emit_block(bus, m);
 }
 
-/* The leading nibbles remain directly addressable. After the lead-in, advance
- * one canonical Huffman word per original nibble and restore its sign. The
- * entropy decoder is reset from the immutable head whenever a voice restarts. */
-static inline unsigned d9_cymbal_nibble(const uint8_t *data, uint32_t *stream, unsigned index)
-{
-    if (!stream || index < X0X_CYMBAL_HEAD) {
-        unsigned byte = data[index >> 1];
-        return (byte >> (4 * (index & 1))) & 15;
-    }
-    unsigned cursor = *stream;
-    if (index == X0X_CYMBAL_HEAD)
-        cursor = (X0X_CYMBAL_HEAD * 4u << 1) | (data[X0X_CYMBAL_HEAD / 2 - 1] >> 7);
-    unsigned pos = cursor >> 1;
-    const uint8_t *at = data + pos / 8;
-    unsigned window = ((unsigned)at[0] | ((unsigned)at[1] << 8)) >> (pos & 7u);
-    unsigned pair = x0x_cymbal_prefix[window & X0X_CYMBAL_MASK];
-    unsigned code = (pair & 15u) ^ ((cursor & 1u) << 3);
-    *stream = ((pos + (pair >> 4)) << 1) | (code >> 3);
-    return code;
-}
-
 /* Hats, ride, crash (render_sampler) */
 static void d9_render_smp(d9_smp_t *s, const d9_bus_t *bus, int n)
 {
@@ -1055,96 +950,45 @@ static void d9_render_smp(d9_smp_t *s, const d9_bus_t *bus, int n)
     const float pre = 1.0f + s->drive * 0.5f;
     const uint8_t *adpcm = s->adpcm;
     const uint32_t len = s->len;
-    /* At the native sample rate, interpolation at fraction zero yields the
-     * exact integer sample. Keep the decoder's ordinary one-sample lookahead,
-     * including the priming nibble on a new hit. Endpoints, non-integral rates
-     * and an unaligned decoder take the general path. */
-    if (m > 0 && s->inc == 1u && !(s->incf | s->frac) &&
-        s->pos < len && (unsigned)m < len - s->pos &&
-        (s->dk == s->pos || s->dk == s->pos + 1u)) {
-        uint32_t next = s->dk;
-        int32_t pred = s->pred, idx = s->idx;
-        int32_t h0 = s->h0, h1 = s->h1;
-        d9_env_values(&s->out, bus->y, m);
-        if (next == s->pos)
-            h1 = ima_decode_code(d9_cymbal_nibble(adpcm, bus->prefix_cursor, next++), &pred, &idx);
-        int raw = m;
-        if (bus->prefix_cursor) {
-            unsigned available = next < X0X_CYMBAL_HEAD ? X0X_CYMBAL_HEAD - next : 0;
-            if (available < (unsigned)raw) raw = (int)available;
+    /* Decode forward to sample pos+1 (to the last sample at the end): the same
+     * values as a fully decoded buffer. pos only goes up, so each sample is
+     * decoded once (up to 4 a sample at pitch x4). Drive and the shape type
+     * are constant for the block: one loop each, no per-sample branch. */
+#define D9_SMP_CORE \
+        float v = 0.0f; \
+        if (s->pos < len) { \
+            const uint32_t need = s->pos + 2 < len ? s->pos + 2 : len; \
+            while (s->dk < need) { \
+                s->h0 = s->h1; \
+                s->h1 = ima_decode(adpcm, s->dk++, &s->pred, &s->idx); \
+            } \
+            const int last = s->pos + 1 >= len; \
+            const float a = (float)(last ? s->h1 : s->h0) * (1.0f / 32768.0f); \
+            const float b = last ? 0.0f : (float)s->h1 * (1.0f / 32768.0f); \
+            const float fr = (float)s->frac * (1.0f / 4294967296.0f); \
+            v = a + (b - a) * fr; \
+            const uint32_t f2 = s->frac + s->incf; \
+            s->pos += s->inc + (f2 < s->frac); \
+            s->frac = f2; \
+        } \
+        v *= d9_env_tick(&s->out);
+    if (!drive) {
+        for (int i = 0; i < m; ++i) { D9_SMP_CORE; bus->y[i] = v; }
+    } else if (s->shape.type == 0) {
+        const float k = s->shape.k, g = s->shape.g;
+        for (int i = 0; i < m; ++i) {
+            D9_SMP_CORE;
+            v = d9_tanh_inline(k * (v * pre)) * g;
+            bus->y[i] = v;
         }
-        for (int i = 0; i < raw; i++) {
-            h0 = h1;
-            h1 = ima_decode(adpcm, next++, &pred, &idx);
-            bus->y[i] = ((float)h0 * (1.0f / 32768.0f)) * bus->y[i];
-        }
-        if (raw < m) {
-            unsigned cursor = next == X0X_CYMBAL_HEAD
-                ? (X0X_CYMBAL_HEAD * 8u) | (adpcm[X0X_CYMBAL_HEAD / 2 - 1] >> 7)
-                : *bus->prefix_cursor;
-            unsigned pos = cursor >> 1, bits = 24u - (pos & 7u);
-            const uint8_t *read = adpcm + pos / 8;
-            unsigned window = (read[0] | (unsigned)read[1] << 8 | (unsigned)read[2] << 16) >> (pos & 7u);
-            unsigned sign = (cursor & 1u) << 3;
-            read += 3;
-            for (int i = raw; i < m; i++) {
-                unsigned pair = x0x_cymbal_prefix[window & X0X_CYMBAL_MASK];
-                unsigned code = (pair & 15u) ^ sign, width = pair >> 4;
-                sign = code & 8;
-                window >>= width;
-                pos += width;
-                bits -= width;
-                if (bits < 8u) {
-                    window |= (read[0] | (unsigned)read[1] << 8) << bits;
-                    read += 2;
-                    bits += 16;
-                }
-                h0 = h1;
-                h1 = ima_decode_code(code, &pred, &idx);
-                bus->y[i] = ((float)h0 * (1.0f / 32768.0f)) * bus->y[i];
-            }
-            *bus->prefix_cursor = pos * 2u + (sign >> 3);
-            next += (unsigned)(m - raw);
-        }
-        s->h0 = h0;
-        s->h1 = h1;
-        s->dk = next;
-        s->pred = pred;
-        s->idx = idx;
-        s->pos += (unsigned)m;
     } else {
         for (int i = 0; i < m; ++i) {
-            float v = 0.0f;
-            if (s->pos < len) {
-                const uint32_t need = s->pos + 2 < len ? s->pos + 2 : len;
-                while (s->dk < need) {
-                    s->h0 = s->h1;
-                    s->h1 = ima_decode_code(d9_cymbal_nibble(adpcm, bus->prefix_cursor, s->dk++), &s->pred, &s->idx);
-                }
-                const int last = s->pos + 1 >= len;
-                const float a = (float)(last ? s->h1 : s->h0) * (1.0f / 32768.0f);
-                const float b = last ? 0.0f : (float)s->h1 * (1.0f / 32768.0f);
-                const float fr = (float)s->frac * (1.0f / 4294967296.0f);
-                v = a + (b - a) * fr;
-                const uint32_t f2 = s->frac + s->incf;
-                s->pos += s->inc + (f2 < s->frac);
-                s->frac = f2;
-            }
-            bus->y[i] = v * d9_env_tick(&s->out);
+            D9_SMP_CORE;
+            v = d9_shape_other(&s->shape, v * pre, s->crush_st);
+            bus->y[i] = v;
         }
     }
-    /* Drive reads this voice's decoded output in the original sample order.
-     * Its crush history is disjoint from the decoder and its output envelope. */
-    if (drive) {
-        if (s->shape.type == 0) {
-            const float k = s->shape.k, g = s->shape.g;
-            for (int i = 0; i < m; ++i)
-                bus->y[i] = d9_tanh_inline(k * (bus->y[i] * pre)) * g;
-        } else {
-            for (int i = 0; i < m; ++i)
-                bus->y[i] = d9_shape_other(&s->shape, bus->y[i] * pre, s->crush_st);
-        }
-    }
+#undef D9_SMP_CORE
     d9_emit_block(bus, m);
 }
 
@@ -1211,13 +1055,10 @@ static void d9_render(drum909_t *d, float *dry, float *rev, float *dly, int n, u
         d9_bus(&bus, d, DR_SD, dry, rev, dly, audible_tracks);
         d9_render_sd(&d->bt[DR_SD], nz, &bus, n);
     }
-    d9_warmed_end_t warmed = {0};
     for (int t = 0; t < 3; ++t)
         if (d->tom[t].mute > 0) {
-            if (d->tom[t].stick_warm)
-                d9_warm_toms(&d->tom[t], d->tom + 3, nz);
             d9_bus(&bus, d, DR_LT + t, dry, rev, dly, audible_tracks);
-            d9_render_tom(&d->tom[t], &d->bt[DR_LT + t], nz, &bus, n, &warmed);
+            d9_render_tom(&d->tom[t], &d->bt[DR_LT + t], nz, &bus, n);
         }
     if (d->rim.mute > 0) {
         d9_bus(&bus, d, DR_RS, dry, rev, dly, audible_tracks);
@@ -1232,7 +1073,6 @@ static void d9_render(drum909_t *d, float *dry, float *rev, float *dly, int n, u
         d9_smp_t *s = &d->smp[order[k] - DR_CH];
         if (s->mute > 0) {
             d9_bus(&bus, d, order[k], dry, rev, dly, audible_tracks);
-            bus.prefix_cursor = &d->prefix_cursor[order[k] - DR_CH];
             d9_render_smp(s, &bus, n);
         }
     }
@@ -1244,44 +1084,18 @@ void drum909_render(drum909_t *d, float *dry, float *rev, float *dly, int n)
     d9_render(d, dry, rev, dly, n, 0x7FFu);
 }
 
-/* All callers share pan, noise and serial voice state. The engine's 909 job
- * owns two cleared dry buffers. If every pan stays at unity, the two buses
- * get the same sequence of binary32 additions, and the mono render computes
- * that sequence once. Other callers may already have unequal bus contents. */
-static void d9_render_st_masked(drum909_t *d, float *dry_l, float *dry_r, float *rev, float *dly,
-                                int n, uint16_t audible_tracks, int cleared)
+void drum909_render_st_masked(drum909_t *d, float *dry_l, float *dry_r, float *rev, float *dly,
+                             int n, uint16_t audible_tracks)
 {
-    int duplicate = cleared;
-    if (n > 256) n = 256;
-    for (int v = 0; v < DR_NUM; ++v) {
+    d9_dry_r = dry_r;
+    for (int v = 0; v < DR_NUM; ++v) {             /* every voice's pan glides, sounding or not */
         d9_pl0[v] = d->pan_lc[v];
         d9_pr0[v] = d->pan_rc[v];
-        if (d9_pl0[v] == 1.0f && d9_pr0[v] == 1.0f &&
-            d->pan_l[v] == 1.0f && d->pan_r[v] == 1.0f) {
-            d->pan_dl[v] = d->pan_dr[v] = 0.0f;
-        } else {
-            duplicate = 0;
-            d->pan_dl[v] = x0x_glide_block(&d->pan_lc[v], d->pan_l[v], n);
-            d->pan_dr[v] = x0x_glide_block(&d->pan_rc[v], d->pan_r[v], n);
-        }
+        d->pan_dl[v] = x0x_glide_block(&d->pan_lc[v], d->pan_l[v], n > 256 ? 256 : n);
+        d->pan_dr[v] = x0x_glide_block(&d->pan_rc[v], d->pan_r[v], n > 256 ? 256 : n);
     }
-    d9_dry_r = duplicate ? 0 : dry_r;
     d9_render(d, dry_l, rev, dly, n, audible_tracks);
-    if (duplicate && n > 0)
-        __builtin_memcpy(dry_r, dry_l, (unsigned)n * sizeof *dry_l);
     d9_dry_r = 0;
-}
-
-void drum909_render_st_cleared(drum909_t *d, float *dry_l, float *dry_r, float *rev, float *dly,
-                               int n, uint16_t audible_tracks)
-{
-    d9_render_st_masked(d, dry_l, dry_r, rev, dly, n, audible_tracks, 1);
-}
-
-void drum909_render_st_masked(drum909_t *d, float *dry_l, float *dry_r, float *rev, float *dly,
-                              int n, uint16_t audible_tracks)
-{
-    d9_render_st_masked(d, dry_l, dry_r, rev, dly, n, audible_tracks, 0);
 }
 
 void drum909_render_st(drum909_t *d, float *dry_l, float *dry_r, float *rev, float *dly, int n)

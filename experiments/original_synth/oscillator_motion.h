@@ -44,9 +44,6 @@ int original_mg_tempo_cached(original_mg_tempo_cache *cache,float *phase,unsigne
 /* Four explicit current/target glide pitches; finite 0..127 (MIDI notes; final oscillator pitch clamps to 120). */
 int original_glide(float current[4],const float target[4],float portamento,float modulation,float fs,uint32_t duration);
 int original_glide_cached(original_glide_cache *cache,float current[4],const float target[4],float portamento,float modulation,float fs,uint32_t duration);
-/* These backends share the same pinned 128 MIDI-note increments. */
-const int32_t *original_factory_pitch_table(void);
-#define ORIGINAL_FACTORY_PITCH_44100 original_factory_pitch_table()
 /* Original signed integer lookup requires verified 128-entry table. */
 int original_pitch_increment(float pitch,const int32_t table[128],uint32_t *out);
 int original_xmod_coefficient(float native_depth,float modulation,float *out);

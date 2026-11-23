@@ -42,13 +42,17 @@ def instrument(root):
 }'''
     text=wrap(text,sig,'cv_text',wrapper);gfx.write_text(text)
     ui=root/'firmware/src/app/ui.c';body=ui.read_text()
-    a='    for(int x=1;x<=214;x++) {'
+    a='    for(int x=1;x<=span;x++) {' if '    for(int x=1;x<=span;x++) {' in body else '    for(int x=1;x<=214;x++) {'
     body=once(body,a,'''    uint16_t envelope_before[CV_MAX];first_snapshot(envelope_before);
     first_glyph_type="envelope-curve";first_ref[0]=r.kind;first_ref[1]=r.a;first_ref[2]=r.b;first_ref[3]=r.c;
     first_name=pref_desc(r)?pref_desc(r)->name:"";
 '''+a)
-    a='    char num[16],unit[8],label[32];pref_value_of(r,matrix_value(r),num,unit);'
-    body=once(body,a,'    first_finish(envelope_before,"glyph",x0,top-off,0);\n'+a);ui.write_text(body)
+    # Finish immediately after the actual curve, before a compact KIT row
+    # can return and before its axis/caption/meter ink enters the snapshot.
+    compact='    if(level_time<0)return;'
+    a=compact if compact in body else '    char num[16],unit[8],label[32];pref_value_of(r,matrix_value(r),num,unit);'
+    y='top' if 'int h,int level_time)' in body else 'top-off'
+    body=once(body,a,f'    first_finish(envelope_before,"glyph",x0,{y},0);\n'+a);ui.write_text(body)
     dv=root/'firmware/src/app/ui_drum_voice.inc';text=dv.read_text()
     draw='UI_DRAW ' if 'static UI_DRAW void dv_glyph(' in text else ''
     text=once(text,'int off = band * BAND_H, bh = dv_band_h(band);','int off = band * BAND_H, bh = dv_band_h(band);\n    first_offset=band==2?158:20;first_control=-1;first_row=-1;')
@@ -61,6 +65,7 @@ def instrument(root):
     text=once(text,'rbox(3, by, 234, body_h, UI_PANEL_RADIUS, SOUND_FACE);','{first_panel("control-banks",3,by,234,body_h);rbox(3, by, 234, body_h, UI_PANEL_RADIUS, SOUND_FACE);}')
     active_panels = (
         'rbox(6, ay, 228, ah, UI_PANEL_RADIUS, ui_theme_light?SOUND_SELECT:RGB(36,48,54));',
+        'dv_bank_focus(ay,ah);',
     )
     matches = [anchor for anchor in active_panels if anchor in text]
     if len(matches) != 1:
@@ -68,11 +73,18 @@ def instrument(root):
     anchor = matches[0]
     text=once(text,anchor,'{first_panel("active-bank",6,ay,228,ah);'+anchor+'}')
     text=once(text,'rbox(3, py, 234, ph, UI_PANEL_RADIUS, SOUND_FACE);','first_panel("voice-body",3,py,234,ph);rbox(3, py, 234, ph, UI_PANEL_RADIUS, SOUND_FACE);')
-    text=once(text,'cv_rect(sx, sy, 11, 4, sc);','{uint16_t before[CV_MAX];first_snapshot(before);cv_rect(sx, sy, 11, 4, sc);first_finish(before,"step",sx,sy,0);}')
+    if 'dv_voice_steps(' in text:
+        step='cv_rect(sx,step_y,11,4,live?C_WHITE:hit?col:SOUND_LINE);'
+        text=once(text,step,'{uint16_t before[CV_MAX];first_snapshot(before);'+step+'first_finish(before,"step",sx,step_y,0);}')
+    else:
+        text=once(text,'cv_rect(sx, sy, 11, 4, sc);','{uint16_t before[CV_MAX];first_snapshot(before);cv_rect(sx, sy, 11, 4, sc);first_finish(before,"step",sx,sy,0);}')
+    if 'dv_cp_stage_page(' in text:
+        text=once(text,'rbox(3,24-off,234,213,UI_PANEL_RADIUS,SOUND_FACE);','first_panel("owner-stage-banks",3,24-off,234,213);rbox(3,24-off,234,213,UI_PANEL_RADIUS,SOUND_FACE);')
     sig='static '+draw+'void dv_tune_fork(float ox, float oy, float sx, float sy, float tune01, uint16_t col)'
     text=once(text,sig+'\n{',sig+'\n{\n    first_glyph_type="tuning-fork";')
     # Route marker belongs to actual Pitch branch if present, not inferred from name.
-    pitch='if (d && name_is(d,"Pitch")) {'
+    pitch='if (r.kind == R_ENG && r.a == T_909 && r.b == DR_BD && r.c == 5) {'
+    if pitch not in text:pitch='if (d && name_is(d,"Pitch")) {'
     if pitch in text:text=once(text,pitch,pitch+'\n        first_glyph_type="carrier-wave";')
     sig='static '+draw+'void dv_glyph(pref_t r, float ev, float ox, float oy, float sx, float sy, uint16_t col)'
     wrapper=sig+'''\n{
@@ -107,6 +119,15 @@ def instrument(root):
         '    uint16_t curve_before[CV_MAX];first_snapshot(curve_before);\n'
         '    cv_poly_aa(points,used/2,col);\n'
         '    first_finish(curve_before,"envelope-curve",13,top,0);')
+    # New owner-bound rows: record only the real polyline raster, separately
+    # from physical captions/axes and the genuine live level tick.
+    if 'dv_bound_stage(' in text:
+        sig='static '+draw+'void dv_bound_stage(drum_curve_t *v,int stage,int top,int off,uint16_t col)'
+        if text.count(sig)!=1:raise ValueError('Expected exactly one owner-bound stage renderer')
+        text=once(text,'    cv_poly_aa(points,used,col);',
+            '    uint16_t stage_before[CV_MAX];first_snapshot(stage_before);\n'
+            '    cv_poly_aa(points,used,col);\n'
+            '    first_finish(stage_before,"envelope-curve",13,top-off,0);')
     # Real body paths are included in ink measurements, but panel fills are not.
     sig='static '+draw+'void dv_body_pictogram('
     start=text.index(sig); brace=text.index('{',start);signature=text[start:brace].strip()

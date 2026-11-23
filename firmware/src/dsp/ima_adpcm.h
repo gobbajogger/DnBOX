@@ -32,8 +32,9 @@ static const uint8_t IMA_ROUND_CORR[64] = {
     0,0,0,0,0,0,0,0, 0,0,1,1,0,0,1,1,
     0,1,0,1,0,1,0,1, 0,1,1,2,0,1,1,2
 };
-static inline int32_t ima_decode_code(uint32_t code, int32_t *pred, int32_t *idx)
+static inline int32_t ima_decode(const uint8_t *d, uint32_t i, int32_t *pred, int32_t *idx)
 {
+    uint32_t byte = d[i >> 1], code = (i & 1u) ? (byte >> 4) : (byte & 15u);
     uint32_t mag = code & 7u;
     int32_t step = IMA_STEP_T[*idx];
     int32_t delta = ((step * (int32_t)(2u * mag + 1u)) >> 3) - IMA_ROUND_CORR[((step & 7) << 3) | mag];
@@ -42,11 +43,4 @@ static inline int32_t ima_decode_code(uint32_t code, int32_t *pred, int32_t *idx
     int32_t x = *idx + IMA_IDX_T[mag];
     *idx = x < 0 ? 0 : x > 88 ? 88 : x;
     return *pred;
-}
-
-
-static inline int32_t ima_decode(const uint8_t *d, uint32_t i, int32_t *pred, int32_t *idx)
-{
-    uint32_t byte = d[i >> 1];
-    return ima_decode_code((i & 1u) ? byte >> 4 : byte & 15u, pred, idx);
 }

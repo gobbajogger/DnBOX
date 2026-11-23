@@ -37,60 +37,8 @@ static int check_oscillator_curves(void)
  }
  return 1;
 }
-/* Compiled controls are shared by voices. Compare both live overlays with
- * the effective controls each engine would pass to the public gain API. */
-static int check_gain_overlays(void)
-{
- const int32_t active[4] = {0, -1, 3, 0};
- original_voice_gain initial = {0};
- initial.oscillator[0].current = .2f;
- initial.stereo[1].current = .4f;
- for (unsigned chicago = 0; chicago <= 1; chicago++) {
-  original_voice_gain_controls program = {
-   .level = {.5f, .2f, .3f, 1.f}, .output = .7f, .pan = -.4f,
-   .curve = 2, .unison_flag = 255, .filter_gain = 1.f, .ms20 = 1
-  };
-  if (!chicago) {
-   program.mod_level = .1f;
-   program.mod_specific[2] = -.25f;
-   program.mod_pan = .2f;
-   program.spread = .65f;
-  }
-  original_chicago_voice_gain_controls compact = {0};
-  memcpy(compact.level, program.level, sizeof compact.level);
-  compact.pan = program.pan;
-  compact.output = program.output;
-  compact.curve = program.curve;
-  compact.unison_flag = program.unison_flag;
-  compact.ms20 = program.ms20;
-  original_voice_gain_controls effective = program;
-  effective.envelope = -.8f;
-  effective.mod_gain = .4f;
-  effective.velocity = .6f;
-  if (!chicago) effective.unison_flag = 2;
-  const unsigned char *overlay = chicago ? (const void *)&compact : (const void *)&program;
-  size_t size = chicago ? sizeof compact : sizeof program;
-  unsigned char saved[sizeof program];
-  memcpy(saved, overlay, size);
-  for (unsigned invalid = 0; invalid <= 1; invalid++) {
-   original_voice_gain expected = initial;
-   if (invalid) expected.stereo[1].current = NAN;
-   original_voice_gain actual = expected, untouched = expected;
-   int ref = original_voice_gain_prepare(&expected, &effective, active, 63);
-   int ok = chicago ?
-     original_voice_gain_prepare_chicago(&actual, &compact, active, 63, -.8f, .4f, .6f, 1.f) :
-     original_voice_gain_prepare_miami(&actual, &program, active, 63, -.8f, .4f, .6f, 2);
-   if (ref != !invalid || ok != ref || memcmp(&actual, &expected, sizeof actual) ||
-       memcmp(saved, overlay, size) || (invalid && memcmp(&actual, &untouched, sizeof actual))) {
-    fprintf(stderr, "Gain overlay differs for chicago=%u invalid=%u\n", chicago, invalid);
-    return 0;
-   }
-  }
- }
- return 1;
-}
 int main(void){
- if(!check_oscillator_curves() || !check_gain_overlays())return 1;
+ if(!check_oscillator_curves())return 1;
  for(uint32_t d=1;d<=64;d++)if(!check(d))return 1;
  const uint32_t edge[]={0,65,66,127,128,255,256,44100,16777215,16777216,16777217,2147482880u,UINT32_MAX};
  for(unsigned i=0;i<sizeof edge/sizeof edge[0];i++)if(!check(edge[i]))return 1;

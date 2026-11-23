@@ -13,14 +13,13 @@ with tempfile.TemporaryDirectory(prefix='chicago-compact-') as tmp:
                     str(ROOT/'experiments/original_synth/chicago_packed_private.h'),
                     str(tmp/'chicago_compact_private.h')], check=True)
     cc = os.environ.get('CC', 'cc')
-    for factory in (0, 1):
-        for flags in (['-O2'], ['-O1', '-fsanitize=address,undefined', '-fno-omit-frame-pointer']):
-            output = tmp/'test'
-            subprocess.run([cc, '-std=c11', '-Wall', '-Wextra', '-Werror', f'-DX0X_SUPERJ6_FACTORY={factory}', *flags,
-                            '-I'+str(tmp), '-I'+str(ROOT/'experiments/original_synth'),
-                            str(ROOT/'tests/chicago_compact_headers.c'),
-                            str(ROOT/'tests/chicago_compact_raw.c'),
-                            str(ROOT/'experiments/original_synth/lossless_table.c'),
-                            '-o', str(output)], check=True)
-            subprocess.run([str(output)], check=True)
-            print('PASS: 32770 exact values + public cached lookups + invalid inputs:', ' '.join(flags))
+    for flags in (['-O2'], ['-O1', '-fsanitize=address,undefined', '-fno-omit-frame-pointer']):
+        output = tmp/'test'
+        subprocess.run([cc, '-std=c11', '-Wall', '-Wextra', '-Werror', *flags,
+                        '-I'+str(tmp), '-I'+str(ROOT/'experiments/original_synth'),
+                        str(ROOT/'tests/chicago_compact_headers.c'),
+                        str(ROOT/'tests/chicago_compact_raw.c'),
+                        str(ROOT/'experiments/original_synth/lossless_table.c'),
+                        '-o', str(output)], check=True)
+        subprocess.run([str(output)], check=True)
+        print('PASS: 32770 exact values + public cached lookups + invalid inputs:', ' '.join(flags))

@@ -1,14 +1,9 @@
 #!/bin/sh
 # SPDX-License-Identifier: GPL-3.0-only
-# Miami mod-wheel routing, including older WBL1 checkouts.
+# Miami mod wheel → W_WOBBLE_DEPTH on product WBL1 path.
 set -eu
 TEST_ROOT=$(CDPATH= cd "$(dirname "$0")/../.." && pwd)
 SRC=${X0X_SOURCE_ROOT:-$TEST_ROOT}
-# The original engine superseded WBL1. Exercise its scanner, command queue,
-# live Wobble Depth and stored value through the production wheel-mode test.
-if [ -f "$SRC/firmware/src/dsp/original_miami_backend.c" ] && [ ! -f "$SRC/firmware/src/dsp/wobble_backend.h" ]; then
-    exec sh "$TEST_ROOT/tests/host/smk_wheel_mode_test.sh"
-fi
 OUT=$(mktemp -d)
 trap 'rm -rf "$OUT"' EXIT HUP INT TERM
 awk '/^static void smk_wheels\(void\)/{on=1} on{print} on && /^}/{exit}' "$SRC/firmware/src/app/main_fm1.c" > "$OUT/smk_wheels.inc"

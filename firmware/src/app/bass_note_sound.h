@@ -1,8 +1,7 @@
 /* SPDX-License-Identifier: GPL-3.0-only */
 /* Stream 7 note sound, version 1. One existing motion-pool record per onset.
  * No pointers, native padding, repurposed step flags or change to project size.
- * Payload: complete product cell32, wire identity12, target mixer5, zero15. An explicitly tagged Synth One
- * master edit uses the first seven reserved bytes; old cells still require all 15 zero.
+ * Payload: complete product cell32, wire identity12, target mixer5, zero15.
  * Global send processors/master remain project state, as in ordinary playback. */
 #pragma once
 #include "bass_identity.h"

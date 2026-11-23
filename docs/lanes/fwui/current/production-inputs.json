@@ -1,0 +1,14 @@
+{
+  "measured_commit": "db48241eabca5fd686aabeb5f807ea041b8a4c2c",
+  "measured_tree": "36786dccccfd6cd56cfae43477ddb1133b728e1f",
+  "identical_release_inputs": {
+    "firmware": "02663651eed320308eb7f8156afc368499f127ee",
+    "host": "79483183292b47483b677767dc00ba4910a96a20",
+    "tools": "0990667da09769a02c8f86a285903cdaaf91b086",
+    "experiments": "c7eb8703996eda5849db1b516759a2e5cb92a1da",
+    "build.sh": "7d13fcb6c33cee8f8f58676a2ce5357f265ec7d7",
+    "assets": "c3f4f03b55dffddbc0f0de5f7e14fc5c62f81671",
+    "reference": "92e242c69f647ea3e174dd8e07d07dfdf6632255"
+  },
+  "scope": "Production, host, tool, experiment, asset and reference inputs are identical at the measurement and qualification commits. The qualification commit adds focused tests, captures and documentation."
+}

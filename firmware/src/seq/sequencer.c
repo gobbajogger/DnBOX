@@ -45,6 +45,7 @@ X0X_COLD void seq_init(seq_t *s, pattern_t *patterns)
     s->bpm = 125.0f;
     s->ext_bpm = 125.0f;
     s->accent_q7 = 88;                /* a 909 non-accented hit sits ~3 dB under an accent */
+    s->brk_velocity = 127;            /* an unedited BREAK hit plays at its original gain */
     s->send_clock = 1;
     for (i = 0; i < NTRACKS; i++)
         s->ch[i] = SEQ_CH_DEFAULT[i];
@@ -253,7 +254,6 @@ static uint32_t bass_slot_q8(const seq_t *s, int b, int p)
     int t = TRK_BASS0 + b;
     uint32_t L = seq_step_q8(s, bpart(s, b)->rate);
     uint32_t sw = swing_q8(s, bpart(s, b)->rate, L);
-    if (!sw) return L;
     if (bpart(s, b)->dir == DIR_RANDOM)
         return (s->t[t].mut_steps & RANDOM_SWING_ODD) ? L + sw : L - sw;
     int np = next_pos((seq_t *)s, t, p, 0);
@@ -432,7 +432,7 @@ static int clamp_steps(int n)
     return n < 1 ? 1 : n > NSTEPS ? NSTEPS : n;
 }
 
-static int rate_ticks(int rate)
+int seq_rate_ticks(int rate)
 {
     return (int)TICKS_PER_STEP[(unsigned)rate < NRATES ? (unsigned)rate : RATE_16];
 }
@@ -483,14 +483,14 @@ static int chain_slot_len(const seq_t *s, uint32_t restarted)
         if (s->ppat[t] >= NPAT) return 1;
     p = &s->pat[s->ppat[TRK_DRUM]];
     bar_len = clamp_steps(p->drum[0].len);
-    bar_t = bar_len * rate_ticks(p->drum[0].rate);
+    bar_t = bar_len * seq_rate_ticks(p->drum[0].rate);
     max_t = bar_t;                                   /* at least one 909 pass */
 
     /* 808 (the 909 sets the bar, already in max_t) */
     p = &s->pat[s->ppat[1]];
     if (!SEQ_PART_OFF(s, 1) && !seq_part_muted(s, 1) &&
         drum_plays(&p->drum[1], (s->mute | s->vmute) >> NDRUM)) {
-        int tt = clamp_steps(p->drum[1].len) * rate_ticks(p->drum[1].rate);
+        int tt = clamp_steps(p->drum[1].len) * seq_rate_ticks(p->drum[1].rate);
         if (tt > max_t) max_t = tt;
     }
     for (t = 0; t < NBASS; t++) {
@@ -500,13 +500,13 @@ static int chain_slot_len(const seq_t *s, uint32_t restarted)
             !bass_plays(&p->bass[t], s->t[tr].sounding,
                         !s->t[tr].started || (restarted & (1u << tr))))
             continue;
-        tt = clamp_steps(p->bass[t].len) * rate_ticks(p->bass[t].rate);
+        tt = clamp_steps(p->bass[t].len) * seq_rate_ticks(p->bass[t].rate);
         if (tt > max_t) max_t = tt;
     }
     p = &s->pat[s->ppat[TRK_BRK]];
     /* BREAK's sequencer clock is 16 steps at 1/16, even when RATE_8 / RATE_4 group them. */
     if (!SEQ_PART_OFF(s, TRK_BRK) && !seq_part_muted(s, TRK_BRK) && brk_plays(&p->brk)) {
-        int tt = 16 * rate_ticks(RATE_16);
+        int tt = 16 * seq_rate_ticks(RATE_16);
         if (tt > max_t) max_t = tt;
     }
     n_bars = (max_t + bar_t - 1) / bar_t;
@@ -687,15 +687,13 @@ static uint32_t fire_step(seq_t *s, int t, const seq_sink_t *o)
             tr->ext_due--;
     } else {
         /* the step that follows p: swung if it is an odd one */
+        int np = next_pos(s, t, p, 0);
         uint32_t sw = swing_q8(s, rate, L);
-        if (!sw)
-            tr->to_next = carry + L;
-        else if (bass && bpart(s, t - TRK_BASS0)->dir == DIR_RANDOM) {
+        if (bass && bpart(s, t - TRK_BASS0)->dir == DIR_RANDOM) {
             /* Swing belongs to successive musical time slots, not to the
              * parity of the randomly selected source-step position. */
             tr->to_next = carry + ((tr->mut_steps & RANDOM_SWING_ODD) ? L + sw : L - sw);
         } else {
-            int np = next_pos(s, t, p, 0);
             tr->to_next = carry + ((np & 1) ? L + sw : L - sw);
             if (!(np & 1) && (p & 1) == 0)           /* even -> even (odd lengths, wraps): no swing */
                 tr->to_next = carry + L;

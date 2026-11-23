@@ -89,13 +89,14 @@ static void break_layout_footer(void)
     const brkpart_t *bp=&cur_pat()->brk;
     int ph=seq.playing?eng_step[TRK_BRK]:-1,count=engine_brk_count(0);
     uint32_t locks=lock_marks(-1,-1,0);
+    int sequence=ui.view==V_SEQ;
     if(count<1)count=1;
     for(int i=0;i<16;i++){
-        int x=9+i*14,on=(bp->steps>>i)&1u;char t[4];
-        put_i(t,i+1);text_c(x+5,vc(&FONT_T,214-KNOB_Y,9),&FONT_T,t,C_GRAY);
+        int x=sequence?64+i*10:9+i*14,on=(bp->steps>>i)&1u;char t[4];
+        put_i(t,i+1);text_c(x+5,vc(&FONT_T,(sequence?211:214)-KNOB_Y,9),&FONT_T,t,C_GRAY);
         if(bp->slice[i])put_i(t,(bp->slice[i]-1)%count+1);else put_s(t,"-");
-        text_c(x+5,vc(&FONT_T,224-KNOB_Y,9),&FONT_T,t,bp->slice[i]?(on?C_HI:C_DIM):C_DIM);
-        cv_rect(x,234-KNOB_Y,11,4,i==ph?C_WHITE:on?part_col():C_LINE);
+        text_c(x+5,vc(&FONT_T,(sequence?219:224)-KNOB_Y,9),&FONT_T,t,bp->slice[i]?(on?C_HI:C_DIM):C_DIM);
+        if(!sequence)cv_rect(x,234-KNOB_Y,11,4,i==ph?C_WHITE:on?part_col():C_LINE);
         if((locks>>i)&1u)cv_rect(x+4,238-KNOB_Y,3,2,C_AMB);
     }
 }

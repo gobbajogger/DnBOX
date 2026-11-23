@@ -15,9 +15,8 @@
  *  - Master: 9W9's seven distortion characters (or Off) and its one-knob glue
  *    compressor (hard bypass at 0), then volume.
  *
- * fxbus_init accepts the original int16 ring. fxbus_init_packed uses only
- * FX_DELAY_BYTES(frames) of aligned storage for a 10-bit mantissa per sample, a
- * scale per 64 samples and the current write block. The
+ * The delay line is int16 (9W9 writes it at 12 bits, so nothing is lost; values
+ * past +-16 full scale saturate) and is passed in by the caller (.pool). The
  * reverb lines are int16 combs (also 12-bit in 9W9) and float allpasses, inside
  * the struct. Both effects go idle (no per-sample work) once their input and
  * their lines are silent. */
@@ -26,9 +25,6 @@
 #include "x0x_param.h"
 #include "drum909_dsp.h"
 
-#define FX10_DATA_BYTES(frames) (((frames) * 10u + 7u) / 8u)
-#define FX_DELAY_BYTES(frames) (132u + FX10_DATA_BYTES(frames) + ((frames) + 63u) / 64u)
-#define FX_808_DELAY_FRAMES 19200
 #define FX_RV_COMB_TOTAL (1116 + 1188 + 1277 + 1356)
 #define FX_RV_AP_TOTAL (556 + 441)
 #define FX_RV_APR_TOTAL (579 + 457)   /* X0X: the right side's allpasses */
@@ -57,7 +53,7 @@ struct fxbus {
     int32_t dl_div, dl_type;
     d9_biquad_t dl_hp;
     int16_t *dbuf;
-    int32_t dlen /* negative for packed storage */, w, dl_quiet;
+    int32_t dlen, w, dl_quiet;
     float dcur, lp, tape_hp;
     uint32_t wow_ph, flut_ph;
     int32_t dl_ping;                  /* X0X: ping-pong, a second tap at twice the time */
@@ -72,21 +68,12 @@ struct fxbus {
 typedef struct fxbus fxbus_t;
 
 void fxbus_init(fxbus_t *f, int16_t *dly_buf, int dly_len);
-void fxbus_init_packed(fxbus_t *f, int16_t *dly_buf, int dly_len);
-void fxbus_init_808_reverb(fxbus_t *f);
-void fxbus_init_808_fx(fxbus_t *f, int16_t *delay);
-int fxbus_808_delay_active(const fxbus_t *f);
-void fxbus_808_delay(fxbus_t *f, const float *send, float *left, float *right, int frames, float gain);
-int fxbus_reverb_active(const fxbus_t *f);
-void fxbus_808_reverb(fxbus_t *f, const float *send, float *left, float *right, int frames, float gain);
 void fxbus_set_bpm(fxbus_t *f, float bpm);
 void fxbus_process(fxbus_t *f, const float *dry, const float *rev, const float *dly, float *out, int n);
 /* X0X stereo: dry in L / R, the sends mono; with everything centred and no reverb, out_l and out_r
  * are fxbus_process's out exactly */
 void fxbus_process_st(fxbus_t *f, const float *dry_l, const float *dry_r, const float *rev, const float *dly,
                       float *out_l, float *out_r, int n);
-/* The idle-delay and reverb gates permit equivalent consecutive subcalls. */
-int fxbus_can_stream_idle_delay(const fxbus_t *,const float *rev,const float *dly,unsigned n);
 int fxbus_nparams(void);
 const x0x_param_t *fxbus_param(int i);
 int fxbus_param_si(int i, int pot, float *val);

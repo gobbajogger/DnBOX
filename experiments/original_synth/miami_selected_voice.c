@@ -183,7 +183,8 @@ static int preparation_tail(original_miami_selected_voice *s,const original_miam
   if(!original_oscillator_prepare(&s->prepared,&oc))return 0;
   s->wave_preparations++;
  }
- if(!original_voice_gain_prepare_miami(&s->gain,&c->gain,s->activation,D,s->vca.level,s->mod_gain,s->velocity,s->unison_flag))return 0;
+ original_voice_gain_controls gc=c->gain;gc.envelope=s->vca.level;gc.mod_gain=s->mod_gain;gc.velocity=s->velocity;gc.unison_flag=s->unison_flag;
+ if(!original_voice_gain_prepare(&s->gain,&gc,s->activation,D))return 0;
  ms20_prepare(&s->filter,t,c,s->vcf.level,s->mod_cutoff,D);
  for(unsigned i=0;i<4;i++)if(s->activation[i]>0)s->activation[i]--;
  s->last_duration=D;s->control_updates++;return 1;

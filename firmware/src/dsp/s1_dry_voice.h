@@ -20,9 +20,7 @@ typedef struct {
 } s1_dry_controls;
 
 typedef struct {
-    /* The envelopes consume the prepared retentions and sustain below. Keep
-     * their physical ADSR inputs only in the editable patch. */
-    float cutoff_hz, resonance, filter_depth, oscillator1_level, balance;
+    s1_dry_controls controls;
     dnbx_s1_envelope_params amp, filter;
     float cached_cutoff_hz, pole_retention, feedback;
 } s1_dry_prepared;
@@ -50,8 +48,6 @@ int s1_dry_note_off(s1_dry_voice *voice);
 /* Original release ends at a render boundary when amplitude falls below 0.01. */
 void s1_dry_begin_block(s1_dry_voice *voice);
 float s1_dry_sample(s1_dry_voice *voice);
-/* Add one active voice after the caller has applied its block boundary. */
-void s1_dry_mix(s1_dry_voice *voice, float *mix, unsigned frames);
 int s1_dry_render(s1_dry_voice *voice, float *mono, unsigned frames);
 /* Exposed physical control law for numerical validation, not a control ID API. */
 float s1_dry_cutoff(float base_hz, float depth, float envelope);

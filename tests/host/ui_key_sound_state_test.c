@@ -19,6 +19,9 @@ int main(void)
 {
  for(int kit=0;kit<2;kit++)for(int voice=0;voice<NDRUM;voice++){
   setup(V_PART,kit);ui.sel[kit]=voice;ui.page[V_PART][kit]=0;build_pages();
+  int choices=kit==PART_808&&voice==D8_CP?2:1;
+  for(int choice=0;choice<choices;choice++){
+   if(choices==2)pref_set(PR(R_ENG,T_808,D8_CP,4),choice);
   for(int theme=0;theme<2;theme++)for(int mode=0;mode<8;mode++){
    pref_set(PR(R_PALETTE,0,0,0),theme?NPALETTES-1:0);seq.playing=mode&1;ui.rec=(mode>>1)&1;proj.set.keysound=(mode>>2)&1;
    int off=seq.playing&&!ui.rec&&!proj.set.keysound;
@@ -28,8 +31,11 @@ int main(void)
     if(!(x>=91&&x<91+tw(&FONT_T,"KEY SOUND OFF")&&y>=28&&y<28+FONT_T.h))
      CHECK(rendered[y*240+x]==selection_only[y*240+x]);
    if(kit==0&&voice==2&&mode==1)shot(theme?"key-sound-off-light":"key-sound-off-dark");
+   if(choices==2&&mode==1){char name[80];snprintf(name,sizeof name,"key-sound-off-%s-%s",choice?"maracas":"clap",theme?"light":"dark");shot(name);}
+  }
   }
  }
  puts("PASS all22 drum key-sound state visibility across transport/record/mode/themes");
+ puts("PASS 352 established mode combinations plus16 alternate MARACAS combinations; unchanged y28 oracle and redraw mask");
  return 0;
 }

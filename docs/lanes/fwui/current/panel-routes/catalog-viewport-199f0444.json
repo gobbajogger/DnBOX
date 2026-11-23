@@ -1,0 +1,61 @@
+{
+  "production": "199f0444a4cf27374112a5fdf48f82005b070bbc",
+  "screenIndexSha256": "9aa3a8b48b82001ffcff065968ca31a429099e943587fb9707de3cf8ca20e9ab",
+  "nativeSize": [
+    240,
+    240
+  ],
+  "nativeStates": 1968,
+  "viewportLCDComparisons": 5904,
+  "results": [
+    {
+      "viewport": [
+        1440,
+        900
+      ],
+      "lcdBounds": [
+        263,
+        142,
+        503,
+        382
+      ],
+      "shellRGB": "20436d3f91d7a00733ebbb0da5ef82d3374a57b8a2ea5ac70b64f0ab1a5000b5",
+      "checked": 1968,
+      "clippedOrResampledLCDs": 0
+    },
+    {
+      "viewport": [
+        390,
+        844
+      ],
+      "lcdBounds": [
+        75,
+        203,
+        315,
+        443
+      ],
+      "shellRGB": "af664933b2f867e357ef235a45ea1004c5a519b8d07effb8cf78c08434b7ea9a",
+      "checked": 1968,
+      "clippedOrResampledLCDs": 0
+    },
+    {
+      "viewport": [
+        844,
+        390
+      ],
+      "lcdBounds": [
+        43,
+        142,
+        283,
+        382
+      ],
+      "shellRGB": "9e96f81ddcd47206f97b1e85529b112958bd51b7c2a2f5e1cda87190ff157ec9",
+      "checked": 1968,
+      "clippedOrResampledLCDs": 0
+    }
+  ],
+  "method": "Decode each indexed native PNG, verify its full RGB SHA-256, and replace the LCD rectangle in each previously recorded Qt WebKit shell raster. Verify all decoded RGB bytes in the full LCD rectangle. These are deterministic replay checks of the previously measured viewport layout.",
+  "independentOrdinaryInspection": "All 24 changed or newly active ordinary screens were inspected at native size. Twelve Synth One engine frames show the selected oscillator, filter, envelopes, EFFECT or SOUND on A and B. The twelve BREAK and BREAK SEQ captures retain waveform, slice counts and footer controls. Previous archived selectors and current Synth One, safe and retry screens also have separate before/after reviews.",
+  "independentDefaultEditor": "../synthone-editor/default-review/review.md",
+  "independentRecovery": "../native-routes/recovery-review.json"
+}

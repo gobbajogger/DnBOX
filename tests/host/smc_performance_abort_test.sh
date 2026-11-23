@@ -11,5 +11,5 @@ X0X_HOST_OUT="$OUT/host" sh host/build_host.sh --generate-only > "$OUT/build.log
 ${CC:-cc} -O1 -g -ffp-contract=off -std=c99 -Wall -Wextra -Wno-unused-function -Wno-unused-parameter \
     -DX0X_HOST $ORIGINAL_FLAGS -DSMC_SOURCE_FILE=\"${SMC_SOURCE_FILE:-app/smc_mixer.c}\" ${X0X_HOST_DEFS:-} \
     -Ifirmware/src -Ifirmware/src/app -Ifirmware/src/dsp -Ibuild/gen \
-    tests/host/smc_performance_abort_test.c $U -Wl,--wrap=original_runtime_init -lm -o "$OUT/test"
+    tests/host/smc_performance_abort_test.c $U -lm -o "$OUT/test"
 "$OUT/test"

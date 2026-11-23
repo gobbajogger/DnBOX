@@ -67,8 +67,6 @@ static uint32_t play_adpcm(d9_smp_t *s, float *out, uint32_t max, uint32_t *deco
     memset(&bus, 0, sizeof bus);
     bus.dry = dry;
     bus.y = y;
-    uint32_t cursor = 0;
-    bus.prefix_cursor = &cursor;
     uint32_t k = 0;
     while (s->pos < s->len && k < max) {
         memset(dry, 0, sizeof dry);
@@ -83,13 +81,13 @@ static uint32_t play_adpcm(d9_smp_t *s, float *out, uint32_t max, uint32_t *deco
 int main(int argc, char **argv)
 {
     if (argc < 2) { fprintf(stderr, "usage: %s REFDIR\n", argv[0]); return 2; }
-    struct { const char *name; const uint8_t *adpcm, *packed; uint32_t len, bytes, packed_bytes; } C[3] = {
-        {"hh", x0x_smp_hh, x0x_smp_hh_packed, X0X_SMP_HH_LEN, sizeof x0x_smp_hh, sizeof x0x_smp_hh_packed},
-        {"ride", x0x_smp_ride, x0x_smp_ride_packed, X0X_SMP_RIDE_LEN, sizeof x0x_smp_ride, sizeof x0x_smp_ride_packed},
-        {"crash", x0x_smp_crash, x0x_smp_crash_packed, X0X_SMP_CRASH_LEN, sizeof x0x_smp_crash, sizeof x0x_smp_crash_packed}};
+    struct { const char *name; const uint8_t *adpcm; uint32_t len, bytes; } C[3] = {
+        {"hh", x0x_smp_hh, X0X_SMP_HH_LEN, sizeof x0x_smp_hh},
+        {"ride", x0x_smp_ride, X0X_SMP_RIDE_LEN, sizeof x0x_smp_ride},
+        {"crash", x0x_smp_crash, X0X_SMP_CRASH_LEN, sizeof x0x_smp_crash}};
     static const float PITCH[] = {0.25f, 0.5f, 0.7937005f, 1.0f, 1.3348398f, 2.0f, 3.1748021f, 4.0f};
     int bad = 0;
-    uint32_t flash = sizeof x0x_cymbal_prefix, pcm_bytes = 0;
+    uint32_t flash = 0, pcm_bytes = 0;
     for (int c = 0; c < 3; c++) {
         const uint32_t n = C[c].len;
         int16_t *ref = load(argv[1], C[c].name, "ref", n), *pcm = load(argv[1], C[c].name, "pcm", n);
@@ -103,7 +101,7 @@ int main(int argc, char **argv)
             es += (double)(dec[i] - pcm[i]) * (dec[i] - pcm[i]);
             ps += (double)pcm[i] * pcm[i];
         }
-        flash += C[c].packed_bytes;
+        flash += C[c].bytes;
         pcm_bytes += n * 2;
         const double snr = 10.0 * log10(ps / es);
         const int ok = maxd <= 1 && C[c].bytes == (n + 1) / 2 && snr > 15.0;
@@ -116,7 +114,7 @@ int main(int argc, char **argv)
         for (unsigned p = 0; p < sizeof PITCH / sizeof PITCH[0]; p++) {
             d9_smp_t s;
             memset(&s, 0, sizeof s);
-            s.adpcm = C[c].packed;
+            s.adpcm = C[c].adpcm;
             s.len = n;
             s.pitch = PITCH[p];
             d9_smp_rate(&s);
@@ -140,7 +138,7 @@ int main(int argc, char **argv)
         {
             d9_smp_t s;
             memset(&s, 0, sizeof s);
-            s.adpcm = C[c].packed;
+            s.adpcm = C[c].adpcm;
             s.len = n;
             s.pitch = 1.3348398f;
             d9_smp_rate(&s);
@@ -149,11 +147,9 @@ int main(int argc, char **argv)
             d9_bus_t bus;
             static float y[256];
             memset(&bus, 0, sizeof bus);
-            uint32_t cursor = 0;
-            bus.prefix_cursor = &cursor;
             bus.dry = dry;
             bus.y = y;
-            for (int k = 0; k < 140; k++)
+            for (int k = 0; k < 40; k++)
                 d9_render_smp(&s, &bus, 32);
             trig(&s);
             const uint32_t na = play_pcm(dec, n, s.pitch, a, 4 * n + 64);
@@ -161,7 +157,7 @@ int main(int argc, char **argv)
             uint32_t diff = 0;
             for (uint32_t i = 0; i < na && i < nb; i++)
                 diff += memcmp(&a[i], &b[i], sizeof(float)) != 0;
-            printf("  %s %-5s retrigger at 4480 samples: %u differ\n", diff ? "FAIL" : "ok  ", C[c].name, diff);
+            printf("  %s %-5s retrigger at 1280 samples: %u differ\n", diff ? "FAIL" : "ok  ", C[c].name, diff);
             bad += diff != 0;
         }
         free(a); free(b); free(dec); free(ref); free(pcm);

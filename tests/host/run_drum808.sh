@@ -25,8 +25,4 @@ WARN="-Wall -Wextra -Wdouble-promotion -Werror"
 "$CC" -std=c99 -O2 -ffp-contract=off $WARN -Ifirmware/src/dsp -c firmware/src/dsp/x0x_param.c -o "$OUT/x0x_param.o"
 "$CXX" -o "$OUT/drum808_test" "$OUT/drum808_test.o" "$OUT/drum808.o" "$OUT/x0x_param.o" "$OUT/sc808_engine.o" -lm
 
-# The engine uses cleared, separate dry buses, including on a retrigger or a live pan change.
-"$CC" -std=c99 -O2 -ffp-contract=off -Ifirmware/src/dsp tests/host/drum808_center_test.c \
-    "$OUT/drum808.o" "$OUT/x0x_param.o" -lm -o "$OUT/drum808_center_test"
-"$OUT/drum808_center_test"
 "$OUT/drum808_test" build/drum808_demo.wav "$@"

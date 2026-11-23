@@ -603,7 +603,7 @@ void project_reset_stage(void) { project_defaults_for(&project_stage, proj.set.b
 static int project_validate_for(const project_t *p)
 {
     const settings_t *s = &p->set;
-    uint32_t length;
+    uint32_t length, break_velocity_patterns = 0;
     int t, v, i, k, b;
 #if X0X_BASS_TAGGED_SOUND
     int bass_status=engine_bass_sound_validate(&p->sound);
@@ -700,9 +700,15 @@ static int project_validate_for(const project_t *p)
                 return -1;
             max = PROB_COND + PROB_NCOND - 1;
         } else if (l->t == T_VEL) {
-            /* Drum black-key strike velocity only; 303 steps keep bstep.velocity. */
-            if (l->part >= NKIT || (l->v >> 4) != l->part || (l->v & 15) >= NDRUM || l->i)
+            /* BREAK has one sequenced hit owner. 303 steps keep bstep.velocity. */
+            if ((l->part >= NKIT && l->part != PART_BRK) || (l->v >> 4) != l->part ||
+                (l->v & 15) >= (l->part == PART_BRK ? 1 : NDRUM) || l->i)
                 return -1;
+            if (l->part == PART_BRK) {
+                uint32_t pattern = 1u << l->pat;
+                if (break_velocity_patterns & pattern) return -1;
+                break_velocity_patterns |= pattern;
+            }
             max = 127;
         } else {
             if (l->t >= NTARGETS || l->v >= engine_nvoices(l->t) ||

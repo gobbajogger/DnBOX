@@ -45,6 +45,10 @@ int engine_brk_outline_snapshot(int which, uint8_t *peaks, int n, uint32_t *revi
 { (void)which; (void)peaks; (void)n; (void)revision; return 0; }
 int engine_drum808_curve(int voice, drum_curve_t *out)
 { (void)voice; (void)out; return 0; }
+int engine_drum808_param_curve(int voice,int param,drum_curve_t *out)
+{ (void)voice; (void)param; (void)out; return 0; }
+int engine_drum808_param_curve_preview(int voice,int param,int selection,int raw,drum_curve_t *out)
+{ (void)voice; (void)param; (void)selection; (void)raw; (void)out; return 0; }
 int engine_bd909_pitch_view(float *ms, float *hz)
 { (void)ms; (void)hz; return 0; }
 int engine_drum909_decay_view(int voice, engine_decay_view_t *out)

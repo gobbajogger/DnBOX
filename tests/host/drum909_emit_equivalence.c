@@ -2,7 +2,6 @@
 /* Compare the isolated emit/rim/clap candidates with a pinned source baseline. */
 #include "drum909.h"
 #include <stdio.h>
-#include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -24,17 +23,6 @@ static void check(const void *a, const void *b, size_t n, const char *what, int 
         exit(1);
     }
 }
-/* The pinned implementation holds raw nibble pointers. Keep those live while
- * it renders, and compare all shared DSP state with only the pointers normalized.
- * The extra prefix cursors are private to the new storage representation. */
-static void check_state(const drum909_t *candidate, const drum909_t *original,
-                        const char *label, int seed, int dist, int block)
-{
-    drum909_t copy = *candidate;
-    for (int i = 0; i < 4; i++) copy.smp[i].adpcm = original->smp[i].adpcm;
-    check(&copy, original, offsetof(drum909_t, prefix_cursor), label, seed, dist, block);
-}
-
 int main(void)
 {
     unsigned blocks = 0;
@@ -60,7 +48,7 @@ int main(void)
             drum909_render_st_masked(&a, x[0], x[1], x[2], x[3], n, 0x7ff);
             ref_drum909_render_st_masked(&b, y[0], y[1], y[2], y[3], n, 0x7ff);
             check(x, y, sizeof x, "ring PCM", phase, -1, block);
-            check_state(&a, &b, "ring state", phase, -1, block);
+            check(&a, &b, sizeof a, "ring state", phase, -1, block);
             ++blocks;
         }
     }
@@ -68,7 +56,14 @@ int main(void)
         drum909_t a, b;
         memset(&a, 0, sizeof a); memset(&b, 0, sizeof b);
         drum909_init(&a); ref_drum909_init(&b);
-        check_state(&a, &b, "init", seed, dist, -1);
+        /* Each TU has its own static sample arrays. Check their bytes, then use
+         * the same immutable arrays so full-state memcmp includes all pointers. */
+        for (int v = 0; v < 4; ++v) {
+            check(&a.smp[v].len, &b.smp[v].len, sizeof a.smp[v].len, "sample length", seed, dist, -1);
+            check(a.smp[v].adpcm, b.smp[v].adpcm, (a.smp[v].len + 1u) / 2u, "sample bytes", seed, dist, -1);
+            b.smp[v].adpcm = a.smp[v].adpcm;
+        }
+        check(&a, &b, sizeof a, "init", seed, dist, -1);
         rng = (unsigned)seed;
         for (int block = 0; block < 520; ++block) {
             if (block % 31 == 0) {
@@ -85,6 +80,8 @@ int main(void)
             /* The pinned base has no panic API; compare its real reset lifecycle. */
             if (block % 97 == 96) {
                 drum909_init(&a); ref_drum909_init(&b);
+                /* Reset restores each TU's separately allocated immutable arrays. */
+                for (int v = 0; v < 4; ++v) b.smp[v].adpcm = a.smp[v].adpcm;
             }
             if (block % 19 == 0) for (int v = 0; v < DR_NUM; ++v) {
                 const float vel = (float)(next() % 128u) / 127.0f;
@@ -111,10 +108,10 @@ int main(void)
                 ref_drum909_render_st_masked(&b, y[0], y[1], br, bd, n, mask);
             }
             check(x, y, sizeof x, "PCM", seed, dist, block);
-            check_state(&a, &b, "state", seed, dist, block);
+            check(&a, &b, sizeof a, "state", seed, dist, block);
             ++blocks;
         }
     }
-    printf("PASS: %u blocks; shared DSP state (%zu bytes) and four PCM buses identical\n", blocks, offsetof(drum909_t, prefix_cursor));
+    printf("PASS: %u blocks; full state (%zu bytes) and four PCM buses identical\n", blocks, sizeof(drum909_t));
     return 0;
 }

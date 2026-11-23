@@ -1,0 +1,93 @@
+{
+  "fwui_parent": "11bc3f3a0e9c361dcfb51a95bbc03eef9fec7a75",
+  "sound_provider": "80b7e1db59e5c3eceb2b3530e80c2cedf29c5b7f",
+  "integration_base": "76040daa5b52d686a8b7b544296ba5d79610a95d",
+  "feature": "X0X_SYNTHONE_PATCH=1",
+  "preset": "Synth One INIT",
+  "production_synthone_factory_count_admitted": 1,
+  "bound_factory_ids": [
+    2,
+    5,
+    16,
+    17,
+    19,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29
+  ],
+  "cases": {
+    "panel_checks": 1071,
+    "owner_count": 2,
+    "physical_controls_per_owner": 13,
+    "physical_control_changes": 26,
+    "target_readout_region_changed": 26,
+    "frames_240x240": 88,
+    "provider_positions": 1664,
+    "providers_audible_controls": 13,
+    "filter_geometry_states": 49152,
+    "formatted_control_extents": 1664,
+    "amp_attack_changed_pixels": 200,
+    "amp_held_changed_pixels": 362,
+    "peer_changed_pixels": 0,
+    "linked_board_feature_combinations": 4,
+    "matched_binary_fingerprints": 16
+  },
+  "notes": [
+    "Checked real firmware frame pixels and 26 control-specific before/applied regions using the released 10px and 12px font cap metrics.",
+    "When two encoders turn on one part before its next audio block, the second receives an explicit retry. The other part can accept its own edit in that block.",
+    "Full factory bank selection and default-on production admission depend on Sound. Four stock links and exact output hashes are recorded in native-replay.json.",
+    "The 88 framebuffer hashes on the original F7 candidate and on the combined c5203be2 pruning/editor blob match exactly.",
+    "The final host run pinned FWUI 61827a71 and the test-source blobs in input-refs.json. All 88 native images match frames.json and the original bytes in frames.tar.gz."
+  ],
+  "source_blobs": {
+    "firmware/src/app/ui.c": "c5203be2a2c64286b0587f9ddded2936473d5e00",
+    "firmware/src/app/ui_original_controls.h": "eb1534e456311f15a70ea2bd7e44e22d7f292205"
+  },
+  "reference_generator_blob": "8721a0db9fd68fe6fa2c5cb48494de8b1b02549e",
+  "generated_caps": {
+    "T": [
+      2,
+      9
+    ],
+    "XS": [
+      3,
+      11
+    ]
+  },
+  "patch_off_preprocessed_parent_and_candidate": {
+    "bytes": 501548,
+    "sha256": "a98c9e5d8d8c55376dbb87dfcefcf14c06c0aec0ab3fe69cfbca101174e79bcc",
+    "scope": "Isolated conditional F7 contribution with the #975 production source before independent strip pruning. The separately integrated pruning changes compiled code by design."
+  },
+  "archive_sha256": "dafbb5b607f631176ed5cabf91d577a36b7575d0cad1465c5f8dd922a22227ab",
+  "frames_manifest_sha256": "204456594661b10582125446b66f8cbe23de74515f11bb0c6f02441bee1f07e3",
+  "provider_readback": {
+    "pr": 973,
+    "head": "a305021382739c5472321ae8fb682b6d232cdb57",
+    "commits_since_qualified_provider": 2,
+    "changed_files": 40,
+    "production_or_test_inputs_changed": 0
+  },
+  "fwui_source": "61827a714ca7b240c01a55ed347b5fd7b847c7c2",
+  "test_blobs": {
+    "qualify_fwui_s1.py": "d3782e75576a8088154e03b28abe4f436a1b3b29",
+    "ui_synthone_patch_test.c": "bfbc4cc8ba7914d3692777516bfe6d5349712a91",
+    "ui_synthone_frame_test.c": "e04ccc1edf98b8a365e60a839aefdc1404aa6246"
+  },
+  "reproduce": "python3 tests/host/qualify_fwui_s1.py /tmp/dnbox-f7-new --fwui 61827a714ca7b240c01a55ed347b5fd7b847c7c2 --test-ref HEAD --native-receipt docs/lanes/fwui/current/synthone-editor/native-replay.json",
+  "independent_geometry_negative": {
+    "mutation": "Filter widget y+21 to y+16",
+    "exit": 1,
+    "damaged_caption_pixels": 40652,
+    "affected_widget_states": 17317,
+    "total_states": 49152,
+    "evidence": "frame-review.json"
+  },
+  "qualified_source_tree": "b476f07ab234bbb683e4080712778781af7bb502",
+  "fresh_board_replay": "native-replay-result.json"
+}

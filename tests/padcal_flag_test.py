@@ -6,7 +6,7 @@ The test keeps the pad calibration module. It checks the flag itself:
 - app/x0x.h makes 1 the default, and tools/build.py passes X0X_DEV_PADCAL=0 or 1 from the environment.
 - With 0, the source after the #if X0X_DEV_PADCAL blocks (a small preprocessor that only knows this flag)
   has no pad calibration code in main_fm1.c, ui.c and plat_fm1.c: no padcal name, no "PAD COLOURS",
-  no "pad 1 top-left?", no apc40_pad_gamma.h. INLOG args 2-5 then go to the entries reply, as before CLP-79.
+  no "K2: TOP-LEFT PAD", no apc40_pad_gamma.h. INLOG args 2-5 then go to the entries reply, as before CLP-79.
 - With 1, the same files keep all of it (the padcal tests run on this form).
 The Elite builds of both flags: BUILDING.md (nm and strings, in the commit report)."""
 import re
@@ -68,7 +68,7 @@ owner_h = " ".join((SRC / "apc40_pad_owner.h").read_text().replace("*", " ").spl
 check("--pad-name APC40_PAD_OWNER writes the live pad table" in " ".join(pad_h.replace("*", " ").split()) and
       "in the dev and the release build" in owner_h,
       "app/apc40_pad_owner.h (generated): the owner-calibrated pad table is the pad table of both builds")
-BAD = re.compile(r"padcal|PAD COLOURS|pad 1 top-left|apc40_pad_gamma|apc40_pad_names|ACT_PADCAL|BOOST X|REAL LEVEL", re.I)
+BAD = re.compile(r"padcal|PAD COLOURS|pad 1 top-left|TOP-LEFT PAD|PLAY: CONFIRM|apc40_pad_gamma|apc40_pad_names|ACT_PADCAL|BOOST X|REAL LEVEL", re.I)
 for name in ("main_fm1.c", "ui.c", "plat_fm1.c"):
     text = (SRC / name).read_text()
     rel = strip(text, 0)

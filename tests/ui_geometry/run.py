@@ -8,6 +8,7 @@ all possible UI states, native memory fit, or the aggregate lane gate.
 import argparse,json,os,re,shutil,subprocess,sys
 from pathlib import Path
 from instrument import instrument
+from scan_text import scan
 sys.path.append(str(Path(__file__).resolve().parents[1]/"ui_defects/first_slice"))
 from screen_walk import validate as validate_frames
 from full_geometry import validate_audits
@@ -24,8 +25,10 @@ def run(source,output):
     env.pop('AUDIT_MUTATE_SKIP',None);env.pop('AUDIT_MUTATE_ZERO',None)
     for key in ('PIXEL_MUTATE_BLANK','PIXEL_MUTATE_SHIFT','PIXEL_MUTATE_OVERPAINT','ENVELOPE_MUTATE_CURVE','ENVELOPE_MUTATE_BLANK'):env.pop(key,None)
     for key in ('PRESENCE_MUTATE_VALUE','PRESENCE_MUTATE_GLYPH','PRESENCE_MUTATE_LIST','PRESENCE_MUTATE_SYNTH','PRESENCE_MUTATE_STRIP','PRESENCE_MUTATE_ENV_KNOB','PRESENCE_MUTATE_ENV_STAGE','PRESENCE_MUTATE_ENV_PERCENT','PRESENCE_MUTATE_ENV_MISSING'):env.pop(key,None)
+    env['FWUI_TEXT_TRACE']='1'
     with (output/'render.log').open('w') as log:
         result=subprocess.run(['sh','tests/host/smc_ui_test.sh'],cwd=work,env=env,stdout=log,stderr=subprocess.STDOUT,timeout=600)
+    env.pop('FWUI_TEXT_TRACE', None)
     # Validate actual output before any PASS or mutants: catches truncated walks,
     # failed PNG writes (including disk full), blank frames and wrong identities.
     inventory=validate_frames((output/'render.log').read_text(),output/'host',result.returncode)
@@ -72,6 +75,10 @@ def run(source,output):
             if mrun.returncode==0 or len(pm)!=1 or int(pm[0][1])+int(pm[0][2])==0:report['status']='FAIL'
             if key.startswith('ENVELOPE_'):
                 expected={prefix+f'view-01-part-00-voice-{voice:02d}-page-01' for voice in (0,1) for prefix in ('','edge-0-','edge-1-')}
+                # Both bound CP/MA stages belong to the SOUND bank. The KIT
+                # bank still shows the graphs but its active control is Accent.
+                expected.update(prefix+'view-01-part-01-voice-06-page-00'
+                                for prefix in ('','edge-0-','edge-1-'))
                 actual=set(re.findall(r'^GLYPH_PIXEL_MISSING screen=(\S+)',lp.read_text(),re.M))
                 report[key]['expectedGraphFailures']=sorted(expected)
                 report[key]['actualGraphFailures']=sorted(actual)
@@ -87,6 +94,12 @@ def run(source,output):
         gm=re.findall(r'^GEOMETRY findings=(\d+) screens=(\d+)$',lp.read_text(),re.M)
         report[key]={'exit':mrun.returncode,'auditRejected':rejected}
         if mrun.returncode!=0 or not rejected or len(gm)!=1 or int(gm[0][1])!=inventory['screens']:report['status']='FAIL'
+    with (output / 'render.log').open() as render_log:
+        visible = scan(render_log)
+    (output / 'screen-text.json').write_text(json.dumps(visible, indent=2) + '\n')
+    report['screenText'] = {key: value for key, value in visible.items() if key != 'screen_text'}
+    if visible['known_instructional_copy']:
+        report['status'] = 'FAIL'
     (output/'result.json').write_text(json.dumps(report,indent=2)+'\n');print(json.dumps(report));return 0 if report['status']=='PASS' else 1
 
 if __name__=='__main__':

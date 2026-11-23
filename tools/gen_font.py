@@ -12,8 +12,9 @@ alpha 0..15. Each glyph's packed bytes use lossless PackBits: a control byte
 0..127 introduces that many + 1 literal bytes; 128..255 repeats the following
 byte (control & 127) + 1 times. Glyph metrics and all coverage values are unchanged.
 """
-from collections import Counter
 import sys
+from collections import Counter
+from heapq import heapify, heappop, heappush
 from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont, features as PILFeatures
@@ -237,88 +238,107 @@ def pack_glyph_lz(raw):
     return out
 
 
-def pack_cropped_glyph(pixels, width, height):
+def crop_glyph(pixels, width, height):
     """Omit transparent borders only; keep original advances and bitmap metrics.
 
-    Three little-endian bytes hold x, y, width, height in six bits each.
-    Empty glyphs have a zero rectangle and no payload.
+    Return exact positioned alpha nibbles. Empty glyphs use a zero rectangle.
     """
     hits = [(x, y) for y in range(height) for x in range(width)
             if pixels[y * width + x]]
     if not hits:
-        return [0, 0, 0]
+        return (0, 0, 0, 0), []
     x0, y0 = min(x for x, y in hits), min(y for x, y in hits)
     w = max(x for x, y in hits) + 1 - x0
     h = max(y for x, y in hits) + 1 - y0
     assert all(0 <= v < 64 for v in (x0, y0, w, h))
-    rectangle = x0 | (y0 << 6) | (w << 12) | (h << 18)
-    raw = []
-    for y in range(y0, y0 + h):
-        row = pixels[y * width + x0:y * width + x0 + w] + [0]
-        raw.extend((row[x] << 4) | row[x + 1] for x in range(0, w, 2))
-    return [rectangle & 255, (rectangle >> 8) & 255, rectangle >> 16,
-            *pack_glyph_lz(raw)]
+    return (x0, y0, w, h), [pixels[y * width + x0:y * width + x0 + w] for y in range(y0, y0 + h)]
+
+def pack_cropped_glyph(pixels, width, height):
+    coords, rows = crop_glyph(pixels, width, height)
+    raw = [(row[x] << 4) | (row + [0])[x + 1] for row in rows for x in range(0, len(row), 2)]
+    rectangle = sum(v << (i * 6) for i, v in enumerate(coords))
+    return [*rectangle.to_bytes(3, "little"), *pack_glyph_lz(raw)]
+
+def up_context(rows):
+    for j, row in enumerate(rows):
+        for i, alpha in enumerate(row):
+            yield (rows[j-1][i] if j else 0), alpha
+
+def alpha_models(fonts):
+    freqs = [Counter({v: 0 for v in range(16)}) for _ in range(16)]
+    for name, h, glyphs in fonts:
+        if name == "L":  # This face is unlinked on stock; model still encodes all 16 symbols.
+            continue
+        for bw, pix in {(bw, tuple(g)) for _, bw, g in glyphs}:
+            for up, v in up_context(crop_glyph(pix, bw, h)[1]):
+                freqs[up][v] += 1
+    models = []
+    for freq in freqs:
+        q = [(n, (v,)) for v, n in freq.items()]
+        heapify(q)
+        lengths = Counter()
+        while len(q) > 1:
+            a, left = heappop(q); b, right = heappop(q)
+            lengths.update(left + right)
+            heappush(q, (a + b, left + right))
+        order = sorted(lengths, key=lambda v: (lengths[v], v))
+        code, prev, mapping = 0, 0, {}
+        for v in order:
+            n = lengths[v]
+            code <<= n - prev
+            mapping[v] = code, n
+            code += 1; prev = n
+        assert max(lengths.values()) <= 7
+        counts = [sum(lengths[v] == i for v in order) for i in range(1, 8)]
+        combined = [(order[i] << 4) | order[i + 1] for i in range(0, 16, 2)]
+        models.append((mapping, counts + combined))
+    return models
+
+def pack_cropped_alpha(pixels, width, height, models):
+    (x, y, w, h), rows = crop_glyph(pixels, width, height)
+    assert w <= 32
+    if x < 4 and y < 16 and w < 32 and h < 32:
+        rectangle = x | (y << 2) | (w << 6) | (h << 11)
+    else:
+        rectangle = 65535
+    if rectangle == 65535:
+        extended = x | (y << 6) | (w << 12) | (h << 18)
+        prefix = [255, 255, *extended.to_bytes(3, "little")]
+    else:
+        prefix = list(rectangle.to_bytes(2, "little"))
+    bits = used = 0
+    for up, v in up_context(rows):
+        code, n = models[up][0][v]
+        bits = (bits << n) | code; used += n
+        if used >= 8:
+            used -= 8
+            prefix.append(bits >> used)
+            bits &= (1 << used) - 1
+    if used:
+        prefix.append(bits << (8-used))
+    return prefix
 
 
-def entropy_codes(payloads):
-    """Encode byte ranks in eight prefix groups using four to ten bits each."""
-    counts = Counter(byte for data in payloads for byte in data)
-    symbols = sorted(range(256), key=lambda b: (-counts[b], b))
-    codes = {}
-    for rank, byte in enumerate(symbols):
-        group = max(0, rank.bit_length() - 1)
-        width = max(1, group)
-        base = 1 << group if group else 0
-        codes[byte] = (group | ((rank - base) << 3), 3 + width)
-    return symbols, codes
+def glyph_index16(offsets, advances):
+    """Return lossless index words, or None when legacy tables are required."""
+    assert len(offsets) == len(advances)
+    if not all(0 <= offset <= 2047 and 0 <= advance <= 31
+               for offset, advance in zip(offsets, advances)):
+        return None
+    return [offset | (advance << 11) for offset, advance in zip(offsets, advances)]
 
 
-def encode_glyphs(data, offsets, codes):
-    """Keep glyphs byte-addressable and bound the decoder's two-byte lookahead."""
-    starts = sorted(set(offsets))
-    ends = starts[1:] + [len(data)]
-    encoded, new_offsets = [], {}
-    for start, end in zip(starts, ends):
-        new_offsets[start] = len(encoded)
-        reservoir = bits = 0
-        for byte in data[start:end]:
-            word, width = codes[byte]
-            reservoir |= word << bits
-            bits += width
-            while bits >= 8:
-                encoded.append(reservoir & 255)
-                reservoir >>= 8
-                bits -= 8
-        if bits:
-            encoded.append(reservoir)
-    return encoded + [0, 0], [new_offsets[start] for start in offsets]
-
-
-def cap_alignment(data, offset, width, height):
-    """Preserve the preceding packed font's observed cap-line alignment.
-
-    The panel measured H (or 0 in the numeric face) from the stored bytes.
-    Record that existing layout before recoding the glyph payload.
-    """
-    stride = (width + 1) // 2
-    rows = []
-    for y in range(height):
-        for x in range(width):
-            index = offset + y * stride + x // 2
-            if index < len(data) and (data[index] >> (0 if x & 1 else 4)) & 15 >= 8:
-                rows.append(y)
-                break
-    return [rows[0], rows[-1]] if rows else [0, 0]
-
-
-def main(out, compressed=True, codec="crop-lz"):
-    assert codec in ("crop-lz", "packbits")
+def main(out, compressed=True, codec=None):
+    codec = codec or ("crop-alpha" if FONTSET == "barlow" else "crop-lz")
+    assert codec in ("crop-alpha", "crop-lz", "packbits")
     if not PILFeatures.check("raqm"):
         print("font renderer: Pillow has no libraqm; using centered tabular-digit metrics")
     lines = [f"/* generated by tools/gen_font.py: font set {FONTSET} */",
              "#pragma once", "#include <stdint.h>", f"#define FONT_PAD {PAD}  /* x scale for L, see below */", ""]
     if compressed:
-        lines.append("#define FONT_LZ_CROP 1" if codec == "crop-lz" else "#define FONT_PACKBITS 1")
+        lines.append({"crop-alpha": "#define FONT_ALPHA_CROP 1", "crop-lz": "#define FONT_LZ_CROP 1",
+                      "packbits": "#define FONT_PACKBITS 1"}[codec])
+    configs = []
     roles = []
     for name, ttf, px, scale, pixel, first, last in SIZES:
         h, glyphs = render(ttf, px, scale, pixel, first, last)
@@ -329,6 +349,35 @@ def main(out, compressed=True, codec="crop-lz"):
             glyphs = [glyphs[ord(fold.get(chr(first + i), chr(first + i).upper())) - first]
                       if (chr(first + i).islower() and chr(first + i) not in LOWER_KEEP) or chr(first + i) in fold
                       else g for i, g in enumerate(glyphs)]
+        configs.append((name, ttf, px, scale, first, last, h, glyphs))
+    models = None
+    if compressed and codec == "crop-alpha":
+        models = alpha_models((name, h, glyphs) for name, _, _, _, _, _, h, glyphs in configs)
+        prefixes, subtables = [], []
+        for mapping, _ in models:
+            direct = [0] * 128
+            for value, (code, length) in mapping.items():
+                for suffix in range(1 << (7-length)):
+                    direct[(code << (7-length)) | suffix] = (length << 4) | value
+            prefix = []
+            for i in range(16):
+                sub = direct[i*8:(i+1)*8]
+                if sub[0] >> 4 <= 4:
+                    assert len(set(sub)) == 1
+                    prefix.append(sub[0])
+                else:
+                    if sub not in subtables:
+                        subtables.append(sub)
+                    prefix.append(128 | subtables.index(sub))
+            prefixes.append(prefix)
+        assert len(subtables) < 128
+        for cname, table, width in [("FONT_ALPHA_PREFIX", prefixes, 16),
+                                     ("FONT_ALPHA_SUB", subtables, 8)]:
+            lines.append(f"static const uint8_t {cname}[{len(table)}][{width}] = {{")
+            for row in table:
+                lines.append("    {" + ", ".join(map(str, row)) + "},")
+            lines.append("};")
+    for name, ttf, px, scale, first, last, h, glyphs in configs:
         data, offs, seen = [], [], {}
         for adv, bw, g in glyphs:
             key = (bw, tuple(g))
@@ -342,39 +391,51 @@ def main(out, compressed=True, codec="crop-lz"):
                 row = g[y * bw:(y + 1) * bw] + [0]
                 for x in range(0, bw, 2):
                     raw.append((row[x] << 4) | row[x + 1])
-            data.extend((pack_cropped_glyph(g, bw, h) if codec == "crop-lz" else pack_glyph(raw))
-                        if compressed else raw)
+            data.extend(pack_cropped_alpha(g, bw, h, models) if models is not None
+                        else pack_cropped_glyph(g, bw, h) if compressed and codec == "crop-lz"
+                        else pack_glyph(raw) if compressed else raw)
+        if models is not None:
+            data.append(0)  # bounded seven-bit lookahead at the final glyph
         roles.append((name, ttf, px, h, scale, first, last, glyphs, data, offs))
-    entropy = compressed and codec == "crop-lz"
-    if entropy:
-        symbols, codes = entropy_codes(role[-2] for role in roles)
-        lines.append("#define FONT_ENTROPY 1")
-        lines.append("static const uint8_t font_symbols[256] = {" + ",".join(map(str, symbols)) + "};")
+    packed_indexes = {
+        role[0]: glyph_index16(role[-1], [a for a, _, _ in role[-3]]) for role in roles
+    }
+    pack_index = compressed and all(index is not None for index in packed_indexes.values())
+    if pack_index:
+        lines.append("#define FONT_INDEX16 1")
     for name, ttf, px, h, scale, first, last, glyphs, data, offs in roles:
-        if entropy:
-            cap = ord("H" if last >= ord("H") else "0") - first
-            alignment = cap_alignment(data, offs[cap], glyphs[cap][1], h)
-            data, offs = encode_glyphs(data, offs, codes)
-            data = alignment + data
-            offs = [offset + len(alignment) for offset in offs]
         assert len(data) < 65536
         lines.append(f"static const uint8_t FONT_{name}_DATA[{len(data)}] = {{")
         for i in range(0, len(data), 24):
             lines.append("    " + ", ".join(f"0x{b:02x}" for b in data[i:i + 24]) + ",")
         lines.append("};")
+        advances = [a for a, _, _ in glyphs]
+        advance_table = f"FONT_{name}_ADV"
+        if pack_index:
+            # Eleven exact offset bits plus the original five-bit advance.
+            offs = packed_indexes[name]
+            advance_table = "0"  # advance is in the same index word
+        else:
+            lines.append(f"static const uint8_t {advance_table}[{len(advances)}] = {{" +
+                         ", ".join(map(str, advances)) + "};")
         lines.append(f"static const uint16_t FONT_{name}_OFF[{len(offs)}] = {{" + ", ".join(map(str, offs)) + "};")
-        lines.append(f"static const uint8_t FONT_{name}_ADV[{len(glyphs)}] = {{" +
-                     ", ".join(str(a) for a, _, _ in glyphs) + "};")
         # A packed font may omit a redundant width array, never its metrics.
         # Some BDF/custom faces have independent advances: retain their table.
-        derived_bw = compressed and codec == "crop-lz" and all(
+        derived_bw = compressed and codec in ("crop-alpha", "crop-lz") and all(
             b == (a + 2 * PAD * scale if a else 0) for a, b, _ in glyphs)
         if not derived_bw:
             lines.append(f"static const uint8_t FONT_{name}_BW[{len(glyphs)}] = {{" +
                          ", ".join(str(b) for _, b, _ in glyphs) + "};")
         width_table = "0" if derived_bw else f"FONT_{name}_BW"
+        # Match the UI's half-coverage cap-line rule on the source raster.
+        # Numeric faces use zero, since they have no capital H.
+        metric_char = 'H' if first <= ord('H') <= last else '0'
+        _, metric_width, metric_pixels = glyphs[ord(metric_char) - first]
+        ink_rows = [y for y in range(h)
+                    if any(a >= 8 for a in metric_pixels[y * metric_width:(y + 1) * metric_width])]
+        cap_top, cap_bottom = (ink_rows[0], ink_rows[-1]) if ink_rows else (0, 0)
         lines.append(f"static const felucca_font_t FONT_{name} = {{ {h}, {PAD * scale}, {first}, {last}, "
-                     f"FONT_{name}_ADV, {width_table}, FONT_{name}_OFF, FONT_{name}_DATA }};")
+                     f"{advance_table}, {width_table}, FONT_{name}_OFF, FONT_{name}_DATA, {{ {cap_top}, {cap_bottom} }} }};")
         lines.append("")
         print(f"font {name}: {ttf} {px}px h {h}, digit adv {glyphs[ord('0') - first][0]}, {len(data)} B")
     print(f"font set {FONTSET}: {sum(len(l) for l in lines if l.startswith('    0x')) // 6} B (approx)")

@@ -15,7 +15,7 @@ if p.returncode:print(p.stdout[-5000:]);raise SystemExit(p.returncode)
 if 'PASS FX configured feedback' not in p.stdout:raise SystemExit('missing positive runtime completion')
 with tempfile.TemporaryDirectory(prefix='dnbox-fx-context-negative-') as tmp:
  source=(ROOT/'firmware/src/app/ui.c').read_text()
- good='    pref_value(PR(R_ENG,T_FX,0,FX_DL_FDBK),a,u);\n    put_s(put_s(t,a),u);'
+ good='    pref_value(PR(R_ENG,T_FX,0,delay ? FX_RV_DECAY : FX_DL_FDBK),a,u);\n    put_s(put_s(t,a),u);'
  old='    put_s(put_i(t,proj.sound.v[T_FX][0][FX_DL_FDBK]*100/127),"%");'
  if source.count(good)!=1:raise SystemExit('missing/duplicate physical formatter anchor')
  path=Path(tmp)/'ui.c';path.write_text(source.replace(good,old));p=run('old-raw-percent',path)

@@ -3,22 +3,42 @@
 /* Small-canvas renderer (no full framebuffer). Draw text/lines into
  * an off-screen strip, then blit it in one DMA transfer. Pixels are stored
  * byte-swapped (the panel takes RGB565 big-endian). */
+typedef struct { int8_t top, bot; } capm_t;
+
 typedef struct {               /* proportional, see tools/gen_font.py */
     uint8_t h;
     uint8_t pad;               /* bitmap starts this many pixels left of the pen */
     uint8_t first, last;
     const uint8_t *adv;        /* advance per glyph */
     const uint8_t *bw;         /* bitmap width per glyph (starts FONT_PAD left of the pen) */
-    const uint16_t *off;       /* byte offset of each glyph */
+    const uint16_t *off;       /* glyph offset, optionally with advance in its upper five bits */
     const uint8_t *data;
+    capm_t cap;                /* rows containing at least half-covered H (or 0) pixels */
 } felucca_font_t;
 #include "felucca_font.h"
+
+static inline uint32_t font_offset(const felucca_font_t *f, uint32_t gi)
+{
+#ifdef FONT_INDEX16
+    return f->off[gi] & 2047u;
+#else
+    return f->off[gi];
+#endif
+}
+static inline uint32_t font_advance(const felucca_font_t *f, uint32_t gi)
+{
+#ifdef FONT_INDEX16
+    return f->off[gi] >> 11;
+#else
+    return f->adv[gi];
+#endif
+}
 
 /* Null bw denotes a generation-verified advance+padding width. Zero-advance
  * blank glyphs retain zero width. Other font families keep their exact table. */
 static inline uint32_t font_bitmap_width(const felucca_font_t *f, uint32_t gi)
 {
-    uint32_t advance = f->adv[gi];
+    uint32_t advance = font_advance(f,gi);
     return f->bw ? f->bw[gi] : advance ? advance + 2u * f->pad : 0u;
 }
 
@@ -142,23 +162,64 @@ static void cv_rect(int32_t x, int32_t y, int32_t w, int32_t h, uint16_t c)
             cv_px[(uint32_t)y * cv_w + (uint32_t)i] = sc;
 }
 
+#if defined(__clang__) && !defined(X0X_HOST)
+__attribute__((minsize, noinline))
+#endif
+static void px_blend(int32_t x, int32_t y, uint16_t c, uint32_t a)
+{
+    uint16_t *q;
+    uint32_t bg;
+    y += cv_oy;
+    if ((uint32_t)x >= cv_w || y < cv_y0 || y >= cv_y1 || !a)
+        return;
+    q = &cv_px[(uint32_t)y * cv_w + (uint32_t)x];
+    if (a >= 16u) {
+        *q = swap16(c);
+        return;
+    }
+    bg = swap16(*q);
+    *q = swap16((uint32_t)(((((c >> 11) * a + (bg >> 11) * (16u - a)) >> 4) << 11) |
+                           (((((c >> 5) & 63u) * a + ((bg >> 5) & 63u) * (16u - a)) >> 4) << 5) |
+                           (((c & 31u) * a + (bg & 31u) * (16u - a)) >> 4)));
+}
+
+static int cv_abs(int value) { return value < 0 ? -value : value; }
+
+/* Integer 1 px strokes. Keep axis-aligned pixels solid. On a slope, the
+ * projected filter footprint spans at most three pixels on the minor axis. */
+#if defined(__clang__) && !defined(X0X_HOST)
+__attribute__((minsize, noinline))
+#endif
 static void cv_line(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint16_t c)
 {
-    int32_t dx = x1 > x0 ? x1 - x0 : x0 - x1, sx = x0 < x1 ? 1 : -1;
-    int32_t dy = y1 > y0 ? y0 - y1 : y1 - y0, sy = y0 < y1 ? 1 : -1;
-    int32_t err = dx + dy, guard = 2000;
-    while (guard--) {                       /* bounded: a line is never longer than 480 px */
-        int32_t e2 = 2 * err;               /* both tests use the same error value */
-        cv_pset(x0, y0, c);
-        if (x0 == x1 && y0 == y1)
-            break;
-        if (e2 >= dy) {
-            err += dy;
-            x0 += sx;
-        }
-        if (e2 <= dx) {
-            err += dx;
-            y0 += sy;
+    int dx = x1 - x0, dy = y1 - y0;
+    if (!dx || !dy) {
+        cv_rect(dx < 0 ? x1 : x0, dy < 0 ? y1 : y0,
+                cv_abs(dx) + 1, cv_abs(dy) + 1, c);
+        return;
+    }
+    int steep = cv_abs(dy) > cv_abs(dx);
+    int major = steep ? y0 : x0, end = steep ? y1 : x1;
+    int minor = steep ? x0 : y0, last = steep ? x1 : y1;
+    if (major > end) {
+        int m = major;
+        major = end;
+        end = m;
+        m = minor;
+        minor = last;
+        last = m;
+    }
+    int n = end - major;
+    int advance = ((last - minor) * 65536) / n;
+    int falloff = 16 - cv_abs(advance) / 16384;
+    int p = minor * 65536;
+    for (int i = 0; i <= n && i < 2000; i++, p += advance) {
+        int at = i == n ? last : (p + 32768) >> 16;
+        int delta = i == n ? 0 : p - at * 65536;
+        for (int off = -1; off <= 1; off++) {
+            int alpha = 16 - ((cv_abs(delta - off * 65536) * falloff + 32768) >> 16);
+            if (alpha > 0)
+                px_blend(steep ? at + off : major + i, steep ? major + i : at + off, c, (uint32_t)alpha);
         }
     }
 }
@@ -174,32 +235,26 @@ static uint32_t glyph(const felucca_font_t *f, uint32_t ch)
     return ch - f->first;
 }
 
-/* text in colour c, each pixel's coverage blended over what is already on the canvas (an
- * anti-aliased face on a coloured box gets no dark fringe); returns the end x */
-#ifdef FONT_ENTROPY
-typedef struct {
-    const uint8_t *next;
-    uint32_t word, bits;
-} font_stream_t;
-
-/* Each three-bit group identifies a power-of-two range of byte ranks. The
- * generator appends two guard bytes for the last glyph's lookahead. */
-static inline uint32_t font_byte(font_stream_t *s)
+#if defined(FONT_ALPHA_CROP) || defined(FONT_LZ_CROP)
+/* Internal normalized crop descriptor, consumed by both the painter and its tests. */
+static uint32_t font_crop_read(const uint8_t **gp)
 {
-    while (s->bits < 10u) {
-        s->word |= (uint32_t)*s->next++ << s->bits;
-        s->bits += 8u;
+    const uint8_t *d=*gp;
+#ifdef FONT_ALPHA_CROP
+    uint32_t n=(uint32_t)d[0]|((uint32_t)d[1]<<8);
+    d+=2;
+    if(n!=65535u) {
+        *gp=d;
+        return (n&3u)|((n&60u)<<4)|((n&1984u)<<6)|((n&63488u)<<7);
     }
-    uint32_t group = s->word & 7u;
-    uint32_t width = group ? group : 1u;
-    uint32_t base = group ? 1u << group : 0u;
-    uint32_t rank = base + ((s->word >> 3) & ((1u << width) - 1u));
-    s->word >>= 3u + width;
-    s->bits -= 3u + width;
-    return font_symbols[rank];
+#endif
+    *gp=d+3;
+    return d[0]|((uint32_t)d[1]<<8)|((uint32_t)d[2]<<16);
 }
 #endif
 
+/* text in colour c, each pixel's coverage blended over what is already on the canvas (an
+ * anti-aliased face on a coloured box gets no dark fringe); returns the end x */
 static int32_t cv_text_clip(int32_t x, int32_t y, const felucca_font_t *f, const char *s, uint16_t c, int32_t clip_left, int32_t clip_right)
 {
     uint32_t r = c >> 11, g = (c >> 5) & 63u, b = c & 31u;
@@ -207,7 +262,10 @@ static int32_t cv_text_clip(int32_t x, int32_t y, const felucca_font_t *f, const
     for (; *s; s++) {
         uint32_t gi = glyph(f, (uint8_t)*s), gx, gy, w, height = f->h;
         uint32_t crop_x = 0, crop_y = 0;
-#ifdef FONT_LZ_CROP
+#if defined(FONT_ALPHA_CROP)
+        uint8_t above[32] = {0};
+        uint32_t code_bits=0, code_left=0;
+#elif defined(FONT_LZ_CROP)
         uint8_t history[256];
         uint32_t written = 0, left = 0, distance = 0, byte = 0;
 #elif defined(FONT_PACKBITS)
@@ -216,44 +274,49 @@ static int32_t cv_text_clip(int32_t x, int32_t y, const felucca_font_t *f, const
         uint32_t bpr;
 #endif
         const uint8_t *gd;
-        w = font_bitmap_width(f, gi);
-#if !defined(FONT_PACKBITS) && !defined(FONT_LZ_CROP)
-        bpr = (w + 1u) / 2u;
-#endif
-        gd = f->data + f->off[gi];
-#ifdef FONT_LZ_CROP
-#ifdef FONT_ENTROPY
-        font_stream_t stream = {gd, 0, 0};
-#define FONT_BYTE() font_byte(&stream)
-#else
-#define FONT_BYTE() (*gd++)
-#endif
-        uint32_t rectangle = FONT_BYTE();
-        rectangle |= FONT_BYTE() << 8;
-        rectangle |= FONT_BYTE() << 16;
+        gd = f->data + font_offset(f,gi);
+#if defined(FONT_ALPHA_CROP) || defined(FONT_LZ_CROP)
+        uint32_t rectangle = font_crop_read(&gd);
         crop_x = rectangle & 63u;
         crop_y = (rectangle >> 6) & 63u;
         w = (rectangle >> 12) & 63u;
         height = rectangle >> 18;
+#else
+        w = font_bitmap_width(f, gi);
+#ifndef FONT_PACKBITS
+        bpr = (w + 1u) / 2u;
+#endif
 #endif
         for (gy = 0; gy < height; gy++)
             for (gx = 0; gx < w; gx++) {
                 uint32_t a;
-#ifdef FONT_LZ_CROP
+#if defined(FONT_ALPHA_CROP)
+                /* Per-glyph bitstream; exact alpha uses the already decoded previous
+                 * row only. Generated codebooks cover all values in at most 7 bits. */
+                if (code_left < 7u) {
+                    code_bits=(code_bits<<8)|*gd++;
+                    code_left+=8u;
+                }
+                uint32_t peek=(code_bits>>(code_left-7u))&127u;
+                uint32_t entry=FONT_ALPHA_PREFIX[above[gx]][peek>>3];
+                if (entry&128u) entry=FONT_ALPHA_SUB[entry&127u][peek&7u];
+                code_left-=entry>>4;
+                a=entry&15u;
+                above[gx]=(uint8_t)a;
+#elif defined(FONT_LZ_CROP)
                 /* Generated streams never reference before their own glyph;
                  * the ring is bounded and needs no clear or shared state. */
                 if (!(gx & 1u)) {
                     if (!left) {
-                        uint32_t token = FONT_BYTE();
-                        distance = token & 128u ? FONT_BYTE() : 0;
+                        uint32_t token = *gd++;
+                        distance = token & 128u ? *gd++ : 0;
                         left = (token & 127u) + (distance ? 3u : 1u);
                     }
-                    byte = distance ? history[(written - distance) & 255u] : FONT_BYTE();
+                    byte = distance ? history[(written - distance) & 255u] : *gd++;
                     history[written++ & 255u] = (uint8_t)byte;
                     left--;
                 }
                 a = byte;
-#undef FONT_BYTE
 #elif defined(FONT_PACKBITS)
                 /* Decode one byte per pixel pair; odd-width rows discard their
                  * padding nibble exactly as the original bitmap reader did. */
@@ -274,7 +337,9 @@ static int32_t cv_text_clip(int32_t x, int32_t y, const felucca_font_t *f, const
                 a = gd[gy * bpr + gx / 2u];
 #endif
                 int32_t px = x - f->pad + (int32_t)(gx + crop_x), py = y + (int32_t)(gy + crop_y) + cv_oy;
+#ifndef FONT_ALPHA_CROP
                 a = (gx & 1u) ? (a & 15u) : (a >> 4);
+#endif
                 if (!a || px < clip_left || px >= clip_right || (uint32_t)px >= cv_w || py < cv_y0 || py >= cv_y1)
                     continue;
                 if (a == 15u) {
@@ -287,7 +352,7 @@ static int32_t cv_text_clip(int32_t x, int32_t y, const felucca_font_t *f, const
                     cv_px[(uint32_t)py * cv_w + (uint32_t)px] = swap16((nr << 11) | (ng << 5) | nb);
                 }
             }
-        x += f->adv[gi];
+        x += font_advance(f,gi);
     }
     return x;
 }
@@ -299,7 +364,7 @@ static int32_t text_w(const felucca_font_t *f, const char *s)
 {
     int32_t w = 0;
     for (; *s; s++)
-        w += f->adv[glyph(f, (uint8_t)*s)];
+        w += font_advance(f,glyph(f, (uint8_t)*s));
     return w;
 }
 

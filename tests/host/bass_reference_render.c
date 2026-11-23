@@ -3,7 +3,6 @@
  * public control readbacks in ID order for a custom instrument stimulus. */
 #include "app/original_runtime.h"
 #include "chicago_fx2_compact.h"
-#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -22,38 +21,18 @@ int main(int argc, char **argv)
     else if (!strcmp(argv[1], "chicago")) kind = ORIGINAL_SOUND_CHICAGO;
     else return 2;
     char *end;
-    unsigned long program;
+    unsigned long program = strtoul(argv[2], &end, 10);
     unsigned count = original_sound_count(kind);
-    int factory = argc == 7 && !strcmp(argv[3], "--factory");
-    float bpm = 120.f;
-    if (factory) {
-        /* AU manifests sort programs alphabetically. Saved product indices and
-         * native Chicago indices use different orders. Match the actual name. */
-        for (program = 0; program < original_sound_factories(kind); ++program)
-            if (!strcmp(argv[2], original_sound_name(kind, program))) break;
-        if (program == original_sound_factories(kind)) return 2;
-        bpm = strtof(argv[4], &end);
-        if (!*argv[4] || *end || !isfinite(bpm) || bpm < 20.f || bpm > 400.f ||
-            (strcmp(argv[5], "stored") && strcmp(argv[5], "arp-off")) ||
-            (strcmp(argv[6], "stored") && strcmp(argv[6], "bypass"))) return 2;
-    } else {
-        program = strtoul(argv[2], &end, 10);
-        if (!*argv[2] || *end || program >= original_sound_factories(kind) ||
-            (argc != 3 && (unsigned)argc != 3 + count)) return 2;
-    }
+    if (!*argv[2] || *end || program >= original_sound_factories(kind) ||
+        (argc != 3 && (unsigned)argc != 3 + count)) return 2;
 
     uint8_t cell[ORIGINAL_SOUND_BYTES];
     if (!original_sound_init(cell, kind, (unsigned)program) ||
         !original_chicago_tuning_bind(&tuning, 0, 0, NULL, 0x6d70) ||
         !original_chicago_fx2_compact_init(&fx)) return 1;
     original_chicago_fx2_cold_owner owner = original_chicago_fx2_compact_owner(&fx);
-    if (original_runtime_init(&part, cell, bpm, &tuning, &owner) != ORIGINAL_RUNTIME_OK) return 1;
-    if (factory && !strcmp(argv[5], "arp-off") && kind == ORIGINAL_SOUND_CHICAGO &&
-        original_runtime_param(&part, 13, 0.f) != ORIGINAL_RUNTIME_OK) return 1;
-    if (factory && !strcmp(argv[6], "bypass") &&
-        original_runtime_param(&part, kind == ORIGINAL_SOUND_CHICAGO ? ORIGINAL_CHICAGO_FX_TYPE : 10,
-                               0.f) != ORIGINAL_RUNTIME_OK) return 1;
-    for (int i = 3; !factory && i < argc; ++i) {
+    if (original_runtime_init(&part, cell, 120.f, &tuning, &owner) != ORIGINAL_RUNTIME_OK) return 1;
+    for (int i = 3; i < argc; ++i) {
         float value = strtof(argv[i], &end);
         if (!*argv[i] || *end || original_runtime_param(&part, (unsigned)(i - 3), value) != ORIGINAL_RUNTIME_OK)
             return 1;
@@ -86,7 +65,7 @@ int main(int argc, char **argv)
     if (kind == ORIGINAL_SOUND_CHICAGO && original_runtime_all_off(&part) != ORIGINAL_RUNTIME_OK) return 1;
     unsigned event = 0, cut = 0;
     for (unsigned cursor = 0; cursor < frames;) {
-        if (original_runtime_prepare(&part, bpm) != ORIGINAL_RUNTIME_OK) return 1;
+        if (original_runtime_prepare(&part, 120.f) != ORIGINAL_RUNTIME_OK) return 1;
         while (event < events && ticks[event] == cursor) {
             if (original_runtime_key(&part, ORIGINAL_INPUT_SEQUENCE, keys[event], velocities[event]) != ORIGINAL_RUNTIME_OK)
                 return 1;

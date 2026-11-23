@@ -37,7 +37,7 @@ int main(void)
 
     btn(B_SAVE, 1);
     tick(300);
-    CHECK(strcmp(ui.msg, "CHOOSE PASTE TARGET") == 0, "holding SAVE must not claim a snapshot was copied");
+    CHECK(strcmp(ui.msg, "PASTE TARGET") == 0, "holding SAVE must not claim a snapshot was copied");
     seq.ppat[PART_909] = 2;
     seq.ppat[PART_808] = 3;
     key(WHITE_KEY[1], 1); /* empty P2: copy the now-live, mixed sources */

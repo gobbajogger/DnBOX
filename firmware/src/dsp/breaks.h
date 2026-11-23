@@ -67,11 +67,10 @@ typedef struct {
     float g, dg;                      /* crossfade gain and its per-sample slope */
     uint32_t lo, hi;                  /* reverse: wraps within [lo, hi) (the slice) */
     uint32_t rbase;                   /* reverse: rbuf holds samples rbase .. rbase + BRK_RCH - 1 */
-    uint8_t rvalid;
-    int8_t interpolate_mask;          /* 0 for original programmed rolls, -1 otherwise */
-    uint8_t rsv[2];
+    float hit_gain;                   /* latched strike amplitude, independent of the fade and part level */
     int16_t rbuf[BRK_RCH];
-    brk_ima_t seek_state;             /* before previous adjacent reverse-cache block */
+    int16_t seek_pred;                /* decoder state before previous adjacent reverse-cache block */
+    uint8_t seek_idx, rvalid;
     uint32_t seek_pos;               /* UINT32_MAX when no saved boundary is valid */
 } brk_voice_t;
 
@@ -107,7 +106,7 @@ typedef struct breaks {
     float sp16;                       /* output samples per 16th, from the sequencer */
     float spt;                        /* output samples per trigger */
     int32_t trig_left;                /* samples to a pending mid-16th trigger (1/4 bar length) */
-    uint8_t step_on;                  /* this step's enable bit */
+    uint8_t step_on, step_velocity;   /* step gate and strike velocity for scheduled triggers */
 
     /* retrigger (BB Gen's sub-slice) */
     uint8_t sub_div, sub_count;
@@ -120,6 +119,7 @@ typedef struct breaks {
                                        * is shut its voices stop; the next trigger starts them again */
 
     /* Slice ownership and legacy macro bits are independent; applied by audio. */
+    uint8_t sub_velocity;            /* velocity of the hit that scheduled the subdivisions */
     volatile uint8_t local_guard; /* pin/live gesture count-change admission */
     volatile uint32_t slices;
     uint32_t slices_seen;
@@ -150,6 +150,8 @@ void breaks_flush(breaks_t *b);                /* publish a loop change that wai
 void breaks_drop_range(breaks_t *b, const uint8_t *base, uint32_t nbytes); /* samples at base are going away */
 const brk_bank_t *breaks_bank(const breaks_t *b, int which); /* the published loop, for the screen */
 void breaks_step(breaks_t *b, int step16, int bar, float samples_per_16th, int enabled);
+void breaks_step_velocity(breaks_t *b, int step16, int bar, float samples_per_16th, int enabled,
+                          uint8_t velocity); /* 0..127; 127 retains the original amplitude */
 void breaks_pin(breaks_t *b, int slice);           /* next step: stored A slice0..31 resolved modulo count; -1 generator */
 void breaks_stop(breaks_t *b);
 void breaks_live(breaks_t *b, int key, int down);  /* 0-7 hold slice of A, 8 reverse, 9 jungle stretch, 10 stutter */

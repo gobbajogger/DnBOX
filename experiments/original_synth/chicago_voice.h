@@ -29,6 +29,10 @@ typedef struct {
  float fine_tune[4];
 } original_chicago_voice_pitch_controls;
 typedef struct {
+ float level[4],output,pan;
+ uint8_t curve,unison_flag,ms20;
+} original_chicago_voice_gain_controls;
+typedef struct {
  original_chicago_voice_pitch_controls pitch;
  original_chicago_voice_gain_controls gain;
  original_chicago_routing routing;
@@ -43,15 +47,11 @@ typedef struct {
  * Outer ARP/FX/master endpoints remain explicit in routing; they are not
  * silently applied per voice. No getters/conversions in the audio sample path. */
 int original_chicago_voice_compile(original_chicago_voice_controls *out,const original_chicago_program *program);
-/* Incremental oscillator mix, bend or cutoff edit of an initialized corresponding snapshot.
+/* Incremental bend/cutoff edit of an initialized corresponding snapshot.
  * Program must differ only by the named program_set edit. Other edits, an
  * unready snapshot or a revision gap use full compilation. Failure is atomic. */
 int original_chicago_voice_recompile(original_chicago_voice_controls *out,
  const original_chicago_program *program,unsigned macro);
-/* The owner verified every mapped target is bit-identical to the preceding
- * snapshot. Preserve revision and validation even for a repeated edit. */
-int original_chicago_voice_recompile_unchanged(original_chicago_voice_controls *out,
- const original_chicago_program *program);
 typedef struct {float phase,unipolar,bipolar,hold;uint32_t noise;uint8_t wrapped;} original_chicago_voice_mg;
 typedef struct {
  uint32_t oscillator_phase[4],noise;

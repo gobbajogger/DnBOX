@@ -20,32 +20,8 @@
 #define ORIGINAL_SOUND_SCHEMA 2u
 #define ORIGINAL_CHICAGO_FACTORIES 81u
 #define ORIGINAL_SYNTHONE_FACTORIES 1u
-#define ORIGINAL_SYNTHONE_NPARAMS 24u
-#define ORIGINAL_SYNTHONE_BASE_COUNT 6u
-enum {
-    ORIGINAL_SYNTHONE_TREM = ORIGINAL_SYNTHONE_BASE_COUNT,
-    ORIGINAL_SYNTHONE_LFO1_SHAPE, ORIGINAL_SYNTHONE_LFO1_LEVEL, ORIGINAL_SYNTHONE_LFO1_RATE,
-    ORIGINAL_SYNTHONE_LFO2_SHAPE, ORIGINAL_SYNTHONE_LFO2_LEVEL, ORIGINAL_SYNTHONE_LFO2_RATE,
-    ORIGINAL_SYNTHONE_PHASER_MIX, ORIGINAL_SYNTHONE_PHASER_RATE,
-    ORIGINAL_SYNTHONE_PHASER_FEEDBACK, ORIGINAL_SYNTHONE_PHASER_WIDTH,
-    ORIGINAL_SYNTHONE_MASTER_VOLUME, ORIGINAL_SYNTHONE_MASTER_RATIO, ORIGINAL_SYNTHONE_MASTER_THRESHOLD,
-    ORIGINAL_SYNTHONE_MASTER_ATTACK, ORIGINAL_SYNTHONE_MASTER_RELEASE, ORIGINAL_SYNTHONE_MASTER_MAKEUP,
-    ORIGINAL_SYNTHONE_CRUSH_LFO
-};
-static inline int original_sound_s1_master_id(unsigned id)
-{ return id >= ORIGINAL_SYNTHONE_MASTER_VOLUME && id <= ORIGINAL_SYNTHONE_MASTER_MAKEUP; }
-/* A master edit claims seven bytes in the owner's auxiliary row. The main
- * cell explicitly binds that row; historical project padding stays inert. */
-enum { S1_MASTER_EXT_SIZE=7 };
-float s1_master_control(unsigned slot,unsigned pot);
-int original_master_valid(const uint8_t *cell,const uint8_t *ext);
-unsigned original_master_display(const uint8_t *cell,const uint8_t *ext,unsigned id);
-int original_sound_set_extended(uint8_t *cell,uint8_t *ext,unsigned id,unsigned value);
+#define ORIGINAL_SYNTHONE_NPARAMS 3u
 #define ORIGINAL_SYNTHONE_CRUSH 2u
-#define ORIGINAL_SYNTHONE_WIDTH 3u
-#define ORIGINAL_SYNTHONE_PAN 4u
-#define ORIGINAL_SYNTHONE_PAN_RATE 5u
-#define ORIGINAL_SYNTHONE_PAN_RATE_INIT 3u
 #define ORIGINAL_SYNTHONE_INIT_FACTORY 0u
 #define ORIGINAL_CHICAGO_FX_CHOICES 12u
 
@@ -68,14 +44,14 @@ static inline int original_sound_is_performance(unsigned kind, unsigned paramete
 /* New firmware patch representation, not a legacy bank decoder:
  * [0..21] macro display bytes; [22..25] LE edit mask; [26..27] 'OS'; [28] version;
  * [29] engine kind; [30] selected factory index; [31] zero, or one for a
- * Synth One cell with stock effect edits, distinguishing historical cells.
+ * Synth One cell with an edited crush rate, distinguishing historical cells.
  * Chicago indexes all 81 programs (the 55 compact ones first, then the 26
  * restored-insert ones) and FxType stores a twelve-choice index.
  * Kind 2 is Synth One. New writes use persistent id OS11. Historical id
  * 0x4F445231 and historical 8-parameter kind-2 cells load as the Synth One
  * init cell (factory 0); they are never written back. No song-layout change.
  * With X0X_SYNTHONE_PATCH enabled, bytes/bits 8..20 hold native INIT
- * edits in descriptor order. Stock refuses these edited cells. Untouched
+ * edits in descriptor order. Builds with X0X_SYNTHONE_PATCH disabled refuse these edited cells. Untouched
  * cells retain their historical 32 bytes and exact INIT values.
  * The original engines still map to their original selectors; schema1 is refused.
  * Untouched controls come from the immutable binary32 factory data, never
@@ -116,7 +92,6 @@ const char *original_sound_fx_name(unsigned choice);
 uint32_t original_sound_engine_id(unsigned kind);
 const char *original_sound_name(unsigned kind, unsigned factory);
 const x0x_param_t *original_sound_param(unsigned kind, unsigned parameter);
-unsigned original_sound_s1_display(const uint8_t cell[ORIGINAL_SOUND_BYTES], unsigned parameter);
 int original_sound_valid(const uint8_t cell[ORIGINAL_SOUND_BYTES]);
 int original_sound_init(uint8_t cell[ORIGINAL_SOUND_BYTES], unsigned kind, unsigned factory);
 int original_sound_set(uint8_t cell[ORIGINAL_SOUND_BYTES], unsigned parameter, unsigned value);

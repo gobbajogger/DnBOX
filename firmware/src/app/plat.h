@@ -22,13 +22,6 @@
 #define X0X_XPOOL __attribute__((section(".xpool")))
 #endif
 
-/* Reserved application SRAM beyond the SMK BLE host's 4 KiB window. */
-#if X0X_HIGH_AUDIO_RAM && !defined(X0X_HOST)
-#define X0X_AUDIOHIGH __attribute__((section(".audiohigh")))
-#else
-#define X0X_AUDIOHIGH X0X_POOL
-#endif
-
 /* CQ replacement: exclude only its audio-ISR consumer, preserving an already
  * disabled source. Host app simulation is single-threaded; interleaving tests
  * supply a source-mask model when extracting the production queue. */

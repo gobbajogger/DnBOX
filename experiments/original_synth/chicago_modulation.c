@@ -1,16 +1,6 @@
 /* SPDX-License-Identifier: GPL-3.0-only */
 #include "chicago_modulation.h"
 #include "chicago_chorus_span.h"
-#if !defined(ORIGINAL_MODULATION_COEFFICIENTS)
-#include "linear_control.h"
-#define linear_control(value) original_linear_control(value)
-#define chorus_feedback(value) original_chorus_feedback(value)
-#define chorus_wet(value) original_chorus_wet(value)
-#else
-#define linear_control(value) mod_linear[(value)]
-#define chorus_feedback(value) mod_feedback[(value)]
-#define chorus_wet(value) mod_wet[(value)]
-#endif
 #ifndef ORIGINAL_MODULATION_COEFFICIENTS
 #define ORIGINAL_MODULATION_COEFFICIENTS "modulation_private.h"
 #endif
@@ -45,13 +35,13 @@ void original_chicago_ring_init(original_chicago_ring *s){
  memset(s,0,sizeof *s);
  s->edit1=s->edit2=64;
  s->dirty=1;
- s->pending_frequency=asr(linear_control(64)*3,3);s->pending_wet=linear_control(64);
+ s->pending_frequency=asr(mod_linear[64]*3,3);s->pending_wet=mod_linear[64];
 }
 void original_chicago_ring_reset(original_chicago_ring *s){if(s){s->frequency_acc=shl(s->frequency,15);s->wet_acc=shl(s->wet,15);s->phase=0;}}
 int original_chicago_ring_set(original_chicago_ring *s,unsigned p,unsigned v){
  if(!s||v>127||(p!=2&&p!=3))return 0;
  if(p==2)s->edit1=(uint8_t)v;else s->edit2=(uint8_t)v;
- s->pending_frequency=asr(linear_control(s->edit1)*3,3);s->pending_wet=linear_control(s->edit2);s->dirty=1;return 1;
+ s->pending_frequency=asr(mod_linear[s->edit1]*3,3);s->pending_wet=mod_linear[s->edit2];s->dirty=1;return 1;
 }
 int original_chicago_ring_process(original_chicago_ring *s,int16_t *l,int16_t *r,uint32_t n){
  if(!s||(n&&(!l||!r||l==r)))return 0;
@@ -90,7 +80,7 @@ int original_chicago_chorus_set(original_chicago_chorus *s,unsigned p,unsigned v
  if(!s||v>127||(p!=2&&p!=3))return 0;
  if(p==2)s->edit1=(uint8_t)v;
  else s->edit2=(uint8_t)v;
- s->pending_speed=mod_speed[s->edit1];s->pending_feedback=chorus_feedback(s->edit2);s->pending_wet=chorus_wet(s->edit2);s->dirty=1;return 1;
+ s->pending_speed=mod_speed[s->edit1];s->pending_feedback=mod_feedback[s->edit2];s->pending_wet=mod_wet[s->edit2];s->dirty=1;return 1;
 }
 static int32_t feedback_twice(int32_t y){int32_t a=sub(shl(y,1),shl(y,15));for(unsigned j=0;j<2;j++)a=sub(shl(asr(a,15),1),si((uint32_t)a&0xffff8000u));return asr(a,15);}
 int original_chicago_chorus_process(original_chicago_chorus *s,int16_t *l,int16_t *r,uint32_t n){
@@ -120,8 +110,8 @@ void original_chicago_phaser_init(original_chicago_phaser *s){
  s->edit1=30;
  s->edit2=63;
  s->speed=mod_speed[30];
- s->modulation=asr(mul(linear_control(63),16102),15);
- int32_t x=asr(sub(shl(linear_control(120),15),linear_control(120)),15);s->depth=(int32_t)((uint32_t)mul(x,x)>>15);s->feedback=asr(mul(mod_ph_feedback[40],32440),15);s->wet=linear_control(64);
+ s->modulation=asr(mul(mod_linear[63],16102),15);
+ int32_t x=asr(sub(shl(mod_linear[120],15),mod_linear[120]),15);s->depth=(int32_t)((uint32_t)mul(x,x)>>15);s->feedback=asr(mul(mod_ph_feedback[40],32440),15);s->wet=mod_linear[64];
 }
 void original_chicago_phaser_reset(original_chicago_phaser *s){
  if(!s)return;
@@ -134,7 +124,7 @@ void original_chicago_phaser_reset(original_chicago_phaser *s){
 }
 int original_chicago_phaser_set(original_chicago_phaser *s,unsigned p,unsigned v){
  if(!s||v>127||(p!=2&&p!=3))return 0;
- if(p==2){s->edit1=(uint8_t)v;s->speed=mod_speed[v];}else{s->edit2=(uint8_t)v;s->modulation=asr(mul(linear_control(v),16102),15);}
+ if(p==2){s->edit1=(uint8_t)v;s->speed=mod_speed[v];}else{s->edit2=(uint8_t)v;s->modulation=asr(mul(mod_linear[v],16102),15);}
  return 1;
 }
 int original_chicago_phaser_process(original_chicago_phaser *s,int16_t *l,int16_t *r,uint32_t n){

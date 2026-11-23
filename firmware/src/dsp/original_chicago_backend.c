@@ -3,7 +3,7 @@
 #include "binary32_classify.h"
 #include "binary32_math.h"
 #include "chicago_packed.h"
-#include "motion_tables_private.h"
+#include "original_backend_pitch.h"
 #include <string.h>
 
 #define BACKEND_READY UINT32_C(0x43484231)
@@ -113,10 +113,9 @@ static int initialize(original_chicago_backend *s, unsigned factory,
     s->factory = factory;
     s->fz = fz;
     s->program = program;
-    s->coefficient_cache.index = UINT32_MAX;
     if (!original_chicago_voice_compile(&s->controls, &s->program) ||
-        !original_chicago_voice_tables_bind(&s->tables, original_chicago_packed_cached,
-            &s->coefficient_cache, ORIGINAL_FACTORY_PITCH_44100)) return s->status;
+        !original_chicago_voice_tables_bind(&s->tables, original_chicago_packed_lookup,
+            NULL, original_backend_pitch44100())) return s->status;
 
     original_chicago_voice_seed seed;
     memset(&seed, 0, sizeof seed);
@@ -432,10 +431,8 @@ static int end_admitted(original_chicago_backend *s, float *left, float *right, 
         original_chicago_engine_output_process_zero : original_chicago_engine_output_process;
     if (!output(&s->output, &ow, &fw, &s->controls.routing,
         w->core_left, w->core_right, w->core_left, w->core_right, s->block_frames, s->fz)) return fault(s);
-    if (left) {
-        memcpy(left, w->core_left, sizeof *left * s->block_frames);
-        memcpy(right, w->core_right, sizeof *right * s->block_frames);
-    }
+    memcpy(left, w->core_left, sizeof *left * s->block_frames);
+    memcpy(right, w->core_right, sizeof *right * s->block_frames);
     s->block_open = 0;
     s->block_prepared = 0;
     s->block_frames = 0;
@@ -451,14 +448,14 @@ int original_chicago_backend_end(original_chicago_backend *s, float *left, float
     return end_admitted(s, left, right, 0);
 }
 
-static int render_block(original_chicago_backend *s,
+int original_chicago_backend_render(original_chicago_backend *s,
     original_chicago_backend_workspace *w, const original_engine_event *events,
-    uint32_t count, float *left, float *right, uint32_t frames, int in_place)
+    uint32_t count, float *left, float *right, uint32_t frames)
 {
     if (!running(s)) return unavailable(s);
     if (s->block_open) return ORIGINAL_CHICAGO_BACKEND_INVALID;
     if (!frames) return count ? ORIGINAL_CHICAGO_BACKEND_INVALID : ORIGINAL_CHICAGO_BACKEND_OK;
-    if (!workspace_valid(w, frames) || (!in_place && !outputs_valid(w, left, right, frames)))
+    if (!workspace_valid(w, frames) || !outputs_valid(w, left, right, frames))
         return ORIGINAL_CHICAGO_BACKEND_INVALID;
     /* The serial whole-block entry has already admitted workspace/output
      * geometry. Public begin/end remain checked for split-frame callers. */
@@ -547,16 +544,4 @@ static int render_block(original_chicago_backend *s,
         if (result != ORIGINAL_CHICAGO_BACKEND_OK) return result;
     }
     return end_admitted(s, left, right, 0);
-}
-
-int original_chicago_backend_render(original_chicago_backend *s, original_chicago_backend_workspace *w,
-    const original_engine_event *events, uint32_t count, float *left, float *right, uint32_t frames)
-{
-    return render_block(s, w, events, count, left, right, frames, 0);
-}
-
-int original_chicago_backend_render_in_place(original_chicago_backend *s,
-    original_chicago_backend_workspace *w, uint32_t frames)
-{
-    return render_block(s, w, NULL, 0, NULL, NULL, frames, 1);
 }

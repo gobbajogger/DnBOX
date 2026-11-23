@@ -1,0 +1,41 @@
+{
+  "composition": {
+    "base": "76040daa5b52d686a8b7b544296ba5d79610a95d",
+    "fwui": "ac63b270ed52ef728750afc9edd1f173cb0298db",
+    "sound": "80b7e1db59e5c3eceb2b3530e80c2cedf29c5b7f",
+    "test_sources": {
+      "ui_synthone_patch_test.c": "27c9ce50e46250036ff1b1c178fdf8725302addc",
+      "ui_synthone_frame_test.c": "931836f0a6dfa58b09a637c3aec6ad8c43b6a10a"
+    }
+  },
+  "published_equivalent_fwui_commit": "ac63b270ed52ef728750afc9edd1f173cb0298db",
+  "firmware_ui_blob": "2cf5beae94ee319b2fc57a3728701855f57e45d0",
+  "host_results": {
+    "sound-provider": [
+      "Synth One INIT patch: 13 factory IDs x 128 positions, separate owners, stale/refused writes, queued readback, project save/load, preset replacement, coherent snapshot and note locks PASS",
+      "Synth One INIT: stock and legacy cells, audible MIDI, two owners, sustain, pitch, release, voice steal and panic PASS"
+    ],
+    "panel": [
+      "Synth One INIT F7: 1161 checks, two owners, 13 controls each, 88 captures"
+    ],
+    "frame-review": [
+      "PASS Synth One F7 frame ownership and geometry"
+    ]
+  },
+  "archive_file": "routes.tar.xz",
+  "archive_sha256": "cb71d87f884aaf420955e5eadc7d36ee1100295dc7632db07cbddfe80f4ffcf9",
+  "manifest_file": "routes.json",
+  "manifest_sha256": "3cc32d1487428634803a799290b8ae1210f55b62febcd181fa5e526ed9b7ca89",
+  "pngs": 122,
+  "counts": {
+    "matrix": 88,
+    "list": 28,
+    "live_and_contention": 6
+  },
+  "matrix_and_list_layout": {
+    "checker_sha256": "6328c30622243b134f67aab4d7ac2f4e989b87faab20af29a608096d6b5a5b28",
+    "result": "R22 Synth One A3: 116 frames, 632 panels, 0 failing frames",
+    "minimum_ink_bounds_percent": 80.13,
+    "maximum_empty_screen_percent": 5.575
+  }
+}

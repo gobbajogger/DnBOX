@@ -2,8 +2,6 @@
 /* Send reverb, synced delay and master stage: a port of 9W9's er99_verb_tick,
  * er99_dly_tick, master distortion and master_glue (GPL-3.0). See fxbus.h. */
 #include "fxbus.h"
-#include "fxbus_delay_store.h"
-#include "x0x_glue.h"
 #include "../x0x_cold.h"          /* X0X_COLD: fxbus_init is boot only, not the send/render */
 
 static const int32_t fx_cl[4] = { 1116, 1188, 1277, 1356 };
@@ -92,9 +90,7 @@ __attribute__((noinline)) static void fx_retime(fxbus_t *f)
     if (i > 12) i = 12;
     const float bpm = f->bpm >= 20.0f ? f->bpm : 120.0f;
     float ms = fx_beats[i] * 60000.0f / bpm;
-    int frames = f->dlen < 0 ? -f->dlen : f->dlen;
-    const float max_ms = (float)(frames - 256) / D9_SR * 1000.0f;
-    if (f->dl_type < 0 && ms > max_ms) ms = max_ms; /* 8W8 clamps at its upper limit. */
+    const float max_ms = (float)(f->dlen - 256) / D9_SR * 1000.0f;
     while (ms > max_ms)                 /* longer than the line (1/2. under 90 BPM): half of it, */
         ms *= 0.5f;                     /* which is still on the beat; cutting it short is not */
     f->dl_time_ms = ms;
@@ -103,7 +99,11 @@ __attribute__((noinline)) static void fx_retime(fxbus_t *f)
 /* Pot/init path only — not the send/render (X0X_COLD) */
 X0X_COLD static void fx_comp_prep(fxbus_t *f)
 {
-    x0x_glue_prepare(f->comp, &f->c_thr, &f->c_slope, &f->c_makeup);
+    const float a = f->comp;
+    const float ratio = 2.0f + 3.0f * a;
+    f->c_thr = 10.0f - 18.0f * a;
+    f->c_slope = 1.0f - 1.0f / ratio;
+    f->c_makeup = a * 2.2f + a * a * 6.6f;
 }
 
 /* Pot path only — not the send/render (X0X_COLD) */
@@ -165,17 +165,15 @@ void fxbus_set_bpm(fxbus_t *f, float bpm)
 }
 
 /* Boot only (engine_init). fxbus_process and the reverb/delay ticks stay -O2. */
-X0X_COLD static void fxbus_init_storage(fxbus_t *f, int16_t *dly_buf, int dly_len, int packed)
+X0X_COLD void fxbus_init(fxbus_t *f, int16_t *dly_buf, int dly_len)
 {
     uint8_t *p = (uint8_t *)f;
     for (unsigned i = 0; i < sizeof(*f); ++i)
         p[i] = 0;
-    unsigned bytes = packed ? FX_DELAY_BYTES((unsigned)dly_len) : (unsigned)dly_len * sizeof(int16_t);
-    for (unsigned i = 0; i < bytes; ++i)
-        ((uint8_t *)dly_buf)[i] = 0;
-    if (packed) dly_buf[0] = dly_buf[1] = -1;
+    for (int i = 0; i < dly_len; ++i)
+        dly_buf[i] = 0;
     f->dbuf = dly_buf;
-    f->dlen = packed ? -dly_len : dly_len;
+    f->dlen = dly_len;
 
     f->rv_decay = 0.62f; f->rv_damp = 0.75f - 0.45f * 0.55f; f->rv_level = 0.8f;
     d9_biquad_set(&f->rv_hp, D9_HP, 150.0f, 0.7071f);
@@ -206,18 +204,8 @@ X0X_COLD static void fxbus_init_storage(fxbus_t *f, int16_t *dly_buf, int dly_le
 }
 
 
-X0X_COLD void fxbus_init(fxbus_t *f, int16_t *data, int frames)
-{
-    fxbus_init_storage(f, data, frames, 0);
-}
-
-X0X_COLD void fxbus_init_packed(fxbus_t *f, int16_t *data, int frames)
-{
-    fxbus_init_storage(f, data, frames, 1);
-}
-
 /* 12-bit sat store (toward zero). Shared by reverb combs + delay DIGI/TAPE writes. */
-static inline __attribute__((always_inline)) int32_t sat12_store(int16_t *cell, float v)
+static inline __attribute__((always_inline)) int32_t sat12_store_i(int16_t *cell, float v)
 {
     int32_t k = (int32_t)(v * 2048.0f);
     if (k > 32767) k = 32767;
@@ -225,6 +213,7 @@ static inline __attribute__((always_inline)) int32_t sat12_store(int16_t *cell, 
     *cell = (int16_t)k;
     return k;
 }
+__attribute__((noinline)) static int32_t sat12_store(int16_t *cell, float v) { return sat12_store_i(cell, v); }
 
 /* Distortion sample — one body; stereo process_st calls this for L and R. */
 static inline __attribute__((always_inline)) float dist_one(const d9_shape_t *sh, float x, float k, float *crush)
@@ -232,30 +221,36 @@ static inline __attribute__((always_inline)) float dist_one(const d9_shape_t *sh
     return d9_shape(sh, x * k, crush) * 0.7f;
 }
 
-static inline __attribute__((always_inline)) float rv_ap_cell(float *cell, float y)
+/* One Schroeder allpass step — shared by L/R reverb (mono 2×, stereo 4×). Inlined: per sample,
+ * a call and its register saves cost more than the step (fm1-emu cost table, TPROF 2026-11-12). */
+static inline __attribute__((always_inline)) float rv_ap(float *ab, int32_t *pos, int32_t alen, float y)
 {
-    float old = *cell;
-    *cell = y + old * 0.5f;
-    return old - y * 0.5f;
+    const int32_t p = *pos;
+    const float bo = ab[p];
+    ab[p] = y + bo * 0.5f;
+    *pos = p + 1 >= alen ? 0 : p + 1;
+    return bo - y * 0.5f;
 }
 
-static inline __attribute__((always_inline)) float rv_comb_cell(int16_t *cell, float *state,
-                                                                float x, float damp, float fb, int32_t *wr)
+/* One Schroeder comb step — 4 combs a sample; inlined (see rv_ap). */
+static inline __attribute__((always_inline)) float rv_comb(fxbus_t *f, int16_t *b, int c, float x, float damp, float fb, int32_t *wr)
 {
-    const float y = (float)*cell * (1.0f / 2048.0f);
-    *state = y + (*state - y) * damp;
-    *wr |= sat12_store(cell, x + *state * fb);
+    const int32_t p = f->cpos[c];
+    const float y = (float)b[p] * (1.0f / 2048.0f);
+    f->cdmp[c] = y + (f->cdmp[c] - y) * damp;
+    *wr |= sat12_store_i(&b[p], x + f->cdmp[c] * fb);
+    f->cpos[c] = p + 1 >= fx_cl[c] ? 0 : p + 1;
     return y;
 }
 
 /* ===================================================================== */
 /* Reverb (er99_verb_tick), adds its return into out                      */
 /* ===================================================================== */
-static void fx_reverb(fxbus_t *f, const float *in, float *out, float *out_r, int n, int mono_return)
+static void fx_reverb(fxbus_t *f, const float *in, float *out, float *out_r, int n)
 {
     if (f->rv_quiet >= FX_RV_QUIET) {
         int any = 0;
-        for (int i = 0; in && i < n; ++i)
+        for (int i = 0; i < n; ++i)
             if (in[i] != 0.0f) { any = 1; break; }
         if (!any)
             return;                         /* silent in, silent lines: 0 out */
@@ -271,85 +266,31 @@ static void fx_reverb(fxbus_t *f, const float *in, float *out, float *out_r, int
     float *ab0 = f->ap, *ab1 = f->ap + fx_al[0];
     float *ar0 = f->apr, *ar1 = f->apr + fx_alr[0];
     int32_t quiet = f->rv_quiet;
-    /* A pass stops at the first ring end. Every index in its inner loop
-     * addresses contiguous cells in all active delay lines. */
-    for (int offset = 0; offset < n;) {
-        int count = n - offset;
+    for (int i = 0; i < n; ++i) {
+        const float x = d9_biquad_tick(&f->rv_hp, in[i]);
+        float acc = 0.0f, acc_r = 0.0f;
+        int32_t wr = 0;
         for (int c = 0; c < 4; ++c) {
-            int room = fx_cl[c] - f->cpos[c];
-            if (room < count) count = room;
+            const float y = rv_comb(f, cb[c], c, x, damp, fb, &wr);
+            acc += y;
+            acc_r += (c & 1) ? -y : y;
         }
-        for (int j = 0; j < 2; ++j) {
-            int room = fx_al[j] - f->apos[j];
-            if (room < count) count = room;
-            room = fx_alr[j] - f->aposr[j];
-            if (out_r && !mono_return && room < count) count = room;
+        float y = acc * 0.25f;
+        y = rv_ap(ab0, &f->apos[0], fx_al[0], y);
+        y = rv_ap(ab1, &f->apos[1], fx_al[1], y);
+        out[i] += y * lvl;
+        if (out_r) {                        /* the right: the combs, alternate signs, its own allpasses */
+            float yr = acc_r * 0.25f;
+            yr = rv_ap(ar0, &f->aposr[0], fx_alr[0], yr);
+            yr = rv_ap(ar1, &f->aposr[1], fx_alr[1], yr);
+            out_r[i] += yr * lvl;
         }
-        int16_t *c0 = cb[0] + f->cpos[0];
-        int16_t *c1 = cb[1] + f->cpos[1];
-        int16_t *c2 = cb[2] + f->cpos[2];
-        int16_t *c3 = cb[3] + f->cpos[3];
-        float *l0 = ab0 + f->apos[0], *r0 = ar0 + f->aposr[0];
-        float *l1 = ab1 + f->apos[1], *r1 = ar1 + f->aposr[1];
-        for (int i = 0; i < count; ++i) {
-            const float sample = in ? in[offset + i] : 0.0f;
-            const float x = d9_biquad_tick(&f->rv_hp, sample);
-            int32_t wr = 0;
-            const float y0 = rv_comb_cell(&c0[i], &f->cdmp[0], x, damp, fb, &wr);
-            const float y1 = rv_comb_cell(&c1[i], &f->cdmp[1], x, damp, fb, &wr);
-            const float y2 = rv_comb_cell(&c2[i], &f->cdmp[2], x, damp, fb, &wr);
-            const float y3 = rv_comb_cell(&c3[i], &f->cdmp[3], x, damp, fb, &wr);
-            float y = ((0.0f + y0 + y1) + y2 + y3) * 0.25f;
-            y = rv_ap_cell(&l0[i], y);
-            float wet = rv_ap_cell(&l1[i], y) * lvl;
-            out[offset + i] += wet;
-            if (mono_return)
-                out_r[offset + i] += wet;
-            else if (out_r) {
-                y = ((0.0f + y0 - y1) + y2 - y3) * 0.25f;
-                y = rv_ap_cell(&r0[i], y);
-                out_r[offset + i] += rv_ap_cell(&r1[i], y) * lvl;
-            }
-            quiet = (wr == 0 && sample == 0.0f) ? quiet + 1 : 0;
-        }
-        for (int j = 0; j < 4; ++j) {
-            f->cpos[j] += count;
-            if (f->cpos[j] == fx_cl[j]) f->cpos[j] = 0;
-        }
-        for (int j = 0; j < 2; ++j) {
-            f->apos[j] += count;
-            if (f->apos[j] == fx_al[j]) f->apos[j] = 0;
-            if (out_r && !mono_return) {
-                f->aposr[j] += count;
-                if (f->aposr[j] == fx_alr[j]) f->aposr[j] = 0;
-            }
-        }
-        offset += count;
+        quiet = (wr == 0 && in[i] == 0.0f) ? quiet + 1 : 0;
     }
     f->rv_quiet = quiet;
 }
 
 /* ===================================================================== */
-/* The private 8W8 return uses the original mono tap on both dry channels. */
-X0X_COLD void fxbus_init_808_reverb(fxbus_t *f)
-{
-    uint8_t *memory = (uint8_t *)f;
-    for (unsigned i = 0; i < sizeof *f; ++i) memory[i] = 0;
-    f->rv_quiet = FX_RV_QUIET;
-    for (int i = FX_RV_DECAY; i <= FX_RV_LEVEL; ++i)
-        fxbus_set(f, i, fx_p[i].ui.def);
-}
-
-int fxbus_reverb_active(const fxbus_t *f) { return f->rv_quiet < FX_RV_QUIET; }
-
-void fxbus_808_reverb(fxbus_t *f, const float *send, float *left, float *right, int frames, float gain)
-{
-    float level = f->rv_level;
-    f->rv_level = level * gain;
-    fx_reverb(f, send, left, right, frames, 1);
-    f->rv_level = level;
-}
-
 /* Delay (er99_dly_tick), adds its return into out                        */
 /* ===================================================================== */
 __attribute__((noinline)) static float fx_psin(uint32_t ph)                 /* parabolic sine of a turn */
@@ -358,9 +299,10 @@ __attribute__((noinline)) static float fx_psin(uint32_t ph)                 /* p
     return 4.0f * x * (1.0f - fm_fabsf(x));
 }
 
-/* The interpolated delay tap d samples behind w. Inlining lets both taps
- * use the current DIGI or TAPE loop state without saving it across calls. */
-static inline __attribute__((always_inline)) float dl_tap(const int16_t *buf, int32_t len, float flen, int32_t w, float d, int packed)
+/* the line at d samples behind w, interpolated (X0X: the ping-pong tap).
+ * Outlined once: fx_delay calls this many times (mono + stereo / PING taps);
+ * one body beats N inlined copies on pi32 (-O2). */
+__attribute__((noinline)) static float dl_tap(const int16_t *buf, int32_t len, float flen, int32_t w, float d)
 {
     float rp = (float)w - d;
     while (rp < 0.0f) rp += flen;
@@ -368,9 +310,7 @@ static inline __attribute__((always_inline)) float dl_tap(const int16_t *buf, in
     const float fr = rp - (float)i0;
     if (i0 >= len) i0 -= len;
     const int32_t i1 = i0 + 1 >= len ? 0 : i0 + 1;
-    const int a = packed ? fx10_read(buf, len, i0) : buf[i0];
-    const int b = packed ? fx10_read(buf, len, i1) : buf[i1];
-    const float b0 = (float)a * (1.0f / 2048.0f), b1 = (float)b * (1.0f / 2048.0f);
+    const float b0 = (float)buf[i0] * (1.0f / 2048.0f), b1 = (float)buf[i1] * (1.0f / 2048.0f);
     return b0 + (b1 - b0) * fr;
 }
 
@@ -381,8 +321,7 @@ static void fx_delay(fxbus_t *f, const float *in, float *out, float *out_r, int 
 {
     f->dl_signal = 0;
     const float target = f->dl_time_ms * 0.001f * D9_SR;
-    const int packed = f->dlen < 0;
-    const int32_t len = packed ? -f->dlen : f->dlen;
+    const int32_t len = f->dlen;
     const int tape = f->dl_type == 1;
     if (f->dl_quiet >= len) {
         int any = 0;
@@ -452,8 +391,8 @@ static void fx_delay(fxbus_t *f, const float *in, float *out, float *out_r, int 
             fp += flut_i;
             d = dcur + wow_a * fx_psin(wp) + flut_a * fx_psin(fp);
         }
-        const float y = dl_tap(buf, len, flen, w, d, packed);
-        const float y2 = ping ? dl_tap(buf, len, flen, w, 2.0f * d, packed) : y;
+        const float y = dl_tap(buf, len, flen, w, d);
+        const float y2 = ping ? dl_tap(buf, len, flen, w, 2.0f * d) : y;
         signal |= in[i] != 0.0f || y != 0.0f || (out_r && y2 != 0.0f);
         lp += (y2 * fdbk - lp) * tc;
         if (fm_fabsf(lp) < 1e-20f) lp = 0.0f;
@@ -464,9 +403,7 @@ static void fx_delay(fxbus_t *f, const float *in, float *out, float *out_r, int 
             s -= hp;
             write = s;
         }
-        int16_t word;
-        int32_t k = sat12_store(packed ? &word : &buf[w], x + write);
-        if (packed) fx10_write(buf, len, w, k);
+        int32_t k = sat12_store(&buf[w], x + write);       /* 12-bit, toward zero */
         if (++w >= len) w = 0;
         out[i] += y * lvl;
         if (out_r)
@@ -485,35 +422,29 @@ static void fx_delay(fxbus_t *f, const float *in, float *out, float *out_r, int 
     f->dl_signal = (uint8_t)signal;
 }
 
-/* The private 8W8 delay uses the 9W9 DIGI arithmetic. Its unused right
- * reverb allpasses remain zero and feed the delay after the route is closed. */
-X0X_COLD void fxbus_init_808_fx(fxbus_t *f, int16_t *delay)
+/* Soft-knee glue gain reduction — one body for mono + stereo (same pattern as
+ * master soft_ceiling / djf_gsmooth). */
+__attribute__((noinline)) static float fx_comp_gr(float over, float slope)
 {
-    fxbus_init(f, delay, FX_808_DELAY_FRAMES);
-    f->dl_type = -1;
-    for (int i = FX_RV_DECAY; i <= FX_DL_HPF; ++i)
-        fxbus_set(f, i, fx_p[i].ui.def);
-}
-
-int fxbus_808_delay_active(const fxbus_t *f)
-{
-    const float next = f->dcur + (f->dl_time_ms * 0.001f * D9_SR - f->dcur) * 0.0008f;
-    return f->dl_quiet < f->dlen || next != f->dcur;
-}
-
-void fxbus_808_delay(fxbus_t *f, const float *send, float *left, float *right, int frames, float gain)
-{
-    float level = f->dl_level;
-    f->dl_level = level * gain;
-    while (frames > 0) {
-        int n = frames < FX_RV_APR_TOTAL ? frames : FX_RV_APR_TOTAL;
-        fx_delay(f, send ? send : f->apr, left, right, n);
-        if (send) send += n;
-        left += n;
-        right += n;
-        frames -= n;
+    if (over >= 3.0f)
+        return -over * slope;
+    if (over > -3.0f) {
+        const float t = over + 3.0f;
+        return -(t * t) * (1.0f / 12.0f) * slope;
     }
-    f->dl_level = level;
+    return 0.0f;
+}
+
+/* One glue sample: update det/env, return linear gain (mono + stereo). */
+static inline __attribute__((always_inline)) float fx_comp_gain(float mag, float thr, float slope, float drel,
+                                                    float atk, float rel, float makeup,
+                                                    float *det, float *env)
+{
+    *det = mag > *det ? mag : *det * drel;
+    const float in_db = *det > 1e-9f ? 6.0205999f * fm_log2f(*det) : -120.0f;
+    const float gr = fx_comp_gr(in_db - thr, slope);
+    *env = gr + (*env - gr) * (gr < *env ? atk : rel);
+    return fm_db2lin(*env + makeup);
 }
 
 /* ===================================================================== */
@@ -539,7 +470,7 @@ void fxbus_process(fxbus_t *f, const float *dry, const float *rev, const float *
     if (n > 256)
         n = 256;
     __builtin_memcpy(out, dry, (unsigned)n * sizeof(float));
-    fx_reverb(f, rev, out, 0, n, 0);
+    fx_reverb(f, rev, out, 0, n);
     fx_delay(f, dly, out, 0, n);
 
     if (f->dist_mode >= 1) {
@@ -553,7 +484,7 @@ void fxbus_process(fxbus_t *f, const float *dry, const float *rev, const float *
         float det = f->comp_det, env = f->comp_env_db;
         for (int i = 0; i < n; ++i) {
             const float in = out[i];
-            out[i] = in * x0x_glue_gain(fm_fabsf(in), thr, slope, drel, atk, rel, makeup, &det, &env);
+            out[i] = in * fx_comp_gain(fm_fabsf(in), thr, slope, drel, atk, rel, makeup, &det, &env);
         }
         f->comp_det = det;
         f->comp_env_db = env;
@@ -561,24 +492,6 @@ void fxbus_process(fxbus_t *f, const float *dry, const float *rev, const float *
     const float vol = f->muted & 4u ? 0.0f : f->volume;
     for (int i = 0; i < n; ++i)
         out[i] *= vol;
-}
-
-/* Splitting an idle delay reproduces its time slew and integer phase advance.
- * A reverb that stays active or stays gated retains the same ring positions
- * across the split. A nonzero first sample resets its quiet count. */
-int fxbus_can_stream_idle_delay(const fxbus_t *f,const float *rev,const float *dly,unsigned n)
-{
-    int frames = f->dlen < 0 ? -f->dlen : f->dlen;
-    if (!n || n > 256 || f->dl_quiet < frames)
-        return 0;
-    for (unsigned i = 0; i < n; ++i)
-        if (dly[i] != 0.0f) return 0;
-    if (f->rv_quiet <= FX_RV_QUIET - (int)n || rev[0] != 0.0f)
-        return 1;
-    if (f->rv_quiet < FX_RV_QUIET) return 0;
-    for (unsigned i = 0; i < n; ++i)
-        if (rev[i] != 0.0f) return 0;
-    return 1;
 }
 
 /* X0X stereo: 9W9's chain on L and R. The distortion runs on each side; the glue compressor reads
@@ -590,7 +503,7 @@ void fxbus_process_st(fxbus_t *f, const float *dry_l, const float *dry_r, const 
         n = 256;
     __builtin_memcpy(out_l, dry_l, (unsigned)n * sizeof(float));
     __builtin_memcpy(out_r, dry_r, (unsigned)n * sizeof(float));
-    fx_reverb(f, rev, out_l, out_r, n, 0);
+    fx_reverb(f, rev, out_l, out_r, n);
     fx_delay(f, dly, out_l, out_r, n);
     if (f->dist_mode >= 1) {
         const float k = f->drive;
@@ -605,7 +518,7 @@ void fxbus_process_st(fxbus_t *f, const float *dry_l, const float *dry_r, const 
         float det = f->comp_det, env = f->comp_env_db;
         for (int i = 0; i < n; ++i) {
             const float ml = fm_fabsf(out_l[i]), mr = fm_fabsf(out_r[i]);
-            const float g = x0x_glue_gain(ml > mr ? ml : mr, thr, slope, drel, atk, rel, makeup, &det, &env);
+            const float g = fx_comp_gain(ml > mr ? ml : mr, thr, slope, drel, atk, rel, makeup, &det, &env);
             out_l[i] *= g;
             out_r[i] *= g;
         }

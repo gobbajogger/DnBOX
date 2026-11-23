@@ -3872,11 +3872,43 @@
       "family": "engine"
     },
     {
+      "id": "engine-2-part-2-page-2",
+      "family": "engine"
+    },
+    {
+      "id": "engine-2-part-2-page-3",
+      "family": "engine"
+    },
+    {
+      "id": "engine-2-part-2-page-4",
+      "family": "engine"
+    },
+    {
+      "id": "engine-2-part-2-page-5",
+      "family": "engine"
+    },
+    {
       "id": "engine-2-part-3-page-0",
       "family": "engine"
     },
     {
       "id": "engine-2-part-3-page-1",
+      "family": "engine"
+    },
+    {
+      "id": "engine-2-part-3-page-2",
+      "family": "engine"
+    },
+    {
+      "id": "engine-2-part-3-page-3",
+      "family": "engine"
+    },
+    {
+      "id": "engine-2-part-3-page-4",
+      "family": "engine"
+    },
+    {
+      "id": "engine-2-part-3-page-5",
       "family": "engine"
     },
     {
@@ -6132,6 +6164,29 @@
         "view-01-part-00-voice-01-page-02",
         "edge-0-view-01-part-00-voice-01-page-02",
         "edge-1-view-01-part-00-voice-01-page-02"
+      ]
+    },
+    {
+      "reason": "Stock Synth One has no editable INIT parameters. Its sole SOUND route is now page 0 on both bass parts. Page 1 was the former SOUND route following an empty bank. The patch-enabled editor is verified separately.",
+      "removed": [
+        "engine-2-part-2-page-1",
+        "engine-2-part-3-page-1"
+      ]
+    },
+    {
+      "revision": "199f0444a4cf27374112a5fdf48f82005b070bbc",
+      "reason": "Stock Elite and Pro expose OSC, FILTER, FILTER ENV, AMP ENV, EFFECT and SOUND for Synth One on both bass parts. Page 0 is now OSC. The two patch-disabled selector routes are exercised by the separate slot fixture.",
+      "added": [
+        "engine-2-part-2-page-1",
+        "engine-2-part-2-page-2",
+        "engine-2-part-2-page-3",
+        "engine-2-part-2-page-4",
+        "engine-2-part-2-page-5",
+        "engine-2-part-3-page-1",
+        "engine-2-part-3-page-2",
+        "engine-2-part-3-page-3",
+        "engine-2-part-3-page-4",
+        "engine-2-part-3-page-5"
       ]
     }
   ]

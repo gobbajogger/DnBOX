@@ -50,14 +50,6 @@ static inline int32_t miami_fx_input_fast(uint32_t u){
 }
 /* miami_fx_output_rne, inline for the per-sample output loops (same code). */
 static inline uint32_t miami_fx_output_rne_inline(int16_t input) {
-#ifdef __PI32V2__
-    /* The AC79 FPU implements the original FDIV. The stock DSP build
-     * disables reciprocal substitution for this operation. */
-    float result=(float)input/32767.0f;
-    uint32_t word;
-    __builtin_memcpy(&word,&result,sizeof word);
-    return word;
-#else
     uint32_t magnitude=input<0?(uint32_t)(-(int32_t)input):(uint32_t)input;
     if (!magnitude) return 0;
     unsigned top=31u-(unsigned)__builtin_clz(magnitude);
@@ -76,6 +68,5 @@ static inline uint32_t miami_fx_output_rne_inline(int16_t input) {
         ++exponent;
     }
     return (input<0?0x80000000u:0u)|(exponent<<23)|(significand&0x007fffffu);
-#endif
 }
 #endif

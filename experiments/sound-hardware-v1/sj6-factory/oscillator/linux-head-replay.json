@@ -50,37 +50,5 @@
     "juno6_factory.inc": "00510eee13b98d82b7ef609bc9d75a432f81ca1d60933f496689716d98175814"
   },
   "reference_header_sha256": "546c8b94493fd8d22ccc575e7da932b8cc5dca5207385ebdca2e02d4000f8ee3",
-  "remote_source": "90cf5429a0aac5929c72d8abf387d70c399488ad",
-  "sampler_voice": {
-    "harness_source": "2fe5930c161a30c907a4b91991ab3c9724380b10",
-    "source_tree": "144c51e05989c66deaf8c474615a85ddd2904001",
-    "sampler_harness_sha256": "eaafb9192be2def4f112994613cd2492d63cb17465818eee987d579628984526",
-    "scope": "Original-derived CoreSampler key-map, pitch and stereo analytic voice, with neutral envelope, modulation and filter. Firmware pre-filter oscillator tap. Suites overlap.",
-    "suites": {
-      "notes": {
-        "passed": 36,
-        "cases": 36,
-        "paired_pcm_digests_matching_archive": 36,
-        "max_abs_level_db": 0.014523530133976614,
-        "max_spectral_db": 0.2642913598889052,
-        "result_json_sha256": "5d9b93a911475e69c5141fcf4123a7eeeeca8b9172ff5da87fcafec7c9bb8ad6"
-      },
-      "controls": {
-        "passed": 48,
-        "cases": 48,
-        "paired_pcm_digests_matching_archive": 48,
-        "max_abs_level_db": 0.01293773397903987,
-        "max_spectral_db": 0.2642913598889052,
-        "result_json_sha256": "aef8989242e4ac8e87156a1d4d2306e825b9060abc16280cd2ec4cf0011a9912"
-      },
-      "pwm-string-pad": {
-        "passed": 8,
-        "cases": 8,
-        "paired_pcm_digests_matching_archive": 8,
-        "max_abs_level_db": 0.004096009528464612,
-        "max_spectral_db": 0.06696200232419343,
-        "result_json_sha256": "b52dc43096c22f3d147c65658464c2a475d5f226faa6aa3a24ed206bdebb601a"
-      }
-    }
-  }
+  "remote_source": "90cf5429a0aac5929c72d8abf387d70c399488ad"
 }

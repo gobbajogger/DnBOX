@@ -1,7 +1,6 @@
 /* SPDX-License-Identifier: GPL-3.0-only */
 #define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
-#include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
@@ -9,13 +8,6 @@
 
 void ref_drum909_render_st_masked(drum909_t *, float *, float *, float *, float *, int, uint16_t);
 void ref_drum909_render(drum909_t *, float *, float *, float *, int);
-void ref_drum909_init(drum909_t *);
-static void restore_raw_sources(drum909_t *d)
-{
-    drum909_t original = {0};
-    ref_drum909_init(&original);
-    for (int i = 0; i < 4; i++) d->smp[i].adpcm = original.smp[i].adpcm;
-}
 static uint32_t rng = 1;
 static uint32_t random_u32(void)
 {
@@ -53,8 +45,7 @@ static void check(void)
             drum909_trigger(&a, v, 0.8f);
         }
         rate(&a, seed);
-        b = a;
-        restore_raw_sources(&b);
+        b = a; /* Use the same sample pointers, so full-state memcmp is valid. */
         for (int step = 0; step < 1300; ++step) {
             float x[4][256], y[4][256];
             const int n = step % 257;
@@ -93,18 +84,15 @@ static void check(void)
                 drum909_render(&a, x[0], x[2], x[3], n);
                 ref_drum909_render(&b, y[0], y[2], y[3], n);
             }
-            drum909_t comparable = a;
-            for (int j = 0; j < 4; j++) comparable.smp[j].adpcm = b.smp[j].adpcm;
-            int mismatch = memcmp(&comparable, &b, offsetof(drum909_t, prefix_cursor));
-            if (mismatch || memcmp(x, y, sizeof x)) {
+            if (memcmp(&a, &b, sizeof a) || memcmp(x, y, sizeof x)) {
                 fprintf(stderr, "FAIL seed=%d step=%d n=%d state=%d pcm=%d\n", seed, step, n,
-                    mismatch, memcmp(x, y, sizeof x));
+                    memcmp(&a, &b, sizeof a), memcmp(x, y, sizeof x));
                 exit(1);
             }
             ++calls;
         }
     }
-    printf("PASS %u calls: shared DSP state (%zu bytes) and four PCM buses bit-identical\n", calls, offsetof(drum909_t, prefix_cursor));
+    printf("PASS %u calls: complete drum909_t (%zu bytes) and four PCM buses bit-identical\n", calls, sizeof(drum909_t));
 }
 static double now(void)
 {
@@ -117,7 +105,6 @@ static double bench(int reference, int dense, int fractional)
     drum909_t d;
     float bus[4][32];
     memset(&d, 0, sizeof d); drum909_init(&d);
-    if (reference) restore_raw_sources(&d);
     for (int j = 0; j < 4; ++j) {
         d.smp[j].inc = 1;
         d.smp[j].incf = fractional ? 0x80000000u : 0;

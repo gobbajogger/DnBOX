@@ -236,82 +236,6 @@ def write_header(path, content):
     Path(target.name).replace(path)
 
 
-# Keep the first 46 ms in their original nibble format; ordinary retriggers
-# do not need a prefix decode. Sign is predicted from the previous nibble
-# in the tail, with a single seven-bit inverse table shared by the three WAVs.
-CYMBAL_HEAD = 8192
-
-
-def cymbal_codes(samples):
-    from collections import Counter
-    from heapq import heappop, heappush
-
-    counts = Counter()
-    for data in samples:
-        previous = (data[CYMBAL_HEAD // 2 - 1] >> 4) & 8
-        for byte in data[CYMBAL_HEAD // 2:]:
-            for nibble in (byte & 15, byte >> 4):
-                counts[nibble ^ previous] += 1
-                previous = nibble & 8
-    heap = []
-    for nibble in range(16):
-        heappush(heap, (counts[nibble], [nibble]))
-    widths = [0] * 16
-    while len(heap) > 1:
-        fa, a = heappop(heap)
-        fb, b = heappop(heap)
-        for symbol in a + b:
-            widths[symbol] += 1
-        heappush(heap, (fa + fb, a + b))
-    max_bits = max(widths)
-    lookup = [None] * (1 << max_bits)
-    codes = [None] * 16
-    code = old = 0
-    for n, symbol in sorted((width, i) for i, width in enumerate(widths)):
-        code <<= n - old
-        # Stream bits are consumed least-significant first on the board.
-        word = int(format(code, f'0{n}b')[::-1], 2)
-        codes[symbol] = (word, n)
-        for row in range(word, len(lookup), 1 << n):
-            assert lookup[row] is None
-            lookup[row] = n << 4 | symbol
-        code += 1
-        old = n
-    assert None not in lookup and max_bits <= 8
-    return codes, lookup
-
-
-def pack_cymbal(data, codes, lookup):
-    out = bytearray(data[:CYMBAL_HEAD // 2])
-    previous = (out[-1] >> 4) & 8
-    bits = filled = 0
-    for byte in data[CYMBAL_HEAD // 2:]:
-        for nibble in (byte & 15, byte >> 4):
-            code, width = codes[nibble ^ previous]
-            previous = nibble & 8
-            bits |= code << filled
-            filled += width
-            if filled >= 8:
-                out.append(bits & 255)
-                bits >>= 8
-                filled -= 8
-    if filled:
-        out.append(bits)
-    out.extend((0, 0, 0, 0))  # suffix lookahead in the streamed prefix reader
-    # Invert the complete generated stream, including a possible pad nibble.
-    pos = CYMBAL_HEAD * 4
-    previous = (data[CYMBAL_HEAD // 2 - 1] >> 4) & 8
-    for i in range(CYMBAL_HEAD, 2 * len(data)):
-        at = pos >> 3
-        window = (out[at] | out[at + 1] << 8) >> (pos & 7)
-        code = lookup[window & (len(lookup) - 1)]
-        decoded = (code & 15) ^ previous
-        assert decoded == ((data[i >> 1] >> (4 * (i & 1))) & 15)
-        pos += code >> 4
-        previous = decoded & 8
-    return out
-
-
 def main():
     out_s = Path(sys.argv[1]) if len(sys.argv) > 1 else SRC / "build" / "gen" / "x0x_drum_samples.h"
     out_t = out_s.parent / "x0x_drum_tables.h"
@@ -325,11 +249,6 @@ def main():
     total = nbytes = 0
     encoded_dir = ASSETS / "encoded"
     manifest = json.loads((encoded_dir / "manifest.json").read_text())
-    codes, lookup = cymbal_codes([(encoded_dir / (Path(fn).stem + '.adpcm')).read_bytes()
-                                  for _, fn in SAMPLES])
-    hdr.extend([f'#define X0X_CYMBAL_HEAD {CYMBAL_HEAD}u',
-                f'#define X0X_CYMBAL_MASK {len(lookup) - 1}u',
-                arr("uint8_t", "x0x_cymbal_prefix", lookup, per=24)])
     for name, fn in SAMPLES:
         wav = ASSETS / fn
         pcm, bits = read_wav(wav)
@@ -343,8 +262,7 @@ def main():
         nbytes += len(data)
         hdr.append(f"/* {fn}: {len(pcm)} frames, source {bits}-bit, {len(data)} B of ADPCM */")
         hdr.append(f"#define {name.upper()}_LEN {len(pcm)}u")
-        hdr.append(arr("uint8_t", name, list(data), per=24))  # raw ADPCM comparison oracle
-        hdr.append(arr("uint8_t", name + "_packed", list(pack_cymbal(data, codes, lookup)), per=24))
+        hdr.append(arr("uint8_t", name, list(data), per=24))
         hdr.append("")
     write_header(out_s, "\n".join(hdr))
 
