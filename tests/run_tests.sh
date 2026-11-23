@@ -697,6 +697,7 @@ run diag-size python3 tests/diag_size_test.py           # a76: ED_DIAG stays in 
 run smk-inlog sh -c "$CC -std=c99 -O2 -Wall -Wextra -Werror -Ifirmware/src -o $OUT/smk_inlog_test tests/smk_inlog_test.c && $OUT/smk_inlog_test"   # a76: inbound recorder ring
 run ble-central-diag python3 -B tests/ble_central_diag_test.py
 if [ "$ASAN_SKIP" = 1 ]; then not_run ble-role-switch "ASan runtime"; else run ble-role-switch sh tests/host/ble_role_switch_test.sh; fi
+run smk-inlog-profile python3 tests/host/smk_inlog_profile_test.py
 run inlog-tool python3 tests/inlog_tool_test.py      # a76: ED_INLOG dump text
 run smk-pad-inputs python3 tests/smk_pad_inputs_test.py   # read-only sensor snapshot and strict decoder
 run smk-clip-ble-notify sh -c "$CC -std=c99 -O2 -Wall -Wextra -Wno-unused-function -Werror -Ifirmware/src -Ifirmware/hal -Ifirmware/src/ble -o $OUT/smk_clip_ble_notify_test tests/smk_clip_ble_notify_test.c && $OUT/smk_clip_ble_notify_test"   # a76: no pad colour while notify is off

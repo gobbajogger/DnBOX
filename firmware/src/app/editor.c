@@ -28,7 +28,8 @@ enum { ED_INFO = 1, ED_PROJECT = 9, ED_SMP_BEGIN = 11, ED_SMP_WRITE, ED_SMP_END,
 #endif
 #include "app/fittab.h"
 #endif
-#if BOARD_SMK37
+#include "app/smk_inlog_profile.h"
+#if X0X_SMK_INLOG
 /* ED_INLOG (SMK-37, read only, a76): the inbound recorder (app/smk_inlog.h). No arg or arg 0: the entry
  * count, fm1_ms now, then 2 words for each entry (the oldest first), each word 5 x 7 bits, low bits
  * first. Then the 40 stored clip velocities and the 40 stored clip channels (one byte each).
@@ -942,7 +943,7 @@ static void ed_handle(const uint8_t *f, uint32_t n)
         }
         break;
     }
-#if BOARD_SMK37
+#if X0X_SMK_INLOG
     case ED_INLOG:                                    /* read only: the inbound recorder (main_fm1.c) */
         smk_inlog_reply(na >= 1u ? a[0] : 0u);
         break;

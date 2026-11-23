@@ -337,7 +337,8 @@ uint8_t smk_apc_usb_event(uint32_t pkt)
         return owned;
     return 0u;
 }
-#if BOARD_SMK37
+#include "app/smk_inlog_profile.h"
+#if X0X_SMK_INLOG
 /* a76: the inbound recorder (app/smk_inlog.h). usb.c and ble.c give it each APC40 LED message that
  * came in. ble.c also gives it the link and notify edges. */
 #include "app/smk_inlog.h"
@@ -459,10 +460,10 @@ uint8_t smk_apc_ble_event(uint32_t pkt, uint8_t notifying)
 {
     uint8_t r;
     if (smk_apc40_ble_colour_unheard(pkt, notifying)) {
-        smk_inlog(3u, pkt);
+        SMK_INLOG_RECORD(3u, pkt);
         return (uint8_t)(clip_grid_mode || (apc_host_on & 2u));
     }
-    smk_inlog(1u, pkt);
+    SMK_INLOG_RECORD(1u, pkt);
     apc_in_ble = 1u;
     r = smk_apc_usb_event(pkt);
     apc_in_ble = 0u;
