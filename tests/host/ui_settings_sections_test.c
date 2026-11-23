@@ -7,13 +7,13 @@ static void enter_group(int g){ui.msg_until=0;global_index();ui.list_sel=(uint8_
 int main(void){
  setup(V_HOME,PART_909);pref_set(PR(R_ENG,T_MST,0,MST_PUMP),0);audio_due_ms=now_ms;run_ms(20);button_tap(B_GLO);CHECK(ui.glo_section==-1&&ui.list_n==6);ui_frame();shot("01-global-sections");
  project_t *keep=malloc(sizeof proj);CHECK(keep);memcpy(keep,&proj,sizeof proj);turn_ref(list_rows[0],1,EN_ALGO);CHECK(!memcmp(keep,&proj,sizeof proj));
- pref_t seen[40];int count=0;const int counts[]={9,5,10,3,5,4};   /* AUDIO: Tune + five M7 part ON/OFF rows + QUEUE MUTES + NOTE LOCK */
+ pref_t seen[40];int count=0;const int counts[]={9,5,10,3,5,2+X0X_UI_PERF};   /* AUDIO: Tune + five M7 part ON/OFF rows + QUEUE MUTES + NOTE LOCK */
  for(int g=0;g<6;g++){
   enter_group(g);CHECK(ui.list_n==counts[g]);for(int i=0;i<ui.list_n;i++){pref_t r=list_rows[i];CHECK(r.kind!=R_HDR&&r.kind!=R_SECTION);for(int j=0;j<count;j++)CHECK(memcmp(&r,&seen[j],sizeof r));seen[count++]=r;}
   ui_frame();char name[40];snprintf(name,sizeof name,"group-%d",g);shot(name);
   button_tap(B_HOME);CHECK(ui.glo_section==-1&&ui.list_sel==g);
  }
- CHECK(count==36);CHECK(!memcmp(keep,&proj,sizeof proj));
+ CHECK(count==34+X0X_UI_PERF);CHECK(!memcmp(keep,&proj,sizeof proj));
  enter_group(0);for(int i=0;i<5;i++)CHECK(list_rows[3+i].a==part_at(i));list_move(8);CHECK(ui.list_sel==8&&ui.list_top==3);ui_frame();shot("midi-scroll");button_tap(B_HOME);list_enter();CHECK(ui.list_sel==8&&ui.list_top==3);
  button_tap(B_GLO);CHECK(ui.view!=V_GLO);button_tap(B_GLO);CHECK(ui.glo_section==-1&&ui.list_sel==0);
  /* Physical > entry consumes the held repeat until release, including clip mode. */
@@ -23,7 +23,9 @@ int main(void){
  enter_group(3);ui.list_sel=1;int v3=pref_get(list_rows[1]);memset(&host_arw,0,sizeof host_arw);arrows_held=1;host_arrows();CHECK(ui.glo_section==-1&&ui.list_sel==3);
  for(int t=0;t<20;t++){now_ms+=80;host_arrows();CHECK(ui.glo_section==-1&&ui.list_sel==3);}arrows_held=0;host_arrows();ui_frame();shot("back-arrow");
  list_enter();CHECK(ui.glo_section==3&&ui.list_sel==1&&pref_get(list_rows[1])==v3);
- enter_group(5);CHECK(ui.list_n==3);clip_grid_mode=clip_on=0;
+ enter_group(5);CHECK(ui.list_n==2+X0X_UI_PERF);
+ CHECK(list_rows[X0X_UI_PERF].kind==R_ACT&&list_rows[X0X_UI_PERF].a==ACT_ABOUT);
+ CHECK(list_rows[1+X0X_UI_PERF].kind==R_BATT);clip_grid_mode=clip_on=0;
  enter_group(4);ui.list_sel=4;list_enter();CHECK(ui.overlay==O_ASK&&ui.ask_act==ACT_RESET);ui_frame();shot("reset-confirmation");button_tap(B_HOME);CHECK(ui.overlay==O_LIST&&ui.glo_section==4&&ui.list_sel==4);
  /* Connected-name bounds and marquee are covered by ui_peer_names_test.c. */
  enter_group(2);ui.list_sel=1;pref_set(PR(R_USBFULL,0,0,0),0);ui_frame();shot("audio-long-enum");

@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 """Run the real selector/scheduler with cheap bodies, not firmware qualification.
 
-Catches a missing/duplicate registration, wrong command, lost G serialization,
+Catches a missing/duplicate registration, wrong command, lost reader isolation,
 selection leakage, or swallowed test failure. Only expensive compile bodies are
 replaced; the runner's admission, scheduling and status propagation are real.
 """
@@ -12,20 +12,16 @@ import subprocess
 import tempfile
 
 ROOT = Path(__file__).resolve().parents[2]
-WORKER = '''import os, pathlib, sys, time
+WORKER = r'''import os, pathlib, sys
 name = sys.argv[1]
 if os.environ["X0X_TEST_JOBS"] != "1":
-    assert pathlib.Path("build/host/iso/.lock-gen").is_dir(), "shared generator lock not held"
-lock = pathlib.Path("shared-generator")
-try:
-    lock.mkdir()
-except FileExistsError:
-    sys.exit(23)
-try:
-    with open("events", "a") as f: f.write(name + "\\n")
-    time.sleep(.2)
-finally:
-    lock.rmdir()
+    iso = pathlib.Path.cwd() / "build/host/iso" / name
+    for variable, subdir in (("SMC_UI_OUT", "smc-ui"), ("HOME", "home"), ("TMPDIR", "tmp")):
+        path = pathlib.Path(os.environ[variable])
+        assert path == iso / subdir and path.is_dir(), (name, variable, path)
+    assert not pathlib.Path("build/host/iso/.lock-gen").is_dir(), "UI reader holds scheduler writer lock"
+    (iso / "smc-ui" / "reader").write_text(name)
+with open("events", "a") as f: f.write(name + "\n")
 sys.exit(7 if os.environ.get("FAIL_TEST") == name else 0)
 '''
 
@@ -56,6 +52,12 @@ def check(source, jobs, selected, fail=""):
 
 def main():
     source = (ROOT / "tests/run_tests.sh").read_text()
+    start = source.index("\ntest_class() {") + 1
+    end = source.index("\n}", start) + 2
+    classes = subprocess.check_output(
+        ["sh", "-c", source[start:end] + "\nfor name; do test_class \"$name\"; echo \"$TEST_CLASS\"; done",
+         "_", "smc-ui", "ui-overlay-battery", "ui-toast-battery"], text=True)
+    assert classes.splitlines() == ["G", "G", "G"], classes
     cases = 0
     for jobs in (1, 4):
         for selected, fail in (("ui-overlay-battery", ""),
