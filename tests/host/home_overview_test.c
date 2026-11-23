@@ -10,7 +10,7 @@ static const int display_position[5] = {0,1,4,3,2};
 static const char *outdir;
 static unsigned row_mask(int pattern, int part, int row)
 {
-    int i, x = 39 + pattern * 12;
+    int i, x = 46 + pattern * 12;
     unsigned mask = 0;
     int y = MAIN_Y + 42 + display_position[part] * 18 + row;
     for (i = 0; i < 8; ++i)
@@ -56,7 +56,7 @@ static void check(const char *name, int pattern, int part, unsigned expected_pb,
          * brightness levels are 12/7 and 16/9 for current/noncurrent. */
         int brightness = part < NKIT ? (current ? 12 : 7) : (current ? 16 : 9);
         uint16_t ink = swap16(dim(PART_COL[part], brightness));
-        int x = 39 + pattern * 12;
+        int x = 46 + pattern * 12;
         int y = MAIN_Y + 42 + display_position[part] * 18;
         for (int row = 0; row < 3; ++row)
             for (int col = 0; col < 8; ++col) {
@@ -78,7 +78,7 @@ static void check(const char *name, int pattern, int part, unsigned expected_pb,
         }
     }
     {
-        int x=43+pattern*12,y=MAIN_Y+38+display_position[part]*18;
+        int x=50+pattern*12,y=MAIN_Y+38+display_position[part]*18;
         /* R22 assignment outline is visible even for an empty pattern. It is
          * not content; row_mask above still requires zero content for empties. */
         int active=seq.ppat[part]==pattern;
@@ -189,7 +189,7 @@ static void tie_matrix(void)
  * brightness helper as the oracle. The final 64-step bin is column seven. */
 static void check_velocity_glyph(int pattern, int brightness)
 {
-    int x = 39 + pattern * 12;
+    int x = 46 + pattern * 12;
     assert(row_mask(pattern, PART_909, 0) == 0x80u);
     for (int row = 0; row < 3; ++row)
         for (int col = 0; col < 8; ++col) {

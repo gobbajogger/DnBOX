@@ -85,7 +85,7 @@ int main(void){
  for(int light=0;light<2;light++){
   pref_set(PR(R_PALETTE,0,0,0),light?5:0);draw_header();draw_main();draw_knobs();draw_footer();
   expect_ink(13,88,"MARACAS ATTACK",SOUND_GRAY);
-  expect_ink(13,132,"CLAP DECAY",SOUND_GRAY);
+  expect_ink(120-tw(&FONT_T,"CLAP DECAY")/2,132,"CLAP DECAY",SOUND_GRAY);
   /* one readout per stage: the physical 99% duration, right-aligned, no % beside it */
   expect_ink(227-tw(&FONT_T,"5.5ms"),88,"5.5ms",SOUND_INK);
   /* Independent CP law: raw64 maps .35*8^(64/127) seconds;

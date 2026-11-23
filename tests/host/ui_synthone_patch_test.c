@@ -64,12 +64,12 @@ static int turn_crush(pref_t r, int encoder, int delta)
 static void check_part(unsigned owner)
 {
     static const unsigned ids[] = {2,5,16,17,19,22,23,24,25,26,27,28,29};
-    static const char *const titles[] = {"OSCILLATOR", "FILTER", "FILTER ADSR", "AMP ADSR", "EFFECT", "SOUND"};
+    static const char *const titles[] = {"OSCILLATOR", "FILTER", "FILTER ADSR", "AMP ADSR", "ARPEGGIATOR", "EFFECT", "SOUND"};
     int visited = 0;
     ui.part = (uint8_t)(PART_303A + owner);
     set_view(V_PART);
     ui_input_only(); /* Observe current bank before turning a physical control. */
-    CHECK(pg.n == 6);
+    CHECK(pg.n == 7);
     for (int p = 0; p < pg.n; ++p) {
         *page_of(V_PART) = (uint8_t)p;
         CHECK(!strcmp(pg.title[p], titles[p]));
@@ -80,6 +80,11 @@ static void check_part(unsigned owner)
             pref_t ref = pg.r[p][k];
             if (ref.kind == R_NONE) continue;
             if (p == 4) {
+                static const int fields[] = {ARP_F_ON, ARP_F_RANGE, ARP_F_MODE, ARP_F_SPEED};
+                CHECK(ref.kind == R_ARP && ref.b == owner && ref.a == fields[k]);
+                continue;
+            }
+            if (p == 5) {
                 CHECK(k == 0 && ref.b == owner && pref_get(ref) == 0);
                 capture(owner, p, k, "before");
                 CHECK(turn_crush(ref, EN_K1, 12) == 12);
@@ -88,7 +93,7 @@ static void check_part(unsigned owner)
                 capture(owner, p, k, "applied");
                 continue;
             }
-            if (p == 5) {
+            if (p == 6) {
                 CHECK(k < 3 && ref.b == owner);
                 CHECK(ref.kind == (k == 0 ? R_BENGINE : k == 1 ? R_BPRESET : R_BSTATUS));
                 continue;
