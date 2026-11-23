@@ -578,9 +578,10 @@ def build_app():
                     "-plugin-opt=-function-sections", "-plugin-opt=-data-sections",
                     "-plugin-opt=-fp-contract=off", "--sort-section=alignment"]
     tc("pi32v2/bin/ld", *lto_link, "--gc-sections", *factory_roots, "-e", "_start", "-T", ld, *objs, "-o", elf)
-    for sect in ("text.bin", "data.bin", "ramtext.bin", "c1text.bin"):
+    for sect in ("text.bin", "data.bin", "ramtext.bin", "c1text.bin", "xdata.bin"):
         (OUT / sect).unlink(missing_ok=True)
-    *_, syms, dis, rt = tc_all(("common/bin/objcopy", "-O", "binary", "-j", ".text", elf, OUT / "text.bin"),
+    *_, syms, dis, rt = tc_all(("common/bin/objcopy", "-O", "binary", "-j", ".xdata", elf, OUT / "xdata.bin"),
+                               ("common/bin/objcopy", "-O", "binary", "-j", ".text", elf, OUT / "text.bin"),
                                ("common/bin/objcopy", "-O", "binary", "-j", ".data", elf, OUT / "data.bin"),
                                ("common/bin/objcopy", "-O", "binary", "-j", ".ram_text", elf, OUT / "ramtext.bin"),
                                ("common/bin/objcopy", "-O", "binary", "-j", ".c1_text", elf, OUT / "c1text.bin"),
@@ -610,6 +611,49 @@ def build_app():
     img += b"\x00\xff\xff\xff"
     (OUT / "x0x.bin").write_bytes(img)
     return bytes(img), syms, dis, rt
+
+
+XDATA_LO, XDATA_HI = 0xAD000, 0xAF000         # fm1_flash_map.h FL_XDATA_LO / FL_XDATA_HI
+XDATA_MAGIC = 0x31445858                       # "XXD1", app/xdata.h XDATA_MAGIC
+XDATA_TYPE = 101                               # the package's xdata.bin UFW entry (loader/ldr_core.c LDR_XD_TYPE)
+
+
+def record_like(r):
+    """the update loader's flash-record test (loader/ldr_core.c, step 4): 80 B at a sector's last 256 B"""
+    rd16 = lambda o: r[o] | (r[o + 1] << 8)    # noqa: E731
+    return rd16(6) == 0x5441 and rd16(0) != 0 and rd16(0) == fm1pkg_make.crc16(r[2:80])
+
+
+def xdata_problems(region, lo=XDATA_LO):
+    """what is wrong with an XDATA region image (16 B header + blob, 0xFF up to the region end)"""
+    import zlib
+    errors = []
+    if len(region) != XDATA_HI - XDATA_LO:
+        return [f"XDATA image is {len(region)} B, not the {XDATA_HI - XDATA_LO} B region"]
+    magic, n, crc, ident = struct.unpack_from("<IIII", region, 0)
+    if magic != XDATA_MAGIC:
+        errors.append(f"XDATA magic {magic:#x}")
+    elif 16 + n > len(region):
+        errors.append(f"XDATA blob {n} B does not fit")
+    elif zlib.crc32(region[16:16 + n]) != crc or crc != ident:
+        errors.append(f"XDATA CRC {zlib.crc32(region[16:16 + n]):#x}, header {crc:#x} / build id {ident:#x}")
+    elif any(b != 0xFF for b in region[16 + n:]):
+        errors.append("XDATA tail after the blob is not erased")
+    # the loader erases a sector whose last 256 B look like an update record: never one of ours
+    for s in range(lo + 0x1000, lo + len(region) + 1, 0x1000):
+        if record_like(region[s - 0x100 - lo:s - 0x100 - lo + 80]):
+            errors.append(f"XDATA at {s - 0x100:#x} looks like an update record (the loader would erase it)")
+    return errors
+
+
+def xdata_image():
+    """the linked .xdata section as the 8 KiB region the loader writes, or None (none in this build)"""
+    raw = (OUT / "xdata.bin").read_bytes() if (OUT / "xdata.bin").exists() else b""
+    if not raw:
+        return None
+    if len(raw) > XDATA_HI - XDATA_LO:
+        raise SystemExit(f"XDATA {len(raw)} B exceeds the region ({XDATA_HI - XDATA_LO} B)")
+    return raw + b"\xff" * (XDATA_HI - XDATA_LO - len(raw))
 
 
 def check(img, syms, dis, rt):
@@ -849,9 +893,17 @@ def main():
         print("  ok   ", n)
     for e in errors:
         print("  FAIL ", e)
+    xdata = xdata_image()
+    if xdata is not None:
+        if BOARD != "smk37":
+            errors.append("XDATA is an SMK-37 region: this board keeps its fonts in the app")
+        errors += xdata_problems(xdata)
+        n = struct.unpack_from("<I", xdata, 4)[0]
+        print(f"XDATA: {16 + n} B of {XDATA_HI - XDATA_LO} (flash {XDATA_LO:#x}), {XDATA_HI - XDATA_LO - 16 - n} B spare")
+        (OUT / "xdata.img").write_bytes(xdata)
     if errors:
         raise SystemExit("build: checks failed")
-    pkg = fm1pkg_make.ufw(fm1pkg_make.flash_image(img, fm1pkg_make.KEY), ota, PRODUCT)
+    pkg = fm1pkg_make.ufw(fm1pkg_make.flash_image(img, fm1pkg_make.KEY), ota, PRODUCT, xdata=xdata)
     (pkg_dir / name).write_bytes(pkg)
     print(f"app      {OUT / 'x0x.bin'}  {len(img)} B")
     print(f"loader   {LDR / 'ota.bin'}  {len(ota)} B")

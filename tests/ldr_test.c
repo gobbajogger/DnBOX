@@ -14,6 +14,8 @@
 #define T_APP_HI 0x9D000u                   /* end of the app area the loader writes */
 #define T_REC 0xBFF00u                      /* the update record (ota.c OTA_RES) */
 #define T_ERASE_HI 0xC0000u                 /* nothing erased at or above (BTIF, USRTRIM, ...) */
+#define T_XD_LO 0xAD000u                    /* XDATA: the font region, from the package's xdata.bin (type 101) */
+#define T_XD_HI 0xAF000u
 #else
 #define FELUCCA_ID "ota-FM-1_900"
 #define T_APP_HI 0x93000u
@@ -100,7 +102,12 @@ static int ldr_prog(uint32_t off, const void *p, uint32_t n)
 {
     const uint8_t *s = p;
     uint32_t i;
-    if (off < 0x4000u || off + n > T_APP_HI || ((off & 0xFFu) + n) > 256u) bad_range++;
+    if (off < 0x4000u || ((off & 0xFFu) + n) > 256u) bad_range++;
+#if BOARD_SMK37
+    if (off + n > T_APP_HI && !(off >= T_XD_LO && off + n <= T_XD_HI)) bad_range++;   /* app area or XDATA */
+#else
+    if (off + n > T_APP_HI) bad_range++;
+#endif
     for (i = 0; i < n; i++) nor[off + i] &= s[i];
     return 0;
 }
@@ -135,6 +142,21 @@ static uint32_t flash_off(const uint8_t *lg)        /* flash.bin offset in the l
         uint8_t *e = h + 0x40 + i * 0x50u;
         ota_jl_enc(e, 0x50);
         if (ota_rd16(e) == 0) return ota_rd32(e + 8);
+    }
+    return 0;
+}
+
+static uint32_t entry_of(const uint8_t *lg, uint32_t type, uint32_t *len)  /* a file's offset, 0 = none */
+{
+    uint8_t h[0x400];
+    uint32_t i, n;
+    memcpy(h, lg, sizeof h);
+    ota_jl_enc(h, 0x40);
+    n = ota_rd16(h + 8);
+    for (i = 0; i < n; i++) {
+        uint8_t *e = h + 0x40 + i * 0x50u;
+        ota_jl_enc(e, 0x50);
+        if (ota_rd16(e) == type) { *len = ota_rd32(e + 12); return ota_rd32(e + 8); }
     }
     return 0;
 }
@@ -217,6 +239,39 @@ int main(int argc, char **argv)
         bad += check("foreign key / damaged app head refused, nothing erased", rc == -6 && erases == 0);
         logical[nfo + 0x4000 + 5] = save;
     }
+#if BOARD_SMK37
+    {   /* XDATA: written from xdata.bin when the package has one, else left; the store around it never */
+        static uint8_t store[0x13000];
+        uint32_t xlen = 0, xo = entry_of(logical, 101u, &xlen), k;
+        memcpy(nor, old + ofo, T_APP_HI);
+        for (k = 0; k < sizeof store; k++)
+            nor[0x9D000u + k] = (uint8_t)(k * 7u + 3u);
+        memcpy(store, nor + 0x9D000u, sizeof store);
+        put_record_at(T_REC);
+        erases = 0; bad_range = 0;
+        rc = ldr_session();
+        bad += check("install with XDATA state completes", rc == 0 && bad_range == 0);
+        if (xo) {
+            bad += check("XDATA 0xAD000..0xAEFFF == the package's xdata.bin", xlen == T_XD_HI - T_XD_LO &&
+                         !memcmp(nor + T_XD_LO, logical + xo, xlen));
+            bad += check("store 0x9D000..0xACFFF and owner tag 0xAF000 untouched",
+                         !memcmp(nor + 0x9D000u, store, T_XD_LO - 0x9D000u) &&
+                         !memcmp(nor + 0xAF000u, store + (0xAF000u - 0x9D000u), 0x1000u));
+            erases = 0;
+            rc = ldr_session();
+            bad += check("re-run: XDATA already equal, nothing erased", rc == 0 && erases == 0);
+            logical[xo + 100] ^= 0x01;                   /* damaged xdata.bin: refused before any erase */
+            memcpy(nor, old + ofo, T_APP_HI);
+            erases = 0;
+            rc = ldr_session();
+            bad += check("damaged xdata.bin refused (CRC), nothing erased", rc == -13 && erases == 0);
+            logical[xo + 100] ^= 0x01;
+        } else {
+            bad += check("no xdata.bin: store and XDATA sectors untouched",
+                         !memcmp(nor + 0x9D000u, store, sizeof store));
+        }
+    }
+#endif
     bad += check("protected ranges untouched (SMK: BTIF, USRTRIM, USR, key_mac)", protect_ok());
     printf("%s\n", bad ? "LOADER TEST FAILED" : "loader test passed");
     return bad != 0;

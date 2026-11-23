@@ -9,13 +9,14 @@ engine by its name, and to a memory area by its address:
   flash  XIP app code area  [APP_XIP, APP_XIP + APP_CODE_MAX)
   ram    ordinary RAM       .data + .bss, [0x01C08000, 0x01C20000)
   pool   the pool           [_pool_start, _pool_end)
+  xdata  SMK XDATA region   [XDATA_XIP, XDATA_XIP + XDATA_SIZE): flash 0xAD000, font bitmaps outside the app
   other  core-1 stack, xpool, noinit, BLE RAM, RAM code
 Symbols that match no engine are "shared" (UI, sequencer, platform, shared DSP). The engine
 counts are lower bounds: inlined code and merged literals stay in the caller's symbol.
 
 The report ends with the stock budget lines and exits 1 if
   XIP free < XIP_MIN (1024 B) or pool margin < POOL_MIN (512 B),
-the same limits the gate's budget step uses. Last line: "engine-memory: PASS|FAIL <model>".
+the same limits the gate's budget step uses, or if the XDATA region (16 B header + blob) overflows its 8 KiB. Last line: "engine-memory: PASS|FAIL <model>".
 """
 import argparse
 import os
@@ -30,6 +31,7 @@ RAM_LO, RAM_HI = 0x01C08000, 0x01C20000
 RAM_SIZE = 98304                 # tools/build.py check(): ".data+.bss ... of 98304"
 POOL_SIZE = 0x54000              # tools/build.py: pool raw free = 0x54000 - pool
 POOL_RESERVE = 8192
+XDATA_XIP, XDATA_SIZE = 0x020A9000, 0x2000   # fm1_flash_map.h FL_XDATA_LO 0xAD000 via FM1_XIP; app.ld XDATA
 XIP_MIN = int(os.environ.get("XIP_MIN", "1024"))
 POOL_MIN = int(os.environ.get("POOL_MIN", "512"))
 
@@ -71,6 +73,8 @@ def parse_nm(text):
 def area_of(addr, pool_lo, pool_hi):
     if APP_XIP <= addr < APP_XIP + APP_CODE_MAX:
         return "flash"
+    if XDATA_XIP <= addr < XDATA_XIP + XDATA_SIZE:
+        return "xdata"
     if RAM_LO <= addr < RAM_HI:
         return "ram"
     if pool_lo <= addr < pool_hi:
@@ -91,14 +95,18 @@ def report(syms, marks, image_bytes=None):
         if size == 0 or hi <= lo or name.startswith(".L"):   # .L_MergedGlobals: a container
             continue
         covered = hi
-        row = table.setdefault(engine_of(name), {"flash": 0, "ram": 0, "pool": 0, "other": 0})
+        row = table.setdefault(engine_of(name), {"flash": 0, "ram": 0, "pool": 0, "other": 0, "xdata": 0})
         row[area_of(addr, pool_lo, pool_hi)] += hi - lo
     pool_used = pool_hi - pool_lo
     bss_end = marks.get("_bss_end")
     ram_used = (bss_end - RAM_LO) if bss_end is not None else None
     if image_bytes is None:
         image_bytes = sum(r["flash"] for r in table.values())
+    xs, xe = marks.get("_xdata_start"), marks.get("_xdata_end")
+    xdata_used = (xe - xs) if xs is not None and xe is not None else sum(r.get("xdata", 0) for r in table.values())
     return table, {
+        "xdata_used": xdata_used,
+        "xdata_free": XDATA_SIZE - xdata_used,
         "xip_free": APP_CODE_MAX - image_bytes,
         "pool_used": pool_used,
         "pool_margin": POOL_SIZE - pool_used - POOL_RESERVE,
@@ -119,7 +127,9 @@ def render(model, table, totals):
     out.append(f"pool margin: {totals['pool_margin']} B (min {POOL_MIN}; pool {totals['pool_used']} of {POOL_SIZE}, reserve {POOL_RESERVE})")
     if totals["ram_used"] is not None:
         out.append(f"ordinary RAM: {totals['ram_used']} of {RAM_SIZE} B, {totals['ram_free']} B free")
-    ok = totals["xip_free"] >= XIP_MIN and totals["pool_margin"] >= POOL_MIN
+    if totals.get("xdata_used"):
+        out.append(f"XDATA: {totals['xdata_used']} of {XDATA_SIZE} B (flash 0xAD000), {totals['xdata_free']} B free")
+    ok = totals["xip_free"] >= XIP_MIN and totals["pool_margin"] >= POOL_MIN and totals.get("xdata_free", 0) >= 0
     out.append(f"engine-memory: {'PASS' if ok else 'FAIL'} {model}")
     return "\n".join(out), ok
 

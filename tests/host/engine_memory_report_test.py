@@ -65,6 +65,23 @@ class Attribution(unittest.TestCase):
         table, totals = emr.report(syms, marks, image_bytes=0)
         self.assertFalse(emr.render("pro", table, totals)[1])
 
+    def test_xdata_region(self):
+        # the SMK font region (flash 0xAD000 = XIP 0x020A9000): its own area, never app XIP; over 8 KiB fails
+        syms, marks = emr.parse_nm(nm([
+            "020a9000 00000010 r FONT_XDATA_HDR",
+            "020a9010 00001e02 r FONT_XDATA_BLOB",
+            "020a9000 A _xdata_start", "020aae12 A _xdata_end",
+        ]))
+        table, totals = emr.report(syms, marks, image_bytes=0x86EE0 - 4000)
+        self.assertEqual(table["shared"]["xdata"], 0x10 + 0x1E02)
+        self.assertEqual(table["shared"]["flash"], 0)
+        self.assertEqual((totals["xdata_used"], totals["xdata_free"], totals["xip_free"]), (7698, 494, 4000))
+        text, ok = emr.render("pro", table, totals)
+        self.assertTrue(ok)
+        self.assertIn("XDATA: 7698 of 8192 B (flash 0xAD000), 494 B free", text)
+        marks["_xdata_end"] = 0x020A9000 + 0x2001
+        self.assertFalse(emr.render("pro", *emr.report(syms, marks, image_bytes=0x86EE0 - 4000))[1])
+
     def test_missing_pool_symbols_fail_closed(self):
         syms, marks = emr.parse_nm("02000200 00000100 t d9_render\n")
         with self.assertRaises(ValueError):
