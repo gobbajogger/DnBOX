@@ -6752,6 +6752,18 @@ static UI_DRAW void draw_readout(void)
         nm = "TEMPO";
     } else {
         r = pg.r[cur_page()][ui.touched];
+        /* A bound strip already shows the active label, glyph and value. */
+#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+        /* Compare kind, target and parameter; ignore the bound MIX part. */
+        uint32_t key;
+        __builtin_memcpy(&key, &r, sizeof key);
+        key &= 0xff00ffffu;
+        if (key == (R_ENG | (T_FX << 8) | (FX_DL_FDBK << 24)) ||
+            key == (R_ENG | (T_MIX << 8) | (MX_LEVEL << 24))) return;
+#else
+        if (r.kind == R_ENG && ((r.a == T_FX && r.c == FX_DL_FDBK) ||
+                                (r.a == T_MIX && r.c == MX_LEVEL))) return;
+#endif
         nm = caps_of(pref_name(r));
         if (track_page()) {                              /* a track's own: "BD  Tune" */
             put_s(put_s(put_s(t, engine_voice_name(ui.part == PART_909 ? T_909 : T_808, ui.sel[ui.part])), "  "), nm);
