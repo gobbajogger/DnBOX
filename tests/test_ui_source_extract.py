@@ -40,13 +40,4 @@ class Extract(unittest.TestCase):
                 original=next(line for line in UI.splitlines() if line.startswith(anchor))
                 duplicate=original+'\n' if anchor.startswith('#') else function(UI,anchor)
                 with self.assertRaises(ValueError):autosave(UI+'\n'+duplicate)
-    def test_actual_padcal_guard_mutation_is_rejected(self):
-        signature='static void key_event(int k, int down)';body=function(UI,signature)
-        guard='smk_clip_mode_on() || smk_padcal_on()';self.assertEqual(body.count(guard),1)
-        with tempfile.TemporaryDirectory(prefix='padcal-guard-') as d:
-            path=Path(d)/'ui.c';path.write_text(UI.replace(body.rstrip(),body.replace(guard,'0').rstrip(),1))
-            p=subprocess.run([sys.executable,str(ROOT/'tests/smk_padcal_wiring_test.py')],env=dict(os.environ,SMK_PADCAL_UI_SOURCE=str(path)),capture_output=True,text=True,timeout=10)
-            self.assertEqual(p.returncode,1,p.stdout+p.stderr)
-            self.assertIn('FAIL UI: no keys in the mode',p.stdout)
-            self.assertNotIn('Traceback',p.stderr)
 if __name__=='__main__':unittest.main(verbosity=2)

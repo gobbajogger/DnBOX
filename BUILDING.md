@@ -2,7 +2,7 @@ Publish only with current action-specific authority through the assigned publish
 
 # Building X0X
 
-Default to development builds and installs (`X0X_DEV_PADCAL=1`). Build a release
+Default to development builds and installs. Build a release
 configuration only after the user explicitly requests a release build for the
 current work. Until then, always skip the full gate, including trial runs. See
 [the active release boundary](docs/rules/workflow.md).
@@ -382,17 +382,8 @@ connections when many containers start at once.
 Build option: `X0X_CDC=1` adds Felucca's USB serial function (off by default: one plain
 MIDI interface).
 
-Build option: `X0X_DEV_PADCAL` (SMK-37). `1` (the default) makes a dev build with the pad calibration
-mode (BEHAVIOR.md CLP-79). `0` makes a release build without it: no PAD COLOURS row, no pad calibration
-code or RAM, and no INLOG args 2-5 export. The pads use the owner-calibrated table `APC40_PAD_OWNER`
-(BEHAVIOR.md CLP-13) in the two builds. To make the release build, use this command:
-
-```
-X0X_DEV_PADCAL=0 MODEL=elite ./build.sh --board smk37
-```
-
-To get the calibration mode again, build with `X0X_DEV_PADCAL=1` (or with no value). The tag `padcal-v1`
-marks the complete calibration mode (CLP-79, orientation page, reopen fix, ok dot).
+The pads use the owner-calibrated table `APC40_PAD_OWNER` (BEHAVIOR.md CLP-13). The pad calibration mode and
+its `X0X_DEV_PADCAL` option are removed (CLP-79), so dev and release builds are the same image.
 
 The build also generates `build/gen/`. It contains the font and the 909's cymbal samples (IMA ADPCM,
 44.1 kHz) and tables (`tools/gen_drum_samples.py`). The default app image does not compile in factory

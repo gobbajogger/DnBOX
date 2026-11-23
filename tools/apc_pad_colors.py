@@ -8,13 +8,11 @@ table "RGB LEDs"). The rules and their named constants are in tools/apc_colour_m
 Usage:
   tools/apc_pad_colors.py                      # table on stdout
   tools/apc_pad_colors.py --lcd-idle-h firmware/src/app/apc40_lcd_idle.h   # idle clip squares (CLP-05)
-  tools/apc_pad_colors.py --names-h firmware/src/app/apc40_pad_names.h --names-csv names.csv   # CLP-79 names
   tools/apc_pad_colors.py --pad-h out.h        # APC40_PAD_DEFAULT[128][3]: pad LED start levels
   tools/apc_pad_colors.py --pad-h out.h --pad-override export.txt   # the entries marked ok replace the rule
   tools/apc_pad_colors.py --pad-h firmware/src/app/apc40_pad_owner.h --pad-override tools/padcal/pads-owner-20261017.txt \\
       --pad-name APC40_PAD_OWNER               # the live pad table (owner-calibrated, BEHAVIOR.md CLP-13)
   tools/apc_pad_colors.py --lcd-h out.h        # APC40_LCD565[128]: LCD colours
-  tools/apc_pad_colors.py --gamma-h out.h      # PAD_GAMMA_LUT, PAD_GAIN_Q8, PAD_FLOOR_LEVEL (firmware)
   tools/apc_pad_colors.py --report out.csv [--old-pad F] [--old-lcd F]   # old and new, hues
   tools/apc_pad_colors.py --html out.html [--old-pad F] [--old-lcd F]    # swatches
   --gamma G  --target apc|live  --no-balance   # try other values of the named constants
@@ -57,18 +55,6 @@ def pad_header(pad, gamma, balance, target, override=None, name="APC40_PAD_DEFAU
     return "\n".join(out) + "\n"
 
 
-def gamma_header(gamma, balance):
-    lut, gain = m.pad_gamma_lut(gamma), m.pad_gain_q8(balance)
-    return (GEN.format(opt="--gamma-h") +
-            f" * The pad calibration start values (app/smk_padcal.h smk_padcal_default): decode gamma {gamma},\n"
-            f" * white gains {'on' if balance else 'off'} (WS2812B data sheet) with trim {m.PAD_GAIN_TRIM} in Q8,\n"
-            f" * floor {m.PAD_FLOOR_LEVEL} (the brightest channel sends at least {m.PAD_FLOOR_SENT}). */\n"
-            "#include <stdint.h>\n"
-            "static const uint8_t PAD_GAMMA_LUT[32] = {" + ",".join(map(str, lut)) + "};\n"
-            "static const uint16_t PAD_GAIN_Q8[3] = {" + ",".join(map(str, gain)) + "};\n"
-            f"#define PAD_FLOOR_LEVEL {m.PAD_FLOOR_LEVEL}u\n")
-
-
 def lcd_header(lcd, target):
     out = [GEN.format(opt="--lcd-h") +
            f" * LCD clip colour (RGB565) for each velocity: colour {target} as plain RGB565 (no gamma, no lift).\n"
@@ -89,21 +75,6 @@ def lcd_idle_header(src, target):
            f"static const uint16_t APC40_LCD_IDLE565[{len(idle)}] = {{",
            "    " + ",".join(f"0x{c:04X}" for c in idle) + ",", "};"]
     return "\n".join(out) + "\n"
-
-
-def names_header(src):
-    codes = [h << 3 | s for h, s in (m.entry_name(src, v) for v in range(128))]
-    return (GEN.format(opt="--names-h") +
-            " * The name of each pad calibration entry (BEHAVIOR.md CLP-79, dev build only): hue family and shade\n"
-            " * from the Akai reference colour. Descriptive names made by the tool: the CSV has no names, and they\n"
-            " * are not Loopy Pro colour names. Code = hue << 3 | shade. */\n"
-            "#include <stdint.h>\n"
-            "static const char *const PADCAL_HUE[" + str(len(m.NAME_HUES)) + "] = {" +
-            ", ".join(f'"{n}"' for n in m.NAME_HUES) + "};\n"
-            "static const char *const PADCAL_SHADE[" + str(len(m.NAME_SHADES)) + "] = {" +
-            ", ".join(f'"{n}"' for n in m.NAME_SHADES) + "};\n"
-            "static const uint8_t PADCAL_NAME[128] = {\n" +
-            "".join("    " + ",".join(str(c) for c in codes[i:i + 16]) + ",\n" for i in range(0, 128, 16)) + "};\n")
 
 
 def names_csv(src, owner):
@@ -142,9 +113,7 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--pad-h")
     ap.add_argument("--lcd-h")
-    ap.add_argument("--gamma-h")
     ap.add_argument("--lcd-idle-h")
-    ap.add_argument("--names-h")
     ap.add_argument("--names-csv")
     ap.add_argument("--report")
     ap.add_argument("--html")
@@ -167,8 +136,6 @@ def main():
         Path(a.pad_h).write_text(pad_header(pad, a.gamma, bal, a.target, ov, a.pad_name, a.pad_override))
     if a.lcd_h:
         Path(a.lcd_h).write_text(lcd_header(lcd, a.target))
-    if a.names_h:
-        Path(a.names_h).write_text(names_header(src))
     if a.names_csv:
         oh = Path(__file__).resolve().parents[1] / "firmware/src/app/apc40_pad_owner.h"
         mt = re.search(r"APC40_PAD_OWNER\[128\]\[3\]\s*=\s*\{(.*?)\};", oh.read_text(), re.S)
@@ -176,8 +143,6 @@ def main():
         Path(a.names_csv).write_text(names_csv(src, owner))
     if a.lcd_idle_h:
         Path(a.lcd_idle_h).write_text(lcd_idle_header(src, a.target))
-    if a.gamma_h:
-        Path(a.gamma_h).write_text(gamma_header(a.gamma, bal))
     op = read_table(a.old_pad, "APC40_RGB", 6) if a.old_pad else None
     ol = read_table(a.old_lcd, "APC40_LCD565", 4) if a.old_lcd else None
     if a.report:
@@ -215,7 +180,7 @@ def main():
             "color:#ddd;font:12px monospace}span{display:inline-block;width:40px;height:18px;margin-right:6px;"
             "vertical-align:middle}td{padding:2px 8px}</style><table><tr>" + head + "</tr>" + "".join(trs) +
             "</table>")
-    if not (a.pad_h or a.lcd_h or a.gamma_h or a.report or a.html):
+    if not (a.pad_h or a.lcd_h or a.report or a.html):
         print("vel  source  pad      lcd")
         for e, p, c in zip(src, pad, lcd):
             print(f"{e['v']:3d}  {e['apc']:06X}  {m.join(*p):06X}   {c:04X}")

@@ -190,9 +190,6 @@ static const char *part_s(int i)
 enum { O_NONE, O_LIST, O_ASK };
 enum { ACT_NONE, ACT_SAVE, ACT_LOAD, ACT_CLEAR_PART, ACT_CLEAR_PAT, ACT_COPY, ACT_RESET, ACT_ABOUT, ACT_SONG_INS,
        ACT_SONG_DEL, ACT_SONG_CLR, ACT_PERF, ACT_PERF_TEST,
-#if BOARD_SMK37 && X0X_DEV_PADCAL
-       ACT_PADCAL,
-#endif
        ACT_RESET_SOUND, ACT_HOME_LIVE, ACT_HOME_PATTERNS,
 };
 
@@ -517,9 +514,6 @@ static const x0x_param_t ACT_P[] = {
     {"CLEAR THIS PART", 0, 0, 0}, {"CLEAR PATTERN", 0, 0, 0},
     {"COPY PATTERN", 0, 0, 0}, {"RESET PROJECT", 0, 0, 0}, {"ABOUT DnBOX", 0, 0, 0}, {"INSERT BAR", 0, 0, 0},
     {"DELETE BAR", 0, 0, 0}, {"CLEAR SONG", 0, 0, 0}, {"PERFORMANCE", 0, 0, 0}, {"RUN PERF TEST", 0, 0, 0},
-#if BOARD_SMK37 && X0X_DEV_PADCAL
-    {"PAD COLOURS", 0, 0, 0},
-#endif
     [ACT_HOME_LIVE] = {"LIVE OVERVIEW", 0, 0, 0},
     [ACT_HOME_PATTERNS] = {"PATTERNS", 0, 0, 0},
 };
@@ -2122,12 +2116,6 @@ static void global_section(int g)
             list_add(PR(kind,arg,0,0));
         }
     }
-#if BOARD_SMK37 && X0X_DEV_PADCAL
-    if(g==5) {
-        extern uint8_t smk_clip_mode_on(void);
-        if(!smk_clip_mode_on()) list_add(PR(R_ACT,ACT_PADCAL,0,0));
-    }
-#endif
     put_s(list_title,GLOBAL_SECTIONS[g]);ui.list_sel=ui.glo_sel[g]<ui.list_n?ui.glo_sel[g]:0;
     ui.list_top=ui.glo_top[g]<=ui.list_sel?ui.glo_top[g]:0;ui.overlay=O_LIST;
 }
@@ -3064,14 +3052,6 @@ X0X_COLD static void run_action(int act, int arg)
         perf_test_start();
         say("PERF TEST: 15 SECONDS", 0);
         break;
-#if BOARD_SMK37 && X0X_DEV_PADCAL
-    case ACT_PADCAL: {
-        extern void smk_padcal_enter(void);
-        ui.overlay = O_NONE;
-        smk_padcal_enter();
-        break;
-    }
-#endif
     case ACT_ABOUT: {
         char full[64], *e;
         /* The long line alone carries the diagnostic SHA. The header uses a smaller
@@ -4062,8 +4042,7 @@ void ui_brk_page_keys(unsigned keys, int allowed)
 
 /* HOME + held GLOBE. A pattern-pad tap clears that pattern for the selected
  * part. Hold the source pad and press the target pad to copy that part.
- * Release GLOBE with no pad and it still opens settings. Pad calibration
- * consumes GLOBE before this runs (main_fm1.c). */
+ * Release GLOBE with no pad and it still opens settings. */
 static int glo_key = -1, glo_pat = -1, glo_copied;
 static uint32_t glo_key_edges; /* keys that changed this scan; a source must already be held */
 static void globe_part_reset(void)
@@ -4152,12 +4131,7 @@ static UI_DRAW void key_event(int k, int down)
     }
 #if BOARD_SMK37
     extern uint8_t smk_clip_mode_on(void);
-#if X0X_DEV_PADCAL
-    extern uint8_t smk_padcal_on(void);
-    if (smk_clip_mode_on() || smk_padcal_on())
-#else
     if (smk_clip_mode_on())
-#endif
         return;   /* clip mode: the pads launch clips, the keybed plays MIDI to Loopy (main_fm1.c clip keys) */
 #endif
     int bl = KEY_BLACK[k], wp = w >= 0 ? ui.pbank * 16 + w : -1;   /* wp: a white key's pattern */
@@ -4738,10 +4712,6 @@ static int division_pad_owner(void)
         !ui.freeplay[bidx()] || engine_bass_bank(bidx()) != ORIGINAL_SOUND_MIAMI ||
         smk_clip_mode_on() || smc_ui_active())
         return 0;
-#if X0X_DEV_PADCAL
-    extern uint8_t smk_padcal_on(void);
-    if (smk_padcal_on()) return 0;
-#endif
     return bidx() + 1;
 #else
     return 0;
@@ -4818,9 +4788,6 @@ int ui_live_key_owner(void)
 #if BOARD_SMK37
     extern uint8_t smk_clip_mode_on(void);
     if(smk_clip_mode_on() || smc_ui_active())return 0;
-#if X0X_DEV_PADCAL
-    extern uint8_t smk_padcal_on(void);if(smk_padcal_on())return 0;
-#endif
 #endif
     return bidx()+1;
 #else
@@ -7344,16 +7311,6 @@ static UI_DRAW void draw_main(void)
         extern uint8_t smk_clip_wait(void);
         static uint8_t clip_wait_on;              /* 1: the waiting screen is on the LCD */
         if (!blit_hash[1]) clip_wait_on = 0u;      /* an SMC screen covered the waiting screen */
-#if X0X_DEV_PADCAL
-        extern uint8_t smk_padcal_on(void);
-        extern uint8_t smk_padcal_draw(uint32_t w, uint32_t h);
-        if (smk_padcal_on()) {                    /* the pad calibration page (main_fm1.c, CLP-79) */
-            clip_wait_on = 0u;                    /* its LCD page replaces the waiting screen */
-            if (smk_padcal_draw(240u, 2u * BAND_H))
-                cv_commit_rect(1, 0, MAIN_Y);
-            return;
-        }
-#endif
         if (smk_clip_mode_on() && ui.overlay == O_NONE && !ui.help && smk_clip_wait()) {
             if (!clip_wait_on) {                  /* CLP-80: no Loopy host: the waiting screen, not the grid */
                 clip_wait_on = 1u;

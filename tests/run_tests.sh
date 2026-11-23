@@ -103,7 +103,7 @@ RES="$OUT/.results"
 # simulator's CPU guard uses the host time, so a busy host changes the result). P: host-only, parallel.
 test_class() {
     case "$1" in
-    drum909-tanh-pair|ui-clock-comp|ui-layer-restoration|smc-caption-geometry|ui-808-accent|ui-step-lane|ui-step-lane-edit|ui-step-lane-transaction|break-step-velocity-engine|ui-overlay-battery|ui-toast-battery|ui-shared-parameter-panel|ui-held-target-visibility|break-preview-integration|break-preview-visibility|break-held-edit-journey|break-family-layout|break-context-label|break-outline-snapshot|ui-chance-framebuffer|ui-break-seq-phase|ui-break-seq-metadata|ui-padcal-render) TEST_CLASS=G ;;
+    drum909-tanh-pair|ui-clock-comp|ui-layer-restoration|smc-caption-geometry|ui-808-accent|ui-step-lane|ui-step-lane-edit|ui-step-lane-transaction|break-step-velocity-engine|ui-overlay-battery|ui-toast-battery|ui-shared-parameter-panel|ui-held-target-visibility|break-preview-integration|break-preview-visibility|break-held-edit-journey|break-family-layout|break-context-label|break-outline-snapshot|ui-chance-framebuffer|ui-break-seq-phase|ui-break-seq-metadata) TEST_CLASS=G ;;
     install-slots-web) TEST_CLASS=W ;;
     installer|installer-f02-bind|installer-f02-bind-web|installer-targets|installer-slots|slot-build-safe|installer-restore-status|slot-backup|slot-backup-durable|slot-archive-zone|slot-verify-order|slot-read-reply|slot-ack-integrity|slot-echo-7bit|ctl-publish-atomic|upload-tools|\
     breaks-page|projects-page|ble-acl-start-flags|ble-hci-completed|ble-acl-zero-credit|ble-zero-conn|ble-link-epoch-reset|smc-reconnect-epoch|smc-boot-saved-roles|smc-ble-payload|ble-central-first-notification|ble-dual-peer|ble-one-peer-command|ble-one-peer-contract|ble-command-credit|ble-controller-heap|ble-ctl-fail-return|ble-disconnect-status|ble-sysex-bounds|ble|ble-package|smk-package|smk-ota-entry*|smk-update-loader|smk-build-package*|\
@@ -682,18 +682,13 @@ if [ "$PIL_SKIP" = 1 ]; then not_run smk-clip-chord-display Pillow; else run smk
 run smk-ck-page-layout python3 tests/smk_ck_page_layout_test.py   # CLP-75: no top bar on the stage page, help line at the bottom
 run smk-arrows sh -c "$CC -std=c99 -O2 -Wall -Wextra -Werror -Ifirmware/src -o $OUT/smk_arrows_test tests/smk_arrows_test.c && $OUT/smk_arrows_test"   # < > route and hold repeat
 run smk-arrows-owner python3 tests/smk_arrows_owner_test.py   # one owner for each < > press in clip mode (CLP-27)
-run apc40-tables sh -c "python3 tools/apc_pad_colors.py --pad-h $OUT/apc40_pad_default_gen.h --lcd-h $OUT/apc40_lcd565_gen.h --gamma-h $OUT/apc40_pad_gamma_gen.h && \
-    $CC -std=c99 -O2 -Wall -Wextra -Werror -Ifirmware/src -I$OUT -o $OUT/apc40_tables_test tests/apc40_tables_test.c && $OUT/apc40_tables_test"   # the LCD table and the pad calibration start point against their tool
+run apc40-tables sh -c "python3 tools/apc_pad_colors.py --pad-h $OUT/apc40_pad_default_gen.h --lcd-h $OUT/apc40_lcd565_gen.h && \
+    $CC -std=c99 -O2 -Wall -Wextra -Werror -Ifirmware/src -I$OUT -o $OUT/apc40_tables_test tests/apc40_tables_test.c && $OUT/apc40_tables_test"   # the LCD table against its tool
 run smk-clip-idle python3 tests/smk_clip_idle_test.py   # CLP-05: idle clip squares = half of the group full shade
 run smk-clip-idle-pad python3 tests/smk_clip_idle_pad_test.py   # CLP-13: idle clip pads send the full owner level
 run apc40-pad-owner python3 tests/apc40_pad_owner_test.py   # CLP-13: the owner-calibrated pad table, the export, the clip pad bytes
-run smk-padcal sh -c "$CC -std=c99 -O2 -Wall -Wextra -Werror -Ifirmware/src -o $OUT/smk_padcal_test tests/smk_padcal_test.c && $OUT/smk_padcal_test"   # CLP-79: pad calibration logic
-run padcal-view python3 tests/padcal_view_test.py   # CLP-79: selected LCD square boost, entry names; pads unchanged
-run smk-padcal-export sh -c "$CC -std=c99 -O2 -Wall -Wextra -Werror -Ifirmware/src -o $OUT/smk_padcal_export_bin tests/smk_padcal_test.c && python3 tests/smk_padcal_export_test.py $OUT/smk_padcal_export_bin"   # CLP-79: export round trip
 run ui-source-extraction python3 tests/test_ui_source_extract.py
-run smk-padcal-wiring python3 tests/smk_padcal_wiring_test.py   # CLP-79: menu row, keys, knobs, pads, LCD
 run pad-placement-doc python3 tests/pad_placement_doc_test.py   # PAD_MAP.md physical pad placement = PADLED_SLOT, SMK_PADMUX
-run padcal-flag python3 tests/padcal_flag_test.py   # X0X_DEV_PADCAL: flag 0 (release) has no pad calibration code, flag 1 keeps it
 run apc40-lcd565-csv python3 tests/apc40_lcd565_csv_test.py   # CLP-05: the LCD table is plain RGB565 of the Akai CSV, all 128
 run apc-palette python3 tests/apc_palette_test.py   # one source, hue order, distinct colours, INLOG replay
 run installer-targets python3 tests/make_pages_test.py
@@ -881,7 +876,6 @@ run ui-step-lane-edit sh tests/host/ui_step_lane_edit_test.sh
 run ui-step-lane-transaction python3 tests/host/ui_step_lane_transaction_test.py
 run ui-break-seq-phase env SMC_UI_TEST_FILE=tests/ui_inventory/break_seq_phase.c SMC_UI_OUT=build/host/break-seq-phase sh tests/host/smc_ui_test.sh
 run ui-break-seq-metadata env SMC_UI_TEST_FILE=tests/ui_inventory/break_seq_metadata.c SMC_UI_OUT=build/host/break-seq-metadata sh tests/host/smc_ui_test.sh
-run ui-padcal-render sh tests/host/ui_padcal_render_test.sh
 run ui-glyph-polish sh tests/host/ui_glyph_polish_test.sh
 run ui-tape-reel sh tests/host/ui_tape_reel_test.sh
 run ui-perf-labels sh tests/host/ui_perf_labels_test.sh
