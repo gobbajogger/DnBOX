@@ -746,19 +746,24 @@ def plan_slots(dev, image, product, require_backup=False):
     return SlotMove(lay, old_map, new_map, risk, board_of(dev.id.text)) if risk or require_backup else None
 
 
-def preload_defaults(up, out):
-    """--fresh-install: the owner's default BREAK loops (tools/default_breaks.py) into blank slots 1 and 2"""
+def preload_defaults(up, out, select=None):
+    """--fresh-install [--default-breaks WHICH]: selected default BREAK loops into blank slots."""
     import default_breaks
+    ids = default_breaks.parse_selection(select)
+    if not ids:
+        print("default BREAK loops: none selected", file=out)
+        return []
     back = up.reconnect_after(lambda i: not i.loader, DELAY["wait_reboot"])
     if not back:
         raise InstallError("slots", "installed, but the device did not answer for the default BREAK loops")
     try:
-        filled = default_breaks.fill_fresh(EditorLink(back.link), fresh_install=True)
+        filled = default_breaks.fill_fresh(EditorLink(back.link), fresh_install=True, select=ids)
     except (xs.SlotError, TimeoutError) as e:
         raise InstallError("slots", f"installed, but the default BREAK loops were not written ({e})")
     finally:
         back.link.close()
-    print(f"default BREAK loops: slot(s) {', '.join(map(str, filled))} written and read back" if filled else
+    which = ", ".join(ids)
+    print(f"default BREAK loops: slot(s) {', '.join(map(str, filled))} written and read back ({which})" if filled else
           "default BREAK loops: not written (a slot is not blank)", file=out)
     return filled
 
@@ -1047,7 +1052,7 @@ def run(a, backend, out, ask):
         raise InstallError("slots", f"installed, but this firmware has no X0X sample slots for restoration. "
                                     f"The backed-up slots were not written back. {move.help()}")
     if getattr(a, "fresh_install", False):
-        preload_defaults(up, out)
+        preload_defaults(up, out, getattr(a, "default_break_ids", None))
     ctl = getattr(a, "ctl_bytes", None)
     if ctl:
         back = up.reconnect_after(lambda i: not i.loader, DELAY["wait_reboot"])
@@ -1152,8 +1157,16 @@ def main(argv=None, backend=None, out=sys.stdout, ask=ask_tty):
     ap.add_argument("--head-ref", metavar="FILE", help="a flash read-back of this unit (raw, from flash 0): the bootloader guard reference")
     ap.add_argument("--head-check", action="store_true", help="compare the package head with the reference only (no device)")
     ap.add_argument("--fresh-install", action="store_true",
-                    help="SMK-37, first X0X install on this keyboard: after the install, preload the owner's 5 default "
-                         "BREAK loops into slots 1 and 2 (only if every slot is blank; never on a later install)")
+                    help="SMK-37, first X0X install on this keyboard: after the install, preload the owner's default "
+                         "BREAK loops into slots 1 and 2 (only if every slot is blank; never on a later install). "
+                         "Choose which of the 5 with --default-breaks (default all). Listen first: "
+                         "https://gobbajogger.github.io/DnBOX-nightly/starting-breaks/")
+    ap.add_argument("--default-breaks", metavar="WHICH", default=None,
+                    help="with --fresh-install, which of the 5 default BREAK zones to preload: all (the default), "
+                         "none, or a comma-separated list (personal-br1-zone1 or short br1-1, br1-2, br1-3, "
+                         "br2-1, br2-2). Listen first at https://gobbajogger.github.io/DnBOX-nightly/starting-breaks/ "
+                         "(WAV: .../private-audio/<id>.wav). Nightly tests: "
+                         "tests/product-starting-break-preview.test.mjs, tests/product-break-http.test.mjs")
     ap.add_argument("--config", choices=("dev", "rel"), default="dev",
                     help="the build config of the package for the gate guard: dev (X0X_DEV_PADCAL=1, default) or rel (0)")
     a = ap.parse_args(argv)
@@ -1161,6 +1174,16 @@ def main(argv=None, backend=None, out=sys.stdout, ask=ask_tty):
         ap.error("--backup and --no-slots cannot be used together")
     if a.fresh_install and a.no_slots:
         ap.error("--fresh-install needs the sample layout check (not --no-slots)")
+    if a.default_breaks is not None and not a.fresh_install:
+        ap.error("--default-breaks needs --fresh-install")
+    if a.fresh_install:
+        import default_breaks
+        try:
+            a.default_break_ids = default_breaks.parse_selection(a.default_breaks)
+        except ValueError as e:
+            ap.error(str(e))
+    else:
+        a.default_break_ids = None
     if bool(a.info) == bool(a.package):
         ap.error("give a PACKAGE.fwsc or --info")
     if a.head_check:                        # no device: only the bootloader guard

@@ -20,3 +20,23 @@ including inherited Felucca IMA decoder semantics, not to the audio payloads.
 No installer, device write, sample erasure, package replacement, deployment,
 hardware acceptance or complete historical sample restoration occurred.
 
+## Listen and choose which of the five to preload
+
+Preview WAVs (listen before a fresh install) live on the nightly site, not in this
+firmware tree:
+
+- Page: https://gobbajogger.github.io/DnBOX-nightly/starting-breaks/
+- WAV: https://gobbajogger.github.io/DnBOX-nightly/private-audio/<id>.wav
+  (also without the .wav suffix). <id> is personal-br1-zone1, personal-br1-zone2,
+  personal-br1-zone3, personal-br2-zone1, or personal-br2-zone2.
+- Nightly tests: tests/product-starting-break-preview.test.mjs and
+  tests/product-break-http.test.mjs in gobbajogger/DnBOX-nightly.
+
+On a fresh install, choose all or any subset with the host installer (no new UI):
+
+    tools/fm1_install.py PACKAGE.fwsc --fresh-install
+    tools/fm1_install.py PACKAGE.fwsc --fresh-install --default-breaks all
+    tools/fm1_install.py PACKAGE.fwsc --fresh-install --default-breaks br1-1,br2-2
+    tools/fm1_install.py PACKAGE.fwsc --fresh-install --default-breaks none
+
+A later install, or a zone or slot the user cleared, is never refilled.

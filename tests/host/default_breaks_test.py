@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: GPL-3.0-only
-"""perf row 3: the owner's 5 BREAK zones as the default contents of user slots 1 and 2.
+"""perf rows 3 and 4 (firmware): the owner's 5 BREAK zones as default user-slot contents,
+with an installer choice of all or any and a link to the nightly preview WAVs.
 
 Checks: the 5 pinned original ADPCM zones (no substitutes); the slot images tools/default_breaks.py
 builds decode, with the firmware's ima_decode, to the pinned PCM sample for sample; they fit slot 1
@@ -98,3 +99,72 @@ assert bytes(dev.fl.mem[0xB3000:0xF4000]) == before, "user data and empty slots 
 dev = MockDevice(slots=[(0xA0000, 0x14000), (0xB4000, 0x14000)])
 assert db.fill_fresh(dev, fresh_install=True) == []
 print("default-breaks: PASS fresh-install-only path (flag + all blank; repeat, cleared stays cleared, user data, foreign map)")
+
+# Row 4 (firmware): choose all or any of the 5, with nightly preview URLs to listen first.
+# Selection is an installer option (tools/fm1_install.py --default-breaks); no new UI.
+assert db.parse_selection(None) == ids and db.parse_selection("all") == ids
+assert db.parse_selection("none") == [] and db.parse_selection("") == []
+assert db.parse_selection("br1-1, personal-br2-zone2") == ["personal-br1-zone1", "personal-br2-zone2"]
+assert db.parse_selection(["BR1 2", "br2-1", "br1-2"]) == ["personal-br1-zone2", "personal-br2-zone1"]
+try:
+    db.parse_selection("personal-br9-zone1")
+except ValueError as e:
+    assert "unknown default BREAK" in str(e) and db.PREVIEW_PAGE in str(e)
+else:
+    raise SystemExit("bad id must raise")
+# Manifest preview links and WAV hashes match the nightly contract (decoded PCM + 44-byte header).
+assert meta["preview"]["page"] == db.PREVIEW_PAGE
+assert meta["preview"]["wav"] == db.PREVIEW_WAV and meta["preview"]["raw"] == db.PREVIEW_RAW
+assert meta["preview"]["tests"] == list(db.PREVIEW_TESTS)
+for z in zones:
+    urls = db.preview_urls(z["id"])
+    assert urls["page"] == db.PREVIEW_PAGE
+    assert urls["wav"] == f"https://gobbajogger.github.io/DnBOX-nightly/private-audio/{z['id']}.wav"
+    assert urls["raw"] == f"https://gobbajogger.github.io/DnBOX-nightly/private-audio/{z['id']}"
+    assert urls["tests"] == list(db.PREVIEW_TESTS)
+# Rebuild the nightly preview WAV from the firmware-decoded PCM and check the pinned hash.
+for k, img in imgs.items():
+    mine = [z for z in zones if z["slot"] == k]
+    for i, z in enumerate(mine):
+        off, n, *_ = struct.unpack_from("<5I2h4B", img, 32 + 28 * i)
+        pcm = subprocess.run([str(dec), str(OUT / f"slot{k}.bin"), str(off), str(n)],
+                             capture_output=True, check=True).stdout
+        wav = db.preview_wav(pcm, z["sample_rate"])
+        assert len(wav) == z["preview_bytes"] == 44 + z["frames"] * 2, z["id"]
+        assert hashlib.sha256(wav).hexdigest() == z["preview_sha256"], f"{z['id']}: preview WAV differs"
+print("default-breaks: PASS preview URLs + WAV hashes (nightly private-audio form)")
+
+# Subset preload: only the chosen zones are written; unselected slots stay empty.
+dev = MockDevice(slots=AGREED)
+pick = ["personal-br1-zone1", "personal-br1-zone3", "personal-br2-zone2"]
+assert db.fill_fresh(dev, fresh_install=True, select=pick) == [1, 2]
+assert [s["nz"] for s in xs.layout(dev)["slots"]] == [2, 1, 0]
+want = db.images(pick)
+assert bytes(dev.fl.mem[0xC2000:0xC2000 + len(want[1])]) == want[1]
+assert bytes(dev.fl.mem[0xD6000:0xD6000 + len(want[2])]) == want[2]
+# A later install, even with --default-breaks=all, does not add the omitted zones.
+before = bytes(dev.fl.mem[0xB3000:0xF4000])
+assert db.fill_fresh(dev, fresh_install=True, select="all") == []
+assert bytes(dev.fl.mem[0xB3000:0xF4000]) == before and [s["nz"] for s in xs.layout(dev)["slots"]] == [2, 1, 0]
+# Only slot-2 zones: slot 1 stays erased (empty), slot 2 is written.
+dev = MockDevice(slots=AGREED)
+assert db.fill_fresh(dev, fresh_install=True, select="br2-1,br2-2") == [2]
+assert [s["nz"] for s in xs.layout(dev)["slots"]] == [0, 2, 0]
+assert all(b == 0xFF for b in dev.fl.mem[0xC2000:0xC2000 + 32])
+# --default-breaks=none writes nothing.
+dev = MockDevice(slots=AGREED)
+assert db.fill_fresh(dev, fresh_install=True, select="none") == []
+assert all(b == 0xFF for b in dev.fl.mem[0xB3000:0xF4000])
+# Per-zone clear: after a full preload the user drops one zone from slot 1 (rewrites the
+# slot with the remaining zones). Later installs do not put the cleared zone back.
+dev = MockDevice(slots=AGREED)
+assert db.fill_fresh(dev, fresh_install=True) == [1, 2]
+kept = [z for z in zones if z["id"] in ("personal-br1-zone1", "personal-br1-zone3")]
+cleared = db.slot_image("BR1", [(z["adpcm"], z["frames"]) for z in kept])
+xs.write_slot(dev, 0, cleared)
+after = bytes(dev.fl.mem[0xC2000:0xC2000 + len(cleared)])
+assert after == cleared and xs.layout(dev)["slots"][0]["nz"] == 2
+assert db.fill_fresh(dev, fresh_install=True, select="all") == []
+assert bytes(dev.fl.mem[0xC2000:0xC2000 + len(cleared)]) == after
+assert xs.layout(dev)["slots"][0]["nz"] == 2 and xs.layout(dev)["slots"][1]["nz"] == 2
+print("default-breaks: PASS choose-any (--default-breaks subset/none) and per-zone clear stays cleared")

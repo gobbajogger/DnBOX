@@ -337,17 +337,51 @@ def fresh_install():
     image = I.logical_image(raw)
     p = pkgfile("fresh.fwsc", raw)
     calls = []
+    all_ids = list(default_breaks.ZONE_IDS)
     real = default_breaks.fill_fresh
-    default_breaks.fill_fresh = lambda link, fresh_install, progress=None: calls.append(fresh_install) or [1, 2]
+
+    def fake_fill(link, fresh_install, progress=None, select=None):
+        calls.append((fresh_install, list(select) if select is not None else None))
+        return [1, 2]
+
+    default_breaks.fill_fresh = fake_fill
     try:
         dev = FakeSMK(image)                            # blank layout (all nz = 0)
         rc, out, err = cli([p, "--yes", "--fresh-install"], dev)
-        ok(rc == 0 and dev.upgrades == 2 and calls == [True] and "slot(s) 1, 2 written" in out,
-           "--fresh-install on a blank keyboard: install, then the defaults")
+        ok(rc == 0 and dev.upgrades == 2 and calls == [(True, all_ids)] and "slot(s) 1, 2 written" in out
+           and "personal-br1-zone1" in out,
+           "--fresh-install on a blank keyboard: install, then all 5 defaults")
+        calls.clear()
+        dev = FakeSMK(image)
+        rc, out, err = cli([p, "--yes", "--fresh-install", "--default-breaks", "br1-1,personal-br2-zone2"], dev)
+        ok(rc == 0 and dev.upgrades == 2 and calls == [(True, ["personal-br1-zone1", "personal-br2-zone2"])]
+           and "personal-br1-zone1, personal-br2-zone2" in out,
+           "--fresh-install --default-breaks subset: only the chosen zones")
+        calls.clear()
+        dev = FakeSMK(image)
+        rc, out, err = cli([p, "--yes", "--fresh-install", "--default-breaks", "none"], dev)
+        ok(rc == 0 and dev.upgrades == 2 and calls == [] and "none selected" in out,
+           "--fresh-install --default-breaks none: firmware installs, no slots written")
         calls.clear()
         dev = FakeSMK(image)
         rc, out, err = cli([p, "--yes"], dev)
         ok(rc == 0 and calls == [], "an ordinary install never writes the defaults")
+        def cli_usage(args):
+            buf = io.StringIO()
+            old_err, sys.stderr = sys.stderr, buf
+            try:
+                rc = I.main(args, backend=FakeSMK(image), out=io.StringIO(), ask=lambda _p: True)
+                return rc, buf.getvalue()
+            except SystemExit as e:
+                return e.code, buf.getvalue()
+            finally:
+                sys.stderr = old_err
+        rc, msg = cli_usage([p, "--yes", "--default-breaks", "all"])
+        ok(rc == 2 and "needs --fresh-install" in msg,
+           "--default-breaks without --fresh-install -> usage error")
+        rc, msg = cli_usage([p, "--yes", "--fresh-install", "--default-breaks", "nope"])
+        ok(rc == 2 and "unknown default BREAK" in msg,
+           "unknown --default-breaks id -> usage error before write")
         dev = FakeSMK(image, slot_info=(2, 80, 3, ord("B"), ord("R"), ord("1"), 0, 59, 0, 0, 0))
         rc, out, err = cli([p, "--yes", "--fresh-install"], dev)
         ok(rc == I.EXIT["slots"] and dev.upgrades == 0 and calls == [] and "not a fresh install" in err,
