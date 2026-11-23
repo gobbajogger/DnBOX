@@ -26,3 +26,5 @@ static void geo_blit(int x,int y) {
  }
 }
 
+
+static unsigned pan_format_checks,pan_format_bad;

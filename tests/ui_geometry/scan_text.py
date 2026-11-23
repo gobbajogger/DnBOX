@@ -5,6 +5,7 @@ import argparse
 from collections import defaultdict
 import json
 from pathlib import Path
+import re
 
 # Confirmed instructional sentences from the existing renderers. Keep a complete
 # register of observed strings, including new words requiring editorial review.
@@ -31,7 +32,17 @@ INSTRUCTIONAL = {
     "THE PART'S SOUND",
     "IN A LIST: RUN THE ACTION",
     "EMPTY: WHITE KEYS ADD BARS",
+    "EMPTY   WHITE KEY: ADD BAR",
 }
+
+# L14: outside the on-demand hold-a-button help screens, no visible caption may
+# be a question or an instruction ("CONTROL: ACTION", "TAP: ...", "+ KNOB: ...").
+INSTRUCTION = re.compile(r"\?|^\+ |\b(TAP|HOLD|PRESS|TURN)\b.*[:+]|"
+                         r"\b(KEYS?|KNOBS?|PADS?|STEP|BUTTONS?|SEQ|SCALE|SEL|HOME|PATCH|GLOBE)\b[^:]*: ")
+
+
+def is_instruction(caption):
+    return bool(INSTRUCTION.search(caption))
 
 
 def scan(log):
@@ -56,6 +67,12 @@ def scan(log):
         raise ValueError("Missing final-frame text trace or incomplete geometry walk")
     findings = {caption: sorted(screen for screen in screens if caption in screens[screen])
                 for caption in sorted(INSTRUCTIONAL)}
+    for screen, captions in screens.items():
+        if screen.startswith("help-"):
+            continue
+        for caption in captions:
+            if is_instruction(caption) and screen not in findings.get(caption, []):
+                findings.setdefault(caption, []).append(screen)
     for suffix in (": THIS TRACK", ": THE PATTERN", ": THE SOUND"):
         for screen, captions in screens.items():
             for caption in captions:

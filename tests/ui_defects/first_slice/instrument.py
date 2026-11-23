@@ -52,7 +52,14 @@ def instrument(root):
     compact='    if(level_time<0)return;'
     a=compact if compact in body else '    char num[16],unit[8],label[32];pref_value_of(r,matrix_value(r),num,unit);'
     y='top' if 'int h,int level_time)' in body else 'top-off'
-    body=once(body,a,f'    first_finish(envelope_before,"glyph",x0,{y},0);\n'+a);ui.write_text(body)
+    body=once(body,a,f'    first_finish(envelope_before,"glyph",x0,{y},0);\n'+a)
+    # The plot's painted 50% guide and 0% baseline are real ink that bounds
+    # the LEVEL/TIME plot; record them as "axis" (mask only, never as glyph
+    # or curve pixels, so they cannot satisfy a missing-curve negative).
+    for axis in ('cv_rect(x0,(top+y0)/2,194,1,SOUND_LINE);','cv_rect(x0,y0,span+1,1,SOUND_SELECT_SIDE);'):
+        if axis in body:
+            body=once(body,axis,'{uint16_t axis_before[CV_MAX];first_snapshot(axis_before);'+axis+'first_finish(axis_before,"axis",x0,y0,0);}')
+    ui.write_text(body)
     dv=root/'firmware/src/app/ui_drum_voice.inc';text=dv.read_text()
     draw='UI_DRAW ' if 'static UI_DRAW void dv_glyph(' in text else ''
     text=once(text,'int off = band * BAND_H, bh = dv_band_h(band);','int off = band * BAND_H, bh = dv_band_h(band);\n    first_offset=band==2?158:20;first_control=-1;first_row=-1;')

@@ -28,8 +28,10 @@ def body(text, head):
 
 # The menu row: GLOBAL > SYSTEM > PAD COLOURS, SMK only, not in clip mode.
 glob = body(ui, "static void global_section(int g)")
-sysi = glob.index("case 5:")
-check(sysi < glob.index("ACT_PADCAL") < glob.index("break;", sysi) and "if(!smk_clip_mode_on())" in glob,
+# ccf451a6 compacted the sections into a row table; SYSTEM is section 5.
+sysi = glob.index("if(g==5) {")
+check(sysi < glob.index("ACT_PADCAL", sysi) < glob.index("}", sysi) and
+      "if(!smk_clip_mode_on()) list_add(PR(R_ACT,ACT_PADCAL,0,0));" in glob[sysi:],
       "menu: PAD COLOURS is in GLOBAL > SYSTEM, not in clip mode")
 check('{"PAD COLOURS", 0, 0, 0}' in ui and re.search(r"case ACT_PADCAL: \{[^}]*ui\.overlay = O_NONE;\s*smk_padcal_enter\(\);", ui),
       "menu: the row closes the list and starts the mode")

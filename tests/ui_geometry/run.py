@@ -60,6 +60,20 @@ def run(source,output):
             pm=re.findall(r'^PRESENCE checks=(\d+) missing=(\d+)$',logpath.read_text(),re.M)
             report[key]={'exit':mrun.returncode,'presence':pm}
             if mrun.returncode==0 or len(pm)!=1 or int(pm[0][1])==0:report['status']='FAIL'
+    # L11: 4-level battery in every reached top bar; pan L50..C..R50 wherever formatted.
+    bat=re.findall(r'^BATTERY checks=(\d+) missing=(\d+) levels=(\d+),(\d+),(\d+),(\d+)$',(output/'render.log').read_text(),re.M)
+    pan=re.findall(r'^PAN_FORMAT checks=(\d+) bad=(\d+)$',(output/'render.log').read_text(),re.M)
+    report['battery']=bat;report['panFormat']=pan
+    if (len(bat)!=1 or int(bat[0][0])!=inventory['screens'] or int(bat[0][1])!=0 or 0 in map(int,bat[0][2:]) or
+            len(pan)!=1 or int(pan[0][0])==0 or int(pan[0][1])!=0):report['status']='FAIL'
+    else:
+        for key,pattern,index in (('BATTERY_MUTATE',r'^BATTERY checks=(\d+) missing=(\d+) ',1),('PAN_MUTATE',r'^PAN_FORMAT checks=(\d+) bad=(\d+)$',1)):
+            me=dict(env,**{key:'1'});me.pop('SMC_UI_SHOTS',None)
+            lp=output/(key.lower()+'.log')
+            with lp.open('w') as log:mrun=subprocess.run([str(output/'host/test')],cwd=work,env=me,stdout=log,stderr=subprocess.STDOUT,timeout=600)
+            pm=re.findall(pattern,lp.read_text(),re.M)
+            report[key]={'exit':mrun.returncode,'counts':pm}
+            if mrun.returncode==0 or len(pm)!=1 or int(pm[0][index])==0:report['status']='FAIL'
     pix=re.findall(r'^GLYPH_PIXELS checks=(\d+) missing=(\d+) damaged=(\d+)$',(output/'render.log').read_text(),re.M)
     report['glyphPixelScope']='active 909/808 controls: positive raster deltas, own bank/cell bounds and final-frame survival'
     report['glyphPixels']=pix

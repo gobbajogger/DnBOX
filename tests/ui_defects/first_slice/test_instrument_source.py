@@ -37,6 +37,16 @@ class CurrentSourceHooks(unittest.TestCase):
             self.assertEqual(source.count('first_original_dv_curve_row(v,kick,top,bottom,col);'), 1)
             self.assertEqual(source.count('first_finish(before,"envelope-body",13,top,0);'), 1)
 
+    def test_amp_plot_axes_observed_as_axis_only(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            self.prepare(root)
+            instrument(root)
+            source = (root / FILES[1]).read_text()
+            self.assertEqual(source.count('first_finish(axis_before,"axis",x0,y0,0);'), 2)
+            # The curve snapshot starts after both axes, so axis ink is never curve ink.
+            self.assertLess(source.rindex('first_finish(axis_before'), source.index('first_snapshot(envelope_before)'))
+
     def test_missing_or_duplicate_curve_renderer_rejected(self):
         anchor = 'static UI_DRAW void dv_curve_row(drum_curve_t *v,int kick,int top,int bottom,uint16_t col)'
         for replacement in ('', anchor + anchor):
