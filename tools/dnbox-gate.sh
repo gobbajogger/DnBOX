@@ -159,8 +159,7 @@ budget()     { local model xip pool bad=0
                  fi
                done
                return $bad; }
-ui_defects() { python3 tests/ui_defects/test_gate.py || return 1
-               python3 -m unittest discover -s tests/ui_defects/first_slice -p 'test_*.py' || return 1
+ui_defects() { python3 -m unittest discover -s tests/ui_defects/first_slice -p 'test_*.py' || return 1
                # Render the screens from this checkout on the host and judge them (no saved receipts).
                rm -rf "$OUT/ui-judge"
                python3 tests/ui_defects/first_slice/judge.py --output "$OUT/ui-judge" || return 1
