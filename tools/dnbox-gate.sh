@@ -164,7 +164,9 @@ ui_defects() { python3 -m unittest discover -s tests/ui_defects/first_slice -p '
                rm -rf "$OUT/ui-judge"
                python3 tests/ui_defects/first_slice/judge.py --output "$OUT/ui-judge" || return 1
              }
-retired_engine() { local n; n=$(git grep -niwI 'dr[o]ne' -- firmware web tests ':!*CHANGELOG*' ':!docs/history/*' | wc -l); echo "Retired slot-2 engine mentions: $n"; [ "$LANE" = sound ] || [ "$LANE" = integ ] || return 0; [ "$n" -eq 0 ]; }
+# Whole repo. Excluded: CHANGELOG, docs/history, and the upstream AudioKit Synth One factory banks
+# (assets/factory_banks/synthone/*.json, third-party preset names pinned byte-for-byte to upstream).
+retired_engine() { local n; n=$(git grep -niwI 'dr[o]ne' -- . ':!*CHANGELOG*' ':!docs/history/*' ':!assets/factory_banks/synthone/*.json' | wc -l); echo "Retired slot-2 engine mentions: $n"; [ "$LANE" = sound ] || [ "$LANE" = integ ] || return 0; [ "$n" -eq 0 ]; }
 
 step pool-accounting python3 tests/test_pool_budget.py
 step clean-tree clean

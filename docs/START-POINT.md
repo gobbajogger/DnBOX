@@ -61,7 +61,7 @@ Nothing else is done. At 10:05 VLAT **0 of the 41 CHECKLISTS items are PASS** in
 | L04 | SuperJ6 A/B bench vs the original passes | as L02, using the 14/56 comparison set (decision N01) | S4, R019 |
 | L05 | All 640 AudioKit presets / 12 banks load with verified mapping | test prints `presets=640 unmapped=0`, including the 2 legacy keys | S5, R017 |
 | L06 | Every engine fits stock memory together | Elite and Pro with all engines: gate `budget` PASS (pool ≥ 512 B, XIP ≥ 1024 B); `docs/lanes/sound-memory.md` lists measured RAM/flash per engine from the link map; no PSRAM (gate `limits`) | S6, R012 |
-| L07 | The retired slot-2 engine is gone from the firmware repo | `git grep -niwI 'dr[o]ne' -- firmware web tests ':!*CHANGELOG*' ':!docs/history/*' \| wc -l` = 0 | S7, rule 31 |
+| L07 | The retired slot-2 engine is gone from the firmware repo | `git grep -niwI 'dr[o]ne' -- . ':!*CHANGELOG*' ':!docs/history/*' ':!assets/factory_banks/synthone/*.json' \| wc -l` = 0 (the excluded banks are upstream AudioKit preset data) | S7, rule 31 |
 
 ### fwui (firmware repo): move M2
 | ID | Finished feature | Counts as done when | Req |
