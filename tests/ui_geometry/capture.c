@@ -373,6 +373,23 @@ static void required_dead_space(const char *screen) {
  dead_checks++;
  if(best*4>240*240){dead_bad++;printf("DEAD_SPACE screen=%s area=%.3f box=%d,%d %dx%d\n",screen,best/(240.*240.),bx,by+Y0,bw,bh);}
 }
+/* KNOB_GROUPS (#48/#71): every engine page binds 1..4 controls to K5-K8, no control
+ * twice, and every control of the engine's table is reachable on some page. */
+static unsigned knob_group_checks,knob_group_bad;
+static void required_knob_groups(unsigned kind,int part) {
+ unsigned want=kind==ORIGINAL_SOUND_CHICAGO?20u:kind==ORIGINAL_SOUND_SYNTHONE?0u:16u;
+ uint32_t seen=0;int dup=0;
+ for(int i=0;i<pg.n;i++){
+  int n=0;
+  for(int k=0;k<4;k++){pref_t r=pg.r[i][k];if(r.kind==R_NONE)continue;n++;
+   if(r.kind==R_ENG&&r.a==T_303&&r.c<32){if(seen>>r.c&1u)dup++;seen|=1u<<r.c;}}
+  knob_group_checks++;
+  if(n<1||n>4){knob_group_bad++;printf("KNOB_GROUPS kind=%u part=%d page=%s bound=%d\n",kind,part,pg.title[i],n);}
+ }
+ if(dup){knob_group_bad++;printf("KNOB_GROUPS kind=%u part=%d duplicate=%d\n",kind,part,dup);}
+ for(unsigned id=0;id<want;id++){knob_group_checks++;
+  if(!(seen>>id&1u)){knob_group_bad++;printf("KNOB_GROUPS kind=%u part=%d unreachable=%s\n",kind,part,ui_original_name(kind,id));}}
+}
 static unsigned audit_frames;
 static void geo_audit(const char *screen) {
  static unsigned calls;
@@ -488,6 +505,7 @@ int main(void)
       CHECK(engine_bass_select_preset(part-PART_303A,kind,0,&proj.sound)==0);
       for(int block=0;block<12;block++){int32_t audio[512];engine_render(audio,256);}
       CHECK(!engine_bass_preset_pending(part-PART_303A));build_pages();int pages=pg.n;
+      required_knob_groups(kind,part);
       for(int page=0;page<pages;page++) {
        *page_of(V_PART)=(uint8_t)page;build_pages();geo_nframe=0;memset(pixel_frame_owner,0,sizeof pixel_frame_owner);presence_nglyph=0;geo_enabled=1;
        memset(blit_hash,0,sizeof blit_hash);memset(cv_tile_valid,0,sizeof cv_tile_valid);ui_frame();
@@ -558,7 +576,8 @@ int main(void)
     printf("KNOB_PREFIX checks=%u bad=%u\n",kprefix_checks,kprefix_bad);
     printf("ABBREV checks=%u bad=%u\n",abbrev_checks,abbrev_bad);
     printf("DEAD_SPACE checks=%u bad=%u\n",dead_checks,dead_bad);
+    printf("KNOB_GROUPS checks=%u bad=%u\n",knob_group_checks,knob_group_bad);
     printf("UNIT_NAMES checks=%u bad=%u\n",unitname_checks,unitname_bad);
     printf("HEADERS checks=%u bad=%u\n",header_checks,header_bad);
-    return type_bad||dupread_bad||duplabel_bad||kprefix_bad||abbrev_bad||dead_bad||raw_bad||unitname_bad||!unitname_checks||header_bad||!header_checks||unit_missing||!unit_checks||geo_findings||presence_missing||pixel_missing||pixel_damaged||battery_missing||pan_format_bad||!pan_format_checks||r22_roll_missing||r22_roll_screens<8?1:0;
+    return knob_group_bad||!knob_group_checks||type_bad||dupread_bad||duplabel_bad||kprefix_bad||abbrev_bad||dead_bad||raw_bad||unitname_bad||!unitname_checks||header_bad||!header_checks||unit_missing||!unit_checks||geo_findings||presence_missing||pixel_missing||pixel_damaged||battery_missing||pan_format_bad||!pan_format_checks||r22_roll_missing||r22_roll_screens<8?1:0;
 }

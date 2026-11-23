@@ -168,6 +168,8 @@ def instrument(root):
     p=root/'firmware/src/app/ui_drum_voice.inc';s=p.read_text()
     s=once(s,'put_s(caption,"DECAY ")','put_s(caption,getenv("KPREFIX_MUTATE")?"K5 DECAY ":"DECAY ")');p.write_text(s)
     p=root/'firmware/src/app/ui.c';s=p.read_text()
+    # KNOBGROUP_MUTATE drops SuperJ6's last group (LFO/CHORUS): four controls unreachable.
+    s=once(s,'                pref_t refs[4];\n                for (int col = 0; col < 4; col++) refs[col] = rows[row][col] < 0','                pref_t refs[4];\n                if(getenv("KNOBGROUP_MUTATE") && kind == ORIGINAL_SOUND_JUNO && row == count - 1) continue;\n                for (int col = 0; col < 4; col++) refs[col] = rows[row][col] < 0')
     # DEADSPACE_MUTATE leaves the 808/909 MIX strip panel undrawn.
     s=once(s,'static UI_DRAW void draw_drum_mix(int band, int k)\n{','static UI_DRAW void draw_drum_mix(int band, int k)\n{\n    if(getenv("DEADSPACE_MUTATE"))return;')
     s=once(s,'    if (r.kind >= R_DLEN && r.kind <= R_BTRANS)','    if(getenv("ABBREV_MUTATE")&&ui.view==V_SEQ&&r.kind==R_DLEN+5)return "TRANSP";\n    if (r.kind >= R_DLEN && r.kind <= R_BTRANS)')

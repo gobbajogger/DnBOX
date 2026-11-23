@@ -98,7 +98,7 @@ def run(source,output):
         if mrun.returncode==0 or len(pm)!=1 or int(pm[0][1])==0:report['status']='FAIL'
     # Page compliance: no raw 0..127 readouts, canonical unit names, one header contract.
     for name,key in (('RAW_VALUES','RAW_MUTATE'),('UNIT_NAMES','UNITNAME_MUTATE'),('HEADERS','HEADER_MUTATE'),('TYPE_SCALE','TYPESCALE_MUTATE'),
-                     ('DUP_READOUT','DUPREAD_MUTATE'),('KNOB_PREFIX','KPREFIX_MUTATE'),('ABBREV','ABBREV_MUTATE'),('DUP_LABEL','DUPLABEL_MUTATE'),('DEAD_SPACE','DEADSPACE_MUTATE')):
+                     ('DUP_READOUT','DUPREAD_MUTATE'),('KNOB_PREFIX','KPREFIX_MUTATE'),('ABBREV','ABBREV_MUTATE'),('DUP_LABEL','DUPLABEL_MUTATE'),('DEAD_SPACE','DEADSPACE_MUTATE'),('KNOB_GROUPS','KNOBGROUP_MUTATE')):
         pat=r'^'+name+r' checks=(\d+) bad=(\d+)$'
         got=re.findall(pat,(output/'render.log').read_text(),re.M)
         report[name.lower()]=got
