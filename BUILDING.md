@@ -430,7 +430,7 @@ The SMK build differs from the FM-1 build in these items:
 
 - The flash map (`firmware/hal/fm1_flash_map.h`): an explicit allow-list with compile-time checks. No
   window reaches the head (0x0-0x3FFF), BTIF / USRTRIM (0xC0000-0xC1FFF, the factory key and pad
-  calibration), the stock resources (0xF4000-0xFDFFF) or key_mac (0xFF000-). The RAM flash driver has a
+  calibration), the stock resources (0xF4000-0xFDFFF) or key_mac (0xFF000-). The 4 KiB at 0xFE000-0xFEFFF is FITTAB, written only by the update loader. The RAM flash driver has a
   second guard.
 - The store (`storage.c`): seven objects A/B at 0x9D000-0xAAFFF, boot screen copies at 0xAB000 and 0xAC000, spare 0xAD000-0xAEFFF, the store owner tag at
   0xAF000. The update staging at 0xBB000 (`ota.c`). Three user sample slots (`app/slots.c`): slot 1 80 KiB at

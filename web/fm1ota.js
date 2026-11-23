@@ -6,7 +6,7 @@
 // loader. Step 2: the loader reads the whole image and writes it. In both steps
 // the device sends cmd 0x30 read requests on the logical image and we answer.
 
-import { packageXdata } from "./fm1pkg.js";
+import { packageXdata, packageFittab } from "./fm1pkg.js";
 
 const HS_QUERY = [0xF0, 0x00, 0x32, 0x45, 0x00, 0x00, 0x00, 0x40, 0x7F, 0xF7];
 const UPGRADE = [0xF0, 0x22, 0x24, 0x35, 0x7F, 0xF7];
@@ -19,7 +19,8 @@ const SMK_FAMILY = /^(ota-)?(SMK-37[ +].*|MKE-P37|STARRYKEY-37.*)$/i;
 export const sameKeyboard = (a, b) => a === b || (SMK_FAMILY.test(a) && SMK_FAMILY.test(b));   // two models
 
 // errors carry a code the pages translate: notfound, model, stopped, noloader, lost, noreturn,
-// mismatch (detail: the identity the device reports), badreq, xdata (the font region did not read back)
+// mismatch (detail: the identity the device reports), badreq, xdata (the font region did not read back),
+// fittab (the fit table did not read back)
 function fail(code, msg, detail = "") { const e = new Error(msg); e.code = code; e.detail = detail; return e; }
 
 // SMK XDATA read back (editor.c ED_XDATA 50): after the reboot the running firmware reports whether it uses
@@ -47,6 +48,34 @@ export async function xdataReadback(link, xdata, ms = 2000, tries = 2) {
   for (let i = 0; i < 16; i++) hdr.push((r[1 + 2 * i] | (r[2 + 2 * i] << 7)) & 0xFF);
   if (r[0] !== 1 || hdr.some((v, i) => v !== xdata[i]))
     throw fail("xdata", "installed, but the font region did not read back as the package's: install again");
+  return hdr;
+}
+
+// SMK FITTAB read back (editor.c ED_FITTAB 51): after the reboot the running firmware reports whether the
+// fit-table sector is present and the region's 16 B header as read now; it must be the package's
+// (tools/fm1_install.py fittab_readback does the same).
+const ED_FITTAB = 51;
+export async function fittabReadback(link, fittab, ms = 2000, tries = 2) {
+  let r = null;
+  for (let t = 0; t < tries && !r; t++) {
+    if (link.drain) link.drain();
+    if (!link.send([...ED_HDR, ED_FITTAB, 0xF7])) throw fail("fittab", "the USB connection was lost before the fit table read back");
+    const end = Date.now() + ms;
+    while (Date.now() < end) {
+      const p = await link.read(end - Date.now());
+      if (!p) break;
+      if (p.length > 5 && p[0] === 0xF0 && p[p.length - 1] === 0xF7 && ED_HDR.every((v, i) => p[i] === v) && p[4] === ED_FITTAB) {
+        r = Array.from(p.slice(5, -1));
+        break;
+      }
+    }
+  }
+  if (!r) throw fail("fittab", "installed, but the firmware did not report its fit table: install again");
+  if (r.length !== 33) throw fail("fittab", `malformed fit table reply (${r.length} B): install again`);
+  const hdr = [];
+  for (let i = 0; i < 16; i++) hdr.push((r[1 + 2 * i] | (r[2 + 2 * i] << 7)) & 0xFF);
+  if (r[0] !== 1 || hdr.some((v, i) => v !== fittab[i]))
+    throw fail("fittab", "installed, but the fit table did not read back as the package's: install again");
   return hdr;
 }
 
@@ -363,6 +392,8 @@ export class Updater {
       if (back.id.text !== product) throw fail("mismatch", `installed, but the device reports ${back.id.text}`, back.id.text);
       const xd = packageXdata(image);
       if (xd) { step("xdata"); await xdataReadback(back.link, xd); }
+      const ft = packageFittab(image);
+      if (ft) { step("fittab"); await fittabReadback(back.link, ft); }
     } finally { back.link.close(); }
     step("done", back.id.text);
     return back.id.text;

@@ -13,9 +13,11 @@
 #define FELUCCA_ID "ota-SMK-37 Pro_900"
 #define T_APP_HI 0x9D000u                   /* end of the app area the loader writes */
 #define T_REC 0xBFF00u                      /* the update record (ota.c OTA_RES) */
-#define T_ERASE_HI 0xC0000u                 /* nothing erased at or above (BTIF, USRTRIM, ...) */
+#define T_ERASE_HI 0xC0000u                 /* nothing erased at or above except the FITTAB sector */
 #define T_XD_LO 0xAD000u                    /* XDATA: the font region, from the package's xdata.bin (type 101) */
 #define T_XD_HI 0xAF000u
+#define T_FT_LO 0xFE000u                    /* FITTAB: the fit-table sector, from fittab.bin (type 102) */
+#define T_FT_HI 0xFF000u
 #else
 #define FELUCCA_ID "ota-FM-1_900"
 #define T_APP_HI 0x93000u
@@ -92,8 +94,13 @@ static void ota_commit(const uint8_t *parm) { (void)parm; }
 static int ldr_fread(uint32_t off, void *p, uint32_t n) { memcpy(p, nor + off, n); return 0; }
 static int ldr_erase(uint32_t off)
 {
-    if (off < 0x4000u || off >= T_ERASE_HI || (off & 0xFFFu)) bad_range++;
-    if (off < 0x4000u) { printf("ERASE IN THE HEAD %#x\n", off); exit(1); }
+    if ((off & 0xFFFu) || off < 0x4000u ||
+        (off >= T_ERASE_HI
+#if BOARD_SMK37
+         && !(off >= T_FT_LO && off < T_FT_HI)
+#endif
+        )) bad_range++;
+    if (off < 0x4000u || off >= 0xFF000u) { printf("ERASE IN A PROTECTED RANGE %#x\n", off); exit(1); }
     erases++;
     memset(nor + off, 0xFF, 0x1000);
     return 0;
@@ -104,7 +111,9 @@ static int ldr_prog(uint32_t off, const void *p, uint32_t n)
     uint32_t i;
     if (off < 0x4000u || ((off & 0xFFu) + n) > 256u) bad_range++;
 #if BOARD_SMK37
-    if (off + n > T_APP_HI && !(off >= T_XD_LO && off + n <= T_XD_HI)) bad_range++;   /* app area or XDATA */
+    if (off + n > T_APP_HI &&
+        !(off >= T_XD_LO && off + n <= T_XD_HI) &&
+        !(off >= T_FT_LO && off + n <= T_FT_HI)) bad_range++;   /* app area, XDATA or FITTAB */
 #else
     if (off + n > T_APP_HI) bad_range++;
 #endif
@@ -269,6 +278,37 @@ int main(int argc, char **argv)
         } else {
             bad += check("no xdata.bin: store and XDATA sectors untouched",
                          !memcmp(nor + 0x9D000u, store, sizeof store));
+        }
+    }
+    {   /* FITTAB: written from fittab.bin when the package has one, else left; USR and key_mac never */
+        uint32_t flen = 0, fo = entry_of(logical, 102u, &flen), k;
+        uint8_t usr[0xA000], key[0x1000], gap[0x1000];
+        memcpy(usr, nor + 0xF4000u, sizeof usr);
+        memcpy(key, nor + 0xFF000u, sizeof key);
+        for (k = 0; k < sizeof gap; k++)
+            nor[T_FT_LO + k] = (uint8_t)(k * 11u + 9u);
+        memcpy(gap, nor + T_FT_LO, sizeof gap);
+        put_record_at(T_REC);
+        erases = 0; bad_range = 0;
+        rc = ldr_session();
+        bad += check("install with FITTAB state completes", rc == 0 && bad_range == 0);
+        if (fo) {
+            bad += check("FITTAB 0xFE000..0xFEFFF == the package's fittab.bin", flen == T_FT_HI - T_FT_LO &&
+                         !memcmp(nor + T_FT_LO, logical + fo, flen));
+            bad += check("USR 0xF4000..0xFDFFF and key_mac 0xFF000 untouched",
+                         !memcmp(nor + 0xF4000u, usr, sizeof usr) && !memcmp(nor + 0xFF000u, key, sizeof key));
+            erases = 0;
+            rc = ldr_session();
+            bad += check("re-run: FITTAB already equal, nothing erased", rc == 0 && erases == 0);
+            logical[fo + 100] ^= 0x01;                   /* damaged fittab.bin: refused before any erase */
+            memcpy(nor + T_FT_LO, gap, sizeof gap);
+            erases = 0;
+            rc = ldr_session();
+            bad += check("damaged fittab.bin refused (CRC), nothing erased", rc == -15 && erases == 0);
+            logical[fo + 100] ^= 0x01;
+        } else {
+            bad += check("no fittab.bin: FITTAB sector untouched",
+                         !memcmp(nor + T_FT_LO, gap, sizeof gap));
         }
     }
 #endif

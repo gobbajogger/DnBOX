@@ -655,6 +655,8 @@ run locked-settings python3 tools/check_locked_settings.py   # hardware-relevant
 run xdata-region sh -c "$CC -O2 -Wall -Wextra -Werror -Wno-unused-function -Wno-type-limits -DBOARD_SMK37=1 -Ifirmware/hal -o $OUT/xdata_region_test tests/host/xdata_region_test.c && $OUT/xdata_region_test"   # XDATA: owner clear stops at 0xAD000, FL_STORE_OK excludes it, exact header check
 run xdata-font-fallback sh -c "$CC -std=c99 -O2 -Wall -Wextra -Werror -Wno-unused-function -Ibuild/gen -o $OUT/xdata_font_fallback_test tests/host/xdata_font_fallback_test.c && $OUT/xdata_font_fallback_test"   # bad XDATA: S/M/XS/B draw as FONT_T
 run xdata-package python3 tests/host/xdata_package_test.py   # XDATA record-tail check, package entry, installer read back (py + web), gate_flashmap
+run fittab-region sh -c "$CC -O2 -Wall -Wextra -Werror -Wno-unused-function -Wno-type-limits -DBOARD_SMK37=1 -Ifirmware/hal -o $OUT/fittab_region_test tests/host/fittab_region_test.c && $OUT/fittab_region_test"   # FITTAB: 0xFE000 one sector, key_mac 0xFF000 refused, header returns absent
+run fittab-package python3 tests/host/fittab_package_test.py   # FITTAB region image, package entry, installer read back (py + web), gate_flashmap
 run smk-update-protection sh -c "$CC -O2 -Wall -Wextra -Werror -Wno-unused-function -Wno-type-limits -DBOARD_SMK37=1 -DX0X_SMC_VENDOR_TEST=1 -Ifirmware/hal -o $OUT/smk_update_protection_test tests/host/smk_update_protection_test.c && $OUT/smk_update_protection_test"
 run smk-vendor-update-gate sh -c "for m in 0 1; do for d in 0 1; do $CC -O2 -Wall -Wextra -Werror -Wno-sign-compare -Wno-unused-function -DBOARD_SMK37=1 -DT_MODEL=\$m -DT_DEFAULT_GATE=\$d -o $OUT/smk_vendor_update_gate_test\$m-\$d tests/host/smk_vendor_update_gate_test.c && $OUT/smk_vendor_update_gate_test\$m-\$d || exit 1; done; done"
 run smk-flash sh -c "$CC -O2 -Wall -Wno-unused-function -DBOARD_SMK37=1 -Ifirmware/hal -o $OUT/smk_flash_test \
@@ -700,7 +702,8 @@ run smk-clip-wait sh tests/host/smk_clip_wait_test.sh   # CLP-80: the clip scree
 run smk-apc40-violet python3 tests/smk_apc40_violet_test.py   # a76: violet, purple and pink clips are not blue
 if [ -f build/smk37/x0x.bin ] && [ -f build/smk37/loader/ota.bin ] && [ -n "${AC79_SDK:-}" ]; then
     XDATA_ARG=""; [ -f build/smk37/xdata.img ] && XDATA_ARG="--xdata build/smk37/xdata.img"   # SMK font region (loader writes 0xAD000)
-    run smk-package sh -c "python3 tools/fm1pkg_make.py --board smk37 $XDATA_ARG build/smk37/x0x.bin build/smk37/loader/ota.bin $OUT/smk_new.fwsc >/dev/null && \
+    FITTAB_ARG=""; [ -f build/smk37/fittab.img ] && FITTAB_ARG="--fittab build/smk37/fittab.img"   # SMK fit table (loader writes 0xFE000)
+    run smk-package sh -c "python3 tools/fm1pkg_make.py --board smk37 $XDATA_ARG $FITTAB_ARG build/smk37/x0x.bin build/smk37/loader/ota.bin $OUT/smk_new.fwsc >/dev/null && \
         python3 tests/smk_pkg_test.py $OUT/smk_new.fwsc"
     run smk-ota-entry sh -c "$CC -DBOARD_SMK37=1 -o $OUT/ota_test_smk tests/ota_test.c && $OUT/ota_test_smk $OUT/smk_new.fwsc"
     for m in 1 2; do                     # the MODEL=elite / mke builds of ota.c

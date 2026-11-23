@@ -24,8 +24,9 @@
 #include "fm1_sys.h"
 /* the loader may write the app area and erase update records; never the head */
 #if BOARD_SMK37
-/* SMK: app area 0x4000..0x9CFFF, records in the VM 0x9D000..0xBFFFF only: never BTIF / USRTRIM
- * 0xC0000..0xC1FFF, USR 0xF4000.., key_mac 0xFF000 (FL_APP / FL_REC, asserted in fm1_flash_map.h; the RAM
+/* SMK: app area 0x4000..0x9CFFF, records in the VM 0x9D000..0xBFFFF, and the FITTAB sector
+ * 0xFE000..0xFEFFF only: never BTIF / USRTRIM 0xC0000..0xC1FFF, USR 0xF4000..0xFDFFF, or
+ * key_mac 0xFF000 (FL_APP / FL_REC / FL_FITTAB, asserted in fm1_flash_map.h; the RAM
  * driver also refuses every protected range on its own, FL_GUARD) */
 #define FL_RANGE_OK(off, n) FL_LDR_RANGE_OK(off, n)
 #else

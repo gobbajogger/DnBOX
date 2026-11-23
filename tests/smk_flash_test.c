@@ -59,7 +59,7 @@ int main(void)
           FL_GUARD(0x9D000u, 0x1000u) && FL_GUARD(0xAF000u, 0x1000u) && FL_GUARD(0xB0000u, 0x1000u) &&
           FL_GUARD(0xBA000u, 0x1000u) && FL_GUARD(0xBF000u, 0x1000u) && FL_GUARD(0xC2000u, 0x1000u) &&
           FL_GUARD(0xF3000u, 0x1000u) && !FL_GUARD(0xF4000u, 0x1000u) && !FL_GUARD(0x9C000u, 0x1000u) &&
-          FL_DATA_HI == 0xB0000u && allowed == (0xC0000u - 0x9D000u + 0xF4000u - 0xC2000u) / 0x1000u);
+          FL_DATA_HI == 0xB0000u && allowed == (0xC0000u - 0x9D000u - (FL_XDATA_HI - FL_XDATA_LO) + 0xF4000u - 0xC2000u) / 0x1000u);
     check("FL_DATA (the store) and FL_SMPV (VM spare) do not overlap: no store sector in 0xB0000-0xBAFFF",
           FL_IN(0xAF000u, 0x1000u, FL_DATA_LO, FL_DATA_HI) && !FL_IN(0xB0000u, 0x1000u, FL_DATA_LO, FL_DATA_HI) &&
           FL_IN(0xB0000u, 0xB000u, FL_SMPV_LO, FL_SMPV_HI));
@@ -67,9 +67,13 @@ int main(void)
           FL_BLE_LO == 0x8B000u && FL_BLE_HI == 0x9B000u && FL_BLE_HI - FL_BLE_LO == 0x10000u &&
           FL_LDR_RANGE_OK(FL_BLE_LO, FL_BLE_HI - FL_BLE_LO) && !FL_GUARD(FL_BLE_LO, 0x1000u) &&
           FL_BLE_HI <= 0x4120u + 0x97400u && FL_APP_CODE_MAX == 0x86EE0u);
-    check("loader: app area 0x4000-0x9CFFF, records 0x9D000-0xBFFFF only",
+    check("loader: app area 0x4000-0x9CFFF, records 0x9D000-0xBFFFF, FITTAB 0xFE000-0xFEFFF only",
           LDR_RANGE_OK(0x4000u, 0x1000u) && LDR_RANGE_OK(0x9C000u, 0x1000u) && LDR_RANGE_OK(0xBF000u, 0x1000u) &&
-          !LDR_RANGE_OK(0xC0000u, 0x1000u) && FL_REC_HI == 0xC0000u);
+          !LDR_RANGE_OK(0xC0000u, 0x1000u) && FL_REC_HI == 0xC0000u &&
+          LDR_RANGE_OK(0xFE000u, 0x1000u) && LDR_RANGE_OK(0xFEFFFu, 1) &&
+          !LDR_RANGE_OK(0xFEFFFu, 2) && !LDR_RANGE_OK(0xFF000u, 1) && !LDR_RANGE_OK(0xFE000u, 0x2000u) &&
+          !FL_GUARD(0xFE000u, 0x1000u) && FL_PROTECTED(0xFE000u, 0x2000u) &&
+          FL_FITTAB_LO == 0xFE000u && FL_FITTAB_HI == FL_KEYMAC_LO && FL_KEYMAC_LO == 0xFF000u);
     for (o = 0; o < OBJ_NOBJ; o++)
         for (c = 0; c < 2u; c++)
             in_store &= FL_STORE_OK(st_sector(o, c), 0x1000u) && st_sector(o, c) < ST_OWNER_SECTOR;

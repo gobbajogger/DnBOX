@@ -12,7 +12,8 @@
  *   3. writes ONLY the app area [0x4000, 0x93000), sector by sector, skipping
  *      sectors that are already equal, and verifies each one; the flash head
  *      (SPL, isd_config) is never written; SMK: then the XDATA region
- *      0xAD000..0xAEFFF from the package's xdata.bin entry, if it has one;
+ *      0xAD000..0xAEFFF from the package's xdata.bin entry, if it has one,
+ *      then the FITTAB sector 0xFE000..0xFEFFF from fittab.bin, if it has one;
  *   4. asks 0xF0000000 ("success"), then invalidates the update record (RAM
  *      and flash) so the SPL boots the new app, and resets.
  * Power loss during 3: the record is still there, the SPL runs the loader
@@ -151,6 +152,54 @@ static int ldr_xdata(const uint8_t *hdr, uint8_t *sec, uint8_t *cur, uint32_t wr
 #define ldr_xdata(hdr, sec, cur, write) 0
 #endif
 
+#if BOARD_SMK37 && !(defined(X0X_SMC_VENDOR_TEST) && X0X_SMC_VENDOR_TEST)
+/* FITTAB (fm1_flash_map.h FL_FITTAB, plain, the 4 KiB spare between USR and key_mac): the package's
+ * "fittab.bin" UFW entry (type 102, exactly the 4 KiB sector: tools/build.py fittab_image). write 0:
+ * only check the entry (its CRC16 over the whole entry), before the app area's first erase; write 1:
+ * then put it in place. No entry (an older package, or stock vendor / mask-ROM rescue): left as it is
+ * (the app's fittab_blob / fittab_load then return NULL, absent). Any write or erase that would reach
+ * 0xFF000 is refused by FL_LDR_RANGE_OK / FL_PROTECTED. */
+#define LDR_FT_LO   0xFE000u
+#define LDR_FT_HI   0xFF000u
+#define LDR_FT_TYPE 102u
+_Static_assert(LDR_FT_LO == 0xFE000u && LDR_FT_HI == 0xFF000u && LDR_FT_HI - LDR_FT_LO == 0x1000u,
+               "FITTAB is exactly one sector, immediately below key_mac");
+static int ldr_fittab(const uint8_t *hdr, uint8_t *sec, uint8_t *cur, uint32_t write)
+{
+    uint32_t i, k, s, off = 0, len = 0, want = 0, crc = 0, nent = ota_rd16(hdr + 8);
+    int rc;
+    for (i = 0; i < nent; i++) {
+        const uint8_t *e = hdr + 0x40 + i * 0x50u;
+        if (ota_rd16(e) == LDR_FT_TYPE) {
+            want = ota_rd16(e + 4);
+            off = ota_rd32(e + 8);
+            len = ota_rd32(e + 12);
+        }
+    }
+    if (!off)
+        return 0;
+    if (len != LDR_FT_HI - LDR_FT_LO)
+        return -14;
+    for (k = 0; k < len; k += 512u) {
+        if (ota_read(off + k, sec, 512))
+            return -7;
+        crc = ota_crc16(sec, 512, crc);
+    }
+    if (crc != want)
+        return -15;
+    for (s = LDR_FT_LO; write && s < LDR_FT_HI; s += 0x1000u) {
+        for (k = 0; k < 0x1000u; k += 512u)
+            if (ota_read(off + (s - LDR_FT_LO) + k, sec + k, 512))
+                return -7;
+        if ((rc = ldr_put(s, sec, cur)) != 0)
+            return rc;
+    }
+    return 0;
+}
+#else
+#define ldr_fittab(hdr, sec, cur, write) 0
+#endif
+
 static int ldr_session(void)
 {
     static uint8_t hdr[0x400], sec[0x1000], cur[0x1000];
@@ -169,8 +218,10 @@ static int ldr_session(void)
     ldr_sfc(sec, 32, 0, key);
     if (ota_crc16(sec + 2, 30, 0) != ota_rd16(sec))
         return -6;                                       /* package for another chip key */
-    /* the XDATA entry, if any, must be whole before anything is erased */
+    /* the XDATA and FITTAB entries, if any, must be whole before anything is erased */
     if ((rc = ldr_xdata(hdr, sec, cur, 0)) != 0)
+        return rc;
+    if ((rc = ldr_fittab(hdr, sec, cur, 0)) != 0)
         return rc;
     /* 3. app area, sector by sector */
     for (s = LDR_APP_LO; s < LDR_APP_HI; s += 0x1000u) {
@@ -182,8 +233,10 @@ static int ldr_session(void)
         done += 0x1000u;
         ldr_progress(done, LDR_APP_HI - LDR_APP_LO);
     }
-    /* 3b. XDATA after the app: power loss here resumes from the record like the app area */
+    /* 3b. XDATA then FITTAB after the app: power loss here resumes from the record like the app area */
     if ((rc = ldr_xdata(hdr, sec, cur, 1)) != 0)
+        return rc;
+    if ((rc = ldr_fittab(hdr, sec, cur, 1)) != 0)
         return rc;
     /* 4. finish: the host confirms, the record goes, the SPL boots the app */
     for (i = 0; i < 4u; i++)

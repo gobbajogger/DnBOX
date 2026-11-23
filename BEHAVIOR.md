@@ -513,7 +513,7 @@ FLS-01. SMK-37 flash map (layout 2):
   - VM spare 0xB0000-0xBAFFF: the sector-0 shadows of the three slots 0xB0000-0xB2FFF, user sample slot 3 0xB3000-0xBAFFF.
   - Update staging 0xBB000-0xBFFFF.
   - User sample slots 1 and 2 0xC2000-0xF3FFF.
-  - 0xAB000 and 0xAC000 hold the boot screen (two copies). 0xAD000-0xAEFFF stays spare. 0xFE000-0xFEFFF stays unused on the SMK-37 (4 KiB is too small for a slot). [CODE ../hal/fm1_flash_map.h:25-68] [CODE app/boot_screen.h]
+  - 0xAB000 and 0xAC000 hold the boot screen (two copies). 0xAD000-0xAEFFF is XDATA (font bitmaps). 0xFE000-0xFEFFF is FITTAB (Synth One option-B fit table, 4 KiB, between USR and key_mac at 0xFF000). [CODE ../hal/fm1_flash_map.h:25-68] [CODE app/boot_screen.h]
 FLS-02. The SMK-37 has 3 user sample slots: slot 1 80 KiB at 0xC2000, slot 2 120 KiB at 0xD6000, slot 3 32 KiB at 0xB3000. Slots 1 and 2 keep the flash offsets of the earlier layouts. Slot 3 sits in the 44 KiB window at 0xB0000, after the three 4 KiB sector-0 shadows (0xB0000-0xB2FFF). The FM-1 has 2 slots of 80 KiB at 0xA0000 and 0xB4000. [CODE app/slots.c:15-45] (Changed 2026-11-12: slot 3 is back, 32 KiB; the owner asked for it, and the 2026-10-26 cut had no reason in the owner's words. 2026-10-26 had removed it; 2026-10-15 had added it at 44 KiB.)
 FLS-03. Keep the imported-sample flash of the slots. A space saving must not shrink slot 1, slot 2 or slot 3. [USER]
 FLS-04. The store-owner check at first start clears only 0x9D000-0xAEFFF. It does not clear the sample slots or the 44 KiB window at 0xB0000 (shadows and slot 3). [CODE storage.c:50-105]

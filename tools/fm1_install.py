@@ -263,12 +263,13 @@ def package_damage(image):
         typ = int.from_bytes(e[0:2], "little")
         # flash.bin (0) and ota.bin (100), what the device installs, carry the CRC of their bytes as
         # served. The stock packer's other entries store a CRC of something else: bounds only.
-        if typ in (0, 100, XDATA_TYPE) and _crc16(image[off:off + size]) != dcrc:
+        if typ in (0, 100, XDATA_TYPE, FITTAB_TYPE) and _crc16(image[off:off + size]) != dcrc:
             return f"{name}: CRC"
     return None
 
 
 XDATA_TYPE = 101                                    # SMK: xdata.bin, the font region the loader writes at 0xAD000
+FITTAB_TYPE = 102                                   # SMK: fittab.bin, the fit-table sector the loader writes at 0xFE000
 
 
 def package_xdata(image):
@@ -284,7 +285,21 @@ def package_xdata(image):
     return None
 
 
+def package_fittab(image):
+    """the SMK FITTAB region image (4 KiB: 16 B header + fit table) the package's loader installs, or None"""
+    if package_damage(image):
+        return None
+    hdr = _dec(image[0:0x40])
+    for i in range(int.from_bytes(hdr[8:10], "little")):
+        e = _dec(image[0x40 + i * 0x50:0x40 + (i + 1) * 0x50])
+        if int.from_bytes(e[0:2], "little") == FITTAB_TYPE:
+            off, size = int.from_bytes(e[8:12], "little"), int.from_bytes(e[12:16], "little")
+            return bytes(image[off:off + size])
+    return None
+
+
 ED_XDATA = 50                                       # editor.c: XDATA in use + the region header as read now
+ED_FITTAB = 51                                      # editor.c: FITTAB present + the region header as read now
 
 
 def xdata_readback(link, xdata, timeout=2.0):
@@ -300,6 +315,22 @@ def xdata_readback(link, xdata, timeout=2.0):
     if hdr != bytes(xdata[:16]) or r[0] != 1:
         raise InstallError("xdata", f"the font region reads back {hdr.hex()} (in use: {r[0]}), "
                                     f"expected {bytes(xdata[:16]).hex()}: reinstall")
+    return hdr
+
+
+def fittab_readback(link, fittab, timeout=2.0):
+    """after the reboot: the running firmware reads its FITTAB region back. Raises InstallError unless it
+    reports the region present and the header there is the package's (magic, length, CRC-32, build id)."""
+    try:
+        r = EditorLink(link).req(ED_FITTAB, [], timeout)
+    except TimeoutError as e:
+        raise InstallError("fittab", "written, but the firmware did not report its fit table: reinstall") from e
+    if len(r) != 33:
+        raise InstallError("fittab", f"malformed fit table reply ({len(r)} B): reinstall")
+    hdr = bytes((r[1 + 2 * i] | (r[2 + 2 * i] << 7)) & 0xFF for i in range(16))
+    if hdr != bytes(fittab[:16]) or r[0] != 1:
+        raise InstallError("fittab", f"the fit table reads back {hdr.hex()} (present: {r[0]}), "
+                                    f"expected {bytes(fittab[:16]).hex()}: reinstall")
     return hdr
 
 
@@ -601,7 +632,7 @@ class Updater:
                                "if already in update mode, use --no-slots only with a verified backup or no X0X samples")
         step("write", 100)
 
-    def verify(self, product, step, xdata=None):
+    def verify(self, product, step, xdata=None, fittab=None):
         before_running = self._before_running if self._before_running is not None else []
         step("reboot")
         time.sleep(DELAY["reboot"])
@@ -614,6 +645,9 @@ class Updater:
             if xdata is not None:
                 step("xdata")
                 xdata_readback(back.link, xdata)
+            if fittab is not None:
+                step("fittab")
+                fittab_readback(back.link, fittab)
         finally:
             back.link.close()
         step("done", back.id.text)
@@ -627,7 +661,7 @@ class Updater:
             raise InstallError("model", f"the device is {dev.id.text}, the package is for {product}")
         ota = dev if dev.id.loader else self.check(dev, image, step)
         self.write(ota, image, step)
-        return self.verify(product, step, package_xdata(image))
+        return self.verify(product, step, package_xdata(image), package_fittab(image))
 
 
 # ---------------------------------------------------------- sample slots ---
@@ -871,6 +905,7 @@ class Progress:
             self.end()
             msg = {"start": f"starting the update on {a}", "loader": "switching to update mode",
                    "reboot": "restarting", "xdata": "reading the font region back",
+                   "fittab": "reading the fit table back",
                    "done": f"done: the FM-1 runs {a}"}[k]
             print(msg, file=self.out, flush=True)
 

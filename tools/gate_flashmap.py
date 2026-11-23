@@ -9,6 +9,9 @@ the 44 KiB VM spare at 0xB0000-0xBAFFF (sector-0 shadows, then sample slot 3 fro
 The owner tag (ST_OWNER_SECTOR in firmware/src/storage.c) must be at 0xAF000, in the last sector of the store.
 XDATA (FL_XDATA, the font bitmaps the update loader installs) must be exactly 0xAD000-0xAEFFF, between the boot
 screens and the owner tag, and the owner check's foreign-store clear (ST_CLEAR_HI) must stop at its start.
+FITTAB (FL_FITTAB, the Synth One option-B fit table the update loader installs) must be exactly 0xFE000-0xFEFFF,
+the 4 KiB spare between stock USR and key_mac (FL_KEYMAC_LO 0xFF000), and the loader allow-list may cover only
+that one sector above USR (never 0xFF000 or above).
   tools/gate_flashmap.py firmware/hal/fm1_flash_map.h [firmware/src/storage.c]
 The last line is "flashmap: PASS" or "flashmap: FAIL <reason>". The exit code is 0 or 1."""
 import os
@@ -26,6 +29,19 @@ regions = [("head", 0, d["FL_HEAD_HI"]), ("app code", 0x4120, d["FL_BLE_LO"]),
            ("OTA", d["FL_OTA_LO"], d["FL_OTA_HI"]), ("BTIF and USRTRIM", d["FL_CAL_LO"], d["FL_CAL_HI"]),
            ("USR", d["FL_USRRES_LO"], d["FL_USRRES_HI"]),
            ("key_mac", d["FL_KEYMAC_LO"], 0x100000)]
+# FITTAB: the 4 KiB spare 0xFE000-0xFEFFF, installed with the image, never a store write
+if "FL_FITTAB_LO" in d and "FL_FITTAB_HI" in d:
+    regions += [("FITTAB (Synth One B fit table)", d["FL_FITTAB_LO"], d["FL_FITTAB_HI"])]
+    if (d["FL_FITTAB_LO"], d["FL_FITTAB_HI"]) != (0xFE000, 0xFF000):
+        errors.append(f"FL_FITTAB is {d['FL_FITTAB_LO']:#x}-{d['FL_FITTAB_HI']:#x}, expected 0xfe000-0xff000")
+    if d.get("FL_KEYMAC_LO") != 0xFF000:
+        errors.append(f"FL_KEYMAC_LO is {d.get('FL_KEYMAC_LO', 0):#x}, expected 0xff000")
+    if d["FL_FITTAB_LO"] != d["FL_USRRES_HI"] or d["FL_FITTAB_HI"] != d["FL_KEYMAC_LO"]:
+        errors.append("FL_FITTAB must sit exactly between USR and key_mac")
+    if "FL_IN(off, n, FL_FITTAB_LO, FL_FITTAB_HI)" not in smk:
+        errors.append("FL_LDR_RANGE_OK does not allow the FITTAB sector")
+else:
+    errors.append("no FL_FITTAB_LO / FL_FITTAB_HI")
 # the store, less XDATA (0xAD000-0xAEFFF, installed with the image, never a store write)
 if "FL_XDATA_LO" in d and "FL_XDATA_HI" in d:
     regions += [("store objects and boot screens", d["FL_DATA_LO"], d["FL_XDATA_LO"]),

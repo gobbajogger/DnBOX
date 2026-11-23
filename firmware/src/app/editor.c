@@ -19,9 +19,15 @@
 enum { ED_INFO = 1, ED_PROJECT = 9, ED_SMP_BEGIN = 11, ED_SMP_WRITE, ED_SMP_END, ED_SMP_ERASE, ED_SMP_INFO, ED_SMP_READ, ED_PING = 25,
        ED_DIAG = 33, ED_BT_TEST = 34, ED_CTL_READ = 37, ED_INLOG = 38, ED_BOOT_INFO = 39,
        ED_BOOT_BEGIN = 43, ED_BOOT_WRITE, ED_BOOT_READ, ED_BOOT_END, ED_BOOT_ABORT,
-       ED_INSTALL = 48, ED_CAPTURE = 49, ED_XDATA = 50 };
+       ED_INSTALL = 48, ED_CAPTURE = 49, ED_XDATA = 50, ED_FITTAB = 51 };
 #include "../../../tools/mboot/session_wire.h"
 #include "boot_screen.h"
+#if BOARD_SMK37
+#if defined(__has_include) && __has_include("fittab_id.h")
+#include "fittab_id.h"
+#endif
+#include "app/fittab.h"
+#endif
 #if BOARD_SMK37
 /* ED_INLOG (SMK-37, read only, a76): the inbound recorder (app/smk_inlog.h). No arg or arg 0: the entry
  * count, fm1_ms now, then 2 words for each entry (the oldest first), each word 5 x 7 bits, low bits
@@ -895,6 +901,21 @@ static void ed_handle(const uint8_t *f, uint32_t n)
         uint32_t k;
         ed_b(gfx_xdata_ok);
         for (k = 0; k < XDATA_HDR; k++) {
+            ed_b(h[k]);
+            ed_b(h[k] >> 7);
+        }
+        break;
+    }
+#endif
+#if defined(FITTAB_LEN) && BOARD_SMK37
+    case ED_FITTAB: {                                 /* read only: FITTAB present (1) or absent (0), then the
+                                                       * region's 16 B header as read now, each byte 2 x 7 bits, low
+                                                       * first: the installers compare it with the package (read back) */
+        const uint8_t *h = (const uint8_t *)FL_XIP(FL_FITTAB_LO);
+        const uint8_t *blob = fittab_blob(h, FL_FITTAB_HI - FL_FITTAB_LO, FITTAB_LEN, FITTAB_CRC32);
+        uint32_t k;
+        ed_b(blob ? 1 : 0);
+        for (k = 0; k < FITTAB_HDR; k++) {
             ed_b(h[k]);
             ed_b(h[k] >> 7);
         }
