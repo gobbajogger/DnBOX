@@ -60,28 +60,41 @@ print(f"default-breaks: slot1 BR1 {len(imgs[1])} B of {sizes[0]}, slot2 BR2 {len
       f"(FL_FDATA 0xF000), slot3 empty {sizes[2]}; user capacity {sum(sizes)} B, defaults {used} B, free {free} B")
 print("default-breaks: PASS 5 original zones, bit-exact PCM, fit")
 
-# The install path: fill only empty slots (mocked device, no hardware).
+# The install path: fresh install only (mocked device, no hardware).
 sys.path.insert(0, str(ROOT / "tests"))
-from slot_mock import MockDevice, Flash  # noqa: E402
+from slot_mock import MockDevice  # noqa: E402
 import x0x_slots as xs  # noqa: E402
 AGREED = [(0xC2000, 0x14000), (0xD6000, 0x1E000 - 0xF000), (0xB3000, 0x8000)]
 NOW = [(0xC2000, 0x14000), (0xD6000, 0x1E000), (0xB3000, 0x8000)]
 for slots in (AGREED, NOW):
-    dev = MockDevice(slots=slots)                        # fresh install: every slot empty
-    assert db.fill_empty(dev) == [1, 2], "fresh install gets both defaults"
-    lay = xs.layout(dev)
-    assert [s["nz"] for s in lay["slots"]] == [3, 2, 0]
+    dev = MockDevice(slots=slots)                        # blank keyboard
+    assert db.fill_fresh(dev, fresh_install=False) == [], "no flag: an ordinary install writes nothing"
+    assert all(b == 0xFF for b in dev.fl.mem[0xB3000:0xF4000]), "nothing written without the flag"
+    assert db.fill_fresh(dev, fresh_install=True) == [1, 2], "fresh install gets both defaults"
+    assert [s["nz"] for s in xs.layout(dev)["slots"]] == [3, 2, 0]
     assert bytes(dev.fl.mem[0xC2000:0xC2000 + len(imgs[1])]) == imgs[1]
     assert bytes(dev.fl.mem[0xD6000:0xD6000 + len(imgs[2])]) == imgs[2]
-    assert db.fill_empty(dev) == [], "a second install changes nothing"
-# A user's own loop in slot 2 is never touched; only the empty slot 1 is filled.
+    assert db.fill_fresh(dev, fresh_install=True) == [], "a second install changes nothing"
+# The user clears default slot 1 (erase): later installs, flagged or not, never bring it back.
+dev = MockDevice(slots=AGREED)
+db.fill_fresh(dev, fresh_install=True)
+xs.write_slot(dev, 0, None)
+cleared = bytes(dev.fl.mem[0xC2000:0xD6000])
+for flag in (False, True):
+    assert db.fill_fresh(dev, fresh_install=flag) == []
+assert bytes(dev.fl.mem[0xC2000:0xD6000]) == cleared and xs.layout(dev)["slots"][0]["nz"] == 0, "cleared stays cleared"
+# The user clears BOTH defaults: an ordinary install still writes nothing.
+xs.write_slot(dev, 1, None)
+assert db.fill_fresh(dev, fresh_install=False) == []
+assert xs.layout(dev)["slots"][0]["nz"] == 0 and xs.layout(dev)["slots"][1]["nz"] == 0
+# A user's own loop anywhere: even a flagged install writes nothing at all.
 dev = MockDevice(slots=AGREED)
 own = db.slot_image("MINE", [(bytes(range(256)) * 8, 4096)])
-xs.write_slot(dev, 1, own)
-before = bytes(dev.fl.mem[0xD6000:0xD6000 + 0xF000])
-assert db.fill_empty(dev) == [1]
-assert bytes(dev.fl.mem[0xD6000:0xD6000 + 0xF000]) == before, "user slot 2 unchanged"
+xs.write_slot(dev, 2, own)
+before = bytes(dev.fl.mem[0xB3000:0xF4000])
+assert db.fill_fresh(dev, fresh_install=True) == []
+assert bytes(dev.fl.mem[0xB3000:0xF4000]) == before, "user data and empty slots untouched"
 # A different slot map (slot 1 elsewhere): nothing is written there.
 dev = MockDevice(slots=[(0xA0000, 0x14000), (0xB4000, 0x14000)])
-assert db.fill_empty(dev) == []
-print("default-breaks: PASS fill-empty-only install path (fresh, repeat, user slot kept, foreign map)")
+assert db.fill_fresh(dev, fresh_install=True) == []
+print("default-breaks: PASS fresh-install-only path (flag + all blank; repeat, cleared stays cleared, user data, foreign map)")

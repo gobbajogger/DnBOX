@@ -706,6 +706,23 @@ def plan_slots(dev, image, product, require_backup=False):
     return SlotMove(lay, old_map, new_map, risk, board_of(dev.id.text)) if risk or require_backup else None
 
 
+def preload_defaults(up, out):
+    """--fresh-install: the owner's default BREAK loops (tools/default_breaks.py) into blank slots 1 and 2"""
+    import default_breaks
+    back = up.reconnect_after(lambda i: not i.loader, DELAY["wait_reboot"])
+    if not back:
+        raise InstallError("slots", "installed, but the device did not answer for the default BREAK loops")
+    try:
+        filled = default_breaks.fill_fresh(EditorLink(back.link), fresh_install=True)
+    except (xs.SlotError, TimeoutError) as e:
+        raise InstallError("slots", f"installed, but the default BREAK loops were not written ({e})")
+    finally:
+        back.link.close()
+    print(f"default BREAK loops: slot(s) {', '.join(map(str, filled))} written and read back" if filled else
+          "default BREAK loops: not written (a slot is not blank)", file=out)
+    return filled
+
+
 # ------------------------------------------------------------------- CLI ---
 
 def load_package(path, force):
@@ -943,6 +960,18 @@ def run(a, backend, out, ask):
                   file=out)
             print("They are saved to a file first and written back after the install." if move.new_map else
                   "They are saved to a file first. This firmware has no X0X slots: restore them later in X0X.", file=out)
+    if getattr(a, "fresh_install", False):
+        fresh_lay = None
+        if not dev.id.loader:
+            try:
+                fresh_lay = slot_probe(dev.link)
+            except (xs.SlotError, TimeoutError) as e:
+                dev.link.close()
+                raise InstallError("slots", f"--fresh-install: the sample layout cannot be read ({e}); nothing was written")
+        if fresh_lay is None or any(sl["nz"] or sl["used"] for sl in fresh_lay["slots"]):
+            dev.link.close()
+            raise InstallError("slots", "--fresh-install: this keyboard already has samples or no readable sample layout; "
+                                        "it is not a fresh install. Nothing was written. Install without --fresh-install")
     if not a.yes and not ask("Install? Do not unplug the FM-1 while writing. [y/N] "):
         dev.link.close()
         print("cancelled", file=out)
@@ -976,6 +1005,8 @@ def run(a, backend, out, ask):
     elif move and move.risk:
         raise InstallError("slots", f"installed, but this firmware has no X0X sample slots for restoration. "
                                     f"The backed-up slots were not written back. {move.help()}")
+    if getattr(a, "fresh_install", False):
+        preload_defaults(up, out)
     ctl = getattr(a, "ctl_bytes", None)
     if ctl:
         back = up.reconnect_after(lambda i: not i.loader, DELAY["wait_reboot"])
@@ -1079,11 +1110,16 @@ def main(argv=None, backend=None, out=sys.stdout, ask=ask_tty):
     ap.add_argument("--dev-record", metavar="FILE", help="scoped development validation record; requires config dev and explicit --ctl or --no-ctl")
     ap.add_argument("--head-ref", metavar="FILE", help="a flash read-back of this unit (raw, from flash 0): the bootloader guard reference")
     ap.add_argument("--head-check", action="store_true", help="compare the package head with the reference only (no device)")
+    ap.add_argument("--fresh-install", action="store_true",
+                    help="SMK-37, first X0X install on this keyboard: after the install, preload the owner's 5 default "
+                         "BREAK loops into slots 1 and 2 (only if every slot is blank; never on a later install)")
     ap.add_argument("--config", choices=("dev", "rel"), default="dev",
                     help="the build config of the package for the gate guard: dev (X0X_DEV_PADCAL=1, default) or rel (0)")
     a = ap.parse_args(argv)
     if a.backup and a.no_slots:
         ap.error("--backup and --no-slots cannot be used together")
+    if a.fresh_install and a.no_slots:
+        ap.error("--fresh-install needs the sample layout check (not --no-slots)")
     if bool(a.info) == bool(a.package):
         ap.error("give a PACKAGE.fwsc or --info")
     if a.head_check:                        # no device: only the bootloader guard

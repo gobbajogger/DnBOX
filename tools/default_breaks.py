@@ -5,14 +5,14 @@
 BR1 zones 1-3 go in user slot 1 (0xC2000, 80 KiB), BR2 zones 1-2 in user slot 2 (0xD6000). Slot 3 stays
 empty. Each zone is the original encoded IMA ADPCM, byte for byte (no re-encode, no resample); the
 slot header is the one tools/sampleio.user_slot writes (firmware/src/app/slots.c reads it).
-They are defaults: an installer may write a slot image only into a slot with no valid FSMP header
-(an empty slot or a fresh install), never over a slot that holds data.
+They are defaults, written on a fresh install only; users overwrite or clear them like any slot.
 
   tools/default_breaks.py OUTDIR      writes slot1.img and slot2.img (header at 0, ADPCM at +512)
 
-fill_empty(link) is the install-path step: it writes a default image only into a slot that SMP_INFO
-reports empty (0 zones, 0 KiB used), at the expected flash offset, and that still reads back as no
-valid header just before the write; it never erases or overwrites a slot holding data.
+fill_fresh(link, fresh_install) is the install-path step (tools/fm1_install.py --fresh-install): only on
+a fresh install (the caller's explicit flag) and only when every slot is blank does it write the
+defaults; it never erases or overwrites a slot, and a later install never refills one, so a default
+the user cleared stays cleared.
 """
 import hashlib
 import json
@@ -77,16 +77,17 @@ HOME = {1: 0xC2000, 2: 0xD6000}
 
 
 def plan_fill(lay, imgs=None):
-    """SMP_INFO layout (x0x_slots.parse_info) -> [(slot index k, image)] for the empty slots only"""
+    """SMP_INFO layout (x0x_slots.parse_info) of a blank device -> [(slot index k, image)].
+    [] unless EVERY slot is blank (0 zones, 0 KiB used): defaults are for a fresh install only."""
     imgs = images() if imgs is None else imgs
+    if any(sl["nz"] or sl["used"] for sl in lay["slots"]):
+        return []
     todo = []
     for slot, img in sorted(imgs.items()):
         k = slot - 1
         if k >= lay["count"]:
             continue
         sl = lay["slots"][k]
-        if sl["nz"] or sl["used"]:
-            continue                                     # holds data: never touched
         if lay["ext"] and sl["off"] != HOME[slot]:
             continue                                     # another map: not where the default belongs
         if len(img) > sl["size"]:
@@ -95,16 +96,23 @@ def plan_fill(lay, imgs=None):
     return todo
 
 
-def fill_empty(link, progress=None):
-    """write the defaults into empty slots; -> list of slot numbers filled (1-based)"""
+def fill_fresh(link, fresh_install, progress=None):
+    """Fresh install only: write the defaults when the caller says this is the first X0X install
+    on the keyboard (fresh_install=True) AND every slot is blank (SMP_INFO and the header bytes).
+    A later install never refills a slot, so a default the user cleared stays cleared.
+    -> list of slot numbers filled (1-based)"""
     import x0x_slots as xs
+    if not fresh_install:
+        return []
+    lay = xs.layout(link)
+    todo = plan_fill(lay)
+    if not todo:
+        return []
+    for k in range(lay["count"]):                        # every header still erased: nothing was there
+        if any(b != 0xFF for b in xs.read_bytes(link, k, 0, xs.HDR_LEN)):
+            return []
     filled = []
-    for k, img in plan_fill(xs.layout(link)):
-        lay = xs.layout(link)                            # again, just before the write
-        if lay["slots"][k]["nz"] or lay["slots"][k]["used"]:
-            continue
-        if xs.parse_header(bytes(xs.read_bytes(link, k, 0, xs.HDR_LEN))) is not None:
-            continue                                     # a header is there (SMP_INFO said empty): leave it
+    for k, img in todo:
         xs.write_slot(link, k, img, progress)
         if bytes(xs.read_bytes(link, k, 0, len(img))) != img:
             raise xs.SlotError(f"slot {k + 1}: default image did not read back")

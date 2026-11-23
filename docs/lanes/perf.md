@@ -44,7 +44,9 @@ web/product-site/assets/starting-breaks). `tools/default_breaks.py` builds the d
 slot 1 (0xC2000, 80 KiB) "BR1" = BR1 zones 1-3, 60,237 B (512 header + 59,725 ADPCM), 21,683 B left;
 slot 2 (0xD6000, 60 KiB with FL_FDATA 0xF000) "BR2" = BR2 zones 1-2, 50,061 B (512 + 49,549), 11,379 B left;
 slot 3 (0xB3000, 32 KiB) empty. 22,050 Hz, no re-encode, decoded PCM is the pinned PCM sample for sample.
-They are defaults, not a reserved area: an installer may write them only into a slot with no valid
-FSMP header (empty slot or fresh install), never over a slot that holds data. Tests:
+They are defaults, not a reserved area, written on a FRESH install only: `tools/fm1_install.py
+--fresh-install` refuses before writing if the keyboard has any sample (or no readable layout), and
+after the install `default_breaks.fill_fresh` writes them only if every slot is still blank. An
+ordinary install never writes them, so a default the user cleared stays cleared. Tests:
 `default-breaks` (pins, bit-exact decode, fit for FL_FDATA 0..0xF000) and `scenario-default_breaks`
 (the firmware's slots.c parses both images, 5 loops listed, BREAK plays them).
