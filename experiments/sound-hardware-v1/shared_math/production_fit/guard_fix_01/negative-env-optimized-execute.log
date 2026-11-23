@@ -1,9 +1,0 @@
-Traceback (most recent call last):
-  File "/workspace/scratch/e803955aec60/fit_next_plan/guard_fix_01/negative_modified_input/verify_inputs.py", line 70, in <module>
-    raise SystemExit(main())
-                     ^^^^^^
-  File "/workspace/scratch/e803955aec60/fit_next_plan/guard_fix_01/negative_modified_input/verify_inputs.py", line 29, in main
-    require(sys.flags.optimize == 0, "Optimized Python is forbidden for verification and native execution; use normal Python without -O/-OO or PYTHONOPTIMIZE")
-  File "/workspace/scratch/e803955aec60/fit_next_plan/guard_fix_01/negative_modified_input/verify_inputs.py", line 20, in require
-    raise RuntimeError(message)
-RuntimeError: Optimized Python is forbidden for verification and native execution; use normal Python without -O/-OO or PYTHONOPTIMIZE
