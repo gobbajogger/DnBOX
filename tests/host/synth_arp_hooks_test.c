@@ -88,7 +88,7 @@ static void s1_arp(void)
     select_bank(v, ORIGINAL_SOUND_SYNTHONE, 0);
     engine_arp_settings s = settings(v);
     CHECK(!s.on && s.mode == ARP_UP && s.range == 1 && s.speed == ARP_SPEED_1_16 && s.length == 16 &&
-          s.interval == 12 && s.gate == 50 && !s.note_locked);
+          s.interval == 12 && s.gate == 100 && !s.note_locked);
     engine_arp_steps st; CHECK(engine_arp_steps_read(v, &st) && st.on_mask == 0xFFFF && !st.oct_mask);
     /* OFF: held keys play directly. */
     unsigned from = nev;
@@ -102,13 +102,23 @@ static void s1_arp(void)
     render(period() * 4);
     n = ons(from, got, NULL, 64);
     CHECK(n >= 4 && got[0] == 48 && got[1] == 52 && got[2] == 48);
-    /* Gate 50 %: each note ends half a step after it starts. */
+    /* Source gate (100 %): a note ends exactly when the next step starts. */
     for (unsigned i = from; i + 1 < nev; ++i) if (ev[i].vel) {
         unsigned j = i + 1; while (j < nev && ev[j].key != ev[i].key) ++j;
-        if (j < nev && (ev[j].vel || ev[j].at - ev[i].at != period() / 2)) fprintf(stderr, "on %d@%llu next %d vel %d @%llu period %u\n", ev[i].key, (unsigned long long)ev[i].at, ev[j].key, ev[j].vel, (unsigned long long)ev[j].at, period());
-        if (j < nev) CHECK(!ev[j].vel && ev[j].at - ev[i].at == period() / 2);
+        if (!(j < nev && !ev[j].vel && ev[j].at - ev[i].at == period())) { for (unsigned q = from; q < nev && q < from + 12; ++q) fprintf(stderr, "ev %u key %d vel %d at %llu\n", q, ev[q].key, ev[q].vel, (unsigned long long)ev[q].at); fprintf(stderr, "period %u\n", period()); }
+        CHECK(j < nev && !ev[j].vel && ev[j].at - ev[i].at == period());
         break;
     }
+    /* SJ6-style gate delta, 50 %: half a step. */
+    set(v, ARP_F_GATE, 50);
+    from = nev;
+    render(period() * 3);
+    for (unsigned i = from; i + 1 < nev; ++i) if (ev[i].vel) {
+        unsigned j = i + 1; while (j < nev && ev[j].key != ev[i].key) ++j;
+        CHECK(j < nev && !ev[j].vel && ev[j].at - ev[i].at == period() / 2);
+        break;
+    }
+    set(v, ARP_F_GATE, 100);
     /* H3: running view, last fired step and its age. */
     unsigned step; uint32_t age;
     CHECK(engine_arp_view(v, &step, &age) && step < 16 && age <= period() / 44u + 1);
@@ -126,6 +136,9 @@ static void s1_arp(void)
     { int k[] = {48, 52}, w[] = {48, 52, 60, 64, 48}; expect_order(v, k, 2, w, 5); }
     set(v, ARP_F_MODE, ARP_DOWN);
     { int k[] = {48, 52}, w[] = {64, 60, 52, 48, 64}; expect_order(v, k, 2, w, 5); }
+    /* Source order is press order (sequencerNotes2), not pitch. */
+    set(v, ARP_F_MODE, ARP_UP);
+    { int k[] = {52, 48}, w[] = {52, 48, 64, 60, 52}; expect_order(v, k, 2, w, 5); }
     set(v, ARP_F_MODE, ARP_UPDN); set(v, ARP_F_INTERVAL, 7);
     { int k[] = {48, 52}, w[] = {48, 52, 55, 59, 55, 52, 48, 52}; expect_order(v, k, 2, w, 8); }
     /* SEQ: step offsets (S1 clamps to +-12), off steps rest, OCT adds 12, length wraps. */
@@ -135,8 +148,12 @@ static void s1_arp(void)
     block();
     CHECK(engine_arp_steps_read(v, &st) && st.offset[1] == 3 && st.offset[3] == 12 && !(st.on_mask & 4) && st.oct_mask == 8);
     { int k[] = {48}, w[] = {48, 51, 72, 48, 51}; expect_order(v, k, 1, w, 5); }
-    /* SEQ plays every held key. */
-    { int k[] = {48, 55}, w[] = {48, 55, 51, 58}; expect_order(v, k, 2, w, 4); }
+    /* OCT follows the offset's sign (nnob). */
+    step_set(v, 3, ARP_S_OFFSET, -5); block();
+    { int k[] = {60}, w[] = {60, 63, 43}; expect_order(v, k, 1, w, 3); }
+    step_set(v, 3, ARP_S_OFFSET, 12); block();
+    /* SEQ plays every held key, newest first (heldNoteNumbersAE order). */
+    { int k[] = {48, 55}, w[] = {55, 48, 58, 51}; expect_order(v, k, 2, w, 4); }
     /* H3 follows the step that really sounded: rests do not move it. */
     engine_bass_on(v, 48, 0, 0);
     render(period() * 2 + 8);                      /* fired steps 0, 1; step 2 is off */
@@ -212,7 +229,7 @@ static void storage(void)
     engine_apply_sound(&proj.sound);
     block();
     after = settings(v);
-    CHECK(!after.on && after.mode == ARP_UP && after.length == 16 && after.gate == 50);
+    CHECK(!after.on && after.mode == ARP_UP && after.length == 16 && after.gate == 100);
     /* Unknown block version -> defaults too. */
     proj.sound.v[T_303][ARP_BLOCK_VOICE0][1] = 2;
     CHECK(!engine_arp_block_decode(proj.sound.v[T_303][ARP_BLOCK_VOICE0], &d) && !d.on && d.length == 16);

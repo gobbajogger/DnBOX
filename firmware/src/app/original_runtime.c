@@ -75,6 +75,9 @@ X0X_COLD int original_runtime_init(original_runtime_part *p, const uint8_t cell[
     return original_runtime_prepare(p, bpm);
 }
 
+#if X0X_ARP_ENGINE
+static void arp_params(original_runtime_part *p);
+#endif
 int original_runtime_prepare(original_runtime_part *p, float bpm)
 {
     if (!p || p->status != ORIGINAL_RUNTIME_OK) return p ? p->status : 0;
@@ -82,6 +85,7 @@ int original_runtime_prepare(original_runtime_part *p, float bpm)
     if (p->kind == ORIGINAL_SOUND_JUNO || p->kind == ORIGINAL_SOUND_SYNTHONE) {
 #if X0X_ARP_ENGINE
         p->arp.bpm = bpm;   /* only the arp clock follows tempo: idempotent */
+        arp_params(p);      /* engine_arp.h; defined with the arp below */
 #else
         (void)bpm;          /* no tempo-dependent parameters: idempotent */
 #endif
@@ -173,7 +177,7 @@ void engine_arp_cfg_default(engine_arp_cfg *c)
 {
     memset(c, 0, sizeof *c);
     c->mode = ARP_UP; c->range = 1; c->speed = ARP_SPEED_1_16; c->length = ARP_STEPS;
-    c->interval = 12; c->gate = 50; c->src_type = 0xFF; c->on_mask = 0xFFFF;
+    c->interval = 12; c->gate = 100; c->src_type = 0xFF; c->on_mask = 0xFFFF;
 }
 static uint8_t arp_clamp(unsigned v, unsigned lo, unsigned hi) { return (uint8_t)(v < lo ? lo : v > hi ? hi : v); }
 int engine_arp_block_decode(const uint8_t b[ARP_BLOCK_BYTES], engine_arp_cfg *c)
@@ -302,13 +306,11 @@ int engine_arp_from_s1(engine_arp_cfg *c, unsigned id, float v)
     }
 }
 
-/* ---- Shared live arp / ARP SEQ (SYNTHONE, JUNO). Behaviour model: AudioKit
- * Synth One's arp, which the SuperJ6 app ("Synth One J6") also uses: UP/DOWN/
- * UP+DN over held keys, `range` passes `interval` semitones apart; SEQ plays
- * every held key + step offset (+12 with OCT) on enabled steps, rests on the
- * others. Live sources feed it; SEQUENCE playback bypasses it (as Chicago).
- * The host-only source port (dsp/synthone/scheduler) keeps its arpIsOn pins:
- * the device Synth One is s1_dry_part and runs this arp instead. */
+/* ---- Shared Synth One / SuperJ6 arp + ARP SEQ: the original AudioKit Synth
+ * One S1Sequencer (dsp/synthone/sequencer, MIT), one copy for both owners; the
+ * SuperJ6 app ("Synth One J6") runs the same sequencer. Live sources feed
+ * heldNoteNumbersAE (newest first, as the source); SEQUENCE playback bypasses it. */
+#include "../dsp/synthone/sequencer/S1Sequencer.c"
 static int arp_engaged(const original_runtime_part *p)
 {
     return p->arp.cfg.on && (p->kind == ORIGINAL_SOUND_JUNO || p->kind == ORIGINAL_SOUND_SYNTHONE);
@@ -319,26 +321,26 @@ static int live_held(const original_runtime_part *p, unsigned key)
     for (unsigned s = 0; s < ORIGINAL_INPUT_COUNT; ++s) if (live_source(s) && p->keys[s][key]) return 1;
     return 0;
 }
-static void arp_silence(original_runtime_part *p)
+static void arp_key_on(void *ctx, int note, int velocity) { (void)runtime_note(ctx, (unsigned)note, (unsigned)velocity); }
+static void arp_key_off(void *ctx, int note)
 {
-    original_runtime_arp *a = &p->arp;
-    for (unsigned i = 0; i < a->nsound; ++i)
-        if (!p->keys[ORIGINAL_INPUT_SEQUENCE][a->sounding[i]]) (void)runtime_note(p, a->sounding[i], 0);
-    a->nsound = 0;
-    a->gate_left = 0;
+    original_runtime_part *p = ctx;
+    if (!p->keys[ORIGINAL_INPUT_SEQUENCE][note]) (void)runtime_note(p, (unsigned)note, 0);
 }
-/* Held list = lowest ORIGINAL_ARP_HELD live keys, ascending. */
-static void arp_rebuild(original_runtime_part *p)
+/* heldNoteNumbers: remove the pitch, then (on) insert it at the front. */
+static void arp_hold(original_runtime_part *p, unsigned key, unsigned velocity)
 {
     original_runtime_arp *a = &p->arp;
     unsigned n = 0;
-    for (unsigned key = 0; key < 128 && n < ORIGINAL_ARP_HELD; ++key)
-        if (live_held(p, key)) a->held[n++] = (uint8_t)key;
-    if (!n) { arp_silence(p); a->pos = 0; a->to_next = 0; }
+    for (unsigned i = 0; i < a->nheld; ++i) if (a->held[i].noteNumber != key) a->held[n++] = a->held[i];
+    if (velocity) {
+        if (n == S1_SEQ_MAX_HELD) --n;
+        __builtin_memmove(a->held + 1, a->held, n * sizeof a->held[0]);
+        a->held[0].noteNumber = (uint8_t)key; a->held[0].velocity = (uint8_t)velocity; ++n;
+    }
     a->nheld = (uint8_t)n;
 }
-/* SPEED = the Chicago list (1/2 1/4D 1/2T 1/4 1/8D 1/4T 1/8 1/8T 1/16 1/32) in
- * 24 ppqn ticks; same numbers as CK_RATE_T[CHI_ARP_RATE_IX[]]. */
+/* engine_arp_cfg -> the S1Parameter values the sequencer reads. */
 uint32_t engine_arp_step_frames(float bpm, unsigned speed)
 {
     static const uint8_t ticks[ARP_NSPEED] = {48, 36, 32, 24, 18, 16, 12, 8, 6, 3};
@@ -346,101 +348,67 @@ uint32_t engine_arp_step_frames(float bpm, unsigned speed)
     float f = 44100.f * 60.f * ticks[speed < ARP_NSPEED ? speed : ARP_SPEED_1_16] / (bpm * 24.f);
     return f < 1.f ? 1u : (uint32_t)(f + .5f);
 }
-static uint32_t arp_period(const original_runtime_arp *a) { return engine_arp_step_frames(a->bpm, a->cfg.speed); }
-static void arp_fire(original_runtime_part *p)
+static void arp_params(original_runtime_part *p)
 {
-    original_runtime_arp *a = &p->arp;
-    const engine_arp_cfg *c = &a->cfg;
-    uint32_t period = arp_period(a);
-    unsigned pos = a->pos++, count = 0, step;
-    uint8_t notes[ORIGINAL_ARP_HELD];
-    a->to_next = period ? period : 1u;
-    if (c->mode == ARP_SEQ) {
-        step = pos % (c->length ? c->length : 16u);
-        if (c->on_mask >> step & 1u) {
-            int lim = p->kind == ORIGINAL_SOUND_SYNTHONE ? 12 : 24;
-            int off = c->offset[step] < -lim ? -lim : c->offset[step] > lim ? lim : c->offset[step];
-            off += (c->oct_mask >> step & 1u) ? 12 : 0;
-            for (unsigned i = 0; i < a->nheld; ++i) {
-                int note = a->held[i] + off;
-                unsigned d = 0;
-                if (note < 0 || note > 127) continue;
-                while (d < count && notes[d] != note) ++d;
-                if (d == count) notes[count++] = (uint8_t)note;
-            }
-        }
-    } else {
-        unsigned span = (unsigned)a->nheld * (c->range ? c->range : 1u), i = pos % span;
-        if (c->mode == ARP_DOWN) i = span - 1u - i;
-        else if (c->mode == ARP_UPDN && span > 1u) {
-            i = pos % (2u * span - 2u);
-            if (i >= span) i = 2u * span - 2u - i;
-        }
-        step = i % ARP_STEPS;
-        int note = a->held[i % a->nheld] + (int)(i / a->nheld) * c->interval;
-        if (note <= 127) notes[count++] = (uint8_t)note;
-    }
-    if (!count) return;
-    uint32_t gate = (uint32_t)((uint64_t)a->to_next * (c->gate ? c->gate : 50u) / 100u);
-    a->gate_left = gate ? gate : 1u;
-    for (unsigned i = 0; i < count; ++i) {
-        if (runtime_note(p, notes[i], a->vel ? a->vel : 100u) != ORIGINAL_RUNTIME_OK) return;
-        a->sounding[a->nsound++] = notes[i];
-    }
-    a->step = (uint8_t)step;
-    a->fired = 1;
-    a->age = 0;
-}
-/* Frames until the next arp event; 0 = due now. */
-static uint32_t arp_due(const original_runtime_arp *a)
-{
-    uint32_t due = a->nheld ? a->to_next : UINT32_MAX;
-    return a->nsound && a->gate_left < due ? a->gate_left : due;
-}
-static void arp_event(original_runtime_part *p)
-{
-    original_runtime_arp *a = &p->arp;
-    if (a->nsound && (!a->gate_left || (a->nheld && !a->to_next))) arp_silence(p);
-    if (a->nheld && !a->to_next) arp_fire(p);
-}
-static void arp_advance(original_runtime_arp *a, uint32_t n)
-{
-    if (a->nheld) a->to_next -= n;
-    if (a->nsound) a->gate_left -= n;
-    a->age = a->age > UINT32_MAX - n ? UINT32_MAX : a->age + n;
+    static const uint8_t dir[3] = {ArpeggiatorMode_Up, ArpeggiatorMode_Down, ArpeggiatorMode_UpDown};
+    const engine_arp_cfg *c = &p->arp.cfg;
+    S1SequencerParams *q = &p->arp.prm;
+    q->arpIsOn = c->on;
+    q->arpIsSequencer = c->mode == ARP_SEQ;
+    q->arpDirection = dir[c->mode < 3 ? c->mode : 0];
+    q->arpOctave = (uint8_t)(c->range ? c->range - 1 : 0);
+    q->arpInterval = c->interval;
+    q->arpTotalSteps = c->length ? c->length : 16;
+    __builtin_memcpy(q->sequencerPattern, c->offset, sizeof q->sequencerPattern);
+    q->sequencerOctBoost = c->oct_mask;
+    q->sequencerNoteOn = c->on_mask;
+    /* arpRate = project tempo; arpSeqTempoMultiplier = SPEED (exact frames). */
+    q->arpBeatsPerSample = S1_SAMPLE_TICKS;
+    q->arpSeqTempoMultiplier = S1_SAMPLE_TICKS * engine_arp_step_frames(p->arp.bpm, c->speed);
+    q->seqGate = c->gate ? c->gate : 100;
+    q->patternRange = p->kind == ORIGINAL_SOUND_SYNTHONE ? 12 : 24;
 }
 int original_runtime_arp_config(original_runtime_part *p, const engine_arp_cfg *c)
 {
     if (!p || !c) return 0;
     int ok = p->status == ORIGINAL_RUNTIME_OK, was = ok && arp_engaged(p);
     original_runtime_arp *a = &p->arp;
-    if (was) arp_silence(p);
+    if (was) S1Sequencer_reset(&a->seq, 0, p, arp_key_off);
     a->cfg = *c;
     if (!ok) return 0;
+    arp_params(p);
     int now = arp_engaged(p);
     if (now && !was) {                 /* direct live notes hand over to the arp */
+        a->nheld = 0;
         for (unsigned key = 0; key < 128; ++key)
-            if (live_held(p, key) && !p->keys[ORIGINAL_INPUT_SEQUENCE][key]) (void)runtime_note(p, key, 0);
-        a->nheld = 0; a->pos = 0; a->to_next = 0; a->fired = 0;
-        arp_rebuild(p);
+            if (live_held(p, key)) {
+                if (!p->keys[ORIGINAL_INPUT_SEQUENCE][key]) (void)runtime_note(p, key, 0);
+                arp_hold(p, key, a->vel ? a->vel : 100u);
+            }
+        S1Sequencer_init(&a->seq);
+        a->fired = 0;
     } else if (was && !now) {          /* keys still down sound directly again */
+        for (unsigned i = a->nheld; i--;)
+            if (live_held(p, a->held[i].noteNumber)) (void)runtime_note(p, a->held[i].noteNumber, a->held[i].velocity);
         a->nheld = 0; a->fired = 0;
-        for (unsigned key = 0; key < 128; ++key)
-            if (live_held(p, key)) (void)runtime_note(p, key, a->vel ? a->vel : 100u);
-    } else if (now && a->to_next > arp_period(a)) a->to_next = arp_period(a);
+        S1Sequencer_init(&a->seq);
+    }
     return 1;
 }
 int original_runtime_arp_view(const original_runtime_part *p, unsigned *step, uint32_t *frames)
 {
     if (!p || p->status != ORIGINAL_RUNTIME_OK || !arp_engaged(p) || !p->arp.nheld || !p->arp.fired) return 0;
-    *step = p->arp.step;
+    *step = (unsigned)p->arp.seq.lastPosition % ARP_STEPS;
     *frames = p->arp.age;
     return 1;
 }
 /* A live or sequenced key's count already went down: the arp, or the voice. */
 static int live_off(original_runtime_part *p, unsigned source, unsigned key)
 {
-    if (live_source(source) && arp_engaged(p)) { arp_rebuild(p); return ORIGINAL_RUNTIME_OK; }
+    if (live_source(source) && arp_engaged(p)) {
+        if (!live_held(p, key)) arp_hold(p, key, 0);
+        return ORIGINAL_RUNTIME_OK;
+    }
     return key_held(p, key) ? ORIGINAL_RUNTIME_OK : runtime_note(p, key, 0);
 }
 #else
@@ -505,7 +473,7 @@ int original_runtime_key(original_runtime_part *p, unsigned source, unsigned key
 #if X0X_ARP_ENGINE
         if (live_source(source) && arp_engaged(p)) {
             p->arp.vel = (uint8_t)velocity;
-            arp_rebuild(p);
+            arp_hold(p, key, velocity ? velocity : 1u);
             return ORIGINAL_RUNTIME_OK;
         }
 #endif
@@ -584,7 +552,7 @@ int original_runtime_all_off(original_runtime_part *p)
     memset(p->stale_pending, 0, sizeof p->stale_pending);
     p->stale_tick_frames = p->stale_timers = 0;
 #if X0X_ARP_ENGINE
-    p->arp.nheld = p->arp.nsound = 0; p->arp.pos = 0; p->arp.to_next = p->arp.gate_left = 0;
+    p->arp.nheld = 0; S1Sequencer_init(&p->arp.seq);
 #endif
     return runtime_result(p, ok);
 }
@@ -699,22 +667,24 @@ int original_runtime_render(original_runtime_part *p, original_runtime_workspace
     if (p->status != ORIGINAL_RUNTIME_OK) return p->status;
     if (runtime_stale_tick(p, frames) != ORIGINAL_RUNTIME_OK) return p->status;
 #if X0X_ARP_ENGINE
-    if (arp_engaged(p) && (p->arp.nheld || p->arp.nsound)) {
-        /* Split the block at arp events: sample-accurate steps and gates. */
+    if (arp_engaged(p) || p->arp.seq.sequencerLastNotesCount) {
+        /* S1Sequencer::process runs once per sample, as in S1DSPKernel; the
+         * block is split where it turns notes on or off. */
+        original_runtime_arp *a = &p->arp;
         unsigned done = 0;
-        while (done < frames) {
-            uint32_t due = arp_due(&p->arp);
-            if (!due) {
-                arp_event(p);
+        for (unsigned i = 0; i < frames; ++i) {
+            if (S1Sequencer_willFire(&a->seq, &a->prm, a->nheld)) {
+                if (i > done && render_backend(p, w, left + done, right + done, i - done) != ORIGINAL_RUNTIME_OK)
+                    return p->status;
+                done = i;
+                int before = a->seq.mStepCounter, first = !a->seq.previousHeldNoteNumbersAECount && a->nheld;
+                S1Sequencer_process(&a->seq, &a->prm, a->held, a->nheld, p, arp_key_on, arp_key_off);
                 if (p->status != ORIGINAL_RUNTIME_OK) return p->status;
-                continue;
-            }
-            unsigned n = frames - done < due ? frames - done : (unsigned)due;
-            if (render_backend(p, w, left + done, right + done, n) != ORIGINAL_RUNTIME_OK) return p->status;
-            arp_advance(&p->arp, n);
-            done += n;
+                if (a->seq.gateOpen && (first || a->seq.mStepCounter != before)) { a->fired = 1; a->age = 0; }
+            } else S1Sequencer_process(&a->seq, &a->prm, a->held, a->nheld, p, arp_key_on, arp_key_off);
+            a->age += a->age < UINT32_MAX;
         }
-        return p->status;
+        return frames > done ? render_backend(p, w, left + done, right + done, frames - done) : p->status;
     }
 #endif
     return render_backend(p, w, left, right, frames);

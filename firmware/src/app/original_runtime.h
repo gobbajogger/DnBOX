@@ -24,14 +24,15 @@ typedef union {
 /* Shared live arp / ARP SEQ for SYNTHONE and JUNO owners (engine_arp.h). Live
  * sources feed held[]; SEQUENCE playback bypasses it. Audio context only. */
 #if X0X_ARP_ENGINE
-#define ORIGINAL_ARP_HELD 8u
+#include "../dsp/synthone/sequencer/S1Sequencer.h"
 typedef struct {
     engine_arp_cfg cfg;
+    S1SequencerParams prm;              /* derived from cfg + tempo */
+    S1Sequencer seq;
+    NoteNumber held[S1_SEQ_MAX_HELD];   /* heldNoteNumbersAE, newest first */
     float bpm;
-    uint32_t to_next, gate_left, age;   /* frames */
-    uint16_t pos;
-    uint8_t held[ORIGINAL_ARP_HELD], sounding[ORIGINAL_ARP_HELD];
-    uint8_t nheld, nsound, vel, step, fired;
+    uint32_t age;                       /* frames since the last real note-on (H3) */
+    uint8_t nheld, vel, fired;
 } original_runtime_arp;
 #endif
 typedef struct {
