@@ -3227,3 +3227,20 @@ Rule: no evidence-only files in Git. Receipts, logs, results and review notes un
 - `experiments/wobble/evidence/tests.txt` — evidence-only; retained in Git history.
 - `experiments/wobble/evidence/undefined-symbols.txt` — evidence-only; retained in Git history.
 - `tests/evidence/pr734-repair-round2-selectors.md` — evidence-only; retained in Git history.
+
+## Further evidence-only files removed (cleanup, 2026-11-23 22:20 UTC+10)
+Paths named *evidence* that no test, tool, build or hash manifest reads. Kept (read, code, or hash-pinned): see the cleanup notes; each kept path is listed with its reason in the PR.
+
+- `docs/notes/remaining-home-overview-evidence.md` — evidence-only; retained in Git history.
+- `docs/notes/remaining-host-evidence-694.json` — evidence-only; retained in Git history.
+- `docs/verification/pr715-cloud-test-evidence-20261030.md` — evidence-only; retained in Git history.
+- `docs/verification/pr715-evidence/pr715-archive-readme.md` — evidence-only; retained in Git history.
+- `docs/verification/pr715-evidence/pr715-new-rerun-logs.md` — evidence-only; retained in Git history.
+- `experiments/sound-hardware-v1/dry_voice_followup/filter_probe_c/EVIDENCE-MANIFEST.json` — evidence-only; retained in Git history.
+- `experiments/sound-hardware-v1/dry_voice_followup/ownership_followup/EVIDENCE-MANIFEST.json` — evidence-only; retained in Git history.
+- `experiments/sound-hardware-v1/hardware_candidate/size_variants/bounds_dictionary/EVIDENCE-HASHES.json` — evidence-only; retained in Git history.
+- `experiments/sound-hardware-v1/shared_math/production_fit/execution/production-reference-elite-04/EVIDENCE.json` — evidence-only; retained in Git history.
+- `experiments/sound-hardware-v1/shared_math/production_fit/execution/production-reference-pro-06/EVIDENCE.json` — evidence-only; retained in Git history.
+- `experiments/sound-hardware-v1/shared_math/production_fit/execution/production-shared-elite-05/EVIDENCE.json` — evidence-only; retained in Git history.
+- `experiments/sound-hardware-v1/shared_math/production_fit/execution/production-shared-pro-07/EVIDENCE.json` — evidence-only; retained in Git history.
+- `tests/host/bass_probability_midi_evidence.json` — evidence-only; retained in Git history.
