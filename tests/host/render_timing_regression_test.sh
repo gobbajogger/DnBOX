@@ -14,6 +14,16 @@ cd "$(dirname "$0")/../.."
 OUT=${X0X_TIMING_OUT:-build/host/render-timing}
 BLOCKS=${X0X_TIMING_BLOCKS:-256}
 REPS=${X0X_TIMING_REPS:-2}
+# A shared runner may have a stable core reserved for the timing probe.
+# Pin only the measured process when requested; keep all samples and limits.
+run_stress() {
+    if [ -n "${X0X_TIMING_CPU:-}" ]; then
+        case "$X0X_TIMING_CPU" in *[!0-9]*) echo "invalid X0X_TIMING_CPU" >&2; return 2 ;; esac
+        taskset -c "$X0X_TIMING_CPU" "$@"
+    else
+        "$@"
+    fi
+}
 mkdir -p "$OUT"
 awk '/^static void smk_wheels\(void\)/{on=1} on{print} on && /^}/{exit}' firmware/src/app/main_fm1.c > "$OUT/smk_wheels.inc"
 test -s "$OUT/smk_wheels.inc"
@@ -44,7 +54,7 @@ for pair in 0,1 2,3; do
     rep=1
     while [ "$rep" -le "$REPS" ]; do
         csv="$OUT/${pair%,*}${pair#*,}-$rep.csv"
-        X0X_STRESS_KINDS=$pair X0X_STRESS_DEADLINE_NS=0 "$OUT/stress" "$csv" /dev/null "$BLOCKS" "$factory" "$choice" > "$OUT/run.log" 2>&1 \
+        X0X_STRESS_KINDS=$pair X0X_STRESS_DEADLINE_NS=0 run_stress "$OUT/stress" "$csv" /dev/null "$BLOCKS" "$factory" "$choice" > "$OUT/run.log" 2>&1 \
             || { cat "$OUT/run.log"; echo "FAIL: stress run pair=$pair rep=$rep"; exit 1; }
         csvs="$csvs $pair:$csv"
         rep=$((rep + 1))
