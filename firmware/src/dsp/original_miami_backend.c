@@ -6,6 +6,7 @@
 #include "../../../experiments/original_synth/miami_zero.h"
 #include "original_backend_pitch.h"
 #include <string.h>
+#include "x0x_cold.h"
 
 #define BACKEND_READY UINT32_C(0x4d424531)
 
@@ -574,7 +575,7 @@ int original_miami_backend_render_stereo(original_miami_backend *s, original_mia
     return original_miami_backend_render_events(s, w, left, right, frames, NULL, 0);
 }
 
-int original_miami_backend_motion_view(const original_miami_backend *s, float *phase, float *bipolar,
+X0X_COLD int original_miami_backend_motion_view(const original_miami_backend *s, float *phase, float *bipolar,
     float *current, float *target, int *active)
 {
     unsigned i, k = 0;

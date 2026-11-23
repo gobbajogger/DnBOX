@@ -32,6 +32,13 @@ seq/motion, dsp/x0x_param) at -Oz instead of -O2. XIP free: Elite 1,452 -> 4,072
 (+2,620 B each); pool and RAM unchanged. Host heavy stress (4,096 blocks, Elite) -O2 vs -Oz for these
 units: Chicago+Miami mean 536.3 vs 525.9 us, Synth One+SuperJ6 481.2 vs 490.9 us (noise), late 0.
 
+Main-loop-only functions in the -O2/-Os units get `X0X_COLD` (minsize): 28 definitions in engine.c,
+original_presets.inc, original_runtime.c, original_sound.c, drum909.c and the Chicago/Miami backends
+(views, preset select/restore, BREAK slot scan, voice names). Each one was checked as unreachable from
+the ALNK0/TIMER5 ISRs, RAM/CPU1 code and every address-taken function (linked call graph of the Elite
+image). Nothing on the audio path changes. XIP free: Elite 11,268 -> 11,876 B, Pro 11,280 -> 11,888 B
+(+608 B each); pool and RAM unchanged.
+
 ## Row 3: the owner's 5 BREAK zones as default slot contents (owner choice 18:29: "2 is better")
 `assets/default-breaks/` holds the 5 original encoded zones (pinned sha256, same bytes as DnBOX-nightly
 web/product-site/assets/starting-breaks). `tools/default_breaks.py` builds the default slot images:

@@ -327,7 +327,7 @@ X0X_COLD int original_runtime_voice_view(const original_runtime_part *p, float *
     return 1;
 }
 
-int original_runtime_adsr_view(const original_runtime_part *p, float values[4], unsigned *gate)
+X0X_COLD int original_runtime_adsr_view(const original_runtime_part *p, float values[4], unsigned *gate)
 {
     if (!p || p->status != ORIGINAL_RUNTIME_OK || p->kind != ORIGINAL_SOUND_CHICAGO || !values || !gate) return 0;
     for (unsigned i=0;i<4;i++) values[i]=p->dsp.chicago.controls.vca[i];
@@ -335,7 +335,7 @@ int original_runtime_adsr_view(const original_runtime_part *p, float values[4], 
     return 1;
 }
 
-int original_runtime_motion_view(const original_runtime_part *p, float *phase, float *bipolar,
+X0X_COLD int original_runtime_motion_view(const original_runtime_part *p, float *phase, float *bipolar,
     float *current, float *target, int *active)
 {
     if (!p || p->status != ORIGINAL_RUNTIME_OK) return 0;

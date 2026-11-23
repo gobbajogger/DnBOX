@@ -1139,7 +1139,7 @@ void drum909_all_off(drum909_t *d)
     }
 }
 
-int drum909_read_amp(const drum909_t *d,int voice,drum909_amp_snapshot *out)
+X0X_COLD int drum909_read_amp(const drum909_t *d,int voice,drum909_amp_snapshot *out)
 {
  if(!d||!out||(voice!=DR_BD&&voice!=DR_SD))return 0;
  const d9_bt_t *n=&d->bt[voice];

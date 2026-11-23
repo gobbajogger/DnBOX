@@ -5,6 +5,7 @@
 #include "s1_patch.h"
 #endif
 #include <string.h>
+#include "x0x_cold.h"
 
 static const char *const original_sound_fx_names[ORIGINAL_CHICAGO_FX_CHOICES] = {
     "OFF", "CHO/FLG", "PHASER", "RING MOD", "COMPRESSOR", "DECIMATOR", "EQ",
@@ -132,7 +133,7 @@ int original_sound_control_value(unsigned kind, unsigned parameter, unsigned con
 uint32_t original_sound_engine_id(unsigned kind)
 { return kind == ORIGINAL_SOUND_CHICAGO ? ORIGINAL_SOUND_CHICAGO_ID : kind == ORIGINAL_SOUND_MIAMI ? ORIGINAL_SOUND_MIAMI_ID :
     kind == ORIGINAL_SOUND_JUNO ? ORIGINAL_SOUND_JUNO_ID : kind == ORIGINAL_SOUND_SYNTHONE ? ORIGINAL_SOUND_SYNTHONE_ID : 0u; }
-const char *original_sound_name(unsigned kind, unsigned factory)
+X0X_COLD const char *original_sound_name(unsigned kind, unsigned factory)
 {
     int source = original_sound_factory_source(kind, factory);
     if (source < 0) return 0;
@@ -255,7 +256,7 @@ int original_sound_s1_set(uint8_t cell[ORIGINAL_SOUND_BYTES], unsigned slot, uns
 }
 #endif
 
-int original_sound_restore_miami(original_miami_program *out, const uint8_t cell[ORIGINAL_SOUND_BYTES])
+X0X_COLD int original_sound_restore_miami(original_miami_program *out, const uint8_t cell[ORIGINAL_SOUND_BYTES])
 {
     if (!out || !original_sound_valid(cell) || cell[29] != ORIGINAL_SOUND_MIAMI) return 0;
     original_miami_program next;
@@ -269,7 +270,7 @@ int original_sound_restore_miami(original_miami_program *out, const uint8_t cell
     *out = next;
     return 1;
 }
-int original_sound_restore_chicago(original_chicago_program *out, const uint8_t cell[ORIGINAL_SOUND_BYTES])
+X0X_COLD int original_sound_restore_chicago(original_chicago_program *out, const uint8_t cell[ORIGINAL_SOUND_BYTES])
 {
     if (!out || !original_sound_valid(cell) || cell[29] != ORIGINAL_SOUND_CHICAGO) return 0;
     original_chicago_program next;

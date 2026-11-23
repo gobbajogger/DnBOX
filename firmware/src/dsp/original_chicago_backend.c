@@ -5,6 +5,7 @@
 #include "chicago_packed.h"
 #include "original_backend_pitch.h"
 #include <string.h>
+#include "x0x_cold.h"
 
 #define BACKEND_READY UINT32_C(0x43484231)
 
@@ -275,7 +276,7 @@ int original_chicago_backend_all_off(original_chicago_backend *s)
     return healthy(s);
 }
 
-int original_chicago_backend_filter_view(const original_chicago_backend *s, float *eg, float *depth)
+X0X_COLD int original_chicago_backend_filter_view(const original_chicago_backend *s, float *eg, float *depth)
 {
     if (!s || s->ready != BACKEND_READY) return 0;
     *eg = s->voice.active ? s->voice.vcf.level : 0.0f;
@@ -283,7 +284,7 @@ int original_chicago_backend_filter_view(const original_chicago_backend *s, floa
     return 1;
 }
 
-int original_chicago_backend_env_view(const original_chicago_backend *s, float adsr[4], float *level, int *state)
+X0X_COLD int original_chicago_backend_env_view(const original_chicago_backend *s, float adsr[4], float *level, int *state)
 {
     if (!s || s->ready != BACKEND_READY) return 0;
     for (unsigned i = 0; i < 4; i++) adsr[i] = s->controls.vca[i];
@@ -292,7 +293,7 @@ int original_chicago_backend_env_view(const original_chicago_backend *s, float a
     return 1;
 }
 
-int original_chicago_backend_pitch_view(const original_chicago_backend *s, float *current, float *target, int *active)
+X0X_COLD int original_chicago_backend_pitch_view(const original_chicago_backend *s, float *current, float *target, int *active)
 {
     if (!s || s->ready != BACKEND_READY) return 0;
     *current = s->voice.pitch.current[0]; *target = s->voice.pitch.target[0];

@@ -113,7 +113,7 @@ X0X_COLD int engine_drum_view(int kit, int v, uint32_t *age_ms, float *env)
 X0X_COLD float engine_bd909_hz(float tau, float m, float pm, float t_ms) { return drum909_bd_hz(tau, m, pm, t_ms); }
 /* The 909 kick latches its sweep on trigger. Observe the next oscillator
  * sample and its rendered sample position under the same control lock. */
-int engine_bd909_pitch_view(float *ms,float *hz)
+X0X_COLD int engine_bd909_pitch_view(float *ms,float *hz)
 {
     if(!ms || !hz)return 0;
     uint32_t flags=plat_cq_lock();
@@ -150,7 +150,7 @@ int engine_drum808_curve(int voice,drum_curve_t *view)
     plat_cq_unlock(lock);
     return ok;
 }
-int engine_drum808_param_curve_preview(int voice,int param,int selection,int raw,drum_curve_t *view)
+X0X_COLD int engine_drum808_param_curve_preview(int voice,int param,int selection,int raw,drum_curve_t *view)
 {
     if(!view)return 0;
     uint32_t lock=plat_cq_lock();
@@ -378,7 +378,7 @@ static void live_key_retire(int voice,int release);
 static void live_key_context_retire(int voice,int release);
 static void live_key_drain(void);
 
-void engine_live_key_state(int voice,uint32_t *generation,int *arp,uint32_t *context)
+X0X_COLD void engine_live_key_state(int voice,uint32_t *generation,int *arp,uint32_t *context)
 {
     if((unsigned)voice>=NBASS) { *generation=0;*arp=0;if(context)*context=0;return; }
     uint32_t flags=plat_cq_lock();
@@ -766,7 +766,7 @@ X0X_COLD int engine_param_si(int t, int v, int i, int pot, float *val)
 static const char *const N909[DR_NUM + 1] = {"BD", "SD", "LT", "MT", "HT", "RS", "CP", "CH", "OH", "CR", "RD", "KIT"};
 static const char *const N808[D8_NUM + 1] = {"BD", "SD", "LT", "MT", "HT", "RS", "CP", "CB", "CY", "OH", "CH", "KIT"};
 
-const char *engine_voice_name(int t, int v)
+X0X_COLD const char *engine_voice_name(int t, int v)
 {
     switch (t) {
     case T_909: return (v >= 0 && v <= DR_NUM) ? N909[v] : "";
@@ -1039,7 +1039,7 @@ void engine_bass_on(int part, int note, int accent, int slide)
 {
     engine_bass_on_velocity(part, note, accent, slide, 100);
 }
-void engine_bass_on_velocity(int part, int note, int accent, int slide, int velocity)
+X0X_COLD void engine_bass_on_velocity(int part, int note, int accent, int slide, int velocity)
 {
     if ((unsigned)part < NBASS && SEQ_PART_OFF(&seq, TRK_BASS0 + part)) return;
     if (velocity < 1) velocity = 1;
@@ -1062,7 +1062,7 @@ static uint32_t notes_off_cutoff;
 static uint8_t notes_off_discard;
 static uint32_t notes_off_midi_epoch;
 static uint8_t notes_off_midi_valid;
-void engine_request_notes_off(void)
+X0X_COLD void engine_request_notes_off(void)
 {
     /* Keyboard and SMC request from the CPU0 main loop. Publish the three
      * queue boundaries together while audio is excluded; the MIDI primitive
@@ -1507,7 +1507,7 @@ int engine_motion_part(int t, int v)
 int engine_motion_value(int k) { return motion_value(&mot, k); }
 void engine_motion_rec(int k) { motion_req_rec(&mot, k); }
 void engine_motion_hold(int k) { motion_req_hold(&mot, k); }
-void engine_motion_clear(int k)
+X0X_COLD void engine_motion_clear(int k)
 {
     /* Main-loop removal publishes unused BEFORE the queued restore. An IRQ
      * between them can keep the old value for one block, but cannot run the
@@ -3182,7 +3182,7 @@ static int load_pack(void)
 }
 #endif
 
-static int builtin_count(void)
+X0X_COLD static int builtin_count(void)
 {
 #if X0X_NBREAKS > 0
     return X0X_NBREAKS;                   /* compiled into the image */
