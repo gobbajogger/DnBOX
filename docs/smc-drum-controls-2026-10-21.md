@@ -47,6 +47,6 @@ Independent source review identified the held probability-edit and preview-resto
 Retained logs:
 
 - [Candidate host regression](../evidence/smc-drum-controls-20261021/candidate.log).
-- [Exact baseline negative control](../evidence/smc-drum-controls-20261021/baseline.log).
+- [Exact baseline negative control](https://github.com/gobbajogger/DnBOX/blob/245a4e8372fc7e893bbb54d57193cc7d778bf6b7/evidence/smc-drum-controls-20261021/baseline.log).
 
 These logs are host evidence. The final installation kit's separate development record identifies the exact integrated source, scoped checks, Elite target build, controller and artifacts. This note claims no physical installation or live Bluetooth/device result.
