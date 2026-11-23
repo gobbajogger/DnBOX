@@ -45,6 +45,7 @@ static int mot, mst, fx;
 #define ORIGINAL_INPUT_KEYS 1
 #define PROF_T(name) unsigned name = 0
 #define PROF_ADD(stage, name) ((void)(name))
+#define PROF_FRAMES(n) (eng_prof_frames += (n))
 
 static int prob_skip(int part, int voice) { return probability_skip; }
 static void original_midi_context(void) {}

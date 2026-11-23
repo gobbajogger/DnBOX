@@ -12,6 +12,7 @@
  * machine's tracks or the break's slice pads (HOME: part mutes). */
 #include "../dsp/drum808.h"
 #include "x0x.h"
+#include "ui_perf_profile.h"
 #include "../seq/held_chord.h"
 #include "panic_chord.h"
 #include "play_question.h"
@@ -105,15 +106,6 @@ static const uint8_t WHITE_KEY[16] = {0, 2, 4, 6, 7, 9, 11, 12, 14, 16, 18, 19, 
 static const uint8_t BLACK_KEY[11] = {1, 3, 5, 8, 10, 13, 15, 17, 20, 22, 25};
 
 enum { V_HOME, V_PART, V_GEN, V_FX, V_MIX, V_GLO, V_SONG, V_PERF, V_SEQ, NVIEWS };
-/* The SMK build fits the playable engines first. Keep the benchmark for
- * host/FM-1 tests and explicitly enabled diagnostic builds only. */
-#ifndef X0X_UI_PERF
-#if BOARD_SMK37 && !defined(X0X_HOST) && !X0X_LCD_TRACE
-#define X0X_UI_PERF 0
-#else
-#define X0X_UI_PERF 1
-#endif
-#endif
 static const char *const VIEW_N[NVIEWS] = {"HOME", "", "TB-3PO", "FX", "MIX", "GLOBAL", "SONG",
                                          X0X_UI_PERF ? "PERF" : "", "SEQ"};
 static const uint16_t PART_COLOURS[2][NPARTS] = {

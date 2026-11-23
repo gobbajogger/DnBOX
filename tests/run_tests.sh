@@ -822,6 +822,7 @@ run vca-sustain sh tests/host/vca_sustain_test.sh   # 3c2ad0ec
 run chicago-ens-hoist python3 tests/host/run_chicago_ens_hoist.py   # 5b158ba2
 run chicago-modulation-hoist python3 tests/host/run_chicago_modulation_hoist.py   # c994d659
 run audio-stress sh tests/host/audio_stress_test.sh
+run stock-render-profiling python3 tests/host/stock_render_profiling_test.py
 run render-timing sh tests/host/render_timing_regression_test.sh   # per-block render CPU time: 0 late blocks, engine mean/max vs tests/host/render_timing_baseline.json
 run synth-param-jump sh tests/host/synth_param_jump_test.sh
 run param-write-sources sh tests/host/param_write_sources_test.sh

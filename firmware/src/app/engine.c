@@ -1,6 +1,7 @@
 /* SPDX-License-Identifier: GPL-3.0-only */
 /* X0X audio engine; see engine.h. */
 #include "engine.h"
+#include "ui_perf_profile.h"
 #include <string.h>
 #include "unit_control.h"
 #include "../seq/held_chord.h"
@@ -27,9 +28,18 @@
 
 /* time per stage of the render, in plat_cycles() units (the CPU's cycles, or the 24 MHz timer):
  * running totals (wrapping; the PERF screen takes differences) and the frames rendered. */
+#if X0X_ENGINE_PROFILE || defined(X0X_HOST)
 volatile uint32_t eng_prof[ENG_PROF_N], eng_prof_frames;
+#endif
+#if X0X_ENGINE_PROFILE
 #define PROF_T(v) uint32_t v = plat_cycles()
 #define PROF_ADD(k, t0) (eng_prof[k] += plat_cycles() - (t0))
+#define PROF_FRAMES(n) (eng_prof_frames += (n))
+#else
+#define PROF_T(v) ((void)0)
+#define PROF_ADD(k, t0) ((void)0)
+#define PROF_FRAMES(n) ((void)0)
+#endif
 
 /* ---------------------------------------------------------------- state --- */
 seq_t seq;
@@ -2928,7 +2938,7 @@ __attribute__((noinline)) static void render_sub(float *out_l, float *out_r, uin
         if (!(eng_c1_mask & (1u << j)))
             (void)run_job(j, 0);
     if (eng_c1_mask) {
-        uint32_t pt = plat_cycles();
+        PROF_T(pt);
         if (!eng_c1_waited) {
             eng_c1_waited = 1;
             if (plat_cpu2_wait())
@@ -3070,7 +3080,7 @@ void engine_render(int32_t *out_lr, uint32_t n)
             out_lr[i] = 0;
         return;
     }
-    eng_prof_frames += n;
+    PROF_FRAMES(n);
 #if X0X_SYNTHONE_PATCH
     s1_patch_boundary();
 #endif
