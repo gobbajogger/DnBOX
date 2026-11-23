@@ -56,12 +56,13 @@ def instrument(root):
     # from the glyph contract. Snapshot only the curve: baseline/text cannot
     # satisfy a missing-curve negative.
     p=root/'firmware/src/app/ui.c';s=p.read_text()
-    a='    for(int x=1;x<=214;x++) {'
+    a='    for(int x=1;x<=span;x++) {' if '    for(int x=1;x<=span;x++) {' in s else '    for(int x=1;x<=214;x++) {'
     s=once(s,a,'''    uint16_t curve_before[CV_MAX];pixel_snapshot(curve_before);
     if(getenv("PIXEL_MUTATE_SHIFT")){x0+=80;prevx+=80;}
     if(!getenv("PRESENCE_MUTATE_GLYPH")&&!getenv("ENVELOPE_MUTATE_CURVE"))
 '''+a)
-    a='    char num[16],unit[8],label[32];pref_value_of(r,matrix_value(r),num,unit);'
+    compact='    if(level_time<0)return;'
+    a=compact if compact in s else '    char num[16],unit[8],label[32];pref_value_of(r,matrix_value(r),num,unit);'
     s=once(s,a,'''    if(getenv("PIXEL_MUTATE_SHIFT"))x0-=80;
     uint32_t curve_owner=1u+((uint32_t)r.kind<<24)+((uint32_t)r.a<<16)+((uint32_t)r.b<<8)+r.c;
     if(geo_enabled&&(getenv("PIXEL_MUTATE_BLANK")||getenv("ENVELOPE_MUTATE_BLANK")))memcpy(cv_px,curve_before,cv_w*cv_h*sizeof *curve_before);

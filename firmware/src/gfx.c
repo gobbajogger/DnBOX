@@ -11,17 +11,34 @@ typedef struct {               /* proportional, see tools/gen_font.py */
     uint8_t first, last;
     const uint8_t *adv;        /* advance per glyph */
     const uint8_t *bw;         /* bitmap width per glyph (starts FONT_PAD left of the pen) */
-    const uint16_t *off;       /* byte offset of each glyph */
+    const uint16_t *off;       /* glyph offset, optionally with advance in its upper five bits */
     const uint8_t *data;
     capm_t cap;                /* rows containing at least half-covered H (or 0) pixels */
 } felucca_font_t;
 #include "felucca_font.h"
 
+static inline uint32_t font_offset(const felucca_font_t *f, uint32_t gi)
+{
+#ifdef FONT_INDEX16
+    return f->off[gi] & 2047u;
+#else
+    return f->off[gi];
+#endif
+}
+static inline uint32_t font_advance(const felucca_font_t *f, uint32_t gi)
+{
+#ifdef FONT_INDEX16
+    return f->off[gi] >> 11;
+#else
+    return f->adv[gi];
+#endif
+}
+
 /* Null bw denotes a generation-verified advance+padding width. Zero-advance
  * blank glyphs retain zero width. Other font families keep their exact table. */
 static inline uint32_t font_bitmap_width(const felucca_font_t *f, uint32_t gi)
 {
-    uint32_t advance = f->adv[gi];
+    uint32_t advance = font_advance(f,gi);
     return f->bw ? f->bw[gi] : advance ? advance + 2u * f->pad : 0u;
 }
 
@@ -257,7 +274,7 @@ static int32_t cv_text_clip(int32_t x, int32_t y, const felucca_font_t *f, const
         uint32_t bpr;
 #endif
         const uint8_t *gd;
-        gd = f->data + f->off[gi];
+        gd = f->data + font_offset(f,gi);
 #if defined(FONT_ALPHA_CROP) || defined(FONT_LZ_CROP)
         uint32_t rectangle = font_crop_read(&gd);
         crop_x = rectangle & 63u;
@@ -335,7 +352,7 @@ static int32_t cv_text_clip(int32_t x, int32_t y, const felucca_font_t *f, const
                     cv_px[(uint32_t)py * cv_w + (uint32_t)px] = swap16((nr << 11) | (ng << 5) | nb);
                 }
             }
-        x += f->adv[gi];
+        x += font_advance(f,gi);
     }
     return x;
 }
@@ -347,7 +364,7 @@ static int32_t text_w(const felucca_font_t *f, const char *s)
 {
     int32_t w = 0;
     for (; *s; s++)
-        w += f->adv[glyph(f, (uint8_t)*s)];
+        w += font_advance(f,glyph(f, (uint8_t)*s));
     return w;
 }
 
