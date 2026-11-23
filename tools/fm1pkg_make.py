@@ -52,7 +52,21 @@ BOARDS = {"fm1": (0x93000, 0x8DFBC, "FM-1_900", 0x8DFBC),
           "smk37": (0x9D000, 0x97400, "SMK-37 Pro_900", 0x86EE0)}   # SMK: the stock app is 0x974B8; build.py sets app.ld XIP
 BLE_LO, BLE_HI = 0x8B000, 0x9B000              # SMK: flash range of the Bluetooth block (FL_BLE_LO / FL_BLE_HI)
 # SMK sample slot map (firmware/src/app/slots.c SMP_USER_OFF / SMP_USER_SIZE): (flash offset, size) per slot
-SLOTMAP = {"smk37": [(0xC2000, 0x14000), (0xD6000, 0x1E000), (0xB3000, 0x8000)],
+def fdata_size(header=None):
+    """FL_FDATA_SIZE from firmware/hal/fm1_flash_map.h: the factory synth data taken from the end of slot 2"""
+    import re
+    header = header or Path(__file__).resolve().parents[1] / "firmware" / "hal" / "fm1_flash_map.h"
+    m = re.search(r"#define FL_FDATA_SIZE\s+0x([0-9A-Fa-f]+)u", Path(header).read_text())
+    if not m:
+        raise SystemExit(f"{header}: no FL_FDATA_SIZE")
+    n = int(m.group(1), 16)
+    if n % 0x1000 or n > 0x1E000 - 0x1000:
+        raise SystemExit(f"FL_FDATA_SIZE {n:#x}: whole 4 KiB sectors, at most 0x1D000")
+    return n
+
+
+FDATA_SIZE = fdata_size()
+SLOTMAP = {"smk37": [(0xC2000, 0x14000), (0xD6000, 0x1E000 - FDATA_SIZE), (0xB3000, 0x8000)],
            "fm1": [(0xA0000, 0x14000), (0xB4000, 0x14000)]}
 # Complete maps the live installer pkHasSlotMap allow-list accepts (flash 0x9CF00, CRC required).
 # Two-slot; older 44 KiB slot 3 at 0xB0000; current 32 KiB slot 3 at 0xB3000 after the shadows.
@@ -61,6 +75,10 @@ SLOTMAP_ALLOWED = (
     ((0xC2000, 0x14000), (0xD6000, 0x1E000), (0xB0000, 0xB000)),
     ((0xC2000, 0x14000), (0xD6000, 0x1E000), (0xB3000, 0x8000)),
 )
+if FDATA_SIZE:
+    # Slot 2 shortened by the factory synth data. The live installer's pkHasSlotMap allow-list
+    # (nightly repo) must list this same map before such a package is published.
+    SLOTMAP_ALLOWED += (tuple(SLOTMAP["smk37"]),)
 # Plain bytes after the encrypted cfg, scanned by the installers. SMK: just below 0x9D000.
 # FM-1: in the gap at the end of the 0x93000 image. Older packages have no record and stay on the
 # three-slot fallback.

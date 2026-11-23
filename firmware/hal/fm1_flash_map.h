@@ -64,6 +64,19 @@
 #define FL_OTA_HI       0x000C0000u
 #define FL_SMP_LO       0x000C2000u                /* user sample slots (app/slots.c) */
 #define FL_SMP_HI       0x000F4000u
+/* Factory synth data (FL_FDATA; user approval 2026-11-23: synth presets may use part of the user
+ * sample-slot area). It is the top FL_FDATA_SIZE bytes of FL_SMP, taken from the END of user sample
+ * slot 2, so slots 1, 2 and 3 keep their start offsets (no live slot moves) and slots 1 and 3 keep their
+ * sizes. Slot 2 shrinks to 0x1E000 - FL_FDATA_SIZE. 0 = no region: the stock layout. Read in place
+ * through the plain XIP window (>= FL_PLAIN_LO). Set it once, here (tools/fm1pkg_make.py and
+ * tools/gate_flashmap.py read this line). */
+#ifndef FL_FDATA_SIZE
+#define FL_FDATA_SIZE   0x00000000u
+#endif
+#define FL_FDATA_HI     FL_SMP_HI
+#define FL_FDATA_LO     (FL_SMP_HI - FL_FDATA_SIZE)
+_Static_assert(FL_FDATA_SIZE % 0x1000u == 0u && FL_FDATA_SIZE <= 0x1E000u - 0x1000u,
+               "SMK: FL_FDATA is whole sectors and leaves slot 2 at least one sector");
 /* the Bluetooth controller block (step 5): one 64 KiB piece of the encrypted app area, at the top of the
  * stock app slot (0x4120 + APP_SLOT 0x97400 = 0x9B520), sector aligned. The app code ends below it. */
 #define FL_APP_SLOT_END 0x0009B520u

@@ -109,7 +109,7 @@ test_class() {
     save-note-quiet|original-release-integration|original-release-ui|freeplay-rate-pads|freeplay-live-keys|synth-bus-mute|storage-warning|freeplay-latency|pads-in-settings|boot-screen|ui-theme) TEST_CLASS=G ;;
     rec-held-duration|rec-endpoint-lifecycle|rec-endpoint-storage|rec-nonforward-guard|pattern-preset-notelock) TEST_CLASS=G ;;
     dsp-host-linkage|drum-pan|stereo|drum909-adpcm|drum909|copy-semantics|song-actions|home-globe-part|home-globe-part-matrix|seq-pad-led|seq-lane-label-tap|ui-feedback|home-overview|part-order|sound-matrix|sound-layout|chicago-presentation|chicago-readout|matrix-knob-caption|preset-navigation-noop|ui-303-entry|host-build|gen-nonfont-tables|project-protocol|project-runtime|project-stage|project-save-preflight|smp-begin-cancel|smc-fx-caption|smc-fx-page-port|smc-fx-two-page-strip|smc-fx-echo-page|smc-fx-peer-view|smc-fx-preset-preserve|smc-reachability|smc-ui|drum-page-contract|smc-ui-popup|ui-shared-glyph|ui-glyph-polish|ui-tape-reel|ui-perf-labels|ui-chicago-env-motion|ui-drum-mix-material|smc-mixer-page|smc-ui-bounds|smc-ui-negative|smc-drum-mutes|smc-drum-rs|smc-performance-abort|smc-record-feedback|smc-lock|smc-lock-beat|smc-multi-peer|smc-multi-peer-negative|smc-select-mode|smc-pause-loss|smk-wheel-mode|perf-wheel-motion|miami-mw-wobble|smc-pickup-acceptance) TEST_CLASS=G ;;
-    adaptive-break-controls|adaptive-break-storage|audio-stress) TEST_CLASS=G ;;
+    adaptive-break-controls|adaptive-break-storage|audio-stress|heavy-playback) TEST_CLASS=G ;;
     perf-wheel-noise|ext-midi-rec-smk) TEST_CLASS=G ;;   # generates and reads shared build/gen headers
     dsp-host-linkage|drum-pan|stereo|drum909-adpcm|drum909|copy-semantics|song-actions|home-globe-part|home-globe-part-matrix|seq-pad-led|seq-lane-label-tap|ui-feedback|home-overview|part-order|sound-matrix|sound-layout|chicago-presentation|chicago-readout|matrix-knob-caption|preset-navigation-noop|ui-303-entry|host-build|gen-nonfont-tables|project-protocol|project-runtime|project-stage|project-save-preflight|smp-begin-cancel|smc-fx-caption|smc-fx-page-port|smc-fx-two-page-strip|smc-fx-echo-page|smc-fx-peer-view|smc-fx-preset-preserve|smc-reachability|smc-ui|drum-page-contract|smc-ui-popup|smc-remainder|smc-popup-engine|smc-audit-core|smc-audit-contract|ui-shared-glyph|ui-glyph-polish|ui-tape-reel|ui-perf-labels|ui-chicago-env-motion|ui-drum-mix-material|smc-mixer-page|smc-ui-bounds|smc-ui-negative|smc-drum-mutes|smc-drum-rs|smc-performance-abort|smc-record-feedback|smc-lock|smc-lock-beat|smc-multi-peer|smc-multi-peer-negative|smc-select-mode|smc-pause-loss|smk-wheel-mode|perf-wheel-motion|miami-mw-wobble|smc-pickup-acceptance) TEST_CLASS=G ;;
     adaptive-break-controls|adaptive-break-storage) TEST_CLASS=G ;;
@@ -386,6 +386,8 @@ run chicago-fx2-inserts sh tests/host/chicago_fx2_inserts_test.sh build/chicago_
 run original-sound-cell sh tests/host/original_sound_cell_test.sh build/original-sound-cell
 run original-release-ui sh tests/host/original_release_ui_test.sh build/ui-theme/original-ui
 run original-build python3 tests/host/test_original_build_composition.py
+run engine-memory-report python3 -B tests/host/engine_memory_report_test.py   # per-engine flash/RAM/pool report + stock budget
+run flashmap-fdata python3 -B tests/host/flashmap_fdata_test.py   # factory synth data at the end of slot 2
 run load-guard-diagnostic python3 tests/host/test_load_guard_diagnostic.py
 run state-trace-diagnostic python3 tests/host/test_state_trace_diagnostic.py
 run play-question sh tests/host/play_question_test.sh
@@ -703,6 +705,7 @@ run upload-images sh -c "python3 tests/host/make_test_loops.py build/test_loops 
     python3 tools/upload_breaks.py --rate 22050 --nslots 2 --dry-run build/test_upload build/test_loops/loop*.wav && \
     python3 tools/upload_breaks.py --dry-run build/test_upload44 --slot-kb 80,120 build/test_loops/loop*.wav && \
     python3 tools/upload_breaks.py --rate 22050 --slots 3 --slot-kb 80,120,32 --dry-run build/test_upload44s3 build/test_loops/loop1.wav"   # 22.05 kHz (2 x 80), the 44.1 kHz default (80/120), slot 3 (32 KiB)
+run default-breaks python3 -B tests/host/default_breaks_test.py   # perf row 3: the 5 owner BREAK zones as default slot 1/2 contents (scenario default_breaks plays them)
 run upload-tools python3 tests/upload_tools_test.py   # upload_breaks.py on a mocked device; one-shot trim
 run builtin-break-output python3 tests/host/test_builtin_break_output.py
 run break-pack python3 tests/break_pack_test.py   # optional factory-loop pack: full ADPCM, free tail, C parser
@@ -784,6 +787,7 @@ run vca-sustain sh tests/host/vca_sustain_test.sh   # 3c2ad0ec
 run chicago-ens-hoist python3 tests/host/run_chicago_ens_hoist.py   # 5b158ba2
 run chicago-modulation-hoist python3 tests/host/run_chicago_modulation_hoist.py   # c994d659
 run audio-stress sh tests/host/audio_stress_test.sh
+run heavy-playback sh tests/host/heavy_playback_10min_test.sh   # perf row 2: 10 simulated minutes, every engine, Elite + Pro, dropouts=0 late=0
 run synth-param-jump sh tests/host/synth_param_jump_test.sh
 run param-write-sources sh tests/host/param_write_sources_test.sh
 if [ "$PIL_SKIP" = 1 ]; then not_run chicago-presentation Pillow; else run chicago-presentation sh tests/host/chicago_presentation_test.sh; fi

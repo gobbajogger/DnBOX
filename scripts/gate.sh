@@ -11,7 +11,7 @@
 #   scripts/gate.sh [<lane>] --online
 #   scripts/gate.sh --self-test
 #
-# Lane is sound, fwui, integ, remote, or web (default: integ).
+# Lane is sound, fwui, integ, perf, synths, remote, or web (default: integ).
 #
 # Offline is the default: the run uses only the local checkout and does
 # not git fetch, clone or ls-remote. Network Git (and npm ci) run only
@@ -37,7 +37,7 @@ SKIPPABLE="fetch-base"
 usage() {
   echo "Usage: scripts/gate.sh [<lane>] [--post] [--online]" >&2
   echo "       scripts/gate.sh --self-test" >&2
-  echo "Lane: sound, fwui, integ, remote, or web (default: integ)." >&2
+  echo "Lane: sound, fwui, integ, perf, synths, remote, or web (default: integ)." >&2
   echo "Offline is the default (no git fetch/clone/ls-remote)." >&2
   echo "--online: allow network Git and npm ci (sets DNBOX_GATE_ONLINE=1)." >&2
   echo "--post: upload a dnbox-gate commit status for this SHA via gh api." >&2
@@ -350,7 +350,7 @@ for arg in "$@"; do
     --parse-log=*) PARSELOG=${arg#--parse-log=} ;;
     --exit-code=*) PARSE_RC=${arg#--exit-code=} ;;
     -h|--help) usage; exit 0 ;;
-    sound|fwui|integ|remote|web) LANE="$arg" ;;
+    sound|fwui|integ|perf|synths|remote|web) LANE="$arg" ;;
     *)
       echo "scripts/gate.sh: unknown argument: $arg" >&2
       usage

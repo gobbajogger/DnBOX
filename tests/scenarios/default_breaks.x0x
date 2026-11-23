@@ -1,0 +1,28 @@
+# perf row 3: the owner's 5 BREAK zones, preloaded as the default contents of user slots 1 and 2
+# (tests/host/default_breaks_test.py builds build/default-breaks/ from assets/default-breaks/),
+# parsed by the firmware's own slots.c and played by the BREAK part.
+wait 200
+expect loops 2
+slotimg 0 build/default-breaks/slot1.hdr build/default-breaks/slot1.bin
+expect loops 5
+slotimg 1 build/default-breaks/slot2.hdr build/default-breaks/slot2.bin
+expect loops 7
+turn ALGO 2
+expect part 4
+tap EDIT
+tap EDIT
+turn K1 2
+expect loop_a 0
+tap SEL
+expect loop_a 2
+tapkey w0
+tapkey w4
+tapkey w8
+tapkey w12
+wav default_breaks.wav
+tap PLAY
+wait 3000
+tap PLAY
+wait 300
+wavstop
+expect peak_db_min -40

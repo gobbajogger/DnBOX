@@ -330,10 +330,40 @@ def against_js():
     ok(I.LOADER_MARK in raw, f"{clean.name} carries the Felucca loader marker")
 
 
+def fresh_install():
+    """--fresh-install: default BREAK loops only on a blank keyboard, after the install"""
+    import default_breaks
+    raw = package()
+    image = I.logical_image(raw)
+    p = pkgfile("fresh.fwsc", raw)
+    calls = []
+    real = default_breaks.fill_fresh
+    default_breaks.fill_fresh = lambda link, fresh_install, progress=None: calls.append(fresh_install) or [1, 2]
+    try:
+        dev = FakeSMK(image)                            # blank layout (all nz = 0)
+        rc, out, err = cli([p, "--yes", "--fresh-install"], dev)
+        ok(rc == 0 and dev.upgrades == 2 and calls == [True] and "slot(s) 1, 2 written" in out,
+           "--fresh-install on a blank keyboard: install, then the defaults")
+        calls.clear()
+        dev = FakeSMK(image)
+        rc, out, err = cli([p, "--yes"], dev)
+        ok(rc == 0 and calls == [], "an ordinary install never writes the defaults")
+        dev = FakeSMK(image, slot_info=(2, 80, 3, ord("B"), ord("R"), ord("1"), 0, 59, 0, 0, 0))
+        rc, out, err = cli([p, "--yes", "--fresh-install"], dev)
+        ok(rc == I.EXIT["slots"] and dev.upgrades == 0 and calls == [] and "not a fresh install" in err,
+           "--fresh-install with samples on the keyboard -> refused before write")
+        dev = FakeSMK(image, slot_info=None)
+        rc, out, err = cli([p, "--yes", "--fresh-install"], dev)
+        ok(rc == I.EXIT["slots"] and dev.upgrades == 0 and calls == [], "--fresh-install, no layout -> refused before write")
+    finally:
+        default_breaks.fill_fresh = real
+
+
 if __name__ == "__main__":
     wire()
     installs()
     errors()
+    fresh_install()
     against_js()
     shutil.rmtree(TMP, ignore_errors=True)
     # the SMK-37 Pro, Elite and MKE-P37 are one keyboard: packages install across them, never across FM-1 / SMK
