@@ -52,6 +52,7 @@ static void original_midi_context(void) {}
 static void brk_channel_reconcile(void) {}
 static void original_prepare_all(void) {}
 static void guard_apply(void) {}
+static void arp_boundary(void) {} /* Unrelated synth controls are not in this BREAK-only fixture. */
 static void live_key_drain(void) {}
 static void brk_midi_drain(void) {}
 static void motion_release(int *owner) {}
