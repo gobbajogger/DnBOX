@@ -66,7 +66,7 @@ int original_runtime_prepare(original_runtime_part *p, float bpm)
     if (!p || p->status != ORIGINAL_RUNTIME_OK) return p ? p->status : 0;
     int ok;
     if (p->kind == ORIGINAL_SOUND_JUNO || p->kind == ORIGINAL_SOUND_SYNTHONE) {
-#if X0X_ARP_HOOKS
+#if X0X_ARP_ENGINE
         p->arp.bpm = bpm;   /* only the arp clock follows tempo: idempotent */
 #else
         (void)bpm;          /* no tempo-dependent parameters: idempotent */
@@ -137,7 +137,7 @@ static int key_held(const original_runtime_part *p, unsigned key)
     return 0;
 }
 
-#if X0X_ARP_HOOKS
+#if X0X_ARP_ENGINE
 /* ---- Persistent arp block v1 (engine_arp.h). Explicit bytes, no ABI layout. */
 void engine_arp_cfg_default(engine_arp_cfg *c)
 {
@@ -472,7 +472,7 @@ int original_runtime_key(original_runtime_part *p, unsigned source, unsigned key
             ++p->stale_timers;
         }
         ++*held;
-#if X0X_ARP_HOOKS
+#if X0X_ARP_ENGINE
         if (live_source(source) && arp_engaged(p)) {
             p->arp.vel = (uint8_t)velocity;
             arp_rebuild(p);
@@ -553,7 +553,7 @@ int original_runtime_all_off(original_runtime_part *p)
     memset(p->stale_ttl, 0, sizeof p->stale_ttl);
     memset(p->stale_pending, 0, sizeof p->stale_pending);
     p->stale_tick_frames = p->stale_timers = 0;
-#if X0X_ARP_HOOKS
+#if X0X_ARP_ENGINE
     p->arp.nheld = p->arp.nsound = 0; p->arp.pos = 0; p->arp.to_next = p->arp.gate_left = 0;
 #endif
     return runtime_result(p, ok);
@@ -664,7 +664,7 @@ int original_runtime_render(original_runtime_part *p, original_runtime_workspace
     if (!p || !w || !left || !right || frames > 256) return 0;
     if (p->status != ORIGINAL_RUNTIME_OK) return p->status;
     if (runtime_stale_tick(p, frames) != ORIGINAL_RUNTIME_OK) return p->status;
-#if X0X_ARP_HOOKS
+#if X0X_ARP_ENGINE
     if (arp_engaged(p) && (p->arp.nheld || p->arp.nsound)) {
         /* Split the block at arp events: sample-accurate steps and gates. */
         unsigned done = 0;

@@ -3,7 +3,7 @@
  * (engine_arp.h) and the persistent per-voice block at sound.v[T_303][2 + v].
  * Main loop: read = short locked copy; write = edit one pending copy (newest
  * wins). Audio boundary (arp_boundary): apply, store, bump the revision. */
-#if X0X_ARP_HOOKS
+#if X0X_ARP_ENGINE
 #define ARP_SLOT(s, v) ((s)->v[T_303][ARP_BLOCK_VOICE0 + (unsigned)(v)])
 static volatile uint32_t arp_revision[NBASS];
 static engine_arp_cfg arp_pending[NBASS];

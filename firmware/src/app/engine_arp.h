@@ -6,11 +6,19 @@
  * next engine_render boundary and writes to proj.sound.v[T_303][2 + voice]. */
 #pragma once
 #include <stdint.h>
-/* Opt-in until the image has XIP room (~4 KB -Oz, see ARP-HOOKS-API.md):
- * 0 compiles the whole arp out (types only). */
+/* THE arp config switch (engine, runtime and ui_arp_hooks.h all read this one;
+ * build with -DX0X_ARP_HOOKS=0/1 to override). 0 compiles the whole arp and
+ * its UI pages out (types only). */
 #ifndef X0X_ARP_HOOKS
 #define X0X_ARP_HOOKS 0
 #endif
+/* Host UI tests swap the hooks for a fake (X0X_ARP_FAKE_H, same types);
+ * the engine side then builds as hooks-off (X0X_ARP_ENGINE 0) and ui.c
+ * includes the fake itself (ui_arp_hooks.h). */
+#ifdef X0X_ARP_FAKE_H
+#define X0X_ARP_ENGINE 0
+#else
+#define X0X_ARP_ENGINE X0X_ARP_HOOKS
 enum { ARP_STEPS = 16 };
 enum { ARP_UP, ARP_DOWN, ARP_UPDN, ARP_SEQ, ARP_NMODES };      /* MODE knob order on screen */
 enum { ARP_NSPEED = 10, ARP_SPEED_1_16 = 8 };                   /* == CHI_ARP_NSPEED, CHI_ARP_SPD_1_16 */
@@ -57,7 +65,7 @@ int engine_arp_from_s1(engine_arp_cfg *, unsigned id, float value);
 /* Frames (44.1 kHz) per arp step at bpm for a SPEED index. */
 uint32_t engine_arp_step_frames(float bpm, unsigned speed);
 
-#if X0X_ARP_HOOKS
+#if X0X_ARP_ENGINE
 #if !X0X_SYNTHONE_PATCH
 enum { S1_EDIT_REJECTED, S1_EDIT_QUEUED, S1_EDIT_BUSY };
 #endif
@@ -71,3 +79,4 @@ int engine_arp_reload(unsigned voice);
 /* Replace the whole arp block from a preset reader; returns S1_EDIT_*. */
 int engine_arp_preset(unsigned voice, const engine_arp_cfg *cfg);
 #endif
+#endif /* !X0X_ARP_FAKE_H */
