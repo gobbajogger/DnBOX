@@ -7759,32 +7759,62 @@ static UI_DRAW void physical_stage_label(char *label,int slot,char stage,int raw
     *end++=' ';*end++=stage;*end++=' ';
     put_s(put_i(end,(raw*100+63)/127),"%");
 }
-static UI_DRAW void draw_drum_amp_inline(int p,int active,int y,int h,int off)
+/* The drum readouts all use the same unspaced physical number and unit. */
+static UI_DRAW void dv_readout(char *value,pref_t r,int raw)
+{
+    char unit[8];
+    pref_value_of(r,raw,value,unit);
+    while(*value)value++;
+    put_s(value,unit);
+}
+
+static UI_DRAW void ui_curve_cursor(int x,int y,uint16_t col)
+{
+    cv_rect(x-1,y-1,3,3,col);
+}
+
+static UI_DRAW void draw_drum_amp_inline(int p,int active,int y,int h,int level_time)
 {
     pref_t r=pg.r[p][0];drum909_amp_snapshot v;
     if(!engine_drum909_amp_view(r.b,&v))return;
     int x0=13,y0=y+h-5,top=y+22,edited=active && ui.touched==0 &&
         (int32_t)(ui.touch_until-plat_ms())>0;
-    uint16_t col=active?matrix_col():SOUND_WHITE,ink=edited?SOUND_INK:col;
+    uint16_t col=active||level_time>0?matrix_col():SOUND_WHITE,ink=edited?SOUND_INK:col;
     float max_ms=0;
     if(!drum909_param_si(r.b,r.c,127,&max_ms) || max_ms<=0)return;
     float horizon=max_ms+v.target_hold_ms,hold=v.target_hold_ms,decay=v.target_decay_ms;
+    int span=214;
+    if(level_time<0) { x0=11;top=y+20;y0=y+28;span=215; }
+    else if(level_time) { x0=33;top=y+21;y0-=7;span=193;
+        cv_rect(x0,(top+y0)/2,194,1,SOUND_LINE);
+    }
     int prevx=x0,prevy=top;
-    cv_rect(x0,y0-off,215,1,SOUND_SELECT_SIDE);
-    for(int x=1;x<=214;x++) {
-        float ms=horizon*x/214.0f;
+    cv_rect(x0,y0,span+1,1,SOUND_SELECT_SIDE);
+    for(int x=1;x<=span;x++) {
+        float ms=horizon*x/(float)span;
         float level=ms<=hold?1.0f:ms>=hold+decay?0.0f:fm_expf(fm_logf(.00001f)*(ms-hold)/decay);
         int yy=y0-(int)(level*(y0-top)+.5f);
-        cv_line(prevx,prevy-off,x0+x,yy-off,ink);prevx=x0+x;prevy=yy;
+        cv_line(prevx,prevy,x0+x,yy,ink);prevx=x0+x;prevy=yy;
     }
-    char num[16],unit[8],label[32];pref_value_of(r,matrix_value(r),num,unit);
-    physical_stage_label(label,0,'D',matrix_value(r));
-    text_c(75,y+8-off,&FONT_T,label,edited?SOUND_INK:SOUND_GRAY);
-    put_s(put_s(label,num),unit);
+    if(level_time<0)return; /* inactive KIT summary shares the curve without axes or a meter */
+    if(level_time) {
+        cv_text(142,y+3,&FONT_T,"LEVEL/TIME",SOUND_GRAY);
+        text_r(29,top-3,&FONT_T,"100%",SOUND_GRAY);
+        text_r(29,y0-3,&FONT_T,"0%",SOUND_GRAY);
+        cv_text(x0,y0+1,&FONT_T,"0 ms",SOUND_GRAY);
+        /* BD domain: 4.0 s maximum decay plus the fixed 40 ms hold. */
+        text_r(x0+span,y0+1,&FONT_T,"4.04s",SOUND_GRAY);
+    } else {
+    char label[32];
+    int raw=matrix_value(r);
+    physical_stage_label(label,0,'D',raw);
+    text_c(75,y+8,&FONT_T,label,edited?SOUND_INK:SOUND_GRAY);
+    dv_readout(label,r,raw);
     int vx=232-tw(&FONT_T,label);
-    cv_text(vx,y-off,&FONT_T,label,edited?SOUND_INK:SOUND_GRAY);
-    text_r(vx-5,y-off,&FONT_T,"DECAY",edited?SOUND_INK:SOUND_GRAY);
-    if(edited)cv_rect(x0,y0+2-off,215,2,SOUND_INK);
+    cv_text(vx,y,&FONT_T,label,edited?SOUND_INK:SOUND_GRAY);
+    text_r(vx-5,y,&FONT_T,"DECAY",edited?SOUND_INK:SOUND_GRAY);
+    if(edited)cv_rect(x0,y0+2,215,2,SOUND_INK);
+    }
     if(v.active && (v.hold_active || v.ramp_valid)) {
         float level=fm_maxf(0,fm_minf(1,v.raw_level));
         /* Current BD trigger fixes the hold at 40ms; SD has none. Ramp
@@ -7793,15 +7823,17 @@ static UI_DRAW void draw_drum_amp_inline(int p,int active,int y,int h,int off)
         float live_hold=r.b==DR_BD?40.0f:0.0f;
         float elapsed=v.hold_active?live_hold-v.hold_left/44.1f:
             live_hold+fm_maxf(0,(float)(v.ramp_ticks-v.ramp_left-1))/44.1f;
-        int px=x0+(int)(214*fm_minf(1,fm_maxf(0,elapsed/horizon))+.5f);
+        int px=x0+(int)(span*fm_minf(1,fm_maxf(0,elapsed/horizon))+.5f);
         int py=y0-(int)(level*(y0-top)+.5f);
-        cv_rect(px,top-off,1,y0-top,SOUND_DIM);cv_rect(px-1,py-1-off,3,3,SOUND_INK);
-        cv_rect(9,top-off,1,y0-top+1,SOUND_DIM);cv_rect(7,py-off,5,1,SOUND_INK);
+        cv_rect(px,top,1,y0-top,SOUND_DIM);ui_curve_cursor(px,py,SOUND_INK);
+        int meter_x=level_time?30:9;
+        cv_rect(meter_x,top,1,y0-top+1,SOUND_DIM);
+        cv_rect(meter_x-(level_time?1:2),py,level_time?3:5,1,SOUND_INK);
     }
 }
 static UI_DRAW void draw_adsr_inline(int p,int active,int y,int h,int off)
 {
-    if(drum_amp_ref(pg.r[p][0])){draw_drum_amp_inline(p,active,y,h,off);return;}
+    if(drum_amp_ref(pg.r[p][0])){draw_drum_amp_inline(p,active,y-off,h,0);return;}
     static const char *const names[4]={"ATTACK","DECAY","SUSTAIN","RELEASE"};
     ui_adsr_t e;
     int k,touched=active && ui.touched>=0 && ui.touched<4 &&
@@ -7917,7 +7949,7 @@ static UI_DRAW void draw_adsr_inline(int p,int active,int y,int h,int off)
                 if(!(e.present&(1u<<stage)))px=-1;}
             if(px>=0){int py=y0-(int)(lv*(y0-top)+.5f);
             cv_rect(px,top-off,1,y0-top,SOUND_DIM);
-            cv_rect(px-1,py-1-off,3,3,hi);}
+            ui_curve_cursor(px,py-off,hi);}
         }
     }
 }
@@ -8436,7 +8468,7 @@ static UI_DRAW void orig_strip_glyph(pref_t r,int val,int gx,int gy,uint16_t col
         else {
             cv_line(gx,bot-1,x0,bot-1,col);cv_line(x0,bot-1,dx,dy,col);
             cv_line(dx,dy,x0+w,top,C_LINE);cv_line(x0+w,top,right,top,C_LINE);
-            cv_rect(dx-1,dy-1,3,3,C_WHITE);
+            ui_curve_cursor(dx,dy,C_WHITE);
         }
     } else if(chi && c==5) og_wave(gx,gy,og_bite,q,col);       /* BITE: soft clip */
     else if(chi && c==6) og_wave(gx,gy,og_gnaw,q,col);         /* GNAW: fold */

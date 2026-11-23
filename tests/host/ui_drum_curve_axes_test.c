@@ -38,26 +38,44 @@ static void chart(float window,const char *half,const char *end)
 static void pitch_chart_and_dense(void)
 {
     setup(V_PART,PART_909);
-    drum_curve_t v={.window=160,.elapsed=-1};
+    /* Follow the real 909 KIT route. Its lower-panel graph is 29 px high;
+     * a synthetic 70 px pitch plot cannot be reached by this layout. */
+    const int left=13,right=227,top=179,bottom=208,window=160;
+    ui.sel[PART_909]=DR_BD;
+    build_pages();
+    int kit=0;
+    while(kit<pg.n && pg.group[kit]!=GR_KIT)kit++;
+    CHECK(kit<pg.n);
+    *page_of(V_PART)=(uint8_t)kit;
+    build_pages();
+    CHECK(pg.group[cur_page()]==GR_KIT);
+    int32_t audio[512];
+    /* Let boot's queued sound and startup fade settle before striking. */
+    for(int i=0;i<52;i++)engine_render(audio,256);
+    now_ms|=1u;
+    draw_main();draw_knobs();
+    uint16_t idle[9];
+    CHECK(!SEQ_PART_OFF(&seq,PART_909));
     engine_drum(PART_909,DR_BD,1.f);
-    int32_t audio[512];engine_render(audio,256);engine_render(audio,256);
+    engine_render(audio,256);engine_render(audio,256);
     float elapsed,hz;CHECK(engine_bd909_pitch_view(&elapsed,&hz));
-    CHECK(elapsed>=0 && elapsed<=160 && hz>0);
-    cv_begin(240,138,0);cv_rect(0,0,240,138,SOUND_FACE);
-    dv_curve_row(&v,1,20,90,PART_COL[PART_909]);
-    memcpy(rendered,cv_px,sizeof rendered);
-    label_at(29-tw(&FONT_T,"640Hz"),18,"640Hz");
-    label_at(29-tw(&FONT_T,"113"),45,"113");
-    label_at(29-tw(&FONT_T,"20"),72,"20");
-    label_at(130-tw(&FONT_T,"80")/2,78,"80");
-    label_at(227-tw(&FONT_T,"160ms"),78,"160ms");
+    CHECK(elapsed>=0 && elapsed<=window && hz>0);
     float octaves=log2f(hz/20.f);if(octaves<0)octaves=0;if(octaves>5)octaves=5;
-    int x=33+(int)(194.f*elapsed/160.f+.5f);
-    int y=76-(int)((76-20)*octaves*.2f+.5f);
-    CHECK(x>=33 && x<=227 && y>=20 && y<=76);
-    CHECK(rendered[y*240+x]==swap16(SOUND_INK));
+    int x=left+(int)((right-left)*elapsed/(float)window+.5f);
+    int y=bottom-(int)((bottom-top)*octaves*.2f+.5f);
+    CHECK(x>left && x<right && y>=top && y<=bottom);
+    for(int dy=-1;dy<=1;dy++)for(int dx=-1;dx<=1;dx++)idle[3*(dy+1)+dx+1]=fb[(y+dy)*240+x+dx];
+    draw_main();draw_knobs();
+    for(int dy=-1;dy<=1;dy++)for(int dx=-1;dx<=1;dx++) {
+        CHECK(idle[3*(dy+1)+dx+1]!=swap16(SOUND_INK));
+        CHECK(fb[(y+dy)*240+x+dx]==swap16(SOUND_INK));
+    }
+    int pitch_ink=0;
+    for(int row=top;row<=bottom;row++)for(int col=left;col<=right;col++)
+        pitch_ink+=fb[row*240+col]==swap16(PART_COL[PART_909]);
+    CHECK(pitch_ink>100);
     /* Dense native rows must not acquire labels at the cost of their curve. */
-    v=(drum_curve_t){.peak=1,.fall=100,.window=1000,.elapsed=-1};
+    drum_curve_t v={.peak=1,.fall=100,.window=1000,.elapsed=-1};
     cv_begin(240,138,0);cv_rect(0,0,240,138,SOUND_FACE);
     dv_curve_row(&v,0,20,50,PART_COL[PART_909]);
     int gray=0,ink=0;

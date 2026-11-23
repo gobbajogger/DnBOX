@@ -56,7 +56,8 @@ int main(void)
         assert(f->h == r->h && f->pad == r->pad && f->first == r->first && f->last == r->last);
         for (uint32_t g = 0; g <= (uint32_t)(f->last - f->first); ++g)
             assert(font_bitmap_width(f,g) == font_bitmap_width(r,g));
-        assert(!memcmp(f->adv, r->adv, f->last - f->first + 1));
+        for (uint32_t g = 0; g <= (uint32_t)(f->last - f->first); ++g)
+            assert(font_advance(f,g) == r->adv[g]);
         for (ch = 1; ch < 256; ch++) {
             char s[4] = {(char)ch, '8', (char)ch, 0};
             /* The number-only L face has no '?' fallback; its callers use its
