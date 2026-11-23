@@ -5808,8 +5808,8 @@ static UI_DRAW void draw_drum(int band)
                 continue;
             }
             box(x, y, 12, DROW - 2, hit ? (muted ? C_DIM : sel ? col : on_dim) : (s == ph ? C_DIM : C_LINE));
-            if (hit && s == ph)
-                box(x + 2, y + 2, 8, DROW - 6, C_WHITE);
+            if (hit && s == ph && engine_drum_fired(k, v, s, (uint32_t)(15000.0f / (seq.bpm >= 20.0f ? seq.bpm : 120.0f)) + 20u))
+                box(x + 2, y + 2, 8, DROW - 6, C_WHITE);   /* lit only on the real hit: never a rest, mute or chance skip */
             if (hit && sel && ((lmarks >> c) & 1u))      /* the step's own values (p-locks): a notch */
                 cv_rect(x + 8, y + 1, 3, 3, C_BLACK);
         }

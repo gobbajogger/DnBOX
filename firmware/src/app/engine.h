@@ -133,6 +133,7 @@ int engine_superj6_factory_load(unsigned owner, const sj6_factory_row *row);
 int engine_bass_voice_view(int voice, float *level, float *modulation, unsigned *state, unsigned *key_down);
 /* drums, UI: ms since the track's last hit, its live amp envelope 0..1; 0 when silent */
 int engine_drum_view(int kit, int voice, uint32_t *age_ms, float *env);
+int engine_drum_fired(int kit, int voice, int step, uint32_t window_ms);  /* the step lit only on a real hit */
 /* UI: the 909 kick's pitch t ms after a hit for these engine values (drum909_bd_hz) */
 int engine_bd909_pitch_view(float *ms,float *hz); /* sounding kick position, sampled atomically */
 float engine_bd909_hz(float tau, float depth, float pitch, float t_ms);

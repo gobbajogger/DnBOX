@@ -37,6 +37,7 @@ volatile uint8_t eng_step[NTRACKS];
 volatile uint16_t eng_peak[NPARTS];
 volatile uint8_t eng_hit[NKIT][NDRUM];
 static volatile uint32_t eng_hit_ms[NKIT][NDRUM];     /* UI glyph motion: when each track last hit */
+static volatile uint8_t eng_hit_step[NKIT][NDRUM];    /* the step that hit was on (UI: only a real hit lights) */
 static float eng_hit_pk[NKIT][NDRUM];                 /* the envelope's peak since that hit (UI side) */
 static uint32_t eng_hit_seen[NKIT][NDRUM];
 int16_t eng_scope[SCOPE_N] X0X_POOL;
@@ -75,6 +76,16 @@ int engine_bass_status(int v) { return (unsigned)v < NBASS ? original_bass[v].st
  * peak. 0 when it has never hit or the tail has ended. */
 static float eng_hit_e[NDRUM];
 static uint32_t eng_hit_e_at[NDRUM], eng_hit_e_t[NDRUM];
+/* 1 when the track really fired on this step within the last window_ms: a rest,
+ * a muted track or a chance-skipped step never fires the sink, so it stays dark. */
+X0X_COLD int engine_drum_fired(int kit, int v, int step, uint32_t window_ms)
+{
+    if ((unsigned)kit >= NKIT || (unsigned)v >= NDRUM) return 0;
+    uint32_t at = eng_hit_ms[kit][v];
+    if (!at || eng_hit_step[kit][v] != (uint8_t)step) return 0;
+    int32_t age = (int32_t)(plat_ms() - at);
+    return age < 0 || (uint32_t)age <= window_ms;
+}
 X0X_COLD int engine_drum_view(int kit, int v, uint32_t *age_ms, float *env)
 {
     if ((unsigned)kit >= NKIT || (unsigned)v >= NDRUM) return 0;
@@ -1142,6 +1153,7 @@ __attribute__((noinline)) static void s_drum(void *x, int kit, int v, float vel)
     {
         eng_hit[kit][v] = (uint8_t)(vel >= 1.0f ? 255 : (int)(vel * 255.0f));
         if(kit==1)d8_trigger_frame[drum808_clock_slot(v)]=d8_frame;
+        eng_hit_step[kit][v] = eng_step[TRK_DRUM + kit];
         eng_hit_ms[kit][v] = plat_ms() | 1u;          /* 0 = never hit */
     }
     if (kit == 0)
