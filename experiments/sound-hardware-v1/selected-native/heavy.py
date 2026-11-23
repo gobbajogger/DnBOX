@@ -33,7 +33,10 @@ def main():
     guest = measure(args.elf, args.output / "heavy", duration_ms=8000)
     owners_ok = guest["bass_kinds"] == args.owners and guest["runtime_status"] == [1, 1]
     all_active = (all(guest["peak_meter_909_808_A_B_BREAK"])
-                  and all(guest["triggered_rows_909_808"])
+                  and guest["triggered_rows_909_808"] == [11, 11]
+                  and guest["user_zones"] == [0, 1, 0]
+                  and guest["loop_count"] == 1
+                  and guest["first_catalog_slot_zone"] == [1, 0]
                   and guest["last_half_second_nonzero_words"] > 0)
     scene_late = shot["raw_late"] - boot["raw_late"]
     timing_ok = (shot["max_us"] < 11609 and shot["raw_late"] == 0

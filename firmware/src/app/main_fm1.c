@@ -2008,7 +2008,7 @@ uint8_t smk_padcal_draw(uint32_t w, uint32_t h)
     uint32_t sig = smk_padcal_word(&padcal, e) ^ (uint32_t)(padcal.sel | padcal.page << 4) << 25 ^
                    (uint32_t)(padcal.tl | padcal.orient << 4 | padcal.real << 5) * 2654435761u;
     char t[32], *q;
-    if (sig == padcal_sig)                        /* only the selected entry, the pad and the page change */
+    if (sig == padcal_sig && blit_hash[1])         /* SMC expiry invalidates the LCD body */
         return 0u;
     padcal_sig = sig;
     cv_begin(w, h, C_BLACK);
@@ -2282,10 +2282,9 @@ static int capture_maintenance_poll(void)
 /* SAFE MODE: X0X crashed (or hung) twice while starting. Nothing that makes sound runs: no audio,
  * no engine, no UI; USB is on, so the web installer (X0X, or the stock firmware) and M-UPGRADE can
  * reach it. PLAY tries X0X again. The chip's own update mode stays the last resort (fm1_cstart). */
-static void safe_main(void)
+static void draw_safe_mode(void)
 {
     char b[24];
-    uint32_t t0, play;
     lcd_fill(0, 0, 240, 240, C_BLACK);
     draw_text_box(0, 18, 240, &FONT_B, "DnBOX SAFE MODE", C_HI, 1);
     draw_text_box(0, 52, 240, &FONT_S, "STARTUP CRASHES: 2", C_WHITE, 1);
@@ -2309,6 +2308,12 @@ static void safe_main(void)
         hexs(b + 7, fm1_crash.dbg);
         draw_text_box(0, 220, 240, &FONT_S, b, C_GRAY, 1);
     }
+}
+
+static void safe_main(void)
+{
+    uint32_t t0, play;
+    draw_safe_mode();
     fm1_input_init();
     panel_init();
     usb_start();
@@ -2336,8 +2341,10 @@ static void safe_main(void)
         if (usb.ota_req) {
             usb.ota_req = 0;
             ed_install_forget();
-            if (flash_ok)
-                ota_session();                      /* an install commits and resets; else back here */
+            if (flash_ok) {
+                ota_session();                      /* a committed install resets */
+                draw_safe_mode();                   /* restore controls after the result expires */
+            }
         }
         if (usb.uboot_req) {
             ed_install_forget();

@@ -9,7 +9,7 @@ for arithmetic in native soft; do
         [ "$mode" != sanitized ] || flags='-O1 -g -fsanitize=address,undefined -fno-sanitize-recover=all'
         [ "$arithmetic" != soft ] || flags="$flags -DORIGINAL_USE_SOFT_FMA"
         exe="$OUT/cell-$arithmetic-$mode"
-        ${CC:-cc} -std=c99 -DX0X_SYNTHONE_PATCH=${X0X_SYNTHONE_PATCH:-0} -DX0X_SYNTHONE_WIDEN=${X0X_SYNTHONE_WIDEN:-0} $flags -Wall -Wextra -Werror -pedantic -fno-fast-math -ffp-contract=off -frounding-math \
+        ${CC:-cc} -std=c99 -DX0X_SYNTHONE_PATCH=${X0X_SYNTHONE_PATCH:-0} $flags -Wall -Wextra -Werror -pedantic -fno-fast-math -ffp-contract=off -frounding-math \
             -Iexperiments/original_synth tests/host/original_sound_cell_test.c firmware/src/app/original_sound.c \
             experiments/original_synth/miami_program.c experiments/original_synth/chicago_program.c \
             experiments/original_synth/fused_reference.c -lm -o "$exe"

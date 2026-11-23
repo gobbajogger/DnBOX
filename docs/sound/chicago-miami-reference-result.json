@@ -368,12 +368,12 @@
     {
       "configuration": "overlap_glide_mid",
       "stereo_pcm_exact": false,
-      "candidate_sha256": "811d18f82b60ede70da82a5a1113f8b34eefd02153ac4768875d347e373df094",
-      "steady_rms_db": -0.04451544706119781,
+      "candidate_sha256": "a16ddce9c4bec5c35b34b58feb505a8744e21008e85b4db5ffaccd3380f3a8d9",
+      "steady_rms_db": 4.273794414544965e-06,
       "pitch_valid": false,
       "pitch_error_cents": null,
-      "max_steady_envelope_db": 0.7554235121334787,
-      "max_relative_harmonic_db": 2.211604783048167,
+      "max_steady_envelope_db": 1.6723723531721758e-05,
+      "max_relative_harmonic_db": 0.000408931269362256,
       "pass_goals": false,
       "before_fix_max_steady_envelope_db": 2.7044515112216088,
       "before_fix_max_relative_harmonic_db": 2.4002394086270433
@@ -592,11 +592,11 @@
     ]
   },
   "chicago_glide_diagnostic": {
-    "status": "Unqualified; production leaves the counter at zero.",
+    "status": "The production 129-frame hold preserves the previous note through two 690 Hz control ticks. The original AU pitch fit remains boundary-clipped.",
     "reproduce": "OPENBLAS_NUM_THREADS=1 python3 tests/host/bass_reference_qualification.py --out build/chicago-anchor --probe-chicago-anchor",
     "stimulus": "Original AU 3.1.6 overlap_glide_mid, native 44100 Hz. Note 48 starts at frame 0 and overlaps note 55 at frame 11025. The reference pitch search hit its boundary.",
-    "mechanism": "Cold firmware Chicago leaves allocator.gate_duration zero. The recovered after-events countdown then never copies the current note to the previous-note anchor. Deferred restart reads that anchor upon completion.",
-    "identifiability": "The capture distinguishes zero and the 95/96 and 11025/11026 boundaries. All sampled interior durations produce identical full candidate PCM for this stimulus. The original duration and true moving pitch trajectory remain unknown. A shorter-gap licensed AU capture or the native cold-constructor duration is needed before changing the timer.",
+    "mechanism": "A stolen voice mutes on one envelope tick and restarts on the next. At 44100 Hz each tick takes at most 64 frames. The scheduler advances the anchor before the voice reads it, so the hold is 2 \u00d7 64 + 1 frames.",
+    "identifiability": "The 129-frame hold matches the archived AU envelope and strong harmonics. The capture does not identify the native constructor timer or an independent moving-pitch trajectory. The 64 adjacent onset offsets test ascending and descending phrases against a longer hold and a stuck cold anchor.",
     "measurements": [
       {
         "diagnostic_anchor_frames": 0,
@@ -624,6 +624,14 @@
       },
       {
         "diagnostic_anchor_frames": 96,
+        "candidate_sha256": "a16ddce9c4bec5c35b34b58feb505a8744e21008e85b4db5ffaccd3380f3a8d9",
+        "pitch_valid": false,
+        "steady_rms_db": 4.273794414544965e-06,
+        "max_steady_envelope_db": 1.6723723531721758e-05,
+        "max_relative_harmonic_db": 0.000408931269362256
+      },
+      {
+        "diagnostic_anchor_frames": 129,
         "candidate_sha256": "a16ddce9c4bec5c35b34b58feb505a8744e21008e85b4db5ffaccd3380f3a8d9",
         "pitch_valid": false,
         "steady_rms_db": 4.273794414544965e-06,

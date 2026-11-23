@@ -60,14 +60,9 @@ unsigned engine_original_tail_state(int v)
 }
 #endif
 static original_runtime_workspace original_workspace POOL;
-_Static_assert(sizeof(original_runtime_workspace) >= 4 * 256 * sizeof(float),
-               "808 metal raw fits in the Chicago workspace");
 static original_chicago_tuning original_tuning POOL;
 static original_chicago_fx2_compact original_fx[NBASS] POOL;
 static original_chicago_fx2_cold_owner original_fx_owner[NBASS];
-#if X0X_SYNTHONE_WIDEN
-#include "s1_selected_widen.inc"
-#endif
 static uint8_t original_fx_ready;
 static uint8_t original_key_pitch[NBASS][38]; /* token -> pitch+1; zero is released */
 static uint8_t original_midi_channel[NBASS];
@@ -743,6 +738,12 @@ X0X_COLD int engine_param_si(int t, int v, int i, int pot, float *val)
     switch (t) {
     case T_909: return drum909_param_si(v, i, pot, val);
     case T_808: return drum808_param_si(v, i, pot, val);
+    case T_303:
+        if (engine_bass_bank(v) == ORIGINAL_SOUND_SYNTHONE && i == (int)ORIGINAL_SYNTHONE_CRUSH && (unsigned)pot < 128u) {
+            *val = s1_part_crush_hz(unit_control((unsigned)pot));
+            return X0X_U_HZ;
+        }
+        return X0X_U_NONE;
     case T_FX: return fxbus_param_si(i, pot, val);
     case T_BRK:                                      /* breaks.c: lvl = set/127 */
         if (i == 0) { *val = (float)pot / 127.0f; return X0X_U_GAIN; }
@@ -872,7 +873,7 @@ static void apply_base(int t, int v, int i)
     if (t == T_303 && (unsigned)v < NBASS) {
         float value;
         if (original_sound_is_performance(original_bass[v].kind, (unsigned)i)) {
-            perf_apply(v, i, (unsigned)i == original_sound_count(original_bass[v].kind) - 2u ? 64 : 0, 1);
+            perf_apply(v, i, (unsigned)i == original_sound_bend_id(original_bass[v].kind) ? 64 : 0, 1);
             return;
         }
         if (original_sound_value(mot_base_snd->v[t][v], (unsigned)i, &value))
@@ -1420,7 +1421,7 @@ static void perf_apply(int v, int i, int val, int live)
 {
     float value;
     if ((unsigned)v >= NBASS) return;
-    unsigned first = original_sound_count(original_bass[v].kind) - 2u;
+    unsigned first = original_sound_bend_id(original_bass[v].kind);
     if ((unsigned)i < first || (unsigned)i > first + 1u) return;
     if (val < 0) val = 0;
     if (val > 127) val = 127;
@@ -1448,7 +1449,7 @@ static int mot_base(void *x, int t, int v, int i)
     if (t == T_303 && (unsigned)v < NBASS && i == mod_param(v) && mod_ctl[v] >= 0)
         return mod_ctl[v];
     if (original_motion_performance(t, v, i))
-        return perf_ctl[v][(unsigned)i - (original_sound_count(original_bass[v].kind) - 2u)];
+        return perf_ctl[v][(unsigned)i - (original_sound_bend_id(original_bass[v].kind))];
     return mot_base_snd ? mot_base_snd->v[t][v][i] : 0;
 }
 static void mot_apply(void *x, int t, int v, int i, int val)
@@ -1957,12 +1958,12 @@ __attribute__((noinline)) static void midi_in(uint32_t pkt)
             } else if (ty == 0xb0 && d1 == 64) {
                 /* damper: sustain pedal CC64 (no wheel mapping) */
                 PARAM_TRACE(PARAM_MIDI, T_303, k,
-                            (int)original_sound_count(original_bass[k].kind) - 1, d2);
-                perf_apply(k, (int)original_sound_count(original_bass[k].kind) - 1, d2, 1);
+                            (int)original_sound_bend_id(original_bass[k].kind) + 1, d2);
+                perf_apply(k, (int)original_sound_bend_id(original_bass[k].kind) + 1, d2, 1);
             } else if (ty == 0xe0) {
                 unsigned bend = (unsigned)d1 | (unsigned)d2 << 7;
                 float value = bend < 8192 ? (float)bend / 16384.0f : 0.5f + (float)(bend - 8192) / 16382.0f;
-                unsigned parameter = original_sound_count(original_bass[k].kind) - 2;
+                unsigned parameter = original_sound_bend_id(original_bass[k].kind);
                 PARAM_TRACE(PARAM_MIDI, T_303, k, (int)parameter, (int)(bend >> 7));
                 perf_ctl[k][0] = (uint8_t)(bend >> 7);
                 ext_touch[k] |= 1u;
@@ -2414,7 +2415,6 @@ static uint8_t eng_brk_mark;                           /* brk_midi_count before 
  * is visible. No added audio latency; the sums are the same bits. */
 static uint8_t eng_808_split;
 static volatile uint8_t eng_808_body;                  /* 1: BD+SD is in left808/right808 */
-static volatile uint8_t eng_808_metal_done;            /* 1: core 0 is done with the metal raw (Chicago workspace) */
 static float eng_vol;                                  /* this callback's master volume (render_sub may master) */
 static uint8_t eng_master_done;                        /* 1: this stretch ran the master */
 static uint8_t eng_do_master;                          /* pipeline this stretch */
@@ -2570,24 +2570,19 @@ static int run_job(int j, int core)
         d808_was_active = (uint8_t)drum808_active(&d808);
         if (d808_was_active) {                            /* silent, it does nothing (and is not mixed) */
             if (eng_808_split) {
-                /* metal voices (and the bank) while core 1 mixes BD+SD into the buses.
-                 * raw sits in Chicago's workspace: Miami A on core 1 waits on
-                 * eng_808_metal_done before it uses the same union. */
-                float (*raw)[256] = (float (*)[256])(void *)&original_workspace;
+                /* If A renders on core 1, its mix must finish before that core
+                 * can start B. Otherwise core 0 runs A after this 808 job.
+                 * The selected workspace is therefore free until the metal mix
+                 * finishes, even when both bass jobs are on core 1. */
+                float (*raw)[256] = (eng_c1_mask & (1u << JB_A))
+                    ? original_workspace_b.metal : original_workspace.metal;
                 uint16_t aud = (uint16_t)(arg >> 9 & 0x7FFu);
                 drum808_metal_prepare(&d808, raw, (int)n, aud);
-                if (body_wait(core)) {
-                    eng_sync();
-                    eng_808_metal_done = 1;
-                    eng_sync();
+                if (body_wait(core))
                     return 0;
-                }
                 drum808_finish_rest(&d808, (const float (*)[256])raw, left808, right808, t1, t2,
                                     (int)n, aud);
                 bfx_shape(PART_808, left808, right808, t1, t2, 4, (int)n);
-                eng_sync();
-                eng_808_metal_done = 1;
-                eng_sync();
             } else {
                 for (i = 0; i < n; i++)
                     left808[i] = t1[i] = t2[i] = right808[i] = 0.0f;
@@ -2610,17 +2605,6 @@ static int run_job(int j, int core)
     } else if (j == JB_A || j == JB_B) {
         /* one bass: its own workspace and L/R, so A and B may run at once on the two cores */
         int bv = j - JB_A, p = PART_303A + bv;
-        /* bass A uses original_workspace; the 808 split parks metal raw there.
-         * Core 1 waits only when 909 was short (the heavy 909 case is already past). */
-        if (core && j == JB_A) {
-#ifdef X0X_HOST
-            if (!eng_808_metal_done)
-                return 0;                             /* host: core 0 finishes 808, then takes A */
-#else
-            while (!eng_808_metal_done)
-                eng_sync();
-#endif
-        }
         float *bl = eng_bass_buf[2 * bv], *br = eng_bass_buf[2 * bv + 1];
         float *bb[NBASS];
         bb[bv] = bl; bb[1 - bv] = br;                     /* bass B renders right-left, as always */
@@ -2629,9 +2613,6 @@ static int run_job(int j, int core)
         bass_adapt_pre(bv, (unsigned)n);
         int status = original_runtime_render(&original_bass[bv], bv ? &original_workspace_b : &original_workspace,
                                              bb[bv], bb[1-bv], n);
-#if X0X_SYNTHONE_WIDEN
-        if (status == ORIGINAL_RUNTIME_OK) s1_widen_render(bv, bb[1-bv], (unsigned)n);
-#endif
         bass_adapt_post(bv, bb[bv], bb[1-bv], (unsigned)n);
         if (!core)
             PROF_ADD(2 + bv, pb);
@@ -2907,13 +2888,11 @@ __attribute__((noinline)) static void render_sub(float *out_l, float *out_r, uin
     /* 808 stays on core 0 and core 1 has other work: move the BD+SD prefix */
     eng_808_split = (uint8_t)(!(m & (1u << JB_808)) && m && drum808_active(&d808));
     eng_808_body = (uint8_t)!eng_808_split;
-    eng_808_metal_done = (uint8_t)!eng_808_split;
     eng_sync();
     if (m && !plat_cpu2_run(core2_jobs, 0u)) {
         eng_c1_mask = 0;                              /* one core: all of it here */
         eng_808_split = 0;
         eng_808_body = 1;
-        eng_808_metal_done = 1;
     }
 #if X0X_DEBUG
     eng_dbg_nsub++;

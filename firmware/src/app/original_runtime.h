@@ -16,12 +16,6 @@ typedef union {
     struct { juno6_t synth; juno6_chorus_t chorus; } juno;
     s1_dry_part synthone;
 } original_runtime_backend;
-#if X0X_SYNTHONE_WIDEN
-_Static_assert(sizeof(s1_dry_part) <= sizeof(original_chicago_backend) ||
-               sizeof(s1_dry_part) <= sizeof(original_miami_backend) ||
-               sizeof(s1_dry_part) <= sizeof(((original_runtime_backend *)0)->juno),
-               "Synth One widening must fit its original owner");
-#endif
 typedef struct {
     original_runtime_backend dsp;
     uint8_t keys[ORIGINAL_INPUT_COUNT][128];
@@ -33,6 +27,7 @@ typedef struct {
     int8_t status;
 } original_runtime_part;
 typedef union {
+    float metal[4][256]; /* split 808 render, before the owning bass uses this space */
     struct { uint32_t left[256], right[256]; int16_t converted[2][256], scratch[4][256]; } chicago;
     struct { uint32_t left[256], right[256]; int32_t dry[2][256]; int16_t scratch[2][256]; } miami;
 } original_runtime_workspace;

@@ -41,36 +41,31 @@ static void show(unsigned part)
     draw_header(); draw_main(); draw_knobs();
 }
 
-/* A turn from the fourth row to SOUND must paint four numbered rows, keep
+/* A turn from EFFECT to SOUND must paint four numbered rows, keep
  * the selected part's knob assignments, and refresh the step footer. */
 static void selector_window(unsigned owner)
 {
     static const char *const titles[] = {
-        "2  FILTER", "3  FILTER ENVELOPE", "4  AMP ENVELOPE", "5  SOUND"
+        "3  FILTER ENVELOPE", "4  AMP ENVELOPE", "5  EFFECT", "6  SOUND"
     };
     show(owner);
-    *page_of(V_PART) = 3;
+    *page_of(V_PART) = 4;
     draw_main(); draw_knobs();
     for (int direction = 1; direction >= -1; direction -= 2) {
         enc_acc[EN_SELECT] = direction;
         now_ms += 100;
         ui_frame();
-        CHECK(cur_page() == (direction == 1 ? 4 : 3));
+        CHECK(cur_page() == (direction == 1 ? 5 : 4));
         memcpy(baseline[owner], fb, sizeof fb);
         memset(blit_hash, 0, sizeof blit_hash);
         memset(cv_tile_valid, 0, sizeof cv_tile_valid);
         draw_header(); draw_main(); draw_knobs();
         CHECK(!memcmp(baseline[owner], fb, sizeof fb));
         if (direction < 0) continue;
-        CHECK(pg.r[4][0].kind == R_BENGINE && pg.r[4][0].b == owner);
-        CHECK(pg.r[4][1].kind == R_BPRESET && pref_read_only(pg.r[4][1]));
-        CHECK(pg.r[4][2].kind == R_BSTATUS && pref_read_only(pg.r[4][2]));
-#if X0X_SYNTHONE_WIDEN
-        CHECK(pg.r[4][3].kind == R_S1PATCH && pg.r[4][3].b == owner &&
-              pg.r[4][3].c == S1_PATCH_LEGACY_COUNT);
-#else
-        CHECK(pg.r[4][3].kind == R_NONE);
-#endif
+        CHECK(pg.r[5][0].kind == R_BENGINE && pg.r[5][0].b == owner);
+        CHECK(pg.r[5][1].kind == R_BPRESET && pref_read_only(pg.r[5][1]));
+        CHECK(pg.r[5][2].kind == R_BSTATUS && pref_read_only(pg.r[5][2]));
+        CHECK(pg.r[5][3].kind == R_NONE);
         for (int row = 0; row < 4; ++row) {
             uint16_t ink = swap16(row == 3 ? SOUND_INK : SOUND_GRAY);
             cv_begin(240, 14, C_BLACK);
@@ -125,8 +120,7 @@ static void value_bounds(void)
 {
     /* Exercise the same formatter and exact mixed-font drawing as the matrix;
      * include all editable values, including rounding across the 1s/1kHz boundary. */
-    const unsigned legacy_count = sizeof(((s1_patch_snapshot *)0)->physical) / sizeof(float);
-    for (unsigned slot = 0; slot < legacy_count; ++slot) {
+    for (unsigned slot = 0; slot < S1_PATCH_COUNT; ++slot) {
         const s1_patch_descriptor *d = s1_patch_at(slot);
         unsigned column = slot < 2 ? slot : slot < 5 ? slot-2 : (slot-5)%4;
         int envelope = slot >= 5;
@@ -155,47 +149,6 @@ static void value_bounds(void)
     }
     puts("All 1664 formatted values fit their physical controls");
 }
-
-#if X0X_SYNTHONE_WIDEN
-static void width_value_bounds(void)
-{
-    const unsigned slot = S1_PATCH_LEGACY_COUNT;
-    const s1_patch_descriptor *d = s1_patch_at(slot);
-    const pref_t r = PR(R_S1PATCH, T_303, 0, slot);
-    s1_patch_snapshot snapshot;
-    CHECK(d && d->factory_id == 121);
-    CHECK(s1_matrix_snapshot(0, &snapshot));
-    s1_draw_patch = &snapshot;
-    /* The band must keep its original width even when a newer edit lands. */
-    CHECK(pref_get(r) == 0);
-    edit(0, 121, 64);
-    CHECK(pref_get(r) == 0);
-    CHECK(s1_matrix_snapshot(0, &snapshot));
-    CHECK(pref_get(r) == 64);
-    for (unsigned q = 0; q <= S1_PATCH_STEPS; ++q) {
-        char number[24], unit[12], expected[24], expected_unit[12];
-        s1_draw_width = s1_patch_physical(d, q);
-        CHECK(pref_get(r) == (int)q);
-        pref_value(r, number, unit);
-        unit_value(d->unit, s1_patch_display(d, s1_draw_width), expected, expected_unit);
-        CHECK(!strcmp(number, expected) && !strcmp(unit, expected_unit));
-        /* Leave space on both sides so a clipped right edge cannot pass. */
-        const int x0 = 70;
-        cv_begin(240, CELL_H, C_BLACK);
-        draw_param_widget(r, x0, 0, CELL_W, 1, matrix_col(), CELL_H, 1);
-        unsigned marked = 0;
-        for (unsigned i = 0; i < 240u * CELL_H; ++i) {
-            if (cv_px[i] == swap16(C_BLACK)) continue;
-            int x = (int)(i % 240u);
-            CHECK(x >= x0 && x < x0 + CELL_W);
-            ++marked;
-        }
-        CHECK(marked > 5);
-    }
-    s1_draw_patch = 0;
-    edit(0, 121, 0);
-}
-#endif
 
 static void busy_frame(void)
 {
@@ -236,11 +189,7 @@ int main(void)
     choose_patch(0); choose_patch(1);
     selector_window(0); selector_window(1);
     show(0);
-    filter_labels(); value_bounds();
-#if X0X_SYNTHONE_WIDEN
-    width_value_bounds();
-#endif
-    busy_frame();
+    filter_labels(); value_bounds(); busy_frame();
     for (unsigned v=0; v<2; ++v) {
         edit(v,2,0); edit(v,5,127); edit(v,16,125); edit(v,17,127); edit(v,19,106);
         edit(v,22,7); edit(v,26,7);

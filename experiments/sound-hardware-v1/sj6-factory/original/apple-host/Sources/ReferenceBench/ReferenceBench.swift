@@ -191,7 +191,7 @@ func render(_ format: AVAudioFormat, _ block: AURenderBlock, _ schedule: AUSched
             }
         }
     }
-    try require(cursor == spec.events.count && sounding.contains(true) && firstRender != nil, "Incomplete event schedule or silent original")
+    try require(cursor == spec.events.count && sounding.allSatisfy({ $0 }) && firstRender != nil, "Incomplete event schedule or silent original channel")
     return (result, scheduled, firstRender!)
 }
 

@@ -1,8 +1,6 @@
 /* SPDX-License-Identifier: GPL-3.0-only */
 #include "chicago_packed.h"
-#if X0X_CHICAGO_DENSE
-#include "chicago_dense.inc"
-#elif defined(X0X_CHICAGO_COMPACT_HEADERS)
+#ifdef X0X_CHICAGO_COMPACT_HEADERS
 #include "chicago_compact_private.h"
 static int chicago_compact_decode(const uint8_t *p,size_t bytes,uint32_t entries,uint32_t entry,uint32_t prefix,uint32_t *out){
  if(bytes<7)return 0;
@@ -52,11 +50,6 @@ static int chicago_compact_lookup(const original_lossless_table16 *t,uint32_t in
 #include <stdint.h>
 int original_chicago_packed_lookup(const void *context,uint32_t index,float *a,float *e){
  if(context||!a||!e||a==e)return 0;
-#if X0X_CHICAGO_DENSE
- if(index>16384u)return 0;
- uint32_t ab=dense_word(dense_a_data,dense_a_offset,index);
- uint32_t eb=dense_word(dense_e_data,dense_e_offset,index);
-#else
  /* The tables are constant: repeat the last decoded pair for the same index. Two
   * Chicago parts may look up at once on the two cores (DnBOX engine.c): the index is
   * cleared before the pair is written and set after it, and a hit is taken only when
@@ -72,6 +65,5 @@ int original_chicago_packed_lookup(const void *context,uint32_t index,float *a,f
 #endif
   last_index=UINT32_MAX;last_a=ab;last_e=eb;last_index=index;
  }
-#endif
  memcpy(a,&ab,4);memcpy(e,&eb,4);return 1;
 }

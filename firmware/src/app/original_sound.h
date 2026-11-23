@@ -20,7 +20,8 @@
 #define ORIGINAL_SOUND_SCHEMA 2u
 #define ORIGINAL_CHICAGO_FACTORIES 81u
 #define ORIGINAL_SYNTHONE_FACTORIES 1u
-#define ORIGINAL_SYNTHONE_NPARAMS 2u
+#define ORIGINAL_SYNTHONE_NPARAMS 3u
+#define ORIGINAL_SYNTHONE_CRUSH 2u
 #define ORIGINAL_SYNTHONE_INIT_FACTORY 0u
 #define ORIGINAL_CHICAGO_FX_CHOICES 12u
 
@@ -29,7 +30,7 @@ enum { ORIGINAL_CHICAGO_CUTOFF = 2, ORIGINAL_CHICAGO_FX_TYPE = 17, ORIGINAL_CHIC
        ORIGINAL_MIAMI_WOBBLE_SHAPE = 11, ORIGINAL_MIAMI_WOBBLE_DEPTH = 12, ORIGINAL_MIAMI_WOBBLE_RATE = 13,
        ORIGINAL_MIAMI_PITCH_BEND = 16 };
 
-/* The final two macro IDs remain native runtime inputs, outside patch edits. */
+/* Performance macro IDs remain stable across patch-control additions. */
 static inline int original_sound_is_performance(unsigned kind, unsigned parameter)
 {
     return (kind == ORIGINAL_SOUND_CHICAGO &&
@@ -42,15 +43,15 @@ static inline int original_sound_is_performance(unsigned kind, unsigned paramete
 
 /* New firmware patch representation, not a legacy bank decoder:
  * [0..21] macro display bytes; [22..25] LE edit mask; [26..27] 'OS'; [28] version;
- * [29] engine kind; [30] selected factory index; [31] reserved zero.
+ * [29] engine kind; [30] selected factory index; [31] zero, or one for a
+ * Synth One cell with an edited crush rate, distinguishing historical cells.
  * Chicago indexes all 81 programs (the 55 compact ones first, then the 26
  * restored-insert ones) and FxType stores a twelve-choice index.
  * Kind 2 is Synth One. New writes use persistent id OS11. Historical id
  * 0x4F445231 and historical 8-parameter kind-2 cells load as the Synth One
  * init cell (factory 0); they are never written back. No song-layout change.
  * With X0X_SYNTHONE_PATCH enabled, bytes/bits 8..20 hold native INIT
- * edits in descriptor order. With the widening option, byte/bit 21 stores
- * factory ID 121. Stock refuses these edited cells. Untouched
+ * edits in descriptor order. Builds with X0X_SYNTHONE_PATCH disabled refuse these edited cells. Untouched
  * cells retain their historical 32 bytes and exact INIT values.
  * The original engines still map to their original selectors; schema1 is refused.
  * Untouched controls come from the immutable binary32 factory data, never
@@ -85,6 +86,8 @@ int original_sound_factory_source(unsigned kind, unsigned factory);
  * Chicago ENV4 and Miami TUNE7 have exact midpoint64; all others use q/127.
  * Failed conversion does not change *value. */
 int original_sound_control_value(unsigned kind, unsigned parameter, unsigned control, float *value);
+static inline unsigned original_sound_bend_id(unsigned kind)
+{ return kind == ORIGINAL_SOUND_SYNTHONE ? 0u : original_sound_count(kind) - 2u; }
 const char *original_sound_fx_name(unsigned choice);
 uint32_t original_sound_engine_id(unsigned kind);
 const char *original_sound_name(unsigned kind, unsigned factory);

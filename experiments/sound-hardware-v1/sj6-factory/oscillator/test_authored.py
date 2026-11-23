@@ -82,6 +82,11 @@ class SelectedRecordTests(unittest.TestCase):
             self.assertEqual(row[5]["authored_pwm_amount"] is None, bool(row[1]))
             self.assertEqual(row[5]["authored_pwm_enable"] is None, not row[1])
 
+    def test_bundled_records_drive_both_authored_layers(self):
+        records = {path.stem: path.read_bytes() for path in self.files}
+        release = (replay.SPEC_FILE.read_bytes(), {}, records)
+        self.assertEqual(list(replay.cases(None, "controls", release=release)), self.settings())
+
     def test_wrapped_bytes_uid_types_and_missing_records_are_checked(self):
         path = self.files[-1]
         raw = path.read_bytes()

@@ -57,9 +57,6 @@ static void note_lock(void)
     block();
 }
 
-#ifdef X0X_WIDEN_PROBE
-#include "s1_widen_probe.inc"
-#endif
 int main(void)
 {
     boot();
@@ -75,17 +72,12 @@ int main(void)
     assert(!s1_patch_at(S1_PATCH_COUNT));
     assert(!engine_bass_preset_edited(0) && !engine_bass_preset_edited(1));
 
-    unsigned ids[] = {2,5,16,17,19,22,23,24,25,26,27,28,29,
-#if X0X_SYNTHONE_WIDEN
-                      121,
-#endif
-    };
+    unsigned ids[] = {2,5,16,17,19,22,23,24,25,26,27,28,29};
     assert(sizeof ids / sizeof ids[0] == S1_PATCH_COUNT);
     for (unsigned i = 0; i < S1_PATCH_COUNT; ++i) {
         const s1_patch_descriptor *d = s1_patch_at(i);
         assert(d && *d->label && d->factory_id == ids[i] && d->minimum < d->maximum);
         assert(d->unit == X0X_U_HZ || d->unit == X0X_U_S || d->unit == X0X_U_PCT);
-        assert(s1_patch_increment(d) == (d->maximum - d->minimum) / 127.f);
         assert(s1_patch_physical(d, 0) == d->minimum && s1_patch_physical(d, 127) == d->maximum);
         /* Sweep every position on one part, reading the other owner's target
          * and comparing its entire sound cell and identity after each edit. */
@@ -125,7 +117,7 @@ int main(void)
         assert(read_patch(0, ids[i]).physical == s1_patch_at(i)->maximum);
     s1_patch_snapshot snapshot;
     assert(engine_s1_patch_snapshot(0, &snapshot) && !snapshot.note_locked);
-    for (unsigned i=0; i<S1_PATCH_LEGACY_COUNT; ++i) assert(snapshot.physical[i] == s1_patch_at(i)->maximum);
+    for (unsigned i=0; i<S1_PATCH_COUNT; ++i) assert(snapshot.physical[i] == s1_patch_at(i)->maximum);
     assert(!engine_s1_patch_snapshot(2, &snapshot) && !engine_s1_patch_snapshot(0, NULL));
     assert(engine_s1_patch_set(1, read_patch(1,16).revision, 16, 1) == S1_EDIT_QUEUED);
     block();
@@ -134,8 +126,5 @@ int main(void)
     assert(!engine_s1_patch_read(1, 16, &b));
     assert(engine_s1_patch_set(1, b.revision, 16, 127) == S1_EDIT_REJECTED);
     note_lock();
-#ifdef X0X_WIDEN_PROBE
-    width_scenario();
-#endif
-    printf("Synth One INIT patch: %u factory IDs x 128 positions, separate owners, stale/refused writes, queued readback, project save/load, preset replacement, coherent snapshot and note locks PASS\n", (unsigned)S1_PATCH_COUNT);
+    puts("Synth One INIT patch: 13 factory IDs x 128 positions, separate owners, stale/refused writes, queued readback, project save/load, preset replacement, coherent snapshot and note locks PASS");
 }

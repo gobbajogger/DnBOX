@@ -7,6 +7,29 @@
 static uint8_t loop_data[4096];
 static int32_t audio[512];
 
+/* A player holds a BREAK step and turns K3 with SEQ held. The audio
+ * measurements below use the project saved through that input path. */
+static void turn_hit_velocity(int step, int delta)
+{
+    held_keys = 1u << WHITE_KEY[step];
+    ++now_ms;
+    input();
+    CHECK(held_any_step() == step);
+    held_btn = 1u << B_SEQ;
+    ++now_ms;
+    input();
+    enc_acc[EN_ALGO] = delta;
+    ++now_ms;
+    input();
+    held_btn = 0;
+    ++now_ms;
+    input();
+    held_keys = 0;
+    ++now_ms;
+    input();
+    CHECK(step_lane_has_note(PART_BRK, 0, step));
+}
+
 static unsigned peak_on_step(int pattern, int step)
 {
     unsigned blocks = 0;
@@ -72,14 +95,15 @@ int main(void)
     memset(bp->slice, 2, sizeof bp->slice);  /* each step starts on the same decoded plateau */
     bp->set[BRK_COMPLEX] = 0;
     proj.pat[1].brk = *bp;
-    int lane = motion_alloc(proj.arr.lane, 0, PART_BRK, T_VEL, PART_BRK << 4, 0);
+    ui_step_lane = UI_LANE_VELOCITY;
+    turn_hit_velocity(1, -63);
+    turn_hit_velocity(2, -127);
+    turn_hit_velocity(4, -95);
+    turn_hit_velocity(15, -127);
+    int lane = motion_find(proj.arr.lane, 0, PART_BRK, T_VEL, PART_BRK << 4, 0);
     CHECK(lane >= 0);
     lane_t *l = &proj.arr.lane[lane];
-    l->val[0] = 127;
-    l->val[1] = 64;
-    l->val[2] = 0;
-    l->val[4] = 32;
-    l->val[15] = 0;
+    l->val[0] = 127;  /* older projects can store unity explicitly */
     proj.sound.v[T_MIX][PART_BRK][MX_LEVEL] = 75;  /* keep the unity signal inside the Q15 meter range */
     proj.set.bt |= PROJ_BT_CLK_IN;
     CHECK(project_validate_for(&proj) == 0);

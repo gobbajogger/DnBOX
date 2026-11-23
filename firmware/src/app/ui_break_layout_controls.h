@@ -78,5 +78,4 @@ static void break_layout_controls(void)
         put_i(put_s(t,"B SLICES "),(int)brk_slice_count(&cur_pat()->brk,1));
         cv_text(105,vc(&FONT_T,31,10),&FONT_T,t,C_GRAY);
     }
-    break_layout_footer();
 }

@@ -102,6 +102,9 @@ class ComparisonTests(unittest.TestCase):
                         (directory/(uid+".applied.json")).write_bytes(active)
                         return capture(directory, row, spec, matrix_hash, arm, inputs, candidate, revision)
                     self.assertEqual(read(armrec)[1], sha(audio))
+                    # The release route regenerates these bytes from the checked IPA.
+                    self.assertEqual(capture(directory, row, spec, matrix_hash, arm, {uid: packed},
+                                             image, commit)[1], sha(audio))
                     for field, value in [("program_uid","other"),("record_sha256","other"),("pcm_sha256","wrong"),
                                          ("complete_preset",1),("gain",True),("first_render_frame",1),
                                          ("input_file_sha256","wrong"),("applied_tempo",120),
@@ -128,7 +131,8 @@ class ComparisonTests(unittest.TestCase):
                         with self.subTest(arm=arm,pcm=label), self.assertRaises(ValueError):
                             read(dict(armrec, pcm_sha256=sha(pcm)), pcm=pcm)
                     pcm = silent_channel.tobytes()
-                    read(dict(armrec, pcm_sha256=sha(pcm)), pcm=pcm)
+                    with self.assertRaisesRegex(ValueError, "silent channel"):
+                        read(dict(armrec, pcm_sha256=sha(pcm)), pcm=pcm)
                     if arm == "dnbox":
                         for candidate, revision in [(None,commit),(image,"vague"),(image,"2"*40),("other",commit)]:
                             with self.subTest(candidate=candidate,revision=revision), self.assertRaises(ValueError):

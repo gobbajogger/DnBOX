@@ -1,57 +1,8 @@
 # Sound lane
 
-## Current sound qualification on Elite and Pro
+## Draft #985 populated playback and original effects
 
-The sound branch includes the original-engine corrections from [#985](https://github.com/gobbajogger/DnBOX/pull/985) and consolidated FWUI through `46874497`. On firmware source `5837c73f`, all seven engines produced stereo output during eight strict 360 MHz emulator runs. Each selected-instrument run captured 96,768 stereo frames with zero late transfers and zero xruns. Both kits triggered all eleven rows. The two bass parts and loaded BREAK sample played together. The calibrated 922-event scene and the complete original factory gates are separate tests. [Selected-instrument receipts](../../experiments/sound-hardware-v1/integrated-sound/selected-results.json)
-
-| Engine | Original comparison or focused playback result |
-| --- | --- |
-| 808 | 436/436 against 8W8 with the shipping release and choke path. Before the fix, 42 cases exceeded the pointwise tolerance. |
-| 909 | 108/108 against the original 9W9 cymbals within 1 dB level and 3 dB spectral error. The separate pointwise test against the WAVs still reports 133 failures. |
-| BREAK | All 40 slices across five loops passed the straight-playback comparison with BB Gen. After the 88-frame onset ramp and known slice-boundary offsets, 694,381 PCM16 words matched. |
-| Chicago | All 81 factory programs sounded on both channels. The AU comparison improved from 0/29 to 28/29. Overlapping-note glide differs by 2.212 dB against the 1 dB strong-harmonic limit. |
-| Miami | All 30 factory programs sounded on both channels. All seven measured AU configurations passed pitch, envelope and harmonics. The current Stereo control widens all three tested presets and rejects a forced mono render. [Stereo regression](../../experiments/sound-hardware-v1/integrated-sound/miami-stereo.json) |
-| Synth One | INIT retriggered at three pitches against the original. With the width option, both owners passed all 14 controls at 128 positions and 985,600 original width-history comparisons. |
-| Juno / SuperJ6 | Four shipping Juno presets render stereo. The SuperJ6 factory loader passed 32 synthetic selections on both owners. The separate Linux CoreSampler covers 36 controlled note renders, 48 layer/PWM comparisons and eight authored PWM String Pad layer comparisons. |
-
-[Original-reference results](../../experiments/sound-hardware-v1/integrated-sound/engine-host-summary.json) · [Commands, reference inputs and exit statuses](../../experiments/sound-hardware-v1/integrated-sound/all-engines.json.gz)
-
-On the calibrated default project, all 24 matched-package eight-second runs completed 647 halves with zero late transfers or xruns. Each used 922 physical input events, at shifts 0 through 5 ms. The margin target requires a peak at or below 10,909 µs. Matches compare each opt-in run with ordinary firmware of the same source, model and shift. [Elite captures](../../experiments/sound-hardware-v1/integrated-sound/physical-elite.json) · [Pro captures](../../experiments/sound-hardware-v1/integrated-sound/physical-pro.json)
-
-| Board | Ordinary worst (µs) | Width + factory worst (µs) | Width + factory margin (µs) | Live PCM / project matches |
-| --- | ---: | ---: | ---: | ---: |
-| Elite | 11,386 | 11,460 | 149 | 0/6 PCM, 0/6 project |
-| Pro | 11,390 | 11,353 | 256 | 0/6 PCM, 0/6 project |
-
-The populated eight-second input replay missed the 11,609 µs deadline in all four combined-firmware runs. Warm boot had zero late transfers. Every populated scene activated both drum kits, both basses and a full-rate BREAK loop.
-
-| Board | Bass A / B | Peak (µs) | DMA xruns |
-| --- | --- | ---: | ---: |
-| Elite | Chicago / Miami | 13,706 | 72 |
-| Elite | Juno / Synth One | 12,901 | 27 |
-| Pro | Miami / Chicago | 15,576 | 100 |
-| Pro | Synth One / Juno | 14,790 | 119 |
-
-The earlier experimental 648-half planner on `63278e33` reached 10,464 µs Elite and 10,512 µs Pro across the six shifts per board with zero late or xruns. It reproduced the saved Clip startup, but every live stereo stream and final project differed. At 3,181 ms the Elite candidate still had a hit in the queue that stock had played at 3,171 ms. [Populated results](../../experiments/sound-hardware-v1/integrated-sound/native-selected-and-heavy.json) · [Separate timing candidate](../../experiments/sound-hardware-v1/strict-timing/original-bank-planner/README.md)
-
-Two scheduler changes were also compiled directly on the combined sound source. Across 14 paired trials, every candidate changed both the full DAC recording and the saved project. Broader second-core scheduling reached 10,172 µs on Elite and 10,163 µs on Pro at +1 ms, with zero xruns. On populated Pro it reduced the Juno/Synth One peak to 12,416 µs with 10 xruns, but raised the Chicago/Miami peak to 19,074 µs with 122 xruns. Both variants remain experimental. [Patched sources, physical input, comparisons and replay commands](../../experiments/sound-hardware-v1/integrated-sound/scheduler-trials.tar.gz)
-
-The optional stereo-width control uses a private 50 ms history on each selected Synth One part. With the editor, width and SuperJ6 factory loader enabled, the application has 3,028 B free flash on Elite and 3,036 B on Pro. Both keep 9,024 B of free pool, 832 B above reserve. The prior combined profile overflowed Elite flash by 3,104 B on the consolidated FWUI source before the new Chicago encoding. The rebuilt coefficient reader matches all 32,770 source words. [Per-engine RAM and flash](sound-memory.md) · [Editor and ownership tests](../../experiments/sound-hardware-v1/integrated-sound/width-host.json)
-
-| Checklist | Current status | Qualification boundary |
-| --- | --- | --- |
-| S1 | FAIL | The production selector offers INIT. The compiled selector exposes 0/694 complete factory programs. On this shared host, dual INIT missed 0 CPU and 12 wall deadlines in 2,048 callbacks. With 808/909 it missed 65 CPU and 199 wall deadlines. Both scenes had zero nonfinite preconversion samples. [Callback results](../../experiments/sound-hardware-v1/integrated-sound/callback.json) |
-| S2 | FAIL | The fresh generic host comparison completed all 694 programs, 66,624,000 stereo frames per arm and zero nonfinite or differing words. All 1,388 files matched the historical PCM manifest. The arms share the original effects. Production full-program level and spectral scores remain unavailable. [Host results](../../experiments/sound-hardware-v1/integrated-sound/factory-host.json) · [694 per-program rows](../../experiments/sound-hardware-v1/integrated-sound/factory-host-programs.jsonl.gz) |
-| S3 | FAIL | The integrated importer binds 11 main-pass fields. The separate range prototype verifies the three evidenced ID 86 stops. Remaining controls and complete FX routing require original state and output validation. |
-| S4 | BLOCKED | 0/14 complete original stereo pairs. Six authenticated PWM String Pad words and the Linux CoreSampler qualify the oscillator. The 14 selected program records and matching original full-preset PCM are unavailable on this Linux host. The identified build-9 original targets iOS. [Exact original and bank identities, program list and stimulus](../sound/superj6-ab.md) |
-| S5 | FAIL | 640 records across 12 banks were previously decoded. Complete parameter-by-parameter application and selection of every record remain open. |
-| S6 | FAIL | All seven current engine paths link within stock Elite/Pro memory. The complete factory instruments with independent original effects still lack a fitting image. |
-| S7 | PASS | `git grep -niw drone -- firmware tests web` returned zero matches. |
-
-The 240 × 240 firmware review found only 58 changed pixels in the new width cell on each part. The original 13-control configuration reproduced all 122 recorded panel and frame hashes. The reviewer placed both native frames into hash-verified archived shell captures at 1440 × 900, 390 × 844 and 844 × 390. All 18 composites preserve every pixel outside the LCD. Fresh candidate browser captures remain outstanding. [Before and after](../../experiments/sound-hardware-v1/integrated-sound/width-before-after.png) · [Independent review](../../experiments/sound-hardware-v1/integrated-sound/width-review-ledger.json) · [Viewport comparisons](../../experiments/sound-hardware-v1/integrated-sound/viewports/composites.json)
-
-
-The branch contains the consolidated base and deletes zero paths (C2). The repository-wide credential, installer, workflow and blob-size checks pass (C4); stock memory fit is measured above. C1 retains the failing audio and timing gates. C3 has the native review and archived-shell composites. C5 and C6 remain open. The two board builds and focused checks are posted against the tested commit on [draft PR #973](https://github.com/gobbajogger/DnBOX/pull/973).
+The [engine qualification report](../sound/engine-qualification.md) tracks the four populated 360 MHz scenes, effects coverage and the S4 pairs. The Chicago overlap correction passes its level and harmonic checks across the measured transition, and 64 onset offsets select the preceding pitch. Both parts have an independent Synth One rate reducer with 128 original-stage comparisons. The seven-engine effects matrix, final populated deadlines and 14 full original stereo pairs remain open. Use the original build-9 app and its embedded AU for S4. The release banks supply the selections directly.
 
 ## Ordinary Elite and Pro engine qualification, 2026-11-21
 
@@ -609,3 +560,9 @@ The experimental `firmware/src/dsp/synthone/scheduler/oracle/state.hpp` moved to
 The callback benchmark and its original deadline contract were recovered from `55e1288d`. The untraced 48 kHz host test used 128-frame blocks. The full 694-program result was DEADLINE_FAIL. [Timing receipt](../sound/restored-callback-result.json)
 
 At 44.1 kHz the four original ten-second delay histories alone allocate 7,056,016 bytes. In a fresh component test with pseudorandom input and a two-second delay, reducing the ring from ten seconds to 5.0001 seconds changed an output word at frame 220,528. An earlier minimum-size native build with link-time optimization still exceeded Elite XIP by 25,528 bytes and Pro by 25,520. The current build flags and effect behavior are preserved.
+
+## Frozen draft preservation (not an implementation or merge)
+
+The retiring #973 and #985 snapshots use the current consolidated tree so the same Sound changes do not compete with a new single-feature draft. All original files and commits remain reachable on their retained branches via #973 at `f013ecc653f2b9f0006e976a1097250e9356ce14` (tree `eaea5698e9cec40af57a17b39c533c33f91144fa`) and #985 at `230a73e4ac075f3752926b3a65130181de5c723a` (tree `e84af89ca11f6ff989d89c2b6c6c19739f790d34`).
+
+The compared draft deltas retain 58 draft-only and 56 differently versioned paths for #973, and 309 draft-only and 21 differently versioned paths for #985. These include generated reports, media and capture evidence preserved for provenance, and code, tests, docs and shared renderers preserved as candidates for narrow review. None are silently dropped or assumed shipped. Current versions win only in the retirement snapshot; no historical binaries or unqualified code are introduced to consolidated. No branch is deleted. No factory, effect or fidelity item is closed by this snapshot.

@@ -11,17 +11,34 @@ typedef struct {               /* proportional, see tools/gen_font.py */
     uint8_t first, last;
     const uint8_t *adv;        /* advance per glyph */
     const uint8_t *bw;         /* bitmap width per glyph (starts FONT_PAD left of the pen) */
-    const uint16_t *off;       /* byte offset of each glyph */
+    const uint16_t *off;       /* glyph offset, optionally with advance in its upper five bits */
     const uint8_t *data;
     capm_t cap;                /* rows containing at least half-covered H (or 0) pixels */
 } felucca_font_t;
 #include "felucca_font.h"
 
+static inline uint32_t font_offset(const felucca_font_t *f, uint32_t gi)
+{
+#ifdef FONT_INDEX16
+    return f->off[gi] & 2047u;
+#else
+    return f->off[gi];
+#endif
+}
+static inline uint32_t font_advance(const felucca_font_t *f, uint32_t gi)
+{
+#ifdef FONT_INDEX16
+    return f->off[gi] >> 11;
+#else
+    return f->adv[gi];
+#endif
+}
+
 /* Null bw denotes a generation-verified advance+padding width. Zero-advance
  * blank glyphs retain zero width. Other font families keep their exact table. */
 static inline uint32_t font_bitmap_width(const felucca_font_t *f, uint32_t gi)
 {
-    uint32_t advance = f->adv[gi];
+    uint32_t advance = font_advance(f,gi);
     return f->bw ? f->bw[gi] : advance ? advance + 2u * f->pad : 0u;
 }
 
@@ -145,23 +162,64 @@ static void cv_rect(int32_t x, int32_t y, int32_t w, int32_t h, uint16_t c)
             cv_px[(uint32_t)y * cv_w + (uint32_t)i] = sc;
 }
 
+#if defined(__clang__) && !defined(X0X_HOST)
+__attribute__((minsize, noinline))
+#endif
+static void px_blend(int32_t x, int32_t y, uint16_t c, uint32_t a)
+{
+    uint16_t *q;
+    uint32_t bg;
+    y += cv_oy;
+    if ((uint32_t)x >= cv_w || y < cv_y0 || y >= cv_y1 || !a)
+        return;
+    q = &cv_px[(uint32_t)y * cv_w + (uint32_t)x];
+    if (a >= 16u) {
+        *q = swap16(c);
+        return;
+    }
+    bg = swap16(*q);
+    *q = swap16((uint32_t)(((((c >> 11) * a + (bg >> 11) * (16u - a)) >> 4) << 11) |
+                           (((((c >> 5) & 63u) * a + ((bg >> 5) & 63u) * (16u - a)) >> 4) << 5) |
+                           (((c & 31u) * a + (bg & 31u) * (16u - a)) >> 4)));
+}
+
+static int cv_abs(int value) { return value < 0 ? -value : value; }
+
+/* Integer 1 px strokes. Keep axis-aligned pixels solid. On a slope, the
+ * projected filter footprint spans at most three pixels on the minor axis. */
+#if defined(__clang__) && !defined(X0X_HOST)
+__attribute__((minsize, noinline))
+#endif
 static void cv_line(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint16_t c)
 {
-    int32_t dx = x1 > x0 ? x1 - x0 : x0 - x1, sx = x0 < x1 ? 1 : -1;
-    int32_t dy = y1 > y0 ? y0 - y1 : y1 - y0, sy = y0 < y1 ? 1 : -1;
-    int32_t err = dx + dy, guard = 2000;
-    while (guard--) {                       /* bounded: a line is never longer than 480 px */
-        int32_t e2 = 2 * err;               /* both tests use the same error value */
-        cv_pset(x0, y0, c);
-        if (x0 == x1 && y0 == y1)
-            break;
-        if (e2 >= dy) {
-            err += dy;
-            x0 += sx;
-        }
-        if (e2 <= dx) {
-            err += dx;
-            y0 += sy;
+    int dx = x1 - x0, dy = y1 - y0;
+    if (!dx || !dy) {
+        cv_rect(dx < 0 ? x1 : x0, dy < 0 ? y1 : y0,
+                cv_abs(dx) + 1, cv_abs(dy) + 1, c);
+        return;
+    }
+    int steep = cv_abs(dy) > cv_abs(dx);
+    int major = steep ? y0 : x0, end = steep ? y1 : x1;
+    int minor = steep ? x0 : y0, last = steep ? x1 : y1;
+    if (major > end) {
+        int m = major;
+        major = end;
+        end = m;
+        m = minor;
+        minor = last;
+        last = m;
+    }
+    int n = end - major;
+    int advance = ((last - minor) * 65536) / n;
+    int falloff = 16 - cv_abs(advance) / 16384;
+    int p = minor * 65536;
+    for (int i = 0; i <= n && i < 2000; i++, p += advance) {
+        int at = i == n ? last : (p + 32768) >> 16;
+        int delta = i == n ? 0 : p - at * 65536;
+        for (int off = -1; off <= 1; off++) {
+            int alpha = 16 - ((cv_abs(delta - off * 65536) * falloff + 32768) >> 16);
+            if (alpha > 0)
+                px_blend(steep ? at + off : major + i, steep ? major + i : at + off, c, (uint32_t)alpha);
         }
     }
 }
@@ -216,7 +274,7 @@ static int32_t cv_text_clip(int32_t x, int32_t y, const felucca_font_t *f, const
         uint32_t bpr;
 #endif
         const uint8_t *gd;
-        gd = f->data + f->off[gi];
+        gd = f->data + font_offset(f,gi);
 #if defined(FONT_ALPHA_CROP) || defined(FONT_LZ_CROP)
         uint32_t rectangle = font_crop_read(&gd);
         crop_x = rectangle & 63u;
@@ -294,7 +352,7 @@ static int32_t cv_text_clip(int32_t x, int32_t y, const felucca_font_t *f, const
                     cv_px[(uint32_t)py * cv_w + (uint32_t)px] = swap16((nr << 11) | (ng << 5) | nb);
                 }
             }
-        x += f->adv[gi];
+        x += font_advance(f,gi);
     }
     return x;
 }
@@ -306,7 +364,7 @@ static int32_t text_w(const felucca_font_t *f, const char *s)
 {
     int32_t w = 0;
     for (; *s; s++)
-        w += f->adv[glyph(f, (uint8_t)*s)];
+        w += font_advance(f,glyph(f, (uint8_t)*s));
     return w;
 }
 

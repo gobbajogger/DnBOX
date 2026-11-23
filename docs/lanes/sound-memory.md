@@ -1,30 +1,5 @@
 # Sound memory on stock SMK-37 Elite and Pro
 
-## Current linked Elite and Pro images
-
-The sound lane at `5837c73f` includes the consolidated FWUI and the engine fixes from #985. All four development packages pass the stock linker checks. Both models have 9,024 B free in the pool, 832 B above the 8,192 B reserve. The required additional margin is 512 B.
-
-| Native configuration | Elite app / free flash (B) | Pro app / free flash (B) | Ordinary RAM used (B) |
-| --- | ---: | ---: | ---: |
-| Ordinary | 546,468 / 6,204 | 546,460 / 6,212 | 97,156 / 98,304 |
-| Synth One editor and width plus SuperJ6 loader | 549,644 / 3,028 | 549,636 / 3,036 | 97,172 / 98,304 |
-
-The combined profile reads both Chicago coefficient tables from 21,302 B. All 32,770 binary32 words match the original. Each selected Synth One part holds its independent 6,615 B width history in 4,095 B of retired insert storage and 2,520 B of its backend. The target ABI includes controls and state in the sizes below. Each bass part selects one backend from its 3,720 B union. The two owners also retain their two 5,120 B render workspaces.
-
-| Engine | Owner or linked object (B) | Attributed functions (B) | Attributed constants (B) |
-| --- | ---: | ---: | ---: |
-| 808 | 3,628 | 1,784 | 11 |
-| 909 | 7,612 | 11,088 | 55,327 |
-| BREAK | 11,164 | 1,646 | 0 |
-| Chicago | 3,492 | 28,412 | 27,975 |
-| Miami | 3,720 | 18,242 | 5,327 |
-| Synth One | 3,540 | 3,044 | 48 |
-| Juno backend | 3,416 | 6,168 | 111 |
-
-BREAK includes both linked objects. Flash figures count disjoint named ranges in the combined Elite ELF. Shared functions, anonymous literals and inlined code may fall outside these counts. The [model receipts](../../experiments/sound-hardware-v1/integrated-sound/native.json) include the Pro figures, ELF and package hashes, object symbols and flags.
-
-Full S6 remains open. The verified factory dictionary and strings alone occupy 102,976 B of target read-only data. A separate offline LZMA trial used 56,380 B for the column-ordered 694 × 144 unaltered control words and names, before a decoder or random-access index. Both representations exceed the measured application tail. [Lossless layouts, hashes and size check](../../experiments/sound-hardware-v1/integrated-sound/bank-size.json) The original independent live delay histories also exceed the demonstrated memory or callback budget. [Factory reader measurement](../../experiments/sound-hardware-v1/factory-admission/README.md) · [Independent delay histories](../../experiments/sound-hardware-v1/synthone-delay/README.md)
-
 S6 remains **FAIL**. The regular native build links and packages a playable partial Synth One with either the shipped Juno backend or the experimental compact SuperJ6 backend. All five source variants below preserve the shipped UI and run with stock memory. The simultaneous full SuperJ6 and Synth One control sets, factory programs and independent original FX histories still require implementation and a new pair of links.
 
 ## Linked factory loader and shipping Juno on stock hardware

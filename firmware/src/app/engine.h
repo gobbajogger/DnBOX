@@ -31,10 +31,6 @@
 enum { S1_EDIT_REJECTED, S1_EDIT_QUEUED, S1_EDIT_BUSY };
 int engine_s1_patch_pending(void);
 int engine_s1_patch_snapshot(unsigned voice, s1_patch_snapshot *out);
-#if X0X_SYNTHONE_WIDEN
-/* The original snapshot and extra factory field 121 from one audio boundary. */
-int engine_s1_patch_snapshot_widen(unsigned voice, s1_patch_snapshot *out, float *widen_target);
-#endif
 int engine_s1_patch_read(unsigned voice, unsigned factory_id, s1_patch_value *out);
 int engine_s1_patch_set(unsigned voice, uint32_t revision, unsigned factory_id, unsigned position);
 #endif

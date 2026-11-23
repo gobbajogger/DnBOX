@@ -966,8 +966,14 @@ void breaks_render(breaks_t *b, float *out, int n)
         if (b->sub_count + 1 < b->sub_div) {                /* retrigger: replay the slice head */
             if ((float)b->sub_elapsed >= (float)(b->sub_count + 1) * b->sub_len) {
                 b->sub_count++;
-                slice_start(b, b->render_bank, b->current_slice,
-                            (float)b->sub_velocity * (1.0f / 127.0f));
+                if (slice_start(b, b->render_bank, b->current_slice,
+                                (float)b->sub_velocity * (1.0f / 127.0f)) && !b->perf.stutter) {
+                    /* Programmed repeats use BB Gen's short attack. The
+                     * live stutter pad keeps its full crossfade. */
+                    const float repeat_step = 1.0f / ((BRK_FADE + 3) / 4);
+                    b->v[b->cur ^ 1u].dg = -repeat_step;
+                    b->v[b->cur].dg = repeat_step;
+                }
                 inc[b->cur] = b->v[b->cur].snap ? brk_inc(b, b->v[b->cur].snap) : 0.0f;
             }
             b->sub_elapsed++;

@@ -25,11 +25,13 @@ SIGNATURES = (
     "static void hexs(char *b, uint32_t v)",
     "static void fm1_fault(const fm1_crash_t *c)",
     "static void enter_uboot(const char *why)",
+    "static void draw_safe_mode(void)",
     "static void safe_main(void)",
 )
 ARCHIVED = {
     "boot-default", "boot-safe-mode", "boot-safe-crash-core-0", "boot-safe-crash-core-1",
     "boot-post-crash-core-0", "boot-post-crash-core-1", "boot-safe-retry", "boot-uboot", "boot-uboot-usb", "boot-crash-diagnostics",
+    "boot-update-step-1", "boot-update-failed",
     *(f"hardware-calibration-button-{i:02d}" for i in range(14)),
     *(f"hardware-calibration-encoder-{i:02d}" for i in range(7)),
 }
@@ -45,7 +47,8 @@ def sha(data):
 
 def compile_fixture(tmp):
     src = (SRC / "app/main_fm1.c").read_text()
-    (tmp / "route_bodies.inc").write_text("\n".join(exact_function(src, sig) for sig in SIGNATURES))
+    ota_show = exact_function((SRC / "x0x.c").read_text(), "static void ota_show(uint32_t step, int32_t code)")
+    (tmp / "route_bodies.inc").write_text(ota_show + "\n".join(exact_function(src, sig) for sig in SIGNATURES))
     startup = exact_function(src, "static void fm1_main(void)")
     cut = "    x0x_dbg.boots++;"
     if startup.count(cut) != 1:
@@ -120,6 +123,8 @@ def compare(tmp, output):
     retry = reference["boot-safe-mode"].copy()
     retry.paste(reference["boot-safe-retry"].crop((0,165,240,197)), (0,165))
     reference["safe-retry-without-crash"] = retry
+    reference["safe-after-failed-update"] = reference["boot-safe-crash-core-1"]
+    reference["safe-retry-after-failed-update"] = reference["boot-safe-retry"]
     paths = {p.stem:p for p in tmp.glob("*.rgb565")}
     if paths.keys() != reference.keys():
         raise ValueError("unexpected state inventory: " + str(paths.keys() ^ reference.keys()))
@@ -150,6 +155,27 @@ def wave_fallback(tmp):
                 scope="All Chicago/Miami factory cells and individual admitted non-performance wave previews; combinations untested.")
 
 
+def missing_repaint_control(tmp):
+    bodies = tmp / "route_bodies.inc"
+    source = bodies.read_text()
+    call = "                draw_safe_mode();"
+    bodies.write_text(hook_once(source, call, "                /* omitted recovery repaint */"))
+    try:
+        build_native(tmp)
+        mutated = tmp / "no-repaint"
+        mutated.mkdir()
+        subprocess.run([str(tmp / "check")], cwd=mutated, check=True, timeout=30)
+        try:
+            compare(mutated, mutated)
+        except ValueError as exc:
+            if str(exc) == "native frame or reference geometry changed: safe-after-failed-update":
+                return "Detected missing recovery repaint after OTA timeout"
+            raise
+        raise AssertionError("missing recovery repaint was accepted")
+    finally:
+        bodies.write_text(source)
+
+
 def shifted_retry_control(tmp):
     bodies = tmp / "route_bodies.inc"
     before = 'draw_text_box(0, 172, 240, &FONT_S, "STARTING DnBOX..."'
@@ -175,9 +201,10 @@ def main(output):
         subprocess.run([str(tmp / "check")], cwd=tmp, check=True, timeout=30)
         frames = compare(tmp, output)
         waveform = wave_fallback(tmp)
+        no_repaint = missing_repaint_control(tmp)
         negative = shifted_retry_control(tmp)
     inputs = ["firmware/src/lcd.c", "firmware/src/gfx.c", "firmware/src/app/panel.c",
-              "firmware/src/app/main_fm1.c", "firmware/hal/fm1_irq.h", "firmware/hal/smk_input.h",
+              "firmware/src/app/main_fm1.c", "firmware/src/ota.c", "firmware/src/x0x.c", "firmware/hal/fm1_irq.h", "firmware/hal/smk_input.h",
               "firmware/hal/fm1_time.h", "firmware/src/app/plat.h", "firmware/src/app/boot_screen.h",
               "firmware/src/ui_theme.h", "tools/gen_font.py", "tests/ui_inventory/native_routes.py",
               "tests/ui_inventory/native_routes.c", "tests/ui_inventory/wave_fallback.c",
@@ -189,6 +216,7 @@ def main(output):
                   startup="Complete fm1_cstart control flow with RAM linker regions, through the fm1_main RAM-only prefix to the end of its crash notice, or the complete safe-mode branch.",
                   functions=["fm1_cstart", "lcd_init", "panel_setup", "safe_main", "fm1_fault", "enter_uboot"],
                   geometry="All pixels equal independently archived frames or their explicitly composed references.",
+                  failedUpdateRepaintNegativeControl=no_repaint,
                   waveFallback=waveform, geometryNegativeControl=negative, archivedFrames=len(ARCHIVED), additionalFrames=len(frames)-len(ARCHIVED),
                   rgbSha256=frames, inputSha256={p:sha((ROOT/p).read_bytes()) for p in inputs})
     (output / "report.json").write_text(json.dumps(report, indent=2)+"\n")

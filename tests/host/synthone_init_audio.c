@@ -1,5 +1,6 @@
 /* SPDX-License-Identifier: GPL-3.0-only */
 #include "app/original_runtime.h"
+#include "app/bass_identity.h"
 #include <assert.h>
 #include <math.h>
 #include <stdio.h>
@@ -165,8 +166,42 @@ static void patch_audio(void)
 }
 #endif
 
+static void crush_patch(void)
+{
+    uint8_t cell[32], old[32];
+    const uint8_t old_tag[8] = {0x31,0x31,0x53,0x4f,ORIGINAL_SOUND_SCHEMA,0,2,BASS_IDENTITY_KNOWN};
+    const bass_identity_entry_t registry = {ORIGINAL_SOUND_SYNTHONE_ID, ORIGINAL_SOUND_SCHEMA,
+                                             ORIGINAL_SYNTHONE_NPARAMS, 1};
+    bass_identity_t identity;
+    assert(bass_identity_decode(&identity, old_tag, sizeof old_tag, &registry, 1) == BASS_IDENTITY_READY);
+    assert(identity.count == ORIGINAL_SYNTHONE_NPARAMS);
+    float amount;
+    assert(original_sound_init(cell, ORIGINAL_SOUND_SYNTHONE, 0));
+    assert(original_sound_value(cell, ORIGINAL_SYNTHONE_CRUSH, &amount) && amount == 0.f);
+    memcpy(old, cell, sizeof old);
+    /* Old eight-control cells can also carry an edit at position two. */
+    old[2] = 127;
+    old[22] = 4;
+    assert(original_sound_is_legacy_slot2_cell(old));
+    assert(original_sound_adopt_legacy_cell(old) && !memcmp(old, cell, sizeof old));
+    assert(original_runtime_init(&part_b, cell, 120, NULL, NULL) == ORIGINAL_RUNTIME_OK);
+    assert(original_sound_set(cell, ORIGINAL_SYNTHONE_CRUSH, 127));
+    assert(original_sound_valid(cell) && !original_sound_is_legacy_slot2_cell(cell));
+    assert(original_sound_value(cell, ORIGINAL_SYNTHONE_CRUSH, &amount) && amount == 1.f);
+    assert(original_runtime_init(&part_a, cell, 120, NULL, NULL) == ORIGINAL_RUNTIME_OK);
+    key(&part_a, 60, 105);
+    key(&part_b, 60, 105);
+    float l[64], r[64], dl[64], dr[64];
+    assert(original_runtime_render(&part_a, &workspace, l, r, 64) == ORIGINAL_RUNTIME_OK);
+    assert(original_runtime_render(&part_b, &workspace, dl, dr, 64) == ORIGINAL_RUNTIME_OK);
+    assert(!memcmp(l, r, sizeof l) && memcmp(l, dl, sizeof l));
+    assert(part_b.dsp.synthone.crush_interval == 1.f);
+    assert(original_runtime_all_off(&part_a) == ORIGINAL_RUNTIME_OK);
+    assert(part_a.dsp.synthone.crush_interval == 44100.f / 2048.f);
+}
 int main(void)
 {
+    crush_patch();
 #if X0X_SYNTHONE_PATCH
     patch_audio();
 #endif

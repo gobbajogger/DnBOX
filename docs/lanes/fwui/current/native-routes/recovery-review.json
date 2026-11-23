@@ -1,0 +1,257 @@
+{
+  "method": "Native 240x240 captures placed at 1:1 in the three archived browser-painted shell screenshots. Each original LCD crop matched its indexed native RGB. A new browser process could not start in the executor (Chromium socket permission; Qt WebKit missing).",
+  "native": {
+    "safe-after-failed-update": {
+      "beforeRGB": "0a7a88f1b68f157048799ecfc7b784278c04f551d9f84e07f1f93518af1f7e59",
+      "afterRGB": "4e5ffae22f202157ab74626f6d0b5948137713cf958746cb2221df067fa1ff9c",
+      "differentPixels": 5520,
+      "bounds": [
+        34,
+        20,
+        205,
+        233
+      ]
+    },
+    "safe-retry-after-failed-update": {
+      "beforeRGB": "c57b4746079c77739351b49f13c59be6cdbe6fb01e2c37e09b7ba5205c136d66",
+      "afterRGB": "5aceb6eed3258f8f816a9ad9a3e2c6af4b17f5ba53241d6c2fe2960af3702607",
+      "differentPixels": 5103,
+      "bounds": [
+        34,
+        20,
+        205,
+        233
+      ]
+    }
+  },
+  "previews": [
+    {
+      "viewport": [
+        1440,
+        900
+      ],
+      "native": "safe-after-failed-update-before.png",
+      "lcdBounds": [
+        263,
+        142,
+        503,
+        382
+      ],
+      "shellSource": "1440x900-synth-one-bass-A-page-5-k0-overview.png",
+      "shellPNG": "bc6ccb5c9b4275fdec5bd348d4691314cefee1bbefee3d3b6c81fd16983ab3a4",
+      "shellOriginalLCD": "4e5ea1fdaa481951af14c0c61571bb74dd4ef63302d501451bd761d3f1316870",
+      "lcdRGB": "0a7a88f1b68f157048799ecfc7b784278c04f551d9f84e07f1f93518af1f7e59",
+      "image": "1440x900-safe-after-failed-update-before.png",
+      "imagePNG": "164555a5f9baeb573c83c98b808efa3d742ce753f166c539e5153167d253869b"
+    },
+    {
+      "viewport": [
+        1440,
+        900
+      ],
+      "native": "safe-after-failed-update.png",
+      "lcdBounds": [
+        263,
+        142,
+        503,
+        382
+      ],
+      "shellSource": "1440x900-synth-one-bass-A-page-5-k0-overview.png",
+      "shellPNG": "bc6ccb5c9b4275fdec5bd348d4691314cefee1bbefee3d3b6c81fd16983ab3a4",
+      "shellOriginalLCD": "4e5ea1fdaa481951af14c0c61571bb74dd4ef63302d501451bd761d3f1316870",
+      "lcdRGB": "4e5ffae22f202157ab74626f6d0b5948137713cf958746cb2221df067fa1ff9c",
+      "image": "1440x900-safe-after-failed-update.png",
+      "imagePNG": "a4012e217b7a4f668e8b9b97f7dbb5fd14fb88605615758ef2abed844ee5d965"
+    },
+    {
+      "viewport": [
+        1440,
+        900
+      ],
+      "native": "safe-retry-after-failed-update-before.png",
+      "lcdBounds": [
+        263,
+        142,
+        503,
+        382
+      ],
+      "shellSource": "1440x900-synth-one-bass-A-page-5-k0-overview.png",
+      "shellPNG": "bc6ccb5c9b4275fdec5bd348d4691314cefee1bbefee3d3b6c81fd16983ab3a4",
+      "shellOriginalLCD": "4e5ea1fdaa481951af14c0c61571bb74dd4ef63302d501451bd761d3f1316870",
+      "lcdRGB": "c57b4746079c77739351b49f13c59be6cdbe6fb01e2c37e09b7ba5205c136d66",
+      "image": "1440x900-safe-retry-after-failed-update-before.png",
+      "imagePNG": "7a41c1878c301f1f19519d2e6cd721007de27f5f3172378f3b2e7a90d9e71595"
+    },
+    {
+      "viewport": [
+        1440,
+        900
+      ],
+      "native": "safe-retry-after-failed-update.png",
+      "lcdBounds": [
+        263,
+        142,
+        503,
+        382
+      ],
+      "shellSource": "1440x900-synth-one-bass-A-page-5-k0-overview.png",
+      "shellPNG": "bc6ccb5c9b4275fdec5bd348d4691314cefee1bbefee3d3b6c81fd16983ab3a4",
+      "shellOriginalLCD": "4e5ea1fdaa481951af14c0c61571bb74dd4ef63302d501451bd761d3f1316870",
+      "lcdRGB": "5aceb6eed3258f8f816a9ad9a3e2c6af4b17f5ba53241d6c2fe2960af3702607",
+      "image": "1440x900-safe-retry-after-failed-update.png",
+      "imagePNG": "c2cd1183b2d10943357b33d2ab4d30de54b797194fdea1912023156dfc0a02c7"
+    },
+    {
+      "viewport": [
+        390,
+        844
+      ],
+      "native": "safe-after-failed-update-before.png",
+      "lcdBounds": [
+        75,
+        203,
+        315,
+        443
+      ],
+      "shellSource": "390x844-startup-startup-sample-recovered.png",
+      "shellPNG": "d0e771b82df7cea632e3aca4cdb412916aa3952c047fd0ce1dea3afd36af7d00",
+      "shellOriginalLCD": "4f9674bf823d7edaba8c1f1a4770d2f9332eeeaae99ac741192e7cbf384916cc",
+      "lcdRGB": "0a7a88f1b68f157048799ecfc7b784278c04f551d9f84e07f1f93518af1f7e59",
+      "image": "390x844-safe-after-failed-update-before.png",
+      "imagePNG": "bac1fe0241e6e5cf76d54ee4fdd9b6c8b82c8c0c883cc9e93d3387237516e964"
+    },
+    {
+      "viewport": [
+        390,
+        844
+      ],
+      "native": "safe-after-failed-update.png",
+      "lcdBounds": [
+        75,
+        203,
+        315,
+        443
+      ],
+      "shellSource": "390x844-startup-startup-sample-recovered.png",
+      "shellPNG": "d0e771b82df7cea632e3aca4cdb412916aa3952c047fd0ce1dea3afd36af7d00",
+      "shellOriginalLCD": "4f9674bf823d7edaba8c1f1a4770d2f9332eeeaae99ac741192e7cbf384916cc",
+      "lcdRGB": "4e5ffae22f202157ab74626f6d0b5948137713cf958746cb2221df067fa1ff9c",
+      "image": "390x844-safe-after-failed-update.png",
+      "imagePNG": "282b894d54aa9a9f7dea0be21e1ab7c25cd2b3186aa67507699317e8eb484fcd"
+    },
+    {
+      "viewport": [
+        390,
+        844
+      ],
+      "native": "safe-retry-after-failed-update-before.png",
+      "lcdBounds": [
+        75,
+        203,
+        315,
+        443
+      ],
+      "shellSource": "390x844-startup-startup-sample-recovered.png",
+      "shellPNG": "d0e771b82df7cea632e3aca4cdb412916aa3952c047fd0ce1dea3afd36af7d00",
+      "shellOriginalLCD": "4f9674bf823d7edaba8c1f1a4770d2f9332eeeaae99ac741192e7cbf384916cc",
+      "lcdRGB": "c57b4746079c77739351b49f13c59be6cdbe6fb01e2c37e09b7ba5205c136d66",
+      "image": "390x844-safe-retry-after-failed-update-before.png",
+      "imagePNG": "b77e0a3dfa9741700b040beb1109047c5e45db73ef61ff9f724cce332f2f8f57"
+    },
+    {
+      "viewport": [
+        390,
+        844
+      ],
+      "native": "safe-retry-after-failed-update.png",
+      "lcdBounds": [
+        75,
+        203,
+        315,
+        443
+      ],
+      "shellSource": "390x844-startup-startup-sample-recovered.png",
+      "shellPNG": "d0e771b82df7cea632e3aca4cdb412916aa3952c047fd0ce1dea3afd36af7d00",
+      "shellOriginalLCD": "4f9674bf823d7edaba8c1f1a4770d2f9332eeeaae99ac741192e7cbf384916cc",
+      "lcdRGB": "5aceb6eed3258f8f816a9ad9a3e2c6af4b17f5ba53241d6c2fe2960af3702607",
+      "image": "390x844-safe-retry-after-failed-update.png",
+      "imagePNG": "273b952c00d3e8b159aee008335b6eb70fdfb3d409778bebadadc9c44a9756bb"
+    },
+    {
+      "viewport": [
+        844,
+        390
+      ],
+      "native": "safe-after-failed-update-before.png",
+      "lcdBounds": [
+        43,
+        142,
+        283,
+        382
+      ],
+      "shellSource": "844x390-superj6-slot-b-matrix-oscillator.png",
+      "shellPNG": "09c8820a65ebf2f60f0e12561d351962acee4f78f785b369f83c59b5a976ffb0",
+      "shellOriginalLCD": "fac9b8878bbce73cefe40e4af7970dbcd5848e23bc9a56e0fdbf81561a0c2021",
+      "lcdRGB": "0a7a88f1b68f157048799ecfc7b784278c04f551d9f84e07f1f93518af1f7e59",
+      "image": "844x390-safe-after-failed-update-before.png",
+      "imagePNG": "ae05829d9f8f3a3270d3941610b098c85c767c56804d10337b6e8554bb1c1782"
+    },
+    {
+      "viewport": [
+        844,
+        390
+      ],
+      "native": "safe-after-failed-update.png",
+      "lcdBounds": [
+        43,
+        142,
+        283,
+        382
+      ],
+      "shellSource": "844x390-superj6-slot-b-matrix-oscillator.png",
+      "shellPNG": "09c8820a65ebf2f60f0e12561d351962acee4f78f785b369f83c59b5a976ffb0",
+      "shellOriginalLCD": "fac9b8878bbce73cefe40e4af7970dbcd5848e23bc9a56e0fdbf81561a0c2021",
+      "lcdRGB": "4e5ffae22f202157ab74626f6d0b5948137713cf958746cb2221df067fa1ff9c",
+      "image": "844x390-safe-after-failed-update.png",
+      "imagePNG": "d03d7e6c6c433ea96024e2cbaf31e15c8c71ab198053e3196fd7f246704161ab"
+    },
+    {
+      "viewport": [
+        844,
+        390
+      ],
+      "native": "safe-retry-after-failed-update-before.png",
+      "lcdBounds": [
+        43,
+        142,
+        283,
+        382
+      ],
+      "shellSource": "844x390-superj6-slot-b-matrix-oscillator.png",
+      "shellPNG": "09c8820a65ebf2f60f0e12561d351962acee4f78f785b369f83c59b5a976ffb0",
+      "shellOriginalLCD": "fac9b8878bbce73cefe40e4af7970dbcd5848e23bc9a56e0fdbf81561a0c2021",
+      "lcdRGB": "c57b4746079c77739351b49f13c59be6cdbe6fb01e2c37e09b7ba5205c136d66",
+      "image": "844x390-safe-retry-after-failed-update-before.png",
+      "imagePNG": "36eb095c28312c203da53c5c50604a4efecb95027290708c25cd63e3ae44dd03"
+    },
+    {
+      "viewport": [
+        844,
+        390
+      ],
+      "native": "safe-retry-after-failed-update.png",
+      "lcdBounds": [
+        43,
+        142,
+        283,
+        382
+      ],
+      "shellSource": "844x390-superj6-slot-b-matrix-oscillator.png",
+      "shellPNG": "09c8820a65ebf2f60f0e12561d351962acee4f78f785b369f83c59b5a976ffb0",
+      "shellOriginalLCD": "fac9b8878bbce73cefe40e4af7970dbcd5848e23bc9a56e0fdbf81561a0c2021",
+      "lcdRGB": "5aceb6eed3258f8f816a9ad9a3e2c6af4b17f5ba53241d6c2fe2960af3702607",
+      "image": "844x390-safe-retry-after-failed-update.png",
+      "imagePNG": "8dad0949aa70c5eed224fea1c4c6e23dee18f250e8b9f9438c396d1003b61584"
+    }
+  ]
+}

@@ -268,10 +268,6 @@ def generate():
         import gen_chicago_compact
         gen_chicago_compact.generate(SRC / "experiments/original_synth/chicago_packed_private.h",
                                      GEN / "chicago_compact_private.h")
-        if SUPERJ6_FACTORY == "1" and os.environ.get("X0X_SYNTHONE_PATCH") == "1":
-            import gen_chicago_dense
-            gen_chicago_dense.generate(SRC / "experiments/original_synth/motion_tables_private.h",
-                                       GEN / "chicago_dense_private.h")
     if gen_cache.restore(GEN):
         print("generate: cached font, drums, and break bank")
         return
@@ -397,6 +393,16 @@ def require_original_synth_sources(root=None):
                          "; ".join(inputs["errors"]))
 
 
+def synthone_patch_setting():
+    # The ordinary Elite and Pro ship the dry INIT editor. The alternative
+    # SuperJ6 factory configuration keeps its explicit patch/link policy.
+    stock_smk = BOARD == "smk37" and MODEL in ("elite", "pro") and SUPERJ6_FACTORY == "0"
+    value = os.environ.get("X0X_SYNTHONE_PATCH", "1" if stock_smk else "0")
+    if value not in ("0", "1"):
+        raise SystemExit("X0X_SYNTHONE_PATCH: 0 or 1")
+    return value
+
+
 def app_compile_commands(flags, original_synth, wobble):
     """Return the exact app compile/link input plan without running tools."""
     if not original_synth:
@@ -411,6 +417,8 @@ def app_compile_commands(flags, original_synth, wobble):
                  "-Iexperiments/original_synth", "-Iexperiments/wobble"]
     if BOARD == "smk37" and MODEL in ("elite", "pro"):
         flags = [*flags, "-flto"]
+    synthone_patch = synthone_patch_setting()
+    flags = [*flags, "-DX0X_SYNTHONE_PATCH=" + synthone_patch]
     if SUPERJ6_FACTORY == "1":
         flags = [*flags, "-DX0X_SUPERJ6_FACTORY=1"]
     chance_probe = os.environ.get("X0X_GFINAL_CHANCE_PROBE", "1")
@@ -443,10 +451,8 @@ def app_compile_commands(flags, original_synth, wobble):
                 uf = [f for f in uf if f != "-flto"]
             if BOARD == "smk37" and MODEL in ("elite", "pro") and Path(u).stem == "chicago_packed":
                 uf = [*uf, "-DX0X_CHICAGO_COMPACT_HEADERS=1"]
-            if SUPERJ6_FACTORY == "1" and os.environ.get("X0X_SYNTHONE_PATCH") == "1":
+            if SUPERJ6_FACTORY == "1" and synthone_patch == "1":
                 uf = ["-Oz" if flag == "-Os" else flag for flag in uf]
-                if BOARD == "smk37" and MODEL in ("elite", "pro") and Path(u).stem == "chicago_packed":
-                    uf = [*uf, "-DX0X_CHICAGO_DENSE=1"]
             if SUPERJ6_FACTORY == "1" and Path(u).stem in {"dnbx_core", "juno6"}:
                 uf = ["-Oz" if flag == "-Os" else flag for flag in uf]
                 uf = [*uf, "-DDNBX_DIAGNOSTIC_COUNTERS=0"]
@@ -470,7 +476,7 @@ def build_app():
     factory_roots = []
     if SUPERJ6_FACTORY == "1":
         names = ["engine_superj6_factory_load"]
-        if os.environ.get("X0X_SYNTHONE_PATCH") != "1":
+        if synthone_patch_setting() != "1":
             names.extend(("engine_superj6_edit", "engine_superj6_pre_note_wave"))
         for name in names:
             factory_roots.extend(("-u", name))
@@ -496,16 +502,13 @@ def build_app():
             flags.append(f"-D{flag}={v}")
     # Sound-selector previews use tagged storage but deliberately leave the
     # separate per-note snapshot lifecycle disabled until it is qualified.
-    sound_flags = ("X0X_BASS_PRESET_PREVIEW", "X0X_BASS_TAGGED_SOUND", "X0X_BASS_NOTE_SOUND",
-                   "X0X_SYNTHONE_PATCH", "X0X_SYNTHONE_WIDEN")
+    sound_flags = ("X0X_BASS_PRESET_PREVIEW", "X0X_BASS_TAGGED_SOUND", "X0X_BASS_NOTE_SOUND")
     for flag in sound_flags:
         v = os.environ.get(flag)
         if v is not None:
             if v not in ("0", "1"):
                 raise SystemExit(f"{flag}: 0 or 1")
             flags.append(f"-D{flag}={v}")
-    if os.environ.get("X0X_SYNTHONE_WIDEN") == "1" and os.environ.get("X0X_SYNTHONE_PATCH") != "1":
-        raise SystemExit("X0X_SYNTHONE_WIDEN requires X0X_SYNTHONE_PATCH=1")
     if os.environ.get("X0X_BASS_NOTE_SOUND") == "1" and os.environ.get("X0X_BASS_TAGGED_SOUND") != "1":
         raise SystemExit("X0X_BASS_NOTE_SOUND requires X0X_BASS_TAGGED_SOUND=1")
     if os.environ.get("X0X_BASS_TAGGED_SOUND") == "1" and os.environ.get("X0X_BASS_PRESET_PREVIEW") != "1":

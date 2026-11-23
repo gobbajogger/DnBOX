@@ -8,6 +8,7 @@ import struct
 from pathlib import Path
 
 from factory import canonical_bytes
+from release_matrix import prepare_release
 
 import numpy as np
 
@@ -95,7 +96,7 @@ def check_state(arm, directory, row, checked, receipt, inputs):
     uid = row["program_uid"]
     if inputs is None:
         raise ValueError("authenticated factory input directory required")
-    raw = (inputs / (uid + ".json")).read_bytes()
+    raw = inputs[uid] if isinstance(inputs, dict) else (inputs / (uid + ".json")).read_bytes()
     expect(digest(raw), checked["file_sha256"], "input file digest")
     selection = json_object(raw)
     source = selection["preset"]
@@ -135,7 +136,8 @@ def check_state(arm, directory, row, checked, receipt, inputs):
     expect(details.get("live_words"), live, "live control words")
 
 
-def capture(directory, row, spec, spec_hash, arm, inputs=None, candidate_sha=None, candidate_commit=None):
+def capture(directory, row, spec, spec_hash, arm, inputs=None, candidate_sha=None, candidate_commit=None,
+            audit=None):
     uid = row["program_uid"]
     receipt = json_object((directory / (uid + ".json")).read_bytes())
     for key, expected in {
@@ -148,7 +150,8 @@ def capture(directory, row, spec, spec_hash, arm, inputs=None, candidate_sha=Non
         "first_render_frame": 0, "event_count": len(spec["events"]), "scheduled_events": spec["events"],
     }.items():
         expect(receipt.get(key), expected, key)
-    audit = json_object(AUDIT.read_bytes())
+    if audit is None:
+        audit = json_object(AUDIT.read_bytes())
     checked = next((p for p in audit["programs"] if p["uid"] == uid), None)
     if not checked or checked["supplied_bank_uuid"] != row["bank_uuid"] or audit["spec_sha256"] != spec_hash:
         raise ValueError("release audit disagrees with matrix")
@@ -170,19 +173,25 @@ def capture(directory, row, spec, spec_hash, arm, inputs=None, candidate_sha=Non
     if len(raw) != spec["capture_frames"] * spec["channels"] * 4 or digest(raw) != receipt.get("pcm_sha256"):
         raise ValueError(f"{arm} PCM length or digest differs")
     data = np.frombuffer(raw, "<f4").reshape(-1, spec["channels"])
-    if not np.isfinite(data).all() or not np.any(data):
-        raise ValueError(f"{arm} PCM contains nonfinite values or is entirely silent")
+    if not np.isfinite(data).all() or not np.any(data, axis=0).all():
+        raise ValueError(f"{arm} PCM contains nonfinite values or a silent channel")
     return data, receipt["pcm_sha256"]
 
 
-def compare(original, dnbox, inputs=None, candidate_image=None, candidate_commit=None):
+def compare(original, dnbox, inputs=None, candidate_image=None, candidate_commit=None, release_ipa=None):
     candidate_sha = None
     if candidate_image is not None:
         image = candidate_image.read_bytes()
         if not image:
             raise ValueError("empty DnBOX production image")
         candidate_sha = digest(image)
-    raw_spec = SPEC.read_bytes()
+    if release_ipa is None:
+        raw_spec = SPEC.read_bytes()
+        audit = json_object(AUDIT.read_bytes())
+    else:
+        if inputs is not None:
+            raise ValueError("choose an original release or exported matrix input")
+        raw_spec, audit, inputs = prepare_release(release_ipa)
     spec_hash = hashlib.sha256(raw_spec).hexdigest()
     spec = json.loads(raw_spec)
     results = []
@@ -193,7 +202,7 @@ def compare(original, dnbox, inputs=None, candidate_image=None, candidate_commit
         for arm, directory in [("original", original), ("dnbox", dnbox)]:
             try:
                 arms[arm], result[arm + "_pcm_sha256"] = capture(
-                    directory, row, spec, spec_hash, arm, inputs, candidate_sha, candidate_commit)
+                    directory, row, spec, spec_hash, arm, inputs, candidate_sha, candidate_commit, audit)
             except FileNotFoundError as error:
                 errors.append(f"{arm} missing {Path(error.filename).name}")
             except (ValueError, KeyError, TypeError, OverflowError) as error:
@@ -218,10 +227,12 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("original", type=Path)
     parser.add_argument("dnbox", type=Path)
-    parser.add_argument("--inputs", type=Path, help="factory.py matrix output")
+    source = parser.add_mutually_exclusive_group()
+    source.add_argument("--inputs", type=Path, help="factory.py matrix output")
+    source.add_argument("--release-ipa", type=Path, help="authenticate inputs directly from the original build-9 IPA")
     parser.add_argument("--candidate-image", type=Path, help="independently identified DnBOX production executable")
     parser.add_argument("--candidate-commit", help="full source commit for that executable")
     args = parser.parse_args()
-    result = compare(args.original, args.dnbox, args.inputs, args.candidate_image, args.candidate_commit)
+    result = compare(args.original, args.dnbox, args.inputs, args.candidate_image, args.candidate_commit, args.release_ipa)
     print(json.dumps(result, indent=2, allow_nan=False))
     raise SystemExit(0 if result["passed"] == 14 else 2 if result["scored"] != 14 else 1)
