@@ -79,6 +79,7 @@ echo 'RAM .data+.bss 40 B of 100; pool 100 B of 10000'
         (self.sdk/'library').write_text('fixture SDK')
         self.env.update(JIELI_TOOLCHAIN=str(self.tc), AC79_SDK=str(self.sdk))
         self.env.update(X0X_REPO=str(self.repo), X0X_QUEUE_FILE=str(self.queue),
+                        X0X_GATE_LOCK=str(self.root/'gate.lock'),
                         X0X_RESULTS_DIR=str(self.root/'no-gate-results'))
 
     def git(self, *args):

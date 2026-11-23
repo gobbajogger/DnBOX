@@ -22,7 +22,11 @@ def fn(s,name):
   level += (s[e]=='{')-(s[e]=='}');e+=1
  return s[a:e]+'\n'
 (out/'chord_font_types.inc').write_text(g[g.index('typedef struct {'):g.index('#include "felucca_font.h"')])
-(out/'chord_metrics.inc').write_text(fn(g,'static inline uint32_t font_offset(')+
+# In the production host build XDATA faces are resident and enabled.
+font_live = ('#ifdef FONT_XDATA_LEN\nstatic uint8_t gfx_xdata_ok = 1;\n' +
+             fn(g,'static inline const felucca_font_t *font_live(') +
+             '#else\n#define font_live(f) (f)\n#endif\n')
+(out/'chord_metrics.inc').write_text(font_live+fn(g,'static inline uint32_t font_offset(')+
  fn(g,'static inline uint32_t font_advance(')+fn(g,'static inline uint32_t font_bitmap_width(')+
  fn(g,'static uint32_t glyph(')+fn(g,'static int32_t text_w(')+
  fn(u,'static const capm_t *caps(')+fn(u,'static int32_t vc('))

@@ -12,6 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / 'tests/host/engine_808_scratch_alias_test.sh'
 DECLARATIONS = '''#include <stdint.h>
 typedef struct { uint32_t sentinel; } drum_curve_t;
+typedef struct { uint32_t sentinel; } sound_t;
 typedef struct { uint32_t sentinel; } engine_decay_view_t;
 typedef struct { uint32_t sentinel; } drum909_amp_snapshot;
 typedef struct { uint32_t sentinel; } juno6_envelope_snapshot;
@@ -20,6 +21,9 @@ CALLS = '''int main(void) {
  uint8_t peaks[2]={17,29}; uint32_t revision=73;
  drum909_amp_snapshot drum={91}; juno6_envelope_snapshot juno={97};
  drum_curve_t curve={17};
+ sound_t archived={71};
+ arp_adopt(0,&archived,1);
+ if(archived.sentinel!=71 || engine_drum_fired(0,1,2,3)!=0)return 12;
  if(engine_drum808_curve(0,&curve)!=0 || curve.sentinel!=17)return 9;
  if(engine_drum808_param_curve(6,3,&curve)!=0 || curve.sentinel!=17)return 10;
  if(engine_drum808_param_curve_preview(6,3,0,127,&curve)!=0 || curve.sentinel!=17)return 11;
