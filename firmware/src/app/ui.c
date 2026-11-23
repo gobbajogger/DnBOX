@@ -3152,6 +3152,8 @@ static void set_view(int v)
         say("RELEASE STEP FIRST", 0);
         return;
     }
+    if (v != ui.view)
+        ui.touched = -1;                              /* a knob's readout belongs to the screen it was turned on */
 #if BOARD_SMK37
     smc_ui_cancel();
 #endif
@@ -7322,7 +7324,8 @@ static UI_DRAW void draw_footer(void)
 static UI_DRAW void draw_main(void)
 {
     int band, readout = ui.touched >= 0 && (int32_t)(ui.touch_until - plat_ms()) > 0 &&
-                        ui.overlay == O_NONE && !ui.help;
+                        ui.overlay == O_NONE && !ui.help &&
+                        (ui.touched >= 4 || pg.n <= 0 || pg.r[cur_page()][ui.touched].kind != R_NONE);   /* never an empty readout */
     int envelope = readout && adsr_touch_active();
     if (!readout)
         ui.touched = -1;
