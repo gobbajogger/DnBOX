@@ -277,6 +277,35 @@ class OriginalBuildCompositionTests(unittest.TestCase):
         self.assertIn('cv_text(dx, 6, &FONT_T, division_pad_label(), C_AMB)', ui)
         self.assertNotIn("shape_pad_owner(", ui)
 
+    def test_division_pad_owner_cached_once_in_header_and_knobs_sig(self):
+        # draw_header and knobs_sig used to call the owner predicate several
+        # times in one frame; keep a single local and reuse it.
+        ui = (ROOT / "firmware/src/app/ui.c").read_text()
+
+        def extract(signature):
+            i = ui.index(signature)
+            brace = ui.index("{", i)
+            depth = 0
+            for j, ch in enumerate(ui[brace:], brace):
+                if ch == "{":
+                    depth += 1
+                elif ch == "}":
+                    depth -= 1
+                    if depth == 0:
+                        return ui[i:j + 1]
+            self.fail("could not extract " + signature)
+
+        header = extract("static UI_DRAW void draw_header(void)")
+        knobs = extract("static UI_DRAW uint32_t knobs_sig(void)")
+        self.assertEqual(header.count("division_pad_owner()"), 1)
+        self.assertIn("int div_owner = division_pad_owner();", header)
+        self.assertIn("!div_owner", header)
+        self.assertIn("if (div_owner && !pickup && !clip_mode)", header)
+        self.assertEqual(knobs.count("division_pad_owner()"), 1)
+        self.assertIn("int div_owner = division_pad_owner();", knobs)
+        self.assertIn("MIXIN(div_owner);", knobs)
+        self.assertIn("if (div_owner) MIXIN(division_pad_index());", knobs)
+
     def test_host_build_allows_original_rate_pad_flag_without_legacy_sources(self):
         # The host app should accept the same UI-only build flag as firmware.
         host = (ROOT / "host/build_host.sh").read_text()

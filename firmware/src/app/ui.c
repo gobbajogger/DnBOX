@@ -5789,9 +5789,10 @@ static UI_DRAW void draw_header(void)
     int edit_step = lock_step();
     int pickup = ui.msg[0] == 'P' && ui.msg[1] == 'I' && ui.msg[2] == 'C' &&
                  ui.msg[3] == 'K' && ui.msg[4] == ' ';
+    int div_owner = division_pad_owner();
     part_header_snapshot_t snapshot = {0};
     int cacheable = edit_step < 0 && !seq.ext && !ui.msg_until && ui.view == V_PART && (is_drum() || is_303()) &&
-        ui.overlay == O_NONE && !ui.help && !division_pad_owner() &&
+        ui.overlay == O_NONE && !ui.help && !div_owner &&
         seq_cue_of(&seq, ui.part) < 0
 #if BOARD_SMK37
         && !smk_clip_mode_on()
@@ -5898,7 +5899,7 @@ static UI_DRAW void draw_header(void)
                 text_c(left+5,vc(&FONT_XS,3,13),&FONT_XS,ss==SAVE_FAILED?"!":ss==SAVE_QUEUED?"Q":"*",C_BLACK);
             }
         }
-        if (division_pad_owner() && !pickup && !clip_mode) {
+        if (div_owner && !pickup && !clip_mode) {
             int dx = 4 + tw(&FONT_B, name) + 8;
             dx = cv_text(dx, 6, &FONT_T, "PADS ", C_AMB);
             cv_text(dx, 6, &FONT_T, division_pad_label(), C_AMB);
@@ -5909,9 +5910,9 @@ static UI_DRAW void draw_header(void)
             cv_text(132,4,&FONT_T,smk_ck_ext()?"EXT":"INT",smk_ck_ext()?C_AMB:SOUND_GRAY);
         } else
 #endif
-        if(cancel_pattern_cue() && edit_step<0 && !division_pad_owner())
+        if(cancel_pattern_cue() && edit_step<0 && !div_owner)
             cv_text_clip(128,4,&FONT_T,ui.msg,C_AMB,126,168);
-        else if(pickup || !division_pad_owner()) {
+        else if(pickup || !div_owner) {
             char pattern[16];
             int header_part=part_view()?ui.part:PART_909;
             int cue=seq_cue_of(&seq,header_part);
@@ -9063,8 +9064,9 @@ static UI_DRAW uint32_t knobs_sig(void)
         for(int c=0;c<16;c++)MIXIN(lane.value[c]);
     }
     MIXIN(ui.part);
-    MIXIN(division_pad_owner());
-    if (division_pad_owner()) MIXIN(division_pad_index());
+    int div_owner = division_pad_owner();
+    MIXIN(div_owner);
+    if (div_owner) MIXIN(division_pad_index());
 #if X0X_BASS_PRESET_PREVIEW
     if(is_303()) MIXIN(engine_bass_preset_pending(bidx()));
 #endif
