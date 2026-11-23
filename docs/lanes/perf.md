@@ -31,3 +31,9 @@ Reference: /workspace/dnbox-handoff/BOT-RULES.md (finisher bots, 2026-11-23). On
 (600.0 s) for Elite and Pro, engine pairs Chicago+Miami (factory 18, Chicago FX 6) and Synth One+SuperJ6,
 all drums, breaks, bus FX, reverb, delay and master on. Each block is timed in thread CPU time against
 11,609 us; it fails on any late block or dropout. Runs at nice 19.
+
+## Code room for the Synth One reader
+`tools/build.py` OZ_UNITS builds the control-rate units (seq/sequencer, seq/tb3po, seq/pattern,
+seq/motion, dsp/x0x_param) at -Oz instead of -O2. XIP free: Elite 1,452 -> 4,072 B, Pro 1,460 -> 4,080 B
+(+2,620 B each); pool and RAM unchanged. Host heavy stress (4,096 blocks, Elite) -O2 vs -Oz for these
+units: Chicago+Miami mean 536.3 vs 525.9 us, Synth One+SuperJ6 481.2 vs 490.9 us (noise), late 0.
