@@ -3107,7 +3107,7 @@ void engine_render(int32_t *out_lr, uint32_t n)
     while (done < n) {
         uint32_t k = seq_until_event(&seq, n - done);
         brk_mute_boundary(); /* also follows song mutes at an in-buffer event */
-#if X0X_ARP_HOOKS
+#if X0X_ARP_ENGINE
         arp_clock();
 #endif
         /* any stretch of ENG_TAIL_CS or more: pipeline. Mastered frames
