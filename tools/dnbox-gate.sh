@@ -127,6 +127,9 @@ fw_build()   { pass_env
                [ -f build/x0x-smk37-elite.fwsc ] || { echo "missing build/x0x-smk37-elite.fwsc"; return 1; }
                cp -f build/x0x-smk37-elite.fwsc "$OUT/elite.fwsc" || return 1
                budget_from_log "$OUT/elite-build.log" elite || return 1
+               python3 tools/engine_memory_report.py build/smk37-elite/x0x.elf --model elite \
+                 --nm "$JIELI_TOOLCHAIN/pi32v2/bin/nm" | tee "$OUT/elite-engine-memory.txt"
+               [ "${PIPESTATUS[0]}" -eq 0 ] || return 1
 
                MODEL=pro ./build.sh > "$OUT/pro-build.log" 2>&1
                local prc=$?
@@ -135,6 +138,9 @@ fw_build()   { pass_env
                [ -f build/x0x-smk37.fwsc ] || { echo "missing build/x0x-smk37.fwsc"; return 1; }
                cp -f build/x0x-smk37.fwsc "$OUT/pro.fwsc" || return 1
                budget_from_log "$OUT/pro-build.log" pro || return 1
+               python3 tools/engine_memory_report.py build/smk37/x0x.elf --model pro \
+                 --nm "$JIELI_TOOLCHAIN/pi32v2/bin/nm" | tee "$OUT/pro-engine-memory.txt"
+               [ "${PIPESTATUS[0]}" -eq 0 ] || return 1
              }
 flashmap()   { python3 tools/gate_flashmap.py firmware/hal/fm1_flash_map.h firmware/src/storage.c; }
 budget()     { local model xip pool bad=0

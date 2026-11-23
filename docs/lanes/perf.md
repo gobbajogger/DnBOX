@@ -1,0 +1,27 @@
+# perf lane (memory and performance)
+
+Reference: /workspace/dnbox-handoff/BOT-RULES.md (finisher bots, 2026-11-23). One branch, `lane/perf`, one PR into `integration/dnbox-consolidated`.
+
+## Items
+1. All engines fit stock Elite and Pro (no PSRAM): gate budget XIP free >= 1024 B, pool margin >= 512 B; per-engine memory report as a test.
+2. 10 simulated minutes of all-engine heavy playback: dropouts=0, zero late blocks, every block under 11,609 us, both models.
+3. The user's 5 BREAK samples in stock firmware, without overwriting user slots or substituting samples.
+4. Combined Elite+Pro builds, flashmap, host suite 0 FAIL / 0 NOT_RUN.
+
+## Done
+- (this PR) `tools/engine_memory_report.py` + `tests/host/engine_memory_report_test.py`: per-engine flash / RAM / pool attribution of each linked model; the gate's build step prints it for Elite and Pro and fails on the stock budget.
+- (this PR) `FL_FDATA` factory synth data region (user approval 2026-11-23): the top `FL_FDATA_SIZE` bytes of FL_SMP, cut from the end of sample slot 2. Slots 1/2/3 keep their start offsets; slots 1 and 3 keep their sizes. Stock value 0 (no change). `tools/gate_flashmap.py`, `tools/fm1pkg_make.py` (package slot map) and `slots.c` follow the one define; `tests/host/flashmap_fdata_test.py` covers 0 and nonzero sizes.
+
+## Measured at 395579bd (Elite / Pro)
+- App image 551,220 / 551,212 B of 552,672: XIP free 1,452 / 1,460 B (428 / 436 B above the 1,024 B minimum).
+- Pool 335,040 of 344,064 B: margin 832 B (320 B above 512). Ordinary RAM .data+.bss 97,188 of 98,304 B (1,116 B free).
+
+## Left
+- Item 1: full Synth One (694 programs, FX) and SuperJ6 (640 presets) need far more than the free XIP; packed tables go to FL_FDATA (size set with the synth lane), and code room comes from moving read-only tables out of the app image.
+- Activating a nonzero FL_FDATA needs the nightly installer's slot-map allow-list entry and a slot-2 migration (back up slot 2 when its data runs past the new end).
+- Items 2-4.
+
+## Risks
+1. A nonzero FL_FDATA shortens slot 2; a sample longer than the new slot 2 fails its header check (fail-closed) until it is re-uploaded.
+2. Engine attribution is a lower bound (inlined code stays in callers).
+3. Code room for the synth engines (25-31 KB) is not available in the app image without moving data out.

@@ -21,8 +21,14 @@ typedef struct {
  * per-slot sector-0 shadows (one 4 KiB sector per slot), so slot 3 is 32 KiB and not bb32802e's 44 KiB. */
 #define SMP_USER_SLOTS 3
 #define SMP_USER_OFF(k) ((k) == 0u ? 0xC2000u : (k) == 1u ? 0xD6000u : 0xB3000u)
-#define SMP_USER_SIZE(k) ((k) == 0u ? 0x14000u : (k) == 1u ? 0x1E000u : 0x8000u)
-#define SMP_USER_MAX 0x1E000u                       /* the largest slot */
+/* Slot 2 ends where the factory synth data (FL_FDATA, fm1_flash_map.h) starts; 0x1E000 without it. */
+#ifdef FL_FDATA_SIZE
+#define SMP_SLOT2_SIZE (0x1E000u - FL_FDATA_SIZE)
+#else
+#define SMP_SLOT2_SIZE 0x1E000u
+#endif
+#define SMP_USER_SIZE(k) ((k) == 0u ? 0x14000u : (k) == 1u ? SMP_SLOT2_SIZE : 0x8000u)
+#define SMP_USER_MAX (SMP_SLOT2_SIZE > 0x14000u ? SMP_SLOT2_SIZE : 0x14000u)  /* the largest slot */
 /* First 12 KiB of FL_SMPV: per-slot 4 KiB shadow of sector 0 so a mid-WRITE
  * cancel / failed END / power loss can put the last-good header+data back. */
 #define SMP_SEC0_BACKUP 1
@@ -30,7 +36,8 @@ typedef struct {
 #ifdef FL_SMP_LO
 _Static_assert(SMP_USER_SLOTS == 3u, "SMK: three user sample slots");
 _Static_assert(SMP_USER_OFF(0u) == FL_SMP_LO && SMP_USER_OFF(0u) + SMP_USER_SIZE(0u) == SMP_USER_OFF(1u) &&
-               SMP_USER_OFF(1u) + SMP_USER_SIZE(1u) == FL_SMP_HI, "SMK: slots 1 and 2 must fill FL_SMP");
+               SMP_USER_OFF(1u) + SMP_USER_SIZE(1u) == FL_FDATA_LO,
+               "SMK: slots 1 and 2 must fill FL_SMP up to the factory synth data (FL_FDATA)");
 _Static_assert(SMP_USER_OFF(0u) >= FL_SMPV_HI, "SMK: slots 1 and 2 must not use the VM spare");
 _Static_assert(SMP_SEC0_BACKUP_OFF(0u) >= FL_SMPV_LO &&
                SMP_SEC0_BACKUP_OFF(SMP_USER_SLOTS - 1u) + 0x1000u == SMP_USER_OFF(2u),

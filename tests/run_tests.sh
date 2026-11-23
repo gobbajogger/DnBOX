@@ -373,6 +373,8 @@ run chicago-fx2-inserts sh tests/host/chicago_fx2_inserts_test.sh build/chicago_
 run original-sound-cell sh tests/host/original_sound_cell_test.sh build/original-sound-cell
 run original-release-ui sh tests/host/original_release_ui_test.sh build/ui-theme/original-ui
 run original-build python3 tests/host/test_original_build_composition.py
+run engine-memory-report python3 -B tests/host/engine_memory_report_test.py   # per-engine flash/RAM/pool report + stock budget
+run flashmap-fdata python3 -B tests/host/flashmap_fdata_test.py   # factory synth data at the end of slot 2
 run load-guard-diagnostic python3 tests/host/test_load_guard_diagnostic.py
 run state-trace-diagnostic python3 tests/host/test_state_trace_diagnostic.py
 run play-question sh tests/host/play_question_test.sh
