@@ -49,14 +49,12 @@ static uint32_t s1p_sym(s1p_bits *b, const uint16_t *cnt, unsigned L)
 }
 
 #define H16(o) s1p_le(pack + (o), 2)
-uint32_t s1pack_total(const uint8_t *pack) { return s1p_le(pack + 12, 4); }
-uint32_t s1pack_crc(const uint8_t *pack) { return s1p_le(pack + 16, 4); }
 
 unsigned s1pack_programs(const uint8_t *pack, uint32_t available)
 {
     uint32_t total;
     if (!pack || available < S1PACK_HEADER || s1p_le(pack, 4) != 0x4B503153u || H16(4) != 1u) return 0;
-    total = s1pack_total(pack);
+    total = s1p_le(pack + 12, 4);
     if (total > available || H16(20) != S1PACK_HEADER || H16(22) >= total || H16(24) >= total ||
         !H16(30) || !H16(28) || !H16(6))
         return 0;
@@ -113,40 +111,6 @@ static int s1p_read_name(s1p_bits *b, const s1p_names *n, char *o)
     }
 }
 
-/* Walk to program p from its checkpoint. Column codes are re-read per skipped
- * program from the column section; every value is skipped, names kept in out. */
-static int s1p_seek(const uint8_t *pack, unsigned program, s1p_bits *b, char *out)
-{
-    s1p_names n;
-    unsigned pstep = H16(30), ncol = H16(8), gbits = pack[11], skip, c;
-    uint16_t cnt[15];
-    if (program >= H16(6)) return 0;
-    s1p_name_tables(pack, &n);
-    b->p = pack + H16(24);
-    b->at = s1p_table(pack, 3u + (H16(26) + H16(28) - 1u) / H16(28) + program / pstep);
-    for (skip = program % pstep;; skip--) {
-        if (!s1p_read_name(b, &n, out)) return 0;
-        if (!skip) return 1;
-        s1p_bits col = {pack + H16(24), s1p_table(pack, 0)};
-        for (c = 0; c < ncol; c++) {
-            uint32_t esc, s;
-            unsigned L;
-            s1p_get(&col, 8);
-            esc = s1p_eg(&col, 0);
-            L = s1p_counts(&col, cnt);
-            s = s1p_sym(b, cnt, L);
-            if (s == 0xFFFFu) return 0;
-            if (esc && s == esc - 1u) s1p_get(b, gbits);
-        }
-    }
-}
-
-int s1pack_name(const uint8_t *pack, unsigned program, char *out)
-{
-    s1p_bits b;
-    return s1p_seek(pack, program, &b, out);
-}
-
 static uint32_t s1p_global(const uint8_t *pack, uint32_t index)
 {
     unsigned gstep = H16(28);
@@ -159,42 +123,53 @@ static uint32_t s1p_global(const uint8_t *pack, uint32_t index)
     return v;
 }
 
-int s1pack_load(const uint8_t *pack, unsigned program, s1pack_emit_fn emit, void *context)
+/* Walk from program p's checkpoint to p, reading each name into out (front
+ * coding keeps the shared prefix) and each column symbol. At p, emit is NULL
+ * for a name lookup; otherwise each column resolves its dictionary entry and
+ * global value. Returns the column count, or -1 on a malformed pack. */
+int s1pack_read(const uint8_t *pack, unsigned program, char *out, s1pack_emit_fn emit, void *context)
 {
-    char name[S1PACK_NAME_MAX];
+    s1p_names n;
     s1p_bits b, col, dict;
-    unsigned ncol = H16(8), gbits = pack[11], c;
+    unsigned pstep = H16(30), ncol = H16(8), gbits = pack[11], skip, c;
     uint16_t cnt[15];
-    if (!s1p_seek(pack, program, &b, name)) return -1;
-    col.p = dict.p = pack + H16(24);
-    col.at = s1p_table(pack, 0);
-    dict.at = s1p_table(pack, 1);
-    for (c = 0; c < ncol; c++) {
-        unsigned id = s1p_get(&col, 8), L, k, i, entries = 0;
-        uint32_t esc = s1p_eg(&col, 0), s, g = 0, at, key;
-        L = s1p_counts(&col, cnt);
-        for (i = 0; i < L; i++) entries += cnt[i];
-        if (esc) entries--;
-        s = s1p_sym(&b, cnt, L);
-        if (s == 0xFFFFu) return -1;
-        k = s1p_get(&dict, 4);
-        if (esc && s == esc - 1u) {
-            g = s1p_get(&b, gbits);
-            s = entries;                 /* walk past the whole dictionary */
-        } else if (esc && s > esc - 1u) {
-            s--;
+    if (program >= H16(6)) return -1;
+    s1p_name_tables(pack, &n);
+    b.p = col.p = dict.p = pack + H16(24);
+    b.at = s1p_table(pack, 3u + (H16(26) + H16(28) - 1u) / H16(28) + program / pstep);
+    for (skip = program % pstep;; skip--) {
+        if (!s1p_read_name(&b, &n, out)) return -1;
+        if (!skip && !emit) return 0;
+        col.at = s1p_table(pack, 0);
+        dict.at = s1p_table(pack, 1);
+        for (c = 0; c < ncol; c++) {
+            unsigned id = s1p_get(&col, 8), L, k, i, entries = 0;
+            uint32_t esc = s1p_eg(&col, 0), s, g = 0, at;
+            L = s1p_counts(&col, cnt);
+            s = s1p_sym(&b, cnt, L);
+            if (s == 0xFFFFu) return -1;
+            if (esc && s == esc - 1u) g = s1p_get(&b, gbits);
+            if (skip) continue;
+            for (i = 0; i < L; i++) entries += cnt[i];
+            k = s1p_get(&dict, 4);
+            if (esc) {
+                entries--;
+                if (s == esc - 1u) s = entries;      /* walk past the whole dictionary */
+                else if (s > esc - 1u) s--;
+            }
+            for (i = 0, at = 0; i < entries; i++) {
+                uint32_t z = s1p_eg(&dict, k);
+                at += (z & 1u) ? ~(z >> 1) : z >> 1;
+                if (i == s) g = at;
+            }
+            if (g >= H16(26)) return -1;
+            {
+                uint32_t key = s1p_global(pack, g);
+                union { uint32_t u; float f; } bits = {(key & 0x80000000u) ? key & 0x7FFFFFFFu : ~key};
+                emit(context, id, bits.f);
+            }
         }
-        for (i = 0, at = 0; i < entries; i++) {
-            uint32_t z = s1p_eg(&dict, k);
-            at += (z & 1u) ? ~(z >> 1) : z >> 1;
-            if (i == s) g = at;
-        }
-        if (g >= H16(26)) return -1;
-        key = s1p_global(pack, g);
-        {
-            union { uint32_t u; float f; } bits = {(key & 0x80000000u) ? key & 0x7FFFFFFFu : ~key};
-            emit(context, id, bits.f);
-        }
+        if (!skip) return (int)ncol;
     }
-    return (int)ncol;
 }
+
