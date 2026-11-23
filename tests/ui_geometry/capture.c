@@ -33,11 +33,11 @@ static void required_drum_content(const char *screen) {
   pref_value_of(r,matrix_value(r),num,unit);snprintf(value,sizeof value,"%s%s",num,unit);
   unsigned glyph=0;for(unsigned z=0;z<presence_nglyph;z++)if(presence_glyph[z][0]==r.kind&&presence_glyph[z][1]==r.a&&presence_glyph[z][2]==r.b&&presence_glyph[z][3]==r.c)glyph++;
   presence_checks++;if(!glyph){presence_missing++;printf("MISSING_CONTENT screen=%s kind=glyph expected=[%s]\n",screen,caption);}
-  /* 837530d99: the 909 Kick AMP bank is one "K5 DECAY <value>" caption over the
+  /* 837530d99: the 909 Kick AMP bank is one "DECAY <value>" caption over the
    * lower LEVEL/TIME graph, and its KIT bank names the velocity depth. */
   if(ui.part!=PART_808 && ui.sel[ui.part]==DR_BD){
    if(KICK_AMP(r)){
-    char physical[48];snprintf(physical,sizeof physical,"%s%s",X0X_SMK_CAPTIONS?"K5 DECAY ":"K1 DECAY ",value);
+    char physical[48];snprintf(physical,sizeof physical,"DECAY %s",value);  /* guideline: no K-number prefix */
     presence_checks++;if(!seen_text(physical)){presence_missing++;printf("MISSING_CONTENT screen=%s kind=kick-decay expected=[%s]\n",screen,physical);}
     continue;
    }
