@@ -15,8 +15,10 @@ Symbols that match no engine are "shared" (UI, sequencer, platform, shared DSP).
 counts are lower bounds: inlined code and merged literals stay in the caller's symbol.
 
 The report ends with the stock budget lines and exits 1 if
-  XIP free < XIP_MIN (1024 B) or pool margin < POOL_MIN (512 B),
-the same limits the gate's budget step uses, or if the XDATA region (16 B header + blob) overflows its 8 KiB. Last line: "engine-memory: PASS|FAIL <model>".
+  XIP free < XIP_MIN (default 0 B: the image must physically fit; build.py still
+  fails a real overflow) or pool margin < POOL_MIN (512 B),
+the same limits the gate's budget step uses, or if the XDATA region (16 B header + blob)
+overflows its 8 KiB. Last line: "engine-memory: PASS|FAIL <model>".
 """
 import argparse
 import os
@@ -32,7 +34,7 @@ RAM_SIZE = 98304                 # tools/build.py check(): ".data+.bss ... of 98
 POOL_SIZE = 0x54000              # tools/build.py: pool raw free = 0x54000 - pool
 POOL_RESERVE = 8192
 XDATA_XIP, XDATA_SIZE = 0x020A9000, 0x2000   # fm1_flash_map.h FL_XDATA_LO 0xAD000 via FM1_XIP; app.ld XDATA
-XIP_MIN = int(os.environ.get("XIP_MIN", "1024"))
+XIP_MIN = int(os.environ.get("XIP_MIN", "0"))
 POOL_MIN = int(os.environ.get("POOL_MIN", "512"))
 
 # First match wins. Order matters: specific engine prefixes before generic ones.

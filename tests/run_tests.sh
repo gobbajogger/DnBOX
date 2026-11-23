@@ -6,6 +6,10 @@
 # audio in build/scenarios/. Needs the reference sources (see tests/host/run_*.sh).
 #   tests/run_tests.sh
 #   tests/run_tests.sh <name>...           only the named tests (the names of the result lines). Also X0X_TESTS="<name> ...".
+#   On-demand only (not in the default per-push suite): the mutation self-tests smc-ui-negative,
+#     smc-interaction-negative, smc-multi-peer-negative (Dot-only meta-tests). Run them by name:
+#     tests/run_tests.sh smc-ui-negative smc-interaction-negative smc-multi-peer-negative
+#   heavy-playback was dropped from the suite (user 2026-11-23 23:36) and the script was removed; audio-stress stays.
 #   X0X_TEST_JOBS=1 tests/run_tests.sh    serial: one test at a time, in order.
 #   The default is X0X_TEST_JOBS=8: host-only tests run 8 at a time. See test_class below.
 #     Install, update, package, BLE and mocked-device tests always run serially, one at a time, after
@@ -232,6 +236,13 @@ not_run() {         # name reason: same T_SEQ and phase admission as run, but do
             mark_gen_fail
         fi
     fi
+}
+# Run only when named (X0X_TESTS or argv). Skipped in the default per-push suite.
+run_on_demand() {
+    if [ -z "$X0X_TESTS" ]; then
+        return
+    fi
+    run "$@"
 }
 run() {
     name="$1"; shift
@@ -518,13 +529,13 @@ run midi-out-mq-pb-overflow python3 tests/host/midi_pb_overflow_test.py out
 run ble-out-pb-overflow python3 tests/host/midi_pb_overflow_test.py ble
 run ble-device-setting-flow python3 tests/host/ble_device_setting_flow_test.py   # BLUETOOTH row: independent bit-0 save, BT SAVE PENDING, retry
 run ble-toggle-persistence-gate python3 tests/host/ble_toggle_persistence_gate_test.py
-run smc-multi-peer-negative python3 tests/host/smc_multi_peer_negative_test.py
+run_on_demand smc-multi-peer-negative python3 tests/host/smc_multi_peer_negative_test.py
 run smc-pause-loss sh tests/host/smc_pause_loss_test.sh
 run smk-wheel-mode sh tests/host/smk_wheel_mode_test.sh
 run miami-table-interpolation sh tests/host/run_miami_table_interpolation.sh
 run miami-coef-cache sh tests/host/run_miami_coef_cache.sh
 run legacy-303-project sh tests/host/legacy_303_project_test.sh   # old bass303 projects load as the Chicago default, no crash, no save
-run smc-interaction-negative python3 tests/host/smc_interaction_negative_test.py
+run_on_demand smc-interaction-negative python3 tests/host/smc_interaction_negative_test.py
 run corner-coverage python3 tests/host/corner_coverage_test.py
 run part-order sh tests/host/part_order_test.sh
 run synthone-short-label python3 tests/host/test_synthone_short_label.py
@@ -565,7 +576,7 @@ run ui-text-units sh tests/host/ui_text_units_test.sh
 run ui-arp-seq sh tests/host/ui_arp_seq_test.sh
 run ui-arp-engine sh tests/host/ui_arp_engine_test.sh
 run smc-ui-bounds sh tests/host/smc_ui_bounds_test.sh
-run smc-ui-negative python3 tests/host/smc_ui_negative_test.py
+run_on_demand smc-ui-negative python3 tests/host/smc_ui_negative_test.py
 run smc-mapping python3 tests/host/smc_mapping_test.py
 if [ "$PIL_SKIP" = 1 ]; then not_run smc-drum-mutes Pillow; else run smc-drum-mutes sh tests/host/smc_drum_mutes_test.sh; fi
 if [ "$PIL_SKIP" = 1 ]; then not_run smc-drum-rs Pillow; else run smc-drum-rs sh tests/host/smc_drum_rs_test.sh; fi

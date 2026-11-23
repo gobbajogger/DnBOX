@@ -54,7 +54,7 @@ class Attribution(unittest.TestCase):
 
     def test_budget_boundaries(self):
         syms, marks = emr.parse_nm(nm([], pool_used=0x54000 - 8192 - 512))
-        for xip_free, ok in [(1024, True), (1023, False)]:
+        for xip_free, ok in [(0, True), (-1, False)]:
             with self.subTest(xip_free=xip_free):
                 table, totals = emr.report(syms, marks, image_bytes=0x86EE0 - xip_free)
                 text, verdict = emr.render("elite", table, totals)

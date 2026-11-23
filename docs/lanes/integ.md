@@ -3244,3 +3244,6 @@ Paths named *evidence* that no test, tool, build or hash manifest reads. Kept (r
 - `experiments/sound-hardware-v1/shared_math/production_fit/execution/production-shared-elite-05/EVIDENCE.json` — evidence-only; retained in Git history.
 - `experiments/sound-hardware-v1/shared_math/production_fit/execution/production-shared-pro-07/EVIDENCE.json` — evidence-only; retained in Git history.
 - `tests/host/bass_probability_midi_evidence.json` — evidence-only; retained in Git history.
+
+## Deletes for the 2026-11-24 00:02 LeakSanitizer cut
+- tests/test_compact_sanitizer_control.py — user dropped FINAL-GOAL rows 10 and 11 (Dot-only LeakSanitizer qualification) at 2026-11-24 00:02 VLAT; compact-programs value checks remain.

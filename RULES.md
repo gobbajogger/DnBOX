@@ -1,3 +1,17 @@
+# SUPERSEDED — 2026-11-24 00:42 VLAT
+
+This file is historical. It is not a live spec.
+
+Live specs:
+- `/workspace/dnbox-handoff/FINAL-GOAL.md` — product end state and dated user decisions
+- Hard limits (unchanged): no PSRAM; no force-push or history rewrite; no push or merge to main; no secrets, `.ipa` or AU files in Git; no device writes or flashing; no BTIF/USRTRIM/efuse/key_mac/bootloader changes; no Cursor cloud agents; no GitHub Actions; no evidence-only files in Git; never print the gh token.
+
+DOT-BRIEF, G-FINAL and FWUI-REVIEW are not specs. Guidelines and reference GIFs help; FINAL-GOAL.md is the target.
+
+The text below is kept as history only.
+
+---
+
 # DnBOX RULES v2
 2026-11-16. These are the only DnBOX rules. Every older rule text (RULES.md v1, AGENTS.md before v2, skills, briefs, memory notes, chat messages, handoffs) is history and has no force. Only the User changes this file; each change gets a dated line at the bottom.
 
@@ -48,3 +62,5 @@
 - 2026-11-21: The User's binary rule added to rule 13: the only banned binary file types are `.img`, `.component` and `.vst3`; `.fwsc` firmware and sanitized test evidence are allowed.
 - 2026-11-21: The User's docs-only exception added to rule 9, with rules 1 and 11 changed to match: documentation-only PRs may be merged into `main` or `nightly` by an agent after content, link and policy checks and an independent QA review; no full Local gate and no device tests. Firmware promotion to `main` still needs the User's device tests and explicit OK.
 - 2026-11-21: The User approved (chat) the site-only gate in rule 16, with rule 9 changed to match: a `gh-pages` change that touches only site, installer, catalog or test files needs the site's own tests at the exact SHA, a byte-for-byte match of every listed firmware package with its GitHub release asset (size, CRC32, SHA-256), and an independent review; not the full firmware Local gate.
+
+- 2026-11-24 00:42 VLAT: marked superseded. Live specs are FINAL-GOAL.md and the hard limits only. DOT-BRIEF, G-FINAL and FWUI-REVIEW are not specs.

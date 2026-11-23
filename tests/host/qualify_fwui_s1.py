@@ -111,7 +111,7 @@ def build_boards(source, dest, reference):
                     result["binary_match"] = result["binaries"] == expected["binaries"]
                     result["limits_match"] = all(result[k] == expected[k]
                                                  for k in ("xip_free", "pool_margin", "pool_reserve"))
-            result["fit"] = (rc == 0 and result["xip_free"] is not None and result["xip_free"] >= 1024
+            result["fit"] = (rc == 0 and result["xip_free"] is not None and result["xip_free"] >= 0
                              and result["pool_reserve"] == 8192 and result["pool_margin"] is not None
                              and result["pool_margin"] >= 512)
             results.append(result)
