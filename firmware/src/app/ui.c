@@ -8574,7 +8574,7 @@ static UI_DRAW void draw_knobs(void)
             if (mv >= 0)
                 val = mv;
         }
-        if (gf_cell(r, val, cx - 13, 29, col)) {
+        if (control_glyph(r, val, cx, col)) {
             /* Its existing value/motion/lock path is retained below. */
         } else if (d->names && d->max < 12) {           /* a switch: positions as pips */
             int n = d->max + 1, k, pw = n > 6 ? 3 : 6, gap = 2, w0 = n * (pw + gap) - gap;

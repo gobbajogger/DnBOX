@@ -84,6 +84,8 @@ static UI_DRAW int gf_cell(pref_t r, int val, int gx, int gy, uint16_t ink)
     gf_cell_as(r, id, val, gx, gy, ink);
     return 1;
 }
+/* An ordinary knob strip: the shared cell centred on cx, rows 29..47. */
+static UI_DRAW int control_glyph(pref_t r, int val, int cx, uint16_t ink) { return gf_cell(r, val, cx - 13, 29, ink); }
 /* The Synth One filter readout: live cutoff/resonance drive the shared curve. */
 static UI_DRAW void gf_filt_cell(int gx, int gy, int mode, int cutoff, int resonance, uint16_t ink)
 {

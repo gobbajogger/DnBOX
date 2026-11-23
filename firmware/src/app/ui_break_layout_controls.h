@@ -63,7 +63,7 @@ static void break_layout_controls(void)
             /* Canonical body at local y15 via the existing cv_oy=-13. */
         } else
 #endif
-        if(!(break_groove_pips(r,val,cx,part_col())||gf_cell(r,val,cx-13,29,part_col()))&&d->names&&d->max<12){
+        if(!(break_groove_pips(r,val,cx,part_col())||control_glyph(r,val,cx,part_col()))&&d->names&&d->max<12){
             int n=d->max+1,pw=n>6?3:6,w=n*(pw+2)-2;
             for(int k=0;k<n;k++)box(cx-w/2+k*(pw+2),33,pw,9,k==val?part_col():C_LINE);
         }

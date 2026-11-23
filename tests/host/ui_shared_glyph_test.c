@@ -28,12 +28,18 @@ int main(void)
    }
   }
  }
- /* Preserve the DJ master's neutral centre as well as pan and transpose. */
+ /* G-FINAL: PAN's marker sits at 3+18q in the 26x19 cell (cell x = cx-13, y = 29);
+  * transpose and the DJ master filter keep three distinct pictures across their range. */
  pref_t pans[]={PR(R_ENG,T_MIX,0,MX_PAN),PR(R_BTRANS,0,0,0),PR(R_ENG,T_MST,0,MST_DJF)};
- for(int i=0;i<3;i++)for(int j=0;j<3;j++) {
-  const x0x_param_t *d=pref_desc(pans[i]);int v=j==0?0:j==1?(d->max+1)/2:d->max;
-  cv_begin(240,KNOB_H,C_BLACK);CHECK(control_glyph(pans[i],v,30,C_HI));
-  int x=j==0?12:j==1?30:48;CHECK(cv_px[34*240+x]==swap16(C_HI));
+ for(int i=0;i<3;i++) {
+  uint32_t h[3];
+  for(int j=0;j<3;j++) {
+   const x0x_param_t *d=pref_desc(pans[i]);int v=j==0?0:j==1?(d->max+1)/2:d->max;
+   cv_begin(240,KNOB_H,C_BLACK);CHECK(control_glyph(pans[i],v,30,C_HI));
+   h[j]=2166136261u;for(int k=0;k<240*KNOB_H;k++)h[j]=(h[j]^cv_px[k])*16777619u;
+   if(!i){int q=(v*127+d->max/2)/d->max,x=17+(int)fm_floorf(3.f+18.f*(float)q/127.f+.5f);CHECK(cv_px[38*240+x]==swap16(C_HI));CHECK(cv_px[38*240+x+1]==swap16(C_HI));}
+  }
+  CHECK(h[0]!=h[1] && h[1]!=h[2] && h[0]!=h[2]);
  }
  cv_begin(240,KNOB_H,C_BLACK);CHECK(!control_glyph(PR(R_CLKOUT,0,0,0),0,30,C_HI));
  test_distinct_maps();
