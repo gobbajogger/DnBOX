@@ -142,7 +142,8 @@ static uint32_t direct_drum(pref_t r,int value)
 static uint32_t tune_wave_band(pref_t r,int value)
 {
  direct_drum(r,value);
- for(int y=16;y<=17;y++)for(int x=10;x<36;x++)CHECK(cv_px[y*240+x]==swap16(C_BLACK));
+ /* the gutter holds no solid ink (1ec2d61a8 stroke edges may blend into it) */
+ for(int y=16;y<=17;y++)for(int x=10;x<36;x++)CHECK(cv_px[y*240+x]!=swap16(C_HI));
  uint32_t h=2166136261u;
  for(int y=18;y<=26;y++)for(int x=10;x<36;x++)h=(h^cv_px[y*240+x])*16777619u;
  return h;

@@ -15,8 +15,14 @@ static uint32_t polish_glyph(pref_t r,int value,int *px,int *py){
  *px=*py=-1;
  for(int y=0;y<KNOB_H;y++)for(int x=0;x<240;x++)if(cv_px[y*240+x]!=swap16(C_BLACK)){
   if(!GLYPH_IN(x,y,cv_px[y*240+x]))fprintf(stderr,"glyph bounds target=%d voice=%d control=%d value=%d pixel=%d,%d\n",r.a,r.b,r.c,value,x,y);CHECK(GLYPH_IN(x,y,cv_px[y*240+x]));
-  if(cv_px[y*240+x]!=swap16(C_LINE) && *py<0){*px=x;*py=y;}
+  (void)0;
  }
+ /* The stroke's solid ink is its most frequent colour; 1ec2d61a8's partial-coverage
+  * edge pixels are blends and do not mark the knee. */
+ uint16_t best=0;int most=0;
+ for(int y=10;y<=28;y++)for(int x=10;x<36;x++){uint16_t c=cv_px[y*240+x];if(c==swap16(C_BLACK)||c==swap16(C_LINE))continue;
+  int n=0;for(int j=10;j<=28;j++)for(int i=10;i<36;i++)n+=cv_px[j*240+i]==c;if(n>most){most=n;best=c;}}
+ for(int y=0;y<KNOB_H && *py<0;y++)for(int x=0;x<240;x++)if(most&&cv_px[y*240+x]==best){*px=x;*py=y;break;}
  return pixels(cv_px,10,10,26,19);
 }
 static void chicago(void){setup(V_PART,PART_303B);pref_set(PR(R_ENG,T_303,1,13),0);drain_ms(300);}
@@ -102,7 +108,7 @@ static void adsr_expected_header_and_labels(int highlighted)
  const char *const labels[4]={"K5 A 63%","K6 D 31%","K7 S 63%","K8 R 31%"};
  CHECK(UI_FIRST_KNOB==5); /* Actual board profile, independently pinned. */
  const char *const touched[4]={"ATTACK 63%","DECAY 31%","SUSTAIN 63%","RELEASE 31%"};
- uint16_t actual[240*22];
+ uint16_t actual[240*21];   /* y=21 holds the curve's blended halo (1ec2d61a8), not a caption */
  memcpy(actual,cv_px,sizeof actual);
  cv_begin(240,KNOB_H,C_BLACK);
  if(highlighted>=0)text_r(232,0,&FONT_T,touched[highlighted],SOUND_INK);

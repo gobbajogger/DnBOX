@@ -13,7 +13,7 @@ import pathlib,sys
 out=pathlib.Path(sys.argv[1])
 out.joinpath('ui.c').write_bytes(pathlib.Path('firmware/src/app/ui.c').read_bytes())
 s=pathlib.Path('firmware/src/app/ui_drum_voice.inc').read_text()
-a='        cv_rect(x-1,y-1,3,3,SOUND_INK);'
+a='        ui_curve_cursor(x,y,SOUND_INK);'
 if s.count(a)!=1: raise SystemExit('missing/duplicate real circuit marker anchor')
 out.joinpath('ui_drum_voice.inc').write_text(s.replace(a,'        (void)x; (void)y; /* negative: missing actual marker */'))
 PYTHON
