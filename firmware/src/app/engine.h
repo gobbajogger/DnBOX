@@ -33,6 +33,10 @@ int engine_s1_patch_pending(void);
 int engine_s1_patch_snapshot(unsigned voice, s1_patch_snapshot *out);
 int engine_s1_patch_read(unsigned voice, unsigned factory_id, s1_patch_value *out);
 int engine_s1_patch_set(unsigned voice, uint32_t revision, unsigned factory_id, unsigned position);
+/* Loudest started voice's amplitude (filter=0) or filter (filter=1) envelope:
+ * level, stage (DNBX_S1_ENVELOPE_*: 0 idle, 1 attack, 2 decay/sustain,
+ * 3 release) and key_down. 0 when no voice is started. */
+int engine_s1_envelope_view(unsigned voice, unsigned filter, float *level, unsigned *stage, unsigned *key_down);
 #endif
 
 enum { T_909, T_808, T_303, T_BRK, T_FX, T_MIX, T_MST, NTARGETS };
