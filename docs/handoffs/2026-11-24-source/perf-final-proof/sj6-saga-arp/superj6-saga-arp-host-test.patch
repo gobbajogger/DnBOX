@@ -1,0 +1,352 @@
+--- /dev/null
++++ b/tests/host/ui_superj6_saga_test.c
+@@ -0,0 +1,296 @@
++/* SPDX-License-Identifier: GPL-3.0-only */
++#define PWM_FIXTURE_MAIN retained_pwm_main
++#include "ui_superj6_pwm1_lfo2_test.c"
++#include "../../firmware/src/app/original_runtime.h"
++#include <math.h>
++
++static original_runtime_part probe_part;
++static original_runtime_workspace probe_work;
++static float output[2][256];
++static unsigned cursor;
++
++static void start_probe(const engine_arp_cfg *cfg)
++{
++    uint8_t cell[ORIGINAL_SOUND_BYTES];
++    CHECK(original_sound_init(cell, ORIGINAL_SOUND_JUNO, 0));
++    CHECK(original_runtime_init(&probe_part, cell, 120.f, NULL, NULL) == ORIGINAL_RUNTIME_OK);
++    CHECK(original_runtime_arp_config(&probe_part, cfg));
++    cursor = 0;
++}
++
++static void run_to(unsigned end, int transport)
++{
++    while (cursor < end) {
++        unsigned span = end - cursor < 256 ? end - cursor : 256;
++        if (transport)
++            original_runtime_arp_clock(&probe_part, (uint64_t)cursor * 256u,
++                                       22050u * 256u, cursor == 500);
++        CHECK(original_runtime_render(&probe_part, &probe_work, output[0], output[1], span) == ORIGINAL_RUNTIME_OK);
++        cursor += span;
++    }
++}
++
++static int sounding_pitch(void)
++{
++    int note = -1;
++    for (unsigned i = 0; i < DNBX_VOICES; ++i) {
++        const dnbx_voice *voice = &probe_part.dsp.juno.synth.core.voice[i];
++        if (voice->gate) {
++            CHECK(note < 0);
++            note = voice->note;
++        }
++    }
++    return note;
++}
++
++static void expect_pitch(int note)
++{
++    int heard = sounding_pitch();
++    if (heard != note) fprintf(stderr, "after frame %u wanted pitch %d, saw %d\n", cursor, note, heard);
++    CHECK(heard == note);
++}
++
++static void key(unsigned pitch, unsigned velocity)
++{
++    CHECK(original_runtime_key(&probe_part, ORIGINAL_INPUT_KEYS, pitch, velocity) == ORIGINAL_RUNTIME_OK);
++}
++
++static void all_divisions(void)
++{
++    static const float beats[] = {.0625f, .09375f, .125f, .1875f, .25f, .375f, .5f, .75f, 1,
++                                  1.5f, 2, 3, 4, 8, 12, 16, 24, 32};
++    for (unsigned i = 0; i < 18; ++i) {
++        engine_arp_cfg cfg, saved;
++        engine_arp_cfg_default(&cfg);
++        CHECK(engine_arp_from_sj6(&cfg, 143, 1.f - i / 17.f) && cfg.division == i + 1);
++        cfg.mode = ARP_UPDN_REPEAT;
++        cfg.amp2_mask = 9;
++        cfg.amp2[0] = 420;
++        uint8_t bytes[ARP_BLOCK_BYTES];
++        engine_arp_block_encode(&cfg, bytes);
++        CHECK(engine_arp_block_decode(bytes, &saved));
++        CHECK(saved.division == cfg.division && saved.mode == cfg.mode);
++        CHECK(saved.speed == ARP_SPEED_1_16 && saved.amp2_mask == 9 && saved.amp2[0] == 420);
++        CHECK(((bytes[2] >> 1) & 3u) == ARP_UPDN); /* Old reader's fallback. */
++        start_probe(&saved);
++        CHECK(probe_part.arp.prm.arpSeqTempoMultiplier == (unsigned)(22050.f * 256.f * beats[i]));
++    }
++    engine_arp_cfg cfg;
++    engine_arp_cfg_default(&cfg);
++    CHECK(engine_arp_from_sj6(&cfg, 143, -.008403362f) && cfg.division == 18);
++    CHECK(!engine_arp_from_sj6(&cfg, 143, -1.f) && cfg.division == 18);
++    CHECK(!engine_arp_from_sj6(&cfg, 143, 2.f) && cfg.division == 18);
++    CHECK(engine_arp_from_sj6(&cfg, 143, .5f) && cfg.division == 10);
++    for (unsigned i = 0; i < 17; ++i) {
++        const float raw = 1.f - (i + .5f) / 17.f;
++        const float neighbors[] = {nextafterf(raw, 0.f), raw, nextafterf(raw, 1.f)};
++        for (unsigned j = 0; j < 3; ++j) {
++            CHECK(engine_arp_from_sj6(&cfg, 143, neighbors[j]));
++            CHECK(cfg.division == 1 + (unsigned)roundf((1.f - neighbors[j]) * 17.f));
++        }
++    }
++    puts("PASS all 18 authored Saga periods, preset rounding, and the fixed arp block");
++}
++
++static void physical_modes(void)
++{
++    static const unsigned mode[] = {ARP_UP, ARP_DOWN, ARP_UPDN, ARP_UPDN_REPEAT};
++    static const unsigned length[] = {3, 3, 4, 8};
++    static const int expected[][8] = {
++        {60,64,67}, {67,64,60}, {60,64,67,64}, {60,60,64,64,67,67,64,64}
++    };
++    engine_arp_cfg cfg;
++    engine_arp_cfg_default(&cfg);
++    cfg.on = 1;
++    cfg.division = 1;
++    for (unsigned m = 0; m < 4; ++m) {
++        cfg.mode = mode[m];
++        start_probe(&cfg);
++        key(64, 100); key(60, 100); key(67, 100); /* Deliberately unsorted. */
++        for (unsigned i = 0; i <= length[m]; ++i) {
++            unsigned frame = (i * 352800u + 255u) / 256u;
++            run_to(frame + 1, 0);
++            expect_pitch(expected[m][i % length[m]]);
++        }
++    }
++    cfg.mode = ARP_UP;
++    cfg.range = 2;
++    cfg.interval = 7;
++    start_probe(&cfg);
++    key(72, 100); key(60, 100);
++    static const int overlap[] = {60, 67, 72, 79};
++    for (unsigned i = 0; i < 4; ++i) {
++        run_to((i * 352800u + 255u) / 256u + 1, 0);
++        expect_pitch(overlap[i]);
++    }
++    cfg.range = 1;
++    start_probe(&cfg);
++    for (unsigned i = 60; i <= 66; ++i) key(i, 100);
++    run_to((3u * 352800u + 255u) / 256u + 1, 0);
++    expect_pitch(63);
++    key(61, 0); key(62, 0); key(63, 0); key(65, 0);
++    run_to((4u * 352800u + 255u) / 256u + 1, 0);
++    expect_pitch(64); /* Pick 4 % 3, increment, and reset against the shrunken pool. */
++    run_to((5u * 352800u + 255u) / 256u + 1, 0);
++    expect_pitch(60);
++    puts("PASS actual notes for four deterministic modes, interleaved tiers and a shrinking pool");
++}
++
++static void timed_pattern(const engine_arp_cfg *cfg, unsigned owner)
++{
++    CHECK(cfg->division == 2 && cfg->mode == ARP_SEQ && cfg->on && cfg->gate == 50 && cfg->length == 3);
++    CHECK(cfg->offset[0] == 24 && cfg->offset[2] == -24 && (cfg->on_mask & 7u) == 5u);
++    start_probe(cfg);
++    key(120, 100);
++    run_to(1, 0);
++    expect_pitch(127);
++    run_to(1034, 0);
++    expect_pitch(127);
++    run_to(1035, 0);
++    expect_pitch(-1);
++    run_to(2069, 0);
++    expect_pitch(-1); /* Step 1 is muted. */
++    run_to(4135, 0);
++    expect_pitch(-1);
++    run_to(4136, 0);
++    expect_pitch(96);
++    CHECK(output[0][0] != 0.f);
++    printf("part=%u 3/32 beat: note 127 on frame 0, off 1034, rest 2068, note 96 on 4135\n", owner);
++
++    start_probe(cfg);
++    cursor = 500;
++    key(4, 100);
++    run_to(501, 1);
++    expect_pitch(-1);
++    run_to(2069, 1);
++    expect_pitch(-1); /* Quantized entry reaches the muted first boundary. */
++    run_to(4135, 1);
++    expect_pitch(-1);
++    run_to(4136, 1);
++    expect_pitch(0);
++    printf("part=%u off-grid held note waited for the transport; step 2 clipped to MIDI 0 on frame 4135\n", owner);
++}
++
++static void arp_turn(unsigned col, unsigned field, int value)
++{
++    pref_t ref = pg.r[cur_page()][col];
++    CHECK(ref.kind == R_ARP && ref.a == field && smc_same(ref, smc_knob_target(col)));
++    while (pref_get(ref) != value) {
++        int before = pref_get(ref);
++        int detent = value < before ? -1 : 1;
++        now_ms += 200;
++        knob(col, detent);
++        CHECK(pref_get(ref) == before + detent);
++    }
++}
++
++static void select_synthone(unsigned owner)
++{
++    CHECK(!engine_bass_select_preset(owner, ORIGINAL_SOUND_SYNTHONE, 0, &proj.sound));
++    for (unsigned n = 0; n < 1024 && engine_bass_preset_pending(owner); ++n) render(1);
++    CHECK(engine_bass_bank(owner) == ORIGINAL_SOUND_SYNTHONE && !engine_bass_preset_pending(owner));
++}
++
++static void check_part(unsigned owner)
++{
++    setup(V_PART, PART_303A + owner);
++    proj.set.bt |= PROJ_BT_CLK_IN;
++    select_owner(owner, 0);
++    select_owner(1-owner, 0);
++    uint8_t peer[ARP_BLOCK_BYTES];
++    memcpy(peer, proj.sound.v[T_303][ARP_BLOCK_VOICE0 + 1-owner], sizeof peer);
++    engine_arp_cfg peer_cfg;
++    (void)engine_arp_block_decode(peer, &peer_cfg);
++    visit("ARPEGGIATOR");
++    arp_turn(0, ARP_F_ON, 1);
++    arp_turn(2, ARP_F_MODE, ARP_UPDN_REPEAT);
++    render(1);
++    save_and_reload();
++    engine_apply_sound(&proj.sound);
++    engine_arp_settings state;
++    CHECK(engine_arp_settings_read(owner, &state) && state.mode == ARP_UPDN_REPEAT);
++    arp_turn(2, ARP_F_MODE, ARP_SEQ);
++    render(1);
++
++    set_view(V_SEQ);
++    smc.view = V_SEQ;
++    visit("ARP SEQ");
++    CHECK(cur_page() == 3 && arp_seq_page());
++    arp_turn(0, ARP_F_LENGTH, 2);
++    arp_turn(2, ARP_F_GATE, 49); /* Knob 3 is still Gate. */
++    arp_turn(3, ARP_F_DIVISION, 2);
++    CHECK(engine_arp_settings_read(owner, &state));
++    CHECK(engine_arp_step_set(owner, state.revision, 0, ARP_S_OFFSET, 24) == S1_EDIT_QUEUED);
++    CHECK(engine_arp_step_set(owner, state.revision, 1, ARP_S_ON, 0) == S1_EDIT_QUEUED);
++    CHECK(engine_arp_step_set(owner, state.revision, 2, ARP_S_OFFSET, -24) == S1_EDIT_QUEUED);
++    render(1);
++    save_and_reload();
++    CHECK(!memcmp(peer, proj.sound.v[T_303][ARP_BLOCK_VOICE0 + 1-owner], sizeof peer));
++    engine_apply_sound(&proj.sound);
++    CHECK(engine_arp_settings_read(owner, &state) && state.division == 2 && state.gate == 50);
++    CHECK(engine_arp_settings_read(1-owner, &state) && state.division == peer_cfg.division);
++    engine_arp_cfg cfg;
++    CHECK(engine_arp_block_decode(proj.sound.v[T_303][ARP_BLOCK_VOICE0 + owner], &cfg));
++    timed_pattern(&cfg, owner);
++
++    /* The saved SuperJ6 division is dormant during Synth One speed edits. */
++    select_synthone(owner);
++    CHECK(engine_arp_settings_read(owner, &state) && !state.division);
++    CHECK(engine_arp_set(owner, state.revision, ARP_F_SPEED, 6) == S1_EDIT_QUEUED);
++    render(1);
++    CHECK(engine_arp_block_decode(proj.sound.v[T_303][ARP_BLOCK_VOICE0 + owner], &cfg));
++    CHECK(cfg.division == 2);
++    select_owner(owner, 0);
++    CHECK(engine_arp_settings_read(owner, &state) && state.division == 2 && state.speed == 6);
++
++    set_view(V_PART);
++    smc.view = V_PART;
++    visit("ARPEGGIATOR");
++    arp_turn(3, ARP_F_SPEED, 7);
++    render(1);
++    CHECK(engine_arp_settings_read(owner, &state) && !state.division && state.speed == 7);
++    unsigned peer_owner = 1-owner;
++    select_synthone(peer_owner);
++    CHECK(engine_arp_settings_read(peer_owner, &state));
++    CHECK(engine_arp_set(peer_owner, state.revision, ARP_F_DIVISION, 2) == S1_EDIT_REJECTED);
++    CHECK(engine_arp_set(peer_owner, state.revision, ARP_F_MODE, ARP_UPDN_REPEAT) == S1_EDIT_REJECTED);
++    CHECK(arp_desc(ARP_F_MODE, peer_owner)->max == ARP_SEQ && !arp_desc(ARP_F_DIVISION, peer_owner));
++    printf("part=%u actual SMK, saved owner block, legacy SPEED and Synth One isolation PASS\n", owner);
++}
++
++#ifdef SJ6_SAGA_AUTHORED
++#include "saga_divisions.inc"
++static void authored_divisions(void)
++{
++    const unsigned size = sizeof source_division_words / sizeof *source_division_words;
++    CHECK(size == 640);
++    unsigned seen = 0, authored_negative = 0;
++    for (unsigned i = 0; i < size; ++i) {
++        float raw;
++        memcpy(&raw, &source_division_words[i], sizeof raw);
++        engine_arp_cfg cfg;
++        engine_arp_cfg_default(&cfg);
++        CHECK(engine_arp_from_sj6(&cfg, 143, raw));
++        CHECK(cfg.division == 1 + (unsigned)roundf((1.f - raw) * 17.f));
++        seen |= 1u << (cfg.division - 1u);
++        authored_negative += raw < 0.f;
++    }
++    unsigned used = 0;
++    for (; seen; seen >>= 1) used += seen & 1u;
++    printf("PASS authored records=%u used divisions=%u negative authored inputs=%u\n",
++           size, used, authored_negative);
++}
++#endif
++
++int main(void)
++{
++    all_divisions();
++    physical_modes();
++#ifdef SJ6_SAGA_AUTHORED
++    authored_divisions();
++#endif
++    check_part(0);
++    check_part(1);
++    printf("PASS SuperJ6 Saga ARP/SEQ %u checks\n", checks);
++    return 0;
++}
+--- /dev/null
++++ b/tests/host/ui_arp_legacy_pcm_test.c
+@@ -0,0 +1,50 @@
++/* SPDX-License-Identifier: GPL-3.0-only */
++#define ARP_FIXTURE_MAIN retained_arp_main
++#include "ui_arp_engine_test.c"
++
++int main(void)
++{
++    const char *dir = getenv("SMC_UI_SHOTS");
++    char path[1024];
++    CHECK(dir && snprintf(path, sizeof path, "%s/arp-legacy.pcm", dir) < (int)sizeof path);
++    FILE *stream = fopen(path, "wb");
++    CHECK(stream);
++    for (unsigned owner = 0; owner < 2; ++owner) for (unsigned mode = ARP_UP; mode <= ARP_SEQ; ++mode) {
++        setup(V_PART, PART_303A + owner);
++        proj.set.bt |= PROJ_BT_CLK_IN;
++        CHECK(!engine_bass_select_preset(owner, ORIGINAL_SOUND_SYNTHONE, 0, &proj.sound));
++        for (unsigned n = 0; n < 1024 && engine_bass_preset_pending(owner); ++n) render(1);
++        CHECK(engine_bass_bank(owner) == ORIGINAL_SOUND_SYNTHONE && !engine_bass_preset_pending(owner));
++        pref_set_impl(PR(R_TEMPO, 0, 0, 0), 100, 0);
++        engine_arp_cfg cfg;
++        engine_arp_cfg_default(&cfg);
++        cfg.on = 1;
++        cfg.mode = (uint8_t)mode;
++        cfg.speed = 9;
++        cfg.range = 2;
++        cfg.gate = 55;
++        cfg.offset[1] = 3;
++        cfg.offset[2] = -7;
++        cfg.on_mask &= UINT16_C(0xfffd);
++        CHECK(engine_arp_preset(owner, &cfg) == S1_EDIT_QUEUED);
++        render(4);
++        const unsigned channel = 4 + owner;
++        seq.ch[TRK_BASS0 + owner] = channel;
++        host_midi_put(9u | (0x90u | channel) << 8 | 60u << 16 | 100u << 24);
++        host_midi_put(9u | (0x90u | channel) << 8 | 67u << 16 | 110u << 24);
++        int32_t pcm[512], signal = 0;
++        for (unsigned n = 0; n < 24; ++n) {
++            if (n == 18) {
++                host_midi_put(8u | (0x80u | channel) << 8 | 60u << 16);
++                host_midi_put(8u | (0x80u | channel) << 8 | 67u << 16);
++            }
++            engine_render(pcm, 256);
++            for (unsigned i = 0; i < 512; ++i) signal |= pcm[i];
++            CHECK(fwrite(pcm, sizeof pcm, 1, stream) == 1);
++        }
++        CHECK(signal);
++    }
++    CHECK(!fclose(stream));
++    puts("PASS 49,152 stereo frames of actual Synth One ARP and SEQ across both owners");
++    return 0;
++}

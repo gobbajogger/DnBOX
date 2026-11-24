@@ -1,0 +1,15 @@
+# SuperJ6 Saga ARP/SEQ checkpoint
+
+Apply superj6-saga-arp-source.patch after the exact LFO-sync source checkpoint. The host-test patch uses the established PWM fixture helpers. The source and test patches pass forward and reverse apply checks separately.
+
+SuperJ6's ARP SEQ page keeps the 16-step grid and Gate on K3. K4 BEATS selects the 18 original division durations or SPEED to return to the previous clock. The ARPEGGIATOR mode knob offers the deterministic repeated up/down order alongside UP, DOWN, UP+DN and SEQ. The new controls are for the compact SuperJ6 owners. The original mode and timing rules reuse the existing shared renderer, audio-boundary edit queue, and owner-specific 32-byte arp slot. Older saved blocks continue to decode with their stored SPEED. AMP2 words and the independent sound-state rows keep their original locations. The compact Synth One view and playback retain their established ARP modes.
+
+The red fixture demonstrated that stored division 1 at 120 BPM selected 705,536 sample ticks in Q8. The fixed source prepares the verified 352,800 Q8 ticks. The 2,176-check host replay covers all 18 divisions and 640 authenticated raw division words, each deterministic mode, overlapping tiers, and shrinking the held pool. At 120 BPM and 3/32 beat, each owner's saved project produced note 127 at frame 0, gate release at 1,034, a rest at 2,068, and note 96 at 4,135. A synced note held off-grid waited through the first muted boundary and clipped to MIDI 0 at 4,135. Both parts passed actual SMK edits, exact project reload and peer slot isolation. The separate unchanged-path comparison used 49,152 stereo frames of the four active Synth One modes across both owners and matched the LFO-sync preimage bit for bit.
+
+Run tests/host/sj6-smc-ui.sh with the prior compact flags and SMC_UI_TEST_FILE=tests/host/ui_superj6_saga_test.c. For the archive arm, run generate-division-fixture.py with the known DnBOX source containing the factory reader, the already authenticated J6presets ZIP and a temporary saga_divisions.inc destination. Add -DSJ6_SAGA_AUTHORED and that directory to X0X_HOST_DEFS. The same driver replays red-fixture.c and the unchanged Synth One comparison. Use the checkout's own tests/host include path when compiling a fixture from outside it. Keep outputs ephemeral.
+
+BUILD-9-SAGA-ARP.md records the remaining listener, selector and original lifecycle limitations. The patch uses host evidence. Native fit and strict timing remain pending.
+
+When the same owner changes to Synth One, its SuperJ6 division is dormant. A Synth One SPEED edit keeps it intact, and returning to SuperJ6 restores it. A SuperJ6 SPEED edit explicitly returns its timing to the previous speed table. The host arp owner and shared sequencer allocations remain 160 and 32 bytes. The UI settings snapshot grows from 12 to 16 bytes.
+
+The final source passed the 66-check held-pad keyboard and Gate fixture, both compact and stock arp suites, and the Hz, sync, PWM, oscillator, envelope/LINK, LEVEL and Synth One LINK regressions. The final legacy PCM comparison and unchanged red-fixture replay are recorded alongside the source patch.

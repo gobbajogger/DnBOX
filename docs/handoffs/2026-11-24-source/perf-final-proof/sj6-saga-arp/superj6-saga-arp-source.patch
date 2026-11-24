@@ -1,0 +1,527 @@
+--- a/firmware/src/app/engine_arp.h
++++ b/firmware/src/app/engine_arp.h
+@@ -20,7 +20,14 @@
+ #else
+ #define X0X_ARP_ENGINE X0X_ARP_HOOKS
+ enum { ARP_STEPS = 16 };
+-enum { ARP_UP, ARP_DOWN, ARP_UPDN, ARP_SEQ, ARP_NMODES };      /* MODE knob order on screen */
++enum { ARP_UP, ARP_DOWN, ARP_UPDN, ARP_SEQ,
++#if X0X_SUPERJ6_BUILTIN_INIT
++       ARP_UPDN_REPEAT,
++#endif
++       ARP_NMODES };      /* MODE knob order on screen */
++#if X0X_SUPERJ6_BUILTIN_INIT
++enum { ARP_SAGA_DIVISIONS = 18 }; /* Division 0 keeps the existing SPEED clock. */
++#endif
+ enum { ARP_NSPEED = 10, ARP_SPEED_1_16 = 8 };                   /* == CHI_ARP_NSPEED, CHI_ARP_SPD_1_16 */
+ 
+ typedef struct {
+@@ -32,7 +39,10 @@
+     uint8_t length;         /* ARP SEQ steps 1..16 */
+     uint8_t interval;       /* 0..12 st between octave passes (12 = octave) */
+     uint8_t note_locked;    /* always 0: arp is not part of the note-lock cell */
+-    uint8_t gate;           /* appended: 1..100 % of a step */
++    uint8_t gate;           /* 1..100 % of a step */
++#if X0X_SUPERJ6_BUILTIN_INIT
++    uint8_t division;       /* SuperJ6: 0 SPEED, 1..18 Saga beat durations */
++#endif
+ } engine_arp_settings;
+ 
+ typedef struct {
+@@ -42,7 +52,14 @@
+     uint16_t oct_mask;              /* bit n: +1 octave */
+ } engine_arp_steps;
+ 
+-enum { ARP_F_ON, ARP_F_MODE, ARP_F_RANGE, ARP_F_SPEED, ARP_F_LENGTH, ARP_F_INTERVAL, ARP_F_GATE, ARP_NF };
++enum { ARP_F_ON, ARP_F_MODE, ARP_F_RANGE, ARP_F_SPEED, ARP_F_LENGTH, ARP_F_INTERVAL, ARP_F_GATE,
++#if X0X_SUPERJ6_BUILTIN_INIT
++       ARP_F_DIVISION,
++#endif
++       ARP_NF };
++#if X0X_SUPERJ6_BUILTIN_INIT
++enum { ARP_S1_NMODES = ARP_SEQ + 1 };
++#endif
+ enum { ARP_S_OFFSET, ARP_S_ON, ARP_S_OCT };    /* per-step field */
+ 
+ /* Persistent block, explicit bytes (layout in engine_arp_block_* below). */
+@@ -53,6 +70,9 @@
+     int8_t offset[ARP_STEPS];
+     uint16_t on_mask, oct_mask;
+     uint8_t amp2_mask;                    /* bit n: SJ6 field 119 + n stored */
++#if X0X_SUPERJ6_BUILTIN_INIT
++    uint8_t division;
++#endif
+     uint16_t amp2[4];                     /* unit * 65535 */
+ } engine_arp_cfg;
+ void engine_arp_cfg_default(engine_arp_cfg *);
+--- a/firmware/src/app/engine_arp.inc
++++ b/firmware/src/app/engine_arp.inc
+@@ -90,6 +90,12 @@
+     int ok = arp_kind_ok(v);
+     if (ok) {
+         *c = arp_pending_flag[v] ? arp_pending[v] : original_bass[v].arp.cfg;
++#if X0X_SUPERJ6_BUILTIN_INIT
++        if (original_bass[v].kind == ORIGINAL_SOUND_SYNTHONE) {
++            if (c->mode == ARP_UPDN_REPEAT) c->mode = ARP_UPDN;
++            c->division = 0;
++        }
++#endif
+         *rev = arp_revision[v];
+     }
+     plat_cq_unlock(lock);
+@@ -99,7 +105,11 @@
+ {
+     engine_arp_cfg c; uint32_t rev;
+     if (!out || !arp_snapshot(v, &c, &rev)) return 0;
+-    *out = (engine_arp_settings){rev, c.on, c.mode, c.range, c.speed, c.length, c.interval, 0, c.gate};
++    *out = (engine_arp_settings){rev, c.on, c.mode, c.range, c.speed, c.length, c.interval, 0, c.gate
++#if X0X_SUPERJ6_BUILTIN_INIT
++                                 , c.division
++#endif
++    };
+     return 1;
+ }
+ int engine_arp_steps_read(unsigned v, engine_arp_steps *out)
+@@ -114,7 +124,12 @@
+ /* field < 16: step field (step << 4 | ARP_S_*) + 16; else settings field. */
+ static int arp_edit(unsigned v, uint32_t revision, unsigned step, unsigned field, int value)
+ {
+-    static const uint8_t lo[ARP_NF] = {0, 0, 1, 0, 1, 0, 1}, hi[ARP_NF] = {1, ARP_NMODES - 1, 4, 9, 16, 12, 100};
++    static const uint8_t lo[ARP_NF] = {0, 0, 1, 0, 1, 0, 1};
++    static const uint8_t hi[ARP_NF] = {1, ARP_NMODES - 1, 4, 9, 16, 12, 100
++#if X0X_SUPERJ6_BUILTIN_INIT
++                                      , ARP_SAGA_DIVISIONS
++#endif
++    };
+     if (v >= NBASS) return S1_EDIT_REJECTED;
+     if (step == 0xFFu ? (field >= ARP_NF || value < lo[field] || value > hi[field])
+                       : (step >= ARP_STEPS || field > ARP_S_OCT ||
+@@ -123,7 +138,12 @@
+     uint32_t lock = plat_cq_lock();
+     int status = S1_EDIT_REJECTED;
+     uint32_t request = bass_request[v];
+-    if (arp_kind_ok(v) && revision == arp_revision[v]) {
++    if (arp_kind_ok(v) && revision == arp_revision[v]
++#if X0X_SUPERJ6_BUILTIN_INIT
++        && (step != 0xFFu || original_bass[v].kind == ORIGINAL_SOUND_JUNO ||
++            (field != ARP_F_DIVISION && (field != ARP_F_MODE || value < ARP_S1_NMODES)))
++#endif
++       ) {
+         if (project_hold || ((request & 0x80000000u) && request != bass_applied[v])) status = S1_EDIT_BUSY;
+         else {
+             engine_arp_cfg *c = &arp_pending[v];
+@@ -135,8 +155,16 @@
+                 else if (field == ARP_S_ON) c->on_mask = (uint16_t)(value ? c->on_mask | bit : c->on_mask & ~bit);
+                 else c->oct_mask = (uint16_t)(value ? c->oct_mask | bit : c->oct_mask & ~bit);
+             } else {
+-                uint8_t *f[ARP_NF] = {&c->on, &c->mode, &c->range, &c->speed, &c->length, &c->interval, &c->gate};
++                uint8_t *f[ARP_NF] = {&c->on, &c->mode, &c->range, &c->speed, &c->length, &c->interval, &c->gate
++#if X0X_SUPERJ6_BUILTIN_INIT
++                                     , &c->division
++#endif
++                };
+                 *f[field] = (uint8_t)value;
++#if X0X_SUPERJ6_BUILTIN_INIT
++                if (field == ARP_F_SPEED && original_bass[v].kind == ORIGINAL_SOUND_JUNO)
++                    c->division = 0;
++#endif
+             }
+             arp_pending_flag[v] = 1;
+             status = S1_EDIT_QUEUED;
+--- a/firmware/src/app/original_runtime.c
++++ b/firmware/src/app/original_runtime.c
+@@ -202,6 +202,11 @@
+     if (!b || b[0] != 'A' || b[1] != 1u) return 0;
+     c->on = b[2] & 1u;
+     c->mode = (uint8_t)(b[2] >> 1 & 3u);
++#if X0X_SUPERJ6_BUILTIN_INIT
++    if (c->mode == ARP_UPDN && (b[2] & 0x40u)) c->mode = ARP_UPDN_REPEAT;
++    const unsigned division = (b[2] & 0x20u) >> 1 | b[7] >> 4;
++    if (division <= ARP_SAGA_DIVISIONS) c->division = division;
++#endif
+     c->range = (uint8_t)((b[2] >> 3 & 3u) + 1u);
+     c->speed = arp_clamp(b[3] & 15u, 0, ARP_NSPEED - 1u);
+     c->length = (uint8_t)((b[3] >> 4) + 1u);
+@@ -223,12 +228,23 @@
+ {
+     memset(b, 0, ARP_BLOCK_BYTES);
+     b[0] = 'A'; b[1] = 1u;
+-    b[2] = (uint8_t)((c->on & 1u) | (arp_clamp(c->mode, 0, ARP_NMODES - 1u) << 1) | ((arp_clamp(c->range, 1, 4) - 1u) << 3));
++    unsigned mode = arp_clamp(c->mode, 0, ARP_NMODES - 1u), flags = 0;
++#if X0X_SUPERJ6_BUILTIN_INIT
++    const unsigned division = c->division <= ARP_SAGA_DIVISIONS ? c->division : 0;
++    /* Reserved v1 header bits hold the extended mode and division. Older
++     * readers still see UPDN and the legacy SPEED fallback. */
++    flags = (division & 16u) << 1;
++    if (mode == ARP_UPDN_REPEAT) { mode = ARP_UPDN; flags |= 0x40u; }
++#endif
++    b[2] = (uint8_t)((c->on & 1u) | (mode << 1) | ((arp_clamp(c->range, 1, 4) - 1u) << 3) | flags);
+     b[3] = (uint8_t)(arp_clamp(c->speed, 0, ARP_NSPEED - 1u) | ((arp_clamp(c->length, 1, 16) - 1u) << 4));
+     b[4] = arp_clamp(c->interval, 0, 12);
+     b[5] = arp_clamp(c->gate, 1, 100);
+     b[6] = c->src_type;
+     b[7] = c->amp2_mask & 15u;
++#if X0X_SUPERJ6_BUILTIN_INIT
++    b[7] |= (uint8_t)(division << 4);
++#endif
+     for (unsigned i = 0; i < 4; ++i) { b[8 + 2 * i] = (uint8_t)c->amp2[i]; b[9 + 2 * i] = (uint8_t)(c->amp2[i] >> 8); }
+     for (unsigned i = 0; i < ARP_STEPS; ++i) {
+         int o = c->offset[i] < -24 ? -24 : c->offset[i] > 24 ? 24 : c->offset[i];
+@@ -246,8 +262,10 @@
+  * AMP2. arpEnable / seqEnable are exclusive in the app; SEQ wins if both. */
+ int engine_arp_from_sj6(engine_arp_cfg *c, unsigned id, float v)
+ {
+-    /* 12 seqDivision stops (provisional names 1/1 .. 1/64) -> CHI_ARP_SPD_*. */
++#if !X0X_SUPERJ6_BUILTIN_INIT
++    /* Older profile's provisional mapping kept for replay compatibility. */
+     static const uint8_t div[12] = {0, 0, 2, 3, 5, 6, 7, 8, 9, 9, 9, 9};
++#endif
+     if (!c || !(v == v)) return 0;
+     if (id >= 147 && id <= 162) { c->offset[id - 147] = (int8_t)arp_round((v - .5f) * 48.f, -24, 24); return 1; }
+     if (id >= 163 && id <= 178) {
+@@ -278,8 +296,16 @@
+         else if (c->mode == ARP_SEQ) c->mode = (uint8_t)(c->src_type <= ARP_UPDN ? c->src_type : ARP_UP);
+         return 1;
+     case 143: {
++#if X0X_SUPERJ6_BUILTIN_INIT
++        /* Stored division, distinct from the app's normalized rate-knob law. */
++        float index = (1.f - v) * 17.f;
++        if (!(index > -.5f && index < 17.5f)) return 0;
++        unsigned whole = index > 0.f ? (unsigned)index : 0u;
++        c->division = (uint8_t)(1u + whole + (index - whole >= .5f));
++#else
+         int k = (int)(v * 12.f);
+         c->speed = div[k < 0 ? 0 : k > 11 ? 11 : k];
++#endif
+         return 1;
+     }
+     case 144: c->gate = (uint8_t)arp_round(v * 100.f, 1, 100); return 1;
+@@ -324,8 +350,8 @@
+ 
+ /* ---- Shared Synth One / SuperJ6 arp + ARP SEQ: the original AudioKit Synth
+  * One S1Sequencer (dsp/synthone/sequencer, MIT), one copy for both owners; the
+- * SuperJ6 app ("Synth One J6") runs the same sequencer. Live sources feed
+- * heldNoteNumbersAE (newest first, as the source); SEQUENCE playback bypasses it. */
++ * compact SuperJ6 uses this scheduler with its qualified Saga division and
++ * note rules. Live sources feed the held pool; main SEQUENCE playback bypasses it. */
+ #include "../dsp/synthone/sequencer/S1Sequencer.c"
+ static int arp_engaged(const original_runtime_part *p)
+ {
+@@ -357,6 +383,17 @@
+     a->nheld = (uint8_t)n;
+ }
+ /* engine_arp_cfg -> the S1Parameter values the sequencer reads. */
++#if X0X_SUPERJ6_BUILTIN_INIT
++/* Build-9 Saga periods in units of 1/32 beat, indexed by stored division. */
++static uint32_t saga_step(uint32_t beat, unsigned division)
++{
++    static const uint16_t units[ARP_SAGA_DIVISIONS] = {
++        2, 3, 4, 6, 8, 12, 16, 24, 32, 48, 64, 96, 128, 256, 384, 512, 768, 1024
++    };
++    uint64_t ticks = ((uint64_t)beat * units[division - 1u]) >> 5;
++    return ticks > UINT32_MAX - S1_SAMPLE_TICKS ? UINT32_MAX - S1_SAMPLE_TICKS : (uint32_t)ticks;
++}
++#endif
+ static const uint8_t arp_ticks[ARP_NSPEED] = {48, 36, 32, 24, 18, 16, 12, 8, 6, 3};   /* 24 PPQN */
+ uint32_t engine_arp_step_frames(float bpm, unsigned speed)
+ {
+@@ -379,10 +416,21 @@
+     __builtin_memcpy(q->sequencerPattern, c->offset, sizeof q->sequencerPattern);
+     q->sequencerOctBoost = c->oct_mask;
+     q->sequencerNoteOn = c->on_mask;
+-    /* arpRate = project tempo; arpSeqTempoMultiplier = SPEED (exact frames). */
+     q->arpBeatsPerSample = S1_SAMPLE_TICKS;
+     q->seqGate = c->gate ? c->gate : 100;
+-    S1Sequencer_setStep(q, S1_SAMPLE_TICKS * engine_arp_step_frames(p->arp.bpm, c->speed));
++#if X0X_SUPERJ6_BUILTIN_INIT
++    q->saga_notes = p->kind == ORIGINAL_SOUND_JUNO;
++    q->saga_timing = q->saga_notes && c->division && c->division <= ARP_SAGA_DIVISIONS;
++    if (c->mode == ARP_UPDN_REPEAT)
++        q->arpDirection = q->saga_notes ? ArpeggiatorMode_UpDownRepeat : ArpeggiatorMode_UpDown;
++    if (q->saga_timing) {
++        float bpm = p->arp.bpm;
++        bpm = !(bpm >= 20.f) ? (bpm > 0.f ? 20.f : 120.f) : bpm > 275.f ? 275.f : bpm;
++        unsigned beat = (unsigned)((44100.f * 60.f * S1_SAMPLE_TICKS) / bpm + .5f);
++        S1Sequencer_setStep(q, saga_step(beat, c->division));
++    } else
++#endif
++        S1Sequencer_setStep(q, S1_SAMPLE_TICKS * engine_arp_step_frames(p->arp.bpm, c->speed));
+     q->patternRange = p->kind == ORIGINAL_SOUND_SYNTHONE ? 12 : 24;
+     q->clocked = 0;
+ }
+@@ -396,7 +444,12 @@
+ static void arp_follow_clock(original_runtime_arp *a)
+ {
+     const unsigned sp = a->cfg.speed < ARP_NSPEED ? a->cfg.speed : ARP_SPEED_1_16;
+-    uint32_t len = (uint32_t)((uint64_t)a->clk_beat * arp_ticks[sp] / 24u);
++    uint32_t len;
++#if X0X_SUPERJ6_BUILTIN_INIT
++    if (a->prm.saga_timing) len = saga_step(a->clk_beat, a->cfg.division);
++    else
++#endif
++        len = (uint32_t)((uint64_t)a->clk_beat * arp_ticks[sp] / 24u);
+     if (len < 2u * S1_SAMPLE_TICKS) len = 2u * S1_SAMPLE_TICKS;
+     a->prm.arpBeatsPerSample = S1_SAMPLE_TICKS;
+     if (len != a->prm.arpSeqTempoMultiplier || !a->prm.clocked) S1Sequencer_setStep(&a->prm, len);
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -453,7 +453,7 @@
+ #endif
+ #if X0X_ARP_HOOKS
+ enum { R_ARP = R_NOTELOCK + 2 };          /* a: ARP_F_* field, b: bass voice */
+-static const x0x_param_t *arp_desc(unsigned field);
++static const x0x_param_t *arp_desc(unsigned field, unsigned owner);
+ static int arp_get(unsigned voice, unsigned field);
+ static void arp_set(unsigned voice, unsigned field, int v);
+ #endif
+@@ -643,7 +643,7 @@
+ {
+     switch (r.kind) {
+ #if X0X_ARP_HOOKS
+-    case R_ARP: return arp_desc(r.a);
++    case R_ARP: return arp_desc(r.a, r.b);
+ #endif
+ #if X0X_SUPERJ6_BUILTIN_INIT
+     case R_SJ6KNOB: return sj6_knob_desc(r.c);
+@@ -1813,7 +1813,11 @@
+ #if X0X_ARP_HOOKS
+ /* SJ6 / Synth One arp (UX-PROPOSAL.md, approved 23 Nov 2026). The engine owns
+  * every value; the UI reads it each frame and queues edits with the revision. */
+-static const char *const ARP_MODE_N[] = {"UP", "DOWN", "UP+DN", "SEQ"};
++static const char *const ARP_MODE_N[] = {"UP", "DOWN", "UP+DN", "SEQ"
++#if X0X_SUPERJ6_BUILTIN_INIT && !defined(X0X_ARP_FAKE_H)
++                                       , "UP+DN X2"
++#endif
++};
+ static const char *const ARP_RANGE_N[] = {"1 OCT", "2 OCT", "3 OCT", "4 OCT"};
+ static const char *const ARP_SPEED_N[] = {"1/2", "3/8", "1/3", "1/4", "3/16", "1/6", "1/8", "1/12", "1/16", "1/32"};
+ static const char *const ARP_STEPS_N[] = {"1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16"};
+@@ -1825,7 +1829,22 @@
+ static int8_t arp_held = -1;                 /* the ARP SEQ pad held (0..15), or -1 */
+ static uint8_t arp_edited;
+ static uint32_t arp_t0;
+-static const x0x_param_t *arp_desc(unsigned field) { return field < ARP_NF ? &ARP_P[field] : 0; }
++static const x0x_param_t *arp_desc(unsigned field, unsigned owner)
++{
++#if X0X_SUPERJ6_BUILTIN_INIT && !defined(X0X_ARP_FAKE_H)
++    static const x0x_param_t saga_mode = {"MODE", ARP_NMODES - 1, 0, ARP_MODE_N};
++    static const char *const beats[] = {"SPEED", "1/16", "3/32", "1/8", "3/16", "1/4",
++        "3/8", "1/2", "3/4", "1", "1.5", "2", "3", "4", "8", "12", "16", "24", "32"};
++    static const x0x_param_t division = {"BEATS", ARP_SAGA_DIVISIONS, 0, beats};
++    if ((field == ARP_F_MODE || field == ARP_F_DIVISION) &&
++        engine_bass_bank(owner) == ORIGINAL_SOUND_JUNO)
++        return field == ARP_F_MODE ? &saga_mode : &division;
++    if (field == ARP_F_DIVISION) return 0;
++#else
++    (void)owner;
++#endif
++    return field < ARP_NF ? &ARP_P[field] : 0;
++}
+ /* The voice's engine has the arp (SuperJ6 or Synth One, hooks answering). */
+ static int arp_engine(int b)
+ {
+@@ -1845,6 +1864,9 @@
+     case ARP_F_LENGTH: return s.length ? s.length - 1 : 0;
+     case ARP_F_INTERVAL: return s.interval;
+     case ARP_F_GATE: return s.gate ? s.gate - 1 : 0;
++#if X0X_SUPERJ6_BUILTIN_INIT && !defined(X0X_ARP_FAKE_H)
++    case ARP_F_DIVISION: return s.division;
++#endif
+     }
+     return 0;
+ }
+@@ -2014,9 +2036,13 @@
+             do { static const pref_t refs[4] = {PR(R_FREEPLAY, 0, 0, 0), NONE, NONE, NONE};
+             add_page_refs(emit, "KEYS", refs, 1, b); } while (0);
+ #if X0X_ARP_HOOKS
+-            if (arp_engine(b)) {                       /* 4: the 16 arp steps on the pads; K7/K8 stay empty */
++            if (arp_engine(b)) {                       /* 4: the 16 arp steps on the pads */
+                 emit->group = GR_PAT;
+-                add_page(emit, "ARP SEQ", PR(R_ARP, ARP_F_LENGTH, b, 0), PR(R_ARP, ARP_F_INTERVAL, b, 0), PR(R_ARP, ARP_F_GATE, b, 0), NONE);
++                pref_t division = NONE;
++#if X0X_SUPERJ6_BUILTIN_INIT && !defined(X0X_ARP_FAKE_H)
++                if (engine_bass_bank(b) == ORIGINAL_SOUND_JUNO) division = PR(R_ARP, ARP_F_DIVISION, b, 0);
++#endif
++                add_page(emit, "ARP SEQ", PR(R_ARP, ARP_F_LENGTH, b, 0), PR(R_ARP, ARP_F_INTERVAL, b, 0), PR(R_ARP, ARP_F_GATE, b, 0), division);
+                 emit->group = GR_NONE;
+             }
+ #endif
+--- a/firmware/src/dsp/synthone/sequencer/S1Sequencer.c
++++ b/firmware/src/dsp/synthone/sequencer/S1Sequencer.c
+@@ -32,6 +32,9 @@
+     s->lastPosition = -1;
+     s->gateOpen = 0;
+     s->sequencerLastNotesCount = 0;
++#if X0X_SUPERJ6_BUILTIN_INIT
++    s->saga_index = 0;
++#endif
+ }
+ 
+ static void turnOffLastNotes(S1Sequencer *s, void *ctx, KeyOffCallback off)
+@@ -63,10 +66,44 @@
+     NoteNumber r = { (uint8_t)(nn < 0 || nn >= S1_NUM_MIDI_NOTES ? 255 : nn), note.velocity };
+     return r;
+ }
++#if X0X_SUPERJ6_BUILTIN_INIT
++static unsigned saga_clip(int note)
++{ return note < 0 ? 0u : note >= S1_NUM_MIDI_NOTES ? S1_NUM_MIDI_NOTES - 1u : (unsigned)note; }
++
++/* The original sorts the pitches across all tiers before choosing a note.
++ * Sort only on an event, with bounded scratch and no second clock/state machine. */
++static NoteNumber saga_note(const NoteNumber *held, int count, int octaves,
++                           int interval, int mode, int index)
++{
++    NoteNumber notes[S1_SEQ_MAX_HELD * 4];
++    int size = 0;
++    for (int h = 0; h < count; ++h) for (int oct = 0; oct < octaves; ++oct) {
++        unsigned pitch = held[h].noteNumber + oct * interval;
++        int slot = size++;
++        while (slot > 0 && notes[slot - 1].noteNumber > pitch) {
++            notes[slot] = notes[slot - 1];
++            --slot;
++        }
++        notes[slot] = (NoteNumber){(uint8_t)pitch, held[h].velocity};
++    }
++    if (mode == ArpeggiatorMode_Down) index = size - 1 - index;
++    else {
++        if (mode == ArpeggiatorMode_UpDownRepeat) index /= 2;
++        if (index >= size) index = 2 * size - 2 - index;
++    }
++    NoteNumber note = notes[index];
++    note.noteNumber = (uint8_t)saga_clip(note.noteNumber);
++    return note;
++}
++#endif
++
+ static int sequenceSize(const S1SequencerParams *p, int heldNotesCount)
+ {
+     if (p->arpIsSequencer) return p->arpTotalSteps > 16 ? 16 : p->arpTotalSteps;
+     const int m = heldNotesCount * (p->arpOctave + 1);
++#if X0X_SUPERJ6_BUILTIN_INIT
++    if (p->arpDirection == ArpeggiatorMode_UpDownRepeat) return (m > 1 ? 2 * m - 2 : m) * 2;
++#endif
+     return p->arpDirection == ArpeggiatorMode_UpDown && m > 1 ? 2 * m - 2 : m;
+ }
+ static uint32_t gateLength(const S1SequencerParams *p) { return p->gateTicks; }
+@@ -98,6 +135,9 @@
+ 
+     // reset arp/seq when user goes from 0 to N, or N to 0 held keys
+     if (arpSeqIsOn && (firstTimeNoKeysHeld || firstTimeAnyKeysHeld)) {
++#if X0X_SUPERJ6_BUILTIN_INIT
++        s->saga_index = 0;
++#endif
+         if (!p->clocked) {               // DnBOX: a running transport keeps its grid
+             s->mBeatTime = 0u - p->arpBeatsPerSample; // reset internal beattime (0 after this sample's add)
+             s->mStepCounter = 0;
+@@ -122,7 +162,11 @@
+         if (!crossed && s->gateOpen && s->mBeatTime >= gateLength(p)) turnOffLastNotes(s, ctx, off);
+ 
+         // If keys are now held, or if beat boundary was crossed
+-        if (firstTimeAnyKeysHeld || crossed) {
++        if (crossed || (firstTimeAnyKeysHeld
++#if X0X_SUPERJ6_BUILTIN_INIT
++                        && !(p->saga_timing && p->clocked)
++#endif
++                       )) {
+             // Turn off previous beat's notes even if arp is off
+             turnOffLastNotes(s, ctx, off);
+             // ARP/SEQ is ON, held notes
+@@ -132,8 +176,14 @@
+                 if (size > 0) {
+                     // DnBOX: SEQ follows the transport grid; ARP order starts on the press
+                     if (firstTimeAnyKeysHeld || s->mStepCounter < s->mStepBase) s->mStepBase = s->mStepCounter;
+-                    const int seqNotePosition = (p->arpIsSequencer == 1 ? s->mStepCounter
+-                                                 : s->mStepCounter - s->mStepBase) % size;
++                    int seqNotePosition = (p->arpIsSequencer == 1 ? s->mStepCounter
++                                           : s->mStepCounter - s->mStepBase) % size;
++#if X0X_SUPERJ6_BUILTIN_INIT
++                    if (p->saga_notes && !p->arpIsSequencer) {
++                        seqNotePosition = s->saga_index % size;
++                        if (++s->saga_index >= size) s->saga_index = 0;
++                    }
++#endif
+                     if (p->arpIsSequencer == 1) {
+                         // SEQUENCER
+                         const int i = seqNotePosition;
+@@ -144,7 +194,10 @@
+                         const int nnob = (nn < 0) ? (nn - octBoost * 12) : (nn + octBoost * 12);
+                         if (onOff == 1) {
+                             for (int h = 0; h < heldNoteNumbersAECount; ++h) {
+-                                const int note = held[h].noteNumber + nnob;
++                                int note = held[h].noteNumber + nnob;
++#if X0X_SUPERJ6_BUILTIN_INIT
++                                if (p->saga_notes) note = (int)saga_clip(note);
++#endif
+                                 if (note >= 0 && note < S1_NUM_MIDI_NOTES &&
+                                     s->sequencerLastNotesCount < S1_SEQ_MAX_HELD) {
+                                     on(ctx, note, held[h].velocity);
+@@ -154,8 +207,14 @@
+                         }
+                     } else {
+                         // ARPEGGIATOR
+-                        const NoteNumber snn = arpNote(held, heldNoteNumbersAECount, p->arpOctave + 1,
+-                                                       p->arpInterval, p->arpDirection, seqNotePosition);
++                        NoteNumber snn;
++#if X0X_SUPERJ6_BUILTIN_INIT
++                        if (p->saga_notes) snn = saga_note(held, heldNoteNumbersAECount, p->arpOctave + 1,
++                                                         p->arpInterval, p->arpDirection, seqNotePosition);
++                        else
++#endif
++                            snn = arpNote(held, heldNoteNumbersAECount, p->arpOctave + 1,
++                                          p->arpInterval, p->arpDirection, seqNotePosition);
+                         if (snn.noteNumber < S1_NUM_MIDI_NOTES) {
+                             on(ctx, snn.noteNumber, snn.velocity);
+                             s->sequencerLastNotes[s->sequencerLastNotesCount++] = snn.noteNumber;
+@@ -180,6 +239,9 @@
+ {
+     const uint32_t len = p->arpSeqTempoMultiplier;
+     if (force) {
++#if X0X_SUPERJ6_BUILTIN_INIT
++        s->saga_index = 0;
++#endif
+         s->mStepCounter = step; s->mBeatTime = phase; s->mStepBase = step + 1;
+     } else if (step == s->mStepCounter) {
+         s->mBeatTime = phase;
+--- a/firmware/src/dsp/synthone/sequencer/S1Sequencer.h
++++ b/firmware/src/dsp/synthone/sequencer/S1Sequencer.h
+@@ -8,9 +8,8 @@
+ //
+ //  C port of DSP/Sequencer/S1Sequencer.hpp + S1SeqNoteNumber.hpp + S1ArpModes.hpp
+ //  (pinned source 56079bbd). Same structure and names; compact where the chip
+-//  needs it (see S1Sequencer.c for every change). Used by BOTH the Synth One and
+-//  the SuperJ6 owner (the SuperJ6 app is "Synth One J6", same sequencer); the
+-//  SuperJ6-only differences are the two delta fields in S1SequencerParams.
++//  needs it (see S1Sequencer.c for changes). Both owners share this scheduler.
++//  The compact SuperJ6 owner uses its Saga pitch law and division grid.
+ //
+ #pragma once
+ #include <stdint.h>
+@@ -24,7 +23,7 @@
+ typedef struct { uint8_t noteNumber, velocity; } NoteNumber;     /* heldNoteNumbersAE entry */
+ 
+ /* S1ArpModes.hpp */
+-enum ArpeggiatorMode { ArpeggiatorMode_Up = 0, ArpeggiatorMode_UpDown = 1, ArpeggiatorMode_Down = 2 };
++enum ArpeggiatorMode { ArpeggiatorMode_Up = 0, ArpeggiatorMode_UpDown = 1, ArpeggiatorMode_Down = 2, ArpeggiatorMode_UpDownRepeat = 3 };
+ 
+ /* The S1Parameter values S1Sequencer::process reads (S1Parameter.h ids). */
+ typedef struct {
+@@ -47,6 +46,9 @@
+     uint8_t patternRange;               /* |sequencerPattern| limit: S1 12, SJ6 24 */
+     uint32_t gateTicks;                 /* seqGate % of arpSeqTempoMultiplier (UINT32_MAX = 100 %) */
+     uint8_t clocked;                    /* DnBOX: transport clock owns mStepCounter / mBeatTime */
++#if X0X_SUPERJ6_BUILTIN_INIT
++    uint8_t saga_notes, saga_timing;    /* SuperJ6 pitch law and optional original grid */
++#endif
+ } S1SequencerParams;
+ 
+ typedef void (*KeyOnCallback)(void *ctx, int note, int velocity);
+@@ -61,6 +63,9 @@
+     uint8_t gateOpen;
+     uint8_t sequencerLastNotesCount;
+     uint8_t sequencerLastNotes[S1_SEQ_MAX_HELD];
++#if X0X_SUPERJ6_BUILTIN_INIT
++    uint8_t saga_index;
++#endif
+ } S1Sequencer;
+ 
+ void S1Sequencer_init(S1Sequencer *);

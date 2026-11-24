@@ -1,0 +1,17 @@
+full pinned J6 archive + 12 member checks; installed Synth One independently checked through production C reader 640 694
+quoted J6 COPY base, add metadata, total, checkpoint, words, layouts, program count, refs, copy, prev 78971 224 79195 375 90549 14 640 52 19154 0 stream-sha 8cda0418c9efcf8df9b60a410dc5f219ccbe0160e2d83a4fa2175c3fe72081af
+shuffled seek checkpoints, rows, exact words 80 640 90549 field IDs 174 largest table symbols 113 sum table symbols 3055 eager dictionary bytes 46056 per field table index bytes at 24-bit 522
+quoted J6 COPY+PREV base, add metadata, total, checkpoint, words, layouts, program count, refs, copy, prev 79003 224 79227 375 90549 14 640 52 19154 5118 stream-sha b62bec6e6a33e62db7b5ffe3b75c2e67188466d6ad06f6b144ead21d336ef692
+shuffled seek checkpoints, rows, exact words 80 640 90549 field IDs 174 largest table symbols 101 sum table symbols 2643 eager dictionary bytes 46060 per field table index bytes at 24-bit 522
+installed 694 S1 COPY base, add metadata, total, checkpoint, words, layouts, program count, refs, copy, prev 62435 148 62583 336 99936 1 694 33 14359 0 stream-sha acf0d3e5da46306a197c3656739301a4b3839ce0fe0b08104e89603d65be4fcd
+shuffled seek checkpoints, rows, exact words 87 694 99936 field IDs 144 largest table symbols 475 sum table symbols 4877 eager dictionary bytes 24608 per field table index bytes at 24-bit 432
+installed 694 S1 COPY+PREV base, add metadata, total, checkpoint, words, layouts, program count, refs, copy, prev 62045 148 62193 336 99936 1 694 33 14359 7656 stream-sha a2937676b836d51cc12cafe98b9b02158018c31373f6d6155754874587b73e4c
+shuffled seek checkpoints, rows, exact words 87 694 99936 field IDs 144 largest table symbols 476 sum table symbols 4731 eager dictionary bytes 24612 per field table index bytes at 24-bit 432
+installed 694 S1 plus J6 COPY base, add metadata, total, checkpoint, words, layouts, program count, refs, copy, prev 143350 356 143706 708 190485 15 1334 85 33513 0 stream-sha 467493d317d068a004bfb9a8be9c5c3d576d45eac95b1523845d5969977ab88f
+shuffled seek checkpoints, rows, exact words 167 1334 190485 field IDs 318 largest table symbols 475 sum table symbols 8921 eager dictionary bytes 69708 per field table index bytes at 24-bit 954
+installed 694 S1 plus J6 COPY+PREV base, add metadata, total, checkpoint, words, layouts, program count, refs, copy, prev 143081 356 143437 708 190485 15 1334 85 33513 12774 stream-sha 8075a079256c1f320b955ea5def5ac36a5495779800a1ef274ad46545ba479c0
+shuffled seek checkpoints, rows, exact words 167 1334 190485 field IDs 318 largest table symbols 476 sum table symbols 8323 eager dictionary bytes 69712 per field table index bytes at 24-bit 954
+expanded 906 S1 report by source only; no verified matching expanded input used; difference 212 programs
+J6 actual DNC1 Huffman catalog (excluding UUID) 7080 program UUID bytes 10240 with literal UUIDs 17320 bank count 12
+installed current pair actual DNC1 Huffman catalog (excluding UUID) 14084 program UUID bytes 21344 with literal UUIDs 35428 bank count 24
+current DNC1 + actual largest two bank payload bytes 14084 [(19114, 'SuperJ6', 123), (15552, 'SuperJ6', 101)] logical with 64 directory 48814 sector-rounded 53248 resident every independent bank plus catalog 190574
