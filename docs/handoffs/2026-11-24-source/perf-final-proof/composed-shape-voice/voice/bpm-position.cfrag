@@ -1,0 +1,47 @@
+/* Exact framed transport: tempo acknowledgement is checked against a separate
+ * STATE; panel tempo change is checked without sending another TEMPO. Starting
+ * and stopping exercise actual sequencer/render clocks, not assigned positions. */
+static void focused_bpm_position(void)
+{
+    rep_t r;
+    seq_stop(&seq); tick(35); clksrc(SEQ_CLK_INT);
+    open_lease(1u<<6);
+    ep(); pu(1375,2); r=req(0x27);
+    CHECK(r.status==0 && r.len==7 && gu(r.fl,2)==1375u,"[focus] exact fractional TEMPO ACK");
+    r=req(0x30);
+    CHECK(!r.status && gu(r.fl+4,2)==1375u,"[focus] independent STATE confirms measured BPM");
+    pref_set(PR(R_TEMPO,0,0,0),121);
+    tick(50);
+    r=req(0x30);
+    CHECK(!r.status && gu(r.fl+4,2)==1410u,"[focus] panel tempo change reflected in STATE");
+    pu(epoch+1u,4);pu(1800,2);r=req(0x27);
+    CHECK(r.status==4,"[focus] stale-epoch TEMPO rejected");
+    r=req(0x30);
+    CHECK(!r.status && gu(r.fl+4,2)==1410u,"[focus] rejected TEMPO leaves BPM unchanged");
+
+    CHECK(transport(1)==1,"[focus] start accepted");
+    int prev=-1, changed=0, same_rev=0;
+    uint32_t prev_rev=0;
+    for (int i=0;i<6;i++) {
+        nof=0; tick(183);
+        if (!notifies(6,&r)) continue;
+        CHECK(r.seq==0 && r.len==10,"[focus] POSITION exact notification length and seq");
+        uint8_t pos[5];memcpy(pos,r.fl,5);
+        for(int k=0;k<5;k++)CHECK(pos[k]<64u,"[focus] playing positions are valid for all five tracks");
+        uint32_t rev=r.rev;
+        rep_t s=req(0x30);
+        CHECK(!s.status && s.fl[0]==1 && !memcmp(s.fl+35,pos,5),
+              "[focus] independent STATE reports the same actual rendered position");
+        if(prev>=0 && pos[0]!=prev){changed++;if(rev==prev_rev)same_rev++;}
+        prev=pos[0];prev_rev=rev;
+    }
+    CHECK(changed>=2 && same_rev>=2,"[focus] cursor advances, including same-revision wire frames");
+    CHECK(transport(0)==0,"[focus] stop accepted");
+    nof=0;tick(45);
+    uint8_t stop[5]={127,127,127,127,127};
+    CHECK(notifies(6,&r) && r.len==10 && !memcmp(r.fl,stop,5),"[focus] native POSITION stop sentinels");
+    r=req(0x30);
+    CHECK(!r.status && !r.fl[0] && !memcmp(r.fl+35,stop,5),
+          "[focus] stopped raw STATE confirms no active positions");
+}
+

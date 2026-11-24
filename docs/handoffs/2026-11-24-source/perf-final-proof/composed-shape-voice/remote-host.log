@@ -1,0 +1,11 @@
+Validated 313 exact product source files before test/patch (pre)
+Validated 313 exact product source files before test/patch (post)
+  remote-dnr3: 173 page values
+  remote-dnr3: 170 values set (min, max, max+1)
+  remote-dnr3: state 124 B RAM (+256 B host frame buffer; the device builds in the editor's ed_out)
+remote-dnr3: 1322 checks, 0 failed
+  remote-dnr3: 173 page values
+  remote-dnr3: 170 values set (min, max, max+1)
+  remote-dnr3: state 120 B RAM (+256 B host frame buffer; the device builds in the editor's ed_out)
+remote-dnr3: 1341 checks, 0 failed
+PASS BLE DNR3: actual split ATT ingress, HELLO, lease, write, long dump, WATCH, accepted VOICE, link reset, isolated USB

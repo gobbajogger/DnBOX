@@ -1,0 +1,13 @@
+static void missing_voice_signal(void)
+{
+    rep_t r;
+    p7(3);r=req(0x00);CHECK(!r.status && !(gu(r.fl+26,4)&256u),"[focus] donor HELLO honestly omits VOICE");
+    seq_stop(&seq);seq.mute=0;seq.part_off=0;tick(160);
+    open_lease(1u<<5);
+    ep();pu(1u<<5,4);r=req(0x08);
+    CHECK(!r.status && !gu(r.fl,4),"[focus] donor declines WATCH VOICE");
+    nof=0;
+    engine_drum(0,0,100.0f/127.0f);tick(43);
+    CHECK(eng_peak[PART_909]>0,"[focus] physical engine command produces actual audio");
+    CHECK(!notifies(5,0),"[focus] baseline accepted trigger has no native wire VOICE");
+}

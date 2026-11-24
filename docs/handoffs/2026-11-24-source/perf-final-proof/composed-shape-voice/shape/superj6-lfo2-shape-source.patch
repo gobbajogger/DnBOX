@@ -1,0 +1,344 @@
+diff --git a/firmware/src/app/original_presets.inc b/firmware/src/app/original_presets.inc
+--- a/firmware/src/app/original_presets.inc
++++ b/firmware/src/app/original_presets.inc
+@@ -317,7 +317,8 @@
+     return original_sound_sj6_vibrato_words(cell, wire, values);
+ }
+ 
+-_Static_assert(SJ6_KNOBS <= 32u, "SuperJ6 panel mask fits");
++_Static_assert((unsigned)SJ6_A_REFERENCE < SJ6_MAILBOX_WORD_BITS &&
++               (unsigned)SJ6_LFO2_SHAPE == SJ6_MAILBOX_WORD_BITS, "SuperJ6 mailbox dispatch order");
+ _Static_assert(ORIGINAL_SJ6_VIBRATO_ROW == BASS_SHARED_EXTRA_ROW, "SuperJ6 uses shared bass rows");
+ _Static_assert(BASS_SHARED_EXTRA_ROW + NBASS <= NVOICES_MAX, "SuperJ6 shared rows fit");
+ _Static_assert(BASS_SHARED_EXTRA_BYTES >= ORIGINAL_SJ6_TUNING_WIRE_BYTES, "Undo copies the tuning record");
+@@ -339,6 +340,7 @@
+     juno6_t *s = &original_bass[owner].dsp.juno.synth;
+     juno6_set_lfo_words(s, &motion->lfo, 1);
+     juno6_set_lfo2_pwm(s, 0);
++    juno6_set_lfo2_shape(s, SJ6_LFO_TRI);
+     juno6_set_vibrato_words(s, motion->vibrato, motion->vibrato_present, 1);
+     if (motion->a_reference_present || (s->core.raw_present[SJ6_A_REFERENCE_ID / 32u] &
+                                        (1u << (SJ6_A_REFERENCE_ID % 32u))))
+@@ -349,6 +351,7 @@
+     uint8_t *extra = sound->v[T_303][ORIGINAL_SJ6_EXTRA_ROW + owner];
+     original_sound_sj6_lfo_store(cell, extra, &motion->lfo);
+     original_sound_sj6_lfo2_pwm_store(cell, 0);
++    original_sound_sj6_shape_store(cell, SJ6_LFO_TRI);
+     original_sound_sj6_chorus_store(cell, chorus_mode);
+     uint8_t *wire = sound->v[T_303][BASS_SHARED_EXTRA_ROW + owner];
+     if (original_sound_sj6_vibrato_marker(cell) == 1u) memset(extra + ORIGINAL_SJ6_VIBRATO_OFFSET, 0, 2u);
+@@ -386,8 +389,10 @@
+ {
+     if (sj6_knob_has(owner, slot)) return sj6_knob_value[owner][slot];
+ #if defined(X0X_HOST) && defined(X0X_SJ6_MAILBOX_PROBE)
+-    if (slot >= SJ6_MAILBOX_WORD_BITS) return engine_superj6_mailbox_probe_read(owner, slot);
+-#endif
++    if (slot >= SJ6_KNOBS) return engine_superj6_mailbox_probe_read(owner, slot);
++#endif
++    if (slot == SJ6_LFO2_SHAPE)
++        return (int)juno6_knob_position(&original_bass[owner].dsp.juno.synth, slot);
+     if (slot == SJ6_A_REFERENCE) {
+         float raw;
+         if (dnbx_read_raw(&original_bass[owner].dsp.juno.synth.core, SJ6_A_REFERENCE_ID, &raw) != DNBX_OK)
+@@ -464,7 +469,7 @@
+         slot = sj6_panel_slot(owner, slot);
+         int before = sj6_knob_position(owner, slot);
+         value = sj6_knob_target(before, value, (int)original_sound_sj6_max(slot), relative);
+-        if (value != before && (slot < SJ6_VIBRATO_DEPTH ||
++        if (value != before && (slot < SJ6_VIBRATO_DEPTH || slot == SJ6_LFO2_SHAPE ||
+             sj6_factory_storage_ready(owner, slot != SJ6_A_REFERENCE, slot == SJ6_A_REFERENCE))) {
+             sj6_knob_post(owner, slot, value);
+             changed = 1;
+@@ -476,9 +481,9 @@
+ 
+ #if defined(X0X_HOST) && defined(X0X_SJ6_MAILBOX_PROBE)
+ /* Exercise the upper word through the same mailbox, without assigning a
+- * panel, DSP, or project field. The public panel index 32 is a PWM alias. */
++ * panel, DSP, or project field. The PWM BASE panel alias stays separate. */
+ static int sj6_knob_probe_slot(unsigned owner, unsigned slot)
+-{ return owner < NBASS && slot >= SJ6_MAILBOX_WORD_BITS && slot < SJ6_MAILBOX_SLOTS; }
++{ return owner < NBASS && slot >= SJ6_KNOBS && slot < SJ6_MAILBOX_SLOTS; }
+ 
+ int engine_superj6_mailbox_probe_turn(unsigned owner, unsigned slot, int value, int relative)
+ {
+@@ -555,8 +560,8 @@
+     return ready;
+ }
+ 
+-/* Keep the original low-word DSP and persistence order. */
+-__attribute__((noinline)) X0X_COLD static void sj6_knob_commit(unsigned v, uint32_t mask)
++/* Keep the original low-word DSP and persistence order before shape. */
++__attribute__((noinline)) X0X_COLD static void sj6_knob_commit(unsigned v, uint32_t mask, int shape_edit)
+ {
+     sound_t *sound = (sound_t *)mot_base_snd;
+     juno6_t *s = &original_bass[v].dsp.juno.synth;
+@@ -627,6 +632,11 @@
+         original_sound_sj6_a_reference_store(cell, wire, raw, 1u);
+         juno6_set_a_reference(s, raw, 1u);
+     }
++    if (shape_edit) {
++        unsigned shape = sj6_knob_value[v][SJ6_LFO2_SHAPE];
++        juno6_set_lfo2_shape(s, shape);
++        original_sound_sj6_shape_store(cell, shape);
++    }
+     bass_tag_set(sound, v, ORIGINAL_SOUND_JUNO, bass_named_preset[v],
+                  original_sound_is_edited(cell));
+ }
+@@ -641,9 +651,10 @@
+ #if X0X_BASS_NOTE_SOUND
+         if (note_lock_applied[v]) continue;
+ #endif
+-        if (pending.word[0]) sj6_knob_commit(v, pending.word[0]);
++        int shape_edit = (pending.word[1] & sj6_knob_bit(SJ6_LFO2_SHAPE)) != 0;
++        if (pending.word[0] || shape_edit) sj6_knob_commit(v, pending.word[0], shape_edit);
+ #if defined(X0X_HOST) && defined(X0X_SJ6_MAILBOX_PROBE)
+-        for (unsigned slot = SJ6_MAILBOX_WORD_BITS; slot < SJ6_MAILBOX_SLOTS; ++slot)
++        for (unsigned slot = SJ6_KNOBS; slot < SJ6_MAILBOX_SLOTS; ++slot)
+             if (pending.word[1] & sj6_knob_bit(slot))
+                 engine_superj6_mailbox_probe_apply(v, slot, sj6_knob_value[v][slot]);
+ #endif
+@@ -843,6 +854,7 @@
+     unsigned mask = original_sound_sj6_knobs(cell, knobs);
+     if (mask) juno6_apply_knobs(&part->dsp.juno.synth, mask, knobs);
+     juno6_set_lfo2_pwm(&part->dsp.juno.synth, original_sound_sj6_lfo2_pwm(cell));
++    juno6_set_lfo2_shape(&part->dsp.juno.synth, original_sound_sj6_shape(cell));
+     part->dsp.juno.chorus.factory_mode = (uint8_t)original_sound_sj6_chorus(cell);
+ }
+ #endif
+diff --git a/firmware/src/app/original_runtime.c b/firmware/src/app/original_runtime.c
+--- a/firmware/src/app/original_runtime.c
++++ b/firmware/src/app/original_runtime.c
+@@ -80,6 +80,7 @@
+         unsigned mask = original_sound_sj6_knobs(cell, positions);
+         if (mask) juno6_apply_knobs(&p->dsp.juno.synth, mask, positions);
+         juno6_set_lfo2_pwm(&p->dsp.juno.synth, original_sound_sj6_lfo2_pwm(cell));
++        juno6_set_lfo2_shape(&p->dsp.juno.synth, original_sound_sj6_shape(cell));
+         original_runtime_sj6_chorus(p, cell);
+         return original_runtime_prepare(p, bpm);
+     }
+diff --git a/firmware/src/app/original_sound.c b/firmware/src/app/original_sound.c
+--- a/firmware/src/app/original_sound.c
++++ b/firmware/src/app/original_sound.c
+@@ -205,6 +205,7 @@
+     if (slot < SJ6_OSC_KNOBS) return max[slot];
+     if (slot == SJ6_MASTER_LEVEL) return SJ6_MASTER_INIT;
+     if (slot == SJ6_A_REFERENCE) return SJ6_A_REFERENCE_STEPS;
++    if (slot == SJ6_LFO2_SHAPE) return SJ6_LFO2_SHAPE_MAX;
+     if (slot == SJ6_LFO2_PWM_ROUTE) return DNBX_LAYERS;
+     if (slot == SJ6_FILTER_LINK || (slot >= SJ6_LFO1_MODE && slot <= SJ6_CHORUS_II)) return 1u;
+     return slot <= SJ6_LFO2_PWM_BASE ? 127u : 0;
+@@ -364,7 +365,7 @@
+ 
+ void original_sound_sj6_vibrato_store(uint8_t *cell, uint8_t *wire, const float values[2], unsigned present)
+ {
+-    cell[31] = (uint8_t)((cell[31] & ORIGINAL_SJ6_A_REFERENCE_MARK) | (present ? present + 1u : 0u));
++    cell[31] = (uint8_t)((cell[31] & ~7u) | (present ? present + 1u : 0u));
+     for (unsigned i = 0; i < 2; ++i) {
+         uint32_t word = 0;
+         if (present & (1u << i)) memcpy(&word, &values[i], sizeof word);
+@@ -386,7 +387,7 @@
+     uint32_t word = 0;
+     if (present) memcpy(&word, &value, sizeof word);
+     sj6_write_word(wire + ORIGINAL_SJ6_VIBRATO_WIRE_BYTES, word);
+-    cell[31] = (uint8_t)(original_sound_sj6_vibrato_marker(cell) | (present ? ORIGINAL_SJ6_A_REFERENCE_MARK : 0u));
++    cell[31] = (uint8_t)((cell[31] & ~ORIGINAL_SJ6_A_REFERENCE_MARK) | (present ? ORIGINAL_SJ6_A_REFERENCE_MARK : 0u));
+ }
+ 
+ int original_sound_sj6_a_reference_available(const uint8_t *cell, const uint8_t *wire)
+diff --git a/firmware/src/app/original_sound.h b/firmware/src/app/original_sound.h
+--- a/firmware/src/app/original_sound.h
++++ b/firmware/src/app/original_sound.h
+@@ -144,11 +144,28 @@
+ #define ORIGINAL_SJ6_VIBRATO_WIRE_BYTES 8u
+ #define ORIGINAL_SJ6_A_REFERENCE_MARK 8u
+ #define ORIGINAL_SJ6_TUNING_WIRE_BYTES 12u
++/* The base cell owns the shape. Low-nibble marks keep their old shared-row
++ * meanings. Only a tagged nondefault shape can use the upper nibble. */
++#define ORIGINAL_SJ6_LFO2_SHAPE_MARK 128u
++#define ORIGINAL_SJ6_LFO2_SHAPE_SHIFT 4u
++static inline unsigned original_sound_sj6_shape(const uint8_t *cell)
++{ return (cell[31] >> ORIGINAL_SJ6_LFO2_SHAPE_SHIFT) & SJ6_LFO2_SHAPE_MAX; }
++static inline void original_sound_sj6_shape_store(uint8_t *cell, unsigned shape)
++{
++    if (shape <= SJ6_LFO2_SHAPE_MAX)
++        cell[31] = (cell[31] & 15u) | (shape ? ORIGINAL_SJ6_LFO2_SHAPE_MARK |
++                   (shape << ORIGINAL_SJ6_LFO2_SHAPE_SHIFT) : 0u);
++}
+ /* The same kind-discriminated byte marks Synth One crush edits. */
+ static inline unsigned original_sound_sj6_vibrato_marker(const uint8_t *cell)
+ { return cell[31] & 7u; }
+ static inline int original_sound_sj6_marker_valid(const uint8_t *cell)
+-{ return cell[29] == ORIGINAL_SOUND_JUNO && cell[31] <= 12u && original_sound_sj6_vibrato_marker(cell) <= 4u; }
++{
++    unsigned high = cell[31] >> ORIGINAL_SJ6_LFO2_SHAPE_SHIFT;
++    unsigned tag = ORIGINAL_SJ6_LFO2_SHAPE_MARK >> ORIGINAL_SJ6_LFO2_SHAPE_SHIFT;
++    return cell[29] == ORIGINAL_SOUND_JUNO && original_sound_sj6_vibrato_marker(cell) <= 4u &&
++           (!high || (high > tag && high <= tag + SJ6_LFO2_SHAPE_MAX));
++}
+ static inline int original_sound_sj6_vibrato(const uint8_t *cell)
+ { return original_sound_sj6_marker_valid(cell) && original_sound_sj6_vibrato_marker(cell) != 0; }
+ static inline unsigned original_sound_sj6_vibrato_mask(const uint8_t *cell)
+diff --git a/firmware/src/app/ui.c b/firmware/src/app/ui.c
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -507,6 +507,7 @@
+     static const char *const enable[] = {"OFF", "ON"};
+     static const char *const pwm_route[] = {"OFF", "PWM 1", "PWM 2"};
+     static const char *const lfo_mode[] = {"SYNC", "HZ"};
++    static const char *const lfo_shape[] = {"TRI", "RAMP UP", "RAMP DOWN", "SQUARE"};
+     static const x0x_param_t knobs[] = {
+         {"WAVE 1", SJ6_WAVE_STOPS, 2, wave}, {"WAVE 2", SJ6_WAVE_STOPS, 2, wave},
+         {"RANGE", SJ6_RANGE_STOPS, 1, range},
+@@ -524,6 +525,7 @@
+         {"RATE", 127, 0, 0}, {"MIX", 127, 0, 0},
+         {"DEPTH", 127, 0, 0}, {"RATE", 127, 0, 0},
+         {"A REF", SJ6_A_REFERENCE_STEPS, SJ6_A_REFERENCE_DEFAULT, 0},
++        {"LFO 2 SHAPE", SJ6_LFO2_SHAPE_MAX, SJ6_LFO_TRI, lfo_shape},
+         {"PWM BASE", SJ6_PWM_STEPS, 0, 0},
+     };
+     return slot < sizeof knobs / sizeof *knobs ? &knobs[slot] : 0;
+@@ -2131,7 +2133,7 @@
+                     {"FILTER ADSR", {SJ6_FILTER_ATTACK, SJ6_FILTER_DECAY, SJ6_FILTER_SUSTAIN, SJ6_FILTER_RELEASE}},
+                     {"AMP ADSR", {SJ6_AMP_ATTACK, SJ6_AMP_DECAY, SJ6_AMP_SUSTAIN, SJ6_AMP_RELEASE}},
+                     {"OUTPUT", {ORIG_PAGE_ENGINE + 9, SJ6_MASTER_LEVEL, ORIG_PAGE_NONE, ORIG_PAGE_NONE}},
+-                    {"LFO RATE", {SJ6_LFO1_RATE, SJ6_LFO2_RATE, SJ6_LFO3_RATE, ORIG_PAGE_NONE}},
++                    {"LFO RATE", {SJ6_LFO1_RATE, SJ6_LFO2_RATE, SJ6_LFO3_RATE, SJ6_LFO2_SHAPE}},
+                     {"LFO MODE", {SJ6_LFO1_MODE, SJ6_LFO2_MODE, SJ6_LFO3_MODE, ORIG_PAGE_NONE}},
+                     {"LFO2 PWM", {SJ6_LFO2_RATE, SJ6_LFO2_PWM_DEPTH, SJ6_LFO2_PWM_ROUTE, SJ6_LFO2_PWM_BASE}},
+                     {"LFO", {ORIG_PAGE_ENGINE + 10, ORIG_PAGE_ENGINE + 11, ORIG_PAGE_NONE, ORIG_PAGE_NONE}},
+diff --git a/firmware/src/dsp/juno6.h b/firmware/src/dsp/juno6.h
+--- a/firmware/src/dsp/juno6.h
++++ b/firmware/src/dsp/juno6.h
+@@ -20,7 +20,7 @@
+        SJ6_FILTER_LINK, SJ6_MASTER_LEVEL, SJ6_LFO1_RATE, SJ6_LFO2_RATE, SJ6_LFO3_RATE,
+        SJ6_LFO2_PWM_DEPTH, SJ6_LFO2_PWM_ROUTE, SJ6_LFO1_MODE, SJ6_LFO2_MODE, SJ6_LFO3_MODE,
+        SJ6_CHORUS_I, SJ6_CHORUS_II, SJ6_CHORUS_RATE, SJ6_CHORUS_MIX,
+-       SJ6_VIBRATO_DEPTH, SJ6_VIBRATO_RATE, SJ6_A_REFERENCE,
++       SJ6_VIBRATO_DEPTH, SJ6_VIBRATO_RATE, SJ6_A_REFERENCE, SJ6_LFO2_SHAPE,
+        SJ6_KNOBS, SJ6_LFO2_PWM_BASE = SJ6_KNOBS };
+ enum { SJ6_A_REFERENCE_ID = 206, SJ6_A_REFERENCE_STEPS = 100, SJ6_A_REFERENCE_DEFAULT = 60 };
+ enum { SJ6_LFO_COUNT = 3, SJ6_LFO_WORD_COUNT = 6, SJ6_LFO_DIVISIONS = 18 };
+@@ -35,7 +35,12 @@
+     uint8_t division; /* Build-9 index, valid with both words and mode zero. */
+ } juno6_lfo_view;
+ enum { SJ6_ADSR_STAGES = 4, SJ6_EXTRA_COUNT = SJ6_LFO2_PWM_DEPTH - SJ6_OSC_KNOBS };
+-enum { SJ6_LFO2_PWM_DEPTH_MASK = 127, SJ6_LFO2_PWM_ROUTE_SHIFT = 7 };
++enum { SJ6_LFO2_PWM_DEPTH_MASK = 127, SJ6_LFO2_PWM_ROUTE_SHIFT = 7,
++       SJ6_LFO2_PWM_ROUTE_MASK = 3u << SJ6_LFO2_PWM_ROUTE_SHIFT,
++       SJ6_LFO2_PWM_SHAPE_SHIFT = 9 };
++/* Deterministic entries in the Build-9 runtime wave row. */
++enum { SJ6_LFO_TRI, SJ6_LFO_UP, SJ6_LFO_DOWN, SJ6_LFO_SQUARE,
++       SJ6_LFO2_SHAPE_MAX = SJ6_LFO_SQUARE };
+ enum { SJ6_WAVE_STOPS = 3, SJ6_RANGE_STOPS = 2, SJ6_PWM_STEPS = 127, SJ6_MASTER_INIT = 128 };
+ #endif
+ static inline int juno6_factory_range_valid(float raw)
+@@ -129,6 +134,7 @@
+ { juno6_set_panel_lfo(s, lfo, (int)position, 1); }
+ void juno6_read_lfo(const juno6_t *, unsigned lfo, juno6_lfo_view *);
+ void juno6_set_lfo2_pwm(juno6_t *, uint16_t setting);
++void juno6_set_lfo2_shape(juno6_t *, unsigned shape);
+ void juno6_set_vibrato(juno6_t *, float depth_unit, float rate_unit, int reset);
+ /* Binary32 unit interval, including an authored negative zero. */
+ static inline int juno6_unit_word_valid(uint32_t bits)
+diff --git a/firmware/src/dsp/juno6_factory.inc b/firmware/src/dsp/juno6_factory.inc
+--- a/firmware/src/dsp/juno6_factory.inc
++++ b/firmware/src/dsp/juno6_factory.inc
+@@ -294,9 +294,17 @@
+ 
+ void juno6_set_lfo2_pwm(juno6_t *s, uint16_t setting)
+ {
+-    if (!(setting & SJ6_LFO2_PWM_DEPTH_MASK) || !(setting >> SJ6_LFO2_PWM_ROUTE_SHIFT))
++    const unsigned mask = SJ6_LFO2_PWM_DEPTH_MASK | SJ6_LFO2_PWM_ROUTE_MASK;
++    if (!(setting & SJ6_LFO2_PWM_DEPTH_MASK) || !(setting & SJ6_LFO2_PWM_ROUTE_MASK))
+         s->lfo2_pwm_until_tick = 0;
+-    s->lfo2_pwm = setting;
++    s->lfo2_pwm = (s->lfo2_pwm & ~mask) | (setting & mask);
++}
++
++void juno6_set_lfo2_shape(juno6_t *s, unsigned shape)
++{
++    const unsigned mask = SJ6_LFO2_SHAPE_MAX << SJ6_LFO2_PWM_SHAPE_SHIFT;
++    if (shape <= SJ6_LFO2_SHAPE_MAX)
++        s->lfo2_pwm = (s->lfo2_pwm & ~mask) | (shape << SJ6_LFO2_PWM_SHAPE_SHIFT);
+ }
+ 
+ static const uint8_t sj6_knob_ids[SJ6_OSC_KNOBS] = {82, 83, 86, 210, 78, 211, 79};
+@@ -317,7 +325,9 @@
+ unsigned juno6_knob_position(const juno6_t *s, unsigned slot)
+ {
+     if (slot == SJ6_LFO2_PWM_DEPTH) return s->lfo2_pwm & SJ6_LFO2_PWM_DEPTH_MASK;
+-    if (slot == SJ6_LFO2_PWM_ROUTE) return s->lfo2_pwm >> SJ6_LFO2_PWM_ROUTE_SHIFT;
++    if (slot == SJ6_LFO2_PWM_ROUTE)
++        return (s->lfo2_pwm & SJ6_LFO2_PWM_ROUTE_MASK) >> SJ6_LFO2_PWM_ROUTE_SHIFT;
++    if (slot == SJ6_LFO2_SHAPE) return s->lfo2_pwm >> SJ6_LFO2_PWM_SHAPE_SHIFT;
+     if (slot >= SJ6_LFO1_MODE && slot <= SJ6_LFO3_MODE) {
+         float hz = 1.f;
+         (void)dnbx_read_raw(&s->core, 195u + slot - SJ6_LFO1_MODE, &hz);
+@@ -544,10 +554,30 @@
+     return DNBX_OK;
+ }
+ 
+-/* Explicit LFO2 first route to live receiver 78 or 79. Column 0 of the Build-9
+- * wave row is a 256-entry triangle rotated by 64 entries. Apply its
+- * bipolar amount before the existing PWM conversion. Sample the audio
+- * clock at the nominal 80 Hz control cadence, independent of block size. */
++/* Build-9 row columns 0 to 3. The ramps use one-sided amount laws.
++ * Every wave uses the same 256 phase bins as the original constructors. */
++static float lfo2_pwm_delta(unsigned shape, unsigned index, float depth)
++{
++    switch (shape) {
++    case SJ6_LFO_UP: {
++        float wave = index * (1.f / 128.f) - 1.f;
++        return depth * ((wave + 1.f) * .5f);
++    }
++    case SJ6_LFO_DOWN: {
++        float wave = 1.f - index * (1.f / 128.f);
++        return depth * ((wave - 1.f) * .5f);
++    }
++    case SJ6_LFO_SQUARE:
++        return ((index < 128u ? 1.f : -1.f) * depth) * .5f;
++    default: {
++        unsigned rotated = (index + 64u) & 255u;
++        float wave = rotated < 128u ? rotated * (1.f / 64.f) - 1.f : 3.f - rotated * (1.f / 64.f);
++        return (wave * depth) * .5f;
++    }
++    }
++}
++
++/* Sample the existing audio clock on the nominal 80 Hz control grid. */
+ static int render_lfo2_pwm(juno6_t *s, unsigned receiver, float *left, float *right, unsigned frames)
+ {
+     const unsigned tick_hz = 80;
+@@ -555,6 +585,7 @@
+     dnbx_layer_params *layer = &s->core.layer[receiver].params;
+     const float base = s->core.raw[78u + receiver];
+     const float depth = (s->lfo2_pwm & SJ6_LFO2_PWM_DEPTH_MASK) * (1.f / 127.f);
++    const unsigned shape = s->lfo2_pwm >> SJ6_LFO2_PWM_SHAPE_SHIFT;
+     const float saved_width = layer->pulse_width, saved_depth = layer->lfo_pwm_depth;
+     unsigned until_tick = s->lfo2_pwm_until_tick;
+     uint64_t phase = s->lfo_phase_q40[1];
+@@ -562,12 +593,11 @@
+     layer->lfo_pwm_depth = 0.f;
+     while (frames) {
+         if (until_tick < tick_hz) {
+-            s->lfo2_pwm_index = (uint8_t)((phase >> 32) + 64u);
++            s->lfo2_pwm_index = (uint8_t)(phase >> 32);
+             until_tick += sample_rate;
+         }
+-        unsigned index = s->lfo2_pwm_index;
+-        float wave = index < 128 ? index * (1.f / 64.f) - 1.f : 3.f - index * (1.f / 64.f);
+-        float raw = fm_clampf(base + (wave * depth) * .5f, 0.f, 1.f);
++        float delta = lfo2_pwm_delta(shape, s->lfo2_pwm_index, depth);
++        float raw = fm_clampf(base + delta, 0.f, 1.f);
+         (void)dnbx_pwm_from_unit(raw, &layer->pulse_width);
+         unsigned count = until_tick / tick_hz;
+         if (count > frames) count = frames;
+@@ -596,7 +626,7 @@
+  }
+ #endif
+ #if X0X_SUPERJ6_BUILTIN_INIT
+- unsigned receiver = (s->lfo2_pwm >> SJ6_LFO2_PWM_ROUTE_SHIFT) - 1u;
++ unsigned receiver = ((s->lfo2_pwm & SJ6_LFO2_PWM_ROUTE_MASK) >> SJ6_LFO2_PWM_ROUTE_SHIFT) - 1u;
+  if (receiver < DNBX_LAYERS && (s->lfo2_pwm & SJ6_LFO2_PWM_DEPTH_MASK) &&
+      (s->lfo_running & 2u) && s->core.layer[receiver].params.waveform == 1.f &&
+      s->core.raw[210u + receiver] > .5f && frames && frames <= DNBX_MAX_FRAMES &&

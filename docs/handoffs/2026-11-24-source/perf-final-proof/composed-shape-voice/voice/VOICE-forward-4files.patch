@@ -1,0 +1,211 @@
+diff --git a/firmware/src/app/engine.c b/firmware/src/app/engine.c
+index 743b06e05..250b79c6b 100644
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -425,6 +425,23 @@ int engine_live_key(int voice,uint32_t generation,int token,int pitch,int veloci
+ }
+ 
+ static breaks_t brk POOL;
++/* These hooks are called only after the DSP admits an actual note/held
++ * slice. Isolated engine and DSP fixtures can link without DNR3. */
++extern void remote_dnr3_voice(unsigned, unsigned, unsigned) __attribute__((weak));
++void engine_remote_break_voice(const breaks_t *owner, int slice)
++{
++    if (remote_dnr3_voice && owner == &brk)
++        remote_dnr3_voice(PART_BRK, (unsigned)slice + 12u, 127u);
++}
++void engine_remote_bass_voice(const original_runtime_part *owner, unsigned note, unsigned velocity)
++{
++    if (remote_dnr3_voice && (owner == &original_bass[0] || owner == &original_bass[1])) {
++        unsigned b = owner == &original_bass[1];
++        if (!velocity || !(seq.mute & (1u << (MUTE_BASS0 + b))))
++            remote_dnr3_voice(PART_303A + b, note, velocity);
++    }
++}
++
+ /* Latest-value physical wheel mailbox: centre cannot be dropped by a full CQ.
+  * Only audio writes the DSP bend and the external MIDI owner. */
+ static volatile int16_t brk_wheel;
+@@ -1183,6 +1200,10 @@ __attribute__((noinline)) static void s_drum(void *x, int kit, int v, float vel)
+         drum909_trigger(&d909, v, vel);
+     else                                 /* the 808's unaccented hit sits at D8_VEL_NORMAL, not at our 909 level */
+         drum808_trigger(&d808, v, vel >= 0.999f ? 1.0f : vel * (D8_VEL_NORMAL / (88.0f / 127.0f)));
++    if (remote_dnr3_voice && (unsigned)kit < NKIT && (unsigned)v < NDRUM &&
++        !(seq.mute & (1u << (kit * NDRUM + v))))
++        remote_dnr3_voice((unsigned)kit, GM_DRUM[kit][v], (unsigned)(vel * 127.0f + 0.5f));
++
+ }
+ 
+ static void bass_adapt_flags(int p, int acc, int sl)
+diff --git a/firmware/src/app/original_runtime.c b/firmware/src/app/original_runtime.c
+index 08b051d90..ee0ddbe8f 100644
+--- a/firmware/src/app/original_runtime.c
++++ b/firmware/src/app/original_runtime.c
+@@ -150,7 +150,7 @@ int original_runtime_param(original_runtime_part *p, unsigned parameter, float v
+         original_chicago_backend_set(&p->dsp.chicago, parameter, value) == ORIGINAL_CHICAGO_BACKEND_OK);
+ }
+ 
+-static int runtime_note(original_runtime_part *p, unsigned key, unsigned velocity)
++static int runtime_note_backend(original_runtime_part *p, unsigned key, unsigned velocity)
+ {
+     if(p->kind==ORIGINAL_SOUND_JUNO){
+         if(velocity) return runtime_result(p,juno6_note_on(&p->dsp.juno.synth,(uint8_t)key,(uint8_t)velocity));
+@@ -165,6 +165,15 @@ static int runtime_note(original_runtime_part *p, unsigned key, unsigned velocit
+         original_chicago_backend_note(&p->dsp.chicago, key, velocity) == ORIGINAL_CHICAGO_BACKEND_OK);
+ }
+ 
++extern void engine_remote_bass_voice(const original_runtime_part *, unsigned, unsigned) __attribute__((weak));
++static int runtime_note(original_runtime_part *p, unsigned key, unsigned velocity)
++{
++    int result = runtime_note_backend(p, key, velocity);
++    if (result == ORIGINAL_RUNTIME_OK && engine_remote_bass_voice)
++        engine_remote_bass_voice(p, key, velocity);
++    return result;
++}
++
+ static int key_held(const original_runtime_part *p, unsigned key)
+ {
+     for (unsigned s = 0; s < ORIGINAL_INPUT_COUNT; ++s) if (p->keys[s][key]) return 1;
+diff --git a/firmware/src/app/remote_dnr3.c b/firmware/src/app/remote_dnr3.c
+index bf8a6c6db..611a9906a 100644
+--- a/firmware/src/app/remote_dnr3.c
++++ b/firmware/src/app/remote_dnr3.c
+@@ -40,8 +40,8 @@ enum { RD_HELLO = 0, RD_OPEN = 1, RD_KEEP = 6, RD_CLOSE = 7, RD_WATCH = 8, RD_DE
+ enum { RS_OK, RS_QUEUED, RS_BAD, RS_BUSY, RS_STALE, RS_CONFLICT, RS_UNSUPPORTED, RS_FULL, RS_DENIED };
+ enum { RN_PARAM, RN_STEP, RN_CUE, RN_TRANSPORT, RN_MUTE, RN_VOICE, RN_POSITION, RN_PATTERN, RN_N };
+ #define RD_WBIT(k) ((k) == RN_PATTERN ? 4u : 1u << (k))   /* the WATCH bit of a NOTIFY kind */
+-#define RD_CAPS 0x2FFu       /* PARAM..PC (bits 0..7), no VOICE (8), guarded bass PARAM_SET (9) */
+-#define RD_WATCHABLE 0x5Fu   /* WATCH bits served: all but VOICE (5) */
++#define RD_CAPS 0x3FFu       /* PARAM..VOICE (0..8), guarded bass PARAM_SET (9) */
++#define RD_WATCHABLE 0x7Fu
+ #define RD_LEASE_MS 2000u
+ #define RD_GAP_MS 20u        /* >= 20 ms between notifications: <= 50 frames/s (HELLO watch_max_hz) */
+ #define RD_HEAD 15u          /* F0 7D 44 4E 03 op seq2 len2 status rev4 */
+@@ -50,10 +50,30 @@ enum { RN_PARAM, RN_STEP, RN_CUE, RN_TRANSPORT, RN_MUTE, RN_VOICE, RN_POSITION,
+ 
+ static struct {
+     uint32_t rev, epoch, client, deadline, last_tx, ccrc, fp[4], par[4], step;   /* par: PARAM changes waiting, kind|a|b|c */
++    volatile uint32_t voice;
++    uint32_t voice_seen;
+     uint16_t cseq;
+     uint8_t active, watch, dirty, pend, cop, clen, np;
+-    uint8_t pos[NTRACKS], cache[48];   /* the last write's reply: an exact retry gets it again */
++    volatile uint8_t voice_arm;
++    uint8_t voice_generation;
++    /* Frames cached only for writes. The widest response is CUE: 15-byte
++     * header + 2 address + 2*NTRACKS + 6 CRC/end = 33 bytes (step max 32). */
++    uint8_t pos[NTRACKS], cache[36];
+ } rd;
++_Static_assert(RD_HEAD + 2 + 2 * NTRACKS + 6 <= sizeof rd.cache, "CUE write cache");
++/* Bounded latest-event pulse: one aligned publication from the audio owners,
++ * never a SysEx or wait on that side. A WATCH generation rejects any late
++ * store from an expired/replaced subscription. Packed as generation:7,
++ * stamp:8, velocity:7, note:7, part:3; bursts may overwrite earlier pulses.
++ * The client times out pulses in addition to handling bass releases. */
++
++__attribute__((noinline)) void remote_dnr3_voice(unsigned part, unsigned note, unsigned vel)
++{
++    uint32_t a = rd.voice_arm;
++    if (a)
++        rd.voice = a << 25 | ((rd.voice + (1u << 17)) & (255u << 17)) |
++                   vel << 10 | note << 3 | part;
++}
+ #if X0X_REMOTE_BLE
+ /* 0 = USB. A nonzero BLE token is only valid for one connection epoch. */
+ static uint32_t rd_wire, rd_lease_wire;
+@@ -131,7 +151,7 @@ __attribute__((noinline)) static void rd_lease(uint32_t now)
+                       || (rd_lease_wire && !ble_dnr3_live(rd_lease_wire))
+ #endif
+                      ))
+-        rd.active = 0;                                    /* the lease ran out: read only */
++        rd.active = rd.voice_arm = 0;                     /* lease ran out: read only */
+     rd_sync();
+ }
+ 
+@@ -352,6 +372,11 @@ __attribute__((noinline)) void remote_dnr3_tick(uint32_t now)
+     }
+     if (now - rd.last_tx < RD_GAP_MS)
+         return;
++    uint32_t voice = rd.voice;
++    rd.pend &= (uint8_t)~(1u << RN_VOICE);
++    if (rd.voice_arm && (voice >> 25) == rd.voice_arm && voice != rd.voice_seen) {
++        rd.pend |= 1u << RN_VOICE;
++    }
+     for (k = 0; k < RN_N; k++) {
+         if (!(rd.pend >> k & 1u))
+             continue;
+@@ -378,6 +403,10 @@ __attribute__((noinline)) void remote_dnr3_tick(uint32_t now)
+             rd_b((uint32_t)rd_playing()); rd_u(rd_bpm10(), 2); rd_b(seq.clk_src);
+         } else if (k == RN_MUTE) {
+             rd_mutes(); rd_b(seq.part_off);
++        } else if (k == RN_VOICE) {
++            rd_b(voice & 7u);
++            rd_u(voice >> 3, 2);
++            rd.voice_seen = voice;
+         } else if (k == RN_POSITION)
+             rd_bytes(rd.pos, NTRACKS, 128);
+         else
+@@ -465,18 +494,25 @@ __attribute__((noinline)) static int rd_op(uint32_t op, const uint8_t *a, uint32
+ #if X0X_REMOTE_BLE
+         rd_lease_wire = rd_wire;
+ #endif
+-        rd.watch = rd.clen = 0;
++        rd.watch = rd.clen = rd.voice_arm = 0;
+         rd.deadline = plat_ms() + RD_LEASE_MS;
+         rd_u(rd.epoch, 4);
+         rd_u(RD_LEASE_MS, 2);
+         return 0;
+     case RD_CLOSE:
+-        rd.active = 0;
++        rd.active = rd.voice_arm = 0;
+         /* fall through */
+     case RD_KEEP:
+         return 0;
+     case RD_WATCH:
+         rd.watch = (uint8_t)(rd_g(q, 4) & RD_WATCHABLE);
++        if (rd.watch & (1u << RN_VOICE)) {
++            if (!rd.voice_arm) {
++                if (!(++rd.voice_generation & 127u)) rd.voice_generation = 1;
++                rd.voice_seen = rd.voice;
++                rd.voice_arm = rd.voice_generation;
++            }
++        } else rd.voice_arm = 0;
+         rd_u(rd.watch, 4);
+         return 0;
+     case RD_DESCRIBE: {
+diff --git a/firmware/src/dsp/breaks.c b/firmware/src/dsp/breaks.c
+index 6c1abaa0f..e29fc5a5b 100644
+--- a/firmware/src/dsp/breaks.c
++++ b/firmware/src/dsp/breaks.c
+@@ -721,6 +721,13 @@ __attribute__((noinline)) static void gate_update(breaks_t *b)
+ }
+ 
+ /* apply live key changes (keys is written by breaks_live, possibly from another context) */
++extern void engine_remote_break_voice(const breaks_t *, int) __attribute__((weak));
++static void perf_slice_start(breaks_t *b, int key)
++{
++    if (slice_start(b, 0, key, 1.0f) && engine_remote_break_voice)
++        engine_remote_break_voice(b, key);
++}
++
+ static void perf_sync(breaks_t *b)
+ {
+     uint32_t k = b->slices, d = k ^ b->slices_seen;
+@@ -756,7 +763,7 @@ static void perf_sync(breaks_t *b)
+                         b->current_slice = key;
+                         b->render_bank = 0;
+                         b->sub_div = 0;
+-                        slice_start(b, 0, key, 1.0f);
++                        perf_slice_start(b, key);
+                     }
+                     edged = key;
+                 } else
+@@ -775,7 +782,7 @@ static void perf_sync(breaks_t *b)
+             b->current_slice = sl;
+             b->render_bank = 0;
+             b->sub_div = 0;
+-            slice_start(b, 0, sl, 1.0f);
++            perf_slice_start(b, sl);
+             gate_update(b);
+         }
+     }

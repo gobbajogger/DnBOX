@@ -1,0 +1,24 @@
+
+Case 00
+part=0 PWM1 held shape=1 changed=8192 peer=0
+part=0 PWM1 held shape=2 changed=8192 peer=0
+part=0 PWM1 held shape=3 changed=8192 peer=0
+part=0 PWM1 zero depth, route OFF, exact reload, old marker, preset and note locks PASS
+
+Case 01
+part=0 PWM2 held shape=1 changed=8192 peer=0
+part=0 PWM2 held shape=2 changed=8192 peer=0
+part=0 PWM2 held shape=3 changed=8192 peer=0
+part=0 PWM2 zero depth, route OFF, exact reload, old marker, preset and note locks PASS
+
+Case 10
+part=1 PWM1 held shape=1 changed=8192 peer=0
+part=1 PWM1 held shape=2 changed=8191 peer=0
+part=1 PWM1 held shape=3 changed=8192 peer=0
+part=1 PWM1 zero depth, route OFF, exact reload, old marker, preset and note locks PASS
+
+Case 11
+part=1 PWM2 held shape=1 changed=8192 peer=0
+part=1 PWM2 held shape=2 changed=8191 peer=0
+part=1 PWM2 held shape=3 changed=8192 peer=0
+part=1 PWM2 zero depth, route OFF, exact reload, old marker, preset and note locks PASS
