@@ -1,0 +1,4 @@
+# Pool + S1 cutoff LFO native unchanged-stock link
+Exact pool-cutoff donor packet POSTIMAGE.sha256 digest 83f1490251d47a3b16b7d7a6f72ec3513a4ee740e9c8592e52507956f1e09ff2 verified before/after fresh isolated compile-links clearing all old objects/maps. Standard pinned native-link-only wrapper/model/config as depth-focus-pool-remedy-fit. No code changes.
+- Elite attempted XIP 580952 B (+392), physical overflow 28280 B; Pro 580940 B (+392), overflow 28268 B. Both real ld overflow only, no unresolved symbols. Section differential +379 B before alignment.
+- Both .pool 0x51de4 / capacity 0x54000; 540 usable after 8192 reserve (hard 512 floor met by 28 B). .data/.bss and ordinary RAM tail through 0x01C20000 unchanged; fixed XPOOL/RAM text/core1/XDATA unchanged. No stack runtime, timing, package/device/emulator, release or layout claims.

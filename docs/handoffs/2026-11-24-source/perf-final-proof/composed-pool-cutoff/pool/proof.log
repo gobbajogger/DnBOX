@@ -1,0 +1,10 @@
+catalog-off: PASS 120 catalog contexts, max pages=8 more=12
+  matches all 417 page rows, 795 raw tail refs, 1881 physically visited list entries
+  PASS catalog-off 89 paired frames pixel-exact; same semantic log SHA256 8ea4a9d96f147d648b868e886a330a7f51a31700f83aa1b3152c94b7aab426aa
+catalog-full: PASS 124 catalog contexts, max pages=15 more=12
+  matches all 475 page rows, 795 raw tail refs, 1881 physically visited list entries
+  PASS catalog-full 89 paired frames pixel-exact; same semantic log SHA256 9e5d5e57e15269e246e598c25f2b50a78ad001fb887d0a2e5a32e5e10b99d63a
+  PASS ui_sound_reachable_capture 14 paired frames pixel-exact; same semantic log SHA256 bb05374bac8eeae1952ad401858df23b1421f94f00875297029ceb7eea2826fa
+  PASS ui_arp_endpoint_capture 32 paired frames pixel-exact; same semantic log SHA256 b1502fbd5bcc4e6b98186df344b0ec92aa47bef7da794aa0fd199e1e99cbee28
+  PASS ui_synth_focus_capture 98 paired frames pixel-exact; same semantic log SHA256 e6ccccc0633e404f3425e9722243e31b8ea70bd3faddc1780ff46c413b996a43
+  PASS ui_lfo_wave_glyph_capture 26 paired frames pixel-exact; same semantic log SHA256 499af72e493508e2c1e336759c77a6171cd6a89248c7b1f21f907a048c80b6d9

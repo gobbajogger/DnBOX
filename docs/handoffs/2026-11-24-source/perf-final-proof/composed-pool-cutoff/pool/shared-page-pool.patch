@@ -1,0 +1,55 @@
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -1730,10 +1730,21 @@
+     char title[MAXPAGES][12];
+     uint8_t group[MAXPAGES];
+     int n;
+-    pref_t more[MAXMORE];              /* the screen's other knobs: only in SEL's list, under MORE */
+     int nmore;
+ } pages_t;
++enum { PAGE_REFS = MAXPAGES * 4 };
++_Static_assert(sizeof(pref_t) == 4 && sizeof(pages_t) <= 472,
++               "page materialization must fit the original POOL storage");
++_Static_assert(MAXMORE <= PAGE_REFS, "page and MORE refs share a bounded matrix");
+ static pages_t pg X0X_POOL;
++
++/* Page rows grow forward from zero; SEL's MORE refs grow backward through
++ * the unused rows. Keep append order without allocating a second matrix. */
++static pref_t *page_more(pages_t *pages, unsigned i)
++{
++    unsigned slot = PAGE_REFS - 1u - i;
++    return &pages->r[slot / 4u][slot % 4u];
++}
+ typedef struct { pref_t r[4]; char title[12]; int page, n; } page_query_t;
+ /* The descriptor emitter has one explicit output contract. Query mode records
+  * one requested page plus the count, without a second persistent page table. */
+@@ -1746,8 +1757,9 @@
+ static void more(page_emitter_t *emit, pref_t r)
+ {
+     pages_t *pages = emit->pages;
+-    if (pages && r.kind != R_NONE && pages->nmore < MAXMORE)
+-        pages->more[pages->nmore++] = r;
++    if (pages && r.kind != R_NONE && pages->nmore < MAXMORE &&
++        4 * pages->n + pages->nmore < PAGE_REFS)
++        *page_more(pages, pages->nmore++) = r;
+ }
+ 
+ /* Both page consumers write the same four refs and truncated title. Select
+@@ -1767,7 +1779,7 @@
+         refs = query->r;
+         text = query->title;
+     } else {
+-        if (pages->n >= MAXPAGES)
++        if (pages->n >= MAXPAGES || 4 * (pages->n + 1) + pages->nmore > PAGE_REFS)
+             return;
+         refs = pages->r[pages->n];
+         text = pages->title[pages->n];
+@@ -2412,7 +2424,7 @@
+     if (pg.nmore && ui.list_n < LIST_MAX)              /* the knobs no page has */
+         list_rows[ui.list_n++] = PR(R_HDR, GR_MORE, 0, 0);
+     for (k = 0; k < pg.nmore; k++)
+-        list_add(pg.more[k]);
++        list_add(*page_more(&pg, k));
+     if (ui.view == V_HOME)
+         list_add(PR(R_ACT, ui.home_live ? ACT_HOME_PATTERNS : ACT_HOME_LIVE, 0, 0));
+ #if X0X_UI_PERF

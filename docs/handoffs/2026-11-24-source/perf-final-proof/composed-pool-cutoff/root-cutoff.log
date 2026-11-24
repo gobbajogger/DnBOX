@@ -1,0 +1,25 @@
+Private host output: SCRATCH
+PASS compact dry/wet render captured INIT and 694 factory programs, 1024 frames each
+PASS compact dry/wet render captured INIT and 694 factory programs, 1024 frames each
+2b7c2c740edb57be12652f58c81a538815dd21c1ca8f66b0971cad51df0f331f  SCRATCH/base.pcm
+2b7c2c740edb57be12652f58c81a538815dd21c1ca8f66b0971cad51df0f331f  SCRATCH/join.pcm
+FAIL tests/host/ui_synthone_cutoff_lfo_test.c:222: engine_s1_patch_read(0,CUTOFF_LFO,&missing)
+SCRATCH/depth-positive.log:PASS independent HP×Widen×cutoff states=1935, all 2048 escape headers classified (114 rejected)
+SCRATCH/depth-positive.log:owner 0 cutoff destination 1: 4096/4096 changed, target/peer/phase exact
+SCRATCH/depth-positive.log:owner 0 cutoff destination 2: 4096/4096 changed, target/peer/phase exact
+SCRATCH/depth-positive.log:owner 0 cutoff destination 3: 4096/4096 changed, target/peer/phase exact
+SCRATCH/depth-positive.log:owner 1 cutoff destination 1: 4096/4096 changed, target/peer/phase exact
+SCRATCH/depth-positive.log:owner 1 cutoff destination 2: 4096/4096 changed, target/peer/phase exact
+SCRATCH/depth-positive.log:owner 1 cutoff destination 3: 4096/4096 changed, target/peer/phase exact
+SCRATCH/depth-positive.log:PASS held cutoff routes across both owners and Sound/lock protections (26342 checks)
+SCRATCH/depth-old.log:PASS old HP/WIDEN and lock accepted; cutoff route Sound/lock types rejected before writes (265 checks)
+SCRATCH/pages-base.log:PASS owner A all 15 pages reached in both directions
+SCRATCH/pages-base.log:PASS owner B all 15 pages reached in both directions
+SCRATCH/pages-base.log:PASS Synth One owner A reaches all 14 dependency-baseline panels both ways
+SCRATCH/pages-base.log:PASS Synth One owner B reaches all 14 dependency-baseline panels both ways
+SCRATCH/pages-join.log:PASS owner A all 15 pages reached in both directions
+SCRATCH/pages-join.log:PASS owner B all 15 pages reached in both directions
+SCRATCH/pages-join.log:PASS Synth One owner A reaches all 14 dependency-baseline panels both ways
+SCRATCH/pages-join.log:PASS Synth One owner B reaches all 14 dependency-baseline panels both ways
+PASS 14 unchanged SuperJ6 actual LCDs byte-exact
+PASS both physical LFO depths across two owners, project/lock safety (5421 checks)

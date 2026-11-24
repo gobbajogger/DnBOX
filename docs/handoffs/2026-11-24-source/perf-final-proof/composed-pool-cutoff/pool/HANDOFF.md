@@ -1,0 +1,9 @@
+# Preserve 15 pages while restoring POOL
+
+Exact preimage ledger eb0431ad701c6d585fab17b35a2536db855c20c8bc2df1ed92c6defa8a6c34ea. Private source patch and complete firmware POST ledger included. No changes to page capacity, page/query semantics, title lists, knob references, stack allocations, ordinary RAM placement, or storage/audio source.
+
+Remove the dedicated 14×4-byte MORE array. Visible rows grow from the front of the existing 15×4 ref matrix; MORE grows from its unused tail through one reverse index helper. The logical MORE index stays append order. Before each mutation a row needs four free slots and an extra needs one; both enforce previous independent maxima. This remains safe when MORE comes first (drum), last (FX), or between front rows (MIX inserts its 12 MORE entries before WAVE). Tested both impossible growth insertion orders at capacity; nothing overlaps, and actual worst mixed population is 32/60 refs (MIX 5×4+12). Both 15-page SuperJ6 owners use all 60 front slots and zero MORE. Existing compile-time 15-page list bound retained and new compile-time POOL-storage bound requires sizeof(pages_t) <= 472.
+
+Host evidence: tested with compact synth/ARP flags on and off, actual page emission compared with query, raw MORE order and physical Select overlay traversal unchanged in every test. Exact 500→444 byte pg (56 B recovered); no simultaneous title/stack relocation. Refer to the performance agent's independent native link results for actual POOL, ordinary RAM, and release fit; no native build or device was touched by this UI task. UI packet does not imply release eligibility.
+
+Portable host replay with Python Pillow: bash replay.sh EXACT_EB0_SOURCE. Full source verification and reconstruction, then actual stock-product UI/input/audio handoff in private copies only.

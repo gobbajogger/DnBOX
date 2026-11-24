@@ -1,0 +1,16 @@
+A-start 1/15 OSCILLATOR
+A-forward-arp 14/15 ARPEGGIATOR
+A-forward-sound 15/15 SOUND
+A-wrapped-first 1/15 OSCILLATOR
+A-backward-sound 15/15 SOUND
+A-backward-arp 14/15 ARPEGGIATOR
+A-returned 1/15 OSCILLATOR
+PASS owner A all 15 pages reached in both directions
+B-start 1/15 OSCILLATOR
+B-forward-arp 14/15 ARPEGGIATOR
+B-forward-sound 15/15 SOUND
+B-wrapped-first 1/15 OSCILLATOR
+B-backward-sound 15/15 SOUND
+B-backward-arp 14/15 ARPEGGIATOR
+B-returned 1/15 OSCILLATOR
+PASS owner B all 15 pages reached in both directions
