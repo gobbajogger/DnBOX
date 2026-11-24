@@ -1,0 +1,441 @@
+--- a/firmware/src/app/original_sound.c
++++ b/firmware/src/app/original_sound.c
+@@ -203,6 +203,73 @@
+     return original_sound_init(cell, ORIGINAL_SOUND_SYNTHONE, ORIGINAL_SYNTHONE_INIT_FACTORY);
+ }
+ #if X0X_SUPERJ6_BUILTIN_INIT
++static int sj6_marker_shape(unsigned hi) { return hi==0u || (hi>=8u && hi<=11u); }
++static int sj6_marker_canonical(unsigned b)
++{ return sj6_marker_shape(b>>4) && (b&7u)<=4u; }
++static unsigned sj6_invalid_before(unsigned b)
++{
++    unsigned hi=b>>4, lo=b&15u;
++    unsigned rows=(hi>0u)+(hi>8u ? (hi>12u ? 4u : hi-8u) : 0u);
++    unsigned valid=0;
++    if(sj6_marker_shape(hi)) {
++        valid=lo<5u?lo:5u;
++        if(lo>8u) valid+=lo-8u<5u?lo-8u:5u;
++    }
++    return b-10u*rows-valid;
++}
++static unsigned sj6_marker_from_invalid(unsigned n)
++{
++    for(unsigned hi=0;hi<16u;++hi) {
++        unsigned valid=sj6_marker_shape(hi), width=valid?6u:16u;
++        if(n<width) return hi*16u+(valid ? n+5u+(n>=3u?5u:0u) : n);
++        n-=width;
++    }
++    return 256u;
++}
++unsigned original_sound_sj6_marker(const uint8_t *cell)
++{
++    unsigned b=cell[31];
++    if(sj6_marker_canonical(b)) return b;
++    unsigned n=sj6_invalid_before(b);
++    if(n>=200u) return 256u;
++    n%=50u;
++    unsigned hi=n/10u,lo=n%10u;
++    return (hi?hi+7u:0u)*16u+lo+(lo>=5u?3u:0u);
++}
++unsigned original_sound_sj6_osc1_code(const uint8_t *cell)
++{
++    unsigned b=cell[31];
++    if(cell[29]!=ORIGINAL_SOUND_JUNO || sj6_marker_canonical(b)) return 0;
++    unsigned n=sj6_invalid_before(b);
++    if(n>=200u) return 0;
++    unsigned occupied=(cell[25] & (ORIGINAL_SJ6_LFO2_PWM_BIT>>24))!=0;
++    unsigned low=(cell[13]>>7)|((cell[14]>>7)<<1)|((cell[18]>>7)<<2)|((cell[19]>>7)<<3)
++        |((occupied!=(cell[21]!=0u))<<4);
++    return 1u+(n/50u)*32u+low;
++}
++static void sj6_store_marker(uint8_t *cell,unsigned b,unsigned position)
++{
++    unsigned hi=b>>4,lo=b&15u;
++    unsigned n=(hi?hi-7u:0u)*10u+lo-(lo>=8u?3u:0u);
++    cell[31]=(uint8_t)sj6_marker_from_invalid((position>>5)*50u+n);
++}
++void original_sound_sj6_marker_store(uint8_t *cell,unsigned b)
++{
++    unsigned code=original_sound_sj6_osc1_code(cell);
++    if(!code)cell[31]=(uint8_t)b;
++    else sj6_store_marker(cell,b,code-1u);
++}
++void original_sound_sj6_osc1_store(uint8_t *cell,unsigned pos)
++{
++    unsigned b=original_sound_sj6_marker(cell);
++    if(pos>127u || b>255u || cell[29]!=ORIGINAL_SOUND_JUNO)return;
++    static const uint8_t plane[]={13,14,18,19};
++    for(unsigned i=0;i<4u;++i) cell[plane[i]]=(cell[plane[i]]&127u)|(((pos>>i)&1u)<<7);
++    unsigned bit=ORIGINAL_SJ6_LFO2_PWM_BIT>>24;
++    unsigned owner=(cell[21]!=0u)^((pos>>4)&1u);
++    cell[25]=(cell[25]&~bit)|(owner?bit:0u);
++    sj6_store_marker(cell,b,pos);
++}
+ unsigned original_sound_sj6_max(unsigned slot)
+ {
+     static const uint8_t max[SJ6_OSC_KNOBS] = {3, 3, 2, 1, 127, 1, 127};
+@@ -227,8 +294,10 @@
+ {
+     uint32_t flags = original_sound_edit_mask(cell) &
+                      ~(ORIGINAL_SJ6_LFO2_PWM_BIT | ORIGINAL_SJ6_LFO2_PWM2_BIT);
++    unsigned code=original_sound_sj6_osc1_code(cell);
+     cell[ORIGINAL_SJ6_LFO2_PWM_BYTE] = (uint8_t)setting;
+-    if ((uint8_t)setting) flags |= ORIGINAL_SJ6_LFO2_PWM_BIT;
++    if (((uint8_t)setting!=0u)^((code && ((code-1u)&16u))!=0))
++        flags |= ORIGINAL_SJ6_LFO2_PWM_BIT;
+     if (setting >> 8) flags |= ORIGINAL_SJ6_LFO2_PWM2_BIT;
+     original_sound_put_mask(cell, flags);
+ }
+@@ -446,7 +515,7 @@
+ 
+ void original_sound_sj6_vibrato_store(uint8_t *cell, uint8_t *wire, const float values[2], unsigned present)
+ {
+-    cell[31] = (uint8_t)((cell[31] & ~7u) | (present ? present + 1u : 0u));
++    original_sound_sj6_marker_store(cell,(original_sound_sj6_marker(cell) & ~7u) | (present ? present + 1u : 0u));
+     for (unsigned i = 0; i < 2; ++i) {
+         uint32_t word = 0;
+         if (present & (1u << i)) memcpy(&word, &values[i], sizeof word);
+@@ -468,7 +537,7 @@
+     uint32_t word = 0;
+     if (present) memcpy(&word, &value, sizeof word);
+     sj6_write_word(wire + ORIGINAL_SJ6_VIBRATO_WIRE_BYTES, word);
+-    cell[31] = (uint8_t)((cell[31] & ~ORIGINAL_SJ6_A_REFERENCE_MARK) | (present ? ORIGINAL_SJ6_A_REFERENCE_MARK : 0u));
++    original_sound_sj6_marker_store(cell,(original_sound_sj6_marker(cell) & ~ORIGINAL_SJ6_A_REFERENCE_MARK) | (present ? ORIGINAL_SJ6_A_REFERENCE_MARK : 0u));
+ }
+ 
+ int original_sound_sj6_a_reference_available(const uint8_t *cell, const uint8_t *wire)
+@@ -499,9 +568,9 @@
+     positions[SJ6_WAVE2] = (mixed >> 2) & 3u;
+     positions[SJ6_RANGE] = (mixed >> 4) & 3u;
+     positions[SJ6_PWM1_ON] = (mixed >> 6) & 1u;
+-    positions[SJ6_PWM1] = cell[18];
++    positions[SJ6_PWM1] = cell[18] & 127u;
+     positions[SJ6_PWM2_ON] = mixed >> 7;
+-    positions[SJ6_PWM2] = cell[19];
++    positions[SJ6_PWM2] = cell[19] & 127u;
+     return (original_sound_edit_mask(cell) >> ORIGINAL_SJ6_EDIT_SHIFT) & ORIGINAL_SJ6_EDIT_MASK;
+ }
+ 
+@@ -512,8 +581,8 @@
+     (void)original_sound_sj6_knobs(cell, saved);
+     for (unsigned i = 0; i < SJ6_OSC_KNOBS; ++i)
+         if (mask & (1u << i)) saved[i] = positions[i];
+-    cell[18] = saved[SJ6_PWM1];
+-    cell[19] = saved[SJ6_PWM2];
++    cell[18] = saved[SJ6_PWM1] | (cell[18] & 128u);
++    cell[19] = saved[SJ6_PWM2] | (cell[19] & 128u);
+     cell[20] = (uint8_t)(saved[SJ6_WAVE1] | saved[SJ6_WAVE2] << 2 |
+                         saved[SJ6_RANGE] << 4 | saved[SJ6_PWM1_ON] << 6 |
+                         saved[SJ6_PWM2_ON] << 7);
+@@ -553,12 +622,15 @@
+     if (cell[29] == ORIGINAL_SOUND_JUNO) {
+         for (unsigned l = 0; l < 2; ++l)
+             if (original_sound_sj6_fine_code(cell, l) > SJ6_FINE_MAX) return 0;
+-        if (cell[13] > 127u || cell[14] > 127u || cell[16] > 127u || cell[17] > 127u) return 0;
++        if (cell[16] > 127u || cell[17] > 127u) return 0;
++        if (!original_sound_sj6_osc1_code(cell) &&
++            ((cell[13]|cell[14]|cell[18]|cell[19])&128u)) return 0;
+     }
+-    if (cell[29] == ORIGINAL_SOUND_JUNO && sj6_flags >> ORIGINAL_SJ6_EDIT_SHIFT) {
++    if (cell[29] == ORIGINAL_SOUND_JUNO && ((sj6_flags >> ORIGINAL_SJ6_EDIT_SHIFT) || original_sound_sj6_osc1_code(cell))) {
+         uint8_t positions[SJ6_OSC_KNOBS];
+         unsigned mask = original_sound_sj6_knobs(cell, positions);
+-        if (!!cell[ORIGINAL_SJ6_LFO2_PWM_BYTE] != !!(sj6_flags & ORIGINAL_SJ6_LFO2_PWM_BIT) ||
++        if ((!original_sound_sj6_osc1_code(cell) &&
++             !!cell[ORIGINAL_SJ6_LFO2_PWM_BYTE] != !!(sj6_flags & ORIGINAL_SJ6_LFO2_PWM_BIT)) ||
+             original_sound_sj6_lfo2_pwm(cell) >> SJ6_LFO2_PWM_ROUTE_SHIFT > DNBX_LAYERS ||
+             original_sound_sj6_chorus(cell) > JUNO6_CHORUS_BOTH) return 0;
+         for (unsigned i = 0; i < SJ6_OSC_KNOBS; ++i)
+--- a/firmware/src/app/original_sound.h
++++ b/firmware/src/app/original_sound.h
+@@ -171,26 +171,30 @@
+  * meanings. Only a tagged nondefault shape can use the upper nibble. */
+ #define ORIGINAL_SJ6_LFO2_SHAPE_MARK 128u
+ #define ORIGINAL_SJ6_LFO2_SHAPE_SHIFT 4u
++/* Dense level plane preserves every canonical old shape/tuning marker.
++ * 50 semantic states times four groups of 32 = 128 optional positions.
++ * In an extended marker the redundant PWM occupancy flag is XOR digit bit 4. */
++unsigned original_sound_sj6_marker(const uint8_t *cell);
++unsigned original_sound_sj6_osc1_code(const uint8_t *cell);
++void original_sound_sj6_marker_store(uint8_t *cell,unsigned canonical);
++void original_sound_sj6_osc1_store(uint8_t *cell,unsigned position);
+ static inline unsigned original_sound_sj6_shape(const uint8_t *cell)
+ {
+-    unsigned high = cell[31] >> ORIGINAL_SJ6_LFO2_SHAPE_SHIFT;
++    unsigned high = original_sound_sj6_marker(cell) >> ORIGINAL_SJ6_LFO2_SHAPE_SHIFT;
+     return high == 8u ? SJ6_LFO_HELD : high >= 9u && high <= 11u ? high - 8u : SJ6_LFO_TRI;
+ }
+ static inline void original_sound_sj6_shape_store(uint8_t *cell, unsigned shape)
+ {
+     if (shape <= SJ6_LFO2_SHAPE_MAX)
+-        cell[31] = (cell[31] & 15u) | (shape ? ORIGINAL_SJ6_LFO2_SHAPE_MARK |
+-                   ((shape & 3u) << ORIGINAL_SJ6_LFO2_SHAPE_SHIFT) : 0u);
++        original_sound_sj6_marker_store(cell,(original_sound_sj6_marker(cell) & 15u) |
++                    (shape ? ORIGINAL_SJ6_LFO2_SHAPE_MARK | ((shape & 3u) << ORIGINAL_SJ6_LFO2_SHAPE_SHIFT) : 0u));
+ }
+ /* The same kind-discriminated byte marks Synth One crush edits. */
+ static inline unsigned original_sound_sj6_vibrato_marker(const uint8_t *cell)
+-{ return cell[31] & 7u; }
++{ return original_sound_sj6_marker(cell) & 7u; }
+ static inline int original_sound_sj6_marker_valid(const uint8_t *cell)
+ {
+-    unsigned high = cell[31] >> ORIGINAL_SJ6_LFO2_SHAPE_SHIFT;
+-    unsigned tag = ORIGINAL_SJ6_LFO2_SHAPE_MARK >> ORIGINAL_SJ6_LFO2_SHAPE_SHIFT;
+-    return cell[29] == ORIGINAL_SOUND_JUNO && original_sound_sj6_vibrato_marker(cell) <= 4u &&
+-           (!high || (high >= tag && high <= tag + SJ6_LFO_SQUARE));
++    return cell[29] == ORIGINAL_SOUND_JUNO && original_sound_sj6_marker(cell)<=255u;
+ }
+ static inline int original_sound_sj6_vibrato(const uint8_t *cell)
+ { return original_sound_sj6_marker_valid(cell) && original_sound_sj6_vibrato_marker(cell) != 0; }
+@@ -200,7 +204,7 @@
+     return original_sound_sj6_vibrato(cell) && marker > 1u ? marker - 1u : 0u;
+ }
+ static inline int original_sound_sj6_has_a_reference(const uint8_t *cell)
+-{ return original_sound_sj6_marker_valid(cell) && (cell[31] & ORIGINAL_SJ6_A_REFERENCE_MARK); }
++{ return original_sound_sj6_marker_valid(cell) && (original_sound_sj6_marker(cell) & ORIGINAL_SJ6_A_REFERENCE_MARK); }
+ int original_sound_sj6_a_reference_word(const uint8_t *cell, const uint8_t *wire, float *value);
+ void original_sound_sj6_a_reference_store(uint8_t *cell, uint8_t *wire, float value, unsigned present);
+ int original_sound_sj6_a_reference_available(const uint8_t *cell, const uint8_t *wire);
+--- a/firmware/src/app/original_runtime.c
++++ b/firmware/src/app/original_runtime.c
+@@ -22,7 +22,7 @@
+      * first switch edits start from the visible positions in the sound cell. */
+     for (unsigned id = 13; id <= 14; ++id) {
+         float value;
+-        if (original_sound_control_value(ORIGINAL_SOUND_JUNO, id, cell[id], &value))
++        if (original_sound_control_value(ORIGINAL_SOUND_JUNO, id, original_sound_panel_position(cell,id), &value))
+             (void)original_runtime_param(part, id, value);
+     }
+ }
+@@ -51,6 +51,7 @@
+ #if X0X_SUPERJ6_BUILTIN_INIT
+         p->dsp.juno.chorus.mix = 0;
+         p->dsp.juno.synth.osc2_level_code = (uint8_t)original_sound_sj6_osc2_code(cell);
++        p->dsp.juno.synth.osc1_level_code = (uint8_t)original_sound_sj6_osc1_code(cell);
+ #endif
+         rc=ORIGINAL_RUNTIME_OK;
+     } else if (kind == ORIGINAL_SOUND_SYNTHONE) {
+--- a/firmware/src/app/original_presets.inc
++++ b/firmware/src/app/original_presets.inc
+@@ -412,9 +412,10 @@
+ #if defined(X0X_HOST) && defined(X0X_SJ6_MAILBOX_PROBE)
+     if (slot >= SJ6_KNOBS) return engine_superj6_mailbox_probe_read(owner, slot);
+ #endif
+-    if (slot == SJ6_OSC2_LEVEL) {
++    if (slot == SJ6_OSC2_LEVEL || slot == SJ6_OSC1_LEVEL) {
+         if (bass_named_preset[owner] != 0) return -1;
+-        unsigned code=original_bass[owner].dsp.juno.synth.osc2_level_code;
++        unsigned code=slot==SJ6_OSC2_LEVEL ? original_bass[owner].dsp.juno.synth.osc2_level_code :
++                      original_bass[owner].dsp.juno.synth.osc1_level_code;
+         return code ? (int)code-1 : 128; /* explicit new control vs untouched Init */
+     }
+     if (slot == SJ6_LFO2_SHAPE)
+@@ -436,7 +437,7 @@
+         return (int)(raw * 127.f + .5f);
+     }
+     if (slot >= SJ6_CHORUS_RATE)
+-        return mot_base_snd ? mot_base_snd->v[T_303][owner][13u + slot - SJ6_CHORUS_RATE] : 0;
++        return mot_base_snd ? original_sound_panel_position(mot_base_snd->v[T_303][owner],13u + slot - SJ6_CHORUS_RATE) : 0;
+     if (slot >= SJ6_CHORUS_I) {
+         unsigned mode = original_bass[owner].dsp.juno.chorus.factory_mode;
+         return mode ? ((mode - JUNO6_CHORUS_OFF) >> (slot - SJ6_CHORUS_I)) & 1u : 0;
+@@ -502,7 +503,7 @@
+     if (owner >= NBASS || slot > SJ6_LFO2_PWM_BASE) return 0;
+     uint32_t lock = plat_cq_lock();
+     int changed = 0;
+-    if (sj6_knob_can_turn(owner) && (slot != SJ6_OSC2_LEVEL || bass_named_preset[owner] == 0)) {
++    if (sj6_knob_can_turn(owner) && ((slot != SJ6_OSC2_LEVEL && slot != SJ6_OSC1_LEVEL) || bass_named_preset[owner] == 0)) {
+         slot = sj6_panel_slot(owner, slot);
+         int before = sj6_knob_position(owner, slot);
+         value = sj6_knob_target(before, value, (int)original_sound_sj6_max(slot), relative);
+@@ -695,6 +696,11 @@
+         cell[30]=(uint8_t)(128u | position);
+         s->osc2_level_code=(uint8_t)(position+1u);
+     }
++    if ((upper & sj6_knob_bit(SJ6_OSC1_LEVEL)) && !original_sound_sj6_factory(cell)) {
++        unsigned position=sj6_knob_value[v][SJ6_OSC1_LEVEL];
++        original_sound_sj6_osc1_store(cell,position);
++        s->osc1_level_code=(uint8_t)(position+1u);
++    }
+     bass_tag_set(sound, v, ORIGINAL_SOUND_JUNO, bass_named_preset[v],
+                  original_sound_is_edited(cell));
+ }
+@@ -711,7 +717,7 @@
+ #endif
+         unsigned upper = pending.word[1] & (sj6_knob_bit(SJ6_LFO2_SHAPE) | sj6_knob_bit(SJ6_LAYER1_SEMI) |
+                                              sj6_knob_bit(SJ6_LAYER2_SEMI) | sj6_knob_bit(SJ6_LAYER1_FINE) |
+-                                             sj6_knob_bit(SJ6_LAYER2_FINE) | sj6_knob_bit(SJ6_OSC2_LEVEL));
++                                             sj6_knob_bit(SJ6_LAYER2_FINE) | sj6_knob_bit(SJ6_OSC2_LEVEL) | sj6_knob_bit(SJ6_OSC1_LEVEL));
+         if (pending.word[0] || upper) sj6_knob_commit(v, pending.word[0], upper);
+ #if defined(X0X_HOST) && defined(X0X_SJ6_MAILBOX_PROBE)
+         for (unsigned slot = SJ6_KNOBS; slot < SJ6_MAILBOX_SLOTS; ++slot)
+@@ -918,6 +924,7 @@
+     }
+     sj6_restore_semi(part, cell, extra);
+     part->dsp.juno.synth.osc2_level_code=(uint8_t)original_sound_sj6_osc2_code(cell);
++    part->dsp.juno.synth.osc1_level_code=(uint8_t)original_sound_sj6_osc1_code(cell);
+     sj6_locked_extra[v] = (uint8_t)(lock && marked);
+     uint8_t knobs[SJ6_OSC_KNOBS];
+     unsigned mask = original_sound_sj6_knobs(cell, knobs);
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -531,6 +531,7 @@
+         {"LAYER 1 FINE", SJ6_FINE_MAX, SJ6_FINE_CENTER, 0},
+         {"LAYER 2 FINE", SJ6_FINE_MAX, SJ6_FINE_CENTER, 0},
+         {"OSC 2 LVL", 127, 127, 0},
++        {"OSC 1 LVL", 127, 127, 0},
+         {"PWM BASE", SJ6_PWM_STEPS, 0, 0},
+     };
+     return slot < sizeof knobs / sizeof *knobs ? &knobs[slot] : 0;
+@@ -1519,7 +1520,7 @@
+     }
+ #if X0X_SUPERJ6_BUILTIN_INIT
+     if (r.kind == R_SJ6KNOB && !d->names) {
+-        if (r.c == SJ6_OSC2_LEVEL && v == 128) { put_s(num,"INIT"); return; }
++        if ((r.c == SJ6_OSC2_LEVEL || r.c == SJ6_OSC1_LEVEL) && v == 128) { put_s(num,"INIT"); return; }
+         if (r.c == SJ6_LAYER1_FINE || r.c == SJ6_LAYER2_FINE) {
+             put_i(num, v - SJ6_FINE_CENTER);
+             put_s(unit, "ct");
+@@ -2190,7 +2191,7 @@
+                     {"FILTER", {ORIG_PAGE_ENGINE + 2, ORIG_PAGE_ENGINE + 3, ORIG_PAGE_ENGINE + 4, SJ6_FILTER_LINK}},
+                     {"FILTER ADSR", {SJ6_FILTER_ATTACK, SJ6_FILTER_DECAY, SJ6_FILTER_SUSTAIN, SJ6_FILTER_RELEASE}},
+                     {"AMP ADSR", {SJ6_AMP_ATTACK, SJ6_AMP_DECAY, SJ6_AMP_SUSTAIN, SJ6_AMP_RELEASE}},
+-                    {"OUTPUT", {ORIG_PAGE_ENGINE + 9, SJ6_MASTER_LEVEL, ORIG_PAGE_NONE, SJ6_OSC2_LEVEL}},
++                    {"OUTPUT", {ORIG_PAGE_ENGINE + 9, SJ6_MASTER_LEVEL, SJ6_OSC1_LEVEL, SJ6_OSC2_LEVEL}},
+                     {"LFO RATE", {SJ6_LFO1_RATE, SJ6_LFO2_RATE, SJ6_LFO3_RATE, SJ6_LFO2_SHAPE}},
+                     {"LFO MODE", {SJ6_LFO1_MODE, SJ6_LFO2_MODE, SJ6_LFO3_MODE, ORIG_PAGE_NONE}},
+                     {"LFO2 PWM", {SJ6_LFO2_RATE, SJ6_LFO2_PWM_DEPTH, SJ6_LFO2_PWM_ROUTE, SJ6_LFO2_PWM_BASE}},
+--- a/firmware/src/dsp/juno6.h
++++ b/firmware/src/dsp/juno6.h
+@@ -21,7 +21,7 @@
+        SJ6_LFO2_PWM_DEPTH, SJ6_LFO2_PWM_ROUTE, SJ6_LFO1_MODE, SJ6_LFO2_MODE, SJ6_LFO3_MODE,
+        SJ6_CHORUS_I, SJ6_CHORUS_II, SJ6_CHORUS_RATE, SJ6_CHORUS_MIX,
+        SJ6_VIBRATO_DEPTH, SJ6_VIBRATO_RATE, SJ6_A_REFERENCE, SJ6_LFO2_SHAPE,
+-       SJ6_LAYER1_SEMI, SJ6_LAYER2_SEMI, SJ6_LAYER1_FINE, SJ6_LAYER2_FINE, SJ6_OSC2_LEVEL, SJ6_KNOBS, SJ6_LFO2_PWM_BASE = SJ6_KNOBS };
++       SJ6_LAYER1_SEMI, SJ6_LAYER2_SEMI, SJ6_LAYER1_FINE, SJ6_LAYER2_FINE, SJ6_OSC2_LEVEL, SJ6_OSC1_LEVEL, SJ6_KNOBS, SJ6_LFO2_PWM_BASE = SJ6_KNOBS };
+ enum { SJ6_LAYER1_SEMI_ID = 72, SJ6_LAYER2_SEMI_ID = 73, SJ6_SEMI_CENTER = 12, SJ6_SEMI_MAX = 24 };
+ enum { SJ6_LAYER1_FINE_ID = 74, SJ6_FINE_CENTER = 50, SJ6_FINE_MAX = 100 };
+ enum { SJ6_A_REFERENCE_ID = 206, SJ6_A_REFERENCE_STEPS = 100, SJ6_A_REFERENCE_DEFAULT = 60 };
+@@ -89,6 +89,7 @@
+  float vibrato_depth, vibrato_ratio;
+  uint64_t lfo2_entropy_state;
+  float lfo2_hold_elapsed, lfo2_hold_period, lfo2_hold_sample;
++ uint8_t osc1_level_code;
+ #endif
+ #endif
+ } juno6_t;
+--- a/firmware/src/dsp/juno6_factory.inc
++++ b/firmware/src/dsp/juno6_factory.inc
+@@ -575,15 +575,14 @@
+     juno6_set_vibrato(s, present & 1u ? values[0] : 0.f, present & 2u ? values[1] : 0.f, reset);
+ }
+ 
+-static float osc2_gain(const juno6_t *s)
+-{
+-    return s->osc2_level_code ? ((float)(s->osc2_level_code-1u) / 127.f) * .808f : 1.f;
+-}
++static float osc_level_gain(unsigned code)
++{ return code ? ((float)(code-1u) / 127.f) * .808f : 1.f; }
+ 
+ static int render_typed_dry(juno6_t *s,float *left,float *right,unsigned frames)
+ {
+-    return s->osc2_level_code ? dnbx_render_superj6_osc2(&s->core,left,right,frames,osc2_gain(s)) :
+-                               dnbx_render(&s->core,left,right,frames,0);
++    if (!(s->osc1_level_code|s->osc2_level_code)) return dnbx_render(&s->core,left,right,frames,0);
++    return dnbx_render_pitch_osc_levels(&s->core,left,right,frames,1.f,
++                                       osc_level_gain(s->osc1_level_code),osc_level_gain(s->osc2_level_code));
+ }
+ 
+ static int render_typed_span(juno6_t *s, float *left, float *right, unsigned frames)
+@@ -613,7 +612,7 @@
+             s->vibrato_left = SJ6_VIBRATO_TICK;
+         }
+         unsigned count = frames < s->vibrato_left ? frames : s->vibrato_left;
+-        int result = dnbx_render_pitch_osc2(&s->core,left,right,count,s->vibrato_ratio,osc2_gain(s));
++        int result = dnbx_render_pitch_osc_levels(&s->core,left,right,count,s->vibrato_ratio,osc_level_gain(s->osc1_level_code),osc_level_gain(s->osc2_level_code));
+         if (result != DNBX_OK) return result;
+         s->vibrato_left -= count;
+         frames -= count;
+--- a/firmware/src/dsp/dnbx_core.c
++++ b/firmware/src/dsp/dnbx_core.c
+@@ -471,7 +471,7 @@
+     out->note=v->note; out->gate=v->gate; out->age_rank=v->age_rank;
+     out->active=(uint8_t)(voice_active(v)!=0); return DNBX_OK;
+ }
+-static int render_with_osc2_gain(dnbx_part *s,float *left,float *right,unsigned n,dnbx_work *w,float gain)
++static int render_with_osc_gains(dnbx_part *s,float *left,float *right,unsigned n,dnbx_work *w,float gain1,float gain2)
+ {
+     if (!valid(s)) return DNBX_E_UNINITIALIZED;
+ #if !DNBX_DIAGNOSTIC_COUNTERS
+@@ -481,6 +481,7 @@
+     if (!n) return DNBX_OK;
+     if (!left || !right || left==right) return DNBX_E_ARGUMENT;
+     COUNT(w,frames,n);
++    const float osc_gain[]={gain1,gain2};
+     dnbx_envelope_params linked[DNBX_LAYERS];
+     const dnbx_envelope_params *fp[DNBX_LAYERS];
+     for (unsigned l=0;l<DNBX_LAYERS;l++) fp[l]=filter_params(s,l,&linked[l]);
+@@ -509,7 +510,7 @@
+                 float x = p->oscillator_mode == DNBX_OSC_SUPERJ6
+                     ? factory_oscillator(lv, p->waveform, width[l], w)
+                     : oscillator(lv->phase,lv->increment,p->waveform,width[l],p->oscillator_mode,w);
+-                if (l==1u && gain!=1.f) x*=gain;
++                if (osc_gain[l]!=1.f) x*=osc_gain[l];
+                 x+=(lv->subphase<.5f?1.0f:-1.0f)*p->sub_gain;
+                 /* Existing DnBOX two-pole recurrence, with explicit saturation
+                  * guards to make a finite bound part of this candidate ABI. */
+@@ -533,22 +534,23 @@
+ }
+ int dnbx_render(dnbx_part *s,float *left,float *right,unsigned n,dnbx_work *w)
+ {
+-    return render_with_osc2_gain(s,left,right,n,w,1.f);
++    return render_with_osc_gains(s,left,right,n,w,1.f,1.f);
+ }
+ int dnbx_render_superj6_osc2(dnbx_part *s,float *left,float *right,unsigned n,float gain)
+ {
+     if (!valid(s)) return DNBX_E_UNINITIALIZED;
+     if (!s->superj6_amp_range) return DNBX_E_UNSUPPORTED;
+     if (!(gain >= 0.f && gain <= .808f)) return DNBX_E_RANGE;
+-    return render_with_osc2_gain(s,left,right,n,0,gain);
++    return render_with_osc_gains(s,left,right,n,0,1.f,gain);
+ }
+ #if X0X_SUPERJ6_BUILTIN_INIT
+-int dnbx_render_pitch_osc2(dnbx_part *s, float *left, float *right, unsigned n, float ratio, float gain)
++int dnbx_render_pitch_osc_levels(dnbx_part *s, float *left, float *right, unsigned n, float ratio, float gain1,float gain2)
+ {
+     if (!valid(s)) return DNBX_E_UNINITIALIZED;
+     if (!(ratio >= .5f && ratio <= 2.f)) return DNBX_E_RANGE;
+-    if (!(gain >= 0.f && (gain <= .808f || gain == 1.f))) return DNBX_E_RANGE;
+-    if (ratio == 1.f) return render_with_osc2_gain(s, left, right, n, 0, gain);
++    if (!(gain1 >= 0.f && (gain1 <= .808f || gain1 == 1.f)) ||
++        !(gain2 >= 0.f && (gain2 <= .808f || gain2 == 1.f))) return DNBX_E_RANGE;
++    if (ratio == 1.f) return render_with_osc_gains(s,left,right,n,0,gain1,gain2);
+     float nominal[DNBX_VOICES][DNBX_LAYERS];
+     for (unsigned i = 0; i < DNBX_VOICES; ++i)
+         for (unsigned l = 0; l < DNBX_LAYERS; ++l) {
+@@ -556,12 +558,14 @@
+             nominal[i][l] = *step;
+             *step = fm_minf(*step * ratio, .45f);
+         }
+-    int result = render_with_osc2_gain(s, left, right, n, 0, gain);
++    int result = render_with_osc_gains(s,left,right,n,0,gain1,gain2);
+     for (unsigned i = 0; i < DNBX_VOICES; ++i)
+         for (unsigned l = 0; l < DNBX_LAYERS; ++l)
+             s->voice[i].layer[l].increment = nominal[i][l];
+     return result;
+ }
++int dnbx_render_pitch_osc2(dnbx_part *s,float *l,float *r,unsigned n,float ratio,float gain)
++{ return dnbx_render_pitch_osc_levels(s,l,r,n,ratio,1.f,gain); }
+ int dnbx_render_pitch(dnbx_part *s, float *l, float *r, unsigned n, float ratio)
+ { return dnbx_render_pitch_osc2(s,l,r,n,ratio,1.f); }
+ #endif
+--- a/firmware/src/dsp/dnbx_core.h
++++ b/firmware/src/dsp/dnbx_core.h
+@@ -158,6 +158,7 @@
+                             unsigned frames, float oscillator_2_gain);
+ #if X0X_SUPERJ6_BUILTIN_INIT
+ int dnbx_render_pitch_osc2(dnbx_part *, float *, float *, unsigned, float, float);
++int dnbx_render_pitch_osc_levels(dnbx_part *, float *, float *, unsigned, float, float, float);
+ #endif
+ 
+ 

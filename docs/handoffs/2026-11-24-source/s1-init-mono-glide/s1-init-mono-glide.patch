@@ -1,0 +1,257 @@
+--- a/firmware/src/app/original_runtime.c
++++ b/firmware/src/app/original_runtime.c
+@@ -69,7 +69,7 @@
+ #if X0X_SYNTHONE_PATCH
+         if ((original_sound_edit_mask(cell) & (S1_PATCH_MASK | S1_LINK_MASK | S1_BASE_EDIT_MASK | S1_ROUTE_MASK | S1_MOD_EXT_MARK))
+ #if X0X_S1_EXTRA
+-            || s1_coarse_code(cell,0) || s1_coarse_code(cell,1) || s1_detune_code(cell)
++            || s1_coarse_code(cell,0) || s1_coarse_code(cell,1) || s1_detune_code(cell) || s1_voice_code(cell)
+ #endif
+             )
+             s1_part_apply_cell(&p->dsp.synthone, cell);
+--- a/firmware/src/app/original_sound.c
++++ b/firmware/src/app/original_sound.c
+@@ -598,7 +598,7 @@
+ #endif
+     if (cell[29] == ORIGINAL_SOUND_SYNTHONE && ((mask & editor)
+ #if X0X_S1_EXTRA
+-        || s1_coarse_code(cell,0) || s1_coarse_code(cell,1)
++        || s1_coarse_code(cell,0) || s1_coarse_code(cell,1) || s1_voice_code(cell) || (cell[S1_VOICE_MARK_BYTE] & 128u)
+ #endif
+         )) {
+         if (mask & ~(editor | 7u)) return 0;
+@@ -606,11 +606,18 @@
+         uint8_t codes[S1_ROUTE_COUNT];
+         if (!s1_route_decode(mask >> S1_ROUTE_SHIFT, codes)) return 0;
+ #endif
++#if X0X_S1_EXTRA
++        if ((cell[S1_LINK_BYTE] & 1u) != ((mask & S1_LINK_MASK) != 0) ||
++            s1_voice_code(cell) >= S1_VOICE_CODES ||
++            !!s1_voice_code(cell) != !!(cell[S1_VOICE_MARK_BYTE] & 128u)) return 0;
++#else
+         if (cell[S1_LINK_BYTE] != ((mask & S1_LINK_MASK) != 0)) return 0;
++#endif
+         for (unsigned i = 0; i < 22; ++i) {
+             unsigned v = cell[i];
+ #if X0X_S1_EXTRA
+-            if (i-S1_PATCH_FIRST_BYTE < 2u*S1_COARSE_BITS) v &= 127u;
++            if (i == S1_LINK_BYTE) v &= 1u;
++            if (i-S1_PATCH_FIRST_BYTE < 2u*S1_COARSE_BITS || i == S1_VOICE_MARK_BYTE) v &= 127u;
+ #endif
+             if (v > 127u || (i >= 2 && i != S1_LINK_BYTE && !(mask & (UINT32_C(1) << i)) && v)) return 0;
+         }
+@@ -934,6 +941,15 @@
+         ) || position > S1_PATCH_STEPS ||
+         !original_sound_valid(cell) || cell[29] != ORIGINAL_SOUND_SYNTHONE) return 0;
+ #if X0X_S1_EXTRA
++    if (slot - S1_VOICE_MODE < 2u) {
++        if (position > s1_patch_steps(slot)) return 0;
++        unsigned code = s1_voice_code(cell);
++        code = slot == S1_VOICE_MODE ? code % S1_GLIDE_RADIX + (position+1u)*S1_GLIDE_RADIX :
++                                      code - code % S1_GLIDE_RADIX + position+1u;
++        cell[S1_LINK_BYTE] = (uint8_t)((cell[S1_LINK_BYTE] & 1u) | (code << 1));
++        cell[S1_VOICE_MARK_BYTE] |= 128u;
++        return 1;
++    }
+     if (slot == S1_OSC2_DETUNE) {
+         if (position > S1_DETUNE_STEPS) return 0;
+         cell[31] = (uint8_t)((cell[31] & 1u) | ((position+1u) << 1));
+@@ -975,7 +991,7 @@
+ #endif
+     if (slot == S1_PATCH_COUNT) {
+         if (position > 1) return 0;
+-        cell[S1_LINK_BYTE] = (uint8_t)position;
++        cell[S1_LINK_BYTE] = (uint8_t)((cell[S1_LINK_BYTE] & 254u) | position);
+         uint32_t mask = original_sound_edit_mask(cell);
+         original_sound_put_mask(cell, position ? mask | S1_LINK_MASK : mask & ~S1_LINK_MASK);
+         return 1;
+--- a/firmware/src/app/s1_patch.h
++++ b/firmware/src/app/s1_patch.h
+@@ -31,7 +31,7 @@
+     S1_EXTRA_BYTES = S1_FILTER_EXTRA_BYTES + 2,
+     S1_LFO_DIVISIONS = 19, S1_LFO_CODE_SYNC = 129,
+     S1_LFO_RATE_CODES = S1_LFO_CODE_SYNC + S1_LFO_DIVISIONS,
+-    S1_PART_LEVEL = 40, S1_LFO1_DEPTH, S1_LFO2_DEPTH, S1_CUTOFF_LFO, S1_NOISE_LFO, S1_OSC_MIX_LFO, S1_RESONANCE_LFO, S1_FM_LFO, S1_AMP_DECAY_LFO, S1_OSC1_SEMI, S1_OSC2_SEMI, S1_OSC2_DETUNE,
++    S1_PART_LEVEL = 40, S1_LFO1_DEPTH, S1_LFO2_DEPTH, S1_CUTOFF_LFO, S1_NOISE_LFO, S1_OSC_MIX_LFO, S1_RESONANCE_LFO, S1_FM_LFO, S1_AMP_DECAY_LFO, S1_OSC1_SEMI, S1_OSC2_SEMI, S1_OSC2_DETUNE, S1_VOICE_MODE, S1_MONO_GLIDE,
+     S1_BASE_EDIT_FIRST = S1_PART_LEVEL, S1_BASE_EDIT_COUNT = 3, S1_BASE_EDIT_BYTE = 3
+ };
+ /* Formerly invalid q7 top bits. Code zero keeps the exact program;
+@@ -49,6 +49,10 @@
+  * invalid high bits hold absent or one of the 81 manual -4..+4 detents. */
+ enum { S1_DETUNE_STEPS = 80 };
+ static inline unsigned s1_detune_code(const uint8_t cell[32]) { return cell[31] >> 1; }
++/* The prior typed link domain was exactly 0/1. Preserve bit 0 and
++ * allocate the old-invalid high bits to independent 3 x 42 digits. */
++enum { S1_VOICE_MARK_BYTE = 20, S1_GLIDE_STEPS = 40, S1_GLIDE_RADIX = S1_GLIDE_STEPS+2, S1_VOICE_CODES = 3*S1_GLIDE_RADIX };
++static inline unsigned s1_voice_code(const uint8_t cell[32]) { return cell[S1_LINK_BYTE] >> 1; }
+ #define S1_MOD_EXT_MARK (UINT32_C(1) << 23)
+ /* Radix five stores independent absent/explicit OFF/LFO1/LFO2/BOTH digits.
+  * FM-only codes 0..4 are identical to the preceding typed binding. */
+@@ -83,7 +87,7 @@
+ static inline int s1_base_route_slot(unsigned slot)
+ { return slot - S1_ROUTE_FIRST < S1_ROUTE_COUNT; }
+ static inline int s1_base_edit_slot(unsigned slot)
+-{ return slot == S1_OSC2_DETUNE || s1_coarse_slot(slot) || s1_mod_ext_slot(slot) || s1_base_route_slot(slot) || slot - S1_BASE_EDIT_FIRST < S1_BASE_EDIT_COUNT; }
++{ return slot - S1_VOICE_MODE < 2u || slot == S1_OSC2_DETUNE || s1_coarse_slot(slot) || s1_mod_ext_slot(slot) || s1_base_route_slot(slot) || slot - S1_BASE_EDIT_FIRST < S1_BASE_EDIT_COUNT; }
+ float s1c_morph_preview(float position, uint32_t phase);
+ static inline unsigned s1_extra_bits(const uint8_t *data)
+ { return (unsigned)data[0] | (((unsigned)data[1] & 7u) << 8); }
+@@ -113,6 +117,8 @@
+ static inline unsigned s1_patch_steps(unsigned slot)
+ {
+ #if X0X_S1_EXTRA
++    if (slot == S1_VOICE_MODE) return 1u;
++    if (slot == S1_MONO_GLIDE) return S1_GLIDE_STEPS;
+     if (slot == S1_OSC2_DETUNE) return S1_DETUNE_STEPS;
+     if (s1_coarse_slot(slot)) return S1_COARSE_STEPS;
+     if (slot == S1_SUB_OCTAVE || slot == S1_SUB_WAVE) return 1;
+--- a/firmware/src/app/s1c_part.c
++++ b/firmware/src/app/s1c_part.c
+@@ -12,7 +12,7 @@
+ 
+ #define S1C_SR 44100.0f
+ /* Synth One factory parameter ids (s1c uses the same numbering). */
+-enum { P_MONO = 20, P_DET2 = 30, P_DETM = 31, P_BCSR = 34, P_PAN_RATE = 36, P_DELAY_TIME = 43, P_CUTOFF_LFO = 48, P_RESONANCE_LFO = 49, P_OSC_MIX_LFO = 50, P_AMP_DECAY_LFO = 52, P_NOISE_LFO = 53, P_FM_LFO = 54, P_TEMPO_SYNC = 139 };
++enum { P_MONO = 20, P_GLIDE = 21, P_DET2 = 30, P_DETM = 31, P_BCSR = 34, P_PAN_RATE = 36, P_DELAY_TIME = 43, P_CUTOFF_LFO = 48, P_RESONANCE_LFO = 49, P_OSC_MIX_LFO = 50, P_AMP_DECAY_LFO = 52, P_NOISE_LFO = 53, P_FM_LFO = 54, P_TEMPO_SYNC = 139 };
+ 
+ #if !X0X_SYNTH_CONTROLS_INIT_ONLY
+ static const uint8_t *s1_part_pack;
+@@ -91,6 +91,8 @@
+     part->clock_factory_delay = e->t[P_DELAY_TIME];
+     part->cutoff_lfo_factory = e->t[P_CUTOFF_LFO];
+     part->detune_factory = e->t[P_DET2];
++    part->voice_factory[0] = e->t[P_MONO];
++    part->voice_factory[1] = e->t[P_GLIDE];
+     for (unsigned i=0;i<2;++i) part->coarse_factory[i] = e->t[3u+i];
+     for (unsigned i = 0; i < S1_MOD_EXT_COUNT; ++i)
+         part->mod_ext_factory[i] = e->t[s1_patch_at(S1_MOD_EXT_FIRST+i)->factory_id];
+@@ -201,6 +203,10 @@
+     {"OSC 1 SEMI", -12, 24, 3, X0X_U_ST},
+     {"OSC 2 SEMI", -12, 24, 4, X0X_U_ST},
+ };
++static const s1_patch_descriptor voice_mode[2] = {
++    {"VOICE MODE", 0, 1, P_MONO, X0X_U_NONE},
++    {"MONO GLIDE", 0, .2f, P_GLIDE, X0X_U_S},
++};
+ static const s1_patch_descriptor detune = {"OSC 2 DETUNE", -4, 4, P_DET2, X0X_U_NONE};
+ static const s1_patch_descriptor cutoff_lfo = {"CUTOFF LFO", 0, 3, P_CUTOFF_LFO, X0X_U_NONE};
+ enum { S1_CATALOG_EXTRA_COUNT = sizeof extra_parameters / sizeof extra_parameters[0] };
+@@ -214,6 +220,7 @@
+ #if X0X_S1_EXTRA
+     if (slot == S1_CUTOFF_LFO) return &cutoff_lfo;
+     if (slot == S1_OSC2_DETUNE) return &detune;
++    if (slot-S1_VOICE_MODE < 2u) return &voice_mode[slot-S1_VOICE_MODE];
+     if (s1_coarse_slot(slot)) return &coarse[slot-S1_COARSE_FIRST];
+     if (s1_mod_ext_slot(slot)) return &mod_ext[slot-S1_MOD_EXT_FIRST];
+     if (s1_base_route_slot(slot)) return &routes[slot-S1_ROUTE_FIRST];
+@@ -230,6 +237,7 @@
+ #if X0X_S1_EXTRA
+     if (id == P_CUTOFF_LFO) return S1_CUTOFF_LFO;
+     if (id == P_DET2) return S1_OSC2_DETUNE;
++    if (id-P_MONO < 2u) return (int)(S1_VOICE_MODE+id-P_MONO);
+     if (id-3u < 2u) return (int)(S1_COARSE_FIRST+id-3u);
+     for (unsigned i = 0; i < S1_MOD_EXT_COUNT; ++i)
+         if (id == mod_ext[i].factory_id) return (int)(S1_MOD_EXT_FIRST+i);
+@@ -341,6 +349,10 @@
+         unsigned code = s1_coarse_code(cell,i);
+         s1c_set(&part->e, 3u+i, code ? (float)((int)code-13) : part->coarse_factory[i]);
+     }
++    unsigned voice = s1_voice_code(cell);
++    unsigned mono = voice / S1_GLIDE_RADIX, glide = voice % S1_GLIDE_RADIX;
++    s1c_set(&part->e, P_MONO, mono ? (float)(mono-1u) : part->voice_factory[0]);
++    s1c_set(&part->e, P_GLIDE, glide ? (float)(glide-1u) / 200.f : part->voice_factory[1]);
+     unsigned detune_code = s1_detune_code(cell);
+     s1c_set(&part->e, P_DET2, detune_code ? (float)((int)detune_code-41) / 10.f : part->detune_factory);
+     unsigned mod_code = mask & S1_MOD_EXT_MARK ? cell[S1_MOD_EXT_BYTE] : 0u;
+--- a/firmware/src/app/s1c_part.h
++++ b/firmware/src/app/s1c_part.h
+@@ -24,7 +24,7 @@
+ #if X0X_S1_EXTRA
+     float extra_factory[S1_EXTRA_COUNT]; /* exact pack values for note-lock transitions */
+     float lfo_factory[S1_LFO_COUNT], wet_factory[S1_WET_COUNT];
+-    float mod_ext_factory[S1_MOD_EXT_COUNT], coarse_factory[2], detune_factory;
++    float mod_ext_factory[S1_MOD_EXT_COUNT], coarse_factory[2], detune_factory, voice_factory[2];
+     float clock_factory_pan, clock_factory_delay, cutoff_lfo_factory, route_factory[S1_ROUTE_COUNT], base_factory[S1_BASE_EDIT_COUNT];
+     uint16_t extra_live_mask;
+     uint8_t lfo_live_mask;
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -1496,6 +1496,8 @@
+         }
+         if (r.c == S1_SUB_OCTAVE) { put_s(num, physical > 0.f ? "-24" : "-12"); put_s(unit, "st"); return; }
+         if (r.c == S1_SUB_WAVE) { put_s(num, physical > 0.f ? "SQUARE" : "SINE"); return; }
++        if (r.c == S1_VOICE_MODE) { put_s(num, owner.position ? "MONO" : "POLY"); return; }
++        if (r.c == S1_MONO_GLIDE) { put_i(num, (int)(1000.f*physical + .5f)); put_s(unit, "ms"); return; }
+         if (r.c == S1_OSC2_DETUNE) { put_d1(num, physical, 1); put_s(unit, "Hz@C4"); return; }
+         if (r.c == S1_FM_INDEX) { put_d1(num, physical, 0); return; }
+         if (r.c == S1_CUTOFF_LFO || s1_mod_ext_slot(r.c) || s1_base_route_slot(r.c)) {
+@@ -2210,7 +2212,7 @@
+ #endif
+ #if X0X_S1_EXTRA
+             if (kind == ORIGINAL_SOUND_SYNTHONE) {
+-                enum { S1_PAGE_ID_FITS = 1 / (S1_OSC2_DETUNE < ORIG_PAGE_ENGINE && S1_MONO_LEGATO < ORIG_PAGE_ENGINE) };
++                enum { S1_PAGE_ID_FITS = 1 / (S1_MONO_GLIDE < ORIG_PAGE_ENGINE && S1_MONO_LEGATO < ORIG_PAGE_ENGINE) };
+                 static const original_page_row_t s1_pages[] = {
+                     {"OSCILLATOR", {0, 1, S1_OSC1_MORPH, S1_OSC2_MORPH}},
+                     {"OSC MIX", {S1_OSC2_LEVEL, S1_SUB_LEVEL, S1_SUB_OCTAVE, S1_SUB_WAVE}},
+@@ -2224,7 +2226,7 @@
+                     {"TEMPO SYNC", {S1_LFO_SYNC, S1_LFO1_DEPTH, S1_LFO2_DEPTH, ORIG_PAGE_NONE}},
+                     {"MOD ROUTE", {S1_OSC_MIX_LFO, S1_RESONANCE_LFO, S1_FM_LFO, S1_AMP_DECAY_LFO}},
+                     {"EFFECT", {ORIG_PAGE_ENGINE + ORIGINAL_SYNTHONE_CRUSH, S1_DELAY_MIX, S1_REVERB_MIX, S1_REVERB_HP}},
+-                    {"OUTPUT", {S1_WIDEN, S1_PART_LEVEL, ORIG_PAGE_NONE, ORIG_PAGE_NONE}},
++                    {"OUTPUT", {S1_WIDEN, S1_PART_LEVEL, S1_VOICE_MODE, S1_MONO_GLIDE}},
+                 };
+                 const unsigned effect_page = sizeof s1_pages / sizeof s1_pages[0] - 2;
+                 add_original_extra_pages(emit, s1_pages, effect_page, b, R_S1PATCH);
+--- a/firmware/src/dsp/s1c/s1c.c
++++ b/firmware/src/dsp/s1c/s1c.c
+@@ -127,6 +127,23 @@
+ }
+ static void voice_clear(s1c_voice *v) { v->gate = 0.0f; v->stage = 0; v->amp = 0.0f; v->root = -1; }
+ 
++/* A sequenced patch can switch mode immediately before starting a note.
++ * Reset existing voices before admission, not after the new note starts.
++ * Render retains the same reset for mode edits without a new onset. */
++static __attribute__((noinline)) void voice_mode_reset(s1c *s, uint8_t mono)
++{
++    s->mono_prev = mono;
++    for (unsigned i = 0; i < S1C_VOICES; i++) voice_clear(&s->v[i]);
++    s->nlast = 0; s->prev_held = 0;
++#if !S1C_BUSFX
++#if S1C_EXT
++    s->ddec = 0;     /* re-partition (clears the lines) */
++#else
++    for (unsigned i = 0; i < 4; i++) { memset(s->dl[i].buf, 0, sizeof s->dbuf[0]); s->dl[i].prev = 0.0f; }
++#endif
++#endif
++}
++
+ /* ---- note handling (6-voice poly with the instrument's stealing order, or one mono voice) ---- */
+ static void key_on(s1c *s, int note, int vel)
+ {
+@@ -172,6 +189,7 @@
+ {
+     int i, n = s->nheld;
+     if (note < 0 || note > 127) return;
++    if (s->t[MONO] != (float)s->mono_prev) voice_mode_reset(s, (uint8_t)s->t[MONO]);
+     for (i = 0; i < n; i++) if (s->held[i][0] == note) { for (int j = i; j < n - 1; j++) { s->held[j][0] = s->held[j + 1][0]; s->held[j][1] = s->held[j + 1][1]; } n--; break; }
+     if (n == 8) n--;
+     for (i = n; i > 0; i--) { s->held[i][0] = s->held[i - 1][0]; s->held[i][1] = s->held[i - 1][1]; }  /* no memmove on the device */
+@@ -900,16 +918,7 @@
+         if (gh != s->glide_h) { s->glide_h = gh; s->glide_c2 = gh > 0.0f ? powf(0.5f, 1.0f / (s->sr * gh)) : 0.0f; }
+         s->monos = (1.0f - s->glide_c2) * s->monof + s->glide_c2 * s->monos;
+         if (P(MONO) != (float)s->mono_prev) {
+-            s->mono_prev = (uint8_t)P(MONO);
+-            for (i = 0; i < S1C_VOICES; i++) voice_clear(&s->v[i]);
+-            s->nlast = 0; s->prev_held = 0;
+-#if !S1C_BUSFX
+-#if S1C_EXT
+-            s->ddec = 0;     /* re-partition (clears the lines) */
+-#else
+-            for (i = 0; i < 4; i++) { memset(s->dl[i].buf, 0, sizeof s->dbuf[0]); s->dl[i].prev = 0.0f; }
+-#endif
+-#endif
++            voice_mode_reset(s, (uint8_t)P(MONO));
+         }
+         /* LFOs */
+         float x;

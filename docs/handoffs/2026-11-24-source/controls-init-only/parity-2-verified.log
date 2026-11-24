@@ -1,0 +1,4 @@
+PASS independent original OSC1 level real output K3 and audio, both owners, 19200 full joint shape/level/PWM codec states, existing ID3 independent, project/held lock (153790 checks)
+PASS both real OUTPUT K3/K4, poly no-op/mono 200 ms law, peer PCM, detune/legato/link and cold reload; 9552 checks
+PASS previous reader rejects marked OSC1 Sound plus lock-only before any writes (96 checks)
+PASS exact prior parser rejects live projects and subsequent save without writes, 208 checks
