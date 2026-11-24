@@ -1,0 +1,2172 @@
+diff --git a/tests/chicago_compact_headers.c b/tests/chicago_compact_headers.c
+index 4ebb1e30d8417b1ea9be24d7088b3682841e4ff4..c4c5aa73bc1090af8e421f854b1b23880e9383f0 100644
+--- a/tests/chicago_compact_headers.c
++++ b/tests/chicago_compact_headers.c
+@@ -22,18 +22,21 @@ int main(void){
+  assert(!original_chicago_packed_lookup(0,0,0,&e));
+  assert(!original_chicago_packed_lookup(0,0,&a,0));
+  assert(!original_chicago_packed_lookup(0,0,&a,&a));
+- original_lossless_table16 t=original_chicago_packed_a;
++ chicago_compact_table t=original_chicago_packed_a;
+  #define BAD() assert(!chicago_compact_lookup(&t,0,original_chicago_packed_a_prefix,&v))
+  assert(!chicago_compact_lookup(0,0,0,&v));
+  assert(!chicago_compact_lookup(&t,0,0,0));
+  t.data=0;BAD();t=original_chicago_packed_a;
+- t.offset=0;BAD();t=original_chicago_packed_a;
++ t.offset_base=0;BAD();t=original_chicago_packed_a;
++ t.offset_stride=0;BAD();t=original_chicago_packed_a;
++ t.offset_residual=0;BAD();t=original_chicago_packed_a;
+  t.count=0;BAD();t=original_chicago_packed_a;
+  t.blocks--;BAD();t=original_chicago_packed_a;
+  t.bytes=65536;BAD();t=original_chicago_packed_a;
+- uint16_t offsets[513];memcpy(offsets,t.offset,sizeof offsets);t.offset=offsets;
+- offsets[0]=1;BAD();offsets[0]=0;
+- offsets[1]=6;BAD();offsets[1]=65535;BAD();
++ int8_t residuals[513];memcpy(residuals,t.offset_residual,sizeof residuals);t.offset_residual=residuals;
++ residuals[0]=1;BAD();residuals[0]=0;
++ residuals[1]=(int8_t)(6-t.offset_stride[0]);BAD();
++ residuals[1]=INT8_MIN;BAD();
+  uint8_t block[8]={0};
+  assert(!chicago_compact_decode(block,6,1,0,0,&v));
+  assert(!chicago_compact_decode(block,8,1,0,0,&v));
+diff --git a/tests/host/chicago_span_hold_test.c b/tests/host/chicago_span_hold_test.c
+index 208814505bc1597385b5261a0d8cebcbefe89a22..90198fdbe09b7c9b060be0325cbfd909e32f3355 100644
+--- a/tests/host/chicago_span_hold_test.c
++++ b/tests/host/chicago_span_hold_test.c
+@@ -81,8 +81,17 @@ static void fill_prep(original_prepared_oscillators *p,unsigned shape,uint32_t i
+  p->controls.xmod=xmod;
+  p->ready=1;
+ }
+-static void compare(int held_ramps,uint32_t n,unsigned shape,int mid_fail){
++static void compare(int held_ramps,uint32_t n,unsigned shape,int mid_fail,unsigned boundary){
+  original_prepared_oscillators p;fill_prep(&p,shape,0x01000000u+(rng()&0xffffffu),(float)(rng()&0xff)/256.0f,(rng()&1)?0.0f:frand()*0.3f);
++ if(boundary){
++  /* The zero-XMod shortcut must round the original unsigned increment to
++   * binary32 before saturating. Raw integers and signed casts are not exact. */
++  static const uint32_t rates[]={0,1,0x01000001u,0x01000003u,0x7fffffbfu,
++                               0x7fffffc0u,0x7ffffffeu,0x80000000u,0xffffffffu};
++  p.controls.increment[1]=rates[(boundary-1)%9];
++  p.controls.increment[3]=rates[8-(boundary-1)%9];
++  p.controls.xmod=boundary<=9?0.0f:boundary<=18?-0.0f:0.25f;
++ }
+  original_voice_gain vg,vg_r;original_oscillators ph,ph_r;original_ramp ng,ng_r;
+  original_chicago_mp4 f,f_r;uint32_t ns,ns_r;
+  memset(&vg,0,sizeof vg);memset(&ph,0,sizeof ph);memset(&f,0,sizeof f);
+@@ -107,6 +116,7 @@ static void compare(int held_ramps,uint32_t n,unsigned shape,int mid_fail){
+  vg_r=vg;ph_r=ph;ng_r=ng;f_r=f;ns_r=ns;
+  uint32_t *L=malloc(n*4),*R=malloc(n*4),*Lr=malloc(n*4),*Rr=malloc(n*4);
+  if(!L||!R||!Lr||!Rr){fprintf(stderr,"oom\n");exit(1);}
++ for(uint32_t k=0;k<n;k++)L[k]=R[k]=Lr[k]=Rr[k]=0xdecafbadu;
+  float vco=(rng()&3)?1.0f+frand():0.0f;
+  int ok=original_chicago_voice_span(&vg,&ph,&p,&ng,&ns,vco,&f,L,R,n);
+  int okr=1;
+@@ -116,14 +126,9 @@ static void compare(int held_ramps,uint32_t n,unsigned shape,int mid_fail){
+   }
+  }
+  if(ok!=okr){fprintf(stderr,"ok %d vs %d n=%u held=%d\n",ok,okr,n,held_ramps);free(L);free(R);free(Lr);free(Rr);CHECK(0);}
+- uint32_t upto=ok?n:0;
+- if(!ok){
+-  /* both failed: find how far the product wrote. The product stops at the
+-   * first failure and still writes back committed state. Compare state only. */
+- }else{
+-  for(uint32_t k=0;k<n;k++){
+-   if(L[k]!=Lr[k]||R[k]!=Rr[k]){fprintf(stderr,"pcm k=%u L %08x/%08x R %08x/%08x held=%d\n",k,L[k],Lr[k],R[k],Rr[k],held_ramps);CHECK(0);}
+-  }
++ /* Include the exact committed prefix and untouched sentinels on rejection. */
++ for(uint32_t k=0;k<n;k++){
++  if(L[k]!=Lr[k]||R[k]!=Rr[k]){fprintf(stderr,"pcm k=%u L %08x/%08x R %08x/%08x held=%d\n",k,L[k],Lr[k],R[k],Rr[k],held_ramps);CHECK(0);}
+  }
+  CHECK(ph.phase[0]==ph_r.phase[0]&&ph.phase[1]==ph_r.phase[1]&&ph.phase[2]==ph_r.phase[2]&&ph.phase[3]==ph_r.phase[3]);
+  CHECK(ns==ns_r);
+@@ -131,7 +136,6 @@ static void compare(int held_ramps,uint32_t n,unsigned shape,int mid_fail){
+  CHECK(eq_ramp(&vg.stereo[0],&vg_r.stereo[0])&&eq_ramp(&vg.stereo[1],&vg_r.stereo[1]));
+  CHECK(eq_ramp(&ng,&ng_r)&&eq_ramp(&f.a,&f_r.a)&&eq_ramp(&f.e,&f_r.e)&&eq_ramp(&f.resonance,&f_r.resonance));
+  for(unsigned i=0;i<5;i++)CHECK(original_math_bits(f.history[i])==original_math_bits(f_r.history[i]));
+- (void)upto;
+  free(L);free(R);free(Lr);free(Rr);
+  checks++;
+ }
+@@ -140,13 +144,17 @@ int main(void){
+  for(unsigned h=0;h<2;h++)
+   for(unsigned s=0;s<4;s++)
+    for(unsigned i=0;i<sizeof lens/sizeof lens[0];i++)
+-    compare((int)h,lens[i],s,0);
++    compare((int)h,lens[i],s,0,0);
+  for(unsigned i=0;i<4000;i++){
+   uint32_t n=1+(rng()%512);
+-  compare((int)(rng()&1),n,rng()&3,(int)((rng()%50)==0));
++  compare((int)(rng()&1),n,rng()&3,(int)((rng()%50)==0),0);
+  }
+  /* n=1 kernel path (held and moving) */
+- for(unsigned i=0;i<200;i++)compare((int)(i&1),1,i&3,0);
++ for(unsigned i=0;i<200;i++)compare((int)(i&1),1,i&3,0,0);
++ for(unsigned h=0;h<2;h++)
++  for(unsigned s=0;s<4;s++)
++   for(unsigned i=1;i<=27;i++)
++    compare((int)h,i&1?1:257,s,0,i);
+  printf("Chicago span hold identity: %u exact comparisons PASS\n",checks);
+  return 0;
+ }
+diff --git a/tests/host/drum909_emit_equivalence.c b/tests/host/drum909_emit_equivalence.c
+index d51b149ab8ecd8d8baf8022751a4c5927b40c4d9..0bc7c67ac9c7681e61738274c5f1701f865f7c1f 100644
+--- a/tests/host/drum909_emit_equivalence.c
++++ b/tests/host/drum909_emit_equivalence.c
+@@ -52,6 +52,30 @@ int main(void)
+             ++blocks;
+         }
+     }
++    /* A cleared engine bus is not the additive API: check settled-centre
++     * duplication and fallback for one moving pan with equal and mixed masks.
++     * The conventional stereo render is the oracle; compare sends and state too. */
++    for (int scenario = 0; scenario < 6; ++scenario) {
++        drum909_t a, b;
++        memset(&a, 0, sizeof a);
++        drum909_init(&a);
++        for (int v = 0; v < DR_NUM; ++v) {
++            a.pan_lc[v] = a.pan_l[v] = a.pan_rc[v] = a.pan_r[v] = 1.0f;
++            drum909_trigger(&a, v, 1.0f);
++        }
++        if (scenario & 1) a.pan_r[DR_RS] = 0.6f;
++        memcpy(&b, &a, sizeof b);
++        for (int span = 0; span < 12; ++span) {
++            float x[4][256] = {{0}}, y[4][256] = {{0}};
++            int n = span == 0 ? 0 : span == 11 ? 1 : 256;
++            uint16_t mask = scenario < 2 ? 0x7ffu : scenario < 4 ? 0x345u : 0u;
++            drum909_render_st_cleared(&a, x[0], x[1], x[2], x[3], n, mask);
++            ref_drum909_render_st_masked(&b, y[0], y[1], y[2], y[3], n, mask);
++            check(x, y, sizeof x, "cleared PCM", scenario, -1, span);
++            check(&a, &b, sizeof a, "cleared state", scenario, -1, span);
++            ++blocks;
++        }
++    }
+     for (int seed = 1; seed <= 6; ++seed) for (int dist = 0; dist < 7; ++dist) {
+         drum909_t a, b;
+         memset(&a, 0, sizeof a); memset(&b, 0, sizeof b);
+diff --git a/tests/host/editor_diagnostic_count_test.py b/tests/host/editor_diagnostic_count_test.py
+index 66d0218353391f07e3fbfc66d0e9e439fe16d31f..fccd931319c67544f163d7c6e36422d4977f68cc 100644
+--- a/tests/host/editor_diagnostic_count_test.py
++++ b/tests/host/editor_diagnostic_count_test.py
+@@ -1,6 +1,6 @@
+ #!/usr/bin/env python3
+ # SPDX-License-Identifier: GPL-3.0-only
+-"""The production count assertions must accept 127 and reject 128 words."""
++"""Check editor diagnostics profiles and the exact 7-bit count boundary."""
+ import os
+ from pathlib import Path
+ import re
+@@ -11,6 +11,32 @@ ROOT = Path(__file__).resolve().parents[2]
+ source = (ROOT / "firmware/src/app/editor.c").read_text()
+ checks = re.findall(r'_Static_assert\([^;]+"ED_BT_TEST op [34] count fits 7 bits"\);', source)
+ assert len(checks) == 2, "both diagnostic count assertions are required"
++# Preprocess the production switch with only the case labels (all other
++# editor dependencies are immaterial to these profile checks).
++labels = {
++    "ED_DIAG", "ED_BT_TEST", "ED_CTL_READ", "ED_FDATA", "ED_INSTALL", "ED_SMP_READ",
++}
++switch = source[source.index("static void ed_handle("):]
++lines = []
++for ln in switch.splitlines():
++    if re.match(r"^#(?:if|else|elif|endif)", ln):
++        lines.append(ln)
++    else:
++        case = re.match(r"^    case (ED_[A-Z0-9_]+):", ln)
++        if case and case[1] in labels:
++            lines.append(case[0])
++unit = '#include "editor_diag_profile.h"\n' + "\n".join(lines) + "\n"
++for defs, diagnostic in (([], False), (["X0X_LCD_TRACE=1"], True), (["X0X_HOST=1"], True)):
++    result = subprocess.run(
++        [os.environ.get("CC", "cc"), "-E", "-P", "-x", "c", "-I",
++         str(ROOT / "firmware/src/app"), "-DBOARD_SMK37=1", "-DX0X_BLE=1",
++         *("-D" + d for d in defs), "-"], input=unit, capture_output=True, text=True,
++    )
++    assert result.returncode == 0, result.stderr
++    wanted = labels if diagnostic else labels - {"ED_DIAG", "ED_BT_TEST"}
++    cases = set(re.findall(r"^    case (ED_[A-Z0-9_]+):", result.stdout, re.M))
++    assert cases == wanted, (defs, cases, wanted)
++
+ with tempfile.TemporaryDirectory(prefix="editor-count-") as temporary:
+     path = Path(temporary)
+     # (timer words, stopped-core words, canary words, accepted)
+diff --git a/tests/host/editor_read_area_test.py b/tests/host/editor_read_area_test.py
+index aa823e81fc863971a370e26adb2fb3c877b64ffb..d508d49a6138b6f8b730c0121d06a72d88e6350a 100644
+--- a/tests/host/editor_read_area_test.py
++++ b/tests/host/editor_read_area_test.py
+@@ -60,7 +60,7 @@ static int ed_send(void) {
+ '''
+ # The frame header is shared production code too.
+ unit += "\n#define ED_HDR0 0x7d\n#define ED_HDR1 0x46\n#define ED_HDR2 0x4c\n"
+-for name in ("ed_begin", "ed_b", "ed_put7", "ed_read_area"):
++for name in ("ed_begin", "ed_b", "ed_u", "ed_g", "ed_put7", "ed_read_area"):
+     unit += function(name) + "\n"
+ unit += "static void dispatch(unsigned cmd, const uint8_t *a, unsigned na) {\ned_begin(cmd);\nswitch(cmd) {\n"
+ unit += case("ED_SMP_READ", "    case ED_SMP_INFO:")
+diff --git a/tests/host/fittab_package_test.py b/tests/host/fittab_package_test.py
+index 1711f9097e7749135401fd837dcd754d72779b89..0b15cc3f2408801bc6080f613856976131e1449f 100644
+--- a/tests/host/fittab_package_test.py
++++ b/tests/host/fittab_package_test.py
+@@ -62,11 +62,15 @@ class Image(unittest.TestCase):
+         self.assertEqual(magic, build.FITTAB_MAGIC)
+         self.assertEqual((n, ident), (1388, zlib.crc32(BLOB.read_bytes()) & 0xFFFFFFFF))
+         self.assertEqual(crc, ident)
+-        imgs = sorted((ROOT / "build").glob("smk37*/fittab.img"))
+-        for p in imgs:
+-            with self.subTest(img=str(p.relative_to(ROOT))):
+-                self.assertEqual(build.fittab_problems(p.read_bytes()), [])
+-                self.assertEqual(p.read_bytes(), img)
++    def test_current_stock_packages_omit_unused_fit_table(self):
++        for name in ("x0x-smk37.fwsc", "x0x-smk37-elite.fwsc"):
++            p = ROOT / "build" / name
++            if p.is_file():
++                with self.subTest(package=name):
++                    package = fm1_install.logical_image(p.read_bytes())
++                    self.assertIsNone(fm1_install.package_fittab(package))
++                    self.assertIsNone(fm1_install.package_damage(package))
++        self.assertEqual(list((ROOT / "build").glob("smk37*/fittab.img")), [])
+ 
+ 
+ class Package(unittest.TestCase):
+diff --git a/tests/host/font_unit_case_test.py b/tests/host/font_unit_case_test.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..db77c8fb87c66fa740469df7b5956d6bdaa49230
+--- /dev/null
++++ b/tests/host/font_unit_case_test.py
+@@ -0,0 +1,21 @@
++#!/usr/bin/env python3
++# SPDX-License-Identifier: GPL-3.0-only
++"""Units keep their case: every lower-case letter in a ui.c unit literal must have its own
++lower-case bitmap in XS/S/B (tools/gen_font.py LOWER_KEEP), else the face folds it to the
++upper-case bitmap and "16 steps" draws as "16 stEps"."""
++import re, sys
++from pathlib import Path
++ROOT = Path(__file__).resolve().parents[2]
++sys.path.insert(0, str(ROOT / 'tools'))
++import gen_font  # noqa: E402
++
++src = (ROOT / 'firmware' / 'src' / 'app' / 'ui.c').read_text()
++units = sorted(set(re.findall(r'put_s\(\s*unit\s*,\s*"([^"]*)"', src)))
++bad = {u: ''.join(c for c in u if c.islower() and c not in gen_font.LOWER_KEEP) for u in units}
++bad = {u: c for u, c in bad.items() if c}
++if not units:
++    print('FAIL: no unit literals found in ui.c'); sys.exit(1)
++if bad:
++    for u, c in bad.items(): print(f'FAIL unit "{u}": lower-case {c!r} folds to upper case in XS/S/B')
++    sys.exit(1)
++print(f'PASS {len(units)} unit literals keep their lower case ({", ".join(units)})')
+diff --git a/tests/host/remote_dnr3_ble_test.c b/tests/host/remote_dnr3_ble_test.c
+new file mode 100644
+index 0000000000000000000000000000000000000000..7a4ce105e59c58215ed38dbc5dc8a48576043c89
+--- /dev/null
++++ b/tests/host/remote_dnr3_ble_test.c
+@@ -0,0 +1,186 @@
++/* SPDX-License-Identifier: GPL-3.0-only */
++/* The generator includes the real firmware app and real peripheral glue.
++ * Mock only the chip IRQ boundary and the outbound HCI radio mailbox. */
++#include <assert.h>
++#include <stdint.h>
++#include <stdio.h>
++#define X0X_REMOTE_BLE 1
++static int ble_dnr3_live(uint32_t wire);
++static void ble_dnr3_out(uint32_t wire, const uint8_t *p, uint32_t n);
++#include "remote_dnr3_app.inc"
++
++static void ble_dnr3_reset(void);
++#define BLEH_LINK_RESET() ble_dnr3_reset()
++#include "ble/ble_midi_host.c"
++#undef BLEH_LINK_RESET
++
++static struct { struct { bleh_t h; } host; uint32_t sysex_drops; } ble_r;
++static uint8_t ble_up = 1, ble_host_on = 1, ble_want = 1, ble_central_role;
++static uint32_t fm1_ms;
++static unsigned apc_handshakes;
++static unsigned irq_depth;
++static uint32_t irq_save(void) { return irq_depth++; }
++static void irq_restore(uint32_t v) { assert(irq_depth == v + 1u); irq_depth = v; }
++int smc_ble_role_get(void) { return 0; }
++static void smk_apc_ble_host_seen(void) { apc_handshakes++; }
++static void smk_apc_host_generic(uint8_t flag) { assert(flag); }
++void smc_mmc_host(uint8_t cmd, uint8_t src) { (void)cmd; assert(src == 1); }
++#define RING_PUBLISH() __asm__ volatile("" ::: "memory")
++#include "remote_dnr3_radio.inc"
++
++static uint8_t captured[256];
++static unsigned nc, notifications;
++static int radio_send(uint8_t type, const uint8_t *p, uint16_t n, void *unused)
++{
++    (void)unused;
++    if (type != BLEH_H4_ACL || n < 12 || p[8] != 0x1B) return 0;
++    assert(p[9] == 6 && p[10] == 0 && (p[11] & 0xC0) == 0x80);
++    /* Decode the documented real BLE-MIDI notification wire before DNR3. */
++    unsigned i = 12;
++    if (nc == 0) {
++        assert(i + 1 < n && (p[i] & 0x80) && p[i + 1] == 0xF0);
++        i++;
++        captured[nc++] = p[i++];
++    }
++    while (i < n) {
++        if (p[i] & 0x80) {
++            assert(i + 1 == n - 1 && p[i + 1] == 0xF7);
++            i++;
++        }
++        assert(nc < sizeof captured);
++        captured[nc++] = p[i++];
++    }
++    notifications++;
++    return 0;
++}
++
++static void att_write(const uint8_t *att, uint16_t n)
++{
++    uint8_t pkt[31] = {1, 0x30, (uint8_t)(n + 4), 0, (uint8_t)n, 0, 4, 0};
++    assert(n <= 23);
++    memcpy(pkt + 8, att, n);
++    bleh_rx(&ble_r.host.h, BLEH_H4_ACL, pkt, n + 8);
++}
++static void radio_connect(void)
++{
++    const uint8_t up[] = {0x3E, 5, 1, 0, 1, 0, 1};
++    const uint8_t cccd[] = {0x12, 7, 0, 1, 0};
++    bleh_rx(&ble_r.host.h, BLEH_H4_EVT, up, sizeof up);
++    att_write(cccd, sizeof cccd);
++    assert(bleh_notifying(&ble_r.host.h));
++}
++static void radio_disconnect(void)
++{
++    const uint8_t down[] = {0x05, 4, 0, 1, 0, 0x13};
++    bleh_rx(&ble_r.host.h, BLEH_H4_EVT, down, sizeof down);
++    assert(!bleh_connected(&ble_r.host.h));
++}
++static void midi_frame(const uint8_t *f, unsigned n)
++{
++    uint8_t att[23] = {0x52, 6, 0, 0x80, 0x81, 0xF0};
++    unsigned at = 1, off = 6;
++    assert(n >= 2 && f[0] == 0xF0 && f[n - 1] == 0xF7);
++    for (;;) {
++        /* Deliberately fragment at small sizes, including within the CRC. */
++        unsigned amount = 5;
++        while (amount-- && at < n - 1) att[off++] = f[at++];
++        if (at == n - 1) { att[off++] = 0x81; att[off++] = 0xF7; }
++        att_write(att, (uint16_t)off);
++        if (at == n - 1) break;
++        off = 4;
++    }
++}
++static void radio_drain(void)
++{
++    const uint8_t credit[] = {0x13, 5, 1, 1, 0, 1, 0};
++    nc = notifications = 0;
++    for (unsigned i = 0; i < 32 && ble_r.host.h.sx_on; i++) {
++        bleh_poll(&ble_r.host.h);
++        bleh_rx(&ble_r.host.h, BLEH_H4_EVT, credit, sizeof credit);
++    }
++    assert(!ble_r.host.h.sx_on);
++}
++static rep_t ble_request(int op, unsigned seqnum)
++{
++    uint8_t f[256];
++    unsigned n = frame_mk(f, 3, op, (int)seqnum, P, pn);
++    pn = 0;
++    nof = 0;
++    midi_frame(f, n);
++    assert(!ble_r.host.h.sx_on && !nof);         /* parsing is never in the radio ISR */
++    ble_dnr3_service();
++    radio_drain();
++    if (!nc) {
++        fprintf(stderr, "FAIL BLE DNR3: no native response to op %02x\n", op);
++        exit(1);
++    }
++    assert(!nof);                              /* incoming BLE is never answered over USB */
++    memcpy(of[0], captured, nc);
++    on[0] = nc;
++    rep_t r;
++    assert(!parse(0, &r) && r.op == (op | 0x40) && r.seq == (int)seqnum);
++    return r;
++}
++
++int main(void)
++{
++    host_remote_sink = sink;                   /* exact app's USB transport oracle */
++    boot();
++    bleh_init(&ble_r.host.h, radio_send, 0, "DnBOX test", 0);
++    ble_r.host.h.sx = ble_dnr3_tx;
++    bleh_set_sysex(&ble_r.host.h, ble_sysex_in);
++    radio_connect();
++
++    const uint8_t inquiry[] = {0xF0, 0x7E, 0x7F, 0x06, 0x01, 0xF7};
++    midi_frame(inquiry, sizeof inquiry);        /* existing BLE peripheral APC path stays live */
++    ble_sx_answer(&ble_r.host.h);
++    radio_drain();
++    assert(apc_handshakes == 1 && nc == 35 && captured[1] == 0x7E);
++
++    p7(3);
++    rep_t r = ble_request(0x00, 110);
++    assert(!r.status && r.fl[0] == 3 && notifications > 1);
++    pu(0x1234, 4);
++    r = ble_request(0x01, 111);
++    assert(!r.status);
++    uint32_t radio_epoch = gu(r.fl, 4);
++    pu(0x1234, 4);
++    r = req(0x01);
++    assert(r.status == 3);                      /* same USB client ID cannot steal BLE lease */
++    pu(radio_epoch, 4); pu(1300, 2);
++    r = req(0x27);
++    assert(r.status == 8 && !ble_r.host.h.sx_on);
++
++    pu(radio_epoch, 4); pu(1260, 2);
++    r = ble_request(0x27, 112);
++    assert(!r.status && rd_bpm10() == 1260);
++    p7(0); pu(0, 2); p7(112);
++    r = ble_request(0x23, 113);
++    assert(!r.status && r.fl[5] == 112 && nc > 66 && notifications > 4);
++
++    pu(radio_epoch, 4); pu(8, 4);
++    assert(!ble_request(0x08, 114).status);
++    pref_set(PR(R_TEMPO, 0, 0, 0), 110);
++    nof = 0;
++    remote_dnr3_tick(100);
++    radio_drain();
++    assert(!nof && nc && captured[5] == 0x7F);  /* WATCH goes only to its owning radio link */
++
++    uint8_t stale[256];
++    pu(radio_epoch, 4); pu(1800, 2);
++    unsigned n = frame_mk(stale, 3, 0x27, 115, P, pn);
++    pn = 0;
++    midi_frame(stale, n);                       /* queued before disconnect and handle reuse */
++    assert(ble_dnr3_n && rd_bpm10() != 1800);
++    radio_disconnect();
++    radio_connect();                            /* same connection handle, new epoch */
++    ble_dnr3_service();
++    assert(!ble_r.host.h.sx_on && rd_bpm10() != 1800);
++    pu(radio_epoch, 4); pu(1800, 2);
++    assert(ble_request(0x27, 116).status == 8);  /* new link cannot use old lease */
++    pu(0x5678, 4);
++    assert(!req(0x01).status);                  /* USB is still independently functional */
++
++    puts("PASS BLE DNR3: actual split ATT ingress, HELLO, lease, write, long dump, WATCH, link reset, isolated USB");
++    return 0;
++}
+diff --git a/tests/host/remote_dnr3_ble_test.sh b/tests/host/remote_dnr3_ble_test.sh
+new file mode 100755
+index 0000000000000000000000000000000000000000..ea9a138d304aa5d83582292b4ddf9cbee922ed5b
+--- /dev/null
++++ b/tests/host/remote_dnr3_ble_test.sh
+@@ -0,0 +1,25 @@
++#!/bin/sh
++# SPDX-License-Identifier: GPL-3.0-only
++# Native host fixture: exact firmware app, BLE-MIDI decoder/encoder and peripheral RX/TX.
++set -eu
++cd "$(dirname "$0")/../.."
++. tests/host/original_build.sh
++OUT=${X0X_REMOTE_BLE_TEST_OUT:-build/host/remote-dnr3-ble}
++mkdir -p "$OUT"
++[ -f build/gen/x0x_drum_tables.h ] || sh host/build_host.sh --generate-only >"$OUT/assets.log" 2>&1
++python3 - "$OUT" <<'PY'
++import sys
++from pathlib import Path
++out = Path(sys.argv[1])
++app = Path('tests/host/remote_dnr3_test.c').read_text()
++(out / 'remote_dnr3_app.inc').write_text(app[:app.index('\nint main(void)')].replace(
++    '"../../host/x0x_host.c"', '"' + str(Path('host/x0x_host.c').resolve()) + '"'))
++radio = Path('firmware/src/ble.c').read_text()
++start = radio.index('#if X0X_REMOTE_BLE\nstatic uint8_t ble_sx[')
++end = radio.index('/* power-on, before core 1 starts', start)
++(out / 'remote_dnr3_radio.inc').write_text(radio[start:end])
++PY
++${CC:-cc} ${SAN_FLAGS:-} -g -O1 -std=gnu99 -w -DX0X_HOST -DBOARD_SMK37=1 \
++  -Ifirmware/src -Ifirmware/src/dsp -Ibuild/gen -I"$OUT" $ORIGINAL_FLAGS \
++  tests/host/remote_dnr3_ble_test.c $ORIGINAL_SOURCES -lm -o "$OUT/test"
++"$OUT/test"
+diff --git a/tests/host/remote_dnr3_test.c b/tests/host/remote_dnr3_test.c
+new file mode 100644
+index 0000000000000000000000000000000000000000..4069e560928cbc9db82a2a25ba969004eeb46067
+--- /dev/null
++++ b/tests/host/remote_dnr3_test.c
+@@ -0,0 +1,895 @@
++/* SPDX-License-Identifier: GPL-3.0-only */
++/* DNR3 Remote protocol (REMOTE-FW-PROTOCOL v3.0 section 8, items 1-15) on the whole app: the host
++ * simulator (host/x0x_host.c without its script main) with app/remote_dnr3.c in the UI's unit. Frames
++ * go to remote_dnr3_frame(); replies and NOTIFYs come back through remote_dnr3_out() (host_remote_sink).
++ * The codec here is written from the spec and checked against the Web Remote's byte vectors.
++ * Build: tests/host/remote_dnr3_test.sh (needs build/gen from host/build_host.sh). */
++#define X0X_DNR3_GIT_SHA_BYTES {187,25,7,73,0,128,255,1,2,3,4,5,6,7,8,9,10,253,254,255}
++#define main x0x_host_main
++#include "../../host/x0x_host.c"
++#undef main
++
++#if BOARD_SMK37
++static uint8_t test_clip_mode, test_clip_busy;
++uint8_t smk_clip_mode_on(void) { return test_clip_mode; }
++uint8_t smk_padcal_on(void) { return 0; }
++uint8_t smk_padcal_draw(uint32_t w, uint32_t h) { (void)w; (void)h; return 0; }
++void smk_padcal_enter(void) {}
++uint8_t smk_clip_lcd_draw(uint32_t w, uint32_t h) { (void)w; (void)h; return 0; }
++void smk_clip_lcd_force(void) {}
++uint8_t smk_clip_wait(void) { return 0; }
++uint8_t smk_ck_ext(void) { return 0; }
++uint8_t smk_ck_flash_busy(void) { return test_clip_busy; }
++uint8_t smk_ck_knobs_owned(void) { return 0; }
++uint8_t smk_ck_panel(uint32_t *last, uint32_t force) { (void)last; (void)force; return 0; }
++uint8_t smk_clip_history_button(uint8_t button, uint8_t pressed, uint8_t patch_held)
++{ (void)button; (void)pressed; (void)patch_held; return 0; }
++uint8_t smk_clip_transport_button(uint8_t button, uint8_t pressed)
++{ (void)button; (void)pressed; return 0; }
++void smk_play_note_button(uint8_t pressed, uint8_t home_held) { (void)pressed; (void)home_held; }
++void smk_apc_transport_led_set(uint8_t note, uint8_t velocity) { (void)note; (void)velocity; }
++uint8_t smk_apc_transport_led_state(uint8_t note) { (void)note; return 0; }
++void smk_apc_clock_tick(void) {}
++void smk_apc_clock_start(void) {}
++void smk_apc_clock_position(uint32_t sixteenths) { (void)sixteenths; }
++void smk_ck_midi_stop(void) {}
++int smc_connected(void) { return 0; }
++/* This fixture models disconnected SMC; project_smc_runtime_test.c covers
++ * the production SMC project-active/reset implementation. */
++/* This link does not include smc_mixer.c. ui.c still asks whether an SMC solo holds the project. */
++int smc_project_active(void) { return 0; }
++void smc_project_reset(void) {}
++void smc_frame(void) {}
++void smc_poll(void) {}
++int smc_midi_host(uint32_t pkt) { (void)pkt; return 0; }
++/* Presentation lives in smc_mixer.c; this fixture is disconnected SMC / live-rec only. */
++void smc_ui_cancel(void) {}
++int smc_ui_active(void) { return 0; }
++void smc_ui_draw(void) {}
++void smc_ui_clip_show(int n, const char *name, const char *value)
++{ (void)n; (void)name; (void)value; }
++#endif
++
++/* Chicago/Miami stay active through release tails; inspect key ownership. */
++
++static int fails, checks;
++#define CHECK(c, ...) do { checks++; if (!(c)) { fails++; printf("  FAIL %s:%d: ", __FILE__, __LINE__); printf(__VA_ARGS__); printf("\n"); } } while (0)
++
++/* ---- the wire, from the spec ---- */
++#define NF 64
++static uint8_t of[NF][256];
++static uint32_t on[NF];
++static int nof;
++static void sink(const uint8_t *f, uint32_t n)
++{
++    if (nof < NF && n <= 256u) { memcpy(of[nof], f, n); on[nof] = n; }
++    nof++;
++}
++static uint32_t crc32_ref(const uint8_t *p, uint32_t n)        /* zlib CRC-32, bitwise */
++{
++    uint32_t c = 0xFFFFFFFFu;
++    while (n--) { c ^= *p++; for (int k = 0; k < 8; k++) c = c & 1u ? c >> 1 ^ 0xEDB88320u : c >> 1; }
++    return ~c;
++}
++static uint8_t P[256];
++static int pn;
++static void p7(uint32_t v) { P[pn++] = (uint8_t)(v & 127u); }
++static void pu(uint32_t v, int k) { while (k--) { p7(v); v >>= 7; } }
++static uint32_t gu(const uint8_t *a, int k) { uint32_t v = 0; while (k--) v = v << 7 | a[k]; return v; }
++static uint32_t frame_mk(uint8_t *f, int major, int op, int sq, const uint8_t *pl, int len)
++{
++    uint32_t c, n;
++    f[0] = 0xF0, f[1] = 0x7D, f[2] = 0x44, f[3] = 0x4E, f[4] = (uint8_t)major, f[5] = (uint8_t)op;
++    f[6] = (uint8_t)(sq & 127), f[7] = (uint8_t)(sq >> 7 & 127), f[8] = (uint8_t)(len & 127), f[9] = (uint8_t)(len >> 7);
++    memcpy(f + 10, pl, (size_t)len);
++    c = crc32_ref(f + 5, 5u + (uint32_t)len);
++    n = 10u + (uint32_t)len;
++    for (int k = 0; k < 5; k++, c >>= 7) f[n++] = (uint8_t)(c & 127u);
++    f[n++] = 0xF7;
++    return n;
++}
++static int tx(const uint8_t *f, uint32_t n) { nof = 0; return remote_dnr3_frame(f + 1, n - 2u); }
++typedef struct { int op, seq, len, status; uint32_t rev; const uint8_t *pl, *fl; int ok; } rep_t;
++static int parse(int i, rep_t *r)                                /* frame i of the capture: 0 = valid */
++{
++    const uint8_t *f = of[i];
++    uint32_t n = on[i], len;
++    memset(r, 0, sizeof *r);
++    if (n < 16u || n > 256u || f[0] != 0xF0 || f[1] != 0x7D || f[2] != 0x44 || f[3] != 0x4E || f[4] != 3 || f[n - 1] != 0xF7)
++        return -1;
++    for (uint32_t k = 1; k + 1 < n; k++) if (f[k] & 0x80u) return -2;
++    len = gu(f + 8, 2);
++    if (len != n - 16u) return -3;
++    if (crc32_ref(f + 5, 5u + len) != gu(f + 10 + len, 5)) return -4;
++    r->op = f[5], r->seq = (int)gu(f + 6, 2), r->len = (int)len, r->pl = f + 10;
++    if (r->op == 0x7F) r->rev = gu(r->pl, 4), r->status = -1, r->fl = r->pl + 5, r->ok = 1;
++    else r->status = r->pl[0], r->rev = gu(r->pl + 1, 4), r->fl = r->pl + 5, r->ok = 1;
++    return 0;
++}
++static uint32_t epoch;
++static int sq_next = 1;
++static uint8_t F[300];
++static uint32_t Fn;
++/* one request (P/pn as payload): exactly one reply, valid, to this op and seq */
++static rep_t req(int op)
++{
++    rep_t r;
++    int sq = sq_next++ & 0x3FFF;
++    Fn = frame_mk(F, 3, op, sq, P, pn);
++    pn = 0;
++    if (tx(F, Fn) != 0 || nof != 1 || parse(0, &r) || r.op != (op | 0x40) || r.seq != sq) {
++        printf("  FAIL op %02X: handled/frames/reply wrong (nof %d)\n", op, nof);
++        fails++;
++        memset(&r, 0, sizeof r);
++        r.status = -9;
++    }
++    return r;
++}
++static void ep(void) { pu(epoch, 4); }
++static int autokeep = 1;                                           /* KEEPALIVE every second, out of the capture */
++static void tick(uint32_t ms)
++{
++    while (ms--) {
++        run_ms(1);
++        if (autokeep && epoch && !(now_ms % 1000u)) {
++            uint8_t f[32], pl[4] = {(uint8_t)(epoch & 127u), (uint8_t)(epoch >> 7 & 127u), (uint8_t)(epoch >> 14 & 127u), (uint8_t)(epoch >> 21 & 127u)};
++            uint32_t n = frame_mk(f, 3, 0x06, 0, pl, 4);
++            int was = nof;
++            (void)remote_dnr3_frame(f + 1, n - 2u);
++            nof = was;
++        }
++        remote_dnr3_tick(now_ms);
++    }
++}
++static uint32_t rev_now(void) { rep_t r = req(0x30); return r.rev; }
++static int notifies(int kind, rep_t *last)                        /* NOTIFYs of a kind in the capture */
++{
++    int c = 0;
++    rep_t r;
++    for (int i = 0; i < nof && i < NF; i++)
++        if (!parse(i, &r) && r.op == 0x7F && r.fl[-1] == kind) { c++; if (last) *last = r; }
++    return c;
++}
++static uint8_t S[300];
++static uint32_t Sn;
++static void open_lease(uint32_t mask)
++{
++    rep_t r;
++    pu(0x1234, 4);
++    r = req(0x01);
++    CHECK(r.status == 0, "OPEN ok (%d)", r.status);
++    epoch = gu(r.fl, 4);
++    CHECK(gu(r.fl + 4, 2) == 2000u, "lease 2000 ms");
++    ep(); pu(mask, 4);
++    r = req(0x08);
++    CHECK(r.status == 0, "WATCH ok");
++}
++static void keep(void) { rep_t r; ep(); r = req(0x06); CHECK(r.status == 0, "KEEPALIVE ok"); }
++static void pset_payload(int kind, int a, int b, int c, int expect, int v)
++{
++    ep(); p7(kind); p7(a); p7(b); p7(c); pu(expect, 2); pu(v, 2);
++}
++static int pset(int kind, int a, int b, int c, int expect, int v, int *out)
++{
++    pset_payload(kind, a, b, c, expect, v);
++    rep_t r = req(0x12);
++    if (out && r.status == 0) *out = (int)gu(r.fl + 4, 2);
++    return r.status;
++}
++static rep_t guarded_pset(int bank, int param, int expect, int value)
++{
++    pset_payload(R_ENG, T_303, 0, param, expect, value);
++    p7(bank);
++    return req(0x12);
++}
++static int pget(int kind, int a, int b, int c, int *max)
++{
++    rep_t r;
++    p7(1); p7(kind); p7(a); p7(b); p7(c);
++    r = req(0x11);
++    if (r.status) return -2;
++    *max = (int)gu(r.fl + 7, 2);
++    return gu(r.fl + 5, 2) == 0x3FFFu ? -1 : (int)gu(r.fl + 5, 2);
++}
++static int sset(int part, int pat, int step, int expect, const uint8_t *rec, int n, rep_t *out)
++{
++    rep_t r;
++    ep(); p7(part); p7(pat); p7(step); pu(expect, 2);
++    for (int i = 0; i < n; i++) p7(rec[i]);
++    r = req(0x21);
++    if (out) *out = r;
++    return r.status;
++}
++static int sget(int part, int pat, int step, int track, uint8_t *rec)
++{
++    rep_t r;
++    p7(part); p7(pat); p7(step); if (track >= 0) p7(track);
++    r = req(0x20);
++    if (r.status) return -1;
++    memcpy(rec, r.fl + 3, (size_t)(r.len - 8));
++    return r.len - 8;
++}
++static void clksrc(int v) { pref_set(PR(R_CLKSRC, 0, 0, 0), v); tick(60); }   /* GLO > MIDI > CLOCK SOURCE (ui_frame applies it) */
++static uint32_t pcrc(int pat) { return crc32_ref((const uint8_t *)&proj.pat[pat], sizeof(pattern_t)) & 0x3FFFu; }
++static void unpack7(const uint8_t *s, uint32_t n, uint8_t *d)     /* ed_put7 */
++{
++    while (n) {
++        uint32_t k = n < 7u ? n : 7u;
++        for (uint32_t j = 0; j < k; j++) d[j] = (uint8_t)(s[1 + j] | ((s[0] >> j & 1u) << 7));
++        s += k + 1, d += k, n -= k;
++    }
++}
++static int hex(const char *h, uint8_t *b) { int n = 0; while (h[0] && h[1]) { unsigned v; sscanf(h, "%2x", &v); b[n++] = (uint8_t)v; h += 2; } return n; }
++
++/* ---- 1 framing ---- */
++static void t1_framing(void)
++{
++    uint8_t v[300];
++    int n, before_bpm = (int)rd_bpm10();
++    uint32_t rev0;
++    rep_t r;
++    /* the Web Remote's vectors (dnr3-vectors.json v1): CRC, pack7 and a HELLO request */
++    CHECK(x0x_crc32("123456789", 9) == 0xCBF43926u && crc32_ref((const uint8_t *)"DNR3", 4) == 0x786BEE7Cu, "[1] CRC-32 vectors");
++    {
++        static const uint8_t raw[8] = {0x80, 0x81, 0x82, 0x83, 0x84, 0x85, 0x86, 0x87};
++        RD_N = 0; rd_put7(raw, 8);
++        n = hex("7f000102030405060107", v);
++        CHECK(RD_N == n && !memcmp(RD_OUT, v, (size_t)n), "[1] ed_put7 vector");
++    }
++    n = hex("f07d444e030001000100031e67262301f7", v);
++    CHECK(tx(v, (uint32_t)n) == 0 && nof == 1 && !parse(0, &r) && r.op == 0x40 && r.status == 0, "[1] Remote's HELLO vector accepted");
++    if (r.ok) {
++        uint8_t want_sha[20], got_sha[20];
++        CHECK(hex("bb1907490080ff0102030405060708090afdfeff", want_sha) == 20, "[1] full SHA fixture length");
++        unpack7(r.fl + 2, 20, got_sha);
++        CHECK(!memcmp(got_sha, want_sha, 20), "[1] HELLO carries all 20 source bytes including zero and high bits");
++        /* reply layout = the vector's (42 B: status rev proto minor sha23 board caps4 NPAT NSTEPS 11 2 clip clk hz) */
++        CHECK(r.len == 42 && r.fl[0] == 3 && r.fl[1] == 0 && r.fl[25] == 3 && r.fl[30] == 32 && r.fl[31] == 64 &&
++              r.fl[32] == 11 && r.fl[33] == 2 && r.fl[36] == 50, "[1] HELLO reply layout as the vector (len %d)", r.len);
++        CHECK(gu(r.fl + 26, 4) == 0x2FFu, "[1] HELLO advertises guarded bass writes, not VOICE");
++    }
++    open_lease(0);
++    rev0 = rev_now();
++    /* a valid TEMPO write, then each malformed copy: BAD, nothing changes, no rev bump */
++    ep(); pu(1337, 2);
++    {
++        uint8_t m[300], F[300];
++        uint32_t k, Fn = frame_mk(F, 3, 0x27, 77, P, pn);
++        pn = 0;
++        memcpy(m, F, Fn); m[4] = 5;                                  /* bad header (major) */
++        CHECK(tx(m, Fn) == 0 && nof == 1 && !parse(0, &r) && r.status == 2, "[1] bad major -> BAD");
++        memcpy(m, F, Fn); m[8]++;                                    /* bad length field */
++        CHECK(tx(m, Fn) == 0 && nof == 1 && !parse(0, &r) && r.status == 2, "[1] bad len -> BAD");
++        memcpy(m, F, Fn); m[12] |= 0x80;                             /* a byte >= 0x80 */
++        CHECK(tx(m, Fn) == 0 && nof == 1 && !parse(0, &r) && r.status == 2, "[1] byte >= 0x80 -> BAD");
++        memcpy(m, F, Fn); m[Fn - 3] ^= 1;                            /* bad CRC */
++        CHECK(tx(m, Fn) == 0 && nof == 1 && !parse(0, &r) && r.status == 2, "[1] bad CRC -> BAD");
++        memset(m, 0x11, sizeof m);                                   /* over-long: 257 B */
++        k = frame_mk(m, 3, 0x27, 78, m + 40, 241);
++        CHECK(k == 257 && tx(m, k) == 0 && nof == 1 && !parse(0, &r) && r.status == 2, "[1] over-long -> BAD");
++        CHECK(tx(m, 10) == 0 && nof == 1 && !parse(0, &r) && r.status == 2, "[1] too short -> BAD");
++        CHECK((int)rd_bpm10() == before_bpm && rev_now() == rev0, "[1] no state change and no rev bump after malformed frames");
++        CHECK(tx(F, Fn) == 0 && nof == 1 && !parse(0, &r) && r.status == 0 && rd_bpm10() == 1337u, "[1] the valid frame applies");
++    }
++}
++/* ---- 2 DNR2 and FL ---- */
++static void t2_dnr2_fl(void)
++{
++    uint8_t f[64] = {0xF0, 0x7D, 0x44, 0x4E, 0x02, 0x10, 0x05};
++    rep_t r;
++    f[50] = 0xF7;
++    CHECK(tx(f, 51) == 0 && nof == 1 && !parse(0, &r) && r.op == 0x50 && r.status == 6 && r.len == 5, "[2] DNR2 frame -> UNSUPPORTED");
++    {
++        static const uint8_t fl[] = {0xF0, 0x7D, 0x46, 0x4C, 0x01, 0xF7};   /* FL INFO */
++        static const uint8_t fl9[] = {0xF0, 0x7D, 0x46, 0x4C, 0x09, 0x41, 0x00, 0xF7}; /* FL PROJECT export */
++        CHECK(tx(fl, sizeof fl) == -1 && nof == 0, "[2] FL INFO is not DNR3's (left for ed_handle)");
++        CHECK(tx(fl9, sizeof fl9) == -1 && nof == 0, "[2] FL PROJECT is not DNR3's");
++    }
++}
++/* ---- 3 lease ---- */
++static void t3_lease(void)
++{
++    rep_t r;
++    uint32_t e;
++    autokeep = 0;
++    tick(2100);                                                      /* the lease of [1] runs out */
++    epoch = 0;
++    ep(); pu(1300, 2);
++    r = req(0x27);
++    CHECK(r.status == 8 && r.len == 5, "[3] write without OPEN -> DENIED (%d)", r.status);
++    open_lease(0);
++    e = epoch;
++    pu(0x999, 4);
++    r = req(0x01);
++    CHECK(r.status == 3, "[3] second client's OPEN while live -> BUSY (%d)", r.status);
++    epoch = e + 1; ep(); pu(1300, 2);
++    r = req(0x27);
++    CHECK(r.status == 4, "[3] wrong epoch -> STALE (%d)", r.status);
++    epoch = e;
++    tick(1500); keep(); tick(1500);
++    ep(); pu(1310, 2);
++    r = req(0x27);
++    CHECK(r.status == 0, "[3] KEEPALIVE renews (3000 ms after OPEN: %d)", r.status);
++    tick(2001);
++    ep(); pu(1320, 2);
++    r = req(0x27);
++    CHECK(r.status == 8, "[3] expiry after 2000 ms -> DENIED (%d)", r.status);
++    pu(0x999, 4);
++    r = req(0x01);
++    CHECK(r.status == 0, "[3] another client may OPEN after expiry");
++    epoch = gu(r.fl, 4);
++    ep(); r = req(0x07);
++    CHECK(r.status == 0, "[3] CLOSE ok");
++    pu(0x1234, 4);
++    r = req(0x01);
++    CHECK(r.status == 0, "[3] CLOSE frees: a new client OPENs");
++    epoch = gu(r.fl, 4);
++    autokeep = 1;
++}
++/* ---- 4 PARAM over every pref_t the pages show ---- */
++static pref_t refs[1500];
++static int nrefs;
++static void add_ref(pref_t r)
++{
++    if (r.kind == R_NONE || r.kind == R_HDR || r.kind == R_SECTION || r.kind == R_ACT) return;
++    for (int i = 0; i < nrefs; i++) if (!memcmp(&refs[i], &r, sizeof r)) return;
++    if (nrefs < 1500) refs[nrefs++] = r;
++}
++static void t4_param(void)
++{
++    static pages_t pgs;
++    int v, max, i, k, unsup = 0, sets = 0;
++    rep_t r;
++    for (int view = 0; view < NVIEWS; view++)
++        for (int part = 0; part < NPARTS; part++)
++            for (int mix = 0; mix < NPARTS; mix++) {
++                if (view == V_GEN && !part_is_303(part)) continue;   /* the panel opens GEN on a 303 only */
++                memset(&pgs, 0, sizeof pgs);
++                describe_pages(&pgs, 0, view, part, mix, ui.sel);
++                for (i = 0; i < pgs.n && i < MAXPAGES; i++) for (k = 0; k < 4; k++) add_ref(pgs.r[i][k]);
++                for (i = 0; i < pgs.nmore && i < MAXMORE; i++) add_ref(pgs.more[i]);
++            }
++    printf("  remote-dnr3: %d page values\n", nrefs);
++    CHECK(nrefs > 100, "[4] the page walk finds the panel's values (%d)", nrefs);
++    for (i = 0; i < nrefs; i++) {
++        pref_t a = refs[i];
++        const x0x_param_t *d = pref_desc(a);
++        if (!d) continue;
++        p7(a.kind); p7(a.a); p7(a.b); p7(a.c);
++        r = req(0x10);
++        if (r.status) { unsup++; printf("  FAIL [4] DESCRIBE kind %d a %d b %d c %d -> %d\n", a.kind, a.a, a.b, a.c, r.status); fails++; continue; }
++        {
++            const uint8_t *q = r.fl;
++            int nl = (int)strlen((const char *)q);
++            int ok = !strncmp((const char *)q, d->name, 6) && (nl == (int)strlen(d->name) || nl == 6);
++            q += nl + 1;
++            ok = ok && gu(q, 2) == d->max && gu(q + 2, 2) == d->def;
++            CHECK(ok, "[4] DESCRIBE == pref_desc for kind %d a %d b %d c %d (%s)", a.kind, a.a, a.b, a.c, d->name);
++        }
++        v = pget(a.kind, a.a, a.b, a.c, &max);
++        CHECK(v == pref_get(a) && max == d->max, "[4] PARAM_GET == pref_get kind %d a %d b %d c %d (%d vs %d)", a.kind, a.a, a.b, a.c, v, pref_get(a));
++        if (rd_pref_ok(a.kind, a.a, a.b, a.c) != 1 || pref_read_only(a)) continue;
++        {
++            int orig = pref_get(a), got = -1, st;
++            keep();
++            st = pset(a.kind, a.a, a.b, a.c, 0x3FFF, 0, &got);
++            CHECK(st == 0 && got == pref_get(a) && pget(a.kind, a.a, a.b, a.c, &max) == got, "[4] PARAM_SET min kind %d a %d b %d c %d", a.kind, a.a, a.b, a.c);
++            st = pset(a.kind, a.a, a.b, a.c, 0x3FFF, d->max, &got);
++            CHECK(st == 0 && got == pref_get(a) && got <= d->max, "[4] PARAM_SET max kind %d a %d b %d c %d", a.kind, a.a, a.b, a.c);
++            st = pset(a.kind, a.a, a.b, a.c, 0x3FFF, d->max + 1, &got);
++            CHECK(st == 0 && got <= d->max && got == pref_get(a), "[4] PARAM_SET max+1 clamps kind %d a %d b %d c %d", a.kind, a.a, a.b, a.c);
++            (void)pset(a.kind, a.a, a.b, a.c, 0x3FFF, orig, 0);
++            sets++;
++        }
++    }
++    printf("  remote-dnr3: %d values set (min, max, max+1)\n", sets);
++    CHECK(!unsup && sets > 50, "[4] every page value is DESCRIBEd and the writable ones set");
++    /* expect mismatch: CONFLICT, nothing applied */
++    {
++        int cur = pref_get(PR(R_SWING, 0, 0, 0)), got;
++        CHECK(pset(R_SWING, 0, 0, 0, (cur + 1) & 0x3FFF, 10, 0) == 5 && pref_get(PR(R_SWING, 0, 0, 0)) == cur, "[4] expect mismatch -> CONFLICT");
++        CHECK(pset(R_SWING, 0, 0, 0, cur, 10, &got) == 0 && got == 10, "[4] expect match applies");
++    }
++    /* flash-writing / radio / device kinds: UNSUPPORTED, unchanged */
++    {
++        static const uint8_t ks[] = {R_AUTOSAVE, R_BT, R_USBFULL, R_CLKSRC, R_SMC_ROLE};
++        for (i = 0; i < (int)sizeof ks; i++) {
++            int was = pref_get(PR(ks[i], 0, 0, 0));
++            CHECK(pset(ks[i], 0, 0, 0, 0x3FFF, was ? 0 : 1, 0) == 6 && pref_get(PR(ks[i], 0, 0, 0)) == was, "[4] kind %d -> UNSUPPORTED", ks[i]);
++        }
++        CHECK(pset(R_MIDICH, 0, 0, 0, 0x3FFF, 3, 0) == 6, "[4] R_MIDICH -> UNSUPPORTED");
++        CHECK(pset(R_ENG, 0, 99, 0, 0x3FFF, 3, 0) == 2 && pset(60, 0, 0, 0, 0x3FFF, 3, 0) == 2, "[4] a bad address -> BAD");
++    }
++    /* one NOTIFY PARAM per write */
++    {
++        rep_t last;
++        int got;
++        ep(); pu(1, 4); (void)req(0x08);
++        tick(200);
++        CHECK(pset(R_ENG, T_909, 0, 0, 0x3FFF, 33, &got) == 0, "[4] PARAM_SET 909 BD");
++        nof = 0;
++        tick(100);
++        CHECK(notifies(0, &last) == 1 && last.fl[0] == R_ENG && last.fl[1] == T_909 && last.fl[2] == 0 && last.fl[3] == 0 &&
++              (int)gu(last.fl + 4, 2) == got, "[4] NOTIFY PARAM once with the stored value (%d)", notifies(0, 0));
++    }
++}
++/* A bank-local numeric parameter and its old value can overlap between banks.
++ * The optional last byte must actually protect the stored sound, not just ACK. */
++static void t4_bass_bank_guard(void)
++{
++    uint8_t *cell = proj.sound.v[T_303][0];
++    uint8_t saved[ORIGINAL_SOUND_BYTES], drift[ORIGINAL_SOUND_BYTES];
++    const int param = 2;                 /* a writable control in both Chicago and Miami */
++    int bank = engine_bass_bank(0), other = bank ^ 1, max, got;
++    int value = pget(R_ENG, T_303, 0, param, &max);
++    int change = value == 0 ? 1 : 0;
++    rep_t r;
++    keep();
++    CHECK(bank == ORIGINAL_SOUND_CHICAGO || bank == ORIGINAL_SOUND_MIAMI, "[4] bass guard fixture has Chicago or Miami");
++    CHECK(value >= 0 && !engine_bass_preset_pending(0), "[4] bass guard fixture has a stable descriptor");
++    r = guarded_pset(bank, param, value, change);
++    CHECK(r.status == 0 && gu(r.fl + 4, 2) == (unsigned)change && cell[param] == change,
++          "[4] matching bank, descriptor and expected value: writes and reads back");
++    r = guarded_pset(bank, param, value, change == 0 ? 1 : 0);
++    CHECK(r.status == 5 && cell[param] == change, "[4] matching bank still checks expected value");
++    CHECK(pset(R_ENG, T_303, 0, param, change, value, &got) == 0 && got == value && cell[param] == value,
++          "[4] legacy 12-byte bass client retains behavior");
++    memcpy(saved, cell, sizeof saved);
++    uint32_t rev = rev_now();
++    r = guarded_pset(other, param, value, change);
++    CHECK(r.status == 5 && !memcmp(saved, cell, sizeof saved) && rev_now() == rev,
++          "[4] wrong bank with identical scalar: conflict, no cell/revision mutation");
++    CHECK(guarded_pset(4, param, value, change).status == 2, "[4] out-of-range guard fails BAD");
++    CHECK(guarded_pset(bank, 127, value, change).status == 2, "[4] invalid parameter fails BAD under hold");
++    pset_payload(R_ENG, T_909, 0, 0, 0x3FFF, 1); p7(bank);
++    CHECK(req(0x12).status == 2, "[4] guard is only legal on bass target");
++    pset_payload(R_ENG, T_303, NBASS, param, 0x3FFF, 1); p7(bank);
++    CHECK(req(0x12).status == 2, "[4] guarded bass voice out of range fails BAD");
++    pset_payload(R_ENG, T_303, 0, param, value, change); p7(bank); p7(0);
++    CHECK(req(0x12).status == 2, "[4] trailing junk after bank guard fails BAD");
++    pset_payload(R_ENG, T_303, 0, param, value, change); P[pn++] = 0x80;
++    CHECK(req(0x12).status == 2 && !memcmp(saved, cell, sizeof saved) && rev_now() == rev,
++          "[4] non-7-bit bank guard fails even with valid CRC, no mutation");
++    CHECK(original_sound_init(cell, (unsigned)other, 0), "[4] forge mismatched persisted cell in fixture only");
++    memcpy(drift, cell, sizeof drift);
++    CHECK(guarded_pset(bank, param, 0x3FFF, change).status == 3 && !memcmp(drift, cell, sizeof drift),
++          "[4] active bank matches but stored bank differs: busy, no mutation");
++    memcpy(cell, saved, sizeof saved);
++    CHECK(!engine_bass_select_preset(0, bank, 1, &proj.sound) && engine_bass_preset_pending(0),
++          "[4] queue same-bank factory replacement");
++    CHECK(guarded_pset(bank, param, 0x3FFF, change).status == 3 && !memcmp(saved, cell, sizeof saved),
++          "[4] pending same-bank replacement blocks write and preserves cell");
++    CHECK(!engine_bass_select_preset(0, other, 0, &proj.sound) && engine_bass_preset_pending(0),
++          "[4] queue other bank");
++    CHECK(guarded_pset(other, param, 0x3FFF, change).status == 3 && !memcmp(saved, cell, sizeof saved),
++          "[4] requested bank is not treated as active");
++    for (int i = 0; i < 1200 && engine_bass_preset_pending(0); i++) tick(1);
++    CHECK(!engine_bass_preset_pending(0) && engine_bass_bank(0) == other, "[4] pending preset applies after guard releases its hold");
++    memcpy(saved, cell, sizeof saved);
++    value = pget(R_ENG, T_303, 0, param, &max);
++    change = value == 0 ? 1 : 0;
++    CHECK(guarded_pset(bank, param, value, change).status == 5 && !memcmp(saved, cell, sizeof saved),
++          "[4] stale old bank cannot edit the new sound at the same parameter ID and matching scalar");
++    CHECK(guarded_pset(other, param, value, change).status == 0 && cell[param] == change,
++          "[4] actual active bank now accepts a guarded write");
++    CHECK(!engine_bass_select_preset(0, bank, 0, &proj.sound), "[4] restore original fixture bank");
++    for (int i = 0; i < 1200 && engine_bass_preset_pending(0); i++) tick(1);
++    CHECK(engine_bass_bank(0) == bank, "[4] original fixture bank restored");
++}
++
++/* ---- 5 STEP ---- */
++static int midi_has(FILE *f, int status, int note)                /* the MIDI log: "ms: SS NN VV" */
++{
++    char line[96];
++    unsigned ms, s, n, v;
++    int c = 0;
++    rewind(f);
++    while (fgets(line, sizeof line, f))
++        if (sscanf(line, "%u ms: %x %x %x", &ms, &s, &n, &v) == 4 && (int)s == status && (int)n == note && v) c++;
++    return c;
++}
++static void t5_step(void)
++{
++    uint8_t rec[8], got[8];
++    rep_t r;
++    int pat = 3;
++    keep();
++    /* 909: voice 0 and the accent row, first / last / beyond len */
++    proj.pat[pat].drum[0].len = 16;
++    static const int steps[3] = {0, 63, 40};
++    for (int t = 0; t < 2; t++)
++        for (int i = 0; i < 3; i++) {
++            int tr = t ? NDRUM : 0, s = steps[i];
++            uint32_t *w = (tr == NDRUM ? proj.pat[pat].drum[0].accent : proj.pat[pat].drum[0].hit[tr]);
++            rec[0] = (uint8_t)tr, rec[1] = 1, rec[2] = 127;
++            CHECK(sset(0, pat, s, pcrc(pat), rec, 3, &r) == 0 && sm_get(w, s) && r.fl[3] == tr && r.fl[4] == 1 &&
++                  gu(r.fl + 6, 2) == pcrc(pat), "[5] 909 track %d step %d set (reply pattern_crc)", tr, s);
++            CHECK(sget(0, pat, s, tr, got) == 3 && got[0] == tr && got[1] == 1, "[5] STEP_GET 909 track %d step %d", tr, s);
++            rec[1] = 0;
++            CHECK(sset(0, pat, s, 0x3FFF, rec, 3, 0) == 0 && !sm_get(w, s), "[5] 909 track %d step %d clear", tr, s);
++        }
++    /* drum velocity lane */
++    rec[0] = 2, rec[1] = 1, rec[2] = 40;
++    CHECK(sset(1, pat, 5, 0x3FFF, rec, 3, 0) == 0 && sget(1, pat, 5, 2, got) == 3 && got[1] == 1 && got[2] == 40, "[5] 808 step velocity 40");
++    rec[2] = 0;
++    CHECK(sset(1, pat, 5, 0x3FFF, rec, 3, 0) == 0 && sget(1, pat, 5, 2, got) == 3 && got[2] == 0, "[5] velocity 0 = the accent law");
++    /* 303: flag packing round trip */
++    {
++        static const uint8_t b[6] = {36, G_NOTE, 1, 1, 90, 15};
++        const bstep_t *st = &proj.pat[pat].bass[1].step[63];
++        CHECK(sset(3, pat, 63, 0x3FFF, b, 6, &r) == 0 && st->note == 36 && st->velocity == 90 &&
++              st->flags == (G_NOTE | BS_ACCENT | BS_SLIDE | 15u << BS_END_SHIFT), "[5] 303 B step 63 packs gate/accent/slide/end");
++        CHECK(sget(3, pat, 63, -1, got) == 6 && !memcmp(got, b, 6), "[5] 303 STEP_GET round trip");
++        static const uint8_t t2[6] = {40, G_TIE, 0, 0, 0, 0};
++        CHECK(sset(2, pat, 0, 0x3FFF, t2, 6, 0) == 0 && bstep_gate(&proj.pat[pat].bass[0].step[0]) == G_TIE &&
++              sget(2, pat, 0, -1, got) == 6 && !memcmp(got, t2, 6), "[5] 303 A tie step 0");
++        static const uint8_t bad[6] = {40, 3, 0, 0, 0, 0};
++        CHECK(sset(2, pat, 1, 0x3FFF, bad, 6, 0) == 2, "[5] 303 gate 3 -> BAD");
++    }
++    /* BREAK: step 31, slice on a 16th */
++    {
++        uint8_t b[2] = {1, 0};
++        CHECK(sset(4, pat, 31, 0x3FFF, b, 2, 0) == 0 && (proj.pat[pat].brk.steps >> 31 & 1u), "[5] BREAK step 31 on");
++        b[1] = 32;
++        CHECK(sset(4, pat, 3, 0x3FFF, b, 2, 0) == 0 && proj.pat[pat].brk.slice[3] == 32 && (proj.pat[pat].brk.steps >> 3 & 1u), "[5] BREAK slice 32 on step 3");
++        CHECK(sget(4, pat, 3, -1, got) == 2 && got[0] == 1 && got[1] == 32, "[5] BREAK STEP_GET");
++        b[1] = 5;
++        CHECK(sset(4, pat, 20, 0x3FFF, b, 2, 0) == 2 && sset(4, pat, 32, 0x3FFF, b, 2, 0) == 2, "[5] BREAK slice past 16 / step 32 -> BAD");
++    }
++    /* expect_crc conflict: nothing written */
++    {
++        uint32_t c = pcrc(pat);
++        rec[0] = 4, rec[1] = 1, rec[2] = 127;
++        CHECK(sset(0, pat, 9, (c + 1) & 0x3FFF, rec, 3, 0) == 5 && pcrc(pat) == c && !sm_get(proj.pat[pat].drum[0].hit[4], 9),
++              "[5] expect_crc mismatch -> CONFLICT, nothing written");
++    }
++    /* the sequencer then plays it: 909 BD on step 4 of an empty pattern, 303 A note 48 on step 2 */
++    {
++        FILE *log = tmpfile();
++        int pp = 9;
++        memset(&proj.pat[pp].drum[0], 0, sizeof proj.pat[pp].drum[0]);
++        memset(proj.pat[pp].bass[0].step, 0, sizeof proj.pat[pp].bass[0].step);
++        proj.pat[pp].drum[0].len = 16; proj.pat[pp].bass[0].len = 16;
++        seq.mute = seq.vmute = 0; seq.part_off = 0;
++        for (int k = 0; k < NTRACKS; k++) seq.pcue[k] = (uint8_t)pp;
++        seq.send_notes = 1;
++        clksrc(SEQ_CLK_INT);
++        tick(10);
++        midi_log = log;
++        seq_start(&seq); tick(2500); seq_stop(&seq); tick(20);
++        CHECK(midi_has(log, 0x90 | seq.ch[0], 36) == 0 && midi_has(log, 0x90 | seq.ch[2], 48) == 0, "[5] empty pattern: no notes (control)");
++        rec[0] = 0, rec[1] = 1, rec[2] = 127;
++        CHECK(sset(0, pp, 4, 0x3FFF, rec, 3, 0) == 0, "[5] BD on step 4");
++        {
++            static const uint8_t n48[6] = {48, G_NOTE, 0, 0, 0, 0};
++            CHECK(sset(2, pp, 2, 0x3FFF, n48, 6, 0) == 0, "[5] 303 A note 48 on step 2");
++        }
++        fflush(log);
++        midi_log = 0; log = tmpfile(); midi_log = log;
++        seq_start(&seq); tick(2500); keep(); seq_stop(&seq); tick(20);
++        fflush(log);
++        midi_log = 0;
++        CHECK(midi_has(log, 0x90 | seq.ch[0], 36) >= 1, "[5] the sequencer plays the Remote's 909 step");
++        CHECK(midi_has(log, 0x90 | seq.ch[2], 48) >= 1, "[5] the sequencer plays the Remote's 303 step");
++        fclose(log);
++        seq.send_notes = 0;
++    }
++}
++/* ---- 6 PART_SET ---- */
++static int part_set(int part, int pat, int field, int v, int *out)
++{
++    rep_t r;
++    ep(); p7(part); p7(pat); p7(field); pu(v, 2);
++    r = req(0x22);
++    if (out && !r.status) *out = (int)gu(r.fl + 3, 2);
++    return r.status;
++}
++static void t6_part(void)
++{
++    int got, pat = 4;
++    keep();
++    CHECK(part_set(0, pat, 0, 64, &got) == 0 && got == 64 && proj.pat[pat].drum[0].len == 64, "[6] 909 len 64");
++    CHECK(part_set(1, pat, 0, 1, &got) == 0 && got == 1 && proj.pat[pat].drum[1].len == 1, "[6] 808 len 1");
++    CHECK(part_set(1, pat, 0, 0, 0) == 2 && part_set(1, pat, 0, 65, 0) == 2, "[6] len 0 / 65 -> BAD");
++    CHECK(part_set(0, pat, 1, RATE_8, &got) == 0 && got == RATE_8 && proj.pat[pat].drum[0].rate == RATE_8, "[6] 909 rate");
++    CHECK(part_set(2, pat, 2, DIR_PINGPONG, &got) == 0 && proj.pat[pat].bass[0].dir == DIR_PINGPONG, "[6] 303 A dir");
++    CHECK(part_set(3, pat, 3, 30, &got) == 0 && got == 30 && proj.pat[pat].bass[1].transpose == 30, "[6] 303 B transpose");
++    CHECK(part_set(3, pat, 0, 48, &got) == 0 && proj.pat[pat].bass[1].len == 48, "[6] 303 B len");
++    CHECK(part_set(0, pat, 4, 60, &got) == 0 && got == 60 && proj.pat[pat].swing == 60, "[6] swing on part 0");
++    CHECK(part_set(1, pat, 4, 60, 0) == 6 && part_set(2, pat, 4, 60, 0) == 6, "[6] swing only on part 0");
++    CHECK(part_set(4, pat, 1, RATE_8, &got) == 0 && got == RATE_8 && proj.pat[pat].brk.rate == RATE_8, "[6] BREAK rate");
++    CHECK(part_set(0, pat, 2, 1, 0) == 6, "[6] dir on a drum part -> UNSUPPORTED");
++}
++/* ---- 7 PATTERN_DUMP ---- */
++static void t7_dump(void)
++{
++    static uint8_t buf[sizeof(pattern_t) + 128];
++    uint32_t off = 0, total = 0;
++    int pat = 3, ok = 1, frames = 0;
++    rep_t r;
++    while (1) {
++        p7(pat); pu(off, 2); p7(112);
++        r = req(0x23);
++        if (r.status) { ok = 0; break; }
++        total = gu(r.fl + 3, 2);
++        uint32_t c = r.fl[5];
++        if (r.fl[0] != pat || gu(r.fl + 1, 2) != off) ok = 0;
++        unpack7(r.fl + 6, c, buf + off);
++        if (gu(r.fl + 6 + c + (c + 6) / 7, 2) != pcrc(pat)) ok = 0;
++        off += c; frames++;
++        if (!c || off >= total) break;
++    }
++    CHECK(ok && total == sizeof(pattern_t) && off == total && !memcmp(buf, &proj.pat[pat], sizeof(pattern_t)),
++          "[7] concatenated chunks == proj.pat[%d] (%u B, %d frames), CRC matches", pat, total, frames);
++    p7(pat); pu(sizeof(pattern_t) + 1, 2); p7(10);
++    CHECK(req(0x23).status == 2, "[7] offset past total -> BAD");
++    p7(32); pu(0, 2); p7(10);
++    CHECK(req(0x23).status == 2, "[7] pattern 32 -> BAD");
++    p7(pat); pu(sizeof(pattern_t), 2); p7(10);
++    r = req(0x23);
++    CHECK(r.status == 0 && r.fl[5] == 0, "[7] offset == total: empty chunk");
++}
++/* ---- 8 CUE and Program Change ---- */
++static void pc(int ch, int pp) { host_midi_put(0xCu | (uint32_t)(0xC0 | ch) << 8 | (uint32_t)pp << 16); }
++static void t8_cue(void)
++{
++    rep_t r, last;
++    int k, launched_at = -1;
++    keep();
++    ep(); pu(1u << 2, 4); (void)req(0x08);
++    clksrc(SEQ_CLK_INT);
++    for (k = 0; k < NTRACKS; k++) seq.pcue[k] = 0, proj.pat[0].drum[0].len = 16;
++    tick(10);
++    seq_start(&seq); tick(300);
++    CHECK(seq.playing, "[8] playing");
++    ep(); p7(0); p7(5);
++    r = req(0x24);
++    CHECK(r.status == 0 && r.fl[2] == 0 && r.fl[7] == 5 && seq.pcue[0] == 5, "[8] CUE while playing: pcue in the reply");
++    nof = 0;
++    tick(5);
++    CHECK(seq.ppat[0] == 0, "[8] not launched before the bar");
++    for (k = 0; k < 4000 && launched_at < 0; k++) {
++        int pos = seq.t[0].pos;
++        tick(1);
++        if (seq.ppat[0] == 5) launched_at = pos;
++        if (!(k % 1000)) keep();
++    }
++    tick(40);
++    CHECK(launched_at >= 0 && seq.t[0].pos < 2, "[8] launched at the bar (step %d)", seq.t[0].pos);
++    CHECK(notifies(7, &last) >= 1 && last.fl[0] == 5, "[8] NOTIFY PATTERN on the launch");
++    ep(); p7(1); p7(7); (void)req(0x24);
++    ep(); p7(1); p7(127);
++    r = req(0x24);
++    CHECK(r.status == 0 && seq.pcue[1] == 0xFF && r.fl[8] == 127, "[8] 127 cancels the cue");
++    keep(); tick(1500); keep();
++    CHECK(seq.ppat[1] != 7, "[8] a cancelled cue never launches");
++    seq_stop(&seq); tick(30);
++    ep(); p7(127); p7(9);
++    r = req(0x24);
++    tick(5);
++    CHECK(r.status == 0 && seq.ppat[0] == 9 && seq.ppat[4] == 9, "[8] CUE all while stopped sets ppat");
++    /* Program Change on a part's channel */
++    pc(seq.ch[2], 12); tick(5);
++    CHECK(seq.ppat[2] == 12 && seq.ppat[3] == 9, "[8] PC on 303 A's channel cues 303 A (stopped: now)");
++    seq_start(&seq); tick(50);
++    pc(seq.ch[3], 13); tick(10);
++    CHECK(seq.pcue[3] == 13 && seq.ppat[3] == 9, "[8] PC while playing: cued for the bar");
++    pc(seq.ch[3], 127); tick(10);
++    CHECK(seq.pcue[3] == 0xFF, "[8] PC 127 cancels");
++    pc(seq.ch[3], 40); tick(10);
++    CHECK(seq.pcue[3] == 0xFF, "[8] PC 32..126 ignored");
++    seq_stop(&seq); tick(30);
++    {
++        int ch = 15, used = 0;
++        for (k = 0; k < NTRACKS; k++) used |= seq.ch[k] == ch;
++        CHECK(!used, "[8] channel 16 is no part's");
++        uint8_t before[NTRACKS];
++        for (k = 0; k < NTRACKS; k++) before[k] = seq.ppat[k];
++        pc(ch, 20); tick(5);
++        for (k = 0; k < NTRACKS; k++) CHECK(seq.ppat[k] == before[k] && seq.pcue[k] == 0xFF, "[8] PC on a non-part channel ignored (part %d)", k);
++    }
++#if BOARD_SMK37
++    test_clip_mode = 1;
++    pc(seq.ch[2], 21); tick(5);
++    CHECK(seq.ppat[2] == 12, "[8] PC ignored in clip mode");
++    test_clip_mode = 0;
++#endif
++}
++/* ---- 9 TRANSPORT ---- */
++static int transport(int a) { rep_t r; ep(); p7(a); r = req(0x26); return r.status ? -r.status : r.fl[0]; }
++static void t9_transport(void)
++{
++    keep();
++    clksrc(SEQ_CLK_INT);
++    CHECK(seq.clk_src == SEQ_CLK_INT, "[9] clock source INTERNAL");
++    host_midi_put(0xFu | 0xFAu << 8); tick(20);
++    CHECK(!seq.playing, "[9] INTERNAL drops FA (why TRANSPORT exists)");
++    CHECK(transport(1) == 1, "[9] play: playing 1 in the reply");
++    tick(20);
++    CHECK(seq.playing, "[9] internal clock: play edge");
++    tick(500);
++    CHECK(transport(0) == 0, "[9] stop reply");
++    tick(20);
++    CHECK(!seq.playing, "[9] stop edge");
++    CHECK(transport(2) == 1, "[9] continue");
++    tick(20);
++    CHECK(seq.playing, "[9] continue edge");
++    CHECK(transport(3) == -2, "[9] action 3 -> BAD");
++    transport(0); tick(20);
++    /* external clock running: DENIED; FA/FC still run it */
++    clksrc(SEQ_CLK_EXT);
++    host_midi_put(0xFu | 0xFAu << 8);
++    for (int k = 0; k < 48; k++) { host_midi_put(0xFu | 0xF8u << 8); tick(20); }
++    CHECK(seq.ext && seq.playing, "[9] FA + clock under EXTERNAL: playing");
++    keep();
++    CHECK(transport(0) == -8 && seq.playing, "[9] external clock -> DENIED, still playing");
++    host_midi_put(0xFu | 0xFCu << 8); tick(20);
++    CHECK(!seq.playing, "[9] FC under EXTERNAL stops");
++    tick(1000);
++    clksrc(SEQ_CLK_AUTO);
++}
++/* ---- 10 MUTE ---- */
++static int mute(int bit, int onoff, int queued) { rep_t r; ep(); p7(bit); p7(onoff); p7(queued); r = req(0x28); return r.status; }
++static void t10_mute(void)
++{
++    keep();
++    seq.mute = seq.vmute = seq.mute_q = seq.vmute_q = 0;
++    CHECK(mute(MUTE_BASS0, 1, 0) == 0 && (seq.mute >> MUTE_BASS0 & 1u), "[10] immediate part mute");
++    CHECK(mute(NDRUM + 3, 1, 0) == 0 && (seq.mute >> (NDRUM + 3) & 1u), "[10] immediate 808 voice mute");
++    CHECK(mute(MUTE_BRK + 1, 1, 0) == 2 && mute(32, 1, 0) == 2, "[10] bad bits -> BAD");
++    seq_start(&seq); tick(100);
++    CHECK(mute(MUTE_BRK, 1, 1) == 0 && !(seq.mute >> MUTE_BRK & 1u), "[10] queued: not yet");
++    for (int k = 0; k < 4000 && !(seq.mute >> MUTE_BRK & 1u); k++) { tick(1); if (!(k % 1000)) keep(); }
++    CHECK((seq.mute >> MUTE_BRK & 1u) && seq.t[0].pos < 2, "[10] queued mute lands on the next 909 bar (step %d)", seq.t[0].pos);
++    seq_stop(&seq); tick(30);
++    CHECK(mute(MUTE_BASS0, 0, 0) == 0 && !(seq.mute >> MUTE_BASS0 & 1u), "[10] unmute");
++}
++/* ---- 11 revision: one bump and one NOTIFY per mutation, from every source; reads bump nothing ---- */
++static void t11_rev(void)
++{
++    uint32_t r0, r1;
++    rep_t last;
++    keep();
++    ep(); pu(0x5F, 4); (void)req(0x08);
++    tick(60); keep(); nof = 0;
++    r0 = rev_now();
++    (void)rev_now(); (void)req(0x30);
++    p7(1); p7(R_SWING); p7(0); p7(0); p7(0); (void)req(0x11);
++    (void)sget(0, 0, 0, 0, (uint8_t[8]){0});
++    tick(60);
++    CHECK(rev_now() == r0, "[11] reads (STATE, PARAM_GET, STEP_GET) and time bump nothing");
++#define BUMP(what, kind, act) do { int nn_; keep(); r0 = rev_now(); nof = 0; act; tick(60); nn_ = notifies(kind, &last); r1 = rev_now(); \
++        CHECK(r1 == ((r0 + 1u) & 0x0FFFFFFFu), "[11] %s: rev %u -> %u (want +1)", what, r0, r1); \
++        CHECK(nn_ == 1 && last.rev == r1, "[11] %s: one NOTIFY kind %d at that rev (%d)", what, kind, nn_); } while (0)
++    BUMP("DNR3 PARAM_SET", 0, (void)pset(R_SWING, 0, 0, 0, 0x3FFF, 21, 0));
++    BUMP("panel pref (pref_set)", 0, pref_set(PR(R_SWING, 0, 0, 0), 22));
++    BUMP("DNR3 STEP_SET", 1, (void)sset(0, 2, 7, 0x3FFF, (uint8_t[3]){1, 1, 127}, 3, 0));
++    BUMP("panel step edit (mark_dirty)", 1, mark_dirty());
++    BUMP("MIDI live recording (rec_dirty)", 1, seq.rec_dirty = 1);
++    BUMP("Program Change (stopped: launch)", 7, (pc(seq.ch[0], 6), tick(5)));
++    BUMP("DNR3 TEMPO", 3, ({ ep(); pu(1263, 2); (void)req(0x27); }));
++    BUMP("panel tempo", 3, pref_set(PR(R_TEMPO, 0, 0, 0), 100));
++    BUMP("HOME mute (seq.mute)", 4, seq.mute ^= 1u);
++    BUMP("transport edge (PLAY)", 3, (seq_start(&seq), tick(5)));
++    {
++        /* the cue launch at the bar: CUE (one bump), then the launch (one more) */
++        BUMP("DNR3 CUE", 2, ({ ep(); p7(0); p7(8); (void)req(0x24); }));
++        keep(); r0 = rev_now(); nof = 0;
++        for (int k = 0; k < 4000 && seq.ppat[0] != 8; k++) tick(1);
++        tick(60);
++        {
++            int nn = notifies(7, &last);
++            r1 = rev_now();
++            CHECK(seq.ppat[0] == 8 && r1 == ((r0 + 1u) & 0x0FFFFFFFu), "[11] cue launch: rev %u -> %u", r0, r1);
++            CHECK(nn == 1 && last.rev == r1, "[11] cue launch: one NOTIFY PATTERN (%d)", nn);
++        }
++    }
++    BUMP("transport edge (stop)", 3, (seq_stop(&seq), tick(5)));
++    BUMP("undo", 1, do_undo(0));
++    /* a failed write changes nothing */
++    keep(); r0 = rev_now();
++    CHECK(pset(R_SWING, 0, 0, 0, 99, 5, 0) == 5 && rev_now() == r0, "[11] a CONFLICT write bumps nothing");
++}
++/* ---- 12 busy ---- */
++static void t12_busy(void)
++{
++    uint32_t r0;
++    int sw = pref_get(PR(R_SWING, 0, 0, 0)), tempo = (int)rd_bpm10();
++    rep_t r;
++    keep();
++    r0 = rev_now();
++    host_remote_busy = 1;
++    CHECK(pset(R_SWING, 0, 0, 0, 0x3FFF, sw + 1, 0) == 3, "[12] PARAM_SET while busy -> BUSY");
++    ep(); pu(1500, 2);
++    CHECK(req(0x27).status == 3, "[12] TEMPO while busy -> BUSY");
++    CHECK(sset(0, 0, 1, 0x3FFF, (uint8_t[3]){0, 1, 127}, 3, 0) == 3, "[12] STEP_SET while busy -> BUSY");
++    ep(); p7(0); p7(3);
++    CHECK(req(0x24).status == 3, "[12] CUE while busy -> BUSY");
++    r = req(0x30);
++    CHECK(r.status == 0, "[12] reads still answer");
++    host_remote_busy = 0;
++    project_busy = 1;                                    /* a project transfer (ui_project_begin) */
++    CHECK(pset(R_SWING, 0, 0, 0, 0x3FFF, sw + 1, 0) == 3, "[12] PARAM_SET during a project transfer -> BUSY");
++    project_busy = 0;
++    CHECK(pref_get(PR(R_SWING, 0, 0, 0)) == sw && (int)rd_bpm10() == tempo && !sm_get(proj.pat[0].drum[0].hit[0], 1) &&
++          rev_now() == r0, "[12] nothing changed, no rev bump");
++}
++/* ---- 13 rate ---- */
++static void t13_rate(void)
++{
++    int n, last_v = -1, i, ons0, ons1;
++    rep_t r;
++    keep();
++    ep(); pu(0x5F, 4); (void)req(0x08);
++    seq.send_notes = 1;
++    seq_start(&seq); tick(100);
++    ons0 = (int)note_ons; tick(1000); ons0 = (int)note_ons - ons0;   /* 1 s of notes, no Remote traffic */
++    nof = 0; ons1 = (int)note_ons;
++    for (i = 0; i < 1000; i++) {                       /* 1000 changes in 1 s */
++        pref_set(PR(R_ENG, T_909, 0, 1), i & 127);
++        tick(1);
++    }
++    ons1 = (int)note_ons - ons1;
++    n = nof;
++    for (i = 0; i < nof && i < NF; i++)
++        if (!parse(i, &r) && r.op == 0x7F && r.fl[-1] == 0) last_v = (int)gu(r.fl + 4, 2);
++    tick(100);
++    for (i = 0; i < nof && i < NF; i++)
++        if (!parse(i, &r) && r.op == 0x7F && r.fl[-1] == 0) last_v = (int)gu(r.fl + 4, 2);
++    CHECK(n <= 52, "[13] 1000 changes in 1 s -> %d frames (<= watch_max_hz 50)", n);
++    CHECK(last_v == pref_get(PR(R_ENG, T_909, 0, 1)), "[13] the last NOTIFY carries the latest value (%d vs %d)", last_v, pref_get(PR(R_ENG, T_909, 0, 1)));
++    CHECK(abs(ons1 - ons0) <= 1, "[13] MIDI note output unchanged under the NOTIFY load (%d vs %d notes)", ons1, ons0);
++    seq_stop(&seq); tick(30);
++    seq.send_notes = 0;
++}
++/* ---- 14 idempotent retry ---- */
++static void t14_retry(void)
++{
++    uint8_t first[256], f2[300];
++    uint32_t n1, r0, n2;
++    keep();
++    ep(); pu(1300, 2);
++    n2 = frame_mk(f2, 3, 0x27, 4242, P, pn); pn = 0;
++    CHECK(tx(f2, n2) == 0 && nof == 1, "[14] TEMPO");
++    memcpy(first, of[0], on[0]); n1 = on[0];
++    pref_set(PR(R_TEMPO, 0, 0, 0), 140 - 20);          /* the panel moves it on */
++    tick(30);
++    r0 = rev_now();
++    CHECK(tx(f2, n2) == 0 && nof == 1 && on[0] == n1 && !memcmp(of[0], first, n1), "[14] the same seq again: the same reply bytes");
++    CHECK(rd_bpm10() == 1400u && rev_now() == r0, "[14] one mutation: the retry applied nothing (bpm %u)", rd_bpm10());
++    ep(); pu(1300, 2);
++    n2 = frame_mk(f2, 3, 0x27, 4243, P, pn); pn = 0;
++    CHECK(tx(f2, n2) == 0 && nof == 1 && rd_bpm10() == 1300u, "[14] a new seq applies again");
++}
++/* ---- 15 budgets (the build's limits gate measures .text / RAM; here: the handler's own RAM) ---- */
++static void t15_budget(void)
++{
++    printf("  remote-dnr3: state %u B RAM (+%u B host frame buffer; the device builds in the editor's ed_out)\n",
++           (unsigned)sizeof rd, (unsigned)sizeof rd_outbuf);
++    CHECK(sizeof rd <= 160u, "[15] handler state <= 160 B RAM (%u)", (unsigned)sizeof rd);
++}
++
++int main(void)
++{
++    host_remote_sink = sink;
++    boot();
++    tick(300);
++    t1_framing();
++    t2_dnr2_fl();
++    t3_lease();
++    t4_bass_bank_guard();
++    t4_param();
++    t5_step();
++    t6_part();
++    t7_dump();
++    t8_cue();
++    t9_transport();
++    t10_mute();
++    t11_rev();
++    t12_busy();
++    t13_rate();
++    t14_retry();
++    t15_budget();
++    printf("remote-dnr3: %d checks, %d failed\n", checks, fails);
++    return fails ? 1 : 0;
++}
+diff --git a/tests/host/remote_dnr3_test.sh b/tests/host/remote_dnr3_test.sh
+new file mode 100755
+index 0000000000000000000000000000000000000000..64f727622a451570c6efffaf2ad67579fa992228
+--- /dev/null
++++ b/tests/host/remote_dnr3_test.sh
+@@ -0,0 +1,70 @@
++#!/bin/sh
++# SPDX-License-Identifier: GPL-3.0-only
++# DNR3 Remote protocol (REMOTE-FW-PROTOCOL v3.0 section 8, items 1-15) on the whole app (host build),
++# the device wiring (editor.c dispatch, usb.c reply hook, x0x.c frame buffer), and mutants that must fail.
++#   X0X_REMOTE_MUTANTS=0 skips the mutant builds (each is a whole-app compile).
++set -eu
++cd "$(dirname "$0")/../.."
++. tests/host/original_build.sh
++OUT=${X0X_REMOTE_TEST_OUT:-build/host/remote-dnr3}
++mkdir -p "$OUT"; OUT=$(cd "$OUT" && pwd)
++[ -f build/gen/x0x_drum_tables.h ] || sh host/build_host.sh --generate-only >"$OUT/assets.log" 2>&1
++# [2] [15] device wiring: DNR3 frames go to remote_dnr3_frame before the FL header check and only a
++# handled frame (0) is consumed; replies never wait (usb.c); the device frame buffer is the editor's.
++python3 - <<'PY'
++import re, sys
++ed = open('firmware/src/app/editor.c').read()
++svc = ed[ed.index('static int ed_service(void)'):]
++svc = svc[:svc.index('\n}\n')]
++i = svc.find('if (!remote_dnr3_frame(p, n)) {')
++j = svc.find('p[0] != ED_HDR0')
++bad = []
++if i < 0 or j < 0 or i > j: bad.append('editor.c: ed_service must offer a frame to remote_dnr3_frame before the FL check and consume it only on 0')
++if 'remote_dnr3_tick(plat_ms())' not in svc: bad.append('editor.c: ed_service must call remote_dnr3_tick')
++usb = open('firmware/src/usb.c').read()
++m = re.search(r'void remote_dnr3_out\(const uint8_t \*frame, uint32_t n\)\n\{(.*?)\n\}', usb, re.S)
++if not m or 'sx_busy' not in m.group(1): bad.append('usb.c: remote_dnr3_out must drop (not wait) when the SysEx ring is busy')
++x = open('firmware/src/x0x.c').read()
++if '#define REMOTE_DNR3_OUTBUF ed_out' not in x: bad.append('x0x.c: the device builds DNR3 frames in ed_out')
++src = open('firmware/src/app/remote_dnr3.c').read()
++for w in ('X0X_POOL', 'psram', 'PSRAM', 'malloc'):
++    if w in src: bad.append('remote_dnr3.c uses ' + w)
++for b in bad: print('  FAIL', b)
++sys.exit(1 if bad else 0)
++PY
++build() {   # build <exe> [extra cc args]
++    exe=$1; shift
++    ${CC:-cc} ${SAN_FLAGS:-} -O1 -g -std=gnu99 -w -DX0X_HOST -DBOARD_SMK37=1 \
++        -Ifirmware/src -Ifirmware/src/dsp -Ibuild/gen $ORIGINAL_FLAGS "$@" \
++        tests/host/remote_dnr3_test.c $ORIGINAL_SOURCES -lm -o "$exe"
++}
++build "$OUT/test"
++"$OUT/test"
++[ "${X0X_REMOTE_MUTANTS:-1}" = 0 ] && exit 0
++# Mutants: each breaks one rule of the spec; the test must fail on every one.
++python3 - "$OUT" <<'PY'
++import sys
++out = sys.argv[1]
++src = open('firmware/src/app/remote_dnr3.c').read()
++muts = {
++  'nocrc':  ('if (len != n - 14u || crc != rd_g(p + n - 5u, 5))', 'if (len != n - 14u)'),
++  'norev':  ('rd.dirty = 0, rd.rev = (rd.rev + 1u) & 0x0FFFFFFFu;', 'rd.dirty = 0;'),
++  'nocache':('if (f & 0x80u && rd.clen &&', 'if (0 && rd.clen &&'),
++  'nolease':('st = !rd.active ? RS_DENIED :', 'st = 0 ? RS_DENIED :'),
++  'nobank': ('else if (engine_bass_bank(q[2]) != q[8])', 'else if (0)'),
++  'nopending': ('if (engine_bass_preset_pending(q[2]))', 'if (0)'),
++}
++for k, (a, b) in muts.items():
++    assert src.count(a) == 1, k
++    open(f'{out}/mut_{k}.c', 'w').write(src.replace(a, b).replace('#include "remote_dnr3.h"', '#include "app/remote_dnr3.h"').replace('#include "../crc32_nibble.h"', '#include "crc32_nibble.h"').replace('#include "version.h"', '#include "app/version.h"'))
++PY
++rc=0
++for m in nocrc norev nocache nolease nobank nopending; do
++    build "$OUT/mut_$m" "-DREMOTE_DNR3_SOURCE=\"$OUT/mut_$m.c\""
++    if "$OUT/mut_$m" >"$OUT/mut_$m.log" 2>&1; then
++        echo "  FAIL mutant $m survived (the test did not notice)"; rc=1
++    else
++        echo "  mutant $m killed"
++    fi
++done
++exit $rc
+diff --git a/tests/host/s1c_programs_test.c b/tests/host/s1c_programs_test.c
+index 9e2b92dd9d514368fde735d1400bab1cbb7c8e73..bbef6ecf4ff4829455139e6a4c47763e10b14668 100644
+--- a/tests/host/s1c_programs_test.c
++++ b/tests/host/s1c_programs_test.c
+@@ -44,6 +44,16 @@ static double now(void)
+ 
+ static unsigned nonfinite, overruns, silent;
+ static double worst_ms;
++/* Optional bit comparison across engines compiled in the same environment.
++ * A textual identity avoids writing hundreds of MB of diagnostic audio. */
++static int digest_on;
++static uint64_t digest = UINT64_C(14695981039346656037);
++static void add_sample(float value)
++{
++    uint32_t bits;
++    memcpy(&bits, &value, sizeof bits);
++    digest = (digest ^ bits) * UINT64_C(1099511628211);
++}
+ 
+ static void play(unsigned factory)
+ {
+@@ -68,6 +78,7 @@ static void play(unsigned factory)
+         for (unsigned i = 0; i < 256; ++i) {
+             if (!isfinite(l[i]) || !isfinite(r[i])) { nonfinite++; break; }
+             if (fabsf(l[i]) > peak) peak = fabsf(l[i]);
++            if (digest_on) { add_sample(l[i]); add_sample(r[i]); }
+         }
+     }
+     if (peak == 0.0f) { silent++; if (getenv("S1_LIST")) printf("silent %u\n", factory); }
+@@ -86,6 +97,7 @@ int main(int argc, char **argv)
+     assert(original_chicago_fx2_compact_init(&fx));
+     owner = original_chicago_fx2_compact_owner(&fx);
+     (void)s1_part_set_pack(pack, n);
++    digest_on = getenv("S1_AUDIO_DIGEST") != NULL;
+     play(0);
+     unsigned programs = s1_part_programs();
+     if (!pack || !programs) {
+@@ -102,5 +114,6 @@ int main(int argc, char **argv)
+     assert(fx.ready == clean.ready && fx.selected == clean.selected);
+     printf("programs=%u nonfinite=%u silent=%u host_overruns=%u worst_block_ms=%.3f \n",
+            programs, nonfinite, silent, overruns, worst_ms);
++    if (digest_on) printf("audio_word_digest=%016llx\n", (unsigned long long)digest);
+     return nonfinite != 0 || silent != 0;
+ }
+diff --git a/tests/host/test_engine_render_shortcuts.py b/tests/host/test_engine_render_shortcuts.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..6ec0f4bcfc538cbd9db4d4a55368c9a832fb0fbd
+--- /dev/null
++++ b/tests/host/test_engine_render_shortcuts.py
+@@ -0,0 +1,127 @@
++#!/usr/bin/env python3
++# SPDX-License-Identifier: GPL-3.0-only
++"""Test the real renderer's quiet scan and split selection against forward oracles."""
++import os
++from pathlib import Path
++import subprocess
++import tempfile
++
++ROOT = Path(__file__).resolve().parents[2]
++SOURCE = (ROOT / "firmware/src/app/engine.c").read_text()
++
++
++def extract_between(start, end):
++    lo = SOURCE.index(start)
++    return SOURCE[lo:SOURCE.index(end, lo)]
++
++
++enum = extract_between("enum { JB_909,", "\n")
++plan = extract_between("#define ENG_C1_LAT ", "/* post-mix tail")
++scan = extract_between("uint32_t last = n;", "            bfx_shape(p,")
++head = r'''
++#include "fastmath.h"
++#include <assert.h>
++#include <math.h>
++#include <stdio.h>
++#include <stdint.h>
++'''
++plan_state = r'''
++static uint8_t eng_plan;
++static uint32_t eng_job_cost[JB_N];
++enum { ORIGINAL_SOUND_MIAMI = 1 };
++struct { unsigned kind; } original_bass[2];
++static int d909, d808, brk;
++static int drum909_active(const int *a) { return *a; }
++static int drum808_active(const int *a) { return *a; }
++static int breaks_silent(const int *a) { return !*a; }
++'''
++quiet_start = r'''
++static unsigned quiet_after(unsigned start, unsigned n, float *l, float *r)
++{
++    const unsigned bv = 0;
++    float *bb[2] = {l, r};
++    unsigned original_quiet_samples[2] = {start, 0}, bass_quiet_next[2];
++'''
++body = r'''
++    return bass_quiet_next[0];
++}
++
++static uint32_t rng = 0x97u;
++static uint32_t next(void) { return rng = rng * 1664525u + 1013904223u; }
++
++static unsigned all_masks(unsigned allowed, const uint32_t *c, unsigned current)
++{
++    unsigned best = current & allowed, cost = plan_cost(best, c), min = cost;
++    for (unsigned m = 0; m < 1u << JB_N; ++m) {
++        if (m & ~allowed) continue;
++        unsigned k = plan_cost(m, c);
++        if (k < min) { min = k; best = m; }
++    }
++    return min * 8u < cost * 7u || (current & ~allowed) ? best : current & allowed;
++}
++
++int main(void)
++{
++    unsigned checks = 0;
++    const float q = 1.0f / 65536.0f;
++    const float levels[] = {0.0f, -0.0f, q, -q, q * 1.1f, -q * 1.1f, INFINITY, NAN};
++    for (unsigned pattern = 0; pattern < 64; ++pattern) {
++        float l[256], r[256];
++        for (unsigned i = 0; i < 256; ++i) {
++            l[i] = levels[next() >> 29];
++            r[i] = levels[next() >> 29];
++            if (pattern & 1) l[i] = 0.0f;
++            if (pattern & 2) r[i] = 0.0f;
++        }
++        for (unsigned n = 0; n <= 256; ++n) {
++            unsigned start = (pattern & 4) ? 512 : next() % 513, ref = start;
++            for (unsigned i = 0; i < n; ++i) {
++                if (fm_fabsf(l[i]) > q || fm_fabsf(r[i]) > q) ref = 0;
++                else if (ref < 512) ++ref;
++            }
++            assert(quiet_after(start, n, l, r) == ref);
++            ++checks;
++        }
++    }
++    /* All actual activity/affinity combinations, initial schedules (including
++     * stale jobs), short and full spans, ties, and varying stage costs. */
++    const unsigned ns[] = {1, 32, 64, 128, 256};
++    for (unsigned state = 0; state < 32; ++state) {
++        d909 = (state >> 0) & 1u;
++        d808 = (state >> 1) & 1u;
++        brk  = (state >> 2) & 1u;
++        original_bass[0].kind = (state >> 3) & 1u;
++        original_bass[1].kind = (state >> 4) & 1u;
++        const unsigned act = (d909 << JB_909) | (d808 << JB_808) |
++                             (brk << JB_BRK) | (1u << JB_A) | (1u << JB_B);
++        const unsigned mask = act & ((1u << JB_909) | (1u << JB_808) | (1u << JB_BRK) |
++            (original_bass[0].kind << JB_A) | (original_bass[1].kind << JB_B));
++        for (unsigned vector = 0; vector < 16; ++vector) {
++            for (unsigned i = 0; i < JB_N; ++i)
++                eng_job_cost[i] = vector == 0 ? 0 : vector == 1 ? 1800 : next() % 8000;
++            for (unsigned j = 0; j < sizeof ns / sizeof ns[0]; ++j) {
++                const unsigned n = ns[j], nn = n < 64 ? 64 : n;
++                uint32_t c[JB_N];
++                for (unsigned i = 0; i < JB_N; ++i)
++                    c[i] = (act >> i & 1u) ? eng_job_cost[i] * nn / 256u : 0u;
++                for (unsigned old = 0; old < 1u << JB_N; ++old) {
++                    eng_plan = (uint8_t)old;
++                    assert(plan_pick(n) == all_masks(mask, c, old));
++                    ++checks;
++                }
++            }
++        }
++    }
++    printf("PASS %u quiet-frame and split-selection comparisons\n", checks);
++}
++'''
++
++with tempfile.TemporaryDirectory(prefix="render-shortcuts-") as folder:
++    d = Path(folder)
++    source = d / "test.c"
++    output = d / "test"
++    source.write_text(head + enum + plan_state + plan + quiet_start + scan + body)
++    subprocess.run([os.environ.get("CC", "cc"), "-std=c99", "-O2", "-Wall", "-Wextra", "-Werror",
++                    "-DX0X_HOST", "-I" + str(ROOT / "firmware/src/dsp"), str(source), "-o", str(output)],
++                   check=True)
++    subprocess.run([str(output)], check=True)
+diff --git a/tests/host/test_nightly_version.py b/tests/host/test_nightly_version.py
+index b00dafbd5ddc64a09b3371a3e790170cac051fdc..c5acd1936d7dc3cc09805b2ab3e65cce6ad67aee 100644
+--- a/tests/host/test_nightly_version.py
++++ b/tests/host/test_nightly_version.py
+@@ -36,6 +36,7 @@ class NightlyVersionTest(unittest.TestCase):
+                     self.assertEqual(build.PRODUCT, product)
+                     self.assertEqual(build.VERSION, '0.0.23')
+                     self.assertEqual(build.GIT_SHA, 'aaaaaaaa')
++                    self.assertEqual(build.GIT_SHA_BYTES, bytes([170]) * 20)
+                     self.assertIsNone(build.RELEASE_LABEL)
+                     self.assertFalse(any('X0X_GIT_SHA' in flag or 'X0X_VERSION' in flag
+                                          for flag in build.BOARD_DEFS['smk37']))
+@@ -44,7 +45,7 @@ class NightlyVersionTest(unittest.TestCase):
+ 
+     def test_nightly_is_numeric_without_a_release_identity(self):
+         self.assertEqual(build.nightly_identity('0.0.23', 'a' * 40),
+-                         {'version_macro': '0.0.23', 'git_sha': 'aaaaaaaa'})
++                         {'version_macro': '0.0.23', 'git_sha': 'aaaaaaaa', 'git_sha_bytes': bytes([170]) * 20})
+ 
+     def test_empty_cli_version_refuses_before_build_work(self):
+         with patch.object(build.sys, 'argv', ['build.py', '--nightly-version', '',
+@@ -83,7 +84,8 @@ class NightlyVersionTest(unittest.TestCase):
+ 
+             with self.subTest(model=model), patch.dict(os.environ, {}, clear=True), \
+                  patch.multiple(build, BOARD='smk37', MODEL=model, PRODUCT=product,
+-                                VERSION='0.0.23', GIT_SHA='bb190749', RELEASE_LABEL=None), \
++                                VERSION='0.0.23', GIT_SHA='bb190749', RELEASE_LABEL=None,
++                                GIT_SHA_BYTES=bytes.fromhex('bb190749' + '0080ff01' * 4)), \
+                  patch.object(build, 'synth_build_config', return_value=(False, 0)), \
+                  patch.object(build, 'clang_std_inc', return_value=[]), \
+                  patch.object(build, 'app_compile_commands', side_effect=capture):
+@@ -91,6 +93,7 @@ class NightlyVersionTest(unittest.TestCase):
+                     build.build_app()
+             self.assertIn('-DX0X_VERSION="0.0.23"', captured)
+             self.assertIn('-DX0X_GIT_SHA="bb190749"', captured)
++            self.assertIn('-DX0X_DNR3_GIT_SHA_BYTES={187,25,7,73,' + '0,128,255,1,' * 3 + '0,128,255,1}', captured)
+             self.assertIn('-DFELUCCA_ID="' + product + '"', captured)
+             self.assertIn(usb, captured)
+             self.assertFalse(any(flag.startswith('-DX0X_RELEASE_LABEL=') for flag in captured))
+diff --git a/tests/host/ui_arp_engine_test.c b/tests/host/ui_arp_engine_test.c
+index 4d2b3babb5ce81ec6fae5a9f9f24af7bf24dd57c..512dd72f9899e20c0eb85f633d55f06d4a23ca98 100644
+--- a/tests/host/ui_arp_engine_test.c
++++ b/tests/host/ui_arp_engine_test.c
+@@ -24,7 +24,19 @@ static void engine_case(int kind,const char *tag)
+     EXPECT(page_named("ARP SEQ")==3);
+     *page_of(V_SEQ)=3;build_pages();ui_frame();EXPECT(arp_seq_page());
+     EXPECT(engine_arp_steps_read(0,&st));unsigned on0=st.on_mask;
+-    tap_pad(4);EXPECT(engine_arp_steps_read(0,&st)&&((st.on_mask^on0)&1u<<4));
++    EXPECT(engine_arp_settings_read(0,&s)&&s.length==16);
++    /* Every physical white pad edits only its corresponding step at length 16.
++     * Read the persisted project block too, not just the UI's pending view. */
++    const uint8_t *stored=proj.sound.v[T_303][ARP_BLOCK_VOICE0];
++    for(int step=0;step<ARP_STEPS;step++) {
++        engine_arp_cfg persisted;
++        tap_pad(step);
++        unsigned expected=on0^(1u<<step);
++        EXPECT(engine_arp_steps_read(0,&st)&&st.on_mask==expected);
++        EXPECT(engine_arp_block_decode(stored,&persisted)&&persisted.on_mask==expected);
++        tap_pad(step);
++        EXPECT(engine_arp_steps_read(0,&st)&&st.on_mask==on0);
++    }
+     pad_down(5);turn(0,3);
+     EXPECT(engine_arp_steps_read(0,&st)&&st.offset[5]==3);
+     tap_panel(B_OCTUP);
+@@ -47,8 +59,48 @@ static void engine_case(int kind,const char *tag)
+     ui_frame();snprintf(name,sizeof name,"real-arp-seq-%s-running",tag);shot(name);
+     engine_bass_off(0);seq.playing=0;render(64);
+ }
++/* Independent expected K5-K8 layout for the 16 admitted stock Juno macros.
++ * Use physical SELECT detents and knob inputs, never direct pref_set calls. */
++static void juno_stock_knob_journey(int part)
++{
++    static const signed char ids[4][4]={{0,1,12,15},{2,3,4,9},{5,6,7,8},{10,11,13,14}};
++    static const char *const titles[]={"OSCILLATOR","FILTER","ENVELOPE","LFO/CHORUS"};
++    unsigned owner=(unsigned)(part-PART_303A);
++    setup(V_PART,part);
++    EXPECT(engine_bass_select_preset(owner,ORIGINAL_SOUND_JUNO,0,&proj.sound)==0);
++    for(int n=0;n<1024&&engine_bass_preset_pending(owner);n++)render(1);
++    EXPECT(engine_bass_bank(owner)==ORIGINAL_SOUND_JUNO);
++    build_pages();
++    EXPECT(cur_page()==0&&ui.overlay==O_NONE);
++    unsigned edits=0;
++    for(int page=0;page<4;page++) {
++        EXPECT(cur_page()==page&&!strcmp(pg.title[cur_page()],titles[page]));
++        for(int k=0;k<4;k++) {
++            pref_t r=pg.r[page][k];
++            int id=ids[page][k];
++            EXPECT(r.kind==R_ENG&&r.a==T_303&&r.b==owner&&r.c==id&&!pref_read_only(r));
++            uint8_t before[ORIGINAL_SOUND_BYTES],peer[ORIGINAL_SOUND_BYTES];
++            memcpy(before,proj.sound.v[T_303][owner],sizeof before);
++            memcpy(peer,proj.sound.v[T_303][1-owner],sizeof peer);
++            int delta=before[id]<64?1:-1;
++            now_ms+=160; turn(k,delta);
++            const uint8_t *after=proj.sound.v[T_303][owner];
++            EXPECT(pref_get(r)==before[id]+delta&&after[id]==before[id]+delta);
++            EXPECT(original_sound_edit_mask(after)==(original_sound_edit_mask(before)|(1u<<id)));
++            EXPECT(!memcmp(after,before,(unsigned)id));
++            EXPECT(!memcmp(after+id+1,before+id+1,22u-(unsigned)id-1u));
++            EXPECT(!memcmp(peer,proj.sound.v[T_303][1-owner],sizeof peer));
++            edits|=1u<<id;
++        }
++        now_ms+=160; enc_acc[EN_SELECT]=1;input();
++    }
++    EXPECT(edits==0xffffu);
++    EXPECT(cur_page()==4&&!strcmp(pg.title[cur_page()],"ARPEGGIATOR"));
++}
+ int main(void)
+ {
++    juno_stock_knob_journey(PART_303A);
++    juno_stock_knob_journey(PART_303B);
+     engine_case(ORIGINAL_SOUND_SYNTHONE,"s1");
+     engine_case(ORIGINAL_SOUND_JUNO,"sj6");
+     if(failures){fprintf(stderr,"FAIL %u/%u\n",failures,expectations);return 1;}
+diff --git a/tests/host/ui_envelope_rows_test.c b/tests/host/ui_envelope_rows_test.c
+new file mode 100644
+index 0000000000000000000000000000000000000000..47fd851faf09ed913ab15e6224ee7ff932643874
+--- /dev/null
++++ b/tests/host/ui_envelope_rows_test.c
+@@ -0,0 +1,36 @@
++/* SPDX-License-Identifier: GPL-3.0-only */
++/* Guideline row #22: every synth page whose controls are envelope stages
++ * (Attack/Decay/Sustain/Release) is drawn by draw_adsr_inline, on every
++ * bass engine (Chicago, Miami, Synth One FILTER + AMP when built, SuperJ6/Juno).
++ * A new engine page with stage controls but no graph fails here. */
++#define SMC_UI_MAIN unused_smc_ui_main
++#include "smc_ui_test.c"
++#include <ctype.h>
++static void audio_ms(unsigned ms){int32_t a[512];unsigned left=ms*44100/1000;while(left){unsigned n=left>256?256:left;engine_render(a,n);left-=n;}}
++static int has(const char *h,const char *n){for(;*h;h++){int i=0;while(n[i]&&tolower((unsigned char)h[i])==n[i])i++;if(!n[i])return 1;}return 0;}
++static int stage(const char *n){return n&&(has(n,"attack")||has(n,"decay")||has(n,"sustain")||has(n,"release"));}
++int main(void)
++{
++ const int banks[]={ORIGINAL_SOUND_CHICAGO,ORIGINAL_SOUND_MIAMI,ORIGINAL_SOUND_SYNTHONE,ORIGINAL_SOUND_JUNO};
++ int graphs=0;
++ for(unsigned b=0;b<4;b++){
++  setup(V_PART,PART_303A);
++  if(engine_bass_select_preset(0,banks[b],0,&proj.sound))continue;   /* bank not in this build */
++  for(int i=0;i<1024&&engine_bass_preset_pending(0);i++)audio_ms(6);
++  build_pages();
++  for(int p=0;p<pg.n;p++){
++   int n=0;for(int k=0;k<4;k++)n+=pg.r[p][k].kind!=R_NONE&&stage(pref_name(pg.r[p][k]));
++   if(n>=2){
++    if(!adsr_row(p))printf("bank %d page %d: %d envelope stages without draw_adsr_inline\n",banks[b],p,n);
++    CHECK(adsr_row(p));graphs++;
++   }
++  }
++ }
++#if X0X_SYNTHONE_PATCH
++ CHECK(graphs==4);    /* Chicago, Synth One FILTER and AMP, SuperJ6/Juno */
++#else
++ CHECK(graphs>=2);
++#endif
++ printf("PASS %d envelope rows, all draw_adsr_inline\n",graphs);
++ return 0;
++}
+diff --git a/tests/host/ui_envelope_rows_test.sh b/tests/host/ui_envelope_rows_test.sh
+new file mode 100644
+index 0000000000000000000000000000000000000000..61d832f2f4f683c9316d642e960e730f972e6a93
+--- /dev/null
++++ b/tests/host/ui_envelope_rows_test.sh
+@@ -0,0 +1,8 @@
++#!/bin/sh
++# Every bass-engine envelope row draws the inline ADSR graph, with and without the Synth One editor.
++set -eu
++cd "$(dirname "$0")/../.."
++export SMC_UI_TEST_FILE=tests/host/ui_envelope_rows_test.c
++OUT=${SMC_UI_OUT:-build/host/envelope-rows}
++SMC_UI_OUT=$OUT/default sh tests/host/smc_ui_test.sh
++X0X_SYNTHONE_PATCH=1 X0X_HOST_DEFS="${X0X_HOST_DEFS:-} -DX0X_SYNTHONE_PATCH=1" SMC_UI_OUT=$OUT/synthone sh tests/host/smc_ui_test.sh
+diff --git a/tests/host/ui_hihat_glyph_refs.inc b/tests/host/ui_hihat_glyph_refs.inc
+new file mode 100644
+index 0000000000000000000000000000000000000000..1baee4f6964bd33ca382c837c5f1a0401a52c4e8
+--- /dev/null
++++ b/tests/host/ui_hihat_glyph_refs.inc
+@@ -0,0 +1,8 @@
++    {"909-ch-strip", 0xee298ec4u},
++    {"909-oh-strip", 0xef975324u},
++    {"808-ch-strip", 0xee298ec4u},
++    {"808-oh-strip", 0xef975324u},
++    {"909-ch-header", 0x569ca7e4u},
++    {"909-oh-header", 0x173b2461u},
++    {"808-ch-header", 0x569ca7e4u},
++    {"808-oh-header", 0x173b2461u},
+diff --git a/tests/host/ui_hihat_glyph_test.c b/tests/host/ui_hihat_glyph_test.c
+new file mode 100644
+index 0000000000000000000000000000000000000000..c1f8f1b2f0311a2254ae74802d65be7409372dfe
+--- /dev/null
++++ b/tests/host/ui_hihat_glyph_test.c
+@@ -0,0 +1,63 @@
++/* SPDX-License-Identifier: GPL-3.0-only */
++/* The hi-hat pictograms keep the R22 fix: paired cymbals, pull-rod + clutch above, the
++ * lower support (stem) below, and for OPEN the rod between the separated cymbals.
++ * Source: web/product-site/HIHAT-SOURCE-PATCH.json (sharedSHA256 2d234b1e..., nightly
++ * APPROVED-PRESENTATION.json R22HiHat), in firmware since 76040daa5 (#970).
++ * 1) the packed paths decode to those exact source coordinates (909 and 808 share them);
++ * 2) each pictogram's pixels at the MIX-strip (.26) and voice-header (.32) scales are pinned. */
++#define SMC_UI_MAIN retained_smc_main
++#include "smc_ui_test.c"
++
++typedef struct { int n; int xy[40]; } hh_poly;
++/* R22 source (x1000): CLOSED = row 7 "after", OPEN = row 8 "after"; curves as sampled. */
++static const int CH_RODS[4][4] = {{11500,200,11500,2400},{10500,2500,12500,2500},{10300,8100,12700,8100},{11500,8200,11500,11600}};
++static const int OH_RODS[5][4] = {{11500,100,11500,900},{10500,1100,12500,1100},{11500,5100,11500,6700},{10300,10000,12700,10000},{11500,10100,11500,11700}};
++static int decode(int t,int v,hh_poly *out,int max)
++{
++    const dv_body_t *b=&DV_BODY[t==T_808][v]; int np=b->npoly<max?b->npoly:max;
++    for(int p=0;p<np;p++){unsigned path=dv_path(b->first+p),off=path&2047u,n=path>>11;out[p].n=(int)n;
++        for(unsigned i=0;i<n && i<20;i++){out[p].xy[2*i]=(int)dv_coordinate_next(&off);out[p].xy[2*i+1]=(int)dv_coordinate_next(&off);}}
++    return np;
++}
++static void check_paths(int t,int ch,int oh)
++{
++    hh_poly P[8]; int n=decode(t,ch,P,8);
++    CHECK(n==6); CHECK(P[0].n==18 && P[0].xy[0]==3500 && P[0].xy[1]==5400 && P[0].xy[8]==11500 && P[0].xy[9]==3350 && P[0].xy[16]==19500);
++    CHECK(P[1].n==9 && P[1].xy[0]==3800 && P[1].xy[1]==6500 && P[1].xy[16]==19200 && P[1].xy[17]==6500);
++    for(int r=0;r<4;r++){CHECK(P[2+r].n==2);for(int k=0;k<4;k++)CHECK(P[2+r].xy[k]==CH_RODS[r][k]);}
++    n=decode(t,oh,P,8);
++    CHECK(n==7); CHECK(P[0].n==18 && P[0].xy[1]==3600 && P[0].xy[9]==1600); CHECK(P[1].n==18 && P[1].xy[1]==8300 && P[1].xy[9]==6950);
++    for(int r=0;r<5;r++){CHECK(P[2+r].n==2);for(int k=0;k<4;k++)CHECK(P[2+r].xy[k]==OH_RODS[r][k]);}
++}
++static const struct { const char *name; uint32_t hash; } expected[] = {
++#include "ui_hihat_glyph_refs.inc"
++};
++static unsigned witnessed, failures;
++static void pin(const char *name,int t,int v,float scale)
++{
++    cv_begin(240,40,C_BLACK); dv_body_pictogram(t,v,40,6,scale,0,C_HI);
++    uint32_t h=2166136261u; int lit=0;
++    for(int i=0;i<240*40;i++){h=(h^cv_px[i])*16777619u;lit|=cv_px[i]!=swap16(C_BLACK);}
++    CHECK(lit);
++    if(getenv("HIHAT_DUMP")){printf("    {\"%s\", 0x%08lxu},\n",name,(unsigned long)h);return;}
++    for(unsigned i=0;i<sizeof expected/sizeof expected[0];i++) if(!strcmp(expected[i].name,name)){witnessed++;
++        if(expected[i].hash!=h){fprintf(stderr,"FAIL %s: %08lx != %08lx (pinned R22 hi-hat)\n",name,(unsigned long)h,(unsigned long)expected[i].hash);failures++;}return;}
++    fprintf(stderr,"FAIL %s has no pinned reference\n",name);failures++;
++}
++int main(void)
++{
++    setup(V_MIX,0);
++    check_paths(T_909,DR_CH,DR_OH); check_paths(T_808,D8_CH,D8_OH);
++    static const float sc[2]={.26f,.32f}; static const char *sn[2]={"strip","header"}; char n[48];
++    for(int s=0;s<2;s++){
++        snprintf(n,sizeof n,"909-ch-%s",sn[s]);pin(n,T_909,DR_CH,sc[s]);
++        snprintf(n,sizeof n,"909-oh-%s",sn[s]);pin(n,T_909,DR_OH,sc[s]);
++        snprintf(n,sizeof n,"808-ch-%s",sn[s]);pin(n,T_808,D8_CH,sc[s]);
++        snprintf(n,sizeof n,"808-oh-%s",sn[s]);pin(n,T_808,D8_OH,sc[s]);
++    }
++    if(getenv("HIHAT_DUMP")) return 0;
++    CHECK(witnessed==sizeof expected/sizeof expected[0]);
++    if(failures) return 1;
++    printf("PASS R22 hi-hat: exact source paths (909+808 CH/OH) and %u pinned pictograms\n",witnessed);
++    return 0;
++}
+diff --git a/tests/host/ui_master_waveform_test.c b/tests/host/ui_master_waveform_test.c
+new file mode 100644
+index 0000000000000000000000000000000000000000..69aebd45e6fbf7b2bc4240f70d2430eb7dbe6f1e
+--- /dev/null
++++ b/tests/host/ui_master_waveform_test.c
+@@ -0,0 +1,62 @@
++/* SPDX-License-Identifier: GPL-3.0-only */
++/* MASTER displays its live audio history and gain reduction in a single
++ * R22 panel. Updating one peak may write one column, not move the history. */
++#define SMC_UI_MAIN inherited_smc_ui_main
++#include "smc_ui_test.c"
++
++static void draw(int band)
++{
++    cv_begin(240, MAIN_ROWS, C_BLACK);
++    cv_band(band * BAND_H, BAND_H);
++    draw_mix(band);
++}
++
++static int pixel(int x, int y, uint16_t color)
++{
++    return cv_px[(y - HDR_H) * 240 + x] == swap16(color);
++}
++
++int main(void)
++{
++    setup(V_MIX, PART_909);
++    ui.page[V_MIX][0] = MIX_FIRST_KIT_PAGE + NKIT;
++    build_pages();
++    for (int p = 0; p < NPARTS; ++p) eng_peak[p] = 0;
++    /* At most setup touched two canvas bands; advance past the whole ring. */
++    for (int i = 0; i < 98; ++i) { now_ms += 21; draw(0); }
++    draw(1);
++    for (int x = 4; x < 200; ++x) CHECK(pixel(x, 106, part_col()));
++    draw(0);
++    CHECK(pixel(80, 46, SOUND_FACE)); /* same panel behind waveform and reduction */
++    eng_peak[PART_808] = 24576;
++    now_ms += 21;
++    draw(0);
++    int peak = -1;
++    for (int x = 4; x < 200; x += 2) {
++        if (pixel(x, 65, part_col())) { CHECK(peak < 0); peak = x; }
++    }
++    CHECK(peak >= 0);
++    eng_peak[PART_808] = 0;
++    now_ms += 21;
++    draw(0);
++    CHECK(pixel(peak, 65, part_col()));
++    for (int x = 4; x < 200; x += 2)
++        if (x != peak) CHECK(!pixel(x, 65, part_col()));
++    draw(1);
++    CHECK(pixel(120, 140, SOUND_FACE));
++    /* Both layouts reuse the same bounded meter at their own baseline. */
++    for (int y = 5; y <= 25; y += 20) {
++        cv_begin(240, MAIN_ROWS, C_BLACK);
++        cv_band(0, BAND_H);
++        mix_gr_meter(y, y - 1, 30);
++        CHECK(pixel(211, HDR_H + y + 9, RGB(255,80,60)));
++        CHECK(pixel(211, HDR_H + y + 33, C_LINE));
++        if (y == 5) {
++            mix_gr_meter(y, y - 1, 123);
++            CHECK(pixel(211, HDR_H + y + 55, RGB(255,80,60)));
++            CHECK(pixel(211, HDR_H + y + 61, C_BLACK));
++        }
++    }
++    puts("PASS R22 MASTER panel: fixed columns, two bands and bounded live gain reduction");
++    return 0;
++}
+diff --git a/tests/host/ui_seq_voice_glyph_test.c b/tests/host/ui_seq_voice_glyph_test.c
+new file mode 100644
+index 0000000000000000000000000000000000000000..d3f9fd59c8664f3b7a2582019a7bdba16b3a5237
+--- /dev/null
++++ b/tests/host/ui_seq_voice_glyph_test.c
+@@ -0,0 +1,43 @@
++/* SPDX-License-Identifier: GPL-3.0-only */
++/* Guidelines §3 / audit #44: the 808 and 909 sequencers label each lane with
++ * the voice's own R22 pictogram (the MIX strip's), not a BD/SD abbreviation,
++ * and AC with the accent chevrons. Every lane is distinct, none is the old
++ * text label, the selected lane inverts, and the pixels are pinned. */
++#define SMC_UI_MAIN unused_smc_ui_main
++#include "smc_ui_test.c"
++static uint16_t full[2*BAND_H*240];
++static uint32_t lane_hash(int v, int text)
++{
++    int y = v*DROW + 1, x, yy; uint32_t h = 2166136261u;
++    for (int band = 0; band < 2; band++) {
++        cv_begin(240, BAND_H, C_BLACK);
++        if (!text) draw_drum(band);
++        else cv_text(5, vc(&FONT_XS, y - 1 - band*BAND_H, DROW - 1), &FONT_XS,
++                     v < NDRUM ? engine_voice_name(ui.part == PART_909 ? T_909 : T_808, v) : "AC", C_GRAY);
++        memcpy(full + band*BAND_H*240, cv_px, BAND_H*240*sizeof *full);
++    }
++    for (yy = y - 1; yy < y + DROW - 1; yy++)
++        for (x = 0; x < 25; x++) h = (h ^ full[yy*240 + x])*16777619u;
++    return h;
++}
++int main(void)
++{
++    static const uint32_t pin[2] = {0x2e6afa88u, 0x9a430d91u};
++    int parts[2] = {PART_909, PART_808};
++    for (int k = 0; k < 2; k++) {
++        setup(V_SEQ, parts[k]); ui.sel[parts[k]] = 3; build_pages();
++        uint32_t h[NDRUM + 1], all = 2166136261u;
++        for (int v = 0; v <= NDRUM; v++) {
++            h[v] = lane_hash(v, 0);
++            CHECK(h[v] != lane_hash(v, 1));               /* not the BD/SD text */
++            for (int j = 0; j < v; j++) CHECK(h[v] != h[j]);
++            all = (all ^ h[v])*16777619u;
++        }
++        ui.sel[parts[k]] = 4; uint32_t moved = lane_hash(3, 0);
++        CHECK(moved != h[3]);                        /* selection inverts the lane */
++        printf("SEQ_VOICE_GLYPHS part=%d hash=0x%08x\n", parts[k], all);
++        if (pin[k]) CHECK(all == pin[k]);
++    }
++    puts("PASS 808/909 SEQ lanes use distinct voice pictograms, not BD/SD text");
++    return 0;
++}
+diff --git a/tests/run_tests.sh b/tests/run_tests.sh
+index c1064d9dbb01121a890d385b024e6112da29e0db..0a083b7be198514f04efed224c898f7bd382cfdd 100755
+--- a/tests/run_tests.sh
++++ b/tests/run_tests.sh
+@@ -117,9 +117,10 @@ test_class() {
+     dsp-host-linkage|drum-pan|stereo|drum909-adpcm|drum909|copy-semantics|song-actions|home-globe-part|home-globe-part-matrix|seq-pad-led|seq-hit-light|seq-lane-label-tap|ui-feedback|home-overview|part-order|sound-matrix|sound-layout|chicago-presentation|chicago-readout|matrix-knob-caption|preset-navigation-noop|ui-303-entry|host-build|gen-nonfont-tables|project-protocol|project-runtime|project-stage|project-save-preflight|smp-begin-cancel|smc-fx-caption|smc-fx-page-port|smc-fx-two-page-strip|smc-fx-echo-page|smc-fx-peer-view|smc-fx-preset-preserve|smc-reachability|smc-ui|drum-page-contract|smc-ui-popup|ui-shared-glyph|ui-glyph-polish|ui-tape-reel|ui-perf-labels|ui-stock-no-perf|ui-chicago-env-motion|ui-drum-mix-material|smc-mixer-page|smc-ui-bounds|smc-ui-negative|smc-drum-mutes|smc-drum-rs|smc-performance-abort|smc-record-feedback|smc-lock|smc-lock-beat|smc-multi-peer|smc-multi-peer-negative|smc-select-mode|smc-pause-loss|smk-wheel-mode|perf-wheel-motion|miami-mw-wobble|smc-pickup-acceptance|roll-marks) TEST_CLASS=G ;;
+     adaptive-break-controls|adaptive-break-storage|audio-stress) TEST_CLASS=G ;;
+     perf-wheel-noise|ext-midi-rec-smk) TEST_CLASS=G ;;   # generates and reads shared build/gen headers
++    remote-dnr3|remote-dnr3-ble) TEST_CLASS=G ;;   # whole-app host build: reads build/gen
+     dsp-host-linkage|drum-pan|stereo|drum909-adpcm|drum909|copy-semantics|song-actions|home-globe-part|home-globe-part-matrix|seq-pad-led|seq-hit-light|roll-marks|seq-lane-label-tap|ui-feedback|home-overview|part-order|sound-matrix|sound-layout|chicago-presentation|chicago-readout|matrix-knob-caption|preset-navigation-noop|ui-303-entry|host-build|gen-nonfont-tables|project-protocol|project-runtime|project-stage|project-save-preflight|smp-begin-cancel|smc-fx-caption|smc-fx-page-port|smc-fx-two-page-strip|smc-fx-echo-page|smc-fx-peer-view|smc-fx-preset-preserve|smc-reachability|smc-ui|drum-page-contract|smc-ui-popup|smc-remainder|smc-popup-engine|smc-audit-core|smc-audit-contract|ui-shared-glyph|ui-glyph-polish|ui-tape-reel|ui-perf-labels|ui-stock-no-perf|ui-chicago-env-motion|ui-drum-mix-material|smc-mixer-page|smc-ui-bounds|smc-ui-negative|smc-drum-mutes|smc-drum-rs|smc-performance-abort|smc-record-feedback|smc-lock|smc-lock-beat|smc-multi-peer|smc-multi-peer-negative|smc-select-mode|smc-pause-loss|smk-wheel-mode|perf-wheel-motion|miami-mw-wobble|smc-pickup-acceptance) TEST_CLASS=G ;;
+     adaptive-break-controls|adaptive-break-storage) TEST_CLASS=G ;;
+-    synth-param-jump|param-write-sources|ui-drum-glyph|ui-808-stage-rows|ui-drum-curve-axes|ui-midi-next-cancel|ui-selected-adsr-readout|ui-envelope-graph|ui-terse-action-copy|ui-terse-action-copy-sel|ui-fx-feedback-context|ui-no-loss-return|ui-song-empty-action|ui-key-sound-state|ui-drum-mix-selected|ui-synth-step-footer|ui-sound-footer-oracle|ui-release-footer-mutants|ui-pattern-sound-identity|ui-freeplay-state|ui-drum-tune-role|ui-snare-tone-law) TEST_CLASS=G ;;   # regenerates build/gen via smc_ui_test.sh
++    synth-param-jump|param-write-sources|ui-drum-glyph|ui-808-stage-rows|ui-drum-curve-axes|ui-midi-next-cancel|ui-selected-adsr-readout|ui-envelope-graph|ui-hihat-glyph|ui-seq-voice-glyph|ui-master-waveform|ui-envelope-rows|ui-terse-action-copy|ui-terse-action-copy-sel|ui-fx-feedback-context|ui-no-loss-return|ui-song-empty-action|ui-key-sound-state|ui-drum-mix-selected|ui-synth-step-footer|ui-sound-footer-oracle|ui-release-footer-mutants|ui-pattern-sound-identity|ui-freeplay-state|ui-drum-tune-role|ui-snare-tone-law) TEST_CLASS=G ;;   # regenerates build/gen via smc_ui_test.sh
+     chicago-adsr-graph|ui-adsr-engine-graph|ui-drum-amp-graph|ui-drum-single-lane|ui-drum-kit-section|ui-list-feedback|ui-reverb-return|ui-settings-sections|ui-text-units|ui-arp-seq) TEST_CLASS=G ;;
+     bass-presets-map|bass-presets-export|bass-presets-live|bass-legacy-display|bass-tagged-storage|bass-303-adapt) TEST_CLASS=G ;;
+     scenario-*|perf-scratch|render-timing) TEST_CLASS=C ;;   # perf-scratch compares with scenario perfsave: it runs after the scenarios
+@@ -446,6 +447,8 @@ run storage-warning sh tests/host/storage_warning_test.sh
+ run freeplay-latency sh tests/host/freeplay_latency_test.sh
+ run lcd-bounded-tiles sh tests/host/lcd_bounded_test.sh
+ run pads-in-settings sh tests/host/pads_in_settings_test.sh
++run remote-dnr3 sh tests/host/remote_dnr3_test.sh
++run remote-dnr3-ble sh tests/host/remote_dnr3_ble_test.sh
+ run boot-screen sh tests/host/boot_screen_test.sh
+ run ui-theme env ORIGINAL_UI_TEST_FILE=tests/host/ui_theme_test.c sh tests/host/original_release_ui_test.sh build/ui-theme/theme
+ run project-protocol sh tests/host/run_project_protocol.sh
+@@ -562,6 +565,8 @@ run ui-selected-adsr-readout env X0X_SYNTHONE_PATCH=1 X0X_HOST_DEFS="${X0X_HOST_
+ run ui-terse-action-copy env SMC_UI_TEST_FILE=tests/host/ui_terse_action_copy_test.c SMC_UI_OUT=build/host/ui-terse-action-copy sh tests/host/smc_ui_test.sh
+ run ui-terse-action-copy-sel env X0X_HOST_DEFS="${X0X_HOST_DEFS:-} -DX0X_SMK_CAPTIONS=0" SMC_UI_TEST_FILE=tests/host/ui_terse_action_copy_test.c SMC_UI_OUT=build/host/ui-terse-action-copy-sel sh tests/host/smc_ui_test.sh
+ run ui-envelope-graph env X0X_SYNTHONE_PATCH=1 X0X_HOST_DEFS="${X0X_HOST_DEFS:-} -DX0X_SYNTHONE_PATCH=1" SMC_UI_TEST_FILE=tests/host/ui_envelope_graph_test.c SMC_UI_OUT=build/host/ui-envelope-graph sh tests/host/smc_ui_test.sh
++run ui-envelope-rows sh tests/host/ui_envelope_rows_test.sh
++run font-unit-case python3 tests/host/font_unit_case_test.py
+ run ui-shared-parameter-panel sh tests/host/ui_shared_parameter_panel_test.sh
+ run ui-held-target-visibility sh tests/host/ui_held_target_visibility_test.sh
+ run ui-overlay-battery-registration python3 tests/host/test_ui_overlay_battery_registration.py
+@@ -756,6 +761,7 @@ command -v node >/dev/null 2>&1 && run project-adoption-identities node --test w
+ run offline-sequencer node --test web/offline-sequencer/*.test.mjs
+ # compact-sanitizer-control (LeakSanitizer qualification) dropped 2026-11-24 00:02 (user, FINAL-GOAL row 11).
+ run compact-programs python3 tests/program_values_compact_test.py
++run chicago-compact-headers python3 tests/test_chicago_compact_headers.py # exact lossless native coefficient lookup and index
+ run offline-browser-safety python3 tests/test_offline_browser_safety.py
+ # f6b refuses any executable override (safety contract); gate/box environments export
+ # CHROMIUM_EXECUTABLE for other tools, so this one runs with Playwright's own managed Chromium.
+@@ -792,6 +798,7 @@ run ctl-read-framing python3 tests/ctl_read_framing_test.py  # reject corrupt/ov
+ run ctl-publish-atomic python3 tests/add_ctl_atomic_test.py   # atomic controller-package publication and failure handling
+ run rec-held-duration sh tests/host/rec_held_duration_test.sh
+ run original-stale-release python3 tests/host/test_original_runtime_lost_off.py
++run engine-render-shortcuts python3 tests/host/test_engine_render_shortcuts.py
+ run rec-endpoint-lifecycle sh tests/host/rec_endpoint_lifecycle_test.sh
+ run rec-endpoint-storage sh tests/host/rec_endpoint_storage_test.sh
+ run rec-nonforward-guard sh tests/host/rec_nonforward_guard_test.sh
+@@ -843,6 +850,9 @@ if [ -f firmware/src/app/s1_patch.h ]; then
+     run ui-synthone-frames env X0X_SYNTHONE_PATCH=1 X0X_HOST_DEFS="${X0X_HOST_DEFS:-} -DX0X_SYNTHONE_PATCH=1" SMC_UI_TEST_FILE=tests/host/ui_synthone_frame_test.c SMC_UI_OUT="$OUT/ui-synthone-frames" sh tests/host/smc_ui_test.sh
+ fi
+ run ui-drum-glyph sh tests/host/ui_drum_glyph_test.sh
++run ui-hihat-glyph env SMC_UI_TEST_FILE=tests/host/ui_hihat_glyph_test.c SMC_UI_OUT=build/host/ui-hihat-glyph sh tests/host/smc_ui_test.sh
++run ui-seq-voice-glyph env SMC_UI_TEST_FILE=tests/host/ui_seq_voice_glyph_test.c SMC_UI_OUT=build/host/ui-seq-voice-glyph sh tests/host/smc_ui_test.sh
++run ui-master-waveform env SMC_UI_TEST_FILE=tests/host/ui_master_waveform_test.c SMC_UI_OUT=build/host/ui-master-waveform sh tests/host/smc_ui_test.sh
+ run ui-808-stage-rows sh tests/host/ui_808_stage_rows_test.sh
+ run ui-drum-curve-axes python3 tests/host/ui_drum_curve_axes_test.py
+ run ui-no-loss-return python3 tests/host/ui_no_loss_return_test.py
+diff --git a/tests/test_chicago_compact_headers.py b/tests/test_chicago_compact_headers.py
+index 22b6732b78884d89ab56e5665f5aa8feec7ecbae..9b4f0a8ff7b9403ea22fdb85d46c3e4826065bc7 100644
+--- a/tests/test_chicago_compact_headers.py
++++ b/tests/test_chicago_compact_headers.py
+@@ -3,6 +3,7 @@
+ """Compile exhaustive bit-exact raw/compact oracle and malformed-input checks."""
+ from pathlib import Path
+ import os
++import re
+ import subprocess
+ import sys
+ import tempfile
+@@ -12,6 +13,15 @@ with tempfile.TemporaryDirectory(prefix='chicago-compact-') as tmp:
+     subprocess.run([sys.executable, str(ROOT/'tools/gen_chicago_compact.py'),
+                     str(ROOT/'experiments/original_synth/chicago_packed_private.h'),
+                     str(tmp/'chicago_compact_private.h')], check=True)
++    generated = (tmp/'chicago_compact_private.h').read_text()
++    # Reverting to a 16-bit offset per block silently spends ~1 KiB of XIP.
++    for table in ('a', 'e'):
++        stem = f'original_chicago_packed_{table}_'
++        for ctype, name, count in [('uint16_t', 'offset_base', 17),
++                                   ('uint8_t', 'offset_stride', 17),
++                                   ('int8_t', 'offset_residual', 513)]:
++            if not re.search(rf'static const {ctype} {stem}{name}\[{count}\]', generated):
++                raise AssertionError(f'Unexpected packed index representation: {stem}{name}')
+     cc = os.environ.get('CC', 'cc')
+     for flags in (['-O2'], ['-O1', '-fsanitize=address,undefined', '-fno-omit-frame-pointer']):
+         output = tmp/'test'
+diff --git a/tests/ui_geometry/capture.c b/tests/ui_geometry/capture.c
+index 67b696b486578954b4bf5d28d461549e98790d48..7e665e82294500be2e63522a17cf61f5e52e9434 100644
+--- a/tests/ui_geometry/capture.c
++++ b/tests/ui_geometry/capture.c
+@@ -373,22 +373,43 @@ static void required_dead_space(const char *screen) {
+  dead_checks++;
+  if(best*4>240*240){dead_bad++;printf("DEAD_SPACE screen=%s area=%.3f box=%d,%d %dx%d\n",screen,best/(240.*240.),bx,by+Y0,bw,bh);}
+ }
+-/* KNOB_GROUPS (#48/#71): every engine page binds 1..4 controls to K5-K8, no control
+- * twice, and every control of the engine's table is reachable on some page. */
++/* KNOB_GROUPS (#48/#71): every reached page binds 1..4 controls to K5-K8;
++ * every published control has one binding, on the selected engine owner.
++ * This checks stock admitted controls, not untranslated original-app fields. */
+ static unsigned knob_group_checks,knob_group_bad;
+ static void required_knob_groups(unsigned kind,int part) {
+- unsigned want=kind==ORIGINAL_SOUND_CHICAGO?20u:kind==ORIGINAL_SOUND_SYNTHONE?0u:16u;
+- uint32_t seen=0;int dup=0;
++ const unsigned owner=(unsigned)(part-PART_303A);
++ const int s1=kind==ORIGINAL_SOUND_SYNTHONE;
++ const unsigned want=kind==ORIGINAL_SOUND_CHICAGO?20u:s1?1u:16u;
++ uint32_t seen=0,patch_seen=0;int dup=0,wrong=0;
+  for(int i=0;i<pg.n;i++){
+   int n=0;
+-  for(int k=0;k<4;k++){pref_t r=pg.r[i][k];if(r.kind==R_NONE)continue;n++;
+-   if(r.kind==R_ENG&&r.a==T_303&&r.c<32){if(seen>>r.c&1u)dup++;seen|=1u<<r.c;}}
++  for(int k=0;k<4;k++){
++   pref_t r=pg.r[i][k];if(r.kind==R_NONE)continue;n++;
++   if(r.kind==R_ENG&&r.a==T_303){
++    if(r.b!=owner || (s1 ? r.c!=ORIGINAL_SYNTHONE_CRUSH : r.c>=want)){wrong++;continue;}
++    unsigned id=s1?0u:r.c;
++    if(seen>>id&1u)dup++;
++    seen|=1u<<id;
++   }
++#if X0X_SYNTHONE_PATCH
++   if(r.kind==R_S1PATCH){
++    if(!s1 || r.a!=T_303 || r.b!=owner || r.c>=S1_PATCH_COUNT){wrong++;continue;}
++    if(patch_seen>>r.c&1u)dup++;
++    patch_seen|=1u<<r.c;
++   }
++#endif
++  }
+   knob_group_checks++;
+   if(n<1||n>4){knob_group_bad++;printf("KNOB_GROUPS kind=%u part=%d page=%s bound=%d\n",kind,part,pg.title[i],n);}
+  }
+- if(dup){knob_group_bad++;printf("KNOB_GROUPS kind=%u part=%d duplicate=%d\n",kind,part,dup);}
++ if(dup||wrong){knob_group_bad++;printf("KNOB_GROUPS kind=%u part=%d duplicate=%d wrong-binding=%d\n",kind,part,dup,wrong);}
+  for(unsigned id=0;id<want;id++){knob_group_checks++;
+-  if(!(seen>>id&1u)){knob_group_bad++;printf("KNOB_GROUPS kind=%u part=%d unreachable=%s\n",kind,part,ui_original_name(kind,id));}}
++  if(!(seen>>id&1u)){knob_group_bad++;printf("KNOB_GROUPS kind=%u part=%d unreachable=%s\n",kind,part,ui_original_name(kind,s1?ORIGINAL_SYNTHONE_CRUSH:id));}}
++#if X0X_SYNTHONE_PATCH
++ if(s1)for(unsigned id=0;id<S1_PATCH_COUNT;id++){knob_group_checks++;
++  if(!(patch_seen>>id&1u)){knob_group_bad++;printf("KNOB_GROUPS kind=%u part=%d unreachable=%s\n",kind,part,s1_patch_at(id)->label);}}
++#endif
+ }
+ static unsigned audit_frames;
+ static void geo_audit(const char *screen) {
+diff --git a/tests/ui_geometry/instrument.py b/tests/ui_geometry/instrument.py
+index afa0c98ac5c47e40b05bbfa28848afcd8c4914bf..b53c6768b111febb0290e9e694351862354bb408 100644
+--- a/tests/ui_geometry/instrument.py
++++ b/tests/ui_geometry/instrument.py
+@@ -168,8 +168,8 @@ def instrument(root):
+     p=root/'firmware/src/app/ui_drum_voice.inc';s=p.read_text()
+     s=once(s,'put_s(caption,"DECAY ")','put_s(caption,getenv("KPREFIX_MUTATE")?"K5 DECAY ":"DECAY ")');p.write_text(s)
+     p=root/'firmware/src/app/ui.c';s=p.read_text()
+-    # KNOBGROUP_MUTATE drops SuperJ6's last group (LFO/CHORUS): four controls unreachable.
+-    s=once(s,'                pref_t refs[4];\n                for (int col = 0; col < 4; col++) refs[col] = rows[row][col] < 0','                pref_t refs[4];\n                if(getenv("KNOBGROUP_MUTATE") && kind == ORIGINAL_SOUND_JUNO && row == count - 1) continue;\n                for (int col = 0; col < 4; col++) refs[col] = rows[row][col] < 0')
++    # Missing SuperJ6 or Synth One control page must fail the whole-map check.
++    s=once(s,'                pref_t refs[4];\n                for (int col = 0; col < 4; col++) refs[col] = rows[row][col] < 0','                pref_t refs[4];\n                if((getenv("KNOBGROUP_MUTATE") && kind == ORIGINAL_SOUND_JUNO && row == count - 1) || (getenv("KNOBGROUP_S1_MUTATE") && kind == ORIGINAL_SOUND_SYNTHONE && row == 2)) continue;\n                for (int col = 0; col < 4; col++) refs[col] = rows[row][col] < 0')
+     # DEADSPACE_MUTATE leaves the 808/909 MIX strip panel undrawn.
+     s=once(s,'static UI_DRAW void draw_drum_mix(int band, int k)\n{','static UI_DRAW void draw_drum_mix(int band, int k)\n{\n    if(getenv("DEADSPACE_MUTATE"))return;')
+     s=once(s,'    if (r.kind >= R_DLEN && r.kind <= R_BTRANS)','    if(getenv("ABBREV_MUTATE")&&ui.view==V_SEQ&&r.kind==R_DLEN+5)return "TRANSP";\n    if (r.kind >= R_DLEN && r.kind <= R_BTRANS)')
+diff --git a/tests/ui_geometry/run.py b/tests/ui_geometry/run.py
+index 756da123fc390710a858dff97d8ee6e58b1f984b..727e882b41caf166db48c9b6e3c5d5b33032e106 100644
+--- a/tests/ui_geometry/run.py
++++ b/tests/ui_geometry/run.py
+@@ -104,7 +104,7 @@ def run(source,output,mutants=False):
+         if mrun.returncode==0 or len(pm)!=1 or int(pm[0][1])==0:report['status']='FAIL'
+     # Page compliance: no raw 0..127 readouts, canonical unit names, one header contract.
+     for name,key in (('RAW_VALUES','RAW_MUTATE'),('UNIT_NAMES','UNITNAME_MUTATE'),('HEADERS','HEADER_MUTATE'),('TYPE_SCALE','TYPESCALE_MUTATE'),
+-                     ('DUP_READOUT','DUPREAD_MUTATE'),('KNOB_PREFIX','KPREFIX_MUTATE'),('ABBREV','ABBREV_MUTATE'),('DUP_LABEL','DUPLABEL_MUTATE'),('DEAD_SPACE','DEADSPACE_MUTATE'),('KNOB_GROUPS','KNOBGROUP_MUTATE')):
++                     ('DUP_READOUT','DUPREAD_MUTATE'),('KNOB_PREFIX','KPREFIX_MUTATE'),('ABBREV','ABBREV_MUTATE'),('DUP_LABEL','DUPLABEL_MUTATE'),('DEAD_SPACE','DEADSPACE_MUTATE'),('KNOB_GROUPS','KNOBGROUP_MUTATE'),('KNOB_GROUPS','KNOBGROUP_S1_MUTATE')):
+         pat=r'^'+name+r' checks=(\d+) bad=(\d+)$'
+         got=re.findall(pat,(output/'render.log').read_text(),re.M)
+         report[name.lower()]=got

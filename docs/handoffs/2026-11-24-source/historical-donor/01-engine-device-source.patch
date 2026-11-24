@@ -1,0 +1,2509 @@
+diff --git a/experiments/original_synth/chicago_mp4.c b/experiments/original_synth/chicago_mp4.c
+index 705dd72e891eedb55023e1f602b1376cd82feecd..16951e99bef7f14ce4a752e1f29c66bce8ba6f84 100644
+--- a/experiments/original_synth/chicago_mp4.c
++++ b/experiments/original_synth/chicago_mp4.c
+@@ -68,25 +68,36 @@ static inline float ck_wave(unsigned shape,float p,float width,float correction,
+  if(shape>=2){float q=p+(width+width);if(q>1)q=q-2;value=value-ck_saw(q,correction);}
+  return value;
+ }
++/* Each slave uses the original rounded binary32 increment when its master
++ * is silent or cross modulation is either sign of zero. Cache that exact
++ * integer once per span; master sync still observes every phase wrap. */
++typedef struct {float base[2];uint32_t plain[2];} ck_slaves;
++static inline uint32_t ck_phase_delta(float step){
++ return (uint32_t)(step>=0x1p31f?INT32_MAX:(int32_t)step);
++}
+ static inline float ck_phase(uint32_t u){return (float)(int32_t)u*0x1p-31f;}
+ static inline float ck_xadvance(original_ramp *r){float n=r->current+r->delta;if((r->delta>0)!=(r->target>n))n=r->target;r->current=n;return n;}
+ /* One sample. Locals stand in for the voice state; the caller loads and
+  * stores them once per span. Commit order matches the original: phases,
+  * gain ramps and noise advance before the filter checks; the filter state
+  * changes only when every filter value is finite. */
+-static inline __attribute__((always_inline)) int ck_step(const original_prepared_oscillators *p,float vco_gain,
++static inline __attribute__((always_inline)) int ck_step(const original_prepared_oscillators *p,const ck_slaves *slaves,float vco_gain,
+  uint32_t phase[4],original_ramp og[4],original_ramp st[2],original_ramp *ngr,uint32_t *nsp,
+  float H[5],original_ramp *ra,original_ramp *re,original_ramp *rr,uint32_t *lo,uint32_t *ro){
+  const original_osc_controls *c=&p->controls;float w[4],gain[4];
+  for(unsigned i=0;i<4;i++)gain[i]=og[i].current;
+  for(unsigned i=0;i<4;i+=2){
+   uint32_t old=phase[i];phase[i]-=c->increment[i];
+-  float b=(float)c->increment[i+1]*0x1p-31f,step;
++  uint32_t delta=slaves->plain[i/2];
++  w[i]=0.0f;
+   if(gain[i]!=0.0f||c->xmod!=0.0f){
+    w[i]=ck_wave(c->shape[i],ck_phase(phase[i]),c->width[i],p->correction[i],p->triangle[i]);
+-   float a=w[i]*c->xmod;step=ck_clamp(a+b,-1,1)*0x1p31f;
+-  }else{w[i]=0.0f;step=ck_clamp(b,-1,1)*0x1p31f;}
+-  phase[i+1]-=(uint32_t)(step>=0x1p31f?INT32_MAX:(int32_t)step);
++   if(c->xmod!=0.0f||!original_binary32_isfinite(w[i])){
++    float a=w[i]*c->xmod;
++    delta=ck_phase_delta(ck_clamp(a+slaves->base[i/2],-1,1)*0x1p31f);
++   }
++  }
++  phase[i+1]-=delta;
+   if((int32_t)phase[i]>(int32_t)old)phase[i+1]=0x7fffffffu;
+   w[i+1]=gain[i+1]!=0.0f?ck_wave(c->shape[i+1],ck_phase(phase[i+1]),c->width[i+1],p->correction[i+1],p->triangle[i+1]):0.0f;
+  }
+@@ -101,7 +112,8 @@ static inline __attribute__((always_inline)) int ck_step(const original_prepared
+  if(!original_binary32_isfinite(d))return 0;
+  float u=original_binary32_abs(d)>=1?0:1-original_binary32_abs(d);float u2=u*u,u4=u2*u2,u5=u*u4;float v5=1-u5;float nonlinear=d>=0?v5:-v5;
+  float v=input-R*nonlinear,z1=v+A*(H[0]-v),z2=z1+A*(H[1]-z1),z3=z2+A*(H[2]-z2),z4=z3+A*(H[3]-z3);
+- if(!original_binary32_isfinite(z1)||!original_binary32_isfinite(z2)||!original_binary32_isfinite(z3)||!original_binary32_isfinite(z4)||!original_binary32_isfinite(tmp))return 0;
++ /* Each nonfinite cascade stage propagates to z4. The finite d check also covers tmp. */
++ if(!original_binary32_isfinite(z4))return 0;
+  *ra=a2;*re=e2;*rr=r2;H[0]=z1;H[1]=z2;H[2]=z3;H[3]=z4;H[4]=tmp;
+  float l=ck_xadvance(&st[0]),r=ck_xadvance(&st[1]);
+  *lo=original_math_bits(z4*l);*ro=original_math_bits(z4*r);return 1;
+@@ -109,18 +121,22 @@ static inline __attribute__((always_inline)) int ck_step(const original_prepared
+ /* Same operations as ck_step when every ramp is already at its target with
+  * a zero delta: advance()/ck_xadvance return the held value and write it
+  * back unchanged. Constants stay in registers; the ramps are not touched. */
+-static inline __attribute__((always_inline)) int ck_step_hold(const original_prepared_oscillators *p,float vco_gain,
++static inline __attribute__((always_inline)) int ck_step_hold(const original_prepared_oscillators *p,const ck_slaves *slaves,float vco_gain,
+  uint32_t phase[4],const float gain[4],float ng,float A,float E,float R,float sl,float sr,
+  uint32_t *nsp,float H[5],uint32_t *lo,uint32_t *ro){
+  const original_osc_controls *c=&p->controls;float w[4];
+  for(unsigned i=0;i<4;i+=2){
+   uint32_t old=phase[i];phase[i]-=c->increment[i];
+-  float b=(float)c->increment[i+1]*0x1p-31f,step;
++  uint32_t delta=slaves->plain[i/2];
++  w[i]=0.0f;
+   if(gain[i]!=0.0f||c->xmod!=0.0f){
+    w[i]=ck_wave(c->shape[i],ck_phase(phase[i]),c->width[i],p->correction[i],p->triangle[i]);
+-   float a=w[i]*c->xmod;step=ck_clamp(a+b,-1,1)*0x1p31f;
+-  }else{w[i]=0.0f;step=ck_clamp(b,-1,1)*0x1p31f;}
+-  phase[i+1]-=(uint32_t)(step>=0x1p31f?INT32_MAX:(int32_t)step);
++   if(c->xmod!=0.0f||!original_binary32_isfinite(w[i])){
++    float a=w[i]*c->xmod;
++    delta=ck_phase_delta(ck_clamp(a+slaves->base[i/2],-1,1)*0x1p31f);
++   }
++  }
++  phase[i+1]-=delta;
+   if((int32_t)phase[i]>(int32_t)old)phase[i+1]=0x7fffffffu;
+   w[i+1]=gain[i+1]!=0.0f?ck_wave(c->shape[i+1],ck_phase(phase[i+1]),c->width[i+1],p->correction[i+1],p->triangle[i+1]):0.0f;
+  }
+@@ -132,7 +148,8 @@ static inline __attribute__((always_inline)) int ck_step_hold(const original_pre
+  if(!original_binary32_isfinite(d))return 0;
+  float u=original_binary32_abs(d)>=1?0:1-original_binary32_abs(d);float u2=u*u,u4=u2*u2,u5=u*u4;float v5=1-u5;float nonlinear=d>=0?v5:-v5;
+  float v=input-R*nonlinear,z1=v+A*(H[0]-v),z2=z1+A*(H[1]-z1),z3=z2+A*(H[2]-z2),z4=z3+A*(H[3]-z3);
+- if(!original_binary32_isfinite(z1)||!original_binary32_isfinite(z2)||!original_binary32_isfinite(z3)||!original_binary32_isfinite(z4)||!original_binary32_isfinite(tmp))return 0;
++ /* Each nonfinite cascade stage propagates to z4. The finite d check also covers tmp. */
++ if(!original_binary32_isfinite(z4))return 0;
+  H[0]=z1;H[1]=z2;H[2]=z3;H[3]=z4;H[4]=tmp;
+  *lo=original_math_bits(z4*sl);*ro=original_math_bits(z4*sr);return 1;
+ }
+@@ -147,15 +164,20 @@ int original_chicago_voice_span(original_voice_gain *vg,original_oscillators *ph
+  original_ramp og[4]={vg->oscillator[0],vg->oscillator[1],vg->oscillator[2],vg->oscillator[3]},st[2]={vg->stereo[0],vg->stereo[1]};
+  original_ramp ngr=*noise_gain,ra=f->a,re=f->e,rr=f->resonance;uint32_t ns=*noise_state;
+  float H[5]={f->history[0],f->history[1],f->history[2],f->history[3],f->history[4]};
++ ck_slaves slaves;
++ for(unsigned i=0;i<2;i++){
++  float b=(float)p->controls.increment[2*i+1]*0x1p-31f;
++  slaves.base[i]=b;slaves.plain[i]=ck_phase_delta(ck_clamp(b,-1,1)*0x1p31f);
++ }
+  int ok=1;
+  if(ramp_held(&ra)&&ramp_held(&re)&&ramp_held(&rr)&&
+     ramp_held(&og[0])&&ramp_held(&og[1])&&ramp_held(&og[2])&&ramp_held(&og[3])&&
+     ramp_held(&st[0])&&ramp_held(&st[1])&&ramp_held(&ngr)){
+   float gain[4]={og[0].current,og[1].current,og[2].current,og[3].current};
+   float A=ra.target,E=re.target,R=rr.target,sl=st[0].current,sr=st[1].current,ng=ngr.current;
+-  for(uint32_t k=0;k<n;k++)if(!ck_step_hold(p,vco_gain,phase,gain,ng,A,E,R,sl,sr,&ns,H,left+k,right+k)){ok=0;break;}
++  for(uint32_t k=0;k<n;k++)if(!ck_step_hold(p,&slaves,vco_gain,phase,gain,ng,A,E,R,sl,sr,&ns,H,left+k,right+k)){ok=0;break;}
+  }else{
+-  for(uint32_t k=0;k<n;k++)if(!ck_step(p,vco_gain,phase,og,st,&ngr,&ns,H,&ra,&re,&rr,left+k,right+k)){ok=0;break;}
++  for(uint32_t k=0;k<n;k++)if(!ck_step(p,&slaves,vco_gain,phase,og,st,&ngr,&ns,H,&ra,&re,&rr,left+k,right+k)){ok=0;break;}
+  }
+  for(unsigned i=0;i<4;i++){ph->phase[i]=phase[i];vg->oscillator[i]=og[i];}
+  vg->stereo[0]=st[0];vg->stereo[1]=st[1];*noise_gain=ngr;*noise_state=ns;
+diff --git a/experiments/original_synth/chicago_packed.c b/experiments/original_synth/chicago_packed.c
+index 9119df1bc74044e5cefd10448c9eed782256ecba..025a14941796ae56114111a0236238eb2f67dd3c 100644
+--- a/experiments/original_synth/chicago_packed.c
++++ b/experiments/original_synth/chicago_packed.c
+@@ -1,6 +1,15 @@
+ /* SPDX-License-Identifier: GPL-3.0-only */
+ #include "chicago_packed.h"
++#include <stddef.h>
+ #ifdef X0X_CHICAGO_COMPACT_HEADERS
++typedef struct {
++ const uint8_t *data;
++ const uint16_t *offset_base;
++ const uint8_t *offset_stride;
++ const int8_t *offset_residual;
++ size_t bytes;
++ uint32_t count, blocks;
++} chicago_compact_table;
+ #include "chicago_compact_private.h"
+ static int chicago_compact_decode(const uint8_t *p,size_t bytes,uint32_t entries,uint32_t entry,uint32_t prefix,uint32_t *out){
+  if(bytes<7)return 0;
+@@ -35,10 +44,19 @@ static int chicago_compact_decode(const uint8_t *p,size_t bytes,uint32_t entries
+  *out=value;return 1;
+ }
+ 
+-static int chicago_compact_lookup(const original_lossless_table16 *t,uint32_t index,uint32_t prefix,uint32_t *out){
+- if(!t||!out||!t->data||!t->offset||!t->count||index>=t->count||t->bytes>UINT16_MAX||t->blocks!=(t->count/32u+(t->count%32u!=0))||t->offset[0]!=0)return 0;
++static uint32_t chicago_compact_offset(const chicago_compact_table *t,uint32_t block){
++ uint32_t group=block/32u;
++ return (uint32_t)((int)t->offset_base[group]+(int)t->offset_stride[group]*(int)(block%32u)+
++                   (int)t->offset_residual[block]);
++}
++
++static int chicago_compact_lookup(const chicago_compact_table *t,uint32_t index,uint32_t prefix,uint32_t *out){
++ if(!t||!out||!t->data||!t->offset_base||!t->offset_stride||!t->offset_residual||
++    !t->count||index>=t->count||t->bytes>UINT16_MAX||
++    t->blocks!=(t->count/32u+(t->count%32u!=0))||chicago_compact_offset(t,0)!=0)return 0;
+  uint32_t block=index/32u,remaining=t->count-block*32u;
+- size_t pos=t->offset[block],end=block+1<t->blocks?t->offset[block+1]:t->bytes;
++ size_t pos=chicago_compact_offset(t,block);
++ size_t end=block+1<t->blocks?chicago_compact_offset(t,block+1):t->bytes;
+  if(pos>end||end>t->bytes)return 0;
+  return chicago_compact_decode(t->data+pos,end-pos,remaining>32?32:remaining,index%32u,prefix,out);
+ }
+diff --git a/firmware/hal/fm1_guard.h b/firmware/hal/fm1_guard.h
+index 4a23dfedab625b7880bad42a0448ba3180e155f7..4a7ec6ae07a33ebe39d69584e1b91a591a6067d1 100644
+--- a/firmware/hal/fm1_guard.h
++++ b/firmware/hal/fm1_guard.h
+@@ -218,7 +218,11 @@ static void fm1_t5w_check(uint32_t tag, uint32_t ms)
+         f[i] = fm1_t5_snap[i];
+     }
+ }
+-static void fm1_t5w_end(uint32_t ms)
++/* Keep the probe in its own code-generation scope. With the native BLE
++ * transport, inlining groups the second ICFG read and DBG address calculation
++ * onto the same destination register; strict native replay faults at startup.
++ * Outlining keeps all of the existing volatile reads and write protections. */
++static __attribute__((noinline)) void fm1_t5w_end(uint32_t ms)
+ {
+     fm1_t5w_close();                        /* before the pops and the next entry's pushes */
+     fm1_t5w.icfg0_3 = FM1_ICFG(24);
+diff --git a/firmware/src/app/editor.c b/firmware/src/app/editor.c
+index 19456a7c7f4787e3052d4d8c830e38f5cdbb0f83..bbccdbbf524aca8cd8ebf1a3fe6361e20255df11 100644
+--- a/firmware/src/app/editor.c
++++ b/firmware/src/app/editor.c
+@@ -19,19 +19,16 @@
+ enum { ED_INFO = 1, ED_PROJECT = 9, ED_SMP_BEGIN = 11, ED_SMP_WRITE, ED_SMP_END, ED_SMP_ERASE, ED_SMP_INFO, ED_SMP_READ, ED_PING = 25,
+        ED_DIAG = 33, ED_BT_TEST = 34, ED_CTL_READ = 37, ED_INLOG = 38, ED_BOOT_INFO = 39,
+        ED_BOOT_BEGIN = 43, ED_BOOT_WRITE, ED_BOOT_READ, ED_BOOT_END, ED_BOOT_ABORT,
+-       ED_INSTALL = 48, ED_CAPTURE = 49, ED_XDATA = 50, ED_FITTAB = 51, ED_FDATA = 52 };
++       ED_INSTALL = 48, ED_CAPTURE = 49, ED_XDATA = 50, /* 51 reserved: retired FITTAB read-back. */ ED_FDATA = 52 };
+ #include "../../../tools/mboot/session_wire.h"
+ #include "boot_screen.h"
+ #if BOARD_SMK37
+-#if defined(__has_include) && __has_include("fittab_id.h")
+-#include "fittab_id.h"
+-#endif
+-#include "app/fittab.h"
+ #if X0X_S1C
+ #include "app/s1c_part.h"
+ #endif
+ #endif
+ #include "smk_inlog_profile.h"
++#include "editor_diag_profile.h"
+ #if X0X_SMK_INLOG
+ /* ED_INLOG (SMK-37, read only, a76): the inbound recorder (app/smk_inlog.h). No arg or arg 0: the entry
+  * count, fm1_ms now, then 2 words for each entry (the oldest first), each word 5 x 7 bits, low bits
+@@ -52,6 +49,8 @@ static void smk_inlog_reply(uint32_t arg);   /* main_fm1.c */
+ static uint32_t ed_reboot_at;                /* fm1_ms + 1 when a restart was asked for (0: none) */
+ #define ED_READ_MAX 224u                     /* X0X: SMP_READ's bytes a frame (the break page draws the slots) */
+ 
++/* DNR3 Remote frames (7D 44 4E ..): remote_dnr3.c (app/remote_dnr3.h), included after this file */
++
+ static uint8_t ed_out[732];                  /* ED_INLOG with 64 entries: 732 B (tests/diag_size_test.py) */
+ static uint32_t ed_n;
+ 
+@@ -69,6 +68,19 @@ static void ed_b(uint32_t v)
+     if (ed_n < sizeof ed_out - 1u)
+         ed_out[ed_n++] = (uint8_t)(v & 0x7Fu);
+ }
++/* Fixed-width little-endian 7-bit fields in editor and Remote frames. */
++static __attribute__((noinline)) void ed_u(uint32_t v, int n)
++{
++    for (; n > 0; n--, v >>= 7)
++        ed_b(v);
++}
++static __attribute__((noinline)) uint32_t ed_g(const uint8_t *a, int n)
++{
++    uint32_t v = 0;
++    while (n--)
++        v = v << 7 | a[n];
++    return v;
++}
+ static void ed_str(const char *s, uint32_t max)
+ {
+     uint32_t i;
+@@ -132,15 +144,13 @@ static void ed_put7(const uint8_t *src, uint32_t n)
+ /* Offset is 21 bits; count is in byte pairs. Invalid offsets send no reply. */
+ static int ed_read_area(const uint8_t *base, uint32_t size, const uint8_t *a)
+ {
+-    uint32_t off = (uint32_t)a[0] | (uint32_t)a[1] << 7 | (uint32_t)a[2] << 14;
++    uint32_t off = ed_g(a, 3);
+     uint32_t count = a[3] > ED_READ_MAX / 2u ? ED_READ_MAX : a[3] * 2u;
+     if (off >= size)
+         return 0;
+     if (count > size - off)
+         count = size - off;
+-    ed_b(off);
+-    ed_b(off >> 7);
+-    ed_b(off >> 14);
++    ed_u(off, 3);
+     ed_put7(base + off, count);
+     return 1;
+ }
+@@ -216,9 +226,9 @@ static int ed_project_samples_restored(void)
+ 
+ static uint32_t ed_u21(const uint8_t *a)
+ {
+-    return (uint32_t)a[0] | (uint32_t)a[1] << 7 | (uint32_t)a[2] << 14;
++    return ed_g(a, 3);
+ }
+-static void ed_w21(uint32_t v) { ed_b(v); ed_b(v >> 7); ed_b(v >> 14); }
++
+ static uint8_t *ed_project_byte(uint32_t off)
+ {
+     return off < PROJECT_FILE_HDR ? &ed_project.header[off] : (uint8_t *)&project_stage + off - PROJECT_FILE_HDR;
+@@ -259,7 +269,7 @@ static void ed_project_handle(const uint8_t *a, uint32_t na)
+     switch (op) {
+     case 64:                                        /* QUERY / keepalive */
+         if (na) { rc = 1; break; }
+-        ed_b(0); ed_b(X0X_BASS_TAGGED_SOUND?2:1); ed_w21(PROJECT_FILE_SIZE); ed_b(ed_project.recovery ? 3 : ed_project.mode);
++        ed_b(0); ed_b(X0X_BASS_TAGGED_SOUND?2:1); ed_u(PROJECT_FILE_SIZE, 3); ed_b(ed_project.recovery ? 3 : ed_project.mode);
+         return;
+     case 65:                                        /* EXPORT BEGIN */
+     case 67:                                        /* IMPORT BEGIN */
+@@ -283,20 +293,20 @@ static void ed_project_handle(const uint8_t *a, uint32_t na)
+         if (op == 65) {
+             project_capture_stage();
+             project_file_header(ed_project.header);
+-            ed_b(0); ed_w21(PROJECT_FILE_SIZE);
++            ed_b(0); ed_u(PROJECT_FILE_SIZE, 3);
+             return;
+         }
+         break;
+     case 66:                                        /* READ */
+         if (ed_project.mode != 1) { rc = 2; break; }
+         if (na != 5) { rc = 1; break; }
+-        off = ed_u21(a); n = (uint32_t)a[3] | (uint32_t)a[4] << 7;
++        off = ed_u21(a); n = ed_g(a + 3, 2);
+         if (!n || n > ED_READ_MAX || off > ED_PROJECT_SIZE || n > ED_PROJECT_SIZE - off) {
+             rc = 1; break;
+         }
+         for (i = 0; i < n; i++)
+             ed_smp_buf[i] = *ed_project_byte(off + i);
+-        ed_b(0); ed_w21(off); ed_put7(ed_smp_buf, n);
++        ed_b(0); ed_u(off, 3); ed_put7(ed_smp_buf, n);
+         return;
+     case 68:                                        /* sequential WRITE, exact retries are idempotent */
+         if (ed_project.mode != 2) { rc = 2; break; }
+@@ -317,7 +327,7 @@ static void ed_project_handle(const uint8_t *a, uint32_t na)
+                 *ed_project_byte(off + i) = ed_smp_buf[i];
+             ed_project.next += n;
+         }
+-        ed_b(0); ed_w21(ed_project.next);
++        ed_b(0); ed_u(ed_project.next, 3);
+         return;
+     case 69:                                        /* COMMIT, deliberately never saved implicitly */
+     case 74:                                        /* VALIDATE before any sample write */
+@@ -592,7 +602,7 @@ enum { ED_PEEK = 40, ED_POKE, ED_CLOCK };
+ #include "fm1_debug.h"
+ static uint32_t ed_u35(const uint8_t *a)
+ {
+-    return (uint32_t)a[0] | (uint32_t)a[1] << 7 | (uint32_t)a[2] << 14 | (uint32_t)a[3] << 21 | (uint32_t)a[4] << 28;
++    return ed_g(a, 5);
+ }
+ static void ed_w35(uint32_t v)
+ {
+@@ -714,7 +724,7 @@ static void ed_boot(uint32_t cmd, const uint8_t *a, uint32_t na)
+             ed_b(1);
+             return;
+         }
+-        off = (uint32_t)a[0] | (uint32_t)a[1] << 7 | (uint32_t)a[2] << 14;
++        off = ed_g(a, 3);
+         len = boot_u32(sec + 12);
+         n = a[3] > ED_READ_MAX / 2u ? ED_READ_MAX : a[3] * 2u;
+         if (off >= len) {
+@@ -724,9 +734,7 @@ static void ed_boot(uint32_t cmd, const uint8_t *a, uint32_t na)
+         if (n > len - off)
+             n = len - off;
+         ed_b(0);
+-        ed_b(off);
+-        ed_b(off >> 7);
+-        ed_b(off >> 14);
++        ed_u(off, 3);
+         ed_put7(sec + BOOT_PAY_OFF + off, n);
+         return;
+     }
+@@ -765,12 +773,10 @@ static void ed_boot(uint32_t cmd, const uint8_t *a, uint32_t na)
+     if (cmd == ED_BOOT_WRITE) {
+         uint32_t off = 0, n;
+         if (na >= 3u)
+-            off = (uint32_t)a[0] | (uint32_t)a[1] << 7 | (uint32_t)a[2] << 14;
++            off = ed_g(a, 3);
+         n = na >= 3u ? ed_unpack_exact(a + 3, na - 3u, ed_smp_buf, 256u) : 0u;
+         rc = boot_write(&bst, off, n ? ed_smp_buf : 0, n, fm1_ms);
+-        ed_b(off);
+-        ed_b(off >> 7);
+-        ed_b(off >> 14);
++        ed_u(off, 3);
+         boot_finish(rc);
+         return;
+     }
+@@ -905,23 +911,7 @@ static void ed_handle(const uint8_t *f, uint32_t n)
+         uint32_t k;
+         ed_b(gfx_xdata_ok);
+         for (k = 0; k < XDATA_HDR; k++) {
+-            ed_b(h[k]);
+-            ed_b(h[k] >> 7);
+-        }
+-        break;
+-    }
+-#endif
+-#if defined(FITTAB_LEN) && BOARD_SMK37
+-    case ED_FITTAB: {                                 /* read only: FITTAB present (1) or absent (0), then the
+-                                                       * region's 16 B header as read now, each byte 2 x 7 bits, low
+-                                                       * first: the installers compare it with the package (read back) */
+-        const uint8_t *h = (const uint8_t *)FL_XIP(FL_FITTAB_LO);
+-        const uint8_t *blob = fittab_blob(h, FL_FITTAB_HI - FL_FITTAB_LO, FITTAB_LEN, FITTAB_CRC32);
+-        uint32_t k;
+-        ed_b(blob ? 1 : 0);
+-        for (k = 0; k < FITTAB_HDR; k++) {
+-            ed_b(h[k]);
+-            ed_b(h[k] >> 7);
++            ed_u(h[k], 2);
+         }
+         break;
+     }
+@@ -939,12 +929,12 @@ static void ed_handle(const uint8_t *f, uint32_t n)
+ #endif
+         for (k = 0; k < FL_FDATA_HDR; k++) {
+             uint32_t v = FL_FDATA_SIZE ? h[k] : 0xFFu;
+-            ed_b(v);
+-            ed_b(v >> 7);
++            ed_u(v, 2);
+         }
+         break;
+     }
+ #endif
++#if X0X_EDITOR_DIAG
+     case ED_DIAG: {                                   /* read only: the crash record and the Bluetooth start */
+         uint32_t w[77], nw = 0, k;            /* 77 x 5 B fit ed_out (tests/diag_size_test.py) */
+         const uint32_t *c = (const uint32_t *)&fm1_crash;
+@@ -957,14 +947,11 @@ static void ed_handle(const uint8_t *f, uint32_t n)
+ #endif
+         ed_b(nw);
+         for (k = 0; k < nw; k++) {
+-            ed_b(w[k]);
+-            ed_b(w[k] >> 7);
+-            ed_b(w[k] >> 14);
+-            ed_b(w[k] >> 21);
+-            ed_b(w[k] >> 28);
++            ed_u(w[k], 5);
+         }
+         break;
+     }
++#endif
+ #if X0X_SMK_INLOG
+     case ED_INLOG:                                    /* read only: the inbound recorder (main_fm1.c) */
+         smk_inlog_reply(na >= 1u ? a[0] : 0u);
+@@ -986,7 +973,7 @@ static void ed_handle(const uint8_t *f, uint32_t n)
+         uint32_t off, len, rc = 0, took;
+         if (na < 5u || a[0] >= SMP_USER_SLOTS || !flash_ok)
+             return;
+-        off = (uint32_t)a[1] | (uint32_t)a[2] << 7 | (uint32_t)a[3] << 14;
++        off = ed_g(a + 1, 3);
+         len = ed_unpack_exact(a + 4, na - 4u, ed_smp_buf, 256u);
+         if (off < SMP_USER_DATA || (off & 0xFFu) || !len || off + len > SMP_USER_SIZE(a[0]))
+             rc = 1;
+@@ -1011,9 +998,7 @@ static void ed_handle(const uint8_t *f, uint32_t n)
+             }
+         }
+         ed_b(a[0]);
+-        ed_b(off);
+-        ed_b(off >> 7);
+-        ed_b(off >> 14);
++        ed_u(off, 3);
+         ed_b(rc);
+         break;
+     }
+@@ -1080,13 +1065,13 @@ static void ed_handle(const uint8_t *f, uint32_t n)
+             v[1] = SMP_USER_SIZE(i) / 0x1000u;
+             v[2] = usr_nz[i] ? (h->data_len + 1023u) / 1024u : 0u;
+             for (j = 0; j < 3u; j++) {
+-                ed_b(v[j]);
+-                ed_b(v[j] >> 7);
++                ed_u(v[j], 2);
+             }
+         }
+         break;
+     }
+ #if X0X_BLE
++#if X0X_EDITOR_DIAG
+     case ED_BT_TEST: {
+         uint32_t op = na > 0u ? a[0] : 0u;
+         if (op > 4u)
+@@ -1106,11 +1091,7 @@ static void ed_handle(const uint8_t *f, uint32_t n)
+             ed_b(words);
+             for (k = 0; k < words; k++) {
+                 uint32_t v = k < nt ? t[k] : op == 3u ? fm1_t5w.hits : g[k - nt];
+-                ed_b(v);
+-                ed_b(v >> 7);
+-                ed_b(v >> 14);
+-                ed_b(v >> 21);
+-                ed_b(v >> 28);
++                ed_u(v, 5);
+             }
+             break;
+         }
+@@ -1126,6 +1107,7 @@ static void ed_handle(const uint8_t *f, uint32_t n)
+         ed_b((uint32_t)plat_ble_state());
+         break;
+     }
++#endif
+     case ED_CTL_READ: {
+         _Static_assert(XB_FLASH_OFF == FL_BLE_LO && XB_FLASH_SIZE == FL_BLE_HI - FL_BLE_LO,
+                        "ED_CTL_READ: the Bluetooth block is FL_BLE");
+@@ -1147,12 +1129,18 @@ static int ed_service(void)
+ {
+     const uint8_t *p;
+     uint32_t n;
++#if X0X_REMOTE_BLE
++    ble_dnr3_service();                            /* dispatch still obeys the DNR3 maintenance/write gate */
++#endif
+     if (ED_MAINTENANCE_HELD()) {
+         /* No project timeout, boot housekeeping or editor dispatch while held.
+          * Future capture transport must have its own qualified dispatcher; all
+          * currently supported frames are refused, never replayed on release. */
+         if (ota_frame_get(&p, &n)) {
+             (void)ED_MAINTENANCE_ADMIT();
++#if X0X_REMOTE_DNR3
++            (void)remote_dnr3_frame(p, n);            /* a Remote write gets BUSY, a read its answer */
++#endif
+             ota_frame_done();
+         }
+         return 0;
+@@ -1160,8 +1148,17 @@ static int ed_service(void)
+     if (ed_project.mode && !ed_project.recovery && fm1_ms - ed_project.at >= 15000u)
+         ed_project_end(0);
+     boot_housekeep();
++#if X0X_REMOTE_DNR3
++    remote_dnr3_tick(plat_ms());
++#endif
+     if (!ota_frame_get(&p, &n))
+         return 0;
++#if X0X_REMOTE_DNR3
++    if (!remote_dnr3_frame(p, n)) {                  /* never the OTA's: answered here, also while busy */
++        ota_frame_done();
++        return 0;
++    }
++#endif
+     if (n < 4u || p[0] != ED_HDR0 || p[1] != ED_HDR1 || p[2] != ED_HDR2) {
+         if (ed_project.mode) {
+             ota_frame_done();                        /* OTA and project operations share scratch */
+diff --git a/firmware/src/app/editor_diag_profile.h b/firmware/src/app/editor_diag_profile.h
+new file mode 100644
+index 0000000000000000000000000000000000000000..85784972e2795a291a08b89421c5008ef47cb8d8
+--- /dev/null
++++ b/firmware/src/app/editor_diag_profile.h
+@@ -0,0 +1,14 @@
++/* SPDX-License-Identifier: GPL-3.0-only */
++#ifndef EDITOR_DIAG_PROFILE_H
++#define EDITOR_DIAG_PROFILE_H
++
++/* Preserve full diagnostics in the existing trace profile. Neither ED_DIAG
++ * nor the ED_BT_TEST radio probes are used by the stock editor or installers. */
++#ifndef X0X_EDITOR_DIAG
++#if BOARD_SMK37 && !defined(X0X_HOST) && !(defined(X0X_LCD_TRACE) && X0X_LCD_TRACE)
++#define X0X_EDITOR_DIAG 0
++#else
++#define X0X_EDITOR_DIAG 1
++#endif
++#endif
++#endif
+diff --git a/firmware/src/app/engine.c b/firmware/src/app/engine.c
+index 4146b673d4e5774435209a3fe306c028f40b2522..743b06e0504a9c8e4afdd2275978cfe9d0725872 100644
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -1843,6 +1843,23 @@ static void original_midi_context(void)
+ }
+ 
+ /* noinline: keeps GM_DRUM lookup out of engine_render when the map is shared with seq */
++/* Program Change on a part's channel: cue that pattern for the part, as a UI cue (the next bar, or now
++ * when stopped); 127 cancels the cue, 32..126 do nothing. The Remote's plain-MIDI clip launch (DNR3 2.3).
++ * Clip mode leaves program changes to the host. */
++__attribute__((noinline)) X0X_COLD static void midi_program(int ch, int pp)
++{
++#if BOARD_SMK37
++    if (smk_clip_mode_on())
++        return;
++#endif
++    if (pp >= NPAT && pp != 127)
++        return;
++    if (pp < NPAT)
++        seq_chain(&seq, 0, 0);                    /* as the PRESET encoder: a cue ends a chain */
++    for (int k = 0; k < NTRACKS; k++)
++        if (seq.ch[k] == ch)
++            seq.pcue[k] = pp < NPAT ? (uint8_t)pp : 0xFFu;
++}
+ __attribute__((noinline)) static void midi_in(uint32_t pkt)
+ {
+     uint8_t st = (uint8_t)(pkt >> 8), d1 = (uint8_t)(pkt >> 16) & 0x7F, d2 = (uint8_t)(pkt >> 24) & 0x7F;
+@@ -1913,6 +1930,10 @@ __attribute__((noinline)) static void midi_in(uint32_t pkt)
+         }
+     }
+ #endif
++    if (ty == 0xC0) {
++        midi_program(ch, d1);
++        return;
++    }
+     if (ty == 0x90 && d2 == 0)
+         ty = 0x80;
+     /* Transport packets precede the next note for every part, including kits
+@@ -2326,6 +2347,7 @@ __attribute__((noinline)) static void scale_glide(float *buf, glide_t *g, uint32
+     uint32_t i;
+     float c = g->cur, t = g->tgt;
+     if (c == t) {
++        if (c == 1.0f) return;
+         for (i = 0; i < n; i++)
+             buf[i] *= c;
+         return;
+@@ -2586,7 +2608,7 @@ static int run_job(int j, int core)
+             drum909_advance_noise(&d909, (int)n);       /* retain the exact restart noise/history */
+             drum909_pan_settle(&d909);                    /* silent: pans move at once, no glide */
+         } else {
+-            drum909_render_st_masked(&d909, dry_l, dry_r, rev, dly, (int)n, smc_audible_drums(solo, PART_909));
++            drum909_render_st_cleared(&d909, dry_l, dry_r, rev, dly, (int)n, smc_audible_drums(solo, PART_909));
+             mix_targets(PART_909, mix_level[PART_909], solo_parts);
+             bfx_shape(PART_909, dry_l, dry_r, rev, dly, 4, (int)n);
+             for (i = 0; i < n; i++)                       /* kit send: filtered sides, still centred */
+@@ -2658,48 +2680,22 @@ static int run_job(int j, int core)
+              * gone, fade residual insert output over 512 samples. Cancellation or
+              * a fresh owner ramps back smoothly; DSP histories keep advancing. */
+             int fade = engine_bass_preset_pending(bv) == 2 && !original_runtime_owned(&original_bass[bv]);
+-            if (fade || original_switch_gain[bv] != 512u)    /* else fused below */
+-                bass_303_accent_makeup(bb[bv], bb[1-bv], (unsigned)n, &bass_accent_mk[bv], bass_accent_mk_to[bv]);
+-            if (!fade && original_switch_gain[bv] == 512u) {
+-                /* Settled gain 1.0: x * 1.0f == x for every float, so only the
+-                 * quiet count runs (the same per-sample result). */
+-                uint32_t q = original_quiet_samples[bv];
+-                float g = bass_accent_mk[bv], t = bass_accent_mk_to[bv];
+-                if (g == 1.0f && t == 1.0f) {
+-                    for (i = 0; i < n; ++i) {
+-                        if (fm_fabsf(bb[bv][i]) > 1.0f/65536.0f || fm_fabsf(bb[1-bv][i]) > 1.0f/65536.0f) q = 0;
+-                        else if (q < 512u) ++q;
+-                    }
+-                } else {
+-                    /* Accent make-up (bass_303_accent_makeup), fused into this
+-                     * scan: one pass over the part, the same samples. */
+-                    for (i = 0; i < n; ++i) {
+-                        if (g != t) {
+-                            float d = t - g;
+-                            g = d > BASS_303_MAKEUP_SLEW ? g + BASS_303_MAKEUP_SLEW
+-                              : d < -BASS_303_MAKEUP_SLEW ? g - BASS_303_MAKEUP_SLEW : t;
+-                        }
+-                        float l = bb[bv][i] * g, r = bb[1-bv][i] * g;
+-                        bb[bv][i] = l; bb[1-bv][i] = r;
+-                        if (fm_fabsf(l) > 1.0f/65536.0f || fm_fabsf(r) > 1.0f/65536.0f) q = 0;
+-                        else if (q < 512u) ++q;
+-                    }
+-                    bass_accent_mk[bv] = g;
+-                }
+-                bass_quiet_next[bv] = q;
+-            } else {
+-                uint32_t q = original_quiet_samples[bv];
++            bass_303_accent_makeup(bb[bv], bb[1-bv], (unsigned)n, &bass_accent_mk[bv], bass_accent_mk_to[bv]);
++            if (fade || original_switch_gain[bv] != 512u) {
+                 for (i = 0; i < n; ++i) {
+                     if (fade) { if (original_switch_gain[bv]) --original_switch_gain[bv]; }
+                     else if (original_switch_gain[bv] < 512u) ++original_switch_gain[bv];
+                     float gain = (float)original_switch_gain[bv] * (1.0f/512.0f);
+                     bb[bv][i] *= gain; bb[1-bv][i] *= gain;
+-                    if (fm_fabsf(bb[bv][i]) > 1.0f/65536.0f || fm_fabsf(bb[1-bv][i]) > 1.0f/65536.0f)
+-                        q = 0;
+-                    else if (q < 512u) ++q;
+                 }
+-                bass_quiet_next[bv] = q;
+             }
++            /* Only the trailing quiet frames survive the last audible sample. */
++            uint32_t last = n;
++            while (last && !(fm_fabsf(bb[bv][last - 1]) > 1.0f/65536.0f ||
++                             fm_fabsf(bb[1-bv][last - 1]) > 1.0f/65536.0f))
++                --last;
++            uint32_t quiet = last ? n - last : original_quiet_samples[bv] + n;
++            bass_quiet_next[bv] = quiet < 512u ? quiet : 512u;
+             bfx_shape(p, bb[bv], bb[1-bv], 0, 0, 2, (int)n);
+         }
+         w0 = plat_ticks24();
+@@ -2848,20 +2844,21 @@ static uint32_t plan_pick(uint32_t n)
+     if (!breaks_silent(&brk)) act |= 1u << JB_BRK;
+     for (j = 0; j < JB_N; j++)                         /* a short stretch still pays a call's set-up */
+         c[j] = (act >> j & 1u) ? eng_job_cost[j] * nn / 256u : 0u;
+-    best &= act & ok;
++    uint32_t allowed = act & ok;
++    best &= allowed;
+     bc = plan_cost(best, c);
+     cost = bc;
+-    for (m = 0; m < (1u << JB_N); m++) {
+-        uint32_t k;
+-        if (m & ~(act & ok))
+-            continue;
+-        k = plan_cost(m, c);
++    /* Visit allowed masks in their original ascending order, preserving ties. */
++    m = 0;
++    do {
++        uint32_t k = plan_cost(m, c);
+         if (k < bc) { bc = k; best = m; }
+-    }
++        m = (m - allowed) & allowed;
++    } while (m);
+ 
+-    if (bc * 8u < cost * 7u || (eng_plan & ~(act & ok)))   /* 1/8 better, or a job of it went idle */
++    if (bc * 8u < cost * 7u || (eng_plan & ~allowed))
+         eng_plan = (uint8_t)best;
+-    return eng_plan & act & ok;
++    return eng_plan & allowed;
+ }
+ 
+ /* post-mix tail on both cores. L and R cannot be split: the reverb's four combs
+diff --git a/firmware/src/app/remote_dnr3.c b/firmware/src/app/remote_dnr3.c
+new file mode 100644
+index 0000000000000000000000000000000000000000..bf8a6c6db6f45fffc12e1c2c718c47d1f9d2dbb0
+--- /dev/null
++++ b/firmware/src/app/remote_dnr3.c
+@@ -0,0 +1,731 @@
++/* SPDX-License-Identifier: GPL-3.0-only */
++/* DNR3: the DnBOX Remote's SysEx protocol (Web Remote spec REMOTE-FW-PROTOCOL.md v3.0, sections 3-5).
++ * Part of the UI's translation unit: x0x.c includes it after editor.c, host/x0x_host.c after ui.c, so
++ * it uses the panel's own (static) pattern, lane and pref code. It runs in the main loop only
++ * (ed_service, the UI's context): pattern writes are single bytes / aligned words, as the panel's.
++ *
++ *   F0 7D 44 4E 03  op  seq u14  len u14  payload[len]  crc u32  F7
++ *
++ * Numbers are 7-bit groups, low first; crc = CRC-32 of op .. payload end. A reply is op | 0x40 with
++ * "status u7, rev u28, fields" (fields only for OK); a notification is op 0x7F, seq 0, "rev u28, kind u7,
++ * fields". Lean on purpose (XIP and RAM budgets): one frame buffer (the editor's on the device), static
++ * tables, a 4-entry PARAM queue and fingerprints instead of copies of the sequencer state. */
++#include "remote_dnr3.h"
++#include "../crc32_nibble.h"
++/* Native nightly builds supply the validated full source SHA as 20 bytes;
++ * the editor/About screen still uses its separate short display identity. */
++#ifndef X0X_DNR3_GIT_SHA_BYTES
++#define X0X_DNR3_GIT_SHA_BYTES {0}
++#endif
++
++#ifndef REMOTE_DNR3_BUSY
++#define REMOTE_DNR3_BUSY() 0
++#endif
++#ifdef REMOTE_DNR3_OUTBUF
++#define RD_OUT REMOTE_DNR3_OUTBUF
++#define RD_N ed_n
++#define rd_b ed_b
++#define rd_u ed_u
++#define rd_g ed_g
++#define rd_str ed_str
++#define rd_put7 ed_put7
++#else
++static uint8_t rd_outbuf[256];
++#define RD_OUT rd_outbuf
++static uint32_t rd_n;
++#define RD_N rd_n
++#endif
++enum { RD_HELLO = 0, RD_OPEN = 1, RD_KEEP = 6, RD_CLOSE = 7, RD_WATCH = 8, RD_DESCRIBE = 0x10, RD_PGET, RD_PSET,
++       RD_SGET = 0x20, RD_SSET, RD_PART, RD_DUMP, RD_CUE, RD_TRANSPORT = 0x26, RD_TEMPO, RD_MUTE, RD_STATE = 0x30 };
++enum { RS_OK, RS_QUEUED, RS_BAD, RS_BUSY, RS_STALE, RS_CONFLICT, RS_UNSUPPORTED, RS_FULL, RS_DENIED };
++enum { RN_PARAM, RN_STEP, RN_CUE, RN_TRANSPORT, RN_MUTE, RN_VOICE, RN_POSITION, RN_PATTERN, RN_N };
++#define RD_WBIT(k) ((k) == RN_PATTERN ? 4u : 1u << (k))   /* the WATCH bit of a NOTIFY kind */
++#define RD_CAPS 0x2FFu       /* PARAM..PC (bits 0..7), no VOICE (8), guarded bass PARAM_SET (9) */
++#define RD_WATCHABLE 0x5Fu   /* WATCH bits served: all but VOICE (5) */
++#define RD_LEASE_MS 2000u
++#define RD_GAP_MS 20u        /* >= 20 ms between notifications: <= 50 frames/s (HELLO watch_max_hz) */
++#define RD_HEAD 15u          /* F0 7D 44 4E 03 op seq2 len2 status rev4 */
++#define RD_ANY 127u          /* a wildcard address in a NOTIFY: the Remote re-reads */
++#define RD_MAXOUT 254u       /* + crc and F7 stay inside 256 */
++
++static struct {
++    uint32_t rev, epoch, client, deadline, last_tx, ccrc, fp[4], par[4], step;   /* par: PARAM changes waiting, kind|a|b|c */
++    uint16_t cseq;
++    uint8_t active, watch, dirty, pend, cop, clen, np;
++    uint8_t pos[NTRACKS], cache[48];   /* the last write's reply: an exact retry gets it again */
++} rd;
++#if X0X_REMOTE_BLE
++/* 0 = USB. A nonzero BLE token is only valid for one connection epoch. */
++static uint32_t rd_wire, rd_lease_wire;
++static void rd_out(const uint8_t *p, uint32_t n)
++{
++    if (rd_wire) ble_dnr3_out(rd_wire, p, n);
++    else remote_dnr3_out(p, n);
++}
++#else
++#define rd_out remote_dnr3_out
++#endif
++
++/* ---- what changed ----------------------------------------------------------------------------- */
++__attribute__((noinline)) void remote_touch(int kind, uint32_t at)
++{
++    int i = 0;
++    rd.dirty = 1;
++    if (kind == REMOTE_TOUCH_ALL) {                       /* a project load, an undo: every value */
++        rd.np = 0;
++        remote_touch(RN_PARAM, 0x7F7F7F7Fu);
++        kind = RN_STEP, at = 0x7F7F7Fu;
++    }
++    if (kind == RN_PARAM) {
++        while (i < rd.np && rd.par[i] != at)
++            i++;
++        if (i == rd.np) {                                 /* full: one wildcard for all of them */
++            if (i == 4)
++                rd.np = 0, at = 0x7F7F7F7Fu;
++            rd.par[rd.np++] = at;
++        }
++    } else if (kind == RN_STEP) {
++        if (rd.pend & 1u << RN_STEP)                      /* two different steps: RD_ANY = re-read */
++            for (; i < 24; i += 8)
++                if ((rd.step ^ at) >> i & 255u)
++                    at |= RD_ANY << i;
++        rd.step = at;
++    }
++    rd.pend |= (uint8_t)(1u << kind);
++}
++static int rd_playing(void) { return !seq.req_stop && (seq.playing || seq.req_start || seq.req_cont); }
++__attribute__((noinline)) static uint32_t rd_bpm10(void) { return (uint32_t)(seq.bpm * 10.0f + 0.5f); }
++static int rd_clip(void)
++{
++#if BOARD_SMK37
++    extern uint8_t smk_clip_mode_on(void);
++    return smk_clip_mode_on() != 0;
++#else
++    return 0;
++#endif
++}
++/* Sequencer state that changes outside the UI (the audio ISR: the bar's cue launch, transport edges,
++ * MIDI Start/Stop and Program Change, queued mutes; also HOME pads and SMC): a CRC fingerprint per
++ * NOTIFY kind, checked every main-loop pass. Then one rev step for everything that changed. */
++__attribute__((noinline)) static void rd_sync(void)
++{
++    static const uint8_t kind[4] = {RN_CUE, RN_PATTERN, RN_TRANSPORT, RN_MUTE};
++    uint32_t v[5];
++    int k;
++    v[0] = (uint32_t)rd_playing() | (uint32_t)seq.clk_src << 1, v[1] = rd_bpm10();
++    v[2] = seq.mute, v[3] = seq.vmute, v[4] = seq.mute_q ^ seq.vmute_q * 3u ^ (uint32_t)seq.part_off << 25;
++    {
++        uint32_t f[4] = {x0x_crc32((const uint8_t *)seq.pcue, NTRACKS), x0x_crc32((const uint8_t *)seq.ppat, NTRACKS),
++                         x0x_crc32(v, 8), x0x_crc32(v + 2, 12)};
++        for (k = 0; k < 4; k++)
++            if (f[k] != rd.fp[k])
++                rd.fp[k] = f[k], remote_touch(kind[k], 0);
++    }
++    if (rd.dirty)
++        rd.dirty = 0, rd.rev = (rd.rev + 1u) & 0x0FFFFFFFu;
++}
++__attribute__((noinline)) static void rd_lease(uint32_t now)
++{
++    if (rd.active && ((int32_t)(now - rd.deadline) >= 0
++#if X0X_REMOTE_BLE
++                      || (rd_lease_wire && !ble_dnr3_live(rd_lease_wire))
++#endif
++                     ))
++        rd.active = 0;                                    /* the lease ran out: read only */
++    rd_sync();
++}
++
++/* ---- frames out ------------------------------------------------------------------------------- */
++#ifndef REMOTE_DNR3_OUTBUF
++static void rd_b(uint32_t v)
++{
++    if (RD_N < RD_MAXOUT - 5u)
++        RD_OUT[RD_N++] = (uint8_t)(v & 127u);
++}
++static void rd_u(uint32_t v, int k)
++{
++    for (; k > 0; k--, v >>= 7)
++        rd_b(v);
++}
++#endif
++/* the header (status < 0: a notification of kind -1 - status) and the crc; then out */
++__attribute__((noinline)) static void rd_send(int op, uint32_t sq, int status)
++{
++    static const uint8_t h[5] = {0xF0, 0x7D, 0x44, 0x4E, 0x03};
++    uint32_t n = RD_N;
++    memcpy(RD_OUT, h, 5);
++    RD_N = 5;
++    rd_b((uint32_t)op);
++    rd_u(sq, 2);
++    rd_u(n - 10u, 2);
++    if (status < 0)
++        rd_u(rd.rev, 4), rd_b((uint32_t)(-1 - status));
++    else
++        rd_b((uint32_t)status), rd_u(rd.rev, 4);
++    RD_N = n;
++    rd_u(x0x_crc32(RD_OUT + 5, n - 5u), 5);
++    RD_OUT[RD_N++] = 0xF7;
++    rd_out(RD_OUT, RD_N);
++}
++#ifndef REMOTE_DNR3_OUTBUF
++/* ed_put7: per 7 bytes one byte of their high bits, then the 7 low parts */
++static void rd_put7(const uint8_t *s, uint32_t n)
++{
++    while (n) {
++        uint32_t k = n < 7u ? n : 7u, j, hi = 0;
++        for (j = 0; j < k; j++)
++            hi |= (uint32_t)(s[j] >> 7) << j;
++        rd_b(hi);
++        for (j = 0; j < k; j++)
++            rd_b(s[j]);
++        s += k;
++        n -= k;
++    }
++}
++static void rd_str(const char *s, int max)
++{
++    for (int k = 0; s && s[k] && k < max; k++)
++        rd_b((uint8_t)s[k]);
++    rd_b(0);
++}
++#endif
++static uint32_t rd_pcrc(int pat) { return x0x_crc32(&proj.pat[pat], sizeof(pattern_t)) & 0x3FFFu; }
++__attribute__((noinline)) static void rd_bytes(const volatile uint8_t *s, int n, int none)
++{
++    while (n-- > 0) {
++        uint32_t b = *s++;                         /* one snapshot of each ISR-owned byte */
++        rd_b(b < (uint32_t)none ? b : 127u);
++    }
++}
++__attribute__((noinline)) static void rd_cues(void) { rd_bytes(seq.ppat, NTRACKS, 128); rd_bytes(seq.pcue, NTRACKS, NPAT); }
++__attribute__((noinline)) static void rd_mutes(void) { rd_u(seq.mute, 5); rd_u(seq.vmute, 5); }
++
++/* ---- the panel's values (pref_t), checked before ui.c indexes a table with them ----------------
++ * 0: no such value, 1: the Remote may set it, 2: readable only (settings that write flash, change
++ * radios or run the device; 4.1) */
++__attribute__((noinline)) static int rd_pref_ok(unsigned kind, unsigned a, unsigned b, unsigned c)
++{
++    enum { G = 1, PA, FP, BB, SW, KP, BP, GN, BS, SL, BR, SP, SR, EN, RO = 0x80 };
++    static const uint8_t LIM[EN][3] = {    /* the highest a, b, c of each kind of address (255: any) */
++        {0}, {0, 0, 0}, {NPARTS - 1, 255, 255}, {NBASS - 1, 255, 255}, {255, NBASS - 1, 255},
++        {0, NPAT, 255}, {NKIT - 1, NPAT, 255}, {NBASS - 1, NPAT, 255}, {NBASS - 1, NPAT, NGEN - 1},
++        {255, NPAT, BRK_NSET - 1}, {1, NPAT, 255}, {255, NPAT, 255}, {NPARTS - 1, NSONG, 255}, {255, NSONG, 255}};
++    static const uint8_t KIND[R_NOTELOCK + 1] = {
++        [R_ENG] = EN, [R_SWING] = SW, [R_DLEN] = KP, [R_DRATE] = KP, [R_BLEN] = BP, [R_BRATE] = BP, [R_BDIR] = BP,
++        [R_BTRANS] = BP, [R_GEN] = GN, [R_BRKSET] = BS, [R_BRKSLICE] = SL, [R_BRKSLOT] = SL, [R_BRKRATE] = BR,
++        [R_SPAT] = SP, [R_SREP] = SR, [R_PARTON] = PA, [R_MIDICH] = PA | RO, [R_FREEPLAY] = FP, [R_BENGINE] = BB,
++        [R_BPRESET] = BB, [R_BPATSND] = BB, [R_BSTATUS] = BB | RO, [R_TEMPO] = G, [R_ACCENT] = G, [R_CLKOUT] = G,
++        [R_NOTEOUT] = G, [R_PALETTE] = G, [R_KEYLED] = G, [R_KEYSOUND] = G, [R_SBAR] = G, [R_SLEN] = G, [R_TAPE] = G,
++        [R_OUTLOUD] = G, [R_CKCH] = G, [R_FINETUNE] = G, [R_QUEUEMUTE] = G, [R_NOTELOCK] = G,
++        [R_AUTOSAVE] = G | RO, [R_STALLS] = G | RO, [R_BATT] = G | RO, [R_USBFULL] = G | RO, [R_BT] = G | RO,
++        [R_BTSTAT] = G | RO, [R_BTNAME] = G | RO, [R_CLKSRC] = G | RO, [R_SMC_ROLE] = G | RO, [R_SMC_MAP] = G | RO};
++    unsigned k = kind <= R_NOTELOCK ? KIND[kind] : 0u, l = k & 15u;
++    if (l == EN)
++        return a < NTARGETS && (int)b < engine_nvoices((int)a) && (int)c < engine_nparams((int)a, (int)b);
++    if (!l || a > LIM[l][0] || b > LIM[l][1] || c > LIM[l][2])
++        return 0;
++    return k & RO ? 2 : 1;
++}
++/* ui.c; e: kind, a, b, c. -1: no such value (or set and read only); *d: its descriptor */
++int ui_remote_pref(const uint8_t *e, int set, int v, const x0x_param_t **d);
++__attribute__((noinline)) static int rd_pget(const uint8_t *e, const x0x_param_t **d)
++{
++    *d = 0;
++    return rd_pref_ok(e[0], e[1], e[2], e[3]) ? ui_remote_pref(e, 0, 0, d) : -1;
++}
++
++/* ---- step records (4.2), the same bytes in and out --------------------------------------------
++ *   909/808: track (11 = accent row), on, vel (the T_VEL lane: get 0 = none; set 0 = none, 127 = keep)
++ *   303:     note, gate, accent, slide, velocity, end
++ *   BREAK:   on, slice (0 = the generator, 1..32; steps 0..15 only)
++ * the record length, -1 for a bad address */
++__attribute__((noinline)) static int rd_step_get(int part, int pat, int step, int track, uint8_t *rec)
++{
++    const pattern_t *p = &proj.pat[pat & (NPAT - 1)];
++    if ((unsigned)part >= NPARTS || (unsigned)pat >= NPAT || (unsigned)step >= NSTEPS)
++        return -1;
++    if (part < NKIT) {
++        int lane = motion_find(proj.arr.lane, pat, part, T_VEL, part << 4 | track, 0), v;
++        if ((unsigned)track > NDRUM)
++            return -1;
++        rec[0] = (uint8_t)track;
++        rec[1] = (uint8_t)sm_get(track == NDRUM ? p->drum[part].accent : p->drum[part].hit[track], step);
++        v = track < NDRUM && lane >= 0 ? proj.arr.lane[lane].val[step] : MOT_NONE;
++        rec[2] = (uint8_t)(v == MOT_NONE ? 0 : v);
++        return 3;
++    }
++    if (part == PART_BRK) {
++        if (step >= 32)
++            return -1;
++        rec[0] = (uint8_t)(p->brk.steps >> step & 1u);
++        rec[1] = step < 16 ? p->brk.slice[step] : 0;
++        return 2;
++    }
++    {
++        const bstep_t *s = &p->bass[part - NKIT].step[step];
++        rec[0] = s->note & 127u;
++        rec[1] = (uint8_t)bstep_gate(s);
++        rec[2] = !!(s->flags & BS_ACCENT);
++        rec[3] = !!(s->flags & BS_SLIDE);
++        rec[4] = s->velocity & 127u;
++        rec[5] = (uint8_t)(s->flags >> BS_END_SHIFT);
++        return 6;
++    }
++}
++/* 0 written, RS_BAD a bad record, RS_FULL no room for a velocity lane or the note's sound */
++__attribute__((noinline)) static int rd_step_set(int part, int pat, int step, const uint8_t *rec)
++{
++    pattern_t *p = &proj.pat[pat & (NPAT - 1)];
++    uint8_t now[6];
++    if (rd_step_get(part, pat, step, rec[0], now) < 0)
++        return RS_BAD;
++    if (part < NKIT) {                                    /* as the SEQ pads and drum_vel_*_step */
++        int t = rec[0], voice = part << 4 | t, lane = motion_find(proj.arr.lane, pat, part, T_VEL, voice, 0);
++        uint32_t *w = (t == NDRUM ? p->drum[part].accent : p->drum[part].hit[t]) + (step >> 5), m = 1u << (step & 31);
++        if (rec[1] > 1u)
++            return RS_BAD;
++        if (t < NDRUM && rec[1] && rec[2] && rec[2] < 127u) {
++            if (lane < 0 && (lane = motion_alloc(proj.arr.lane, pat, part, T_VEL, voice, 0)) < 0)
++                return RS_FULL;
++            proj.arr.lane[lane].val[step] = rec[2];
++        } else if (t < NDRUM && lane >= 0 && (!rec[1] || !rec[2])) {
++            lane_t *l = &proj.arr.lane[lane];
++            int j, any = 0;
++            l->val[step] = MOT_NONE;
++            for (j = 0; j < NSTEPS; j++)
++                any |= l->val[j] != MOT_NONE;
++            if (!any)
++                engine_motion_clear(lane);
++        }
++        *w = rec[1] ? *w | m : *w & ~m;
++    } else if (part == PART_BRK) {
++        if (rec[0] > 1u || rec[1] > 32u || (step >= 16 && rec[1]))
++            return RS_BAD;
++        if (step < 16)
++            p->brk.slice[step] = rec[1];
++        p->brk.steps = rec[0] ? p->brk.steps | 1u << step : p->brk.steps & ~(1u << step);
++    } else {                                              /* as bass_write */
++        int b = part - NKIT;
++        bstep_t *s = &p->bass[b].step[step];
++        if (rec[1] > G_TIE || (rec[2] | rec[3]) > 1u || rec[5] > 15u)
++            return RS_BAD;
++#if X0X_BASS_NOTE_SOUND
++        if (rec[1] == G_NOTE && now[1] != G_NOTE && engine_bass_note_capture(proj.arr.lane, pat, b, step, &proj.sound) < 0)
++            return RS_FULL;
++        if (rec[1] != G_NOTE)
++            bass_note_clear(proj.arr.lane, pat, b, step);
++#endif
++        if (now[0] != rec[0] || now[1] != rec[1])
++            (void)held_chord_set(proj.arr.lane, pat, b, step, 0, 0);   /* a chord follows its own key gestures */
++        s->velocity = rec[4];
++        s->note = rec[0];
++        s->flags = (uint8_t)(rec[1] | (rec[2] ? BS_ACCENT : 0u) | (rec[3] ? BS_SLIDE : 0u) | rec[5] << BS_END_SHIFT);
++    }
++    ui.dirty = 1;                                         /* SAVE has work to do; the change is the Remote's */
++    remote_touch(RN_STEP, (uint32_t)part | (uint32_t)pat << 8 | (uint32_t)step << 16);
++    return 0;
++}
++__attribute__((noinline)) static int rd_step(int part, int pat, int step, int track)
++{
++    uint8_t r[6];
++    int n = rd_step_get(part, pat, step, track, r);
++    rd_b((uint32_t)part); rd_b((uint32_t)pat); rd_b((uint32_t)step);
++    for (int i = 0; i < n; i++)
++        rd_b(r[i]);
++    return n;
++}
++
++/* ---- notifications (only to the lease holder, for its WATCH bits) ------------------------------ */
++__attribute__((noinline)) void remote_dnr3_tick(uint32_t now)
++{
++    const x0x_param_t *d;
++    int k, v;
++    rd_lease(now);
++    if (!rd.active) {
++        rd.pend = rd.np = 0;
++        return;
++    }
++    for (k = 0; k < NTRACKS; k++) {                       /* POSITION: not a state change, no rev */
++        uint8_t p = seq.playing ? seq.t[k].pos & 127u : 127u;
++        if (p != rd.pos[k])
++            rd.pos[k] = p, rd.pend |= 1u << RN_POSITION;
++    }
++    if (now - rd.last_tx < RD_GAP_MS)
++        return;
++    for (k = 0; k < RN_N; k++) {
++        if (!(rd.pend >> k & 1u))
++            continue;
++        rd.pend &= (uint8_t)~(1u << k);
++        if (!(rd.watch & RD_WBIT(k))) {
++            if (!k)
++                rd.np = 0;
++            continue;
++        }
++        RD_N = RD_HEAD;
++        if (k == RN_PARAM) {
++            const uint8_t *e = (const uint8_t *)rd.par;   /* little-endian: kind, a, b, c */
++            v = rd_pget(e, &d);
++            rd_bytes(e, 4, 128);
++            rd_u(v < 0 ? 0x3FFFu : (uint32_t)v, 2);
++            rd.par[0] = rd.par[1], rd.par[1] = rd.par[2], rd.par[2] = rd.par[3];
++            if (--rd.np)
++                rd.pend |= 1u << RN_PARAM;
++        } else if (k == RN_STEP) {
++            rd_bytes((const uint8_t *)&rd.step, 3, 128);
++            v = rd.step >> 8 & 255u;
++            rd_u(v < NPAT ? rd_pcrc(v) : 0x3FFFu, 2);
++        } else if (k == RN_TRANSPORT) {
++            rd_b((uint32_t)rd_playing()); rd_u(rd_bpm10(), 2); rd_b(seq.clk_src);
++        } else if (k == RN_MUTE) {
++            rd_mutes(); rd_b(seq.part_off);
++        } else if (k == RN_POSITION)
++            rd_bytes(rd.pos, NTRACKS, 128);
++        else
++            rd_cues();                                    /* CUE, PATTERN */
++#if X0X_REMOTE_BLE
++        rd_wire = rd_lease_wire;
++#endif
++        rd_send(0x7F, 0, -1 - k);
++        rd.last_tx = now;
++        return;
++    }
++}
++
++/* ---- requests --------------------------------------------------------------------------------- */
++#ifndef REMOTE_DNR3_OUTBUF
++__attribute__((noinline)) static uint32_t rd_g(const uint8_t *a, int k)
++{
++    uint32_t v = 0;
++    while (k--)
++        v = v << 7 | a[k];
++    return v;
++}
++#endif
++/* 1 + the payload bytes a request needs (0: no such op); 0x40: a lease op (epoch first), 0x80: a write */
++#define RL 0x40u
++#define RW 0xC0u
++static const uint8_t RD_OPS[RD_STATE + 1] = {
++    [RD_HELLO] = 2, [RD_OPEN] = 5, [RD_KEEP] = RL | 5, [RD_CLOSE] = RL | 5, [RD_WATCH] = RL | 9,
++    [RD_DESCRIBE] = 5, [RD_PGET] = 2, [RD_PSET] = RW | 13, [RD_SGET] = 4, [RD_SSET] = RW | 10, [RD_PART] = RW | 10,
++    [RD_DUMP] = 5, [RD_CUE] = RW | 7, [RD_TRANSPORT] = RW | 6, [RD_TEMPO] = RW | 7, [RD_MUTE] = RW | 8, [RD_STATE] = 1};
++
++static int rd_pset(const uint8_t *q)
++{
++    const x0x_param_t *d;
++    int v;
++    if ((v = rd_pget(q, &d)) < 0)
++        return RS_BAD;
++    if (rd_pref_ok(q[0], q[1], q[2], q[3]) > 1)
++        return RS_UNSUPPORTED;
++    if (rd_g(q + 4, 2) != 0x3FFFu && rd_g(q + 4, 2) != (uint32_t)v)
++        return RS_CONFLICT;
++    if ((v = ui_remote_pref(q, 1, (int)rd_g(q + 6, 2), &d)) < 0)
++        return RS_UNSUPPORTED;                        /* read only here (a performance value, BSTATUS) */
++    rd_bytes(q, 4, 128);
++    rd_u((uint32_t)v, 2);
++    return 0;
++}
++
++__attribute__((noinline)) static int rd_op(uint32_t op, const uint8_t *a, uint32_t len)
++{
++    const uint8_t *q = a + 4;                             /* a write's fields, after its epoch */
++    const x0x_param_t *d;
++    int k, v;
++    switch (op) {
++    case RD_HELLO: {
++        static const uint8_t t[8] = {RD_CAPS & 127u, RD_CAPS >> 7, 0, 0, NPAT, NSTEPS, NDRUM, NKIT};
++        static const uint8_t sha[20] = X0X_DNR3_GIT_SHA_BYTES;
++        if (a[0] != 3u)
++            return RS_UNSUPPORTED;
++        rd_b(3);
++        rd_b(0);
++        rd_put7(sha, 20);
++#if defined(X0X_HOST)
++        rd_b(3);
++#elif defined(SMK_MODEL)
++        rd_b(SMK_MODEL[7] == 'E' ? 1u : 2u);
++#else
++        rd_b(0);
++#endif
++        rd_bytes(t, 8, 128);                              /* caps u28, NPAT, NSTEPS, drum tracks, drum machines */
++        rd_b((uint32_t)rd_clip()); rd_b(seq.clk_src); rd_b(1000u / RD_GAP_MS);
++        return 0;
++    }
++    case RD_OPEN:
++        if (rd.active && (rd_g(a, 4) != rd.client
++#if X0X_REMOTE_BLE
++                          || rd_wire != rd_lease_wire
++#endif
++                         ))         /* another client's lease is live */
++            return RS_BUSY;
++        rd.client = rd_g(a, 4);
++        rd.epoch = (rd.epoch + 1u + (plat_ms() << 3)) & 0x0FFFFFFFu;
++        rd.epoch += !rd.epoch;
++        rd.active = 1;
++#if X0X_REMOTE_BLE
++        rd_lease_wire = rd_wire;
++#endif
++        rd.watch = rd.clen = 0;
++        rd.deadline = plat_ms() + RD_LEASE_MS;
++        rd_u(rd.epoch, 4);
++        rd_u(RD_LEASE_MS, 2);
++        return 0;
++    case RD_CLOSE:
++        rd.active = 0;
++        /* fall through */
++    case RD_KEEP:
++        return 0;
++    case RD_WATCH:
++        rd.watch = (uint8_t)(rd_g(q, 4) & RD_WATCHABLE);
++        rd_u(rd.watch, 4);
++        return 0;
++    case RD_DESCRIBE: {
++        if (rd_pget(a, &d) < 0)
++            return RS_UNSUPPORTED;
++        rd_str(d->name, 6);
++        rd_u(d->max, 2);
++        rd_u(d->def, 2);
++        rd_b(0);                                          /* unit: the Remote formats it */
++        v = d->names && d->max < 32u ? d->max + 1 : 0;    /* more switch names than fit: numbers */
++        rd_b((uint32_t)v);
++        for (k = 0; k < v; k++)
++            rd_str(d->names[k], 5);
++        return 0;
++    }
++    case RD_PGET:
++        if (!a[0] || a[0] > 16u || len < 1u + 4u * a[0])
++            return RS_BAD;
++        rd_b(a[0]);
++        for (k = 0; k < a[0]; k++) {
++            const uint8_t *e = a + 1 + 4 * k;
++            v = rd_pget(e, &d);
++            rd_bytes(e, 4, 128);
++            rd_u(v < 0 ? 0x3FFFu : (uint32_t)v, 2);       /* 0x3FFF, max 0: not a value here */
++            rd_u(v < 0 ? 0u : d->max, 2);
++        }
++        return 0;
++    case RD_PSET:
++        if (len == 12u)                                  /* legacy parameter writes */
++            return rd_pset(q);
++        if (len != 13u || q[0] != R_ENG || q[1] != T_303 || q[2] >= NBASS || q[8] > ORIGINAL_SOUND_JUNO)
++            return RS_BAD;
++        /* Match the active engine, not R_BENGINE's requested bank. Keep the
++         * descriptor, compare-and-set and readback on that same audio owner.
++         * A queued preset (even in the same bank) may replace the whole cell. */
++        engine_bass_edit_hold(1);
++        if (engine_bass_preset_pending(q[2]))
++            v = RS_BUSY;
++        else if (engine_bass_bank(q[2]) != q[8])
++            v = RS_CONFLICT;
++        else {
++            const uint8_t *cell = proj.sound.v[T_303][q[2]];
++            /* The persisted engine kind is byte 29 (original_sound.h).
++             * Use a non-mutating check; legacy project adoption is not an edit. */
++            v = cell[29] == q[8] && original_sound_valid(cell) ? rd_pset(q) : RS_BUSY;
++        }
++        engine_bass_edit_hold(0);
++        return v;
++    case RD_SGET:                                         /* a 4th byte: the drum track (default 0) */
++        return rd_step(a[0], a[1], a[2], len > 3u ? a[3] : 0) < 0 ? RS_BAD : 0;
++    case RD_SSET: {
++        int part = q[0], need = part < NKIT ? 3 : part == PART_BRK ? 2 : 6;
++        if (len < 9u + (uint32_t)need || (unsigned)q[1] >= NPAT)
++            return RS_BAD;
++        if (rd_g(q + 3, 2) != 0x3FFFu && rd_g(q + 3, 2) != rd_pcrc(q[1]))
++            return RS_CONFLICT;
++        if ((k = rd_step_set(part, q[1], q[2], q + 5)) != 0)
++            return k;
++        rd_step(part, q[1], q[2], q[5]);
++        rd_u(rd_pcrc(q[1]), 2);
++        return 0;
++    }
++    case RD_PART: {
++        /* field: 0 len 1..64, 1 rate RATE_*, 2 dir (303), 3 transpose (303), 4 swing (909) */
++        static const uint8_t KIND[3][5] = {{R_DLEN, R_DRATE, 0, 0, R_SWING}, {R_BLEN, R_BRATE, R_BDIR, R_BTRANS, 0},
++                                           {0, R_BRKRATE, 0, 0, 0}};
++        uint8_t e[4];
++        int part = q[0], f = q[2], kind;
++        if ((unsigned)part >= NTRACKS || (unsigned)q[1] >= NPAT || f > 4)
++            return RS_BAD;
++        kind = KIND[part < NKIT ? 0 : part == PART_BRK ? 2 : 1][f];
++        if (!kind || (kind == R_SWING && part))
++            return RS_UNSUPPORTED;
++        e[0] = (uint8_t)kind, e[1] = (uint8_t)(kind == R_SWING || kind == R_BRKRATE ? 0 : part < NKIT ? part : part - NKIT);
++        e[2] = (uint8_t)(q[1] + 1), e[3] = 0;
++        v = (int)rd_g(q + 3, 2) - !f;                     /* len: the pref counts from 0 */
++        _Static_assert(RATE_16 == 0 && RATE_4 == RATE_8 + 1, "R_BRKRATE: 0 16th, 1 8th, 2 4th");
++        if (kind == R_BRKRATE)
++            v = !v ? 0 : v == RATE_8 || v == RATE_4 ? v - (RATE_8 - 1) : -1;
++        if (rd_pget(e, &d) < 0 || v < 0 || v > d->max)
++            return RS_BAD;
++        v = ui_remote_pref(e, 1, v, &d) + !f;
++        if (kind == R_BRKRATE && v)
++            v += RATE_8 - 1;
++        rd_bytes(q, 3, 128);
++        rd_u((uint32_t)v, 2);
++        return 0;
++    }
++    case RD_DUMP: {
++        uint32_t off = rd_g(a + 1, 2), c = a[3];
++        if (a[0] >= NPAT || c > 112u || off > sizeof(pattern_t))
++            return RS_BAD;
++        if (c > sizeof(pattern_t) - off)
++            c = sizeof(pattern_t) - off;
++        rd_b(a[0]);
++        rd_u(off, 2);
++        rd_u(sizeof(pattern_t), 2);
++        rd_b(c);
++        rd_put7((const uint8_t *)&proj.pat[a[0]] + off, c);
++        rd_u(rd_pcrc(a[0]), 2);
++        return 0;
++    }
++    case RD_CUE:
++        if ((q[0] >= NTRACKS && q[0] != 127u) || (q[1] >= NPAT && q[1] != 127u))
++            return RS_BAD;
++        if (q[1] < NPAT)
++            seq_chain(&seq, 0, 0);                        /* as the PRESET encoder: a cue ends a chain */
++        for (k = 0; k < NTRACKS; k++)
++            if (q[0] == 127u || q[0] == k)
++                seq.pcue[k] = q[1] < NPAT ? q[1] : 0xFFu;
++        rd_bytes(q, 2, 128);
++        rd_cues();
++        return 0;
++    case RD_TRANSPORT:                                    /* the PLAY key's requests, plus CONTINUE */
++        if (q[0] > 2u)
++            return RS_BAD;
++        if (seq.clk_src == SEQ_CLK_EXT && seq.ext)        /* an external clock runs it: FA/FB/FC */
++            return RS_DENIED;
++        if (!q[0]) {
++            if (rd_playing())
++                seq_stop(&seq);
++        } else if (!rd_playing()) {
++            memset(bass_rec_step, 0, sizeof bass_rec_step);
++            if (q[0] == 1) {
++                seq.song_start = ui.song_sel < song()->len ? ui.song_sel : 0;
++                seq_start(&seq);
++            } else
++                seq_continue(&seq);
++        }
++        rd_b((uint32_t)rd_playing());
++        return 0;
++    case RD_TEMPO:
++        v = (int)rd_g(q, 2);
++        if (v < 200 || v > 3000)
++            return RS_BAD;
++        seq.bpm = (float)v / 10.0f;
++        ui.dirty = 1;
++        rd_u(rd_bpm10(), 2);
++        return 0;
++    case RD_MUTE: {
++        /* bit: MUTE_* (0 .. MUTE_BRK: the drum voices, the 303s, BREAK); queued: the next 909 bar */
++        uint32_t m = 1u << (q[0] & 31u), want = q[1] ? m : 0u;
++        if (q[1] > 1u || q[2] > 1u || q[0] > MUTE_BRK)
++            return RS_BAD;
++        seq.mute_q &= ~m;                                 /* mute_q: bits that flip at the bar */
++        if (!q[2])
++            seq.mute = (seq.mute & ~m) | want;
++        else if ((seq.mute & m) != want)
++            seq.mute_q |= m;
++        rd_mutes();
++        return 0;
++    }
++    default:                                              /* RD_STATE */
++        rd_b((uint32_t)rd_playing()); rd_b(seq.clk_src); rd_b((uint32_t)rd_clip()); rd_b(seq.send_notes);
++        rd_u(rd_bpm10(), 2);
++        rd_cues();
++        rd_mutes();
++        rd_b(seq.part_off); rd_b(seq.song_on); rd_u(seq.song_pos, 2);
++        rd_bytes(seq.ch, NTRACKS, 16);
++        for (k = 0; k < NTRACKS; k++)
++            rd_b(seq.playing ? seq.t[k].pos : 127u);
++        for (k = 0; k < NPAT; k++)
++            rd_u(rd_pcrc(k), 2);
++        return 0;
++    }
++}
++
++/* p: the frame without F0/F7. 0: a DNR frame (answered or dropped), -1: not one (the editor's, OTA) */
++#if X0X_REMOTE_BLE
++__attribute__((noinline)) int remote_dnr3_frame_on(const uint8_t *p, uint32_t n, uint32_t wire)
++#else
++__attribute__((noinline)) int remote_dnr3_frame(const uint8_t *p, uint32_t n)
++#endif
++{
++    uint32_t i = 0, op, sq, len = 0, crc = 0, f = 0;
++    int st;
++    if (n < 4u || p[0] != 0x7Du || p[1] != 0x44u || p[2] != 0x4Eu)
++        return -1;
++    if (n < 7u || p[4] > 0x3Fu || p[5] > 0x7Fu || p[6] > 0x7Fu)
++        return 0;                                         /* no readable op/seq (or a reply/notify echo): dropped */
++#if X0X_REMOTE_BLE
++    rd_wire = wire;
++#endif
++    op = p[4];
++    sq = rd_g(p + 5, 2);
++    st = p[3] == 2u ? RS_UNSUPPORTED : RS_BAD;            /* DNR2: the old page fails clearly; other majors: header */
++    if (p[3] != 3u)
++        goto reply;
++    while (i < n && p[i] < 0x80u)
++        i++;
++    if (i < n || n < 14u || n > 254u)
++        goto reply;                                       /* range, length */
++    len = rd_g(p + 7, 2);
++    crc = x0x_crc32(p + 4, n - 9u);
++    if (len != n - 14u || crc != rd_g(p + n - 5u, 5))
++        goto reply;                                       /* length, crc */
++    f = RD_OPS[op <= RD_STATE ? op : 2u];                 /* (op 2: none) */
++    st = RS_UNSUPPORTED;
++    if (!f)
++        goto reply;
++    st = RS_BAD;
++    if (len + 1u < (f & 63u))
++        goto reply;
++    if (f & 0x80u && rd.clen && rd.cop == op && rd.cseq == sq && rd.ccrc == crc
++#if X0X_REMOTE_BLE
++        && rd_wire == rd_lease_wire
++#endif
++       ) {
++        rd_out(rd.cache, rd.clen);               /* an exact retry: the same reply, no second write */
++        return 0;
++    }
++    rd_lease(plat_ms());                                  /* panel edits first: rev and expect are current */
++    st = RS_BUSY;
++    if ((f & 0x80u || op == RD_OPEN) && REMOTE_DNR3_BUSY())
++        goto reply;
++    if (f & 0x40u) {
++#if X0X_REMOTE_BLE
++        if (rd_wire != rd_lease_wire) goto denied;
++#endif
++        st = !rd.active ? RS_DENIED : rd_g(p + 9, 4) != rd.epoch ? RS_STALE : RS_OK;
++        if (st)
++            goto reply;
++        rd.deadline = plat_ms() + RD_LEASE_MS;            /* any write or KEEPALIVE renews */
++    }
++    RD_N = RD_HEAD;
++    st = rd_op(op, p + 9, len);
++    rd_sync();
++reply:
++    if (st)
++        RD_N = RD_HEAD;
++    rd_send((int)(op | 0x40u), sq, st);
++    if (!st && f & 0x80u && RD_N <= sizeof rd.cache) {
++        memcpy(rd.cache, RD_OUT, RD_N);
++        rd.clen = (uint8_t)RD_N;
++        rd.cop = (uint8_t)op;
++        rd.cseq = (uint16_t)sq;
++        rd.ccrc = crc;
++    }
++    return 0;
++#if X0X_REMOTE_BLE
++denied:
++    st = RS_DENIED;
++    goto reply;
++#endif
++}
++
++#if X0X_REMOTE_BLE
++int remote_dnr3_frame(const uint8_t *p, uint32_t n)
++{
++    return remote_dnr3_frame_on(p, n, 0);
++}
++#endif
+diff --git a/firmware/src/app/remote_dnr3.h b/firmware/src/app/remote_dnr3.h
+new file mode 100644
+index 0000000000000000000000000000000000000000..ad38a42e5c5aec2167d0acacf3ba4cf127630d77
+--- /dev/null
++++ b/firmware/src/app/remote_dnr3.h
+@@ -0,0 +1,21 @@
++/* SPDX-License-Identifier: GPL-3.0-only */
++/* DNR3 Remote protocol (REMOTE-FW-PROTOCOL v3.0): the firmware's entry points. The platform (usb.c on
++ * the device, the host harness or the web emulator) supplies remote_dnr3_out(). */
++#pragma once
++#include <stdint.h>
++
++/* 1: the firmware answers DNR3. host/x0x_host.c and x0x.c turn it on before ui.c; other units that
++ * pull ui.c or editor.c alone (host fixtures) keep it off and need no remote_dnr3.c. */
++#ifndef X0X_REMOTE_DNR3
++#define X0X_REMOTE_DNR3 0
++#endif
++
++int remote_dnr3_frame(const uint8_t *p, uint32_t n);    /* p: a SysEx frame without F0/F7. 0 handled, -1 not DNR */
++int remote_dnr3_frame_on(const uint8_t *p, uint32_t n, uint32_t wire); /* nonzero: BLE link epoch */
++void remote_dnr3_tick(uint32_t now_ms);                 /* main loop: lease, revision, notifications */
++void remote_dnr3_out(const uint8_t *frame, uint32_t n); /* platform: send one frame F0 .. F7, n <= 256 */
++/* firmware: a state change (main loop only). kind = NOTIFY kind, at = its address, one byte each from
++ * bit 0 (0 PARAM: kind,a,b,c, a pref_t; 1 STEP: part,pat,step; 127 = any); REMOTE_TOUCH_ALL: everything,
++ * the Remote re-reads. Rev bumps once per main-loop pass however many sites touch. */
++void remote_touch(int kind, uint32_t at);
++#define REMOTE_TOUCH_ALL 127
+diff --git a/firmware/src/app/ui.c b/firmware/src/app/ui.c
+index 22b0c236138ca19217b8927501392cb2257e5cc8..22f8c3300bbc9d883b12c9e4c884e4d16fb5f0dc 100644
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -277,7 +277,17 @@ static int division_pad_index(void);
+ static const char *division_pad_label(void);
+ 
+ /* something the project keeps changed: SAVE (or the autosave) has work to do */
+-static void mark_dirty(void) { ui.dirty = 1; }
++/* DNR3 Remote (app/remote_dnr3.c, after this file in the unit): every project edit is one remote_touch,
++ * a pref write a PARAM one (pref_dirty), the rest the part's steps. */
++#include "remote_dnr3.h"
++#if X0X_REMOTE_DNR3
++#define REMOTE_EDIT() remote_touch(1, ui.part | 0x7F7F00u)
++#define REMOTE_ALL() remote_touch(REMOTE_TOUCH_ALL, 0)
++#else
++#define REMOTE_EDIT() ((void)0)
++#define REMOTE_ALL() ((void)0)
++#endif
++static void mark_dirty(void) { ui.dirty = 1; REMOTE_EDIT(); }
+ 
+ static uint8_t save_wait;
+ static void live_boundary(int entry);
+@@ -814,6 +824,14 @@ static void ui_restore_base(int target, int voice, int parameter)
+     engine_set(target,voice,parameter,proj.sound.v[target][voice][parameter]);
+ }
+ 
++/* a pref write: SAVE has work to do; the Remote hears the value (PARAM) */
++__attribute__((noinline)) static void pref_dirty(const pref_t *r)
++{
++    ui.dirty = 1;
++#if X0X_REMOTE_DNR3
++    remote_touch(0, (uint32_t)r->kind | (uint32_t)r->a << 8 | (uint32_t)r->b << 16 | (uint32_t)r->c << 24);
++#endif
++}
+ X0X_COLD static void pref_set_impl(pref_t r, int v, int from_keyboard)
+ {
+ #if X0X_ARP_HOOKS
+@@ -854,11 +872,11 @@ X0X_COLD static void pref_set_impl(pref_t r, int v, int from_keyboard)
+         }
+         if (!from_keyboard) bass_layout_note_remote_edit(r.b);
+         else bass_layout_accept();
+-        mark_dirty();
++        pref_dirty(&r);
+         if (from_keyboard) build_pages();
+         return;
+     }
+-    mark_dirty();
++    pref_dirty(&r);
+     switch (r.kind) {
+     case R_ENG:
+         if (r.a == T_303) {
+@@ -2614,6 +2632,7 @@ static void do_undo(int redo)
+         ui.song_sel = song()->len;
+     build_pages();
+     mark_dirty();
++    REMOTE_ALL();                                    /* sound, song or patterns */
+     undo_name(lo, hi, t);
+     say(redo ? "REDO " : "UNDO ", t);
+ }
+@@ -6017,6 +6036,7 @@ static int step_of(int col) { return ui.spage * 16 + col; }
+ #define GX 27
+ static int32_t col_x(int c) { return GX + c * 13 + (c >> 2); }   /* a pixel between beats */
+ 
++static UI_DRAW void dv_body_pictogram(int t,int v,int x,int y,float scale,float env,uint16_t col);
+ #define DROW 11                                    /* drum rows: 12 of them over both bands, a gap under */
+ static UI_DRAW void draw_drum(int band)
+ {
+@@ -6028,14 +6048,21 @@ static UI_DRAW void draw_drum(int band)
+                       lock_marks(T_PROB, k << 4 | ui.sel[k], ui.spage * 16);
+     for (v = 0; v <= NDRUM; v++) {
+         int y = v * DROW + 1 - band * BAND_H, sel = v < NDRUM && v == ui.sel[k];
+-        const char *nm = v < NDRUM ? engine_voice_name(k == PART_909 ? T_909 : T_808, v) : "AC";
+         const uint32_t *bits = v < NDRUM ? d->hit[v] : d->accent;
+         int muted = v < NDRUM && ((seq.mute | seq.vmute) & (1u << (k * NDRUM + v)));
+         if (y < -DROW || y >= BAND_H)
+             continue;
+         if (sel)
+             surface_panel(0,y-1,24,DROW,1,col,col,dim(col,5));
+-        cv_text(5, vc(&FONT_XS, y - 1, DROW - 1), &FONT_XS, nm, sel ? C_BLACK : muted ? C_LINE : v < NDRUM ? C_GRAY : C_WHITE);
++        if (v < NDRUM) {                               /* the voice's own R22 pictogram (guidelines §3), */
++            uint32_t age; float env = 0;               /* brightening with its sounding hit */
++            if (!engine_drum_view(k, v, &age, &env)) env = 0;
++            dv_body_pictogram(k == PART_909 ? T_909 : T_808, v, -21, y - 12, .26f, env, sel ? C_BLACK : muted ? C_LINE : C_GRAY);
++        } else                                         /* AC: the accent chevrons */
++            for (c = 0; c < 2; c++) {
++                cv_line(7, y + 5 + 3*c, 12, y + 1 + 3*c, C_WHITE);
++                cv_line(12, y + 1 + 3*c, 17, y + 5 + 3*c, C_WHITE);
++            }
+         for (c = 0; c < 16; c++) {
+             int s = step_of(c), x = col_x(c), hit = s < NSTEPS && sm_get(bits, s);
+             if (s >= len) {
+@@ -6801,6 +6828,20 @@ static UI_DRAW void draw_master_wave(void)
+     }
+ }
+ 
++/* Share the compressor scale and number formatting across the mix panels. */
++static UI_DRAW void mix_gr_meter(int y, int label_y, int height)
++{
++    rbox(208,y,7,61,3,C_LINE);
++    if (height > 1)
++        rbox(208,y,7,height>61?61:height,3,RGB(255,80,60));
++    cv_text(218,label_y,&FONT_T,"GR",C_GRAY);
++}
++
++static UI_DRAW void mix_number(char *out, const char *prefix, int value, const char *unit)
++{
++    put_s(put_i(put_s(out,prefix),value),unit);
++}
++
+ static UI_DRAW void draw_mix(int band)
+ {
+     int p, dm = drum_mix_page();
+@@ -6812,35 +6853,49 @@ static UI_DRAW void draw_mix(int band)
+     int page = ui.page[V_MIX][0];
+     int master = page == MIX_FIRST_KIT_PAGE + NKIT;
+     int wave = page > MIX_FIRST_KIT_PAGE + NKIT;
+-    /* MASTER peak history: fixed 98 columns. A scrolling ring rewrote every column each
+-     * frame, so cv_commit_rect sent nearly the whole main band (~18 ms SPI) — panel tear
+-     * ("broken" hist) and knob-strip lag (draw_knobs waits on that blit). Write-head
+-     * overwrite + wall-clock sample keeps geometry stable and dirties ~one column. */
+-    if (band == 0 && master) {
+-        enum { HIST_N = 98, HIST_MS = 20 };             /* ~2 s window; never shrink width */
++    /* One MASTER panel for peak history and compressor gain reduction.
++     * Retain the fixed write head: shifting the history repaints the whole
++     * LCD band and delays the knob strip. */
++    if (master) {
++        int o = HDR_H + band * BAND_H;
++        rbox(3, 40 - o, 234, 121, UI_PANEL_RADIUS, SOUND_FACE);
++        int gr = (int)(engine_gr_db() + 0.5f);
++        enum { HIST_N = 98, HIST_MS = 20 };
+         static uint8_t hist[HIST_N];
+-        static uint32_t hw, hist_ms;                    /* hw was uint8_t: ring broke every 256 */
++        static uint32_t hw, hist_ms;
+         static uint16_t peak_hold;
+-        int x, pk = 0;
+-        uint32_t now = plat_ms();
+-        for (p = 0; p < NPARTS; p++)
+-            pk = eng_peak[p] > pk ? eng_peak[p] : pk;
+-        if ((uint16_t)pk > peak_hold)
+-            peak_hold = (uint16_t)pk;
+-        if (!hist_ms || (int32_t)(now - hist_ms) >= HIST_MS) {
+-            hist[hw % (uint32_t)HIST_N] = (uint8_t)(peak_hold * 62 / 32768);
+-            hw++;
+-            peak_hold = 0;
+-            hist_ms = now;                             /* one column per paint when overdue */
++        if (!band) {
++            uint32_t now = plat_ms();
++            for (p = 0; p < NPARTS; p++)
++                if (eng_peak[p] > peak_hold)
++                    peak_hold = eng_peak[p];
++            if (!hist_ms || (int32_t)(now - hist_ms) >= HIST_MS) {
++                hist[hw % (uint32_t)HIST_N] = (uint8_t)(peak_hold * 62 / 32768);
++                hw++;
++                hist_ms = now;
++                peak_hold = 0;
++            }
+         }
+-        for (x = 0; x < HIST_N; x++) {
+-            int h = hist[x];
+-            cv_rect(4 + x * 2, 66 - h, 2, h + 1, part_col());
++        uint16_t col = part_col();
++        for (int x = 0; x < HIST_N; x++)
++            cv_rect(4 + x * 2, 106 - hist[x] - o, 2, hist[x] + 1, col);
++        mix_gr_meter(45 - o, 43 - o, gr > 24 ? 61 : gr * 61 / 24);
++        if (band) {
++            char text[16];
++            cv_text(10, 116 - o, &FONT_T, "COMP REDUCTION", C_GRAY);
++            mix_number(text, gr ? "-" : "", gr, "dB");
++            cv_text(10, 128 - o, &FONT_S, text, SOUND_WHITE);
++            unsigned load = plat_cpu_pct();
++            mix_number(text, "CPU ", (int)load, "%");
++            cv_text(10, 149 - o, &FONT_T, text, load > 85u ? C_AMB : C_GRAY);
++            if (engine_guard_active())
++                text_r(232, 149 - o, &FONT_T, "GUARD", C_AMB);
+         }
++        return;
+     }
+     if (band == 0 && wave)
+         draw_master_wave();
+-    if (band == 0 && !master && !wave) {               /* channel strips */
++    if (band == 0 && !wave) {                          /* channel strips */
+         for (int pos = 0; pos < NPARTS; pos++) {
+             p = part_at(pos);
+             int x = 6 + pos * 38, lvl = proj.sound.v[T_MIX][p][0], pk = eng_peak[p] * 64 / 32768;
+@@ -6853,31 +6908,24 @@ static UI_DRAW void draw_mix(int band)
+             rbox(x + 4, 67 - lvl * 64 / 127, 18, 3, 1, C_WHITE);
+         }
+     }
+-    if (band == 0) {                                   /* the master's gain reduction (MASTER and WAVE) */
+-        {
+-            int gr = (int)(engine_gr_db() * 64.0f / 24.0f);
+-            gr = gr > 64 ? 64 : gr;
+-            night_panel(205,1,32,66,0);
+-            rbox(208,5,7,61,3,C_LINE);
+-            if (gr > 1)
+-                rbox(208,5,7,gr>61?61:gr,3,RGB(255,80,60));
+-            cv_text(218,4,&FONT_T,"GR",C_GRAY);
+-        }
++    if (band == 0) {
++        night_panel(205,1,32,66,0);
++        mix_gr_meter(5, 4, (int)(engine_gr_db() * 64.0f / 24.0f));
+     } else {
+         char t[24], a[12], u[8], *q;
+         if(wave) {
+             night_panel(3,3,114,34,0);
+             cv_text(9,6,&FONT_T,"WET GR",C_GRAY);
+-            if(engine_gr_db()>0.5f)put_s(put_i(put_s(t,"-"),(int)(engine_gr_db()+0.5f))," dB");
++            if(engine_gr_db()>0.5f)mix_number(t,"-",(int)(engine_gr_db()+0.5f)," dB");
+             else put_s(t,"0 dB");
+             cv_text(9,20,&FONT_S,t,C_WHITE);
+             night_panel(3,42,234,24,0);
+-            put_s(put_i(put_s(t,"AUDIO LOAD "),(int)plat_cpu_pct()),"%");
++            mix_number(t,"AUDIO LOAD ",(int)plat_cpu_pct(),"%");
+             cv_text(9,49,&FONT_XS,t,plat_cpu_pct()>85u?C_AMB:C_GRAY);
+             if(engine_guard_active())text_r(229,49,&FONT_XS,"GUARD",C_AMB);
+             return;
+         }
+-        if (!master && !wave) {                        /* strip names: full words unless two neighbours collide */
++        if (!wave) {                                   /* strip names: full words unless two neighbours collide */
+             const char *nm[NPARTS];
+             mix_strip_names(nm);
+             for (int pos = 0; pos < NPARTS; pos++) {
+@@ -6888,11 +6936,11 @@ static UI_DRAW void draw_mix(int band)
+         night_panel(0,14,118,31,0);
+         night_panel(0,46,240,22,0);
+         if ((int)(engine_gr_db() + 0.5f))
+-            put_s(put_i(put_s(t, "WET GR -"), (int)(engine_gr_db() + 0.5f)), "dB");
++            mix_number(t, "WET GR -", (int)(engine_gr_db() + 0.5f), "dB");
+         else
+             put_s(t, "WET GR 0dB");
+         cv_text(4, 20, &FONT_B, t, engine_gr_db() > 0.5f ? RGB(255, 110, 90) : C_GRAY);
+-        if (!master) {
++        {
+             night_panel(120,14,120,31,0);
+             pref_value(PR(R_ENG, T_MST, 0, MST_PUMP), a, u);
+             q = put_s(put_s(t, "PUMP "), a);
+@@ -8481,7 +8529,11 @@ static UI_DRAW int control_glyph(pref_t r,int val,int cx,uint16_t col)
+             if(val!=1){cv_line(right-6,32,right,38,col);cv_line(right,38,right-6,44,col);}
+             if(val!=0){cv_line(left+6,32,left,38,col);cv_line(left,38,left+6,44,col);}
+         }
+-    } else if(r.kind==R_ENG && r.a==T_FX && (r.c==FX_RV_TONE || r.c==FX_DL_TONE || r.c==FX_RV_HPF)) {
++    } else if(r.kind==R_ENG && r.a==T_FX && (r.c==FX_RV_HPF || r.c==FX_DL_HPF)) {
++        int knee=left+1+q*23/127; /* low shelf, upward cutoff, high passband */
++        cv_rect(left,47,37,1,C_LINE);
++        cv_line(left,46,knee,46,col);cv_line(knee,46,knee+6,32,col);cv_line(knee+6,32,right,32,col);
++    } else if(r.kind==R_ENG && r.a==T_FX && (r.c==FX_RV_TONE || r.c==FX_DL_TONE)) {
+         int pivot=left+7+q*20/127;
+         cv_rect(left,47,37,1,C_LINE);cv_line(left,32,pivot,32,col);cv_line(pivot,32,right,46,col);
+     } else if(d && d->names && d->max<12) {
+@@ -9656,6 +9708,7 @@ X0X_COLD void ui_project_end(int apply)
+         engine_brk_loops();
+         ui_init();
+         mark_dirty();                               /* reset/import are saved only by the ordinary save policy */
++        REMOTE_ALL();                               /* a new project: the Remote re-reads */
+         project_revision++;
+     } else {
+         memcpy(undo_shadow, (uint8_t *)&proj + UNDO_OFF, UNDO_BYTES);
+@@ -9877,4 +9930,18 @@ void ui_input_only(void) { input(); division_pad_input(); }
+ int ui_dirty(void) { return ui.dirty != 0; }
+ void ui_say(const char *a, const char *b) { say(a, b); }
+ 
+-
++#if X0X_REMOTE_DNR3
++/* DNR3 Remote (REMOTE-FW-PROTOCOL 4.1): the panel's own read and write of a pref_t value, so a Remote
++ * write takes the same path (undo, traces, bass edit hold, S1 patch). remote_dnr3.c checks the address
++ * and the kinds it may set first. The value is clamped to the descriptor; -1: no such value. */
++int ui_remote_pref(const uint8_t *e, int set, int v, const x0x_param_t **dp)   /* e: kind, a, b, c */
++{
++    pref_t r;
++    const x0x_param_t *d = *dp = pref_desc((memcpy(&r, e, 4), r));
++    if (!d || (set && pref_read_only(r)))
++        return -1;
++    if (set)
++        pref_set_impl(r, v, 0);                    /* clamps to the descriptor */
++    return pref_get(r);
++}
++#endif
+diff --git a/firmware/src/app/ui_break_layout_main.h b/firmware/src/app/ui_break_layout_main.h
+index 943a68bdb04427ab43177b07872825adb200f624..58e1e62fa673a5be23e1e0e264fa177a8254c876 100644
+--- a/firmware/src/app/ui_break_layout_main.h
++++ b/firmware/src/app/ui_break_layout_main.h
+@@ -84,6 +84,10 @@ static void break_layout_main(int band)
+     cv_text(10,vc(&FONT_T,147-off,10),&FONT_T,pg.title[cur_page()],col);
+     if(pg.n>1){q=put_i(t,cur_page()+1);put_i(put_s(q," / "),pg.n);text_r(230,vc(&FONT_T,147-off,10),&FONT_T,t,C_GRAY);}
+ }
++/* One BREAK sequence register for persistent metadata and every step lane.
++ * Ten-pixel two-digit advances need an eleven-pixel pitch for a real gutter. */
++static inline int break_seq_step_center(int step) {return 59 + step*11;}
++
+ static void break_layout_footer(void)
+ {
+     const brkpart_t *bp=&cur_pat()->brk;
+@@ -92,7 +96,7 @@ static void break_layout_footer(void)
+     int sequence=ui.view==V_SEQ;
+     if(count<1)count=1;
+     for(int i=0;i<16;i++){
+-        int x=sequence?64+i*10:9+i*14,on=(bp->steps>>i)&1u;char t[4];
++        int x=sequence?break_seq_step_center(i)-5:9+i*14,on=(bp->steps>>i)&1u;char t[4];
+         put_i(t,i+1);text_c(x+5,vc(&FONT_T,(sequence?211:214)-KNOB_Y,9),&FONT_T,t,C_GRAY);
+         if(bp->slice[i])put_i(t,(bp->slice[i]-1)%count+1);else put_s(t,"-");
+         text_c(x+5,vc(&FONT_T,(sequence?219:224)-KNOB_Y,9),&FONT_T,t,bp->slice[i]?(on?C_HI:C_DIM):C_DIM);
+diff --git a/firmware/src/app/ui_step_lane.inc b/firmware/src/app/ui_step_lane.inc
+index f1e081e5405b8a8f352c0528b6a2ee6d57a38cb5..137a4e08ca906fece5144f043e684ce77c50d8d4 100644
+--- a/firmware/src/app/ui_step_lane.inc
++++ b/firmware/src/app/ui_step_lane.inc
+@@ -164,11 +164,11 @@ static UI_DRAW void draw_step_lane(void)
+     /* BREAK's playback position remains visible even when the step is a rest. */
+     if(ui.part==PART_BRK && seq.playing) {
+         unsigned phase=eng_step[TRK_BRK];
+-        if(phase<16)cv_rect(67+phase*10,71,5,1,part_col());
++        if(phase<16)cv_rect(break_seq_step_center(phase)-2,71,5,1,part_col());
+     }
+     for(int c=0;c<16;c++) {
+         int maximum=snapshot.maximum,value=snapshot.value[c];
+-        int x=69+c*10;
++        int x=ui.part==PART_BRK?break_seq_step_center(c):69+c*10;
+         uint16_t ink=(snapshot.notes & (1u<<c))?part_col():SOUND_LINE;
+         cv_rect(x,72,1,8,SOUND_LINE);
+         if(value<0) {cv_rect(x-1,78,3,1,SOUND_GRAY);continue;}
+diff --git a/firmware/src/ble.c b/firmware/src/ble.c
+index c7f580ca0c9fc6dc84ebf690f2ea5150fb0229f2..ba27fff57980f3ad27c80dfc61525a27f6dd788e 100644
+--- a/firmware/src/ble.c
++++ b/firmware/src/ble.c
+@@ -13,7 +13,12 @@
+  * before. Service: the TIMER5 interrupt, next to usb_poll (2 kHz, never inside the render). */
+ #include "fm1_ble.h"
+ #include "fm1_supply.h"
++#if X0X_REMOTE_BLE
++static void ble_dnr3_reset(void);
++#define BLEH_LINK_RESET() ble_dnr3_reset()
++#endif
+ #include "ble/ble_midi_host.c"
++#undef BLEH_LINK_RESET
+ #include "ble/ble_midi_central.c"
+ #include "ble/ble_glue.h"
+ 
+@@ -112,7 +117,44 @@ extern void smk_apc_host_generic(uint8_t ble);
+ extern void smk_apc_ble_link(uint8_t connected, uint8_t notifying);
+ extern uint8_t smk_apc_ble_event(uint32_t pkt, uint8_t notifying);
+ #include "app/smk_inlog_profile.h"
++#if X0X_REMOTE_BLE
++static uint8_t ble_sx[254], ble_dnr3_tx[BLEH_SYSEX_MAX];
++static uint8_t ble_sx_n, ble_sx_over, ble_sx_reply, ble_sx_ch;
++static volatile uint8_t ble_dnr3_n;                 /* ISR publishes complete frames, editor owns until cleared */
++static volatile uint32_t ble_dnr3_wire = 1;
++static uint32_t ble_dnr3_rx_wire;
++static void ble_dnr3_reset(void)
++{
++    ble_dnr3_wire += 2u;                         /* odd generation never aliases USB (0) */
++    ble_sx_n = ble_sx_over = ble_sx_reply = 0;
++    /* A queued frame is immutable until the editor releases it. Old-wire
++     * input and output are ignored, even if the controller reuses a handle. */
++}
++static int ble_dnr3_live(uint32_t wire)
++{
++    return wire == ble_dnr3_wire && ble_up && ble_want &&
++           !ble_central_role && !smc_ble_role_get() && bleh_notifying(&ble_r.host.h);
++}
++static void ble_dnr3_out(uint32_t wire, const uint8_t *p, uint32_t n)
++{
++    uint32_t f = irq_save();                       /* TIMER5 owns bleh state and its union otherwise */
++    if (ble_dnr3_live(wire))
++        (void)bleh_sysex_send(&ble_r.host.h, p, n, (uint16_t)fm1_ms);
++    irq_restore(f);
++}
++static void ble_dnr3_service(void)
++{
++    uint32_t n = ble_dnr3_n;
++    if (!n) return;
++    RING_PUBLISH();
++    uint32_t wire = ble_dnr3_rx_wire;
++    if (ble_dnr3_live(wire)) (void)remote_dnr3_frame_on(ble_sx, n, wire);
++    RING_PUBLISH();
++    ble_dnr3_n = 0;
++}
++#else
+ static uint8_t ble_sx[16], ble_sx_n, ble_sx_over, ble_sx_reply, ble_sx_ch;
++#endif
+ static void ble_sysex_in(const uint8_t *p, uint32_t n, int end, void *ctx)
+ {
+     (void)ctx;
+@@ -120,6 +162,12 @@ static void ble_sysex_in(const uint8_t *p, uint32_t n, int end, void *ctx)
+         ble_sx_n = ble_sx_over = ble_sx_reply = 0;
+         return;                                 /* discard the old device link during a role change */
+     }
++#if X0X_REMOTE_BLE
++    if (ble_dnr3_n) {                              /* never overwrite bytes owned by the editor */
++        ble_sx_over = !end;
++        return;
++    }
++#endif
+     if (!end) {
+         while (n--) {
+             if (ble_sx_n < sizeof ble_sx) ble_sx[ble_sx_n++] = *p++;
+@@ -127,6 +175,16 @@ static void ble_sysex_in(const uint8_t *p, uint32_t n, int end, void *ctx)
+         }
+         return;
+     }
++#if X0X_REMOTE_BLE
++    if (end > 0 && !ble_sx_over && ble_sx_n >= 4u &&
++        ble_sx[0] == 0x7Du && ble_sx[1] == 0x44u && ble_sx[2] == 0x4Eu) {
++        ble_dnr3_rx_wire = ble_dnr3_wire;
++        RING_PUBLISH();
++        ble_dnr3_n = ble_sx_n;
++        ble_sx_n = 0;
++        return;
++    }
++#endif
+     if (end > 0 && !ble_sx_over && ble_sx_n == 4u && ble_sx[0] == 0x7Eu && ble_sx[2] == 0x06u &&
+         ble_sx[3] == 0x01u && (ble_sx[1] <= 0x0Fu || ble_sx[1] == 0x7Fu)) {
+         ble_sx_ch = ble_sx[1];                    /* Universal Device Inquiry */
+@@ -270,6 +328,9 @@ static void ble_start(void)
+     } else {
+         blec_pair_bind(0, 0);
+         bleh_init(&ble_r.host.h, ble_send, 0, ble_r.nm, addr);
++#if X0X_REMOTE_BLE
++        ble_r.host.h.sx = ble_dnr3_tx;
++#endif
+         bleh_set_sysex(&ble_r.host.h, ble_sysex_in);
+     }
+     fm1_ble_sync();
+diff --git a/firmware/src/ble/ble_midi_host.c b/firmware/src/ble/ble_midi_host.c
+index 7adf849a28f328f2696004ac7f7eefd637c18fca..ad5ef709755bca81cfd1cd72115354e4c53b1d2c 100644
+--- a/firmware/src/ble/ble_midi_host.c
++++ b/firmware/src/ble/ble_midi_host.c
+@@ -413,6 +413,9 @@ static void acl_in(bleh_t *h, const uint8_t *p, unsigned n)
+ /* ---- events ---- */
+ static void link_reset(bleh_t *h)
+ {
++#ifdef BLEH_LINK_RESET
++    BLEH_LINK_RESET();
++#endif
+     h->cccd[0] = h->cccd[1] = 0;
+     h->att_rsp_len = 0;
+     /* A new accepted BLE link starts a fresh MIDI epoch, even when the old
+@@ -544,6 +547,9 @@ int bleh_sysex_send(bleh_t *h, const uint8_t *m, uint32_t len, uint16_t ts)
+     /* Check the advertised length before dereferencing the caller's tail. */
+     if (!m || len < 2u || len - 2u > BLEH_SYSEX_MAX ||
+         m[0] != 0xF0u || m[len - 1u] != 0xF7u) return -1;
++#if X0X_REMOTE_BLE
++    if (!h->sx) return -1;
++#endif
+     for (i = 1; i + 1 < len; i++) if (m[i] & 0x80u) return -1;
+     if (h->sx_on) return -2;
+     for (i = 0; i + 2 < len; i++) h->sx[i] = m[i + 1];
+diff --git a/firmware/src/ble/ble_midi_host.h b/firmware/src/ble/ble_midi_host.h
+index 92428ab600853c7a30cc3b88bb3ec75044a9bcb0..2dd1330e85b2e08ab6fed52eaadc6634423bad20 100644
+--- a/firmware/src/ble/ble_midi_host.h
++++ b/firmware/src/ble/ble_midi_host.h
+@@ -25,7 +25,11 @@
+ #define BLEH_NAME_MAX 20u
+ #define BLEH_MIDIQ 32u
+ #define BLEH_INQ 64u                         /* attempt 32: MIDI in (iPhone colour bursts); a power of 2 */
++#if X0X_REMOTE_BLE
++#define BLEH_SYSEX_MAX 254u
++#else
+ #define BLEH_SYSEX_MAX 64u               /* the longest SysEx bleh_sysex_send takes */
++#endif
+ 
+ enum { BLEH_H4_CMD = 1, BLEH_H4_ACL = 2, BLEH_H4_EVT = 4 };
+ enum { BLEH_IDLE = 0, BLEH_STARTING, BLEH_ADVERTISING, BLEH_CONNECTED, BLEH_ERROR };
+@@ -63,7 +67,11 @@ typedef struct {
+     uint8_t q_r, q_w;
+     bleh_msg_t in_q[BLEH_INQ];
+     uint8_t in_r, in_w, in_running, in_sysex;
++#if X0X_REMOTE_BLE
++    uint8_t *sx;                        /* device supplies a main-RAM 254-byte buffer */
++#else
+     uint8_t sx[BLEH_SYSEX_MAX];          /* outgoing SysEx: data bytes between F0 and F7 */
++#endif
+     uint8_t sx_len, sx_pos, sx_on;
+     uint16_t sx_ts;
+     uint32_t drops_in, sysex_in, smp_rejects;
+diff --git a/firmware/src/dsp/drum909.c b/firmware/src/dsp/drum909.c
+index 9c82f6a20444f74dadb83f190a455249e67825d9..884f7cd67c1a91ef6ea0ab03ce04a483ab744d02 100644
+--- a/firmware/src/dsp/drum909.c
++++ b/firmware/src/dsp/drum909.c
+@@ -30,8 +30,28 @@ D9_INLINE float d9_vca(float x)
+ 
+ /* 9W9's back-to-back diode rounding at the two fixed drives the circuits use */
+ /* inline with their tanh: they run per sample in the voice loops (no call) */
+-D9_INLINE float d9_diode16(float x) { return d9_tanh_inline(1.6f * x) * D9_INV_TANH_1_6; }
+-D9_INLINE float d9_diode20(float x) { return d9_tanh_inline(2.0f * x) * D9_INV_TANH_2_0; }
++/* These two callers take only d9_tri: its rounded integer fold gives [-1,1].
++ * Both fixed drives therefore stay inside the real interpolation table. */
++_Static_assert(2 * ((int)X0X_TANH_SCALE + 1) <= X0X_TANH_N, "fixed triangle drives must fit the tanh table");
++D9_INLINE float d9_triangle_diode(float x, float drive, float gain)
++{
++    const float u = drive * x;
++    const float t = d9_tanh_table(fm_fabsf(u) * X0X_TANH_SCALE);
++    return (u < 0.0f ? -t : t) * gain;
++}
++D9_INLINE float d9_diode16(float x) { return d9_triangle_diode(x, 1.6f, D9_INV_TANH_1_6); }
++/* A fold is nonnegative and at most 2^31-1. Scaling the triangle
++ * subtraction by 256 is exact throughout binary32's normal range.
++ * This is the fixed 2x diode lookup coordinate, before sign/magnitude. */
++D9_INLINE float d9_triangle20(uint32_t phase)
++{
++    if (X0X_TANH_SCALE != 128.0f)
++        return d9_triangle_diode(d9_tri(phase), 2.0f, D9_INV_TANH_2_0);
++    const uint32_t folded = phase ^ (uint32_t)((int32_t)phase >> 31);
++    const float coordinate = (float)(int32_t)folded * 0x1p-22f - 256.0f;
++    const float result = d9_tanh_table(fm_fabsf(coordinate));
++    return (coordinate < 0.0f ? -result : result) * D9_INV_TANH_2_0;
++}
+ /* d9_shape with the diode (every voice's default type) inline, tanh included */
+ D9_INLINE float d9_shape_v(const d9_shape_t *s, float x, float *st)
+ {
+@@ -806,8 +826,8 @@ static void d9_render_sd(d9_bt_t *v, const float *nz, const d9_bus_t *bus, int n
+ 
+         v->ph += d9_inc(f);
+         v->ph2 += d9_inc(f * ratio);
+-        float o = d9_diode20(d9_tri(v->ph));
+-        o += d9_diode20(d9_tri(v->ph2)) * mix2;
++        float o = d9_triangle20(v->ph);
++        o += d9_triangle20(v->ph2) * mix2;
+         o *= inv_mix;
+         float y = d9_shape_v(&v->shape, o, v->crush_st) * amp;
+ 
+@@ -832,6 +852,20 @@ static void d9_render_sd(d9_bt_t *v, const float *nz, const d9_bus_t *bus, int n
+ /* Toms (er99_tom909_render): three VCOs on their own envelopes + stick noise.
+  * The two upper partials and the stick are attack features (110 / 70 / 8 ms);
+  * once their envelopes have run out (-100 dB) they are skipped. */
++/* During a tom note only its own ticks advance these envelope countdowns.
++ * Measure each boundary from the beginning of the block. The last ramp
++ * tick still installs v1 exactly and cur retains the value it returned. */
++D9_INLINE float d9_tom_value(d9_env_t *e, int ticks, int frame)
++{
++    const float value = e->v;
++    e->cur = value;
++    if (frame < ticks) e->v = frame + 1 == ticks ? e->v1 : value * e->r;
++    return value;
++}
++D9_INLINE int d9_tom_left(int ticks, int frames)
++{
++    return ticks > frames ? ticks - frames : 0;
++}
+ static void d9_render_tom(d9_tom_t *t, const d9_bt_t *p, const float *nz, const d9_bus_t *bus, int n)
+ {
+     const int m = n < t->mute ? n : t->mute;
+@@ -841,32 +875,66 @@ static void d9_render_tom(d9_tom_t *t, const d9_bt_t *p, const float *nz, const
+     d9_env_anchor(&t->env[1]);
+     d9_env_anchor(&t->env[2]);
+     d9_env_anchor(&t->noise_env);
++    const int pitch_ticks = t->pitch.left;
++    const int body_ticks = t->env[0].left;
++    const int partial1_ticks = t->env[1].left;
++    const int partial2_ticks = t->env[2].left;
++    const int stick_ticks = t->noise_env.left;
++    /* At least one checked tick follows the interior prefix for every
++     * participating envelope. It records cur, which no voice reads inside
++     * this render. The prefix needs only the original five multiplications. */
++    int interior = m;
++    if (pitch_ticks < interior) interior = pitch_ticks;
++    if (body_ticks < interior) interior = body_ticks;
++    if (partial1_ticks < interior) interior = partial1_ticks;
++    if (partial2_ticks < interior) interior = partial2_ticks;
++    if (stick_ticks < interior) interior = stick_ticks;
++    --interior;
+     const float stick_g = t->noise_level * 1.5f;
+     if (t->stick_warm) {
+         d9_warm(&t->noise_bp, nz);
+         t->stick_warm = 0;
+     }
+     for (int i = 0; i < m; ++i) {
+-        const float f = d9_env_tick(&t->pitch);
++        float f, body, part1 = 0.0f, part2 = 0.0f, stick_amp = 0.0f;
++        const int one = i < partial1_ticks, two = i < partial2_ticks, stick_on = i < stick_ticks;
++        if (i < interior) {
++            f = t->pitch.v; t->pitch.v *= t->pitch.r;
++            body = t->env[0].v; t->env[0].v *= t->env[0].r;
++            part1 = t->env[1].v; t->env[1].v *= t->env[1].r;
++            part2 = t->env[2].v; t->env[2].v *= t->env[2].r;
++            stick_amp = t->noise_env.v; t->noise_env.v *= t->noise_env.r;
++        } else {
++            f = d9_tom_value(&t->pitch, pitch_ticks, i);
++            body = d9_tom_value(&t->env[0], body_ticks, i);
++            if (one) part1 = d9_tom_value(&t->env[1], partial1_ticks, i);
++            if (two) part2 = d9_tom_value(&t->env[2], partial2_ticks, i);
++            if (stick_on) stick_amp = d9_tom_value(&t->noise_env, stick_ticks, i);
++        }
+         float o = 0.0f;
+         t->ph[0] += d9_inc(f);
+-        o += d9_diode20(d9_tri(t->ph[0])) * d9_env_tick(&t->env[0]);
+-        if (t->env[1].left) {
++        o += d9_triangle20(t->ph[0]) * body;
++        if (one) {
+             t->ph[1] += d9_inc(f * 1.50f);
+-            o += d9_diode20(d9_tri(t->ph[1])) * d9_env_tick(&t->env[1]);
++            o += d9_triangle20(t->ph[1]) * part1;
+         }
+-        if (t->env[2].left) {
++        if (two) {
+             t->ph[2] += d9_inc(f * 2.75f);
+-            o += d9_diode20(d9_tri(t->ph[2])) * d9_env_tick(&t->env[2]);
++            o += d9_triangle20(t->ph[2]) * part2;
+         }
+         o *= 0.55f;
+         float stick = 0.0f;
+-        if (t->noise_env.left)
+-            stick = d9_biquad_tick(&t->noise_bp, nz[i]) * d9_env_tick(&t->noise_env) * stick_g;
++        if (stick_on)
++            stick = d9_biquad_tick(&t->noise_bp, nz[i]) * stick_amp * stick_g;
+         float y = d9_shape_v(&p->shape, o + stick, t->crush_st);
+         y = d9_biquad_tick(&t->dc_block, y);
+         bus->y[i] = y * t->out_gain;
+     }
++    t->pitch.left = d9_tom_left(pitch_ticks, m);
++    t->env[0].left = d9_tom_left(body_ticks, m);
++    t->env[1].left = d9_tom_left(partial1_ticks, m);
++    t->env[2].left = d9_tom_left(partial2_ticks, m);
++    t->noise_env.left = d9_tom_left(stick_ticks, m);
+     d9_emit_block(bus, m);
+     if (!t->noise_env.left)
+         t->stick_stale = 1;
+@@ -962,51 +1030,61 @@ static void d9_render_smp(d9_smp_t *s, const d9_bus_t *bus, int n)
+     const float pre = 1.0f + s->drive * 0.5f;
+     const uint8_t *adpcm = s->adpcm;
+     const uint32_t len = s->len;
+-    /* Decode forward to sample pos+1 (to the last sample at the end): the same
+-     * values as a fully decoded buffer. pos only goes up, so each sample is
+-     * decoded once (up to 4 a sample at pitch x4). Drive and the shape type
+-     * are constant for the block: one loop each, no per-sample branch. */
+-#define D9_SMP_CORE \
+-        float v = 0.0f; \
+-        if (s->pos < len) { \
+-            const uint32_t need = s->pos + 2 < len ? s->pos + 2 : len; \
+-            while (s->dk < need) { \
+-                s->h0 = s->h1; \
+-                s->h1 = ima_decode(adpcm, s->dk++, &s->pred, &s->idx); \
+-            } \
+-            const int last = s->pos + 1 >= len; \
+-            const float a = (float)(last ? s->h1 : s->h0) * (1.0f / 32768.0f); \
+-            const float b = last ? 0.0f : (float)s->h1 * (1.0f / 32768.0f); \
+-            const float fr = (float)s->frac * (1.0f / 4294967296.0f); \
+-            v = a + (b - a) * fr; \
+-            const uint32_t f2 = s->frac + s->incf; \
+-            s->pos += s->inc + (f2 < s->frac); \
+-            s->frac = f2; \
+-        } \
+-        v *= d9_env_tick(&s->out);
+-    if (!drive) {
+-        for (int i = 0; i < m; ++i) { D9_SMP_CORE; bus->y[i] = v; }
+-    } else if (s->shape.type == 0) {
+-        const float k = s->shape.k, g = s->shape.g;
++    /* At the native sample rate, interpolation at fraction zero yields the
++     * exact integer sample. Keep the decoder's ordinary one-sample lookahead,
++     * including the priming nibble on a new hit. Endpoints, non-integral rates
++     * and an unaligned decoder take the general path. */
++    if (m > 0 && s->inc == 1u && !(s->incf | s->frac) &&
++        s->pos < len && (unsigned)m < len - s->pos &&
++        (s->dk == s->pos || s->dk == s->pos + 1u)) {
++        if (s->dk == s->pos)
++            s->h1 = ima_decode(adpcm, s->dk++, &s->pred, &s->idx);
+         for (int i = 0; i < m; ++i) {
+-            D9_SMP_CORE;
+-            v = d9_tanh_inline(k * (v * pre)) * g;
+-            bus->y[i] = v;
++            s->h0 = s->h1;
++            s->h1 = ima_decode(adpcm, s->dk++, &s->pred, &s->idx);
++            const float v = (float)s->h0 * (1.0f / 32768.0f);
++            bus->y[i] = v * d9_env_tick(&s->out);
+         }
++        s->pos += (unsigned)m;
+     } else {
+         for (int i = 0; i < m; ++i) {
+-            D9_SMP_CORE;
+-            v = d9_shape_other(&s->shape, v * pre, s->crush_st);
+-            bus->y[i] = v;
++            float v = 0.0f;
++            if (s->pos < len) {
++                const uint32_t need = s->pos + 2 < len ? s->pos + 2 : len;
++                while (s->dk < need) {
++                    s->h0 = s->h1;
++                    s->h1 = ima_decode(adpcm, s->dk++, &s->pred, &s->idx);
++                }
++                const int last = s->pos + 1 >= len;
++                const float a = (float)(last ? s->h1 : s->h0) * (1.0f / 32768.0f);
++                const float b = last ? 0.0f : (float)s->h1 * (1.0f / 32768.0f);
++                const float fr = (float)s->frac * (1.0f / 4294967296.0f);
++                v = a + (b - a) * fr;
++                const uint32_t f2 = s->frac + s->incf;
++                s->pos += s->inc + (f2 < s->frac);
++                s->frac = f2;
++            }
++            bus->y[i] = v * d9_env_tick(&s->out);
++        }
++    }
++    /* Drive reads this voice's decoded output in the original sample order.
++     * Its crush history is disjoint from the decoder and its output envelope. */
++    if (drive) {
++        if (s->shape.type == 0) {
++            const float k = s->shape.k, g = s->shape.g;
++            for (int i = 0; i < m; ++i)
++                bus->y[i] = d9_tanh_inline(k * (bus->y[i] * pre)) * g;
++        } else {
++            for (int i = 0; i < m; ++i)
++                bus->y[i] = d9_shape_other(&s->shape, bus->y[i] * pre, s->crush_st);
+         }
+     }
+-#undef D9_SMP_CORE
+     d9_emit_block(bus, m);
+ }
+ 
+ static float *d9_dry_r;         /* the render in progress: its right side (0: mono) */
+ static float d9_pl0[DR_NUM], d9_pr0[DR_NUM];   /* each voice's pan where this block starts */
+-__attribute__((noinline)) static void d9_bus(d9_bus_t *b, drum909_t *d, int voice, float *dry, float *rev, float *dly,
++static inline __attribute__((always_inline)) void d9_bus_inline(d9_bus_t *b, drum909_t *d, int voice, float *dry, float *rev, float *dly,
+                           uint16_t audible_tracks)
+ {
+     b->dry = audible_tracks & (1u << voice) ? dry : 0;
+@@ -1025,6 +1103,12 @@ __attribute__((noinline)) static void d9_bus(d9_bus_t *b, drum909_t *d, int voic
+     b->dly = b->sdly != 0.0f ? dly : 0;
+ }
+ 
++__attribute__((noinline)) static void d9_bus(d9_bus_t *b, drum909_t *d, int voice, float *dry,
++                                               float *rev, float *dly, uint16_t audible_tracks)
++{
++    d9_bus_inline(b, d, voice, dry, rev, dly, audible_tracks);
++}
++
+ /* Identical noise/history transition for an active or silent span. */
+ static float *d9_noise_span(drum909_t *d, int n)
+ {
+@@ -1060,7 +1144,7 @@ static void d9_render(drum909_t *d, float *dry, float *rev, float *dly, int n, u
+ 
+     /* 9W9's summing order: BD SD LT MT HT RS CP OH RD CR CH */
+     if (d->bt[DR_BD].mute > 0) {
+-        d9_bus(&bus, d, DR_BD, dry, rev, dly, audible_tracks);
++        d9_bus_inline(&bus, d, DR_BD, dry, rev, dly, audible_tracks);
+         d9_render_bd(&d->bt[DR_BD], nz, &bus, n);
+     }
+     if (d->bt[DR_SD].mute > 0) {
+@@ -1096,20 +1180,46 @@ void drum909_render(drum909_t *d, float *dry, float *rev, float *dly, int n)
+     d9_render(d, dry, rev, dly, n, 0x7FFu);
+ }
+ 
+-void drum909_render_st_masked(drum909_t *d, float *dry_l, float *dry_r, float *rev, float *dly,
+-                             int n, uint16_t audible_tracks)
++/* All callers share pan, noise and serial voice state. The engine's 909 job
++ * owns two cleared dry buffers. If every pan stays at unity, the two buses
++ * get the same sequence of binary32 additions, and the mono render computes
++ * that sequence once. Other callers may already have unequal bus contents. */
++static void d9_render_st_masked(drum909_t *d, float *dry_l, float *dry_r, float *rev, float *dly,
++                                int n, uint16_t audible_tracks, int cleared)
+ {
+-    d9_dry_r = dry_r;
+-    for (int v = 0; v < DR_NUM; ++v) {             /* every voice's pan glides, sounding or not */
++    int duplicate = cleared;
++    if (n > 256) n = 256;
++    for (int v = 0; v < DR_NUM; ++v) {
+         d9_pl0[v] = d->pan_lc[v];
+         d9_pr0[v] = d->pan_rc[v];
+-        d->pan_dl[v] = x0x_glide_block(&d->pan_lc[v], d->pan_l[v], n > 256 ? 256 : n);
+-        d->pan_dr[v] = x0x_glide_block(&d->pan_rc[v], d->pan_r[v], n > 256 ? 256 : n);
++        if (d9_pl0[v] == 1.0f && d9_pr0[v] == 1.0f &&
++            d->pan_l[v] == 1.0f && d->pan_r[v] == 1.0f) {
++            d->pan_dl[v] = d->pan_dr[v] = 0.0f;
++        } else {
++            duplicate = 0;
++            d->pan_dl[v] = x0x_glide_block(&d->pan_lc[v], d->pan_l[v], n);
++            d->pan_dr[v] = x0x_glide_block(&d->pan_rc[v], d->pan_r[v], n);
++        }
+     }
++    d9_dry_r = duplicate ? 0 : dry_r;
+     d9_render(d, dry_l, rev, dly, n, audible_tracks);
++    if (duplicate && n > 0)
++        __builtin_memcpy(dry_r, dry_l, (unsigned)n * sizeof *dry_l);
+     d9_dry_r = 0;
+ }
+ 
++void drum909_render_st_cleared(drum909_t *d, float *dry_l, float *dry_r, float *rev, float *dly,
++                               int n, uint16_t audible_tracks)
++{
++    d9_render_st_masked(d, dry_l, dry_r, rev, dly, n, audible_tracks, 1);
++}
++
++void drum909_render_st_masked(drum909_t *d, float *dry_l, float *dry_r, float *rev, float *dly,
++                              int n, uint16_t audible_tracks)
++{
++    d9_render_st_masked(d, dry_l, dry_r, rev, dly, n, audible_tracks, 0);
++}
++
+ void drum909_render_st(drum909_t *d, float *dry_l, float *dry_r, float *rev, float *dly, int n)
+ {
+     drum909_render_st_masked(d, dry_l, dry_r, rev, dly, n, 0x7FFu);
+diff --git a/firmware/src/dsp/drum909.h b/firmware/src/dsp/drum909.h
+index 477fcd719559bccd3ecd9906859928036d22255c..b1c8967641d5eed94ffd119a82dcf996feccdb31 100644
+--- a/firmware/src/dsp/drum909.h
++++ b/firmware/src/dsp/drum909.h
+@@ -121,6 +121,9 @@ void drum909_render_st(drum909_t *d, float *dry_l, float *dry_r, float *rev, flo
+ /* Only selected tracks reach dry/send buses; every voice still advances normally. */
+ void drum909_render_st_masked(drum909_t *d, float *dry_l, float *dry_r, float *rev, float *dly,
+                              int n, uint16_t audible_tracks);
++/* Distinct cleared dry buffers, as in the 909 engine job. */
++void drum909_render_st_cleared(drum909_t *d, float *dry_l, float *dry_r, float *rev, float *dly,
++                             int n, uint16_t audible_tracks);
+ void drum909_pan_settle(drum909_t *d);   /* every pan to its target at once (the kit is silent: no zipper) */
+ int drum909_nparams(int voice);
+ const x0x_param_t *drum909_param(int voice, int i);
+diff --git a/firmware/src/dsp/drum909_dsp.h b/firmware/src/dsp/drum909_dsp.h
+index bd0dee18855786d39c002f2c327314e637e0c558..c64eebaddd6253c6f5cd372085c37996b9669520 100644
+--- a/firmware/src/dsp/drum909_dsp.h
++++ b/firmware/src/dsp/drum909_dsp.h
+@@ -235,19 +235,19 @@ static inline void d9_tanh_pair(unsigned i, float *t0, float *t1)
+ 
+ /* The body, always inlined: drum909.c's per-sample voice loops call it with no call
+  * overhead. d9_tanh below is the same body for every other caller. */
++D9_INLINE float d9_tanh_table(float a)
++{
++    const int32_t i = (int32_t)a;
++    const float fr = a - (float)i;
++    const float t0 = x0x_tanh_raw[(unsigned)i];
++    const float t1 = x0x_tanh_raw[(unsigned)i + 1u];
++    return t0 + (t1 - t0) * fr;
++}
++
+ D9_INLINE float d9_tanh_inline(float u)
+ {
+     const float a = fm_fabsf(u) * X0X_TANH_SCALE;
+-    float t;
+-    if (a >= (float)X0X_TANH_N) {
+-        t = 1.0f;
+-    } else {
+-        const int32_t i = (int32_t)a;
+-        const float fr = a - (float)i;
+-        const float t0 = x0x_tanh_raw[(unsigned)i];      /* 0e88652c0: one exact const float table */
+-        const float t1 = x0x_tanh_raw[(unsigned)i + 1u];
+-        t = t0 + (t1 - t0) * fr;
+-    }
++    const float t = a >= (float)X0X_TANH_N ? 1.0f : d9_tanh_table(a);
+     return u < 0.0f ? -t : t;
+ }
+ 
+diff --git a/firmware/src/dsp/s1c/s1c.c b/firmware/src/dsp/s1c/s1c.c
+index 07f87be169fd27f8d9d3526df285083a200db513..85da474be00a2ef2c25e0e2360b6f0435196f68e 100644
+--- a/firmware/src/dsp/s1c/s1c.c
++++ b/firmware/src/dsp/s1c/s1c.c
+@@ -252,15 +252,15 @@ static float shape(int k, float t, float dt, int bl)
+     if (bl) { float u = t + 1.0f - w; if (u >= 1.0f) u -= 1.0f; y += blep(u, dt) - blep(t, dt); }
+     return y;
+ }
+-static float morph(uint32_t *ph, float hz, float pos, int bl, float sr)
++static float morph(uint32_t *ph, float dt, uint32_t increment, float pos, int bl)
+ {
+-    float t = (float)*ph * (1.0f / Q32), dt = hz / sr;
++    float t = (float)*ph * (1.0f / Q32);
+     if (pos > 1.0f) pos -= (int)pos;
+     float f = pos * 3.0f; int k = (int)f; if (k > 2) k = 2;
+     f -= k;
+     float y = shape(k, t, dt, bl);
+     if (f > 0.0f) y += f * (shape(k + 1, t, dt, bl) - y);
+-    *ph += ph_inc(dt);
++    *ph += increment;
+     return y;
+ }
+ static float sine_q(uint32_t ph) { return sinf((float)ph * (TWO_PI / Q32)); }
+@@ -351,8 +351,9 @@ static float voice_run(s1c *s, s1c_voice *v)
+     float cut = P(CUT) * lfo10(s, P(LCUT)), em = P(FENV) * lfo10(s, P(LFENV));
+     cut = clampf(cut - cut * em * (1.0f - v->fenv), 64.0f, 22050.0f);
+     int bl = P(BLE) > 0.0f;
+-    float o1 = morph(&v->ph[0], f1, P(I1), bl, s->sr) * v->vamp * P(VOL1);
+-    float o2 = morph(&v->ph[1], f2, P(I2), bl, s->sr) * v->vamp * P(VOL2);
++    float dt1 = f1 / s->sr, dt2 = f2 / s->sr;
++    float o1 = morph(&v->ph[0], dt1, ph_inc(dt1), P(I1), bl) * v->vamp * P(VOL1);
++    float o2 = morph(&v->ph[1], dt2, ph_inc(dt2), P(I2), bl) * v->vamp * P(VOL2);
+     float y = (1.0f - bal) * o1 + bal * o2;
+     float sub = sine_q(v->ph[2]);
+     v->ph[2] += ph_inc(fs / s->sr);
+@@ -392,26 +393,32 @@ static float voice_run_kr(s1c *s, s1c_voice *v)
+         v->kc = S1C_KR;
+         float base = mono ? s->monos : v->freq, half = 0.5f * s->sr;
+         float plfo = 1.0f + lfo01(s, P(LPITCH)) * 0.0594630944f, k = P(DETM) * plfo;
+-        v->kf1 = clampf(base * exp2f((int)P(SEMI1) / 12.0f) * k, 0.0f, half);
++        const float f1 = clampf(base * exp2f((int)P(SEMI1) / 12.0f) * k, 0.0f, half);
+         float det = P(DET2) * (v->freq / 261.6255653f);
+         if ((int)P(LDET)) det *= lfo01(s, P(LDET));
+-        v->kf2 = clampf(base * exp2f((int)P(SEMI2) / 12.0f) * k + det, 0.0f, half);
+-        v->kfs = clampf(base * k / (2.0f * (1.0f + P(SUBOCT))), 0.0f, half);
++        const float f2 = clampf(base * exp2f((int)P(SEMI2) / 12.0f) * k + det, 0.0f, half);
++        const float fs = clampf(base * k / (2.0f * (1.0f + P(SUBOCT))), 0.0f, half);
+         v->kff = clampf(base * k, 0.0f, half);
++        /* The frequencies and the sample rate cannot change until the next
++         * control tick. Save the original rounded divisions and phase words
++         * in the existing cache, not additional voice state. */
++        v->kd1 = f1 / s->sr; v->kd2 = f2 / s->sr;
++        v->ki1 = ph_inc(v->kd1); v->ki2 = ph_inc(v->kd2);
++        v->kis = ph_inc(fs / s->sr); v->kif = ph_inc(v->kff / s->sr);
+         v->kidx = clampf(P(FMA) * lfo10(s, P(LFM)), 0.0f, 15.0f);
+         v->kbal = clampf(P(BAL) + lfo01(s, P(LMIX)), 0.0f, 1.0f);
+-        v->kres = clampf(P(RES) * lfo10(s, P(LRES)), 0.0f, 0.98f);
+-        float pitch = log2f(v->kf1 > 0.0f ? v->kf1 : 261.0f), kt = 1.0f - clampf((pitch - 6.0f) / 5.0f, 0.0f, 1.0f);
++        const float kres = clampf(P(RES) * lfo10(s, P(LRES)), 0.0f, 0.98f);
++        float pitch = log2f(f1 > 0.0f ? f1 : 261.0f), kt = 1.0f - clampf((pitch - 6.0f) / 5.0f, 0.0f, 1.0f);
+         float kf = 1.0f - P(KTRK);
+         v->kkey = (1.0f - kf) * kt * kt + kf;
+-        v->kcut = P(CUT) * lfo10(s, P(LCUT)); v->kem = P(FENV) * lfo10(s, P(LFENV));
+-        float cut = clampf(v->kcut - v->kcut * v->kem * (1.0f - v->fenv), 64.0f, 22050.0f);
++        const float kcut = P(CUT) * lfo10(s, P(LCUT)), kem = P(FENV) * lfo10(s, P(LFENV));
++        float cut = clampf(kcut - kcut * kem * (1.0f - v->fenv), 64.0f, 22050.0f);
+         if (ft == 0) {
+             float x = cut * (2.0f / s->sr); if (x > 1.0f) x = 1.0f;
+             v->kA = ladder_a(x);
+-            v->kfb = v->kres * (3.98720139f + x * (3.68178143f - x * 3.93633599f));
++            v->kfb = kres * (3.98720139f + x * (3.68178143f - x * 3.93633599f));
+         } else if (ft == 1) {
+-            float bw = 0.0625f * s->sr * (exp2f(clampf(1.0f - v->kres, 0.0f, 1.0f)) - 1.0f);
++            float bw = 0.0625f * s->sr * (exp2f(clampf(1.0f - kres, 0.0f, 1.0f)) - 1.0f);
+             float cc = 1.0f / tanf(3.14159265f * bw / s->sr), d = 2.0f * cosf(TWO_PI * cut / s->sr), a1 = 1.0f / (1.0f + cc);
+             v->ka1 = a1; v->ka4 = -cc * d * a1; v->ka5 = (cc - 1.0f) * a1;
+         } else {
+@@ -420,15 +427,15 @@ static float voice_run_kr(s1c *s, s1c_voice *v)
+         }
+     }
+     int bl = P(BLE) > 0.0f;
+-    float o1 = morph(&v->ph[0], v->kf1, P(I1), bl, s->sr) * v->vamp * P(VOL1);
+-    float o2 = morph(&v->ph[1], v->kf2, P(I2), bl, s->sr) * v->vamp * P(VOL2);
++    float o1 = morph(&v->ph[0], v->kd1, v->ki1, P(I1), bl) * v->vamp * P(VOL1);
++    float o2 = morph(&v->ph[1], v->kd2, v->ki2, P(I2), bl) * v->vamp * P(VOL2);
+     float y = (1.0f - v->kbal) * o1 + v->kbal * o2;
+     float sub = sine_t(v->ph[2]);
+-    v->ph[2] += ph_inc(v->kfs / s->sr);
++    v->ph[2] += v->kis;
+     y += P(SUBSQ) != 0.0f ? (sub > 0.0f ? P(SUBV) : -P(SUBV)) : sub * v->vamp * P(SUBV) * 3.0f;
+     if (P(FMV) != 0.0f) {
+         float mod = sine_t(v->mph) * v->kff * v->kidx;
+-        v->mph += ph_inc(v->kff / s->sr);
++        v->mph += v->kif;
+         y += sine_t(v->cph) * v->vamp * P(FMV);
+         v->cph += ph_inc((v->kff + mod) / s->sr);
+     }
+@@ -564,8 +571,18 @@ static float dl_tick_c(s1c_dline *d, float in, float del, float fb, float c)
+ /* Device memory model (smallest): exact-size half-float lines carved from a caller-owned pool. */
+ static float xl_read(const s1c_dline *d, float del)
+ {
++    const uint32_t len = (uint32_t)d->len;   /* device partitions use positive integer lengths */
++    const float ring = (float)len;
+     float pos = (float)d->w - del;
+-    while (pos < 0.0f) pos += (float)d->len;
++    /* Fold whole negative wraps at once. Within the exact-integer float
++     * range these additions are exact while the position is negative:
++     * each integer shift reduces its magnitude. Keep the final fractional
++     * wrap in the original order; the tap and interpolation are unchanged. */
++    if (pos < -4.0f * ring && pos >= -16777216.0f) {
++        const uint32_t wraps = (uint32_t)(-pos) / len;
++        pos += (float)(wraps * len);
++    }
++    while (pos < 0.0f) pos += ring;
+     int i = (int)pos; float f = pos - (float)i;
+     int j = i + 1 == d->len ? 0 : i + 1;
+     const uint16_t *b = (const uint16_t *)d->buf;
+@@ -847,10 +864,25 @@ void s1c_render(s1c *s, float *outl, float *outr, unsigned n)
+ #endif
+ #endif
+     (void)cr; (void)cw;
++#if S1C_FAST && S1C_CSM && S1C_NO_SEQ
++    /* Targets and coefficients cannot change inside this audio span. Do
++     * frame zero once; a bit-stable recurrence (including signed zero)
++     * stays fixed. A moving span resumes the unmodified dense loop. */
++    uint32_t glide_diff = 0;
++    if (n) for (i = 0; i < (int)sizeof s1c_smid; i++) {
++        const s1c_fb old = {.f = s->c[i]};
++        const s1c_fb next = {.f = c1 * s->t[s1c_smid[i]] + c2 * old.f};
++        glide_diff |= old.u ^ next.u;
++        s->c[i] = next.f;
++    }
++#endif
+     for (f = 0; f < n; f++) {
+ #if S1C_FAST
+         int cu = (f & 3) == 0;
+ #if S1C_CSM
++#if S1C_NO_SEQ
++        if (f && glide_diff)
++#endif
+         for (i = 0; i < (int)sizeof s1c_smid; i++) s->c[i] = c1 * s->t[s1c_smid[i]] + c2 * s->c[i];
+ #else
+         for (i = 0; i < s1c_nsm; i++) { unsigned q = s1c_sm[i]; s->c[q] = c1 * s->t[q] + c2 * s->c[q]; }
+diff --git a/firmware/src/dsp/s1c/s1c.h b/firmware/src/dsp/s1c/s1c.h
+index 6719cf6a6ff2d7b0850208bdd0640b3aad891e8a..8cf7fc8141d71048b0baffc6300610cc4f730f0e 100644
+--- a/firmware/src/dsp/s1c/s1c.h
++++ b/firmware/src/dsp/s1c/s1c.h
+@@ -109,7 +109,8 @@ typedef struct {
+     int8_t root, stage, pad[2];
+ #if S1C_KR > 1
+     int32_t kc;                         /* control-rate countdown */
+-    float kf1, kf2, kfs, kff, kidx, kbal, kres, kkey, kA, kfb, ka1, ka4, ka5, kcut, kem;
++    float kd1, kd2, kff, kidx, kbal, kkey, kA, kfb, ka1, ka4, ka5;
++    uint32_t ki1, ki2, kis, kif;         /* binary32-rounded phase increments */
+ #endif
+ } s1c_voice;
+ #ifndef S1C_EXT
+diff --git a/firmware/src/usb.c b/firmware/src/usb.c
+index 658ec4f21c8d740eafce5daa2f96eb2c7b33d2df..76a225f49adbdbc6d9351191d07a9e6050851f07 100644
+--- a/firmware/src/usb.c
++++ b/firmware/src/usb.c
+@@ -1103,6 +1103,15 @@ static int ota_wire_send(const uint8_t *p, uint32_t n)   /* F0..F7 -> USB-MIDI S
+     sx_busy = 0;
+     return 0;
+ }
++/* DNR3 Remote replies and notifications (app/remote_dnr3.h): never wait for the host; a frame that does
++ * not fit the ring now is dropped (the Remote retries, or re-reads on the revision gap). */
++#if X0X_REMOTE_DNR3
++void remote_dnr3_out(const uint8_t *frame, uint32_t n)
++{
++    if (!sx_busy && SXQ - (so_w - so_r) >= (n + 2u) / 3u)
++        (void)ota_wire_send(frame, n);
++}
++#endif
+ static int ota_frame_get(const uint8_t **p, uint32_t *n)
+ {
+     if (!sx_ready)
+diff --git a/firmware/src/x0x.c b/firmware/src/x0x.c
+index b4c2f46caa9a100199ebf54a15aeed260912eab1..82427be34738866ca782dc167b6c5c76143e0ad7 100644
+--- a/firmware/src/x0x.c
++++ b/firmware/src/x0x.c
+@@ -5,6 +5,10 @@
+  * units compiled at -O2 by tools/build.py; this one is -Os. Order matters. */
+ #include <stdint.h>
+ #include "fm1_time.h"
++#ifndef X0X_REMOTE_DNR3
++#define X0X_REMOTE_DNR3 1                   /* the DNR3 Remote protocol (app/remote_dnr3.c) */
++#endif
++#include "app/remote_dnr3.h"         /* X0X_REMOTE_DNR3 */
+ #include "fm1_sys.h"
+ #include "fm1_irq.h"
+ #include "fm1_guard.h"
+@@ -189,6 +193,7 @@ static void ota_commit(const uint8_t *parm)
+ #define X0X_BLE BOARD_SMK37          /* Bluetooth MIDI through a separate controller image (src/ble.c) */
+ #endif
+ #if X0X_BLE
++#define X0X_REMOTE_BLE X0X_REMOTE_DNR3
+ #include "ble.c"
+ #endif
+ 
+@@ -211,4 +216,9 @@ _Static_assert(sizeof st_buf >= PLAT_STORE_MAX, "project object fits the store b
+ #include "app/smc_mixer.c"
+ #endif
+ #include "app/editor.c"
++#if X0X_REMOTE_DNR3
++#define REMOTE_DNR3_BUSY() (ED_MAINTENANCE_HELD() || ed_project.mode || ui_project_busy())
++#define REMOTE_DNR3_OUTBUF ed_out           /* the editor's reply buffer: both build and send in ed_service */
++#include "app/remote_dnr3.c"          /* DNR3 Remote protocol (ed_service dispatches it) */
++#endif
+ #include "app/main_fm1.c"
+diff --git a/host/x0x_host.c b/host/x0x_host.c
+index 0a99de21cbe58f65ffaea0289a376dee74ef6821..b4ca116881d08601a879e2488d9ac59531dc93d9 100644
+--- a/host/x0x_host.c
++++ b/host/x0x_host.c
+@@ -35,6 +35,9 @@
+  *                                to the simulated flash and booted, as if it had been made here
+  */
+ #define X0X_HOST 1
++#ifndef X0X_REMOTE_DNR3
++#define X0X_REMOTE_DNR3 1                       /* the DNR3 Remote protocol (app/remote_dnr3.c, below) */
++#endif
+ #ifdef __APPLE__
+ #define _DARWIN_C_SOURCE 1   /* libproc / task instruction-count APIs require Darwin types */
+ #endif
+@@ -341,6 +344,21 @@ void plat_stalls_enable(int on) { (void)on; }
+ #endif
+ #include X0X_HOST_UI_SOURCE
+ 
++/* DNR3 Remote protocol: the firmware's remote_dnr3.c in the same unit as the UI (host tests and the web
++ * emulator feed remote_dnr3_frame() and call remote_dnr3_tick(); replies go to remote_dnr3_out()). */
++#if X0X_REMOTE_DNR3
++static int host_remote_busy;                     /* a test's stand-in for a project transfer or hold */
++void (*host_remote_sink)(const uint8_t *frame, uint32_t n);
++#define REMOTE_DNR3_BUSY() (host_remote_busy || ui_project_busy())
++#ifndef REMOTE_DNR3_SOURCE                       /* a test may build a mutant */
++#define REMOTE_DNR3_SOURCE "../firmware/src/app/remote_dnr3.c"
++#endif
++#include REMOTE_DNR3_SOURCE
++#ifndef X0X_WEB                                  /* the web emulator's kernel.c has its own */
++void remote_dnr3_out(const uint8_t *frame, uint32_t n) { if (host_remote_sink) host_remote_sink(frame, n); }
++#endif
++#endif
++
+ #if X0X_PARAM_TRACE
+ void x0x_param_trace(int source, int target, int voice, int parameter, int value)
+ {
