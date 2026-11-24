@@ -1,0 +1,9 @@
+part=0 off-default PCM during held edits and after reload, including persisted sound bytes
+part=1 off-default PCM during held edits and after reload, including persisted sound bytes
+part=0 off-default PCM during held edits and after reload, including persisted sound bytes
+part=1 off-default PCM during held edits and after reload, including persisted sound bytes
+133784 after-0.pcm
+cbaa2fdd67023d755cf2a268fffbde537dec783f11945ff4b64da1a2cea23563  after-0.pcm
+133784 after-1.pcm
+8c52704c7a670df3f959a0a838edee49fa4d4a0c5e8e91437491ce61a618b9b9  after-1.pcm
+PASS cmp matched each arm byte for byte. Total 32768 stereo frames and 5424 saved sound bytes.

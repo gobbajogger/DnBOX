@@ -1,0 +1,23 @@
+ui_superj6_a_reference_test
+640 full bank records on both parts, 26 exact authored A440 words and 614 omissions
+owner=0 A REF held frames=8192 down=8192 up=8192 peer=0, range and reload PASS
+owner=1 A REF held frames=8192 down=8192 up=8192 peer=0, range and reload PASS
+SuperJ6 A reference 7594 checks
+ui_superj6_pwm1_lfo2_test
+PWM1 Build-9 transfer oracle exact over 8192 stereo frames with 0 clipped ticks; depth-zero and enable-threshold PCM PASS
+part=0 PWM1 held depth changed 6666 target frames, 0 peer frames
+part=0 PWM1 save/reload, routed base, depth-zero and route-off PCM, preset isolation PASS
+part=1 PWM1 held depth changed 6649 target frames, 0 peer frames
+part=1 PWM1 save/reload, routed base, depth-zero and route-off PCM, preset isolation PASS
+PWM2 Build-9 transfer oracle exact over 8192 stereo frames with 3 clipped ticks; depth-zero and enable-threshold PCM PASS
+part=0 PWM2 held depth changed 6666 target frames, 0 peer frames
+part=0 PWM2 save/reload, routed base, depth-zero and route-off PCM, preset isolation PASS
+part=1 PWM2 held depth changed 6649 target frames, 0 peer frames
+part=1 PWM2 save/reload, routed base, depth-zero and route-off PCM, preset isolation PASS
+PASS SuperJ6 LFO2 PWM 2074 checks
+ui_superj6_chorus_test
+SuperJ6 CHORUS I/II 1034 checks
+ui_s1_lfo_shared_full_control_test
+PASS shared-row LFO, authored vibrato, refusal and cross-engine history with Synth One owner 1
+PASS shared-row LFO, authored vibrato, refusal and cross-engine history with Synth One owner 0
+PASS joined LFO/shared-row ownership 382 checks

@@ -1,0 +1,9 @@
+preimage p0: FAIL red-fixture.c:42: engine_superj6_knob_position(v, SJ6_A_REFERENCE) == 60
+two-word p0: PASS
+preimage p1: FAIL red-fixture.c:42: engine_superj6_knob_position(v, SJ6_A_REFERENCE) == 60
+two-word p1: PASS
+preimage l0: FAIL red-fixture.c:42: engine_superj6_knob_position(v, SJ6_A_REFERENCE) == 60
+two-word l0: PASS
+preimage l1: FAIL red-fixture.c:42: engine_superj6_knob_position(v, SJ6_A_REFERENCE) == 60
+two-word l1: PASS
+PASS all four unchanged red fixture runs on the two-word source

@@ -1,0 +1,269 @@
+diff --git a/firmware/src/app/engine.c b/firmware/src/app/engine.c
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -264,6 +264,7 @@
+ #if X0X_ARP_ENGINE
+ static void arp_factory_toggles(unsigned owner, uint16_t seen, uint16_t on);
+ #endif
++static void sj6_knob_clear(unsigned owner);
+ static int sj6_factory_storage_ready(unsigned owner, unsigned vibrato, unsigned a_reference);
+ static void sj6_commit_factory(unsigned owner, const sj6_factory_motion *motion, unsigned chorus_mode);
+ #endif
+@@ -334,6 +335,7 @@
+                 value[SJ6_ROW_WAVE + layer], value[SJ6_ROW_AMOUNT + layer], value[SJ6_ROW_ENABLE + layer]};
+         }
+ #if X0X_SUPERJ6_BUILTIN_INIT
++        sj6_knob_clear(owner);
+         sj6_factory_motion_pending[owner] = motion;
+ #endif
+         part->dsp.juno.chorus.factory_pending = (uint8_t)chorus_mode;
+diff --git a/firmware/src/app/engine.h b/firmware/src/app/engine.h
+--- a/firmware/src/app/engine.h
++++ b/firmware/src/app/engine.h
+@@ -149,6 +149,12 @@
+ int engine_superj6_a_reference(unsigned owner, float *hz);
+ int engine_superj6_knob_turn(unsigned owner, unsigned slot, int value, int relative);
+ int engine_superj6_knob_pending(void);
++#if defined(X0X_HOST) && defined(X0X_SJ6_MAILBOX_PROBE)
++int engine_superj6_mailbox_probe_turn(unsigned owner, unsigned slot, int value, int relative);
++int engine_superj6_mailbox_probe_position(unsigned owner, unsigned slot);
++int engine_superj6_mailbox_probe_read(unsigned owner, unsigned slot);
++void engine_superj6_mailbox_probe_apply(unsigned owner, unsigned slot, unsigned value);
++#endif
+ int engine_superj6_panel_envelope(unsigned owner, unsigned filter, juno6_envelope_snapshot *, unsigned *linked);
+ int engine_superj6_panel_master(unsigned owner, float *gain);
+ int engine_superj6_lfo_view(unsigned owner, unsigned lfo, juno6_lfo_view *);
+diff --git a/firmware/src/app/original_presets.inc b/firmware/src/app/original_presets.inc
+--- a/firmware/src/app/original_presets.inc
++++ b/firmware/src/app/original_presets.inc
+@@ -58,6 +58,9 @@
+     __asm__ volatile("" ::: "memory");
+     bass_midi_mark[voice] = plat_midi_mark(); bass_cq_mark[voice] = cq_w;
+     bass_request[voice] = token;
++#if X0X_SUPERJ6_BUILTIN_INIT
++    sj6_knob_clear((unsigned)voice);
++#endif
+     __asm__ volatile("" ::: "memory");
+     ++bass_publish_seq[voice];
+ }
+@@ -241,8 +244,34 @@
+ }
+ #endif
+ #if X0X_SUPERJ6_BUILTIN_INIT
++enum { SJ6_MAILBOX_WORD_BITS = 32, SJ6_MAILBOX_WORDS = 2,
++       SJ6_MAILBOX_SLOTS = SJ6_MAILBOX_WORDS * SJ6_MAILBOX_WORD_BITS };
++typedef struct { uint32_t word[SJ6_MAILBOX_WORDS]; } sj6_knob_bits;
++static volatile sj6_knob_bits sj6_knob_mask[NBASS];
++#if defined(X0X_HOST) && defined(X0X_SJ6_MAILBOX_PROBE)
++static uint8_t sj6_knob_value[NBASS][SJ6_MAILBOX_SLOTS];
++#else
+ static uint8_t sj6_knob_value[NBASS][SJ6_KNOBS];
+-static volatile uint32_t sj6_knob_mask[NBASS];
++#endif
++_Static_assert((unsigned)SJ6_KNOBS <= SJ6_MAILBOX_SLOTS, "SuperJ6 knob mailbox capacity");
++
++static uint32_t sj6_knob_bit(unsigned slot)
++{ return UINT32_C(1) << (slot % SJ6_MAILBOX_WORD_BITS); }
++
++static int sj6_knob_has(unsigned owner, unsigned slot)
++{ return (sj6_knob_mask[owner].word[slot / SJ6_MAILBOX_WORD_BITS] & sj6_knob_bit(slot)) != 0; }
++
++static void sj6_knob_clear(unsigned owner)
++{
++    sj6_knob_mask[owner].word[0] = 0;
++    sj6_knob_mask[owner].word[1] = 0;
++}
++
++static void sj6_knob_post(unsigned owner, unsigned slot, int value)
++{
++    sj6_knob_value[owner][slot] = (uint8_t)value;
++    sj6_knob_mask[owner].word[slot / SJ6_MAILBOX_WORD_BITS] |= sj6_knob_bit(slot);
++}
+ 
+ static void sj6_apply_extra(juno6_t *s, unsigned mask, const uint8_t *values, int reset)
+ {
+@@ -341,7 +370,10 @@
+ }
+ 
+ int engine_superj6_knob_pending(void)
+-{ return sj6_knob_mask[0] || sj6_knob_mask[1]; }
++{
++    return (sj6_knob_mask[0].word[0] | sj6_knob_mask[0].word[1] |
++            sj6_knob_mask[1].word[0] | sj6_knob_mask[1].word[1]) != 0;
++}
+ 
+ static int sj6_knob_ready(unsigned owner)
+ {
+@@ -352,7 +384,10 @@
+ 
+ static int sj6_knob_position(unsigned owner, unsigned slot)
+ {
+-    if (sj6_knob_mask[owner] & (1u << slot)) return sj6_knob_value[owner][slot];
++    if (sj6_knob_has(owner, slot)) return sj6_knob_value[owner][slot];
++#if defined(X0X_HOST) && defined(X0X_SJ6_MAILBOX_PROBE)
++    if (slot >= SJ6_MAILBOX_WORD_BITS) return engine_superj6_mailbox_probe_read(owner, slot);
++#endif
+     if (slot == SJ6_A_REFERENCE) {
+         float raw;
+         if (dnbx_read_raw(&original_bass[owner].dsp.juno.synth.core, SJ6_A_REFERENCE_ID, &raw) != DNBX_OK)
+@@ -401,31 +436,76 @@
+     return position;
+ }
+ 
++static int sj6_knob_can_turn(unsigned owner)
++{
++    return !project_hold && mot_base_snd && sj6_knob_ready(owner) && !engine_bass_preset_pending(owner)
++#if X0X_BASS_NOTE_SOUND
++        && !note_lock_applied[owner]
++#endif
++        ;
++}
++
++static int sj6_knob_target(int before, int value, int max, int relative)
++{
++    if (relative) {
++        if (value < -before) return 0;
++        if (value > max - before) return max;
++        return before + value;
++    }
++    return value < 0 ? 0 : value > max ? max : value;
++}
++
+ X0X_COLD int engine_superj6_knob_turn(unsigned owner, unsigned slot, int value, int relative)
+ {
+     if (owner >= NBASS || slot > SJ6_LFO2_PWM_BASE) return 0;
+     uint32_t lock = plat_cq_lock();
+     int changed = 0;
+-    if (!project_hold && mot_base_snd && sj6_knob_ready(owner) && !engine_bass_preset_pending(owner)
+-#if X0X_BASS_NOTE_SOUND
+-        && !note_lock_applied[owner]
+-#endif
+-       ) {
++    if (sj6_knob_can_turn(owner)) {
+         slot = sj6_panel_slot(owner, slot);
+         int before = sj6_knob_position(owner, slot);
+-        int max = (int)original_sound_sj6_max(slot);
+-        if (relative) value += before;
+-        value = value < 0 ? 0 : value > max ? max : value;
++        value = sj6_knob_target(before, value, (int)original_sound_sj6_max(slot), relative);
+         if (value != before && (slot < SJ6_VIBRATO_DEPTH ||
+             sj6_factory_storage_ready(owner, slot != SJ6_A_REFERENCE, slot == SJ6_A_REFERENCE))) {
+-            sj6_knob_value[owner][slot] = (uint8_t)value;
+-            sj6_knob_mask[owner] |= 1u << slot;
++            sj6_knob_post(owner, slot, value);
+             changed = 1;
+         }
+     }
+     plat_cq_unlock(lock);
+     return changed;
+ }
++
++#if defined(X0X_HOST) && defined(X0X_SJ6_MAILBOX_PROBE)
++/* Exercise the upper word through the same mailbox, without assigning a
++ * panel, DSP, or project field. The public panel index 32 is a PWM alias. */
++static int sj6_knob_probe_slot(unsigned owner, unsigned slot)
++{ return owner < NBASS && slot >= SJ6_MAILBOX_WORD_BITS && slot < SJ6_MAILBOX_SLOTS; }
++
++int engine_superj6_mailbox_probe_turn(unsigned owner, unsigned slot, int value, int relative)
++{
++    if (!sj6_knob_probe_slot(owner, slot)) return 0;
++    uint32_t lock = plat_cq_lock();
++    int changed = 0;
++    if (sj6_knob_can_turn(owner)) {
++        int before = sj6_knob_position(owner, slot);
++        value = sj6_knob_target(before, value, UINT8_MAX, relative);
++        if (value != before) {
++            sj6_knob_post(owner, slot, value);
++            changed = 1;
++        }
++    }
++    plat_cq_unlock(lock);
++    return changed;
++}
++
++int engine_superj6_mailbox_probe_position(unsigned owner, unsigned slot)
++{
++    if (!sj6_knob_probe_slot(owner, slot)) return -1;
++    uint32_t lock = plat_cq_lock();
++    int position = sj6_knob_ready(owner) ? sj6_knob_position(owner, slot) : -1;
++    plat_cq_unlock(lock);
++    return position;
++}
++#endif
+ 
+ X0X_COLD int engine_superj6_a_reference(unsigned owner, float *hz)
+ {
+@@ -434,7 +514,7 @@
+     int ready = sj6_knob_ready(owner);
+     if (ready) {
+         float raw = .6f;
+-        if (sj6_knob_mask[owner] & (1u << SJ6_A_REFERENCE))
++        if (sj6_knob_has(owner, SJ6_A_REFERENCE))
+             raw = juno6_a_reference_unit(sj6_knob_value[owner][SJ6_A_REFERENCE]);
+         else
+             (void)dnbx_read_raw(&original_bass[owner].dsp.juno.synth.core, SJ6_A_REFERENCE_ID, &raw);
+@@ -475,9 +555,8 @@
+     return ready;
+ }
+ 
+-/* The audio boundary keeps mask read/clear and readiness in its
+- * existing order; only an admitted edit needs the common store/applier. */
+-__attribute__((noinline)) X0X_COLD static void sj6_knob_commit(unsigned v, unsigned mask)
++/* Keep the original low-word DSP and persistence order. */
++__attribute__((noinline)) X0X_COLD static void sj6_knob_commit(unsigned v, uint32_t mask)
+ {
+     sound_t *sound = (sound_t *)mot_base_snd;
+     juno6_t *s = &original_bass[v].dsp.juno.synth;
+@@ -555,14 +634,19 @@
+ X0X_COLD static void sj6_knob_boundary(void)
+ {
+     for (unsigned v = 0; v < NBASS; ++v) {
+-        unsigned mask = sj6_knob_mask[v];
+-        if (!mask) continue;
+-        sj6_knob_mask[v] = 0;
+-        if (!sj6_knob_ready(v) || engine_bass_preset_pending(v)) continue;
++        const sj6_knob_bits pending = {{sj6_knob_mask[v].word[0], sj6_knob_mask[v].word[1]}};
++        if (!(pending.word[0] | pending.word[1])) continue;
++        sj6_knob_clear(v);
++        if (!mot_base_snd || !sj6_knob_ready(v) || engine_bass_preset_pending(v)) continue;
+ #if X0X_BASS_NOTE_SOUND
+         if (note_lock_applied[v]) continue;
+ #endif
+-        sj6_knob_commit(v, mask);
++        if (pending.word[0]) sj6_knob_commit(v, pending.word[0]);
++#if defined(X0X_HOST) && defined(X0X_SJ6_MAILBOX_PROBE)
++        for (unsigned slot = SJ6_MAILBOX_WORD_BITS; slot < SJ6_MAILBOX_SLOTS; ++slot)
++            if (pending.word[1] & sj6_knob_bit(slot))
++                engine_superj6_mailbox_probe_apply(v, slot, sj6_knob_value[v][slot]);
++#endif
+     }
+ }
+ #endif
+@@ -792,6 +876,9 @@
+         if(k>=0 && mot.lane[k].val[29]==(uint8_t)original_bass[v].kind)l=&mot.lane[k];
+     }
+     if(!l) { if(note_lock_applied[v])note_lock_restore(v); return; }
++#if X0X_SUPERJ6_BUILTIN_INIT
++    if (original_bass[v].kind == ORIGINAL_SOUND_JUNO) sj6_knob_clear((unsigned)v);
++#endif
+ #if X0X_SYNTHONE_PATCH
+     if (original_bass[v].kind == ORIGINAL_SOUND_SYNTHONE) {
+         s1_part_apply_cell(&original_bass[v].dsp.synthone, l->val);
+@@ -844,7 +931,7 @@
+     s1_patch_replaced(v);
+ #endif
+ #if X0X_SUPERJ6_BUILTIN_INIT
+-    sj6_knob_mask[v] = 0;
++    sj6_knob_clear((unsigned)v);
+ #if X0X_BASS_NOTE_SOUND
+     sj6_locked_extra[v] = 0;
+ #endif
+@@ -1035,7 +1122,7 @@
+         s1_patch_replaced(v);
+ #endif
+ #if X0X_SUPERJ6_BUILTIN_INIT
+-        sj6_knob_mask[v] = 0;
++        sj6_knob_clear((unsigned)v);
+ #if X0X_BASS_NOTE_SOUND
+         sj6_locked_extra[v] = 0;
+ #endif

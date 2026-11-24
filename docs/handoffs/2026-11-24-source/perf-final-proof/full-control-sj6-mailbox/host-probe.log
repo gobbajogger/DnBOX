@@ -1,0 +1,10 @@
+part=0 live two-word SMK order, PWM alias, readback, shift bounds, high-only save guard and reload PASS
+part=1 live two-word SMK order, PWM alias, readback, shift bounds, high-only save guard and reload PASS
+part=0 preset cancellation discarded both words and retained peer queue PASS
+part=1 preset cancellation discarded both words and retained peer queue PASS
+part=0 transport note lock discarded both words and retained peer queue PASS
+part=1 transport note lock discarded both words and retained peer queue PASS
+part=0 J6/S1/J6 and direct project adoption isolated old pending values PASS
+part=1 J6/S1/J6 and direct project adoption isolated old pending values PASS
+part=0 rejected factory preserved both words, accepted replacement retired both PASS
+part=1 rejected factory preserved both words, accepted replacement retired both PASS

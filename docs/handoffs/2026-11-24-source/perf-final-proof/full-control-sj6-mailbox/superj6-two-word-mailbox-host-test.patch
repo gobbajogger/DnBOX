@@ -1,0 +1,286 @@
+diff --git a/tests/host/ui_superj6_mailbox_test.c b/tests/host/ui_superj6_mailbox_test.c
+new file mode 100644
+--- /dev/null
++++ b/tests/host/ui_superj6_mailbox_test.c
+@@ -0,0 +1,281 @@
++/* SPDX-License-Identifier: GPL-3.0-only */
++#define PWM_FIXTURE_MAIN retained_pwm_main
++#include "ui_superj6_pwm1_lfo2_test.c"
++
++static void start_parts(unsigned owner)
++{
++    setup(V_PART, PART_303A + owner);
++    proj.set.bt |= PROJ_BT_CLK_IN;
++    select_owner(owner, 0);
++    select_owner(1 - owner, 0);
++    isolate_dry_pair();
++}
++
++static void real_turns(void)
++{
++    visit("OSCILLATOR");
++    panel_turn(0, SJ6_WAVE1, 3);
++    panel_turn(3, SJ6_A_REFERENCE, 83);
++    visit("CHORUS");
++    panel_turn(0, SJ6_CHORUS_I, 1);
++    panel_turn(3, SJ6_CHORUS_MIX, 48);
++    visit("LFO2 PWM");
++    panel_turn(2, SJ6_LFO2_PWM_ROUTE, 2);
++    panel_turn(3, SJ6_LFO2_PWM_BASE, 63);
++}
++
++#if defined(X0X_SJ6_MAILBOX_PROBE)
++#include <limits.h>
++
++enum { HIGH_FIRST = 32, HIGH_LAST = 63 };
++static uint8_t applied_value[NBASS][64];
++static struct {
++    unsigned owner, slot, value;
++    int a_reference, wave, mix, pwm_alias;
++} applied[8];
++static unsigned apply_count;
++
++int engine_superj6_mailbox_probe_read(unsigned owner, unsigned slot)
++{
++    CHECK(owner < NBASS && slot >= HIGH_FIRST && slot <= HIGH_LAST);
++    return applied_value[owner][slot];
++}
++
++void engine_superj6_mailbox_probe_apply(unsigned owner, unsigned slot, unsigned value)
++{
++    CHECK(owner < NBASS && slot >= HIGH_FIRST && slot <= HIGH_LAST);
++    CHECK(apply_count < sizeof applied / sizeof applied[0]);
++    applied_value[owner][slot] = (uint8_t)value;
++    applied[apply_count].owner = owner;
++    applied[apply_count].slot = slot;
++    applied[apply_count].value = value;
++    applied[apply_count].a_reference = engine_superj6_knob_position(owner, SJ6_A_REFERENCE);
++    applied[apply_count].wave = engine_superj6_knob_position(owner, SJ6_WAVE1);
++    applied[apply_count].mix = engine_superj6_knob_position(owner, SJ6_CHORUS_MIX);
++    applied[apply_count].pwm_alias = engine_superj6_knob_position(owner, SJ6_LFO2_PWM_BASE);
++    apply_count++;
++}
++
++static int high(unsigned owner, unsigned slot)
++{ return engine_superj6_mailbox_probe_position(owner, slot); }
++
++static int turn_high(unsigned owner, unsigned slot, int value, int relative)
++{ return engine_superj6_mailbox_probe_turn(owner, slot, value, relative); }
++
++static void both_words(unsigned owner)
++{
++    unsigned peer = 1 - owner;
++    start_parts(owner);
++    begin_pair();
++    capture(pcm[0]);
++    begin_pair();
++    real_turns();
++    CHECK(turn_high(owner, HIGH_LAST, 70, 0));
++    CHECK(turn_high(owner, HIGH_FIRST, 44, 0));
++    CHECK(turn_high(owner, HIGH_LAST, 5, 1));
++    CHECK(turn_high(peer, HIGH_LAST, INT_MAX, 1));
++    CHECK(turn_high(peer, HIGH_LAST, INT_MIN, 1));
++    CHECK(turn_high(peer, HIGH_LAST, 24, 0));
++    CHECK(engine_superj6_knob_turn(peer, SJ6_A_REFERENCE, 67, 0));
++    CHECK(!turn_high(owner, 64, 9, 0) && high(owner, 64) == -1);
++    CHECK(!turn_high(owner, 31, 9, 0) && high(owner, 31) == -1);
++    CHECK(!turn_high(NBASS, HIGH_FIRST, 9, 0) && high(NBASS, HIGH_FIRST) == -1);
++    CHECK(!engine_superj6_knob_turn(owner, HIGH_LAST, 9, 0));
++    CHECK(engine_superj6_knob_position(owner, HIGH_LAST) == -1);
++    CHECK(engine_superj6_knob_position(owner, SJ6_PWM2) == 63);
++    CHECK(engine_superj6_knob_position(owner, SJ6_LFO2_PWM_BASE) == 63);
++    CHECK(engine_superj6_knob_position(owner, SJ6_A_REFERENCE) == 83);
++    float hz;
++    CHECK(engine_superj6_a_reference(owner, &hz) && fabsf(hz - 532.f) < .001f);
++    CHECK(high(owner, HIGH_FIRST) == 44 && high(owner, HIGH_LAST) == 75);
++    CHECK(high(peer, HIGH_FIRST) == 0 && high(peer, HIGH_LAST) == 24);
++    CHECK(!apply_count && project_save() == -8);
++    capture(pcm[1]);
++    CHECK(changed(pcm[0], pcm[1], owner) > COUNT / 2);
++    CHECK(!engine_superj6_knob_pending() && apply_count == 3);
++    unsigned i = owner ? 1 : 0;
++    CHECK(applied[i].owner == owner && applied[i].slot == HIGH_FIRST && applied[i].value == 44);
++    for (unsigned n = i; n <= i + 1; ++n) {
++        CHECK(applied[n].a_reference == 83 && applied[n].wave == 3);
++        CHECK(applied[n].mix == 48 && applied[n].pwm_alias == 63);
++    }
++    CHECK(applied[i + 1].owner == owner && applied[i + 1].slot == HIGH_LAST && applied[i + 1].value == 75);
++    unsigned j = owner ? 0 : 2;
++    CHECK(applied[j].owner == peer && applied[j].slot == HIGH_LAST && applied[j].value == 24);
++    CHECK(applied[j].a_reference == 67);
++    CHECK(high(owner, HIGH_FIRST) == 44 && high(owner, HIGH_LAST) == 75);
++
++    sound_t edited = proj.sound;
++    CHECK(turn_high(owner, HIGH_FIRST, 91, 0));
++    CHECK(engine_superj6_knob_pending() && project_save() == -8);
++    engine_project_hold(1);
++    render(2);
++    CHECK(engine_superj6_knob_pending() && apply_count == 3);
++    engine_project_hold(0);
++    render(1);
++    CHECK(apply_count == 4 && high(owner, HIGH_FIRST) == 91);
++    CHECK(!memcmp(&edited, &proj.sound, sizeof edited));
++    save_and_reload();
++    CHECK(engine_superj6_knob_position(owner, SJ6_A_REFERENCE) == 83);
++    CHECK(engine_superj6_knob_position(owner, SJ6_CHORUS_MIX) == 48);
++    CHECK(engine_superj6_knob_position(owner, SJ6_LFO2_PWM_BASE) == 63);
++    printf("part=%u live two-word SMK order, PWM alias, readback, shift bounds, high-only save guard and reload PASS\n", owner);
++}
++
++static void queue_halves(unsigned owner)
++{
++    CHECK(engine_superj6_knob_turn(owner, SJ6_A_REFERENCE, 83, 0));
++    CHECK(turn_high(owner, HIGH_FIRST, 9, 0));
++    CHECK(turn_high(owner, HIGH_LAST, 19, 0));
++}
++
++static void cancelled(unsigned owner, char scene)
++{
++    unsigned peer = 1 - owner;
++    start_parts(owner);
++    if (scene == 'l') {
++        engine_note_lock_capture(1);
++        CHECK(!engine_bass_note_capture(proj.arr.lane, 0, owner, 0, &proj.sound));
++        engine_note_lock_capture(0);
++        bpart_t *line = &proj.pat[0].bass[owner];
++        for (unsigned n = 0; n < NSTEPS; ++n) line->step[n].flags = G_REST;
++        line->len = 16;
++        line->rate = RATE_16;
++        line->dir = DIR_FWD;
++        line->transpose = 24;
++        line->step[0].flags = G_NOTE;
++        line->step[0].note = 45;
++        line->step[0].velocity = 100;
++        seq.ppat[TRK_BASS0 + owner] = 0;
++        engine_note_lock_refresh();
++    }
++    const sound_t before = proj.sound;
++    queue_halves(owner);
++    CHECK(turn_high(peer, HIGH_LAST, 22, 0));
++    engine_bass_edit_hold(1);
++    if (scene == 'p') {
++        CHECK(!engine_bass_select_preset(owner, ORIGINAL_SOUND_JUNO, 1, &proj.sound));
++        CHECK(!turn_high(owner, HIGH_FIRST, 15, 0));
++        engine_bass_cancel_preset(owner);
++        CHECK(engine_bass_preset_index(owner) == 0);
++    } else {
++        seq_start(&seq);
++        for (unsigned n = 0; n < 2000 && high(owner, HIGH_FIRST); ++n) render(1);
++        CHECK(!turn_high(owner, HIGH_FIRST, 15, 0));
++        CHECK(!engine_superj6_knob_turn(owner, SJ6_A_REFERENCE, 84, 0));
++        seq_stop(&seq);
++        render(2);
++    }
++    CHECK(high(owner, HIGH_FIRST) == 0 && high(owner, HIGH_LAST) == 0);
++    CHECK(engine_superj6_knob_position(owner, SJ6_A_REFERENCE) == 60);
++    CHECK(high(peer, HIGH_LAST) == 22 && apply_count == 0);
++    engine_bass_edit_hold(0);
++    render(2);
++    CHECK(!engine_superj6_knob_pending() && apply_count == 1 && applied[0].owner == peer);
++    CHECK(high(owner, HIGH_FIRST) == 0 && high(owner, HIGH_LAST) == 0);
++    CHECK(!memcmp(&before, &proj.sound, sizeof before));
++    printf("part=%u %s discarded both words and retained peer queue PASS\n",
++           owner, scene == 'p' ? "preset cancellation" : "transport note lock");
++}
++
++static void transition(unsigned owner)
++{
++    unsigned peer = 1 - owner;
++    start_parts(owner);
++    queue_halves(owner);
++    CHECK(turn_high(peer, HIGH_LAST, 23, 0));
++    CHECK(!engine_bass_select_preset(owner, ORIGINAL_SOUND_SYNTHONE, 0, &proj.sound));
++    for (unsigned n = 0; n < 1024 && engine_bass_preset_pending(owner); ++n) render(1);
++    CHECK(!engine_bass_preset_pending(owner) && engine_bass_bank(owner) == ORIGINAL_SOUND_SYNTHONE);
++    CHECK(high(owner, HIGH_LAST) == -1 && !turn_high(owner, HIGH_LAST, 5, 0));
++    CHECK(engine_superj6_knob_position(owner, SJ6_A_REFERENCE) == -1);
++    CHECK(apply_count == 1 && applied[0].owner == peer && high(peer, HIGH_LAST) == 23);
++    select_owner(owner, 0);
++    CHECK(high(owner, HIGH_FIRST) == 0 && high(owner, HIGH_LAST) == 0);
++    CHECK(engine_superj6_knob_position(owner, SJ6_A_REFERENCE) == 60);
++    queue_halves(owner);
++    CHECK(turn_high(peer, HIGH_LAST, 5, 0));
++    engine_apply_sound(&proj.sound);
++    render(2);
++    CHECK(!engine_superj6_knob_pending() && apply_count == 1);
++    CHECK(high(owner, HIGH_LAST) == 0 && high(peer, HIGH_LAST) == 23);
++    CHECK(engine_superj6_knob_position(owner, SJ6_A_REFERENCE) == 60);
++    printf("part=%u J6/S1/J6 and direct project adoption isolated old pending values PASS\n", owner);
++}
++
++static void factory(unsigned owner)
++{
++    unsigned peer = 1 - owner;
++    start_parts(owner);
++    queue_halves(owner);
++    CHECK(turn_high(peer, HIGH_LAST, 23, 0));
++    sj6_factory_row row = {0};
++    CHECK(!engine_superj6_factory_load(owner, &row));
++    CHECK(high(owner, HIGH_LAST) == 19 && engine_superj6_knob_position(owner, SJ6_A_REFERENCE) == 83);
++    row.present = (1u << SJ6_ROW_AMOUNT) - 1u;
++    row.value[SJ6_ROW_MASTER] = .66f;
++    engine_bass_edit_hold(1);
++    CHECK(engine_superj6_factory_load(owner, &row));
++    CHECK(!engine_superj6_knob_turn(owner, SJ6_A_REFERENCE, 99, 0));
++    CHECK(!turn_high(owner, HIGH_LAST, 23, 0));
++    render(2);
++    CHECK(!engine_superj6_factory_pending() && apply_count == 0);
++    CHECK(high(owner, HIGH_FIRST) == 0 && high(owner, HIGH_LAST) == 0);
++    CHECK(engine_superj6_knob_position(owner, SJ6_A_REFERENCE) == 60);
++    engine_bass_edit_hold(0);
++    render(2);
++    CHECK(!engine_superj6_knob_pending() && apply_count == 1 && applied[0].owner == peer);
++    CHECK(high(peer, HIGH_LAST) == 23);
++    printf("part=%u rejected factory preserved both words, accepted replacement retired both PASS\n", owner);
++}
++
++int main(void)
++{
++    const char *scene = getenv("SJ6_MAILBOX_SCENE");
++    CHECK(scene && strlen(scene) == 2 && (scene[1] == '0' || scene[1] == '1'));
++    unsigned owner = (unsigned)(scene[1] - '0');
++    switch (scene[0]) {
++    case 'b': both_words(owner); break;
++    case 'p':
++    case 'l': cancelled(owner, scene[0]); break;
++    case 't': transition(owner); break;
++    case 'f': factory(owner); break;
++    default: CHECK(0);
++    }
++    return 0;
++}
++#else
++/* Compile with the production mailbox configuration in both comparison arms. */
++int main(void)
++{
++    const char *part = getenv("SJ6_MAILBOX_SCENE");
++    CHECK(part && part[0] == 'm' && (part[1] == '0' || part[1] == '1'));
++    const unsigned owner = (unsigned)(part[1] - '0'), peer = 1 - owner;
++    start_parts(owner);
++    begin_pair();
++    capture(pcm[0]);
++    begin_pair();
++    real_turns();
++    CHECK(engine_superj6_knob_turn(peer, SJ6_A_REFERENCE, 69, 0));
++    CHECK(engine_superj6_knob_turn(peer, SJ6_WAVE2, 3, 0));
++    CHECK(engine_superj6_knob_turn(peer, SJ6_CHORUS_II, 1, 0));
++    CHECK(engine_superj6_knob_turn(peer, SJ6_CHORUS_MIX, 73, 0));
++    capture(pcm[1]);
++    CHECK(changed(pcm[0], pcm[1], owner) > COUNT / 2);
++    CHECK(changed(pcm[0], pcm[1], peer) > COUNT / 2);
++    CHECK(engine_superj6_knob_position(owner, SJ6_A_REFERENCE) == 83);
++    CHECK(engine_superj6_knob_position(peer, SJ6_A_REFERENCE) == 69);
++    CHECK(engine_superj6_knob_position(peer, SJ6_CHORUS_MIX) == 73);
++    const char *path = getenv("SJ6_MAILBOX_PCM");
++    CHECK(path);
++    FILE *file = fopen(path, "wb");
++    CHECK(file && fwrite(pcm[1], sizeof pcm[1], 1, file) == 1);
++    save_and_reload();
++    begin_pair();
++    capture(pcm[1]);
++    CHECK(fwrite(pcm[1], sizeof pcm[1], 1, file) == 1);
++    CHECK(fwrite(&proj.sound, sizeof proj.sound, 1, file) == 1 && !fclose(file));
++    printf("part=%u off-default PCM during held edits and after reload, including persisted sound bytes\n", owner);
++    return 0;
++}
++#endif
