@@ -13,7 +13,13 @@
 #define FELUCCA_ID "ota-SMK-37 Pro_900"
 #define T_APP_HI 0x9D000u                   /* end of the app area the loader writes */
 #define T_REC 0xBFF00u                      /* the update record (ota.c OTA_RES) */
-#define T_ERASE_HI 0xC0000u                 /* nothing erased at or above (BTIF, USRTRIM, ...) */
+#define T_ERASE_HI 0xC0000u                 /* nothing erased at or above except FDATA and the FITTAB sector */
+#define T_XD_LO 0xAD000u                    /* XDATA: the font region, from the package's xdata.bin (type 101) */
+#define T_XD_HI 0xAF000u
+#define T_FT_LO 0xFE000u                    /* FITTAB: the fit-table sector, from fittab.bin (type 102) */
+#define T_FT_HI 0xFF000u
+#define T_FD_LO 0xE5000u                    /* FDATA: the Synth One factory pack, from fdata.bin (type 103) */
+#define T_FD_HI 0xF4000u
 #else
 #define FELUCCA_ID "ota-FM-1_900"
 #define T_APP_HI 0x93000u
@@ -90,8 +96,13 @@ static void ota_commit(const uint8_t *parm) { (void)parm; }
 static int ldr_fread(uint32_t off, void *p, uint32_t n) { memcpy(p, nor + off, n); return 0; }
 static int ldr_erase(uint32_t off)
 {
-    if (off < 0x4000u || off >= T_ERASE_HI || (off & 0xFFFu)) bad_range++;
-    if (off < 0x4000u) { printf("ERASE IN THE HEAD %#x\n", off); exit(1); }
+    if ((off & 0xFFFu) || off < 0x4000u ||
+        (off >= T_ERASE_HI
+#if BOARD_SMK37
+         && !(off >= T_FT_LO && off < T_FT_HI) && !(off >= T_FD_LO && off < T_FD_HI)
+#endif
+        )) bad_range++;
+    if (off < 0x4000u || off >= 0xFF000u) { printf("ERASE IN A PROTECTED RANGE %#x\n", off); exit(1); }
     erases++;
     memset(nor + off, 0xFF, 0x1000);
     return 0;
@@ -100,7 +111,15 @@ static int ldr_prog(uint32_t off, const void *p, uint32_t n)
 {
     const uint8_t *s = p;
     uint32_t i;
-    if (off < 0x4000u || off + n > T_APP_HI || ((off & 0xFFu) + n) > 256u) bad_range++;
+    if (off < 0x4000u || ((off & 0xFFu) + n) > 256u) bad_range++;
+#if BOARD_SMK37
+    if (off + n > T_APP_HI &&
+        !(off >= T_XD_LO && off + n <= T_XD_HI) &&
+        !(off >= T_FT_LO && off + n <= T_FT_HI) &&
+        !(off >= T_FD_LO && off + n <= T_FD_HI)) bad_range++;   /* app area, XDATA, FITTAB or FDATA */
+#else
+    if (off + n > T_APP_HI) bad_range++;
+#endif
     for (i = 0; i < n; i++) nor[off + i] &= s[i];
     return 0;
 }
@@ -135,6 +154,21 @@ static uint32_t flash_off(const uint8_t *lg)        /* flash.bin offset in the l
         uint8_t *e = h + 0x40 + i * 0x50u;
         ota_jl_enc(e, 0x50);
         if (ota_rd16(e) == 0) return ota_rd32(e + 8);
+    }
+    return 0;
+}
+
+static uint32_t entry_of(const uint8_t *lg, uint32_t type, uint32_t *len)  /* a file's offset, 0 = none */
+{
+    uint8_t h[0x400];
+    uint32_t i, n;
+    memcpy(h, lg, sizeof h);
+    ota_jl_enc(h, 0x40);
+    n = ota_rd16(h + 8);
+    for (i = 0; i < n; i++) {
+        uint8_t *e = h + 0x40 + i * 0x50u;
+        ota_jl_enc(e, 0x50);
+        if (ota_rd16(e) == type) { *len = ota_rd32(e + 12); return ota_rd32(e + 8); }
     }
     return 0;
 }
@@ -217,6 +251,104 @@ int main(int argc, char **argv)
         bad += check("foreign key / damaged app head refused, nothing erased", rc == -6 && erases == 0);
         logical[nfo + 0x4000 + 5] = save;
     }
+#if BOARD_SMK37
+    {   /* XDATA: written from xdata.bin when the package has one, else left; the store around it never */
+        static uint8_t store[0x13000];
+        uint32_t xlen = 0, xo = entry_of(logical, 101u, &xlen), k;
+        memcpy(nor, old + ofo, T_APP_HI);
+        for (k = 0; k < sizeof store; k++)
+            nor[0x9D000u + k] = (uint8_t)(k * 7u + 3u);
+        memcpy(store, nor + 0x9D000u, sizeof store);
+        put_record_at(T_REC);
+        erases = 0; bad_range = 0;
+        rc = ldr_session();
+        bad += check("install with XDATA state completes", rc == 0 && bad_range == 0);
+        if (xo) {
+            bad += check("XDATA 0xAD000..0xAEFFF == the package's xdata.bin", xlen == T_XD_HI - T_XD_LO &&
+                         !memcmp(nor + T_XD_LO, logical + xo, xlen));
+            bad += check("store 0x9D000..0xACFFF and owner tag 0xAF000 untouched",
+                         !memcmp(nor + 0x9D000u, store, T_XD_LO - 0x9D000u) &&
+                         !memcmp(nor + 0xAF000u, store + (0xAF000u - 0x9D000u), 0x1000u));
+            erases = 0;
+            rc = ldr_session();
+            bad += check("re-run: XDATA already equal, nothing erased", rc == 0 && erases == 0);
+            logical[xo + 100] ^= 0x01;                   /* damaged xdata.bin: refused before any erase */
+            memcpy(nor, old + ofo, T_APP_HI);
+            erases = 0;
+            rc = ldr_session();
+            bad += check("damaged xdata.bin refused (CRC), nothing erased", rc == -13 && erases == 0);
+            logical[xo + 100] ^= 0x01;
+        } else {
+            bad += check("no xdata.bin: store and XDATA sectors untouched",
+                         !memcmp(nor + 0x9D000u, store, sizeof store));
+        }
+    }
+    {   /* FITTAB: written from fittab.bin when the package has one, else left; USR and key_mac never */
+        uint32_t flen = 0, fo = entry_of(logical, 102u, &flen), k;
+        uint8_t usr[0xA000], key[0x1000], gap[0x1000];
+        memcpy(usr, nor + 0xF4000u, sizeof usr);
+        memcpy(key, nor + 0xFF000u, sizeof key);
+        for (k = 0; k < sizeof gap; k++)
+            nor[T_FT_LO + k] = (uint8_t)(k * 11u + 9u);
+        memcpy(gap, nor + T_FT_LO, sizeof gap);
+        put_record_at(T_REC);
+        erases = 0; bad_range = 0;
+        rc = ldr_session();
+        bad += check("install with FITTAB state completes", rc == 0 && bad_range == 0);
+        if (fo) {
+            bad += check("FITTAB 0xFE000..0xFEFFF == the package's fittab.bin", flen == T_FT_HI - T_FT_LO &&
+                         !memcmp(nor + T_FT_LO, logical + fo, flen));
+            bad += check("USR 0xF4000..0xFDFFF and key_mac 0xFF000 untouched",
+                         !memcmp(nor + 0xF4000u, usr, sizeof usr) && !memcmp(nor + 0xFF000u, key, sizeof key));
+            erases = 0;
+            rc = ldr_session();
+            bad += check("re-run: FITTAB already equal, nothing erased", rc == 0 && erases == 0);
+            logical[fo + 100] ^= 0x01;                   /* damaged fittab.bin: refused before any erase */
+            memcpy(nor + T_FT_LO, gap, sizeof gap);
+            erases = 0;
+            rc = ldr_session();
+            bad += check("damaged fittab.bin refused (CRC), nothing erased", rc == -15 && erases == 0);
+            logical[fo + 100] ^= 0x01;
+        } else {
+            bad += check("no fittab.bin: FITTAB sector untouched",
+                         !memcmp(nor + T_FT_LO, gap, sizeof gap));
+        }
+    }
+    {   /* FDATA: written from fdata.bin when the package has one, else left; the sample slots below and
+         * USR above never */
+        static uint8_t slots[T_FD_LO - 0xC2000u], gap[T_FD_HI - T_FD_LO];
+        uint32_t dlen = 0, dof = entry_of(logical, 103u, &dlen), k;
+        uint8_t usr[0xA000];
+        for (k = 0; k < sizeof slots; k++)
+            nor[0xC2000u + k] = (uint8_t)(k * 5u + 1u);
+        memcpy(slots, nor + 0xC2000u, sizeof slots);
+        for (k = 0; k < sizeof gap; k++)
+            nor[T_FD_LO + k] = (uint8_t)(k * 3u + 7u);
+        memcpy(gap, nor + T_FD_LO, sizeof gap);
+        memcpy(usr, nor + 0xF4000u, sizeof usr);
+        put_record_at(T_REC);
+        erases = 0; bad_range = 0;
+        rc = ldr_session();
+        bad += check("install with FDATA state completes", rc == 0 && bad_range == 0);
+        bad += check("sample slots 0xC2000..0xE4FFF and USR 0xF4000.. untouched",
+                     !memcmp(nor + 0xC2000u, slots, sizeof slots) && !memcmp(nor + 0xF4000u, usr, sizeof usr));
+        if (dof) {
+            bad += check("FDATA 0xE5000..0xF3FFF == the package's fdata.bin", dlen == T_FD_HI - T_FD_LO &&
+                         !memcmp(nor + T_FD_LO, logical + dof, dlen));
+            erases = 0;
+            rc = ldr_session();
+            bad += check("re-run: FDATA already equal, nothing erased", rc == 0 && erases == 0);
+            logical[dof + 100] ^= 0x01;                  /* damaged fdata.bin: refused before any erase */
+            memcpy(nor + T_FD_LO, gap, sizeof gap);
+            erases = 0;
+            rc = ldr_session();
+            bad += check("damaged fdata.bin refused (CRC), nothing erased", rc == -17 && erases == 0);
+            logical[dof + 100] ^= 0x01;
+        } else {
+            bad += check("no fdata.bin: FDATA region untouched", !memcmp(nor + T_FD_LO, gap, sizeof gap));
+        }
+    }
+#endif
     bad += check("protected ranges untouched (SMK: BTIF, USRTRIM, USR, key_mac)", protect_ok());
     printf("%s\n", bad ? "LOADER TEST FAILED" : "loader test passed");
     return bad != 0;

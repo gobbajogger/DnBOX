@@ -13,7 +13,8 @@ sys.path.append(str(Path(__file__).resolve().parents[1]/"ui_defects/first_slice"
 from screen_walk import validate as validate_frames
 from full_geometry import validate_audits
 
-def run(source,output):
+def run(source,output,mutants=False):
+    """mutants=False is the per-push path. On demand: --mutants or UI_GEOMETRY_MUTANTS=1."""
     source=source.resolve();output=output.resolve()
     if output.exists():raise ValueError('use a new output directory; stale results are not accepted')
     if output.is_relative_to(source):raise ValueError('output must be outside source')
@@ -39,19 +40,23 @@ def run(source,output):
     if len(matches)==1:
         findings,screens=map(int,matches[0]);report.update(findings=findings,screens=screens)
         if result.returncode==0 and findings==0 and screens==inventory['screens'] and audits['findings']==findings:
-            mutant_env=dict(env,GEOMETRY_MUTATE='1');mutant_env.pop('SMC_UI_SHOTS',None)
-            with (output/'negative.log').open('w') as log:
-                negative=subprocess.run([str(output/'host/test')],cwd=work,env=mutant_env,stdout=log,stderr=subprocess.STDOUT,timeout=600)
-            validate_audits((output/'negative.log').read_text())
-            m=re.findall(r'^GEOMETRY findings=(\d+) screens=(\d+)$',(output/'negative.log').read_text(),re.M)
-            report['negativeExit']=negative.returncode
-            if negative.returncode!=0 and len(m)==1 and int(m[0][0])>0 and int(m[0][1])==screens:report['status']='PASS'
+            report['status']='PASS'
+            if mutants:
+                mutant_env=dict(env,GEOMETRY_MUTATE='1');mutant_env.pop('SMC_UI_SHOTS',None)
+                with (output/'negative.log').open('w') as log:
+                    negative=subprocess.run([str(output/'host/test')],cwd=work,env=mutant_env,stdout=log,stderr=subprocess.STDOUT,timeout=600)
+                validate_audits((output/'negative.log').read_text())
+                m=re.findall(r'^GEOMETRY findings=(\d+) screens=(\d+)$',(output/'negative.log').read_text(),re.M)
+                report['negativeExit']=negative.returncode
+                if not (negative.returncode!=0 and len(m)==1 and int(m[0][0])>0 and int(m[0][1])==screens):
+                    report['status']='FAIL'
     presence=re.findall(r'^PRESENCE checks=(\d+) missing=(\d+)$',(output/'render.log').read_text(),re.M)
     report['presenceScope']='active 909/808 controls, region-bound reachable lists, synth controls and ordinary knob strips; not all-screen R22 qualification'
     if len(presence)!=1 or int(presence[0][0])==0 or int(presence[0][1])!=0:report['status']='FAIL'
     else:
         report['presenceChecks']=int(presence[0][0])
-        for key in ('PRESENCE_MUTATE_VALUE','PRESENCE_MUTATE_GLYPH','PRESENCE_MUTATE_LIST','PRESENCE_MUTATE_SYNTH','PRESENCE_MUTATE_STRIP','PRESENCE_MUTATE_ENV_KNOB','PRESENCE_MUTATE_ENV_STAGE','PRESENCE_MUTATE_ENV_PERCENT','PRESENCE_MUTATE_ENV_MISSING'):
+        if mutants:
+          for key in ('PRESENCE_MUTATE_VALUE','PRESENCE_MUTATE_GLYPH','PRESENCE_MUTATE_LIST','PRESENCE_MUTATE_SYNTH','PRESENCE_MUTATE_STRIP','PRESENCE_MUTATE_ENV_KNOB','PRESENCE_MUTATE_ENV_STAGE','PRESENCE_MUTATE_ENV_PERCENT','PRESENCE_MUTATE_ENV_MISSING'):
             me=dict(env,**{key:'1'});me.pop('SMC_UI_SHOTS',None)
             logpath=output/(key.lower()+'.log')
             with logpath.open('w') as log:
@@ -60,11 +65,62 @@ def run(source,output):
             pm=re.findall(r'^PRESENCE checks=(\d+) missing=(\d+)$',logpath.read_text(),re.M)
             report[key]={'exit':mrun.returncode,'presence':pm}
             if mrun.returncode==0 or len(pm)!=1 or int(pm[0][1])==0:report['status']='FAIL'
+    # L11: 4-level battery in every reached top bar; pan L50..C..R50 wherever formatted.
+    bat=re.findall(r'^BATTERY checks=(\d+) missing=(\d+) levels=(\d+),(\d+),(\d+),(\d+)$',(output/'render.log').read_text(),re.M)
+    pan=re.findall(r'^PAN_FORMAT checks=(\d+) bad=(\d+)$',(output/'render.log').read_text(),re.M)
+    report['battery']=bat;report['panFormat']=pan
+    if (len(bat)!=1 or int(bat[0][0])!=inventory['screens'] or int(bat[0][1])!=0 or 0 in map(int,bat[0][2:]) or
+            len(pan)!=1 or int(pan[0][0])==0 or int(pan[0][1])!=0):report['status']='FAIL'
+    else:
+        if mutants:
+          for key,pattern,index in (('BATTERY_MUTATE',r'^BATTERY checks=(\d+) missing=(\d+) ',1),('PAN_MUTATE',r'^PAN_FORMAT checks=(\d+) bad=(\d+)$',1)):
+            me=dict(env,**{key:'1'});me.pop('SMC_UI_SHOTS',None)
+            lp=output/(key.lower()+'.log')
+            with lp.open('w') as log:mrun=subprocess.run([str(output/'host/test')],cwd=work,env=me,stdout=log,stderr=subprocess.STDOUT,timeout=600)
+            pm=re.findall(pattern,lp.read_text(),re.M)
+            report[key]={'exit':mrun.returncode,'counts':pm}
+            if mrun.returncode==0 or len(pm)!=1 or int(pm[0][index])==0:report['status']='FAIL'
+    # Row 7: synth sequencer on the R22 piano roll on every reached SEQ screen (all 4 engines).
+    roll=re.findall(r'^R22_ROLL screens=(\d+) missing=(\d+)$',(output/'render.log').read_text(),re.M)
+    report['r22Roll']=roll
+    if len(roll)!=1 or int(roll[0][0])<8 or int(roll[0][1])!=0:report['status']='FAIL'
+    elif mutants:
+        me=dict(env,R22_MUTATE='1');me.pop('SMC_UI_SHOTS',None)
+        lp=output/'r22_mutate.log'
+        with lp.open('w') as log:mrun=subprocess.run([str(output/'host/test')],cwd=work,env=me,stdout=log,stderr=subprocess.STDOUT,timeout=600)
+        pm=re.findall(r'^R22_ROLL screens=(\d+) missing=(\d+)$',lp.read_text(),re.M)
+        report['R22_MUTATE']={'exit':mrun.returncode,'counts':pm}
+        if mrun.returncode==0 or len(pm)!=1 or int(pm[0][1])!=int(pm[0][0]):report['status']='FAIL'
+    # Row 7: every value drawn on its own carries its unit in the same frame.
+    units=re.findall(r'^UNITS checks=(\d+) missing=(\d+)$',(output/'render.log').read_text(),re.M)
+    report['units']=units
+    if len(units)!=1 or int(units[0][0])==0 or int(units[0][1])!=0:report['status']='FAIL'
+    elif mutants:
+        me=dict(env,UNIT_MUTATE='1');me.pop('SMC_UI_SHOTS',None)
+        lp=output/'unit_mutate.log'
+        with lp.open('w') as log:mrun=subprocess.run([str(output/'host/test')],cwd=work,env=me,stdout=log,stderr=subprocess.STDOUT,timeout=600)
+        pm=re.findall(r'^UNITS checks=(\d+) missing=(\d+)$',lp.read_text(),re.M)
+        report['UNIT_MUTATE']={'exit':mrun.returncode,'counts':pm}
+        if mrun.returncode==0 or len(pm)!=1 or int(pm[0][1])==0:report['status']='FAIL'
+    # Page compliance: no raw 0..127 readouts, canonical unit names, one header contract.
+    for name,key in (('RAW_VALUES','RAW_MUTATE'),('UNIT_NAMES','UNITNAME_MUTATE'),('HEADERS','HEADER_MUTATE'),('TYPE_SCALE','TYPESCALE_MUTATE'),
+                     ('DUP_READOUT','DUPREAD_MUTATE'),('KNOB_PREFIX','KPREFIX_MUTATE'),('ABBREV','ABBREV_MUTATE'),('DUP_LABEL','DUPLABEL_MUTATE'),('DEAD_SPACE','DEADSPACE_MUTATE'),('KNOB_GROUPS','KNOBGROUP_MUTATE')):
+        pat=r'^'+name+r' checks=(\d+) bad=(\d+)$'
+        got=re.findall(pat,(output/'render.log').read_text(),re.M)
+        report[name.lower()]=got
+        if len(got)!=1 or int(got[0][0])==0 or int(got[0][1])!=0:report['status']='FAIL';continue
+        if not mutants:continue
+        me=dict(env,**{key:'1'});me.pop('SMC_UI_SHOTS',None)
+        lp=output/(key.lower()+'.log')
+        with lp.open('w') as log:mrun=subprocess.run([str(output/'host/test')],cwd=work,env=me,stdout=log,stderr=subprocess.STDOUT,timeout=600)
+        pm=re.findall(pat,lp.read_text(),re.M)
+        report[key]={'exit':mrun.returncode,'counts':pm}
+        if mrun.returncode==0 or len(pm)!=1 or int(pm[0][1])==0:report['status']='FAIL'
     pix=re.findall(r'^GLYPH_PIXELS checks=(\d+) missing=(\d+) damaged=(\d+)$',(output/'render.log').read_text(),re.M)
     report['glyphPixelScope']='active 909/808 controls: positive raster deltas, own bank/cell bounds and final-frame survival'
     report['glyphPixels']=pix
     if len(pix)!=1 or int(pix[0][0])==0 or int(pix[0][1])+int(pix[0][2])!=0:report['status']='FAIL'
-    else:
+    elif mutants:
         for key in ('PIXEL_MUTATE_BLANK','PIXEL_MUTATE_SHIFT','PIXEL_MUTATE_OVERPAINT','ENVELOPE_MUTATE_CURVE','ENVELOPE_MUTATE_BLANK'):
             me=dict(env,**{key:'1'});me.pop('SMC_UI_SHOTS',None)
             lp=output/(key.lower()+'.log')
@@ -84,7 +140,8 @@ def run(source,output):
                 report[key]['actualGraphFailures']=sorted(actual)
                 if actual!=expected:report['status']='FAIL'
 
-    for key in ('AUDIT_MUTATE_SKIP','AUDIT_MUTATE_ZERO'):
+    if mutants:
+      for key in ('AUDIT_MUTATE_SKIP','AUDIT_MUTATE_ZERO'):
         me=dict(env,**{key:'1'});me.pop('SMC_UI_SHOTS',None);lp=output/(key.lower()+'.log')
         with lp.open('w') as log:
             mrun=subprocess.run([str(output/'host/test')],cwd=work,env=me,stdout=log,stderr=subprocess.STDOUT,timeout=600)
@@ -100,9 +157,21 @@ def run(source,output):
     report['screenText'] = {key: value for key, value in visible.items() if key != 'screen_text'}
     if visible['known_instructional_copy']:
         report['status'] = 'FAIL'
+    # Negative fixtures for the text rules: each must be caught.
+    from scan_text import truncated_words, CRYPTIC, is_instruction
+    fixtures = {'truncated': 'RELEAS' in truncated_words({'a': {'RELEAS'}, 'b': {'RELEASE'}}),
+                'plural_ok': not truncated_words({'a': {'LOOP'}, 'b': {'LOOPS', 'STALLS', 'STALL'}}),
+                'cryptic': bool(CRYPTIC.search('<> \u2191\u2193 PARA \u2192')),
+                'instruction': is_instruction('SEQ + SEL: SLIDER LANE')}
+    report['textFixtures'] = fixtures
+    if not all(fixtures.values()):
+        report['status'] = 'FAIL'
     (output/'result.json').write_text(json.dumps(report,indent=2)+'\n');print(json.dumps(report));return 0 if report['status']=='PASS' else 1
 
 if __name__=='__main__':
-    p=argparse.ArgumentParser();p.add_argument('--source',type=Path,default=Path(__file__).resolve().parents[2]);p.add_argument('--output',type=Path,required=True);a=p.parse_args()
-    try:raise SystemExit(run(a.source,a.output))
+    p=argparse.ArgumentParser();p.add_argument('--source',type=Path,default=Path(__file__).resolve().parents[2]);p.add_argument('--output',type=Path,required=True)
+    p.add_argument('--mutants',action='store_true',help='run mutation self-tests (on demand; not in the per-push gate)')
+    a=p.parse_args()
+    mutants=a.mutants or os.environ.get('UI_GEOMETRY_MUTANTS','') in ('1','true','yes')
+    try:raise SystemExit(run(a.source,a.output,mutants=mutants))
     except (OSError,ValueError,subprocess.SubprocessError) as error:print(json.dumps({'status':'FAIL','reason':str(error)}));raise SystemExit(1)

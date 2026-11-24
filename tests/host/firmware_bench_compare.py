@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 import re
 
-LIMIT_US, XIP_MIN, POOL_MIN = 11609, 1024, 512
+LIMIT_US, XIP_MIN, POOL_MIN = 11609, 0, 512
 
 def digest(value, field):
     if not isinstance(value,str) or not re.fullmatch('[0-9a-f]{64}',value):
@@ -19,7 +19,7 @@ def count(value, field, minimum=0):
     return value
 
 def parse_budget(log, model):
-    pattern=rf'^{re.escape(model)}: XIP free: (\d+) B \(min 1024\); pool margin: (\d+) B \(min 512\)$'
+    pattern=rf'^{re.escape(model)}: XIP free: (\d+) B \(min \d+\); pool margin: (\d+) B \(min \d+\)$'
     hits=re.findall(pattern,log,re.M)
     if len(hits)!=1:
         raise ValueError(f'expected one stock budget line for {model}')

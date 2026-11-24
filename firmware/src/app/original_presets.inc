@@ -1,6 +1,7 @@
 /* SPDX-License-Identifier: GPL-3.0-only */
 /* Textually included by engine.c: replacement-only patch publication. */
 static int16_t bass_named_preset[NBASS] = {-1, -1};
+static void arp_adopt(int v, const sound_t *sound, int preset_change); /* engine_arp.inc */
 static volatile uint8_t bass_preview_dirty, bass_wheel_mask, bass_edit_depth;
 #if X0X_SYNTHONE_PATCH
 /* One main-loop edit per part. A new adoption invalidates its predecessor,
@@ -56,7 +57,7 @@ static void bass_publish_request(int voice, uint32_t token)
     ++bass_publish_seq[voice];
 }
 #if X0X_SYNTHONE_PATCH
-int engine_s1_patch_snapshot(unsigned voice, s1_patch_snapshot *out)
+X0X_COLD int engine_s1_patch_snapshot(unsigned voice, s1_patch_snapshot *out)
 {
     if (voice >= NBASS || !out) return 0;
     uint32_t lock = plat_cq_lock();
@@ -71,6 +72,33 @@ int engine_s1_patch_snapshot(unsigned voice, s1_patch_snapshot *out)
     }
     plat_cq_unlock(lock);
     return ready;
+}
+
+int engine_s1_envelope_view(unsigned voice, unsigned filter, float *level, unsigned *stage, unsigned *key_down)
+{
+    if (voice >= NBASS || !level || !stage || !key_down) return 0;
+    uint32_t lock = plat_cq_lock();
+    const original_runtime_part *owner = &original_bass[voice];
+    int selected = -1;
+#if X0X_S1C
+    if (owner->kind == ORIGINAL_SOUND_SYNTHONE && owner->status == ORIGINAL_RUNTIME_OK)
+        selected = s1_part_env_view(&owner->dsp.synthone, filter, level, stage, key_down) ? 0 : -1;
+#else
+    if (owner->kind == ORIGINAL_SOUND_SYNTHONE && owner->status == ORIGINAL_RUNTIME_OK) {
+        const s1_dry_part *part = &owner->dsp.synthone;
+        /* Same voice as engine_bass_voice_view: the loudest started one. */
+        for (unsigned i = 0; i < S1_CORE_VOICES; ++i)
+            if (part->voice[i].started &&
+                (selected < 0 || part->voice[i].amp.level > part->voice[selected].amp.level))
+                selected = (int)i;
+        if (selected >= 0) {
+            const dnbx_s1_envelope_state *e = filter ? &part->voice[selected].filter : &part->voice[selected].amp;
+            *level = e->level; *stage = e->stage; *key_down = part->down[selected];
+        }
+    }
+#endif
+    plat_cq_unlock(lock);
+    return selected >= 0;
 }
 
 int engine_s1_patch_read(unsigned voice, unsigned factory_id, s1_patch_value *out)
@@ -142,6 +170,23 @@ static void s1_patch_boundary(void)
     }
 }
 #endif
+/* Compact Synth One uses the cell's extension bytes for its 10-bit preset.
+ * Other engines and stock INIT retain the legacy byte and project encoding. */
+static unsigned bass_cell_preset(const uint8_t *cell)
+{
+#if X0X_S1C
+    if (cell[29] == ORIGINAL_SOUND_SYNTHONE) return original_sound_s1_program(cell);
+#endif
+    return cell[30];
+}
+#if X0X_S1C
+enum { BASS_REQ_PRESET_BITS = 10 };
+#else
+enum { BASS_REQ_PRESET_BITS = 7 };
+#endif
+#define BASS_REQ_PRESET_MASK ((1u << BASS_REQ_PRESET_BITS) - 1u)
+#define BASS_REQ_SERIAL_SHIFT (BASS_REQ_PRESET_BITS + 2)
+#define BASS_REQ_SERIAL_MASK ((1u << (31 - BASS_REQ_SERIAL_SHIFT)) - 1u)
 static int bass_tagged_cell_validate(uint8_t *cell, bass_sound_tag_t *tag, int *bank)
 {
     bass_sound_info_t info;
@@ -158,7 +203,7 @@ static int bass_tagged_cell_validate(uint8_t *cell, bass_sound_tag_t *tag, int *
     }
     *bank = cell[29];
     if (info.identity.engine != original_sound_engine_id((unsigned)*bank) ||
-        info.preset != cell[30] || info.flags != (original_sound_edit_mask(cell) ? BASS_SOUND_EDITED : 0)) return -9;
+        info.preset != bass_cell_preset(cell) || info.flags != (original_sound_edit_mask(cell) ? BASS_SOUND_EDITED : 0)) return -9;
     return 0;
 }
 int engine_bass_sound_bank(const sound_t *sound, int voice)
@@ -168,7 +213,7 @@ int engine_bass_sound_bank(const sound_t *sound, int voice)
     return mut && (unsigned)voice < NBASS &&
         !bass_tagged_cell_validate(mut->v[T_303][voice], &mut->bass[voice], &bank) ? bank : -1;
 }
-int engine_bass_sound_validate(const sound_t *sound)
+X0X_COLD int engine_bass_sound_validate(const sound_t *sound)
 {
     if (!sound) return -1;
     for (int v = 0; v < NBASS; ++v) if (engine_bass_sound_bank(sound, v) < 0) return -9;
@@ -230,7 +275,7 @@ static int bass_note_capture(lane_t *lanes,int pat,int voice,int step,const soun
         const uint8_t *cell=next.val;
         bass_sound_info_t info = {{original_sound_engine_id((unsigned)cell[29]), ORIGINAL_SOUND_SCHEMA,
             (uint8_t)original_sound_count((unsigned)cell[29]), BASS_IDENTITY_KNOWN},
-            (uint16_t)cell[30], (uint8_t)(original_sound_edit_mask(cell) ? BASS_SOUND_EDITED : 0)};
+            (uint16_t)bass_cell_preset(cell), (uint8_t)(original_sound_edit_mask(cell) ? BASS_SOUND_EDITED : 0)};
         if(bass_sound_tag_encode((bass_sound_tag_t *)(next.val+BASS_NOTE_TAG),&info,
                                 BASS_SOUND_REGISTRY,4)!=BASS_IDENTITY_READY)return -1;
     }
@@ -314,9 +359,9 @@ void engine_bass_sound_refresh(sound_t *sound, int v)
 {
     if (!sound || (unsigned)v >= NBASS || !original_sound_valid(sound->v[T_303][v])) return;
     const uint8_t *cell = sound->v[T_303][v];
-    bass_tag_set(sound, v, cell[29], cell[30], original_sound_edit_mask(cell) != 0);
+    bass_tag_set(sound, v, cell[29], bass_cell_preset(cell), original_sound_edit_mask(cell) != 0);
 }
-static int bass_restore_part(const sound_t *sound, int v)
+X0X_COLD static int bass_restore_part(const sound_t *sound, int v)
 {
     if (engine_bass_sound_bank(sound, v) < 0) return 0;
     if (original_runtime_retire(&original_bass[v]) != ORIGINAL_RUNTIME_OK) return 0;
@@ -326,14 +371,15 @@ static int bass_restore_part(const sound_t *sound, int v)
 #if X0X_SYNTHONE_PATCH
     s1_patch_replaced(v);
 #endif
-    bass_named_preset[v] = sound->v[T_303][v][30];
+    arp_adopt(v, sound, 0);
+    bass_named_preset[v] = (int16_t)bass_cell_preset(sound->v[T_303][v]);
     original_seq_note[v] = -1;
     __builtin_memset(original_key_pitch[v], 0, sizeof original_key_pitch[v]);
     bass_held[v] = bass_held_count[v] = 0;
     for (unsigned s = 0; s < 3; ++s) src_held[s] &= (uint16_t)~(1u << v);
     return rc;
 }
-static void bass_restore_sound(const sound_t *sound)
+X0X_COLD static void bass_restore_sound(const sound_t *sound)
 {
     for (int v = 0; v < NBASS; ++v) {
         live_key_context_retire(v, 0);
@@ -370,11 +416,11 @@ int engine_bass_preset_pending(int v)
     if (original_runtime_owned(&original_bass[v]) || original_quiet_samples[v] < 512u) return 2;
     return 1;
 }
-int engine_bass_requested_bank(int v)
-{ bass_request_t r; return (unsigned)v < NBASS && bass_request_snapshot(v, &r) && engine_bass_preset_pending(v) ? (int)((r.token >> 7) & 3u) : engine_bass_bank(v); }
-int engine_bass_requested_preset(int v)
-{ bass_request_t r; return (unsigned)v < NBASS && bass_request_snapshot(v, &r) && engine_bass_preset_pending(v) ? (int)(r.token & 127) : engine_bass_preset_index(v); }
-void engine_bass_cancel_preset(int v)
+X0X_COLD int engine_bass_requested_bank(int v)
+{ bass_request_t r; return (unsigned)v < NBASS && bass_request_snapshot(v, &r) && engine_bass_preset_pending(v) ? (int)((r.token >> BASS_REQ_PRESET_BITS) & 3u) : engine_bass_bank(v); }
+X0X_COLD int engine_bass_requested_preset(int v)
+{ bass_request_t r; return (unsigned)v < NBASS && bass_request_snapshot(v, &r) && engine_bass_preset_pending(v) ? (int)(r.token & BASS_REQ_PRESET_MASK) : engine_bass_preset_index(v); }
+X0X_COLD void engine_bass_cancel_preset(int v)
 { if ((unsigned)v < NBASS) bass_publish_request(v, 0x40000000u | ((++bass_request_serial & 0x3fffffu) << 8)); }
 void engine_bass_edit_hold(int hold)
 {
@@ -383,7 +429,7 @@ void engine_bass_edit_hold(int hold)
     else if (bass_edit_depth) --bass_edit_depth;
     __asm__ volatile("" ::: "memory");
 }
-int engine_bass_base_ready(unsigned mask, const bass_base_state_t *target)
+X0X_COLD int engine_bass_base_ready(unsigned mask, const bass_base_state_t *target)
 {
     for (int v = 0; v < NBASS; ++v) if (mask & (1u << v)) {
         int bank;
@@ -400,7 +446,7 @@ int engine_bass_base_ready(unsigned mask, const bass_base_state_t *target)
     return cq_r != cq_w || live_key_r != live_key_w || live_key_cancel ||
         !plat_midi_passed(plat_midi_mark()) ? 2 : 0;
 }
-void engine_bass_base_restore(unsigned mask)
+X0X_COLD void engine_bass_base_restore(unsigned mask)
 {
     for (int v = 0; v < NBASS; ++v) if (mask & (1u << v)) {
         engine_bass_cancel_preset(v);
@@ -409,7 +455,7 @@ void engine_bass_base_restore(unsigned mask)
         for (int i = 0; i < MX_NPARAMS; ++i) apply_base(T_MIX, PART_303A + v, i);
     }
 }
-int engine_bass_select_preset_at(int v, int bank, int preset, sound_t *sound, int pat)
+X0X_COLD int engine_bass_select_preset_at(int v, int bank, int preset, sound_t *sound, int pat)
 {
     if ((unsigned)v >= NBASS || !sound || sound != mot_base_snd ||
         (unsigned)preset >= original_sound_factories((unsigned)bank)) return -1;
@@ -417,8 +463,8 @@ int engine_bass_select_preset_at(int v, int bank, int preset, sound_t *sound, in
     if (bass_has_locks(v)) return -4;
     bass_gate_pat[v] = (uint8_t)((unsigned)pat < NPAT ? pat : 0xFF);
     __asm__ volatile("" ::: "memory");
-    uint32_t token = 0x80000000u | ((++bass_request_serial & 0x3fffffu) << 9) |
-        ((uint32_t)bank << 7) | (uint32_t)preset;
+    uint32_t token = 0x80000000u | ((++bass_request_serial & BASS_REQ_SERIAL_MASK) << BASS_REQ_SERIAL_SHIFT) |
+        ((uint32_t)bank << BASS_REQ_PRESET_BITS) | (uint32_t)preset;
 #if X0X_SYNTHONE_PATCH
     s1_edit[v].pending = 0;
 #endif
@@ -439,7 +485,7 @@ static void bass_preset_boundary_voice(int v)
         if (engine_bass_preset_pending(v) != 1) return;
         /* A pattern preset waits until its pattern plays (the bar switch). */
         if (bass_gate_pat[v] < NPAT && seq.ppat[TRK_BASS0 + v] != bass_gate_pat[v]) return;
-        int bank = (int)((token >> 7) & 3u), preset = (int)(token & 127);
+        int bank = (int)((token >> BASS_REQ_PRESET_BITS) & 3u), preset = (int)(token & BASS_REQ_PRESET_MASK);
         uint8_t next[32];
         if (!engine_bass_bank_available(v, bank) || !original_sound_init(next, bank, preset)) return;
         live_key_context_retire(v, 1);
@@ -462,6 +508,7 @@ static void bass_preset_boundary_voice(int v)
 #if X0X_SYNTHONE_PATCH
         s1_patch_replaced(v);
 #endif
+        arp_adopt(v, sound, 1);
         bass_named_preset[v] = (int16_t)preset;
         /* A committed bank/preset replacement, never merely a pending request.
          * parameter -1 identifies the bank; parameter -2 the factory index. */

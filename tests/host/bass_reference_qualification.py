@@ -26,7 +26,7 @@ import check_original_inputs
 sys.path.insert(0, str(ROOT / "experiments/wobble"))
 import compare as au
 
-REFERENCE = ROOT / "experiments/wobble/evidence/comparison.json"
+REFERENCE = ROOT / "experiments/wobble/reference/comparison.json"
 
 
 def compile_renderer(out):

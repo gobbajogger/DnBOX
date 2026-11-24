@@ -276,6 +276,19 @@ X0X_COLD int drum909_param_si(int voice, int i, int pot, float *val)
     }
 }
 
+/* 909 kick base pitch (FINAL-GOAL row 16: "909 pitch and tune shouldn't be doing
+ * the same thing"). PITCH is a base-pitch offset in its own right, at any P.Dpth: the
+ * ratio to the default pot 45 (whose 1.0034 table word, and the boot 1.0, read as
+ * 0 st, so the default kit is bit-identical). TUNE stays the sweep time constant.
+ * Before this, base = BASE*(1+m*(pm-1)) made PITCH inert at the default P.Dpth 0. */
+#define D9_BD_PITCH_POT0 45
+static float d9_bd_base(float pm)
+{
+    const float unity = x0x_pot_exp_value(X0X_EXP_BD_PITCH, D9_BD_PITCH_POT0);
+    if (!(pm > 0.0f) || (pm >= 1.0f && pm <= unity)) return D9_BD_BASE_HZ;
+    return D9_BD_BASE_HZ * (pm / unity);
+}
+
 /* UI: the 909 kick's pitch t ms after a hit, from its pot values (Tune = sweep
  * time constant ms, P.Dpth, Pitch), the same formula d9_bt_trigger/d9_render_bd use. */
 X0X_COLD float drum909_bd_hz(float tau, float m, float pm, float t_ms)
@@ -283,7 +296,7 @@ X0X_COLD float drum909_bd_hz(float tau, float m, float pm, float t_ms)
     tau = tau < 6.0f ? 6.0f : (tau > 32.0f ? 32.0f : tau);
     m = m < 0.0f ? 0.0f : (m > 1.0f ? 1.0f : m);
     if (!(pm > 0.0f)) pm = 1.0f;
-    float base = D9_BD_BASE_HZ * (1.0f + m * (pm - 1.0f)), df = D9_BD_DF_PER_MS * tau * (1.0f + 1.2f * m);
+    float base = d9_bd_base(pm), df = D9_BD_DF_PER_MS * tau * (1.0f + 1.2f * m);
     t_ms -= D9_BD_PHOLD_MS;
     return base + (t_ms > 0.0f ? df * fm_expf(-t_ms / tau) : df);
 }
@@ -545,8 +558,7 @@ static void d9_bt_trigger(d9_bt_t *v, int bd, float accent)
     if (bd) {
         const float tau = v->tune < 6.0f ? 6.0f : (v->tune > 32.0f ? 32.0f : v->tune);
         const float m = v->sweep_depth < 0.0f ? 0.0f : (v->sweep_depth > 1.0f ? 1.0f : v->sweep_depth);
-        const float pm = v->pitch_mod > 0.0f ? v->pitch_mod : 1.0f;
-        v->bd_base = D9_BD_BASE_HZ * (1.0f + m * (pm - 1.0f));
+        v->bd_base = d9_bd_base(v->pitch_mod);
         v->bd_df = D9_BD_DF_PER_MS * tau * (1.0f + 1.2f * m);
         v->bd_mult = d9_exp_small(-1.0f / (tau * D9_MS));
         v->bd_phold = (int32_t)(D9_BD_PHOLD_MS * D9_MS);
@@ -1139,7 +1151,7 @@ void drum909_all_off(drum909_t *d)
     }
 }
 
-int drum909_read_amp(const drum909_t *d,int voice,drum909_amp_snapshot *out)
+X0X_COLD int drum909_read_amp(const drum909_t *d,int voice,drum909_amp_snapshot *out)
 {
  if(!d||!out||(voice!=DR_BD&&voice!=DR_SD))return 0;
  const d9_bt_t *n=&d->bt[voice];

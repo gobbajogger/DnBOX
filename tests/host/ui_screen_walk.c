@@ -102,7 +102,8 @@ int main(void)
       CHECK(engine_bass_select_preset(part-PART_303A,kind,0,&proj.sound)==0);
       for(int block=0;block<12;block++){int32_t audio[512];engine_render(audio,256);}
       CHECK(!engine_bass_preset_pending(part-PART_303A));build_pages();int pages=pg.n;
-      CHECK(pages==3);
+      /* Chicago/Miami: SEQUENCE, PRESET, KEYS. Synth One/SuperJ6 add their ARP SEQ page. */
+      CHECK(pages==(kind==ORIGINAL_SOUND_SYNTHONE || kind==ORIGINAL_SOUND_JUNO ? 4 : 3));
       for(int page=0;page<pages;page++) {
        *page_of(V_SEQ)=(uint8_t)page;build_pages();
        memset(blit_hash,0,sizeof blit_hash);memset(cv_tile_valid,0,sizeof cv_tile_valid);ui_frame();
@@ -133,7 +134,7 @@ int main(void)
     }
     for(int modal=0;modal<4;modal++) {
       setup(V_HOME,PART_909);
-      if(modal==0)ask(ACT_RESET,0,"RESET PROJECT?","SAMPLES ARE KEPT");
+      if(modal==0)ask(ACT_RESET,0,"RESET PROJECT","SAMPLES KEPT; EDITS LOST");
       if(modal==1)say("SAVED",0);
       if(modal==2)say("NEXT: PAT 16",0);
       if(modal==3)run_action(ACT_ABOUT,0);

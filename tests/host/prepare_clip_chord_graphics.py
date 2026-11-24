@@ -26,12 +26,12 @@ hook = hook.replace('return x+tw(f,s);', '''/* Observe actual opaque font ink, t
     for (const unsigned char *p=(const unsigned char*)s; *p; p++) {
         unsigned ch=*p; if(ch<f->first || ch>f->last) ch='?';
         unsigned gi=ch-f->first,w=font_bitmap_width(f,gi),stride=(w+1)/2;
-        const uint8_t *data=f->data+f->off[gi];
+        const uint8_t *data=f->data+font_offset(f,gi);
         for(unsigned yy=0;yy<f->h;yy++) for(unsigned xx=0;xx<w;xx++) {
             unsigned a=data[yy*stride+xx/2]; a=(xx&1)?a&15:a>>4;
             if(a) { assert(pen-(int)f->pad+(int)xx>=0); assert(pen-(int)f->pad+(int)xx<(int)cv_w); assert(y+(int)yy>=0 && y+(int)yy<(int)cv_h); }
         }
-        pen+=f->adv[gi];
+        pen+=font_advance(f,gi);
     }
     return cv_text(x,y,f,s,c);''')
 hook = hook.replace('(void)c;', 'int32_t pen=x;')

@@ -52,6 +52,9 @@ def unpack_lz(data):
 
 
 def main():
+    assert gen_font.glyph_index16([0, 2047], [0, 31]) == [0, 65535]
+    for offset, advance in ((2048, 0), (-1, 0), (0, 32), (0, -1)):
+        assert gen_font.glyph_index16([offset], [advance]) is None
     rng = random.Random(9327)
     for count in (0, 1, 2, 3, 127, 128, 129, 255, 256, 257, 600):
         for source in ([0] * count, [255] * count, [i & 255 for i in range(count)],
@@ -67,7 +70,7 @@ def main():
             gen_font.main(path / "font_raw.h", compressed=False)
             original = (path / "font_raw.h").read_text()
             packed = (path / "felucca_font.h").read_text()
-            size = lambda text: sum(map(int, re.findall(r"_DATA\[(\d+)\]", text)))
+            size = lambda text: sum(map(int, re.findall(r"_(?:DATA|BLOB)\[(\d+)\]", text)))
             assert size(packed) < size(original)
             if fontset == "barlow":
                 assert size(original) - size(packed) >= 16000

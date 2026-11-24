@@ -11,17 +11,70 @@ typedef struct {               /* proportional, see tools/gen_font.py */
     uint8_t first, last;
     const uint8_t *adv;        /* advance per glyph */
     const uint8_t *bw;         /* bitmap width per glyph (starts FONT_PAD left of the pen) */
-    const uint16_t *off;       /* byte offset of each glyph */
+    const uint16_t *off;       /* glyph offset, optionally with advance in its upper five bits */
     const uint8_t *data;
     capm_t cap;                /* rows containing at least half-covered H (or 0) pixels */
 } felucca_font_t;
+/* FONT_S/M/XS/B bitmaps live outside the app, in the XDATA flash region (FL_XDATA, 0xAD000: tools/build.py
+ * links .xdata.font there and installs it with a 16 B header). Host builds keep them in memory. */
+#if defined(__clang__) && !defined(X0X_HOST) && BOARD_SMK37 && !defined(X0X_XDATA_IN_APP)
+#define FONT_XDATA_SECTION __attribute__((section(".xdata.font"), used))
+#define GFX_XDATA_OK0 0u           /* firmware: FONT_T until xdata_check() has read the header */
+#else
+#define GFX_XDATA_OK0 1u
+#endif
 #include "felucca_font.h"
+#include "app/xdata.h"
+#ifdef FONT_XDATA_LEN
+static uint8_t gfx_xdata_ok = GFX_XDATA_OK0;   /* 0: draw XDATA faces with FONT_T (bad/missing region) */
+/* the face actually drawn: an XDATA face falls back to FONT_T (always in the app) when the region failed */
+static inline const felucca_font_t *font_live(const felucca_font_t *f)
+{
+    if (!gfx_xdata_ok && f->data >= FONT_XDATA_BLOB && f->data < FONT_XDATA_BLOB + FONT_XDATA_LEN)
+        return &FONT_T;
+    return f;
+}
+#if !GFX_XDATA_OK0
+/* the region's header, linked at FL_XDATA_LO ahead of the blob (app.ld .xdata; tools/build.py checks it) */
+static const uint32_t FONT_XDATA_HDR[4] __attribute__((section(".xdata.0hdr"), used, aligned(4))) =
+    { XDATA_MAGIC, FONT_XDATA_LEN, FONT_XDATA_CRC32, FONT_XDATA_CRC32 };
+/* boot, after fl_plain_window_init (the region reads as plaintext from then on): trust XDATA or not */
+static void xdata_check(void)
+{
+    gfx_xdata_ok = xdata_valid((const uint8_t *)FL_XIP(FL_XDATA_LO), FL_XDATA_HI - FL_XDATA_LO,
+                               FONT_XDATA_LEN, FONT_XDATA_CRC32);
+}
+#else
+static void xdata_check(void) {}
+#endif
+#else
+#define font_live(f) (f)
+static uint8_t gfx_xdata_ok = 1;
+static void xdata_check(void) {}
+#endif
+
+static inline uint32_t font_offset(const felucca_font_t *f, uint32_t gi)
+{
+#ifdef FONT_INDEX16
+    return f->off[gi] & 2047u;
+#else
+    return f->off[gi];
+#endif
+}
+static inline uint32_t font_advance(const felucca_font_t *f, uint32_t gi)
+{
+#ifdef FONT_INDEX16
+    return f->off[gi] >> 11;
+#else
+    return f->adv[gi];
+#endif
+}
 
 /* Null bw denotes a generation-verified advance+padding width. Zero-advance
  * blank glyphs retain zero width. Other font families keep their exact table. */
 static inline uint32_t font_bitmap_width(const felucca_font_t *f, uint32_t gi)
 {
-    uint32_t advance = f->adv[gi];
+    uint32_t advance = font_advance(f,gi);
     return f->bw ? f->bw[gi] : advance ? advance + 2u * f->pad : 0u;
 }
 
@@ -242,6 +295,7 @@ static int32_t cv_text_clip(int32_t x, int32_t y, const felucca_font_t *f, const
 {
     uint32_t r = c >> 11, g = (c >> 5) & 63u, b = c & 31u;
     uint16_t sc = swap16(c);
+    f = font_live(f);
     for (; *s; s++) {
         uint32_t gi = glyph(f, (uint8_t)*s), gx, gy, w, height = f->h;
         uint32_t crop_x = 0, crop_y = 0;
@@ -257,7 +311,7 @@ static int32_t cv_text_clip(int32_t x, int32_t y, const felucca_font_t *f, const
         uint32_t bpr;
 #endif
         const uint8_t *gd;
-        gd = f->data + f->off[gi];
+        gd = f->data + font_offset(f,gi);
 #if defined(FONT_ALPHA_CROP) || defined(FONT_LZ_CROP)
         uint32_t rectangle = font_crop_read(&gd);
         crop_x = rectangle & 63u;
@@ -335,7 +389,7 @@ static int32_t cv_text_clip(int32_t x, int32_t y, const felucca_font_t *f, const
                     cv_px[(uint32_t)py * cv_w + (uint32_t)px] = swap16((nr << 11) | (ng << 5) | nb);
                 }
             }
-        x += f->adv[gi];
+        x += font_advance(f,gi);
     }
     return x;
 }
@@ -346,8 +400,9 @@ static int32_t cv_text(int32_t x, int32_t y, const felucca_font_t *f, const char
 static int32_t text_w(const felucca_font_t *f, const char *s)
 {
     int32_t w = 0;
+    f = font_live(f);
     for (; *s; s++)
-        w += f->adv[glyph(f, (uint8_t)*s)];
+        w += font_advance(f,glyph(f, (uint8_t)*s));
     return w;
 }
 

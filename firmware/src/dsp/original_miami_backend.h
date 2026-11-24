@@ -67,6 +67,8 @@ int original_miami_backend_init(original_miami_backend *, unsigned factory, floa
  * explicitly calls panic/init when a load requires cleared transient history. */
 int original_miami_backend_load_factory(original_miami_backend *, unsigned factory);
 int original_miami_backend_set_macro(original_miami_backend *, unsigned control, float normalized);
+/* Display only: control 9 (Cutoff, 0..1) -> base filter corner in Hz (MS-20 A table law). */
+int original_miami_backend_cutoff_hz(float control, float *hz);
 const original_miami_program *original_miami_backend_program(const original_miami_backend *);
 int original_miami_backend_set_tempo(original_miami_backend *, float bpm);
 /* Prepare one future output block before serial frame-zero events. Repeated

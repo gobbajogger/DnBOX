@@ -1,6 +1,7 @@
 /* SPDX-License-Identifier: GPL-3.0-only */
 /* X0X audio engine; see engine.h. */
 #include "engine.h"
+#include "ui_perf_profile.h"
 #include <string.h>
 #include "unit_control.h"
 #include "../seq/held_chord.h"
@@ -27,9 +28,18 @@
 
 /* time per stage of the render, in plat_cycles() units (the CPU's cycles, or the 24 MHz timer):
  * running totals (wrapping; the PERF screen takes differences) and the frames rendered. */
+#if X0X_ENGINE_PROFILE || defined(X0X_HOST)
 volatile uint32_t eng_prof[ENG_PROF_N], eng_prof_frames;
+#endif
+#if X0X_ENGINE_PROFILE
 #define PROF_T(v) uint32_t v = plat_cycles()
 #define PROF_ADD(k, t0) (eng_prof[k] += plat_cycles() - (t0))
+#define PROF_FRAMES(n) (eng_prof_frames += (n))
+#else
+#define PROF_T(v) ((void)0)
+#define PROF_ADD(k, t0) ((void)0)
+#define PROF_FRAMES(n) ((void)0)
+#endif
 
 /* ---------------------------------------------------------------- state --- */
 seq_t seq;
@@ -37,6 +47,7 @@ volatile uint8_t eng_step[NTRACKS];
 volatile uint16_t eng_peak[NPARTS];
 volatile uint8_t eng_hit[NKIT][NDRUM];
 static volatile uint32_t eng_hit_ms[NKIT][NDRUM];     /* UI glyph motion: when each track last hit */
+static volatile uint8_t eng_hit_step[NKIT][NDRUM];    /* the step that hit was on (UI: only a real hit lights) */
 static float eng_hit_pk[NKIT][NDRUM];                 /* the envelope's peak since that hit (UI side) */
 static uint32_t eng_hit_seen[NKIT][NDRUM];
 int16_t eng_scope[SCOPE_N] X0X_POOL;
@@ -75,6 +86,16 @@ int engine_bass_status(int v) { return (unsigned)v < NBASS ? original_bass[v].st
  * peak. 0 when it has never hit or the tail has ended. */
 static float eng_hit_e[NDRUM];
 static uint32_t eng_hit_e_at[NDRUM], eng_hit_e_t[NDRUM];
+/* 1 when the track really fired on this step within the last window_ms: a rest,
+ * a muted track or a chance-skipped step never fires the sink, so it stays dark. */
+X0X_COLD int engine_drum_fired(int kit, int v, int step, uint32_t window_ms)
+{
+    if ((unsigned)kit >= NKIT || (unsigned)v >= NDRUM) return 0;
+    uint32_t at = eng_hit_ms[kit][v];
+    if (!at || eng_hit_step[kit][v] != (uint8_t)step) return 0;
+    int32_t age = (int32_t)(plat_ms() - at);
+    return age < 0 || (uint32_t)age <= window_ms;
+}
 X0X_COLD int engine_drum_view(int kit, int v, uint32_t *age_ms, float *env)
 {
     if ((unsigned)kit >= NKIT || (unsigned)v >= NDRUM) return 0;
@@ -102,7 +123,7 @@ X0X_COLD int engine_drum_view(int kit, int v, uint32_t *age_ms, float *env)
 X0X_COLD float engine_bd909_hz(float tau, float m, float pm, float t_ms) { return drum909_bd_hz(tau, m, pm, t_ms); }
 /* The 909 kick latches its sweep on trigger. Observe the next oscillator
  * sample and its rendered sample position under the same control lock. */
-int engine_bd909_pitch_view(float *ms,float *hz)
+X0X_COLD int engine_bd909_pitch_view(float *ms,float *hz)
 {
     if(!ms || !hz)return 0;
     uint32_t flags=plat_cq_lock();
@@ -139,7 +160,7 @@ int engine_drum808_curve(int voice,drum_curve_t *view)
     plat_cq_unlock(lock);
     return ok;
 }
-int engine_drum808_param_curve_preview(int voice,int param,int selection,int raw,drum_curve_t *view)
+X0X_COLD int engine_drum808_param_curve_preview(int voice,int param,int selection,int raw,drum_curve_t *view)
 {
     if(!view)return 0;
     uint32_t lock=plat_cq_lock();
@@ -215,6 +236,7 @@ int engine_juno_envelope_view(int v,juno6_envelope_snapshot *out)
 }
 
 #if X0X_SUPERJ6_FACTORY
+static void arp_store_amp2(unsigned owner, unsigned slot, float unit); /* engine_arp.inc */
 /* The high bit reserves both existing mailboxes as one factory transaction. */
 #define SJ6_FACTORY_GROUP 0x80u
 
@@ -319,9 +341,10 @@ static void apply_superj6_edits(void)
             (void)original_runtime_param(part, JUNO6_APP_PARAM_BASE + ENGINE_SJ6_MASTER_VOLUME,
                                          synth->pending_field[4]);
         for (unsigned slot = 0; slot < 4; ++slot)
-            if (mask & (1u << slot))
-                (void)original_runtime_param(part, JUNO6_APP_PARAM_BASE + ENGINE_SJ6_AMP2_ATTACK + slot,
-                                             synth->pending_field[slot]);
+            if ((mask & (1u << slot)) &&
+                original_runtime_param(part, JUNO6_APP_PARAM_BASE + ENGINE_SJ6_AMP2_ATTACK + slot,
+                                       synth->pending_field[slot]) == ORIGINAL_RUNTIME_OK)
+                arp_store_amp2(owner, slot, synth->pending_field[slot]);
     }
 }
 #endif
@@ -367,7 +390,7 @@ static void live_key_retire(int voice,int release);
 static void live_key_context_retire(int voice,int release);
 static void live_key_drain(void);
 
-void engine_live_key_state(int voice,uint32_t *generation,int *arp,uint32_t *context)
+X0X_COLD void engine_live_key_state(int voice,uint32_t *generation,int *arp,uint32_t *context)
 {
     if((unsigned)voice>=NBASS) { *generation=0;*arp=0;if(context)*context=0;return; }
     uint32_t flags=plat_cq_lock();
@@ -743,6 +766,17 @@ X0X_COLD int engine_param_si(int t, int v, int i, int pot, float *val)
             *val = s1_part_crush_hz(unit_control((unsigned)pot));
             return X0X_U_HZ;
         }
+        {   /* Chicago / Miami cutoff: Hz from each engine's own filter law. */
+            unsigned kind = (unsigned)engine_bass_bank(v);
+            float u;
+            if ((unsigned)pot < 128u &&
+                ((kind == ORIGINAL_SOUND_CHICAGO && i == (int)ORIGINAL_CHICAGO_CUTOFF) ||
+                 (kind == ORIGINAL_SOUND_MIAMI && i == (int)ORIGINAL_MIAMI_CUTOFF)) &&
+                original_sound_control_value(kind, (unsigned)i, (unsigned)pot, &u) &&
+                (kind == ORIGINAL_SOUND_CHICAGO ? original_chicago_backend_cutoff_hz(u, val) :
+                                                  original_miami_backend_cutoff_hz(u, val)))
+                return X0X_U_HZ;
+        }
         return X0X_U_NONE;
     case T_FX: return fxbus_param_si(i, pot, val);
     case T_BRK:                                      /* breaks.c: lvl = set/127 */
@@ -755,7 +789,7 @@ X0X_COLD int engine_param_si(int t, int v, int i, int pot, float *val)
 static const char *const N909[DR_NUM + 1] = {"BD", "SD", "LT", "MT", "HT", "RS", "CP", "CH", "OH", "CR", "RD", "KIT"};
 static const char *const N808[D8_NUM + 1] = {"BD", "SD", "LT", "MT", "HT", "RS", "CP", "CB", "CY", "OH", "CH", "KIT"};
 
-const char *engine_voice_name(int t, int v)
+X0X_COLD const char *engine_voice_name(int t, int v)
 {
     switch (t) {
     case T_909: return (v >= 0 && v <= DR_NUM) ? N909[v] : "";
@@ -1028,7 +1062,7 @@ void engine_bass_on(int part, int note, int accent, int slide)
 {
     engine_bass_on_velocity(part, note, accent, slide, 100);
 }
-void engine_bass_on_velocity(int part, int note, int accent, int slide, int velocity)
+X0X_COLD void engine_bass_on_velocity(int part, int note, int accent, int slide, int velocity)
 {
     if ((unsigned)part < NBASS && SEQ_PART_OFF(&seq, TRK_BASS0 + part)) return;
     if (velocity < 1) velocity = 1;
@@ -1051,7 +1085,7 @@ static uint32_t notes_off_cutoff;
 static uint8_t notes_off_discard;
 static uint32_t notes_off_midi_epoch;
 static uint8_t notes_off_midi_valid;
-void engine_request_notes_off(void)
+X0X_COLD void engine_request_notes_off(void)
 {
     /* Keyboard and SMC request from the CPU0 main loop. Publish the three
      * queue boundaries together while audio is excluded; the MIDI primitive
@@ -1142,6 +1176,7 @@ __attribute__((noinline)) static void s_drum(void *x, int kit, int v, float vel)
     {
         eng_hit[kit][v] = (uint8_t)(vel >= 1.0f ? 255 : (int)(vel * 255.0f));
         if(kit==1)d8_trigger_frame[drum808_clock_slot(v)]=d8_frame;
+        eng_hit_step[kit][v] = eng_step[TRK_DRUM + kit];
         eng_hit_ms[kit][v] = plat_ms() | 1u;          /* 0 = never hit */
     }
     if (kit == 0)
@@ -1495,7 +1530,7 @@ int engine_motion_part(int t, int v)
 int engine_motion_value(int k) { return motion_value(&mot, k); }
 void engine_motion_rec(int k) { motion_req_rec(&mot, k); }
 void engine_motion_hold(int k) { motion_req_hold(&mot, k); }
-void engine_motion_clear(int k)
+X0X_COLD void engine_motion_clear(int k)
 {
     /* Main-loop removal publishes unused BEFORE the queued restore. An IRQ
      * between them can keep the old value for one block, but cannot run the
@@ -2000,6 +2035,7 @@ int engine_midi_held(void)   /* host test: bit k the 303 k gate, bit 8 + s the b
 #endif
 
 #include "original_presets.inc"
+#include "engine_arp.inc"
 
 /* ---------------------------------------------------------------- render --- */
 static void engine_notes_off_apply(void)
@@ -2902,7 +2938,7 @@ __attribute__((noinline)) static void render_sub(float *out_l, float *out_r, uin
         if (!(eng_c1_mask & (1u << j)))
             (void)run_job(j, 0);
     if (eng_c1_mask) {
-        uint32_t pt = plat_cycles();
+        PROF_T(pt);
         if (!eng_c1_waited) {
             eng_c1_waited = 1;
             if (plat_cpu2_wait())
@@ -3044,7 +3080,7 @@ void engine_render(int32_t *out_lr, uint32_t n)
             out_lr[i] = 0;
         return;
     }
-    eng_prof_frames += n;
+    PROF_FRAMES(n);
 #if X0X_SYNTHONE_PATCH
     s1_patch_boundary();
 #endif
@@ -3052,6 +3088,7 @@ void engine_render(int32_t *out_lr, uint32_t n)
 #if X0X_SUPERJ6_FACTORY
     apply_superj6_edits();
 #endif
+    arp_boundary();
     if ((mot_was_on && !mot_on) || mot_release_req) {   /* motion off, or its lanes replaced: knobs back */
         mot_release_req = 0;
         motion_release(&mot);
@@ -3080,6 +3117,9 @@ void engine_render(int32_t *out_lr, uint32_t n)
     while (done < n) {
         uint32_t k = seq_until_event(&seq, n - done);
         brk_mute_boundary(); /* also follows song mutes at an in-buffer event */
+#if X0X_ARP_ENGINE
+        arp_clock();
+#endif
         /* any stretch of ENG_TAIL_CS or more: pipeline. Mastered frames
          * must be a prefix (the master's state is in sample order). */
         eng_do_master = (k >= ENG_TAIL_CS && done == eng_mastered);
@@ -3170,7 +3210,7 @@ static int load_pack(void)
 }
 #endif
 
-static int builtin_count(void)
+X0X_COLD static int builtin_count(void)
 {
 #if X0X_NBREAKS > 0
     return X0X_NBREAKS;                   /* compiled into the image */

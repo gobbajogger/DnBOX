@@ -11,7 +11,6 @@ Each round:
      screen for 4 s and restarts once more: wait until DIAG answers and the state is stable.
   4. Read DIAG (editor command 33) and print STATUS, the start record and the crash record.
      --diag-only also prints the inbound recorder and the pad LED output (editor command 38 INLOG).
-     --padcal-export FILE reads the pad calibration (CLP-79, INLOG args 2-5) for apc_pad_colors.py --pad-override.
      --pad-inputs reads one sensor snapshot (INLOG arg 6), without any Bluetooth reset/test commands.
      For READY, read DIAG again after --hold seconds: the controller must stay up (polls grow).
 
@@ -250,8 +249,6 @@ def main():
     ap.add_argument("--log", help="append each round as one JSON line")
     ap.add_argument("--diag-only", action="store_true", help="read and print DIAG only")
     ap.add_argument("--pad-inputs", action="store_true", help="read one pad sensor snapshot only; never reset")
-    ap.add_argument("--padcal-export", metavar="FILE",
-                    help="read the pad calibration (CLP-79, INLOG args 2-5) into FILE for apc_pad_colors.py --pad-override")
     a = ap.parse_args()
     if not ports():
         sys.exit("ble_autotest: no X0X USB MIDI port")
@@ -262,18 +259,6 @@ def main():
             print(json.dumps(d, sort_keys=True))
             return 0
         return 1
-    if a.padcal_export:
-        ents, tl = [], None
-        for arg in inlog_fmt.PADCAL_ARGS:
-            rr = ask(inlog_fmt.ED_INLOG, [arg])
-            e = inlog_fmt.parse_padcal(rr, arg)
-            tl = inlog_fmt.parse_padcal_tl(rr)
-            if e is None:
-                sys.exit(f"ble_autotest: no pad calibration reply (arg {arg}; firmware before CLP-79?)")
-            ents += e
-        open(a.padcal_export, "w").write("\n".join(inlog_fmt.padcal_lines(ents, tl)) + "\n")
-        print(f"{a.padcal_export}: {sum(e[4] for e in ents)} of 128 entries marked ok")
-        return 0
     if a.diag_only:
         d = diag()
         if not d:

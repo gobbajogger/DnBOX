@@ -44,6 +44,8 @@ def compile_and_run():
     index = function(ui, "static int division_pad_index(void)")
     label = function(ui, "static const char *division_pad_label(void)")
     handler = function(ui, "static void division_pad_input(void)")
+    quantize = function(ui, "static int division_value_index(int v, int steps)")
+    shape_label = function(ui, "static const char *division_shape_label(int index)")
     shape = function(ui, "static int division_shape_index(void)")
     shape_enum = re.search(r"enum \{ DIVISION_SHAPE_PADS = \d+ \};", ui).group(0)
 
@@ -110,7 +112,7 @@ static void smk__padq(uint32_t pad, uint32_t vel) {
  else if(smk_pad_note[pad]){smk_pad_note[pad]=0;note_up++;}
 }
 static int plat_division_pad(unsigned owner) {return smk__division_poll(owner);}
-''' + owner + '\n' + index + '\n' + label + '\n' + shape_enum + '\n' + shape + '\n' + handler + r'''
+''' + owner + '\n' + quantize + '\n' + index + '\n' + label + '\n' + shape_enum + '\n' + shape + '\n' + shape_label + '\n' + handler + r'''
 int main(void) {
     ui.view=V_PART; ui.part=0; ui.freeplay[0]=1;
 #if X0X_DEV_WOBBLE
@@ -122,14 +124,27 @@ int main(void) {
         assert(smk_div_pending==(uint8_t)(pad+1));
         division_pad_input();
         assert(rate_edits==pad+1);
+        assert(rate[0]==(pad*127+3)/7);
         assert(division_pad_index()==pad);
-        assert(strstr(division_pad_label(), names[pad]));
+        assert(!strncmp(division_pad_label(), "RATE ", 5));
+        assert(!strcmp(division_pad_label()+5, names[pad]));
+        assert(!strcmp(said, division_pad_label()));
         assert(ui.dirty==1 && ui.act_t==1234u);
         assert(feedbacks==pad+1);
         smk__padq((uint32_t)pad,0);
         assert(smk_div_held==0);
     }
     assert(note_down==0 && note_up==0); /* rate hits never play notes */
+    /* Include out-of-range control read-back and boundary rounding. */
+    rate[0]=-1; assert(division_pad_index()==0);
+    rate[0]=128; assert(division_pad_index()==7);
+    for(int v=0;v<=127;v++) {
+        rate[0]=v; assert(division_pad_index()==(v*7+63)/127);
+        wshape[0]=v; assert(division_shape_index()==(v*3+63)/127);
+    }
+    wshape[0]=-1; assert(division_shape_index()==0);
+    wshape[0]=128; assert(division_shape_index()==3);
+    rate[0]=127; wshape[0]=0;
 
     /* Bottom row: pads 9-12 pick the wobble shape TRI, DOWN, UP, SQR; pads 13-16
      * are empty. No pad of the bottom row plays a note or edits the rate. */
@@ -145,6 +160,8 @@ int main(void) {
         if (pad<12) {
             assert(shape_edits==edits+1 && wshape[0]==values[pad-8]);
             assert(division_shape_index()==pad-8 && !strcmp(said,shapes[pad-8]));
+            assert(!strcmp(division_shape_label(pad-8), shapes[pad-8]));
+            assert(ui.dirty==1 && ui.act_t==1234u);
             assert(feedbacks==fb+1);
         } else {
             assert(shape_edits==edits && feedbacks==fb && division_shape_index()==before);
@@ -185,7 +202,9 @@ int main(void) {
             int edits=rate_edits;
             division_pad_input();smk__padq((uint32_t)pad,90);division_pad_input();
             assert(rate_edits==edits+1 && division_pad_index()==pad);
-            assert(strstr(division_pad_label(), names[pad]));
+            assert(!strncmp(division_pad_label(), "RATE ", 5));
+            assert(!strcmp(division_pad_label()+5, names[pad]));
+            assert(!strcmp(said, division_pad_label()));
             smk__padq((uint32_t)pad,0);
         }
         for (int pad=8;pad<16;pad++) {

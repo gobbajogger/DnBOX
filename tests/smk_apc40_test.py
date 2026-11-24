@@ -137,7 +137,7 @@ print("PASS Loopy Play/Record feedback LEDs, clock-synced PLAY blink, momentary 
 plat = (ROOT / "firmware/src/app/plat_fm1.c").read_text()
 assert "clip_mode && panel.btn[i] <= FM1_BTN_OCT_UP" in plat
 # clip keys: the keybed stays out of the X0X UI; a held pad still blocks its white key (main_fm1.c)
-assert "if (smk_clip_mode_on() || smk_padcal_on())\n#else\n    if (smk_clip_mode_on())\n#endif\n        return;" in ui   # CLP-79: also in the pad calibration (dev build)
+assert "    if (smk_clip_mode_on())\n        return;" in ui
 assert "w >= 0 && ((fm1_in.pnotes >> (k - SMK_KEY_F3)) & 1u)" in main
 update_mode = main.split("/* OCT- + OCT+ held 5 s:")[1].split("/* Project transfers cannot queue")[0]
 assert "if (ui_project_busy()" in update_mode and "|| smk_clip_mode_on()" in update_mode

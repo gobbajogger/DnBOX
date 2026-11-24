@@ -7,6 +7,11 @@ It also compares the map with the layout that the owner approved (a65 and later)
 one Bluetooth block of 64 KiB at 0x8B000, the store at 0x9D000-0xAFFFF (with the owner tag at 0xAF000),
 the 44 KiB VM spare at 0xB0000-0xBAFFF (sector-0 shadows, then sample slot 3 from 0xB3000), no piece 2 (FL_CTL2) and no FL_BOND.
 The owner tag (ST_OWNER_SECTOR in firmware/src/storage.c) must be at 0xAF000, in the last sector of the store.
+XDATA (FL_XDATA, the font bitmaps the update loader installs) must be exactly 0xAD000-0xAEFFF, between the boot
+screens and the owner tag, and the owner check's foreign-store clear (ST_CLEAR_HI) must stop at its start.
+FITTAB (FL_FITTAB, the Synth One option-B fit table the update loader installs) must be exactly 0xFE000-0xFEFFF,
+the 4 KiB spare between stock USR and key_mac (FL_KEYMAC_LO 0xFF000), and the loader allow-list may cover only
+that one sector above USR (never 0xFF000 or above).
   tools/gate_flashmap.py firmware/hal/fm1_flash_map.h [firmware/src/storage.c]
 The last line is "flashmap: PASS" or "flashmap: FAIL <reason>". The exit code is 0 or 1."""
 import os
@@ -20,10 +25,55 @@ d = {k: int(v, 16) for k, v in re.findall(r"#define (FL_\w+)\s+0x([0-9A-Fa-f]+)u
 errors = []
 regions = [("head", 0, d["FL_HEAD_HI"]), ("app code", 0x4120, d["FL_BLE_LO"]),
            ("Bluetooth block", d["FL_BLE_LO"], d["FL_BLE_HI"]), ("app slot end and cfg", d["FL_BLE_HI"], d["FL_APP_HI"]),
-           ("store", d["FL_DATA_LO"], d["FL_DATA_HI"]), ("VM spare", d["FL_SMPV_LO"], d["FL_SMPV_HI"]),
+           ("VM spare", d["FL_SMPV_LO"], d["FL_SMPV_HI"]),
            ("OTA", d["FL_OTA_LO"], d["FL_OTA_HI"]), ("BTIF and USRTRIM", d["FL_CAL_LO"], d["FL_CAL_HI"]),
-           ("slots 1 and 2", d["FL_SMP_LO"], d["FL_SMP_HI"]), ("USR", d["FL_USRRES_LO"], d["FL_USRRES_HI"]),
+           ("USR", d["FL_USRRES_LO"], d["FL_USRRES_HI"]),
            ("key_mac", d["FL_KEYMAC_LO"], 0x100000)]
+# FITTAB: the 4 KiB spare 0xFE000-0xFEFFF, installed with the image, never a store write
+if "FL_FITTAB_LO" in d and "FL_FITTAB_HI" in d:
+    regions += [("FITTAB (Synth One B fit table)", d["FL_FITTAB_LO"], d["FL_FITTAB_HI"])]
+    if (d["FL_FITTAB_LO"], d["FL_FITTAB_HI"]) != (0xFE000, 0xFF000):
+        errors.append(f"FL_FITTAB is {d['FL_FITTAB_LO']:#x}-{d['FL_FITTAB_HI']:#x}, expected 0xfe000-0xff000")
+    if d.get("FL_KEYMAC_LO") != 0xFF000:
+        errors.append(f"FL_KEYMAC_LO is {d.get('FL_KEYMAC_LO', 0):#x}, expected 0xff000")
+    if d["FL_FITTAB_LO"] != d["FL_USRRES_HI"] or d["FL_FITTAB_HI"] != d["FL_KEYMAC_LO"]:
+        errors.append("FL_FITTAB must sit exactly between USR and key_mac")
+    if "FL_IN(off, n, FL_FITTAB_LO, FL_FITTAB_HI)" not in smk:
+        errors.append("FL_LDR_RANGE_OK does not allow the FITTAB sector")
+else:
+    errors.append("no FL_FITTAB_LO / FL_FITTAB_HI")
+# the store, less XDATA (0xAD000-0xAEFFF, installed with the image, never a store write)
+if "FL_XDATA_LO" in d and "FL_XDATA_HI" in d:
+    regions += [("store objects and boot screens", d["FL_DATA_LO"], d["FL_XDATA_LO"]),
+                ("XDATA (font bitmaps)", d["FL_XDATA_LO"], d["FL_XDATA_HI"]),
+                ("store owner tag", d["FL_XDATA_HI"], d["FL_DATA_HI"])]
+    if (d["FL_XDATA_LO"], d["FL_XDATA_HI"]) != (0xAD000, 0xAF000):
+        errors.append(f"FL_XDATA is {d['FL_XDATA_LO']:#x}-{d['FL_XDATA_HI']:#x}, expected 0xad000-0xaf000")
+    if "FL_IN(off, n, FL_DATA_LO, FL_XDATA_LO) || FL_IN(off, n, FL_XDATA_HI, FL_DATA_HI)" not in smk:
+        errors.append("FL_STORE_OK does not leave XDATA out of the store")
+else:
+    regions += [("store", d["FL_DATA_LO"], d["FL_DATA_HI"])]
+    errors.append("no FL_XDATA_LO / FL_XDATA_HI")
+# Factory synth data (FL_FDATA): the top FL_FDATA_SIZE bytes of FL_SMP, cut from the end of slot 2.
+# Slots 1, 2 and 3 keep their start offsets; slot 1 (80 KiB) and slot 3 (32 KiB) keep their sizes.
+fdata = d.get("FL_FDATA_SIZE")
+if fdata is None:
+    errors.append("no FL_FDATA_SIZE")
+    fdata = 0
+if fdata % 0x1000 or fdata > 0x1E000 - 0x1000:
+    errors.append(f"FL_FDATA_SIZE {fdata:#x} is not whole sectors leaving slot 2 at least 4 KiB")
+fdata_lo = d["FL_SMP_HI"] - fdata
+slot1 = (d["FL_SMP_LO"], d["FL_SMP_LO"] + 0x14000)
+slot2 = (slot1[1], fdata_lo)
+regions += [("sample slot 1", *slot1), ("sample slot 2", *slot2)]
+if fdata:
+    regions += [("factory synth data (FL_FDATA)", fdata_lo, d["FL_SMP_HI"])]
+    if "(FL_FDATA_SIZE && FL_IN(off, n, FL_FDATA_LO, FL_FDATA_HI))" not in smk:
+        errors.append("FL_LDR_RANGE_OK does not allow FL_FDATA (the loader installs the pack there)")
+    if "FL_IN(off, n, FL_SMP_LO, FL_FDATA_LO)" not in smk:
+        errors.append("FL_STORE_OK does not stop the sample slots at FL_FDATA")
+if (slot1[0], slot2[0]) != (0xC2000, 0xD6000):
+    errors.append("sample slots 1/2 moved: they must stay at 0xC2000 / 0xD6000")
 if "FL_CTL2_LO" in d:
     regions += [("piece 2", d["FL_CTL2_LO"], d["FL_CTL2_HI"])]
     errors.append("piece 2 (FL_CTL2) exists")
@@ -42,7 +92,11 @@ for k, v in expect.items():
     if d.get(k) != v:
         errors.append(f"{k} is {d.get(k, 0):#x}, expected {v:#x}")
 st_path = sys.argv[2] if len(sys.argv) > 2 else os.path.join(os.path.dirname(sys.argv[1]), "..", "src", "storage.c")
-m = re.search(r"#define ST_OWNER_SECTOR\s+0x([0-9A-Fa-f]+)u?", open(st_path).read()) if os.path.exists(st_path) else None
+st_src = open(st_path).read() if os.path.exists(st_path) else ""
+m = re.search(r"#define ST_OWNER_SECTOR\s+0x([0-9A-Fa-f]+)u?", st_src)
+c = re.search(r"#define ST_CLEAR_HI\s+0x([0-9A-Fa-f]+)u?", st_src)
+if not c or int(c.group(1), 16) != d.get("FL_XDATA_LO"):
+    errors.append(f"ST_CLEAR_HI in {st_path} is not FL_XDATA_LO: the owner check would erase XDATA")
 if not m:
     errors.append(f"no ST_OWNER_SECTOR in {st_path}")
 else:
@@ -52,6 +106,8 @@ else:
         errors.append(f"ST_OWNER_SECTOR is {owner:#x}, expected 0xaf000")
     if not (d["FL_DATA_LO"] <= owner and owner + 0x1000 <= d["FL_DATA_HI"]):
         errors.append(f"ST_OWNER_SECTOR {owner:#x} is not in the store")
+print(f"sample slot 2: {slot2[0]:#x}-{slot2[1] - 1:#x}, {(slot2[1] - slot2[0]) // 1024} KiB; "
+      f"factory synth data: {fdata // 1024} KiB" + (f" at {fdata_lo:#x}-{d['FL_SMP_HI'] - 1:#x}" if fdata else ""))
 print(f"VM spare: {d['FL_SMPV_LO']:#x}-{d['FL_SMPV_HI'] - 1:#x}, {(d['FL_SMPV_HI'] - d['FL_SMPV_LO']) // 1024} KiB")
 print("flashmap: PASS" if not errors else "flashmap: FAIL " + "; ".join(errors))
 sys.exit(1 if errors else 0)

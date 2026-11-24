@@ -57,6 +57,12 @@ int engine_drum909_amp_view(int voice, drum909_amp_snapshot *out)
 { (void)voice; (void)out; return 0; }
 int engine_juno_envelope_view(int voice, juno6_envelope_snapshot *out)
 { (void)voice; (void)out; return 0; }
+/* The archived renderer has no fire-timestamp UI observation or arp state.
+ * The shared preset include calls this hook even in an arp-off render build. */
+int engine_drum_fired(int kit, int voice, int step, uint32_t window_ms)
+{ (void)kit; (void)voice; (void)step; (void)window_ms; return 0; }
+static void arp_adopt(int voice, const sound_t *sound, int preset_change)
+{ (void)voice; (void)sound; (void)preset_change; }
 BASE_PREVIEW_COMPAT
 U=$(python3 - <<'PY'
 import importlib.util
@@ -65,9 +71,11 @@ b.synth_build_config();b.require_original_synth_sources()
 print(' '.join(['firmware/src/dsp/drum909.c','firmware/src/dsp/drum808.c','firmware/src/dsp/x0x_param.c','firmware/src/dsp/breaks.c','firmware/src/dsp/fxbus.c','firmware/src/dsp/master.c','firmware/src/seq/sequencer.c','firmware/src/seq/tb3po.c','firmware/src/seq/pattern.c','firmware/src/seq/motion.c','firmware/src/app/factory_banks.c',*b.ORIGINAL_SYNTH_UNITS,*b.ORIGINAL_SYNTH_BACKENDS]))
 PY
 )
+# Match the archive configuration: arp is independently covered by the
+# production-on gate and does not belong to this archived 808 A/B.
 for mode in normal san; do
  for dw in 1 0; do
- F="-O1 -g -ffp-contract=off -std=c99 -w -DX0X_HOST -DX0X_ORIGINAL_SYNTH=1 -DX0X_WOBBLE=0 -DX0X_DEV_WOBBLE=$dw -fno-fast-math -DORIGINAL_USE_SOFT_FMA -DMIAMI_FX_NO_HOST_FENV -D_POSIX_C_SOURCE=200809L -Iexperiments/original_synth -Iexperiments/wobble -Ifirmware/src -Ifirmware/src/app -Ifirmware/src/dsp -Ibuild/gen"
+ F="-O1 -g -ffp-contract=off -std=c99 -w -DX0X_HOST -DX0X_ARP_HOOKS=0 -DX0X_ORIGINAL_SYNTH=1 -DX0X_WOBBLE=0 -DX0X_DEV_WOBBLE=$dw -fno-fast-math -DORIGINAL_USE_SOFT_FMA -DMIAMI_FX_NO_HOST_FENV -D_POSIX_C_SOURCE=200809L -Iexperiments/original_synth -Iexperiments/wobble -Ifirmware/src -Ifirmware/src/app -Ifirmware/src/dsp -Ibuild/gen"
  [ $mode = san ] && F="$F -fsanitize=address,undefined -fno-sanitize-recover=all"
  for v in base new; do
   src=$D/engine-base.c; [ $v = new ] && src=firmware/src/app/engine.c

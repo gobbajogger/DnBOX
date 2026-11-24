@@ -101,6 +101,8 @@ int original_chicago_backend_reset(original_chicago_backend *, unsigned factory)
  * A healthy in-flight block cannot be disposed. init recovers it. */
 int original_chicago_backend_retire(original_chicago_backend *);
 int original_chicago_backend_set(original_chicago_backend *, unsigned macro, float normalized);
+/* Display only: macro 2 (Cutoff, 0..1) -> base filter corner in Hz (MP4 A table law). */
+int original_chicago_backend_cutoff_hz(float macro, float *hz);
 int original_chicago_backend_tempo(original_chicago_backend *, float bpm);
 /* Idempotent preparation before serial frame-zero input. The following begin
  * consumes the prepared snapshot instead of preparing after the input. */

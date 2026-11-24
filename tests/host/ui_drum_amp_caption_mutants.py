@@ -3,11 +3,14 @@
 import os,signal,subprocess,tempfile
 from pathlib import Path
 root=Path(__file__).resolve().parents[2];out=root/'build/host/drum-amp-caption';out.mkdir(parents=True,exist_ok=True)
-s=(root/'firmware/src/app/ui.c').read_text();anchor="physical_stage_label(label,0,'D',matrix_value(r));"
+s=(root/'firmware/src/app/ui.c').read_text();anchor="physical_stage_label(label,0,'D',raw);"
 if s.count(anchor)!=1:raise SystemExit('missing/duplicate AMP caption owner')
-for name,replacement in [('missing-amp-label','label[0]=0;'),('wrong-amp-slot',"physical_stage_label(label,1,'D',matrix_value(r));")]:
+# The caption has no knob-number prefix (guidelines), so the wrong slot is a wrong x: slot 1 is +59 px.
+slot0="text_c(75,y+8,&FONT_T,label,edited?SOUND_INK:SOUND_GRAY);"
+if s.count(slot0)!=1:raise SystemExit('missing/duplicate AMP caption position')
+for name,old,new in [('missing-amp-label',anchor,'label[0]=0;'),('wrong-amp-slot',slot0,slot0.replace('75,','134,',1))]:
  with tempfile.TemporaryDirectory(prefix='amp-caption-negative-') as d:
-  f=Path(d)/'ui.c';f.write_text(s.replace(anchor,replacement))
+  f=Path(d)/'ui.c';f.write_text(s.replace(old,new))
   env=dict(os.environ,SMC_UI_TEST_FILE='tests/host/ui_drum_amp_graph_test.c',SMC_UI_OUT=str(out/name),X0X_HOST_DEFS=os.environ.get('X0X_HOST_DEFS','')+' -DX0X_HOST_UI_SOURCE="'+str(f)+'"')
   p=subprocess.Popen(['sh','tests/host/smc_ui_test.sh'],cwd=root,env=env,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,text=True,start_new_session=True)
   try:output,_=p.communicate(timeout=100)

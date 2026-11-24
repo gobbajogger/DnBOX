@@ -117,6 +117,35 @@ static void check_slide_and_range(int owner, int enforce)
         CHECK(fb[bottom * 240 + col_x(0) + 4] == swap16(dim(part_col(), 9)));
         CHECK(fb[top * 240 + col_x(15) + 4] == swap16(dim(part_col(), 9)));
     }
+    /* A legal 0..127 pitch span must not paint away time when it becomes
+     * denser than the raster. Exercise the real sequencer, not a fake index. */
+    button_tap(B_PLAY);
+    reach_step(owner, 4);
+    /* Keep the original 0..127 witness, then cross exactly where a spare
+     * row stops fitting between guides. Existing viewport bounds pad by 4. */
+    static const int largest_note[]={127,109,53,52,51};
+    bp->step[4].note=24;
+    for(unsigned span=0;span<sizeof largest_note/sizeof *largest_note;span++) {
+        int high=largest_note[span];
+        bp->step[15].note=(uint8_t)high;
+        capture("gen-boundary-play",owner,high);
+        if(enforce) {
+            unsigned beat=0,subdivision=0,playhead=0;
+            for(int y=33;y<57;y++) { /* clear of seeded note and tie rectangles */
+                beat+=fb[y*240+col_x(4)-1]==swap16(C_DIM);
+                subdivision+=fb[y*240+col_x(5)-1]==swap16(C_LINE);
+                playhead+=fb[y*240+col_x(4)+6]==swap16(dim(part_col(),2));
+            }
+            printf("PITCH SPACING owner=%d high=%d beat=%u subdivisions=%u cursor=%u\n",
+                   owner,high,beat,subdivision,playhead);
+            if(high<=52) {
+                CHECK(beat>=12 && beat<24);
+                CHECK(subdivision>=12);
+                CHECK(playhead>=12 && playhead<24);
+            } else CHECK(beat==24 && subdivision==24 && playhead==24);
+        }
+    }
+
 }
 
 int main(void)

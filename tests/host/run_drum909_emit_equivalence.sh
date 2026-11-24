@@ -8,6 +8,12 @@ OUT=build/909-emit-proof
 BASE=a06e20189141ff5fb8766e2c6152be460f4356c3
 mkdir -p "$OUT"
 git show "$BASE:firmware/src/dsp/drum909.c" > "$OUT/base.c"
+# The later independent kick pitch behavior is deliberate and has its own
+# byte-exact default and non-default regression. Compare both mixers with
+# that same kick behavior, retaining the pinned old emit/rim/clap code.
+PITCH=fdb0aec198e5fe8be21ff7979dae9d2615f192cf
+git show --format= --no-ext-diff "$PITCH" -- firmware/src/dsp/drum909.c > "$OUT/pitch.patch"
+patch --batch --fuzz=0 "$OUT/base.c" "$OUT/pitch.patch"
 python3 - "$OUT" <<'PY'
 import pathlib, re, sys
 out = pathlib.Path(sys.argv[1])

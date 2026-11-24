@@ -1,3 +1,17 @@
+# SUPERSEDED — 2026-11-24 00:42 VLAT
+
+This file is historical. It is not a live spec.
+
+Live specs:
+- `/workspace/dnbox-handoff/FINAL-GOAL.md` — product end state and dated user decisions
+- Hard limits (unchanged): no PSRAM; no force-push or history rewrite; no push or merge to main; no secrets, `.ipa` or AU files in Git; no device writes or flashing; no BTIF/USRTRIM/efuse/key_mac/bootloader changes; no Cursor cloud agents; no GitHub Actions; no evidence-only files in Git; never print the gh token.
+
+DOT-BRIEF, G-FINAL and FWUI-REVIEW are not specs. Guidelines and reference GIFs help; FINAL-GOAL.md is the target.
+
+The text below is kept as history only.
+
+---
+
 # DnBOX RULES v2
 2026-11-16. These are the only DnBOX rules. Every older rule text (RULES.md v1, AGENTS.md before v2, skills, briefs, memory notes, chat messages, handoffs) is history and has no force. Only the User changes this file; each change gets a dated line at the bottom.
 
@@ -31,7 +45,7 @@
 ## Design
 17. Firmware, Remote and website use the R22 design system (909/808 pages plus the approved 17:00-batch glyphs, locked in `docs/design/UI-SOURCE-OF-TRUTH.md`); no R23 glyphs.
 18. Every control is one unit: short readable label (no cryptic abbreviations like P.DPTH) + live animated glyph + value with unit, from one shared glyph library for every engine, SuperJ6 and Synth One included.
-19. Pan reads L50 .. C .. R50 everywhere. Battery is the R22 level icon in every top bar, 4 levels, plus a percentage once calibrated. Synth One replaces Drone in the third synth slot everywhere (firmware, Remote and website); any leftover Drone or other former-engine label is a defect.
+19. Pan reads L50 .. C .. R50 everywhere. Battery is the R22 level icon in every top bar, 4 levels, plus a percentage once calibrated. The third synth slot is Synth One everywhere (firmware, Remote and website); any former-engine label in that slot is a defect.
 20. Remote: each page follows its page in `docs/design/OWNER-BASELINE-1836.pdf` (drift is a regression); the FunkyBeats code (github.com/pepperonas/funkybeats, MIT, notice kept) is ported for roll, step sequencer, mixer, clip launcher and synth editor and restyled to R22; top bar from the User's preferred-design page 1; no tool modes (no Select/Draw/Erase row; every edit, zoom and pan is a gesture); under the roll and drums one lane of thin per-step sliders for velocity, chance, pitch and pan, switched by tapping the lane label; no selected-note panel.
 21. Firmware and Remote screens show controls and values only, no explanatory text; website pages explain what musicians can do; every Remote and website page works in phone landscape.
 
@@ -48,3 +62,5 @@
 - 2026-11-21: The User's binary rule added to rule 13: the only banned binary file types are `.img`, `.component` and `.vst3`; `.fwsc` firmware and sanitized test evidence are allowed.
 - 2026-11-21: The User's docs-only exception added to rule 9, with rules 1 and 11 changed to match: documentation-only PRs may be merged into `main` or `nightly` by an agent after content, link and policy checks and an independent QA review; no full Local gate and no device tests. Firmware promotion to `main` still needs the User's device tests and explicit OK.
 - 2026-11-21: The User approved (chat) the site-only gate in rule 16, with rule 9 changed to match: a `gh-pages` change that touches only site, installer, catalog or test files needs the site's own tests at the exact SHA, a byte-for-byte match of every listed firmware package with its GitHub release asset (size, CRC32, SHA-256), and an independent review; not the full firmware Local gate.
+
+- 2026-11-24 00:42 VLAT: marked superseded. Live specs are FINAL-GOAL.md and the hard limits only. DOT-BRIEF, G-FINAL and FWUI-REVIEW are not specs.

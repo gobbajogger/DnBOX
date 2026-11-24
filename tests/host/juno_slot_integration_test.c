@@ -159,7 +159,7 @@ static void check_panel_route(int owner)
         settle_selector(owner);
         CHECK(pg.r[cur_page()][0].kind == R_BENGINE);
     }
-    CHECK(engine_bass_bank(owner) == ORIGINAL_SOUND_JUNO && pg.n == 5);
+    CHECK(engine_bass_bank(owner) == ORIGINAL_SOUND_JUNO && pg.n == 5 + !!X0X_ARP_HOOKS);
     CHECK(pref_desc(pg.r[cur_page()][1])->max == 3);
     for (int preset = 0; preset < 4; ++preset) {
         if (preset) {
@@ -188,7 +188,9 @@ static void check_panel_route(int owner)
     panel_tap(B_SEL);
     CHECK(ui.overlay == O_LIST);
     unsigned seen = 0;
-    for (int row = 0; row < 19; ++row) {
+    const int sound_row = 16 + (X0X_ARP_HOOKS ? 4 : 0);
+    CHECK(ui.list_n == sound_row + 3);
+    for (int row = 0; row < sound_row + 3; ++row) {
         pref_t r = list_rows[ui.list_sel];
         CHECK(r.b == owner);
         if (row < 16) {
@@ -203,12 +205,19 @@ static void check_panel_route(int owner)
                 render_blocks(1);
                 CHECK(pref_get(r) == before + step);
             }
-        } else {
-            CHECK(r.kind == (row == 16 ? R_BENGINE : row == 17 ? R_BPRESET : R_BSTATUS));
-            if (row == 16) capture_route(owner, "list", "sound");
+        }
+#if X0X_ARP_HOOKS
+        else if (row < sound_row) {
+            static const int fields[] = {ARP_F_ON, ARP_F_RANGE, ARP_F_MODE, ARP_F_SPEED};
+            CHECK(r.kind == R_ARP && r.a == fields[row - 16]);
+        }
+#endif
+        else {
+            CHECK(r.kind == (row == sound_row ? R_BENGINE : row == sound_row + 1 ? R_BPRESET : R_BSTATUS));
+            if (row == sound_row) capture_route(owner, "list", "sound");
             if (r.kind == R_BSTATUS) capture_route(owner, "list", "last");
         }
-        if (row < 18) panel_turn(EN_SELECT, 1);
+        if (row < sound_row + 2) panel_turn(EN_SELECT, 1);
     }
     CHECK(seen == 0xffff && !memcmp(peer_cell, proj.sound.v[T_303][peer], sizeof peer_cell));
     panel_tap(B_HOME);
@@ -242,7 +251,13 @@ int main(void)
             CHECK(engine_bass_preset_index(voice)==preset);
             CHECK(engine_bass_sound_bank(&proj.sound,voice)==ORIGINAL_SOUND_JUNO);
             ui.part=(uint8_t)(PART_303A+voice);build_pages();
-            CHECK(pg.n==UI_ORIGINAL_JUNO_PAGES+1);
+#if X0X_ARP_HOOKS
+            CHECK(pg.n == UI_ORIGINAL_JUNO_PAGES + 2);
+            CHECK(!strcmp(pg.title[UI_ORIGINAL_JUNO_PAGES], "ARPEGGIATOR"));
+#else
+            CHECK(pg.n == UI_ORIGINAL_JUNO_PAGES + 1);
+#endif
+            CHECK(!strcmp(pg.title[pg.n - 1], "SOUND"));
             engine_bass_on_velocity(voice,60,0,0,100);
             render_blocks(32);
             float level,mod;unsigned state,down;

@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""Repeat-safe M2 positive and compiled current-source runtime negatives."""
+"""REVERB bank = Decay, Tone, Rev Low Cut, Rev Return (Guidelines §3). Repeat-safe M2 positive and compiled current-source runtime negatives."""
 import json,os,subprocess,hashlib,signal
 from pathlib import Path
 root=Path(__file__).resolve().parents[2]
 out=Path(os.environ.get('M2_OUT',root/'build/host/reverb-return')).resolve();out.mkdir(parents=True,exist_ok=True)
 (out/'receipt.json').unlink(missing_ok=True)
 source=(root/'firmware/src/app/ui.c').read_text()
-front='PR(R_ENG, T_FX, 0, FX_RV_DECAY), PR(R_ENG, T_FX, 0, FX_RV_TONE), PR(R_ENG, T_FX, 0, FX_RV_LEVEL), PR(R_ENG, T_FX, 0, FX_DL_LEVEL)'
+front='PR(R_ENG, T_FX, 0, FX_RV_DECAY), PR(R_ENG, T_FX, 0, FX_RV_TONE), PR(R_ENG, T_FX, 0, FX_RV_HPF), PR(R_ENG, T_FX, 0, FX_RV_LEVEL)'
 guard='if (ui.view != V_FX || p || k < 2)'
 assert source.count(front)==1 and source.count(guard)==1,'candidate anchors missing/duplicated'
 records=[]
@@ -39,8 +39,8 @@ def run(name,text=None,expected=None):
   if p.returncode==0 or expected not in p.stdout:raise SystemExit(name+': wrong/missing runtime rejection\n'+p.stdout[-2500:])
  elif p.returncode or 'failures=0' not in p.stdout:raise SystemExit(name+': positive failed\n'+p.stdout[-2500:])
 run('positive')
-run('wrong-owner',source.replace(front,front.replace('FX_RV_LEVEL','SWAP_RETURN').replace('FX_DL_LEVEL','FX_RV_LEVEL').replace('SWAP_RETURN','FX_DL_LEVEL')),'M2_FAIL FRONT_BANK_EXACT_OWNER')
-run('missing-front-slots',source.replace(front,'PR(R_ENG, T_FX, 0, FX_RV_DECAY), PR(R_ENG, T_FX, 0, FX_RV_TONE), NONE, NONE'),'M2_FAIL K7_MISSING_REV_RETURN')
+run('wrong-owner',source.replace(front,front.replace('FX_RV_LEVEL','SWAP_RETURN').replace('FX_RV_HPF','FX_RV_LEVEL').replace('SWAP_RETURN','FX_RV_HPF')),'M2_FAIL FRONT_BANK_EXACT_OWNER')
+run('missing-front-slots',source.replace(front,'PR(R_ENG, T_FX, 0, FX_RV_DECAY), PR(R_ENG, T_FX, 0, FX_RV_TONE), NONE, NONE'),'M2_FAIL K7_MISSING_REV_LOW_CUT')
 # The fixture CHECK fails on exact identity at the first moved list row.
 run('removed-order-guard',source.replace(guard,'if (1)'),'ref_eq(list_rows[i],refs[i])')
 print('PASS M2 real framebuffer/physical owners and three compiled current-source runtime negatives')

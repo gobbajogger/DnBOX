@@ -35,7 +35,7 @@ def make_controller(size=4096, **overrides):
     return bytes(data)
 
 
-def make_package(model, loader=True, version="0.1.3", extra=b""):
+def make_package(model, loader=True, version="0.1.3", extra=b"", fdata=None, reserve_fdata=False):
     """Real packer/layout/CRCs; synthetic SDK placeholders and non-executable application bytes."""
     fake_sdk = {"uboot.boot": b"SYNTHETIC-BOOT-NOT-FIRMWARE" * 4,
                 "cfg_tool.bin": b"SYNTHETIC-CFG" * 4,
@@ -47,7 +47,12 @@ def make_package(model, loader=True, version="0.1.3", extra=b""):
             about = b"" if version is None else ("DnBOX " + version + "  MEM ").encode("ascii") + b"\0"
             flash = pm.flash_image(b"SYNTHETIC-APPLICATION-NOT-FIRMWARE" * 16 + about + extra, pm.KEY)
         ota = b"SYNTHETIC-LOADER-NOT-FIRMWARE " + (b"FELUCCA-LOADER-1" if loader else b"NO-UPDATE-LOADER")
-        return pm.ufw(flash, ota, nightly.MODELS[model] + "_900")
+        if not reserve_fdata:
+            # Keep the legacy full-slot baseline for the existing admission regressions.
+            flash = bytearray(flash)
+            legacy = pm.slotmap_blob([(0xC2000, 0x14000), (0xD6000, 0x1E000), (0xB3000, 0x8000)])
+            flash[pm.SLOTMAP_OFF:pm.SLOTMAP_OFF + len(legacy)] = legacy
+        return pm.ufw(flash, ota, nightly.MODELS[model] + "_900", fdata=fdata)
     finally:
         pm.set_board(previous)
 
@@ -164,6 +169,16 @@ def main(argv=None):
     for model in nightly.MODELS:
         raw, complete = fixtures[model + "-blank.fwsc"], fixtures[model + "-bundled.fwsc"]
         output, receipt = nightly.compose(raw, ctl, model, digest, size)
+        # New compact firmware must carry the reviewed FDATA region and reduced geometry together.
+        if pm.FDATA_SIZE:
+            fd = bytearray(b"\xff" * pm.FDATA_SIZE)
+            fd[:32] = bytes(32)
+            struct.pack_into("<4sHH", fd, 0, b"S1PK", 1, 694)
+            struct.pack_into("<II", fd, 12, 32, 0)
+            fdata_pkg = make_package(model, fdata=fd, reserve_fdata=True)
+            nightly.compose(fdata_pkg, ctl, model, digest, size)
+            for wrong in (make_package(model, fdata=fd), make_package(model, reserve_fdata=True)):
+                refused(lambda: nightly._package(wrong, model), "FDATA requires")
         assert output == complete, "NIGHTLY composition must match proven add_ctl bytes"
         assert receipt == nightly.inspect(output, model, digest, size)
         assert receipt["model"] == model and receipt["controller_strategy"] == "bundled"

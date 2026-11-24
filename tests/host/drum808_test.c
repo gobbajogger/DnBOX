@@ -374,9 +374,18 @@ int main(int argc, char **argv)
                 const x0x_param_t *p = drum808_param(tr, i);
                 int want = p->max > 1 ? p->max / 2 + 1 : 1, j;
                 if (strlen(p->name) > 6) { printf("  name '%s' > 6 chars  FAIL\n", p->name); bad++; }
-                if (p->names)
+                if (p->names) {
                     for (j = 0; j <= p->max; j++)
-                        if (strlen(p->names[j]) > 5) { printf("  label '%s' > 5 chars  FAIL\n", p->names[j]); bad++; }
+                        if (tr == D8_CP && !strcmp(p->name, "Sound") && j == 1) {
+                            /* The R22 TYPE readout uses the full voice name. The
+                             * dedicated CP/MA framebuffer test checks its layout. */
+                            if (strcmp(p->names[j], "MARACAS")) {
+                                puts("  clap Sound variant must read MARACAS  FAIL"); bad++;
+                            }
+                        } else if (strlen(p->names[j]) > 5) {
+                            printf("  label '%s' > 5 chars  FAIL\n", p->names[j]); bad++;
+                        }
+                }
                 if (drum808_get(&port, tr, i) != p->def) { printf("  track %d %s default %d != %d  FAIL\n", tr, p->name, drum808_get(&port, tr, i), p->def); bad++; }
                 drum808_set(&port, tr, i, want);
                 if (drum808_get(&port, tr, i) != want) { printf("  track %d %s set/get  FAIL\n", tr, p->name); bad++; }
@@ -386,7 +395,7 @@ int main(int argc, char **argv)
         drum808_set(&port, D8_LT, port_index(D8_LT, "Sound"), 1);
         if (drum808_get(&port, D8_LT, port_index(D8_LT, "Decay")) != 58) { printf("  conga keeps its own Decay  FAIL\n"); bad++; }
         n_fail += bad;
-        printf("  %d tracks + kit: names <= 6, labels <= 5, defaults, set/get, per-sound pots: %s\n", D8_NUM, bad ? "FAIL" : "ok");
+        printf("  %d tracks + kit: names <= 6, short enum labels and MARACAS, defaults, set/get, per-sound pots: %s\n", D8_NUM, bad ? "FAIL" : "ok");
     }
     printf("%d cases, %d over %.0e; worst rel %.3e (%s)\n", n_cases, n_fail, TOL, worst_rel, worst_name);
     if (argc > 1 && demo(argv[1])) return 1;

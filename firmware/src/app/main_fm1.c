@@ -209,14 +209,6 @@ extern void isr_timer5(void);
 #include "app/apc40_lcd565.h"   /* APC40_LCD565[128]: the LCD clip colours (tools/apc_pad_colors.py) */
 #include "app/apc40_lcd_idle.h"   /* APC40_LCD_IDLE565: the LCD idle clip squares (CLP-05) */
 #include "app/smk_clip_colour.h"
-#if X0X_DEV_PADCAL                      /* dev builds only: a release build has no pad calibration */
-#include "app/smk_padcal.h"      /* the pad calibration (CLP-79) */
-#include "app/apc40_pad_gamma.h"     /* its start rule (tools/apc_pad_colors.py --gamma-h) */
-#include "app/apc40_pad_names.h"     /* the entry names (tools/apc_pad_colors.py --names-h) */
-static smk_padcal_t padcal;           /* in .bss: RAM only, no settings byte, no flash save */
-static uint32_t padcal_btn, padcal_pads, padcal_sig;   /* the last frame: buttons, pads (edges), LCD */
-uint8_t smk_padcal_on(void) { return padcal.on; }
-#endif
 /* ------------------------------------------------------------ SMK-37 Pro --- */
 /* What the SMK-37 Pro has beyond the FM-1's panel (smk_input.h), after the UI (ui.c) in this unity build.
  * The pads: the 16 white keys' lights (plat_fm1.c plat_leds) in the colour of the part on screen, lit half
@@ -345,7 +337,8 @@ uint8_t smk_apc_usb_event(uint32_t pkt)
         return owned;
     return 0u;
 }
-#if BOARD_SMK37
+#include "app/smk_inlog_profile.h"
+#if X0X_SMK_INLOG
 /* a76: the inbound recorder (app/smk_inlog.h). usb.c and ble.c give it each APC40 LED message that
  * came in. ble.c also gives it the link and notify edges. */
 #include "app/smk_inlog.h"
@@ -436,7 +429,7 @@ static void smk_pad_inputs_reply(void)
     }
 }
 /* The reply of editor command 38 INLOG (editor.c, web/EDITOR_PROTOCOL.md). Arg 1: the pad LED output
- * (lcd.c): the colour to send and the last frame sent. Args 2-5: the pad calibration export (CLP-79).
+ * (lcd.c): the colour to send and the last frame sent.
  * Arg 6: the read-only pad input snapshot. Else: the entries and the stored clip cells. */
 static void smk_inlog_reply(uint32_t arg)
 {
@@ -445,18 +438,6 @@ static void smk_inlog_reply(uint32_t arg)
         smk_pad_inputs_reply();
         return;
     }
-#if X0X_DEV_PADCAL
-    if (arg - 2u < 128u / SMK_PADCAL_CHUNK) {     /* args 2-5: the pad calibration, 32 entries each (CLP-79) */
-        const uint8_t *c = padcal.rgb[(arg - 2u) * SMK_PADCAL_CHUNK];
-        ed_b(arg);
-        for (i = 0; i < 3u * SMK_PADCAL_CHUNK; i++)     /* R, G, B of each entry, 2 x 7 bits */
-            smk_inlog_w(c[i], 2u);
-        for (i = 0; i < SMK_PADCAL_CHUNK / 8u; i++)     /* then the ok bits of the 32 entries */
-            smk_inlog_w(padcal.ok[(arg - 2u) * (SMK_PADCAL_CHUNK / 8u) + i], 2u);
-        smk_inlog_w(padcal.tl, 2u);                  /* the orientation correction */
-        return;
-    }
-#endif
     if (arg == 1u) {
         ed_b(1u);
         ed_b(padled_dirty);
@@ -479,10 +460,10 @@ uint8_t smk_apc_ble_event(uint32_t pkt, uint8_t notifying)
 {
     uint8_t r;
     if (smk_apc40_ble_colour_unheard(pkt, notifying)) {
-        smk_inlog(3u, pkt);
+        SMK_INLOG_RECORD(3u, pkt);
         return (uint8_t)(clip_grid_mode || (apc_host_on & 2u));
     }
-    smk_inlog(1u, pkt);
+    SMK_INLOG_RECORD(1u, pkt);
     apc_in_ble = 1u;
     r = smk_apc_usb_event(pkt);
     apc_in_ble = 0u;
@@ -1998,101 +1979,6 @@ static void smk_grid(void)
         smk_pad_piano = 0;
 }
 
-/* The pad calibration page on the LCD (CLP-79, ui.c draw_main): the 16 target colours (APC40_LCD565) in
- * the layout of the pads, a white frame on the selected pad, a dot on each entry marked ok, then the
- * palette entry (velocity) and the name of the selected pad, and its boost (SEQ REC: real level). */
-#if X0X_DEV_PADCAL
-uint8_t smk_padcal_draw(uint32_t w, uint32_t h)
-{
-    uint8_t e = smk_padcal_entry(padcal.page, padcal.sel), i, s = padcal.real ? 0u : smk_padcal_boost_shift(APC40_LCD565[e]);
-    uint32_t sig = smk_padcal_word(&padcal, e) ^ (uint32_t)(padcal.sel | padcal.page << 4) << 25 ^
-                   (uint32_t)(padcal.tl | padcal.orient << 4 | padcal.real << 5) * 2654435761u;
-    char t[32], *q;
-    if (sig == padcal_sig && blit_hash[1])         /* SMC expiry invalidates the LCD body */
-        return 0u;
-    padcal_sig = sig;
-    cv_begin(w, h, C_BLACK);
-    cv_band(0, (int32_t)h);
-    if (padcal.orient) {
-        cv_text(4, 70, &FONT_S, "K2: TOP-LEFT PAD", C_WHITE);
-        cv_text(4, 92, &FONT_S, "PLAY: CONFIRM", C_WHITE);
-        return 1u;
-    }
-    for (i = 0; i < SMK_PADCAL_PADS; i++) {
-        int32_t x = (int32_t)(i & 7u) * 30, y = (int32_t)(i >> 3) * 30;
-        uint8_t n = smk_padcal_entry(padcal.page, i);
-        uint16_t c = i == padcal.sel ? smk_padcal_boost565(APC40_LCD565[n], s) : APC40_LCD565[n];
-        if (i == padcal.sel)
-            cv_rect(x, y, 30, 30, C_WHITE);
-        cv_rect(x + 3, y + 3, 24, 24, c);
-        if (smk_padcal_is_ok(&padcal, n))
-            cv_rect(x + 12, y + 12, 6, 6, smk_padcal_dot565(c));   /* black on a light square */
-    }
-    q = put_s(put_s(put_s(put_i(put_s(t, "#"), e), " "), PADCAL_HUE[PADCAL_NAME[e] >> 3]), " ");
-    put_s(q, PADCAL_SHADE[PADCAL_NAME[e] & 7u]);
-    cv_text(4, 70, &FONT_S, t, C_WHITE);
-    put_i(put_s(t, "BOOST X"), 1u << s);
-    cv_text(4, 92, &FONT_S, padcal.real ? "REAL LEVEL" : t, C_WHITE);   /* SEQ REC toggles */
-    return 1u;
-}
-/* GLOBAL > SYSTEM > PAD COLOURS (ui.c run_action). The row is not in the list in clip mode: the clip keys
- * own the knobs there. */
-void smk_padcal_enter(void)
-{
-    if (clip_grid_mode)                           /* (clip mode came on while the list was open) */
-        return;
-    smk_padcal_start(&padcal, APC40_LCD565, PAD_GAMMA_LUT, PAD_GAIN_Q8, PAD_FLOOR_LEVEL);
-    padcal_btn = fm1_in.buttons;
-    padcal_pads = fm1_in.pnotes;
-    padcal_sig = ~0u;
-    say("PAD COLOURS", 0);
-}
-/* The pad calibration frame (CLP-79). The UI gets no buttons, keys or knobs meanwhile (plat_fm1.c, ui.c).
- * First the orientation page: K2 moves the white light, SEQ PLAY confirms it as top-left (smk_padcal_phys).
- * A pad selects its entry. K2 / K3 / K4 nudge R / G / B. PLAY marks ok. OCT- / OCT+ change the page.
- * PATCH or GLOBE ends it on the release, so the UI does not see that button. */
-static void smk_padcal_frame(void)
-{
-    uint32_t b = fm1_in.buttons, p = fm1_in.pnotes, down = b & ~padcal_btn, i;
-    if (padcal_btn & ~b & (1u << panel.btn[B_HOME] | 1u << panel.btn[B_GLO]))
-        padcal.on = 0u;
-    for (i = 0; i < SMK_PADCAL_PADS; i++)
-        if (p & ~padcal_pads & (1u << SMK_WHITE_NOTE[i]))
-            padcal.sel = smk_padcal_phys(padcal.tl, (uint8_t)i);
-    padcal_btn = b;
-    padcal_pads = p;
-    if (down & (1u << panel.btn[B_PLAY])) {
-        if (padcal.orient)
-            padcal.orient = 0u;                  /* the lit pad is top-left: page 1 */
-        else
-            smk_padcal_mark(&padcal);
-    }
-    if (down & (1u << panel.btn[B_REC]))
-        padcal.real ^= 1u;                       /* the selected LCD square: boost or real level */
-    if (down & (1u << panel.btn[B_OCTDN]))
-        padcal.page = smk_padcal_page_step(padcal.page, -1);
-    if (down & (1u << panel.btn[B_OCTUP]))
-        padcal.page = smk_padcal_page_step(padcal.page, 1);
-    for (i = 0; i < NE; i++) {                   /* all knobs: the others do not act after the end */
-        int32_t d = fm1_enc_take(panel.enc[i]) * panel.dir[i];
-        if (d && padcal.orient && !i)
-            smk_padcal_orient_turn(&padcal, d);
-        else if (d && i < 3u && !padcal.orient)
-            smk_padcal_turn(&padcal, (uint8_t)i, d);
-    }
-    smk_pad_grid = 1u;
-    for (i = 0; i < SMK_PADCAL_PADS; i++) {      /* level / 2: as a lit clip pad (smk_pads) */
-        const uint8_t *c = padcal.rgb[smk_padcal_entry(padcal.page, (uint8_t)i)];
-        uint8_t ph = smk_padcal_phys(padcal.tl, (uint8_t)i), w = !i ? 127u : 0u;
-        if (padcal.orient)                       /* the orientation page: only reading position 0, white */
-            padled_set(ph, w, w, w);
-        else
-            padled_set(ph, c[0] >> 1, c[1] >> 1, c[2] >> 1);
-    }
-    padled_flush();
-}
-#endif
-
 /* Resolve mode ownership before either UI input path can dispatch REC or PLAY. */
 static void smk_clip_mode_poll(void)
 {
@@ -2100,10 +1986,6 @@ static void smk_clip_mode_poll(void)
         knob_bank_prev = (uint8_t)((fm1_in.buttons >> SMK_BTN_KNOB_BANK) & 1u);
         return;
     }
-#if X0X_DEV_PADCAL
-    if (padcal.on)
-        return;
-#endif
     uint8_t down = (uint8_t)((fm1_in.buttons >> SMK_BTN_KNOB_BANK) & 1u);
     if (down && !knob_bank_prev) {
         extern void engine_clip_midi_flush(void);
@@ -2128,9 +2010,6 @@ CK_FN static void smk_frame(void)
     unsigned outer = (unsigned)((fm1_in.keys >> 1) & 1u) | (unsigned)((fm1_in.keys >> 2) & 2u) |
         (unsigned)((fm1_in.keys << 2) & 4u) | (unsigned)((fm1_in.keys << 1) & 8u);
     int allow_pages = !clip_grid_mode;
-#if X0X_DEV_PADCAL
-    allow_pages = allow_pages && !padcal.on;
-#endif
     ui_brk_page_keys(outer, allow_pages);
     if (ui_project_busy()) {
         smk_arrows();
@@ -2138,12 +2017,6 @@ CK_FN static void smk_frame(void)
         clip_pad_keys = fm1_in.pnotes;
         return;
     }
-#if X0X_DEV_PADCAL
-    if (padcal.on) {
-        smk_padcal_frame();
-        return;
-    }
-#endif
     smk_arrows();
     (void)smk_clip_map_refresh();
     smk_faders();
@@ -2368,6 +2241,7 @@ static void fm1_main(void)
 #if BOARD_SMK37
             st_owner_check();                       /* SMK: never parse another ported firmware's store (storage.c) */
 #endif
+            xdata_check();                          /* font bitmaps in XDATA: else FONT_T (gfx.c font_live) */
             for (k = 0; k < SMP_USER_SLOTS; k++)
                 smp_user_scan(k);
             ed_smp_recover();                       /* mid-WRITE power loss: put sector 0 back from FL_SMPV */
@@ -2411,6 +2285,10 @@ static void fm1_main(void)
     panel_init();
     led_pos_init();
     plat_perf_init();
+#if BOARD_SMK37 && X0X_S1C && FL_FDATA_SIZE
+    if (flash_ok)
+        (void)s1_part_set_pack(fm1_xip_ptr(FL_FDATA_LO), FL_FDATA_SIZE);
+#endif
     engine_init(proj.pat, &proj.arr.song, proj.arr.lane, &proj.sound);
     if (project_load() != 0)
         project_defaults();                         /* nothing saved yet (or another format) */
@@ -2466,6 +2344,8 @@ static void fm1_main(void)
     if (st_owner_cleared)
         ui_say("OLD DATA CLEARED", 0);          /* another firmware's store (storage.c st_owner_check); say() has 27 chars */
 #endif
+    if (!gfx_xdata_ok)
+        ui_say("FONTS MISSING: REINSTALL", 0);  /* XDATA bad CRC / build id (gfx.c xdata_check) */
 
     for (;;) {
         fm1_wdt_feed();

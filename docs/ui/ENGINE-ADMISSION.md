@@ -8,8 +8,8 @@ Reference version: owner document dated 2026-11-16 17:22; SHA256
 ## Current firmware, not renamed fiction
 
 At development source `94197fc839b00aff47b98ca02f3c6396e4a6eabf`, and the local
-R22 overlay under review, the selectable banks remain Chicago, Miami, Drone
-and generic Juno6. `firmware/src/app/original_sound.h` assigns Drone bank 2
+R22 overlay under review, the selectable banks were Chicago, Miami, the retired slot-2 engine
+and generic Juno6. `firmware/src/app/original_sound.h` assigned that engine bank 2
 and persistent identifier `0x4f445231`, and generic Juno bank 3 and persistent
 identifier `0x4f4a5531`. `original_sound.c` uses the kind in packed cell byte 29.
 The UI selector and header names are in `ui.c`; runtime dispatch and compiled

@@ -50,7 +50,8 @@ class Compare(unittest.TestCase):
         self.assertFalse(self.run_pair()['guards_passed'])
     def test_budget(self):
         self.assertEqual(parse_budget("pro: XIP free: 1036 B (min 1024); pool margin: 1244 B (min 512)",'pro'),self.mem)
-        r=compare(self.a,self.b,self.mem,(1023,1244),'pro')
+        self.assertEqual(parse_budget("pro: XIP free: 1036 B (min 0); pool margin: 1244 B (min 512)",'pro'),self.mem)
+        r=compare(self.a,self.b,self.mem,(0,511),'pro')  # pool below POOL_MIN=512; XIP_MIN is 0
         self.assertFalse(r['guards_passed'])
     def test_mismatched_model(self):
         self.b['model']='elite'

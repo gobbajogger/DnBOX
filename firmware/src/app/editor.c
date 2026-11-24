@@ -19,10 +19,20 @@
 enum { ED_INFO = 1, ED_PROJECT = 9, ED_SMP_BEGIN = 11, ED_SMP_WRITE, ED_SMP_END, ED_SMP_ERASE, ED_SMP_INFO, ED_SMP_READ, ED_PING = 25,
        ED_DIAG = 33, ED_BT_TEST = 34, ED_CTL_READ = 37, ED_INLOG = 38, ED_BOOT_INFO = 39,
        ED_BOOT_BEGIN = 43, ED_BOOT_WRITE, ED_BOOT_READ, ED_BOOT_END, ED_BOOT_ABORT,
-       ED_INSTALL = 48, ED_CAPTURE = 49 };
+       ED_INSTALL = 48, ED_CAPTURE = 49, ED_XDATA = 50, ED_FITTAB = 51, ED_FDATA = 52 };
 #include "../../../tools/mboot/session_wire.h"
 #include "boot_screen.h"
 #if BOARD_SMK37
+#if defined(__has_include) && __has_include("fittab_id.h")
+#include "fittab_id.h"
+#endif
+#include "app/fittab.h"
+#if X0X_S1C
+#include "app/s1c_part.h"
+#endif
+#endif
+#include "smk_inlog_profile.h"
+#if X0X_SMK_INLOG
 /* ED_INLOG (SMK-37, read only, a76): the inbound recorder (app/smk_inlog.h). No arg or arg 0: the entry
  * count, fm1_ms now, then 2 words for each entry (the oldest first), each word 5 x 7 bits, low bits
  * first. Then the 40 stored clip velocities and the 40 stored clip channels (one byte each).
@@ -887,6 +897,54 @@ static void ed_handle(const uint8_t *f, uint32_t n)
     case ED_PING:
         ed_b(0);
         break;
+#if defined(FONT_XDATA_LEN) && BOARD_SMK37
+    case ED_XDATA: {                                  /* read only: XDATA in use (1) or FONT_T fallback (0), then the
+                                                       * region's 16 B header as read now, each byte 2 x 7 bits, low
+                                                       * first: the installers compare it with the package (read back) */
+        const uint8_t *h = (const uint8_t *)FL_XIP(FL_XDATA_LO);
+        uint32_t k;
+        ed_b(gfx_xdata_ok);
+        for (k = 0; k < XDATA_HDR; k++) {
+            ed_b(h[k]);
+            ed_b(h[k] >> 7);
+        }
+        break;
+    }
+#endif
+#if defined(FITTAB_LEN) && BOARD_SMK37
+    case ED_FITTAB: {                                 /* read only: FITTAB present (1) or absent (0), then the
+                                                       * region's 16 B header as read now, each byte 2 x 7 bits, low
+                                                       * first: the installers compare it with the package (read back) */
+        const uint8_t *h = (const uint8_t *)FL_XIP(FL_FITTAB_LO);
+        const uint8_t *blob = fittab_blob(h, FL_FITTAB_HI - FL_FITTAB_LO, FITTAB_LEN, FITTAB_CRC32);
+        uint32_t k;
+        ed_b(blob ? 1 : 0);
+        for (k = 0; k < FITTAB_HDR; k++) {
+            ed_b(h[k]);
+            ed_b(h[k] >> 7);
+        }
+        break;
+    }
+#endif
+#if BOARD_SMK37
+    case ED_FDATA: {                                  /* read only: FDATA valid and bound (1) or absent (0), then its first
+                                                       * 32 B as read now, each byte 2 x 7 bits, low first: the
+                                                       * installers compare them with the package (read back) */
+        uint32_t k;
+        const uint8_t *h = (const uint8_t *)FL_XIP(FL_FDATA_LO);
+#if X0X_S1C
+        ed_b(s1_part_programs() != 0);
+#else
+        ed_b(0);
+#endif
+        for (k = 0; k < FL_FDATA_HDR; k++) {
+            uint32_t v = FL_FDATA_SIZE ? h[k] : 0xFFu;
+            ed_b(v);
+            ed_b(v >> 7);
+        }
+        break;
+    }
+#endif
     case ED_DIAG: {                                   /* read only: the crash record and the Bluetooth start */
         uint32_t w[77], nw = 0, k;            /* 77 x 5 B fit ed_out (tests/diag_size_test.py) */
         const uint32_t *c = (const uint32_t *)&fm1_crash;
@@ -907,7 +965,7 @@ static void ed_handle(const uint8_t *f, uint32_t n)
         }
         break;
     }
-#if BOARD_SMK37
+#if X0X_SMK_INLOG
     case ED_INLOG:                                    /* read only: the inbound recorder (main_fm1.c) */
         smk_inlog_reply(na >= 1u ? a[0] : 0u);
         break;

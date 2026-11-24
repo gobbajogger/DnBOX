@@ -2,6 +2,10 @@
 /* Original-control adapter in the actual released UI, without a donor renderer. */
 #define main simulator_main
 #include "../../host/x0x_host.c"
+/* 1ec2d61a8 blends sloped 1 px strokes over at most three minor-axis pixels:
+ * a partial-coverage halo may touch the ring just outside the cell, never solid ink. */
+#define GLYPH_IN(x,y,px) (((x)>=10 && (x)<36 && (y)>=10 && (y)<=28) || \
+    ((x)>=9 && (x)<37 && (y)>=9 && (y)<=29 && (px)!=swap16(C_HI)))
 #undef main
 #include "../../experiments/original_synth/chicago_voice.h"
 #include "../../experiments/original_synth/miami_selected_voice.h"
@@ -215,7 +219,7 @@ static void fx_picture_cases(void)
         uint32_t hash=2166136261u; unsigned ink=0;
         for(int y=0;y<KNOB_H;++y) for(int x=0;x<240;++x) {
             uint16_t pixel=cv_px[y*240+x];
-            if(pixel!=swap16(C_BLACK)) {CHECK(x>=10 && x<36 && y>=10 && y<=28);++ink;}
+            if(pixel!=swap16(C_BLACK)) {CHECK(GLYPH_IN(x,y,pixel));++ink;}
             hash=(hash^pixel)*16777619u;
         }
         CHECK(ink); pictures[fx]=hash;
@@ -381,7 +385,7 @@ static void picture_rule_cases(void)
         for(int slot=14;slot<16;slot++)for(int i=0;i<8;i++)for(int row=0;row<3;row++){
             unsigned mask=slot==15?0x11u:0x02u;
             uint16_t ink=(mask&(1u<<i))?dim(PART_COL[PART_909],slot==15?16:9):UI_N_SIDE;
-            CHECK(fb[(MAIN_Y+42+pos*18+row)*240+39+slot*12+i]==swap16(ink));
+            CHECK(fb[(MAIN_Y+42+pos*18+row)*240+46+slot*12+i]==swap16(ink));
         }
         ui.view=V_PART; build_pages(); draw_header();
         char pending[16],current[16];snprintf(current,sizeof current,"P%d",NPAT);

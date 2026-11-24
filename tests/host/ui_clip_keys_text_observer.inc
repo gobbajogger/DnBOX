@@ -5,13 +5,13 @@ static int32_t audit_text(int32_t x,int32_t y,const felucca_font_t*f,const char*
  int left=999,right=-999,pen=x; unsigned clipped=0;
  for(const unsigned char*p=(const unsigned char*)s;*p;p++) {
   unsigned ch=*p;if(ch<f->first||ch>f->last)ch='?';unsigned gi=ch-f->first,w=font_bitmap_width(f,gi),stride=(w+1)/2;
-  const uint8_t*d=f->data+f->off[gi];
+  const uint8_t*d=f->data+font_offset(f,gi);
   for(unsigned yy=0;yy<f->h;yy++)for(unsigned xx=0;xx<w;xx++) {
    unsigned a=d[yy*stride+xx/2];a=(xx&1)?a&15:a>>4;if(!a)continue;
    int gx=pen-(int)f->pad+xx,gy=y+yy;
    if(gx<left)left=gx;if(gx>right)right=gx;
    if(gx<0||gx>=(int)cv_w||gy<0||gy>=(int)cv_h)clipped++;
-  }pen+=f->adv[gi];
+  }pen+=font_advance(f,gi);
  }
  unsigned value=audit_call%2,overlap=value&&left<=audit_label_right;
  unsigned cell_right=(audit_call/2<5)?119:239,overrun=right>(int)cell_right;

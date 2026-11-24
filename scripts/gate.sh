@@ -11,7 +11,7 @@
 #   scripts/gate.sh [<lane>] --online
 #   scripts/gate.sh --self-test
 #
-# Lane is sound, fwui, integ, remote, or web (default: integ).
+# Lane is sound, fwui, integ, perf, synths, remote, or web (default: integ).
 #
 # Offline is the default: the run uses only the local checkout and does
 # not git fetch, clone or ls-remote. Network Git (and npm ci) run only
@@ -30,14 +30,14 @@
 #   JIELI_TOOLCHAIN, AC79_SDK, CHROMIUM_EXECUTABLE, TMPDIR, DNBOX_GATE_ONLINE
 set -u
 
-FW_REQUIRED="clean-tree setup no-loss limits host-tests build-elite-pro flashmap budget ui-defects drone"
+FW_REQUIRED="clean-tree setup no-loss limits host-tests build-elite-pro flashmap budget ui-defects retired-engine"
 NT_REQUIRED="clean-tree setup no-loss limits build unit-tests browser-tests"
 SKIPPABLE="fetch-base"
 
 usage() {
   echo "Usage: scripts/gate.sh [<lane>] [--post] [--online]" >&2
   echo "       scripts/gate.sh --self-test" >&2
-  echo "Lane: sound, fwui, integ, remote, or web (default: integ)." >&2
+  echo "Lane: sound, fwui, integ, perf, synths, remote, or web (default: integ)." >&2
   echo "Offline is the default (no git fetch/clone/ls-remote)." >&2
   echo "--online: allow network Git and npm ci (sets DNBOX_GATE_ONLINE=1)." >&2
   echo "--post: upload a dnbox-gate commit status for this SHA via gh api." >&2
@@ -209,8 +209,8 @@ DNBOX-GATE repo=firmware lane=integ sha=0123456789abcdef0123456789abcdef01234567
 [PASS] budget
 == ui-defects
 [PASS] ui-defects
-== drone
-[PASS] drone
+== retired-engine
+[PASS] retired-engine
 DNBOX-GATE RESULT PASS sha=0123456789abcdef0123456789abcdef01234567 lane=integ log=build/dnbox-gate/01234567-test.log
 LOG
     if [ -n "$missing" ]; then
@@ -283,8 +283,8 @@ DNBOX-GATE repo=firmware lane=integ sha=0123456789abcdef0123456789abcdef01234567
 [FAIL] budget
 == ui-defects
 [PASS] ui-defects
-== drone
-[PASS] drone
+== retired-engine
+[PASS] retired-engine
 DNBOX-GATE RESULT FAIL sha=0123456789abcdef0123456789abcdef01234567 lane=integ log=x
 LOG
   expect inner-fail "$tmp/fail.log" 1 "DNBOX-GATE: FAIL"
@@ -350,7 +350,7 @@ for arg in "$@"; do
     --parse-log=*) PARSELOG=${arg#--parse-log=} ;;
     --exit-code=*) PARSE_RC=${arg#--exit-code=} ;;
     -h|--help) usage; exit 0 ;;
-    sound|fwui|integ|remote|web) LANE="$arg" ;;
+    sound|fwui|integ|perf|synths|remote|web) LANE="$arg" ;;
     *)
       echo "scripts/gate.sh: unknown argument: $arg" >&2
       usage

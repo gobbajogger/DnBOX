@@ -6,6 +6,10 @@
 # audio in build/scenarios/. Needs the reference sources (see tests/host/run_*.sh).
 #   tests/run_tests.sh
 #   tests/run_tests.sh <name>...           only the named tests (the names of the result lines). Also X0X_TESTS="<name> ...".
+#   On-demand only (not in the default per-push suite): the mutation self-tests smc-ui-negative,
+#     smc-interaction-negative, smc-multi-peer-negative (Dot-only meta-tests). Run them by name:
+#     tests/run_tests.sh smc-ui-negative smc-interaction-negative smc-multi-peer-negative
+#   heavy-playback was dropped from the suite (user 2026-11-23 23:36) and the script was removed; audio-stress stays.
 #   X0X_TEST_JOBS=1 tests/run_tests.sh    serial: one test at a time, in order.
 #   The default is X0X_TEST_JOBS=8: host-only tests run 8 at a time. See test_class below.
 #     Install, update, package, BLE and mocked-device tests always run serially, one at a time, after
@@ -69,6 +73,19 @@ PIL_SKIP=0          # tests_body sets 1 when python3 cannot import PIL
 ASAN_SKIP=0         # tests_body sets 1 when the ASan runtime does not link
 ASAN_CHECKED=0
 OUT=build/host
+# Browser fixtures refuse a TMPDIR inside the checkout or /tmp, but each parallel test gets
+# TMPDIR=build/host/iso/<test>/tmp. Give them one dedicated root outside both (the runner's own
+# HOME cache) unless the caller already chose one.
+if [ -z "${DNBOX_BROWSER_TMPDIR:-}" ] && [ -n "${HOME:-}" ]; then
+    DNBOX_BROWSER_TMPDIR="$HOME/.cache/dnbox-browser-tmp"
+    mkdir -p "$DNBOX_BROWSER_TMPDIR" 2>/dev/null || unset DNBOX_BROWSER_TMPDIR
+fi
+[ -z "${DNBOX_BROWSER_TMPDIR:-}" ] || export DNBOX_BROWSER_TMPDIR
+# Each test gets a private HOME, which hides Playwright's managed browsers in the real one.
+# Point Playwright at that cache (a browser root, not an executable override).
+if [ -z "${PLAYWRIGHT_BROWSERS_PATH:-}" ] && [ -d "${HOME:-/nonexistent}/.cache/ms-playwright" ]; then
+    export PLAYWRIGHT_BROWSERS_PATH="$HOME/.cache/ms-playwright"
+fi
 mkdir -p "$OUT"
 JOBS="${X0X_TEST_JOBS:-8}"
 export X0X_TEST_TIME_SCALE="${X0X_TEST_TIME_SCALE:-20}"
@@ -81,29 +98,31 @@ RES="$OUT/.results"
 # The class of a test. S: serial and alone (install, update, package, BLE, mocked device).
 # W: install-slots-web (a long node test with a temp folder and a mocked keyboard, no port): it starts with
 # phase 1 and runs beside the class P and G tests only. It ends before phase 2 starts.
-# G: host-only, shares build/gen (one at a time). C: scenario (needs host-build; serial, because the
+# G: host-only, needs build/gen. host-build and gen-nonfont-tables write the shared tree and stay
+#     locked; the rest run in the job pool with per-test HOME/TMPDIR/SMC_UI_OUT. C: scenario (needs host-build; serial, because the
 # simulator's CPU guard uses the host time, so a busy host changes the result). P: host-only, parallel.
 test_class() {
     case "$1" in
-    drum909-tanh-pair|ui-clock-comp|ui-layer-restoration|smc-caption-geometry|ui-808-accent|ui-step-lane|ui-step-lane-edit|ui-step-lane-transaction|break-step-velocity-engine|ui-overlay-battery|ui-toast-battery|ui-shared-parameter-panel|ui-held-target-visibility|break-preview-integration|break-preview-visibility|break-held-edit-journey|break-family-layout|break-context-label|break-outline-snapshot|ui-chance-framebuffer|ui-break-seq-phase|ui-break-seq-metadata|ui-padcal-render) TEST_CLASS=G ;;
+    drum909-tanh-pair|ui-clock-comp|ui-layer-restoration|smc-caption-geometry|ui-808-accent|ui-step-lane|ui-step-lane-edit|ui-step-lane-transaction|break-step-velocity-engine|ui-overlay-battery|ui-toast-battery|ui-shared-parameter-panel|ui-held-target-visibility|break-preview-integration|break-preview-visibility|break-held-edit-journey|break-family-layout|break-context-label|break-outline-snapshot|ui-chance-framebuffer|ui-break-seq-phase|ui-break-seq-metadata|ui-screen-walk) TEST_CLASS=G ;;
     install-slots-web) TEST_CLASS=W ;;
     installer|installer-f02-bind|installer-f02-bind-web|installer-targets|installer-slots|slot-build-safe|installer-restore-status|slot-backup|slot-backup-durable|slot-archive-zone|slot-verify-order|slot-read-reply|slot-ack-integrity|slot-echo-7bit|ctl-publish-atomic|upload-tools|\
     breaks-page|projects-page|ble-acl-start-flags|ble-hci-completed|ble-acl-zero-credit|ble-zero-conn|ble-link-epoch-reset|smc-reconnect-epoch|smc-boot-saved-roles|smc-ble-payload|ble-central-first-notification|ble-dual-peer|ble-one-peer-command|ble-one-peer-contract|ble-command-credit|ble-controller-heap|ble-ctl-fail-return|ble-disconnect-status|ble-sysex-bounds|ble|ble-package|smk-package|smk-ota-entry*|smk-update-loader|smk-build-package*|\
     smk-clip-ble-clear|smk-clip-ble-notify|installer-ctl|ctl-read-framing|installer-backup-snapshot) TEST_CLASS=S ;;
     composed-features|composed-panic-cutover|panic-clear|panic-order|panic-mutants|live-key-epoch|midi-epoch-step|composed-ui-identity|synthone-slot|juno-slot-integration|held-chord-integration|poly-chord-integration|project-rates-companion|composed-smc-panic) TEST_CLASS=G ;;
+    s1c-slot|s1c-programs|s1c-fx-controls|synth-arp-hooks) TEST_CLASS=G ;;
     ui-synthone-patch|ui-synthone-frames) TEST_CLASS=G ;;   # SMK host fixtures regenerate build/gen
     rec-live-smk) TEST_CLASS=S ;;   # these read build/gen from host-build (phase 1)
     save-note-quiet|original-release-integration|original-release-ui|freeplay-rate-pads|freeplay-live-keys|synth-bus-mute|storage-warning|freeplay-latency|pads-in-settings|boot-screen|ui-theme) TEST_CLASS=G ;;
     rec-held-duration|rec-endpoint-lifecycle|rec-endpoint-storage|rec-nonforward-guard|pattern-preset-notelock) TEST_CLASS=G ;;
-    dsp-host-linkage|drum-pan|stereo|drum909-adpcm|drum909|copy-semantics|song-actions|home-globe-part|ui-feedback|home-overview|part-order|sound-matrix|sound-layout|chicago-presentation|chicago-readout|matrix-knob-caption|preset-navigation-noop|ui-303-entry|host-build|gen-nonfont-tables|project-protocol|project-runtime|project-stage|project-save-preflight|smp-begin-cancel|smc-fx-caption|smc-fx-page-port|smc-fx-two-page-strip|smc-fx-echo-page|smc-fx-peer-view|smc-fx-preset-preserve|smc-reachability|smc-ui|drum-page-contract|smc-ui-popup|ui-shared-glyph|ui-glyph-polish|ui-tape-reel|ui-perf-labels|ui-chicago-env-motion|ui-drum-mix-material|smc-mixer-page|smc-ui-bounds|smc-ui-negative|smc-drum-mutes|smc-drum-rs|smc-performance-abort|smc-record-feedback|smc-lock|smc-lock-beat|smc-multi-peer|smc-multi-peer-negative|smc-select-mode|smc-pause-loss|smk-wheel-mode|perf-wheel-motion|miami-mw-wobble|smc-pickup-acceptance) TEST_CLASS=G ;;
+    dsp-host-linkage|drum-pan|stereo|drum909-adpcm|drum909|copy-semantics|song-actions|home-globe-part|home-globe-part-matrix|seq-pad-led|seq-hit-light|seq-lane-label-tap|ui-feedback|home-overview|part-order|sound-matrix|sound-layout|chicago-presentation|chicago-readout|matrix-knob-caption|preset-navigation-noop|ui-303-entry|host-build|gen-nonfont-tables|project-protocol|project-runtime|project-stage|project-save-preflight|smp-begin-cancel|smc-fx-caption|smc-fx-page-port|smc-fx-two-page-strip|smc-fx-echo-page|smc-fx-peer-view|smc-fx-preset-preserve|smc-reachability|smc-ui|drum-page-contract|smc-ui-popup|ui-shared-glyph|ui-glyph-polish|ui-tape-reel|ui-perf-labels|ui-stock-no-perf|ui-chicago-env-motion|ui-drum-mix-material|smc-mixer-page|smc-ui-bounds|smc-ui-negative|smc-drum-mutes|smc-drum-rs|smc-performance-abort|smc-record-feedback|smc-lock|smc-lock-beat|smc-multi-peer|smc-multi-peer-negative|smc-select-mode|smc-pause-loss|smk-wheel-mode|perf-wheel-motion|miami-mw-wobble|smc-pickup-acceptance|roll-marks) TEST_CLASS=G ;;
     adaptive-break-controls|adaptive-break-storage|audio-stress) TEST_CLASS=G ;;
     perf-wheel-noise|ext-midi-rec-smk) TEST_CLASS=G ;;   # generates and reads shared build/gen headers
-    dsp-host-linkage|drum-pan|stereo|drum909-adpcm|drum909|copy-semantics|song-actions|home-globe-part|ui-feedback|home-overview|part-order|sound-matrix|sound-layout|chicago-presentation|chicago-readout|matrix-knob-caption|preset-navigation-noop|ui-303-entry|host-build|gen-nonfont-tables|project-protocol|project-runtime|project-stage|project-save-preflight|smp-begin-cancel|smc-fx-caption|smc-fx-page-port|smc-fx-two-page-strip|smc-fx-echo-page|smc-fx-peer-view|smc-fx-preset-preserve|smc-reachability|smc-ui|drum-page-contract|smc-ui-popup|smc-remainder|smc-popup-engine|smc-audit-core|smc-audit-contract|ui-shared-glyph|ui-glyph-polish|ui-tape-reel|ui-perf-labels|ui-chicago-env-motion|ui-drum-mix-material|smc-mixer-page|smc-ui-bounds|smc-ui-negative|smc-drum-mutes|smc-drum-rs|smc-performance-abort|smc-record-feedback|smc-lock|smc-lock-beat|smc-multi-peer|smc-multi-peer-negative|smc-select-mode|smc-pause-loss|smk-wheel-mode|perf-wheel-motion|miami-mw-wobble|smc-pickup-acceptance) TEST_CLASS=G ;;
+    dsp-host-linkage|drum-pan|stereo|drum909-adpcm|drum909|copy-semantics|song-actions|home-globe-part|home-globe-part-matrix|seq-pad-led|seq-hit-light|roll-marks|seq-lane-label-tap|ui-feedback|home-overview|part-order|sound-matrix|sound-layout|chicago-presentation|chicago-readout|matrix-knob-caption|preset-navigation-noop|ui-303-entry|host-build|gen-nonfont-tables|project-protocol|project-runtime|project-stage|project-save-preflight|smp-begin-cancel|smc-fx-caption|smc-fx-page-port|smc-fx-two-page-strip|smc-fx-echo-page|smc-fx-peer-view|smc-fx-preset-preserve|smc-reachability|smc-ui|drum-page-contract|smc-ui-popup|smc-remainder|smc-popup-engine|smc-audit-core|smc-audit-contract|ui-shared-glyph|ui-glyph-polish|ui-tape-reel|ui-perf-labels|ui-stock-no-perf|ui-chicago-env-motion|ui-drum-mix-material|smc-mixer-page|smc-ui-bounds|smc-ui-negative|smc-drum-mutes|smc-drum-rs|smc-performance-abort|smc-record-feedback|smc-lock|smc-lock-beat|smc-multi-peer|smc-multi-peer-negative|smc-select-mode|smc-pause-loss|smk-wheel-mode|perf-wheel-motion|miami-mw-wobble|smc-pickup-acceptance) TEST_CLASS=G ;;
     adaptive-break-controls|adaptive-break-storage) TEST_CLASS=G ;;
-    synth-param-jump|param-write-sources|ui-drum-glyph|ui-808-stage-rows|ui-drum-curve-axes|ui-fx-feedback-context|ui-no-loss-return|ui-song-empty-action|ui-key-sound-state|ui-drum-mix-selected|ui-synth-step-footer|ui-sound-footer-oracle|ui-release-footer-mutants|ui-pattern-sound-identity|ui-freeplay-state|ui-drum-tune-role|ui-snare-tone-law) TEST_CLASS=G ;;   # regenerates build/gen via smc_ui_test.sh
-    chicago-adsr-graph|ui-adsr-engine-graph|ui-drum-amp-graph|ui-drum-single-lane|ui-drum-kit-section|ui-list-feedback|ui-reverb-return|ui-settings-sections) TEST_CLASS=G ;;
+    ui-seq-keyed-roll|synth-param-jump|param-write-sources|ui-drum-glyph|ui-808-stage-rows|ui-drum-curve-axes|ui-midi-next-cancel|ui-selected-adsr-readout|ui-envelope-graph|ui-terse-action-copy|ui-terse-action-copy-sel|ui-fx-feedback-context|ui-no-loss-return|ui-song-empty-action|ui-key-sound-state|ui-drum-mix-selected|ui-synth-step-footer|ui-sound-footer-oracle|ui-release-footer-mutants|ui-pattern-sound-identity|ui-freeplay-state|ui-drum-tune-role|ui-snare-tone-law) TEST_CLASS=G ;;   # regenerates build/gen via smc_ui_test.sh
+    chicago-adsr-graph|ui-adsr-engine-graph|ui-drum-amp-graph|ui-drum-single-lane|ui-drum-kit-section|ui-list-feedback|ui-reverb-return|ui-settings-sections|ui-text-units|ui-arp-seq) TEST_CLASS=G ;;
     bass-presets-map|bass-presets-export|bass-presets-live|bass-legacy-display|bass-tagged-storage|bass-303-adapt) TEST_CLASS=G ;;
-    scenario-*|perf-scratch) TEST_CLASS=C ;;   # perf-scratch compares with scenario perfsave: it runs after the scenarios
+    scenario-*|perf-scratch|render-timing) TEST_CLASS=C ;;   # perf-scratch compares with scenario perfsave: it runs after the scenarios
     *) TEST_CLASS=P ;;
     esac
 }
@@ -140,7 +159,7 @@ lk() {                  # name command...: start the command. An install-path te
 }
 needs_gen() {           # name: the test includes the headers in build/gen (host-build writes them)
     case "$1" in drum909-tanh-pair|save-note-quiet) return 0 ;; esac
-    case "$1" in dsp-host-linkage|bass-presets-map|bass-presets-export|bass-presets-live|bass-legacy-display|rec-held-duration|rec-endpoint-lifecycle|rec-endpoint-storage|rec-nonforward-guard|drum-pan|stereo|rec-live|rec-live-smk|copy-semantics|song-actions|home-globe-part|ui-feedback|ui-303-entry|project-protocol|project-runtime|project-stage|project-save-preflight|smp-begin-cancel) return 0 ;; *) return 1 ;; esac
+    case "$1" in dsp-host-linkage|bass-presets-map|bass-presets-export|bass-presets-live|bass-legacy-display|rec-held-duration|rec-endpoint-lifecycle|rec-endpoint-storage|rec-nonforward-guard|drum-pan|stereo|rec-live|rec-live-smk|copy-semantics|song-actions|home-globe-part|home-globe-part-matrix|seq-pad-led|seq-hit-light|roll-marks|seq-lane-label-tap|ui-feedback|ui-303-entry|project-protocol|project-runtime|project-stage|project-save-preflight|smp-begin-cancel) return 0 ;; *) return 1 ;; esac
 }
 gen_wait() {            # name: 0 if the test must wait for host-build (host-build runs in this run and did not end)
     needs_gen "$1" || return 1
@@ -219,6 +238,13 @@ not_run() {         # name reason: same T_SEQ and phase admission as run, but do
         fi
     fi
 }
+# Run only when named (X0X_TESTS or argv). Skipped in the default per-push suite.
+run_on_demand() {
+    if [ -z "$X0X_TESTS" ]; then
+        return
+    fi
+    run "$@"
+}
 run() {
     name="$1"; shift
     T_SEQ=$((T_SEQ + 1))
@@ -258,11 +284,13 @@ run() {
         return
     fi
     gw=0; gen_wait "$name" && gw=1
-    [ "$cls" = W ] || [ "$cls" = G ] || [ $gw = 1 ] || read -r _ <&3       # wait for a free job slot (class W does not use one)
+    [ "$cls" = W ] || [ "$name" = host-build ] || [ "$name" = gen-nonfont-tables ] || [ $gw = 1 ] || read -r _ <&3       # wait for a free job slot (class W and gen writers do not use one yet)
     (                                       # xtrace goes to the file on the next line so sh -x lines do not tear
         export HOME="$PWD/$OUT/iso/$name/home" TMPDIR="$PWD/$OUT/iso/$name/tmp"
         export PYTHONUSERBASE="$X0X_PYTHONUSERBASE"   # pip --user Pillow must survive the private HOME
-        mkdir -p "$HOME" "$TMPDIR"
+        # Unique compiler/UI output so parallel G tests do not share build/host/smc-ui.
+        export SMC_UI_OUT="$PWD/$OUT/iso/$name/smc-ui"
+        mkdir -p "$HOME" "$TMPDIR" "$SMC_UI_OUT"
         if [ $gw = 1 ]; then      # wait for generation without a job slot, then take a slot
             until [ -e "$OUT/iso/.gen-done" ] || [ -e "$OUT/iso/.gen-fail" ]; do sleep 0.1; done
             if [ -e "$OUT/iso/.gen-fail" ]; then
@@ -271,11 +299,19 @@ run() {
                 echo "0 s $name" > "$RES/$key.time"
                 exit 0            # no job-slot read: the pool must not deadlock on a failed generation
             fi
-            [ "$cls" = W ] || [ "$cls" = G ] || read -r _ <&3
+            [ "$cls" = W ] || [ "$name" = host-build ] || [ "$name" = gen-nonfont-tables ] || read -r _ <&3
         fi
-        if [ "$cls" = G ]; then gen_lock; read -r _ <&3; fi
+        # Only the writers of the shared build/gen tree take gen_lock.
+        # Other class G tests already took a job slot outside, or just above after
+        # waiting for .gen-done; do not take a second slot.
+        if [ "$name" = host-build ] || [ "$name" = gen-nonfont-tables ]; then
+            gen_lock
+            read -r _ <&3
+        fi
         run_one "$key" "$name" "$@"
-        [ "$cls" = G ] && gen_unlock
+        if [ "$name" = host-build ] || [ "$name" = gen-nonfont-tables ]; then
+            gen_unlock
+        fi
         [ "$name" = host-build ] && : > "$OUT/iso/.gen-done"   # also after a FAIL: the waiting tests then start and report
         [ "$cls" = W ] || echo >&3
     ) 2>>"$OUT/$name.xtrace" &
@@ -298,6 +334,7 @@ W="-O2 -ffp-contract=off -Wall -Wextra -Wdouble-promotion -Werror"
 # Composed 0.0.25 regressions exercise the production UI, engine, storage and MIDI paths.
 run composed-features sh tests/host/composed_features_test.sh
 run juno6-runtime sh tests/host/juno6_runtime_test.sh "$OUT/juno6-runtime"
+run superj6-controls sh tests/host/superj6_controls_test.sh "$OUT/superj6-controls"   # row 5: 16/16 page controls, chorus FX, bit-exact bypass
 run synthone-init-audio sh tests/host/synthone_init_audio.sh "$OUT/synthone-init-audio"
 run juno6-slot sh -c "$CC -std=c99 -O2 -Iexperiments/original_synth tests/host/juno6_slot_test.c firmware/src/app/original_sound.c experiments/original_synth/miami_program.c experiments/original_synth/chicago_program.c experiments/original_synth/fused_reference.c -lm -o $OUT/juno6_slot && $OUT/juno6_slot"
 run legacy-slot2-map sh -c "$CC -std=c99 -O2 -Wall -Wextra -Werror -Iexperiments/original_synth tests/host/legacy_slot2_map_test.c firmware/src/app/original_sound.c experiments/original_synth/miami_program.c experiments/original_synth/chicago_program.c experiments/original_synth/fused_reference.c -lm -o $OUT/legacy_slot2_map && $OUT/legacy_slot2_map"
@@ -311,6 +348,10 @@ run composed-panic-cutover sh tests/host/panic_cutover_integration_test.sh
 run panic-clear sh tests/host/panic_clear_test.sh
 run composed-ui-identity env SMC_UI_TEST_FILE=tests/host/composed_ui_identity_test.c SMC_UI_OUT=build/host/composed-ui sh tests/host/smc_ui_test.sh
 run synthone-slot env SMC_UI_TEST_FILE=tests/host/synthone_slot_test.c SMC_UI_OUT=build/host/synthone-slot sh tests/host/smc_ui_test.sh
+run s1c-slot env X0X_S1C=1 X0X_HOST_DEFS="-DX0X_S1C=1 -DX0X_SYNTHONE_PATCH=1" SMC_UI_TEST_FILE=tests/host/synthone_slot_test.c SMC_UI_OUT=build/host/s1c-slot sh tests/host/smc_ui_test.sh
+run s1c-programs sh tests/host/s1c_programs_test.sh "$OUT/s1c-programs"
+run s1c-fx-controls sh tests/host/s1c_fx_controls_test.sh "$OUT/s1c-fx-controls"
+run synth-arp-hooks sh tests/host/synth_arp_hooks_test.sh "$OUT/synth-arp-hooks"
 run synthone-envelope-dnbx python3 -B tests/host/test_synthone_dnbx_envelope.py
 run juno-slot-integration env SMC_UI_TEST_FILE=tests/host/juno_slot_integration_test.c SMC_UI_OUT=build/host/juno-slot sh tests/host/smc_ui_test.sh
 run poly-chord-integration sh tests/host/poly_chord_integration_test.sh
@@ -373,6 +414,8 @@ run chicago-fx2-inserts sh tests/host/chicago_fx2_inserts_test.sh build/chicago_
 run original-sound-cell sh tests/host/original_sound_cell_test.sh build/original-sound-cell
 run original-release-ui sh tests/host/original_release_ui_test.sh build/ui-theme/original-ui
 run original-build python3 tests/host/test_original_build_composition.py
+run engine-memory-report python3 -B tests/host/engine_memory_report_test.py   # per-engine flash/RAM/pool report + stock budget
+run flashmap-fdata python3 -B tests/host/flashmap_fdata_test.py   # factory synth data at the end of slot 2
 run load-guard-diagnostic python3 tests/host/test_load_guard_diagnostic.py
 run state-trace-diagnostic python3 tests/host/test_state_trace_diagnostic.py
 run play-question sh tests/host/play_question_test.sh
@@ -492,16 +535,19 @@ run midi-out-mq-pb-overflow python3 tests/host/midi_pb_overflow_test.py out
 run ble-out-pb-overflow python3 tests/host/midi_pb_overflow_test.py ble
 run ble-device-setting-flow python3 tests/host/ble_device_setting_flow_test.py   # BLUETOOTH row: independent bit-0 save, BT SAVE PENDING, retry
 run ble-toggle-persistence-gate python3 tests/host/ble_toggle_persistence_gate_test.py
-run smc-multi-peer-negative python3 tests/host/smc_multi_peer_negative_test.py
+run_on_demand smc-multi-peer-negative python3 tests/host/smc_multi_peer_negative_test.py
 run smc-pause-loss sh tests/host/smc_pause_loss_test.sh
 run smk-wheel-mode sh tests/host/smk_wheel_mode_test.sh
 run miami-table-interpolation sh tests/host/run_miami_table_interpolation.sh
 run miami-coef-cache sh tests/host/run_miami_coef_cache.sh
+run drum909-tune-pitch sh tests/host/drum909_tune_pitch_test.sh
 run legacy-303-project sh tests/host/legacy_303_project_test.sh   # old bass303 projects load as the Chicago default, no crash, no save
-run smc-interaction-negative python3 tests/host/smc_interaction_negative_test.py
+run_on_demand smc-interaction-negative python3 tests/host/smc_interaction_negative_test.py
 run corner-coverage python3 tests/host/corner_coverage_test.py
 run part-order sh tests/host/part_order_test.sh
 run synthone-short-label python3 tests/host/test_synthone_short_label.py
+run synthone-pack python3 tests/host/test_s1pack.py   # 694 packed factory programs decode bit for bit, fit 15 sectors
+run superj6-presets python3 tests/host/test_superj6_presets.py   # 640 private factory presets, 12 banks, unmapped=0; SKIP without the private export
 run smc-ui sh tests/host/smc_ui_test.sh
 run drum-page-contract sh tests/host/drum_page_contract_test.sh
 run ui-adsr-engine-graph sh tests/host/ui_adsr_engine_graph_test.sh
@@ -511,6 +557,11 @@ run ui-drum-kit-section python3 tests/host/ui_drum_kit_section_test.py
 run smc-ui-popup sh tests/host/smc_ui_popup_test.sh
 run ui-overlay-battery sh tests/host/ui_overlay_battery_test.sh
 run ui-toast-battery sh tests/host/ui_toast_battery_test.sh
+run ui-midi-next-cancel env SMC_UI_TEST_FILE=tests/host/ui_midi_next_cancel_test.c SMC_UI_OUT=build/host/ui-midi-next-cancel sh tests/host/smc_ui_test.sh
+run ui-selected-adsr-readout env X0X_SYNTHONE_PATCH=1 X0X_HOST_DEFS="${X0X_HOST_DEFS:-} -DX0X_SYNTHONE_PATCH=1" SMC_UI_TEST_FILE=tests/host/ui_selected_adsr_readout_test.c SMC_UI_OUT=build/host/ui-selected-adsr-readout sh tests/host/smc_ui_test.sh
+run ui-terse-action-copy env SMC_UI_TEST_FILE=tests/host/ui_terse_action_copy_test.c SMC_UI_OUT=build/host/ui-terse-action-copy sh tests/host/smc_ui_test.sh
+run ui-terse-action-copy-sel env X0X_HOST_DEFS="${X0X_HOST_DEFS:-} -DX0X_SMK_CAPTIONS=0" SMC_UI_TEST_FILE=tests/host/ui_terse_action_copy_test.c SMC_UI_OUT=build/host/ui-terse-action-copy-sel sh tests/host/smc_ui_test.sh
+run ui-envelope-graph env X0X_SYNTHONE_PATCH=1 X0X_HOST_DEFS="${X0X_HOST_DEFS:-} -DX0X_SYNTHONE_PATCH=1" SMC_UI_TEST_FILE=tests/host/ui_envelope_graph_test.c SMC_UI_OUT=build/host/ui-envelope-graph sh tests/host/smc_ui_test.sh
 run ui-shared-parameter-panel sh tests/host/ui_shared_parameter_panel_test.sh
 run ui-held-target-visibility sh tests/host/ui_held_target_visibility_test.sh
 run ui-overlay-battery-registration python3 tests/host/test_ui_overlay_battery_registration.py
@@ -528,8 +579,11 @@ run chicago-adsr-graph sh tests/host/chicago_adsr_graph_test.sh
 run ui-settings-sections sh tests/host/ui_settings_sections_test.sh
 run ui-list-feedback python3 tests/host/ui_list_feedback_test.py
 run ui-reverb-return python3 tests/host/ui_reverb_return_test.py
+run ui-text-units sh tests/host/ui_text_units_test.sh
+run ui-arp-seq sh tests/host/ui_arp_seq_test.sh
+run ui-arp-engine sh tests/host/ui_arp_engine_test.sh
 run smc-ui-bounds sh tests/host/smc_ui_bounds_test.sh
-run smc-ui-negative python3 tests/host/smc_ui_negative_test.py
+run_on_demand smc-ui-negative python3 tests/host/smc_ui_negative_test.py
 run smc-mapping python3 tests/host/smc_mapping_test.py
 if [ "$PIL_SKIP" = 1 ]; then not_run smc-drum-mutes Pillow; else run smc-drum-mutes sh tests/host/smc_drum_mutes_test.sh; fi
 if [ "$PIL_SKIP" = 1 ]; then not_run smc-drum-rs Pillow; else run smc-drum-rs sh tests/host/smc_drum_rs_test.sh; fi
@@ -616,6 +670,12 @@ command -v node >/dev/null 2>&1 && run ota-request-guards-web node web/test_ota_
 command -v node >/dev/null 2>&1 && run installer-six-stage-web node web/test_installer_six_stage_flow.mjs   # six-stage installer projection
 # SMK-37 update fixtures use the Pro app/loader. Elite and MKE identities exercise the same layout.
 run locked-settings python3 tools/check_locked_settings.py   # hardware-relevant settings
+run xdata-region sh -c "$CC -O2 -Wall -Wextra -Werror -Wno-unused-function -Wno-type-limits -DBOARD_SMK37=1 -Ifirmware/hal -o $OUT/xdata_region_test tests/host/xdata_region_test.c && $OUT/xdata_region_test"   # XDATA: owner clear stops at 0xAD000, FL_STORE_OK excludes it, exact header check
+run xdata-font-fallback sh -c "$CC -std=c99 -O2 -Wall -Wextra -Werror -Wno-unused-function -Ibuild/gen -o $OUT/xdata_font_fallback_test tests/host/xdata_font_fallback_test.c && $OUT/xdata_font_fallback_test"   # bad XDATA: S/M/XS/B draw as FONT_T
+run xdata-package python3 tests/host/xdata_package_test.py   # XDATA record-tail check, package entry, installer read back (py + web), gate_flashmap
+run fittab-region sh -c "$CC -O2 -Wall -Wextra -Werror -Wno-unused-function -Wno-type-limits -DBOARD_SMK37=1 -Ifirmware/hal -o $OUT/fittab_region_test tests/host/fittab_region_test.c && $OUT/fittab_region_test"   # FITTAB: 0xFE000 one sector, key_mac 0xFF000 refused, header returns absent
+run fittab-package python3 tests/host/fittab_package_test.py   # FITTAB region image, package entry, installer read back (py + web), gate_flashmap
+run fdata-package python3 tests/host/fdata_package_test.py   # FDATA (Synth One pack) region image, package entry, installer read back (py + web), gate_flashmap
 run smk-update-protection sh -c "$CC -O2 -Wall -Wextra -Werror -Wno-unused-function -Wno-type-limits -DBOARD_SMK37=1 -DX0X_SMC_VENDOR_TEST=1 -Ifirmware/hal -o $OUT/smk_update_protection_test tests/host/smk_update_protection_test.c && $OUT/smk_update_protection_test"
 run smk-vendor-update-gate sh -c "for m in 0 1; do for d in 0 1; do $CC -O2 -Wall -Wextra -Werror -Wno-sign-compare -Wno-unused-function -DBOARD_SMK37=1 -DT_MODEL=\$m -DT_DEFAULT_GATE=\$d -o $OUT/smk_vendor_update_gate_test\$m-\$d tests/host/smk_vendor_update_gate_test.c && $OUT/smk_vendor_update_gate_test\$m-\$d || exit 1; done; done"
 run smk-flash sh -c "$CC -O2 -Wall -Wno-unused-function -DBOARD_SMK37=1 -Ifirmware/hal -o $OUT/smk_flash_test \
@@ -630,18 +690,13 @@ if [ "$PIL_SKIP" = 1 ]; then not_run smk-clip-chord-display Pillow; else run smk
 run smk-ck-page-layout python3 tests/smk_ck_page_layout_test.py   # CLP-75: no top bar on the stage page, help line at the bottom
 run smk-arrows sh -c "$CC -std=c99 -O2 -Wall -Wextra -Werror -Ifirmware/src -o $OUT/smk_arrows_test tests/smk_arrows_test.c && $OUT/smk_arrows_test"   # < > route and hold repeat
 run smk-arrows-owner python3 tests/smk_arrows_owner_test.py   # one owner for each < > press in clip mode (CLP-27)
-run apc40-tables sh -c "python3 tools/apc_pad_colors.py --pad-h $OUT/apc40_pad_default_gen.h --lcd-h $OUT/apc40_lcd565_gen.h --gamma-h $OUT/apc40_pad_gamma_gen.h && \
-    $CC -std=c99 -O2 -Wall -Wextra -Werror -Ifirmware/src -I$OUT -o $OUT/apc40_tables_test tests/apc40_tables_test.c && $OUT/apc40_tables_test"   # the LCD table and the pad calibration start point against their tool
+run apc40-tables sh -c "python3 tools/apc_pad_colors.py --pad-h $OUT/apc40_pad_default_gen.h --lcd-h $OUT/apc40_lcd565_gen.h && \
+    $CC -std=c99 -O2 -Wall -Wextra -Werror -Ifirmware/src -I$OUT -o $OUT/apc40_tables_test tests/apc40_tables_test.c && $OUT/apc40_tables_test"   # the LCD table against its tool
 run smk-clip-idle python3 tests/smk_clip_idle_test.py   # CLP-05: idle clip squares = half of the group full shade
 run smk-clip-idle-pad python3 tests/smk_clip_idle_pad_test.py   # CLP-13: idle clip pads send the full owner level
 run apc40-pad-owner python3 tests/apc40_pad_owner_test.py   # CLP-13: the owner-calibrated pad table, the export, the clip pad bytes
-run smk-padcal sh -c "$CC -std=c99 -O2 -Wall -Wextra -Werror -Ifirmware/src -o $OUT/smk_padcal_test tests/smk_padcal_test.c && $OUT/smk_padcal_test"   # CLP-79: pad calibration logic
-run padcal-view python3 tests/padcal_view_test.py   # CLP-79: selected LCD square boost, entry names; pads unchanged
-run smk-padcal-export sh -c "$CC -std=c99 -O2 -Wall -Wextra -Werror -Ifirmware/src -o $OUT/smk_padcal_export_bin tests/smk_padcal_test.c && python3 tests/smk_padcal_export_test.py $OUT/smk_padcal_export_bin"   # CLP-79: export round trip
 run ui-source-extraction python3 tests/test_ui_source_extract.py
-run smk-padcal-wiring python3 tests/smk_padcal_wiring_test.py   # CLP-79: menu row, keys, knobs, pads, LCD
 run pad-placement-doc python3 tests/pad_placement_doc_test.py   # PAD_MAP.md physical pad placement = PADLED_SLOT, SMK_PADMUX
-run padcal-flag python3 tests/padcal_flag_test.py   # X0X_DEV_PADCAL: flag 0 (release) has no pad calibration code, flag 1 keeps it
 run apc40-lcd565-csv python3 tests/apc40_lcd565_csv_test.py   # CLP-05: the LCD table is plain RGB565 of the Akai CSV, all 128
 run apc-palette python3 tests/apc_palette_test.py   # one source, hue order, distinct colours, INLOG replay
 run installer-targets python3 tests/make_pages_test.py
@@ -649,6 +704,7 @@ run diag-size python3 tests/diag_size_test.py           # a76: ED_DIAG stays in 
 run smk-inlog sh -c "$CC -std=c99 -O2 -Wall -Wextra -Werror -Ifirmware/src -o $OUT/smk_inlog_test tests/smk_inlog_test.c && $OUT/smk_inlog_test"   # a76: inbound recorder ring
 run ble-central-diag python3 -B tests/ble_central_diag_test.py
 if [ "$ASAN_SKIP" = 1 ]; then not_run ble-role-switch "ASan runtime"; else run ble-role-switch sh tests/host/ble_role_switch_test.sh; fi
+run smk-inlog-profile python3 tests/host/smk_inlog_profile_test.py
 run inlog-tool python3 tests/inlog_tool_test.py      # a76: ED_INLOG dump text
 run smk-pad-inputs python3 tests/smk_pad_inputs_test.py   # read-only sensor snapshot and strict decoder
 run smk-clip-ble-notify sh -c "$CC -std=c99 -O2 -Wall -Wextra -Wno-unused-function -Werror -Ifirmware/src -Ifirmware/hal -Ifirmware/src/ble -o $OUT/smk_clip_ble_notify_test tests/smk_clip_ble_notify_test.c && $OUT/smk_clip_ble_notify_test"   # a76: no pad colour while notify is off
@@ -660,7 +716,10 @@ run smk-fader-pickup sh tests/host/smk_fader_pickup_test.sh   # fader pickup and
 run smk-clip-wait sh tests/host/smk_clip_wait_test.sh   # CLP-80: the clip screen waits for Loopy Pro (no host: no grid)
 run smk-apc40-violet python3 tests/smk_apc40_violet_test.py   # a76: violet, purple and pink clips are not blue
 if [ -f build/smk37/x0x.bin ] && [ -f build/smk37/loader/ota.bin ] && [ -n "${AC79_SDK:-}" ]; then
-    run smk-package sh -c "python3 tools/fm1pkg_make.py --board smk37 build/smk37/x0x.bin build/smk37/loader/ota.bin $OUT/smk_new.fwsc >/dev/null && \
+    XDATA_ARG=""; [ -f build/smk37/xdata.img ] && XDATA_ARG="--xdata build/smk37/xdata.img"   # SMK font region (loader writes 0xAD000)
+    FITTAB_ARG=""; [ -f build/smk37/fittab.img ] && FITTAB_ARG="--fittab build/smk37/fittab.img"   # SMK fit table (loader writes 0xFE000)
+    FDATA_ARG=""; [ -f build/smk37/fdata.img ] && FDATA_ARG="--fdata build/smk37/fdata.img"   # SMK Synth One pack (loader writes FL_FDATA)
+    run smk-package sh -c "python3 tools/fm1pkg_make.py --board smk37 $XDATA_ARG $FITTAB_ARG $FDATA_ARG build/smk37/x0x.bin build/smk37/loader/ota.bin $OUT/smk_new.fwsc >/dev/null && \
         python3 tests/smk_pkg_test.py $OUT/smk_new.fwsc"
     run smk-ota-entry sh -c "$CC -DBOARD_SMK37=1 -o $OUT/ota_test_smk tests/ota_test.c && $OUT/ota_test_smk $OUT/smk_new.fwsc"
     for m in 1 2; do                     # the MODEL=elite / mke builds of ota.c
@@ -686,6 +745,7 @@ run upload-images sh -c "python3 tests/host/make_test_loops.py build/test_loops 
     python3 tools/upload_breaks.py --rate 22050 --nslots 2 --dry-run build/test_upload build/test_loops/loop*.wav && \
     python3 tools/upload_breaks.py --dry-run build/test_upload44 --slot-kb 80,120 build/test_loops/loop*.wav && \
     python3 tools/upload_breaks.py --rate 22050 --slots 3 --slot-kb 80,120,32 --dry-run build/test_upload44s3 build/test_loops/loop1.wav"   # 22.05 kHz (2 x 80), the 44.1 kHz default (80/120), slot 3 (32 KiB)
+run default-breaks python3 -B tests/host/default_breaks_test.py   # perf rows 3-4: 5 owner BREAK zones as defaults; --default-breaks chooses any; nightly preview URLs
 run upload-tools python3 tests/upload_tools_test.py   # upload_breaks.py on a mocked device; one-shot trim
 run builtin-break-output python3 tests/host/test_builtin_break_output.py
 run break-pack python3 tests/break_pack_test.py   # optional factory-loop pack: full ADPCM, free tail, C parser
@@ -694,10 +754,12 @@ command -v node >/dev/null 2>&1 && run breaks-web node web/test_breaks.mjs   # t
 command -v node >/dev/null 2>&1 && run breaks-page node web/test_breaks_page.mjs   # the page against a mocked device
 command -v node >/dev/null 2>&1 && run project-adoption-identities node --test web/test_project_adoption_identities.mjs
 run offline-sequencer node --test web/offline-sequencer/*.test.mjs
-run compact-sanitizer-control python3 tests/test_compact_sanitizer_control.py
+# compact-sanitizer-control (LeakSanitizer qualification) dropped 2026-11-24 00:02 (user, FINAL-GOAL row 11).
 run compact-programs python3 tests/program_values_compact_test.py
 run offline-browser-safety python3 tests/test_offline_browser_safety.py
-run offline-sequencer-browser python3 web/offline-sequencer/f6b-browser.test.py
+# f6b refuses any executable override (safety contract); gate/box environments export
+# CHROMIUM_EXECUTABLE for other tools, so this one runs with Playwright's own managed Chromium.
+run offline-sequencer-browser env -u DNBOX_CHROMIUM_EXECUTABLE -u CHROMIUM_EXECUTABLE -u PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH python3 web/offline-sequencer/f6b-browser.test.py
 run offline-touchosc-pack python3 web/offline-sequencer/touchosc/pack.test.py
 run offline-touchosc-identity python3 tests/host/test_touchosc_identity.py
 run offline-touchosc-lua lua5.1 web/offline-sequencer/touchosc/controller.test.lua
@@ -744,6 +806,11 @@ fi
 if [ "$PIL_SKIP" = 1 ]; then not_run copy-semantics Pillow; else run copy-semantics sh tests/host/copy_semantics_test.sh; fi
 if [ "$PIL_SKIP" = 1 ]; then not_run song-actions Pillow; else run song-actions sh tests/host/song_actions_test.sh; fi
 if [ "$PIL_SKIP" = 1 ]; then not_run home-globe-part Pillow; else run home-globe-part sh tests/host/home_globe_part_test.sh; fi
+if [ "$PIL_SKIP" = 1 ]; then not_run home-globe-part-matrix Pillow; else run home-globe-part-matrix sh tests/host/home_globe_part_matrix_test.sh; fi
+if [ "$PIL_SKIP" = 1 ]; then not_run seq-pad-led Pillow; else run seq-pad-led sh tests/host/seq_pad_led_test.sh; fi
+run seq-hit-light sh tests/host/seq_hit_light_test.sh
+run roll-marks sh tests/host/roll_marks_test.sh
+if [ "$PIL_SKIP" = 1 ]; then not_run seq-lane-label-tap Pillow; else run seq-lane-label-tap sh tests/host/seq_lane_label_tap_test.sh; fi
 if [ "$PIL_SKIP" = 1 ]; then not_run ui-feedback Pillow; else run ui-feedback sh tests/host/ui_feedback_test.sh; fi
 run remaining-feature-proof-selftest python3 -B tests/host/remaining_feature_proof_test.py
 run home-pattern-glyph sh tests/host/home_pattern_glyph_test.sh
@@ -757,11 +824,15 @@ run chicago-span-hold sh tests/host/chicago_span_hold_test.sh
 run fma-exact-identity sh tests/host/fma_exact_identity_test.sh
 run chicago-coef-cache sh tests/host/chicago_coef_cache_test.sh
 run fxbus-coef-cache sh tests/host/fxbus_coef_cache_test.sh   # zl-coefcache eb93c3ba/b5be0b83
+run reverb-bank-mapping sh tests/host/reverb_bank_mapping_test.sh
 run chicago-peaking-coef-cache sh tests/host/chicago_peaking_coef_cache_test.sh   # 527059a5
 run vca-sustain sh tests/host/vca_sustain_test.sh   # 3c2ad0ec
 run chicago-ens-hoist python3 tests/host/run_chicago_ens_hoist.py   # 5b158ba2
 run chicago-modulation-hoist python3 tests/host/run_chicago_modulation_hoist.py   # c994d659
 run audio-stress sh tests/host/audio_stress_test.sh
+run stock-render-profiling python3 tests/host/stock_render_profiling_test.py
+run render-timing-repetitions python3 tests/host/test_render_timing_repetitions.py
+run render-timing sh tests/host/render_timing_regression_test.sh   # per-block render CPU time: 0 late blocks, engine mean/max vs tests/host/render_timing_baseline.json
 run synth-param-jump sh tests/host/synth_param_jump_test.sh
 run param-write-sources sh tests/host/param_write_sources_test.sh
 if [ "$PIL_SKIP" = 1 ]; then not_run chicago-presentation Pillow; else run chicago-presentation sh tests/host/chicago_presentation_test.sh; fi
@@ -817,10 +888,13 @@ run ui-step-lane-edit sh tests/host/ui_step_lane_edit_test.sh
 run ui-step-lane-transaction python3 tests/host/ui_step_lane_transaction_test.py
 run ui-break-seq-phase env SMC_UI_TEST_FILE=tests/ui_inventory/break_seq_phase.c SMC_UI_OUT=build/host/break-seq-phase sh tests/host/smc_ui_test.sh
 run ui-break-seq-metadata env SMC_UI_TEST_FILE=tests/ui_inventory/break_seq_metadata.c SMC_UI_OUT=build/host/break-seq-metadata sh tests/host/smc_ui_test.sh
-run ui-padcal-render sh tests/host/ui_padcal_render_test.sh
 run ui-glyph-polish sh tests/host/ui_glyph_polish_test.sh
 run ui-tape-reel sh tests/host/ui_tape_reel_test.sh
+run ui-seq-keyed-roll env X0X_SYNTHONE_PATCH=1 X0X_HOST_DEFS="${X0X_HOST_DEFS:-} -DX0X_SYNTHONE_PATCH=1" SMC_UI_TEST_FILE=tests/host/ui_seq_keyed_roll_test.c SMC_UI_OUT="$OUT/ui-seq-keyed-roll" sh tests/host/smc_ui_test.sh
+run ui-screen-walk sh tests/host/ui_screen_walk_test.sh
+run ui-defects-judge python3 tests/ui_defects/first_slice/test_judge.py
 run ui-perf-labels sh tests/host/ui_perf_labels_test.sh
+run ui-stock-no-perf env SMC_UI_TEST_FILE=tests/host/ui_stock_no_perf_test.c SMC_UI_OUT=build/host/ui-stock-no-perf sh tests/host/smc_ui_test.sh
 run ui-chicago-env-motion sh tests/host/ui_chicago_env_motion_test.sh
 if [ "$PIL_SKIP" = 1 ]; then not_run matrix-knob-caption Pillow; else run matrix-knob-caption sh tests/host/matrix_knob_caption_test.sh; fi
 if [ "$PIL_SKIP" = 1 ]; then not_run preset-navigation-noop Pillow; else run preset-navigation-noop sh tests/host/preset_navigation_noop_test.sh; fi

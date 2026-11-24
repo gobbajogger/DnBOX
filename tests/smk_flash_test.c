@@ -55,11 +55,11 @@ int main(void)
           !LDR_RANGE_OK(0x3000u, 0x2000u) && FL_PROTECTED(0xBF000u, 0x2000u) && FL_PROTECTED(0x3F00u, 0x200u));
     check("wrapping ranges refused (off + n past 4 GiB)",
           !FL_GUARD(0xBB000u, 0xFFFFF000u) && !LDR_RANGE_OK(0x9D000u, 0xFFFFFF00u) && FL_PROTECTED(0xBB000u, 0xFFFFF000u));
-    check("app windows: FL_DATA 0x9D000-0xAFFFF, FL_SMPV 0xB0000-0xBAFFF, FL_OTA 0xBB000-0xBFFFF, FL_SMP 0xC2000-0xF3FFF",
+    check("app windows: FL_DATA 0x9D000-0xAFFFF, FL_SMPV 0xB0000-0xBAFFF, FL_OTA 0xBB000-0xBFFFF, FL_SMP 0xC2000 up to FDATA",
           FL_GUARD(0x9D000u, 0x1000u) && FL_GUARD(0xAF000u, 0x1000u) && FL_GUARD(0xB0000u, 0x1000u) &&
           FL_GUARD(0xBA000u, 0x1000u) && FL_GUARD(0xBF000u, 0x1000u) && FL_GUARD(0xC2000u, 0x1000u) &&
-          FL_GUARD(0xF3000u, 0x1000u) && !FL_GUARD(0xF4000u, 0x1000u) && !FL_GUARD(0x9C000u, 0x1000u) &&
-          FL_DATA_HI == 0xB0000u && allowed == (0xC0000u - 0x9D000u + 0xF4000u - 0xC2000u) / 0x1000u);
+          FL_GUARD(FL_FDATA_LO - 0x1000u, 0x1000u) && !FL_GUARD(FL_FDATA_LO, 0x1000u) && !FL_GUARD(0xF4000u, 0x1000u) && !FL_GUARD(0x9C000u, 0x1000u) &&
+          FL_DATA_HI == 0xB0000u && allowed == (0xC0000u - 0x9D000u - (FL_XDATA_HI - FL_XDATA_LO) + FL_FDATA_LO - 0xC2000u) / 0x1000u);
     check("FL_DATA (the store) and FL_SMPV (VM spare) do not overlap: no store sector in 0xB0000-0xBAFFF",
           FL_IN(0xAF000u, 0x1000u, FL_DATA_LO, FL_DATA_HI) && !FL_IN(0xB0000u, 0x1000u, FL_DATA_LO, FL_DATA_HI) &&
           FL_IN(0xB0000u, 0xB000u, FL_SMPV_LO, FL_SMPV_HI));
@@ -67,9 +67,13 @@ int main(void)
           FL_BLE_LO == 0x8B000u && FL_BLE_HI == 0x9B000u && FL_BLE_HI - FL_BLE_LO == 0x10000u &&
           FL_LDR_RANGE_OK(FL_BLE_LO, FL_BLE_HI - FL_BLE_LO) && !FL_GUARD(FL_BLE_LO, 0x1000u) &&
           FL_BLE_HI <= 0x4120u + 0x97400u && FL_APP_CODE_MAX == 0x86EE0u);
-    check("loader: app area 0x4000-0x9CFFF, records 0x9D000-0xBFFFF only",
+    check("loader: app area 0x4000-0x9CFFF, records 0x9D000-0xBFFFF, FITTAB 0xFE000-0xFEFFF only",
           LDR_RANGE_OK(0x4000u, 0x1000u) && LDR_RANGE_OK(0x9C000u, 0x1000u) && LDR_RANGE_OK(0xBF000u, 0x1000u) &&
-          !LDR_RANGE_OK(0xC0000u, 0x1000u) && FL_REC_HI == 0xC0000u);
+          !LDR_RANGE_OK(0xC0000u, 0x1000u) && FL_REC_HI == 0xC0000u &&
+          LDR_RANGE_OK(0xFE000u, 0x1000u) && LDR_RANGE_OK(0xFEFFFu, 1) &&
+          !LDR_RANGE_OK(0xFEFFFu, 2) && !LDR_RANGE_OK(0xFF000u, 1) && !LDR_RANGE_OK(0xFE000u, 0x2000u) &&
+          !FL_GUARD(0xFE000u, 0x1000u) && FL_PROTECTED(0xFE000u, 0x2000u) &&
+          FL_FITTAB_LO == 0xFE000u && FL_FITTAB_HI == FL_KEYMAC_LO && FL_KEYMAC_LO == 0xFF000u);
     for (o = 0; o < OBJ_NOBJ; o++)
         for (c = 0; c < 2u; c++)
             in_store &= FL_STORE_OK(st_sector(o, c), 0x1000u) && st_sector(o, c) < ST_OWNER_SECTOR;
@@ -102,9 +106,9 @@ int main(void)
             slots_ok &= k == k2 || SMP_USER_OFF(k) + SMP_USER_SIZE(k) <= SMP_USER_OFF(k2) ||
                         SMP_USER_OFF(k2) + SMP_USER_SIZE(k2) <= SMP_USER_OFF(k);
     }
-    check("slots.c: 3 slots, 0xC2000 80 KiB, 0xD6000 120 KiB, 0xB3000 32 KiB: allowed, apart, outside the store",
+    check("slots.c: 3 slots, 0xC2000 80 KiB, 0xD6000 up to FDATA, 0xB3000 32 KiB: allowed, apart, outside the store",
           SMP_USER_SLOTS == 3 && SMP_USER_OFF(0u) == 0xC2000u && SMP_USER_SIZE(0u) == 0x14000u &&
-          SMP_USER_OFF(1u) == 0xD6000u && SMP_USER_SIZE(1u) == 0x1E000u &&
+          SMP_USER_OFF(1u) == 0xD6000u && SMP_USER_SIZE(1u) == 0x1E000u - FL_FDATA_SIZE &&
           SMP_USER_OFF(2u) == 0xB3000u && SMP_USER_SIZE(2u) == 0x8000u && slots_ok);
     check("slots 1 and 2 keep the offsets of the 2 x 80 KiB layout (their data stays valid)",
           SMP_USER_OFF(0u) == 0xC2000u && SMP_USER_OFF(1u) == 0xC2000u + 0x14000u);

@@ -13,9 +13,12 @@ alpha 0..15. Each glyph's packed bytes use lossless PackBits: a control byte
 byte (control & 127) + 1 times. Glyph metrics and all coverage values are unchanged.
 """
 import sys
+import zlib
 from collections import Counter
 from heapq import heapify, heappop, heappush
 from pathlib import Path
+
+XDATA_FONTS = ("S", "M", "XS", "B")   # bitmaps in the XDATA flash region, in blob order
 
 from PIL import Image, ImageDraw, ImageFont, features as PILFeatures
 
@@ -319,6 +322,15 @@ def pack_cropped_alpha(pixels, width, height, models):
     return prefix
 
 
+def glyph_index16(offsets, advances):
+    """Return lossless index words, or None when legacy tables are required."""
+    assert len(offsets) == len(advances)
+    if not all(0 <= offset <= 2047 and 0 <= advance <= 31
+               for offset, advance in zip(offsets, advances)):
+        return None
+    return [offset | (advance << 11) for offset, advance in zip(offsets, advances)]
+
+
 def main(out, compressed=True, codec=None):
     codec = codec or ("crop-alpha" if FONTSET == "barlow" else "crop-lz")
     assert codec in ("crop-alpha", "crop-lz", "packbits")
@@ -330,6 +342,7 @@ def main(out, compressed=True, codec=None):
         lines.append({"crop-alpha": "#define FONT_ALPHA_CROP 1", "crop-lz": "#define FONT_LZ_CROP 1",
                       "packbits": "#define FONT_PACKBITS 1"}[codec])
     configs = []
+    roles = []
     for name, ttf, px, scale, pixel, first, last in SIZES:
         h, glyphs = render(ttf, px, scale, pixel, first, last)
         if name in KEEP:
@@ -386,14 +399,47 @@ def main(out, compressed=True, codec=None):
                         else pack_glyph(raw) if compressed else raw)
         if models is not None:
             data.append(0)  # bounded seven-bit lookahead at the final glyph
-        assert len(data) < 65536
-        lines.append(f"static const uint8_t FONT_{name}_DATA[{len(data)}] = {{")
-        for i in range(0, len(data), 24):
-            lines.append("    " + ", ".join(f"0x{b:02x}" for b in data[i:i + 24]) + ",")
+        roles.append((name, ttf, px, h, scale, first, last, glyphs, data, offs))
+    packed_indexes = {
+        role[0]: glyph_index16(role[-1], [a for a, _, _ in role[-3]]) for role in roles
+    }
+    pack_index = compressed and all(index is not None for index in packed_indexes.values())
+    if pack_index:
+        lines.append("#define FONT_INDEX16 1")
+    # FONT_S/M/XS/B bitmaps: one blob, in this order, that the firmware places in the XDATA flash region
+    # (0xAD000, tools/build.py); FONT_T stays in the app as the fallback face (gfx.c font_live)
+    xdata = [r for n in XDATA_FONTS for r in roles if r[0] == n] if all(
+        any(r[0] == n for r in roles) for n in XDATA_FONTS) else []
+    if xdata:
+        blob = b"".join(bytes(r[8]) for r in xdata)
+        lines += ["#ifndef FONT_XDATA_SECTION", "#define FONT_XDATA_SECTION", "#endif",
+                  f"#define FONT_XDATA_LEN {len(blob)}u",
+                  f"#define FONT_XDATA_CRC32 0x{zlib.crc32(blob):08X}u",
+                  f"static const uint8_t FONT_XDATA_BLOB[{len(blob)}] FONT_XDATA_SECTION = {{"]
+        for i in range(0, len(blob), 24):
+            lines.append("    " + ", ".join(f"0x{b:02x}" for b in blob[i:i + 24]) + ",")
         lines.append("};")
+        at = 0
+        for r in xdata:
+            lines.append(f"#define FONT_{r[0]}_DATA (FONT_XDATA_BLOB + {at})")
+            at += len(r[8])
+    for name, ttf, px, h, scale, first, last, glyphs, data, offs in roles:
+        assert len(data) < 65536
+        if not any(r[0] == name for r in xdata):
+            lines.append(f"static const uint8_t FONT_{name}_DATA[{len(data)}] = {{")
+            for i in range(0, len(data), 24):
+                lines.append("    " + ", ".join(f"0x{b:02x}" for b in data[i:i + 24]) + ",")
+            lines.append("};")
+        advances = [a for a, _, _ in glyphs]
+        advance_table = f"FONT_{name}_ADV"
+        if pack_index:
+            # Eleven exact offset bits plus the original five-bit advance.
+            offs = packed_indexes[name]
+            advance_table = "0"  # advance is in the same index word
+        else:
+            lines.append(f"static const uint8_t {advance_table}[{len(advances)}] = {{" +
+                         ", ".join(map(str, advances)) + "};")
         lines.append(f"static const uint16_t FONT_{name}_OFF[{len(offs)}] = {{" + ", ".join(map(str, offs)) + "};")
-        lines.append(f"static const uint8_t FONT_{name}_ADV[{len(glyphs)}] = {{" +
-                     ", ".join(str(a) for a, _, _ in glyphs) + "};")
         # A packed font may omit a redundant width array, never its metrics.
         # Some BDF/custom faces have independent advances: retain their table.
         derived_bw = compressed and codec in ("crop-alpha", "crop-lz") and all(
@@ -410,7 +456,7 @@ def main(out, compressed=True, codec=None):
                     if any(a >= 8 for a in metric_pixels[y * metric_width:(y + 1) * metric_width])]
         cap_top, cap_bottom = (ink_rows[0], ink_rows[-1]) if ink_rows else (0, 0)
         lines.append(f"static const felucca_font_t FONT_{name} = {{ {h}, {PAD * scale}, {first}, {last}, "
-                     f"FONT_{name}_ADV, {width_table}, FONT_{name}_OFF, FONT_{name}_DATA, {{ {cap_top}, {cap_bottom} }} }};")
+                     f"{advance_table}, {width_table}, FONT_{name}_OFF, FONT_{name}_DATA, {{ {cap_top}, {cap_bottom} }} }};")
         lines.append("")
         print(f"font {name}: {ttf} {px}px h {h}, digit adv {glyphs[ord('0') - first][0]}, {len(data)} B")
     print(f"font set {FONTSET}: {sum(len(l) for l in lines if l.startswith('    0x')) // 6} B (approx)")

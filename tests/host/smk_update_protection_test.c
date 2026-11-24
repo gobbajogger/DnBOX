@@ -44,7 +44,13 @@ int main(void)
     assert(FL_GUARD(0xBB000u, 0x5000u));
     assert(FL_LDR_RANGE_OK(0x4000u, 0x99000u));
     assert(FL_LDR_RANGE_OK(0xAF000u, 0x11000u));
-    assert(FL_STORE_OK(0xC2000u, 0x32000u));
+    assert(FL_STORE_OK(0xC2000u, FL_FDATA_LO - 0xC2000u));
+#if FL_FDATA_SIZE
+    assert(!FL_STORE_OK(FL_FDATA_LO, 4096));
+    assert(!FL_RANGE_OK(FL_FDATA_LO, 4096));
+    assert(FL_LDR_RANGE_OK(FL_FDATA_LO, FL_FDATA_SIZE));
+    assert(!FL_LDR_RANGE_OK(FL_FDATA_LO - 4096, 8192));
+#endif
     for (unsigned erased = 0; erased < 2; erased++) {
         memset(flash, 0x5A, sizeof flash);
         if (erased) memset(flash + 0xAF000u, 255, 4096);

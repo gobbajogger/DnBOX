@@ -13,8 +13,8 @@ import tempfile
 ROOT = Path(__file__).resolve().parents[2]
 SOURCE = (ROOT / 'firmware/src/app/original_runtime.c').read_text()
 
-def extract(signature):
-    pos = SOURCE.index(signature)
+def extract(signature, last=False):
+    pos = SOURCE.rindex(signature) if last else SOURCE.index(signature)
     start = SOURCE.index('{', pos)
     depth = 0
     for end in range(start, len(SOURCE)):
@@ -26,8 +26,13 @@ def extract(signature):
                 return SOURCE[pos:end + 1]
     raise AssertionError('Unclosed C function: ' + signature)
 
-selected = [extract('static int key_held('),
-            extract('int original_runtime_key('),
+selected = [extract('static int key_held(')]
+# Isolate the non-arp voice path: the new handler's alternate arp-on path is
+# covered by the full clock and ownership tests. Older source in RED trials
+# predates the helper and calls the note endpoint directly.
+if 'static int live_off(' in SOURCE:
+    selected.append(extract('static int live_off(', last=True))
+selected += [extract('int original_runtime_key('),
             extract('int original_runtime_release_source('),
             extract('int original_runtime_cut_source(')]
 if 'static int runtime_stale_tick(' in SOURCE:

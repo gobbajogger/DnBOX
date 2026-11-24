@@ -45,12 +45,14 @@ static int mot, mst, fx;
 #define ORIGINAL_INPUT_KEYS 1
 #define PROF_T(name) unsigned name = 0
 #define PROF_ADD(stage, name) ((void)(name))
+#define PROF_FRAMES(n) (eng_prof_frames += (n))
 
 static int prob_skip(int part, int voice) { return probability_skip; }
 static void original_midi_context(void) {}
 static void brk_channel_reconcile(void) {}
 static void original_prepare_all(void) {}
 static void guard_apply(void) {}
+static void arp_boundary(void) {} /* Unrelated synth controls are not in this BREAK-only fixture. */
 static void live_key_drain(void) {}
 static void brk_midi_drain(void) {}
 static void motion_release(int *owner) {}

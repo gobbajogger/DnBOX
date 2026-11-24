@@ -29,9 +29,9 @@ static int word(const char *s,int row){
 static void group(int g){global_index();ui.list_sel=g;button_tap(B_SEL);CHECK(ui.glo_section==g);}
 static void cue_cases(int palette){
  char name[80];global_index();ui.list_sel=2;snprintf(name,sizeof name,"palette%d-global-categories",palette);capture(name);
- for(int r=0;r<6;r++)EXPECT(word("SCALE",r));
+ for(int r=0;r<6;r++)EXPECT(word("SCALE",r)==(r==2));   /* the cue on the selected row only */
  button_tap(B_SEL);CHECK(ui.glo_section==2&&ui.list_n==10);button_tap(B_HOME);CHECK(ui.glo_section==-1&&ui.list_sel==2);
- group(4);ui.list_sel=3;capture(NULL);CHECK(word("OFF",2));for(int r=0;r<5;r++)EXPECT(word("SCALE",r)==(r!=2));
+ group(4);ui.list_sel=3;capture(NULL);CHECK(word("OFF",2));for(int r=0;r<5;r++)EXPECT(word("SCALE",r)==(r==3));
  button_tap(B_SEL);CHECK(ui.overlay==O_ASK&&ui.ask_act==ACT_CLEAR_PAT);button_tap(B_HOME);CHECK(ui.overlay==O_LIST&&ui.list_sel==3);
  group(5);ui.list_sel=1;snprintf(name,sizeof name,"palette%d-about-action",palette);capture(name);EXPECT(word("SCALE",1));
  clip_grid_mode=clip_on=1;capture(NULL);for(int r=0;r<ui.list_n&&r<6;r++)EXPECT(!word("SCALE",r));

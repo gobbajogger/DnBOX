@@ -29,7 +29,9 @@
  *     0x8B000-0x9AFFF  Bluetooth controller block, 64 KiB, one piece (FL_BLE; XIP 0x02087000), in app.bin
  *     0x9B000-0x9CFFF  app slot end (0x9B520, APP_SLOT 0x97400 as stock), cfg_tool, region table, cfg
  *   0x9D000-0xAFFFF  VM: X0X store (storage.c: 7 objects, A/B, 0x9D000-0xAAFFF; boot screen
- *                    copies 0xAB000 and 0xAC000; spare 0xAD000-0xAEFFF; owner tag 0xAF000)  FL_DATA
+ *                    copies 0xAB000 and 0xAC000; owner tag 0xAF000)                  FL_DATA
+ *     0xAD000-0xAEFFF  XDATA: the FONT_S/M/XS/B bitmaps (16 B header + blob, tools/build.py),
+ *                      written by the update loader / installer only; never a store write   FL_XDATA
  *   0xB0000-0xBAFFF  VM spare, 44 KiB, not linker code: the sector-0 shadows of the three sample
  *                    slots (0xB0000-0xB2FFF) and user sample slot 3 (0xB3000-0xBAFFF, 32 KiB;
  *                    app/slots.c). The app code region ends at the Bluetooth block (0x8B000).
@@ -38,10 +40,15 @@
  *   0xBB000-0xBFFFF  VM: M-UPGRADE loader staging + update record (ota.c)          FL_OTA
  *   0xC0000-0xC0FFF  BTIF (BT pairing)              NEVER
  *   0xC1000-0xC1FFF  USRTRIM (key/pad/wheel calibration, "trimdat")   NEVER
- *   0xC2000-0xF3FFF  user sample slots 1 (80 KiB) and 2 (120 KiB; app/slots.c): stock USRFLASH
+ *   0xC2000-0xF3FFF  user sample slots 1 (80 KiB) and 2 (60 KiB; app/slots.c): stock USRFLASH
  *                    0xC2000-0xEAFFF and the unlisted 0xEB000-0xF3FFF                FL_SMP
+ *   0xE5000-0xF3FFF  of it: FDATA, the Synth One factory pack (60 KiB, the end of slot 2), written by
+ *                    the update loader only (fdata.bin)                              FL_FDATA
  *   0xF4000-0xFDFFF  USR (stock resources; kept for a rollback)   NEVER
- *   0xFE000-0xFEFFF  free, unused (4 KiB: too small for a slot)
+ *   0xFE000-0xFEFFF  FITTAB: Synth One option-B per-program fit table
+ *                    (16 B header + blob, tools/build.py), written by the
+ *                    update loader / installer only; never a store write;
+ *                    stock vendor loader / mask-ROM rescue never write it   FL_FITTAB
  *   0xFF000-0xFFFFF  key_mac                        NEVER
  * Everything below is an explicit allow-list; the asserts keep each allowed window out of the
  * protected ranges at compile time. */
@@ -58,12 +65,48 @@
 #define FL_PLAIN_LO     0x0009D000u                /* plain XIP window from the VM start */
 #define FL_DATA_LO      0x0009D000u                /* X0X store */
 #define FL_DATA_HI      0x000B0000u
+/* XDATA (app/rodata moved out of the app code area): written only through the update loader with the
+ * image, read in place through the plain XIP window. Not a store window (FL_STORE_OK), and the owner
+ * check's foreign-store clear stops below it (storage.c). Layout: 16 B header {magic FL_XDATA_MAGIC,
+ * blob length, zlib CRC-32 of the blob, build id = FONT_XDATA_CRC32 the app was built with}, then the blob. */
+#define FL_XDATA_LO     0x000AD000u
+#define FL_XDATA_HI     0x000AF000u
+#define FL_XDATA_MAGIC  0x31445858u                /* "XXD1" little endian */
+#define FL_XDATA_HDR    16u
+/* FITTAB: the 4 KiB spare between stock USR (ends at 0xFE000) and key_mac (starts at
+ * 0xFF000). Layout matches XDATA: 16 B header {magic FL_FITTAB_MAGIC, blob length,
+ * zlib CRC-32 of the blob, build id}, then the blob. Read in place through the plain
+ * XIP window (fl_plain_window_init maps [FL_PLAIN_LO, 0x100000)). */
+#define FL_FITTAB_LO    0x000FE000u
+#define FL_FITTAB_HI    0x000FF000u
+#define FL_FITTAB_MAGIC 0x31425446u                /* "FTB1" little endian */
+#define FL_FITTAB_HDR   16u
 #define FL_SMPV_LO      0x000B0000u                /* VM spare: slot shadows + sample slot 3 (app/slots.c) */
 #define FL_SMPV_HI      0x000BB000u
 #define FL_OTA_LO       0x000BB000u                /* M-UPGRADE loader staging, ota.c */
 #define FL_OTA_HI       0x000C0000u
 #define FL_SMP_LO       0x000C2000u                /* user sample slots (app/slots.c) */
 #define FL_SMP_HI       0x000F4000u
+/* Factory synth data (FL_FDATA; user approval 2026-11-23: synth presets may use part of the user
+ * sample-slot area). It is the top FL_FDATA_SIZE bytes of FL_SMP, taken from the END of user sample
+ * slot 2, so slots 1, 2 and 3 keep their start offsets (no live slot moves) and slots 1 and 3 keep their
+ * sizes. Slot 2 shrinks to 0x1E000 - FL_FDATA_SIZE. 0 = no region: the stock layout. Read in place
+ * through the plain XIP window (>= FL_PLAIN_LO). Set it once, here (tools/fm1pkg_make.py and
+ * tools/gate_flashmap.py read this line). */
+#ifndef FL_FDATA_SIZE
+#define FL_FDATA_SIZE   0x0000F000u                /* 60 KiB: the Synth One factory pack (S1PK, 61,208 B) */
+#endif
+#define FL_FDATA_HI     FL_SMP_HI
+#define FL_FDATA_LO     (FL_SMP_HI - FL_FDATA_SIZE)
+_Static_assert(FL_FDATA_SIZE % 0x1000u == 0u && FL_FDATA_SIZE <= 0x1E000u - 0x1000u,
+               "SMK: FL_FDATA is whole sectors and leaves slot 2 at least one sector");
+/* FDATA is written only by the update loader, from the package's "fdata.bin" entry (type 103, exactly
+ * FL_FDATA_SIZE bytes: tools/build.py fdata_image). The stock vendor loader and mask-ROM rescue never write it;
+ * after them the app finds no pack there (first word erased) and Synth One falls back to INIT. */
+#define FL_FDATA_HDR    32u                        /* the installers read back the first 32 B (the pack header) */
+_Static_assert(FL_FDATA_SIZE == 0 || (FL_FDATA_LO >= FL_PLAIN_LO && FL_FDATA_LO > FL_SMP_LO &&
+               FL_FDATA_HI <= FL_USRRES_LO && FL_FDATA_LO >= FL_CAL_HI),
+               "SMK: FDATA is plain, inside FL_SMP and clear of every protected range");
 /* the Bluetooth controller block (step 5): one 64 KiB piece of the encrypted app area, at the top of the
  * stock app slot (0x4120 + APP_SLOT 0x97400 = 0x9B520), sector aligned. The app code ends below it. */
 #define FL_APP_SLOT_END 0x0009B520u
@@ -88,21 +131,32 @@ _Static_assert(FL_WIN_SAFE(FL_REC_LO, FL_REC_HI), "SMK: FL_REC overlaps a protec
 _Static_assert(FL_REC_HI == FL_CAL_LO && FL_OTA_HI <= FL_REC_HI && FL_OTA_LO >= FL_REC_LO,
                "SMK: the update record (OTA area) must lie in the loader's record window, below BTIF");
 _Static_assert(FL_DATA_HI <= FL_OTA_LO && FL_APP_HI <= FL_DATA_LO, "SMK: windows overlap");
+_Static_assert(FL_XDATA_LO == 0xAD000u && FL_XDATA_HI == 0xAF000u && FL_XDATA_LO >= FL_PLAIN_LO &&
+               FL_XDATA_LO >= FL_REC_LO && FL_XDATA_HI <= FL_DATA_HI,
+               "SMK: XDATA is the spare above the boot screens, below the owner tag, plain and loader-writable");
+_Static_assert(FL_FITTAB_LO == 0xFE000u && FL_FITTAB_HI == 0xFF000u &&
+               FL_FITTAB_LO == FL_USRRES_HI && FL_FITTAB_HI == FL_KEYMAC_LO &&
+               FL_WIN_SAFE(FL_FITTAB_LO, FL_FITTAB_HI) && FL_FITTAB_HDR == 16u,
+               "SMK: FITTAB is the 4 KiB spare between USR and key_mac; never key_mac");
 /* the update loader (loader.c): the app area, and records only in the VM below BTIF */
 #if defined(X0X_SMC_VENDOR_TEST) && X0X_SMC_VENDOR_TEST
 #define FL_LDR_RANGE_OK(off, n) (FL_IN(off, n, FL_APP_LO, FL_APP_HI) || \
-                               FL_IN(off, n, FL_REC_LO, 0xAB000u) || FL_IN(off, n, 0xAF000u, FL_REC_HI))
+                               FL_IN(off, n, FL_REC_LO, 0xAB000u) || FL_IN(off, n, 0xAF000u, FL_REC_HI) || \
+                               FL_IN(off, n, FL_FITTAB_LO, FL_FITTAB_HI) || \
+                               (FL_FDATA_SIZE && FL_IN(off, n, FL_FDATA_LO, FL_FDATA_HI)))
 #else
-#define FL_LDR_RANGE_OK(off, n) (FL_IN(off, n, FL_APP_LO, FL_APP_HI) || FL_IN(off, n, FL_REC_LO, FL_REC_HI))
+#define FL_LDR_RANGE_OK(off, n) (FL_IN(off, n, FL_APP_LO, FL_APP_HI) || FL_IN(off, n, FL_REC_LO, FL_REC_HI) || \
+                               FL_IN(off, n, FL_FITTAB_LO, FL_FITTAB_HI) || \
+                               (FL_FDATA_SIZE && FL_IN(off, n, FL_FDATA_LO, FL_FDATA_HI)))
 #endif
 /* TEST profile's external data stay protected independently of BLE state. */
 #if defined(X0X_SMC_VENDOR_TEST) && X0X_SMC_VENDOR_TEST
 #define FL_STORE_OK(off, n) (FL_IN(off, n, FL_DATA_LO, 0xAB000u) || FL_IN(off, n, 0xAF000u, FL_DATA_HI) || \
-                             FL_IN(off, n, FL_SMP_LO, FL_SMP_HI) || FL_IN(off, n, FL_SMPV_LO, FL_SMPV_HI))
+                             FL_IN(off, n, FL_SMP_LO, FL_FDATA_LO) || FL_IN(off, n, FL_SMPV_LO, FL_SMPV_HI))
 #else
-/* X0X's own store: FL_DATA and the sample slots */
-#define FL_STORE_OK(off, n) (FL_IN(off, n, FL_DATA_LO, FL_DATA_HI) || FL_IN(off, n, FL_SMP_LO, FL_SMP_HI) || \
-                             FL_IN(off, n, FL_SMPV_LO, FL_SMPV_HI))
+/* X0X's own store: FL_DATA less XDATA, and the sample slots up to FDATA (the loader's only) */
+#define FL_STORE_OK(off, n) (FL_IN(off, n, FL_DATA_LO, FL_XDATA_LO) || FL_IN(off, n, FL_XDATA_HI, FL_DATA_HI) || \
+                             FL_IN(off, n, FL_SMP_LO, FL_FDATA_LO) || FL_IN(off, n, FL_SMPV_LO, FL_SMPV_HI))
 #endif
 #ifndef FL_RANGE_OK
 #define FL_RANGE_OK(off, n) (FL_STORE_OK(off, n) || FL_IN(off, n, FL_OTA_LO, FL_OTA_HI))

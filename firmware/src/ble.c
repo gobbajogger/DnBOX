@@ -111,7 +111,7 @@ extern void smk_apc_ble_host_seen(void);
 extern void smk_apc_host_generic(uint8_t ble);
 extern void smk_apc_ble_link(uint8_t connected, uint8_t notifying);
 extern uint8_t smk_apc_ble_event(uint32_t pkt, uint8_t notifying);
-extern void smk_inlog(uint32_t src, uint32_t pkt);   /* a76: the inbound recorder (main_fm1.c) */
+#include "app/smk_inlog_profile.h"
 static uint8_t ble_sx[16], ble_sx_n, ble_sx_over, ble_sx_reply, ble_sx_ch;
 static void ble_sysex_in(const uint8_t *p, uint32_t n, int end, void *ctx)
 {
@@ -219,11 +219,13 @@ static void ble_central_midi(const uint8_t *p, uint8_t n, void *ctx)
      * would otherwise cut away genuine new-session controls. */
     if (blec_connected(c))
         ble_central_link_notify_slot(slot, 1);
+#if X0X_SMK_INLOG
     /* Reuse the bounded ISR-owned INLOG ring; MMC records command in d1. */
     if (n == 3u)
-        smk_inlog(4u, (uint32_t)p[0] << 8 | (uint32_t)p[1] << 16 | (uint32_t)p[2] << 24);
+        SMK_INLOG_RECORD(4u, (uint32_t)p[0] << 8 | (uint32_t)p[1] << 16 | (uint32_t)p[2] << 24);
     else if (n == 6u)
-        smk_inlog(4u, (uint32_t)p[0] << 8 | (uint32_t)p[4] << 16);
+        SMK_INLOG_RECORD(4u, (uint32_t)p[0] << 8 | (uint32_t)p[4] << 16);
+#endif
     /* TIMER5: stop old-role input as soon as a role change is requested. */
     if (ble_want && smc_ble_role_get()) smc_ble_midi_slot(slot, p, n);
 }
@@ -565,7 +567,7 @@ static void ble_device_service(void)
             break;                              /* the host's queue is full: next tick */
         ble_r.orr++;
     }
-    smk_inlog(2u, (uint32_t)((bleh_connected(h) ? 1u : 0u) | (bleh_notifying(h) ? 2u : 0u)) << 24);   /* a76: edges */
+    SMK_INLOG_RECORD(2u, (uint32_t)((bleh_connected(h) ? 1u : 0u) | (bleh_notifying(h) ? 2u : 0u)) << 24);   /* a76: edges */
     ble_sx_answer(h);
     /* attempt 37: no parameter request (test 34's, accepted by the iPhone, came with a huge MIDI delay) */
     bleh_poll(h);

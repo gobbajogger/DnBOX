@@ -11,6 +11,21 @@ import sys
 import tempfile
 import time
 import unittest
+# Hang bounds, not performance limits: a loaded shared gate box can take well over
+# 5 s to fork the fixture toolchain. A real hang still fails, just later.
+WAIT = float(os.environ.get("DNBOX_CTL_TEST_WAIT", "60"))
+
+
+def restore_stop_signals():
+    """Reset stop signals before exec.
+
+    A background or nohup gate ignores SIGHUP. A non-interactive sh cannot
+    trap or reset a signal that was ignored on entry, so trap HUP never
+    runs and a hung unit is left to finish: the controller then exits 0.
+    """
+    for sig in (signal.SIGHUP, signal.SIGINT, signal.SIGTERM):
+        signal.signal(sig, signal.SIG_DFL)
+
 
 TOP = Path(__file__).resolve().parents[2]
 COMPILER = r'''
@@ -38,12 +53,12 @@ if unit and os.environ.get('BARRIER'):
     units = ['src/a.c', 'src/b.c', 'src/c.S', 'gen/d.c']
     jobs = int(os.environ['X0X_JOBS'])
     required = (units.index(source) // jobs + 1) * jobs
-    deadline = time.monotonic() + 5
+    deadline = time.monotonic() + float(os.environ.get('DNBOX_CTL_TEST_WAIT', '60'))
     while sum(json.loads(l)[0] == 'start' for l in Path(os.environ['EVENTS']).read_text().splitlines()) < required:
         assert time.monotonic() < deadline, 'compile batch did not start'
         time.sleep(.01)
 if os.environ.get('AFTER_SUCCESS') == source:
-    deadline = time.monotonic() + 5
+    deadline = time.monotonic() + float(os.environ.get('DNBOX_CTL_TEST_WAIT', '60'))
     while not any(json.loads(l)[:2] == ['end', 'src/a.c'] for l in Path(os.environ['EVENTS']).read_text().splitlines()):
         assert time.monotonic() < deadline, 'earlier driver did not succeed'
         time.sleep(.01)
@@ -51,7 +66,9 @@ hang = os.environ.get('HANG') or os.environ.get('HANG_SOURCE') == source
 if hang or os.environ.get('SPAWN_CHILD') == source:
     child = subprocess.Popen([sys.executable, '-S', '-c', 'import time; time.sleep(60)'])
     with open(os.environ['CHILDREN'], 'a') as f: f.write(str(child.pid) + '\n')
-    if hang: time.sleep(60)
+    if hang:
+        event('hang')
+        time.sleep(60)
 else:
     time.sleep(.08 if source == 'src/a.c' else .20)
 print('stdout ' + source)
@@ -165,7 +182,7 @@ class ControllerCompile(unittest.TestCase):
     def run_build(self, jobs):
         self.env['X0X_JOBS'] = str(jobs)
         return subprocess.run(['sh', str(TOP / 'ble/ctl/build_in_container.sh')],
-                              env=self.env, text=True, capture_output=True, timeout=10)
+                              env=self.env, text=True, capture_output=True, timeout=2 * WAIT)
 
     def assert_clean(self):
         self.assertEqual(list(self.root.glob('ctlbuild.*')), [])
@@ -235,20 +252,21 @@ class ControllerCompile(unittest.TestCase):
                 self.children.unlink(missing_ok=True)
                 self.env.update(X0X_JOBS='2', LINK_HANG=phase)
                 p = subprocess.Popen(['sh', str(TOP / 'ble/ctl/build_in_container.sh')],
-                                     env=self.env, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+                                     env=self.env, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+                                     preexec_fn=restore_stop_signals)
                 try:
-                    deadline = time.monotonic() + 5
+                    deadline = time.monotonic() + WAIT
                     while not self.child_pids():
                         self.assertLess(time.monotonic(), deadline)
                         time.sleep(.01)
                     p.send_signal(signal.SIGTERM)
-                    stdout, stderr = p.communicate(timeout=5)
+                    stdout, stderr = p.communicate(timeout=WAIT)
                     self.assertEqual(p.returncode, 143, stdout + stderr)
                     self.assertFalse((self.out / 'ctl.elf').exists())
                     self.assert_children_stopped_before_cleanup()
                 finally:
                     if p.poll() is None:
-                        p.send_signal(signal.SIGTERM); p.communicate(timeout=5)
+                        p.send_signal(signal.SIGTERM); p.communicate(timeout=WAIT)
                     self.stop_fixture_children()
         self.env.pop('LINK_HANG', None)
 
@@ -307,31 +325,45 @@ class ControllerCompile(unittest.TestCase):
                 # tested child needs the normal disposition before its shell exec.
                 p = subprocess.Popen(['sh', str(TOP / 'ble/ctl/build_in_container.sh')],
                                      env=self.env, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
-                                     preexec_fn=lambda: signal.signal(signal.SIGINT, signal.SIG_DFL))
+                                     preexec_fn=restore_stop_signals)
                 try:
-                    deadline = time.monotonic() + 5
-                    while len(self.child_pids()) < 2:
-                        self.assertLess(time.monotonic(), deadline, 'later compiler did not start')
+                    deadline = time.monotonic() + WAIT
+                    # Wait until the later unit is in its hang, and the controller
+                    # is still running, before signalling. A stale children file
+                    # stays after a successful build, so a PID count alone can
+                    # let the signal arrive after the controller has already
+                    # exited 0.
+                    while True:
+                        self.assertLess(time.monotonic(), deadline, 'later compiler did not start hanging')
+                        self.assertIsNone(p.poll(),
+                                          'controller exited %s before the interrupt was sent' % (p.returncode,))
+                        hung = self.events.exists() and any(
+                            ev[:2] == ['hang', 'src/b.c'] for ev in self.events_list())
+                        if hung and len(self.child_pids()) >= 2:
+                            break
                         time.sleep(.01)
                     # The previous group must already be stopped at the batch boundary.
                     self.assert_stopped(self.child_pids()[:1])
+                    self.assertIsNone(p.poll(),
+                                      'controller finished before the interrupt was sent')
                     p.send_signal(sig)
-                    stdout, stderr = p.communicate(timeout=5)
+                    stdout, stderr = p.communicate(timeout=WAIT)
                     self.assertEqual(p.returncode, 128 + sig, stdout + stderr)
                     self.assert_children_stopped_before_cleanup()
                     self.assertFalse((self.out / 'ctl.elf').exists())
                 finally:
                     if p.poll() is None:
                         p.send_signal(signal.SIGTERM)
-                        p.communicate(timeout=5)
+                        p.communicate(timeout=WAIT)
                     self.stop_fixture_children()
 
     def test_interruption_joins_compilers_and_descendants_before_cleanup(self):
         self.env.update(X0X_JOBS='2', HANG='1')
         p = subprocess.Popen(['sh', str(TOP / 'ble/ctl/build_in_container.sh')],
-                             env=self.env, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+                             env=self.env, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+                             preexec_fn=restore_stop_signals)
         self.addCleanup(lambda: p.poll() is None and p.kill())
-        deadline = time.monotonic() + 5
+        deadline = time.monotonic() + WAIT
         while time.monotonic() < deadline:
             if self.children.exists() and len(self.children.read_text().splitlines()) == 2:
                 break
@@ -339,7 +371,7 @@ class ControllerCompile(unittest.TestCase):
         else:
             self.fail('compilers did not start')
         p.send_signal(signal.SIGTERM)
-        stdout, stderr = p.communicate(timeout=5)
+        stdout, stderr = p.communicate(timeout=WAIT)
         self.assertEqual(p.returncode, 143, stdout + stderr)
         pids = [event[2] for event in self.events_list()] + [int(n) for n in self.children.read_text().splitlines()]
         self.assert_stopped(pids)

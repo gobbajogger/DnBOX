@@ -33,7 +33,7 @@ p=subprocess.run([str(OUT/'ui_action_state_return/test')],env=dict(os.environ,NO
 if p.returncode or 'PASS modal physical cues' not in p.stdout:raise SystemExit('modal journey failed: '+p.stdout)
 source=(ROOT/'firmware/src/app/ui.c').read_text()
 mutants=[(cases[0], 'ui.home_live = act == ACT_HOME_LIVE;', 'ui.home_live = 0;'),
-         (cases[1], 'UI_FIRST_KNOB+slot', 'UI_FIRST_KNOB+((slot+1)%4)'),
+         (cases[1], 'text_c(31+e.slot[k]*59,y+8-off', 'text_c(31+((e.slot[k]+1)%4)*59,y+8-off'),
          (cases[2], 'gen && ui.gen_stale[b] ? "CHANGED" : 0', '0 ? "CHANGED" : 0')]
 for (case,marker,mode),old,new in mutants:
     if source.count(old)!=1:raise SystemExit('mutation source anchor changed: '+old)

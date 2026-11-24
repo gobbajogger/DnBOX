@@ -192,7 +192,7 @@ for reply,expected in ((r,0),([6,1,1],1),(None,1)):
         calls.append((cmd,args)); return reply
     cli.ask = ask
     old = sys.argv
-    sys.argv = ['ble_autotest.py','--pad-inputs','--diag-only','--padcal-export','must-not-write']
+    sys.argv = ['ble_autotest.py','--pad-inputs','--diag-only']
     try:
         with contextlib.redirect_stdout(io.StringIO()):
             assert cli.main() == expected

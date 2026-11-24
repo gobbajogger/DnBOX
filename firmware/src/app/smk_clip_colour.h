@@ -27,7 +27,7 @@ static inline uint16_t smk_clip_lcd565(uint32_t v)
     return SMK_CLIP_IDLE_LIFT && smk_clip_idle_shade(v) ? APC40_LCD_IDLE565[(v - 7u) >> 2] : APC40_LCD565[v];
 }
 /* CLP-13: the byte that a clip pad sends for one channel of APC40_PAD_OWNER[v] (brightness 255 or 0).
- * Lit: level / 2, as in the calibration mode. Idle shade: the full level (2 x). */
+ * Lit: level / 2. Idle shade: the full level (2 x). */
 static inline uint8_t smk_clip_pad_level(uint32_t level, uint32_t v, uint32_t brightness)
 {
     return (uint8_t)((level * brightness) / (SMK_CLIP_IDLE_PAD_LIFT && smk_clip_idle_shade(v) ? 255u : 510u));
