@@ -1,0 +1,210 @@
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -5950,7 +5950,7 @@
+         int free_mode=ui.view==V_SEQ && is_303() && ui.freeplay[bidx()] && !ui.rec;
+         if(ui.view==V_SEQ || ui.view==V_GEN) {
+             name=free_mode?bass_header_name():part_display(ui.part);
+-            if(ui.view!=V_GEN || engine_bass_bank(bidx())!=ORIGINAL_SOUND_MIAMI) {
++            if(ui.view!=V_GEN) {
+                 put_s(put_s(put_s(context_title,name)," "),free_mode?"FREE PLAY":VIEW_N[ui.view]);
+                 name=context_title;
+             }
+@@ -8382,6 +8382,21 @@
+     } else tape_glyph_at = now;
+     tape_glyph_running = active;
+ }
++/* Round reels and their lower tape path. The wear meter is drawn separately. */
++static UI_DRAW void tape_reels(int cx, uint16_t ink)
++{
++    static const int8_t dx[16] = {0,2,3,4,4,4,3,2,0,-2,-3,-4,-4,-4,-3,-2};
++    static const int8_t dy[16] = {-4,-4,-3,-2,0,2,3,4,4,4,3,2,0,-2,-3,-4};
++    cv_rect(cx - 7, 43, 15, 2, ink);
++    for (int x = cx - 7; x <= cx + 7; x += 14) {
++        disc((float)x + 0.5f, 37.5f, 6.f, ink);
++        disc((float)x + 0.5f, 37.5f, 4.8f, SOUND_FACE);
++        for (unsigned spoke = 0; spoke < 3; spoke++) {
++            unsigned phase = (tape_glyph_phase + spoke * 5u) & 15u;
++            cv_line(x, 37, x + dx[phase], 37 + dy[phase], ink);
++        }
++    }
++}
+ static uint8_t tempo_glyph_view; /* latched once for signature + complete knob strip */
+ static UI_DRAW int perform_glyph(pref_t r,int val,int cx,uint16_t col)
+ {
+@@ -8489,7 +8504,11 @@
+   else glyph_identity(d->max+1,val,l,col);
+  }else if(r.kind==R_TAPE){
+   if(val<16){cv_line(l,43,l+8,43,col);cv_line(l+8,43,l+8,33,col);cv_line(l+8,33,l+18,33,col);cv_line(l+18,33,l+18,43,col);cv_line(l+18,43,l+28,43,col);cv_line(l+28,43,l+28,33,col);cv_line(l+28,33,l+36,33,col);}
+-  else{for(int s=-1;s<=1;s+=2){int x=cx+s*10;disc((float)x+0.5f,37.5f,7.0f,C_LINE);disc((float)x+0.5f,37.5f,5.0f,SOUND_FACE);cv_rect(x-1,36,3,3,col);static const int8_t dx[16]={0,2,3,4,4,4,3,2,0,-2,-3,-4,-4,-4,-3,-2};static const int8_t dy[16]={-4,-4,-3,-2,0,2,3,4,4,4,3,2,0,-2,-3,-4};cv_line(x,37,x+dx[tape_glyph_phase],37+dy[tape_glyph_phase],col);}cv_rect(l+2,48,33,1,C_LINE);int wear=(val-16)*32/111;cv_rect(l+2,47,1+wear,2,col);}
++  else {
++   tape_reels(cx, col);
++   cv_rect(l+2,48,33,1,C_LINE);
++   cv_rect(l+2,47,1+(val-16)*32/111,2,col);
++  }
+  }else if(r.kind==R_ENG&&r.a==T_FX&&r.c==FX_DRIVE){
+   drive_amount_glyph(val,cx,col);
+  }else return 0;return 1;
+--- a/tests/host/ui_gen_keyed_roll_test.c
++++ b/tests/host/ui_gen_keyed_roll_test.c
+@@ -193,7 +193,7 @@
+                 CHECK(fb[25 * 240 + col_x(phase) - 1] == swap16((phase & 3) ? C_LINE : C_DIM));
+             }
+         }
+-        const char *title = owner ? "CHICAGO TB-3PO" : "MIAMI";
++        const char *title = owner ? "CHICAGO" : "MIAMI";
+         if (!baseline)
+             check_title(title);
+         button_tap(B_ARP);
+--- a/tests/host/ui_tape_reel_test.c
++++ b/tests/host/ui_tape_reel_test.c
+@@ -1,22 +1,117 @@
+ /* SPDX-License-Identifier: GPL-3.0-only */
+ #define SMC_UI_MAIN retained_fixture_main
+ #include "smc_ui_test.c"
+-int main(void) {
+- setup(V_FX,PART_909);
+- for(int phase=0;phase<16;phase++)for(int val=16;val<=127;val+=111) {
+-  tape_glyph_phase=(uint8_t)phase;
+-  cv_begin(240,80,SOUND_FACE);
+-  CHECK(control_glyph(PR(R_TAPE,0,0,0),val,120,C_HI));
+-  for(int side=-1;side<=1;side+=2) {
+-   int cx=120+side*10,cy=37;
+-   /* A circular radius-7 reel cannot occupy its rounded-square corners. */
+-   for(int y=-7;y<=7;y++)for(int x=-7;x<=7;x++)
+-    if(x*x+y*y>=60)CHECK(cv_px[(cy+y)*240+cx+x]==swap16(SOUND_FACE));
+-   CHECK(cv_px[cy*240+cx+7]!=swap16(SOUND_FACE));
+-   CHECK(cv_px[(cy-7)*240+cx]!=swap16(SOUND_FACE));
+-   CHECK(cv_px[cy*240+cx]!=swap16(SOUND_FACE));
+-  }
+- }
+- printf("tape-reels: phases=16 wear-endpoints=2 circular-support PASS checks=%u\n",checks);
+- return 0;
++
++static uint16_t still[16][28];
++
++static uint16_t glyph_pixel(int x, int y)
++{
++    return fb[(KNOB_Y + y) * 240 + x];
+ }
++
++static void remember_reels(void)
++{
++    for (int y = 30; y < 46; y++)
++        for (int x = 196; x < 224; x++)
++            still[y - 30][x - 196] = glyph_pixel(x, y);
++}
++
++static unsigned reel_delta(int x0, int x1)
++{
++    unsigned changed = 0;
++    for (int y = 30; y < 46; y++)
++        for (int x = x0; x < x1; x++)
++            changed += still[y - 30][x - 196] != glyph_pixel(x, y);
++    return changed;
++}
++
++static void excite_delay(void)
++{
++    engine_drum(0, 0, 1.f);
++    for (int block = 0; block < 8 && !engine_tape_active(); block++)
++        audio_block();
++    CHECK(engine_tape_active());
++}
++
++static void check_circular_support(void)
++{
++    setup(V_FX, PART_909);
++    for (int phase = 0; phase < 16; phase++) {
++        for (int value = 16; value <= 127; value += 111) {
++            tape_glyph_phase = (uint8_t)phase;
++            cv_begin(240, 80, SOUND_FACE);
++            CHECK(control_glyph(PR(R_TAPE, 0, 0, 0), value, 120, C_HI));
++            for (int side = -1; side <= 1; side += 2) {
++                int cx = 120 + side * 7;
++                /* Preserve the circular support oracle, excluding the tape belt. */
++                for (int y = -6; y <= 6; y++)
++                    for (int x = -6; x <= 6; x++)
++                        if (x*x + y*y >= 43 && y != 6)
++                            CHECK(cv_px[(37+y)*240+cx+x] == swap16(SOUND_FACE));
++                CHECK(cv_px[37*240+cx+6] != swap16(SOUND_FACE));
++                CHECK(cv_px[31*240+cx] != swap16(SOUND_FACE));
++                CHECK(cv_px[37*240+cx] != swap16(SOUND_FACE));
++            }
++        }
++    }
++}
++
++int main(void)
++{
++    for (int theme = 0; theme < 2; theme++) {
++        setup(V_HOME, PART_909);
++        palette_set(theme ? 5 : 0);
++        button_tap(B_FX); ui_input_only();
++        button_tap(B_FX); ui_input_only();
++        CHECK(ui.view == V_FX && cur_page() == 1 && pg.r[1][3].kind == R_TAPE);
++        pref_t tape = pg.r[1][3];
++        pref_set(tape, 15);
++        CHECK(pref_get(tape) == 15 && proj.sound.v[T_FX][0][FX_DL_TYPE] == 0);
++        ui_frame(); shot(theme ? "tape-digital-light" : "tape-digital-dark");
++
++        now_ms += 128;
++        enc_acc[EN_K4] = 1; ui_input_only();
++        CHECK(pref_get(tape) == 16 && proj.sound.v[T_FX][0][FX_DL_TYPE] == 1);
++        CHECK(proj.sound.v[T_FX][0][FX_DL_WEAR] == 0);
++        char number[16], unit[8];
++        pref_value(tape, number, unit);
++        CHECK(!strcmp(number, "0") && !strcmp(unit, "%"));
++        audio_block();
++        CHECK(!engine_tape_active());
++        ui_frame(); shot(theme ? "tape-idle-light" : "tape-idle-dark");
++        uint16_t belt = glyph_pixel(210, 43);
++        if (belt == glyph_pixel(210, 41) || belt != glyph_pixel(210, 44)) {
++            fprintf(stderr, "TAPE_BELT_MISSING theme=%d\n", theme);
++            CHECK(0);
++        }
++        CHECK(belt == glyph_pixel(208, 43) && belt == glyph_pixel(212, 44));
++        remember_reels();
++        now_ms += 240; ui_frame();
++        CHECK(!reel_delta(196, 224));
++
++        pref_set(PR(R_ENG, T_MIX, PART_909, MX_DLY), 127);
++        pref_set(find_ref(T_909, 0, "Dly"), 127);
++        pref_set(PR(R_ENG, T_FX, 0, FX_DL_LEVEL), 100);
++        excite_delay();
++        ui_frame();
++        remember_reels();
++        now_ms += 80;
++        excite_delay();
++        ui_frame(); shot(theme ? "tape-spokes-light" : "tape-spokes-dark");
++        CHECK(reel_delta(198, 209) > 3 && reel_delta(212, 223) > 3);
++        CHECK(glyph_pixel(210, 43) == belt && glyph_pixel(210, 44) == belt);
++        CHECK(pref_get(tape) == 16 && proj.sound.v[T_FX][0][FX_DL_WEAR] == 0);
++
++        now_ms += 80;
++        CHECK(!engine_tape_active());
++        ui_frame(); remember_reels();
++        now_ms += 160; ui_frame();
++        CHECK(!reel_delta(196, 224));
++
++        enc_acc[EN_K4] = -1; ui_input_only();
++        CHECK(pref_get(tape) == 15 && proj.sound.v[T_FX][0][FX_DL_TYPE] == 0);
++    }
++    check_circular_support();
++    printf("PASS TAPE reels: %u checks across two palettes\n", checks);
++    return 0;
++}
+--- a/tests/ui_geometry/instrument.py
++++ b/tests/ui_geometry/instrument.py
+@@ -49,9 +49,10 @@
+ '''+a);p.write_text(s)
+ 
+ 
++    p=root/'firmware/src/app/ui_break_layout_controls.h';s=p.read_text()
++    a='        text_c(cx,label_y,namefont,caps_of(pref_name(r)),touched?C_WHITE:C_GRAY);'
++    s=once(s,a,'        if(getenv("DUPLABEL_MUTATE"))text_c(cx+30,label_y,namefont,caps_of(pref_name(r)),C_GRAY);\n        if(!getenv("PRESENCE_MUTATE_STRIP"))'+a.strip());p.write_text(s)
+     p=root/'firmware/src/app/ui.c';s=p.read_text()
+-    a='        text_c(cx, vc(&FONT_XS, mix_kit >= 0 && i == 0 ? 66 : 13, 10), &FONT_XS, caps_of(pref_name(r)), touched ? C_WHITE : C_GRAY);'
+-    s=once(s,a,'        if(getenv("DUPLABEL_MUTATE"))text_c(cx+30, vc(&FONT_XS, mix_kit >= 0 && i == 0 ? 66 : 13, 10), &FONT_XS, caps_of(pref_name(r)), C_GRAY);\n        if(!getenv("PRESENCE_MUTATE_STRIP"))'+a.strip());p.write_text(s)
+     a='            text_r(pickup?215:200, 3, &FONT_T, b, seq.ext ? C_AMB : C_HI);'
+     s=once(s,a,'            if(!getenv("HEADER_MUTATE"))'+a.strip());p.write_text(s)
+ 

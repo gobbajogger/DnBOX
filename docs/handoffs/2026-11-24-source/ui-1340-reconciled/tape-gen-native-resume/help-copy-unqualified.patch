@@ -1,0 +1,103 @@
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -2331,7 +2331,7 @@
+     int n = 0, gen = ui.view == V_GEN, kbd = is_303() && ui.rec;
+ #define L(s) (l[n++] = (s))
+     switch (b) {
+-    case B_FX: L("REVERB / DELAY"); L("TAPE / KIT DRIVE"); L("TAP: NEXT PAGE"); break;
++    case B_FX: L("REVERB / DELAY"); break;
+     case B_SEL: L("TAP: LIST"); L("LIST: ACTIVATE"); L("CONFIRM: YES"); break;
+     case B_ENV:
+         if (is_303()) { L("HOLD + KEY: ACCENT"); if (kbd) L("REC + " UI_CAP_OCT ": REST"); }
+@@ -2339,16 +2339,15 @@
+         else L("HOLD + KEY: ACCENT");
+         break;
+     case B_LFO:
+-        L("MIXER / MASTER"); L("TAP: NEXT PAGE");
++        L("MIXER / MASTER");
+         if (ui.view == V_MIX) L(UI_CAP_HOME " + BLACK KEY: MUTE");
+         if (is_303()) { L("HOLD + KEY: SLIDE"); if (kbd) L("HOLD + " UI_CAP_OCT ": TIE"); }
+         break;
+-    case B_EDIT: L("PART SOUND"); L("TAP: NEXT PAGE"); L("STEP + KNOB: PARAMETER LOCK");
++    case B_EDIT: L("PART SOUND"); L("STEP + KNOB: PARAMETER LOCK");
+         L("STEP + " UI_CAP_SELECT ": CHANCE"); break;
+     case B_GLO:
+         L("SETTINGS / SAVE / LOAD");
+         L(X0X_UI_PERF ? "RESET / CLEAR / PERFORMANCE" : "RESET / CLEAR");
+-        L("TAP: CLOSE");
+         /* HOME only: the same card, no new screen. A pad tap clears the selected
+          * part of that pattern. Hold one pad and press another to copy that part. */
+         if (ui.view == V_HOME) { L("+ PAD: CLEAR PART"); L("+ HOLD PAD + PAD: COPY PART"); }
+@@ -2381,10 +2380,9 @@
+     case B_ARP:
+         L("TB-3PO / 303 GENERATOR"); L("CHICAGO / MIAMI");
+         if (gen) { L(UI_CAP_OCT "+: NEW LINE"); L(UI_CAP_OCT "-: MUTATE LINE"); }
+-        L("TAP: NEXT PAGE");
+         break;
+     case B_SEQ:
+-        L("STEP LENGTH / RATE"); L("TAP: NEXT PAGE"); L("STEP + " UI_CAP_SELECT ": CHANCE");
++        L("STEP LENGTH / RATE"); L("STEP + " UI_CAP_SELECT ": CHANCE");
+         if (is_303()) L("STEP + " UI_CAP_ALGO ": VELOCITY");
+         break;
+     case B_PLAY: L("START / STOP"); L(UI_CAP_HOME " + " UI_CAP_PLAY ": REDO"); break;
+--- a/tests/host/smc_ui_test.c
++++ b/tests/host/smc_ui_test.c
+@@ -260,6 +260,49 @@
+     now_ms += 1500; ui_frame(); unchanged(saved);
+     puts("PASS overlays: confirmation blocks input; menu/help state survives activity and timeout");
+ }
++static void test_help_copy(void)
++{
++    const char *lines[HELP_LINES];
++    const int buttons[] = {B_FX, B_LFO, B_EDIT, B_GLO, B_ARP, B_SEQ};
++    setup(V_FX, PART_909);
++    int page = cur_page();
++    held_btn = 1u << B_FX;
++    ++now_ms;
++    ui_input_only();
++    now_ms += HELP_HOLD + 1;
++    ui_input_only();
++    CHECK(ui.help == B_FX + 1);
++    ui_frame();
++    shot("help-fx-held");
++    CHECK(help_lines(B_FX, lines) == 1);
++    CHECK(!strcmp(lines[0], "REVERB / DELAY"));
++    held_btn = 0;
++    ++now_ms;
++    ui_input_only();
++    CHECK(!ui.help && ui.view == V_FX && cur_page() == page);
++    ui_frame();
++    shot("help-fx-released");
++    button_tap(B_FX);
++    CHECK(cur_page() != page);
++
++    for (unsigned i = 0; i < sizeof buttons / sizeof buttons[0]; i++) {
++        int n = help_lines(buttons[i], lines);
++        for (int row = 0; row < n; row++) {
++            CHECK(strcmp(lines[row], "TAP: NEXT PAGE"));
++            CHECK(strcmp(lines[row], "TAP: CLOSE"));
++        }
++    }
++    setup(V_HOME, PART_909);
++    int count = help_lines(B_GLO, lines);
++    int clear = 0, copy = 0;
++    for (int row = 0; row < count; row++) {
++        clear |= !strcmp(lines[row], "+ PAD: CLEAR PART");
++        copy |= !strcmp(lines[row], "+ HOLD PAD + PAD: COPY PART");
++    }
++    CHECK(clear && copy);
++    puts("PASS help: compact cards, unique chords, hold/release, and FX paging");
++}
++
+ static void test_clip(void)
+ {
+     for (int waiting = 0; waiting < 2; waiting++) {
+@@ -748,7 +791,7 @@
+ {
+     test_navigation_replay(); test_distinct_maps(); test_track_knob_align(); test_home_touch(); test_physical_geometry(); test_selected_lane(); test_drum_titles(); test_action_captions_and_knobs();
+     test_restore(); puts("PASS restore: eight views preserve complete navigation state and exact framebuffer");
+-    test_activity(); test_existing_feedback(); test_navigation(); test_overlays(); test_clip(); test_actions_and_reset();
++    test_activity(); test_existing_feedback(); test_navigation(); test_overlays(); test_help_copy(); test_clip(); test_actions_and_reset();
+     printf("smc_ui: PASS (%u checks)\n", checks);
+     return 0;
+ }

@@ -1,0 +1,130 @@
+{
+  "firmware": {
+    "commit": "68be4d44edafbb2c41dcb5e7c773ac10bf00cf1f",
+    "tree": "974e17096c24a02c475e320e7bd9b8448dc468b4",
+    "guarded_commit": "74344dc9df41fbc63c90220361d9ecaa99c21517",
+    "guarded_tree": "d203a0e130c71bc262fe12672c9773df4ab74e83",
+    "unchanged_guarded_control_files": [
+      "ui.c",
+      "ui_original_controls.h",
+      "s1c_part.c",
+      "s1_dry_part.c",
+      "original_sound.c",
+      "original_presets.inc",
+      "engine_arp.inc",
+      "engine_arp.h"
+    ]
+  },
+  "original": {
+    "commit": "6466a3715c96b7ecf1dd255a218cbd571408a314",
+    "tree": "2a36703ec69a24e6669942f7492c315233741cb2",
+    "checked_closure_files": 89,
+    "parameter_header_sha256": "9598182b88dd9fdc7f31332857647a63913e232cb40d85169978b2ccdf271783",
+    "parameter_id_count": 150,
+    "verified_source_app_files": [
+      "SynthOne/AudioKitSynthOne/DSP/AKSynthOne.swift",
+      "SynthOne/AudioKitSynthOne/DSP/S1TuningTable.swift",
+      "SynthOne/AudioKitSynthOne/Tunings/Model/Tunings.swift",
+      "SynthOne/AudioKitSynthOne/Tunings/TuningsPanelController/TuningsPanelController.swift",
+      "SynthOne/AudioKitSynthOne/DSP/Conductor.swift",
+      "SynthOne/AudioKitSynthOne/Settings/AppSettings.swift",
+      "SynthOne/AudioKitSynthOne/DSP/SDSustainer.swift",
+      "SynthOne/AudioKitSynthOne/Keyboard/Manager+ModWheelDelegate.swift",
+      "SynthOne/AudioKitSynthOne/Keyboard/Manager+Keyboard.swift",
+      "SynthOne/AudioKitSynthOne/Manager/Manager+callbacks.swift"
+    ],
+    "sequencer_step_field_count": 48,
+    "selected_smoothing_count": 46,
+    "documented_unused_or_deprecated": [
+      18,
+      33,
+      145
+    ]
+  },
+  "direct_editable": [
+    {
+      "id": 2,
+      "original": "morphBalance",
+      "firmware": "OSC BALANCE"
+    },
+    {
+      "id": 5,
+      "original": "morph1Volume",
+      "firmware": "OSC 1 LEVEL"
+    },
+    {
+      "id": 16,
+      "original": "cutoff",
+      "firmware": "CUTOFF"
+    },
+    {
+      "id": 17,
+      "original": "resonance",
+      "firmware": "RESONANCE"
+    },
+    {
+      "id": 19,
+      "original": "filterADSRMix",
+      "firmware": "FILTER ENV"
+    },
+    {
+      "id": 22,
+      "original": "filterAttackDuration",
+      "firmware": "FILTER ATTACK"
+    },
+    {
+      "id": 23,
+      "original": "filterDecayDuration",
+      "firmware": "FILTER DECAY"
+    },
+    {
+      "id": 24,
+      "original": "filterSustainLevel",
+      "firmware": "FILTER SUSTAIN"
+    },
+    {
+      "id": 25,
+      "original": "filterReleaseDuration",
+      "firmware": "FILTER RELEASE"
+    },
+    {
+      "id": 26,
+      "original": "attackDuration",
+      "firmware": "AMP ATTACK"
+    },
+    {
+      "id": 27,
+      "original": "decayDuration",
+      "firmware": "AMP DECAY"
+    },
+    {
+      "id": 28,
+      "original": "sustainLevel",
+      "firmware": "AMP SUSTAIN"
+    },
+    {
+      "id": 29,
+      "original": "releaseDuration",
+      "firmware": "AMP RELEASE"
+    },
+    {
+      "id": 34,
+      "original": "bitCrushSampleRate",
+      "firmware": "CRUSH RATE"
+    }
+  ],
+  "shared_arp_field_names": [
+    "ARP_F_GATE",
+    "ARP_F_INTERVAL",
+    "ARP_F_LENGTH",
+    "ARP_F_MODE",
+    "ARP_F_ON",
+    "ARP_F_RANGE",
+    "ARP_F_SPEED"
+  ],
+  "link_candidate": {
+    "patch_sha256": "be9a2ca1553e04a878b960abd1efe7daa24b93a13ef069c999e0d4db109b9729",
+    "dry_receipt_sha256": "83a51205f07d93e3c90d738c1ce56b2ebc7d74c6ad0e2dac7a91018fef9a981b",
+    "compact_receipt_sha256": "c425d91c4652f9d03f18cda514f1bdb76abe13280c43e91d58a3227307f0c60d"
+  }
+}
