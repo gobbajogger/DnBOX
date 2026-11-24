@@ -1,0 +1,33 @@
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -6767,6 +6767,11 @@
+      * Keep the selected page and its physical encoder bindings unchanged. */
+     int tail = pg.n >= rows && first + rows > pg.n;
+     if (tail) first = pg.n - rows;
++    int synth_page_marker = 0;
++#if X0X_S1_EXTRA || X0X_SUPERJ6_BUILTIN_INIT
++    int bank = engine_bass_bank(bidx());
++    synth_page_marker = bank == ORIGINAL_SOUND_SYNTHONE || bank == ORIGINAL_SOUND_JUNO;
++#endif
+     uint16_t col=matrix_col();
+     if(night) cv_rect(0,0,240,band==2?KNOB_H:BAND_H,SOUND_BASE);
+     for (row=0;row<rows;row++) {
+@@ -6777,8 +6782,16 @@
+         if (night) sound_slab(3,y,234,height,active);
+         else surface_panel(3,y,234,height,active,active?col:SOUND_FACE,
+                            active?blend(col,C_WHITE,5):SOUND_EDGE,active?dim(col,8):SOUND_SIDE);
+-        put_s(put_s(put_i(t,(tail ? p : row)+1),"  "),matrix_group(p));
+-        cv_text(8,y,&FONT_T,t,label);
++        if (synth_page_marker) {
++            cv_text(8,y,&FONT_T,matrix_group(p),label);
++            if (active) {
++                put_i(put_s(put_i(t,p+1),"/"),pg.n);
++                text_r(232,y,&FONT_T,t,label);
++            }
++        } else {
++            put_s(put_s(put_i(t,(tail ? p : row)+1),"  "),matrix_group(p));
++            cv_text(8,y,&FONT_T,t,label);
++        }
+         if (adsr_row(p)) { draw_adsr_inline(p,active,y+off,height,off); continue; } /* graph replaces A/D/S/R, any row */
+         if (active) {
+             char knobs[20];matrix_knob_caption(knobs,p);

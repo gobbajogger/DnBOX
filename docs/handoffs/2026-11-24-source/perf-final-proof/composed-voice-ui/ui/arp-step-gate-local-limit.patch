@@ -1,0 +1,84 @@
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -455,7 +455,7 @@
+ enum { R_ARP = R_NOTELOCK + 2 };          /* a: ARP_F_* field, b: bass voice */
+ static const x0x_param_t *arp_desc(unsigned field, unsigned owner);
+ static int arp_get(unsigned voice, unsigned field);
+-static void arp_set(unsigned voice, unsigned field, int v);
++static void arp_set(unsigned voice, unsigned field, int v, int from_keyboard);
+ #endif
+ #if X0X_SUPERJ6_BUILTIN_INIT
+ enum { R_SJ6KNOB = R_NOTELOCK + 3 };
+@@ -894,7 +894,7 @@
+ X0X_COLD static void pref_set_impl(pref_t r, int v, int from_keyboard)
+ {
+ #if X0X_ARP_HOOKS
+-    if (r.kind == R_ARP) { arp_set(r.b, r.a, v); return; }
++    if (r.kind == R_ARP) { arp_set(r.b, r.a, v, from_keyboard); return; }
+ #endif
+ #if X0X_SUPERJ6_BUILTIN_INIT
+     if (r.kind == R_SJ6KNOB) {
+@@ -1898,18 +1898,33 @@
+     }
+     return 0;
+ }
+-static void arp_set(unsigned voice, unsigned field, int v)
++/* SEQ page 4: SEQUENCE, PRESET, KEYS, ARP SEQ. */
++static int arp_seq_page(void)
++{
++    return ui.view == V_SEQ && is_303() && *page_of(V_SEQ) == 3 && arp_engine(bidx());
++}
++
++static uint32_t arp_limit_until;
++static uint8_t arp_limit_owner, arp_limit_field;
++static void arp_set(unsigned voice, unsigned field, int v, int from_keyboard)
+ {
+     engine_arp_settings s;
+     if (!engine_arp_settings_read(voice, &s)) return;
++    /* A bound reached by the panel is not an edit or a global alert. Keep
++     * the hardware header live and explain the bound in the ARP status row. */
++    if (from_keyboard && (field == ARP_F_LENGTH || field == ARP_F_GATE) &&
++        voice == (unsigned)bidx() && arp_seq_page()) {
++        if (v < 0 || v > ARP_P[field].max) {
++            arp_limit_owner = (uint8_t)voice;
++            arp_limit_field = (uint8_t)field;
++            arp_limit_until = plat_ms() + 900u;
++            return;
++        }
++        arp_limit_until = 0;
++    }
+     if (field == ARP_F_RANGE || field == ARP_F_LENGTH || field == ARP_F_GATE) v++;
+     if (engine_arp_set(voice, s.revision, field, v) == S1_EDIT_REJECTED) say("ARP NOT CHANGED", 0);
+ }
+-/* SEQ page 4: SEQUENCE, PRESET, KEYS, ARP SEQ. */
+-static int arp_seq_page(void)
+-{
+-    return ui.view == V_SEQ && is_303() && *page_of(V_SEQ) == 3 && arp_engine(bidx());
+-}
+ static void arp_step_edit(unsigned step, unsigned field, int v)
+ {
+     engine_arp_settings s;
+@@ -7494,6 +7509,14 @@
+             nm = t;
+         }
+     }
++    int arp_limit = 0;
++#if X0X_ARP_HOOKS
++    if (r.kind == R_ARP && r.a == arp_limit_field && r.b == arp_limit_owner &&
++        arp_limit_until && (int32_t)(arp_limit_until - plat_ms()) > 0 && arp_seq_page()) {
++        nm = r.a == ARP_F_LENGTH ? "STEPS LIMIT" : "GATE LIMIT";
++        arp_limit = 1;
++    }
++#endif
+     pref_value(r, num, unit);
+     if (r.kind == R_BPRESET) {
+         const char *name = original_sound_name((unsigned)engine_bass_requested_bank(r.b),
+@@ -7516,7 +7539,7 @@
+         ly = vc(vf, by, bh);
+         box(bx, by, bw, bh, C_BLACK);
+         frame(bx, by, bw, bh, part_col());
+-        cv_text(bx + 12, vc(&FONT_B, by, bh), &FONT_B, nm, C_GRAY);
++        cv_text(bx + 12, vc(&FONT_B, by, bh), &FONT_B, nm, arp_limit ? C_AMB : C_GRAY);
+         w = tw(vf, num);
+         x = bx + bw - 12 - uw - w;
+         cv_text(x, ly, vf, num, C_WHITE);

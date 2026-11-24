@@ -1,0 +1,9 @@
+# Restore SuperJ6 SOUND reachability without exposing imported banks
+
+Exact authored-coarse 314-file parent ledger SHA-256 5be84b92b4d329b4ed77708b3859dc01db5d960b9b3cfc71e2fdea51420e022b, verified in a separate local copy. Only firmware/src/app/ui.c changes.
+
+Root cause: thirteen SuperJ6 knob pages plus ARPEGGIATOR consumed fourteen materialized slots, so SOUND was silently dropped. The same producer's logical query still returned it one beyond the physical UI array. Increase the one shared descriptor table by one page, 14 to 15, and require by compile-time assertion that the SuperJ6 control-table count leaves two owned tail slots. No page, control, name, ARP behavior, selected patch data, or provider identity changes. Host measured static pg 472→500 bytes (+28, same C layout on the measured host), pref_t unchanged at 4 B and query stack object unchanged at 36 B. Native static fit and release gate not measured.
+
+One fenced test source uses the exact stock firmware UI input. Same fixture red on parent pg.n=14; green 529 checks on repaired source: both owners all fifteen, repeated real SELECT traversal and reverse wrap, all materialized names and four references equal logical query, B_SEL opens list / B_HOME exits to exact SOUND, K2 physical detent reaches the existing builtin selector, valid note-lock context and list/home safety. Enumerates other stock views at initial parts as a bounded global cap check.
+
+Replay with sibling sj6-picker-host-hook/replay-host.sh, SMC_UI_TEST_FILE=<this packet>/ui_superj6_sound_reachability_test.c, HOST_EXTRA=-I<checkout>/tests/host and separate temp SMC_UI_OUT. Apply the one product patch with standard patch -p1 and verify pre/post. This repair does not expose any imported picker, embed data or change disk format. Imported UI denial and prior-project untouched proof remain in the picker-host-hook packet.

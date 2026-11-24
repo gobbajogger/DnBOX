@@ -1,0 +1,4 @@
+descriptor bytes: pg=500 sizeof(pref_t)=4 query=36 cap=15
+PASS owner=0 real 15-page SELECT wrap and backward wrap, overlay EXIT, SOUND K2, note-lock context
+PASS owner=1 real 15-page SELECT wrap and backward wrap, overlay EXIT, SOUND K2, note-lock context
+PASS exact query/materialized pages and slots: 529 checks

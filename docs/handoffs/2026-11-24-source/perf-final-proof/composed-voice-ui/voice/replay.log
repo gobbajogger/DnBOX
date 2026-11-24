@@ -1,0 +1,26 @@
+Private host output: HOST_REPLAY
+PASS compact dry/wet render captured INIT and 694 factory programs, 1024 frames each
+PASS compact dry/wet render captured INIT and 694 factory programs, 1024 frames each
+2b7c2c740edb57be12652f58c81a538815dd21c1ca8f66b0971cad51df0f331f  HOST_REPLAY/base.pcm
+2b7c2c740edb57be12652f58c81a538815dd21c1ca8f66b0971cad51df0f331f  HOST_REPLAY/join.pcm
+FAIL tests/host/ui_synthone_part_level_test.c:268: engine_s1_patch_read(0, PART_LEVEL, &absent)
+HOST_REPLAY/part_level-positive.log:owner 0 PART LEVEL factory 0.347500 -> adjacent 0.362205 original gain unit
+HOST_REPLAY/part_level-positive.log:owner 0 PART LEVEL 32 enable 0: 4096/4096 owner frames changed, peer exact
+HOST_REPLAY/part_level-positive.log:owner 1 PART LEVEL factory 0.347500 -> adjacent 0.362205 original gain unit
+HOST_REPLAY/part_level-positive.log:owner 1 PART LEVEL 32 enable 0: 4096/4096 owner frames changed, peer exact
+HOST_REPLAY/part_level-positive.log:owner 0 PART LEVEL factory 1.255000 -> adjacent 1.275591 original gain unit
+HOST_REPLAY/part_level-positive.log:owner 0 PART LEVEL 32 enable 1: 4096/4096 owner frames changed, peer exact
+HOST_REPLAY/part_level-positive.log:owner 1 PART LEVEL factory 1.255000 -> adjacent 1.275591 original gain unit
+HOST_REPLAY/part_level-positive.log:owner 1 PART LEVEL 32 enable 1: 4096/4096 owner frames changed, peer exact
+HOST_REPLAY/part_level-positive.log:PASS real Synth One PART LEVEL, both owners and enables, 5344 checks
+HOST_REPLAY/part_level-old.log:PASS exact previous reader accepts the LFO control and refuses Part Level Sound/lock without writes, 257 checks
+FAIL tests/host/ui_synthone_legato_test.c:262: engine_s1_patch_read(0,LEGATO,&absent)
+HOST_REPLAY/legato-positive.log:owner 0 mono 0: original overlap changes 0/4096 frames, peer exact
+HOST_REPLAY/legato-positive.log:owner 1 mono 0: original overlap changes 0/4096 frames, peer exact
+HOST_REPLAY/legato-positive.log:part 0 MONO amp overlap 0.92766833/0.07004367 resumption 0.92675990/0.07004367, held and pitch valid
+HOST_REPLAY/legato-positive.log:owner 0 mono 1: original overlap changes 4096/4096 frames, peer exact
+HOST_REPLAY/legato-positive.log:part 1 MONO amp overlap 0.92766833/0.07004367 resumption 0.92675990/0.07004367, held and pitch valid
+HOST_REPLAY/legato-positive.log:owner 1 mono 1: original overlap changes 4096/4096 frames, peer exact
+HOST_REPLAY/legato-positive.log:PASS physical part VOICE MONO LEGATO and shared payload (637 checks)
+HOST_REPLAY/legato-old.log:PASS old HP Sound/lock accepted; Legato Sound/lock rejected before any writes (263 checks)
+PASS actual voice and output LCD for mono Legato and independent part Level

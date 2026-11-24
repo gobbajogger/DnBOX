@@ -1,0 +1,22 @@
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -1712,7 +1712,7 @@
+ }
+ 
+ /* ===================================================================== pages === */
+-#define MAXPAGES 14
++#define MAXPAGES 15
+ /* page groups: whose values a page holds (the SEL list's headers, the header's colour) */
+ enum { GR_NONE, GR_TRACK, GR_TMIX, GR_KIT, GR_PAT, GR_SOUND, GR_MORE,
+        GR_MIDI, GR_AUDIO, GR_KEYS, GR_PROJECT, GR_SYSTEM, GR_BT };   /* (the last six: GLO's sections) */
+@@ -2148,6 +2148,10 @@
+                     {"VIBRATO", {SJ6_VIBRATO_DEPTH, SJ6_VIBRATO_RATE, ORIG_PAGE_NONE, ORIG_PAGE_NONE}},
+                     {"TUNING", {SJ6_LAYER1_SEMI, SJ6_LAYER2_SEMI, ORIG_PAGE_NONE, ORIG_PAGE_NONE}},
+                 };
++                /* Leave room for the ARPEGGIATOR and the legacy SOUND selector
++                 * after the last synth control page. Query and device agree. */
++                _Static_assert(sizeof pages / sizeof *pages + 2u <= MAXPAGES,
++                               "SuperJ6 pages must leave room for ARP and SOUND");
+                 add_original_extra_pages(emit, pages, sizeof pages / sizeof *pages, b, R_SJ6KNOB);
+                 first_row = UI_ORIGINAL_JUNO_PAGES;
+             }

@@ -1,0 +1,288 @@
+diff --git a/firmware/src/app/original_sound.c b/firmware/src/app/original_sound.c
+--- a/firmware/src/app/original_sound.c
++++ b/firmware/src/app/original_sound.c
+@@ -521,8 +521,12 @@
+ #endif
+ #if X0X_SYNTHONE_PATCH
+     uint32_t mask = original_sound_edit_mask(cell);
+-    if (cell[29] == ORIGINAL_SOUND_SYNTHONE && (mask & (S1_PATCH_MASK | S1_LINK_MASK | S1_EXTRA_MARK))) {
+-        if (mask & ~(S1_PATCH_MASK | S1_LINK_MASK | S1_EXTRA_MARK | 7u)) return 0;
++    uint32_t editor = S1_PATCH_MASK | S1_LINK_MASK | S1_EXTRA_MARK;
++#if X0X_S1_EXTRA
++    editor |= S1_PART_LEVEL_MASK;
++#endif
++    if (cell[29] == ORIGINAL_SOUND_SYNTHONE && (mask & editor)) {
++        if (mask & ~(editor | 7u)) return 0;
+         if (cell[S1_LINK_BYTE] != ((mask & S1_LINK_MASK) != 0)) return 0;
+         for (unsigned i = 0; i < 22; ++i) {
+             if (cell[i] > 127u || (i >= 2 && i != S1_LINK_BYTE && !(mask & (UINT32_C(1) << i)) && cell[i])) return 0;
+@@ -629,8 +633,8 @@
+     S1_DIGIT(S1_SUB_OCTAVE), S1_DIGIT(S1_SUB_WAVE), S1_DIGIT(S1_FILTER_TYPE)
+ };
+ #undef S1_DIGIT
+-_Static_assert(16u + 4u * 15u + 3u * 2u + 21u + 15u == 118u && S1_EXTRA_BYTES == 15,
+-               "wet MIX overlay leaves two reserved high bits");
++_Static_assert(16u + 4u * 15u + 3u * 2u + 21u + 15u + 2u == 8u * S1_EXTRA_BYTES,
++               "last two packed bits hold the ternary mono legato digit");
+ 
+ static unsigned s1_take_bits(const uint8_t *data, unsigned *at, unsigned width)
+ {
+@@ -658,8 +662,9 @@
+     const unsigned extended = (data[1] & S1_EXTENDED_FX) == S1_EXTENDED_FX;
+     const unsigned reverb_hp = extended ? data[0] : 0u;
+     const unsigned widen = extended ? data[1] & 7u : 0u;
+-    if ((extended && !(reverb_hp || widen)) || reverb_hp >= S1_MIX_RADIX || widen > 2u ||
+-        (data[S1_EXTRA_BYTES-1] & 0xc0u)) return 0;
++    const unsigned legato = data[S1_EXTRA_BYTES-1] >> 6;
++    if ((extended && !(reverb_hp || widen)) || reverb_hp >= S1_MIX_RADIX ||
++        widen > 2u || legato > 2u) return 0;
+     unsigned at = 16;
+     for (unsigned i = 0; i < sizeof s1_packed_pairs / sizeof s1_packed_pairs[0]; ++i) {
+         unsigned pair = s1_take_bits(data, &at, 15);
+@@ -675,12 +680,13 @@
+     }
+     unsigned ordinal = s1_take_bits(data, &at, 21);
+     unsigned wet = s1_take_bits(data, &at, 15);
+-    if (ordinal >= S1_LFO_GROUP_STATES || (!wet && !reverb_hp && !widen) || wet >= S1_MIX_PAIR) return 0;
++    if (ordinal >= S1_LFO_GROUP_STATES || (!wet && !reverb_hp && !widen && !legato) || wet >= S1_MIX_PAIR) return 0;
+     s1_lfo_digits(ordinal, state->lfo);
+     state->wet[0] = (uint8_t)(wet / S1_MIX_RADIX);
+     state->wet[1] = (uint8_t)(wet % S1_MIX_RADIX);
+     state->wet[S1_REVERB_HP - S1_WET_FIRST] = (uint8_t)reverb_hp;
+     state->wet[S1_WIDEN - S1_WET_FIRST] = (uint8_t)widen;
++    state->wet[S1_MONO_LEGATO - S1_WET_FIRST] = (uint8_t)legato;
+     return 1;
+ }
+ 
+@@ -698,6 +704,7 @@
+         s1_put_bits(data, &at, 2, state->panel[s1_packed_selectors[i]]);
+     s1_put_bits(data, &at, 21, s1_lfo_ordinal(state->lfo));
+     s1_put_bits(data, &at, 15, S1_MIX_RADIX * state->wet[0] + state->wet[1]);
++    s1_put_bits(data, &at, 2, state->wet[S1_MONO_LEGATO - S1_WET_FIRST]);
+     memcpy(dest, data, sizeof data);
+ }
+ 
+@@ -774,7 +781,7 @@
+         if (position > s1_patch_steps(slot)) return 0;
+         state.panel[slot-S1_EXTRA_FIRST] = (uint8_t)(position + 1u);
+     }
+-    if (state.wet[0] || state.wet[1] || state.wet[2] || state.wet[3]) s1_write_packed(extra, &state);
++    if (state.wet[0] || state.wet[1] || state.wet[2] || state.wet[3] || state.wet[4]) s1_write_packed(extra, &state);
+     else if (slot >= S1_LFO_FIRST) s1_extra_lfo_write(extra, state.lfo);
+     else {
+         unsigned i = slot - S1_EXTRA_FIRST;
+@@ -797,7 +804,7 @@
+             if (state.lfo[i]) state.lfo[i] = (uint8_t)(S1_LFO_CODE_SYNC + divisions[i]);
+     }
+     state.lfo[S1_LFO_SYNC - S1_LFO_FIRST] = (uint8_t)code;
+-    if (state.wet[0] || state.wet[1] || state.wet[2] || state.wet[3]) s1_write_packed(extra, &state);
++    if (state.wet[0] || state.wet[1] || state.wet[2] || state.wet[3] || state.wet[4]) s1_write_packed(extra, &state);
+     else s1_extra_lfo_write(extra, state.lfo);
+     original_sound_put_mask(cell, original_sound_edit_mask(cell) | S1_EXTRA_MARK);
+     return 1;
+@@ -806,8 +813,19 @@
+ #if X0X_SYNTHONE_PATCH
+ int original_sound_s1_set(uint8_t cell[ORIGINAL_SOUND_BYTES], unsigned slot, unsigned position)
+ {
+-    if (slot > S1_PATCH_COUNT || position > S1_PATCH_STEPS ||
++    if ((slot > S1_PATCH_COUNT
++#if X0X_S1_EXTRA
++        && slot != S1_PART_LEVEL
++#endif
++        ) || position > S1_PATCH_STEPS ||
+         !original_sound_valid(cell) || cell[29] != ORIGINAL_SOUND_SYNTHONE) return 0;
++#if X0X_S1_EXTRA
++    if (slot == S1_PART_LEVEL) {
++        cell[S1_PART_LEVEL_BYTE] = (uint8_t)position;
++        original_sound_put_mask(cell, original_sound_edit_mask(cell) | S1_PART_LEVEL_MASK);
++        return 1;
++    }
++#endif
+     if (slot == S1_PATCH_COUNT) {
+         if (position > 1) return 0;
+         cell[S1_LINK_BYTE] = (uint8_t)position;
+diff --git a/firmware/src/app/original_runtime.c b/firmware/src/app/original_runtime.c
+--- a/firmware/src/app/original_runtime.c
++++ b/firmware/src/app/original_runtime.c
+@@ -62,7 +62,7 @@
+         }
+ #endif
+ #if X0X_SYNTHONE_PATCH
+-        if (original_sound_edit_mask(cell) & (S1_PATCH_MASK | S1_LINK_MASK))
++        if (original_sound_edit_mask(cell) & (S1_PATCH_MASK | S1_LINK_MASK | S1_PART_LEVEL_MASK))
+             s1_part_apply_cell(&p->dsp.synthone, cell);
+ #endif
+         rc = ORIGINAL_RUNTIME_OK;
+diff --git a/firmware/src/app/original_presets.inc b/firmware/src/app/original_presets.inc
+--- a/firmware/src/app/original_presets.inc
++++ b/firmware/src/app/original_presets.inc
+@@ -159,14 +159,14 @@
+             status = S1_EDIT_REJECTED;
+         else if (s1_lfo_rate_slot((unsigned)slot) &&
+                  position > s1c_front_lfo_steps(&original_bass[voice].dsp.synthone.e)) status = S1_EDIT_REJECTED;
+-        else if (slot >= S1_EXTRA_FIRST &&
++        else if (slot >= S1_EXTRA_FIRST && slot != S1_PART_LEVEL &&
+                  (!mot_base_snd || !original_sound_s1_extra_available(mot_base_snd->v[T_303][voice],
+                   mot_base_snd->v[T_303][S1_EXTRA_ROW + voice], (unsigned)slot))) status = S1_EDIT_REJECTED;
+ #endif
+         else {
+             s1_edit[voice].slot = (uint8_t)slot;
+ #if X0X_S1_EXTRA
+-            if (slot >= S1_LFO_FIRST)
++            if (slot >= S1_LFO_FIRST && slot != S1_PART_LEVEL)
+                 position += s1_lfo_rate_slot((unsigned)slot) &&
+                             s1c_front_lfo_steps(&original_bass[voice].dsp.synthone.e) < S1_PATCH_STEPS ?
+                             S1_LFO_CODE_SYNC : 1u;
+@@ -215,7 +215,7 @@
+         sound_t *sound = (sound_t *)mot_base_snd;
+         uint8_t *cell = sound->v[T_303][v];
+ #if X0X_S1_EXTRA
+-        if (s1_edit[v].slot >= S1_EXTRA_FIRST) {
++        if (s1_edit[v].slot >= S1_EXTRA_FIRST && s1_edit[v].slot != S1_PART_LEVEL) {
+             uint8_t *extra = sound->v[T_303][S1_EXTRA_ROW + v];
+             s1_dry_part *part = &original_bass[v].dsp.synthone;
+             unsigned slot = s1_edit[v].slot, code = s1_edit[v].position;
+diff --git a/firmware/src/app/s1_patch.h b/firmware/src/app/s1_patch.h
+--- a/firmware/src/app/s1_patch.h
++++ b/firmware/src/app/s1_patch.h
+@@ -23,16 +23,18 @@
+     S1_FILTER_TYPE, S1_ADSR_TRACK,
+     S1_OSC_EXTRA_BYTES = 2 + S1_FILTER_TYPE - S1_EXTRA_FIRST,
+     S1_LFO1_RATE = S1_ADSR_TRACK + 1, S1_LFO2_RATE, S1_LFO1_SHAPE, S1_LFO2_SHAPE,
+-    S1_LFO_SYNC, S1_DELAY_MIX, S1_REVERB_MIX, S1_REVERB_HP, S1_WIDEN,
+-    S1_WET_FIRST = S1_DELAY_MIX, S1_WET_COUNT = 4,
++    S1_LFO_SYNC, S1_DELAY_MIX, S1_REVERB_MIX, S1_REVERB_HP, S1_WIDEN, S1_MONO_LEGATO,
++    S1_WET_FIRST = S1_DELAY_MIX, S1_WET_COUNT = 5,
+     S1_LFO_FIRST = S1_LFO1_RATE, S1_LFO_COUNT = 5,
+     S1_EXTRA_COUNT = S1_ADSR_TRACK + 1 - S1_EXTRA_FIRST,
+     S1_FILTER_EXTRA_BYTES = 2 + S1_EXTRA_COUNT,
+     S1_EXTRA_BYTES = S1_FILTER_EXTRA_BYTES + 2,
+     S1_LFO_DIVISIONS = 19, S1_LFO_CODE_SYNC = 129,
+-    S1_LFO_RATE_CODES = S1_LFO_CODE_SYNC + S1_LFO_DIVISIONS
++    S1_LFO_RATE_CODES = S1_LFO_CODE_SYNC + S1_LFO_DIVISIONS,
++    S1_PART_LEVEL = 40, S1_PART_LEVEL_BYTE = 3
+ };
+ #define S1_EXTRA_MARK (UINT32_C(1) << 22)
++#define S1_PART_LEVEL_MASK (UINT32_C(1) << S1_PART_LEVEL_BYTE)
+ float s1c_morph_preview(float position, uint32_t phase);
+ static inline unsigned s1_extra_bits(const uint8_t *data)
+ { return (unsigned)data[0] | (((unsigned)data[1] & 7u) << 8); }
+@@ -55,13 +57,14 @@
+ int s1_extra_read(const uint8_t *data, s1_extra_state *state);
+ #else
+ #define S1_EXTRA_MARK 0u
++#define S1_PART_LEVEL_MASK 0u
+ #endif
+ static inline unsigned s1_patch_steps(unsigned slot)
+ {
+ #if X0X_S1_EXTRA
+     if (slot == S1_SUB_OCTAVE || slot == S1_SUB_WAVE) return 1;
+     if (slot == S1_FILTER_TYPE) return 2;
+-    if (slot == S1_LFO_SYNC || slot == S1_WIDEN) return 1;
++    if (slot == S1_LFO_SYNC || slot == S1_WIDEN || slot == S1_MONO_LEGATO) return 1;
+     if (slot - S1_LFO1_SHAPE < 2u) return 3;
+ #endif
+     return slot == S1_PATCH_COUNT ? 1u : S1_PATCH_STEPS;
+diff --git a/firmware/src/app/s1c_part.c b/firmware/src/app/s1c_part.c
+--- a/firmware/src/app/s1c_part.c
++++ b/firmware/src/app/s1c_part.c
+@@ -77,6 +77,7 @@
+     part->lfo_live_mask = 0;
+     part->clock_factory_pan = e->t[P_PAN_RATE];
+     part->clock_factory_delay = e->t[P_DELAY_TIME];
++    part->level_factory = e->t[S1C_P_MVOL];
+     for (unsigned i = 0; i < S1_EXTRA_COUNT; ++i)
+         part->extra_factory[i] = e->t[s1_patch_at(S1_EXTRA_FIRST+i)->factory_id];
+     for (unsigned i = 0; i < S1_LFO_COUNT; ++i)
+@@ -160,7 +161,9 @@
+     {"REVERB MIX", 0, 1, S1C_P_RVMIX, X0X_U_PCT},
+     {"REVERB HP", 80, 900, S1C_P_RVHP, X0X_U_HZ},
+     {"WIDEN", 0, 1, S1C_P_WIDEN, X0X_U_NONE},
++    {"MONO LEGATO", 0, 1, 120, X0X_U_NONE},
+ };
++static const s1_patch_descriptor part_level = {"PART LEVEL", 0, 2, S1C_P_MVOL, X0X_U_PCT};
+ enum { S1_CATALOG_EXTRA_COUNT = sizeof extra_parameters / sizeof extra_parameters[0] };
+ _Static_assert(S1_CATALOG_EXTRA_COUNT == S1_WET_FIRST - S1_EXTRA_FIRST + S1_WET_COUNT,
+                "Synth One editable catalog follows its persisted slot order");
+@@ -170,6 +173,7 @@
+ {
+     if (slot < S1_PATCH_COUNT) return &patch_parameters[slot];
+ #if X0X_S1_EXTRA
++    if (slot == S1_PART_LEVEL) return &part_level;
+     if (slot - S1_EXTRA_FIRST < S1_CATALOG_EXTRA_COUNT) return &extra_parameters[slot-S1_EXTRA_FIRST];
+ #endif
+     return NULL;
+@@ -180,6 +184,7 @@
+     for (unsigned i = 0; i < S1_PATCH_COUNT; ++i)
+         if (patch_parameters[i].factory_id == id) return (int)i;
+ #if X0X_S1_EXTRA
++    if (id == S1C_P_MVOL) return S1_PART_LEVEL;
+     for (unsigned i = 0; i < S1_CATALOG_EXTRA_COUNT; ++i)
+         if (extra_parameters[i].factory_id == id) return (int)(S1_EXTRA_FIRST + i);
+ #endif
+@@ -246,7 +251,7 @@
+         if (!(digit || (part->extra_live_mask & bit))) continue;
+         const s1_patch_descriptor *d = &extra_parameters[S1_WET_FIRST - S1_EXTRA_FIRST + i];
+         float value = part->wet_factory[i];
+-        if (digit) value = d->factory_id == S1C_P_WIDEN ?
++        if (digit) value = s1_patch_steps(S1_WET_FIRST+i) == 1u ?
+                            (float)(digit-1u) : s1_patch_physical(d, digit-1u);
+         s1c_set(&part->e, d->factory_id, value);
+         if (digit) next |= bit;
+@@ -278,6 +283,10 @@
+ void s1_part_apply_cell(s1_dry_part *part, const uint8_t cell[32])
+ {
+     uint32_t mask = original_sound_edit_mask(cell);
++#if X0X_S1_EXTRA
++    s1c_set(&part->e, S1C_P_MVOL, mask & S1_PART_LEVEL_MASK ?
++            s1_patch_physical(&part_level, cell[S1_PART_LEVEL_BYTE]) : part->level_factory);
++#endif
+     if (part->filter_link)
+         for (unsigned i = 0; i < 4; ++i)
+             part->e.t[patch_parameters[S1_FILTER_FIRST + i].factory_id] = part->filter_unlinked[i];
+diff --git a/firmware/src/app/s1c_part.h b/firmware/src/app/s1c_part.h
+--- a/firmware/src/app/s1c_part.h
++++ b/firmware/src/app/s1c_part.h
+@@ -24,7 +24,7 @@
+ #if X0X_S1_EXTRA
+     float extra_factory[S1_EXTRA_COUNT]; /* exact pack values for note-lock transitions */
+     float lfo_factory[S1_LFO_COUNT], wet_factory[S1_WET_COUNT];
+-    float clock_factory_pan, clock_factory_delay;
++    float clock_factory_pan, clock_factory_delay, level_factory;
+     uint16_t extra_live_mask;
+     uint8_t lfo_live_mask;
+ #endif
+diff --git a/firmware/src/app/ui.c b/firmware/src/app/ui.c
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -1470,7 +1470,7 @@
+             else put_s(put_i(put_s(num, "1/"), 1u << ((div - 5u)/2u)), !(div & 1u) ? "T" : "");
+             return;
+         }
+-        if ((r.c == S1_LFO_SYNC || r.c == S1_WIDEN)) { put_s(num, physical > 0.f ? "ON" : "OFF"); return; }
++        if ((r.c == S1_LFO_SYNC || r.c == S1_WIDEN || r.c == S1_MONO_LEGATO)) { put_s(num, physical > 0.f ? "ON" : "OFF"); return; }
+         if (s1_lfo_rate_slot(r.c)) {
+             put_d1(num, physical < 1.f ? physical * 1000.f : physical, 0);
+             put_s(unit, physical < 1.f ? "mHz" : "Hz");
+@@ -2153,7 +2153,7 @@
+ #endif
+ #if X0X_S1_EXTRA
+             if (kind == ORIGINAL_SOUND_SYNTHONE) {
+-                enum { S1_PAGE_ID_FITS = 1 / (S1_WIDEN < ORIG_PAGE_ENGINE) };
++                enum { S1_PAGE_ID_FITS = 1 / (S1_PART_LEVEL < ORIG_PAGE_ENGINE && S1_MONO_LEGATO < ORIG_PAGE_ENGINE) };
+                 static const original_page_row_t s1_pages[] = {
+                     {"OSCILLATOR", {0, 1, S1_OSC1_MORPH, S1_OSC2_MORPH}},
+                     {"OSC MIX", {S1_OSC2_LEVEL, S1_SUB_LEVEL, S1_SUB_OCTAVE, S1_SUB_WAVE}},
+@@ -2162,10 +2162,11 @@
+                     {"FILTER MODE", {S1_FILTER_TYPE, S1_ADSR_TRACK, ORIG_PAGE_NONE, ORIG_PAGE_NONE}},
+                     {"FILTER ADSR", {5, 6, 7, 8}},
+                     {"AMP ADSR", {9, 10, 11, 12}},
++                    {"VOICE", {S1_MONO_LEGATO, ORIG_PAGE_NONE, ORIG_PAGE_NONE, ORIG_PAGE_NONE}},
+                     {"LFO", {S1_LFO1_RATE, S1_LFO1_SHAPE, S1_LFO2_RATE, S1_LFO2_SHAPE}},
+                     {"TEMPO SYNC", {S1_LFO_SYNC, ORIG_PAGE_NONE, ORIG_PAGE_NONE, ORIG_PAGE_NONE}},
+                     {"EFFECT", {ORIG_PAGE_ENGINE + ORIGINAL_SYNTHONE_CRUSH, S1_DELAY_MIX, S1_REVERB_MIX, S1_REVERB_HP}},
+-                    {"OUTPUT", {S1_WIDEN, ORIG_PAGE_NONE, ORIG_PAGE_NONE, ORIG_PAGE_NONE}},
++                    {"OUTPUT", {S1_WIDEN, S1_PART_LEVEL, ORIG_PAGE_NONE, ORIG_PAGE_NONE}},
+                 };
+                 const unsigned effect_page = sizeof s1_pages / sizeof s1_pages[0] - 2;
+                 add_original_extra_pages(emit, s1_pages, effect_page, b, R_S1PATCH);

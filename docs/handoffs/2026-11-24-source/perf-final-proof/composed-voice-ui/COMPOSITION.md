@@ -1,0 +1,3 @@
+# Composed Synth One voice controls and hardware navigation
+
+Apply the voice patch to the exact authored-coarse parent and verify its COARSE-VOICE-OUTPUT-POSTIMAGE manifest. Then apply page capacity, progress, and local ARP limit patches, in that order; verify combined VOICE-UI-POST.sha256. Root independently ran the actual composed reachability fixture and visual comparisons for the eight ARP endpoint cases. The other UI captures are separately qualified on the source-identical prior UI donor. This checkpoint does not add a user bank picker or claim full guideline, native, timing or release qualification.

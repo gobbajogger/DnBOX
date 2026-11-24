@@ -1,0 +1,10 @@
+ARP A-GATE-hi-limit.png same header as exact valid arrival; cue-only changed rect: (20, 123, 88, 134)
+ARP A-GATE-lo-limit.png same header as exact valid arrival; cue-only changed rect: (20, 123, 88, 134)
+ARP A-STEPS-hi-limit.png same header as exact valid arrival; cue-only changed rect: (20, 123, 95, 134)
+ARP A-STEPS-lo-limit.png same header as exact valid arrival; cue-only changed rect: (20, 123, 95, 134)
+ARP B-GATE-hi-limit.png same header as exact valid arrival; cue-only changed rect: (20, 123, 88, 134)
+ARP B-GATE-lo-limit.png same header as exact valid arrival; cue-only changed rect: (20, 123, 88, 134)
+ARP B-STEPS-hi-limit.png same header as exact valid arrival; cue-only changed rect: (20, 123, 95, 134)
+ARP B-STEPS-lo-limit.png same header as exact valid arrival; cue-only changed rect: (20, 123, 95, 134)
+PASS 8 exact ARP limit comparisons; 24 untouched stable/edit/arrival pairs.
+PASS 70 exact coarse-source page-progress pairs; only row-title strips differ.
