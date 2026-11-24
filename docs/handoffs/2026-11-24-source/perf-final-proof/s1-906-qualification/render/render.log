@@ -1,0 +1,3 @@
+PASS detached uploads 906 + legacy-only 1: exact ordered callback pairs 130608; owner schedule 8192 stereo frames per row, identical independently rendered owners; audible rows 907/907; finite parallel-owner PCM
+PASS original 694 runtime ordinals retained in original source; exact compact stereo PCM at both owners for every original ordinal versus matching detached content; legacy 44 explicitly matched detached index 906, no migration
+Actual nonzero stereo frames owners A/B 7317530 and 7317530 (out of 7430144 each), 44100.000 Hz, compact host S1 object 3440 B and unchanged FX arena 4252 B per owner; no INIT fallback
