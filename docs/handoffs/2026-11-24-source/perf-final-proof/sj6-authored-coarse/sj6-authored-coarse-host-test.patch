@@ -1,0 +1,231 @@
+--- /dev/null
++++ b/tests/host/ui_superj6_factory_tuning_test.c
+@@ -0,0 +1,228 @@
++/* SPDX-License-Identifier: GPL-3.0-only */
++#define PWM_FIXTURE_MAIN retained_pwm_main
++#include "ui_superj6_pwm1_lfo2_test.c"
++#include "bank_reader.c"
++#include <math.h>
++
++static juno6_t *last_synth, *parts[2];
++void __real_juno6_init(juno6_t *, float);
++void __wrap_juno6_init(juno6_t *s, float rate)
++{
++    __real_juno6_init(s, rate);
++    last_synth = s;
++}
++static void fresh(void)
++{
++    setup(V_PART, PART_303A);
++    proj.set.bt |= PROJ_BT_CLK_IN;
++    for (unsigned v = 0; v < 2; ++v) {
++        last_synth = NULL;
++        select_owner(v, 0);
++        CHECK(last_synth);
++        parts[v] = last_synth;
++    }
++    isolate_dry_pair();
++}
++static unsigned step(uint32_t word)
++{
++    float u;
++    memcpy(&u, &word, sizeof u);
++    const double s = 24.0 * (double)u - 12.0;
++    return (unsigned)(12 + (int)(s < 0. ? s - .5 : s + .5));
++}
++#ifndef SJ6_NEUTRAL_ONLY
++static uint32_t word(float value)
++{
++    uint32_t w;
++    memcpy(&w, &value, sizeof w);
++    return w;
++}
++static void rounding(void)
++{
++    /* Every half-semitone crossing, tested at both adjacent binary32s. */
++    for (unsigned i = 0; i < 24; ++i) {
++        float f = (float)((2.0 * i + 1.0) / 48.0);
++        for (unsigned n = 0; n < 3; ++n) {
++            float test = n == 0 ? nextafterf(f, 0.f) : n == 1 ? f : nextafterf(f, 1.f);
++            CHECK(sj6_factory_semi_word(word(test)) == step(word(test)) + 1u);
++        }
++    }
++    uint32_t r = 12345;
++    for (unsigned i = 0; i < 200000; ++i) {
++        r = r * 1664525u + 1013904223u;
++        uint32_t u = r % UINT32_C(0x3f800001);
++        CHECK(sj6_factory_semi_word(u) == step(u) + 1u);
++    }
++    CHECK(sj6_factory_semi_word(0x80000000u) == 1);
++    CHECK(sj6_factory_semi_word(0x3f800000u) == 25);
++    CHECK(sj6_factory_semi_word(0xbf000000u) == 255);
++    CHECK(sj6_factory_semi_word(0x7fc00000u) == 255);
++    CHECK(sj6_factory_semi_word(0x7f800000u) == 255);
++    CHECK(sj6_factory_semi_word(0x3f800001u) == 255);
++}
++#endif
++
++static float hz_expected(juno6_t *s, unsigned q)
++{
++    float range = .5f, reference = .6f;
++    (void)dnbx_read_raw(&s->core, 86, &range);
++    (void)dnbx_read_raw(&s->core, 206, &reference);
++    return juno6_a_reference_hz(reference) * exp2f((24.f * range + (int)q - 24.f) / 12.f);
++}
++static void play_verify(unsigned owner, const unsigned pos[2], FILE *pcm)
++{
++    juno6_t *s = parts[owner];
++    CHECK(juno6_note_on(s, 69, 100));
++    float buf[2][256];
++    CHECK(juno6_render_stereo(s, buf[0], buf[1], 256));
++#ifndef SJ6_NEUTRAL_ONLY
++    unsigned found = 0;
++    for (unsigned v = 0; v < DNBX_VOICES; ++v)
++        if (s->core.voice[v].gate && s->core.voice[v].note == 69) {
++            ++found;
++            for (unsigned l = 0; l < 2; ++l) {
++                float hz = s->core.voice[v].layer[l].increment * s->sample_rate;
++                CHECK(fabsf(hz - hz_expected(s, pos[l])) < .1f);
++            }
++        }
++    CHECK(found);
++#endif
++    if (pcm) CHECK(fwrite(buf, sizeof buf, 1, pcm) == 1);
++    juno6_all_off(s);
++}
++static void verify_preserved(unsigned owner, unsigned shape, const unsigned pos[2])
++{
++    const uint8_t *cell = proj.sound.v[T_303][owner];
++    const uint8_t *extra = proj.sound.v[T_303][ORIGINAL_SJ6_EXTRA_ROW + owner];
++    CHECK(juno6_knob_position(parts[owner], SJ6_LFO2_SHAPE) == shape);
++    CHECK(original_sound_sj6_shape(cell) == shape);
++    CHECK(original_sound_sj6_ext_valid(cell, extra));
++    for (unsigned l = 0; l < 2; ++l) {
++        CHECK(engine_superj6_knob_position(owner, SJ6_LAYER1_SEMI + l) == (int)pos[l]);
++        CHECK(juno6_layer_semi(parts[owner], l) == pos[l]);
++        CHECK(original_sound_sj6_layer_semi(extra, l) == pos[l]);
++    }
++}
++static void archive_test(void)
++{
++    FILE *out = NULL;
++    const char *dest = getenv("SJ6_NEUTRAL_PCM");
++    if (dest) { out = fopen(dest, "wb"); CHECK(out); }
++    fresh();
++    unsigned rows = 0, neutral = 0, loads = 0, nonzero[2] = {0,0}, saved[2] = {0,0};
++    for (unsigned b = 0; b < BANK_COUNT; ++b)
++        for (unsigned p = 0; p < (unsigned)(bank_start[b+1] - bank_start[b]); ++p) {
++            sj6_record_reader cursor, by_id;
++            sj6_factory_row row = {0};
++            CHECK(sj6_select_position(b, p, &cursor));
++            CHECK(sj6_select_uid(bank_uid + b * 16, program_uid + (bank_start[b] + p) * 16, &by_id));
++            CHECK(!memcmp(&cursor, &by_id, sizeof cursor));
++            unsigned id, seen = 0, pos[2] = {0,0}, shape = 0;
++            uint32_t raw;
++            while (sj6_next_field(&cursor, &id, &raw)) {
++                if (id == 72u || id == 73u) {
++                    unsigned l = id - 72u;
++                    CHECK(!(seen & (1u << l)));
++                    seen |= 1u << l;
++                    pos[l] = step(raw);
++                } else if (id == 98u) {
++                    float u;
++                    memcpy(&u, &raw, sizeof u);
++                    shape = (unsigned)(4.0 * (double)u);
++                }
++                sj6_factory_add_word(&row, id, raw);
++            }
++            CHECK(seen == 3u);
++            ++rows;
++            const unsigned both_neutral = pos[0] == 12 && pos[1] == 12;
++            neutral += both_neutral;
++            nonzero[0] += pos[0] != 12;
++            nonzero[1] += pos[1] != 12;
++#ifdef SJ6_NEUTRAL_ONLY
++            if (!both_neutral) continue;
++#endif
++            const unsigned chorus = (unsigned)sj6_factory_chorus_mode(&row);
++            if (both_neutral) {
++                /* Establish the same cold state for neutral comparisons. */
++                fresh();
++            }
++            for (unsigned owner = 0; owner < 2; ++owner) {
++                const unsigned peer = owner ^ 1u;
++                const sound_t before = proj.sound;
++                CHECK(engine_superj6_factory_load(owner, &row));
++                render(1);
++                ++loads;
++                verify_preserved(owner, shape, pos);
++                CHECK(original_sound_sj6_chorus(proj.sound.v[T_303][owner]) == chorus);
++                CHECK(!memcmp(before.v[T_303][peer], proj.sound.v[T_303][peer], NPARAMS_MAX));
++                CHECK(!memcmp(before.v[T_303][ORIGINAL_SJ6_EXTRA_ROW+peer],
++                              proj.sound.v[T_303][ORIGINAL_SJ6_EXTRA_ROW+peer], NPARAMS_MAX));
++                CHECK(!memcmp(before.v[T_MIX], proj.sound.v[T_MIX], sizeof before.v[T_MIX]));
++                play_verify(owner, pos, both_neutral ? out : NULL);
++#ifndef SJ6_NEUTRAL_ONLY
++                if (!both_neutral && (saved[owner] < 3u)) {
++                    save_and_reload();
++                    engine_apply_sound(&proj.sound);
++                    render(1);
++                    verify_preserved(owner, shape, pos);
++                    play_verify(owner, pos, NULL);
++                    ++saved[owner];
++                }
++#endif
++            }
++        }
++    CHECK(rows == 640 && nonzero[0] == 187 && nonzero[1] == 409);
++#ifdef SJ6_NEUTRAL_ONLY
++    CHECK(loads == 2u * neutral && out);
++#else
++    CHECK(loads == 1280 && saved[0] == 3 && saved[1] == 3);
++#endif
++    if (out) CHECK(!fclose(out));
++    printf("records=%u loaded-owner-cases=%u both-neutral=%u tuned layer1/2=%u/%u project-reloads=%u/%u\n",
++           rows, loads, neutral, nonzero[0], nonzero[1], saved[0], saved[1]);
++}
++#ifndef SJ6_NEUTRAL_ONLY
++static void preflight(void)
++{
++    fresh();
++    sj6_factory_row row = {.present = (1u << SJ6_ROW_AMOUNT) - 1u};
++    row.value[SJ6_ROW_MASTER] = 1.f;
++    sj6_factory_add_word(&row, 72, 0x7fc00000u);
++    sj6_factory_add_word(&row, 72, 0x3f000000u); /* First invalid occurrence still wins. */
++    CHECK(!engine_superj6_factory_load(0, &row));
++    row.semi_authored[0] = 0;
++    sj6_factory_add_word(&row, 72, 0x3f800000u);
++    sj6_factory_add_word(&row, 72, 0);
++    uint8_t *extra = proj.sound.v[T_303][ORIGINAL_SJ6_EXTRA_ROW];
++    extra[2] = 128u;
++    CHECK(!engine_superj6_factory_load(0, &row) && extra[2] == 128u);
++    extra[2] = 0;
++    CHECK(engine_superj6_factory_load(0, &row));
++    extra[2] = 128u;
++    render(1);
++    CHECK(juno6_layer_semi(parts[0], 0) == 12u && extra[2] == 128u);
++    extra[2] = 0;
++    CHECK(engine_superj6_factory_load(0, &row));
++    render(1);
++    CHECK(juno6_layer_semi(parts[0], 0) == 24u && juno6_layer_semi(parts[0], 1) == 12u);
++    row.semi_authored[0] = 0;
++    CHECK(engine_superj6_factory_load(0, &row));
++    render(1);
++    CHECK(juno6_layer_semi(parts[0], 0) == 24u); /* Omitted legacy call preserves an override. */
++    sj6_factory_add_word(&row, 72, 0x3f000000u);
++    CHECK(engine_superj6_factory_load(0, &row));
++    render(1);
++    CHECK(juno6_layer_semi(parts[0], 0) == 12u);
++    CHECK(!(original_sound_edit_mask(proj.sound.v[T_303][0]) & ORIGINAL_SJ6_EXTRA_BIT));
++}
++#endif
++int main(void)
++{
++#ifndef SJ6_NEUTRAL_ONLY
++    rounding();
++    preflight();
++#endif
++    archive_test();
++    printf("SuperJ6 authored coarse wiring %u checks\n", checks);
++    return 0;
++}

@@ -1,0 +1,172 @@
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -255,7 +255,7 @@
+ typedef struct {
+     juno6_lfo_words lfo;
+     float vibrato[2], a_reference;
+-    uint8_t vibrato_present, a_reference_present, lfo2_shape;
++    uint8_t vibrato_present, a_reference_present, lfo2_shape, semi_authored[2];
+ #if X0X_ARP_ENGINE
+     uint16_t saga_seen, saga_on;
+ #endif
+@@ -265,7 +265,7 @@
+ static void arp_factory_toggles(unsigned owner, uint16_t seen, uint16_t on);
+ #endif
+ static void sj6_knob_clear(unsigned owner);
+-static int sj6_factory_storage_ready(unsigned owner, unsigned vibrato, unsigned a_reference);
++static int sj6_factory_storage_ready(unsigned owner, const sj6_factory_motion *motion);
+ static void sj6_commit_factory(unsigned owner, const sj6_factory_motion *motion, unsigned chorus_mode);
+ #endif
+ X0X_COLD static int superj6_stage_factory(unsigned owner, const sj6_factory_row *row,
+@@ -291,6 +291,11 @@
+     sj6_factory_motion motion = {0};
+     if (row->lfo2_authored > SJ6_LFO2_SHAPE_MAX + 1u) return 0;
+     motion.lfo2_shape = row->lfo2_authored ? row->lfo2_authored - 1u : SJ6_LFO_TRI;
++    for (unsigned l = 0; l < DNBX_LAYERS; ++l) {
++        unsigned edited = row->semi_authored[l];
++        if (edited > SJ6_SEMI_MAX + 1u) return 0;
++        motion.semi_authored[l] = (uint8_t)edited;
++    }
+ #if X0X_ARP_ENGINE
+     if (row->saga_invalid) return 0;
+     motion.saga_seen = row->saga_seen;
+@@ -327,7 +332,7 @@
+                  !synth->pending_wave_mask && !synth->pending_field_mask && !synth->pending_filter_link &&
+                  !juno6_active(synth) && !engine_bass_preset_pending(owner);
+ #if X0X_SUPERJ6_BUILTIN_INIT
+-    if (accept && !sj6_factory_storage_ready(owner, motion.vibrato_present, motion.a_reference_present)) accept = 0;
++    if (accept && !sj6_factory_storage_ready(owner, &motion)) accept = 0;
+ #endif
+     if (accept) {
+         memcpy(synth->pending_field, value, 5u * sizeof(float));
+@@ -474,10 +479,9 @@
+                 juno6_chorus_t *chorus = &part->dsp.juno.chorus;
+                 unsigned chorus_mode = chorus->factory_pending;
+                 chorus->factory_pending = 0;
+-                if (active || engine_bass_preset_pending(owner) ||
++                if (active || project_hold || engine_bass_preset_pending(owner) ||
+ #if X0X_SUPERJ6_BUILTIN_INIT
+-                    !sj6_factory_storage_ready(owner, sj6_factory_motion_pending[owner].vibrato_present,
+-                                               sj6_factory_motion_pending[owner].a_reference_present) ||
++                    !sj6_factory_storage_ready(owner, &sj6_factory_motion_pending[owner]) ||
+ #endif
+                     ((synth->pending_field_mask & SJ6_FACTORY_AMP1) &&
+                      !juno6_apply_independent_amp1_attack(synth,synth->pending_field[5]))) {
+--- a/firmware/src/app/original_presets.inc
++++ b/firmware/src/app/original_presets.inc
+@@ -330,7 +330,7 @@
+ _Static_assert(BASS_SHARED_EXTRA_ROW + NBASS <= NVOICES_MAX, "SuperJ6 shared rows fit");
+ _Static_assert(BASS_SHARED_EXTRA_BYTES >= ORIGINAL_SJ6_TUNING_WIRE_BYTES, "Undo copies the tuning record");
+ 
+-static int sj6_factory_storage_ready(unsigned owner, unsigned vibrato, unsigned a_reference)
++static int sj6_wire_storage_ready(unsigned owner, unsigned vibrato, unsigned a_reference)
+ {
+     if (!mot_base_snd) return 1;
+     const uint8_t *cell = mot_base_snd->v[T_303][owner];
+@@ -342,6 +342,14 @@
+            original_sound_sj6_vibrato_available(cell, wire);
+ }
+ 
++static int sj6_factory_storage_ready(unsigned owner, const sj6_factory_motion *motion)
++{
++    if (!sj6_wire_storage_ready(owner, motion->vibrato_present, motion->a_reference_present)) return 0;
++    return !mot_base_snd || !(motion->semi_authored[0] | motion->semi_authored[1]) ||
++           original_sound_sj6_semi_ready(mot_base_snd->v[T_303][owner],
++                                        mot_base_snd->v[T_303][ORIGINAL_SJ6_EXTRA_ROW + owner]);
++}
++
+ static void sj6_commit_factory(unsigned owner, const sj6_factory_motion *motion, unsigned chorus_mode)
+ {
+     juno6_t *s = &original_bass[owner].dsp.juno.synth;
+@@ -352,10 +360,14 @@
+     if (motion->a_reference_present || (s->core.raw_present[SJ6_A_REFERENCE_ID / 32u] &
+                                        (1u << (SJ6_A_REFERENCE_ID % 32u))))
+         juno6_set_a_reference(s, motion->a_reference, motion->a_reference_present);
++    for (unsigned l = 0; l < DNBX_LAYERS; ++l) if (motion->semi_authored[l])
++        juno6_set_layer_semi(s, l, motion->semi_authored[l] - 1u);
+     if (!mot_base_snd) return;
+     sound_t *sound = (sound_t *)mot_base_snd;
+     uint8_t *cell = sound->v[T_303][owner];
+     uint8_t *extra = sound->v[T_303][ORIGINAL_SJ6_EXTRA_ROW + owner];
++    for (unsigned l = 0; l < DNBX_LAYERS; ++l) if (motion->semi_authored[l])
++        original_sound_sj6_semi_store(cell, extra, l, motion->semi_authored[l] - 1u);
+     original_sound_sj6_lfo_store(cell, extra, &motion->lfo);
+     original_sound_sj6_lfo2_pwm_store(cell, 0);
+     original_sound_sj6_shape_store(cell, motion->lfo2_shape);
+@@ -487,7 +499,7 @@
+         value = sj6_knob_target(before, value, (int)original_sound_sj6_max(slot), relative);
+         if (value != before && (slot < SJ6_VIBRATO_DEPTH || slot == SJ6_LFO2_SHAPE ||
+             (slot >= SJ6_LAYER1_SEMI ? sj6_semi_storage_ready(owner) :
+-             sj6_factory_storage_ready(owner, slot != SJ6_A_REFERENCE, slot == SJ6_A_REFERENCE)))) {
++             sj6_wire_storage_ready(owner, slot != SJ6_A_REFERENCE, slot == SJ6_A_REFERENCE)))) {
+             sj6_knob_post(owner, slot, value);
+             changed = 1;
+         }
+@@ -628,7 +640,7 @@
+         if (!prior || chorus_turns >> 2) original_runtime_sj6_chorus(&original_bass[v], cell);
+     }
+     unsigned vibrato_turns = (mask >> SJ6_VIBRATO_DEPTH) & 3u;
+-    if (vibrato_turns && sj6_factory_storage_ready(v, 1u, 0u)) {
++    if (vibrato_turns && sj6_wire_storage_ready(v, 1u, 0u)) {
+         uint8_t *extra = sound->v[T_303][ORIGINAL_SJ6_EXTRA_ROW + v];
+         uint8_t *wire = sound->v[T_303][BASS_SHARED_EXTRA_ROW + v];
+         float values[2] = {0};
+@@ -643,7 +655,7 @@
+             juno6_set_vibrato_words(s, values, present, 0);
+         }
+     }
+-    if ((mask & (1u << SJ6_A_REFERENCE)) && sj6_factory_storage_ready(v, 0u, 1u)) {
++    if ((mask & (1u << SJ6_A_REFERENCE)) && sj6_wire_storage_ready(v, 0u, 1u)) {
+         uint8_t *wire = sound->v[T_303][BASS_SHARED_EXTRA_ROW + v];
+         float raw = juno6_a_reference_unit(sj6_knob_value[v][SJ6_A_REFERENCE]);
+         original_sound_sj6_a_reference_store(cell, wire, raw, 1u);
+--- a/firmware/src/app/original_sound.c
++++ b/firmware/src/app/original_sound.c
+@@ -352,7 +352,7 @@
+         memset(extra + 2 + first_rate, 0, SJ6_LFO_COUNT);
+         extra[0] = (uint8_t)mask;
+         extra[1] = (uint8_t)(mask >> 8);
+-        if (!mask) flags &= ~ORIGINAL_SJ6_EXTRA_BIT;
++        if (!(mask | sj6_semi_code(extra) | sj6_layer2_code(extra))) flags &= ~ORIGINAL_SJ6_EXTRA_BIT;
+     }
+     if (words->present || (flags & ORIGINAL_SJ6_AUTHORED_LFO_BIT)) {
+         uint8_t *p = extra + ORIGINAL_SJ6_EXTRA_SIZE;
+--- a/firmware/src/app/superj6_factory.h
++++ b/firmware/src/app/superj6_factory.h
+@@ -25,14 +25,36 @@
+ #if X0X_SUPERJ6_BUILTIN_INIT
+     uint8_t saga_invalid;
+     uint16_t saga_seen, saga_on;
++    uint8_t semi_authored[2]; /* 0 absent, 1–25 exact physical step + 1, 255 invalid. */
+     uint8_t lfo2_authored; /* 0 absent; 1–5 validated selector+1; 255 invalid */
+ #endif
+ } sj6_factory_row;
+ 
++#if X0X_SUPERJ6_BUILTIN_INIT
++static inline unsigned sj6_factory_semi_word(uint32_t bits)
++{
++    if (bits == UINT32_C(0x80000000)) bits = 0; /* -0 */
++    if (bits > UINT32_C(0x3f800000)) return 255u;
++    /* All u < 1/64 round to -12. Every Float32 from 1/64 to 1 is
++     * represented exactly at Q29. Compute 24u at Q26, no FP64 needed.
++     * For u below 1/2 an exact tie rounds towards the lower integer. */
++    unsigned exponent = bits >> 23;
++    if (exponent < 121u) return 1u;
++    uint32_t scaled = ((UINT32_C(0x00800000) | (bits & UINT32_C(0x007fffff))) <<
++                       (exponent - 121u)) * 3u;
++    return 1u + ((scaled + (1u << 25) - (bits < UINT32_C(0x3f000000))) >> 26);
++}
++#endif
++
+ static inline void sj6_factory_add_word(sj6_factory_row *row, unsigned id, uint32_t bits)
+ {
+     unsigned slot;
+ #if X0X_SUPERJ6_BUILTIN_INIT
++    if (id == 72u || id == 73u) {
++        uint8_t *value = row->semi_authored + (id - 72u);
++        if (!*value) *value = (uint8_t)sj6_factory_semi_word(bits);
++        return;
++    }
+     if (id == 98u) {
+         if (!row->lfo2_authored) {
+             /* On [0,1], Build-9 widens Float32, multiplies by 4 exactly,
