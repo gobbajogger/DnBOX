@@ -1,0 +1,71 @@
+--- a/firmware/src/app/s1_patch.h
++++ b/firmware/src/app/s1_patch.h
+@@ -31,16 +31,16 @@
+     S1_EXTRA_BYTES = S1_FILTER_EXTRA_BYTES + 2,
+     S1_LFO_DIVISIONS = 19, S1_LFO_CODE_SYNC = 129,
+     S1_LFO_RATE_CODES = S1_LFO_CODE_SYNC + S1_LFO_DIVISIONS,
+-    S1_PART_LEVEL = 40, S1_LFO1_DEPTH, S1_LFO2_DEPTH, S1_CUTOFF_LFO, S1_NOISE_LFO, S1_OSC_MIX_LFO, S1_RESONANCE_LFO, S1_FM_LFO, S1_AMP_DECAY_LFO,
++    S1_PART_LEVEL = 40, S1_LFO1_DEPTH, S1_LFO2_DEPTH, S1_CUTOFF_LFO, S1_NOISE_LFO, S1_OSC_MIX_LFO, S1_RESONANCE_LFO, S1_FM_LFO, S1_AMP_DECAY_LFO, S1_FILTER_ENV_LFO,
+     S1_BASE_EDIT_FIRST = S1_PART_LEVEL, S1_BASE_EDIT_COUNT = 3, S1_BASE_EDIT_BYTE = 3
+ };
+ #define S1_MOD_EXT_MARK (UINT32_C(1) << 23)
+ /* Radix five stores independent absent/explicit OFF/LFO1/LFO2/BOTH digits.
+  * FM-only codes 0..4 are identical to the preceding typed binding. */
+-enum { S1_MOD_EXT_BYTE = 30, S1_MOD_EXT_FIRST = S1_FM_LFO, S1_MOD_EXT_COUNT = 2,
+-       S1_MOD_RADIX = 5, S1_MOD_EXT_CODES = S1_MOD_RADIX * S1_MOD_RADIX };
++enum { S1_MOD_EXT_BYTE = 30, S1_MOD_EXT_FIRST = S1_FM_LFO, S1_MOD_EXT_COUNT = 3,
++       S1_MOD_RADIX = 5, S1_MOD_EXT_CODES = S1_MOD_RADIX * S1_MOD_RADIX * S1_MOD_RADIX };
+ static inline int s1_mod_ext_slot(unsigned slot) { return slot - S1_MOD_EXT_FIRST < S1_MOD_EXT_COUNT; }
+-static inline unsigned s1_mod_ext_divisor(unsigned slot) { return slot == S1_FM_LFO ? 1u : S1_MOD_RADIX; }
++static inline unsigned s1_mod_ext_divisor(unsigned slot) { return slot == S1_FM_LFO ? 1u : slot == S1_AMP_DECAY_LFO ? S1_MOD_RADIX : S1_MOD_RADIX * S1_MOD_RADIX; }
+ #define S1_EXTRA_MARK (UINT32_C(1) << 22)
+ #define S1_BASE_EDIT_MASK (((UINT32_C(1) << S1_BASE_EDIT_COUNT) - 1u) << S1_BASE_EDIT_BYTE)
+ /* Synth One route group: legacy Noise/Osc lanes keep their exact bytes.
+--- a/firmware/src/app/s1c_part.c
++++ b/firmware/src/app/s1c_part.c
+@@ -12,7 +12,7 @@
+ 
+ #define S1C_SR 44100.0f
+ /* Synth One factory parameter ids (s1c uses the same numbering). */
+-enum { P_MONO = 20, P_DETM = 31, P_BCSR = 34, P_PAN_RATE = 36, P_DELAY_TIME = 43, P_CUTOFF_LFO = 48, P_RESONANCE_LFO = 49, P_OSC_MIX_LFO = 50, P_AMP_DECAY_LFO = 52, P_NOISE_LFO = 53, P_FM_LFO = 54, P_TEMPO_SYNC = 139 };
++enum { P_MONO = 20, P_DETM = 31, P_BCSR = 34, P_PAN_RATE = 36, P_DELAY_TIME = 43, P_CUTOFF_LFO = 48, P_RESONANCE_LFO = 49, P_OSC_MIX_LFO = 50, P_AMP_DECAY_LFO = 52, P_NOISE_LFO = 53, P_FM_LFO = 54, P_FILTER_ENV_LFO = 56, P_TEMPO_SYNC = 139 };
+ 
+ static const uint8_t *s1_part_pack;
+ static uint16_t s1_part_pack_count;
+@@ -182,6 +182,7 @@
+ static const s1_patch_descriptor mod_ext[S1_MOD_EXT_COUNT] = {
+     {"FM LFO", 0, 3, P_FM_LFO, X0X_U_NONE},
+     {"AMP DEC LFO", 0, 3, P_AMP_DECAY_LFO, X0X_U_NONE},
++    {"ENV LFO", 0, 3, P_FILTER_ENV_LFO, X0X_U_NONE},
+ };
+ static const s1_patch_descriptor cutoff_lfo = {"CUTOFF LFO", 0, 3, P_CUTOFF_LFO, X0X_U_NONE};
+ enum { S1_CATALOG_EXTRA_COUNT = sizeof extra_parameters / sizeof extra_parameters[0] };
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -2207,13 +2207,13 @@
+ #endif
+ #if X0X_S1_EXTRA
+             if (kind == ORIGINAL_SOUND_SYNTHONE) {
+-                enum { S1_PAGE_ID_FITS = 1 / (S1_AMP_DECAY_LFO < ORIG_PAGE_ENGINE && S1_MONO_LEGATO < ORIG_PAGE_ENGINE) };
++                enum { S1_PAGE_ID_FITS = 1 / (S1_FILTER_ENV_LFO < ORIG_PAGE_ENGINE && S1_MONO_LEGATO < ORIG_PAGE_ENGINE) };
+                 static const original_page_row_t s1_pages[] = {
+                     {"OSCILLATOR", {0, 1, S1_OSC1_MORPH, S1_OSC2_MORPH}},
+                     {"OSC MIX", {S1_OSC2_LEVEL, S1_SUB_LEVEL, S1_SUB_OCTAVE, S1_SUB_WAVE}},
+                     {"FM / NOISE", {S1_FM_LEVEL, S1_FM_INDEX, S1_NOISE_LEVEL, S1_NOISE_LFO}},
+                     {"FILTER", {2, 3, 4, ORIG_PAGE_S1_LINK}},
+-                    {"FILTER MODE", {S1_FILTER_TYPE, S1_ADSR_TRACK, S1_CUTOFF_LFO, ORIG_PAGE_NONE}},
++                    {"FILTER MODE", {S1_FILTER_TYPE, S1_ADSR_TRACK, S1_CUTOFF_LFO, S1_FILTER_ENV_LFO}},
+                     {"FILTER ADSR", {5, 6, 7, 8}},
+                     {"AMP ADSR", {9, 10, 11, 12}},
+                     {"VOICE", {S1_MONO_LEGATO, ORIG_PAGE_NONE, ORIG_PAGE_NONE, ORIG_PAGE_NONE}},
+@@ -8070,6 +8070,10 @@
+         default: break;
+         }
+     }
++#if X0X_S1_EXTRA
++    /* Four-way FILTER MODE keeps the full descriptor and a readable tile. */
++    if (r.kind == R_S1PATCH && r.c == S1_ADSR_TRACK) return "ADSR P-TRK";
++#endif
+     return caps_of(pref_name(r));
+ }
+ 

@@ -1,0 +1,16 @@
+first off-tick mismatch, mode 1 sample 1: held 3230.954590 Hz, current 3236.856934 Hz, voice phase 1
+genuine pack ordinal 81, route 1, bypass 0: device KR=8; tick matches 512/512; between ticks mismatch 3584/3584 (attack 1064, release 1792), max drift 40.905762 Hz (attack 40.905762, release 1.777344)
+route-specific current-vs-OFF changes 4096/4096, stale contribution 3584/3584, max 11.504883 Hz
+genuine pack ordinal 542, route 1, bypass 1: device KR=8; tick matches 512/512; between ticks mismatch 3584/3584 (attack 1792, release 1792), max drift 1.475586 Hz (attack 1.475586, release 1.069824)
+route-specific current-vs-OFF changes 0/4096, stale contribution 0/3584, max 0.000000 Hz
+first off-tick mismatch, mode 2 sample 1: held 3242.366699 Hz, current 3248.225586 Hz, voice phase 1
+genuine pack ordinal 81, route 2, bypass 0: device KR=8; tick matches 512/512; between ticks mismatch 3584/3584 (attack 1064, release 1792), max drift 40.605957 Hz (attack 40.605957, release 1.775391)
+route-specific current-vs-OFF changes 4096/4096, stale contribution 3584/3584, max 11.804688 Hz
+genuine pack ordinal 542, route 2, bypass 1: device KR=8; tick matches 512/512; between ticks mismatch 3584/3584 (attack 1792, release 1792), max drift 1.475586 Hz (attack 1.475586, release 1.069824)
+route-specific current-vs-OFF changes 0/4096, stale contribution 0/3584, max 0.000000 Hz
+first off-tick mismatch, mode 3 sample 1: held 3236.660645 Hz, current 3242.541260 Hz, voice phase 1
+genuine pack ordinal 81, route 3, bypass 0: device KR=8; tick matches 512/512; between ticks mismatch 3584/3584 (attack 1064, release 1792), max drift 40.755859 Hz (attack 40.755859, release 1.776367)
+route-specific current-vs-OFF changes 4096/4096, stale contribution 3584/3584, max 11.654785 Hz
+genuine pack ordinal 542, route 3, bypass 1: device KR=8; tick matches 512/512; between ticks mismatch 3584/3584 (attack 1792, release 1792), max drift 1.475586 Hz (attack 1.475586, release 1.069824)
+route-specific current-vs-OFF changes 0/4096, stale contribution 0/3584, max 0.000000 Hz
+PASS mismatch diagnostic: matching transfer/clamp at control ticks but not original per-sample attack/release cutoff; real zero-envelope-mix bypass exact.
