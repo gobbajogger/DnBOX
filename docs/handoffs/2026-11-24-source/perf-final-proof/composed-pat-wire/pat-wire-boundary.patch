@@ -1,0 +1,12 @@
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -10441,6 +10450,9 @@
+     const x0x_param_t *d = *dp = pref_desc((memcpy(&r, e, 4), r));
+     if (!d || (set && pref_read_only(r)))
+         return -1;
++    if (set && r.kind == R_BPATSND && engine_bass_requested_bank(r.b) == ORIGINAL_SOUND_SYNTHONE &&
++        (unsigned)v > 1u)
++        return -1;                                /* reject unsupported pattern preset ordinals on the wire */
+     if (set)
+         pref_set_impl(r, v, 0);                    /* clamps to the descriptor */
+     return pref_get(r);

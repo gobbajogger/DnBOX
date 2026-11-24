@@ -1,0 +1,3 @@
+# Pattern preset Remote boundary
+
+Apply the single-hunk patch to the exact composed FX/Decay source 02069b8e9ebdc013e8fdbe7d79e8508245aba57d1008b21182d8d20f81bd47b6 and verify POST.sha256. This follows the earlier physical Off/Init PAT UI fix. Out-of-domain Remote input is refused before state changes; physical knob clamping and historical aliases are unchanged. Root replay confirmed both owners and all 216 cases. The host replay needs the local S1PK and vibrato-mixed-helpers.h (generate the latter from tests/host/ui_superj6_vibrato_mixed_test.c by keeping lines before int main). No native or device writes.
