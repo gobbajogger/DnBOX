@@ -1,0 +1,10 @@
+Before source edits
+/tmp/dnbox-sj6-mixed.OzzKXX/red-opaque.log:FAIL tests/host/ui_superj6_vibrato_mixed_test.c:130: !engine_superj6_factory_load(j, &row)
+/tmp/dnbox-sj6-mixed.OzzKXX/red-mixed.log:FAIL tests/host/ui_superj6_vibrato_mixed_test.c:68: engine_superj6_knob_position(j, SJ6_VIBRATO_DEPTH) == 64
+Final fixture on preimage, both owners
+/tmp/dnbox-sj6-mixed.OzzKXX/red-final-m1.log:FAIL tests/host/ui_superj6_vibrato_mixed_test.c:77: engine_superj6_knob_position(j, SJ6_VIBRATO_DEPTH) == 64
+/tmp/dnbox-sj6-mixed.OzzKXX/red-final-m0.log:FAIL tests/host/ui_superj6_vibrato_mixed_test.c:77: engine_superj6_knob_position(j, SJ6_VIBRATO_DEPTH) == 64
+/tmp/dnbox-sj6-mixed.OzzKXX/red-final-o0.log:FAIL tests/host/ui_superj6_vibrato_mixed_test.c:146: !engine_superj6_factory_load(j, &row)
+/tmp/dnbox-sj6-mixed.OzzKXX/red-final-o1.log:FAIL tests/host/ui_superj6_vibrato_mixed_test.c:146: !engine_superj6_factory_load(j, &row)
+Final fixture on candidate
+SuperJ6/Synth One shared-row ownership 322 checks

@@ -1,0 +1,506 @@
+diff --git a/tests/host/ui_superj6_vibrato_authored_test.c b/tests/host/ui_superj6_vibrato_authored_test.c
+new file mode 100644
+--- /dev/null
++++ b/tests/host/ui_superj6_vibrato_authored_test.c
+@@ -0,0 +1,252 @@
++/* SPDX-License-Identifier: GPL-3.0-only */
++#define PWM_FIXTURE_MAIN retained_pwm_main
++#include "ui_superj6_pwm1_lfo2_test.c"
++#include "app/unit_control.h"
++#include "bank_reader.c"
++#include "authored_vibrato.inc"
++#include <math.h>
++
++static juno6_t *last_init, *synth[2];
++void __real_juno6_init(juno6_t *, float);
++void __wrap_juno6_init(juno6_t *s, float rate)
++{
++    __real_juno6_init(s, rate);
++    last_init = s;
++}
++
++static uint32_t word(float f)
++{
++    uint32_t bits;
++    memcpy(&bits, &f, sizeof bits);
++    return bits;
++}
++
++static void reset_pair(unsigned owner)
++{
++    setup(V_PART, PART_303A + owner);
++    proj.set.bt |= PROJ_BT_CLK_IN;
++    for (unsigned v = 0; v < 2; ++v) {
++        last_init = NULL;
++        select_owner(v, 0);
++        synth[v] = last_init;
++        CHECK(synth[v]);
++    }
++    CHECK(synth[0] != synth[1]);
++    isolate_dry_pair();
++}
++
++/* project_load restores data. Explicitly cold-adopt the loaded sound so
++ * assertions about the runtime cannot accidentally read the old owner state. */
++static void reload_pair(void)
++{
++    save_and_reload();
++    engine_apply_sound(&proj.sound);
++    render(1);
++}
++
++static void verify(unsigned owner, unsigned present, const uint32_t expected[2])
++{
++    const uint8_t *cell = proj.sound.v[T_303][owner];
++    const uint8_t *wire = proj.sound.v[T_303][ORIGINAL_SJ6_VIBRATO_ROW + owner];
++    float value[2] = {0};
++    CHECK(original_sound_sj6_vibrato_words(cell, wire, value) == (int)present);
++    CHECK(engine_bass_sound_bank(&proj.sound, owner) == ORIGINAL_SOUND_JUNO);
++    for (unsigned i = 0; i < 2; ++i) {
++        unsigned has_word = present & (1u << i);
++        float seen = 0.f;
++        CHECK(dnbx_read_raw(&synth[owner]->core, 105u + i, &seen) == (has_word ? DNBX_OK : DNBX_E_ABSENT));
++        CHECK(word(value[i]) == (has_word ? expected[i] : 0));
++        if (has_word) CHECK(word(seen) == expected[i]);
++        if (!engine_superj6_factory_pending())
++            CHECK(engine_superj6_knob_position(owner, SJ6_VIBRATO_DEPTH + i) == (int)(seen * 127.f + .5f));
++    }
++    CHECK(fabsf(synth[owner]->vibrato_depth - 12.f * powf(value[0], 3.03f)) < .0001f);
++    float hz = synth[owner]->vibrato_step * (synth[owner]->sample_rate / (16.f * 0x1p32f));
++    CHECK(fabsf(hz - 16.f * powf(value[1], 3.33f)) < .0001f);
++}
++
++static sj6_factory_row playback_row;
++static uint32_t playback_words[2];
++
++static void test_archive(void)
++{
++    reset_pair(0);
++    unsigned programs = 0;
++    for (unsigned b = 0; b < BANK_COUNT; ++b) {
++        for (unsigned p = 0; p < (unsigned)(bank_start[b+1] - bank_start[b]); ++p) {
++            sj6_record_reader reader;
++            CHECK(sj6_select_position(b, p, &reader));
++            sj6_factory_row row = {0};
++            unsigned id;
++            uint32_t bits;
++            while (sj6_next_field(&reader, &id, &bits)) sj6_factory_add_word(&row, id, bits);
++            CHECK(((row.present >> SJ6_ROW_VIBRATO) & 3u) == 3u);
++            for (unsigned v = 0; v < 2; ++v) {
++                uint8_t peer[ORIGINAL_SJ6_VIBRATO_WIRE_BYTES];
++                memcpy(peer, proj.sound.v[T_303][ORIGINAL_SJ6_VIBRATO_ROW + (v ^ 1u)], sizeof peer);
++                CHECK(engine_superj6_factory_load(v, &row));
++                CHECK(engine_superj6_factory_pending());
++                render(1);
++                CHECK(!engine_superj6_factory_pending());
++                verify(v, 3, authored_words[programs]);
++                CHECK(!memcmp(peer, proj.sound.v[T_303][ORIGINAL_SJ6_VIBRATO_ROW + (v ^ 1u)], sizeof peer));
++            }
++            if (!playback_words[0] && row.value[SJ6_ROW_VIBRATO] > .4f &&
++                row.value[SJ6_ROW_VIBRATO+1] > .4f && row.value[SJ6_ROW_MASTER] > .7f) {
++                playback_row = row;
++                memcpy(playback_words, authored_words[programs], sizeof playback_words);
++            }
++            ++programs;
++        }
++    }
++    CHECK(programs == 640 && playback_words[0]);
++    puts("640 full authored rows loaded on both owners, 2560 exact raw words verified in runtime and wire");
++}
++
++static sj6_factory_row blank_row(void)
++{
++    sj6_factory_row row = {.present = (1u << SJ6_ROW_AMOUNT) - 1u};
++    row.value[SJ6_ROW_MASTER] = 1.f;
++    row.value[SJ6_ROW_AMP2 + 2] = 1.f;
++    return row;
++}
++
++static void test_presence(unsigned owner)
++{
++    reset_pair(owner);
++    sj6_factory_row empty = blank_row(), edge = empty;
++    const uint32_t zeros[2] = {0x80000000u, 0u};
++    sj6_factory_add_word(&edge, 105, zeros[0]);
++    sj6_factory_add_word(&edge, 105, 0x7fc00000u);
++    CHECK(engine_superj6_factory_load(owner, &edge));
++    verify(owner, 0, zeros);
++    render(1);
++    verify(owner, 1, zeros);
++    reload_pair();
++    verify(owner, 1, zeros);
++    sound_t malformed = proj.sound;
++    malformed.v[T_303][ORIGINAL_SJ6_VIBRATO_ROW + owner][7] = 0x80u;
++    CHECK(engine_bass_sound_bank(&malformed, owner) < 0);
++    malformed = proj.sound;
++    memset(malformed.v[T_303][ORIGINAL_SJ6_VIBRATO_ROW + owner], 0xff, 4);
++    CHECK(engine_bass_sound_bank(&malformed, owner) < 0);
++
++    static const uint32_t invalids[] = {0x7fc00000u, 0x7f800000u, 0xbf800000u, 0x3fc00000u};
++    for (unsigned k = 0; k < sizeof invalids / sizeof *invalids; ++k) {
++        sj6_factory_row invalid = empty;
++        sj6_factory_add_word(&invalid, 106, invalids[k]);
++        sj6_factory_add_word(&invalid, 106, 0);
++        CHECK(!engine_superj6_factory_load(owner, &invalid));
++        verify(owner, 1, zeros);
++    }
++    CHECK(engine_superj6_factory_load(owner, &empty));
++    CHECK(juno6_note_on(synth[owner], 67, 100));
++    render(1);
++    verify(owner, 1, zeros);
++    juno6_all_off(synth[owner]);
++
++    edge = empty;
++    sj6_factory_add_word(&edge, 106, zeros[1]);
++    CHECK(engine_superj6_factory_load(owner, &edge));
++    render(1);
++    verify(owner, 2, zeros);
++    reload_pair();
++    verify(owner, 2, zeros);
++    CHECK(engine_superj6_factory_load(owner, &empty));
++    render(1);
++    verify(owner, 0, zeros);
++    reload_pair();
++    verify(owner, 0, zeros);
++}
++
++static void play_factory(unsigned owner, const sj6_factory_row *row, const sound_t *start, int32_t *output)
++{
++    proj.sound = *start;
++    engine_apply_sound(&proj.sound);
++    render(24);
++    CHECK(engine_superj6_factory_load(owner, row));
++    render(1);
++    engine_bass_on(0, 57, 0, 0);
++    engine_bass_on(1, 62, 0, 0);
++    render(4);
++    capture(output);
++}
++
++static void test_playback(unsigned owner)
++{
++    reset_pair(owner);
++    const sound_t start = proj.sound;
++    sj6_factory_row dry = playback_row;
++    dry.value[SJ6_ROW_VIBRATO] = 0.f;
++    play_factory(owner, &dry, &start, pcm[0]);
++    const uint32_t negative_zero = 0x80000000u;
++    memcpy(&dry.value[SJ6_ROW_VIBRATO], &negative_zero, sizeof negative_zero);
++    play_factory(owner, &dry, &start, pcm[1]);
++    CHECK(!memcmp(pcm[0], pcm[1], sizeof pcm[0]));
++    dry.present &= ~(1u << SJ6_ROW_VIBRATO);
++    play_factory(owner, &dry, &start, pcm[1]);
++    CHECK(!memcmp(pcm[0], pcm[1], sizeof pcm[0]));
++    play_factory(owner, &playback_row, &start, pcm[1]);
++    unsigned changed_frames = changed(pcm[0], pcm[1], owner);
++    CHECK(changed_frames > COUNT / 2 && !changed(pcm[0], pcm[1], owner ^ 1u));
++    verify(owner, 3, playback_words);
++
++    begin_pair();
++    capture(pcm[0]);
++    reload_pair();
++    verify(owner, 3, playback_words);
++    begin_pair();
++    capture(pcm[1]);
++    CHECK(!memcmp(pcm[0], pcm[1], sizeof pcm[0]));
++
++    visit("VIBRATO");
++    unsigned position = engine_superj6_knob_position(owner, SJ6_VIBRATO_RATE) == 97 ? 95 : 97;
++    panel_turn(1, SJ6_VIBRATO_RATE, position);
++    render(1);
++    const uint32_t edited[] = {playback_words[0], word(unit_control(position))};
++    verify(owner, 3, edited);
++    reload_pair();
++    verify(owner, 3, edited);
++
++    select_owner(owner, 1);
++    const uint32_t defaults[] = {0, 0};
++    verify(owner, 0, defaults);
++    reload_pair();
++    verify(owner, 0, defaults);
++    CHECK(!memcmp(proj.sound.v[T_303][ORIGINAL_SJ6_VIBRATO_ROW + owner],
++                  (uint8_t[ORIGINAL_SJ6_VIBRATO_WIRE_BYTES]){0}, ORIGINAL_SJ6_VIBRATO_WIRE_BYTES));
++    printf("owner=%u authored held PCM changed=%u/%u peer=0 reload=exact replacement=absent\n",
++           owner, changed_frames, COUNT);
++}
++
++static void test_old_knob_words(unsigned owner)
++{
++    reset_pair(owner);
++    uint8_t *cell = proj.sound.v[T_303][owner];
++    uint8_t *legacy = proj.sound.v[T_303][ORIGINAL_SJ6_EXTRA_ROW + owner] + ORIGINAL_SJ6_VIBRATO_OFFSET;
++    cell[31] = 1;
++    legacy[0] = 101;
++    legacy[1] = 85;
++    engine_bass_sound_refresh(&proj.sound, owner);
++    reload_pair();
++    CHECK(engine_superj6_knob_position(owner, SJ6_VIBRATO_DEPTH) == 101);
++    CHECK(engine_superj6_knob_position(owner, SJ6_VIBRATO_RATE) == 85);
++    visit("VIBRATO");
++    panel_turn(1, SJ6_VIBRATO_RATE, 96);
++    render(1);
++    uint32_t expected[] = {word(unit_control(101)), word(unit_control(96))};
++    verify(owner, 3, expected);
++    CHECK(!legacy[0] && !legacy[1]);
++}
++
++int main(void)
++{
++    test_archive();
++    for (unsigned v = 0; v < 2; ++v) {
++        test_presence(v);
++        test_playback(v);
++        test_old_knob_words(v);
++    }
++    printf("SuperJ6 authored vibrato %u checks\n", checks);
++    return 0;
++}
+diff --git a/tests/host/ui_superj6_vibrato_mixed_test.c b/tests/host/ui_superj6_vibrato_mixed_test.c
+new file mode 100644
+--- /dev/null
++++ b/tests/host/ui_superj6_vibrato_mixed_test.c
+@@ -0,0 +1,232 @@
++/* SPDX-License-Identifier: GPL-3.0-only */
++#define PWM_FIXTURE_MAIN retained_pwm_main
++#include "ui_superj6_pwm1_lfo2_test.c"
++
++static sj6_factory_row authored(void)
++{
++    sj6_factory_row row = {.present = (1u << SJ6_ROW_AMOUNT) - 1u};
++    row.value[SJ6_ROW_MASTER] = 1.f;
++    row.value[SJ6_ROW_AMP2 + 2] = 1.f;
++    sj6_factory_add_word(&row, 105, UINT32_C(0x3f000000));
++    sj6_factory_add_word(&row, 106, UINT32_C(0x3f400000));
++    return row;
++}
++
++static uint8_t *shared(unsigned part)
++{
++    return proj.sound.v[T_303][S1_EXTRA_ROW + part];
++}
++
++static void select_bank(unsigned owner, unsigned bank)
++{
++    CHECK(!engine_bass_select_preset(owner, bank, 0, &proj.sound));
++    for (unsigned n = 0; n < 1024 && engine_bass_preset_pending(owner); ++n) render(1);
++    CHECK(engine_bass_bank(owner) == (int)bank && !engine_bass_preset_pending(owner));
++}
++
++static int set_s1(unsigned owner, unsigned slot, unsigned position)
++{
++    const s1_patch_descriptor *p = s1_patch_at(slot);
++    s1_patch_value before;
++    CHECK(p && engine_s1_patch_read(owner, p->factory_id, &before));
++    int status = engine_s1_patch_set(owner, before.revision, p->factory_id, position);
++    render(1);
++    return status;
++}
++
++static void reopen(void)
++{
++    save_and_reload();
++    engine_apply_sound(&proj.sound);
++    render(4);
++}
++
++static void check_payload_default(unsigned owner, unsigned end, uint8_t opaque_11, uint8_t opaque_tail)
++{
++    for (unsigned i = 0; i < end; ++i) CHECK(!shared(owner)[i]);
++    CHECK(shared(owner)[S1_OSC_EXTRA_BYTES] == opaque_11);
++    CHECK(shared(owner)[NPARAMS_MAX-1] == opaque_tail);
++}
++
++static void fresh_setup(unsigned owner)
++{
++    /* Scenarios save on purpose. Start each from a separate simulated store. */
++    for (unsigned obj = 0; obj < OBJ_NOBJ; ++obj)
++        store_len[obj] = store_previous_len[obj] = -1;
++    memset(stored_known, 0, sizeof stored_known);
++    setup(V_PART, PART_303A + owner);
++}
++
++static void test_mixed(unsigned j)
++{
++    unsigned s = j ^ 1u;
++    fresh_setup(j);
++    proj.set.bt |= PROJ_BT_CLK_IN;
++    select_bank(j, ORIGINAL_SOUND_JUNO);
++    select_bank(s, ORIGINAL_SOUND_SYNTHONE);
++    shared(j)[S1_OSC_EXTRA_BYTES] = 0xc1;
++    shared(j)[NPARAMS_MAX-1] = 0xa5;
++    shared(s)[NPARAMS_MAX-1] = 0x56;
++    CHECK(set_s1(s, S1_OSC2_LEVEL, 91) == S1_EDIT_QUEUED);
++    CHECK(set_s1(s, S1_FILTER_TYPE, 1) == S1_EDIT_QUEUED);
++    uint8_t peer[NPARAMS_MAX];
++    memcpy(peer, shared(s), sizeof peer);
++    sj6_factory_row row = authored();
++    CHECK(engine_superj6_factory_load(j, &row));
++    render(1);
++    CHECK(engine_superj6_knob_position(j, SJ6_VIBRATO_DEPTH) == 64);
++    CHECK(engine_superj6_knob_position(j, SJ6_VIBRATO_RATE) == 95);
++    CHECK(!memcmp(peer, shared(s), sizeof peer));
++    const uint8_t exact[] = {0, 0, 0, 0x3f, 0, 0, 0x40, 0x3f};
++    CHECK(!memcmp(exact, shared(j), sizeof exact));
++    CHECK(shared(j)[S1_OSC_EXTRA_BYTES] == 0xc1 && shared(j)[NPARAMS_MAX-1] == 0xa5);
++    reopen();
++    CHECK(engine_superj6_knob_position(j, SJ6_VIBRATO_DEPTH) == 64);
++    CHECK(!memcmp(peer, shared(s), sizeof peer));
++    CHECK(!memcmp(exact, shared(j), sizeof exact));
++
++    select_bank(j, ORIGINAL_SOUND_SYNTHONE);
++    check_payload_default(j, sizeof exact, 0xc1, 0xa5);
++    CHECK(!memcmp(peer, shared(s), sizeof peer));
++    CHECK(set_s1(j, S1_FILTER_TYPE, 1) == S1_EDIT_REJECTED);
++    CHECK(set_s1(j, S1_OSC2_LEVEL, 70) == S1_EDIT_QUEUED);
++    CHECK(shared(j)[S1_OSC_EXTRA_BYTES] == 0xc1);
++    reopen();
++    select_bank(j, ORIGINAL_SOUND_JUNO);
++    check_payload_default(j, S1_OSC_EXTRA_BYTES, 0xc1, 0xa5);
++    CHECK(!memcmp(peer, shared(s), sizeof peer));
++
++    uint8_t outgoing_j[NPARAMS_MAX];
++    memcpy(outgoing_j, shared(j), sizeof outgoing_j);
++    select_bank(s, ORIGINAL_SOUND_JUNO);
++    check_payload_default(s, S1_EXTRA_BYTES, 0, 0x56);
++    CHECK(!memcmp(outgoing_j, shared(j), sizeof outgoing_j));
++    CHECK(!engine_superj6_knob_position(s, SJ6_VIBRATO_DEPTH));
++    CHECK(engine_superj6_factory_load(s, &row));
++    render(1);
++    CHECK(!memcmp(exact, shared(s), sizeof exact));
++    CHECK(!engine_superj6_knob_position(j, SJ6_VIBRATO_DEPTH));
++
++    /* Previous knob marker stays playable and upgrades only on an edit. */
++    uint8_t *old = proj.sound.v[T_303][ORIGINAL_SJ6_EXTRA_ROW + j] + ORIGINAL_SJ6_VIBRATO_OFFSET;
++    old[0] = 101;
++    old[1] = 96;
++    proj.sound.v[T_303][j][31] = 1;
++    engine_bass_sound_refresh(&proj.sound, j);
++    reopen();
++    CHECK(engine_superj6_knob_position(j, SJ6_VIBRATO_DEPTH) == 101);
++    CHECK(engine_superj6_knob_position(j, SJ6_VIBRATO_RATE) == 96);
++    CHECK(engine_superj6_knob_turn(j, SJ6_VIBRATO_RATE, 81, 0));
++    render(1);
++    CHECK(proj.sound.v[T_303][j][31] == 4 && !old[0] && !old[1]);
++    CHECK(engine_superj6_knob_position(j, SJ6_VIBRATO_DEPTH) == 101);
++    CHECK(!memcmp(exact, shared(s), sizeof exact));
++}
++
++static void test_opaque(unsigned j)
++{
++    unsigned s = j ^ 1u;
++    fresh_setup(j);
++    proj.set.bt |= PROJ_BT_CLK_IN;
++    select_bank(j, ORIGINAL_SOUND_JUNO);
++    select_bank(s, ORIGINAL_SOUND_SYNTHONE);
++    sj6_factory_row row = authored();
++    CHECK(engine_superj6_factory_load(j, &row));
++    shared(j)[3] = 0x3f; /* plausible word, but neither engine owns the row */
++    render(1); /* a late occupied prefix cancels the existing factory group */
++    CHECK(!engine_superj6_factory_pending());
++    CHECK(!engine_superj6_knob_position(j, SJ6_VIBRATO_DEPTH));
++    CHECK(shared(j)[3] == 0x3f);
++    shared(j)[NPARAMS_MAX-1] = 0xd9;
++    shared(s)[NPARAMS_MAX-1] = 0x79;
++    uint8_t before[2][NPARAMS_MAX];
++    memcpy(before[0], shared(j), NPARAMS_MAX);
++    memcpy(before[1], shared(s), NPARAMS_MAX);
++    reopen();
++    CHECK(!engine_superj6_factory_load(j, &row));
++    CHECK(!engine_superj6_knob_turn(j, SJ6_VIBRATO_DEPTH, 100, 0));
++    CHECK(!engine_superj6_factory_pending());
++    select_bank(j, ORIGINAL_SOUND_SYNTHONE);
++    CHECK(set_s1(j, S1_OSC2_LEVEL, 70) == S1_EDIT_REJECTED);
++    CHECK(!memcmp(before[0], shared(j), NPARAMS_MAX));
++    CHECK(!memcmp(before[1], shared(s), NPARAMS_MAX));
++    select_bank(j, ORIGINAL_SOUND_JUNO);
++    CHECK(!memcmp(before[0], shared(j), NPARAMS_MAX));
++
++    /* A malformed marked payload must not be interpreted as free storage. */
++    proj.sound.v[T_303][j][31] = 4;
++    engine_bass_sound_refresh(&proj.sound, j);
++    shared(j)[3] = 0xff;
++    memcpy(before[0], shared(j), NPARAMS_MAX);
++    CHECK(engine_bass_sound_bank(&proj.sound, j) < 0);
++    CHECK(!engine_superj6_factory_load(j, &row));
++    CHECK(engine_bass_select_preset(j, ORIGINAL_SOUND_SYNTHONE, 0, &proj.sound) < 0);
++    CHECK(!memcmp(before[0], shared(j), NPARAMS_MAX));
++    CHECK(!memcmp(before[1], shared(s), NPARAMS_MAX));
++    CHECK(set_s1(s, S1_OSC2_LEVEL, 75) == S1_EDIT_QUEUED);
++    shared(s)[1] |= 0x80;
++    memcpy(before[1], shared(s), NPARAMS_MAX);
++    CHECK(engine_bass_sound_bank(&proj.sound, s) < 0);
++    CHECK(engine_bass_select_preset(s, ORIGINAL_SOUND_JUNO, 0, &proj.sound) < 0);
++    CHECK(!memcmp(before[0], shared(j), NPARAMS_MAX));
++    CHECK(!memcmp(before[1], shared(s), NPARAMS_MAX));
++}
++
++static void test_history(unsigned j)
++{
++    unsigned s = j ^ 1u;
++    fresh_setup(j);
++    proj.set.bt |= PROJ_BT_CLK_IN;
++    select_bank(j, ORIGINAL_SOUND_JUNO);
++    select_bank(s, ORIGINAL_SOUND_SYNTHONE);
++    shared(j)[NPARAMS_MAX-1] = 0xcc;
++    shared(s)[NPARAMS_MAX-1] = 0xdd;
++    CHECK(set_s1(s, S1_OSC2_LEVEL, 92) == S1_EDIT_QUEUED);
++    uint8_t peer[NPARAMS_MAX];
++    memcpy(peer, shared(s), sizeof peer);
++    sj6_factory_row row = authored();
++    CHECK(engine_superj6_factory_load(j, &row));
++    render(1);
++    undo_commit_stable();
++    CHECK(engine_superj6_knob_turn(j, SJ6_VIBRATO_RATE, 78, 0));
++    render(1);
++    undo_commit_stable();
++    do_undo(0);
++    CHECK(engine_superj6_knob_position(j, SJ6_VIBRATO_RATE) == 95);
++    do_undo(1);
++    CHECK(engine_superj6_knob_position(j, SJ6_VIBRATO_RATE) == 78);
++    select_bank(j, ORIGINAL_SOUND_SYNTHONE);
++    undo_commit_stable();
++    do_undo(0);
++    CHECK(engine_bass_bank(j) == ORIGINAL_SOUND_JUNO);
++    CHECK(engine_superj6_knob_position(j, SJ6_VIBRATO_RATE) == 78);
++    do_undo(1);
++    CHECK(engine_bass_bank(j) == ORIGINAL_SOUND_SYNTHONE);
++    check_payload_default(j, 8, 0, 0xcc);
++    CHECK(!memcmp(peer, shared(s), sizeof peer));
++    do_undo(0);
++    reset_sound(PART_303A + j);
++    check_payload_default(j, 8, 0, 0xcc);
++    CHECK(!memcmp(peer, shared(s), sizeof peer));
++    do_undo(0);
++    CHECK(engine_bass_bank(j) == ORIGINAL_SOUND_JUNO);
++    CHECK(engine_superj6_knob_position(j, SJ6_VIBRATO_RATE) == 78);
++}
++
++int main(void)
++{
++    const char *red = getenv("SJ6_MIXED_RED");
++    if (red) {
++        unsigned owner = strchr(red, '1') ? 1 : 0;
++        if (*red == 'o') test_opaque(owner);
++        else test_mixed(owner);
++    } else {
++        for (unsigned owner = 0; owner < 2; ++owner) {
++            test_mixed(owner);
++            test_opaque(owner);
++            test_history(owner);
++        }
++    }
++    printf("SuperJ6/Synth One shared-row ownership %u checks\n", checks);
++    return 0;
++}
+diff --git a/tests/host/ui_superj6_vibrato_test.c b/tests/host/ui_superj6_vibrato_test.c
+--- a/tests/host/ui_superj6_vibrato_test.c
++++ b/tests/host/ui_superj6_vibrato_test.c
+@@ -103,7 +103,7 @@
+     CHECK(original_sound_sj6_vibrato(cell) && original_sound_is_edited(cell));
+     extension[ORIGINAL_SJ6_VIBRATO_OFFSET + 1] = 128;
+     CHECK(!original_sound_sj6_ext_valid(cell, extension));
+-    cell[31] = 2;
++    cell[31] = 5;
+     CHECK(!original_sound_valid(cell));
+ }
+ 

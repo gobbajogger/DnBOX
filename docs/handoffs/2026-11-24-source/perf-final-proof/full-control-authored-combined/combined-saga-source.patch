@@ -1,0 +1,97 @@
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -256,8 +256,14 @@
+     juno6_lfo_words lfo;
+     float vibrato[2];
+     uint8_t vibrato_present;
++#if X0X_ARP_ENGINE
++    uint16_t saga_seen, saga_on;
++#endif
+ } sj6_factory_motion;
+ static sj6_factory_motion sj6_factory_motion_pending[NBASS];
++#if X0X_ARP_ENGINE
++static void arp_factory_toggles(unsigned owner, uint16_t seen, uint16_t on);
++#endif
+ static int sj6_factory_vibrato_ready(unsigned owner, unsigned present);
+ static void sj6_commit_factory(unsigned owner, const sj6_factory_motion *motion, unsigned chorus_mode);
+ #endif
+@@ -282,6 +288,11 @@
+     }
+ #if X0X_SUPERJ6_BUILTIN_INIT
+     sj6_factory_motion motion = {0};
++#if X0X_ARP_ENGINE
++    if (row->saga_invalid) return 0;
++    motion.saga_seen = row->saga_seen;
++    motion.saga_on = row->saga_on;
++#endif
+     juno6_lfo_words *lfo = &motion.lfo;
+     lfo->present = (uint8_t)((row->present >> SJ6_ROW_LFO_RATE) & ((1u << SJ6_LFO_WORD_COUNT) - 1u));
+     for (unsigned i = 0; i < SJ6_LFO_WORD_COUNT; ++i) if (lfo->present & (1u << i)) {
+@@ -466,7 +477,11 @@
+                 juno6_apply_factory_waves(synth, synth->pending_wave);
+                 chorus->factory_mode = (uint8_t)chorus_mode;
+ #if X0X_SUPERJ6_BUILTIN_INIT
+-                sj6_commit_factory(owner, &sj6_factory_motion_pending[owner], chorus_mode);
++                const sj6_factory_motion *motion = &sj6_factory_motion_pending[owner];
++                sj6_commit_factory(owner, motion, chorus_mode);
++#if X0X_ARP_ENGINE
++                if (motion->saga_seen) arp_factory_toggles(owner, motion->saga_seen, motion->saga_on);
++#endif
+ #endif
+             } else if (!active && !engine_bass_preset_pending(owner))
+                 for (unsigned layer = 0; layer < 2; ++layer)
+--- a/firmware/src/app/engine_arp.inc
++++ b/firmware/src/app/engine_arp.inc
+@@ -39,6 +39,21 @@
+     ++arp_revision[v];
+ }
+ #if X0X_SUPERJ6_FACTORY
++#if X0X_SUPERJ6_BUILTIN_INIT
++/* Runs only on a successful pre-note factory commit, before AMP2 can write
++ * the first v1 block. Never overwrite an owner project or a queued edit. */
++static void arp_factory_toggles(unsigned v, uint16_t seen, uint16_t on)
++{
++    if (!mot_base_snd || arp_pending_flag[v]) return;
++    engine_arp_cfg c;
++    if (engine_arp_block_decode(ARP_SLOT(mot_base_snd, v), &c)) return;
++    c = original_bass[v].arp.cfg;
++    c.on_mask = (uint16_t)((c.on_mask & ~seen) | (on & seen));
++    if (!original_runtime_arp_config(&original_bass[v], &c)) return;
++    arp_store(v, &c);
++    ++arp_revision[v];
++}
++#endif
+ static void arp_store_amp2(unsigned v, unsigned slot, float unit)
+ {
+     if (!mot_base_snd || slot >= 4) return;
+--- a/firmware/src/app/superj6_factory.h
++++ b/firmware/src/app/superj6_factory.h
+@@ -22,11 +22,28 @@
+     uint16_t present;
+ #endif
+     uint8_t chorus_flags;
++#if X0X_SUPERJ6_BUILTIN_INIT
++    uint8_t saga_invalid;
++    uint16_t saga_seen, saga_on;
++#endif
+ } sj6_factory_row;
+ 
+ static inline void sj6_factory_add_word(sj6_factory_row *row, unsigned id, uint32_t bits)
+ {
+     unsigned slot;
++#if X0X_SUPERJ6_BUILTIN_INIT
++    /* Only the literal binary step toggles are qualified. Do not feed the
++     * normalized offset/count/gate fields through the provisional mapper. */
++    if (id >= 163 && id <= 178) {
++        uint16_t bit = (uint16_t)(1u << (id - 163));
++        if (!(row->saga_seen & bit)) {
++            row->saga_seen |= bit;
++            if (bits == UINT32_C(0x3f800000)) row->saga_on |= bit;
++            else if (bits & UINT32_C(0x7fffffff)) row->saga_invalid = 1;
++        }
++        return;
++    }
++#endif
+     if (id == 40 || id == 41) {
+         unsigned mb = 1u << (id - 40), pb = mb << 2;
+         if (!(row->chorus_flags & pb)) {

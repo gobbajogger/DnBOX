@@ -1,0 +1,6 @@
+part=0 3/32 beat: note 127 on frame 0, off 1034, rest 2068, note 96 on 4135
+part=0 off-grid held note waited for the transport; step 2 clipped to MIDI 0 on frame 4135
+part=1 3/32 beat: note 127 on frame 0, off 1034, rest 2068, note 96 on 4135
+part=1 off-grid held note waited for the transport; step 2 clipped to MIDI 0 on frame 4135
+PASS authenticated 640: 493 full toggle grids, 147 omitted, 377 rests, alternating owners
+PASS authored binary toggles: both owners, group, save/reload, project priority and legacy

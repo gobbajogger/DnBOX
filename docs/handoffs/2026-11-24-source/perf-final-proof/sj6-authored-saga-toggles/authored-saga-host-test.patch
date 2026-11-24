@@ -1,0 +1,163 @@
+diff --git a/tests/host/ui_superj6_saga_test.c b/tests/host/ui_superj6_saga_test.c
+--- a/tests/host/ui_superj6_saga_test.c
++++ b/tests/host/ui_superj6_saga_test.c
+@@ -282,7 +282,10 @@
+ }
+ #endif
+ 
+-int main(void)
++#ifndef SAGA_FIXTURE_MAIN
++#define SAGA_FIXTURE_MAIN main
++#endif
++int SAGA_FIXTURE_MAIN(void)
+ {
+     all_divisions();
+     physical_modes();
+diff --git a/tests/host/ui_superj6_authored_saga_test.c b/tests/host/ui_superj6_authored_saga_test.c
+new file mode 100644
+--- /dev/null
++++ b/tests/host/ui_superj6_authored_saga_test.c
+@@ -0,0 +1,143 @@
++/* SPDX-License-Identifier: GPL-3.0-only */
++#define SAGA_FIXTURE_MAIN retained_saga_main
++#include "ui_superj6_saga_test.c"
++#undef SAGA_FIXTURE_MAIN
++
++static void row_base(sj6_factory_row *row)
++{
++    *row = (sj6_factory_row){0};
++    static const unsigned ids[] = {119,120,121,122,0,82,83,40,41};
++    for (unsigned i = 0; i < sizeof ids / sizeof *ids; ++i)
++        sj6_factory_add_word(row, ids[i], 0u);
++    sj6_factory_add_word(row, 0, 0x3f800000u); /* first win tested by the reader */
++}
++
++static void set_project_arp(unsigned owner, uint16_t mask)
++{
++    engine_arp_cfg c;
++    engine_arp_cfg_default(&c);
++    c.on_mask = mask;
++    c.division = 2;
++    c.gate = 50;
++    c.length = 3;
++    c.offset[0] = 24;
++    c.offset[2] = -24;
++    c.mode = ARP_SEQ;
++    c.on = 1;
++    engine_arp_block_encode(&c, proj.sound.v[T_303][ARP_BLOCK_VOICE0 + owner]);
++}
++
++static void fresh(unsigned owner)
++{
++    setup(V_PART, PART_303A + owner);
++    proj.set.bt |= PROJ_BT_CLK_IN;
++    select_owner(owner, 0);
++    select_owner(1-owner, 0);
++    memset(proj.sound.v[T_303][ARP_BLOCK_VOICE0 + owner], 0, ARP_BLOCK_BYTES);
++    set_project_arp(1-owner, 0x7654);
++    engine_apply_sound(&proj.sound);
++    CHECK(!engine_bass_preset_pending(owner));
++}
++
++static uint16_t mask_read(unsigned owner)
++{
++    engine_arp_steps steps;
++    CHECK(engine_arp_steps_read(owner, &steps));
++    return steps.on_mask;
++}
++
++static void exercise(unsigned owner)
++{
++    sj6_factory_row row;
++    row_base(&row);
++    sj6_factory_add_word(&row, 164, 0x80000000u); /* exact signed zero is OFF */
++    sj6_factory_add_word(&row, 178, 0u);
++    sj6_factory_add_word(&row, 164, 0x3f800000u); /* duplicate must not override */
++    sj6_factory_add_word(&row, 142, 0x3f800000u); /* do not infer sequencer activation */
++    fresh(owner);
++    CHECK(mask_read(owner) == 0xffffu && mask_read(1-owner) == 0x7654u);
++    uint8_t peer[ARP_BLOCK_BYTES];
++    memcpy(peer, proj.sound.v[T_303][ARP_BLOCK_VOICE0 + 1-owner], ARP_BLOCK_BYTES);
++    CHECK(engine_superj6_factory_load(owner, &row));
++    CHECK(mask_read(owner) == 0xffffu);
++    render(1);
++    CHECK(mask_read(owner) == 0x7ffdu);
++    CHECK(!memcmp(peer, proj.sound.v[T_303][ARP_BLOCK_VOICE0 + 1-owner], ARP_BLOCK_BYTES));
++    engine_arp_cfg active;
++    CHECK(engine_arp_block_decode(proj.sound.v[T_303][ARP_BLOCK_VOICE0 + owner], &active));
++    CHECK(!active.on && active.mode == ARP_UP && !active.division && active.gate == 100 &&
++          active.length == 16 && !active.offset[1] && !active.oct_mask);
++    /* Replay the decoded adopted mask with a deliberate transport setup;
++     * factory application above does not silently change BPM, mode or gate. */
++    active.on = 1; active.mode = ARP_SEQ; active.division = 2;
++    active.gate = 50; active.length = 3;
++    active.offset[0] = 24; active.offset[2] = -24;
++    timed_pattern(&active, owner);
++    save_and_reload();
++    engine_apply_sound(&proj.sound);
++    CHECK(mask_read(owner) == 0x7ffdu);
++    select_owner(owner, 1);
++    CHECK(mask_read(owner) == 0x7ffdu);
++
++    /* Existing project's musical settings win over a newly loaded program. */
++    set_project_arp(owner, 0xffffu);
++    engine_apply_sound(&proj.sound);
++    CHECK(engine_superj6_factory_load(owner, &row));
++    render(1);
++    CHECK(mask_read(owner) == 0xffffu);
++    CHECK(engine_arp_block_decode(proj.sound.v[T_303][ARP_BLOCK_VOICE0 + owner], &active));
++    CHECK(active.on && active.mode == ARP_SEQ && active.division == 2 && active.gate == 50 && active.length == 3);
++
++    /* Explicit edits queued while still unset outrank the factory fallback. */
++    fresh(owner);
++    CHECK(engine_superj6_factory_load(owner, &row));
++    engine_arp_steps view;
++    CHECK(engine_arp_steps_read(owner, &view));
++    CHECK(engine_arp_step_set(owner, view.revision, 0, ARP_S_ON, 0) == S1_EDIT_QUEUED);
++    render(1);
++    CHECK(mask_read(owner) == 0xfffeu);
++
++    fresh(owner);
++    sj6_factory_add_word(&row, 170, 0x3f000000u);
++    CHECK(!engine_superj6_factory_load(owner, &row));
++    render(1);
++    CHECK(mask_read(owner) == 0xffffu);
++}
++
++#ifdef SJ6_SAGA_CORPUS
++#include "saga_toggles.inc"
++static void corpus(void)
++{
++    unsigned loaded = 0, omitted = 0, rests = 0;
++    for (unsigned i = 0; i < sizeof source_toggle_mask / sizeof *source_toggle_mask; ++i) {
++        unsigned owner = i & 1u;
++        sj6_factory_row row;
++        row_base(&row);
++        if (source_toggle_mask[i] <= 0xffffu) {
++            for (unsigned k = 0; k < 16; ++k) {
++                unsigned on = source_toggle_mask[i] >> k & 1u;
++                sj6_factory_add_word(&row, 163 + k, on ? 0x3f800000u : 0u);
++                rests += !on;
++            }
++            ++loaded;
++        } else ++omitted;
++        fresh(owner);
++        CHECK(engine_superj6_factory_load(owner, &row));
++        render(1);
++        CHECK(mask_read(owner) == (source_toggle_mask[i] <= 0xffffu ? source_toggle_mask[i] : 0xffffu));
++        CHECK(mask_read(1-owner) == 0x7654u);
++    }
++    CHECK(loaded == 493 && omitted == 147 && rests == 377);
++    printf("PASS authenticated 640: %u full toggle grids, %u omitted, %u rests, alternating owners\n", loaded, omitted, rests);
++}
++#endif
++
++int main(void)
++{
++    exercise(0); exercise(1);
++#ifdef SJ6_SAGA_CORPUS
++    corpus();
++#endif
++    puts("PASS authored binary toggles: both owners, group, save/reload, project priority and legacy");
++    return 0;
++}
