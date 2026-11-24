@@ -1,0 +1,77 @@
+=== direct
+PASS 49,152 stereo frames across two owners and four legacy sound paths
+PASS complete page descriptors 8800, SMC queries 39640, paired digest 433afe1b
+PASS all 18 authored Saga periods, preset rounding, and the fixed arp block
+PASS actual notes for four deterministic modes, interleaved tiers and a shrinking pool
+PASS SuperJ6 Saga ARP/SEQ 895 checks
+PASS all 18 Build-9 divisions, binary32 boundaries and exact three-clock steps at 8001 to 192000 Hz
+PASS SuperJ6 LFO sync 11778 checks
+PASS filter owner 0: all modes, tracking energy (0.853182 / 0.517702), linked ADSR, note locks and reload
+PASS filter owner 1: all modes, tracking energy (0.853182 / 0.517702), linked ADSR, note locks and reload
+PASS Synth One filter mode and ADSR pitch tracking 33234 checks
+PASS Synth One compact oscillator panel 194 checks
+PASS mixed owner 0: typed bit 22, shared ARP, locks, motion, project and cross-bank ownership
+PASS mixed owner 1: typed bit 22, shared ARP, locks, motion, project and cross-bank ownership
+PASS Synth One and SuperJ6 storage seam 317 checks
+=== compact
+PASS 49,152 stereo frames across two owners and four legacy sound paths
+PASS complete page descriptors 8800, SMC queries 39640, paired digest 433afe1b
+PASS all 18 authored Saga periods, preset rounding, and the fixed arp block
+PASS actual notes for four deterministic modes, interleaved tiers and a shrinking pool
+PASS SuperJ6 Saga ARP/SEQ 895 checks
+PASS all 18 Build-9 divisions, binary32 boundaries and exact three-clock steps at 8001 to 192000 Hz
+PASS SuperJ6 LFO sync 11778 checks
+PASS filter owner 0: all modes, tracking energy (0.853182 / 0.517702), linked ADSR, note locks and reload
+PASS filter owner 1: all modes, tracking energy (0.853182 / 0.517702), linked ADSR, note locks and reload
+PASS Synth One filter mode and ADSR pitch tracking 33234 checks
+PASS Synth One compact oscillator panel 194 checks
+PASS mixed owner 0: typed bit 22, shared ARP, locks, motion, project and cross-bank ownership
+PASS mixed owner 1: typed bit 22, shared ARP, locks, motion, project and cross-bank ownership
+PASS Synth One and SuperJ6 storage seam 317 checks
+PASS all 18 authored Saga periods, preset rounding, and the fixed arp block
+PASS actual notes for four deterministic modes, interleaved tiers and a shrinking pool
+PASS SuperJ6 Saga ARP/SEQ 895 checks
+PASS all 18 Build-9 divisions, binary32 boundaries and exact three-clock steps at 8001 to 192000 Hz
+PASS SuperJ6 LFO sync 11778 checks
+PASS filter owner 0: all modes, tracking energy (0.853182 / 0.517702), linked ADSR, note locks and reload
+PASS filter owner 1: all modes, tracking energy (0.853182 / 0.517702), linked ADSR, note locks and reload
+PASS Synth One filter mode and ADSR pitch tracking 33234 checks
+PASS mixed owner 0: typed bit 22, shared ARP, locks, motion, project and cross-bank ownership
+PASS mixed owner 1: typed bit 22, shared ARP, locks, motion, project and cross-bank ownership
+PASS Synth One and SuperJ6 storage seam 317 checks
+PASS previous editor reads oscillator projects and preserves unsupported filter Sound/lock projects, 258 checks
+=== guarded
+PASS all 18 authored Saga periods, preset rounding, and the fixed arp block
+PASS actual notes for four deterministic modes, interleaved tiers and a shrinking pool
+PASS SuperJ6 Saga ARP/SEQ 895 checks
+PASS all 18 Build-9 divisions, binary32 boundaries and exact three-clock steps at 8001 to 192000 Hz
+PASS SuperJ6 LFO sync 11778 checks
+PASS filter owner 0: all modes, tracking energy (0.853182 / 0.517702), linked ADSR, note locks and reload
+PASS filter owner 1: all modes, tracking energy (0.853182 / 0.517702), linked ADSR, note locks and reload
+PASS Synth One filter mode and ADSR pitch tracking 33234 checks
+PASS Synth One compact oscillator panel 194 checks
+PASS mixed owner 0: typed bit 22, shared ARP, locks, motion, project and cross-bank ownership
+PASS mixed owner 1: typed bit 22, shared ARP, locks, motion, project and cross-bank ownership
+PASS Synth One and SuperJ6 storage seam 317 checks
+PASS filter owner 0: all modes, tracking energy (0.853182 / 0.517702), linked ADSR, note locks and reload
+PASS filter owner 1: all modes, tracking energy (0.853182 / 0.517702), linked ADSR, note locks and reload
+PASS Synth One filter mode and ADSR pitch tracking 33234 checks
+PASS complete page descriptors 8800, SMC queries 39640, paired digest 433afe1b
+PASS all 18 authored Saga periods, preset rounding, and the fixed arp block
+PASS actual notes for four deterministic modes, interleaved tiers and a shrinking pool
+PASS SuperJ6 Saga ARP/SEQ 895 checks
+PASS provenance: rapid/idle navigation, duplicate/no-change/zero-delta silence, real movement and pickup
+PASS maps: both kits/banks, production descriptors, keyboard list isolation
+PASS align: drum Tune/Decay ranks; B TONE / OSC mapping and SOUND identity
+PASS physical layout: all eight knob/fader positions, three physical rows and no phantom fourth row
+PASS lane selection: part/FX/master, both kits/views/banks, touch independence, locked live selection and outside bank
+PASS drum titles: 909/808 SEQ names in both banks, inactive lanes, captured kit/view/bank; MIX numbers unchanged
+PASS action captions: filter PART/HOME/MIX/MENU, drum solo/record dispatch, inactive/live-locked; knob arc extremes and bipolar center
+PASS restore: eight views preserve complete navigation state and exact framebuffer
+PASS activity: pickup, live values, repeated controls, exact boundary and wrap
+PASS feedback: existing header message and local knob readout survive temporary UI
+PASS navigation: physical buttons, encoder, key and SMC navigation cancel
+PASS overlays: confirmation blocks input; menu/help state survives activity and timeout
+PASS clip: grid/waiting framebuffer restores; keyboard clip fields stay unchanged under independent SMC popup
+PASS actions/reset: mute+Solo, inactive strips, init/project lock/reset
+smc_ui: PASS (8839 checks)

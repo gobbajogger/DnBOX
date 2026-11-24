@@ -1,0 +1,121 @@
+--- a/firmware/src/app/original_presets.inc
++++ b/firmware/src/app/original_presets.inc
+@@ -376,6 +376,61 @@
+     return ready;
+ }
+ 
++/* The audio boundary keeps mask read/clear and readiness in its
++ * existing order; only an admitted edit needs the common store/applier. */
++__attribute__((noinline)) X0X_COLD static void sj6_knob_commit(unsigned v, unsigned mask)
++{
++    sound_t *sound = (sound_t *)mot_base_snd;
++    juno6_t *s = &original_bass[v].dsp.juno.synth;
++    uint8_t *cell = sound->v[T_303][v];
++    unsigned oscillator = mask & ORIGINAL_SJ6_EDIT_MASK;
++    unsigned extra = (mask >> SJ6_OSC_KNOBS) & ((1u << SJ6_EXTRA_COUNT) - 1u);
++    if (oscillator) {
++        juno6_apply_knobs(s, oscillator, sj6_knob_value[v]);
++        original_sound_sj6_store(cell, oscillator, sj6_knob_value[v]);
++    }
++    unsigned mode_turns = (mask >> SJ6_LFO1_MODE) & ((1u << SJ6_LFO_COUNT) - 1u);
++    if (extra || mode_turns) {
++        const uint8_t *positions = sj6_knob_value[v];
++        unsigned modes = mode_turns | (extra >> ORIGINAL_SJ6_RATE_INDEX), hz_modes = 0;
++        for (unsigned i = 0; i < SJ6_LFO_COUNT; ++i) if (modes & (1u << i)) {
++            unsigned slot = SJ6_LFO1_MODE + i;
++            unsigned hz = mode_turns & (1u << i) ? positions[slot] : juno6_knob_position(s, slot);
++            hz_modes |= hz << i;
++        }
++        uint8_t *row = sound->v[T_303][ORIGINAL_SJ6_EXTRA_ROW + v];
++        original_sound_sj6_extra_store(cell, row, extra, positions + SJ6_OSC_KNOBS, modes, hz_modes);
++        sj6_apply_extra(s, extra | (modes << ORIGINAL_SJ6_MODE_INDEX), row + 2, 0);
++    }
++    unsigned depth = mask & (1u << SJ6_LFO2_PWM_DEPTH), route = mask & (1u << SJ6_LFO2_PWM_ROUTE);
++    if (depth || route) {
++        unsigned setting = original_sound_sj6_lfo2_pwm(cell);
++        if (depth) setting = (setting & ~SJ6_LFO2_PWM_DEPTH_MASK) | sj6_knob_value[v][SJ6_LFO2_PWM_DEPTH];
++        if (route) setting = (setting & SJ6_LFO2_PWM_DEPTH_MASK) |
++                             (sj6_knob_value[v][SJ6_LFO2_PWM_ROUTE] << SJ6_LFO2_PWM_ROUTE_SHIFT);
++        juno6_set_lfo2_pwm(s, setting);
++        original_sound_sj6_lfo2_pwm_store(cell, setting);
++    }
++    unsigned chorus_turns = mask >> SJ6_CHORUS_I;
++    if (chorus_turns) {
++        juno6_chorus_t *chorus = &original_bass[v].dsp.juno.chorus;
++        unsigned prior = chorus->factory_mode;
++        unsigned enabled = prior ? prior - JUNO6_CHORUS_OFF : 0;
++        const uint8_t *positions = sj6_knob_value[v] + SJ6_CHORUS_I;
++        for (unsigned i = 0; i < 2; ++i) {
++            if (chorus_turns & (1u << i))
++                enabled = (enabled & ~(1u << i)) | (positions[i] << i);
++            if (chorus_turns & (4u << i))
++                (void)original_sound_set(cell, 13u + i, positions[2u + i]);
++        }
++        chorus->factory_mode = (uint8_t)(JUNO6_CHORUS_OFF + enabled);
++        original_sound_sj6_chorus_store(cell, chorus->factory_mode);
++        if (!prior || chorus_turns >> 2) original_runtime_sj6_chorus(&original_bass[v], cell);
++    }
++    bass_tag_set(sound, v, ORIGINAL_SOUND_JUNO, bass_named_preset[v],
++                 original_sound_edit_mask(cell) != 0);
++}
++
+ X0X_COLD static void sj6_knob_boundary(void)
+ {
+     for (unsigned v = 0; v < NBASS; ++v) {
+@@ -386,55 +441,7 @@
+ #if X0X_BASS_NOTE_SOUND
+         if (note_lock_applied[v]) continue;
+ #endif
+-        sound_t *sound = (sound_t *)mot_base_snd;
+-        juno6_t *s = &original_bass[v].dsp.juno.synth;
+-        uint8_t *cell = sound->v[T_303][v];
+-        unsigned oscillator = mask & ORIGINAL_SJ6_EDIT_MASK;
+-        unsigned extra = (mask >> SJ6_OSC_KNOBS) & ((1u << SJ6_EXTRA_COUNT) - 1u);
+-        if (oscillator) {
+-            juno6_apply_knobs(s, oscillator, sj6_knob_value[v]);
+-            original_sound_sj6_store(cell, oscillator, sj6_knob_value[v]);
+-        }
+-        unsigned mode_turns = (mask >> SJ6_LFO1_MODE) & ((1u << SJ6_LFO_COUNT) - 1u);
+-        if (extra || mode_turns) {
+-            const uint8_t *positions = sj6_knob_value[v];
+-            unsigned modes = mode_turns | (extra >> ORIGINAL_SJ6_RATE_INDEX), hz_modes = 0;
+-            for (unsigned i = 0; i < SJ6_LFO_COUNT; ++i) if (modes & (1u << i)) {
+-                unsigned slot = SJ6_LFO1_MODE + i;
+-                unsigned hz = mode_turns & (1u << i) ? positions[slot] : juno6_knob_position(s, slot);
+-                hz_modes |= hz << i;
+-            }
+-            uint8_t *row = sound->v[T_303][ORIGINAL_SJ6_EXTRA_ROW + v];
+-            original_sound_sj6_extra_store(cell, row, extra, positions + SJ6_OSC_KNOBS, modes, hz_modes);
+-            sj6_apply_extra(s, extra | (modes << ORIGINAL_SJ6_MODE_INDEX), row + 2, 0);
+-        }
+-        unsigned depth = mask & (1u << SJ6_LFO2_PWM_DEPTH), route = mask & (1u << SJ6_LFO2_PWM_ROUTE);
+-        if (depth || route) {
+-            unsigned setting = original_sound_sj6_lfo2_pwm(cell);
+-            if (depth) setting = (setting & ~SJ6_LFO2_PWM_DEPTH_MASK) | sj6_knob_value[v][SJ6_LFO2_PWM_DEPTH];
+-            if (route) setting = (setting & SJ6_LFO2_PWM_DEPTH_MASK) |
+-                                 (sj6_knob_value[v][SJ6_LFO2_PWM_ROUTE] << SJ6_LFO2_PWM_ROUTE_SHIFT);
+-            juno6_set_lfo2_pwm(s, setting);
+-            original_sound_sj6_lfo2_pwm_store(cell, setting);
+-        }
+-        unsigned chorus_turns = mask >> SJ6_CHORUS_I;
+-        if (chorus_turns) {
+-            juno6_chorus_t *chorus = &original_bass[v].dsp.juno.chorus;
+-            unsigned prior = chorus->factory_mode;
+-            unsigned enabled = prior ? prior - JUNO6_CHORUS_OFF : 0;
+-            const uint8_t *positions = sj6_knob_value[v] + SJ6_CHORUS_I;
+-            for (unsigned i = 0; i < 2; ++i) {
+-                if (chorus_turns & (1u << i))
+-                    enabled = (enabled & ~(1u << i)) | (positions[i] << i);
+-                if (chorus_turns & (4u << i))
+-                    (void)original_sound_set(cell, 13u + i, positions[2u + i]);
+-            }
+-            chorus->factory_mode = (uint8_t)(JUNO6_CHORUS_OFF + enabled);
+-            original_sound_sj6_chorus_store(cell, chorus->factory_mode);
+-            if (!prior || chorus_turns >> 2) original_runtime_sj6_chorus(&original_bass[v], cell);
+-        }
+-        bass_tag_set(sound, v, ORIGINAL_SOUND_JUNO, bass_named_preset[v],
+-                     original_sound_edit_mask(cell) != 0);
++        sj6_knob_commit(v, mask);
+     }
+ }
+ #endif

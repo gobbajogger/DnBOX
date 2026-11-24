@@ -1,0 +1,293 @@
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -253,7 +253,7 @@
+ enum { SJ6_FILTER_OFF=1, SJ6_FILTER_ON, SJ6_FILTER_OMITTED };
+ #if X0X_SUPERJ6_BUILTIN_INIT
+ static juno6_lfo_words sj6_factory_lfo_pending[NBASS];
+-static void sj6_commit_factory_lfo(unsigned owner, const juno6_lfo_words *words);
++static void sj6_commit_factory(unsigned owner, const juno6_lfo_words *words, unsigned chorus_mode);
+ #endif
+ X0X_COLD static int superj6_stage_factory(unsigned owner, const sj6_factory_row *row,
+                                         float amp1, unsigned extra)
+@@ -443,10 +443,10 @@
+                 }
+                 synth->amp1_independent = (synth->pending_field_mask & SJ6_FACTORY_AMP1) != 0;
+                 juno6_apply_factory_waves(synth, synth->pending_wave);
++                chorus->factory_mode = (uint8_t)chorus_mode;
+ #if X0X_SUPERJ6_BUILTIN_INIT
+-                sj6_commit_factory_lfo(owner, &sj6_factory_lfo_pending[owner]);
++                sj6_commit_factory(owner, &sj6_factory_lfo_pending[owner], chorus_mode);
+ #endif
+-                chorus->factory_mode = (uint8_t)chorus_mode;
+             } else if (!active && !engine_bass_preset_pending(owner))
+                 for (unsigned layer = 0; layer < 2; ++layer)
+                     if (waves & (1u << layer))
+--- a/firmware/src/app/original_presets.inc
++++ b/firmware/src/app/original_presets.inc
+@@ -247,7 +247,7 @@
+     juno6_set_lfo_words(&part->dsp.juno.synth, has_words ? &words : NULL, 0);
+ }
+ 
+-static void sj6_commit_factory_lfo(unsigned owner, const juno6_lfo_words *words)
++static void sj6_commit_factory(unsigned owner, const juno6_lfo_words *words, unsigned chorus_mode)
+ {
+     juno6_t *s = &original_bass[owner].dsp.juno.synth;
+     juno6_set_lfo_words(s, words, 1);
+@@ -257,6 +257,8 @@
+     uint8_t *cell = sound->v[T_303][owner];
+     original_sound_sj6_lfo_store(cell, sound->v[T_303][ORIGINAL_SJ6_EXTRA_ROW + owner], words);
+     original_sound_sj6_lfo2_pwm_store(cell, 0);
++    original_sound_sj6_chorus_store(cell, chorus_mode);
++    original_runtime_sj6_chorus(&original_bass[owner], cell);
+     bass_tag_set(sound, owner, ORIGINAL_SOUND_JUNO, bass_named_preset[owner],
+                  original_sound_edit_mask(cell) != 0);
+ }
+@@ -282,6 +284,12 @@
+ static int sj6_knob_position(unsigned owner, unsigned slot)
+ {
+     if (sj6_knob_mask[owner] & (1u << slot)) return sj6_knob_value[owner][slot];
++    if (slot >= SJ6_CHORUS_RATE)
++        return mot_base_snd ? mot_base_snd->v[T_303][owner][13u + slot - SJ6_CHORUS_RATE] : 0;
++    if (slot >= SJ6_CHORUS_I) {
++        unsigned mode = original_bass[owner].dsp.juno.chorus.factory_mode;
++        return mode ? ((mode - JUNO6_CHORUS_OFF) >> (slot - SJ6_CHORUS_I)) & 1u : 0;
++    }
+     if (slot >= SJ6_OSC_KNOBS && slot < SJ6_LFO2_PWM_DEPTH && mot_base_snd &&
+ #if X0X_BASS_NOTE_SOUND
+         !note_lock_applied[owner] &&
+@@ -387,7 +395,7 @@
+             juno6_apply_knobs(s, oscillator, sj6_knob_value[v]);
+             original_sound_sj6_store(cell, oscillator, sj6_knob_value[v]);
+         }
+-        unsigned mode_turns = mask >> SJ6_LFO1_MODE;
++        unsigned mode_turns = (mask >> SJ6_LFO1_MODE) & ((1u << SJ6_LFO_COUNT) - 1u);
+         if (extra || mode_turns) {
+             const uint8_t *positions = sj6_knob_value[v];
+             unsigned modes = mode_turns | (extra >> ORIGINAL_SJ6_RATE_INDEX), hz_modes = 0;
+@@ -409,6 +417,22 @@
+             juno6_set_lfo2_pwm(s, setting);
+             original_sound_sj6_lfo2_pwm_store(cell, setting);
+         }
++        unsigned chorus_turns = mask >> SJ6_CHORUS_I;
++        if (chorus_turns) {
++            juno6_chorus_t *chorus = &original_bass[v].dsp.juno.chorus;
++            unsigned prior = chorus->factory_mode;
++            unsigned enabled = prior ? prior - JUNO6_CHORUS_OFF : 0;
++            const uint8_t *positions = sj6_knob_value[v] + SJ6_CHORUS_I;
++            for (unsigned i = 0; i < 2; ++i) {
++                if (chorus_turns & (1u << i))
++                    enabled = (enabled & ~(1u << i)) | (positions[i] << i);
++                if (chorus_turns & (4u << i))
++                    (void)original_sound_set(cell, 13u + i, positions[2u + i]);
++            }
++            chorus->factory_mode = (uint8_t)(JUNO6_CHORUS_OFF + enabled);
++            original_sound_sj6_chorus_store(cell, chorus->factory_mode);
++            if (!prior || chorus_turns >> 2) original_runtime_sj6_chorus(&original_bass[v], cell);
++        }
+         bass_tag_set(sound, v, ORIGINAL_SOUND_JUNO, bass_named_preset[v],
+                      original_sound_edit_mask(cell) != 0);
+     }
+@@ -608,6 +632,7 @@
+     unsigned mask = original_sound_sj6_knobs(cell, knobs);
+     if (mask) juno6_apply_knobs(&part->dsp.juno.synth, mask, knobs);
+     juno6_set_lfo2_pwm(&part->dsp.juno.synth, original_sound_sj6_lfo2_pwm(cell));
++    part->dsp.juno.chorus.factory_mode = (uint8_t)original_sound_sj6_chorus(cell);
+ }
+ #endif
+ static void note_lock_restore(int v)
+--- a/firmware/src/app/original_runtime.c
++++ b/firmware/src/app/original_runtime.c
+@@ -13,6 +13,21 @@
+     return p->status;
+ }
+ 
++#if X0X_SUPERJ6_BUILTIN_INIT
++X0X_COLD void original_runtime_sj6_chorus(original_runtime_part *part, const uint8_t *cell)
++{
++    part->dsp.juno.chorus.factory_mode = (uint8_t)original_sound_sj6_chorus(cell);
++    if (!part->dsp.juno.chorus.factory_mode) return;
++    /* These are the existing compact RATE/MIX controls. Loaded patches and
++     * first switch edits start from the visible positions in the sound cell. */
++    for (unsigned id = 13; id <= 14; ++id) {
++        float value;
++        if (original_sound_control_value(ORIGINAL_SOUND_JUNO, id, cell[id], &value))
++            (void)original_runtime_param(part, id, value);
++    }
++}
++#endif
++
+ X0X_COLD int original_runtime_init(original_runtime_part *p, const uint8_t cell[32], float bpm,
+     original_chicago_tuning *tuning, const original_chicago_fx2_cold_owner *fx)
+ {
+@@ -65,6 +80,7 @@
+         unsigned mask = original_sound_sj6_knobs(cell, positions);
+         if (mask) juno6_apply_knobs(&p->dsp.juno.synth, mask, positions);
+         juno6_set_lfo2_pwm(&p->dsp.juno.synth, original_sound_sj6_lfo2_pwm(cell));
++        original_runtime_sj6_chorus(p, cell);
+         return original_runtime_prepare(p, bpm);
+     }
+ #endif
+--- a/firmware/src/app/original_runtime.h
++++ b/firmware/src/app/original_runtime.h
+@@ -66,6 +66,9 @@
+ int original_runtime_retire(original_runtime_part *);
+ int original_runtime_prepare(original_runtime_part *, float bpm);
+ int original_runtime_param(original_runtime_part *, unsigned parameter, float value);
++#if X0X_SUPERJ6_BUILTIN_INIT
++void original_runtime_sj6_chorus(original_runtime_part *, const uint8_t *cell);
++#endif
+ int original_runtime_key(original_runtime_part *, unsigned source, unsigned key, unsigned velocity);
+ int original_runtime_release_source(original_runtime_part *, unsigned source);
+ int original_runtime_cut_source(original_runtime_part *p, unsigned source);
+--- a/firmware/src/app/original_sound.c
++++ b/firmware/src/app/original_sound.c
+@@ -205,10 +205,16 @@
+     if (slot < SJ6_OSC_KNOBS) return max[slot];
+     if (slot == SJ6_MASTER_LEVEL) return SJ6_MASTER_INIT;
+     if (slot == SJ6_LFO2_PWM_ROUTE) return DNBX_LAYERS;
+-    if (slot == SJ6_FILTER_LINK || (slot >= SJ6_LFO1_MODE && slot <= SJ6_LFO3_MODE)) return 1u;
++    if (slot == SJ6_FILTER_LINK || (slot >= SJ6_LFO1_MODE && slot <= SJ6_CHORUS_II)) return 1u;
+     return slot <= SJ6_LFO2_PWM_BASE ? 127u : 0;
+ }
+ 
++void original_sound_sj6_chorus_store(uint8_t *cell, unsigned mode)
++{
++    const unsigned shift = ORIGINAL_SJ6_CHORUS_SHIFT - 24u;
++    cell[25] = (uint8_t)((cell[25] & ((1u << shift) - 1u)) | (mode << shift));
++}
++
+ void original_sound_sj6_lfo2_pwm_store(uint8_t *cell, uint16_t setting)
+ {
+     uint32_t flags = original_sound_edit_mask(cell) &
+@@ -375,7 +381,7 @@
+         unsigned mask = original_sound_sj6_knobs(cell, positions);
+         if (!!cell[ORIGINAL_SJ6_LFO2_PWM_BYTE] != !!(sj6_flags & ORIGINAL_SJ6_LFO2_PWM_BIT) ||
+             original_sound_sj6_lfo2_pwm(cell) >> SJ6_LFO2_PWM_ROUTE_SHIFT > DNBX_LAYERS ||
+-            sj6_flags & ~((ORIGINAL_SJ6_LFO2_PWM2_BIT << 1) - 1u)) return 0;
++            original_sound_sj6_chorus(cell) > JUNO6_CHORUS_BOTH) return 0;
+         for (unsigned i = 0; i < SJ6_OSC_KNOBS; ++i)
+             if (positions[i] > (mask & (1u << i) ? original_sound_sj6_max(i) : 0)) return 0;
+         for (unsigned i = 0; i < count; ++i)
+--- a/firmware/src/app/original_sound.h
++++ b/firmware/src/app/original_sound.h
+@@ -113,6 +113,11 @@
+ #define ORIGINAL_SJ6_LFO2_PWM_BIT (ORIGINAL_SJ6_AUTHORED_LFO_BIT << 1)
+ #define ORIGINAL_SJ6_LFO2_PWM_BYTE 21u
+ #define ORIGINAL_SJ6_LFO2_PWM2_BIT (ORIGINAL_SJ6_LFO2_PWM_BIT << 1)
++#define ORIGINAL_SJ6_CHORUS_SHIFT 29u
++/* The upper three edit bits encode a mode, including explicit OFF. */
++static inline unsigned original_sound_sj6_chorus(const uint8_t *cell)
++{ return cell[25] >> (ORIGINAL_SJ6_CHORUS_SHIFT - 24); }
++void original_sound_sj6_chorus_store(uint8_t *cell, unsigned mode);
+ static inline unsigned original_sound_sj6_lfo2_pwm(const uint8_t *cell)
+ {
+     /* Keep the earlier OFF/PWM1 byte intact. PWM2 occupies the next edit bit. */
+--- a/firmware/src/app/superj6_factory.h
++++ b/firmware/src/app/superj6_factory.h
+@@ -55,7 +55,7 @@
+     }
+ }
+ 
+-/* Zero means old record, then dry/I/II/I+II; active modes still unqualified. */
++/* Zero means an older record without the switches, then OFF/I/II/I+II. */
+ static inline int sj6_factory_chorus_mode(const sj6_factory_row *row)
+ {
+     unsigned mask = row->chorus_flags;
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -517,6 +517,8 @@
+         {"LFO 1", 127, 0, 0}, {"LFO 2", 127, 0, 0}, {"LFO 3", 127, 0, 0},
+         {"DEPTH", 127, 0, 0}, {"ROUTE", DNBX_LAYERS, 0, pwm_route},
+         {"LFO 1", 1, 1, lfo_mode}, {"LFO 2", 1, 1, lfo_mode}, {"LFO 3", 1, 1, lfo_mode},
++        {"CHORUS I", 1, 0, enable}, {"CHORUS II", 1, 0, enable},
++        {"RATE", 127, 0, 0}, {"MIX", 127, 0, 0},
+         {"PWM BASE", SJ6_PWM_STEPS, 0, 0},
+     };
+     return slot < sizeof knobs / sizeof *knobs ? &knobs[slot] : 0;
+@@ -2123,9 +2125,11 @@
+                     {"LFO RATE", {SJ6_LFO1_RATE, SJ6_LFO2_RATE, SJ6_LFO3_RATE, ORIG_PAGE_NONE}},
+                     {"LFO MODE", {SJ6_LFO1_MODE, SJ6_LFO2_MODE, SJ6_LFO3_MODE, ORIG_PAGE_NONE}},
+                     {"LFO2 PWM", {SJ6_LFO2_RATE, SJ6_LFO2_PWM_DEPTH, SJ6_LFO2_PWM_ROUTE, SJ6_LFO2_PWM_BASE}},
++                    {"LFO", {ORIG_PAGE_ENGINE + 10, ORIG_PAGE_ENGINE + 11, ORIG_PAGE_NONE, ORIG_PAGE_NONE}},
++                    {"CHORUS", {SJ6_CHORUS_I, SJ6_CHORUS_II, SJ6_CHORUS_RATE, SJ6_CHORUS_MIX}},
+                 };
+                 add_original_extra_pages(emit, pages, sizeof pages / sizeof *pages, b, R_SJ6KNOB);
+-                first_row = 3;
++                first_row = UI_ORIGINAL_JUNO_PAGES;
+             }
+ #endif
+ #if X0X_S1_EXTRA
+--- a/firmware/src/dsp/juno6.c
++++ b/firmware/src/dsp/juno6.c
+@@ -99,12 +99,23 @@
+ }
+ void juno6_chorus_init(juno6_chorus_t*c,float sr){memset(c,0,sizeof *c);c->sample_rate=sr>8000?sr:44100;c->rate_hz=.8f;c->depth_ms=3.4f;c->mix=.22f;}
+ void juno6_chorus_set(juno6_chorus_t*c,float r,float d,float m){c->rate_hz=clampf(r,.1f,5);c->depth_ms=clampf(d,1.7f,5.4f);c->mix=clampf(m,0,.5f);}
++static inline float chorus_read(const juno6_chorus_t *c, unsigned write, float delay)
++{
++ unsigned whole = (unsigned)delay;
++ unsigned a = (write + JUNO6_CHORUS_SAMPLES - whole) & (JUNO6_CHORUS_SAMPLES - 1);
++ unsigned b = (a + JUNO6_CHORUS_SAMPLES - 1) & (JUNO6_CHORUS_SAMPLES - 1);
++ float frac = delay - whole;
++ return ((float)c->delay[a] * (1 - frac) + (float)c->delay[b] * frac) / 32768.0f;
++}
++
+ void juno6_chorus_process(juno6_chorus_t *c, float *l, float *r, unsigned n)
+ {
+ #if X0X_SUPERJ6_FACTORY
+- /* Only the authored dry mode is reference-qualified. Active modes use
+-  * the existing unqualified preview, not purported J60V2 parameters. */
+- if (c->factory_mode == 1u) return;
++ if (c->factory_mode == JUNO6_CHORUS_OFF) return;
++#endif
++#if X0X_SUPERJ6_BUILTIN_INIT
++ unsigned mode = c->factory_mode;
++ if (mode != JUNO6_CHORUS_LEGACY && c->mix == 0.f) return;
+ #endif
+  const float sr = c->sample_rate;
+  const float min_delay = sr * .0017f, max_delay = fm_minf(255, sr * .0054f);
+@@ -116,10 +127,20 @@
+  for (unsigned i = 0; i < n; ++i) {
+   float in = (l[i] + r[i]) * .5f;
+   float angle = (float)phase / 4294967296.0f * TWO_PI;
+-  float d = clampf(sr * (.0017f + depth * (.5f + .5f * fm_sinf(angle))), min_delay, max_delay);
+-  unsigned whole = (unsigned)d, a = (write + 256 - whole) & 255, b = (a + 255) & 255;
+-  float frac = d - whole;
+-  float delayed = ((float)c->delay[a] * (1 - frac) + (float)c->delay[b] * frac) / 32768.0f;
++  float sweep = .5f * fm_sinf(angle);
++#if X0X_SUPERJ6_BUILTIN_INIT
++  /* Both compact taps share one history and oscillator. The opposed sweep
++   * gives the two switches distinct preview paths within that history. */
++  if (mode == JUNO6_CHORUS_II) sweep = -sweep;
++#endif
++  float d = clampf(sr * (.0017f + depth * (.5f + sweep)), min_delay, max_delay);
++  float delayed = chorus_read(c, write, d);
++#if X0X_SUPERJ6_BUILTIN_INIT
++  if (mode == JUNO6_CHORUS_BOTH) {
++   d = clampf(sr * (.0017f + depth * (.5f - sweep)), min_delay, max_delay);
++   delayed = .5f * (delayed + chorus_read(c, write, d));
++  }
++#endif
+   float wet = delayed * mix;
+   c->delay[write] = (int16_t)clampf(in * 32767, -32768, 32767);
+   write = (write + 1) & 255;
+--- a/firmware/src/dsp/juno6.h
++++ b/firmware/src/dsp/juno6.h
+@@ -19,6 +19,7 @@
+        SJ6_FILTER_ATTACK, SJ6_FILTER_DECAY, SJ6_FILTER_SUSTAIN, SJ6_FILTER_RELEASE,
+        SJ6_FILTER_LINK, SJ6_MASTER_LEVEL, SJ6_LFO1_RATE, SJ6_LFO2_RATE, SJ6_LFO3_RATE,
+        SJ6_LFO2_PWM_DEPTH, SJ6_LFO2_PWM_ROUTE, SJ6_LFO1_MODE, SJ6_LFO2_MODE, SJ6_LFO3_MODE,
++       SJ6_CHORUS_I, SJ6_CHORUS_II, SJ6_CHORUS_RATE, SJ6_CHORUS_MIX,
+        SJ6_KNOBS, SJ6_LFO2_PWM_BASE = SJ6_KNOBS };
+ enum { SJ6_LFO_COUNT = 3, SJ6_LFO_WORD_COUNT = 6, SJ6_LFO_DIVISIONS = 18 };
+ typedef struct {
+@@ -79,6 +80,9 @@
+ #endif
+ #endif
+ } juno6_t;
++#if X0X_SUPERJ6_FACTORY
++enum { JUNO6_CHORUS_LEGACY, JUNO6_CHORUS_OFF, JUNO6_CHORUS_I, JUNO6_CHORUS_II, JUNO6_CHORUS_BOTH };
++#endif
+ typedef struct {
+  int16_t delay[JUNO6_CHORUS_SAMPLES];
+  uint16_t write;

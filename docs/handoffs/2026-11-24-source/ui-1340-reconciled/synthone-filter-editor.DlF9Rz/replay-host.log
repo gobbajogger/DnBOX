@@ -1,0 +1,77 @@
+synthone-filter-mode-track.patch: OK
+Isolated host replay /dev/shm/dn-s1-filter-replay.NE6q3v
+synthone-pwm2-sync-owner.patch: OK
+firmware/src/app/engine.h: OK
+firmware/src/app/original_presets.inc: OK
+firmware/src/app/original_sound.c: OK
+firmware/src/app/original_sound.h: OK
+firmware/src/app/s1_patch.h: OK
+firmware/src/app/s1c_part.c: OK
+firmware/src/app/s1c_part.h: OK
+firmware/src/app/sound_reset.c: OK
+firmware/src/app/ui.c: OK
+firmware/src/dsp/s1c/s1c.c: OK
+firmware/src/app/engine.c: OK
+firmware/src/app/project.c: OK
+firmware/src/dsp/juno6.c: OK
+firmware/src/dsp/juno6.h: OK
+tests/host/sj6-smc-ui.sh: OK
+firmware/src/app/original_presets.inc: OK
+firmware/src/app/original_sound.c: OK
+firmware/src/app/original_sound.h: OK
+firmware/src/app/s1_patch.h: OK
+firmware/src/app/s1c_part.c: OK
+firmware/src/app/sound_reset.c: OK
+firmware/src/app/ui.c: OK
+firmware/src/app/engine.h: OK
+firmware/src/app/project.c: OK
+firmware/src/app/s1c_part.h: OK
+firmware/src/dsp/s1c/s1c.c: OK
+firmware/src/dsp/s1c/s1c_config.h: OK
+firmware/src/dsp/s1c/s1c_front.c: OK
+firmware/src/app/original_presets.inc: OK
+firmware/src/app/original_sound.c: OK
+firmware/src/app/original_sound.h: OK
+firmware/src/app/s1_patch.h: OK
+firmware/src/app/s1c_part.c: OK
+firmware/src/app/sound_reset.c: OK
+firmware/src/app/ui.c: OK
+firmware/src/app/engine.h: OK
+firmware/src/app/project.c: OK
+firmware/src/app/s1c_part.h: OK
+firmware/src/dsp/s1c/s1c.c: OK
+firmware/src/dsp/s1c/s1c_config.h: OK
+firmware/src/dsp/s1c/s1c_front.c: OK
+PASS filter owner 0: all modes, tracking energy (0.853182 / 0.517702), linked ADSR, note locks and reload
+PASS filter owner 1: all modes, tracking energy (0.853182 / 0.517702), linked ADSR, note locks and reload
+PASS Synth One filter mode and ADSR pitch tracking 33234 checks
+PASS previous editor reads oscillator projects and preserves unsupported filter Sound/lock projects, 258 checks
+PASS held mode changes refresh the active filter on the first compact DSP sample
+PASS INIT and 694 factory mode/track values restored exactly. Modes low/band/high 599/60/36, tracking nonzero 17.
+PASS compact dry/wet render captured INIT and 694 factory programs, 1024 frames each
+PASS 49,152 stereo frames across two owners and four legacy sound paths
+PASS compact dry/wet render captured INIT and 694 factory programs, 1024 frames each
+PASS 49,152 stereo frames across two owners and four legacy sound paths
+2b7c2c740edb57be12652f58c81a538815dd21c1ca8f66b0971cad51df0f331f  /dev/shm/dn-s1-filter-replay.NE6q3v/base-factory.pcm
+2b7c2c740edb57be12652f58c81a538815dd21c1ca8f66b0971cad51df0f331f  /dev/shm/dn-s1-filter-replay.NE6q3v/join-factory.pcm
+a3b1e885f4f553fb394991ba8c859c447f3d07770416db752db0a10340ded8bb  /dev/shm/dn-s1-filter-replay.NE6q3v/base-ui_superj6_legacy_pcm_test/legacy.pcm
+a3b1e885f4f553fb394991ba8c859c447f3d07770416db752db0a10340ded8bb  /dev/shm/dn-s1-filter-replay.NE6q3v/join-ui_superj6_legacy_pcm_test/legacy.pcm
+PASS Synth One compact oscillator panel 194 checks
+PASS factory editor owners A/B: program 129/694 identity and exact replacement, 28 checks
+PASS Synth One envelope LINK 40 checks
+PASS mixed owner 0: typed bit 22, shared ARP, locks, motion, project and cross-bank ownership
+PASS mixed owner 1: typed bit 22, shared ARP, locks, motion, project and cross-bank ownership
+PASS Synth One and SuperJ6 storage seam 317 checks
+PASS all 18 Build-9 divisions, binary32 boundaries and exact three-clock steps at 8001 to 192000 Hz
+part=0 active save/reload, retained sync on rate edit, zero-depth PCM and peer clock isolation PASS
+part=1 active save/reload, retained sync on rate edit, zero-depth PCM and peer clock isolation PASS
+PASS SuperJ6 LFO sync 11778 checks
+PWM1 Build-9 transfer oracle exact over 8192 stereo frames with 0 clipped ticks; depth-zero and enable-threshold PCM PASS
+part=0 PWM1 save/reload, routed base, depth-zero and route-off PCM, preset isolation PASS
+part=1 PWM1 save/reload, routed base, depth-zero and route-off PCM, preset isolation PASS
+PWM2 Build-9 transfer oracle exact over 8192 stereo frames with 3 clipped ticks; depth-zero and enable-threshold PCM PASS
+part=0 PWM2 save/reload, routed base, depth-zero and route-off PCM, preset isolation PASS
+part=1 PWM2 save/reload, routed base, depth-zero and route-off PCM, preset isolation PASS
+PASS SuperJ6 LFO2 PWM 2074 checks
+PASS ui-arp-engine 126 checks
+PASS ARP SEQ held-pad keyboard pitch: 66 checks

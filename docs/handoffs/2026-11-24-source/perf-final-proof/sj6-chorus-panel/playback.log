@@ -1,0 +1,5 @@
+FAIL /tmp/dnbox-sj6-chorus.knm7ld/red-fixture.c:31: memcmp(actual, expected, sizeof actual)
+chorus state bytes=536 sound cell bytes=32
+owner=0 held frames=8192 I/II=8192 I/both=8192 II/both=8192 peer=0 I/II delta energy=0.119838
+owner=1 held frames=8192 I/II=8192 I/both=8192 II/both=8185 peer=0 I/II delta energy=0.085417
+SuperJ6 CHORUS I/II 1241 checks

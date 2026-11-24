@@ -1,0 +1,39 @@
+diff --git a/firmware/src/app/ui.c b/firmware/src/app/ui.c
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -517,6 +517,8 @@
+         {"LFO 1", 127, 0, 0}, {"LFO 2", 127, 0, 0}, {"LFO 3", 127, 0, 0},
+         {"DEPTH", 127, 0, 0}, {"ROUTE", DNBX_LAYERS, 0, pwm_route},
+         {"LFO 1", 1, 1, lfo_mode}, {"LFO 2", 1, 1, lfo_mode}, {"LFO 3", 1, 1, lfo_mode},
++        {"CHORUS I", 1, 0, enable}, {"CHORUS II", 1, 0, enable},
++        {"RATE", 127, 0, 0}, {"MIX", 127, 0, 0},
+         {"PWM BASE", SJ6_PWM_STEPS, 0, 0},
+     };
+     return slot < sizeof knobs / sizeof *knobs ? &knobs[slot] : 0;
+@@ -2098,6 +2100,8 @@
+                     {"LFO RATE", {SJ6_LFO1_RATE, SJ6_LFO2_RATE, SJ6_LFO3_RATE, SJ6_PAGE_NONE}},
+                     {"LFO MODE", {SJ6_LFO1_MODE, SJ6_LFO2_MODE, SJ6_LFO3_MODE, SJ6_PAGE_NONE}},
+                     {"LFO2 PWM", {SJ6_LFO2_RATE, SJ6_LFO2_PWM_DEPTH, SJ6_LFO2_PWM_ROUTE, SJ6_LFO2_PWM_BASE}},
++                    {"LFO", {SJ6_PAGE_ENGINE + 10, SJ6_PAGE_ENGINE + 11, SJ6_PAGE_NONE, SJ6_PAGE_NONE}},
++                    {"CHORUS", {SJ6_CHORUS_I, SJ6_CHORUS_II, SJ6_CHORUS_RATE, SJ6_CHORUS_MIX}},
+                 };
+                 for (unsigned row = 0; row < sizeof pages / sizeof *pages; ++row) {
+                     pref_t refs[4];
+@@ -2109,7 +2113,7 @@
+                     }
+                     add_page_refs(emit, pages[row].title, refs, 0, 0);
+                 }
+-                first_row = 3;
++                first_row = UI_ORIGINAL_JUNO_PAGES;
+             }
+ #endif
+             for (int row = first_row; row < count; row++) {
+@@ -2130,7 +2134,7 @@
+                 }
+ #endif
+ #if X0X_ARP_HOOKS
+-                /* ARPEGGIATOR before EFFECT (Chicago order); SJ6 has no EFFECT group. */
++                /* Synth One follows Chicago's ARPEGGIATOR/EFFECT order. */
+                 if (kind == ORIGINAL_SOUND_SYNTHONE && row == count - 1 && arp_engine(b))
+                     add_page(emit, "ARPEGGIATOR", PR(R_ARP, ARP_F_ON, b, 0), PR(R_ARP, ARP_F_RANGE, b, 0),
+                              PR(R_ARP, ARP_F_MODE, b, 0), PR(R_ARP, ARP_F_SPEED, b, 0));

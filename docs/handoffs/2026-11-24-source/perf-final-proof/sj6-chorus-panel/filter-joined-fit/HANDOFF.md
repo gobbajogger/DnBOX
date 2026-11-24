@@ -1,0 +1,15 @@
+# CHORUS I/II on exact FILTER+TRACK + shared-page fit checkpoint
+
+| Actual same-model arm | Normal Elite / Pro app free | Guarded Elite / Pro app free | Primary / FITTAB | POOL above reserve |
+|---|---:|---:|---:|---:|
+| Exact filter-table base | −15,948 / −15,936 | +100 / +108 | 13,427 / 4,096 | 512 each |
+| Joined CHORUS source | −16,528 / −16,516 | −392 / −384 | 13,505 / 4,096 | 512 each |
+| Joined plus conditional common SJ6 commit | **−16,464 / −16,452** | **−328 / −320** | 13,505 / 4,096 | 512 each |
+
+Direct increment costs exactly +580 B normal and +492 B guarded per model. Actual source reuse isolates the existing common admitted SuperJ6 knob commit from duplicated/inlined audio-boundary control logic. The volatile request masks are still fetched and cleared once in the same order, readiness and note-lock checks stay in the original path, and only an eligible mask conditionally calls the common helper. Both models recover 64 B in both layouts with no change to tap math or control laws. It is still RED. No unresolved compiler/runtime symbols, but no sealed ELF/companion for either new arm, and no emulator. Native RAM text 2,748 B, core1 420 B, XDATA 7,775 B, POOL margin all unchanged. No third region or changed map. Relocation is still hypothetical user-slot/FITTAB lab, and stock remains physically too large. Biggest additive stock symbols include engine_render + audio ISR aggregate +176 B, chorus read/process +100 B, runtime setup +62, knob position +60; mixed compiler effects are documented, no inference of strict hot costs.
+
+Reconciled the Work table-only hunk into the already shared emitter: existing LFO RATE/MODE/LFO2 PWM, then separate LFO and CHORUS before original ARPEGGIATOR/SOUND, with no duplicate LFO/CHORUS legacy row. CHORUS K1/K2 independent I/II, K3/K4 existing rate/mix preview. No collision with Synth One extension bit22. Authored build behavior remains the scoped compact preview; building distinct I/II paths does not demonstrate the original BBD transfer, equations, depth/version assignments or final sound qualification.
+
+Both variants independently pass 1,241 actual CHORUS checks with same exact mode separation/persistence and untouched peer, 33,234 S1 filter checks and 317 mixed storage; direct Saga 895. Exact filter preimage, direct and reuse match four-bank 49,152 stereo frames and 12,288 active legacy chorus stereo frames bytewise. No raw PCM stored. The 536-byte per-owner chorus alloc remains in the existing state; genuine target POOL proof, not inferred from host. Keep direct and optional reuse as separate source-only work; neither can consume the previous +100/+108 fit receipt.
+
+Reproduce from previous exact FILTER+TRACK compact checkpoint. Apply chorus-joined-source.patch instead of the unmerged Work source/table patches; then optional chorus-cold-commit.patch. Verify PREIMAGE/DIRECT/REUSE manifests. Model links use same plain normal and unchanged exact dual-group lab helper with existing bounds. Work chorus-test patch is independent (host resolves SJ6_CHORUS_PANEL), and legacy-active.c verifies baseline, direct and reuse. No installer, packaging, production or public writes.

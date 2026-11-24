@@ -1,0 +1,8 @@
+legacy-candidate.log:PASS 49,152 stereo frames across two owners and four legacy sound paths
+legacy-candidate.log:PASS 12,288 stereo frames of active legacy compact chorus across both owners
+legacy-preimage.log:PASS 49,152 stereo frames across two owners and four legacy sound paths
+legacy-preimage.log:PASS 12,288 stereo frames of active legacy compact chorus across both owners
+a3b1e885f4f553fb394991ba8c859c447f3d07770416db752db0a10340ded8bb  legacy-preimage/legacy.pcm
+e1d282a9d69e1c6a43aec9898f453f77d9121fdbe1553b936632f1e83be96e98  legacy-preimage/legacy-active-chorus.pcm
+a3b1e885f4f553fb394991ba8c859c447f3d07770416db752db0a10340ded8bb  legacy-candidate/legacy.pcm
+e1d282a9d69e1c6a43aec9898f453f77d9121fdbe1553b936632f1e83be96e98  legacy-candidate/legacy-active-chorus.pcm

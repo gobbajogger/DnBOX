@@ -1,0 +1,39 @@
+=== base
+PASS 49,152 stereo frames across two owners and four legacy sound paths
+PASS 12,288 stereo frames of active legacy compact chorus across both owners
+=== chorus
+SuperJ6 CHORUS I/II 1241 checks
+PASS 49,152 stereo frames across two owners and four legacy sound paths
+PASS 12,288 stereo frames of active legacy compact chorus across both owners
+PASS 49,152 stereo frames across two owners and four legacy sound paths
+PASS all 18 authored Saga periods, preset rounding, and the fixed arp block
+PASS actual notes for four deterministic modes, interleaved tiers and a shrinking pool
+PASS SuperJ6 Saga ARP/SEQ 895 checks
+PASS filter owner 0: all modes, tracking energy (0.853182 / 0.517702), linked ADSR, note locks and reload
+PASS filter owner 1: all modes, tracking energy (0.853182 / 0.517702), linked ADSR, note locks and reload
+PASS Synth One filter mode and ADSR pitch tracking 33234 checks
+PASS mixed owner 0: typed bit 22, shared ARP, locks, motion, project and cross-bank ownership
+PASS mixed owner 1: typed bit 22, shared ARP, locks, motion, project and cross-bank ownership
+PASS Synth One and SuperJ6 storage seam 317 checks
+=== reuse
+SuperJ6 CHORUS I/II 1241 checks
+SuperJ6 CHORUS I/II 1241 checks
+PASS 49,152 stereo frames across two owners and four legacy sound paths
+PASS 12,288 stereo frames of active legacy compact chorus across both owners
+PASS 49,152 stereo frames across two owners and four legacy sound paths
+PASS all 18 authored Saga periods, preset rounding, and the fixed arp block
+PASS actual notes for four deterministic modes, interleaved tiers and a shrinking pool
+PASS SuperJ6 Saga ARP/SEQ 895 checks
+PASS filter owner 0: all modes, tracking energy (0.853182 / 0.517702), linked ADSR, note locks and reload
+PASS filter owner 1: all modes, tracking energy (0.853182 / 0.517702), linked ADSR, note locks and reload
+PASS Synth One filter mode and ADSR pitch tracking 33234 checks
+PASS mixed owner 0: typed bit 22, shared ARP, locks, motion, project and cross-bank ownership
+PASS mixed owner 1: typed bit 22, shared ARP, locks, motion, project and cross-bank ownership
+PASS Synth One and SuperJ6 storage seam 317 checks
+PASS 49,152 stereo frames across two owners and four legacy sound paths
+PASS filter owner 0: all modes, tracking energy (0.853182 / 0.517702), linked ADSR, note locks and reload
+PASS filter owner 1: all modes, tracking energy (0.853182 / 0.517702), linked ADSR, note locks and reload
+PASS Synth One filter mode and ADSR pitch tracking 33234 checks
+PASS mixed owner 0: typed bit 22, shared ARP, locks, motion, project and cross-bank ownership
+PASS mixed owner 1: typed bit 22, shared ARP, locks, motion, project and cross-bank ownership
+PASS Synth One and SuperJ6 storage seam 317 checks

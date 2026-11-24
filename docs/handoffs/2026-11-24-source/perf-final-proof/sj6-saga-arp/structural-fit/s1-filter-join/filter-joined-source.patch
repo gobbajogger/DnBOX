@@ -1,0 +1,222 @@
+--- a/firmware/src/app/original_presets.inc
++++ b/firmware/src/app/original_presets.inc
+@@ -143,7 +143,7 @@
+ #if X0X_S1_EXTRA
+         else if (slot >= S1_EXTRA_FIRST &&
+                  (!mot_base_snd || !original_sound_s1_extra_available(mot_base_snd->v[T_303][voice],
+-                  mot_base_snd->v[T_303][S1_EXTRA_ROW + voice]))) status = S1_EDIT_REJECTED;
++                  mot_base_snd->v[T_303][S1_EXTRA_ROW + voice], (unsigned)slot))) status = S1_EDIT_REJECTED;
+ #endif
+         else {
+             s1_edit[voice].slot = (uint8_t)slot;
+@@ -498,7 +498,7 @@
+     _Static_assert(BASS_NOTE_USED + S1_EXTRA_BYTES <= NSTEPS, "Synth One note-lock extension fits");
+     if (bank == ORIGINAL_SOUND_SYNTHONE && (original_sound_edit_mask(l->val) & S1_EXTRA_MARK)) {
+         if (!original_sound_s1_extra_valid(l->val, l->val+BASS_NOTE_USED)) return -1;
+-        used += S1_EXTRA_BYTES;
++        used += s1_extra_size(l->val+BASS_NOTE_USED);
+     }
+ #endif
+ #if X0X_SUPERJ6_BUILTIN_INIT
+@@ -526,8 +526,10 @@
+     next.pat=(uint8_t)pat;next.part=(uint8_t)(PART_303A+voice);next.v=(uint8_t)step;next.i=BASS_NOTE_VERSION;
+     __builtin_memcpy(next.val,sound->v[T_303][voice],NPARAMS_MAX);
+ #if X0X_S1_EXTRA
+-    if (next.val[29] == ORIGINAL_SOUND_SYNTHONE && (original_sound_edit_mask(next.val) & S1_EXTRA_MARK))
+-        memcpy(next.val+BASS_NOTE_USED, sound->v[T_303][S1_EXTRA_ROW+voice], S1_EXTRA_BYTES);
++    if (original_sound_s1_has_extra(next.val)) {
++        const uint8_t *extra = sound->v[T_303][S1_EXTRA_ROW+voice];
++        memcpy(next.val+BASS_NOTE_USED, extra, s1_extra_size(extra));
++    }
+ #endif
+ #if X0X_SUPERJ6_BUILTIN_INIT
+     if (next.val[29] == ORIGINAL_SOUND_JUNO)
+@@ -855,8 +857,10 @@
+             memset(sj6_extra + ORIGINAL_SJ6_EXTRA_SIZE, 0, ORIGINAL_SJ6_LFO_AUTHORED_SIZE);
+ #endif
+ #if X0X_S1_EXTRA
+-        if (original_sound_s1_has_extra(sound->v[T_303][v]))
+-            memset(sound->v[T_303][S1_EXTRA_ROW+v], 0, S1_EXTRA_BYTES);
++        if (original_sound_s1_has_extra(sound->v[T_303][v])) {
++            uint8_t *extra = sound->v[T_303][S1_EXTRA_ROW+v];
++            memset(extra, 0, s1_extra_size(extra));
++        }
+ #endif
+         __builtin_memcpy(sound->v[T_303][v], next, sizeof next);
+         bass_tag_set(sound, v, bank, preset, 0);
+--- a/firmware/src/app/original_sound.c
++++ b/firmware/src/app/original_sound.c
+@@ -461,20 +461,24 @@
+     if (!original_sound_s1_has_extra(cell)) return 1;
+     unsigned mask = s1_extra_bits(extra);
+     if (!mask || mask >> S1_EXTRA_COUNT) return 0;
+-    for (unsigned i = 0; i < S1_EXTRA_COUNT; ++i)
++    for (unsigned i = 0; i < s1_extra_size(extra) - 2; ++i)
+         if (extra[2+i] > ((mask & (1u << i)) ? s1_patch_steps(S1_EXTRA_FIRST+i) : 0u))
+             return 0;
+     return 1;
+ }
+ 
+-int original_sound_s1_extra_available(const uint8_t *cell, const uint8_t *extra)
++int original_sound_s1_extra_available(const uint8_t *cell, const uint8_t *extra, unsigned slot)
+ {
+     if (cell[29] != ORIGINAL_SOUND_SYNTHONE) return 0;
+-    if (original_sound_s1_has_extra(cell))
+-        return original_sound_s1_extra_valid(cell, extra);
+-    for (unsigned i = 0; i < S1_EXTRA_BYTES; ++i)
+-        if (extra[i]) return 0;
+-    return 1;
++    if (original_sound_s1_has_extra(cell)) {
++        if (!original_sound_s1_extra_valid(cell, extra)) return 0;
++    } else {
++        for (unsigned i = 0; i < S1_OSC_EXTRA_BYTES; ++i)
++            if (extra[i]) return 0;
++    }
++    /* Claim the appended pair only when both unowned bytes are free. */
++    return slot < S1_FILTER_TYPE || s1_extra_size(extra) == S1_EXTRA_BYTES ||
++           !(extra[S1_OSC_EXTRA_BYTES] | extra[S1_OSC_EXTRA_BYTES+1]);
+ }
+ 
+ int original_sound_s1_extra_set(uint8_t *cell, uint8_t *extra, unsigned slot, unsigned position)
+@@ -482,7 +486,7 @@
+     unsigned i = slot - S1_EXTRA_FIRST;
+     if (i >= S1_EXTRA_COUNT || position > s1_patch_steps(slot) ||
+         cell[29] != ORIGINAL_SOUND_SYNTHONE || !original_sound_valid(cell) ||
+-        !original_sound_s1_extra_available(cell, extra)) return 0;
++        !original_sound_s1_extra_available(cell, extra, slot)) return 0;
+     extra[2+i] = (uint8_t)position;
+     extra[i >> 3] |= (uint8_t)(1u << (i & 7u));
+     original_sound_put_mask(cell, original_sound_edit_mask(cell) | S1_EXTRA_MARK);
+--- a/firmware/src/app/original_sound.h
++++ b/firmware/src/app/original_sound.h
+@@ -99,7 +99,7 @@
+ #include "s1_patch.h"
+ #if X0X_S1_EXTRA
+ int original_sound_s1_extra_valid(const uint8_t *cell, const uint8_t *extra);
+-int original_sound_s1_extra_available(const uint8_t *cell, const uint8_t *extra);
++int original_sound_s1_extra_available(const uint8_t *cell, const uint8_t *extra, unsigned slot);
+ int original_sound_s1_extra_set(uint8_t *cell, uint8_t *extra, unsigned slot, unsigned position);
+ #endif
+ int original_sound_s1_set(uint8_t cell[ORIGINAL_SOUND_BYTES], unsigned slot, unsigned position);
+--- a/firmware/src/app/s1_patch.h
++++ b/firmware/src/app/s1_patch.h
+@@ -20,13 +20,18 @@
+     S1_EXTRA_ROW = 6, S1_EXTRA_FIRST = S1_PATCH_COUNT + 1,
+     S1_OSC1_MORPH = S1_EXTRA_FIRST, S1_OSC2_MORPH, S1_OSC2_LEVEL,
+     S1_SUB_LEVEL, S1_SUB_OCTAVE, S1_SUB_WAVE, S1_FM_LEVEL, S1_FM_INDEX, S1_NOISE_LEVEL,
+-    S1_EXTRA_COUNT = S1_NOISE_LEVEL + 1 - S1_EXTRA_FIRST,
++    S1_FILTER_TYPE, S1_ADSR_TRACK,
++    S1_OSC_EXTRA_BYTES = 2 + S1_FILTER_TYPE - S1_EXTRA_FIRST,
++    S1_EXTRA_COUNT = S1_ADSR_TRACK + 1 - S1_EXTRA_FIRST,
+     S1_EXTRA_BYTES = 2 + S1_EXTRA_COUNT
+ };
+ #define S1_EXTRA_MARK (UINT32_C(1) << 22)
+ float s1c_morph_preview(float position, uint32_t phase);
+ static inline unsigned s1_extra_bits(const uint8_t *data)
+ { return (unsigned)data[0] | ((unsigned)data[1] << 8); }
++/* Old oscillator records do not own the two appended filter bytes. */
++static inline unsigned s1_extra_size(const uint8_t *data)
++{ return s1_extra_bits(data) >> (S1_FILTER_TYPE - S1_EXTRA_FIRST) ? S1_EXTRA_BYTES : S1_OSC_EXTRA_BYTES; }
+ #else
+ #define S1_EXTRA_MARK 0u
+ #endif
+@@ -34,6 +39,7 @@
+ {
+ #if X0X_S1_EXTRA
+     if (slot == S1_SUB_OCTAVE || slot == S1_SUB_WAVE) return 1;
++    if (slot == S1_FILTER_TYPE) return 2;
+ #endif
+     return slot == S1_PATCH_COUNT ? 1u : S1_PATCH_STEPS;
+ }
+--- a/firmware/src/app/s1c_part.c
++++ b/firmware/src/app/s1c_part.c
+@@ -142,6 +142,8 @@
+     {"FM LEVEL", 0, 1, 10, X0X_U_PCT},
+     {"FM INDEX", 0, 15, 11, X0X_U_NONE},
+     {"NOISE LEVEL", 0, .25f, 12, X0X_U_PCT},
++    {"FILTER TYPE", 0, 2, 115, X0X_U_NONE},
++    {"ADSR PITCH TRACK", 0, 1, 149, X0X_U_PCT},
+ };
+ #endif
+ 
+@@ -190,9 +192,14 @@
+         float value = part->extra_factory[i];
+         if (next & (1u << i)) {
+             unsigned position = extra[2+i];
+-            value = s1_patch_steps(S1_EXTRA_FIRST+i) == 1 ? (float)position :
++            value = s1_patch_steps(S1_EXTRA_FIRST+i) < S1_PATCH_STEPS ? (float)position :
+                     s1_patch_physical(d, position);
+         }
++#if S1C_KR > 1
++        /* A held mode switch needs the new coefficients on its first sample. */
++        if (i == S1_FILTER_TYPE - S1_EXTRA_FIRST && value != part->e.t[d->factory_id])
++            for (unsigned v = 0; v < S1C_VOICES; ++v) part->e.v[v].kc = 0;
++#endif
+         (void)s1c_front_set(&part->e, d->factory_id, value);
+     }
+     part->extra_live_mask = (uint16_t)next;
+--- a/firmware/src/app/sound_reset.c
++++ b/firmware/src/app/sound_reset.c
+@@ -142,10 +142,12 @@
+ #if X0X_S1_EXTRA
+     uint8_t extra_pre[S1_EXTRA_BYTES];
+     uint8_t *extra = NULL;
++    unsigned extra_size = 0;
+     if (tag >= 0 && original_sound_s1_has_extra(sound->v[T_303][tag])) {
+         extra = sound->v[T_303][S1_EXTRA_ROW + tag];
+-        memcpy(extra_pre, extra, sizeof extra_pre);
+-        memset(extra, 0, sizeof extra_pre);
++        extra_size = s1_extra_size(extra);
++        memcpy(extra_pre, extra, extra_size);
++        memset(extra, 0, extra_size);
+     }
+ #endif
+     sound_reset_copy(sound, factory, target, voice, nvoice, tag);
+@@ -158,8 +160,8 @@
+         sound_reset_restore(sound, undo->shadow, pre, target, voice, nvoice, tag);
+ #if X0X_S1_EXTRA
+         if (extra) {
+-            memcpy(extra, extra_pre, sizeof extra_pre);
+-            memcpy(undo->shadow + (extra - (uint8_t *)sound), extra_pre, sizeof extra_pre);
++            memcpy(extra, extra_pre, extra_size);
++            memcpy(undo->shadow + (extra - (uint8_t *)sound), extra_pre, extra_size);
+         }
+ #endif
+         return SOUND_RESET_BAD;
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -1456,6 +1456,10 @@
+         if (r.c == S1_SUB_OCTAVE) { put_s(num, physical > 0.f ? "-24" : "-12"); put_s(unit, "st"); return; }
+         if (r.c == S1_SUB_WAVE) { put_s(num, physical > 0.f ? "SQUARE" : "SINE"); return; }
+         if (r.c == S1_FM_INDEX) { put_d1(num, physical, 0); return; }
++        if (r.c == S1_FILTER_TYPE) {
++            put_s(num, physical < 1.f ? "LOW PASS" : physical < 2.f ? "BAND PASS" : "HIGH PASS");
++            return;
++        }
+ #endif
+         unit_value(patch->unit, s1_patch_display(patch, physical), num, unit);
+         return;
+@@ -2154,6 +2158,9 @@
+                     };
+                     add_original_extra_pages(emit, extra, sizeof extra / sizeof *extra, b, R_S1PATCH);
+                 }
++                if (kind == ORIGINAL_SOUND_SYNTHONE && row == 1)
++                    add_page(emit, "FILTER MODE", PR(R_S1PATCH,T_303,b,S1_FILTER_TYPE),
++                             PR(R_S1PATCH,T_303,b,S1_ADSR_TRACK), NONE, NONE);
+ #endif
+             }
+ #if X0X_ARP_HOOKS
+@@ -2835,9 +2842,10 @@
+ #endif
+ #if X0X_S1_EXTRA
+             undo_peek(&undo, entry, cell + S1_EXTRA_ROW * NPARAMS_MAX, target.s1_extra[v], S1_EXTRA_BYTES);
+-            if ((original_sound_s1_has_extra(target.cell[v]) ||
+-                 original_sound_s1_has_extra(proj.sound.v[T_303][v])) &&
+-                memcmp(target.s1_extra[v], proj.sound.v[T_303][S1_EXTRA_ROW+v], S1_EXTRA_BYTES))
++            const uint8_t *s1_extra = proj.sound.v[T_303][S1_EXTRA_ROW+v];
++            unsigned pending = original_sound_s1_has_extra(target.cell[v]) ? s1_extra_size(target.s1_extra[v]) : 0;
++            unsigned applied = original_sound_s1_has_extra(proj.sound.v[T_303][v]) ? s1_extra_size(s1_extra) : 0;
++            if (memcmp(target.s1_extra[v], s1_extra, pending > applied ? pending : applied))
+                 undo_bass_mask |= 1u << v;
+ #endif
+             if(memcmp(target.cell[v],proj.sound.v[T_303][v],NPARAMS_MAX) ||

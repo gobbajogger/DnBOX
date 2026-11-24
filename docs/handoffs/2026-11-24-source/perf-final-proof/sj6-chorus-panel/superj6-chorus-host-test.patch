@@ -1,0 +1,211 @@
+diff --git a/tests/host/ui_superj6_chorus_test.c b/tests/host/ui_superj6_chorus_test.c
+new file mode 100644
+--- /dev/null
++++ b/tests/host/ui_superj6_chorus_test.c
+@@ -0,0 +1,206 @@
++/* SPDX-License-Identifier: GPL-3.0-only */
++#define PWM_FIXTURE_MAIN chorus_retained_pwm_main
++#include "ui_superj6_pwm1_lfo2_test.c"
++#include "app/superj6_factory.h"
++
++enum { CHORUS_OFF = 1, CHORUS_I, CHORUS_II, CHORUS_BOTH };
++static int32_t modes[4][COUNT * 2];
++
++static void render_chorus(unsigned mode, float mix, float pcm[2][COUNT])
++{
++    juno6_chorus_t chorus;
++    juno6_chorus_init(&chorus, RATE);
++    juno6_chorus_set(&chorus, 1.6f, 5.4f, mix);
++    chorus.factory_mode = (uint8_t)mode;
++    for (unsigned i = 0; i < COUNT; ++i) {
++        pcm[0][i] = (float)((int)(i % 151) - 75) / 96.f;
++        pcm[1][i] = pcm[0][i] * .75f;
++    }
++    for (unsigned n = 0; n < COUNT; n += 256)
++        juno6_chorus_process(&chorus, pcm[0] + n, pcm[1] + n, 256);
++    if (mode == CHORUS_OFF || !mix) {
++        CHECK(chorus.write == 0 && chorus.phase == 0);
++        for (unsigned i = 0; i < JUNO6_CHORUS_SAMPLES; ++i) CHECK(!chorus.delay[i]);
++    }
++}
++
++static void test_kernel(void)
++{
++    render_chorus(CHORUS_I, .35f, actual);
++    render_chorus(CHORUS_II, .35f, expected);
++    CHECK(memcmp(actual, expected, sizeof actual));
++    render_chorus(CHORUS_BOTH, .35f, actual);
++    CHECK(memcmp(actual, expected, sizeof actual));
++    render_chorus(CHORUS_I, .35f, expected);
++    CHECK(memcmp(actual, expected, sizeof actual));
++    render_chorus(CHORUS_OFF, .35f, actual);
++    for (unsigned mode = CHORUS_I; mode <= CHORUS_BOTH; ++mode) {
++        render_chorus(mode, 0, expected);
++        CHECK(!memcmp(actual, expected, sizeof actual));
++    }
++}
++
++#ifdef SJ6_CHORUS_PANEL
++static void test_cell(void)
++{
++    uint8_t cell[ORIGINAL_SOUND_BYTES];
++    CHECK(original_sound_init(cell, ORIGINAL_SOUND_JUNO, 0));
++    original_sound_sj6_lfo2_pwm_store(cell, 267);
++    for (unsigned mode = 0; mode < 8; ++mode) {
++        original_sound_sj6_chorus_store(cell, mode);
++        CHECK(original_sound_sj6_chorus(cell) == mode);
++        CHECK(original_sound_valid(cell) == (mode <= CHORUS_BOTH));
++        CHECK(original_sound_sj6_lfo2_pwm(cell) == 267);
++    }
++    printf("chorus state bytes=%zu sound cell bytes=%zu\n", sizeof(juno6_chorus_t), sizeof cell);
++}
++
++static void test_factory_switches(void)
++{
++    setup(V_PART, PART_303A);
++    proj.set.bt |= PROJ_BT_CLK_IN;
++    select_owner(0, 0);
++    select_owner(1, 0);
++    const unsigned required = (1u << SJ6_ROW_AMOUNT) - 1u;
++    for (unsigned owner = 0; owner < 2; ++owner) {
++        sj6_factory_row row = {.present = required};
++        sj6_factory_add_word(&row, 40, UINT32_C(0x3f800000));
++        CHECK(!engine_superj6_factory_load(owner, &row));
++        sj6_factory_add_word(&row, 41, owner ? UINT32_C(0x3f800000) : 0);
++        CHECK(engine_superj6_factory_load(owner, &row));
++        CHECK(original_sound_sj6_chorus(proj.sound.v[T_303][owner]) == 0);
++        render(1);
++        CHECK(original_sound_sj6_chorus(proj.sound.v[T_303][owner]) == (owner ? CHORUS_BOTH : CHORUS_I));
++    }
++    save_and_reload();
++    CHECK(engine_superj6_knob_position(0, SJ6_CHORUS_I) == 1);
++    CHECK(engine_superj6_knob_position(0, SJ6_CHORUS_II) == 0);
++    CHECK(engine_superj6_knob_position(1, SJ6_CHORUS_I) == 1);
++    CHECK(engine_superj6_knob_position(1, SJ6_CHORUS_II) == 1);
++
++    sj6_factory_row legacy = {.present = required};
++    CHECK(engine_superj6_factory_load(0, &legacy));
++    render(1);
++    CHECK(original_sound_sj6_chorus(proj.sound.v[T_303][0]) == 0);
++    CHECK(original_sound_sj6_chorus(proj.sound.v[T_303][1]) == CHORUS_BOTH);
++}
++
++static double residual_ratio(const int32_t *a, const int32_t *b, unsigned ch)
++{
++    double signal = 0, residual = 0;
++    for (unsigned i = 0; i < COUNT; ++i) {
++        double sample = a[2 * i + ch];
++        double delta = sample - b[2 * i + ch];
++        signal += sample * sample;
++        residual += delta * delta;
++    }
++    return residual / signal;
++}
++
++static void test_panel(unsigned owner)
++{
++    setup(V_PART, PART_303A + owner);
++    proj.set.bt |= PROJ_BT_CLK_IN;
++    select_owner(owner, 0);
++    select_owner(1 - owner, 0);
++    isolate_dry_pair();
++    visit("CHORUS");
++    CHECK(pref_get(pg.r[cur_page()][0]) == 0 && pref_get(pg.r[cur_page()][1]) == 0);
++    begin_pair();
++    capture(modes[0]);
++    CHECK(changed(modes[0], silence, owner) > COUNT / 2);
++    CHECK(changed(modes[0], silence, 1 - owner) > COUNT / 2);
++
++    begin_pair();
++    panel_turn(2, SJ6_CHORUS_RATE, 27);
++    panel_turn(3, SJ6_CHORUS_MIX, 48);
++    capture(pcm[0]);
++    CHECK(!memcmp(modes[0], pcm[0], sizeof pcm[0]));
++    CHECK(original_sound_sj6_chorus(proj.sound.v[T_303][owner]) == CHORUS_OFF);
++    begin_pair();
++    panel_turn(0, SJ6_CHORUS_I, 1);
++    capture(modes[1]);
++    begin_pair();
++    panel_turn(0, SJ6_CHORUS_I, 0);
++    panel_turn(1, SJ6_CHORUS_II, 1);
++    capture(modes[2]);
++    begin_pair();
++    panel_turn(0, SJ6_CHORUS_I, 1);
++    capture(modes[3]);
++    for (unsigned i = 1; i < 4; ++i) {
++        CHECK(changed(modes[i], modes[0], owner) > COUNT / 2);
++        CHECK(!changed(modes[i], modes[0], 1 - owner));
++        for (unsigned j = 1; j < i; ++j) CHECK(changed(modes[i], modes[j], owner) > COUNT / 2);
++    }
++    double ratio = residual_ratio(modes[1], modes[2], owner);
++    CHECK(ratio > .001);
++    printf("owner=%u held frames=%u I/II=%u I/both=%u II/both=%u peer=0 I/II delta energy=%.6f\n",
++           owner, COUNT, changed(modes[1], modes[2], owner), changed(modes[1], modes[3], owner),
++           changed(modes[2], modes[3], owner), ratio);
++
++    begin_pair();
++    capture(pcm[1]);
++    begin_pair();
++    panel_turn(2, SJ6_CHORUS_RATE, 91);
++    capture(pcm[0]);
++    CHECK(changed(pcm[0], pcm[1], owner) > COUNT / 2);
++    CHECK(!changed(pcm[0], pcm[1], 1 - owner));
++    begin_pair();
++    capture(pcm[1]);
++    begin_pair();
++    panel_turn(3, SJ6_CHORUS_MIX, 88);
++    capture(pcm[0]);
++    CHECK(changed(pcm[0], pcm[1], owner) > COUNT / 2);
++    CHECK(!changed(pcm[0], pcm[1], 1 - owner));
++    begin_pair();
++    capture(pcm[0]);
++    save_and_reload();
++    visit("CHORUS");
++    CHECK(pref_get(pg.r[cur_page()][0]) == 1 && pref_get(pg.r[cur_page()][1]) == 1);
++    CHECK(pref_get(pg.r[cur_page()][2]) == 91 && pref_get(pg.r[cur_page()][3]) == 88);
++    begin_pair();
++    capture(pcm[1]);
++    CHECK(!memcmp(pcm[0], pcm[1], sizeof pcm[0]));
++
++    panel_turn(3, SJ6_CHORUS_MIX, 0);
++    render(1);
++    begin_pair();
++    capture(pcm[0]);
++    begin_pair();
++    panel_turn(0, SJ6_CHORUS_I, 0);
++    panel_turn(1, SJ6_CHORUS_II, 0);
++    capture(pcm[1]);
++    CHECK(!memcmp(pcm[0], pcm[1], sizeof pcm[0]));
++    save_and_reload();
++    visit("CHORUS");
++    CHECK(pref_get(pg.r[cur_page()][0]) == 0 && pref_get(pg.r[cur_page()][1]) == 0);
++    CHECK(pref_get(pg.r[cur_page()][2]) == 91 && pref_get(pg.r[cur_page()][3]) == 0);
++    begin_pair();
++    capture(pcm[1]);
++    CHECK(!memcmp(pcm[0], pcm[1], sizeof pcm[0]));
++    uint8_t peer[ORIGINAL_SOUND_BYTES];
++    memcpy(peer, proj.sound.v[T_303][1 - owner], sizeof peer);
++    panel_turn(0, SJ6_CHORUS_I, 1);
++    CHECK(!engine_bass_select_preset(owner, ORIGINAL_SOUND_JUNO, 1, &proj.sound));
++    engine_bass_off(owner);
++    for (unsigned n = 0; n < 1024 && engine_bass_preset_pending(owner); ++n) render(1);
++    CHECK(!engine_bass_preset_pending(owner));
++    CHECK(engine_superj6_knob_position(owner, SJ6_CHORUS_I) == 0 &&
++          engine_superj6_knob_position(owner, SJ6_CHORUS_II) == 0);
++    CHECK(original_sound_sj6_chorus(proj.sound.v[T_303][owner]) == 0);
++    CHECK(!memcmp(peer, proj.sound.v[T_303][1 - owner], sizeof peer));
++}
++#endif
++
++int main(void)
++{
++    test_kernel();
++#ifdef SJ6_CHORUS_PANEL
++    test_cell();
++    test_factory_switches();
++    test_panel(0);
++    test_panel(1);
++#endif
++    printf("SuperJ6 CHORUS I/II %u checks\n", checks);
++    return 0;
++}
