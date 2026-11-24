@@ -1,0 +1,9 @@
+owner 0 reverb HP factory 900.000000 -> adjacent 893.543335 Hz
+owner 0 reverb HP 39 enable 0: 0/4096 owner frames changed, peer exact
+owner 1 reverb HP factory 900.000000 -> adjacent 893.543335 Hz
+owner 1 reverb HP 39 enable 0: 0/4096 owner frames changed, peer exact
+owner 0 reverb HP factory 219.399994 -> adjacent 228.503937 Hz
+owner 0 reverb HP 39 enable 1: 4096/4096 owner frames changed, peer exact
+owner 1 reverb HP factory 219.399994 -> adjacent 228.503937 Hz
+owner 1 reverb HP 39 enable 1: 4096/4096 owner frames changed, peer exact
+PASS real Synth One REVERB HP, both owners and enables, 1696 checks

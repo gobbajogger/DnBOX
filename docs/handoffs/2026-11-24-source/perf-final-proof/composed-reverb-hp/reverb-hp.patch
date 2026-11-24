@@ -1,0 +1,122 @@
+diff --git a/firmware/src/app/original_sound.c b/firmware/src/app/original_sound.c
+--- a/firmware/src/app/original_sound.c
++++ b/firmware/src/app/original_sound.c
+@@ -571,7 +571,11 @@
+ 
+ /* A zero legacy header was invalid for every marked Synth One record. The
+  * wet format uses it without borrowing any more of the 15-byte lock tail. */
+-enum { S1_MIX_RADIX = 129, S1_MIX_PAIR = S1_MIX_RADIX * S1_MIX_RADIX };
++enum { S1_MIX_RADIX = 129, S1_MIX_PAIR = S1_MIX_RADIX * S1_MIX_RADIX,
++       S1_REVERB_HP_MARK = 0xf8u };
++/* With high=31, even the shortest nonzero legacy LFO suffix is invalid.
++ * Byte zero can therefore hold an optional Reverb HP stop on the same record. */
++_Static_assert(S1_LFO_GROUP_STATES < 30u * 65535u + 1u, "reverb HP marker must fail legacy decoding");
+ #define S1_DIGIT(slot) ((slot) - S1_EXTRA_FIRST)
+ static const uint8_t s1_packed_pairs[][2] = {
+     {S1_DIGIT(S1_OSC1_MORPH), S1_DIGIT(S1_OSC2_MORPH)},
+@@ -609,7 +613,9 @@
+ 
+ static int s1_read_packed(const uint8_t *data, s1_extra_state *state)
+ {
+-    if (data[S1_EXTRA_BYTES-1] & 0xc0u) return 0;
++    const unsigned reverb_hp = data[1] == S1_REVERB_HP_MARK ? data[0] : 0u;
++    if ((data[1] == S1_REVERB_HP_MARK && !reverb_hp) || reverb_hp >= S1_MIX_RADIX ||
++        (data[S1_EXTRA_BYTES-1] & 0xc0u)) return 0;
+     unsigned at = 16;
+     for (unsigned i = 0; i < sizeof s1_packed_pairs / sizeof s1_packed_pairs[0]; ++i) {
+         unsigned pair = s1_take_bits(data, &at, 15);
+@@ -625,16 +631,19 @@
+     }
+     unsigned ordinal = s1_take_bits(data, &at, 21);
+     unsigned wet = s1_take_bits(data, &at, 15);
+-    if (ordinal >= S1_LFO_GROUP_STATES || !wet || wet >= S1_MIX_PAIR) return 0;
++    if (ordinal >= S1_LFO_GROUP_STATES || (!wet && !reverb_hp) || wet >= S1_MIX_PAIR) return 0;
+     s1_lfo_digits(ordinal, state->lfo);
+     state->wet[0] = (uint8_t)(wet / S1_MIX_RADIX);
+     state->wet[1] = (uint8_t)(wet % S1_MIX_RADIX);
++    state->wet[S1_REVERB_HP - S1_WET_FIRST] = (uint8_t)reverb_hp;
+     return 1;
+ }
+ 
+ static void s1_write_packed(uint8_t *dest, const s1_extra_state *state)
+ {
+     uint8_t data[S1_EXTRA_BYTES] = {0};
++    const uint8_t reverb_hp = state->wet[S1_REVERB_HP - S1_WET_FIRST];
++    if (reverb_hp) { data[0] = reverb_hp; data[1] = S1_REVERB_HP_MARK; }
+     unsigned at = 16;
+     for (unsigned i = 0; i < sizeof s1_packed_pairs / sizeof s1_packed_pairs[0]; ++i)
+         s1_put_bits(data, &at, 15, S1_MIX_RADIX * state->panel[s1_packed_pairs[i][0]] +
+@@ -671,7 +680,8 @@
+ int s1_extra_read(const uint8_t *data, s1_extra_state *state)
+ {
+     s1_extra_state next = {0};
+-    if (data && !(s1_extra_packed(data) ? s1_read_packed(data, &next) : s1_read_legacy(data, &next)))
++    if (data && !((s1_extra_packed(data) || data[1] == S1_REVERB_HP_MARK) ?
++                     s1_read_packed(data, &next) : s1_read_legacy(data, &next)))
+         return 0;
+     *state = next;
+     return 1;
+@@ -718,7 +728,7 @@
+         if (position > s1_patch_steps(slot)) return 0;
+         state.panel[slot-S1_EXTRA_FIRST] = (uint8_t)(position + 1u);
+     }
+-    if (state.wet[0] || state.wet[1]) s1_write_packed(extra, &state);
++    if (state.wet[0] || state.wet[1] || state.wet[S1_REVERB_HP - S1_WET_FIRST]) s1_write_packed(extra, &state);
+     else if (slot >= S1_LFO_FIRST) s1_extra_lfo_write(extra, state.lfo);
+     else {
+         unsigned i = slot - S1_EXTRA_FIRST;
+@@ -741,7 +751,7 @@
+             if (state.lfo[i]) state.lfo[i] = (uint8_t)(S1_LFO_CODE_SYNC + divisions[i]);
+     }
+     state.lfo[S1_LFO_SYNC - S1_LFO_FIRST] = (uint8_t)code;
+-    if (state.wet[0] || state.wet[1]) s1_write_packed(extra, &state);
++    if (state.wet[0] || state.wet[1] || state.wet[S1_REVERB_HP - S1_WET_FIRST]) s1_write_packed(extra, &state);
+     else s1_extra_lfo_write(extra, state.lfo);
+     original_sound_put_mask(cell, original_sound_edit_mask(cell) | S1_EXTRA_MARK);
+     return 1;
+diff --git a/firmware/src/app/s1_patch.h b/firmware/src/app/s1_patch.h
+--- a/firmware/src/app/s1_patch.h
++++ b/firmware/src/app/s1_patch.h
+@@ -23,8 +23,8 @@
+     S1_FILTER_TYPE, S1_ADSR_TRACK,
+     S1_OSC_EXTRA_BYTES = 2 + S1_FILTER_TYPE - S1_EXTRA_FIRST,
+     S1_LFO1_RATE = S1_ADSR_TRACK + 1, S1_LFO2_RATE, S1_LFO1_SHAPE, S1_LFO2_SHAPE,
+-    S1_LFO_SYNC, S1_DELAY_MIX, S1_REVERB_MIX,
+-    S1_WET_FIRST = S1_DELAY_MIX, S1_WET_COUNT = 2,
++    S1_LFO_SYNC, S1_DELAY_MIX, S1_REVERB_MIX, S1_REVERB_HP,
++    S1_WET_FIRST = S1_DELAY_MIX, S1_WET_COUNT = 3,
+     S1_LFO_FIRST = S1_LFO1_RATE, S1_LFO_COUNT = 5,
+     S1_EXTRA_COUNT = S1_ADSR_TRACK + 1 - S1_EXTRA_FIRST,
+     S1_FILTER_EXTRA_BYTES = 2 + S1_EXTRA_COUNT,
+diff --git a/firmware/src/app/s1c_part.c b/firmware/src/app/s1c_part.c
+--- a/firmware/src/app/s1c_part.c
++++ b/firmware/src/app/s1c_part.c
+@@ -158,6 +158,7 @@
+     {"SYNC TO ARP", 0, 1, P_TEMPO_SYNC, X0X_U_NONE},
+     {"DELAY MIX", 0, 1, S1C_P_DLMIX, X0X_U_PCT},
+     {"REVERB MIX", 0, 1, S1C_P_RVMIX, X0X_U_PCT},
++    {"REVERB HP", 80, 900, S1C_P_RVHP, X0X_U_HZ},
+ };
+ enum { S1_CATALOG_EXTRA_COUNT = sizeof extra_parameters / sizeof extra_parameters[0] };
+ _Static_assert(S1_CATALOG_EXTRA_COUNT == S1_WET_FIRST - S1_EXTRA_FIRST + S1_WET_COUNT,
+diff --git a/firmware/src/app/ui.c b/firmware/src/app/ui.c
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -2144,7 +2144,7 @@
+ #endif
+ #if X0X_S1_EXTRA
+             if (kind == ORIGINAL_SOUND_SYNTHONE) {
+-                enum { S1_PAGE_ID_FITS = 1 / (S1_REVERB_MIX < ORIG_PAGE_ENGINE) };
++                enum { S1_PAGE_ID_FITS = 1 / (S1_REVERB_HP < ORIG_PAGE_ENGINE) };
+                 static const original_page_row_t s1_pages[] = {
+                     {"OSCILLATOR", {0, 1, S1_OSC1_MORPH, S1_OSC2_MORPH}},
+                     {"OSC MIX", {S1_OSC2_LEVEL, S1_SUB_LEVEL, S1_SUB_OCTAVE, S1_SUB_WAVE}},
+@@ -2155,7 +2155,7 @@
+                     {"AMP ADSR", {9, 10, 11, 12}},
+                     {"LFO", {S1_LFO1_RATE, S1_LFO1_SHAPE, S1_LFO2_RATE, S1_LFO2_SHAPE}},
+                     {"TEMPO SYNC", {S1_LFO_SYNC, ORIG_PAGE_NONE, ORIG_PAGE_NONE, ORIG_PAGE_NONE}},
+-                    {"EFFECT", {ORIG_PAGE_ENGINE + ORIGINAL_SYNTHONE_CRUSH, S1_DELAY_MIX, S1_REVERB_MIX, ORIG_PAGE_NONE}},
++                    {"EFFECT", {ORIG_PAGE_ENGINE + ORIGINAL_SYNTHONE_CRUSH, S1_DELAY_MIX, S1_REVERB_MIX, S1_REVERB_HP}},
+                 };
+                 const unsigned effect_page = sizeof s1_pages / sizeof s1_pages[0] - 1;
+                 add_original_extra_pages(emit, s1_pages, effect_page, b, R_S1PATCH);

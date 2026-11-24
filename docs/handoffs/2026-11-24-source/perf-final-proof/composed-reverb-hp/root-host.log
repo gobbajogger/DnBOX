@@ -1,0 +1,26 @@
+Private host evidence: SCRATCH
+PASS compact dry/wet render captured INIT and 694 factory programs, 1024 frames each
+PASS compact dry/wet render captured INIT and 694 factory programs, 1024 frames each
+2b7c2c740edb57be12652f58c81a538815dd21c1ca8f66b0971cad51df0f331f  SCRATCH/base.pcm
+2b7c2c740edb57be12652f58c81a538815dd21c1ca8f66b0971cad51df0f331f  SCRATCH/join.pcm
+FAIL tests/host/ui_synthone_reverb_hp_test.c:291: engine_s1_patch_read(0, REVERB_HP, &absent)
+SCRATCH/positive.log:owner 0 reverb HP factory 900.000000 -> adjacent 893.543335 Hz
+SCRATCH/positive.log:owner 0 reverb HP 39 enable 0: 0/4096 owner frames changed, peer exact
+SCRATCH/positive.log:owner 1 reverb HP factory 900.000000 -> adjacent 893.543335 Hz
+SCRATCH/positive.log:owner 1 reverb HP 39 enable 0: 0/4096 owner frames changed, peer exact
+SCRATCH/positive.log:owner 0 reverb HP factory 219.399994 -> adjacent 228.503937 Hz
+SCRATCH/positive.log:owner 0 reverb HP 39 enable 1: 4096/4096 owner frames changed, peer exact
+SCRATCH/positive.log:owner 1 reverb HP factory 219.399994 -> adjacent 228.503937 Hz
+SCRATCH/positive.log:owner 1 reverb HP 39 enable 1: 4096/4096 owner frames changed, peer exact
+SCRATCH/positive.log:PASS real Synth One REVERB HP, both owners and enables, 1696 checks
+SCRATCH/old.log:PASS exact previous reader accepts the LFO control and refuses Reverb HP Sound/lock without writes, 257 checks
+SCRATCH/prior-wet.log:owner 0 MIX 44 enable 0: 0/4096 owner frames changed, peer exact
+SCRATCH/prior-wet.log:owner 0 MIX 40 enable 0: 0/4096 owner frames changed, peer exact
+SCRATCH/prior-wet.log:owner 1 MIX 44 enable 0: 0/4096 owner frames changed, peer exact
+SCRATCH/prior-wet.log:owner 1 MIX 40 enable 0: 0/4096 owner frames changed, peer exact
+SCRATCH/prior-wet.log:owner 0 MIX 44 enable 1: 4096/4096 owner frames changed, peer exact
+SCRATCH/prior-wet.log:owner 0 MIX 40 enable 1: 4096/4096 owner frames changed, peer exact
+SCRATCH/prior-wet.log:owner 1 MIX 44 enable 1: 4096/4096 owner frames changed, peer exact
+SCRATCH/prior-wet.log:owner 1 MIX 40 enable 1: 4096/4096 owner frames changed, peer exact
+SCRATCH/prior-wet.log:PASS real Synth One delay and reverb MIX, both owners and enables, 1100 checks
+PASS actual Reverb HP EFFECT LCD at 700 and 80 Hz
