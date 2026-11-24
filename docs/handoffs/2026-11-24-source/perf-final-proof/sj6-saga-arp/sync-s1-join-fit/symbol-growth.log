@@ -1,0 +1,60 @@
+=== s1 Elite stock map (normalized LTO suffixes)
+engine_render + fm1_alnk0_irq                8140 ->  8842 delta  +702
+describe_pages                               3138 ->  3684 delta  +546
+draw_param_widget                            3670 ->  3904 delta  +234
+engine_s1_patch_read                          136 ->   320 delta  +184
+do_undo                                       896 ->  1032 delta  +136
+run_action                                   1898 ->  2022 delta  +124
+s1_part_apply_extra                             0 ->   120 delta  +120
+pref_value_of                                1660 ->  1736 delta   +76
+s1_part_patch_value                             0 ->    70 delta   +70
+original_sound_s1_extra_valid                   0 ->    68 delta   +68
+bass_note_capture                             562 ->   616 delta   +54
+original_sound_s1_extra_available               0 ->    52 delta   +52
+s1_patch_steps                                  0 ->    48 delta   +48
+original_sound_s1_has_extra                     0 ->    48 delta   +48
+bass_preset_boundary_voice                    604 ->   650 delta   +46
+s1_part_program                               180 ->   224 delta   +44
+s1_edit                                       324 ->   364 delta   +40
+s1_patch_physical                               0 ->    38 delta   +38
+engine_bass_base_ready                        290 ->   326 delta   +36
+=== saga Elite stock map (normalized LTO suffixes)
+S1Sequencer_process                           548 ->   900 delta  +352
+arp_params                                    156 ->   286 delta  +130
+saga_step                                       0 ->    56 delta   +56
+engine_arp_settings_read                      176 ->   226 delta   +50
+engine_arp_block_encode                       218 ->   264 delta   +46
+arp_edit                                      382 ->   426 delta   +44
+pref_desc                                     778 ->   818 delta   +40
+engine_arp_block_decode                       204 ->   240 delta   +36
+describe_pages                               3138 ->  3166 delta   +28
+saga_clip                                       0 ->    20 delta   +20
+draw_303                                     1808 ->  1816 delta    +8
+S1Sequencer_clock                              56 ->    62 delta    +6
+original_runtime_render                       722 ->   728 delta    +6
+pref_get                                     1314 ->  1320 delta    +6
+S1Sequencer_init                               16 ->    20 delta    +4
+global_back                                    36 ->    36 delta    +0
+ed_install_busy                               110 ->   110 delta    +0
+load_stream_object                             50 ->    50 delta    +0
+ff_to_u32                                      54 ->    54 delta    +0
+=== both Elite stock map (normalized LTO suffixes)
+engine_render + fm1_alnk0_irq                8140 ->  8842 delta  +702
+describe_pages                               3138 ->  3712 delta  +574
+S1Sequencer_process                           548 ->   900 delta  +352
+draw_param_widget                            3670 ->  3904 delta  +234
+engine_s1_patch_read                          136 ->   320 delta  +184
+do_undo                                       896 ->  1032 delta  +136
+arp_params                                    156 ->   286 delta  +130
+run_action                                   1898 ->  2022 delta  +124
+s1_part_apply_extra                             0 ->   120 delta  +120
+pref_value_of                                1660 ->  1736 delta   +76
+s1_part_patch_value                             0 ->    70 delta   +70
+original_sound_s1_extra_valid                   0 ->    68 delta   +68
+saga_step                                       0 ->    56 delta   +56
+bass_note_capture                             562 ->   616 delta   +54
+pref_desc                                     778 ->   832 delta   +54
+original_sound_s1_extra_available               0 ->    52 delta   +52
+engine_arp_settings_read                      176 ->   226 delta   +50
+original_sound_s1_has_extra                     0 ->    48 delta   +48
+s1_patch_steps                                  0 ->    48 delta   +48

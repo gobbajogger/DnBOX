@@ -1,0 +1,41 @@
+=== sync-ui_arp_engine.log
+PASS ui-arp-engine 126 checks
+=== sync-ui_arp_keyboard.log
+PASS ARP SEQ held-pad keyboard pitch: 66 checks
+=== sync-ui_arp_legacy_pcm.log
+PASS 49,152 stereo frames of actual Synth One ARP and SEQ across both owners
+=== sync-ui_superj6_pwm1_lfo2.log
+part=0 PWM1 save/reload, routed base, depth-zero and route-off PCM, preset isolation PASS
+part=1 PWM1 save/reload, routed base, depth-zero and route-off PCM, preset isolation PASS
+part=0 PWM2 save/reload, routed base, depth-zero and route-off PCM, preset isolation PASS
+part=1 PWM2 save/reload, routed base, depth-zero and route-off PCM, preset isolation PASS
+PASS SuperJ6 LFO2 PWM 2074 checks
+=== sync-ui_superj6_saga.log
+PASS all 18 authored Saga periods, preset rounding, and the fixed arp block
+PASS actual notes for four deterministic modes, interleaved tiers and a shrinking pool
+part=0 actual SMK, saved owner block, legacy SPEED and Synth One isolation PASS
+part=1 actual SMK, saved owner block, legacy SPEED and Synth One isolation PASS
+PASS SuperJ6 Saga ARP/SEQ 895 checks
+=== sync-ui_superj6_sync.log
+PASS all 18 Build-9 divisions, binary32 boundaries and exact three-clock steps at 8001 to 192000 Hz
+part=0 active save/reload, retained sync on rate edit, zero-depth PCM and peer clock isolation PASS
+part=1 active save/reload, retained sync on rate edit, zero-depth PCM and peer clock isolation PASS
+PASS SuperJ6 LFO sync 11778 checks
+=== sync-ui_synthone_filter_link.log
+PASS Synth One envelope LINK 40 checks
+=== sync-ui_synthone_oscillator_editor.log
+PASS Synth One compact oscillator panel 194 checks
+=== sync-ui_synthone_sync_storage.log
+PASS mixed owner 0: typed bit 22, shared ARP, locks, motion, project and cross-bank ownership
+PASS mixed owner 1: typed bit 22, shared ARP, locks, motion, project and cross-bank ownership
+PASS Synth One and SuperJ6 storage seam 317 checks
+=== sync-combined-legacy-seam.log
+PASS exact old checkpoint loads unmarked mixed sounds and rejects edited records without overwriting them
+PASS Synth One and SuperJ6 storage seam 24 checks
+=== authored.log
+PASS all 18 authored Saga periods, preset rounding, and the fixed arp block
+PASS actual notes for four deterministic modes, interleaved tiers and a shrinking pool
+PASS authored records=640 used divisions=12 negative authored inputs=11
+part=0 actual SMK, saved owner block, legacy SPEED and Synth One isolation PASS
+part=1 actual SMK, saved owner block, legacy SPEED and Synth One isolation PASS
+PASS SuperJ6 Saga ARP/SEQ 2176 checks

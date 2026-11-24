@@ -1,0 +1,166 @@
+--- a/firmware/src/app/original_presets.inc
++++ b/firmware/src/app/original_presets.inc
+@@ -106,40 +106,25 @@
+ 
+ int engine_s1_patch_read(unsigned voice, unsigned factory_id, s1_patch_value *out)
+ {
+-    s1_patch_snapshot snapshot;
+     int slot = factory_id == S1_LINK_ID ? S1_PATCH_COUNT : s1_patch_slot(factory_id);
+-#if X0X_S1_EXTRA
+-    if (slot >= S1_EXTRA_FIRST) {
+-        if (voice >= NBASS || !out) return 0;
+-        uint32_t lock = plat_cq_lock();
+-        const original_runtime_part *p = &original_bass[voice];
+-        int ready = p->kind == ORIGINAL_SOUND_SYNTHONE && p->status == ORIGINAL_RUNTIME_OK;
+-        if (ready) {
+-            const s1_patch_descriptor *d = s1_patch_at((unsigned)slot);
+-            out->revision = s1_patch_identity(voice);
+-            out->preset = bass_named_preset[voice];
+-            out->note_locked = note_lock_applied[voice];
+-            out->physical = s1_part_patch_value(&p->dsp.synthone, (unsigned)slot);
+-            out->position = (uint8_t)((out->physical - d->minimum) *
+-                (s1_patch_steps((unsigned)slot) / (d->maximum - d->minimum)) + .5f);
+-        }
++    if (voice >= NBASS || slot < 0 || !out) return 0;
++    uint32_t lock = plat_cq_lock();
++    const original_runtime_part *p = &original_bass[voice];
++    if (!original_panel_ready(p, ORIGINAL_SOUND_SYNTHONE)) {
+         plat_cq_unlock(lock);
+-        return ready;
++        return 0;
+     }
+-#endif
+-    if (slot < 0 || !out || !engine_s1_patch_snapshot(voice, &snapshot)) return 0;
+-    out->revision = snapshot.revision;
+-    out->note_locked = snapshot.note_locked;
+-    out->preset = snapshot.preset;
+-    if (slot == S1_PATCH_COUNT) {
+-        out->position = snapshot.filter_link;
+-        out->physical = snapshot.filter_link;
+-        return 1;
++    out->revision = s1_patch_identity(voice);
++    out->preset = bass_named_preset[voice];
++    out->note_locked = note_lock_applied[voice];
++    out->physical = s1_part_patch_value(&p->dsp.synthone, (unsigned)slot);
++    if (slot == S1_PATCH_COUNT) out->position = (uint8_t)out->physical;
++    else {
++        const s1_patch_descriptor *d = s1_patch_at((unsigned)slot);
++        out->position = (uint8_t)((out->physical - d->minimum) *
++            (s1_patch_steps((unsigned)slot) / (d->maximum - d->minimum)) + .5f);
+     }
+-    const s1_patch_descriptor *d = s1_patch_at((unsigned)slot);
+-    out->physical = snapshot.physical[slot];
+-    out->position = (uint8_t)((out->physical - d->minimum) *
+-        (S1_PATCH_STEPS / (d->maximum - d->minimum)) + .5f);
++    plat_cq_unlock(lock);
+     return 1;
+ }
+ 
+@@ -193,9 +178,10 @@
+ #endif
+ #endif
+ #if X0X_SYNTHONE_PATCH
+-static void s1_patch_boundary(void)
++/* Project/edit publication is conditionally entered from the audio
++ * boundary; keep its empty mailbox check in the unchanged caller. */
++__attribute__((noinline)) X0X_COLD static void s1_patch_commit(void)
+ {
+-    if (bass_edit_depth || !engine_s1_patch_pending()) return;
+     for (unsigned v = 0; v < NBASS; ++v) {
+         if (!s1_edit[v].pending || note_lock_applied[v]) continue;
+         s1_edit[v].pending = 0;
+@@ -218,6 +204,10 @@
+                      original_sound_edit_mask(cell) != 0);
+     }
+ }
++static void s1_patch_boundary(void)
++{
++    if (!bass_edit_depth && engine_s1_patch_pending()) s1_patch_commit();
++}
+ #endif
+ #if X0X_SUPERJ6_BUILTIN_INIT
+ static uint8_t sj6_knob_value[NBASS][SJ6_KNOBS];
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -2012,6 +2012,25 @@
+ }
+ 
+ /* Pure navigation inputs: emit existing descriptors without keyboard clamping. */
++#if X0X_SUPERJ6_BUILTIN_INIT || X0X_S1_EXTRA
++enum { ORIG_PAGE_ENGINE = 128, ORIG_PAGE_NONE = 255 };
++typedef struct { const char *title; uint8_t id[4]; } original_page_row_t;
++__attribute__((noinline)) X0X_COLD static void add_original_extra_pages(
++    page_emitter_t *emit, const original_page_row_t *pages, unsigned count, int owner, unsigned kind)
++{
++    for (unsigned row = 0; row < count; ++row) {
++        pref_t refs[4];
++        for (unsigned col = 0; col < 4; ++col) {
++            unsigned id = pages[row].id[col];
++            refs[col] = id == ORIG_PAGE_NONE ? NONE :
++                id >= ORIG_PAGE_ENGINE ? PR(R_ENG,T_303,owner,id - ORIG_PAGE_ENGINE) :
++                PR(kind,T_303,owner,id);
++        }
++        add_page_refs(emit, pages[row].title, refs, 0, 0);
++    }
++}
++#endif
++
+ static void describe_pages(pages_t *out, page_query_t *query, int view, int p, int mixsel, const uint8_t *selection)
+ {
+     page_emitter_t output = {out, query, GR_NONE};
+@@ -2086,29 +2105,19 @@
+             int first_row = 0;
+ #if X0X_SUPERJ6_BUILTIN_INIT
+             if (kind == ORIGINAL_SOUND_JUNO) {
+-                enum { SJ6_PAGE_ENGINE = 128, SJ6_PAGE_NONE = 255 };
+-                enum { SJ6_PAGE_ID_FITS = 1 / (SJ6_LFO2_PWM_BASE < SJ6_PAGE_ENGINE) };
+-                static const struct { const char *title; uint8_t id[4]; } pages[] = {
+-                    {"OSCILLATOR", {SJ6_WAVE1, SJ6_WAVE2, SJ6_RANGE, SJ6_PAGE_NONE}},
++                enum { SJ6_PAGE_ID_FITS = 1 / (SJ6_LFO2_PWM_BASE < ORIG_PAGE_ENGINE) };
++                static const original_page_row_t pages[] = {
++                    {"OSCILLATOR", {SJ6_WAVE1, SJ6_WAVE2, SJ6_RANGE, ORIG_PAGE_NONE}},
+                     {"PULSE WIDTH", {SJ6_PWM1_ON, SJ6_PWM1, SJ6_PWM2_ON, SJ6_PWM2}},
+-                    {"FILTER", {SJ6_PAGE_ENGINE + 2, SJ6_PAGE_ENGINE + 3, SJ6_PAGE_ENGINE + 4, SJ6_FILTER_LINK}},
++                    {"FILTER", {ORIG_PAGE_ENGINE + 2, ORIG_PAGE_ENGINE + 3, ORIG_PAGE_ENGINE + 4, SJ6_FILTER_LINK}},
+                     {"FILTER ADSR", {SJ6_FILTER_ATTACK, SJ6_FILTER_DECAY, SJ6_FILTER_SUSTAIN, SJ6_FILTER_RELEASE}},
+                     {"AMP ADSR", {SJ6_AMP_ATTACK, SJ6_AMP_DECAY, SJ6_AMP_SUSTAIN, SJ6_AMP_RELEASE}},
+-                    {"OUTPUT", {SJ6_PAGE_ENGINE + 9, SJ6_MASTER_LEVEL, SJ6_PAGE_NONE, SJ6_PAGE_NONE}},
+-                    {"LFO RATE", {SJ6_LFO1_RATE, SJ6_LFO2_RATE, SJ6_LFO3_RATE, SJ6_PAGE_NONE}},
+-                    {"LFO MODE", {SJ6_LFO1_MODE, SJ6_LFO2_MODE, SJ6_LFO3_MODE, SJ6_PAGE_NONE}},
++                    {"OUTPUT", {ORIG_PAGE_ENGINE + 9, SJ6_MASTER_LEVEL, ORIG_PAGE_NONE, ORIG_PAGE_NONE}},
++                    {"LFO RATE", {SJ6_LFO1_RATE, SJ6_LFO2_RATE, SJ6_LFO3_RATE, ORIG_PAGE_NONE}},
++                    {"LFO MODE", {SJ6_LFO1_MODE, SJ6_LFO2_MODE, SJ6_LFO3_MODE, ORIG_PAGE_NONE}},
+                     {"LFO2 PWM", {SJ6_LFO2_RATE, SJ6_LFO2_PWM_DEPTH, SJ6_LFO2_PWM_ROUTE, SJ6_LFO2_PWM_BASE}},
+                 };
+-                for (unsigned row = 0; row < sizeof pages / sizeof *pages; ++row) {
+-                    pref_t refs[4];
+-                    for (unsigned col = 0; col < 4; ++col) {
+-                        unsigned id = pages[row].id[col];
+-                        refs[col] = id == SJ6_PAGE_NONE ? NONE :
+-                            id >= SJ6_PAGE_ENGINE ? PR(R_ENG,T_303,b,id - SJ6_PAGE_ENGINE) :
+-                            PR(R_SJ6KNOB,T_303,b,id);
+-                    }
+-                    add_page_refs(emit, pages[row].title, refs, 0, 0);
+-                }
++                add_original_extra_pages(emit, pages, sizeof pages / sizeof *pages, b, R_SJ6KNOB);
+                 first_row = 3;
+             }
+ #endif
+@@ -2138,11 +2147,12 @@
+                 add_page_refs(emit, titles[row],refs,0,0);
+ #if X0X_S1_EXTRA
+                 if (kind == ORIGINAL_SOUND_SYNTHONE && !row) {
+-                    add_page(emit, "OSC MIX", PR(R_S1PATCH,T_303,b,S1_OSC2_LEVEL),
+-                             PR(R_S1PATCH,T_303,b,S1_SUB_LEVEL), PR(R_S1PATCH,T_303,b,S1_SUB_OCTAVE),
+-                             PR(R_S1PATCH,T_303,b,S1_SUB_WAVE));
+-                    add_page(emit, "FM / NOISE", PR(R_S1PATCH,T_303,b,S1_FM_LEVEL),
+-                             PR(R_S1PATCH,T_303,b,S1_FM_INDEX), PR(R_S1PATCH,T_303,b,S1_NOISE_LEVEL), NONE);
++                    enum { S1_PAGE_ID_FITS = 1 / (S1_NOISE_LEVEL < ORIG_PAGE_ENGINE) };
++                    static const original_page_row_t extra[] = {
++                        {"OSC MIX", {S1_OSC2_LEVEL, S1_SUB_LEVEL, S1_SUB_OCTAVE, S1_SUB_WAVE}},
++                        {"FM / NOISE", {S1_FM_LEVEL, S1_FM_INDEX, S1_NOISE_LEVEL, ORIG_PAGE_NONE}}
++                    };
++                    add_original_extra_pages(emit, extra, sizeof extra / sizeof *extra, b, R_S1PATCH);
+                 }
+ #endif
+             }
