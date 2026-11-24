@@ -1,0 +1,3 @@
+# Layer 2 coarse and all five LFO2 shapes, composed host checkpoint
+
+Start with the previous composed Widen + ID72 ledger. Apply both Layer 2 tuning patches and verify its PRODUCT-POST manifest; then apply held-composed-widen-tune.patch and verify BOTH-POST.sha256. No patch backup, bank binaries, original AU, private PCM or ZIP files are part of this checkpoint. The host replay separately reconstructs held shape on the older HP and Widen+ID72 donors and tests shared storage overlap. Root additionally reran Layer 2 after composing both changes. Authored 72/73 tuning import is still separate. The compact held clock/provider is not claimed to be binary-identical to desktop AU PCM, and native fit, BLE, timing and release are unverified.

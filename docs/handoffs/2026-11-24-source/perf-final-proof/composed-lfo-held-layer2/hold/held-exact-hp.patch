@@ -1,0 +1,602 @@
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -255,7 +255,7 @@
+ typedef struct {
+     juno6_lfo_words lfo;
+     float vibrato[2], a_reference;
+-    uint8_t vibrato_present, a_reference_present;
++    uint8_t vibrato_present, a_reference_present, lfo2_shape;
+ #if X0X_ARP_ENGINE
+     uint16_t saga_seen, saga_on;
+ #endif
+@@ -289,6 +289,8 @@
+     }
+ #if X0X_SUPERJ6_BUILTIN_INIT
+     sj6_factory_motion motion = {0};
++    if (row->lfo2_authored > SJ6_LFO2_SHAPE_MAX + 1u) return 0;
++    motion.lfo2_shape = row->lfo2_authored ? row->lfo2_authored - 1u : SJ6_LFO_TRI;
+ #if X0X_ARP_ENGINE
+     if (row->saga_invalid) return 0;
+     motion.saga_seen = row->saga_seen;
+--- a/firmware/src/app/original_presets.inc
++++ b/firmware/src/app/original_presets.inc
+@@ -340,7 +340,7 @@
+     juno6_t *s = &original_bass[owner].dsp.juno.synth;
+     juno6_set_lfo_words(s, &motion->lfo, 1);
+     juno6_set_lfo2_pwm(s, 0);
+-    juno6_set_lfo2_shape(s, SJ6_LFO_TRI);
++    juno6_set_lfo2_shape(s, motion->lfo2_shape);
+     juno6_set_vibrato_words(s, motion->vibrato, motion->vibrato_present, 1);
+     if (motion->a_reference_present || (s->core.raw_present[SJ6_A_REFERENCE_ID / 32u] &
+                                        (1u << (SJ6_A_REFERENCE_ID % 32u))))
+@@ -351,7 +351,7 @@
+     uint8_t *extra = sound->v[T_303][ORIGINAL_SJ6_EXTRA_ROW + owner];
+     original_sound_sj6_lfo_store(cell, extra, &motion->lfo);
+     original_sound_sj6_lfo2_pwm_store(cell, 0);
+-    original_sound_sj6_shape_store(cell, SJ6_LFO_TRI);
++    original_sound_sj6_shape_store(cell, motion->lfo2_shape);
+     original_sound_sj6_chorus_store(cell, chorus_mode);
+     uint8_t *wire = sound->v[T_303][BASS_SHARED_EXTRA_ROW + owner];
+     if (original_sound_sj6_vibrato_marker(cell) == 1u) memset(extra + ORIGINAL_SJ6_VIBRATO_OFFSET, 0, 2u);
+@@ -948,6 +948,7 @@
+     sj6_locked_extra[v] = 0;
+ #endif
+     if (rc == ORIGINAL_RUNTIME_OK && original_bass[v].kind == ORIGINAL_SOUND_JUNO) {
++        original_bass[v].dsp.juno.synth.lfo2_entropy_state ^= (uint64_t)(unsigned)v << 32;
+         const uint8_t *cell = sound->v[T_303][v];
+         const uint8_t *extra = sound->v[T_303][ORIGINAL_SJ6_EXTRA_ROW + v];
+         if (original_sound_edit_mask(cell) & ORIGINAL_SJ6_AUTHORED_LFO_BIT)
+@@ -1115,6 +1116,8 @@
+         }
+         original_switch_gain[v] = 512u; original_quiet_samples[v] = 0;
+ #if X0X_SUPERJ6_BUILTIN_INIT
++        if (original_bass[v].kind == ORIGINAL_SOUND_JUNO)
++            original_bass[v].dsp.juno.synth.lfo2_entropy_state ^= (uint64_t)(unsigned)v << 32;
+         if (sound->v[T_303][v][29] == ORIGINAL_SOUND_JUNO) {
+             uint32_t sj6_flags = original_sound_edit_mask(sound->v[T_303][v]);
+             uint8_t *sj6_extra = sound->v[T_303][ORIGINAL_SJ6_EXTRA_ROW + v];
+--- a/firmware/src/app/original_sound.h
++++ b/firmware/src/app/original_sound.h
+@@ -149,12 +149,15 @@
+ #define ORIGINAL_SJ6_LFO2_SHAPE_MARK 128u
+ #define ORIGINAL_SJ6_LFO2_SHAPE_SHIFT 4u
+ static inline unsigned original_sound_sj6_shape(const uint8_t *cell)
+-{ return (cell[31] >> ORIGINAL_SJ6_LFO2_SHAPE_SHIFT) & SJ6_LFO2_SHAPE_MAX; }
++{
++    unsigned high = cell[31] >> ORIGINAL_SJ6_LFO2_SHAPE_SHIFT;
++    return high == 8u ? SJ6_LFO_HELD : high >= 9u && high <= 11u ? high - 8u : SJ6_LFO_TRI;
++}
+ static inline void original_sound_sj6_shape_store(uint8_t *cell, unsigned shape)
+ {
+     if (shape <= SJ6_LFO2_SHAPE_MAX)
+         cell[31] = (cell[31] & 15u) | (shape ? ORIGINAL_SJ6_LFO2_SHAPE_MARK |
+-                   (shape << ORIGINAL_SJ6_LFO2_SHAPE_SHIFT) : 0u);
++                   ((shape & 3u) << ORIGINAL_SJ6_LFO2_SHAPE_SHIFT) : 0u);
+ }
+ /* The same kind-discriminated byte marks Synth One crush edits. */
+ static inline unsigned original_sound_sj6_vibrato_marker(const uint8_t *cell)
+@@ -164,7 +167,7 @@
+     unsigned high = cell[31] >> ORIGINAL_SJ6_LFO2_SHAPE_SHIFT;
+     unsigned tag = ORIGINAL_SJ6_LFO2_SHAPE_MARK >> ORIGINAL_SJ6_LFO2_SHAPE_SHIFT;
+     return cell[29] == ORIGINAL_SOUND_JUNO && original_sound_sj6_vibrato_marker(cell) <= 4u &&
+-           (!high || (high > tag && high <= tag + SJ6_LFO2_SHAPE_MAX));
++           (!high || (high >= tag && high <= tag + SJ6_LFO_SQUARE));
+ }
+ static inline int original_sound_sj6_vibrato(const uint8_t *cell)
+ { return original_sound_sj6_marker_valid(cell) && original_sound_sj6_vibrato_marker(cell) != 0; }
+--- a/firmware/src/app/superj6_factory.h
++++ b/firmware/src/app/superj6_factory.h
+@@ -25,6 +25,7 @@
+ #if X0X_SUPERJ6_BUILTIN_INIT
+     uint8_t saga_invalid;
+     uint16_t saga_seen, saga_on;
++    uint8_t lfo2_authored; /* 0 absent; 1–5 validated selector+1; 255 invalid */
+ #endif
+ } sj6_factory_row;
+ 
+@@ -32,6 +33,19 @@
+ {
+     unsigned slot;
+ #if X0X_SUPERJ6_BUILTIN_INIT
++    if (id == 98u) {
++        if (!row->lfo2_authored) {
++            /* On [0,1], Build-9 widens Float32, multiplies by 4 exactly,
++             * and truncates. Ordering IEEE-754 positive words is equivalent. */
++            if (bits == UINT32_C(0x80000000)) bits = 0; /* -0 */
++            row->lfo2_authored = bits > UINT32_C(0x3f800000) ? 255u :
++                bits == UINT32_C(0x3f800000) ? 5u :
++                bits >= UINT32_C(0x3f400000) ? 4u :
++                bits >= UINT32_C(0x3f000000) ? 3u :
++                bits >= UINT32_C(0x3e800000) ? 2u : 1u;
++        }
++        return;
++    }
+     /* Only the literal binary step toggles are qualified. Do not feed the
+      * normalized offset/count/gate fields through the provisional mapper. */
+     if (id >= 163 && id <= 178) {
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -507,7 +507,7 @@
+     static const char *const enable[] = {"OFF", "ON"};
+     static const char *const pwm_route[] = {"OFF", "PWM 1", "PWM 2"};
+     static const char *const lfo_mode[] = {"SYNC", "HZ"};
+-    static const char *const lfo_shape[] = {"TRI", "RAMP UP", "RAMP DOWN", "SQUARE"};
++    static const char *const lfo_shape[] = {"TRI", "RAMP UP", "RAMP DOWN", "SQUARE", "S&H"};
+     static const x0x_param_t knobs[] = {
+         {"WAVE 1", SJ6_WAVE_STOPS, 2, wave}, {"WAVE 2", SJ6_WAVE_STOPS, 2, wave},
+         {"RANGE", SJ6_RANGE_STOPS, 1, range},
+--- a/firmware/src/dsp/juno6.h
++++ b/firmware/src/dsp/juno6.h
+@@ -38,9 +38,9 @@
+ enum { SJ6_LFO2_PWM_DEPTH_MASK = 127, SJ6_LFO2_PWM_ROUTE_SHIFT = 7,
+        SJ6_LFO2_PWM_ROUTE_MASK = 3u << SJ6_LFO2_PWM_ROUTE_SHIFT,
+        SJ6_LFO2_PWM_SHAPE_SHIFT = 9 };
+-/* Deterministic entries in the Build-9 runtime wave row. */
+-enum { SJ6_LFO_TRI, SJ6_LFO_UP, SJ6_LFO_DOWN, SJ6_LFO_SQUARE,
+-       SJ6_LFO2_SHAPE_MAX = SJ6_LFO_SQUARE };
++/* Build-9 normalized wave choices; internal sine is not selector ID98. */
++enum { SJ6_LFO_TRI, SJ6_LFO_UP, SJ6_LFO_DOWN, SJ6_LFO_SQUARE, SJ6_LFO_HELD,
++       SJ6_LFO2_SHAPE_MAX = SJ6_LFO_HELD, SJ6_LFO2_SHAPE_MASK = 7 };
+ enum { SJ6_WAVE_STOPS = 3, SJ6_RANGE_STOPS = 2, SJ6_PWM_STEPS = 127, SJ6_MASTER_INIT = 128 };
+ #endif
+ static inline int juno6_factory_range_valid(float raw)
+@@ -85,6 +85,8 @@
+  uint8_t lfo_running, lfo_sync, lfo2_pwm_index, vibrato_left;
+  uint32_t lfo2_pwm_until_tick, vibrato_phase, vibrato_step;
+  float vibrato_depth, vibrato_ratio;
++ uint64_t lfo2_entropy_state;
++ float lfo2_hold_elapsed, lfo2_hold_period, lfo2_hold_sample;
+ #endif
+ #endif
+ } juno6_t;
+--- a/firmware/src/dsp/juno6_factory.inc
++++ b/firmware/src/dsp/juno6_factory.inc
+@@ -6,6 +6,7 @@
+   * that the typed setters and host/UI read, not its private voice state. */
+  memset(s,0,sizeof *s);
+  s->sample_rate=sr>8000?sr:44100;
++ s->lfo2_entropy_state=UINT64_C(0xc42735cc98dbcb83);
+  s->macro[0]=.35f;s->macro[4]=.35f;s->macro[10]=.12f;
+  s->macro[15]=1.0f;s->macro[16]=.5f;
+ #else
+@@ -254,6 +255,7 @@
+     float advance = view.hz * ((float)SJ6_LFO_TURN / s->sample_rate) + .5f;
+     uint64_t step = sj6_lfo_unsigned_phase(advance);
+     s->lfo_step_q40[lfo] = step;
++    if (lfo == 1u) s->lfo2_hold_period = view.hz > 0.f ? 1.f / view.hz : 0.f;
+     unsigned bit = 1u << lfo;
+     s->lfo_running = (uint8_t)(step ? s->lfo_running | bit : s->lfo_running & ~bit);
+     s->lfo_sync = (uint8_t)(view.present == 3u && view.mode == 0.f ?
+@@ -270,6 +272,10 @@
+ 
+ void juno6_set_lfo_words(juno6_t *s, const juno6_lfo_words *words, int reset_phase)
+ {
++    if (reset_phase) {
++        s->lfo2_hold_sample = s->lfo2_hold_elapsed = 0.f;
++        s->lfo2_pwm_until_tick = 0;
++    }
+     for (unsigned lfo = 0; lfo < SJ6_LFO_COUNT; ++lfo) {
+         unsigned mask = words ? words->present >> lfo : 0u;
+         unsigned presence = (mask & 1u) | ((mask >> 2u) & 2u);
+@@ -295,14 +301,15 @@
+ void juno6_set_lfo2_pwm(juno6_t *s, uint16_t setting)
+ {
+     const unsigned mask = SJ6_LFO2_PWM_DEPTH_MASK | SJ6_LFO2_PWM_ROUTE_MASK;
+-    if (!(setting & SJ6_LFO2_PWM_DEPTH_MASK) || !(setting & SJ6_LFO2_PWM_ROUTE_MASK))
++    if ((s->lfo2_pwm >> SJ6_LFO2_PWM_SHAPE_SHIFT) != SJ6_LFO_HELD &&
++        (!(setting & SJ6_LFO2_PWM_DEPTH_MASK) || !(setting & SJ6_LFO2_PWM_ROUTE_MASK)))
+         s->lfo2_pwm_until_tick = 0;
+     s->lfo2_pwm = (s->lfo2_pwm & ~mask) | (setting & mask);
+ }
+ 
+ void juno6_set_lfo2_shape(juno6_t *s, unsigned shape)
+ {
+-    const unsigned mask = SJ6_LFO2_SHAPE_MAX << SJ6_LFO2_PWM_SHAPE_SHIFT;
++    const unsigned mask = SJ6_LFO2_SHAPE_MASK << SJ6_LFO2_PWM_SHAPE_SHIFT;
+     if (shape <= SJ6_LFO2_SHAPE_MAX)
+         s->lfo2_pwm = (s->lfo2_pwm & ~mask) | (shape << SJ6_LFO2_PWM_SHAPE_SHIFT);
+ }
+@@ -577,6 +584,35 @@
+     }
+ }
+ 
++#include "juno6_lfo_hold.h"
++static uint64_t sj6_held_next(void *ctx)
++{
++    juno6_t *s = ctx;
++    uint64_t x = s->lfo2_entropy_state;
++    x ^= x << 13; x ^= x >> 7; x ^= x << 17;
++    s->lfo2_entropy_state = x;
++    return x;
++}
++static void sj6_held_80hz(juno6_t *s)
++{
++    (void)sj6_held_tick(&s->lfo2_hold_elapsed, &s->lfo2_hold_sample, 1.f / 80.f,
++                       s->lfo2_hold_period, sj6_held_next, s);
++}
++/* Advance the held clock when its mapped audio destination is bypassed; no
++ * typed-render split, so muted/invalid routes do not change audio work. */
++static void sj6_held_bypass(juno6_t *s, unsigned frames)
++{
++    unsigned until = s->lfo2_pwm_until_tick;
++    while (frames) {
++        if (until < 80u) {sj6_held_80hz(s); until += (unsigned)s->sample_rate;}
++        unsigned count = until / 80u;
++        if (count > frames) count = frames;
++        frames -= count;
++        until -= count * 80u;
++    }
++    s->lfo2_pwm_until_tick = until;
++}
++
+ /* Sample the existing audio clock on the nominal 80 Hz control grid. */
+ static int render_lfo2_pwm(juno6_t *s, unsigned receiver, float *left, float *right, unsigned frames)
+ {
+@@ -594,9 +630,11 @@
+     while (frames) {
+         if (until_tick < tick_hz) {
+             s->lfo2_pwm_index = (uint8_t)(phase >> 32);
++            if (shape == SJ6_LFO_HELD) sj6_held_80hz(s);
+             until_tick += sample_rate;
+         }
+-        float delta = lfo2_pwm_delta(shape, s->lfo2_pwm_index, depth);
++        float delta = shape == SJ6_LFO_HELD ? (s->lfo2_hold_sample * depth) * .5f :
++                      lfo2_pwm_delta(shape, s->lfo2_pwm_index, depth);
+         float raw = fm_clampf(base + delta, 0.f, 1.f);
+         (void)dnbx_pwm_from_unit(raw, &layer->pulse_width);
+         unsigned count = until_tick / tick_hz;
+@@ -633,8 +671,9 @@
+      left && right && left != right) {
+   if (render_lfo2_pwm(s,receiver,left,right,frames)!=DNBX_OK)return 0;
+  } else {
+-  s->lfo2_pwm_until_tick = 0;
+   if (render_typed_span(s,left,right,frames)!=DNBX_OK)return 0;
++  if ((s->lfo2_pwm >> SJ6_LFO2_PWM_SHAPE_SHIFT) == SJ6_LFO_HELD) sj6_held_bypass(s,frames);
++  else s->lfo2_pwm_until_tick = 0;
+  }
+  /* Keep all three audio-clock phases independent of receiver and span. */
+  for (unsigned i = 0, running = s->lfo_running; running; ++i, running >>= 1)
+--- /dev/null
++++ b/firmware/src/dsp/juno6_lfo_hold.h
+@@ -0,0 +1,80 @@
++/* SPDX-License-Identifier: GPL-3.0-only */
++#pragma once
++#include <stdint.h>
++
++/* Build 9 held sample law. The compact renderer owns an independent seeded
++ * provider per engine. No table is filled or stored; the unused table's draws
++ * are preserved while the compact held route ticks. Bound provider rejection
++ * in realtime; failure does not publish a partial held/elapsed result. */
++typedef uint64_t (*sj6_entropy_word)(void *);
++static uint64_t sj6_held_high(uint64_t a, uint64_t b)
++{
++    const uint64_t m = UINT32_MAX;
++    uint64_t x = (a & m) * (b & m), t = (a >> 32) * (b & m) + (x >> 32);
++    return (a >> 32) * (b >> 32) + (t >> 32) + (((t & m) + (a & m) * (b >> 32)) >> 32);
++}
++static int sj6_held_bound(sj6_entropy_word next, void *ctx,
++                         uint64_t bound, uint64_t threshold, uint64_t *out)
++{
++    for (unsigned attempt = 0; attempt < 4; ++attempt) {
++        const uint64_t sample = next(ctx);
++        if (sample * bound >= threshold) {
++            *out = sj6_held_high(sample, bound);
++            return 1;
++        }
++    }
++    return 0;
++}
++static int sj6_held_amplitude_discard(sj6_entropy_word next, void *ctx)
++{
++    for (unsigned attempt = 0; attempt < 4; ++attempt)
++        if ((uint32_t)((uint64_t)(uint32_t)next(ctx) * 16777217u) >= 16776961u)
++            return 1;
++    return 0;
++}
++static int sj6_held_table_discard(sj6_entropy_word next, void *ctx)
++{
++    uint64_t duration;
++    if (!sj6_held_amplitude_discard(next, ctx) ||
++        !sj6_held_bound(next, ctx, 207u, 52u, &duration)) return 0;
++    for (unsigned done = 0; done < 256u; done += 50u + (unsigned)duration)
++        if (!sj6_held_amplitude_discard(next, ctx) ||
++            !sj6_held_bound(next, ctx, 207u, 52u, &duration)) return 0;
++    return 1;
++}
++static float sj6_held_center(uint64_t value)
++{
++    const uint64_t middle = UINT64_C(1) << 52;
++    const unsigned negative = value < middle;
++    uint64_t magnitude = negative ? middle - value : value - middle;
++    if (!magnitude) return 0.f;
++    /* Integer conversion would otherwise require a target-specific uint64 ->
++     * float helper. Round the 24-bit mantissa, then scale by a binary power. */
++    unsigned shift = magnitude >> 32 ? 40u - __builtin_clz((uint32_t)(magnitude >> 32)) :
++                     magnitude >= (1u << 24) ? 8u - __builtin_clz((uint32_t)magnitude) : 0u;
++    uint64_t top = magnitude >> shift;
++    if (shift) {
++        uint64_t half = UINT64_C(1) << (shift - 1);
++        uint64_t low = magnitude & ((half << 1) - 1u);
++        top += low > half || (low == half && (top & 1u));
++    }
++    /* top <= 2^24, so its binary32 conversion is exact. */
++    union {uint32_t u; float f;} scale = {.u = (uint32_t)(75 + shift) << 23};
++    float f = (uint32_t)top * scale.f;
++    return negative ? -f : f;
++}
++static int sj6_held_tick(float *elapsed, float *held, float dt, float period,
++                         sj6_entropy_word next, void *ctx)
++{
++    if (!sj6_held_table_discard(next, ctx)) return 0;
++    float e = *elapsed + dt;
++    if (period > 0.f && e >= period) {
++        uint64_t value;
++        if (!sj6_held_bound(next, ctx, UINT64_C(9007199254740993),
++                           UINT64_C(9007199254738945), &value)) return 0;
++        *held = sj6_held_center(value);
++        e = 0.f;
++    }
++    *elapsed = e;
++    return 1;
++}
+--- /dev/null
++++ b/tests/host/sj6_lfo2_held_entropy_test.c
+@@ -0,0 +1,87 @@
++/* SPDX-License-Identifier: GPL-3.0-only
++ * Independent host oracle for the Build-9 bounded entropy and compact tick. */
++#include <assert.h>
++#include <stdio.h>
++#include <stdint.h>
++#include "dsp/juno6_lfo_hold.h"
++#include "app/superj6_factory.h"
++
++struct script {const uint64_t *word; unsigned used, length;};
++static uint64_t fixed(void *ctx)
++{
++    struct script *s=ctx;
++    assert(s->used<s->length);
++    return s->word[s->used++];
++}
++static uint64_t roll(uint64_t *state)
++{
++    uint64_t x=*state;
++    x ^= x << 13; x ^= x >> 7; x ^= x << 17;
++    return *state=x;
++}
++int main(void)
++{
++    uint64_t state=UINT64_C(0xf50ddb45c5330df1);
++    const uint64_t span=UINT64_C(9007199254740993);
++    const uint64_t middle=UINT64_C(1)<<52;
++    unsigned rejects=0;
++    for (unsigned i=0;i<16384;i++) {
++        uint64_t x=roll(&state),y=roll(&state);
++        assert(sj6_held_high(x,y)==(uint64_t)(((__uint128_t)x*y)>>64));
++        const uint64_t probe[]={x,y,UINT64_MAX};
++        struct script text={probe,0,3};
++        uint64_t got=0,want=0;
++        unsigned expected=0;
++        do {
++            __uint128_t prod=(__uint128_t)probe[expected++]*span;
++            if((uint64_t)prod>=-span%span){want=(uint64_t)(prod>>64);break;}
++            rejects++;
++        } while(expected<3);
++        assert(sj6_held_bound(fixed,&text,span,-span%span,&got) && got==want && text.used==expected);
++        assert(sj6_held_center(got)==(float)(((double)got-(double)middle)*0x1p-52));
++    }
++    assert(rejects);
++    const uint32_t control_boundary[]={0,0x80000000u,0x3e7fffffu,0x3e800000u,
++        0x3effffffu,0x3f000000u,0x3f3fffffu,0x3f400000u,0x3f7fffffu,0x3f800000u,
++        0x3f800001u,0x80000001u,0x7f800000u,0x7fc00000u};
++    for (unsigned i=0;i<sizeof control_boundary/sizeof *control_boundary;++i) {
++        sj6_factory_row row={0};
++        uint32_t raw=control_boundary[i];
++        union {uint32_t u; float f;} input={.u=raw};
++        unsigned expected=(input.f>=0.f && input.f<=1.f)?(unsigned)((double)input.f*4.)+1u:255u;
++        sj6_factory_add_word(&row,98,raw);
++        assert(row.lfo2_authored==expected);
++        sj6_factory_add_word(&row,98,0x3f800000u);
++        assert(row.lfo2_authored==expected); /* first exact field wins */
++    }
++
++    for (int i=-512;i<=512;i++) {
++        uint64_t x=middle+i;
++        assert(sj6_held_center(x)==(float)(i*0x1p-52));
++    }
++    assert(sj6_held_center(0)==-1.f && sj6_held_center(middle*2)==1.f);
++
++    const uint64_t ticks[]={UINT64_MAX,UINT64_MAX,UINT64_MAX,UINT64_MAX,0,1};
++    struct script tape={ticks,0,6};
++    float elapsed=.375f, held=.25f;
++    /* Same-tick threshold after a rate change: equality refreshes, first
++     * 4 words are discarded table staging, word zero rejected before -1. */
++    assert(sj6_held_tick(&elapsed,&held,.125f,.5f,fixed,&tape));
++    assert(elapsed==0 && held==-1 && tape.used==6);
++    tape.used=0;elapsed=.375f;held=.25f;
++    assert(sj6_held_tick(&elapsed,&held,0,.5f,fixed,&tape) && tape.used==4);
++    assert(elapsed==.375f && held==.25f);
++    tape.used=0;
++    assert(sj6_held_tick(&elapsed,&held,.25f,0,fixed,&tape) && tape.used==4);
++    assert(elapsed==.625f && held==.25f);
++    tape.used=0;
++    assert(sj6_held_tick(&elapsed,&held,.25f,.5f,fixed,&tape));
++    assert(elapsed==0 && held==-1 && tape.used==6); /* deliberately discard overshoot */
++
++    const uint64_t fail[]={UINT64_MAX,UINT64_MAX,UINT64_MAX,UINT64_MAX,0,0,0,0};
++    struct script failed={fail,0,8};
++    elapsed=.375f;held=.25f;
++    assert(!sj6_held_tick(&elapsed,&held,.125f,.5f,fixed,&failed));
++    assert(elapsed==.375f && held==.25f && failed.used==8);
++    printf("PASS held entropy, 16384 independent high-product/float/rejection checks (%u retries), signed center endpoints, table-before-draw, equality/rate/zero-dt/overshoot and bounded failure\n",rejects);
++}
+--- a/tests/host/ui_superj6_lfo2_shape_test.c
++++ b/tests/host/ui_superj6_lfo2_shape_test.c
+@@ -119,7 +119,7 @@
+     original_sound_sj6_shape_store(cell, SJ6_LFO_DOWN);
+     CHECK(original_sound_sj6_vibrato_words(cell, wire, found) == 3 && !memcmp(found, vib, sizeof vib));
+     CHECK(original_sound_sj6_a_reference_word(cell, wire, &a) == 1 && a == .71f);
+-    const unsigned invalid[] = {16, 32, 48, 64, 128, 144 + 5, 192, 240, 255};
++    const unsigned invalid[] = {16, 32, 48, 64, 144 + 5, 192, 240, 255};
+     for (unsigned i = 0; i < sizeof invalid / sizeof invalid[0]; ++i) {
+         cell[31] = (uint8_t)invalid[i];
+         CHECK(!original_sound_valid(cell) && original_sound_bass_shared_size(cell, wire) < 0);
+@@ -136,17 +136,17 @@
+     pref_t ref = pg.r[cur_page()][3];
+     const x0x_param_t *desc = pref_desc(ref);
+     CHECK(desc && desc->names && !strcmp(desc->name, "LFO 2 SHAPE"));
+-    CHECK(desc->max == 3 && !strcmp(desc->names[position],
+-          ((const char *const[]){"TRI", "RAMP UP", "RAMP DOWN", "SQUARE"})[position]));
++    CHECK(desc->max == 4 && !strcmp(desc->names[position],
++          ((const char *const[]){"TRI", "RAMP UP", "RAMP DOWN", "SQUARE", "S&H"})[position]));
+     panel_turn(3, SJ6_LFO2_SHAPE, position);
+ }
+ 
+ static int panel_shape(unsigned owner)
+ { return engine_superj6_knob_position(owner, SJ6_LFO2_SHAPE); }
+ 
+-static void check_note_lock(unsigned owner)
++static void check_note_lock(unsigned owner, unsigned locked)
+ {
+-    CHECK(panel_shape(owner) == SJ6_LFO_SQUARE);
++    CHECK(panel_shape(owner) == (int)locked);
+     engine_note_lock_capture(1);
+     CHECK(!engine_bass_note_capture(proj.arr.lane, 0, owner, 0, &proj.sound));
+     engine_note_lock_capture(0);
+@@ -168,8 +168,8 @@
+     engine_bass_edit_hold(1);
+     edit_shape(SJ6_LFO_DOWN);
+     seq_start(&seq);
+-    for (unsigned n = 0; n < 2000 && panel_shape(owner) != SJ6_LFO_SQUARE; ++n) render(1);
+-    CHECK(panel_shape(owner) == SJ6_LFO_SQUARE && !engine_superj6_knob_pending());
++    for (unsigned n = 0; n < 2000 && panel_shape(owner) != (int)locked; ++n) render(1);
++    CHECK(panel_shape(owner) == (int)locked && !engine_superj6_knob_pending());
+     CHECK(!engine_superj6_knob_turn(owner, SJ6_LFO2_SHAPE, SJ6_LFO_TRI, 0));
+     seq_stop(&seq);
+     engine_bass_edit_hold(0);
+@@ -229,12 +229,15 @@
+         printf("part=%u PWM%u held shape=%d changed=%u peer=0\n",
+                owner, layer + 1, shape, changed(pcm[0], pcm[1], owner));
+     }
+-    begin_pair();
+-    capture(pcm[0]);
+-    save_and_reload();
+-    begin_pair();
+-    capture(pcm[1]);
+-    CHECK(!memcmp(pcm[0], pcm[1], sizeof pcm[0]) && panel_shape(owner) == SJ6_LFO_SQUARE);
++    for (int saved=SJ6_LFO_SQUARE; saved<=SJ6_LFO_HELD; ++saved) {
++        if (panel_shape(owner)!=saved) {edit_shape(saved);render(1);}
++        begin_pair();
++        capture(pcm[0]);
++        save_and_reload();
++        begin_pair();
++        capture(pcm[1]);
++        CHECK(!memcmp(pcm[0], pcm[1], sizeof pcm[0]) && panel_shape(owner) == saved);
++    }
+     visit("LFO2 PWM");
+     panel_turn(2, SJ6_LFO2_PWM_ROUTE, 0);
+     render(1);
+@@ -255,19 +258,65 @@
+     proj.sound = bypass;
+     engine_apply_sound(&proj.sound);
+     render(8);
+-    check_note_lock(owner);
++    edit_shape(SJ6_LFO_SQUARE);
++    render(1);
++    check_note_lock(owner, SJ6_LFO_SQUARE);
++    memset(proj.arr.lane, 0, sizeof proj.arr.lane);
++    edit_shape(SJ6_LFO_HELD);
++    render(1);
++    check_note_lock(owner, SJ6_LFO_HELD);
+     printf("part=%u PWM%u zero depth, route OFF, exact reload, old marker, preset and note locks PASS\n",
+            owner, layer + 1);
+ }
+ 
++/* Actual compact renderer: the next grid tick uses the newly selected
++ * sync rate, without resetting accumulated hold or oscillator phase. */
++static void hold_clock(void)
++{
++    static juno6_t test;
++    float l[64], r[64];
++    juno6_init(&test,16000.f);
++    const uint64_t seed=test.lfo2_entropy_state;
++    juno6_lfo_words words={.present=0x12};
++    words.word[1]=1.f;
++    words.word[4]=1.f;
++    juno6_set_lfo_words(&test,&words,1);
++    juno6_set_lfo2_shape(&test,SJ6_LFO_HELD);
++    CHECK(juno6_render_stereo(&test,l,r,1));
++    CHECK(test.lfo2_hold_elapsed==1.f/80.f && test.lfo2_hold_sample==0.f && test.lfo2_entropy_state!=seed);
++    uint64_t phase=test.lfo_phase_q40[1];
++    juno6_set_lfo_tempo(&test,120.f);
++    juno6_set_panel_lfo(&test,1,-1,0);
++    CHECK(test.lfo2_hold_period==1.f/32.f && test.lfo_phase_q40[1]==phase);
++    for (unsigned n=199;n;) {unsigned span=n>64?64:n;CHECK(juno6_render_stereo(&test,l,r,span));n-=span;}
++    CHECK(test.lfo2_hold_elapsed==1.f/80.f);
++    CHECK(juno6_render_stereo(&test,l,r,1));
++    CHECK(test.lfo2_hold_elapsed==2.f/80.f && test.lfo2_hold_sample==0.f);
++    phase=test.lfo_phase_q40[1];
++    juno6_set_lfo_tempo(&test,240.f);
++    CHECK(test.lfo2_hold_period==1.f/64.f && test.lfo_phase_q40[1]==phase);
++    for (unsigned n=199;n;) {unsigned span=n>64?64:n;CHECK(juno6_render_stereo(&test,l,r,span));n-=span;}
++    CHECK(test.lfo2_hold_sample==0.f);
++    CHECK(juno6_render_stereo(&test,l,r,1));
++    CHECK(test.lfo2_hold_sample!=0.f && test.lfo2_hold_elapsed==0.f);
++    const float held=test.lfo2_hold_sample;phase=test.lfo_phase_q40[1];
++    juno6_set_lfo2_shape(&test,SJ6_LFO_TRI);
++    CHECK(juno6_render_stereo(&test,l,r,64));
++    CHECK(test.lfo2_hold_sample==held && test.lfo2_hold_elapsed==0.f && phase!=test.lfo_phase_q40[1]);
++    juno6_set_lfo_words(&test,&words,1);
++    CHECK(test.lfo2_hold_sample==0.f && test.lfo2_hold_elapsed==0.f && !test.lfo_phase_q40[1]);
++    puts("PASS compact hold elapsed: same-grid-tick sync/rate change, bypass cadence, non-selected hold, reset and independent oscillator phase");
++}
++
+ int main(void)
+ {
+     const char *which = getenv("SJ6_SHAPE_CASE");
+     CHECK(which && strlen(which) == 2);
+     if (!strcmp(which, "or")) {
+         check_markers();
++        hold_clock();
+         for (unsigned layer = 0; layer < 2; ++layer)
+-            for (unsigned shape = 0; shape <= SJ6_LFO2_SHAPE_MAX; ++shape)
++            for (unsigned shape = 0; shape <= SJ6_LFO_SQUARE; ++shape)
+                 exact_receiver(layer, shape);
+         puts("2048 phase/shape/receiver raw comparisons and 65536 stereo frames matched the Build-9 law");
+     } else {
+--- a/tests/host/ui_superj6_vibrato_authored_test.c
++++ b/tests/host/ui_superj6_vibrato_authored_test.c
+@@ -4,6 +4,7 @@
+ #include "app/unit_control.h"
+ #include "bank_reader.c"
+ #include "authored_vibrato.inc"
++#include "authored_shape.inc"
+ #include <math.h>
+ 
+ static juno6_t *last_init, *synth[2];
+@@ -79,7 +80,16 @@
+             sj6_factory_row row = {0};
+             unsigned id;
+             uint32_t bits;
+-            while (sj6_next_field(&reader, &id, &bits)) sj6_factory_add_word(&row, id, bits);
++            unsigned seen=0;
++            while (sj6_next_field(&reader, &id, &bits)) {
++                sj6_factory_add_word(&row, id, bits);
++                if (id==98) {CHECK(bits==authored_shape[programs]); ++seen;}
++            }
++            CHECK(seen==1);
++            float authored;
++            memcpy(&authored, &authored_shape[programs], sizeof authored);
++            unsigned want=(unsigned)((double)authored * 4.0);
++            CHECK(row.lfo2_authored==want+1u);
+             CHECK(((row.present >> SJ6_ROW_VIBRATO) & 3u) == 3u);
+             for (unsigned v = 0; v < 2; ++v) {
+                 uint8_t peer[ORIGINAL_SJ6_VIBRATO_WIRE_BYTES];
+@@ -89,6 +99,8 @@
+                 render(1);
+                 CHECK(!engine_superj6_factory_pending());
+                 verify(v, 3, authored_words[programs]);
++                CHECK(engine_superj6_knob_position(v, SJ6_LFO2_SHAPE)==(int)want);
++                CHECK(original_sound_sj6_shape(proj.sound.v[T_303][v])==want);
+                 CHECK(!memcmp(peer, proj.sound.v[T_303][ORIGINAL_SJ6_VIBRATO_ROW + (v ^ 1u)], sizeof peer));
+             }
+             if (!playback_words[0] && row.value[SJ6_ROW_VIBRATO] > .4f &&

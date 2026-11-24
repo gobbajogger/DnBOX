@@ -1,0 +1,32 @@
+Host-only work and logs: SCRATCH
+ID98 raw words Counter({0: 407, 1065353216: 76, 1056964608: 61, 1048576000: 58, 1061158912: 38})
+PASS held entropy, 16384 independent high-product/float/rejection checks (10 retries), signed center endpoints, table-before-draw, equality/rate/zero-dt/overshoot and bounded failure
+part=0 PWM1 held shape=1 changed=8192 peer=0
+part=0 PWM1 held shape=2 changed=8192 peer=0
+part=0 PWM1 held shape=3 changed=8192 peer=0
+part=0 PWM1 held shape=4 changed=8192 peer=0
+part=0 PWM1 zero depth, route OFF, exact reload, old marker, preset and note locks PASS
+part=0 PWM2 held shape=1 changed=8192 peer=0
+part=0 PWM2 held shape=2 changed=8192 peer=0
+part=0 PWM2 held shape=3 changed=8192 peer=0
+part=0 PWM2 held shape=4 changed=8192 peer=0
+part=0 PWM2 zero depth, route OFF, exact reload, old marker, preset and note locks PASS
+part=1 PWM1 held shape=1 changed=8192 peer=0
+part=1 PWM1 held shape=2 changed=8191 peer=0
+part=1 PWM1 held shape=3 changed=8192 peer=0
+part=1 PWM1 held shape=4 changed=8192 peer=0
+part=1 PWM1 zero depth, route OFF, exact reload, old marker, preset and note locks PASS
+part=1 PWM2 held shape=1 changed=8192 peer=0
+part=1 PWM2 held shape=2 changed=8191 peer=0
+part=1 PWM2 held shape=3 changed=8192 peer=0
+part=1 PWM2 held shape=4 changed=8192 peer=0
+part=1 PWM2 zero depth, route OFF, exact reload, old marker, preset and note locks PASS
+PASS owner 1 real tuning/hold edits both directions, exact retained EXTRA, disjoint base tag, reload and peer
+PASS compact hold elapsed: same-grid-tick sync/rate change, bypass cadence, non-selected hold, reset and independent oscillator phase
+2048 phase/shape/receiver raw comparisons and 65536 stereo frames matched the Build-9 law
+640 full authored rows loaded on both owners, 2560 exact raw words verified in runtime and wire
+owner=0 authored held PCM changed=8192/8192 peer=0 reload=exact replacement=absent
+owner=1 authored held PCM changed=8191/8192 peer=0 reload=exact replacement=absent
+SuperJ6 authored vibrato 26812 checks
+PASS exact old composed reader admits four old shapes and rejects S&H in sound and existing note lock, no writes
+PASS owner 0 real tuning/hold edits both directions, exact retained EXTRA, disjoint base tag, reload and peer

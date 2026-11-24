@@ -1,0 +1,172 @@
+--- a/tests/host/ui_superj6_layer1_tuning_test.c
++++ b/tests/host/ui_superj6_layer1_tuning_test.c
+@@ -50,7 +50,7 @@
+     CHECK(fabsf(hz(owner, 1) - 440.f) < .02f);
+ }
+ 
+-static void isolated_pcm(void)
++static void isolated_layer_pcm(unsigned target)
+ {
+     for (unsigned audible = 0; audible < DNBX_LAYERS; ++audible) {
+         juno6_t synth[2];
+@@ -58,12 +58,12 @@
+         synth[0].core.layer[1 - audible].params.gain = 0.f;
+         CHECK(juno6_note_on(&synth[0], 69, 100));
+         synth[1] = synth[0];
+-        juno6_set_layer1_semi(&synth[1], 24);
++        juno6_set_layer_semi(&synth[1], target, 24);
+         for (unsigned i = 0; i < COUNT; i += 256) {
+             CHECK(juno6_render_stereo(&synth[0], actual[0] + i, actual[1] + i, 256));
+             CHECK(juno6_render_stereo(&synth[1], expected[0] + i, expected[1] + i, 256));
+         }
+-        CHECK((memcmp(actual, expected, sizeof actual) != 0) == (audible == 0));
++        CHECK((memcmp(actual, expected, sizeof actual) != 0) == (audible == target));
+         float maxima = 0.f;
+         for (unsigned i = 0; i < COUNT; ++i) maxima += fabsf(actual[0][i]);
+         CHECK(maxima > 0.f);
+@@ -178,9 +178,12 @@
+            owner, edited, COUNT);
+ }
+ 
+-int main(void)
++#ifndef SJ6_LAYER1_FIXTURE_MAIN
++#define SJ6_LAYER1_FIXTURE_MAIN main
++#endif
++int SJ6_LAYER1_FIXTURE_MAIN(void)
+ {
+-    isolated_pcm();
++    isolated_layer_pcm(0);
+     test_tuning(0);
+     test_tuning(1);
+     printf("SuperJ6 Build-9 ID72 layer 1 semitone: %u checks\n", checks);
+--- /dev/null
++++ b/tests/host/ui_superj6_layer2_tuning_test.c
+@@ -0,0 +1,96 @@
++/* SPDX-License-Identifier: GPL-3.0-only */
++#define SJ6_LAYER1_FIXTURE_MAIN layer1_main
++#include "ui_superj6_layer1_tuning_test.c"
++#undef SJ6_LAYER1_FIXTURE_MAIN
++
++static void layer2(unsigned owner)
++{
++    setup_tuning(owner);
++    panel_turn(0, SJ6_LAYER1_SEMI, 24);
++    render(1);
++    const sound_t neutral2 = proj.sound;
++    const unsigned other = owner ^ 1u;
++    const unsigned idx = 2 + SJ6_FILTER_LINK - SJ6_OSC_KNOBS;
++    uint8_t *row = proj.sound.v[T_303][ORIGINAL_SJ6_EXTRA_ROW + owner];
++    uint8_t *cell = proj.sound.v[T_303][owner];
++    play_a4();
++    capture(pcm[0]);
++    play_a4();
++    for (unsigned pos = 0; pos <= 24; ++pos) {
++        panel_turn(1, SJ6_LAYER2_SEMI, pos);
++        char num[24] = {0}, unit[12] = {0}, want[24];
++        pref_value_of(pg.r[cur_page()][1], pos, num, unit);
++        snprintf(want, sizeof want, "%d", (int)pos - 12);
++        CHECK(!strcmp(num, want) && !strcmp(unit, "st"));
++        if (!pos) capture(pcm[1]); else render(1);
++        CHECK(fabsf(hz(owner, 1) - 440.f * exp2f(((int)pos - 12) / 12.f)) < .05f);
++        CHECK(fabsf(hz(owner, 0) - 880.f) < .05f);
++        CHECK(hz(other, 0) == hz(other, 1));
++        CHECK(juno6_layer_semi(parts[owner], 1) == pos);
++        CHECK(original_sound_sj6_layer_semi(row, 1) == pos && original_sound_sj6_ext_valid(cell, row));
++        if (pos == 12) CHECK(!memcmp(&proj.sound, &neutral2, sizeof neutral2));
++        CHECK(!memcmp(row, neutral2.v[T_303][ORIGINAL_SJ6_EXTRA_ROW + owner], idx));
++        CHECK(!memcmp(row+idx+1, neutral2.v[T_303][ORIGINAL_SJ6_EXTRA_ROW + owner]+idx+1,
++                      NPARAMS_MAX-idx-1));
++    }
++    const unsigned changed_frames = changed(pcm[0], pcm[1], owner);
++    CHECK(changed_frames > COUNT / 2 && !changed(pcm[0], pcm[1], other));
++    visit("FILTER");
++    panel_turn(3, SJ6_FILTER_LINK, 1);
++    render(1);
++    CHECK((row[idx] & 1u) && parts[owner]->core.filter_link == 1);
++    CHECK(original_sound_sj6_layer_semi(row, 0) == 24 && original_sound_sj6_layer_semi(row, 1) == 24);
++    visit("TUNING");
++    panel_turn(0, SJ6_LAYER1_SEMI, 19);
++    render(1);
++    CHECK((row[idx] & 1u) && original_sound_sj6_layer_semi(row, 1) == 24);
++    panel_turn(1, SJ6_LAYER2_SEMI, 0);
++    render(1);
++    engine_note_lock_capture(1);
++    CHECK(!engine_bass_note_capture(proj.arr.lane, 0, owner, 0, &proj.sound));
++    engine_note_lock_capture(0);
++    CHECK(!engine_bass_note_validate(&proj.arr.lane[0]));
++    panel_turn(1, SJ6_LAYER2_SEMI, 23);
++    render(1);
++    play_a4();
++    capture(pcm[0]);
++    save_and_reload();
++    play_a4();
++    capture(pcm[1]);
++    CHECK(!memcmp(pcm[0], pcm[1], sizeof pcm[0]));
++
++    bpart_t *line = &proj.pat[0].bass[owner];
++    for (unsigned n = 0; n < NSTEPS; ++n) line->step[n].flags = G_REST;
++    line->len = 16;
++    line->rate = RATE_16;
++    line->dir = DIR_FWD;
++    line->transpose = 24;
++    line->step[0].flags = G_NOTE;
++    line->step[0].note = 45;
++    line->step[0].velocity = 100;
++    seq.ppat[TRK_BASS0 + owner] = 0;
++    engine_note_lock_refresh();
++    engine_bass_edit_hold(1);
++    seq_start(&seq);
++    for (unsigned n = 0; n < 2000 && juno6_layer_semi(parts[owner], 1) != 0; ++n) render(1);
++    CHECK(juno6_layer_semi(parts[owner], 1) == 0);
++    CHECK(fabsf(hz(owner, 1) - 220.f) < .02f);
++    CHECK(juno6_layer_semi(parts[owner], 0) == 19 && parts[owner]->core.filter_link == 1);
++    CHECK(!engine_superj6_knob_turn(owner, SJ6_LAYER2_SEMI, 12, 0));
++    seq_stop(&seq);
++    engine_bass_edit_hold(0);
++    render(4);
++    CHECK(juno6_layer_semi(parts[owner], 1) == 23 && juno6_layer_semi(parts[owner], 0) == 19);
++    CHECK(juno6_layer_semi(parts[other], 1) == 12);
++    printf("owner=%u layer2 changes=%u, layer1 and filter link preserved, saved note lock PASS\n",
++           owner, changed_frames);
++}
++
++int main(void)
++{
++    isolated_layer_pcm(1);
++    layer2(0);
++    layer2(1);
++    printf("SuperJ6 Build-9 ID73 layer2 coarse: %u checks\n", checks);
++    return 0;
++}
+--- /dev/null
++++ b/tests/host/ui_superj6_layer2_prior_reader_test.c
+@@ -0,0 +1,29 @@
++/* SPDX-License-Identifier: GPL-3.0-only */
++#define ARP_FIXTURE_MAIN retained_arp_main
++#include "ui_arp_engine_test.c"
++
++int main(void)
++{
++    uint8_t cell[ORIGINAL_SOUND_BYTES], row[NPARAMS_MAX] = {0};
++    CHECK(original_sound_init(cell, ORIGINAL_SOUND_JUNO, 0));
++    enum { link = SJ6_FILTER_LINK - SJ6_OSC_KNOBS };
++    uint8_t positions[SJ6_EXTRA_COUNT] = {[link] = 1};
++    const unsigned expect_new = !!getenv("SJ6_NEW_READER");
++    original_sound_sj6_extra_store(cell, row, 1u << link, positions, 0, 0);
++    row[2] = 0x80; /* Existing ID72 alongside real Filter Link. */
++    CHECK(original_sound_sj6_ext_valid(cell, row));
++    row[2 + link] = (24u << 1) | 1;
++    CHECK(original_sound_sj6_ext_valid(cell, row) == expect_new);
++    CHECK(original_sound_sj6_semi(row) == 0);
++    row[2 + link] = (25u << 1) | 1;
++    CHECK(!original_sound_sj6_ext_valid(cell, row));
++    row[2 + link] = 0x80 | 1;
++    CHECK(!original_sound_sj6_ext_valid(cell, row));
++    row[2] = 0;
++    row[0] = row[1] = 0;
++    row[2 + link] = 2; /* ID73-only. */
++    CHECK(original_sound_sj6_ext_valid(cell, row) == expect_new);
++    puts(expect_new ? "PASS new ID73 extends ID72 reader without dropping filter-link validation" :
++           "PASS previous ID72 reader rejects ID73-only and mixed edited payloads");
++    return 0;
++}
