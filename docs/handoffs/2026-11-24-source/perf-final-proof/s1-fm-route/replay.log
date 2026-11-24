@@ -1,0 +1,36 @@
+Private host output: /tmp/s1-fm-route-host.sFaNVt
+PASS compact dry/wet render captured INIT and 694 factory programs, 1024 frames each
+PASS compact dry/wet render captured INIT and 694 factory programs, 1024 frames each
+2b7c2c740edb57be12652f58c81a538815dd21c1ca8f66b0971cad51df0f331f  /tmp/s1-fm-route-host.sFaNVt/base.pcm
+2b7c2c740edb57be12652f58c81a538815dd21c1ca8f66b0971cad51df0f331f  /tmp/s1-fm-route-host.sFaNVt/join.pcm
+FAIL tests/host/ui_synthone_fm_route_test.c:282: engine_s1_patch_read(0,FM_LFO,&missing)
+/tmp/s1-fm-route-host.sFaNVt/res-positive.log:PASS both owners historical slots 0..3 adopt and retag identically, with or without old tag
+/tmp/s1-fm-route-host.sFaNVt/res-positive.log:PASS all 625 mixed independent states; all 512 marker/payload combinations classified
+/tmp/s1-fm-route-host.sFaNVt/res-positive.log:owner 0 FM audible 0 route 1: 0/4096 changed, target/peer/phase exact
+/tmp/s1-fm-route-host.sFaNVt/res-positive.log:owner 0 FM audible 0 route 2: 0/4096 changed, target/peer/phase exact
+/tmp/s1-fm-route-host.sFaNVt/res-positive.log:owner 0 FM audible 0 route 3: 0/4096 changed, target/peer/phase exact
+/tmp/s1-fm-route-host.sFaNVt/res-positive.log:owner 1 FM audible 0 route 1: 0/4096 changed, target/peer/phase exact
+/tmp/s1-fm-route-host.sFaNVt/res-positive.log:owner 1 FM audible 0 route 2: 0/4096 changed, target/peer/phase exact
+/tmp/s1-fm-route-host.sFaNVt/res-positive.log:owner 1 FM audible 0 route 3: 0/4096 changed, target/peer/phase exact
+/tmp/s1-fm-route-host.sFaNVt/res-positive.log:owner 0 FM audible 1 route 1: 4096/4096 changed, target/peer/phase exact
+/tmp/s1-fm-route-host.sFaNVt/res-positive.log:owner 0 FM audible 1 route 2: 4096/4096 changed, target/peer/phase exact
+/tmp/s1-fm-route-host.sFaNVt/res-positive.log:owner 0 FM audible 1 route 3: 4096/4096 changed, target/peer/phase exact
+/tmp/s1-fm-route-host.sFaNVt/res-positive.log:owner 1 FM audible 1 route 1: 4096/4096 changed, target/peer/phase exact
+/tmp/s1-fm-route-host.sFaNVt/res-positive.log:owner 1 FM audible 1 route 2: 4096/4096 changed, target/peer/phase exact
+/tmp/s1-fm-route-host.sFaNVt/res-positive.log:owner 1 FM audible 1 route 3: 4096/4096 changed, target/peer/phase exact
+/tmp/s1-fm-route-host.sFaNVt/res-positive.log:PASS held FM routes across both owners and Sound/lock protections (25389 checks)
+/tmp/s1-fm-route-host.sFaNVt/res-old.log:PASS both owners historical slots 0..3 adopt and retag identically, with or without old tag
+/tmp/s1-fm-route-host.sFaNVt/res-old.log:PASS old Noise/Osc/Resonance/cutoff/HP/WIDEN and lock accepted; FM route Sound/lock types rejected before writes (352 checks)
+Verifying retained prior Resonance physical/PCM/locks
+PASS 125 independent Resonance×Noise×Osc Mix states; all 256 route bytes classified, 131 invalid
+PASS held Resonance routes across both owners and Sound/lock protections (7592 checks)
+/tmp/s1-fm-route-host.sFaNVt/pages-base.log:PASS owner A all 15 pages reached in both directions
+/tmp/s1-fm-route-host.sFaNVt/pages-base.log:PASS owner B all 15 pages reached in both directions
+/tmp/s1-fm-route-host.sFaNVt/pages-base.log:PASS Synth One owner A reaches all 15 panels both ways
+/tmp/s1-fm-route-host.sFaNVt/pages-base.log:PASS Synth One owner B reaches all 15 panels both ways
+/tmp/s1-fm-route-host.sFaNVt/pages-join.log:PASS owner A all 15 pages reached in both directions
+/tmp/s1-fm-route-host.sFaNVt/pages-join.log:PASS owner B all 15 pages reached in both directions
+/tmp/s1-fm-route-host.sFaNVt/pages-join.log:PASS Synth One owner A reaches all 15 panels both ways
+/tmp/s1-fm-route-host.sFaNVt/pages-join.log:PASS Synth One owner B reaches all 15 panels both ways
+PASS 14 unchanged SuperJ6 actual LCDs byte-exact
+PASS actual MOD ROUTE LCD for OFF, LFO 1, LFO 2, BOTH on physical K3
