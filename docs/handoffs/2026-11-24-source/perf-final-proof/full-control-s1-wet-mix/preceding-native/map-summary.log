@@ -1,0 +1,26 @@
+smk37-elite
+3fa3895f821bf65f15be75933de0b5f2a354d831d3dadcd9167ca4b63e0656a6  /tmp/dn-current-fit.QaUZzz/build/smk37-elite/candidate.map
+XIP              0x0000000002000120 0x0000000000086ee0 xr
+POOL             0x0000000001c20000 0x0000000000054000 rw
+.ram_text       0x0000000001c00400      0xabc load address 0x000000000208b544
+.c1_text        0x0000000001c00ebc      0x1a4 load address 0x000000000208c000
+.data           0x0000000001c08000      0x274 load address 0x000000000208c1a4
+.bss            0x0000000001c08280    0x17968
+.pool           0x0000000001c20000    0x51e00
+.xpool          0x0000000001c75200     0x2400
+                0x0000000001c7a000                _ustack_top = 0x1c7a000
+                0x0000000001c7c000                _sstack_top = 0x1c7c000
+.xdata          0x00000000020a9000     0x1e5f
+smk37
+1ffd1e89a00de4193f26c773de415c9ff8b7dc10884c658446e542566ca75c9c  /tmp/dn-current-fit.QaUZzz/build/smk37/candidate.map
+XIP              0x0000000002000120 0x0000000000086ee0 xr
+POOL             0x0000000001c20000 0x0000000000054000 rw
+.ram_text       0x0000000001c00400      0xabc load address 0x000000000208b538
+.c1_text        0x0000000001c00ebc      0x1a4 load address 0x000000000208bff4
+.data           0x0000000001c08000      0x274 load address 0x000000000208c198
+.bss            0x0000000001c08280    0x17968
+.pool           0x0000000001c20000    0x51e00
+.xpool          0x0000000001c75200     0x2400
+                0x0000000001c7a000                _ustack_top = 0x1c7a000
+                0x0000000001c7c000                _sstack_top = 0x1c7c000
+.xdata          0x00000000020a9000     0x1e5f

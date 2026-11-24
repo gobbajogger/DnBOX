@@ -1,0 +1,29 @@
+Private host replay [scratch removed from receipt]
+Exact preimage and postimage verified for 313 firmware files
+FAIL tests/host/ui_synthone_wet_mix_test.c:269: engine_s1_patch_read(0, DELAY_MIX, &absent)
+owner 0 MIX 44 enable 0: 0/4096 owner frames changed, peer exact
+owner 0 MIX 40 enable 0: 0/4096 owner frames changed, peer exact
+owner 1 MIX 44 enable 0: 0/4096 owner frames changed, peer exact
+owner 1 MIX 40 enable 0: 0/4096 owner frames changed, peer exact
+owner 0 MIX 44 enable 1: 4096/4096 owner frames changed, peer exact
+owner 0 MIX 40 enable 1: 4096/4096 owner frames changed, peer exact
+owner 1 MIX 44 enable 1: 4096/4096 owner frames changed, peer exact
+owner 1 MIX 40 enable 1: 4096/4096 owner frames changed, peer exact
+PASS real Synth One delay and reverb MIX, both owners and enables, 1100 checks
+PASS exact previous reader accepts the LFO control and refuses wet Sound/lock without writes, 257 checks
+PASS shared-row MIX, LFO, authored vibrato and A REF, refusal and cross-engine history with Synth One owner 1
+PASS shared-row MIX, LFO, authored vibrato and A REF, refusal and cross-engine history with Synth One owner 0
+PASS joined MIX/shared-row ownership 418 checks
+PASS previous product reads the mixed control and preserves both unsupported MIX cases, 266 checks
+PASS physical LFO owner edits, held PCM isolation, save and note-lock recovery
+PASS physical LFO owner edits, held PCM isolation, save and note-lock recovery
+PASS independent Synth One LFO rates and shapes 597 checks
+PASS clock owner 0, 8 base and 108 locked render boundaries checked
+PASS clock owner 1, 8 base and 108 locked render boundaries checked
+PASS original Synth One tempo sync transaction 1955 checks
+FAIL tests/host/ui_synthone_lfo_clock_test.c:40: targets[clock_ids[i]] == expected[locked][i]
+PASS compact dry/wet render captured INIT and 694 factory programs, 1024 frames each
+PASS compact dry/wet render captured INIT and 694 factory programs, 1024 frames each
+2b7c2c740edb57be12652f58c81a538815dd21c1ca8f66b0971cad51df0f331f  base-factory.pcm
+2b7c2c740edb57be12652f58c81a538815dd21c1ca8f66b0971cad51df0f331f  join-factory.pcm
+PASS 83,205 paired digit states, 36 selector states, 1,642,800 LFO states and malformed record refusals
