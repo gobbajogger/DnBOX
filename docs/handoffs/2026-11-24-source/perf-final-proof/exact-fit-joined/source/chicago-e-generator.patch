@@ -1,0 +1,42 @@
+--- a/tools/gen_chicago_compact.py
++++ b/tools/gen_chicago_compact.py
+@@ -2,9 +2,11 @@
+ # SPDX-License-Identifier: GPL-3.0-only
+ """Repack pinned Chicago inputs losslessly; never modify the pinned header.
+ 
+-Each 32-entry block retains its exact residual payload. Seven header bytes
+-store value low27 bits, width5, and signed delta24 (amplitude uses six
+-bytes and a signed delta16). High5 value bits are fixed
++Each 32-entry block retains its exact residual payload. Header stores low27
++value bits, five width/tag bits and signed delta16 or delta24. Ordinary
++width codes 0..23 have six header bytes. Escape codes 24..29 indicate
++residual widths 18..23 and seven header bytes. Codes 30..31 are invalid.
++High5 value bits are fixed
+ per table. Groups of 32 offsets use an absolute anchor and integer stride,
+ then a signed byte residual for each exact offset. Reject any input not
+ representable without truncation.
+@@ -35,7 +37,7 @@
+                 raise ValueError('invalid input range')
+             value, delta, width = struct.unpack_from('<IiB', data, offset)
+             entries = min(32, 16385 - block*32)
+-            if width > 31 or end-offset != 9 + (max(entries-2, 0)*width+7)//8:
++            if width > 23 or end-offset != 9 + (max(entries-2, 0)*width+7)//8:
+                 raise ValueError('invalid residual layout')
+             if prefix is None:
+                 prefix = value & 0xf8000000
+@@ -43,11 +45,11 @@
+                 raise ValueError('header cannot be represented losslessly')
+             new_offsets.append(len(packed))
+             packed.extend((value & 0xffffff).to_bytes(3, 'little'))
+-            packed.append(((value >> 24) & 7) << 5 | width)
+-            delta_bits = 16 if name == 'a' else 24
+-            if (prefix == 0x38000000) != (name == 'a') or not -(1 << (delta_bits-1)) <= delta < (1 << (delta_bits-1)):
++            wide = not -32768 <= delta <= 32767
++            if (prefix == 0x38000000) != (name == 'a') or wide and (name != 'e' or width < 18):
+                 raise ValueError('pinned packed delta or prefix out of exact format')
+-            packed.extend(delta.to_bytes(delta_bits // 8, 'little', signed=True))
++            packed.append(((value >> 24) & 7) << 5 | (width + 6 if wide else width))
++            packed.extend(delta.to_bytes(3 if wide else 2, 'little', signed=True))
+             packed.extend(data[offset+9:end])
+         if len(packed) > 65535:
+             raise ValueError('offset overflow')

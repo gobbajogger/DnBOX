@@ -1,0 +1,136 @@
+--- a/firmware/src/dsp/s1c/s1c.c
++++ b/firmware/src/dsp/s1c/s1c.c
+@@ -586,6 +586,83 @@
+     d->prev = o;
+     return o;
+ }
++/* Random access block: binary16 endpoint anchors (4 B), biased scale
++ * exponent (1 B), fourteen signed 4-bit residuals (7 B).
++ * Existing stg[16] holds writes until a block completes. */
++enum { DELAY_A4_SLOTS = 16, DELAY_A4_BYTES = 12 };
++
++static unsigned a4_anchor(const uint8_t *p)
++{
++    return (unsigned)p[0] | (unsigned)p[1] << 8;
++}
++
++static float a4_line(float a, float b, unsigned k)
++{
++    return a + (b - a) * ((float)k / 15.0f);
++}
++
++static void a4_pack(uint8_t *p, const int16_t *stage)
++{
++    const unsigned ia = (uint16_t)stage[0], ib = (uint16_t)stage[15];
++    const float a = h16_get(ia), b = h16_get(ib);
++    p[0] = ia; p[1] = ia >> 8;
++    p[2] = ib; p[3] = ib >> 8;
++    float peak = 0.0f;
++    for (unsigned k = 1; k < 15; ++k) {
++        const float e = h16_get((uint16_t)stage[k]) - a4_line(a,b,k);
++        if (fabsf(e) > peak) peak = fabsf(e);
++    }
++    /* Round scale up to the next binary power, with a finite lower bound. */
++    s1c_fb power;
++    power.f = peak / 7.0f;
++    unsigned exponent = (power.u + 0x7fffffu) >> 23;
++    if (exponent < 102u) exponent = 102u; /* 2^-25, below binary16 subnormal resolution */
++    p[4] = exponent;
++    power.u = (254u - exponent) << 23;   /* reciprocal of the chosen scale */
++    for (unsigned k = 0; k < 14; k += 2) {
++        const float l = (h16_get((uint16_t)stage[k+1]) - a4_line(a,b,k+1)) * power.f;
++        const float h = (h16_get((uint16_t)stage[k+2]) - a4_line(a,b,k+2)) * power.f;
++        int lo = (int)(l + (l < 0.0f ? -0.5f : 0.5f));
++        int hi = (int)(h + (h < 0.0f ? -0.5f : 0.5f));
++        if (lo < -7) lo = -7;
++        if (lo > 7) lo = 7;
++        if (hi < -7) hi = -7;
++        if (hi > 7) hi = 7;
++        p[5 + k/2] = (uint8_t)(((unsigned)lo & 15u) | (((unsigned)hi & 15u) << 4));
++    }
++}
++
++static float a4_get(const s1c_dline *d, int i)
++{
++    const unsigned block = (unsigned)i / DELAY_A4_SLOTS;
++    const unsigned k = (unsigned)i & 15u;
++    if (block == (unsigned)d->w / DELAY_A4_SLOTS && k <= ((unsigned)d->w & 15u))
++        return h16_get((uint16_t)d->stg[k]);
++    const uint8_t *p = (const uint8_t *)(const void *)d->buf + block * DELAY_A4_BYTES;
++    const float a = h16_get(a4_anchor(p)), b = h16_get(a4_anchor(p+2));
++    if (k == 0) return a;
++    if (k == 15) return b;
++    const unsigned u = (p[5+(k-1)/2] >> (((k-1)&1u)*4u)) & 15u;
++    const int q = u < 8 ? (int)u : (int)u - 16;
++    const s1c_fb scale = {.u = (unsigned)p[4] << 23};
++    return a4_line(a,b,k) + (float)q * scale.f;
++}
++
++static float xl_tick_a4(s1c_dline *d, float in, float del, float fb)
++{
++    const unsigned w = d->w, k = w & 15u;
++    d->stg[k] = (int16_t)h16_put(in + d->prev * fb);
++    float pos = (float)w - del;
++    while (pos < 0.0f) pos += (float)d->len;
++    const int i = (int)pos, j = (i + 1 == d->len) ? 0 : i + 1;
++    const float f = pos - (float)i;
++    const float out = a4_get(d,i) * (1.0f-f) + a4_get(d,j) * f;
++    if (k == 15u) a4_pack((uint8_t *)(void *)d->buf + (w / DELAY_A4_SLOTS)*DELAY_A4_BYTES,d->stg);
++    d->w = w + 1 == (unsigned)d->len ? 0 : (int)(w + 1);
++    d->prev = out;
++    return out;
++}
++#define DL_TICK_DEC(d, in, del, fb) xl_tick_a4(d, in, del, fb)
+ #define DL_TICK(d, in, del, fb) xl_tick(d, in, del, fb)
+ #elif S1C_EXT
+ /* Device memory model: exact-size lines carved from a caller-owned pool. h16 lines keep the host's
+@@ -643,6 +720,9 @@
+ #define DL_TICK(d, in, del, fb) xl_tick(d, in, del, fb, s->dfmt)
+ #else
+ #define DL_TICK(d, in, del, fb) dl_tick(d, in, del, fb)
++#endif
++#ifndef DL_TICK_DEC
++#define DL_TICK_DEC DL_TICK
+ #endif
+ #if !S1C_RVB
+ static void reverb(s1c *s, float il, float ir, float *ol, float *or_)
+@@ -801,7 +881,11 @@
+         int el = 0;
+ #endif
+         int samples = la * (nl - 1) + lc;
+-        int bytes = (fmt == 2 ? samples + samples / 16 : 2 * samples) + 3 * el * 2;
++        int stride16 = 32;
++#if S1C_DL_H16
++        if (dd != 1) stride16 = DELAY_A4_BYTES;
++#endif
++        int bytes = (fmt == 2 ? samples + samples / 16 : stride16 * (samples / 16)) + 3 * el * 2;
+         if (bytes <= s->pool_bytes || dd == 4095) {
+             uint8_t *p = s->pool; int lens[4] = {la, nl == 3 ? la : 0, 0, lc};
+             memset(s->pool, 0, (size_t)s->pool_bytes);
+@@ -814,7 +898,7 @@
+                 d->len = lens[i] ? lens[i] : 16;
+                 if (!lens[i]) continue;
+                 if (fmt == 2) { d->m = (int8_t *)p; p += lens[i]; d->ex = (int8_t *)p; p += lens[i] / 16; }
+-                else { d->buf = (int16_t *)(void *)p; p += 2 * lens[i]; }
++                else { d->buf = (int16_t *)(void *)p; p += stride16 * (lens[i] / 16); }
+             }
+             break;
+         }
+@@ -998,14 +1082,14 @@
+             float r = dl_tick_c(&s->dl[1], iR, 2.0f * T, fbk, 0.0f), f2 = dl_tick_c(&s->dl[2], iR, T, fbk, lc);
+             s->d1[1] = dl_tick_c(&s->dl[3], r, T, fbk, lc) + f2;
+ #else
+-            s->d1[0] = DL_TICK(&s->dl[0], iL, 2.0f * T, fbk);
++            s->d1[0] = DL_TICK_DEC(&s->dl[0], iL, 2.0f * T, fbk);
+ #if S1C_DLN == 5      /* C_T(R) + C_T(C_2T(R)) == C_T(R + C_2T(R)): one T line instead of two */
+ #if S1C_DLMONO
+-            float r = s->dmono ? s->d1[0] : DL_TICK(&s->dl[1], iR, 2.0f * T, fbk);
++            float r = s->dmono ? s->d1[0] : DL_TICK_DEC(&s->dl[1], iR, 2.0f * T, fbk);
+ #else
+             float r = dl_tick(&s->dl[1], iR, 2.0f * T, fbk);
+ #endif
+-            s->d1[1] = DL_TICK(&s->dl[3], iR + r, T, fbk);
++            s->d1[1] = DL_TICK_DEC(&s->dl[3], iR + r, T, fbk);
+ #else
+             float r = dl_tick(&s->dl[1], iR, 2.0f * T, fbk), f2 = dl_tick(&s->dl[2], iR, T, fbk);
+             s->d1[1] = dl_tick(&s->dl[3], r, T, fbk) + f2;

@@ -1,0 +1,98 @@
+--- a/experiments/original_synth/chicago_packed.c
++++ b/experiments/original_synth/chicago_packed.c
+@@ -12,11 +12,13 @@
+ } chicago_compact_table;
+ #include "chicago_compact_private.h"
+ static int chicago_compact_decode(const uint8_t *p,size_t bytes,uint32_t entries,uint32_t entry,uint32_t prefix,uint32_t *out){
+- /* The pinned amplitude delta fits in 16 bits; E retains 24 bits. */
+- const unsigned wide=prefix!=original_chicago_packed_a_prefix;
++ /* Formerly unused width codes tag the six possible wide E widths. */
++ if(bytes<6||!entries||entry>=entries)return 0;
++ unsigned width=p[3]&31u;
++ if(width>=30)return 0;
++ const unsigned wide=width>=24;
+  const unsigned header=6u+wide;
+- if(bytes<header)return 0;
+- unsigned width=(p[3]&31u);if(width>32)return 0;
++ if(wide)width-=6;
+  size_t residuals=entries>1?entries-2:0,payload=(residuals*width+7u)/8u;
+  if(bytes!=header+payload)return 0;
+  uint32_t value=(uint32_t)p[0]|(uint32_t)p[1]<<8|(uint32_t)p[2]<<16|((uint32_t)p[3]>>5)<<24|prefix;
+@@ -24,25 +26,13 @@
+  if(wide){delta|=(uint32_t)p[6]<<16;delta=(delta^0x800000u)-0x800000u;}
+  else delta=(delta^0x8000u)-0x8000u;
+  if(entry)value+=delta;
+- size_t bit=0;p+=header;
+- /* At widths up to 24, refilling one byte while fewer than width bits
+-  * remain never exceeds 31 live bits. Consume each payload byte once, with
+-  * no speculative read past the validated payload and no 64-bit shifts.
+-  * Wider generic blocks retain the original fragment decoder below. */
+- if(width<=24){
+-  uint32_t reservoir=0,mask=(1u<<width)-1u;unsigned available=0;
+-  for(unsigned n=1;n<entry;n++){
+-   while(available<width){reservoir|=(uint32_t)*p++<<available;available+=8;}
+-   uint32_t z=reservoir&mask;reservoir>>=width;available-=width;
+-   delta+=(z>>1)^(0u-(z&1u));value+=delta;
+-  }
+-  *out=value;return 1;
+- }
++ p+=header;
++ /* At widths up to 23, the reservoir holds at most 30 bits and the
++  * exact validated payload bounds each refill. */
++ uint32_t reservoir=0,mask=(1u<<width)-1u;unsigned available=0;
+  for(unsigned n=1;n<entry;n++){
+-  uint32_t z=0;unsigned used=0;
+-  while(used<width){unsigned shift=(unsigned)(bit%8u),take=8-shift;if(take>width-used)take=width-used;
+-   z|=((uint32_t)(p[bit/8u]>>shift)&((1u<<take)-1u))<<used;used+=take;bit+=take;
+-  }
++  while(available<width){reservoir|=(uint32_t)*p++<<available;available+=8;}
++  uint32_t z=reservoir&mask;reservoir>>=width;available-=width;
+   delta+=(z>>1)^(0u-(z&1u));value+=delta;
+  }
+  *out=value;return 1;
+--- a/tests/chicago_compact_headers.c
++++ b/tests/chicago_compact_headers.c
+@@ -14,8 +14,17 @@
+   assert(original_chicago_packed_lookup(0,i,&a,&e));
+   assert(memcmp(&a,&ra,4)==0 && memcmp(&e,&re,4)==0);
+   assert(original_chicago_packed_lookup(0,i,&a,&e)); /* cached */
++  assert(memcmp(&a,&ra,4)==0 && memcmp(&e,&re,4)==0);
+  }
++ /* Co-prime permutation crosses each block boundary on cold cache hits. */
+  uint32_t v; float a,e;
++ for(uint32_t i=0;i<16385;i++){
++  uint32_t j=(i*97u+19u)%16385u,ra,re;
++  assert(chicago_raw_bits(j,&ra,&re));
++  assert(original_chicago_packed_lookup(0,j,&a,&e));
++  assert(memcmp(&a,&ra,4)==0&&memcmp(&e,&re,4)==0);
++ }
++
+  assert(!original_chicago_packed_lookup(0,16385,&a,&e));
+  assert(!original_chicago_packed_lookup(0,UINT32_MAX,&a,&e));
+  assert(!original_chicago_packed_lookup(&v,0,&a,&e));
+@@ -38,7 +47,13 @@
+  residuals[1]=(int8_t)(6-t.offset_stride[0]);BAD();
+  residuals[1]=INT8_MIN;BAD();
+  uint8_t block[8]={0};
++ block[3]=24; /* wide width18 */
+  assert(!chicago_compact_decode(block,6,1,0,0,&v));
+  assert(!chicago_compact_decode(block,8,1,0,0,&v));
++ block[3]=30;assert(!chicago_compact_decode(block,6,1,0,0,&v));
++ block[3]=31;assert(!chicago_compact_decode(block,6,1,0,0,&v));
++ block[3]=0;assert(chicago_compact_decode(block,6,1,0,0,&v)&&v==0);
++ assert(!chicago_compact_decode(block,6,0,0,0,&v));
++ assert(!chicago_compact_decode(block,6,1,1,0,&v));
+  return 0;
+ }
+--- a/tests/test_chicago_compact_headers.py
++++ b/tests/test_chicago_compact_headers.py
+@@ -14,6 +14,9 @@
+                     str(ROOT/'experiments/original_synth/chicago_packed_private.h'),
+                     str(tmp/'chicago_compact_private.h')], check=True)
+     generated = (tmp/'chicago_compact_private.h').read_text()
++    for label, size in [('a', 7617), ('e', 17079)]:
++        if not re.search(rf'original_chicago_packed_{label}_data\[{size}\]', generated):
++            raise AssertionError(f'Unexpected exact compact table size: {label}')
+     # Reverting to a 16-bit offset per block silently spends ~1 KiB of XIP.
+     for table in ('a', 'e'):
+         stem = f'original_chicago_packed_{table}_'

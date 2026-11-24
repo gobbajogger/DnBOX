@@ -1,0 +1,155 @@
+{
+  "stage_sampling": {
+    "1000": {
+      "runs": 16,
+      "sampled_inside_s1": 607,
+      "sampled_outside_s1": 713,
+      "stage_counts": {
+        "smoothing_control_lfo": 14,
+        "oscillator_filter_voice_mix": 317,
+        "crush_pan_phaser": 128,
+        "delay": 0,
+        "reverb": 111,
+        "master_compressor_widen": 37
+      },
+      "s1_share_percent": {
+        "smoothing_control_lfo": 2.31,
+        "oscillator_filter_voice_mix": 52.22,
+        "crush_pan_phaser": 21.09,
+        "delay": 0.0,
+        "reverb": 18.29,
+        "master_compressor_widen": 6.1
+      }
+    },
+    "1700": {
+      "runs": 16,
+      "sampled_inside_s1": 833,
+      "sampled_outside_s1": 888,
+      "stage_counts": {
+        "smoothing_control_lfo": 47,
+        "oscillator_filter_voice_mix": 406,
+        "crush_pan_phaser": 179,
+        "delay": 8,
+        "reverb": 148,
+        "master_compressor_widen": 45
+      },
+      "s1_share_percent": {
+        "smoothing_control_lfo": 5.64,
+        "oscillator_filter_voice_mix": 48.74,
+        "crush_pan_phaser": 21.49,
+        "delay": 0.96,
+        "reverb": 17.77,
+        "master_compressor_widen": 5.4
+      }
+    },
+    "pooled": {
+      "runs": 32,
+      "sampled_inside_s1": 1440,
+      "sampled_outside_s1": 1601,
+      "stage_counts": {
+        "smoothing_control_lfo": 61,
+        "oscillator_filter_voice_mix": 723,
+        "crush_pan_phaser": 307,
+        "delay": 8,
+        "reverb": 259,
+        "master_compressor_widen": 82
+      },
+      "s1_share_percent": {
+        "smoothing_control_lfo": 4.24,
+        "oscillator_filter_voice_mix": 50.21,
+        "crush_pan_phaser": 21.32,
+        "delay": 0.56,
+        "reverb": 17.99,
+        "master_compressor_widen": 5.69
+      }
+    }
+  },
+  "unpinned_whole_span_thread_cpu": {
+    "pairs": 16,
+    "cpu_affinity": null,
+    "all_pairs": {
+      "active_faster_count": 8,
+      "median_delta_percent": -0.42,
+      "min_delta_percent": -33.84,
+      "max_delta_percent": 40.23
+    },
+    "control_first": {
+      "active_faster_count": 4,
+      "median_delta_percent": 0.29,
+      "min_delta_percent": -32.87,
+      "max_delta_percent": 40.23
+    },
+    "active_first": {
+      "active_faster_count": 4,
+      "median_delta_percent": -0.43,
+      "min_delta_percent": -33.84,
+      "max_delta_percent": 11.28
+    },
+    "per_pair_delta_percent": [
+      -7.48,
+      8.33,
+      -32.87,
+      -33.84,
+      40.23,
+      11.28,
+      -2.03,
+      -7.83,
+      3.47,
+      2.89,
+      5.18,
+      -2.04,
+      2.61,
+      -5.69,
+      -6.32,
+      1.19
+    ]
+  },
+  "pinned_whole_span_thread_cpu": {
+    "pairs": 24,
+    "cpu_affinity": 0,
+    "all_pairs": {
+      "active_faster_count": 11,
+      "median_delta_percent": 0.7,
+      "min_delta_percent": -34.91,
+      "max_delta_percent": 68.98
+    },
+    "control_first": {
+      "active_faster_count": 5,
+      "median_delta_percent": 0.86,
+      "min_delta_percent": -34.91,
+      "max_delta_percent": 20.02
+    },
+    "active_first": {
+      "active_faster_count": 6,
+      "median_delta_percent": 0.52,
+      "min_delta_percent": -33.93,
+      "max_delta_percent": 68.98
+    },
+    "per_pair_delta_percent": [
+      -0.93,
+      -32.96,
+      -28.1,
+      -10.95,
+      7.71,
+      68.98,
+      -34.91,
+      2.46,
+      20.02,
+      -0.25,
+      7.6,
+      18.27,
+      -4.21,
+      -24.23,
+      1.81,
+      2.92,
+      1.62,
+      -3.09,
+      7.47,
+      1.3,
+      -0.03,
+      -33.93,
+      0.11,
+      2.29
+    ]
+  }
+}

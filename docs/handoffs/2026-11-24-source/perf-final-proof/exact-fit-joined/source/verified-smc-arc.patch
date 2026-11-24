@@ -1,0 +1,303 @@
+diff --git a/firmware/src/app/smc_mixer.c b/firmware/src/app/smc_mixer.c
+index 307981bc..1743e9d6 100644
+--- a/firmware/src/app/smc_mixer.c
++++ b/firmware/src/app/smc_mixer.c
+@@ -1134,7 +1134,7 @@ static UI_DRAW void smc_ui_grid(void)
+             int bipolar = k.kind == R_BTRANS || is_pan(k) ||
+                 (k.kind == R_ENG && k.a == T_MST && k.c == MST_DJF);
+             if (bipolar) cv_rect(x + 14, 25, 2, 3, C_WHITE);
+-            arc(x + 15, 36, 8, (float)smc_scaled(k) / 127.0f, C_LINE, kc, bipolar);
++            smc_knob_arc(x + 15, 36, smc_scaled(k), C_LINE, kc, bipolar);
+         } else text_c(x + 15, 30, &FONT_T, "--", C_DIM);
+         smc_ui_strip_value(k, x + 15, 46, k.kind == R_NONE ? C_DIM : kc);
+         cv_rect(x + 3, 64, 2, 51, f.kind == R_NONE ? C_LINE : C_DIM);
+diff --git a/firmware/src/app/ui.c b/firmware/src/app/ui.c
+index a6277a8c..1ca88bb7 100644
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -5652,13 +5652,53 @@ static float turns(float y, float x)
+     return r * (1.0f / FM_TWO_PI);
+ }
+ 
++/* Both arc paths use the exact same float geometry for track ends and handle. */
++static void arc_caps(int32_t cx, int32_t cy, int32_t r, float v, float lo, float hi, uint16_t track, uint16_t fill)
++{
++    const float th=3.4f, a0=0.375f, sweep=0.75f;
++    float rm=(float)r-th*.5f, fx=(float)cx+.5f, fy=(float)cy+.5f;
++    /* Round ends: the track's, then the fill's, then the handle. */
++    float e0 = (a0) * FM_TWO_PI, e1 = (a0 + sweep) * FM_TWO_PI, ev = (a0 + sweep * v) * FM_TWO_PI;
++    float el = (a0 + sweep * lo) * FM_TWO_PI;
++    disc(fx + fm_cosf(e0) * rm - 0.5f, fy + fm_sinf(e0) * rm - 0.5f, th * 0.5f, lo <= 0.0f && hi > 0.0f ? fill : track);
++    disc(fx + fm_cosf(e1) * rm - 0.5f, fy + fm_sinf(e1) * rm - 0.5f, th * 0.5f, hi >= 1.0f ? fill : track);
++    if (hi > lo)
++        disc(fx + fm_cosf(el) * rm - 0.5f, fy + fm_sinf(el) * rm - 0.5f, th * 0.5f, fill);
++    disc(fx + fm_cosf(ev) * rm - 0.5f, fy + fm_sinf(ev) * rm - 0.5f, th * 0.5f + 1.3f, C_BLACK);
++    disc(fx + fm_cosf(ev) * rm - 0.5f, fy + fm_sinf(ev) * rm - 0.5f, th * 0.5f + 0.6f, C_WHITE);
++}
++
++#include "ui_smc_arc8.h"
++
++/* The SMC panel supplies an entire byte but normally uses 0..127.
++ * The two-byte tuple keeps exactly the old blend order, coverage and
++ * integer thresholds for that domain. A threshold of zero marks the
++ * four exact centre pixels, included on either side in bipolar mode. */
++static void smc_knob_arc(int32_t cx, int32_t cy, uint8_t value, uint16_t track, uint16_t fill, int bipolar)
++{
++    unsigned pos=0;
++    for (unsigned i=0; i<sizeof smc_arc_pixels / sizeof *smc_arc_pixels; ++i) {
++        unsigned step=smc_arc_pixels[i][0], t=smc_arc_pixels[i][1];
++        pos+=step>>3;
++        int ink=!t ? (bipolar || value>=64) :
++                bipolar && !(t&128u) ? value<t : value>=(t&127u);
++        px_blend(cx+(int)(pos&31u)-8,cy+(int)(pos>>5)-8,
++                 ink?fill:track,smc_arc_alpha[step&7u]);
++    }
++    float v=(float)value/127.0f;
++    float lo=bipolar && v<.5f?v:bipolar?.5f:0.0f;
++    float hi=bipolar && v<.5f?.5f:v;
++    arc_caps(cx,cy,8,fm_clampf(v,0.0f,1.0f),lo,hi,track,fill);
++}
++
++#ifdef X0X_HOST
+ /* a knob: a 270-degree track from 7:30 to 4:30, thickness th, anti-aliased, round ends; the
+  * value filled from the start (or from the top, for a bipolar value) and a round handle */
+ #include "ui_arc8_geometry.h"
+ static void arc(int32_t cx, int32_t cy, int32_t r, float v, uint16_t track, uint16_t fill, int bipolar)
+ {
+     const float th = 3.4f, a0 = 0.375f, sweep = 0.75f;  /* start at 135 degrees, in turns */
+-    float ro = (float)r, ri = ro - th, rm = ro - th * 0.5f, fx = (float)cx + 0.5f, fy = (float)cy + 0.5f;
++    float ro = (float)r, ri = ro - th;
+     float lo = bipolar ? (v < 0.5f ? v : 0.5f) : 0.0f, hi = bipolar ? (v < 0.5f ? 0.5f : v) : v;
+     int32_t x, y;
+     v = fm_clampf(v, 0.0f, 1.0f);
+@@ -5686,17 +5726,9 @@ static void arc(int32_t cx, int32_t cy, int32_t r, float v, uint16_t track, uint
+                 continue;                              /* the gap at the bottom; the caps close it */
+             px_blend(cx + x, cy + y, (t >= lo && t <= hi) ? fill : track, (uint32_t)(a * 16.0f + 0.5f));
+         }
+-    {   /* round ends: the track's, then the fill's, then the handle */
+-        float e0 = (a0) * FM_TWO_PI, e1 = (a0 + sweep) * FM_TWO_PI, ev = (a0 + sweep * v) * FM_TWO_PI;
+-        float el = (a0 + sweep * lo) * FM_TWO_PI;
+-        disc(fx + fm_cosf(e0) * rm - 0.5f, fy + fm_sinf(e0) * rm - 0.5f, th * 0.5f, lo <= 0.0f && hi > 0.0f ? fill : track);
+-        disc(fx + fm_cosf(e1) * rm - 0.5f, fy + fm_sinf(e1) * rm - 0.5f, th * 0.5f, hi >= 1.0f ? fill : track);
+-        if (hi > lo)
+-            disc(fx + fm_cosf(el) * rm - 0.5f, fy + fm_sinf(el) * rm - 0.5f, th * 0.5f, fill);
+-        disc(fx + fm_cosf(ev) * rm - 0.5f, fy + fm_sinf(ev) * rm - 0.5f, th * 0.5f + 1.3f, C_BLACK);
+-        disc(fx + fm_cosf(ev) * rm - 0.5f, fy + fm_sinf(ev) * rm - 0.5f, th * 0.5f + 0.6f, C_WHITE);
+-    }
++    arc_caps(cx,cy,r,v,lo,hi,track,fill);
+ }
++#endif
+ 
+ static void play_icon(int32_t x, int32_t y, uint16_t c)
+ {
+diff --git a/firmware/src/app/ui_smc_arc8.h b/firmware/src/app/ui_smc_arc8.h
+new file mode 100644
+index 00000000..ba160590
+--- /dev/null
++++ b/firmware/src/app/ui_smc_arc8.h
+@@ -0,0 +1,132 @@
++/* SPDX-License-Identifier: GPL-3.0-only */
++/* Generated by tests/host/gen_arc8_table.c with the original float arithmetic. */
++/* --smc-packed: (screen position delta << 3) | coverage index, then threshold. */
++static const uint8_t smc_arc_alpha[] = {2,4,6,7,8,11,14,16};
++static const uint8_t smc_arc_pixels[][2] = {
++    {0x31,0x39},
++    {0x0b,0x3d},
++    {0x0c,0x00},
++    {0x0b,0xc3},
++    {0x09,0xc7},
++    {0xd3,0x32},
++    {0x0e,0x35},
++    {0x0f,0x38},
++    {0x0f,0x3c},
++    {0x0f,0x00},
++    {0x0f,0xc4},
++    {0x0f,0xc8},
++    {0x0e,0xcb},
++    {0x0b,0xce},
++    {0xbd,0x2d},
++    {0x0f,0x30},
++    {0x0f,0x34},
++    {0x0f,0x37},
++    {0x0f,0x3c},
++    {0x0f,0x00},
++    {0x0f,0xc4},
++    {0x0f,0xc9},
++    {0x0f,0xcc},
++    {0x0f,0xd0},
++    {0x0d,0xd3},
++    {0xad,0x28},
++    {0x0f,0x2b},
++    {0x0f,0x2e},
++    {0x0f,0x31},
++    {0x0f,0x36},
++    {0x0f,0x3b},
++    {0x0e,0x00},
++    {0x0f,0xc5},
++    {0x0f,0xca},
++    {0x0f,0xcf},
++    {0x0f,0xd2},
++    {0x0f,0xd5},
++    {0x0d,0xd8},
++    {0x9b,0x24},
++    {0x0f,0x26},
++    {0x0f,0x28},
++    {0x0f,0x2b},
++    {0x0e,0x2f},
++    {0x0a,0x34},
++    {0x22,0xcc},
++    {0x0e,0xd1},
++    {0x0f,0xd5},
++    {0x0f,0xd8},
++    {0x0f,0xda},
++    {0x0b,0xdc},
++    {0x96,0x21},
++    {0x0f,0x22},
++    {0x0f,0x24},
++    {0x0e,0x27},
++    {0x08,0x2b},
++    {0x30,0xd5},
++    {0x0e,0xd9},
++    {0x0f,0xdc},
++    {0x0f,0xde},
++    {0x0e,0xdf},
++    {0x89,0x1c},
++    {0x0f,0x1d},
++    {0x0f,0x1e},
++    {0x0f,0x20},
++    {0x0a,0x22},
++    {0x42,0xde},
++    {0x0f,0xe0},
++    {0x0f,0xe2},
++    {0x0f,0xe3},
++    {0x09,0xe4},
++    {0x83,0x19},
++    {0x0f,0x19},
++    {0x0f,0x1a},
++    {0x0f,0x1b},
++    {0x57,0xe5},
++    {0x0f,0xe6},
++    {0x0f,0xe7},
++    {0x0b,0xe7},
++    {0x84,0x16},
++    {0x0f,0x16},
++    {0x0f,0x16},
++    {0x0e,0x16},
++    {0x56,0xea},
++    {0x0f,0xea},
++    {0x0f,0xea},
++    {0x0c,0xea},
++    {0x83,0x12},
++    {0x0f,0x12},
++    {0x0f,0x11},
++    {0x0f,0x10},
++    {0x57,0xf0},
++    {0x0f,0xef},
++    {0x0f,0xee},
++    {0x0b,0xee},
++    {0x81,0x0f},
++    {0x0f,0x0e},
++    {0x0f,0x0d},
++    {0x0f,0x0b},
++    {0x0a,0x09},
++    {0x42,0xf7},
++    {0x0f,0xf5},
++    {0x0f,0xf3},
++    {0x0f,0xf2},
++    {0x09,0xf1},
++    {0x8e,0x0b},
++    {0x0f,0x09},
++    {0x0f,0x07},
++    {0x0e,0x04},
++    {0x08,0x01},
++    {0x30,0xff},
++    {0x0e,0xfc},
++    {0x0f,0xf9},
++    {0x0f,0xf7},
++    {0x0e,0xf5},
++    {0x93,0x08},
++    {0x0f,0x06},
++    {0x0f,0x03},
++    {0x0f,0x01},
++    {0x47,0xff},
++    {0x0f,0xfd},
++    {0x0f,0xfa},
++    {0x0b,0xf8},
++    {0x9d,0x03},
++    {0x0f,0x01},
++    {0x57,0xff},
++    {0x0d,0xfd},
++};
+diff --git a/tests/host/composed_ui_identity_test.c b/tests/host/composed_ui_identity_test.c
+index 76f71c41..2686dea4 100644
+--- a/tests/host/composed_ui_identity_test.c
++++ b/tests/host/composed_ui_identity_test.c
+@@ -135,6 +135,16 @@ int main(void)
+         cv_begin(240,69,C_LINE);arc(x,35,radius,value/127.0f,C_GRAY,C_HI,bipolar);
+         CHECK(!memcmp(reference_pixels,cv_px,240*69*2));
+     }
++    /* Native SMC's packed path: exhaustive byte inputs, including clips,
++     * both bipolar halves and a non-flat background for coverage parity. */
++    for(int theme=0;theme<6;theme++) for(int bipolar=0;bipolar<2;bipolar++)
++    for(unsigned value=0;value<=255;value++) {
++        palette_set(theme);int x=value%3==0?0:value%3==1?120:239;
++        cv_begin(240,69,C_LINE);arc_reference(x,35,8,value/127.0f,C_GRAY,C_HI,bipolar);
++        memcpy(reference_pixels,cv_px,240*69*2);
++        cv_begin(240,69,C_LINE);smc_knob_arc(x,35,(uint8_t)value,C_GRAY,C_HI,bipolar);
++        CHECK(!memcmp(reference_pixels,cv_px,240*69*2));
++    }
+     setup(V_MIX,PART_909);
+     for(int state=0;state<240;state++) {
+         palette_set(state%6);ui.part=(uint8_t)(state%NPARTS);eng_scope_w=(uint32_t)(state*7)&(SCOPE_N-1u);
+diff --git a/tests/host/gen_arc8_table.c b/tests/host/gen_arc8_table.c
+index 57a2111e..d31ee626 100644
+--- a/tests/host/gen_arc8_table.c
++++ b/tests/host/gen_arc8_table.c
+@@ -17,11 +17,18 @@ static float turns(float y, float x)
+     return r * (1.0f / FM_TWO_PI);
+ }
+ 
+-int main(void)
++int main(int argc, char **argv)
+ {
++    static const uint8_t alpha[] = {2,4,6,7,8,11,14,16};
++    int packed = argc > 1 && !strcmp(argv[1], "--smc-packed");
++    int prev = 0, n = 0;
+     puts("/* SPDX-License-Identifier: GPL-3.0-only */");
+     puts("/* Generated by tests/host/gen_arc8_table.c with the original float arithmetic. */");
+-    puts("static const struct { int8_t x, y; uint8_t coverage; uint32_t turns_bits; } arc8_geometry[] = {");
++    if (packed) {
++        puts("/* --smc-packed: (screen position delta << 3) | coverage index, then threshold. */");
++        puts("static const uint8_t smc_arc_alpha[] = {2,4,6,7,8,11,14,16};");
++        puts("static const uint8_t smc_arc_pixels[][2] = {");
++    } else puts("static const struct { int8_t x, y; uint8_t coverage; uint32_t turns_bits; } arc8_geometry[] = {");
+     for (int y = -9; y <= 9; ++y) for (int x = -9; x <= 9; ++x) {
+         float dx = (float)x + 0.5f - 0.5f, dy = (float)y + 0.5f - 0.5f;
+         float d = fm_sqrtf(dx * dx + dy * dy), t;
+@@ -31,9 +38,25 @@ int main(void)
+         if (t < 0.0f) t += 1.0f;
+         t /= 0.75f;
+         if (t > 1.0f) continue;
++        if (packed) {
++            unsigned a16 = (unsigned)(a * 16.0f + 0.5f);
++            if (!a16) continue;
++            unsigned i = 0;
++            while (i < sizeof alpha && alpha[i] != a16) ++i;
++            int pos = (y+8)*32 + x+8, delta = pos-prev;
++            unsigned q = 0, qmul = 0;
++            while (q < 127 && (float)q / 127.0f < t) ++q;
++            while (qmul < 127 && (float)qmul * (1.0f / 127.0f) < t) ++qmul;
++            /* Both legal compiler evaluations must give a strict boundary. */
++            if (delta < 1 || delta > 31 || i == sizeof alpha || !q || q != qmul ||
++                !((float)q / 127.0f > t && (float)qmul * (1.0f / 127.0f) > t)) return 1;
++            printf("    {0x%02x,0x%02x},\n", ((unsigned)delta << 3) | i,
++                   t == .5f ? 0u : q | (t > .5f ? 128u : 0u));
++            ++n; prev = pos; continue;
++        }
+         uint32_t bits; memcpy(&bits, &t, sizeof bits);
+         printf("    {%d, %d, %u, 0x%08xu},\n", x, y, (unsigned)(a * 16.0f + 0.5f), (unsigned)bits);
+     }
+     puts("};");
+-    return 0;
++    return packed && n != 126;
+ }

@@ -1,0 +1,51 @@
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -2044,26 +2044,28 @@
+             int first_row = 0;
+ #if X0X_SUPERJ6_BUILTIN_INIT
+             if (kind == ORIGINAL_SOUND_JUNO) {
+-                add_page(emit, "OSCILLATOR", PR(R_SJ6KNOB,T_303,b,SJ6_WAVE1),
+-                         PR(R_SJ6KNOB,T_303,b,SJ6_WAVE2), PR(R_SJ6KNOB,T_303,b,SJ6_RANGE), NONE);
+-                add_page(emit, "PULSE WIDTH", PR(R_SJ6KNOB,T_303,b,SJ6_PWM1_ON),
+-                         PR(R_SJ6KNOB,T_303,b,SJ6_PWM1), PR(R_SJ6KNOB,T_303,b,SJ6_PWM2_ON),
+-                         PR(R_SJ6KNOB,T_303,b,SJ6_PWM2));
+-                add_page(emit, "FILTER", PR(R_ENG,T_303,b,2), PR(R_ENG,T_303,b,3),
+-                         PR(R_ENG,T_303,b,4), PR(R_SJ6KNOB,T_303,b,SJ6_FILTER_LINK));
+-                add_page(emit, "FILTER ADSR", PR(R_SJ6KNOB,T_303,b,SJ6_FILTER_ATTACK),
+-                         PR(R_SJ6KNOB,T_303,b,SJ6_FILTER_DECAY), PR(R_SJ6KNOB,T_303,b,SJ6_FILTER_SUSTAIN),
+-                         PR(R_SJ6KNOB,T_303,b,SJ6_FILTER_RELEASE));
+-                add_page(emit, "AMP ADSR", PR(R_SJ6KNOB,T_303,b,SJ6_AMP_ATTACK),
+-                         PR(R_SJ6KNOB,T_303,b,SJ6_AMP_DECAY), PR(R_SJ6KNOB,T_303,b,SJ6_AMP_SUSTAIN),
+-                         PR(R_SJ6KNOB,T_303,b,SJ6_AMP_RELEASE));
+-                add_page(emit, "OUTPUT", PR(R_ENG,T_303,b,9),
+-                         PR(R_SJ6KNOB,T_303,b,SJ6_MASTER_LEVEL), NONE, NONE);
+-                add_page(emit, "LFO HZ", PR(R_SJ6KNOB,T_303,b,SJ6_LFO1_RATE),
+-                         PR(R_SJ6KNOB,T_303,b,SJ6_LFO2_RATE), PR(R_SJ6KNOB,T_303,b,SJ6_LFO3_RATE), NONE);
+-                add_page(emit, "LFO2 PWM", PR(R_SJ6KNOB,T_303,b,SJ6_LFO2_RATE),
+-                         PR(R_SJ6KNOB,T_303,b,SJ6_LFO2_PWM_DEPTH), PR(R_SJ6KNOB,T_303,b,SJ6_LFO2_PWM_ROUTE),
+-                         PR(R_SJ6KNOB,T_303,b,SJ6_LFO2_PWM_BASE));
++                enum { SJ6_PAGE_ENGINE = 128, SJ6_PAGE_NONE = 255 };
++                enum { SJ6_PAGE_ID_FITS = 1 / (SJ6_LFO2_PWM_BASE < SJ6_PAGE_ENGINE) };
++                static const struct { const char *title; uint8_t id[4]; } pages[] = {
++                    {"OSCILLATOR", {SJ6_WAVE1, SJ6_WAVE2, SJ6_RANGE, SJ6_PAGE_NONE}},
++                    {"PULSE WIDTH", {SJ6_PWM1_ON, SJ6_PWM1, SJ6_PWM2_ON, SJ6_PWM2}},
++                    {"FILTER", {SJ6_PAGE_ENGINE + 2, SJ6_PAGE_ENGINE + 3, SJ6_PAGE_ENGINE + 4, SJ6_FILTER_LINK}},
++                    {"FILTER ADSR", {SJ6_FILTER_ATTACK, SJ6_FILTER_DECAY, SJ6_FILTER_SUSTAIN, SJ6_FILTER_RELEASE}},
++                    {"AMP ADSR", {SJ6_AMP_ATTACK, SJ6_AMP_DECAY, SJ6_AMP_SUSTAIN, SJ6_AMP_RELEASE}},
++                    {"OUTPUT", {SJ6_PAGE_ENGINE + 9, SJ6_MASTER_LEVEL, SJ6_PAGE_NONE, SJ6_PAGE_NONE}},
++                    {"LFO HZ", {SJ6_LFO1_RATE, SJ6_LFO2_RATE, SJ6_LFO3_RATE, SJ6_PAGE_NONE}},
++                    {"LFO2 PWM", {SJ6_LFO2_RATE, SJ6_LFO2_PWM_DEPTH, SJ6_LFO2_PWM_ROUTE, SJ6_LFO2_PWM_BASE}},
++                };
++                for (unsigned row = 0; row < sizeof pages / sizeof *pages; ++row) {
++                    pref_t refs[4];
++                    for (unsigned col = 0; col < 4; ++col) {
++                        unsigned id = pages[row].id[col];
++                        refs[col] = id == SJ6_PAGE_NONE ? NONE :
++                            id >= SJ6_PAGE_ENGINE ? PR(R_ENG,T_303,b,id - SJ6_PAGE_ENGINE) :
++                            PR(R_SJ6KNOB,T_303,b,id);
++                    }
++                    add_page_refs(emit, pages[row].title, refs, 0, 0);
++                }
+                 first_row = 3;
+             }
+ #endif

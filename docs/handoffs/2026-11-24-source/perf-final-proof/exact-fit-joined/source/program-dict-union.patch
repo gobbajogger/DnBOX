@@ -1,0 +1,80 @@
+--- a/tools/gen_program_values_compact.py
++++ b/tools/gen_program_values_compact.py
+@@ -25,7 +25,33 @@
+ for u in factory+mb+cb:
+  if u not in dictionary:dictionary.append(u)
+ assert len(dictionary)<=256
++# Preserve every existing byte code. Decode the immutable Chicago factory
++# header independently before appending only previously missing binary32 words.
++def bytes_array(file,name,n):
++ m=re.search(r'\b'+name+r'\['+str(n)+r'\]\s*=\s*\{([^}]+)\}',s[file])
++ a=bytes(int(v) for v in m[1].split(',') if v.strip())
++ assert len(a)==n
++ return a
++ch='chicago_program_private.h'
++old_words=values(ch,'original_chicago_factory_dictionary',309)
++old_codes=bytes_array(ch,'original_chicago_factory_codes',2005)
++ch_factory=[]
++for bit in range(0,81*22*9,9):
++ byte=bit//8
++ slot=((old_codes[byte]|old_codes[byte+1]<<8)>>(bit&7))&511
++ ch_factory.append(old_words[slot])
++for u in ch_factory:
++ if u not in dictionary:dictionary.append(u)
++assert len(dictionary)<=512
+ code=lambda a:[dictionary.index(u) for u in a]
++def packed9(values):
++ sym=code(values); bits=0
++ for i,v in enumerate(sym):bits|=v<<(i*9)
++ # Keep the two-byte last lookup safe independently of count alignment.
++ result=bits.to_bytes(max((len(sym)*9+7)//8,(len(sym)-1)*9//8+2),'little')
++ assert all(((int.from_bytes(result[i*9//8:i*9//8+2],'little')>>(i*9&7))&511)==v
++            for i,v in enumerate(sym))
++ return result
+ names=re.findall(r'"(.*?)"',re.search(r'original_miami_factory_name\[30\]\[24\]=\{(.*?)\};',s['miami_program_private.h'],re.S)[1]);assert len(names)==30
+ payload=[];offset=[]
+ for name in names:offset.append(len(payload));payload+=list(name.encode('ascii')+b'\0')
+@@ -40,7 +66,9 @@
+ out+='static inline float compact_miami_factory_value(unsigned f,unsigned p){return p<16u?compact_program_value(compact_miami_factory_codes[f*16u+p]):p==16u?0.5f:0.0f;}\n'
+ out+='static inline float compact_miami_base_value(unsigned i){return compact_program_value(compact_miami_base_codes[i]);}\n'
+ out+='static inline const char *compact_miami_factory_name(unsigned f){return compact_miami_names+compact_miami_name_offsets[f];}\n#endif\n'
+-out+='#ifdef ORIGINAL_PROGRAM_VALUES_CHICAGO\n'+arr('uint8_t','compact_chicago_base_codes',code(cb))+'static inline float compact_chicago_base_value(unsigned i){return compact_program_value(compact_chicago_base_codes[i]);}\n#endif\n'
++out+='#ifdef ORIGINAL_PROGRAM_VALUES_CHICAGO\n'+arr('uint8_t','compact_chicago_base_codes',code(cb))
++out+=arr('uint8_t','compact_chicago_factory_codes',packed9(ch_factory))
++out+='static inline float compact_chicago_base_value(unsigned i){return compact_program_value(compact_chicago_base_codes[i]);}\n#endif\n'
+ if len(sys.argv)>2:
+  raise SystemExit('usage: gen_program_values_compact.py [OUTPUT_HEADER]')
+ destination=Path(sys.argv[1]) if len(sys.argv)==2 else D/'program_values_compact.h'
+--- a/experiments/original_synth/chicago_program.c
++++ b/experiments/original_synth/chicago_program.c
+@@ -53,9 +53,14 @@
+   float x=original_chicago_factory_macro[factory][i];
+ #else
+   unsigned bit=(factory*22+i)*9,byte=bit>>3;
++#ifdef ORIGINAL_PROGRAM_VALUES_CHICAGO
++  unsigned code=((unsigned)compact_chicago_factory_codes[byte]|((unsigned)compact_chicago_factory_codes[byte+1]<<8))>>(bit&7);
++  float x=compact_program_value(code&511);
++#else
+   unsigned code=((unsigned)original_chicago_factory_codes[byte]|((unsigned)original_chicago_factory_codes[byte+1]<<8))>>(bit&7);
+   float x=original_chicago_factory_dictionary[code&511];
+ #endif
++#endif
+   (void)original_chicago_program_set(&next,i,x);
+  }
+  next.revision=0;*p=next;return 1;
+--- a/tests/host/program_values_compact_test.c
++++ b/tests/host/program_values_compact_test.c
+@@ -17,5 +17,13 @@
+  }
+  for(unsigned i=0;i<109;i++){if(bits(compact_miami_base_value(i))!=bits(original_miami_base[i]))return fprintf(stderr,"miami base %u mismatch\n",i),1;n++;}
+  for(unsigned i=0;i<117;i++){if(bits(compact_chicago_base_value(i))!=bits(original_chicago_base[i]))return fprintf(stderr,"chicago base %u mismatch\n",i),1;n++;}
++ for(unsigned i=0;i<81*22;i++){
++  unsigned bit=i*9,byte=bit>>3,shift=bit&7u;
++  unsigned old=((unsigned)original_chicago_factory_codes[byte]|(unsigned)original_chicago_factory_codes[byte+1]<<8)>>shift;
++  unsigned got=((unsigned)compact_chicago_factory_codes[byte]|(unsigned)compact_chicago_factory_codes[byte+1]<<8)>>shift;
++  if(bits(compact_program_value(got&511u))!=bits(original_chicago_factory_dictionary[old&511u]))
++   return fprintf(stderr,"Chicago factory position %u word mismatch\n",i),1;
++  n++;
++ }
+  printf("PASS compact program metadata: %u exact binary32/name checks\n",n);return 0;
+ }

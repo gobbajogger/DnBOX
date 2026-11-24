@@ -1,0 +1,74 @@
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -1640,44 +1640,42 @@
+         pages->more[pages->nmore++] = r;
+ }
+ 
+-static void title(pages_t *pages, int i, const char *s)
+-{
+-    int k = 0;
+-    while (s[k] && k < 11) {
+-        pages->title[i][k] = s[k];
+-        k++;
+-    }
+-    pages->title[i][k] = 0;
+-}
+-
++/* Both page consumers write the same four refs and truncated title. Select
++ * the destination once, retaining each consumer's bounds and count. */
+ static void add_page(page_emitter_t *emit, const char *t,
+                      pref_t a, pref_t b, pref_t c, pref_t d)
+ {
+     page_query_t *query = emit->query;
+     pages_t *pages = emit->pages;
++    pref_t *refs;
++    char *text;
+     if (query) {
+-        if (query->n == query->page) {
+-            query->r[0] = a;
+-            query->r[1] = b;
+-            query->r[2] = c;
+-            query->r[3] = d;
+-            unsigned i = 0;
+-            for (; t[i] && i < 11; i++)
+-                query->title[i] = t[i];
+-            query->title[i] = 0;
++        if (query->n != query->page) {
++            query->n++;
++            return;
+         }
++        refs = query->r;
++        text = query->title;
++    } else {
++        if (pages->n >= MAXPAGES)
++            return;
++        refs = pages->r[pages->n];
++        text = pages->title[pages->n];
++    }
++    refs[0] = a;
++    refs[1] = b;
++    refs[2] = c;
++    refs[3] = d;
++    unsigned i = 0;
++    for (; i < 11 && t[i]; i++)
++        text[i] = t[i];
++    text[i] = 0;
++    if (query) {
+         query->n++;
+-        return;
++    } else {
++        pages->group[pages->n] = emit->group;
++        pages->n++;
+     }
+-    if (pages->n >= MAXPAGES)
+-        return;
+-    pages->r[pages->n][0] = a;
+-    pages->r[pages->n][1] = b;
+-    pages->r[pages->n][2] = c;
+-    pages->r[pages->n][3] = d;
+-    title(pages, pages->n, t);
+-    pages->group[pages->n] = emit->group;
+-    pages->n++;
+ }
+ 
+ static int name_is(const x0x_param_t *d, const char *n)

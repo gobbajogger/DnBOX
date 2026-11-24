@@ -1,0 +1,105 @@
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -2622,34 +2622,28 @@
+         if (!core)
+             PROF_ADD(PR_909, p9);
+         eng_sync();
+-        eng_stage = 1;
++        eng_stage = d808_was_active ? 1u : 2u;
+     } else if (j == JB_808) {
+         PROF_T(p8);
+-        d808_was_active = (uint8_t)drum808_active(&d808);
+-        if (d808_was_active) {                            /* silent, it does nothing (and is not mixed) */
+-            if (eng_808_split) {
+-                /* If A renders on core 1, its mix must finish before that core
+-                 * can start B. Otherwise core 0 runs A after this 808 job.
+-                 * The selected workspace is therefore free until the metal mix
+-                 * finishes, even when both bass jobs are on core 1. */
+-                float (*raw)[256] = (eng_c1_mask & (1u << JB_A))
+-                    ? original_workspace_b.metal : original_workspace.metal;
+-                uint16_t aud = (uint16_t)(arg >> 9 & 0x7FFu);
+-                drum808_metal_prepare(&d808, raw, (int)n, aud);
+-                if (body_wait(core))
+-                    return 0;
+-                drum808_finish_rest(&d808, (const float (*)[256])raw, left808, right808, t1, t2,
+-                                    (int)n, aud);
+-                bfx_shape(PART_808, left808, right808, t1, t2, 4, (int)n);
+-            } else {
+-                for (i = 0; i < n; i++)
+-                    left808[i] = t1[i] = t2[i] = right808[i] = 0.0f;
+-                drum808_render_st_masked(&d808, left808, right808, t1, t2, (int)n, (uint16_t)(arg >> 9 & 0x7FFu));
+-                bfx_shape(PART_808, left808, right808, t1, t2, 4, (int)n);
+-            }
++        if (eng_808_split) {
++            /* If A renders on core 1, its mix must finish before that core
++             * can start B. Otherwise core 0 runs A after this 808 job.
++             * The selected workspace is therefore free until the metal mix
++             * finishes, even when both bass jobs are on core 1. */
++            float (*raw)[256] = (eng_c1_mask & (1u << JB_A))
++                ? original_workspace_b.metal : original_workspace.metal;
++            uint16_t aud = (uint16_t)(arg >> 9 & 0x7FFu);
++            drum808_metal_prepare(&d808, raw, (int)n, aud);
++            if (body_wait(core))
++                return 0;
++            drum808_finish_rest(&d808, (const float (*)[256])raw, left808, right808, t1, t2,
++                                (int)n, aud);
++            bfx_shape(PART_808, left808, right808, t1, t2, 4, (int)n);
+         } else {
+-            active = 0;
+-            drum808_pan_settle(&d808);
++            for (i = 0; i < n; i++)
++                left808[i] = t1[i] = t2[i] = right808[i] = 0.0f;
++            drum808_render_st_masked(&d808, left808, right808, t1, t2, (int)n, (uint16_t)(arg >> 9 & 0x7FFu));
++            bfx_shape(PART_808, left808, right808, t1, t2, 4, (int)n);
+         }
+         w0 = plat_ticks24();
+         if (stage_wait(1, core))
+@@ -2805,7 +2799,7 @@
+     uint32_t t[2] = {0u, m ? ENG_C1_LAT : 0u}, s, x;
+     int k, j;
+     k = (int)(m & 1u); t[k] += c[JB_909]; s = t[k];
+-    for (j = JB_808; j <= JB_B; j++) {
++    for (j = d808_was_active ? JB_808 : JB_A; j <= JB_B; j++) {
+         k = (int)(m >> j & 1u);
+         x = c[j] >> 4;
+         t[k] += c[j] - x;                               /* render */
+@@ -2833,13 +2827,13 @@
+ #ifdef X0X_CORE_PLAN                                  /* development: one fixed split, for A/B trials */
+     (void)c; (void)best; (void)cost; (void)bc; (void)m; (void)nn; (void)j;
+     if (drum909_active(&d909)) act |= 1u << JB_909;
+-    if (drum808_active(&d808)) act |= 1u << JB_808;
++    if (d808_was_active) act |= 1u << JB_808;
+     act |= 1u << JB_A | 1u << JB_B;
+     if (!breaks_silent(&brk)) act |= 1u << JB_BRK;
+     return (uint32_t)(X0X_CORE_PLAN) & act & ok;
+ #endif
+     if (drum909_active(&d909)) act |= 1u << JB_909;
+-    if (drum808_active(&d808)) act |= 1u << JB_808;
++    if (d808_was_active) act |= 1u << JB_808;
+     act |= 1u << JB_A | 1u << JB_B;
+     if (!breaks_silent(&brk)) act |= 1u << JB_BRK;
+     for (j = 0; j < JB_N; j++)                         /* a short stretch still pays a call's set-up */
+@@ -2916,10 +2910,13 @@
+     eng_c1_waited = 0;
+     bass_render_ok[0] = bass_render_ok[1] = 0;
+     original_rec_cancel_cut();                        /* both basses' recorder state: here, before the jobs */
++    d808_was_active = (uint8_t)drum808_active(&d808);
++    if (!d808_was_active)
++        drum808_pan_settle(&d808); /* no 808 mix stage to wait for */
+     m = plan_pick(n);
+     eng_c1_mask = (uint8_t)m;
+     /* 808 stays on core 0 and core 1 has other work: move the BD+SD prefix */
+-    eng_808_split = (uint8_t)(!(m & (1u << JB_808)) && m && drum808_active(&d808));
++    eng_808_split = (uint8_t)(!(m & (1u << JB_808)) && m && d808_was_active);
+     eng_808_body = (uint8_t)!eng_808_split;
+     eng_sync();
+     if (m && !plat_cpu2_run(core2_jobs, 0u)) {
+@@ -2932,7 +2929,7 @@
+     uint32_t w0 = plat_ticks24();
+ #endif
+     for (j = 0; j < JB_N; j++)
+-        if (!(eng_c1_mask & (1u << j)))
++        if ((j != JB_808 || d808_was_active) && !(eng_c1_mask & (1u << j)))
+             (void)run_job(j, 0);
+     if (eng_c1_mask) {
+         PROF_T(pt);

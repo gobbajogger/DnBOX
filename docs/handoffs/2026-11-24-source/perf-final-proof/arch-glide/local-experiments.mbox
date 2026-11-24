@@ -1,0 +1,81 @@
+From f70ea4ed851fe3f8a9f071620a86632c38246f43 Mon Sep 17 00:00:00 2001
+From: dot <dot@openai.invalid>
+Date: Tue, 24 Nov 2026 02:36:27 -0500
+Subject: [PATCH 1/2] Bound Synth One delay wrapping without moving the tap
+
+Keep legacy allocator, fractional interpolation and feedback history, but fold exact whole wraps once. Host DSP matches every factory-program audio digest; native real playing and strict heavy gates are still red. Local experiment only.
+---
+ firmware/src/dsp/s1c/s1c.c | 12 +++++++++++-
+ 1 file changed, 11 insertions(+), 1 deletion(-)
+
+diff --git a/firmware/src/dsp/s1c/s1c.c b/firmware/src/dsp/s1c/s1c.c
+index db818b71..47c56cc2 100644
+--- a/firmware/src/dsp/s1c/s1c.c
++++ b/firmware/src/dsp/s1c/s1c.c
+@@ -571,8 +571,18 @@ static float dl_tick_c(s1c_dline *d, float in, float del, float fb, float c)
+ /* Device memory model (smallest): exact-size half-float lines carved from a caller-owned pool. */
+ static float xl_read(const s1c_dline *d, float del)
+ {
++    const uint32_t len = (uint32_t)d->len;   /* device partitions use positive integer lengths */
++    const float ring = (float)len;
+     float pos = (float)d->w - del;
+-    while (pos < 0.0f) pos += (float)d->len;
++    /* Fold whole negative wraps at once. Within the exact-integer float
++     * range these additions are exact while the position is negative:
++     * each integer shift reduces its magnitude. Keep the final fractional
++     * wrap in the original order; the tap and interpolation are unchanged. */
++    if (pos < -4.0f * ring && pos >= -16777216.0f) {
++        const uint32_t wraps = (uint32_t)(-pos) / len;
++        pos += (float)(wraps * len);
++    }
++    while (pos < 0.0f) pos += ring;
+     int i = (int)pos; float f = pos - (float)i;
+     int j = i + 1 == d->len ? 0 : i + 1;
+     const uint16_t *b = (const uint16_t *)d->buf;
+-- 
+2.56.1
+
+
+From 1cb4b0af6361e3d1a1821db87650c20a79ab7270 Mon Sep 17 00:00:00 2001
+From: dot <dot@openai.invalid>
+Date: Tue, 24 Nov 2026 02:36:27 -0500
+Subject: [PATCH 2/2] Skip a bitwise fixed Synth One glide within its span
+
+Preserve the first rounded update, signed zero and all moving-state work. This narrows native XRUN cost without passing the full real workload, so retain only as a local experiment.
+---
+ firmware/src/dsp/s1c/s1c.c | 15 +++++++++++++++
+ 1 file changed, 15 insertions(+)
+
+diff --git a/firmware/src/dsp/s1c/s1c.c b/firmware/src/dsp/s1c/s1c.c
+index 47c56cc2..85da474b 100644
+--- a/firmware/src/dsp/s1c/s1c.c
++++ b/firmware/src/dsp/s1c/s1c.c
+@@ -864,10 +864,25 @@ void s1c_render(s1c *s, float *outl, float *outr, unsigned n)
+ #endif
+ #endif
+     (void)cr; (void)cw;
++#if S1C_FAST && S1C_CSM && S1C_NO_SEQ
++    /* Targets and coefficients cannot change inside this audio span. Do
++     * frame zero once; a bit-stable recurrence (including signed zero)
++     * stays fixed. A moving span resumes the unmodified dense loop. */
++    uint32_t glide_diff = 0;
++    if (n) for (i = 0; i < (int)sizeof s1c_smid; i++) {
++        const s1c_fb old = {.f = s->c[i]};
++        const s1c_fb next = {.f = c1 * s->t[s1c_smid[i]] + c2 * old.f};
++        glide_diff |= old.u ^ next.u;
++        s->c[i] = next.f;
++    }
++#endif
+     for (f = 0; f < n; f++) {
+ #if S1C_FAST
+         int cu = (f & 3) == 0;
+ #if S1C_CSM
++#if S1C_NO_SEQ
++        if (f && glide_diff)
++#endif
+         for (i = 0; i < (int)sizeof s1c_smid; i++) s->c[i] = c1 * s->t[s1c_smid[i]] + c2 * s->c[i];
+ #else
+         for (i = 0; i < s1c_nsm; i++) { unsigned q = s1c_sm[i]; s->c[q] = c1 * s->t[q] + c2 * s->c[q]; }
+-- 
+2.56.1
+

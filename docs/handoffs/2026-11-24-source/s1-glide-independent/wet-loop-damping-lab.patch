@@ -1,0 +1,13 @@
+--- a/firmware/src/dsp/s1c/s1u.c
++++ b/firmware/src/dsp/s1c/s1u.c
+@@ -247,7 +247,9 @@
+     float y[4], previous_l = 0.0f, previous_r = 0.0f;
+     int n;
+     if (fb != r->fb) {                    /* per-line gains when feedback changes */
+-        float lref = 0.068390f * sr, G = 0.70710678f;
++        /* Keep the DC feedback law; layer a second -3 dB of
++         * Nyquist loss across one reference traversal. */
++        float lref = 0.068390f * sr, G = 0.5f;
+         r->fb = fb;
+         for (n = 0; n < 4; n++) {
+             float q = (float)r->ln[n] / lref;

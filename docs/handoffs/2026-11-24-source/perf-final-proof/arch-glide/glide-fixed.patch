@@ -1,0 +1,28 @@
+--- a/firmware/src/dsp/s1c/s1c.c
++++ b/firmware/src/dsp/s1c/s1c.c
+@@ -864,10 +864,25 @@
+ #endif
+ #endif
+     (void)cr; (void)cw;
++#if S1C_FAST && S1C_CSM && S1C_NO_SEQ
++    /* Targets and coefficients cannot change inside this audio span. Do
++     * frame zero once; a bit-stable recurrence (including signed zero)
++     * stays fixed. A moving span resumes the unmodified dense loop. */
++    uint32_t glide_diff = 0;
++    if (n) for (i = 0; i < (int)sizeof s1c_smid; i++) {
++        const s1c_fb old = {.f = s->c[i]};
++        const s1c_fb next = {.f = c1 * s->t[s1c_smid[i]] + c2 * old.f};
++        glide_diff |= old.u ^ next.u;
++        s->c[i] = next.f;
++    }
++#endif
+     for (f = 0; f < n; f++) {
+ #if S1C_FAST
+         int cu = (f & 3) == 0;
+ #if S1C_CSM
++#if S1C_NO_SEQ
++        if (f && glide_diff)
++#endif
+         for (i = 0; i < (int)sizeof s1c_smid; i++) s->c[i] = c1 * s->t[s1c_smid[i]] + c2 * s->c[i];
+ #else
+         for (i = 0; i < s1c_nsm; i++) { unsigned q = s1c_sm[i]; s->c[q] = c1 * s->t[q] + c2 * s->c[q]; }

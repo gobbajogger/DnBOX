@@ -1,0 +1,121 @@
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -225,11 +225,18 @@
+     plat_cq_unlock(flags);
+     return ok;
+ }
++/* Only for checked owners under the existing foreground CQ lock.
++ * Admission and every bank-specific mailbox rule stay in the caller. */
++__attribute__((noinline)) X0X_COLD static int original_panel_ready(const original_runtime_part *p, unsigned bank)
++{
++    return p->kind == bank && p->status == ORIGINAL_RUNTIME_OK;
++}
++
+ int engine_juno_envelope_view(int v,juno6_envelope_snapshot *out)
+ {
+     if((unsigned)v>=NBASS || !out)return 0;
+     uint32_t flags=plat_cq_lock();
+-    int ok=original_bass[v].status==ORIGINAL_RUNTIME_OK && original_bass[v].kind==ORIGINAL_SOUND_JUNO &&
++    int ok=original_panel_ready(&original_bass[v], ORIGINAL_SOUND_JUNO) &&
+         juno6_read_envelope(&original_bass[v].dsp.juno.synth,out);
+     plat_cq_unlock(flags);
+     return ok;
+@@ -280,7 +287,7 @@
+     uint32_t flags = plat_cq_lock();
+     original_runtime_part *part = &original_bass[owner];
+     juno6_t *synth = &part->dsp.juno.synth;
+-    int accept = !project_hold && part->kind == ORIGINAL_SOUND_JUNO && part->status == ORIGINAL_RUNTIME_OK &&
++    int accept = !project_hold && original_panel_ready(part, ORIGINAL_SOUND_JUNO) &&
+                  !synth->pending_wave_mask && !synth->pending_field_mask && !synth->pending_filter_link &&
+                  !juno6_active(synth) && !engine_bass_preset_pending(owner);
+     if (accept) {
+@@ -321,10 +328,9 @@
+ {
+     if (owner >= NBASS || !(unit >= 0.f && unit <= 1.f)) return 0;
+     uint32_t flags = plat_cq_lock();
+-    original_runtime_part *p = &original_bass[owner];
+-    juno6_t *s = &p->dsp.juno.synth;
+-    int ok = !project_hold && p->kind == ORIGINAL_SOUND_JUNO &&
+-             p->status == ORIGINAL_RUNTIME_OK && s->amp1_independent &&
++    original_runtime_part *part = &original_bass[owner];
++    juno6_t *s = &part->dsp.juno.synth;
++    int ok = !project_hold && original_panel_ready(part, ORIGINAL_SOUND_JUNO) && s->amp1_independent &&
+              !(s->pending_field_mask & SJ6_FACTORY_GROUP) &&
+              !juno6_active(s) && !engine_bass_preset_pending(owner);
+     if (ok) {
+@@ -342,7 +348,7 @@
+     const original_runtime_part *part = &original_bass[owner];
+     const juno6_t *s = &part->dsp.juno.synth;
+     float unit;
+-    int ok = part->kind == ORIGINAL_SOUND_JUNO && part->status == ORIGINAL_RUNTIME_OK &&
++    int ok = original_panel_ready(part, ORIGINAL_SOUND_JUNO) &&
+              s->amp1_independent && dnbx_read_raw(&s->core, 36, &unit) == DNBX_OK;
+     if (ok) {
+         *raw = unit;
+@@ -367,7 +373,7 @@
+     if (owner >= NBASS || !(unit >= 0 && unit <= limit)) return 0;
+     uint32_t flags = plat_cq_lock();
+     original_runtime_part *part = &original_bass[owner];
+-    int accept = !project_hold && part->kind == ORIGINAL_SOUND_JUNO && part->status == ORIGINAL_RUNTIME_OK &&
++    int accept = !project_hold && original_panel_ready(part, ORIGINAL_SOUND_JUNO) &&
+                  !(part->dsp.juno.synth.pending_field_mask & SJ6_FACTORY_GROUP) &&
+                  (slot == 4 || (slot == SJ6_RANGE_FIELD ?
+                      !juno6_active(&part->dsp.juno.synth) && !engine_bass_preset_pending(owner) :
+@@ -388,8 +394,7 @@
+             : selector == 1) return 0;
+     uint32_t flags = plat_cq_lock();
+     original_runtime_part *part = &original_bass[owner];
+-    int accept = !project_hold && part->kind == ORIGINAL_SOUND_JUNO &&
+-                 part->status == ORIGINAL_RUNTIME_OK &&
++    int accept = !project_hold && original_panel_ready(part, ORIGINAL_SOUND_JUNO) &&
+                  !(part->dsp.juno.synth.pending_field_mask & SJ6_FACTORY_GROUP) &&
+                  !juno6_active(&part->dsp.juno.synth) && !engine_bass_preset_pending(owner);
+     if (accept) {
+@@ -405,10 +410,9 @@
+ {
+     if (owner >= NBASS || on > 1u) return 0;
+     uint32_t flags = plat_cq_lock();
+-    original_runtime_part *p = &original_bass[owner];
+-    juno6_t *s = &p->dsp.juno.synth;
+-    int ok = !project_hold && p->kind == ORIGINAL_SOUND_JUNO &&
+-             p->status == ORIGINAL_RUNTIME_OK && s->typed &&
++    original_runtime_part *part = &original_bass[owner];
++    juno6_t *s = &part->dsp.juno.synth;
++    int ok = !project_hold && original_panel_ready(part, ORIGINAL_SOUND_JUNO) && s->typed &&
+              !(s->pending_field_mask & SJ6_FACTORY_GROUP) &&
+              !juno6_active(s) && !engine_bass_preset_pending(owner);
+     if (ok) s->pending_filter_link = (uint8_t)(on ? SJ6_FILTER_ON : SJ6_FILTER_OFF);
+--- a/firmware/src/app/original_presets.inc
++++ b/firmware/src/app/original_presets.inc
+@@ -64,7 +64,7 @@
+     if (voice >= NBASS || !out) return 0;
+     uint32_t lock = plat_cq_lock();
+     const original_runtime_part *owner = &original_bass[voice];
+-    int ready = owner->kind == ORIGINAL_SOUND_SYNTHONE && owner->status == ORIGINAL_RUNTIME_OK;
++    int ready = original_panel_ready(owner, ORIGINAL_SOUND_SYNTHONE);
+     if (ready) {
+         out->revision = s1_patch_identity(voice);
+         out->note_locked = note_lock_applied[voice];
+@@ -84,10 +84,10 @@
+     const original_runtime_part *owner = &original_bass[voice];
+     int selected = -1;
+ #if X0X_S1C
+-    if (owner->kind == ORIGINAL_SOUND_SYNTHONE && owner->status == ORIGINAL_RUNTIME_OK)
++    if (original_panel_ready(owner, ORIGINAL_SOUND_SYNTHONE))
+         selected = s1_part_env_view(&owner->dsp.synthone, filter, level, stage, key_down) ? 0 : -1;
+ #else
+-    if (owner->kind == ORIGINAL_SOUND_SYNTHONE && owner->status == ORIGINAL_RUNTIME_OK) {
++    if (original_panel_ready(owner, ORIGINAL_SOUND_SYNTHONE)) {
+         const s1_dry_part *part = &owner->dsp.synthone;
+         /* Same voice as engine_bass_voice_view: the loudest started one. */
+         for (unsigned i = 0; i < S1_CORE_VOICES; ++i)
+@@ -132,8 +132,7 @@
+     uint32_t lock = plat_cq_lock();
+     int status = S1_EDIT_REJECTED;
+     uint32_t request = bass_request[voice];
+-    if (original_bass[voice].kind == ORIGINAL_SOUND_SYNTHONE &&
+-        original_bass[voice].status == ORIGINAL_RUNTIME_OK &&
++    if (original_panel_ready(&original_bass[voice], ORIGINAL_SOUND_SYNTHONE) &&
+         s1_patch_identity(voice) == revision &&
+         !((request & 0x80000000u) && request != bass_applied[voice])) {
+         if (s1_edit[voice].pending || note_lock_applied[voice]) status = S1_EDIT_BUSY;

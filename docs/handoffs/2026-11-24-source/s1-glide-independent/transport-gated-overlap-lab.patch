@@ -1,0 +1,17 @@
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -2845,6 +2845,14 @@
+     for (j = 0; j < JB_N; j++)                         /* a short stretch still pays a call's set-up */
+         c[j] = (act >> j & 1u) ? eng_job_cost[j] * nn / 256u : 0u;
+     uint32_t allowed = act & ok;
++    /* Only during transport playback, allow the otherwise empty 808 stage to
++     * travel with a remote 909 when S1 and Miami compete for core time. */
++    if (seq.playing && (act & (1u << JB_909)) &&
++        ((original_bass[0].kind == ORIGINAL_SOUND_SYNTHONE &&
++          original_bass[1].kind == ORIGINAL_SOUND_MIAMI) ||
++         (original_bass[1].kind == ORIGINAL_SOUND_SYNTHONE &&
++          original_bass[0].kind == ORIGINAL_SOUND_MIAMI)))
++        allowed |= 1u << JB_808;
+     best &= allowed;
+     bc = plan_cost(best, c);
+     cost = bc;
