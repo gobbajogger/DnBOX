@@ -1,0 +1,18 @@
+......
+----------------------------------------------------------------------
+Ran 6 tests in 0.135s
+
+OK
+PASS missing-note negative control
+coverage: redraws=64/64 audible=31 drum_masks=2047/2047 max_voices=1/2
+heavy: kinds=0,1 blocks=64 frames=32768 seconds=0.7 dropouts=0 late=0 max_block_us=2881.5 deadline_us=0.0
+PASS stress coverage: blocks=64 frames=32768 Chicago=1 Miami=2 redraws=64 nonzero=65407 factory=0 FX=0; host transport substitutes, no DMA/xrun proof
+Host audio half peak 2.881520 ms; margin 8.728457 ms; host timing limits PASS; target NOT_RUN
+coverage: redraws=64/64 audible=31 drum_masks=2047/2047 max_voices=1/2
+heavy: kinds=0,1 blocks=64 frames=32768 seconds=0.7 dropouts=0 late=0 max_block_us=2988.4 deadline_us=0.0
+PASS stress coverage: blocks=64 frames=32768 Chicago=1 Miami=2 redraws=64 nonzero=65406 factory=29 FX=1; host transport substitutes, no DMA/xrun proof
+Host audio half peak 2.988369 ms; margin 8.621608 ms; host timing limits PASS; target NOT_RUN
+coverage: redraws=64/64 audible=31 drum_masks=2047/2047 max_voices=1/2
+heavy: kinds=0,1 blocks=64 frames=32768 seconds=0.7 dropouts=0 late=0 max_block_us=3187.5 deadline_us=0.0
+PASS stress coverage: blocks=64 frames=32768 Chicago=1 Miami=2 redraws=64 nonzero=65406 factory=18 FX=6; host transport substitutes, no DMA/xrun proof
+Host audio half peak 3.187469 ms; margin 8.422508 ms; host timing limits PASS; target NOT_RUN

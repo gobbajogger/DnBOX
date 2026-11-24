@@ -1,0 +1,20 @@
+render-timing: pair=0,1 /tmp/dnbox-render-contract-EEW9nc/timing/01-1.csv: blocks=240 mean=877.6us max=2003.1us late=0 (limit 3869.7us = 11609/3) chicago=66.5us miami=105.9us rest=705.2us arp_note_ons=0/0
+render-timing: pair=0,1 /tmp/dnbox-render-contract-EEW9nc/timing/01-2.csv: blocks=240 mean=929.9us max=3009.0us late=0 (limit 3869.7us = 11609/3) chicago=79.3us miami=101.0us rest=749.6us arp_note_ons=0/0
+render-timing: pair=0,1 /tmp/dnbox-render-contract-EEW9nc/timing/01-3.csv: blocks=240 mean=925.2us max=4732.7us late=1 (limit 3869.7us = 11609/3) chicago=73.3us miami=93.9us rest=758.0us arp_note_ons=0/0
+render-timing: pair=0,1 /tmp/dnbox-render-contract-EEW9nc/timing/01-4.csv: blocks=240 mean=851.7us max=2870.4us late=0 (limit 3869.7us = 11609/3) chicago=64.3us miami=98.3us rest=689.1us arp_note_ons=0/0
+render-timing: pair=2,3 /tmp/dnbox-render-contract-EEW9nc/timing/23-1.csv: blocks=240 mean=1284.7us max=2975.7us late=0 (limit 3869.7us = 11609/3) synthone=393.1us superj6=167.6us rest=724.0us arp_note_ons=32/32
+render-timing: pair=2,3 /tmp/dnbox-render-contract-EEW9nc/timing/23-2.csv: blocks=240 mean=1262.3us max=2632.1us late=0 (limit 3869.7us = 11609/3) synthone=399.4us superj6=178.6us rest=684.3us arp_note_ons=32/32
+render-timing: pair=2,3 /tmp/dnbox-render-contract-EEW9nc/timing/23-3.csv: blocks=240 mean=1310.2us max=5062.5us late=1 (limit 3869.7us = 11609/3) synthone=424.8us superj6=167.3us rest=718.2us arp_note_ons=32/32
+render-timing: pair=2,3 /tmp/dnbox-render-contract-EEW9nc/timing/23-4.csv: blocks=240 mean=1269.3us max=4358.1us late=1 (limit 3869.7us = 11609/3) synthone=395.8us superj6=173.5us rest=700.0us arp_note_ons=32/32
+render-timing: pair=0,1 chicago mean: ratio 0.093 (baseline 0.0942, limit 0.122) ok
+render-timing: pair=0,1 miami mean: ratio 0.124 (baseline 0.1394, limit 0.181) ok
+render-timing: pair=0,1 block max: ratio 2.840 (baseline 1.9868, limit 3.974) ok
+render-timing: pair=2,3 synthone mean: ratio 0.543 (baseline 0.1034, limit 0.134) REGRESSED
+render-timing: pair=2,3 superj6 mean: ratio 0.231 (baseline 0.0945, limit 0.123) REGRESSED
+render-timing: pair=2,3 block max: ratio 3.846 (baseline 1.7887, limit 3.577) REGRESSED
+FAIL render-timing: pair 0,1: 1 late blocks over 3869.7 us
+FAIL render-timing: pair 2,3: 1 late blocks over 3869.7 us
+FAIL render-timing: pair 2,3: 1 late blocks over 3869.7 us
+FAIL render-timing: pair 2,3 synthone mean: ratio 0.543 > 0.134
+FAIL render-timing: pair 2,3 superj6 mean: ratio 0.231 > 0.123
+FAIL render-timing: pair 2,3 block max: ratio 3.846 > 3.577

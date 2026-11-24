@@ -1,0 +1,500 @@
+--- a/tests/host/audio_stress_test.c
++++ b/tests/host/audio_stress_test.c
+@@ -5,6 +5,19 @@
+ #include "app/original_runtime.h"
+ #include "dsp/busfx.h"
+ 
++#if X0X_TIMING_SHIPPED
++#if !X0X_S1C || !X0X_SYNTHONE_PATCH || !X0X_SUPERJ6_FACTORY || !X0X_SUPERJ6_BUILTIN_INIT || !X0X_ARP_ENGINE
++#error "render timing needs the compact Synth One, native SuperJ6 and production arp"
++#endif
++static original_runtime_part *timed_part[4];
++static unsigned render_frames[4], compact_frames, superj6_frames, arp_notes[2];
++#define TIMING_BLOCK_FRAMES 512u
++#define TIMING_SAMPLE_RATE 44100u
++/* The pattern plays 48..71, the external chord plays 48..63. Only the
++ * configured multi-octave arp can send a higher pitch to either backend. */
++#define TIMING_DIRECT_PITCH_MAX 71u
++#endif
++
+ static uint64_t synth_cpu[4];
+ static unsigned max_active[4], note_events[4][2][2], measured, runtime_faults, drop_one;
+ static unsigned kind_a = ORIGINAL_SOUND_CHICAGO, kind_b = ORIGINAL_SOUND_MIAMI;
+@@ -14,6 +27,36 @@
+     clock_gettime(CLOCK_THREAD_CPUTIME_ID, &t);
+     return (uint64_t)t.tv_sec * 1000000000u + (uint64_t)t.tv_nsec;
+ }
++#if X0X_TIMING_SHIPPED
++void __real_s1c_render(s1c *, float *, float *, unsigned);
++void __wrap_s1c_render(s1c *part, float *left, float *right, unsigned frames)
++{
++    __real_s1c_render(part, left, right, frames);
++    if (measured) compact_frames += frames;
++}
++int __real_juno6_render_stereo(juno6_t *, float *, float *, unsigned);
++int __wrap_juno6_render_stereo(juno6_t *part, float *left, float *right, unsigned frames)
++{
++    int ok = __real_juno6_render_stereo(part, left, right, frames);
++    if (measured && ok && part->typed) superj6_frames += frames;
++    return ok;
++}
++int __real_s1_part_note(s1_dry_part *, unsigned, unsigned);
++int __wrap_s1_part_note(s1_dry_part *part, unsigned key, unsigned velocity)
++{
++    int ok = __real_s1_part_note(part, key, velocity);
++    if (measured && ok && velocity && key > TIMING_DIRECT_PITCH_MAX) ++arp_notes[0];
++    return ok;
++}
++int __real_juno6_note_on(juno6_t *, uint8_t, uint8_t);
++int __wrap_juno6_note_on(juno6_t *part, uint8_t key, uint8_t velocity)
++{
++    int ok = __real_juno6_note_on(part, key, velocity);
++    if (measured && ok && part->typed && velocity && key > TIMING_DIRECT_PITCH_MAX) ++arp_notes[1];
++    return ok;
++}
++#endif
++
+ static void charge(original_runtime_part *p, uint64_t start, int rc)
+ {
+     if (!measured) return;
+@@ -52,6 +95,12 @@
+ int original_runtime_render(original_runtime_part *p,original_runtime_workspace *w,float *l,float *r,uint32_t n)
+ {
+     uint64_t t=cpu_ns(); int rc=stress_real_original_runtime_render(p,w,l,r,n); charge(p,t,rc);
++#if X0X_TIMING_SHIPPED
++    if (measured && rc == ORIGINAL_RUNTIME_OK && p->kind < 4u) {
++        timed_part[p->kind] = p;
++        render_frames[p->kind] += n;
++    }
++#endif
+     unsigned active=0;
+     if(p->kind==ORIGINAL_SOUND_CHICAGO) active=p->dsp.chicago.voice.active!=0;
+     else if(p->kind==ORIGINAL_SOUND_MIAMI) for(unsigned i=0;i<ORIGINAL_MIAMI_BACKEND_VOICES;i++) active+=p->dsp.miami.voices[i].active!=0;
+@@ -103,6 +152,10 @@
+     /* X0X_STRESS_KINDS=a,b: the engines of the two synth parts (original_sound.h kinds 0-3). */
+     const char *kinds=getenv("X0X_STRESS_KINDS");
+     if(kinds) { CHECK(sscanf(kinds,"%u,%u",&kind_a,&kind_b)==2); CHECK(kind_a<4&&kind_b<4); }
++#if X0X_TIMING_SHIPPED
++    const int compact_pair = kind_a == ORIGINAL_SOUND_SYNTHONE && kind_b == ORIGINAL_SOUND_JUNO;
++    CHECK(compact_pair || (kind_a == ORIGINAL_SOUND_CHICAGO && kind_b == ORIGINAL_SOUND_MIAMI));
++#endif
+     /* X0X_STRESS_DEADLINE_NS: a block whose render CPU time exceeds it is late (0 = do not judge). */
+     const char *dl=getenv("X0X_STRESS_DEADLINE_NS");
+     uint64_t deadline=dl?strtoull(dl,NULL,10):0,max_block=0; unsigned late=0;
+@@ -115,7 +168,27 @@
+     CHECK(original_sound_init(proj.sound.v[T_303][0],kind_a,kind_a==ORIGINAL_SOUND_MIAMI?factory:0));
+     CHECK(original_sound_init(proj.sound.v[T_303][1],kind_b,kind_b==ORIGINAL_SOUND_MIAMI?factory:0));
+     if(kind_a==ORIGINAL_SOUND_CHICAGO) CHECK(original_sound_set(proj.sound.v[T_303][0],ORIGINAL_CHICAGO_FX_TYPE,choice));
++#if X0X_TIMING_SHIPPED
++    if (compact_pair) {
++        engine_arp_cfg config;
++        engine_arp_cfg_default(&config);
++        config.on = 1;
++        config.range = 4;
++        config.gate = 75;
++        for (unsigned part = 0; part < 2; ++part)
++            engine_arp_block_encode(&config, proj.sound.v[T_303][ARP_BLOCK_VOICE0 + part]);
++    }
++#endif
+     engine_apply_sound(&proj.sound);audio();
++#if X0X_TIMING_SHIPPED
++    if (compact_pair) {
++        for (unsigned part = 0; part < 2; ++part) {
++            engine_arp_settings settings;
++            CHECK(engine_arp_settings_read(part, &settings) && settings.on && settings.range == 4);
++        }
++    }
++    CHECK(!engine_guard_active());
++#endif
+     CHECK(engine_bass_bank(0)==(int)kind_a&&engine_bass_bank(1)==(int)kind_b);
+     /* Stock now starts with empty BREAK slots. Seed the host store exactly
+      * as an installed sample, without embedding audio in native images. */
+@@ -150,9 +223,20 @@
+     proj.set.bt=PROJ_BT_SMC_CENTRAL;smc_ble_link(1);smc_poll();
+     ui.part=PART_303A;set_view(V_PART);build_pages();
+     uint64_t stages[ENG_PROF_N]={0}; unsigned redraws=0,nonzero=0,audible=0,drums[2]={0};
++#if X0X_TIMING_SHIPPED
++    fputs("block,frames,sample_rate_hz,clock,cpu_ns,part_a_cpu_ns,part_b_cpu_ns,part_a_kind,part_b_kind,"
++          "part_a_render_frames,part_b_render_frames,part_a_active,part_b_active,compact_s1_frames,"
++          "superj6_stereo_frames,s1_arp_note_ons,sj6_arp_note_ons\n", csv);
++#else
+     fputs("block,cpu_ns,wall_ns,chicago_cpu_ns,miami_cpu_ns,ui_cpu_ns,909_ns,808_ns,brk_ns,fx_ns\n",csv);
++#endif
+     for(unsigned b=0;b<blocks;b++) {
+         stress_inputs(b);
++#if X0X_TIMING_SHIPPED
++        memset(timed_part, 0, sizeof timed_part);
++        memset(render_frames, 0, sizeof render_frames);
++        compact_frames = superj6_frames = arp_notes[0] = arp_notes[1] = 0;
++#endif
+         uint32_t before[ENG_PROF_N];for(unsigned k=0;k<ENG_PROF_N;k++)before[k]=eng_prof[k];
+         int32_t output[1024];memset(synth_cpu,0,sizeof synth_cpu);memset(note_events,0,sizeof note_events);measured=1;
+         uint64_t start=cpu_ns();double wall=now_ns();
+@@ -160,6 +244,12 @@
+         engine_render(output,256);engine_volume(output,256);
+         engine_render(output+512,256);engine_volume(output+512,256);
+         uint64_t elapsed=cpu_ns()-start;wall=now_ns()-wall;measured=0;
++#if X0X_TIMING_SHIPPED
++        CHECK(!engine_guard_active());
++        CHECK(timed_part[kind_a] && timed_part[kind_b]);
++        int a_active = original_runtime_active(timed_part[kind_a]);
++        int b_active = original_runtime_active(timed_part[kind_b]);
++#endif
+         if(elapsed>max_block)max_block=elapsed;
+         if(deadline&&elapsed>deadline)late++;
+         uint32_t delta[ENG_PROF_N];for(unsigned k=0;k<ENG_PROF_N;k++){delta[k]=eng_prof[k]-before[k];stages[k]+=delta[k];}
+@@ -178,9 +268,17 @@
+         unsigned before_blits=blits;
+         start=cpu_ns();enc_acc[EN_ALGO]=1;ui_frame();smc_frame();uint64_t ui_cpu=cpu_ns()-start;
+         redraws+=blits!=before_blits;
++#if X0X_TIMING_SHIPPED
++        fprintf(csv, "%u,%u,%u,thread_cpu,%llu,%llu,%llu,%u,%u,%u,%u,%d,%d,%u,%u,%u,%u\n",
++                b, TIMING_BLOCK_FRAMES, TIMING_SAMPLE_RATE, (unsigned long long)elapsed,
++                (unsigned long long)synth_cpu[kind_a], (unsigned long long)synth_cpu[kind_b],
++                timed_part[kind_a]->kind, timed_part[kind_b]->kind, render_frames[kind_a], render_frames[kind_b],
++                a_active != 0, b_active != 0, compact_frames, superj6_frames, arp_notes[0], arp_notes[1]);
++#else
+         fprintf(csv,"%u,%llu,%.0f,%llu,%llu,%llu,%u,%u,%u,%u\n",b,(unsigned long long)elapsed,wall,
+             (unsigned long long)synth_cpu[kind_a],(unsigned long long)synth_cpu[kind_b],(unsigned long long)ui_cpu,
+             delta[PR_909],delta[PR_808],delta[PR_BRK],delta[PR_FX]);
++#endif
+     }
+     printf("coverage: redraws=%u/%u audible=%u drum_masks=%u/%u max_voices=%u/%u\n",redraws,blocks,audible,drums[0],drums[1],max_active[0],max_active[1]);
+     CHECK(nonzero&&redraws>blocks/4);
+--- a/tests/host/render_timing_regression_test.sh
++++ b/tests/host/render_timing_regression_test.sh
+@@ -29,8 +29,11 @@
+ mkdir -p "$OUT"
+ awk '/^static void smk_wheels\(void\)/{on=1} on{print} on && /^}/{exit}' firmware/src/app/main_fm1.c > "$OUT/smk_wheels.inc"
+ test -s "$OUT/smk_wheels.inc"
++# Keep host imports and all translation units on the same shipping composition.
++export X0X_S1C=1 X0X_SUPERJ6_FACTORY=1
+ . tests/host/original_build.sh
+-ORIGINAL_FLAGS="$ORIGINAL_FLAGS -DX0X_FAST_FMA"
++ORIGINAL_FLAGS="$ORIGINAL_FLAGS -DX0X_FAST_FMA -DX0X_TIMING_SHIPPED=1 -DX0X_S1C=1 \
++-DX0X_SYNTHONE_PATCH=1 -DX0X_SUPERJ6_BUILTIN_INIT=1 -DX0X_ARP_HOOKS=1"
+ sh host/build_host.sh --generate-only >"$OUT/assets.log" 2>&1
+ RT_OPT=${X0X_TIMING_RUNTIME_OPT:-$(python3 -c "
+ import importlib.util
+@@ -49,15 +52,16 @@
+ for source in $ORIGINAL_SOURCES; do
+     case "$source" in firmware/src/app/original_runtime.c) ;; *) sources="$sources $source" ;; esac
+ done
+-compile -O2 tests/host/audio_stress_test.c $sources "$OUT/runtime.o" -lm -o "$OUT/stress"
++compile -O2 tests/host/audio_stress_test.c $sources "$OUT/runtime.o" -lm \
++    -Wl,--wrap=s1c_render,--wrap=juno6_render_stereo,--wrap=s1_part_note,--wrap=juno6_note_on -o "$OUT/stress"
+ csvs=
+ for pair in 0,1 2,3; do
+     case "$pair" in 0,1) factory=18; choice=6 ;; *) factory=0; choice=0 ;; esac
+     rep=1
+     while [ "$rep" -le "$REPS" ]; do
+         csv="$OUT/${pair%,*}${pair#*,}-$rep.csv"
+-        X0X_STRESS_KINDS=$pair X0X_STRESS_DEADLINE_NS=0 run_stress "$OUT/stress" "$csv" /dev/null "$BLOCKS" "$factory" "$choice" > "$OUT/run.log" 2>&1 \
+-            || { cat "$OUT/run.log"; echo "FAIL: stress run pair=$pair rep=$rep"; exit 1; }
++        X0X_STRESS_KINDS=$pair X0X_STRESS_DEADLINE_NS=0 run_stress "$OUT/stress" "$csv" /dev/null "$BLOCKS" "$factory" "$choice" > "$csv.log" 2>&1 \
++            || { cat "$csv.log"; echo "FAIL: stress run pair=$pair rep=$rep"; exit 1; }
+         csvs="$csvs $pair:$csv"
+         rep=$((rep + 1))
+     done
+--- a/tests/host/test_render_timing_repetitions.py
++++ b/tests/host/test_render_timing_repetitions.py
+@@ -1,44 +1,78 @@
+ #!/usr/bin/env python3
+ # SPDX-License-Identifier: GPL-3.0-only
+-"""Protect the distinction between noisy ratios and a missed absolute deadline."""
++"""Exercise workload identity and the existing absolute and relative limits."""
+ import csv
++from pathlib import Path
+ import subprocess
+ import sys
+ import tempfile
+ import unittest
+-from pathlib import Path
+ 
+ ROOT = Path(__file__).resolve().parents[2]
++FIELDS = ('block', 'frames', 'sample_rate_hz', 'clock', 'cpu_ns', 'part_a_cpu_ns', 'part_b_cpu_ns',
++          'part_a_kind', 'part_b_kind', 'part_a_render_frames', 'part_b_render_frames',
++          'part_a_active', 'part_b_active', 'compact_s1_frames', 'superj6_stereo_frames',
++          's1_arp_note_ons', 'sj6_arp_note_ons')
+ 
+ 
+ class TimingRepetitions(unittest.TestCase):
+-    def check_pairs(self, outlier_ns):
+-        with tempfile.TemporaryDirectory() as td:
+-            results = []
+-            for repeat, peak in enumerate((outlier_ns, 900_000, 925_000, 950_000)):
+-                path = Path(td) / f'{repeat}.csv'
+-                with path.open('w', newline='') as stream:
+-                    writer = csv.writer(stream)
+-                    writer.writerow(('cpu_ns', 'chicago_cpu_ns', 'miami_cpu_ns'))
+-                    for block in range(256):
+-                        writer.writerow((peak if block == 100 else 800_000, 45_000, 60_000))
+-                results.append(f'0,1:{path}')
+-            return subprocess.run(
+-                [sys.executable, str(ROOT/'tools/render_timing_check.py'),
+-                 '--baseline', str(ROOT/'tests/host/render_timing_baseline.json'), *results],
++    def check_pairs(self, outlier=900_000, *, pairs=('0,1','2,3'), bad=None, legacy=False):
++        with tempfile.TemporaryDirectory() as temp:
++            runs = []
++            for pair in pairs:
++                a, b = map(int, pair.split(','))
++                compact = pair == '2,3'
++                for repeat, peak in enumerate((outlier, 900_000, 925_000, 950_000)):
++                    path = Path(temp)/f'{pair}-{repeat}.csv'
++                    with path.open('w', newline='') as stream:
++                        writer = csv.writer(stream)
++                        writer.writerow(('cpu_ns','chicago_cpu_ns','miami_cpu_ns') if legacy else FIELDS)
++                        for i in range(256):
++                            cpu = peak if i == 100 else 800_000
++                            arp = int(compact and i % 16 == 0)
++                            row = [i, 512, 44100, 'thread_cpu', cpu, 45_000, 60_000,
++                                   a, b, 512, 512, 1, 1, 512*compact, 512*compact, arp, arp]
++                            if compact and bad is not None:
++                                row[FIELDS.index(bad[0])] = bad[1]
++                            writer.writerow((cpu,45_000,60_000) if legacy else row)
++                    runs.append(f'{pair}:{path}')
++            return subprocess.run([sys.executable, str(ROOT/'tools/render_timing_check.py'),
++                '--baseline', str(ROOT/'tests/host/render_timing_baseline.json'), *runs],
+                 capture_output=True, text=True, check=False)
+ 
++    def assert_fails(self, result, text):
++        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
++        self.assertIn(text, result.stdout)
++
+     def test_noisy_ratio_uses_repeated_measurements(self):
+         result = self.check_pairs(3_000_000)
+         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+         self.assertIn('0 late blocks', result.stdout)
+ 
+-    def test_deadline_miss_fails_even_in_a_nonwinning_run(self):
++    def test_any_deadline_miss_fails(self):
+         result = self.check_pairs(4_000_000)
+-        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+-        self.assertIn('1 late blocks over 3869.7 us', result.stdout)
++        self.assert_fails(result, '1 late blocks over 3869.7 us')
+         self.assertNotIn('REGRESSED', result.stdout)
+ 
++    def test_missing_pair_and_legacy_workload_fail(self):
++        self.assert_fails(self.check_pairs(pairs=('0,1',)), 'missing pair 2,3')
++        self.assert_fails(self.check_pairs(legacy=True), 'columns')
++
++    def test_requires_compact_renderer_and_real_arp_for_both_parts(self):
++        for field in FIELDS[13:]:
++            with self.subTest(field=field):
++                self.assert_fails(self.check_pairs(bad=(field,0)), field)
++
++    def test_genuine_ratio_regression_fails(self):
++        result = self.check_pairs(bad=('part_b_cpu_ns',300_000))
++        self.assert_fails(result, 'pair 2,3 superj6 mean')
++        self.assertIn('REGRESSED', result.stdout)
++
++    def test_units_and_pair_identity_are_pinned(self):
++        for field,value in (('clock','wall'),('part_a_kind',0),('frames',256),('sample_rate_hz',48000)):
++            with self.subTest(field=field):
++                self.assert_fails(self.check_pairs(bad=(field,value)), field)
++
+ 
+ if __name__ == '__main__':
+     unittest.main()
+--- a/tools/render_timing_check.py
++++ b/tools/render_timing_check.py
+@@ -1,88 +1,130 @@
+ #!/usr/bin/env python3
+ # SPDX-License-Identifier: GPL-3.0-only
+-"""Judge tests/host/render_timing_regression_test.sh runs (CSV from tests/host/audio_stress_test.c).
++"""Judge the shipped engine composition and its host thread-CPU timings."""
++import argparse
++import csv
++import json
++import sys
+ 
+-Per block: cpu_ns = the whole render (both 256-frame stretches), synth A / B = the two synth parts'
+-original_runtime time inside it, rest = cpu_ns - A - B (drums, BREAK, FX bus, master: code this
+-check uses as the same-run speed reference). The first WARMUP blocks are skipped.
+-
+-Fails when:
+-  - any block's cpu_ns exceeds HALF_DEADLINE_NS / SAFETY (a late block with a safety factor);
+-  - a synth part's mean / rest-mean ratio exceeds the baseline by more than MEAN_TOL;
+-  - the block max / rest-mean ratio exceeds the baseline by more than MAX_TOL.
+-Repetitions of a pair take the best (lowest) ratio, so one preempted run cannot fail the check.
+---write-baseline records the ratios instead of judging them.
+-"""
+-import argparse, csv, json, sys
+-
+-HALF_DEADLINE_NS = 11_609_000      # 512 frames at 44.1 kHz (main_fm1.c HALF_FRAMES)
+-SAFETY = 3                          # host block must stay under a third of the device deadline
++HALF_DEADLINE_NS = 11_609_000
++SAFETY = 3
+ WARMUP = 16
+ MEAN_TOL = 0.30
+ MAX_TOL = 1.00
+-NAMES = {"0": "chicago", "1": "miami", "2": "synthone", "3": "superj6"}
+-
+-
+-def measure(path):
+-    rows = list(csv.DictReader(open(path)))[WARMUP:]
+-    if len(rows) < 64:
+-        raise SystemExit(f"render-timing: {path}: {len(rows)} blocks after warm-up (< 64)")
+-    cpu = [int(r["cpu_ns"]) for r in rows]
+-    a = [int(r["chicago_cpu_ns"]) for r in rows]      # synth part A (column name from the stress CSV)
+-    b = [int(r["miami_cpu_ns"]) for r in rows]        # synth part B
+-    rest = [c - x - y for c, x, y in zip(cpu, a, b)]
+-    rm = sum(rest) / len(rest)
+-    return {"blocks": len(rows), "max_ns": max(cpu), "mean_ns": sum(cpu) / len(cpu),
+-            "a_mean_ns": sum(a) / len(a), "b_mean_ns": sum(b) / len(b), "rest_mean_ns": rm,
+-            "a_ratio": sum(a) / len(a) / rm, "b_ratio": sum(b) / len(b) / rm, "max_ratio": max(cpu) / rm}
++NAMES = {0: 'chicago', 1: 'miami', 2: 'synthone', 3: 'superj6'}
++PAIRS = {'0,1': (0, 1), '2,3': (2, 3)}
++FIELDS = ('block', 'frames', 'sample_rate_hz', 'clock', 'cpu_ns', 'part_a_cpu_ns', 'part_b_cpu_ns',
++          'part_a_kind', 'part_b_kind', 'part_a_render_frames', 'part_b_render_frames',
++          'part_a_active', 'part_b_active', 'compact_s1_frames', 'superj6_stereo_frames',
++          's1_arp_note_ons', 'sj6_arp_note_ons')
++
++
++def measure(path, pair):
++    with open(path, newline='') as stream:
++        reader = csv.DictReader(stream)
++        if tuple(reader.fieldnames or ()) != FIELDS:
++            raise ValueError('missing or unexpected timing columns')
++        rows = list(reader)
++    if len(rows) - WARMUP < 64:
++        raise ValueError(f'{len(rows) - WARMUP} blocks after warm-up (< 64)')
++    compact = pair == '2,3'
++    a_kind, b_kind = PAIRS[pair]
++    numbers = []
++    facts = {'frames': 512, 'sample_rate_hz': 44100, 'part_a_kind': a_kind, 'part_b_kind': b_kind,
++             'part_a_render_frames': 512, 'part_b_render_frames': 512,
++             'compact_s1_frames': 512 if compact else 0, 'superj6_stereo_frames': 512 if compact else 0}
++    for i, row in enumerate(rows):
++        if None in row or row['clock'] != 'thread_cpu':
++            raise ValueError(f'block {i}: expected clock=thread_cpu and a complete row')
++        values = {field: int(row[field]) for field in FIELDS if field != 'clock'}
++        for field, expected in {'block': i, **facts}.items():
++            if values[field] != expected:
++                raise ValueError(f'block {i}: {field}={values[field]} instead of {expected}')
++        if any(values[field] not in (0, 1) for field in ('part_a_active', 'part_b_active')):
++            raise ValueError(f'block {i}: invalid backend activity')
++        if any(values[field] < 0 for field in FIELDS[15:]):
++            raise ValueError(f'block {i}: invalid arp note-on count')
++        # Thread CPU time measurements are nested, with positive time outside the synths.
++        a, b, cpu = (values[field] for field in ('part_a_cpu_ns', 'part_b_cpu_ns', 'cpu_ns'))
++        if min(a,b) < 0 or cpu <= a + b:
++            raise ValueError(f'block {i}: invalid thread CPU timing')
++        numbers.append(values)
++    visible = numbers[WARMUP:]
++    active = [sum(row[field] for row in visible) for field in ('part_a_active', 'part_b_active')]
++    if not all(active):
++        raise ValueError('both engines must sound during measured blocks')
++    arp = {field: sum(row[field] for row in visible) for field in FIELDS[15:]}
++    for field, count in arp.items():
++        if bool(count) != compact:
++            raise ValueError(f'{field}={count}; expected {"nonzero" if compact else "zero"}')
++    cpu, part_a, part_b = ([row[field] for row in visible] for field in ('cpu_ns','part_a_cpu_ns','part_b_cpu_ns'))
++    count = len(cpu)
++    rest = (sum(cpu) - sum(part_a) - sum(part_b))/count
++    a_mean, b_mean = sum(part_a)/count, sum(part_b)/count
++    return dict(blocks=count, max_ns=max(cpu), mean_ns=sum(cpu)/count, a_mean_ns=a_mean,
++                b_mean_ns=b_mean, rest_mean_ns=rest, a_ratio=a_mean/rest, b_ratio=b_mean/rest,
++                max_ratio=max(cpu)/rest, late=sum(t>HALF_DEADLINE_NS//SAFETY for t in cpu), arp=arp)
+ 
+ 
+ def main():
+-    ap = argparse.ArgumentParser()
+-    ap.add_argument("--baseline", required=True)
+-    ap.add_argument("--runtime-opt", default="?")
+-    ap.add_argument("--write-baseline", action="store_true")
+-    ap.add_argument("runs", nargs="+", help="pair:csv, e.g. 0,1:build/x.csv")
+-    a = ap.parse_args()
++    ap = argparse.ArgumentParser(description=__doc__)
++    ap.add_argument('--baseline', required=True)
++    ap.add_argument('--runtime-opt', default='?')
++    ap.add_argument('--write-baseline', action='store_true')
++    ap.add_argument('runs', nargs='+', help='pair:csv, e.g. 0,1:build/x.csv')
++    args = ap.parse_args()
+     limit = HALF_DEADLINE_NS // SAFETY
+     pairs, bad = {}, []
+-    for spec in a.runs:
+-        pair, path = spec.split(":", 1)
+-        m = measure(path)
+-        late = sum(1 for r in list(csv.DictReader(open(path)))[WARMUP:] if int(r["cpu_ns"]) > limit)
+-        print(f"render-timing: pair={pair} {path}: blocks={m['blocks']} mean={m['mean_ns']/1e3:.1f}us "
+-              f"max={m['max_ns']/1e3:.1f}us late={late} (limit {limit/1e3:.1f}us = {HALF_DEADLINE_NS/1e3:.0f}/{SAFETY}) "
+-              f"{NAMES[pair[0]]}={m['a_mean_ns']/1e3:.1f}us {NAMES[pair[2]]}={m['b_mean_ns']/1e3:.1f}us rest={m['rest_mean_ns']/1e3:.1f}us")
+-        if late:
+-            bad.append(f"pair {pair}: {late} late blocks over {limit/1e3:.1f} us")
++    for spec in args.runs:
++        pair, _, path = spec.partition(':')
++        if pair not in PAIRS or not path:
++            bad.append(f'{spec}: unsupported pair or missing CSV path')
++            continue
++        try:
++            m = measure(path, pair)
++        except (OSError, ValueError, TypeError) as error:
++            bad.append(f'pair {pair} {path}: {error}')
++            continue
++        a,b = (NAMES[kind] for kind in PAIRS[pair])
++        print(f"render-timing: pair={pair} {path}: blocks={m['blocks']} mean={m['mean_ns']/1000:.1f}us "
++              f"max={m['max_ns']/1000:.1f}us late={m['late']} (limit {limit/1000:.1f}us = {HALF_DEADLINE_NS/1000:.0f}/{SAFETY}) "
++              f"{a}={m['a_mean_ns']/1000:.1f}us {b}={m['b_mean_ns']/1000:.1f}us rest={m['rest_mean_ns']/1000:.1f}us "
++              f"arp_note_ons={m['arp']['s1_arp_note_ons']}/{m['arp']['sj6_arp_note_ons']}")
++        if m['late']:
++            bad.append(f"pair {pair}: {m['late']} late blocks over {limit/1000:.1f} us")
+         best = pairs.setdefault(pair, dict(m))
+-        for k in ("a_ratio", "b_ratio", "max_ratio"):
+-            best[k] = min(best[k], m[k])
+-    if a.write_baseline:
+-        out = {"note": "render_timing_check.py ratios (engine mean / rest mean, block max / rest mean); "
+-                       "best of the repetitions", "runtime_opt": a.runtime_opt,
+-               "pairs": {p: {k: round(v[k], 4) for k in ("a_ratio", "b_ratio", "max_ratio")} for p, v in sorted(pairs.items())}}
+-        open(a.baseline, "w").write(json.dumps(out, indent=1) + "\n")
+-        print(f"render-timing: baseline written to {a.baseline}")
++        for field in ('a_ratio','b_ratio','max_ratio'):
++            best[field] = min(best[field],m[field])
++    bad.extend(f'missing pair {pair}' for pair in PAIRS if pair not in pairs)
++    if args.write_baseline and not bad:
++        baseline = {'note':'engine mean / rest mean, block max / rest mean; best of the repetitions',
++                    'runtime_opt':args.runtime_opt,
++                    'pairs':{p:{k:round(m[k],4) for k in ('a_ratio','b_ratio','max_ratio')} for p,m in pairs.items()}}
++        with open(args.baseline,'w') as stream:
++            stream.write(json.dumps(baseline,indent=1)+'\n')
++        print(f'render-timing: baseline written to {args.baseline}')
+         return 0
+-    base = json.load(open(a.baseline))["pairs"]
+-    for pair, m in sorted(pairs.items()):
+-        if pair not in base:
+-            bad.append(f"pair {pair}: no baseline"); continue
+-        for k, tol in (("a_ratio", MEAN_TOL), ("b_ratio", MEAN_TOL), ("max_ratio", MAX_TOL)):
+-            lim = base[pair][k] * (1 + tol)
+-            who = {"a_ratio": NAMES[pair[0]] + " mean", "b_ratio": NAMES[pair[2]] + " mean", "max_ratio": "block max"}[k]
+-            status = "ok" if m[k] <= lim else "REGRESSED"
+-            print(f"render-timing: pair={pair} {who}: ratio {m[k]:.3f} (baseline {base[pair][k]:.3f}, limit {lim:.3f}) {status}")
+-            if m[k] > lim:
+-                bad.append(f"pair {pair} {who}: ratio {m[k]:.3f} > {lim:.3f}")
++    if not args.write_baseline:
++        with open(args.baseline) as stream:
++            base = json.load(stream)['pairs']
++        for pair,m in sorted(pairs.items()):
++            if pair not in base:
++                bad.append(f'pair {pair}: no baseline')
++                continue
++            a,b = (NAMES[kind] for kind in PAIRS[pair])
++            for key,tol,who in (('a_ratio',MEAN_TOL,a+' mean'),('b_ratio',MEAN_TOL,b+' mean'),('max_ratio',MAX_TOL,'block max')):
++                maximum = base[pair][key]*(1+tol)
++                status = 'ok' if m[key] <= maximum else 'REGRESSED'
++                print(f"render-timing: pair={pair} {who}: ratio {m[key]:.3f} (baseline {base[pair][key]:.4f}, limit {maximum:.3f}) {status}")
++                if m[key] > maximum:
++                    bad.append(f'pair {pair} {who}: ratio {m[key]:.3f} > {maximum:.3f}')
+     if bad:
+-        for b in bad:
+-            print("FAIL render-timing:", b)
++        for violation in bad:
++            print('FAIL render-timing:',violation)
+         return 1
+-    print(f"PASS render-timing: runtime -{a.runtime_opt}, pairs {','.join(sorted(pairs))}, 0 late blocks")
++    print(f"PASS render-timing: runtime -{args.runtime_opt}, pairs {','.join(sorted(pairs))}, 0 late blocks")
+     return 0
+ 
+ 
+-if __name__ == "__main__":
++if __name__ == '__main__':
+     sys.exit(main())
