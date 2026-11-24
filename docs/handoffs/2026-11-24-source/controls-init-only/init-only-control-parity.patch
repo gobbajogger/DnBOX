@@ -1,0 +1,754 @@
+--- a/tools/build.py
++++ b/tools/build.py
+@@ -138,6 +138,19 @@
+ ]
+ 
+ # Native and host front ends import this same source composition.
++def synth_controls_init_only():
++    # The combined development controls profile is bank-free by default.
++    # Explicit 0 is only for reproducing earlier banked build receipts.
++    dual_controls = (BOARD == "smk37" and MODEL in ("elite", "pro") and
++                     S1C == "1" and SUPERJ6_FACTORY == "1" and
++                     os.environ.get("X0X_SUPERJ6_BUILTIN_INIT") == "1" and
++                     synthone_patch_setting() == "1")
++    value = os.environ.get("X0X_SYNTH_CONTROLS_INIT_ONLY", "1" if dual_controls else "0")
++    if value not in ("0", "1"):
++        raise SystemExit("X0X_SYNTH_CONTROLS_INIT_ONLY: 0 or 1")
++    return value == "1"
++
++
+ SUPERJ6_FACTORY = os.environ.get("X0X_SUPERJ6_FACTORY", "0")
+ if SUPERJ6_FACTORY not in ("0", "1"):
+     raise SystemExit("X0X_SUPERJ6_FACTORY: 0 or 1")
+@@ -478,6 +491,12 @@
+         flags = [*flags, "-DX0X_SUPERJ6_BUILTIN_INIT=1"]
+     if S1C == "1":
+         flags = [*flags, "-DX0X_S1C=1"]
++    init_only = synth_controls_init_only()
++    if init_only:
++        if not (BOARD == "smk37" and MODEL in ("elite", "pro") and
++                S1C == "1" and synthone_patch == "1" and sj6_builtin_init == "1"):
++            raise SystemExit("Init-only controls require SMK Elite/Pro, compact Synth One editor and built-in SuperJ6 Init")
++        flags = [*flags, "-DX0X_SYNTH_CONTROLS_INIT_ONLY=1"]
+     chance_probe = os.environ.get("X0X_GFINAL_CHANCE_PROBE", "1")
+     if chance_probe not in ("0", "1"):
+         raise SystemExit("X0X_GFINAL_CHANCE_PROBE: 0 or 1")
+@@ -504,6 +523,8 @@
+         original_flags = [*flags, *ORIGINAL_SYNTH_FLAGS]
+         original_o2 = [*o2, *ORIGINAL_SYNTH_FLAGS]
+         for u in (*ORIGINAL_SYNTH_UNITS, *ORIGINAL_SYNTH_BACKENDS):
++            if init_only and Path(u).stem == "s1pack":
++                continue
+             o = OUT / "original" / (Path(u).stem + ".o")
+             uf = original_o2 if Path(u).stem in ORIGINAL_SYNTH_O2_UNITS else original_flags
+             if Path(u).stem in ORIGINAL_SYNTH_OZ_UNITS:
+@@ -763,7 +784,7 @@
+     """the FL_FDATA region the loader writes (the payload, then 0xFF to FL_FDATA_SIZE). SMK only; None
+     when the flash map has no FDATA or there is no payload."""
+     lo, hi = fdata_region()
+-    if BOARD != "smk37" or lo == hi:
++    if BOARD != "smk37" or lo == hi or synth_controls_init_only():
+         return None
+     raw = fdata_payload()
+     if raw is None:
+@@ -1062,6 +1083,7 @@
+         print(f"FDATA: {used} B of {len(fdata)} (flash {fdata_region()[0]:#x}), {len(fdata) - used} B spare")
+         (OUT / "fdata.img").write_bytes(fdata)
+     elif fm1pkg_make.FDATA_SIZE and BOARD == "smk37":
++        (OUT / "fdata.img").unlink(missing_ok=True)  # never leave a stale package input
+         print(f"FDATA: {fm1pkg_make.FDATA_SIZE} B region, no payload in this tree (no fdata.bin entry)")
+     if errors:
+         raise SystemExit("build: checks failed")
+--- a/firmware/src/app/main_fm1.c
++++ b/firmware/src/app/main_fm1.c
+@@ -2317,7 +2317,7 @@
+     panel_init();
+     led_pos_init();
+     plat_perf_init();
+-#if BOARD_SMK37 && X0X_S1C && FL_FDATA_SIZE
++#if BOARD_SMK37 && X0X_S1C && FL_FDATA_SIZE && !X0X_SYNTH_CONTROLS_INIT_ONLY
+     if (flash_ok)
+         (void)s1_part_set_pack(fm1_xip_ptr(FL_FDATA_LO), FL_FDATA_SIZE);
+ #endif
+--- a/firmware/src/app/bass_pattern_preset.h
++++ b/firmware/src/app/bass_pattern_preset.h
+@@ -18,7 +18,7 @@
+ static inline unsigned bass_pattern_preset_encode(unsigned kind, unsigned one_based)
+ {
+     if (!one_based) return 0u;
+-    if (one_based > original_sound_factories(kind)) return 0u;
++    if (one_based > original_sound_available_factories(kind)) return 0u;
+     if (kind == ORIGINAL_SOUND_JUNO) return 0xE0u | one_based;
+     if (kind == ORIGINAL_SOUND_SYNTHONE) return one_based == 1u ? 0xC1u : 0u;
+     if (kind == ORIGINAL_SOUND_CHICAGO || kind == ORIGINAL_SOUND_MIAMI)
+@@ -40,6 +40,11 @@
+     unsigned p = juno ? code & 0x1Fu : code & 0x7Fu;
+     if (k == ORIGINAL_SOUND_SYNTHONE) return 0;
+     if (!p || p > original_sound_factories(k)) return 0;
+-    *kind = k; *one_based = p;
++    *kind = k;
++#if X0X_SYNTH_CONTROLS_INIT_ONLY
++    *one_based = juno ? 1u : p;   /* old bytes stay valid, play Init in this profile */
++#else
++    *one_based = p;
++#endif
+     return 1;
+ }
+--- a/firmware/src/app/original_sound.c
++++ b/firmware/src/app/original_sound.c
+@@ -42,6 +42,7 @@
+  {"Width",127,0,0},{"ChoRate",127,0,0},{"Chorus",127,0,0},{"Level",127,0,0},
+  {"PBend",127,0,0},{"Damper",127,0,0}
+ };
++#if !X0X_SYNTH_CONTROLS_INIT_ONLY
+ static const uint8_t original_sound_juno_factories[4][16] = {
+  {42,28,70,18,45,8,40,92,40,0,15,8,64,25,45,100},
+  {90,18,42,24,35,65,55,95,75,0,12,15,55,40,55,100},
+@@ -49,6 +50,7 @@
+  {70,10,105,12,20,0,20,110,15,12,25,5,80,60,50,96}
+ };
+ static const char *const original_sound_juno_names[4] = {"SUPERJ6 POLY", "SUPERJ6 PAD", "SUPERJ6 PLUCK", "SUPERJ6 BRASS"};
++#endif
+ static const x0x_param_t original_sound_synthone_params[ORIGINAL_SYNTHONE_NPARAMS] = {
+     {"PBend",127,64,0},{"Damper",127,0,0},{"Crush",127,0,0}
+ };
+@@ -155,9 +157,11 @@
+     if (source < 0) return 0;
+     return kind == ORIGINAL_SOUND_CHICAGO ? original_chicago_program_name((unsigned)source) :
+     kind == ORIGINAL_SOUND_MIAMI ? original_miami_program_name((unsigned)source) :
++#if !X0X_SYNTH_CONTROLS_INIT_ONLY
+     kind == ORIGINAL_SOUND_JUNO ? original_sound_juno_names[factory] :
+ #if X0X_S1C
+     factory ? s1_part_program_name(factory - 1u) :
++#endif
+ #endif
+     original_sound_synthone_names[0];
+ }
+@@ -539,7 +543,11 @@
+         if (marked != !!code || code >= S1_MOD_EXT_CODES) return 0;
+     } else
+ #endif
+-    if (cell[30] >= original_sound_factories(cell[29])) return 0;
++    if (
++#if X0X_SUPERJ6_BUILTIN_INIT
++        !original_sound_sj6_osc2_code(cell) &&
++#endif
++        cell[30] >= original_sound_factories(cell[29])) return 0;
+ #if X0X_SUPERJ6_BUILTIN_INIT
+     uint32_t sj6_flags = original_sound_edit_mask(cell);
+     if (cell[29] == ORIGINAL_SOUND_JUNO) {
+@@ -621,7 +629,9 @@
+         if (!original_miami_program_init(&p, (unsigned)source)) return 0;
+         for (unsigned i = 0; i < 18; ++i) next[i] = original_sound_display_byte(kind, i, p.macro[i]);
+     } else if (kind == ORIGINAL_SOUND_JUNO) {
++#if !X0X_SYNTH_CONTROLS_INIT_ONLY
+         memcpy(next, original_sound_juno_factories[factory], 16u);
++#endif
+     } else if (kind == ORIGINAL_SOUND_SYNTHONE) {
+         /* Init cell: performance defaults only. Full 150-parameter packing is not admitted. */
+         next[0] = 64;
+@@ -1004,7 +1014,17 @@
+     else if (cell[29] == ORIGINAL_SOUND_SYNTHONE)
+         result = 0.f;
+     else if (cell[29] == ORIGINAL_SOUND_JUNO)
+-        result = unit_control(original_sound_juno_factories[cell[30]][parameter]);
++#if X0X_SYNTH_CONTROLS_INIT_ONLY
++        result = unit_control(cell[parameter] & 127u);
++#else
++        result = unit_control(original_sound_juno_factories[
++#if X0X_SUPERJ6_BUILTIN_INIT
++            original_sound_sj6_factory(cell)
++#else
++            cell[30]
++#endif
++        ][parameter]);
++#endif
+     else if (cell[29] == ORIGINAL_SOUND_CHICAGO) {
+         original_chicago_program p;
+         if (!original_chicago_program_init(&p, (unsigned)original_sound_factory_source(cell[29], cell[30]))) return 0;
+--- a/firmware/src/app/original_sound.h
++++ b/firmware/src/app/original_sound.h
+@@ -85,7 +85,15 @@
+  * rewritten, 0 if the cell is already a current Synth One or other kind. */
+ int original_sound_adopt_legacy_cell(uint8_t cell[ORIGINAL_SOUND_BYTES]);
+ unsigned original_sound_count(unsigned kind);
++/* Keep legacy ordinal validation separate from choices offered in this build. */
+ unsigned original_sound_factories(unsigned kind);
++static inline unsigned original_sound_available_factories(unsigned kind)
++{
++#if X0X_SYNTH_CONTROLS_INIT_ONLY
++    if (kind == ORIGINAL_SOUND_JUNO || kind == ORIGINAL_SOUND_SYNTHONE) return 1;
++#endif
++    return original_sound_factories(kind);
++}
+ /* Returns the immutable original program index, or -1 on invalid input. */
+ int original_sound_factory_source(unsigned kind, unsigned factory);
+ /* Convert a firmware control to its actual original macro. FxType is discrete;
+@@ -122,6 +130,12 @@
+ #endif
+ #if X0X_SUPERJ6_BUILTIN_INIT
+ #include "../dsp/juno6.h"
++/* Init-only typed oscillator-2 level. Unmarked legacy factory ordinals
++ * are unchanged, while older readers reject the marked form before writes. */
++static inline unsigned original_sound_sj6_osc2_code(const uint8_t *cell)
++{ return cell[29] == ORIGINAL_SOUND_JUNO && (cell[30] & 128u) ? (cell[30] & 127u)+1u : 0u; }
++static inline unsigned original_sound_sj6_factory(const uint8_t *cell)
++{ return original_sound_sj6_osc2_code(cell) ? 0u : cell[30]; }
+ #define ORIGINAL_SJ6_EDIT_SHIFT 18u
+ #define ORIGINAL_SJ6_EDIT_MASK ((1u << SJ6_OSC_KNOBS) - 1u)
+ #define ORIGINAL_SJ6_EXTRA_BIT (1u << (ORIGINAL_SJ6_EDIT_SHIFT + SJ6_OSC_KNOBS))
+@@ -228,7 +242,7 @@
+ {
+ #if X0X_SUPERJ6_BUILTIN_INIT
+     if (original_sound_sj6_marker_valid(cell) &&
+-        (cell[31] || original_sound_sj6_fine_code(cell, 0) || original_sound_sj6_fine_code(cell, 1))) return 1;
++        (cell[31] || original_sound_sj6_osc2_code(cell) || original_sound_sj6_fine_code(cell, 0) || original_sound_sj6_fine_code(cell, 1))) return 1;
+ #endif
+     return original_sound_edit_mask(cell) != 0;
+ }
+--- a/firmware/src/app/original_runtime.c
++++ b/firmware/src/app/original_runtime.c
+@@ -35,7 +35,11 @@
+     (void)original_sound_adopt_legacy_cell((uint8_t *)cell);
+     if (!original_sound_valid(cell)) return ORIGINAL_RUNTIME_INVALID;
+     unsigned kind = cell[29];
+-    unsigned factory = (unsigned)original_sound_factory_source(kind, kind == ORIGINAL_SOUND_SYNTHONE ? 0u : cell[30]);
++    unsigned ordinal = kind == ORIGINAL_SOUND_SYNTHONE ? 0u : cell[30];
++#if X0X_SUPERJ6_BUILTIN_INIT
++    if (kind == ORIGINAL_SOUND_JUNO) ordinal=original_sound_sj6_factory(cell);
++#endif
++    unsigned factory = (unsigned)original_sound_factory_source(kind, ordinal);
+     /* The old active union is intentionally retired at this explicit cold
+      * boundary. A caller must inspect the returned admission result. */
+     memset(p, 0, sizeof *p);
+@@ -46,6 +50,7 @@
+         juno6_chorus_init(&p->dsp.juno.chorus,44100);
+ #if X0X_SUPERJ6_BUILTIN_INIT
+         p->dsp.juno.chorus.mix = 0;
++        p->dsp.juno.synth.osc2_level_code = (uint8_t)original_sound_sj6_osc2_code(cell);
+ #endif
+         rc=ORIGINAL_RUNTIME_OK;
+     } else if (kind == ORIGINAL_SOUND_SYNTHONE) {
+--- a/firmware/src/app/original_presets.inc
++++ b/firmware/src/app/original_presets.inc
+@@ -412,6 +412,11 @@
+ #if defined(X0X_HOST) && defined(X0X_SJ6_MAILBOX_PROBE)
+     if (slot >= SJ6_KNOBS) return engine_superj6_mailbox_probe_read(owner, slot);
+ #endif
++    if (slot == SJ6_OSC2_LEVEL) {
++        if (bass_named_preset[owner] != 0) return -1;
++        unsigned code=original_bass[owner].dsp.juno.synth.osc2_level_code;
++        return code ? (int)code-1 : 128; /* explicit new control vs untouched Init */
++    }
+     if (slot == SJ6_LFO2_SHAPE)
+         return (int)juno6_knob_position(&original_bass[owner].dsp.juno.synth, slot);
+     if (slot == SJ6_LAYER1_FINE || slot == SJ6_LAYER2_FINE)
+@@ -497,7 +502,7 @@
+     if (owner >= NBASS || slot > SJ6_LFO2_PWM_BASE) return 0;
+     uint32_t lock = plat_cq_lock();
+     int changed = 0;
+-    if (sj6_knob_can_turn(owner)) {
++    if (sj6_knob_can_turn(owner) && (slot != SJ6_OSC2_LEVEL || bass_named_preset[owner] == 0)) {
+         slot = sj6_panel_slot(owner, slot);
+         int before = sj6_knob_position(owner, slot);
+         value = sj6_knob_target(before, value, (int)original_sound_sj6_max(slot), relative);
+@@ -685,6 +690,11 @@
+         original_sound_sj6_fine_store(cell, l, position);
+         juno6_set_layer_fine(s, l, position);
+     }
++    if ((upper & sj6_knob_bit(SJ6_OSC2_LEVEL)) && !original_sound_sj6_factory(cell)) {
++        unsigned position=sj6_knob_value[v][SJ6_OSC2_LEVEL];
++        cell[30]=(uint8_t)(128u | position);
++        s->osc2_level_code=(uint8_t)(position+1u);
++    }
+     bass_tag_set(sound, v, ORIGINAL_SOUND_JUNO, bass_named_preset[v],
+                  original_sound_is_edited(cell));
+ }
+@@ -701,7 +711,7 @@
+ #endif
+         unsigned upper = pending.word[1] & (sj6_knob_bit(SJ6_LFO2_SHAPE) | sj6_knob_bit(SJ6_LAYER1_SEMI) |
+                                              sj6_knob_bit(SJ6_LAYER2_SEMI) | sj6_knob_bit(SJ6_LAYER1_FINE) |
+-                                             sj6_knob_bit(SJ6_LAYER2_FINE));
++                                             sj6_knob_bit(SJ6_LAYER2_FINE) | sj6_knob_bit(SJ6_OSC2_LEVEL));
+         if (pending.word[0] || upper) sj6_knob_commit(v, pending.word[0], upper);
+ #if defined(X0X_HOST) && defined(X0X_SJ6_MAILBOX_PROBE)
+         for (unsigned slot = SJ6_KNOBS; slot < SJ6_MAILBOX_SLOTS; ++slot)
+@@ -718,6 +728,9 @@
+ {
+ #if X0X_S1C
+     if (cell[29] == ORIGINAL_SOUND_SYNTHONE) return original_sound_s1_program(cell);
++#endif
++#if X0X_SUPERJ6_BUILTIN_INIT
++    if (cell[29] == ORIGINAL_SOUND_JUNO) return original_sound_sj6_factory(cell);
+ #endif
+     return cell[30];
+ }
+@@ -904,6 +917,7 @@
+         sj6_restore_extra(part, cell, extra, 1);
+     }
+     sj6_restore_semi(part, cell, extra);
++    part->dsp.juno.synth.osc2_level_code=(uint8_t)original_sound_sj6_osc2_code(cell);
+     sj6_locked_extra[v] = (uint8_t)(lock && marked);
+     uint8_t knobs[SJ6_OSC_KNOBS];
+     unsigned mask = original_sound_sj6_knobs(cell, knobs);
+@@ -1117,7 +1131,7 @@
+ X0X_COLD int engine_bass_select_preset_at(int v, int bank, int preset, sound_t *sound, int pat)
+ {
+     if ((unsigned)v >= NBASS || !sound || sound != mot_base_snd ||
+-        (unsigned)preset >= original_sound_factories((unsigned)bank)) return -1;
++        (unsigned)preset >= original_sound_available_factories((unsigned)bank)) return -1;
+     if (!engine_bass_bank_available(v, bank)) return -2;
+     if (bass_has_locks(v)) return -4;
+ #if X0X_S1_EXTRA || X0X_SUPERJ6_BUILTIN_INIT
+--- a/firmware/src/app/s1c_part.c
++++ b/firmware/src/app/s1c_part.c
+@@ -14,8 +14,10 @@
+ /* Synth One factory parameter ids (s1c uses the same numbering). */
+ enum { P_MONO = 20, P_DETM = 31, P_BCSR = 34, P_PAN_RATE = 36, P_DELAY_TIME = 43, P_CUTOFF_LFO = 48, P_RESONANCE_LFO = 49, P_OSC_MIX_LFO = 50, P_AMP_DECAY_LFO = 52, P_NOISE_LFO = 53, P_FM_LFO = 54, P_TEMPO_SYNC = 139 };
+ 
++#if !X0X_SYNTH_CONTROLS_INIT_ONLY
+ static const uint8_t *s1_part_pack;
+ static uint16_t s1_part_pack_count;
++#endif
+ 
+ _Static_assert(S1C_RVB_BYTES % 4u == 0u && S1C_RVB_BYTES + 1024u <= S1C_ARENA_BYTES,
+                "reverb lines leave at least 1 KiB of delay pool in the Chicago FX2 arena");
+@@ -27,7 +29,9 @@
+     e->rv.fit[0] = 0.5f; e->rv.fit[1] = 1.5f; e->rv.fit[2] = 1.0f; e->dfmt = 0;
+ }
+ 
++#if !X0X_SYNTH_CONTROLS_INIT_ONLY
+ static void emit(void *context, unsigned id, float physical) { (void)s1c_front_set((s1c *)context, id, physical); }
++#endif
+ 
+ static void load_init(s1c *e)
+ {
+@@ -35,6 +39,11 @@
+     for (unsigned i = 0; i < 150u; ++i) (void)s1c_front_set(e, i, s1c_front_init(i));
+ }
+ 
++#if X0X_SYNTH_CONTROLS_INIT_ONLY
++unsigned s1_part_set_pack(const uint8_t *p, uint32_t bytes) { (void)p; (void)bytes; return 0; }
++unsigned s1_part_programs(void) { return 0; }
++const char *s1_part_program_name(unsigned program) { (void)program; return "INIT"; }
++#else
+ unsigned s1_part_set_pack(const uint8_t *p, uint32_t bytes)
+ {
+     s1_part_pack = NULL;
+@@ -61,6 +70,7 @@
+     name[i] = 0;
+     return name;
+ }
++#endif
+ 
+ int s1_part_program(s1_dry_part *part, unsigned program)
+ {
+@@ -68,10 +78,12 @@
+     int ok = 1;
+     if (program != S1_PART_INIT && program >= s1_part_programs()) { program = S1_PART_INIT; ok = 0; }
+     load_init(e);
++#if !X0X_SYNTH_CONTROLS_INIT_ONLY
+     if (program != S1_PART_INIT) {
+         char name[S1PACK_NAME_MAX];
+         if (s1pack_read(s1_part_pack, program, name, emit, e) < 0) { load_init(e); program = S1_PART_INIT; ok = 0; }
+     }
++#endif
+ #if X0X_S1_EXTRA
+     part->extra_live_mask = 0;
+     part->lfo_live_mask = 0;
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -530,6 +530,7 @@
+         {"LAYER 2 SEMI", SJ6_SEMI_MAX, SJ6_SEMI_CENTER, 0},
+         {"LAYER 1 FINE", SJ6_FINE_MAX, SJ6_FINE_CENTER, 0},
+         {"LAYER 2 FINE", SJ6_FINE_MAX, SJ6_FINE_CENTER, 0},
++        {"OSC 2 LVL", 127, 127, 0},
+         {"PWM BASE", SJ6_PWM_STEPS, 0, 0},
+     };
+     return slot < sizeof knobs / sizeof *knobs ? &knobs[slot] : 0;
+@@ -627,7 +628,7 @@
+ {
+     if (r.kind == R_BSTATUS) return 1;
+     /* A bank with a single preset (Synth One INIT) has nothing to choose. */
+-    if (r.kind == R_BPRESET && original_sound_factories((unsigned)engine_bass_requested_bank(r.b)) <= 1u) return 1;
++    if (r.kind == R_BPRESET && original_sound_available_factories((unsigned)engine_bass_requested_bank(r.b)) <= 1u) return 1;
+     if (r.kind == R_ENG && r.a == T_303 && original_sound_is_performance(
+         (unsigned)engine_bass_sound_bank(&proj.sound,r.b),r.c)) return 1;
+     return r.kind == R_BATT || r.kind == R_BTSTAT || r.kind == R_BTNAME;
+@@ -679,7 +680,7 @@
+     case R_BENGINE: return &BENGINE_P;
+     case R_BPRESET:
+         {
+-            unsigned max = original_sound_factories((unsigned)engine_bass_requested_bank(r.b));
++            unsigned max = original_sound_available_factories((unsigned)engine_bass_requested_bank(r.b));
+             BPRESET_P.max = max > 256u ? 255u : (uint8_t)(max ? max - 1u : 0u);
+         }
+         return &BPRESET_P;
+@@ -687,7 +688,7 @@
+     case R_BPATSND: {
+         unsigned bank = (unsigned)engine_bass_requested_bank(r.b);
+         /* The pattern wire can recall only Synth One INIT, not factory ordinals. */
+-        PATSND_P.max = bank == ORIGINAL_SOUND_SYNTHONE ? 1u : (uint8_t)original_sound_factories(bank);
++        PATSND_P.max = bank == ORIGINAL_SOUND_SYNTHONE ? 1u : (uint8_t)original_sound_available_factories(bank);
+         return &PATSND_P;
+     }
+     case R_NOTELOCK: return &NOTELOCK_P;
+@@ -928,7 +929,7 @@
+     int vmax = d->max;
+ #if X0X_S1C
+     if (r.kind == R_BPRESET)
+-        vmax = (int)original_sound_factories((unsigned)engine_bass_requested_bank(r.b)) - 1;
++        vmax = (int)original_sound_available_factories((unsigned)engine_bass_requested_bank(r.b)) - 1;
+ #endif
+     v = v < 0 ? 0 : v > vmax ? vmax : v;
+     if (r.kind == R_BENGINE || r.kind == R_BPRESET) {
+@@ -1518,6 +1519,7 @@
+     }
+ #if X0X_SUPERJ6_BUILTIN_INIT
+     if (r.kind == R_SJ6KNOB && !d->names) {
++        if (r.c == SJ6_OSC2_LEVEL && v == 128) { put_s(num,"INIT"); return; }
+         if (r.c == SJ6_LAYER1_FINE || r.c == SJ6_LAYER2_FINE) {
+             put_i(num, v - SJ6_FINE_CENTER);
+             put_s(unit, "ct");
+@@ -2188,7 +2190,7 @@
+                     {"FILTER", {ORIG_PAGE_ENGINE + 2, ORIG_PAGE_ENGINE + 3, ORIG_PAGE_ENGINE + 4, SJ6_FILTER_LINK}},
+                     {"FILTER ADSR", {SJ6_FILTER_ATTACK, SJ6_FILTER_DECAY, SJ6_FILTER_SUSTAIN, SJ6_FILTER_RELEASE}},
+                     {"AMP ADSR", {SJ6_AMP_ATTACK, SJ6_AMP_DECAY, SJ6_AMP_SUSTAIN, SJ6_AMP_RELEASE}},
+-                    {"OUTPUT", {ORIG_PAGE_ENGINE + 9, SJ6_MASTER_LEVEL, ORIG_PAGE_NONE, ORIG_PAGE_NONE}},
++                    {"OUTPUT", {ORIG_PAGE_ENGINE + 9, SJ6_MASTER_LEVEL, ORIG_PAGE_NONE, SJ6_OSC2_LEVEL}},
+                     {"LFO RATE", {SJ6_LFO1_RATE, SJ6_LFO2_RATE, SJ6_LFO3_RATE, SJ6_LFO2_SHAPE}},
+                     {"LFO MODE", {SJ6_LFO1_MODE, SJ6_LFO2_MODE, SJ6_LFO3_MODE, ORIG_PAGE_NONE}},
+                     {"LFO2 PWM", {SJ6_LFO2_RATE, SJ6_LFO2_PWM_DEPTH, SJ6_LFO2_PWM_ROUTE, SJ6_LFO2_PWM_BASE}},
+--- a/firmware/src/dsp/juno6.h
++++ b/firmware/src/dsp/juno6.h
+@@ -21,7 +21,7 @@
+        SJ6_LFO2_PWM_DEPTH, SJ6_LFO2_PWM_ROUTE, SJ6_LFO1_MODE, SJ6_LFO2_MODE, SJ6_LFO3_MODE,
+        SJ6_CHORUS_I, SJ6_CHORUS_II, SJ6_CHORUS_RATE, SJ6_CHORUS_MIX,
+        SJ6_VIBRATO_DEPTH, SJ6_VIBRATO_RATE, SJ6_A_REFERENCE, SJ6_LFO2_SHAPE,
+-       SJ6_LAYER1_SEMI, SJ6_LAYER2_SEMI, SJ6_LAYER1_FINE, SJ6_LAYER2_FINE, SJ6_KNOBS, SJ6_LFO2_PWM_BASE = SJ6_KNOBS };
++       SJ6_LAYER1_SEMI, SJ6_LAYER2_SEMI, SJ6_LAYER1_FINE, SJ6_LAYER2_FINE, SJ6_OSC2_LEVEL, SJ6_KNOBS, SJ6_LFO2_PWM_BASE = SJ6_KNOBS };
+ enum { SJ6_LAYER1_SEMI_ID = 72, SJ6_LAYER2_SEMI_ID = 73, SJ6_SEMI_CENTER = 12, SJ6_SEMI_MAX = 24 };
+ enum { SJ6_LAYER1_FINE_ID = 74, SJ6_FINE_CENTER = 50, SJ6_FINE_MAX = 100 };
+ enum { SJ6_A_REFERENCE_ID = 206, SJ6_A_REFERENCE_STEPS = 100, SJ6_A_REFERENCE_DEFAULT = 60 };
+@@ -77,7 +77,7 @@
+  float pending_field[7]; /* AMP2 0..3, master 4, independent AMP1 attack 5, oscillator range 6 */
+  float master_gain;
+  juno6_oscillator_edit pending_wave[2];
+- uint8_t pending_field_mask, pending_wave_mask, pending_filter_link;
++ uint8_t pending_field_mask, pending_wave_mask, pending_filter_link, osc2_level_code;
+  float typed_hp_state[2], typed_hp_input[2];
+ #if X0X_SUPERJ6_BUILTIN_INIT
+  uint64_t lfo_phase_q40[SJ6_LFO_COUNT];
+--- a/firmware/src/dsp/juno6_factory.inc
++++ b/firmware/src/dsp/juno6_factory.inc
+@@ -575,13 +575,24 @@
+     juno6_set_vibrato(s, present & 1u ? values[0] : 0.f, present & 2u ? values[1] : 0.f, reset);
+ }
+ 
++static float osc2_gain(const juno6_t *s)
++{
++    return s->osc2_level_code ? ((float)(s->osc2_level_code-1u) / 127.f) * .808f : 1.f;
++}
++
++static int render_typed_dry(juno6_t *s,float *left,float *right,unsigned frames)
++{
++    return s->osc2_level_code ? dnbx_render_superj6_osc2(&s->core,left,right,frames,osc2_gain(s)) :
++                               dnbx_render(&s->core,left,right,frames,0);
++}
++
+ static int render_typed_span(juno6_t *s, float *left, float *right, unsigned frames)
+ {
+     if ((!s->vibrato_step && !s->vibrato_phase && !s->vibrato_left) ||
+         !frames || frames > DNBX_MAX_FRAMES || !left || !right || left == right)
+-        return dnbx_render(&s->core, left, right, frames, 0);
++        return render_typed_dry(s,left,right,frames);
+     if (!s->vibrato_depth) {
+-        int result = dnbx_render(&s->core, left, right, frames, 0);
++        int result = render_typed_dry(s,left,right,frames);
+         if (result != DNBX_OK) return result;
+         /* The original shared sine still advances while its depth is zero. */
+         unsigned remaining = s->vibrato_left;
+@@ -602,7 +613,7 @@
+             s->vibrato_left = SJ6_VIBRATO_TICK;
+         }
+         unsigned count = frames < s->vibrato_left ? frames : s->vibrato_left;
+-        int result = dnbx_render_pitch(&s->core, left, right, count, s->vibrato_ratio);
++        int result = dnbx_render_pitch_osc2(&s->core,left,right,count,s->vibrato_ratio,osc2_gain(s));
+         if (result != DNBX_OK) return result;
+         s->vibrato_left -= count;
+         frames -= count;
+--- a/firmware/src/dsp/dnbx_core.c
++++ b/firmware/src/dsp/dnbx_core.c
+@@ -471,7 +471,7 @@
+     out->note=v->note; out->gate=v->gate; out->age_rank=v->age_rank;
+     out->active=(uint8_t)(voice_active(v)!=0); return DNBX_OK;
+ }
+-int dnbx_render(dnbx_part *s,float *left,float *right,unsigned n,dnbx_work *w)
++static int render_with_osc2_gain(dnbx_part *s,float *left,float *right,unsigned n,dnbx_work *w,float gain)
+ {
+     if (!valid(s)) return DNBX_E_UNINITIALIZED;
+ #if !DNBX_DIAGNOSTIC_COUNTERS
+@@ -509,6 +509,7 @@
+                 float x = p->oscillator_mode == DNBX_OSC_SUPERJ6
+                     ? factory_oscillator(lv, p->waveform, width[l], w)
+                     : oscillator(lv->phase,lv->increment,p->waveform,width[l],p->oscillator_mode,w);
++                if (l==1u && gain!=1.f) x*=gain;
+                 x+=(lv->subphase<.5f?1.0f:-1.0f)*p->sub_gain;
+                 /* Existing DnBOX two-pole recurrence, with explicit saturation
+                  * guards to make a finite bound part of this candidate ABI. */
+@@ -530,12 +531,24 @@
+     }
+     return DNBX_OK;
+ }
++int dnbx_render(dnbx_part *s,float *left,float *right,unsigned n,dnbx_work *w)
++{
++    return render_with_osc2_gain(s,left,right,n,w,1.f);
++}
++int dnbx_render_superj6_osc2(dnbx_part *s,float *left,float *right,unsigned n,float gain)
++{
++    if (!valid(s)) return DNBX_E_UNINITIALIZED;
++    if (!s->superj6_amp_range) return DNBX_E_UNSUPPORTED;
++    if (!(gain >= 0.f && gain <= .808f)) return DNBX_E_RANGE;
++    return render_with_osc2_gain(s,left,right,n,0,gain);
++}
+ #if X0X_SUPERJ6_BUILTIN_INIT
+-int dnbx_render_pitch(dnbx_part *s, float *left, float *right, unsigned n, float ratio)
++int dnbx_render_pitch_osc2(dnbx_part *s, float *left, float *right, unsigned n, float ratio, float gain)
+ {
+     if (!valid(s)) return DNBX_E_UNINITIALIZED;
+     if (!(ratio >= .5f && ratio <= 2.f)) return DNBX_E_RANGE;
+-    if (ratio == 1.f) return dnbx_render(s, left, right, n, 0);
++    if (!(gain >= 0.f && (gain <= .808f || gain == 1.f))) return DNBX_E_RANGE;
++    if (ratio == 1.f) return render_with_osc2_gain(s, left, right, n, 0, gain);
+     float nominal[DNBX_VOICES][DNBX_LAYERS];
+     for (unsigned i = 0; i < DNBX_VOICES; ++i)
+         for (unsigned l = 0; l < DNBX_LAYERS; ++l) {
+@@ -543,12 +556,14 @@
+             nominal[i][l] = *step;
+             *step = fm_minf(*step * ratio, .45f);
+         }
+-    int result = dnbx_render(s, left, right, n, 0);
++    int result = render_with_osc2_gain(s, left, right, n, 0, gain);
+     for (unsigned i = 0; i < DNBX_VOICES; ++i)
+         for (unsigned l = 0; l < DNBX_LAYERS; ++l)
+             s->voice[i].layer[l].increment = nominal[i][l];
+     return result;
+ }
++int dnbx_render_pitch(dnbx_part *s, float *l, float *r, unsigned n, float ratio)
++{ return dnbx_render_pitch_osc2(s,l,r,n,ratio,1.f); }
+ #endif
+ 
+ int dnbx_store_raw(dnbx_part *s,unsigned id,float raw)
+--- a/firmware/src/dsp/dnbx_core.h
++++ b/firmware/src/dsp/dnbx_core.h
+@@ -151,6 +151,15 @@
+  * No allocations, locks, variable-bound retry, or I/O. */
+ int dnbx_render(dnbx_part *, float *left, float *right, unsigned frames,
+                 dnbx_work *work);
++/* Typed SuperJ6 audio owner: Scale only oscillator 2, leaving its sub and
++ * composite gain intact. Physical original ID3 domain [0,.808].
++ * No state/layout change; caller owns the immutable gain for this block. */
++int dnbx_render_superj6_osc2(dnbx_part *, float *left, float *right,
++                            unsigned frames, float oscillator_2_gain);
++#if X0X_SUPERJ6_BUILTIN_INIT
++int dnbx_render_pitch_osc2(dnbx_part *, float *, float *, unsigned, float, float);
++#endif
++
+ 
+ /* Lossless finite raw admission, deliberately separate from physical DSP.
+  * NONE of the 218 app control IDs is automatically applied to the DSP.
+--- /dev/null
++++ b/tests/host/synth_controls_init_only_test.py
+@@ -0,0 +1,31 @@
++"""Init-only development packaging never touches the reserved factory data."""
++import os
++import sys
++from pathlib import Path
++
++sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
++from tools import build
++
++build.BOARD = 'smk37'
++build.MODEL = 'elite'
++old_lo, old_hi = build.fdata_region()
++assert old_hi > old_lo
++
++def unexpected_factory_read():
++    raise AssertionError('Init-only build tried to read or generate the Synth One factory bank')
++
++os.environ.pop('X0X_SYNTH_CONTROLS_INIT_ONLY',None)
++os.environ['X0X_SUPERJ6_BUILTIN_INIT'] = '1'
++os.environ['X0X_SYNTHONE_PATCH'] = '1'
++build.SUPERJ6_FACTORY = '1'
++build.enable_compact_synthone()
++build.fdata_payload = unexpected_factory_read
++assert build.fdata_image() is None, 'Init-only build must omit, not erase, FDATA'
++assert build.fdata_region() == (old_lo, old_hi), 'Reserved addressing must not change'
++for model in ('elite','pro'):
++    build.MODEL=model
++    assert build.synth_controls_init_only()
++    commands, *_ = build.app_compile_commands([], True, "0")
++    assert any('-DX0X_SYNTH_CONTROLS_INIT_ONLY=1' in command for command in commands)
++    assert not any(str(arg).endswith('/s1pack.c') for command in commands for arg in command)
++print('Init-only package avoids factory payload and preserves original FDATA geometry')
+--- /dev/null
++++ b/tests/host/synth_controls_init_only_test.c
+@@ -0,0 +1,60 @@
++/* SPDX-License-Identifier: GPL-3.0-only */
++#include "synth_init_test_helpers.h"
++#include "app/bass_pattern_preset.h"
++#include "app/s1c_part.h"
++
++#if !X0X_SYNTH_CONTROLS_INIT_ONLY
++static void choose(unsigned owner, unsigned bank, unsigned preset)
++{
++    CHECK(!engine_bass_select_preset(owner,bank,preset,&proj.sound));
++    for (unsigned n=0;n<1024 && engine_bass_preset_pending(owner);++n) render(1);
++    CHECK(!engine_bass_preset_pending(owner));
++    CHECK(engine_bass_bank(owner)==(int)bank && engine_bass_preset_index(owner)==(int)preset);
++}
++int main(void)
++{
++    for (unsigned owner=0;owner<NBASS;++owner) {
++        setup(V_PART,PART_303A+owner);
++        proj.set.bt|=PROJ_BT_CLK_IN;
++        choose(owner,ORIGINAL_SOUND_SYNTHONE,45);
++        choose(1-owner,ORIGINAL_SOUND_JUNO,3);
++        stabilize();
++        CHECK(!project_save());
++        stored_project("init-only-reopen",owner,PROJECT_EXPORT);
++    }
++    puts("Seeded project using existing runtime save and real bank identity/wire paths");
++}
++#else
++int main(void)
++{
++    CHECK(original_sound_available_factories(ORIGINAL_SOUND_SYNTHONE)==1);
++    CHECK(original_sound_available_factories(ORIGINAL_SOUND_JUNO)==1);
++    CHECK(original_sound_available_factories(ORIGINAL_SOUND_CHICAGO)==81);
++    CHECK(original_sound_available_factories(ORIGINAL_SOUND_MIAMI)==30);
++    CHECK(s1_part_programs()==0);
++    for (unsigned owner=0;owner<NBASS;++owner) {
++        setup(V_PART,PART_303A+owner);
++        unsigned k,p;
++        CHECK(bass_pattern_preset_decode(0xe4,&k,&p) && k==ORIGINAL_SOUND_JUNO && p==1);
++        CHECK(bass_pattern_preset_encode(k,1)==0xe1 && bass_pattern_preset_encode(k,4)==0);
++        CHECK(bass_pattern_preset_decode(0xc4,&k,&p) && k==ORIGINAL_SOUND_SYNTHONE && p==1);
++        CHECK(engine_bass_select_preset(owner,ORIGINAL_SOUND_SYNTHONE,1,&proj.sound)<0);
++        CHECK(engine_bass_select_preset(owner,ORIGINAL_SOUND_JUNO,1,&proj.sound)<0);
++        CHECK(!strcmp(original_sound_name(ORIGINAL_SOUND_SYNTHONE,45),"INIT"));
++        CHECK(!strcmp(original_sound_name(ORIGINAL_SOUND_JUNO,3),"INIT"));
++        stored_project("init-only-reopen",owner,PROJECT_MOUNT);
++        unsigned writes=store_writes;
++        CHECK(!project_load() && store_writes==writes);
++        CHECK(original_sound_s1_program(proj.sound.v[T_303][owner])==45);
++        stored_project("init-only-reopen",owner,PROJECT_VERIFY);
++        begin_pair(owner,57);
++        CHECK(engine_bass_bank(owner)==ORIGINAL_SOUND_SYNTHONE);
++        CHECK(engine_bass_bank(1-owner)==ORIGINAL_SOUND_JUNO);
++        record(reference);
++        (void)energy(reference,owner);
++        (void)energy(reference,1-owner);
++    }
++    puts("Init only on both owners: historical projects unchanged on load, both engines audible, Korg choices untouched");
++}
++
++#endif
+--- /dev/null
++++ b/tests/host/ui_superj6_osc2_level_test.c
+@@ -0,0 +1,77 @@
++/* SPDX-License-Identifier: GPL-3.0-only */
++#define SJ6_LAYER1_FIXTURE_MAIN retained_osc2_tuning_main
++#include "ui_superj6_layer1_tuning_test.c"
++#include "osc2_old_wire.h"
++static float out[2][2][COUNT];
++static void render_arm(const juno6_t *p,unsigned which)
++{
++    juno6_t s=*p;
++    s.core.layer[0].params.pan=-1.f;
++    s.core.layer[1].params.pan=1.f;
++    s.core.layer[1].params.sub_gain=.25f;
++    CHECK(juno6_note_on(&s,69,100));
++    for(unsigned i=0;i<COUNT;i+=256)
++        CHECK(juno6_render_stereo(&s,out[which][0]+i,out[which][1]+i,256));
++}
++int main(void)
++{
++    uint8_t c[32], base[32];
++    CHECK(original_sound_init(base,ORIGINAL_SOUND_JUNO,0));
++    for(unsigned u=0;u<128;++u) {
++        memcpy(c,base,32); c[30]=(uint8_t)(128u+u);
++        CHECK(original_sound_valid(c) && original_sound_is_edited(c));
++        CHECK(original_sound_sj6_factory(c)==0 && original_sound_sj6_osc2_code(c)==1u+u);
++    }
++    for(unsigned v=0;v<NBASS;++v) {
++        setup_tuning(v);
++        visit("OUTPUT");
++        CHECK(pg.r[cur_page()][3].kind==R_SJ6KNOB && pg.r[cur_page()][3].c==SJ6_OSC2_LEVEL);
++        CHECK(!strcmp(pref_desc(pg.r[cur_page()][3])->name,"OSC 2 LVL"));
++        CHECK(engine_superj6_knob_position(v,SJ6_OSC2_LEVEL)==128);
++        const float own=parts[v]->core.layer[1].params.gain, sub=parts[v]->core.layer[1].params.sub_gain;
++        turn(3,-1); render(1);
++        CHECK(engine_superj6_knob_position(v,SJ6_OSC2_LEVEL)==127);
++        CHECK(parts[v]->osc2_level_code==128 && !parts[1-v]->osc2_level_code);
++        CHECK(parts[v]->core.layer[1].params.gain==own && parts[v]->core.layer[1].params.sub_gain==sub);
++        CHECK(proj.sound.v[T_303][v][30]==255);
++        const juno6_t high=*parts[v];
++        CHECK(!project_save() && !project_load());
++        CHECK(engine_bass_preset_index(v)==0 && engine_superj6_knob_position(v,SJ6_OSC2_LEVEL)==127);
++        engine_note_lock_capture(1);
++        CHECK(!engine_bass_note_capture(proj.arr.lane,0,v,0,&proj.sound));
++        engine_note_lock_capture(0);
++        CHECK(!engine_bass_note_validate(&proj.arr.lane[0]));
++        CHECK(proj.arr.lane[0].val[30]==255);
++        CHECK(engine_superj6_knob_turn(v,SJ6_OSC2_LEVEL,0,0)); render(1);
++        CHECK(engine_superj6_knob_position(v,SJ6_OSC2_LEVEL)==0);
++        CHECK(proj.sound.v[T_303][v][30]==128);
++        render_arm(&high,0); render_arm(parts[v],1);
++        CHECK(!memcmp(out[0][0],out[1][0],sizeof out[0][0]));
++        CHECK(memcmp(out[0][1],out[1][1],sizeof out[0][1]));
++        unsigned nz=0; for(unsigned i=0;i<COUNT;++i) nz+=out[1][1][i]!=0.f;
++        CHECK(nz>COUNT/2);
++        bpart_t *line=&proj.pat[0].bass[v];
++        for(unsigned n=0;n<NSTEPS;++n) line->step[n].flags=G_REST;
++        line->len=16; line->rate=RATE_16; line->dir=DIR_FWD; line->transpose=24;
++        line->step[0].flags=G_NOTE; line->step[0].note=45; line->step[0].velocity=100;
++        seq.ppat[TRK_BASS0+v]=0; engine_note_lock_refresh(); engine_bass_edit_hold(1);
++        seq_start(&seq);
++        for(unsigned n=0;n<2000 && parts[v]->osc2_level_code!=128;++n) render(1);
++        CHECK(parts[v]->osc2_level_code==128 && !parts[1-v]->osc2_level_code);
++        CHECK(!engine_superj6_knob_turn(v,SJ6_OSC2_LEVEL,72,0));
++        seq_stop(&seq); engine_bass_edit_hold(0); render(4);
++        CHECK(parts[v]->osc2_level_code==1 && proj.sound.v[T_303][v][30]==128);
++        if (getenv("OSC2_WIRE_PATH")) {
++            CHECK(!project_save()); osc2_project(v,0,1);
++            proj.sound.v[T_303][v][30]=0;
++            engine_bass_sound_refresh(&proj.sound,v);
++            CHECK(!project_save()); osc2_project(v,1,1);
++            proj.sound.v[T_303][v][30]=128;
++            engine_bass_sound_refresh(&proj.sound,v);
++        }
++        build_pages(); visit("OUTPUT"); now_ms+=2800; ui_frame();
++        shot(v?"osc2-level-b":"osc2-level-a");
++    }
++    printf("PASS actual OUTPUT K4, tagged Init values, independent composite/sub, both-owner real stereo and held save/lock/restore (%u checks)\n",checks);
++    return 0;
++}
+--- /dev/null
++++ b/tests/host/osc2_old_wire.h
+@@ -0,0 +1,15 @@
++static void osc2_project(unsigned owner,unsigned scenario,int export)
++{
++    const char *dir=getenv("OSC2_WIRE_PATH"); CHECK(dir);
++    char name[1024];snprintf(name,sizeof name,"%s/both-%u-%u",dir,scenario,owner);
++    FILE *f=fopen(name,export ? "wb" : "rb"); CHECK(f);
++    const unsigned objects[]={OBJ_SET,OBJ_SOUND,OBJ_PAT0,OBJ_PAT1,OBJ_SONG,OBJ_MOTION};
++    uint8_t data[PLAT_STORE_MAX];
++    for(unsigned i=0;i<sizeof objects/sizeof *objects;++i){
++        int n;
++        if(export){n=plat_store_load(objects[i],data,sizeof data);CHECK(n>=0);CHECK(fwrite(&n,sizeof n,1,f)==1);CHECK(fwrite(data,1,(size_t)n,f)==(size_t)n);}
++        else {CHECK(fread(&n,sizeof n,1,f)==1&&n>=0&&(unsigned)n<=sizeof data);CHECK(fread(data,1,(size_t)n,f)==(size_t)n);CHECK(!plat_store_save(objects[i],data,(size_t)n));}
++    }
++    if(!export) CHECK(fgetc(f)==EOF);
++    CHECK(!fclose(f));
++}
