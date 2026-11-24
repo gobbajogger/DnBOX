@@ -1,0 +1,39 @@
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -684,9 +684,12 @@
+         }
+         return &BPRESET_P;
+     case R_BSTATUS: return &BSTATUS_P;
+-    case R_BPATSND:
+-        PATSND_P.max = (uint8_t)original_sound_factories((unsigned)engine_bass_requested_bank(r.b));
++    case R_BPATSND: {
++        unsigned bank = (unsigned)engine_bass_requested_bank(r.b);
++        /* The pattern wire can recall only Synth One INIT, not factory ordinals. */
++        PATSND_P.max = bank == ORIGINAL_SOUND_SYNTHONE ? 1u : (uint8_t)original_sound_factories(bank);
+         return &PATSND_P;
++    }
+     case R_NOTELOCK: return &NOTELOCK_P;
+     case R_ENG: return engine_param(r.a, r.b, r.c);
+     case R_GEN: return &GEN_P[r.c % NGEN];
+@@ -944,6 +947,11 @@
+         if (from_keyboard) build_pages();
+         return;
+     }
++    if (r.kind == R_BPATSND && engine_bass_requested_bank(r.b) == ORIGINAL_SOUND_SYNTHONE) {
++        unsigned ps = pat_of(PART_303A + (r.b & 1))->rsv[r.b & 1];
++        /* The upper stop is also a no-op for historical INIT aliases. */
++        if ((!v && !ps) || (v == 1 && ps >= 0xC1u && ps <= 0xC4u)) return;
++    }
+     pref_dirty(&r);
+     switch (r.kind) {
+     case R_ENG:
+@@ -1705,7 +1713,8 @@
+         if (!ps) { put_s(num, "OFF"); return; }
+         unsigned kind, preset;
+         if (!bass_pattern_preset_decode(ps, &kind, &preset)) { put_s(num, "INVALID"); return; }
+-        num[0] = kind == ORIGINAL_SOUND_JUNO ? 'J' : kind == ORIGINAL_SOUND_SYNTHONE ? 'S' : kind == ORIGINAL_SOUND_MIAMI ? 'M' : 'C';
++        if (kind == ORIGINAL_SOUND_SYNTHONE) { put_s(num, "INIT"); return; }
++        num[0] = kind == ORIGINAL_SOUND_JUNO ? 'J' : kind == ORIGINAL_SOUND_MIAMI ? 'M' : 'C';
+         put_i(num + 1, (int)preset);
+         return;
+     }

@@ -1,0 +1,39 @@
+Private host output: HOST_REPLAY
+PASS compact dry/wet render captured INIT and 694 factory programs, 1024 frames each
+PASS compact dry/wet render captured INIT and 694 factory programs, 1024 frames each
+2b7c2c740edb57be12652f58c81a538815dd21c1ca8f66b0971cad51df0f331f  HOST_REPLAY/base.pcm
+2b7c2c740edb57be12652f58c81a538815dd21c1ca8f66b0971cad51df0f331f  HOST_REPLAY/join.pcm
+FAIL tests/host/ui_synthone_resonance_lfo_test.c:235: engine_s1_patch_read(0,RESONANCE_LFO,&missing)
+HOST_REPLAY/res-positive.log:PASS 125 independent Resonance×Noise×Osc Mix states; all 256 route bytes classified, 131 invalid
+HOST_REPLAY/res-positive.log:owner 0 filter mode 0 resonance route 1: 4096/4096 changed, target/peer/phase exact
+HOST_REPLAY/res-positive.log:owner 0 filter mode 0 resonance route 2: 4096/4096 changed, target/peer/phase exact
+HOST_REPLAY/res-positive.log:owner 0 filter mode 0 resonance route 3: 4096/4096 changed, target/peer/phase exact
+HOST_REPLAY/res-positive.log:owner 1 filter mode 0 resonance route 1: 4096/4096 changed, target/peer/phase exact
+HOST_REPLAY/res-positive.log:owner 1 filter mode 0 resonance route 2: 4096/4096 changed, target/peer/phase exact
+HOST_REPLAY/res-positive.log:owner 1 filter mode 0 resonance route 3: 4096/4096 changed, target/peer/phase exact
+HOST_REPLAY/res-positive.log:owner 0 filter mode 1 resonance route 1: 4096/4096 changed, target/peer/phase exact
+HOST_REPLAY/res-positive.log:owner 0 filter mode 1 resonance route 2: 4096/4096 changed, target/peer/phase exact
+HOST_REPLAY/res-positive.log:owner 0 filter mode 1 resonance route 3: 4096/4096 changed, target/peer/phase exact
+HOST_REPLAY/res-positive.log:owner 1 filter mode 1 resonance route 1: 4096/4096 changed, target/peer/phase exact
+HOST_REPLAY/res-positive.log:owner 1 filter mode 1 resonance route 2: 4096/4096 changed, target/peer/phase exact
+HOST_REPLAY/res-positive.log:owner 1 filter mode 1 resonance route 3: 4096/4096 changed, target/peer/phase exact
+HOST_REPLAY/res-positive.log:owner 0 filter mode 2 resonance route 1: 0/4096 changed, target/peer/phase exact
+HOST_REPLAY/res-positive.log:owner 0 filter mode 2 resonance route 2: 0/4096 changed, target/peer/phase exact
+HOST_REPLAY/res-positive.log:owner 0 filter mode 2 resonance route 3: 0/4096 changed, target/peer/phase exact
+HOST_REPLAY/res-positive.log:owner 1 filter mode 2 resonance route 1: 0/4096 changed, target/peer/phase exact
+HOST_REPLAY/res-positive.log:owner 1 filter mode 2 resonance route 2: 0/4096 changed, target/peer/phase exact
+HOST_REPLAY/res-positive.log:owner 1 filter mode 2 resonance route 3: 0/4096 changed, target/peer/phase exact
+HOST_REPLAY/res-positive.log:PASS held Resonance routes across both owners and Sound/lock protections (7592 checks)
+HOST_REPLAY/res-old.log:PASS old Noise/Osc/cutoff/HP/WIDEN and lock accepted; Resonance route Sound/lock types rejected before writes (271 checks)
+HOST_REPLAY/pages-base.log:PASS owner A all 15 pages reached in both directions
+HOST_REPLAY/pages-base.log:PASS owner B all 15 pages reached in both directions
+HOST_REPLAY/pages-base.log:PASS Synth One owner A reaches all 15 panels both ways
+HOST_REPLAY/pages-base.log:PASS Synth One owner B reaches all 15 panels both ways
+HOST_REPLAY/pages-join.log:PASS owner A all 15 pages reached in both directions
+HOST_REPLAY/pages-join.log:PASS owner B all 15 pages reached in both directions
+HOST_REPLAY/pages-join.log:PASS Synth One owner A reaches all 15 panels both ways
+HOST_REPLAY/pages-join.log:PASS Synth One owner B reaches all 15 panels both ways
+PASS 14 unchanged SuperJ6 actual LCDs byte-exact
+PASS actual MOD ROUTE LCD for OFF, LFO 1, LFO 2, BOTH on physical K2
+PASS 25 independent Noise×Osc Mix routes and all 64 typed bytes; 39 of the 64 low-byte states invalid; 0x40 and 0xff remain invalid
+PASS held Osc Mix routes across both owners and Sound/lock protections (1992 checks)
