@@ -1,0 +1,219 @@
+--- /dev/null
++++ b/tests/host/ui_superj6_layer1_tuning_test.c
+@@ -0,0 +1,188 @@
++/* SPDX-License-Identifier: GPL-3.0-only */
++#define PWM_FIXTURE_MAIN retained_pwm_main
++#include "ui_superj6_pwm1_lfo2_test.c"
++#include <math.h>
++
++static juno6_t *last_synth, *parts[2];
++void __real_juno6_init(juno6_t *, float);
++void __wrap_juno6_init(juno6_t *s, float rate)
++{
++    __real_juno6_init(s, rate);
++    last_synth = s;
++}
++
++static void setup_tuning(unsigned owner)
++{
++    setup(V_PART, PART_303A + owner);
++    proj.set.bt |= PROJ_BT_CLK_IN;
++    for (unsigned v = 0; v < 2; ++v) {
++        last_synth = NULL;
++        select_owner(v, 0);
++        CHECK(last_synth);
++        parts[v] = last_synth;
++    }
++    CHECK(parts[0] != parts[1]);
++    isolate_dry_pair();
++    visit("TUNING");
++}
++
++static void play_a4(void)
++{
++    engine_apply_sound(&proj.sound);
++    render(24);
++    for (unsigned v = 0; v < 2; ++v) engine_bass_on(v, 69, 0, 0);
++    render(4);
++}
++
++static float hz(unsigned v, unsigned l)
++{
++    juno6_t *p = parts[v];
++    CHECK(p->core.voice[0].gate && p->core.voice[0].note == 69);
++    return p->core.voice[0].layer[l].increment * p->sample_rate;
++}
++
++static void law(unsigned owner, unsigned pos)
++{
++    float expect = 440.f * exp2f(((int)pos - SJ6_SEMI_CENTER) / 12.f);
++    CHECK(fabsf(hz(owner, 0) - expect) < .05f);
++    CHECK(hz(owner, 1) == hz(1 - owner, 0));
++    CHECK(hz(owner, 1) == hz(1 - owner, 1));
++    CHECK(fabsf(hz(owner, 1) - 440.f) < .02f);
++}
++
++static void isolated_pcm(void)
++{
++    for (unsigned audible = 0; audible < DNBX_LAYERS; ++audible) {
++        juno6_t synth[2];
++        juno6_init(&synth[0], RATE);
++        synth[0].core.layer[1 - audible].params.gain = 0.f;
++        CHECK(juno6_note_on(&synth[0], 69, 100));
++        synth[1] = synth[0];
++        juno6_set_layer1_semi(&synth[1], 24);
++        for (unsigned i = 0; i < COUNT; i += 256) {
++            CHECK(juno6_render_stereo(&synth[0], actual[0] + i, actual[1] + i, 256));
++            CHECK(juno6_render_stereo(&synth[1], expected[0] + i, expected[1] + i, 256));
++        }
++        CHECK((memcmp(actual, expected, sizeof actual) != 0) == (audible == 0));
++        float maxima = 0.f;
++        for (unsigned i = 0; i < COUNT; ++i) maxima += fabsf(actual[0][i]);
++        CHECK(maxima > 0.f);
++    }
++}
++
++static void lock_tuning(unsigned owner)
++{
++    engine_note_lock_capture(1);
++    CHECK(!engine_bass_note_capture(proj.arr.lane, 0, owner, 0, &proj.sound));
++    engine_note_lock_capture(0);
++    CHECK(!engine_bass_note_validate(&proj.arr.lane[0]));
++    panel_turn(0, SJ6_LAYER1_SEMI, 5);
++    render(1);
++    CHECK(juno6_layer1_semi(parts[owner]) == 5);
++    bpart_t *line = &proj.pat[0].bass[owner];
++    for (unsigned n = 0; n < NSTEPS; ++n) line->step[n].flags = G_REST;
++    line->len = 16;
++    line->rate = RATE_16;
++    line->dir = DIR_FWD;
++    line->transpose = 24;
++    line->step[0].flags = G_NOTE;
++    line->step[0].note = 45;
++    line->step[0].velocity = 100;
++    seq.ppat[TRK_BASS0 + owner] = 0;
++    engine_note_lock_refresh();
++    engine_bass_edit_hold(1);
++    seq_start(&seq);
++    for (unsigned n = 0; n < 2000 && juno6_layer1_semi(parts[owner]) != 24; ++n) render(1);
++    CHECK(juno6_layer1_semi(parts[owner]) == 24);
++    CHECK(fabsf(hz(owner, 0) - 880.f) < .05f && fabsf(hz(owner, 1) - 440.f) < .02f);
++    CHECK(!engine_superj6_knob_turn(owner, SJ6_LAYER1_SEMI, 12, 0));
++    seq_stop(&seq);
++    engine_bass_edit_hold(0);
++    render(4);
++    CHECK(juno6_layer1_semi(parts[owner]) == 5);
++    CHECK(juno6_layer1_semi(parts[1-owner]) == 12);
++    save_and_reload();
++    CHECK(!engine_bass_note_validate(&proj.arr.lane[0]));
++}
++
++static void test_tuning(unsigned owner)
++{
++    setup_tuning(owner);
++    uint8_t *row = proj.sound.v[T_303][ORIGINAL_SJ6_EXTRA_ROW + owner];
++    uint8_t *cell = proj.sound.v[T_303][owner];
++    row[2] = 0x80; /* Unowned data must not be claimed. */
++    CHECK(!engine_superj6_knob_turn(owner, SJ6_LAYER1_SEMI, 0, 0));
++    CHECK(row[2] == 0x80);
++    row[2] = 0;
++    const sound_t neutral = proj.sound;
++    play_a4();
++    law(owner, 12);
++    capture(pcm[0]);
++    play_a4();
++    for (unsigned pos = 0; pos <= 24; ++pos) {
++        panel_turn(0, SJ6_LAYER1_SEMI, pos);
++        char num[24] = {0}, unit[12] = {0}, expected_num[24];
++        pref_value_of(pg.r[cur_page()][0], pos, num, unit);
++        snprintf(expected_num, sizeof expected_num, "%d", (int)pos - 12);
++        CHECK(!strcmp(num, expected_num) && !strcmp(unit, "st"));
++        CHECK(juno6_layer1_semi(parts[owner]) == (pos ? pos - 1 : 12));
++        if (!pos) capture(pcm[1]); else render(1);
++        law(owner, pos);
++        CHECK(original_sound_sj6_semi(row) == pos);
++        if (pos == 12) CHECK(!memcmp(&neutral, &proj.sound, sizeof neutral));
++        else CHECK(original_sound_sj6_ext_valid(cell, row));
++    }
++    const unsigned edited = changed(pcm[0], pcm[1], owner);
++    CHECK(edited > COUNT / 2 && !changed(pcm[0], pcm[1], 1 - owner));
++    play_a4();
++    law(owner, 24);
++    capture(pcm[0]);
++    save_and_reload();
++    play_a4();
++    law(owner, 24);
++    capture(pcm[1]);
++    CHECK(!memcmp(pcm[0], pcm[1], sizeof pcm[0]));
++    /* Existing ADSR writes preserve plane, and packed bits do not leak into ADSR. */
++    visit("AMP ADSR");
++    unsigned attack = (pref_get(pg.r[cur_page()][0]) + 3) & 127u;
++    panel_turn(0, SJ6_AMP_ATTACK, attack);
++    render(1);
++    CHECK(pref_get(pg.r[cur_page()][0]) == (int)attack);
++    CHECK(original_sound_sj6_semi(row) == 24 && original_sound_sj6_ext_valid(cell, row));
++    CHECK(engine_superj6_knob_turn(owner, SJ6_LAYER1_SEMI, 12, 0));
++    render(1);
++    CHECK(pref_get(pg.r[cur_page()][0]) == (int)attack);
++    for (unsigned l = 0; l < 2; ++l)
++        CHECK(parts[owner]->core.layer[l].params.amp.attack_s >= 0.f);
++    CHECK(engine_superj6_knob_turn(owner, SJ6_LAYER1_SEMI, 24, 0));
++    render(1);
++    visit("TUNING");
++    lock_tuning(owner);
++
++    const juno6_lfo_words authored = {{.25f, .75f, .5f, 0.f, 1.f, 0.f}, 63u};
++    original_sound_sj6_lfo_store(cell, row, &authored);
++    original_sound_sj6_shape_store(cell, SJ6_LFO_DOWN);
++    original_sound_sj6_lfo2_pwm_store(cell, 65u);
++    original_sound_sj6_chorus_store(cell, JUNO6_CHORUS_I);
++    const sound_t before = proj.sound;
++    CHECK(engine_superj6_knob_turn(owner, SJ6_LAYER1_SEMI, 3, 0));
++    render(1);
++    const uint8_t *old_row = before.v[T_303][ORIGINAL_SJ6_EXTRA_ROW + owner];
++    for (unsigned i = 0; i < sizeof before.v[T_303][0]; ++i)
++        CHECK((row[i] & (i >= 2 && i <= 6 ? 127u : 255u)) ==
++              (old_row[i] & (i >= 2 && i <= 6 ? 127u : 255u)));
++    CHECK(!memcmp(before.v[T_303][owner], cell, sizeof before.v[T_303][owner]));
++    CHECK(!memcmp(before.v[T_303][owner ^ 1], proj.sound.v[T_303][owner ^ 1],
++                  sizeof before.v[T_303][0]));
++    printf("owner=%u 25 physical positions, held delta=%u/%u peer=0, exact reload and saved note lock\n",
++           owner, edited, COUNT);
++}
++
++int main(void)
++{
++    isolated_pcm();
++    test_tuning(0);
++    test_tuning(1);
++    printf("SuperJ6 Build-9 ID72 layer 1 semitone: %u checks\n", checks);
++    return 0;
++}
+--- /dev/null
++++ b/tests/host/ui_superj6_layer1_prior_reader_test.c
+@@ -0,0 +1,25 @@
++/* SPDX-License-Identifier: GPL-3.0-only */
++/* Build this unchanged on the prior and new readers; no new API required. */
++#define ARP_FIXTURE_MAIN retained_arp_main
++#include "ui_arp_engine_test.c"
++
++int main(void)
++{
++    uint8_t cell[ORIGINAL_SOUND_BYTES], row[NPARAMS_MAX] = {0};
++    CHECK(original_sound_init(cell, ORIGINAL_SOUND_JUNO, 0));
++    const uint8_t attack = 31;
++    uint8_t positions[SJ6_EXTRA_COUNT] = {attack};
++    original_sound_sj6_extra_store(cell, row, 1u, positions, 0, 0);
++    CHECK(original_sound_sj6_ext_valid(cell, row));
++    row[2] |= 0x80; /* ID72 signed position -12 alongside old AMP1 data. */
++    const unsigned expect_new = !!getenv("SJ6_NEW_READER");
++    CHECK(original_sound_sj6_ext_valid(cell, row) == expect_new);
++    row[0] = 0;
++    row[2] &= 0x80; /* ID72-only extension; mask zero was invalid before. */
++    CHECK(original_sound_sj6_ext_valid(cell, row) == expect_new);
++    for (unsigned i = 2; i <= 6; ++i) row[i] = 0x80; /* Forbidden code 31. */
++    CHECK(!original_sound_sj6_ext_valid(cell, row));
++    puts(expect_new ? "PASS new reader exact plane admission and malformed refusal" :
++           "PASS unmodified prior reader refuses both tuned saves; old extension loads");
++    return 0;
++}

@@ -1,0 +1,9 @@
+owner 0 MIX 44 enable 0: 0/4096 owner frames changed, peer exact
+owner 0 MIX 40 enable 0: 0/4096 owner frames changed, peer exact
+owner 1 MIX 44 enable 0: 0/4096 owner frames changed, peer exact
+owner 1 MIX 40 enable 0: 0/4096 owner frames changed, peer exact
+owner 0 MIX 44 enable 1: 4096/4096 owner frames changed, peer exact
+owner 0 MIX 40 enable 1: 4096/4096 owner frames changed, peer exact
+owner 1 MIX 44 enable 1: 4096/4096 owner frames changed, peer exact
+owner 1 MIX 40 enable 1: 4096/4096 owner frames changed, peer exact
+PASS real Synth One delay and reverb MIX, both owners and enables, 1100 checks

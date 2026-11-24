@@ -1,0 +1,31 @@
+Private host evidence: SCRATCH
+PASS compact dry/wet render captured INIT and 694 factory programs, 1024 frames each
+PASS compact dry/wet render captured INIT and 694 factory programs, 1024 frames each
+2b7c2c740edb57be12652f58c81a538815dd21c1ca8f66b0971cad51df0f331f  SCRATCH/base.pcm
+2b7c2c740edb57be12652f58c81a538815dd21c1ca8f66b0971cad51df0f331f  SCRATCH/join.pcm
+FAIL tests/host/ui_synthone_widen_test.c:220: engine_s1_patch_read(0,WIDEN,&absent)
+SCRATCH/positive.log:owner 0 wet effects 0: WIDEN factory 0.000000 -> 1, owner RIGHT 4096/4096 changed, LEFT and peer exact
+SCRATCH/positive.log:owner 1 wet effects 0: WIDEN factory 0.000000 -> 1, owner RIGHT 4096/4096 changed, LEFT and peer exact
+SCRATCH/positive.log:owner 0 wet effects 1: WIDEN factory 1.000000 -> 0, owner RIGHT 4096/4096 changed, LEFT and peer exact
+SCRATCH/positive.log:owner 1 wet effects 1: WIDEN factory 1.000000 -> 0, owner RIGHT 4096/4096 changed, LEFT and peer exact
+SCRATCH/positive.log:PASS physical part OUTPUT WIDEN and shared payload (16908 checks)
+SCRATCH/old.log:PASS old HP Sound/lock accepted; Widen Sound/lock rejected before any writes (263 checks)
+SCRATCH/prior-wet.log:owner 0 MIX 44 enable 0: 0/4096 owner frames changed, peer exact
+SCRATCH/prior-wet.log:owner 0 MIX 40 enable 0: 0/4096 owner frames changed, peer exact
+SCRATCH/prior-wet.log:owner 1 MIX 44 enable 0: 0/4096 owner frames changed, peer exact
+SCRATCH/prior-wet.log:owner 1 MIX 40 enable 0: 0/4096 owner frames changed, peer exact
+SCRATCH/prior-wet.log:owner 0 MIX 44 enable 1: 4096/4096 owner frames changed, peer exact
+SCRATCH/prior-wet.log:owner 0 MIX 40 enable 1: 4096/4096 owner frames changed, peer exact
+SCRATCH/prior-wet.log:owner 1 MIX 44 enable 1: 4096/4096 owner frames changed, peer exact
+SCRATCH/prior-wet.log:owner 1 MIX 40 enable 1: 4096/4096 owner frames changed, peer exact
+SCRATCH/prior-wet.log:PASS real Synth One delay and reverb MIX, both owners and enables, 1100 checks
+SCRATCH/prior-hp.log:owner 0 reverb HP factory 900.000000 -> adjacent 893.543335 Hz
+SCRATCH/prior-hp.log:owner 0 reverb HP 39 enable 0: 0/4096 owner frames changed, peer exact
+SCRATCH/prior-hp.log:owner 1 reverb HP factory 900.000000 -> adjacent 893.543335 Hz
+SCRATCH/prior-hp.log:owner 1 reverb HP 39 enable 0: 0/4096 owner frames changed, peer exact
+SCRATCH/prior-hp.log:owner 0 reverb HP factory 219.399994 -> adjacent 228.503937 Hz
+SCRATCH/prior-hp.log:owner 0 reverb HP 39 enable 1: 4096/4096 owner frames changed, peer exact
+SCRATCH/prior-hp.log:owner 1 reverb HP factory 219.399994 -> adjacent 228.503937 Hz
+SCRATCH/prior-hp.log:owner 1 reverb HP 39 enable 1: 4096/4096 owner frames changed, peer exact
+SCRATCH/prior-hp.log:PASS real Synth One REVERB HP, both owners and enables, 1696 checks
+PASS part OUTPUT LCD uses the real OFF/ON switch, other slots empty
