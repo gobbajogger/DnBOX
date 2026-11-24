@@ -1,0 +1,5 @@
+FAIL /workspace/scratch/3a7051e761a0/perf-final-proof/full-control-a-reference/red-fixture.c:10: dial && !strcmp(dial->name, "A REF")
+640 full bank records on both parts, 26 exact authored A440 words and 614 omissions
+owner=0 A REF held frames=8192 down=8192 up=8192 peer=0, range and reload PASS
+owner=1 A REF held frames=8192 down=8192 up=8192 peer=0, range and reload PASS
+SuperJ6 A reference 7594 checks

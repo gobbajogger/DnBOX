@@ -1,0 +1,558 @@
+--- a/firmware/src/app/original_presets.inc
++++ b/firmware/src/app/original_presets.inc
+@@ -1,5 +1,8 @@
+ /* SPDX-License-Identifier: GPL-3.0-only */
+ /* Textually included by engine.c: replacement-only patch publication. */
++#if X0X_S1_EXTRA
++#include "../dsp/s1c/s1c_front.h"
++#endif
+ static int16_t bass_named_preset[NBASS] = {-1, -1};
+ static void arp_adopt(int v, const sound_t *sound, int preset_change); /* engine_arp.inc */
+ static volatile uint8_t bass_preview_dirty, bass_wheel_mask, bass_edit_depth;
+@@ -118,11 +121,18 @@
+     out->preset = bass_named_preset[voice];
+     out->note_locked = note_lock_applied[voice];
+     out->physical = s1_part_patch_value(&p->dsp.synthone, (unsigned)slot);
++    out->max_position = (uint8_t)s1_patch_steps((unsigned)slot);
+     if (slot == S1_PATCH_COUNT) out->position = (uint8_t)out->physical;
++#if X0X_S1_EXTRA
++    else if (s1_lfo_rate_slot((unsigned)slot)) {
++        out->max_position = (uint8_t)s1c_front_lfo_steps(&p->dsp.synthone.e);
++        out->position = (uint8_t)s1c_front_lfo_position(&p->dsp.synthone.e, factory_id);
++    }
++#endif
+     else {
+         const s1_patch_descriptor *d = s1_patch_at((unsigned)slot);
+         out->position = (uint8_t)((out->physical - d->minimum) *
+-            (s1_patch_steps((unsigned)slot) / (d->maximum - d->minimum)) + .5f);
++            (out->max_position / (d->maximum - d->minimum)) + .5f);
+     }
+     plat_cq_unlock(lock);
+     return 1;
+@@ -141,12 +151,23 @@
+         !((request & 0x80000000u) && request != bass_applied[voice])) {
+         if (s1_edit[voice].pending || note_lock_applied[voice]) status = S1_EDIT_BUSY;
+ #if X0X_S1_EXTRA
++        else if (slot == S1_LFO_SYNC &&
++                 s1_part_patch_value(&original_bass[voice].dsp.synthone, S1_LFO_SYNC) == (float)position)
++            status = S1_EDIT_REJECTED;
++        else if (s1_lfo_rate_slot((unsigned)slot) &&
++                 position > s1c_front_lfo_steps(&original_bass[voice].dsp.synthone.e)) status = S1_EDIT_REJECTED;
+         else if (slot >= S1_EXTRA_FIRST &&
+                  (!mot_base_snd || !original_sound_s1_extra_available(mot_base_snd->v[T_303][voice],
+                   mot_base_snd->v[T_303][S1_EXTRA_ROW + voice], (unsigned)slot))) status = S1_EDIT_REJECTED;
+ #endif
+         else {
+             s1_edit[voice].slot = (uint8_t)slot;
++#if X0X_S1_EXTRA
++            if (slot >= S1_LFO_FIRST)
++                position += s1_lfo_rate_slot((unsigned)slot) &&
++                            s1c_front_lfo_steps(&original_bass[voice].dsp.synthone.e) < S1_PATCH_STEPS ?
++                            S1_LFO_CODE_SYNC : 1u;
++#endif
+             s1_edit[voice].position = (uint8_t)position;
+             s1_edit[voice].pending = 1;
+             status = S1_EDIT_QUEUED;
+@@ -193,8 +214,17 @@
+ #if X0X_S1_EXTRA
+         if (s1_edit[v].slot >= S1_EXTRA_FIRST) {
+             uint8_t *extra = sound->v[T_303][S1_EXTRA_ROW + v];
+-            if (!original_sound_s1_extra_set(cell, extra, s1_edit[v].slot, s1_edit[v].position)) continue;
+-            s1_part_apply_extra(&original_bass[v].dsp.synthone, extra);
++            s1_dry_part *part = &original_bass[v].dsp.synthone;
++            unsigned slot = s1_edit[v].slot, code = s1_edit[v].position;
++            if (slot == S1_LFO_SYNC) {
++                uint8_t divisions[2] = {0};
++                if (code == 1u) {
++                    divisions[0] = (uint8_t)s1c_front_lfo_position(&part->e, s1_patch_at(S1_LFO1_RATE)->factory_id);
++                    divisions[1] = (uint8_t)s1c_front_lfo_position(&part->e, s1_patch_at(S1_LFO2_RATE)->factory_id);
++                }
++                if (!original_sound_s1_sync_set(cell, extra, code, divisions)) continue;
++            } else if (!original_sound_s1_extra_set(cell, extra, slot, code)) continue;
++            s1_part_apply_extra(part, extra);
+         } else
+ #endif
+         {
+--- a/firmware/src/app/original_sound.c
++++ b/firmware/src/app/original_sound.c
+@@ -503,12 +503,53 @@
+     return 1;
+ }
+ #if X0X_S1_EXTRA
++enum { S1_LFO_GROUP_STATES = S1_LFO_RATE_CODES * S1_LFO_RATE_CODES * 75u };
++_Static_assert(S1_EXTRA_COUNT == 11 && S1_LFO_GROUP_STATES <= 31u * 65535u,
++               "LFO group shares only the five spare header bits and two suffix bytes");
++
++/* Header zero leaves legacy suffix bytes unowned. Marked suffixes are never
++ * zero, so stray unused header bits cannot be mistaken for a saved edit. */
++int s1_extra_lfo_read(const uint8_t *data, uint8_t state[S1_LFO_COUNT])
++{
++    unsigned high = data[1] >> 3;
++    unsigned ordinal = 0;
++    if (high) {
++        unsigned suffix = data[S1_FILTER_EXTRA_BYTES] |
++                          ((unsigned)data[S1_FILTER_EXTRA_BYTES+1] << 8);
++        ordinal = (high - 1u) * 65535u + suffix;
++        if (!suffix || ordinal >= S1_LFO_GROUP_STATES) return 0;
++    }
++    state[0] = (uint8_t)(ordinal % S1_LFO_RATE_CODES); ordinal /= S1_LFO_RATE_CODES;
++    state[1] = (uint8_t)(ordinal % S1_LFO_RATE_CODES); ordinal /= S1_LFO_RATE_CODES;
++    state[2] = (uint8_t)(ordinal % 5u);
++    ordinal /= 5u;
++    state[3] = (uint8_t)(ordinal % 5u);
++    state[4] = (uint8_t)(ordinal / 5u);
++    return 1;
++}
++
++static void s1_extra_lfo_write(uint8_t *data, const uint8_t state[S1_LFO_COUNT])
++{
++    unsigned ordinal = state[0] + S1_LFO_RATE_CODES *
++                       (state[1] + S1_LFO_RATE_CODES * (state[2] + 5u * (state[3] + 5u * state[4])));
++    unsigned high = (ordinal - 1u) / 65535u + 1u;
++    unsigned suffix = ordinal - (high - 1u) * 65535u;
++    data[1] = (uint8_t)((data[1] & 7u) | (high << 3));
++    data[S1_FILTER_EXTRA_BYTES] = (uint8_t)suffix;
++    data[S1_FILTER_EXTRA_BYTES+1] = (uint8_t)(suffix >> 8);
++}
++
+ int original_sound_s1_extra_valid(const uint8_t *cell, const uint8_t *extra)
+ {
+     if (!original_sound_s1_has_extra(cell)) return 1;
+     unsigned mask = s1_extra_bits(extra);
+-    if (!mask || mask >> S1_EXTRA_COUNT) return 0;
+-    for (unsigned i = 0; i < s1_extra_size(extra) - 2; ++i)
++    unsigned size = s1_extra_size(extra);
++    if (size == S1_EXTRA_BYTES) {
++        uint8_t state[S1_LFO_COUNT];
++        if (!s1_extra_lfo_read(extra, state)) return 0;
++    } else if (!mask) return 0;
++    unsigned count = size == S1_OSC_EXTRA_BYTES ? S1_OSC_EXTRA_BYTES - 2u : S1_EXTRA_COUNT;
++    for (unsigned i = 0; i < count; ++i)
+         if (extra[2+i] > ((mask & (1u << i)) ? s1_patch_steps(S1_EXTRA_FIRST+i) : 0u))
+             return 0;
+     return 1;
+@@ -523,19 +564,48 @@
+         for (unsigned i = 0; i < S1_OSC_EXTRA_BYTES; ++i)
+             if (extra[i]) return 0;
+     }
+-    /* Claim the appended pair only when both unowned bytes are free. */
+-    return slot < S1_FILTER_TYPE || s1_extra_size(extra) == S1_EXTRA_BYTES ||
+-           !(extra[S1_OSC_EXTRA_BYTES] | extra[S1_OSC_EXTRA_BYTES+1]);
++    /* A longer record can claim a gap only if the unowned bytes are free. */
++    unsigned needed = slot < S1_FILTER_TYPE ? S1_OSC_EXTRA_BYTES :
++                      slot < S1_LFO_FIRST ? S1_FILTER_EXTRA_BYTES : S1_EXTRA_BYTES;
++    for (unsigned i = s1_extra_size(extra); i < needed; ++i)
++        if (extra[i]) return 0;
++    return 1;
+ }
+ 
+ int original_sound_s1_extra_set(uint8_t *cell, uint8_t *extra, unsigned slot, unsigned position)
+ {
+     unsigned i = slot - S1_EXTRA_FIRST;
+-    if (i >= S1_EXTRA_COUNT || position > s1_patch_steps(slot) ||
+-        cell[29] != ORIGINAL_SOUND_SYNTHONE || !original_sound_valid(cell) ||
+-        !original_sound_s1_extra_available(cell, extra, slot)) return 0;
+-    extra[2+i] = (uint8_t)position;
+-    extra[i >> 3] |= (uint8_t)(1u << (i & 7u));
++    if (slot < S1_EXTRA_FIRST || slot >= S1_LFO_SYNC ||
++        !original_sound_valid(cell) || !original_sound_s1_extra_available(cell, extra, slot)) return 0;
++    if (slot >= S1_LFO_FIRST) {
++        unsigned limit = s1_lfo_rate_slot(slot) ? S1_LFO_RATE_CODES : 5u;
++        uint8_t state[S1_LFO_COUNT];
++        if (!position || position >= limit || !s1_extra_lfo_read(extra, state)) return 0;
++        state[slot-S1_LFO_FIRST] = (uint8_t)position;
++        s1_extra_lfo_write(extra, state);
++    } else {
++        if (position > s1_patch_steps(slot)) return 0;
++        extra[2+i] = (uint8_t)position;
++        extra[i >> 3] |= (uint8_t)(1u << (i & 7u));
++    }
++    original_sound_put_mask(cell, original_sound_edit_mask(cell) | S1_EXTRA_MARK);
++    return 1;
++}
++
++/* OFF retains the last snapped rates. Preserve each authored rate as its
++ * division before disabling the shared sync flag, at the audio boundary. */
++int original_sound_s1_sync_set(uint8_t *cell, uint8_t *extra, unsigned code, const uint8_t divisions[2])
++{
++    uint8_t state[S1_LFO_COUNT];
++    if (!code || code > 2u || !original_sound_valid(cell) ||
++        !original_sound_s1_extra_available(cell, extra, S1_LFO_SYNC) ||
++        !s1_extra_lfo_read(extra, state)) return 0;
++    if (code == 1u) {
++        for (unsigned i = 0; i < 2; ++i)
++            if (state[i]) state[i] = (uint8_t)(S1_LFO_CODE_SYNC + divisions[i]);
++    }
++    state[S1_LFO_SYNC - S1_LFO_FIRST] = (uint8_t)code;
++    s1_extra_lfo_write(extra, state);
+     original_sound_put_mask(cell, original_sound_edit_mask(cell) | S1_EXTRA_MARK);
+     return 1;
+ }
+--- a/firmware/src/app/original_sound.h
++++ b/firmware/src/app/original_sound.h
+@@ -106,6 +106,7 @@
+ int original_sound_s1_extra_valid(const uint8_t *cell, const uint8_t *extra);
+ int original_sound_s1_extra_available(const uint8_t *cell, const uint8_t *extra, unsigned slot);
+ int original_sound_s1_extra_set(uint8_t *cell, uint8_t *extra, unsigned slot, unsigned position);
++int original_sound_s1_sync_set(uint8_t *cell, uint8_t *extra, unsigned code, const uint8_t divisions[2]);
+ #endif
+ int original_sound_s1_set(uint8_t cell[ORIGINAL_SOUND_BYTES], unsigned slot, unsigned position);
+ #endif
+--- a/firmware/src/app/s1_patch.h
++++ b/firmware/src/app/s1_patch.h
+@@ -22,16 +22,29 @@
+     S1_SUB_LEVEL, S1_SUB_OCTAVE, S1_SUB_WAVE, S1_FM_LEVEL, S1_FM_INDEX, S1_NOISE_LEVEL,
+     S1_FILTER_TYPE, S1_ADSR_TRACK,
+     S1_OSC_EXTRA_BYTES = 2 + S1_FILTER_TYPE - S1_EXTRA_FIRST,
++    S1_LFO1_RATE = S1_ADSR_TRACK + 1, S1_LFO2_RATE, S1_LFO1_SHAPE, S1_LFO2_SHAPE,
++    S1_LFO_SYNC,
++    S1_LFO_FIRST = S1_LFO1_RATE, S1_LFO_COUNT = 5,
+     S1_EXTRA_COUNT = S1_ADSR_TRACK + 1 - S1_EXTRA_FIRST,
+-    S1_EXTRA_BYTES = 2 + S1_EXTRA_COUNT
++    S1_FILTER_EXTRA_BYTES = 2 + S1_EXTRA_COUNT,
++    S1_EXTRA_BYTES = S1_FILTER_EXTRA_BYTES + 2,
++    S1_LFO_DIVISIONS = 19, S1_LFO_CODE_SYNC = 129,
++    S1_LFO_RATE_CODES = S1_LFO_CODE_SYNC + S1_LFO_DIVISIONS
+ };
+ #define S1_EXTRA_MARK (UINT32_C(1) << 22)
+ float s1c_morph_preview(float position, uint32_t phase);
+ static inline unsigned s1_extra_bits(const uint8_t *data)
+-{ return (unsigned)data[0] | ((unsigned)data[1] << 8); }
+-/* Old oscillator records do not own the two appended filter bytes. */
++{ return (unsigned)data[0] | (((unsigned)data[1] & 7u) << 8); }
+ static inline unsigned s1_extra_size(const uint8_t *data)
+-{ return s1_extra_bits(data) >> (S1_FILTER_TYPE - S1_EXTRA_FIRST) ? S1_EXTRA_BYTES : S1_OSC_EXTRA_BYTES; }
++{
++    if (data[1] >> 3) return S1_EXTRA_BYTES;
++    return s1_extra_bits(data) >> (S1_FILTER_TYPE - S1_EXTRA_FIRST) ?
++           S1_FILTER_EXTRA_BYTES : S1_OSC_EXTRA_BYTES;
++}
++static inline int s1_lfo_rate_slot(unsigned slot)
++{ return slot - S1_LFO_FIRST < 2u; }
++/* Decodes independent LFO slots. Zero means no override of the program word. */
++int s1_extra_lfo_read(const uint8_t *data, uint8_t state[S1_LFO_COUNT]);
+ #else
+ #define S1_EXTRA_MARK 0u
+ #endif
+@@ -40,6 +53,8 @@
+ #if X0X_S1_EXTRA
+     if (slot == S1_SUB_OCTAVE || slot == S1_SUB_WAVE) return 1;
+     if (slot == S1_FILTER_TYPE) return 2;
++    if (slot == S1_LFO_SYNC) return 1;
++    if (slot - S1_LFO1_SHAPE < 2u) return 3;
+ #endif
+     return slot == S1_PATCH_COUNT ? 1u : S1_PATCH_STEPS;
+ }
+@@ -57,6 +72,7 @@
+     float physical; /* applied DSP target; the exact INIT value before an edit */
+     uint8_t position;      /* nearest editable position */
+     uint8_t note_locked;   /* temporary sequencer patch owns the heard value */
++    uint8_t max_position;  /* original division stops while a rate is synced */
+ } s1_patch_value;
+ 
+ /* Whole audible patch from a single render boundary. Values are in the same
+--- a/firmware/src/app/s1c_part.c
++++ b/firmware/src/app/s1c_part.c
+@@ -12,7 +12,7 @@
+ 
+ #define S1C_SR 44100.0f
+ /* Synth One factory parameter ids (s1c uses the same numbering). */
+-enum { P_MONO = 20, P_DETM = 31, P_BCSR = 34 };
++enum { P_MONO = 20, P_DETM = 31, P_BCSR = 34, P_PAN_RATE = 36, P_DELAY_TIME = 43, P_TEMPO_SYNC = 139 };
+ 
+ static const uint8_t *s1_part_pack;
+ static uint16_t s1_part_pack_count;
+@@ -74,8 +74,13 @@
+     }
+ #if X0X_S1_EXTRA
+     part->extra_live_mask = 0;
++    part->lfo_live_mask = 0;
++    part->clock_factory_pan = e->t[P_PAN_RATE];
++    part->clock_factory_delay = e->t[P_DELAY_TIME];
+     for (unsigned i = 0; i < S1_EXTRA_COUNT; ++i)
+         part->extra_factory[i] = e->t[s1_patch_at(S1_EXTRA_FIRST+i)->factory_id];
++    for (unsigned i = 0; i < S1_LFO_COUNT; ++i)
++        part->lfo_factory[i] = e->t[s1_patch_at(S1_LFO_FIRST+i)->factory_id];
+ #endif
+     fit_apply(e);
+     /* The engine clears its voices when mono changes; a program load is not a change. */
+@@ -132,7 +137,7 @@
+ };
+ 
+ #if X0X_S1_EXTRA
+-static const s1_patch_descriptor extra_parameters[S1_EXTRA_COUNT] = {
++static const s1_patch_descriptor extra_parameters[] = {
+     {"OSC 1 MORPH", 0, 1, 0, X0X_U_PCT},
+     {"OSC 2 MORPH", 0, 1, 1, X0X_U_PCT},
+     {"OSC 2 LEVEL", 0, 1, 6, X0X_U_PCT},
+@@ -144,14 +149,22 @@
+     {"NOISE LEVEL", 0, .25f, 12, X0X_U_PCT},
+     {"FILTER TYPE", 0, 2, 115, X0X_U_NONE},
+     {"ADSR PITCH TRACK", 0, 1, 149, X0X_U_PCT},
++    {"LFO 1 RATE", 0x1.111112p-11f, 80, 15, X0X_U_HZ},
++    {"LFO 2 RATE", 0x1.111112p-11f, 80, 47, X0X_U_HZ},
++    {"LFO 1 SHAPE", 0, 3, 13, X0X_U_NONE},
++    {"LFO 2 SHAPE", 0, 3, 45, X0X_U_NONE},
++    {"SYNC TO ARP", 0, 1, P_TEMPO_SYNC, X0X_U_NONE},
+ };
++enum { S1_CATALOG_EXTRA_COUNT = sizeof extra_parameters / sizeof extra_parameters[0] };
++_Static_assert(S1_CATALOG_EXTRA_COUNT == S1_LFO_FIRST - S1_EXTRA_FIRST + S1_LFO_COUNT,
++               "Synth One editable catalog follows its persisted slot order");
+ #endif
+ 
+ const s1_patch_descriptor *s1_patch_at(unsigned slot)
+ {
+     if (slot < S1_PATCH_COUNT) return &patch_parameters[slot];
+ #if X0X_S1_EXTRA
+-    if (slot - S1_EXTRA_FIRST < S1_EXTRA_COUNT) return &extra_parameters[slot-S1_EXTRA_FIRST];
++    if (slot - S1_EXTRA_FIRST < S1_CATALOG_EXTRA_COUNT) return &extra_parameters[slot-S1_EXTRA_FIRST];
+ #endif
+     return NULL;
+ }
+@@ -161,7 +174,7 @@
+     for (unsigned i = 0; i < S1_PATCH_COUNT; ++i)
+         if (patch_parameters[i].factory_id == id) return (int)i;
+ #if X0X_S1_EXTRA
+-    for (unsigned i = 0; i < S1_EXTRA_COUNT; ++i)
++    for (unsigned i = 0; i < S1_CATALOG_EXTRA_COUNT; ++i)
+         if (extra_parameters[i].factory_id == id) return (int)(S1_EXTRA_FIRST + i);
+ #endif
+     return -1;
+@@ -183,6 +196,22 @@
+ }
+ 
+ #if X0X_S1_EXTRA
++/* Called only at the existing patch/lock audio boundary. Restore immutable
++ * program words directly before applying an authored clock as one tuple. */
++static void s1_part_clock(s1_dry_part *part, unsigned code)
++{
++    s1c *e = &part->e;
++    s1c_set(e, P_TEMPO_SYNC, part->lfo_factory[S1_LFO_SYNC - S1_LFO_FIRST]);
++    s1c_set(e, extra_parameters[S1_LFO1_RATE - S1_EXTRA_FIRST].factory_id, part->lfo_factory[0]);
++    s1c_set(e, extra_parameters[S1_LFO2_RATE - S1_EXTRA_FIRST].factory_id, part->lfo_factory[1]);
++    s1c_set(e, P_PAN_RATE, part->clock_factory_pan);
++    s1c_set(e, P_DELAY_TIME, part->clock_factory_delay);
++    if (code) {
++        (void)s1c_front_set(e, P_TEMPO_SYNC, 1.f);
++        if (code == 1u) (void)s1c_front_set(e, P_TEMPO_SYNC, 0.f);
++    }
++}
++
+ void s1_part_apply_extra(s1_dry_part *part, const uint8_t *extra)
+ {
+     unsigned next = extra ? s1_extra_bits(extra) : 0;
+@@ -203,6 +232,27 @@
+         (void)s1c_front_set(&part->e, d->factory_id, value);
+     }
+     part->extra_live_mask = (uint16_t)next;
++    if (!part->lfo_live_mask && !(extra && (extra[1] >> 3))) return;
++    uint8_t values[S1_LFO_COUNT] = {0};
++    if (extra && !s1_extra_lfo_read(extra, values)) return;
++    const unsigned clock_index = S1_LFO_SYNC - S1_LFO_FIRST;
++    const unsigned clock_bit = 1u << clock_index;
++    const unsigned clock = values[clock_index];
++    int clock_dirty = clock || (part->lfo_live_mask & clock_bit);
++    if (clock_dirty) s1_part_clock(part, clock);
++    unsigned live = clock ? clock_bit : 0;
++    for (unsigned i = 0; i < clock_index; ++i) {
++        unsigned id = extra_parameters[S1_LFO_FIRST - S1_EXTRA_FIRST + i].factory_id;
++        if (values[i]) {
++            if (i < 2) s1c_front_lfo_apply(&part->e, id, values[i]);
++            else s1c_set(&part->e, id, (float)(values[i] - 1u));
++            live |= 1u << i;
++        } else if ((!clock_dirty || i >= 2) && (part->lfo_live_mask & (1u << i))) {
++            /* Program targets are already in applied units. Do not re-quantize. */
++            s1c_set(&part->e, id, part->lfo_factory[i]);
++        }
++    }
++    part->lfo_live_mask = (uint8_t)live;
+ }
+ #endif
+ 
+--- a/firmware/src/app/s1c_part.h
++++ b/firmware/src/app/s1c_part.h
+@@ -23,7 +23,10 @@
+ #if X0X_SYNTHONE_PATCH
+ #if X0X_S1_EXTRA
+     float extra_factory[S1_EXTRA_COUNT]; /* exact pack values for note-lock transitions */
++    float lfo_factory[S1_LFO_COUNT];
++    float clock_factory_pan, clock_factory_delay;
+     uint16_t extra_live_mask;
++    uint8_t lfo_live_mask;
+ #endif
+     float filter_unlinked[4];
+     uint8_t filter_link;
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -486,9 +486,12 @@
+     s1_patch_value owner;
+     if (!s1_read(r, &owner)) return;
+     if (relative) value += owner.position;
+-    int max = (int)s1_patch_steps(r.kind == R_S1LINK ? S1_PATCH_COUNT : r.c);
++    int max = owner.max_position;
+     value = value < 0 ? 0 : value > max ? max : value;
+     if (r.kind == R_S1LINK && value == owner.position) return;
++#if X0X_S1_EXTRA
++    if (r.kind == R_S1PATCH && r.c >= S1_LFO_FIRST && value == owner.position) return;
++#endif
+     unsigned id = r.kind == R_S1LINK ? S1_LINK_ID : s1_patch_at(r.c)->factory_id;
+     int status = engine_s1_patch_set(r.b, owner.revision, id, (unsigned)value);
+     if (status == S1_EDIT_QUEUED) mark_dirty();
+@@ -1447,15 +1450,33 @@
+ #if X0X_SYNTHONE_PATCH
+     if (r.kind == R_S1PATCH) {
+         const s1_patch_descriptor *patch = s1_patch_at(r.c);
++        s1_patch_value owner = {0};
+         float physical;
+         if (s1_draw_patch && bidx() == r.b && r.c < S1_PATCH_COUNT)
+             physical = s1_draw_patch->physical[r.c];
+         else {
+-            s1_patch_value owner;
+             if (!s1_read(r, &owner)) { put_s(num, "--"); return; }
+             physical = owner.physical;
+         }
+ #if X0X_S1_EXTRA
++        if (s1_lfo_rate_slot(r.c) && owner.max_position < S1_PATCH_STEPS) {
++            static const uint8_t bars[] = {8, 6, 4, 3, 2, 1, 1};
++            unsigned div = owner.position;
++            if (div < sizeof bars) put_s(put_i(num, bars[div]), div == 6 ? " BAR T" : " BAR");
++            else put_s(put_i(put_s(num, "1/"), 1u << ((div - 5u)/2u)), !(div & 1u) ? "T" : "");
++            return;
++        }
++        if (r.c == S1_LFO_SYNC) { put_s(num, physical > 0.f ? "ON" : "OFF"); return; }
++        if (s1_lfo_rate_slot(r.c)) {
++            put_d1(num, physical < 1.f ? physical * 1000.f : physical, 0);
++            put_s(unit, physical < 1.f ? "mHz" : "Hz");
++            return;
++        }
++        if (r.c - S1_LFO1_SHAPE < 2u) {
++            static const char *const shapes[] = {"SINE", "SQUARE", "SAW", "REV SAW"};
++            put_s(num, shapes[(unsigned)physical & 3u]);
++            return;
++        }
+         if (r.c == S1_SUB_OCTAVE) { put_s(num, physical > 0.f ? "-24" : "-12"); put_s(unit, "st"); return; }
+         if (r.c == S1_SUB_WAVE) { put_s(num, physical > 0.f ? "SQUARE" : "SINE"); return; }
+         if (r.c == S1_FM_INDEX) { put_d1(num, physical, 0); return; }
+@@ -2114,7 +2135,7 @@
+ #endif
+ #if X0X_S1_EXTRA
+             if (kind == ORIGINAL_SOUND_SYNTHONE) {
+-                enum { S1_PAGE_ID_FITS = 1 / (S1_ADSR_TRACK < ORIG_PAGE_ENGINE) };
++                enum { S1_PAGE_ID_FITS = 1 / (S1_LFO_SYNC < ORIG_PAGE_ENGINE) };
+                 static const original_page_row_t s1_pages[] = {
+                     {"OSCILLATOR", {0, 1, S1_OSC1_MORPH, S1_OSC2_MORPH}},
+                     {"OSC MIX", {S1_OSC2_LEVEL, S1_SUB_LEVEL, S1_SUB_OCTAVE, S1_SUB_WAVE}},
+@@ -2123,15 +2144,18 @@
+                     {"FILTER MODE", {S1_FILTER_TYPE, S1_ADSR_TRACK, ORIG_PAGE_NONE, ORIG_PAGE_NONE}},
+                     {"FILTER ADSR", {5, 6, 7, 8}},
+                     {"AMP ADSR", {9, 10, 11, 12}},
++                    {"LFO", {S1_LFO1_RATE, S1_LFO1_SHAPE, S1_LFO2_RATE, S1_LFO2_SHAPE}},
++                    {"TEMPO SYNC", {S1_LFO_SYNC, ORIG_PAGE_NONE, ORIG_PAGE_NONE, ORIG_PAGE_NONE}},
+                     {"EFFECT", {ORIG_PAGE_ENGINE + ORIGINAL_SYNTHONE_CRUSH, ORIG_PAGE_NONE, ORIG_PAGE_NONE, ORIG_PAGE_NONE}},
+                 };
+-                add_original_extra_pages(emit, s1_pages, 7, b, R_S1PATCH);
++                const unsigned effect_page = sizeof s1_pages / sizeof s1_pages[0] - 1;
++                add_original_extra_pages(emit, s1_pages, effect_page, b, R_S1PATCH);
+ #if X0X_ARP_HOOKS
+                 if (arp_engine(b))
+                     add_page(emit, "ARPEGGIATOR", PR(R_ARP, ARP_F_ON, b, 0), PR(R_ARP, ARP_F_RANGE, b, 0),
+                              PR(R_ARP, ARP_F_MODE, b, 0), PR(R_ARP, ARP_F_SPEED, b, 0));
+ #endif
+-                add_original_extra_pages(emit, s1_pages + 7, 1, b, R_S1PATCH);
++                add_original_extra_pages(emit, s1_pages + effect_page, 1, b, R_S1PATCH);
+             } else
+ #endif
+             for (int row = first_row; row < count; row++) {
+--- a/firmware/src/dsp/s1c/s1c_front.c
++++ b/firmware/src/dsp/s1c/s1c_front.c
+@@ -3,6 +3,14 @@
+  * contributors); this is an independent C rewrite for the compact engine. */
+ #include "s1c_front.h"
+ #include "s1c_tables.inc"
++#if X0X_SYNTHONE_PATCH
++#ifdef S1C_FASTMATH
++#include "../fastmath.h"
++#define powf fm_powf
++#else
++#include <math.h>
++#endif
++#endif
+ static float dict_f(uint8_t i) { union { uint32_t u; float f; } v; v.u = s1c_dict[i]; return v.f; }
+ #define MINV(id) dict_f(s1c_imin[id])
+ #define MAXV(id) dict_f(s1c_imax[id])
+@@ -31,17 +39,58 @@
+     return x < lo ? lo : x > hi ? hi : x;
+ }
+ static void put(s1c *s, unsigned id, float x) { s1c_set(s, id, s1c_front_clamp(id, x)); }
+-static float nearest_frequency(float x, float bpm, float lo, float hi)
++void s1c_front_bounds(unsigned id, float *minimum, float *maximum)
+ {
+-    float best = 1.f / rate_time(bpm, 0), diff = 1e9f;
++    *minimum = MINV(id);
++    *maximum = MAXV(id);
++}
++static int nearest_division(float x, float bpm, float lo, float hi)
++{
++    int best = 0;
++    float diff = 1e9f;
+     for (int i = 0; i < F_RATES; i++) {
+         float f = 1.f / rate_time(bpm, i);
+         if (f < lo || f > hi) continue;
+         float d = fabs_(f - x);
+-        if (d < diff) { diff = d; best = f; }
++        if (d < diff) { diff = d; best = i; }
+     }
+     return best;
+ }
++static float nearest_frequency(float x, float bpm, float lo, float hi)
++{ return 1.f / rate_time(bpm, nearest_division(x, bpm, lo, hi)); }
++
++#if X0X_SYNTHONE_PATCH
++unsigned s1c_front_lfo_steps(const s1c *s)
++{
++    if (s->t[F_TSYNC] <= 0.f) return 127u;
++    /* At 200 BPM the original binary32 last triplet can exceed MAXV. */
++    return 1.f / rate_time(s->t[F_ARPRATE], F_RATES - 1) > MAXV(F_L1R) ?
++           F_RATES - 2u : F_RATES - 1u;
++}
++
++unsigned s1c_front_lfo_position(const s1c *s, unsigned id)
++{
++    float low, high, hz = s->t[id];
++    s1c_front_bounds(id, &low, &high);
++    if (s->t[F_TSYNC] > 0.f)
++        return (unsigned)nearest_division(hz, s->t[F_ARPRATE], low, high);
++    float linear = (s1c_front_clamp(id, hz) - low) / (high - low);
++    return (unsigned)(powf(linear, 0.4f) * 127.f + 0.5f);
++}
++
++void s1c_front_lfo_apply(s1c *s, unsigned id, unsigned code)
++{
++    float value;
++    if (code >= 129u) value = 1.f / rate_time(s->t[F_ARPRATE], (int)(code - 129u));
++    else {
++        float normalized = (float)(code - 1u) / 127.f;
++        const float low = MINV(id), high = MAXV(id);
++        value = low + powf(normalized, 2.5f) * (high - low);
++    }
++    (void)s1c_front_set(s, id, value);
++}
++#endif
++
+ static float nearest_time(float x, float bpm, float lo, float hi)
+ {
+     float best = rate_time(bpm, F_RATES - 1), diff = 1e9f;
+--- a/firmware/src/dsp/s1c/s1c_front.h
++++ b/firmware/src/dsp/s1c/s1c_front.h
+@@ -7,5 +7,11 @@
+ #include "s1c.h"
+ int s1c_front_set(s1c *s, unsigned id, float value);   /* 1 = applied */
+ float s1c_front_clamp(unsigned id, float value);
++void s1c_front_bounds(unsigned id, float *minimum, float *maximum);
++#if X0X_SYNTHONE_PATCH
++unsigned s1c_front_lfo_steps(const s1c *s);
++unsigned s1c_front_lfo_position(const s1c *s, unsigned id);
++void s1c_front_lfo_apply(s1c *s, unsigned id, unsigned code);
++#endif
+ float s1c_front_init(unsigned id);                    /* INIT value of a parameter */
+ #endif

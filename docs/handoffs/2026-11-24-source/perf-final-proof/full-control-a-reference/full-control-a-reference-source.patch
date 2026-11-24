@@ -1,0 +1,563 @@
+diff --git a/firmware/src/app/engine.c b/firmware/src/app/engine.c
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -254,8 +254,8 @@
+ #if X0X_SUPERJ6_BUILTIN_INIT
+ typedef struct {
+     juno6_lfo_words lfo;
+-    float vibrato[2];
+-    uint8_t vibrato_present;
++    float vibrato[2], a_reference;
++    uint8_t vibrato_present, a_reference_present;
+ #if X0X_ARP_ENGINE
+     uint16_t saga_seen, saga_on;
+ #endif
+@@ -264,7 +264,7 @@
+ #if X0X_ARP_ENGINE
+ static void arp_factory_toggles(unsigned owner, uint16_t seen, uint16_t on);
+ #endif
+-static int sj6_factory_vibrato_ready(unsigned owner, unsigned present);
++static int sj6_factory_storage_ready(unsigned owner, unsigned vibrato, unsigned a_reference);
+ static void sj6_commit_factory(unsigned owner, const sj6_factory_motion *motion, unsigned chorus_mode);
+ #endif
+ X0X_COLD static int superj6_stage_factory(unsigned owner, const sj6_factory_row *row,
+@@ -305,8 +305,15 @@
+         const float *raw = &row->value[SJ6_ROW_VIBRATO + i];
+         uint32_t bits;
+         memcpy(&bits, raw, sizeof bits);
+-        if (!juno6_vibrato_word_valid(bits)) return 0;
++        if (!juno6_unit_word_valid(bits)) return 0;
+         memcpy(&motion.vibrato[i], &bits, sizeof bits);
++    }
++    motion.a_reference_present = (row->present >> SJ6_ROW_A_REFERENCE) & 1u;
++    if (motion.a_reference_present) {
++        uint32_t bits;
++        memcpy(&bits, &row->value[SJ6_ROW_A_REFERENCE], sizeof bits);
++        if (!juno6_unit_word_valid(bits)) return 0;
++        memcpy(&motion.a_reference, &bits, sizeof bits);
+     }
+ #endif
+ 
+@@ -317,7 +324,7 @@
+                  !synth->pending_wave_mask && !synth->pending_field_mask && !synth->pending_filter_link &&
+                  !juno6_active(synth) && !engine_bass_preset_pending(owner);
+ #if X0X_SUPERJ6_BUILTIN_INIT
+-    if (accept && !sj6_factory_vibrato_ready(owner, motion.vibrato_present)) accept = 0;
++    if (accept && !sj6_factory_storage_ready(owner, motion.vibrato_present, motion.a_reference_present)) accept = 0;
+ #endif
+     if (accept) {
+         memcpy(synth->pending_field, value, 5u * sizeof(float));
+@@ -465,7 +472,8 @@
+                 chorus->factory_pending = 0;
+                 if (active || engine_bass_preset_pending(owner) ||
+ #if X0X_SUPERJ6_BUILTIN_INIT
+-                    !sj6_factory_vibrato_ready(owner, sj6_factory_motion_pending[owner].vibrato_present) ||
++                    !sj6_factory_storage_ready(owner, sj6_factory_motion_pending[owner].vibrato_present,
++                                               sj6_factory_motion_pending[owner].a_reference_present) ||
+ #endif
+                     ((synth->pending_field_mask & SJ6_FACTORY_AMP1) &&
+                      !juno6_apply_independent_amp1_attack(synth,synth->pending_field[5]))) {
+diff --git a/firmware/src/app/engine.h b/firmware/src/app/engine.h
+--- a/firmware/src/app/engine.h
++++ b/firmware/src/app/engine.h
+@@ -146,6 +146,7 @@
+ int engine_superj6_amp1_read(unsigned owner, float *raw, float *seconds);
+ #if X0X_SUPERJ6_BUILTIN_INIT
+ int engine_superj6_knob_position(unsigned owner, unsigned slot);
++int engine_superj6_a_reference(unsigned owner, float *hz);
+ int engine_superj6_knob_turn(unsigned owner, unsigned slot, int value, int relative);
+ int engine_superj6_knob_pending(void);
+ int engine_superj6_panel_envelope(unsigned owner, unsigned filter, juno6_envelope_snapshot *, unsigned *linked);
+@@ -230,7 +231,7 @@
+ #if X0X_S1_EXTRA
+ #define BASS_SHARED_EXTRA_BYTES S1_EXTRA_BYTES
+ #else
+-#define BASS_SHARED_EXTRA_BYTES 8u
++#define BASS_SHARED_EXTRA_BYTES 12u
+ #endif
+ #endif
+ int engine_bass_sound_bank(const sound_t *sound,int voice);
+diff --git a/firmware/src/app/original_presets.inc b/firmware/src/app/original_presets.inc
+--- a/firmware/src/app/original_presets.inc
++++ b/firmware/src/app/original_presets.inc
+@@ -250,7 +250,7 @@
+ 
+ static int sj6_load_vibrato(const uint8_t *cell, const uint8_t *extra, const uint8_t *wire, float values[2])
+ {
+-    if (cell[31] == 1u) {
++    if (original_sound_sj6_vibrato_marker(cell) == 1u) {
+         values[0] = unit_control(extra[ORIGINAL_SJ6_VIBRATO_OFFSET]);
+         values[1] = unit_control(extra[ORIGINAL_SJ6_VIBRATO_OFFSET + 1u]);
+         return 3;
+@@ -258,17 +258,21 @@
+     return original_sound_sj6_vibrato_words(cell, wire, values);
+ }
+ 
++_Static_assert(SJ6_KNOBS <= 32u, "SuperJ6 panel mask fits");
+ _Static_assert(ORIGINAL_SJ6_VIBRATO_ROW == BASS_SHARED_EXTRA_ROW, "SuperJ6 uses shared bass rows");
+ _Static_assert(BASS_SHARED_EXTRA_ROW + NBASS <= NVOICES_MAX, "SuperJ6 shared rows fit");
+-_Static_assert(BASS_SHARED_EXTRA_BYTES >= ORIGINAL_SJ6_VIBRATO_WIRE_BYTES, "Undo copies both words");
+-
+-static int sj6_factory_vibrato_ready(unsigned owner, unsigned present)
++_Static_assert(BASS_SHARED_EXTRA_BYTES >= ORIGINAL_SJ6_TUNING_WIRE_BYTES, "Undo copies the tuning record");
++
++static int sj6_factory_storage_ready(unsigned owner, unsigned vibrato, unsigned a_reference)
+ {
+     if (!mot_base_snd) return 1;
+     const uint8_t *cell = mot_base_snd->v[T_303][owner];
+-    if (cell[29] != ORIGINAL_SOUND_JUNO || cell[31] > 4u) return 0;
+-    return (!present && !original_sound_sj6_vibrato_mask(cell)) ||
+-           original_sound_sj6_vibrato_available(cell, mot_base_snd->v[T_303][BASS_SHARED_EXTRA_ROW + owner]);
++    const uint8_t *wire = mot_base_snd->v[T_303][BASS_SHARED_EXTRA_ROW + owner];
++    if (!original_sound_sj6_marker_valid(cell)) return 0;
++    if (a_reference || original_sound_sj6_has_a_reference(cell))
++        return original_sound_sj6_a_reference_available(cell, wire);
++    return (!vibrato && !original_sound_sj6_vibrato_mask(cell)) ||
++           original_sound_sj6_vibrato_available(cell, wire);
+ }
+ 
+ static void sj6_commit_factory(unsigned owner, const sj6_factory_motion *motion, unsigned chorus_mode)
+@@ -277,6 +281,9 @@
+     juno6_set_lfo_words(s, &motion->lfo, 1);
+     juno6_set_lfo2_pwm(s, 0);
+     juno6_set_vibrato_words(s, motion->vibrato, motion->vibrato_present, 1);
++    if (motion->a_reference_present || (s->core.raw_present[SJ6_A_REFERENCE_ID / 32u] &
++                                       (1u << (SJ6_A_REFERENCE_ID % 32u))))
++        juno6_set_a_reference(s, motion->a_reference, motion->a_reference_present);
+     if (!mot_base_snd) return;
+     sound_t *sound = (sound_t *)mot_base_snd;
+     uint8_t *cell = sound->v[T_303][owner];
+@@ -284,10 +291,12 @@
+     original_sound_sj6_lfo_store(cell, extra, &motion->lfo);
+     original_sound_sj6_lfo2_pwm_store(cell, 0);
+     original_sound_sj6_chorus_store(cell, chorus_mode);
+-    if (cell[31] == 1u) memset(extra + ORIGINAL_SJ6_VIBRATO_OFFSET, 0, 2u);
++    uint8_t *wire = sound->v[T_303][BASS_SHARED_EXTRA_ROW + owner];
++    if (original_sound_sj6_vibrato_marker(cell) == 1u) memset(extra + ORIGINAL_SJ6_VIBRATO_OFFSET, 0, 2u);
+     if (motion->vibrato_present || original_sound_sj6_vibrato(cell))
+-        original_sound_sj6_vibrato_store(cell, sound->v[T_303][ORIGINAL_SJ6_VIBRATO_ROW + owner],
+-                                         motion->vibrato, motion->vibrato_present);
++        original_sound_sj6_vibrato_store(cell, wire, motion->vibrato, motion->vibrato_present);
++    if (motion->a_reference_present || original_sound_sj6_has_a_reference(cell))
++        original_sound_sj6_a_reference_store(cell, wire, motion->a_reference, motion->a_reference_present);
+     original_runtime_sj6_chorus(&original_bass[owner], cell);
+     bass_tag_set(sound, owner, ORIGINAL_SOUND_JUNO, bass_named_preset[owner],
+                  original_sound_is_edited(cell));
+@@ -314,6 +323,12 @@
+ static int sj6_knob_position(unsigned owner, unsigned slot)
+ {
+     if (sj6_knob_mask[owner] & (1u << slot)) return sj6_knob_value[owner][slot];
++    if (slot == SJ6_A_REFERENCE) {
++        float raw;
++        if (dnbx_read_raw(&original_bass[owner].dsp.juno.synth.core, SJ6_A_REFERENCE_ID, &raw) != DNBX_OK)
++            return SJ6_A_REFERENCE_DEFAULT;
++        return (int)(raw * SJ6_A_REFERENCE_STEPS + .5f);
++    }
+     if (slot >= SJ6_VIBRATO_DEPTH) {
+         float raw;
+         unsigned id = 105u + slot - SJ6_VIBRATO_DEPTH;
+@@ -371,7 +386,8 @@
+         int max = (int)original_sound_sj6_max(slot);
+         if (relative) value += before;
+         value = value < 0 ? 0 : value > max ? max : value;
+-        if (value != before && (slot < SJ6_VIBRATO_DEPTH || sj6_factory_vibrato_ready(owner, 1u))) {
++        if (value != before && (slot < SJ6_VIBRATO_DEPTH ||
++            sj6_factory_storage_ready(owner, slot != SJ6_A_REFERENCE, slot == SJ6_A_REFERENCE))) {
+             sj6_knob_value[owner][slot] = (uint8_t)value;
+             sj6_knob_mask[owner] |= 1u << slot;
+             changed = 1;
+@@ -379,6 +395,23 @@
+     }
+     plat_cq_unlock(lock);
+     return changed;
++}
++
++X0X_COLD int engine_superj6_a_reference(unsigned owner, float *hz)
++{
++    if (owner >= NBASS || !hz) return 0;
++    uint32_t lock = plat_cq_lock();
++    int ready = sj6_knob_ready(owner);
++    if (ready) {
++        float raw = .6f;
++        if (sj6_knob_mask[owner] & (1u << SJ6_A_REFERENCE))
++            raw = juno6_a_reference_unit(sj6_knob_value[owner][SJ6_A_REFERENCE]);
++        else
++            (void)dnbx_read_raw(&original_bass[owner].dsp.juno.synth.core, SJ6_A_REFERENCE_ID, &raw);
++        *hz = juno6_a_reference_hz(raw);
++    }
++    plat_cq_unlock(lock);
++    return ready;
+ }
+ 
+ X0X_COLD int engine_superj6_panel_envelope(unsigned owner, unsigned filter,
+@@ -463,8 +496,8 @@
+         original_sound_sj6_chorus_store(cell, chorus->factory_mode);
+         if (!prior || chorus_turns >> 2) original_runtime_sj6_chorus(&original_bass[v], cell);
+     }
+-    unsigned vibrato_turns = mask >> SJ6_VIBRATO_DEPTH;
+-    if (vibrato_turns && sj6_factory_vibrato_ready(v, 1u)) {
++    unsigned vibrato_turns = (mask >> SJ6_VIBRATO_DEPTH) & 3u;
++    if (vibrato_turns && sj6_factory_storage_ready(v, 1u, 0u)) {
+         uint8_t *extra = sound->v[T_303][ORIGINAL_SJ6_EXTRA_ROW + v];
+         uint8_t *wire = sound->v[T_303][BASS_SHARED_EXTRA_ROW + v];
+         float values[2] = {0};
+@@ -474,10 +507,16 @@
+                 if (vibrato_turns & (1u << i))
+                     values[i] = unit_control(sj6_knob_value[v][SJ6_VIBRATO_DEPTH + i]);
+             present |= vibrato_turns;
+-            if (cell[31] == 1u) memset(extra + ORIGINAL_SJ6_VIBRATO_OFFSET, 0, 2u);
++            if (original_sound_sj6_vibrato_marker(cell) == 1u) memset(extra + ORIGINAL_SJ6_VIBRATO_OFFSET, 0, 2u);
+             original_sound_sj6_vibrato_store(cell, wire, values, present);
+             juno6_set_vibrato_words(s, values, present, 0);
+         }
++    }
++    if ((mask & (1u << SJ6_A_REFERENCE)) && sj6_factory_storage_ready(v, 0u, 1u)) {
++        uint8_t *wire = sound->v[T_303][BASS_SHARED_EXTRA_ROW + v];
++        float raw = juno6_a_reference_unit(sj6_knob_value[v][SJ6_A_REFERENCE]);
++        original_sound_sj6_a_reference_store(cell, wire, raw, 1u);
++        juno6_set_a_reference(s, raw, 1u);
+     }
+     bass_tag_set(sound, v, ORIGINAL_SOUND_JUNO, bass_named_preset[v],
+                  original_sound_is_edited(cell));
+@@ -785,9 +824,12 @@
+         if (original_sound_edit_mask(cell) & ORIGINAL_SJ6_AUTHORED_LFO_BIT)
+             sj6_restore_authored_lfo(&original_bass[v], cell, extra);
+         sj6_restore_extra(&original_bass[v], cell, extra, 0);
+-        float values[2] = {0};
+-        int present = sj6_load_vibrato(cell, extra, sound->v[T_303][BASS_SHARED_EXTRA_ROW + v], values);
++        const uint8_t *wire = sound->v[T_303][BASS_SHARED_EXTRA_ROW + v];
++        float values[2] = {0}, a_reference;
++        int present = sj6_load_vibrato(cell, extra, wire, values);
+         if (present > 0) juno6_set_vibrato_words(&original_bass[v].dsp.juno.synth, values, present, 1);
++        if (original_sound_sj6_a_reference_word(cell, wire, &a_reference) > 0)
++            juno6_set_a_reference(&original_bass[v].dsp.juno.synth, a_reference, 1u);
+     }
+ #endif
+ #if X0X_S1_EXTRA
+@@ -950,7 +992,8 @@
+             if (sj6_flags & ORIGINAL_SJ6_EXTRA_BIT) memset(sj6_extra, 0, ORIGINAL_SJ6_EXTRA_SIZE);
+             if (sj6_flags & ORIGINAL_SJ6_AUTHORED_LFO_BIT)
+                 memset(sj6_extra + ORIGINAL_SJ6_EXTRA_SIZE, 0, ORIGINAL_SJ6_LFO_AUTHORED_SIZE);
+-            if (sound->v[T_303][v][31] == 1u) memset(sj6_extra + ORIGINAL_SJ6_VIBRATO_OFFSET, 0, 2u);
++            if (original_sound_sj6_vibrato_marker(sound->v[T_303][v]) == 1u)
++                memset(sj6_extra + ORIGINAL_SJ6_VIBRATO_OFFSET, 0, 2u);
+         }
+ #endif
+ #if X0X_S1_EXTRA || X0X_SUPERJ6_BUILTIN_INIT
+diff --git a/firmware/src/app/original_sound.c b/firmware/src/app/original_sound.c
+--- a/firmware/src/app/original_sound.c
++++ b/firmware/src/app/original_sound.c
+@@ -204,6 +204,7 @@
+     static const uint8_t max[SJ6_OSC_KNOBS] = {3, 3, 2, 1, 127, 1, 127};
+     if (slot < SJ6_OSC_KNOBS) return max[slot];
+     if (slot == SJ6_MASTER_LEVEL) return SJ6_MASTER_INIT;
++    if (slot == SJ6_A_REFERENCE) return SJ6_A_REFERENCE_STEPS;
+     if (slot == SJ6_LFO2_PWM_ROUTE) return DNBX_LAYERS;
+     if (slot == SJ6_FILTER_LINK || (slot >= SJ6_LFO1_MODE && slot <= SJ6_CHORUS_II)) return 1u;
+     return slot <= SJ6_LFO2_PWM_BASE ? 127u : 0;
+@@ -325,14 +326,25 @@
+     original_sound_put_mask(cell, flags);
+ }
+ 
++static uint32_t sj6_read_word(const uint8_t *wire)
++{
++    uint32_t word = 0;
++    for (unsigned b = 0; b < 4; ++b) word |= (uint32_t)wire[b] << (8u * b);
++    return word;
++}
++
++static void sj6_write_word(uint8_t *wire, uint32_t word)
++{
++    for (unsigned b = 0; b < 4; ++b) wire[b] = (uint8_t)(word >> (8u * b));
++}
++
+ int original_sound_sj6_vibrato_words(const uint8_t *cell, const uint8_t *wire, float values[2])
+ {
+     unsigned present = original_sound_sj6_vibrato_mask(cell);
+     if (!present) return 0;
+     for (unsigned i = 0; i < 2; ++i) {
+-        uint32_t word = 0;
+-        for (unsigned b = 0; b < 4; ++b) word |= (uint32_t)wire[4u * i + b] << (8u * b);
+-        if (present & (1u << i) ? !juno6_vibrato_word_valid(word) : word != 0) return -1;
++        uint32_t word = sj6_read_word(wire + 4u * i);
++        if (present & (1u << i) ? !juno6_unit_word_valid(word) : word != 0) return -1;
+         memcpy(&values[i], &word, sizeof word);
+     }
+     return (int)present;
+@@ -340,7 +352,7 @@
+ 
+ int original_sound_sj6_vibrato_available(const uint8_t *cell, const uint8_t *wire)
+ {
+-    if (cell[29] != ORIGINAL_SOUND_JUNO || cell[31] > 4u) return 0;
++    if (!original_sound_sj6_marker_valid(cell)) return 0;
+     if (original_sound_sj6_vibrato_mask(cell)) {
+         float values[2];
+         return original_sound_sj6_vibrato_words(cell, wire, values) > 0;
+@@ -352,12 +364,37 @@
+ 
+ void original_sound_sj6_vibrato_store(uint8_t *cell, uint8_t *wire, const float values[2], unsigned present)
+ {
+-    cell[31] = (uint8_t)(present ? present + 1u : 0u);
++    cell[31] = (uint8_t)((cell[31] & ORIGINAL_SJ6_A_REFERENCE_MARK) | (present ? present + 1u : 0u));
+     for (unsigned i = 0; i < 2; ++i) {
+         uint32_t word = 0;
+         if (present & (1u << i)) memcpy(&word, &values[i], sizeof word);
+-        for (unsigned b = 0; b < 4; ++b) wire[4u * i + b] = (uint8_t)(word >> (8u * b));
+-    }
++        sj6_write_word(wire + 4u * i, word);
++    }
++}
++
++int original_sound_sj6_a_reference_word(const uint8_t *cell, const uint8_t *wire, float *value)
++{
++    if (!original_sound_sj6_has_a_reference(cell)) return 0;
++    uint32_t word = sj6_read_word(wire + ORIGINAL_SJ6_VIBRATO_WIRE_BYTES);
++    if (!juno6_unit_word_valid(word)) return -1;
++    memcpy(value, &word, sizeof word);
++    return 1;
++}
++
++void original_sound_sj6_a_reference_store(uint8_t *cell, uint8_t *wire, float value, unsigned present)
++{
++    uint32_t word = 0;
++    if (present) memcpy(&word, &value, sizeof word);
++    sj6_write_word(wire + ORIGINAL_SJ6_VIBRATO_WIRE_BYTES, word);
++    cell[31] = (uint8_t)(original_sound_sj6_vibrato_marker(cell) | (present ? ORIGINAL_SJ6_A_REFERENCE_MARK : 0u));
++}
++
++int original_sound_sj6_a_reference_available(const uint8_t *cell, const uint8_t *wire)
++{
++    if (!original_sound_sj6_vibrato_available(cell, wire)) return 0;
++    float value;
++    int has_word = original_sound_sj6_a_reference_word(cell, wire, &value);
++    return has_word ? has_word > 0 : !sj6_read_word(wire + ORIGINAL_SJ6_VIBRATO_WIRE_BYTES);
+ }
+ 
+ int original_sound_sj6_ext_valid(const uint8_t *cell, const uint8_t *extra)
+@@ -365,7 +402,7 @@
+     uint32_t flags = original_sound_edit_mask(cell);
+     juno6_lfo_words words;
+     const uint8_t *vibrato = extra + ORIGINAL_SJ6_VIBRATO_OFFSET;
+-    return (cell[31] != 1u || ((vibrato[0] | vibrato[1]) <= 127u)) &&
++    return (original_sound_sj6_vibrato_marker(cell) != 1u || ((vibrato[0] | vibrato[1]) <= 127u)) &&
+            (!(flags & ORIGINAL_SJ6_EXTRA_BIT) || original_sound_sj6_extra_valid(extra)) &&
+            (!(flags & ORIGINAL_SJ6_AUTHORED_LFO_BIT) || original_sound_sj6_lfo_words(extra, &words));
+ }
+@@ -409,7 +446,7 @@
+         (original_sound_edit_mask(cell) & (1u << ORIGINAL_SYNTHONE_CRUSH));
+     if (cell[31] != crush_edit
+ #if X0X_SUPERJ6_BUILTIN_INIT
+-        && !original_sound_sj6_vibrato(cell)
++        && !original_sound_sj6_marker_valid(cell)
+ #endif
+        ) return 0;
+     if (cell[29] == ORIGINAL_SOUND_SYNTHONE && !crush_edit && cell[ORIGINAL_SYNTHONE_CRUSH]) return 0;
+@@ -567,7 +604,9 @@
+         return original_sound_s1_extra_valid(cell, extra) ? (int)s1_extra_size(extra) : -1;
+ #endif
+ #if X0X_SUPERJ6_BUILTIN_INIT
+-    if (cell[29] == ORIGINAL_SOUND_JUNO && cell[31] > 4u) return -1;
++    if (cell[29] == ORIGINAL_SOUND_JUNO && !original_sound_sj6_marker_valid(cell)) return -1;
++    if (original_sound_sj6_has_a_reference(cell))
++        return original_sound_sj6_a_reference_available(cell, extra) ? (int)ORIGINAL_SJ6_TUNING_WIRE_BYTES : -1;
+     if (original_sound_sj6_vibrato_mask(cell))
+         return original_sound_sj6_vibrato_available(cell, extra) ? (int)ORIGINAL_SJ6_VIBRATO_WIRE_BYTES : -1;
+ #endif
+diff --git a/firmware/src/app/original_sound.h b/firmware/src/app/original_sound.h
+--- a/firmware/src/app/original_sound.h
++++ b/firmware/src/app/original_sound.h
+@@ -49,7 +49,8 @@
+  * [0..21] macro display bytes; [22..25] LE edit mask; [26..27] 'OS'; [28] version;
+  * [29] engine kind; [30] selected factory index; [31] normally zero. Synth
+  * One uses 1 for crush. SuperJ6 uses 1 for old knob bytes and 2..4 for exact
+- * vibrato records with depth, rate or both present, respectively.
++ * vibrato records with depth, rate or both present, respectively. Bit 3
++ * independently marks an A-reference word in the same qualified record.
+  * Chicago indexes all 81 programs (the 55 compact ones first, then the 26
+  * restored-insert ones) and FxType stores a twelve-choice index.
+  * Kind 2 is Synth One. New writes use persistent id OS11. Historical id
+@@ -140,11 +141,25 @@
+ /* Rows 6 and 7 carry one bank-qualified extension per bass part. */
+ #define ORIGINAL_SJ6_VIBRATO_ROW (ORIGINAL_SJ6_EXTRA_ROW + 2u)
+ #define ORIGINAL_SJ6_VIBRATO_WIRE_BYTES 8u
++#define ORIGINAL_SJ6_A_REFERENCE_MARK 8u
++#define ORIGINAL_SJ6_TUNING_WIRE_BYTES 12u
+ /* The same kind-discriminated byte marks Synth One crush edits. */
++static inline unsigned original_sound_sj6_vibrato_marker(const uint8_t *cell)
++{ return cell[31] & 7u; }
++static inline int original_sound_sj6_marker_valid(const uint8_t *cell)
++{ return cell[29] == ORIGINAL_SOUND_JUNO && cell[31] <= 12u && original_sound_sj6_vibrato_marker(cell) <= 4u; }
+ static inline int original_sound_sj6_vibrato(const uint8_t *cell)
+-{ return cell[29] == ORIGINAL_SOUND_JUNO && cell[31] >= 1u && cell[31] <= 4u; }
++{ return original_sound_sj6_marker_valid(cell) && original_sound_sj6_vibrato_marker(cell) != 0; }
+ static inline unsigned original_sound_sj6_vibrato_mask(const uint8_t *cell)
+-{ return original_sound_sj6_vibrato(cell) && cell[31] > 1u ? cell[31] - 1u : 0u; }
++{
++    unsigned marker = original_sound_sj6_vibrato_marker(cell);
++    return original_sound_sj6_vibrato(cell) && marker > 1u ? marker - 1u : 0u;
++}
++static inline int original_sound_sj6_has_a_reference(const uint8_t *cell)
++{ return original_sound_sj6_marker_valid(cell) && (cell[31] & ORIGINAL_SJ6_A_REFERENCE_MARK); }
++int original_sound_sj6_a_reference_word(const uint8_t *cell, const uint8_t *wire, float *value);
++void original_sound_sj6_a_reference_store(uint8_t *cell, uint8_t *wire, float value, unsigned present);
++int original_sound_sj6_a_reference_available(const uint8_t *cell, const uint8_t *wire);
+ /* Exact little-endian binary32 words. Zero means no exact record, -1 means malformed. */
+ int original_sound_sj6_vibrato_words(const uint8_t *cell, const uint8_t *wire, float values[2]);
+ void original_sound_sj6_vibrato_store(uint8_t *cell, uint8_t *wire, const float values[2], unsigned present);
+@@ -174,7 +189,7 @@
+ static inline int original_sound_is_edited(const uint8_t *cell)
+ {
+ #if X0X_SUPERJ6_BUILTIN_INIT
+-    if (original_sound_sj6_vibrato(cell)) return 1;
++    if (original_sound_sj6_marker_valid(cell) && cell[31]) return 1;
+ #endif
+     return original_sound_edit_mask(cell) != 0;
+ }
+diff --git a/firmware/src/app/superj6_factory.h b/firmware/src/app/superj6_factory.h
+--- a/firmware/src/app/superj6_factory.h
++++ b/firmware/src/app/superj6_factory.h
+@@ -9,7 +9,7 @@
+     SJ6_ROW_AMP2 = 0, SJ6_ROW_MASTER = 4, SJ6_ROW_WAVE = 5,
+     SJ6_ROW_AMOUNT = 7, SJ6_ROW_ENABLE = 9, SJ6_ROW_RANGE = 11, SJ6_ROW_FILTER_LINK = 12,
+ #if X0X_SUPERJ6_BUILTIN_INIT
+-    SJ6_ROW_LFO_RATE = 13, SJ6_ROW_LFO_HZ = 16, SJ6_ROW_VIBRATO = 19, SJ6_ROW_COUNT = 21
++    SJ6_ROW_LFO_RATE = 13, SJ6_ROW_LFO_HZ = 16, SJ6_ROW_VIBRATO = 19, SJ6_ROW_A_REFERENCE = 21, SJ6_ROW_COUNT = 22
+ #else
+     SJ6_ROW_COUNT = 13
+ #endif
+@@ -64,6 +64,7 @@
+     else if (id == 88 || id == 96 || id == 100) slot = SJ6_ROW_LFO_RATE + (id == 88 ? 0u : id == 96 ? 1u : 2u);
+     else if (id >= 195 && id <= 197) slot = SJ6_ROW_LFO_HZ + id - 195;
+     else if (id == 105 || id == 106) slot = SJ6_ROW_VIBRATO + id - 105;
++    else if (id == 206) slot = SJ6_ROW_A_REFERENCE;
+ #endif
+     else return;
+     unsigned bit = 1u << slot;
+diff --git a/firmware/src/app/ui.c b/firmware/src/app/ui.c
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -520,6 +520,7 @@
+         {"CHORUS I", 1, 0, enable}, {"CHORUS II", 1, 0, enable},
+         {"RATE", 127, 0, 0}, {"MIX", 127, 0, 0},
+         {"DEPTH", 127, 0, 0}, {"RATE", 127, 0, 0},
++        {"A REF", SJ6_A_REFERENCE_STEPS, SJ6_A_REFERENCE_DEFAULT, 0},
+         {"PWM BASE", SJ6_PWM_STEPS, 0, 0},
+     };
+     return slot < sizeof knobs / sizeof *knobs ? &knobs[slot] : 0;
+@@ -1476,6 +1477,14 @@
+     }
+ #if X0X_SUPERJ6_BUILTIN_INIT
+     if (r.kind == R_SJ6KNOB && !d->names) {
++        if (r.c == SJ6_A_REFERENCE) {
++            float hz;
++            if (engine_superj6_a_reference(r.b, &hz)) {
++                put_d1(num, hz, 0);
++                put_s(unit, "Hz");
++            } else put_s(num, "--");
++            return;
++        }
+         if (r.c >= SJ6_LFO1_RATE && r.c <= SJ6_LFO3_RATE) {
+             juno6_lfo_view lfo;
+             if (!engine_superj6_lfo_view(r.b, r.c - SJ6_LFO1_RATE, &lfo) || lfo.present != 3u)
+@@ -2095,7 +2104,7 @@
+             if (kind == ORIGINAL_SOUND_JUNO) {
+                 enum { SJ6_PAGE_ID_FITS = 1 / (SJ6_LFO2_PWM_BASE < ORIG_PAGE_ENGINE) };
+                 static const original_page_row_t pages[] = {
+-                    {"OSCILLATOR", {SJ6_WAVE1, SJ6_WAVE2, SJ6_RANGE, ORIG_PAGE_NONE}},
++                    {"OSCILLATOR", {SJ6_WAVE1, SJ6_WAVE2, SJ6_RANGE, SJ6_A_REFERENCE}},
+                     {"PULSE WIDTH", {SJ6_PWM1_ON, SJ6_PWM1, SJ6_PWM2_ON, SJ6_PWM2}},
+                     {"FILTER", {ORIG_PAGE_ENGINE + 2, ORIG_PAGE_ENGINE + 3, ORIG_PAGE_ENGINE + 4, SJ6_FILTER_LINK}},
+                     {"FILTER ADSR", {SJ6_FILTER_ATTACK, SJ6_FILTER_DECAY, SJ6_FILTER_SUSTAIN, SJ6_FILTER_RELEASE}},
+diff --git a/firmware/src/dsp/juno6.h b/firmware/src/dsp/juno6.h
+--- a/firmware/src/dsp/juno6.h
++++ b/firmware/src/dsp/juno6.h
+@@ -20,7 +20,9 @@
+        SJ6_FILTER_LINK, SJ6_MASTER_LEVEL, SJ6_LFO1_RATE, SJ6_LFO2_RATE, SJ6_LFO3_RATE,
+        SJ6_LFO2_PWM_DEPTH, SJ6_LFO2_PWM_ROUTE, SJ6_LFO1_MODE, SJ6_LFO2_MODE, SJ6_LFO3_MODE,
+        SJ6_CHORUS_I, SJ6_CHORUS_II, SJ6_CHORUS_RATE, SJ6_CHORUS_MIX,
+-       SJ6_VIBRATO_DEPTH, SJ6_VIBRATO_RATE, SJ6_KNOBS, SJ6_LFO2_PWM_BASE = SJ6_KNOBS };
++       SJ6_VIBRATO_DEPTH, SJ6_VIBRATO_RATE, SJ6_A_REFERENCE,
++       SJ6_KNOBS, SJ6_LFO2_PWM_BASE = SJ6_KNOBS };
++enum { SJ6_A_REFERENCE_ID = 206, SJ6_A_REFERENCE_STEPS = 100, SJ6_A_REFERENCE_DEFAULT = 60 };
+ enum { SJ6_LFO_COUNT = 3, SJ6_LFO_WORD_COUNT = 6, SJ6_LFO_DIVISIONS = 18 };
+ typedef struct {
+     float word[SJ6_LFO_WORD_COUNT]; /* Rates, then Hz mode words, in index order. */
+@@ -129,9 +131,13 @@
+ void juno6_set_lfo2_pwm(juno6_t *, uint16_t setting);
+ void juno6_set_vibrato(juno6_t *, float depth_unit, float rate_unit, int reset);
+ /* Binary32 unit interval, including an authored negative zero. */
+-static inline int juno6_vibrato_word_valid(uint32_t bits)
++static inline int juno6_unit_word_valid(uint32_t bits)
+ { return bits <= UINT32_C(0x3f800000) || bits == UINT32_C(0x80000000); }
+ void juno6_set_vibrato_words(juno6_t *, const float values[2], unsigned present, int reset);
++void juno6_set_a_reference(juno6_t *, float normalized, unsigned present);
++float juno6_a_reference_unit(unsigned position);
++static inline float juno6_a_reference_hz(float normalized)
++{ return 200.f + 400.f * normalized; }
+ int juno6_read_panel_envelope(const juno6_t *, unsigned filter, juno6_envelope_snapshot *, unsigned *linked);
+ #endif
+ void juno6_apply_pre_note_wave(juno6_t *, unsigned, const juno6_oscillator_edit *);
+diff --git a/firmware/src/dsp/juno6_factory.inc b/firmware/src/dsp/juno6_factory.inc
+--- a/firmware/src/dsp/juno6_factory.inc
++++ b/firmware/src/dsp/juno6_factory.inc
+@@ -161,21 +161,30 @@
+ {
+ #if X0X_SUPERJ6_BUILTIN_INIT
+  const float bend=(s->macro[16]-.5f)*4;
++ float raw;
++ if (dnbx_read_raw(&s->core, SJ6_A_REFERENCE_ID, &raw) == DNBX_OK && raw != .6f)
++  return bend + range_pitch(range) + 12.f * fm_log2f(juno6_a_reference_hz(raw) / 440.f);
+ #else
+  const float bend=s->bend;
+ #endif
+  return bend+range_pitch(range);
+ }
+-void juno6_apply_pre_note_range(juno6_t *s,float x)
+-{
+- const unsigned id=86u;
+- const float pitch=typed_range_pitch(s,x<0.f?.5f:x);
++static int apply_voice_tuning(juno6_t *s, float range)
++{
++ const float pitch=typed_range_pitch(s,range);
+  for(unsigned l=0;l<DNBX_LAYERS;l++) {
+   dnbx_layer_params p;
+-  if(dnbx_get_layer(&s->core,l,&p)!=DNBX_OK) return;
++  if(dnbx_get_layer(&s->core,l,&p)!=DNBX_OK) return 0;
+   p.tune_semitones=pitch;
+-  if(dnbx_set_layer(&s->core,l,&p)!=DNBX_OK)return;
+- }
++  if(dnbx_set_layer(&s->core,l,&p)!=DNBX_OK)return 0;
++ }
++ return 1;
++}
++
++void juno6_apply_pre_note_range(juno6_t *s,float x)
++{
++ const unsigned id=86u;
++ if (!apply_voice_tuning(s, x < 0.f ? .5f : x)) return;
+  if(x<0.f) {
+   s->core.raw[id]=0.f;
+   s->core.raw_present[id/32u]&=~(1u<<(id%32u));
+@@ -221,6 +230,22 @@
+ }
+ 
+ #include "juno6_lfo_phase.h"
++
++float juno6_a_reference_unit(unsigned position)
++{
++    /* Correctly rounded hundredths through the same fixed-point strategy
++     * as the 7-bit unit control. 2^32 / 100 has quotient 42949672 and remainder 96. */
++    if (position >= SJ6_A_REFERENCE_STEPS) return 1.f;
++    return (float)(position * 42949672u + (position * 96u + 50u) / 100u) * 0x1p-32f;
++}
++
++void juno6_set_a_reference(juno6_t *s, float normalized, unsigned present)
++{
++    set_lfo_word(&s->core, SJ6_A_REFERENCE_ID, present, normalized);
++    float range = .5f;
++    (void)dnbx_read_raw(&s->core, 86u, &range);
++    (void)apply_voice_tuning(s, range);
++}
+ 
+ static void prepare_lfo_step(juno6_t *s, unsigned lfo)
+ {

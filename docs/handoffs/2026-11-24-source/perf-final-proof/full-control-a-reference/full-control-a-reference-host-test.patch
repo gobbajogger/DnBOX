@@ -1,0 +1,239 @@
+diff --git a/tests/host/ui_superj6_a_reference_test.c b/tests/host/ui_superj6_a_reference_test.c
+new file mode 100644
+--- /dev/null
++++ b/tests/host/ui_superj6_a_reference_test.c
+@@ -0,0 +1,234 @@
++/* SPDX-License-Identifier: GPL-3.0-only */
++#define PWM_FIXTURE_MAIN retained_pwm_main
++#include "ui_superj6_pwm1_lfo2_test.c"
++#include "bank_reader.c"
++#include <math.h>
++
++static juno6_t *last_init, *part_synth[2];
++void __real_juno6_init(juno6_t *, float);
++void __wrap_juno6_init(juno6_t *s, float rate)
++{
++    __real_juno6_init(s, rate);
++    last_init = s;
++}
++
++static uint32_t float_word(float f)
++{
++    uint32_t v;
++    memcpy(&v, &f, sizeof v);
++    return v;
++}
++
++static void fresh(unsigned owner)
++{
++    for (unsigned obj = 0; obj < OBJ_NOBJ; ++obj)
++        store_len[obj] = store_previous_len[obj] = -1;
++    memset(stored_known, 0, sizeof stored_known);
++    setup(V_PART, PART_303A + owner);
++    proj.set.bt |= PROJ_BT_CLK_IN;
++    for (unsigned v = 0; v < 2; ++v) {
++        last_init = NULL;
++        select_owner(v, 0);
++        part_synth[v] = last_init;
++        CHECK(part_synth[v]);
++    }
++    CHECK(part_synth[0] != part_synth[1]);
++    isolate_dry_pair();
++}
++
++static void verify_reference(unsigned owner, unsigned present, uint32_t word, float hz)
++{
++    const uint8_t *cell = proj.sound.v[T_303][owner];
++    const uint8_t *wire = proj.sound.v[T_303][BASS_SHARED_EXTRA_ROW + owner];
++    float value, live, shown;
++    CHECK(original_sound_sj6_a_reference_word(cell, wire, &value) == (int)present);
++    CHECK(dnbx_read_raw(&part_synth[owner]->core, SJ6_A_REFERENCE_ID, &live) ==
++          (present ? DNBX_OK : DNBX_E_ABSENT));
++    if (present) CHECK(float_word(value) == word && float_word(live) == word);
++    CHECK(engine_superj6_a_reference(owner, &shown));
++    CHECK(fabsf(hz - shown) < .001f);
++}
++
++static void verify_pitch(unsigned owner, float expected)
++{
++    const juno6_t *s = part_synth[owner];
++    CHECK(s->core.voice[0].gate && s->core.voice[0].note == 69);
++    for (unsigned l = 0; l < DNBX_LAYERS; ++l) {
++        float hz = s->core.voice[0].layer[l].increment * s->sample_rate;
++        CHECK(fabsf(hz - expected) < .02f);
++    }
++}
++
++static void begin_a4(void)
++{
++    engine_apply_sound(&proj.sound);
++    render(24);
++    engine_bass_on(0, 69, 0, 0);
++    engine_bass_on(1, 69, 0, 0);
++    render(4);
++}
++
++static void reload_reference(void)
++{
++    save_and_reload();
++    engine_apply_sound(&proj.sound);
++    render(1);
++}
++
++static void test_panel(unsigned owner)
++{
++    fresh(owner);
++    visit("OSCILLATOR");
++    CHECK(pref_get(pg.r[cur_page()][3]) == 60);
++    const sound_t baseline = proj.sound;
++    begin_a4();
++    verify_pitch(owner, 440.f);
++    verify_pitch(owner ^ 1u, 440.f);
++    capture(pcm[0]);
++
++    begin_a4();
++    panel_turn(3, SJ6_A_REFERENCE, 0);
++    capture(pcm[1]);
++    unsigned down = changed(pcm[0], pcm[1], owner);
++    CHECK(down > COUNT / 2 && !changed(pcm[0], pcm[1], owner ^ 1u));
++    verify_pitch(owner, 200.f);
++    verify_pitch(owner ^ 1u, 440.f);
++    verify_reference(owner, 1, 0, 200.f);
++
++    proj.sound = baseline;
++    begin_a4();
++    panel_turn(3, SJ6_A_REFERENCE, 100);
++    capture(pcm[1]);
++    unsigned up = changed(pcm[0], pcm[1], owner);
++    CHECK(up > COUNT / 2 && !changed(pcm[0], pcm[1], owner ^ 1u));
++    verify_pitch(owner, 600.f);
++    verify_pitch(owner ^ 1u, 440.f);
++    verify_reference(owner, 1, 0x3f800000u, 600.f);
++    panel_turn(2, SJ6_RANGE, 0);
++    render(1);
++    verify_pitch(owner, 300.f);
++    panel_turn(2, SJ6_RANGE, 2);
++    render(1);
++    verify_pitch(owner, 1200.f);
++    panel_turn(2, SJ6_RANGE, 1);
++    render(1);
++    verify_pitch(owner, 600.f);
++
++    begin_a4();
++    capture(pcm[0]);
++    reload_reference();
++    verify_reference(owner, 1, 0x3f800000u, 600.f);
++    begin_a4();
++    verify_pitch(owner, 600.f);
++    capture(pcm[1]);
++    CHECK(!memcmp(pcm[0], pcm[1], sizeof pcm[0]));
++
++    CHECK(!engine_bass_select_preset(owner, ORIGINAL_SOUND_JUNO, 1, &proj.sound));
++    engine_bass_off(owner);
++    for (unsigned n = 0; n < 1024 && engine_bass_preset_pending(owner); ++n) render(1);
++    CHECK(!engine_bass_preset_pending(owner));
++    verify_reference(owner, 0, 0, 440.f);
++    reload_reference();
++    verify_reference(owner, 0, 0, 440.f);
++    printf("owner=%u A REF held frames=%u down=%u up=%u peer=0, range and reload PASS\n",
++           owner, COUNT, down, up);
++}
++
++static sj6_factory_row blank(void)
++{
++    sj6_factory_row row = {.present = (1u << SJ6_ROW_AMOUNT) - 1u};
++    row.value[SJ6_ROW_MASTER] = 1.f;
++    row.value[SJ6_ROW_AMP2 + 2] = 1.f;
++    return row;
++}
++
++static void test_wire(unsigned owner)
++{
++    fresh(owner);
++    unsigned peer = owner ^ 1u;
++    uint8_t *shared = proj.sound.v[T_303][BASS_SHARED_EXTRA_ROW + owner];
++    uint8_t *other = proj.sound.v[T_303][BASS_SHARED_EXTRA_ROW + peer];
++    other[31] = 0x5a;
++    shared[8] = 0x17;
++    shared[12] = 0x8f;
++    uint8_t snapshot[NPARAMS_MAX];
++    memcpy(snapshot, shared, sizeof snapshot);
++    sj6_factory_row row = blank();
++    const uint32_t off_grid = 0x3eeeeeefu;
++    sj6_factory_add_word(&row, SJ6_A_REFERENCE_ID, off_grid);
++    CHECK(!engine_superj6_factory_load(owner, &row));
++    CHECK(!engine_superj6_knob_turn(owner, SJ6_A_REFERENCE, 75, 0));
++    CHECK(!memcmp(snapshot, shared, sizeof snapshot));
++
++    shared[8] = 0;
++    sj6_factory_add_word(&row, 105, 0x3f000000u);
++    sj6_factory_add_word(&row, 106, 0x3f400000u);
++    sj6_factory_add_word(&row, SJ6_A_REFERENCE_ID, 0x7fc00000u);
++    CHECK(engine_superj6_factory_load(owner, &row));
++    render(1);
++    float u;
++    memcpy(&u, &off_grid, sizeof u);
++    verify_reference(owner, 1, off_grid, 200.f + 400.f * u);
++    CHECK(original_sound_bass_shared_size(proj.sound.v[T_303][owner], shared) == 12);
++    uint8_t vib[8];
++    memcpy(vib, shared, sizeof vib);
++    reload_reference();
++    CHECK(!memcmp(vib, shared, sizeof vib));
++    verify_reference(owner, 1, off_grid, 200.f + 400.f * u);
++    CHECK(engine_superj6_knob_turn(owner, SJ6_A_REFERENCE, 75, 0));
++    render(1);
++    CHECK(!memcmp(vib, shared, sizeof vib));
++    verify_reference(owner, 1, 0x3f400000u, 500.f);
++    CHECK(shared[12] == 0x8f && other[31] == 0x5a);
++
++    sj6_factory_row invalid = blank();
++    sj6_factory_add_word(&invalid, SJ6_A_REFERENCE_ID, 0x7fc00000u);
++    CHECK(!engine_superj6_factory_load(owner, &invalid));
++    verify_reference(owner, 1, 0x3f400000u, 500.f);
++    CHECK(engine_superj6_factory_load(owner, &(sj6_factory_row){.present = (1u << SJ6_ROW_AMOUNT) - 1u}));
++    render(1);
++    verify_reference(owner, 0, 0, 440.f);
++    for (unsigned i = 0; i < 12; ++i) CHECK(!shared[i]);
++    CHECK(shared[12] == 0x8f && other[31] == 0x5a);
++}
++
++static void test_archive(void)
++{
++    fresh(0);
++    unsigned records = 0, explicit = 0;
++    for (unsigned b = 0; b < BANK_COUNT; ++b) {
++        for (unsigned p = 0; p < (unsigned)(bank_start[b+1] - bank_start[b]); ++p) {
++            sj6_record_reader reader;
++            CHECK(sj6_select_position(b, p, &reader));
++            sj6_factory_row row = {0};
++            unsigned id;
++            uint32_t w;
++            while (sj6_next_field(&reader, &id, &w)) sj6_factory_add_word(&row, id, w);
++            unsigned marked = (row.present >> SJ6_ROW_A_REFERENCE) & 1u;
++            explicit += marked;
++            ++records;
++            for (unsigned owner = 0; owner < 2; ++owner) {
++                CHECK(engine_superj6_factory_load(owner, &row));
++                render(1);
++                verify_reference(owner, marked, 0x3f19999au, 440.f);
++            }
++        }
++    }
++    CHECK(records == 640 && explicit == 26);
++    puts("640 full bank records on both parts, 26 exact authored A440 words and 614 omissions");
++}
++
++int main(void)
++{
++    for (unsigned q = 0; q <= 100; ++q) {
++        CHECK(float_word(juno6_a_reference_unit(q)) == float_word((float)q / 100.f));
++        CHECK(fabsf(juno6_a_reference_hz(juno6_a_reference_unit(q)) - (200.f + 4.f * q)) < .001f);
++    }
++    test_archive();
++    for (unsigned v = 0; v < 2; ++v) {
++        test_panel(v);
++        test_wire(v);
++    }
++    printf("SuperJ6 A reference %u checks\n", checks);
++    return 0;
++}

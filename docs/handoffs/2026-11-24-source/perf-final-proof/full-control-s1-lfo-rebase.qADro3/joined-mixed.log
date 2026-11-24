@@ -1,0 +1,194 @@
+In file included from tests/host/../../host/x0x_host.c:345,
+                 from tests/host/smc_ui_test.c:8,
+                 from tests/host/ui_arp_engine_test.c:6,
+                 from tests/host/ui_superj6_pwm1_lfo2_test.c:3,
+                 from tests/host/vibrato-mixed-helpers.h:3,
+                 from tests/host/ui_s1_lfo_shared_full_control_test.c:2:
+tests/host/../../host/../firmware/src/app/ui.c: In function ‘pref_set_impl’:
+tests/host/../../host/../firmware/src/app/ui.c:1013:57: warning: operand of ‘?:’ changes signedness from ‘int’ to ‘unsigned int’ due to unsignedness of other operand [-Wsign-compare]
+ 1013 |     case R_MIDICH: seq.ch[r.a % NPARTS] = (uint8_t)(v ? v - 1 : SEQ_CH_OFF); break;
+      |                                                         ^~~~~
+tests/host/../../host/../firmware/src/app/ui.c: In function ‘original_value_text’:
+tests/host/../../host/../firmware/src/app/ui.c:1325:40: warning: comparison of integer expressions of different signedness: ‘int’ and ‘unsigned int’ [-Wsign-compare]
+ 1325 |         put_s(num, value >= 0 && value <= ORIGINAL_SOUND_JUNO ? BENGINE_N[value] : "INVALID");
+      |                                        ^~
+tests/host/../../host/../firmware/src/app/ui.c: In function ‘pref_value_of’:
+tests/host/../../host/../firmware/src/app/ui.c:1475:33: warning: comparison of integer expressions of different signedness: ‘int’ and ‘unsigned int’ [-Wsign-compare]
+ 1475 |         if (r.c - S1_LFO1_SHAPE < 2u) {
+      |                                 ^
+tests/host/../../host/../firmware/src/app/ui.c: In function ‘describe_pages’:
+tests/host/../../host/../firmware/src/app/ui.c:2117:66: warning: comparison between ‘enum <anonymous>’ and ‘enum <anonymous>’ [-Wenum-compare]
+ 2117 |                 enum { SJ6_PAGE_ID_FITS = 1 / (SJ6_LFO2_PWM_BASE < ORIG_PAGE_ENGINE) };
+      |                                                                  ^
+tests/host/../../host/../firmware/src/app/ui.c:2138:59: warning: comparison between ‘enum <anonymous>’ and ‘enum <anonymous>’ [-Wenum-compare]
+ 2138 |                 enum { S1_PAGE_ID_FITS = 1 / (S1_LFO_SYNC < ORIG_PAGE_ENGINE) };
+      |                                                           ^
+tests/host/../../host/../firmware/src/app/ui.c: In function ‘prob_turn’:
+tests/host/../../host/../firmware/src/app/ui.c:3823:43: warning: operand of ‘?:’ changes signedness from ‘int’ to ‘unsigned int’ due to unsignedness of other operand [-Wsign-compare]
+ 3823 |         l->val[s] = (uint8_t)(nv != 100 ? nv : MOT_NONE);
+      |                                           ^~
+tests/host/../../host/../firmware/src/app/ui.c: In function ‘draw_adsr_inline’:
+tests/host/../../host/../firmware/src/app/ui.c:8642:13: warning: this ‘if’ clause does not guard... [-Wmisleading-indentation]
+ 8642 |             if(level<0)level=0; if(level>1)level=1;
+      |             ^~
+tests/host/../../host/../firmware/src/app/ui.c:8642:33: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘if’
+ 8642 |             if(level<0)level=0; if(level>1)level=1;
+      |                                 ^~
+tests/host/../../host/../firmware/src/app/ui.c:8671:13: warning: this ‘if’ clause does not guard... [-Wmisleading-indentation]
+ 8671 |             if(lv<0)lv=0; if(lv>1)lv=1;
+      |             ^~
+tests/host/../../host/../firmware/src/app/ui.c:8671:27: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘if’
+ 8671 |             if(lv<0)lv=0; if(lv>1)lv=1;
+      |                           ^~
+tests/host/../../host/../firmware/src/app/ui.c: In function ‘og_wave_width’:
+tests/host/../../host/../firmware/src/app/ui.c:9028:9: warning: this ‘if’ clause does not guard... [-Wmisleading-indentation]
+ 9028 |         if(v>1)v=1; if(v<-1)v=-1;
+      |         ^~
+tests/host/../../host/../firmware/src/app/ui.c:9028:21: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘if’
+ 9028 |         if(v>1)v=1; if(v<-1)v=-1;
+      |                     ^~
+tests/host/../../host/../firmware/src/app/ui.c: In function ‘og_gnaw’:
+tests/host/../../host/../firmware/src/app/ui.c:9039:5: warning: this ‘while’ clause does not guard... [-Wmisleading-indentation]
+ 9039 |     while(v>1||v<-1) v=v>1?2-v:-2-v; return v;}             /* wavefolder */
+      |     ^~~~~
+tests/host/../../host/../firmware/src/app/ui.c:9039:38: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘while’
+ 9039 |     while(v>1||v<-1) v=v>1?2-v:-2-v; return v;}             /* wavefolder */
+      |                                      ^~~~~~
+tests/host/../../host/../firmware/src/app/ui.c: In function ‘orig_strip_glyph’:
+tests/host/../../host/../firmware/src/app/ui.c:9182:5: warning: this ‘if’ clause does not guard... [-Wmisleading-indentation]
+ 9182 |     if(q<0)q=0; if(q>1)q=1;
+      |     ^~
+tests/host/../../host/../firmware/src/app/ui.c:9182:17: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘if’
+ 9182 |     if(q<0)q=0; if(q>1)q=1;
+      |                 ^~
+tests/host/../../host/../firmware/src/app/ui.c:9185:5: warning: this ‘if’ clause does not guard... [-Wmisleading-indentation]
+ 9185 |     if(amp<0)amp=0; if(amp>1)amp=1;
+      |     ^~
+tests/host/../../host/../firmware/src/app/ui.c:9185:21: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘if’
+ 9185 |     if(amp<0)amp=0; if(amp>1)amp=1;
+      |                     ^~
+tests/host/../../host/../firmware/src/app/ui.c:9200:9: warning: this ‘if’ clause does not guard... [-Wmisleading-indentation]
+ 9200 |         if(eg<0)eg=0; if(eg>1)eg=1; if(pq<0)pq=0; if(pq>1)pq=1;
+      |         ^~
+tests/host/../../host/../firmware/src/app/ui.c:9200:23: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘if’
+ 9200 |         if(eg<0)eg=0; if(eg>1)eg=1; if(pq<0)pq=0; if(pq>1)pq=1;
+      |                       ^~
+tests/host/../../host/../firmware/src/app/ui.c:9221:9: warning: this ‘if’ clause does not guard... [-Wmisleading-indentation]
+ 9221 |         if(f<0)f=0; if(f>1)f=1;
+      |         ^~
+tests/host/../../host/../firmware/src/app/ui.c:9221:21: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘if’
+ 9221 |         if(f<0)f=0; if(f>1)f=1;
+      |                     ^~
+tests/host/../../host/../firmware/src/app/ui.c:9290:13: warning: this ‘if’ clause does not guard... [-Wmisleading-indentation]
+ 9290 |             if(mod<0)mod=0; if(mod>1)mod=1;
+      |             ^~
+tests/host/../../host/../firmware/src/app/ui.c:9290:29: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘if’
+ 9290 |             if(mod<0)mod=0; if(mod>1)mod=1;
+      |                             ^~
+tests/host/../../host/../firmware/src/app/ui.c: In function ‘dg_tail’:
+tests/host/../../host/../firmware/src/app/ui.c:9351:5: warning: this ‘if’ clause does not guard... [-Wmisleading-indentation]
+ 9351 |     if(xe<2)xe=2; if(xe>OG_W-1)xe=OG_W-1;
+      |     ^~
+tests/host/../../host/../firmware/src/app/ui.c:9351:19: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘if’
+ 9351 |     if(xe<2)xe=2; if(xe>OG_W-1)xe=OG_W-1;
+      |                   ^~
+tests/host/../../host/../firmware/src/app/ui.c: In function ‘drum_strip_glyph’:
+tests/host/../../host/../firmware/src/app/ui.c:9448:5: warning: this ‘if’ clause does not guard... [-Wmisleading-indentation]
+ 9448 |     if(q<0)q=0; if(q>1)q=1;
+      |     ^~
+tests/host/../../host/../firmware/src/app/ui.c:9448:17: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘if’
+ 9448 |     if(q<0)q=0; if(q>1)q=1;
+      |                 ^~
+In file included from tests/host/../../host/../firmware/src/app/ui.c:9527:
+tests/host/../../host/../firmware/src/app/ui_drum_voice.inc: In function ‘dv_sweep_level’:
+tests/host/../../host/../firmware/src/app/ui_drum_voice.inc:250:5: warning: this ‘if’ clause does not guard... [-Wmisleading-indentation]
+  250 |     if(level<0)level=0;if(level>1)level=1;
+      |     ^~
+tests/host/../../host/../firmware/src/app/ui_drum_voice.inc:250:24: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘if’
+  250 |     if(level<0)level=0;if(level>1)level=1;
+      |                        ^~
+tests/host/../../host/../firmware/src/app/ui.c: In function ‘ui_frame’:
+tests/host/../../host/../firmware/src/app/ui.c:10274:26: warning: this ‘for’ clause does not guard... [-Wmisleading-indentation]
+10274 |     else { int visible=0;for(unsigned row=ui.list_top;row<ui.list_n && row<ui.list_top+6u;row++)
+      |                          ^~~
+tests/host/../../host/../firmware/src/app/ui.c:10276:9: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘for’
+10276 |         if(!visible)peer_scroll.active=0; }
+      |         ^~
+tests/host/../../host/x0x_host.c: In function ‘simulator_main’:
+tests/host/../../host/x0x_host.c:1128:44: warning: operand of ‘?:’ changes signedness from ‘int’ to ‘unsigned int’ due to unsignedness of other operand [-Wsign-compare]
+ 1128 |             seq.ch[part] = (uint8_t)(chn ? chn - 1 : SEQ_CH_OFF);
+      |                                            ^~~~~~~
+tests/host/smc_ui_test.c: At top level:
+tests/host/smc_ui_test.c:11:9: warning: "CK_FN" redefined
+   11 | #define CK_FN __attribute__((unused))
+      |         ^~~~~
+In file included from tests/host/../../host/../firmware/src/app/smk_clip_arp_share.c:5,
+                 from tests/host/../../host/x0x_host.c:339:
+tests/host/../../host/../firmware/src/app/smk_clip_keys.h:16:9: note: this is the location of the previous definition
+   16 | #define CK_FN __attribute__((X0X_MINSIZE noinline, unused))   /* small code: the app area is almost full */
+      |         ^~~~~
+In file included from tests/host/smc_ui_test.c:59:
+/dev/shm/dn-s1-lfo-join.RyQDJd/candidate/firmware/src/app/smc_mixer.c: In function ‘smc_fx_bus’:
+/dev/shm/dn-s1-lfo-join.RyQDJd/candidate/firmware/src/app/smc_mixer.c:1807:44: warning: operand of ‘?:’ changes signedness from ‘int’ to ‘unsigned int’ due to unsignedness of other operand [-Wsign-compare]
+ 1807 |     int strip = note < 32u ? (note & 7u) : -1;
+      |                                            ^~
+/dev/shm/dn-s1-lfo-join.RyQDJd/candidate/firmware/src/app/smc_mixer.c: At top level:
+/dev/shm/dn-s1-lfo-join.RyQDJd/candidate/firmware/src/app/smc_mixer.c:2272:5: warning: missing initializer for field ‘pending’ of ‘smc_panic_peer_t’ [-Wmissing-field-initializers]
+ 2272 |     {{0, 0}, 0, -1}
+      |     ^
+/dev/shm/dn-s1-lfo-join.RyQDJd/candidate/firmware/src/app/smc_mixer.c:2269:13: note: ‘pending’ declared here
+ 2269 |     uint8_t pending;              /* single BANK action waits for its physical release */
+      |             ^~~~~~~
+tests/host/../../host/../firmware/src/app/ui.c: In function ‘unit_value’:
+tests/host/../../host/../firmware/src/app/ui.c:1432:25: warning: this statement may fall through [-Wimplicit-fallthrough=]
+ 1432 |     case X0X_U_RATIO: x = 12.0f * fm_log2f(x); /* fall through: semitones */
+      |                       ~~^~~~~~~~~~~~~~~~~~~~~
+tests/host/../../host/../firmware/src/app/ui.c:1433:5: note: here
+ 1433 |     case X0X_U_ST: put_d1(num, x, 1); put_s(unit, "st"); return;
+      |     ^~~~
+tests/host/../../host/../firmware/src/app/ui.c: At top level:
+tests/host/../../host/../firmware/src/app/ui.c:4288:38: warning: ‘smk_mute_known’ defined but not used [-Wunused-variable]
+ 4288 | static uint8_t smk_mute_intended[4], smk_mute_known, smk_mute_active, smk_mute_edit, smk_mute_bank;
+      |                                      ^~~~~~~~~~~~~~
+In file included from firmware/src/dsp/juno6.c:196:
+firmware/src/dsp/juno6_factory.inc: In function ‘juno6_set_lfo_words’:
+firmware/src/dsp/juno6_factory.inc:249:33: warning: operand of ‘?:’ changes signedness from ‘int’ to ‘unsigned int’ due to unsignedness of other operand [-Wsign-compare]
+  249 |         unsigned mask = words ? words->present >> lfo : 0u;
+      |                                 ^~~~~~~~~~~~~~~~~~~~~
+In file included from /usr/include/features.h:523,
+                 from /usr/include/x86_64-linux-gnu/bits/libc-header-start.h:33,
+                 from /usr/include/stdint.h:26,
+                 from /usr/lib/gcc/x86_64-linux-gnu/14/include/stdint.h:9,
+                 from firmware/src/dsp/s1c/s1c.h:5,
+                 from firmware/src/dsp/s1c/s1c.c:6:
+firmware/src/dsp/s1c/s1c.c:57:21: warning: comparison between ‘enum <anonymous>’ and ‘enum <anonymous>’ [-Wenum-compare]
+   57 | _Static_assert(MVOL == S1C_P_MVOL && BCSR == S1C_P_BCSR && PANA == S1C_P_PANA && RVMIX == S1C_P_RVMIX &&
+      |                     ^~
+firmware/src/dsp/s1c/s1c.c:57:43: warning: comparison between ‘enum <anonymous>’ and ‘enum <anonymous>’ [-Wenum-compare]
+   57 | _Static_assert(MVOL == S1C_P_MVOL && BCSR == S1C_P_BCSR && PANA == S1C_P_PANA && RVMIX == S1C_P_RVMIX &&
+      |                                           ^~
+firmware/src/dsp/s1c/s1c.c:57:65: warning: comparison between ‘enum <anonymous>’ and ‘enum <anonymous>’ [-Wenum-compare]
+   57 | _Static_assert(MVOL == S1C_P_MVOL && BCSR == S1C_P_BCSR && PANA == S1C_P_PANA && RVMIX == S1C_P_RVMIX &&
+      |                                                                 ^~
+firmware/src/dsp/s1c/s1c.c:57:88: warning: comparison between ‘enum <anonymous>’ and ‘enum <anonymous>’ [-Wenum-compare]
+   57 | _Static_assert(MVOL == S1C_P_MVOL && BCSR == S1C_P_BCSR && PANA == S1C_P_PANA && RVMIX == S1C_P_RVMIX &&
+      |                                                                                        ^~
+firmware/src/dsp/s1c/s1c.c:58:22: warning: comparison between ‘enum <anonymous>’ and ‘enum <anonymous>’ [-Wenum-compare]
+   58 |                DLMIX == S1C_P_DLMIX && PHMIX == S1C_P_PHMIX && PHW == S1C_P_PHW && WIDEN == S1C_P_WIDEN, "public ids");
+      |                      ^~
+firmware/src/dsp/s1c/s1c.c:58:46: warning: comparison between ‘enum <anonymous>’ and ‘enum <anonymous>’ [-Wenum-compare]
+   58 |                DLMIX == S1C_P_DLMIX && PHMIX == S1C_P_PHMIX && PHW == S1C_P_PHW && WIDEN == S1C_P_WIDEN, "public ids");
+      |                                              ^~
+firmware/src/dsp/s1c/s1c.c:58:68: warning: comparison between ‘enum <anonymous>’ and ‘enum <anonymous>’ [-Wenum-compare]
+   58 |                DLMIX == S1C_P_DLMIX && PHMIX == S1C_P_PHMIX && PHW == S1C_P_PHW && WIDEN == S1C_P_WIDEN, "public ids");
+      |                                                                    ^~
+firmware/src/dsp/s1c/s1c.c:58:90: warning: comparison between ‘enum <anonymous>’ and ‘enum <anonymous>’ [-Wenum-compare]
+   58 |                DLMIX == S1C_P_DLMIX && PHMIX == S1C_P_PHMIX && PHW == S1C_P_PHW && WIDEN == S1C_P_WIDEN, "public ids");
+      |                                                                                          ^~
+firmware/src/dsp/s1c/s1c.c: In function ‘s1c_render’:
+firmware/src/dsp/s1c/s1c.c:915:15: warning: unused variable ‘x’ [-Wunused-variable]
+  915 |         float x;
+      |               ^
+PASS shared-row LFO, authored vibrato, refusal and cross-engine history with Synth One owner 1
+PASS shared-row LFO, authored vibrato, refusal and cross-engine history with Synth One owner 0
+PASS joined LFO/shared-row ownership 382 checks
