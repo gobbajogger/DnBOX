@@ -1,0 +1,36 @@
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -7150,21 +7150,22 @@
+         night_send(60,y+3,76,proj.sound.v[T_MIX][p][1],PART_COL[p]);
+         night_send(154,y+3,76,proj.sound.v[T_MIX][p][2],PART_COL[p]);
+     }
+-    int delay = cur_page() == 1;
++    /* The shared FX summary occupies the second main band only. */
++    if (band != 1) return;
+     night_panel(3,92-off,234,20,0);
+     q=put_s(t,"DELAY ");
+-    if(!delay) {
+-        pref_value(PR(R_ENG,T_FX,0,FX_DL_TIME),a,u);
+-        q=put_s(put_s(q,a),"  ");
+-    }
++    pref_value(PR(R_ENG,T_FX,0,FX_DL_TIME),a,u);
++    q=put_s(put_s(q,a),"  ");
+     pref_value(PR(R_ENG,T_FX,0,FX_DL_TYPE),a,u);
+     put_s(q,a);cv_text(9,96-off,&FONT_S,t,C_HI);
+-    int x = delay ? 123 : 3;
+-    night_panel(x,116-off,114,20,0);
+-    cv_text(x+6,121-off,&FONT_T,delay ? "RV DECAY" : "FEEDBACK",C_GRAY);
+-    pref_value(PR(R_ENG,T_FX,0,delay ? FX_RV_DECAY : FX_DL_FDBK),a,u);
+-    put_s(put_s(t,a),u);
+-    text_r(x+108,121-off,&FONT_T,t,C_WHITE);
++    for (int decay=0; decay<2; decay++) {
++        int x = decay ? 123 : 3;
++        night_panel(x,116-off,114,20,0);
++        cv_text(x+6,121-off,&FONT_T,decay ? "RV DECAY" : "FEEDBACK",C_GRAY);
++        pref_value(PR(R_ENG,T_FX,0,decay ? FX_RV_DECAY : FX_DL_FDBK),a,u);
++        put_s(put_s(t,a),u);
++        text_r(x+108,121-off,&FONT_T,t,C_WHITE);
++    }
+ }
+ 
+ /* MIX, a drum machine's page: its eleven tracks' levels (and pans), the selected one lit */
