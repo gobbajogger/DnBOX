@@ -37,6 +37,10 @@ enum {DNP_OK=0,DNP_INVALID=-1,DNP_BUSY=-2,DNP_FULL=-3,DNP_CORRUPT=-4,DNP_IO=-5,D
 void dnp_init(dnpool *,const dnp_io *);
 /* Explicit format ONLY if entire pool blank. Never format existing legacy data. */
 int dnp_format(dnpool *);
+/* Adopt a verified legacy sample only when all other capacity is erased.
+ * No implicit erase of S1PK, stale sample tails, or unknown directories.
+ * Safe to retry a torn initialization; sample_extent must also verify shadow. */
+int dnp_adopt_sample(dnpool *);
 int dnp_get_info(dnpool *,dnp_info *);
 int dnp_verify(dnpool *);
 /* Open exact ID; pointer map refers to active directory, valid only until mutation. */

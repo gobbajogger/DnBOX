@@ -28,7 +28,7 @@ class Info(C.Structure):
 
 
 def run(lib):
-    for name, args in {'init':[P,P], 'format':[P], 'get_info':[P,P], 'verify':[P], 'begin':[P,P,I,I,I], 'write':[P,I,P,U], 'end':[P], 'remove':[P,P,I], 'reserve_sample':[P,U,I], 'release_sample':[P,I], 'bank_at':[P,U,P,P,P], 'bank_read':[P,P,I,I,P,U]}.items():
+    for name, args in {'init':[P,P], 'format':[P], 'adopt_sample':[P], 'get_info':[P,P], 'verify':[P], 'begin':[P,P,I,I,I], 'write':[P,I,P,U], 'end':[P], 'remove':[P,P,I], 'reserve_sample':[P,U,I], 'release_sample':[P,I], 'bank_at':[P,U,P,P,P], 'bank_read':[P,P,I,I,P,U]}.items():
         getattr(lib, 'dnp_'+name).argtypes = args
     lib.dnp_init.restype = None
 
@@ -132,6 +132,33 @@ def run(lib):
     assert m.reserve(cap)==0 and m.info().contiguous==cap and m.packs()==after
     assert m.remove(key)==0
     assert lib.dnp_release_sample(m.pool,m.info().generation)==0 and m.info().contiguous==28
+    # Migration of an existing sample: the extent callback is the trusted
+    # FSMP/CRC/shadow authority; no sample bytes may be changed by adoption.
+    extent = 2*SECTOR-37
+    sample = bytes((i*31+17)&255 for i in range(extent))
+    legacy = sample + b'\xff'*(SIZE-extent)
+    def adopt(image=legacy, end=extent):
+        m = Model(image);m.extent=end;return m
+    a = adopt();assert lib.dnp_adopt_sample(a.pool)==0
+    assert a.info().reserved==2 and a.info().banks==0
+    assert bytes(a.mem[:extent])==sample
+    assert a.packs()=={}
+    nops=list(a.ops); a.ops.clear();assert lib.dnp_adopt_sample(a.pool)==0 and not a.ops
+    migration_cuts=0
+    for i,n in enumerate(nops,1):
+        for k in sorted({0,1,n//2,n-1,n}):
+            a=adopt();a.cut,a.partial=i,k;assert lib.dnp_adopt_sample(a.pool)!=0
+            r=adopt(bytes(a.mem));assert lib.dnp_adopt_sample(r.pool)==0
+            assert bytes(r.mem[:extent])==sample and r.info().reserved==2 and r.packs()=={}
+            migration_cuts+=1
+    for offset in (2*SECTOR,15*SECTOR,28*SECTOR+50,29*SECTOR):
+        bad=bytearray(legacy);bad[offset:offset+4]=b'S1PK';a=adopt(bad)
+        assert lib.dnp_adopt_sample(a.pool)==-6 and bytes(a.mem)==bad and not a.ops
+    for invalid_extent in (0,28*SECTOR+1,0xffffffff):
+        a=adopt(end=invalid_extent);assert lib.dnp_adopt_sample(a.pool)==-6 and bytes(a.mem)==legacy
+    a=adopt();assert lib.dnp_adopt_sample(a.pool)==0 and a.install(full)==0
+    before=bytes(a.mem);assert lib.dnp_adopt_sample(a.pool)==-6 and bytes(a.mem)==before
+    print('PASS:',migration_cuts,'legacy-sample adoption interruption cases; S1PK, uncertain shadow, oversized sample and nonempty directory refused')
     print('PASS: exact installed bytes, protected deletion, subset replacement, relocation, full capacity,',cuts,'interrupted writes')
 
 

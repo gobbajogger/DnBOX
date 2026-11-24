@@ -12,7 +12,19 @@ static unsigned minbits(unsigned n){unsigned k=0;while(n){k++;n>>=1;}return k;}
 static unsigned block_start(const dnbank *b,unsigned i){unsigned base=b->off[1]+2u*((b->ng+STEP-1u)/STEP);return base+le16(b,b->off[1]+2u*i);}
 static unsigned index_record(const dnbank *b,unsigned i){return b->off[5]+2u*b->programs+le16(b,b->off[5]+2u*i);}
 static unsigned index_layout(const dnbank *b,unsigned i){return b->off[4]+2u*b->nl+le16(b,b->off[4]+2u*i);}
-static int global_word(const dnbank *b,unsigned index,uint32_t *out){if(index>=b->ng)return 0;unsigned i=index/STEP,a=block_start(b,i),n=(b->ng+STEP-1u)/STEP,end=i+1<n?block_start(b,i+1):b->off[2];if(a>end||end-a<5||end>b->off[2])return 0;unsigned k=rd(b,a);if(k>32)return 0;uint32_t w=le32(b,a+1);unsigned at=(a+5u)*8u;for(unsigned j=index%STEP;j;j--){uint32_t d=get(b,&at,end*8u,k);if(!d||d>~w)return 0;w+=d;}if(at>end*8u||(w&0x7f800000u)==0x7f800000u)return 0;*out=w;return 1;}
+/* Decode a prefix of one exact dictionary block. Shared by open-time
+ * full validation and random access: the same bounds/finite/overflow checks
+ * apply on both paths. The first word is returned for cross-block ordering. */
+static __attribute__((noinline)) int global_block(const dnbank *b,unsigned i,unsigned take,uint32_t *first,uint32_t *last){
+ unsigned groups=(b->ng+STEP-1u)/STEP,a=block_start(b,i),end=i+1u<groups?block_start(b,i+1u):b->off[2],n=b->ng-i*STEP;
+ if(n>STEP)n=STEP;
+ if(!take||take>n||a>end||end-a<5||end>b->off[2])return 0;
+ unsigned k=rd(b,a);if(k>32||end-a!=5u+((n-1u)*k+7u)/8u)return 0;
+ uint32_t w=le32(b,a+1);*first=w;unsigned at=(a+5u)*8u;
+ while(take--){if((w&0x7f800000u)==0x7f800000u)return 0;if(take){uint32_t d=get(b,&at,end*8u,k);if(!d||d>~w)return 0;w+=d;}}
+ if(at>end*8u)return 0;*last=w;return 1;
+}
+static int global_word(const dnbank *b,unsigned index,uint32_t *out){uint32_t first;return index<b->ng&&global_block(b,index/STEP,index%STEP+1u,&first,out);}
 static int open_core(dnbank *b,size_t length){
  static const uint8_t max[]={22,18,150,220};
  if(le32(b,0)!=0x324c4e44u||le32(b,4)!=length||crc(b,(unsigned)length)!=le32(b,8)||rd(b,13)!=1||rd(b,12)>3)return 0;
@@ -23,7 +35,8 @@ static int open_core(dnbank *b,size_t length){
  if(o[0]!=HEADER||o[1]-o[0]!=le16(b,14)||o[2]-o[1]<2u*groups||o[3]-o[2]!=6u*b->nf||((o[4]-o[3])&1u)||o[5]-o[4]<2u*b->nl||o[6]-o[5]<2u*b->programs||o[6]!=length)return 0;
  if(le16(b,o[1])||le16(b,o[4])||le16(b,o[5]))return 0;
  /* Validate every table extent and every ordered global word, including the tail. */
- uint32_t prev=0;for(unsigned i=0;i<groups;i++){unsigned a=block_start(b,i),end=i+1<groups?block_start(b,i+1):o[2],n=b->ng-i*STEP;if(n>STEP)n=STEP;if(a>end||end-a<5||end>o[2])return 0;unsigned k=rd(b,a);if(k>32||end-a!=5u+((n-1u)*k+7u)/8u)return 0;uint32_t w=le32(b,a+1);unsigned at=(a+5u)*8u;for(unsigned j=0;j<n;j++){if(j){uint32_t d=get(b,&at,end*8u,k);if(!d||d>~w)return 0;w+=d;}if((i||j)&&w<=prev)return 0;if((w&0x7f800000u)==0x7f800000u)return 0;prev=w;}}
+ uint32_t prev=0;for(unsigned i=0;i<groups;i++){unsigned n=b->ng-i*STEP;if(n>STEP)n=STEP;uint32_t first,last;if(!global_block(b,i,n,&first,&last)||(i&&first<=prev))return 0;prev=last;}
+
  for(unsigned i=0;i<b->nf;i++){unsigned f=o[2]+6*i,k=rd(b,f+1),n=le16(b,f+2),d=le16(b,f+4);if(rd(b,f)>=max[b->engine]||(i&&rd(b,f)<=rd(b,f-6))||k>8||n>(1u<<k)||d+n>(o[4]-o[3])/2u)return 0;for(unsigned j=0;j<n;j++)if(le16(b,o[3]+2*(d+j))>=b->ng)return 0;}
  for(unsigned i=0;i<b->nl;i++){unsigned a=index_layout(b,i),end=i+1<b->nl?index_layout(b,i+1):o[5];if(a>=end||end>o[5]||!rd(b,a)||rd(b,a)>220||end-a!=1u+rd(b,a))return 0;for(unsigned j=a+1;j<end;j++)if(rd(b,j)>=b->nf)return 0;}
  for(unsigned i=0;i<b->programs;i++){unsigned a=index_record(b,i),end=i+1<b->programs?index_record(b,i+1):o[6];if(a>end||end>o[6]||end-a<11||rd(b,a+8)>=b->nl||!rd(b,a+9)||rd(b,a+9)>47||rd(b,a+9)>end-a-10)return 0;}
