@@ -1,0 +1,29 @@
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -6787,10 +6787,14 @@
+      * Keep the selected page and its physical encoder bindings unchanged. */
+     int tail = pg.n >= rows && first + rows > pg.n;
+     if (tail) first = pg.n - rows;
+-    int synth_page_marker = 0;
++    int synth_page_marker = 0, synth_focus_row = 0;
+ #if X0X_S1_EXTRA || X0X_SUPERJ6_BUILTIN_INIT
+     int bank = engine_bass_bank(bidx());
+     synth_page_marker = bank == ORIGINAL_SOUND_SYNTHONE || bank == ORIGINAL_SOUND_JUNO;
++    if (ui.touched >= 0 && (int32_t)(ui.touch_until - plat_ms()) > 0)
++        synth_focus_row = bank == ORIGINAL_SOUND_JUNO ? !strcmp_s(pg.title[page],"LFO RATE") :
++            bank == ORIGINAL_SOUND_SYNTHONE &&
++            (!strcmp_s(pg.title[page],"EFFECT") || !strcmp_s(pg.title[page],"OUTPUT"));
+ #endif
+     uint16_t col=matrix_col();
+     if(night) cv_rect(0,0,240,band==2?KNOB_H:BAND_H,SOUND_BASE);
+@@ -6831,6 +6835,10 @@
+ #endif
+                 )) cv_rect(x,y+14,1,night?height-18:32,night?(active?SOUND_SELECT_SIDE:SOUND_LINE):(active?dim(col,3):C_LINE));
+             draw_param_widget(pg.r[p][k],x,y,cell_width,active,col,height,night);
++            /* Existing amber focus cue, below (never replacing) the value extent. */
++            if (active && synth_focus_row && pg.r[p][k].kind != R_NONE &&
++                matrix_touch_matches(pg.r[p][k],k))
++                cv_rect(x+8,y+height-3,cell_width-17,2,C_AMB);
+         }
+ #if X0X_BASS_PRESET_PREVIEW
+         if (!X0X_ORIGINAL_SYNTH && pg.r[p][0].kind==R_BENGINE) {

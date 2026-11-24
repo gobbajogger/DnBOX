@@ -1,0 +1,25 @@
+Private host output: SCRATCH
+PASS compact dry/wet render captured INIT and 694 factory programs, 1024 frames each
+PASS compact dry/wet render captured INIT and 694 factory programs, 1024 frames each
+2b7c2c740edb57be12652f58c81a538815dd21c1ca8f66b0971cad51df0f331f  SCRATCH/base.pcm
+2b7c2c740edb57be12652f58c81a538815dd21c1ca8f66b0971cad51df0f331f  SCRATCH/join.pcm
+FAIL tests/host/ui_synthone_lfo_depth_test.c:216: engine_s1_patch_read(0,DEPTH1,&missing)
+SCRATCH/depth-positive.log:owner 0 LFO1 unrouted: adjacent 0.00000000 -> 0.00787402, 0/4096 affected, peer/clocks exact
+SCRATCH/depth-positive.log:owner 1 LFO1 unrouted: adjacent 0.00000000 -> 0.00787402, 0/4096 affected, peer/clocks exact
+SCRATCH/depth-positive.log:owner 0 LFO1 routed: adjacent 0.66749960 -> 0.67716533, 4096/4096 affected, peer/clocks exact
+SCRATCH/depth-positive.log:owner 1 LFO1 routed: adjacent 0.66749960 -> 0.67716533, 4096/4096 affected, peer/clocks exact
+SCRATCH/depth-positive.log:owner 0 LFO2 unrouted: adjacent 0.01666600 -> 0.02362205, 0/4096 affected, peer/clocks exact
+SCRATCH/depth-positive.log:owner 1 LFO2 unrouted: adjacent 0.01666600 -> 0.02362205, 0/4096 affected, peer/clocks exact
+SCRATCH/depth-positive.log:owner 0 LFO2 routed: adjacent 0.44500002 -> 0.45669290, 4096/4096 affected, peer/clocks exact
+SCRATCH/depth-positive.log:owner 1 LFO2 routed: adjacent 0.44500002 -> 0.45669290, 4096/4096 affected, peer/clocks exact
+SCRATCH/depth-positive.log:PASS both physical LFO depths across two owners, project/lock safety (5421 checks)
+SCRATCH/depth-old.log:PASS old Level and lock accepted; both LFO depth Sound/lock types rejected before writes (523 checks)
+SCRATCH/pages-base.log:PASS owner A all 15 pages reached in both directions
+SCRATCH/pages-base.log:PASS owner B all 15 pages reached in both directions
+SCRATCH/pages-base.log:PASS Synth One owner A reaches all 14 dependency-baseline panels both ways
+SCRATCH/pages-base.log:PASS Synth One owner B reaches all 14 dependency-baseline panels both ways
+SCRATCH/pages-join.log:PASS owner A all 15 pages reached in both directions
+SCRATCH/pages-join.log:PASS owner B all 15 pages reached in both directions
+SCRATCH/pages-join.log:PASS Synth One owner A reaches all 14 dependency-baseline panels both ways
+SCRATCH/pages-join.log:PASS Synth One owner B reaches all 14 dependency-baseline panels both ways
+PASS 14 unchanged SuperJ6 actual LCDs byte-exact

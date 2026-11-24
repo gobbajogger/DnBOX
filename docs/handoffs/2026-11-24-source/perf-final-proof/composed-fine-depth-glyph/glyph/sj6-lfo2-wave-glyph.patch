@@ -1,0 +1,28 @@
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -8310,6 +8310,25 @@
+         return;
+     }
+ #endif
++#if X0X_SUPERJ6_BUILTIN_INIT
++    if (r.kind == R_SJ6KNOB && r.c == SJ6_LFO2_SHAPE &&
++        (unsigned)val <= SJ6_LFO2_SHAPE_MAX && height == 49) {
++        /* Same compact waveform-line convention as the other curve controls.
++         * Project Build 9's triangle/ramp/square phase into five ordinate
++         * points. S&H denotes held levels, not a claimed audio/entropy trace. */
++        static const uint8_t py[][5] = {
++            {2,0,2,4,2}, {4,3,2,1,0}, {0,1,2,3,4},
++            {0,0,4,4,4}, {3,1,1,4,4}
++        };
++        int gx = cx-12, gy = y+22;
++        for (int i=0; i<4; i++) {
++            int x0=gx+i*6, y0=gy+py[val][i], y1=gy+py[val][i+1];
++            cv_line(x0,y0,x0+6,val>=SJ6_LFO_SQUARE?y0:y1,ink);
++            if (val>=SJ6_LFO_SQUARE && y0!=y1)
++                cv_line(x0+6,y0,x0+6,y1,ink);
++        }
++    }
++#endif
+     if(r.kind==R_ENG && val>=0 && val<=d->max) shape=wave_shape(r,val,&mix);
+     if(!shape && !unused && val>=0 && orig_strip_slot(r)) {
+         /* Drum parts draw their own rows in draw_drum_voice. */

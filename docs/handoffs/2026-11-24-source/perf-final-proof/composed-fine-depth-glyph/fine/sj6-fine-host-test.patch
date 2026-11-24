@@ -1,0 +1,192 @@
+--- /dev/null
++++ b/tests/host/ui_superj6_fine_tuning_test.c
+@@ -0,0 +1,159 @@
++/* SPDX-License-Identifier: GPL-3.0-only */
++#define SJ6_LAYER1_FIXTURE_MAIN coarse_main
++#include "ui_superj6_layer1_tuning_test.c"
++
++static void near_pitch(unsigned owner, unsigned layer, float target)
++{
++    const float f = 440.f * exp2f(target / 12.f);
++    CHECK(fabsf(hz(owner,layer) - f) < .04f);
++}
++
++static void note_lock_fine(unsigned owner)
++{
++    engine_note_lock_capture(1);
++    CHECK(!engine_bass_note_capture(proj.arr.lane, 0, owner, 0, &proj.sound));
++    engine_note_lock_capture(0);
++    CHECK(!engine_bass_note_validate(&proj.arr.lane[0]));
++    CHECK(engine_superj6_knob_turn(owner,SJ6_LAYER1_FINE,20,0));
++    CHECK(engine_superj6_knob_turn(owner,SJ6_LAYER2_FINE,90,0));
++    render(1);
++    bpart_t *line=&proj.pat[0].bass[owner];
++    for (unsigned i=0;i<NSTEPS;++i) line->step[i].flags=G_REST;
++    line->len=16;
++    line->rate=RATE_16;
++    line->dir=DIR_FWD;
++    line->transpose=24;
++    line->step[0].flags=G_NOTE;
++    line->step[0].note=45;
++    line->step[0].velocity=100;
++    seq.ppat[TRK_BASS0+owner]=0;
++    engine_note_lock_refresh();
++    engine_bass_edit_hold(1);
++    seq_start(&seq);
++    for (unsigned i=0;i<2000 && juno6_layer_fine(parts[owner],0)!=0;++i) render(1);
++    CHECK(juno6_layer_fine(parts[owner],0)==0 && juno6_layer_fine(parts[owner],1)==100);
++    near_pitch(owner,0,11.5f);
++    near_pitch(owner,1,-11.5f);
++    CHECK(!engine_superj6_knob_turn(owner,SJ6_LAYER2_FINE,0,0));
++    seq_stop(&seq);
++    engine_bass_edit_hold(0);
++    render(4);
++    CHECK(juno6_layer_fine(parts[owner],0)==20 && juno6_layer_fine(parts[owner],1)==90);
++}
++
++static void fine(unsigned owner)
++{
++    setup_tuning(owner);
++    CHECK(pg.n == 15 && pg.r[cur_page()][2].c == SJ6_LAYER1_FINE && pg.r[cur_page()][3].c == SJ6_LAYER2_FINE);
++    uint8_t *cell=proj.sound.v[T_303][owner];
++    const unsigned peer=owner^1u;
++    const sound_t neutral=proj.sound;
++    play_a4();
++    capture(pcm[0]);
++    for(unsigned l=0;l<2;++l) {
++        play_a4();
++        for(unsigned pos=0;pos<=100;++pos) {
++            panel_turn(l+2,SJ6_LAYER1_FINE+l,pos);
++            char n[20]={0},u[8]={0}, oracle[20];
++            pref_value_of(pg.r[cur_page()][l+2],pos,n,u);
++            snprintf(oracle,sizeof oracle,"%d",(int)pos-50);
++            CHECK(!strcmp(n,oracle)&&!strcmp(u,"ct"));
++            if(!pos) capture(pcm[1]); else render(1);
++            near_pitch(owner,l,((int)pos-50)/100.f);
++            near_pitch(owner,l^1u,0.f);
++            CHECK(hz(peer,0)==hz(peer,1));
++            CHECK(original_sound_sj6_fine(cell,l)==pos);
++            CHECK(original_sound_valid(cell));
++            for(unsigned i=0;i<ORIGINAL_JUNO_NPARAMS;++i)
++                CHECK(original_sound_panel_position(cell,i)==neutral.v[T_303][owner][i]);
++            if(pos==50) CHECK(!memcmp(&neutral,&proj.sound,sizeof neutral));
++        }
++        CHECK(changed(pcm[0],pcm[1],owner)>COUNT/2 && !changed(pcm[0],pcm[1],peer));
++        CHECK(engine_superj6_knob_turn(owner,SJ6_LAYER1_FINE+l,50,0));
++        render(1);
++    }
++    CHECK(engine_superj6_knob_turn(owner,SJ6_LAYER1_SEMI,24,0));
++    CHECK(engine_superj6_knob_turn(owner,SJ6_LAYER2_SEMI,0,0));
++    CHECK(engine_superj6_knob_turn(owner,SJ6_LAYER1_FINE,0,0));
++    CHECK(engine_superj6_knob_turn(owner,SJ6_LAYER2_FINE,100,0));
++    CHECK(engine_superj6_knob_turn(owner,SJ6_LFO2_SHAPE,SJ6_LFO_HELD,0));
++    render(1);
++    /* Exercise real DNR3 validator/get and guarded panel setter on an old
++     * overloaded cutoff byte. Fine itself isn't a newly exposed wire kind. */
++    const x0x_param_t *d;
++    uint8_t arg[13]={0,0,0,0,R_ENG,T_303,owner,0,0,0,27,0,ORIGINAL_SOUND_JUNO};
++    uint8_t *ref=arg+4;
++    CHECK(rd_pref_ok(ref[0],ref[1],ref[2],ref[3])==1 && cell[0]>=128u);
++    int old=rd_pget(ref,&d);
++    CHECK(old==(cell[0]&127));
++    arg[8]=(uint8_t)((old+1)&127);
++    RD_N=0;
++    CHECK(rd_op(RD_PSET,arg,sizeof arg)==RS_CONFLICT);
++    CHECK(rd_pget(ref,&d)==old && original_sound_sj6_fine(cell,0)==0);
++    arg[8]=(uint8_t)old;
++    RD_N=0;
++    CHECK(rd_op(RD_PSET,arg,sizeof arg)==RS_OK && cell[0]==(128u|27u));
++    CHECK(rd_pget(ref,&d)==27 && original_sound_sj6_fine(cell,0)==0);
++    render(1);
++
++    /* The first lock should use the masked legacy position, not 155. */
++    ui.held_step=0;
++    ui.rec=0;
++    now_ms+=300;
++    lock_turn(PR(R_ENG,T_303,owner,0),1,EN_K1);
++    int lk=motion_find(proj.arr.lane,seq.ppat[ui.part],ui.part,T_303,owner,0);
++    CHECK(lk>=0 && proj.arr.lane[lk].val[0]>27 && proj.arr.lane[lk].val[0]<40);
++    CHECK(original_sound_sj6_fine(cell,0)==0 && cell[0]==(128u|27u));
++    engine_motion_clear(lk);
++    ui.held_step=-1;
++    render(1);
++    save_and_reload();
++    play_a4();
++    near_pitch(owner,0,11.5f);
++    near_pitch(owner,1,-11.5f);
++    CHECK(engine_superj6_knob_position(owner,SJ6_LFO2_SHAPE)==SJ6_LFO_HELD);
++    note_lock_fine(owner);
++    printf("owner=%u real K3/K4 101 detents each, exact neutral/readback, coarse/shape retained, project and lock proof\n",owner);
++}
++
++static void isolated_fine(void)
++{
++    for(unsigned target=0;target<2;++target) for(unsigned audible=0;audible<2;++audible) {
++        juno6_t s[2];
++        juno6_init(&s[0],RATE);
++        s[0].core.layer[audible^1u].params.gain=0.f;
++        CHECK(juno6_note_on(&s[0],69,100));
++        s[1]=s[0];
++        juno6_set_layer_fine(&s[1],target,100);
++        for(unsigned j=0;j<COUNT;j+=256) {
++            CHECK(juno6_render_stereo(&s[0],actual[0]+j,actual[1]+j,256));
++            CHECK(juno6_render_stereo(&s[1],expected[0]+j,expected[1]+j,256));
++        }
++        CHECK((memcmp(actual,expected,sizeof actual)!=0)==(target==audible));
++    }
++}
++
++static void history(void)
++{
++    setup_tuning(0);
++    undo_commit_stable();
++    panel_turn(2,SJ6_LAYER1_FINE,13);
++    render(1);
++    undo_commit_stable();
++    CHECK(juno6_layer_fine(parts[0],0)==13);
++    do_undo(0); render(1);
++    CHECK(juno6_layer_fine(parts[0],0)==50);
++    do_undo(1); render(1);
++    CHECK(juno6_layer_fine(parts[0],0)==13);
++    CHECK(!engine_bass_select_preset(0,ORIGINAL_SOUND_JUNO,1,&proj.sound));
++    for(unsigned n=0;n<1024 && engine_bass_preset_pending(0);++n)render(1);
++    CHECK(!engine_bass_preset_pending(0) && juno6_layer_fine(parts[0],0)==50);
++    CHECK(original_sound_sj6_fine(proj.sound.v[T_303][0],0)==50);
++}
++int main(void)
++{
++    isolated_fine();
++    fine(0); fine(1); history();
++    printf("PASS fine tuning: %u checks\n",checks);
++    return 0;
++}
+--- /dev/null
++++ b/tests/host/ui_superj6_fine_prior_reader_test.c
+@@ -0,0 +1,27 @@
++/* SPDX-License-Identifier: GPL-3.0-only */
++#define PWM_FIXTURE_MAIN retained_pwm_main
++#include "ui_superj6_pwm1_lfo2_test.c"
++
++int main(void)
++{
++    uint8_t c[ORIGINAL_SOUND_BYTES], old[ORIGINAL_SOUND_BYTES];
++    CHECK(original_sound_init(c,ORIGINAL_SOUND_JUNO,0));
++    CHECK(original_sound_set(c,0,27));
++    memcpy(old,c,sizeof c);
++    CHECK(original_sound_valid(c));
++    const int current=!!getenv("SJ6_FINE_READER");
++    c[0]|=128u; /* new ID74 code 1, low 27 retained */
++    CHECK(original_sound_valid(c)==current);
++    memcpy(c,old,sizeof c);
++    c[15]|=128u; /* new ID75 code 64 */
++    CHECK(original_sound_valid(c)==current);
++    memcpy(c,old,sizeof c);
++    for(unsigned i=0;i<7;++i)c[i]|=128u; /* illegal code 127 */
++    CHECK(!original_sound_valid(c));
++    memcpy(c,old,sizeof c);
++    c[13]|=128u;
++    CHECK(!original_sound_valid(c)); /* still invalid: chorus is not owned by fine tune */
++    puts(current ? "PASS new fine codec, malformed and unrelated MSB fail closed" :
++         "PASS exact prior reader refuses new payload, accepts unmodified project cell");
++    return 0;
++}
