@@ -1,0 +1,31 @@
+Private host output: HOST_REPLAY
+PASS compact dry/wet render captured INIT and 694 factory programs, 1024 frames each
+PASS compact dry/wet render captured INIT and 694 factory programs, 1024 frames each
+2b7c2c740edb57be12652f58c81a538815dd21c1ca8f66b0971cad51df0f331f  HOST_REPLAY/base.pcm
+2b7c2c740edb57be12652f58c81a538815dd21c1ca8f66b0971cad51df0f331f  HOST_REPLAY/join.pcm
+FAIL tests/host/ui_synthone_osc_mix_lfo_test.c:228: engine_s1_patch_read(0,OSC_MIX_LFO,&missing)
+HOST_REPLAY/depth-positive.log:PASS 25 independent Noise×Osc Mix routes and all 64 typed bytes; 39 invalid, high bits remain reserved
+HOST_REPLAY/depth-positive.log:owner 0 oscillator balance destination 1: 0/4096 changed, target/peer/phase exact
+HOST_REPLAY/depth-positive.log:owner 0 oscillator balance destination 2: 0/4096 changed, target/peer/phase exact
+HOST_REPLAY/depth-positive.log:owner 0 oscillator balance destination 3: 0/4096 changed, target/peer/phase exact
+HOST_REPLAY/depth-positive.log:owner 1 oscillator balance destination 1: 0/4096 changed, target/peer/phase exact
+HOST_REPLAY/depth-positive.log:owner 1 oscillator balance destination 2: 0/4096 changed, target/peer/phase exact
+HOST_REPLAY/depth-positive.log:owner 1 oscillator balance destination 3: 0/4096 changed, target/peer/phase exact
+HOST_REPLAY/depth-positive.log:owner 0 oscillator balance destination 1: 4096/4096 changed, target/peer/phase exact
+HOST_REPLAY/depth-positive.log:owner 0 oscillator balance destination 2: 4096/4096 changed, target/peer/phase exact
+HOST_REPLAY/depth-positive.log:owner 0 oscillator balance destination 3: 4096/4096 changed, target/peer/phase exact
+HOST_REPLAY/depth-positive.log:owner 1 oscillator balance destination 1: 4096/4096 changed, target/peer/phase exact
+HOST_REPLAY/depth-positive.log:owner 1 oscillator balance destination 2: 4096/4096 changed, target/peer/phase exact
+HOST_REPLAY/depth-positive.log:owner 1 oscillator balance destination 3: 4096/4096 changed, target/peer/phase exact
+HOST_REPLAY/depth-positive.log:PASS held Osc Mix routes across both owners and Sound/lock protections (1992 checks)
+HOST_REPLAY/depth-old.log:PASS old Noise/cutoff/HP/WIDEN and lock accepted; Osc Mix route Sound/lock types rejected before writes (269 checks)
+HOST_REPLAY/pages-base.log:PASS owner A all 15 pages reached in both directions
+HOST_REPLAY/pages-base.log:PASS owner B all 15 pages reached in both directions
+HOST_REPLAY/pages-base.log:PASS Synth One owner A reaches all 14 panels both ways
+HOST_REPLAY/pages-base.log:PASS Synth One owner B reaches all 14 panels both ways
+HOST_REPLAY/pages-join.log:PASS owner A all 15 pages reached in both directions
+HOST_REPLAY/pages-join.log:PASS owner B all 15 pages reached in both directions
+HOST_REPLAY/pages-join.log:PASS Synth One owner A reaches all 15 panels both ways
+HOST_REPLAY/pages-join.log:PASS Synth One owner B reaches all 15 panels both ways
+PASS 14 unchanged SuperJ6 actual LCDs byte-exact
+PASS actual MOD ROUTE LCD for OFF, LFO 1, LFO 2, BOTH on physical K1

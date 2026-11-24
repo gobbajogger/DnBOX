@@ -1,0 +1,14 @@
+PASS 25 independent Noise×Osc Mix routes and all 64 typed bytes; 39 invalid, high bits remain reserved
+owner 0 oscillator balance destination 1: 0/4096 changed, target/peer/phase exact
+owner 0 oscillator balance destination 2: 0/4096 changed, target/peer/phase exact
+owner 0 oscillator balance destination 3: 0/4096 changed, target/peer/phase exact
+owner 1 oscillator balance destination 1: 0/4096 changed, target/peer/phase exact
+owner 1 oscillator balance destination 2: 0/4096 changed, target/peer/phase exact
+owner 1 oscillator balance destination 3: 0/4096 changed, target/peer/phase exact
+owner 0 oscillator balance destination 1: 4096/4096 changed, target/peer/phase exact
+owner 0 oscillator balance destination 2: 4096/4096 changed, target/peer/phase exact
+owner 0 oscillator balance destination 3: 4096/4096 changed, target/peer/phase exact
+owner 1 oscillator balance destination 1: 4096/4096 changed, target/peer/phase exact
+owner 1 oscillator balance destination 2: 4096/4096 changed, target/peer/phase exact
+owner 1 oscillator balance destination 3: 4096/4096 changed, target/peer/phase exact
+PASS held Osc Mix routes across both owners and Sound/lock protections (1992 checks)

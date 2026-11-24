@@ -1,0 +1,20 @@
+diff --git a/firmware/src/app/original_presets.inc b/firmware/src/app/original_presets.inc
+--- a/firmware/src/app/original_presets.inc
++++ b/firmware/src/app/original_presets.inc
+@@ -828,11 +828,12 @@
+     }
+ #endif
+ #if X0X_SUPERJ6_BUILTIN_INIT
+-    if (next.val[29] == ORIGINAL_SOUND_JUNO)
++    if (next.val[29] == ORIGINAL_SOUND_JUNO) {
+         next.val[25] &= (uint8_t)~(ORIGINAL_SJ6_AUTHORED_LFO_BIT >> 24);
+-    if (original_sound_edit_mask(next.val) & ORIGINAL_SJ6_EXTRA_BIT)
+-        memcpy(next.val + BASS_NOTE_USED, sound->v[T_303][ORIGINAL_SJ6_EXTRA_ROW + voice],
+-               ORIGINAL_SJ6_EXTRA_SIZE);
++        if (original_sound_edit_mask(next.val) & ORIGINAL_SJ6_EXTRA_BIT)
++            memcpy(next.val + BASS_NOTE_USED, sound->v[T_303][ORIGINAL_SJ6_EXTRA_ROW + voice],
++                   ORIGINAL_SJ6_EXTRA_SIZE);
++    }
+ #endif
+     __builtin_memcpy(next.val+BASS_NOTE_MIX,sound->v[T_MIX][PART_303A+voice],MX_NPARAMS);
+     if(effective) {
