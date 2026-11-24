@@ -1,0 +1,202 @@
+--- a/firmware/src/app/original_runtime.c
++++ b/firmware/src/app/original_runtime.c
+@@ -67,7 +67,11 @@
+         }
+ #endif
+ #if X0X_SYNTHONE_PATCH
+-        if (original_sound_edit_mask(cell) & (S1_PATCH_MASK | S1_LINK_MASK | S1_BASE_EDIT_MASK | S1_ROUTE_MASK | S1_MOD_EXT_MARK))
++        if ((original_sound_edit_mask(cell) & (S1_PATCH_MASK | S1_LINK_MASK | S1_BASE_EDIT_MASK | S1_ROUTE_MASK | S1_MOD_EXT_MARK))
++#if X0X_S1_EXTRA
++            || s1_coarse_code(cell,0) || s1_coarse_code(cell,1)
++#endif
++            )
+             s1_part_apply_cell(&p->dsp.synthone, cell);
+ #endif
+         rc = ORIGINAL_RUNTIME_OK;
+--- a/firmware/src/app/original_sound.c
++++ b/firmware/src/app/original_sound.c
+@@ -589,7 +589,11 @@
+ #if X0X_S1_EXTRA
+     editor |= S1_BASE_EDIT_MASK | S1_ROUTE_MASK | S1_MOD_EXT_MARK;
+ #endif
+-    if (cell[29] == ORIGINAL_SOUND_SYNTHONE && (mask & editor)) {
++    if (cell[29] == ORIGINAL_SOUND_SYNTHONE && ((mask & editor)
++#if X0X_S1_EXTRA
++        || s1_coarse_code(cell,0) || s1_coarse_code(cell,1)
++#endif
++        )) {
+         if (mask & ~(editor | 7u)) return 0;
+ #if X0X_S1_EXTRA
+         uint8_t codes[S1_ROUTE_COUNT];
+@@ -597,8 +601,16 @@
+ #endif
+         if (cell[S1_LINK_BYTE] != ((mask & S1_LINK_MASK) != 0)) return 0;
+         for (unsigned i = 0; i < 22; ++i) {
+-            if (cell[i] > 127u || (i >= 2 && i != S1_LINK_BYTE && !(mask & (UINT32_C(1) << i)) && cell[i])) return 0;
++            unsigned v = cell[i];
++#if X0X_S1_EXTRA
++            if (i-S1_PATCH_FIRST_BYTE < 2u*S1_COARSE_BITS) v &= 127u;
++#endif
++            if (v > 127u || (i >= 2 && i != S1_LINK_BYTE && !(mask & (UINT32_C(1) << i)) && v)) return 0;
+         }
++#if X0X_S1_EXTRA
++        if (s1_coarse_code(cell,0) > S1_COARSE_STEPS+1u ||
++            s1_coarse_code(cell,1) > S1_COARSE_STEPS+1u) return 0;
++#endif
+         return 1;
+     }
+     if (mask >> count) return 0;
+@@ -915,6 +927,15 @@
+         ) || position > S1_PATCH_STEPS ||
+         !original_sound_valid(cell) || cell[29] != ORIGINAL_SOUND_SYNTHONE) return 0;
+ #if X0X_S1_EXTRA
++    if (s1_coarse_slot(slot)) {
++        if (position > S1_COARSE_STEPS) return 0;
++        unsigned offset = S1_PATCH_FIRST_BYTE + (slot-S1_COARSE_FIRST)*S1_COARSE_BITS;
++        for (unsigned i=0;i<S1_COARSE_BITS;++i) {
++            unsigned hi = ((position+1u) >> i) & 1u;
++            cell[offset+i] = (uint8_t)((cell[offset+i] & 127u) | (hi << 7));
++        }
++        return 1;
++    }
+     if (s1_mod_ext_slot(slot)) {
+         if (position > 3u) return 0;
+         unsigned code = cell[S1_MOD_EXT_BYTE], divisor = s1_mod_ext_divisor(slot);
+@@ -948,7 +969,7 @@
+         return 1;
+     }
+     unsigned byte = S1_PATCH_FIRST_BYTE + slot;
+-    cell[byte] = (uint8_t)position;
++    cell[byte] = (uint8_t)((cell[byte] & 128u) | position);
+     original_sound_put_mask(cell, original_sound_edit_mask(cell) | (UINT32_C(1) << byte));
+     return 1;
+ }
+--- a/firmware/src/app/s1_patch.h
++++ b/firmware/src/app/s1_patch.h
+@@ -31,9 +31,20 @@
+     S1_EXTRA_BYTES = S1_FILTER_EXTRA_BYTES + 2,
+     S1_LFO_DIVISIONS = 19, S1_LFO_CODE_SYNC = 129,
+     S1_LFO_RATE_CODES = S1_LFO_CODE_SYNC + S1_LFO_DIVISIONS,
+-    S1_PART_LEVEL = 40, S1_LFO1_DEPTH, S1_LFO2_DEPTH, S1_CUTOFF_LFO, S1_NOISE_LFO, S1_OSC_MIX_LFO, S1_RESONANCE_LFO, S1_FM_LFO, S1_AMP_DECAY_LFO,
++    S1_PART_LEVEL = 40, S1_LFO1_DEPTH, S1_LFO2_DEPTH, S1_CUTOFF_LFO, S1_NOISE_LFO, S1_OSC_MIX_LFO, S1_RESONANCE_LFO, S1_FM_LFO, S1_AMP_DECAY_LFO, S1_OSC1_SEMI, S1_OSC2_SEMI,
+     S1_BASE_EDIT_FIRST = S1_PART_LEVEL, S1_BASE_EDIT_COUNT = 3, S1_BASE_EDIT_BYTE = 3
+ };
++/* Formerly invalid q7 top bits. Code zero keeps the exact program;
++ * codes 1..37 are the original integer stops -12..+24. */
++enum { S1_COARSE_FIRST = S1_OSC1_SEMI, S1_COARSE_STEPS = 36, S1_COARSE_BITS = 6 };
++static inline int s1_coarse_slot(unsigned slot) { return slot-S1_COARSE_FIRST < 2u; }
++static inline unsigned s1_coarse_code(const uint8_t cell[32], unsigned osc)
++{
++    unsigned code = 0;
++    for (unsigned i=0;i<S1_COARSE_BITS;++i)
++        code |= (unsigned)(cell[S1_PATCH_FIRST_BYTE + osc*S1_COARSE_BITS + i] >> 7) << i;
++    return code;
++}
+ #define S1_MOD_EXT_MARK (UINT32_C(1) << 23)
+ /* Radix five stores independent absent/explicit OFF/LFO1/LFO2/BOTH digits.
+  * FM-only codes 0..4 are identical to the preceding typed binding. */
+@@ -68,7 +79,7 @@
+ static inline int s1_base_route_slot(unsigned slot)
+ { return slot - S1_ROUTE_FIRST < S1_ROUTE_COUNT; }
+ static inline int s1_base_edit_slot(unsigned slot)
+-{ return s1_mod_ext_slot(slot) || s1_base_route_slot(slot) || slot - S1_BASE_EDIT_FIRST < S1_BASE_EDIT_COUNT; }
++{ return s1_coarse_slot(slot) || s1_mod_ext_slot(slot) || s1_base_route_slot(slot) || slot - S1_BASE_EDIT_FIRST < S1_BASE_EDIT_COUNT; }
+ float s1c_morph_preview(float position, uint32_t phase);
+ static inline unsigned s1_extra_bits(const uint8_t *data)
+ { return (unsigned)data[0] | (((unsigned)data[1] & 7u) << 8); }
+@@ -98,6 +109,7 @@
+ static inline unsigned s1_patch_steps(unsigned slot)
+ {
+ #if X0X_S1_EXTRA
++    if (s1_coarse_slot(slot)) return S1_COARSE_STEPS;
+     if (slot == S1_SUB_OCTAVE || slot == S1_SUB_WAVE) return 1;
+     if (slot == S1_FILTER_TYPE) return 2;
+     if (slot == S1_LFO_SYNC || slot == S1_WIDEN || slot == S1_MONO_LEGATO) return 1;
+--- a/firmware/src/app/s1c_part.c
++++ b/firmware/src/app/s1c_part.c
+@@ -90,6 +90,7 @@
+     part->clock_factory_pan = e->t[P_PAN_RATE];
+     part->clock_factory_delay = e->t[P_DELAY_TIME];
+     part->cutoff_lfo_factory = e->t[P_CUTOFF_LFO];
++    for (unsigned i=0;i<2;++i) part->coarse_factory[i] = e->t[3u+i];
+     for (unsigned i = 0; i < S1_MOD_EXT_COUNT; ++i)
+         part->mod_ext_factory[i] = e->t[s1_patch_at(S1_MOD_EXT_FIRST+i)->factory_id];
+     for (unsigned i = 0; i < S1_ROUTE_COUNT; ++i)
+@@ -195,6 +196,10 @@
+     {"FM LFO", 0, 3, P_FM_LFO, X0X_U_NONE},
+     {"AMP DEC LFO", 0, 3, P_AMP_DECAY_LFO, X0X_U_NONE},
+ };
++static const s1_patch_descriptor coarse[2] = {
++    {"OSC 1 SEMI", -12, 24, 3, X0X_U_ST},
++    {"OSC 2 SEMI", -12, 24, 4, X0X_U_ST},
++};
+ static const s1_patch_descriptor cutoff_lfo = {"CUTOFF LFO", 0, 3, P_CUTOFF_LFO, X0X_U_NONE};
+ enum { S1_CATALOG_EXTRA_COUNT = sizeof extra_parameters / sizeof extra_parameters[0] };
+ _Static_assert(S1_CATALOG_EXTRA_COUNT == S1_WET_FIRST - S1_EXTRA_FIRST + S1_WET_COUNT,
+@@ -206,6 +211,7 @@
+     if (slot < S1_PATCH_COUNT) return &patch_parameters[slot];
+ #if X0X_S1_EXTRA
+     if (slot == S1_CUTOFF_LFO) return &cutoff_lfo;
++    if (s1_coarse_slot(slot)) return &coarse[slot-S1_COARSE_FIRST];
+     if (s1_mod_ext_slot(slot)) return &mod_ext[slot-S1_MOD_EXT_FIRST];
+     if (s1_base_route_slot(slot)) return &routes[slot-S1_ROUTE_FIRST];
+     if (s1_base_edit_slot(slot)) return &base_editor[slot-S1_BASE_EDIT_FIRST];
+@@ -220,6 +226,7 @@
+         if (patch_parameters[i].factory_id == id) return (int)i;
+ #if X0X_S1_EXTRA
+     if (id == P_CUTOFF_LFO) return S1_CUTOFF_LFO;
++    if (id-3u < 2u) return (int)(S1_COARSE_FIRST+id-3u);
+     for (unsigned i = 0; i < S1_MOD_EXT_COUNT; ++i)
+         if (id == mod_ext[i].factory_id) return (int)(S1_MOD_EXT_FIRST+i);
+     for (unsigned i = 0; i < S1_ROUTE_COUNT; ++i)
+@@ -326,6 +333,10 @@
+ {
+     uint32_t mask = original_sound_edit_mask(cell);
+ #if X0X_S1_EXTRA
++    for (unsigned i=0;i<2;++i) {
++        unsigned code = s1_coarse_code(cell,i);
++        s1c_set(&part->e, 3u+i, code ? (float)((int)code-13) : part->coarse_factory[i]);
++    }
+     unsigned mod_code = mask & S1_MOD_EXT_MARK ? cell[S1_MOD_EXT_BYTE] : 0u;
+     for (unsigned i = 0; i < S1_MOD_EXT_COUNT; ++i) {
+         unsigned digit = mod_code % S1_MOD_RADIX;
+@@ -351,7 +362,7 @@
+     for (unsigned i = 0; i < S1_PATCH_COUNT; ++i) {
+         unsigned byte = S1_PATCH_FIRST_BYTE + i;
+         if (mask & (UINT32_C(1) << byte))
+-            (void)s1c_front_set(&part->e, patch_parameters[i].factory_id, s1_patch_physical(&patch_parameters[i], cell[byte]));
++            (void)s1c_front_set(&part->e, patch_parameters[i].factory_id, s1_patch_physical(&patch_parameters[i], cell[byte] & 127u));
+     }
+     part->filter_link = (mask & S1_LINK_MASK) != 0;
+     if (part->filter_link)
+--- a/firmware/src/app/s1c_part.h
++++ b/firmware/src/app/s1c_part.h
+@@ -24,7 +24,7 @@
+ #if X0X_S1_EXTRA
+     float extra_factory[S1_EXTRA_COUNT]; /* exact pack values for note-lock transitions */
+     float lfo_factory[S1_LFO_COUNT], wet_factory[S1_WET_COUNT];
+-    float mod_ext_factory[S1_MOD_EXT_COUNT];
++    float mod_ext_factory[S1_MOD_EXT_COUNT], coarse_factory[2];
+     float clock_factory_pan, clock_factory_delay, cutoff_lfo_factory, route_factory[S1_ROUTE_COUNT], base_factory[S1_BASE_EDIT_COUNT];
+     uint16_t extra_live_mask;
+     uint8_t lfo_live_mask;
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -2209,7 +2209,7 @@
+ #endif
+ #if X0X_S1_EXTRA
+             if (kind == ORIGINAL_SOUND_SYNTHONE) {
+-                enum { S1_PAGE_ID_FITS = 1 / (S1_AMP_DECAY_LFO < ORIG_PAGE_ENGINE && S1_MONO_LEGATO < ORIG_PAGE_ENGINE) };
++                enum { S1_PAGE_ID_FITS = 1 / (S1_OSC2_SEMI < ORIG_PAGE_ENGINE && S1_MONO_LEGATO < ORIG_PAGE_ENGINE) };
+                 static const original_page_row_t s1_pages[] = {
+                     {"OSCILLATOR", {0, 1, S1_OSC1_MORPH, S1_OSC2_MORPH}},
+                     {"OSC MIX", {S1_OSC2_LEVEL, S1_SUB_LEVEL, S1_SUB_OCTAVE, S1_SUB_WAVE}},
+@@ -2218,7 +2218,7 @@
+                     {"FILTER MODE", {S1_FILTER_TYPE, S1_ADSR_TRACK, S1_CUTOFF_LFO, ORIG_PAGE_NONE}},
+                     {"FILTER ADSR", {5, 6, 7, 8}},
+                     {"AMP ADSR", {9, 10, 11, 12}},
+-                    {"VOICE", {S1_MONO_LEGATO, ORIG_PAGE_NONE, ORIG_PAGE_NONE, ORIG_PAGE_NONE}},
++                    {"VOICE", {S1_MONO_LEGATO, S1_OSC1_SEMI, S1_OSC2_SEMI, ORIG_PAGE_NONE}},
+                     {"LFO", {S1_LFO1_RATE, S1_LFO1_SHAPE, S1_LFO2_RATE, S1_LFO2_SHAPE}},
+                     {"TEMPO SYNC", {S1_LFO_SYNC, S1_LFO1_DEPTH, S1_LFO2_DEPTH, ORIG_PAGE_NONE}},
+                     {"MOD ROUTE", {S1_OSC_MIX_LFO, S1_RESONANCE_LFO, S1_FM_LFO, S1_AMP_DECAY_LFO}},

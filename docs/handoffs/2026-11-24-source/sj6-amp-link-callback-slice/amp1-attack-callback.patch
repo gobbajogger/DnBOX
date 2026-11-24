@@ -1,0 +1,46 @@
+--- a/firmware/src/dsp/juno6.h
++++ b/firmware/src/dsp/juno6.h
+@@ -127,6 +127,9 @@
+ int juno6_render_stereo(juno6_t *, float *, float *, unsigned);
+ int juno6_can_edit_amp2(const juno6_t *);
+ #if X0X_SUPERJ6_BUILTIN_INIT
++/* Original 36, before note, with externally established ID115 and ID116 OFF.
++ * No toggle, persistence, or filter semantics are inferred here. */
++int juno6_apply_sj6_primary_attack(juno6_t *, float, unsigned);
+ unsigned juno6_knob_position(const juno6_t *s, unsigned slot);
+ void juno6_apply_knobs(juno6_t *s, unsigned mask, const uint8_t positions[SJ6_OSC_KNOBS]);
+ void juno6_apply_panel_envelopes(juno6_t *, unsigned mask, const uint8_t positions[SJ6_EXTRA_COUNT], int reset);
+--- a/firmware/src/dsp/juno6_factory.inc
++++ b/firmware/src/dsp/juno6_factory.inc
+@@ -103,6 +103,31 @@
+     return dnbx_store_raw(&s->core, 36, raw) == DNBX_RAW_STORED_ONLY;
+ }
+ 
++#if X0X_SUPERJ6_BUILTIN_INIT
++int juno6_apply_sj6_primary_attack(juno6_t *s, float raw, unsigned layer_link)
++{
++    float physical;
++    dnbx_layer_params primary, secondary;
++    if (!s || !s->typed || layer_link>1u || s->core.filter_link ||
++        dnbx_active_voices(&s->core)!=0 ||
++        dnbx_attack_from_unit(raw,&physical)!=DNBX_OK ||
++        dnbx_get_layer(&s->core,0,&primary)!=DNBX_OK ||
++        (layer_link && dnbx_get_layer(&s->core,1,&secondary)!=DNBX_OK))
++        return 0;
++    primary.amp.attack_s=physical;
++    dnbx_apply_panel_envelopes(&s->core,0,&primary.amp,&primary.filter,0);
++    (void)dnbx_store_raw(&s->core,36u,raw);
++    if (layer_link) {
++        /* Original 36 forwards the same normalized word to 119.
++         * The two qualified Attack laws agree; other stages are untouched. */
++        secondary.amp.attack_s=physical;
++        dnbx_apply_panel_envelopes(&s->core,1,&secondary.amp,&secondary.filter,0);
++        (void)dnbx_store_raw(&s->core,119u,raw);
++    }
++    return 1;
++}
++#endif
++
+ /* Called only for a validated pre-note snapshot. Missing legacy PWM fields
+  * are irrelevant for sine/triangle/saw. Square requires an explicit gate. */
+ void juno6_apply_pre_note_wave(juno6_t *s, unsigned layer, const juno6_oscillator_edit *edit)
