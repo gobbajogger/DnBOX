@@ -1,0 +1,91 @@
+--- /dev/null
++++ b/tests/host/ui_arp_keyboard_test.c
+@@ -0,0 +1,88 @@
++/* SPDX-License-Identifier: GPL-3.0-only */
++#define X0X_ARP_KEYBOARD_TEST 1
++#define ARP_FIXTURE_MAIN retained_arp_fixture_main
++#include "ui_arp_engine_test.c"
++
++static uint32_t test_pads;
++static uint64_t test_keyboard;
++uint32_t plat_arp_input(uint64_t *keyboard)
++{
++    *keyboard = test_keyboard;
++    return test_pads;
++}
++static void gesture(uint32_t pads, uint64_t keyboard)
++{
++    test_pads = pads;
++    test_keyboard = keyboard;
++    held_keys = pads | (uint32_t)(keyboard >> 5);
++    ++now_ms;
++    input();
++    render(4);
++}
++static void keyboard_case(int kind)
++{
++    const unsigned owner = 0;
++    const uint32_t step = 1u << WHITE_KEY[5];
++    const uint64_t e = UINT64_C(1) << (52 - 36);
++    const uint64_t c = UINT64_C(1) << (48 - 36);
++    engine_arp_steps before, after;
++    uint8_t peer[ARP_BLOCK_BYTES];
++    engine_arp_cfg saved;
++    engine_arp_settings settings;
++    setup(V_SEQ, PART_303A);
++    EXPECT(!engine_bass_select_preset(owner, kind, 0, &proj.sound));
++    for (int n=0; n<1024 && engine_bass_preset_pending(owner); ++n) render(1);
++    EXPECT(engine_bass_bank(owner)==kind);
++    *page_of(V_SEQ)=3;
++    ui.oct=0;
++    build_pages();
++    EXPECT(arp_seq_page());
++    EXPECT(engine_arp_settings_read(owner,&settings));
++    const unsigned gate=settings.gate;
++    gesture(0,0);
++    EXPECT(engine_arp_steps_read(owner,&before));
++    memcpy(peer, proj.sound.v[T_303][ARP_BLOCK_VOICE0+1], sizeof peer);
++    gesture(0,c); /* no write from a key alone */
++    gesture(step,c); /* do not capture a key that was already down */
++    EXPECT(engine_arp_steps_read(owner,&after) && after.offset[5]==before.offset[5]);
++    gesture(step,0);
++    gesture(step,e);
++    EXPECT(engine_arp_steps_read(owner,&after) && after.offset[5]==4);
++    gesture(step,0);
++    gesture(step,UINT64_C(1) << (WHITE_KEY[5]+5)); /* same alias as the held pad */
++    EXPECT(engine_arp_steps_read(owner,&after) && after.offset[5]==41+WHITE_KEY[5]-48);
++    gesture(0,UINT64_C(1) << (WHITE_KEY[5]+5)); /* releasing pad before the key is safe */
++    gesture(0,0);
++    EXPECT(engine_arp_steps_read(owner,&after) && after.on_mask==before.on_mask);
++    EXPECT(engine_arp_block_decode(proj.sound.v[T_303][ARP_BLOCK_VOICE0],&saved) &&
++           saved.offset[5]==after.offset[5] && saved.on_mask==before.on_mask);
++    for (int i=0; i<ARP_STEPS; ++i)
++        if (i!=5) EXPECT(after.offset[i]==before.offset[i]);
++    EXPECT(!memcmp(peer, proj.sound.v[T_303][ARP_BLOCK_VOICE0+1], sizeof peer));
++    gesture(step,0); gesture(0,0);
++    EXPECT(engine_arp_steps_read(owner,&after) && after.on_mask==(before.on_mask ^ (1u<<5)));
++    unsigned off_mask=after.on_mask;
++    gesture(step,0);
++    gesture(step,UINT64_C(1)<<36); /* High end of the physical keybed, beyond central lanes */
++    gesture(0,0);
++    EXPECT(engine_arp_steps_read(owner,&after) &&
++           after.offset[5]==(kind==ORIGINAL_SOUND_JUNO?24:12) && after.on_mask==off_mask);
++    EXPECT(engine_arp_settings_read(owner,&settings) && settings.gate==gate);
++    gesture(step,0);
++    set_view(V_PART);
++    gesture(step,e); /* no capture in a different view */
++    set_view(V_SEQ);
++    *page_of(V_SEQ)=3;build_pages();
++    gesture(step,e); /* pre-held pad does not re-arm on re-entry */
++    gesture(0,0);
++    EXPECT(engine_arp_steps_read(owner,&after) &&
++           after.offset[5]==(kind==ORIGINAL_SOUND_JUNO?24:12) && after.on_mask==off_mask);
++}
++int main(void)
++{
++    keyboard_case(ORIGINAL_SOUND_JUNO);
++    keyboard_case(ORIGINAL_SOUND_SYNTHONE);
++    if (failures) return 1;
++    printf("PASS ARP SEQ held-pad keyboard pitch: %u checks\n",expectations);
++    return 0;
++}

@@ -1,0 +1,9 @@
+# SuperJ6 output LEVEL panel
+
+Apply superj6-master-panel.patch after the checksummed SuperJ6 envelope panel patch. OUTPUT knob 2 controls the qualified build-9 ID 0, neonvolumeControl. The pinned original setter applies gain 0.404 × raw after instrument FX. All 640 authored programs contain this value. Eight exceed raw unity and the largest input is binary32 1.3200000524520874. These identities and the original post-FX setter receipt are in experiments/sound-hardware-v1/sj6-factory/master/README.md.
+
+Panel positions 0–127 span raw 0–1.32 and use the original typed post-effects setter. The top extra position recalls the pre-existing DnBOX built-in INIT gain of 1.0 so legacy INIT can still be recalled. The added position steps above the largest observed original gain, about 0.53328. The panel displays applied gain in dB. The LEVEL field uses the same sound extension and pending-write guard as the envelope pages.
+
+The 69-check compact host test traversed OUTPUT using physical-input hooks and edited LEVEL on sounding notes on both slots. At raw 0, 0.66519690 and 1.32000005 every 4,096-frame stereo comparison was bit-exact to the typed entry, with the existing chorus audibly active. The fixture separately confirmed the chorus stimulus changed the audio and that gain zero silenced its output. It verified exact maximum gain and PCM on reload, restored INIT unity through save/load, and checked peer ownership. This establishes the LEVEL path through DnBOX's existing effect stage. Original active chorus parity remains open.
+
+Run tests/host/ui_superj6_master_test.c with the same replay script and compact host flags as the preceding packet. That packet's final envelope, oscillator and ARP receipts also ran on this combined source. No native size, strict zero-dropout, physical hardware or original full preset parity is claimed.

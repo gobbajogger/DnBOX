@@ -1,0 +1,348 @@
+--- a/firmware/src/app/original_presets.inc
++++ b/firmware/src/app/original_presets.inc
+@@ -216,12 +216,12 @@
+ {
+     juno6_t *s = &original_bass[owner].dsp.juno.synth;
+     juno6_set_lfo_words(s, words, 1);
+-    juno6_set_lfo2_pwm1(s, 0);
++    juno6_set_lfo2_pwm(s, 0);
+     if (!mot_base_snd) return;
+     sound_t *sound = (sound_t *)mot_base_snd;
+     uint8_t *cell = sound->v[T_303][owner];
+     original_sound_sj6_lfo_store(cell, sound->v[T_303][ORIGINAL_SJ6_EXTRA_ROW + owner], words);
+-    original_sound_sj6_pwm1_lfo_store(cell, 0);
++    original_sound_sj6_lfo2_pwm_store(cell, 0);
+     bass_tag_set(sound, owner, ORIGINAL_SOUND_JUNO, bass_named_preset[owner],
+                  original_sound_edit_mask(cell) != 0);
+ }
+@@ -247,7 +247,7 @@
+ static int sj6_knob_position(unsigned owner, unsigned slot)
+ {
+     if (sj6_knob_mask[owner] & (1u << slot)) return sj6_knob_value[owner][slot];
+-    if (slot >= SJ6_OSC_KNOBS && slot < SJ6_LFO2_PWM1_DEPTH && mot_base_snd &&
++    if (slot >= SJ6_OSC_KNOBS && slot < SJ6_LFO2_PWM_DEPTH && mot_base_snd &&
+ #if X0X_BASS_NOTE_SOUND
+         !note_lock_applied[owner] &&
+ #endif
+@@ -259,18 +259,26 @@
+     return (int)juno6_knob_position(&original_bass[owner].dsp.juno.synth, slot);
+ }
+ 
++/* Use the pending route, so a base edit following a route turn in the
++ * same audio block still belongs to the selected oscillator. */
++static unsigned sj6_panel_slot(unsigned owner, unsigned slot)
++{
++    if (slot != SJ6_LFO2_PWM_BASE) return slot;
++    return sj6_knob_position(owner, SJ6_LFO2_PWM_ROUTE) == 2 ? SJ6_PWM2 : SJ6_PWM1;
++}
++
+ X0X_COLD int engine_superj6_knob_position(unsigned owner, unsigned slot)
+ {
+-    if (owner >= NBASS || slot >= SJ6_KNOBS) return -1;
++    if (owner >= NBASS || slot > SJ6_LFO2_PWM_BASE) return -1;
+     uint32_t lock = plat_cq_lock();
+-    int position = sj6_knob_ready(owner) ? sj6_knob_position(owner, slot) : -1;
++    int position = sj6_knob_ready(owner) ? sj6_knob_position(owner, sj6_panel_slot(owner, slot)) : -1;
+     plat_cq_unlock(lock);
+     return position;
+ }
+ 
+ X0X_COLD int engine_superj6_knob_turn(unsigned owner, unsigned slot, int value, int relative)
+ {
+-    if (owner >= NBASS || slot >= SJ6_KNOBS) return 0;
++    if (owner >= NBASS || slot > SJ6_LFO2_PWM_BASE) return 0;
+     uint32_t lock = plat_cq_lock();
+     int changed = 0;
+     if (!project_hold && mot_base_snd && sj6_knob_ready(owner) && !engine_bass_preset_pending(owner)
+@@ -278,6 +286,7 @@
+         && !note_lock_applied[owner]
+ #endif
+        ) {
++        slot = sj6_panel_slot(owner, slot);
+         int before = sj6_knob_position(owner, slot);
+         int max = (int)original_sound_sj6_max(slot);
+         if (relative) value += before;
+@@ -347,13 +356,14 @@
+             sj6_apply_extra(s, extra, values, 0);
+             original_sound_sj6_extra_store(cell, sound->v[T_303][ORIGINAL_SJ6_EXTRA_ROW + v], extra, values);
+         }
+-        unsigned depth = mask & (1u << SJ6_LFO2_PWM1_DEPTH), route = mask & (1u << SJ6_LFO2_PWM1_ROUTE);
++        unsigned depth = mask & (1u << SJ6_LFO2_PWM_DEPTH), route = mask & (1u << SJ6_LFO2_PWM_ROUTE);
+         if (depth || route) {
+-            uint8_t setting = cell[ORIGINAL_SJ6_PWM1_LFO_BYTE];
+-            if (depth) setting = (setting & SJ6_LFO2_PWM1_ON) | sj6_knob_value[v][SJ6_LFO2_PWM1_DEPTH];
+-            if (route) setting = (setting & SJ6_LFO2_PWM1_DEPTH_MASK) | (sj6_knob_value[v][SJ6_LFO2_PWM1_ROUTE] << 7);
+-            juno6_set_lfo2_pwm1(s, setting);
+-            original_sound_sj6_pwm1_lfo_store(cell, setting);
++            unsigned setting = original_sound_sj6_lfo2_pwm(cell);
++            if (depth) setting = (setting & ~SJ6_LFO2_PWM_DEPTH_MASK) | sj6_knob_value[v][SJ6_LFO2_PWM_DEPTH];
++            if (route) setting = (setting & SJ6_LFO2_PWM_DEPTH_MASK) |
++                                 (sj6_knob_value[v][SJ6_LFO2_PWM_ROUTE] << SJ6_LFO2_PWM_ROUTE_SHIFT);
++            juno6_set_lfo2_pwm(s, setting);
++            original_sound_sj6_lfo2_pwm_store(cell, setting);
+         }
+         bass_tag_set(sound, v, ORIGINAL_SOUND_JUNO, bass_named_preset[v],
+                      original_sound_edit_mask(cell) != 0);
+@@ -535,7 +545,7 @@
+     uint8_t knobs[SJ6_OSC_KNOBS];
+     unsigned mask = original_sound_sj6_knobs(cell, knobs);
+     if (mask) juno6_apply_knobs(&part->dsp.juno.synth, mask, knobs);
+-    juno6_set_lfo2_pwm1(&part->dsp.juno.synth, cell[ORIGINAL_SJ6_PWM1_LFO_BYTE]);
++    juno6_set_lfo2_pwm(&part->dsp.juno.synth, original_sound_sj6_lfo2_pwm(cell));
+ }
+ #endif
+ static void note_lock_restore(int v)
+--- a/firmware/src/app/original_runtime.c
++++ b/firmware/src/app/original_runtime.c
+@@ -64,7 +64,7 @@
+         uint8_t positions[SJ6_OSC_KNOBS];
+         unsigned mask = original_sound_sj6_knobs(cell, positions);
+         if (mask) juno6_apply_knobs(&p->dsp.juno.synth, mask, positions);
+-        juno6_set_lfo2_pwm1(&p->dsp.juno.synth, cell[ORIGINAL_SJ6_PWM1_LFO_BYTE]);
++        juno6_set_lfo2_pwm(&p->dsp.juno.synth, original_sound_sj6_lfo2_pwm(cell));
+         return original_runtime_prepare(p, bpm);
+     }
+ #endif
+--- a/firmware/src/app/original_sound.c
++++ b/firmware/src/app/original_sound.c
+@@ -204,14 +204,18 @@
+     static const uint8_t max[SJ6_OSC_KNOBS] = {3, 3, 2, 1, 127, 1, 127};
+     if (slot < SJ6_OSC_KNOBS) return max[slot];
+     if (slot == SJ6_MASTER_LEVEL) return SJ6_MASTER_INIT;
+-    return slot == SJ6_FILTER_LINK || slot == SJ6_LFO2_PWM1_ROUTE ? 1u : slot < SJ6_KNOBS ? 127u : 0;
++    if (slot == SJ6_LFO2_PWM_ROUTE) return DNBX_LAYERS;
++    return slot == SJ6_FILTER_LINK ? 1u : slot <= SJ6_LFO2_PWM_BASE ? 127u : 0;
+ }
+ 
+-void original_sound_sj6_pwm1_lfo_store(uint8_t *cell, uint8_t setting)
++void original_sound_sj6_lfo2_pwm_store(uint8_t *cell, uint16_t setting)
+ {
+-    uint32_t flags = original_sound_edit_mask(cell) & ~ORIGINAL_SJ6_PWM1_LFO_BIT;
+-    cell[ORIGINAL_SJ6_PWM1_LFO_BYTE] = setting;
+-    original_sound_put_mask(cell, setting ? flags | ORIGINAL_SJ6_PWM1_LFO_BIT : flags);
++    uint32_t flags = original_sound_edit_mask(cell) &
++                     ~(ORIGINAL_SJ6_LFO2_PWM_BIT | ORIGINAL_SJ6_LFO2_PWM2_BIT);
++    cell[ORIGINAL_SJ6_LFO2_PWM_BYTE] = (uint8_t)setting;
++    if ((uint8_t)setting) flags |= ORIGINAL_SJ6_LFO2_PWM_BIT;
++    if (setting >> 8) flags |= ORIGINAL_SJ6_LFO2_PWM2_BIT;
++    original_sound_put_mask(cell, flags);
+ }
+ 
+ /* Rows 4 and 5 belong to the two candidate owner extensions. A base-cell
+@@ -359,8 +363,9 @@
+     if (cell[29] == ORIGINAL_SOUND_JUNO && sj6_flags >> ORIGINAL_SJ6_EDIT_SHIFT) {
+         uint8_t positions[SJ6_OSC_KNOBS];
+         unsigned mask = original_sound_sj6_knobs(cell, positions);
+-        if (!!cell[ORIGINAL_SJ6_PWM1_LFO_BYTE] != !!(sj6_flags & ORIGINAL_SJ6_PWM1_LFO_BIT) ||
+-            sj6_flags & ~((ORIGINAL_SJ6_PWM1_LFO_BIT << 1) - 1u)) return 0;
++        if (!!cell[ORIGINAL_SJ6_LFO2_PWM_BYTE] != !!(sj6_flags & ORIGINAL_SJ6_LFO2_PWM_BIT) ||
++            original_sound_sj6_lfo2_pwm(cell) >> SJ6_LFO2_PWM_ROUTE_SHIFT > DNBX_LAYERS ||
++            sj6_flags & ~((ORIGINAL_SJ6_LFO2_PWM2_BIT << 1) - 1u)) return 0;
+         for (unsigned i = 0; i < SJ6_OSC_KNOBS; ++i)
+             if (positions[i] > (mask & (1u << i) ? original_sound_sj6_max(i) : 0)) return 0;
+         for (unsigned i = 0; i < count; ++i)
+--- a/firmware/src/app/original_sound.h
++++ b/firmware/src/app/original_sound.h
+@@ -104,8 +104,15 @@
+ #define ORIGINAL_SJ6_EDIT_MASK ((1u << SJ6_OSC_KNOBS) - 1u)
+ #define ORIGINAL_SJ6_EXTRA_BIT (1u << (ORIGINAL_SJ6_EDIT_SHIFT + SJ6_OSC_KNOBS))
+ #define ORIGINAL_SJ6_AUTHORED_LFO_BIT (ORIGINAL_SJ6_EXTRA_BIT << 1)
+-#define ORIGINAL_SJ6_PWM1_LFO_BIT (ORIGINAL_SJ6_AUTHORED_LFO_BIT << 1)
+-#define ORIGINAL_SJ6_PWM1_LFO_BYTE 21u
++#define ORIGINAL_SJ6_LFO2_PWM_BIT (ORIGINAL_SJ6_AUTHORED_LFO_BIT << 1)
++#define ORIGINAL_SJ6_LFO2_PWM_BYTE 21u
++#define ORIGINAL_SJ6_LFO2_PWM2_BIT (ORIGINAL_SJ6_LFO2_PWM_BIT << 1)
++static inline unsigned original_sound_sj6_lfo2_pwm(const uint8_t *cell)
++{
++    /* Keep the earlier OFF/PWM1 byte intact. PWM2 occupies the next edit bit. */
++    return cell[ORIGINAL_SJ6_LFO2_PWM_BYTE] |
++           ((cell[25] & (ORIGINAL_SJ6_LFO2_PWM2_BIT >> 24)) ? (2u << SJ6_LFO2_PWM_ROUTE_SHIFT) : 0u);
++}
+ #define ORIGINAL_SJ6_EXT_BITS (ORIGINAL_SJ6_EXTRA_BIT | ORIGINAL_SJ6_AUTHORED_LFO_BIT)
+ #define ORIGINAL_SJ6_EXTRA_ROW 4u
+ #define ORIGINAL_SJ6_EXTRA_SIZE (2u + SJ6_EXTRA_COUNT)
+@@ -118,7 +125,7 @@
+ int original_sound_sj6_extra_valid(const uint8_t *extra);
+ void original_sound_sj6_extra_store(uint8_t *cell, uint8_t *extra, unsigned mask, const uint8_t *positions);
+ unsigned original_sound_sj6_max(unsigned slot);
+-void original_sound_sj6_pwm1_lfo_store(uint8_t *cell, uint8_t setting);
++void original_sound_sj6_lfo2_pwm_store(uint8_t *cell, uint16_t setting);
+ unsigned original_sound_sj6_knobs(const uint8_t cell[ORIGINAL_SOUND_BYTES],
+                                 uint8_t positions[SJ6_OSC_KNOBS]);
+ void original_sound_sj6_store(uint8_t cell[ORIGINAL_SOUND_BYTES], unsigned mask,
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -502,8 +502,8 @@
+     static const char *const wave[] = {"SINE", "TRI", "SAW", "SQ"};
+     static const char *const range[] = {"16FT", "8FT", "4FT"};
+     static const char *const enable[] = {"OFF", "ON"};
+-    static const char *const pwm1_route[] = {"OFF", "PWM 1"};
+-    static const x0x_param_t knobs[SJ6_KNOBS] = {
++    static const char *const pwm_route[] = {"OFF", "PWM 1", "PWM 2"};
++    static const x0x_param_t knobs[] = {
+         {"WAVE 1", SJ6_WAVE_STOPS, 2, wave}, {"WAVE 2", SJ6_WAVE_STOPS, 2, wave},
+         {"RANGE", SJ6_RANGE_STOPS, 1, range},
+         {"PWM 1 ON", 1, 0, enable}, {"PWM 1", SJ6_PWM_STEPS, 0, 0},
+@@ -514,9 +514,10 @@
+         {"SUSTAIN", 127, 0, 0}, {"RELEASE", 127, 0, 0},
+         {"LINK", 1, 0, enable}, {"LEVEL", SJ6_MASTER_INIT, SJ6_MASTER_INIT, 0},
+         {"LFO 1", 127, 0, 0}, {"LFO 2", 127, 0, 0}, {"LFO 3", 127, 0, 0},
+-        {"DEPTH", 127, 0, 0}, {"ROUTE", 1, 0, pwm1_route},
++        {"DEPTH", 127, 0, 0}, {"ROUTE", DNBX_LAYERS, 0, pwm_route},
++        {"PWM BASE", SJ6_PWM_STEPS, 0, 0},
+     };
+-    return slot < SJ6_KNOBS ? &knobs[slot] : 0;
++    return slot < sizeof knobs / sizeof *knobs ? &knobs[slot] : 0;
+ }
+ #endif
+ static const char *const BENGINE_N[] = {"CHICAGO", "MIAMI", "SYNTH ONE", "SUPERJ6"};
+@@ -2062,9 +2063,9 @@
+                          PR(R_SJ6KNOB,T_303,b,SJ6_MASTER_LEVEL), NONE, NONE);
+                 add_page(emit, "LFO HZ", PR(R_SJ6KNOB,T_303,b,SJ6_LFO1_RATE),
+                          PR(R_SJ6KNOB,T_303,b,SJ6_LFO2_RATE), PR(R_SJ6KNOB,T_303,b,SJ6_LFO3_RATE), NONE);
+-                add_page(emit, "LFO2 PWM1", PR(R_SJ6KNOB,T_303,b,SJ6_LFO2_RATE),
+-                         PR(R_SJ6KNOB,T_303,b,SJ6_LFO2_PWM1_DEPTH), PR(R_SJ6KNOB,T_303,b,SJ6_LFO2_PWM1_ROUTE),
+-                         PR(R_SJ6KNOB,T_303,b,SJ6_PWM1));
++                add_page(emit, "LFO2 PWM", PR(R_SJ6KNOB,T_303,b,SJ6_LFO2_RATE),
++                         PR(R_SJ6KNOB,T_303,b,SJ6_LFO2_PWM_DEPTH), PR(R_SJ6KNOB,T_303,b,SJ6_LFO2_PWM_ROUTE),
++                         PR(R_SJ6KNOB,T_303,b,SJ6_LFO2_PWM_BASE));
+                 first_row = 3;
+             }
+ #endif
+--- a/firmware/src/dsp/juno6.h
++++ b/firmware/src/dsp/juno6.h
+@@ -18,7 +18,7 @@
+        SJ6_AMP_ATTACK = SJ6_OSC_KNOBS, SJ6_AMP_DECAY, SJ6_AMP_SUSTAIN, SJ6_AMP_RELEASE,
+        SJ6_FILTER_ATTACK, SJ6_FILTER_DECAY, SJ6_FILTER_SUSTAIN, SJ6_FILTER_RELEASE,
+        SJ6_FILTER_LINK, SJ6_MASTER_LEVEL, SJ6_LFO1_RATE, SJ6_LFO2_RATE, SJ6_LFO3_RATE,
+-       SJ6_LFO2_PWM1_DEPTH, SJ6_LFO2_PWM1_ROUTE, SJ6_KNOBS };
++       SJ6_LFO2_PWM_DEPTH, SJ6_LFO2_PWM_ROUTE, SJ6_KNOBS, SJ6_LFO2_PWM_BASE = SJ6_KNOBS };
+ enum { SJ6_LFO_COUNT = 3, SJ6_LFO_WORD_COUNT = 6 };
+ typedef struct {
+     float word[SJ6_LFO_WORD_COUNT]; /* Rates, then Hz mode words, in index order. */
+@@ -29,8 +29,8 @@
+     uint64_t phase;
+     uint8_t present; /* Bit 0 = rate, bit 1 = mode. */
+ } juno6_lfo_view;
+-enum { SJ6_ADSR_STAGES = 4, SJ6_EXTRA_COUNT = SJ6_LFO2_PWM1_DEPTH - SJ6_OSC_KNOBS };
+-enum { SJ6_LFO2_PWM1_ON = 128, SJ6_LFO2_PWM1_DEPTH_MASK = SJ6_LFO2_PWM1_ON - 1 };
++enum { SJ6_ADSR_STAGES = 4, SJ6_EXTRA_COUNT = SJ6_LFO2_PWM_DEPTH - SJ6_OSC_KNOBS };
++enum { SJ6_LFO2_PWM_DEPTH_MASK = 127, SJ6_LFO2_PWM_ROUTE_SHIFT = 7 };
+ enum { SJ6_WAVE_STOPS = 3, SJ6_RANGE_STOPS = 2, SJ6_PWM_STEPS = 127, SJ6_MASTER_INIT = 128 };
+ #endif
+ static inline int juno6_factory_range_valid(float raw)
+@@ -70,8 +70,9 @@
+ #if X0X_SUPERJ6_BUILTIN_INIT
+  uint64_t lfo_phase_q40[SJ6_LFO_COUNT];
+  uint32_t lfo_step_q40[SJ6_LFO_COUNT];
+- uint8_t lfo_running, lfo2_pwm1, lfo2_pwm1_index;
+- uint32_t lfo2_pwm1_until_tick;
++ uint16_t lfo2_pwm;
++ uint8_t lfo_running, lfo2_pwm_index;
++ uint32_t lfo2_pwm_until_tick;
+ #endif
+ #endif
+ } juno6_t;
+@@ -114,7 +115,7 @@
+ void juno6_set_lfo_words(juno6_t *, const juno6_lfo_words *, int reset_phase);
+ void juno6_set_panel_lfo_rate(juno6_t *, unsigned lfo, unsigned position);
+ void juno6_read_lfo(const juno6_t *, unsigned lfo, juno6_lfo_view *);
+-void juno6_set_lfo2_pwm1(juno6_t *, uint8_t setting);
++void juno6_set_lfo2_pwm(juno6_t *, uint16_t setting);
+ int juno6_read_panel_envelope(const juno6_t *, unsigned filter, juno6_envelope_snapshot *, unsigned *linked);
+ #endif
+ void juno6_apply_pre_note_wave(juno6_t *, unsigned, const juno6_oscillator_edit *);
+--- a/firmware/src/dsp/juno6_factory.inc
++++ b/firmware/src/dsp/juno6_factory.inc
+@@ -235,10 +235,11 @@
+     set_lfo_rate(s, lfo, 3u, position * (1.f / 127.f), 1.f);
+ }
+ 
+-void juno6_set_lfo2_pwm1(juno6_t *s, uint8_t setting)
++void juno6_set_lfo2_pwm(juno6_t *s, uint16_t setting)
+ {
+-    if (setting <= SJ6_LFO2_PWM1_ON) s->lfo2_pwm1_until_tick = 0;
+-    s->lfo2_pwm1 = setting;
++    if (!(setting & SJ6_LFO2_PWM_DEPTH_MASK) || !(setting >> SJ6_LFO2_PWM_ROUTE_SHIFT))
++        s->lfo2_pwm_until_tick = 0;
++    s->lfo2_pwm = setting;
+ }
+ 
+ static const uint8_t sj6_knob_ids[SJ6_OSC_KNOBS] = {82, 83, 86, 210, 78, 211, 79};
+@@ -258,8 +259,8 @@
+ 
+ unsigned juno6_knob_position(const juno6_t *s, unsigned slot)
+ {
+-    if (slot == SJ6_LFO2_PWM1_DEPTH) return s->lfo2_pwm1 & SJ6_LFO2_PWM1_DEPTH_MASK;
+-    if (slot == SJ6_LFO2_PWM1_ROUTE) return s->lfo2_pwm1 >> 7;
++    if (slot == SJ6_LFO2_PWM_DEPTH) return s->lfo2_pwm & SJ6_LFO2_PWM_DEPTH_MASK;
++    if (slot == SJ6_LFO2_PWM_ROUTE) return s->lfo2_pwm >> SJ6_LFO2_PWM_ROUTE_SHIFT;
+     if (slot >= SJ6_LFO1_RATE) {
+         float raw = 0.f;
+         (void)dnbx_read_raw(&s->core, sj6_lfo_rate_id[slot - SJ6_LFO1_RATE], &raw);
+@@ -422,28 +423,28 @@
+     (void)juno6_set(s, JUNO6_APP_PARAM_BASE, raw);
+ }
+ 
+-/* Explicit LFO2 first route to live receiver 78. Column 0 of the Build-9
++/* Explicit LFO2 first route to live receiver 78 or 79. Column 0 of the Build-9
+  * wave row is a 256-entry triangle rotated by 64 entries. Apply its
+  * bipolar amount before the existing PWM conversion. Sample the audio
+  * clock at the nominal 80 Hz control cadence, independent of block size. */
+-static int render_lfo2_pwm1(juno6_t *s, float *left, float *right, unsigned frames)
++static int render_lfo2_pwm(juno6_t *s, unsigned receiver, float *left, float *right, unsigned frames)
+ {
+     const unsigned tick_hz = 80;
+     const unsigned sample_rate = (unsigned)s->sample_rate;
+-    dnbx_layer_params *layer = &s->core.layer[0].params;
+-    const float base = s->core.raw[78];
+-    const float depth = (s->lfo2_pwm1 & SJ6_LFO2_PWM1_DEPTH_MASK) * (1.f / 127.f);
++    dnbx_layer_params *layer = &s->core.layer[receiver].params;
++    const float base = s->core.raw[78u + receiver];
++    const float depth = (s->lfo2_pwm & SJ6_LFO2_PWM_DEPTH_MASK) * (1.f / 127.f);
+     const float saved_width = layer->pulse_width, saved_depth = layer->lfo_pwm_depth;
+-    unsigned until_tick = s->lfo2_pwm1_until_tick;
++    unsigned until_tick = s->lfo2_pwm_until_tick;
+     uint64_t phase = s->lfo_phase_q40[1];
+     int result = DNBX_OK;
+     layer->lfo_pwm_depth = 0.f;
+     while (frames) {
+         if (until_tick < tick_hz) {
+-            s->lfo2_pwm1_index = (uint8_t)((phase >> 32) + 64u);
++            s->lfo2_pwm_index = (uint8_t)((phase >> 32) + 64u);
+             until_tick += sample_rate;
+         }
+-        unsigned index = s->lfo2_pwm1_index;
++        unsigned index = s->lfo2_pwm_index;
+         float wave = index < 128 ? index * (1.f / 64.f) - 1.f : 3.f - index * (1.f / 64.f);
+         float raw = fm_clampf(base + (wave * depth) * .5f, 0.f, 1.f);
+         (void)dnbx_pwm_from_unit(raw, &layer->pulse_width);
+@@ -457,7 +458,7 @@
+         left += count;
+         right += count;
+     }
+-    s->lfo2_pwm1_until_tick = until_tick;
++    s->lfo2_pwm_until_tick = until_tick;
+     layer->pulse_width = saved_width;
+     layer->lfo_pwm_depth = saved_depth;
+     return result;
+@@ -474,12 +475,14 @@
+  }
+ #endif
+ #if X0X_SUPERJ6_BUILTIN_INIT
+- if (s->lfo2_pwm1 > SJ6_LFO2_PWM1_ON && (s->lfo_running & 2u) &&
+-     s->core.layer[0].params.waveform == 1.f && s->core.raw[210] > .5f &&
+-     frames && frames <= DNBX_MAX_FRAMES && left && right && left != right) {
+-  if (render_lfo2_pwm1(s,left,right,frames)!=DNBX_OK)return 0;
++ unsigned receiver = (s->lfo2_pwm >> SJ6_LFO2_PWM_ROUTE_SHIFT) - 1u;
++ if (receiver < DNBX_LAYERS && (s->lfo2_pwm & SJ6_LFO2_PWM_DEPTH_MASK) &&
++     (s->lfo_running & 2u) && s->core.layer[receiver].params.waveform == 1.f &&
++     s->core.raw[210u + receiver] > .5f && frames && frames <= DNBX_MAX_FRAMES &&
++     left && right && left != right) {
++  if (render_lfo2_pwm(s,receiver,left,right,frames)!=DNBX_OK)return 0;
+  } else {
+-  s->lfo2_pwm1_until_tick = 0;
++  s->lfo2_pwm_until_tick = 0;
+   if (dnbx_render(&s->core,left,right,frames,0)!=DNBX_OK)return 0;
+  }
+  /* Keep all three audio-clock phases independent of receiver and span. */

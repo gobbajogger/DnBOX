@@ -1,0 +1,263 @@
+--- /dev/null
++++ b/tests/host/ui_superj6_pwm1_lfo2_test.c
+@@ -0,0 +1,222 @@
++/* SPDX-License-Identifier: GPL-3.0-only */
++#define ARP_FIXTURE_MAIN retained_arp_main
++#include "ui_arp_engine_test.c"
++
++enum { COUNT = 8192, RATE = 44100 };
++static int32_t pcm[2][COUNT * 2];
++static const int32_t silence[COUNT * 2];
++static float actual[2][COUNT], expected[2][COUNT];
++
++static void select_owner(unsigned owner, unsigned preset)
++{
++    CHECK(!engine_bass_select_preset(owner, ORIGINAL_SOUND_JUNO, preset, &proj.sound));
++    for (unsigned n = 0; n < 1024 && engine_bass_preset_pending(owner); ++n) render(1);
++    CHECK(engine_bass_bank(owner) == ORIGINAL_SOUND_JUNO && !engine_bass_preset_pending(owner));
++}
++
++static void visit(const char *name)
++{
++    build_pages();
++    for (int n = 0; n < pg.n && strcmp(pg.title[cur_page()], name); ++n) {
++        now_ms += 200;
++        enc_acc[EN_SELECT] = 1;
++        input();
++    }
++    CHECK(!strcmp(pg.title[cur_page()], name));
++    smc_peek_cancel();
++    smc_page_set(cur_page());
++}
++
++static void panel_turn(unsigned col, unsigned slot, int pos)
++{
++    pref_t ref = pg.r[cur_page()][col];
++    CHECK(ref.kind == R_SJ6KNOB && ref.c == slot);
++    int delta = pos - pref_get(ref);
++    CHECK(delta && smc_same(ref, smc_knob_target(col)));
++    while (delta) {
++        int step = delta < -32 ? -32 : delta > 32 ? 32 : delta;
++        now_ms += 200u + (unsigned)abs(step) * 70u;
++        knob(col, step);
++        delta -= step;
++    }
++    CHECK(pref_get(ref) == pos && project_save() == -8);
++}
++
++static void begin_pair(void)
++{
++    engine_apply_sound(&proj.sound);
++    render(24);
++    engine_bass_on(0, 57, 0, 0);
++    engine_bass_on(1, 62, 0, 0);
++    render(4);
++}
++
++static void capture(int32_t *samples)
++{
++    for (unsigned n = 0; n < COUNT; n += 256) engine_render(samples + n * 2, 256);
++}
++
++static unsigned changed(const int32_t *a, const int32_t *b, unsigned ch)
++{
++    unsigned differences = 0;
++    for (unsigned n = 0; n < COUNT; ++n) differences += a[n * 2 + ch] != b[n * 2 + ch];
++    return differences;
++}
++
++static void verify_panel(unsigned owner)
++{
++    setup(V_PART, PART_303A + owner);
++    proj.set.bt |= PROJ_BT_CLK_IN;
++    select_owner(owner, 0);
++    select_owner(1-owner, 0);
++    proj.sound.v[T_MIX][PART_303A][MX_PAN] = 0;
++    proj.sound.v[T_MIX][PART_303B][MX_PAN] = 127;
++    proj.sound.v[T_MIX][PART_303A][MX_REV] = proj.sound.v[T_MIX][PART_303B][MX_REV] = 0;
++    proj.sound.v[T_MIX][PART_303A][MX_DLY] = proj.sound.v[T_MIX][PART_303B][MX_DLY] = 0;
++    proj.sound.v[T_MST][0][MST_RATIO] = proj.sound.v[T_MST][0][MST_PUMP] = 0;
++    proj.sound.v[T_MST][0][MST_LIMIT] = proj.sound.v[T_MST][0][MST_MODE] = 0;
++    engine_fx_mute(3u);
++    visit("OSCILLATOR");
++    panel_turn(0, SJ6_WAVE1, 3);
++    render(1);
++    visit("PULSE WIDTH");
++    panel_turn(0, SJ6_PWM1_ON, 1);
++    panel_turn(1, SJ6_PWM1, 61);
++    render(1);
++    visit("LFO2 PWM1");
++    panel_turn(0, SJ6_LFO2_RATE, 127);
++    panel_turn(2, SJ6_LFO2_PWM1_ROUTE, 1);
++    render(1);
++    sound_t armed = proj.sound;
++    begin_pair();
++    capture(pcm[0]); /* Route on, depth zero. */
++    CHECK(changed(pcm[0], silence, owner) > COUNT / 2);
++    CHECK(changed(pcm[0], silence, 1-owner) > COUNT / 2);
++    begin_pair();
++    panel_turn(1, SJ6_LFO2_PWM1_DEPTH, 100); /* Editor input while both notes sound. */
++    CHECK(proj.sound.v[T_303][owner][21] == armed.v[T_303][owner][21]);
++    capture(pcm[1]);
++    unsigned delta = changed(pcm[0], pcm[1], owner);
++    unsigned peer_delta = changed(pcm[0], pcm[1], 1-owner);
++    printf("part=%u held depth PCM changed %u target frames, %u peer frames\n", owner, delta, peer_delta);
++    CHECK(delta > COUNT / 2 && !peer_delta);
++    CHECK(!memcmp(armed.v[T_303][1-owner], proj.sound.v[T_303][1-owner], ORIGINAL_SOUND_BYTES));
++    sound_t active = proj.sound;
++    begin_pair();
++    capture(pcm[0]);
++    engine_bass_off(0);
++    engine_bass_off(1);
++    for (unsigned n = 0; n < 1024 && ui_boot_flash_busy(); ++n) render(1);
++    CHECK(!ui_boot_flash_busy());
++    int saved = ui_project_save();
++    int loaded = saved ? 0 : project_load();
++    if (saved || loaded)
++        fprintf(stderr, "save=%d load=%d unsupported=%d bank0=%d bank1=%d\n",
++                saved, loaded, project_storage_unsupported(),
++                engine_bass_sound_bank(&proj.sound, 0), engine_bass_sound_bank(&proj.sound, 1));
++    CHECK(!saved && !loaded);
++    CHECK(!memcmp(&active, &proj.sound, sizeof active));
++    begin_pair();
++    CHECK(pref_get(pg.r[cur_page()][1]) == 100 && pref_get(pg.r[cur_page()][2]) == 1);
++    capture(pcm[1]);
++    CHECK(!memcmp(pcm[0], pcm[1], sizeof pcm[0]));
++
++    begin_pair();
++    panel_turn(2, SJ6_LFO2_PWM1_ROUTE, 0);
++    render(1);
++    CHECK(pref_get(pg.r[cur_page()][1]) == 100);
++    begin_pair();
++    capture(pcm[0]);
++    proj.sound = armed;
++    begin_pair();
++    capture(pcm[1]);
++    CHECK(!memcmp(pcm[0], pcm[1], sizeof pcm[0]));
++    proj.sound = active;
++    begin_pair();
++    panel_turn(1, SJ6_LFO2_PWM1_DEPTH, 71);
++    CHECK(!engine_bass_select_preset(owner, ORIGINAL_SOUND_JUNO, 1, &proj.sound));
++    engine_bass_off(owner);
++    for (unsigned n = 0; n < 1024 && engine_bass_preset_pending(owner); ++n) render(1);
++    CHECK(!engine_bass_preset_pending(owner));
++    CHECK(engine_superj6_knob_position(owner, SJ6_LFO2_PWM1_DEPTH) == 0);
++    CHECK(engine_superj6_knob_position(owner, SJ6_LFO2_PWM1_ROUTE) == 0);
++    CHECK(!memcmp(armed.v[T_303][1-owner], proj.sound.v[T_303][1-owner], ORIGINAL_SOUND_BYTES));
++    printf("part=%u held SMK PWM1 edits changed %u/%u target samples, 0 peer samples; save/reload, depth-zero and route-off PCM, preset isolation PASS\n",
++           owner, delta, COUNT);
++}
++
++static void verify_cell(void)
++{
++    uint8_t cell[ORIGINAL_SOUND_BYTES];
++    CHECK(original_sound_init(cell, ORIGINAL_SOUND_JUNO, 0));
++    for (unsigned state = 0; state < 256; ++state) {
++        original_sound_sj6_pwm1_lfo_store(cell, (uint8_t)state);
++        CHECK(original_sound_valid(cell) && cell[ORIGINAL_SJ6_PWM1_LFO_BYTE] == state);
++        cell[25] ^= ORIGINAL_SJ6_PWM1_LFO_BIT >> 24;
++        CHECK(!original_sound_valid(cell));
++        cell[25] ^= ORIGINAL_SJ6_PWM1_LFO_BIT >> 24;
++    }
++}
++
++static void verify_receiver(void)
++{
++    juno6_t synth;
++    juno6_init(&synth, RATE);
++    juno6_oscillator_edit square = {1.f, .5f, 1.f};
++    juno6_apply_pre_note_wave(&synth, 0, &square);
++    juno6_set_panel_lfo_rate(&synth, 1, 127);
++    CHECK(juno6_note_on(&synth, 57, 127));
++    juno6_t baseline = synth;
++    juno6_lfo_view lfo;
++    juno6_read_lfo(&synth, 1, &lfo);
++    CHECK(lfo.hz == 16.f);
++
++    /* Physical oracle uses the archive's table rotation and depth law. The
++     * receiver's 80 Hz sample grid is independent of caller partitioning. */
++    uint64_t turn = UINT64_C(1) << 40;
++    uint64_t step = (uint64_t)(16.f * ((float)turn / RATE) + .5f);
++    const unsigned uneven[] = {137, 87, 257, 311};
++    juno6_t bypass = synth;
++    juno6_set_lfo2_pwm1(&bypass, 128u);
++    for (unsigned n = 0, i = 0; n < COUNT; ++i) {
++        unsigned span = fm_minf(uneven[i % 4], COUNT - n);
++        CHECK(juno6_render_stereo(&baseline, actual[0]+n, actual[1]+n, span));
++        CHECK(juno6_render_stereo(&bypass, expected[0]+n, expected[1]+n, span));
++        n += span;
++    }
++    CHECK(!memcmp(actual, expected, sizeof actual));
++
++    baseline = synth;
++    juno6_set_lfo2_pwm1(&synth, 255u);
++    for (unsigned n = 0, i = 0; n < COUNT; ++i) {
++        unsigned span = fm_minf(uneven[i % 4], COUNT - n);
++        CHECK(juno6_render_stereo(&synth, actual[0]+n, actual[1]+n, span));
++        n += span;
++    }
++    for (unsigned tick = 0, n = 0; n < COUNT; ++tick) {
++        unsigned end = (tick + 1u) * RATE / 80u;
++        if (end > COUNT) end = COUNT;
++        unsigned index = (unsigned)(((n * step) % turn) >> 32);
++        unsigned p = (index + 64u) % 256u;
++        float wave = p < 128u ? (float)p / 64.f - 1.f : 3.f - (float)p / 64.f;
++        float raw = .5f + (wave * 1.f) * .5f;
++        baseline.core.layer[0].params.pulse_width = .5f - .47f * raw;
++        CHECK(juno6_render_stereo(&baseline, expected[0]+n, expected[1]+n, end-n));
++        n = end;
++    }
++    CHECK(!memcmp(actual, expected, sizeof actual));
++    CHECK(synth.core.layer[0].params.pulse_width == .5f - .47f * .5f);
++    float raw;
++    CHECK(dnbx_read_raw(&synth.core, 78, &raw) == DNBX_OK && raw == .5f);
++    printf("Build-9 triangle, depth and PWM oracle exact over %u stereo frames; irregular blocks and depth-zero PCM PASS\n", COUNT);
++}
++
++int main(void)
++{
++    verify_cell();
++    verify_receiver();
++    verify_panel(0);
++    verify_panel(1);
++    printf("PASS SuperJ6 LFO2 PWM1 %u checks\n", checks);
++    return 0;
++}
+--- /dev/null
++++ b/tests/host/ui_superj6_legacy_pcm_test.c
+@@ -0,0 +1,35 @@
++/* SPDX-License-Identifier: GPL-3.0-only */
++#define ARP_FIXTURE_MAIN retained_arp_main
++#include "ui_arp_engine_test.c"
++
++/* This test has no new receiver API dependencies so the same source runs
++ * against the preimage. It writes only external build-output PCM. */
++int main(void)
++{
++    const char *dir = getenv("SMC_UI_SHOTS");
++    char path[1024];
++    CHECK(dir && snprintf(path, sizeof path, "%s/legacy.pcm", dir) < (int)sizeof path);
++    FILE *stream = fopen(path, "wb");
++    CHECK(stream);
++    const unsigned banks[] = {ORIGINAL_SOUND_JUNO, ORIGINAL_SOUND_SYNTHONE,
++                              ORIGINAL_SOUND_CHICAGO, ORIGINAL_SOUND_MIAMI};
++    for (unsigned b = 0; b < sizeof banks / sizeof banks[0]; ++b) for (unsigned owner = 0; owner < 2; ++owner) {
++        setup(V_PART, PART_303A + owner);
++        proj.set.bt |= PROJ_BT_CLK_IN;
++        CHECK(!engine_bass_select_preset(owner, banks[b], 0, &proj.sound));
++        for (unsigned n = 0; n < 1024 && engine_bass_preset_pending(owner); ++n) render(1);
++        CHECK(engine_bass_bank(owner) == (int)banks[b] && !engine_bass_preset_pending(owner));
++        engine_bass_on(owner, 57, 0, 0);
++        int32_t pcm[512], nonzero = 0;
++        for (unsigned n = 0; n < 24; ++n) {
++            if (n == 16) engine_bass_off(owner);
++            engine_render(pcm, 256);
++            for (unsigned i = 0; i < sizeof pcm / sizeof pcm[0]; ++i) nonzero |= pcm[i];
++            CHECK(fwrite(pcm, sizeof pcm, 1, stream) == 1);
++        }
++        CHECK(nonzero);
++    }
++    CHECK(!fclose(stream));
++    puts("PASS 49,152 stereo frames across two owners and four legacy sound paths");
++    return 0;
++}

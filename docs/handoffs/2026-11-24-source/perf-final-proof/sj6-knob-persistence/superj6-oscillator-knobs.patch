@@ -1,0 +1,565 @@
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -3198,6 +3198,9 @@
+ #endif
+     original_prepare_all(); /* precedes every serial frame-zero edit and key */
+ #if X0X_SUPERJ6_FACTORY
++#if X0X_SUPERJ6_BUILTIN_INIT
++    if (!bass_edit_depth && engine_superj6_knob_pending()) sj6_knob_boundary();
++#endif
+     apply_superj6_edits();
+ #endif
+     arp_boundary();
+--- a/firmware/src/app/engine.h
++++ b/firmware/src/app/engine.h
+@@ -141,6 +141,11 @@
+  * pre-note toggle; active or pending owners do not apply a partial edit. */
+ int engine_superj6_filter_link(unsigned owner, unsigned on);
+ int engine_superj6_amp1_read(unsigned owner, float *raw, float *seconds);
++#if X0X_SUPERJ6_BUILTIN_INIT
++int engine_superj6_knob_position(unsigned owner, unsigned slot);
++int engine_superj6_knob_turn(unsigned owner, unsigned slot, int value, int relative);
++int engine_superj6_knob_pending(void);
++#endif
+ #endif
+ /* UI-only snapshot of the real amplitude EG and first modulator. */
+ int engine_bass_voice_view(int voice, float *level, float *modulation, unsigned *state, unsigned *key_down);
+--- a/firmware/src/app/original_presets.inc
++++ b/firmware/src/app/original_presets.inc
+@@ -3,10 +3,12 @@
+ static int16_t bass_named_preset[NBASS] = {-1, -1};
+ static void arp_adopt(int v, const sound_t *sound, int preset_change); /* engine_arp.inc */
+ static volatile uint8_t bass_preview_dirty, bass_wheel_mask, bass_edit_depth;
++#if X0X_SYNTHONE_PATCH || X0X_BASS_NOTE_SOUND
++static volatile uint8_t note_lock_applied[NBASS];
++#endif
+ #if X0X_SYNTHONE_PATCH
+ /* One main-loop edit per part. A new adoption invalidates its predecessor,
+  * even on a project reload or a new choice of the same named preset. */
+-static volatile uint8_t note_lock_applied[NBASS];
+ static volatile uint32_t s1_patch_revision[NBASS];
+ static uint32_t s1_patch_identity(unsigned voice)
+ { return (s1_patch_revision[voice] << 1) | voice; }
+@@ -170,6 +172,77 @@
+     }
+ }
+ #endif
++#if X0X_SUPERJ6_BUILTIN_INIT
++static uint8_t sj6_knob_value[NBASS][SJ6_KNOBS];
++static volatile uint8_t sj6_knob_mask[NBASS];
++
++int engine_superj6_knob_pending(void)
++{ return sj6_knob_mask[0] || sj6_knob_mask[1]; }
++
++static int sj6_knob_ready(unsigned owner)
++{
++    const original_runtime_part *p = &original_bass[owner];
++    return p->kind == ORIGINAL_SOUND_JUNO && p->status == ORIGINAL_RUNTIME_OK &&
++           !(p->dsp.juno.synth.pending_field_mask & SJ6_FACTORY_GROUP);
++}
++
++static int sj6_knob_position(unsigned owner, unsigned slot)
++{
++    return (sj6_knob_mask[owner] & (1u << slot)) ? sj6_knob_value[owner][slot]
++        : (int)juno6_knob_position(&original_bass[owner].dsp.juno.synth, slot);
++}
++
++X0X_COLD int engine_superj6_knob_position(unsigned owner, unsigned slot)
++{
++    if (owner >= NBASS || slot >= SJ6_KNOBS) return -1;
++    uint32_t lock = plat_cq_lock();
++    int position = sj6_knob_ready(owner) ? sj6_knob_position(owner, slot) : -1;
++    plat_cq_unlock(lock);
++    return position;
++}
++
++X0X_COLD int engine_superj6_knob_turn(unsigned owner, unsigned slot, int value, int relative)
++{
++    if (owner >= NBASS || slot >= SJ6_KNOBS) return 0;
++    uint32_t lock = plat_cq_lock();
++    int changed = 0;
++    if (!project_hold && mot_base_snd && sj6_knob_ready(owner) && !engine_bass_preset_pending(owner)
++#if X0X_BASS_NOTE_SOUND
++        && !note_lock_applied[owner]
++#endif
++       ) {
++        int before = sj6_knob_position(owner, slot);
++        int max = (int)original_sound_sj6_max(slot);
++        if (relative) value += before;
++        value = value < 0 ? 0 : value > max ? max : value;
++        if (value != before) {
++            sj6_knob_value[owner][slot] = (uint8_t)value;
++            sj6_knob_mask[owner] |= (uint8_t)(1u << slot);
++            changed = 1;
++        }
++    }
++    plat_cq_unlock(lock);
++    return changed;
++}
++
++X0X_COLD static void sj6_knob_boundary(void)
++{
++    for (unsigned v = 0; v < NBASS; ++v) {
++        unsigned mask = sj6_knob_mask[v];
++        if (!mask) continue;
++        sj6_knob_mask[v] = 0;
++        if (!sj6_knob_ready(v) || engine_bass_preset_pending(v)) continue;
++#if X0X_BASS_NOTE_SOUND
++        if (note_lock_applied[v]) continue;
++#endif
++        sound_t *sound = (sound_t *)mot_base_snd;
++        juno6_apply_knobs(&original_bass[v].dsp.juno.synth, mask, sj6_knob_value[v]);
++        original_sound_sj6_store(sound->v[T_303][v], mask, sj6_knob_value[v]);
++        bass_tag_set(sound, v, ORIGINAL_SOUND_JUNO, bass_named_preset[v], 1);
++    }
++}
++#endif
++
+ /* Compact Synth One uses the cell's extension bytes for its 10-bit preset.
+  * Other engines and stock INIT retain the legacy byte and project encoding. */
+ static unsigned bass_cell_preset(const uint8_t *cell)
+@@ -226,11 +299,7 @@
+  * and part mixer are applied at that note's onset, before the key. Capture runs
+  * only while NOTE LOCK is on (runtime, not saved); with no lock records the
+  * onset path does one flag read. */
+-#if X0X_SYNTHONE_PATCH
+ static volatile uint8_t note_lock_capture, note_lock_any;
+-#else
+-static volatile uint8_t note_lock_capture, note_lock_any, note_lock_applied[NBASS];
+-#endif
+ void engine_note_lock_capture(int on) { note_lock_capture = (uint8_t)(on != 0); }
+ int engine_note_lock_capture_on(void) { return note_lock_capture; }
+ int engine_bass_note_validate(const lane_t *l)
+@@ -371,6 +440,9 @@
+ #if X0X_SYNTHONE_PATCH
+     s1_patch_replaced(v);
+ #endif
++#if X0X_SUPERJ6_BUILTIN_INIT
++    sj6_knob_mask[v] = 0;
++#endif
+     arp_adopt(v, sound, 0);
+     bass_named_preset[v] = (int16_t)bass_cell_preset(sound->v[T_303][v]);
+     original_seq_note[v] = -1;
+@@ -508,6 +580,9 @@
+ #if X0X_SYNTHONE_PATCH
+         s1_patch_replaced(v);
+ #endif
++#if X0X_SUPERJ6_BUILTIN_INIT
++        sj6_knob_mask[v] = 0;
++#endif
+         arp_adopt(v, sound, 1);
+         bass_named_preset[v] = (int16_t)preset;
+         /* A committed bank/preset replacement, never merely a pending request.
+--- a/firmware/src/app/original_runtime.c
++++ b/firmware/src/app/original_runtime.c
+@@ -57,9 +57,14 @@
+     p->status = (int8_t)rc;
+     if (rc != ORIGINAL_RUNTIME_OK) return rc;
+ #if X0X_SUPERJ6_BUILTIN_INIT
+-    /* Older Juno slots keep their project identity. They cold-start the
+-     * built-in SuperJ6 voice instead of replaying old sound edits. */
+-    if (kind == ORIGINAL_SOUND_JUNO) return original_runtime_prepare(p, bpm);
++    /* Legacy macro edits belong to the earlier renderer. Explicit build-9
++     * panel edits are reapplied with the selected sound. */
++    if (kind == ORIGINAL_SOUND_JUNO) {
++        uint8_t positions[SJ6_KNOBS];
++        unsigned mask = original_sound_sj6_knobs(cell, positions);
++        if (mask) juno6_apply_knobs(&p->dsp.juno.synth, mask, positions);
++        return original_runtime_prepare(p, bpm);
++    }
+ #endif
+     if (kind == ORIGINAL_SOUND_JUNO) {
+         for(unsigned i=0;i<ORIGINAL_JUNO_NPARAMS-2u;i++){
+--- a/firmware/src/app/original_sound.c
++++ b/firmware/src/app/original_sound.c
+@@ -198,6 +198,45 @@
+     if (!original_sound_is_legacy_slot2_cell(cell)) return 0;
+     return original_sound_init(cell, ORIGINAL_SOUND_SYNTHONE, ORIGINAL_SYNTHONE_INIT_FACTORY);
+ }
++#if X0X_SUPERJ6_BUILTIN_INIT
++unsigned original_sound_sj6_max(unsigned slot)
++{
++    static const uint8_t max[SJ6_KNOBS] = {3, 3, 2, 1, 127, 1, 127};
++    return slot < SJ6_KNOBS ? max[slot] : 0;
++}
++
++/* Keep legacy macro bytes and preset identity. Bytes 18/19 store PWM amounts.
++ * Byte 20 packs the two waveforms, range, then the two enable switches. */
++unsigned original_sound_sj6_knobs(const uint8_t cell[ORIGINAL_SOUND_BYTES],
++                                uint8_t positions[SJ6_KNOBS])
++{
++    unsigned mixed = cell[20];
++    positions[SJ6_WAVE1] = mixed & 3u;
++    positions[SJ6_WAVE2] = (mixed >> 2) & 3u;
++    positions[SJ6_RANGE] = (mixed >> 4) & 3u;
++    positions[SJ6_PWM1_ON] = (mixed >> 6) & 1u;
++    positions[SJ6_PWM1] = cell[18];
++    positions[SJ6_PWM2_ON] = mixed >> 7;
++    positions[SJ6_PWM2] = cell[19];
++    return (original_sound_edit_mask(cell) >> ORIGINAL_SJ6_EDIT_SHIFT) & ORIGINAL_SJ6_EDIT_MASK;
++}
++
++void original_sound_sj6_store(uint8_t cell[ORIGINAL_SOUND_BYTES], unsigned mask,
++                             const uint8_t positions[SJ6_KNOBS])
++{
++    uint8_t saved[SJ6_KNOBS];
++    (void)original_sound_sj6_knobs(cell, saved);
++    for (unsigned i = 0; i < SJ6_KNOBS; ++i)
++        if (mask & (1u << i)) saved[i] = positions[i];
++    cell[18] = saved[SJ6_PWM1];
++    cell[19] = saved[SJ6_PWM2];
++    cell[20] = (uint8_t)(saved[SJ6_WAVE1] | saved[SJ6_WAVE2] << 2 |
++                        saved[SJ6_RANGE] << 4 | saved[SJ6_PWM1_ON] << 6 |
++                        saved[SJ6_PWM2_ON] << 7);
++    original_sound_put_mask(cell, original_sound_edit_mask(cell) | (mask << ORIGINAL_SJ6_EDIT_SHIFT));
++}
++#endif
++
+ int original_sound_valid(const uint8_t cell[ORIGINAL_SOUND_BYTES])
+ {
+     if (!cell || cell[26] != 'O' || cell[27] != 'S' || cell[28] != ORIGINAL_SOUND_SCHEMA) return 0;
+@@ -207,6 +246,18 @@
+         (cell[29] == ORIGINAL_SOUND_SYNTHONE && !crush_edit && cell[ORIGINAL_SYNTHONE_CRUSH])) return 0;
+     unsigned count = original_sound_count(cell[29]);
+     if (!count || cell[30] >= original_sound_factories(cell[29])) return 0;
++#if X0X_SUPERJ6_BUILTIN_INIT
++    if (cell[29] == ORIGINAL_SOUND_JUNO && original_sound_edit_mask(cell) >> ORIGINAL_SJ6_EDIT_SHIFT) {
++        uint8_t positions[SJ6_KNOBS];
++        unsigned mask = original_sound_sj6_knobs(cell, positions);
++        if (cell[21] || original_sound_edit_mask(cell) >> (ORIGINAL_SJ6_EDIT_SHIFT + SJ6_KNOBS)) return 0;
++        for (unsigned i = 0; i < SJ6_KNOBS; ++i)
++            if (positions[i] > (mask & (1u << i) ? original_sound_sj6_max(i) : 0)) return 0;
++        for (unsigned i = 0; i < count; ++i)
++            if (cell[i] > original_sound_param(ORIGINAL_SOUND_JUNO, i)->max) return 0;
++        return 1;
++    }
++#endif
+ #if X0X_S1C
+     /* Synth One program bytes [7] and [21]: checked here, then masked for the zero checks. */
+     uint8_t s1c_copy[ORIGINAL_SOUND_BYTES];
+--- a/firmware/src/app/original_sound.h
++++ b/firmware/src/app/original_sound.h
+@@ -98,6 +98,16 @@
+ #if X0X_SYNTHONE_PATCH
+ int original_sound_s1_set(uint8_t cell[ORIGINAL_SOUND_BYTES], unsigned slot, unsigned position);
+ #endif
++#if X0X_SUPERJ6_BUILTIN_INIT
++#include "../dsp/juno6.h"
++#define ORIGINAL_SJ6_EDIT_SHIFT 18u
++#define ORIGINAL_SJ6_EDIT_MASK ((1u << SJ6_KNOBS) - 1u)
++unsigned original_sound_sj6_max(unsigned slot);
++unsigned original_sound_sj6_knobs(const uint8_t cell[ORIGINAL_SOUND_BYTES],
++                                uint8_t positions[SJ6_KNOBS]);
++void original_sound_sj6_store(uint8_t cell[ORIGINAL_SOUND_BYTES], unsigned mask,
++                             const uint8_t positions[SJ6_KNOBS]);
++#endif
+ uint32_t original_sound_edit_mask(const uint8_t cell[ORIGINAL_SOUND_BYTES]);
+ int original_sound_restore_miami(original_miami_program *, const uint8_t cell[ORIGINAL_SOUND_BYTES]);
+ int original_sound_restore_chicago(original_chicago_program *, const uint8_t cell[ORIGINAL_SOUND_BYTES]);
+--- a/firmware/src/app/project.c
++++ b/firmware/src/app/project.c
+@@ -856,6 +856,9 @@
+ #if X0X_SYNTHONE_PATCH
+     if(engine_s1_patch_pending())return -8;
+ #endif
++#if X0X_SUPERJ6_BUILTIN_INIT
++    if(engine_superj6_knob_pending())return -8;
++#endif
+     if(engine_bass_sound_validate(&proj.sound))return -9;
+     for(int v=0;v<NBASS;v++)if(engine_bass_preset_pending(v))return -8;
+ #elif X0X_BASS_PRESET_PREVIEW
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -457,6 +457,9 @@
+ static int arp_get(unsigned voice, unsigned field);
+ static void arp_set(unsigned voice, unsigned field, int v);
+ #endif
++#if X0X_SUPERJ6_BUILTIN_INIT
++enum { R_SJ6KNOB = R_NOTELOCK + 3 };
++#endif
+ typedef struct { uint8_t kind, a, b, c; } pref_t;
+ #define PR(k, a, b, c) ((pref_t){(k), (a), (b), (c)})
+ #define NONE PR(R_NONE, 0, 0, 0)
+@@ -491,6 +494,21 @@
+              "PATCH CHANGED", 0);
+ }
+ #endif
++#if X0X_SUPERJ6_BUILTIN_INIT
++static const x0x_param_t *sj6_knob_desc(unsigned slot)
++{
++    static const char *const wave[] = {"SINE", "TRI", "SAW", "SQ"};
++    static const char *const range[] = {"16FT", "8FT", "4FT"};
++    static const char *const enable[] = {"OFF", "ON"};
++    static const x0x_param_t knobs[SJ6_KNOBS] = {
++        {"WAVE 1", SJ6_WAVE_STOPS, 2, wave}, {"WAVE 2", SJ6_WAVE_STOPS, 2, wave},
++        {"RANGE", SJ6_RANGE_STOPS, 1, range},
++        {"PWM 1 ON", 1, 0, enable}, {"PWM 1", SJ6_PWM_STEPS, 0, 0},
++        {"PWM 2 ON", 1, 0, enable}, {"PWM 2", SJ6_PWM_STEPS, 0, 0},
++    };
++    return slot < SJ6_KNOBS ? &knobs[slot] : 0;
++}
++#endif
+ static const char *const BENGINE_N[] = {"CHICAGO", "MIAMI", "SYNTH ONE", "SUPERJ6"};
+ static const x0x_param_t BENGINE_P = {"ENGINE",3,0,BENGINE_N};
+ static x0x_param_t BPRESET_P = {"PRESET",54,0,0};
+@@ -614,6 +632,9 @@
+ #if X0X_ARP_HOOKS
+     case R_ARP: return arp_desc(r.a);
+ #endif
++#if X0X_SUPERJ6_BUILTIN_INIT
++    case R_SJ6KNOB: return sj6_knob_desc(r.c);
++#endif
+ #if X0X_SYNTHONE_PATCH
+     case R_S1PATCH: {
+         const s1_patch_descriptor *d = s1_patch_at(r.c);
+@@ -728,6 +749,9 @@
+ #if X0X_ARP_HOOKS
+     case R_ARP: return arp_get(r.b, r.a);
+ #endif
++#if X0X_SUPERJ6_BUILTIN_INIT
++    case R_SJ6KNOB: return engine_superj6_knob_position(r.b, r.c);
++#endif
+ #if X0X_SYNTHONE_PATCH
+     case R_S1PATCH: {
+         const s1_patch_descriptor *d = s1_patch_at(r.c);
+@@ -837,6 +861,12 @@
+ #if X0X_ARP_HOOKS
+     if (r.kind == R_ARP) { arp_set(r.b, r.a, v); return; }
+ #endif
++#if X0X_SUPERJ6_BUILTIN_INIT
++    if (r.kind == R_SJ6KNOB) {
++        if (engine_superj6_knob_turn(r.b, r.c, v, 0)) mark_dirty();
++        return;
++    }
++#endif
+ #if X0X_SYNTHONE_PATCH
+     if (r.kind == R_S1PATCH) { s1_edit(r, v, 0); return; }
+ #endif
+@@ -1408,6 +1438,13 @@
+         engine_bass_edit_hold(0);
+         return;
+     }
++#if X0X_SUPERJ6_BUILTIN_INIT
++    if (r.kind == R_SJ6KNOB && !d->names) {
++        if (v < 0) put_s(num, "--");
++        else { put_i(num, (v * 100 + 63) / 127); put_s(unit, "%"); }
++        return;
++    }
++#endif
+     if (d->names) {
+         /* Retained or incompatible sound data must not become a pointer lookup. */
+         put_s(num, v >= 0 && v <= d->max ? d->names[v] : "INVALID");
+@@ -1954,7 +1991,18 @@
+                 chicago ? ui_original_chicago_titles : ui_original_miami_titles;
+             int count = kind == ORIGINAL_SOUND_JUNO ? UI_ORIGINAL_JUNO_PAGES : kind == ORIGINAL_SOUND_SYNTHONE ? UI_ORIGINAL_SYNTHONE_PAGES :
+                 chicago ? UI_ORIGINAL_CHICAGO_PAGES : UI_ORIGINAL_MIAMI_PAGES;
+-            for (int row = 0; row < count; row++) {
++            int first_row = 0;
++#if X0X_SUPERJ6_BUILTIN_INIT
++            if (kind == ORIGINAL_SOUND_JUNO) {
++                add_page(emit, "OSCILLATOR", PR(R_SJ6KNOB,T_303,b,SJ6_WAVE1),
++                         PR(R_SJ6KNOB,T_303,b,SJ6_WAVE2), PR(R_SJ6KNOB,T_303,b,SJ6_RANGE), NONE);
++                add_page(emit, "PULSE WIDTH", PR(R_SJ6KNOB,T_303,b,SJ6_PWM1_ON),
++                         PR(R_SJ6KNOB,T_303,b,SJ6_PWM1), PR(R_SJ6KNOB,T_303,b,SJ6_PWM2_ON),
++                         PR(R_SJ6KNOB,T_303,b,SJ6_PWM2));
++                first_row = 1;
++            }
++#endif
++            for (int row = first_row; row < count; row++) {
+                 pref_t refs[4];
+                 for (int col = 0; col < 4; col++) refs[col] = rows[row][col] < 0 ? NONE : PR(R_ENG,T_303,b,rows[row][col]);
+ #if X0X_SYNTHONE_PATCH
+@@ -3628,6 +3676,14 @@
+ 
+ static void turn_ref(pref_t r, int e, int knob)
+ {
++#if X0X_SUPERJ6_BUILTIN_INIT
++    if (r.kind == R_SJ6KNOB) {
++        int max = (int)original_sound_sj6_max(r.c);
++        int delta = max <= SJ6_WAVE_STOPS ? (e > 0) - (e < 0) : accel(knob, e, max);
++        if (engine_superj6_knob_turn(r.b, r.c, delta, 1)) mark_dirty();
++        return;
++    }
++#endif
+ #if X0X_SYNTHONE_PATCH
+     if (r.kind == R_S1PATCH) { s1_edit(r, accel(knob, e, S1_PATCH_STEPS), 1); return; }
+ #endif
+--- a/firmware/src/dsp/juno6.h
++++ b/firmware/src/dsp/juno6.h
+@@ -12,6 +12,11 @@
+ #define JUNO6_APP_PARAM_BASE 256u
+ /* Qualified raw master-volume domain includes the authored over-unity stops. */
+ #define JUNO6_FACTORY_MASTER_MAX 1.32f
++#if X0X_SUPERJ6_BUILTIN_INIT
++/* Authored build-9 IDs: 82, 83, 86, 210, 78, 211, 79. */
++enum { SJ6_WAVE1, SJ6_WAVE2, SJ6_RANGE, SJ6_PWM1_ON, SJ6_PWM1, SJ6_PWM2_ON, SJ6_PWM2, SJ6_KNOBS };
++enum { SJ6_WAVE_STOPS = 3, SJ6_RANGE_STOPS = 2, SJ6_PWM_STEPS = 127 };
++#endif
+ static inline int juno6_factory_range_valid(float raw)
+ { return raw == 0.f || raw == .5f || raw == 1.f; }
+ #endif
+@@ -79,6 +84,10 @@
+ #if X0X_SUPERJ6_FACTORY
+ int juno6_render_stereo(juno6_t *, float *, float *, unsigned);
+ int juno6_can_edit_amp2(const juno6_t *);
++#if X0X_SUPERJ6_BUILTIN_INIT
++unsigned juno6_knob_position(const juno6_t *s, unsigned slot);
++void juno6_apply_knobs(juno6_t *s, unsigned mask, const uint8_t positions[SJ6_KNOBS]);
++#endif
+ void juno6_apply_pre_note_wave(juno6_t *, unsigned, const juno6_oscillator_edit *);
+ void juno6_apply_factory_waves(juno6_t *, const juno6_oscillator_edit waves[2]);
+ /* Audio boundary, idle, with already-qualified independent envelopes. */
+--- a/firmware/src/dsp/juno6_factory.inc
++++ b/firmware/src/dsp/juno6_factory.inc
+@@ -187,6 +187,44 @@
+  }
+ }
+ 
++#if X0X_SUPERJ6_BUILTIN_INIT
++static const uint8_t sj6_knob_ids[SJ6_KNOBS] = {82, 83, 86, 210, 78, 211, 79};
++
++static float sj6_knob_raw(const juno6_t *s, unsigned slot)
++{
++    float raw = slot <= SJ6_WAVE2 ? 0x1.555556p-1f : slot == SJ6_RANGE ? .5f : 0.f;
++    (void)dnbx_read_raw(&s->core, sj6_knob_ids[slot], &raw);
++    return raw;
++}
++
++unsigned juno6_knob_position(const juno6_t *s, unsigned slot)
++{
++    float raw = sj6_knob_raw(s, slot);
++    if (slot <= SJ6_WAVE2)
++        return (raw >= 0x1.555556p-2f) + (raw >= 0x1.555556p-1f) + (raw == 1);
++    if (slot == SJ6_RANGE) return (unsigned)(raw * 2.f);
++    if (slot == SJ6_PWM1_ON || slot == SJ6_PWM2_ON) return raw > .5f;
++    return (unsigned)(raw * SJ6_PWM_STEPS + .5f);
++}
++
++/* Only apply the touched controls. Read neighboring authored words at the
++ * audio boundary so a panel detent never re-quantizes another control. */
++void juno6_apply_knobs(juno6_t *s, unsigned mask, const uint8_t p[SJ6_KNOBS])
++{
++    for (unsigned layer = 0; layer < DNBX_LAYERS; ++layer) {
++        unsigned wave = SJ6_WAVE1 + layer, on = SJ6_PWM1_ON + 2u * layer, amount = on + 1u;
++        if (!(mask & ((1u << wave) | (1u << on) | (1u << amount)))) continue;
++        juno6_oscillator_edit e = {
++            mask & (1u << wave) ? p[wave] * (1.f / SJ6_WAVE_STOPS) : sj6_knob_raw(s, wave),
++            mask & (1u << amount) ? p[amount] * (1.f / SJ6_PWM_STEPS) : sj6_knob_raw(s, amount),
++            mask & (1u << on) ? p[on] : sj6_knob_raw(s, on)
++        };
++        juno6_apply_pre_note_wave(s, layer, &e);
++    }
++    if (mask & (1u << SJ6_RANGE)) juno6_apply_pre_note_range(s, p[SJ6_RANGE] * .5f);
++}
++#endif
++
+ int juno6_set(juno6_t *s,unsigned id,float x)
+ {
+  if(!s)return 0;
+--- /dev/null
++++ b/tests/host/ui_superj6_knobs_test.c
+@@ -0,0 +1,104 @@
++/* SPDX-License-Identifier: GPL-3.0-only */
++#define ARP_FIXTURE_MAIN retained_arp_main
++#include "ui_arp_engine_test.c"
++
++enum { FRAMES = 4096 };
++static int32_t pcm[2][FRAMES * 2];
++
++static void capture(unsigned owner, int32_t *out, int knob, int delta)
++{
++    engine_apply_sound(&proj.sound);
++    render(4);
++    engine_bass_on(owner, 57, 0, 0);
++    render(4);
++    if (knob >= 0) {
++        now_ms += 160;
++        turn(knob, delta);
++    } else {
++        render(4);
++    }
++    for (unsigned i = 0; i < FRAMES; i += 256)
++        engine_render(out + i * 2, 256);
++    engine_bass_off(owner);
++    render(8);
++}
++
++static void select_page(const char *title)
++{
++    for (int i = 0; i < pg.n; ++i) {
++        if (!strcmp(pg.title[cur_page()], title)) return;
++        now_ms += 160;
++        enc_acc[EN_SELECT] = 1;
++        input();
++    }
++}
++
++static void change(unsigned owner, unsigned knob, int delta, const char *label)
++{
++    pref_t p = pg.r[cur_page()][knob];
++    CHECK(pref_desc(p) && !strcmp(pref_desc(p)->name, label));
++    int before = pref_get(p);
++    capture(owner, pcm[0], -1, 0);
++    capture(owner, pcm[1], (int)knob, delta);
++    CHECK(pref_get(p) != before);
++    unsigned changed = 0;
++    for (unsigned i = 0; i < FRAMES * 2; ++i)
++        changed += pcm[0][i] != pcm[1][i];
++    CHECK(changed > FRAMES);
++    printf("owner=%u %s position=%d->%d changed PCM samples=%u/%u\n",
++           owner, label, before, pref_get(p), changed, FRAMES * 2);
++}
++
++static void journey(unsigned owner)
++{
++    setup(V_PART, PART_303A + owner);
++    proj.set.bt |= PROJ_BT_CLK_IN;
++    CHECK(!engine_bass_select_preset(owner, ORIGINAL_SOUND_JUNO, 0, &proj.sound));
++    for (unsigned n = 0; n < 1024 && engine_bass_preset_pending(owner); ++n) render(1);
++    CHECK(engine_bass_bank(owner) == ORIGINAL_SOUND_JUNO);
++    build_pages();
++    sound_t before = proj.sound;
++    select_page("OSCILLATOR");
++    change(owner, 0, 1, "WAVE 1");
++    change(owner, 1, 1, "WAVE 2");
++    change(owner, 2, 1, "RANGE");
++    if (!owner) { ui_frame(); shot("oscillator-smk"); }
++    select_page("PULSE WIDTH");
++    now_ms += 160; turn(1, 20);
++    now_ms += 160; turn(3, 25);
++    change(owner, 0, 1, "PWM 1 ON");
++    change(owner, 2, 1, "PWM 2 ON");
++    change(owner, 1, -8, "PWM 1");
++    change(owner, 3, -10, "PWM 2");
++    CHECK(!memcmp(before.v[T_303][1-owner], proj.sound.v[T_303][1-owner], ORIGINAL_SOUND_BYTES));
++    CHECK(!memcmp(before.v[T_303][ARP_BLOCK_VOICE0 + owner],
++                  proj.sound.v[T_303][ARP_BLOCK_VOICE0 + owner], sizeof proj.sound.v[T_303][0]));
++    if (!owner) { ui_frame(); shot("pwm-smk"); }
++    CHECK(!project_save());
++    sound_t saved = proj.sound;
++    capture(owner, pcm[0], -1, 0);
++    CHECK(!project_load());
++    CHECK(!memcmp(&saved, &proj.sound, sizeof saved));
++    capture(owner, pcm[1], -1, 0);
++    CHECK(!memcmp(pcm[0], pcm[1], sizeof pcm[0]));
++    CHECK(engine_superj6_knob_turn(owner, SJ6_PWM1_ON, -1, 1));
++    CHECK(project_save() == -8);
++    CHECK(!engine_bass_select_preset(owner, ORIGINAL_SOUND_JUNO, 1, &proj.sound));
++    CHECK(!engine_superj6_knob_turn(owner, SJ6_PWM2_ON, -1, 1));
++    for (unsigned n = 0; n < 1024 && engine_bass_preset_pending(owner); ++n) render(1);
++    CHECK(!engine_bass_preset_pending(owner));
++    CHECK(engine_superj6_knob_position(owner, SJ6_PWM1_ON) == 0);
++    CHECK(!original_sound_edit_mask(proj.sound.v[T_303][owner]));
++    printf("owner=%u exact project reload PCM and preset reset PASS\n", owner);
++}
++
++int main(void)
++{
++    journey(0);
++    journey(1);
++    engine_case(ORIGINAL_SOUND_SYNTHONE, "s1");
++    engine_case(ORIGINAL_SOUND_JUNO, "sj6");
++    CHECK(!failures);
++    printf("PASS SuperJ6 knob playback/project %u and existing arp %u checks\n", checks, expectations);
++    return 0;
++}

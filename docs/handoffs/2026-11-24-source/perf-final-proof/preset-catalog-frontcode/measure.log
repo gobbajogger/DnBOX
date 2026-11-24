@@ -1,0 +1,18 @@
+authored bank/program fields S1/J6 12 12 694 640 99936 90549
+actual max UTF-8 name bytes 36 max expanded one J6 ordered record (one ID+one word per field) 835
+complete 694+640 literal program UUID bytes 21344
+expanded cache e/S1=0 J6=1, restart, max exact id+word/name/UUID bytes 0 8 6075
+expanded cache e/S1=0 J6=1, restart, max exact id+word/name/UUID bytes 0 16 12137
+expanded cache e/S1=0 J6=1, restart, max exact id+word/name/UUID bytes 0 32 24248
+expanded cache e/S1=0 J6=1, restart, max exact id+word/name/UUID bytes 1 8 6737
+expanded cache e/S1=0 J6=1, restart, max exact id+word/name/UUID bytes 1 16 13237
+expanded cache e/S1=0 J6=1, restart, max exact id+word/name/UUID bytes 1 32 26405
+report arithmetic, supplied benchmark only: 61,052 tuned S1 + 79,195 externally reported J6 words = 140247
+bank directory includes 88 B fixed header + pinned corpus IDs, per-bank 12 B fixed fields, exact title and authored J6 bank UUID; 16-bit per-block offsets
+stored UUID variant charges 16 bytes per program in addition; CRC lives in the 88 B header
+seek 4 tested rows 1334 name bytes compact/2-byte 20154 20894 offsets 686 registry/header 863 catalog implicit 21703 catalog UUIDs 43047 saved 740
+seek 8 tested rows 1334 name bytes compact/2-byte 19758 20517 offsets 354 registry/header 863 catalog implicit 20975 catalog UUIDs 42319 saved 759
+seek 16 tested rows 1334 name bytes compact/2-byte 19568 20338 offsets 186 registry/header 863 catalog implicit 20617 catalog UUIDs 41961 saved 770
+seek 32 tested rows 1334 name bytes compact/2-byte 19497 20273 offsets 104 registry/header 863 catalog implicit 20464 catalog UUIDs 41808 saved 776
+standalone native name reader object text/data/bss 224 0 0
+foreground scratch 37 caller-owned output bytes; no history/dictionary/heap

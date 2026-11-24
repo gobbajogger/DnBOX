@@ -1,0 +1,46 @@
+{
+  "firmware/src/app/engine.h": {
+    "before": "ac26d33a4f618d89f393208b21d371414940f0727cc39120f58044be0260ae98",
+    "after": "fe0cea36b7b719a6e01000991d36fad76e9e4d29229b9225760c286b722da345"
+  },
+  "firmware/src/app/original_presets.inc": {
+    "before": "ccaee393c8b04fba09ba2167f9b87206e8b083081271fbbd539811f93de60e43",
+    "after": "a28821f05d737d73b6f51c67d7d7bc04a8f9c2fab7e1c2de000b0ebfea85623c"
+  },
+  "firmware/src/app/original_sound.c": {
+    "before": "b419bed5820f8c0f7ec20fce854d6125be366335ac76d11bbf3a9be28eb36d9e",
+    "after": "21f2adb8ecd23bb558dee7371d410081e773f1b0a6ef5163e3717c27948be12b"
+  },
+  "firmware/src/app/original_sound.h": {
+    "before": "a872f7d6a475a192657742c621791317e13fba0b079d53e18c4f5f7105f28946",
+    "after": "cbc499940e20e368a85826785360b0f6f8a20391b25c8e63487913a16795159a"
+  },
+  "firmware/src/app/s1_patch.h": {
+    "before": "21be2bf90d945a05031858875424b39078f6982a075a17200c9eaf9b868787de",
+    "after": "1e0328f65e9b1094b6212e5914c972dde51a0c00c3dbb63ff1362ee584aa7dc3"
+  },
+  "firmware/src/app/s1c_part.c": {
+    "before": "08ede1af32cea102c71c0b696f384bc5e9b15c971940de92bff54a37090d7093",
+    "after": "17d86228978f2ed94c04a1213dd1e4ea7e39e016dc664cf76350971c6b4a4fd7"
+  },
+  "firmware/src/app/s1c_part.h": {
+    "before": "323f3fd72f3b1f5a6372bdfbc516bfed2a9c2a794b0f16a5f84ead324312fd50",
+    "after": "9f13c629b35ef586a6b91b83b39b3bbdee23740352e4c89c23db1cf443120bd3"
+  },
+  "firmware/src/app/sound_reset.c": {
+    "before": "9c6ec4fe1df285f8426c959ebfd0044d9b6761a30e3a74955e8518b046580a85",
+    "after": "e63fa3ebdbd6897ecbfaaedc69f1cb7d92c5c94dab3b5690d25e130e9bd138cc"
+  },
+  "firmware/src/app/ui.c": {
+    "before": "2bcbb2f1c0cf5527edc6d2213874706c589642ae18ea9d43ae9edb514a269bfd",
+    "after": "c6f928cc7ab3afc63e052e45508537de78fd2e60b783ae1cc2dc31b85502559c"
+  },
+  "firmware/src/dsp/s1c/s1c.c": {
+    "before": "d709c6bbd5dd2140627fdf7580881a3d89314b083ef3d3d56121e4a4da0419c8",
+    "after": "189d52bc66dd473ac8f1b7cd95ba960103dc9ccc012225f0140a340ab308eda0"
+  },
+  "tests/host/ui_synthone_oscillator_editor_test.c": {
+    "before": null,
+    "after": "6617250a8430925941d0eb23314e15047f8a82cdd9b734830c713f4bcabe2757"
+  }
+}

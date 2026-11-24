@@ -1,0 +1,16 @@
+--- a/tests/host/ui_arp_keyboard_test.c
++++ b/tests/host/ui_arp_keyboard_test.c
+@@ -68,6 +68,13 @@
+     EXPECT(engine_arp_steps_read(owner,&after) &&
+            after.offset[5]==(kind==ORIGINAL_SOUND_JUNO?24:12) && after.on_mask==off_mask);
+     EXPECT(engine_arp_settings_read(owner,&settings) && settings.gate==gate);
++    EXPECT(pg.r[cur_page()][2].kind==R_ARP && pg.r[cur_page()][2].a==ARP_F_GATE);
++    now_ms += 160;
++    turn(2, gate > 1u ? -1 : 1);
++    unsigned adjusted_gate = gate > 1u ? gate - 1u : gate + 1u;
++    EXPECT(engine_arp_settings_read(owner,&settings) && settings.gate==adjusted_gate);
++    EXPECT(engine_arp_block_decode(proj.sound.v[T_303][ARP_BLOCK_VOICE0],&saved) &&
++           saved.gate==adjusted_gate && saved.on_mask==off_mask);
+     gesture(step,0);
+     set_view(V_PART);
+     gesture(step,e); /* no capture in a different view */

@@ -1,0 +1,279 @@
+--- a/tests/host/ui_superj6_pwm1_lfo2_test.c
++++ b/tests/host/ui_superj6_pwm1_lfo2_test.c
+@@ -34,12 +34,15 @@
+     int delta = pos - pref_get(ref);
+     CHECK(delta && smc_same(ref, smc_knob_target(col)));
+     while (delta) {
+-        int step = delta < -32 ? -32 : delta > 32 ? 32 : delta;
++        int limit = pref_desc(ref)->max <= 3 ? 1 : 32;
++        int step = delta < -limit ? -limit : delta > limit ? limit : delta;
+         now_ms += 200u + (unsigned)abs(step) * 70u;
+         knob(col, step);
+         delta -= step;
+     }
+-    CHECK(pref_get(ref) == pos && project_save() == -8);
++    int readback = pref_get(ref);
++    if (readback != pos) fprintf(stderr, "SMC slot %u expected %d read %d\n", slot, pos, readback);
++    CHECK(readback == pos && project_save() == -8);
+ }
+ 
+ static void begin_pair(void)
+@@ -63,8 +66,28 @@
+     return differences;
+ }
+ 
+-static void verify_panel(unsigned owner)
++static void save_and_reload(void)
+ {
++    sound_t expected_sound = proj.sound;
++    engine_bass_off(0);
++    engine_bass_off(1);
++    for (unsigned n = 0; n < 1024 && ui_boot_flash_busy(); ++n) render(1);
++    CHECK(!ui_boot_flash_busy());
++    int saved = ui_project_save();
++    int loaded = saved ? 0 : project_load();
++    if (saved || loaded)
++        fprintf(stderr, "save=%d load=%d unsupported=%d bank0=%d bank1=%d\n",
++                saved, loaded, project_storage_unsupported(),
++                engine_bass_sound_bank(&proj.sound, 0), engine_bass_sound_bank(&proj.sound, 1));
++    CHECK(!saved && !loaded);
++    CHECK(!memcmp(&expected_sound, &proj.sound, sizeof expected_sound));
++}
++
++static void verify_panel(unsigned owner, unsigned layer)
++{
++    const unsigned amount_slot = layer ? SJ6_PWM2 : SJ6_PWM1;
++    const unsigned other_amount = layer ? SJ6_PWM1 : SJ6_PWM2;
++    const unsigned route = layer + 1;
+     setup(V_PART, PART_303A + owner);
+     proj.set.bt |= PROJ_BT_CLK_IN;
+     select_owner(owner, 0);
+@@ -77,15 +100,17 @@
+     proj.sound.v[T_MST][0][MST_LIMIT] = proj.sound.v[T_MST][0][MST_MODE] = 0;
+     engine_fx_mute(3u);
+     visit("OSCILLATOR");
+-    panel_turn(0, SJ6_WAVE1, 3);
++    panel_turn(layer, SJ6_WAVE1 + layer, 3);
+     render(1);
+     visit("PULSE WIDTH");
+-    panel_turn(0, SJ6_PWM1_ON, 1);
+-    panel_turn(1, SJ6_PWM1, 61);
++    panel_turn(2u * layer, layer ? SJ6_PWM2_ON : SJ6_PWM1_ON, 1);
+     render(1);
+-    visit("LFO2 PWM1");
++    visit("LFO2 PWM");
+     panel_turn(0, SJ6_LFO2_RATE, 127);
+-    panel_turn(2, SJ6_LFO2_PWM1_ROUTE, 1);
++    panel_turn(2, SJ6_LFO2_PWM_ROUTE, (int)route);
++    panel_turn(3, SJ6_LFO2_PWM_BASE, 61); /* Follows the route before commit. */
++    CHECK(engine_superj6_knob_position(owner, amount_slot) == 61);
++    CHECK(engine_superj6_knob_position(owner, other_amount) == 0);
+     render(1);
+     sound_t armed = proj.sound;
+     begin_pair();
+@@ -93,39 +118,33 @@
+     CHECK(changed(pcm[0], silence, owner) > COUNT / 2);
+     CHECK(changed(pcm[0], silence, 1-owner) > COUNT / 2);
+     begin_pair();
+-    panel_turn(1, SJ6_LFO2_PWM1_DEPTH, 100); /* Editor input while both notes sound. */
+-    CHECK(proj.sound.v[T_303][owner][21] == armed.v[T_303][owner][21]);
++    panel_turn(1, SJ6_LFO2_PWM_DEPTH, 100); /* Editor input while both notes sound. */
++    CHECK(original_sound_sj6_lfo2_pwm(proj.sound.v[T_303][owner]) ==
++          original_sound_sj6_lfo2_pwm(armed.v[T_303][owner]));
+     capture(pcm[1]);
+     unsigned delta = changed(pcm[0], pcm[1], owner);
+     unsigned peer_delta = changed(pcm[0], pcm[1], 1-owner);
+-    printf("part=%u held depth PCM changed %u target frames, %u peer frames\n", owner, delta, peer_delta);
++    printf("part=%u PWM%u held depth changed %u target frames, %u peer frames\n",
++           owner, route, delta, peer_delta);
+     CHECK(delta > COUNT / 2 && !peer_delta);
+     CHECK(!memcmp(armed.v[T_303][1-owner], proj.sound.v[T_303][1-owner], ORIGINAL_SOUND_BYTES));
+     sound_t active = proj.sound;
+     begin_pair();
+     capture(pcm[0]);
+-    engine_bass_off(0);
+-    engine_bass_off(1);
+-    for (unsigned n = 0; n < 1024 && ui_boot_flash_busy(); ++n) render(1);
+-    CHECK(!ui_boot_flash_busy());
+-    int saved = ui_project_save();
+-    int loaded = saved ? 0 : project_load();
+-    if (saved || loaded)
+-        fprintf(stderr, "save=%d load=%d unsupported=%d bank0=%d bank1=%d\n",
+-                saved, loaded, project_storage_unsupported(),
+-                engine_bass_sound_bank(&proj.sound, 0), engine_bass_sound_bank(&proj.sound, 1));
+-    CHECK(!saved && !loaded);
+-    CHECK(!memcmp(&active, &proj.sound, sizeof active));
++    save_and_reload();
+     begin_pair();
+-    CHECK(pref_get(pg.r[cur_page()][1]) == 100 && pref_get(pg.r[cur_page()][2]) == 1);
++    CHECK(pref_get(pg.r[cur_page()][1]) == 100 && pref_get(pg.r[cur_page()][2]) == (int)route);
++    CHECK(pref_get(pg.r[cur_page()][3]) == 61 && engine_superj6_knob_position(owner, other_amount) == 0);
+     capture(pcm[1]);
+     CHECK(!memcmp(pcm[0], pcm[1], sizeof pcm[0]));
+ 
+     begin_pair();
+-    panel_turn(2, SJ6_LFO2_PWM1_ROUTE, 0);
++    panel_turn(2, SJ6_LFO2_PWM_ROUTE, 0);
+     render(1);
+-    CHECK(pref_get(pg.r[cur_page()][1]) == 100);
++    save_and_reload();
+     begin_pair();
++    CHECK(pref_get(pg.r[cur_page()][1]) == 100 && pref_get(pg.r[cur_page()][2]) == 0);
++    CHECK(pref_get(pg.r[cur_page()][3]) == (layer ? 0 : 61)); /* OFF falls back to PWM1. */
+     capture(pcm[0]);
+     proj.sound = armed;
+     begin_pair();
+@@ -133,37 +152,48 @@
+     CHECK(!memcmp(pcm[0], pcm[1], sizeof pcm[0]));
+     proj.sound = active;
+     begin_pair();
+-    panel_turn(1, SJ6_LFO2_PWM1_DEPTH, 71);
++    panel_turn(1, SJ6_LFO2_PWM_DEPTH, 71);
+     CHECK(!engine_bass_select_preset(owner, ORIGINAL_SOUND_JUNO, 1, &proj.sound));
+     engine_bass_off(owner);
+     for (unsigned n = 0; n < 1024 && engine_bass_preset_pending(owner); ++n) render(1);
+     CHECK(!engine_bass_preset_pending(owner));
+-    CHECK(engine_superj6_knob_position(owner, SJ6_LFO2_PWM1_DEPTH) == 0);
+-    CHECK(engine_superj6_knob_position(owner, SJ6_LFO2_PWM1_ROUTE) == 0);
++    CHECK(engine_superj6_knob_position(owner, SJ6_LFO2_PWM_DEPTH) == 0);
++    CHECK(engine_superj6_knob_position(owner, SJ6_LFO2_PWM_ROUTE) == 0);
+     CHECK(!memcmp(armed.v[T_303][1-owner], proj.sound.v[T_303][1-owner], ORIGINAL_SOUND_BYTES));
+-    printf("part=%u held SMK PWM1 edits changed %u/%u target samples, 0 peer samples; save/reload, depth-zero and route-off PCM, preset isolation PASS\n",
+-           owner, delta, COUNT);
++    printf("part=%u PWM%u save/reload, routed base, depth-zero and route-off PCM, preset isolation PASS\n",
++           owner, route);
+ }
+ 
+ static void verify_cell(void)
+ {
+     uint8_t cell[ORIGINAL_SOUND_BYTES];
+     CHECK(original_sound_init(cell, ORIGINAL_SOUND_JUNO, 0));
+-    for (unsigned state = 0; state < 256; ++state) {
+-        original_sound_sj6_pwm1_lfo_store(cell, (uint8_t)state);
+-        CHECK(original_sound_valid(cell) && cell[ORIGINAL_SJ6_PWM1_LFO_BYTE] == state);
+-        cell[25] ^= ORIGINAL_SJ6_PWM1_LFO_BIT >> 24;
++    for (unsigned state = 0; state < 384; ++state) {
++        original_sound_sj6_lfo2_pwm_store(cell, (uint16_t)state);
++        CHECK(original_sound_valid(cell) && original_sound_sj6_lfo2_pwm(cell) == state);
++        CHECK(cell[ORIGINAL_SJ6_LFO2_PWM_BYTE] == (uint8_t)state);
++        CHECK(!!(original_sound_edit_mask(cell) & ORIGINAL_SJ6_LFO2_PWM2_BIT) == (state >= 256));
++        cell[25] ^= ORIGINAL_SJ6_LFO2_PWM_BIT >> 24;
+         CHECK(!original_sound_valid(cell));
+-        cell[25] ^= ORIGINAL_SJ6_PWM1_LFO_BIT >> 24;
++        cell[25] ^= ORIGINAL_SJ6_LFO2_PWM_BIT >> 24;
+     }
++    original_sound_sj6_lfo2_pwm_store(cell, 128u);
++    cell[25] |= ORIGINAL_SJ6_LFO2_PWM2_BIT >> 24;
++    CHECK(!original_sound_valid(cell)); /* Both route bits set. */
+ }
+ 
+-static void verify_receiver(void)
++static void verify_receiver(unsigned layer)
+ {
++    const unsigned route = layer + 1, setting = route << SJ6_LFO2_PWM_ROUTE_SHIFT;
++    const float base = layer ? .2f : .5f;
+     juno6_t synth;
+     juno6_init(&synth, RATE);
+-    juno6_oscillator_edit square = {1.f, .5f, 1.f};
+-    juno6_apply_pre_note_wave(&synth, 0, &square);
++    juno6_oscillator_edit square = {1.f, base, 1.f};
++    juno6_apply_pre_note_wave(&synth, layer, &square);
++    square.amount = .37f;
++    juno6_apply_pre_note_wave(&synth, 1-layer, &square);
++    synth.core.layer[1-layer].params.lfo_pwm_depth = .05f;
++    synth.core.layer[1-layer].params.lfo_hz = 3.f;
+     juno6_set_panel_lfo_rate(&synth, 1, 127);
+     CHECK(juno6_note_on(&synth, 57, 127));
+     juno6_t baseline = synth;
+@@ -171,52 +201,76 @@
+     juno6_read_lfo(&synth, 1, &lfo);
+     CHECK(lfo.hz == 16.f);
+ 
+-    /* Physical oracle uses the archive's table rotation and depth law. The
+-     * receiver's 80 Hz sample grid is independent of caller partitioning. */
++    /* The reference stream uses the archived rotation, depth and PWM laws,
++     * with exact integer boundaries on the nominal 80 Hz control grid. */
+     uint64_t turn = UINT64_C(1) << 40;
+     uint64_t step = (uint64_t)(16.f * ((float)turn / RATE) + .5f);
+     const unsigned uneven[] = {137, 87, 257, 311};
+     juno6_t bypass = synth;
+-    juno6_set_lfo2_pwm1(&bypass, 128u);
++    juno6_set_lfo2_pwm(&bypass, setting);
+     for (unsigned n = 0, i = 0; n < COUNT; ++i) {
+-        unsigned span = fm_minf(uneven[i % 4], COUNT - n);
++        unsigned span = uneven[i % 4];
++        if (span > COUNT - n) span = COUNT - n;
+         CHECK(juno6_render_stereo(&baseline, actual[0]+n, actual[1]+n, span));
+         CHECK(juno6_render_stereo(&bypass, expected[0]+n, expected[1]+n, span));
+         n += span;
+     }
+     CHECK(!memcmp(actual, expected, sizeof actual));
+ 
++    /* At the enable threshold both receivers must retain legacy PCM with
++     * depth on. Setting one receiver must leave the peer layer untouched. */
++    bypass = synth;
++    square.amount = base;
++    square.enable = .5f;
++    juno6_apply_pre_note_wave(&bypass, layer, &square);
++    baseline = bypass;
++    juno6_set_lfo2_pwm(&bypass, setting | 127u);
++    CHECK(juno6_render_stereo(&bypass, actual[0], actual[1], 256));
++    CHECK(juno6_render_stereo(&baseline, expected[0], expected[1], 256));
++    for (unsigned channel = 0; channel < 2; ++channel)
++        CHECK(!memcmp(actual[channel], expected[channel], 256 * sizeof(float)));
++
+     baseline = synth;
+-    juno6_set_lfo2_pwm1(&synth, 255u);
++    juno6_set_lfo2_pwm(&synth, setting | 127u);
+     for (unsigned n = 0, i = 0; n < COUNT; ++i) {
+-        unsigned span = fm_minf(uneven[i % 4], COUNT - n);
++        unsigned span = uneven[i % 4];
++        if (span > COUNT - n) span = COUNT - n;
+         CHECK(juno6_render_stereo(&synth, actual[0]+n, actual[1]+n, span));
+         n += span;
+     }
++    unsigned clipped_ticks = 0;
+     for (unsigned tick = 0, n = 0; n < COUNT; ++tick) {
+         unsigned end = (tick + 1u) * RATE / 80u;
+         if (end > COUNT) end = COUNT;
+         unsigned index = (unsigned)(((n * step) % turn) >> 32);
+         unsigned p = (index + 64u) % 256u;
+         float wave = p < 128u ? (float)p / 64.f - 1.f : 3.f - (float)p / 64.f;
+-        float raw = .5f + (wave * 1.f) * .5f;
+-        baseline.core.layer[0].params.pulse_width = .5f - .47f * raw;
++        float raw = base + wave / 2.f;
++        if (raw < 0.f) { raw = 0.f; ++clipped_ticks; }
++        baseline.core.layer[layer].params.pulse_width = .5f - .47f * raw;
+         CHECK(juno6_render_stereo(&baseline, expected[0]+n, expected[1]+n, end-n));
+         n = end;
+     }
+     CHECK(!memcmp(actual, expected, sizeof actual));
+-    CHECK(synth.core.layer[0].params.pulse_width == .5f - .47f * .5f);
++    CHECK(clipped_ticks == (layer ? 3u : 0u));
++    CHECK(synth.core.layer[layer].params.pulse_width == .5f - .47f * base);
++    CHECK(synth.core.layer[1-layer].params.pulse_width == .5f - .47f * .37f);
++    CHECK(synth.core.layer[1-layer].params.lfo_pwm_depth == .05f);
+     float raw;
+-    CHECK(dnbx_read_raw(&synth.core, 78, &raw) == DNBX_OK && raw == .5f);
+-    printf("Build-9 triangle, depth and PWM oracle exact over %u stereo frames; irregular blocks and depth-zero PCM PASS\n", COUNT);
++    CHECK(dnbx_read_raw(&synth.core, 78u + layer, &raw) == DNBX_OK && raw == base);
++    CHECK(dnbx_read_raw(&synth.core, 79u - layer, &raw) == DNBX_OK && raw == .37f);
++    printf("PWM%u Build-9 transfer oracle exact over %u stereo frames with %u clipped ticks; depth-zero and enable-threshold PCM PASS\n",
++           route, COUNT, clipped_ticks);
+ }
+ 
+ int main(void)
+ {
+     verify_cell();
+-    verify_receiver();
+-    verify_panel(0);
+-    verify_panel(1);
+-    printf("PASS SuperJ6 LFO2 PWM1 %u checks\n", checks);
++    for (unsigned layer = 0; layer < DNBX_LAYERS; ++layer) {
++        verify_receiver(layer);
++        verify_panel(0, layer);
++        verify_panel(1, layer);
++    }
++    printf("PASS SuperJ6 LFO2 PWM %u checks\n", checks);
+     return 0;
+ }

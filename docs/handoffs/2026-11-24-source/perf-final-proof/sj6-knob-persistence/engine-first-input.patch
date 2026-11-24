@@ -1,0 +1,1087 @@
+diff --git a/experiments/original_synth/chicago_packed.c b/experiments/original_synth/chicago_packed.c
+index 025a1494..3b45dbdd 100644
+--- a/experiments/original_synth/chicago_packed.c
++++ b/experiments/original_synth/chicago_packed.c
+@@ -12,15 +12,19 @@ typedef struct {
+ } chicago_compact_table;
+ #include "chicago_compact_private.h"
+ static int chicago_compact_decode(const uint8_t *p,size_t bytes,uint32_t entries,uint32_t entry,uint32_t prefix,uint32_t *out){
+- if(bytes<7)return 0;
++ /* The pinned amplitude delta fits in 16 bits; E retains 24 bits. */
++ const unsigned wide=prefix!=original_chicago_packed_a_prefix;
++ const unsigned header=6u+wide;
++ if(bytes<header)return 0;
+  unsigned width=(p[3]&31u);if(width>32)return 0;
+  size_t residuals=entries>1?entries-2:0,payload=(residuals*width+7u)/8u;
+- if(bytes!=7+payload)return 0;
++ if(bytes!=header+payload)return 0;
+  uint32_t value=(uint32_t)p[0]|(uint32_t)p[1]<<8|(uint32_t)p[2]<<16|((uint32_t)p[3]>>5)<<24|prefix;
+- uint32_t delta=(uint32_t)p[4]|(uint32_t)p[5]<<8|(uint32_t)p[6]<<16;
+- delta=(delta^0x800000u)-0x800000u;
++ uint32_t delta=(uint32_t)p[4]|(uint32_t)p[5]<<8;
++ if(wide){delta|=(uint32_t)p[6]<<16;delta=(delta^0x800000u)-0x800000u;}
++ else delta=(delta^0x8000u)-0x8000u;
+  if(entry)value+=delta;
+- size_t bit=0;p+=7;
++ size_t bit=0;p+=header;
+  /* At widths up to 24, refilling one byte while fewer than width bits
+   * remain never exceeds 31 live bits. Consume each payload byte once, with
+   * no speculative read past the validated payload and no 64-bit shifts.
+diff --git a/firmware/src/app/engine.c b/firmware/src/app/engine.c
+index 743b06e0..5a783984 100644
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -240,12 +240,25 @@ static void arp_store_amp2(unsigned owner, unsigned slot, float unit); /* engine
+ /* The high bit reserves both existing mailboxes as one factory transaction. */
+ #define SJ6_FACTORY_GROUP 0x80u
+ 
+-X0X_COLD int engine_superj6_factory_load(unsigned owner, const sj6_factory_row *row)
++#define SJ6_FACTORY_AMP1 (1u << 5)
++#define SJ6_RANGE_FIELD 6u
++#define SJ6_RANGE_BIT (1u << SJ6_RANGE_FIELD)
++enum { SJ6_FILTER_OFF=1, SJ6_FILTER_ON, SJ6_FILTER_OMITTED };
++X0X_COLD static int superj6_stage_factory(unsigned owner, const sj6_factory_row *row,
++                                        float amp1, unsigned extra)
+ {
+     const unsigned required = (1u << SJ6_ROW_AMOUNT) - 1u;
+     if (owner >= NBASS || !row || (row->present & required) != required) return 0;
+-    float value[SJ6_ROW_COUNT];
+-    for (unsigned i = 0; i < SJ6_ROW_COUNT; ++i) {
++    int chorus_mode = sj6_factory_chorus_mode(row);
++    if (chorus_mode < 0) return 0;
++    const int has_range = (row->present & (1u << SJ6_ROW_RANGE)) != 0;
++    const float range = has_range ? row->value[SJ6_ROW_RANGE] : -1.f;
++    if (has_range && !juno6_factory_range_valid(range)) return 0;
++    const int has_link = (row->present & (1u << SJ6_ROW_FILTER_LINK)) != 0;
++    const float link = has_link ? row->value[SJ6_ROW_FILTER_LINK] : 0.f;
++    if (!(link == 0.f || link == 1.f)) return 0;
++    float value[SJ6_ROW_RANGE];
++    for (unsigned i = 0; i < SJ6_ROW_RANGE; ++i) {
+         value[i] = row->present & (1u << i) ? row->value[i] : 0.f;
+         float limit = i == SJ6_ROW_MASTER ? JUNO6_FACTORY_MASTER_MAX : 1.f;
+         if (!(value[i] >= 0 && value[i] <= limit)) return 0;
+@@ -255,26 +268,82 @@ X0X_COLD int engine_superj6_factory_load(unsigned owner, const sj6_factory_row *
+     original_runtime_part *part = &original_bass[owner];
+     juno6_t *synth = &part->dsp.juno.synth;
+     int accept = !project_hold && part->kind == ORIGINAL_SOUND_JUNO && part->status == ORIGINAL_RUNTIME_OK &&
+-                 !synth->pending_wave_mask && !synth->pending_field_mask &&
++                 !synth->pending_wave_mask && !synth->pending_field_mask && !synth->pending_filter_link &&
+                  !juno6_active(synth) && !engine_bass_preset_pending(owner);
+     if (accept) {
+-        memcpy(synth->pending_field, value, sizeof synth->pending_field);
++        memcpy(synth->pending_field, value, 5u * sizeof(float));
++        synth->pending_field[SJ6_RANGE_FIELD] = range;
+         for (unsigned layer = 0; layer < 2; ++layer) {
+             synth->pending_wave[layer] = (juno6_oscillator_edit){
+                 value[SJ6_ROW_WAVE + layer], value[SJ6_ROW_AMOUNT + layer], value[SJ6_ROW_ENABLE + layer]};
+         }
++        part->dsp.juno.chorus.factory_pending = (uint8_t)chorus_mode;
+         synth->pending_wave_mask = 3u;
+-        synth->pending_field_mask = SJ6_FACTORY_GROUP | 31u;
++        synth->pending_filter_link = has_link ? (link == 1.f ? SJ6_FILTER_ON : SJ6_FILTER_OFF) : SJ6_FILTER_OMITTED;
++        if (extra) synth->pending_field[5] = amp1;
++        synth->pending_field_mask = (uint8_t)(SJ6_FACTORY_GROUP | SJ6_RANGE_BIT | 31u | extra);
+     }
+     plat_cq_unlock(flags);
+     return accept;
+ }
+ 
++int engine_superj6_factory_load(unsigned owner, const sj6_factory_row *row)
++{
++    return superj6_stage_factory(owner, row, 0.f, 0u);
++}
++
++int engine_superj6_factory_load_amp1(unsigned owner, const sj6_factory_row *row,
++                                     float raw, enum engine_sj6_amp1_topology topology)
++{
++    if (topology != ENGINE_SJ6_AMP1_INDEPENDENT || !(raw >= 0.f && raw <= 1.f)) return 0;
++    return superj6_stage_factory(owner, row, raw, SJ6_FACTORY_AMP1);
++}
++
++/* Accept only the established independent topology. A preset request or
++ * sounding voice may arrive before commit and cancels this pre-note edit. */
++X0X_COLD int engine_superj6_amp1_edit(unsigned owner, float unit)
++{
++    if (owner >= NBASS || !(unit >= 0.f && unit <= 1.f)) return 0;
++    uint32_t flags = plat_cq_lock();
++    original_runtime_part *p = &original_bass[owner];
++    juno6_t *s = &p->dsp.juno.synth;
++    int ok = !project_hold && p->kind == ORIGINAL_SOUND_JUNO &&
++             p->status == ORIGINAL_RUNTIME_OK && s->amp1_independent &&
++             !(s->pending_field_mask & SJ6_FACTORY_GROUP) &&
++             !juno6_active(s) && !engine_bass_preset_pending(owner);
++    if (ok) {
++        s->pending_field[5] = unit;
++        s->pending_field_mask |= SJ6_FACTORY_AMP1;
++    }
++    plat_cq_unlock(flags);
++    return ok;
++}
++
++X0X_COLD int engine_superj6_amp1_read(unsigned owner, float *raw, float *seconds)
++{
++    if (owner >= NBASS || !raw || !seconds || raw == seconds) return 0;
++    uint32_t flags = plat_cq_lock();
++    const original_runtime_part *part = &original_bass[owner];
++    const juno6_t *s = &part->dsp.juno.synth;
++    float unit;
++    int ok = part->kind == ORIGINAL_SOUND_JUNO && part->status == ORIGINAL_RUNTIME_OK &&
++             s->amp1_independent && dnbx_read_raw(&s->core, 36, &unit) == DNBX_OK;
++    if (ok) {
++        *raw = unit;
++        *seconds = s->core.layer[0].params.amp.attack_s;
++    }
++    plat_cq_unlock(flags);
++    return ok;
++}
++
+ int engine_superj6_edit(unsigned owner, enum engine_superj6_field field, float unit)
+ {
+     unsigned slot = 4;
+     float limit = JUNO6_FACTORY_MASTER_MAX;
+-    if (field != ENGINE_SJ6_MASTER_VOLUME) {
++    if (field == ENGINE_SJ6_OSC_RANGE) {
++        if (!juno6_factory_range_valid(unit)) return 0;
++        slot = SJ6_RANGE_FIELD;
++    } else if (field != ENGINE_SJ6_MASTER_VOLUME) {
+         slot = (unsigned)field - ENGINE_SJ6_AMP2_ATTACK;
+         if (slot >= 4) return 0;
+         limit = 1.f;
+@@ -284,7 +353,9 @@ int engine_superj6_edit(unsigned owner, enum engine_superj6_field field, float u
+     original_runtime_part *part = &original_bass[owner];
+     int accept = !project_hold && part->kind == ORIGINAL_SOUND_JUNO && part->status == ORIGINAL_RUNTIME_OK &&
+                  !(part->dsp.juno.synth.pending_field_mask & SJ6_FACTORY_GROUP) &&
+-                 (slot == 4 || juno6_can_edit_amp2(&part->dsp.juno.synth));
++                 (slot == 4 || (slot == SJ6_RANGE_FIELD ?
++                     !juno6_active(&part->dsp.juno.synth) && !engine_bass_preset_pending(owner) :
++                     juno6_can_edit_amp2(&part->dsp.juno.synth)));
+     if (accept) {
+         juno6_t *synth = &part->dsp.juno.synth;
+         synth->pending_field[slot] = unit;
+@@ -303,7 +374,8 @@ int engine_superj6_pre_note_wave(unsigned owner, unsigned layer, float selector,
+     original_runtime_part *part = &original_bass[owner];
+     int accept = !project_hold && part->kind == ORIGINAL_SOUND_JUNO &&
+                  part->status == ORIGINAL_RUNTIME_OK &&
+-                 !(part->dsp.juno.synth.pending_field_mask & SJ6_FACTORY_GROUP) && !juno6_active(&part->dsp.juno.synth);
++                 !(part->dsp.juno.synth.pending_field_mask & SJ6_FACTORY_GROUP) &&
++                 !juno6_active(&part->dsp.juno.synth) && !engine_bass_preset_pending(owner);
+     if (accept) {
+         juno6_t *synth = &part->dsp.juno.synth;
+         juno6_oscillator_edit event = {selector, pwm ? pwm->amount : 0, pwm ? pwm->enable : -1};
+@@ -313,6 +385,21 @@ int engine_superj6_pre_note_wave(unsigned owner, unsigned layer, float selector,
+     plat_cq_unlock(flags);
+     return accept;
+ }
++X0X_COLD int engine_superj6_filter_link(unsigned owner, unsigned on)
++{
++    if (owner >= NBASS || on > 1u) return 0;
++    uint32_t flags = plat_cq_lock();
++    original_runtime_part *p = &original_bass[owner];
++    juno6_t *s = &p->dsp.juno.synth;
++    int ok = !project_hold && p->kind == ORIGINAL_SOUND_JUNO &&
++             p->status == ORIGINAL_RUNTIME_OK && s->typed &&
++             !(s->pending_field_mask & SJ6_FACTORY_GROUP) &&
++             !juno6_active(s) && !engine_bass_preset_pending(owner);
++    if (ok) s->pending_filter_link = (uint8_t)(on ? SJ6_FILTER_ON : SJ6_FILTER_OFF);
++    plat_cq_unlock(flags);
++    return ok;
++}
++
+ static void apply_superj6_edits(void)
+ {
+     for (unsigned owner = 0; owner < NBASS; ++owner) {
+@@ -324,19 +411,47 @@ static void apply_superj6_edits(void)
+             synth->pending_wave_mask = 0;
+             int active = juno6_active(synth);
+             if (synth->pending_field_mask & SJ6_FACTORY_GROUP) {
+-                if (active || engine_bass_preset_pending(owner)) {
++                juno6_chorus_t *chorus = &part->dsp.juno.chorus;
++                unsigned chorus_mode = chorus->factory_pending;
++                chorus->factory_pending = 0;
++                if (active || engine_bass_preset_pending(owner) ||
++                    ((synth->pending_field_mask & SJ6_FACTORY_AMP1) &&
++                     !juno6_apply_independent_amp1_attack(synth,synth->pending_field[5]))) {
+                     synth->pending_field_mask = 0;
++                    synth->pending_filter_link = 0;
+                     continue;
+                 }
++                synth->amp1_independent = (synth->pending_field_mask & SJ6_FACTORY_AMP1) != 0;
+                 juno6_apply_factory_waves(synth, synth->pending_wave);
+-            } else if (!active)
++                chorus->factory_mode = (uint8_t)chorus_mode;
++            } else if (!active && !engine_bass_preset_pending(owner))
+                 for (unsigned layer = 0; layer < 2; ++layer)
+                     if (waves & (1u << layer))
+                         juno6_apply_pre_note_wave(synth, layer, &synth->pending_wave[layer]);
+         }
++        unsigned link = synth->pending_filter_link;
++        if (link) {
++            synth->pending_filter_link = 0;
++            if (!project_hold && !engine_bass_preset_pending(owner) &&
++                dnbx_set_filter_link(&synth->core, link == SJ6_FILTER_ON) == DNBX_OK) {
++                if (link == SJ6_FILTER_OMITTED) {
++                    synth->core.raw[116] = 0.f;
++                    synth->core.raw_present[116u/32u] &= ~(1u << (116u%32u));
++                } else {
++                    (void)dnbx_store_raw(&synth->core, 116, link == SJ6_FILTER_ON ? 1.f : 0.f);
++                }
++            }
++        }
+         unsigned mask = synth->pending_field_mask;
+         if (!mask) continue;
+         synth->pending_field_mask = 0;
++        if ((mask & (SJ6_FACTORY_GROUP | SJ6_FACTORY_AMP1)) == SJ6_FACTORY_AMP1 &&
++            synth->amp1_independent && !project_hold && !juno6_active(synth) &&
++            !engine_bass_preset_pending(owner))
++            (void)juno6_apply_independent_amp1_attack(synth, synth->pending_field[5]);
++        if ((mask & SJ6_RANGE_BIT) && !project_hold && !juno6_active(synth) &&
++            !engine_bass_preset_pending(owner))
++            juno6_apply_pre_note_range(synth, synth->pending_field[SJ6_RANGE_FIELD]);
+         if (mask & (1u << 4))
+             (void)original_runtime_param(part, JUNO6_APP_PARAM_BASE + ENGINE_SJ6_MASTER_VOLUME,
+                                          synth->pending_field[4]);
+diff --git a/firmware/src/app/engine.h b/firmware/src/app/engine.h
+index f37f3c53..e69c2533 100644
+--- a/firmware/src/app/engine.h
++++ b/firmware/src/app/engine.h
+@@ -107,7 +107,7 @@ int engine_bass_adsr_view(int voice, float values[4], unsigned *gate);
+ int engine_juno_envelope_view(int voice, juno6_envelope_snapshot *out);
+ #if X0X_SUPERJ6_FACTORY
+ enum engine_superj6_field {
+-    ENGINE_SJ6_MASTER_VOLUME = 0,
++    ENGINE_SJ6_MASTER_VOLUME = 0, ENGINE_SJ6_OSC_RANGE = 86,
+     ENGINE_SJ6_AMP2_ATTACK = 119, ENGINE_SJ6_AMP2_DECAY,
+     ENGINE_SJ6_AMP2_SUSTAIN, ENGINE_SJ6_AMP2_RELEASE
+ };
+@@ -129,6 +129,18 @@ int engine_superj6_pre_note_wave(unsigned owner, unsigned layer, float selector,
+  * native preset or a voice that became active before commit supersedes it.
+  * Returns zero on invalid, busy, or unselected owners, without staging edits. */
+ int engine_superj6_factory_load(unsigned owner, const sj6_factory_row *row);
++/* An independent envelope owner must already be established by the caller.
++ * Authored zero links, absent links, or possession of a preset row alone
++ * do not establish this policy. This is a pre-note pilot, not a link adapter. */
++enum engine_sj6_amp1_topology { ENGINE_SJ6_AMP1_UNKNOWN, ENGINE_SJ6_AMP1_INDEPENDENT };
++int engine_superj6_factory_load_amp1(unsigned owner, const sj6_factory_row *row,
++                                     float raw, enum engine_sj6_amp1_topology topology);
++/* Stage a pre-note edit after an explicitly independent factory load. */
++int engine_superj6_amp1_edit(unsigned owner, float unit);
++/* One visible AMP-to-FILTER link control. Current verified input is a binary
++ * pre-note toggle; active or pending owners do not apply a partial edit. */
++int engine_superj6_filter_link(unsigned owner, unsigned on);
++int engine_superj6_amp1_read(unsigned owner, float *raw, float *seconds);
+ #endif
+ /* UI-only snapshot of the real amplitude EG and first modulator. */
+ int engine_bass_voice_view(int voice, float *level, float *modulation, unsigned *state, unsigned *key_down);
+diff --git a/firmware/src/app/original_runtime.c b/firmware/src/app/original_runtime.c
+index 08b051d9..dd7f52c5 100644
+--- a/firmware/src/app/original_runtime.c
++++ b/firmware/src/app/original_runtime.c
+@@ -29,6 +29,9 @@ X0X_COLD int original_runtime_init(original_runtime_part *p, const uint8_t cell[
+     if (kind == ORIGINAL_SOUND_JUNO) {
+         juno6_init(&p->dsp.juno.synth,44100);
+         juno6_chorus_init(&p->dsp.juno.chorus,44100);
++#if X0X_SUPERJ6_BUILTIN_INIT
++        p->dsp.juno.chorus.mix = 0;
++#endif
+         rc=ORIGINAL_RUNTIME_OK;
+     } else if (kind == ORIGINAL_SOUND_SYNTHONE) {
+         s1_part_init(&p->dsp.synthone);
+@@ -53,6 +56,11 @@ X0X_COLD int original_runtime_init(original_runtime_part *p, const uint8_t cell[
+         rc = original_chicago_backend_init_compact(&p->dsp.chicago, factory, bpm, 0, tuning, fx);
+     p->status = (int8_t)rc;
+     if (rc != ORIGINAL_RUNTIME_OK) return rc;
++#if X0X_SUPERJ6_BUILTIN_INIT
++    /* Older Juno slots keep their project identity. They cold-start the
++     * built-in SuperJ6 voice instead of replaying old sound edits. */
++    if (kind == ORIGINAL_SOUND_JUNO) return original_runtime_prepare(p, bpm);
++#endif
+     if (kind == ORIGINAL_SOUND_JUNO) {
+         for(unsigned i=0;i<ORIGINAL_JUNO_NPARAMS-2u;i++){
+             float value;
+diff --git a/firmware/src/app/plat.h b/firmware/src/app/plat.h
+index b57f2737..3af184fe 100644
+--- a/firmware/src/app/plat.h
++++ b/firmware/src/app/plat.h
+@@ -68,6 +68,10 @@ uint64_t plat_physical_keys(void);
+ int plat_outer_keys(plat_outer_event_t *events,uint64_t *keys,int *overflow,
+                     uint32_t epoch,int enabled,int octave,int publish);
+ #endif
++#if (BOARD_SMK37 && !defined(X0X_HOST)) || defined(X0X_ARP_KEYBOARD_TEST)
++/* Sample pads and the physical keybed together. Their central note aliases overlap. */
++uint32_t plat_arp_input(uint64_t *keyboard);
++#endif
+ uint8_t plat_key_velocity(int key);    /* last strike, 1..127; 100 without velocity sensing */
+ int32_t plat_enc(int role);            /* detents since the last call, + = clockwise; EN_* */
+ uint32_t plat_master(void);            /* MASTER pot, 0..4096 gain Q12 */
+diff --git a/firmware/src/app/plat_fm1.c b/firmware/src/app/plat_fm1.c
+index 0f81a4d2..b645bfac 100644
+--- a/firmware/src/app/plat_fm1.c
++++ b/firmware/src/app/plat_fm1.c
+@@ -103,6 +103,17 @@ int plat_outer_keys(plat_outer_event_t *events, uint64_t *keys, int *overflow,
+     return n;
+ }
+ 
++#if BOARD_SMK37
++uint32_t plat_arp_input(uint64_t *keyboard)
++{
++    uint32_t flags = irq_save();
++    uint32_t pads = fm1_in.pnotes;
++    *keyboard = fm1_in.keys;
++    irq_restore(flags);
++    return pads;
++}
++#endif
++
+ uint8_t plat_key_velocity(int key)
+ {
+ #if BOARD_SMK37
+diff --git a/firmware/src/app/superj6_factory.h b/firmware/src/app/superj6_factory.h
+index eab427d2..060f2d85 100644
+--- a/firmware/src/app/superj6_factory.h
++++ b/firmware/src/app/superj6_factory.h
+@@ -7,21 +7,33 @@
+  * Presence distinguishes authored +0/-0 from an absent PWM word. */
+ enum {
+     SJ6_ROW_AMP2 = 0, SJ6_ROW_MASTER = 4, SJ6_ROW_WAVE = 5,
+-    SJ6_ROW_AMOUNT = 7, SJ6_ROW_ENABLE = 9, SJ6_ROW_COUNT = 11
++    SJ6_ROW_AMOUNT = 7, SJ6_ROW_ENABLE = 9, SJ6_ROW_RANGE = 11, SJ6_ROW_FILTER_LINK = 12, SJ6_ROW_COUNT = 13
+ };
+ typedef struct {
+     float value[SJ6_ROW_COUNT];
+     uint16_t present;
++    uint8_t chorus_flags;
+ } sj6_factory_row;
+ 
+ static inline void sj6_factory_add_word(sj6_factory_row *row, unsigned id, uint32_t bits)
+ {
+     unsigned slot;
++    if (id == 40 || id == 41) {
++        unsigned mb = 1u << (id - 40), pb = mb << 2;
++        if (!(row->chorus_flags & pb)) {
++            row->chorus_flags |= (uint8_t)pb;
++            if (bits == UINT32_C(0x3f800000)) row->chorus_flags |= (uint8_t)mb;
++            else if (bits != 0) row->chorus_flags |= 16u;
++        }
++        return;
++    }
+     if (id == 0) slot = SJ6_ROW_MASTER;
+     else if (id >= 119 && id <= 122) slot = SJ6_ROW_AMP2 + id - 119;
+     else if (id == 82 || id == 83) slot = SJ6_ROW_WAVE + id - 82;
+     else if (id == 78 || id == 79) slot = SJ6_ROW_AMOUNT + id - 78;
+     else if (id == 210 || id == 211) slot = SJ6_ROW_ENABLE + id - 210;
++    else if (id == 86) slot = SJ6_ROW_RANGE;
++    else if (id == 116) slot = SJ6_ROW_FILTER_LINK;
+     else return;
+     unsigned bit = 1u << slot;
+     if (!(row->present & bit)) {
+@@ -29,3 +41,12 @@ static inline void sj6_factory_add_word(sj6_factory_row *row, unsigned id, uint3
+         row->present |= (uint16_t)bit;
+     }
+ }
++
++/* Zero means old record, then dry/I/II/I+II; active modes still unqualified. */
++static inline int sj6_factory_chorus_mode(const sj6_factory_row *row)
++{
++    unsigned mask = row->chorus_flags;
++    if (!mask) return 0;
++    if ((mask & ~3u) != 12u) return -1;
++    return 1 + (mask & 3u);
++}
+diff --git a/firmware/src/app/ui.c b/firmware/src/app/ui.c
+index 22f8c330..70f6f5dd 100644
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -1792,6 +1792,60 @@ static void arp_step_key(int white, int down)
+         arp_held = -1;
+     }
+ }
++#if (BOARD_SMK37 && !defined(X0X_HOST)) || defined(X0X_ARP_KEYBOARD_TEST)
++#define X0X_ARP_SPLIT_INPUT 1
++static int8_t arp_input_owner = -1;
++static int perf_testing(void);
++
++/* Store a semitone offset relative to the displayed C, not an absolute MIDI
++ * note: playback still transposes the same pattern from the triggering key. */
++static X0X_COLD void arp_grid_input(void)
++{
++    static uint64_t old_keys;
++    static uint32_t old_pads;
++#if BOARD_SMK37
++    extern uint8_t smk_clip_mode_on(void);
++    if (smk_clip_mode_on() || smc_ui_active()) goto inactive;
++#endif
++    if (ui.overlay == O_NONE && !ui.help && !(ui.btn & (1u << B_SAVE)) &&
++        !kbd_on() && arp_seq_page() && !perf_testing()) {
++        uint64_t keys;
++        uint32_t pads = plat_arp_input(&keys);
++        uint32_t rises = pads & ~old_pads, falls = old_pads & ~pads;
++        uint64_t strikes = keys & ~old_keys;
++        old_pads = pads;
++        old_keys = keys;
++        if (arp_input_owner != bidx()) {
++            arp_held = -1;
++            arp_input_owner = (int8_t)bidx();
++            return;  /* pre-held inputs belong to the previous page or owner */
++        }
++        for (unsigned i = 0; rises || falls; ++i, rises >>= 1, falls >>= 1) {
++            if (falls & 1u) arp_step_key(KEY_WHITE[i], 0);
++            if (rises & 1u) arp_step_key(KEY_WHITE[i], 1);
++        }
++        if (arp_held >= 0 && strikes) {
++            engine_arp_steps st;
++            if (engine_arp_steps_read((unsigned)bidx(), &st)) {
++                /* If simultaneous, use the highest struck key. */
++                int key = 0;
++                while (strikes >>= 1) ++key;
++                int offset = 36 + key + 12 * ui.oct - UI_ARP_ROOT;
++                if ((st.oct_mask >> arp_held) & 1u) offset -= 12;
++                arp_edited = 1;   /* never toggle on pad release after editing */
++                arp_step_edit((unsigned)arp_held, ARP_S_OFFSET, offset);
++            }
++        }
++        return;
++    }
++#if BOARD_SMK37
++inactive:
++#endif
++    if (arp_input_owner >= 0) arp_held = -1;
++    arp_input_owner = -1;
++}
++#endif
++
+ static void arp_step_knob(int knob, int e)
+ {
+     engine_arp_steps st;
+@@ -4339,8 +4393,12 @@ static UI_DRAW void key_event(int k, int down)
+                 bass_kbd(k, ui.view == V_SEQ);
+         }
+ #if X0X_ARP_HOOKS
+-        else if (w >= 0 && arp_seq_page())
+-            arp_step_key(w, down);
++        else if (arp_seq_page()) {
++#if X0X_ARP_SPLIT_INPUT
++            if (arp_input_owner >= 0) return;  /* split pads/keys below input_body */
++#endif
++            if (w >= 0) arp_step_key(w, down);
++        }
+ #endif
+         else if (w >= 0 && ui.view == V_SEQ)
+             bass_step_key(w, down);
+@@ -5124,6 +5182,9 @@ X0X_COLD static void input_body(void)
+     if (!(btn & (1u << B_GLO)) || ui.view != V_HOME)
+         globe_part_reset();
+     glo_key_edges = ch;
++#if X0X_ARP_SPLIT_INPUT
++    arp_grid_input();
++#endif
+     for (i = 0; i < NKEYS; i++)
+         if (ch & (1u << i))
+             key_event((int)i, (keys >> i) & 1u);
+diff --git a/firmware/src/dsp/dnbx_core.c b/firmware/src/dsp/dnbx_core.c
+index 6e0cae5a..dea67776 100644
+--- a/firmware/src/dsp/dnbx_core.c
++++ b/firmware/src/dsp/dnbx_core.c
+@@ -301,6 +301,26 @@ int dnbx_init_superj6(dnbx_part *s, float sr)
+     if (status == DNBX_OK) s->superj6_amp_range = 1;
+     return status;
+ }
++/* Prepare outside the sample loop. Link the four ADSR settings only;
++ * keep the filter's own hold policy and independent per-voice history. */
++static const dnbx_envelope_params *filter_params(const dnbx_part *s,unsigned layer,
++                                                dnbx_envelope_params *tmp)
++{
++    const dnbx_layer_params *p=&s->layer[layer].params;
++    if (!s->filter_link) return &p->filter;
++    *tmp=p->filter;
++    tmp->attack_s=p->amp.attack_s; tmp->decay_s=p->amp.decay_s;
++    tmp->sustain=p->amp.sustain; tmp->release_s=p->amp.release_s;
++    return tmp;
++}
++int dnbx_set_filter_link(dnbx_part *s,unsigned enabled)
++{
++    if (!valid(s)) return DNBX_E_UNINITIALIZED;
++    if (enabled>1u) return DNBX_E_RANGE;
++    if (!s->superj6_amp_range || dnbx_active_voices(s)) return DNBX_E_UNSUPPORTED;
++    s->filter_link=(uint8_t)enabled;
++    return DNBX_OK;
++}
+ int dnbx_set_layer(dnbx_part *s,unsigned layer,const dnbx_layer_params *p)
+ {
+     if (!valid(s)) return DNBX_E_UNINITIALIZED;
+@@ -312,7 +332,7 @@ int dnbx_set_layer(dnbx_part *s,unsigned layer,const dnbx_layer_params *p)
+         v->increment=increment(s->voice[i].note,p->tune_semitones,s->sample_rate);
+         /* A running timed segment retains its cached endpoint/rate. */
+         if (v->amp.stage==DNBX_ENV_SUSTAIN) v->amp.level=v->amp.curve=p->amp.sustain;
+-        if (v->filter.stage==DNBX_ENV_SUSTAIN) v->filter.level=v->filter.curve=p->filter.sustain;
++        if (v->filter.stage==DNBX_ENV_SUSTAIN) v->filter.level=v->filter.curve=s->filter_link?p->amp.sustain:p->filter.sustain;
+     }
+     return DNBX_OK;
+ }
+@@ -363,7 +383,8 @@ int dnbx_note_on(dnbx_part *s,unsigned note,unsigned velocity)
+         const dnbx_layer_params *p=&s->layer[l].params;
+         v->layer[l].increment=increment(note,p->tune_semitones,s->sample_rate);
+         envelope_on(&v->layer[l].amp,&p->amp,s->sample_rate);
+-        envelope_on(&v->layer[l].filter,&p->filter,s->sample_rate);
++        dnbx_envelope_params linked;
++        envelope_on(&v->layer[l].filter,filter_params(s,l,&linked),s->sample_rate);
+     }
+     return (int)chosen;
+ }
+@@ -371,7 +392,8 @@ static void release_voice(dnbx_part *s,dnbx_voice *v)
+ {
+     for (unsigned l=0;l<DNBX_LAYERS;l++) {
+         envelope_off(&v->layer[l].amp,&s->layer[l].params.amp,s->sample_rate);
+-        envelope_off(&v->layer[l].filter,&s->layer[l].params.filter,s->sample_rate);
++        dnbx_envelope_params linked;
++        envelope_off(&v->layer[l].filter,filter_params(s,l,&linked),s->sample_rate);
+     }
+ }
+ int dnbx_note_off(dnbx_part *s,unsigned note)
+@@ -441,6 +463,9 @@ int dnbx_render(dnbx_part *s,float *left,float *right,unsigned n,dnbx_work *w)
+     if (!n) return DNBX_OK;
+     if (!left || !right || left==right) return DNBX_E_ARGUMENT;
+     COUNT(w,frames,n);
++    dnbx_envelope_params linked[DNBX_LAYERS];
++    const dnbx_envelope_params *fp[DNBX_LAYERS];
++    for (unsigned l=0;l<DNBX_LAYERS;l++) fp[l]=filter_params(s,l,&linked[l]);
+     for (unsigned k=0;k<n;k++) {
+         float mix[2]={0,0},width[2];
+         for (unsigned l=0;l<DNBX_LAYERS;l++) {
+@@ -462,7 +487,7 @@ int dnbx_render(dnbx_part *s,float *left,float *right,unsigned n,dnbx_work *w)
+                 dnbx_layer_voice *lv=&v->layer[l];
+                 const dnbx_layer_params *p=&s->layer[l].params;
+                 float amp=envelope_sample(&lv->amp,&p->amp,s->sample_rate,w);
+-                float env=envelope_sample(&lv->filter,&p->filter,s->sample_rate,w);
++                float env=envelope_sample(&lv->filter,fp[l],s->sample_rate,w);
+                 float x = p->oscillator_mode == DNBX_OSC_SUPERJ6
+                     ? factory_oscillator(lv, p->waveform, width[l], w)
+                     : oscillator(lv->phase,lv->increment,p->waveform,width[l],p->oscillator_mode,w);
+diff --git a/firmware/src/dsp/dnbx_core.h b/firmware/src/dsp/dnbx_core.h
+index 7dff2615..1c678edd 100644
+--- a/firmware/src/dsp/dnbx_core.h
++++ b/firmware/src/dsp/dnbx_core.h
+@@ -94,7 +94,7 @@ typedef struct {
+     dnbx_voice voice[DNBX_VOICES];
+     float raw[DNBX_RAW_CONTROLS];
+     uint32_t raw_present[(DNBX_RAW_CONTROLS + 31u) / 32u];
+-    uint8_t damper, velocity_mode, superj6_amp_range, reserved;
++    uint8_t damper, velocity_mode, superj6_amp_range, filter_link;
+ } dnbx_part;
+ 
+ /* Optional caller-owned render-only semantic counters. They count dnbx_render
+@@ -124,6 +124,8 @@ size_t dnbx_work_size(void);
+ void dnbx_default_layer_params(dnbx_layer_params *);
+ int dnbx_init(dnbx_part *, float sample_rate);
+ int dnbx_init_superj6(dnbx_part *, float sample_rate); /* 8000 .. 192000 inclusive. */
++/* Typed SuperJ6 only: binary pre-note switch, no overwrite of independent settings. */
++int dnbx_set_filter_link(dnbx_part *, unsigned);
+ int dnbx_set_layer(dnbx_part *, unsigned layer, const dnbx_layer_params *);
+ int dnbx_get_layer(const dnbx_part *, unsigned layer, dnbx_layer_params *);
+ /* Positive velocity returns chosen voice index 0..5. Velocity 0 performs
+diff --git a/firmware/src/dsp/juno6.c b/firmware/src/dsp/juno6.c
+index 89cc912d..eaf9a40e 100644
+--- a/firmware/src/dsp/juno6.c
++++ b/firmware/src/dsp/juno6.c
+@@ -101,6 +101,11 @@ void juno6_chorus_init(juno6_chorus_t*c,float sr){memset(c,0,sizeof *c);c->sampl
+ void juno6_chorus_set(juno6_chorus_t*c,float r,float d,float m){c->rate_hz=clampf(r,.1f,5);c->depth_ms=clampf(d,1.7f,5.4f);c->mix=clampf(m,0,.5f);}
+ void juno6_chorus_process(juno6_chorus_t *c, float *l, float *r, unsigned n)
+ {
++#if X0X_SUPERJ6_FACTORY
++ /* Only the authored dry mode is reference-qualified. Active modes use
++  * the existing unqualified preview, not purported J60V2 parameters. */
++ if (c->factory_mode == 1u) return;
++#endif
+  const float sr = c->sample_rate;
+  const float min_delay = sr * .0017f, max_delay = fm_minf(255, sr * .0054f);
+  const float depth = c->depth_ms * .001f - .0017f;
+diff --git a/firmware/src/dsp/juno6.h b/firmware/src/dsp/juno6.h
+index 4ef106c3..3f40b7a2 100644
+--- a/firmware/src/dsp/juno6.h
++++ b/firmware/src/dsp/juno6.h
+@@ -12,6 +12,8 @@
+ #define JUNO6_APP_PARAM_BASE 256u
+ /* Qualified raw master-volume domain includes the authored over-unity stops. */
+ #define JUNO6_FACTORY_MASTER_MAX 1.32f
++static inline int juno6_factory_range_valid(float raw)
++{ return raw == 0.f || raw == .5f || raw == 1.f; }
+ #endif
+ #define JUNO6_VOICES 6u
+ #define JUNO6_CHORUS_BYTES 512u
+@@ -36,19 +38,23 @@ typedef struct {
+ #if X0X_SUPERJ6_FACTORY
+  dnbx_part core;
+  /* An idle typed wave or AMP2 edit selects the app renderer until cold adoption. */
+- uint8_t typed;
++ uint8_t typed, amp1_independent; /* qualified by committed factory source, never inferred from raw words */
+  /* Main writes under the audio-source mask. The block boundary commits each
+   * field once. Cold selection clears staged edits with the whole synth. */
+- float pending_field[5]; /* slots 0..3 AMP2, slot 4 output attenuation */
++ float pending_field[7]; /* AMP2 0..3, master 4, independent AMP1 attack 5, oscillator range 6 */
+  float master_gain;
+  juno6_oscillator_edit pending_wave[2];
+- uint8_t pending_field_mask, pending_wave_mask;
++ uint8_t pending_field_mask, pending_wave_mask, pending_filter_link;
+  float typed_hp_state[2], typed_hp_input[2];
+ #endif
+ } juno6_t;
+ typedef struct {
+  int16_t delay[JUNO6_CHORUS_SAMPLES];
+  uint16_t write;
++#if X0X_SUPERJ6_FACTORY
++ /* Fits the existing alignment gap; pending is audio-boundary owned. */
++ uint8_t factory_mode, factory_pending;
++#endif
+  uint32_t phase;
+  float sample_rate,depth_ms,rate_hz,mix;
+ } juno6_chorus_t;
+@@ -75,4 +81,8 @@ int juno6_render_stereo(juno6_t *, float *, float *, unsigned);
+ int juno6_can_edit_amp2(const juno6_t *);
+ void juno6_apply_pre_note_wave(juno6_t *, unsigned, const juno6_oscillator_edit *);
+ void juno6_apply_factory_waves(juno6_t *, const juno6_oscillator_edit waves[2]);
++/* Audio boundary, idle, with already-qualified independent envelopes. */
++/* Prevalidated idle only, negative internal sentinel means absent. */
++void juno6_apply_pre_note_range(juno6_t*,float);
++int juno6_apply_independent_amp1_attack(juno6_t *, float);
+ #endif
+diff --git a/firmware/src/dsp/juno6_factory.inc b/firmware/src/dsp/juno6_factory.inc
+index 4472290f..e9128fb2 100644
+--- a/firmware/src/dsp/juno6_factory.inc
++++ b/firmware/src/dsp/juno6_factory.inc
+@@ -1,35 +1,69 @@
+ /* SPDX-License-Identifier: GPL-3.0-only */
+ void juno6_init(juno6_t *s,float sr)
+ {
++#if X0X_SUPERJ6_BUILTIN_INIT
++ /* This profile never runs the retired renderer. Keep only the controls
++  * that the typed setters and host/UI read, not its private voice state. */
++ memset(s,0,sizeof *s);
++ s->sample_rate=sr>8000?sr:44100;
++ s->macro[0]=.35f;s->macro[4]=.35f;s->macro[10]=.12f;
++ s->macro[15]=1.0f;s->macro[16]=.5f;
++#else
+  stock_init(s,sr);
++#endif
+  (void)dnbx_init_superj6(&s->core,s->sample_rate);
+  s->master_gain=1.f;
++#if X0X_SUPERJ6_BUILTIN_INIT
++ /* The prepared core already defaults to saw (2/3), centered and dry. */
++ for(unsigned l=0;l<DNBX_LAYERS;l++)
++  s->core.layer[l].params.oscillator_mode=DNBX_OSC_SUPERJ6;
++ s->typed=1;
++#endif
+ }
+ int juno6_note_on(juno6_t *s,uint8_t note,uint8_t velocity)
+ {
++#if !X0X_SUPERJ6_BUILTIN_INIT
+  if (!s->typed) return stock_note_on(s,note,velocity);
++#endif
+  return dnbx_note_on(&s->core,note,velocity)>=0;
+ }
+ void juno6_note_off(juno6_t *s,uint8_t note)
+ {
++#if X0X_SUPERJ6_BUILTIN_INIT
++ (void)dnbx_note_off(&s->core,note);
++#else
+  if (!s->typed) stock_note_off(s,note);
+  else (void)dnbx_note_off(&s->core,note);
++#endif
+ }
+ void juno6_all_off(juno6_t *s)
+ {
++#if X0X_SUPERJ6_BUILTIN_INIT
++ s->macro[17]=0;
++#else
+  stock_all_off(s);
++#endif
+  (void)dnbx_all_off(&s->core);
+  memset(s->typed_hp_state,0,sizeof s->typed_hp_state);
+  memset(s->typed_hp_input,0,sizeof s->typed_hp_input);
+ }
+ int juno6_active(const juno6_t *s)
+ {
++#if X0X_SUPERJ6_BUILTIN_INIT
++ return dnbx_active_voices(&s->core)>0;
++#else
+  return s->typed ? dnbx_active_voices(&s->core)>0 : stock_active(s);
++#endif
+ }
+ 
+ int juno6_can_edit_amp2(const juno6_t *s)
+ {
++#if X0X_SUPERJ6_BUILTIN_INIT
++ (void)s;
++ return 1;
++#else
+  return s->typed || !stock_active(s);
++#endif
+ }
+ 
+ /* Direct AMP2 events target only layer 2, including while AMP link is on.
+@@ -58,6 +92,18 @@ static int set_amp2(dnbx_part *core, unsigned id, float raw)
+     return dnbx_store_raw(core, id, raw) == DNBX_RAW_STORED_ONLY;
+ }
+ 
++/* Public ID36, only for an explicitly independent pre-note layer 1.
++ * Use the qualified scalar law and leave layer 2 and the filter EG alone. */
++int juno6_apply_independent_amp1_attack(juno6_t *s, float raw)
++{
++    dnbx_layer_params layer;
++    if (dnbx_get_layer(&s->core, 0, &layer) != DNBX_OK ||
++        dnbx_attack_from_unit(raw, &layer.amp.attack_s) != DNBX_OK ||
++        dnbx_set_layer(&s->core, 0, &layer) != DNBX_OK)
++        return 0;
++    return dnbx_store_raw(&s->core, 36, raw) == DNBX_RAW_STORED_ONLY;
++}
++
+ /* Called only for a validated pre-note snapshot. Missing legacy PWM fields
+  * are irrelevant for sine/triangle/saw. Square requires an explicit gate. */
+ void juno6_apply_pre_note_wave(juno6_t *s, unsigned layer, const juno6_oscillator_edit *edit)
+@@ -112,6 +158,35 @@ static float master_from_raw(float raw)
+     return value.f;
+ }
+ 
++static float range_pitch(float x) { return x * 24.f - 12.f; }
++static float typed_range_pitch(const juno6_t *s,float range)
++{
++#if X0X_SUPERJ6_BUILTIN_INIT
++ const float bend=(s->macro[16]-.5f)*4;
++#else
++ const float bend=s->bend;
++#endif
++ return bend+range_pitch(range);
++}
++void juno6_apply_pre_note_range(juno6_t *s,float x)
++{
++ const unsigned id=86u;
++ const float pitch=typed_range_pitch(s,x<0.f?.5f:x);
++ for(unsigned l=0;l<DNBX_LAYERS;l++) {
++  dnbx_layer_params p;
++  if(dnbx_get_layer(&s->core,l,&p)!=DNBX_OK) return;
++  p.tune_semitones=pitch;
++  if(dnbx_set_layer(&s->core,l,&p)!=DNBX_OK)return;
++ }
++ if(x<0.f) {
++  s->core.raw[id]=0.f;
++  s->core.raw_present[id/32u]&=~(1u<<(id%32u));
++ } else {
++  (void)dnbx_store_raw(&s->core,id,x);
++  s->typed=1;
++ }
++}
++
+ int juno6_set(juno6_t *s,unsigned id,float x)
+ {
+  if(!s)return 0;
+@@ -129,7 +204,15 @@ int juno6_set(juno6_t *s,unsigned id,float x)
+   s->typed=1;
+   return 1;
+  }
++#if X0X_SUPERJ6_BUILTIN_INIT
++ if(id>=18)return 0;
++ s->macro[id]=x;
++ if(id==9)s->hpf=x;
++ #define JUNO6_APPLY_VALUE(stock,native) (native)
++#else
+  if(!stock_set(s,id,x))return 0;
++ #define JUNO6_APPLY_VALUE(stock,native) (stock)
++#endif
+  if(id==17)return dnbx_set_sustain(&s->core,x>=.5f)==DNBX_OK;
+  if(id==9)return 1;
+  if(id==13||id==14)return 1; /* Existing runtime owns stock chorus parameters. */
+@@ -140,33 +223,41 @@ int juno6_set(juno6_t *s,unsigned id,float x)
+   case 0:
+    if (p.oscillator_mode == DNBX_OSC_SUPERJ6) p.oscillator_mode = DNBX_OSC_STOCK_BLEP;
+    p.waveform=(2+x)/3;break;
+-  case 1:p.sub_gain=s->sub_level;break;
++  case 1:p.sub_gain=JUNO6_APPLY_VALUE(s->sub_level,juno6_control_physical(1,x));break;
+   case 2:p.cutoff_hz=35+x*x*12000;break;
+-  case 3:p.resonance=s->resonance;break;
++  case 3:p.resonance=JUNO6_APPLY_VALUE(s->resonance,x);break;
+   case 4:p.filter_env_hz=7000*x;break;
+-  case 5:p.amp.attack_s=p.filter.attack_s=s->attack;break;
+-  case 6:p.amp.decay_s=p.filter.decay_s=s->decay;break;
+-  case 7:p.amp.sustain=p.filter.sustain=s->sustain;break;
+-  case 8:p.amp.release_s=p.filter.release_s=s->release;break;
++  case 5:p.amp.attack_s=p.filter.attack_s=JUNO6_APPLY_VALUE(s->attack,juno6_control_physical(5,x));break;
++  case 6:p.amp.decay_s=p.filter.decay_s=JUNO6_APPLY_VALUE(s->decay,juno6_control_physical(6,x));break;
++  case 7:p.amp.sustain=p.filter.sustain=JUNO6_APPLY_VALUE(s->sustain,x);break;
++  case 8:p.amp.release_s=p.filter.release_s=JUNO6_APPLY_VALUE(s->release,juno6_control_physical(8,x));break;
+   case 10:p.lfo_hz=.1f+8*x*x;break;
+   case 11:p.lfo_pwm_depth=x*.2f;break;
+-  case 12:p.pulse_width=clampf(s->pulse_width,.03f,.5f);break;
++  case 12:p.pulse_width=clampf(JUNO6_APPLY_VALUE(s->pulse_width,juno6_control_physical(12,x)),.03f,.5f);break;
+   case 15:p.gain=x;break;
+-  case 16:p.tune_semitones=s->bend;break;
++  case 16:{
++   float raw=.5f;
++   (void)dnbx_read_raw(&s->core,86,&raw);
++   p.tune_semitones=typed_range_pitch(s,raw);
++   break;
++  }
+   default:break;
+   }
+   if(dnbx_set_layer(&s->core,l,&p)!=DNBX_OK)return 0;
+  }
++ #undef JUNO6_APPLY_VALUE
+  return 1;
+ }
+ 
+ int juno6_render_stereo(juno6_t *s,float *left,float *right,unsigned frames)
+ {
++#if !X0X_SUPERJ6_BUILTIN_INIT
+  if(!s->typed){
+   stock_render(s,left,frames);
+   memcpy(right,left,frames*sizeof *right);
+   return 1;
+  }
++#endif
+  if(dnbx_render(&s->core,left,right,frames,0)!=DNBX_OK)return 0;
+  if(s->hpf>0){
+   const float hp=1/(1+TWO_PI*(15+2000*s->hpf*s->hpf)/s->core.sample_rate);
+@@ -190,7 +281,9 @@ static unsigned legacy_stage(unsigned stage)
+ int juno6_read_envelope(const juno6_t *s,juno6_envelope_snapshot *out)
+ {
+  if(!s||!out)return 0;
++#if !X0X_SUPERJ6_BUILTIN_INIT
+  if(!s->typed)return stock_read_envelope(s,out);
++#endif
+  juno6_envelope_snapshot value={0};
+  const dnbx_envelope_params *p=&s->core.layer[0].params.amp;
+  value.adsr[0]=p->attack_s;value.adsr[1]=p->decay_s;
+@@ -211,10 +304,12 @@ int juno6_read_envelope(const juno6_t *s,juno6_envelope_snapshot *out)
+  * Bound temporary storage independently of the caller's block length. */
+ void juno6_render(juno6_t *s, float *out, unsigned frames)
+ {
++#if !X0X_SUPERJ6_BUILTIN_INIT
+  if (!s->typed) {
+   stock_render(s, out, frames);
+   return;
+  }
++#endif
+  float right[32];
+  while (frames) {
+   unsigned n = frames < 32 ? frames : 32;
+diff --git a/firmware/src/dsp/s1c/s1c_front.c b/firmware/src/dsp/s1c/s1c_front.c
+index 859064e7..88200852 100644
+--- a/firmware/src/dsp/s1c/s1c_front.c
++++ b/firmware/src/dsp/s1c/s1c_front.c
+@@ -10,20 +10,19 @@ float s1c_front_init(unsigned id) { return id < 150 ? dict_f(s1c_iinit[id]) : 0.
+ 
+ enum { F_L1R = 15, F_PANF = 36, F_DLT = 43, F_L2R = 47, F_ARPRATE = 64, F_TSYNC = 139, F_PB = 140,
+        F_A4 = 143, F_TMULT = 147, F_RATES = 19, F_TWOBARS = 4 };
+-/* bars per rate (8 bars .. 1/64 triplet) and the triplet flag */
+-static const float bars[F_RATES] = {8.f, 6.f, 4.f, 3.f, 2.f, 1.f, 1.f, 1.f/2.f, 1.f/2.f, 1.f/4.f, 1.f/4.f,
+-    1.f/8.f, 1.f/8.f, 1.f/16.f, 1.f/16.f, 1.f/32.f, 1.f/32.f, 1.f/64.f, 1.f/64.f};
++/* Store bars in exact binary units of 1/64 (8 bars to 1/64).
++ * Every triplet uses a power-of-two base; scaling the rounded 2/3
++ * by that base is exactly the old factor table's binary32 value. */
++static const uint16_t bars64[F_RATES] = {512,384,256,192,128,64,64,32,32,16,16,8,8,4,4,2,2,1,1};
+ #define TRIP(i) ((i) == 6 || ((i) >= 8 && ((i) & 1) == 0))
+ static float rate_time(float bpm, int i)
+ {
+-    return (4.f * bars[i]) / (bpm * (1.f / 60.f)) / (TRIP(i) ? 1.5f : 1.f);
++    return ((float)bars64[i] * (1.f / 16.f)) / (bpm * (1.f / 60.f)) / (TRIP(i) ? 1.5f : 1.f);
+ }
+ static float rate_factor(int i)
+ {
+-    static const float f[F_RATES] = {8.f, 6.f, 4.f, 3.f, 2.f, 1.f, 1.f / 1.5f, 1.f / 2.f, 1.f / 2.f / 1.5f,
+-        1.f / 4.f, 1.f / 4.f / 1.5f, 1.f / 8.f, 1.f / 8.f / 1.5f, 1.f / 16.f, 1.f / 16.f / 1.5f,
+-        1.f / 32.f, 1.f / 32.f / 1.5f, 1.f / 64.f, 1.f / 64.f / 1.5f};
+-    return f[i];
++    const float base = (float)bars64[i] * (1.f / 64.f);
++    return TRIP(i) ? base * (1.f / 1.5f) : base;
+ }
+ static float fabs_(float x) { return x < 0.f ? -x : x; }
+ float s1c_front_clamp(unsigned id, float x)
+diff --git a/tests/host/superj6_factory_load_test.c b/tests/host/superj6_factory_load_test.c
+index ca7ca400..cdaf4923 100644
+--- a/tests/host/superj6_factory_load_test.c
++++ b/tests/host/superj6_factory_load_test.c
+@@ -38,7 +38,11 @@ static void check_word(unsigned v, unsigned i, uint32_t expected)
+ {
+     float raw;
+     CHECK(dnbx_read_raw(&owner[v]->core, id[i], &raw) == DNBX_OK);
+-    CHECK(!memcmp(&raw, &expected, sizeof raw));
++    uint32_t got;
++    memcpy(&got, &raw, sizeof got);
++    if (got != expected)
++        fprintf(stderr, "owner %u original id %u: got %08x expected %08x\n", v, id[i], got, expected);
++    CHECK(got == expected);
+ }
+ static void rejected(unsigned v, const sj6_factory_row *row)
+ {
+@@ -60,7 +64,7 @@ static void check_negative(void)
+         static const uint32_t invalid[] = {0x7fc00000,0x7f800000,0xbf800000,0x3fc00000};
+         for (unsigned k = 0; k < 4; ++k) {
+             memcpy(&bad.value[i], &invalid[k], sizeof(float));
+-            bad.present = full.present;
++            bad.present = (uint16_t)(full.present | (1u << i));
+             rejected(0, &bad);
+         }
+     }
+@@ -82,6 +86,7 @@ static void check_negative(void)
+     juno6_all_off(owner[0]);
+     CHECK(engine_bass_select_preset(0, ORIGINAL_SOUND_JUNO, 3, &proj.sound) == 0);
+     rejected(0, &full);
++    CHECK(!engine_superj6_pre_note_wave(0, 0, 1.f, &(engine_superj6_pwm){.5f,1.f}));
+     engine_bass_cancel_preset(0);
+ }
+ #ifdef SJ6_AUTHORED_BANK
+@@ -100,7 +105,7 @@ static void check_bank(void)
+             unsigned v = programs++ % 2;
+             CHECK(engine_superj6_factory_load(v, &row));
+             boundary();
+-            for (unsigned i = 0; i < SJ6_ROW_COUNT; ++i) {
++            for (unsigned i = 0; i < sizeof id / sizeof *id; ++i) {
+                 bits = 0;
+                 if (row.present & (1u << i)) {
+                     memcpy(&bits, &row.value[i], sizeof bits);
+@@ -154,7 +159,7 @@ int main(void)
+             memcpy(old_presence, peer->core.raw_present, sizeof old_presence);
+             CHECK(engine_superj6_factory_load(v, &row));
+             boundary();
+-            for (unsigned i = 0; i < SJ6_ROW_COUNT; ++i) {
++            for (unsigned i = 0; i < sizeof id / sizeof *id; ++i) {
+                 unsigned present = (row.present >> i) & 1u;
+                 check_word(v, i, present ? example[i] : 0u);
+                 authored += present;
+diff --git a/tests/host/ui_arp_engine_test.c b/tests/host/ui_arp_engine_test.c
+index 512dd72f..2940e5c4 100644
+--- a/tests/host/ui_arp_engine_test.c
++++ b/tests/host/ui_arp_engine_test.c
+@@ -97,7 +97,10 @@ static void juno_stock_knob_journey(int part)
+     EXPECT(edits==0xffffu);
+     EXPECT(cur_page()==4&&!strcmp(pg.title[cur_page()],"ARPEGGIATOR"));
+ }
+-int main(void)
++#ifndef ARP_FIXTURE_MAIN
++#define ARP_FIXTURE_MAIN main
++#endif
++int ARP_FIXTURE_MAIN(void)
+ {
+     juno_stock_knob_journey(PART_303A);
+     juno_stock_knob_journey(PART_303B);
+diff --git a/tests/test_chicago_compact_headers.py b/tests/test_chicago_compact_headers.py
+index 9b4f0a8f..fd7ca871 100644
+--- a/tests/test_chicago_compact_headers.py
++++ b/tests/test_chicago_compact_headers.py
+@@ -14,6 +14,8 @@ with tempfile.TemporaryDirectory(prefix='chicago-compact-') as tmp:
+                     str(ROOT/'experiments/original_synth/chicago_packed_private.h'),
+                     str(tmp/'chicago_compact_private.h')], check=True)
+     generated = (tmp/'chicago_compact_private.h').read_text()
++    if not re.search(r'original_chicago_packed_a_data\[7617\]', generated):
++        raise AssertionError('Amplitude table must use the 16-bit original block delta')
+     # Reverting to a 16-bit offset per block silently spends ~1 KiB of XIP.
+     for table in ('a', 'e'):
+         stem = f'original_chicago_packed_{table}_'
+diff --git a/tools/build.py b/tools/build.py
+index 6e5c4b1f..ef17311a 100644
+--- a/tools/build.py
++++ b/tools/build.py
+@@ -471,6 +471,11 @@ def app_compile_commands(flags, original_synth, wobble):
+     flags = [*flags, "-DX0X_SYNTHONE_PATCH=" + synthone_patch]
+     if SUPERJ6_FACTORY == "1":
+         flags = [*flags, "-DX0X_SUPERJ6_FACTORY=1"]
++    sj6_builtin_init = os.environ.get("X0X_SUPERJ6_BUILTIN_INIT", "0")
++    if sj6_builtin_init not in ("0", "1") or sj6_builtin_init == "1" and SUPERJ6_FACTORY != "1":
++        raise SystemExit("X0X_SUPERJ6_BUILTIN_INIT requires X0X_SUPERJ6_FACTORY=1")
++    if sj6_builtin_init == "1":
++        flags = [*flags, "-DX0X_SUPERJ6_BUILTIN_INIT=1"]
+     if S1C == "1":
+         flags = [*flags, "-DX0X_S1C=1"]
+     chance_probe = os.environ.get("X0X_GFINAL_CHANCE_PROBE", "1")
+@@ -534,7 +539,7 @@ def build_app():
+              f"-I{GEN.relative_to(SRC)}"]
+     factory_roots = []
+     if SUPERJ6_FACTORY == "1":
+-        names = ["engine_superj6_factory_load"]
++        names = ["engine_superj6_factory_load", "engine_superj6_factory_load_amp1", "engine_superj6_amp1_read", "engine_superj6_amp1_edit", "engine_superj6_filter_link"]
+         if synthone_patch_setting() != "1":
+             names.extend(("engine_superj6_edit", "engine_superj6_pre_note_wave"))
+         for name in names:
+diff --git a/tools/gen_chicago_compact.py b/tools/gen_chicago_compact.py
+index ab64b6c1..dd8bdd89 100644
+--- a/tools/gen_chicago_compact.py
++++ b/tools/gen_chicago_compact.py
+@@ -3,7 +3,8 @@
+ """Repack pinned Chicago inputs losslessly; never modify the pinned header.
+ 
+ Each 32-entry block retains its exact residual payload. Seven header bytes
+-store value low27 bits, width5, and signed delta24. High5 value bits are fixed
++store value low27 bits, width5, and signed delta24 (amplitude uses six
++bytes and a signed delta16). High5 value bits are fixed
+ per table. Groups of 32 offsets use an absolute anchor and integer stride,
+ then a signed byte residual for each exact offset. Reject any input not
+ representable without truncation.
+@@ -43,7 +44,10 @@ def generate(source, output):
+             new_offsets.append(len(packed))
+             packed.extend((value & 0xffffff).to_bytes(3, 'little'))
+             packed.append(((value >> 24) & 7) << 5 | width)
+-            packed.extend((delta & 0xffffff).to_bytes(3, 'little'))
++            delta_bits = 16 if name == 'a' else 24
++            if (prefix == 0x38000000) != (name == 'a') or not -(1 << (delta_bits-1)) <= delta < (1 << (delta_bits-1)):
++                raise ValueError('pinned packed delta or prefix out of exact format')
++            packed.extend(delta.to_bytes(delta_bits // 8, 'little', signed=True))
+             packed.extend(data[offset+9:end])
+         if len(packed) > 65535:
+             raise ValueError('offset overflow')
+diff --git a/tools/pack_synthone_factory.py b/tools/pack_synthone_factory.py
+index af6d9f03..e7186b52 100644
+--- a/tools/pack_synthone_factory.py
++++ b/tools/pack_synthone_factory.py
+@@ -88,6 +88,46 @@ def best_k(values):
+     return min(range(31), key=cost)
+ 
+ 
++def canonical_column(lengths):
++    """Choose equal-length symbol order to shrink the exact v1 dictionary.
++
++    Keep the same alphabet and prefix lengths. For each Golomb parameter,
++    pick an ascending or descending traversal for each length's rank bin.
++    Two endpoint states per bin suffice; ESC never occupies a dictionary word.
++    """
++    groups = [(width, [x for x in sorted(lengths) if x >= 0 and lengths[x] == width])
++              for width in range(1, max(lengths.values()) + 1)]
++    best = None
++    for k in range(16):
++        def bits(delta):
++            return 2 * (zig(delta) + (1 << k)).bit_length() - 1 - k
++
++        paths = {0: (0, [])}
++        for width, ranks in groups:
++            if not ranks:
++                continue
++            next_paths = {}
++            for walk in (ranks, ranks[::-1]):
++                inside = sum(bits(b - a) for a, b in zip(walk, walk[1:]))
++                candidate = min((cost + bits(walk[0] - end) + inside, history + [(width, walk)])
++                                for end, (cost, history) in paths.items())
++                if walk[-1] not in next_paths or candidate < next_paths[walk[-1]]:
++                    next_paths[walk[-1]] = candidate
++            paths = next_paths
++        candidate = min(paths.values())
++        if best is None or candidate < best:
++            best = candidate
++
++    chosen = dict(best[1])
++    order = []
++    for width in range(1, max(lengths.values()) + 1):
++        if lengths.get(ESC) == width:
++            order.append(ESC)
++        order.extend(chosen.get(width, ()))
++    rank = {symbol: i for i, symbol in enumerate(order)}
++    return canonical(lengths, rank.__getitem__)
++
++
+ def load_programs(commands_json):
+     cases = json.loads(Path(commands_json).read_bytes())['cases']
+     by_bank = {}
+@@ -156,7 +196,7 @@ def pack(programs, banks, order):
+         if len(esc) < 2: esc = set()
+         syms = [ESC if v in esc else gi[v] for v in cols[c]]
+         lens = huff_lengths(Counter(syms))
+-        order_syms, codes, counts = canonical(lens, lambda x: x)
++        order_syms, codes, counts = canonical_column(lens)
+         s.put(order[c], 8)
+         s.egk(order_syms.index(ESC) + 1 if esc else 0, 0)
+         s.put(len(counts), 4)

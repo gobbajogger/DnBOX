@@ -1,0 +1,134 @@
+diff --git a/firmware/src/app/original_runtime.c b/firmware/src/app/original_runtime.c
+index 08b051d9..dd7f52c5 100644
+--- a/firmware/src/app/original_runtime.c
++++ b/firmware/src/app/original_runtime.c
+@@ -29,6 +29,9 @@ X0X_COLD int original_runtime_init(original_runtime_part *p, const uint8_t cell[
+     if (kind == ORIGINAL_SOUND_JUNO) {
+         juno6_init(&p->dsp.juno.synth,44100);
+         juno6_chorus_init(&p->dsp.juno.chorus,44100);
++#if X0X_SUPERJ6_BUILTIN_INIT
++        p->dsp.juno.chorus.mix = 0;
++#endif
+         rc=ORIGINAL_RUNTIME_OK;
+     } else if (kind == ORIGINAL_SOUND_SYNTHONE) {
+         s1_part_init(&p->dsp.synthone);
+@@ -53,6 +56,11 @@ X0X_COLD int original_runtime_init(original_runtime_part *p, const uint8_t cell[
+         rc = original_chicago_backend_init_compact(&p->dsp.chicago, factory, bpm, 0, tuning, fx);
+     p->status = (int8_t)rc;
+     if (rc != ORIGINAL_RUNTIME_OK) return rc;
++#if X0X_SUPERJ6_BUILTIN_INIT
++    /* Older Juno slots keep their project identity. They cold-start the
++     * built-in SuperJ6 voice instead of replaying old sound edits. */
++    if (kind == ORIGINAL_SOUND_JUNO) return original_runtime_prepare(p, bpm);
++#endif
+     if (kind == ORIGINAL_SOUND_JUNO) {
+         for(unsigned i=0;i<ORIGINAL_JUNO_NPARAMS-2u;i++){
+             float value;
+diff --git a/firmware/src/dsp/juno6_factory.inc b/firmware/src/dsp/juno6_factory.inc
+index 4472290f..62420a74 100644
+--- a/firmware/src/dsp/juno6_factory.inc
++++ b/firmware/src/dsp/juno6_factory.inc
+@@ -4,16 +4,28 @@ void juno6_init(juno6_t *s,float sr)
+  stock_init(s,sr);
+  (void)dnbx_init_superj6(&s->core,s->sample_rate);
+  s->master_gain=1.f;
++#if X0X_SUPERJ6_BUILTIN_INIT
++ /* The prepared core already defaults to saw (2/3), centered and dry. */
++ for(unsigned l=0;l<DNBX_LAYERS;l++)
++  s->core.layer[l].params.oscillator_mode=DNBX_OSC_SUPERJ6;
++ s->typed=1;
++#endif
+ }
+ int juno6_note_on(juno6_t *s,uint8_t note,uint8_t velocity)
+ {
++#if !X0X_SUPERJ6_BUILTIN_INIT
+  if (!s->typed) return stock_note_on(s,note,velocity);
++#endif
+  return dnbx_note_on(&s->core,note,velocity)>=0;
+ }
+ void juno6_note_off(juno6_t *s,uint8_t note)
+ {
++#if X0X_SUPERJ6_BUILTIN_INIT
++ (void)dnbx_note_off(&s->core,note);
++#else
+  if (!s->typed) stock_note_off(s,note);
+  else (void)dnbx_note_off(&s->core,note);
++#endif
+ }
+ void juno6_all_off(juno6_t *s)
+ {
+@@ -24,12 +36,21 @@ void juno6_all_off(juno6_t *s)
+ }
+ int juno6_active(const juno6_t *s)
+ {
++#if X0X_SUPERJ6_BUILTIN_INIT
++ return dnbx_active_voices(&s->core)>0;
++#else
+  return s->typed ? dnbx_active_voices(&s->core)>0 : stock_active(s);
++#endif
+ }
+ 
+ int juno6_can_edit_amp2(const juno6_t *s)
+ {
++#if X0X_SUPERJ6_BUILTIN_INIT
++ (void)s;
++ return 1;
++#else
+  return s->typed || !stock_active(s);
++#endif
+ }
+ 
+ /* Direct AMP2 events target only layer 2, including while AMP link is on.
+@@ -162,11 +183,13 @@ int juno6_set(juno6_t *s,unsigned id,float x)
+ 
+ int juno6_render_stereo(juno6_t *s,float *left,float *right,unsigned frames)
+ {
++#if !X0X_SUPERJ6_BUILTIN_INIT
+  if(!s->typed){
+   stock_render(s,left,frames);
+   memcpy(right,left,frames*sizeof *right);
+   return 1;
+  }
++#endif
+  if(dnbx_render(&s->core,left,right,frames,0)!=DNBX_OK)return 0;
+  if(s->hpf>0){
+   const float hp=1/(1+TWO_PI*(15+2000*s->hpf*s->hpf)/s->core.sample_rate);
+@@ -190,7 +213,9 @@ static unsigned legacy_stage(unsigned stage)
+ int juno6_read_envelope(const juno6_t *s,juno6_envelope_snapshot *out)
+ {
+  if(!s||!out)return 0;
++#if !X0X_SUPERJ6_BUILTIN_INIT
+  if(!s->typed)return stock_read_envelope(s,out);
++#endif
+  juno6_envelope_snapshot value={0};
+  const dnbx_envelope_params *p=&s->core.layer[0].params.amp;
+  value.adsr[0]=p->attack_s;value.adsr[1]=p->decay_s;
+@@ -211,10 +236,12 @@ int juno6_read_envelope(const juno6_t *s,juno6_envelope_snapshot *out)
+  * Bound temporary storage independently of the caller's block length. */
+ void juno6_render(juno6_t *s, float *out, unsigned frames)
+ {
++#if !X0X_SUPERJ6_BUILTIN_INIT
+  if (!s->typed) {
+   stock_render(s, out, frames);
+   return;
+  }
++#endif
+  float right[32];
+  while (frames) {
+   unsigned n = frames < 32 ? frames : 32;
+diff --git a/tools/build.py b/tools/build.py
+index 6e5c4b1f..a61cb6bf 100644
+--- a/tools/build.py
++++ b/tools/build.py
+@@ -471,6 +471,11 @@ def app_compile_commands(flags, original_synth, wobble):
+     flags = [*flags, "-DX0X_SYNTHONE_PATCH=" + synthone_patch]
+     if SUPERJ6_FACTORY == "1":
+         flags = [*flags, "-DX0X_SUPERJ6_FACTORY=1"]
++    sj6_builtin_init = os.environ.get("X0X_SUPERJ6_BUILTIN_INIT", "0")
++    if sj6_builtin_init not in ("0", "1") or sj6_builtin_init == "1" and SUPERJ6_FACTORY != "1":
++        raise SystemExit("X0X_SUPERJ6_BUILTIN_INIT requires X0X_SUPERJ6_FACTORY=1")
++    if sj6_builtin_init == "1":
++        flags = [*flags, "-DX0X_SUPERJ6_BUILTIN_INIT=1"]
+     if S1C == "1":
+         flags = [*flags, "-DX0X_S1C=1"]
+     chance_probe = os.environ.get("X0X_GFINAL_CHANCE_PROBE", "1")

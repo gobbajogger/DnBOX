@@ -1,0 +1,818 @@
+--- a/firmware/src/app/engine.h
++++ b/firmware/src/app/engine.h
+@@ -233,6 +233,9 @@
+ #if X0X_SUPERJ6_BUILTIN_INIT
+     uint8_t sj6_extra[NBASS][NPARAMS_MAX];
+ #endif
++#if X0X_S1_EXTRA
++    uint8_t s1_extra[NBASS][S1_EXTRA_BYTES];
++#endif
+ } bass_base_state_t;
+ int engine_bass_base_ready(unsigned mask,const bass_base_state_t *target);
+ void engine_bass_base_restore(unsigned mask); /* caller holds audio; ready was 0 */
+--- a/firmware/src/app/original_presets.inc
++++ b/firmware/src/app/original_presets.inc
+@@ -108,6 +108,25 @@
+ {
+     s1_patch_snapshot snapshot;
+     int slot = factory_id == S1_LINK_ID ? S1_PATCH_COUNT : s1_patch_slot(factory_id);
++#if X0X_S1_EXTRA
++    if (slot >= S1_EXTRA_FIRST) {
++        if (voice >= NBASS || !out) return 0;
++        uint32_t lock = plat_cq_lock();
++        const original_runtime_part *p = &original_bass[voice];
++        int ready = p->kind == ORIGINAL_SOUND_SYNTHONE && p->status == ORIGINAL_RUNTIME_OK;
++        if (ready) {
++            const s1_patch_descriptor *d = s1_patch_at((unsigned)slot);
++            out->revision = s1_patch_identity(voice);
++            out->preset = bass_named_preset[voice];
++            out->note_locked = note_lock_applied[voice];
++            out->physical = s1_part_patch_value(&p->dsp.synthone, (unsigned)slot);
++            out->position = (uint8_t)((out->physical - d->minimum) *
++                (s1_patch_steps((unsigned)slot) / (d->maximum - d->minimum)) + .5f);
++        }
++        plat_cq_unlock(lock);
++        return ready;
++    }
++#endif
+     if (slot < 0 || !out || !engine_s1_patch_snapshot(voice, &snapshot)) return 0;
+     out->revision = snapshot.revision;
+     out->note_locked = snapshot.note_locked;
+@@ -127,7 +146,7 @@
+ int engine_s1_patch_set(unsigned voice, uint32_t revision, unsigned factory_id, unsigned position)
+ {
+     int slot = factory_id == S1_LINK_ID ? S1_PATCH_COUNT : s1_patch_slot(factory_id);
+-    if (voice >= NBASS || slot < 0 || position > (factory_id == S1_LINK_ID ? 1u : S1_PATCH_STEPS))
++    if (voice >= NBASS || slot < 0 || position > s1_patch_steps((unsigned)slot))
+         return S1_EDIT_REJECTED;
+     uint32_t lock = plat_cq_lock();
+     int status = S1_EDIT_REJECTED;
+@@ -137,6 +156,11 @@
+         s1_patch_identity(voice) == revision &&
+         !((request & 0x80000000u) && request != bass_applied[voice])) {
+         if (s1_edit[voice].pending || note_lock_applied[voice]) status = S1_EDIT_BUSY;
++#if X0X_S1_EXTRA
++        else if (slot >= S1_EXTRA_FIRST &&
++                 (!mot_base_snd || !original_sound_s1_extra_available(mot_base_snd->v[T_303][voice],
++                  mot_base_snd->v[T_303][S1_EXTRA_ROW + voice]))) status = S1_EDIT_REJECTED;
++#endif
+         else {
+             s1_edit[voice].slot = (uint8_t)slot;
+             s1_edit[voice].position = (uint8_t)position;
+@@ -162,6 +186,13 @@
+         (uint16_t)preset, (uint8_t)(edited ? BASS_SOUND_EDITED : 0)};
+     (void)bass_sound_tag_encode(&sound->bass[voice], &info, BASS_SOUND_REGISTRY, 4);
+ }
++#if X0X_S1_EXTRA
++_Static_assert(S1_EXTRA_ROW + NBASS <= NVOICES_MAX, "Synth One project rows fit");
++_Static_assert(S1_EXTRA_ROW >= ARP_BLOCK_VOICE0 + NBASS, "Synth One records avoid ARP slots");
++#if X0X_SUPERJ6_BUILTIN_INIT
++_Static_assert(S1_EXTRA_ROW >= ORIGINAL_SJ6_EXTRA_ROW + NBASS, "Synth One records avoid SuperJ6 rows");
++#endif
++#endif
+ #if X0X_SYNTHONE_PATCH
+ static void s1_patch_boundary(void)
+ {
+@@ -173,8 +204,17 @@
+             original_bass[v].status != ORIGINAL_RUNTIME_OK) continue;
+         sound_t *sound = (sound_t *)mot_base_snd;
+         uint8_t *cell = sound->v[T_303][v];
+-        if (!original_sound_s1_set(cell, s1_edit[v].slot, s1_edit[v].position)) continue;
+-        s1_part_apply_cell(&original_bass[v].dsp.synthone, cell);
++#if X0X_S1_EXTRA
++        if (s1_edit[v].slot >= S1_EXTRA_FIRST) {
++            uint8_t *extra = sound->v[T_303][S1_EXTRA_ROW + v];
++            if (!original_sound_s1_extra_set(cell, extra, s1_edit[v].slot, s1_edit[v].position)) continue;
++            s1_part_apply_extra(&original_bass[v].dsp.synthone, extra);
++        } else
++#endif
++        {
++            if (!original_sound_s1_set(cell, s1_edit[v].slot, s1_edit[v].position)) continue;
++            s1_part_apply_cell(&original_bass[v].dsp.synthone, cell);
++        }
+         bass_tag_set(sound, v, ORIGINAL_SOUND_SYNTHONE, bass_named_preset[v],
+                      original_sound_edit_mask(cell) != 0);
+     }
+@@ -395,6 +435,11 @@
+     if (bank == ORIGINAL_SOUND_JUNO && !original_sound_sj6_ext_valid(
+             mut->v[T_303][voice], mut->v[T_303][ORIGINAL_SJ6_EXTRA_ROW + voice])) return -1;
+ #endif
++#if X0X_S1_EXTRA
++    if (bank == ORIGINAL_SOUND_SYNTHONE &&
++        !original_sound_s1_extra_valid(mut->v[T_303][voice], mut->v[T_303][S1_EXTRA_ROW+voice]))
++        return -1;
++#endif
+     return bank;
+ }
+ X0X_COLD int engine_bass_sound_validate(const sound_t *sound)
+@@ -423,6 +468,13 @@
+     int rc=bass_tagged_cell_validate(mut->val,(bass_sound_tag_t *)(mut->val+BASS_NOTE_TAG),&bank);
+     if(rc)return rc;
+     unsigned used = BASS_NOTE_USED;
++#if X0X_S1_EXTRA
++    _Static_assert(BASS_NOTE_USED + S1_EXTRA_BYTES <= NSTEPS, "Synth One note-lock extension fits");
++    if (bank == ORIGINAL_SOUND_SYNTHONE && (original_sound_edit_mask(l->val) & S1_EXTRA_MARK)) {
++        if (!original_sound_s1_extra_valid(l->val, l->val+BASS_NOTE_USED)) return -1;
++        used += S1_EXTRA_BYTES;
++    }
++#endif
+ #if X0X_SUPERJ6_BUILTIN_INIT
+     _Static_assert(BASS_NOTE_USED + ORIGINAL_SJ6_EXTRA_SIZE <= NSTEPS, "SuperJ6 note-lock extension fits");
+     if (bank == ORIGINAL_SOUND_JUNO && (original_sound_edit_mask(l->val) & ORIGINAL_SJ6_AUTHORED_LFO_BIT))
+@@ -447,6 +499,10 @@
+     next.used=1;next.gen=(uint8_t)(lanes[k].gen+1);next.t=BASS_NOTE_TARGET;
+     next.pat=(uint8_t)pat;next.part=(uint8_t)(PART_303A+voice);next.v=(uint8_t)step;next.i=BASS_NOTE_VERSION;
+     __builtin_memcpy(next.val,sound->v[T_303][voice],NPARAMS_MAX);
++#if X0X_S1_EXTRA
++    if (next.val[29] == ORIGINAL_SOUND_SYNTHONE && (original_sound_edit_mask(next.val) & S1_EXTRA_MARK))
++        memcpy(next.val+BASS_NOTE_USED, sound->v[T_303][S1_EXTRA_ROW+voice], S1_EXTRA_BYTES);
++#endif
+ #if X0X_SUPERJ6_BUILTIN_INIT
+     if (next.val[29] == ORIGINAL_SOUND_JUNO)
+         next.val[25] &= (uint8_t)~(ORIGINAL_SJ6_AUTHORED_LFO_BIT >> 24);
+@@ -530,8 +586,14 @@
+     unsigned n=original_sound_count(original_bass[v].kind);
+     note_lock_applied[v]=0;
+ #if X0X_SYNTHONE_PATCH
+-    if (original_bass[v].kind == ORIGINAL_SOUND_SYNTHONE)
+-        s1_part_apply_cell(&original_bass[v].dsp.synthone, mot_base_snd->v[T_303][v]);
++    if (original_bass[v].kind == ORIGINAL_SOUND_SYNTHONE) {
++        const uint8_t *cell = mot_base_snd->v[T_303][v];
++        s1_part_apply_cell(&original_bass[v].dsp.synthone, cell);
++#if X0X_S1_EXTRA
++        s1_part_apply_extra(&original_bass[v].dsp.synthone, original_sound_edit_mask(cell) & S1_EXTRA_MARK ?
++                            mot_base_snd->v[T_303][S1_EXTRA_ROW+v] : NULL);
++#endif
++    }
+ #endif
+     for(unsigned i=0;i<n;i++)if(!original_sound_is_performance(original_bass[v].kind,i))apply_base(T_303,v,(int)i);
+ #if X0X_SUPERJ6_BUILTIN_INIT
+@@ -550,8 +612,13 @@
+     }
+     if(!l) { if(note_lock_applied[v])note_lock_restore(v); return; }
+ #if X0X_SYNTHONE_PATCH
+-    if (original_bass[v].kind == ORIGINAL_SOUND_SYNTHONE)
++    if (original_bass[v].kind == ORIGINAL_SOUND_SYNTHONE) {
+         s1_part_apply_cell(&original_bass[v].dsp.synthone, l->val);
++#if X0X_S1_EXTRA
++        s1_part_apply_extra(&original_bass[v].dsp.synthone, original_sound_edit_mask(l->val) & S1_EXTRA_MARK ?
++                            l->val+BASS_NOTE_USED : NULL);
++#endif
++    }
+ #endif
+     unsigned n=original_sound_count(original_bass[v].kind);
+     for(unsigned i=0;i<n;i++) {
+@@ -607,6 +674,11 @@
+             sj6_restore_authored_lfo(&original_bass[v], cell, extra);
+         sj6_restore_extra(&original_bass[v], cell, extra, 0);
+     }
++#endif
++#if X0X_S1_EXTRA
++    if (rc == ORIGINAL_RUNTIME_OK && original_bass[v].kind == ORIGINAL_SOUND_SYNTHONE &&
++        (original_sound_edit_mask(sound->v[T_303][v]) & S1_EXTRA_MARK))
++        s1_part_apply_extra(&original_bass[v].dsp.synthone, sound->v[T_303][S1_EXTRA_ROW+v]);
+ #endif
+     arp_adopt(v, sound, 0);
+     bass_named_preset[v] = (int16_t)bass_cell_preset(sound->v[T_303][v]);
+@@ -676,6 +748,10 @@
+         if (bass_tagged_cell_validate(cell, &tag, &bank)) return -5;
+ #if X0X_SUPERJ6_BUILTIN_INIT
+         if (bank == ORIGINAL_SOUND_JUNO && !original_sound_sj6_ext_valid(cell, target->sj6_extra[v]))
++            return -5;
++#endif
++#if X0X_S1_EXTRA
++        if (bank == ORIGINAL_SOUND_SYNTHONE && !original_sound_s1_extra_valid(cell, target->s1_extra[v]))
+             return -5;
+ #endif
+         if (!engine_bass_bank_available(v, bank)) return -2;
+@@ -751,6 +827,11 @@
+         if (sj6_flags & ORIGINAL_SJ6_AUTHORED_LFO_BIT)
+             memset(sj6_extra + ORIGINAL_SJ6_EXTRA_SIZE, 0, ORIGINAL_SJ6_LFO_AUTHORED_SIZE);
+ #endif
++#if X0X_S1_EXTRA
++        if (sound->v[T_303][v][29] == ORIGINAL_SOUND_SYNTHONE &&
++            (original_sound_edit_mask(sound->v[T_303][v]) & S1_EXTRA_MARK))
++            memset(sound->v[T_303][S1_EXTRA_ROW+v], 0, S1_EXTRA_BYTES);
++#endif
+         __builtin_memcpy(sound->v[T_303][v], next, sizeof next);
+         bass_tag_set(sound, v, bank, preset, 0);
+ #if X0X_SYNTHONE_PATCH
+--- a/firmware/src/app/original_sound.c
++++ b/firmware/src/app/original_sound.c
+@@ -373,8 +373,8 @@
+ #endif
+ #if X0X_SYNTHONE_PATCH
+     uint32_t mask = original_sound_edit_mask(cell);
+-    if (cell[29] == ORIGINAL_SOUND_SYNTHONE && (mask & (S1_PATCH_MASK | S1_LINK_MASK))) {
+-        if (mask & ~(S1_PATCH_MASK | S1_LINK_MASK | 7u)) return 0;
++    if (cell[29] == ORIGINAL_SOUND_SYNTHONE && (mask & (S1_PATCH_MASK | S1_LINK_MASK | S1_EXTRA_MARK))) {
++        if (mask & ~(S1_PATCH_MASK | S1_LINK_MASK | S1_EXTRA_MARK | 7u)) return 0;
+         if (cell[S1_LINK_BYTE] != ((mask & S1_LINK_MASK) != 0)) return 0;
+         for (unsigned i = 0; i < 22; ++i) {
+             if (cell[i] > 127u || (i >= 2 && i != S1_LINK_BYTE && !(mask & (UINT32_C(1) << i)) && cell[i])) return 0;
+@@ -432,6 +432,39 @@
+     original_sound_put_mask(cell, mask);
+     return 1;
+ }
++#if X0X_S1_EXTRA
++int original_sound_s1_extra_valid(const uint8_t *cell, const uint8_t *extra)
++{
++    if (!(original_sound_edit_mask(cell) & S1_EXTRA_MARK)) return 1;
++    unsigned mask = s1_extra_bits(extra);
++    if (!mask || mask >> S1_EXTRA_COUNT) return 0;
++    for (unsigned i = 0; i < S1_EXTRA_COUNT; ++i)
++        if (extra[2+i] > ((mask & (1u << i)) ? s1_patch_steps(S1_EXTRA_FIRST+i) : 0u))
++            return 0;
++    return 1;
++}
++
++int original_sound_s1_extra_available(const uint8_t *cell, const uint8_t *extra)
++{
++    if (original_sound_edit_mask(cell) & S1_EXTRA_MARK)
++        return original_sound_s1_extra_valid(cell, extra);
++    for (unsigned i = 0; i < S1_EXTRA_BYTES; ++i)
++        if (extra[i]) return 0;
++    return 1;
++}
++
++int original_sound_s1_extra_set(uint8_t *cell, uint8_t *extra, unsigned slot, unsigned position)
++{
++    unsigned i = slot - S1_EXTRA_FIRST;
++    if (i >= S1_EXTRA_COUNT || position > s1_patch_steps(slot) ||
++        cell[29] != ORIGINAL_SOUND_SYNTHONE || !original_sound_valid(cell) ||
++        !original_sound_s1_extra_available(cell, extra)) return 0;
++    extra[2+i] = (uint8_t)position;
++    extra[i >> 3] |= (uint8_t)(1u << (i & 7u));
++    original_sound_put_mask(cell, original_sound_edit_mask(cell) | S1_EXTRA_MARK);
++    return 1;
++}
++#endif
+ #if X0X_SYNTHONE_PATCH
+ int original_sound_s1_set(uint8_t cell[ORIGINAL_SOUND_BYTES], unsigned slot, unsigned position)
+ {
+--- a/firmware/src/app/original_sound.h
++++ b/firmware/src/app/original_sound.h
+@@ -96,6 +96,12 @@
+ int original_sound_init(uint8_t cell[ORIGINAL_SOUND_BYTES], unsigned kind, unsigned factory);
+ int original_sound_set(uint8_t cell[ORIGINAL_SOUND_BYTES], unsigned parameter, unsigned value);
+ #if X0X_SYNTHONE_PATCH
++#include "s1_patch.h"
++#if X0X_S1_EXTRA
++int original_sound_s1_extra_valid(const uint8_t *cell, const uint8_t *extra);
++int original_sound_s1_extra_available(const uint8_t *cell, const uint8_t *extra);
++int original_sound_s1_extra_set(uint8_t *cell, uint8_t *extra, unsigned slot, unsigned position);
++#endif
+ int original_sound_s1_set(uint8_t cell[ORIGINAL_SOUND_BYTES], unsigned slot, unsigned position);
+ #endif
+ #if X0X_SUPERJ6_BUILTIN_INIT
+--- a/firmware/src/app/s1_patch.h
++++ b/firmware/src/app/s1_patch.h
+@@ -13,6 +13,30 @@
+ /* Panel link is a project option outside the upstream factory ID space. */
+ enum { S1_LINK_BYTE = 6, S1_LINK_ID = 255, S1_FILTER_FIRST = 5, S1_AMP_FIRST = 9 };
+ #define S1_LINK_MASK (UINT32_C(1) << 21)
++#define X0X_S1_EXTRA (X0X_S1C && X0X_SYNTHONE_PATCH)
++#if X0X_S1_EXTRA
++/* Existing project sound rows 0/1 own the base cells, 2/3 ARP, 4/5 SJ6. */
++enum {
++    S1_EXTRA_ROW = 6, S1_EXTRA_FIRST = S1_PATCH_COUNT + 1,
++    S1_OSC1_MORPH = S1_EXTRA_FIRST, S1_OSC2_MORPH, S1_OSC2_LEVEL,
++    S1_SUB_LEVEL, S1_SUB_OCTAVE, S1_SUB_WAVE, S1_FM_LEVEL, S1_FM_INDEX, S1_NOISE_LEVEL,
++    S1_EXTRA_COUNT = S1_NOISE_LEVEL + 1 - S1_EXTRA_FIRST,
++    S1_EXTRA_BYTES = 2 + S1_EXTRA_COUNT
++};
++#define S1_EXTRA_MARK (UINT32_C(1) << 22)
++float s1c_morph_preview(float position, uint32_t phase);
++static inline unsigned s1_extra_bits(const uint8_t *data)
++{ return (unsigned)data[0] | ((unsigned)data[1] << 8); }
++#else
++#define S1_EXTRA_MARK 0u
++#endif
++static inline unsigned s1_patch_steps(unsigned slot)
++{
++#if X0X_S1_EXTRA
++    if (slot == S1_SUB_OCTAVE || slot == S1_SUB_WAVE) return 1;
++#endif
++    return slot == S1_PATCH_COUNT ? 1u : S1_PATCH_STEPS;
++}
+ #define S1_PATCH_MASK (((UINT32_C(1) << S1_PATCH_COUNT) - 1) << S1_PATCH_FIRST_BYTE)
+ 
+ typedef struct {
+--- a/firmware/src/app/s1c_part.c
++++ b/firmware/src/app/s1c_part.c
+@@ -72,6 +72,11 @@
+         char name[S1PACK_NAME_MAX];
+         if (s1pack_read(s1_part_pack, program, name, emit, e) < 0) { load_init(e); program = S1_PART_INIT; ok = 0; }
+     }
++#if X0X_S1_EXTRA
++    part->extra_live_mask = 0;
++    for (unsigned i = 0; i < S1_EXTRA_COUNT; ++i)
++        part->extra_factory[i] = e->t[s1_patch_at(S1_EXTRA_FIRST+i)->factory_id];
++#endif
+     fit_apply(e);
+     /* The engine clears its voices when mono changes; a program load is not a change. */
+     e->mono_prev = (uint8_t)e->t[P_MONO];
+@@ -126,13 +131,37 @@
+     {"AMP RELEASE", .004f, 2, 29, X0X_U_S},
+ };
+ 
++#if X0X_S1_EXTRA
++static const s1_patch_descriptor extra_parameters[S1_EXTRA_COUNT] = {
++    {"OSC 1 MORPH", 0, 1, 0, X0X_U_PCT},
++    {"OSC 2 MORPH", 0, 1, 1, X0X_U_PCT},
++    {"OSC 2 LEVEL", 0, 1, 6, X0X_U_PCT},
++    {"SUB LEVEL", 0, 1, 7, X0X_U_PCT},
++    {"SUB OCTAVE", 0, 1, 8, X0X_U_NONE},
++    {"SUB WAVE", 0, 1, 9, X0X_U_NONE},
++    {"FM LEVEL", 0, 1, 10, X0X_U_PCT},
++    {"FM INDEX", 0, 15, 11, X0X_U_NONE},
++    {"NOISE LEVEL", 0, .25f, 12, X0X_U_PCT},
++};
++#endif
++
+ const s1_patch_descriptor *s1_patch_at(unsigned slot)
+-{ return slot < S1_PATCH_COUNT ? &patch_parameters[slot] : NULL; }
++{
++    if (slot < S1_PATCH_COUNT) return &patch_parameters[slot];
++#if X0X_S1_EXTRA
++    if (slot - S1_EXTRA_FIRST < S1_EXTRA_COUNT) return &extra_parameters[slot-S1_EXTRA_FIRST];
++#endif
++    return NULL;
++}
+ 
+ int s1_patch_slot(unsigned id)
+ {
+     for (unsigned i = 0; i < S1_PATCH_COUNT; ++i)
+         if (patch_parameters[i].factory_id == id) return (int)i;
++#if X0X_S1_EXTRA
++    for (unsigned i = 0; i < S1_EXTRA_COUNT; ++i)
++        if (extra_parameters[i].factory_id == id) return (int)(S1_EXTRA_FIRST + i);
++#endif
+     return -1;
+ }
+ 
+@@ -147,8 +176,28 @@
+     if (slot == S1_PATCH_COUNT) return part->filter_link;
+     if (part->filter_link && slot >= S1_FILTER_FIRST && slot < S1_AMP_FIRST)
+         return part->filter_unlinked[slot - S1_FILTER_FIRST];
+-    return slot < S1_PATCH_COUNT ? part->e.t[patch_parameters[slot].factory_id] : 0.0f;
+-}
++    const s1_patch_descriptor *d = s1_patch_at(slot);
++    return d ? part->e.t[d->factory_id] : 0.0f;
++}
++
++#if X0X_S1_EXTRA
++void s1_part_apply_extra(s1_dry_part *part, const uint8_t *extra)
++{
++    unsigned next = extra ? s1_extra_bits(extra) : 0;
++    unsigned changed = next | part->extra_live_mask;
++    for (unsigned i = 0; changed; ++i, changed >>= 1) if (changed & 1u) {
++        const s1_patch_descriptor *d = &extra_parameters[i];
++        float value = part->extra_factory[i];
++        if (next & (1u << i)) {
++            unsigned position = extra[2+i];
++            value = s1_patch_steps(S1_EXTRA_FIRST+i) == 1 ? (float)position :
++                    s1_patch_physical(d, position);
++        }
++        (void)s1c_front_set(&part->e, d->factory_id, value);
++    }
++    part->extra_live_mask = (uint16_t)next;
++}
++#endif
+ 
+ void s1_part_apply_cell(s1_dry_part *part, const uint8_t cell[32])
+ {
+--- a/firmware/src/app/s1c_part.h
++++ b/firmware/src/app/s1c_part.h
+@@ -21,6 +21,10 @@
+     uint16_t program;          /* pack program, or S1_PART_INIT */
+     float detm;                /* program DETM: pitch bend scales it */
+ #if X0X_SYNTHONE_PATCH
++#if X0X_S1_EXTRA
++    float extra_factory[S1_EXTRA_COUNT]; /* exact pack values for note-lock transitions */
++    uint16_t extra_live_mask;
++#endif
+     float filter_unlinked[4];
+     uint8_t filter_link;
+ #endif
+@@ -45,7 +49,10 @@
+ #if X0X_SYNTHONE_PATCH
+ int s1_patch_slot(unsigned factory_id);
+ float s1_part_patch_value(const s1_dry_part *, unsigned slot);
+-void s1_part_apply_cell(s1_dry_part *, const uint8_t cell[32]);
++void s1_part_apply_cell(s1_dry_part *part, const uint8_t cell[32]);
++#if X0X_S1_EXTRA
++void s1_part_apply_extra(s1_dry_part *, const uint8_t *extra);
++#endif
+ #endif
+ int s1_part_param(s1_dry_part *part, unsigned id, float value);
+ int s1_part_note(s1_dry_part *part, unsigned key, unsigned velocity);
+--- a/firmware/src/app/sound_reset.c
++++ b/firmware/src/app/sound_reset.c
+@@ -139,6 +139,16 @@
+     if (sound_reset_empty(sound, target, voice, nvoice, tag))
+         return SOUND_RESET_NO_SAVED;
+     sound_reset_keep(pre, sound, target, voice, nvoice, tag);
++#if X0X_S1_EXTRA
++    uint8_t extra_pre[S1_EXTRA_BYTES];
++    uint8_t *extra = NULL;
++    if (tag >= 0 && sound->v[T_303][tag][29] == ORIGINAL_SOUND_SYNTHONE &&
++        (original_sound_edit_mask(sound->v[T_303][tag]) & S1_EXTRA_MARK)) {
++        extra = sound->v[T_303][S1_EXTRA_ROW + tag];
++        memcpy(extra_pre, extra, sizeof extra_pre);
++        memset(extra, 0, sizeof extra_pre);
++    }
++#endif
+     sound_reset_copy(sound, factory, target, voice, nvoice, tag);
+ #if SOUND_RESET_MUTANT_CLEAR_PAN
+     sound->v[T_MIX][part][MX_PAN] = 0;
+@@ -147,6 +157,12 @@
+     if (committed < 0) {
+         /* undo.c has cleared the pool and snapped the region. Put this part back. */
+         sound_reset_restore(sound, undo->shadow, pre, target, voice, nvoice, tag);
++#if X0X_S1_EXTRA
++        if (extra) {
++            memcpy(extra, extra_pre, sizeof extra_pre);
++            memcpy(undo->shadow + (extra - (uint8_t *)sound), extra_pre, sizeof extra_pre);
++        }
++#endif
+         return SOUND_RESET_BAD;
+     }
+     return SOUND_RESET_OK;
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -486,7 +486,7 @@
+     s1_patch_value owner;
+     if (!s1_read(r, &owner)) return;
+     if (relative) value += owner.position;
+-    int max = r.kind == R_S1LINK ? 1 : S1_PATCH_STEPS;
++    int max = (int)s1_patch_steps(r.kind == R_S1LINK ? S1_PATCH_COUNT : r.c);
+     value = value < 0 ? 0 : value > max ? max : value;
+     if (r.kind == R_S1LINK && value == owner.position) return;
+     unsigned id = r.kind == R_S1LINK ? S1_LINK_ID : s1_patch_at(r.c)->factory_id;
+@@ -654,6 +654,7 @@
+         static x0x_param_t pot = {0, S1_PATCH_STEPS, 0, 0};
+         if (!d) return 0;
+         pot.name = d->label;
++        pot.max = (uint8_t)s1_patch_steps(r.c);
+         return &pot;
+     }
+ #endif
+@@ -773,7 +774,7 @@
+     }
+     case R_S1PATCH: {
+         const s1_patch_descriptor *d = s1_patch_at(r.c);
+-        if (d && s1_draw_patch && bidx() == r.b)
++        if (d && r.c < S1_PATCH_COUNT && s1_draw_patch && bidx() == r.b)
+             return (int)((s1_draw_patch->physical[r.c] - d->minimum) *
+                          (S1_PATCH_STEPS / (d->maximum - d->minimum)) + .5f);
+         s1_patch_value value;
+@@ -1439,13 +1440,18 @@
+     if (r.kind == R_S1PATCH) {
+         const s1_patch_descriptor *patch = s1_patch_at(r.c);
+         float physical;
+-        if (s1_draw_patch && bidx() == r.b)
++        if (s1_draw_patch && bidx() == r.b && r.c < S1_PATCH_COUNT)
+             physical = s1_draw_patch->physical[r.c];
+         else {
+             s1_patch_value owner;
+             if (!s1_read(r, &owner)) { put_s(num, "--"); return; }
+             physical = owner.physical;
+         }
++#if X0X_S1_EXTRA
++        if (r.c == S1_SUB_OCTAVE) { put_s(num, physical > 0.f ? "-24" : "-12"); put_s(unit, "st"); return; }
++        if (r.c == S1_SUB_WAVE) { put_s(num, physical > 0.f ? "SQUARE" : "SINE"); return; }
++        if (r.c == S1_FM_INDEX) { put_d1(num, physical, 0); return; }
++#endif
+         unit_value(patch->unit, s1_patch_display(patch, physical), num, unit);
+         return;
+     }
+@@ -2070,6 +2076,12 @@
+                     for (int col=0; col<4; ++col)
+                         if (refs[col].kind != R_NONE) refs[col].kind = R_S1PATCH;
+                     if (row == 1) refs[3] = PR(R_S1LINK, T_303, b, 0);
++#if X0X_S1_EXTRA
++                    if (!row) {
++                        refs[2] = PR(R_S1PATCH,T_303,b,S1_OSC1_MORPH);
++                        refs[3] = PR(R_S1PATCH,T_303,b,S1_OSC2_MORPH);
++                    }
++#endif
+                 }
+ #endif
+ #if X0X_ARP_HOOKS
+@@ -2079,6 +2091,15 @@
+                              PR(R_ARP, ARP_F_MODE, b, 0), PR(R_ARP, ARP_F_SPEED, b, 0));
+ #endif
+                 add_page_refs(emit, titles[row],refs,0,0);
++#if X0X_S1_EXTRA
++                if (kind == ORIGINAL_SOUND_SYNTHONE && !row) {
++                    add_page(emit, "OSC MIX", PR(R_S1PATCH,T_303,b,S1_OSC2_LEVEL),
++                             PR(R_S1PATCH,T_303,b,S1_SUB_LEVEL), PR(R_S1PATCH,T_303,b,S1_SUB_OCTAVE),
++                             PR(R_S1PATCH,T_303,b,S1_SUB_WAVE));
++                    add_page(emit, "FM / NOISE", PR(R_S1PATCH,T_303,b,S1_FM_LEVEL),
++                             PR(R_S1PATCH,T_303,b,S1_FM_INDEX), PR(R_S1PATCH,T_303,b,S1_NOISE_LEVEL), NONE);
++                }
++#endif
+             }
+ #if X0X_ARP_HOOKS
+             if (kind == ORIGINAL_SOUND_JUNO && arp_engine(b))
+@@ -2756,6 +2777,13 @@
+                 memcmp(target.sj6_extra[v], proj.sound.v[T_303][ORIGINAL_SJ6_EXTRA_ROW + v],
+                        ORIGINAL_SJ6_EXT_USED)) undo_bass_mask |= 1u << v;
+ #endif
++#if X0X_S1_EXTRA
++            undo_peek(&undo, entry, cell + S1_EXTRA_ROW * NPARAMS_MAX, target.s1_extra[v], S1_EXTRA_BYTES);
++            if (((original_sound_edit_mask(target.cell[v]) |
++                  original_sound_edit_mask(proj.sound.v[T_303][v])) & S1_EXTRA_MARK) &&
++                memcmp(target.s1_extra[v], proj.sound.v[T_303][S1_EXTRA_ROW+v], S1_EXTRA_BYTES))
++                undo_bass_mask |= 1u << v;
++#endif
+             if(memcmp(target.cell[v],proj.sound.v[T_303][v],NPARAMS_MAX) ||
+                memcmp(&target.tag[v],&proj.sound.bass[v],sizeof target.tag[v]))undo_bass_mask|=1u<<v;
+         }
+@@ -3144,6 +3172,9 @@
+         bass_base_state_t next;
+         memcpy(next.cell, factory.v[T_303], sizeof next.cell);
+         memcpy(next.tag, factory.bass, sizeof next.tag);
++#if X0X_S1_EXTRA
++        memset(next.s1_extra, 0, sizeof next.s1_extra);
++#endif
+ #if X0X_SUPERJ6_BUILTIN_INIT
+         memcpy(next.sj6_extra, &factory.v[T_303][ORIGINAL_SJ6_EXTRA_ROW], sizeof next.sj6_extra);
+ #endif
+@@ -8081,6 +8112,22 @@
+     }
+ #endif
+ #if X0X_SYNTHONE_PATCH
++#if X0X_S1_EXTRA
++    if (r.kind == R_S1PATCH && (r.c == S1_OSC1_MORPH || r.c == S1_OSC2_MORPH)) {
++        const int top = y + 24;
++        const float position = (float)val * (1.f / S1_PATCH_STEPS);
++        int prev = 0;
++        for (int x = 0; x < 25; ++x) {
++            float sample = s1c_morph_preview(position, (uint32_t)x * UINT32_C(171798692));
++            int next = top + (int)((1.f - sample) * 3.f + .5f);
++            if (x) cv_line(cx - 13 + x, prev, cx - 12 + x, next, ink);
++            prev = next;
++        }
++        pref_value_of(r, val, num, unit);
++        strip_value(cx, y+35, num, unit, ink,0);
++        return;
++    }
++#endif
+     if (r.kind == R_S1PATCH && s1_draw_patch && r.c < 2) {
+         /* Both controls scale oscillator 1 in Sound's admitted INIT voice.
+          * These bars show that source's configured and gated amplitudes. */
+--- a/firmware/src/dsp/s1c/s1c.c
++++ b/firmware/src/dsp/s1c/s1c.c
+@@ -263,6 +263,12 @@
+     *ph += increment;
+     return y;
+ }
++#if X0X_SYNTHONE_PATCH
++/* Panel preview uses the same continuous morph with the note-dependent
++ * antialiasing disabled. It does not advance any playing oscillator. */
++float s1c_morph_preview(float position, uint32_t phase)
++{ return morph(&phase, 0.f, 0, position, 0); }
++#endif
+ static float sine_q(uint32_t ph) { return sinf((float)ph * (TWO_PI / Q32)); }
+ 
+ /* ---- filters ---- */
+--- /dev/null
++++ b/tests/host/ui_synthone_oscillator_editor_test.c
+@@ -0,0 +1,235 @@
++/* SPDX-License-Identifier: GPL-3.0-only */
++#define ARP_FIXTURE_MAIN retained_arp_main
++#include "ui_arp_engine_test.c"
++#include "../../firmware/src/dsp/s1c/s1c_front.h"
++#include "../../firmware/src/app/s1c_part.h"
++
++enum { SAMPLE_FRAMES = 4096 };
++static int32_t before[SAMPLE_FRAMES * 2], edited[SAMPLE_FRAMES * 2], reloaded[SAMPLE_FRAMES * 2];
++
++static void visit_page(const char *name)
++{
++    for (int i = 0; i < pg.n; ++i) {
++        if (!strcmp(pg.title[cur_page()], name)) return;
++        now_ms += 160;
++        enc_acc[EN_SELECT] = 1;
++        input();
++    }
++    CHECK(0 && "expected Synth One page");
++}
++
++static void select_s1(unsigned owner, unsigned preset)
++{
++    CHECK(!engine_bass_select_preset(owner, ORIGINAL_SOUND_SYNTHONE, preset, &proj.sound));
++    for (unsigned n = 0; n < 1024 && engine_bass_preset_pending(owner); ++n) render(1);
++    CHECK(engine_bass_bank(owner) == ORIGINAL_SOUND_SYNTHONE);
++    CHECK(engine_bass_preset_index(owner) == (int)preset);
++    build_pages();
++}
++
++static void start_held(unsigned owner)
++{
++    engine_init(proj.pat, &proj.arr.song, proj.arr.lane, &proj.sound);
++    engine_apply_sound(&proj.sound);
++    render(4);
++    engine_bass_on(owner, 57, 0, 0);
++    render(8);
++}
++
++static void capture_held(unsigned owner, int32_t *out)
++{
++    for (unsigned i = 0; i < SAMPLE_FRAMES; i += 256) engine_render(out + i * 2, 256);
++    engine_bass_off(owner);
++    render(8);
++}
++
++static void pcm(unsigned owner, int32_t *out)
++{
++    start_held(owner);
++    capture_held(owner, out);
++}
++
++static unsigned differences(const int32_t *a, const int32_t *b)
++{
++    unsigned n = 0;
++    for (unsigned i = 0; i < SAMPLE_FRAMES * 2; ++i) n += a[i] != b[i];
++    return n;
++}
++
++static void detent(unsigned knob, int delta)
++{
++    now_ms += 160;
++    turn((int)knob, delta);
++}
++
++static void layout(unsigned owner, const char *page, const char *const labels[4])
++{
++    visit_page(page);
++    for (unsigned i = 0; i < 4; ++i) {
++        pref_t ref = pg.r[cur_page()][i];
++        if (!labels[i]) { CHECK(ref.kind == R_NONE); continue; }
++        CHECK(ref.b == owner && pref_desc(ref));
++        CHECK(!strcmp(pref_desc(ref)->name, labels[i]));
++    }
++}
++
++#if X0X_S1_EXTRA && X0X_BASS_NOTE_SOUND
++static unsigned capture_lock(unsigned owner)
++{
++    engine_note_lock_capture(1);
++    CHECK(!engine_bass_note_capture(proj.arr.lane, 0, owner, 3, &proj.sound));
++    engine_note_lock_capture(0);
++    for (unsigned i = 0; i < NLANE; ++i) {
++        lane_t *lock = &proj.arr.lane[i];
++        if (lock->used && lock->t == BASS_NOTE_TARGET && lock->part == PART_303A + owner) {
++            CHECK(!engine_bass_note_validate(lock));
++            CHECK(!memcmp(lock->val+BASS_NOTE_USED, proj.sound.v[T_303][S1_EXTRA_ROW+owner], S1_EXTRA_BYTES));
++            lane_t invalid = *lock;
++            invalid.val[BASS_NOTE_USED+2+S1_SUB_WAVE-S1_EXTRA_FIRST] = 2;
++            CHECK(engine_bass_note_validate(&invalid));
++            return i;
++        }
++    }
++    CHECK(0);
++    return 0;
++}
++#endif
++
++static void journey(unsigned owner)
++{
++    static const unsigned ids[] = {0, 1, 6, 7, 8, 9, 10, 11, 12};
++    static const unsigned group[] = {0,0,1,1,1,1,2,2,2};
++    static const unsigned knob[] = {2,3,0,1,2,3,0,1,2};
++    static const char *const page[] = {"OSCILLATOR", "OSC MIX", "FM / NOISE"};
++    static const char *const labels[3][4] = {
++        {"OSC BALANCE", "OSC 1 LEVEL", "OSC 1 MORPH", "OSC 2 MORPH"},
++        {"OSC 2 LEVEL", "SUB LEVEL", "SUB OCTAVE", "SUB WAVE"},
++        {"FM LEVEL", "FM INDEX", "NOISE LEVEL", NULL}
++    };
++    setup(V_PART, PART_303A + owner);
++    proj.set.bt |= PROJ_BT_CLK_IN;
++    select_s1(owner, 0);
++    s1_patch_value a;
++    CHECK(engine_s1_patch_read(owner, 0, &a)); /* Red: compact oscillator morph has no editor. */
++    CHECK(a.physical == s1c_front_init(0));
++    uint8_t old_owner[ORIGINAL_SOUND_BYTES];
++    memcpy(old_owner, proj.sound.v[T_303][owner], sizeof old_owner);
++    uint8_t former_peer[ORIGINAL_SOUND_BYTES];
++    memcpy(former_peer, proj.sound.v[T_303][1-owner], sizeof former_peer);
++    for (unsigned i = 0; i < 3; ++i) {
++        layout(owner, page[i], labels[i]);
++        ui_frame();
++        const char *const capture[] = {"compact-oscillator", "compact-osc-mix", "compact-fm-noise"};
++        if (owner == 0) shot(capture[i]);
++    }
++#if X0X_S1_EXTRA
++    uint8_t peer_extra[S1_EXTRA_BYTES];
++    memcpy(peer_extra, proj.sound.v[T_303][S1_EXTRA_ROW+1-owner], sizeof peer_extra);
++#endif
++    pcm(owner, before);
++    for (unsigned i = 0; i < sizeof ids / sizeof ids[0]; ++i) {
++        visit_page(page[group[i]]);
++        CHECK(engine_s1_patch_read(owner, ids[i], &a));
++        CHECK(a.physical == s1c_front_init(ids[i]));
++        start_held(owner);
++        detent(knob[i], 0);
++        capture_held(owner, edited);
++        start_held(owner);
++        unsigned max = ids[i] == 8 || ids[i] == 9 ? 1 : 127;
++        detent(knob[i], a.position > max / 2 ? -127 : 127);
++        capture_held(owner, reloaded);
++        unsigned audible = differences(edited, reloaded);
++        CHECK(audible > 0);
++        printf("owner=%u source-id=%u held edit changed %u/%u samples\n", owner, ids[i], audible, SAMPLE_FRAMES*2);
++        s1_patch_value changed;
++        CHECK(engine_s1_patch_read(owner, ids[i], &changed));
++        CHECK(changed.physical != a.physical);
++    }
++    CHECK(!memcmp(former_peer, proj.sound.v[T_303][1-owner], sizeof former_peer));
++#if X0X_S1_EXTRA
++    CHECK(!memcmp(peer_extra, proj.sound.v[T_303][S1_EXTRA_ROW+1-owner], sizeof peer_extra));
++    sound_t bad = proj.sound;
++    bad.v[T_303][S1_EXTRA_ROW+owner][1] |= 0x80u;
++    CHECK(engine_bass_sound_validate(&bad));
++#endif
++    if (owner == 0) {
++        visit_page("OSCILLATOR"); ui_frame(); shot("compact-oscillator-edited");
++        visit_page("OSC MIX"); ui_frame(); shot("compact-osc-mix-edited");
++        visit_page("FM / NOISE"); ui_frame(); shot("compact-fm-noise-edited");
++    }
++    visit_page("FILTER ADSR");
++    detent(0, 42);
++    s1_patch_snapshot link_off, link_on;
++    CHECK(engine_s1_patch_snapshot(owner, &link_off));
++    visit_page("FILTER");
++    detent(3, 1);
++    CHECK(engine_s1_patch_snapshot(owner, &link_on) && link_on.filter_link);
++    CHECK(!memcmp(link_off.physical, link_on.physical, sizeof link_off.physical));
++    pcm(owner, edited);
++    unsigned changed = differences(before, edited);
++    CHECK(changed > SAMPLE_FRAMES);
++#if X0X_S1_EXTRA && X0X_BASS_NOTE_SOUND
++    unsigned locked = capture_lock(owner);
++#endif
++    sound_t saved = proj.sound;
++    CHECK(!project_save() && !project_load());
++    CHECK(!memcmp(&saved, &proj.sound, sizeof saved));
++    pcm(owner, reloaded);
++    CHECK(!differences(edited, reloaded));
++    CHECK(engine_s1_patch_read(owner, 0, &a));
++    CHECK(engine_s1_patch_snapshot(owner, &link_on) && link_on.filter_link);
++    CHECK(!memcmp(link_off.physical, link_on.physical, sizeof link_off.physical));
++#if X0X_S1_EXTRA && X0X_BASS_NOTE_SOUND
++    CHECK(!engine_bass_note_validate(&proj.arr.lane[locked]));
++    memset(&proj.arr.lane[locked], 0, sizeof proj.arr.lane[locked]);
++    engine_note_lock_refresh();
++#endif
++    select_s1(owner, 0);
++    CHECK(engine_s1_patch_set(owner, a.revision, 0, 0) == S1_EDIT_REJECTED);
++    CHECK(!memcmp(old_owner, proj.sound.v[T_303][owner], sizeof old_owner));
++    pcm(owner, reloaded);
++    CHECK(!differences(before, reloaded));
++    printf("owner=%u held scene changed %u/%u samples; reload and INIT replacement bit-exact\n",
++           owner, changed, SAMPLE_FRAMES * 2);
++}
++
++static void factory_journey(const char *pack_path)
++{
++    static uint8_t pack[0xf000];
++    FILE *input_file = fopen(pack_path, "rb");
++    CHECK(input_file);
++    unsigned n = (unsigned)fread(pack, 1, sizeof pack, input_file);
++    CHECK(fgetc(input_file) == EOF && !fclose(input_file) && s1_part_set_pack(pack, n) == 694);
++    for (unsigned owner = 0; owner < 2; ++owner) {
++        setup(V_PART, PART_303A+owner);
++        proj.set.bt |= PROJ_BT_CLK_IN;
++        unsigned preset = owner ? 694 : 129;
++        select_s1(owner, preset);
++        s1_patch_value original, current;
++        CHECK(engine_s1_patch_read(owner, 0, &original));
++        uint8_t original_cell[ORIGINAL_SOUND_BYTES];
++        memcpy(original_cell, proj.sound.v[T_303][owner], sizeof original_cell);
++        visit_page("OSCILLATOR");
++        detent(2, original.position > 64 ? -127 : 127);
++        CHECK(engine_s1_patch_read(owner, 0, &current) && current.physical != original.physical);
++        unsigned applied_position = current.position;
++        CHECK(!project_save() && !project_load());
++        pcm(owner, edited);
++        CHECK(engine_s1_patch_read(owner, 0, &current) && current.position == applied_position);
++        CHECK(engine_bass_preset_index(owner) == (int)preset);
++        select_s1(owner, preset);
++        CHECK(!memcmp(original_cell, proj.sound.v[T_303][owner], sizeof original_cell));
++        CHECK(engine_s1_patch_read(owner, 0, &current) && current.physical == original.physical);
++    }
++    printf("PASS factory editor owners A/B: program 129/694 identity and exact replacement, %u checks\n", checks);
++}
++
++int main(void)
++{
++    const char *pack_path = getenv("S1_EDITOR_TEST_PACK");
++    if (pack_path) { factory_journey(pack_path); return 0; }
++    journey(0);
++    journey(1);
++    printf("PASS Synth One compact oscillator panel %u checks\n", checks);
++    return 0;
++}

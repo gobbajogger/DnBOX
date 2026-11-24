@@ -1,0 +1,236 @@
+--- /dev/null
++++ b/tests/host/ui_superj6_hz_test.c
+@@ -0,0 +1,233 @@
++/* SPDX-License-Identifier: GPL-3.0-only */
++#define ARP_FIXTURE_MAIN retained_arp_main
++#include "ui_arp_engine_test.c"
++#include <math.h>
++
++#define TURN_Q40 (UINT64_C(1) << 40)
++static const unsigned ids[] = {88, 96, 100, 195, 196, 197};
++
++static uint32_t bits(float f)
++{
++    uint32_t u;
++    memcpy(&u, &f, sizeof u);
++    return u;
++}
++static float word(uint32_t u)
++{
++    float f;
++    memcpy(&f, &u, sizeof f);
++    return f;
++}
++static void select_owner(unsigned owner, unsigned preset)
++{
++    CHECK(!engine_bass_select_preset(owner, ORIGINAL_SOUND_JUNO, preset, &proj.sound));
++    for (unsigned n = 0; n < 1024 && engine_bass_preset_pending(owner); ++n) render(1);
++    CHECK(engine_bass_bank(owner) == ORIGINAL_SOUND_JUNO && !engine_bass_preset_pending(owner));
++}
++static juno6_lfo_view lfo(unsigned owner, unsigned index)
++{
++    juno6_lfo_view out;
++    CHECK(engine_superj6_lfo_view(owner, index, &out));
++    return out;
++}
++static void visit_lfo(void)
++{
++    build_pages();
++    for (unsigned i = 0; i < (unsigned)pg.n; ++i) {
++        if (!strcmp(pg.title[cur_page()], "LFO HZ")) return;
++        now_ms += 160;
++        enc_acc[EN_SELECT] = 1;
++        input();
++    }
++    CHECK(0);
++}
++static void move_rate(unsigned index, int position)
++{
++    pref_t ref = pg.r[cur_page()][index];
++    CHECK(ref.kind == R_SJ6KNOB && ref.c == SJ6_LFO1_RATE + index);
++    int detents = position - pref_get(ref);
++    now_ms += 160u + (unsigned)abs(detents) * 70u;
++    enc_acc[EN_K1 + index] = detents;
++    input();
++    CHECK(pref_get(ref) == position && project_save() == -8);
++}
++static uint64_t advance(uint64_t phase, float hz)
++{
++    uint32_t step = (uint32_t)(hz * ((float)TURN_Q40 / 44100.f) + .5f);
++    return (phase + (uint64_t)step * 256u) & (TURN_Q40 - 1u);
++}
++static void sounding_block(void)
++{
++    int32_t pcm[512], nonzero = 0;
++    engine_render(pcm, 256);
++    for (unsigned i = 0; i < 512; ++i) nonzero |= pcm[i];
++    CHECK(nonzero);
++}
++static void check_panel(unsigned owner)
++{
++    const int positions[] = {32, 64, 127};
++    setup(V_PART, PART_303A + owner);
++    proj.set.bt |= PROJ_BT_CLK_IN;
++    select_owner(owner, 0);
++    select_owner(1-owner, 0);
++    uint8_t peer[NPARAMS_MAX];
++    memcpy(peer, proj.sound.v[T_303][1-owner], sizeof peer);
++    visit_lfo();
++    engine_bass_on(owner, 57, 0, 0);
++    render(8);
++    float hz[3];
++    for (unsigned i = 0; i < 3; ++i) {
++        CHECK(!lfo(owner, i).present);
++        move_rate(i, positions[i]);
++        CHECK(!lfo(owner, i).present);
++        sounding_block();
++        juno6_lfo_view after = lfo(owner, i);
++        float raw = positions[i] * (1.f / 127.f);
++        CHECK(after.present == 3u && after.mode == 1.f && bits(after.rate) == bits(raw));
++        CHECK(fabsf(after.hz - 16.f * powf(raw, 3.33f)) < .001f);
++        CHECK(after.phase == advance(0, after.hz) && after.phase);
++        hz[i] = after.hz;
++        CHECK(!lfo(1-owner, i).present);
++        printf("owner=%u LFO%u SMK position=%d Hz=%.8f phase=%llu after 256 sounding frames\n",
++               owner, i + 1u, positions[i], hz[i], (unsigned long long)after.phase);
++    }
++    juno6_lfo_view prior = lfo(owner, 0);
++    move_rate(0, 1);
++    sounding_block();
++    juno6_lfo_view slow = lfo(owner, 0);
++    CHECK(slow.phase != prior.phase && slow.phase == advance(prior.phase, slow.hz));
++    move_rate(0, 0);
++    render(1);
++    uint64_t stopped = lfo(owner, 0).phase;
++    render(2);
++    CHECK(lfo(owner, 0).phase == stopped);
++    move_rate(0, positions[0]);
++    render(1);
++    engine_bass_off(owner);
++    render(256);
++    CHECK(!ui_project_save());
++    sound_t saved = proj.sound;
++    CHECK(!project_load() && !memcmp(&saved, &proj.sound, sizeof saved));
++    engine_apply_sound(&proj.sound);
++    for (unsigned i = 0; i < 3; ++i) CHECK(lfo(owner, i).hz == hz[i] && !lfo(owner, i).phase);
++    CHECK(!memcmp(peer, proj.sound.v[T_303][1-owner], sizeof peer));
++    select_owner(owner, 1);
++    for (unsigned i = 0; i < 3; ++i) CHECK(!lfo(owner, i).present);
++    printf("owner=%u Hz panel save/reload, phase continuity, zero, smallest detent, peer and replacement PASS\n", owner);
++}
++static sj6_factory_row factory_row(const uint32_t input[6], unsigned mask)
++{
++    const unsigned core_ids[] = {119, 120, 121, 122, 0, 82, 83};
++    sj6_factory_row row = {0};
++    for (unsigned i = 0; i < sizeof core_ids / sizeof *core_ids; ++i)
++        sj6_factory_add_word(&row, core_ids[i], UINT32_C(0x3f000000));
++    for (unsigned i = 0; i < 6; ++i) if (mask & (1u << i)) {
++        sj6_factory_add_word(&row, ids[i], input[i]);
++        sj6_factory_add_word(&row, ids[i], UINT32_C(0x7fc00000));
++    }
++    return row;
++}
++static void exact(unsigned owner, const uint32_t words[6], unsigned mask)
++{
++    const uint8_t *cell = proj.sound.v[T_303][owner];
++    const uint8_t *extra = proj.sound.v[T_303][ORIGINAL_SJ6_EXTRA_ROW + owner];
++    juno6_lfo_words stored;
++    CHECK(!!(original_sound_edit_mask(cell) & ORIGINAL_SJ6_AUTHORED_LFO_BIT) == !!mask);
++    if (mask) CHECK(original_sound_sj6_lfo_words(extra, &stored) && stored.present == mask);
++    for (unsigned i = 0; i < 3; ++i) {
++        juno6_lfo_view v = lfo(owner, i);
++        unsigned have_rate = (mask >> i) & 1u, have_mode = (mask >> (i + 3u)) & 1u;
++        CHECK(v.present == (have_rate | (have_mode << 1)));
++        if (have_rate) CHECK(bits(v.rate) == words[i] && bits(stored.word[i]) == words[i]);
++        if (have_mode) CHECK(bits(v.mode) == words[3+i] && bits(stored.word[3+i]) == words[3+i]);
++        if (!have_rate || !have_mode || v.mode == 0.f) CHECK(v.hz == 0.f);
++    }
++}
++static void check_authored(unsigned owner)
++{
++    const uint32_t words[] = {0x80000000, 0x3eb7a15c, 0x3f267aff, 0x3f800000, 0x80000000, 0x3f800000};
++    select_owner(owner, 0);
++    sj6_factory_row row = factory_row(words, 63);
++    CHECK(engine_superj6_factory_load(owner, &row));
++    CHECK(project_save() == -8);
++    render(1);
++    exact(owner, words, 63);
++    CHECK(!project_save() && !project_load());
++    engine_apply_sound(&proj.sound);
++    exact(owner, words, 63);
++
++    ui.part = (uint8_t)(PART_303A + owner);
++    set_view(V_PART);
++    visit_lfo();
++    engine_bass_on(owner, 57, 0, 0);
++    render(4);
++    juno6_lfo_view sync = lfo(owner, 1);
++    CHECK(!sync.hz && !sync.phase && bits(sync.mode) == UINT32_C(0x80000000));
++    move_rate(1, 60);
++    sounding_block();
++    CHECK(lfo(owner, 1).hz > 0.f && lfo(owner, 1).phase);
++    CHECK(bits(lfo(owner, 2).rate) == words[2]);
++    juno6_lfo_words saved;
++    CHECK(original_sound_sj6_lfo_words(proj.sound.v[T_303][ORIGINAL_SJ6_EXTRA_ROW + owner], &saved));
++    CHECK(bits(saved.word[1]) == words[1] && bits(saved.word[4]) == words[4]);
++    engine_bass_off(owner);
++    render(256);
++    CHECK(!project_save() && !project_load());
++    engine_apply_sound(&proj.sound);
++    render(1); /* Complete the existing AMP2 recall mailbox before a new factory transaction. */
++    CHECK(lfo(owner, 1).mode == 1.f && lfo(owner, 1).rate == 60.f * (1.f / 127.f));
++    CHECK(bits(lfo(owner, 2).rate) == words[2]);
++
++    row.value[SJ6_ROW_LFO_HZ] = .5f;
++    CHECK(!engine_superj6_factory_load(owner, &row));
++    CHECK(!engine_superj6_factory_pending());
++    row = factory_row(words, 2u | 8u);
++    CHECK(engine_superj6_factory_load(owner, &row));
++    render(1);
++    exact(owner, words, 2u | 8u);
++    row = factory_row(words, 63);
++    CHECK(engine_superj6_factory_load(owner, &row));
++    select_owner(owner, 1);
++    exact(owner, words, 0);
++    printf("owner=%u first-match, signed zero, missing mode, overrides across reload and stale factory cancellation PASS\n", owner);
++}
++#ifdef SJ6_HZ_AUTHORED
++#include "rate_words.inc"
++static void check_bank(void)
++{
++    float max_error = 0.f;
++    unsigned programs = sizeof authored_rates / sizeof authored_rates[0];
++    CHECK(programs == 640);
++    for (unsigned p = 0; p < programs; ++p) {
++        unsigned owner = p & 1u;
++        sj6_factory_row row = factory_row(authored_rates[p], 63);
++        CHECK(engine_superj6_factory_load(owner, &row));
++        render(1);
++        exact(owner, authored_rates[p], 63);
++        for (unsigned i = 0; i < 3; ++i) if (word(authored_rates[p][3+i]) == 1.f) {
++            float want = 16.f * powf(word(authored_rates[p][i]), 3.33f);
++            float error = fabsf(lfo(owner, i).hz - want);
++            if (error > max_error) max_error = error;
++        }
++    }
++    CHECK(max_error < .001f);
++    CHECK(!project_save() && !project_load());
++    engine_apply_sound(&proj.sound);
++    exact(0, authored_rates[638], 63);
++    exact(1, authored_rates[639], 63);
++    printf("authored programs=%u exact binary32 words=%u max Hz error vs binary32 libm=%.9f PASS\n",
++           programs, programs * 6u, max_error);
++}
++#endif
++int main(void)
++{
++    check_panel(0);
++    check_panel(1);
++    check_authored(0);
++    check_authored(1);
++#ifdef SJ6_HZ_AUTHORED
++    check_bank();
++#endif
++    printf("PASS SuperJ6 Hz clocks %u checks\n", checks);
++    return 0;
++}
