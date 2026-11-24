@@ -1,0 +1,5 @@
+both scalar laws all 128 stops, zero-depth PCM and 13-frame partition PASS, synth bytes=2968
+active vibrato plus LFO2 PWM: identical PCM over 8192 frames in both partitions
+owner=0 held depth_changed=8191 rate_changed=8174 of 8192 frames, peer=0 and reload PASS
+owner=1 held depth_changed=8191 rate_changed=8174 of 8192 frames, peer=0 and reload PASS
+SuperJ6 vibrato 1766 checks
