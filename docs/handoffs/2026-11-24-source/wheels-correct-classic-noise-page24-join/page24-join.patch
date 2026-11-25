@@ -1,0 +1,151 @@
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -2092,7 +2092,7 @@
+ }
+ 
+ /* ===================================================================== pages === */
+-#define MAXPAGES 23
++#define MAXPAGES 24
+ /* page groups: whose values a page holds (the SEL list's headers, the header's colour) */
+ enum { GR_NONE, GR_TRACK, GR_TMIX, GR_KIT, GR_PAT, GR_SOUND, GR_MORE,
+        GR_MIDI, GR_AUDIO, GR_KEYS, GR_PROJECT, GR_SYSTEM, GR_BT };   /* (the last six: GLO's sections) */
+@@ -2100,12 +2100,22 @@
+ typedef struct {
+     pref_t r[MAXPAGES][4];
+     uint8_t title[MAXPAGES];
+-    uint8_t group[MAXPAGES];
+-    int n;
+-    int nmore;
++    uint8_t packed_group[(MAXPAGES + 1u) / 2u];
++    uint8_t n, nmore;
+ } pages_t;
++_Static_assert(GR_BT < 16, "page group uses one nibble");
++static inline uint8_t page_group(const pages_t *p, unsigned page)
++{
++    return (uint8_t)((p->packed_group[page >> 1] >> ((page & 1u) * 4u)) & 15u);
++}
++static inline void page_group_set(pages_t *p, unsigned page, unsigned group)
++{
++    const unsigned shift = (page & 1u) * 4u;
++    uint8_t *const value = &p->packed_group[page >> 1];
++    *value = (uint8_t)((*value & ~(15u << shift)) | (group << shift));
++}
+ enum { PAGE_REFS = MAXPAGES * 4 };
+-_Static_assert(sizeof(pref_t) == 4 && sizeof(pages_t) <= 472,
++_Static_assert(sizeof(pref_t) == 4 && sizeof(pages_t) <= 424,
+                "page materialization must fit the original POOL storage");
+ _Static_assert(MAXMORE <= PAGE_REFS, "page and MORE refs share a bounded matrix");
+ static pages_t pg X0X_POOL;
+@@ -2276,7 +2286,7 @@
+         text[i] = 0;
+         query->n++;
+     } else {
+-        pages->group[pages->n] = emit->group;
++        page_group_set(pages, pages->n, emit->group);
+         pages->n++;
+     }
+ }
+@@ -2979,7 +2989,7 @@
+ /* a drum machine's page of the selected track's own sound (not the whole kit's: SENDS, PART, KIT) */
+ static int track_page(void)
+ {
+-    int g = pg.group[cur_page()];
++    int g = page_group(&pg, cur_page());
+     return ui.view == V_PART && is_drum() && (g == GR_TRACK || g == GR_TMIX);
+ }
+ 
+@@ -2988,7 +2998,7 @@
+  * GLOBAL is a list of its own. SELECT moves, ALGORITHM changes, SEL runs an action. */
+ #define LIST_MAX 92
+ typedef struct { uint8_t x, y, z; } list_ref_t;
+-_Static_assert(R_NOTELOCK < 128 && sizeof(pages_t) + LIST_MAX * sizeof(list_ref_t) == 700,
++_Static_assert(R_NOTELOCK < 128 && sizeof(pages_t) + LIST_MAX * sizeof(list_ref_t) <= 700,
+                "pages plus list must not grow the original POOL footprint");
+ static list_ref_t list_rows[LIST_MAX] X0X_POOL;
+ static pref_t list_ref(unsigned i)
+@@ -3045,12 +3055,12 @@
+     int p, k, last = -1, groups = 0;
+     ui.list_n = 0;
+     for (p = 0; p < pg.n; p++)
+-        if (pg.group[p] != (p ? pg.group[p - 1] : GR_NONE))
++        if (page_group(&pg, p) != (p ? page_group(&pg, p - 1) : GR_NONE))
+             groups++;
+     for (p = 0; p < pg.n; p++) {
+-        if (groups > 1 && pg.group[p] != last && ui.list_n < LIST_MAX)
+-            list_push(PR(R_HDR, pg.group[p], 0, 0));
+-        last = pg.group[p];
++        if (groups > 1 && page_group(&pg, p) != last && ui.list_n < LIST_MAX)
++            list_push(PR(R_HDR, page_group(&pg, p), 0, 0));
++        last = page_group(&pg, p);
+         for (k = 0; k < 4; k++)
+             if (ui.view != V_FX || p || k < 2)         /* low cut / return shortcuts keep their MORE rows */
+                 list_add(pg.r[p][k]);
+@@ -10669,7 +10679,7 @@
+ /* the knob row's tag: whose knobs these are (BD, 909 KIT, P3 PATTERN, 909 MIX: BD, 303A STEP 5) */
+ static UI_DRAW void knob_tag(char *t)
+ {
+-    int g = pg.group[cur_page()], dm = drum_mix_page();
++    int g = page_group(&pg, cur_page()), dm = drum_mix_page();
+     const char *ti = page_title(&pg, cur_page());
+     if (lock_step() >= 0) {
+         put_i(put_s(put_s(t, is_drum() ? engine_voice_name(ui.part == PART_909 ? T_909 : T_808, ui.sel[ui.part])
+--- a/firmware/src/app/ui_drum_voice.inc
++++ b/firmware/src/app/ui_drum_voice.inc
+@@ -472,7 +472,7 @@
+     if (role == DG_ACCENT) {
+         /* The focused standard KIT slot uses the shared strike peaks. */
+         if (sx == DV_ACTIVE_SINGLE_SCALE && sy == DV_ACTIVE_SINGLE_SCALE &&
+-            pg.n && pg.group[cur_page()] == GR_KIT &&
++            pg.n && page_group(&pg, cur_page()) == GR_KIT &&
+             ((r.a == T_808 && ui.sel[PART_808] != D8_CP && name_is(d,"Accent")) ||
+              (r.a == T_909 && ui.sel[PART_909] == DR_BD && r.b == NDRUM && r.c == 1))) {
+             dg_accent((int)ox+4,(int)oy,43,22,q,live,e,col);
+@@ -789,7 +789,7 @@
+     int v = ui.sel[ui.part];
+     int page = cur_page();
+     int bd_amp = -1;
+-    int kick_kit = t == T_909 && v == DR_BD && pg.group[page] == GR_KIT;
++    int kick_kit = t == T_909 && v == DR_BD && page_group(&pg, page) == GR_KIT;
+     int n = pg.n;
+     int p, y, active;
+     uint16_t col = part_col();
+--- a/tests/host/smc_ui_test.c
++++ b/tests/host/smc_ui_test.c
+@@ -423,7 +423,7 @@
+     ui.sel[t == T_909 ? 0 : 1] = (uint8_t)v;
+     build_pages();
+     for (page = 0; page < pg.n; page++) {
+-        if (pg.group[page] != GR_TRACK) continue;
++        if (page_group(&pg, page) != GR_TRACK) continue;
+         for (k = 0; k < 4; k++) {
+             pref_t r = pg.r[page][k];
+             if (r.kind == R_NONE) continue;
+@@ -452,7 +452,7 @@
+     int kit = t == T_808, rows = 0, amp = expected_amp_id(t,v);
+     TRACK_CHECK(v >= 0 && v < 11);
+     for (int page = 0; page < pg.n; page++) {
+-        if (pg.group[page] != GR_TRACK) continue;
++        if (page_group(&pg, page) != GR_TRACK) continue;
+         TRACK_CHECK(rows < (amp >= 0 ? 2 : 1));
+         for (int k = 0; k < 4; k++) {
+             int id = rows == 0 ? ids[kit][v][k] : k == 0 ? amp : -1;
+@@ -482,7 +482,7 @@
+             check_track_page_contract(t, v);
+             for (page = 0; page < pg.n; page++) {
+                 int hole = 0;
+-                if (pg.group[page] != GR_TRACK) continue;
++                if (page_group(&pg, page) != GR_TRACK) continue;
+                 for (k = 0; k < 4; k++) {
+                     pref_t r = pg.r[page][k];
+                     int rank = 100, n;
+--- a/tests/host/ui_page_budget_test.c
++++ b/tests/host/ui_page_budget_test.c
+@@ -31,7 +31,7 @@
+             *page_of(ui.view)=p;ui.touched=-1;ui.msg_until=0;ui_frame();
+             printf("frame %d %u %08lx\n",ui.part,p,frame_hash());
+         }
+-        printf("page %d %u %s %u ",ui.view,p,TITLE(p),pg.group[p]);
++        printf("page %d %u %s %u ",ui.view,p,TITLE(p),page_group(&pg, p));
+         for(unsigned k=0;k<4;k++)refs(pg.r[p][k]);
+         smc_page_set(p);
+         printf(" smc ");for(unsigned k=0;k<8;k++)refs(smc_knob_target(k));

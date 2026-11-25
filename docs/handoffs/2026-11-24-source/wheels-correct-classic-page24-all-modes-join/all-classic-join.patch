@@ -1,0 +1,173 @@
+--- a/firmware/src/app/original_presets.inc
++++ b/firmware/src/app/original_presets.inc
+@@ -654,27 +654,36 @@
+ }
+ static int sj6_classic_i_active(const sound_t *sound,unsigned v) {
+  return live137(sound,v) && original_bass[v].kind==ORIGINAL_SOUND_JUNO &&
+-   original_bass[v].dsp.juno.chorus.factory_mode==JUNO6_CHORUS_I;
++   original_bass[v].dsp.juno.chorus.factory_mode>=JUNO6_CHORUS_I &&
++   original_bass[v].dsp.juno.chorus.factory_mode<=JUNO6_CHORUS_BOTH;
+ }
+ static void sj6_classic_i_apply(const sound_t *sound,unsigned v) {
+  original_runtime_part *p=&original_bass[v];
+- if(!sj6_classic_i_active(sound,v))return;
++ if(!sj6_classic_i_active(sound,v)) {
++  if (p->classic_i_authored) classic_wrapper_start(&p->classic_i_effect,0);
++  return;
++ }
++ const unsigned mode=p->dsp.juno.chorus.factory_mode-JUNO6_CHORUS_OFF;
+  const uint8_t *row=read137(sound,v)+SJ6_CLASSIC_I_BYTE;
+  if(!sj6_classic_i_bytes_valid(row))return;
+  const int set=row[0]||row[1]||row[2];
+  if(set && !p->classic_i_authored) {
+-  // Exact classic-I app default projection; AU old feedback Init 0.
+-  static const float init[4]={.51299995f,.1900618f,0.f,.505f};
+-  classic_wrapper_prepare(&p->classic_i_effect,init,10000u);
+-  classic_wrapper_start(&p->classic_i_effect,1);
++  /* Cold-created delay/ramp state, seeded by exact active mode defaults. */
++  classic_mode_i *fx=&p->classic_i_effect;
++  const float zero[4]={0.f,0.f,0.f,0.f};
++  classic_wrapper_prepare(fx,zero,10000u);
++  (void)classic_wrapper_enter(fx,mode);
++  for(unsigned i=0;i<4;++i)
++   fx->p[i].target=fx->p[i].current=fx->p[i].initial=fx->p[i].pending;
+  }
+  p->classic_i_authored=(uint8_t)!!set;
+  if(set) {
+-  const float raw[3]={(float)pow(.513/16.,1./3.33),(float)(.97*.202),.505f};
+-  for(unsigned i=0;i<3;++i) {
+-   const float v=row[i]&&row[i]!=SJ6_CLASSIC_I_DEFAULT?(row[i]-1u)/127.f:raw[i];
+-   (void)classic_wrapper_command(&p->classic_i_effect,42+i,v);
+-  }
++  /* Original mode default transaction first; then restore authored overrides.
++   * Pending targets latch at the render quantum, preserving existing ramps. */
++  (void)classic_wrapper_enter(&p->classic_i_effect,mode);
++  for(unsigned i=0;i<3;++i)
++   if(row[i] && row[i]!=SJ6_CLASSIC_I_DEFAULT)
++    (void)classic_wrapper_command(&p->classic_i_effect,42+i,(row[i]-1u)/127.f);
+  }
+ }
+ int sj6_classic_i_choose(unsigned v,unsigned slot,unsigned pos) {
+@@ -1188,19 +1197,15 @@
+         original_sound_sj6_chorus_store(cell, chorus->factory_mode);
+         if (!prior || chorus_turns >> 2) original_runtime_sj6_chorus(&original_bass[v], cell);
+ #if X0X_SJ6_CLASSIC_I_PROBE
+-        if(prior!=JUNO6_CHORUS_I && chorus->factory_mode==JUNO6_CHORUS_I &&
++        if(prior!=chorus->factory_mode && (chorus_turns&3u) &&
+             live137(sound,v) && s1_typed_tuple_editable()) {
+-            /* Source mode entry restores the source defaults, not stale detents. */
+-            uint8_t *typed=slot137(sound,v)+SJ6_CLASSIC_I_BYTE;
+-            memset(typed,SJ6_CLASSIC_I_DEFAULT,SJ6_CLASSIC_I_COUNT);
++            if(chorus->factory_mode>=JUNO6_CHORUS_I) {
++                /* One original active trio; new mode reapplies its defaults. */
++                uint8_t *typed=slot137(sound,v)+SJ6_CLASSIC_I_BYTE;
++                memset(typed,SJ6_CLASSIC_I_DEFAULT,SJ6_CLASSIC_I_COUNT);
++            }
+             sj6_classic_i_apply(sound,v);
+         }
+-#if defined(X0X_HOST) && defined(X0X_SJ6_CLASSIC_SWITCH_WITNESS)
+-        if (prior!=chorus->factory_mode && (chorus_turns&3u) &&
+-            live137(sound,v) && s1_typed_tuple_editable() && original_bass[v].classic_i_authored)
+-            (void)classic_wrapper_enter(&original_bass[v].classic_i_effect,
+-                                        chorus->factory_mode-JUNO6_CHORUS_OFF);
+-#endif
+ #endif
+     }
+     unsigned vibrato_turns = (mask >> SJ6_VIBRATO_DEPTH) & 3u;
+--- a/firmware/src/app/original_runtime.c
++++ b/firmware/src/app/original_runtime.c
+@@ -911,11 +911,7 @@
+             juno6_alt3_process(&p->dsp.juno.synth,left,right,frames); /* after HPF, before downstream FX */
+ #endif
+ #if X0X_SJ6_CLASSIC_I_PROBE
+-            if(p->classic_i_authored && (p->dsp.juno.chorus.factory_mode==JUNO6_CHORUS_I
+-#if defined(X0X_HOST) && defined(X0X_SJ6_CLASSIC_SWITCH_WITNESS)
+-               || p->dsp.juno.chorus.factory_mode>=JUNO6_CHORUS_OFF
+-#endif
+-              )) {
++            if(p->classic_i_authored && p->dsp.juno.chorus.factory_mode>=JUNO6_CHORUS_OFF) {
+                 classic_wrapper_process(&p->classic_i_effect,p->classic_i_sample,left,right,frames);
+             } else
+ #endif
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -45,7 +45,7 @@
+     PT_CH,
+     PT_CHORUS,
+ #if X0X_SJ6_CLASSIC_I_PROBE
+-    PT_CHORUS_I_PARAMS,
++    PT_CHORUS_I_PARAMS, PT_CHORUS_II_PARAMS, PT_CHORUS_BOTH_PARAMS,
+ #endif
+     PT_CP,
+     PT_CR,
+@@ -556,9 +556,13 @@
+ enum { R_SJ6CLASSIC_I = R_NOTELOCK+14 };
+ extern int sj6_classic_i_choose(unsigned,unsigned,unsigned);
+ extern void sj6_classic_i_undo(unsigned);
++static unsigned classic_layout_mode;
+ static int ui_classic_i(unsigned v) {
+-    return live137(&proj.sound,v) &&
+-        original_sound_sj6_chorus(proj.sound.v[T_303][v])==JUNO6_CHORUS_I;
++    if (!live137(&proj.sound,v)) return 0;
++    unsigned mode=original_sound_sj6_chorus(proj.sound.v[T_303][v]);
++    const uint8_t *row=read137(&proj.sound,v)+SJ6_CLASSIC_I_BYTE;
++    return mode>=JUNO6_CHORUS_I && mode<=JUNO6_CHORUS_BOTH &&
++        (row[0] || row[1] || row[2]) ? (int)mode : 0;
+ }
+ #endif
+ #if defined(X0X_S1_AUTOPAN_PROBE) && X0X_S1_AUTOPAN_PROBE
+@@ -1053,7 +1057,13 @@
+ #if X0X_SJ6_CLASSIC_I_PROBE
+     case R_SJ6CLASSIC_I: {
+         unsigned v=read137(&proj.sound,r.b)[SJ6_CLASSIC_I_BYTE+r.c];
+-        return v&&v!=SJ6_CLASSIC_I_DEFAULT?(int)(v-1u):pref_desc(r)->def;
++        if(v && v!=SJ6_CLASSIC_I_DEFAULT)return (int)(v-1u);
++        unsigned m=ui_classic_i(r.b);
++        /* Nearest actual detent for the first relative move from the exact
++         * default sentinel; the receiver itself does not quantize defaults. */
++        static const uint8_t stops[3][3]={{45,25,64},{53,25,64},{65,25,70}};
++        return m>=JUNO6_CHORUS_I && m<=JUNO6_CHORUS_BOTH && r.c<3 ?
++            stops[m-JUNO6_CHORUS_I][r.c] : pref_desc(r)->def;
+     }
+ #endif
+     case R_S1A4: return live_s1_mod(&proj.sound,r.b)?(int)s1_a4_hz(read137(&proj.sound,r.b)[S1_A4_BYTE])-410:30;
+@@ -2141,6 +2151,8 @@
+     [PT_CHORUS] = "CHORUS",
+ #if X0X_SJ6_CLASSIC_I_PROBE
+     [PT_CHORUS_I_PARAMS] = "CHORUS I",
++    [PT_CHORUS_II_PARAMS] = "CHORUS II",
++    [PT_CHORUS_BOTH_PARAMS] = "CHORUS BOTH",
+ #endif
+ #if defined(X0X_HOST) && defined(X0X_SJ6_DELAY_WITNESS)
+     [PT_SJ6_DELAY] = "DELAY",
+@@ -2647,7 +2659,8 @@
+         if(pages[row].title==PT_CHORUS && kind==R_SJ6KNOB && ui_classic_i(owner)) {
+             refs[2]=NONE;refs[3]=NONE;
+             add_page_refs(emit,pages[row].title,refs,0,0);
+-            add_page(emit,PT_CHORUS_I_PARAMS,PR(R_SJ6CLASSIC_I,T_303,owner,0),
++            unsigned mode=ui_classic_i(owner);
++            add_page(emit,PT_CHORUS_I_PARAMS+mode-JUNO6_CHORUS_I,PR(R_SJ6CLASSIC_I,T_303,owner,0),
+                 PR(R_SJ6CLASSIC_I,T_303,owner,1),PR(R_SJ6CLASSIC_I,T_303,owner,2),NONE);
+             continue;
+         }
+@@ -2939,6 +2952,9 @@
+         pg.r[oldpage][0].kind==R_BENGINE && pg.r[oldpage][0].b==b;
+ #endif
+     describe_pages(&pg, 0, ui.view, ui.part, ui.mixsel, ui.sel);
++#if X0X_SJ6_CLASSIC_I_PROBE
++    classic_layout_mode=ui.view==V_PART && is_303() ? ui_classic_i(bidx()) : 0;
++#endif
+     if (ui.view == V_PART && is_303()) original_page_bank = (uint8_t)engine_bass_bank(bidx());
+ #if X0X_BASS_PRESET_PREVIEW
+     if(!preserve && keep_sound) *page_of(ui.view)=(uint8_t)(pg.n-1);
+@@ -6305,6 +6321,10 @@
+     uint32_t btn = plat_buttons(), keys = plat_keys(), ch, i;
+     unsigned panic_consume;
+     if(btn!=ui.btn || keys!=ui.keys)bass_layout_accept();
++#if X0X_SJ6_CLASSIC_I_PROBE
++    if(ui.view==V_PART && is_303() && classic_layout_mode!=(unsigned)ui_classic_i(bidx()))
++        build_pages();
++#endif
+ #if X0X_BASS_PRESET_PREVIEW
+     static int observed_bank[NBASS]={-1,-1};
+     for(int v=0;v<NBASS;v++) if(observed_bank[v]!=engine_bass_bank(v)) {
