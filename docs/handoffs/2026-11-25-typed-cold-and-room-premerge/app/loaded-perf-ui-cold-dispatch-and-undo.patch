@@ -1,0 +1,738 @@
+--- a/tree/firmware/src/app/ui.c
++++ b/tree/firmware/src/app/ui.c
+@@ -791,87 +791,57 @@
+ #if DNBOX_TYPED_CONTROLS_NATIVE_TEST
+ /* Keep a single original live getter shared by presentation and edit admission.
+  * A missing lookup entry remains a legacy/unsupported kind. */
+-#if X0X_SJ6_VINTAGE_NATIVE && X0X_SJ6_ALT3_NATIVE
+-static int typed_read_sj6limiter(pref_t r){return sj6_native_limiter_get(r.b,r.c);}
+-#endif
+-#if X0X_SJ6_MONO32_PROBE
+-static int typed_read_sj6mono32(pref_t r){return engine_sj6_mono32_get(r.b,r.c);}
+-#endif
+-#if 1
+-static int typed_read_s1phaser(pref_t r){return s1_phaser_get(r.b,r.c);}
+-#endif
+-#if 1
+-static int typed_read_s1cmp(pref_t r){return s1_cmp_position(r.b,r.c);}
+-#endif
+-#if 1
+-static int typed_read_s1cwg(pref_t r){return s1_typed_cwg_position(r.b);}
+-#endif
+-#if X0X_SJ6_NATIVE_ROOM
+-static int typed_read_sj6room(pref_t r){return sj6_native_room_get(r.b,r.c);}
+-#endif
+-#if X0X_SJ6_NATIVE_ROOM
+-static int typed_read_sj6crush(pref_t r){return sj6_crush_get(r.b,r.c);}
+-#endif
+-#if X0X_SJ6_OTA_NATIVE
+-static int typed_read_sj6ota(pref_t r){return sj6_ota_get(r.b);}
+-#endif
+-#if X0X_SJ6_NATIVE_UNISON
+-static int typed_read_sj6unison(pref_t r){return engine_sj6_unison_get(r.b,r.c);}
+-#endif
+-#if X0X_SJ6_NATIVE_J60
+-static int typed_read_sj6j60(pref_t r){return engine_sj6_j60_get(r.b,r.c);}
+-#endif
+-#if X0X_SJ6_PITCH_ENV_NATIVE
+-static int typed_read_sj6pitch(pref_t r){return sj6_pitch_get(r.b,r.c);}
+-#endif
+-#if X0X_SJ6_VCF_PORT
+-static int typed_read_sj6filter_extra(pref_t r){return sj6_filter_control_get(r.b,r.c);}
+-#endif
+-#if X0X_SJ6_AUX_LFO_NATIVE
+-static int typed_read_sj6aux(pref_t r){return sj6_aux_get(r.b,r.c);}
+-#endif
+-typedef int (*typed_read_fn)(pref_t);
++typedef int (*typed_read_fn)(unsigned,unsigned);
+ static typed_read_fn const typed_readers[]={
+ #if X0X_SJ6_VINTAGE_NATIVE && X0X_SJ6_ALT3_NATIVE
+-    [0]=typed_read_sj6limiter,
++    [0]=sj6_native_limiter_get,
+ #endif
+ #if X0X_SJ6_MONO32_PROBE
+-    [1]=typed_read_sj6mono32,
++    [1]=engine_sj6_mono32_get,
+ #endif
+ #if 1
+-    [2]=typed_read_s1phaser,
++    [2]=s1_phaser_get,
+ #endif
+ #if 1
+-    [3]=typed_read_s1cmp,
++    [3]=s1_cmp_position,
+ #endif
+ #if 1
+-    [4]=typed_read_s1cwg,
++    [4]=0,
+ #endif
+ #if X0X_SJ6_NATIVE_ROOM
+-    [5]=typed_read_sj6room,
++    [5]=sj6_native_room_get,
+ #endif
+ #if X0X_SJ6_NATIVE_ROOM
+-    [6]=typed_read_sj6crush,
++    [6]=sj6_crush_get,
+ #endif
+ #if X0X_SJ6_OTA_NATIVE
+-    [7]=typed_read_sj6ota,
++    [7]=0,
+ #endif
+ #if X0X_SJ6_NATIVE_UNISON
+-    [8]=typed_read_sj6unison,
++    [8]=engine_sj6_unison_get,
+ #endif
+ #if X0X_SJ6_NATIVE_J60
+-    [9]=typed_read_sj6j60,
++    [9]=engine_sj6_j60_get,
+ #endif
+ #if X0X_SJ6_PITCH_ENV_NATIVE
+-    [10]=typed_read_sj6pitch,
++    [10]=sj6_pitch_get,
+ #endif
+ #if X0X_SJ6_VCF_PORT
+-    [11]=typed_read_sj6filter_extra,
++    [11]=sj6_filter_control_get,
+ #endif
+ #if X0X_SJ6_AUX_LFO_NATIVE
+-    [12]=typed_read_sj6aux,
++    [12]=sj6_aux_get,
+ #endif
+ };
++static __attribute__((noinline)) int typed_read_eval(unsigned code,pref_t r)
++{
++    unsigned slot=(code&127u)-1u;
++    if(slot==4u)return s1_typed_cwg_position(r.b);
++#if X0X_SJ6_OTA_NATIVE
++    if(slot==7u)return sj6_ota_get(r.b);
++#endif
++    return typed_readers[slot](r.b,r.c);
++}
+ static const uint8_t typed_read_codes[]={
+ #if X0X_SJ6_VINTAGE_NATIVE && X0X_SJ6_ALT3_NATIVE
+     [R_SJ6LIMITER-R_NOTELOCK]=1u,
+@@ -923,7 +893,7 @@
+ {
+ #if DNBOX_TYPED_CONTROLS_NATIVE_TEST
+     unsigned code=typed_read_find(r.kind);
+-    if(code)return ((code&128u) && r.b>=NBASS) || typed_readers[(code&127u)-1u](r)<0 || !s1_typed_tuple_editable();
++    if(code)return ((code&128u) && r.b>=NBASS) || typed_read_eval(code,r)<0 || !s1_typed_tuple_editable();
+ #endif
+ #if X0X_S1_SCALE_NATIVE && DNBOX_TYPED_CONTROLS_NATIVE_TEST
+     if(r.kind==R_S1SCALE){
+@@ -1472,7 +1442,7 @@
+ #if DNBOX_TYPED_CONTROLS_NATIVE_TEST
+     unsigned code=typed_read_find(r.kind);
+     if(code){
+-        int x=typed_readers[(code&127u)-1u](r);
++        int x=typed_read_eval(code,r);
+         if(x<0)return r.kind==R_S1PHASER?(int)s1_phase_init(r.c):0;
+ #if X0X_SJ6_AUX_LFO_NATIVE
+         if(r.kind==R_SJ6AUX && sj6_aux_field_route(r.c))return (int)sj6_aux_route_detent((unsigned)x);
+@@ -1691,191 +1661,256 @@
+ }
+ 
+ #if DNBOX_TYPED_CONTROLS_NATIVE_TEST
+-/* Common descriptor, range and owner/read-only admission before original
+- * type-specific callbacks. An absent kind is not an accepted write. */
+-#if X0X_S1_FEEDBACK_PROBE
+-static int typed_set_r_s1dlfb(pref_t r,int v){return (s1_typed_feedback_choose(r.b,(unsigned)v));}
+-#endif
+-#if 1
+-static int typed_set_r_s1dlyres(pref_t r,int v){return (s1_delay_res_choose(r.b,(unsigned)v));}
+-#endif
+-#if 1
+-static int typed_set_r_s1envlfo(pref_t r,int v){return (s1_env_lfo_choose(r.b,(unsigned)v));}
++/* Two receiver ABI groups use their original function types. Only the few
++ * nonstandard remaps need entry thunks. IDs remain the same public prefs. */
++static int typed_set_r_s1a4(pref_t r,int v){return (s1_typed_a4_choose(r.b,(unsigned)v+410u));}
++static int typed_set_r_s1trans(pref_t r,int v){return (s1_typed_trans_choose(r.b,v-24));}
++#if X0X_S1_KEYBOARD_HOLD
++static int typed_set_r_s1key_hold(pref_t r,int v){return (engine_s1_key_set_hold(r.b,v));}
+ #endif
+-#if X0X_S1_DELAY_TRACK_TEST
+-static int typed_set_r_s1dict(pref_t r,int v){return (s1_typed_dict_choose(r.b,(unsigned)v));}
++#if X0X_S1_KEYBOARD_HOLD && X0X_S1_SCALE_NATIVE
++static int typed_set_r_s1a4reset(pref_t r,int v){return (v==1 && s1_typed_scale_choose(r.b,0,1));}
+ #endif
+-#if X0X_S1_CRUSH_LFO_PROBE
+-static int typed_set_r_s1crush(pref_t r,int v){return (s1_typed_crush_choose(r.b,(unsigned)v));}
++#if X0X_SJ6_AUX_LFO_NATIVE
++static int typed_set_r_sj6aux(pref_t r,int v){return sj6_aux_choose(r.b,r.c,(unsigned)(sj6_aux_field_route(r.c)?sj6_aux_route_wire((unsigned)v):v));}
+ #endif
+-#if 1
+-static int typed_set_r_s1aa(pref_t r,int v){return (s1_aa_choose(r.b,(unsigned)v));}
++#if X0X_S1_AUTOPAN_PROBE
++static int typed_set_r_s1pan(pref_t r,int v){return s1_typed_pan_choose(r.b,r.c,(unsigned)v);}
+ #endif
+-#if 1
+-static int typed_set_r_s1a4(pref_t r,int v){return (s1_typed_a4_choose(r.b,(unsigned)v+410u));}
++typedef int (*typed_edit1_fn)(unsigned,unsigned);
++typedef int (*typed_edit2_fn)(unsigned,unsigned,unsigned);
++typedef int (*typed_custom_fn)(pref_t,int);
++enum {
++    TYPED_0_BASE=0,
++#if X0X_S1_FEEDBACK_PROBE
++    TYPED_R_S1DLFB,
+ #endif
+-#if 1
+-static int typed_set_r_s1rvfb(pref_t r,int v){return (s1_typed_rvfb_choose(r.b,(unsigned)v));}
++    TYPED_R_S1DLYRES,
++    TYPED_R_S1ENVLFO,
++#if X0X_S1_DELAY_TRACK_TEST
++    TYPED_R_S1DICT,
+ #endif
+-#if 1
+-static int typed_set_r_s1trans(pref_t r,int v){return (s1_typed_trans_choose(r.b,v-24));}
++#if X0X_S1_CRUSH_LFO_PROBE
++    TYPED_R_S1CRUSH,
+ #endif
++    TYPED_R_S1AA,
++    TYPED_R_S1RVFB,
+ #if X0X_S1_HALFTIME
+-static int typed_set_r_s1half(pref_t r,int v){return (s1_half_choose(r.b,(unsigned)v));}
++    TYPED_R_S1HALF,
+ #endif
+-#if X0X_S1_KEYBOARD_HOLD
+-static int typed_set_r_s1key_hold(pref_t r,int v){return (engine_s1_key_set_hold(r.b,v));}
+-#endif
+-#if X0X_S1_KEYBOARD_HOLD && X0X_S1_SCALE_NATIVE
+-static int typed_set_r_s1a4reset(pref_t r,int v){return (v==1 && s1_typed_scale_choose(r.b,0,1));}
++    TYPED_R_S1MODWHEEL,
++#if X0X_SJ6_OTA_NATIVE
++    TYPED_R_SJ6OTA,
+ #endif
+-#if 1
+-static int typed_set_r_s1modwheel(pref_t r,int v){return (s1_typed_mod_choose(r.b,(unsigned)v));}
++#if X0X_SJ6_MOD_TYPED_PROBE
++    TYPED_R_SJ6MOD,
+ #endif
++    TYPED_R_S1CWG,
++    TYPED_0_END,
++    TYPED_1_BASE=TYPED_0_END,
+ #if X0X_SJ6_NATIVE_ROOM
+-static int typed_set_r_sj6room(pref_t r,int v){return sj6_native_room_choose(r.b,r.c, (unsigned)v);}
++    TYPED_R_SJ6ROOM,
+ #endif
+ #if X0X_SJ6_NATIVE_ROOM
+-static int typed_set_r_sj6crush(pref_t r,int v){return sj6_crush_choose(r.b,r.c, (unsigned)v);}
+-#endif
+-#if X0X_SJ6_OTA_NATIVE
+-static int typed_set_r_sj6ota(pref_t r,int v){return sj6_ota_choose(r.b, (unsigned)v);}
++    TYPED_R_SJ6CRUSH,
+ #endif
+ #if X0X_SJ6_NATIVE_UNISON
+-static int typed_set_r_sj6unison(pref_t r,int v){return engine_sj6_unison_edit(r.b,r.c, (unsigned)v);}
++    TYPED_R_SJ6UNISON,
+ #endif
+ #if X0X_SJ6_NATIVE_J60
+-static int typed_set_r_sj6j60(pref_t r,int v){return engine_sj6_j60_edit(r.b,r.c, (unsigned)v);}
++    TYPED_R_SJ6J60,
+ #endif
+ #if X0X_SJ6_PITCH_ENV_NATIVE
+-static int typed_set_r_sj6pitch(pref_t r,int v){return sj6_pitch_choose(r.b,r.c, (unsigned)v);}
++    TYPED_R_SJ6PITCH,
+ #endif
+ #if X0X_SJ6_VCF_PORT
+-static int typed_set_r_sj6filter_extra(pref_t r,int v){return sj6_filter_control_choose(r.b,r.c, (unsigned)v);}
+-#endif
+-#if X0X_SJ6_AUX_LFO_NATIVE
+-static int typed_set_r_sj6aux(pref_t r,int v){return sj6_aux_choose(r.b,r.c,(unsigned)(sj6_aux_field_route(r.c)?sj6_aux_route_wire((unsigned)v):v));}
++    TYPED_R_SJ6FILTER_EXTRA,
+ #endif
+ #if X0X_SJ6_BEND_TYPED_PROBE
+-static int typed_set_r_sj6pb(pref_t r,int v){return sj6_typed_pb_edit(r.b,r.c,(unsigned)v);}
+-#endif
+-#if X0X_SJ6_MOD_TYPED_PROBE
+-static int typed_set_r_sj6mod(pref_t r,int v){return sj6_typed_mod_choose(r.b,(unsigned)v);}
++    TYPED_R_SJ6PB,
+ #endif
+ #if X0X_SJ6_MONO32_PROBE
+-static int typed_set_r_sj6mono32(pref_t r,int v){return engine_sj6_mono32_edit(r.b,r.c,(unsigned)v);}
++    TYPED_R_SJ6MONO32,
+ #endif
+ #if X0X_SJ6_VELOCITY_SETTINGS
+-static int typed_set_r_sj6inputvel(pref_t r,int v){return sj6_input_velocity_choose(r.b,r.c,(unsigned)v);}
++    TYPED_R_SJ6INPUTVEL,
+ #endif
+-#if 1
+-static int typed_set_r_s1phaser(pref_t r,int v){return s1_phaser_choose(r.b,r.c,(unsigned)v);}
++    TYPED_R_S1PHASER,
++    TYPED_R_S1CMP,
++    TYPED_1_END,
++    TYPED_2_BASE=TYPED_1_END,
++    TYPED_R_S1A4,
++    TYPED_R_S1TRANS,
++#if X0X_S1_KEYBOARD_HOLD
++    TYPED_R_S1KEY_HOLD,
+ #endif
+-#if 1
+-static int typed_set_r_s1cmp(pref_t r,int v){return s1_cmp_choose(r.b,r.c,(unsigned)v);}
++#if X0X_S1_KEYBOARD_HOLD && X0X_S1_SCALE_NATIVE
++    TYPED_R_S1A4RESET,
+ #endif
+-#if 1
+-static int typed_set_r_s1cwg(pref_t r,int v){return s1_typed_cwg_choose(r.b,(unsigned)v);}
++#if X0X_SJ6_AUX_LFO_NATIVE
++    TYPED_R_SJ6AUX,
+ #endif
+ #if X0X_S1_AUTOPAN_PROBE
+-static int typed_set_r_s1pan(pref_t r,int v){return s1_typed_pan_choose(r.b,r.c,(unsigned)v);}
++    TYPED_R_S1PAN,
+ #endif
+-typedef int (*typed_set_fn)(pref_t,int);
+-static typed_set_fn const typed_setters[]={
++    TYPED_2_END,
++};
++static const uint8_t typed_kind[]={
+ #if X0X_S1_FEEDBACK_PROBE
+-    [R_S1DLFB-R_NOTELOCK]=typed_set_r_s1dlfb,
+-#endif
+-#if 1
+-    [R_S1DLYRES-R_NOTELOCK]=typed_set_r_s1dlyres,
+-#endif
+-#if 1
+-    [R_S1ENVLFO-R_NOTELOCK]=typed_set_r_s1envlfo,
++    [TYPED_R_S1DLFB]=R_S1DLFB,
+ #endif
++    [TYPED_R_S1DLYRES]=R_S1DLYRES,
++    [TYPED_R_S1ENVLFO]=R_S1ENVLFO,
+ #if X0X_S1_DELAY_TRACK_TEST
+-    [R_S1DICT-R_NOTELOCK]=typed_set_r_s1dict,
++    [TYPED_R_S1DICT]=R_S1DICT,
+ #endif
+ #if X0X_S1_CRUSH_LFO_PROBE
+-    [R_S1CRUSH-R_NOTELOCK]=typed_set_r_s1crush,
++    [TYPED_R_S1CRUSH]=R_S1CRUSH,
+ #endif
+-#if 1
+-    [R_S1AA-R_NOTELOCK]=typed_set_r_s1aa,
++    [TYPED_R_S1AA]=R_S1AA,
++    [TYPED_R_S1RVFB]=R_S1RVFB,
++#if X0X_S1_HALFTIME
++    [TYPED_R_S1HALF]=R_S1HALF,
+ #endif
+-#if 1
+-    [R_S1A4-R_NOTELOCK]=typed_set_r_s1a4,
++    [TYPED_R_S1MODWHEEL]=R_S1MODWHEEL,
++#if X0X_SJ6_OTA_NATIVE
++    [TYPED_R_SJ6OTA]=R_SJ6OTA,
+ #endif
+-#if 1
+-    [R_S1RVFB-R_NOTELOCK]=typed_set_r_s1rvfb,
++#if X0X_SJ6_MOD_TYPED_PROBE
++    [TYPED_R_SJ6MOD]=R_SJ6MOD,
+ #endif
+-#if 1
+-    [R_S1TRANS-R_NOTELOCK]=typed_set_r_s1trans,
++    [TYPED_R_S1CWG]=R_S1CWG,
++#if X0X_SJ6_NATIVE_ROOM
++    [TYPED_R_SJ6ROOM]=R_SJ6ROOM,
+ #endif
+-#if X0X_S1_HALFTIME
+-    [R_S1HALF-R_NOTELOCK]=typed_set_r_s1half,
++#if X0X_SJ6_NATIVE_ROOM
++    [TYPED_R_SJ6CRUSH]=R_SJ6CRUSH,
+ #endif
++#if X0X_SJ6_NATIVE_UNISON
++    [TYPED_R_SJ6UNISON]=R_SJ6UNISON,
++#endif
++#if X0X_SJ6_NATIVE_J60
++    [TYPED_R_SJ6J60]=R_SJ6J60,
++#endif
++#if X0X_SJ6_PITCH_ENV_NATIVE
++    [TYPED_R_SJ6PITCH]=R_SJ6PITCH,
++#endif
++#if X0X_SJ6_VCF_PORT
++    [TYPED_R_SJ6FILTER_EXTRA]=R_SJ6FILTER_EXTRA,
++#endif
++#if X0X_SJ6_BEND_TYPED_PROBE
++    [TYPED_R_SJ6PB]=R_SJ6PB,
++#endif
++#if X0X_SJ6_MONO32_PROBE
++    [TYPED_R_SJ6MONO32]=R_SJ6MONO32,
++#endif
++#if X0X_SJ6_VELOCITY_SETTINGS
++    [TYPED_R_SJ6INPUTVEL]=R_SJ6INPUTVEL,
++#endif
++    [TYPED_R_S1PHASER]=R_S1PHASER,
++    [TYPED_R_S1CMP]=R_S1CMP,
++    [TYPED_R_S1A4]=R_S1A4,
++    [TYPED_R_S1TRANS]=R_S1TRANS,
+ #if X0X_S1_KEYBOARD_HOLD
+-    [R_S1KEY_HOLD-R_NOTELOCK]=typed_set_r_s1key_hold,
++    [TYPED_R_S1KEY_HOLD]=R_S1KEY_HOLD,
+ #endif
+ #if X0X_S1_KEYBOARD_HOLD && X0X_S1_SCALE_NATIVE
+-    [R_S1A4RESET-R_NOTELOCK]=typed_set_r_s1a4reset,
++    [TYPED_R_S1A4RESET]=R_S1A4RESET,
+ #endif
+-#if 1
+-    [R_S1MODWHEEL-R_NOTELOCK]=typed_set_r_s1modwheel,
++#if X0X_SJ6_AUX_LFO_NATIVE
++    [TYPED_R_SJ6AUX]=R_SJ6AUX,
+ #endif
+-#if X0X_SJ6_NATIVE_ROOM
+-    [R_SJ6ROOM-R_NOTELOCK]=typed_set_r_sj6room,
++#if X0X_S1_AUTOPAN_PROBE
++    [TYPED_R_S1PAN]=R_S1PAN,
+ #endif
+-#if X0X_SJ6_NATIVE_ROOM
+-    [R_SJ6CRUSH-R_NOTELOCK]=typed_set_r_sj6crush,
++};
++static typed_edit1_fn const typed_0[]={
++#if X0X_S1_FEEDBACK_PROBE
++    [TYPED_R_S1DLFB-TYPED_0_BASE-1]=s1_typed_feedback_choose,
++#endif
++    [TYPED_R_S1DLYRES-TYPED_0_BASE-1]=s1_delay_res_choose,
++    [TYPED_R_S1ENVLFO-TYPED_0_BASE-1]=s1_env_lfo_choose,
++#if X0X_S1_DELAY_TRACK_TEST
++    [TYPED_R_S1DICT-TYPED_0_BASE-1]=s1_typed_dict_choose,
++#endif
++#if X0X_S1_CRUSH_LFO_PROBE
++    [TYPED_R_S1CRUSH-TYPED_0_BASE-1]=s1_typed_crush_choose,
++#endif
++    [TYPED_R_S1AA-TYPED_0_BASE-1]=s1_aa_choose,
++    [TYPED_R_S1RVFB-TYPED_0_BASE-1]=s1_typed_rvfb_choose,
++#if X0X_S1_HALFTIME
++    [TYPED_R_S1HALF-TYPED_0_BASE-1]=s1_half_choose,
+ #endif
++    [TYPED_R_S1MODWHEEL-TYPED_0_BASE-1]=s1_typed_mod_choose,
+ #if X0X_SJ6_OTA_NATIVE
+-    [R_SJ6OTA-R_NOTELOCK]=typed_set_r_sj6ota,
++    [TYPED_R_SJ6OTA-TYPED_0_BASE-1]=sj6_ota_choose,
++#endif
++#if X0X_SJ6_MOD_TYPED_PROBE
++    [TYPED_R_SJ6MOD-TYPED_0_BASE-1]=sj6_typed_mod_choose,
++#endif
++    [TYPED_R_S1CWG-TYPED_0_BASE-1]=s1_typed_cwg_choose,
++};
++static typed_edit2_fn const typed_1[]={
++#if X0X_SJ6_NATIVE_ROOM
++    [TYPED_R_SJ6ROOM-TYPED_1_BASE-1]=sj6_native_room_choose,
++#endif
++#if X0X_SJ6_NATIVE_ROOM
++    [TYPED_R_SJ6CRUSH-TYPED_1_BASE-1]=sj6_crush_choose,
+ #endif
+ #if X0X_SJ6_NATIVE_UNISON
+-    [R_SJ6UNISON-R_NOTELOCK]=typed_set_r_sj6unison,
++    [TYPED_R_SJ6UNISON-TYPED_1_BASE-1]=engine_sj6_unison_edit,
+ #endif
+ #if X0X_SJ6_NATIVE_J60
+-    [R_SJ6J60-R_NOTELOCK]=typed_set_r_sj6j60,
++    [TYPED_R_SJ6J60-TYPED_1_BASE-1]=engine_sj6_j60_edit,
+ #endif
+ #if X0X_SJ6_PITCH_ENV_NATIVE
+-    [R_SJ6PITCH-R_NOTELOCK]=typed_set_r_sj6pitch,
++    [TYPED_R_SJ6PITCH-TYPED_1_BASE-1]=sj6_pitch_choose,
+ #endif
+ #if X0X_SJ6_VCF_PORT
+-    [R_SJ6FILTER_EXTRA-R_NOTELOCK]=typed_set_r_sj6filter_extra,
+-#endif
+-#if X0X_SJ6_AUX_LFO_NATIVE
+-    [R_SJ6AUX-R_NOTELOCK]=typed_set_r_sj6aux,
++    [TYPED_R_SJ6FILTER_EXTRA-TYPED_1_BASE-1]=sj6_filter_control_choose,
+ #endif
+ #if X0X_SJ6_BEND_TYPED_PROBE
+-    [R_SJ6PB-R_NOTELOCK]=typed_set_r_sj6pb,
+-#endif
+-#if X0X_SJ6_MOD_TYPED_PROBE
+-    [R_SJ6MOD-R_NOTELOCK]=typed_set_r_sj6mod,
++    [TYPED_R_SJ6PB-TYPED_1_BASE-1]=sj6_typed_pb_edit,
+ #endif
+ #if X0X_SJ6_MONO32_PROBE
+-    [R_SJ6MONO32-R_NOTELOCK]=typed_set_r_sj6mono32,
++    [TYPED_R_SJ6MONO32-TYPED_1_BASE-1]=engine_sj6_mono32_edit,
+ #endif
+ #if X0X_SJ6_VELOCITY_SETTINGS
+-    [R_SJ6INPUTVEL-R_NOTELOCK]=typed_set_r_sj6inputvel,
++    [TYPED_R_SJ6INPUTVEL-TYPED_1_BASE-1]=sj6_input_velocity_choose,
+ #endif
+-#if 1
+-    [R_S1PHASER-R_NOTELOCK]=typed_set_r_s1phaser,
++    [TYPED_R_S1PHASER-TYPED_1_BASE-1]=s1_phaser_choose,
++    [TYPED_R_S1CMP-TYPED_1_BASE-1]=s1_cmp_choose,
++};
++static typed_custom_fn const typed_2[]={
++    [TYPED_R_S1A4-TYPED_2_BASE-1]=typed_set_r_s1a4,
++    [TYPED_R_S1TRANS-TYPED_2_BASE-1]=typed_set_r_s1trans,
++#if X0X_S1_KEYBOARD_HOLD
++    [TYPED_R_S1KEY_HOLD-TYPED_2_BASE-1]=typed_set_r_s1key_hold,
+ #endif
+-#if 1
+-    [R_S1CMP-R_NOTELOCK]=typed_set_r_s1cmp,
++#if X0X_S1_KEYBOARD_HOLD && X0X_S1_SCALE_NATIVE
++    [TYPED_R_S1A4RESET-TYPED_2_BASE-1]=typed_set_r_s1a4reset,
+ #endif
+-#if 1
+-    [R_S1CWG-R_NOTELOCK]=typed_set_r_s1cwg,
++#if X0X_SJ6_AUX_LFO_NATIVE
++    [TYPED_R_SJ6AUX-TYPED_2_BASE-1]=typed_set_r_sj6aux,
+ #endif
+ #if X0X_S1_AUTOPAN_PROBE
+-    [R_S1PAN-R_NOTELOCK]=typed_set_r_s1pan,
++    [TYPED_R_S1PAN-TYPED_2_BASE-1]=typed_set_r_s1pan,
+ #endif
+ };
+ static __attribute__((noinline)) int pref_set_typed_value(pref_t r,int v)
+ {
+-    unsigned idx=(unsigned)r.kind-R_NOTELOCK;
+-    if(idx>=sizeof typed_setters/sizeof *typed_setters || !typed_setters[idx])return 0;
++    if(r.kind<=R_NOTELOCK)return 0;
++    unsigned i=1;
++    for(;i<sizeof typed_kind;i++)if(typed_kind[i]==r.kind)break;
++    if(i==sizeof typed_kind)return 0;
+     const x0x_param_t *d=pref_desc(r);
+-    if(d && (unsigned)v<=d->max && !pref_read_only(r) && typed_setters[idx](r,v))mark_dirty();
++    if(d && (unsigned)v<=d->max && !pref_read_only(r)){
++        int changed;
++        if(i<TYPED_0_END)changed=typed_0[i-TYPED_0_BASE-1](r.b,(unsigned)v);
++        else if(i<TYPED_1_END)changed=typed_1[i-TYPED_1_BASE-1](r.b,r.c,(unsigned)v);
++        else changed=typed_2[i-TYPED_2_BASE-1](r,v);
++        if(changed)mark_dirty();
++    }
+     return 1;
+ }
+ #endif
+@@ -4216,33 +4251,50 @@
+ /* a run of the project changed under the engine: the sound's pots go to the engine again */
+ __attribute__((noinline)) static void undo_changed(uint32_t off, uint32_t len)
+ {
+-    const uint32_t s0 = __builtin_offsetof(project_t, sound), s1 = s0 + sizeof(proj.sound.v);
+-    const uint32_t l0 = __builtin_offsetof(project_t, arr) + __builtin_offsetof(arrange_t, lane);
+-    uint32_t a = off + UNDO_OFF, k;
+-    for (k = a; k < a + len; k++) {
+-        if (k >= s0 && k < s1) {
+-            uint32_t x = k - s0, t = x / (NVOICES_MAX * NPARAMS_MAX), v = (x / NPARAMS_MAX) % NVOICES_MAX,
+-                     i = x % NPARAMS_MAX;
++    const uint32_t s0=__builtin_offsetof(project_t,sound),s1=s0+sizeof(proj.sound.v);
++    const uint32_t l0=__builtin_offsetof(project_t,arr)+__builtin_offsetof(arrange_t,lane);
++    uint32_t first=off+UNDO_OFF,last=first+len;
++    /* The changed bytes are the undo engine's validated ranges. Read no
++     * additional data, and queue common controls in their original order. */
++    _Static_assert(__builtin_offsetof(project_t,sound)+sizeof(proj.sound.v)
++        <=__builtin_offsetof(project_t,arr)+__builtin_offsetof(arrange_t,lane),"sound before motion");
++    if(len && last>l0)undo_lanes=1;
++    if(first<s0)first=s0;
++    if(last>s1)last=s1;
++    for(uint32_t k=first;k<last;){
++        const unsigned x=k-s0, row=x/NPARAMS_MAX;
++        const int t=(int)(row/NVOICES_MAX),v=(int)(row%NVOICES_MAX);
++        const uint32_t next=s0+(row+1u)*NPARAMS_MAX;
+ #if X0X_ARP_HOOKS
+-            /* The arp block (sound.v[T_303][2 + voice]): the engine re-reads it. */
+-            if (t == T_303 && v >= 2 && v < 2 + NBASS) {
+-                (void)engine_arp_reload(v - 2);
+-                k = s0 + (t * NVOICES_MAX + v + 1) * NPARAMS_MAX - 1;   /* once per block */
+-                continue;
+-            }
++        /* One reload for every touched ARP row, even a partial range. */
++        if(t==T_303 && v>=2 && v<2+NBASS){
++            (void)engine_arp_reload((unsigned)(v-2));
++            k=next;continue;
++        }
+ #endif
+ #if X0X_BASS_TAGGED_SOUND
+-            if((t==T_303 && (undo_bass_mask&(1u<<v))) ||
+-               (t==T_MIX && v>=PART_303A && v<=PART_303B && (undo_bass_mask&(1u<<(v-PART_303A)))))continue;
++        if((t==T_303 && (undo_bass_mask&(1u<<v))) ||
++           (t==T_MIX && v>=PART_303A && v<=PART_303B && (undo_bass_mask&(1u<<(v-PART_303A))))){
++            k=next;continue;
++        }
+ #endif
+-            if ((int)v < engine_nvoices((int)t) && (int)i < engine_nparams((int)t, (int)v))
+-                ui_restore_base((int)t, (int)v, (int)i);
+-        } else if (k >= l0) {
+-            undo_lanes = 1;
++        if(v<engine_nvoices(t)){
++            unsigned stop=(unsigned)engine_nparams(t,v);
++            const unsigned avail=last+NPARAMS_MAX-next;
++            if(stop>avail)stop=avail;
++            for(unsigned i=x%NPARAMS_MAX;i<stop;i++)ui_restore_base(t,v,(int)i);
+         }
++        k=next;
+     }
+ }
+ 
++static __attribute__((noinline)) int undo_part_at(unsigned x)
++{
++    return (int)(x < __builtin_offsetof(pattern_t, bass) ? x / sizeof(dpart_t)
++               : x < __builtin_offsetof(pattern_t, brk) ? NKIT + (x - __builtin_offsetof(pattern_t, bass)) / sizeof(bpart_t)
++               : PART_BRK);
++}
++
+ /* what an undo step touched, in words: "909 P3", "SOUND", "SONG", "MOTION" */
+ static void undo_name(uint32_t lo, uint32_t hi, char *t)
+ {
+@@ -4253,12 +4305,7 @@
+         put_s(t, "SOUND");
+     } else if (a >= p0 && b < a0 && (a - p0) / sizeof(pattern_t) == (b - p0) / sizeof(pattern_t)) {
+         uint32_t pi = (a - p0) / sizeof(pattern_t), x = (a - p0) % sizeof(pattern_t), y = (b - p0) % sizeof(pattern_t);
+-        int pa = (int)(x < __builtin_offsetof(pattern_t, bass) ? x / sizeof(dpart_t)
+-                       : x < __builtin_offsetof(pattern_t, brk) ? NKIT + (x - __builtin_offsetof(pattern_t, bass)) / sizeof(bpart_t)
+-                       : PART_BRK);
+-        int pb = (int)(y < __builtin_offsetof(pattern_t, bass) ? y / sizeof(dpart_t)
+-                       : y < __builtin_offsetof(pattern_t, brk) ? NKIT + (y - __builtin_offsetof(pattern_t, bass)) / sizeof(bpart_t)
+-                       : PART_BRK);
++        int pa=undo_part_at(x),pb=undo_part_at(y);
+         char *q = put_s(t, pa == pb ? part_name(pa) : "PATTERN");
+         put_i(put_s(q, " P"), (int)pi + 1);
+     } else if (a >= p0 && b < a0) {
+@@ -4515,6 +4562,10 @@
+ #endif
+ #ifdef DNBOX_137_HOST_WITNESS
+             if (proj.set.snd_rev==REV137) {
++                const int undo_j6_init=target.cell[v][29]==ORIGINAL_SOUND_JUNO &&
++                    !original_sound_sj6_factory(target.cell[v]);
++                const int undo_s1_init=s1_typed_init_cell(target.cell[v]);
++                (void)undo_j6_init;(void)undo_s1_init;
+                 uint8_t p;
+ #if X0X_SJ6_NATIVE_J60
+                 uint8_t j60[4];
+@@ -4527,7 +4578,7 @@
+                 undo_peek(&undo,entry,classic_off,classic,sizeof classic);
+                 if(!sj6_classic_native_valid(classic) ||
+                    ((classic[0]|classic[1]|classic[2]) &&
+-                    (target.cell[v][29]!=ORIGINAL_SOUND_JUNO || original_sound_sj6_factory(target.cell[v])))){
++                    !undo_j6_init)){
+                     ui_undo_invalid("UNDO LEGACY CHORUS INVALID");return;
+                 }
+                 if(memcmp(classic,sj6_classic_native_code(&proj.sound,v),sizeof classic))undo_j60|=1u<<v;
+@@ -4535,7 +4586,7 @@
+                 undo_peek(&undo,entry,j60_off,j60,sizeof j60);
+                 if(!sj6_j60_valid(j60) ||
+                    ((j60[0]|j60[1]|j60[2]|j60[3]) &&
+-                    (target.cell[v][29]!=ORIGINAL_SOUND_JUNO || original_sound_sj6_factory(target.cell[v])))){
++                    !undo_j6_init)){
+                     ui_undo_invalid("UNDO CHORUS INVALID");return;
+                 }
+                 if(memcmp(j60,sj6_j60_code(&proj.sound,v),sizeof j60))undo_j60|=1u<<v;
+@@ -4548,7 +4599,7 @@
+                 undo_peek(&undo,entry,lfo1_off,lfo1_route,sizeof lfo1_route);
+                 if(!sj6_aux_lfo1_valid(lfo1_route) ||
+                    ((lfo1_route[0]|lfo1_route[2]) &&
+-                    (target.cell[v][29]!=ORIGINAL_SOUND_JUNO || original_sound_sj6_factory(target.cell[v])))){
++                    !undo_j6_init)){
+                     ui_undo_invalid("UNDO LFO1 ROUTE INVALID");return;
+                 }
+                 if(memcmp(lfo1_route,sj6_aux_lfo1_read(&proj.sound,v),sizeof lfo1_route))undo_aux|=1u<<v;
+@@ -4577,7 +4628,7 @@
+                 undo_peek(&undo,entry,unison_off,uni,sizeof uni);
+                 if(uni[0]>1u || uni[1]>128u || uni[2]>127u || uni[3]>5u ||
+                    ((uni[0]|uni[1]|uni[2]|uni[3]) &&
+-                    (target.cell[v][29]!=ORIGINAL_SOUND_JUNO || original_sound_sj6_factory(target.cell[v])))){
++                    !undo_j6_init)){
+                     ui_undo_invalid("UNDO UNISON INVALID");return;
+                 }
+                 if(memcmp(uni,sj6_unison_code(&proj.sound,v),sizeof uni))undo_sj6_unison|=1u<<v;
+@@ -4596,31 +4647,19 @@
+ #endif
+ #if DNBOX_TYPED_CONTROLS_NATIVE_TEST
+ #if X0X_SJ6_NOISE_SUB_NATIVE
+-                uint8_t sources[SJ6_SOURCES_COUNT];
+                 const uint32_t sources_off=__builtin_offsetof(sound_t,v)+
+                     ((T_MST*NVOICES_MAX+SJ6_SOURCES_ROW+v)*NPARAMS_MAX+SJ6_SOURCES_OFFSET);
+-                undo_peek(&undo,entry,sources_off,sources,sizeof sources);
+-                if(sources[0]>127u || sources[1]>127u) {
+-                    ui_undo_invalid("UNDO OSC SOURCE INVALID");return;
+-                }
+-                if(memcmp(sources,sj6_sources_read(&proj.sound,v),sizeof sources))undo_delay|=1u<<v;
++                if(!ui_undo_span(entry,sources_off,sj6_sources_read(&proj.sound,v),SJ6_SOURCES_COUNT,127u,0,1u<<v,&undo_delay,"UNDO OSC SOURCE INVALID"))return;
+ #endif
+ #if X0X_SJ6_SEQ_SETTINGS_NATIVE
+-                uint8_t seqcfg[SJ6_SEQ_SETTINGS_COUNT];
+                 const uint32_t seqcfg_off=__builtin_offsetof(sound_t,v)+
+                     ((T_MST*NVOICES_MAX+SJ6_SEQ_SETTINGS_ROW+v)*NPARAMS_MAX+SJ6_SEQ_SETTINGS_OFFSET);
+-                undo_peek(&undo,entry,seqcfg_off,seqcfg,sizeof seqcfg);
+-                if(!sj6_seq_settings_valid(seqcfg)) {
+-                    ui_undo_invalid("UNDO SEQ SETUP INVALID");return;
+-                }
+-                if(memcmp(seqcfg,sj6_seq_settings_read(&proj.sound,v),sizeof seqcfg))undo_delay|=1u<<v;
++                if(!ui_undo_span(entry,seqcfg_off,sj6_seq_settings_read(&proj.sound,v),SJ6_SEQ_SETTINGS_COUNT,1u,0,1u<<v,&undo_delay,"UNDO SEQ SETUP INVALID"))return;
+ #if X0X_SJ6_SEQ_DEST_NATIVE
+-                uint8_t dest;
+                 const uint32_t dest_off=__builtin_offsetof(sound_t,v)+
+                     ((T_MST*NVOICES_MAX+SJ6_DEST_ROW+v)*NPARAMS_MAX+SJ6_DEST_BYTE);
+-                undo_peek(&undo,entry,dest_off,&dest,1u);
+-                if(dest>2u){ui_undo_invalid("UNDO SEQ DEST INVALID");return;}
+-                if(dest!=sj6_dest_read(&proj.sound,v))undo_delay|=1u<<v;
++                if(!undo_bounded_field(entry,dest_off,2u,sj6_dest_read(&proj.sound,v),
++                    1u<<v,&undo_delay,"UNDO SEQ DEST INVALID"))return;
+ #endif
+ #endif
+ #if X0X_SJ6_NATIVE_ROOM
+@@ -4635,12 +4674,10 @@
+                 if(memcmp(crush,sj6_crush_code(&proj.sound,v),sizeof crush))undo_room|=1u<<v;
+ #endif
+ #if X0X_SJ6_OTA_NATIVE
+-                uint8_t ota;
+                 const uint32_t ota_off=__builtin_offsetof(sound_t,v)+
+                     ((T_MST*NVOICES_MAX+SJ6_OTA_ROW+v)*NPARAMS_MAX+SJ6_OTA_BYTE);
+-                undo_peek(&undo,entry,ota_off,&ota,1u);
+-                if(ota>1u){ui_undo_invalid("UNDO FILTER INVALID");return;}
+-                if(ota!=sj6_ota_read(&proj.sound,v))undo_ota|=1u<<v;
++                if(!undo_bounded_field(entry,ota_off,1u,sj6_ota_read(&proj.sound,v),
++                    1u<<v,&undo_ota,"UNDO FILTER INVALID"))return;
+ #endif
+ #if X0X_SJ6_NATIVE_LIMITER
+                 const uint32_t lim_off=__builtin_offsetof(sound_t,v)+
+@@ -4654,10 +4691,8 @@
+                 if(!undo_bounded_field(entry,lim_off+SJ6_INPUT_VEL_BYTE-SJ6_LIM_BYTE,SJ6_INPUT_VEL_MAX,
+                     sj6_input_vel(&proj.sound,v),1u<<v,&undo_sj6_input_vel,"UNDO VELOCITY INVALID"))return;
+ #endif
+-                uint8_t rage;
+-                undo_peek(&undo,entry,lim_off+SJ6_RAGE_BYTE-SJ6_LIM_BYTE,&rage,1u);
+-                if(rage>128u){ui_undo_invalid("UNDO LIMITER INVALID");return;}
+-                if(rage!=sj6_rage_read(&proj.sound,v))undo_limiter|=1u<<v;
++                if(!undo_bounded_field(entry,lim_off+SJ6_RAGE_BYTE-SJ6_LIM_BYTE,128u,sj6_rage_read(&proj.sound,v),
++                    1u<<v,&undo_limiter,"UNDO LIMITER INVALID"))return;
+ #endif
+                 const uint32_t cmp_off=__builtin_offsetof(sound_t,v)+
+                     ((T_MST*NVOICES_MAX+S1_CMP_ROW+v)*NPARAMS_MAX);
+@@ -4671,7 +4706,7 @@
+                 const uint32_t wave_off=__builtin_offsetof(sound_t,v)+
+                     ((T_MST*NVOICES_MAX+SJ6_LFO1_WAVE_ROW+v)*NPARAMS_MAX+SJ6_LFO1_WAVE_OFFSET);
+                 undo_peek(&undo,entry,wave_off,&p,1u);
+-                if(p>SJ6_LFO1_WAVE_MAX || (p && !sj6_lfo1_wave_allowed(target.cell[v]))){
++                if(p>SJ6_LFO1_WAVE_MAX || (p && !undo_j6_init)){
+                     ui_undo_invalid("UNDO LFO WAVE INVALID");return;
+                 }
+                 if(p!=sj6_lfo1_wave_read(&proj.sound,v))undo_delay|=1u<<v;
+@@ -4681,14 +4716,14 @@
+                     ((T_MST*NVOICES_MAX+SJ6_TREM_ROW+v)*NPARAMS_MAX+SJ6_TREM_OFFSET);
+                 undo_peek(&undo,entry,trem_off,trem,sizeof trem);
+                 if(trem[0]>127u || trem[1]>128u || ((trem[0]|trem[1]) &&
+-                   !sj6_lfo1_wave_allowed(target.cell[v]))){
++                   !undo_j6_init)){
+                     ui_undo_invalid("UNDO TREMOLO INVALID");return;
+                 }
+                 if(memcmp(trem,sj6_trem_read(&proj.sound,v),sizeof trem))undo_delay|=1u<<v;
+ #endif
+                 for(unsigned k=0;k<2u;++k) {
+                     undo_peek(&undo,entry,wave_off+1u+k,&p,1u);
+-                    if(p>1u || (p && !sj6_lfo1_wave_allowed(target.cell[v]))) {
++                    if(p>1u || (p && !undo_j6_init)) {
+                         ui_undo_invalid("UNDO LFO SWITCH INVALID");return;
+                     }
+                     if(p!=sj6_lfo1_option(&proj.sound,v,k))undo_delay|=1u<<v;
+@@ -4783,7 +4818,7 @@
+                 const uint32_t half_off=__builtin_offsetof(sound_t,v)+
+                     ((T_MST*NVOICES_MAX+S1_HALF_ROW+v)*NPARAMS_MAX+S1_HALF_BYTE);
+                 undo_peek(&undo,entry,half_off,&p,1u);
+-                if(p>128u || (p && !s1_typed_init_cell(target.cell[v]))){
++                if(p>128u || (p && !undo_s1_init)){
+                     ui_undo_invalid("UNDO SMOOTH INVALID");return;
+                 }
+                 if(p!=s1_half_code(&proj.sound,v))undo_a4|=1u<<v;
+@@ -4792,9 +4827,9 @@
+                 const uint32_t scale_off=__builtin_offsetof(sound_t,v)+
+                     ((T_MST*NVOICES_MAX+S1_SCALE_ROW+v)*NPARAMS_MAX+S1_SCALE_BYTE);
+                 undo_peek(&undo,entry,scale_off,&p,1u);
+-                if(p>S1C_SCALE_MAX || (p && !s1_typed_init_cell(target.cell[v])
++                if(p>S1C_SCALE_MAX || (p && !undo_s1_init
+ #if X0X_SJ6_SCALE_NATIVE
+-                   && !(target.cell[v][29]==ORIGINAL_SOUND_JUNO && !original_sound_sj6_factory(target.cell[v]))
++                   && !undo_j6_init
+ #endif
+                    )){
+                     ui_undo_invalid("UNDO SCALE INVALID");return;

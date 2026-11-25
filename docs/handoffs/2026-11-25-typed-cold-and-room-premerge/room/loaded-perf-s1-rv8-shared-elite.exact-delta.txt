@@ -1,0 +1,18 @@
+SECTION
+.lab_slot3 32764 32764 0
+.xdata 8180 8180 0
+.c1_text 608 608 0
+.data 648 648 0
+.bss 97476 97476 0
+.pool 335308 335308 0
+.lab_fdata 61432 61432 0
+.lab_fittab 4072 4072 0
+.ram_text 2748 2748 0
+.text 548168 549080 912
+HOT .text section child deltas (fold numeric LTO suffix)
+.text.rv8_step 114
+.text.rv8_antimage 54
+Other .text section child deltas
+.text.s1_part_render 726
+.rodata.cst16 16
+Total child delta 910 focus delta 168
