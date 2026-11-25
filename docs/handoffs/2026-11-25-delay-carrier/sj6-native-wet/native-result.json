@@ -1,0 +1,262 @@
+{
+  "elite": [
+    {
+      "arm": "owner-epoch-link-wet",
+      "timing": {
+        "halves": 623,
+        "worst_us": 6494,
+        "raw_late": 0,
+        "xruns": 0,
+        "pcm_peak": 5331,
+        "frames": 319488
+      },
+      "ring": {
+        "current": 661.5,
+        "fb": 0.49889764189720154,
+        "wet": 0.8999999761581421,
+        "inv_stride": 0.0625,
+        "stride": 16,
+        "filled": 1024,
+        "mix": 127,
+        "refused": 0,
+        "sync": 1,
+        "enabled": 1,
+        "history_frames_loaded": 1024,
+        "settled_tap_audio_frames": 10584.0,
+        "peak_abs_in_ring": 25
+      },
+      "owner": {
+        "slot": 1,
+        "bank": 3,
+        "preset": 0,
+        "settled": 1,
+        "owner_generation": 3
+      },
+      "control_readback": [
+        {
+          "id": 118,
+          "value": 1
+        },
+        {
+          "id": 25,
+          "value": 45
+        },
+        {
+          "id": 26,
+          "value": 64
+        },
+        {
+          "id": 27,
+          "value": 127
+        },
+        {
+          "id": 24,
+          "value": 1
+        }
+      ],
+      "notes": [
+        60,
+        64,
+        67,
+        55,
+        72
+      ],
+      "virtual_nor_unchanged": true,
+      "pcm_sha256": "49f88bfd417d1844da484d1089a9657a149ac0ac84ecee92cee7dad2efa4da9d"
+    },
+    {
+      "arm": "delay-center-exact-wet",
+      "timing": {
+        "halves": 623,
+        "worst_us": 6508,
+        "raw_late": 0,
+        "xruns": 0,
+        "pcm_peak": 5331,
+        "frames": 319488
+      },
+      "ring": {
+        "current": 661.5,
+        "fb": 0.49889764189720154,
+        "wet": 0.8999999761581421,
+        "inv_stride": 0.0625,
+        "stride": 16,
+        "filled": 1024,
+        "mix": 127,
+        "refused": 0,
+        "sync": 1,
+        "enabled": 1,
+        "history_frames_loaded": 1024,
+        "settled_tap_audio_frames": 10584.0,
+        "peak_abs_in_ring": 24
+      },
+      "owner": {
+        "slot": 1,
+        "bank": 3,
+        "preset": 0,
+        "settled": 1,
+        "owner_generation": 3
+      },
+      "control_readback": [
+        {
+          "id": 118,
+          "value": 1
+        },
+        {
+          "id": 25,
+          "value": 45
+        },
+        {
+          "id": 26,
+          "value": 64
+        },
+        {
+          "id": 27,
+          "value": 127
+        },
+        {
+          "id": 24,
+          "value": 1
+        }
+      ],
+      "notes": [
+        60,
+        64,
+        67,
+        55,
+        72
+      ],
+      "virtual_nor_unchanged": true,
+      "pcm_sha256": "85856107eb1c14ad347843680331308b21be58a576ad15ac68aa3ba8fd3b86eb"
+    }
+  ],
+  "pro": [
+    {
+      "arm": "owner-epoch-link-wet",
+      "timing": {
+        "halves": 623,
+        "worst_us": 6506,
+        "raw_late": 0,
+        "xruns": 0,
+        "pcm_peak": 5331,
+        "frames": 319488
+      },
+      "ring": {
+        "current": 661.5,
+        "fb": 0.49889764189720154,
+        "wet": 0.8999999761581421,
+        "inv_stride": 0.0625,
+        "stride": 16,
+        "filled": 1024,
+        "mix": 127,
+        "refused": 0,
+        "sync": 1,
+        "enabled": 1,
+        "history_frames_loaded": 1024,
+        "settled_tap_audio_frames": 10584.0,
+        "peak_abs_in_ring": 25
+      },
+      "owner": {
+        "slot": 1,
+        "bank": 3,
+        "preset": 0,
+        "settled": 1,
+        "owner_generation": 3
+      },
+      "control_readback": [
+        {
+          "id": 118,
+          "value": 1
+        },
+        {
+          "id": 25,
+          "value": 45
+        },
+        {
+          "id": 26,
+          "value": 64
+        },
+        {
+          "id": 27,
+          "value": 127
+        },
+        {
+          "id": 24,
+          "value": 1
+        }
+      ],
+      "notes": [
+        60,
+        64,
+        67,
+        55,
+        72
+      ],
+      "virtual_nor_unchanged": true,
+      "pcm_sha256": "49f88bfd417d1844da484d1089a9657a149ac0ac84ecee92cee7dad2efa4da9d"
+    },
+    {
+      "arm": "delay-center-exact-wet",
+      "timing": {
+        "halves": 623,
+        "worst_us": 6497,
+        "raw_late": 0,
+        "xruns": 0,
+        "pcm_peak": 5331,
+        "frames": 319488
+      },
+      "ring": {
+        "current": 661.5,
+        "fb": 0.49889764189720154,
+        "wet": 0.8999999761581421,
+        "inv_stride": 0.0625,
+        "stride": 16,
+        "filled": 1024,
+        "mix": 127,
+        "refused": 0,
+        "sync": 1,
+        "enabled": 1,
+        "history_frames_loaded": 1024,
+        "settled_tap_audio_frames": 10584.0,
+        "peak_abs_in_ring": 24
+      },
+      "owner": {
+        "slot": 1,
+        "bank": 3,
+        "preset": 0,
+        "settled": 1,
+        "owner_generation": 3
+      },
+      "control_readback": [
+        {
+          "id": 118,
+          "value": 1
+        },
+        {
+          "id": 25,
+          "value": 45
+        },
+        {
+          "id": 26,
+          "value": 64
+        },
+        {
+          "id": 27,
+          "value": 127
+        },
+        {
+          "id": 24,
+          "value": 1
+        }
+      ],
+      "notes": [
+        60,
+        64,
+        67,
+        55,
+        72
+      ],
+      "virtual_nor_unchanged": true,
+      "pcm_sha256": "85856107eb1c14ad347843680331308b21be58a576ad15ac68aa3ba8fd3b86eb"
+    }
+  ]
+}

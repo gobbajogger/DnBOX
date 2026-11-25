@@ -1,0 +1,11 @@
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -1112,7 +1112,7 @@
+     static const x0x_param_t clock={"CLOCK",1,0,clocks};
+     if(slot==SJ6_DELAYSYNC)return &clock;
+     static const x0x_param_t delay[4]={{"ENABLE",1,0,0},{"MIX",127,0,0},{"TIME",127,0,0},{"FEEDBACK",127,0,0}};
+-    if(slot>=SJ6_DELAY24&&slot<=SJ6_DELAY27)return &delay[slot-SJ6_DELAY24];
++    if(slot>=SJ6_DELAY24&&slot<=SJ6_DELAY26)return &delay[slot-SJ6_DELAY24];
+ #endif
+     static const char *const wave[] = {"SINE", "TRI", "SAW", "SQ"};
+     static const char *const range[] = {"16FT", "8FT", "4FT"};

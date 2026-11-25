@@ -1,0 +1,464 @@
+{
+  "321": {
+    "state": 4088,
+    "max_nominal_macs_per_stereo_frame": 160.5,
+    "selected": [
+      {
+        "mode": "subband",
+        "f": 1000,
+        "fb": 0.499,
+        "rep": 1,
+        "carrier": -1.389,
+        "spur": -50.726,
+        "spur_hz": 804.8,
+        "norm_null": -16.527
+      },
+      {
+        "mode": "subband",
+        "f": 1000,
+        "fb": 0.499,
+        "rep": 4,
+        "carrier": -5.562,
+        "spur": -43.614,
+        "spur_hz": 312.2,
+        "norm_null": -6.464
+      },
+      {
+        "mode": "subband",
+        "f": 3000,
+        "fb": 0.499,
+        "rep": 1,
+        "carrier": -1.377,
+        "spur": -50.749,
+        "spur_hz": 3324.2,
+        "norm_null": -16.597
+      },
+      {
+        "mode": "subband",
+        "f": 3000,
+        "fb": 0.499,
+        "rep": 4,
+        "carrier": -5.498,
+        "spur": -46.478,
+        "spur_hz": 3598.7,
+        "norm_null": -6.536
+      },
+      {
+        "mode": "subband",
+        "f": 3400,
+        "fb": 0.499,
+        "rep": 1,
+        "carrier": -0.003,
+        "spur": -50.948,
+        "spur_hz": 3071.2,
+        "norm_null": -38.61
+      },
+      {
+        "mode": "subband",
+        "f": 3400,
+        "fb": 0.499,
+        "rep": 4,
+        "carrier": -0.009,
+        "spur": -42.559,
+        "spur_hz": 3200.4,
+        "norm_null": -32.815
+      }
+    ]
+  },
+  "193": {
+    "state": 3576,
+    "max_nominal_macs_per_stereo_frame": 96.5,
+    "selected": [
+      {
+        "mode": "subband",
+        "f": 1000,
+        "fb": 0.499,
+        "rep": 1,
+        "carrier": -3.925,
+        "spur": -52.777,
+        "spur_hz": 627.2,
+        "norm_null": -8.777
+      },
+      {
+        "mode": "subband",
+        "f": 1000,
+        "fb": 0.499,
+        "rep": 4,
+        "carrier": -15.754,
+        "spur": -51.14,
+        "spur_hz": 134.6,
+        "norm_null": -1.545
+      },
+      {
+        "mode": "subband",
+        "f": 3000,
+        "fb": 0.499,
+        "rep": 1,
+        "carrier": -3.942,
+        "spur": -35.406,
+        "spur_hz": 2514.0,
+        "norm_null": -8.738
+      },
+      {
+        "mode": "subband",
+        "f": 3000,
+        "fb": 0.499,
+        "rep": 4,
+        "carrier": -15.774,
+        "spur": -47.395,
+        "spur_hz": 2514.0,
+        "norm_null": -1.54
+      },
+      {
+        "mode": "subband",
+        "f": 3400,
+        "fb": 0.499,
+        "rep": 1,
+        "carrier": -0.004,
+        "spur": -51.402,
+        "spur_hz": 3248.8,
+        "norm_null": -38.818
+      },
+      {
+        "mode": "subband",
+        "f": 3400,
+        "fb": 0.499,
+        "rep": 4,
+        "carrier": -0.035,
+        "spur": -45.393,
+        "spur_hz": 3248.8,
+        "norm_null": -33.06
+      }
+    ]
+  },
+  "129": {
+    "state": 3320,
+    "max_nominal_macs_per_stereo_frame": 64.5,
+    "selected": [
+      {
+        "mode": "subband",
+        "f": 1000,
+        "fb": 0.499,
+        "rep": 1,
+        "carrier": -6.004,
+        "spur": -50.438,
+        "spur_hz": 1755.0,
+        "norm_null": -6.034
+      },
+      {
+        "mode": "subband",
+        "f": 1000,
+        "fb": 0.499,
+        "rep": 4,
+        "carrier": -24.018,
+        "spur": -53.228,
+        "spur_hz": 105.0,
+        "norm_null": -0.565
+      },
+      {
+        "mode": "subband",
+        "f": 3000,
+        "fb": 0.499,
+        "rep": 1,
+        "carrier": -5.78,
+        "spur": -22.696,
+        "spur_hz": 2514.0,
+        "norm_null": -6.166
+      },
+      {
+        "mode": "subband",
+        "f": 3000,
+        "fb": 0.499,
+        "rep": 4,
+        "carrier": -22.727,
+        "spur": -39.654,
+        "spur_hz": 2511.3,
+        "norm_null": -0.658
+      },
+      {
+        "mode": "subband",
+        "f": 3400,
+        "fb": 0.499,
+        "rep": 1,
+        "carrier": -0.049,
+        "spur": -51.418,
+        "spur_hz": 3550.3,
+        "norm_null": -38.238
+      },
+      {
+        "mode": "subband",
+        "f": 3400,
+        "fb": 0.499,
+        "rep": 4,
+        "carrier": -0.138,
+        "spur": -44.825,
+        "spur_hz": 3550.3,
+        "norm_null": -32.317
+      }
+    ]
+  },
+  "97": {
+    "state": 3192,
+    "max_nominal_macs_per_stereo_frame": 48.5,
+    "selected": [
+      {
+        "mode": "subband",
+        "f": 1000,
+        "fb": 0.499,
+        "rep": 1,
+        "carrier": -7.242,
+        "spur": -32.153,
+        "spur_hz": 1755.0,
+        "norm_null": -4.94
+      },
+      {
+        "mode": "subband",
+        "f": 1000,
+        "fb": 0.499,
+        "rep": 4,
+        "carrier": -28.912,
+        "spur": -51.831,
+        "spur_hz": 105.0,
+        "norm_null": -0.317
+      },
+      {
+        "mode": "subband",
+        "f": 3000,
+        "fb": 0.499,
+        "rep": 1,
+        "carrier": -5.598,
+        "spur": -17.228,
+        "spur_hz": 2514.0,
+        "norm_null": -6.109
+      },
+      {
+        "mode": "subband",
+        "f": 3000,
+        "fb": 0.499,
+        "rep": 4,
+        "carrier": -21.143,
+        "spur": -32.755,
+        "spur_hz": 2511.3,
+        "norm_null": -0.785
+      },
+      {
+        "mode": "subband",
+        "f": 3400,
+        "fb": 0.499,
+        "rep": 1,
+        "carrier": -0.052,
+        "spur": -38.307,
+        "spur_hz": 2112.9,
+        "norm_null": -35.071
+      },
+      {
+        "mode": "subband",
+        "f": 3400,
+        "fb": 0.499,
+        "rep": 4,
+        "carrier": -0.166,
+        "spur": -38.425,
+        "spur_hz": 2112.9,
+        "norm_null": -30.844
+      }
+    ]
+  },
+  "65": {
+    "state": 3064,
+    "max_nominal_macs_per_stereo_frame": 32.5,
+    "selected": [
+      {
+        "mode": "subband",
+        "f": 1000,
+        "fb": 0.499,
+        "rep": 1,
+        "carrier": -8.379,
+        "spur": -21.939,
+        "spur_hz": 1755.0,
+        "norm_null": -4.094
+      },
+      {
+        "mode": "subband",
+        "f": 1000,
+        "fb": 0.499,
+        "rep": 4,
+        "carrier": -32.513,
+        "spur": -46.035,
+        "spur_hz": 1757.6,
+        "norm_null": -0.208
+      },
+      {
+        "mode": "subband",
+        "f": 3000,
+        "fb": 0.499,
+        "rep": 1,
+        "carrier": -3.676,
+        "spur": -10.52,
+        "spur_hz": 2511.3,
+        "norm_null": -6.798
+      },
+      {
+        "mode": "subband",
+        "f": 3000,
+        "fb": 0.499,
+        "rep": 4,
+        "carrier": -10.887,
+        "spur": -17.717,
+        "spur_hz": 2511.3,
+        "norm_null": -2.445
+      },
+      {
+        "mode": "subband",
+        "f": 3400,
+        "fb": 0.499,
+        "rep": 1,
+        "carrier": -0.042,
+        "spur": -19.173,
+        "spur_hz": 2112.9,
+        "norm_null": -17.692
+      },
+      {
+        "mode": "subband",
+        "f": 3400,
+        "fb": 0.499,
+        "rep": 4,
+        "carrier": 0.146,
+        "spur": -18.981,
+        "spur_hz": 2112.9,
+        "norm_null": -17.039
+      }
+    ]
+  },
+  "49": {
+    "state": 3000,
+    "max_nominal_macs_per_stereo_frame": 24.5,
+    "selected": [
+      {
+        "mode": "subband",
+        "f": 1000,
+        "fb": 0.499,
+        "rep": 1,
+        "carrier": -7.695,
+        "spur": -16.995,
+        "spur_hz": 1755.0,
+        "norm_null": -4.369
+      },
+      {
+        "mode": "subband",
+        "f": 1000,
+        "fb": 0.499,
+        "rep": 4,
+        "carrier": -27.93,
+        "spur": -33.825,
+        "spur_hz": 3754.9,
+        "norm_null": -0.349
+      },
+      {
+        "mode": "subband",
+        "f": 3000,
+        "fb": 0.499,
+        "rep": 1,
+        "carrier": -2.301,
+        "spur": -6.586,
+        "spur_hz": 2511.3,
+        "norm_null": -5.549
+      },
+      {
+        "mode": "subband",
+        "f": 3000,
+        "fb": 0.499,
+        "rep": 4,
+        "carrier": -2.484,
+        "spur": -6.757,
+        "spur_hz": 2511.3,
+        "norm_null": -2.478
+      },
+      {
+        "mode": "subband",
+        "f": 3400,
+        "fb": 0.499,
+        "rep": 1,
+        "carrier": -0.028,
+        "spur": -11.682,
+        "spur_hz": 2112.9,
+        "norm_null": -9.655
+      },
+      {
+        "mode": "subband",
+        "f": 3400,
+        "fb": 0.499,
+        "rep": 4,
+        "carrier": 1.614,
+        "spur": -9.949,
+        "spur_hz": 2112.9,
+        "norm_null": -5.617
+      }
+    ]
+  },
+  "33": {
+    "state": 2936,
+    "max_nominal_macs_per_stereo_frame": 16.5,
+    "selected": [
+      {
+        "mode": "subband",
+        "f": 1000,
+        "fb": 0.499,
+        "rep": 1,
+        "carrier": -4.795,
+        "spur": -9.508,
+        "spur_hz": 1755.0,
+        "norm_null": -5.165
+      },
+      {
+        "mode": "subband",
+        "f": 1000,
+        "fb": 0.499,
+        "rep": 4,
+        "carrier": -8.254,
+        "spur": -3.481,
+        "spur_hz": 3757.5,
+        "norm_null": 1.015
+      },
+      {
+        "mode": "subband",
+        "f": 3000,
+        "fb": 0.499,
+        "rep": 1,
+        "carrier": -1.126,
+        "spur": -3.129,
+        "spur_hz": 2511.3,
+        "norm_null": -2.279
+      },
+      {
+        "mode": "subband",
+        "f": 3000,
+        "fb": 0.499,
+        "rep": 4,
+        "carrier": 7.824,
+        "spur": 6.018,
+        "spur_hz": 2511.3,
+        "norm_null": 9.808
+      },
+      {
+        "mode": "subband",
+        "f": 3400,
+        "fb": 0.499,
+        "rep": 1,
+        "carrier": -0.013,
+        "spur": -5.385,
+        "spur_hz": 2112.9,
+        "norm_null": -2.833
+      },
+      {
+        "mode": "subband",
+        "f": 3400,
+        "fb": 0.499,
+        "rep": 4,
+        "carrier": 8.242,
+        "spur": 3.735,
+        "spur_hz": 2112.9,
+        "norm_null": 9.558
+      }
+    ]
+  }
+}
