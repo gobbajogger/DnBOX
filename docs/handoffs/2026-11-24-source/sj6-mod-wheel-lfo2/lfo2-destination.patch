@@ -1,0 +1,63 @@
+--- a/firmware/src/dsp/juno6.h
++++ b/firmware/src/dsp/juno6.h
+@@ -89,7 +89,7 @@
+  float vibrato_depth, vibrato_ratio;
+  uint64_t lfo2_entropy_state;
+  float lfo2_hold_elapsed, lfo2_hold_period, lfo2_hold_sample;
+- uint8_t osc1_level_code, mod_destination, mod_wheel_lfo1; /* 0 untouched, 1..128 physical CC1 */
++ uint8_t osc1_level_code, mod_destination, mod_wheel_lfo1, mod_wheel_lfo2; /* 0 untouched, 1..128 physical CC1 */
+ #endif
+ #endif
+ } juno6_t;
+--- a/firmware/src/dsp/juno6_factory.inc
++++ b/firmware/src/dsp/juno6_factory.inc
+@@ -310,7 +310,7 @@
+ static void prepare_lfo_step(juno6_t *s, unsigned lfo)
+ {
+     juno6_lfo_view view;
+-    read_lfo(s,lfo,lfo ? 0u:s->mod_wheel_lfo1,&view);
++    read_lfo(s,lfo,lfo==0 ? s->mod_wheel_lfo1 : lfo==1 ? s->mod_wheel_lfo2 : 0u,&view);
+     float advance = view.hz * ((float)SJ6_LFO_TURN / s->sample_rate) + .5f;
+     uint64_t step = sj6_lfo_unsigned_phase(advance);
+     s->lfo_step_q40[lfo] = step;
+@@ -326,7 +326,7 @@
+ int juno6_set_mod_destination(juno6_t *s,unsigned selected)
+ {
+     if (selected==6u) selected=0; /* Build-9 final segment aliases the default. */
+-    if (!s || !s->typed || selected>1u) return 0;
++    if (!s || !s->typed || (selected>1u && selected!=4u)) return 0;
+     s->mod_destination=(uint8_t)selected;
+     return 1;
+ }
+@@ -338,9 +338,11 @@
+         s->vibrato_depth=sj6_vibrato_depth((float)value/127.f);
+         return 1;
+     }
+-    if (s->mod_wheel_lfo1!=value+1u) {
+-        s->mod_wheel_lfo1=(uint8_t)(value+1u);
+-        prepare_lfo_step(s,0);
++    const unsigned lfo = s->mod_destination==4u;
++    uint8_t *effective = lfo ? &s->mod_wheel_lfo2 : &s->mod_wheel_lfo1;
++    if (*effective!=value+1u) {
++        *effective=(uint8_t)(value+1u);
++        prepare_lfo_step(s,lfo);
+     }
+     return 1;
+ }
+@@ -356,7 +358,7 @@
+ void juno6_set_lfo_words(juno6_t *s, const juno6_lfo_words *words, int reset_phase)
+ {
+     if (reset_phase) {
+-        s->mod_wheel_lfo1=0;
++        s->mod_wheel_lfo1=s->mod_wheel_lfo2=0;
+         s->lfo2_hold_sample = s->lfo2_hold_elapsed = 0.f;
+         s->lfo2_pwm_until_tick = 0;
+     }
+@@ -375,6 +377,7 @@
+ {
+     if (position >= 0) {
+         if (lfo==0) s->mod_wheel_lfo1=0;
++        if (lfo==1) s->mod_wheel_lfo2=0;
+         (void)dnbx_store_raw(&s->core, sj6_lfo_rate_id[lfo], position * (1.f / 127.f));
+     }
+     float old_mode;

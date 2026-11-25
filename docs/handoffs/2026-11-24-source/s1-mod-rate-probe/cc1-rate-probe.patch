@@ -1,0 +1,81 @@
+--- a/firmware/src/app/s1c_part.c
++++ b/firmware/src/app/s1c_part.c
+@@ -425,9 +425,23 @@
+ 
+ /* AudioKit Manager routes normalized CC1 to the inverted logarithmic
+  * 120..7600 scale, times 3. Front end clamps cutoff to 64..22050 Hz. */
++#if X0X_SYNTHONE_PATCH && defined(X0X_S1_MOD_RATE_PROBE) && X0X_S1_MOD_RATE_PROBE
++int s1_part_mod_route(s1_dry_part *part, unsigned route)
++{
++    if (route > 2u) return 0;
++    part->mod_wheel_route = (uint8_t)route;
++    return 1;
++}
++#endif
+ void s1_part_mod_wheel(s1_dry_part *part, unsigned cc1)
+ {
+     if (cc1 > 127u) cc1 = 127u;
++#if X0X_SYNTHONE_PATCH && defined(X0X_S1_MOD_RATE_PROBE) && X0X_S1_MOD_RATE_PROBE
++    if (part->mod_wheel_route) {
++        s1c_front_mod_rate(&part->e, part->mod_wheel_route == 1u ? 15u : 47u, cc1);
++        return;
++    }
++#endif
+     const float cutoff = 360.f * powf(7600.f / 120.f, (float)(127u-cc1) / 127.f);
+     (void)s1c_front_set(&part->e, P_CUT, cutoff);
+ }
+--- a/firmware/src/app/s1c_part.h
++++ b/firmware/src/app/s1c_part.h
+@@ -31,6 +31,9 @@
+ #endif
+     float filter_unlinked[4];
+     uint8_t filter_link;
++#if defined(X0X_S1_MOD_RATE_PROBE) && X0X_S1_MOD_RATE_PROBE
++    uint8_t mod_wheel_route;
++#endif
+ #endif
+     uint8_t damper, held;      /* held: voices kept sounding by the damper */
+ } s1_dry_part;
+@@ -60,6 +63,10 @@
+ #endif
+ int s1_part_param(s1_dry_part *part, unsigned id, float value);
+ /* Original Init route (cutoff). Performance-only, no Sound or REC lane. */
++#if X0X_SYNTHONE_PATCH && defined(X0X_S1_MOD_RATE_PROBE) && X0X_S1_MOD_RATE_PROBE
++/* Diagnostic only: select without dispatching a gesture. No product writer. */
++int s1_part_mod_route(s1_dry_part *, unsigned route);
++#endif
+ void s1_part_mod_wheel(s1_dry_part *part, unsigned cc1);
+ int s1_part_note(s1_dry_part *part, unsigned key, unsigned velocity);
+ int s1_part_active(const s1_dry_part *part);
+--- a/firmware/src/dsp/s1c/s1c_front.c
++++ b/firmware/src/dsp/s1c/s1c_front.c
+@@ -60,6 +60,17 @@
+ { return 1.f / rate_time(bpm, nearest_division(x, bpm, lo, hi)); }
+ 
+ #if X0X_SYNTHONE_PATCH
++#if defined(X0X_S1_MOD_RATE_PROBE) && X0X_S1_MOD_RATE_PROBE
++void s1c_front_mod_rate(s1c *s, unsigned id, unsigned cc1)
++{
++    const float x = (float)cc1 / 127.f;
++    const float lo = MINV(id), hi = MAXV(id);
++    const float hz = s->t[F_TSYNC] > 0.f
++        ? 1.f / rate_time(s->t[F_ARPRATE], (int)(x * (F_RATES - 1)))
++        : lo + powf(x, 2.5f) * (hi - lo);
++    (void)s1c_front_set(s, id, hz);
++}
++#endif
+ unsigned s1c_front_lfo_steps(const s1c *s)
+ {
+     if (s->t[F_TSYNC] <= 0.f) return 127u;
+--- a/firmware/src/dsp/s1c/s1c_front.h
++++ b/firmware/src/dsp/s1c/s1c_front.h
+@@ -9,6 +9,9 @@
+ float s1c_front_clamp(unsigned id, float value);
+ void s1c_front_bounds(unsigned id, float *minimum, float *maximum);
+ #if X0X_SYNTHONE_PATCH
++#if defined(X0X_S1_MOD_RATE_PROBE) && X0X_S1_MOD_RATE_PROBE
++void s1c_front_mod_rate(s1c *, unsigned id, unsigned cc1);
++#endif
+ unsigned s1c_front_lfo_steps(const s1c *s);
+ unsigned s1c_front_lfo_position(const s1c *s, unsigned id);
+ void s1c_front_lfo_apply(s1c *s, unsigned id, unsigned code);

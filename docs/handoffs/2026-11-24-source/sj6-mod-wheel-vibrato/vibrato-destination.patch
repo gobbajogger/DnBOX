@@ -1,0 +1,55 @@
+--- a/firmware/src/dsp/juno6.h
++++ b/firmware/src/dsp/juno6.h
+@@ -89,7 +89,7 @@
+  float vibrato_depth, vibrato_ratio;
+  uint64_t lfo2_entropy_state;
+  float lfo2_hold_elapsed, lfo2_hold_period, lfo2_hold_sample;
+- uint8_t osc1_level_code, mod_wheel_lfo1; /* 0 untouched, 1..128 physical CC1 */
++ uint8_t osc1_level_code, mod_destination, mod_wheel_lfo1; /* 0 untouched, 1..128 physical CC1 */
+ #endif
+ #endif
+ } juno6_t;
+@@ -138,6 +138,8 @@
+ void juno6_apply_panel_master(juno6_t *, unsigned position);
+ /* Transient Build-9 default MOD destination, LFO1 RATE. Audio owner only. */
+ int juno6_set_mod_wheel(juno6_t *, unsigned value);
++/* ID179 original editor index; only source-qualified receivers are enabled. */
++int juno6_set_mod_destination(juno6_t *, unsigned selected);
+ void juno6_set_lfo_words(juno6_t *, const juno6_lfo_words *, int reset_phase);
+ void juno6_set_panel_lfo(juno6_t *, unsigned lfo, int position, unsigned hz_mode);
+ void juno6_set_lfo_tempo(juno6_t *, float bpm);
+--- a/firmware/src/dsp/juno6_factory.inc
++++ b/firmware/src/dsp/juno6_factory.inc
+@@ -321,9 +321,23 @@
+                           s->lfo_sync | bit : s->lfo_sync & ~bit);
+ }
+ 
++static float sj6_vibrato_depth(float unit) { return 12.f * fm_powf(unit,3.03f); }
++
++int juno6_set_mod_destination(juno6_t *s,unsigned selected)
++{
++    if (selected==6u) selected=0; /* Build-9 final segment aliases the default. */
++    if (!s || !s->typed || selected>1u) return 0;
++    s->mod_destination=(uint8_t)selected;
++    return 1;
++}
++
+ int juno6_set_mod_wheel(juno6_t *s,unsigned value)
+ {
+     if (!s || !s->typed || value>127u) return 0;
++    if (s->mod_destination==1u) {
++        s->vibrato_depth=sj6_vibrato_depth((float)value/127.f);
++        return 1;
++    }
+     if (s->mod_wheel_lfo1!=value+1u) {
+         s->mod_wheel_lfo1=(uint8_t)(value+1u);
+         prepare_lfo_step(s,0);
+@@ -599,7 +613,7 @@
+     float hz;
+     if (!(depth_unit >= 0.f && depth_unit <= 1.f) ||
+         dnbx_lfo_from_unit(rate_unit, &hz) != DNBX_OK) return;
+-    s->vibrato_depth = 12.f * fm_powf(depth_unit, 3.03f);
++    s->vibrato_depth = sj6_vibrato_depth(depth_unit);
+     s->vibrato_step = (uint32_t)(hz * ((float)SJ6_VIBRATO_TICK * 0x1p32f / s->sample_rate) + .5f);
+     if (reset) s->vibrato_phase = s->vibrato_left = 0;
+ }

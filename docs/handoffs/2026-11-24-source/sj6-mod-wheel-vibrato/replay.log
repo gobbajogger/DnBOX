@@ -1,0 +1,14 @@
+juno6.c: OK
+juno6.h: OK
+juno6_factory.inc: OK
+dnbx_core.c: OK
+FAIL 10: juno6_set_mod_destination
+patching file firmware/src/dsp/juno6.h
+patching file firmware/src/dsp/juno6_factory.inc
+juno6.c: OK
+juno6.h: OK
+juno6_factory.inc: OK
+owner=0: 127/127 stereo blocks changed with audible vibrato; matched reference transfer exact
+owner=1: 127/127 stereo blocks changed with audible vibrato; matched reference transfer exact
+PASS DSP 2992 B
+b23b1a8bdf25f06b889c28044c460d3974c443294387dc11f2db2c5e1f545cd0  /tmp/sj6-mod-replay.LGj9Cw/after.pcm

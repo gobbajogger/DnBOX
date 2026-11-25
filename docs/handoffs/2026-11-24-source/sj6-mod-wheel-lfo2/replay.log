@@ -1,0 +1,21 @@
+juno6.c: OK
+juno6.h: OK
+juno6_factory.inc: OK
+dnbx_core.c: OK
+patching file firmware/src/dsp/juno6.h
+patching file firmware/src/dsp/juno6_factory.inc
+juno6.c: OK
+juno6.h: OK
+juno6_factory.inc: OK
+FAIL 18: juno6_set_mod_destination(s,4)
+patching file firmware/src/dsp/juno6.h
+patching file firmware/src/dsp/juno6_factory.inc
+juno6.c: OK
+juno6.h: OK
+juno6_factory.inc: OK
+owner=0 mode=0 changed=79/80 blocks; opposite oscillator and direct route exact
+owner=0 mode=1 changed=79/80 blocks; opposite oscillator and direct route exact
+owner=1 mode=0 changed=79/80 blocks; opposite oscillator and direct route exact
+owner=1 mode=1 changed=79/80 blocks; opposite oscillator and direct route exact
+PASS DSP size 2992
+b23b1a8bdf25f06b889c28044c460d3974c443294387dc11f2db2c5e1f545cd0  /tmp/sj6-mod-replay.7FuK8Z/after.pcm
