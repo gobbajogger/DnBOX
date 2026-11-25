@@ -1,0 +1,53 @@
+{
+  "model": "pro",
+  "owner": 0,
+  "compiled_ram_offsets": {
+    "partBytes": 5348,
+    "gateCfg": 3726,
+    "gateTicks": 3800,
+    "latchTicks": 3828,
+    "beatTick": 3812,
+    "gateOpen": 3832,
+    "noteCount": 3833,
+    "arpKind": 5344,
+    "arpDiv": 3749,
+    "drumCh": 34,
+    "sound": 40
+  },
+  "keys": "2350:e2:+4,2600:e2:+4,3100:SEQ,3150:SEQ^,3310:e1:+4,3520:e1:+4,3730:e1:+4,3820:SEQ REC,3880:SEQ REC^,3990:k14@127,4130:e6:-2,4310:e6:-2",
+  "ui_first4": [
+    8,
+    2,
+    1,
+    0
+  ],
+  "state": [
+    {
+      "gateCfg": 47,
+      "gateTicks": 30563205,
+      "latchTicks": 32514048,
+      "beatTick": 6422272,
+      "gateOpen": 1,
+      "noteCount": 1,
+      "arpKind": 3,
+      "arpDiv": 15
+    },
+    {
+      "gateCfg": 50,
+      "gateTicks": 32514048,
+      "latchTicks": 0,
+      "beatTick": 42991616,
+      "gateOpen": 0,
+      "noteCount": 0,
+      "arpKind": 3,
+      "arpDiv": 15
+    }
+  ],
+  "halves": 327,
+  "max_us": 8184,
+  "raw_late": 0,
+  "audio_has_nonzero_pcm": true,
+  "elf_sha256": "7e3f814cf6c6ed598d4470523ada21d56442a23e3f85afa179a67cc7eeac4be4",
+  "flash_unchanged": true,
+  "lcd_sha256": "d7dbdadb46c1d0539ae37d01fcc6a502111a8748adba8187ca0adafa0d0ecda1"
+}

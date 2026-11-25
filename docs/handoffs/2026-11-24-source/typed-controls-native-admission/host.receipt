@@ -1,0 +1,8 @@
+writer owner 0 pan stores 32 / 0.250000000 applied 0.277777791 sync=1
+writer owner 1 pan stores 48 / 0.500000000 applied 0.416666687 sync=1
+PASS exact writer produced coherent physical-project tuple and inner files using production stage/save
+trial owner 0 recalled applied pan rate 0.277777791 sync=1
+trial owner 1 recalled applied pan rate 0.416666687 sync=1
+PASS trial policy real portable/flash admission, unsupported/torn refusal, both-owner RAM editing and playback, no saves
+PASS flag-off stock-equivalent reader accepts ordinary and rejects typed newer media, zero writes
+PASS full typed wheel/A4/RV/clock/gate/transpose/CRUSH/Delay/AutoPan/ID64/S1 Feedback/Classic II/Both/RANDOM2 mixed project with S1 MOD/PB/ID51 + SJ6 ID137, real held pitch, Undo/Redo and staged recall: 893 checks

@@ -1,0 +1,170 @@
+--- a/firmware/src/app/engine_arp.inc
++++ b/firmware/src/app/engine_arp.inc
+@@ -8,6 +8,9 @@
+ static volatile uint32_t arp_revision[NBASS];
+ static engine_arp_cfg arp_pending[NBASS];
+ static volatile uint8_t arp_pending_flag[NBASS];
++#if X0X_SUPERJ6_BUILTIN_INIT
++static uint8_t arp_only_gate[NBASS];
++#endif
+ 
+ static int arp_kind_ok(unsigned v)
+ {
+@@ -92,7 +95,10 @@
+         engine_arp_cfg c = arp_pending[v];
+         c.amp2_mask = original_bass[v].arp.cfg.amp2_mask;          /* AMP2 is not an arp edit */
+         __builtin_memcpy(c.amp2, original_bass[v].arp.cfg.amp2, sizeof c.amp2);
+-        (void)original_runtime_arp_config(&original_bass[v], &c);
++#if X0X_SUPERJ6_BUILTIN_INIT
++        if(!(arp_only_gate[v] && original_runtime_sj6_live_gate(&original_bass[v],c.gate)))
++#endif
++            (void)original_runtime_arp_config(&original_bass[v], &c);
+         arp_store(v, &c);
+         ++arp_revision[v];
+     }
+@@ -163,6 +169,10 @@
+         else {
+             engine_arp_cfg *c = &arp_pending[v];
+             if (!arp_pending_flag[v]) *c = original_bass[v].arp.cfg;
++#if X0X_SUPERJ6_BUILTIN_INIT
++            arp_only_gate[v]=(uint8_t)(step==0xffu && field==ARP_F_GATE &&
++                (!arp_pending_flag[v] || arp_only_gate[v]));
++#endif
+             if (step != 0xFFu) {
+                 uint16_t bit = (uint16_t)(1u << step);
+                 int lim = original_bass[v].kind == ORIGINAL_SOUND_SYNTHONE ? 12 : 24;
+@@ -209,7 +219,12 @@
+     int status = S1_EDIT_REJECTED;
+     if (arp_kind_ok(v)) {
+         if (project_hold) status = S1_EDIT_BUSY;
+-        else { arp_pending[v] = *c; arp_pending_flag[v] = 1; status = S1_EDIT_QUEUED; }
++        else {
++#if X0X_SUPERJ6_BUILTIN_INIT
++            arp_only_gate[v]=0;
++#endif
++            arp_pending[v] = *c; arp_pending_flag[v] = 1; status = S1_EDIT_QUEUED;
++        }
+     }
+     plat_cq_unlock(lock);
+     return status;
+--- a/firmware/src/app/original_runtime.c
++++ b/firmware/src/app/original_runtime.c
+@@ -503,6 +503,16 @@
+     S1Sequencer_clock(&a->seq, &a->prm, step, phase, a->clk_force);
+     a->clk_force = 0;
+ }
++#if X0X_SUPERJ6_BUILTIN_INIT
++int original_runtime_sj6_live_gate(original_runtime_part *p,unsigned gate)
++{
++    if(!p || p->status!=ORIGINAL_RUNTIME_OK || p->kind!=ORIGINAL_SOUND_JUNO ||
++       !p->dsp.juno.synth.typed || gate<1u || gate>100u) return 0;
++    p->arp.cfg.gate=(uint8_t)gate;
++    S1Sequencer_liveGate(&p->arp.seq,&p->arp.prm,gate);
++    return 1;
++}
++#endif
+ int original_runtime_arp_config(original_runtime_part *p, const engine_arp_cfg *c)
+ {
+     if (!p || !c) return 0;
+--- a/firmware/src/app/original_runtime.h
++++ b/firmware/src/app/original_runtime.h
+@@ -95,6 +95,9 @@
+ int original_runtime_env_view(const original_runtime_part *, float adsr[4], float *level, int *state);
+ #if X0X_ARP_ENGINE
+ /* Apply an arp block (on/off transitions hand held keys over). 1 = applied. */
++#if X0X_SUPERJ6_BUILTIN_INIT
++int original_runtime_sj6_live_gate(original_runtime_part *,unsigned);
++#endif
+ int original_runtime_arp_config(original_runtime_part *, const engine_arp_cfg *);
+ /* Display only: 1 while running, the step that last sounded, frames since. */
+ /* Per block, before render: the DnBOX transport clock (seq_t metronome).
+--- a/firmware/src/dsp/synthone/sequencer/S1Sequencer.c
++++ b/firmware/src/dsp/synthone/sequencer/S1Sequencer.c
+@@ -31,6 +31,9 @@
+     s->mStepCounter = 0;
+     s->lastPosition = -1;
+     s->gateOpen = 0;
++#if X0X_SUPERJ6_BUILTIN_INIT
++    s->liveGateTicks=0;
++#endif
+     s->sequencerLastNotesCount = 0;
+ #if X0X_SUPERJ6_BUILTIN_INIT
+     s->saga_index = 0;
+@@ -42,6 +45,9 @@
+     for (unsigned i = 0; i < s->sequencerLastNotesCount; ++i) off(ctx, s->sequencerLastNotes[i]);
+     s->sequencerLastNotesCount = 0;
+     s->gateOpen = 0;
++#if X0X_SUPERJ6_BUILTIN_INIT
++    s->liveGateTicks=0;
++#endif
+ }
+ 
+ void S1Sequencer_reset(S1Sequencer *s, int resetNotes, void *ctx, KeyOffCallback off)
+@@ -106,7 +112,26 @@
+ #endif
+     return p->arpDirection == ArpeggiatorMode_UpDown && m > 1 ? 2 * m - 2 : m;
+ }
+-static uint32_t gateLength(const S1SequencerParams *p) { return p->gateTicks; }
++static uint32_t gateLength(const S1Sequencer *s,const S1SequencerParams *p)
++{
++#if X0X_SUPERJ6_BUILTIN_INIT
++    if (s->liveGateTicks) return s->liveGateTicks;
++#endif
++    (void)s;
++    return p->gateTicks;
++}
++#if X0X_SUPERJ6_BUILTIN_INIT
++void S1Sequencer_liveGate(S1Sequencer *s,S1SequencerParams *p,unsigned percent)
++{
++    if (p->seqGate==percent) return;
++    /* Positive legacy Gate mode has a nonzero threshold even at the
++     * shortest admitted clock; UINT32_MAX retains the full step. */
++    if (s->gateOpen && s->sequencerLastNotesCount && !s->liveGateTicks)
++        s->liveGateTicks=p->gateTicks;
++    p->seqGate=(uint8_t)percent;
++    S1Sequencer_setStep(p,p->arpSeqTempoMultiplier);
++}
++#endif
+ void S1Sequencer_setStep(S1SequencerParams *p, uint32_t ticks)
+ {
+     p->arpSeqTempoMultiplier = ticks;
+@@ -122,7 +147,7 @@
+     if (!(arpSeqIsOn || s->sequencerLastNotesCount)) return 0;
+     const uint32_t next = s->mBeatTime + p->arpBeatsPerSample;
+     if (next >= p->arpSeqTempoMultiplier) return 1;                 /* r1 < r0 */
+-    return s->gateOpen && s->sequencerLastNotesCount && next >= gateLength(p);
++    return s->gateOpen && s->sequencerLastNotesCount && next >= gateLength(s,p);
+ }
+ 
+ void S1Sequencer_process(S1Sequencer *s, const S1SequencerParams *p, const NoteNumber *held, int heldNoteNumbersAECount,
+@@ -159,7 +184,7 @@
+         }
+         s->mBeatTime = newBeatTime;
+         // SuperJ6 seqGate: the step's notes end early
+-        if (!crossed && s->gateOpen && s->mBeatTime >= gateLength(p)) turnOffLastNotes(s, ctx, off);
++        if (!crossed && s->gateOpen && s->mBeatTime >= gateLength(s,p)) turnOffLastNotes(s, ctx, off);
+ 
+         // If keys are now held, or if beat boundary was crossed
+         if (crossed || (firstTimeAnyKeysHeld
+--- a/firmware/src/dsp/synthone/sequencer/S1Sequencer.h
++++ b/firmware/src/dsp/synthone/sequencer/S1Sequencer.h
+@@ -60,6 +60,9 @@
+     int mStepCounter;
+     int lastPosition;                   /* DnBOX H3: sequence position that last sounded */
+     int mStepBase;                      /* DnBOX: ARP order restarts here (press / transport start) */
++#if X0X_SUPERJ6_BUILTIN_INIT
++    uint32_t liveGateTicks;            /* prior active Saga gate; 0 unlatched */
++#endif
+     uint8_t gateOpen;
+     uint8_t sequencerLastNotesCount;
+     uint8_t sequencerLastNotes[S1_SEQ_MAX_HELD];
+@@ -78,6 +81,9 @@
+                          void *ctx, KeyOnCallback on, KeyOffCallback off);
+ int S1Sequencer_getArpBeatCount(const S1Sequencer *);
+ /* Set the step length (and its gate) in ticks. */
++#if X0X_SUPERJ6_BUILTIN_INIT
++void S1Sequencer_liveGate(S1Sequencer *, S1SequencerParams *, unsigned);
++#endif
+ void S1Sequencer_setStep(S1SequencerParams *, uint32_t ticks);
+ /* DnBOX: follow the transport. step/phase = clock position before this sample's
+  * increment (step -1 just before the first step); force = transport (re)start. */

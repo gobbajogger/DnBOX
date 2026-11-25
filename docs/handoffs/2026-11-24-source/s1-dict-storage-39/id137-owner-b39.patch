@@ -1,0 +1,282 @@
+--- a/firmware/src/app/sj6_137_host_witness.h
++++ b/firmware/src/app/sj6_137_host_witness.h
+@@ -82,6 +82,18 @@
+ #if defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE
+ enum { SJ6_ARP_RANDOM_BYTE=26 };
+ #endif
++#if X0X_S1_DELAY_TRACK_TEST
++enum { S1_DICT_BYTE=39, S1_DICT_MAX=50, S1_DICT_INIT=25, S1_DICT_PARAM=137 };
++_Static_assert(S1_DICT_BYTE>=NPARAMS_MAX && S1_DICT_BYTE<2u*NPARAMS_MAX,"S1 Delay tracking belongs in second owner row");
++static inline unsigned s1_dict_encode(unsigned pos)
++{ return pos==S1_DICT_INIT ? 0u : pos+(pos<S1_DICT_INIT); }
++static inline unsigned s1_dict_decode(unsigned code)
++{ return code ? code-(code<=S1_DICT_INIT) : S1_DICT_INIT; }
++static inline unsigned s1_dict_read(const sound_t *s,unsigned owner)
++{ return s->v[T_303][8+2u*owner+S1_DICT_BYTE/NPARAMS_MAX][S1_DICT_BYTE%NPARAMS_MAX]; }
++static inline void s1_dict_store(sound_t *s,unsigned owner,unsigned code)
++{ s->v[T_303][8+2u*owner+S1_DICT_BYTE/NPARAMS_MAX][S1_DICT_BYTE%NPARAMS_MAX]=(uint8_t)code; }
++#endif
+ static inline int canonical137(const sound_t *s) {
+  for (unsigned v=0;v<2;++v) {
+   const uint8_t *b=read137(s,v);
+@@ -146,6 +158,9 @@
+ #if defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE
+    if(i==SJ6_ARP_RANDOM_BYTE){if(x!=0u && x!=2u)return 0;continue;}
+ #endif
++#if X0X_S1_DELAY_TRACK_TEST
++   if(i==S1_DICT_BYTE){if(x>S1_DICT_MAX)return 0;continue;}
++#endif
+    if (x) return 0;
+   }
+  }
+--- a/firmware/src/app/original_presets.inc
++++ b/firmware/src/app/original_presets.inc
+@@ -703,6 +703,51 @@
+ }
+ #endif
+ #ifdef DNBOX_137_HOST_WITNESS
++#if X0X_S1_DELAY_TRACK_TEST
++/* An Init-owned Delay input ratio, never a T_MIX or global FX address. */
++static void s1_typed_dict_apply(const sound_t *sound,unsigned owner)
++{
++    if(live_s1_mod(sound,owner) && original_bass[owner].kind==ORIGINAL_SOUND_SYNTHONE) {
++        unsigned code=s1_dict_read(sound,owner);
++        if(code<=S1_DICT_MAX)
++            (void)s1c_front_set(&original_bass[owner].dsp.synthone.e,S1_DICT_PARAM,
++                               (float)(50u+s1_dict_decode(code))*.01f);
++    }
++}
++int s1_typed_dict_position(unsigned owner)
++{
++    if(!live_s1_mod(mot_base_snd,owner) ||
++       original_bass[owner].kind!=ORIGINAL_SOUND_SYNTHONE) return -1;
++    unsigned code=s1_dict_read(mot_base_snd,owner);
++    return code<=S1_DICT_MAX ? (int)s1_dict_decode(code) : -1;
++}
++int s1_typed_dict_choose(unsigned owner,unsigned pos)
++{
++    if(pos>S1_DICT_MAX || s1_typed_dict_position(owner)<0)return 0;
++    engine_project_hold(1);
++    int before=s1_typed_dict_position(owner);
++    int ok=before>=0 && (unsigned)before!=pos && s1_typed_tuple_editable() &&
++           !ui_project_busy() && !engine_bass_preset_pending(owner) && !note_lock_applied[owner];
++    if(ok) {
++        s1_dict_store((sound_t *)mot_base_snd,owner,s1_dict_encode(pos));
++        s1_typed_dict_apply(mot_base_snd,owner);
++    }
++    engine_project_hold(0);
++    return ok;
++}
++int s1_typed_dict_undo_ready(unsigned mask)
++{
++    if(!s1_typed_tuple_editable())return 0;
++    for(unsigned v=0;v<NBASS;v++)
++        if((mask&(1u<<v)) && live_s1_mod(mot_base_snd,v) &&
++           (note_lock_applied[v] || engine_bass_preset_pending(v)))return 0;
++    return 1;
++}
++void s1_typed_dict_undo(unsigned mask)
++{
++    for(unsigned v=0;v<NBASS;v++)if(mask&(1u<<v))s1_typed_dict_apply(mot_base_snd,v);
++}
++#endif
+ static void s1_typed_a4_apply(const sound_t *sound,unsigned owner) {
+     if(live_s1_mod(sound,owner) && original_bass[owner].kind==ORIGINAL_SOUND_SYNTHONE)
+         (void)s1c_front_set(&original_bass[owner].dsp.synthone.e,S1_A4_PARAM,s1_a4_hz(read137(sound,owner)[S1_A4_BYTE]));
+@@ -1688,6 +1733,9 @@
+ #if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
+     if (rc==ORIGINAL_RUNTIME_OK) s1_pb_load(v,sound);
+ #endif
++#if X0X_S1_DELAY_TRACK_TEST
++    if(rc==ORIGINAL_RUNTIME_OK)s1_typed_dict_apply(sound,v);
++#endif
+     if(rc==ORIGINAL_RUNTIME_OK) {s1_typed_a4_apply(sound,v);s1_typed_rvfb_apply(sound,v);s1_typed_trans_apply(sound,v);s1_typed_crush_apply(sound,v);}
+ #endif
+ #if X0X_SJ6_CLASSIC_I_PROBE
+@@ -1870,6 +1918,9 @@
+         __builtin_memcpy(sound->v[T_303][v], next, sizeof next);
+         bass_tag_set(sound, v, bank, preset, 0);
+ #ifdef DNBOX_137_HOST_WITNESS
++#if X0X_S1_DELAY_TRACK_TEST
++        s1_typed_dict_apply(sound,v);
++#endif
+         s1_typed_a4_apply(sound,v);
+         s1_typed_rvfb_apply(sound,v);
+         s1_typed_trans_apply(sound,v);
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -544,6 +544,13 @@
+ enum { R_S1PATCH = R_NOTELOCK + 1, R_S1LINK = R_NOTELOCK + 4 };
+ #ifdef DNBOX_137_HOST_WITNESS
+ enum { R_S1MODWHEEL = R_NOTELOCK + 5, R_S1A4 = R_NOTELOCK + 8, R_S1RVFB = R_NOTELOCK + 9, R_S1TRANS = R_NOTELOCK + 10, R_S1CRUSH = R_NOTELOCK + 11, R_S1PAN = R_NOTELOCK + 12, R_S1DLFB = R_NOTELOCK + 13 };
++#if X0X_S1_DELAY_TRACK_TEST
++enum { R_S1DICT=R_NOTELOCK+20 };
++extern int s1_typed_dict_position(unsigned);
++extern int s1_typed_dict_choose(unsigned,unsigned);
++extern void s1_typed_dict_undo(unsigned);
++extern int s1_typed_dict_undo_ready(unsigned);
++#endif
+ extern int s1_typed_trans_choose(unsigned,int);
+ extern void s1_typed_trans_undo(unsigned);
+ extern int s1_typed_crush_choose(unsigned,unsigned);
+@@ -812,6 +819,9 @@
+     if(r.kind==R_ARP && r.a==ARP_F_GATE && live137(&proj.sound,r.b))
+         return !s1_typed_tuple_editable();
+ #endif
++#if X0X_S1_DELAY_TRACK_TEST
++    if (r.kind==R_S1DICT) return s1_typed_dict_position(r.b)<0 || !s1_typed_tuple_editable();
++#endif
+     if (r.kind == R_S1MODWHEEL || r.kind == R_S1A4 || r.kind == R_S1RVFB || r.kind == R_S1TRANS || r.kind == R_S1CRUSH || r.kind == R_S1PAN || r.kind == R_S1DLFB) return !live_s1_mod(&proj.sound,r.b) || !s1_typed_tuple_editable();
+ #endif
+     /* A bank with a single preset (Synth One INIT) has nothing to choose. */
+@@ -881,6 +891,9 @@
+         return &rate;
+     }
+ #endif
++#if X0X_S1_DELAY_TRACK_TEST
++    case R_S1DICT: {static const x0x_param_t pot={"IN CUTOFF",S1_DICT_MAX,S1_DICT_INIT,0};return &pot;}
++#endif
+ #if defined(X0X_S1_FEEDBACK_PROBE) && X0X_S1_FEEDBACK_PROBE
+     case R_S1DLFB: {static const x0x_param_t pot={"FEEDBACK",127,14,0};return &pot;}
+ #endif
+@@ -1050,6 +1063,9 @@
+         return !live_s1_mod(&proj.sound,r.b)?0 : r.c?(int)s1_pan_pos(r.b,&max) : read137(&proj.sound,r.b)[S1_PAN_AMOUNT_BYTE];
+     }
+ #endif
++#if X0X_S1_DELAY_TRACK_TEST
++    case R_S1DICT: {int pos=s1_typed_dict_position(r.b);return pos>=0?pos:S1_DICT_INIT;}
++#endif
+ #if defined(X0X_S1_FEEDBACK_PROBE) && X0X_S1_FEEDBACK_PROBE
+     case R_S1DLFB: {
+         unsigned code=live_s1_mod(&proj.sound,r.b)?read137(&proj.sound,r.b)[S1_FB_BYTE]:0;
+@@ -1789,6 +1805,9 @@
+         return;
+     }
+ #endif
++#if X0X_S1_DELAY_TRACK_TEST
++    if(r.kind==R_S1DICT) { put_i(num,50+v);put_s(unit,"%");return; }
++#endif
+ #if defined(X0X_S1_FEEDBACK_PROBE) && X0X_S1_FEEDBACK_PROBE
+     if(r.kind==R_S1DLFB) {
+         unsigned code=live_s1_mod(&proj.sound,r.b)?read137(&proj.sound,r.b)[S1_FB_BYTE]:0;
+@@ -2869,9 +2888,20 @@
+ #if defined(X0X_S1_AUTOPAN_PROBE) && X0X_S1_AUTOPAN_PROBE
+                 if (live_s1_mod(&proj.sound,b)) add_page(emit,PT_AUTO_PAN,PR(R_S1PAN,T_303,b,0),PR(R_S1PAN,T_303,b,1),NONE,NONE);
+ #endif
++#if X0X_S1_DELAY_TRACK_TEST
++                /* Bind the owner from the described context, not the selected page. */
++                if (live_s1_mod(&proj.sound,b)) add_page(emit,PT_DELAY,
++#if defined(X0X_S1_FEEDBACK_PROBE) && X0X_S1_FEEDBACK_PROBE
++                    PR(R_S1DLFB,T_303,b,0),
++#else
++                    NONE,
++#endif
++                    PR(R_S1DICT,T_303,b,0),NONE,NONE);
++#else
+ #if defined(X0X_S1_FEEDBACK_PROBE) && X0X_S1_FEEDBACK_PROBE
+                 if (live_s1_mod(&proj.sound,b)) add_page(emit,PT_DELAY,PR(R_S1DLFB,T_303,b,0),NONE,NONE,NONE);
+ #endif
++#endif
+                 if (live_s1_mod(&proj.sound,b)) add_page(emit,PT_TUNING,PR(R_S1A4,T_303,b,0),PR(R_S1TRANS,T_303,b,0),NONE,NONE);
+ #endif
+             } else
+@@ -3591,6 +3621,11 @@
+ #else
+     const unsigned undo_zero=0;
+ #endif
++#if X0X_S1_DELAY_TRACK_TEST
++    unsigned undo_dict=0;
++#else
++    const unsigned undo_dict=0;
++#endif
+     unsigned undo_velocity137=0,undo_s1_mod=0,undo_a4=0,undo_rvfb=0,undo_trans=0,undo_crush=0,undo_delay=0,undo_pan=0,undo_feedback=0,undo_chorus_i=0;
+ #if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
+     extern int s1_typed_pb_undo_ready(unsigned);
+@@ -3640,6 +3675,12 @@
+             if (proj.set.snd_rev==REV137) {
+                 uint8_t p;
+                 uint32_t off=cell+(8u+v)*NPARAMS_MAX+2u;
++#if X0X_S1_DELAY_TRACK_TEST
++                const uint32_t dict_off=off-2u+S1_DICT_BYTE;
++                undo_peek(&undo,entry,dict_off,&p,1u);
++                if(p>S1_DICT_MAX){say("UNDO IN CUTOFF INVALID",0);engine_bass_edit_hold(0);return;}
++                if(p!=s1_dict_read(&proj.sound,v))undo_dict|=1u<<v;
++#endif
+ #if X0X_SJ6_CLASSIC_I_PROBE
+                 uint8_t ci[SJ6_CLASSIC_I_COUNT];
+                 undo_peek(&undo,entry,off+SJ6_CLASSIC_I_BYTE-2u,ci,sizeof ci);
+@@ -3748,7 +3789,7 @@
+         }
+ #ifdef DNBOX_137_HOST_WITNESS
+         extern int engine_bass_wheel_active(void);
+-        if((undo_s1_mod || undo_a4 || undo_rvfb || undo_trans || undo_crush || undo_delay || undo_pan || undo_feedback || undo_chorus_i || undo_clock || undo_zero) && !s1_typed_tuple_editable()) {
++        if((undo_s1_mod || undo_a4 || undo_rvfb || undo_trans || undo_crush || undo_delay || undo_pan || undo_feedback || undo_dict || undo_chorus_i || undo_clock || undo_zero) && !s1_typed_tuple_editable()) {
+             say("PROJECT READ ONLY",0);
+             engine_bass_edit_hold(0);
+             return;
+@@ -3777,7 +3818,7 @@
+     }
+ #endif
+ #ifdef DNBOX_137_HOST_WITNESS
+-    if ((undo_velocity137 || undo_s1_mod || undo_pb || undo_sj6_pb || undo_sj6_mod || undo_a4 || undo_rvfb || undo_trans || undo_crush || undo_delay || undo_pan || undo_feedback || undo_chorus_i || undo_clock || undo_zero) && !undo_bass_mask) engine_project_hold(1);
++    if ((undo_velocity137 || undo_s1_mod || undo_pb || undo_sj6_pb || undo_sj6_mod || undo_a4 || undo_rvfb || undo_trans || undo_crush || undo_delay || undo_pan || undo_feedback || undo_dict || undo_chorus_i || undo_clock || undo_zero) && !undo_bass_mask) engine_project_hold(1);
+ #if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
+     /* Recheck while audio is held: a note-lock must not acquire the owner
+      * between validating history and publishing the typed scalar pair. */
+@@ -3789,12 +3830,20 @@
+     }
+ #endif
+ #endif
++#if defined(DNBOX_137_HOST_WITNESS) && X0X_S1_DELAY_TRACK_TEST
++    if(undo_dict && !s1_typed_dict_undo_ready(undo_dict & ~undo_bass_mask)) {
++        engine_project_hold(0);
++        engine_bass_edit_hold(0);
++        say("UNDO WAIT IN CUTOFF",0);
++        return;
++    }
++#endif
+     undo_lanes = 0;
+     if (!(redo ? undo_redo : undo_undo)(&undo, undo_changed, &lo, &hi)) {
+ #if X0X_BASS_TAGGED_SOUND
+         if(undo_bass_mask)engine_project_hold(0);
+ #ifdef DNBOX_137_HOST_WITNESS
+-        else if(undo_velocity137 || undo_s1_mod || undo_pb || undo_sj6_pb || undo_sj6_mod || undo_a4 || undo_rvfb || undo_trans || undo_crush || undo_delay || undo_pan || undo_feedback || undo_chorus_i || undo_clock || undo_zero)engine_project_hold(0);
++        else if(undo_velocity137 || undo_s1_mod || undo_pb || undo_sj6_pb || undo_sj6_mod || undo_a4 || undo_rvfb || undo_trans || undo_crush || undo_delay || undo_pan || undo_feedback || undo_dict || undo_chorus_i || undo_clock || undo_zero)engine_project_hold(0);
+ #endif
+ #endif
+ #if X0X_BASS_PRESET_PREVIEW
+@@ -3822,6 +3871,9 @@
+ #if defined(X0X_S1_FEEDBACK_PROBE) && X0X_S1_FEEDBACK_PROBE
+     if(undo_feedback)s1_typed_feedback_undo(undo_feedback & ~undo_bass_mask);
+ #endif
++#if X0X_S1_DELAY_TRACK_TEST
++    if(undo_dict)s1_typed_dict_undo(undo_dict&~undo_bass_mask);
++#endif
+     if(undo_crush) s1_typed_crush_undo(undo_crush & ~undo_bass_mask);
+ #if defined(X0X_S1_AUTOPAN_PROBE) && X0X_S1_AUTOPAN_PROBE
+     if(undo_pan) s1_typed_pan_undo(undo_pan & ~undo_bass_mask);
+@@ -3838,7 +3890,7 @@
+     if(undo_sj6_pb) sj6_typed_pb_undo(undo_sj6_pb & ~undo_bass_mask);
+ #endif
+ #endif
+-    if(undo_bass_mask || undo_velocity137 || undo_s1_mod || undo_pb || undo_sj6_pb || undo_sj6_mod || undo_a4 || undo_rvfb || undo_trans || undo_crush || undo_delay || undo_pan || undo_feedback || undo_chorus_i || undo_clock || undo_zero) engine_project_hold(0);
++    if(undo_bass_mask || undo_velocity137 || undo_s1_mod || undo_pb || undo_sj6_pb || undo_sj6_mod || undo_a4 || undo_rvfb || undo_trans || undo_crush || undo_delay || undo_pan || undo_feedback || undo_dict || undo_chorus_i || undo_clock || undo_zero) engine_project_hold(0);
+ #else
+     if(undo_bass_mask) engine_project_hold(0);
+ #endif
+@@ -4850,6 +4902,15 @@
+         return;
+     }
+ #endif
++#if X0X_S1_DELAY_TRACK_TEST
++    if(r.kind==R_S1DICT) {
++        if(e && !pref_read_only(r)) {
++            int next=pref_get(r)+(e>0?1:-1);
++            if(next>=0 && next<=S1_DICT_MAX && s1_typed_dict_choose(r.b,(unsigned)next))mark_dirty();
++        }
++        return;
++    }
++#endif
+ #if defined(X0X_S1_FEEDBACK_PROBE) && X0X_S1_FEEDBACK_PROBE
+     if(r.kind==R_S1DLFB) {
+         if(pref_read_only(r))return;

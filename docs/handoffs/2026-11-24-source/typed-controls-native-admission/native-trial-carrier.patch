@@ -1,0 +1,696 @@
+--- a/firmware/src/app/engine.h
++++ b/firmware/src/app/engine.h
+@@ -16,6 +16,7 @@
+  *   T_MST           voice 0: master filter + limiter
+  */
+ #pragma once
++#include "typed_controls_trial.h"
+ #include <stdint.h>
+ #include "../dsp/x0x_param.h"
+ #include "../dsp/envelope_snapshot.h"
+--- a/firmware/src/app/original_presets.inc
++++ b/firmware/src/app/original_presets.inc
+@@ -702,6 +702,7 @@
+  for(unsigned v=0;v<NBASS;++v)if(mask&(1u<<v))sj6_classic_i_apply(mot_base_snd,v);
+ }
+ #endif
++#ifdef DNBOX_137_HOST_WITNESS
+ static void s1_typed_a4_apply(const sound_t *sound,unsigned owner) {
+     if(live_s1_mod(sound,owner) && original_bass[owner].kind==ORIGINAL_SOUND_SYNTHONE)
+         (void)s1c_front_set(&original_bass[owner].dsp.synthone.e,S1_A4_PARAM,s1_a4_hz(read137(sound,owner)[S1_A4_BYTE]));
+@@ -857,6 +858,7 @@
+                 juno6_set_filter_velocity(&original_bass[v].dsp.juno.synth,read137(mot_base_snd,v)[2]);
+         }
+ }
++#endif
+ static int sj6_knob_ready(unsigned owner)
+ {
+     const original_runtime_part *p = &original_bass[owner];
+@@ -1368,6 +1370,7 @@
+ int engine_bass_note_validate(const lane_t *l);
+ int engine_bass_note_validate(const lane_t *l)
+ {
++#ifdef DNBOX_137_HOST_WITNESS
+     if(l->i==NOTE_S1_MOD) {
+         if(l->val[BASS_NOTE_TAG+11]>2 || !s1_typed_init_cell(l->val))return -1;
+         lane_t v1=*l;
+@@ -1377,12 +1380,16 @@
+     }
+     if(l->i==NOTE137) {
+         unsigned x=l->val[BASS_NOTE_TAG+11];
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++        if(x)return -1; /* do not pretend the filtered velocity lock applied */
++#endif
+         if(x>127 || l->val[29]!=ORIGINAL_SOUND_JUNO || original_sound_sj6_factory(l->val)!=0)return -1;
+         lane_t v1=*l;
+         v1.i=BASS_NOTE_VERSION;
+         v1.val[BASS_NOTE_TAG+11]=0;
+         return engine_bass_note_validate(&v1);
+     }
++#endif
+     int bank;
+     lane_t *mut=(lane_t *)l;
+     if(l->used!=1 || l->t!=BASS_NOTE_TARGET || l->pat>=NPAT ||
+@@ -1458,6 +1465,7 @@
+         if(bass_sound_tag_encode((bass_sound_tag_t *)(next.val+BASS_NOTE_TAG),&info,
+                                 BASS_SOUND_REGISTRY,4)!=BASS_IDENTITY_READY)return -1;
+     }
++#ifdef DNBOX_137_HOST_WITNESS
+     if(sound==&proj.sound && proj.set.snd_rev==REV137 &&
+        next.val[29]==ORIGINAL_SOUND_JUNO && original_sound_sj6_factory(next.val)==0) {
+         if(!canonical137(sound))return -1;
+@@ -1471,6 +1479,7 @@
+         next.val[BASS_NOTE_TAG+11]=effective && note_lock_applied[voice] ?
+             original_bass[voice].dsp.synthone.mod_wheel_route : read137(sound,voice)[3];
+     }
++#endif
+     if(engine_bass_note_validate(&next))return -1;
+     lanes[k].used=0;
+     __asm__ volatile("" ::: "memory");
+@@ -1507,10 +1516,12 @@
+     if (part->kind != ORIGINAL_SOUND_JUNO) return;
+     const uint8_t *base = mot_base_snd->v[T_303][v];
+     const uint8_t *cell = lock ? lock->val : base;
++#if defined(DNBOX_137_HOST_WITNESS) && !DNBOX_TYPED_CONTROLS_NATIVE_TEST
+     if (live137(mot_base_snd,v)) {
+         unsigned position=lock && lock->i==NOTE137 ? lock->val[BASS_NOTE_TAG+11] : read137(mot_base_snd,v)[2];
+         juno6_set_filter_velocity(&part->dsp.juno.synth,position);
+     }
++#endif
+     const uint8_t *extra = lock ? lock->val + BASS_NOTE_USED :
+                           mot_base_snd->v[T_303][ORIGINAL_SJ6_EXTRA_ROW + v];
+     const uint8_t *base_extra = mot_base_snd->v[T_303][ORIGINAL_SJ6_EXTRA_ROW + v];
+@@ -1541,8 +1552,10 @@
+     if (original_bass[v].kind == ORIGINAL_SOUND_SYNTHONE) {
+         const uint8_t *cell = mot_base_snd->v[T_303][v];
+         s1_part_apply_cell(&original_bass[v].dsp.synthone, cell);
++#ifdef DNBOX_137_HOST_WITNESS
+         s1_part_mod_route(&original_bass[v].dsp.synthone,
+                           live_s1_mod(mot_base_snd,v)?read137(mot_base_snd,v)[3]:0);
++#endif
+ #if X0X_S1_EXTRA
+         s1_part_apply_extra(&original_bass[v].dsp.synthone, original_sound_edit_mask(cell) & S1_EXTRA_MARK ?
+                             mot_base_snd->v[T_303][S1_EXTRA_ROW+v] : NULL);
+@@ -1564,9 +1577,11 @@
+         int k=bass_note_find(mot.lane,seq.ppat[TRK_BASS0+v],v,eng_step[TRK_BASS0+v]);
+         if(k>=0 && mot.lane[k].val[29]==(uint8_t)original_bass[v].kind)l=&mot.lane[k];
+     }
++#ifdef DNBOX_137_HOST_WITNESS
+     if (l && (l->i==NOTE_S1_MOD) != live_s1_mod(mot_base_snd,v)) l=0;
+     if (l && ((l->i==NOTE137) != live137(mot_base_snd,v) ||
+               (l->i==NOTE137 && l->val[BASS_NOTE_TAG+11]>127))) l=0;
++#endif
+     if(!l) { if(note_lock_applied[v])note_lock_restore(v); return; }
+ #if X0X_SUPERJ6_BUILTIN_INIT
+     if (original_bass[v].kind == ORIGINAL_SOUND_JUNO) sj6_knob_clear((unsigned)v);
+@@ -1574,8 +1589,10 @@
+ #if X0X_SYNTHONE_PATCH
+     if (original_bass[v].kind == ORIGINAL_SOUND_SYNTHONE) {
+         s1_part_apply_cell(&original_bass[v].dsp.synthone, l->val);
++#ifdef DNBOX_137_HOST_WITNESS
+         s1_part_mod_route(&original_bass[v].dsp.synthone,
+                           l->i==NOTE_S1_MOD?l->val[BASS_NOTE_TAG+11]:0);
++#endif
+ #if X0X_S1_EXTRA
+         s1_part_apply_extra(&original_bass[v].dsp.synthone, original_sound_edit_mask(l->val) & S1_EXTRA_MARK ?
+                             l->val+BASS_NOTE_USED : NULL);
+@@ -1637,7 +1654,9 @@
+ #endif
+     if (rc == ORIGINAL_RUNTIME_OK && original_bass[v].kind == ORIGINAL_SOUND_JUNO) {
+         original_bass[v].dsp.juno.synth.lfo2_entropy_state ^= (uint64_t)(unsigned)v << 32;
++#if defined(DNBOX_137_HOST_WITNESS) && !DNBOX_TYPED_CONTROLS_NATIVE_TEST
+         if (live137(sound,v)) juno6_set_filter_velocity(&original_bass[v].dsp.juno.synth,read137(sound,v)[2]);
++#endif
+ #if defined(X0X_SJ6_BEND_TYPED_PROBE) && X0X_SJ6_BEND_TYPED_PROBE
+         (void)sj6_pb_apply(v,sound);
+ #endif
+@@ -1663,12 +1682,14 @@
+         (original_sound_edit_mask(sound->v[T_303][v]) & S1_EXTRA_MARK))
+         s1_part_apply_extra(&original_bass[v].dsp.synthone, sound->v[T_303][S1_EXTRA_ROW+v]);
+ #endif
++#ifdef DNBOX_137_HOST_WITNESS
+     if (rc==ORIGINAL_RUNTIME_OK && live_s1_mod(sound,v))
+         s1_part_mod_route(&original_bass[v].dsp.synthone,read137(sound,v)[3]);
+ #if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
+     if (rc==ORIGINAL_RUNTIME_OK) s1_pb_load(v,sound);
+ #endif
+     if(rc==ORIGINAL_RUNTIME_OK) {s1_typed_a4_apply(sound,v);s1_typed_rvfb_apply(sound,v);s1_typed_trans_apply(sound,v);s1_typed_crush_apply(sound,v);}
++#endif
+ #if X0X_SJ6_CLASSIC_I_PROBE
+     if(rc==ORIGINAL_RUNTIME_OK)sj6_classic_i_apply(sound,v);
+ #endif
+@@ -1848,6 +1869,7 @@
+ #endif
+         __builtin_memcpy(sound->v[T_303][v], next, sizeof next);
+         bass_tag_set(sound, v, bank, preset, 0);
++#ifdef DNBOX_137_HOST_WITNESS
+         s1_typed_a4_apply(sound,v);
+         s1_typed_rvfb_apply(sound,v);
+         s1_typed_trans_apply(sound,v);
+@@ -1860,7 +1882,10 @@
+ #if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
+         if (live_s1_mod(sound,v)) s1_pb_load(v,sound);
+ #endif
++#endif
++#if defined(DNBOX_137_HOST_WITNESS) && !DNBOX_TYPED_CONTROLS_NATIVE_TEST
+         if (live137(sound,v)) juno6_set_filter_velocity(&original_bass[v].dsp.juno.synth,read137(sound,v)[2]);
++#endif
+ #if defined(X0X_SJ6_BEND_TYPED_PROBE) && X0X_SJ6_BEND_TYPED_PROBE
+         (void)sj6_pb_apply(v,sound);
+ #endif
+--- a/firmware/src/app/project.c
++++ b/firmware/src/app/project.c
+@@ -21,18 +21,26 @@
+ 
+ project_t proj;
+ /* Reuses the UI undo shadow while an exclusive project operation is active. */
++#ifdef DNBOX_137_HOST_WITNESS
+ #include "sj6_137_host_witness.h"
++#endif
+ project_t project_stage X0X_POOL;
+ 
+ #define PROJ_STREAM 13u                 /* compact Chicago schema2; current raw patterns/arrangement */
+ #define PROJ_STREAM_14 14u              /* 13 + per-pattern bass presets (pattern_t.rsv[0..1]) and note locks */
+ #define PROJ_STREAM_CHORD 15u /* same byte layout, sparse held-key chord metadata */
++#ifdef DNBOX_137_HOST_WITNESS
+ static int stream_known(uint32_t format) { return format == PROJ_STREAM || format == PROJ_STREAM_14 || format == PROJ_STREAM_CHORD || format == STREAM137; }
++#else
++static int stream_known(uint32_t format) { return format == PROJ_STREAM || format == PROJ_STREAM_14 || format == PROJ_STREAM_CHORD; }
++#endif
+ /* Revision 14 only when the project uses what 13 cannot hold, so a project without
+  * pattern presets or note locks stays byte-identical and loads on 0.0.24.x. */
+ static uint32_t stream_format_of(const project_t *pr)
+ {
++#ifdef DNBOX_137_HOST_WITNESS
+     if(pr->set.snd_rev==REV137)return STREAM137;
++#endif
+     for(int k=0;k<NLANE;k++)
+         if(pr->arr.lane[k].used && pr->arr.lane[k].t==HELD_CHORD_TARGET)return PROJ_STREAM_CHORD;
+     for (int p = 0; p < NPAT; p++)
+@@ -63,9 +71,11 @@
+ /* 1: unsupported, 2: damaged. Both retain flash until validated staged adoption. */
+ static uint8_t project_incompatible;
+ static uint8_t stream_previous; /* per-object older-copy selection during recovery */
++#ifdef DNBOX_137_HOST_WITNESS
+ enum { TUPLE_SET_PREVIOUS = 1u << NSTREAM, TUPLE_SOUND_PREVIOUS = 2u << NSTREAM };
+ static uint8_t tuple_recovered; /* previous A/B tuple is playable but permanently read-only until latest coheres */
+ int s1_typed_tuple_editable(void) {return !tuple_recovered && !project_incompatible;}
++#endif
+ static uint8_t device_bt_pending;       /* independent of UI dirty/autosave and project reset/load */
+ static uint8_t settings_read_failed;    /* defaults must not replace unread stored settings */
+ static uint8_t settings_load_failed;    /* a Bluetooth retry alone cannot adopt fallback defaults */
+@@ -132,17 +142,28 @@
+  * objects that changed: an autosave usually erases one or two sectors, not six */
+ static uint64_t stored_hash[OBJ_NOBJ];
+ static uint8_t stored_known[OBJ_NOBJ];
++#ifdef DNBOX_137_HOST_WITNESS
+ __attribute__((noinline)) static uint64_t hash_append(uint64_t h,const uint8_t *p,uint32_t n)
++#else
++__attribute__((noinline)) static uint64_t hash_of(const uint8_t *p, uint32_t n)        /* FNV-1a, 64-bit */
++#endif
+ {
++#ifdef DNBOX_137_HOST_WITNESS
+     while (n--) h = (h ^ *p++) * UINT64_C(1099511628211);
++#else
++    uint64_t h = UINT64_C(14695981039346656037);
++    while (n--)
++        h = (h ^ *p++) * UINT64_C(1099511628211);
++#endif
+     return h;
++#ifdef DNBOX_137_HOST_WITNESS
+ }
+ static uint64_t hash_of(const uint8_t *p,uint32_t n)
+ { return hash_append(UINT64_C(14695981039346656037),p,n); }
+ static uint64_t tuple_hash(const project_t *pr,uint8_t part_off)
+ {
+     settings_t set;
+-    memcpy(&set,&pr->set,sizeof set);
++    __builtin_memcpy(&set,&pr->set,sizeof set);
+     /* The independently persisted device Bluetooth bit is not project data. */
+     set.bt &= ~1u;
+     uint8_t domain[2]={STREAM137,part_off};
+@@ -150,6 +171,7 @@
+     h=hash_append(h,(const uint8_t *)&set,sizeof set);
+     h=hash_append(h,(const uint8_t *)&pr->sound,sizeof pr->sound);
+     return hash_append(h,(const uint8_t *)pr+RAW_OFF,RAW_LEN);
++#endif
+ }
+ 
+ __attribute__((noinline)) static uint32_t get32(const uint8_t *p)
+@@ -183,7 +205,11 @@
+  * invalidate cached equality and block saves until a later read resolves it. */
+ static int read_settings_payload(void)
+ {
++#ifdef DNBOX_137_HOST_WITNESS
+     int n = plat_store_load(OBJ_SET | (stream_previous & TUPLE_SET_PREVIOUS ? PLAT_STORE_PREVIOUS : 0), io_buf, sizeof io_buf);
++#else
++    int n = plat_store_load(OBJ_SET, io_buf, sizeof io_buf);
++#endif
+     settings_read_failed = (uint8_t)(n < -1);
+     if (n < 0) stored_known[OBJ_SET] = 0;
+     return n;
+@@ -195,7 +221,11 @@
+     int n = read_settings_payload();
+     if (n < 0) return n;
+     if (!PROJ_SET_LEN_OK((uint32_t)n) || get32(io_buf) != PROJ_FORMAT ||
++#ifdef DNBOX_137_HOST_WITNESS
+         !valid_rev137(io_buf[4u + __builtin_offsetof(settings_t, snd_rev)])) return -9;
++#else
++        io_buf[4u + __builtin_offsetof(settings_t, snd_rev)] != PROJ_SND_REV) return -9;
++#endif
+     if ((uint32_t)n == 4u + sizeof *dst)
+         __builtin_memset(io_buf + 4u + sizeof *dst, 0, PROJ_SET_TAIL);
+     else if (PROJ_SET_TAIL_BAD(io_buf + 4u + sizeof *dst)) return -9;
+@@ -209,7 +239,11 @@
+ {
+     if (len + 4u > sizeof io_buf)
+         return -1;
++#ifdef DNBOX_137_HOST_WITNESS
+     put32(io_buf, obj==OBJ_SOUND && proj.set.snd_rev==REV137 ? SOUND137 : PROJ_FORMAT);
++#else
++    put32(io_buf, PROJ_FORMAT);
++#endif
+     __builtin_memcpy(io_buf + 4u, src, len);
+     return save_buf(obj, len + 4u);
+ }
+@@ -243,9 +277,16 @@
+ int project_device_bt_pending(void) { return device_bt_pending; }
+ int project_device_bt_save(void)
+ {
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++    return -9; /* no project-flash writes in this test profile */
++#endif
+     int n, rc;
+     if (!device_bt_pending) return 0;
++#ifdef DNBOX_137_HOST_WITNESS
+     if (project_incompatible || tuple_recovered) return -9;
++#else
++    if (project_incompatible) return -9;
++#endif
+     n = read_settings_payload();
+     if (n < -1) return n;                /* pending stays set: UI retries after I/O recovers */
+     if (n == -1) {
+@@ -256,7 +297,11 @@
+         /* Do not normalize or migrate a payload as a side effect of a toggle:
+          * only the exact layout load_settings accepts is patched. */
+         if (!PROJ_SET_LEN_OK((uint32_t)n) || get32(io_buf) != PROJ_FORMAT ||
++#ifdef DNBOX_137_HOST_WITNESS
+             !valid_rev137(io_buf[4u + __builtin_offsetof(settings_t, snd_rev)]) ||
++#else
++            io_buf[4u + __builtin_offsetof(settings_t, snd_rev)] != PROJ_SND_REV ||
++#endif
+             ((uint32_t)n > 4u + sizeof(settings_t) && PROJ_SET_TAIL_BAD(io_buf + 4u + sizeof(settings_t))))
+             return -9;
+         io_buf[4u + __builtin_offsetof(settings_t, bt)] =
+@@ -276,13 +321,29 @@
+ #define SOUND_CELL_V8 28u
+ #define SOUND_BYTES_V8 (NTARGETS * NVOICES_MAX * SOUND_CELL_V8)
+ 
++#ifdef DNBOX_137_HOST_WITNESS
+ static int load_sound(sound_t *dst, unsigned revision)
++#else
++static int load_sound(sound_t *dst)
++#endif
+ {
++#ifdef DNBOX_137_HOST_WITNESS
+     int n = plat_store_load(OBJ_SOUND | (stream_previous & TUPLE_SOUND_PREVIOUS ? PLAT_STORE_PREVIOUS : 0), io_buf, sizeof io_buf);
++#else
++    int n = plat_store_load(OBJ_SOUND, io_buf, sizeof io_buf);
++#endif
+     if (n < 0) return n;
++#ifdef DNBOX_137_HOST_WITNESS
+     if ((uint32_t)n != sizeof *dst + 4u || get32(io_buf) != (revision==REV137 ? SOUND137 : PROJ_FORMAT)) return -9;
++#else
++    if ((uint32_t)n != sizeof *dst + 4u || get32(io_buf) != PROJ_FORMAT) return -9;
++#endif
+     __builtin_memcpy(dst, io_buf + 4u, sizeof *dst);
++#ifdef DNBOX_137_HOST_WITNESS
+     if ((revision==REV137 && !canonical137(dst)) || engine_bass_sound_validate(dst)) return -9;
++#else
++    if (engine_bass_sound_validate(dst)) return -9;
++#endif
+     stored_known[OBJ_SOUND] = 1;
+     stored_hash[OBJ_SOUND] = hash_of(io_buf, (uint32_t)n);
+     return 0;
+@@ -354,6 +415,7 @@
+     lz_sink_t sink = {st_put, &o};
+     o.fill = STREAM_HDR;
+     put32(io_buf, o.format);
++#ifdef DNBOX_137_HOST_WITNESS
+     if (o.format==STREAM137) {
+         uint64_t h=tuple_hash(&proj,part_off_live);
+         put32(io_buf+4,(uint32_t)h);
+@@ -362,6 +424,10 @@
+         put32(io_buf+4,RAW_LEN);
+         put32(io_buf+8,crc);
+     }
++#else
++    put32(io_buf + 4, RAW_LEN);
++    put32(io_buf + 8, crc);
++#endif
+     put32(io_buf + 12, packed_len);
+     if (lz_compress(raw, RAW_LEN, &sink) || o.err || st_flush(&o))
+         return -3;
+@@ -438,7 +504,11 @@
+         const lane_t *l=&arr->lane[k];
+         if(!l->used)continue;
+         if(l->t==HELD_CHORD_TARGET) {
++#ifdef DNBOX_137_HOST_WITNESS
+             if((format!=PROJ_STREAM_CHORD && format!=STREAM137) || !held_chord_lane_valid(l))return 0;
++#else
++            if(format!=PROJ_STREAM_CHORD || !held_chord_lane_valid(l))return 0;
++#endif
+             for(int j=0;j<k;j++)if(arr->lane[j].used && arr->lane[j].t==l->t &&
+                 arr->lane[j].pat==l->pat && arr->lane[j].part==l->part &&
+                 arr->lane[j].v==l->v && arr->lane[j].i==l->i)return 0;
+@@ -447,11 +517,15 @@
+         if(l->t==0xfdu) {
+ #if X0X_BASS_NOTE_SOUND
+             /* A lock on a step that is no longer a note is kept and never plays. */
++#ifdef DNBOX_137_HOST_WITNESS
+             if((format!=PROJ_STREAM_14 && format!=PROJ_STREAM_CHORD && format!=STREAM137) ||
+                ((l->i==NOTE137 || l->i==NOTE_S1_MOD) && format!=STREAM137) ||
+                (format==STREAM137 && s1_typed_init_cell(l->val) && l->i!=NOTE_S1_MOD) ||
+                (format==STREAM137 && l->val[29]==ORIGINAL_SOUND_JUNO && !original_sound_sj6_factory(l->val) && l->i!=NOTE137) ||
+                engine_bass_note_validate(l))return 0;
++#else
++            if((format!=PROJ_STREAM_14 && format!=PROJ_STREAM_CHORD) || engine_bass_note_validate(l))return 0;
++#endif
+             for(int j=0;j<k;j++)if(arr->lane[j].used && arr->lane[j].t==l->t &&
+                 arr->lane[j].pat==l->pat && arr->lane[j].part==l->part && arr->lane[j].v==l->v)return 0;
+ #else
+@@ -479,10 +553,16 @@
+     uint8_t *raw = (uint8_t *)pr + RAW_OFF;
+     uint32_t crc = get32(io_buf + 8), plen = get32(io_buf + 12);
+     uint32_t raw_len = RAW_LEN;
++#ifdef DNBOX_137_HOST_WITNESS
+     uint64_t binding=(uint64_t)get32(io_buf+4)|((uint64_t)crc<<32);
++#endif
+     st_in_t s = {0, n, STREAM_HDR, plen, format, 0};
+     lz_src_t src = {st_get, &s};
++#ifdef DNBOX_137_HOST_WITNESS
+     if (n < (int)STREAM_HDR || (format!=STREAM137 && get32(io_buf + 4) != raw_len) || plen > STREAM_CAP)
++#else
++    if (n < (int)STREAM_HDR || get32(io_buf + 4) != raw_len || plen > STREAM_CAP)
++#endif
+         return -1;
+     stored_known[STREAM_OBJ[0]] = 1;
+     stored_hash[STREAM_OBJ[0]] = hash_of(io_buf, (uint32_t)n);
+@@ -492,11 +572,19 @@
+      * and allow the boot-default autosave path to overwrite it. */
+     if (s.unsupported)
+         return -9;
++#ifdef DNBOX_137_HOST_WITNESS
+     if (decode_rc || s.left || (format!=STREAM137 && crc32_of(raw,raw_len)!=crc))
++#else
++    if (decode_rc || s.left || crc32_of(raw, raw_len) != crc)
++#endif
+         return -1;
++#ifdef DNBOX_137_HOST_WITNESS
+     if (format==STREAM137 && tuple_hash(pr,*part_off_of(pr))!=binding)
+         return -10; /* valid-sized inputs but not necessarily one project generation */
+     if ((format==STREAM137)!=(pr->set.snd_rev==REV137) || !stream_layout_ok(pr, format))
++#else
++    if (!stream_layout_ok(pr, format))
++#endif
+         return -9;
+     stream_13_upgrade(pr, format);
+ #if !X0X_ORIGINAL_SYNTH
+@@ -516,6 +604,7 @@
+         pattern_init(&pr->pat[i], 0x3B0u + (uint32_t)i * 977u, 0x5A1u + (uint32_t)i * 613u);
+ }
+ 
++#ifdef DNBOX_137_HOST_WITNESS
+ 
+ /* Host witness. Search only A/B candidates in the same recognized typed
+  * wire. The streams that matter are those actually consumed by LZ. */
+@@ -537,6 +626,7 @@
+     pr->set.bt=(uint8_t)((pr->set.bt&~1u)|(independent_bt&1u));
+     return project_validate_for(pr);
+ }
++#endif
+ 
+ /* Objects are read into the candidate project; the original profile admits only
+  * a completely validated candidate and leaves safe defaults on every failure. */
+@@ -560,7 +650,11 @@
+     if (rc == -9) goto unsupported;
+     if (!rc) {
+         if (set.magic != PROJ_MAGIC || set.format != PROJ_FORMAT ||
++#ifdef DNBOX_137_HOST_WITNESS
+             !valid_rev137(set.snd_rev) || set.stereo != PROJ_STEREO) goto unsupported;
++#else
++            set.snd_rev != PROJ_SND_REV || set.stereo != PROJ_STEREO) goto unsupported;
++#endif
+         pr->set = set;
+         *part_off_of(pr) = part_off;
+         device_bt = set.bt;                       /* retain saved Bluetooth role on partial-load fallback */
+@@ -573,6 +667,7 @@
+             device_bt = (uint8_t)(1u | PROJ_BT_SMC_CENTRAL);
+ #endif
+     }
++#ifdef DNBOX_137_HOST_WITNESS
+     if (settings_present && pr->set.snd_rev==REV137) {
+         rc=read_typed_tuple(pr,0,device_bt);
+         stream_previous=0;
+@@ -586,7 +681,7 @@
+         for(unsigned mask=1;mask<(4u<<NSTREAM);++mask) {
+             if (!read_typed_tuple(pr,mask,device_bt)) {
+                 stream_previous=0;
+-                memset(stored_known,0,sizeof stored_known);
++                __builtin_memset(stored_known,0,sizeof stored_known);
+                 tuple_recovered=1;
+                 return 0;
+             }
+@@ -594,9 +689,16 @@
+         goto unsupported;
+     }
+     rc = load_sound(&pr->sound,pr->set.snd_rev);
++#else
++    rc = load_sound(&pr->sound);
++#endif
+     present |= rc != -1;
+     transient |= rc == -2 || rc == -8;
++#ifdef DNBOX_137_HOST_WITNESS
+     if (rc == -9 || (pr->set.snd_rev==REV137 && rc==-1)) goto unsupported;
++#else
++    if (rc == -9) goto unsupported;
++#endif
+     if (rc) bad = 1;
+     stream_previous = 0;
+     int n = load_stream_object(0);
+@@ -605,7 +707,11 @@
+     if (n >= 0 && (n < 4 || !stream_known(get32(io_buf)))) goto unsupported;
+     if (n >= 4) {
+         rc = load_stream(pr, n, get32(io_buf));
++#ifdef DNBOX_137_HOST_WITNESS
+         if (rc == -9 || (pr->set.snd_rev==REV137 && rc)) goto unsupported;
++#else
++        if (rc == -9) goto unsupported;
++#endif
+         /* At most 16 A/B combinations, no second stream buffer. A cut can
+          * leave only some newest objects changed (unchanged objects are not
+          * written), so taking all older copies is not sufficient. */
+@@ -625,7 +731,9 @@
+             bad = 1;
+         }
+     } else {
++#ifdef DNBOX_137_HOST_WITNESS
+         if(pr->set.snd_rev==REV137 && n==-1)goto unsupported;
++#endif
+         bad = 1;
+         /* PAT0 may itself be missing while later committed segments remain. */
+         for (int k = 1; k < NSTREAM; ++k)
+@@ -682,7 +790,11 @@
+     if(bass_status)return bass_status;
+ #endif
+     if (s->magic != PROJ_MAGIC || s->format != PROJ_FORMAT || s->stereo != PROJ_STEREO ||
++#ifdef DNBOX_137_HOST_WITNESS
+         !valid_rev137(s->snd_rev) || (s->snd_rev==REV137 && !canonical137(&p->sound)) || s->palette > 5 || s->keyled > 2 || s->clk_out > 1 ||
++#else
++        s->snd_rev != PROJ_SND_REV || s->palette > 5 || s->keyled > 2 || s->clk_out > 1 ||
++#endif
+         s->notes_out > 1 || s->bpm_x10 < 200 || s->bpm_x10 > 2750 || s->accent_q7 > 127 ||
+         s->keysound > 1 || s->autosave_off > 1 || s->out_loud > 1 || s->usb_full > 1 ||
+         (s->bt & 0xC0u) || !(s->bt & PROJ_BT_CLK_IN) || PROJ_CLK_SRC(s->bt) > SEQ_CLK_EXT ||
+@@ -754,10 +866,14 @@
+             return -1;
+ #if X0X_BASS_NOTE_SOUND
+         if(l->t==BASS_NOTE_TARGET) {
++#ifdef DNBOX_137_HOST_WITNESS
+             if(((l->i==NOTE137 || l->i==NOTE_S1_MOD) && s->snd_rev!=REV137) ||
+                (s->snd_rev==REV137 && s1_typed_init_cell(l->val) && l->i!=NOTE_S1_MOD) ||
+                (s->snd_rev==REV137 && l->val[29]==ORIGINAL_SOUND_JUNO && !original_sound_sj6_factory(l->val) && l->i!=NOTE137) ||
+                engine_bass_note_validate(l))return -1;
++#else
++            if(engine_bass_note_validate(l))return -1;
++#endif
+             for(int j=0;j<k;j++)if(p->arr.lane[j].used && p->arr.lane[j].t==l->t &&
+                 p->arr.lane[j].pat==l->pat && p->arr.lane[j].part==l->part && p->arr.lane[j].v==l->v)return -1;
+             continue;
+@@ -864,7 +980,11 @@
+     put32(h + 12, crc32_of((const uint8_t *)&project_stage, sizeof project_stage));
+     put32(h + 16, project_rates_format(&project_stage));
+     put32(h + 20, stream_format_of(&project_stage));
++#ifdef DNBOX_137_HOST_WITNESS
+     put32(h + 24, project_stage.set.snd_rev);
++#else
++    put32(h + 24, PROJ_SND_REV);
++#endif
+     put32(h + 28, PROJ_FILE_OFF_WORD(part_off_staged & PROJ_PART_OFF_ALL));
+ }
+ 
+@@ -874,8 +994,12 @@
+     if (get32(h) != 0x50583058u || get32(h + 4) != 1 || get32(h + 8) != sizeof project_stage ||
+         !PROJ_FORMAT_OK(get32(h + 16)) ||
+         !stream_known(get32(h + 20)) ||
++#ifdef DNBOX_137_HOST_WITNESS
+         !valid_rev137(get32(h + 24)) || get32(h + 24)!=project_stage.set.snd_rev ||
+         ((get32(h+20)==STREAM137)!=(project_stage.set.snd_rev==REV137)) || !PROJ_FILE_OFF_OK(get32(h + 28)))
++#else
++        get32(h + 24) != PROJ_SND_REV || !PROJ_FILE_OFF_OK(get32(h + 28)))
++#endif
+         return -1;
+     if (get32(h + 12) != crc32_of((const uint8_t *)&project_stage, sizeof project_stage))
+         return -4;
+@@ -928,6 +1052,9 @@
+ /* 0 = saved and verified; -7 = the patterns, song and motion do not fit (nothing was written) */
+ int project_save(void)
+ {
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++    return -9; /* portable/flash admission is read-only on disk */
++#endif
+ #if X0X_BASS_TAGGED_SOUND
+ #if X0X_SYNTHONE_PATCH
+     if(engine_s1_patch_pending())return -8;
+@@ -940,8 +1067,12 @@
+ #elif X0X_BASS_PRESET_PREVIEW
+     if(engine_bass_preview_changed()) return -9; /* no untagged preview writes */
+ #endif
++#ifdef DNBOX_137_HOST_WITNESS
+     if (project_incompatible || tuple_recovered || !valid_rev137(proj.set.snd_rev) ||
+         (proj.set.snd_rev==REV137 && !canonical137(&proj.sound)) || !stream_layout_ok(&proj, stream_format_of(&proj)))
++#else
++    if (project_incompatible || !stream_layout_ok(&proj, stream_format_of(&proj)))
++#endif
+         return -9; /* not one settings/sound/pattern object may be rewritten */
+     if (settings_read_failed || settings_load_failed) return -8; /* retry load before saving fallback defaults */
+ #ifndef X0X_HOST
+--- a/firmware/src/app/s1c_part.h
++++ b/firmware/src/app/s1c_part.h
+@@ -8,7 +8,8 @@
+ #pragma once
+ #include "../dsp/s1c/s1c_config.h"
+ #include "../dsp/s1c/s1c.h"
+-#if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE && !defined(X0X_HOST)
++#include "typed_controls_trial.h"
++#if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE && !defined(X0X_HOST) && !DNBOX_TYPED_CONTROLS_NATIVE_TEST
+ #error "Volatile Synth One WHEELS range experiment is host-only"
+ #endif
+ #if X0X_SYNTHONE_PATCH
+--- a/firmware/src/app/sj6_137_host_witness.h
++++ b/firmware/src/app/sj6_137_host_witness.h
+@@ -1,6 +1,7 @@
+-/* Disposable HOST proof only. No shipping opt-in. */
+-#if !defined(X0X_HOST) || !defined(DNBOX_137_HOST_WITNESS)
+-#error Host-only witness
++/* Existing host witness and the explicit read-only native trial. */
++#include "typed_controls_trial.h"
++#if (!defined(X0X_HOST) && !DNBOX_TYPED_CONTROLS_NATIVE_TEST) || !defined(DNBOX_137_HOST_WITNESS)
++#error Typed controls require the host witness or explicit native admission trial
+ #endif
+ #pragma once
+ #include "x0x.h"
+@@ -91,6 +92,9 @@
+   if(!sj6_delay_bytes_valid(b+SJ6_DELAY_BYTE))return 0;
+ #endif
+   if (b[0]!=137 || b[1]!=v || b[2]>127 || b[3]>2) return 0;
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++  if (b[2]) return 0; /* SuperJ6 Filter Velocity receiver not in this slice */
++#endif
+ #if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
+   if (b[S1_PB_DN_BYTE]>S1_PB_LAST || b[S1_PB_UP_BYTE]>S1_PB_LAST) return 0;
+   for(unsigned i=6;i<64;i++)
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -2764,8 +2764,10 @@
+                     {PT_FILTER, {ORIG_PAGE_ENGINE + 2, ORIG_PAGE_ENGINE + 3, ORIG_PAGE_ENGINE + 4, SJ6_FILTER_LINK}},
+                     {PT_FILTER_ADSR, {SJ6_FILTER_ATTACK, SJ6_FILTER_DECAY, SJ6_FILTER_SUSTAIN, SJ6_FILTER_RELEASE}},
+ #ifdef DNBOX_137_HOST_WITNESS
++#if !DNBOX_TYPED_CONTROLS_NATIVE_TEST
+                     {PT_FILTER_MOD, {SJ6_FILTER_VELOCITY, ORIG_PAGE_NONE, ORIG_PAGE_NONE, ORIG_PAGE_NONE}},
+ #endif
++#endif
+                     {PT_AMP_ADSR, {SJ6_AMP_ATTACK, SJ6_AMP_DECAY, SJ6_AMP_SUSTAIN, SJ6_AMP_RELEASE}},
+                     {PT_OUTPUT, {ORIG_PAGE_ENGINE + 9, SJ6_MASTER_LEVEL, SJ6_OSC1_LEVEL, SJ6_OSC2_LEVEL}},
+ #if defined(X0X_HOST) && defined(DNBOX_NOISE_PHYSICAL_WITNESS)
+@@ -2860,8 +2862,10 @@
+                 add_original_extra_pages(emit, s1_pages + effect_page, S1_EFFECT_PAGES, b, R_S1PATCH);
+ #ifdef DNBOX_137_HOST_WITNESS
+ #if defined(X0X_S1_CRUSH_LFO_PROBE) && X0X_S1_CRUSH_LFO_PROBE
++#if !DNBOX_TYPED_CONTROLS_NATIVE_TEST
+                 if (live_s1_mod(&proj.sound,b)) add_page(emit,PT_CRUSH_MOD,PR(R_S1CRUSH,T_303,b,0),NONE,NONE,NONE);
+ #endif
++#endif
+ #if defined(X0X_S1_AUTOPAN_PROBE) && X0X_S1_AUTOPAN_PROBE
+                 if (live_s1_mod(&proj.sound,b)) add_page(emit,PT_AUTO_PAN,PR(R_S1PAN,T_303,b,0),PR(R_S1PAN,T_303,b,1),NONE,NONE);
+ #endif
+@@ -3876,6 +3880,9 @@
+ 
+ X0X_COLD int ui_project_save(void)
+ {
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++    return -9;
++#endif
+     int rc;
+ #if BOARD_SMK37
+     extern uint8_t smk_ck_flash_busy(void);
+@@ -11225,6 +11232,9 @@
+  * A failed write retries after 1 s. Reset/load must not drop this request. */
+ static void device_bt_save(void)
+ {
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++    return;
++#endif
+     int rc;
+     static uint32_t retry_at;
+     if (!project_device_bt_pending() || project_busy || perf_testing() ||
+@@ -11271,6 +11281,9 @@
+ #define AUTOSAVE_GAP 20000u
+ static void autosave(void)
+ {
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++    return; /* not a persistent project session */
++#endif
+     uint32_t now = plat_ms();
+ #if BOARD_SMK37
+     extern uint8_t smk_ck_flash_busy(void), smk_clip_mode_on(void);
+--- /dev/null
++++ b/firmware/src/app/typed_controls_trial.h
+@@ -0,0 +1,27 @@
++/* SPDX-License-Identifier: GPL-3.0-only */
++#pragma once
++/* Firmware-emulator trial only. Do not activate device persistence, migration
++ * or bench-only DSP. All translation units must use the same support flags. */
++#ifndef DNBOX_TYPED_CONTROLS_NATIVE_TEST
++#define DNBOX_TYPED_CONTROLS_NATIVE_TEST 0
++#endif
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST != 0 && DNBOX_TYPED_CONTROLS_NATIVE_TEST != 1
++#error DNBOX_TYPED_CONTROLS_NATIVE_TEST must be 0 or 1
++#endif
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++#if !X0X_SYNTHONE_PATCH || !X0X_S1C || !X0X_SUPERJ6_BUILTIN_INIT || \
++    !X0X_S1_BEND_RANGE_PROBE || !X0X_S1_MOD_RATE_PROBE
++#error Native trial needs Synth One MOD and PB receivers and both engine profiles
++#endif
++#if X0X_SJ6_DELAY_WITNESS || X0X_SJ6_FILTER_VEL_PROBE || X0X_SJ6_ALT3_WITNESS || \
++    X0X_SJ6_ZERO_GATE_PROBE || X0X_SJ6_GATE_DEADLINE_PROBE || X0X_SJ6_RANDOM2_PROBE || \
++    X0X_SJ6_BEND_TYPED_PROBE || defined(X0X_SJ6_MOD_TYPED_PROBE) || X0X_SJ6_CLASSIC_I_PROBE || \
++    X0X_S1_FENCED_CLOCK || X0X_S1_CRUSH_LFO_PROBE || X0X_S1_FEEDBACK_PROBE
++#error Bench-only or separate typed DSP is outside this read-only admission trial
++#endif
++#ifndef DNBOX_137_HOST_WITNESS
++#define DNBOX_137_HOST_WITNESS 1 /* retain exact existing host feature conditionals */
++#endif
++#elif !defined(X0X_HOST) && defined(DNBOX_137_HOST_WITNESS)
++#error The typed bench carrier is not enabled in stock firmware
++#endif

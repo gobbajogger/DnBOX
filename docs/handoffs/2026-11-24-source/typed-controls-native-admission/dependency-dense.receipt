@@ -1,0 +1,10 @@
+EXPECTED RED product admission: same-version torn typed SOUND/stream accepted
+PASS 1526 checks: physical all detents both owners, signed dual layer/AMP unity, real save/load/CRC, undo, V2 sequence onset/unlocked/Stop, ordinary opaque legacy retained
+PASS direct writer cut after 0 commits, exact old tuple and no read writes
+PASS direct writer cut after 1 commits, exact old tuple and no read writes
+PASS direct writer cut after 2 commits, exact old tuple and no read writes
+PASS direct writer cut after 3 commits, exact old tuple and no read writes
+PASS direct writer cut after 4 commits, exact old tuple and no read writes
+PASS direct writer cut after 5 commits, exact new tuple and no read writes
+PASS same-version mixed SOUND/stream with no coherent previous pair rejected read-only
+PASS 1597 checks: physical all detents both owners, signed dual layer/AMP unity, real save/load/CRC, undo, V2 sequence onset/unlocked/Stop, ordinary opaque legacy retained

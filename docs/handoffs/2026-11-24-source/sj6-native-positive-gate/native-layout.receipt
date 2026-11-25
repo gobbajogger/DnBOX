@@ -1,0 +1,11 @@
+@partBytes = constant i32 5348, align 4
+@gateCfg = constant i32 3726, align 4
+@gateTicks = constant i32 3800, align 4
+@latchTicks = constant i32 3828, align 4
+@beatTick = constant i32 3812, align 4
+@gateOpen = constant i32 3832, align 4
+@noteCount = constant i32 3833, align 4
+@arpKind = constant i32 5344, align 4
+@arpDiv = constant i32 3749, align 4
+@drumCh = constant i32 34, align 4
+@sound = constant i32 40, align 4

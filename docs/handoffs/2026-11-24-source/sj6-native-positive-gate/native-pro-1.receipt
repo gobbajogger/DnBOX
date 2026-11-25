@@ -1,0 +1,8 @@
+irq levels at the end: [3, 4], ie true, skipped 0 cycles
+last 40 ms: 76% of instructions in ISRs = 95.9 M ISR instructions per second (clock 5760 MHz)
+LCD: on the wire 13% of the run (603 ms of 4570 ms)
+LED on-fractions: 
+SMK-37 pads (6 frames): 000000 000000 000000 08191f 000000 000000 000000 000000 000000 000000 000000 000000 08191f 20677f 000000 000000
+work/lcd.ppm at 4570 ms; LEDs lit: []; audio peak over the last 0.5 s: 624
+flash: 0 erases / programs
+PASS pro owner 1 native active positive Gate old deadline, actual 50→47
