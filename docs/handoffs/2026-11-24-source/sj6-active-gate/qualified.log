@@ -1,0 +1,6 @@
+FAIL tests/host/ui_active_gate.c:11: gates(parts_juno[v],note)==1 && !all_gates(parts_juno[1-v])
+start owner=0 clocked=0 tempo=120.0
+start owner=0 clocked=1 tempo=120.0
+start owner=1 clocked=0 tempo=120.0
+start owner=1 clocked=1 tempo=120.0
+PASS both owners real active SuperJ6 K3 preserves dispatched deadline, later steps/zero, held + synced release/STOP (28985 checks)

@@ -1,0 +1,222 @@
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -96,6 +96,7 @@
+     PT_PITCH_MOD,
+ #ifdef DNBOX_137_HOST_WITNESS
+     PT_FILTER_MOD,
++    PT_CRUSH_MOD,
+ #endif
+ #if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
+     PT_WHEELS,
+@@ -531,7 +532,7 @@
+ #if X0X_SYNTHONE_PATCH
+ enum { R_S1PATCH = R_NOTELOCK + 1, R_S1LINK = R_NOTELOCK + 4 };
+ #ifdef DNBOX_137_HOST_WITNESS
+-enum { R_S1MODWHEEL = R_NOTELOCK + 5, R_S1A4 = R_NOTELOCK + 6, R_S1RVFB = R_NOTELOCK + 7, R_S1TRANS = R_NOTELOCK + 8 };
++enum { R_S1MODWHEEL = R_NOTELOCK + 5, R_S1A4 = R_NOTELOCK + 6, R_S1RVFB = R_NOTELOCK + 7, R_S1TRANS = R_NOTELOCK + 8, R_S1CRUSH = R_NOTELOCK + 9 };
+ extern int s1_typed_mod_choose(unsigned,unsigned);
+ extern int s1_typed_a4_choose(unsigned,unsigned);
+ extern void s1_typed_a4_undo(unsigned);
+@@ -539,6 +540,8 @@
+ extern void s1_typed_rvfb_undo(unsigned);
+ extern int s1_typed_trans_choose(unsigned,int);
+ extern void s1_typed_trans_undo(unsigned);
++extern int s1_typed_crush_choose(unsigned,unsigned);
++extern void s1_typed_crush_undo(unsigned);
+ extern int s1_typed_tuple_editable(void);
+ #endif
+ #endif
+@@ -725,7 +728,7 @@
+         return !live_s1_mod(&proj.sound,r.b) || !s1_typed_tuple_editable();
+ #endif
+ #ifdef DNBOX_137_HOST_WITNESS
+-    if (r.kind == R_S1MODWHEEL || r.kind == R_S1A4 || r.kind == R_S1RVFB || r.kind == R_S1TRANS) return !live_s1_mod(&proj.sound,r.b) || !s1_typed_tuple_editable();
++    if (r.kind == R_S1MODWHEEL || r.kind == R_S1A4 || r.kind == R_S1RVFB || r.kind == R_S1TRANS || r.kind == R_S1CRUSH) return !live_s1_mod(&proj.sound,r.b) || !s1_typed_tuple_editable();
+ #endif
+     /* A bank with a single preset (Synth One INIT) has nothing to choose. */
+     if (r.kind == R_BPRESET && original_sound_available_factories((unsigned)engine_bass_requested_bank(r.b)) <= 1u) return 1;
+@@ -764,6 +767,11 @@
+ #endif
+ #if X0X_SYNTHONE_PATCH
+ #ifdef DNBOX_137_HOST_WITNESS
++    case R_S1CRUSH: {
++        static const char *const names[]={"OFF","LFO 1","LFO 2","BOTH"};
++        static const x0x_param_t pot={"CRUSH LFO",3,0,names};
++        return &pot;
++    }
+     case R_S1TRANS: {static const x0x_param_t pot={"TRANSPOSE",48,24,0};return &pot;}
+     case R_S1RVFB: {static const x0x_param_t pot={"RV SIZE",128,64,0};return &pot;}
+     case R_S1A4: { static const x0x_param_t pot={"A REF",60,30,0};return &pot; }
+@@ -900,6 +908,7 @@
+ #endif
+ #if X0X_SYNTHONE_PATCH
+ #ifdef DNBOX_137_HOST_WITNESS
++    case R_S1CRUSH: return live_s1_mod(&proj.sound,r.b)?read137(&proj.sound,r.b)[S1_CRUSH_BYTE]:0;
+     case R_S1TRANS: return live_s1_mod(&proj.sound,r.b)?s1_trans_st(read137(&proj.sound,r.b)[S1_TRANS_BYTE])+24:24;
+     case R_S1RVFB: return live_s1_mod(&proj.sound,r.b)?(int)s1_rvfb_pos(read137(&proj.sound,r.b)[S1_RVFB_BYTE]):64;
+     case R_S1A4: return live_s1_mod(&proj.sound,r.b)?(int)s1_a4_hz(read137(&proj.sound,r.b)[S1_A4_BYTE])-410:30;
+@@ -1939,6 +1948,7 @@
+     [PT_FILTER_MODE] = "FILTER MODE",
+ #ifdef DNBOX_137_HOST_WITNESS
+     [PT_FILTER_MOD] = "FILTER MOD",
++    [PT_CRUSH_MOD] = "CRUSH MOD",
+ #endif
+     [PT_FM_NOISE] = "FM / NOISE",
+     [PT_GENERATE] = "GENERATE",
+@@ -2514,8 +2524,8 @@
+                 _Static_assert(sizeof s1_pages / sizeof *s1_pages + 2u <= MAXPAGES,
+                                "Synth One pages must leave room for ARP and SOUND");
+ #ifdef DNBOX_137_HOST_WITNESS
+-                _Static_assert(sizeof s1_pages / sizeof *s1_pages + 4u <= MAXPAGES,
+-                               "Typed S1 pages must leave room for WHEELS/TUNING/ARP/SOUND");
++                _Static_assert(sizeof s1_pages / sizeof *s1_pages + 5u <= MAXPAGES,
++                               "Typed S1 pages must leave room for WHEELS/TUNING/CRUSH/ARP/SOUND");
+ #endif
+                 enum { S1_EFFECT_PAGES = 3 };
+                 const unsigned effect_page = sizeof s1_pages / sizeof s1_pages[0] - S1_EFFECT_PAGES;
+@@ -2527,6 +2537,9 @@
+ #endif
+                 add_original_extra_pages(emit, s1_pages + effect_page, S1_EFFECT_PAGES, b, R_S1PATCH);
+ #ifdef DNBOX_137_HOST_WITNESS
++#if defined(X0X_S1_CRUSH_LFO_PROBE) && X0X_S1_CRUSH_LFO_PROBE
++                if (live_s1_mod(&proj.sound,b)) add_page(emit,PT_CRUSH_MOD,PR(R_S1CRUSH,T_303,b,0),NONE,NONE,NONE);
++#endif
+                 if (live_s1_mod(&proj.sound,b)) add_page(emit,PT_TUNING,PR(R_S1A4,T_303,b,0),PR(R_S1TRANS,T_303,b,0),NONE,NONE);
+ #endif
+             } else
+@@ -3225,7 +3238,7 @@
+     undo_commit_stable();                       /* what was just done is a step too */
+ #if X0X_BASS_TAGGED_SOUND
+ #ifdef DNBOX_137_HOST_WITNESS
+-    unsigned undo_velocity137=0,undo_s1_mod=0,undo_a4=0,undo_rvfb=0,undo_trans=0;
++    unsigned undo_velocity137=0,undo_s1_mod=0,undo_a4=0,undo_rvfb=0,undo_trans=0,undo_crush=0;
+ #if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
+     extern int s1_typed_pb_undo_ready(unsigned);
+     extern void s1_typed_pb_undo(unsigned);
+@@ -3277,6 +3290,8 @@
+                 if (p!=read137(&proj.sound,v)[S1_RVFB_BYTE] && p<=S1_RVFB_LAST) undo_rvfb|=1u<<v;
+                 undo_peek(&undo,entry,off+(S1_TRANS_BYTE-2u),&p,1u);
+                 if (p!=read137(&proj.sound,v)[S1_TRANS_BYTE] && p<=S1_TRANS_LAST) undo_trans|=1u<<v;
++                undo_peek(&undo,entry,off+(S1_CRUSH_BYTE-2u),&p,1u);
++                if (p!=read137(&proj.sound,v)[S1_CRUSH_BYTE] && p<=S1_CRUSH_LAST) undo_crush|=1u<<v;
+ #if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
+                 uint8_t pb[2];
+                 undo_peek(&undo,entry,off+2u,pb,sizeof pb);
+@@ -3297,7 +3312,7 @@
+         }
+ #ifdef DNBOX_137_HOST_WITNESS
+         extern int engine_bass_wheel_active(void);
+-        if((undo_s1_mod || undo_a4 || undo_rvfb || undo_trans) && !s1_typed_tuple_editable()) {
++        if((undo_s1_mod || undo_a4 || undo_rvfb || undo_trans || undo_crush) && !s1_typed_tuple_editable()) {
+             say("PROJECT READ ONLY",0);
+             engine_bass_edit_hold(0);
+             return;
+@@ -3326,7 +3341,7 @@
+     }
+ #endif
+ #ifdef DNBOX_137_HOST_WITNESS
+-    if ((undo_velocity137 || undo_s1_mod || undo_pb || undo_a4 || undo_rvfb || undo_trans) && !undo_bass_mask) engine_project_hold(1);
++    if ((undo_velocity137 || undo_s1_mod || undo_pb || undo_a4 || undo_rvfb || undo_trans || undo_crush) && !undo_bass_mask) engine_project_hold(1);
+ #if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
+     /* Recheck while audio is held: a note-lock must not acquire the owner
+      * between validating history and publishing the typed scalar pair. */
+@@ -3343,7 +3358,7 @@
+ #if X0X_BASS_TAGGED_SOUND
+         if(undo_bass_mask)engine_project_hold(0);
+ #ifdef DNBOX_137_HOST_WITNESS
+-        else if(undo_velocity137 || undo_s1_mod || undo_pb || undo_a4 || undo_rvfb || undo_trans)engine_project_hold(0);
++        else if(undo_velocity137 || undo_s1_mod || undo_pb || undo_a4 || undo_rvfb || undo_trans || undo_crush)engine_project_hold(0);
+ #endif
+ #endif
+ #if X0X_BASS_PRESET_PREVIEW
+@@ -3363,9 +3378,10 @@
+     if(undo_pb) s1_typed_pb_undo(undo_pb & ~undo_bass_mask);
+ #endif
+     if(undo_a4) s1_typed_a4_undo(undo_a4 & ~undo_bass_mask);
++    if(undo_crush) s1_typed_crush_undo(undo_crush & ~undo_bass_mask);
+     if(undo_trans) s1_typed_trans_undo(undo_trans & ~undo_bass_mask);
+     if(undo_rvfb) s1_typed_rvfb_undo(undo_rvfb & ~undo_bass_mask);
+-    if(undo_bass_mask || undo_velocity137 || undo_s1_mod || undo_pb || undo_a4 || undo_rvfb || undo_trans) engine_project_hold(0);
++    if(undo_bass_mask || undo_velocity137 || undo_s1_mod || undo_pb || undo_a4 || undo_rvfb || undo_trans || undo_crush) engine_project_hold(0);
+ #else
+     if(undo_bass_mask) engine_project_hold(0);
+ #endif
+@@ -4342,6 +4358,12 @@
+ #endif
+ #if X0X_SYNTHONE_PATCH
+ #ifdef DNBOX_137_HOST_WITNESS
++    if (r.kind == R_S1CRUSH) {
++        if(pref_read_only(r))return;
++        int old=pref_get(r),next=old+(e>0)-(e<0);
++        if(next>=0 && next<=3 && s1_typed_crush_choose(r.b,(unsigned)next))mark_dirty();
++        return;
++    }
+     if (r.kind == R_S1TRANS) {
+         if(pref_read_only(r))return;
+         int old=pref_get(r),next=old+(e>0)-(e<0);
+--- a/firmware/src/app/original_presets.inc
++++ b/firmware/src/app/original_presets.inc
+@@ -498,6 +498,26 @@
+ void s1_typed_trans_undo(unsigned mask) {
+     for(unsigned v=0;v<NBASS;v++)if(mask&(1u<<v))s1_typed_trans_apply(mot_base_snd,v);
+ }
++static void s1_typed_crush_apply(const sound_t *sound,unsigned owner) {
++    if(live_s1_mod(sound,owner) && original_bass[owner].kind==ORIGINAL_SOUND_SYNTHONE)
++        (void)s1c_front_set(&original_bass[owner].dsp.synthone.e,S1_CRUSH_PARAM,read137(sound,owner)[S1_CRUSH_BYTE]);
++}
++int s1_typed_crush_choose(unsigned owner,unsigned choice) {
++    if(choice>S1_CRUSH_LAST || !live_s1_mod(mot_base_snd,owner))return 0;
++    engine_project_hold(1);
++    int ok=!ui_project_busy() && s1_typed_tuple_editable() &&
++           live_s1_mod(mot_base_snd,owner) && !engine_bass_preset_pending(owner) &&
++           original_bass[owner].kind==ORIGINAL_SOUND_SYNTHONE;
++    if(ok) {
++        slot137((sound_t *)mot_base_snd,owner)[S1_CRUSH_BYTE]=(uint8_t)choice;
++        s1_typed_crush_apply(mot_base_snd,owner);
++    }
++    engine_project_hold(0);
++    return ok;
++}
++void s1_typed_crush_undo(unsigned mask) {
++    for(unsigned v=0;v<NBASS;v++)if(mask&(1u<<v))s1_typed_crush_apply(mot_base_snd,v);
++}
+ static void s1_typed_rvfb_apply(const sound_t *sound,unsigned owner) {
+     if(live_s1_mod(sound,owner) && original_bass[owner].kind==ORIGINAL_SOUND_SYNTHONE)
+         (void)s1c_front_set(&original_bass[owner].dsp.synthone.e,S1C_P_RVFB,(float)s1_rvfb_pos(read137(sound,owner)[S1_RVFB_BYTE])*(1.f/128.f));
+@@ -1260,7 +1280,7 @@
+ #if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
+     if (rc==ORIGINAL_RUNTIME_OK) s1_pb_load(v,sound);
+ #endif
+-    if(rc==ORIGINAL_RUNTIME_OK) {s1_typed_a4_apply(sound,v);s1_typed_rvfb_apply(sound,v);s1_typed_trans_apply(sound,v);}
++    if(rc==ORIGINAL_RUNTIME_OK) {s1_typed_a4_apply(sound,v);s1_typed_rvfb_apply(sound,v);s1_typed_trans_apply(sound,v);s1_typed_crush_apply(sound,v);}
+     arp_adopt(v, sound, 0);
+     bass_named_preset[v] = (int16_t)bass_cell_preset(sound->v[T_303][v]);
+     original_seq_note[v] = -1;
+@@ -1430,6 +1450,7 @@
+         s1_typed_a4_apply(sound,v);
+         s1_typed_rvfb_apply(sound,v);
+         s1_typed_trans_apply(sound,v);
++        s1_typed_crush_apply(sound,v);
+         if (live_s1_mod(sound,v))
+             s1_part_mod_route(&original_bass[v].dsp.synthone,read137(sound,v)[3]);
+ #if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
+--- a/firmware/src/app/sj6_137_host_witness.h
++++ b/firmware/src/app/sj6_137_host_witness.h
+@@ -25,6 +25,7 @@
+ enum {S1_TRANS_BYTE=15,S1_TRANS_LAST=48,S1_TRANS_PARAM=148};
+ static inline int s1_trans_st(unsigned code){return code?(int)code-25+(code>=25):0;}
+ static inline unsigned s1_trans_code(int st){return st?(unsigned)(st+25-(st>0)):0u;}
++enum {S1_CRUSH_BYTE=20, S1_CRUSH_LAST=3, S1_CRUSH_PARAM=58};
+ static inline int canonical137(const sound_t *s) {
+  for (unsigned v=0;v<2;++v) {
+   const uint8_t *b=read137(s,v);
+@@ -38,6 +39,9 @@
+ #endif
+   if (i==S1_RVFB_BYTE) {if(b[i]>S1_RVFB_LAST)return 0;}
+   else if(i==S1_TRANS_BYTE) {if(b[i]>S1_TRANS_LAST)return 0;}
++#if defined(X0X_S1_CRUSH_LFO_PROBE) && X0X_S1_CRUSH_LFO_PROBE
++  else if(i==S1_CRUSH_BYTE) {if(b[i]>S1_CRUSH_LAST)return 0;}
++#endif
+   else if (s->v[T_303][8+2*v+i/32][i%32]) return 0;
+  }
+  return 1;

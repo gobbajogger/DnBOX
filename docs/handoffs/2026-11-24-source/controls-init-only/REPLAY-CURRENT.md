@@ -56,3 +56,10 @@ both-owner application test passed 266 checks on this overlay.
 The newer typed independent range controls and complete six-way MOD
 selector remain separate host-only controls work; neither is presently
 part of the implemented overlay or published firmware.
+
+Apply `../s1-mod-native-scale/native-scale.patch` after the wheel-core
+step to avoid the missing native powf dependency. Verify
+`WHEEL-NATIVE-SCALE-POST.sha256` (ledger SHA-256
+8cf74b7a73a97873e136e0f0d738531c9a852a4e84eebe683793413bfd2bd2be).
+The 8,775-check physical ADC and MIDI host replay is green. Exact
+stock app native fit is still red on Elite and Pro; no packages.

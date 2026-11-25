@@ -1,0 +1,47 @@
+--- a/firmware/src/dsp/s1c/s1c.c
++++ b/firmware/src/dsp/s1c/s1c.c
+@@ -1,4 +1,7 @@
+ /* SPDX-License-Identifier: GPL-3.0-only */
++#if defined(X0X_S1_CRUSH_LFO_PROBE) && X0X_S1_CRUSH_LFO_PROBE
++#include <math.h>
++#endif
+ /* Compact Synth One-style engine, written from scratch for DnBOX from the instrument's documented
+  * behaviour (control laws, envelope, voice allocation, arpeggiator, FX order). Judged by A/B only.
+  * Host prototype: libm math; the device build maps these calls to fm_* helpers. */
+@@ -951,6 +954,28 @@
+         else for (i = 0; i < S1C_VOICES; i++) if (s->v[i].root != -1 && s->v[i].stage) y += voice_run(s, &s->v[i]);
+ 
+         /* bitcrush (sample-and-hold), tremolo */
++#if defined(X0X_S1_CRUSH_LFO_PROBE) && X0X_S1_CRUSH_LFO_PROBE
++#ifndef X0X_HOST
++#error Synth One crush cadence witness is host only
++#endif
++        float crush_route = P(LBC);
++        if (crush_route==1.f || crush_route==2.f || crush_route==3.f) {
++            /* The original clock is consumed only on capture. Evaluate the
++             * effective per-sample rate at that same sample, not at a prior
++             * control tick. Keep the original binary32 add/subtract order. */
++            s1u_crush *cr = &s->crush;
++            if (cr->idx <= cr->n) {
++                float bsr = (float)log2(P(BCSR)) + 4.0f*lfo01(s,crush_route);
++                s1u_crush_clock(cr,clampf((float)exp2(bsr),2048.0f,48000.0f),s->sr);
++                cr->v = y;
++                cr->idx += cr->inc;
++                cr->idx -= cr->n;
++                cr->n = 0.f;
++            } else y = cr->v;
++            cr->n += 1.f;
++        } else
++#endif
++        {
+ #if S1C_FAST
+         if ((f & 7) == 0)
+ #endif
+@@ -959,6 +984,7 @@
+             s1u_crush_clock(&s->crush, clampf(exp2f(bsr), 2048.0f, 48000.0f), s->sr);
+         }
+         y = s1u_crush_run(&s->crush, y);
++        }
+         y *= lfo10(s, P(LTREM));
+         /* autopan, equal power */
+         float L, R;
