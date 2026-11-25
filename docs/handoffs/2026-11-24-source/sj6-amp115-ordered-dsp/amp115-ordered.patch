@@ -1,0 +1,155 @@
+--- a/firmware/src/dsp/juno6.h
++++ b/firmware/src/dsp/juno6.h
+@@ -25,6 +25,7 @@
+ enum { SJ6_LAYER1_SEMI_ID = 72, SJ6_LAYER2_SEMI_ID = 73, SJ6_SEMI_CENTER = 12, SJ6_SEMI_MAX = 24 };
+ enum { SJ6_LAYER1_FINE_ID = 74, SJ6_FINE_CENTER = 50, SJ6_FINE_MAX = 100 };
+ enum { SJ6_A_REFERENCE_ID = 206, SJ6_A_REFERENCE_STEPS = 100, SJ6_A_REFERENCE_DEFAULT = 60 };
++typedef struct { uint16_t q16[4]; uint8_t mask,link; } juno6_amp_state;
+ enum { SJ6_LFO_COUNT = 3, SJ6_LFO_WORD_COUNT = 6, SJ6_LFO_DIVISIONS = 18 };
+ typedef struct {
+     float word[SJ6_LFO_WORD_COUNT]; /* Rates, then Hz mode words, in index order. */
+@@ -90,6 +91,7 @@
+  uint64_t lfo2_entropy_state;
+  float lfo2_hold_elapsed, lfo2_hold_period, lfo2_hold_sample;
+  uint8_t osc1_level_code;
++ juno6_amp_state amp_owner;
+ #endif
+ #endif
+ } juno6_t;
+@@ -128,6 +130,14 @@
+ int juno6_render_stereo(juno6_t *, float *, float *, unsigned);
+ int juno6_can_edit_amp2(const juno6_t *);
+ #if X0X_SUPERJ6_BUILTIN_INIT
++/* Audio-owner boundary. Link: 0 absent, 1 OFF, 2 ON. Source is the
++ * normalized Q16 command, not an inversion of measured DSP state.
++ * Callers classify the independent Saga short-gate branch. */
++int juno6_edit_amp_link(juno6_t *, unsigned enabled,unsigned saga_short_gate);
++int juno6_edit_amp_stage(juno6_t *, unsigned layer,unsigned stage,uint16_t q16,unsigned saga_short_gate);
++int juno6_read_amp_state(const juno6_t *,juno6_amp_state *);
++/* Restore after base reapplication, never replay a toggle event. */
++int juno6_restore_amp_state(juno6_t *,const juno6_amp_state *,unsigned saga_short_gate);
+ unsigned juno6_knob_position(const juno6_t *s, unsigned slot);
+ void juno6_apply_knobs(juno6_t *s, unsigned mask, const uint8_t positions[SJ6_OSC_KNOBS]);
+ void juno6_apply_panel_envelopes(juno6_t *, unsigned mask, const uint8_t positions[SJ6_EXTRA_COUNT], int reset);
+--- a/firmware/src/dsp/juno6_factory.inc
++++ b/firmware/src/dsp/juno6_factory.inc
+@@ -103,6 +103,91 @@
+     return dnbx_store_raw(&s->core, 36, raw) == DNBX_RAW_STORED_ONLY;
+ }
+ 
++#if X0X_SUPERJ6_BUILTIN_INIT
++static float sj6_amp_q16_unit(uint16_t q)
++{ return (float)q * (1.f / 65535.f); }
++static int sj6_amp_context(const juno6_t *s,unsigned short_gate)
++{ return s && s->typed && !short_gate && !s->core.filter_link; }
++static float *sj6_amp_parameter(dnbx_envelope_params *a,unsigned stage)
++{
++    switch(stage) {
++    case 0:return &a->attack_s;
++    case 1:return &a->decay_s;
++    case 2:return &a->sustain;
++    default:return &a->release_s;
++    }
++}
++static void sj6_amp_apply(juno6_t *s,unsigned layer,unsigned stage,uint16_t q)
++{
++    const dnbx_layer_params *p=&s->core.layer[layer].params;
++    dnbx_envelope_params a=p->amp;
++    float raw=sj6_amp_q16_unit(q);
++    *sj6_amp_parameter(&a,stage)=amp_stage_from_unit(stage,raw);
++    dnbx_apply_panel_envelopes(&s->core,layer,&a,&p->filter,0);
++    (void)dnbx_store_raw(&s->core,(layer?119u:36u)+stage,raw);
++}
++/* A legacy receiver may still write the same ADSR before it is routed
++ * through typed commands. Do not export a stale exact snapshot afterwards. */
++static void sj6_amp_invalidate(juno6_t *s,unsigned stages)
++{
++    if(s->amp_owner.mask|s->amp_owner.link)
++        s->amp_owner.mask|=(uint8_t)((stages&15u)<<4);
++}
++static void sj6_amp_secondary(juno6_t *s,unsigned stage,uint16_t q)
++{
++    sj6_amp_apply(s,1,stage,q);
++    s->amp_owner.q16[stage]=q;
++    s->amp_owner.mask=(uint8_t)((s->amp_owner.mask & ~(16u<<stage)) | (1u<<stage));
++}
++/* Source ON event inverse-maps the current primary envelope, then
++ * calls SECONDARY in order. Create each normalized word once here. */
++static int sj6_amp_copy_word(unsigned stage,float physical,uint16_t *out)
++{
++    const float min=stage==2u ? 0.f:.002f;
++    const float max=stage==0u ? 16.f:stage==2u ? 1.f:24.f;
++    if (!(physical>=min && physical<=max)) return 0;
++    const float exponent=stage==0u ? (1.f/3.33f):stage==2u ? (1.f/2.5f):(1.f/3.35f);
++    float raw=fm_powf((physical-min)/(max-min),exponent);
++    *out=(uint16_t)(fm_clampf(raw,0.f,1.f)*65535.f+.5f);
++    return 1;
++}
++int juno6_edit_amp_link(juno6_t *s,unsigned enabled,unsigned short_gate)
++{
++    if (!sj6_amp_context(s,short_gate) || enabled>1u || dnbx_active_voices(&s->core)!=0) return 0;
++    uint16_t q[4];
++    if (enabled) {
++        dnbx_envelope_params a=s->core.layer[0].params.amp;
++        for(unsigned i=0;i<4u;++i) if(!sj6_amp_copy_word(i,*sj6_amp_parameter(&a,i),&q[i]))return 0;
++    }
++    s->amp_owner.link=(uint8_t)(enabled+1u);
++    if(enabled) for(unsigned i=0;i<4u;++i) sj6_amp_secondary(s,i,q[i]);
++    return 1;
++}
++int juno6_edit_amp_stage(juno6_t *s,unsigned layer,unsigned stage,uint16_t q,unsigned short_gate)
++{
++    if (!sj6_amp_context(s,short_gate) || layer>1u || stage>3u ||
++        (!layer && !s->amp_owner.link) || dnbx_active_voices(&s->core)!=0) return 0;
++    if(!layer)sj6_amp_apply(s,0,stage,q);
++    if(layer || s->amp_owner.link==2u)sj6_amp_secondary(s,stage,q);
++    return 1;
++}
++int juno6_read_amp_state(const juno6_t *s,juno6_amp_state *out)
++{
++    if(!s || !out || !s->typed) return -1;
++    if ((s->amp_owner.mask & 0xf0u) || ((s->amp_owner.mask|s->amp_owner.link) && s->core.filter_link)) return -1;
++    *out=s->amp_owner;
++    return !!(out->mask|out->link);
++}
++int juno6_restore_amp_state(juno6_t *s,const juno6_amp_state *in,unsigned short_gate)
++{
++    if (!sj6_amp_context(s,short_gate) || !in || in->link>2u || (in->mask&~15u)) return 0;
++    for(unsigned i=0;i<4u;++i) if(!(in->mask&(1u<<i)) && in->q16[i])return 0;
++    s->amp_owner=*in;
++    for(unsigned i=0;i<4u;++i) if(in->mask&(1u<<i))sj6_amp_apply(s,1,i,in->q16[i]);
++    return 1;
++}
++#endif
++
+ /* Called only for a validated pre-note snapshot. Missing legacy PWM fields
+  * are irrelevant for sine/triangle/saw. Square requires an explicit gate. */
+ void juno6_apply_pre_note_wave(juno6_t *s, unsigned layer, const juno6_oscillator_edit *edit)
+@@ -458,6 +543,7 @@
+          * FILTER time is a physical panel taper across the compact core range. */
+         physical[i] = i < 4 ? amp_stage_from_unit(i, u) : i == 6 ? u : 16.f * u * u * u;
+     }
++    sj6_amp_invalidate(s,reset?15u:mask);
+     unsigned linked = mask & (1u << 8) ? p[8] & 1u : reset ? 0 : s->core.filter_link;
+     dnbx_layer_params defaults;
+     if (reset) dnbx_default_layer_params(&defaults);
+@@ -483,6 +569,11 @@
+  if(!(x>=0&&x<=1))return 0;
+  if(id>=JUNO6_APP_PARAM_BASE){
+   if(!juno6_can_edit_amp2(s) || !set_amp2(&s->core,id-JUNO6_APP_PARAM_BASE,x))return 0;
++#if X0X_SUPERJ6_BUILTIN_INIT
++  unsigned stage=id-JUNO6_APP_PARAM_BASE-119u;
++  if ((s->amp_owner.mask&(1u<<stage))==0 || x != sj6_amp_q16_unit(s->amp_owner.q16[stage]))
++      sj6_amp_invalidate(s,1u<<stage);
++#endif
+   /* AMP2 explicitly selects the two-layer engine. Only a waveform snapshot
+    * selects the original app oscillator on an individual layer. */
+   s->typed=1;
+@@ -490,6 +581,7 @@
+  }
+ #if X0X_SUPERJ6_BUILTIN_INIT
+  /* Existing AMP automation must not overwrite the separate FILTER values. */
++ if(id>=5u && id<=8u)sj6_amp_invalidate(s,1u<<(id-5u));
+  #define JUNO6_LEGACY_ADSR(field, value) (p.amp.field = (value))
+  if(id>=18)return 0;
+  s->macro[id]=x;
