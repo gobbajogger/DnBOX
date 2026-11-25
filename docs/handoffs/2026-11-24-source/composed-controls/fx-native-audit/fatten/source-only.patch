@@ -1,0 +1,97 @@
+--- a/firmware/src/dsp/sj6_native_room.h
++++ b/firmware/src/dsp/sj6_native_room.h
+@@ -4,12 +4,14 @@
+ #if X0X_SJ6_NATIVE_ROOM
+ enum { SJ6_ROOM_ENABLE, SJ6_ROOM_TYPE, SJ6_ROOM_SIZE, SJ6_ROOM_LOCUT,
+        SJ6_ROOM_MIX, SJ6_ROOM_WIDEN, SJ6_ROOM_RATE, SJ6_ROOM_DEPTH, SJ6_ROOM_COUNT };
+-enum { SJ6_ROOM_LINE = 113, SJ6_ROOM_WIDE = 23, SJ6_ROOM_STRIDE = 8 };
++enum { SJ6_ROOM_LINE = 113, SJ6_ROOM_WIDE = 441, SJ6_ROOM_STRIDE = 8 };
+ typedef struct {
+     int16_t ring[4][SJ6_ROOM_LINE], wide[SJ6_ROOM_WIDE];
+     float lo[2], acc[2], wet[2], last[2], pan_phase;
+     float hp_coeff, fb, mix, rate, depth, clock_bpm;
++    float fat_lp[2];  /* Fatten owns only the audible right-hand delay. */
++    uint16_t wide_pos;
+     uint8_t rate_code, clock_sync;
+-    uint8_t pos[4], wide_pos, tick, enable, type, widen, armed;
++    uint8_t pos[4], tick, enable, type, widen, armed;
+ } sj6_room_t;
+ #endif
+--- a/firmware/src/dsp/sj6_native_room.inc
++++ b/firmware/src/dsp/sj6_native_room.inc
+@@ -39,14 +39,19 @@
+     memset(s->last,0,sizeof s->last);
+     s->tick=0;
+ }
++static void sj6_fatten_reset(sj6_room_t *s)
++{
++    memset(s->wide,0,sizeof s->wide);
++    s->wide_pos=0;
++    s->fat_lp[0]=s->fat_lp[1]=0.f;
++}
+ void original_runtime_sj6_room(original_runtime_part *p,const uint8_t word[SJ6_ROOM_COUNT])
+ {
+     if(!p||p->kind!=ORIGINAL_SOUND_JUNO||p->status!=ORIGINAL_RUNTIME_OK)return;
+     sj6_room_t *s=&p->dsp.juno.room;
+     if(s->enable!=word[SJ6_ROOM_ENABLE]||s->type!=word[SJ6_ROOM_TYPE])sj6_room_reset(s);
+     if(s->widen!=word[SJ6_ROOM_WIDEN]){
+-        memset(s->wide,0,sizeof s->wide);
+-        s->wide_pos=0;
++        sj6_fatten_reset(s);
+     }
+     s->armed=1;
+     s->enable=word[SJ6_ROOM_ENABLE];s->type=word[SJ6_ROOM_TYPE];
+@@ -97,6 +102,22 @@
+         if(++s->pos[i]>=length[i])s->pos[i]=0;
+     }
+ }
++/* Build9 Fatten stereo topology. The output of the delayed left leg and
++ * the dry right leg are both discarded by the hard panners. Only right
++ * history is needed. The compact 15 kHz feedback LP is Butterworth;
++ * AudioUnit private internals are not assumed sample-identical. */
++static float sj6_fatten_tick(sj6_room_t *s,float right)
++{
++    const unsigned at=s->wide_pos;
++    const float delayed=(4.f/32767.f)*(float)s->wide[at];
++    const float x=right+.5f*delayed;
++    const float y=0.481161993f*x+s->fat_lp[0];
++    s->fat_lp[0]=0.962323986f*x-0.672069140f*y+s->fat_lp[1];
++    s->fat_lp[1]=0.481161993f*x-0.252578833f*y;
++    s->wide[at]=sj6_room_pcm(.25f*y);
++    s->wide_pos=at+1u==SJ6_ROOM_WIDE?0u:(uint16_t)(at+1u);
++    return delayed;
++}
+ static void sj6_room_process(sj6_room_t *s,float *left,float *right,unsigned frames)
+ {
+     if(!s->armed||(!s->enable&&!s->widen&&s->depth==0.f))return;
+@@ -111,17 +132,7 @@
+                 r+=(s->last[1]+t*(s->wet[1]-s->last[1])-r)*s->mix;
+             }
+         }
+-        if(s->widen){
+-            /* The dry midpoint is unchanged; only the differential path is
+-             * widened. A short all-pass decorrelates even a centered input. */
+-            float m=.5f*(l+r);
+-            float z=s->wide[s->wide_pos]*(1.f/32767.f);
+-            float ap=z-.5f*m;
+-            s->wide[s->wide_pos]=sj6_room_pcm(m+.5f*ap);
+-            if(++s->wide_pos==SJ6_ROOM_WIDE)s->wide_pos=0;
+-            float side=.30f*(m-ap);
+-            l+=side;r-=side;
+-        }
++        if(s->widen)r=sj6_fatten_tick(s,r);
+         if(s->depth>0.f){
+             float pan=fm_sinf(6.2831853f*s->pan_phase)*s->depth;
+             /* Center exactly unity, continuously shift opposing stereo gains. */
+--- a/firmware/src/app/original_runtime.c
++++ b/firmware/src/app/original_runtime.c
+@@ -1171,8 +1171,7 @@
+ #endif
+ #if X0X_SJ6_NATIVE_ROOM
+         sj6_room_reset(&p->dsp.juno.room);
+-        memset(p->dsp.juno.room.wide,0,sizeof p->dsp.juno.room.wide);
+-        p->dsp.juno.room.wide_pos=0;
++        sj6_fatten_reset(&p->dsp.juno.room);
+ #endif
+     } else if (p->kind == ORIGINAL_SOUND_SYNTHONE) {
+         s1_part_all_off(&p->dsp.synthone);

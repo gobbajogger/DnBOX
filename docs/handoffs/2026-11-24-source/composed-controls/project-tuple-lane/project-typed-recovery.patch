@@ -1,0 +1,446 @@
+--- a/firmware/src/app/project.c
++++ b/firmware/src/app/project.c
+@@ -21,16 +21,29 @@
+ 
+ project_t proj;
+ /* Reuses the UI undo shadow while an exclusive project operation is active. */
++#ifdef DNBOX_137_HOST_WITNESS
++#include "sj6_137_host_witness.h"
++#ifdef X0X_HOST
++#include <string.h>
++#endif
++#endif
+ project_t project_stage X0X_POOL;
+ 
+ #define PROJ_STREAM 13u                 /* compact Chicago schema2; current raw patterns/arrangement */
+ #define PROJ_STREAM_14 14u              /* 13 + per-pattern bass presets (pattern_t.rsv[0..1]) and note locks */
+ #define PROJ_STREAM_CHORD 15u /* same byte layout, sparse held-key chord metadata */
++#ifdef DNBOX_137_HOST_WITNESS
++static int stream_known(uint32_t format) { return format == PROJ_STREAM || format == PROJ_STREAM_14 || format == PROJ_STREAM_CHORD || format == STREAM137; }
++#else
+ static int stream_known(uint32_t format) { return format == PROJ_STREAM || format == PROJ_STREAM_14 || format == PROJ_STREAM_CHORD; }
++#endif
+ /* Revision 14 only when the project uses what 13 cannot hold, so a project without
+  * pattern presets or note locks stays byte-identical and loads on 0.0.24.x. */
+ static uint32_t stream_format_of(const project_t *pr)
+ {
++#ifdef DNBOX_137_HOST_WITNESS
++    if(pr->set.snd_rev==REV137)return STREAM137;
++#endif
+     for(int k=0;k<NLANE;k++)
+         if(pr->arr.lane[k].used && pr->arr.lane[k].t==HELD_CHORD_TARGET)return PROJ_STREAM_CHORD;
+     for (int p = 0; p < NPAT; p++)
+@@ -61,6 +74,11 @@
+ /* 1: unsupported, 2: damaged. Both retain flash until validated staged adoption. */
+ static uint8_t project_incompatible;
+ static uint8_t stream_previous; /* per-object older-copy selection during recovery */
++#ifdef DNBOX_137_HOST_WITNESS
++enum { TUPLE_SET_PREVIOUS = 1u << NSTREAM, TUPLE_SOUND_PREVIOUS = 2u << NSTREAM };
++static uint8_t tuple_recovered; /* previous A/B tuple is playable but permanently read-only until latest coheres */
++int s1_typed_tuple_editable(void) {return !tuple_recovered && !project_incompatible;}
++#endif
+ static uint8_t device_bt_pending;       /* independent of UI dirty/autosave and project reset/load */
+ static uint8_t settings_read_failed;    /* defaults must not replace unread stored settings */
+ static uint8_t settings_load_failed;    /* a Bluetooth retry alone cannot adopt fallback defaults */
+@@ -129,12 +147,36 @@
+  * objects that changed: an autosave usually erases one or two sectors, not six */
+ static uint64_t stored_hash[OBJ_NOBJ];
+ static uint8_t stored_known[OBJ_NOBJ];
++#ifdef DNBOX_137_HOST_WITNESS
++__attribute__((noinline)) static uint64_t hash_append(uint64_t h,const uint8_t *p,uint32_t n)
++#else
+ __attribute__((noinline)) static uint64_t hash_of(const uint8_t *p, uint32_t n)        /* FNV-1a, 64-bit */
+-{
++#endif
++{
++#ifdef DNBOX_137_HOST_WITNESS
++    while (n--) h = (h ^ *p++) * UINT64_C(1099511628211);
++#else
+     uint64_t h = UINT64_C(14695981039346656037);
+     while (n--)
+         h = (h ^ *p++) * UINT64_C(1099511628211);
++#endif
+     return h;
++#ifdef DNBOX_137_HOST_WITNESS
++}
++static uint64_t hash_of(const uint8_t *p,uint32_t n)
++{ return hash_append(UINT64_C(14695981039346656037),p,n); }
++static uint64_t tuple_hash(const project_t *pr,uint8_t part_off)
++{
++    settings_t set;
++    memcpy(&set,&pr->set,sizeof set);
++    /* The independently persisted device Bluetooth bit is not project data. */
++    set.bt &= ~1u;
++    uint8_t domain[2]={STREAM137,part_off};
++    uint64_t h=hash_of(domain,sizeof domain);
++    h=hash_append(h,(const uint8_t *)&set,sizeof set);
++    h=hash_append(h,(const uint8_t *)&pr->sound,sizeof pr->sound);
++    return hash_append(h,(const uint8_t *)pr+RAW_OFF,RAW_LEN);
++#endif
+ }
+ 
+ __attribute__((noinline)) static uint32_t get32(const uint8_t *p)
+@@ -168,7 +210,11 @@
+  * invalidate cached equality and block saves until a later read resolves it. */
+ static int read_settings_payload(void)
+ {
++#ifdef DNBOX_137_HOST_WITNESS
++    int n = plat_store_load(OBJ_SET | (stream_previous & TUPLE_SET_PREVIOUS ? PLAT_STORE_PREVIOUS : 0), io_buf, sizeof io_buf);
++#else
+     int n = plat_store_load(OBJ_SET, io_buf, sizeof io_buf);
++#endif
+     settings_read_failed = (uint8_t)(n < -1);
+     if (n < 0) stored_known[OBJ_SET] = 0;
+     return n;
+@@ -180,7 +226,11 @@
+     int n = read_settings_payload();
+     if (n < 0) return n;
+     if (!PROJ_SET_LEN_OK((uint32_t)n) || get32(io_buf) != PROJ_FORMAT ||
++#ifdef DNBOX_137_HOST_WITNESS
++        !valid_rev137(io_buf[4u + __builtin_offsetof(settings_t, snd_rev)])) return -9;
++#else
+         io_buf[4u + __builtin_offsetof(settings_t, snd_rev)] != PROJ_SND_REV) return -9;
++#endif
+     if ((uint32_t)n == 4u + sizeof *dst)
+         __builtin_memset(io_buf + 4u + sizeof *dst, 0, PROJ_SET_TAIL);
+     else if (PROJ_SET_TAIL_BAD(io_buf + 4u + sizeof *dst)) return -9;
+@@ -194,7 +244,11 @@
+ {
+     if (len + 4u > sizeof io_buf)
+         return -1;
++#ifdef DNBOX_137_HOST_WITNESS
++    put32(io_buf, obj==OBJ_SOUND && proj.set.snd_rev==REV137 ? SOUND137 : PROJ_FORMAT);
++#else
+     put32(io_buf, PROJ_FORMAT);
++#endif
+     __builtin_memcpy(io_buf + 4u, src, len);
+     return save_buf(obj, len + 4u);
+ }
+@@ -228,9 +282,16 @@
+ int project_device_bt_pending(void) { return device_bt_pending; }
+ int project_device_bt_save(void)
+ {
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++    return -9; /* no project-flash writes in this test profile */
++#endif
+     int n, rc;
+     if (!device_bt_pending) return 0;
++#ifdef DNBOX_137_HOST_WITNESS
++    if (project_incompatible || tuple_recovered) return -9;
++#else
+     if (project_incompatible) return -9;
++#endif
+     n = read_settings_payload();
+     if (n < -1) return n;                /* pending stays set: UI retries after I/O recovers */
+     if (n == -1) {
+@@ -241,7 +302,11 @@
+         /* Do not normalize or migrate a payload as a side effect of a toggle:
+          * only the exact layout load_settings accepts is patched. */
+         if (!PROJ_SET_LEN_OK((uint32_t)n) || get32(io_buf) != PROJ_FORMAT ||
++#ifdef DNBOX_137_HOST_WITNESS
++            !valid_rev137(io_buf[4u + __builtin_offsetof(settings_t, snd_rev)]) ||
++#else
+             io_buf[4u + __builtin_offsetof(settings_t, snd_rev)] != PROJ_SND_REV ||
++#endif
+             ((uint32_t)n > 4u + sizeof(settings_t) && PROJ_SET_TAIL_BAD(io_buf + 4u + sizeof(settings_t))))
+             return -9;
+         io_buf[4u + __builtin_offsetof(settings_t, bt)] =
+@@ -261,13 +326,29 @@
+ #define SOUND_CELL_V8 28u
+ #define SOUND_BYTES_V8 (NTARGETS * NVOICES_MAX * SOUND_CELL_V8)
+ 
++#ifdef DNBOX_137_HOST_WITNESS
++static int load_sound(sound_t *dst, unsigned revision)
++#else
+ static int load_sound(sound_t *dst)
+-{
++#endif
++{
++#ifdef DNBOX_137_HOST_WITNESS
++    int n = plat_store_load(OBJ_SOUND | (stream_previous & TUPLE_SOUND_PREVIOUS ? PLAT_STORE_PREVIOUS : 0), io_buf, sizeof io_buf);
++#else
+     int n = plat_store_load(OBJ_SOUND, io_buf, sizeof io_buf);
++#endif
+     if (n < 0) return n;
++#ifdef DNBOX_137_HOST_WITNESS
++    if ((uint32_t)n != sizeof *dst + 4u || get32(io_buf) != (revision==REV137 ? SOUND137 : PROJ_FORMAT)) return -9;
++#else
+     if ((uint32_t)n != sizeof *dst + 4u || get32(io_buf) != PROJ_FORMAT) return -9;
++#endif
+     __builtin_memcpy(dst, io_buf + 4u, sizeof *dst);
++#ifdef DNBOX_137_HOST_WITNESS
++    if ((revision==REV137 && !canonical137(dst)) || engine_bass_sound_validate(dst)) return -9;
++#else
+     if (engine_bass_sound_validate(dst)) return -9;
++#endif
+     stored_known[OBJ_SOUND] = 1;
+     stored_hash[OBJ_SOUND] = hash_of(io_buf, (uint32_t)n);
+     return 0;
+@@ -339,8 +420,19 @@
+     lz_sink_t sink = {st_put, &o};
+     o.fill = STREAM_HDR;
+     put32(io_buf, o.format);
++#ifdef DNBOX_137_HOST_WITNESS
++    if (o.format==STREAM137) {
++        uint64_t h=tuple_hash(&proj,part_off_live);
++        put32(io_buf+4,(uint32_t)h);
++        put32(io_buf+8,(uint32_t)(h>>32));
++    } else {
++        put32(io_buf+4,RAW_LEN);
++        put32(io_buf+8,crc);
++    }
++#else
+     put32(io_buf + 4, RAW_LEN);
+     put32(io_buf + 8, crc);
++#endif
+     put32(io_buf + 12, packed_len);
+     if (lz_compress(raw, RAW_LEN, &sink) || o.err || st_flush(&o))
+         return -3;
+@@ -417,7 +509,11 @@
+         const lane_t *l=&arr->lane[k];
+         if(!l->used)continue;
+         if(l->t==HELD_CHORD_TARGET) {
++#ifdef DNBOX_137_HOST_WITNESS
++            if((format!=PROJ_STREAM_CHORD && format!=STREAM137) || !held_chord_lane_valid(l))return 0;
++#else
+             if(format!=PROJ_STREAM_CHORD || !held_chord_lane_valid(l))return 0;
++#endif
+             for(int j=0;j<k;j++)if(arr->lane[j].used && arr->lane[j].t==l->t &&
+                 arr->lane[j].pat==l->pat && arr->lane[j].part==l->part &&
+                 arr->lane[j].v==l->v && arr->lane[j].i==l->i)return 0;
+@@ -426,7 +522,15 @@
+         if(l->t==0xfdu) {
+ #if X0X_BASS_NOTE_SOUND
+             /* A lock on a step that is no longer a note is kept and never plays. */
++#ifdef DNBOX_137_HOST_WITNESS
++            if((format!=PROJ_STREAM_14 && format!=PROJ_STREAM_CHORD && format!=STREAM137) ||
++               ((l->i==NOTE137 || l->i==NOTE_S1_MOD) && format!=STREAM137) ||
++               (format==STREAM137 && s1_typed_init_cell(l->val) && l->i!=NOTE_S1_MOD) ||
++               (format==STREAM137 && l->val[29]==ORIGINAL_SOUND_JUNO && !original_sound_sj6_factory(l->val) && l->i!=NOTE137) ||
++               engine_bass_note_validate(l))return 0;
++#else
+             if((format!=PROJ_STREAM_14 && format!=PROJ_STREAM_CHORD) || engine_bass_note_validate(l))return 0;
++#endif
+             for(int j=0;j<k;j++)if(arr->lane[j].used && arr->lane[j].t==l->t &&
+                 arr->lane[j].pat==l->pat && arr->lane[j].part==l->part && arr->lane[j].v==l->v)return 0;
+ #else
+@@ -454,9 +558,16 @@
+     uint8_t *raw = (uint8_t *)pr + RAW_OFF;
+     uint32_t crc = get32(io_buf + 8), plen = get32(io_buf + 12);
+     uint32_t raw_len = RAW_LEN;
++#ifdef DNBOX_137_HOST_WITNESS
++    uint64_t binding=(uint64_t)get32(io_buf+4)|((uint64_t)crc<<32);
++#endif
+     st_in_t s = {0, n, STREAM_HDR, plen, format, 0};
+     lz_src_t src = {st_get, &s};
++#ifdef DNBOX_137_HOST_WITNESS
++    if (n < (int)STREAM_HDR || (format!=STREAM137 && get32(io_buf + 4) != raw_len) || plen > STREAM_CAP)
++#else
+     if (n < (int)STREAM_HDR || get32(io_buf + 4) != raw_len || plen > STREAM_CAP)
++#endif
+         return -1;
+     stored_known[STREAM_OBJ[0]] = 1;
+     stored_hash[STREAM_OBJ[0]] = hash_of(io_buf, (uint32_t)n);
+@@ -466,9 +577,19 @@
+      * and allow the boot-default autosave path to overwrite it. */
+     if (s.unsupported)
+         return -9;
++#ifdef DNBOX_137_HOST_WITNESS
++    if (decode_rc || s.left || (format!=STREAM137 && crc32_of(raw,raw_len)!=crc))
++#else
+     if (decode_rc || s.left || crc32_of(raw, raw_len) != crc)
++#endif
+         return -1;
++#ifdef DNBOX_137_HOST_WITNESS
++    if (format==STREAM137 && tuple_hash(pr,*part_off_of(pr))!=binding)
++        return -10; /* valid-sized inputs but not necessarily one project generation */
++    if ((format==STREAM137)!=(pr->set.snd_rev==REV137) || !stream_layout_ok(pr, format))
++#else
+     if (!stream_layout_ok(pr, format))
++#endif
+         return -9;
+     stream_13_upgrade(pr, format);
+ #if !X0X_ORIGINAL_SYNTH
+@@ -488,6 +609,29 @@
+         pattern_init(&pr->pat[i], 0x3B0u + (uint32_t)i * 977u, 0x5A1u + (uint32_t)i * 613u);
+ }
+ 
++#ifdef DNBOX_137_HOST_WITNESS
++
++/* Host witness. Search only A/B candidates in the same recognized typed
++ * wire. The streams that matter are those actually consumed by LZ. */
++static int read_typed_tuple(project_t *pr,unsigned mask,uint8_t independent_bt)
++{
++    settings_t set;
++    stream_previous=(uint8_t)mask;
++    int rc=load_settings(&set);
++    if (rc || set.snd_rev!=REV137) return -9;
++    uint8_t part_off=io_buf[4u+sizeof set];
++    pr->set=set;
++    *part_off_of(pr)=part_off;
++    rc=load_sound(&pr->sound,REV137);
++    if (rc) return -9;
++    int n=load_stream_object(0);
++    if (n<(int)STREAM_HDR || get32(io_buf)!=STREAM137) return -9;
++    rc=load_stream(pr,n,STREAM137);
++    if (rc) return rc;
++    pr->set.bt=(uint8_t)((pr->set.bt&~1u)|(independent_bt&1u));
++    return project_validate_for(pr);
++}
++#endif
+ 
+ /* Objects are read into the candidate project; the original profile admits only
+  * a completely validated candidate and leaves safe defaults on every failure. */
+@@ -511,7 +655,11 @@
+     if (rc == -9) goto unsupported;
+     if (!rc) {
+         if (set.magic != PROJ_MAGIC || set.format != PROJ_FORMAT ||
++#ifdef DNBOX_137_HOST_WITNESS
++            !valid_rev137(set.snd_rev) || set.stereo != PROJ_STEREO) goto unsupported;
++#else
+             set.snd_rev != PROJ_SND_REV || set.stereo != PROJ_STEREO) goto unsupported;
++#endif
+         pr->set = set;
+         *part_off_of(pr) = part_off;
+         device_bt = set.bt;                       /* retain saved Bluetooth role on partial-load fallback */
+@@ -524,10 +672,38 @@
+             device_bt = (uint8_t)(1u | PROJ_BT_SMC_CENTRAL);
+ #endif
+     }
++#ifdef DNBOX_137_HOST_WITNESS
++    if (settings_present && pr->set.snd_rev==REV137) {
++        rc=read_typed_tuple(pr,0,device_bt);
++        stream_previous=0;
++        if (!rc) {
++            if (pr==&proj) tuple_recovered=0;
++            return 0;
++        }
++        /* Unsupported/newer envelopes are not rollback candidates. An
++         * exact-schema hash mismatch may have a coherent A/B before-image. */
++        if (rc!=-10 && rc!=-1) goto unsupported;
++        for(unsigned mask=1;mask<(4u<<NSTREAM);++mask) {
++            if (!read_typed_tuple(pr,mask,device_bt)) {
++                stream_previous=0;
++                memset(stored_known,0,sizeof stored_known);
++                tuple_recovered=1;
++                return 0;
++            }
++        }
++        goto unsupported;
++    }
++    rc = load_sound(&pr->sound,pr->set.snd_rev);
++#else
+     rc = load_sound(&pr->sound);
++#endif
+     present |= rc != -1;
+     transient |= rc == -2 || rc == -8;
++#ifdef DNBOX_137_HOST_WITNESS
++    if (rc == -9 || (pr->set.snd_rev==REV137 && rc==-1)) goto unsupported;
++#else
+     if (rc == -9) goto unsupported;
++#endif
+     if (rc) bad = 1;
+     stream_previous = 0;
+     int n = load_stream_object(0);
+@@ -536,7 +712,11 @@
+     if (n >= 0 && (n < 4 || !stream_known(get32(io_buf)))) goto unsupported;
+     if (n >= 4) {
+         rc = load_stream(pr, n, get32(io_buf));
++#ifdef DNBOX_137_HOST_WITNESS
++        if (rc == -9 || (pr->set.snd_rev==REV137 && rc)) goto unsupported;
++#else
+         if (rc == -9) goto unsupported;
++#endif
+         /* At most 16 A/B combinations, no second stream buffer. A cut can
+          * leave only some newest objects changed (unchanged objects are not
+          * written), so taking all older copies is not sufficient. */
+@@ -556,6 +736,9 @@
+             bad = 1;
+         }
+     } else {
++#ifdef DNBOX_137_HOST_WITNESS
++        if(pr->set.snd_rev==REV137 && n==-1)goto unsupported;
++#endif
+         bad = 1;
+         /* PAT0 may itself be missing while later committed segments remain. */
+         for (int k = 1; k < NSTREAM; ++k)
+@@ -612,7 +795,11 @@
+     if(bass_status)return bass_status;
+ #endif
+     if (s->magic != PROJ_MAGIC || s->format != PROJ_FORMAT || s->stereo != PROJ_STEREO ||
++#ifdef DNBOX_137_HOST_WITNESS
++        !valid_rev137(s->snd_rev) || (s->snd_rev==REV137 && !canonical137(&p->sound)) || s->palette > 5 || s->keyled > 2 || s->clk_out > 1 ||
++#else
+         s->snd_rev != PROJ_SND_REV || s->palette > 5 || s->keyled > 2 || s->clk_out > 1 ||
++#endif
+         s->notes_out > 1 || s->bpm_x10 < 200 || s->bpm_x10 > 2750 || s->accent_q7 > 127 ||
+         s->keysound > 1 || s->autosave_off > 1 || s->out_loud > 1 || s->usb_full > 1 ||
+         (s->bt & (0xC0u & ~PROJ_DEVICE_PREFS)) || !(s->bt & PROJ_BT_CLK_IN) || PROJ_CLK_SRC(s->bt) > SEQ_CLK_EXT ||
+@@ -686,7 +873,14 @@
+             return -1;
+ #if X0X_BASS_NOTE_SOUND
+         if(l->t==BASS_NOTE_TARGET) {
++#ifdef DNBOX_137_HOST_WITNESS
++            if(((l->i==NOTE137 || l->i==NOTE_S1_MOD) && s->snd_rev!=REV137) ||
++               (s->snd_rev==REV137 && s1_typed_init_cell(l->val) && l->i!=NOTE_S1_MOD) ||
++               (s->snd_rev==REV137 && l->val[29]==ORIGINAL_SOUND_JUNO && !original_sound_sj6_factory(l->val) && l->i!=NOTE137) ||
++               engine_bass_note_validate(l))return -1;
++#else
+             if(engine_bass_note_validate(l))return -1;
++#endif
+             for(int j=0;j<k;j++)if(p->arr.lane[j].used && p->arr.lane[j].t==l->t &&
+                 p->arr.lane[j].pat==l->pat && p->arr.lane[j].part==l->part && p->arr.lane[j].v==l->v)return -1;
+             continue;
+@@ -795,7 +989,11 @@
+     put32(h + 12, crc32_of((const uint8_t *)&project_stage, sizeof project_stage));
+     put32(h + 16, project_rates_format(&project_stage));
+     put32(h + 20, stream_format_of(&project_stage));
++#ifdef DNBOX_137_HOST_WITNESS
++    put32(h + 24, project_stage.set.snd_rev);
++#else
+     put32(h + 24, PROJ_SND_REV);
++#endif
+     put32(h + 28, PROJ_FILE_OFF_WORD(part_off_staged & PROJ_PART_OFF_ALL));
+ }
+ 
+@@ -805,7 +1003,12 @@
+     if (get32(h) != 0x50583058u || get32(h + 4) != 1 || get32(h + 8) != sizeof project_stage ||
+         !PROJ_FORMAT_OK(get32(h + 16)) ||
+         !stream_known(get32(h + 20)) ||
++#ifdef DNBOX_137_HOST_WITNESS
++        !valid_rev137(get32(h + 24)) || get32(h + 24)!=project_stage.set.snd_rev ||
++        ((get32(h+20)==STREAM137)!=(project_stage.set.snd_rev==REV137)) || !PROJ_FILE_OFF_OK(get32(h + 28)))
++#else
+         get32(h + 24) != PROJ_SND_REV || !PROJ_FILE_OFF_OK(get32(h + 28)))
++#endif
+         return -1;
+     if (get32(h + 12) != crc32_of((const uint8_t *)&project_stage, sizeof project_stage))
+         return -4;
+@@ -858,16 +1061,27 @@
+ /* 0 = saved and verified; -7 = the patterns, song and motion do not fit (nothing was written) */
+ int project_save(void)
+ {
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++    return -9; /* portable/flash admission is read-only on disk */
++#endif
+ #if X0X_BASS_TAGGED_SOUND
+ #if X0X_SYNTHONE_PATCH
+     if(engine_s1_patch_pending())return -8;
++#endif
++#if X0X_SUPERJ6_BUILTIN_INIT
++    if(engine_superj6_knob_pending() || engine_superj6_factory_pending())return -8;
+ #endif
+     if(engine_bass_sound_validate(&proj.sound))return -9;
+     for(int v=0;v<NBASS;v++)if(engine_bass_preset_pending(v))return -8;
+ #elif X0X_BASS_PRESET_PREVIEW
+     if(engine_bass_preview_changed()) return -9; /* no untagged preview writes */
+ #endif
++#ifdef DNBOX_137_HOST_WITNESS
++    if (project_incompatible || tuple_recovered || !valid_rev137(proj.set.snd_rev) ||
++        (proj.set.snd_rev==REV137 && !canonical137(&proj.sound)) || !stream_layout_ok(&proj, stream_format_of(&proj)))
++#else
+     if (project_incompatible || !stream_layout_ok(&proj, stream_format_of(&proj)))
++#endif
+         return -9; /* not one settings/sound/pattern object may be rewritten */
+     if (settings_read_failed || settings_load_failed) return -8; /* retry load before saving fallback defaults */
+ #ifndef X0X_HOST
