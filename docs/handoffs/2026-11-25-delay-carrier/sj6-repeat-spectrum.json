@@ -1,0 +1,108 @@
+{
+  "probe_rate": 44100,
+  "tap_frames": 11025,
+  "input": "left-only sine burst, 0.25 peak, sine-squared window, x0.99*64/127 feedback",
+  "compact_source_sha256": "0e37c63cdef9d366cdf3def539fc0c925f80511635da8eca7a39e0ed66f9ea18",
+  "probes": [
+    {
+      "hz": 220,
+      "reference": {
+        "exact_bypass": true,
+        "max_right": 0.0,
+        "first_echo_peak_hz": 219.4
+      },
+      "compact": {
+        "exact_bypass": true,
+        "max_right": 0.0,
+        "first_echo_peak_hz": 219.4
+      },
+      "level_error_db": [
+        -0.274,
+        -0.5515,
+        -0.8326,
+        -1.1192
+      ],
+      "phase_error_deg": [
+        -13.47,
+        -26.958,
+        -40.443,
+        -53.928
+      ]
+    },
+    {
+      "hz": 1000,
+      "reference": {
+        "exact_bypass": true,
+        "max_right": 0.0,
+        "first_echo_peak_hz": 999.9
+      },
+      "compact": {
+        "exact_bypass": true,
+        "max_right": 0.0,
+        "first_echo_peak_hz": 999.9
+      },
+      "level_error_db": [
+        -5.8885,
+        -13.3984,
+        -20.9387,
+        -28.5987
+      ],
+      "phase_error_deg": [
+        -61.224,
+        -126.105,
+        169.011,
+        104.102
+      ]
+    },
+    {
+      "hz": 3000,
+      "reference": {
+        "exact_bypass": true,
+        "max_right": 0.0,
+        "first_echo_peak_hz": 2999.8
+      },
+      "compact": {
+        "exact_bypass": true,
+        "max_right": 0.0,
+        "first_echo_peak_hz": 243.6
+      },
+      "level_error_db": [
+        -65.5639,
+        -65.9365,
+        -66.3451,
+        -66.8122
+      ],
+      "phase_error_deg": [
+        -3.677,
+        3.879,
+        11.43,
+        18.977
+      ]
+    },
+    {
+      "hz": 6000,
+      "reference": {
+        "exact_bypass": true,
+        "max_right": 0.0,
+        "first_echo_peak_hz": 5999.7
+      },
+      "compact": {
+        "exact_bypass": true,
+        "max_right": 0.0,
+        "first_echo_peak_hz": 487.2
+      },
+      "level_error_db": [
+        -65.9838,
+        -67.4327,
+        -68.9319,
+        -70.5609
+      ],
+      "phase_error_deg": [
+        -7.346,
+        7.578,
+        22.563,
+        37.583
+      ]
+    }
+  ]
+}

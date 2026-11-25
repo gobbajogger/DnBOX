@@ -1,0 +1,37 @@
+WINDOW stock
+1 -0.057 [1.226, 1.226] -11.729 unchanged-dry True
+62 -6.299 [13.427, 15.431] 1.357 unchanged-dry True
+Pad delay-only band change R [0.0, 0.0, 0.0, 0.0, 0.0]
+Delay-only final-second L/R delta [0.0, 0.0]
+113 -4.697 [9.8, 8.525] 1.374 unchanged-dry True
+128 1.25 [1.862, 1.479] 1.143 unchanged-dry True
+Delay-only final-second L/R delta [0.0, 0.0]
+278 -0.804 [4.187, 3.644] 2.146 unchanged-dry True
+Delay-only final-second L/R delta [0.0, 0.0]
+435 1.741 [4.828, 3.101] -0.814 unchanged-dry True
+WINDOW 2
+1 -0.057 [1.226, 1.226] -11.729 unchanged-dry True
+62 -3.196 [13.28, 14.984] 2.171 unchanged-dry True
+Pad delay-only band change R [5.447, 3.629, 3.343, 3.399, 3.393]
+Delay-only final-second L/R delta [1.927, 3.172]
+113 -4.697 [9.8, 8.525] 1.374 unchanged-dry True
+128 2.002 [1.881, 1.504] 1.18 unchanged-dry True
+Delay-only final-second L/R delta [0.589, 0.524]
+278 -0.215 [4.303, 3.856] 2.195 unchanged-dry True
+Delay-only final-second L/R delta [10.782, 9.614]
+435 1.741 [4.828, 3.101] -0.814 unchanged-dry True
+WINDOW 4
+1 -0.057 [1.226, 1.226] -11.729 unchanged-dry True
+62 -1.12 [13.172, 14.76] 2.826 unchanged-dry True
+Pad delay-only band change R [7.932, 4.684, 4.759, 4.726, 4.671]
+Delay-only final-second L/R delta [3.153, 5.301]
+113 -4.697 [9.8, 8.525] 1.374 unchanged-dry True
+128 3.24 [1.882, 1.531] 1.245 unchanged-dry True
+Delay-only final-second L/R delta [0.99, 0.852]
+278 1.949 [4.396, 4.019] 2.387 unchanged-dry True
+Delay-only final-second L/R delta [13.084, 12.957]
+435 1.741 [4.828, 3.101] -0.814 unchanged-dry True
+Synthetic tone 300 stored at 300.0 Hz; stock/half/quarter response dB: [np.float64(-1.382), np.float64(-0.352), np.float64(-0.079)]
+Synthetic tone 700 stored at 280.0 Hz; stock/half/quarter response dB: [np.float64(-9.155), np.float64(-1.992), np.float64(-0.436)]
+Synthetic tone 1300 stored at 320.0 Hz; stock/half/quarter response dB: [np.float64(-13.744), np.float64(-7.991), np.float64(-1.546)]
+Synthetic tone 3000 stored at 60.0 Hz; stock/half/quarter response dB: [np.float64(-33.967), np.float64(-13.945), np.float64(-10.322)]

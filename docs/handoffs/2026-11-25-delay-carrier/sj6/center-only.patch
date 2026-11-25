@@ -1,0 +1,11 @@
+--- a/firmware/src/dsp/juno6_delay_native.inc
++++ b/firmware/src/dsp/juno6_delay_native.inc
+@@ -181,7 +181,7 @@
+             native_delay_advance(&s->delay24.fb,s->delay24.fb_target,s->delay24.step[1],&s->delay24.ramp[1]);
+             native_delay_advance(&s->delay24.wet,s->delay24.wet_target,s->delay24.step[2],&s->delay24.ramp[2]);
+         }
+-        float age=s->delay24.current+1.f-((float)s->delay24.phase+1.f)*s->delay24.inv_stride;
++        float age=s->delay24.current+.5f-((float)s->delay24.phase+.5f)*s->delay24.inv_stride;
+         if (age<1.f) age=1.f;
+         unsigned whole=(unsigned)age, pos=s->delay24.pos;
+         unsigned a=((pos-whole)&MASK)*2u, b=((pos-whole-1u)&MASK)*2u;
