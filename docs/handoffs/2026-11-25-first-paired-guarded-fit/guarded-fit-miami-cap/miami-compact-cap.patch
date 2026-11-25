@@ -1,0 +1,158 @@
+--- a/link-guarded-exact.py
++++ b/link-guarded-exact.py
+@@ -284,6 +284,7 @@
+ b.CFLAGS.append("-DX0X_SJ6_NATIVE_POSITIVE_GATE=1")
+ b.ORIGINAL_SYNTH_OZ_UNITS |= {'chicago_selector','chicago_arp_control','chicago_note_context','miami_geometry','miami_fx_conversion'}
+ b.CFLAGS.extend(Path(os.environ['DNBOX_CONTROL_FLAGS']).read_text().split())
++if os.environ.get("DNBOX_MIAMI_STOCK_CAP_COMPACT") == "1": b.CFLAGS.append("-DDNBOX_MIAMI_STOCK_CAP_COMPACT=1")
+ b.CFLAGS.append('-DX0X_CHICAGO_FAST32=1')
+ if os.environ.get('DNBOX_TANH_SPLIT_LAB') == '1':
+     b.CFLAGS.append('-DX0X_TANH_SPLIT_LAB=1')
+--- a/tree/experiments/original_synth/miami_ms20.h
++++ b/tree/experiments/original_synth/miami_ms20.h
+@@ -12,6 +12,19 @@
+ /* Authentic sample-rate-specific A/B/R and correctedcap arrays must each have
+  *129finite entries. This unit does NOT invent platform libm table bits. */
+ typedef struct {const float *a,*b,*r,*cap;} original_ms20_tables;
++
++/* The sole native stock marker has a certified flat prefix/suffix. All caller
++ * supplied cap pointers retain the original 129-element layout contract. */
++#ifdef DNBOX_MIAMI_STOCK_CAP_COMPACT
++extern const float original_miami_cap_compact[22];
++static inline int original_miami_cap_is_compact(const float *p)
++{ return p==original_miami_cap_compact; }
++static inline float original_miami_cap_at(const float *p,unsigned i)
++{ return p[original_miami_cap_is_compact(p) ? (i<=88u ? 0u : i>=109u ? 21u : i-88u) : i]; }
++#else
++#define original_miami_cap_at(p,i) ((p)[(i)])
++#endif
++
+ int original_miami_ms20_init(original_miami_ms20 *s,unsigned voice_index,float a0,float b0,float cap0);
+ /* Full note reset preserves noise history/gain; next prepare is mandatory. */
+ int original_miami_ms20_note_reset(original_miami_ms20 *s,float a0);
+--- a/tree/experiments/original_synth/miami_ms20.c
++++ b/tree/experiments/original_synth/miami_ms20.c
+@@ -20,6 +20,19 @@
+ static float fl(uint32_t u){return original_math_float(u);}
+ static float clamp(float x,float lo,float hi){return x<lo?lo:x>hi?hi:x;}
+ static float lookup(const float *t,float q){if(q<=fl(0x3727c5ac))return t[0];if(q>=128)return t[128];unsigned j=(unsigned)q;return interpolate(t[j+1]-t[j],q-(float)j,t[j]);}
++#ifdef DNBOX_MIAMI_STOCK_CAP_COMPACT
++static float lookup_cap(const float *t,float q)
++{
++ if(!original_miami_cap_is_compact(t))return lookup(t,q);
++ if(q<=88.f)return t[0];
++ if(q>=109.f)return t[21];
++ unsigned j=(unsigned)q;
++ float a=t[j-88u],b=t[j-87u];
++ return interpolate(b-a,q-(float)j,a);
++}
++#else
++#define lookup_cap lookup
++#endif
+ static void stage(original_ramp *r,float target,float reciprocal){r->target=target;r->delta=(target-r->current)*reciprocal;}
+ static float advance(const original_ramp *r){float q=r->current+r->delta;if(r->delta>0){if(q>=r->target)q=r->target;}else if(r->delta<0){if(q<=r->target)q=r->target;}else q=r->target;return q;}
+ int original_miami_nonlinear(float x,float *out){
+@@ -51,11 +64,11 @@
+  float cutoff,float resonance,float depth,float env,float md,float mc,float mr,float noise,float mn,uint32_t duration){
+  if(!s||!t||!t->a||!t->b||!t->r||!t->cap||!duration||duration>2147482880u)return 0;
+  float controls[]={cutoff,resonance,depth,env,md,mc,mr,noise,mn};for(unsigned i=0;i<9;i++)if(!original_binary32_isfinite(controls[i]))return 0;
+- for(unsigned i=0;i<129;i++)if(!original_binary32_isfinite(t->a[i])||!original_binary32_isfinite(t->b[i])||!original_binary32_isfinite(t->r[i])||!original_binary32_isfinite(t->cap[i]))return 0;
++ for(unsigned i=0;i<129;i++)if(!original_binary32_isfinite(t->a[i])||!original_binary32_isfinite(t->b[i])||!original_binary32_isfinite(t->r[i])||!original_binary32_isfinite(original_miami_cap_at(t->cap,i)))return 0;
+  float r=resonance+mr;if(!original_binary32_isfinite(r)||r<0||r>1)return 0;
+  float d=clamp(depth+md,-1,1),z=ref_fma(env,d,cutoff),q=ref_fma(mc,128,z*128.0f);
+  if(!original_binary32_isfinite(q))return 0;
+- float a=lookup(t->a,q),b=lookup(t->b,q),cap=lookup(t->cap,q),R;
++ float a=lookup(t->a,q),b=lookup(t->b,q),cap=lookup_cap(t->cap,q),R;
+  if(r==1)R=t->r[128];else{float rq=r*128.0f;unsigned j=(unsigned)rq;R=interpolate(t->r[j+1]-t->r[j],rq-(float)j,t->r[j]);}
+  float target=R<=fl(0x3727c5ac)?fl(0x3727c5ac):(R<cap?R:cap);
+  float ng=clamp(noise+mn,0,1);ng=ng*ng+fl(0x3727c5ac);float reciprocal=1.0f/(float)duration;
+--- a/tree/experiments/original_synth/miami_selected_voice.c
++++ b/tree/experiments/original_synth/miami_selected_voice.c
+@@ -26,7 +26,7 @@
+ }
+ static int tables_valid(const original_ms20_tables *in,const int32_t pitch[128]){
+  if(!in||!in->a||!in->b||!in->r||!in->cap||!pitch)return 0;
+- for(unsigned i=0;i<129;i++)if(!original_binary32_isfinite(in->a[i])||!original_binary32_isfinite(in->b[i])||!original_binary32_isfinite(in->r[i])||!original_binary32_isfinite(in->cap[i]))return 0;
++ for(unsigned i=0;i<129;i++)if(!original_binary32_isfinite(in->a[i])||!original_binary32_isfinite(in->b[i])||!original_binary32_isfinite(in->r[i])||!original_binary32_isfinite(original_miami_cap_at(in->cap,i)))return 0;
+  for(unsigned i=0;i<128;i++)if(pitch[i]<=0||(i&&pitch[i]<=pitch[i-1]))return 0;
+  return 1;
+ }
+@@ -36,7 +36,14 @@
+ }
+ int original_miami_voice_tables_init(original_miami_voice_tables *out,original_miami_voice_table_storage *storage,const original_ms20_tables *in,const int32_t pitch[128]){
+  if(!out||!storage||!tables_valid(in,pitch))return 0;
+- memcpy(storage->a,in->a,sizeof storage->a);memcpy(storage->b,in->b,sizeof storage->b);memcpy(storage->r,in->r,sizeof storage->r);memcpy(storage->cap,in->cap,sizeof storage->cap);memcpy(storage->pitch,pitch,sizeof storage->pitch);
++ memcpy(storage->a,in->a,sizeof storage->a);memcpy(storage->b,in->b,sizeof storage->b);memcpy(storage->r,in->r,sizeof storage->r);
++#ifdef DNBOX_MIAMI_STOCK_CAP_COMPACT
++ if(original_miami_cap_is_compact(in->cap)){
++  for(unsigned i=0;i<129;i++)storage->cap[i]=original_miami_cap_at(in->cap,i);
++ }else
++#endif
++ memcpy(storage->cap,in->cap,sizeof storage->cap);
++ memcpy(storage->pitch,pitch,sizeof storage->pitch);
+  original_miami_voice_tables t;memset(&t,0,sizeof t);t.filter=(original_ms20_tables){storage->a,storage->b,storage->r,storage->cap};t.pitch=storage->pitch;t.ready=TABLE_READY;*out=t;return 1;
+ }
+ static int program_valid(const original_miami_program *p){
+@@ -131,6 +138,19 @@
+ }
+ #ifndef MIAMI_VOICE_CHECKED_TABLE_PREP
+ static float lookup(const float t[129],float q){if(q<=fl(0x3727c5ac))return t[0];if(q>=128)return t[128];unsigned j=(unsigned)q;return table_fma(t[j+1]-t[j],q-(float)j,t[j]);}
++#ifdef DNBOX_MIAMI_STOCK_CAP_COMPACT
++static float lookup_cap(const float *t,float q)
++{
++ if(!original_miami_cap_is_compact(t))return lookup(t,q);
++ if(q<=88.f)return t[0];
++ if(q>=109.f)return t[21];
++ unsigned j=(unsigned)q;
++ float a=t[j-88u],b=t[j-87u];
++ return table_fma(b-a,q-(float)j,a);
++}
++#else
++#define lookup_cap lookup
++#endif
+ static void stage(original_ramp *r,float target,float reciprocal){r->target=target;r->delta=(target-r->current)*reciprocal;}
+ #endif
+ /* Identical selected MS20 preparation arithmetic to the checked dependency.
+@@ -142,7 +162,7 @@
+  (void)original_miami_ms20_prepare(s,&tables,c->cutoff,c->resonance,c->env_depth,env,0,mc,0,c->noise,0,D);
+ #else
+  float d=clamp(c->env_depth+0.0f,-1,1),z=ref_fma(env,d,c->cutoff),q=ref_fma(mc,128,z*128.0f);
+- float a=lookup(t->filter.a,q),b=lookup(t->filter.b,q),cap=lookup(t->filter.cap,q),r=c->resonance+0.0f,R;
++ float a=lookup(t->filter.a,q),b=lookup(t->filter.b,q),cap=lookup_cap(t->filter.cap,q),r=c->resonance+0.0f,R;
+  if(r==1)R=t->filter.r[128];else {float rq=r*128.0f;unsigned j=(unsigned)rq;R=table_fma(t->filter.r[j+1]-t->filter.r[j],rq-(float)j,t->filter.r[j]);}
+  float target=R<=fl(0x3727c5ac)?fl(0x3727c5ac):(R<cap?R:cap);
+  float ng=clamp(c->noise+0.0f,0,1);ng=ng*ng+fl(0x3727c5ac);float reciprocal=1.0f/(float)D;
+@@ -152,7 +172,7 @@
+ int original_miami_selected_voice_init(original_miami_selected_voice *s,const original_miami_voice_tables *t,unsigned index,unsigned last){
+  if(!s||!t||t->ready!=TABLE_READY||index>=128||last>127)return 0;
+  original_miami_selected_voice n;memset(&n,0,sizeof n);
+- if(!original_miami_pitch_init(&n.pitch,last)||!original_miami_ms20_init(&n.filter,index,t->filter.a[0],t->filter.b[0],t->filter.cap[0]))return 0;
++ if(!original_miami_pitch_init(&n.pitch,last)||!original_miami_ms20_init(&n.filter,index,t->filter.a[0],t->filter.b[0],original_miami_cap_at(t->filter.cap,0u)))return 0;
+  /* Native B0738 reset, B0990..B09C0: both MG phases -1, cached outputs/
+   * hold zero, S&H LFSR seed6d70 and pending-wrap flag1. Full-note inputs
+   * still replace these with the owner-resolved ordered-head MG snapshot. */
+--- a/tree/firmware/src/dsp/original_miami_backend.c
++++ b/tree/firmware/src/dsp/original_miami_backend.c
+@@ -9,6 +9,13 @@
+ #include <string.h>
+ #include "x0x_cold.h"
+ 
++#ifdef DNBOX_MIAMI_STOCK_CAP_COMPACT
++#include "../../../experiments/original_synth/miami_cap_compact_generated.h"
++#define BACKEND_MIAMI_CAP original_miami_cap_compact
++#else
++#define BACKEND_MIAMI_CAP original_miami_cap
++#endif
++
+ #define BACKEND_READY UINT32_C(0x4d424531)
+ 
+ static int valid_bpm(float bpm)
+@@ -42,7 +49,7 @@
+     s->program = program;
+     s->controls = controls;
+     const original_ms20_tables filter = {
+-        original_miami_a44100, original_miami_b44100, original_miami_r, original_miami_cap
++        original_miami_a44100, original_miami_b44100, original_miami_r, BACKEND_MIAMI_CAP
+     };
+     if (!original_miami_voice_tables_bind_immutable(&s->tables, &filter, original_backend_pitch44100()) ||
+         !original_chicago_allocator_bind(&s->allocator, &s->keys, s->held, s->records,

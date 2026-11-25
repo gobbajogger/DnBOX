@@ -1,0 +1,456 @@
+--- a/firmware/src/app/s1c_part.c
++++ b/firmware/src/app/s1c_part.c
+@@ -1,5 +1,6 @@
+ /* SPDX-License-Identifier: GPL-3.0-only */
+ #include "s1c_part.h"
++#include "../x0x_cold.h"
+ #include "../dsp/s1c/s1c_front.h"
+ #include "../dsp/s1pack/s1pack.h"
+ #include "../dsp/fastmath.h"
+@@ -161,6 +162,138 @@
+ #if X0X_SYNTHONE_PATCH
+ /* Linear 7-bit edits across the original physical domains. The INIT preset
+  * retains its exact unquantized values. Storage order must never change. */
++#if X0X_S1_EXTRA
++/* Slot-indexed descriptors preserve the original stored order. Only repeated
++ * physical domains share an index; begin/end float literals are unchanged. */
++#define S1_CATALOG_ROWS(D) \
++    D(0,"OSC BALANCE",2,X0X_U_PCT,0,127) \
++    D(1,"OSC 1 LEVEL",5,X0X_U_PCT,0,127) \
++    D(2,"CUTOFF",16,X0X_U_HZ,1,127) \
++    D(3,"RESONANCE",17,X0X_U_PCT,2,127) \
++    D(4,"FILTER ENV",19,X0X_U_PCT,3,127) \
++    D(5,"FILTER ATTACK",22,X0X_U_S,4,127) \
++    D(6,"FILTER DECAY",23,X0X_U_S,5,127) \
++    D(7,"FILTER SUSTAIN",24,X0X_U_PCT,0,127) \
++    D(8,"FILTER RELEASE",25,X0X_U_S,6,127) \
++    D(9,"AMP ATTACK",26,X0X_U_S,4,127) \
++    D(10,"AMP DECAY",27,X0X_U_S,5,127) \
++    D(11,"AMP SUSTAIN",28,X0X_U_PCT,0,127) \
++    D(12,"AMP RELEASE",29,X0X_U_S,7,127) \
++    D(S1_EXTRA_FIRST,"OSC 1 MORPH",0,X0X_U_PCT,0,127) \
++    D(S1_EXTRA_FIRST+1,"OSC 2 MORPH",1,X0X_U_PCT,0,127) \
++    D(S1_EXTRA_FIRST+2,"OSC 2 LEVEL",6,X0X_U_PCT,0,127) \
++    D(S1_EXTRA_FIRST+3,"SUB LEVEL",7,X0X_U_PCT,0,127) \
++    D(S1_EXTRA_FIRST+4,"SUB OCTAVE",8,X0X_U_NONE,0,1) \
++    D(S1_EXTRA_FIRST+5,"SUB WAVE",9,X0X_U_NONE,0,1) \
++    D(S1_EXTRA_FIRST+6,"FM LEVEL",10,X0X_U_PCT,0,127) \
++    D(S1_EXTRA_FIRST+7,"FM INDEX",11,X0X_U_NONE,8,127) \
++    D(S1_EXTRA_FIRST+8,"NOISE LEVEL",12,X0X_U_PCT,9,127) \
++    D(S1_EXTRA_FIRST+9,"FILTER TYPE",115,X0X_U_NONE,6,2) \
++    D(S1_EXTRA_FIRST+10,"ADSR PITCH TRACK",149,X0X_U_PCT,0,127) \
++    D(S1_EXTRA_FIRST+11,"LFO 1 RATE",15,X0X_U_HZ,10,127) \
++    D(S1_EXTRA_FIRST+12,"LFO 2 RATE",47,X0X_U_HZ,10,127) \
++    D(S1_EXTRA_FIRST+13,"LFO 1 SHAPE",13,X0X_U_NONE,11,3) \
++    D(S1_EXTRA_FIRST+14,"LFO 2 SHAPE",45,X0X_U_NONE,11,3) \
++    D(S1_EXTRA_FIRST+15,"SYNC TO ARP",P_TEMPO_SYNC,X0X_U_NONE,0,1) \
++    D(S1_EXTRA_FIRST+16,"DELAY MIX",S1C_P_DLMIX,X0X_U_PCT,0,127) \
++    D(S1_EXTRA_FIRST+17,"REVERB MIX",S1C_P_RVMIX,X0X_U_PCT,0,127) \
++    D(S1_EXTRA_FIRST+18,"REVERB HP",S1C_P_RVHP,X0X_U_HZ,12,127) \
++    D(S1_EXTRA_FIRST+19,"WIDEN",S1C_P_WIDEN,X0X_U_NONE,0,1) \
++    D(S1_EXTRA_FIRST+20,"MONO LEGATO",120,X0X_U_NONE,0,1) \
++    D(S1_PART_LEVEL,"PART LEVEL",S1C_P_MVOL,X0X_U_PCT,6,127) \
++    D(S1_LFO1_DEPTH,"LFO 1 DEPTH",14,X0X_U_PCT,0,127) \
++    D(S1_LFO2_DEPTH,"LFO 2 DEPTH",46,X0X_U_PCT,0,127) \
++    D(S1_NOISE_LFO,"NOISE LFO",P_NOISE_LFO,X0X_U_NONE,11,3) \
++    D(S1_OSC_MIX_LFO,"OSC MIX LFO",P_OSC_MIX_LFO,X0X_U_NONE,11,3) \
++    D(S1_RESONANCE_LFO,"RES LFO",P_RESONANCE_LFO,X0X_U_NONE,11,3) \
++    D(S1_FM_LFO,"FM LFO",P_FM_LFO,X0X_U_NONE,11,3) \
++    D(S1_AMP_DECAY_LFO,"AMP DEC LFO",P_AMP_DECAY_LFO,X0X_U_NONE,11,3) \
++    D(S1_OSC1_SEMI,"OSC 1 SEMI",3,X0X_U_ST,13,S1_COARSE_STEPS) \
++    D(S1_OSC2_SEMI,"OSC 2 SEMI",4,X0X_U_ST,13,S1_COARSE_STEPS) \
++    D(S1_VOICE_MODE,"VOICE MODE",P_MONO,X0X_U_NONE,0,1) \
++    D(S1_MONO_GLIDE,"MONO GLIDE",P_GLIDE,X0X_U_S,14,S1_GLIDE_STEPS) \
++    D(S1_OSC2_DETUNE,"OSC 2 DETUNE",P_DET2,X0X_U_NONE,15,S1_DETUNE_STEPS) \
++    D(S1_DELAY_ON,"DELAY",S1C_P_DLON,X0X_U_NONE,0,1) \
++    D(S1_REVERB_ON,"REVERB",S1C_P_RVON,X0X_U_NONE,0,1) \
++    D(S1_DETUNE_LFO,"DETUNE LFO",P_DETUNE_LFO,X0X_U_NONE,11,3) \
++    D(S1_PITCH_LFO,"PITCH LFO",P_PITCH_LFO,X0X_U_NONE,11,3) \
++    D(S1_TREMOLO_LFO,"TREMOLO LFO",P_TREMOLO_LFO,X0X_U_NONE,11,3) \
++    D(S1_REVERB_MIX_LFO,"REVERB MIX LFO",P_REVERB_MIX_LFO,X0X_U_NONE,11,3) \
++    D(S1_CUTOFF_LFO,"CUTOFF LFO",P_CUTOFF_LFO,X0X_U_NONE,11,3) \
++    S1_CATALOG_BEND_ROWS(D)
++#if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
++#define S1_CATALOG_BEND_ROWS(D) \
++    D(S1_BEND_LO,"PB DOWN",141,X0X_U_ST,16,24) \
++    D(S1_BEND_HI,"PB UP",142,X0X_U_ST,17,24)
++#else
++#define S1_CATALOG_BEND_ROWS(D)
++#endif
++static const s1_patch_descriptor patch_parameters[S1_REVERB_MIX_LFO+1] = {
++#define S1_D(slot,label,id,unit,range,steps) [slot]={label,id,unit,range,steps},
++    S1_CATALOG_ROWS(S1_D)
++#undef S1_D
++};
++static const uint8_t patch_slot_code[150] = {
++#define S1_R(slot,label,id,unit,range,steps) [id]=(slot)+1u,
++    S1_CATALOG_ROWS(S1_R)
++#undef S1_R
++};
++/* Duplicate ID or persisted slot is a compile error, independent of any
++ * initializer override warnings. These schema guards emit no runtime code. */
++static inline void s1_catalog_schema_unique(unsigned id,unsigned slot)
++{
++    switch(id) {
++#define S1_ID(slot,label,id,unit,range,steps) case id: break;
++    S1_CATALOG_ROWS(S1_ID)
++#undef S1_ID
++    }
++    switch(slot) {
++#define S1_SLOT(slot,label,id,unit,range,steps) case slot: break;
++    S1_CATALOG_ROWS(S1_SLOT)
++#undef S1_SLOT
++    }
++}
++_Static_assert(S1_LFO_FIRST==S1_EXTRA_FIRST+11 && S1_WET_FIRST==S1_EXTRA_FIRST+16 &&
++               S1_MONO_LEGATO==S1_EXTRA_FIRST+20, "legacy S1 descriptor order");
++#undef S1_CATALOG_ROWS
++#undef S1_CATALOG_BEND_ROWS
++static const float patch_domain[][2] = {
++    {0, 1},
++    {64, 22050},
++    {0, .98f},
++    {0, 1.2f},
++    {.0005f, 2},
++    {.005f, 2},
++    {0, 2},
++    {.004f, 2},
++    {0, 15},
++    {0, .25f},
++    {0x1.111112p-11f, 80},
++    {0, 3},
++    {80, 900},
++    {-12, 24},
++    {0, .2f},
++    {-4, 4},
++    {-24.f, 0.f},
++    {0.f, 24.f},
++};
++_Static_assert(sizeof(void*)!=4u || sizeof(s1_patch_descriptor)==8u, "native compact S1 descriptor");
++const float *s1_patch_bounds(const s1_patch_descriptor *d) { return patch_domain[d->domain]; }
++X0X_COLD __attribute__((noinline)) unsigned s1_patch_steps(unsigned slot)
++{
++    if (slot == S1_PATCH_COUNT) return 1u;
++    if (slot >= sizeof patch_parameters / sizeof patch_parameters[0]) return S1_PATCH_STEPS;
++    unsigned steps=patch_parameters[slot].steps;
++    return steps ? steps : S1_PATCH_STEPS;
++}
++const s1_patch_descriptor *s1_patch_at(unsigned slot)
++{
++    return slot < sizeof patch_parameters / sizeof patch_parameters[0] &&
++           patch_parameters[slot].label ? patch_parameters+slot : NULL;
++}
++int s1_patch_slot(unsigned id)
++{ return id < sizeof patch_slot_code ? (int)patch_slot_code[id]-1 : -1; }
++#else
+ static const s1_patch_descriptor patch_parameters[S1_PATCH_COUNT] = {
+     {"OSC BALANCE", 0, 1, 2, X0X_U_PCT},
+     {"OSC 1 LEVEL", 0, 1, 5, X0X_U_PCT},
+@@ -176,129 +309,26 @@
+     {"AMP SUSTAIN", 0, 1, 28, X0X_U_PCT},
+     {"AMP RELEASE", .004f, 2, 29, X0X_U_S},
+ };
+-
+-#if X0X_S1_EXTRA
+-static const s1_patch_descriptor extra_parameters[] = {
+-    {"OSC 1 MORPH", 0, 1, 0, X0X_U_PCT},
+-    {"OSC 2 MORPH", 0, 1, 1, X0X_U_PCT},
+-    {"OSC 2 LEVEL", 0, 1, 6, X0X_U_PCT},
+-    {"SUB LEVEL", 0, 1, 7, X0X_U_PCT},
+-    {"SUB OCTAVE", 0, 1, 8, X0X_U_NONE},
+-    {"SUB WAVE", 0, 1, 9, X0X_U_NONE},
+-    {"FM LEVEL", 0, 1, 10, X0X_U_PCT},
+-    {"FM INDEX", 0, 15, 11, X0X_U_NONE},
+-    {"NOISE LEVEL", 0, .25f, 12, X0X_U_PCT},
+-    {"FILTER TYPE", 0, 2, 115, X0X_U_NONE},
+-    {"ADSR PITCH TRACK", 0, 1, 149, X0X_U_PCT},
+-    {"LFO 1 RATE", 0x1.111112p-11f, 80, 15, X0X_U_HZ},
+-    {"LFO 2 RATE", 0x1.111112p-11f, 80, 47, X0X_U_HZ},
+-    {"LFO 1 SHAPE", 0, 3, 13, X0X_U_NONE},
+-    {"LFO 2 SHAPE", 0, 3, 45, X0X_U_NONE},
+-    {"SYNC TO ARP", 0, 1, P_TEMPO_SYNC, X0X_U_NONE},
+-    {"DELAY MIX", 0, 1, S1C_P_DLMIX, X0X_U_PCT},
+-    {"REVERB MIX", 0, 1, S1C_P_RVMIX, X0X_U_PCT},
+-    {"REVERB HP", 80, 900, S1C_P_RVHP, X0X_U_HZ},
+-    {"WIDEN", 0, 1, S1C_P_WIDEN, X0X_U_NONE},
+-    {"MONO LEGATO", 0, 1, 120, X0X_U_NONE},
+-};
+-static const s1_patch_descriptor base_editor[S1_BASE_EDIT_COUNT] = {
+-    {"PART LEVEL", 0, 2, S1C_P_MVOL, X0X_U_PCT},
+-    {"LFO 1 DEPTH", 0, 1, 14, X0X_U_PCT},
+-    {"LFO 2 DEPTH", 0, 1, 46, X0X_U_PCT},
+-};
+-static const s1_patch_descriptor routes[S1_ROUTE_COUNT] = {
+-    {"NOISE LFO", 0, 3, P_NOISE_LFO, X0X_U_NONE},
+-    {"OSC MIX LFO", 0, 3, P_OSC_MIX_LFO, X0X_U_NONE},
+-    {"RES LFO", 0, 3, P_RESONANCE_LFO, X0X_U_NONE},
+-};
+-static const s1_patch_descriptor mod_ext[S1_MOD_EXT_COUNT] = {
+-    {"FM LFO", 0, 3, P_FM_LFO, X0X_U_NONE},
+-    {"AMP DEC LFO", 0, 3, P_AMP_DECAY_LFO, X0X_U_NONE},
+-};
+-static const s1_patch_descriptor coarse[2] = {
+-    {"OSC 1 SEMI", -12, 24, 3, X0X_U_ST},
+-    {"OSC 2 SEMI", -12, 24, 4, X0X_U_ST},
+-};
+-static const s1_patch_descriptor voice_mode[2] = {
+-    {"VOICE MODE", 0, 1, P_MONO, X0X_U_NONE},
+-    {"MONO GLIDE", 0, .2f, P_GLIDE, X0X_U_S},
+-};
+-static const s1_patch_descriptor detune = {"OSC 2 DETUNE", -4, 4, P_DET2, X0X_U_NONE};
+-static const s1_patch_descriptor fx_gate[2] = {
+-    {"DELAY", 0, 1, S1C_P_DLON, X0X_U_NONE},
+-    {"REVERB", 0, 1, S1C_P_RVON, X0X_U_NONE},
+-};
+-static const s1_patch_descriptor detune_lfo = {"DETUNE LFO", 0, 3, P_DETUNE_LFO, X0X_U_NONE};
+-static const s1_patch_descriptor pitch_lfo = {"PITCH LFO", 0, 3, P_PITCH_LFO, X0X_U_NONE};
+-static const s1_patch_descriptor tremolo_lfo = {"TREMOLO LFO", 0, 3, P_TREMOLO_LFO, X0X_U_NONE};
+-static const s1_patch_descriptor reverb_lfo = {"REVERB MIX LFO", 0, 3, P_REVERB_MIX_LFO, X0X_U_NONE};
+-static const s1_patch_descriptor cutoff_lfo = {"CUTOFF LFO", 0, 3, P_CUTOFF_LFO, X0X_U_NONE};
+-enum { S1_CATALOG_EXTRA_COUNT = sizeof extra_parameters / sizeof extra_parameters[0] };
+-_Static_assert(S1_CATALOG_EXTRA_COUNT == S1_WET_FIRST - S1_EXTRA_FIRST + S1_WET_COUNT,
+-               "Synth One editable catalog follows its persisted slot order");
+-#endif
+-
+ const s1_patch_descriptor *s1_patch_at(unsigned slot)
+-{
+-    if (slot < S1_PATCH_COUNT) return &patch_parameters[slot];
+-#if X0X_S1_EXTRA
+-#if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
+-    static const s1_patch_descriptor bend_range[] = {
+-        {"PB DOWN", -24.f, 0.f, 141, X0X_U_ST},
+-        {"PB UP", 0.f, 24.f, 142, X0X_U_ST},
+-    };
+-    if (s1_bend_slot(slot)) return &bend_range[slot-S1_BEND_LO];
+-#endif
+-    if (slot == S1_REVERB_MIX_LFO) return &reverb_lfo;
+-    if (slot == S1_CUTOFF_LFO) return &cutoff_lfo;
+-    if (slot == S1_TREMOLO_LFO) return &tremolo_lfo;
+-    if (slot == S1_PITCH_LFO) return &pitch_lfo;
+-    if (slot == S1_DETUNE_LFO) return &detune_lfo;
+-    if (s1_fx_gate_slot(slot)) return &fx_gate[slot-S1_DELAY_ON];
+-    if (slot == S1_OSC2_DETUNE) return &detune;
+-    if (slot-S1_VOICE_MODE < 2u) return &voice_mode[slot-S1_VOICE_MODE];
+-    if (s1_coarse_slot(slot)) return &coarse[slot-S1_COARSE_FIRST];
+-    if (s1_mod_ext_slot(slot)) return &mod_ext[slot-S1_MOD_EXT_FIRST];
+-    if (s1_base_route_slot(slot)) return &routes[slot-S1_ROUTE_FIRST];
+-    if (s1_base_edit_slot(slot)) return &base_editor[slot-S1_BASE_EDIT_FIRST];
+-    if (slot - S1_EXTRA_FIRST < S1_CATALOG_EXTRA_COUNT) return &extra_parameters[slot-S1_EXTRA_FIRST];
+-#endif
+-    return NULL;
+-}
+-
++{ return slot < S1_PATCH_COUNT ? patch_parameters+slot : NULL; }
+ int s1_patch_slot(unsigned id)
+ {
+-    for (unsigned i = 0; i < S1_PATCH_COUNT; ++i)
+-        if (patch_parameters[i].factory_id == id) return (int)i;
+-#if X0X_S1_EXTRA
+-#if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
+-    if (id-141u < 2u) return (int)(S1_BEND_LO+id-141u);
+-#endif
+-    if (id == P_REVERB_MIX_LFO) return S1_REVERB_MIX_LFO;
+-    if (id == P_CUTOFF_LFO) return S1_CUTOFF_LFO;
+-    if (id == P_TREMOLO_LFO) return S1_TREMOLO_LFO;
+-    if (id == P_PITCH_LFO) return S1_PITCH_LFO;
+-    if (id == P_DETUNE_LFO) return S1_DETUNE_LFO;
+-    if (id == S1C_P_DLON || id == S1C_P_RVON) return id == S1C_P_DLON ? S1_DELAY_ON : S1_REVERB_ON;
+-    if (id == P_DET2) return S1_OSC2_DETUNE;
+-    if (id-P_MONO < 2u) return (int)(S1_VOICE_MODE+id-P_MONO);
+-    if (id-3u < 2u) return (int)(S1_COARSE_FIRST+id-3u);
+-    for (unsigned i = 0; i < S1_MOD_EXT_COUNT; ++i)
+-        if (id == mod_ext[i].factory_id) return (int)(S1_MOD_EXT_FIRST+i);
+-    for (unsigned i = 0; i < S1_ROUTE_COUNT; ++i)
+-        if (id == routes[i].factory_id) return (int)(S1_ROUTE_FIRST+i);
+-    for (unsigned i = 0; i < S1_BASE_EDIT_COUNT; ++i)
+-        if (id == base_editor[i].factory_id) return (int)(S1_BASE_EDIT_FIRST + i);
+-    for (unsigned i = 0; i < S1_CATALOG_EXTRA_COUNT; ++i)
+-        if (extra_parameters[i].factory_id == id) return (int)(S1_EXTRA_FIRST + i);
+-#endif
++    for (unsigned i=0;i<S1_PATCH_COUNT;++i)
++        if(patch_parameters[i].factory_id==id) return (int)i;
+     return -1;
+ }
++#endif
+ 
+ float s1_patch_physical(const s1_patch_descriptor *d, unsigned position)
+ {
+-    if (position >= S1_PATCH_STEPS) return d->maximum;
+-    return d->minimum + (d->maximum - d->minimum) * ((float)position / S1_PATCH_STEPS);
++#if X0X_S1_EXTRA
++    const float *bounds=s1_patch_bounds(d);
++    const float lo=bounds[0], hi=bounds[1];
++#else
++    const float lo=d->minimum, hi=d->maximum;
++#endif
++    if (position >= S1_PATCH_STEPS) return hi;
++    return lo + (hi - lo) * ((float)position / S1_PATCH_STEPS);
+ }
+ 
+ float s1_part_patch_value(const s1_dry_part *part, unsigned slot)
+@@ -323,8 +353,8 @@
+     const float pan_hz=e->t[P_PAN_RATE];
+ #endif
+     s1c_set(e, P_TEMPO_SYNC, part->lfo_factory[S1_LFO_SYNC - S1_LFO_FIRST]);
+-    s1c_set(e, extra_parameters[S1_LFO1_RATE - S1_EXTRA_FIRST].factory_id, part->lfo_factory[0]);
+-    s1c_set(e, extra_parameters[S1_LFO2_RATE - S1_EXTRA_FIRST].factory_id, part->lfo_factory[1]);
++    s1c_set(e, patch_parameters[S1_LFO1_RATE].factory_id, part->lfo_factory[0]);
++    s1c_set(e, patch_parameters[S1_LFO2_RATE].factory_id, part->lfo_factory[1]);
+ #if defined(X0X_S1_AUTOPAN_PROBE) && X0X_S1_AUTOPAN_PROBE
+     if(!e->pan_authored)
+ #endif
+@@ -349,7 +379,7 @@
+     for (unsigned i = 0; i < S1_EXTRA_COUNT; ++i) {
+         unsigned digit = state.panel[i], bit = 1u << i;
+         if (!(digit || (part->extra_live_mask & bit))) continue;
+-        const s1_patch_descriptor *d = &extra_parameters[i];
++        const s1_patch_descriptor *d = &patch_parameters[S1_EXTRA_FIRST+i];
+         float value = part->extra_factory[i];
+         if (digit) {
+             next |= bit;
+@@ -367,7 +397,7 @@
+     for (unsigned i = 0; i < S1_WET_COUNT; ++i) {
+         unsigned digit = state.wet[i], bit = 1u << (S1_EXTRA_COUNT+i);
+         if (!(digit || (part->extra_live_mask & bit))) continue;
+-        const s1_patch_descriptor *d = &extra_parameters[S1_WET_FIRST - S1_EXTRA_FIRST + i];
++        const s1_patch_descriptor *d = &patch_parameters[S1_WET_FIRST + i];
+         float value = part->wet_factory[i];
+         if (digit) value = s1_patch_steps(S1_WET_FIRST+i) == 1u ?
+                            (float)(digit-1u) : s1_patch_physical(d, digit-1u);
+@@ -384,7 +414,7 @@
+     if (clock_dirty) s1_part_clock(part, clock);
+     unsigned live = clock ? clock_bit : 0;
+     for (unsigned i = 0; i < clock_index; ++i) {
+-        unsigned id = extra_parameters[S1_LFO_FIRST - S1_EXTRA_FIRST + i].factory_id;
++        unsigned id = patch_parameters[S1_LFO_FIRST + i].factory_id;
+         if (values[i]) {
+             if (i < 2) s1c_front_lfo_apply(&part->e, id, values[i]);
+             else s1c_set(&part->e, id, (float)(values[i] - 1u));
+@@ -415,7 +445,7 @@
+     unsigned mod_code = mask & S1_MOD_EXT_MARK ? cell[S1_MOD_EXT_BYTE] : 0u;
+     for (unsigned i = 0; i < S1_MOD_EXT_COUNT; ++i) {
+         unsigned digit = mod_code % S1_MOD_RADIX;
+-        s1c_set(&part->e, mod_ext[i].factory_id,
++        s1c_set(&part->e, patch_parameters[S1_MOD_EXT_FIRST+i].factory_id,
+                 digit ? (float)(digit - 1u) : part->mod_ext_factory[i]);
+         mod_code /= S1_MOD_RADIX;
+     }
+@@ -431,10 +461,10 @@
+     uint8_t codes[S1_ROUTE_COUNT];
+     if (s1_route_decode(mask >> S1_ROUTE_SHIFT, codes))
+         for (unsigned i = 0; i < S1_ROUTE_COUNT; ++i)
+-            s1c_set(&part->e, routes[i].factory_id,
++            s1c_set(&part->e, patch_parameters[S1_ROUTE_FIRST+i].factory_id,
+                     codes[i] ? (float)(codes[i]-1u) : part->route_factory[i]);
+     for (unsigned i = 0; i < S1_BASE_EDIT_COUNT; ++i) {
+-        const s1_patch_descriptor *d = &base_editor[i];
++        const s1_patch_descriptor *d = &patch_parameters[S1_BASE_EDIT_FIRST+i];
+         const unsigned byte = S1_BASE_EDIT_BYTE + i;
+         s1c_set(&part->e, d->factory_id, mask & (UINT32_C(1) << byte) ?
+                 s1_patch_physical(d, cell[byte] & 127u) : part->base_factory[i]);
+--- a/firmware/src/app/s1_patch.h
++++ b/firmware/src/app/s1_patch.h
+@@ -136,29 +136,22 @@
+ #define S1_ROUTE_MASK 0u
+ #define S1_MOD_EXT_MARK 0u
+ #endif
+-static inline unsigned s1_patch_steps(unsigned slot)
+-{
+ #if X0X_S1_EXTRA
+-#if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
+-    if (s1_bend_slot(slot)) return 24u;
+-#endif
+-    if (slot == S1_VOICE_MODE || s1_fx_gate_slot(slot)) return 1u;
+-    if (slot == S1_MONO_GLIDE) return S1_GLIDE_STEPS;
+-    if (slot == S1_OSC2_DETUNE) return S1_DETUNE_STEPS;
+-    if (s1_coarse_slot(slot)) return S1_COARSE_STEPS;
+-    if (slot == S1_SUB_OCTAVE || slot == S1_SUB_WAVE) return 1;
+-    if (slot == S1_FILTER_TYPE) return 2;
+-    if (slot == S1_LFO_SYNC || slot == S1_WIDEN || slot == S1_MONO_LEGATO) return 1;
+-    if (slot - S1_LFO1_SHAPE < 2u || slot == S1_CUTOFF_LFO || slot == S1_DETUNE_LFO || slot == S1_PITCH_LFO || slot == S1_TREMOLO_LFO || slot == S1_REVERB_MIX_LFO || s1_base_route_slot(slot) || s1_mod_ext_slot(slot)) return 3;
++unsigned s1_patch_steps(unsigned slot);
++#else
++static inline unsigned s1_patch_steps(unsigned slot)
++{ return slot == S1_PATCH_COUNT ? 1u : S1_PATCH_STEPS; }
+ #endif
+-    return slot == S1_PATCH_COUNT ? 1u : S1_PATCH_STEPS;
+-}
+ #define S1_PATCH_MASK (((UINT32_C(1) << S1_PATCH_COUNT) - 1) << S1_PATCH_FIRST_BYTE)
+ 
+ typedef struct {
+     const char *label;
++#if X0X_S1_EXTRA
++    uint8_t factory_id, unit, domain, steps;
++#else
+     float minimum, maximum;
+     uint8_t factory_id, unit;
++#endif
+ } s1_patch_descriptor;
+ 
+ typedef struct {
+@@ -181,6 +174,25 @@
+ } s1_patch_snapshot;
+ 
+ const s1_patch_descriptor *s1_patch_at(unsigned index);
++#if X0X_S1_EXTRA
++const float *s1_patch_bounds(const s1_patch_descriptor *d);
++#endif
++static inline float s1_patch_min(const s1_patch_descriptor *d)
++{
++#if X0X_S1_EXTRA
++    return s1_patch_bounds(d)[0];
++#else
++    return d->minimum;
++#endif
++}
++static inline float s1_patch_max(const s1_patch_descriptor *d)
++{
++#if X0X_S1_EXTRA
++    return s1_patch_bounds(d)[1];
++#else
++    return d->maximum;
++#endif
++}
+ float s1_patch_physical(const s1_patch_descriptor *, unsigned position);
+ /* Value for the firmware's unit_value formatter. Uses real seconds and Hz. */
+ static inline float s1_patch_display(const s1_patch_descriptor *d, float physical)
+--- a/firmware/src/app/original_presets.inc
++++ b/firmware/src/app/original_presets.inc
+@@ -351,8 +351,8 @@
+ #endif
+     else {
+         const s1_patch_descriptor *d = s1_patch_at((unsigned)slot);
+-        out->position = (uint8_t)((out->physical - d->minimum) *
+-            (out->max_position / (d->maximum - d->minimum)) + .5f);
++        out->position = (uint8_t)((out->physical - s1_patch_min(d)) *
++            (out->max_position / (s1_patch_max(d) - s1_patch_min(d))) + .5f);
+     }
+     plat_cq_unlock(lock);
+     return 1;
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -1489,8 +1489,8 @@
+     case R_S1PATCH: {
+         const s1_patch_descriptor *d = s1_patch_at(r.c);
+         if (d && s1_draw_patch && bidx() == r.b)
+-            return (int)((s1_draw_patch->physical[r.c] - d->minimum) *
+-                         (S1_PATCH_STEPS / (d->maximum - d->minimum)) + .5f);
++            return (int)((s1_draw_patch->physical[r.c] - s1_patch_min(d)) *
++                         (S1_PATCH_STEPS / (s1_patch_max(d) - s1_patch_min(d))) + .5f);
+         s1_patch_value value;
+         return s1_read(r, &value) ? value.position : 0;
+     }
+--- a/tests/host/synthone_patch_test.c
++++ b/tests/host/synthone_patch_test.c
+@@ -76,9 +76,9 @@
+     assert(sizeof ids / sizeof ids[0] == S1_PATCH_COUNT);
+     for (unsigned i = 0; i < S1_PATCH_COUNT; ++i) {
+         const s1_patch_descriptor *d = s1_patch_at(i);
+-        assert(d && *d->label && d->factory_id == ids[i] && d->minimum < d->maximum);
++        assert(d && *d->label && d->factory_id == ids[i] && s1_patch_min(d) < s1_patch_max(d));
+         assert(d->unit == X0X_U_HZ || d->unit == X0X_U_S || d->unit == X0X_U_PCT);
+-        assert(s1_patch_physical(d, 0) == d->minimum && s1_patch_physical(d, 127) == d->maximum);
++        assert(s1_patch_physical(d, 0) == s1_patch_min(d) && s1_patch_physical(d, 127) == s1_patch_max(d));
+         /* Sweep every position on one part, reading the other owner's target
+          * and comparing its entire sound cell and identity after each edit. */
+         const s1_patch_value other = read_patch(1, ids[i]);

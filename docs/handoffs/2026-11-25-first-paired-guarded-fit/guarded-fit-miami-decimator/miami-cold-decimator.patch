@@ -1,0 +1,60 @@
+--- a/link-guarded-exact.py
++++ b/link-guarded-exact.py
+@@ -284,6 +284,7 @@
+ b.CFLAGS.append("-DX0X_SJ6_NATIVE_POSITIVE_GATE=1")
+ b.ORIGINAL_SYNTH_OZ_UNITS |= {'chicago_selector','chicago_arp_control','chicago_note_context','miami_geometry','miami_fx_conversion'}
+ b.CFLAGS.extend(Path(os.environ['DNBOX_CONTROL_FLAGS']).read_text().split())
++if os.environ.get("DNBOX_MIAMI_DECIMATOR_COMPACT") == "1": b.CFLAGS.append("-DDNBOX_MIAMI_DECIMATOR_COMPACT=1")
+ b.CFLAGS.append('-DX0X_CHICAGO_FAST32=1')
+ if os.environ.get('DNBOX_TANH_SPLIT_LAB') == '1':
+     b.CFLAGS.append('-DX0X_TANH_SPLIT_LAB=1')
+--- a/tree/experiments/wobble/miami_decimator_adapter.c
++++ b/tree/experiments/wobble/miami_decimator_adapter.c
+@@ -1,6 +1,22 @@
+ /* SPDX-License-Identifier: GPL-3.0-only */
+ #include "miami_decimator_adapter.h"
++#ifdef DNBOX_MIAMI_DECIMATOR_COMPACT
++#include "miami_decimator_compact_generated.h"
++static inline int16_t wet_word(unsigned i)
++{ return (int16_t)(i==127u ? 32767u : i*258u); }
++static uint16_t frequency_word(unsigned i)
++{
++    if(i>=123u)return frequency_tail[i-123u];
++    /* i<=122, so the exact unsigned predictor cannot overflow.
++     * For i==0 unsigned multiply by zero also leaves the predictor zero. */
++    unsigned q=(i*(2351u*i-39u))>>11;
++    return (uint16_t)(1486u+q+((frequency_corrections[i>>3]>>(i&7u))&1u));
++}
++#else
+ #include "miami_decimator_tables_private.h"
++#define wet_word(i) (miami_decimator_wet[(i)])
++#define frequency_word(i) (miami_decimator_frequency[(i)])
++#endif
+ int miami_decimator_adapter_init(miami_decimator_adapter_t *s)
+ {
+     if (!s) return 0;
+@@ -11,8 +27,8 @@
+     (void)miami_decimator_seed(&next.kernel,0,0,0,0);
+     next.frequency_integer = 64;
+     next.wet_integer = 127;
+-    next.wet_gain = miami_decimator_wet[127];
+-    (void)miami_decimator_stage_step(&next.kernel,miami_decimator_frequency[63]);
++    next.wet_gain = wet_word(127u);
++    (void)miami_decimator_stage_step(&next.kernel,frequency_word(63u));
+     *s = next;
+     return 1;
+ }
+@@ -29,11 +45,11 @@
+     uint8_t p = (uint8_t)((uint32_t)value & UINT32_C(127));
+     if (parameter == 2) {
+         s->wet_integer = p;
+-        s->wet_gain = miami_decimator_wet[p];
++        s->wet_gain = wet_word(p);
+     } else {
+         if (parameter == 1) s->frequency_integer = p;
+         else s->bit_integer = p;
+-        (void)miami_decimator_stage_step(&s->kernel,miami_decimator_frequency[127-s->frequency_integer]);
++        (void)miami_decimator_stage_step(&s->kernel,frequency_word(127u-s->frequency_integer));
+     }
+     return 1;
+ }

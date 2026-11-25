@@ -1,0 +1,38 @@
+.lab_fdata      0x00000000020e1000     0xeff8
+.lab_slot3      0x00000000020af000     0x7ffc
+.lab_fittab     0x00000000020fa000      0xfe8
+.xdata          0x00000000020a9000     0x1ff4
+.text           0x0000000002000120    0x85f18
+.bss            0x0000000001c08290    0x17cc4
+.pool           0x0000000001c20000    0x51e64
+XDATA linked-sha256 elite .rodata.original_sound_chicago_params 264 52aa287e8dcdbb6b200f944bdbc4f74a4247ac55b1f5d7f4e4f212a3127078b8
+XDATA linked-sha256 elite .rodata.original_sound_miami_params 216 1b9229544c5e2442b469d2a39848ad0ee271fbb93bd8ac2cb0ab1eccb3fd9e90
+slot3-metadata linked-sha256 elite .rodata.original_miami_mappings 480 1f73ab1035c1d55187b9d2c01565f5ce7164c8a076a381f2bd79b6df6d301811
+slot3-metadata linked-sha256 elite .rodata.original_chicago_mappings 464 c22fcdbca04bf027191c2dcb4485611767daf4b016928497c99235644018e118
+slot3-metadata linked-sha256 elite .rodata.sj6_knob_desc.knobs 504 825424082c819756363579dad4301474010874e0a9515cc1928f04dc893e21f1
+slot3-metadata linked-sha256 elite .rodata.original_sound_juno_params 216 92fb462a1b7e09c0f2bba0b00fde2278262662a55d32b39393902e2865f5749c
+slot3-metadata linked-sha256 elite .rodata.patch_parameters 496 ec1aebb0cd759bdf36bf83976b224cfa60a9ff9e1774ea41cad856288ae6931c
+slot3-metadata linked-sha256 elite .rodata.sj6_aux_route_labels 276 28712786f65b20199090fc1ecc6f934c8cd92ca1fd0e0bd80f932faa074334b9
+slot3-metadata linked-sha256 elite .rodata.rd_panel_sj6_ref.fixed 312 4196b08f27c12512cb36c191ec75acb62ddc21d9c307b4b833b16aede8c08097
+slot3-metadata linked-sha256 elite .rodata.page_titles 344 dbb3457f07d19b9ed9bcd1f0f06915b96e454781a41628fa78bb8823fc2597fe
+slot3-metadata linked-sha256 elite .rodata.d9_cp_p 96 96f425353d408d3bcdedaeb270a79b9ceba4fbc1327b487ce61f9fb33ffab7f5
+guarded elite XIP 552640 free 32 pool usable 412 read-only FDATA 61432 diagnostic slot3 span 32764 slot3 free 4 read-only FITTAB 4072 header 443952440200000001000000d8ef00007def59ef8703eff681e405a145cde357 ELF 5bcd76a82e44a5ce135157c8ccac3ce21be212c3783d285772588a77585e5594
+.lab_fdata      0x00000000020e1000     0xeff8
+.lab_slot3      0x00000000020af000     0x7ffc
+.lab_fittab     0x00000000020fa000      0xfe8
+.xdata          0x00000000020a9000     0x1ff4
+.text           0x0000000002000120    0x85f10
+.bss            0x0000000001c08290    0x17cc4
+.pool           0x0000000001c20000    0x51e64
+XDATA linked-sha256 pro .rodata.original_sound_chicago_params 264 3647c92c4b713c5fc30c5761bd56dfa07165fce066dab575eecb4d85bf295cd7
+XDATA linked-sha256 pro .rodata.original_sound_miami_params 216 97d9fd58541d6cd2a660451df01458a9bdc8b8f181b6b0d80ce63557c16945c7
+slot3-metadata linked-sha256 pro .rodata.original_miami_mappings 480 1f73ab1035c1d55187b9d2c01565f5ce7164c8a076a381f2bd79b6df6d301811
+slot3-metadata linked-sha256 pro .rodata.original_chicago_mappings 464 c22fcdbca04bf027191c2dcb4485611767daf4b016928497c99235644018e118
+slot3-metadata linked-sha256 pro .rodata.sj6_knob_desc.knobs 504 87df6c28974f184e768837b26328fe06283f1928ee6d156a41555b28e22814c3
+slot3-metadata linked-sha256 pro .rodata.original_sound_juno_params 216 494b3d24b0bf429091faee240a84c4f1c0a68ac5419e4b740a3c27103141a81c
+slot3-metadata linked-sha256 pro .rodata.patch_parameters 496 110d7c13231f02d66d230ff873a493439be3bc607dbfb9c6a61dca49ed1b70d7
+slot3-metadata linked-sha256 pro .rodata.sj6_aux_route_labels 276 710412738b2c550cea5db47f9671f1e77c477ba9a8af0a52560466b09b20f36f
+slot3-metadata linked-sha256 pro .rodata.rd_panel_sj6_ref.fixed 312 4196b08f27c12512cb36c191ec75acb62ddc21d9c307b4b833b16aede8c08097
+slot3-metadata linked-sha256 pro .rodata.page_titles 344 165f1799379a44735f9186445843ae55e3cbb2cd916bbf1d50a25ae112eb7d0d
+slot3-metadata linked-sha256 pro .rodata.d9_cp_p 96 29d31f514c336a985ccdc9f56fb8eac8e71ae9a8bf47efc76407232bf520b786
+guarded pro XIP 552632 free 40 pool usable 412 read-only FDATA 61432 diagnostic slot3 span 32764 slot3 free 4 read-only FITTAB 4072 header 443952440200000002000000d8ef00007def59efde1e959c228a9b78acf6fac5 ELF 7145d630918e221c6ef64d7da5d976a3126c42ab4cbd56b0012e1f2b3e77f394

@@ -1,0 +1,61 @@
+--- a/firmware/src/dsp/drum808.c
++++ b/firmware/src/dsp/drum808.c
+@@ -1620,29 +1620,39 @@
+ static const d8_spec_t k_spec_bd_x2[] = {{0.0f, 6.0f, 0, 42}, {0.0f, 1.0f, 0, 24}};
+ static const d8_spec_t k_spec_sd_x2[] = {{0.0f, 1.0f, 0, 89}, {0.0f, 1.0f, 0, 64}};
+ static const d8_spec_t k_spec_ma_x2[] = {{0.0f, 1.0f, 0, 32}, NON};
+-static const d8_spec_t k_spec_head[D8S_NUM][D8_SPEC_HEAD] = {
+-    [D8S_BD] = {LVL, TU12, {0.1f, 8.0f, 1, 87}},
+-    [D8S_SD] = {LVL, TU12, {0.1f, 8.0f, 1, 108}},
+-    [D8S_LT] = {LVL, TU2,  {0.06f, 2.0f, 1, 68}},
+-    [D8S_MT] = {LVL, TU2,  {0.06f, 2.0f, 1, 56}},
+-    [D8S_HT] = {LVL, TU2,  {0.06f, 2.0f, 1, 53}},
+-    [D8S_LC] = {LVL, TU2,  {0.06f, 2.0f, 1, 58}},
+-    [D8S_MC] = {LVL, TU2,  {0.06f, 2.0f, 1, 36}},
+-    [D8S_HC] = {LVL, TU2,  {0.06f, 2.0f, 1, 34}},
+-    [D8S_RS] = {LVL, TU12, {0.005f, 0.2f, 1, 40}},
+-    [D8S_CL] = {LVL, TU12, {0.0f, 1.0f, 0, 64}},
+-    [D8S_MA] = {LVL, TU12, {0.01f, 0.3f, 1, 51}},
+-    [D8S_CP] = {LVL, TU12, {0.35f, 2.8f, 1, 64}},
+-    [D8S_CB] = {LVL, TUM,  {0.1f, 2.0f, 1, 62}},
+-    [D8S_CH] = {LVL, TUM,  {0.03f, 0.5f, 1, 47}},
+-    [D8S_OH] = {LVL, TUM,  {0.08f, 1.5f, 1, 74}},
+-    [D8S_CY] = {LVL, TUM,  {0.4f, 6.0f, 1, 70}},
++static const d8_spec_t k_spec_level = LVL;
++static const d8_spec_t k_spec_tune[] = {TU12, TU2, TUM};
++static const uint8_t k_tune_kind[D8S_NUM] = {
++    [D8S_LT]=1, [D8S_MT]=1, [D8S_HT]=1, [D8S_LC]=1, [D8S_MC]=1, [D8S_HC]=1,
++    [D8S_CB]=2, [D8S_CH]=2, [D8S_OH]=2, [D8S_CY]=2,
+ };
++static const d8_spec_t k_spec_decay[D8S_NUM] = {
++    [D8S_BD] = {0.1f, 8.0f, 1, 87},
++    [D8S_SD] = {0.1f, 8.0f, 1, 108},
++    [D8S_LT] = {0.06f, 2.0f, 1, 68},
++    [D8S_MT] = {0.06f, 2.0f, 1, 56},
++    [D8S_HT] = {0.06f, 2.0f, 1, 53},
++    [D8S_LC] = {0.06f, 2.0f, 1, 58},
++    [D8S_MC] = {0.06f, 2.0f, 1, 36},
++    [D8S_HC] = {0.06f, 2.0f, 1, 34},
++    [D8S_RS] = {0.005f, 0.2f, 1, 40},
++    [D8S_CL] = {0.0f, 1.0f, 0, 64},
++    [D8S_MA] = {0.01f, 0.3f, 1, 51},
++    [D8S_CP] = {0.35f, 2.8f, 1, 64},
++    [D8S_CB] = {0.1f, 2.0f, 1, 62},
++    [D8S_CH] = {0.03f, 0.5f, 1, 47},
++    [D8S_OH] = {0.08f, 1.5f, 1, 74},
++    [D8S_CY] = {0.4f, 6.0f, 1, 70},
++};
++_Static_assert(D8S_LT==D8S_SD+1 && D8S_HC==D8S_LT+5 && D8S_CY==D8S_CB+3 &&
++               D8S_CY+1==D8S_NUM,"808 shared tune range layout");
+ static const d8_spec_t *d8_kspec(int s, int slot)
+ {
+     int fx;
+-    if (slot < D8_SPEC_HEAD)
+-        return &k_spec_head[s][slot];
++    if (slot == 0) return &k_spec_level;
++    if (slot == 1)
++        return &k_spec_tune[k_tune_kind[s]];
++    if (slot == 2) return &k_spec_decay[s];
+     fx = slot - D8_SPEC_HEAD;
+     if (s == D8S_BD) {
+         if (fx < 2)

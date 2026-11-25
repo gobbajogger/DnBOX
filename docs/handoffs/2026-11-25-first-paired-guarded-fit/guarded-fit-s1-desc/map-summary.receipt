@@ -1,0 +1,40 @@
+region `XIP' overflowed by 2400 bytes
+.lab_fdata      0x00000000020e1000     0xee28
+.lab_slot3      0x00000000020af000     0x7f9c
+.lab_fittab     0x00000000020fa000      0xf73
+.xdata          0x00000000020a9000     0x1ff4
+.text           0x0000000002000120    0x8689c
+.bss            0x0000000001c08290    0x17cc4
+.pool           0x0000000001c20000    0x51e64
+slot3-metadata map-only elite .rodata.original_miami_mappings 0x20b6388 480
+slot3-metadata map-only elite .rodata.original_chicago_mappings 0x20b6568 464
+slot3-metadata map-only elite .rodata.sj6_knob_desc.knobs 0x20b6738 504
+slot3-metadata map-only elite .rodata.original_sound_juno_params 0x20b6930 216
+slot3-metadata map-only elite .rodata.patch_parameters 0x20b6a08 496
+slot3-metadata map-only elite .rodata.sj6_aux_route_labels 0x20b6bf8 276
+slot3-metadata map-only elite .rodata.rd_panel_sj6_ref.fixed 0x20b6d0c 312
+slot3-metadata map-only elite .rodata.page_titles 0x20b6e44 344
+slot3-metadata span elite 32668 remaining 100
+XDATA map-only elite .rodata.original_sound_chicago_params 0x20aae14 264
+XDATA map-only elite .rodata.original_sound_miami_params 0x20aaf1c 216
+XDATA map-only extent elite 8180 remaining 12
+region `XIP' overflowed by 2388 bytes
+.lab_fdata      0x00000000020e1000     0xee28
+.lab_slot3      0x00000000020af000     0x7f9c
+.lab_fittab     0x00000000020fa000      0xf73
+.xdata          0x00000000020a9000     0x1ff4
+.text           0x0000000002000120    0x86890
+.bss            0x0000000001c08290    0x17cc4
+.pool           0x0000000001c20000    0x51e64
+slot3-metadata map-only pro .rodata.original_miami_mappings 0x20b6388 480
+slot3-metadata map-only pro .rodata.original_chicago_mappings 0x20b6568 464
+slot3-metadata map-only pro .rodata.sj6_knob_desc.knobs 0x20b6738 504
+slot3-metadata map-only pro .rodata.original_sound_juno_params 0x20b6930 216
+slot3-metadata map-only pro .rodata.patch_parameters 0x20b6a08 496
+slot3-metadata map-only pro .rodata.sj6_aux_route_labels 0x20b6bf8 276
+slot3-metadata map-only pro .rodata.rd_panel_sj6_ref.fixed 0x20b6d0c 312
+slot3-metadata map-only pro .rodata.page_titles 0x20b6e44 344
+slot3-metadata span pro 32668 remaining 100
+XDATA map-only pro .rodata.original_sound_chicago_params 0x20aae14 264
+XDATA map-only pro .rodata.original_sound_miami_params 0x20aaf1c 216
+XDATA map-only extent pro 8180 remaining 12

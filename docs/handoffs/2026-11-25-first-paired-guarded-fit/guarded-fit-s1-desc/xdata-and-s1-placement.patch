@@ -1,0 +1,126 @@
+--- a/link-guarded-exact.py
++++ b/link-guarded-exact.py
+@@ -2,6 +2,7 @@
+ import hashlib,os,re,struct,zlib
+ from pathlib import Path
+ from tools import build as b
++assert os.environ.get("D9_LAB_XDATA_TAIL")=="1", "XDATA-tail laboratory must be explicitly enabled"
+ real=b.tc
+ class Stop(Exception):pass
+ def seal(tool,*args):
+@@ -105,9 +106,8 @@
+         '.rodata.original_miami_mappings':480,
+         '.rodata.original_chicago_mappings':464,
+         '.rodata.sj6_knob_desc.knobs':504,
+-        '.rodata.extra_parameters':336,
+         '.rodata.original_sound_juno_params':216,
+-        '.rodata.patch_parameters':208,
++        '.rodata.patch_parameters':496,
+         '.rodata.sj6_aux_route_labels':276,
+         '.rodata.rd_panel_sj6_ref.fixed':312,
+         '.rodata.page_titles':344,
+@@ -141,13 +141,28 @@
+         for (_,end),(next_start,_) in zip(sorted(seen),sorted(seen)[1:]):
+             assert end<=next_start
+         print('slot3-metadata span',b.MODEL,sz,'remaining',0x8000-sz,flush=True)
+-    def link(header,companion,fittab):
++    xdata_tables = {
++        '.rodata.original_sound_chicago_params': 264,
++        '.rodata.original_sound_miami_params': 216,
++    }
++    def link(header,companion,fittab,xcrc):
++
+         h=' '.join('LONG(0x%08x);'%x for x in struct.unpack('<8I',header))
+         h2=' '.join('LONG(0x%08x);'%x for x in struct.unpack('<8I',companion))
+         h3=' '.join('LONG(0x%08x);'%x for x in struct.unpack('<8I',fittab))
+         s=script.replace('    XIP    (rx)','    LABFDATA (r) : ORIGIN = 0x020E1000, LENGTH = 0xF000\n    LABSLOT3 (r) : ORIGIN = 0x020AF000, LENGTH = 0x8000\n    LABFITTAB (r) : ORIGIN = 0x020FA000, LENGTH = 0x1000\n    XIP    (rx)')
+         s=s.replace('SECTIONS\n{\n','SECTIONS\n{\n .lab_fdata : { cold_lab_start = .; '+h+tables+' cold_lab_end = .; } > LABFDATA\n .lab_slot3 : { cold_slot3_start = .; '+h2+held+' cold_slot3_end = .; } > LABSLOT3\n .lab_fittab : { cold_fittab_start = .; '+h3+ft+' cold_fittab_end = .; } > LABFITTAB\n')
+-        s=s.replace(' *(.rodata*) . = ALIGN(4); _etext', ' *(.rodata*) . = ALIGN(4); cold_lab_expected = .; '+h+' cold_slot3_expected = .; '+h2+' cold_fittab_expected = .; '+h3+' . = ALIGN(4); _etext')
++        assert s.count('_xdata_end = .; } > XDATA') == 1
++        tail=' . = ALIGN(4); cold_xdata_tail_start = .; '+''.join(' KEEP(*('+n+'))' for n in xdata_tables)+' cold_xdata_tail_end = .;'
++        s=s.replace('_xdata_end = .; } > XDATA','_xdata_end = .;'+tail+' } > XDATA',1)
++        # GNU ld assigns input sections in script order. The exact cold
++        # selectors must run before .text's generic .rodata* collector.
++        import re
++        xm=re.search(r'^ +\.xdata.*?_xdata_end = \.;.*?} > XDATA[ 	]*$',s,re.M|re.S)
++        assert xm and s.count(' .text :')==1
++        xblock=xm.group(0)
++        s=(s[:xm.start()]+s[xm.end():]).replace(' .text :',xblock+chr(10)+' .text :',1)
++        s=s.replace(' *(.rodata*) . = ALIGN(4); _etext', ' *(.rodata*) . = ALIGN(4); cold_lab_expected = .; '+h+' cold_slot3_expected = .; '+h2+' cold_fittab_expected = .; '+h3+' cold_xdata_tail_crc = .; LONG(0x%08x); . = ALIGN(4); _etext'%xcrc)
+         assert s!=script and s.count('cold_lab_')==3 and s.count('cold_slot3_')==3 and s.count('cold_fittab_')==3
+         ld.write_text(s)
+         if mp.exists():mp.unlink() # Never certify a stale failed-link map.
+@@ -155,10 +170,41 @@
+             real(tool,*cmd,'-Map='+str(mp))
+         except SystemExit:
+             if mp.is_file():audit_meta()
++            if mp.exists():
++                m=mp.read_text()
++                def loc(n):
++                    return int(re.search(r'^\s*(0x[0-9a-f]+)\s+'+re.escape(n)+r' = \.',m,re.M)[1],16)
++                beg=0x020a9000
++                lo,hi=loc('cold_xdata_tail_start'),loc('cold_xdata_tail_end')
++                assert loc('_xdata_start')==beg and loc('_xdata_end')==beg+7698
++                assert lo==beg+7700 and hi==beg+8180
++                for name,addr,n in (('.xdata.0hdr',beg,16),('.xdata.font',beg+16,7682)):
++                    z=re.findall(r'^ '+re.escape(name)+r'\s+(0x[0-9a-f]+)\s+(0x[0-9a-f]+)',m,re.M)
++                    assert len(z)==1 and tuple(int(i,16) for i in z[0])==(addr,n)
++                offsets=[]
++                for name,expected in xdata_tables.items():
++                    z=re.findall(r'^ '+re.escape(name)+r'\s+(0x[0-9a-f]+)\s+(0x[0-9a-f]+)',m,re.M)
++                    assert len(z)==1,(name,z)
++                    addr,n=tuple(int(i,16) for i in z[0])
++                    assert n==expected and lo<=addr<=hi-n,(name,addr,n)
++                    offsets.append((addr,addr+n))
++                    print('XDATA map-only',b.MODEL,name,hex(addr),n,flush=True)
++                assert sorted(offsets)[0][0]==lo and sorted(offsets)[0][1]==sorted(offsets)[1][0] and sorted(offsets)[1][1]==hi
++                print('XDATA map-only extent',b.MODEL,hi-beg,'remaining',8192-(hi-beg),flush=True)
+             raise
+         for n in syms: real('common/bin/objcopy','-O','binary','-j','.'+n,elf,out/(n+'.bin'))
+         return [(out/(n+'.bin')).read_bytes() for n in syms]
+-    a=link(bytes(32),bytes(32),bytes(32))
++    a=link(bytes(32),bytes(32),bytes(32),0)
++    mt=mp.read_text()
++    def sym(n):
++        return int(re.search(r'^\s*(0x[0-9a-f]+)\s+'+re.escape(n)+r' = \.',mt,re.M)[1],16)
++    lo,hi=(sym(n)-0x020A9000 for n in ('cold_xdata_tail_start','cold_xdata_tail_end'))
++    assert sym('_xdata_end')-0x020A9000==7698
++    assert lo==7700 and hi==8180 and len(a[5])==hi
++    for n,size in xdata_tables.items():
++        addr,count=(int(x,16) for x in re.search(r'^ '+re.escape(n)+r'\s+(0x[0-9a-f]+)\s+(0x[0-9a-f]+)',mt,re.M).groups())
++        assert count==size and 0x020A9000+lo<=addr<=0x020A9000+hi-count,(n,addr,count)
++    xcrc=zlib.crc32(a[5][lo:hi])
+     p,p2,p3=(a[-2][32:],a[-1][32:],a[4][32:])
+     assert cold909_end+sum(relocated.values())<=len(a[-2])<=61440
+     assert 32+sum(pair.values())<=len(a[-1])<=32768
+@@ -169,12 +215,20 @@
+     h=struct.pack('<4s4I12s',b'D9RD',2,i,len(p),zlib.crc32(p),ident)
+     h2=struct.pack('<4s4I12s',b'D9T3',2,i,len(p2),zlib.crc32(p2),ident)
+     h3=struct.pack('<4s4I12s',b'D9FT',2,i,len(p3),zlib.crc32(p3),ident)
+-    z=link(h,h2,h3)
++    z=link(h,h2,h3,xcrc)
+     n=z[0].index(h)
+     assert z[0].count(h)==z[0].count(h2)==1 and z[0].index(h2)==n+32
+     assert z[0].count(h3)==1 and z[0].index(h3)==n+64
+-    assert z[0][:n]+bytes(96)+z[0][n+96:]==a[0] and z[1:4]==a[1:4] and z[5]==a[5]
++    assert z[0][:n]+bytes(100)+z[0][n+100:]==a[0] and z[1:4]==a[1:4] and z[5]==a[5]
++    assert z[0][n+96:n+100]==struct.pack('<I',xcrc)
+     assert z[4]==h3+p3
++    for name,size in xdata_tables.items():
++        entries=re.findall(r'^ '+re.escape(name)+r'\s+(0x[0-9a-f]+)\s+(0x[0-9a-f]+)',mt,re.M)
++        assert len(entries)==1
++        address,count=map(lambda v:int(v,16),entries[0])
++        k=address-0x020a9000
++        assert count==size and z[5][k:k+size]==a[5][k:k+size]
++        print('XDATA linked-sha256',b.MODEL,name,size,hashlib.sha256(z[5][k:k+size]).hexdigest(),flush=True)
+     assert z[-2]==h+p and z[-1]==h2+p2
+     audit_meta(z[-1],a[-1])
+     m=mp.read_text()
+@@ -233,6 +287,7 @@
+ b.CFLAGS.append('-DX0X_CHICAGO_FAST32=1')
+ if os.environ.get('DNBOX_TANH_SPLIT_LAB') == '1':
+     b.CFLAGS.append('-DX0X_TANH_SPLIT_LAB=1')
++b.CFLAGS += ["-DX0X_COLD_XDATA_TAIL_LAB=1"]
+ b.generate=lambda:None
+ b.build_loader=lambda:None
+ b.tc=seal

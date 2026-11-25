@@ -1,0 +1,106 @@
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -10971,66 +10971,45 @@
+ 
+ /* Qualitative effect identities in the existing 26x19 box. The short name
+  * beside each picture remains authoritative; these are not measured DSP plots. */
++/* Compact fixed icons: three-byte op stores four 5-bit coordinates and
++ * the line/rectangle bit. Geometry, colour and invocation order originate
++ * in the original static FX renderer. Dynamic and native input paths are unchanged. */
+ static UI_DRAW void orig_fx_glyph(int type,int gx,int gy,uint16_t col)
+ {
+-    int right=gx+OG_W-1,bot=gy+OG_H,mid=gy+OG_H/2;
+-    switch(type) {
+-    case 0: /* bypass */
+-        cv_line(gx,mid,right,mid,col);cv_line(gx+10,gy+2,gx+15,bot-2,col);break;
+-    case 1: case 7: { /* chorus pair / ensemble trio */
+-        int n=type==7?3:2;
+-        for(int row=0;row<n;row++) {
+-            int y=gy+(n==3?3+row*5:5+row*7),py=y;
+-            for(int k=1;k<=4;k++) {
+-                int x=gx+k*6,yy=y+(k&1?2:-2);
+-                cv_line(gx+(k-1)*6,py,x,yy,col);py=yy;
+-            }
+-        }
+-        break;
+-    }
+-    case 2: /* phaser notches */
+-        cv_line(gx,gy+5,gx+3,gy+5,col);
+-        for(int i=0;i<2;i++) {
+-            int x=gx+3+i*10;
+-            cv_line(x,gy+5,x+4,bot-2,col);cv_line(x+4,bot-2,x+8,gy+5,col);
+-            cv_line(x+8,gy+5,i?right:x+10,gy+5,col);
+-        }
+-        break;
+-    case 3: /* ring modulation: alternating lobes under an amplitude envelope */
+-        for(int i=0;i<6;i++) {
+-            int x=gx+i*4,h=i<3?2+i*2:12-i*2;
+-            cv_line(x,mid,x+2,mid+(i&1?h:-h),col);
+-            cv_line(x+2,mid+(i&1?h:-h),x+4,mid,col);
+-        }
+-        break;
+-    case 4: /* compressor knee */
+-        cv_line(gx,bot,gx+11,gy+7,col);cv_line(gx+11,gy+7,right,gy+3,col);break;
+-    case 5: /* decimator steps */
+-        for(int i=0;i<4;i++) {
+-            int x=gx+i*6,y=gy+15-i*4;
+-            cv_line(x,y,x+6,y,col);if(i<3)cv_line(x+6,y,x+6,y-4,col);
+-        }
+-        break;
+-    case 6: /* EQ peak */
+-        cv_line(gx,mid,gx+6,mid,col);cv_line(gx+6,mid,gx+12,gy+2,col);
+-        cv_line(gx+12,gy+2,gx+18,mid,col);cv_line(gx+18,mid,right,mid,col);break;
+-    case 8: /* short delay taps */
+-        for(int i=0;i<3;i++)cv_rect(gx+i*9,bot-12+i*4,2,12-i*4,col);
+-        cv_line(gx,bot,right,bot,col);break;
+-    case 9: /* BPM delay: clock plus taps */
+-        cv_line(gx,gy+3,gx+8,gy+3,col);cv_line(gx+8,gy+3,gx+8,gy+11,col);
+-        cv_line(gx+8,gy+11,gx,gy+11,col);cv_line(gx,gy+11,gx,gy+3,col);
+-        cv_line(gx+4,gy+5,gx+4,gy+7,col);cv_line(gx+4,gy+7,gx+6,gy+7,col);
+-        for(int i=0;i<3;i++)cv_rect(gx+12+i*6,bot-12+i*4,1,12-i*4,col);
+-        cv_line(gx,bot,right,bot,col);break;
+-    case 10: /* hall: room walls and diffuse reflections */
+-        cv_line(gx,bot,gx,gy+2,col);cv_line(gx,gy+2,right,gy+2,col);cv_line(right,gy+2,right,bot,col);
+-        for(int i=0;i<5;i++)cv_rect(gx+3+i*4,gy+5+i,1,10-i*2,col);
+-        break;
+-    case 11: /* reverb cut off at a gate */
+-        for(int i=0;i<4;i++)cv_rect(gx+i*5,gy+3+i*2,2,12-i*2,col);
+-        cv_rect(gx+20,gy+1,2,17,col);cv_line(gx+22,bot,right,bot,col);break;
+-    default: break;
++    static const uint8_t at[]={
++        0,2,10,17,29,31,38,42,54,58,68,76,
++        82,
++    };
++    static const uint8_t commands[]={
++        32,229,4,74,60,8,160,152,3,230,176,1,
++        108,200,3,242,224,1,128,25,7,198,49,5,
++        76,73,7,210,97,5,160,140,2,163,28,8,
++        7,174,2,171,180,2,173,68,8,17,214,2,
++        181,228,2,32,137,3,226,144,4,36,153,6,
++        166,161,4,40,169,1,106,176,4,44,185,7,
++        238,193,4,48,201,2,178,208,4,52,217,5,
++        118,225,4,64,174,3,235,228,1,224,153,7,
++        230,153,5,102,177,5,108,177,3,236,200,3,
++        242,200,1,114,224,1,32,153,4,38,49,1,
++        76,200,4,50,229,4,96,152,2,166,176,0,
++        44,200,2,178,224,0,0,25,5,70,49,3,
++        204,72,5,82,97,3,160,153,7,230,177,5,
++        108,201,7,242,225,5,192,8,22,73,9,20,
++        210,9,18,64,102,9,96,160,1,104,160,5,
++        104,129,5,96,129,1,164,144,3,228,152,3,
++        204,4,22,82,5,20,216,5,18,64,102,9,
++        64,2,1,64,100,1,89,100,9,163,4,21,
++        199,4,20,235,4,19,15,5,18,51,5,17,
++        96,8,22,165,8,21,234,8,20,47,9,19,
++        52,136,24,86,102,9,
++    };
++    if((unsigned)type>=sizeof at-1u)return;
++    for(unsigned j=at[type];j<at[type+1];j++){
++        const uint8_t *p=commands+3u*j;
++        unsigned w=(unsigned)p[0]|((unsigned)p[1]<<8)|((unsigned)p[2]<<16);
++        int x=(int)(w&31u),y=(int)((w>>5)&31u),a=(int)((w>>10)&31u),b=(int)((w>>15)&31u);
++        if(w&(1u<<20))cv_rect(gx+x,gy+y,a,b,col);
++        else cv_line(gx+x,gy+y,gx+a,gy+b,col);
+     }
+ }
+ static UI_DRAW void og_wave_width(int gx,int gy,int width,float (*f)(float,float),float q,uint16_t col)
