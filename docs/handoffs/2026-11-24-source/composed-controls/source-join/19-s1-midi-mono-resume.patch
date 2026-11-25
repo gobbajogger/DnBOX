@@ -1,0 +1,161 @@
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -1925,8 +1925,12 @@
+  * identity and the admitted mapping across preference changes and aliases. */
+ typedef struct { uint32_t down[4], white[4]; } s1_midi_admission_t;
+ static s1_midi_admission_t s1_midi_admission[NBASS][MIDI_NSRC];
++/* 1 + (port<<7 | raw), zero means no currently focused MIDI key. */
++static uint16_t s1_midi_focus[NBASS];
+ static void s1_midi_clear(int owner,int source)
+ {
++    if(source<0 || (s1_midi_focus[owner] &&
++       ((s1_midi_focus[owner]-1u)>>7)==(unsigned)source))s1_midi_focus[owner]=0;
+     if(source<0) memset(s1_midi_admission[owner],0,sizeof s1_midi_admission[owner]);
+     else memset(&s1_midi_admission[owner][source],0,sizeof s1_midi_admission[owner][source]);
+ }
+@@ -1935,6 +1939,37 @@
+     static const uint8_t deg[12]={0,0,1,1,2,3,3,4,4,5,5,6};
+     return 25u+7u*(raw/12u)+deg[raw%12u];
+ }
++/* Pin Manager's highest raw MIDI note rule, rather than changing the
++ * compact kernel's newest-note behavior for unrelated local/pattern keys. */
++static void s1_midi_mono_resume(int owner,unsigned off_velocity)
++{
++    original_runtime_part *p=&original_bass[owner];
++    if(p->dsp.synthone.e.t[20]<=0.f)return;             /* original ID20 isMono */
++    for(int word=3;word>=0;--word){
++        uint32_t u=s1_midi_admission[owner][0].down[word] |
++                   s1_midi_admission[owner][1].down[word] |
++                   s1_midi_admission[owner][2].down[word];
++        while(u){
++            const unsigned column=31u-(unsigned)__builtin_clz(u);
++            const uint32_t bit=UINT32_C(1)<<column;
++            const unsigned raw=(unsigned)word*32u+column;
++            u&=~bit;
++            for(unsigned port=0;port<MIDI_NSRC;port++){
++                const s1_midi_admission_t *admit=&s1_midi_admission[owner][port];
++                if(!(admit->down[word]&bit))continue;
++                const unsigned key=(admit->white[word]&bit)?s1_midi_white(raw):raw;
++                if(!p->keys[port][key])continue;        /* cancelled recorder ingress */
++                const unsigned token=1u+(port<<7)+raw;
++                if(s1_midi_focus[owner]!=token){
++                    s1_midi_focus[owner]=(uint16_t)token;
++                    original_runtime_s1_repress(p,key,off_velocity);
++                }
++                return;
++            }
++        }
++    }
++    s1_midi_focus[owner]=0;
++}
+ #endif
+ static void s_transport(void *ctx, int running)
+ {
+@@ -2346,11 +2381,13 @@
+                 if(admit) {
+                     if(velocity){
+                         admit->down[word]|=bit;
++                        s1_midi_focus[k]=(uint16_t)(1u+((unsigned)src<<7)+d1);
+                         if(mapped)admit->white[word]|=bit;
+                         else admit->white[word]&=~bit;
+                     } else if(original_bass[k].keys[src][note]<before){
+                         admit->down[word]&=~bit;
+                         admit->white[word]&=~bit;
++                        if(ty==0x80)s1_midi_mono_resume(k,d2);
+                     }
+                 }
+ #endif
+--- a/firmware/src/app/original_runtime.c
++++ b/firmware/src/app/original_runtime.c
+@@ -494,6 +494,13 @@
+         return;
+     }
+ #endif
++#if X0X_S1_KEYBOARD_HOLD
++    original_runtime_part *s1=ctx;
++    if (!velocity && s1->kind==ORIGINAL_SOUND_SYNTHONE) {
++        s1_part_key_on(&s1->dsp.synthone,(unsigned)note,0);
++        return;
++    }
++#endif
+     (void)runtime_note(ctx, (unsigned)note, (unsigned)velocity);
+ }
+ static void arp_key_off(void *ctx, int note)
+@@ -1092,6 +1099,26 @@
+ }
+ #endif
+ 
++#if X0X_S1_KEYBOARD_HOLD
++/* Manager's direct pressAdded, not another external MIDI Note On packet.
++ * Its release velocity may be zero; that is an actual silent press. The
++ * physical MIDI admission already owns the key, so reordering is not a
++ * fresh token and must not grow any input source's held counter. */
++void original_runtime_s1_repress(original_runtime_part *p,unsigned key,unsigned velocity)
++{
++    if(p->kind!=ORIGINAL_SOUND_SYNTHONE || p->status!=ORIGINAL_RUNTIME_OK)return;
++#if X0X_ARP_ENGINE
++    if(arp_engaged(p)){
++        arp_hold(p,key,1u);
++        p->arp.vel=p->arp.held[0].velocity=(uint8_t)velocity;
++        return;
++    }
++#endif
++    s1_part_key_on(&p->dsp.synthone,key,velocity);
++    if(velocity && engine_remote_bass_voice)engine_remote_bass_voice(p,key,velocity);
++}
++#endif
++
+ int original_runtime_release_source(original_runtime_part *p, unsigned source)
+ {
+     if (!p || source >= ORIGINAL_INPUT_COUNT) return 0;
+--- a/firmware/src/app/original_runtime.h
++++ b/firmware/src/app/original_runtime.h
+@@ -121,6 +121,9 @@
+ int original_runtime_sj6_key(original_runtime_part *,unsigned source,unsigned key,unsigned velocity,unsigned code);
+ #endif
+ int original_runtime_release_source(original_runtime_part *, unsigned source);
++#if X0X_S1_KEYBOARD_HOLD
++void original_runtime_s1_repress(original_runtime_part *, unsigned key, unsigned velocity);
++#endif
+ int original_runtime_cut_source(original_runtime_part *p, unsigned source);
+ int original_runtime_all_off(original_runtime_part *);
+ #if X0X_S1C
+--- a/firmware/src/app/s1c_part.c
++++ b/firmware/src/app/s1c_part.c
+@@ -543,13 +543,21 @@
+     return 1;
+ }
+ 
++#if !X0X_S1_KEYBOARD_HOLD
++static
++#endif
++void s1_part_key_on(s1_dry_part *part,unsigned key,unsigned velocity)
++{
++    for (unsigned i=0;i<S1C_VOICES;++i)
++        if(part->e.v[i].root==(int)key)part->held&=(uint8_t)~(1u<<i);
++    s1c_start(&part->e,(int)key,(int)velocity);
++}
++
+ int s1_part_note(s1_dry_part *part, unsigned key, unsigned velocity)
+ {
+     if (key > 127 || velocity > 127) return 0;
+     if (velocity) {
+-        for (unsigned i = 0; i < S1C_VOICES; ++i)
+-            if (part->e.v[i].root == (int)key) part->held &= (uint8_t)~(1u << i);
+-        s1c_start(&part->e, (int)key, (int)velocity);
++        s1_part_key_on(part,key,velocity);
+         return 1;
+     }
+     if (part->damper) {
+--- a/firmware/src/app/s1c_part.h
++++ b/firmware/src/app/s1c_part.h
+@@ -78,6 +78,9 @@
+ #endif
+ void s1_part_mod_wheel(s1_dry_part *part, unsigned cc1);
+ int s1_part_note(s1_dry_part *part, unsigned key, unsigned velocity);
++#if X0X_S1_KEYBOARD_HOLD
++void s1_part_key_on(s1_dry_part *, unsigned key, unsigned velocity);
++#endif
+ #if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
+ int s1_part_bend_ranges(s1_dry_part *, float min_st, float max_st);
+ #endif

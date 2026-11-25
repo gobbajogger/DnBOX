@@ -1,0 +1,22 @@
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -1,6 +1,9 @@
+ /* SPDX-License-Identifier: GPL-3.0-only */
+ /* X0X audio engine; see engine.h. */
+ #include "engine.h"
++#if X0X_S1_KEYBOARD_HOLD
++#include "x0x.h"                    /* original Synth One input settings */
++#endif
+ #include "ui_perf_profile.h"
+ #include <string.h>
+ #include "unit_control.h"
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -657,6 +657,7 @@
+ enum { R_S1SCALE=R_NOTELOCK+58, R_S1MICROKEYS=R_NOTELOCK+65 };
+ extern int s1_typed_scale_choose(unsigned,unsigned,int);
+ extern const char *s1c_scale_name(unsigned);
++extern unsigned s1c_scale_npo(unsigned);
+ #endif
+ #endif
+ #if X0X_SJ6_NATIVE_ROOM

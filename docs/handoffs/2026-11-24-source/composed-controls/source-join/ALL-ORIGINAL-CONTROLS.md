@@ -1,4 +1,4 @@
-# DnBOX all-controls source join (OPEN)
+# DnBOX all-controls source join (WIRED; build pending)
 
 **One combined revision, not incremental fit probes.** The owner's current
 order is: finish source wiring for every authentic playable control in both
@@ -18,12 +18,12 @@ separate in the Init-only controls build.
 | Parallel group | Source evidence / landed into the donor | Status |
 |---|---|---|
 | Synth One direct DSP, all panels | `recovery/s1-controls-index/PINNED-SYNTH-ONE.md`; independent SEQ and authentic DelFRes, White Keys v2 | Direct panel index written; performance separate below |
-| Synth One original keyboard/MIDI/performance | White Keys v2 and external velocity and source-authentic HOLD re-strike patches applied; exact external bend and physical microtonal key cycle wired; external White Keys note identity work continues | OPEN |
+| Synth One original keyboard/MIDI/performance | White Keys v2 and external velocity and source-authentic HOLD re-strike patches applied; exact external bend and physical microtonal key cycle wired; external White Keys raw identity and original Mono resume wired | Source wired |
 | SuperJ6 main filter/drive/direct controls | Original picker/Distortion outlets proven dormant; true Main/OTA receiver, sustain coupling and real LFO cutoffs wired; original FX/front panel closure source report remains | Source wired |
 | SuperJ6 original arp/step sequencer | Real step pattern, gate, destination, originally distinct arp and seq; live edit phase/history, held note velocity restoration and selective in-flight layer retirement wired | Source wired |
 | SuperJ6 oscillator/wave/PWM, envelopes/Unison | `recovery/sj6-front-audit/OSC-ENV-SOURCE-INDEX.md`; exact original filter ADSR and OTA dependencies wired | Source wired |
 | SuperJ6 MIDI velocity settings | `recovery/sj6-velocity-control/EVIDENCE.md`; actual fixed 87 and original MIDI velocity transfer wired | Source wired |
-| SuperJ6 remaining root group (wheels, tuning, integration and existing FX reconciliation) | Actual PB/MW hardware route, independent +-48 ranges, original USB normalization and cutoff OTA receiver; Vintage 123 in combined source, A-reference present. Reused the same AudioKit non-12ET ratios and existing validated Scala import carrier at actual new SJ6 note onset, with physical SCALE; source staged. Original iOS editor presentation separate; direct LFO panels source audit/implementation runs independently. | Source wired; LFO open |
+| SuperJ6 remaining root group (wheels, tuning, integration and existing FX reconciliation) | Actual PB/MW hardware route, independent +-48 ranges, original USB normalization and cutoff OTA receiver; Vintage 123 in combined source, A-reference present. Reused the same AudioKit non-12ET ratios and existing validated Scala import carrier at actual new SJ6 note onset, with physical SCALE; source staged. Original iOS editor presentation separate; direct LFO originals mapped in `recovery/sj6-lfo-direct/HANDOFF.md`, actual LFO1 depth last-writer wired. | Source wired |
 
 Known scope: one amp→filter LINK, no silent stand-in controls, physical PB/MW,
 presets temporarily excluded (do not remove the original input mechanisms),
