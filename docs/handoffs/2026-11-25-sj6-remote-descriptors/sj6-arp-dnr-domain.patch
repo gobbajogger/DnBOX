@@ -1,0 +1,11 @@
+--- a/firmware/src/app/remote_sj6_panel.inc
++++ b/firmware/src/app/remote_sj6_panel.inc
+@@ -226,7 +226,7 @@
+     if (field!=ARP_NF) {
+         engine_arp_settings settings;
+         int physical;
+-        *dp=arp_desc(field,voice);
++        *dp=arp_desc(voice,field);
+         if (!*dp || !engine_arp_settings_read(voice,&settings)) return -1;
+         old=arp_get(voice,field);
+         if (!set || old==v) return old;
