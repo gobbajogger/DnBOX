@@ -1,0 +1,46 @@
+--- a/firmware/src/dsp/s1c/s1c.c
++++ b/firmware/src/dsp/s1c/s1c.c
+@@ -93,7 +93,13 @@
+ #define P(i) (s->c[i])
+ #endif
+ static float clampf(float x, float a, float b) { return x < a ? a : x > b ? b : x; }
+-static float note_hz(int n) { n = n < 0 ? 0 : n > 127 ? 127 : n; return 440.0f * exp2f((n - 69) / 12.0f); }
++static float note_hz(const s1c *s, int n)
++{
++    n = n < 0 ? 0 : n > 127 ? 127 : n;
++    float ref = s->t[A4];
++    if (!(ref >= 410.f && ref <= 470.f)) ref = 440.f;
++    return ref * exp2f((n - 69) / 12.0f);
++}
+ static float lfo01(const s1c *s, float sel)
+ {
+     int k = (int)sel;
+@@ -147,7 +153,7 @@
+ /* ---- note handling (6-voice poly with the instrument's stealing order, or one mono voice) ---- */
+ static void key_on(s1c *s, int note, int vel)
+ {
+-    float hz = note_hz(note + (int)s->t[TRANS]);
++    float hz = note_hz(s, note + (int)s->t[TRANS]);
+     if (s->t[MONO] > 0.0f) {
+         s1c_voice *v = &s->v[0];
+         s->monof = hz;
+@@ -176,7 +182,7 @@
+             s1c_voice *v = &s->v[0];
+             int h = s->held[0][0], vel = s->held[0][1];
+             v->root = (int8_t)h; v->vamp = (vel / 127.0f) * (vel / 127.0f);
+-            s->monof = v->freq = note_hz(h + (int)s->t[TRANS]);
++            s->monof = v->freq = note_hz(s, h + (int)s->t[TRANS]);
+             if (s->t[LEGATO] == 0.0f) voice_release(s, v, 1);
+             v->stage = 1; v->gate = 1.0f;
+         }
+--- a/firmware/src/dsp/s1c/s1c_front.c
++++ b/firmware/src/dsp/s1c/s1c_front.c
+@@ -132,7 +132,7 @@
+     } else if (id == F_L1R || id == F_L2R || id == F_PANF || id == F_DLT || id == F_PB || id == F_TMULT)
+         rate(s, id, x);
+     else if (id == F_A4)
+-        put(s, id, (float)(int)x);
++        s1c_set(s, id, (float)(int)s1c_front_clamp(id, x));
+     else
+         put(s, id, x);
+     return 1;
