@@ -1,0 +1,33 @@
+--- a/experiments/original_synth/chicago_program.c
++++ b/experiments/original_synth/chicago_program.c
+@@ -70,7 +70,7 @@
+ #ifdef ORIGINAL_CHICAGO_EXPANDED_FACTORY
+  return original_chicago_factory_name[factory];
+ #else
+- return original_chicago_factory_names+original_chicago_factory_name_offset[factory];
++ const char *name=original_chicago_factory_names; while(factory--) while(*name++) {} return name;
+ #endif
+ }
+ int original_chicago_program_routing(const original_chicago_program *p,original_chicago_routing *out){
+--- a/experiments/original_synth/program_values_compact.h
++++ b/experiments/original_synth/program_values_compact.h
+@@ -76,10 +76,6 @@
+  207,208,49,49,49,49,49,209,53,210,211,212,213,49,0,49,
+  214,14,14,14,14,0,14,14,14,49,14,14,14,
+ };
+-static const uint16_t compact_miami_name_offsets[30]={
+- 0,10,25,35,40,53,66,76,90,100,113,128,140,150,162,174,
+- 185,196,208,217,227,239,248,262,274,285,298,308,321,328,
+-};
+ static const char compact_miami_names[339]={
+  49,54,116,104,32,67,117,116,122,0,65,108,105,97,115,32,
+  84,114,105,32,66,97,115,115,0,66,97,115,101,32,83,104,
+@@ -106,7 +102,7 @@
+ };
+ static inline float compact_miami_factory_value(unsigned f,unsigned p){return p<16u?compact_program_value(compact_miami_factory_codes[f*16u+p]):p==16u?0.5f:0.0f;}
+ static inline float compact_miami_base_value(unsigned i){return compact_program_value(compact_miami_base_codes[i]);}
+-static inline const char *compact_miami_factory_name(unsigned f){return compact_miami_names+compact_miami_name_offsets[f];}
++static inline const char *compact_miami_factory_name(unsigned f){const char *name=compact_miami_names; while(f--) while(*name++) {} return name;}
+ #endif
+ #ifdef ORIGINAL_PROGRAM_VALUES_CHICAGO
+ static const uint8_t compact_chicago_base_codes[117]={

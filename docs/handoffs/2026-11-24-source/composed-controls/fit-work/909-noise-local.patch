@@ -1,0 +1,14 @@
+--- a/firmware/src/dsp/drum909.c
++++ b/firmware/src/dsp/drum909.c
+@@ -1122,8 +1122,10 @@
+     }
+     float *const nz = d->nz_buf + d->nz_pos;
+     d->nz_pos += n;
++    uint32_t state=d->noise;
+     for (int i = 0; i < n; ++i)
+-        nz[i] = d9_noise(&d->noise);
++        nz[i] = d9_noise(&state);
++    d->noise=state;
+     return nz;
+ }
+ 

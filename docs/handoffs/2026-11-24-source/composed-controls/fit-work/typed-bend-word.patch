@@ -1,0 +1,20 @@
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -2455,9 +2455,14 @@
+                     value = (float)bend * (1.0f / 16384.0f);
+                 else
+ #endif
+-                /* Pinned Synth One Manager+MIDIListener normalizes the raw
+-                 * word over 0...16383. Physical PB uses its separate center. */
+-                if (original_bass[k].kind == ORIGINAL_SOUND_SYNTHONE)
++                /* The stock Synth One uses /16383. The configurable signed
++                 * bend receiver consumes the exact raw word via its existing
++                 * centered carrier, not a second quantization of /16383. */
++                if (original_bass[k].kind == ORIGINAL_SOUND_SYNTHONE
++#if X0X_S1_BEND_RANGE_PROBE
++                    && !original_bass[k].dsp.synthone.bend_typed
++#endif
++                   )
+                     value = (float)bend * (1.0f / 16383.0f);
+                 else
+                     value = bend < 8192 ? (float)bend / 16384.0f :

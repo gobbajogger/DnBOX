@@ -1,0 +1,13 @@
+{
+  "data_initial_bytes": 186893,
+  "data_initial_sector_bytes": 188416,
+  "data_initial_sector_count": 46,
+  "with_ab_directory_bytes": 196608,
+  "update_append_bytes": 20350,
+  "transient_data_sector_bytes": 208896,
+  "verified_presets": 1546,
+  "torn_directory_cases": 4097,
+  "shipping": false,
+  "reclaim_note": "GC and bounded target decoder not implemented"
+}
+{"codec": "lzma", "minimum": 2, "checked_replace_and_remove": true, "shared_bytes": 24682, "bank_bytes": 162176, "bank_sectors": 52, "shared_sectors": 7}
