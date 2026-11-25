@@ -1,0 +1,344 @@
+{
+  "elite": {
+    "shots": {
+      "early": {
+        "control": {
+          "owner": {
+            "slot": 1,
+            "bank": 3,
+            "preset": 0,
+            "settled": 1,
+            "owner_generation": 3
+          },
+          "clock": 0,
+          "variant": "early",
+          "positiveNote": 60,
+          "bpm": [
+            120
+          ],
+          "values": [
+            1,
+            45,
+            63,
+            127,
+            1
+          ],
+          "clockSourceConstant": true
+        },
+        "ring": {
+          "current": 689.0625,
+          "fb": 0.4911023676395416,
+          "wet": 0.8999999761581421,
+          "inv_stride": 0.0625,
+          "stride": 16,
+          "filled": 1024,
+          "mix": 127,
+          "refused": 0,
+          "sync": 1,
+          "enabled": 1,
+          "settled_tap_audio_frames": 11025.0,
+          "ring_sha256": "e88c37282648d32cf0b48a7c6ad652c2385b42bfc8cc5eb9a157a8b2ee8a7fba",
+          "nonzero_history_words": 1580,
+          "peak_abs_in_ring": 1120
+        },
+        "timing": {
+          "halves": 183,
+          "worst_us": 6507,
+          "raw_late": 0,
+          "xruns": 0,
+          "pcm_peak": 5331,
+          "frames": 93696
+        }
+      },
+      "wet": {
+        "control": {
+          "owner": {
+            "slot": 1,
+            "bank": 3,
+            "preset": 0,
+            "settled": 1,
+            "owner_generation": 3
+          },
+          "clock": 0,
+          "variant": "wet",
+          "positiveNote": 60,
+          "bpm": [
+            120,
+            125
+          ],
+          "values": [
+            1,
+            45,
+            63,
+            127,
+            1
+          ],
+          "clockSourceConstant": true
+        },
+        "ring": {
+          "current": 661.5,
+          "fb": 0.4911023676395416,
+          "wet": 0.8999999761581421,
+          "inv_stride": 0.0625,
+          "stride": 16,
+          "filled": 1024,
+          "mix": 127,
+          "refused": 0,
+          "sync": 1,
+          "enabled": 1,
+          "settled_tap_audio_frames": 10584.0,
+          "ring_sha256": "79d059a58d69d1673db62d0a24561eb49fbcff32fbbb12b58f9407bbb7e9850e",
+          "nonzero_history_words": 1374,
+          "peak_abs_in_ring": 42
+        },
+        "timing": {
+          "halves": 270,
+          "worst_us": 6507,
+          "raw_late": 0,
+          "xruns": 0,
+          "pcm_peak": 5331,
+          "frames": 138240
+        }
+      },
+      "dry": {
+        "control": {
+          "owner": {
+            "slot": 1,
+            "bank": 3,
+            "preset": 0,
+            "settled": 1,
+            "owner_generation": 3
+          },
+          "clock": 0,
+          "variant": "dry",
+          "positiveNote": 60,
+          "bpm": [
+            120,
+            125
+          ],
+          "values": [
+            1,
+            45,
+            63,
+            127,
+            0
+          ],
+          "clockSourceConstant": true
+        },
+        "ring": {
+          "current": 661.5,
+          "fb": 0.4911023676395416,
+          "wet": 0.0,
+          "inv_stride": 0.0625,
+          "stride": 16,
+          "filled": 1024,
+          "mix": 0,
+          "refused": 0,
+          "sync": 1,
+          "enabled": 0,
+          "settled_tap_audio_frames": 10584.0,
+          "ring_sha256": "79d059a58d69d1673db62d0a24561eb49fbcff32fbbb12b58f9407bbb7e9850e",
+          "nonzero_history_words": 1374,
+          "peak_abs_in_ring": 42
+        },
+        "timing": {
+          "halves": 270,
+          "worst_us": 6472,
+          "raw_late": 0,
+          "xruns": 0,
+          "pcm_peak": 5331,
+          "frames": 138240
+        }
+      }
+    },
+    "pcm_10ms_windows": [
+      {
+        "peak_bin_from_dry_onset": 26,
+        "wet_peak": 548,
+        "dry_peak": 5
+      },
+      {
+        "peak_bin_from_dry_onset": 50,
+        "wet_peak": 225,
+        "dry_peak": 0
+      },
+      {
+        "peak_bin_from_dry_onset": 74,
+        "wet_peak": 102,
+        "dry_peak": 0
+      }
+    ],
+    "one_dry_onset_bin": 185
+  },
+  "pro": {
+    "shots": {
+      "early": {
+        "control": {
+          "owner": {
+            "slot": 1,
+            "bank": 3,
+            "preset": 0,
+            "settled": 1,
+            "owner_generation": 3
+          },
+          "clock": 0,
+          "variant": "early",
+          "positiveNote": 60,
+          "bpm": [
+            120
+          ],
+          "values": [
+            1,
+            45,
+            63,
+            127,
+            1
+          ],
+          "clockSourceConstant": true
+        },
+        "ring": {
+          "current": 689.0625,
+          "fb": 0.4911023676395416,
+          "wet": 0.8999999761581421,
+          "inv_stride": 0.0625,
+          "stride": 16,
+          "filled": 1024,
+          "mix": 127,
+          "refused": 0,
+          "sync": 1,
+          "enabled": 1,
+          "settled_tap_audio_frames": 11025.0,
+          "ring_sha256": "e88c37282648d32cf0b48a7c6ad652c2385b42bfc8cc5eb9a157a8b2ee8a7fba",
+          "nonzero_history_words": 1580,
+          "peak_abs_in_ring": 1120
+        },
+        "timing": {
+          "halves": 183,
+          "worst_us": 6471,
+          "raw_late": 0,
+          "xruns": 0,
+          "pcm_peak": 5331,
+          "frames": 93696
+        }
+      },
+      "wet": {
+        "control": {
+          "owner": {
+            "slot": 1,
+            "bank": 3,
+            "preset": 0,
+            "settled": 1,
+            "owner_generation": 3
+          },
+          "clock": 0,
+          "variant": "wet",
+          "positiveNote": 60,
+          "bpm": [
+            120,
+            125
+          ],
+          "values": [
+            1,
+            45,
+            63,
+            127,
+            1
+          ],
+          "clockSourceConstant": true
+        },
+        "ring": {
+          "current": 661.5,
+          "fb": 0.4911023676395416,
+          "wet": 0.8999999761581421,
+          "inv_stride": 0.0625,
+          "stride": 16,
+          "filled": 1024,
+          "mix": 127,
+          "refused": 0,
+          "sync": 1,
+          "enabled": 1,
+          "settled_tap_audio_frames": 10584.0,
+          "ring_sha256": "79d059a58d69d1673db62d0a24561eb49fbcff32fbbb12b58f9407bbb7e9850e",
+          "nonzero_history_words": 1374,
+          "peak_abs_in_ring": 42
+        },
+        "timing": {
+          "halves": 270,
+          "worst_us": 6471,
+          "raw_late": 0,
+          "xruns": 0,
+          "pcm_peak": 5331,
+          "frames": 138240
+        }
+      },
+      "dry": {
+        "control": {
+          "owner": {
+            "slot": 1,
+            "bank": 3,
+            "preset": 0,
+            "settled": 1,
+            "owner_generation": 3
+          },
+          "clock": 0,
+          "variant": "dry",
+          "positiveNote": 60,
+          "bpm": [
+            120,
+            125
+          ],
+          "values": [
+            1,
+            45,
+            63,
+            127,
+            0
+          ],
+          "clockSourceConstant": true
+        },
+        "ring": {
+          "current": 661.5,
+          "fb": 0.4911023676395416,
+          "wet": 0.0,
+          "inv_stride": 0.0625,
+          "stride": 16,
+          "filled": 1024,
+          "mix": 0,
+          "refused": 0,
+          "sync": 1,
+          "enabled": 0,
+          "settled_tap_audio_frames": 10584.0,
+          "ring_sha256": "79d059a58d69d1673db62d0a24561eb49fbcff32fbbb12b58f9407bbb7e9850e",
+          "nonzero_history_words": 1374,
+          "peak_abs_in_ring": 42
+        },
+        "timing": {
+          "halves": 270,
+          "worst_us": 6472,
+          "raw_late": 0,
+          "xruns": 0,
+          "pcm_peak": 5331,
+          "frames": 138240
+        }
+      }
+    },
+    "pcm_10ms_windows": [
+      {
+        "peak_bin_from_dry_onset": 26,
+        "wet_peak": 548,
+        "dry_peak": 5
+      },
+      {
+        "peak_bin_from_dry_onset": 50,
+        "wet_peak": 225,
+        "dry_peak": 0
+      },
+      {
+        "peak_bin_from_dry_onset": 74,
+        "wet_peak": 102,
+        "dry_peak": 0
+      }
+    ],
+    "one_dry_onset_bin": 185
+  }
+}
