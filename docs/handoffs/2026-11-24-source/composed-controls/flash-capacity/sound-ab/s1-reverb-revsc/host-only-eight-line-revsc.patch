@@ -1,0 +1,107 @@
+--- a/firmware/src/dsp/s1c/s1c.c
++++ b/firmware/src/dsp/s1c/s1c.c
+@@ -1090,13 +1090,18 @@
+ #define ENV_GET(q, i) s->env[q][i]
+ #endif
+ 
++#include "revsc-proto.inc"
+ void s1c_render(s1c *s, float *outl, float *outr, unsigned n)
+ {
+     unsigned f, i;
+ #if X0X_S1_DELAY_HISTORY_NATIVE
+     /* Existing boot/inactive paths may render before FX is attached. The
+      * real fixed-arena device binds before audio; keep a dry fallback. */
+-    if(s->pool && s->pool_bytes>=60){
++    if(s->pool && !s->ddec && s->t[DLON]==0.f && s->t[RVON]!=0.f && s->pool_bytes>=2152){
++        memset(s->rv.m,0,S1C_ARENA_BYTES);
++        s->ddec=-1; /* host-only exclusive ownership: no live mode edits */
++    }
++    if(s->pool && s->pool_bytes>=60 && s->ddec>=0){
+         if(!s->ddec)dly_partition(s);
+         else dly_regrid(s);
+     }
+@@ -1405,6 +1410,16 @@
+         float wl, wr;
+ #if S1C_RVB
+ #if S1C_RVB_DEC > 1
++        if(s->ddec<0){
++            s->ra[0]+=hl;s->ra[1]+=hr;
++            if(++s->rk>=6){
++                s->rk=0;s->r0[0]=s->r1[0];s->r0[1]=s->r1[1];
++                rv8(s,s->ra[0]*(1.f/6.f),s->ra[1]*(1.f/6.f),&s->r1[0],&s->r1[1]);
++                s->ra[0]=s->ra[1]=0.f;
++            }
++            float u=(float)s->rk*(1.f/6.f);
++            wl=rv8_antimage(s,0,s->r0[0]+(s->r1[0]-s->r0[0])*u);wr=rv8_antimage(s,1,s->r0[1]+(s->r1[1]-s->r0[1])*u);
++        }else{
+         s->ra[0] += hl; s->ra[1] += hr;
+         if (++s->rk >= S1C_RVB_DEC) {
+             s->rk = 0; s->r0[0] = s->r1[0]; s->r0[1] = s->r1[1];
+@@ -1413,6 +1428,7 @@
+         }
+         { float u = (float)s->rk * (1.0f / S1C_RVB_DEC);
+           wl = s->r0[0] + (s->r1[0] - s->r0[0]) * u; wr = s->r0[1] + (s->r1[1] - s->r0[1]) * u; }
++        }
+ #else
+         rvb_compact(s, hl, hr, &wl, &wr);
+ #endif
+--- a/firmware/src/dsp/s1c/revsc-proto.inc
++++ b/firmware/src/dsp/s1c/revsc-proto.inc
+@@ -0,0 +1,57 @@
++/* Host experiment only. This owner overlays dormant delay bytes; live
++ * delay re-enabling is deliberately not admitted by this prototype. */
++#ifndef X0X_HOST
++#error Prototype only: needs runtime delay ownership transition proof
++#endif
++typedef struct {
++    float y[8], interp[2][4];
++    uint16_t w[8];
++    float last_fb;
++    int8_t samples[4156];
++} rv8_owner;
++_Static_assert(sizeof(rv8_owner)<=S1C_ARENA_BYTES,"dormant arena only");
++static const uint16_t rv8_lengths[8]={412,461,536,593,651,688,357,322};
++static uint8_t rv8_encode(float x)
++{
++    union{float f;uint32_t u;}b={x};
++    const unsigned e=(b.u>>23)&255u;
++    if(e<115)return 0;
++    if(e>=130)return (uint8_t)(b.u>>24&128u)|127u;
++    unsigned q=((b.u&0x7fffffu)+0x80000u)>>20;
++    unsigned z=(e-115u)*8u+q+1u;
++    return (uint8_t)((b.u>>24&128u)|(z>127u?127u:z));
++}
++static float rv8_decode(uint8_t h)
++{
++    unsigned z=h&127u;
++    if(!z)return 0.f;
++    union{float f;uint32_t u;}b;
++    b.u=((uint32_t)(h&128u)<<24)|((115u+((z-1u)>>3))<<23)|(((z-1u)&7u)<<20);
++    return b.f;
++}
++static void rv8(s1c *s,float il,float ir,float *ol,float *orr)
++{
++    rv8_owner *q=(void *)s->rv.m;
++    float pressure=0, l=0, r=0;
++    for(unsigned i=0;i<8;++i)pressure+=q->y[i];
++    pressure*=.25f;
++    unsigned at=0;
++    for(unsigned i=0;i<8;++i){
++        unsigned w=q->w[i]; float x=rv8_decode((uint8_t)q->samples[at+w]);
++        q->samples[at+w]=(int8_t)rv8_encode(pressure+((i&1)?ir:il)-q->y[i]);
++        /* Authentic original RevSC feedback and Nyquist damping law. */
++        const float fb=s->t[RVFB], taper=fb<.5f?fb*2.f:1.f; x*=(fb+.25f*(1.f-fb)*taper);x+=.171572875f*(q->y[i]-x);q->y[i]=x;
++        if(i&1)r+=x;else l+=x;
++        q->w[i]=(uint16_t)(w+1u==rv8_lengths[i]?0:w+1u);at+=rv8_lengths[i];
++    }
++    *ol=.35f*l;*orr=.35f*r;
++}
++
++/* Four cheap one-poles suppress reconstructed multirate images, not dry. */
++static float rv8_antimage(s1c *s, unsigned channel,float input)
++{
++    rv8_owner *q=(void *)s->rv.m;
++    float *z=q->interp[channel];
++    for(unsigned i=0;i<4;++i){z[i]+=.42f*(input-z[i]);input=z[i];}
++    return input;
++}
