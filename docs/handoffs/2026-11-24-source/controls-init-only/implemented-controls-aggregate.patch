@@ -1,0 +1,2568 @@
+--- a/firmware/src/app/bass_pattern_preset.h
++++ b/firmware/src/app/bass_pattern_preset.h
+@@ -18,7 +18,7 @@
+ static inline unsigned bass_pattern_preset_encode(unsigned kind, unsigned one_based)
+ {
+     if (!one_based) return 0u;
+-    if (one_based > original_sound_factories(kind)) return 0u;
++    if (one_based > original_sound_available_factories(kind)) return 0u;
+     if (kind == ORIGINAL_SOUND_JUNO) return 0xE0u | one_based;
+     if (kind == ORIGINAL_SOUND_SYNTHONE) return one_based == 1u ? 0xC1u : 0u;
+     if (kind == ORIGINAL_SOUND_CHICAGO || kind == ORIGINAL_SOUND_MIAMI)
+@@ -40,6 +40,11 @@
+     unsigned p = juno ? code & 0x1Fu : code & 0x7Fu;
+     if (k == ORIGINAL_SOUND_SYNTHONE) return 0;
+     if (!p || p > original_sound_factories(k)) return 0;
+-    *kind = k; *one_based = p;
++    *kind = k;
++#if X0X_SYNTH_CONTROLS_INIT_ONLY
++    *one_based = juno ? 1u : p;   /* old bytes stay valid, play Init in this profile */
++#else
++    *one_based = p;
++#endif
+     return 1;
+ }
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -1057,7 +1057,13 @@
+ static int16_t mod_ctl[NBASS] = {-1, -1};
+ static volatile uint8_t ext_touch[NBASS];           /* ISR -> UI: bit0 bend, bit1 mod moved by ext MIDI */
+ static int mod_param(int v)
+-{ return original_bass[v].kind == ORIGINAL_SOUND_JUNO ? 2 : original_bass[v].kind == ORIGINAL_SOUND_SYNTHONE ? -1 :
++{
++#if X0X_SUPERJ6_BUILTIN_INIT
++    /* Actual Build 9 default is a transient LFO1 rate receiver. It is
++     * not an old Chicago/Miami-style macro or a persistent REC lane. */
++    if (original_bass[v].kind == ORIGINAL_SOUND_JUNO) return -1;
++#endif
++    return original_bass[v].kind == ORIGINAL_SOUND_JUNO ? 2 : original_bass[v].kind == ORIGINAL_SOUND_SYNTHONE ? -1 :
+     original_bass[v].kind == ORIGINAL_SOUND_MIAMI ? ORIGINAL_MIAMI_WOBBLE_DEPTH : ORIGINAL_CHICAGO_CUTOFF; }
+ static float mix_level_from_pot(int v)
+ {
+@@ -1073,6 +1079,13 @@
+         if (v < 0 || v >= NBASS)
+             break;
+         if (original_sound_is_performance(original_bass[v].kind, (unsigned)i)) { perf_apply(v, i, val, 1); break; }
++#if X0X_SUPERJ6_BUILTIN_INIT
++        if (i == ORIGINAL_SJ6_HPF_PANEL && original_bass[v].kind == ORIGINAL_SOUND_JUNO &&
++            mot_base_snd && original_sound_sj6_hpf_authored(mot_base_snd->v[T_303][v])) {
++            if ((unsigned)val <= 127u) juno6_set_sj6_hpf(&original_bass[v].dsp.juno.synth, unit_control((unsigned)val));
++            break;
++        }
++#endif
+         if (i == mod_param(v)) {
+             mod_ctl[v] = -1;
+ #ifdef X0X_HOST
+@@ -1117,6 +1130,13 @@
+             perf_apply(v, i, (unsigned)i == original_sound_bend_id(original_bass[v].kind) ? 64 : 0, 1);
+             return;
+         }
++#if X0X_SUPERJ6_BUILTIN_INIT
++        if (i == ORIGINAL_SJ6_HPF_PANEL && original_bass[v].kind == ORIGINAL_SOUND_JUNO &&
++            original_sound_sj6_hpf_authored(mot_base_snd->v[t][v])) {
++            juno6_set_sj6_hpf(&original_bass[v].dsp.juno.synth, unit_control(mot_base_snd->v[t][v][i] & 127u));
++            return;
++        }
++#endif
+         if (original_sound_value(mot_base_snd->v[t][v], (unsigned)i, &value))
+             (void)original_runtime_param(&original_bass[v], (unsigned)i, value);
+         return;
+@@ -1646,8 +1666,23 @@
+ static void mod_apply(int v, int val)              /* ISR */
+ {
+     if ((unsigned)v >= NBASS) return;
++    val = val < 0 ? 0 : val > 127 ? 127 : val;
++#if X0X_S1C
++    if (original_bass[v].kind == ORIGINAL_SOUND_SYNTHONE) {
++        if (original_panel_ready(&original_bass[v], ORIGINAL_SOUND_SYNTHONE))
++            s1_part_mod_wheel(&original_bass[v].dsp.synthone, (unsigned)val);
++        return;
++    }
++#endif
++#if X0X_SUPERJ6_BUILTIN_INIT
++    if (original_bass[v].kind == ORIGINAL_SOUND_JUNO) {
++        if (original_panel_ready(&original_bass[v], ORIGINAL_SOUND_JUNO) &&
++            juno6_set_mod_wheel(&original_bass[v].dsp.juno.synth, (unsigned)val))
++            mod_ctl[v] = (int16_t)val;
++        return;
++    }
++#endif
+     if (mod_param(v) < 0) return;
+-    val = val < 0 ? 0 : val > 127 ? 127 : val;
+     apply_param(T_303, v, mod_param(v), val);      /* the knob's own path */
+     mod_ctl[v] = (int16_t)val;                     /* after: apply_param from a knob clears it */
+ }
+@@ -2221,14 +2256,23 @@
+                 if (held) src_held[src] |= (uint16_t)(1u << k);
+                 else src_held[src] &= (uint16_t)~(1u << k);
+             } else if (ty == 0xb0 && d1 == 1) {
+-                PARAM_TRACE(PARAM_MIDI, T_303, k, mod_param(k), d2);
+-                mod_apply(k, d2);                      /* mod wheel CC1: cutoff / wobble depth */
+-                ext_touch[k] |= 2u;
++                int param = mod_param(k);
++                if (param >= 0)
++                    PARAM_TRACE(PARAM_MIDI, T_303, k, param, d2);
++                mod_apply(k, d2);                      /* same receiver as the physical wheel */
++                if (param >= 0) ext_touch[k] |= 2u;
+             } else if (ty == 0xb0 && d1 == 64) {
+                 /* damper: sustain pedal CC64 (no wheel mapping) */
+                 PARAM_TRACE(PARAM_MIDI, T_303, k,
+                             (int)original_sound_bend_id(original_bass[k].kind) + 1, d2);
+-                perf_apply(k, (int)original_sound_bend_id(original_bass[k].kind) + 1, d2, 1);
++                int pedal = d2;
++                if (original_bass[k].kind == ORIGINAL_SOUND_SYNTHONE) {
++                    /* AudioKit Synth One's MIDI listener uses a down latch:
++                     * a nonzero packet engages from up; any packet releases
++                     * when already down. Keep the original packet in tracing. */
++                    pedal = d2 && !perf_ctl[k][1] ? 127 : 0;
++                }
++                perf_apply(k, (int)original_sound_bend_id(original_bass[k].kind) + 1, pedal, 1);
+             } else if (ty == 0xe0) {
+                 unsigned bend = (unsigned)d1 | (unsigned)d2 << 7;
+                 float value = bend < 8192 ? (float)bend / 16384.0f : 0.5f + (float)(bend - 8192) / 16382.0f;
+--- a/firmware/src/app/main_fm1.c
++++ b/firmware/src/app/main_fm1.c
+@@ -960,11 +960,21 @@
+     }
+ }
+ 
++static int smk_pitch_parameter(int v)
++{
++#if X0X_BASS_PRESET_PREVIEW
++    const unsigned bank = (unsigned)engine_bass_bank(v);
++    if (bank <= ORIGINAL_SOUND_JUNO)
++        return (int)original_sound_bend_id(bank);
++#endif
++    return engine_bass_is_wobble(v) ? ORIGINAL_MIAMI_PITCH_BEND : ORIGINAL_CHICAGO_PITCH_BEND;
++}
++
+ /* The wheels (mux C address 4 = pitch, 5 = mod), self-calibrating as in the reference port: the pitch wheel's
+  * rest is its centre (taken at power-on, followed slowly while it rests), each wheel's range grows to what it
+  * has reached. On a 303 (the part on screen) they play its sound without changing what is saved.
+- * Pitch wheel = the selected engine's bend (Chicago CHI_PBEND / Miami W_PITCH_BEND).
+- * Both span ±2 semitones; release restores that engine's own saved bend, never TUNE.
++ * Pitch wheel = the selected engine's bend, with its existing receiver range.
++ * Release restores that engine's own saved bend, never TUNE.
+  * With REC on and playing, a pitch-wheel move records the bend motion lane.
+  * Mod wheel = Chicago cutoff on native303; Miami/WBL1 wobble depth on a live WBL1 voice.
+  * Chicago: replaces the cutoff knob (BASS303_CUTOFF before master). Down closes (0); up opens (127).
+@@ -1051,8 +1061,7 @@
+             engine_brk_bend(bend < 0 ? bend * 8192 / 63 : bend * 8191 / 63);
+             if (!bend) bend_part = -1;
+         } else if (bend_part >= 0) {
+-            int param = engine_bass_is_wobble(bend_part) ?
+-                ORIGINAL_MIAMI_PITCH_BEND : ORIGINAL_CHICAGO_PITCH_BEND;
++            int param = smk_pitch_parameter(bend_part);
+             PARAM_TRACE(PARAM_WHEEL_PITCH, T_303, bend_part, param,
+                         bend ? ((bend + 63) * 127 + 63) / 126 : 64);
+             if (bend)
+@@ -1071,10 +1080,11 @@
+         if (cut_part >= 0) {
+             /* mw 0 is down (closed / min depth). mw 127 is up (open / max depth). */
+             want = mw;
+-            PARAM_TRACE(PARAM_WHEEL_MOD, T_303, cut_part,
+-                        engine_bass_mod_param(cut_part), (int)want);
++            int param = engine_bass_mod_param(cut_part);
++            if (param >= 0)
++                PARAM_TRACE(PARAM_WHEEL_MOD, T_303, cut_part, param, (int)want);
+             engine_bass_mod(cut_part, (int)want);
+-            motion_touch(PR(R_ENG, T_303, cut_part, engine_bass_mod_param(cut_part)));
++            if (param >= 0) motion_touch(PR(R_ENG, T_303, cut_part, param));
+             if (!mw)
+                 cut_part = -1;
+         }
+@@ -1083,9 +1093,11 @@
+     /* External MIDI bend / CC1 on a part's channel record like the wheels. */
+     for (int v = 0; v < NBASS; ++v) {
+         int t = engine_bass_ext_touch(v);
+-        if (t & 1) motion_touch(PR(R_ENG, T_303, v, engine_bass_is_wobble(v) ?
+-                                   ORIGINAL_MIAMI_PITCH_BEND : ORIGINAL_CHICAGO_PITCH_BEND));
+-        if (t & 2) motion_touch(PR(R_ENG, T_303, v, engine_bass_mod_param(v)));
++        if (t & 1) motion_touch(PR(R_ENG, T_303, v, smk_pitch_parameter(v)));
++        if (t & 2) {
++            int param = engine_bass_mod_param(v);
++            if (param >= 0) motion_touch(PR(R_ENG, T_303, v, param));
++        }
+     }
+ #if X0X_BASS_PRESET_PREVIEW
+     engine_bass_wheel_owners((uint8_t)((bend_part >= 0 && bend_part < NBASS ? 1u << bend_part : 0u) |
+@@ -2317,7 +2329,7 @@
+     panel_init();
+     led_pos_init();
+     plat_perf_init();
+-#if BOARD_SMK37 && X0X_S1C && FL_FDATA_SIZE
++#if BOARD_SMK37 && X0X_S1C && FL_FDATA_SIZE && !X0X_SYNTH_CONTROLS_INIT_ONLY
+     if (flash_ok)
+         (void)s1_part_set_pack(fm1_xip_ptr(FL_FDATA_LO), FL_FDATA_SIZE);
+ #endif
+--- a/firmware/src/app/original_presets.inc
++++ b/firmware/src/app/original_presets.inc
+@@ -412,6 +412,12 @@
+ #if defined(X0X_HOST) && defined(X0X_SJ6_MAILBOX_PROBE)
+     if (slot >= SJ6_KNOBS) return engine_superj6_mailbox_probe_read(owner, slot);
+ #endif
++    if (slot == SJ6_OSC2_LEVEL || slot == SJ6_OSC1_LEVEL) {
++        if (bass_named_preset[owner] != 0) return -1;
++        unsigned code=slot==SJ6_OSC2_LEVEL ? original_bass[owner].dsp.juno.synth.osc2_level_code :
++                      original_bass[owner].dsp.juno.synth.osc1_level_code;
++        return code ? (int)code-1 : 128; /* explicit new control vs untouched Init */
++    }
+     if (slot == SJ6_LFO2_SHAPE)
+         return (int)juno6_knob_position(&original_bass[owner].dsp.juno.synth, slot);
+     if (slot == SJ6_LAYER1_FINE || slot == SJ6_LAYER2_FINE)
+@@ -431,7 +437,7 @@
+         return (int)(raw * 127.f + .5f);
+     }
+     if (slot >= SJ6_CHORUS_RATE)
+-        return mot_base_snd ? mot_base_snd->v[T_303][owner][13u + slot - SJ6_CHORUS_RATE] : 0;
++        return mot_base_snd ? original_sound_panel_position(mot_base_snd->v[T_303][owner],13u + slot - SJ6_CHORUS_RATE) : 0;
+     if (slot >= SJ6_CHORUS_I) {
+         unsigned mode = original_bass[owner].dsp.juno.chorus.factory_mode;
+         return mode ? ((mode - JUNO6_CHORUS_OFF) >> (slot - SJ6_CHORUS_I)) & 1u : 0;
+@@ -497,7 +503,7 @@
+     if (owner >= NBASS || slot > SJ6_LFO2_PWM_BASE) return 0;
+     uint32_t lock = plat_cq_lock();
+     int changed = 0;
+-    if (sj6_knob_can_turn(owner)) {
++    if (sj6_knob_can_turn(owner) && ((slot != SJ6_OSC2_LEVEL && slot != SJ6_OSC1_LEVEL) || bass_named_preset[owner] == 0)) {
+         slot = sj6_panel_slot(owner, slot);
+         int before = sj6_knob_position(owner, slot);
+         value = sj6_knob_target(before, value, (int)original_sound_sj6_max(slot), relative);
+@@ -685,6 +691,16 @@
+         original_sound_sj6_fine_store(cell, l, position);
+         juno6_set_layer_fine(s, l, position);
+     }
++    if ((upper & sj6_knob_bit(SJ6_OSC2_LEVEL)) && !original_sound_sj6_factory(cell)) {
++        unsigned position=sj6_knob_value[v][SJ6_OSC2_LEVEL];
++        cell[30]=(uint8_t)(128u | position);
++        s->osc2_level_code=(uint8_t)(position+1u);
++    }
++    if ((upper & sj6_knob_bit(SJ6_OSC1_LEVEL)) && !original_sound_sj6_factory(cell)) {
++        unsigned position=sj6_knob_value[v][SJ6_OSC1_LEVEL];
++        original_sound_sj6_osc1_store(cell,position);
++        s->osc1_level_code=(uint8_t)(position+1u);
++    }
+     bass_tag_set(sound, v, ORIGINAL_SOUND_JUNO, bass_named_preset[v],
+                  original_sound_is_edited(cell));
+ }
+@@ -701,7 +717,7 @@
+ #endif
+         unsigned upper = pending.word[1] & (sj6_knob_bit(SJ6_LFO2_SHAPE) | sj6_knob_bit(SJ6_LAYER1_SEMI) |
+                                              sj6_knob_bit(SJ6_LAYER2_SEMI) | sj6_knob_bit(SJ6_LAYER1_FINE) |
+-                                             sj6_knob_bit(SJ6_LAYER2_FINE));
++                                             sj6_knob_bit(SJ6_LAYER2_FINE) | sj6_knob_bit(SJ6_OSC2_LEVEL) | sj6_knob_bit(SJ6_OSC1_LEVEL));
+         if (pending.word[0] || upper) sj6_knob_commit(v, pending.word[0], upper);
+ #if defined(X0X_HOST) && defined(X0X_SJ6_MAILBOX_PROBE)
+         for (unsigned slot = SJ6_KNOBS; slot < SJ6_MAILBOX_SLOTS; ++slot)
+@@ -718,6 +734,9 @@
+ {
+ #if X0X_S1C
+     if (cell[29] == ORIGINAL_SOUND_SYNTHONE) return original_sound_s1_program(cell);
++#endif
++#if X0X_SUPERJ6_BUILTIN_INIT
++    if (cell[29] == ORIGINAL_SOUND_JUNO) return original_sound_sj6_factory(cell);
+ #endif
+     return cell[30];
+ }
+@@ -904,6 +923,8 @@
+         sj6_restore_extra(part, cell, extra, 1);
+     }
+     sj6_restore_semi(part, cell, extra);
++    part->dsp.juno.synth.osc2_level_code=(uint8_t)original_sound_sj6_osc2_code(cell);
++    part->dsp.juno.synth.osc1_level_code=(uint8_t)original_sound_sj6_osc1_code(cell);
+     sj6_locked_extra[v] = (uint8_t)(lock && marked);
+     uint8_t knobs[SJ6_OSC_KNOBS];
+     unsigned mask = original_sound_sj6_knobs(cell, knobs);
+@@ -959,6 +980,12 @@
+     for(unsigned i=0;i<n;i++) {
+         float value;
+         if(original_sound_is_performance(original_bass[v].kind,i))continue;
++#if X0X_SUPERJ6_BUILTIN_INIT
++        if (i == ORIGINAL_SJ6_HPF_PANEL && original_sound_sj6_hpf_authored(l->val)) {
++            juno6_set_sj6_hpf(&original_bass[v].dsp.juno.synth, unit_control(l->val[i] & 127u));
++            continue;
++        }
++#endif
+         if(original_sound_value(l->val,i,&value))(void)original_runtime_param(&original_bass[v],i,value);
+     }
+ #if X0X_SUPERJ6_BUILTIN_INIT
+@@ -1117,7 +1144,7 @@
+ X0X_COLD int engine_bass_select_preset_at(int v, int bank, int preset, sound_t *sound, int pat)
+ {
+     if ((unsigned)v >= NBASS || !sound || sound != mot_base_snd ||
+-        (unsigned)preset >= original_sound_factories((unsigned)bank)) return -1;
++        (unsigned)preset >= original_sound_available_factories((unsigned)bank)) return -1;
+     if (!engine_bass_bank_available(v, bank)) return -2;
+     if (bass_has_locks(v)) return -4;
+ #if X0X_S1_EXTRA || X0X_SUPERJ6_BUILTIN_INIT
+--- a/firmware/src/app/original_runtime.c
++++ b/firmware/src/app/original_runtime.c
+@@ -22,7 +22,7 @@
+      * first switch edits start from the visible positions in the sound cell. */
+     for (unsigned id = 13; id <= 14; ++id) {
+         float value;
+-        if (original_sound_control_value(ORIGINAL_SOUND_JUNO, id, cell[id], &value))
++        if (original_sound_control_value(ORIGINAL_SOUND_JUNO, id, original_sound_panel_position(cell,id), &value))
+             (void)original_runtime_param(part, id, value);
+     }
+ }
+@@ -35,7 +35,11 @@
+     (void)original_sound_adopt_legacy_cell((uint8_t *)cell);
+     if (!original_sound_valid(cell)) return ORIGINAL_RUNTIME_INVALID;
+     unsigned kind = cell[29];
+-    unsigned factory = (unsigned)original_sound_factory_source(kind, kind == ORIGINAL_SOUND_SYNTHONE ? 0u : cell[30]);
++    unsigned ordinal = kind == ORIGINAL_SOUND_SYNTHONE ? 0u : cell[30];
++#if X0X_SUPERJ6_BUILTIN_INIT
++    if (kind == ORIGINAL_SOUND_JUNO) ordinal=original_sound_sj6_factory(cell);
++#endif
++    unsigned factory = (unsigned)original_sound_factory_source(kind, ordinal);
+     /* The old active union is intentionally retired at this explicit cold
+      * boundary. A caller must inspect the returned admission result. */
+     memset(p, 0, sizeof *p);
+@@ -46,6 +50,8 @@
+         juno6_chorus_init(&p->dsp.juno.chorus,44100);
+ #if X0X_SUPERJ6_BUILTIN_INIT
+         p->dsp.juno.chorus.mix = 0;
++        p->dsp.juno.synth.osc2_level_code = (uint8_t)original_sound_sj6_osc2_code(cell);
++        p->dsp.juno.synth.osc1_level_code = (uint8_t)original_sound_sj6_osc1_code(cell);
+ #endif
+         rc=ORIGINAL_RUNTIME_OK;
+     } else if (kind == ORIGINAL_SOUND_SYNTHONE) {
+@@ -62,7 +68,11 @@
+         }
+ #endif
+ #if X0X_SYNTHONE_PATCH
+-        if (original_sound_edit_mask(cell) & (S1_PATCH_MASK | S1_LINK_MASK | S1_BASE_EDIT_MASK | S1_ROUTE_MASK | S1_MOD_EXT_MARK))
++        if ((original_sound_edit_mask(cell) & (S1_PATCH_MASK | S1_LINK_MASK | S1_BASE_EDIT_MASK | S1_ROUTE_MASK | S1_MOD_EXT_MARK))
++#if X0X_S1_EXTRA
++            || s1_coarse_code(cell,0) || s1_coarse_code(cell,1) || s1_detune_code(cell) || s1_voice_code(cell)
++#endif
++            )
+             s1_part_apply_cell(&p->dsp.synthone, cell);
+ #endif
+         rc = ORIGINAL_RUNTIME_OK;
+@@ -82,6 +92,8 @@
+         juno6_set_lfo2_pwm(&p->dsp.juno.synth, original_sound_sj6_lfo2_pwm(cell));
+         juno6_set_lfo2_shape(&p->dsp.juno.synth, original_sound_sj6_shape(cell));
+         original_runtime_sj6_chorus(p, cell);
++        if (original_sound_sj6_hpf_authored(cell))
++            juno6_set_sj6_hpf(&p->dsp.juno.synth, ((cell[ORIGINAL_SJ6_HPF_PANEL] & 127u) * (1.f/127.f)));
+         return original_runtime_prepare(p, bpm);
+     }
+ #endif
+--- a/firmware/src/app/original_sound.c
++++ b/firmware/src/app/original_sound.c
+@@ -42,6 +42,7 @@
+  {"Width",127,0,0},{"ChoRate",127,0,0},{"Chorus",127,0,0},{"Level",127,0,0},
+  {"PBend",127,0,0},{"Damper",127,0,0}
+ };
++#if !X0X_SYNTH_CONTROLS_INIT_ONLY
+ static const uint8_t original_sound_juno_factories[4][16] = {
+  {42,28,70,18,45,8,40,92,40,0,15,8,64,25,45,100},
+  {90,18,42,24,35,65,55,95,75,0,12,15,55,40,55,100},
+@@ -49,6 +50,7 @@
+  {70,10,105,12,20,0,20,110,15,12,25,5,80,60,50,96}
+ };
+ static const char *const original_sound_juno_names[4] = {"SUPERJ6 POLY", "SUPERJ6 PAD", "SUPERJ6 PLUCK", "SUPERJ6 BRASS"};
++#endif
+ static const x0x_param_t original_sound_synthone_params[ORIGINAL_SYNTHONE_NPARAMS] = {
+     {"PBend",127,64,0},{"Damper",127,0,0},{"Crush",127,0,0}
+ };
+@@ -90,7 +92,11 @@
+ #define S1_FACTORIES (1u + ORIGINAL_SYNTHONE_PROGRAMS)
+ static unsigned s1_cell_program(const uint8_t *cell)
+ {
+-    return cell[21] ? (unsigned)(cell[21] & 0x3fu) << 7 | (cell[7] & 127u) : 0u;
++    unsigned high = cell[21];
++#if X0X_S1_EXTRA
++    high &= S1_PROGRAM_BYTE_MASK;
++#endif
++    return high ? (high & 0x3fu) << 7 | (cell[7] & 127u) : 0u;
+ }
+ unsigned original_sound_s1_program(const uint8_t cell[ORIGINAL_SOUND_BYTES])
+ {
+@@ -155,9 +161,11 @@
+     if (source < 0) return 0;
+     return kind == ORIGINAL_SOUND_CHICAGO ? original_chicago_program_name((unsigned)source) :
+     kind == ORIGINAL_SOUND_MIAMI ? original_miami_program_name((unsigned)source) :
++#if !X0X_SYNTH_CONTROLS_INIT_ONLY
+     kind == ORIGINAL_SOUND_JUNO ? original_sound_juno_names[factory] :
+ #if X0X_S1C
+     factory ? s1_part_program_name(factory - 1u) :
++#endif
+ #endif
+     original_sound_synthone_names[0];
+ }
+@@ -199,6 +207,73 @@
+     return original_sound_init(cell, ORIGINAL_SOUND_SYNTHONE, ORIGINAL_SYNTHONE_INIT_FACTORY);
+ }
+ #if X0X_SUPERJ6_BUILTIN_INIT
++static int sj6_marker_shape(unsigned hi) { return hi==0u || (hi>=8u && hi<=11u); }
++static int sj6_marker_canonical(unsigned b)
++{ return sj6_marker_shape(b>>4) && (b&7u)<=4u; }
++static unsigned sj6_invalid_before(unsigned b)
++{
++    unsigned hi=b>>4, lo=b&15u;
++    unsigned rows=(hi>0u)+(hi>8u ? (hi>12u ? 4u : hi-8u) : 0u);
++    unsigned valid=0;
++    if(sj6_marker_shape(hi)) {
++        valid=lo<5u?lo:5u;
++        if(lo>8u) valid+=lo-8u<5u?lo-8u:5u;
++    }
++    return b-10u*rows-valid;
++}
++static unsigned sj6_marker_from_invalid(unsigned n)
++{
++    for(unsigned hi=0;hi<16u;++hi) {
++        unsigned valid=sj6_marker_shape(hi), width=valid?6u:16u;
++        if(n<width) return hi*16u+(valid ? n+5u+(n>=3u?5u:0u) : n);
++        n-=width;
++    }
++    return 256u;
++}
++unsigned original_sound_sj6_marker(const uint8_t *cell)
++{
++    unsigned b=cell[31];
++    if(sj6_marker_canonical(b)) return b;
++    unsigned n=sj6_invalid_before(b);
++    if(n>=200u) return 256u;
++    n%=50u;
++    unsigned hi=n/10u,lo=n%10u;
++    return (hi?hi+7u:0u)*16u+lo+(lo>=5u?3u:0u);
++}
++unsigned original_sound_sj6_osc1_code(const uint8_t *cell)
++{
++    unsigned b=cell[31];
++    if(cell[29]!=ORIGINAL_SOUND_JUNO || sj6_marker_canonical(b)) return 0;
++    unsigned n=sj6_invalid_before(b);
++    if(n>=200u) return 0;
++    unsigned occupied=(cell[25] & (ORIGINAL_SJ6_LFO2_PWM_BIT>>24))!=0;
++    unsigned low=(cell[13]>>7)|((cell[14]>>7)<<1)|((cell[18]>>7)<<2)|((cell[19]>>7)<<3)
++        |((occupied!=(cell[21]!=0u))<<4);
++    return 1u+(n/50u)*32u+low;
++}
++static void sj6_store_marker(uint8_t *cell,unsigned b,unsigned position)
++{
++    unsigned hi=b>>4,lo=b&15u;
++    unsigned n=(hi?hi-7u:0u)*10u+lo-(lo>=8u?3u:0u);
++    cell[31]=(uint8_t)sj6_marker_from_invalid((position>>5)*50u+n);
++}
++void original_sound_sj6_marker_store(uint8_t *cell,unsigned b)
++{
++    unsigned code=original_sound_sj6_osc1_code(cell);
++    if(!code)cell[31]=(uint8_t)b;
++    else sj6_store_marker(cell,b,code-1u);
++}
++void original_sound_sj6_osc1_store(uint8_t *cell,unsigned pos)
++{
++    unsigned b=original_sound_sj6_marker(cell);
++    if(pos>127u || b>255u || cell[29]!=ORIGINAL_SOUND_JUNO)return;
++    static const uint8_t plane[]={13,14,18,19};
++    for(unsigned i=0;i<4u;++i) cell[plane[i]]=(cell[plane[i]]&127u)|(((pos>>i)&1u)<<7);
++    unsigned bit=ORIGINAL_SJ6_LFO2_PWM_BIT>>24;
++    unsigned owner=(cell[21]!=0u)^((pos>>4)&1u);
++    cell[25]=(cell[25]&~bit)|(owner?bit:0u);
++    sj6_store_marker(cell,b,pos);
++}
+ unsigned original_sound_sj6_max(unsigned slot)
+ {
+     static const uint8_t max[SJ6_OSC_KNOBS] = {3, 3, 2, 1, 127, 1, 127};
+@@ -223,8 +298,10 @@
+ {
+     uint32_t flags = original_sound_edit_mask(cell) &
+                      ~(ORIGINAL_SJ6_LFO2_PWM_BIT | ORIGINAL_SJ6_LFO2_PWM2_BIT);
++    unsigned code=original_sound_sj6_osc1_code(cell);
+     cell[ORIGINAL_SJ6_LFO2_PWM_BYTE] = (uint8_t)setting;
+-    if ((uint8_t)setting) flags |= ORIGINAL_SJ6_LFO2_PWM_BIT;
++    if (((uint8_t)setting!=0u)^((code && ((code-1u)&16u))!=0))
++        flags |= ORIGINAL_SJ6_LFO2_PWM_BIT;
+     if (setting >> 8) flags |= ORIGINAL_SJ6_LFO2_PWM2_BIT;
+     original_sound_put_mask(cell, flags);
+ }
+@@ -442,7 +519,7 @@
+ 
+ void original_sound_sj6_vibrato_store(uint8_t *cell, uint8_t *wire, const float values[2], unsigned present)
+ {
+-    cell[31] = (uint8_t)((cell[31] & ~7u) | (present ? present + 1u : 0u));
++    original_sound_sj6_marker_store(cell,(original_sound_sj6_marker(cell) & ~7u) | (present ? present + 1u : 0u));
+     for (unsigned i = 0; i < 2; ++i) {
+         uint32_t word = 0;
+         if (present & (1u << i)) memcpy(&word, &values[i], sizeof word);
+@@ -464,7 +541,7 @@
+     uint32_t word = 0;
+     if (present) memcpy(&word, &value, sizeof word);
+     sj6_write_word(wire + ORIGINAL_SJ6_VIBRATO_WIRE_BYTES, word);
+-    cell[31] = (uint8_t)((cell[31] & ~ORIGINAL_SJ6_A_REFERENCE_MARK) | (present ? ORIGINAL_SJ6_A_REFERENCE_MARK : 0u));
++    original_sound_sj6_marker_store(cell,(original_sound_sj6_marker(cell) & ~ORIGINAL_SJ6_A_REFERENCE_MARK) | (present ? ORIGINAL_SJ6_A_REFERENCE_MARK : 0u));
+ }
+ 
+ int original_sound_sj6_a_reference_available(const uint8_t *cell, const uint8_t *wire)
+@@ -495,9 +572,9 @@
+     positions[SJ6_WAVE2] = (mixed >> 2) & 3u;
+     positions[SJ6_RANGE] = (mixed >> 4) & 3u;
+     positions[SJ6_PWM1_ON] = (mixed >> 6) & 1u;
+-    positions[SJ6_PWM1] = cell[18];
++    positions[SJ6_PWM1] = cell[18] & 127u;
+     positions[SJ6_PWM2_ON] = mixed >> 7;
+-    positions[SJ6_PWM2] = cell[19];
++    positions[SJ6_PWM2] = cell[19] & 127u;
+     return (original_sound_edit_mask(cell) >> ORIGINAL_SJ6_EDIT_SHIFT) & ORIGINAL_SJ6_EDIT_MASK;
+ }
+ 
+@@ -508,8 +585,8 @@
+     (void)original_sound_sj6_knobs(cell, saved);
+     for (unsigned i = 0; i < SJ6_OSC_KNOBS; ++i)
+         if (mask & (1u << i)) saved[i] = positions[i];
+-    cell[18] = saved[SJ6_PWM1];
+-    cell[19] = saved[SJ6_PWM2];
++    cell[18] = saved[SJ6_PWM1] | (cell[18] & 128u);
++    cell[19] = saved[SJ6_PWM2] | (cell[19] & 128u);
+     cell[20] = (uint8_t)(saved[SJ6_WAVE1] | saved[SJ6_WAVE2] << 2 |
+                         saved[SJ6_RANGE] << 4 | saved[SJ6_PWM1_ON] << 6 |
+                         saved[SJ6_PWM2_ON] << 7);
+@@ -522,12 +599,19 @@
+     if (!cell || cell[26] != 'O' || cell[27] != 'S' || cell[28] != ORIGINAL_SOUND_SCHEMA) return 0;
+     int crush_edit = cell[29] == ORIGINAL_SOUND_SYNTHONE &&
+         (original_sound_edit_mask(cell) & (1u << ORIGINAL_SYNTHONE_CRUSH));
+-    if (cell[31] != crush_edit
++    int marker = cell[31];
++#if X0X_S1_EXTRA
++    if (cell[29] == ORIGINAL_SOUND_SYNTHONE) {
++        if (s1_detune_code(cell) > S1_DETUNE_STEPS+1u) return 0;
++        marker &= 1u;
++    }
++#endif
++    if (marker != crush_edit
+ #if X0X_SUPERJ6_BUILTIN_INIT
+         && !original_sound_sj6_marker_valid(cell)
+ #endif
+        ) return 0;
+-    if (cell[29] == ORIGINAL_SOUND_SYNTHONE && !crush_edit && cell[ORIGINAL_SYNTHONE_CRUSH]) return 0;
++    if (cell[29] == ORIGINAL_SOUND_SYNTHONE && !crush_edit && original_sound_panel_position(cell,ORIGINAL_SYNTHONE_CRUSH)) return 0;
+     unsigned count = original_sound_count(cell[29]);
+     if (!count) return 0;
+ #if X0X_S1_EXTRA
+@@ -536,21 +620,33 @@
+          * excludes historical slot-2 migration before either reader writes. */
+         unsigned code = cell[S1_MOD_EXT_BYTE];
+         unsigned marked = (original_sound_edit_mask(cell) & S1_MOD_EXT_MARK) != 0;
+-        if (marked != !!code || code >= S1_MOD_EXT_CODES) return 0;
++        unsigned detune_route = s1_detune_route_code(cell);
++        unsigned pitch_route = s1_pitch_route_code(cell);
++        unsigned tremolo_route = s1_tremolo_route_code(cell);
++        if (marked != !!(code || detune_route || pitch_route || tremolo_route) || code >= S1_MOD_EXT_CODES ||
++            detune_route > 4u || pitch_route > 4u || tremolo_route > 4u) return 0;
+     } else
+ #endif
+-    if (cell[30] >= original_sound_factories(cell[29])) return 0;
++    if (
++#if X0X_SUPERJ6_BUILTIN_INIT
++        !original_sound_sj6_osc2_code(cell) &&
++#endif
++        cell[30] >= original_sound_factories(cell[29])) return 0;
+ #if X0X_SUPERJ6_BUILTIN_INIT
+     uint32_t sj6_flags = original_sound_edit_mask(cell);
+     if (cell[29] == ORIGINAL_SOUND_JUNO) {
+         for (unsigned l = 0; l < 2; ++l)
+             if (original_sound_sj6_fine_code(cell, l) > SJ6_FINE_MAX) return 0;
+-        if (cell[13] > 127u || cell[14] > 127u || cell[16] > 127u || cell[17] > 127u) return 0;
+-    }
+-    if (cell[29] == ORIGINAL_SOUND_JUNO && sj6_flags >> ORIGINAL_SJ6_EDIT_SHIFT) {
++        if (cell[17] > 127u ||
++            (original_sound_sj6_hpf_authored(cell) && !(sj6_flags & (1u << ORIGINAL_SJ6_HPF_PANEL)))) return 0;
++        if (!original_sound_sj6_osc1_code(cell) &&
++            ((cell[13]|cell[14]|cell[18]|cell[19])&128u)) return 0;
++    }
++    if (cell[29] == ORIGINAL_SOUND_JUNO && ((sj6_flags >> ORIGINAL_SJ6_EDIT_SHIFT) || original_sound_sj6_osc1_code(cell))) {
+         uint8_t positions[SJ6_OSC_KNOBS];
+         unsigned mask = original_sound_sj6_knobs(cell, positions);
+-        if (!!cell[ORIGINAL_SJ6_LFO2_PWM_BYTE] != !!(sj6_flags & ORIGINAL_SJ6_LFO2_PWM_BIT) ||
++        if ((!original_sound_sj6_osc1_code(cell) &&
++             !!cell[ORIGINAL_SJ6_LFO2_PWM_BYTE] != !!(sj6_flags & ORIGINAL_SJ6_LFO2_PWM_BIT)) ||
+             original_sound_sj6_lfo2_pwm(cell) >> SJ6_LFO2_PWM_ROUTE_SHIFT > DNBX_LAYERS ||
+             original_sound_sj6_chorus(cell) > JUNO6_CHORUS_BOTH) return 0;
+         for (unsigned i = 0; i < SJ6_OSC_KNOBS; ++i)
+@@ -564,11 +660,16 @@
+     /* Synth One program bytes [7] and [21]: checked here, then masked for the zero checks. */
+     uint8_t s1c_copy[ORIGINAL_SOUND_BYTES];
+     if (cell[29] == ORIGINAL_SOUND_SYNTHONE) {
++        unsigned program_high = cell[21];
++#if X0X_S1_EXTRA
++        program_high &= S1_PROGRAM_BYTE_MASK;
++        _Static_assert(ORIGINAL_SYNTHONE_PROGRAMS < 1024u, "legacy preset high bits fit");
++#endif
+         if (
+ #if !X0X_S1_EXTRA
+             cell[30] ||
+ #endif
+-            (cell[21] && ((cell[21] & 0xc0u) != 0x40u || cell[7] > 127u)) || (!cell[21] && cell[7]) ||
++            (program_high && ((program_high & 0xc0u) != 0x40u || cell[7] > 127u)) || (!program_high && cell[7]) ||
+             s1_cell_program(cell) > ORIGINAL_SYNTHONE_PROGRAMS) return 0;
+         for (unsigned i = 0; i < ORIGINAL_SOUND_BYTES; ++i) s1c_copy[i] = cell[i];
+         s1c_copy[7] = s1c_copy[21] = 0;
+@@ -581,16 +682,37 @@
+ #if X0X_S1_EXTRA
+     editor |= S1_BASE_EDIT_MASK | S1_ROUTE_MASK | S1_MOD_EXT_MARK;
+ #endif
+-    if (cell[29] == ORIGINAL_SOUND_SYNTHONE && (mask & editor)) {
++    if (cell[29] == ORIGINAL_SOUND_SYNTHONE && ((mask & editor)
++#if X0X_S1_EXTRA
++        || s1_coarse_code(cell,0) || s1_coarse_code(cell,1) || s1_voice_code(cell) || (cell[S1_VOICE_MARK_BYTE] & 128u)
++#endif
++        )) {
+         if (mask & ~(editor | 7u)) return 0;
+ #if X0X_S1_EXTRA
+         uint8_t codes[S1_ROUTE_COUNT];
+         if (!s1_route_decode(mask >> S1_ROUTE_SHIFT, codes)) return 0;
+ #endif
++#if X0X_S1_EXTRA
++        if ((cell[S1_LINK_BYTE] & 1u) != ((mask & S1_LINK_MASK) != 0) ||
++            s1_voice_code(cell) >= S1_VOICE_CODES ||
++            !!s1_voice_code(cell) != !!(cell[S1_VOICE_MARK_BYTE] & 128u)) return 0;
++#else
+         if (cell[S1_LINK_BYTE] != ((mask & S1_LINK_MASK) != 0)) return 0;
++#endif
+         for (unsigned i = 0; i < 22; ++i) {
+-            if (cell[i] > 127u || (i >= 2 && i != S1_LINK_BYTE && !(mask & (UINT32_C(1) << i)) && cell[i])) return 0;
++            unsigned v = cell[i];
++#if X0X_S1_EXTRA
++            if (i < ORIGINAL_SYNTHONE_NPARAMS) v &= 127u;
++            if (i == S1_LINK_BYTE) v &= 1u;
++            if (i-S1_BASE_EDIT_BYTE < S1_BASE_EDIT_COUNT) v &= 127u;
++            if (i-S1_PATCH_FIRST_BYTE < 2u*S1_COARSE_BITS || i == S1_VOICE_MARK_BYTE) v &= 127u;
++#endif
++            if (v > 127u || (i >= 2 && i != S1_LINK_BYTE && !(mask & (UINT32_C(1) << i)) && v)) return 0;
+         }
++#if X0X_S1_EXTRA
++        if (s1_coarse_code(cell,0) > S1_COARSE_STEPS+1u ||
++            s1_coarse_code(cell,1) > S1_COARSE_STEPS+1u) return 0;
++#endif
+         return 1;
+     }
+     if (mask >> count) return 0;
+@@ -621,7 +743,9 @@
+         if (!original_miami_program_init(&p, (unsigned)source)) return 0;
+         for (unsigned i = 0; i < 18; ++i) next[i] = original_sound_display_byte(kind, i, p.macro[i]);
+     } else if (kind == ORIGINAL_SOUND_JUNO) {
++#if !X0X_SYNTH_CONTROLS_INIT_ONLY
+         memcpy(next, original_sound_juno_factories[factory], 16u);
++#endif
+     } else if (kind == ORIGINAL_SOUND_SYNTHONE) {
+         /* Init cell: performance defaults only. Full 150-parameter packing is not admitted. */
+         next[0] = 64;
+@@ -643,8 +767,11 @@
+ #if X0X_SUPERJ6_BUILTIN_INIT
+     if (cell[29] == ORIGINAL_SOUND_JUNO) value |= cell[parameter] & 128u;
+ #endif
++#if X0X_S1_EXTRA
++    if (cell[29] == ORIGINAL_SOUND_SYNTHONE) value |= cell[parameter] & 128u;
++#endif
+     cell[parameter] = (uint8_t)value;
+-    if (cell[29] == ORIGINAL_SOUND_SYNTHONE && parameter == ORIGINAL_SYNTHONE_CRUSH) cell[31] = 1;
++    if (cell[29] == ORIGINAL_SOUND_SYNTHONE && parameter == ORIGINAL_SYNTHONE_CRUSH) cell[31] |= 1u;
+     original_sound_put_mask(cell, mask);
+     return 1;
+ }
+@@ -905,6 +1032,60 @@
+         ) || position > S1_PATCH_STEPS ||
+         !original_sound_valid(cell) || cell[29] != ORIGINAL_SOUND_SYNTHONE) return 0;
+ #if X0X_S1_EXTRA
++    if (slot - S1_VOICE_MODE < 2u) {
++        if (position > s1_patch_steps(slot)) return 0;
++        unsigned code = s1_voice_code(cell);
++        code = slot == S1_VOICE_MODE ? code % S1_GLIDE_RADIX + (position+1u)*S1_GLIDE_RADIX :
++                                      code - code % S1_GLIDE_RADIX + position+1u;
++        cell[S1_LINK_BYTE] = (uint8_t)((cell[S1_LINK_BYTE] & 1u) | (code << 1));
++        cell[S1_VOICE_MARK_BYTE] |= 128u;
++        return 1;
++    }
++    if (slot == S1_OSC2_DETUNE) {
++        if (position > S1_DETUNE_STEPS) return 0;
++        cell[31] = (uint8_t)((cell[31] & 1u) | ((position+1u) << 1));
++        return 1;
++    }
++    if (s1_coarse_slot(slot)) {
++        if (position > S1_COARSE_STEPS) return 0;
++        unsigned offset = S1_PATCH_FIRST_BYTE + (slot-S1_COARSE_FIRST)*S1_COARSE_BITS;
++        for (unsigned i=0;i<S1_COARSE_BITS;++i) {
++            unsigned hi = ((position+1u) >> i) & 1u;
++            cell[offset+i] = (uint8_t)((cell[offset+i] & 127u) | (hi << 7));
++        }
++        return 1;
++    }
++    if (slot == S1_TREMOLO_LFO) {
++        if (position > 3u) return 0;
++        for (unsigned i=0;i<ORIGINAL_SYNTHONE_NPARAMS;++i)
++            cell[i] = (uint8_t)((cell[i] & 127u) | ((((position+1u) >> i) & 1u) << 7));
++        original_sound_put_mask(cell, original_sound_edit_mask(cell) | S1_MOD_EXT_MARK);
++        return 1;
++    }
++    if (slot == S1_PITCH_LFO) {
++        if (position > 3u) return 0;
++        cell[21] = (uint8_t)((cell[21] & S1_PROGRAM_BYTE_MASK) | ((position+1u) << 3));
++        original_sound_put_mask(cell, original_sound_edit_mask(cell) | S1_MOD_EXT_MARK);
++        return 1;
++    }
++    if (slot == S1_DETUNE_LFO) {
++        if (position > 3u) return 0;
++        for (unsigned i=0;i<S1_BASE_EDIT_COUNT;++i) {
++            uint8_t *p = cell+S1_BASE_EDIT_BYTE+i;
++            *p = (uint8_t)((*p & 127u) | (((position+1u) >> i & 1u) << 7));
++        }
++        original_sound_put_mask(cell, original_sound_edit_mask(cell) | S1_MOD_EXT_MARK);
++        return 1;
++    }
++    if (s1_fx_gate_slot(slot)) {
++        if (position > 1u) return 0;
++        unsigned code = cell[S1_MOD_EXT_BYTE];
++        unsigned divisor = S1_ROUTE_EXT_CODES * (slot == S1_DELAY_ON ? 1u : S1_FX_GATE_RADIX);
++        unsigned prior = code / divisor % S1_FX_GATE_RADIX;
++        cell[S1_MOD_EXT_BYTE] = (uint8_t)(code - prior*divisor + (position+1u)*divisor);
++        original_sound_put_mask(cell, original_sound_edit_mask(cell) | S1_MOD_EXT_MARK);
++        return 1;
++    }
+     if (s1_mod_ext_slot(slot)) {
+         if (position > 3u) return 0;
+         unsigned code = cell[S1_MOD_EXT_BYTE], divisor = s1_mod_ext_divisor(slot);
+@@ -925,20 +1106,20 @@
+     }
+     if (s1_base_edit_slot(slot)) {
+         const unsigned byte = S1_BASE_EDIT_BYTE + slot - S1_BASE_EDIT_FIRST;
+-        cell[byte] = (uint8_t)position;
++        cell[byte] = (uint8_t)((cell[byte] & 128u) | position);
+         original_sound_put_mask(cell, original_sound_edit_mask(cell) | (UINT32_C(1) << byte));
+         return 1;
+     }
+ #endif
+     if (slot == S1_PATCH_COUNT) {
+         if (position > 1) return 0;
+-        cell[S1_LINK_BYTE] = (uint8_t)position;
++        cell[S1_LINK_BYTE] = (uint8_t)((cell[S1_LINK_BYTE] & 254u) | position);
+         uint32_t mask = original_sound_edit_mask(cell);
+         original_sound_put_mask(cell, position ? mask | S1_LINK_MASK : mask & ~S1_LINK_MASK);
+         return 1;
+     }
+     unsigned byte = S1_PATCH_FIRST_BYTE + slot;
+-    cell[byte] = (uint8_t)position;
++    cell[byte] = (uint8_t)((cell[byte] & 128u) | position);
+     original_sound_put_mask(cell, original_sound_edit_mask(cell) | (UINT32_C(1) << byte));
+     return 1;
+ }
+@@ -1004,7 +1185,17 @@
+     else if (cell[29] == ORIGINAL_SOUND_SYNTHONE)
+         result = 0.f;
+     else if (cell[29] == ORIGINAL_SOUND_JUNO)
+-        result = unit_control(original_sound_juno_factories[cell[30]][parameter]);
++#if X0X_SYNTH_CONTROLS_INIT_ONLY
++        result = unit_control(cell[parameter] & 127u);
++#else
++        result = unit_control(original_sound_juno_factories[
++#if X0X_SUPERJ6_BUILTIN_INIT
++            original_sound_sj6_factory(cell)
++#else
++            cell[30]
++#endif
++        ][parameter]);
++#endif
+     else if (cell[29] == ORIGINAL_SOUND_CHICAGO) {
+         original_chicago_program p;
+         if (!original_chicago_program_init(&p, (unsigned)original_sound_factory_source(cell[29], cell[30]))) return 0;
+--- a/firmware/src/app/original_sound.h
++++ b/firmware/src/app/original_sound.h
+@@ -85,7 +85,15 @@
+  * rewritten, 0 if the cell is already a current Synth One or other kind. */
+ int original_sound_adopt_legacy_cell(uint8_t cell[ORIGINAL_SOUND_BYTES]);
+ unsigned original_sound_count(unsigned kind);
++/* Keep legacy ordinal validation separate from choices offered in this build. */
+ unsigned original_sound_factories(unsigned kind);
++static inline unsigned original_sound_available_factories(unsigned kind)
++{
++#if X0X_SYNTH_CONTROLS_INIT_ONLY
++    if (kind == ORIGINAL_SOUND_JUNO || kind == ORIGINAL_SOUND_SYNTHONE) return 1;
++#endif
++    return original_sound_factories(kind);
++}
+ /* Returns the immutable original program index, or -1 on invalid input. */
+ int original_sound_factory_source(unsigned kind, unsigned factory);
+ /* Convert a firmware control to its actual original macro. FxType is discrete;
+@@ -97,6 +105,9 @@
+ {
+ #if X0X_SUPERJ6_BUILTIN_INIT
+     if (id < ORIGINAL_JUNO_NPARAMS && cell[29] == ORIGINAL_SOUND_JUNO) return cell[id] & 127u;
++#endif
++#if X0X_S1C && X0X_SYNTHONE_PATCH
++    if (id < ORIGINAL_SYNTHONE_NPARAMS && cell[29] == ORIGINAL_SOUND_SYNTHONE) return cell[id] & 127u;
+ #endif
+     return cell[id];
+ }
+@@ -110,6 +121,13 @@
+ int original_sound_valid(const uint8_t cell[ORIGINAL_SOUND_BYTES]);
+ int original_sound_init(uint8_t cell[ORIGINAL_SOUND_BYTES], unsigned kind, unsigned factory);
+ int original_sound_set(uint8_t cell[ORIGINAL_SOUND_BYTES], unsigned parameter, unsigned value);
++#if X0X_SUPERJ6_BUILTIN_INIT
++/* Explicit HPF law selected only by an intentional panel edit. Archived
++ * unmarked cells retain their compact interpretation and cold behavior. */
++enum { ORIGINAL_SJ6_HPF_PANEL = 9, ORIGINAL_SJ6_HPF_LAW_BYTE = 16 };
++static inline unsigned original_sound_sj6_hpf_authored(const uint8_t *cell)
++{ return cell[29] == ORIGINAL_SOUND_JUNO && (cell[ORIGINAL_SJ6_HPF_LAW_BYTE] & 128u); }
++#endif
+ #if X0X_SYNTHONE_PATCH
+ #include "s1_patch.h"
+ #if X0X_S1_EXTRA
+@@ -122,6 +140,12 @@
+ #endif
+ #if X0X_SUPERJ6_BUILTIN_INIT
+ #include "../dsp/juno6.h"
++/* Init-only typed oscillator-2 level. Unmarked legacy factory ordinals
++ * are unchanged, while older readers reject the marked form before writes. */
++static inline unsigned original_sound_sj6_osc2_code(const uint8_t *cell)
++{ return cell[29] == ORIGINAL_SOUND_JUNO && (cell[30] & 128u) ? (cell[30] & 127u)+1u : 0u; }
++static inline unsigned original_sound_sj6_factory(const uint8_t *cell)
++{ return original_sound_sj6_osc2_code(cell) ? 0u : cell[30]; }
+ #define ORIGINAL_SJ6_EDIT_SHIFT 18u
+ #define ORIGINAL_SJ6_EDIT_MASK ((1u << SJ6_OSC_KNOBS) - 1u)
+ #define ORIGINAL_SJ6_EXTRA_BIT (1u << (ORIGINAL_SJ6_EDIT_SHIFT + SJ6_OSC_KNOBS))
+@@ -157,26 +181,30 @@
+  * meanings. Only a tagged nondefault shape can use the upper nibble. */
+ #define ORIGINAL_SJ6_LFO2_SHAPE_MARK 128u
+ #define ORIGINAL_SJ6_LFO2_SHAPE_SHIFT 4u
++/* Dense level plane preserves every canonical old shape/tuning marker.
++ * 50 semantic states times four groups of 32 = 128 optional positions.
++ * In an extended marker the redundant PWM occupancy flag is XOR digit bit 4. */
++unsigned original_sound_sj6_marker(const uint8_t *cell);
++unsigned original_sound_sj6_osc1_code(const uint8_t *cell);
++void original_sound_sj6_marker_store(uint8_t *cell,unsigned canonical);
++void original_sound_sj6_osc1_store(uint8_t *cell,unsigned position);
+ static inline unsigned original_sound_sj6_shape(const uint8_t *cell)
+ {
+-    unsigned high = cell[31] >> ORIGINAL_SJ6_LFO2_SHAPE_SHIFT;
++    unsigned high = original_sound_sj6_marker(cell) >> ORIGINAL_SJ6_LFO2_SHAPE_SHIFT;
+     return high == 8u ? SJ6_LFO_HELD : high >= 9u && high <= 11u ? high - 8u : SJ6_LFO_TRI;
+ }
+ static inline void original_sound_sj6_shape_store(uint8_t *cell, unsigned shape)
+ {
+     if (shape <= SJ6_LFO2_SHAPE_MAX)
+-        cell[31] = (cell[31] & 15u) | (shape ? ORIGINAL_SJ6_LFO2_SHAPE_MARK |
+-                   ((shape & 3u) << ORIGINAL_SJ6_LFO2_SHAPE_SHIFT) : 0u);
++        original_sound_sj6_marker_store(cell,(original_sound_sj6_marker(cell) & 15u) |
++                    (shape ? ORIGINAL_SJ6_LFO2_SHAPE_MARK | ((shape & 3u) << ORIGINAL_SJ6_LFO2_SHAPE_SHIFT) : 0u));
+ }
+ /* The same kind-discriminated byte marks Synth One crush edits. */
+ static inline unsigned original_sound_sj6_vibrato_marker(const uint8_t *cell)
+-{ return cell[31] & 7u; }
++{ return original_sound_sj6_marker(cell) & 7u; }
+ static inline int original_sound_sj6_marker_valid(const uint8_t *cell)
+ {
+-    unsigned high = cell[31] >> ORIGINAL_SJ6_LFO2_SHAPE_SHIFT;
+-    unsigned tag = ORIGINAL_SJ6_LFO2_SHAPE_MARK >> ORIGINAL_SJ6_LFO2_SHAPE_SHIFT;
+-    return cell[29] == ORIGINAL_SOUND_JUNO && original_sound_sj6_vibrato_marker(cell) <= 4u &&
+-           (!high || (high >= tag && high <= tag + SJ6_LFO_SQUARE));
++    return cell[29] == ORIGINAL_SOUND_JUNO && original_sound_sj6_marker(cell)<=255u;
+ }
+ static inline int original_sound_sj6_vibrato(const uint8_t *cell)
+ { return original_sound_sj6_marker_valid(cell) && original_sound_sj6_vibrato_marker(cell) != 0; }
+@@ -186,7 +214,7 @@
+     return original_sound_sj6_vibrato(cell) && marker > 1u ? marker - 1u : 0u;
+ }
+ static inline int original_sound_sj6_has_a_reference(const uint8_t *cell)
+-{ return original_sound_sj6_marker_valid(cell) && (cell[31] & ORIGINAL_SJ6_A_REFERENCE_MARK); }
++{ return original_sound_sj6_marker_valid(cell) && (original_sound_sj6_marker(cell) & ORIGINAL_SJ6_A_REFERENCE_MARK); }
+ int original_sound_sj6_a_reference_word(const uint8_t *cell, const uint8_t *wire, float *value);
+ void original_sound_sj6_a_reference_store(uint8_t *cell, uint8_t *wire, float value, unsigned present);
+ int original_sound_sj6_a_reference_available(const uint8_t *cell, const uint8_t *wire);
+@@ -228,7 +256,7 @@
+ {
+ #if X0X_SUPERJ6_BUILTIN_INIT
+     if (original_sound_sj6_marker_valid(cell) &&
+-        (cell[31] || original_sound_sj6_fine_code(cell, 0) || original_sound_sj6_fine_code(cell, 1))) return 1;
++        (cell[31] || original_sound_sj6_osc2_code(cell) || original_sound_sj6_fine_code(cell, 0) || original_sound_sj6_fine_code(cell, 1))) return 1;
+ #endif
+     return original_sound_edit_mask(cell) != 0;
+ }
+--- a/firmware/src/app/s1_patch.h
++++ b/firmware/src/app/s1_patch.h
+@@ -31,14 +31,51 @@
+     S1_EXTRA_BYTES = S1_FILTER_EXTRA_BYTES + 2,
+     S1_LFO_DIVISIONS = 19, S1_LFO_CODE_SYNC = 129,
+     S1_LFO_RATE_CODES = S1_LFO_CODE_SYNC + S1_LFO_DIVISIONS,
+-    S1_PART_LEVEL = 40, S1_LFO1_DEPTH, S1_LFO2_DEPTH, S1_CUTOFF_LFO, S1_NOISE_LFO, S1_OSC_MIX_LFO, S1_RESONANCE_LFO, S1_FM_LFO, S1_AMP_DECAY_LFO,
++    S1_PART_LEVEL = 40, S1_LFO1_DEPTH, S1_LFO2_DEPTH, S1_CUTOFF_LFO, S1_NOISE_LFO, S1_OSC_MIX_LFO, S1_RESONANCE_LFO, S1_FM_LFO, S1_AMP_DECAY_LFO, S1_OSC1_SEMI, S1_OSC2_SEMI, S1_OSC2_DETUNE, S1_VOICE_MODE, S1_MONO_GLIDE, S1_DELAY_ON, S1_REVERB_ON, S1_DETUNE_LFO, S1_PITCH_LFO, S1_TREMOLO_LFO,
+     S1_BASE_EDIT_FIRST = S1_PART_LEVEL, S1_BASE_EDIT_COUNT = 3, S1_BASE_EDIT_BYTE = 3
+ };
++/* Formerly invalid q7 top bits. Code zero keeps the exact program;
++ * codes 1..37 are the original integer stops -12..+24. */
++enum { S1_COARSE_FIRST = S1_OSC1_SEMI, S1_COARSE_STEPS = 36, S1_COARSE_BITS = 6 };
++static inline int s1_coarse_slot(unsigned slot) { return slot-S1_COARSE_FIRST < 2u; }
++static inline unsigned s1_coarse_code(const uint8_t cell[32], unsigned osc)
++{
++    unsigned code = 0;
++    for (unsigned i=0;i<S1_COARSE_BITS;++i)
++        code |= (unsigned)(cell[S1_PATCH_FIRST_BYTE + osc*S1_COARSE_BITS + i] >> 7) << i;
++    return code;
++}
++/* Sound byte 31 bit 0 keeps the existing crush marker. Its previously
++ * invalid high bits hold absent or one of the 81 manual -4..+4 detents. */
++enum { S1_DETUNE_STEPS = 80 };
++static inline unsigned s1_detune_code(const uint8_t cell[32]) { return cell[31] >> 1; }
++/* The prior typed link domain was exactly 0/1. Preserve bit 0 and
++ * allocate the old-invalid high bits to independent 3 x 42 digits. */
++enum { S1_VOICE_MARK_BYTE = 20, S1_GLIDE_STEPS = 40, S1_GLIDE_RADIX = S1_GLIDE_STEPS+2, S1_VOICE_CODES = 3*S1_GLIDE_RADIX };
++static inline unsigned s1_voice_code(const uint8_t cell[32]) { return cell[S1_LINK_BYTE] >> 1; }
+ #define S1_MOD_EXT_MARK (UINT32_C(1) << 23)
+ /* Radix five stores independent absent/explicit OFF/LFO1/LFO2/BOTH digits.
+  * FM-only codes 0..4 are identical to the preceding typed binding. */
+ enum { S1_MOD_EXT_BYTE = 30, S1_MOD_EXT_FIRST = S1_FM_LFO, S1_MOD_EXT_COUNT = 2,
+-       S1_MOD_RADIX = 5, S1_MOD_EXT_CODES = S1_MOD_RADIX * S1_MOD_RADIX };
++       S1_MOD_RADIX = 5, S1_ROUTE_EXT_CODES = S1_MOD_RADIX * S1_MOD_RADIX,
++       S1_FX_GATE_RADIX = 3, S1_MOD_EXT_CODES = S1_ROUTE_EXT_CODES * 9 };
++/* Typed q7 MSBs of three owned base editor bytes; absent/explicit 0..3.
++ * S1_MOD_EXT_MARK must also be present, preventing legacy slot-2 adoption. */
++static inline unsigned s1_detune_route_code(const uint8_t cell[32])
++{
++    const uint8_t *p = cell+S1_BASE_EDIT_BYTE;
++    return (p[0] >> 7) | ((p[1] >> 7) << 1) | ((p[2] >> 7) << 2);
++}
++/* Only formerly invalid bits 3..5 of the historic high ordinal byte.
++ * Bit7 is independently reserved and not claimed by this route. */
++enum { S1_PROGRAM_BYTE_MASK = 0xc7 };
++static inline unsigned s1_pitch_route_code(const uint8_t cell[32])
++{ return (cell[21] & 0x38u) >> 3; }
++/* Formerly invalid high bits [0..2], with typed mod witness. Lower
++ * legacy performance/crush words are unchanged. */
++static inline unsigned s1_tremolo_route_code(const uint8_t cell[32])
++{ return (cell[0] >> 7) | ((cell[1] >> 7) << 1) | ((cell[2] >> 7) << 2); }
++static inline int s1_fx_gate_slot(unsigned slot) { return slot-S1_DELAY_ON < 2u; }
+ static inline int s1_mod_ext_slot(unsigned slot) { return slot - S1_MOD_EXT_FIRST < S1_MOD_EXT_COUNT; }
+ static inline unsigned s1_mod_ext_divisor(unsigned slot) { return slot == S1_FM_LFO ? 1u : S1_MOD_RADIX; }
+ #define S1_EXTRA_MARK (UINT32_C(1) << 22)
+@@ -68,7 +105,7 @@
+ static inline int s1_base_route_slot(unsigned slot)
+ { return slot - S1_ROUTE_FIRST < S1_ROUTE_COUNT; }
+ static inline int s1_base_edit_slot(unsigned slot)
+-{ return s1_mod_ext_slot(slot) || s1_base_route_slot(slot) || slot - S1_BASE_EDIT_FIRST < S1_BASE_EDIT_COUNT; }
++{ return slot == S1_TREMOLO_LFO || slot == S1_PITCH_LFO || slot == S1_DETUNE_LFO || s1_fx_gate_slot(slot) || slot - S1_VOICE_MODE < 2u || slot == S1_OSC2_DETUNE || s1_coarse_slot(slot) || s1_mod_ext_slot(slot) || s1_base_route_slot(slot) || slot - S1_BASE_EDIT_FIRST < S1_BASE_EDIT_COUNT; }
+ float s1c_morph_preview(float position, uint32_t phase);
+ static inline unsigned s1_extra_bits(const uint8_t *data)
+ { return (unsigned)data[0] | (((unsigned)data[1] & 7u) << 8); }
+@@ -98,10 +135,14 @@
+ static inline unsigned s1_patch_steps(unsigned slot)
+ {
+ #if X0X_S1_EXTRA
++    if (slot == S1_VOICE_MODE || s1_fx_gate_slot(slot)) return 1u;
++    if (slot == S1_MONO_GLIDE) return S1_GLIDE_STEPS;
++    if (slot == S1_OSC2_DETUNE) return S1_DETUNE_STEPS;
++    if (s1_coarse_slot(slot)) return S1_COARSE_STEPS;
+     if (slot == S1_SUB_OCTAVE || slot == S1_SUB_WAVE) return 1;
+     if (slot == S1_FILTER_TYPE) return 2;
+     if (slot == S1_LFO_SYNC || slot == S1_WIDEN || slot == S1_MONO_LEGATO) return 1;
+-    if (slot - S1_LFO1_SHAPE < 2u || slot == S1_CUTOFF_LFO || s1_base_route_slot(slot) || s1_mod_ext_slot(slot)) return 3;
++    if (slot - S1_LFO1_SHAPE < 2u || slot == S1_CUTOFF_LFO || slot == S1_DETUNE_LFO || slot == S1_PITCH_LFO || slot == S1_TREMOLO_LFO || s1_base_route_slot(slot) || s1_mod_ext_slot(slot)) return 3;
+ #endif
+     return slot == S1_PATCH_COUNT ? 1u : S1_PATCH_STEPS;
+ }
+--- a/firmware/src/app/s1c_part.c
++++ b/firmware/src/app/s1c_part.c
+@@ -8,14 +8,17 @@
+ #include "original_sound.h"
+ #endif
+ #include <stddef.h>
++#include <math.h>
+ #include <string.h>
+ 
+ #define S1C_SR 44100.0f
+ /* Synth One factory parameter ids (s1c uses the same numbering). */
+-enum { P_MONO = 20, P_DETM = 31, P_BCSR = 34, P_PAN_RATE = 36, P_DELAY_TIME = 43, P_CUTOFF_LFO = 48, P_RESONANCE_LFO = 49, P_OSC_MIX_LFO = 50, P_AMP_DECAY_LFO = 52, P_NOISE_LFO = 53, P_FM_LFO = 54, P_TEMPO_SYNC = 139 };
+-
++enum { P_CUT = 16, P_MONO = 20, P_GLIDE = 21, P_DET2 = 30, P_DETM = 31, P_BCSR = 34, P_PAN_RATE = 36, P_DELAY_TIME = 43, P_CUTOFF_LFO = 48, P_RESONANCE_LFO = 49, P_OSC_MIX_LFO = 50, P_AMP_DECAY_LFO = 52, P_NOISE_LFO = 53, P_FM_LFO = 54, P_DETUNE_LFO = 55, P_PITCH_LFO = 57, P_TREMOLO_LFO = 59, P_TEMPO_SYNC = 139 };
++
++#if !X0X_SYNTH_CONTROLS_INIT_ONLY
+ static const uint8_t *s1_part_pack;
+ static uint16_t s1_part_pack_count;
++#endif
+ 
+ _Static_assert(S1C_RVB_BYTES % 4u == 0u && S1C_RVB_BYTES + 1024u <= S1C_ARENA_BYTES,
+                "reverb lines leave at least 1 KiB of delay pool in the Chicago FX2 arena");
+@@ -27,7 +30,9 @@
+     e->rv.fit[0] = 0.5f; e->rv.fit[1] = 1.5f; e->rv.fit[2] = 1.0f; e->dfmt = 0;
+ }
+ 
++#if !X0X_SYNTH_CONTROLS_INIT_ONLY
+ static void emit(void *context, unsigned id, float physical) { (void)s1c_front_set((s1c *)context, id, physical); }
++#endif
+ 
+ static void load_init(s1c *e)
+ {
+@@ -35,6 +40,11 @@
+     for (unsigned i = 0; i < 150u; ++i) (void)s1c_front_set(e, i, s1c_front_init(i));
+ }
+ 
++#if X0X_SYNTH_CONTROLS_INIT_ONLY
++unsigned s1_part_set_pack(const uint8_t *p, uint32_t bytes) { (void)p; (void)bytes; return 0; }
++unsigned s1_part_programs(void) { return 0; }
++const char *s1_part_program_name(unsigned program) { (void)program; return "INIT"; }
++#else
+ unsigned s1_part_set_pack(const uint8_t *p, uint32_t bytes)
+ {
+     s1_part_pack = NULL;
+@@ -61,6 +71,7 @@
+     name[i] = 0;
+     return name;
+ }
++#endif
+ 
+ int s1_part_program(s1_dry_part *part, unsigned program)
+ {
+@@ -68,16 +79,27 @@
+     int ok = 1;
+     if (program != S1_PART_INIT && program >= s1_part_programs()) { program = S1_PART_INIT; ok = 0; }
+     load_init(e);
++#if !X0X_SYNTH_CONTROLS_INIT_ONLY
+     if (program != S1_PART_INIT) {
+         char name[S1PACK_NAME_MAX];
+         if (s1pack_read(s1_part_pack, program, name, emit, e) < 0) { load_init(e); program = S1_PART_INIT; ok = 0; }
+     }
++#endif
+ #if X0X_S1_EXTRA
+     part->extra_live_mask = 0;
+     part->lfo_live_mask = 0;
+     part->clock_factory_pan = e->t[P_PAN_RATE];
+     part->clock_factory_delay = e->t[P_DELAY_TIME];
+     part->cutoff_lfo_factory = e->t[P_CUTOFF_LFO];
++    part->fx_gate_factory[0] = e->t[S1C_P_DLON];
++    part->fx_gate_factory[1] = e->t[S1C_P_RVON];
++    part->tremolo_lfo_factory = e->t[P_TREMOLO_LFO];
++    part->pitch_lfo_factory = e->t[P_PITCH_LFO];
++    part->detune_lfo_factory = e->t[P_DETUNE_LFO];
++    part->detune_factory = e->t[P_DET2];
++    part->voice_factory[0] = e->t[P_MONO];
++    part->voice_factory[1] = e->t[P_GLIDE];
++    for (unsigned i=0;i<2;++i) part->coarse_factory[i] = e->t[3u+i];
+     for (unsigned i = 0; i < S1_MOD_EXT_COUNT; ++i)
+         part->mod_ext_factory[i] = e->t[s1_patch_at(S1_MOD_EXT_FIRST+i)->factory_id];
+     for (unsigned i = 0; i < S1_ROUTE_COUNT; ++i)
+@@ -183,6 +205,22 @@
+     {"FM LFO", 0, 3, P_FM_LFO, X0X_U_NONE},
+     {"AMP DEC LFO", 0, 3, P_AMP_DECAY_LFO, X0X_U_NONE},
+ };
++static const s1_patch_descriptor coarse[2] = {
++    {"OSC 1 SEMI", -12, 24, 3, X0X_U_ST},
++    {"OSC 2 SEMI", -12, 24, 4, X0X_U_ST},
++};
++static const s1_patch_descriptor voice_mode[2] = {
++    {"VOICE MODE", 0, 1, P_MONO, X0X_U_NONE},
++    {"MONO GLIDE", 0, .2f, P_GLIDE, X0X_U_S},
++};
++static const s1_patch_descriptor detune = {"OSC 2 DETUNE", -4, 4, P_DET2, X0X_U_NONE};
++static const s1_patch_descriptor fx_gate[2] = {
++    {"DELAY", 0, 1, S1C_P_DLON, X0X_U_NONE},
++    {"REVERB", 0, 1, S1C_P_RVON, X0X_U_NONE},
++};
++static const s1_patch_descriptor detune_lfo = {"DETUNE LFO", 0, 3, P_DETUNE_LFO, X0X_U_NONE};
++static const s1_patch_descriptor pitch_lfo = {"PITCH LFO", 0, 3, P_PITCH_LFO, X0X_U_NONE};
++static const s1_patch_descriptor tremolo_lfo = {"TREMOLO LFO", 0, 3, P_TREMOLO_LFO, X0X_U_NONE};
+ static const s1_patch_descriptor cutoff_lfo = {"CUTOFF LFO", 0, 3, P_CUTOFF_LFO, X0X_U_NONE};
+ enum { S1_CATALOG_EXTRA_COUNT = sizeof extra_parameters / sizeof extra_parameters[0] };
+ _Static_assert(S1_CATALOG_EXTRA_COUNT == S1_WET_FIRST - S1_EXTRA_FIRST + S1_WET_COUNT,
+@@ -194,6 +232,13 @@
+     if (slot < S1_PATCH_COUNT) return &patch_parameters[slot];
+ #if X0X_S1_EXTRA
+     if (slot == S1_CUTOFF_LFO) return &cutoff_lfo;
++    if (slot == S1_TREMOLO_LFO) return &tremolo_lfo;
++    if (slot == S1_PITCH_LFO) return &pitch_lfo;
++    if (slot == S1_DETUNE_LFO) return &detune_lfo;
++    if (s1_fx_gate_slot(slot)) return &fx_gate[slot-S1_DELAY_ON];
++    if (slot == S1_OSC2_DETUNE) return &detune;
++    if (slot-S1_VOICE_MODE < 2u) return &voice_mode[slot-S1_VOICE_MODE];
++    if (s1_coarse_slot(slot)) return &coarse[slot-S1_COARSE_FIRST];
+     if (s1_mod_ext_slot(slot)) return &mod_ext[slot-S1_MOD_EXT_FIRST];
+     if (s1_base_route_slot(slot)) return &routes[slot-S1_ROUTE_FIRST];
+     if (s1_base_edit_slot(slot)) return &base_editor[slot-S1_BASE_EDIT_FIRST];
+@@ -208,6 +253,13 @@
+         if (patch_parameters[i].factory_id == id) return (int)i;
+ #if X0X_S1_EXTRA
+     if (id == P_CUTOFF_LFO) return S1_CUTOFF_LFO;
++    if (id == P_TREMOLO_LFO) return S1_TREMOLO_LFO;
++    if (id == P_PITCH_LFO) return S1_PITCH_LFO;
++    if (id == P_DETUNE_LFO) return S1_DETUNE_LFO;
++    if (id == S1C_P_DLON || id == S1C_P_RVON) return id == S1C_P_DLON ? S1_DELAY_ON : S1_REVERB_ON;
++    if (id == P_DET2) return S1_OSC2_DETUNE;
++    if (id-P_MONO < 2u) return (int)(S1_VOICE_MODE+id-P_MONO);
++    if (id-3u < 2u) return (int)(S1_COARSE_FIRST+id-3u);
+     for (unsigned i = 0; i < S1_MOD_EXT_COUNT; ++i)
+         if (id == mod_ext[i].factory_id) return (int)(S1_MOD_EXT_FIRST+i);
+     for (unsigned i = 0; i < S1_ROUTE_COUNT; ++i)
+@@ -314,6 +366,16 @@
+ {
+     uint32_t mask = original_sound_edit_mask(cell);
+ #if X0X_S1_EXTRA
++    for (unsigned i=0;i<2;++i) {
++        unsigned code = s1_coarse_code(cell,i);
++        s1c_set(&part->e, 3u+i, code ? (float)((int)code-13) : part->coarse_factory[i]);
++    }
++    unsigned voice = s1_voice_code(cell);
++    unsigned mono = voice / S1_GLIDE_RADIX, glide = voice % S1_GLIDE_RADIX;
++    s1c_set(&part->e, P_MONO, mono ? (float)(mono-1u) : part->voice_factory[0]);
++    s1c_set(&part->e, P_GLIDE, glide ? (float)(glide-1u) / 200.f : part->voice_factory[1]);
++    unsigned detune_code = s1_detune_code(cell);
++    s1c_set(&part->e, P_DET2, detune_code ? (float)((int)detune_code-41) / 10.f : part->detune_factory);
+     unsigned mod_code = mask & S1_MOD_EXT_MARK ? cell[S1_MOD_EXT_BYTE] : 0u;
+     for (unsigned i = 0; i < S1_MOD_EXT_COUNT; ++i) {
+         unsigned digit = mod_code % S1_MOD_RADIX;
+@@ -321,6 +383,15 @@
+                 digit ? (float)(digit - 1u) : part->mod_ext_factory[i]);
+         mod_code /= S1_MOD_RADIX;
+     }
++    unsigned delay = mod_code % S1_FX_GATE_RADIX, reverb = mod_code / S1_FX_GATE_RADIX;
++    s1c_set_delay_gate(&part->e, delay ? (float)(delay-1u) : part->fx_gate_factory[0], delay != 0);
++    s1c_set(&part->e, S1C_P_RVON, reverb ? (float)(reverb-1u) : part->fx_gate_factory[1]);
++    unsigned detune_route = s1_detune_route_code(cell);
++    s1c_set(&part->e, P_DETUNE_LFO, detune_route ? (float)(detune_route-1u) : part->detune_lfo_factory);
++    unsigned pitch_route = s1_pitch_route_code(cell);
++    s1c_set(&part->e, P_PITCH_LFO, pitch_route ? (float)(pitch_route-1u) : part->pitch_lfo_factory);
++    unsigned tremolo_route = s1_tremolo_route_code(cell);
++    s1c_set(&part->e, P_TREMOLO_LFO, tremolo_route ? (float)(tremolo_route-1u) : part->tremolo_lfo_factory);
+     uint8_t codes[S1_ROUTE_COUNT];
+     if (s1_route_decode(mask >> S1_ROUTE_SHIFT, codes))
+         for (unsigned i = 0; i < S1_ROUTE_COUNT; ++i)
+@@ -330,7 +401,7 @@
+         const s1_patch_descriptor *d = &base_editor[i];
+         const unsigned byte = S1_BASE_EDIT_BYTE + i;
+         s1c_set(&part->e, d->factory_id, mask & (UINT32_C(1) << byte) ?
+-                s1_patch_physical(d, cell[byte]) : part->base_factory[i]);
++                s1_patch_physical(d, cell[byte] & 127u) : part->base_factory[i]);
+     }
+ #endif
+     if (part->filter_link)
+@@ -339,7 +410,7 @@
+     for (unsigned i = 0; i < S1_PATCH_COUNT; ++i) {
+         unsigned byte = S1_PATCH_FIRST_BYTE + i;
+         if (mask & (UINT32_C(1) << byte))
+-            (void)s1c_front_set(&part->e, patch_parameters[i].factory_id, s1_patch_physical(&patch_parameters[i], cell[byte]));
++            (void)s1c_front_set(&part->e, patch_parameters[i].factory_id, s1_patch_physical(&patch_parameters[i], cell[byte] & 127u));
+     }
+     part->filter_link = (mask & S1_LINK_MASK) != 0;
+     if (part->filter_link)
+@@ -352,6 +423,14 @@
+ }
+ #endif
+ 
++/* AudioKit Manager routes normalized CC1 to the inverted logarithmic
++ * 120..7600 scale, times 3. Front end clamps cutoff to 64..22050 Hz. */
++void s1_part_mod_wheel(s1_dry_part *part, unsigned cc1)
++{
++    if (cc1 > 127u) cc1 = 127u;
++    const float cutoff = 360.f * powf(7600.f / 120.f, (float)(127u-cc1) / 127.f);
++    (void)s1c_front_set(&part->e, P_CUT, cutoff);
++}
+ int s1_part_param(s1_dry_part *part, unsigned id, float value)
+ {
+     if (id > 2 || !(value >= 0.0f && value <= 1.0f)) return 0;
+--- a/firmware/src/app/s1c_part.h
++++ b/firmware/src/app/s1c_part.h
+@@ -24,7 +24,7 @@
+ #if X0X_S1_EXTRA
+     float extra_factory[S1_EXTRA_COUNT]; /* exact pack values for note-lock transitions */
+     float lfo_factory[S1_LFO_COUNT], wet_factory[S1_WET_COUNT];
+-    float mod_ext_factory[S1_MOD_EXT_COUNT];
++    float mod_ext_factory[S1_MOD_EXT_COUNT], coarse_factory[2], detune_factory, voice_factory[2], fx_gate_factory[2], detune_lfo_factory, pitch_lfo_factory, tremolo_lfo_factory;
+     float clock_factory_pan, clock_factory_delay, cutoff_lfo_factory, route_factory[S1_ROUTE_COUNT], base_factory[S1_BASE_EDIT_COUNT];
+     uint16_t extra_live_mask;
+     uint8_t lfo_live_mask;
+@@ -59,6 +59,8 @@
+ #endif
+ #endif
+ int s1_part_param(s1_dry_part *part, unsigned id, float value);
++/* Original Init route (cutoff). Performance-only, no Sound or REC lane. */
++void s1_part_mod_wheel(s1_dry_part *part, unsigned cc1);
+ int s1_part_note(s1_dry_part *part, unsigned key, unsigned velocity);
+ int s1_part_active(const s1_dry_part *part);
+ /* UI observation: loudest voice's amp envelope, filter envelope, stage (0 attack,
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -23,6 +23,77 @@
+ #include "../dsp/juno6_controls.h"
+ #include "../dsp/master.h"
+ #include "../dsp/drum909.h"              /* this renderer directly uses DR_* and drum909_param_si */
++typedef enum {
++    PT_EMPTY,
++    PT_808_MIX,
++    PT_909_MIX,
++    PT_AMP_ADSR,
++    PT_AMP_ENVELOP,
++    PT_AMPLIFIER,
++    PT_ARP_SEQ,
++    PT_ARPEGGIATOR,
++    PT_BAR,
++    PT_BD,
++    PT_CARRIER,
++    PT_CB,
++    PT_CH,
++    PT_CHORUS,
++    PT_CP,
++    PT_CR,
++    PT_CY,
++    PT_DELAY,
++    PT_EFFECT,
++    PT_ENVELOPE,
++    PT_FILTER,
++    PT_FILTER_1,
++    PT_FILTER_2,
++    PT_FILTER_ADSR,
++    PT_FILTER_MODE,
++    PT_FM_NOISE,
++    PT_GENERATE,
++    PT_GROOVE,
++    PT_HT,
++    PT_KEYS,
++    PT_KIT,
++    PT_LFO,
++    PT_LFO_MODE,
++    PT_LFO_RATE,
++    PT_LFO_CHORUS,
++    PT_LFO2_PWM,
++    PT_LOOPS,
++    PT_LT,
++    PT_MASTER,
++    PT_MOD_ROUTE,
++    PT_MT,
++    PT_OH,
++    PT_OSC_MIX,
++    PT_OSCILLATOR,
++    PT_OUTPUT,
++    PT_PARTS,
++    PT_PERF,
++    PT_PERFORM,
++    PT_PRESET,
++    PT_PULSE_WIDTH,
++    PT_RD,
++    PT_RETRIG,
++    PT_REVERB,
++    PT_RS,
++    PT_SCALE,
++    PT_SD,
++    PT_SEQUENCE,
++    PT_SOUND,
++    PT_TEMPO_SYNC,
++    PT_TUNING,
++    PT_VIBRATO,
++    PT_VOICE,
++    PT_WAVE,
++    PT_WOBBLE,
++    PT_XMOD,
++    PT_FX_BYPASS,
++    PT_PITCH_MOD,
++    PT_COUNT
++} page_title_id_t;
++
+ #include "ui_original_controls.h"
+ #if X0X_ORIGINAL_SYNTH
+ #include "miami_ms20.h"
+@@ -530,6 +601,8 @@
+         {"LAYER 2 SEMI", SJ6_SEMI_MAX, SJ6_SEMI_CENTER, 0},
+         {"LAYER 1 FINE", SJ6_FINE_MAX, SJ6_FINE_CENTER, 0},
+         {"LAYER 2 FINE", SJ6_FINE_MAX, SJ6_FINE_CENTER, 0},
++        {"OSC 2 LVL", 127, 127, 0},
++        {"OSC 1 LVL", 127, 127, 0},
+         {"PWM BASE", SJ6_PWM_STEPS, 0, 0},
+     };
+     return slot < sizeof knobs / sizeof *knobs ? &knobs[slot] : 0;
+@@ -627,7 +700,7 @@
+ {
+     if (r.kind == R_BSTATUS) return 1;
+     /* A bank with a single preset (Synth One INIT) has nothing to choose. */
+-    if (r.kind == R_BPRESET && original_sound_factories((unsigned)engine_bass_requested_bank(r.b)) <= 1u) return 1;
++    if (r.kind == R_BPRESET && original_sound_available_factories((unsigned)engine_bass_requested_bank(r.b)) <= 1u) return 1;
+     if (r.kind == R_ENG && r.a == T_303 && original_sound_is_performance(
+         (unsigned)engine_bass_sound_bank(&proj.sound,r.b),r.c)) return 1;
+     return r.kind == R_BATT || r.kind == R_BTSTAT || r.kind == R_BTNAME;
+@@ -679,7 +752,7 @@
+     case R_BENGINE: return &BENGINE_P;
+     case R_BPRESET:
+         {
+-            unsigned max = original_sound_factories((unsigned)engine_bass_requested_bank(r.b));
++            unsigned max = original_sound_available_factories((unsigned)engine_bass_requested_bank(r.b));
+             BPRESET_P.max = max > 256u ? 255u : (uint8_t)(max ? max - 1u : 0u);
+         }
+         return &BPRESET_P;
+@@ -687,7 +760,7 @@
+     case R_BPATSND: {
+         unsigned bank = (unsigned)engine_bass_requested_bank(r.b);
+         /* The pattern wire can recall only Synth One INIT, not factory ordinals. */
+-        PATSND_P.max = bank == ORIGINAL_SOUND_SYNTHONE ? 1u : (uint8_t)original_sound_factories(bank);
++        PATSND_P.max = bank == ORIGINAL_SOUND_SYNTHONE ? 1u : (uint8_t)original_sound_available_factories(bank);
+         return &PATSND_P;
+     }
+     case R_NOTELOCK: return &NOTELOCK_P;
+@@ -928,7 +1001,7 @@
+     int vmax = d->max;
+ #if X0X_S1C
+     if (r.kind == R_BPRESET)
+-        vmax = (int)original_sound_factories((unsigned)engine_bass_requested_bank(r.b)) - 1;
++        vmax = (int)original_sound_available_factories((unsigned)engine_bass_requested_bank(r.b)) - 1;
+ #endif
+     v = v < 0 ? 0 : v > vmax ? vmax : v;
+     if (r.kind == R_BENGINE || r.kind == R_BPRESET) {
+@@ -952,6 +1025,15 @@
+         /* The upper stop is also a no-op for historical INIT aliases. */
+         if ((!v && !ps) || (v == 1 && ps >= 0xC1u && ps <= 0xC4u)) return;
+     }
++#if X0X_SUPERJ6_BUILTIN_INIT
++    if (r.kind == R_ENG && r.a == T_303 && r.c == ORIGINAL_SJ6_HPF_PANEL &&
++        proj.sound.v[T_303][r.b][29] == ORIGINAL_SOUND_JUNO && v == pref_get(r)) {
++#if X0X_BASS_PRESET_PREVIEW
++        if (bass_edit) engine_bass_edit_hold(0);
++#endif
++        return;
++    }
++#endif
+     pref_dirty(&r);
+     switch (r.kind) {
+     case R_ENG:
+@@ -959,6 +1041,10 @@
+             if (!original_sound_set(proj.sound.v[T_303][r.b],r.c,(unsigned)v)) {
+                 say("INVALID SOUND",0); break;
+             }
++#if X0X_SUPERJ6_BUILTIN_INIT
++            if (r.c == ORIGINAL_SJ6_HPF_PANEL && proj.sound.v[T_303][r.b][29] == ORIGINAL_SOUND_JUNO)
++                proj.sound.v[T_303][r.b][ORIGINAL_SJ6_HPF_LAW_BYTE] |= 128u;
++#endif
+             engine_bass_sound_refresh(&proj.sound,r.b);
+         } else
+         proj.sound.v[r.a][r.b][r.c] = (uint8_t)v;
+@@ -1368,7 +1454,17 @@
+         float hz;                                     /* CUTOFF: the engine's base corner (Synths 91f6e4e9), else % */
+         if (engine_param_si(T_303, r.b, (int)id, value, &hz) == X0X_U_HZ) { unit_value(X0X_U_HZ, hz, num, unit); return 1; }
+     }
+-    if (kind == ORIGINAL_SOUND_JUNO) { juno_value_text(id, value, num, unit); return 1; }
++    if (kind == ORIGINAL_SOUND_JUNO) {
++#if X0X_SUPERJ6_BUILTIN_INIT
++        if (id == ORIGINAL_SJ6_HPF_PANEL && value > 0 &&
++            original_sound_sj6_hpf_authored(proj.sound.v[T_303][r.b])) {
++            unit_value(X0X_U_HZ, juno6_sj6_hpf_hz((value * (1.f/127.f))), num, unit);
++            return 1;
++        }
++#endif
++        juno_value_text(id, value, num, unit);
++        return 1;
++    }
+     if (kind == ORIGINAL_SOUND_SYNTHONE) { put_i(num,(value*100+63)/127); put_s(unit,"%"); return 1; }
+     if (ui_original_states(kind,id) || (kind == ORIGINAL_SOUND_CHICAGO && (id == 0 || id == 4)) ||
+         (kind == ORIGINAL_SOUND_MIAMI && id == 7)) {
+@@ -1495,8 +1591,12 @@
+         }
+         if (r.c == S1_SUB_OCTAVE) { put_s(num, physical > 0.f ? "-24" : "-12"); put_s(unit, "st"); return; }
+         if (r.c == S1_SUB_WAVE) { put_s(num, physical > 0.f ? "SQUARE" : "SINE"); return; }
++        if (s1_fx_gate_slot(r.c)) { put_s(num, owner.position ? "ON" : "OFF"); return; }
++        if (r.c == S1_VOICE_MODE) { put_s(num, owner.position ? "MONO" : "POLY"); return; }
++        if (r.c == S1_MONO_GLIDE) { put_i(num, (int)(1000.f*physical + .5f)); put_s(unit, "ms"); return; }
++        if (r.c == S1_OSC2_DETUNE) { put_d1(num, physical, 1); put_s(unit, "Hz@C4"); return; }
+         if (r.c == S1_FM_INDEX) { put_d1(num, physical, 0); return; }
+-        if (r.c == S1_CUTOFF_LFO || s1_mod_ext_slot(r.c) || s1_base_route_slot(r.c)) {
++        if (r.c == S1_CUTOFF_LFO || r.c == S1_DETUNE_LFO || r.c == S1_PITCH_LFO || r.c == S1_TREMOLO_LFO || s1_mod_ext_slot(r.c) || s1_base_route_slot(r.c)) {
+             static const char *const sources[] = {"OFF", "LFO 1", "LFO 2", "BOTH"};
+             put_s(num, sources[owner.position & 3u]);
+             return;
+@@ -1518,6 +1618,7 @@
+     }
+ #if X0X_SUPERJ6_BUILTIN_INIT
+     if (r.kind == R_SJ6KNOB && !d->names) {
++        if ((r.c == SJ6_OSC2_LEVEL || r.c == SJ6_OSC1_LEVEL) && v == 128) { put_s(num,"INIT"); return; }
+         if (r.c == SJ6_LAYER1_FINE || r.c == SJ6_LAYER2_FINE) {
+             put_i(num, v - SJ6_FINE_CENTER);
+             put_s(unit, "ct");
+@@ -1734,14 +1835,14 @@
+ }
+ 
+ /* ===================================================================== pages === */
+-#define MAXPAGES 15
++#define MAXPAGES 23
+ /* page groups: whose values a page holds (the SEL list's headers, the header's colour) */
+ enum { GR_NONE, GR_TRACK, GR_TMIX, GR_KIT, GR_PAT, GR_SOUND, GR_MORE,
+        GR_MIDI, GR_AUDIO, GR_KEYS, GR_PROJECT, GR_SYSTEM, GR_BT };   /* (the last six: GLO's sections) */
+ #define MAXMORE 14
+ typedef struct {
+     pref_t r[MAXPAGES][4];
+-    char title[MAXPAGES][12];
++    uint8_t title[MAXPAGES];
+     uint8_t group[MAXPAGES];
+     int n;
+     int nmore;
+@@ -1752,14 +1853,99 @@
+ _Static_assert(MAXMORE <= PAGE_REFS, "page and MORE refs share a bounded matrix");
+ static pages_t pg X0X_POOL;
+ 
+-/* Page rows grow forward from zero; SEL's MORE refs grow backward through
+- * the unused rows. Keep append order without allocating a second matrix. */
++/* One immutable, exactly legacy-truncated label per typed page ID. */
++static const char *const page_titles[PT_COUNT] = {
++    [PT_EMPTY] = "",
++    [PT_808_MIX] = "808 MIX",
++    [PT_909_MIX] = "909 MIX",
++    [PT_AMP_ADSR] = "AMP ADSR",
++    [PT_AMP_ENVELOP] = "AMP ENVELOP",
++    [PT_AMPLIFIER] = "AMPLIFIER",
++    [PT_ARP_SEQ] = "ARP SEQ",
++    [PT_ARPEGGIATOR] = "ARPEGGIATOR",
++    [PT_BAR] = "BAR",
++    [PT_BD] = "BD",
++    [PT_CARRIER] = "CARRIER",
++    [PT_CB] = "CB",
++    [PT_CH] = "CH",
++    [PT_CHORUS] = "CHORUS",
++    [PT_CP] = "CP",
++    [PT_CR] = "CR",
++    [PT_CY] = "CY",
++    [PT_DELAY] = "DELAY",
++    [PT_EFFECT] = "EFFECT",
++    [PT_FX_BYPASS] = "FX SWITCHES",
++    [PT_PITCH_MOD] = "PITCH MOD",
++    [PT_ENVELOPE] = "ENVELOPE",
++    [PT_FILTER] = "FILTER",
++    [PT_FILTER_1] = "FILTER 1",
++    [PT_FILTER_2] = "FILTER 2",
++    [PT_FILTER_ADSR] = "FILTER ADSR",
++    [PT_FILTER_MODE] = "FILTER MODE",
++    [PT_FM_NOISE] = "FM / NOISE",
++    [PT_GENERATE] = "GENERATE",
++    [PT_GROOVE] = "GROOVE",
++    [PT_HT] = "HT",
++    [PT_KEYS] = "KEYS",
++    [PT_KIT] = "KIT",
++    [PT_LFO] = "LFO",
++    [PT_LFO_MODE] = "LFO MODE",
++    [PT_LFO_RATE] = "LFO RATE",
++    [PT_LFO_CHORUS] = "LFO/CHORUS",
++    [PT_LFO2_PWM] = "LFO2 PWM",
++    [PT_LOOPS] = "LOOPS",
++    [PT_LT] = "LT",
++    [PT_MASTER] = "MASTER",
++    [PT_MOD_ROUTE] = "MOD ROUTE",
++    [PT_MT] = "MT",
++    [PT_OH] = "OH",
++    [PT_OSC_MIX] = "OSC MIX",
++    [PT_OSCILLATOR] = "OSCILLATOR",
++    [PT_OUTPUT] = "OUTPUT",
++    [PT_PARTS] = "PARTS",
++    [PT_PERF] = "PERF",
++    [PT_PERFORM] = "PERFORM",
++    [PT_PRESET] = "PRESET",
++    [PT_PULSE_WIDTH] = "PULSE WIDTH",
++    [PT_RD] = "RD",
++    [PT_RETRIG] = "RETRIG",
++    [PT_REVERB] = "REVERB",
++    [PT_RS] = "RS",
++    [PT_SCALE] = "SCALE",
++    [PT_SD] = "SD",
++    [PT_SEQUENCE] = "SEQUENCE",
++    [PT_SOUND] = "SOUND",
++    [PT_TEMPO_SYNC] = "TEMPO SYNC",
++    [PT_TUNING] = "TUNING",
++    [PT_VIBRATO] = "VIBRATO",
++    [PT_VOICE] = "VOICE",
++    [PT_WAVE] = "WAVE",
++    [PT_WOBBLE] = "WOBBLE",
++    [PT_XMOD] = "XMOD",
++};
++_Static_assert(PT_COUNT < 256, "page title IDs fit");
++static const char *page_title(const pages_t *p, int n)
++{ return page_titles[p->title[n]]; }
++static page_title_id_t drum_page_title(int t, int v)
++{
++    static const uint8_t n909[] = { PT_BD, PT_SD, PT_LT, PT_MT, PT_HT, PT_RS,
++                                  PT_CP, PT_CH, PT_OH, PT_CR, PT_RD, PT_KIT };
++    static const uint8_t n808[] = { PT_BD, PT_SD, PT_LT, PT_MT, PT_HT, PT_RS,
++                                  PT_CP, PT_CB, PT_CY, PT_OH, PT_CH, PT_KIT };
++    _Static_assert(sizeof n909 == DR_NUM + 1 && sizeof n808 == D8_NUM + 1,
++                   "drum title coverage");
++    if (t == T_909 && (unsigned)v < sizeof n909) return n909[v];
++    if (t == T_808 && (unsigned)v < sizeof n808) return n808[v];
++    return PT_EMPTY;
++}
++
+ static pref_t *page_more(pages_t *pages, unsigned i)
+ {
+     unsigned slot = PAGE_REFS - 1u - i;
+     return &pages->r[slot / 4u][slot % 4u];
+ }
+-typedef struct { pref_t r[4]; char title[12]; int page, n; } page_query_t;
++typedef struct { pref_t r[4]; char title[12]; int page; uint8_t n, nmore; } page_query_t;
++_Static_assert(sizeof(page_query_t) == 36, "SMC query caches must not grow");
+ /* The descriptor emitter has one explicit output contract. Query mode records
+  * one requested page plus the count, without a second persistent page table. */
+ typedef struct {
+@@ -1771,6 +1957,9 @@
+ static void more(page_emitter_t *emit, pref_t r)
+ {
+     pages_t *pages = emit->pages;
++    page_query_t *q = emit->query;
++    if (q && r.kind != R_NONE && q->nmore < MAXMORE && 4 * q->n + q->nmore < PAGE_REFS)
++        q->nmore++;
+     if (pages && r.kind != R_NONE && pages->nmore < MAXMORE &&
+         4 * pages->n + pages->nmore < PAGE_REFS)
+         *page_more(pages, pages->nmore++) = r;
+@@ -1778,7 +1967,7 @@
+ 
+ /* Both page consumers write the same four refs and truncated title. Select
+  * the destination once, retaining each consumer's bounds and count. */
+-static void add_page(page_emitter_t *emit, const char *t,
++static void add_page(page_emitter_t *emit, page_title_id_t title,
+                      pref_t a, pref_t b, pref_t c, pref_t d)
+ {
+     page_query_t *query = emit->query;
+@@ -1786,6 +1975,7 @@
+     pref_t *refs;
+     char *text;
+     if (query) {
++        if (query->n >= MAXPAGES || 4 * (query->n + 1) + query->nmore > PAGE_REFS) return;
+         if (query->n != query->page) {
+             query->n++;
+             return;
+@@ -1796,17 +1986,19 @@
+         if (pages->n >= MAXPAGES || 4 * (pages->n + 1) + pages->nmore > PAGE_REFS)
+             return;
+         refs = pages->r[pages->n];
+-        text = pages->title[pages->n];
++        text = 0;
++        pages->title[pages->n] = title;
+     }
+     refs[0] = a;
+     refs[1] = b;
+     refs[2] = c;
+     refs[3] = d;
+-    unsigned i = 0;
+-    for (; i < 11 && t[i]; i++)
+-        text[i] = t[i];
+-    text[i] = 0;
+     if (query) {
++        unsigned i = 0;
++        const char *t = page_titles[title];
++        for (; i < 11 && t[i]; i++)
++            text[i] = t[i];
++        text[i] = 0;
+         query->n++;
+     } else {
+         pages->group[pages->n] = emit->group;
+@@ -1860,10 +2052,10 @@
+     more(emit, drum_ref(extra & 15u,t,v));
+     more(emit, drum_ref(extra >> 4,t,v));
+     emit->group = GR_TRACK;
+-    add_page(emit,engine_voice_name(t,v),drum_ref(ids & 15u,t,v),drum_ref((ids >> 4) & 15u,t,v),
++    add_page(emit,drum_page_title(t,v),drum_ref(ids & 15u,t,v),drum_ref((ids >> 4) & 15u,t,v),
+              drum_ref((ids >> 8) & 15u,t,v),drum_ref(ids >> 12,t,v));
+     if(t==T_909 && (v==DR_BD || v==DR_SD))
+-        add_page(emit,"AMP ENVELOPE",PR(R_ENG,t,v,v==DR_BD?2:3),NONE,NONE,NONE);
++        add_page(emit,PT_AMP_ENVELOP,PR(R_ENG,t,v,v==DR_BD?2:3),NONE,NONE,NONE);
+ }
+ 
+ /* where a screen's page is kept: per part on the part's screens (and TB-3PO), else one per screen */
+@@ -2029,8 +2221,17 @@
+                 int key = 0;
+                 while (strikes >>= 1) ++key;
+                 int offset = 36 + key + 12 * ui.oct - UI_ARP_ROOT;
+-                if ((st.oct_mask >> arp_held) & 1u) offset -= 12;
+                 arp_edited = 1;   /* never toggle on pad release after editing */
++                if ((st.oct_mask >> arp_held) & 1u) {
++                    if (engine_bass_bank(bidx()) == ORIGINAL_SOUND_SYNTHONE) {
++                        /* Original OCT+ pushes signed offsets away from zero.
++                         * With boost on, the available pitches are -24..-13
++                         * and +12..+24; keep OCT+ when a key is in the gap. */
++                        if (offset >= -24 && offset <= -13) offset += 12;
++                        else if (offset >= 12 && offset <= 24) offset -= 12;
++                        else { say("OCT+ RANGE", 0); return; }
++                    } else offset -= 12;
++                }
+                 arp_step_edit((unsigned)arp_held, ARP_S_OFFSET, offset);
+             }
+         }
+@@ -2060,7 +2261,7 @@
+ /* Immutable page descriptions avoid rebuilding four constant preference records at
+  * every call site. The only patched byte is the current part/voice/channel;
+  * NONE retains its all-zero record. This runs only during UI page construction. */
+-X0X_COLD __attribute__((noinline)) static void add_page_refs(page_emitter_t *emit, const char *t, const pref_t *refs, int axis, uint8_t value)
++X0X_COLD __attribute__((noinline)) static void add_page_refs(page_emitter_t *emit, page_title_id_t title, const pref_t *refs, int axis, uint8_t value)
+ {
+     pref_t row[4];
+     for (int i = 0; i < 4; i++) {
+@@ -2070,7 +2271,7 @@
+             if (axis == 2) row[i].b = value;
+         }
+     }
+-    add_page(emit, t, row[0], row[1], row[2], row[3]);
++    add_page(emit, title, row[0], row[1], row[2], row[3]);
+ }
+ 
+ X0X_COLD __attribute__((noinline)) static void more_refs(page_emitter_t *emit, const pref_t *refs, unsigned n, int axis, uint8_t value)
+@@ -2087,7 +2288,7 @@
+ /* Pure navigation inputs: emit existing descriptors without keyboard clamping. */
+ #if X0X_SUPERJ6_BUILTIN_INIT || X0X_S1_EXTRA
+ enum { ORIG_PAGE_ENGINE = 128, ORIG_PAGE_S1_LINK = 254, ORIG_PAGE_NONE = 255 };
+-typedef struct { const char *title; uint8_t id[4]; } original_page_row_t;
++typedef struct { uint8_t title; uint8_t id[4]; } original_page_row_t;
+ __attribute__((noinline)) X0X_COLD static void add_original_extra_pages(
+     page_emitter_t *emit, const original_page_row_t *pages, unsigned count, int owner, unsigned kind)
+ {
+@@ -2112,28 +2313,28 @@
+     page_emitter_t output = {out, query, GR_NONE};
+     page_emitter_t *emit = &output;
+     if (query)
+-        query->n = 0;
++        query->n = query->nmore = 0;
+     else
+         out->n = out->nmore = 0;
+     switch (view) {
+     case V_HOME:                                       /* the pattern: how the parts run through it */
+     case V_GLO:
+         do { static const pref_t refs[4] = {PR(R_TEMPO, 0, 0, 0), PR(R_SWING, 0, 0, 0), PR(R_ENG, T_MST, 0, MST_DJF), PR(R_ENG, T_MST, 0, MST_PUMP)};
+-            add_page_refs(emit, "PERFORM", refs, 0, 0); } while (0);
++            add_page_refs(emit, PT_PERFORM, refs, 0, 0); } while (0);
+         break;
+     case V_SEQ:                                        /* the part's steps: how its pattern runs */
+         emit->group = GR_PAT;
+         if (part_is_drum(p))
+             do { static const pref_t refs[4] = {PR(R_DLEN, 0, 0, 0), PR(R_DRATE, 0, 0, 0), NONE, NONE};
+-            add_page_refs(emit, "SEQUENCE", refs, 1, p); } while (0);   /* (the swing: HOME's, all parts') */
++            add_page_refs(emit, PT_SEQUENCE, refs, 1, p); } while (0);   /* (the swing: HOME's, all parts') */
+         else if (part_is_303(p)) {
+             int b = p - PART_303A;
+             do { static const pref_t refs[4] = {PR(R_BLEN, 0, 0, 0), PR(R_BRATE, 0, 0, 0), PR(R_BDIR, 0, 0, 0), PR(R_BTRANS, 0, 0, 0)};
+-            add_page_refs(emit, "SEQUENCE", refs, 1, b); } while (0);
+-            add_page(emit, "PRESET", PR(R_BPATSND, 0, b, 0), NONE, NONE, NONE);   /* 0.0.25: this pattern's bass preset */
++            add_page_refs(emit, PT_SEQUENCE, refs, 1, b); } while (0);
++            add_page(emit, PT_PRESET, PR(R_BPATSND, 0, b, 0), NONE, NONE, NONE);   /* 0.0.25: this pattern's bass preset */
+             emit->group = GR_NONE;                          /* (not the pattern's: no P1 in its name) */
+             do { static const pref_t refs[4] = {PR(R_FREEPLAY, 0, 0, 0), NONE, NONE, NONE};
+-            add_page_refs(emit, "KEYS", refs, 1, b); } while (0);
++            add_page_refs(emit, PT_KEYS, refs, 1, b); } while (0);
+ #if X0X_ARP_HOOKS
+             if (arp_engine(b)) {                       /* 4: the 16 arp steps on the pads */
+                 emit->group = GR_PAT;
+@@ -2141,18 +2342,18 @@
+ #if X0X_SUPERJ6_BUILTIN_INIT && !defined(X0X_ARP_FAKE_H)
+                 if (engine_bass_bank(b) == ORIGINAL_SOUND_JUNO) division = PR(R_ARP, ARP_F_DIVISION, b, 0);
+ #endif
+-                add_page(emit, "ARP SEQ", PR(R_ARP, ARP_F_LENGTH, b, 0), PR(R_ARP, ARP_F_INTERVAL, b, 0), PR(R_ARP, ARP_F_GATE, b, 0), division);
++                add_page(emit, PT_ARP_SEQ, PR(R_ARP, ARP_F_LENGTH, b, 0), PR(R_ARP, ARP_F_INTERVAL, b, 0), PR(R_ARP, ARP_F_GATE, b, 0), division);
+                 emit->group = GR_NONE;
+             }
+ #endif
+         }
+         else {
+             do { static const pref_t refs[4] = {PR(R_BRKRATE, 0, 0, 0), NONE, NONE, NONE};
+-            add_page_refs(emit, "SEQUENCE", refs, 0, 0); } while (0);
++            add_page_refs(emit, PT_SEQUENCE, refs, 0, 0); } while (0);
+             do { static const pref_t refs[4] = {PR(R_BRKSET, 0, 0, BRK_COMPLEX), PR(R_BRKSET, 0, 0, BRK_ANCHOR), PR(R_BRKSET, 0, 0, BRK_ROLL), PR(R_BRKSET, 0, 0, BRK_FILL)};
+-            add_page_refs(emit, "GROOVE", refs, 0, 0); } while (0);
++            add_page_refs(emit, PT_GROOVE, refs, 0, 0); } while (0);
+             do { static const pref_t refs[4] = {PR(R_BRKSET, 0, 0, BRK_R2), PR(R_BRKSET, 0, 0, BRK_R3), PR(R_BRKSET, 0, 0, BRK_R4), PR(R_BRKSET, 0, 0, BRK_R8)};
+-            add_page_refs(emit, "RETRIG", refs, 0, 0); } while (0);
++            add_page_refs(emit, PT_RETRIG, refs, 0, 0); } while (0);
+             do { static const pref_t refs[] = {PR(R_BRKSET, 0, 0, BRK_PHRASE), PR(R_BRKSET, 0, 0, BRK_ALEN), PR(R_BRKSET, 0, 0, BRK_BLEN)};
+                 more_refs(emit, refs, 3, 0, 0); } while (0);
+         }
+@@ -2164,17 +2365,17 @@
+             emit->group = GR_KIT;
+             if (p == PART_909)                         /* (the kit's gain: the mixer's level does it) */
+                 do { static const pref_t refs[4] = {PR(R_ENG, T_909, NDRUM, 1), NONE, NONE, NONE};
+-            add_page_refs(emit, "KIT", refs, 0, 0); } while (0);
++            add_page_refs(emit, PT_KIT, refs, 0, 0); } while (0);
+             else
+                 do { static const pref_t refs[4] = {PR(R_ENG, T_808, NDRUM, 1), NONE, NONE, NONE};
+-            add_page_refs(emit, "KIT", refs, 0, 0); } while (0);
++            add_page_refs(emit, PT_KIT, refs, 0, 0); } while (0);
+         } else if (part_is_303(p)) {
+             int b = p - PART_303A;
+             emit->group = GR_SOUND;
+             int kind = engine_bass_bank(b), chicago = kind == ORIGINAL_SOUND_CHICAGO;
+             const int8_t (*rows)[4] = kind == ORIGINAL_SOUND_JUNO ? ui_original_juno_rows : kind == ORIGINAL_SOUND_SYNTHONE ? ui_original_synthone_rows :
+                 chicago ? ui_original_chicago_rows : ui_original_miami_rows;
+-            const char *const *titles = kind == ORIGINAL_SOUND_JUNO ? ui_original_juno_titles : kind == ORIGINAL_SOUND_SYNTHONE ? ui_original_synthone_titles :
++            const uint8_t *titles = kind == ORIGINAL_SOUND_JUNO ? ui_original_juno_titles : kind == ORIGINAL_SOUND_SYNTHONE ? ui_original_synthone_titles :
+                 chicago ? ui_original_chicago_titles : ui_original_miami_titles;
+             int count = kind == ORIGINAL_SOUND_JUNO ? UI_ORIGINAL_JUNO_PAGES : kind == ORIGINAL_SOUND_SYNTHONE ? UI_ORIGINAL_SYNTHONE_PAGES :
+                 chicago ? UI_ORIGINAL_CHICAGO_PAGES : UI_ORIGINAL_MIAMI_PAGES;
+@@ -2183,19 +2384,19 @@
+             if (kind == ORIGINAL_SOUND_JUNO) {
+                 enum { SJ6_PAGE_ID_FITS = 1 / (SJ6_LFO2_PWM_BASE < ORIG_PAGE_ENGINE) };
+                 static const original_page_row_t pages[] = {
+-                    {"OSCILLATOR", {SJ6_WAVE1, SJ6_WAVE2, SJ6_RANGE, SJ6_A_REFERENCE}},
+-                    {"PULSE WIDTH", {SJ6_PWM1_ON, SJ6_PWM1, SJ6_PWM2_ON, SJ6_PWM2}},
+-                    {"FILTER", {ORIG_PAGE_ENGINE + 2, ORIG_PAGE_ENGINE + 3, ORIG_PAGE_ENGINE + 4, SJ6_FILTER_LINK}},
+-                    {"FILTER ADSR", {SJ6_FILTER_ATTACK, SJ6_FILTER_DECAY, SJ6_FILTER_SUSTAIN, SJ6_FILTER_RELEASE}},
+-                    {"AMP ADSR", {SJ6_AMP_ATTACK, SJ6_AMP_DECAY, SJ6_AMP_SUSTAIN, SJ6_AMP_RELEASE}},
+-                    {"OUTPUT", {ORIG_PAGE_ENGINE + 9, SJ6_MASTER_LEVEL, ORIG_PAGE_NONE, ORIG_PAGE_NONE}},
+-                    {"LFO RATE", {SJ6_LFO1_RATE, SJ6_LFO2_RATE, SJ6_LFO3_RATE, SJ6_LFO2_SHAPE}},
+-                    {"LFO MODE", {SJ6_LFO1_MODE, SJ6_LFO2_MODE, SJ6_LFO3_MODE, ORIG_PAGE_NONE}},
+-                    {"LFO2 PWM", {SJ6_LFO2_RATE, SJ6_LFO2_PWM_DEPTH, SJ6_LFO2_PWM_ROUTE, SJ6_LFO2_PWM_BASE}},
+-                    {"LFO", {ORIG_PAGE_ENGINE + 10, ORIG_PAGE_ENGINE + 11, ORIG_PAGE_NONE, ORIG_PAGE_NONE}},
+-                    {"CHORUS", {SJ6_CHORUS_I, SJ6_CHORUS_II, SJ6_CHORUS_RATE, SJ6_CHORUS_MIX}},
+-                    {"VIBRATO", {SJ6_VIBRATO_DEPTH, SJ6_VIBRATO_RATE, ORIG_PAGE_NONE, ORIG_PAGE_NONE}},
+-                    {"TUNING", {SJ6_LAYER1_SEMI, SJ6_LAYER2_SEMI, SJ6_LAYER1_FINE, SJ6_LAYER2_FINE}},
++                    {PT_OSCILLATOR, {SJ6_WAVE1, SJ6_WAVE2, SJ6_RANGE, SJ6_A_REFERENCE}},
++                    {PT_PULSE_WIDTH, {SJ6_PWM1_ON, SJ6_PWM1, SJ6_PWM2_ON, SJ6_PWM2}},
++                    {PT_FILTER, {ORIG_PAGE_ENGINE + 2, ORIG_PAGE_ENGINE + 3, ORIG_PAGE_ENGINE + 4, SJ6_FILTER_LINK}},
++                    {PT_FILTER_ADSR, {SJ6_FILTER_ATTACK, SJ6_FILTER_DECAY, SJ6_FILTER_SUSTAIN, SJ6_FILTER_RELEASE}},
++                    {PT_AMP_ADSR, {SJ6_AMP_ATTACK, SJ6_AMP_DECAY, SJ6_AMP_SUSTAIN, SJ6_AMP_RELEASE}},
++                    {PT_OUTPUT, {ORIG_PAGE_ENGINE + 9, SJ6_MASTER_LEVEL, SJ6_OSC1_LEVEL, SJ6_OSC2_LEVEL}},
++                    {PT_LFO_RATE, {SJ6_LFO1_RATE, SJ6_LFO2_RATE, SJ6_LFO3_RATE, SJ6_LFO2_SHAPE}},
++                    {PT_LFO_MODE, {SJ6_LFO1_MODE, SJ6_LFO2_MODE, SJ6_LFO3_MODE, ORIG_PAGE_NONE}},
++                    {PT_LFO2_PWM, {SJ6_LFO2_RATE, SJ6_LFO2_PWM_DEPTH, SJ6_LFO2_PWM_ROUTE, SJ6_LFO2_PWM_BASE}},
++                    {PT_LFO, {ORIG_PAGE_ENGINE + 10, ORIG_PAGE_ENGINE + 11, ORIG_PAGE_NONE, ORIG_PAGE_NONE}},
++                    {PT_CHORUS, {SJ6_CHORUS_I, SJ6_CHORUS_II, SJ6_CHORUS_RATE, SJ6_CHORUS_MIX}},
++                    {PT_VIBRATO, {SJ6_VIBRATO_DEPTH, SJ6_VIBRATO_RATE, ORIG_PAGE_NONE, ORIG_PAGE_NONE}},
++                    {PT_TUNING, {SJ6_LAYER1_SEMI, SJ6_LAYER2_SEMI, SJ6_LAYER1_FINE, SJ6_LAYER2_FINE}},
+                 };
+                 /* Leave room for the ARPEGGIATOR and the legacy SOUND selector
+                  * after the last synth control page. Query and device agree. */
+@@ -2207,30 +2408,35 @@
+ #endif
+ #if X0X_S1_EXTRA
+             if (kind == ORIGINAL_SOUND_SYNTHONE) {
+-                enum { S1_PAGE_ID_FITS = 1 / (S1_AMP_DECAY_LFO < ORIG_PAGE_ENGINE && S1_MONO_LEGATO < ORIG_PAGE_ENGINE) };
++                enum { S1_PAGE_ID_FITS = 1 / (S1_TREMOLO_LFO < ORIG_PAGE_ENGINE && S1_MONO_LEGATO < ORIG_PAGE_ENGINE) };
+                 static const original_page_row_t s1_pages[] = {
+-                    {"OSCILLATOR", {0, 1, S1_OSC1_MORPH, S1_OSC2_MORPH}},
+-                    {"OSC MIX", {S1_OSC2_LEVEL, S1_SUB_LEVEL, S1_SUB_OCTAVE, S1_SUB_WAVE}},
+-                    {"FM / NOISE", {S1_FM_LEVEL, S1_FM_INDEX, S1_NOISE_LEVEL, S1_NOISE_LFO}},
+-                    {"FILTER", {2, 3, 4, ORIG_PAGE_S1_LINK}},
+-                    {"FILTER MODE", {S1_FILTER_TYPE, S1_ADSR_TRACK, S1_CUTOFF_LFO, ORIG_PAGE_NONE}},
+-                    {"FILTER ADSR", {5, 6, 7, 8}},
+-                    {"AMP ADSR", {9, 10, 11, 12}},
+-                    {"VOICE", {S1_MONO_LEGATO, ORIG_PAGE_NONE, ORIG_PAGE_NONE, ORIG_PAGE_NONE}},
+-                    {"LFO", {S1_LFO1_RATE, S1_LFO1_SHAPE, S1_LFO2_RATE, S1_LFO2_SHAPE}},
+-                    {"TEMPO SYNC", {S1_LFO_SYNC, S1_LFO1_DEPTH, S1_LFO2_DEPTH, ORIG_PAGE_NONE}},
+-                    {"MOD ROUTE", {S1_OSC_MIX_LFO, S1_RESONANCE_LFO, S1_FM_LFO, S1_AMP_DECAY_LFO}},
+-                    {"EFFECT", {ORIG_PAGE_ENGINE + ORIGINAL_SYNTHONE_CRUSH, S1_DELAY_MIX, S1_REVERB_MIX, S1_REVERB_HP}},
+-                    {"OUTPUT", {S1_WIDEN, S1_PART_LEVEL, ORIG_PAGE_NONE, ORIG_PAGE_NONE}},
++                    {PT_OSCILLATOR, {0, 1, S1_OSC1_MORPH, S1_OSC2_MORPH}},
++                    {PT_OSC_MIX, {S1_OSC2_LEVEL, S1_SUB_LEVEL, S1_SUB_OCTAVE, S1_SUB_WAVE}},
++                    {PT_FM_NOISE, {S1_FM_LEVEL, S1_FM_INDEX, S1_NOISE_LEVEL, S1_NOISE_LFO}},
++                    {PT_FILTER, {2, 3, 4, ORIG_PAGE_S1_LINK}},
++                    {PT_FILTER_MODE, {S1_FILTER_TYPE, S1_ADSR_TRACK, S1_CUTOFF_LFO, ORIG_PAGE_NONE}},
++                    {PT_FILTER_ADSR, {5, 6, 7, 8}},
++                    {PT_AMP_ADSR, {9, 10, 11, 12}},
++                    {PT_VOICE, {S1_MONO_LEGATO, S1_OSC1_SEMI, S1_OSC2_SEMI, S1_OSC2_DETUNE}},
++                    {PT_LFO, {S1_LFO1_RATE, S1_LFO1_SHAPE, S1_LFO2_RATE, S1_LFO2_SHAPE}},
++                    {PT_TEMPO_SYNC, {S1_LFO_SYNC, S1_LFO1_DEPTH, S1_LFO2_DEPTH, ORIG_PAGE_NONE}},
++                    {PT_MOD_ROUTE, {S1_OSC_MIX_LFO, S1_RESONANCE_LFO, S1_FM_LFO, S1_AMP_DECAY_LFO}},
++                    {PT_PITCH_MOD, {S1_DETUNE_LFO, S1_PITCH_LFO, S1_TREMOLO_LFO, ORIG_PAGE_NONE}},
++                    {PT_EFFECT, {ORIG_PAGE_ENGINE + ORIGINAL_SYNTHONE_CRUSH, S1_DELAY_MIX, S1_REVERB_MIX, S1_REVERB_HP}},
++                    {PT_FX_BYPASS, {S1_DELAY_ON, S1_REVERB_ON, ORIG_PAGE_NONE, ORIG_PAGE_NONE}},
++                    {PT_OUTPUT, {S1_WIDEN, S1_PART_LEVEL, S1_VOICE_MODE, S1_MONO_GLIDE}},
+                 };
+-                const unsigned effect_page = sizeof s1_pages / sizeof s1_pages[0] - 2;
++                _Static_assert(sizeof s1_pages / sizeof *s1_pages + 2u <= MAXPAGES,
++                               "Synth One pages must leave room for ARP and SOUND");
++                enum { S1_EFFECT_PAGES = 3 };
++                const unsigned effect_page = sizeof s1_pages / sizeof s1_pages[0] - S1_EFFECT_PAGES;
+                 add_original_extra_pages(emit, s1_pages, effect_page, b, R_S1PATCH);
+ #if X0X_ARP_HOOKS
+                 if (arp_engine(b))
+-                    add_page(emit, "ARPEGGIATOR", PR(R_ARP, ARP_F_ON, b, 0), PR(R_ARP, ARP_F_RANGE, b, 0),
++                    add_page(emit, PT_ARPEGGIATOR, PR(R_ARP, ARP_F_ON, b, 0), PR(R_ARP, ARP_F_RANGE, b, 0),
+                              PR(R_ARP, ARP_F_MODE, b, 0), PR(R_ARP, ARP_F_SPEED, b, 0));
+ #endif
+-                add_original_extra_pages(emit, s1_pages + effect_page, 2, b, R_S1PATCH);
++                add_original_extra_pages(emit, s1_pages + effect_page, S1_EFFECT_PAGES, b, R_S1PATCH);
+             } else
+ #endif
+             for (int row = first_row; row < count; row++) {
+@@ -2245,21 +2451,21 @@
+ #endif
+ #if X0X_ARP_HOOKS && !X0X_S1_EXTRA
+                 if (kind == ORIGINAL_SOUND_SYNTHONE && row == count - 1 && arp_engine(b))
+-                    add_page(emit, "ARPEGGIATOR", PR(R_ARP, ARP_F_ON, b, 0), PR(R_ARP, ARP_F_RANGE, b, 0),
++                    add_page(emit, PT_ARPEGGIATOR, PR(R_ARP, ARP_F_ON, b, 0), PR(R_ARP, ARP_F_RANGE, b, 0),
+                              PR(R_ARP, ARP_F_MODE, b, 0), PR(R_ARP, ARP_F_SPEED, b, 0));
+ #endif
+                 add_page_refs(emit, titles[row],refs,0,0);
+             }
+ #if X0X_ARP_HOOKS
+             if (kind == ORIGINAL_SOUND_JUNO && arp_engine(b))
+-                add_page(emit, "ARPEGGIATOR", PR(R_ARP, ARP_F_ON, b, 0), PR(R_ARP, ARP_F_RANGE, b, 0),
++                add_page(emit, PT_ARPEGGIATOR, PR(R_ARP, ARP_F_ON, b, 0), PR(R_ARP, ARP_F_RANGE, b, 0),
+                          PR(R_ARP, ARP_F_MODE, b, 0), PR(R_ARP, ARP_F_SPEED, b, 0));
+ #endif
+-            add_page(emit, "SOUND",PR(R_BENGINE,0,b,0),PR(R_BPRESET,0,b,0),PR(R_BSTATUS,0,b,0),NONE);
++            add_page(emit, PT_SOUND,PR(R_BENGINE,0,b,0),PR(R_BPRESET,0,b,0),PR(R_BSTATUS,0,b,0),NONE);
+         } else {
+             emit->group = GR_PAT;                           /* (its groove and retrigs: SEQ) */
+             do { static const pref_t refs[4] = {PR(R_BRKSLOT, 0, 0, 0), PR(R_BRKSLOT, 1, 0, 0), PR(R_BRKSET, 0, 0, BRK_BCHANCE), PR(R_ENG, T_BRK, 0, 1)};
+-            add_page_refs(emit, "LOOPS", refs, 0, 0); } while (0);
++            add_page_refs(emit, PT_LOOPS, refs, 0, 0); } while (0);
+             more(emit, PR(R_ENG, T_BRK, 0, 0));
+             more(emit, PR(R_BRKSLICE, 0, 0, 0));
+             more(emit, PR(R_BRKSLICE, 1, 0, 0));
+@@ -2269,52 +2475,52 @@
+         int b = p - PART_303A;
+         emit->group = GR_PAT;
+         do { static const pref_t refs[4] = {PR(R_GEN, 0, 0, G_DENS), PR(R_GEN, 0, 0, G_ACC), PR(R_GEN, 0, 0, G_SLIDE), PR(R_GEN, 0, 0, G_OCTS)};
+-            add_page_refs(emit, "GENERATE", refs, 1, b); } while (0);
++            add_page_refs(emit, PT_GENERATE, refs, 1, b); } while (0);
+         do { static const pref_t refs[4] = {PR(R_GEN, 0, 0, G_ROOT), PR(R_GEN, 0, 0, G_SCALE), PR(R_GEN, 0, 0, G_BASE), PR(R_GEN, 0, 0, G_MUT)};
+-            add_page_refs(emit, "SCALE", refs, 1, b); } while (0);
++            add_page_refs(emit, PT_SCALE, refs, 1, b); } while (0);
+         break;
+     }
+     case V_FX:                                         /* (each part's sends: MIX's PARTS) */
+         do { static const pref_t refs[4] = {PR(R_ENG, T_FX, 0, FX_RV_DECAY), PR(R_ENG, T_FX, 0, FX_RV_TONE), PR(R_ENG, T_FX, 0, FX_RV_HPF), PR(R_ENG, T_FX, 0, FX_RV_LEVEL)};
+-            add_page_refs(emit, "REVERB", refs, 0, 0); } while (0);
++            add_page_refs(emit, PT_REVERB, refs, 0, 0); } while (0);
+         do { static const pref_t refs[4] = {PR(R_ENG, T_FX, 0, FX_DL_TIME), PR(R_ENG, T_FX, 0, FX_DL_FDBK), PR(R_ENG, T_FX, 0, FX_DL_TONE), PR(R_TAPE, 0, 0, 0)};
+-            add_page_refs(emit, "DELAY", refs, 0, 0); } while (0);
++            add_page_refs(emit, PT_DELAY, refs, 0, 0); } while (0);
+             do { static const pref_t refs[] = {PR(R_ENG, T_FX, 0, FX_RV_HPF), PR(R_ENG, T_FX, 0, FX_RV_LEVEL), PR(R_ENG, T_FX, 0, FX_DL_HPF), PR(R_ENG, T_FX, 0, FX_DL_LEVEL), PR(R_ENG, T_FX, 0, FX_DL_PING)};
+                 more_refs(emit, refs, 5, 0, 0); } while (0);
+         break;
+     case V_MIX:                                        /* a channel picked with a black key, its four knobs */
+         do { static const pref_t refs[4] = {PR(R_ENG, T_MIX, 0, MX_LEVEL), PR(R_ENG, T_MIX, 0, MX_PAN), PR(R_ENG, T_MIX, 0, MX_REV), PR(R_ENG, T_MIX, 0, MX_DLY)};
+-            add_page_refs(emit, "PARTS", refs, 2, mixsel); } while (0);
++            add_page_refs(emit, PT_PARTS, refs, 2, mixsel); } while (0);
+         for (p = 0; p < NKIT; p++) {                    /* each drum machine's tracks: LEVEL, PAN, REV, DLY */
+             int t = p ? T_808 : T_909, v = selection[p];
+-            add_page(emit, p ? "808 MIX" : "909 MIX", drum_mix_ref(t, v, 0), drum_mix_ref(t, v, 1), drum_mix_ref(t, v, 2),
++            add_page(emit, p ? PT_808_MIX : PT_909_MIX, drum_mix_ref(t, v, 0), drum_mix_ref(t, v, 1), drum_mix_ref(t, v, 2),
+                      drum_mix_ref(t, v, 3));
+         }
+         do { static const pref_t refs[4] = {PR(R_ENG, T_FX, 0, FX_DRIVE), PR(R_ENG, T_MST, 0, MST_COMP1), PR(R_ENG, T_MST, 0, MST_PUMP), PR(R_ENG, T_MST, 0, MST_DJF)};
+-            add_page_refs(emit, "MASTER", refs, 0, 0); } while (0);
++            add_page_refs(emit, PT_MASTER, refs, 0, 0); } while (0);
+             do { static const pref_t refs[] = {PR(R_ENG, T_MST, 0, MST_THRESH), PR(R_ENG, T_MST, 0, MST_RATIO), PR(R_ENG, T_MST, 0, MST_ATTACK), PR(R_ENG, T_MST, 0, MST_RELEASE), PR(R_ENG, T_MST, 0, MST_MAKEUP), PR(R_ENG, T_MST, 0, MST_MIX), PR(R_ENG, T_MST, 0, MST_PUMPSRC), PR(R_ENG, T_MST, 0, MST_RESO), PR(R_ENG, T_MST, 0, MST_LIMIT), PR(R_ENG, T_FX, 0, FX_DIST), PR(R_ENG, T_FX, 0, FX_COMP), PR(R_ENG, T_FX, 0, FX_VOLUME)};
+                 more_refs(emit, refs, 12, 0, 0); } while (0);
+         /* sibling of MASTER: same knobs, post-master eng_scope wave (Baud Girl ≤10 Hz redraw) */
+         do { static const pref_t refs[4] = {PR(R_ENG, T_FX, 0, FX_DRIVE), PR(R_ENG, T_MST, 0, MST_COMP1), PR(R_ENG, T_MST, 0, MST_PUMP), PR(R_ENG, T_MST, 0, MST_DJF)};
+-            add_page_refs(emit, "WAVE", refs, 0, 0); } while (0);
++            add_page_refs(emit, PT_WAVE, refs, 0, 0); } while (0);
+         break;
+ #if X0X_UI_PERF
+     case V_PERF:
+         do { static const pref_t refs[4] = {PR(R_STALLS, 0, 0, 0), NONE, NONE, NONE};
+-            add_page_refs(emit, "PERF", refs, 0, 0); } while (0);
++            add_page_refs(emit, PT_PERF, refs, 0, 0); } while (0);
+         break;
+ #endif
+     case V_SONG:
+         do { static const pref_t refs[4] = {PR(R_SBAR, 0, 0, 0), PR(R_SPAT, PART_909, 0, 0), PR(R_SPAT, PART_808, 0, 0), PR(R_SPAT, PART_BRK, 0, 0)};
+-            add_page_refs(emit, "BAR", refs, 0, 0); } while (0);
++            add_page_refs(emit, PT_BAR, refs, 0, 0); } while (0);
+         do { static const pref_t refs[4] = {PR(R_SBAR, 0, 0, 0), PR(R_SPAT, PART_303B, 0, 0), PR(R_SPAT, PART_303A, 0, 0), PR(R_SREP, 0, 0, 0)};
+-            add_page_refs(emit, "BAR", refs, 0, 0); } while (0);
++            add_page_refs(emit, PT_BAR, refs, 0, 0); } while (0);
+         break;
+     default: break;
+     }
+     if ((query ? query->n : out->n) == 0)
+         do { static const pref_t refs[4] = {NONE, NONE, NONE, NONE};
+-            add_page_refs(emit, "", refs, 0, 0); } while (0);
++            add_page_refs(emit, PT_EMPTY, refs, 0, 0); } while (0);
+ }
+ 
+ static void build_pages(void)
+@@ -2383,8 +2589,23 @@
+ /* ===================================================================== lists === */
+ /* A list is rows of refs. SEL on a page opens the list of every page's knobs (the deep view);
+  * GLOBAL is a list of its own. SELECT moves, ALGORITHM changes, SEL runs an action. */
+-#define LIST_MAX 64
+-static pref_t list_rows[LIST_MAX] X0X_POOL;
++#define LIST_MAX 92
++typedef struct { uint8_t x, y, z; } list_ref_t;
++_Static_assert(R_NOTELOCK < 128 && sizeof(pages_t) + LIST_MAX * sizeof(list_ref_t) == 700,
++               "pages plus list must not grow the original POOL footprint");
++static list_ref_t list_rows[LIST_MAX] X0X_POOL;
++static pref_t list_ref(unsigned i)
++{
++    list_ref_t x=list_rows[i];
++    unsigned a=(x.x >> 7) | ((x.y & 15u) << 1);
++    return PR(x.x & 127u, a >= 30 ? a + 224 : a, x.y >> 4, x.z);
++}
++static void list_push(pref_t r)
++{
++    unsigned a = r.a >= 254 ? r.a - 224 : r.a;  /* GEN's two live-part sentinels */
++    if (r.kind >= 128 || a >= 32 || (r.a >= 30 && r.a < 254) || r.b >= 16 || ui.list_n >= LIST_MAX) return;
++    list_rows[ui.list_n++] = (list_ref_t){r.kind | (a & 1u) << 7, (a >> 1) | r.b << 4, r.c};
++}
+ static char list_title[16];
+ 
+ static void list_add(pref_t r)
+@@ -2392,10 +2613,11 @@
+     int i;
+     if (r.kind == R_NONE || ui.list_n >= LIST_MAX)
+         return;
+-    for (i = 0; i < ui.list_n; i++)                   /* a ref on two pages (LEVEL) lists once */
+-        if (list_rows[i].kind == r.kind && list_rows[i].a == r.a && list_rows[i].b == r.b && list_rows[i].c == r.c)
+-            return;
+-    list_rows[ui.list_n++] = r;
++    for (i = 0; i < ui.list_n; i++) {                 /* a ref on two pages (LEVEL) lists once */
++        pref_t old = list_ref(i);
++        if (old.kind == r.kind && old.a == r.a && old.b == r.b && old.c == r.c) return;
++    }
++    list_push(r);
+ }
+ 
+ /* a list section's name: whose values follow */
+@@ -2418,7 +2640,7 @@
+     }
+ }
+ 
+-static int list_skip(int i) { return i < ui.list_n && list_rows[i].kind == R_HDR; }
++static int list_skip(int i) { return i < ui.list_n && list_ref(i).kind == R_HDR; }
+ 
+ static void open_list_of_pages(void)
+ {
+@@ -2430,14 +2652,14 @@
+             groups++;
+     for (p = 0; p < pg.n; p++) {
+         if (groups > 1 && pg.group[p] != last && ui.list_n < LIST_MAX)
+-            list_rows[ui.list_n++] = PR(R_HDR, pg.group[p], 0, 0);
++            list_push(PR(R_HDR, pg.group[p], 0, 0));
+         last = pg.group[p];
+         for (k = 0; k < 4; k++)
+             if (ui.view != V_FX || p || k < 2)         /* low cut / return shortcuts keep their MORE rows */
+                 list_add(pg.r[p][k]);
+     }
+     if (pg.nmore && ui.list_n < LIST_MAX)              /* the knobs no page has */
+-        list_rows[ui.list_n++] = PR(R_HDR, GR_MORE, 0, 0);
++        list_push(PR(R_HDR, GR_MORE, 0, 0));
+     for (k = 0; k < pg.nmore; k++)
+         list_add(*page_more(&pg, k));
+     if (ui.view == V_HOME)
+@@ -4795,8 +5017,8 @@
+         s = t;
+     }
+     ui.list_sel = (uint8_t)s;
+-    if (list_rows[s].kind == R_BRKSLICE || list_rows[s].kind == R_BRKSLOT)
+-        ui.brk_count_target = (uint8_t)(list_rows[s].a != 0);
++    if (list_ref(s).kind == R_BRKSLICE || list_ref(s).kind == R_BRKSLOT)
++        ui.brk_count_target = (uint8_t)(list_ref(s).a != 0);
+     if (ui.list_sel < ui.list_top)
+         ui.list_top = ui.list_sel;
+     int visible = visible_list_rows();
+@@ -4806,7 +5028,7 @@
+ 
+ static void list_enter(void)
+ {
+-    pref_t r = list_rows[ui.list_sel];
++    pref_t r = list_ref(ui.list_sel);
+     if (r.kind == R_SECTION) {global_section(r.a);return;}
+     if (r.kind != R_ACT)
+         return;
+@@ -4841,7 +5063,7 @@
+ #if BOARD_SMK37
+     smc_ui_cancel();
+ #endif
+-    pref_t r = list_rows[ui.list_sel];
++    pref_t r = list_ref(ui.list_sel);
+     if (d < 0 && ui.view == V_GLO && ui.glo_section >= 0) {
+         global_back();                                /* "<" leaves a settings section, as HOME */
+         return 1;                                     /* the held "<" must not edit the section index */
+@@ -5546,7 +5768,7 @@
+             ui.btn_used|=1u<<B_SEQ;
+             (void)step_lane_turn(e);
+         } else if (ui.overlay == O_LIST) {
+-            turn_ref(list_rows[ui.list_sel], e, EN_ALGO);
++            turn_ref(list_ref(ui.list_sel), e, EN_ALGO);
+         } else if (ui.view == V_SEQ && is_303() && ui.held_step >= 0) {
+             bstep_t *st = &cur_pat()->bass[bidx()].step[ui.held_step];
+             int v = (int)bstep_velocity(st) + e;
+@@ -6365,7 +6587,7 @@
+             }
+         }
+         int mix_kit=drum_mix_page();
+-        if(mix_kit>=0)name=pg.title[cur_page()];
++        if(mix_kit>=0)name=page_title(&pg, cur_page());
+         if(clip_mode)name="LP";
+         if(pickup)name=ui.msg;
+         sound_slab(0,0,240,HDR_H,0);
+@@ -6555,8 +6777,11 @@
+         arp_bp.len = as.length ? as.length : 16;
+         arp_bp.gen.root = UI_ARP_ROOT % 12;            /* offsets from the held root (C3 when none is held) */
+         arp_bp.gen.base_oct = (uint8_t)(UI_ARP_ROOT / 12 - 1);
++        const int signed_oct = engine_bass_bank(b) == ORIGINAL_SOUND_SYNTHONE;
+         for (c = 0; c < ARP_STEPS; c++) {
+-            arp_bp.step[c].note = (uint8_t)(UI_ARP_ROOT + ast.offset[c] + ((ast.oct_mask >> c) & 1u) * 12);
++            int off = ast.offset[c];
++            if ((ast.oct_mask >> c) & 1u) off += signed_oct && off < 0 ? -12 : 12;
++            arp_bp.step[c].note = (uint8_t)(UI_ARP_ROOT + off);
+             arp_bp.step[c].flags = (ast.on_mask >> c) & 1u ? G_NOTE : G_REST;
+         }
+         bp = &arp_bp;
+@@ -6732,7 +6957,7 @@
+ /* Control rows share the existing main/knob strips; no framebuffer or UI state is added. */
+ static UI_DRAW const char *matrix_group(int page)
+ {
+-    const char *t = pg.title[page];
++    const char *t = page_title(&pg, page);
+     if (!strcmp_s(t,"FX")) {
+         int ty=matrix_value(pg.r[page][0]);
+         return ty==CHI_FX_OFF?"FX / OFF":ty==CHI_FX_COMP?"FX / MASTER":"FX / INSERT";
+@@ -6829,9 +7054,9 @@
+     int bank = engine_bass_bank(bidx());
+     synth_page_marker = bank == ORIGINAL_SOUND_SYNTHONE || bank == ORIGINAL_SOUND_JUNO;
+     if (ui.touched >= 0 && (int32_t)(ui.touch_until - plat_ms()) > 0)
+-        synth_focus_row = bank == ORIGINAL_SOUND_JUNO ? !strcmp_s(pg.title[page],"LFO RATE") :
++        synth_focus_row = bank == ORIGINAL_SOUND_JUNO ? !strcmp_s(page_title(&pg, page),"LFO RATE") :
+             bank == ORIGINAL_SOUND_SYNTHONE &&
+-            (!strcmp_s(pg.title[page],"EFFECT") || !strcmp_s(pg.title[page],"OUTPUT"));
++            (!strcmp_s(page_title(&pg, page),"EFFECT") || !strcmp_s(page_title(&pg, page),"OUTPUT"));
+ #endif
+     uint16_t col=matrix_col();
+     if(night) cv_rect(0,0,240,band==2?KNOB_H:BAND_H,SOUND_BASE);
+@@ -7674,7 +7899,7 @@
+         const x0x_param_t *d;
+         if (row >= ui.list_n)
+             break;
+-        r = list_rows[row];
++        r = list_ref(row);
+         if (r.kind == R_HDR) {                         /* a section: whose values follow */
+             char t[28];
+             hdr_name(r.a, t);
+@@ -8092,8 +8317,8 @@
+     int page = cur_page(), i = ui.touched;
+     if (ui.view != V_PART || !is_303() || i < 0 || i > 3 ||
+         (int32_t)(ui.touch_until - plat_ms()) <= 0 ||
+-        (strcmp_s(pg.title[page], "AMP ADSR") &&
+-         strcmp_s(pg.title[page], "FILTER ADSR"))) return 0;
++        (strcmp_s(page_title(&pg, page), "AMP ADSR") &&
++         strcmp_s(page_title(&pg, page), "FILTER ADSR"))) return 0;
+     r = pg.r[page][i];
+     return matrix_touch_matches(r, i);
+ }
+@@ -9759,7 +9984,7 @@
+ static UI_DRAW void knob_tag(char *t)
+ {
+     int g = pg.group[cur_page()], dm = drum_mix_page();
+-    const char *ti = pg.title[cur_page()];
++    const char *ti = page_title(&pg, cur_page());
+     if (lock_step() >= 0) {
+         put_i(put_s(put_s(t, is_drum() ? engine_voice_name(ui.part == PART_909 ? T_909 : T_808, ui.sel[ui.part])
+                                         : part_name(ui.part)), " P-LOCK STEP "), lock_step() + 1);
+@@ -9787,9 +10012,9 @@
+         put_s(t, ti);
+     {   /* a section over several pages (same name): which of them, "BD (1/2)" */
+         int p = cur_page(), a = p, b = p;
+-        while (a > 0 && !strcmp_s(pg.title[a - 1], ti))
++        while (a > 0 && !strcmp_s(page_title(&pg, a - 1), ti))
+             a--;
+-        while (b + 1 < pg.n && !strcmp_s(pg.title[b + 1], ti))
++        while (b + 1 < pg.n && !strcmp_s(page_title(&pg, b + 1), ti))
+             b++;
+         if (b > a) {
+             char *q = t;
+@@ -10398,7 +10623,7 @@
+ #endif
+     if(ui.overlay!=O_LIST || ui.help) peer_scroll.active=0;
+     else { int visible=0;for(unsigned row=ui.list_top;row<ui.list_n && row<ui.list_top+6u;row++)
+-        if(list_rows[row].kind==R_BTNAME)visible=1;
++        if(list_ref(row).kind==R_BTNAME)visible=1;
+         if(!visible)peer_scroll.active=0; }
+     undo_tick();
+     pattern_sound_tick();
+--- a/firmware/src/app/ui_break_layout_main.h
++++ b/firmware/src/app/ui_break_layout_main.h
+@@ -81,7 +81,7 @@
+     /* Same physical panel crosses the strip boundary; no buffer repartition. */
+     night_panel(3,146-off,234,64,0);
+     /* Keep Q descenders above the main/knob strip boundary at y158. */
+-    cv_text(10,vc(&FONT_T,147-off,10),&FONT_T,pg.title[cur_page()],col);
++    cv_text(10,vc(&FONT_T,147-off,10),&FONT_T,page_title(&pg, cur_page()),col);
+     if(pg.n>1){q=put_i(t,cur_page()+1);put_i(put_s(q," / "),pg.n);text_r(230,vc(&FONT_T,147-off,10),&FONT_T,t,C_GRAY);}
+ }
+ /* One BREAK sequence register for persistent metadata and every step lane.
+--- a/firmware/src/app/ui_original_controls.h
++++ b/firmware/src/app/ui_original_controls.h
+@@ -22,7 +22,7 @@
+ static const int8_t ui_original_juno_rows[UI_ORIGINAL_JUNO_PAGES][4] = {
+  {0,1,12,15}, {2,3,4,9}, {5,6,7,8}, {10,11,13,14}
+ };
+-static const char *const ui_original_juno_titles[] = {"OSCILLATOR","FILTER","ENVELOPE","LFO/CHORUS"};
++static const uint8_t ui_original_juno_titles[] = {PT_OSCILLATOR,PT_FILTER,PT_ENVELOPE,PT_LFO_CHORUS};
+ #if X0X_SYNTHONE_PATCH
+ /* Indices into Sound's stable storage order. Factory IDs belong to the
+  * descriptor and are never passed to the bend/damper performance API. */
+@@ -30,18 +30,18 @@
+     {0,1,-1,-1}, {2,3,4,-1}, {5,6,7,8}, {9,10,11,12},
+     {ORIGINAL_SYNTHONE_CRUSH,-1,-1,-1}
+ };
+-static const char *const ui_original_synthone_titles[] = {
+-    "OSCILLATOR", "FILTER", "FILTER ADSR", "AMP ADSR", "EFFECT"
++static const uint8_t ui_original_synthone_titles[] = {
++    PT_OSCILLATOR, PT_FILTER, PT_FILTER_ADSR, PT_AMP_ADSR, PT_EFFECT
+ };
+ #else
+ static const int8_t ui_original_synthone_rows[][4] = {{ORIGINAL_SYNTHONE_CRUSH,-1,-1,-1}};
+-static const char *const ui_original_synthone_titles[] = {"EFFECT"};
++static const uint8_t ui_original_synthone_titles[] = {PT_EFFECT};
+ #endif
+-static const char *const ui_original_chicago_titles[] = {
+-    "OSCILLATOR", "FILTER 1", "FILTER 2", "ENVELOPE", "AMPLIFIER", "ARPEGGIATOR", "EFFECT"
++static const uint8_t ui_original_chicago_titles[] = {
++    PT_OSCILLATOR, PT_FILTER_1, PT_FILTER_2, PT_ENVELOPE, PT_AMPLIFIER, PT_ARPEGGIATOR, PT_EFFECT
+ };
+-static const char *const ui_original_miami_titles[] = {
+-    "CARRIER", "XMOD", "FILTER", "WOBBLE", "OUTPUT"
++static const uint8_t ui_original_miami_titles[] = {
++    PT_CARRIER, PT_XMOD, PT_FILTER, PT_WOBBLE, PT_OUTPUT
+ };
+ static const char *ui_original_name(unsigned kind, unsigned id)
+ {
+--- a/firmware/src/dsp/dnbx_core.c
++++ b/firmware/src/dsp/dnbx_core.c
+@@ -471,7 +471,7 @@
+     out->note=v->note; out->gate=v->gate; out->age_rank=v->age_rank;
+     out->active=(uint8_t)(voice_active(v)!=0); return DNBX_OK;
+ }
+-int dnbx_render(dnbx_part *s,float *left,float *right,unsigned n,dnbx_work *w)
++static int render_with_osc_gains(dnbx_part *s,float *left,float *right,unsigned n,dnbx_work *w,float gain1,float gain2)
+ {
+     if (!valid(s)) return DNBX_E_UNINITIALIZED;
+ #if !DNBX_DIAGNOSTIC_COUNTERS
+@@ -481,6 +481,7 @@
+     if (!n) return DNBX_OK;
+     if (!left || !right || left==right) return DNBX_E_ARGUMENT;
+     COUNT(w,frames,n);
++    const float osc_gain[]={gain1,gain2};
+     dnbx_envelope_params linked[DNBX_LAYERS];
+     const dnbx_envelope_params *fp[DNBX_LAYERS];
+     for (unsigned l=0;l<DNBX_LAYERS;l++) fp[l]=filter_params(s,l,&linked[l]);
+@@ -509,6 +510,7 @@
+                 float x = p->oscillator_mode == DNBX_OSC_SUPERJ6
+                     ? factory_oscillator(lv, p->waveform, width[l], w)
+                     : oscillator(lv->phase,lv->increment,p->waveform,width[l],p->oscillator_mode,w);
++                if (osc_gain[l]!=1.f) x*=osc_gain[l];
+                 x+=(lv->subphase<.5f?1.0f:-1.0f)*p->sub_gain;
+                 /* Existing DnBOX two-pole recurrence, with explicit saturation
+                  * guards to make a finite bound part of this candidate ABI. */
+@@ -530,12 +532,25 @@
+     }
+     return DNBX_OK;
+ }
++int dnbx_render(dnbx_part *s,float *left,float *right,unsigned n,dnbx_work *w)
++{
++    return render_with_osc_gains(s,left,right,n,w,1.f,1.f);
++}
++int dnbx_render_superj6_osc2(dnbx_part *s,float *left,float *right,unsigned n,float gain)
++{
++    if (!valid(s)) return DNBX_E_UNINITIALIZED;
++    if (!s->superj6_amp_range) return DNBX_E_UNSUPPORTED;
++    if (!(gain >= 0.f && gain <= .808f)) return DNBX_E_RANGE;
++    return render_with_osc_gains(s,left,right,n,0,1.f,gain);
++}
+ #if X0X_SUPERJ6_BUILTIN_INIT
+-int dnbx_render_pitch(dnbx_part *s, float *left, float *right, unsigned n, float ratio)
++int dnbx_render_pitch_osc_levels(dnbx_part *s, float *left, float *right, unsigned n, float ratio, float gain1,float gain2)
+ {
+     if (!valid(s)) return DNBX_E_UNINITIALIZED;
+     if (!(ratio >= .5f && ratio <= 2.f)) return DNBX_E_RANGE;
+-    if (ratio == 1.f) return dnbx_render(s, left, right, n, 0);
++    if (!(gain1 >= 0.f && (gain1 <= .808f || gain1 == 1.f)) ||
++        !(gain2 >= 0.f && (gain2 <= .808f || gain2 == 1.f))) return DNBX_E_RANGE;
++    if (ratio == 1.f) return render_with_osc_gains(s,left,right,n,0,gain1,gain2);
+     float nominal[DNBX_VOICES][DNBX_LAYERS];
+     for (unsigned i = 0; i < DNBX_VOICES; ++i)
+         for (unsigned l = 0; l < DNBX_LAYERS; ++l) {
+@@ -543,12 +558,16 @@
+             nominal[i][l] = *step;
+             *step = fm_minf(*step * ratio, .45f);
+         }
+-    int result = dnbx_render(s, left, right, n, 0);
++    int result = render_with_osc_gains(s,left,right,n,0,gain1,gain2);
+     for (unsigned i = 0; i < DNBX_VOICES; ++i)
+         for (unsigned l = 0; l < DNBX_LAYERS; ++l)
+             s->voice[i].layer[l].increment = nominal[i][l];
+     return result;
+ }
++int dnbx_render_pitch_osc2(dnbx_part *s,float *l,float *r,unsigned n,float ratio,float gain)
++{ return dnbx_render_pitch_osc_levels(s,l,r,n,ratio,1.f,gain); }
++int dnbx_render_pitch(dnbx_part *s, float *l, float *r, unsigned n, float ratio)
++{ return dnbx_render_pitch_osc2(s,l,r,n,ratio,1.f); }
+ #endif
+ 
+ int dnbx_store_raw(dnbx_part *s,unsigned id,float raw)
+--- a/firmware/src/dsp/dnbx_core.h
++++ b/firmware/src/dsp/dnbx_core.h
+@@ -151,6 +151,16 @@
+  * No allocations, locks, variable-bound retry, or I/O. */
+ int dnbx_render(dnbx_part *, float *left, float *right, unsigned frames,
+                 dnbx_work *work);
++/* Typed SuperJ6 audio owner: Scale only oscillator 2, leaving its sub and
++ * composite gain intact. Physical original ID3 domain [0,.808].
++ * No state/layout change; caller owns the immutable gain for this block. */
++int dnbx_render_superj6_osc2(dnbx_part *, float *left, float *right,
++                            unsigned frames, float oscillator_2_gain);
++#if X0X_SUPERJ6_BUILTIN_INIT
++int dnbx_render_pitch_osc2(dnbx_part *, float *, float *, unsigned, float, float);
++int dnbx_render_pitch_osc_levels(dnbx_part *, float *, float *, unsigned, float, float, float);
++#endif
++
+ 
+ /* Lossless finite raw admission, deliberately separate from physical DSP.
+  * NONE of the 218 app control IDs is automatically applied to the DSP.
+--- a/firmware/src/dsp/juno6.h
++++ b/firmware/src/dsp/juno6.h
+@@ -21,7 +21,7 @@
+        SJ6_LFO2_PWM_DEPTH, SJ6_LFO2_PWM_ROUTE, SJ6_LFO1_MODE, SJ6_LFO2_MODE, SJ6_LFO3_MODE,
+        SJ6_CHORUS_I, SJ6_CHORUS_II, SJ6_CHORUS_RATE, SJ6_CHORUS_MIX,
+        SJ6_VIBRATO_DEPTH, SJ6_VIBRATO_RATE, SJ6_A_REFERENCE, SJ6_LFO2_SHAPE,
+-       SJ6_LAYER1_SEMI, SJ6_LAYER2_SEMI, SJ6_LAYER1_FINE, SJ6_LAYER2_FINE, SJ6_KNOBS, SJ6_LFO2_PWM_BASE = SJ6_KNOBS };
++       SJ6_LAYER1_SEMI, SJ6_LAYER2_SEMI, SJ6_LAYER1_FINE, SJ6_LAYER2_FINE, SJ6_OSC2_LEVEL, SJ6_OSC1_LEVEL, SJ6_KNOBS, SJ6_LFO2_PWM_BASE = SJ6_KNOBS };
+ enum { SJ6_LAYER1_SEMI_ID = 72, SJ6_LAYER2_SEMI_ID = 73, SJ6_SEMI_CENTER = 12, SJ6_SEMI_MAX = 24 };
+ enum { SJ6_LAYER1_FINE_ID = 74, SJ6_FINE_CENTER = 50, SJ6_FINE_MAX = 100 };
+ enum { SJ6_A_REFERENCE_ID = 206, SJ6_A_REFERENCE_STEPS = 100, SJ6_A_REFERENCE_DEFAULT = 60 };
+@@ -77,7 +77,7 @@
+  float pending_field[7]; /* AMP2 0..3, master 4, independent AMP1 attack 5, oscillator range 6 */
+  float master_gain;
+  juno6_oscillator_edit pending_wave[2];
+- uint8_t pending_field_mask, pending_wave_mask, pending_filter_link;
++ uint8_t pending_field_mask, pending_wave_mask, pending_filter_link, osc2_level_code;
+  float typed_hp_state[2], typed_hp_input[2];
+ #if X0X_SUPERJ6_BUILTIN_INIT
+  uint64_t lfo_phase_q40[SJ6_LFO_COUNT];
+@@ -89,6 +89,7 @@
+  float vibrato_depth, vibrato_ratio;
+  uint64_t lfo2_entropy_state;
+  float lfo2_hold_elapsed, lfo2_hold_period, lfo2_hold_sample;
++ uint8_t osc1_level_code, mod_wheel_lfo1; /* 0 untouched, 1..128 physical CC1 */
+ #endif
+ #endif
+ } juno6_t;
+@@ -115,6 +116,10 @@
+ void juno6_chorus_process(juno6_chorus_t*,float*,float*,unsigned);
+ /* Slot adapter: normalized patch macros; final two are performance-only. */
+ int juno6_set(juno6_t*, unsigned, float);
++#if X0X_SUPERJ6_BUILTIN_INIT
++float juno6_sj6_hpf_hz(float unit);
++void juno6_set_sj6_hpf(juno6_t *, float unit);
++#endif
+ int juno6_active(const juno6_t*);
+ 
+ /* Caller-owned output must be disjoint from synth. Serialized observation;
+@@ -131,6 +136,8 @@
+ void juno6_apply_knobs(juno6_t *s, unsigned mask, const uint8_t positions[SJ6_OSC_KNOBS]);
+ void juno6_apply_panel_envelopes(juno6_t *, unsigned mask, const uint8_t positions[SJ6_EXTRA_COUNT], int reset);
+ void juno6_apply_panel_master(juno6_t *, unsigned position);
++/* Transient Build-9 default MOD destination, LFO1 RATE. Audio owner only. */
++int juno6_set_mod_wheel(juno6_t *, unsigned value);
+ void juno6_set_lfo_words(juno6_t *, const juno6_lfo_words *, int reset_phase);
+ void juno6_set_panel_lfo(juno6_t *, unsigned lfo, int position, unsigned hz_mode);
+ void juno6_set_lfo_tempo(juno6_t *, float bpm);
+--- a/firmware/src/dsp/juno6_factory.inc
++++ b/firmware/src/dsp/juno6_factory.inc
+@@ -232,12 +232,17 @@
+     1.f, .5f, .3333f, .25f, .1667f, .125f
+ };
+ 
+-void juno6_read_lfo(const juno6_t *s, unsigned lfo, juno6_lfo_view *out)
++static void read_lfo(const juno6_t *s, unsigned lfo, unsigned wheel, juno6_lfo_view *out)
+ {
+     *out = (juno6_lfo_view){0};
+     out->phase = s->lfo_phase_q40[lfo];
+     if (dnbx_read_raw(&s->core, sj6_lfo_rate_id[lfo], &out->rate) == DNBX_OK) out->present |= 1u;
+     if (dnbx_read_raw(&s->core, 195u + lfo, &out->mode) == DNBX_OK) out->present |= 2u;
++    if (wheel) {
++        out->rate=(float)(wheel-1u)/127.f;
++        if (!(out->present&2u)) out->mode=1.f; /* Build-9 default Hz mode */
++        out->present=3u;
++    }
+     if (out->present == 3u) {
+         if (out->mode == 1.f) (void)dnbx_lfo_from_unit(out->rate, &out->hz);
+         else {
+@@ -247,6 +252,9 @@
+     }
+ }
+ 
++void juno6_read_lfo(const juno6_t *s,unsigned lfo,juno6_lfo_view *out)
++{ read_lfo(s,lfo,0,out); }
++
+ static void set_lfo_word(dnbx_part *core, unsigned id, int present, float raw)
+ {
+     if (present) (void)dnbx_store_raw(core, id, raw);
+@@ -302,7 +310,7 @@
+ static void prepare_lfo_step(juno6_t *s, unsigned lfo)
+ {
+     juno6_lfo_view view;
+-    juno6_read_lfo(s, lfo, &view);
++    read_lfo(s,lfo,lfo ? 0u:s->mod_wheel_lfo1,&view);
+     float advance = view.hz * ((float)SJ6_LFO_TURN / s->sample_rate) + .5f;
+     uint64_t step = sj6_lfo_unsigned_phase(advance);
+     s->lfo_step_q40[lfo] = step;
+@@ -313,6 +321,16 @@
+                           s->lfo_sync | bit : s->lfo_sync & ~bit);
+ }
+ 
++int juno6_set_mod_wheel(juno6_t *s,unsigned value)
++{
++    if (!s || !s->typed || value>127u) return 0;
++    if (s->mod_wheel_lfo1!=value+1u) {
++        s->mod_wheel_lfo1=(uint8_t)(value+1u);
++        prepare_lfo_step(s,0);
++    }
++    return 1;
++}
++
+ void juno6_set_lfo_tempo(juno6_t *s, float bpm)
+ {
+     if (bpm == s->lfo_tempo || bpm < 0.f || !sj6_lfo_finite(bpm)) return;
+@@ -324,6 +342,7 @@
+ void juno6_set_lfo_words(juno6_t *s, const juno6_lfo_words *words, int reset_phase)
+ {
+     if (reset_phase) {
++        s->mod_wheel_lfo1=0;
+         s->lfo2_hold_sample = s->lfo2_hold_elapsed = 0.f;
+         s->lfo2_pwm_until_tick = 0;
+     }
+@@ -340,8 +359,10 @@
+ 
+ void juno6_set_panel_lfo(juno6_t *s, unsigned lfo, int position, unsigned hz_mode)
+ {
+-    if (position >= 0)
++    if (position >= 0) {
++        if (lfo==0) s->mod_wheel_lfo1=0;
+         (void)dnbx_store_raw(&s->core, sj6_lfo_rate_id[lfo], position * (1.f / 127.f));
++    }
+     float old_mode;
+     /* Leave an equal authored mode word intact, including signed zero. */
+     if (dnbx_read_raw(&s->core, 195u + lfo, &old_mode) != DNBX_OK || old_mode != hz_mode)
+@@ -468,6 +489,22 @@
+         apply_adsr(&filter, mask >> 4, physical + 4);
+         dnbx_apply_panel_envelopes(&s->core, l, &amp, &filter, linked);
+     }
++}
++#endif
++
++#if X0X_SUPERJ6_BUILTIN_INIT
++float juno6_sj6_hpf_hz(float unit)
++{
++    if (unit <= 0.f) return 0.f;
++    if (unit >= 1.f) return 800.f;
++    return 800.f * fm_powf(unit, 2.42f);
++}
++void juno6_set_sj6_hpf(juno6_t *s, float unit)
++{
++    s->macro[9] = unit;
++    /* Nonnegative hpf retains the exact historical normalized setting;
++     * otherwise cache authored Hz here once per edit, not per audio block. */
++    s->hpf = -1.f - juno6_sj6_hpf_hz(unit);
+ }
+ #endif
+ 
+@@ -575,13 +612,23 @@
+     juno6_set_vibrato(s, present & 1u ? values[0] : 0.f, present & 2u ? values[1] : 0.f, reset);
+ }
+ 
++static float osc_level_gain(unsigned code)
++{ return code ? ((float)(code-1u) / 127.f) * .808f : 1.f; }
++
++static int render_typed_dry(juno6_t *s,float *left,float *right,unsigned frames)
++{
++    if (!(s->osc1_level_code|s->osc2_level_code)) return dnbx_render(&s->core,left,right,frames,0);
++    return dnbx_render_pitch_osc_levels(&s->core,left,right,frames,1.f,
++                                       osc_level_gain(s->osc1_level_code),osc_level_gain(s->osc2_level_code));
++}
++
+ static int render_typed_span(juno6_t *s, float *left, float *right, unsigned frames)
+ {
+     if ((!s->vibrato_step && !s->vibrato_phase && !s->vibrato_left) ||
+         !frames || frames > DNBX_MAX_FRAMES || !left || !right || left == right)
+-        return dnbx_render(&s->core, left, right, frames, 0);
++        return render_typed_dry(s,left,right,frames);
+     if (!s->vibrato_depth) {
+-        int result = dnbx_render(&s->core, left, right, frames, 0);
++        int result = render_typed_dry(s,left,right,frames);
+         if (result != DNBX_OK) return result;
+         /* The original shared sine still advances while its depth is zero. */
+         unsigned remaining = s->vibrato_left;
+@@ -602,7 +649,7 @@
+             s->vibrato_left = SJ6_VIBRATO_TICK;
+         }
+         unsigned count = frames < s->vibrato_left ? frames : s->vibrato_left;
+-        int result = dnbx_render_pitch(&s->core, left, right, count, s->vibrato_ratio);
++        int result = dnbx_render_pitch_osc_levels(&s->core,left,right,count,s->vibrato_ratio,osc_level_gain(s->osc1_level_code),osc_level_gain(s->osc2_level_code));
+         if (result != DNBX_OK) return result;
+         s->vibrato_left -= count;
+         frames -= count;
+@@ -733,8 +780,12 @@
+ #else
+  if (dnbx_render(&s->core,left,right,frames,0)!=DNBX_OK)return 0;
+ #endif
+- if(s->hpf>0){
+-  const float hp=1/(1+TWO_PI*(15+2000*s->hpf*s->hpf)/s->core.sample_rate);
++ float hp_hz = s->hpf > 0.f ? 15+2000*s->hpf*s->hpf : 0.f;
++#if X0X_SUPERJ6_BUILTIN_INIT
++ if (s->hpf < -1.f) hp_hz=-s->hpf-1.f;
++#endif
++ if(hp_hz>0){
++  const float hp=1/(1+TWO_PI*hp_hz/s->core.sample_rate);
+   for(unsigned i=0;i<frames;i++){
+    float y=hp*(s->typed_hp_state[0]+left[i]-s->typed_hp_input[0]);
+    s->typed_hp_input[0]=left[i];s->typed_hp_state[0]=y;left[i]=y;
+--- a/firmware/src/dsp/s1c/s1c.c
++++ b/firmware/src/dsp/s1c/s1c.c
+@@ -127,6 +127,23 @@
+ }
+ static void voice_clear(s1c_voice *v) { v->gate = 0.0f; v->stage = 0; v->amp = 0.0f; v->root = -1; }
+ 
++/* A sequenced patch can switch mode immediately before starting a note.
++ * Reset existing voices before admission, not after the new note starts.
++ * Render retains the same reset for mode edits without a new onset. */
++static __attribute__((noinline)) void voice_mode_reset(s1c *s, uint8_t mono)
++{
++    s->mono_prev = mono;
++    for (unsigned i = 0; i < S1C_VOICES; i++) voice_clear(&s->v[i]);
++    s->nlast = 0; s->prev_held = 0;
++#if !S1C_BUSFX
++#if S1C_EXT
++    s->ddec = 0;     /* re-partition (clears the lines) */
++#else
++    for (unsigned i = 0; i < 4; i++) { memset(s->dl[i].buf, 0, sizeof s->dbuf[0]); s->dl[i].prev = 0.0f; }
++#endif
++#endif
++}
++
+ /* ---- note handling (6-voice poly with the instrument's stealing order, or one mono voice) ---- */
+ static void key_on(s1c *s, int note, int vel)
+ {
+@@ -172,6 +189,7 @@
+ {
+     int i, n = s->nheld;
+     if (note < 0 || note > 127) return;
++    if (s->t[MONO] != (float)s->mono_prev) voice_mode_reset(s, (uint8_t)s->t[MONO]);
+     for (i = 0; i < n; i++) if (s->held[i][0] == note) { for (int j = i; j < n - 1; j++) { s->held[j][0] = s->held[j + 1][0]; s->held[j][1] = s->held[j + 1][1]; } n--; break; }
+     if (n == 8) n--;
+     for (i = n; i > 0; i--) { s->held[i][0] = s->held[i - 1][0]; s->held[i][1] = s->held[i - 1][1]; }  /* no memmove on the device */
+@@ -729,6 +747,18 @@
+ #endif
+     if (id == PORT) s->port_c2 = exp2f(-1.0f / (s->sr * v));   /* 0.5^(1 / (sr v)) */
+ }
++void s1c_set_delay_gate(s1c *s, float gate, int manual)
++{
++#if !S1C_BUSFX
++    if (manual && !s->delay_history) {
++        s->delay_history = 1;
++        if (s->t[DLON] != 1.f) s->ddec = 0; /* expand legacy disabled/dummy ring once */
++    }
++#else
++    (void)manual;
++#endif
++    s1c_set(s, DLON, gate);
++}
+ void s1c_init(s1c *s, float sr, const float init[150])
+ {
+     int i;
+@@ -805,7 +835,7 @@
+     int fmt = s->dfmt, nl, dd, i;
+ #endif
+     float dt = s->t[DLT] > P(DLT) ? s->t[DLT] : P(DLT);
+-    float Tt = dt * s->sr * s->t[DLON];
++    float Tt = dt * s->sr * (s->delay_history ? 1.f : s->t[DLON]);
+     s->dmono = s->t[PANA] == 0.0f && s->t[PHMIX] == 0.0f;
+     nl = s->dmono ? 2 : 3;
+     for (dd = 1; dd < 4096; dd++) {
+@@ -900,16 +930,7 @@
+         if (gh != s->glide_h) { s->glide_h = gh; s->glide_c2 = gh > 0.0f ? powf(0.5f, 1.0f / (s->sr * gh)) : 0.0f; }
+         s->monos = (1.0f - s->glide_c2) * s->monof + s->glide_c2 * s->monos;
+         if (P(MONO) != (float)s->mono_prev) {
+-            s->mono_prev = (uint8_t)P(MONO);
+-            for (i = 0; i < S1C_VOICES; i++) voice_clear(&s->v[i]);
+-            s->nlast = 0; s->prev_held = 0;
+-#if !S1C_BUSFX
+-#if S1C_EXT
+-            s->ddec = 0;     /* re-partition (clears the lines) */
+-#else
+-            for (i = 0; i < 4; i++) { memset(s->dl[i].buf, 0, sizeof s->dbuf[0]); s->dl[i].prev = 0.0f; }
+-#endif
+-#endif
++            voice_mode_reset(s, (uint8_t)P(MONO));
+         }
+         /* LFOs */
+         float x;
+--- a/firmware/src/dsp/s1c/s1c.h
++++ b/firmware/src/dsp/s1c/s1c.h
+@@ -138,7 +138,7 @@
+     float monof, monos, glide_c2, glide_h;
+     s1c_voice v[S1C_VOICES];
+     int8_t held[8][2]; uint8_t nheld, prev_held, mono_prev, play_idx;
+-    int8_t last[8]; uint8_t nlast, pad[3];
++    int8_t last[8]; uint8_t nlast, delay_history, pad[2];
+ #if !defined(S1C_NO_SEQ) || !S1C_NO_SEQ
+     sdbl beat, beat_inc;
+     float beat_rate;
+@@ -211,6 +211,8 @@
+ };
+ void s1c_init(s1c *s, float sr, const float init[150]);
+ void s1c_set(s1c *s, unsigned id, float v);
++/* Explicit panel bypass keeps processing the delay pool behind the mix. */
++void s1c_set_delay_gate(s1c *s, float gate, int manual);
+ void s1c_start(s1c *s, int note, int vel);
+ void s1c_stop(s1c *s, int note);
+ void s1c_stop_all(s1c *s);
+--- a/host/x0x_host.c
++++ b/host/x0x_host.c
+@@ -872,7 +872,7 @@
+     else if (!strcmp(what, "page"))                 /* the page of the view on the screen (0-based) */
+         got = cur_page();
+     else if (!strcmp(what, "rowval"))               /* the value of the selected row of the open list (pref_get) */
+-        got = ui.overlay == O_LIST ? pref_get(list_rows[ui.list_sel]) : -1;
++        got = ui.overlay == O_LIST ? pref_get(list_ref(ui.list_sel)) : -1;
+     else if (!strcmp(what, "arrowsteps"))
+         got = (int)arrow_steps;
+     else if (!strcmp(what, "setsize"))              /* sizeof settings_t */
+--- a/tools/build.py
++++ b/tools/build.py
+@@ -138,6 +138,19 @@
+ ]
+ 
+ # Native and host front ends import this same source composition.
++def synth_controls_init_only():
++    # The combined development controls profile is bank-free by default.
++    # Explicit 0 is only for reproducing earlier banked build receipts.
++    dual_controls = (BOARD == "smk37" and MODEL in ("elite", "pro") and
++                     S1C == "1" and SUPERJ6_FACTORY == "1" and
++                     os.environ.get("X0X_SUPERJ6_BUILTIN_INIT") == "1" and
++                     synthone_patch_setting() == "1")
++    value = os.environ.get("X0X_SYNTH_CONTROLS_INIT_ONLY", "1" if dual_controls else "0")
++    if value not in ("0", "1"):
++        raise SystemExit("X0X_SYNTH_CONTROLS_INIT_ONLY: 0 or 1")
++    return value == "1"
++
++
+ SUPERJ6_FACTORY = os.environ.get("X0X_SUPERJ6_FACTORY", "0")
+ if SUPERJ6_FACTORY not in ("0", "1"):
+     raise SystemExit("X0X_SUPERJ6_FACTORY: 0 or 1")
+@@ -478,6 +491,12 @@
+         flags = [*flags, "-DX0X_SUPERJ6_BUILTIN_INIT=1"]
+     if S1C == "1":
+         flags = [*flags, "-DX0X_S1C=1"]
++    init_only = synth_controls_init_only()
++    if init_only:
++        if not (BOARD == "smk37" and MODEL in ("elite", "pro") and
++                S1C == "1" and synthone_patch == "1" and sj6_builtin_init == "1"):
++            raise SystemExit("Init-only controls require SMK Elite/Pro, compact Synth One editor and built-in SuperJ6 Init")
++        flags = [*flags, "-DX0X_SYNTH_CONTROLS_INIT_ONLY=1"]
+     chance_probe = os.environ.get("X0X_GFINAL_CHANCE_PROBE", "1")
+     if chance_probe not in ("0", "1"):
+         raise SystemExit("X0X_GFINAL_CHANCE_PROBE: 0 or 1")
+@@ -504,6 +523,8 @@
+         original_flags = [*flags, *ORIGINAL_SYNTH_FLAGS]
+         original_o2 = [*o2, *ORIGINAL_SYNTH_FLAGS]
+         for u in (*ORIGINAL_SYNTH_UNITS, *ORIGINAL_SYNTH_BACKENDS):
++            if init_only and Path(u).stem == "s1pack":
++                continue
+             o = OUT / "original" / (Path(u).stem + ".o")
+             uf = original_o2 if Path(u).stem in ORIGINAL_SYNTH_O2_UNITS else original_flags
+             if Path(u).stem in ORIGINAL_SYNTH_OZ_UNITS:
+@@ -763,7 +784,7 @@
+     """the FL_FDATA region the loader writes (the payload, then 0xFF to FL_FDATA_SIZE). SMK only; None
+     when the flash map has no FDATA or there is no payload."""
+     lo, hi = fdata_region()
+-    if BOARD != "smk37" or lo == hi:
++    if BOARD != "smk37" or lo == hi or synth_controls_init_only():
+         return None
+     raw = fdata_payload()
+     if raw is None:
+@@ -1062,6 +1083,7 @@
+         print(f"FDATA: {used} B of {len(fdata)} (flash {fdata_region()[0]:#x}), {len(fdata) - used} B spare")
+         (OUT / "fdata.img").write_bytes(fdata)
+     elif fm1pkg_make.FDATA_SIZE and BOARD == "smk37":
++        (OUT / "fdata.img").unlink(missing_ok=True)  # never leave a stale package input
+         print(f"FDATA: {fm1pkg_make.FDATA_SIZE} B region, no payload in this tree (no fdata.bin entry)")
+     if errors:
+         raise SystemExit("build: checks failed")
