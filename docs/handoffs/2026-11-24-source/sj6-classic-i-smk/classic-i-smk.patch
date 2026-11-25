@@ -1,0 +1,361 @@
+--- a/firmware/src/app/original_runtime.c
++++ b/firmware/src/app/original_runtime.c
+@@ -6,6 +6,10 @@
+ #include "chicago_fx2_compact.h"
+ #endif
+ #include <string.h>
++#if X0X_SJ6_CLASSIC_I_PROBE
++#include "../dsp/classic_i/classic.c"
++#include "../dsp/classic_i/wrapper.c"
++#endif
+ 
+ static int runtime_result(original_runtime_part *p, int ok)
+ {
+@@ -906,7 +910,15 @@
+ #if defined(X0X_HOST) && defined(X0X_SJ6_ALT3_WITNESS)
+             juno6_alt3_process(&p->dsp.juno.synth,left,right,frames); /* after HPF, before downstream FX */
+ #endif
+-            juno6_chorus_process(&p->dsp.juno.chorus,left,right,frames);
++#if X0X_SJ6_CLASSIC_I_PROBE
++            if(p->classic_i_authored && p->dsp.juno.chorus.factory_mode==JUNO6_CHORUS_I) {
++                classic_wrapper_process(&p->classic_i_effect,p->classic_i_sample,left,right,frames);
++            } else
++#endif
++                juno6_chorus_process(&p->dsp.juno.chorus,left,right,frames);
++#if X0X_SJ6_CLASSIC_I_PROBE
++            p->classic_i_sample+=frames;
++#endif
+ #if defined(X0X_HOST) && defined(X0X_SJ6_DELAY_WITNESS)
+             juno6_delay24_process(&p->dsp.juno.synth,left,right,frames);
+ #endif
+--- a/firmware/src/app/original_runtime.h
++++ b/firmware/src/app/original_runtime.h
+@@ -10,6 +10,12 @@
+ #include "../dsp/original_miami_backend.h"
+ #include "../dsp/juno6.h"
+ #include "engine_arp.h"
++#if X0X_SJ6_CLASSIC_I_PROBE
++#ifndef X0X_HOST
++#error scoped classic I host only
++#endif
++#include "../dsp/classic_i/wrapper.h"
++#endif
+ 
+ enum { ORIGINAL_INPUT_USB, ORIGINAL_INPUT_BLE, ORIGINAL_INPUT_TRS,
+        ORIGINAL_INPUT_KEYS, ORIGINAL_INPUT_SEQUENCE, ORIGINAL_INPUT_COUNT };
+@@ -45,6 +51,11 @@
+ #endif
+ typedef struct {
+     original_runtime_backend dsp;
++#if X0X_SJ6_CLASSIC_I_PROBE
++    classic_mode_i classic_i_effect;
++    uint64_t classic_i_sample;
++    uint8_t classic_i_authored;
++#endif
+ #if X0X_ARP_ENGINE
+     original_runtime_arp arp;
+ #endif
+--- a/firmware/src/app/sj6_137_host_witness.h
++++ b/firmware/src/app/sj6_137_host_witness.h
+@@ -52,6 +52,12 @@
+  return b[0]<=3u && b[1]<=127u && b[2]<=127u && b[3]<=127u;
+ }
+ #endif
++#if X0X_SJ6_CLASSIC_I_PROBE
++enum { SJ6_CLASSIC_I_BYTE=27, SJ6_CLASSIC_I_COUNT=3, SJ6_CLASSIC_I_DEFAULT=129 };
++static inline int sj6_classic_i_bytes_valid(const uint8_t *b) {
++ return b[0]<=SJ6_CLASSIC_I_DEFAULT && b[1]<=SJ6_CLASSIC_I_DEFAULT && b[2]<=SJ6_CLASSIC_I_DEFAULT;
++}
++#endif
+ static inline int canonical137(const sound_t *s) {
+  for (unsigned v=0;v<2;++v) {
+   const uint8_t *b=read137(s,v);
+@@ -94,6 +100,12 @@
+ #if defined(X0X_HOST) && defined(X0X_SJ6_DELAY_WITNESS)
+    if(i>=SJ6_DELAY_BYTE && i<SJ6_DELAY_BYTE+SJ6_DELAY_COUNT)continue;
+ #endif
++#if X0X_SJ6_CLASSIC_I_PROBE
++   if(i>=SJ6_CLASSIC_I_BYTE && i<SJ6_CLASSIC_I_BYTE+SJ6_CLASSIC_I_COUNT) {
++     if(x>SJ6_CLASSIC_I_DEFAULT)return 0;
++     continue;
++   }
++#endif
+    if (x) return 0;
+   }
+  }
+--- a/firmware/src/app/original_presets.inc
++++ b/firmware/src/app/original_presets.inc
+@@ -573,6 +573,52 @@
+     for(unsigned v=0;v<NBASS;v++)if(mask&(1u<<v))s1_typed_clock_apply(mot_base_snd,v);
+ }
+ #endif
++#if X0X_SJ6_CLASSIC_I_PROBE
++#include <math.h>
++const classic_mode_i *sj6_classic_i_probe(unsigned v) {
++ return v<NBASS && original_bass[v].classic_i_authored ? &original_bass[v].classic_i_effect : 0;
++}
++static int sj6_classic_i_active(const sound_t *sound,unsigned v) {
++ return live137(sound,v) && original_bass[v].kind==ORIGINAL_SOUND_JUNO &&
++   original_bass[v].dsp.juno.chorus.factory_mode==JUNO6_CHORUS_I;
++}
++static void sj6_classic_i_apply(const sound_t *sound,unsigned v) {
++ original_runtime_part *p=&original_bass[v];
++ if(!sj6_classic_i_active(sound,v))return;
++ const uint8_t *row=read137(sound,v)+SJ6_CLASSIC_I_BYTE;
++ if(!sj6_classic_i_bytes_valid(row))return;
++ const int set=row[0]||row[1]||row[2];
++ if(set && !p->classic_i_authored) {
++  // Exact classic-I app default projection; AU old feedback Init 0.
++  static const float init[4]={.51299995f,.1900618f,0.f,.505f};
++  classic_wrapper_prepare(&p->classic_i_effect,init,10000u);
++  classic_wrapper_start(&p->classic_i_effect,1);
++ }
++ p->classic_i_authored=(uint8_t)!!set;
++ if(set) {
++  const float raw[3]={(float)pow(.513/16.,1./3.33),(float)(.97*.202),.505f};
++  for(unsigned i=0;i<3;++i) {
++   const float v=row[i]&&row[i]!=SJ6_CLASSIC_I_DEFAULT?(row[i]-1u)/127.f:raw[i];
++   (void)classic_wrapper_command(&p->classic_i_effect,42+i,v);
++  }
++ }
++}
++int sj6_classic_i_choose(unsigned v,unsigned slot,unsigned pos) {
++ if(slot>=3||pos>127||!sj6_classic_i_active(mot_base_snd,v))return 0;
++ engine_project_hold(1);
++ int ok=!ui_project_busy() && s1_typed_tuple_editable() && sj6_classic_i_active(mot_base_snd,v) &&
++    !engine_bass_preset_pending(v)&&!note_lock_applied[v];
++ if(ok) {
++  slot137((sound_t*)mot_base_snd,v)[SJ6_CLASSIC_I_BYTE+slot]=(uint8_t)(pos+1u);
++  sj6_classic_i_apply(mot_base_snd,v);
++ }
++ engine_project_hold(0);
++ return ok;
++}
++void sj6_classic_i_undo(unsigned mask) {
++ for(unsigned v=0;v<NBASS;++v)if(mask&(1u<<v))sj6_classic_i_apply(mot_base_snd,v);
++}
++#endif
+ static void s1_typed_a4_apply(const sound_t *sound,unsigned owner) {
+     if(live_s1_mod(sound,owner) && original_bass[owner].kind==ORIGINAL_SOUND_SYNTHONE)
+         (void)s1c_front_set(&original_bass[owner].dsp.synthone.e,S1_A4_PARAM,s1_a4_hz(read137(sound,owner)[S1_A4_BYTE]));
+@@ -1020,6 +1066,15 @@
+         chorus->factory_mode = (uint8_t)(JUNO6_CHORUS_OFF + enabled);
+         original_sound_sj6_chorus_store(cell, chorus->factory_mode);
+         if (!prior || chorus_turns >> 2) original_runtime_sj6_chorus(&original_bass[v], cell);
++#if X0X_SJ6_CLASSIC_I_PROBE
++        if(prior!=JUNO6_CHORUS_I && chorus->factory_mode==JUNO6_CHORUS_I &&
++            live137(sound,v) && s1_typed_tuple_editable()) {
++            /* Source mode entry restores the source defaults, not stale detents. */
++            uint8_t *typed=slot137(sound,v)+SJ6_CLASSIC_I_BYTE;
++            memset(typed,SJ6_CLASSIC_I_DEFAULT,SJ6_CLASSIC_I_COUNT);
++            sj6_classic_i_apply(sound,v);
++        }
++#endif
+     }
+     unsigned vibrato_turns = (mask >> SJ6_VIBRATO_DEPTH) & 3u;
+     if (vibrato_turns && sj6_wire_storage_ready(v, 1u, 0u)) {
+@@ -1482,6 +1537,9 @@
+     if (rc==ORIGINAL_RUNTIME_OK) s1_pb_load(v,sound);
+ #endif
+     if(rc==ORIGINAL_RUNTIME_OK) {s1_typed_a4_apply(sound,v);s1_typed_rvfb_apply(sound,v);s1_typed_trans_apply(sound,v);s1_typed_crush_apply(sound,v);}
++#if X0X_SJ6_CLASSIC_I_PROBE
++    if(rc==ORIGINAL_RUNTIME_OK)sj6_classic_i_apply(sound,v);
++#endif
+     arp_adopt(v, sound, 0);
+ #if X0X_S1_FENCED_CLOCK
+     if(rc==ORIGINAL_RUNTIME_OK) s1_typed_clock_apply(sound,v);
+@@ -1676,6 +1734,9 @@
+         sj6_locked_extra[v] = 0;
+ #endif
+ #endif
++#if X0X_SJ6_CLASSIC_I_PROBE
++        sj6_classic_i_apply(sound,v);
++#endif
+         arp_adopt(v, sound, 1);
+ #if X0X_S1_FENCED_CLOCK
+         s1_typed_clock_apply(sound,v);
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -44,6 +44,9 @@
+     PT_CB,
+     PT_CH,
+     PT_CHORUS,
++#if X0X_SJ6_CLASSIC_I_PROBE
++    PT_CHORUS_I_PARAMS,
++#endif
+     PT_CP,
+     PT_CR,
+     PT_CY,
+@@ -544,6 +547,15 @@
+ extern void s1_typed_trans_undo(unsigned);
+ extern int s1_typed_crush_choose(unsigned,unsigned);
+ extern void s1_typed_crush_undo(unsigned);
++#if X0X_SJ6_CLASSIC_I_PROBE
++enum { R_SJ6CLASSIC_I = R_NOTELOCK+12 };
++extern int sj6_classic_i_choose(unsigned,unsigned,unsigned);
++extern void sj6_classic_i_undo(unsigned);
++static int ui_classic_i(unsigned v) {
++    return live137(&proj.sound,v) &&
++        original_sound_sj6_chorus(proj.sound.v[T_303][v])==JUNO6_CHORUS_I;
++}
++#endif
+ extern int s1_typed_a4_choose(unsigned,unsigned);
+ extern void s1_typed_a4_undo(unsigned);
+ extern int s1_typed_rvfb_choose(unsigned,unsigned);
+@@ -745,6 +757,9 @@
+ 
+ static int pref_read_only(pref_t r)
+ {
++#if X0X_SJ6_CLASSIC_I_PROBE
++    if(r.kind==R_SJ6CLASSIC_I)return !ui_classic_i(r.b)||!s1_typed_tuple_editable();
++#endif
+ #if defined(X0X_HOST) && defined(X0X_SJ6_DELAY_WITNESS)
+     if(r.kind==R_SJ6KNOB && r.c>=SJ6_DELAY24 && r.c<=SJ6_DELAYSYNC)
+         return !live137(&proj.sound,r.b)||!s1_typed_tuple_editable();
+@@ -827,6 +842,12 @@
+         return &pot;
+     }
+     case R_S1TRANS: {static const x0x_param_t pot={"TRANSPOSE",48,24,0};return &pot;}
++#if X0X_SJ6_CLASSIC_I_PROBE
++    case R_SJ6CLASSIC_I: {
++        static const x0x_param_t v[]={{"RATE",127,45,0},{"DEPTH",127,25,0},{"MIX",127,64,0}};
++        return r.c<3?v+r.c:0;
++    }
++#endif
+     case R_S1A4: {static const x0x_param_t pot={"A REF",60,30,0};return &pot;}
+     case R_S1RVFB: {static const x0x_param_t pot={"RV SIZE",128,64,0};return &pot;}
+     case R_S1MODWHEEL: {
+@@ -973,6 +994,12 @@
+ #endif
+     case R_S1CRUSH: return live_s1_mod(&proj.sound,r.b)?read137(&proj.sound,r.b)[S1_CRUSH_BYTE]:0;
+     case R_S1TRANS: return live_s1_mod(&proj.sound,r.b)?s1_trans_st(read137(&proj.sound,r.b)[S1_TRANS_BYTE])+24:24;
++#if X0X_SJ6_CLASSIC_I_PROBE
++    case R_SJ6CLASSIC_I: {
++        unsigned v=read137(&proj.sound,r.b)[SJ6_CLASSIC_I_BYTE+r.c];
++        return v&&v!=SJ6_CLASSIC_I_DEFAULT?(int)(v-1u):pref_desc(r)->def;
++    }
++#endif
+     case R_S1A4: return live_s1_mod(&proj.sound,r.b)?(int)s1_a4_hz(read137(&proj.sound,r.b)[S1_A4_BYTE])-410:30;
+     case R_S1RVFB: return live_s1_mod(&proj.sound,r.b)?(int)s1_rvfb_pos(read137(&proj.sound,r.b)[S1_RVFB_BYTE]):64;
+     case R_S1MODWHEEL: return live_s1_mod(&proj.sound,r.b)?read137(&proj.sound,r.b)[3]:0;
+@@ -2018,6 +2045,9 @@
+     [PT_CB] = "CB",
+     [PT_CH] = "CH",
+     [PT_CHORUS] = "CHORUS",
++#if X0X_SJ6_CLASSIC_I_PROBE
++    [PT_CHORUS_I_PARAMS] = "CHORUS I",
++#endif
+ #if defined(X0X_HOST) && defined(X0X_SJ6_DELAY_WITNESS)
+     [PT_SJ6_DELAY] = "DELAY",
+     [PT_SJ6_DELAY_CLOCK] = "DELAY CLOCK",
+@@ -2518,6 +2548,15 @@
+         if (pages[row].title==PT_FILTER_MOD &&
+             (kind!=R_SJ6KNOB || !live137(&proj.sound,owner))) continue;
+ #endif
++#if X0X_SJ6_CLASSIC_I_PROBE
++        if(pages[row].title==PT_CHORUS && kind==R_SJ6KNOB && ui_classic_i(owner)) {
++            refs[2]=NONE;refs[3]=NONE;
++            add_page_refs(emit,pages[row].title,refs,0,0);
++            add_page(emit,PT_CHORUS_I_PARAMS,PR(R_SJ6CLASSIC_I,T_303,owner,0),
++                PR(R_SJ6CLASSIC_I,T_303,owner,1),PR(R_SJ6CLASSIC_I,T_303,owner,2),NONE);
++            continue;
++        }
++#endif
+         add_page_refs(emit, pages[row].title, refs, 0, 0);
+     }
+ }
+@@ -2624,6 +2663,9 @@
+                  * after the last synth control page. Query and device agree. */
+                 _Static_assert(sizeof pages / sizeof *pages + 2u <= MAXPAGES,
+                                "SuperJ6 pages must leave room for ARP and SOUND");
++#if X0X_SJ6_CLASSIC_I_PROBE
++                _Static_assert(sizeof pages / sizeof *pages + 3u <= MAXPAGES,"Classic I adjacent page capacity");
++#endif
+                 add_original_extra_pages(emit, pages, sizeof pages / sizeof *pages, b, R_SJ6KNOB);
+ #if defined(X0X_SJ6_BEND_TYPED_PROBE) && X0X_SJ6_BEND_TYPED_PROBE
+                 if (live137(&proj.sound,b))
+@@ -3408,6 +3450,7 @@
+ #else
+     const unsigned undo_zero=0;
+ #endif
++    unsigned undo_chorus_i=0;
+     unsigned undo_velocity137=0,undo_s1_mod=0,undo_a4=0,undo_rvfb=0,undo_trans=0,undo_crush=0,undo_delay=0;
+ #if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
+     extern int s1_typed_pb_undo_ready(unsigned);
+@@ -3457,6 +3500,14 @@
+             if (proj.set.snd_rev==REV137) {
+                 uint8_t p;
+                 uint32_t off=cell+(8u+v)*NPARAMS_MAX+2u;
++#if X0X_SJ6_CLASSIC_I_PROBE
++                uint8_t ci[SJ6_CLASSIC_I_COUNT];
++                undo_peek(&undo,entry,off+SJ6_CLASSIC_I_BYTE-2u,ci,sizeof ci);
++                if(memcmp(ci,read137(&proj.sound,v)+SJ6_CLASSIC_I_BYTE,sizeof ci)) {
++                  if(!sj6_classic_i_bytes_valid(ci)){say("UNDO CHORUS INVALID",0);engine_bass_edit_hold(0);return;}
++                  undo_chorus_i|=1u<<v;
++                }
++#endif
+                 undo_peek(&undo,entry,off,&p,1u);
+                 if (p!=read137(&proj.sound,v)[2] && p<=127) undo_velocity137|=1u<<v;
+                 undo_peek(&undo,entry,off+1u,&p,1u);
+@@ -3539,7 +3590,7 @@
+         }
+ #ifdef DNBOX_137_HOST_WITNESS
+         extern int engine_bass_wheel_active(void);
+-        if((undo_s1_mod || undo_a4 || undo_rvfb || undo_trans || undo_crush || undo_delay || undo_clock || undo_zero) && !s1_typed_tuple_editable()) {
++        if((undo_s1_mod || undo_a4 || undo_rvfb || undo_trans || undo_crush || undo_delay || undo_clock || undo_zero || undo_chorus_i) && !s1_typed_tuple_editable()) {
+             say("PROJECT READ ONLY",0);
+             engine_bass_edit_hold(0);
+             return;
+@@ -3568,7 +3619,7 @@
+     }
+ #endif
+ #ifdef DNBOX_137_HOST_WITNESS
+-    if ((undo_velocity137 || undo_s1_mod || undo_pb || undo_sj6_pb || undo_sj6_mod || undo_a4 || undo_rvfb || undo_trans || undo_crush || undo_delay || undo_clock || undo_zero) && !undo_bass_mask) engine_project_hold(1);
++    if ((undo_velocity137 || undo_s1_mod || undo_pb || undo_sj6_pb || undo_sj6_mod || undo_a4 || undo_rvfb || undo_trans || undo_crush || undo_delay || undo_clock || undo_zero || undo_chorus_i) && !undo_bass_mask) engine_project_hold(1);
+ #if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
+     /* Recheck while audio is held: a note-lock must not acquire the owner
+      * between validating history and publishing the typed scalar pair. */
+@@ -3585,7 +3636,7 @@
+ #if X0X_BASS_TAGGED_SOUND
+         if(undo_bass_mask)engine_project_hold(0);
+ #ifdef DNBOX_137_HOST_WITNESS
+-        else if(undo_velocity137 || undo_s1_mod || undo_pb || undo_sj6_pb || undo_sj6_mod || undo_a4 || undo_rvfb || undo_trans || undo_crush || undo_delay || undo_clock || undo_zero)engine_project_hold(0);
++        else if(undo_velocity137 || undo_s1_mod || undo_pb || undo_sj6_pb || undo_sj6_mod || undo_a4 || undo_rvfb || undo_trans || undo_crush || undo_delay || undo_clock || undo_zero || undo_chorus_i)engine_project_hold(0);
+ #endif
+ #endif
+ #if X0X_BASS_PRESET_PREVIEW
+@@ -3605,6 +3656,9 @@
+     extern void s1_typed_mod_undo(unsigned);
+     if(undo_s1_mod) s1_typed_mod_undo(undo_s1_mod & ~undo_bass_mask);
+     if(undo_a4) s1_typed_a4_undo(undo_a4 & ~undo_bass_mask);
++#if X0X_SJ6_CLASSIC_I_PROBE
++    if(undo_chorus_i)sj6_classic_i_undo(undo_chorus_i & ~undo_bass_mask);
++#endif
+     if(undo_rvfb) s1_typed_rvfb_undo(undo_rvfb & ~undo_bass_mask);
+     if(undo_trans) s1_typed_trans_undo(undo_trans & ~undo_bass_mask);
+     if(undo_crush) s1_typed_crush_undo(undo_crush & ~undo_bass_mask);
+@@ -3620,7 +3674,7 @@
+     if(undo_sj6_pb) sj6_typed_pb_undo(undo_sj6_pb & ~undo_bass_mask);
+ #endif
+ #endif
+-    if(undo_bass_mask || undo_velocity137 || undo_s1_mod || undo_pb || undo_sj6_pb || undo_sj6_mod || undo_a4 || undo_rvfb || undo_trans || undo_crush || undo_delay || undo_clock || undo_zero) engine_project_hold(0);
++    if(undo_bass_mask || undo_velocity137 || undo_s1_mod || undo_pb || undo_sj6_pb || undo_sj6_mod || undo_a4 || undo_rvfb || undo_trans || undo_crush || undo_delay || undo_clock || undo_zero || undo_chorus_i) engine_project_hold(0);
+ #else
+     if(undo_bass_mask) engine_project_hold(0);
+ #endif
+@@ -4625,6 +4679,15 @@
+         if(e && next>=0 && next<=48 && s1_typed_trans_choose(r.b,next-24))mark_dirty();
+         return;
+     }
++#if X0X_SJ6_CLASSIC_I_PROBE
++    if(r.kind==R_SJ6CLASSIC_I) {
++        if(!pref_read_only(r) && e) {
++          int next=pref_get(r)+(e>0?1:-1);
++          if(next>=0 && next<=127 && sj6_classic_i_choose(r.b,r.c,next)) mark_dirty();
++        }
++        return;
++    }
++#endif
+     if (r.kind == R_S1A4 || r.kind == R_S1RVFB) {
+         if(pref_read_only(r))return;
+         int next=pref_get(r)+(e>0)-(e<0);

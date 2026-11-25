@@ -1,0 +1,485 @@
+--- a/firmware/src/app/original_presets.inc
++++ b/firmware/src/app/original_presets.inc
+@@ -350,6 +350,13 @@
+                 if (!original_sound_s1_sync_set(cell, extra, code, divisions)) continue;
+             } else if (!original_sound_s1_extra_set(cell, extra, slot, code)) continue;
+             s1_part_apply_extra(part, extra);
++#if defined(X0X_S1_AUTOPAN_PROBE) && X0X_S1_AUTOPAN_PROBE
++            /* The admitted physical clock edit owns its refreshed dependent
++               normalized display and actual Hz snapshot, not another write. */
++            if(slot==S1_LFO_SYNC && live_s1_mod(sound,v) &&
++               s1_pan_rate_word(read137(sound,v)))
++                s1_pan_rate_put(slot137(sound,v),part->e.t[36]);
++#endif
+         } else
+ #endif
+         {
+@@ -613,6 +620,53 @@
+ void s1_typed_trans_undo(unsigned mask) {
+     for(unsigned v=0;v<NBASS;v++)if(mask&(1u<<v))s1_typed_trans_apply(mot_base_snd,v);
+ }
++#if defined(X0X_S1_AUTOPAN_PROBE) && X0X_S1_AUTOPAN_PROBE
++static s1_dry_part *s1_pan_owner(const sound_t *sound,unsigned v)
++{
++    return live_s1_mod(sound,v) && original_bass[v].kind==ORIGINAL_SOUND_SYNTHONE
++            ? &original_bass[v].dsp.synthone : 0;
++}
++static void s1_typed_pan_apply(const sound_t *sound,unsigned v,int force_rate)
++{
++    s1_dry_part *p=s1_pan_owner(sound,v);
++    if(!p)return;
++    const uint8_t *slot=read137(sound,v);
++    unsigned a=slot[S1_PAN_AMOUNT_BYTE];uint32_t r=s1_pan_rate_word(slot);
++    if(force_rate && (r || p->e.pan_authored))
++        (void)s1c_front_set(&p->e,36,r?s1_pan_rate_hz(r):p->clock_factory_pan);
++    p->e.pan_authored=(uint8_t)(a||r);
++    (void)s1c_front_set(&p->e,35,(float)a/127.f);
++}
++int s1_typed_pan_read(unsigned v,unsigned *pos,unsigned *max,int *sync,float *hz)
++{
++    s1_dry_part *p=s1_pan_owner(mot_base_snd,v);
++    if(!p)return 0;
++    *sync=s1c_front_pan_sync(&p->e);
++    *pos=s1c_front_pan_position(&p->e);*max=s1c_front_pan_stops(&p->e);*hz=p->e.t[36];
++    return 1;
++}
++int s1_typed_pan_choose(unsigned v,int rate,unsigned value)
++{
++    if(!s1_pan_owner(mot_base_snd,v) || value>127)return 0;
++    engine_project_hold(1);
++    s1_dry_part *p=s1_pan_owner(mot_base_snd,v);
++    int ok=p && !ui_project_busy() && s1_typed_tuple_editable() && !engine_bass_preset_pending(v);
++    if(ok) {
++        uint8_t *slot=slot137((sound_t *)mot_base_snd,v);
++        if(rate) {
++            ok=s1c_front_pan_select(&p->e,value);
++            if(ok)s1_pan_rate_put(slot,p->e.t[36]);
++        } else slot[S1_PAN_AMOUNT_BYTE]=(uint8_t)value;
++        if(ok)s1_typed_pan_apply(mot_base_snd,v,0);
++    }
++    engine_project_hold(0);
++    return ok;
++}
++void s1_typed_pan_undo(unsigned mask)
++{
++    for(unsigned v=0;v<NBASS;v++)if(mask&(1u<<v))s1_typed_pan_apply(mot_base_snd,v,1);
++}
++#endif
+ static void s1_typed_crush_apply(const sound_t *sound,unsigned owner) {
+     if(live_s1_mod(sound,owner) && original_bass[owner].kind==ORIGINAL_SOUND_SYNTHONE)
+         (void)s1c_front_set(&original_bass[owner].dsp.synthone.e,S1_CRUSH_PARAM,read137(sound,owner)[S1_CRUSH_BYTE]);
+@@ -1482,6 +1536,9 @@
+     if (rc==ORIGINAL_RUNTIME_OK) s1_pb_load(v,sound);
+ #endif
+     if(rc==ORIGINAL_RUNTIME_OK) {s1_typed_a4_apply(sound,v);s1_typed_rvfb_apply(sound,v);s1_typed_trans_apply(sound,v);s1_typed_crush_apply(sound,v);}
++#if defined(X0X_S1_AUTOPAN_PROBE) && X0X_S1_AUTOPAN_PROBE
++    if(rc==ORIGINAL_RUNTIME_OK)s1_typed_pan_apply(sound,v,1);
++#endif
+     arp_adopt(v, sound, 0);
+ #if X0X_S1_FENCED_CLOCK
+     if(rc==ORIGINAL_RUNTIME_OK) s1_typed_clock_apply(sound,v);
+@@ -1655,6 +1712,9 @@
+         s1_typed_rvfb_apply(sound,v);
+         s1_typed_trans_apply(sound,v);
+         s1_typed_crush_apply(sound,v);
++#if defined(X0X_S1_AUTOPAN_PROBE) && X0X_S1_AUTOPAN_PROBE
++        s1_typed_pan_apply(sound,v,1);
++#endif
+         if (live_s1_mod(sound,v))
+             s1_part_mod_route(&original_bass[v].dsp.synthone,read137(sound,v)[3]);
+ #if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
+--- a/firmware/src/app/s1c_part.c
++++ b/firmware/src/app/s1c_part.c
+@@ -319,15 +319,24 @@
+ static void s1_part_clock(s1_dry_part *part, unsigned code)
+ {
+     s1c *e = &part->e;
++#if defined(X0X_S1_AUTOPAN_PROBE) && X0X_S1_AUTOPAN_PROBE
++    const float pan_hz=e->t[P_PAN_RATE];
++#endif
+     s1c_set(e, P_TEMPO_SYNC, part->lfo_factory[S1_LFO_SYNC - S1_LFO_FIRST]);
+     s1c_set(e, extra_parameters[S1_LFO1_RATE - S1_EXTRA_FIRST].factory_id, part->lfo_factory[0]);
+     s1c_set(e, extra_parameters[S1_LFO2_RATE - S1_EXTRA_FIRST].factory_id, part->lfo_factory[1]);
++#if defined(X0X_S1_AUTOPAN_PROBE) && X0X_S1_AUTOPAN_PROBE
++    if(!e->pan_authored)
++#endif
+     s1c_set(e, P_PAN_RATE, part->clock_factory_pan);
+     s1c_set(e, P_DELAY_TIME, part->clock_factory_delay);
+     if (code) {
+         (void)s1c_front_set(e, P_TEMPO_SYNC, 1.f);
+         if (code == 1u) (void)s1c_front_set(e, P_TEMPO_SYNC, 0.f);
+     }
++#if defined(X0X_S1_AUTOPAN_PROBE) && X0X_S1_AUTOPAN_PROBE
++    if(e->pan_authored)(void)s1c_front_set(e,P_PAN_RATE,pan_hz);
++#endif
+ }
+ 
+ void s1_part_apply_extra(s1_dry_part *part, const uint8_t *extra)
+--- a/firmware/src/app/sj6_137_host_witness.h
++++ b/firmware/src/app/sj6_137_host_witness.h
+@@ -52,6 +52,22 @@
+  return b[0]<=3u && b[1]<=127u && b[2]<=127u && b[3]<=127u;
+ }
+ #endif
++enum {S1_PAN_AMOUNT_BYTE=21,S1_PAN_RATE_BYTE=22,S1_PAN_RATE_BYTES=4};
++static inline uint32_t s1_pan_rate_word_bytes(const uint8_t *b){
++ return (uint32_t)b[0]|(uint32_t)b[1]<<8|(uint32_t)b[2]<<16|(uint32_t)b[3]<<24;
++}
++static inline uint32_t s1_pan_rate_word(const uint8_t *r){return s1_pan_rate_word_bytes(r+S1_PAN_RATE_BYTE);}
++static inline float s1_pan_rate_hz(uint32_t bits){
++ float hz;__builtin_memcpy(&hz,&bits,sizeof hz);return hz;
++}
++static inline void s1_pan_rate_put(uint8_t *r,float hz){
++ uint32_t w;__builtin_memcpy(&w,&hz,sizeof w);
++ for(unsigned i=0;i<S1_PAN_RATE_BYTES;i++)r[S1_PAN_RATE_BYTE+i]=(uint8_t)(w>>(8u*i));
++}
++static inline int s1_pan_rate_valid(uint32_t w){
++ const float hz=s1_pan_rate_hz(w);
++ return w==0 || (hz>=1.f/1920.f && hz<=10.f);
++}
+ static inline int canonical137(const sound_t *s) {
+  for (unsigned v=0;v<2;++v) {
+   const uint8_t *b=read137(s,v);
+@@ -94,6 +110,13 @@
+ #if defined(X0X_HOST) && defined(X0X_SJ6_DELAY_WITNESS)
+    if(i>=SJ6_DELAY_BYTE && i<SJ6_DELAY_BYTE+SJ6_DELAY_COUNT)continue;
+ #endif
++#if defined(X0X_S1_AUTOPAN_PROBE) && X0X_S1_AUTOPAN_PROBE
++   if(i==S1_PAN_AMOUNT_BYTE){if(x>127)return 0;continue;}
++   if(i>=S1_PAN_RATE_BYTE && i<S1_PAN_RATE_BYTE+S1_PAN_RATE_BYTES) {
++      if(i==S1_PAN_RATE_BYTE&&!s1_pan_rate_valid(s1_pan_rate_word(b)))return 0;
++      continue;
++   }
++#endif
+    if (x) return 0;
+   }
+  }
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -100,6 +100,7 @@
+ #ifdef DNBOX_137_HOST_WITNESS
+     PT_FILTER_MOD,
+     PT_CRUSH_MOD,
++    PT_AUTO_PAN,
+ #if defined(X0X_HOST) && defined(X0X_SJ6_DELAY_WITNESS)
+     PT_SJ6_DELAY,
+     PT_SJ6_DELAY_CLOCK,
+@@ -539,11 +540,21 @@
+ #if X0X_SYNTHONE_PATCH
+ enum { R_S1PATCH = R_NOTELOCK + 1, R_S1LINK = R_NOTELOCK + 4 };
+ #ifdef DNBOX_137_HOST_WITNESS
+-enum { R_S1MODWHEEL = R_NOTELOCK + 5, R_S1A4 = R_NOTELOCK + 8, R_S1RVFB = R_NOTELOCK + 9, R_S1TRANS = R_NOTELOCK + 10, R_S1CRUSH = R_NOTELOCK + 11 };
++enum { R_S1MODWHEEL = R_NOTELOCK + 5, R_S1A4 = R_NOTELOCK + 8, R_S1RVFB = R_NOTELOCK + 9, R_S1TRANS = R_NOTELOCK + 10, R_S1CRUSH = R_NOTELOCK + 11, R_S1PAN = R_NOTELOCK + 12 };
+ extern int s1_typed_trans_choose(unsigned,int);
+ extern void s1_typed_trans_undo(unsigned);
+ extern int s1_typed_crush_choose(unsigned,unsigned);
+ extern void s1_typed_crush_undo(unsigned);
++#if defined(X0X_S1_AUTOPAN_PROBE) && X0X_S1_AUTOPAN_PROBE
++extern int s1_typed_pan_read(unsigned,unsigned*,unsigned*,int*,float*);
++extern int s1_typed_pan_choose(unsigned,int,unsigned);
++extern void s1_typed_pan_undo(unsigned);
++static unsigned s1_pan_pos(unsigned v,unsigned *max) {
++    unsigned pos=0;int sync;float hz;
++    if(!s1_typed_pan_read(v,&pos,max,&sync,&hz))*max=0;
++    return pos;
++}
++#endif
+ extern int s1_typed_a4_choose(unsigned,unsigned);
+ extern void s1_typed_a4_undo(unsigned);
+ extern int s1_typed_rvfb_choose(unsigned,unsigned);
+@@ -769,7 +780,7 @@
+     if(r.kind==R_ARP && r.a==ARP_F_GATE && live137(&proj.sound,r.b))
+         return !s1_typed_tuple_editable();
+ #endif
+-    if (r.kind == R_S1MODWHEEL || r.kind == R_S1A4 || r.kind == R_S1RVFB || r.kind == R_S1TRANS || r.kind == R_S1CRUSH) return !live_s1_mod(&proj.sound,r.b) || !s1_typed_tuple_editable();
++    if (r.kind == R_S1MODWHEEL || r.kind == R_S1A4 || r.kind == R_S1RVFB || r.kind == R_S1TRANS || r.kind == R_S1CRUSH || r.kind == R_S1PAN) return !live_s1_mod(&proj.sound,r.b) || !s1_typed_tuple_editable();
+ #endif
+     /* A bank with a single preset (Synth One INIT) has nothing to choose. */
+     if (r.kind == R_BPRESET && original_sound_available_factories((unsigned)engine_bass_requested_bank(r.b)) <= 1u) return 1;
+@@ -821,6 +832,16 @@
+         return &desc;
+     }
+ #endif
++#if defined(X0X_S1_AUTOPAN_PROBE) && X0X_S1_AUTOPAN_PROBE
++    case R_S1PAN: {
++        static const x0x_param_t amount={"AMOUNT",127,0,0};
++        static x0x_param_t rate={"RATE",127,0,0};
++        if(!live_s1_mod(&proj.sound,r.b))return NULL;
++        if(!r.c)return &amount;
++        unsigned max;(void)s1_pan_pos(r.b,&max);rate.max=(uint8_t)max;
++        return &rate;
++    }
++#endif
+     case R_S1CRUSH: {
+         static const char *const names[]={"OFF","LFO 1","LFO 2","BOTH"};
+         static const x0x_param_t pot={"CRUSH LFO",3,0,names};
+@@ -971,6 +992,12 @@
+ #if defined(DNBOX_137_HOST_WITNESS) && defined(X0X_SJ6_MOD_TYPED_PROBE)
+     case R_SJ6MOD: return live137(&proj.sound,r.b)?read137(&proj.sound,r.b)[SJ6_MOD_BYTE]:0;
+ #endif
++#if defined(X0X_S1_AUTOPAN_PROBE) && X0X_S1_AUTOPAN_PROBE
++    case R_S1PAN: {
++        unsigned max;
++        return !live_s1_mod(&proj.sound,r.b)?0 : r.c?(int)s1_pan_pos(r.b,&max) : read137(&proj.sound,r.b)[S1_PAN_AMOUNT_BYTE];
++    }
++#endif
+     case R_S1CRUSH: return live_s1_mod(&proj.sound,r.b)?read137(&proj.sound,r.b)[S1_CRUSH_BYTE]:0;
+     case R_S1TRANS: return live_s1_mod(&proj.sound,r.b)?s1_trans_st(read137(&proj.sound,r.b)[S1_TRANS_BYTE])+24:24;
+     case R_S1A4: return live_s1_mod(&proj.sound,r.b)?(int)s1_a4_hz(read137(&proj.sound,r.b)[S1_A4_BYTE])-410:30;
+@@ -1672,6 +1699,20 @@
+     const x0x_param_t *d = pref_desc(r);
+     *num = *unit = 0;
+ #ifdef DNBOX_137_HOST_WITNESS
++#if defined(X0X_S1_AUTOPAN_PROBE) && X0X_S1_AUTOPAN_PROBE
++    if(r.kind==R_S1PAN) {
++        if(!r.c){put_i(num,(v*100+63)/127);put_s(unit,"%");return;}
++        unsigned pos,max;int sync;float hz;
++        if(!s1_typed_pan_read(r.b,&pos,&max,&sync,&hz)) {put_s(num,"--");return;}
++        if(sync) {
++            static const uint8_t bars[]={8,6,4,3,2,1,1};
++            if(pos<sizeof bars) put_s(put_i(num,bars[pos]),pos==6?" BAR T":" BAR");
++            else put_s(put_i(put_s(num,"1/"),1u<<((pos-5u)/2u)),!(pos&1u)?"T":"");
++        } else if(hz<1.f){put_i(num,(int)(hz*1000.f+.5f));put_s(unit,"mHz");}
++        else {put_d1(num,hz,0);put_s(unit,"Hz");}
++        return;
++    }
++#endif
+     if(r.kind==R_S1TRANS) {put_i(num,v-24);put_s(unit,"st");return;}
+     if(r.kind==R_S1RVFB) {put_i(num,(v*100+64)/128);put_s(unit,"%");return;}
+     if(r.kind==R_S1A4) {put_i(num,v+410);put_s(unit,"Hz");return;}
+@@ -2041,6 +2082,7 @@
+ #ifdef DNBOX_137_HOST_WITNESS
+     [PT_FILTER_MOD] = "FILTER MOD",
+     [PT_CRUSH_MOD] = "CRUSH MOD",
++    [PT_AUTO_PAN] = "AUTO PAN",
+ #endif
+     [PT_FM_NOISE] = "FM / NOISE",
+     [PT_GENERATE] = "GENERATE",
+@@ -2670,8 +2712,8 @@
+                 _Static_assert(sizeof s1_pages / sizeof *s1_pages + 2u <= MAXPAGES,
+                                "Synth One pages must leave room for ARP and SOUND");
+ #ifdef DNBOX_137_HOST_WITNESS
+-                _Static_assert(sizeof s1_pages / sizeof *s1_pages + 5u <= MAXPAGES,
+-                               "Typed S1 pages must leave room for WHEELS/TUNING/CRUSH/ARP/SOUND");
++                _Static_assert(sizeof s1_pages / sizeof *s1_pages + 6u <= MAXPAGES,
++                               "Typed S1 pages must leave room for WHEELS/TUNING/CRUSH/PAN/ARP/SOUND");
+ #endif
+                 enum { S1_EFFECT_PAGES = 3 };
+                 const unsigned effect_page = sizeof s1_pages / sizeof s1_pages[0] - S1_EFFECT_PAGES;
+@@ -2692,6 +2734,9 @@
+ #if defined(X0X_S1_CRUSH_LFO_PROBE) && X0X_S1_CRUSH_LFO_PROBE
+                 if (live_s1_mod(&proj.sound,b)) add_page(emit,PT_CRUSH_MOD,PR(R_S1CRUSH,T_303,b,0),NONE,NONE,NONE);
+ #endif
++#if defined(X0X_S1_AUTOPAN_PROBE) && X0X_S1_AUTOPAN_PROBE
++                if (live_s1_mod(&proj.sound,b)) add_page(emit,PT_AUTO_PAN,PR(R_S1PAN,T_303,b,0),PR(R_S1PAN,T_303,b,1),NONE,NONE);
++#endif
+                 if (live_s1_mod(&proj.sound,b)) add_page(emit,PT_TUNING,PR(R_S1A4,T_303,b,0),PR(R_S1TRANS,T_303,b,0),NONE,NONE);
+ #endif
+             } else
+@@ -3408,7 +3453,7 @@
+ #else
+     const unsigned undo_zero=0;
+ #endif
+-    unsigned undo_velocity137=0,undo_s1_mod=0,undo_a4=0,undo_rvfb=0,undo_trans=0,undo_crush=0,undo_delay=0;
++    unsigned undo_velocity137=0,undo_s1_mod=0,undo_a4=0,undo_rvfb=0,undo_trans=0,undo_crush=0,undo_delay=0,undo_pan=0;
+ #if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
+     extern int s1_typed_pb_undo_ready(unsigned);
+     extern void s1_typed_pb_undo(unsigned);
+@@ -3486,6 +3531,12 @@
+                     undo_delay|=1u<<v;
+                 }
+ #endif
++#if defined(X0X_S1_AUTOPAN_PROBE) && X0X_S1_AUTOPAN_PROBE
++                uint8_t pan[1u+S1_PAN_RATE_BYTES];
++                undo_peek(&undo,entry,off+(S1_PAN_AMOUNT_BYTE-2u),pan,sizeof pan);
++                if(pan[0]>127u || !s1_pan_rate_valid(s1_pan_rate_word_bytes(pan+1u))){say("UNDO PAN INVALID",0);engine_bass_edit_hold(0);return;}
++                if(memcmp(pan,read137(&proj.sound,v)+S1_PAN_AMOUNT_BYTE,sizeof pan))undo_pan|=1u<<v;
++#endif
+                 undo_peek(&undo,entry,off+S1_TRANS_BYTE-2u,&p,1u);
+                 if(p>S1_TRANS_LAST){say("UNDO TRANSPOSE INVALID",0);engine_bass_edit_hold(0);return;}
+                 if(p!=read137(&proj.sound,v)[S1_TRANS_BYTE])undo_trans|=1u<<v;
+@@ -3539,7 +3590,7 @@
+         }
+ #ifdef DNBOX_137_HOST_WITNESS
+         extern int engine_bass_wheel_active(void);
+-        if((undo_s1_mod || undo_a4 || undo_rvfb || undo_trans || undo_crush || undo_delay || undo_clock || undo_zero) && !s1_typed_tuple_editable()) {
++        if((undo_s1_mod || undo_a4 || undo_rvfb || undo_trans || undo_crush || undo_delay || undo_pan || undo_clock || undo_zero) && !s1_typed_tuple_editable()) {
+             say("PROJECT READ ONLY",0);
+             engine_bass_edit_hold(0);
+             return;
+@@ -3568,7 +3619,7 @@
+     }
+ #endif
+ #ifdef DNBOX_137_HOST_WITNESS
+-    if ((undo_velocity137 || undo_s1_mod || undo_pb || undo_sj6_pb || undo_sj6_mod || undo_a4 || undo_rvfb || undo_trans || undo_crush || undo_delay || undo_clock || undo_zero) && !undo_bass_mask) engine_project_hold(1);
++    if ((undo_velocity137 || undo_s1_mod || undo_pb || undo_sj6_pb || undo_sj6_mod || undo_a4 || undo_rvfb || undo_trans || undo_crush || undo_delay || undo_pan || undo_clock || undo_zero) && !undo_bass_mask) engine_project_hold(1);
+ #if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
+     /* Recheck while audio is held: a note-lock must not acquire the owner
+      * between validating history and publishing the typed scalar pair. */
+@@ -3585,7 +3636,7 @@
+ #if X0X_BASS_TAGGED_SOUND
+         if(undo_bass_mask)engine_project_hold(0);
+ #ifdef DNBOX_137_HOST_WITNESS
+-        else if(undo_velocity137 || undo_s1_mod || undo_pb || undo_sj6_pb || undo_sj6_mod || undo_a4 || undo_rvfb || undo_trans || undo_crush || undo_delay || undo_clock || undo_zero)engine_project_hold(0);
++        else if(undo_velocity137 || undo_s1_mod || undo_pb || undo_sj6_pb || undo_sj6_mod || undo_a4 || undo_rvfb || undo_trans || undo_crush || undo_delay || undo_pan || undo_clock || undo_zero)engine_project_hold(0);
+ #endif
+ #endif
+ #if X0X_BASS_PRESET_PREVIEW
+@@ -3608,6 +3659,9 @@
+     if(undo_rvfb) s1_typed_rvfb_undo(undo_rvfb & ~undo_bass_mask);
+     if(undo_trans) s1_typed_trans_undo(undo_trans & ~undo_bass_mask);
+     if(undo_crush) s1_typed_crush_undo(undo_crush & ~undo_bass_mask);
++#if defined(X0X_S1_AUTOPAN_PROBE) && X0X_S1_AUTOPAN_PROBE
++    if(undo_pan) s1_typed_pan_undo(undo_pan & ~undo_bass_mask);
++#endif
+ #if X0X_S1_FENCED_CLOCK
+     if(undo_clock) s1_typed_clock_undo(undo_clock & ~undo_bass_mask);
+ #endif
+@@ -3620,7 +3674,7 @@
+     if(undo_sj6_pb) sj6_typed_pb_undo(undo_sj6_pb & ~undo_bass_mask);
+ #endif
+ #endif
+-    if(undo_bass_mask || undo_velocity137 || undo_s1_mod || undo_pb || undo_sj6_pb || undo_sj6_mod || undo_a4 || undo_rvfb || undo_trans || undo_crush || undo_delay || undo_clock || undo_zero) engine_project_hold(0);
++    if(undo_bass_mask || undo_velocity137 || undo_s1_mod || undo_pb || undo_sj6_pb || undo_sj6_mod || undo_a4 || undo_rvfb || undo_trans || undo_crush || undo_delay || undo_pan || undo_clock || undo_zero) engine_project_hold(0);
+ #else
+     if(undo_bass_mask) engine_project_hold(0);
+ #endif
+@@ -4613,6 +4667,16 @@
+         return;
+     }
+ #endif
++#if defined(X0X_S1_AUTOPAN_PROBE) && X0X_S1_AUTOPAN_PROBE
++    if (r.kind == R_S1PAN) {
++        if(pref_read_only(r))return;
++        unsigned max=127,pos=(unsigned)pref_get(r);
++        if(r.c)pos=s1_pan_pos(r.b,&max);
++        int next=(int)pos+(e>0)-(e<0);
++        if(next>=0 && (unsigned)next<=max && s1_typed_pan_choose(r.b,r.c,(unsigned)next))mark_dirty();
++        return;
++    }
++#endif
+     if (r.kind == R_S1CRUSH) {
+         if(pref_read_only(r))return;
+         int next=pref_get(r)+(e>0)-(e<0);
+--- a/firmware/src/dsp/s1c/s1c.c
++++ b/firmware/src/dsp/s1c/s1c.c
+@@ -988,6 +988,10 @@
+         y *= lfo10(s, P(LTREM));
+         /* autopan, equal power */
+         float L, R;
++#if defined(X0X_S1_AUTOPAN_PROBE) && X0X_S1_AUTOPAN_PROBE
++        if(s->pan_authored) s1u_autopan_authored(&s->pan_ph, y, P(PANF), P(PANA), s->sr, &L, &R);
++        else
++#endif
+         s1u_autopan(&s->pan_ph, y, P(PANF), P(PANA), s->sr, &L, &R);
+         /* phaser */
+         s1u_phaser_run(&s->ph, &L, &R, P(PHMIX), P(PHRATE), P(PHW), P(PHFB), s->sr);
+--- a/firmware/src/dsp/s1c/s1c.h
++++ b/firmware/src/dsp/s1c/s1c.h
+@@ -147,6 +147,12 @@
+     uint32_t rnd;
+     /* fx */
+     s1u_crush crush; s1u_phaser ph; float pan_ph;
++#if defined(X0X_S1_AUTOPAN_PROBE) && X0X_S1_AUTOPAN_PROBE
++#ifndef X0X_HOST
++#error Synth One autopan cadence witness is host only
++#endif
++    uint8_t pan_authored;
++#endif
+     float dlp[2][5], hp_y[2][2], cmp[3][2][4];
+ #if !S1C_RVB
+     float rv_fs[8], rv_g, rv_damp;
+--- a/firmware/src/dsp/s1c/s1c_front.c
++++ b/firmware/src/dsp/s1c/s1c_front.c
+@@ -133,6 +133,31 @@
+     } else
+         put(s, id, x);
+ }
++#if defined(X0X_S1_AUTOPAN_PROBE) && X0X_S1_AUTOPAN_PROBE
++unsigned s1c_front_pan_stops(const s1c *s)
++{
++    if (s->t[F_TSYNC]<=0.f) return 127;
++    int j=F_RATES-1;
++    while(j>0 && 1.f/rate_time(s->t[F_ARPRATE],j)>MAXV(F_PANF)) --j;
++    return (unsigned)j;
++}
++int s1c_front_pan_select(s1c *s,unsigned pos)
++{
++    if(pos>s1c_front_pan_stops(s)) return 0;
++    const float lo=MINV(F_PANF),hi=MAXV(F_PANF);
++    const float v=s->t[F_TSYNC]>0.f ? 1.f/rate_time(s->t[F_ARPRATE],(int)pos)
++                                    : lo+(hi-lo)*powf((float)pos/127.f,2.5f);
++    return s1c_front_set(s,F_PANF,v);
++}
++unsigned s1c_front_pan_position(const s1c *s)
++{
++    const float lo=MINV(F_PANF),hi=MAXV(F_PANF);
++    const float hz=s1c_front_clamp(F_PANF,s->t[F_PANF]);
++    return s->t[F_TSYNC]>0.f ? (unsigned)nearest_division(hz,s->t[F_ARPRATE],lo,hi) :
++           (unsigned)(127.f*powf((hz-lo)/(hi-lo),.4f)+.5f);
++}
++int s1c_front_pan_sync(const s1c *s){return s->t[F_TSYNC]>0.f;}
++#endif
+ int s1c_front_set(s1c *s, unsigned id, float x)
+ {
+     if (id >= 150 || !(x == x) || x > 3.4e38f || x < -3.4e38f) return 0;
+--- a/firmware/src/dsp/s1c/s1c_front.h
++++ b/firmware/src/dsp/s1c/s1c_front.h
+@@ -18,3 +18,10 @@
+ #endif
+ float s1c_front_init(unsigned id);                    /* INIT value of a parameter */
+ #endif
++
++#if defined(X0X_S1_AUTOPAN_PROBE) && X0X_S1_AUTOPAN_PROBE
++unsigned s1c_front_pan_stops(const s1c *);
++int s1c_front_pan_select(s1c *,unsigned);
++unsigned s1c_front_pan_position(const s1c *);
++int s1c_front_pan_sync(const s1c *);
++#endif
+--- a/firmware/src/dsp/s1c/s1u.c
++++ b/firmware/src/dsp/s1c/s1u.c
+@@ -2,6 +2,9 @@
+ /* Synth One shared units (see s1u.h). The control laws are the compact engine's; moving them here
+  * changes no output (checked bit-exact against the inline versions on the device configuration). */
+ #include "s1u.h"
++#if defined(X0X_S1_AUTOPAN_PROBE) && X0X_S1_AUTOPAN_PROBE
++#include <math.h>
++#endif
+ #ifdef X0X_S1C
+ #include "s1c_config.h"
+ #endif
+@@ -172,6 +175,22 @@
+     *l = y * s1u_sin(pa + 0x40000000u); *r = y * s1u_sin(pa);
+ }
+ 
++#if defined(X0X_S1_AUTOPAN_PROBE) && X0X_S1_AUTOPAN_PROBE
++/* Same mono->stereo seam and equal-power law; store original Q24 phase
++ * exactly in the existing float lane. Never reset phase at control edits. */
++void s1u_autopan_authored(float *ph, float y, float rate, float amount, float sr, float *l, float *r)
++{
++    const uint32_t mask = 0xFFFFFFu;
++    uint32_t a = (uint32_t)(*ph * 16777216.f) & mask;
++    float pan = s1u_sin(a << 8) * amount;
++    uint32_t inc = (uint32_t)lrintf(rate * (float)(16777216.0 / sr));
++    *ph = (float)((a + inc) & mask) * (1.f / 16777216.f);
++    uint32_t pa = (uint32_t)((1.f + pan) * 0.125f * 4294967296.f);
++    *l = y*s1u_sin(pa + 0x40000000u);
++    *r = y*s1u_sin(pa);
++}
++#endif
++
+ /* ---- half floats ---- */
+ typedef union { float f; uint32_t u; } s1u_fb;
+ uint16_t s1u_h16_put(float x)
+--- a/firmware/src/dsp/s1c/s1u.h
++++ b/firmware/src/dsp/s1c/s1u.h
+@@ -40,6 +40,9 @@
+ 
+ /* ---- auto-pan: equal power, rate in Hz, amount 0..1 ---- */
+ void s1u_autopan(float *ph, float y, float rate, float amount, float sr, float *l, float *r);
++#if defined(X0X_S1_AUTOPAN_PROBE) && X0X_S1_AUTOPAN_PROBE
++void s1u_autopan_authored(float *ph, float y, float rate, float amount, float sr, float *l, float *r);
++#endif
+ 
+ /* ---- widen: the right channel through three h16 Schroeder allpasses, crossfaded by amount ---- */
+ typedef struct { uint16_t *buf; const int16_t *len; int32_t w[3]; } s1u_widen;

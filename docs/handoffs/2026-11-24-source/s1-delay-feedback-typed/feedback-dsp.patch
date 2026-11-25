@@ -1,0 +1,27 @@
+--- a/firmware/src/dsp/s1c/s1c.c
++++ b/firmware/src/dsp/s1c/s1c.c
+@@ -1048,6 +1048,9 @@
+         /* compact lines lose level per repeat (decimation, interpolation): feedback and wet trim, by ear */
+         float T = P(DLT) * s->sr / (float)dd, fbk = P(DLFB) * (1.0f + S1C_DL_FBK * (float)(dd > 1)), oL, oRR;
+         if (fbk > S1C_DL_FBMAX) fbk = S1C_DL_FBMAX;
++#if defined(X0X_S1_FEEDBACK_PROBE) && X0X_S1_FEEDBACK_PROBE
++        if(s->delay_feedback_direct)fbk=P(DLFB);
++#endif
+         if (dd > 1) {
+         /* lines run at sr / S1C_DLY_DEC: box-filtered input, linearly interpolated output */
+ #if S1C_DLAA
+--- a/firmware/src/dsp/s1c/s1c.h
++++ b/firmware/src/dsp/s1c/s1c.h
+@@ -155,6 +155,12 @@
+     int32_t rv_k;
+ #endif
+     float send_dly, send_rev, lfo_c2, hpk[3], dl_fc, hg[2];
++#if defined(X0X_S1_FEEDBACK_PROBE) && X0X_S1_FEEDBACK_PROBE
++#ifndef X0X_HOST
++#error Synth One feedback witness is host only
++#endif
++    uint8_t delay_feedback_direct;
++#endif
+ #if S1C_RVB
+     s1u_rvb rv;               /* lines lent by s1c_attach */
+     float ra[2], r0[2], r1[2]; int32_t rk;

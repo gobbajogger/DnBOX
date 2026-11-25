@@ -1,0 +1,63 @@
+--- a/firmware/src/dsp/s1c/s1c.c
++++ b/firmware/src/dsp/s1c/s1c.c
+@@ -417,6 +417,11 @@
+ #if S1C_KR > 1
+ /* Cheap voice: pitch, LFO, key-tracking and filter coefficients at control rate (every S1C_KR
+  * samples), sines from a 256-point table, the filter envelope still per sample in the cutoff. */
++#if defined(X0X_S1_FILTER_ENV_PROBE) && X0X_S1_FILTER_ENV_PROBE
++#ifndef X0X_HOST
++#error Synth One Filter Envelope cadence witness is host only
++#endif
++#endif
+ static float voice_run_kr(s1c *s, s1c_voice *v)
+ {
+     int mono = P(MONO) > 0.0f, ft = (int)P(FTYPE);
+@@ -448,11 +453,17 @@
+         float cut = clampf(kcut - kcut * kem * (1.0f - v->fenv), 64.0f, 22050.0f);
+         if (ft == 0) {
+             float x = cut * (2.0f / s->sr); if (x > 1.0f) x = 1.0f;
++#if defined(X0X_S1_FILTER_ENV_PROBE) && X0X_S1_FILTER_ENV_PROBE
++            v->ka1 = kres; /* unused by LP; retain original KR resonance */
++#endif
+             v->kA = ladder_a(x);
+             v->kfb = kres * (3.98720139f + x * (3.68178143f - x * 3.93633599f));
+         } else if (ft == 1) {
+             float bw = 0.0625f * s->sr * (exp2f(clampf(1.0f - kres, 0.0f, 1.0f)) - 1.0f);
+             float cc = 1.0f / tanf(3.14159265f * bw / s->sr), d = 2.0f * cosf(TWO_PI * cut / s->sr), a1 = 1.0f / (1.0f + cc);
++#if defined(X0X_S1_FILTER_ENV_PROBE) && X0X_S1_FILTER_ENV_PROBE
++            v->kA = cc; /* unused by BP; retain original KR bandwidth */
++#endif
+             v->ka1 = a1; v->ka4 = -cc * d * a1; v->ka5 = (cc - 1.0f) * a1;
+         } else {
+             float cc = tanf(3.14159265f * cut / s->sr), a1 = 1.0f / (1.0f + 1.41421356f * cc + cc * cc);
+@@ -478,6 +489,30 @@
+     }
+     y *= v->amp * v->kkey;
+     float fo;
++#if defined(X0X_S1_FILTER_ENV_PROBE) && X0X_S1_FILTER_ENV_PROBE
++    const float route=P(LFENV);
++    if(P(FENV)>0.f && ((route==1.f && P(L1A)>0.f) ||
++                      (route==2.f && P(L2A)>0.f) ||
++                      (route==3.f && (P(L1A)>0.f || P(L2A)>0.f)))) {
++        const float base=P(CUT)*lfo10(s,P(LCUT)), amount=P(FENV)*lfo10(s,route);
++        const float hz=clampf(base-base*amount*(1.f-v->fenv),64.f,22050.f);
++        if(ft==0){
++            float x=hz*(2.f/s->sr);if(x>1.f)x=1.f;
++            const float a=ladder_a(x),fb=v->ka1*(3.98720139f+x*(3.68178143f-x*3.93633599f));
++            fo=ladder(v->lp,y,a,fb);
++        } else if(ft==2){
++            const float cc=tanf(3.14159265f*hz/s->sr),a1=1.0f/(1.0f+1.41421356f*cc+cc*cc);
++            const float a4=2.0f*(cc*cc-1.0f)*a1,a5=(1.0f-1.41421356f*cc+cc*cc)*a1;
++            fo=hp2(v->bq,y,a1,a4,a5);
++        } else {
++            const float d=2.f*cosf(TWO_PI*hz/s->sr);
++            const float a4=-v->kA*d*v->ka1;
++            float t=y-a4*v->bq[0]-v->ka5*v->bq[1];
++            fo=t*v->ka1-v->ka1*v->bq[1];
++            v->bq[1]=v->bq[0];v->bq[0]=t;
++        }
++    } else
++#endif
+     if (ft == 0) fo = ladder(v->lp, y, v->kA, v->kfb);
+     else if (ft == 2) fo = hp2(v->bq, y, v->ka1, v->ka4, v->ka5);
+     else {

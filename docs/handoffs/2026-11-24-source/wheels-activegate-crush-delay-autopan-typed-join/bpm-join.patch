@@ -1,0 +1,124 @@
+--- a/firmware/src/app/original_presets.inc
++++ b/firmware/src/app/original_presets.inc
+@@ -533,6 +533,29 @@
+ #endif
+ extern int s1_typed_tuple_editable(void);
+ #if X0X_S1_FENCED_CLOCK
++/* Volatile exact before-image: rate snapping cannot be inverted on Undo. */
++static const uint8_t clock_tones[]={64,15,47,36,43};
++static uint8_t tone_clock_active[NBASS];
++static float tone_clock_before[NBASS][5];
++#if defined(X0X_S1_AUTOPAN_PROBE) && X0X_S1_AUTOPAN_PROBE
++static void s1_typed_pan_apply(const sound_t *,unsigned,int);
++#endif
++static void s1_typed_clock_tones(const sound_t *sound,unsigned v)
++{
++    if(!live_s1_mod(sound,v) || original_bass[v].kind!=ORIGINAL_SOUND_SYNTHONE)return;
++    const uint8_t *p=read137(sound,v)+S1_ARP_CLOCK_BYTE;
++    if(!s1_clock_valid(p))return;
++    s1c *e=&original_bass[v].dsp.synthone.e;
++    if(s1_clock_rate_authored(p)) {
++        if(!tone_clock_active[v])
++            for(unsigned i=0;i<sizeof clock_tones;i++)tone_clock_before[v][i]=e->t[clock_tones[i]];
++        tone_clock_active[v]=1;
++        (void)s1c_front_set(e,64,(float)s1_clock_bpm(p));
++    } else if(tone_clock_active[v]) {
++        for(unsigned i=0;i<sizeof clock_tones;i++)s1c_set(e,clock_tones[i],tone_clock_before[v][i]);
++        tone_clock_active[v]=0;
++    }
++}
+ static void s1_typed_clock_apply(const sound_t *sound,unsigned v)
+ {
+     original_runtime_part *part=&original_bass[v];
+@@ -569,15 +592,30 @@
+         else {
+             unsigned rate=field==ARP_F_SOURCE_RATE ? (unsigned)value : p[2] ? s1_clock_bpm(p) : 120;
+             unsigned factor=field==ARP_F_SOURCE_FACTOR ? (unsigned)value+1u : p[2] ? p[2] : 10;
+-            p[0]=(uint8_t)rate;p[1]=(uint8_t)(rate>>8);p[2]=(uint8_t)factor;
++            p[0]=(uint8_t)rate;p[2]=(uint8_t)factor;
++            if(field==ARP_F_SOURCE_RATE)p[1]=S1_ARP_CLOCK_RATE_AUTHORED;
+             s1_typed_clock_apply(mot_base_snd,owner);
++            if(field==ARP_F_SOURCE_RATE) {
++                s1_typed_clock_tones(mot_base_snd,owner);
++#if defined(X0X_S1_AUTOPAN_PROBE) && X0X_S1_AUTOPAN_PROBE
++                uint8_t *side=slot137((sound_t*)mot_base_snd,owner);
++                if(s1_pan_rate_word(side))s1_pan_rate_put(side,original_bass[owner].dsp.synthone.e.t[36]);
++#endif
++            }
+         }
+     }
+     engine_project_hold(0);
+     return ok;
+ }
+ void s1_typed_clock_undo(unsigned mask) {
+-    for(unsigned v=0;v<NBASS;v++)if(mask&(1u<<v))s1_typed_clock_apply(mot_base_snd,v);
++    for(unsigned v=0;v<NBASS;v++)if(mask&(1u<<v)) {
++        s1_typed_clock_apply(mot_base_snd,v);
++        s1_typed_clock_tones(mot_base_snd,v);
++#if defined(X0X_S1_AUTOPAN_PROBE) && X0X_S1_AUTOPAN_PROBE
++        if(live_s1_mod(mot_base_snd,v)&&s1_pan_rate_word(read137(mot_base_snd,v)))
++            s1_typed_pan_apply(mot_base_snd,v,1);
++#endif
++    }
+ }
+ #endif
+ static void s1_typed_a4_apply(const sound_t *sound,unsigned owner) {
+@@ -1536,12 +1574,13 @@
+     if (rc==ORIGINAL_RUNTIME_OK) s1_pb_load(v,sound);
+ #endif
+     if(rc==ORIGINAL_RUNTIME_OK) {s1_typed_a4_apply(sound,v);s1_typed_rvfb_apply(sound,v);s1_typed_trans_apply(sound,v);s1_typed_crush_apply(sound,v);}
+-#if defined(X0X_S1_AUTOPAN_PROBE) && X0X_S1_AUTOPAN_PROBE
+-    if(rc==ORIGINAL_RUNTIME_OK)s1_typed_pan_apply(sound,v,1);
+-#endif
+     arp_adopt(v, sound, 0);
+ #if X0X_S1_FENCED_CLOCK
+-    if(rc==ORIGINAL_RUNTIME_OK) s1_typed_clock_apply(sound,v);
++    tone_clock_active[v]=0;
++    if(rc==ORIGINAL_RUNTIME_OK) {s1_typed_clock_apply(sound,v);s1_typed_clock_tones(sound,v);}
++#endif
++#if defined(X0X_S1_AUTOPAN_PROBE) && X0X_S1_AUTOPAN_PROBE
++    if(rc==ORIGINAL_RUNTIME_OK)s1_typed_pan_apply(sound,v,1);
+ #endif
+     bass_named_preset[v] = (int16_t)bass_cell_preset(sound->v[T_303][v]);
+     original_seq_note[v] = -1;
+@@ -1712,9 +1751,6 @@
+         s1_typed_rvfb_apply(sound,v);
+         s1_typed_trans_apply(sound,v);
+         s1_typed_crush_apply(sound,v);
+-#if defined(X0X_S1_AUTOPAN_PROBE) && X0X_S1_AUTOPAN_PROBE
+-        s1_typed_pan_apply(sound,v,1);
+-#endif
+         if (live_s1_mod(sound,v))
+             s1_part_mod_route(&original_bass[v].dsp.synthone,read137(sound,v)[3]);
+ #if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
+@@ -1738,7 +1774,12 @@
+ #endif
+         arp_adopt(v, sound, 1);
+ #if X0X_S1_FENCED_CLOCK
++        tone_clock_active[v]=0;
+         s1_typed_clock_apply(sound,v);
++        s1_typed_clock_tones(sound,v);
++#endif
++#if defined(X0X_S1_AUTOPAN_PROBE) && X0X_S1_AUTOPAN_PROBE
++        s1_typed_pan_apply(sound,v,1);
+ #endif
+         bass_named_preset[v] = (int16_t)preset;
+         /* A committed bank/preset replacement, never merely a pending request.
+--- a/firmware/src/app/sj6_137_host_witness.h
++++ b/firmware/src/app/sj6_137_host_witness.h
+@@ -36,10 +36,13 @@
+ static inline unsigned s1_trans_code(int st){return st?(unsigned)(st+25-(st>0)):0u;}
+ #if X0X_S1_FENCED_CLOCK
+ enum { S1_ARP_CLOCK_BYTE=7, S1_ARP_CLOCK_BYTES=3 };
+-static inline unsigned s1_clock_bpm(const uint8_t *p){return p[0]|(unsigned)p[1]<<8;}
++enum {S1_ARP_CLOCK_RATE_AUTHORED=0x80u};
++static inline unsigned s1_clock_bpm(const uint8_t *p){return p[0];}
++static inline int s1_clock_rate_authored(const uint8_t *p){return p[1]==S1_ARP_CLOCK_RATE_AUTHORED;}
+ static inline int s1_clock_valid(const uint8_t *p){
+  unsigned bpm=s1_clock_bpm(p);
+- return (bpm>=1&&bpm<=200&&p[2]>=1&&p[2]<=19) || (!bpm&&!p[2]);
++ if(p[1] && !s1_clock_rate_authored(p))return 0;
++ return (bpm>=1&&bpm<=200&&p[2]>=1&&p[2]<=19) || (!bpm&&!p[1]&&!p[2]);
+ }
+ #endif
+ #if defined(X0X_SJ6_ZERO_GATE_PROBE) && X0X_SJ6_ZERO_GATE_PROBE

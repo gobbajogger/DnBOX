@@ -1,0 +1,78 @@
+--- a/firmware/src/app/original_runtime.c
++++ b/firmware/src/app/original_runtime.c
+@@ -911,7 +911,11 @@
+             juno6_alt3_process(&p->dsp.juno.synth,left,right,frames); /* after HPF, before downstream FX */
+ #endif
+ #if X0X_SJ6_CLASSIC_I_PROBE
+-            if(p->classic_i_authored && p->dsp.juno.chorus.factory_mode==JUNO6_CHORUS_I) {
++            if(p->classic_i_authored && (p->dsp.juno.chorus.factory_mode==JUNO6_CHORUS_I
++#if defined(X0X_HOST) && defined(X0X_SJ6_CLASSIC_SWITCH_WITNESS)
++               || p->dsp.juno.chorus.factory_mode>=JUNO6_CHORUS_OFF
++#endif
++              )) {
+                 classic_wrapper_process(&p->classic_i_effect,p->classic_i_sample,left,right,frames);
+             } else
+ #endif
+--- a/firmware/src/app/original_presets.inc
++++ b/firmware/src/app/original_presets.inc
+@@ -1195,6 +1195,12 @@
+             memset(typed,SJ6_CLASSIC_I_DEFAULT,SJ6_CLASSIC_I_COUNT);
+             sj6_classic_i_apply(sound,v);
+         }
++#if defined(X0X_HOST) && defined(X0X_SJ6_CLASSIC_SWITCH_WITNESS)
++        if (prior!=chorus->factory_mode && (chorus_turns&3u) &&
++            live137(sound,v) && s1_typed_tuple_editable() && original_bass[v].classic_i_authored)
++            (void)classic_wrapper_enter(&original_bass[v].classic_i_effect,
++                                        chorus->factory_mode-JUNO6_CHORUS_OFF);
++#endif
+ #endif
+     }
+     unsigned vibrato_turns = (mask >> SJ6_VIBRATO_DEPTH) & 3u;
+--- a/firmware/src/dsp/classic_i/wrapper.c
++++ b/firmware/src/dsp/classic_i/wrapper.c
+@@ -51,9 +51,9 @@
+         const double omega=(double)rate*WRAPPER_PI2;
+         const float a=sinf((float)(omega*(double)t/WRAPPER_RATE));
+         const float b=sinf((float)(omega*(double)((float)t+.2f)/WRAPPER_RATE));
+-        const float width=s->mode_ii ? .02f : .015f;
+-        const float fb[]={feedback+fmaf(a,.05f,1.f)*width,
+-                          feedback+fmaf(b,.05f,1.f)*-width};
++        /* Earlier mode offsets are overwritten in both delay slots before render. */
++        const float fb[]={feedback*fmaf(a,.05f,1.f),
++                          feedback*fmaf(b,.05f,1.f)};
+         size_t end=off+8<n ? off+8 : n;
+         for(size_t i=off;i<end;++i) {
+             float y[2];classic_i_frame(&s->core,l[i],r[i],depth,increment,fb,mix,y);
+@@ -62,15 +62,17 @@
+         }
+     }
+ }
+-void classic_wrapper_enter_mode_ii(classic_mode_i *s)
++int classic_wrapper_enter(classic_mode_i *s,unsigned mode)
+ {
+-    // Original musical Mode II setter: start legacy graph, select ±.02,
+-    // read back known .863 Hz, project through inverse/Float32/forward,
+-    // and reapply authored default depth/mix. Keep current phase/ramps.
+-    const float u=(float)pow(.863/16.,1./3.33);
+-    s->mode_ii=1;
+-    classic_wrapper_start(s,1);
++    static const double rate[]={.513,.863,1.726};
++    if(mode>3)return 0;
++    classic_wrapper_start(s,mode!=0);
++    if(!mode)return 1; /* Original OFF skips the three reapplications. */
++    const float u=(float)pow(rate[mode-1]/16.,1./3.33);
++    s->mode_ii=mode;
+     (void)classic_wrapper_command(s,42,u);
+     (void)classic_wrapper_command(s,43,(float)(.97*.202));
+-    (void)classic_wrapper_command(s,44,(float).505);
++    (void)classic_wrapper_command(s,44,mode==3 ? .555f : .505f);
++    return 1;
+ }
++void classic_wrapper_enter_mode_ii(classic_mode_i *s){(void)classic_wrapper_enter(s,2);}
+--- a/firmware/src/dsp/classic_i/wrapper.h
++++ b/firmware/src/dsp/classic_i/wrapper.h
+@@ -19,3 +19,4 @@
+ void classic_wrapper_process(classic_mode_i *,uint64_t absolute_frame,float *,float *,size_t);
+ /* Separate source-verified legacy musical mode 2; never the private alternate AU renderer. */
+ void classic_wrapper_enter_mode_ii(classic_mode_i *);
++int classic_wrapper_enter(classic_mode_i *,unsigned musical_mode);

@@ -1,0 +1,11 @@
+gate=1 owner=0 A4=449 feedback=0.757812 applied peak=0.749763
+gate=0 owner=0 applied peak=4.8983e-12
+pages owner=0 engine=S1 part=23/23 seq=4 LINK=1 existing-LFO2-rate-shorthand=0
+pages owner=1 engine=SJ6 part=20/23 seq=4 LINK=1 existing-LFO2-rate-shorthand=2
+pan owner=0 rate=2.12096 amount=0.0165644 rendered=1536 differing LR=1536
+gate=1 owner=1 A4=453 feedback=0.843750 applied peak=0.749763
+gate=0 owner=1 applied peak=4.8983e-12
+pages owner=1 engine=S1 part=23/23 seq=4 LINK=1 existing-LFO2-rate-shorthand=0
+pages owner=0 engine=SJ6 part=20/23 seq=4 LINK=1 existing-LFO2-rate-shorthand=2
+pan owner=1 rate=2.12096 amount=0.0220869 rendered=1536 differing LR=1536
+PASS full typed wheel/A4/RV/clock/gate/transpose/CRUSH/Delay/AutoPan/ID64/S1 Feedback/Classic I mixed project with S1 MOD/PB/ID51 + SJ6 ID137, real held pitch, Undo/Redo and staged recall: 809 checks

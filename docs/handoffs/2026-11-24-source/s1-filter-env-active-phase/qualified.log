@@ -1,0 +1,26 @@
+owner=0 filter=0 route=1 offKR=3584 changed=3584 attack=2048 held=2048 release=2048 wet=1
+owner=0 filter=0 route=2 offKR=3584 changed=3582 attack=2048 held=2048 release=2048 wet=1
+owner=0 filter=0 route=3 offKR=3584 changed=3582 attack=2048 held=2048 release=2048 wet=1
+owner=0 filter=0 route=3 offKR=3584 changed=3582 attack=2048 held=2048 release=2048 wet=0
+owner=0 filter=1 route=1 offKR=3584 changed=3584 attack=2048 held=2048 release=2048 wet=1
+owner=0 filter=1 route=2 offKR=3584 changed=3582 attack=2048 held=2048 release=2048 wet=1
+owner=0 filter=1 route=3 offKR=3584 changed=3582 attack=2048 held=2048 release=2048 wet=1
+owner=0 filter=1 route=3 offKR=3584 changed=3582 attack=2048 held=2048 release=2048 wet=0
+owner=0 filter=2 route=1 offKR=3584 changed=3584 attack=2048 held=2048 release=2048 wet=1
+owner=0 filter=2 route=2 offKR=3584 changed=3582 attack=2048 held=2048 release=2048 wet=1
+owner=0 filter=2 route=3 offKR=3584 changed=3582 attack=2048 held=2048 release=2048 wet=1
+owner=0 filter=2 route=3 offKR=3584 changed=3582 attack=2048 held=2048 release=2048 wet=0
+owner=1 filter=0 route=1 offKR=3584 changed=3584 attack=2048 held=2048 release=2048 wet=1
+owner=1 filter=0 route=2 offKR=3584 changed=3582 attack=2048 held=2048 release=2048 wet=1
+owner=1 filter=0 route=3 offKR=3584 changed=3582 attack=2048 held=2048 release=2048 wet=1
+owner=1 filter=0 route=3 offKR=3584 changed=3582 attack=2048 held=2048 release=2048 wet=0
+owner=1 filter=1 route=1 offKR=3584 changed=3584 attack=2048 held=2048 release=2048 wet=1
+owner=1 filter=1 route=2 offKR=3584 changed=3582 attack=2048 held=2048 release=2048 wet=1
+owner=1 filter=1 route=3 offKR=3584 changed=3582 attack=2048 held=2048 release=2048 wet=1
+owner=1 filter=1 route=3 offKR=3584 changed=3582 attack=2048 held=2048 release=2048 wet=0
+owner=1 filter=2 route=1 offKR=3584 changed=3584 attack=2048 held=2048 release=2048 wet=1
+owner=1 filter=2 route=2 offKR=3584 changed=3582 attack=2048 held=2048 release=2048 wet=1
+owner=1 filter=2 route=3 offKR=3584 changed=3582 attack=2048 held=2048 release=2048 wet=1
+owner=1 filter=2 route=3 offKR=3584 changed=3582 attack=2048 held=2048 release=2048 wet=0
+PASS scoped ID56 actual filter cadence, 3 routes x 3 topologies x 2 owners, wet audio plus filter-off/zero-amount/zero-depth null and teaching K4, no stored writes: 197949 checks
+PASS untouched same-joined 4096 stereo frames exact b3601f7c8dbf1df43d108b269f1825a6eb53c83fb95c5dadc3ef1e0f5b276f7c

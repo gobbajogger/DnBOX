@@ -1,0 +1,7 @@
+PASS Build9 AU a5243e50bda6bd44f463c6e63ea3137802142f55f3c1ea25a5a6e046acba81a1
+PASS 42/43/44 app projections to legacy receiver: 16*u^3.33 Hz, 0.97*u depth, u wet
+PASS model 208 selects distinct 215/216/217 J60 scales 2*u, 2*u, u through app dispatch
+PASS J60 independent binary64 stereo histories (1024 entries/channel at kernel rate); active zero-wet output selection follows history processing
+PASS final feedback setters are multiplicative and supersede earlier same-slot mode offsets before render
+PASS exact public OFF/I/II/Both app reapplication and independent private alternate selector
+PASS 26577 exact independent source-decoded stereo frames, OFF/I/II/Both [4699, 6811, 8312, 6755], two owners with binding, retained history/ramp state and active edits

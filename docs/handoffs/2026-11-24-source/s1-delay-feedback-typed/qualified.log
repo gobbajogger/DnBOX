@@ -1,0 +1,9 @@
+PASS scoped S1 DELAY FEEDBACK K1 from fresh direct gain, increasing first readout, actual tail ring/gate retained, Undo/Redo and exact recall: 55 checks
+owner0 old 0.9800000, typed .8 gain 0.7999997 -> 0.8078737 tail 161.75->175.33; typed INIT gain 0.1000000 -> 0.1062992 tail 0.0024315->0.003146
+owner0 ID43 existing long target 2.400s, 2T tap 10080.0 ticks vs 688 short-ring, ddec=21 unchanged
+owner1 old 0.9800000, typed .8 gain 0.7999997 -> 0.8078737 tail 161.75->175.33; typed INIT gain 0.1000000 -> 0.1062992 tail 0.0024315->0.003146
+owner1 ID43 existing long target 2.400s, 2T tap 10080.0 ticks vs 688 short-ring, ddec=21 unchanged
+PASS real both-owner feedback, fresh direct gain prevents first-detent tail inversion; ID43 diagnosed on actual short ring: 81966 checks
+PASS untouched same-joined 4096 stereo frames exact b3601f7c8dbf1df43d108b269f1825a6eb53c83fb95c5dadc3ef1e0f5b276f7c
+PASS exact ED_PROJECT BEGIN/VALIDATE/COMMIT/ABORT, no stage adoption, samples locked and zero writes on legacy reader
+PASS unchanged old project+BT and ED_PROJECT refuse exact new writer media; no object modified
