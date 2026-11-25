@@ -1,0 +1,82 @@
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -3014,6 +3014,10 @@
+  * metals' voices on core 0 in parallel, mid lanes and metal mix after the body
+  * is visible. No added audio latency; the sums are the same bits. */
+ static uint8_t eng_808_split;
++/* Bench only: a pre-settled inactive 808 contributes no samples. The
++ * designated 909 job publishes its virtual stage along with stage 1. */
++static uint8_t eng_808_settled;
++volatile uint32_t eng_bench_virtual808_spans;
+ static volatile uint8_t eng_808_body;                  /* 1: BD+SD is in left808/right808 */
+ static float eng_vol;                                  /* this callback's master volume (render_sub may master) */
+ static uint8_t eng_master_done;                        /* 1: this stretch ran the master */
+@@ -3164,7 +3168,7 @@
+         if (!core)
+             PROF_ADD(PR_909, p9);
+         eng_sync();
+-        eng_stage = 1;
++        eng_stage = eng_808_settled ? 2u : 1u;
+     } else if (j == JB_808) {
+         PROF_T(p8);
+         d808_was_active = (uint8_t)drum808_active(&d808);
+@@ -3350,12 +3354,12 @@
+  * A job renders as soon as its core is free; only its mix (about 1/16 of it) waits for the
+  * part before it (run_job: render, stage_wait, mix). Counting the whole job as waiting made
+  * every split with the 303s apart cost the same as one core, so 909-only won the tie. */
+-static uint32_t plan_cost(uint32_t m, const uint32_t *c)
++static uint32_t plan_cost(uint32_t m, const uint32_t *c, int idle808)
+ {
+     uint32_t t[2] = {0u, m ? ENG_C1_LAT : 0u}, s, x;
+     int k, j;
+     k = (int)(m & 1u); t[k] += c[JB_909]; s = t[k];
+-    for (j = JB_808; j <= JB_B; j++) {
++    for (j = (m==(1u<<JB_909) && idle808) ? JB_A : JB_808; j <= JB_B; j++) {
+         k = (int)(m >> j & 1u);
+         x = c[j] >> 4;
+         t[k] += c[j] - x;                               /* render */
+@@ -3396,12 +3400,13 @@
+         c[j] = (act >> j & 1u) ? eng_job_cost[j] * nn / 256u : 0u;
+     uint32_t allowed = act & ok;
+     best &= allowed;
+-    bc = plan_cost(best, c);
++    const int idle808 = !(act & (1u<<JB_808));
++    bc = plan_cost(best, c,idle808);
+     cost = bc;
+     /* Visit allowed masks in their original ascending order, preserving ties. */
+     m = 0;
+     do {
+-        uint32_t k = plan_cost(m, c);
++        uint32_t k = plan_cost(m,c,idle808);
+         if (k < bc) { bc = k; best = m; }
+         m = (m - allowed) & allowed;
+     } while (m);
+@@ -3468,9 +3473,18 @@
+     bass_render_ok[0] = bass_render_ok[1] = 0;
+     original_rec_cancel_cut();                        /* both basses' recorder state: here, before the jobs */
+     m = plan_pick(n);
++    const int active808=drum808_active(&d808);
++    eng_808_settled = (uint8_t)(m==(1u<<JB_909) && !active808);
++    if (eng_808_settled) {
++        /* No producer can trigger d808 in this synchronous stretch. Pan
++         * snap belongs only to Core0 and is completed before launch. */
++        d808_was_active=0;
++        drum808_pan_settle(&d808);
++        ++eng_bench_virtual808_spans;
++    }
+     eng_c1_mask = (uint8_t)m;
+     /* 808 stays on core 0 and core 1 has other work: move the BD+SD prefix */
+-    eng_808_split = (uint8_t)(!(m & (1u << JB_808)) && m && drum808_active(&d808));
++    eng_808_split = (uint8_t)(!(m & (1u << JB_808)) && m && active808);
+     eng_808_body = (uint8_t)!eng_808_split;
+     eng_sync();
+     if (m && !plat_cpu2_run(core2_jobs, 0u)) {
+@@ -3483,7 +3497,7 @@
+     uint32_t w0 = plat_ticks24();
+ #endif
+     for (j = 0; j < JB_N; j++)
+-        if (!(eng_c1_mask & (1u << j)))
++        if (!(eng_c1_mask & (1u << j)) && !(eng_808_settled && j==JB_808))
+             (void)run_job(j, 0);
+     if (eng_c1_mask) {
+         PROF_T(pt);

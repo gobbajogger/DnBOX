@@ -1,0 +1,78 @@
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -3003,6 +3003,8 @@
+ static volatile uint8_t eng_c1_next;                   /* core 1: the next of its jobs to start */
+ static uint8_t eng_c1_mask;                            /* jobs on core 1 this stretch (bit per JB_*) */
+ static uint8_t eng_plan;                               /* the plan in force (the same bits) */
++/* Scratch diagnostic: reused timing samples, no source state changes. */
++volatile uint32_t eng_probe_buckets[JB_N+2];
+ static uint32_t eng_job_cost[JB_N];                    /* ticks per 256 frames when active */
+ static uint32_t eng_job_arg;                           /* this stretch's n, 808 mask and window offset */
+ static uint8_t eng_job_solo;
+@@ -3280,8 +3282,11 @@
+         if (!core)
+             PROF_ADD(PR_BRK, pk);
+     }
+-    if (active)
+-        job_cost(j, plat_ticks24() - tk - wt, n);
++    if (active) {
++        const uint32_t work = plat_ticks24() - tk - wt;
++        eng_probe_buckets[j] += work;
++        job_cost(j, work, n);
++    }
+     return 1;
+ }
+ 
+@@ -3441,6 +3446,7 @@
+  * order one core always used (909, 808, bass A, bass B, break): the same sums either way */
+ __attribute__((noinline)) static void render_sub(float *out_l, float *out_r, uint32_t n, uint32_t offset)
+ {
++    uint32_t probe_t0=plat_ticks24(), probe_seen;
+     uint32_t solo = smc_solo_state, m;
+     uint8_t solo_parts = (uint8_t)(solo & 0x1Fu);
+     int j;
+@@ -3487,6 +3493,8 @@
+ #if X0X_DEBUG
+     eng_dbg_wait += plat_ticks24() - w0;              /* now: core 0's whole job span */
+ #endif
++    probe_seen=plat_ticks24();
++    eng_probe_buckets[JB_N] += probe_seen-probe_t0;
+     brk_midi_drain();
+     for (j = 0; j < NBASS; j++)                       /* the recorder (shared with the sequencer): core 0 */
+         if (bass_render_ok[j]) original_rec_recover_off(j);
+@@ -3583,6 +3591,7 @@
+         PROF_ADD(5, pf);
+         bfx_flt_shape(out_l, out_r, (int)n);
+     }
++    eng_probe_buckets[JB_N+1] += plat_ticks24()-probe_seen;
+ }
+ 
+ #if X0X_DIAG_STATE_TRACE
+--- a/firmware/src/app/main_fm1.c
++++ b/firmware/src/app/main_fm1.c
+@@ -35,6 +35,8 @@
+ } x0x_worst;
+ #endif                           /* two failed boots: no audio, USB on (safe_main) */
+ 
++extern volatile uint32_t eng_probe_buckets[7];
++volatile uint32_t eng_probe_worst[8]; /* five jobs, jobs wall, post wall, half index */
+ static void render_block(int32_t *o)                /* ALNK0: one half, measured */
+ {
+     uint32_t t0 = fm1_ticks(), us, budget = HALF_FRAMES * 1000000u / FS;
+@@ -89,8 +91,15 @@
+     engine_load(us * 100u / budget, HALF_FRAMES);
+     x0x_dbg.halves++;
+     x0x_dbg.last_us = us;
+-    if (us > x0x_dbg.max_us)
++    unsigned peak=(us > x0x_dbg.max_us);
++    if (peak) {
+         x0x_dbg.max_us = us;
++        eng_probe_worst[7] = x0x_dbg.halves;
++    }
++    for(unsigned j=0;j<7;j++) {
++        if(peak) eng_probe_worst[j]=eng_probe_buckets[j];
++        eng_probe_buckets[j]=0;
++    }
+     x0x_dbg.in_audio = 0;
+ }
+ 
