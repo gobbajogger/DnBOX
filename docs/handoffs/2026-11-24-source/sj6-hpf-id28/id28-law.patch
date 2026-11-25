@@ -1,0 +1,185 @@
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -1073,6 +1073,13 @@
+         if (v < 0 || v >= NBASS)
+             break;
+         if (original_sound_is_performance(original_bass[v].kind, (unsigned)i)) { perf_apply(v, i, val, 1); break; }
++#if X0X_SUPERJ6_BUILTIN_INIT
++        if (i == ORIGINAL_SJ6_HPF_PANEL && original_bass[v].kind == ORIGINAL_SOUND_JUNO &&
++            mot_base_snd && original_sound_sj6_hpf_authored(mot_base_snd->v[T_303][v])) {
++            if ((unsigned)val <= 127u) juno6_set_sj6_hpf(&original_bass[v].dsp.juno.synth, unit_control((unsigned)val));
++            break;
++        }
++#endif
+         if (i == mod_param(v)) {
+             mod_ctl[v] = -1;
+ #ifdef X0X_HOST
+@@ -1117,6 +1124,13 @@
+             perf_apply(v, i, (unsigned)i == original_sound_bend_id(original_bass[v].kind) ? 64 : 0, 1);
+             return;
+         }
++#if X0X_SUPERJ6_BUILTIN_INIT
++        if (i == ORIGINAL_SJ6_HPF_PANEL && original_bass[v].kind == ORIGINAL_SOUND_JUNO &&
++            original_sound_sj6_hpf_authored(mot_base_snd->v[t][v])) {
++            juno6_set_sj6_hpf(&original_bass[v].dsp.juno.synth, unit_control(mot_base_snd->v[t][v][i] & 127u));
++            return;
++        }
++#endif
+         if (original_sound_value(mot_base_snd->v[t][v], (unsigned)i, &value))
+             (void)original_runtime_param(&original_bass[v], (unsigned)i, value);
+         return;
+--- a/firmware/src/app/original_presets.inc
++++ b/firmware/src/app/original_presets.inc
+@@ -980,6 +980,12 @@
+     for(unsigned i=0;i<n;i++) {
+         float value;
+         if(original_sound_is_performance(original_bass[v].kind,i))continue;
++#if X0X_SUPERJ6_BUILTIN_INIT
++        if (i == ORIGINAL_SJ6_HPF_PANEL && original_sound_sj6_hpf_authored(l->val)) {
++            juno6_set_sj6_hpf(&original_bass[v].dsp.juno.synth, unit_control(l->val[i] & 127u));
++            continue;
++        }
++#endif
+         if(original_sound_value(l->val,i,&value))(void)original_runtime_param(&original_bass[v],i,value);
+     }
+ #if X0X_SUPERJ6_BUILTIN_INIT
+--- a/firmware/src/app/original_runtime.c
++++ b/firmware/src/app/original_runtime.c
+@@ -92,6 +92,8 @@
+         juno6_set_lfo2_pwm(&p->dsp.juno.synth, original_sound_sj6_lfo2_pwm(cell));
+         juno6_set_lfo2_shape(&p->dsp.juno.synth, original_sound_sj6_shape(cell));
+         original_runtime_sj6_chorus(p, cell);
++        if (original_sound_sj6_hpf_authored(cell))
++            juno6_set_sj6_hpf(&p->dsp.juno.synth, ((cell[ORIGINAL_SJ6_HPF_PANEL] & 127u) * (1.f/127.f)));
+         return original_runtime_prepare(p, bpm);
+     }
+ #endif
+--- a/firmware/src/app/original_sound.c
++++ b/firmware/src/app/original_sound.c
+@@ -636,7 +636,8 @@
+     if (cell[29] == ORIGINAL_SOUND_JUNO) {
+         for (unsigned l = 0; l < 2; ++l)
+             if (original_sound_sj6_fine_code(cell, l) > SJ6_FINE_MAX) return 0;
+-        if (cell[16] > 127u || cell[17] > 127u) return 0;
++        if (cell[17] > 127u ||
++            (original_sound_sj6_hpf_authored(cell) && !(sj6_flags & (1u << ORIGINAL_SJ6_HPF_PANEL)))) return 0;
+         if (!original_sound_sj6_osc1_code(cell) &&
+             ((cell[13]|cell[14]|cell[18]|cell[19])&128u)) return 0;
+     }
+--- a/firmware/src/app/original_sound.h
++++ b/firmware/src/app/original_sound.h
+@@ -118,6 +118,13 @@
+ int original_sound_valid(const uint8_t cell[ORIGINAL_SOUND_BYTES]);
+ int original_sound_init(uint8_t cell[ORIGINAL_SOUND_BYTES], unsigned kind, unsigned factory);
+ int original_sound_set(uint8_t cell[ORIGINAL_SOUND_BYTES], unsigned parameter, unsigned value);
++#if X0X_SUPERJ6_BUILTIN_INIT
++/* Explicit HPF law selected only by an intentional panel edit. Archived
++ * unmarked cells retain their compact interpretation and cold behavior. */
++enum { ORIGINAL_SJ6_HPF_PANEL = 9, ORIGINAL_SJ6_HPF_LAW_BYTE = 16 };
++static inline unsigned original_sound_sj6_hpf_authored(const uint8_t *cell)
++{ return cell[29] == ORIGINAL_SOUND_JUNO && (cell[ORIGINAL_SJ6_HPF_LAW_BYTE] & 128u); }
++#endif
+ #if X0X_SYNTHONE_PATCH
+ #include "s1_patch.h"
+ #if X0X_S1_EXTRA
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -1025,6 +1025,15 @@
+         /* The upper stop is also a no-op for historical INIT aliases. */
+         if ((!v && !ps) || (v == 1 && ps >= 0xC1u && ps <= 0xC4u)) return;
+     }
++#if X0X_SUPERJ6_BUILTIN_INIT
++    if (r.kind == R_ENG && r.a == T_303 && r.c == ORIGINAL_SJ6_HPF_PANEL &&
++        proj.sound.v[T_303][r.b][29] == ORIGINAL_SOUND_JUNO && v == pref_get(r)) {
++#if X0X_BASS_PRESET_PREVIEW
++        if (bass_edit) engine_bass_edit_hold(0);
++#endif
++        return;
++    }
++#endif
+     pref_dirty(&r);
+     switch (r.kind) {
+     case R_ENG:
+@@ -1032,6 +1041,10 @@
+             if (!original_sound_set(proj.sound.v[T_303][r.b],r.c,(unsigned)v)) {
+                 say("INVALID SOUND",0); break;
+             }
++#if X0X_SUPERJ6_BUILTIN_INIT
++            if (r.c == ORIGINAL_SJ6_HPF_PANEL && proj.sound.v[T_303][r.b][29] == ORIGINAL_SOUND_JUNO)
++                proj.sound.v[T_303][r.b][ORIGINAL_SJ6_HPF_LAW_BYTE] |= 128u;
++#endif
+             engine_bass_sound_refresh(&proj.sound,r.b);
+         } else
+         proj.sound.v[r.a][r.b][r.c] = (uint8_t)v;
+@@ -1441,7 +1454,17 @@
+         float hz;                                     /* CUTOFF: the engine's base corner (Synths 91f6e4e9), else % */
+         if (engine_param_si(T_303, r.b, (int)id, value, &hz) == X0X_U_HZ) { unit_value(X0X_U_HZ, hz, num, unit); return 1; }
+     }
+-    if (kind == ORIGINAL_SOUND_JUNO) { juno_value_text(id, value, num, unit); return 1; }
++    if (kind == ORIGINAL_SOUND_JUNO) {
++#if X0X_SUPERJ6_BUILTIN_INIT
++        if (id == ORIGINAL_SJ6_HPF_PANEL && value > 0 &&
++            original_sound_sj6_hpf_authored(proj.sound.v[T_303][r.b])) {
++            unit_value(X0X_U_HZ, juno6_sj6_hpf_hz((value * (1.f/127.f))), num, unit);
++            return 1;
++        }
++#endif
++        juno_value_text(id, value, num, unit);
++        return 1;
++    }
+     if (kind == ORIGINAL_SOUND_SYNTHONE) { put_i(num,(value*100+63)/127); put_s(unit,"%"); return 1; }
+     if (ui_original_states(kind,id) || (kind == ORIGINAL_SOUND_CHICAGO && (id == 0 || id == 4)) ||
+         (kind == ORIGINAL_SOUND_MIAMI && id == 7)) {
+--- a/firmware/src/dsp/juno6.h
++++ b/firmware/src/dsp/juno6.h
+@@ -116,6 +116,10 @@
+ void juno6_chorus_process(juno6_chorus_t*,float*,float*,unsigned);
+ /* Slot adapter: normalized patch macros; final two are performance-only. */
+ int juno6_set(juno6_t*, unsigned, float);
++#if X0X_SUPERJ6_BUILTIN_INIT
++float juno6_sj6_hpf_hz(float unit);
++void juno6_set_sj6_hpf(juno6_t *, float unit);
++#endif
+ int juno6_active(const juno6_t*);
+ 
+ /* Caller-owned output must be disjoint from synth. Serialized observation;
+--- a/firmware/src/dsp/juno6_factory.inc
++++ b/firmware/src/dsp/juno6_factory.inc
+@@ -471,6 +471,22 @@
+ }
+ #endif
+ 
++#if X0X_SUPERJ6_BUILTIN_INIT
++float juno6_sj6_hpf_hz(float unit)
++{
++    if (unit <= 0.f) return 0.f;
++    if (unit >= 1.f) return 800.f;
++    return 800.f * fm_powf(unit, 2.42f);
++}
++void juno6_set_sj6_hpf(juno6_t *s, float unit)
++{
++    s->macro[9] = unit;
++    /* Nonnegative hpf retains the exact historical normalized setting;
++     * otherwise cache authored Hz here once per edit, not per audio block. */
++    s->hpf = -1.f - juno6_sj6_hpf_hz(unit);
++}
++#endif
++
+ int juno6_set(juno6_t *s,unsigned id,float x)
+ {
+  if(!s)return 0;
+@@ -743,8 +759,12 @@
+ #else
+  if (dnbx_render(&s->core,left,right,frames,0)!=DNBX_OK)return 0;
+ #endif
+- if(s->hpf>0){
+-  const float hp=1/(1+TWO_PI*(15+2000*s->hpf*s->hpf)/s->core.sample_rate);
++ float hp_hz = s->hpf > 0.f ? 15+2000*s->hpf*s->hpf : 0.f;
++#if X0X_SUPERJ6_BUILTIN_INIT
++ if (s->hpf < -1.f) hp_hz=-s->hpf-1.f;
++#endif
++ if(hp_hz>0){
++  const float hp=1/(1+TWO_PI*hp_hz/s->core.sample_rate);
+   for(unsigned i=0;i<frames;i++){
+    float y=hp*(s->typed_hp_state[0]+left[i]-s->typed_hp_input[0]);
+    s->typed_hp_input[0]=left[i];s->typed_hp_state[0]=y;left[i]=y;
