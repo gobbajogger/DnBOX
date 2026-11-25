@@ -1,0 +1,414 @@
+--- a/firmware/src/dsp/juno6_factory.inc
++++ b/firmware/src/dsp/juno6_factory.inc
+@@ -161,7 +161,12 @@
+ static float typed_range_pitch(const juno6_t *s,float range)
+ {
+ #if X0X_SUPERJ6_BUILTIN_INIT
++#if defined(X0X_SJ6_BEND_TYPED_PROBE) && X0X_SJ6_BEND_TYPED_PROBE
++ const float bend=s->pb_typed ? 0.f : (s->macro[16]-.5f)*4;
++#endif
++#if !(defined(X0X_SJ6_BEND_TYPED_PROBE) && X0X_SJ6_BEND_TYPED_PROBE)
+  const float bend=(s->macro[16]-.5f)*4;
++#endif
+  float raw;
+  if (dnbx_read_raw(&s->core, SJ6_A_REFERENCE_ID, &raw) == DNBX_OK && raw != .6f)
+   return bend + range_pitch(range) + 12.f * fm_log2f(juno6_a_reference_hz(raw) / 440.f);
+@@ -208,6 +213,29 @@
+  return 1;
+ }
+ 
++#if defined(X0X_SJ6_BEND_TYPED_PROBE) && X0X_SJ6_BEND_TYPED_PROBE
++/* Original lower is a magnitude; the sign comes from normalized travel. */
++static int sj6_pb_refresh(juno6_t *s)
++{
++    float x=s->macro[16]-.5f;
++    return dnbx_set_superj6_bend(&s->core,2.f*x*(x<0.f?s->pb_down:s->pb_up))==DNBX_OK;
++}
++int juno6_set_bend_ranges(juno6_t *s, unsigned down, unsigned up)
++{
++    if (!s || !s->typed || down>48u || up>48u) return 0;
++    /* First opt-in happens at adoption. Retain separate authored tuning. */
++    if (!s->pb_typed) {
++        float range=.5f;
++        if (s->macro[16]!=.5f) return 0;
++        (void)dnbx_read_raw(&s->core,86u,&range);
++        s->pb_typed=1;
++        if (!apply_voice_tuning(s,range)) { s->pb_typed=0; return 0; }
++    }
++    s->pb_down=(uint8_t)down;
++    s->pb_up=(uint8_t)up;
++    return sj6_pb_refresh(s);
++}
++#endif
+ void juno6_apply_pre_note_range(juno6_t *s,float x)
+ {
+  const unsigned id=86u;
+@@ -530,6 +558,9 @@
+  #define JUNO6_LEGACY_ADSR(field, value) (p.amp.field = (value))
+  if(id>=18)return 0;
+  s->macro[id]=x;
++#if defined(X0X_SJ6_BEND_TYPED_PROBE) && X0X_SJ6_BEND_TYPED_PROBE
++ if(id==16 && s->pb_typed) return sj6_pb_refresh(s);
++#endif
+  if(id==9)s->hpf=x;
+  #define JUNO6_APPLY_VALUE(stock,native) (native)
+ #else
+--- a/firmware/src/dsp/juno6.h
++++ b/firmware/src/dsp/juno6.h
+@@ -67,6 +67,9 @@
+  uint32_t age;
+  float sample_rate,attack,decay,sustain,release,cutoff,resonance,pulse_width,sub_level;
+  uint8_t waveform, damper;
++#if defined(X0X_SJ6_BEND_TYPED_PROBE) && X0X_SJ6_BEND_TYPED_PROBE
++ uint8_t pb_typed, pb_down, pb_up;
++#endif
+  float macro[18], bend, hpf, hp_state, hp_input, lfo_phase;
+ #if X0X_SUPERJ6_FACTORY
+  dnbx_part core;
+@@ -139,6 +142,9 @@
+ void juno6_apply_panel_envelopes(juno6_t *, unsigned mask, const uint8_t positions[SJ6_EXTRA_COUNT], int reset);
+ void juno6_apply_panel_master(juno6_t *, unsigned position);
+ /* Transient Build-9 default MOD destination, LFO1 RATE. Audio owner only. */
++#if defined(X0X_SJ6_BEND_TYPED_PROBE) && X0X_SJ6_BEND_TYPED_PROBE
++int juno6_set_bend_ranges(juno6_t *, unsigned down, unsigned up);
++#endif
+ int juno6_set_mod_wheel(juno6_t *, unsigned value);
+ void juno6_set_lfo_words(juno6_t *, const juno6_lfo_words *, int reset_phase);
+ void juno6_set_panel_lfo(juno6_t *, unsigned lfo, int position, unsigned hz_mode);
+--- a/firmware/src/dsp/dnbx_core.c
++++ b/firmware/src/dsp/dnbx_core.c
+@@ -79,6 +79,29 @@
+                      .000001f,.45f);
+ }
+ 
++/* Base tune validation stays independent of a live common Build9 bend. */
++static float pitch_increment(const dnbx_part *s, unsigned note, float tune)
++{
++#if defined(X0X_SJ6_BEND_TYPED_PROBE) && X0X_SJ6_BEND_TYPED_PROBE
++    tune += s->superj6_bend_semitones;
++#endif
++    return increment(note,tune,s->sample_rate);
++}
++#if defined(X0X_SJ6_BEND_TYPED_PROBE) && X0X_SJ6_BEND_TYPED_PROBE
++int dnbx_set_superj6_bend(dnbx_part *s, float semitones)
++{
++    if (!valid(s) || !s->superj6_amp_range || !range(semitones,-48.f,48.f))
++        return DNBX_E_RANGE;
++    if (s->superj6_bend_semitones==semitones) return DNBX_OK;
++    s->superj6_bend_semitones=semitones;
++    for (unsigned i=0; i<DNBX_VOICES; ++i)
++        if (voice_active(&s->voice[i]))
++            for (unsigned l=0; l<DNBX_LAYERS; ++l)
++                s->voice[i].layer[l].increment=pitch_increment(s,s->voice[i].note,s->layer[l].params.tune_semitones);
++    return DNBX_OK;
++}
++#endif
++
+ /* DnBOX's existing polynomial BLEP primitive. */
+ static float blep(float t, float dt, dnbx_work *w)
+ {
+@@ -348,7 +371,7 @@
+     s->layer[layer].params=*p;
+     for (unsigned i=0;i<DNBX_VOICES;i++) {
+         dnbx_layer_voice *v=&s->voice[i].layer[layer];
+-        v->increment=increment(s->voice[i].note,p->tune_semitones,s->sample_rate);
++        v->increment=pitch_increment(s,s->voice[i].note,p->tune_semitones);
+         /* A running timed segment retains its cached endpoint/rate. */
+         if (v->amp.stage==DNBX_ENV_SUSTAIN) v->amp.level=v->amp.curve=p->amp.sustain;
+         if (v->filter.stage==DNBX_ENV_SUSTAIN) v->filter.level=v->filter.curve=s->filter_link?p->amp.sustain:p->filter.sustain;
+@@ -400,7 +423,7 @@
+     v->velocity=(float)velocity/127.0f;
+     for (unsigned l=0;l<DNBX_LAYERS;l++) {
+         const dnbx_layer_params *p=&s->layer[l].params;
+-        v->layer[l].increment=increment(note,p->tune_semitones,s->sample_rate);
++        v->layer[l].increment=pitch_increment(s,note,p->tune_semitones);
+         envelope_on(&v->layer[l].amp,&p->amp,s->sample_rate);
+         dnbx_envelope_params linked;
+         envelope_on(&v->layer[l].filter,filter_params(s,l,&linked),s->sample_rate);
+--- a/firmware/src/dsp/dnbx_core.h
++++ b/firmware/src/dsp/dnbx_core.h
+@@ -1,6 +1,10 @@
+ /* SPDX-License-Identifier: GPL-3.0-only */
+ #ifndef DNBX_CORE_H
+ #define DNBX_CORE_H
++#if defined(X0X_SJ6_BEND_TYPED_PROBE) && X0X_SJ6_BEND_TYPED_PROBE && \
++    (!defined(X0X_HOST) || !defined(DNBOX_137_HOST_WITNESS) || !defined(X0X_S1_BEND_RANGE_PROBE))
++#error "SuperJ6 typed bend is a composed host witness only"
++#endif
+ #include <stddef.h>
+ #include <stdint.h>
+ #ifdef __cplusplus
+@@ -94,6 +98,9 @@
+     dnbx_voice voice[DNBX_VOICES];
+     float raw[DNBX_RAW_CONTROLS];
+     uint32_t raw_present[(DNBX_RAW_CONTROLS + 31u) / 32u];
++#if defined(X0X_SJ6_BEND_TYPED_PROBE) && X0X_SJ6_BEND_TYPED_PROBE
++    float superj6_bend_semitones;
++#endif
+     uint8_t damper, velocity_mode, superj6_amp_range, filter_link;
+ } dnbx_part;
+ 
+@@ -140,6 +147,9 @@
+ int dnbx_set_velocity_mode(dnbx_part *, unsigned mode);
+ int dnbx_all_off(dnbx_part *);
+ int dnbx_active_voices(const dnbx_part *);
++#if defined(X0X_SJ6_BEND_TYPED_PROBE) && X0X_SJ6_BEND_TYPED_PROBE
++int dnbx_set_superj6_bend(dnbx_part *, float semitones);
++#endif
+ int dnbx_read_voice(const dnbx_part *, unsigned voice, dnbx_voice_snapshot *);
+ /* Overwrites separate L/R arrays of at least frames floats. Arrays must be
+  * disjoint from each other, part, and work. 0..1024 frames per call; a zero
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -532,6 +532,10 @@
+ enum { R_S1PATCH = R_NOTELOCK + 1, R_S1LINK = R_NOTELOCK + 4 };
+ #ifdef DNBOX_137_HOST_WITNESS
+ enum { R_S1MODWHEEL = R_NOTELOCK + 5 };
++#if defined(X0X_SJ6_BEND_TYPED_PROBE) && X0X_SJ6_BEND_TYPED_PROBE
++enum { R_SJ6PB = R_NOTELOCK + 6 };
++extern int sj6_typed_pb_edit(unsigned,unsigned,unsigned);
++#endif
+ extern int s1_typed_mod_choose(unsigned,unsigned);
+ extern int s1_typed_tuple_editable(void);
+ #endif
+@@ -714,6 +718,9 @@
+ static int pref_read_only(pref_t r)
+ {
+     if (r.kind == R_BSTATUS) return 1;
++#if defined(X0X_SJ6_BEND_TYPED_PROBE) && X0X_SJ6_BEND_TYPED_PROBE
++    if (r.kind==R_SJ6PB) return !live137(&proj.sound,r.b) || !s1_typed_tuple_editable();
++#endif
+ #if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
+     if (r.kind==R_S1PATCH && s1_bend_slot(r.c))
+         return !live_s1_mod(&proj.sound,r.b) || !s1_typed_tuple_editable();
+@@ -758,6 +765,12 @@
+ #endif
+ #if X0X_SYNTHONE_PATCH
+ #ifdef DNBOX_137_HOST_WITNESS
++#if defined(X0X_SJ6_BEND_TYPED_PROBE) && X0X_SJ6_BEND_TYPED_PROBE
++    case R_SJ6PB: {
++        static const x0x_param_t desc[2] = {{"PB DOWN",48,0,NULL},{"PB UP",48,0,NULL}};
++        return &desc[r.c];
++    }
++#endif
+     case R_S1MODWHEEL: {
+         static const char *const values[] = {"CUTOFF","LFO1 RATE","LFO2 RATE"};
+         static const x0x_param_t pot = {"MOD WHEEL",2,0,values};
+@@ -891,6 +904,12 @@
+ #endif
+ #if X0X_SYNTHONE_PATCH
+ #ifdef DNBOX_137_HOST_WITNESS
++#if defined(X0X_SJ6_BEND_TYPED_PROBE) && X0X_SJ6_BEND_TYPED_PROBE
++    case R_SJ6PB: {
++        unsigned magnitude=sj6_pb_decode(read137(&proj.sound,r.b)[SJ6_PB_DN_BYTE+r.c]);
++        return r.c ? (int)magnitude : (int)(SJ6_PB_LIMIT-magnitude);
++    }
++#endif
+     case R_S1MODWHEEL: return live_s1_mod(&proj.sound,r.b)?read137(&proj.sound,r.b)[3]:0;
+ #endif
+     case R_S1LINK: {
+@@ -1592,6 +1611,11 @@
+     }
+ #endif
+ #if X0X_SYNTHONE_PATCH
++#if defined(X0X_SJ6_BEND_TYPED_PROBE) && X0X_SJ6_BEND_TYPED_PROBE
++    if (r.kind==R_SJ6PB) {
++        put_i(num,pref_get(r)-(r.c?0:48)); put_s(unit,"st"); return;
++    }
++#endif
+     if (r.kind == R_S1PATCH) {
+         const s1_patch_descriptor *patch = s1_patch_at(r.c);
+         s1_patch_value owner = {0};
+@@ -2458,6 +2482,10 @@
+                 _Static_assert(sizeof pages / sizeof *pages + 2u <= MAXPAGES,
+                                "SuperJ6 pages must leave room for ARP and SOUND");
+                 add_original_extra_pages(emit, pages, sizeof pages / sizeof *pages, b, R_SJ6KNOB);
++#if defined(X0X_SJ6_BEND_TYPED_PROBE) && X0X_SJ6_BEND_TYPED_PROBE
++                if (live137(&proj.sound,b))
++                    add_page(emit,PT_WHEELS,PR(R_SJ6PB,T_303,b,0),PR(R_SJ6PB,T_303,b,1),NONE,NONE);
++#endif
+                 first_row = UI_ORIGINAL_JUNO_PAGES;
+             }
+ #endif
+@@ -3200,8 +3228,15 @@
+     extern int s1_typed_pb_undo_ready(unsigned);
+     extern void s1_typed_pb_undo(unsigned);
+     unsigned undo_pb=0;
++#if defined(X0X_SJ6_BEND_TYPED_PROBE) && X0X_SJ6_BEND_TYPED_PROBE
++    extern void sj6_typed_pb_undo(unsigned);
++    unsigned undo_sj6_pb=0;
++#endif
++#if !(defined(X0X_SJ6_BEND_TYPED_PROBE) && X0X_SJ6_BEND_TYPED_PROBE)
++    const unsigned undo_sj6_pb=0;
++#endif
+ #else
+-    const unsigned undo_pb=0;
++    const unsigned undo_pb=0,undo_sj6_pb=0;
+ #endif
+ #endif
+     undo_wait=0;undo_bass_mask=0;
+@@ -3253,6 +3288,17 @@
+                     }
+                     undo_pb|=1u<<v;
+                 }
++#if defined(X0X_SJ6_BEND_TYPED_PROBE) && X0X_SJ6_BEND_TYPED_PROBE
++                undo_peek(&undo,entry,off+SJ6_PB_DN_BYTE-2u,pb,sizeof pb);
++                if (pb[0]!=row[SJ6_PB_DN_BYTE] || pb[1]!=row[SJ6_PB_UP_BYTE]) {
++                    if (pb[0]>SJ6_PB_LIMIT || pb[1]>SJ6_PB_LIMIT) {
++                        say("UNDO RANGE INVALID",0);
++                        engine_bass_edit_hold(0);
++                        return;
++                    }
++                    undo_sj6_pb|=1u<<v;
++                }
++#endif
+ #endif
+             }
+ #endif
+@@ -3290,11 +3336,11 @@
+     }
+ #endif
+ #ifdef DNBOX_137_HOST_WITNESS
+-    if ((undo_velocity137 || undo_s1_mod || undo_pb) && !undo_bass_mask) engine_project_hold(1);
++    if ((undo_velocity137 || undo_s1_mod || undo_pb || undo_sj6_pb) && !undo_bass_mask) engine_project_hold(1);
+ #if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
+     /* Recheck while audio is held: a note-lock must not acquire the owner
+      * between validating history and publishing the typed scalar pair. */
+-    if (undo_pb && !s1_typed_pb_undo_ready(undo_pb)) {
++    if ((undo_pb || undo_sj6_pb) && !s1_typed_pb_undo_ready(undo_pb|undo_sj6_pb)) {
+         engine_project_hold(0);
+         engine_bass_edit_hold(0);
+         say("UNDO WAIT RANGE",0);
+@@ -3307,7 +3353,7 @@
+ #if X0X_BASS_TAGGED_SOUND
+         if(undo_bass_mask)engine_project_hold(0);
+ #ifdef DNBOX_137_HOST_WITNESS
+-        else if(undo_velocity137 || undo_s1_mod || undo_pb)engine_project_hold(0);
++        else if(undo_velocity137 || undo_s1_mod || undo_pb || undo_sj6_pb)engine_project_hold(0);
+ #endif
+ #endif
+ #if X0X_BASS_PRESET_PREVIEW
+@@ -3325,8 +3371,11 @@
+     if(undo_s1_mod) s1_typed_mod_undo(undo_s1_mod & ~undo_bass_mask);
+ #if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
+     if(undo_pb) s1_typed_pb_undo(undo_pb & ~undo_bass_mask);
++#if defined(X0X_SJ6_BEND_TYPED_PROBE) && X0X_SJ6_BEND_TYPED_PROBE
++    if(undo_sj6_pb) sj6_typed_pb_undo(undo_sj6_pb & ~undo_bass_mask);
+ #endif
+-    if(undo_bass_mask || undo_velocity137 || undo_s1_mod || undo_pb) engine_project_hold(0);
++#endif
++    if(undo_bass_mask || undo_velocity137 || undo_s1_mod || undo_pb || undo_sj6_pb) engine_project_hold(0);
+ #else
+     if(undo_bass_mask) engine_project_hold(0);
+ #endif
+@@ -4303,6 +4352,15 @@
+ #endif
+ #if X0X_SYNTHONE_PATCH
+ #ifdef DNBOX_137_HOST_WITNESS
++#if defined(X0X_SJ6_BEND_TYPED_PROBE) && X0X_SJ6_BEND_TYPED_PROBE
++    if (r.kind==R_SJ6PB) {
++        if (pref_read_only(r)) return;
++        int before=pref_get(r), after=before+accel(knob,e,SJ6_PB_LIMIT);
++        after=after<0?0:after>SJ6_PB_LIMIT?SJ6_PB_LIMIT:after;
++        if (after!=before && sj6_typed_pb_edit(r.b,r.c,(unsigned)after)) mark_dirty();
++        return;
++    }
++#endif
+     if (r.kind == R_S1MODWHEEL) {
+         if (pref_read_only(r)) return;
+         int old = pref_get(r), next = old + (e>0) - (e<0);
+--- a/firmware/src/app/original_presets.inc
++++ b/firmware/src/app/original_presets.inc
+@@ -124,6 +124,40 @@
+                              (float)s1_pb_decode(row[S1_PB_DN_BYTE])-24.f,
+                              (float)s1_pb_decode(row[S1_PB_UP_BYTE]));
+ }
++#if defined(X0X_SJ6_BEND_TYPED_PROBE) && X0X_SJ6_BEND_TYPED_PROBE
++static int sj6_pb_apply(unsigned owner,const sound_t *sound)
++{
++    if (!live137(sound,owner) || original_bass[owner].kind!=ORIGINAL_SOUND_JUNO) return 0;
++    const uint8_t *row=read137(sound,owner);
++    return row[SJ6_PB_DN_BYTE]<=SJ6_PB_LIMIT && row[SJ6_PB_UP_BYTE]<=SJ6_PB_LIMIT &&
++           juno6_set_bend_ranges(&original_bass[owner].dsp.juno.synth,
++               sj6_pb_decode(row[SJ6_PB_DN_BYTE]),sj6_pb_decode(row[SJ6_PB_UP_BYTE]));
++}
++int sj6_typed_pb_edit(unsigned owner,unsigned up,unsigned pos)
++{
++    if (up>1 || pos>SJ6_PB_LIMIT || !live137(mot_base_snd,owner)) return 0;
++    engine_project_hold(1);
++    int ok=live137(mot_base_snd,owner) && s1_typed_tuple_editable() && !ui_project_busy() &&
++           !note_lock_applied[owner] && !engine_bass_preset_pending(owner) &&
++           original_bass[owner].kind==ORIGINAL_SOUND_JUNO &&
++           original_bass[owner].status==ORIGINAL_RUNTIME_OK;
++    if (ok) {
++        const uint8_t *row=read137(mot_base_snd,owner);
++        unsigned down=up ? sj6_pb_decode(row[SJ6_PB_DN_BYTE]) : SJ6_PB_LIMIT-pos;
++        unsigned above=up ? pos : sj6_pb_decode(row[SJ6_PB_UP_BYTE]);
++        ok=juno6_set_bend_ranges(&original_bass[owner].dsp.juno.synth,down,above);
++        if(ok) slot137((sound_t *)mot_base_snd,owner)[SJ6_PB_DN_BYTE+up]=
++            (uint8_t)sj6_pb_encode(up?above:down);
++    }
++    engine_project_hold(0);
++    return ok;
++}
++void sj6_typed_pb_undo(unsigned mask)
++{
++    for (unsigned owner=0;owner<NBASS;++owner)
++        if(mask&(1u<<owner)) (void)sj6_pb_apply(owner,mot_base_snd);
++}
++#endif
+ int s1_typed_pb_undo_ready(unsigned mask)
+ {
+     if (!s1_typed_tuple_editable() || ui_project_busy()) return 0;
+@@ -1176,6 +1210,9 @@
+     if (rc == ORIGINAL_RUNTIME_OK && original_bass[v].kind == ORIGINAL_SOUND_JUNO) {
+         original_bass[v].dsp.juno.synth.lfo2_entropy_state ^= (uint64_t)(unsigned)v << 32;
+         if (live137(sound,v)) juno6_set_filter_velocity(&original_bass[v].dsp.juno.synth,read137(sound,v)[2]);
++#if defined(X0X_SJ6_BEND_TYPED_PROBE) && X0X_SJ6_BEND_TYPED_PROBE
++        (void)sj6_pb_apply(v,sound);
++#endif
+         const uint8_t *cell = sound->v[T_303][v];
+         const uint8_t *extra = sound->v[T_303][ORIGINAL_SJ6_EXTRA_ROW + v];
+         if (original_sound_edit_mask(cell) & ORIGINAL_SJ6_AUTHORED_LFO_BIT)
+@@ -1372,6 +1409,9 @@
+         if (live_s1_mod(sound,v)) s1_pb_load(v,sound);
+ #endif
+         if (live137(sound,v)) juno6_set_filter_velocity(&original_bass[v].dsp.juno.synth,read137(sound,v)[2]);
++#if defined(X0X_SJ6_BEND_TYPED_PROBE) && X0X_SJ6_BEND_TYPED_PROBE
++        (void)sj6_pb_apply(v,sound);
++#endif
+ #if X0X_SYNTHONE_PATCH
+         s1_patch_replaced(v);
+ #endif
+--- a/firmware/src/app/sj6_137_host_witness.h
++++ b/firmware/src/app/sj6_137_host_witness.h
+@@ -16,6 +16,11 @@
+  return code ? code-(code<=S1_PB_INIT_POS) : S1_PB_INIT_POS;
+ }
+ #endif
++#if defined(X0X_SJ6_BEND_TYPED_PROBE) && X0X_SJ6_BEND_TYPED_PROBE
++enum { SJ6_PB_DN_BYTE=10, SJ6_PB_UP_BYTE=11, SJ6_PB_LIMIT=48 };
++static inline unsigned sj6_pb_encode(unsigned magnitude) { return magnitude==2u ? 0u : magnitude+(magnitude<2u); }
++static inline unsigned sj6_pb_decode(unsigned code) { return code ? code-(code<=2u) : 2u; }
++#endif
+ static inline int canonical137(const sound_t *s) {
+  for (unsigned v=0;v<2;++v) {
+   const uint8_t *b=read137(s,v);
+@@ -26,7 +31,16 @@
+ #else
+   for(unsigned i=4;i<64;i++)
+ #endif
+-  if (s->v[T_303][8+2*v+i/32][i%32]) return 0;
++  {
++   const uint8_t x=s->v[T_303][8+2*v+i/32][i%32];
++#if defined(X0X_SJ6_BEND_TYPED_PROBE) && X0X_SJ6_BEND_TYPED_PROBE
++   if (i==SJ6_PB_DN_BYTE || i==SJ6_PB_UP_BYTE) {
++     if (x>SJ6_PB_LIMIT) return 0;
++     continue;
++   }
++#endif
++   if (x) return 0;
++  }
+  }
+  return 1;
+ }

@@ -1,0 +1,3 @@
+PASS mixed SJ6 WHEELS ±48 with S1 MOD/PB/ID51 + SJ6 ID137, real held pitch, Undo/Redo and staged recall: 242 checks
+PASS exact ED_PROJECT BEGIN/VALIDATE/COMMIT/ABORT, no stage adoption, samples locked and zero writes on legacy reader
+PASS unchanged old project+BT and ED_PROJECT refuse exact new writer media; no object modified

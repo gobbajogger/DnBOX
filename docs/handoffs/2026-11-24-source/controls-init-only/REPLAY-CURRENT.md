@@ -46,3 +46,13 @@ SWITCHES K3. No added page, second LINK or preset payload.
 The previously unused 15-byte code states preserve prior valid bytes.
 The earlier firmware refuses the new active state without writing.
 This is the current host-qualified implementation, not a native release.
+
+Apply `../sj6-bend-build9/midi-bend.patch` after ID51 to reproduce the
+latest implemented wheel core. Verify `WHEEL-CORE-PARITY-POST.sha256`
+(digest 5b9df43bac1c8cf8f6a34f243c4cab1f8d0cd3e73183436329dace203d979c81).
+The original SuperJ6 MIDI denominator only changes that engine's MIDI
+path; the physical wheel retains its full calibrated extent. The exact
+both-owner application test passed 266 checks on this overlay.
+The newer typed independent range controls and complete six-way MOD
+selector remain separate host-only controls work; neither is presently
+part of the implemented overlay or published firmware.

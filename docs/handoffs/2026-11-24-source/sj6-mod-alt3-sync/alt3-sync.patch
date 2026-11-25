@@ -1,0 +1,129 @@
+--- a/firmware/src/dsp/juno6.h
++++ b/firmware/src/dsp/juno6.h
+@@ -92,8 +92,8 @@
+ #if defined(X0X_HOST) && defined(X0X_SJ6_ALT3_WITNESS)
+  struct {
+     float rate,depth,from_rate,from_depth,to_rate,to_depth;
+-    uint32_t phase,increment,elapsed,duration;
+-    uint8_t tick, armed, dirty;
++    uint32_t phase,increment,elapsed,depth_elapsed,duration;
++    uint8_t tick, armed, dirty, tempo_sync, last_wheel_code;
+  } alt3;
+ #endif
+  uint8_t osc1_level_code, mod_destination, mod_wheel_lfo1; /* 0 untouched, 1..128 physical CC1 */
+@@ -149,6 +149,7 @@
+ int juno6_set_mod_destination(juno6_t *, unsigned selected);
+ #if defined(X0X_HOST) && defined(X0X_SJ6_ALT3_WITNESS)
+ int juno6_arm_alt3_free(juno6_t *,unsigned verified_ramp_frames,int tempo_sync);
++int juno6_arm_alt3_running(juno6_t *,unsigned verified_ramp_frames,int tempo_sync);
+ void juno6_alt3_process(juno6_t *,float *,float *,unsigned);
+ #endif
+ void juno6_set_lfo_words(juno6_t *, const juno6_lfo_words *, int reset_phase);
+--- a/firmware/src/dsp/juno6_factory.inc
++++ b/firmware/src/dsp/juno6_factory.inc
+@@ -324,20 +324,44 @@
+ static float sj6_vibrato_depth(float unit) { return 12.f * fm_powf(unit,3.03f); }
+ 
+ #if defined(X0X_HOST) && defined(X0X_SJ6_ALT3_WITNESS)
+-int juno6_arm_alt3_free(juno6_t *s,unsigned verified_ramp_frames,int tempo_sync)
++static float sj6_alt3_rate(float normalized,int synced,float tempo)
+ {
+-    if (!s || !s->typed || tempo_sync || verified_ramp_frames==0 || verified_ramp_frames>100000u)
+-        return 0;
++    if (!synced) return 16.0f*fm_powf(normalized,3.33f);
++    static const double grid[18]={
++        64,48,32,24,16,12,8,6,4,3,2,1.5,1,.5,.3333,.25,.1667,.125
++    };
++    const unsigned index=(unsigned)roundf((1.f-normalized)*17.f);
++    return (float)(((double)tempo/60.0*grid[index])*.25);
++}
++int juno6_arm_alt3_running(juno6_t *s,unsigned verified_ramp_frames,int tempo_sync)
++{
++    /* Only constructor-default ramp profile has a source witness. Do not
++     * choose it for an unknown live AU event or an unverified graph. */
++    if (!s || !s->typed || s->alt3.armed || verified_ramp_frames!=10000u ||
++        (unsigned)tempo_sync>1u || (tempo_sync && !(s->lfo_tempo>0.f))) return 0;
+     s->alt3.duration=verified_ramp_frames;
++    s->alt3.elapsed=s->alt3.depth_elapsed=verified_ramp_frames;
++    /* KoFMInstrument initialization sends frequency=3. Depth starts zero. */
++    s->alt3.rate=s->alt3.to_rate=3.f;
++    s->alt3.tempo_sync=(uint8_t)tempo_sync;
+     s->alt3.armed=1;
+     return 1;
+ }
++int juno6_arm_alt3_free(juno6_t *s,unsigned verified_ramp_frames,int tempo_sync)
++{
++    return !tempo_sync && juno6_arm_alt3_running(s,verified_ramp_frames,0);
++}
++static void sj6_alt3_set_rate(juno6_t *s,float normalized)
++{
++    float rate=sj6_alt3_rate(normalized,s->alt3.tempo_sync,s->lfo_tempo);
++    if(rate!=s->alt3.to_rate){s->alt3.to_rate=rate;s->alt3.dirty|=1u;}
++}
+ static void sj6_alt3_target(juno6_t *s,unsigned value)
+ {
+-    const float u=(float)value/127.f;
+-    s->alt3.to_rate=16.0f*fm_powf(.9f*u,3.33f);
+-    s->alt3.to_depth=u;
+-    s->alt3.dirty=1;
++    float u=(float)value/127.f;
++    sj6_alt3_set_rate(s,.9f*u);
++    if(u!=s->alt3.to_depth){s->alt3.to_depth=u;s->alt3.dirty|=2u;}
++    s->alt3.last_wheel_code=(uint8_t)(value+1u);
+ }
+ static float sj6_alt3_table(unsigned i)
+ {
+@@ -350,20 +374,27 @@
+     if (!s->alt3.armed) return;
+     for(unsigned i=0;i<n;i++){
+         if (!s->alt3.tick) {
+-            if(s->alt3.dirty){
++            if(s->alt3.dirty&1u){
+                 s->alt3.from_rate=s->alt3.rate;
+-                s->alt3.from_depth=s->alt3.depth;
+                 s->alt3.elapsed=0;
+-                s->alt3.dirty=0;
+             }
+-            if(s->alt3.elapsed>=s->alt3.duration){
+-                s->alt3.rate=s->alt3.to_rate;s->alt3.depth=s->alt3.to_depth;
+-            }else{
++            if(s->alt3.dirty&2u){
++                s->alt3.from_depth=s->alt3.depth;
++                s->alt3.depth_elapsed=0;
++            }
++            s->alt3.dirty=0;
++            if(s->alt3.elapsed>=s->alt3.duration)s->alt3.rate=s->alt3.to_rate;
++            else {
+                 float u=(float)s->alt3.elapsed/(float)s->alt3.duration;
+                 s->alt3.rate=fmaf(s->alt3.to_rate-s->alt3.from_rate,u,s->alt3.from_rate);
+-                s->alt3.depth=fmaf(s->alt3.to_depth-s->alt3.from_depth,u,s->alt3.from_depth);
+                 s->alt3.elapsed+=8u;
+             }
++            if(s->alt3.depth_elapsed>=s->alt3.duration)s->alt3.depth=s->alt3.to_depth;
++            else {
++                float u=(float)s->alt3.depth_elapsed/(float)s->alt3.duration;
++                s->alt3.depth=fmaf(s->alt3.to_depth-s->alt3.from_depth,u,s->alt3.from_depth);
++                s->alt3.depth_elapsed+=8u;
++            }
+             s->alt3.increment=(uint32_t)nearbyintf((s->alt3.rate*.5f)*(0x1p24f/s->sample_rate));
+         }
+         s->alt3.tick=(uint8_t)((s->alt3.tick+1u)&7u);
+@@ -399,6 +430,7 @@
+     if (!s || !s->typed || value>127u) return 0;
+ #if defined(X0X_HOST) && defined(X0X_SJ6_ALT3_WITNESS)
+     if (s->mod_destination==3u) {
++        if(s->alt3.tempo_sync && !(s->lfo_tempo>0.f))return 0;
+         sj6_alt3_target(s,value);
+         return 1;
+     }
+@@ -418,6 +450,10 @@
+ {
+     if (bpm == s->lfo_tempo || bpm < 0.f || !sj6_lfo_finite(bpm)) return;
+     s->lfo_tempo = bpm;
++#if defined(X0X_HOST) && defined(X0X_SJ6_ALT3_WITNESS)
++    if (s->alt3.armed && s->alt3.tempo_sync && s->alt3.last_wheel_code && bpm>0.f)
++        sj6_alt3_set_rate(s,.9f*((float)(s->alt3.last_wheel_code-1u)/127.f));
++#endif
+     for (unsigned i = 0, sync = s->lfo_sync; sync; ++i, sync >>= 1)
+         if (sync & 1u) prepare_lfo_step(s, i);
+ }

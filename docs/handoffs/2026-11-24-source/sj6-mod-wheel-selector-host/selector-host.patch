@@ -1,0 +1,149 @@
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -1687,6 +1687,33 @@
+     mod_ctl[v] = (int16_t)val;                     /* after: apply_param from a knob clears it */
+ }
+ void engine_bass_mod(int v, int val) { cq_put(C_MOD, (uint32_t)v, 0, (uint32_t)val); }
++
++#if defined(X0X_HOST) && defined(X0X_SJ6_MOD_SELECTOR_HOST) && X0X_SUPERJ6_BUILTIN_INIT
++static juno6_t *sj6_mod_selector_owner(unsigned owner)
++{
++    return owner<NBASS && original_panel_ready(&original_bass[owner],ORIGINAL_SOUND_JUNO) ?
++        &original_bass[owner].dsp.juno.synth:0;
++}
++int engine_superj6_mod_selector_host(unsigned owner)
++{
++    const juno6_t *s=sj6_mod_selector_owner(owner);
++    return s ? (int)s->mod_destination:-1;
++}
++void engine_superj6_mod_selector_edit_host(unsigned owner,int value,unsigned relative)
++{
++    if(!sj6_mod_selector_owner(owner) ||
++       (relative ? (value!=-1&&value!=1):(value<0||value>5)))return;
++    cq_put(C_MOD,owner,relative?(value<0?2u:1u):3u,relative?0u:(uint32_t)value);
++}
++static void sj6_mod_selector_apply(unsigned owner,int value,unsigned relative)
++{
++    juno6_t *s=sj6_mod_selector_owner(owner);
++    if(!s)return;
++    if(!relative) { (void)juno6_set_mod_destination(s,(unsigned)value);return; }
++    for(int next=(int)s->mod_destination+value;0<=next&&next<=5;next+=value)
++        if(juno6_set_mod_destination(s,(unsigned)next))return;
++}
++#endif
+ int engine_bass_ext_touch(int v)                   /* UI: take the ext-MIDI bend/mod moves */
+ { if ((unsigned)v >= NBASS) return 0; int t = ext_touch[v]; ext_touch[v] = 0; return t; }
+ int engine_bass_mod_param(int v) { return (unsigned)v < NBASS ? mod_param(v) : -1; }
+@@ -2397,8 +2424,14 @@
+         if (type == C_REC) a &= 1u;
+         if (type < 8u)
+             apply_param((int)type, (int)a, (int)b, (int)v);
+-        else if (type == C_MOD)
+-            mod_apply((int)a, (int)v);
++        else if (type == C_MOD) {
++#if defined(X0X_HOST) && defined(X0X_SJ6_MOD_SELECTOR_HOST) && X0X_SUPERJ6_BUILTIN_INIT
++            if(b) sj6_mod_selector_apply(a,b==3u?(int)v:(b==2u?-1:1),b!=3u);
++            else
++#endif
++            mod_apply((int)a,(int)v);
++        }
++
+         else if (type == C_BASE) {
+             if (a < NTARGETS) apply_base((int)a, (int)b, (int)v);
+             else mot_apply(0, (int)a, (int)b, (int)v, mot_base(0, (int)a, (int)b, (int)v));
+--- a/firmware/src/app/engine.h
++++ b/firmware/src/app/engine.h
+@@ -184,6 +184,12 @@
+ void engine_bass_wheel_owners(uint8_t mask);
+ #endif
+ void engine_bass_mod(int v, int val);       /* mod wheel: Chicago cutoff / Miami wobble depth, recordable */
++#if defined(X0X_HOST) && defined(X0X_SJ6_MOD_SELECTOR_HOST) && X0X_SUPERJ6_BUILTIN_INIT
++enum { SJ6_MOD_SELECTOR_HOST_SLOT = SJ6_LFO2_PWM_BASE + 1 };
++int engine_superj6_mod_selector_host(unsigned owner);
++void engine_superj6_mod_selector_edit_host(unsigned owner,int value,unsigned relative);
++#endif
++
+ int engine_bass_mod_param(int v);
+ int engine_bass_ext_touch(int v);           /* bit0 bend, bit1 mod moved by ext MIDI since last call */
+ 
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -91,6 +91,10 @@
+     PT_XMOD,
+     PT_FX_BYPASS,
+     PT_PITCH_MOD,
++
++#if defined(X0X_HOST) && defined(X0X_SJ6_MOD_SELECTOR_HOST) && X0X_SUPERJ6_BUILTIN_INIT
++    PT_SJ6_MOD_SELECTOR_HOST,
++#endif
+     PT_COUNT
+ } page_title_id_t;
+ 
+@@ -605,6 +609,12 @@
+         {"OSC 1 LVL", 127, 127, 0},
+         {"PWM BASE", SJ6_PWM_STEPS, 0, 0},
+     };
++
++#if defined(X0X_HOST) && defined(X0X_SJ6_MOD_SELECTOR_HOST) && X0X_SUPERJ6_BUILTIN_INIT
++    static const char *const mod_dest[]={"LFO Rate","LFO>DCO","LFO>Cutoff","Tremolo","LFO2 Rate","CUTOFF"};
++    static const x0x_param_t mode={"MOD WHEEL DESTINATION",5,0,mod_dest};
++    if(slot==SJ6_MOD_SELECTOR_HOST_SLOT)return &mode;
++#endif
+     return slot < sizeof knobs / sizeof *knobs ? &knobs[slot] : 0;
+ }
+ #endif
+@@ -858,7 +868,11 @@
+     case R_ARP: return arp_get(r.b, r.a);
+ #endif
+ #if X0X_SUPERJ6_BUILTIN_INIT
+-    case R_SJ6KNOB: return engine_superj6_knob_position(r.b, r.c);
++    case R_SJ6KNOB:
++#if defined(X0X_HOST) && defined(X0X_SJ6_MOD_SELECTOR_HOST) && X0X_SUPERJ6_BUILTIN_INIT
++        if(r.c==SJ6_MOD_SELECTOR_HOST_SLOT)return engine_superj6_mod_selector_host(r.b);
++#endif
++        return engine_superj6_knob_position(r.b,r.c);
+ #endif
+ #if X0X_SYNTHONE_PATCH
+     case R_S1LINK: {
+@@ -977,6 +991,9 @@
+ #endif
+ #if X0X_SUPERJ6_BUILTIN_INIT
+     if (r.kind == R_SJ6KNOB) {
++#if defined(X0X_HOST) && defined(X0X_SJ6_MOD_SELECTOR_HOST) && X0X_SUPERJ6_BUILTIN_INIT
++        if(r.c==SJ6_MOD_SELECTOR_HOST_SLOT){engine_superj6_mod_selector_edit_host(r.b,v,0);return;}
++#endif
+         if (engine_superj6_knob_turn(r.b, r.c, v, 0)) mark_dirty();
+         return;
+     }
+@@ -1918,6 +1935,10 @@
+     [PT_TEMPO_SYNC] = "TEMPO SYNC",
+     [PT_TUNING] = "TUNING",
+     [PT_VIBRATO] = "VIBRATO",
++#if defined(X0X_HOST) && defined(X0X_SJ6_MOD_SELECTOR_HOST) && X0X_SUPERJ6_BUILTIN_INIT
++    [PT_SJ6_MOD_SELECTOR_HOST] = "MOD / PITCH WHEELS",
++#endif
++
+     [PT_VOICE] = "VOICE",
+     [PT_WAVE] = "WAVE",
+     [PT_WOBBLE] = "WOBBLE",
+@@ -2396,6 +2417,10 @@
+                     {PT_LFO, {ORIG_PAGE_ENGINE + 10, ORIG_PAGE_ENGINE + 11, ORIG_PAGE_NONE, ORIG_PAGE_NONE}},
+                     {PT_CHORUS, {SJ6_CHORUS_I, SJ6_CHORUS_II, SJ6_CHORUS_RATE, SJ6_CHORUS_MIX}},
+                     {PT_VIBRATO, {SJ6_VIBRATO_DEPTH, SJ6_VIBRATO_RATE, ORIG_PAGE_NONE, ORIG_PAGE_NONE}},
++#if defined(X0X_HOST) && defined(X0X_SJ6_MOD_SELECTOR_HOST) && X0X_SUPERJ6_BUILTIN_INIT
++                    {PT_SJ6_MOD_SELECTOR_HOST,{SJ6_MOD_SELECTOR_HOST_SLOT,ORIG_PAGE_NONE,ORIG_PAGE_NONE,ORIG_PAGE_NONE}},
++#endif
++
+                     {PT_TUNING, {SJ6_LAYER1_SEMI, SJ6_LAYER2_SEMI, SJ6_LAYER1_FINE, SJ6_LAYER2_FINE}},
+                 };
+                 /* Leave room for the ARPEGGIATOR and the legacy SOUND selector
+@@ -4159,6 +4184,9 @@
+ {
+ #if X0X_SUPERJ6_BUILTIN_INIT
+     if (r.kind == R_SJ6KNOB) {
++#if defined(X0X_HOST) && defined(X0X_SJ6_MOD_SELECTOR_HOST) && X0X_SUPERJ6_BUILTIN_INIT
++        if(r.c==SJ6_MOD_SELECTOR_HOST_SLOT){engine_superj6_mod_selector_edit_host(r.b,(e>0)-(e<0),1);return;}
++#endif
+         int max = (int)original_sound_sj6_max(r.c);
+         int delta = max <= SJ6_WAVE_STOPS ? (e > 0) - (e < 0) : accel(knob, e, max);
+         if (engine_superj6_knob_turn(r.b, r.c, delta, 1)) mark_dirty();

@@ -1,0 +1,13 @@
+firmware/src/app/engine.c: OK
+firmware/src/app/engine.h: OK
+firmware/src/app/ui.c: OK
+firmware/src/dsp/juno6.c: OK
+FAIL line 42: pgidx>=0
+FAIL line 42: pgidx>=0
+firmware/src/app/engine.c: OK
+firmware/src/app/engine.h: OK
+firmware/src/app/ui.c: OK
+firmware/src/app/original_runtime.c: OK
+firmware/src/dsp/juno6.h: OK
+firmware/src/dsp/juno6_factory.inc: OK
+PASS physical original MOD selector (70)
