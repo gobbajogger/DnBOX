@@ -1,0 +1,14 @@
+--- a/firmware/src/app/original_sound.c
++++ b/firmware/src/app/original_sound.c
+@@ -221,7 +221,10 @@
+ #if X0X_SYNTHONE_PATCH
+     uint32_t mask = original_sound_edit_mask(cell);
+     if (cell[29] == ORIGINAL_SOUND_SYNTHONE && (mask & (S1_PATCH_MASK | S1_LINK_MASK))) {
+-        if (mask & ~(S1_PATCH_MASK | S1_LINK_MASK | 7u)) return 0;
++        /* Exactly bits 0..2 and 8..21; test serialized bytes directly so
++         * native code doesn't materialize the scalar mask in ROM range. */
++        _Static_assert((S1_PATCH_MASK | S1_LINK_MASK | 7u)==0x003fff07u,"S1 edit permission layout");
++        if ((cell[22] & 0xf8u) || (cell[24] & 0xc0u) || cell[25]) return 0;
+         if (cell[S1_LINK_BYTE] != ((mask & S1_LINK_MASK) != 0)) return 0;
+         for (unsigned i = 0; i < 22; ++i) {
+             if (cell[i] > 127u || (i >= 2 && i != S1_LINK_BYTE && !(mask & (UINT32_C(1) << i)) && cell[i])) return 0;
