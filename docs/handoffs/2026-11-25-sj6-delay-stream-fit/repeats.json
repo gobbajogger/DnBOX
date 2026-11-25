@@ -1,0 +1,111 @@
+{
+  "rates": 44100,
+  "delay_samples": 11025,
+  "feedback": 0.4988976377952756,
+  "arena_bytes": 4096,
+  "stream_state_native_and_host": 4092,
+  "stream_ring_bytes": 3948,
+  "dry_bypass": "all three bit-exact on all four stimuli, no crosstalk",
+  "results": {
+    "220:1": {
+      "fitted": {
+        "rms_error_db": -0.275,
+        "null_rel_db": -12.636,
+        "intended_frequency_level_error_db": -0.276
+      },
+      "3bit": {
+        "rms_error_db": -0.011,
+        "null_rel_db": -31.73,
+        "intended_frequency_level_error_db": -0.013
+      }
+    },
+    "220:2": {
+      "fitted": {
+        "rms_error_db": -0.554,
+        "null_rel_db": -6.814,
+        "intended_frequency_level_error_db": -0.558
+      },
+      "3bit": {
+        "rms_error_db": 0.002,
+        "null_rel_db": -27.775,
+        "intended_frequency_level_error_db": -0.005
+      }
+    },
+    "1000:1": {
+      "fitted": {
+        "rms_error_db": -5.413,
+        "null_rel_db": -0.977,
+        "intended_frequency_level_error_db": -5.89
+      },
+      "3bit": {
+        "rms_error_db": 0.113,
+        "null_rel_db": -17.71,
+        "intended_frequency_level_error_db": 0.039
+      }
+    },
+    "1000:2": {
+      "fitted": {
+        "rms_error_db": -12.915,
+        "null_rel_db": 1.148,
+        "intended_frequency_level_error_db": -13.402
+      },
+      "3bit": {
+        "rms_error_db": -0.474,
+        "null_rel_db": -17.329,
+        "intended_frequency_level_error_db": -0.548
+      }
+    },
+    "3000:1": {
+      "fitted": {
+        "rms_error_db": -22.094,
+        "null_rel_db": 0.022,
+        "intended_frequency_level_error_db": -65.53
+      },
+      "3bit": {
+        "rms_error_db": -0.498,
+        "null_rel_db": -9.642,
+        "intended_frequency_level_error_db": -0.995
+      }
+    },
+    "3000:2": {
+      "fitted": {
+        "rms_error_db": -22.483,
+        "null_rel_db": 0.02,
+        "intended_frequency_level_error_db": -65.925
+      },
+      "3bit": {
+        "rms_error_db": -2.742,
+        "null_rel_db": -8.114,
+        "intended_frequency_level_error_db": -3.236
+      }
+    },
+    "6000:1": {
+      "fitted": {
+        "rms_error_db": -22.902,
+        "null_rel_db": 0.018,
+        "intended_frequency_level_error_db": -65.985,
+        "2820hz_image_rel_to_original_6000hz_db": -158.689
+      },
+      "3bit": {
+        "rms_error_db": -59.952,
+        "null_rel_db": 0.0,
+        "intended_frequency_level_error_db": -105.679,
+        "2820hz_image_rel_to_original_6000hz_db": -62.246
+      }
+    },
+    "6000:2": {
+      "fitted": {
+        "rms_error_db": -24.371,
+        "null_rel_db": 0.012,
+        "intended_frequency_level_error_db": -67.46,
+        "2820hz_image_rel_to_original_6000hz_db": -152.512
+      },
+      "3bit": {
+        "rms_error_db": -53.63,
+        "null_rel_db": 0.0,
+        "intended_frequency_level_error_db": -113.416,
+        "2820hz_image_rel_to_original_6000hz_db": -70.015
+      }
+    }
+  }
+}

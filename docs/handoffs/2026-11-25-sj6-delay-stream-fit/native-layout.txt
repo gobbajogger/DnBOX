@@ -1,0 +1,6 @@
+00001000 00001000 C baseline_ring
+00000048 00000048 C baseline_state
+00000ffc 00000ffc C stream_layout
+  2 .text         000005aa 0000000000000000 TEXT DATA 
+  4 .rodata       00000204 0000000000000000 DATA 
+  5 .rodata.cst16 00000010 0000000000000000 DATA 
