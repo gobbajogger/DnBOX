@@ -1,0 +1,51 @@
+36420 40 2712 2752 768 832 2688 960
+{"seed_sha256": "49f7c1090d9590aad3874d14c099930827af79ad5f55f0ca1b2356fcb3232223", "cold_native": "5bcd76a82e44a5ce135157c8ccac3ce21be212c3783d285772588a77585e5594", "owner_native": "3e78835b5c9928c68b4da092eb8c7677d2e37f07b47edc27c22ad795ae9d7c84"}
+{"seed_sha256": "9edb7ef3471f0d966dadde467bfa71be0cd88e019f9ad061ff7541976de82eca", "cold_native": "5bcd76a82e44a5ce135157c8ccac3ce21be212c3783d285772588a77585e5594", "owner_native": "3e78835b5c9928c68b4da092eb8c7677d2e37f07b47edc27c22ad795ae9d7c84"}
+{"seed_sha256": "83324e08ec1a050a3b943133849aaf09a415ea53b0d4f674254af98380ad058f", "cold_native": "5bcd76a82e44a5ce135157c8ccac3ce21be212c3783d285772588a77585e5594", "owner_native": "3e78835b5c9928c68b4da092eb8c7677d2e37f07b47edc27c22ad795ae9d7c84"}
+{"seed_sha256": "ba2317918a16f739eea347da216a59bad81af877026a6fd5e63f699d0a5da7c9", "cold_native": "5bcd76a82e44a5ce135157c8ccac3ce21be212c3783d285772588a77585e5594", "owner_native": "3e78835b5c9928c68b4da092eb8c7677d2e37f07b47edc27c22ad795ae9d7c84"}
+{"seed_sha256": "0a35ac61da6a847c74c70111a4d6fb4bc5295941a5c48886e7131479df98dd50", "cold_native": "7145d630918e221c6ef64d7da5d976a3126c42ab4cbd56b0012e1f2b3e77f394", "owner_native": "3e78835b5c9928c68b4da092eb8c7677d2e37f07b47edc27c22ad795ae9d7c84"}
+{"seed_sha256": "5f4260f0d94ad163c9b4ece80e56bf50c590769285014193d28911eba803fb32", "cold_native": "7145d630918e221c6ef64d7da5d976a3126c42ab4cbd56b0012e1f2b3e77f394", "owner_native": "3e78835b5c9928c68b4da092eb8c7677d2e37f07b47edc27c22ad795ae9d7c84"}
+{"seed_sha256": "bf74c29d6571f3283812f4f17890bee3e0be40719c491b9b2149f4a8060d90ee", "cold_native": "7145d630918e221c6ef64d7da5d976a3126c42ab4cbd56b0012e1f2b3e77f394", "owner_native": "3e78835b5c9928c68b4da092eb8c7677d2e37f07b47edc27c22ad795ae9d7c84"}
+{"seed_sha256": "0a711bdde130f339d8012af4fd4da4bbb888b84f267edfee905787215539f4a7", "cold_native": "7145d630918e221c6ef64d7da5d976a3126c42ab4cbd56b0012e1f2b3e77f394", "owner_native": "3e78835b5c9928c68b4da092eb8c7677d2e37f07b47edc27c22ad795ae9d7c84"}
+base
+trial
+base elite active 0
+{"count":4,"owners":[{"ms":2945,"seq":11,"bank":2,"status":1,"cutoff":115,"bankB":0,"statusB":1,"arp":1},{"ms":4111,"seq":12,"bank":2,"status":1,"cutoff":115,"bankB":0,"statusB":1,"arp":1},{"ms":5723,"seq":13,"bank":2,"status":1,"cutoff":115,"bankB":0,"statusB":1,"arp":1},{"ms":7847,"seq":14,"bank":2,"status":1,"cutoff":115,"bankB":0,"statusB":1,"arp":1}],"verifiedOwnerThroughout":false}
+{"halves": 485, "worst_us": 15513, "raw_late": 138, "xruns": 138, "pcm_peak": 13162, "frames": 319488}
+{"boot_guard_and_overlays": true, "skipped_cycles": 0, "halves": 485, "worst_us": 15513, "raw_late": 138, "xruns": 138, "pcm_peak": 13162, "frames": 319488, "point_owner_witnesses": 4, "point_owner_witnesses_valid": true, "core1_untouched_stack_bytes": 2176, "accepted": false, "meets_timing": false}
+{"rv8_present": false, "profile": "active", "room_fb": 0.5, "delay_decimation": 63, "delay_on": 0.0, "reverb_on": 1.0, "reverb_mix": 0.7559055089950562}
+trial elite active 0
+{"count":4,"owners":[{"ms":3125,"seq":11,"bank":2,"status":1,"cutoff":115,"bankB":0,"statusB":1,"arp":1},{"ms":4128,"seq":12,"bank":2,"status":1,"cutoff":115,"bankB":0,"statusB":1,"arp":1},{"ms":5700,"seq":13,"bank":2,"status":1,"cutoff":115,"bankB":0,"statusB":1,"arp":1},{"ms":7818,"seq":14,"bank":2,"status":1,"cutoff":115,"bankB":0,"statusB":1,"arp":1}],"verifiedOwnerThroughout":false}
+{"halves": 517, "worst_us": 15761, "raw_late": 106, "xruns": 106, "pcm_peak": 13221, "frames": 319488}
+{"boot_guard_and_overlays": true, "skipped_cycles": 0, "halves": 517, "worst_us": 15761, "raw_late": 106, "xruns": 106, "pcm_peak": 13221, "frames": 319488, "point_owner_witnesses": 4, "point_owner_witnesses_valid": true, "core1_untouched_stack_bytes": 2176, "accepted": false, "meets_timing": false}
+{"rv8_present": true, "profile": "active", "room_fb": -2.0, "delay_decimation": 63, "delay_on": 0.0, "reverb_on": 1.0, "reverb_mix": 0.7559055089950562}
+base pro active 0
+{"count":5,"owners":[{"ms":2322,"seq":10,"bank":2,"status":1,"cutoff":115,"bankB":0,"statusB":1,"arp":1},{"ms":3322,"seq":11,"bank":2,"status":1,"cutoff":115,"bankB":0,"statusB":1,"arp":1},{"ms":4169,"seq":12,"bank":2,"status":1,"cutoff":115,"bankB":0,"statusB":1,"arp":1},{"ms":5677,"seq":13,"bank":2,"status":1,"cutoff":115,"bankB":0,"statusB":1,"arp":1},{"ms":7875,"seq":14,"bank":2,"status":1,"cutoff":115,"bankB":0,"statusB":1,"arp":1}],"verifiedOwnerThroughout":true}
+{"halves": 592, "worst_us": 15352, "raw_late": 31, "xruns": 31, "pcm_peak": 13150, "frames": 319488}
+{"boot_guard_and_overlays": true, "skipped_cycles": 0, "halves": 592, "worst_us": 15352, "raw_late": 31, "xruns": 31, "pcm_peak": 13150, "frames": 319488, "point_owner_witnesses": 5, "point_owner_witnesses_valid": true, "core1_untouched_stack_bytes": 2176, "accepted": false, "meets_timing": false}
+{"rv8_present": false, "profile": "active", "room_fb": 0.5, "delay_decimation": 63, "delay_on": 0.0, "reverb_on": 1.0, "reverb_mix": 0.7559055089950562}
+trial pro active 0
+{"count":4,"owners":[{"ms":3264,"seq":11,"bank":2,"status":1,"cutoff":115,"bankB":0,"statusB":1,"arp":1},{"ms":4204,"seq":12,"bank":2,"status":1,"cutoff":115,"bankB":0,"statusB":1,"arp":1},{"ms":5665,"seq":13,"bank":2,"status":1,"cutoff":115,"bankB":0,"statusB":1,"arp":1},{"ms":7847,"seq":14,"bank":2,"status":1,"cutoff":115,"bankB":0,"statusB":1,"arp":1}],"verifiedOwnerThroughout":false}
+{"halves": 578, "worst_us": 15366, "raw_late": 45, "xruns": 45, "pcm_peak": 13147, "frames": 319488}
+{"boot_guard_and_overlays": true, "skipped_cycles": 0, "halves": 578, "worst_us": 15366, "raw_late": 45, "xruns": 45, "pcm_peak": 13147, "frames": 319488, "point_owner_witnesses": 4, "point_owner_witnesses_valid": true, "core1_untouched_stack_bytes": 2312, "accepted": false, "meets_timing": false}
+{"rv8_present": true, "profile": "active", "room_fb": -2.0, "delay_decimation": 63, "delay_on": 0.0, "reverb_on": 1.0, "reverb_mix": 0.7559055089950562}
+base elite normal 0
+{"count":5,"owners":[{"ms":2290,"seq":10,"bank":2,"status":1,"cutoff":115,"bankB":0,"statusB":1,"arp":1},{"ms":2945,"seq":11,"bank":2,"status":1,"cutoff":115,"bankB":0,"statusB":1,"arp":1},{"ms":4111,"seq":12,"bank":2,"status":1,"cutoff":115,"bankB":0,"statusB":1,"arp":1},{"ms":5723,"seq":13,"bank":2,"status":1,"cutoff":115,"bankB":0,"statusB":1,"arp":1},{"ms":7811,"seq":14,"bank":2,"status":1,"cutoff":115,"bankB":0,"statusB":1,"arp":1}],"verifiedOwnerThroughout":true}
+{"halves": 485, "worst_us": 15512, "raw_late": 138, "xruns": 138, "pcm_peak": 13150, "frames": 319488}
+{"boot_guard_and_overlays": true, "skipped_cycles": 0, "halves": 485, "worst_us": 15512, "raw_late": 138, "xruns": 138, "pcm_peak": 13150, "frames": 319488, "point_owner_witnesses": 5, "point_owner_witnesses_valid": true, "core1_untouched_stack_bytes": 2176, "accepted": false, "meets_timing": false}
+{"rv8_present": false, "profile": "normal", "room_fb": 0.5, "delay_decimation": 63, "delay_on": 0.0, "reverb_on": 1.0, "reverb_mix": 0.0}
+trial elite normal 0
+{"count":4,"owners":[{"ms":2910,"seq":11,"bank":2,"status":1,"cutoff":115,"bankB":0,"statusB":1,"arp":1},{"ms":4116,"seq":12,"bank":2,"status":1,"cutoff":115,"bankB":0,"statusB":1,"arp":1},{"ms":5666,"seq":13,"bank":2,"status":1,"cutoff":115,"bankB":0,"statusB":1,"arp":1},{"ms":7858,"seq":14,"bank":2,"status":1,"cutoff":115,"bankB":0,"statusB":1,"arp":1}],"verifiedOwnerThroughout":false}
+{"halves": 477, "worst_us": 15716, "raw_late": 146, "xruns": 146, "pcm_peak": 13179, "frames": 319488}
+{"boot_guard_and_overlays": true, "skipped_cycles": 0, "halves": 477, "worst_us": 15716, "raw_late": 146, "xruns": 146, "pcm_peak": 13179, "frames": 319488, "point_owner_witnesses": 4, "point_owner_witnesses_valid": true, "core1_untouched_stack_bytes": 2176, "accepted": false, "meets_timing": false}
+{"rv8_present": true, "profile": "normal", "room_fb": -2.0, "delay_decimation": 63, "delay_on": 0.0, "reverb_on": 1.0, "reverb_mix": 0.0}
+base pro normal 0
+{"count":5,"owners":[{"ms":2290,"seq":10,"bank":2,"status":1,"cutoff":115,"bankB":0,"statusB":1,"arp":1},{"ms":3265,"seq":11,"bank":2,"status":1,"cutoff":115,"bankB":0,"statusB":1,"arp":1},{"ms":4146,"seq":12,"bank":2,"status":1,"cutoff":115,"bankB":0,"statusB":1,"arp":1},{"ms":5735,"seq":13,"bank":2,"status":1,"cutoff":115,"bankB":0,"statusB":1,"arp":1},{"ms":7882,"seq":14,"bank":2,"status":1,"cutoff":115,"bankB":0,"statusB":1,"arp":1}],"verifiedOwnerThroughout":true}
+{"halves": 580, "worst_us": 15368, "raw_late": 43, "xruns": 43, "pcm_peak": 13149, "frames": 319488}
+{"boot_guard_and_overlays": true, "skipped_cycles": 0, "halves": 580, "worst_us": 15368, "raw_late": 43, "xruns": 43, "pcm_peak": 13149, "frames": 319488, "point_owner_witnesses": 5, "point_owner_witnesses_valid": true, "core1_untouched_stack_bytes": 2176, "accepted": false, "meets_timing": false}
+{"rv8_present": false, "profile": "normal", "room_fb": 0.5, "delay_decimation": 63, "delay_on": 0.0, "reverb_on": 1.0, "reverb_mix": 0.0}
+trial pro normal 0
+{"count":4,"owners":[{"ms":2946,"seq":11,"bank":2,"status":1,"cutoff":115,"bankB":0,"statusB":1,"arp":1},{"ms":4112,"seq":12,"bank":2,"status":1,"cutoff":115,"bankB":0,"statusB":1,"arp":1},{"ms":5758,"seq":13,"bank":2,"status":1,"cutoff":115,"bankB":0,"statusB":1,"arp":1},{"ms":7805,"seq":14,"bank":2,"status":1,"cutoff":115,"bankB":0,"statusB":1,"arp":1}],"verifiedOwnerThroughout":false}
+{"halves": 476, "worst_us": 15803, "raw_late": 147, "xruns": 147, "pcm_peak": 13203, "frames": 319488}
+{"boot_guard_and_overlays": true, "skipped_cycles": 0, "halves": 476, "worst_us": 15803, "raw_late": 147, "xruns": 147, "pcm_peak": 13203, "frames": 319488, "point_owner_witnesses": 4, "point_owner_witnesses_valid": true, "core1_untouched_stack_bytes": 2176, "accepted": false, "meets_timing": false}
+{"rv8_present": true, "profile": "normal", "room_fb": -2.0, "delay_decimation": 63, "delay_on": 0.0, "reverb_on": 1.0, "reverb_mix": 0.0}

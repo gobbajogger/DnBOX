@@ -27,30 +27,37 @@ project_nor() {
 }
 trialdir=$(project_nor)
 params "$base"
-coldlog=$(mktemp)
-project_nor --run --offsets=-1 --jobs=1 | tee "$coldlog"
-basedir=$(head -1 "$coldlog")
-rm "$coldlog"
-[[ "$basedir" == /tmp/dnbox-emulator-only-* && "$trialdir" == /tmp/dnbox-emulator-only-* ]]
+[[ "$EHASH" == 02ceb3c1c7a3b032e24a0a149daf3a00238f869c8628ba73975e8fe6815f1147 && "$PHASH" == c2e88ec1e2f8efb87933a7c7f1f3eb25b4e945a2747a3de750cd0af8c5bd1dfe ]]
+baseappdir=$(project_nor)
+near=${DNBOX_NEAR_BASE:-$R/rehydrated-reverb/near-bound}
+coldlog=${DNBOX_COLD_RECEIPT:-$D/near-cold.log}
+colddir=$(head -1 "$coldlog")
+[[ "$baseappdir" == /tmp/dnbox-emulator-only-* && "$trialdir" == /tmp/dnbox-emulator-only-* &&
+   "$colddir" == /tmp/dnbox-emulator-only-* ]]
+[[ $(sha256sum "$near/tree/labout/elite/never-install.elf"|cut -c1-64) == 5bcd76a82e44a5ce135157c8ccac3ce21be212c3783d285772588a77585e5594 &&
+   $(sha256sum "$near/tree/labout/pro/never-install.elf"|cut -c1-64) == 7145d630918e221c6ef64d7da5d976a3126c42ab4cbd56b0012e1f2b3e77f394 ]]
 owner="$R/remote-typed-load/tree/build/smk37-elite/x0x.elf"
 owner_ram="$R/remote-typed-load/loaded-smoke-elite/ram.bin"
 for model in elite pro; do
     old="$base/tree/labout/$model/never-install.elf"
     new="$trial/tree/labout/$model/never-install.elf"
     loc() { readelf -sW "$1" | awk '$8=="proj"{print $2,$3,$4,$7}'; }
+    src="$near/tree/labout/$model/never-install.elf"
     cmp <(loc "$old") <(loc "$new")
-    for dir in "$basedir" "$trialdir"; do
-        common=("$dir/$model-virtual-nor.bin" "$old" "$basedir/$model-offset--1/ram.bin" "$owner" "$owner_ram" "$D/fixture")
+    cmp <(loc "$old") <(loc "$src")
+    [[ -s "$colddir/$model-offset--1/result.json" && -s "$colddir/$model-offset--1/ram.bin" ]]
+    for dir in "$baseappdir" "$trialdir"; do
+        common=("$dir/$model-virtual-nor.bin" "$src" "$colddir/$model-offset--1/ram.bin" "$owner" "$owner_ram" "$D/fixture")
         python3 "$D/seed.py" "${common[@]}" "$dir/$model-normal.bin"
         python3 "$D/seed.py" "${common[@]}" "$dir/$model-active.bin" --active
     done
 done
-printf 'base %s\ntrial %s\n' "$basedir" "$trialdir"
+printf 'base %s\ntrial %s\n' "$baseappdir" "$trialdir"
 USB=$(node "$D/owner-scan.mjs" commands)
 for profile in active normal; do
  for model in elite pro; do
   for arm in base trial; do
-   dir="$basedir"; path="$base"; if [[ "$arm" == trial ]]; then dir="$trialdir"; path="$trial"; fi
+   dir="$baseappdir"; path="$base"; if [[ "$arm" == trial ]]; then dir="$trialdir"; path="$trial"; fi
    run="$dir/$model-$profile-$offset"; mkdir "$run"; mkdir "$run/work"
    copied="$run/disposable.bin"; cp "$dir/$model-$profile.bin" "$copied"
    python3 - "$scene" "$run/scene.keys" "$offset" <<'PY'

@@ -4,8 +4,9 @@ room-native-recovery/rerun.sh rehydrated-reverb/cold-undo
 rehydrated-reverb/dual-room 0` on exact pinned linked source. Launcher
 checks both known dual-room ELF SHAs, requires no-skip strict emulator,
 and takes a nonblocking external lock. Outputs are disposable in /tmp.
-No hardware/installer/package. A correct cold boot on the identical
-baseline must be obtained first; source-derived fixture and target ABI
+No hardware/installer/package. Replay needs a verified cold boot from the
+historical exact Near ELF pair (see near-cold.log); source-derived fixture
+and target ABI probe compile against the linked dual-room donor.
 probe compile against the linked dual-room donor. The complete original
 heavy scene is pinned (922 events, offset0 by default).
 

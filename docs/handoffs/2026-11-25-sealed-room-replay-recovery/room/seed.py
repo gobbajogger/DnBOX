@@ -17,7 +17,13 @@ def build(q):
     assert p[:4]==b'0X0P' and g.u32(p,4)==1 and p[19]==13
     assert g.sha(g.regular(q.owner_elf))=='3e78835b5c9928c68b4da092eb8c7677d2e37f07b47edc27c22ad795ae9d7c84'
     owner=native_project(q.owner_elf,q.owner_ram,sz)
-    assert p[b+cell+32:b+cell+64]==owner[b+cell+32:b+cell+64]
+    # Preserved owner's RAM was captured after the old heavy scene; its
+    # B cutoff and edited flag differ from cold. Match each expected literal
+    # and never copy B; copy only the three checked A-owned records below.
+    assert p[b+cell+32:b+cell+64].hex()=='0012205f636a00223349157f667f40406a0036004000000000004f5302000000'
+    assert owner[b+cell+32:b+cell+64].hex()=='7f12205f636a00223349157f667f40406a0036004000010000004f5302000000'
+    assert p[b+tag+12:b+tag+24].hex()=='3148434f0200160100000000'
+    assert owner[b+tag+12:b+tag+24].hex()=='3148434f0200160100000100' 
     assert owner[b+cell+29:b+cell+31]==b'\x02\x00'
     assert owner[b+arp:b+arp+3]==b'A\x01\x09'
     assert owner[b+tag:b+tag+4]==b'11SO'
