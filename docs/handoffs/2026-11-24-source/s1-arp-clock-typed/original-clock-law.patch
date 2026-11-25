@@ -1,0 +1,68 @@
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -2149,10 +2149,10 @@
+ static const x0x_param_t *arp_desc(unsigned field, unsigned owner)
+ {
+ #if X0X_S1_FENCED_CLOCK
+-    static const char *const stops[]={"8 BARS","6 BARS","4 BARS","3 BARS","2 BARS","1 BAR","1 BAR T",
+-        "1/2","1/2 T","1/4","1/4 T","1/8","1/8 T","1/16","1/16 T","1/32","1/32 T","1/64","1/64 T"};
++    static const char *const stops[]={"1/64 T","1/64","1/32 T","1/32","1/16 T","1/16","1/8 T","1/8",
++        "1/4 T","1/4","1/2 T","1/2","1 BAR T","1 BAR","2 BARS","3 BARS","4 BARS","6 BARS","8 BARS"};
+     static const x0x_param_t rate={"ARP RATE",199,119,0};
+-    static const x0x_param_t factor={"CLOCK FACTOR",18,5,stops};
++    static const x0x_param_t factor={"CLOCK FACTOR",18,9,stops};
+     if (field==ARP_F_SOURCE_RATE||field==ARP_F_SOURCE_FACTOR)
+         return engine_bass_bank(owner) != ORIGINAL_SOUND_SYNTHONE ? 0 :
+             field==ARP_F_SOURCE_RATE ? &rate : &factor;
+@@ -2183,7 +2183,7 @@
+ #if X0X_S1_FENCED_CLOCK
+     if (field==ARP_F_SOURCE_RATE||field==ARP_F_SOURCE_FACTOR) {
+         int value=engine_arp_source_get(voice,field);
+-        return value<0 ? 0 : value-(field==ARP_F_SOURCE_RATE);
++        return value<0 ? 0 : field==ARP_F_SOURCE_RATE ? value-1 : 18-value;
+     }
+ #endif
+     engine_arp_settings s;
+@@ -2214,7 +2214,7 @@
+ {
+ #if X0X_S1_FENCED_CLOCK
+     if (field==ARP_F_SOURCE_RATE||field==ARP_F_SOURCE_FACTOR) {
+-        if (engine_arp_source_set(voice,field,v+(field==ARP_F_SOURCE_RATE)))mark_dirty();
++        if (engine_arp_source_set(voice,field,field==ARP_F_SOURCE_RATE ? v+1 : 18-v))mark_dirty();
+         else say("ARP NOT CHANGED",0);
+         return;
+     }
+@@ -4422,6 +4422,13 @@
+ #endif
+         return;
+     }
++#if X0X_S1_FENCED_CLOCK
++    if (r.kind==R_ARP && (r.a==ARP_F_SOURCE_RATE || r.a==ARP_F_SOURCE_FACTOR)) {
++        // Source stepper buttons and factor stops advance one position per detent.
++        if(e) pref_set_impl(r,pref_get(r)+(e>0?1:-1),!accel_smc);
++        return;
++    }
++#endif
+     int switched=original_switch_turn(r,pref_get(r),e,1);
+     if(switched>=0)pref_set_impl(r,switched,!accel_smc);
+     else
+--- a/firmware/src/app/original_presets.inc
++++ b/firmware/src/app/original_presets.inc
+@@ -478,7 +478,7 @@
+     const uint8_t *p=read137(mot_base_snd,owner)+S1_ARP_CLOCK_BYTE;
+     if (!s1_clock_valid(p)) return -1;
+     if (field==ARP_F_SOURCE_RATE) return p[2] ? s1_clock_bpm(p) : 120;
+-    if (field==ARP_F_SOURCE_FACTOR) return p[2] ? p[2]-1u : 5;
++    if (field==ARP_F_SOURCE_FACTOR) return p[2] ? p[2]-1u : 9;
+     return -1;
+ }
+ int engine_arp_source_set(unsigned owner,unsigned field,int value)
+@@ -494,7 +494,7 @@
+         if(!s1_clock_valid(p))ok=0;
+         else {
+             unsigned rate=field==ARP_F_SOURCE_RATE ? (unsigned)value : p[2] ? s1_clock_bpm(p) : 120;
+-            unsigned factor=field==ARP_F_SOURCE_FACTOR ? (unsigned)value+1u : p[2] ? p[2] : 6;
++            unsigned factor=field==ARP_F_SOURCE_FACTOR ? (unsigned)value+1u : p[2] ? p[2] : 10;
+             p[0]=(uint8_t)rate;p[1]=(uint8_t)(rate>>8);p[2]=(uint8_t)factor;
+             s1_typed_clock_apply(mot_base_snd,owner);
+         }

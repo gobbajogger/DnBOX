@@ -1,0 +1,524 @@
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -60,6 +60,13 @@
+ static uint8_t brk_preview_audio_on, brk_preview_pattern;
+ static void brk_preview_interrupt(void);
+ static original_runtime_part original_bass[NBASS] POOL;
++#if X0X_S1_FENCED_CLOCK
++/* Serialized owner setup for host audition only. */
++int engine_host_s1_clock(unsigned owner, float bpm, unsigned factor)
++{
++    return owner<NBASS && original_runtime_s1_clock(&original_bass[owner],bpm,factor);
++}
++#endif
+ static uint16_t original_quiet_samples[NBASS], original_switch_gain[NBASS];
+ #ifdef X0X_HOST
+ /* Read-only host diagnostics for the actual adoption boundary. */
+--- a/firmware/src/app/engine_arp.h
++++ b/firmware/src/app/engine_arp.h
+@@ -56,6 +56,9 @@
+ #if X0X_SUPERJ6_BUILTIN_INIT
+        ARP_F_DIVISION,
+ #endif
++#if X0X_S1_FENCED_CLOCK
++       ARP_F_SOURCE_RATE, ARP_F_SOURCE_FACTOR,
++#endif
+        ARP_NF };
+ #if X0X_SUPERJ6_BUILTIN_INIT
+ enum { ARP_S1_NMODES = ARP_SEQ + 1 };
+@@ -89,6 +92,10 @@
+ #if !X0X_SYNTHONE_PATCH
+ enum { S1_EDIT_REJECTED, S1_EDIT_QUEUED, S1_EDIT_BUSY };
+ #endif
++#if X0X_S1_FENCED_CLOCK
++int engine_arp_source_get(unsigned voice, unsigned field);
++int engine_arp_source_set(unsigned voice, unsigned field, int value);
++#endif
+ int engine_arp_settings_read(unsigned voice, engine_arp_settings *out);
+ int engine_arp_set(unsigned voice, uint32_t revision, unsigned field, int value);
+ int engine_arp_steps_read(unsigned voice, engine_arp_steps *out);
+--- a/firmware/src/app/original_runtime.c
++++ b/firmware/src/app/original_runtime.c
+@@ -472,6 +472,38 @@
+     q->patternRange = p->kind == ORIGINAL_SOUND_SYNTHONE ? 12 : 24;
+     q->clocked = 0;
+ }
++#if X0X_S1_FENCED_CLOCK
++int original_runtime_s1_clock(original_runtime_part *p, float bpm, unsigned factor)
++{
++    static const uint16_t units[]={1536,1152,768,576,384,192,128,96,64,48,32,24,16,12,8,6,4,3,2};
++    if (!p || p->kind!=ORIGINAL_SOUND_SYNTHONE || p->status!=ORIGINAL_RUNTIME_OK ||
++        !(bpm>=1.f && bpm<=200.f) || factor>=sizeof units/sizeof units[0]) return 0;
++    original_runtime_arp *a=&p->arp;
++    if (!a->source_set) a->source_wait=!!a->nheld;
++    a->source_set=1; a->source_bpm=bpm; a->source_stop=(uint8_t)factor;
++    a->source_delta=(bpm/60.f)/44100.;
++    a->source_factor=units[factor]/192.f;
++    return 1;
++}
++static S1ClockPulse source_clock_sample(original_runtime_arp *a)
++{
++    const int prev=a->seq.previousHeldNoteNumbersAECount, first=!prev&&a->nheld, on=a->prm.arpIsOn==1;
++    S1ClockPulse p={on&&(first||(prev&&!a->nheld)),0,0};
++    if (p.reset) a->source_phase=0;
++    if (on || (a->seq.sequencerLastNotesCount && !p.reset)) {
++        const double r0=__builtin_fmod(a->source_phase,a->source_factor);
++        a->source_phase+=a->source_delta;
++        const double r1=__builtin_fmod(a->source_phase,a->source_factor);
++        p.trigger=first||r1<r0;
++        if (p.trigger && on && a->nheld) {
++            const double i=a->source_phase/a->source_factor;
++            if (i>=2147483648.) p.trigger=0;
++            else p.index=(int)i;
++        }
++    }
++    return p;
++}
++#endif
+ void original_runtime_arp_clock(original_runtime_part *p, uint64_t pos_q8, uint32_t beat_q8, int start)
+ {
+     if (!p) return;
+@@ -806,7 +838,30 @@
+         original_runtime_arp *a = &p->arp;
+         unsigned done = 0;
+         if (a->clk_beat) arp_follow_clock(a);
++#if X0X_S1_FENCED_CLOCK
++        const int source_available=a->source_set && p->kind==ORIGINAL_SOUND_SYNTHONE &&
++            !a->clk_beat && a->prm.seqGate==100;
++        if (!source_available) a->source_wait=!!a->source_set;
++        else if (a->source_wait && !a->nheld) {
++            a->source_wait=0; a->source_phase=0; a->prm.clocked=0;
++        }
++#endif
+         for (unsigned i = 0; i < frames; ++i) {
++#if X0X_S1_FENCED_CLOCK
++            if (source_available && !a->source_wait) {
++                const S1ClockPulse pulse=source_clock_sample(a);
++                if ((pulse.reset||pulse.trigger) && i>done) {
++                    if (render_backend(p,w,left+done,right+done,i-done)!=ORIGINAL_RUNTIME_OK)
++                        return p->status;
++                    done=i;
++                }
++                S1Sequencer_processOriginal(&a->seq,&a->prm,a->held,a->nheld,p,arp_key_on,arp_key_off,&pulse);
++                if (p->status!=ORIGINAL_RUNTIME_OK) return p->status;
++                if (pulse.trigger&&a->seq.gateOpen) { a->fired=1; a->age=0; }
++                a->age+=a->age<UINT32_MAX;
++                continue;
++            }
++#endif
+             if (S1Sequencer_willFire(&a->seq, &a->prm, a->nheld)) {
+                 if (i > done && render_backend(p, w, left + done, right + done, i - done) != ORIGINAL_RUNTIME_OK)
+                     return p->status;
+--- a/firmware/src/app/original_runtime.h
++++ b/firmware/src/app/original_runtime.h
+@@ -31,6 +31,12 @@
+     S1Sequencer seq;
+     NoteNumber held[S1_SEQ_MAX_HELD];   /* heldNoteNumbersAE, newest first */
+     float bpm;
++#if X0X_S1_FENCED_CLOCK
++    double source_phase, source_delta;
++    float source_factor, source_bpm;
++    uint8_t source_stop;
++    uint8_t source_set, source_wait;
++#endif
+     uint32_t age;                       /* frames since the last real note-on (H3) */
+     uint64_t clk_pos;                   /* transport position, Q8 samples (clk_beat != 0) */
+     uint32_t clk_beat;                  /* Q8 samples per beat; 0 = transport stopped */
+@@ -100,6 +106,10 @@
+ /* Per block, before render: the DnBOX transport clock (seq_t metronome).
+  * beat_q8 = 0: stopped, the arp free-runs from the key press (Synth One). */
+ void original_runtime_arp_clock(original_runtime_part *, uint64_t pos_q8, uint32_t beat_q8, int start);
++#if X0X_S1_FENCED_CLOCK
++int original_runtime_s1_clock(original_runtime_part *, float, unsigned);
++int engine_host_s1_clock(unsigned, float, unsigned);
++#endif
+ int original_runtime_arp_view(const original_runtime_part *, unsigned *step, uint32_t *frames);
+ #endif
+ int original_runtime_render(original_runtime_part *, original_runtime_workspace *,
+--- a/firmware/src/app/original_presets.inc
++++ b/firmware/src/app/original_presets.inc
+@@ -458,6 +458,54 @@
+ #include "sj6_137_host_witness.h"
+ #endif
+ extern int s1_typed_tuple_editable(void);
++#if X0X_S1_FENCED_CLOCK
++static void s1_typed_clock_apply(const sound_t *sound,unsigned v)
++{
++    original_runtime_part *part=&original_bass[v];
++    if (part->kind!=ORIGINAL_SOUND_SYNTHONE) return;
++    const uint8_t *p=read137(sound,v)+S1_ARP_CLOCK_BYTE;
++    if(live_s1_mod(sound,v) && s1_clock_valid(p) && p[2])
++        (void)original_runtime_s1_clock(part,s1_clock_bpm(p),p[2]-1u);
++    else {
++        part->arp.source_set=0;
++        part->arp.source_wait=0;
++        part->arp.source_phase=0;
++    }
++}
++int engine_arp_source_get(unsigned owner,unsigned field)
++{
++    if (!live_s1_mod(mot_base_snd,owner)) return -1;
++    const uint8_t *p=read137(mot_base_snd,owner)+S1_ARP_CLOCK_BYTE;
++    if (!s1_clock_valid(p)) return -1;
++    if (field==ARP_F_SOURCE_RATE) return p[2] ? s1_clock_bpm(p) : 120;
++    if (field==ARP_F_SOURCE_FACTOR) return p[2] ? p[2]-1u : 5;
++    return -1;
++}
++int engine_arp_source_set(unsigned owner,unsigned field,int value)
++{
++    if (field==ARP_F_SOURCE_RATE ? value<1||value>200 :
++        field!=ARP_F_SOURCE_FACTOR || value<0||value>18) return 0;
++    if(!live_s1_mod(mot_base_snd,owner))return 0;
++    engine_project_hold(1);
++    int ok=!ui_project_busy() && s1_typed_tuple_editable() && live_s1_mod(mot_base_snd,owner) &&
++        !engine_bass_preset_pending(owner) && original_bass[owner].kind==ORIGINAL_SOUND_SYNTHONE;
++    if(ok) {
++        uint8_t *p=slot137((sound_t *)mot_base_snd,owner)+S1_ARP_CLOCK_BYTE;
++        if(!s1_clock_valid(p))ok=0;
++        else {
++            unsigned rate=field==ARP_F_SOURCE_RATE ? (unsigned)value : p[2] ? s1_clock_bpm(p) : 120;
++            unsigned factor=field==ARP_F_SOURCE_FACTOR ? (unsigned)value+1u : p[2] ? p[2] : 6;
++            p[0]=(uint8_t)rate;p[1]=(uint8_t)(rate>>8);p[2]=(uint8_t)factor;
++            s1_typed_clock_apply(mot_base_snd,owner);
++        }
++    }
++    engine_project_hold(0);
++    return ok;
++}
++void s1_typed_clock_undo(unsigned mask) {
++    for(unsigned v=0;v<NBASS;v++)if(mask&(1u<<v))s1_typed_clock_apply(mot_base_snd,v);
++}
++#endif
+ static void s1_typed_a4_apply(const sound_t *sound,unsigned owner) {
+     if(live_s1_mod(sound,owner) && original_bass[owner].kind==ORIGINAL_SOUND_SYNTHONE)
+         (void)s1c_front_set(&original_bass[owner].dsp.synthone.e,S1_A4_PARAM,s1_a4_hz(read137(sound,owner)[S1_A4_BYTE]));
+@@ -1222,6 +1270,9 @@
+ #endif
+     if(rc==ORIGINAL_RUNTIME_OK) s1_typed_a4_apply(sound,v);
+     arp_adopt(v, sound, 0);
++#if X0X_S1_FENCED_CLOCK
++    if(rc==ORIGINAL_RUNTIME_OK) s1_typed_clock_apply(sound,v);
++#endif
+     bass_named_preset[v] = (int16_t)bass_cell_preset(sound->v[T_303][v]);
+     original_seq_note[v] = -1;
+     __builtin_memset(original_key_pitch[v], 0, sizeof original_key_pitch[v]);
+@@ -1404,6 +1455,9 @@
+ #endif
+ #endif
+         arp_adopt(v, sound, 1);
++#if X0X_S1_FENCED_CLOCK
++        s1_typed_clock_apply(sound,v);
++#endif
+         bass_named_preset[v] = (int16_t)preset;
+         /* A committed bank/preset replacement, never merely a pending request.
+          * parameter -1 identifies the bank; parameter -2 the factory index. */
+--- a/firmware/src/app/sj6_137_host_witness.h
++++ b/firmware/src/app/sj6_137_host_witness.h
+@@ -19,16 +19,30 @@
+ enum { S1_A4_BYTE=6, S1_A4_MAX=60, S1_A4_PARAM=143 };
+ static inline unsigned s1_a4_hz(unsigned code) {return code ? 409+code+(code>=31) : 440;}
+ static inline unsigned s1_a4_code(unsigned hz) {return hz==440 ? 0 : hz-409-(hz>440);}
++#if X0X_S1_FENCED_CLOCK
++enum { S1_ARP_CLOCK_BYTE=7, S1_ARP_CLOCK_BYTES=3 };
++static inline unsigned s1_clock_bpm(const uint8_t *p){return p[0]|(unsigned)p[1]<<8;}
++static inline int s1_clock_valid(const uint8_t *p){
++ unsigned bpm=s1_clock_bpm(p);
++ return (bpm>=1&&bpm<=200&&p[2]>=1&&p[2]<=19) || (!bpm&&!p[2]);
++}
++#endif
+ static inline int canonical137(const sound_t *s) {
+  for (unsigned v=0;v<2;++v) {
+   const uint8_t *b=read137(s,v);
++#if X0X_S1_FENCED_CLOCK
++  if(!s1_clock_valid(b+S1_ARP_CLOCK_BYTE)) return 0;
++  const unsigned spare=10;
++#else
++  const unsigned spare=7;
++#endif
+   if (b[0]!=137 || b[1]!=v || b[2]>127 || b[3]>2 || b[S1_A4_BYTE]>S1_A4_MAX) return 0;
+ #if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
+   if (b[S1_PB_DN_BYTE]>S1_PB_LAST || b[S1_PB_UP_BYTE]>S1_PB_LAST) return 0;
+-  for(unsigned i=7;i<64;i++)
++  for(unsigned i=spare;i<64;i++)
+ #else
+   if (b[4] || b[5]) return 0;
+-  for(unsigned i=7;i<64;i++)
++  for(unsigned i=spare;i<64;i++)
+ #endif
+   if (s->v[T_303][8+2*v+i/32][i%32]) return 0;
+  }
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -35,6 +35,9 @@
+     PT_AMPLIFIER,
+     PT_ARP_SEQ,
+     PT_ARPEGGIATOR,
++#if X0X_S1_FENCED_CLOCK
++    PT_ARP_PARAM,
++#endif
+     PT_BAR,
+     PT_BD,
+     PT_CARRIER,
+@@ -721,6 +724,10 @@
+         return !live_s1_mod(&proj.sound,r.b) || !s1_typed_tuple_editable();
+ #endif
+ #ifdef DNBOX_137_HOST_WITNESS
++#if X0X_S1_FENCED_CLOCK
++    if(r.kind==R_ARP && (r.a==ARP_F_SOURCE_RATE||r.a==ARP_F_SOURCE_FACTOR))
++        return !live_s1_mod(&proj.sound,r.b) || !s1_typed_tuple_editable();
++#endif
+     if (r.kind == R_S1MODWHEEL || r.kind == R_S1A4) return !live_s1_mod(&proj.sound,r.b) || !s1_typed_tuple_editable();
+ #endif
+     /* A bank with a single preset (Synth One INIT) has nothing to choose. */
+@@ -1594,6 +1601,11 @@
+     if (!d || r.kind == R_ACT)
+         return;
+ #if X0X_ARP_HOOKS
++#if X0X_S1_FENCED_CLOCK
++    if (r.kind == R_ARP && r.a == ARP_F_SOURCE_RATE) {
++        put_i(num, v + 1); put_s(unit, "BPM"); return;
++    }
++#endif
+     if (r.kind == R_ARP && r.a == ARP_F_GATE) {
+         put_i(num, v + 1); put_s(unit, "%"); return;
+     }
+@@ -1905,6 +1917,9 @@
+     [PT_AMPLIFIER] = "AMPLIFIER",
+     [PT_ARP_SEQ] = "ARP SEQ",
+     [PT_ARPEGGIATOR] = "ARPEGGIATOR",
++#if X0X_S1_FENCED_CLOCK
++    [PT_ARP_PARAM] = "ARP PARAM",
++#endif
+     [PT_BAR] = "BAR",
+     [PT_BD] = "BD",
+     [PT_CARRIER] = "CARRIER",
+@@ -2133,6 +2148,15 @@
+ static uint32_t arp_t0;
+ static const x0x_param_t *arp_desc(unsigned field, unsigned owner)
+ {
++#if X0X_S1_FENCED_CLOCK
++    static const char *const stops[]={"8 BARS","6 BARS","4 BARS","3 BARS","2 BARS","1 BAR","1 BAR T",
++        "1/2","1/2 T","1/4","1/4 T","1/8","1/8 T","1/16","1/16 T","1/32","1/32 T","1/64","1/64 T"};
++    static const x0x_param_t rate={"ARP RATE",199,119,0};
++    static const x0x_param_t factor={"CLOCK FACTOR",18,5,stops};
++    if (field==ARP_F_SOURCE_RATE||field==ARP_F_SOURCE_FACTOR)
++        return engine_bass_bank(owner) != ORIGINAL_SOUND_SYNTHONE ? 0 :
++            field==ARP_F_SOURCE_RATE ? &rate : &factor;
++#endif
+ #if X0X_SUPERJ6_BUILTIN_INIT && !defined(X0X_ARP_FAKE_H)
+     static const x0x_param_t saga_mode = {"MODE", ARP_NMODES - 1, 0, ARP_MODE_N};
+     static const char *const beats[] = {"SPEED", "1/16", "3/32", "1/8", "3/16", "1/4",
+@@ -2156,6 +2180,12 @@
+ }
+ static int arp_get(unsigned voice, unsigned field)
+ {
++#if X0X_S1_FENCED_CLOCK
++    if (field==ARP_F_SOURCE_RATE||field==ARP_F_SOURCE_FACTOR) {
++        int value=engine_arp_source_get(voice,field);
++        return value<0 ? 0 : value-(field==ARP_F_SOURCE_RATE);
++    }
++#endif
+     engine_arp_settings s;
+     if (!engine_arp_settings_read(voice, &s)) return 0;
+     switch (field) {
+@@ -2182,6 +2212,13 @@
+ static uint8_t arp_limit_owner, arp_limit_field;
+ static void arp_set(unsigned voice, unsigned field, int v, int from_keyboard)
+ {
++#if X0X_S1_FENCED_CLOCK
++    if (field==ARP_F_SOURCE_RATE||field==ARP_F_SOURCE_FACTOR) {
++        if (engine_arp_source_set(voice,field,v+(field==ARP_F_SOURCE_RATE)))mark_dirty();
++        else say("ARP NOT CHANGED",0);
++        return;
++    }
++#endif
+     engine_arp_settings s;
+     if (!engine_arp_settings_read(voice, &s)) return;
+     /* A bound reached by the panel is not an edit or a global alert. Keep
+@@ -2509,6 +2546,12 @@
+                     add_page(emit, PT_ARPEGGIATOR, PR(R_ARP, ARP_F_ON, b, 0), PR(R_ARP, ARP_F_RANGE, b, 0),
+                              PR(R_ARP, ARP_F_MODE, b, 0), PR(R_ARP, ARP_F_SPEED, b, 0));
+ #endif
++#if X0X_S1_FENCED_CLOCK && X0X_ARP_HOOKS
++                _Static_assert(sizeof s1_pages / sizeof *s1_pages + 5u <= MAXPAGES,"Typed ARP PARAM capacity");
++                if (arp_engine(b) && live_s1_mod(&proj.sound,b))
++                    add_page(emit,PT_ARP_PARAM,PR(R_ARP,ARP_F_SOURCE_RATE,b,0),
++                        PR(R_ARP,ARP_F_SOURCE_FACTOR,b,0),NONE,NONE);
++#endif
+                 add_original_extra_pages(emit, s1_pages + effect_page, S1_EFFECT_PAGES, b, R_S1PATCH);
+ #ifdef DNBOX_137_HOST_WITNESS
+                 if (live_s1_mod(&proj.sound,b)) add_page(emit,PT_TUNING,PR(R_S1A4,T_303,b,0),NONE,NONE,NONE);
+@@ -3210,6 +3253,12 @@
+ #if X0X_BASS_TAGGED_SOUND
+ #ifdef DNBOX_137_HOST_WITNESS
+     unsigned undo_velocity137=0,undo_s1_mod=0,undo_a4=0;
++#if X0X_S1_FENCED_CLOCK
++    extern void s1_typed_clock_undo(unsigned);
++    unsigned undo_clock=0;
++#else
++    const unsigned undo_clock=0;
++#endif
+ #if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
+     extern int s1_typed_pb_undo_ready(unsigned);
+     extern void s1_typed_pb_undo(unsigned);
+@@ -3255,6 +3304,18 @@
+                 if (p!=read137(&proj.sound,v)[2] && p<=127) undo_velocity137|=1u<<v;
+                 undo_peek(&undo,entry,off+1u,&p,1u);
+                 if (p!=read137(&proj.sound,v)[3] && p<=2) undo_s1_mod|=1u<<v;
++#if X0X_S1_FENCED_CLOCK
++                uint8_t clock_value[S1_ARP_CLOCK_BYTES];
++                undo_peek(&undo,entry,off-2u+S1_ARP_CLOCK_BYTE,clock_value,sizeof clock_value);
++                if(memcmp(clock_value,read137(&proj.sound,v)+S1_ARP_CLOCK_BYTE,sizeof clock_value)) {
++                    if(!s1_clock_valid(clock_value)) {
++                        say("UNDO CLOCK INVALID",0);
++                        engine_bass_edit_hold(0);
++                        return;
++                    }
++                    undo_clock|=1u<<v;
++                }
++#endif
+                 undo_peek(&undo,entry,off+4u,&p,1u);
+                 if (p!=read137(&proj.sound,v)[S1_A4_BYTE] && p<=S1_A4_MAX) undo_a4|=1u<<v;
+ #if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
+@@ -3277,7 +3338,7 @@
+         }
+ #ifdef DNBOX_137_HOST_WITNESS
+         extern int engine_bass_wheel_active(void);
+-        if((undo_s1_mod || undo_a4) && !s1_typed_tuple_editable()) {
++        if((undo_s1_mod || undo_a4 || undo_clock) && !s1_typed_tuple_editable()) {
+             say("PROJECT READ ONLY",0);
+             engine_bass_edit_hold(0);
+             return;
+@@ -3306,7 +3367,7 @@
+     }
+ #endif
+ #ifdef DNBOX_137_HOST_WITNESS
+-    if ((undo_velocity137 || undo_s1_mod || undo_pb || undo_a4) && !undo_bass_mask) engine_project_hold(1);
++    if ((undo_velocity137 || undo_s1_mod || undo_pb || undo_a4 || undo_clock) && !undo_bass_mask) engine_project_hold(1);
+ #if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
+     /* Recheck while audio is held: a note-lock must not acquire the owner
+      * between validating history and publishing the typed scalar pair. */
+@@ -3323,7 +3384,7 @@
+ #if X0X_BASS_TAGGED_SOUND
+         if(undo_bass_mask)engine_project_hold(0);
+ #ifdef DNBOX_137_HOST_WITNESS
+-        else if(undo_velocity137 || undo_s1_mod || undo_pb || undo_a4)engine_project_hold(0);
++        else if(undo_velocity137 || undo_s1_mod || undo_pb || undo_a4 || undo_clock)engine_project_hold(0);
+ #endif
+ #endif
+ #if X0X_BASS_PRESET_PREVIEW
+@@ -3343,7 +3404,10 @@
+     if(undo_pb) s1_typed_pb_undo(undo_pb & ~undo_bass_mask);
+ #endif
+     if(undo_a4) s1_typed_a4_undo(undo_a4 & ~undo_bass_mask);
+-    if(undo_bass_mask || undo_velocity137 || undo_s1_mod || undo_pb || undo_a4) engine_project_hold(0);
++#if X0X_S1_FENCED_CLOCK
++    if(undo_clock) s1_typed_clock_undo(undo_clock & ~undo_bass_mask);
++#endif
++    if(undo_bass_mask || undo_velocity137 || undo_s1_mod || undo_pb || undo_a4 || undo_clock) engine_project_hold(0);
+ #else
+     if(undo_bass_mask) engine_project_hold(0);
+ #endif
+--- a/firmware/src/dsp/synthone/sequencer/S1Sequencer.c
++++ b/firmware/src/dsp/synthone/sequencer/S1Sequencer.c
+@@ -125,8 +125,17 @@
+     return s->gateOpen && s->sequencerLastNotesCount && next >= gateLength(p);
+ }
+ 
+-void S1Sequencer_process(S1Sequencer *s, const S1SequencerParams *p, const NoteNumber *held, int heldNoteNumbersAECount,
+-                         void *ctx, KeyOnCallback on, KeyOffCallback off)
++#if X0X_S1_FENCED_CLOCK
++void S1Sequencer_processOriginal(S1Sequencer *s,
++#else
++void S1Sequencer_process(S1Sequencer *s,
++#endif
++ const S1SequencerParams *p, const NoteNumber *held, int heldNoteNumbersAECount,
++                         void *ctx, KeyOnCallback on, KeyOffCallback off
++#if X0X_S1_FENCED_CLOCK
++                         , const S1ClockPulse *pulse
++#endif
++                         )
+ {
+     /// MARK: ARPEGGIATOR + SEQUENCER BEGIN
+     const int arpSeqIsOn = p->arpIsOn == 1;
+@@ -151,18 +160,31 @@
+         // Compare previous beatTime to current to see if we crossed a beat boundary
+         uint32_t newBeatTime = s->mBeatTime + p->arpBeatsPerSample;
+         int crossed = 0;
++#if X0X_S1_FENCED_CLOCK
++        if (pulse) {
++            crossed = pulse->trigger;
++            if (crossed) s->mStepCounter = pulse->index;
++        } else
++#endif
+         if (newBeatTime >= p->arpSeqTempoMultiplier) {
+             newBeatTime -= p->arpSeqTempoMultiplier;
+             if (newBeatTime >= p->arpSeqTempoMultiplier) newBeatTime = 0;   /* multiplier shrank */
+             ++s->mStepCounter;
+             crossed = 1;
+         }
++#if X0X_S1_FENCED_CLOCK
++        if (!pulse)
++#endif
+         s->mBeatTime = newBeatTime;
+         // SuperJ6 seqGate: the step's notes end early
+         if (!crossed && s->gateOpen && s->mBeatTime >= gateLength(p)) turnOffLastNotes(s, ctx, off);
+ 
+         // If keys are now held, or if beat boundary was crossed
+-        if (crossed || (firstTimeAnyKeysHeld
++        if (crossed || (
++#if X0X_S1_FENCED_CLOCK
++                        !pulse &&
++#endif
++                        firstTimeAnyKeysHeld
+ #if X0X_SUPERJ6_BUILTIN_INIT
+                         && !(p->saga_timing && p->clocked)
+ #endif
+@@ -178,6 +200,9 @@
+                     if (firstTimeAnyKeysHeld || s->mStepCounter < s->mStepBase) s->mStepBase = s->mStepCounter;
+                     int seqNotePosition = (p->arpIsSequencer == 1 ? s->mStepCounter
+                                            : s->mStepCounter - s->mStepBase) % size;
++#if X0X_S1_FENCED_CLOCK
++                    if (pulse) seqNotePosition = pulse->index % size;
++#endif
+ #if X0X_SUPERJ6_BUILTIN_INIT
+                     if (p->saga_notes && !p->arpIsSequencer) {
+                         seqNotePosition = s->saga_index % size;
+@@ -230,6 +255,13 @@
+     /// MARK: ARPEGGIATOR + SEQUENCER END
+ }
+ 
++#if X0X_S1_FENCED_CLOCK
++void S1Sequencer_process(S1Sequencer *s, const S1SequencerParams *p, const NoteNumber *held, int count,
++                         void *ctx, KeyOnCallback on, KeyOffCallback off)
++{
++    S1Sequencer_processOriginal(s,p,held,count,ctx,on,off,0);
++}
++#endif
+ int S1Sequencer_getArpBeatCount(const S1Sequencer *s) { return s->mStepCounter; }
+ 
+ // DnBOX: lock to the transport. The free-running clock above advances at the
+--- a/firmware/src/dsp/synthone/sequencer/S1Sequencer.h
++++ b/firmware/src/dsp/synthone/sequencer/S1Sequencer.h
+@@ -13,6 +13,9 @@
+ //
+ #pragma once
+ #include <stdint.h>
++#if X0X_S1_FENCED_CLOCK && !defined(X0X_HOST)
++#error "Original clock prototype is host-only"
++#endif
+ 
+ #define S1_NUM_MIDI_NOTES 128
+ #define S1_SEQ_MAX_HELD 8          /* DnBOX: held keys tracked (source: 128) */
+@@ -76,6 +79,11 @@
+ /* One sample of S1Sequencer::process. held = heldNoteNumbersAE (newest first). */
+ void S1Sequencer_process(S1Sequencer *, const S1SequencerParams *, const NoteNumber *held, int heldCount,
+                          void *ctx, KeyOnCallback on, KeyOffCallback off);
++#if X0X_S1_FENCED_CLOCK
++typedef struct { int reset, trigger, index; } S1ClockPulse;
++void S1Sequencer_processOriginal(S1Sequencer *, const S1SequencerParams *,
++    const NoteNumber *, int, void *, KeyOnCallback, KeyOffCallback, const S1ClockPulse *);
++#endif
+ int S1Sequencer_getArpBeatCount(const S1Sequencer *);
+ /* Set the step length (and its gate) in ticks. */
+ void S1Sequencer_setStep(S1SequencerParams *, uint32_t ticks);

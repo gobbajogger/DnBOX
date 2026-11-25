@@ -1,0 +1,193 @@
+--- a/firmware/src/dsp/juno6.h
++++ b/firmware/src/dsp/juno6.h
+@@ -89,6 +89,14 @@
+  float vibrato_depth, vibrato_ratio;
+  uint64_t lfo2_entropy_state;
+  float lfo2_hold_elapsed, lfo2_hold_period, lfo2_hold_sample;
++#if defined(X0X_HOST) && defined(X0X_SJ6_DELAY_WITNESS)
++ struct {
++    float *left,*right;
++    float dry,from,target,feedback;
++    unsigned tap, pos, elapsed, tick;
++    unsigned enabled,mix,pending;
++ } delay24;
++#endif
+  uint8_t osc1_level_code, mod_wheel_lfo1; /* 0 untouched, 1..128 physical CC1 */
+ #endif
+ #endif
+@@ -138,6 +146,12 @@
+ void juno6_apply_panel_master(juno6_t *, unsigned position);
+ /* Transient Build-9 default MOD destination, LFO1 RATE. Audio owner only. */
+ int juno6_set_mod_wheel(juno6_t *, unsigned value);
++#if defined(X0X_HOST) && defined(X0X_SJ6_DELAY_WITNESS)
++enum { SJ6_DELAY24=90, SJ6_DELAY27=91 };
++int juno6_delay24_arm(juno6_t *,float *,float *,unsigned,float,unsigned);
++void juno6_delay24_set(juno6_t *,unsigned,unsigned);
++void juno6_delay24_process(juno6_t *,float *,float *,unsigned);
++#endif
+ void juno6_set_lfo_words(juno6_t *, const juno6_lfo_words *, int reset_phase);
+ void juno6_set_panel_lfo(juno6_t *, unsigned lfo, int position, unsigned hz_mode);
+ void juno6_set_lfo_tempo(juno6_t *, float bpm);
+--- a/firmware/src/dsp/juno6_factory.inc
++++ b/firmware/src/dsp/juno6_factory.inc
+@@ -858,3 +858,56 @@
+   out += n;
+  }
+ }
++
++
++#if defined(X0X_HOST) && defined(X0X_SJ6_DELAY_WITNESS)
++/* Verified steady integer-tap, no-ping-pong sub-group only. Each owner
++ * needs its own explicit zeroed stereo lines; no MIX bus sharing. */
++int juno6_delay24_arm(juno6_t *s,float *l,float *r,unsigned tap,float fb,unsigned profile)
++{
++    if(!s||!s->typed||s->delay24.tap||!l||!r||l==r||!tap||tap>66150u||
++       !(fb>=0.f&&fb<=.99f)||profile!=10000u)return 0;
++    s->delay24.left=l;s->delay24.right=r;s->delay24.tap=tap;s->delay24.feedback=fb;
++    s->delay24.dry=s->delay24.target=1.f;s->delay24.elapsed=10000u;
++    return 1;
++}
++void juno6_delay24_set(juno6_t *s,unsigned slot,unsigned pos)
++{
++    if(!s||!s->delay24.tap)return;
++    if(slot==SJ6_DELAY24 && pos<=1u)s->delay24.enabled=pos;
++    else if(slot==SJ6_DELAY27 && pos<=127u)s->delay24.mix=pos;
++    else return;
++    const float raw=(float)s->delay24.mix/127.f;
++    const float target=s->delay24.enabled?(float)(1.0-.9*pow((double)raw,1.1)):1.f;
++    if(target!=s->delay24.target){s->delay24.target=target;s->delay24.pending=1;}
++}
++void juno6_delay24_process(juno6_t *s,float *l,float *r,unsigned n)
++{
++    if(!s->delay24.tap)return;
++    for(unsigned i=0;i<n;i++){
++        if(!s->delay24.tick){
++            if(s->delay24.pending){
++                s->delay24.from=s->delay24.dry;s->delay24.elapsed=0;s->delay24.pending=0;
++            }
++            if(s->delay24.elapsed>=10000u)s->delay24.dry=s->delay24.target;
++            else{
++                s->delay24.dry=fmaf(s->delay24.target-s->delay24.from,
++                    (float)s->delay24.elapsed/10000.f,s->delay24.from);
++                s->delay24.elapsed+=8u;
++            }
++        }
++        s->delay24.tick=(s->delay24.tick+1u)&7u;
++        unsigned at=s->delay24.pos;
++        float left=s->delay24.left[at],right=s->delay24.right[at];
++        s->delay24.left[at]=fmaf(s->delay24.feedback,left,l[i]);
++        s->delay24.right[at]=fmaf(s->delay24.feedback,right,r[i]);
++        if(++at==s->delay24.tap)at=0;
++        s->delay24.pos=at;
++        if(s->delay24.dry!=1.f){
++            float wet=1.f-s->delay24.dry;
++            l[i]=fmaf(wet,left,s->delay24.dry*l[i]);
++            r[i]=fmaf(wet,right,s->delay24.dry*r[i]);
++        }
++    }
++}
++#endif
+--- a/firmware/src/app/original_runtime.c
++++ b/firmware/src/app/original_runtime.c
+@@ -833,6 +833,9 @@
+         ok=juno6_render_stereo(&p->dsp.juno.synth,left,right,frames);
+         if(ok){
+             juno6_chorus_process(&p->dsp.juno.chorus,left,right,frames);
++#if defined(X0X_HOST) && defined(X0X_SJ6_DELAY_WITNESS)
++            juno6_delay24_process(&p->dsp.juno.synth,left,right,frames);
++#endif
+             /* The original master attenuator follows the instrument effects. */
+             float gain=p->dsp.juno.synth.master_gain;
+             if(gain!=1.f) for(unsigned i=0;i<frames;++i){
+--- a/firmware/src/app/original_presets.inc
++++ b/firmware/src/app/original_presets.inc
+@@ -466,6 +466,16 @@
+ 
+ X0X_COLD int engine_superj6_knob_position(unsigned owner, unsigned slot)
+ {
++#if defined(X0X_HOST) && defined(X0X_SJ6_DELAY_WITNESS)
++    if(owner<NBASS && (slot==SJ6_DELAY24||slot==SJ6_DELAY27)){
++        uint32_t lock=plat_cq_lock();
++        const juno6_t *s=&original_bass[owner].dsp.juno.synth;
++        int result=!sj6_knob_ready(owner)||!s->delay24.tap ? -1:
++            (int)(slot==SJ6_DELAY24?s->delay24.enabled:s->delay24.mix);
++        plat_cq_unlock(lock);
++        return result;
++    }
++#endif
+     if (owner >= NBASS || slot > SJ6_LFO2_PWM_BASE) return -1;
+     uint32_t lock = plat_cq_lock();
+     int position = sj6_knob_ready(owner) ? sj6_knob_position(owner, sj6_panel_slot(owner, slot)) : -1;
+@@ -500,6 +510,19 @@
+ 
+ X0X_COLD int engine_superj6_knob_turn(unsigned owner, unsigned slot, int value, int relative)
+ {
++#if defined(X0X_HOST) && defined(X0X_SJ6_DELAY_WITNESS)
++    if(owner<NBASS && (slot==SJ6_DELAY24||slot==SJ6_DELAY27)){
++        uint32_t lock=plat_cq_lock();
++        juno6_t *s=&original_bass[owner].dsp.juno.synth;
++        if(sj6_knob_ready(owner)&&s->delay24.tap){
++            int old=(int)(slot==SJ6_DELAY24?s->delay24.enabled:s->delay24.mix);
++            int next=sj6_knob_target(old,value,slot==SJ6_DELAY24?1:127,relative);
++            juno6_delay24_set(s,slot,(unsigned)next);
++        }
++        plat_cq_unlock(lock);
++        return 0; /* do not mark non-persistent host witness as a saved edit */
++    }
++#endif
+     if (owner >= NBASS || slot > SJ6_LFO2_PWM_BASE) return 0;
+     uint32_t lock = plat_cq_lock();
+     int changed = 0;
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -91,6 +91,9 @@
+     PT_XMOD,
+     PT_FX_BYPASS,
+     PT_PITCH_MOD,
++#if defined(X0X_HOST) && defined(X0X_SJ6_DELAY_WITNESS)
++    PT_SJ6_DELAY,
++#endif
+     PT_COUNT
+ } page_title_id_t;
+ 
+@@ -573,6 +576,10 @@
+ #if X0X_SUPERJ6_BUILTIN_INIT
+ static const x0x_param_t *sj6_knob_desc(unsigned slot)
+ {
++#if defined(X0X_HOST) && defined(X0X_SJ6_DELAY_WITNESS)
++    static const x0x_param_t delay[2]={{"ENABLE",1,0,0},{"MIX",127,0,0}};
++    if(slot==SJ6_DELAY24||slot==SJ6_DELAY27)return &delay[slot-SJ6_DELAY24];
++#endif
+     static const char *const wave[] = {"SINE", "TRI", "SAW", "SQ"};
+     static const char *const range[] = {"16FT", "8FT", "4FT"};
+     static const char *const enable[] = {"OFF", "ON"};
+@@ -1869,6 +1876,9 @@
+     [PT_CB] = "CB",
+     [PT_CH] = "CH",
+     [PT_CHORUS] = "CHORUS",
++#if defined(X0X_HOST) && defined(X0X_SJ6_DELAY_WITNESS)
++    [PT_SJ6_DELAY] = "DELAY",
++#endif
+     [PT_CP] = "CP",
+     [PT_CR] = "CR",
+     [PT_CY] = "CY",
+@@ -2293,6 +2303,9 @@
+     page_emitter_t *emit, const original_page_row_t *pages, unsigned count, int owner, unsigned kind)
+ {
+     for (unsigned row = 0; row < count; ++row) {
++#if defined(X0X_HOST) && defined(X0X_SJ6_DELAY_WITNESS)
++        if(pages[row].title==PT_SJ6_DELAY && engine_superj6_knob_position(owner,SJ6_DELAY24)<0)continue;
++#endif
+         pref_t refs[4];
+         for (unsigned col = 0; col < 4; ++col) {
+             unsigned id = pages[row].id[col];
+@@ -2395,6 +2408,9 @@
+                     {PT_LFO2_PWM, {SJ6_LFO2_RATE, SJ6_LFO2_PWM_DEPTH, SJ6_LFO2_PWM_ROUTE, SJ6_LFO2_PWM_BASE}},
+                     {PT_LFO, {ORIG_PAGE_ENGINE + 10, ORIG_PAGE_ENGINE + 11, ORIG_PAGE_NONE, ORIG_PAGE_NONE}},
+                     {PT_CHORUS, {SJ6_CHORUS_I, SJ6_CHORUS_II, SJ6_CHORUS_RATE, SJ6_CHORUS_MIX}},
++#if defined(X0X_HOST) && defined(X0X_SJ6_DELAY_WITNESS)
++                    {PT_SJ6_DELAY, {SJ6_DELAY24, ORIG_PAGE_NONE, ORIG_PAGE_NONE, SJ6_DELAY27}},
++#endif
+                     {PT_VIBRATO, {SJ6_VIBRATO_DEPTH, SJ6_VIBRATO_RATE, ORIG_PAGE_NONE, ORIG_PAGE_NONE}},
+                     {PT_TUNING, {SJ6_LAYER1_SEMI, SJ6_LAYER2_SEMI, SJ6_LAYER1_FINE, SJ6_LAYER2_FINE}},
+                 };

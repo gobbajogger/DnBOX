@@ -1,0 +1,284 @@
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -714,6 +714,10 @@
+ static int pref_read_only(pref_t r)
+ {
+     if (r.kind == R_BSTATUS) return 1;
++#if defined(X0X_SJ6_ZERO_GATE_PROBE) && X0X_SJ6_ZERO_GATE_PROBE
++    if (r.kind==R_ARP && r.a==ARP_F_GATE && live137(&proj.sound,r.b))
++        return !s1_typed_tuple_editable();
++#endif
+ #if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
+     if (r.kind==R_S1PATCH && s1_bend_slot(r.c))
+         return !live_s1_mod(&proj.sound,r.b) || !s1_typed_tuple_editable();
+@@ -1588,6 +1592,9 @@
+         return;
+ #if X0X_ARP_HOOKS
+     if (r.kind == R_ARP && r.a == ARP_F_GATE) {
++#if defined(X0X_SJ6_ZERO_GATE_PROBE) && X0X_SJ6_ZERO_GATE_PROBE
++        if (live137(&proj.sound,r.b)) { put_i(num,v); put_s(unit,"%"); return; }
++#endif
+         put_i(num, v + 1); put_s(unit, "%"); return;
+     }
+ #endif
+@@ -2134,6 +2141,12 @@
+     if ((field == ARP_F_MODE || field == ARP_F_DIVISION) &&
+         engine_bass_bank(owner) == ORIGINAL_SOUND_JUNO)
+         return field == ARP_F_MODE ? &saga_mode : &division;
++#if defined(X0X_SJ6_ZERO_GATE_PROBE) && X0X_SJ6_ZERO_GATE_PROBE
++    if (field==ARP_F_GATE && live137(&proj.sound,owner)) {
++        static const x0x_param_t gate={"GATE",100,100,0};
++        return &gate;
++    }
++#endif
+     if (field == ARP_F_DIVISION) return 0;
+ #else
+     (void)owner;
+@@ -2158,7 +2171,11 @@
+     case ARP_F_SPEED: return s.speed;
+     case ARP_F_LENGTH: return s.length ? s.length - 1 : 0;
+     case ARP_F_INTERVAL: return s.interval;
+-    case ARP_F_GATE: return s.gate ? s.gate - 1 : 0;
++    case ARP_F_GATE:
++#if defined(X0X_SJ6_ZERO_GATE_PROBE) && X0X_SJ6_ZERO_GATE_PROBE
++        if (live137(&proj.sound,voice)) return s.gate;
++#endif
++        return s.gate ? s.gate - 1 : 0;
+ #if X0X_SUPERJ6_BUILTIN_INIT && !defined(X0X_ARP_FAKE_H)
+     case ARP_F_DIVISION: return s.division;
+ #endif
+@@ -2181,7 +2198,7 @@
+      * the hardware header live and explain the bound in the ARP status row. */
+     if (from_keyboard && (field == ARP_F_LENGTH || field == ARP_F_GATE) &&
+         voice == (unsigned)bidx() && arp_seq_page()) {
+-        if (v < 0 || v > ARP_P[field].max) {
++        if (v < 0 || v > arp_desc(field,voice)->max) {
+             arp_limit_owner = (uint8_t)voice;
+             arp_limit_field = (uint8_t)field;
+             arp_limit_until = plat_ms() + 900u;
+@@ -2189,7 +2206,14 @@
+         }
+         arp_limit_until = 0;
+     }
+-    if (field == ARP_F_RANGE || field == ARP_F_LENGTH || field == ARP_F_GATE) v++;
++#if defined(X0X_SJ6_ZERO_GATE_PROBE) && X0X_SJ6_ZERO_GATE_PROBE
++    const int typed_gate=field==ARP_F_GATE && live137(&proj.sound,voice);
++    if (typed_gate && !s1_typed_tuple_editable()) return;
++#endif
++#if !(defined(X0X_SJ6_ZERO_GATE_PROBE) && X0X_SJ6_ZERO_GATE_PROBE)
++    const int typed_gate=0;
++#endif
++    if (field == ARP_F_RANGE || field == ARP_F_LENGTH || (field == ARP_F_GATE && !typed_gate)) v++;
+     if (engine_arp_set(voice, s.revision, field, v) == S1_EDIT_REJECTED) say("ARP NOT CHANGED", 0);
+ }
+ static void arp_step_edit(unsigned step, unsigned field, int v)
+@@ -3196,6 +3220,13 @@
+ #if X0X_BASS_TAGGED_SOUND
+ #ifdef DNBOX_137_HOST_WITNESS
+     unsigned undo_velocity137=0,undo_s1_mod=0;
++#if defined(X0X_SJ6_ZERO_GATE_PROBE) && X0X_SJ6_ZERO_GATE_PROBE
++    extern void engine_sj6_zero_undo(unsigned);
++    unsigned undo_zero=0;
++#endif
++#if !(defined(X0X_SJ6_ZERO_GATE_PROBE) && X0X_SJ6_ZERO_GATE_PROBE)
++    const unsigned undo_zero=0;
++#endif
+ #if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
+     extern int s1_typed_pb_undo_ready(unsigned);
+     extern void s1_typed_pb_undo(unsigned);
+@@ -3241,6 +3272,17 @@
+                 if (p!=read137(&proj.sound,v)[2] && p<=127) undo_velocity137|=1u<<v;
+                 undo_peek(&undo,entry,off+1u,&p,1u);
+                 if (p!=read137(&proj.sound,v)[3] && p<=2) undo_s1_mod|=1u<<v;
++#if defined(X0X_SJ6_ZERO_GATE_PROBE) && X0X_SJ6_ZERO_GATE_PROBE
++                undo_peek(&undo,entry,off+SJ6_ARP_ZERO_BYTE-2u,&p,1u);
++                if (p!=read137(&proj.sound,v)[SJ6_ARP_ZERO_BYTE]) {
++                    if (p>1u) {
++                        say("UNDO GATE INVALID",0);
++                        engine_bass_edit_hold(0);
++                        return;
++                    }
++                    undo_zero|=1u<<v;
++                }
++#endif
+ #if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
+                 uint8_t pb[2];
+                 undo_peek(&undo,entry,off+2u,pb,sizeof pb);
+@@ -3261,7 +3303,7 @@
+         }
+ #ifdef DNBOX_137_HOST_WITNESS
+         extern int engine_bass_wheel_active(void);
+-        if(undo_s1_mod && !s1_typed_tuple_editable()) {
++        if((undo_s1_mod || undo_zero) && !s1_typed_tuple_editable()) {
+             say("PROJECT READ ONLY",0);
+             engine_bass_edit_hold(0);
+             return;
+@@ -3290,7 +3332,7 @@
+     }
+ #endif
+ #ifdef DNBOX_137_HOST_WITNESS
+-    if ((undo_velocity137 || undo_s1_mod || undo_pb) && !undo_bass_mask) engine_project_hold(1);
++    if ((undo_velocity137 || undo_s1_mod || undo_pb || undo_zero) && !undo_bass_mask) engine_project_hold(1);
+ #if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
+     /* Recheck while audio is held: a note-lock must not acquire the owner
+      * between validating history and publishing the typed scalar pair. */
+@@ -3307,7 +3349,7 @@
+ #if X0X_BASS_TAGGED_SOUND
+         if(undo_bass_mask)engine_project_hold(0);
+ #ifdef DNBOX_137_HOST_WITNESS
+-        else if(undo_velocity137 || undo_s1_mod || undo_pb)engine_project_hold(0);
++        else if(undo_velocity137 || undo_s1_mod || undo_pb || undo_zero)engine_project_hold(0);
+ #endif
+ #endif
+ #if X0X_BASS_PRESET_PREVIEW
+@@ -3323,10 +3365,13 @@
+     if(undo_velocity137) sj6_137_undo_apply(undo_velocity137 & ~undo_bass_mask);
+     extern void s1_typed_mod_undo(unsigned);
+     if(undo_s1_mod) s1_typed_mod_undo(undo_s1_mod & ~undo_bass_mask);
++#if defined(X0X_SJ6_ZERO_GATE_PROBE) && X0X_SJ6_ZERO_GATE_PROBE
++    if(undo_zero) engine_sj6_zero_undo(undo_zero & ~undo_bass_mask);
++#endif
+ #if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
+     if(undo_pb) s1_typed_pb_undo(undo_pb & ~undo_bass_mask);
+ #endif
+-    if(undo_bass_mask || undo_velocity137 || undo_s1_mod || undo_pb) engine_project_hold(0);
++    if(undo_bass_mask || undo_velocity137 || undo_s1_mod || undo_pb || undo_zero) engine_project_hold(0);
+ #else
+     if(undo_bass_mask) engine_project_hold(0);
+ #endif
+--- a/firmware/src/app/engine_arp.inc
++++ b/firmware/src/app/engine_arp.inc
+@@ -17,7 +17,20 @@
+ }
+ static void arp_store(unsigned v, const engine_arp_cfg *c)
+ {
+-    if (mot_base_snd) engine_arp_block_encode(c, ARP_SLOT((sound_t *)mot_base_snd, v));
++    if (!mot_base_snd) return;
++    uint8_t *block=ARP_SLOT((sound_t *)mot_base_snd,v);
++#if defined(X0X_SJ6_ZERO_GATE_PROBE) && X0X_SJ6_ZERO_GATE_PROBE
++    if (original_bass[v].kind==ORIGINAL_SOUND_JUNO && live137(mot_base_snd,v)) {
++        const unsigned typed_zero = c->gate==0;
++        uint8_t prior=block[5];
++        if (block[0]!='A' || block[1]!=1u || prior<1u || prior>100u) prior=100;
++        slot137((sound_t *)mot_base_snd,v)[SJ6_ARP_ZERO_BYTE]=(uint8_t)typed_zero;
++        engine_arp_block_encode(c,block);
++        if(typed_zero) block[5]=prior;  /* preserve prior positive value and the other engine's legacy readback */
++        return;
++    }
++#endif
++    engine_arp_block_encode(c,block);
+ }
+ /* Audio side or held engine: a new owner adopts the stored block. A preset
+  * change keeps the arp but drops stored AMP2 (the new program owns it). */
+@@ -25,6 +38,10 @@
+ {
+     engine_arp_cfg c;
+     (void)engine_arp_block_decode(sound ? ARP_SLOT(sound, v) : NULL, &c);
++#if defined(X0X_SJ6_ZERO_GATE_PROBE) && X0X_SJ6_ZERO_GATE_PROBE
++    if (original_bass[v].kind==ORIGINAL_SOUND_JUNO && live137(sound,v) &&
++        read137(sound,v)[SJ6_ARP_ZERO_BYTE]==1u) c.gate=0;
++#endif
+     if (preset_change && c.amp2_mask) { c.amp2_mask = 0; arp_store((unsigned)v, &c); }
+     arp_pending_flag[v] = 0;
+     (void)original_runtime_arp_config(&original_bass[v], &c);
+@@ -146,7 +163,13 @@
+ #endif
+     };
+     if (v >= NBASS) return S1_EDIT_REJECTED;
+-    if (step == 0xFFu ? (field >= ARP_NF || value < lo[field] || value > hi[field])
++#if defined(X0X_SJ6_ZERO_GATE_PROBE) && X0X_SJ6_ZERO_GATE_PROBE
++    int zero_gate=step==0xFFu && field==ARP_F_GATE && value==0;
++#endif
++#if !(defined(X0X_SJ6_ZERO_GATE_PROBE) && X0X_SJ6_ZERO_GATE_PROBE)
++    const int zero_gate=0;
++#endif
++    if (step == 0xFFu ? (field >= ARP_NF || (!zero_gate && value < lo[field]) || value > hi[field])
+                       : (step >= ARP_STEPS || field > ARP_S_OCT ||
+                          (field == ARP_S_OFFSET ? (value < -24 || value > 24) : (value < 0 || value > 1))))
+         return S1_EDIT_REJECTED;
+@@ -154,6 +177,11 @@
+     int status = S1_EDIT_REJECTED;
+     uint32_t request = bass_request[v];
+     if (arp_kind_ok(v) && revision == arp_revision[v]
++#if defined(X0X_SJ6_ZERO_GATE_PROBE) && X0X_SJ6_ZERO_GATE_PROBE
++        && (!zero_gate || (original_bass[v].kind==ORIGINAL_SOUND_JUNO && live137(mot_base_snd,v)))
++        && !(step==0xFFu && field==ARP_F_GATE && original_bass[v].kind==ORIGINAL_SOUND_JUNO &&
++             live137(mot_base_snd,v) && !s1_typed_tuple_editable())
++#endif
+ #if X0X_SUPERJ6_BUILTIN_INIT
+         && (step != 0xFFu || original_bass[v].kind == ORIGINAL_SOUND_JUNO ||
+             (field != ARP_F_DIVISION && (field != ARP_F_MODE || value < ARP_S1_NMODES)))
+@@ -214,11 +242,31 @@
+     plat_cq_unlock(lock);
+     return status;
+ }
++#if defined(X0X_SJ6_ZERO_GATE_PROBE) && X0X_SJ6_ZERO_GATE_PROBE
++/* Called by actual Undo under the project/audio hold. No save or hardware I/O. */
++void engine_sj6_zero_undo(unsigned mask)
++{
++    for(unsigned v=0;v<NBASS;++v) {
++        if (!(mask & (1u<<v)) || !live137(mot_base_snd,v) || !arp_kind_ok(v) ||
++            original_bass[v].kind!=ORIGINAL_SOUND_JUNO) continue;
++        engine_arp_cfg c;
++        (void)engine_arp_block_decode(ARP_SLOT(mot_base_snd,v),&c);
++        if(read137(mot_base_snd,v)[SJ6_ARP_ZERO_BYTE]==1u)c.gate=0;
++        arp_pending_flag[v]=0;
++        (void)original_runtime_arp_config(&original_bass[v],&c);
++        ++arp_revision[v];
++    }
++}
++#endif
+ int engine_arp_reload(unsigned v)
+ {
+     engine_arp_cfg c;
+     if (v >= NBASS || !mot_base_snd) return S1_EDIT_REJECTED;
+     (void)engine_arp_block_decode(ARP_SLOT(mot_base_snd, v), &c);
++#if defined(X0X_SJ6_ZERO_GATE_PROBE) && X0X_SJ6_ZERO_GATE_PROBE
++    if (live137(mot_base_snd,v) && original_bass[v].kind==ORIGINAL_SOUND_JUNO &&
++        read137(mot_base_snd,v)[SJ6_ARP_ZERO_BYTE]==1u) c.gate=0;
++#endif
+     return arp_queue(v, &c);
+ }
+ int engine_arp_preset(unsigned v, const engine_arp_cfg *c)
+--- a/firmware/src/app/original_runtime.c
++++ b/firmware/src/app/original_runtime.c
+@@ -456,6 +456,12 @@
+     q->sequencerNoteOn = c->on_mask;
+     q->arpBeatsPerSample = S1_SAMPLE_TICKS;
+     q->seqGate = c->gate ? c->gate : 100;
++#if defined(X0X_SJ6_ZERO_GATE_PROBE) && X0X_SJ6_ZERO_GATE_PROBE
++#if !defined(X0X_HOST) || !defined(DNBOX_137_HOST_WITNESS)
++#error "Saga zero Gate is a composed host witness only"
++#endif
++    if (p->kind==ORIGINAL_SOUND_JUNO) q->seqGate=c->gate;
++#endif
+ #if X0X_SUPERJ6_BUILTIN_INIT
+     q->saga_notes = p->kind == ORIGINAL_SOUND_JUNO;
+     q->saga_timing = q->saga_notes && c->division && c->division <= ARP_SAGA_DIVISIONS;
+--- a/firmware/src/app/sj6_137_host_witness.h
++++ b/firmware/src/app/sj6_137_host_witness.h
+@@ -16,6 +16,9 @@
+  return code ? code-(code<=S1_PB_INIT_POS) : S1_PB_INIT_POS;
+ }
+ #endif
++#if defined(X0X_SJ6_ZERO_GATE_PROBE) && X0X_SJ6_ZERO_GATE_PROBE
++enum { SJ6_ARP_ZERO_BYTE=13 };
++#endif
+ static inline int canonical137(const sound_t *s) {
+  for (unsigned v=0;v<2;++v) {
+   const uint8_t *b=read137(s,v);
+@@ -26,7 +29,13 @@
+ #else
+   for(unsigned i=4;i<64;i++)
+ #endif
+-  if (s->v[T_303][8+2*v+i/32][i%32]) return 0;
++  {
++   const uint8_t x=s->v[T_303][8+2*v+i/32][i%32];
++#if defined(X0X_SJ6_ZERO_GATE_PROBE) && X0X_SJ6_ZERO_GATE_PROBE
++   if (i==SJ6_ARP_ZERO_BYTE) { if(x>1u) return 0; continue; }
++#endif
++   if (x) return 0;
++  }
+  }
+  return 1;
+ }
