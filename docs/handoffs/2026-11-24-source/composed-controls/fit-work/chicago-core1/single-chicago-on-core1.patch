@@ -1,0 +1,28 @@
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -3352,14 +3352,19 @@
+     k = (int)(m >> 4 & 1u); t[k] += c[JB_BRK];          /* mixed by core 0 after both */
+     return t[0] > t[1] ? t[0] : t[1];
+ }
+-/* jobs core 1 may take: a Chicago part stays on core 0. Its note start (voice resume, the
+- * full note mask) goes about 3 KB deep, more than core 1's 2,816-byte stack (fm1-emu stack
+- * mark: 2,988 B with Chicago there; static path 2,384 B plus indirect calls). */
++/* The 4352-byte Core1 user stack reserves a conservative 256-byte
++ * bottom guard. The controller has its own separate exception stack.
++ * A single Chicago may use either core, but both must stay serial on
++ * core 0 when present: the immutable lookup's write-back cache is
++ * shared and cannot have two simultaneous writers. */
+ static uint32_t c1_allowed(void)
+ {
+-    uint32_t m = (1u << JB_909) | (1u << JB_808) | (1u << JB_BRK);
+-    if (original_bass[0].kind == ORIGINAL_SOUND_MIAMI) m |= 1u << JB_A;
+-    if (original_bass[1].kind == ORIGINAL_SOUND_MIAMI) m |= 1u << JB_B;
++    const unsigned a=original_bass[0].kind,b=original_bass[1].kind;
++    uint32_t m=(1u<<JB_909)|(1u<<JB_808)|(1u<<JB_BRK);
++    if (a==ORIGINAL_SOUND_MIAMI ||
++        (a==ORIGINAL_SOUND_CHICAGO && b!=ORIGINAL_SOUND_CHICAGO)) m|=1u<<JB_A;
++    if (b==ORIGINAL_SOUND_MIAMI ||
++        (b==ORIGINAL_SOUND_CHICAGO && a!=ORIGINAL_SOUND_CHICAGO)) m|=1u<<JB_B;
+     return m;
+ }
+ /* before a stretch of n frames: the split to use (sticky; idle jobs stay on core 0) */
