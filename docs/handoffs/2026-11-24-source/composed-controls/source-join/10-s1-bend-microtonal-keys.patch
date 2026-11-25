@@ -1,0 +1,168 @@
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -2353,6 +2353,11 @@
+                     value = (float)bend * (1.0f / 16384.0f);
+                 else
+ #endif
++                /* Pinned Synth One Manager+MIDIListener normalizes the raw
++                 * word over 0...16383. Physical PB uses its separate center. */
++                if (original_bass[k].kind == ORIGINAL_SOUND_SYNTHONE)
++                    value = (float)bend * (1.0f / 16383.0f);
++                else
+                     value = bend < 8192 ? (float)bend / 16384.0f :
+                             0.5f + (float)(bend - 8192) / 16382.0f;
+                 unsigned parameter = original_sound_bend_id(original_bass[k].kind);
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -654,7 +654,7 @@
+ #if X0X_S1_KEYBOARD_HOLD
+ enum { R_S1KEY_HOLD=R_NOTELOCK+56, R_S1A4RESET=R_NOTELOCK+57, R_S1WHITEKEYS=R_NOTELOCK+63, R_S1MIDIVEL=R_NOTELOCK+64 };
+ #if X0X_S1_SCALE_NATIVE
+-enum { R_S1SCALE=R_NOTELOCK+58 };
++enum { R_S1SCALE=R_NOTELOCK+58, R_S1MICROKEYS=R_NOTELOCK+65 };
+ extern int s1_typed_scale_choose(unsigned,unsigned,int);
+ extern const char *s1c_scale_name(unsigned);
+ #endif
+@@ -1217,6 +1217,7 @@
+     case R_S1A4RESET: {static const x0x_param_t pot={"RESET TUNING",1,0,0};return &pot;}
+ #if X0X_S1_SCALE_NATIVE
+     case R_S1SCALE: {static const x0x_param_t pot={"SCALE",S1C_SCALE_MAX,0,0};return &pot;}
++    case R_S1MICROKEYS: {static const x0x_param_t pot={"TUNING KEYS",1,0,ONOFF_N};return &pot;}
+ #endif
+ #endif
+ #if X0X_S1_HALFTIME
+@@ -1486,6 +1487,7 @@
+     case R_S1A4RESET:return 0;
+ #if X0X_S1_SCALE_NATIVE
+     case R_S1SCALE:return proj.sound.v[T_MST][S1_SCALE_ROW+r.b][S1_SCALE_BYTE];
++    case R_S1MICROKEYS:return !!(proj.set.ck_x1 & PROJ_S1_MICRO_KEYS);
+ #endif
+ #endif
+ #if X0X_S1_HALFTIME
+@@ -1744,6 +1746,14 @@
+         return;
+     }
+ #if X0X_S1_SCALE_NATIVE
++    if(r.kind==R_S1MICROKEYS){
++        if((unsigned)v<=1u){
++            proj.set.ck_x1=(uint8_t)((proj.set.ck_x1 & ~PROJ_S1_MICRO_KEYS) |
++                                    (v ? PROJ_S1_MICRO_KEYS : 0u));
++            mark_dirty();
++        }
++        return;
++    }
+     if(r.kind==R_S1SCALE){
+         if(v>=0 && v<=S1C_SCALE_MAX && !pref_read_only(r) && s1_typed_scale_choose(r.b,(unsigned)v,0))mark_dirty();
+         return;
+@@ -3600,7 +3610,12 @@
+             do { static const pref_t refs[4] = {PR(R_FREEPLAY, 0, 0, 0), NONE, NONE, NONE};
+ #if X0X_S1_KEYBOARD_HOLD && DNBOX_TYPED_CONTROLS_NATIVE_TEST
+             if(engine_bass_bank(b)==ORIGINAL_SOUND_SYNTHONE)
+-                add_page(emit, PT_KEYS, PR(R_FREEPLAY,b,0,0), PR(R_S1WHITEKEYS,0,0,0), PR(R_S1MIDIVEL,0,0,0), NONE);
++                add_page(emit, PT_KEYS, PR(R_FREEPLAY,b,0,0), PR(R_S1WHITEKEYS,0,0,0), PR(R_S1MIDIVEL,0,0,0),
++#if X0X_S1_SCALE_NATIVE
++                         PR(R_S1MICROKEYS,0,0,0));
++#else
++                         NONE);
++#endif
+             else
+ #endif
+ #if X0X_SJ6_SCALE_NATIVE
+@@ -6475,6 +6490,10 @@
+     }
+ #if X0X_S1_KEYBOARD_HOLD
+ #if X0X_S1_SCALE_NATIVE
++    if(r.kind==R_S1MICROKEYS){
++        if(e)pref_set_impl(r,e>0,1);
++        return;
++    }
+     if(r.kind==R_S1SCALE){
+         if(e)pref_set_impl(r,pref_get(r)+(e>0)-(e<0),1);
+         return;
+@@ -7932,6 +7951,25 @@
+     if(velocity) {
+         if(k->down[physical] || (k->suppressed&bit))return;
+         if(k->n>=UI_BASS_HELD_MAX){k->suppressed|=bit;return;}
++#if X0X_S1_KEYBOARD_HOLD && X0X_S1_SCALE_NATIVE
++        if((proj.set.ck_x1 & PROJ_S1_MICRO_KEYS) && engine_bass_bank(b)==ORIGINAL_SOUND_SYNTHONE) {
++            const uint8_t *scale=proj.sound.v[T_MST][S1_SCALE_ROW+b];
++            const unsigned code=scale[S1_SCALE_BYTE];
++            int npo=(int)s1c_scale_npo(code);
++#if X0X_S1_USER_SCALE
++            if(code==S1C_SCALE_USER && scale[S1_USER_COUNT]>0u &&
++               scale[S1_USER_COUNT]<=S1C_USER_NOTES) npo=scale[S1_USER_COUNT];
++#endif
++            /* Fixed SMK keybed has no changing touchscreen key geometry.
++             * Adjacent keys select adjacent degrees; octave switches move
++             * one whole active tuning period, not twelve arbitrary degrees.
++             * Keep the fixed physical origin and original MIDI key bounds. */
++            int base=41+ui.oct*npo;
++            if(base<0)base=0;
++            pitch=base+(int)physical;
++            if(pitch>127)return;
++        }
++#endif
+ #if X0X_S1_KEYBOARD_HOLD
+         if((proj.set.bt & PROJ_S1_WHITE_KEYS) && engine_bass_bank(b)==ORIGINAL_SOUND_SYNTHONE) {
+             /* Pinned original Manager.swift whiteKeysOnlyMap: 12 local key
+--- a/firmware/src/app/x0x.h
++++ b/firmware/src/app/x0x.h
+@@ -66,6 +66,11 @@
+ #define PROJ_S1_WHITE_KEYS 0u
+ #define PROJ_S1_MIDI_VELOCITY 0u
+ #endif
++#if X0X_S1_KEYBOARD_HOLD && X0X_S1_SCALE_NATIVE
++#define PROJ_S1_MICRO_KEYS 64u         /* otherwise free ck_x1 bit 6 */
++#else
++#define PROJ_S1_MICRO_KEYS 0u
++#endif
+ #define PROJ_DEVICE_BT (1u | PROJ_BT_SMC_CENTRAL | PROJ_BT_SMC_USER)
+ #define PROJ_DEVICE_PREFS (PROJ_DEVICE_BT | PROJ_S1_WHITE_KEYS | PROJ_S1_MIDI_VELOCITY)
+ #define PROJ_CLK_SRC(bt) ((uint8_t)((bt) >> 1 & 3u))
+@@ -112,7 +117,7 @@
+     uint8_t ck_ord, ck_rate, ck_oct;     /* clip mode ARP: order, rate, octaves - 1 (0-3) */
+     uint8_t ck_gate;                     /* clip mode ARP: gate / 10 % - 1 (0-9) */
+     uint8_t ck_inv;                      /* clip mode CHORD: inversion 0-3 */
+-    uint8_t ck_x1;                       /* clip mode ARP: bits 0-2 SWING (50 + 3 x %), bits 3-5 HUMAN (0 = off) */
++    uint8_t ck_x1;                       /* clip mode ARP: bits 0-2 SWING (50 + 3 x %), bits 3-5 HUMAN, bit 6 Synth One degree keyboard */
+     uint8_t ck_x2;                       /* clip mode: bits 0-3 ARP RHYTHM (CK_RHY_T), bits 4-6 CHORD STRUM (x 10 ms) */
+ } settings_t;
+ 
+--- a/firmware/src/app/project.c
++++ b/firmware/src/app/project.c
+@@ -120,9 +120,11 @@
+ static void project_defaults_for(project_t *pr, uint8_t device_bt)
+ {
+     int i;
++    const uint8_t micro_keys=proj.set.ck_x1 & PROJ_S1_MICRO_KEYS;
+     __builtin_memset(pr, 0, sizeof *pr);
+     *part_off_of(pr) = 0;
+     project_settings_defaults(&pr->set, device_bt);
++    pr->set.ck_x1 |= micro_keys;
+     engine_sound_defaults(&pr->sound);
+     arrange_defaults(pr);
+     /* the 303 lines start empty, like the drums: OCT+ on TB-3PO (or keyboard mode) writes one */
+@@ -803,9 +805,11 @@
+         (s->bt & (0xC0u & ~PROJ_DEVICE_PREFS)) || !(s->bt & PROJ_BT_CLK_IN) || PROJ_CLK_SRC(s->bt) > SEQ_CLK_EXT ||
+         s->ck_ch < 2)
+         return -1;
+-    for (i = 0; i < 12; i++)
+-        if ((&s->ck_ch)[i] > CK_MAX[i])
+-            return -1;
++    for (i = 0; i < 12; i++) {
++        unsigned value=(&s->ck_ch)[i];
++        if(i==10) value&=~PROJ_S1_MICRO_KEYS;
++        if(value > CK_MAX[i]) return -1;
++    }
+     for (i = 0; i < NPARTS; i++)
+         if (s->midi_ch[i] > 17)
+             return -1;
+@@ -944,6 +948,8 @@
+     /* Device roles belong to this keyboard; loading music must not change its
+      * Bluetooth connection or opt-in control surface mode. */
+     project_stage.set.bt = (uint8_t)((project_stage.set.bt & ~PROJ_DEVICE_PREFS) | (proj.set.bt & PROJ_DEVICE_PREFS));
++    project_stage.set.ck_x1=(uint8_t)((project_stage.set.ck_x1 & ~PROJ_S1_MICRO_KEYS) |
++                                      (proj.set.ck_x1 & PROJ_S1_MICRO_KEYS));
+     __builtin_memcpy(&proj, &project_stage, sizeof proj);
+     part_off_live = part_off_staged;
+     project_incompatible = 0; /* explicitly validated import/reset is the recovery boundary */

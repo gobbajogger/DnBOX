@@ -1,0 +1,56 @@
+--- a/firmware/src/dsp/dnbx_core.c
++++ b/firmware/src/dsp/dnbx_core.c
+@@ -46,12 +46,12 @@
+ {
+     /* Reuse identical physical ranges without changing their binary32 bounds.
+      * Field order remains guarded by the offset assertion below. */
+-    static const float bounds[11][2]={
++    static const float bounds[12][2]={
+         {0,16},{0,1},{.03f,.5f},{0,4},{0,.5f},
+-        {20,20000},{-20000,20000},{0,.47f},{-48,48},{-1,1},{0,24}
++        {20,20000},{-20000,20000},{0,.47f},{-48,48},{-1,1},{0,24},{0,24.2f}
+     };
+     static const uint8_t field_range[23]={
+-        0,0,10,1,0,10,0,0,0,1,0,0,1,2,3,4,5,1,6,0,7,8,9
++        0,0,10,1,0,10,0,0,10,1,0,11,1,2,3,4,5,1,6,0,7,8,9
+     };
+     _Static_assert(offsetof(dnbx_layer_params,oscillator_mode)==23*sizeof(float),
+                    "parameter fields must match typed bounds table");
+@@ -59,7 +59,8 @@
+     if (p->oscillator_mode == DNBX_OSC_SUPERJ6 &&
+         (!superj6_amp_range || (p->waveform != 0 && p->waveform != 1.f / 3.f &&
+          p->waveform != 2.f / 3.f && p->waveform != 1))) return 0;
+-    if (!superj6_amp_range && (p->amp.decay_s > 16 || p->amp.release_s > 16)) return 0;
++    if (!superj6_amp_range && (p->amp.decay_s > 16 || p->amp.release_s > 16 ||
++                               p->filter.decay_s > 16 || p->filter.release_s > 16)) return 0;
+     for (unsigned i=0;i<23;i++) {
+         float value;
+         memcpy(&value,(const unsigned char *)p+i*sizeof(float),sizeof value);
+--- a/firmware/src/dsp/juno6_factory.inc
++++ b/firmware/src/dsp/juno6_factory.inc
+@@ -948,10 +948,8 @@
+         float values[4];
+         adsr_values_of(filter ? &p->filter : &p->amp, values);
+         float v = values[stage];
+-        if (filter) {
+-            if (stage != 2) v = fm_powf(v * .0625f, 1.f / 3.f);
+-        } else if (stage == 2) v = fm_powf(v, .4f);
+-        else v = fm_powf(fm_maxf(v - .002f, 0.f) /
++        if (stage == 2) v = fm_powf(v, .4f);
++        else v = fm_powf(fm_maxf(v - (filter && stage == 3 ? .202f : .002f), 0.f) /
+                         (stage == 0 ? 15.998f : 23.998f), 1.f / (stage == 0 ? 3.33f : 3.35f));
+         return (unsigned)(fm_clampf(v, 0.f, 1.f) * 127.f + .5f);
+     }
+@@ -993,9 +991,9 @@
+     float physical[8];
+     for (unsigned i = 0; i < 8; ++i) if (mask & (1u << i)) {
+         float u = (p[i] & 127u) * (1.f / 127.f);
+-        /* The common AMP uses the measured attack and secondary stage laws.
+-         * FILTER time is a physical panel taper across the compact core range. */
+-        physical[i] = i < 4 ? amp_stage_from_unit(i, u) : i == 6 ? u : 16.f * u * u * u;
++        /* Build9's filter ADSR shares the AMP taper, but the filter-release
++         * receiver adds 200 ms after converting the authored slider value. */
++        physical[i] = amp_stage_from_unit(i & 3u, u) + (i == 7 ? .2f : 0.f);
+     }
+     unsigned linked = mask & (1u << 8) ? p[8] & 1u : reset ? 0 : s->core.filter_link;
+     dnbx_layer_params defaults;

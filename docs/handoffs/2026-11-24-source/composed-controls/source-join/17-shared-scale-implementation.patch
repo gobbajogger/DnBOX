@@ -1,0 +1,47 @@
+--- a/firmware/src/dsp/s1c/s1c.c
++++ b/firmware/src/dsp/s1c/s1c.c
+@@ -128,6 +128,9 @@
+ #endif
+ static float s1_scale_hz(const s1c *s,unsigned index,int note,float a4)
+ {
++#if X0X_SJ6_SCALE_NATIVE
++    return s1c_shared_scale_hz(index,note,a4,s->user_npo,s->user_scale,S1C_USER_BYTES,NULL);
++#else
+ #if X0X_S1_USER_SCALE
+     const int user=index==S1C_SCALE_USER && s->user_npo;
+     if(index==S1C_SCALE_USER && !user)return a4*exp2f((note-69)/12.f);
+--- a/firmware/src/dsp/s1c/s1c.c
++++ b/firmware/src/dsp/s1c/s1c.c
+@@ -153,6 +153,7 @@
+     const float ratio=normalized.v;
+     float hz=ratio*q.v*(a4*0.5946035575013605f);
+     return hz<22050.f ? hz : 22050.f;
++#endif
+ }
+ #endif
+ static float note_hz(const s1c *s, int n)
+--- a/firmware/src/dsp/dnbx_core.h
++++ b/firmware/src/dsp/dnbx_core.h
+@@ -71,7 +71,9 @@
+ } dnbx_layer_params;
+ 
+ /* Public layout supports static allocation; fields below are implementation
+- * state and must not be modified by a caller. No pointers or global state. */
++ * state and must not be modified by a caller. No mutable global state.
++ * The guarded device tuning path borrows only resident, read-only ratio bytes
++ * that the project owner holds stable for the instrument's lifetime. */
+ typedef struct {
+     float level, curve, delta, asymptote, step_rate, endpoint, correction;
+     uint32_t remaining;
+--- a/firmware/src/dsp/s1c/s1c_scales.h
++++ b/firmware/src/dsp/s1c/s1c_scales.h
+@@ -2,6 +2,9 @@
+ #pragma once
+ enum { S1C_SCALE_COUNT=14 };
+ #if X0X_SJ6_SCALE_NATIVE
++#if !X0X_S1_SCALE_NATIVE || !X0X_S1_USER_SCALE
++#error The shared SuperJ6 scale receiver requires the existing native Scala table
++#endif
+ #include <stdint.h>
+ /* Byte-identical AudioKit scale table used by both compact engines. Split
+  * USER bytes are the existing project carrier, not a second tune bank. */

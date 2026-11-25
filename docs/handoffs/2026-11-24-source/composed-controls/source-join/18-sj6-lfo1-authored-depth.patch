@@ -1,0 +1,26 @@
+--- a/firmware/src/dsp/juno6_factory.inc
++++ b/firmware/src/dsp/juno6_factory.inc
+@@ -606,15 +606,18 @@
+ }
+ 
+ #if X0X_SJ6_VCF_PORT
+-/* Authored Init selector ID181=1 (normal cutoff) and ID180=0 are
+- * constructor state. Neither is a panel knob or a wheel destination. */
++/* JNO2's lfo1Amt2FilterSlider outlet actually binds lfo1AmountControl
++ * (Build9 ID89), not ID90. This writer changes only the active shared
++ * depth, never the independently selected destination or its base. */
+ int juno6_set_vcf_lfo1_amount(juno6_t *s,unsigned position)
+ {
+     if (!s || !s->typed || position>127u) return 0;
+     const float amount=(float)position/127.f;
+-    if(s->lfo1_pwm_route!=3u)
+-        return juno6_configure_lfo1_cutoff(s,0.f,1.f,amount);
+-    return dnbx_store_raw(&s->core,89u,amount)==DNBX_RAW_STORED_ONLY;
++    if(dnbx_store_raw(&s->core,89u,amount)!=DNBX_RAW_STORED_ONLY)return 0;
++    /* CC1 and the panel write the same original receiver. The panel's
++     * explicit edit supersedes CC1 without saving performance state. */
++    s->wheel_lfo1_amount=0;
++    return 1;
+ }
+ #endif
+ int juno6_configure_lfo1_pwm(juno6_t *s,unsigned selector,unsigned enabled,float base,float amount)

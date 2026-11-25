@@ -1,0 +1,80 @@
+--- a/firmware/src/dsp/juno6_aux_core.inc
++++ b/firmware/src/dsp/juno6_aux_core.inc
+@@ -35,9 +35,9 @@
+     if(id==136u)return fm_clampf(p->filter_env_hz*(1.f/7000.f),0.f,1.f);
+     const unsigned filter=id>=132u, stage=id-(filter?132u:36u);
+     const dnbx_envelope_params *e=filter?&p->filter:&p->amp;
+-    if(stage==2u)return filter?e->sustain:fm_powf(e->sustain,.4f);
+-    const float t=stage==0u?e->attack_s:stage==1u?e->decay_s:e->release_s;
+-    if(filter)return fm_clampf(fm_powf(t*(1.f/16.f),1.f/3.f),0.f,1.f);
++    if(stage==2u)return fm_powf(e->sustain,.4f);
++    float t=stage==0u?e->attack_s:stage==1u?e->decay_s:e->release_s;
++    if(filter && stage==3u)t-=.2f;
+     return fm_clampf(fm_powf(fm_maxf(t-.002f,0.f)/
+                      (stage?23.998f:15.998f),1.f/(stage?3.35f:3.33f)),0.f,1.f);
+ }
+@@ -48,6 +48,9 @@
+ #if X0X_SJ6_NOISE_SUB_NATIVE
+     float noise,sub;
+ #endif
++#if X0X_SJ6_OTA_NATIVE
++    float ota_raw_cutoff,ota_sustain[2];
++#endif
+     uint32_t present;
+     unsigned active;
+ } sj6_aux_core_saved;
+@@ -66,6 +69,20 @@
+ #endif
+         save->active=1u;
+     }
++#if X0X_SJ6_OTA_NATIVE
++    /* Only real cutoff or sustained-envelope receivers alter this derived
++     * target. Save the authored/smoothed state once per audio span, so
++     * two destinations can combine without committing either one. */
++    if(p->sj6_ota && (id==7u || id==136u ||
++       id==(p->filter_link?38u:134u))){
++        if(!(save->active&512u)){
++            save->ota_raw_cutoff=s->sj6_live_raw_cutoff;
++            for(unsigned l=0;l<2u;l++)save->ota_sustain[l]=p->sj6_ota_sustain[l];
++            save->active|=512u;
++        }
++        if(id==7u)s->sj6_live_raw_cutoff=raw;
++    }
++#endif
+     if(id>=124u && id<=126u){
+         /* AU's independent global/layer trim, not the keyboard wheel. */
+         const unsigned k=id-124u;
+@@ -105,7 +122,9 @@
+         (void)dnbx_set_layer(p,l,&q);
+     } else {
+         const unsigned filter=id>=132u,stage=id-(filter?132u:36u);
+-        const float physical=filter?(stage==2u?raw:16.f*raw*raw*raw):amp_stage_from_unit(stage,raw);
++        /* Same normalized ADSR transfer as direct original panels,
++         * including Build9 filter release's fixed 200 ms extension. */
++        const float physical=amp_stage_from_unit(stage,raw)+(filter && stage==3u?.2f:0.f);
+         for(unsigned l=0;l<2u;l++){
+             dnbx_envelope_params amp=p->layer[l].params.amp,eg=p->layer[l].params.filter;
+             dnbx_envelope_params *e=filter?&eg:&amp;
+@@ -117,6 +136,9 @@
+ }
+ __attribute__((noinline,minsize)) static void juno6_aux_core_bends(juno6_t *s,const sj6_aux_core_saved *save)
+ {
++#if X0X_SJ6_OTA_NATIVE
++    if(save->active&512u)juno6_refresh_ota_sustain(s,-1.f);
++#endif
+     if(!(save->active&0x1c0u))return;
+     const float common=(save->active&64u)?save->bend[0]:0.f;
+     for(unsigned l=0;l<DNBX_LAYERS;l++){
+@@ -129,6 +151,12 @@
+     dnbx_part *p=&s->core;
+     if(!save->active)return;
+     p->raw[131]=save->track;p->raw[136]=save->strength;p->raw_present[4]=save->present;
++#if X0X_SJ6_OTA_NATIVE
++    if(save->active&512u){
++        s->sj6_live_raw_cutoff=save->ota_raw_cutoff;
++        for(unsigned l=0;l<2u;l++)p->sj6_ota_sustain[l]=save->ota_sustain[l];
++    }
++#endif
+ #if X0X_SJ6_NOISE_SUB_NATIVE
+     p->sj6_noise_gain=save->noise;p->sj6_sub_gain=save->sub;
+ #endif

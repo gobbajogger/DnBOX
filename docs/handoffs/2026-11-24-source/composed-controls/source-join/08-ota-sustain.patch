@@ -1,0 +1,185 @@
+--- a/firmware/src/dsp/dnbx_core.h
++++ b/firmware/src/dsp/dnbx_core.h
+@@ -134,6 +134,7 @@
+     uint8_t sj6_noise_code,sj6_sub_code;
+ #endif
+ #if X0X_SJ6_OTA_NATIVE
++    float sj6_ota_sustain[DNBX_LAYERS];
+     uint8_t sj6_ota;
+ #endif
+     uint8_t damper, velocity_mode, superj6_amp_range, filter_link;
+@@ -170,6 +171,7 @@
+ int dnbx_set_filter_link(dnbx_part *, unsigned);
+ #if X0X_SJ6_OTA_NATIVE
+ int dnbx_set_sj6_ota(dnbx_part *,unsigned);
++void dnbx_set_sj6_ota_filter_sustain(dnbx_part *,unsigned,float);
+ #endif
+ /* Prevalidated physical panel settings, applied at the audio boundary. */
+ void dnbx_apply_panel_envelopes(dnbx_part *, unsigned layer, const dnbx_envelope_params *amp,
+--- a/firmware/src/dsp/dnbx_core.c
++++ b/firmware/src/dsp/dnbx_core.c
+@@ -370,16 +370,32 @@
+     if (status == DNBX_OK) s->superj6_amp_range = 1;
+     return status;
+ }
++static float filter_sustain(const dnbx_part *s,unsigned l)
++{
++    const dnbx_layer_params *p=&s->layer[l].params;
++#if X0X_SJ6_OTA_NATIVE
++    if(s->sj6_ota)return s->sj6_ota_sustain[l];
++#endif
++    return s->filter_link ? p->amp.sustain : p->filter.sustain;
++}
++
+ /* Prepare outside the sample loop. Link the four ADSR settings only;
+  * keep the filter's own hold policy and independent per-voice history. */
+ static const dnbx_envelope_params *filter_params(const dnbx_part *s,unsigned layer,
+                                                 dnbx_envelope_params *tmp)
+ {
+     const dnbx_layer_params *p=&s->layer[layer].params;
+-    if (!s->filter_link) return &p->filter;
++    if (!s->filter_link
++#if X0X_SJ6_OTA_NATIVE
++        && !s->sj6_ota
++#endif
++       ) return &p->filter;
+     *tmp=p->filter;
+-    tmp->attack_s=p->amp.attack_s; tmp->decay_s=p->amp.decay_s;
+-    tmp->sustain=p->amp.sustain; tmp->release_s=p->amp.release_s;
++    if(s->filter_link) {
++        tmp->attack_s=p->amp.attack_s; tmp->decay_s=p->amp.decay_s;
++        tmp->release_s=p->amp.release_s;
++    }
++    tmp->sustain=filter_sustain(s,layer);
+     return tmp;
+ }
+ #if X0X_SJ6_OTA_NATIVE
+@@ -397,6 +413,15 @@
+         }
+     return 1;
+ }
++void dnbx_set_sj6_ota_filter_sustain(dnbx_part *s,unsigned l,float v)
++{
++    s->sj6_ota_sustain[l]=v;
++    const float target=filter_sustain(s,l);
++    for(unsigned i=0;i<DNBX_VOICES;++i) {
++        dnbx_envelope_state *e=&s->voice[i].layer[l].filter;
++        if(e->stage==DNBX_ENV_SUSTAIN)e->level=e->curve=target;
++    }
++}
+ static inline float sj6_ota_stage(float input,float *state,float g)
+ {
+     float v=g*fm_tanhf(input-*state);
+@@ -441,7 +466,7 @@
+         dnbx_layer_voice *v = &s->voice[i].layer[layer];
+         if (v->amp.stage == DNBX_ENV_SUSTAIN) v->amp.level = v->amp.curve = amp->sustain;
+         if (v->filter.stage == DNBX_ENV_SUSTAIN)
+-            v->filter.level = v->filter.curve = linked ? amp->sustain : filter->sustain;
++            v->filter.level = v->filter.curve = filter_sustain(s,layer);
+     }
+ }
+ #endif
+@@ -456,7 +481,7 @@
+         v->increment=voice_pitch_increment(s,&s->voice[i],layer,p->tune_semitones);
+         /* A running timed segment retains its cached endpoint/rate. */
+         if (v->amp.stage==DNBX_ENV_SUSTAIN) v->amp.level=v->amp.curve=p->amp.sustain;
+-        if (v->filter.stage==DNBX_ENV_SUSTAIN) v->filter.level=v->filter.curve=s->filter_link?p->amp.sustain:p->filter.sustain;
++        if (v->filter.stage==DNBX_ENV_SUSTAIN) v->filter.level=v->filter.curve=filter_sustain(s,layer);
+     }
+     return DNBX_OK;
+ }
+--- a/firmware/src/dsp/juno6.h
++++ b/firmware/src/dsp/juno6.h
+@@ -120,6 +120,9 @@
+  uint8_t lfo_running, lfo_sync, lfo2_pwm_index, vibrato_left;
+  uint32_t lfo2_pwm_until_tick, vibrato_phase, vibrato_step;
+  float vibrato_depth, vibrato_ratio, mod_wheel_cutoff_hz;
++#if X0X_SJ6_OTA_NATIVE
++ float sj6_live_raw_cutoff;
++#endif
+  uint64_t lfo2_entropy_state;
+ #if X0X_SJ6_LFO1_WAVE_NATIVE
+  uint64_t lfo1_entropy_state;
+@@ -382,6 +385,11 @@
+ static inline float juno6_a_reference_hz(float normalized)
+ { return 200.f + 400.f * normalized; }
+ int juno6_read_panel_envelope(const juno6_t *, unsigned filter, juno6_envelope_snapshot *, unsigned *linked);
++#if X0X_SJ6_OTA_NATIVE
++/* Refresh OTA sustain after a real cutoff gesture (0..1), or use the current
++ * raw cutoff (-1) after ENV amount, Link, Sustain or filter-model edits. */
++void juno6_refresh_ota_sustain(juno6_t *,float raw_cutoff);
++#endif
+ #endif
+ void juno6_apply_pre_note_wave(juno6_t *, unsigned, const juno6_oscillator_edit *);
+ void juno6_apply_factory_waves(juno6_t *, const juno6_oscillator_edit waves[2]);
+--- a/firmware/src/dsp/juno6_factory.inc
++++ b/firmware/src/dsp/juno6_factory.inc
+@@ -526,6 +526,33 @@
+            hi*(hi*10000.f)-lo*(lo*17.f);
+ #endif
+ }
++/* Build9 ENV134 OTA branch. Derive the effective target in octaves, while
++ * retaining ordinary A/S knobs in their independent authored domains. */
++void juno6_refresh_ota_sustain(juno6_t *s,float raw)
++{
++    if(raw>=0.f && raw<=1.f)s->sj6_live_raw_cutoff=raw;
++    if(!s->core.sj6_ota) {
++        for(unsigned l=0;l<DNBX_LAYERS;++l)
++            dnbx_set_sj6_ota_filter_sustain(&s->core,l,0.f);
++        return;
++    }
++    float amount=s->macro[4];
++    (void)dnbx_read_raw(&s->core,136u,&amount);
++    float lo=0.f,ratio=0.f,inv_cut=0.f,inv_amount=0.f;
++    if(amount>0.f) {
++        lo=sj6_normal_cutoff_hz(s->sj6_live_raw_cutoff);
++        inv_cut=1.f/sj6_ota_cutoff_hz(lo);
++        ratio=(22050.f-lo)*fm_powf(amount,3.03f);
++        inv_amount=1.f/(14.f*amount);
++    }
++    for(unsigned l=0;l<DNBX_LAYERS;++l) {
++        const dnbx_layer_params *p=&s->core.layer[l].params;
++        const float u=s->core.filter_link ? p->amp.sustain : p->filter.sustain;
++        const float v=amount>0.f ?
++            fm_clampf(fm_log2f((lo+ratio*u)*inv_cut)*inv_amount,0.f,1.f) : 0.f;
++        dnbx_set_sj6_ota_filter_sustain(&s->core,l,v);
++    }
++}
+ #endif
+ 
+ int juno6_configure_lfo1_cutoff(juno6_t *s,float base,float current,float amount)
+@@ -1005,6 +1032,9 @@
+         apply_adsr(&filter, mask >> 4, physical + 4);
+         dnbx_apply_panel_envelopes(&s->core, l, &amp, &filter, linked);
+     }
++#if X0X_SJ6_OTA_NATIVE
++    if(s->core.sj6_ota && (reset || (mask&0x144u)))juno6_refresh_ota_sustain(s,-1.f);
++#endif
+ }
+ #endif
+ 
+--- a/firmware/src/app/original_presets.inc
++++ b/firmware/src/app/original_presets.inc
+@@ -1001,8 +1001,10 @@
+ #if X0X_SJ6_OTA_NATIVE
+ static void sj6_ota_apply(const sound_t *sound,unsigned owner)
+ {
+-    if(live137(sound,owner) && original_bass[owner].kind==ORIGINAL_SOUND_JUNO)
+-        (void)dnbx_set_sj6_ota(&original_bass[owner].dsp.juno.synth.core,sj6_ota_read(sound,owner));
++    if(live137(sound,owner) && original_bass[owner].kind==ORIGINAL_SOUND_JUNO) {
++        juno6_t *s=&original_bass[owner].dsp.juno.synth;
++        (void)juno6_sj6_set_ota(s,sj6_ota_read(sound,owner));
++    }
+ }
+ int sj6_ota_get(unsigned owner)
+ {
+@@ -1739,6 +1741,9 @@
+     } else {
+         core->raw_present[136u/32u]&=~(UINT32_C(1)<<(136u%32u));
+     }
++#if X0X_SJ6_OTA_NATIVE
++    if(k && core->sj6_ota)juno6_refresh_ota_sustain(&original_bass[owner].dsp.juno.synth,-1.f);
++#endif
+ }
+ int sj6_filter_control_get(unsigned owner,unsigned k)
+ {

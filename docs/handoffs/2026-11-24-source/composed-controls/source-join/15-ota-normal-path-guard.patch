@@ -1,0 +1,10 @@
+--- a/firmware/src/dsp/juno6_factory.inc
++++ b/firmware/src/dsp/juno6_factory.inc
+@@ -543,6 +543,7 @@
+ {
+     if(raw>=0.f && raw<=1.f)s->sj6_live_raw_cutoff=raw;
+     if(!s->core.sj6_ota) {
++        if(raw>=0.f)return; /* just remember unchanged-model cutoff controls */
+         for(unsigned l=0;l<DNBX_LAYERS;++l)
+             dnbx_set_sj6_ota_filter_sustain(&s->core,l,0.f);
+         return;

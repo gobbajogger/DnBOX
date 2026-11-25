@@ -1,0 +1,181 @@
+--- a/firmware/src/dsp/dnbx_core.c
++++ b/firmware/src/dsp/dnbx_core.c
+@@ -627,6 +627,9 @@
+     for (unsigned i=0;i<DNBX_VOICES;i++) s->voice[i].age_rank=next_rank[i];
+     if (!retrigger) memset(v,0,sizeof *v);
+     v->note=(uint8_t)note; v->gate=1; v->age_rank=0; v->pedal_held=0;
++#if X0X_SJ6_SEQ_DEST_NATIVE
++    v->layer[0].amp.reserved=zero_on>1u ? (uint8_t)(4u | (zero_on>>1)) : 0u;
++#endif
+ #if X0X_SJ6_SCALE_NATIVE
+     sj6_scale_attack(s,v);
+ #endif
+@@ -690,6 +693,9 @@
+     dnbx_voice *v=&s->voice[0];
+     if(!voice_active(v))memset(v,0,sizeof *v);
+     v->note=(uint8_t)note;v->gate=1;v->pedal_held=0;v->age_rank=0;
++#if X0X_SJ6_SEQ_DEST_NATIVE
++    v->layer[0].amp.reserved=(uint8_t)(layers&4u ? layers : 0u);
++#endif
+ #if X0X_SJ6_SCALE_NATIVE
+     sj6_scale_attack(s,v);
+ #endif
+@@ -720,9 +726,32 @@
+ int dnbx_superj6_mono_voice(dnbx_part *s,unsigned note,unsigned vel)
+ { return mono_routed_on(s,note,vel,3); }
+ int dnbx_superj6_mono_routed_on(dnbx_part *s,unsigned note,unsigned vel,unsigned layers)
+-{ return layers>=1u && layers<=3u ? mono_routed_on(s,note,vel,layers) : -1; }
++{ return layers>=1u && layers<=3u ? mono_routed_on(s,note,vel,layers|4u) : -1; }
+ #endif
+ #endif
++static void release_layers(dnbx_part *s,dnbx_voice *v,unsigned mask)
++{
++    for (unsigned l=0;l<DNBX_LAYERS;l++) if (mask&(1u<<l)) {
++        envelope_off(&v->layer[l].amp,&s->layer[l].params.amp,s->sample_rate);
++        dnbx_envelope_params linked;
++        envelope_off(&v->layer[l].filter,filter_params(s,l,&linked),s->sample_rate);
++    }
++}
++#if X0X_SJ6_SEQ_DEST_NATIVE
++void dnbx_superj6_release_routes(dnbx_part *s,unsigned disabled)
++{
++    if (!valid(s) || !s->superj6_amp_range) return;
++    for (unsigned i=0;i<DNBX_VOICES;i++) {
++        dnbx_voice *v=&s->voice[i];
++        uint8_t *route=&v->layer[0].amp.reserved;
++        unsigned off=*route&disabled&3u;
++        if (off) {
++            *route&=(uint8_t)~off;
++            release_layers(s,v,off);
++        }
++    }
++}
++#endif
+ static void release_voice(dnbx_part *s,dnbx_voice *v)
+ {
+ #if X0X_SJ6_PITCH_ENV_NATIVE
+@@ -732,11 +761,16 @@
+ #endif
+       )envelope_off(&v->sj6_pitch,&s->sj6_pitch_param,s->sample_rate);
+ #endif
+-    for (unsigned l=0;l<DNBX_LAYERS;l++) {
+-        envelope_off(&v->layer[l].amp,&s->layer[l].params.amp,s->sample_rate);
+-        dnbx_envelope_params linked;
+-        envelope_off(&v->layer[l].filter,filter_params(s,l,&linked),s->sample_rate);
++#if X0X_SJ6_SEQ_DEST_NATIVE
++    if (v->layer[0].amp.reserved&4u) {
++        /* A destination edit already released the disabled lanes.
++         * Later Note Off must not move their release anchor. */
++        release_layers(s,v,v->layer[0].amp.reserved&3u);
++        v->layer[0].amp.reserved=0;
++        return;
+     }
++#endif
++    release_layers(s,v,3u);
+ }
+ int dnbx_note_off(dnbx_part *s,unsigned note)
+ {
+--- a/firmware/src/dsp/dnbx_core.h
++++ b/firmware/src/dsp/dnbx_core.h
+@@ -75,7 +75,10 @@
+ typedef struct {
+     float level, curve, delta, asymptote, step_rate, endpoint, correction;
+     uint32_t remaining;
+-    uint8_t stage, tick_left, timed_stage, reserved;
++    uint8_t stage, tick_left, timed_stage;
++    /* Amp envelope [layer 0] reserves this byte for compact SuperJ6
++     * sequencer ownership and its sounding routed layer mask. */
++    uint8_t reserved;
+ } dnbx_envelope_state;
+ typedef struct {
+     float phase, increment, subphase, filter_first, filter_second;
+@@ -216,6 +219,7 @@
+ int dnbx_superj6_velocity_zero_on(dnbx_part *,unsigned note);
+ #if X0X_SJ6_SEQ_DEST_NATIVE
+ int dnbx_superj6_routed_on(dnbx_part*,unsigned note,unsigned vel,unsigned layers);
++void dnbx_superj6_release_routes(dnbx_part *,unsigned disabled);
+ #if X0X_SJ6_MONO32_PROBE
+ int dnbx_superj6_mono_routed_on(dnbx_part*,unsigned note,unsigned vel,unsigned layers);
+ #endif
+--- a/firmware/src/dsp/juno6_factory.inc
++++ b/firmware/src/dsp/juno6_factory.inc
+@@ -130,7 +130,11 @@
+ { return s->typed && sj6_note_on(s,note,0,1); }
+ #if X0X_SJ6_SEQ_DEST_NATIVE
+ int juno6_arp_routed_on(juno6_t *s,uint8_t note,uint8_t vel,unsigned layers)
+-{ return s->typed && layers && layers<=2u && sj6_note_on(s,note,vel,1u+layers); }
++{ return s->typed && layers && layers<=3u && sj6_note_on(s,note,vel,1u+layers); }
++void juno6_arp_release_routes(juno6_t *s,unsigned disabled)
++{
++ if (s->typed) dnbx_superj6_release_routes(&s->core,disabled);
++}
+ #endif
+ #endif
+ void juno6_note_off(juno6_t *s,uint8_t note)
+--- a/firmware/src/dsp/juno6.h
++++ b/firmware/src/dsp/juno6.h
+@@ -356,6 +356,7 @@
+ #endif
+ #define SJ6_SEQ_SETTING_SLOT(k) ((k) >= SJ6_SEQ_START_SNAP && (k) <= SJ6_SEQ_DEST)
+ int juno6_arp_routed_on(juno6_t*,uint8_t,uint8_t,unsigned layers);
++void juno6_arp_release_routes(juno6_t*,unsigned disabled);
+ #else
+ #define SJ6_SEQ_SETTING_SLOT(k) ((k)==SJ6_SEQ_START_SNAP || (k)==SJ6_SEQ_LOCK)
+ #endif
+--- a/firmware/src/app/original_runtime.c
++++ b/firmware/src/app/original_runtime.c
+@@ -470,7 +470,10 @@
+     original_runtime_part *zero_owner=ctx;
+ #if X0X_SJ6_SEQ_DEST_NATIVE
+     unsigned layers=zero_owner->arp.prm.saga_layers;
+-    if (layers && zero_owner->kind==ORIGINAL_SOUND_JUNO && zero_owner->dsp.juno.synth.typed) {
++    if (zero_owner->kind==ORIGINAL_SOUND_JUNO && zero_owner->dsp.juno.synth.typed) {
++        /* BOTH also carries scheduler ownership; ordinary live/transport
++         * notes do not acquire that ownership. */
++        if (!layers) layers=3u;
+ #if X0X_SJ6_LFO_TRIGGER_NATIVE
+         if (!velocity)
+             juno6_lfo_trigger(&zero_owner->dsp.juno.synth,SJ6_LFO_EVENT_ARP);
+@@ -733,6 +736,19 @@
+     return p;
+ }
+ #endif
++#if X0X_SJ6_SEQ_DEST_NATIVE
++void original_runtime_sj6_destination(original_runtime_part *p,unsigned destination)
++{
++    unsigned prior=p->arp.prm.saga_layers;
++    if (prior==destination || destination>2u) return;
++    p->arp.prm.saga_layers=(uint8_t)destination;
++    if (p->status==ORIGINAL_RUNTIME_OK && p->kind==ORIGINAL_SOUND_JUNO && p->dsp.juno.synth.typed) {
++        unsigned oldmask=prior ? prior : 3u, newmask=destination ? destination : 3u;
++        if (oldmask&~newmask)
++            juno6_arp_release_routes(&p->dsp.juno.synth,oldmask&~newmask);
++    }
++}
++#endif
+ void original_runtime_arp_clock(original_runtime_part *p, uint64_t pos_q8, uint32_t beat_q8, int start)
+ {
+     if (!p) return;
+--- a/firmware/src/app/original_runtime.h
++++ b/firmware/src/app/original_runtime.h
+@@ -157,6 +157,9 @@
+ /* Per block, before render: the DnBOX transport clock (seq_t metronome).
+  * beat_q8 = 0: stopped, the arp free-runs from the key press (Synth One). */
+ void original_runtime_arp_clock(original_runtime_part *, uint64_t pos_q8, uint32_t beat_q8, int start);
++#if X0X_SJ6_SEQ_DEST_NATIVE
++void original_runtime_sj6_destination(original_runtime_part *,unsigned destination);
++#endif
+ #if X0X_S1_FENCED_CLOCK
+ int original_runtime_s1_clock(original_runtime_part *, float, unsigned);
+ int engine_host_s1_clock(unsigned, float, unsigned);
+--- a/firmware/src/app/engine_arp.inc
++++ b/firmware/src/app/engine_arp.inc
+@@ -193,7 +193,7 @@
+         int native=original_bass[v].kind==ORIGINAL_SOUND_JUNO && live137(mot_base_snd,v);
+         original_bass[v].arp.prm.saga_snap_native=(uint8_t)native;
+ #if X0X_SJ6_SEQ_DEST_NATIVE
+-        original_bass[v].arp.prm.saga_layers=native ? sj6_dest_read(mot_base_snd,v) : 0u;
++        original_runtime_sj6_destination(&original_bass[v],native ? sj6_dest_read(mot_base_snd,v) : 0u);
+ #endif
+         int linked=run && (!native || (seq.ext && seq.ext_period && sj6_seq_settings_read(mot_base_snd,v)[0]));
+ #else

@@ -1,0 +1,18 @@
+--- a/firmware/src/dsp/juno6_factory.inc
++++ b/firmware/src/dsp/juno6_factory.inc
+@@ -108,7 +108,14 @@
+   const int continuing=s->core.voice[0].gate&&mono_has_keys(s);
+   s->mono32_keys[note>>5]|=UINT32_C(1)<<(note&31u);
+   sj6_mono_glide_start(s,note,continuing);
+-  if(continuing&&s->legato33_on)return dnbx_superj6_legato_voice(&s->core,note)==0;
++  if(continuing&&s->legato33_on) {
++#if X0X_SJ6_SEQ_DEST_NATIVE
++   /* A real direct note that retargets the one Mono voice takes over
++    * ownership without re-attacking the legato envelopes. */
++   if(!zero_on)s->core.voice[0].layer[0].amp.reserved=0;
++#endif
++   return dnbx_superj6_legato_voice(&s->core,note)==0;
++  }
+ #if X0X_SJ6_SEQ_DEST_NATIVE
+   if(zero_on>1u)return dnbx_superj6_mono_routed_on(&s->core,note,velocity,zero_on-1u)==0;
+ #endif

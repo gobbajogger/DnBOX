@@ -1,0 +1,180 @@
+--- a/firmware/src/dsp/dnbx_core.c
++++ b/firmware/src/dsp/dnbx_core.c
+@@ -63,6 +63,14 @@
+     for (unsigned i=0;i<23;i++) {
+         float value;
+         memcpy(&value,(const unsigned char *)p+i*sizeof(float),sizeof value);
++#if X0X_SJ6_OTA_NATIVE
++        /* Build9 OTA's normalized cutoff spans ~3..30000 Hz; leave
++         * every legacy engine/output parameter range unchanged. */
++        if(superj6_amp_range && field_range[i]==5u){
++            if(!range(value,3.f,30001.f))return 0;
++            continue;
++        }
++#endif
+         const float *limit=bounds[field_range[i]];
+         if (!range(value,limit[0],limit[1])) return 0;
+     }
+--- a/firmware/src/dsp/juno6.h
++++ b/firmware/src/dsp/juno6.h
+@@ -288,6 +288,10 @@
+ /* Bounded source ID181=1 (normal ID7 cutoff), Loop/Triangle only. */
+ int juno6_configure_lfo1_cutoff(juno6_t *,float authored_base,float live_current,float amount);
+ float juno6_mod_cutoff_hz(unsigned value);
++#if X0X_SJ6_OTA_NATIVE
++void juno6_sj6_set_ota(juno6_t *,unsigned mode);
++float juno6_sj6_panel_cutoff_hz(float normalized,unsigned mode);
++#endif
+ #if (defined(X0X_HOST) && defined(X0X_SJ6_DELAY_WITNESS)) || X0X_SJ6_NATIVE_DELAY
+ enum { SJ6_DELAY24=90, SJ6_DELAY27=91, SJ6_DELAY25=92, SJ6_DELAY26=93, SJ6_DELAYSYNC=94 };
+ #if X0X_SJ6_NATIVE_DELAY
+--- a/firmware/src/dsp/juno6_factory.inc
++++ b/firmware/src/dsp/juno6_factory.inc
+@@ -528,6 +528,30 @@
+ }
+ #endif
+ 
++/* Direct CUTOFF and the live modulation receivers use Build9 ID7's
++ * same effect-model transfer instead of the old compact approximation. */
++#if X0X_SJ6_OTA_NATIVE
++__attribute__((noinline)) float juno6_sj6_panel_cutoff_hz(float raw,unsigned mode)
++{
++    float hz=sj6_normal_cutoff_hz(raw);
++    return mode?sj6_ota_cutoff_hz(hz):hz;
++}
++#define sj6_cutoff_hz(s,raw) juno6_sj6_panel_cutoff_hz((raw),(s)->core.sj6_ota)
++#else
++#define sj6_cutoff_hz(s,raw) sj6_normal_cutoff_hz(raw)
++#endif
++#if X0X_SJ6_OTA_NATIVE
++void juno6_sj6_set_ota(juno6_t *s,unsigned mode)
++{
++    if(mode==s->core.sj6_ota || !dnbx_set_sj6_ota(&s->core,mode))return;
++    /* Original model selection re-evaluates the real knob/current target. */
++    const float hz=sj6_cutoff_hz(s,s->macro[2]);
++    s->core.layer[0].params.cutoff_hz=s->core.layer[1].params.cutoff_hz=hz;
++    if(s->lfo1_cut_active)s->mod_wheel_cutoff_hz=sj6_cutoff_hz(s,s->lfo1_cut_current);
++    juno6_refresh_ota_sustain(s,-1.f);
++}
++#endif
++
+ int juno6_configure_lfo1_cutoff(juno6_t *s,float base,float current,float amount)
+ {
+     if(!s||!s->typed||!(base>=0.f&&base<=1.f&&current>=0.f&&current<=1.f&&amount>=0.f&&amount<=1.f))
+@@ -763,11 +787,10 @@
+     }
+     if (s->mod_destination==5u) {
+         float u=(float)value/127.f;
+-        float hz=sj6_normal_cutoff_hz(u);
++        s->mod_wheel_cutoff_hz=sj6_cutoff_hz(s,u);
+ #if X0X_SJ6_OTA_NATIVE
+-        if(s->core.sj6_ota)hz=sj6_ota_cutoff_hz(hz);
++        juno6_refresh_ota_sustain(s,u);
+ #endif
+-        s->mod_wheel_cutoff_hz=hz;
+         if(s->lfo1_pwm_route==3) {
+             s->lfo1_cut_force=s->lfo1_cut_active;
+             s->lfo1_cut_active=0;
+@@ -1052,7 +1075,12 @@
+  if(id==16 && s->pb_typed) return sj6_pb_refresh(s);
+ #endif
+  if(id==9)s->hpf=x;
+- if(id==2)s->mod_wheel_cutoff_hz=0.f;
++ if(id==2){
++  s->mod_wheel_cutoff_hz=0.f;
++#if X0X_SJ6_OTA_NATIVE
++  if(s->typed)(void)dnbx_store_raw(&s->core,7u,x);
++#endif
++ }
+  #define JUNO6_APPLY_VALUE(stock,native) (native)
+ #else
+  #define JUNO6_LEGACY_ADSR(field, value) (p.amp.field = p.filter.field = (value))
+@@ -1076,7 +1104,13 @@
+    if (p.oscillator_mode == DNBX_OSC_SUPERJ6) p.oscillator_mode = DNBX_OSC_STOCK_BLEP;
+    p.waveform=(2+x)/3;break;
+   case 1:p.sub_gain=JUNO6_APPLY_VALUE(s->sub_level,juno6_control_physical(1,x));break;
+-  case 2:p.cutoff_hz=35+x*x*12000;break;
++  case 2:
++#if X0X_SUPERJ6_BUILTIN_INIT && X0X_SJ6_OTA_NATIVE
++   p.cutoff_hz=s->typed?sj6_cutoff_hz(s,x):35.f+x*x*12000.f;
++#else
++   p.cutoff_hz=35+x*x*12000;
++#endif
++   break;
+   case 3:p.resonance=JUNO6_APPLY_VALUE(s->resonance,x);break;
+   case 4:p.filter_env_hz=7000*x;break;
+   case 5:JUNO6_LEGACY_ADSR(attack_s,JUNO6_APPLY_VALUE(s->attack,juno6_control_physical(5,x)));break;
+@@ -1098,6 +1132,9 @@
+   if(dnbx_set_layer(&s->core,l,&p)!=DNBX_OK)return 0;
+  }
+  #undef JUNO6_APPLY_VALUE
++#if X0X_SUPERJ6_BUILTIN_INIT && X0X_SJ6_OTA_NATIVE
++ if(id==2 && s->typed)juno6_refresh_ota_sustain(s,x);
++#endif
+  #undef JUNO6_LEGACY_ADSR
+  return 1;
+ }
+@@ -1635,7 +1672,10 @@
+                 if(s->lfo1_pwm_route==3u && s->mod_destination!=5u) {
+                     s->lfo1_cut_active=s->lfo1_cut_force=0;
+                     s->lfo1_cut_target=s->lfo1_cut_current=s->lfo1_pwm_base;
+-                    s->mod_wheel_cutoff_hz=sj6_normal_cutoff_hz(s->lfo1_pwm_base);
++                    s->mod_wheel_cutoff_hz=sj6_cutoff_hz(s,s->lfo1_pwm_base);
++#if X0X_SJ6_OTA_NATIVE
++                    juno6_refresh_ota_sustain(s,s->lfo1_pwm_base);
++#endif
+                 }
+             }
+ #endif
+@@ -1705,13 +1745,19 @@
+         if(s->lfo1_cut_force) {
+             s->lfo1_cut_force=s->lfo1_cut_active=0;
+             s->lfo1_cut_current=target;
+-            s->mod_wheel_cutoff_hz=sj6_normal_cutoff_hz(target);
++            s->mod_wheel_cutoff_hz=sj6_cutoff_hz(s,target);
++#if X0X_SJ6_OTA_NATIVE
++            juno6_refresh_ota_sustain(s,target);
++#endif
+         } else if(fm_fabsf(target-s->lfo1_cut_current)>eps) s->lfo1_cut_active=1;
+     }
+     if(s->lfo1_cut_active) {
+         float current=s->lfo1_cut_current,target=s->lfo1_cut_target;
+         float next=current+(target-current)*0x1.217c58p-1f;
+-        s->mod_wheel_cutoff_hz=sj6_normal_cutoff_hz(next);
++        s->mod_wheel_cutoff_hz=sj6_cutoff_hz(s,next);
++#if X0X_SJ6_OTA_NATIVE
++        juno6_refresh_ota_sustain(s,next);
++#endif
+         if(fm_fabsf(target-next)<=eps) {
+             s->lfo1_cut_active=0;
+             s->lfo1_cut_current=target;
+--- a/firmware/src/dsp/juno6_aux_core.inc
++++ b/firmware/src/dsp/juno6_aux_core.inc
+@@ -72,7 +72,7 @@
+         save->bend[k]=(raw-.5f)*24.f;
+         save->active|=1u<<(6u+k);
+     } else if(id==7u){
+-        const float hz=sj6_normal_cutoff_hz(raw);
++        const float hz=sj6_cutoff_hz(s,raw);
+         for(unsigned l=0;l<2u;l++)p->layer[l].params.cutoff_hz=hz;
+     } else if(id==8u){
+         for(unsigned l=0;l<2u;l++)p->layer[l].params.resonance=raw;
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -2253,6 +2253,16 @@
+         if (engine_param_si(T_303, r.b, (int)id, value, &hz) == X0X_U_HZ) { unit_value(X0X_U_HZ, hz, num, unit); return 1; }
+     }
+     if (kind == ORIGINAL_SOUND_JUNO) {
++#if X0X_SJ6_OTA_NATIVE
++        if(id==2u){
++            const int mode=sj6_ota_get(r.b);
++            float x;
++            if(mode>=0 && original_sound_control_value(kind,id,(unsigned)value,&x)){
++                unit_value(X0X_U_HZ,juno6_sj6_panel_cutoff_hz(x,(unsigned)mode),num,unit);
++                return 1;
++            }
++        }
++#endif
+ #if X0X_SUPERJ6_BUILTIN_INIT
+         if (id == ORIGINAL_SJ6_HPF_PANEL && value > 0 &&
+             original_sound_sj6_hpf_authored(proj.sound.v[T_303][r.b])) {
