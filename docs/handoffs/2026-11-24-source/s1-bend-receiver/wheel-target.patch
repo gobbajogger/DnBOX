@@ -1,0 +1,38 @@
+--- a/firmware/src/app/main_fm1.c
++++ b/firmware/src/app/main_fm1.c
+@@ -960,6 +960,15 @@
+     }
+ }
+ 
++static int smk_pitch_parameter(int v)
++{
++#if X0X_BASS_PRESET_PREVIEW
++    if (engine_bass_bank(v) == ORIGINAL_SOUND_SYNTHONE)
++        return (int)original_sound_bend_id(ORIGINAL_SOUND_SYNTHONE);
++#endif
++    return engine_bass_is_wobble(v) ? ORIGINAL_MIAMI_PITCH_BEND : ORIGINAL_CHICAGO_PITCH_BEND;
++}
++
+ /* The wheels (mux C address 4 = pitch, 5 = mod), self-calibrating as in the reference port: the pitch wheel's
+  * rest is its centre (taken at power-on, followed slowly while it rests), each wheel's range grows to what it
+  * has reached. On a 303 (the part on screen) they play its sound without changing what is saved.
+@@ -1051,8 +1060,7 @@
+             engine_brk_bend(bend < 0 ? bend * 8192 / 63 : bend * 8191 / 63);
+             if (!bend) bend_part = -1;
+         } else if (bend_part >= 0) {
+-            int param = engine_bass_is_wobble(bend_part) ?
+-                ORIGINAL_MIAMI_PITCH_BEND : ORIGINAL_CHICAGO_PITCH_BEND;
++            int param = smk_pitch_parameter(bend_part);
+             PARAM_TRACE(PARAM_WHEEL_PITCH, T_303, bend_part, param,
+                         bend ? ((bend + 63) * 127 + 63) / 126 : 64);
+             if (bend)
+@@ -1083,8 +1091,7 @@
+     /* External MIDI bend / CC1 on a part's channel record like the wheels. */
+     for (int v = 0; v < NBASS; ++v) {
+         int t = engine_bass_ext_touch(v);
+-        if (t & 1) motion_touch(PR(R_ENG, T_303, v, engine_bass_is_wobble(v) ?
+-                                   ORIGINAL_MIAMI_PITCH_BEND : ORIGINAL_CHICAGO_PITCH_BEND));
++        if (t & 1) motion_touch(PR(R_ENG, T_303, v, smk_pitch_parameter(v)));
+         if (t & 2) motion_touch(PR(R_ENG, T_303, v, engine_bass_mod_param(v)));
+     }
+ #if X0X_BASS_PRESET_PREVIEW
