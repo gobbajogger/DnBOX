@@ -1,0 +1,160 @@
+--- a/firmware/src/app/typed_controls_trial.h
++++ b/firmware/src/app/typed_controls_trial.h
+@@ -8,6 +8,9 @@
+ #if DNBOX_TYPED_CONTROLS_NATIVE_TEST != 0 && DNBOX_TYPED_CONTROLS_NATIVE_TEST != 1
+ #error DNBOX_TYPED_CONTROLS_NATIVE_TEST must be 0 or 1
+ #endif
++#if X0X_SJ6_NATIVE_POSITIVE_GATE && (!DNBOX_TYPED_CONTROLS_NATIVE_TEST || X0X_SJ6_ZERO_GATE_PROBE || X0X_SJ6_GATE_DEADLINE_PROBE)
++#error Positive Gate is a disjoint native trial, with zero and host Gate flags off
++#endif
+ #if DNBOX_TYPED_CONTROLS_NATIVE_TEST
+ #if !X0X_SYNTHONE_PATCH || !X0X_S1C || !X0X_SUPERJ6_BUILTIN_INIT || \
+     !X0X_S1_BEND_RANGE_PROBE || !X0X_S1_MOD_RATE_PROBE
+--- a/firmware/src/app/engine_arp.inc
++++ b/firmware/src/app/engine_arp.inc
+@@ -8,7 +8,7 @@
+ static volatile uint32_t arp_revision[NBASS];
+ static engine_arp_cfg arp_pending[NBASS];
+ static volatile uint8_t arp_pending_flag[NBASS];
+-#if defined(X0X_SJ6_GATE_DEADLINE_PROBE) && X0X_SJ6_GATE_DEADLINE_PROBE
++#if X0X_SJ6_GATE_DEADLINE_PROBE || X0X_SJ6_NATIVE_POSITIVE_GATE
+ static uint8_t arp_gate_only[NBASS];
+ #endif
+ 
+@@ -133,6 +133,8 @@
+ #if defined(X0X_SJ6_GATE_DEADLINE_PROBE) && X0X_SJ6_GATE_DEADLINE_PROBE
+         if (!(arp_gate_only[v] && live137(mot_base_snd,v) &&
+               original_runtime_sj6_gate_edit(&original_bass[v],c.gate)))
++#elif X0X_SJ6_NATIVE_POSITIVE_GATE
++        if (!(arp_gate_only[v] && original_runtime_sj6_live_gate(&original_bass[v],c.gate)))
+ #endif
+             (void)original_runtime_arp_config(&original_bass[v], &c);
+         arp_store(v, &c);
+@@ -212,6 +214,10 @@
+         && !(step==0xFFu && field==ARP_F_GATE && original_bass[v].kind==ORIGINAL_SOUND_JUNO &&
+              live137(mot_base_snd,v) && !s1_typed_tuple_editable())
+ #endif
++#if X0X_SJ6_NATIVE_POSITIVE_GATE
++        && !(step==0xFFu && field==ARP_F_GATE && original_bass[v].kind==ORIGINAL_SOUND_JUNO &&
++             live137(mot_base_snd,v) && !s1_typed_tuple_editable())
++#endif
+ #if X0X_SUPERJ6_BUILTIN_INIT
+         && (step != 0xFFu || original_bass[v].kind == ORIGINAL_SOUND_JUNO ||
+             (field != ARP_F_DIVISION && (field != ARP_F_MODE || value < ARP_S1_NMODES)))
+@@ -221,7 +227,7 @@
+         else {
+             engine_arp_cfg *c = &arp_pending[v];
+             if (!arp_pending_flag[v]) *c = original_bass[v].arp.cfg;
+-#if defined(X0X_SJ6_GATE_DEADLINE_PROBE) && X0X_SJ6_GATE_DEADLINE_PROBE
++#if X0X_SJ6_GATE_DEADLINE_PROBE || X0X_SJ6_NATIVE_POSITIVE_GATE
+             const int gate_field=step==0xFFu && field==ARP_F_GATE;
+             arp_gate_only[v]=(uint8_t)(gate_field && (!arp_pending_flag[v] || arp_gate_only[v]));
+ #endif
+@@ -272,7 +278,7 @@
+     if (arp_kind_ok(v)) {
+         if (project_hold) status = S1_EDIT_BUSY;
+         else {
+-#if defined(X0X_SJ6_GATE_DEADLINE_PROBE) && X0X_SJ6_GATE_DEADLINE_PROBE
++#if X0X_SJ6_GATE_DEADLINE_PROBE || X0X_SJ6_NATIVE_POSITIVE_GATE
+             arp_gate_only[v]=0;
+ #endif
+             arp_pending[v] = *c; arp_pending_flag[v] = 1; status = S1_EDIT_QUEUED;
+--- a/firmware/src/app/original_runtime.c
++++ b/firmware/src/app/original_runtime.c
+@@ -562,6 +562,16 @@
+     return 1;
+ }
+ #endif
++#if X0X_SJ6_NATIVE_POSITIVE_GATE
++int original_runtime_sj6_live_gate(original_runtime_part *p,unsigned gate)
++{
++    if(!p || p->status!=ORIGINAL_RUNTIME_OK || p->kind!=ORIGINAL_SOUND_JUNO ||
++       !p->dsp.juno.synth.typed || gate<1u || gate>100u) return 0;
++    p->arp.cfg.gate=(uint8_t)gate;
++    S1Sequencer_liveGate(&p->arp.seq,&p->arp.prm,gate);
++    return 1;
++}
++#endif
+ int original_runtime_arp_config(original_runtime_part *p, const engine_arp_cfg *c)
+ {
+     if (!p || !c) return 0;
+--- a/firmware/src/app/original_runtime.h
++++ b/firmware/src/app/original_runtime.h
+@@ -115,6 +115,9 @@
+ #if defined(X0X_SJ6_GATE_DEADLINE_PROBE) && X0X_SJ6_GATE_DEADLINE_PROBE
+ int original_runtime_sj6_gate_edit(original_runtime_part *, unsigned percent);
+ #endif
++#if X0X_SJ6_NATIVE_POSITIVE_GATE
++int original_runtime_sj6_live_gate(original_runtime_part *,unsigned);
++#endif
+ int original_runtime_arp_config(original_runtime_part *, const engine_arp_cfg *);
+ /* Display only: 1 while running, the step that last sounded, frames since. */
+ /* Per block, before render: the DnBOX transport clock (seq_t metronome).
+--- a/firmware/src/dsp/synthone/sequencer/S1Sequencer.c
++++ b/firmware/src/dsp/synthone/sequencer/S1Sequencer.c
+@@ -33,6 +33,8 @@
+     s->gateOpen = 0;
+ #if defined(X0X_SJ6_GATE_DEADLINE_PROBE) && X0X_SJ6_GATE_DEADLINE_PROBE
+     s->editGateLatched = 0;
++#elif X0X_SJ6_NATIVE_POSITIVE_GATE
++    s->liveGateTicks=0;
+ #endif
+ #if defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE
+     s->saga_random_state=0;
+@@ -50,6 +52,8 @@
+     s->gateOpen = 0;
+ #if defined(X0X_SJ6_GATE_DEADLINE_PROBE) && X0X_SJ6_GATE_DEADLINE_PROBE
+     s->editGateLatched = 0;
++#elif X0X_SJ6_NATIVE_POSITIVE_GATE
++    s->liveGateTicks=0;
+ #endif
+ }
+ 
+@@ -140,18 +144,26 @@
+ {
+ #if defined(X0X_SJ6_GATE_DEADLINE_PROBE) && X0X_SJ6_GATE_DEADLINE_PROBE
+     if (s->editGateLatched) return s->editGateTicks;
++#elif X0X_SJ6_NATIVE_POSITIVE_GATE
++    if (s->liveGateTicks) return s->liveGateTicks;
+ #endif
+     (void)s;
+     return p->gateTicks;
+ }
+-#if defined(X0X_SJ6_GATE_DEADLINE_PROBE) && X0X_SJ6_GATE_DEADLINE_PROBE
++#if X0X_SJ6_GATE_DEADLINE_PROBE || X0X_SJ6_NATIVE_POSITIVE_GATE
+ void S1Sequencer_liveGate(S1Sequencer *s,S1SequencerParams *p,unsigned percent)
+ {
+     if (p->seqGate == percent) return;
++#if defined(X0X_SJ6_GATE_DEADLINE_PROBE) && X0X_SJ6_GATE_DEADLINE_PROBE
+     if (s->gateOpen && s->sequencerLastNotesCount && !s->editGateLatched) {
+         s->editGateTicks=p->gateTicks;
+         s->editGateLatched=1;
+     }
++#else
++    /* Positive legacy Gate has a nonzero threshold at the shortest legal step. */
++    if (s->gateOpen && s->sequencerLastNotesCount && !s->liveGateTicks)
++        s->liveGateTicks=p->gateTicks;
++#endif
+     p->seqGate=(uint8_t)percent;
+     S1Sequencer_setStep(p,p->arpSeqTempoMultiplier);
+ }
+--- a/firmware/src/dsp/synthone/sequencer/S1Sequencer.h
++++ b/firmware/src/dsp/synthone/sequencer/S1Sequencer.h
+@@ -83,6 +83,8 @@
+ #if defined(X0X_SJ6_GATE_DEADLINE_PROBE) && X0X_SJ6_GATE_DEADLINE_PROBE
+     uint32_t editGateTicks;           /* already dispatched step's original deadline */
+     uint8_t editGateLatched;
++#elif X0X_SJ6_NATIVE_POSITIVE_GATE
++    uint32_t liveGateTicks;            /* prior active Saga gate; 0 unlatched */
+ #endif
+     uint8_t gateOpen;
+     uint8_t sequencerLastNotesCount;
+@@ -110,7 +112,7 @@
+ #endif
+ int S1Sequencer_getArpBeatCount(const S1Sequencer *);
+ /* Set the step length (and its gate) in ticks. */
+-#if defined(X0X_SJ6_GATE_DEADLINE_PROBE) && X0X_SJ6_GATE_DEADLINE_PROBE
++#if X0X_SJ6_GATE_DEADLINE_PROBE || X0X_SJ6_NATIVE_POSITIVE_GATE
+ void S1Sequencer_liveGate(S1Sequencer *,S1SequencerParams *,unsigned percent);
+ #endif
+ void S1Sequencer_setStep(S1SequencerParams *, uint32_t ticks);

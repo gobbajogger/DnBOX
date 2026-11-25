@@ -1,0 +1,33 @@
+--- a/firmware/src/dsp/synthone/sequencer/S1Sequencer.h
++++ b/firmware/src/dsp/synthone/sequencer/S1Sequencer.h
+@@ -51,8 +51,6 @@
+     uint8_t arpIsSequencer;             /* 65 */
+     uint8_t arpDirection;               /* 60  ArpeggiatorMode */
+     uint8_t arpOctave;                  /* 63  0..3 */
+-    uint8_t arpInterval;                /* 61  0..12 */
+-    uint8_t arpTotalSteps;              /* 66  1..16 */
+     int8_t sequencerPattern[S1_SEQ_STEPS];  /* 67..82 */
+     uint16_t sequencerOctBoost;         /* 83..98, bit per step */
+     uint16_t sequencerNoteOn;           /* 99..114, bit per step */
+@@ -62,16 +60,18 @@
+     uint32_t arpBeatsPerSample;
+     uint32_t arpSeqTempoMultiplier;
+     /* SuperJ6 deltas (Synth One: 100, 12) */
+-    uint8_t seqGate;                    /* % of a step a note sounds (SJ6 seqGate) */
+-    uint8_t patternRange;               /* |sequencerPattern| limit: S1 12, SJ6 24 */
+     uint32_t gateTicks;                 /* seqGate % of arpSeqTempoMultiplier (UINT32_MAX = 100 %) */
+-    uint8_t clocked;                    /* DnBOX: transport clock owns mStepCounter / mBeatTime */
+ #if X0X_SUPERJ6_BUILTIN_INIT
+ #if (defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE) || X0X_SJ6_NATIVE_RANDOM2
+     uint32_t saga_random_seed;
+ #endif
+     uint8_t saga_notes, saga_timing;    /* SuperJ6 pitch law and optional original grid */
+ #endif
++    uint8_t arpInterval;                /* 61  0..12 */
++    uint8_t arpTotalSteps;              /* 66  1..16 */
++    uint8_t seqGate;                    /* % of a step a note sounds (SJ6 seqGate) */
++    uint8_t patternRange;               /* |sequencerPattern| limit: S1 12, SJ6 24 */
++    uint8_t clocked;                    /* DnBOX: transport clock owns mStepCounter / mBeatTime */
+ } S1SequencerParams;
+ 
+ typedef void (*KeyOnCallback)(void *ctx, int note, int velocity);

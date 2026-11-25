@@ -1,0 +1,767 @@
+--- a/firmware/src/app/engine_arp.h
++++ b/firmware/src/app/engine_arp.h
+@@ -23,7 +23,7 @@
+ enum { ARP_UP, ARP_DOWN, ARP_UPDN, ARP_SEQ,
+ #if X0X_SUPERJ6_BUILTIN_INIT
+        ARP_UPDN_REPEAT,
+-#if defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE
++#if (defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE) || X0X_SJ6_NATIVE_RANDOM2
+        ARP_SAGA_RANDOM2,
+ #endif
+ #endif
+--- a/firmware/src/app/engine_arp.inc
++++ b/firmware/src/app/engine_arp.inc
+@@ -22,7 +22,7 @@
+ {
+     if (!mot_base_snd) return;
+     uint8_t *block=ARP_SLOT((sound_t *)mot_base_snd,v);
+-#if (defined(X0X_SJ6_ZERO_GATE_PROBE) && X0X_SJ6_ZERO_GATE_PROBE) || (defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE)
++#if (defined(X0X_SJ6_ZERO_GATE_PROBE) && X0X_SJ6_ZERO_GATE_PROBE) || ((defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE) || X0X_SJ6_NATIVE_RANDOM2)
+     if (original_bass[v].kind==ORIGINAL_SOUND_JUNO && live137(mot_base_snd,v)) {
+ #if defined(X0X_SJ6_ZERO_GATE_PROBE) && X0X_SJ6_ZERO_GATE_PROBE
+         unsigned typed_zero=c->gate==0;
+@@ -30,7 +30,7 @@
+         if (block[0]!='A' || block[1]!=1u || prior_gate<1u || prior_gate>100u) prior_gate=100;
+         slot137((sound_t *)mot_base_snd,v)[SJ6_ARP_ZERO_BYTE]=(uint8_t)typed_zero;
+ #endif
+-#if defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE
++#if (defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE) || X0X_SJ6_NATIVE_RANDOM2
+         unsigned typed_random=c->mode==ARP_SAGA_RANDOM2;
+         const uint8_t prior_mode=block[0]=='A' && block[1]==1u ? block[2]&0x46u : 0u;
+         slot137((sound_t *)mot_base_snd,v)[SJ6_ARP_RANDOM_BYTE]=(uint8_t)(typed_random ? 2u : 0u);
+@@ -39,7 +39,7 @@
+ #if defined(X0X_SJ6_ZERO_GATE_PROBE) && X0X_SJ6_ZERO_GATE_PROBE
+         if(typed_zero) block[5]=prior_gate;
+ #endif
+-#if defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE
++#if (defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE) || X0X_SJ6_NATIVE_RANDOM2
+         /* Keep the dormant deterministic mode and ordinary wire unchanged. */
+         if(typed_random) block[2]=(uint8_t)((block[2]&~0x46u)|prior_mode);
+ #endif
+@@ -58,7 +58,7 @@
+     if (original_bass[v].kind==ORIGINAL_SOUND_JUNO && live137(sound,v) &&
+         read137(sound,v)[SJ6_ARP_ZERO_BYTE]==1u) c.gate=0;
+ #endif
+-#if defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE
++#if (defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE) || X0X_SJ6_NATIVE_RANDOM2
+     if (live137(sound,v) && original_bass[v].kind==ORIGINAL_SOUND_JUNO &&
+         read137(sound,v)[SJ6_ARP_RANDOM_BYTE]==2u) c.mode=ARP_SAGA_RANDOM2;
+     original_bass[v].arp.prm.saga_random_seed=v ? UINT32_C(0x243f6a88) : UINT32_C(0x85a308d3);
+@@ -204,7 +204,7 @@
+     int status = S1_EDIT_REJECTED;
+     uint32_t request = bass_request[v];
+     if (arp_kind_ok(v) && revision == arp_revision[v]
+-#if defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE
++#if (defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE) || X0X_SJ6_NATIVE_RANDOM2
+         && !(step==0xFFu && field==ARP_F_MODE && value==ARP_SAGA_RANDOM2 &&
+              (original_bass[v].kind!=ORIGINAL_SOUND_JUNO || !live137(mot_base_snd,v)))
+         && !(step==0xFFu && field==ARP_F_MODE && live137(mot_base_snd,v) && !s1_typed_tuple_editable())
+@@ -275,7 +275,12 @@
+     if (v >= NBASS) return S1_EDIT_REJECTED;
+     uint32_t lock = plat_cq_lock();
+     int status = S1_EDIT_REJECTED;
+-    if (arp_kind_ok(v)) {
++    if (arp_kind_ok(v)
++#if X0X_SJ6_NATIVE_RANDOM2
++        && !(live137(mot_base_snd,v) && read137(mot_base_snd,v)[SJ6_ARP_RANDOM_BYTE]==2u &&
++             c->mode!=ARP_SAGA_RANDOM2)
++#endif
++       ) {
+         if (project_hold) status = S1_EDIT_BUSY;
+         else {
+ #if X0X_SJ6_GATE_DEADLINE_PROBE || X0X_SJ6_NATIVE_POSITIVE_GATE
+@@ -287,7 +292,7 @@
+     plat_cq_unlock(lock);
+     return status;
+ }
+-#if defined(X0X_SJ6_ZERO_GATE_PROBE) && X0X_SJ6_ZERO_GATE_PROBE
++#if X0X_SJ6_ZERO_GATE_PROBE || X0X_SJ6_NATIVE_RANDOM2
+ /* Called by actual Undo under the project/audio hold. No save or hardware I/O. */
+ void engine_sj6_zero_undo(unsigned mask)
+ {
+@@ -296,8 +301,10 @@
+             original_bass[v].kind!=ORIGINAL_SOUND_JUNO) continue;
+         engine_arp_cfg c;
+         (void)engine_arp_block_decode(ARP_SLOT(mot_base_snd,v),&c);
++#if defined(X0X_SJ6_ZERO_GATE_PROBE) && X0X_SJ6_ZERO_GATE_PROBE
+         if(read137(mot_base_snd,v)[SJ6_ARP_ZERO_BYTE]==1u)c.gate=0;
+-#if defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE
++#endif
++#if (defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE) || X0X_SJ6_NATIVE_RANDOM2
+         if(read137(mot_base_snd,v)[SJ6_ARP_RANDOM_BYTE]==2u)c.mode=ARP_SAGA_RANDOM2;
+ #endif
+         arp_pending_flag[v]=0;
+@@ -315,7 +322,7 @@
+     if (live137(mot_base_snd,v) && original_bass[v].kind==ORIGINAL_SOUND_JUNO &&
+         read137(mot_base_snd,v)[SJ6_ARP_ZERO_BYTE]==1u) c.gate=0;
+ #endif
+-#if defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE
++#if (defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE) || X0X_SJ6_NATIVE_RANDOM2
+     if(live137(mot_base_snd,v) && original_bass[v].kind==ORIGINAL_SOUND_JUNO &&
+        read137(mot_base_snd,v)[SJ6_ARP_RANDOM_BYTE]==2u)c.mode=ARP_SAGA_RANDOM2;
+ #endif
+--- a/firmware/src/app/original_presets.inc
++++ b/firmware/src/app/original_presets.inc
+@@ -760,6 +760,51 @@
+ }
+ #endif
+ #ifdef DNBOX_137_HOST_WITNESS
++#if X0X_S1_DELAY_TRACK_TEST
++/* An Init-owned Delay input ratio, never a T_MIX or global FX address. */
++static void s1_typed_dict_apply(const sound_t *sound,unsigned owner)
++{
++    if(live_s1_mod(sound,owner) && original_bass[owner].kind==ORIGINAL_SOUND_SYNTHONE) {
++        unsigned code=s1_dict_read(sound,owner);
++        if(code<=S1_DICT_MAX)
++            (void)s1c_front_set(&original_bass[owner].dsp.synthone.e,S1_DICT_PARAM,
++                               (float)(50u+s1_dict_decode(code))*.01f);
++    }
++}
++int s1_typed_dict_position(unsigned owner)
++{
++    if(!live_s1_mod(mot_base_snd,owner) ||
++       original_bass[owner].kind!=ORIGINAL_SOUND_SYNTHONE) return -1;
++    unsigned code=s1_dict_read(mot_base_snd,owner);
++    return code<=S1_DICT_MAX ? (int)s1_dict_decode(code) : -1;
++}
++int s1_typed_dict_choose(unsigned owner,unsigned pos)
++{
++    if(pos>S1_DICT_MAX || s1_typed_dict_position(owner)<0)return 0;
++    engine_project_hold(1);
++    int before=s1_typed_dict_position(owner);
++    int ok=before>=0 && (unsigned)before!=pos && s1_typed_tuple_editable() &&
++           !ui_project_busy() && !engine_bass_preset_pending(owner) && !note_lock_applied[owner];
++    if(ok) {
++        s1_dict_store((sound_t *)mot_base_snd,owner,s1_dict_encode(pos));
++        s1_typed_dict_apply(mot_base_snd,owner);
++    }
++    engine_project_hold(0);
++    return ok;
++}
++int s1_typed_dict_undo_ready(unsigned mask)
++{
++    if(!s1_typed_tuple_editable())return 0;
++    for(unsigned v=0;v<NBASS;v++)
++        if((mask&(1u<<v)) && live_s1_mod(mot_base_snd,v) &&
++           (note_lock_applied[v] || engine_bass_preset_pending(v)))return 0;
++    return 1;
++}
++void s1_typed_dict_undo(unsigned mask)
++{
++    for(unsigned v=0;v<NBASS;v++)if(mask&(1u<<v))s1_typed_dict_apply(mot_base_snd,v);
++}
++#endif
+ static void s1_typed_a4_apply(const sound_t *sound,unsigned owner) {
+     if(live_s1_mod(sound,owner) && original_bass[owner].kind==ORIGINAL_SOUND_SYNTHONE)
+         (void)s1c_front_set(&original_bass[owner].dsp.synthone.e,S1_A4_PARAM,s1_a4_hz(read137(sound,owner)[S1_A4_BYTE]));
+@@ -929,7 +974,7 @@
+ #if defined(X0X_HOST) && defined(X0X_SJ6_MAILBOX_PROBE)
+     if (slot >= SJ6_KNOBS) return engine_superj6_mailbox_probe_read(owner, slot);
+ #endif
+-#if defined(X0X_HOST) && defined(X0X_SJ6_FILTER_VEL_PROBE)
++#if (defined(X0X_HOST) && defined(X0X_SJ6_FILTER_VEL_PROBE)) || (DNBOX_TYPED_CONTROLS_NATIVE_TEST && X0X_SJ6_VELOCITY_PORT)
+     if (slot == SJ6_FILTER_VELOCITY) {
+         return live137(mot_base_snd,owner) ?
+             original_bass[owner].dsp.juno.synth.filter_velocity_position : -1;
+@@ -1109,7 +1154,7 @@
+     if (sj6_knob_can_turn(owner) && ((slot != SJ6_OSC2_LEVEL && slot != SJ6_OSC1_LEVEL) || bass_named_preset[owner] == 0)) {
+         slot = sj6_panel_slot(owner, slot);
+         int before = sj6_knob_position(owner, slot);
+-#if defined(X0X_HOST) && defined(X0X_SJ6_FILTER_VEL_PROBE)
++#if (defined(X0X_HOST) && defined(X0X_SJ6_FILTER_VEL_PROBE)) || (DNBOX_TYPED_CONTROLS_NATIVE_TEST && X0X_SJ6_VELOCITY_PORT)
+         if (slot == SJ6_FILTER_VELOCITY && before < 0) { plat_cq_unlock(lock); return 0; }
+ #endif
+         value = sj6_knob_target(before, value, (int)original_sound_sj6_max(slot), relative);
+@@ -1332,7 +1377,7 @@
+ #if X0X_BASS_NOTE_SOUND
+         if (note_lock_applied[v]) continue;
+ #endif
+-#if defined(X0X_HOST) && defined(X0X_SJ6_FILTER_VEL_PROBE)
++#if (defined(X0X_HOST) && defined(X0X_SJ6_FILTER_VEL_PROBE)) || (DNBOX_TYPED_CONTROLS_NATIVE_TEST && X0X_SJ6_VELOCITY_PORT)
+         if (pending.word[1] & sj6_knob_bit(SJ6_FILTER_VELOCITY)) {
+             unsigned pos=sj6_knob_value[v][SJ6_FILTER_VELOCITY];
+             if (!bass_named_preset[v] && live137(mot_base_snd,v) && pos<=127 &&
+@@ -1573,7 +1618,7 @@
+     if (part->kind != ORIGINAL_SOUND_JUNO) return;
+     const uint8_t *base = mot_base_snd->v[T_303][v];
+     const uint8_t *cell = lock ? lock->val : base;
+-#if defined(DNBOX_137_HOST_WITNESS) && !DNBOX_TYPED_CONTROLS_NATIVE_TEST
++#if defined(DNBOX_137_HOST_WITNESS) && (!DNBOX_TYPED_CONTROLS_NATIVE_TEST || X0X_SJ6_VELOCITY_PORT)
+     if (live137(mot_base_snd,v)) {
+         unsigned position=lock && lock->i==NOTE137 ? lock->val[BASS_NOTE_TAG+11] : read137(mot_base_snd,v)[2];
+         juno6_set_filter_velocity(&part->dsp.juno.synth,position);
+@@ -1711,7 +1756,7 @@
+ #endif
+     if (rc == ORIGINAL_RUNTIME_OK && original_bass[v].kind == ORIGINAL_SOUND_JUNO) {
+         original_bass[v].dsp.juno.synth.lfo2_entropy_state ^= (uint64_t)(unsigned)v << 32;
+-#if defined(DNBOX_137_HOST_WITNESS) && !DNBOX_TYPED_CONTROLS_NATIVE_TEST
++#if defined(DNBOX_137_HOST_WITNESS) && (!DNBOX_TYPED_CONTROLS_NATIVE_TEST || X0X_SJ6_VELOCITY_PORT)
+         if (live137(sound,v)) juno6_set_filter_velocity(&original_bass[v].dsp.juno.synth,read137(sound,v)[2]);
+ #endif
+ #if defined(X0X_SJ6_BEND_TYPED_PROBE) && X0X_SJ6_BEND_TYPED_PROBE
+@@ -1744,6 +1789,9 @@
+         s1_part_mod_route(&original_bass[v].dsp.synthone,read137(sound,v)[3]);
+ #if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
+     if (rc==ORIGINAL_RUNTIME_OK) s1_pb_load(v,sound);
++#endif
++#if X0X_S1_DELAY_TRACK_TEST
++    if(rc==ORIGINAL_RUNTIME_OK)s1_typed_dict_apply(sound,v);
+ #endif
+     if(rc==ORIGINAL_RUNTIME_OK) {s1_typed_a4_apply(sound,v);s1_typed_rvfb_apply(sound,v);s1_typed_trans_apply(sound,v);s1_typed_crush_apply(sound,v);}
+ #endif
+@@ -1930,6 +1978,9 @@
+         __builtin_memcpy(sound->v[T_303][v], next, sizeof next);
+         bass_tag_set(sound, v, bank, preset, 0);
+ #ifdef DNBOX_137_HOST_WITNESS
++#if X0X_S1_DELAY_TRACK_TEST
++        s1_typed_dict_apply(sound,v);
++#endif
+         s1_typed_a4_apply(sound,v);
+         s1_typed_rvfb_apply(sound,v);
+         s1_typed_trans_apply(sound,v);
+@@ -1943,7 +1994,7 @@
+         if (live_s1_mod(sound,v)) s1_pb_load(v,sound);
+ #endif
+ #endif
+-#if defined(DNBOX_137_HOST_WITNESS) && !DNBOX_TYPED_CONTROLS_NATIVE_TEST
++#if defined(DNBOX_137_HOST_WITNESS) && (!DNBOX_TYPED_CONTROLS_NATIVE_TEST || X0X_SJ6_VELOCITY_PORT)
+         if (live137(sound,v)) juno6_set_filter_velocity(&original_bass[v].dsp.juno.synth,read137(sound,v)[2]);
+ #endif
+ #if defined(X0X_SJ6_BEND_TYPED_PROBE) && X0X_SJ6_BEND_TYPED_PROBE
+--- a/firmware/src/app/original_runtime.c
++++ b/firmware/src/app/original_runtime.c
+@@ -271,7 +271,7 @@
+     memset(b, 0, ARP_BLOCK_BYTES);
+     b[0] = 'A'; b[1] = 1u;
+     unsigned mode = arp_clamp(c->mode, 0, ARP_NMODES - 1u), flags = 0;
+-#if defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE
++#if (defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE) || X0X_SJ6_NATIVE_RANDOM2
+     if(mode==ARP_SAGA_RANDOM2) mode=ARP_UP;
+ #endif
+ #if X0X_SUPERJ6_BUILTIN_INIT
+@@ -472,7 +472,7 @@
+ #if X0X_SUPERJ6_BUILTIN_INIT
+     q->saga_notes = p->kind == ORIGINAL_SOUND_JUNO;
+     q->saga_timing = q->saga_notes && c->division && c->division <= ARP_SAGA_DIVISIONS;
+-#if defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE
++#if (defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE) || X0X_SJ6_NATIVE_RANDOM2
+     if (c->mode==ARP_SAGA_RANDOM2 && q->saga_notes)
+         q->arpDirection=ArpeggiatorMode_SagaRandom;
+ #endif
+--- a/firmware/src/app/sj6_137_host_witness.h
++++ b/firmware/src/app/sj6_137_host_witness.h
+@@ -79,7 +79,7 @@
+  return b[0]<=SJ6_CLASSIC_I_DEFAULT && b[1]<=SJ6_CLASSIC_I_DEFAULT && b[2]<=SJ6_CLASSIC_I_DEFAULT;
+ }
+ #endif
+-#if defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE
++#if (defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE) || X0X_SJ6_NATIVE_RANDOM2
+ enum { SJ6_ARP_RANDOM_BYTE=26 };
+ #endif
+ #if X0X_SJ6_MONO32_PROBE
+@@ -97,6 +97,19 @@
+  return glide<=127u && code==sj6_voice_tag(v,code&3u,glide);
+ }
+ #endif
++#if X0X_S1_DELAY_TRACK_TEST
++enum { S1_DICT_BYTE=39, S1_DICT_MAX=50, S1_DICT_INIT=25, S1_DICT_PARAM=137 };
++_Static_assert(S1_DICT_BYTE>=NPARAMS_MAX && S1_DICT_BYTE<2u*NPARAMS_MAX,"S1 Delay tracking belongs in second owner row");
++static inline unsigned s1_dict_encode(unsigned pos)
++{ return pos==S1_DICT_INIT ? 0u : pos+(pos<S1_DICT_INIT); }
++static inline unsigned s1_dict_decode(unsigned code)
++{ return code ? code-(code<=S1_DICT_INIT) : S1_DICT_INIT; }
++static inline unsigned s1_dict_read(const sound_t *s,unsigned owner)
++{ return s->v[T_303][8+2u*owner+S1_DICT_BYTE/NPARAMS_MAX][S1_DICT_BYTE%NPARAMS_MAX]; }
++static inline void s1_dict_store(sound_t *s,unsigned owner,unsigned code)
++{ s->v[T_303][8+2u*owner+S1_DICT_BYTE/NPARAMS_MAX][S1_DICT_BYTE%NPARAMS_MAX]=(uint8_t)code; }
++#endif
++static inline int s1_typed_init_cell(const uint8_t *b);
+ static inline int canonical137(const sound_t *s) {
+  for (unsigned v=0;v<2;++v) {
+   const uint8_t *b=read137(s,v);
+@@ -112,7 +125,11 @@
+ #endif
+   if (b[0]!=137 || b[1]!=v || b[2]>127 || b[3]>2) return 0;
+ #if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++#if X0X_SJ6_VELOCITY_PORT
++  if(b[2] && (s->v[T_303][v][29]!=ORIGINAL_SOUND_JUNO || original_sound_sj6_factory(s->v[T_303][v])))return 0;
++#else
+   if (b[2]) return 0; /* SuperJ6 Filter Velocity receiver not in this slice */
++#endif
+ #endif
+ #if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
+   if (b[S1_PB_DN_BYTE]>S1_PB_LAST || b[S1_PB_UP_BYTE]>S1_PB_LAST) return 0;
+@@ -132,7 +149,13 @@
+    if(i==SJ6_MOD_BYTE) {if(x>SJ6_MOD_LAST)return 0;continue;}
+ #endif
+ #if defined(X0X_S1_FEEDBACK_PROBE) && X0X_S1_FEEDBACK_PROBE
+-   if(i==S1_FB_BYTE) {if(x>S1_FB_LAST)return 0;continue;}
++   if(i==S1_FB_BYTE) {
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++    if(x && !s1_typed_init_cell(s->v[T_303][v]))return 0;
++#endif
++    if(x>S1_FB_LAST)return 0;
++    continue;
++   }
+ #endif
+    if(i==S1_A4_BYTE) {if(x>S1_A4_MAX)return 0;continue;}
+    if(i==S1_RVFB_BYTE) {if(x>S1_RVFB_LAST)return 0;continue;}
+@@ -162,11 +185,27 @@
+      continue;
+    }
+ #endif
+-#if defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE
+-   if(i==SJ6_ARP_RANDOM_BYTE){if(x!=0u && x!=2u)return 0;continue;}
++#if (defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE) || X0X_SJ6_NATIVE_RANDOM2
++   if(i==SJ6_ARP_RANDOM_BYTE){
++     if(x!=0u && x!=2u)return 0;
++#if X0X_SJ6_NATIVE_RANDOM2
++     if(x && (s->v[T_303][v][29]!=ORIGINAL_SOUND_JUNO ||
++              original_sound_sj6_factory(s->v[T_303][v])))return 0;
++#endif
++     continue;
++   }
+ #endif
+ #if X0X_SJ6_MONO32_PROBE
+    if(i==SJ6_VOICE_BYTE||i==SJ6_GLIDE_BYTE)continue;
++#endif
++#if X0X_S1_DELAY_TRACK_TEST
++   if(i==S1_DICT_BYTE){
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++    if(x && !s1_typed_init_cell(s->v[T_303][v]))return 0;
++#endif
++    if(x>S1_DICT_MAX)return 0;
++    continue;
++   }
+ #endif
+    if (x) return 0;
+   }
+--- a/firmware/src/app/typed_controls_trial.h
++++ b/firmware/src/app/typed_controls_trial.h
+@@ -16,10 +16,10 @@
+     !X0X_S1_BEND_RANGE_PROBE || !X0X_S1_MOD_RATE_PROBE
+ #error Native trial needs Synth One MOD and PB receivers and both engine profiles
+ #endif
+-#if X0X_SJ6_DELAY_WITNESS || X0X_SJ6_FILTER_VEL_PROBE || X0X_SJ6_ALT3_WITNESS || \
++#if X0X_SJ6_DELAY_WITNESS || (X0X_SJ6_FILTER_VEL_PROBE && !X0X_SJ6_VELOCITY_PORT) || X0X_SJ6_ALT3_WITNESS || \
+     X0X_SJ6_ZERO_GATE_PROBE || X0X_SJ6_GATE_DEADLINE_PROBE || X0X_SJ6_RANDOM2_PROBE || \
+     X0X_SJ6_BEND_TYPED_PROBE || defined(X0X_SJ6_MOD_TYPED_PROBE) || X0X_SJ6_CLASSIC_I_PROBE || \
+-    X0X_S1_FENCED_CLOCK || X0X_S1_CRUSH_LFO_PROBE || X0X_S1_FEEDBACK_PROBE
++    X0X_S1_FENCED_CLOCK || X0X_S1_CRUSH_LFO_PROBE
+ #error Bench-only or separate typed DSP is outside this read-only admission trial
+ #endif
+ #ifndef DNBOX_137_HOST_WITNESS
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -544,6 +544,13 @@
+ enum { R_S1PATCH = R_NOTELOCK + 1, R_S1LINK = R_NOTELOCK + 4 };
+ #ifdef DNBOX_137_HOST_WITNESS
+ enum { R_S1MODWHEEL = R_NOTELOCK + 5, R_S1A4 = R_NOTELOCK + 8, R_S1RVFB = R_NOTELOCK + 9, R_S1TRANS = R_NOTELOCK + 10, R_S1CRUSH = R_NOTELOCK + 11, R_S1PAN = R_NOTELOCK + 12, R_S1DLFB = R_NOTELOCK + 13 };
++#if X0X_S1_DELAY_TRACK_TEST
++enum { R_S1DICT=R_NOTELOCK+20 };
++extern int s1_typed_dict_position(unsigned);
++extern int s1_typed_dict_choose(unsigned,unsigned);
++extern void s1_typed_dict_undo(unsigned);
++extern int s1_typed_dict_undo_ready(unsigned);
++#endif
+ extern int s1_typed_trans_choose(unsigned,int);
+ extern void s1_typed_trans_undo(unsigned);
+ extern int s1_typed_crush_choose(unsigned,unsigned);
+@@ -798,7 +805,7 @@
+ #if defined(DNBOX_137_HOST_WITNESS) && defined(X0X_SJ6_MOD_TYPED_PROBE)
+     if(r.kind==R_SJ6MOD)return !live137(&proj.sound,r.b)||!s1_typed_tuple_editable();
+ #endif
+-#if defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE
++#if (defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE) || X0X_SJ6_NATIVE_RANDOM2
+     if (r.kind==R_ARP && r.a==ARP_F_MODE && live137(&proj.sound,r.b))
+         return !s1_typed_tuple_editable();
+ #endif
+@@ -821,6 +828,9 @@
+ #if defined(X0X_SJ6_ZERO_GATE_PROBE) && X0X_SJ6_ZERO_GATE_PROBE
+     if(r.kind==R_ARP && r.a==ARP_F_GATE && live137(&proj.sound,r.b))
+         return !s1_typed_tuple_editable();
++#endif
++#if X0X_S1_DELAY_TRACK_TEST
++    if (r.kind==R_S1DICT) return s1_typed_dict_position(r.b)<0 || !s1_typed_tuple_editable();
+ #endif
+     if (r.kind == R_S1MODWHEEL || r.kind == R_S1A4 || r.kind == R_S1RVFB || r.kind == R_S1TRANS || r.kind == R_S1CRUSH || r.kind == R_S1PAN || r.kind == R_S1DLFB) return !live_s1_mod(&proj.sound,r.b) || !s1_typed_tuple_editable();
+ #endif
+@@ -893,6 +903,9 @@
+         unsigned max;(void)s1_pan_pos(r.b,&max);rate.max=(uint8_t)max;
+         return &rate;
+     }
++#endif
++#if X0X_S1_DELAY_TRACK_TEST
++    case R_S1DICT: {static const x0x_param_t pot={"IN CUTOFF",S1_DICT_MAX,S1_DICT_INIT,0};return &pot;}
+ #endif
+ #if defined(X0X_S1_FEEDBACK_PROBE) && X0X_S1_FEEDBACK_PROBE
+     case R_S1DLFB: {static const x0x_param_t pot={"FEEDBACK",127,14,0};return &pot;}
+@@ -1065,6 +1078,9 @@
+         unsigned max;
+         return !live_s1_mod(&proj.sound,r.b)?0 : r.c?(int)s1_pan_pos(r.b,&max) : read137(&proj.sound,r.b)[S1_PAN_AMOUNT_BYTE];
+     }
++#endif
++#if X0X_S1_DELAY_TRACK_TEST
++    case R_S1DICT: {int pos=s1_typed_dict_position(r.b);return pos>=0?pos:S1_DICT_INIT;}
+ #endif
+ #if defined(X0X_S1_FEEDBACK_PROBE) && X0X_S1_FEEDBACK_PROBE
+     case R_S1DLFB: {
+@@ -1807,6 +1823,9 @@
+         else {put_d1(num,hz,0);put_s(unit,"Hz");}
+         return;
+     }
++#endif
++#if X0X_S1_DELAY_TRACK_TEST
++    if(r.kind==R_S1DICT) { put_i(num,50+v);put_s(unit,"%");return; }
+ #endif
+ #if defined(X0X_S1_FEEDBACK_PROBE) && X0X_S1_FEEDBACK_PROBE
+     if(r.kind==R_S1DLFB) {
+@@ -2390,7 +2409,7 @@
+ static const char *const ARP_MODE_N[] = {"UP", "DOWN", "UP+DN", "SEQ"
+ #if X0X_SUPERJ6_BUILTIN_INIT && !defined(X0X_ARP_FAKE_H)
+                                        , "UP+DN X2"
+-#if defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE
++#if X0X_SJ6_RANDOM2_PROBE || X0X_SJ6_NATIVE_RANDOM2
+                                        , "RANDOM2"
+ #endif
+ #endif
+@@ -2419,7 +2438,7 @@
+ #endif
+ #if X0X_SUPERJ6_BUILTIN_INIT && !defined(X0X_ARP_FAKE_H)
+     static const x0x_param_t saga_mode = {"MODE", ARP_UPDN_REPEAT, 0, ARP_MODE_N};
+-#if defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE
++#if (defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE) || X0X_SJ6_NATIVE_RANDOM2
+     if(field==ARP_F_MODE && live137(&proj.sound,owner)) {
+         static const x0x_param_t random_mode={"MODE",ARP_SAGA_RANDOM2,0,ARP_MODE_N};
+         return &random_mode;
+@@ -2783,7 +2802,7 @@
+                     {PT_FILTER, {ORIG_PAGE_ENGINE + 2, ORIG_PAGE_ENGINE + 3, ORIG_PAGE_ENGINE + 4, SJ6_FILTER_LINK}},
+                     {PT_FILTER_ADSR, {SJ6_FILTER_ATTACK, SJ6_FILTER_DECAY, SJ6_FILTER_SUSTAIN, SJ6_FILTER_RELEASE}},
+ #ifdef DNBOX_137_HOST_WITNESS
+-#if !DNBOX_TYPED_CONTROLS_NATIVE_TEST
++#if !DNBOX_TYPED_CONTROLS_NATIVE_TEST || X0X_SJ6_VELOCITY_PORT
+                     {PT_FILTER_MOD, {SJ6_FILTER_VELOCITY, ORIG_PAGE_NONE, ORIG_PAGE_NONE, ORIG_PAGE_NONE}},
+ #endif
+ #endif
+@@ -2891,8 +2910,19 @@
+ #if defined(X0X_S1_AUTOPAN_PROBE) && X0X_S1_AUTOPAN_PROBE
+                 if (live_s1_mod(&proj.sound,b)) add_page(emit,PT_AUTO_PAN,PR(R_S1PAN,T_303,b,0),PR(R_S1PAN,T_303,b,1),NONE,NONE);
+ #endif
++#if X0X_S1_DELAY_TRACK_TEST
++                /* Bind the owner from the described context, not the selected page. */
++                if (live_s1_mod(&proj.sound,b)) add_page(emit,PT_DELAY,
++#if defined(X0X_S1_FEEDBACK_PROBE) && X0X_S1_FEEDBACK_PROBE
++                    PR(R_S1DLFB,T_303,b,0),
++#else
++                    NONE,
++#endif
++                    PR(R_S1DICT,T_303,b,0),NONE,NONE);
++#else
+ #if defined(X0X_S1_FEEDBACK_PROBE) && X0X_S1_FEEDBACK_PROBE
+                 if (live_s1_mod(&proj.sound,b)) add_page(emit,PT_DELAY,PR(R_S1DLFB,T_303,b,0),NONE,NONE,NONE);
++#endif
+ #endif
+                 if (live_s1_mod(&proj.sound,b)) add_page(emit,PT_TUNING,PR(R_S1A4,T_303,b,0),PR(R_S1TRANS,T_303,b,0),NONE,NONE);
+ #endif
+@@ -3607,11 +3637,16 @@
+ #else
+     const unsigned undo_clock=0;
+ #endif
+-#if defined(X0X_SJ6_ZERO_GATE_PROBE) && X0X_SJ6_ZERO_GATE_PROBE
++#if X0X_SJ6_ZERO_GATE_PROBE || X0X_SJ6_NATIVE_RANDOM2
+     extern void engine_sj6_zero_undo(unsigned);
+     unsigned undo_zero=0;
+ #else
+     const unsigned undo_zero=0;
++#endif
++#if X0X_S1_DELAY_TRACK_TEST
++    unsigned undo_dict=0;
++#else
++    const unsigned undo_dict=0;
+ #endif
+     unsigned undo_velocity137=0,undo_s1_mod=0,undo_a4=0,undo_rvfb=0,undo_trans=0,undo_crush=0,undo_delay=0,undo_pan=0,undo_feedback=0,undo_chorus_i=0,undo_sj6_voice=0;
+ #if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
+@@ -3662,6 +3697,12 @@
+             if (proj.set.snd_rev==REV137) {
+                 uint8_t p;
+                 uint32_t off=cell+(8u+v)*NPARAMS_MAX+2u;
++#if X0X_S1_DELAY_TRACK_TEST
++                const uint32_t dict_off=off-2u+S1_DICT_BYTE;
++                undo_peek(&undo,entry,dict_off,&p,1u);
++                if(p>S1_DICT_MAX){say("UNDO IN CUTOFF INVALID",0);engine_bass_edit_hold(0);return;}
++                if(p!=s1_dict_read(&proj.sound,v))undo_dict|=1u<<v;
++#endif
+ #if X0X_SJ6_CLASSIC_I_PROBE
+                 uint8_t ci[SJ6_CLASSIC_I_COUNT];
+                 undo_peek(&undo,entry,off+SJ6_CLASSIC_I_BYTE-2u,ci,sizeof ci);
+@@ -3705,7 +3746,7 @@
+                 if(pan[0]>127u || !s1_pan_rate_valid(s1_pan_rate_word_bytes(pan+1u))){say("UNDO PAN INVALID",0);engine_bass_edit_hold(0);return;}
+                 if(memcmp(pan,read137(&proj.sound,v)+S1_PAN_AMOUNT_BYTE,sizeof pan))undo_pan|=1u<<v;
+ #endif
+-#if defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE
++#if X0X_SJ6_RANDOM2_PROBE || X0X_SJ6_NATIVE_RANDOM2
+                 undo_peek(&undo,entry,off+SJ6_ARP_RANDOM_BYTE-2u,&p,1u);
+                 if(p!=read137(&proj.sound,v)[SJ6_ARP_RANDOM_BYTE]){
+                     if(p!=0u && p!=2u){say("UNDO MODE INVALID",0);engine_bass_edit_hold(0);return;}
+@@ -3781,7 +3822,7 @@
+         }
+ #ifdef DNBOX_137_HOST_WITNESS
+         extern int engine_bass_wheel_active(void);
+-        if((undo_s1_mod || undo_a4 || undo_rvfb || undo_trans || undo_crush || undo_delay || undo_pan || undo_feedback || undo_chorus_i || undo_sj6_voice || undo_clock || undo_zero) && !s1_typed_tuple_editable()) {
++        if((undo_s1_mod || undo_a4 || undo_rvfb || undo_trans || undo_crush || undo_delay || undo_pan || undo_feedback || undo_dict || undo_chorus_i || undo_sj6_voice || undo_clock || undo_zero) && !s1_typed_tuple_editable()) {
+             say("PROJECT READ ONLY",0);
+             engine_bass_edit_hold(0);
+             return;
+@@ -3810,7 +3851,7 @@
+     }
+ #endif
+ #ifdef DNBOX_137_HOST_WITNESS
+-    if ((undo_velocity137 || undo_s1_mod || undo_pb || undo_sj6_pb || undo_sj6_mod || undo_a4 || undo_rvfb || undo_trans || undo_crush || undo_delay || undo_pan || undo_feedback || undo_chorus_i || undo_sj6_voice || undo_clock || undo_zero) && !undo_bass_mask) engine_project_hold(1);
++    if ((undo_velocity137 || undo_s1_mod || undo_pb || undo_sj6_pb || undo_sj6_mod || undo_a4 || undo_rvfb || undo_trans || undo_crush || undo_delay || undo_pan || undo_feedback || undo_dict || undo_chorus_i || undo_sj6_voice || undo_clock || undo_zero) && !undo_bass_mask) engine_project_hold(1);
+ #if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
+     /* Recheck while audio is held: a note-lock must not acquire the owner
+      * between validating history and publishing the typed scalar pair. */
+@@ -3827,12 +3868,17 @@
+         engine_project_hold(0);engine_bass_edit_hold(0);say("UNDO WAIT VOICE",0);return;
+     }
+ #endif
++#if defined(DNBOX_137_HOST_WITNESS) && X0X_S1_DELAY_TRACK_TEST
++    if(undo_dict && !s1_typed_dict_undo_ready(undo_dict & ~undo_bass_mask)) {
++        engine_project_hold(0);engine_bass_edit_hold(0);say("UNDO WAIT IN CUTOFF",0);return;
++    }
++#endif
+     undo_lanes = 0;
+     if (!(redo ? undo_redo : undo_undo)(&undo, undo_changed, &lo, &hi)) {
+ #if X0X_BASS_TAGGED_SOUND
+         if(undo_bass_mask)engine_project_hold(0);
+ #ifdef DNBOX_137_HOST_WITNESS
+-        else if(undo_velocity137 || undo_s1_mod || undo_pb || undo_sj6_pb || undo_sj6_mod || undo_a4 || undo_rvfb || undo_trans || undo_crush || undo_delay || undo_pan || undo_feedback || undo_chorus_i || undo_sj6_voice || undo_clock || undo_zero)engine_project_hold(0);
++        else if(undo_velocity137 || undo_s1_mod || undo_pb || undo_sj6_pb || undo_sj6_mod || undo_a4 || undo_rvfb || undo_trans || undo_crush || undo_delay || undo_pan || undo_feedback || undo_dict || undo_chorus_i || undo_sj6_voice || undo_clock || undo_zero)engine_project_hold(0);
+ #endif
+ #endif
+ #if X0X_BASS_PRESET_PREVIEW
+@@ -3863,6 +3909,9 @@
+ #if defined(X0X_S1_FEEDBACK_PROBE) && X0X_S1_FEEDBACK_PROBE
+     if(undo_feedback)s1_typed_feedback_undo(undo_feedback & ~undo_bass_mask);
+ #endif
++#if X0X_S1_DELAY_TRACK_TEST
++    if(undo_dict)s1_typed_dict_undo(undo_dict&~undo_bass_mask);
++#endif
+     if(undo_crush) s1_typed_crush_undo(undo_crush & ~undo_bass_mask);
+ #if defined(X0X_S1_AUTOPAN_PROBE) && X0X_S1_AUTOPAN_PROBE
+     if(undo_pan) s1_typed_pan_undo(undo_pan & ~undo_bass_mask);
+@@ -3870,7 +3919,7 @@
+ #if X0X_S1_FENCED_CLOCK
+     if(undo_clock) s1_typed_clock_undo(undo_clock & ~undo_bass_mask);
+ #endif
+-#if defined(X0X_SJ6_ZERO_GATE_PROBE) && X0X_SJ6_ZERO_GATE_PROBE
++#if X0X_SJ6_ZERO_GATE_PROBE || X0X_SJ6_NATIVE_RANDOM2
+     if(undo_zero) engine_sj6_zero_undo(undo_zero & ~undo_bass_mask);
+ #endif
+ #if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
+@@ -3879,7 +3928,7 @@
+     if(undo_sj6_pb) sj6_typed_pb_undo(undo_sj6_pb & ~undo_bass_mask);
+ #endif
+ #endif
+-    if(undo_bass_mask || undo_velocity137 || undo_s1_mod || undo_pb || undo_sj6_pb || undo_sj6_mod || undo_a4 || undo_rvfb || undo_trans || undo_crush || undo_delay || undo_pan || undo_feedback || undo_chorus_i || undo_sj6_voice || undo_clock || undo_zero) engine_project_hold(0);
++    if(undo_bass_mask || undo_velocity137 || undo_s1_mod || undo_pb || undo_sj6_pb || undo_sj6_mod || undo_a4 || undo_rvfb || undo_trans || undo_crush || undo_delay || undo_pan || undo_feedback || undo_dict || undo_chorus_i || undo_sj6_voice || undo_clock || undo_zero) engine_project_hold(0);
+ #else
+     if(undo_bass_mask) engine_project_hold(0);
+ #endif
+@@ -4898,6 +4947,15 @@
+         if(r.c)pos=s1_pan_pos(r.b,&max);
+         int next=(int)pos+(e>0)-(e<0);
+         if(next>=0 && (unsigned)next<=max && s1_typed_pan_choose(r.b,r.c,(unsigned)next))mark_dirty();
++        return;
++    }
++#endif
++#if X0X_S1_DELAY_TRACK_TEST
++    if(r.kind==R_S1DICT) {
++        if(e && !pref_read_only(r)) {
++            int next=pref_get(r)+(e>0?1:-1);
++            if(next>=0 && next<=S1_DICT_MAX && s1_typed_dict_choose(r.b,(unsigned)next))mark_dirty();
++        }
+         return;
+     }
+ #endif
+--- a/firmware/src/dsp/dnbx_core.c
++++ b/firmware/src/dsp/dnbx_core.c
+@@ -525,6 +525,9 @@
+     out->note=v->note; out->gate=v->gate; out->age_rank=v->age_rank;
+     out->active=(uint8_t)(voice_active(v)!=0); return DNBX_OK;
+ }
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST && X0X_SJ6_VELOCITY_PORT
++#include "sj6_velocity_fma.h"
++#endif
+ static int render_with_osc_gains(dnbx_part *s,float *left,float *right,unsigned n,dnbx_work *w,float gain1,float gain2,float fvel)
+ {
+     if (!valid(s)) return DNBX_E_UNINITIALIZED;
+@@ -537,7 +540,7 @@
+     COUNT(w,frames,n);
+     const float osc_gain[]={gain1,gain2};
+     float filter_note[DNBX_VOICES];
+-#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST && !X0X_SJ6_VELOCITY_PORT
+     /* The admission profile rejects nonzero b2 and the host-only velocity
+        flag. Do not approximate a different sounding filter in the trial. */
+     if(fvel != 0.f) return DNBX_E_UNSUPPORTED;
+@@ -545,7 +548,11 @@
+     if (fvel != 0.f) {
+         float inverse = 1.f - fvel;
+         for (unsigned i = 0; i < DNBX_VOICES; ++i)
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST && X0X_SJ6_VELOCITY_PORT
++            filter_note[i] = sj6_velocity_fma(fvel,s->voice[i].velocity,inverse);
++#else
+             filter_note[i] = fmaf(fvel,s->voice[i].velocity,inverse);
++#endif
+     }
+ #endif
+     dnbx_envelope_params linked[DNBX_LAYERS];
+@@ -638,6 +645,9 @@
+     if (!(ratio >= .5f && ratio <= 2.f)) return DNBX_E_RANGE;
+     if (!(gain1 >= 0.f && (gain1 <= .808f || gain1 == 1.f)) ||
+         !(gain2 >= 0.f && (gain2 <= .808f || gain2 == 1.f))) return DNBX_E_RANGE;
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST && X0X_SJ6_VELOCITY_PORT
++    if (fvel!=0.f && !(fvel>=.008f && fvel<=1.1f)) return DNBX_E_RANGE;
++#endif
+     if (ratio == 1.f) return render_with_osc_gains(s,left,right,n,0,gain1,gain2,fvel);
+     float nominal[DNBX_VOICES][DNBX_LAYERS];
+     for (unsigned i = 0; i < DNBX_VOICES; ++i)
+--- a/firmware/src/dsp/s1c/s1c.h
++++ b/firmware/src/dsp/s1c/s1c.h
+@@ -162,8 +162,8 @@
+ #endif
+     float send_dly, send_rev, lfo_c2, hpk[3], dl_fc, hg[2];
+ #if defined(X0X_S1_FEEDBACK_PROBE) && X0X_S1_FEEDBACK_PROBE
+-#ifndef X0X_HOST
+-#error Synth One feedback witness is host only
++#if !defined(X0X_HOST) && !DNBOX_TYPED_CONTROLS_NATIVE_TEST
++#error Synth One direct Delay Feedback requires an explicit native trial
+ #endif
+     uint8_t delay_feedback_direct;
+ #endif
+--- /dev/null
++++ b/firmware/src/dsp/sj6_velocity_fma.h
+@@ -0,0 +1,36 @@
++/* SPDX-License-Identifier: GPL-3.0-only */
++#pragma once
++#include <stdint.h>
++/* Target-specific exact original fmaf for the verified SMK domains:
++ * factor = one of 128 original rounded (Double(u) * 1.1) detents,
++ * velocity = Float32(note_velocity / 127), offset = Float32(1-factor).
++ * Every nonzero operand has a binary32 exponent >= -10, and each nonzero
++ * product operand exponent >= -7. The FP product plus offset therefore
++ * fits an exact signed Q62 before one nearest-even Float32 rounding.
++ */
++static inline float sj6_velocity_fma(float factor,float velocity,float offset)
++{
++    union { float f; uint32_t u; } a={.f=factor}, v={.f=velocity}, b={.f=offset}, out;
++    uint32_t av=a.u&0x7fffffff, vv=v.u&0x7fffffff,bv=b.u&0x7fffffff;
++    if(!av || !vv) return offset;
++    const unsigned ae=av>>23,ve=vv>>23,be=bv>>23;
++    if(ae<120u||ae>127u||ve<120u||ve>127u||(bv&&be<117u))return offset;
++    uint64_t qprod=(uint64_t)((av&0x7fffffu)|0x800000u)*((vv&0x7fffffu)|0x800000u);
++    qprod<<=ae+ve-238u;
++    uint64_t qoffset=bv?(uint64_t)((bv&0x7fffffu)|0x800000u)<<(be-88u):0;
++    int64_t q=(int64_t)qprod+((b.u>>31)?-(int64_t)qoffset:(int64_t)qoffset);
++    if(!q)return 0.f;
++    const uint64_t p=q<0?(uint64_t)-q:(uint64_t)q;
++    uint32_t hi=(uint32_t)(p>>32);
++    unsigned h=hi?63u-(unsigned)__builtin_clz(hi):31u-(unsigned)__builtin_clz((uint32_t)p);
++    uint64_t f;
++    if(h<=23) f=p<<(23u-h);
++    else{
++        unsigned r=h-23u;
++        f=p>>r;
++        uint64_t rem=p-(f<<r),half=UINT64_C(1)<<(r-1u);
++        f+=rem>half||(rem==half&&(f&1u));
++    }
++    out.u=(q<0?0x80000000u:0u)+((h+64u)<<23)+(uint32_t)f;
++    return out.f;
++}
+--- a/firmware/src/dsp/synthone/sequencer/S1Sequencer.c
++++ b/firmware/src/dsp/synthone/sequencer/S1Sequencer.c
+@@ -36,7 +36,7 @@
+ #elif X0X_SJ6_NATIVE_POSITIVE_GATE
+     s->liveGateTicks=0;
+ #endif
+-#if defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE
++#if (defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE) || X0X_SJ6_NATIVE_RANDOM2
+     s->saga_random_state=0;
+ #endif
+     s->sequencerLastNotesCount = 0;
+@@ -83,7 +83,7 @@
+ static unsigned saga_clip(int note)
+ { return note < 0 ? 0u : note >= S1_NUM_MIDI_NOTES ? S1_NUM_MIDI_NOTES - 1u : (unsigned)note; }
+ 
+-#if defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE
++#if (defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE) || X0X_SJ6_NATIVE_RANDOM2
+ /* Fresh uniform Fisher–Yates followed by reading ONE element has this
+  * marginal distribution. Do not retain a shuffled bag across steps. */
+ static unsigned saga_random_index(uint32_t *state,uint32_t seed,unsigned count)
+@@ -99,7 +99,7 @@
+  * Sort only on an event, with bounded scratch and no second clock/state machine. */
+ static NoteNumber saga_note(const NoteNumber *held, int count, int octaves,
+                            int interval, int mode, int index
+-#if defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE
++#if (defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE) || X0X_SJ6_NATIVE_RANDOM2
+                            , S1Sequencer *sequencer,uint32_t seed
+ #endif
+ )
+@@ -115,7 +115,7 @@
+         }
+         notes[slot] = (NoteNumber){(uint8_t)pitch, held[h].velocity};
+     }
+-#if defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE
++#if (defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE) || X0X_SJ6_NATIVE_RANDOM2
+     if (mode==ArpeggiatorMode_SagaRandom)
+         index=(int)saga_random_index(&sequencer->saga_random_state,seed,(unsigned)size);
+     else
+@@ -297,7 +297,7 @@
+ #if X0X_SUPERJ6_BUILTIN_INIT
+                         if (p->saga_notes) snn = saga_note(held, heldNoteNumbersAECount, p->arpOctave + 1,
+                                                          p->arpInterval, p->arpDirection, seqNotePosition
+-#if defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE
++#if (defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE) || X0X_SJ6_NATIVE_RANDOM2
+                                                          , s,p->saga_random_seed
+ #endif
+                                                          );
+--- a/firmware/src/dsp/synthone/sequencer/S1Sequencer.h
++++ b/firmware/src/dsp/synthone/sequencer/S1Sequencer.h
+@@ -27,6 +27,9 @@
+ #error "Build9 RANDOM2 proof is a composed host witness only"
+ #endif
+ #endif
++#if X0X_SJ6_NATIVE_RANDOM2 && (!DNBOX_TYPED_CONTROLS_NATIVE_TEST || !X0X_SJ6_NATIVE_POSITIVE_GATE || X0X_SJ6_RANDOM2_PROBE || !X0X_SUPERJ6_BUILTIN_INIT)
++#error Native RANDOM2 needs the read-only both-engine positive-Gate trial
++#endif
+ #define S1_NUM_MIDI_NOTES 128
+ #define S1_SEQ_MAX_HELD 8          /* DnBOX: held keys tracked (source: 128) */
+ #define S1_SEQ_STEPS 16
+@@ -37,7 +40,7 @@
+ 
+ /* S1ArpModes.hpp */
+ enum ArpeggiatorMode { ArpeggiatorMode_Up = 0, ArpeggiatorMode_UpDown = 1, ArpeggiatorMode_Down = 2, ArpeggiatorMode_UpDownRepeat = 3
+-#if defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE
++#if (defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE) || X0X_SJ6_NATIVE_RANDOM2
+     , ArpeggiatorMode_SagaRandom=4
+ #endif
+ };
+@@ -64,7 +67,7 @@
+     uint32_t gateTicks;                 /* seqGate % of arpSeqTempoMultiplier (UINT32_MAX = 100 %) */
+     uint8_t clocked;                    /* DnBOX: transport clock owns mStepCounter / mBeatTime */
+ #if X0X_SUPERJ6_BUILTIN_INIT
+-#if defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE
++#if (defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE) || X0X_SJ6_NATIVE_RANDOM2
+     uint32_t saga_random_seed;
+ #endif
+     uint8_t saga_notes, saga_timing;    /* SuperJ6 pitch law and optional original grid */
+@@ -90,7 +93,7 @@
+     uint8_t sequencerLastNotesCount;
+     uint8_t sequencerLastNotes[S1_SEQ_MAX_HELD];
+ #if X0X_SUPERJ6_BUILTIN_INIT
+-#if defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE
++#if (defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE) || X0X_SJ6_NATIVE_RANDOM2
+     uint32_t saga_random_state;
+ #endif
+     uint8_t saga_index;

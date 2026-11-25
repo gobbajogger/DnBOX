@@ -1,0 +1,49 @@
+--- a/firmware/src/app/main_fm1.c
++++ b/firmware/src/app/main_fm1.c
+@@ -2171,6 +2171,9 @@
+ #include "app/cold_companion_lab.h"
+ #include "app/fdata_readonly_lab.h"
+ extern const uint8_t cold_lab_start[], cold_lab_end[], cold_lab_expected[];
++#if X0X_COLD_SLOT3_LAB
++extern const uint8_t cold_slot3_start[], cold_slot3_end[], cold_slot3_expected[];
++#endif
+ static uint8_t cold_lab_bad;
+ #endif
+ static void draw_safe_mode(void)
+@@ -2272,6 +2275,11 @@
+             xdata_check(); /* independent recovery font, with its internal fallback */
+             cold_lab_bad = fdata_lab_status(cold_lab_start,
+                 (uintptr_t)cold_lab_end - (uintptr_t)cold_lab_start, cold_lab_expected);
++#if X0X_COLD_SLOT3_LAB
++            if (!cold_lab_bad && !cold_lab_valid(cold_slot3_start,
++                (uintptr_t)cold_slot3_end - (uintptr_t)cold_slot3_start, cold_slot3_expected))
++                cold_lab_bad = FDATA_MISMATCH;
++#endif
+             if (!cold_lab_bad) {
+ #endif
+ #if BOARD_SMK37
+--- a/firmware/src/app/editor.c
++++ b/firmware/src/app/editor.c
+@@ -460,6 +460,9 @@
+ /* Recover last-good after a failed END, a new BEGIN, or boot (power loss). */
+ static void ed_smp_try_restore(uint32_t k)
+ {
++#if X0X_COLD_SLOT3_LAB
++    if(k==2u)return; /* never restore a legacy sample shadow into diagnostic table storage */
++#endif
+     if (usr_nz[k]) {
+         ed_smp_clear_backup(k);
+         return;
+@@ -864,6 +867,12 @@
+      * also covers empty-slot writes and malformed mutation attempts. Startup
+      * recovery runs before any watch can exist. No other runtime path writes
+      * user-slot bytes. A read or INFO must never reset this state. */
++#if X0X_COLD_SLOT3_LAB
++    /* The diagnostic span is never presented as a writable sample slot. */
++    if (cmd>=ED_SMP_BEGIN && cmd<=ED_SMP_ERASE && na>=1u && a[0]==2u) {
++        ed_b(a[0]); ed_b(4u); ed_send(); return;
++    }
++#endif
+     if (cmd >= ED_SMP_BEGIN && cmd <= ED_SMP_ERASE)
+         ed_install_dirty();
+     switch (cmd) {

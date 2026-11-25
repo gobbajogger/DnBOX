@@ -1,0 +1,58 @@
+{
+  "model": "elite",
+  "owner": 1,
+  "compiled_ram_offsets": {
+    "partBytes": 5348,
+    "gateCfg": 3726,
+    "gateTicks": 3800,
+    "latchTicks": 3828,
+    "beatTick": 3812,
+    "gateOpen": 3832,
+    "noteCount": 3833,
+    "arpKind": 5344,
+    "arpDiv": 3749,
+    "drumCh": 34,
+    "sound": 40,
+    "mono": 3060,
+    "legato": 3061,
+    "glide": 3062,
+    "glideOffset": 2808,
+    "sndRev": 19
+  },
+  "keys": "2350:e2:+4,2600:e2:+4,2900:e2:-2,3100:SEQ,3150:SEQ^,3310:e1:+4,3520:e1:+4,3730:e1:+4,3820:SEQ REC,3880:SEQ REC^,3990:k14@127,4130:e6:-2,4310:e6:-2",
+  "ui_first4": [
+    8,
+    3,
+    1,
+    0
+  ],
+  "state": [
+    {
+      "gateCfg": 50,
+      "gateTicks": 32514048,
+      "latchTicks": 0,
+      "beatTick": 42991616,
+      "gateOpen": 0,
+      "noteCount": 0,
+      "arpKind": 3,
+      "arpDiv": 15
+    },
+    {
+      "gateCfg": 47,
+      "gateTicks": 30563205,
+      "latchTicks": 32514048,
+      "beatTick": 6422272,
+      "gateOpen": 1,
+      "noteCount": 1,
+      "arpKind": 3,
+      "arpDiv": 15
+    }
+  ],
+  "halves": 327,
+  "max_us": 8203,
+  "raw_late": 0,
+  "audio_has_nonzero_pcm": true,
+  "elf_sha256": "dcb7af73392e0aef10856abbdf8ec792b93c2c3886291a2aea7c2adadc28c1bb",
+  "flash_unchanged": true,
+  "lcd_sha256": "bbff04114f5d5dabfd06459cc8c8f7532a9957aca4e67ce01d436ac84b1bd9e0"
+}

@@ -1,0 +1,11 @@
+--- a/firmware/src/dsp/juno6_factory.inc
++++ b/firmware/src/dsp/juno6_factory.inc
+@@ -23,6 +23,6 @@
+ }
+ #if defined(X0X_SJ6_MONO32_PROBE) && X0X_SJ6_MONO32_PROBE
+-#ifndef X0X_HOST
+-#error scoped SuperJ6 Mono32 is host-only
++#if !defined(X0X_HOST) && !DNBOX_TYPED_CONTROLS_NATIVE_TEST
++#error scoped SuperJ6 VOICE requires explicit read-only native trial
+ #endif
+ int juno6_mono32_set(juno6_t *s,unsigned on)
