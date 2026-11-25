@@ -1,0 +1,32 @@
+--- a/firmware/src/app/main_fm1.c
++++ b/firmware/src/app/main_fm1.c
+@@ -2157,6 +2157,7 @@
+  * reach it. PLAY tries X0X again. The chip's own update mode stays the last resort (fm1_cstart). */
+ #if defined(X0X_COLD_COMPANION_LAB)
+ #include "app/cold_companion_lab.h"
++#include "app/fdata_readonly_lab.h"
+ extern const uint8_t cold_lab_start[], cold_lab_end[], cold_lab_expected[];
+ static uint8_t cold_lab_bad;
+ #endif
+@@ -2167,7 +2168,11 @@
+     draw_text_box(0, 18, 240, &FONT_B, "DnBOX SAFE MODE", C_HI, 1);
+ #if defined(X0X_COLD_COMPANION_LAB)
+     if (cold_lab_bad)
+-        draw_text_box(0, 52, 240, &FONT_S, "COMPANION DATA INVALID", C_WHITE, 1);
++        draw_text_box(0, 52, 240, &FONT_S,
++                      cold_lab_bad == FDATA_LEGACY ? "LEGACY S1PK PRESERVED" :
++                      cold_lab_bad == FDATA_MISSING ? "909 COMPANION MISSING" :
++                      cold_lab_bad == FDATA_CORRUPT ? "909 COMPANION CORRUPT" :
++                      "909 COMPANION MISMATCH", C_WHITE, 1);
+     else
+ #endif
+     draw_text_box(0, 52, 240, &FONT_S, "STARTUP CRASHES: 2", C_WHITE, 1);
+@@ -2253,7 +2258,7 @@
+             fl_plain_window_init();                 /* user sample slots read as plaintext through XIP */
+ #if defined(X0X_COLD_COMPANION_LAB)
+             xdata_check(); /* independent recovery font, with its internal fallback */
+-            cold_lab_bad = !cold_lab_valid(cold_lab_start,
++            cold_lab_bad = fdata_lab_status(cold_lab_start,
+                 (uintptr_t)cold_lab_end - (uintptr_t)cold_lab_start, cold_lab_expected);
+             if (!cold_lab_bad) {
+ #endif

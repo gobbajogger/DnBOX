@@ -1,0 +1,9 @@
+test_blank_count_is_only_snapshot_evidence (__main__.ReadOnlyRegions.test_blank_count_is_only_snapshot_evidence) ... ok
+test_erased_magic_does_not_prove_empty (__main__.ReadOnlyRegions.test_erased_magic_does_not_prove_empty) ... ok
+test_occupied_known_data_not_available (__main__.ReadOnlyRegions.test_occupied_known_data_not_available) ... ok
+test_short_or_long_snapshot_rejected (__main__.ReadOnlyRegions.test_short_or_long_snapshot_rejected) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.012s
+
+OK

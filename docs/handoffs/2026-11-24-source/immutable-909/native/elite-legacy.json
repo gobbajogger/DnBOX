@@ -1,0 +1,23 @@
+{
+  "model": "elite",
+  "expected_audio_and_execution_match": true,
+  "audio_has_nonzero_pcm": false,
+  "variant": "legacy",
+  "cold_lab_bad": 2,
+  "halves": 0,
+  "worst_us": 0,
+  "late": 0,
+  "xruns": 0,
+  "scope_w": 0,
+  "lcd_sha256": "2c02d8e6063fea9a2c3fc901d36061eda41e4117981298f392e0f619c54a437b",
+  "pcm_bytes": 0,
+  "sample_slot_scanned_zones": 0,
+  "pcm_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "seed_sha256": "5f7ee10d69ab3d7bf3d11125b6e23d1dd59b1c7dcea766d841088c8a7b3e7df1",
+  "app_sha256": "17d385657c09bbcb663b1bd5b41a744a1264888349cb39d0e50064eb40762326",
+  "primary_sha256": "0045bcb4b322c5f9d7b9b3bc3cd4c9b24cf732061f6edda472cbcadba422ae61",
+  "secondary_sha256": "82822e010bb73ca20b549ee93c1e47974394f809f086ee288b264f2b50b668bc",
+  "sample_sector_sha256": "7729f5aff79922a96d28f1c51cecc10ebf98750bd863cdcce9a3b20e1207e530",
+  "full_flash_unchanged": true,
+  "elf_sha256": "a37622c398693ec4104ac939e73636504947c2948420e318b78617e094e466eb"
+}

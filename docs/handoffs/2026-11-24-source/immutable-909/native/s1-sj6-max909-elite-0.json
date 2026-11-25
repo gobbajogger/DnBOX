@@ -1,0 +1,21 @@
+{
+  "duration_ms": 8000,
+  "shift_ms": 0,
+  "events": 922,
+  "strict": 1,
+  "mhz": 360,
+  "halves": 396,
+  "max_us": 27966,
+  "raw_late": 92,
+  "audio_xruns": 92,
+  "pcm_sha256": "2078a226dd5eb87a6c30de894ac6fe88d2cef60d92cf6bb549cdfc4120387d95",
+  "pcm_bytes": 1277952,
+  "scene_sha256": "d08718b1521119b252b5cca0c5e1db6981ea25a5a0b31b6ead60dceccb3f6271",
+  "initial_flash_sha256": "35becc276c60708402acf5c8bac4fe04d5d4bad25803934d6db483d8ad15e098",
+  "final_flash_sha256": "35becc276c60708402acf5c8bac4fe04d5d4bad25803934d6db483d8ad15e098",
+  "model": "elite",
+  "workload": "s1-sj6-max909",
+  "elf_sha256": "a37622c398693ec4104ac939e73636504947c2948420e318b78617e094e466eb",
+  "startup_included": true,
+  "pass_strict": false
+}
