@@ -1,0 +1,121 @@
+--- a/firmware/src/dsp/s1c/s1c.c
++++ b/firmware/src/dsp/s1c/s1c.c
+@@ -698,18 +698,64 @@
+ 
+ #if S1C_EXT && S1C_DL_H16
+ /* Device memory model (smallest): exact-size half-float lines carved from a caller-owned pool. */
+-static float xl_read(const s1c_dline *d, float del)
++#if X0X_S1_DELAY_HISTORY_NATIVE
++/* E5M2 right-sized float delay history, unlimited random-access and no
++ * retrigger when crossing time ratios. ±1e-5..±3584 at binary32 source. */
++/* E4M1 in aligned 4-sample cells. Every tap can read arbitrary history
++ * in at most two byte loads, preserving the existing warm regrid order. */
++static unsigned f8_put(float v)
++{
++   s1c_fb x={.f=v};
++   unsigned m=(x.u&0x7fffffffu)+(1u<<21),e=m>>23;
++   if(e<115)return 0;
++   unsigned q=e>129?31u:((e-114u)<<1)|(m>>22&1u);
++   return ((x.u>>26)&32u)|q;
++}
++static float f8_get(unsigned v)
++{
++   s1c_fb b={.u=v ? ((v&32u)<<26)|(((v&31u)>>1)+114u)<<23|((v&1u)<<22):0};
++   return b.f;
++}
++static unsigned get6(const uint8_t *b,unsigned p)
++{
++   const unsigned x=p*6u, byte=x>>3, sh=x&7u;
++   unsigned w=b[byte];
++   if(sh>2u)w|=(unsigned)b[byte+1u]<<8;
++   return (w>>sh)&63u;
++}
++static void put6(uint8_t *b,unsigned p,unsigned v)
++{
++   const unsigned x=p*6u, byte=x>>3, sh=x&7u;
++   b[byte]=(uint8_t)((b[byte]&~(63u<<sh))|(v<<sh));
++   if(sh>2u)b[byte+1u]=(uint8_t)((b[byte+1u]&~(63u>>(8u-sh)))|(v>>(8u-sh)));
++}
++#endif
++static float xl_read( s1c_dline *d, float del)
+ {
+     float pos = (float)d->w - del;
+     while (pos < 0.0f) pos += (float)d->len;
+     int i = (int)pos; float f = pos - (float)i;
+     int j = i + 1 == d->len ? 0 : i + 1;
++#if X0X_S1_DELAY_HISTORY_NATIVE
++    const uint8_t *b=(const uint8_t *)(const void *)d->m;
++    if(!d->bn || del<1.f)return f8_get(get6(b,i))*(1.f-f)+f8_get(get6(b,j))*f;
++    float x=f8_get(get6(b,j)),hist;
++    memcpy(&hist,d->stg,sizeof hist);
++    const float z=f<1.e-5f?f8_get(get6(b,i)):hist+(f/(2.f-f))*(x-d->prev);
++    memcpy(d->stg,&x,sizeof x);
++    return z;
++#else
+     const uint16_t *b = (const uint16_t *)d->buf;
+     return h16_get(b[i]) * (1.0f - f) + h16_get(b[j]) * f;
++#endif
+ }
+ static float xl_tick(s1c_dline *d, float in, float del, float fb)
+ {
++#if X0X_S1_DELAY_HISTORY_NATIVE
++    put6((uint8_t *)(void *)d->m,d->w,f8_put(in+d->prev*fb));
++#else
+     ((uint16_t *)d->buf)[d->w] = h16_put(in + d->prev * fb);
++#endif
+     float o = xl_read(d, del);
+     if (++d->w == d->len) d->w = 0;
+     d->prev = o;
+@@ -975,23 +1021,23 @@
+ }
+ static void dly_partition(s1c *s)
+ {
+-    const int short_line=(s->pool_bytes/2)/5;
+-    uint16_t *pool=(uint16_t *)(void *)s->pool;
++    const int short_line=4*(s->pool_bytes/15);
++    uint8_t *pool=s->pool;
+     const unsigned active[3]={0,1,3};
+     memset(s->pool,0,(size_t)s->pool_bytes);
+     memset(s->dl,0,sizeof s->dl);
+     for(unsigned k=0;k<3;k++){
+         s1c_dline *d=&s->dl[active[k]];
+-        d->buf=(int16_t *)(void *)pool;d->len=(k<2?2:1)*short_line;
+-        pool+=d->len;
++        d->m=(int8_t *)(void *)pool;d->len=(k<2?2:1)*short_line;d->bn=k!=0;
++        pool+=3*(d->len/4);
+     }
+     s->dmono=0; /* AutoPan/Phaser can diverge at any point during playback. */
+     s->ddec=dly_needed(s,s->t[DLT]>P(DLT)?s->t[DLT]:P(DLT));
+     s->dk=0;s->da[0]=s->da[1]=s->d0[0]=s->d0[1]=s->d1[0]=s->d1[1]=0.f;
+ }
+-static void delay_reverse(uint16_t *a,int i,int j)
++static void delay_reverse(uint8_t *a,int i,int j)
+ {
+-    while(i<j){uint16_t x=a[i];a[i++]=a[j];a[j--]=x;}
++    while(i<j){unsigned x=get6(a,i);put6(a,i++,get6(a,j));put6(a,j--,x);}
+ }
+ static void dly_regrid(s1c *s)
+ {
+@@ -1003,7 +1049,7 @@
+     const unsigned active[3]={0,1,3};
+     for(unsigned k=0;k<3;k++){
+         s1c_dline *d=&s->dl[active[k]];
+-        uint16_t *b=(uint16_t *)(void *)d->buf;
++        uint8_t *b=(uint8_t *)(void *)d->m;
+         const int n=d->len,w=d->w;
+         if(w){
+             delay_reverse(b,0,w-1);delay_reverse(b,w,n-1);delay_reverse(b,0,n-1);
+@@ -1014,10 +1060,10 @@
+          * safe. Older unavailable time is silence, not wrapped repeats. */
+         while(from>0){
+             float sum=0.f;
+-            for(unsigned j=0;j<stride && from>0;j++)sum+=h16_get(b[--from]);
+-            b[--to]=h16_put(sum/(float)stride);
++            for(unsigned j=0;j<stride && from>0;j++)sum+=f8_get(get6(b,--from));
++            put6(b,--to,f8_put(sum/(float)stride));
+         }
+-        if(to)memset(b,0,(size_t)to*sizeof *b);
++        for(int j=0;j<to;j++)put6(b,j,0);
+         d->w=0;
+     }
+     /* Keep the outgoing interpolant continuous at the rate step; preserve

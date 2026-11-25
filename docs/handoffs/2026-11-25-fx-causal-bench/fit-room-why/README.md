@@ -1,0 +1,15 @@
+# Causal FX follow-up to the fitted and unified room trials
+
+Source pin: first guarded pair ca1dd548; rejected unified room experiment and paired fit: 4ddf1e2c. Tests are local host component renders, not board performance or firmware release evidence. Stock-authorized factory files, source-derived original renderer, proprietary artifacts, and raw captures are not included. No fixture tuning or gain alignment.
+
+## Room topology / full-graph interaction
+
+All five dry and delay-only outputs are byte-identical old-to-new. On Dark Theater Organ delay is actually disabled, and the shared eight-line room recovers the isolated tail (last-second level error -3.827 to +0.716 dB) and the full tail (-4.697 to -0.049 dB); no waveform match. In Sahara, the isolated room gets closer (+1.873 to +1.361), but full effect residual gets farther (+1.390 to +4.266). Atmostrings similarly improves in isolated room (+1.275 to +0.961), but its full effect residual gets worse (-1.342 to -3.196). These are wet-minus-dry measurements except the Organ full-output level, whose dry tail is silent. Both active effects use a cascade: delay mix -> reverb high pass/compression/network -> wet mix -> final compressor/widen. Inputs and phase vary; standalone tail level cannot predict cascaded output. Atmostrings isolated-room waveform change is almost uncorrelated with its full-graph change in the final second (-0.030). Sahara is different: the change is correlated (0.904), but the isolated and combined RMS shifts point in opposite directions. Do not infer which individual coefficient is wrong from the topology swap.
+
+## SuperJ6 delay
+
+Settled 250 ms / 120 BPM, no ping-pong, identical one-channel tone bursts; compare wet minus bypass per arm. Reference is previous Build9-verified original-equation C, not a new whole AU render. At 220 Hz repeat level differs by -0.275/-0.554 dB (first/second); 1 kHz -5.413/-12.915; 3 kHz -22.094/-22.483. Opposite channel remains exact zero. Fits the expected compact history bandwidth loss; the fitted implementation averages into retained bins and linearly reconstructs the tap. Test longer cases and the original ping-pong/automation separately. A single global gain cannot restore that loss. Earlier prototype (sj6-multirate) remains a host lead only.
+
+## Reproduce
+
+From the project working workspace, prepare the existing original renderer and private factory inputs as described in fit-s1-ab/README.md, the exact fitted host executable there, and the rejected all-room fit-organ-unified/compact executable using the patch in 4ddf1e2c. Run isolate.py then cascade.py. The first script writes private Float32 captures to fit-room-why; do not store them in Git. Build the existing exact-component sj6-fx-bench bridge as fit-s1-ab/sj6.so and run sj6-repeat-response.py. The separate s1-delay README compares rate/codec/interpolation/trim one variable at a time. Preserve raw controls/ramps and construct any replacement against isolated probes plus the full matched press/release graph, then run both real links and exact timing. No candidate was approved or installed.
