@@ -1,0 +1,33 @@
+WINDOW stock
+1 -0.057 [1.226, 1.226] -11.729 unchanged-dry True
+62 -6.299 [13.427, 15.431] 1.357 unchanged-dry True
+Pad delay-only band change R [0.0, 0.0, 0.0, 0.0, 0.0]
+Delay-only final-second L/R delta [0.0, 0.0]
+113 -4.697 [9.8, 8.525] 1.374 unchanged-dry True
+128 1.25 [1.862, 1.479] 1.143 unchanged-dry True
+Delay-only final-second L/R delta [0.0, 0.0]
+278 -0.804 [4.187, 3.644] 2.146 unchanged-dry True
+Delay-only final-second L/R delta [0.0, 0.0]
+435 1.741 [4.828, 3.101] -0.814 unchanged-dry True
+WINDOW cubic
+1 -0.057 [1.226, 1.226] -11.729 unchanged-dry True
+62 -6.252 [13.613, 16.203] 1.393 unchanged-dry True
+Pad delay-only band change R [0.07, 2.95, 0.205, -6.81, -14.182]
+Delay-only final-second L/R delta [0.086, 0.04]
+113 -4.697 [9.8, 8.525] 1.374 unchanged-dry True
+128 1.195 [1.871, 1.501] 1.151 unchanged-dry True
+Delay-only final-second L/R delta [0.331, 0.323]
+278 -0.755 [4.176, 3.636] 2.143 unchanged-dry True
+Delay-only final-second L/R delta [0.397, 0.55]
+435 1.741 [4.828, 3.101] -0.814 unchanged-dry True
+WINDOW cosine
+1 -0.057 [1.226, 1.226] -11.729 unchanged-dry True
+62 -6.248 [13.611, 16.215] 1.396 unchanged-dry True
+Pad delay-only band change R [0.076, 3.183, 1.295, -7.706, -15.671]
+Delay-only final-second L/R delta [0.094, 0.044]
+113 -4.697 [9.8, 8.525] 1.374 unchanged-dry True
+128 1.196 [1.875, 1.501] 1.151 unchanged-dry True
+Delay-only final-second L/R delta [0.361, 0.352]
+278 -0.753 [4.166, 3.64] 2.144 unchanged-dry True
+Delay-only final-second L/R delta [0.432, 0.598]
+435 1.741 [4.828, 3.101] -0.814 unchanged-dry True

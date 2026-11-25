@@ -1,0 +1,8 @@
+# Synth One delay reconstruction ablation
+Tested stock linear versus smoothstep/raised-cosine interpolation, retaining the same two channel endpoints, 2,152-byte F16 history, sample cadence, feedback and control state. Headless host only. The Pad's tail error barely improves (<0.06 dB), while waveform and right spectral scores worsen. No source adoption.
+
+`carrier.py` splits the *recorded* alias from the interpolator's *output* images. Both curves recover about 0.6 dB at actual in-band 300 Hz, but they cannot reverse the 3 kHz input being stored as 60 Hz. The surviving image at 3 kHz is weaker than −98 dB. A 1300 Hz input gets an even weaker output image, and a 700 Hz input shows an image increase of about 4 dB while the much louder aliased 280 Hz is still present.
+
+The render driver optionally exercises the warm ring across active playback, bypass, delay-time growth and restoring mix. `*-warm.txt` show ring fingerprints/cadences; they are not target firmware timing. `RESULTS.txt` and the three JSONs contain the original six-preset matched-format renders, including dry identity plus isolated compact wet comparisons. `CARRIER.txt` is entirely synthetic.
+
+Reproduce by copying the scripts and numeric inputs to a standalone workspace as for the prior delay-window experiment: copy the existing path bench's `firmware` and `build` into it, link `experiments` to the absolute `ab-latest-headless/experiments` and `baseline` to the absolute `s1-controlled-ab/baseline`, run `bash run.sh /absolute/workspace`, then `python scores.py` and `python carrier.py`. Reference WAVs, FDATA, and generated binaries and audio are not included.

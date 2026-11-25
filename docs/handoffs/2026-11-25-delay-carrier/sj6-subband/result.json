@@ -1,0 +1,656 @@
+{
+  "history_bytes": 4088,
+  "tap_ms": 250.0,
+  "rows": [
+    {
+      "mode": "subband",
+      "f": 220,
+      "fb": 0,
+      "rep": 1,
+      "carrier": 0.02,
+      "spur": -51.038,
+      "spur_hz": 503.3,
+      "norm_null": -38.91
+    },
+    {
+      "mode": "subband",
+      "f": 220,
+      "fb": 0.499,
+      "rep": 1,
+      "carrier": 0.02,
+      "spur": -51.038,
+      "spur_hz": 503.3,
+      "norm_null": -38.91
+    },
+    {
+      "mode": "subband",
+      "f": 220,
+      "fb": 0.499,
+      "rep": 2,
+      "carrier": 0.007,
+      "spur": -49.216,
+      "spur_hz": 732.1,
+      "norm_null": -36.685
+    },
+    {
+      "mode": "subband",
+      "f": 220,
+      "fb": 0.499,
+      "rep": 3,
+      "carrier": 0.03,
+      "spur": -45.778,
+      "spur_hz": 659.5,
+      "norm_null": -34.323
+    },
+    {
+      "mode": "subband",
+      "f": 220,
+      "fb": 0.499,
+      "rep": 4,
+      "carrier": 0.032,
+      "spur": -45.394,
+      "spur_hz": 441.4,
+      "norm_null": -32.621
+    },
+    {
+      "mode": "stock_fixture",
+      "f": 220,
+      "fb": 0.499,
+      "rep": 1,
+      "carrier": -0.274,
+      "spur": -42.626,
+      "spur_hz": 2535.5,
+      "norm_null": -12.644
+    },
+    {
+      "mode": "stock_fixture",
+      "f": 220,
+      "fb": 0.499,
+      "rep": 2,
+      "carrier": -0.552,
+      "spur": -42.907,
+      "spur_hz": 2535.5,
+      "norm_null": -6.82
+    },
+    {
+      "mode": "stock_fixture",
+      "f": 220,
+      "fb": 0.499,
+      "rep": 3,
+      "carrier": -0.833,
+      "spur": -43.189,
+      "spur_hz": 2535.5,
+      "norm_null": -3.536
+    },
+    {
+      "mode": "stock_fixture",
+      "f": 220,
+      "fb": 0.499,
+      "rep": 4,
+      "carrier": -1.117,
+      "spur": -43.476,
+      "spur_hz": 2535.5,
+      "norm_null": -1.317
+    },
+    {
+      "mode": "subband",
+      "f": 220,
+      "fb": 0.8,
+      "rep": 1,
+      "carrier": 0.02,
+      "spur": -51.038,
+      "spur_hz": 503.3,
+      "norm_null": -38.91
+    },
+    {
+      "mode": "subband",
+      "f": 220,
+      "fb": 0.8,
+      "rep": 2,
+      "carrier": 0.046,
+      "spur": -49.303,
+      "spur_hz": 1098.2,
+      "norm_null": -36.748
+    },
+    {
+      "mode": "subband",
+      "f": 220,
+      "fb": 0.8,
+      "rep": 3,
+      "carrier": 0.037,
+      "spur": -41.245,
+      "spur_hz": 659.5,
+      "norm_null": -33.639
+    },
+    {
+      "mode": "subband",
+      "f": 220,
+      "fb": 0.8,
+      "rep": 4,
+      "carrier": 0.023,
+      "spur": -37.748,
+      "spur_hz": 659.5,
+      "norm_null": -31.425
+    },
+    {
+      "mode": "subband",
+      "f": 1000,
+      "fb": 0,
+      "rep": 1,
+      "carrier": -1.389,
+      "spur": -50.726,
+      "spur_hz": 804.8,
+      "norm_null": -16.527
+    },
+    {
+      "mode": "subband",
+      "f": 1000,
+      "fb": 0.499,
+      "rep": 1,
+      "carrier": -1.389,
+      "spur": -50.726,
+      "spur_hz": 804.8,
+      "norm_null": -16.527
+    },
+    {
+      "mode": "subband",
+      "f": 1000,
+      "fb": 0.499,
+      "rep": 2,
+      "carrier": -2.784,
+      "spur": -49.111,
+      "spur_hz": 314.9,
+      "norm_null": -11.178
+    },
+    {
+      "mode": "subband",
+      "f": 1000,
+      "fb": 0.499,
+      "rep": 3,
+      "carrier": -4.184,
+      "spur": -45.788,
+      "spur_hz": 314.9,
+      "norm_null": -8.304
+    },
+    {
+      "mode": "subband",
+      "f": 1000,
+      "fb": 0.499,
+      "rep": 4,
+      "carrier": -5.562,
+      "spur": -43.614,
+      "spur_hz": 312.2,
+      "norm_null": -6.464
+    },
+    {
+      "mode": "stock_fixture",
+      "f": 1000,
+      "fb": 0.499,
+      "rep": 1,
+      "carrier": -5.888,
+      "spur": -15.683,
+      "spur_hz": 1755.0,
+      "norm_null": -0.976
+    },
+    {
+      "mode": "stock_fixture",
+      "f": 1000,
+      "fb": 0.499,
+      "rep": 2,
+      "carrier": -13.395,
+      "spur": -23.207,
+      "spur_hz": 1757.6,
+      "norm_null": 1.15
+    },
+    {
+      "mode": "stock_fixture",
+      "f": 1000,
+      "fb": 0.499,
+      "rep": 3,
+      "carrier": -20.916,
+      "spur": -30.714,
+      "spur_hz": 1757.6,
+      "norm_null": 0.74
+    },
+    {
+      "mode": "stock_fixture",
+      "f": 1000,
+      "fb": 0.499,
+      "rep": 4,
+      "carrier": -28.502,
+      "spur": -38.287,
+      "spur_hz": 1757.6,
+      "norm_null": 0.086
+    },
+    {
+      "mode": "subband",
+      "f": 1000,
+      "fb": 0.8,
+      "rep": 1,
+      "carrier": -1.389,
+      "spur": -50.726,
+      "spur_hz": 804.8,
+      "norm_null": -16.527
+    },
+    {
+      "mode": "subband",
+      "f": 1000,
+      "fb": 0.8,
+      "rep": 2,
+      "carrier": -2.77,
+      "spur": -48.676,
+      "spur_hz": 121.1,
+      "norm_null": -11.209
+    },
+    {
+      "mode": "subband",
+      "f": 1000,
+      "fb": 0.8,
+      "rep": 3,
+      "carrier": -4.152,
+      "spur": -47.725,
+      "spur_hz": 802.1,
+      "norm_null": -8.353
+    },
+    {
+      "mode": "subband",
+      "f": 1000,
+      "fb": 0.8,
+      "rep": 4,
+      "carrier": -5.511,
+      "spur": -46.005,
+      "spur_hz": 320.3,
+      "norm_null": -6.52
+    },
+    {
+      "mode": "subband",
+      "f": 3000,
+      "fb": 0,
+      "rep": 1,
+      "carrier": -1.377,
+      "spur": -50.749,
+      "spur_hz": 3324.2,
+      "norm_null": -16.597
+    },
+    {
+      "mode": "subband",
+      "f": 3000,
+      "fb": 0.499,
+      "rep": 1,
+      "carrier": -1.377,
+      "spur": -50.749,
+      "spur_hz": 3324.2,
+      "norm_null": -16.597
+    },
+    {
+      "mode": "subband",
+      "f": 3000,
+      "fb": 0.499,
+      "rep": 2,
+      "carrier": -2.737,
+      "spur": -48.67,
+      "spur_hz": 3593.4,
+      "norm_null": -11.303
+    },
+    {
+      "mode": "subband",
+      "f": 3000,
+      "fb": 0.499,
+      "rep": 3,
+      "carrier": -4.106,
+      "spur": -47.191,
+      "spur_hz": 3402.2,
+      "norm_null": -8.432
+    },
+    {
+      "mode": "subband",
+      "f": 3000,
+      "fb": 0.499,
+      "rep": 4,
+      "carrier": -5.498,
+      "spur": -46.478,
+      "spur_hz": 3598.7,
+      "norm_null": -6.536
+    },
+    {
+      "mode": "stock_fixture",
+      "f": 3000,
+      "fb": 0.499,
+      "rep": 1,
+      "carrier": -65.546,
+      "spur": -22.107,
+      "spur_hz": 244.9,
+      "norm_null": 0.022
+    },
+    {
+      "mode": "stock_fixture",
+      "f": 3000,
+      "fb": 0.499,
+      "rep": 2,
+      "carrier": -65.906,
+      "spur": -22.469,
+      "spur_hz": 244.9,
+      "norm_null": 0.02
+    },
+    {
+      "mode": "stock_fixture",
+      "f": 3000,
+      "fb": 0.499,
+      "rep": 3,
+      "carrier": -66.288,
+      "spur": -22.852,
+      "spur_hz": 244.9,
+      "norm_null": 0.019
+    },
+    {
+      "mode": "stock_fixture",
+      "f": 3000,
+      "fb": 0.499,
+      "rep": 4,
+      "carrier": -66.711,
+      "spur": -23.275,
+      "spur_hz": 244.9,
+      "norm_null": 0.017
+    },
+    {
+      "mode": "subband",
+      "f": 3000,
+      "fb": 0.8,
+      "rep": 1,
+      "carrier": -1.377,
+      "spur": -50.749,
+      "spur_hz": 3324.2,
+      "norm_null": -16.597
+    },
+    {
+      "mode": "subband",
+      "f": 3000,
+      "fb": 0.8,
+      "rep": 2,
+      "carrier": -2.766,
+      "spur": -48.016,
+      "spur_hz": 3865.2,
+      "norm_null": -11.225
+    },
+    {
+      "mode": "subband",
+      "f": 3000,
+      "fb": 0.8,
+      "rep": 3,
+      "carrier": -4.164,
+      "spur": -46.525,
+      "spur_hz": 3862.5,
+      "norm_null": -8.337
+    },
+    {
+      "mode": "subband",
+      "f": 3000,
+      "fb": 0.8,
+      "rep": 4,
+      "carrier": -5.551,
+      "spur": -46.849,
+      "spur_hz": 3380.7,
+      "norm_null": -6.478
+    },
+    {
+      "mode": "subband",
+      "f": 3400,
+      "fb": 0,
+      "rep": 1,
+      "carrier": -0.003,
+      "spur": -50.948,
+      "spur_hz": 3071.2,
+      "norm_null": -38.61
+    },
+    {
+      "mode": "subband",
+      "f": 3400,
+      "fb": 0.499,
+      "rep": 1,
+      "carrier": -0.003,
+      "spur": -50.948,
+      "spur_hz": 3071.2,
+      "norm_null": -38.61
+    },
+    {
+      "mode": "subband",
+      "f": 3400,
+      "fb": 0.499,
+      "rep": 2,
+      "carrier": 0.006,
+      "spur": -47.994,
+      "spur_hz": 3248.8,
+      "norm_null": -35.714
+    },
+    {
+      "mode": "subband",
+      "f": 3400,
+      "fb": 0.499,
+      "rep": 3,
+      "carrier": -0.006,
+      "spur": -45.903,
+      "spur_hz": 3195.0,
+      "norm_null": -33.924
+    },
+    {
+      "mode": "subband",
+      "f": 3400,
+      "fb": 0.499,
+      "rep": 4,
+      "carrier": -0.009,
+      "spur": -42.559,
+      "spur_hz": 3200.4,
+      "norm_null": -32.815
+    },
+    {
+      "mode": "stock_fixture",
+      "f": 3400,
+      "fb": 0.499,
+      "rep": 1,
+      "carrier": -45.496,
+      "spur": -16.757,
+      "spur_hz": 643.3,
+      "norm_null": 0.052
+    },
+    {
+      "mode": "stock_fixture",
+      "f": 3400,
+      "fb": 0.499,
+      "rep": 2,
+      "carrier": -48.08,
+      "spur": -19.338,
+      "spur_hz": 643.3,
+      "norm_null": 0.027
+    },
+    {
+      "mode": "stock_fixture",
+      "f": 3400,
+      "fb": 0.499,
+      "rep": 3,
+      "carrier": -50.681,
+      "spur": -21.936,
+      "spur_hz": 643.3,
+      "norm_null": 0.017
+    },
+    {
+      "mode": "stock_fixture",
+      "f": 3400,
+      "fb": 0.499,
+      "rep": 4,
+      "carrier": -53.335,
+      "spur": -24.587,
+      "spur_hz": 643.3,
+      "norm_null": 0.012
+    },
+    {
+      "mode": "subband",
+      "f": 3400,
+      "fb": 0.8,
+      "rep": 1,
+      "carrier": -0.003,
+      "spur": -50.948,
+      "spur_hz": 3071.2,
+      "norm_null": -38.61
+    },
+    {
+      "mode": "subband",
+      "f": 3400,
+      "fb": 0.8,
+      "rep": 2,
+      "carrier": -0.009,
+      "spur": -47.647,
+      "spur_hz": 3248.8,
+      "norm_null": -35.393
+    },
+    {
+      "mode": "subband",
+      "f": 3400,
+      "fb": 0.8,
+      "rep": 3,
+      "carrier": 0.002,
+      "spur": -45.588,
+      "spur_hz": 3692.9,
+      "norm_null": -34.742
+    },
+    {
+      "mode": "subband",
+      "f": 3400,
+      "fb": 0.8,
+      "rep": 4,
+      "carrier": 0.001,
+      "spur": -44.869,
+      "spur_hz": 3248.8,
+      "norm_null": -33.66
+    },
+    {
+      "mode": "subband",
+      "f": 6000,
+      "fb": 0,
+      "rep": 1,
+      "carrier": -300.0,
+      "spur": -300.0,
+      "spur_hz": 0.0,
+      "norm_null": 0.0
+    },
+    {
+      "mode": "subband",
+      "f": 6000,
+      "fb": 0.499,
+      "rep": 1,
+      "carrier": -300.0,
+      "spur": -300.0,
+      "spur_hz": 0.0,
+      "norm_null": 0.0
+    },
+    {
+      "mode": "subband",
+      "f": 6000,
+      "fb": 0.499,
+      "rep": 2,
+      "carrier": -300.0,
+      "spur": -300.0,
+      "spur_hz": 0.0,
+      "norm_null": 0.0
+    },
+    {
+      "mode": "subband",
+      "f": 6000,
+      "fb": 0.499,
+      "rep": 3,
+      "carrier": -300.0,
+      "spur": -300.0,
+      "spur_hz": 0.0,
+      "norm_null": 0.0
+    },
+    {
+      "mode": "subband",
+      "f": 6000,
+      "fb": 0.499,
+      "rep": 4,
+      "carrier": -300.0,
+      "spur": -300.0,
+      "spur_hz": 0.0,
+      "norm_null": 0.0
+    },
+    {
+      "mode": "stock_fixture",
+      "f": 6000,
+      "fb": 0.499,
+      "rep": 1,
+      "carrier": -65.975,
+      "spur": -22.904,
+      "spur_hz": 487.2,
+      "norm_null": 0.018
+    },
+    {
+      "mode": "stock_fixture",
+      "f": 6000,
+      "fb": 0.499,
+      "rep": 2,
+      "carrier": -67.409,
+      "spur": -24.336,
+      "spur_hz": 487.2,
+      "norm_null": 0.012
+    },
+    {
+      "mode": "stock_fixture",
+      "f": 6000,
+      "fb": 0.499,
+      "rep": 3,
+      "carrier": -68.87,
+      "spur": -25.794,
+      "spur_hz": 487.2,
+      "norm_null": 0.009
+    },
+    {
+      "mode": "stock_fixture",
+      "f": 6000,
+      "fb": 0.499,
+      "rep": 4,
+      "carrier": -70.384,
+      "spur": -27.307,
+      "spur_hz": 487.2,
+      "norm_null": 0.006
+    },
+    {
+      "mode": "subband",
+      "f": 6000,
+      "fb": 0.8,
+      "rep": 1,
+      "carrier": -300.0,
+      "spur": -300.0,
+      "spur_hz": 0.0,
+      "norm_null": 0.0
+    },
+    {
+      "mode": "subband",
+      "f": 6000,
+      "fb": 0.8,
+      "rep": 2,
+      "carrier": -300.0,
+      "spur": -300.0,
+      "spur_hz": 0.0,
+      "norm_null": 0.0
+    },
+    {
+      "mode": "subband",
+      "f": 6000,
+      "fb": 0.8,
+      "rep": 3,
+      "carrier": -300.0,
+      "spur": -300.0,
+      "spur_hz": 0.0,
+      "norm_null": 0.0
+    },
+    {
+      "mode": "subband",
+      "f": 6000,
+      "fb": 0.8,
+      "rep": 4,
+      "carrier": -300.0,
+      "spur": -300.0,
+      "spur_hz": 0.0,
+      "norm_null": 0.0
+    }
+  ]
+}
