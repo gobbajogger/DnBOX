@@ -1,0 +1,28 @@
+base/smk37-elite
+.text           0x0000000002000120    0x8d640
+.pool           0x0000000001c20000    0x51de4
+                0x0000000001c71de4                _pool_end = .
+base/smk37
+.text           0x0000000002000120    0x8d634
+.pool           0x0000000001c20000    0x51de4
+                0x0000000001c71de4                _pool_end = .
+src/smk37-elite
+.text           0x0000000002000120    0x8d7a0
+.pool           0x0000000001c20000    0x51de4
+                0x0000000001c71de4                _pool_end = .
+src/smk37
+.text           0x0000000002000120    0x8d794
+.pool           0x0000000001c20000    0x51de4
+                0x0000000001c71de4                _pool_end = .
+base-elite.log
+check_locked_settings: 20 settings ok
+/workspace/scratch/3a7051e761a0/prereqs/jieli-linux-toolchains-20260730.1/pi32v2/bin/ld: region `XIP' overflowed by 30260 bytes
+base-pro.log
+check_locked_settings: 20 settings ok
+/workspace/scratch/3a7051e761a0/prereqs/jieli-linux-toolchains-20260730.1/pi32v2/bin/ld: region `XIP' overflowed by 30248 bytes
+src-elite.log
+check_locked_settings: 20 settings ok
+/workspace/scratch/3a7051e761a0/prereqs/jieli-linux-toolchains-20260730.1/pi32v2/bin/ld: region `XIP' overflowed by 30612 bytes
+src-pro.log
+check_locked_settings: 20 settings ok
+/workspace/scratch/3a7051e761a0/prereqs/jieli-linux-toolchains-20260730.1/pi32v2/bin/ld: region `XIP' overflowed by 30600 bytes

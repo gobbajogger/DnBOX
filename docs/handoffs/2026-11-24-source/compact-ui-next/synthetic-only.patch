@@ -1,0 +1,15 @@
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -2421,6 +2421,12 @@
+                 add_page(emit, PT_ARPEGGIATOR, PR(R_ARP, ARP_F_ON, b, 0), PR(R_ARP, ARP_F_RANGE, b, 0),
+                          PR(R_ARP, ARP_F_MODE, b, 0), PR(R_ARP, ARP_F_SPEED, b, 0));
+ #endif
++#ifdef PAGE_OVERFLOW_FIXTURE
++            if (kind == ORIGINAL_SOUND_SYNTHONE)
++                for (int k=0;k<7;k++)
++                    add_page(emit,PT_AMP_ENVELOP,PR(R_ENG,T_909,k,0),PR(R_ENG,T_909,k,1),
++                             PR(R_ENG,T_909,k,2),PR(R_ENG,T_909,k,3));
++#endif
+             add_page(emit, PT_SOUND,PR(R_BENGINE,0,b,0),PR(R_BPRESET,0,b,0),PR(R_BSTATUS,0,b,0),NONE);
+         } else {
+             emit->group = GR_PAT;                           /* (its groove and retrigs: SEQ) */

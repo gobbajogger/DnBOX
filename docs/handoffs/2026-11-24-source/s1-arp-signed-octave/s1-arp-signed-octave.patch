@@ -1,0 +1,34 @@
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -2035,8 +2035,17 @@
+                 int key = 0;
+                 while (strikes >>= 1) ++key;
+                 int offset = 36 + key + 12 * ui.oct - UI_ARP_ROOT;
+-                if ((st.oct_mask >> arp_held) & 1u) offset -= 12;
+                 arp_edited = 1;   /* never toggle on pad release after editing */
++                if ((st.oct_mask >> arp_held) & 1u) {
++                    if (engine_bass_bank(bidx()) == ORIGINAL_SOUND_SYNTHONE) {
++                        /* Original OCT+ pushes signed offsets away from zero.
++                         * With boost on, the available pitches are -24..-13
++                         * and +12..+24; keep OCT+ when a key is in the gap. */
++                        if (offset >= -24 && offset <= -13) offset += 12;
++                        else if (offset >= 12 && offset <= 24) offset -= 12;
++                        else { say("OCT+ RANGE", 0); return; }
++                    } else offset -= 12;
++                }
+                 arp_step_edit((unsigned)arp_held, ARP_S_OFFSET, offset);
+             }
+         }
+@@ -6561,8 +6570,11 @@
+         arp_bp.len = as.length ? as.length : 16;
+         arp_bp.gen.root = UI_ARP_ROOT % 12;            /* offsets from the held root (C3 when none is held) */
+         arp_bp.gen.base_oct = (uint8_t)(UI_ARP_ROOT / 12 - 1);
++        const int signed_oct = engine_bass_bank(b) == ORIGINAL_SOUND_SYNTHONE;
+         for (c = 0; c < ARP_STEPS; c++) {
+-            arp_bp.step[c].note = (uint8_t)(UI_ARP_ROOT + ast.offset[c] + ((ast.oct_mask >> c) & 1u) * 12);
++            int off = ast.offset[c];
++            if ((ast.oct_mask >> c) & 1u) off += signed_oct && off < 0 ? -12 : 12;
++            arp_bp.step[c].note = (uint8_t)(UI_ARP_ROOT + off);
+             arp_bp.step[c].flags = (ast.on_mask >> c) & 1u ? G_NOTE : G_REST;
+         }
+         bp = &arp_bp;

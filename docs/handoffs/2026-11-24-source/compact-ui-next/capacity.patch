@@ -1,0 +1,767 @@
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -23,6 +23,75 @@
+ #include "../dsp/juno6_controls.h"
+ #include "../dsp/master.h"
+ #include "../dsp/drum909.h"              /* this renderer directly uses DR_* and drum909_param_si */
++typedef enum {
++    PT_EMPTY,
++    PT_808_MIX,
++    PT_909_MIX,
++    PT_AMP_ADSR,
++    PT_AMP_ENVELOP,
++    PT_AMPLIFIER,
++    PT_ARP_SEQ,
++    PT_ARPEGGIATOR,
++    PT_BAR,
++    PT_BD,
++    PT_CARRIER,
++    PT_CB,
++    PT_CH,
++    PT_CHORUS,
++    PT_CP,
++    PT_CR,
++    PT_CY,
++    PT_DELAY,
++    PT_EFFECT,
++    PT_ENVELOPE,
++    PT_FILTER,
++    PT_FILTER_1,
++    PT_FILTER_2,
++    PT_FILTER_ADSR,
++    PT_FILTER_MODE,
++    PT_FM_NOISE,
++    PT_GENERATE,
++    PT_GROOVE,
++    PT_HT,
++    PT_KEYS,
++    PT_KIT,
++    PT_LFO,
++    PT_LFO_MODE,
++    PT_LFO_RATE,
++    PT_LFO_CHORUS,
++    PT_LFO2_PWM,
++    PT_LOOPS,
++    PT_LT,
++    PT_MASTER,
++    PT_MOD_ROUTE,
++    PT_MT,
++    PT_OH,
++    PT_OSC_MIX,
++    PT_OSCILLATOR,
++    PT_OUTPUT,
++    PT_PARTS,
++    PT_PERF,
++    PT_PERFORM,
++    PT_PRESET,
++    PT_PULSE_WIDTH,
++    PT_RD,
++    PT_RETRIG,
++    PT_REVERB,
++    PT_RS,
++    PT_SCALE,
++    PT_SD,
++    PT_SEQUENCE,
++    PT_SOUND,
++    PT_TEMPO_SYNC,
++    PT_TUNING,
++    PT_VIBRATO,
++    PT_VOICE,
++    PT_WAVE,
++    PT_WOBBLE,
++    PT_XMOD,
++    PT_COUNT
++} page_title_id_t;
++
+ #include "ui_original_controls.h"
+ #if X0X_ORIGINAL_SYNTH
+ #include "miami_ms20.h"
+@@ -1740,14 +1809,14 @@
+ }
+ 
+ /* ===================================================================== pages === */
+-#define MAXPAGES 15
++#define MAXPAGES 23
+ /* page groups: whose values a page holds (the SEL list's headers, the header's colour) */
+ enum { GR_NONE, GR_TRACK, GR_TMIX, GR_KIT, GR_PAT, GR_SOUND, GR_MORE,
+        GR_MIDI, GR_AUDIO, GR_KEYS, GR_PROJECT, GR_SYSTEM, GR_BT };   /* (the last six: GLO's sections) */
+ #define MAXMORE 14
+ typedef struct {
+     pref_t r[MAXPAGES][4];
+-    char title[MAXPAGES][12];
++    uint8_t title[MAXPAGES];
+     uint8_t group[MAXPAGES];
+     int n;
+     int nmore;
+@@ -1758,14 +1827,97 @@
+ _Static_assert(MAXMORE <= PAGE_REFS, "page and MORE refs share a bounded matrix");
+ static pages_t pg X0X_POOL;
+ 
+-/* Page rows grow forward from zero; SEL's MORE refs grow backward through
+- * the unused rows. Keep append order without allocating a second matrix. */
++/* One immutable, exactly legacy-truncated label per typed page ID. */
++static const char *const page_titles[PT_COUNT] = {
++    [PT_EMPTY] = "",
++    [PT_808_MIX] = "808 MIX",
++    [PT_909_MIX] = "909 MIX",
++    [PT_AMP_ADSR] = "AMP ADSR",
++    [PT_AMP_ENVELOP] = "AMP ENVELOP",
++    [PT_AMPLIFIER] = "AMPLIFIER",
++    [PT_ARP_SEQ] = "ARP SEQ",
++    [PT_ARPEGGIATOR] = "ARPEGGIATOR",
++    [PT_BAR] = "BAR",
++    [PT_BD] = "BD",
++    [PT_CARRIER] = "CARRIER",
++    [PT_CB] = "CB",
++    [PT_CH] = "CH",
++    [PT_CHORUS] = "CHORUS",
++    [PT_CP] = "CP",
++    [PT_CR] = "CR",
++    [PT_CY] = "CY",
++    [PT_DELAY] = "DELAY",
++    [PT_EFFECT] = "EFFECT",
++    [PT_ENVELOPE] = "ENVELOPE",
++    [PT_FILTER] = "FILTER",
++    [PT_FILTER_1] = "FILTER 1",
++    [PT_FILTER_2] = "FILTER 2",
++    [PT_FILTER_ADSR] = "FILTER ADSR",
++    [PT_FILTER_MODE] = "FILTER MODE",
++    [PT_FM_NOISE] = "FM / NOISE",
++    [PT_GENERATE] = "GENERATE",
++    [PT_GROOVE] = "GROOVE",
++    [PT_HT] = "HT",
++    [PT_KEYS] = "KEYS",
++    [PT_KIT] = "KIT",
++    [PT_LFO] = "LFO",
++    [PT_LFO_MODE] = "LFO MODE",
++    [PT_LFO_RATE] = "LFO RATE",
++    [PT_LFO_CHORUS] = "LFO/CHORUS",
++    [PT_LFO2_PWM] = "LFO2 PWM",
++    [PT_LOOPS] = "LOOPS",
++    [PT_LT] = "LT",
++    [PT_MASTER] = "MASTER",
++    [PT_MOD_ROUTE] = "MOD ROUTE",
++    [PT_MT] = "MT",
++    [PT_OH] = "OH",
++    [PT_OSC_MIX] = "OSC MIX",
++    [PT_OSCILLATOR] = "OSCILLATOR",
++    [PT_OUTPUT] = "OUTPUT",
++    [PT_PARTS] = "PARTS",
++    [PT_PERF] = "PERF",
++    [PT_PERFORM] = "PERFORM",
++    [PT_PRESET] = "PRESET",
++    [PT_PULSE_WIDTH] = "PULSE WIDTH",
++    [PT_RD] = "RD",
++    [PT_RETRIG] = "RETRIG",
++    [PT_REVERB] = "REVERB",
++    [PT_RS] = "RS",
++    [PT_SCALE] = "SCALE",
++    [PT_SD] = "SD",
++    [PT_SEQUENCE] = "SEQUENCE",
++    [PT_SOUND] = "SOUND",
++    [PT_TEMPO_SYNC] = "TEMPO SYNC",
++    [PT_TUNING] = "TUNING",
++    [PT_VIBRATO] = "VIBRATO",
++    [PT_VOICE] = "VOICE",
++    [PT_WAVE] = "WAVE",
++    [PT_WOBBLE] = "WOBBLE",
++    [PT_XMOD] = "XMOD",
++};
++_Static_assert(PT_COUNT < 256, "page title IDs fit");
++static const char *page_title(const pages_t *p, int n)
++{ return page_titles[p->title[n]]; }
++static page_title_id_t drum_page_title(int t, int v)
++{
++    static const uint8_t n909[] = { PT_BD, PT_SD, PT_LT, PT_MT, PT_HT, PT_RS,
++                                  PT_CP, PT_CH, PT_OH, PT_CR, PT_RD, PT_KIT };
++    static const uint8_t n808[] = { PT_BD, PT_SD, PT_LT, PT_MT, PT_HT, PT_RS,
++                                  PT_CP, PT_CB, PT_CY, PT_OH, PT_CH, PT_KIT };
++    _Static_assert(sizeof n909 == DR_NUM + 1 && sizeof n808 == D8_NUM + 1,
++                   "drum title coverage");
++    if (t == T_909 && (unsigned)v < sizeof n909) return n909[v];
++    if (t == T_808 && (unsigned)v < sizeof n808) return n808[v];
++    return PT_EMPTY;
++}
++
+ static pref_t *page_more(pages_t *pages, unsigned i)
+ {
+     unsigned slot = PAGE_REFS - 1u - i;
+     return &pages->r[slot / 4u][slot % 4u];
+ }
+-typedef struct { pref_t r[4]; char title[12]; int page, n; } page_query_t;
++typedef struct { pref_t r[4]; char title[12]; int page; uint8_t n, nmore; } page_query_t;
++_Static_assert(sizeof(page_query_t) == 36, "SMC query caches must not grow");
+ /* The descriptor emitter has one explicit output contract. Query mode records
+  * one requested page plus the count, without a second persistent page table. */
+ typedef struct {
+@@ -1777,6 +1929,9 @@
+ static void more(page_emitter_t *emit, pref_t r)
+ {
+     pages_t *pages = emit->pages;
++    page_query_t *q = emit->query;
++    if (q && r.kind != R_NONE && q->nmore < MAXMORE && 4 * q->n + q->nmore < PAGE_REFS)
++        q->nmore++;
+     if (pages && r.kind != R_NONE && pages->nmore < MAXMORE &&
+         4 * pages->n + pages->nmore < PAGE_REFS)
+         *page_more(pages, pages->nmore++) = r;
+@@ -1784,7 +1939,7 @@
+ 
+ /* Both page consumers write the same four refs and truncated title. Select
+  * the destination once, retaining each consumer's bounds and count. */
+-static void add_page(page_emitter_t *emit, const char *t,
++static void add_page(page_emitter_t *emit, page_title_id_t title,
+                      pref_t a, pref_t b, pref_t c, pref_t d)
+ {
+     page_query_t *query = emit->query;
+@@ -1792,6 +1947,7 @@
+     pref_t *refs;
+     char *text;
+     if (query) {
++        if (query->n >= MAXPAGES || 4 * (query->n + 1) + query->nmore > PAGE_REFS) return;
+         if (query->n != query->page) {
+             query->n++;
+             return;
+@@ -1802,17 +1958,19 @@
+         if (pages->n >= MAXPAGES || 4 * (pages->n + 1) + pages->nmore > PAGE_REFS)
+             return;
+         refs = pages->r[pages->n];
+-        text = pages->title[pages->n];
++        text = 0;
++        pages->title[pages->n] = title;
+     }
+     refs[0] = a;
+     refs[1] = b;
+     refs[2] = c;
+     refs[3] = d;
+-    unsigned i = 0;
+-    for (; i < 11 && t[i]; i++)
+-        text[i] = t[i];
+-    text[i] = 0;
+     if (query) {
++        unsigned i = 0;
++        const char *t = page_titles[title];
++        for (; i < 11 && t[i]; i++)
++            text[i] = t[i];
++        text[i] = 0;
+         query->n++;
+     } else {
+         pages->group[pages->n] = emit->group;
+@@ -1866,10 +2024,10 @@
+     more(emit, drum_ref(extra & 15u,t,v));
+     more(emit, drum_ref(extra >> 4,t,v));
+     emit->group = GR_TRACK;
+-    add_page(emit,engine_voice_name(t,v),drum_ref(ids & 15u,t,v),drum_ref((ids >> 4) & 15u,t,v),
++    add_page(emit,drum_page_title(t,v),drum_ref(ids & 15u,t,v),drum_ref((ids >> 4) & 15u,t,v),
+              drum_ref((ids >> 8) & 15u,t,v),drum_ref(ids >> 12,t,v));
+     if(t==T_909 && (v==DR_BD || v==DR_SD))
+-        add_page(emit,"AMP ENVELOPE",PR(R_ENG,t,v,v==DR_BD?2:3),NONE,NONE,NONE);
++        add_page(emit,PT_AMP_ENVELOP,PR(R_ENG,t,v,v==DR_BD?2:3),NONE,NONE,NONE);
+ }
+ 
+ /* where a screen's page is kept: per part on the part's screens (and TB-3PO), else one per screen */
+@@ -2066,7 +2224,7 @@
+ /* Immutable page descriptions avoid rebuilding four constant preference records at
+  * every call site. The only patched byte is the current part/voice/channel;
+  * NONE retains its all-zero record. This runs only during UI page construction. */
+-X0X_COLD __attribute__((noinline)) static void add_page_refs(page_emitter_t *emit, const char *t, const pref_t *refs, int axis, uint8_t value)
++X0X_COLD __attribute__((noinline)) static void add_page_refs(page_emitter_t *emit, page_title_id_t title, const pref_t *refs, int axis, uint8_t value)
+ {
+     pref_t row[4];
+     for (int i = 0; i < 4; i++) {
+@@ -2076,7 +2234,7 @@
+             if (axis == 2) row[i].b = value;
+         }
+     }
+-    add_page(emit, t, row[0], row[1], row[2], row[3]);
++    add_page(emit, title, row[0], row[1], row[2], row[3]);
+ }
+ 
+ X0X_COLD __attribute__((noinline)) static void more_refs(page_emitter_t *emit, const pref_t *refs, unsigned n, int axis, uint8_t value)
+@@ -2093,7 +2251,7 @@
+ /* Pure navigation inputs: emit existing descriptors without keyboard clamping. */
+ #if X0X_SUPERJ6_BUILTIN_INIT || X0X_S1_EXTRA
+ enum { ORIG_PAGE_ENGINE = 128, ORIG_PAGE_S1_LINK = 254, ORIG_PAGE_NONE = 255 };
+-typedef struct { const char *title; uint8_t id[4]; } original_page_row_t;
++typedef struct { uint8_t title; uint8_t id[4]; } original_page_row_t;
+ __attribute__((noinline)) X0X_COLD static void add_original_extra_pages(
+     page_emitter_t *emit, const original_page_row_t *pages, unsigned count, int owner, unsigned kind)
+ {
+@@ -2118,28 +2276,28 @@
+     page_emitter_t output = {out, query, GR_NONE};
+     page_emitter_t *emit = &output;
+     if (query)
+-        query->n = 0;
++        query->n = query->nmore = 0;
+     else
+         out->n = out->nmore = 0;
+     switch (view) {
+     case V_HOME:                                       /* the pattern: how the parts run through it */
+     case V_GLO:
+         do { static const pref_t refs[4] = {PR(R_TEMPO, 0, 0, 0), PR(R_SWING, 0, 0, 0), PR(R_ENG, T_MST, 0, MST_DJF), PR(R_ENG, T_MST, 0, MST_PUMP)};
+-            add_page_refs(emit, "PERFORM", refs, 0, 0); } while (0);
++            add_page_refs(emit, PT_PERFORM, refs, 0, 0); } while (0);
+         break;
+     case V_SEQ:                                        /* the part's steps: how its pattern runs */
+         emit->group = GR_PAT;
+         if (part_is_drum(p))
+             do { static const pref_t refs[4] = {PR(R_DLEN, 0, 0, 0), PR(R_DRATE, 0, 0, 0), NONE, NONE};
+-            add_page_refs(emit, "SEQUENCE", refs, 1, p); } while (0);   /* (the swing: HOME's, all parts') */
++            add_page_refs(emit, PT_SEQUENCE, refs, 1, p); } while (0);   /* (the swing: HOME's, all parts') */
+         else if (part_is_303(p)) {
+             int b = p - PART_303A;
+             do { static const pref_t refs[4] = {PR(R_BLEN, 0, 0, 0), PR(R_BRATE, 0, 0, 0), PR(R_BDIR, 0, 0, 0), PR(R_BTRANS, 0, 0, 0)};
+-            add_page_refs(emit, "SEQUENCE", refs, 1, b); } while (0);
+-            add_page(emit, "PRESET", PR(R_BPATSND, 0, b, 0), NONE, NONE, NONE);   /* 0.0.25: this pattern's bass preset */
++            add_page_refs(emit, PT_SEQUENCE, refs, 1, b); } while (0);
++            add_page(emit, PT_PRESET, PR(R_BPATSND, 0, b, 0), NONE, NONE, NONE);   /* 0.0.25: this pattern's bass preset */
+             emit->group = GR_NONE;                          /* (not the pattern's: no P1 in its name) */
+             do { static const pref_t refs[4] = {PR(R_FREEPLAY, 0, 0, 0), NONE, NONE, NONE};
+-            add_page_refs(emit, "KEYS", refs, 1, b); } while (0);
++            add_page_refs(emit, PT_KEYS, refs, 1, b); } while (0);
+ #if X0X_ARP_HOOKS
+             if (arp_engine(b)) {                       /* 4: the 16 arp steps on the pads */
+                 emit->group = GR_PAT;
+@@ -2147,18 +2305,18 @@
+ #if X0X_SUPERJ6_BUILTIN_INIT && !defined(X0X_ARP_FAKE_H)
+                 if (engine_bass_bank(b) == ORIGINAL_SOUND_JUNO) division = PR(R_ARP, ARP_F_DIVISION, b, 0);
+ #endif
+-                add_page(emit, "ARP SEQ", PR(R_ARP, ARP_F_LENGTH, b, 0), PR(R_ARP, ARP_F_INTERVAL, b, 0), PR(R_ARP, ARP_F_GATE, b, 0), division);
++                add_page(emit, PT_ARP_SEQ, PR(R_ARP, ARP_F_LENGTH, b, 0), PR(R_ARP, ARP_F_INTERVAL, b, 0), PR(R_ARP, ARP_F_GATE, b, 0), division);
+                 emit->group = GR_NONE;
+             }
+ #endif
+         }
+         else {
+             do { static const pref_t refs[4] = {PR(R_BRKRATE, 0, 0, 0), NONE, NONE, NONE};
+-            add_page_refs(emit, "SEQUENCE", refs, 0, 0); } while (0);
++            add_page_refs(emit, PT_SEQUENCE, refs, 0, 0); } while (0);
+             do { static const pref_t refs[4] = {PR(R_BRKSET, 0, 0, BRK_COMPLEX), PR(R_BRKSET, 0, 0, BRK_ANCHOR), PR(R_BRKSET, 0, 0, BRK_ROLL), PR(R_BRKSET, 0, 0, BRK_FILL)};
+-            add_page_refs(emit, "GROOVE", refs, 0, 0); } while (0);
++            add_page_refs(emit, PT_GROOVE, refs, 0, 0); } while (0);
+             do { static const pref_t refs[4] = {PR(R_BRKSET, 0, 0, BRK_R2), PR(R_BRKSET, 0, 0, BRK_R3), PR(R_BRKSET, 0, 0, BRK_R4), PR(R_BRKSET, 0, 0, BRK_R8)};
+-            add_page_refs(emit, "RETRIG", refs, 0, 0); } while (0);
++            add_page_refs(emit, PT_RETRIG, refs, 0, 0); } while (0);
+             do { static const pref_t refs[] = {PR(R_BRKSET, 0, 0, BRK_PHRASE), PR(R_BRKSET, 0, 0, BRK_ALEN), PR(R_BRKSET, 0, 0, BRK_BLEN)};
+                 more_refs(emit, refs, 3, 0, 0); } while (0);
+         }
+@@ -2170,17 +2328,17 @@
+             emit->group = GR_KIT;
+             if (p == PART_909)                         /* (the kit's gain: the mixer's level does it) */
+                 do { static const pref_t refs[4] = {PR(R_ENG, T_909, NDRUM, 1), NONE, NONE, NONE};
+-            add_page_refs(emit, "KIT", refs, 0, 0); } while (0);
++            add_page_refs(emit, PT_KIT, refs, 0, 0); } while (0);
+             else
+                 do { static const pref_t refs[4] = {PR(R_ENG, T_808, NDRUM, 1), NONE, NONE, NONE};
+-            add_page_refs(emit, "KIT", refs, 0, 0); } while (0);
++            add_page_refs(emit, PT_KIT, refs, 0, 0); } while (0);
+         } else if (part_is_303(p)) {
+             int b = p - PART_303A;
+             emit->group = GR_SOUND;
+             int kind = engine_bass_bank(b), chicago = kind == ORIGINAL_SOUND_CHICAGO;
+             const int8_t (*rows)[4] = kind == ORIGINAL_SOUND_JUNO ? ui_original_juno_rows : kind == ORIGINAL_SOUND_SYNTHONE ? ui_original_synthone_rows :
+                 chicago ? ui_original_chicago_rows : ui_original_miami_rows;
+-            const char *const *titles = kind == ORIGINAL_SOUND_JUNO ? ui_original_juno_titles : kind == ORIGINAL_SOUND_SYNTHONE ? ui_original_synthone_titles :
++            const uint8_t *titles = kind == ORIGINAL_SOUND_JUNO ? ui_original_juno_titles : kind == ORIGINAL_SOUND_SYNTHONE ? ui_original_synthone_titles :
+                 chicago ? ui_original_chicago_titles : ui_original_miami_titles;
+             int count = kind == ORIGINAL_SOUND_JUNO ? UI_ORIGINAL_JUNO_PAGES : kind == ORIGINAL_SOUND_SYNTHONE ? UI_ORIGINAL_SYNTHONE_PAGES :
+                 chicago ? UI_ORIGINAL_CHICAGO_PAGES : UI_ORIGINAL_MIAMI_PAGES;
+@@ -2189,19 +2347,19 @@
+             if (kind == ORIGINAL_SOUND_JUNO) {
+                 enum { SJ6_PAGE_ID_FITS = 1 / (SJ6_LFO2_PWM_BASE < ORIG_PAGE_ENGINE) };
+                 static const original_page_row_t pages[] = {
+-                    {"OSCILLATOR", {SJ6_WAVE1, SJ6_WAVE2, SJ6_RANGE, SJ6_A_REFERENCE}},
+-                    {"PULSE WIDTH", {SJ6_PWM1_ON, SJ6_PWM1, SJ6_PWM2_ON, SJ6_PWM2}},
+-                    {"FILTER", {ORIG_PAGE_ENGINE + 2, ORIG_PAGE_ENGINE + 3, ORIG_PAGE_ENGINE + 4, SJ6_FILTER_LINK}},
+-                    {"FILTER ADSR", {SJ6_FILTER_ATTACK, SJ6_FILTER_DECAY, SJ6_FILTER_SUSTAIN, SJ6_FILTER_RELEASE}},
+-                    {"AMP ADSR", {SJ6_AMP_ATTACK, SJ6_AMP_DECAY, SJ6_AMP_SUSTAIN, SJ6_AMP_RELEASE}},
+-                    {"OUTPUT", {ORIG_PAGE_ENGINE + 9, SJ6_MASTER_LEVEL, SJ6_OSC1_LEVEL, SJ6_OSC2_LEVEL}},
+-                    {"LFO RATE", {SJ6_LFO1_RATE, SJ6_LFO2_RATE, SJ6_LFO3_RATE, SJ6_LFO2_SHAPE}},
+-                    {"LFO MODE", {SJ6_LFO1_MODE, SJ6_LFO2_MODE, SJ6_LFO3_MODE, ORIG_PAGE_NONE}},
+-                    {"LFO2 PWM", {SJ6_LFO2_RATE, SJ6_LFO2_PWM_DEPTH, SJ6_LFO2_PWM_ROUTE, SJ6_LFO2_PWM_BASE}},
+-                    {"LFO", {ORIG_PAGE_ENGINE + 10, ORIG_PAGE_ENGINE + 11, ORIG_PAGE_NONE, ORIG_PAGE_NONE}},
+-                    {"CHORUS", {SJ6_CHORUS_I, SJ6_CHORUS_II, SJ6_CHORUS_RATE, SJ6_CHORUS_MIX}},
+-                    {"VIBRATO", {SJ6_VIBRATO_DEPTH, SJ6_VIBRATO_RATE, ORIG_PAGE_NONE, ORIG_PAGE_NONE}},
+-                    {"TUNING", {SJ6_LAYER1_SEMI, SJ6_LAYER2_SEMI, SJ6_LAYER1_FINE, SJ6_LAYER2_FINE}},
++                    {PT_OSCILLATOR, {SJ6_WAVE1, SJ6_WAVE2, SJ6_RANGE, SJ6_A_REFERENCE}},
++                    {PT_PULSE_WIDTH, {SJ6_PWM1_ON, SJ6_PWM1, SJ6_PWM2_ON, SJ6_PWM2}},
++                    {PT_FILTER, {ORIG_PAGE_ENGINE + 2, ORIG_PAGE_ENGINE + 3, ORIG_PAGE_ENGINE + 4, SJ6_FILTER_LINK}},
++                    {PT_FILTER_ADSR, {SJ6_FILTER_ATTACK, SJ6_FILTER_DECAY, SJ6_FILTER_SUSTAIN, SJ6_FILTER_RELEASE}},
++                    {PT_AMP_ADSR, {SJ6_AMP_ATTACK, SJ6_AMP_DECAY, SJ6_AMP_SUSTAIN, SJ6_AMP_RELEASE}},
++                    {PT_OUTPUT, {ORIG_PAGE_ENGINE + 9, SJ6_MASTER_LEVEL, SJ6_OSC1_LEVEL, SJ6_OSC2_LEVEL}},
++                    {PT_LFO_RATE, {SJ6_LFO1_RATE, SJ6_LFO2_RATE, SJ6_LFO3_RATE, SJ6_LFO2_SHAPE}},
++                    {PT_LFO_MODE, {SJ6_LFO1_MODE, SJ6_LFO2_MODE, SJ6_LFO3_MODE, ORIG_PAGE_NONE}},
++                    {PT_LFO2_PWM, {SJ6_LFO2_RATE, SJ6_LFO2_PWM_DEPTH, SJ6_LFO2_PWM_ROUTE, SJ6_LFO2_PWM_BASE}},
++                    {PT_LFO, {ORIG_PAGE_ENGINE + 10, ORIG_PAGE_ENGINE + 11, ORIG_PAGE_NONE, ORIG_PAGE_NONE}},
++                    {PT_CHORUS, {SJ6_CHORUS_I, SJ6_CHORUS_II, SJ6_CHORUS_RATE, SJ6_CHORUS_MIX}},
++                    {PT_VIBRATO, {SJ6_VIBRATO_DEPTH, SJ6_VIBRATO_RATE, ORIG_PAGE_NONE, ORIG_PAGE_NONE}},
++                    {PT_TUNING, {SJ6_LAYER1_SEMI, SJ6_LAYER2_SEMI, SJ6_LAYER1_FINE, SJ6_LAYER2_FINE}},
+                 };
+                 /* Leave room for the ARPEGGIATOR and the legacy SOUND selector
+                  * after the last synth control page. Query and device agree. */
+@@ -2215,25 +2373,27 @@
+             if (kind == ORIGINAL_SOUND_SYNTHONE) {
+                 enum { S1_PAGE_ID_FITS = 1 / (S1_MONO_GLIDE < ORIG_PAGE_ENGINE && S1_MONO_LEGATO < ORIG_PAGE_ENGINE) };
+                 static const original_page_row_t s1_pages[] = {
+-                    {"OSCILLATOR", {0, 1, S1_OSC1_MORPH, S1_OSC2_MORPH}},
+-                    {"OSC MIX", {S1_OSC2_LEVEL, S1_SUB_LEVEL, S1_SUB_OCTAVE, S1_SUB_WAVE}},
+-                    {"FM / NOISE", {S1_FM_LEVEL, S1_FM_INDEX, S1_NOISE_LEVEL, S1_NOISE_LFO}},
+-                    {"FILTER", {2, 3, 4, ORIG_PAGE_S1_LINK}},
+-                    {"FILTER MODE", {S1_FILTER_TYPE, S1_ADSR_TRACK, S1_CUTOFF_LFO, ORIG_PAGE_NONE}},
+-                    {"FILTER ADSR", {5, 6, 7, 8}},
+-                    {"AMP ADSR", {9, 10, 11, 12}},
+-                    {"VOICE", {S1_MONO_LEGATO, S1_OSC1_SEMI, S1_OSC2_SEMI, S1_OSC2_DETUNE}},
+-                    {"LFO", {S1_LFO1_RATE, S1_LFO1_SHAPE, S1_LFO2_RATE, S1_LFO2_SHAPE}},
+-                    {"TEMPO SYNC", {S1_LFO_SYNC, S1_LFO1_DEPTH, S1_LFO2_DEPTH, ORIG_PAGE_NONE}},
+-                    {"MOD ROUTE", {S1_OSC_MIX_LFO, S1_RESONANCE_LFO, S1_FM_LFO, S1_AMP_DECAY_LFO}},
+-                    {"EFFECT", {ORIG_PAGE_ENGINE + ORIGINAL_SYNTHONE_CRUSH, S1_DELAY_MIX, S1_REVERB_MIX, S1_REVERB_HP}},
+-                    {"OUTPUT", {S1_WIDEN, S1_PART_LEVEL, S1_VOICE_MODE, S1_MONO_GLIDE}},
++                    {PT_OSCILLATOR, {0, 1, S1_OSC1_MORPH, S1_OSC2_MORPH}},
++                    {PT_OSC_MIX, {S1_OSC2_LEVEL, S1_SUB_LEVEL, S1_SUB_OCTAVE, S1_SUB_WAVE}},
++                    {PT_FM_NOISE, {S1_FM_LEVEL, S1_FM_INDEX, S1_NOISE_LEVEL, S1_NOISE_LFO}},
++                    {PT_FILTER, {2, 3, 4, ORIG_PAGE_S1_LINK}},
++                    {PT_FILTER_MODE, {S1_FILTER_TYPE, S1_ADSR_TRACK, S1_CUTOFF_LFO, ORIG_PAGE_NONE}},
++                    {PT_FILTER_ADSR, {5, 6, 7, 8}},
++                    {PT_AMP_ADSR, {9, 10, 11, 12}},
++                    {PT_VOICE, {S1_MONO_LEGATO, S1_OSC1_SEMI, S1_OSC2_SEMI, S1_OSC2_DETUNE}},
++                    {PT_LFO, {S1_LFO1_RATE, S1_LFO1_SHAPE, S1_LFO2_RATE, S1_LFO2_SHAPE}},
++                    {PT_TEMPO_SYNC, {S1_LFO_SYNC, S1_LFO1_DEPTH, S1_LFO2_DEPTH, ORIG_PAGE_NONE}},
++                    {PT_MOD_ROUTE, {S1_OSC_MIX_LFO, S1_RESONANCE_LFO, S1_FM_LFO, S1_AMP_DECAY_LFO}},
++                    {PT_EFFECT, {ORIG_PAGE_ENGINE + ORIGINAL_SYNTHONE_CRUSH, S1_DELAY_MIX, S1_REVERB_MIX, S1_REVERB_HP}},
++                    {PT_OUTPUT, {S1_WIDEN, S1_PART_LEVEL, S1_VOICE_MODE, S1_MONO_GLIDE}},
+                 };
++                _Static_assert(sizeof s1_pages / sizeof *s1_pages + 2u <= MAXPAGES,
++                               "Synth One pages must leave room for ARP and SOUND");
+                 const unsigned effect_page = sizeof s1_pages / sizeof s1_pages[0] - 2;
+                 add_original_extra_pages(emit, s1_pages, effect_page, b, R_S1PATCH);
+ #if X0X_ARP_HOOKS
+                 if (arp_engine(b))
+-                    add_page(emit, "ARPEGGIATOR", PR(R_ARP, ARP_F_ON, b, 0), PR(R_ARP, ARP_F_RANGE, b, 0),
++                    add_page(emit, PT_ARPEGGIATOR, PR(R_ARP, ARP_F_ON, b, 0), PR(R_ARP, ARP_F_RANGE, b, 0),
+                              PR(R_ARP, ARP_F_MODE, b, 0), PR(R_ARP, ARP_F_SPEED, b, 0));
+ #endif
+                 add_original_extra_pages(emit, s1_pages + effect_page, 2, b, R_S1PATCH);
+@@ -2251,21 +2411,21 @@
+ #endif
+ #if X0X_ARP_HOOKS && !X0X_S1_EXTRA
+                 if (kind == ORIGINAL_SOUND_SYNTHONE && row == count - 1 && arp_engine(b))
+-                    add_page(emit, "ARPEGGIATOR", PR(R_ARP, ARP_F_ON, b, 0), PR(R_ARP, ARP_F_RANGE, b, 0),
++                    add_page(emit, PT_ARPEGGIATOR, PR(R_ARP, ARP_F_ON, b, 0), PR(R_ARP, ARP_F_RANGE, b, 0),
+                              PR(R_ARP, ARP_F_MODE, b, 0), PR(R_ARP, ARP_F_SPEED, b, 0));
+ #endif
+                 add_page_refs(emit, titles[row],refs,0,0);
+             }
+ #if X0X_ARP_HOOKS
+             if (kind == ORIGINAL_SOUND_JUNO && arp_engine(b))
+-                add_page(emit, "ARPEGGIATOR", PR(R_ARP, ARP_F_ON, b, 0), PR(R_ARP, ARP_F_RANGE, b, 0),
++                add_page(emit, PT_ARPEGGIATOR, PR(R_ARP, ARP_F_ON, b, 0), PR(R_ARP, ARP_F_RANGE, b, 0),
+                          PR(R_ARP, ARP_F_MODE, b, 0), PR(R_ARP, ARP_F_SPEED, b, 0));
+ #endif
+-            add_page(emit, "SOUND",PR(R_BENGINE,0,b,0),PR(R_BPRESET,0,b,0),PR(R_BSTATUS,0,b,0),NONE);
++            add_page(emit, PT_SOUND,PR(R_BENGINE,0,b,0),PR(R_BPRESET,0,b,0),PR(R_BSTATUS,0,b,0),NONE);
+         } else {
+             emit->group = GR_PAT;                           /* (its groove and retrigs: SEQ) */
+             do { static const pref_t refs[4] = {PR(R_BRKSLOT, 0, 0, 0), PR(R_BRKSLOT, 1, 0, 0), PR(R_BRKSET, 0, 0, BRK_BCHANCE), PR(R_ENG, T_BRK, 0, 1)};
+-            add_page_refs(emit, "LOOPS", refs, 0, 0); } while (0);
++            add_page_refs(emit, PT_LOOPS, refs, 0, 0); } while (0);
+             more(emit, PR(R_ENG, T_BRK, 0, 0));
+             more(emit, PR(R_BRKSLICE, 0, 0, 0));
+             more(emit, PR(R_BRKSLICE, 1, 0, 0));
+@@ -2275,52 +2435,52 @@
+         int b = p - PART_303A;
+         emit->group = GR_PAT;
+         do { static const pref_t refs[4] = {PR(R_GEN, 0, 0, G_DENS), PR(R_GEN, 0, 0, G_ACC), PR(R_GEN, 0, 0, G_SLIDE), PR(R_GEN, 0, 0, G_OCTS)};
+-            add_page_refs(emit, "GENERATE", refs, 1, b); } while (0);
++            add_page_refs(emit, PT_GENERATE, refs, 1, b); } while (0);
+         do { static const pref_t refs[4] = {PR(R_GEN, 0, 0, G_ROOT), PR(R_GEN, 0, 0, G_SCALE), PR(R_GEN, 0, 0, G_BASE), PR(R_GEN, 0, 0, G_MUT)};
+-            add_page_refs(emit, "SCALE", refs, 1, b); } while (0);
++            add_page_refs(emit, PT_SCALE, refs, 1, b); } while (0);
+         break;
+     }
+     case V_FX:                                         /* (each part's sends: MIX's PARTS) */
+         do { static const pref_t refs[4] = {PR(R_ENG, T_FX, 0, FX_RV_DECAY), PR(R_ENG, T_FX, 0, FX_RV_TONE), PR(R_ENG, T_FX, 0, FX_RV_HPF), PR(R_ENG, T_FX, 0, FX_RV_LEVEL)};
+-            add_page_refs(emit, "REVERB", refs, 0, 0); } while (0);
++            add_page_refs(emit, PT_REVERB, refs, 0, 0); } while (0);
+         do { static const pref_t refs[4] = {PR(R_ENG, T_FX, 0, FX_DL_TIME), PR(R_ENG, T_FX, 0, FX_DL_FDBK), PR(R_ENG, T_FX, 0, FX_DL_TONE), PR(R_TAPE, 0, 0, 0)};
+-            add_page_refs(emit, "DELAY", refs, 0, 0); } while (0);
++            add_page_refs(emit, PT_DELAY, refs, 0, 0); } while (0);
+             do { static const pref_t refs[] = {PR(R_ENG, T_FX, 0, FX_RV_HPF), PR(R_ENG, T_FX, 0, FX_RV_LEVEL), PR(R_ENG, T_FX, 0, FX_DL_HPF), PR(R_ENG, T_FX, 0, FX_DL_LEVEL), PR(R_ENG, T_FX, 0, FX_DL_PING)};
+                 more_refs(emit, refs, 5, 0, 0); } while (0);
+         break;
+     case V_MIX:                                        /* a channel picked with a black key, its four knobs */
+         do { static const pref_t refs[4] = {PR(R_ENG, T_MIX, 0, MX_LEVEL), PR(R_ENG, T_MIX, 0, MX_PAN), PR(R_ENG, T_MIX, 0, MX_REV), PR(R_ENG, T_MIX, 0, MX_DLY)};
+-            add_page_refs(emit, "PARTS", refs, 2, mixsel); } while (0);
++            add_page_refs(emit, PT_PARTS, refs, 2, mixsel); } while (0);
+         for (p = 0; p < NKIT; p++) {                    /* each drum machine's tracks: LEVEL, PAN, REV, DLY */
+             int t = p ? T_808 : T_909, v = selection[p];
+-            add_page(emit, p ? "808 MIX" : "909 MIX", drum_mix_ref(t, v, 0), drum_mix_ref(t, v, 1), drum_mix_ref(t, v, 2),
++            add_page(emit, p ? PT_808_MIX : PT_909_MIX, drum_mix_ref(t, v, 0), drum_mix_ref(t, v, 1), drum_mix_ref(t, v, 2),
+                      drum_mix_ref(t, v, 3));
+         }
+         do { static const pref_t refs[4] = {PR(R_ENG, T_FX, 0, FX_DRIVE), PR(R_ENG, T_MST, 0, MST_COMP1), PR(R_ENG, T_MST, 0, MST_PUMP), PR(R_ENG, T_MST, 0, MST_DJF)};
+-            add_page_refs(emit, "MASTER", refs, 0, 0); } while (0);
++            add_page_refs(emit, PT_MASTER, refs, 0, 0); } while (0);
+             do { static const pref_t refs[] = {PR(R_ENG, T_MST, 0, MST_THRESH), PR(R_ENG, T_MST, 0, MST_RATIO), PR(R_ENG, T_MST, 0, MST_ATTACK), PR(R_ENG, T_MST, 0, MST_RELEASE), PR(R_ENG, T_MST, 0, MST_MAKEUP), PR(R_ENG, T_MST, 0, MST_MIX), PR(R_ENG, T_MST, 0, MST_PUMPSRC), PR(R_ENG, T_MST, 0, MST_RESO), PR(R_ENG, T_MST, 0, MST_LIMIT), PR(R_ENG, T_FX, 0, FX_DIST), PR(R_ENG, T_FX, 0, FX_COMP), PR(R_ENG, T_FX, 0, FX_VOLUME)};
+                 more_refs(emit, refs, 12, 0, 0); } while (0);
+         /* sibling of MASTER: same knobs, post-master eng_scope wave (Baud Girl ≤10 Hz redraw) */
+         do { static const pref_t refs[4] = {PR(R_ENG, T_FX, 0, FX_DRIVE), PR(R_ENG, T_MST, 0, MST_COMP1), PR(R_ENG, T_MST, 0, MST_PUMP), PR(R_ENG, T_MST, 0, MST_DJF)};
+-            add_page_refs(emit, "WAVE", refs, 0, 0); } while (0);
++            add_page_refs(emit, PT_WAVE, refs, 0, 0); } while (0);
+         break;
+ #if X0X_UI_PERF
+     case V_PERF:
+         do { static const pref_t refs[4] = {PR(R_STALLS, 0, 0, 0), NONE, NONE, NONE};
+-            add_page_refs(emit, "PERF", refs, 0, 0); } while (0);
++            add_page_refs(emit, PT_PERF, refs, 0, 0); } while (0);
+         break;
+ #endif
+     case V_SONG:
+         do { static const pref_t refs[4] = {PR(R_SBAR, 0, 0, 0), PR(R_SPAT, PART_909, 0, 0), PR(R_SPAT, PART_808, 0, 0), PR(R_SPAT, PART_BRK, 0, 0)};
+-            add_page_refs(emit, "BAR", refs, 0, 0); } while (0);
++            add_page_refs(emit, PT_BAR, refs, 0, 0); } while (0);
+         do { static const pref_t refs[4] = {PR(R_SBAR, 0, 0, 0), PR(R_SPAT, PART_303B, 0, 0), PR(R_SPAT, PART_303A, 0, 0), PR(R_SREP, 0, 0, 0)};
+-            add_page_refs(emit, "BAR", refs, 0, 0); } while (0);
++            add_page_refs(emit, PT_BAR, refs, 0, 0); } while (0);
+         break;
+     default: break;
+     }
+     if ((query ? query->n : out->n) == 0)
+         do { static const pref_t refs[4] = {NONE, NONE, NONE, NONE};
+-            add_page_refs(emit, "", refs, 0, 0); } while (0);
++            add_page_refs(emit, PT_EMPTY, refs, 0, 0); } while (0);
+ }
+ 
+ static void build_pages(void)
+@@ -2389,8 +2549,23 @@
+ /* ===================================================================== lists === */
+ /* A list is rows of refs. SEL on a page opens the list of every page's knobs (the deep view);
+  * GLOBAL is a list of its own. SELECT moves, ALGORITHM changes, SEL runs an action. */
+-#define LIST_MAX 64
+-static pref_t list_rows[LIST_MAX] X0X_POOL;
++#define LIST_MAX 92
++typedef struct { uint8_t x, y, z; } list_ref_t;
++_Static_assert(R_NOTELOCK < 128 && sizeof(pages_t) + LIST_MAX * sizeof(list_ref_t) == 700,
++               "pages plus list must not grow the original POOL footprint");
++static list_ref_t list_rows[LIST_MAX] X0X_POOL;
++static pref_t list_ref(unsigned i)
++{
++    list_ref_t x=list_rows[i];
++    unsigned a=(x.x >> 7) | ((x.y & 15u) << 1);
++    return PR(x.x & 127u, a >= 30 ? a + 224 : a, x.y >> 4, x.z);
++}
++static void list_push(pref_t r)
++{
++    unsigned a = r.a >= 254 ? r.a - 224 : r.a;  /* GEN's two live-part sentinels */
++    if (r.kind >= 128 || a >= 32 || (r.a >= 30 && r.a < 254) || r.b >= 16 || ui.list_n >= LIST_MAX) return;
++    list_rows[ui.list_n++] = (list_ref_t){r.kind | (a & 1u) << 7, (a >> 1) | r.b << 4, r.c};
++}
+ static char list_title[16];
+ 
+ static void list_add(pref_t r)
+@@ -2398,10 +2573,11 @@
+     int i;
+     if (r.kind == R_NONE || ui.list_n >= LIST_MAX)
+         return;
+-    for (i = 0; i < ui.list_n; i++)                   /* a ref on two pages (LEVEL) lists once */
+-        if (list_rows[i].kind == r.kind && list_rows[i].a == r.a && list_rows[i].b == r.b && list_rows[i].c == r.c)
+-            return;
+-    list_rows[ui.list_n++] = r;
++    for (i = 0; i < ui.list_n; i++) {                 /* a ref on two pages (LEVEL) lists once */
++        pref_t old = list_ref(i);
++        if (old.kind == r.kind && old.a == r.a && old.b == r.b && old.c == r.c) return;
++    }
++    list_push(r);
+ }
+ 
+ /* a list section's name: whose values follow */
+@@ -2424,7 +2600,7 @@
+     }
+ }
+ 
+-static int list_skip(int i) { return i < ui.list_n && list_rows[i].kind == R_HDR; }
++static int list_skip(int i) { return i < ui.list_n && list_ref(i).kind == R_HDR; }
+ 
+ static void open_list_of_pages(void)
+ {
+@@ -2436,14 +2612,14 @@
+             groups++;
+     for (p = 0; p < pg.n; p++) {
+         if (groups > 1 && pg.group[p] != last && ui.list_n < LIST_MAX)
+-            list_rows[ui.list_n++] = PR(R_HDR, pg.group[p], 0, 0);
++            list_push(PR(R_HDR, pg.group[p], 0, 0));
+         last = pg.group[p];
+         for (k = 0; k < 4; k++)
+             if (ui.view != V_FX || p || k < 2)         /* low cut / return shortcuts keep their MORE rows */
+                 list_add(pg.r[p][k]);
+     }
+     if (pg.nmore && ui.list_n < LIST_MAX)              /* the knobs no page has */
+-        list_rows[ui.list_n++] = PR(R_HDR, GR_MORE, 0, 0);
++        list_push(PR(R_HDR, GR_MORE, 0, 0));
+     for (k = 0; k < pg.nmore; k++)
+         list_add(*page_more(&pg, k));
+     if (ui.view == V_HOME)
+@@ -4801,8 +4977,8 @@
+         s = t;
+     }
+     ui.list_sel = (uint8_t)s;
+-    if (list_rows[s].kind == R_BRKSLICE || list_rows[s].kind == R_BRKSLOT)
+-        ui.brk_count_target = (uint8_t)(list_rows[s].a != 0);
++    if (list_ref(s).kind == R_BRKSLICE || list_ref(s).kind == R_BRKSLOT)
++        ui.brk_count_target = (uint8_t)(list_ref(s).a != 0);
+     if (ui.list_sel < ui.list_top)
+         ui.list_top = ui.list_sel;
+     int visible = visible_list_rows();
+@@ -4812,7 +4988,7 @@
+ 
+ static void list_enter(void)
+ {
+-    pref_t r = list_rows[ui.list_sel];
++    pref_t r = list_ref(ui.list_sel);
+     if (r.kind == R_SECTION) {global_section(r.a);return;}
+     if (r.kind != R_ACT)
+         return;
+@@ -4847,7 +5023,7 @@
+ #if BOARD_SMK37
+     smc_ui_cancel();
+ #endif
+-    pref_t r = list_rows[ui.list_sel];
++    pref_t r = list_ref(ui.list_sel);
+     if (d < 0 && ui.view == V_GLO && ui.glo_section >= 0) {
+         global_back();                                /* "<" leaves a settings section, as HOME */
+         return 1;                                     /* the held "<" must not edit the section index */
+@@ -5552,7 +5728,7 @@
+             ui.btn_used|=1u<<B_SEQ;
+             (void)step_lane_turn(e);
+         } else if (ui.overlay == O_LIST) {
+-            turn_ref(list_rows[ui.list_sel], e, EN_ALGO);
++            turn_ref(list_ref(ui.list_sel), e, EN_ALGO);
+         } else if (ui.view == V_SEQ && is_303() && ui.held_step >= 0) {
+             bstep_t *st = &cur_pat()->bass[bidx()].step[ui.held_step];
+             int v = (int)bstep_velocity(st) + e;
+@@ -6371,7 +6547,7 @@
+             }
+         }
+         int mix_kit=drum_mix_page();
+-        if(mix_kit>=0)name=pg.title[cur_page()];
++        if(mix_kit>=0)name=page_title(&pg, cur_page());
+         if(clip_mode)name="LP";
+         if(pickup)name=ui.msg;
+         sound_slab(0,0,240,HDR_H,0);
+@@ -6738,7 +6914,7 @@
+ /* Control rows share the existing main/knob strips; no framebuffer or UI state is added. */
+ static UI_DRAW const char *matrix_group(int page)
+ {
+-    const char *t = pg.title[page];
++    const char *t = page_title(&pg, page);
+     if (!strcmp_s(t,"FX")) {
+         int ty=matrix_value(pg.r[page][0]);
+         return ty==CHI_FX_OFF?"FX / OFF":ty==CHI_FX_COMP?"FX / MASTER":"FX / INSERT";
+@@ -6835,9 +7011,9 @@
+     int bank = engine_bass_bank(bidx());
+     synth_page_marker = bank == ORIGINAL_SOUND_SYNTHONE || bank == ORIGINAL_SOUND_JUNO;
+     if (ui.touched >= 0 && (int32_t)(ui.touch_until - plat_ms()) > 0)
+-        synth_focus_row = bank == ORIGINAL_SOUND_JUNO ? !strcmp_s(pg.title[page],"LFO RATE") :
++        synth_focus_row = bank == ORIGINAL_SOUND_JUNO ? !strcmp_s(page_title(&pg, page),"LFO RATE") :
+             bank == ORIGINAL_SOUND_SYNTHONE &&
+-            (!strcmp_s(pg.title[page],"EFFECT") || !strcmp_s(pg.title[page],"OUTPUT"));
++            (!strcmp_s(page_title(&pg, page),"EFFECT") || !strcmp_s(page_title(&pg, page),"OUTPUT"));
+ #endif
+     uint16_t col=matrix_col();
+     if(night) cv_rect(0,0,240,band==2?KNOB_H:BAND_H,SOUND_BASE);
+@@ -7680,7 +7856,7 @@
+         const x0x_param_t *d;
+         if (row >= ui.list_n)
+             break;
+-        r = list_rows[row];
++        r = list_ref(row);
+         if (r.kind == R_HDR) {                         /* a section: whose values follow */
+             char t[28];
+             hdr_name(r.a, t);
+@@ -8098,8 +8274,8 @@
+     int page = cur_page(), i = ui.touched;
+     if (ui.view != V_PART || !is_303() || i < 0 || i > 3 ||
+         (int32_t)(ui.touch_until - plat_ms()) <= 0 ||
+-        (strcmp_s(pg.title[page], "AMP ADSR") &&
+-         strcmp_s(pg.title[page], "FILTER ADSR"))) return 0;
++        (strcmp_s(page_title(&pg, page), "AMP ADSR") &&
++         strcmp_s(page_title(&pg, page), "FILTER ADSR"))) return 0;
+     r = pg.r[page][i];
+     return matrix_touch_matches(r, i);
+ }
+@@ -9765,7 +9941,7 @@
+ static UI_DRAW void knob_tag(char *t)
+ {
+     int g = pg.group[cur_page()], dm = drum_mix_page();
+-    const char *ti = pg.title[cur_page()];
++    const char *ti = page_title(&pg, cur_page());
+     if (lock_step() >= 0) {
+         put_i(put_s(put_s(t, is_drum() ? engine_voice_name(ui.part == PART_909 ? T_909 : T_808, ui.sel[ui.part])
+                                         : part_name(ui.part)), " P-LOCK STEP "), lock_step() + 1);
+@@ -9793,9 +9969,9 @@
+         put_s(t, ti);
+     {   /* a section over several pages (same name): which of them, "BD (1/2)" */
+         int p = cur_page(), a = p, b = p;
+-        while (a > 0 && !strcmp_s(pg.title[a - 1], ti))
++        while (a > 0 && !strcmp_s(page_title(&pg, a - 1), ti))
+             a--;
+-        while (b + 1 < pg.n && !strcmp_s(pg.title[b + 1], ti))
++        while (b + 1 < pg.n && !strcmp_s(page_title(&pg, b + 1), ti))
+             b++;
+         if (b > a) {
+             char *q = t;
+@@ -10404,7 +10580,7 @@
+ #endif
+     if(ui.overlay!=O_LIST || ui.help) peer_scroll.active=0;
+     else { int visible=0;for(unsigned row=ui.list_top;row<ui.list_n && row<ui.list_top+6u;row++)
+-        if(list_rows[row].kind==R_BTNAME)visible=1;
++        if(list_ref(row).kind==R_BTNAME)visible=1;
+         if(!visible)peer_scroll.active=0; }
+     undo_tick();
+     pattern_sound_tick();
+--- a/firmware/src/app/ui_break_layout_main.h
++++ b/firmware/src/app/ui_break_layout_main.h
+@@ -81,7 +81,7 @@
+     /* Same physical panel crosses the strip boundary; no buffer repartition. */
+     night_panel(3,146-off,234,64,0);
+     /* Keep Q descenders above the main/knob strip boundary at y158. */
+-    cv_text(10,vc(&FONT_T,147-off,10),&FONT_T,pg.title[cur_page()],col);
++    cv_text(10,vc(&FONT_T,147-off,10),&FONT_T,page_title(&pg, cur_page()),col);
+     if(pg.n>1){q=put_i(t,cur_page()+1);put_i(put_s(q," / "),pg.n);text_r(230,vc(&FONT_T,147-off,10),&FONT_T,t,C_GRAY);}
+ }
+ /* One BREAK sequence register for persistent metadata and every step lane.
+--- a/firmware/src/app/ui_original_controls.h
++++ b/firmware/src/app/ui_original_controls.h
+@@ -22,7 +22,7 @@
+ static const int8_t ui_original_juno_rows[UI_ORIGINAL_JUNO_PAGES][4] = {
+  {0,1,12,15}, {2,3,4,9}, {5,6,7,8}, {10,11,13,14}
+ };
+-static const char *const ui_original_juno_titles[] = {"OSCILLATOR","FILTER","ENVELOPE","LFO/CHORUS"};
++static const uint8_t ui_original_juno_titles[] = {PT_OSCILLATOR,PT_FILTER,PT_ENVELOPE,PT_LFO_CHORUS};
+ #if X0X_SYNTHONE_PATCH
+ /* Indices into Sound's stable storage order. Factory IDs belong to the
+  * descriptor and are never passed to the bend/damper performance API. */
+@@ -30,18 +30,18 @@
+     {0,1,-1,-1}, {2,3,4,-1}, {5,6,7,8}, {9,10,11,12},
+     {ORIGINAL_SYNTHONE_CRUSH,-1,-1,-1}
+ };
+-static const char *const ui_original_synthone_titles[] = {
+-    "OSCILLATOR", "FILTER", "FILTER ADSR", "AMP ADSR", "EFFECT"
++static const uint8_t ui_original_synthone_titles[] = {
++    PT_OSCILLATOR, PT_FILTER, PT_FILTER_ADSR, PT_AMP_ADSR, PT_EFFECT
+ };
+ #else
+ static const int8_t ui_original_synthone_rows[][4] = {{ORIGINAL_SYNTHONE_CRUSH,-1,-1,-1}};
+-static const char *const ui_original_synthone_titles[] = {"EFFECT"};
++static const uint8_t ui_original_synthone_titles[] = {PT_EFFECT};
+ #endif
+-static const char *const ui_original_chicago_titles[] = {
+-    "OSCILLATOR", "FILTER 1", "FILTER 2", "ENVELOPE", "AMPLIFIER", "ARPEGGIATOR", "EFFECT"
++static const uint8_t ui_original_chicago_titles[] = {
++    PT_OSCILLATOR, PT_FILTER_1, PT_FILTER_2, PT_ENVELOPE, PT_AMPLIFIER, PT_ARPEGGIATOR, PT_EFFECT
+ };
+-static const char *const ui_original_miami_titles[] = {
+-    "CARRIER", "XMOD", "FILTER", "WOBBLE", "OUTPUT"
++static const uint8_t ui_original_miami_titles[] = {
++    PT_CARRIER, PT_XMOD, PT_FILTER, PT_WOBBLE, PT_OUTPUT
+ };
+ static const char *ui_original_name(unsigned kind, unsigned id)
+ {

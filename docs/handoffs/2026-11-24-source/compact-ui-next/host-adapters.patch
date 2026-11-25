@@ -1,0 +1,210 @@
+--- a/host/x0x_host.c
++++ b/host/x0x_host.c
+@@ -872,7 +872,7 @@
+     else if (!strcmp(what, "page"))                 /* the page of the view on the screen (0-based) */
+         got = cur_page();
+     else if (!strcmp(what, "rowval"))               /* the value of the selected row of the open list (pref_get) */
+-        got = ui.overlay == O_LIST ? pref_get(list_rows[ui.list_sel]) : -1;
++        got = ui.overlay == O_LIST ? pref_get(list_ref(ui.list_sel)) : -1;
+     else if (!strcmp(what, "arrowsteps"))
+         got = (int)arrow_steps;
+     else if (!strcmp(what, "setsize"))              /* sizeof settings_t */
+--- a/tests/host/ui_synthone_sync_storage_test.c
++++ b/tests/host/ui_synthone_sync_storage_test.c
+@@ -42,12 +42,12 @@
+     ui.part = PART_303A+owner;
+     set_view(V_PART);
+     build_pages();
+-    for (int i = 0; i < pg.n && strcmp(title, pg.title[cur_page()]); ++i) {
++    for (int i = 0; i < pg.n && strcmp(title, page_title(&pg, cur_page())); ++i) {
+         now_ms += 180;
+         enc_acc[EN_SELECT] = 1;
+         input();
+     }
+-    CHECK(!strcmp(title, pg.title[cur_page()]));
++    CHECK(!strcmp(title, page_title(&pg, cur_page())));
+ }
+ 
+ static void knob_turn(unsigned col, int delta)
+--- a/tests/host/ui_synthone_filter_mode_test.c
++++ b/tests/host/ui_synthone_filter_mode_test.c
+@@ -48,12 +48,12 @@
+ 
+ static void visit(const char *title)
+ {
+-    for (int i = 0; i < pg.n && strcmp(title, pg.title[cur_page()]); ++i) {
++    for (int i = 0; i < pg.n && strcmp(title, page_title(&pg, cur_page())); ++i) {
+         now_ms += 180;
+         enc_acc[EN_SELECT] = 1;
+         input();
+     }
+-    CHECK(!strcmp(title, pg.title[cur_page()]));
++    CHECK(!strcmp(title, page_title(&pg, cur_page())));
+ }
+ 
+ static void detent(unsigned col, int n)
+--- a/tests/host/ui_arp_engine_test.c
++++ b/tests/host/ui_arp_engine_test.c
+@@ -12,7 +12,7 @@
+ static void tap_pad(int w){pad_down(w);pad_up();}
+ static void turn(int k,int e){enc_acc[EN_K1+k]=e;++now_ms;input();render(4);ui_frame();}
+ static void tap_panel(int b){held_btn=1u<<b;++now_ms;input();held_btn=0;++now_ms;input();render(4);}
+-static int page_named(const char *t){for(int i=0;i<pg.n;i++)if(!strcmp(pg.title[i],t))return i;return -1;}
++static int page_named(const char *t){for(int i=0;i<pg.n;i++)if(!strcmp(page_title(&pg, i),t))return i;return -1;}
+ static void engine_case(int kind,const char *tag)
+ {
+     engine_arp_settings s; engine_arp_steps st; char name[64];
+@@ -75,7 +75,7 @@
+     EXPECT(cur_page()==0&&ui.overlay==O_NONE);
+     unsigned edits=0;
+     for(int page=0;page<4;page++) {
+-        EXPECT(cur_page()==page&&!strcmp(pg.title[cur_page()],titles[page]));
++        EXPECT(cur_page()==page&&!strcmp(page_title(&pg, cur_page()),titles[page]));
+         for(int k=0;k<4;k++) {
+             pref_t r=pg.r[page][k];
+             int id=ids[page][k];
+@@ -96,7 +96,7 @@
+         now_ms+=160; enc_acc[EN_SELECT]=1;input();
+     }
+     EXPECT(edits==0xffffu);
+-    EXPECT(cur_page()==4&&!strcmp(pg.title[cur_page()],"ARPEGGIATOR"));
++    EXPECT(cur_page()==4&&!strcmp(page_title(&pg, cur_page()),"ARPEGGIATOR"));
+ }
+ #endif
+ #ifndef ARP_FIXTURE_MAIN
+--- a/tests/host/ui_synthone_oscillator_editor_test.c
++++ b/tests/host/ui_synthone_oscillator_editor_test.c
+@@ -10,7 +10,7 @@
+ static void visit_page(const char *name)
+ {
+     for (int i = 0; i < pg.n; ++i) {
+-        if (!strcmp(pg.title[cur_page()], name)) return;
++        if (!strcmp(page_title(&pg, cur_page()), name)) return;
+         now_ms += 160;
+         enc_acc[EN_SELECT] = 1;
+         input();
+--- a/tests/host/synth_init_test_helpers.h
++++ b/tests/host/synth_init_test_helpers.h
+@@ -48,12 +48,12 @@
+ 
+ static void visit(const char *title)
+ {
+-    for (int i = 0; i < pg.n && strcmp(title, pg.title[cur_page()]); ++i) {
++    for (int i = 0; i < pg.n && strcmp(title, page_title(&pg, cur_page())); ++i) {
+         now_ms += 180;
+         enc_acc[EN_SELECT] = 1;
+         input();
+     }
+-    CHECK(!strcmp(title, pg.title[cur_page()]));
++    CHECK(!strcmp(title, page_title(&pg, cur_page())));
+ }
+ 
+ static void detent(unsigned col, int n)
+--- a/tests/host/ui_superj6_knobs_test.c
++++ b/tests/host/ui_superj6_knobs_test.c
+@@ -26,7 +26,7 @@
+ static void select_page(const char *title)
+ {
+     for (int i = 0; i < pg.n; ++i) {
+-        if (!strcmp(pg.title[cur_page()], title)) return;
++        if (!strcmp(page_title(&pg, cur_page()), title)) return;
+         now_ms += 160;
+         enc_acc[EN_SELECT] = 1;
+         input();
+--- a/tests/host/ui_superj6_hz_test.c
++++ b/tests/host/ui_superj6_hz_test.c
+@@ -34,7 +34,7 @@
+ {
+     build_pages();
+     for (unsigned i = 0; i < (unsigned)pg.n; ++i) {
+-        if (!strcmp(pg.title[cur_page()], "LFO RATE")) return;
++        if (!strcmp(page_title(&pg, cur_page()), "LFO RATE")) return;
+         now_ms += 160;
+         enc_acc[EN_SELECT] = 1;
+         input();
+--- a/tests/host/ui_superj6_pwm1_lfo2_test.c
++++ b/tests/host/ui_superj6_pwm1_lfo2_test.c
+@@ -17,12 +17,12 @@
+ static void visit(const char *name)
+ {
+     build_pages();
+-    for (int n = 0; n < pg.n && strcmp(pg.title[cur_page()], name); ++n) {
++    for (int n = 0; n < pg.n && strcmp(page_title(&pg, cur_page()), name); ++n) {
+         now_ms += 200;
+         enc_acc[EN_SELECT] = 1;
+         input();
+     }
+-    CHECK(!strcmp(pg.title[cur_page()], name));
++    CHECK(!strcmp(page_title(&pg, cur_page()), name));
+     smc_peek_cancel();
+     smc_page_set(cur_page());
+ }
+--- a/tests/host/smc_ui_test.c
++++ b/tests/host/smc_ui_test.c
+@@ -408,7 +408,7 @@
+     /* A keyboard list cannot replace any mixer destination. */
+     pref_t held[8];for(int n=0;n<8;n++)held[n]=smc_knob_target(n);
+     ui.overlay=O_LIST;ui.list_top=0;ui.list_n=6;
+-    for(int n=0;n<6;n++)list_rows[n]=smc_home_target((n+3)%8);
++    ui.list_n=0; for(int n=0;n<6;n++)list_push(smc_home_target((n+3)%8));
+     for(int n=0;n<8;n++)CHECK(smc_same(held[n],smc_knob_target(n)));
+     check_distinct();
+     puts("PASS maps: both kits/banks, production descriptors, keyboard list isolation");
+@@ -460,7 +460,7 @@
+                   : smc_same(pg.r[page][k], PR(R_ENG,t,v,id)));
+         }
+         /* Page keys store11chars; the visible graph title is drawn as AMP. */
+-        if (rows == 1) TRACK_CHECK(!strcmp_s(pg.title[page], "AMP ENVELOP"));
++        if (rows == 1) TRACK_CHECK(!strcmp_s(page_title(&pg, page), "AMP ENVELOP"));
+         rows++;
+     }
+     TRACK_CHECK(rows == (amp >= 0 ? 2 : 1));
+--- a/tests/host/ui_synthone_filter_link_test.c
++++ b/tests/host/ui_synthone_filter_link_test.c
+@@ -8,7 +8,7 @@
+ static void visit(const char *title)
+ {
+     for (int i = 0; i < pg.n; ++i) {
+-        if (!strcmp(pg.title[cur_page()], title)) return;
++        if (!strcmp(page_title(&pg, cur_page()), title)) return;
+         now_ms += 160;
+         enc_acc[EN_SELECT] = 1;
+         input();
+--- a/tests/host/ui_synthone_patch_test.c
++++ b/tests/host/ui_synthone_patch_test.c
+@@ -72,7 +72,7 @@
+     CHECK(pg.n == 7);
+     for (int p = 0; p < pg.n; ++p) {
+         *page_of(V_PART) = (uint8_t)p;
+-        CHECK(!strcmp(pg.title[p], titles[p]));
++        CHECK(!strcmp(page_title(&pg, p), titles[p]));
+         ui.touched = -1;
+         ui.msg_until = 0;
+         capture(owner, p, -1, "overview");
+@@ -152,7 +152,7 @@
+      * scrolling. Capture each selected control after the complete panel frame. */
+     for (;;) {
+         unsigned row = ui.list_sel;
+-        pref_t r = list_rows[row];
++        pref_t r = list_ref(row);
+         if (r.kind == R_S1PATCH) {
+             CHECK(r.b == owner && r.c == seen++);
+             CHECK(row >= ui.list_top && row < (unsigned)ui.list_top + 9);
+@@ -177,7 +177,7 @@
+         CHECK(ui.list_sel > row);
+     }
+     CHECK(seen == S1_PATCH_COUNT);
+-    CHECK(ui.list_sel + 1 == ui.list_n && list_rows[ui.list_sel].kind == R_BSTATUS);
++    CHECK(ui.list_sel + 1 == ui.list_n && list_ref(ui.list_sel).kind == R_BSTATUS);
+     ui_frame();
+     shot(owner ? "list-B-last" : "list-A-last");
+     button_tap(B_HOME);
+@@ -195,7 +195,7 @@
+     unsigned edited = 0, crush_edits = 0;
+     for (;;) {
+         unsigned row = ui.list_sel;
+-        pref_t ref = list_rows[row];
++        pref_t ref = list_ref(row);
+         if (ref.kind == R_S1PATCH) {
+             CHECK(ref.b == owner && ref.c == edited++);
+             const s1_patch_descriptor *d = s1_patch_at(ref.c);

@@ -1,0 +1,11 @@
+93d8268e5fffaa1d51a82e1b51cb6ba1c4b7a427e07b9614e52b43ee3491f297  base.out
+93d8268e5fffaa1d51a82e1b51cb6ba1c4b7a427e07b9614e52b43ee3491f297  candidate.out
+771 base.out
+102
+page-bytes=444 list-bytes=256
+checks=1456
+page-bytes=424 list-bytes=276
+checks=1456
+page-bytes=424 list-bytes=276
+checks=35
+PASS synthetic page index 16 and 85 list entries, SOUND stays last
