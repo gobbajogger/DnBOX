@@ -1,0 +1,127 @@
+--- a/firmware/src/app/x0x.h
++++ b/firmware/src/app/x0x.h
+@@ -57,7 +57,15 @@
+ #define PROJ_BT_CLK_IN 8u
+ #define PROJ_BT_SMC_CENTRAL 16u  /* connect to an SMC-Mixer instead of advertising at next boot */
+ #define PROJ_BT_SMC_USER 32u     /* SMC's editable User preset, rather than factory DAW mode */
++#if X0X_S1_KEYBOARD_HOLD
++/* Device-only Synth One key mapping (the original stores it in app settings),
++ * carried in the local settings object without growing the project layout. */
++#define PROJ_S1_WHITE_KEYS 64u
++#else
++#define PROJ_S1_WHITE_KEYS 0u
++#endif
+ #define PROJ_DEVICE_BT (1u | PROJ_BT_SMC_CENTRAL | PROJ_BT_SMC_USER)
++#define PROJ_DEVICE_PREFS (PROJ_DEVICE_BT | PROJ_S1_WHITE_KEYS)
+ #define PROJ_CLK_SRC(bt) ((uint8_t)((bt) >> 1 & 3u))
+ #define PROJ_A74_CLK_OFF 38u
+ /* M7a: all-ON retains the exact legacy settings/file bytes. Nonzero OFF
+--- a/firmware/src/app/project.c
++++ b/firmware/src/app/project.c
+@@ -105,7 +105,7 @@
+     s->keysound = 0;
+     s->autosave_off = 0;
+     s->clk_out = 1;
+-    s->bt = (uint8_t)((device_bt & PROJ_DEVICE_BT) | PROJ_BT_CLK_IN);   /* CLOCK SOURCE AUTO */
++    s->bt = (uint8_t)((device_bt & PROJ_DEVICE_PREFS) | PROJ_BT_CLK_IN);   /* CLOCK SOURCE AUTO */
+     s->notes_out = 0;
+     s->bpm_x10 = 1250;
+     s->accent_q7 = 88;
+@@ -800,7 +800,7 @@
+ #endif
+         s->notes_out > 1 || s->bpm_x10 < 200 || s->bpm_x10 > 2750 || s->accent_q7 > 127 ||
+         s->keysound > 1 || s->autosave_off > 1 || s->out_loud > 1 || s->usb_full > 1 ||
+-        (s->bt & 0xC0u) || !(s->bt & PROJ_BT_CLK_IN) || PROJ_CLK_SRC(s->bt) > SEQ_CLK_EXT ||
++        (s->bt & (0xC0u & ~PROJ_S1_WHITE_KEYS)) || !(s->bt & PROJ_BT_CLK_IN) || PROJ_CLK_SRC(s->bt) > SEQ_CLK_EXT ||
+         s->ck_ch < 2)
+         return -1;
+     for (i = 0; i < 12; i++)
+@@ -943,7 +943,7 @@
+ {
+     /* Device roles belong to this keyboard; loading music must not change its
+      * Bluetooth connection or opt-in control surface mode. */
+-    project_stage.set.bt = (uint8_t)((project_stage.set.bt & ~PROJ_DEVICE_BT) | (proj.set.bt & PROJ_DEVICE_BT));
++    project_stage.set.bt = (uint8_t)((project_stage.set.bt & ~PROJ_DEVICE_PREFS) | (proj.set.bt & PROJ_DEVICE_PREFS));
+     __builtin_memcpy(&proj, &project_stage, sizeof proj);
+     part_off_live = part_off_staged;
+     project_incompatible = 0; /* explicitly validated import/reset is the recovery boundary */
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -652,7 +652,7 @@
+ extern float s1_half_value(unsigned);
+ #endif
+ #if X0X_S1_KEYBOARD_HOLD
+-enum { R_S1KEY_HOLD=R_NOTELOCK+56, R_S1A4RESET=R_NOTELOCK+57 };
++enum { R_S1KEY_HOLD=R_NOTELOCK+56, R_S1A4RESET=R_NOTELOCK+57, R_S1WHITEKEYS=R_NOTELOCK+63 };
+ #if X0X_S1_SCALE_NATIVE
+ enum { R_S1SCALE=R_NOTELOCK+58 };
+ extern int s1_typed_scale_choose(unsigned,unsigned,int);
+@@ -1207,6 +1207,7 @@
+     }
+ #if X0X_S1_KEYBOARD_HOLD
+     case R_S1KEY_HOLD: {static const x0x_param_t pot={"KEY HOLD",1,0,0};return &pot;}
++    case R_S1WHITEKEYS: {static const x0x_param_t pot={"WHITE KEYS",1,0,ONOFF_N};return &pot;}
+     case R_S1A4RESET: {static const x0x_param_t pot={"RESET TUNING",1,0,0};return &pot;}
+ #if X0X_S1_SCALE_NATIVE
+     case R_S1SCALE: {static const x0x_param_t pot={"SCALE",S1C_SCALE_MAX,0,0};return &pot;}
+@@ -1474,6 +1475,7 @@
+     case R_S1CMP: {int pos=s1_cmp_position(r.b,r.c);return pos>=0 ? pos : 0;}
+ #if X0X_S1_KEYBOARD_HOLD
+     case R_S1KEY_HOLD:return engine_s1_key_hold(r.b);
++    case R_S1WHITEKEYS:return !!(proj.set.bt & PROJ_S1_WHITE_KEYS);
+     case R_S1A4RESET:return 0;
+ #if X0X_S1_SCALE_NATIVE
+     case R_S1SCALE:return proj.sound.v[T_MST][S1_SCALE_ROW+r.b][S1_SCALE_BYTE];
+@@ -1714,6 +1716,14 @@
+ #endif
+     if(r.kind==R_S1CMP){if(!pref_read_only(r) && v>=0 && v<=127 && s1_cmp_choose(r.b,r.c,(unsigned)v))mark_dirty();return;}
+ #if X0X_S1_KEYBOARD_HOLD
++    if(r.kind==R_S1WHITEKEYS){
++        if((unsigned)v<=1u) {
++            proj.set.bt=(uint8_t)((proj.set.bt & ~PROJ_S1_WHITE_KEYS) |
++                                 (v ? PROJ_S1_WHITE_KEYS : 0u));
++            mark_dirty();
++        }
++        return;
++    }
+     if(r.kind==R_S1KEY_HOLD){
+         if(!pref_read_only(r) && v>=0 && v<=1 && !engine_s1_key_set_hold(r.b,v))say("KEY HOLD BUSY",0);
+         return;
+@@ -3563,6 +3573,11 @@
+             add_page(emit, PT_PRESET, PR(R_BPATSND, 0, b, 0), NONE, NONE, NONE);   /* 0.0.25: this pattern's bass preset */
+             emit->group = GR_NONE;                          /* (not the pattern's: no P1 in its name) */
+             do { static const pref_t refs[4] = {PR(R_FREEPLAY, 0, 0, 0), NONE, NONE, NONE};
++#if X0X_S1_KEYBOARD_HOLD && DNBOX_TYPED_CONTROLS_NATIVE_TEST
++            if(engine_bass_bank(b)==ORIGINAL_SOUND_SYNTHONE)
++                add_page(emit, PT_KEYS, PR(R_FREEPLAY,b,0,0), PR(R_S1WHITEKEYS,0,0,0), NONE, NONE);
++            else
++#endif
+             add_page_refs(emit, PT_KEYS, refs, 1, b); } while (0);
+ #if X0X_ARP_HOOKS
+             if (arp_engine(b)) {                       /* 4: the 16 arp steps on the pads */
+@@ -6431,7 +6446,7 @@
+         return;
+     }
+ #endif
+-    if(r.kind==R_S1KEY_HOLD || r.kind==R_S1A4RESET){
++    if(r.kind==R_S1KEY_HOLD || r.kind==R_S1A4RESET || r.kind==R_S1WHITEKEYS){
+         if(e)pref_set_impl(r,e>0,1);
+         return;
+     }
+@@ -7883,6 +7898,16 @@
+     if(velocity) {
+         if(k->down[physical] || (k->suppressed&bit))return;
+         if(k->n>=UI_BASS_HELD_MAX){k->suppressed|=bit;return;}
++#if X0X_S1_KEYBOARD_HOLD
++        if((proj.set.bt & PROJ_S1_WHITE_KEYS) && engine_bass_bank(b)==ORIGINAL_SOUND_SYNTHONE) {
++            /* Pinned original Manager.swift whiteKeysOnlyMap: 12 local key
++             * positions yield seven consecutive degrees; black keys repeat
++             * the preceding white key. Retain the admitted transformed pitch
++             * through release so a mid-hold toggle can't strand the note. */
++            static const uint8_t degree[12]={0,0,1,1,2,3,3,4,4,5,5,6};
++            pitch=25+7*(pitch/12)+degree[pitch%12];
++        }
++#endif
+         k->pitch[physical]=(uint8_t)pitch;k->velocity[physical]=(uint8_t)velocity;
+         k->accent[physical]=(uint8_t)!!(ui.btn&(1u<<B_ENV));k->down[physical]=1;
+         unsigned old=k->n;k->order[k->n++]=(uint8_t)physical;

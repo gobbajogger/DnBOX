@@ -1,0 +1,113 @@
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -2275,6 +2275,13 @@
+             if (ty == 0x90 && SEQ_PART_OFF(&seq, TRK_BASS0 + k)) continue;
+             if (ty == 0x90 || ty == 0x80) {
+                 unsigned velocity = ty == 0x90 ? d2 : 0;
++#if X0X_S1_KEYBOARD_HOLD
++                /* Synth One Manager+MIDIListener: a zero-velocity Note On
++                 * already became Note Off above; sensitivity OFF pins only
++                 * positive external Note On velocity to 127. */
++                if (velocity && original_bass[k].kind==ORIGINAL_SOUND_SYNTHONE &&
++                    !(proj.set.bt & PROJ_S1_MIDI_VELOCITY)) velocity=127u;
++#endif
+                 /* External MIDI recording: accepted physical edges, as the pads do. */
+                 int slide = velocity && live_rec_legato(k, src) && bass_held[k] != d1;
+                 if (original_runtime_key(&original_bass[k], (unsigned)src, d1, velocity) != ORIGINAL_RUNTIME_OK) continue;
+@@ -2282,7 +2289,7 @@
+ #ifdef X0X_HOST
+                     bass_attacked[k] = (uint8_t)!slide;
+ #endif
+-                    seq_rec_bass(&seq, k, d1, d2, 1, src, (d2 >= 100 ? BS_ACCENT : 0) | (slide ? SEQ_REC_LEGATO : 0));
++                    seq_rec_bass(&seq, k, d1, (int)velocity, 1, src, (velocity >= 100u ? BS_ACCENT : 0) | (slide ? SEQ_REC_LEGATO : 0));
+                     bass_held[k] = d1; bass_held_src[k] = (uint8_t)src;
+                     bass_held_count[k] = original_bass[k].keys[src][d1];
+                     live_rec_accept(k, src, d1);
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -652,7 +652,7 @@
+ extern float s1_half_value(unsigned);
+ #endif
+ #if X0X_S1_KEYBOARD_HOLD
+-enum { R_S1KEY_HOLD=R_NOTELOCK+56, R_S1A4RESET=R_NOTELOCK+57, R_S1WHITEKEYS=R_NOTELOCK+63 };
++enum { R_S1KEY_HOLD=R_NOTELOCK+56, R_S1A4RESET=R_NOTELOCK+57, R_S1WHITEKEYS=R_NOTELOCK+63, R_S1MIDIVEL=R_NOTELOCK+64 };
+ #if X0X_S1_SCALE_NATIVE
+ enum { R_S1SCALE=R_NOTELOCK+58 };
+ extern int s1_typed_scale_choose(unsigned,unsigned,int);
+@@ -1208,6 +1208,7 @@
+ #if X0X_S1_KEYBOARD_HOLD
+     case R_S1KEY_HOLD: {static const x0x_param_t pot={"KEY HOLD",1,0,0};return &pot;}
+     case R_S1WHITEKEYS: {static const x0x_param_t pot={"WHITE KEYS",1,0,ONOFF_N};return &pot;}
++    case R_S1MIDIVEL: {static const x0x_param_t pot={"MIDI VELOCITY",1,0,ONOFF_N};return &pot;}
+     case R_S1A4RESET: {static const x0x_param_t pot={"RESET TUNING",1,0,0};return &pot;}
+ #if X0X_S1_SCALE_NATIVE
+     case R_S1SCALE: {static const x0x_param_t pot={"SCALE",S1C_SCALE_MAX,0,0};return &pot;}
+@@ -1476,6 +1477,7 @@
+ #if X0X_S1_KEYBOARD_HOLD
+     case R_S1KEY_HOLD:return engine_s1_key_hold(r.b);
+     case R_S1WHITEKEYS:return !!(proj.set.bt & PROJ_S1_WHITE_KEYS);
++    case R_S1MIDIVEL:return !!(proj.set.bt & PROJ_S1_MIDI_VELOCITY);
+     case R_S1A4RESET:return 0;
+ #if X0X_S1_SCALE_NATIVE
+     case R_S1SCALE:return proj.sound.v[T_MST][S1_SCALE_ROW+r.b][S1_SCALE_BYTE];
+@@ -1716,6 +1718,14 @@
+ #endif
+     if(r.kind==R_S1CMP){if(!pref_read_only(r) && v>=0 && v<=127 && s1_cmp_choose(r.b,r.c,(unsigned)v))mark_dirty();return;}
+ #if X0X_S1_KEYBOARD_HOLD
++    if(r.kind==R_S1MIDIVEL){
++        if((unsigned)v<=1u) {
++            proj.set.bt=(uint8_t)((proj.set.bt & ~PROJ_S1_MIDI_VELOCITY) |
++                                 (v ? PROJ_S1_MIDI_VELOCITY : 0u));
++            mark_dirty();
++        }
++        return;
++    }
+     if(r.kind==R_S1WHITEKEYS){
+         if((unsigned)v<=1u) {
+             proj.set.bt=(uint8_t)((proj.set.bt & ~PROJ_S1_WHITE_KEYS) |
+@@ -3575,7 +3585,7 @@
+             do { static const pref_t refs[4] = {PR(R_FREEPLAY, 0, 0, 0), NONE, NONE, NONE};
+ #if X0X_S1_KEYBOARD_HOLD && DNBOX_TYPED_CONTROLS_NATIVE_TEST
+             if(engine_bass_bank(b)==ORIGINAL_SOUND_SYNTHONE)
+-                add_page(emit, PT_KEYS, PR(R_FREEPLAY,b,0,0), PR(R_S1WHITEKEYS,0,0,0), NONE, NONE);
++                add_page(emit, PT_KEYS, PR(R_FREEPLAY,b,0,0), PR(R_S1WHITEKEYS,0,0,0), PR(R_S1MIDIVEL,0,0,0), NONE);
+             else
+ #endif
+             add_page_refs(emit, PT_KEYS, refs, 1, b); } while (0);
+@@ -6446,7 +6456,7 @@
+         return;
+     }
+ #endif
+-    if(r.kind==R_S1KEY_HOLD || r.kind==R_S1A4RESET || r.kind==R_S1WHITEKEYS){
++    if(r.kind==R_S1KEY_HOLD || r.kind==R_S1A4RESET || r.kind==R_S1WHITEKEYS || r.kind==R_S1MIDIVEL){
+         if(e)pref_set_impl(r,e>0,1);
+         return;
+     }
+--- a/firmware/src/app/x0x.h
++++ b/firmware/src/app/x0x.h
+@@ -61,11 +61,13 @@
+ /* Device-only Synth One key mapping (the original stores it in app settings),
+  * carried in the local settings object without growing the project layout. */
+ #define PROJ_S1_WHITE_KEYS 64u
++#define PROJ_S1_MIDI_VELOCITY 128u
+ #else
+ #define PROJ_S1_WHITE_KEYS 0u
++#define PROJ_S1_MIDI_VELOCITY 0u
+ #endif
+ #define PROJ_DEVICE_BT (1u | PROJ_BT_SMC_CENTRAL | PROJ_BT_SMC_USER)
+-#define PROJ_DEVICE_PREFS (PROJ_DEVICE_BT | PROJ_S1_WHITE_KEYS)
++#define PROJ_DEVICE_PREFS (PROJ_DEVICE_BT | PROJ_S1_WHITE_KEYS | PROJ_S1_MIDI_VELOCITY)
+ #define PROJ_CLK_SRC(bt) ((uint8_t)((bt) >> 1 & 3u))
+ #define PROJ_A74_CLK_OFF 38u
+ /* M7a: all-ON retains the exact legacy settings/file bytes. Nonzero OFF
+--- a/firmware/src/app/project.c
++++ b/firmware/src/app/project.c
+@@ -800,7 +800,7 @@
+ #endif
+         s->notes_out > 1 || s->bpm_x10 < 200 || s->bpm_x10 > 2750 || s->accent_q7 > 127 ||
+         s->keysound > 1 || s->autosave_off > 1 || s->out_loud > 1 || s->usb_full > 1 ||
+-        (s->bt & (0xC0u & ~PROJ_S1_WHITE_KEYS)) || !(s->bt & PROJ_BT_CLK_IN) || PROJ_CLK_SRC(s->bt) > SEQ_CLK_EXT ||
++        (s->bt & (0xC0u & ~PROJ_DEVICE_PREFS)) || !(s->bt & PROJ_BT_CLK_IN) || PROJ_CLK_SRC(s->bt) > SEQ_CLK_EXT ||
+         s->ck_ch < 2)
+         return -1;
+     for (i = 0; i < 12; i++)

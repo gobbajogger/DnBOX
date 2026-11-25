@@ -1,0 +1,57 @@
+--- a/firmware/src/app/original_runtime.c
++++ b/firmware/src/app/original_runtime.c
+@@ -811,13 +811,21 @@
+     int seq_changed=0;
+     if(was && p->kind==ORIGINAL_SOUND_JUNO && p->dsp.juno.synth.typed) {
+         seq_changed=a->cfg.seq_on!=c->seq_on;
+-        if(c->division!=a->cfg.division) {
+-            engine_arp_cfg prior=a->cfg;prior.division=c->division;
+-            if(!__builtin_memcmp(&prior,c,sizeof prior)) {
+-                a->cfg=*c;
+-                arp_params(p); /* keep actual note, current phase + latched gate */
+-                return 1;
+-            }
++        if (a->cfg.on == c->on && !seq_changed &&
++            (a->cfg.mode == ARP_SEQ) == (c->mode == ARP_SEQ)) {
++            /* Build9 writes Type/Octave/Interval, Division, Length and
++             * pattern cells into the running Saga. Only changing the active
++             * owner resets the phrase; editing these cannot turn notes off. */
++#if X0X_SJ6_GATE_DEADLINE_PROBE || X0X_SJ6_NATIVE_POSITIVE_GATE
++            /* The active Note Off has its own old deadline even when the
++             * knob edit changes only Division or aggregates several fields. */
++            if (c->division != a->cfg.division || c->speed != a->cfg.speed ||
++                c->gate != a->cfg.gate)
++                latchGateDeadline(&a->seq, &a->prm);
++#endif
++            a->cfg = *c;
++            arp_params(p);
++            return 1;
+         }
+     }
+ #endif
+--- a/firmware/src/dsp/synthone/sequencer/S1Sequencer.c
++++ b/firmware/src/dsp/synthone/sequencer/S1Sequencer.c
+@@ -168,9 +168,8 @@
+     return p->gateTicks;
+ }
+ #if X0X_SJ6_GATE_DEADLINE_PROBE || X0X_SJ6_NATIVE_POSITIVE_GATE
+-void S1Sequencer_liveGate(S1Sequencer *s,S1SequencerParams *p,unsigned percent)
++static void latchGateDeadline(S1Sequencer *s, const S1SequencerParams *p)
+ {
+-    if (p->seqGate == percent) return;
+ #if defined(X0X_SJ6_GATE_DEADLINE_PROBE) && X0X_SJ6_GATE_DEADLINE_PROBE
+     if (s->gateOpen && s->sequencerLastNotesCount && !s->editGateLatched) {
+         s->editGateTicks=p->gateTicks;
+@@ -188,6 +187,12 @@
+         s->liveGateTicks=p->gateTicks;
+ #endif
+ #endif
++}
++
++void S1Sequencer_liveGate(S1Sequencer *s,S1SequencerParams *p,unsigned percent)
++{
++    if (p->seqGate == percent) return;
++    latchGateDeadline(s,p);
+     p->seqGate=(uint8_t)percent;
+     S1Sequencer_setStep(p,p->arpSeqTempoMultiplier);
+ }

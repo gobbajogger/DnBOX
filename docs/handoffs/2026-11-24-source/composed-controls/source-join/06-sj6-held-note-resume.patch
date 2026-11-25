@@ -1,0 +1,90 @@
+--- a/firmware/src/app/original_runtime.c
++++ b/firmware/src/app/original_runtime.c
+@@ -441,10 +441,14 @@
+  * compact SuperJ6 uses this scheduler with its qualified Saga division and
+  * note rules. Live sources feed the held pool; main SEQUENCE playback bypasses it. */
+ #include "../dsp/synthone/sequencer/S1Sequencer.c"
++#if X0X_SJ6_ARP_ADAPTER_NATIVE
++static inline int sj6_arp_owner(const original_runtime_part *p)
++{ return p->kind == ORIGINAL_SOUND_JUNO && p->dsp.juno.synth.typed; }
++#endif
+ static int arp_engaged(const original_runtime_part *p)
+ {
+ #if X0X_SJ6_ARP_ADAPTER_NATIVE
+-    if(p->kind==ORIGINAL_SOUND_JUNO && p->dsp.juno.synth.typed)
++    if (sj6_arp_owner(p))
+         return p->arp.cfg.on || p->arp.cfg.seq_on;
+ #endif
+     return p->arp.cfg.on && (p->kind == ORIGINAL_SOUND_JUNO || p->kind == ORIGINAL_SOUND_SYNTHONE);
+@@ -839,6 +843,29 @@
+         S1Sequencer_init(&a->seq);  /* new mode starts without losing held keys */
+         a->fired=0;
+     }
++    if (now != was && sj6_arp_owner(p)) {
++        /* The physical held list belongs to the key input, not the active
++         * mode. Keep each note's velocity and playing order on both switches. */
++        if (now) {
++            for (unsigned key=0; key<128; ++key)
++                if (live_held(p,key) && !p->keys[ORIGINAL_INPUT_SEQUENCE][key])
++                    (void)runtime_note(p,key,0);
++        } else {
++            /* Any held key outside the bounded cache still receives its
++             * fallback attack. Replay cached keys oldest-first for Mono. */
++            for (unsigned key=0; key<128; ++key) {
++                if (!live_held(p,key)) continue;
++                unsigned i=0;
++                while(i<a->nheld && a->held[i].noteNumber!=key) ++i;
++                if (i==a->nheld) (void)runtime_note(p,key,a->vel ? a->vel : 100u);
++            }
++            for (unsigned i=a->nheld; i; --i)
++                (void)runtime_note(p,a->held[i-1].noteNumber,a->held[i-1].velocity);
++        }
++        S1Sequencer_init(&a->seq);
++        a->fired=0;
++        return 1;
++    }
+ #endif
+     if (now && !was) a->nheld = 0;
+     if (now != was) {                  /* direct live notes <-> the arp */
+@@ -877,9 +904,16 @@
+ #if X0X_SJ6_LFO_TRIGGER_NATIVE && X0X_ARP_ENGINE
+     sj6_lfo_note_set_changed(p);
+ #endif
+-    if (live_source(source) && arp_engaged(p)) {
+-        if (!live_held(p, key)) arp_hold(p, key, 0);
+-        return ORIGINAL_RUNTIME_OK;
++    if (live_source(source)) {
++        int engaged=arp_engaged(p);
++        if (engaged
++#if X0X_SJ6_ARP_ADAPTER_NATIVE
++            || sj6_arp_owner(p)
++#endif
++           ) {
++            if (!live_held(p,key)) arp_hold(p,key,0);
++            if (engaged) return ORIGINAL_RUNTIME_OK;
++        }
+     }
+     return key_held(p, key) ? ORIGINAL_RUNTIME_OK : runtime_note(p, key, 0);
+ }
+@@ -950,10 +984,17 @@
+             juno6_lfo_trigger(&p->dsp.juno.synth,SJ6_LFO_EVENT_KEY);
+ #endif
+ #if X0X_ARP_ENGINE
+-        if (live_source(source) && arp_engaged(p)) {
+-            p->arp.vel = (uint8_t)velocity;
+-            arp_hold(p, key, velocity ? velocity : 1u);
+-            return ORIGINAL_RUNTIME_OK;
++        if (live_source(source)) {
++            int engaged=arp_engaged(p);
++            if (engaged
++#if X0X_SJ6_ARP_ADAPTER_NATIVE
++                || sj6_arp_owner(p)
++#endif
++               ) {
++                p->arp.vel = (uint8_t)velocity;
++                arp_hold(p,key,velocity);
++                if (engaged) return ORIGINAL_RUNTIME_OK;
++            }
+         }
+ #endif
+         return runtime_note(p, key, velocity);

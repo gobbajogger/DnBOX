@@ -1,0 +1,61 @@
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -2279,8 +2279,22 @@
+                 /* Synth One Manager+MIDIListener: a zero-velocity Note On
+                  * already became Note Off above; sensitivity OFF pins only
+                  * positive external Note On velocity to 127. */
+-                if (velocity && original_bass[k].kind==ORIGINAL_SOUND_SYNTHONE &&
+-                    !(proj.set.bt & PROJ_S1_MIDI_VELOCITY)) velocity=127u;
++                if (original_bass[k].kind==ORIGINAL_SOUND_SYNTHONE) {
++                    if (s1_keyboard_hold[k]) {
++                        /* The original keyboard toggles a latched pitch OFF
++                         * on a new strike, but ignores incoming releases. */
++                        if (!velocity) continue;
++                        if (original_bass[k].keys[src][d1]) {
++                            original_runtime_part *p=&original_bass[k];
++                            /* An intentional latch toggle is not a stale Note Off. */
++                            if (p->stale_ttl[src][d1]) --p->stale_timers;
++                            p->stale[src][d1]=p->stale_ttl[src][d1]=0;
++                            p->keys[src][d1]=1u;
++                            velocity=0;
++                        }
++                    }
++                    if (velocity && !(proj.set.bt & PROJ_S1_MIDI_VELOCITY)) velocity=127u;
++                }
+ #endif
+                 /* External MIDI recording: accepted physical edges, as the pads do. */
+                 int slide = velocity && live_rec_legato(k, src) && bass_held[k] != d1;
+@@ -2608,11 +2622,16 @@
+             if(original_bass[v].kind != ORIGINAL_SOUND_SYNTHONE)continue;
+             unsigned on=(c.word>>1)&1u;
+             if(!on && s1_keyboard_hold[v]) {
+-                /* Release this keyboard's admissions only. Runtime key-off
+-                 * obeys a separately active damper, MIDI and ARP ownership. */
++                /* App Stop All on Hold OFF: stop live keyboard and MIDI
++                 * admissions for this part, not DnBOX pattern ownership. */
+                 chi_live_note_off((int)v);
++                for(unsigned src=0;src<MIDI_NSRC;++src){
++                    (void)original_runtime_release_source(&original_bass[v],src);
++                    src_held[src]&=(uint16_t)~(1u<<v);
++                }
++                seq_rec_cancel(&seq,(int)v);
+                 o->gate=o->token=o->pitch=o->arp=0;
+-                if(bass_held_src[v]==ORIGINAL_INPUT_KEYS)bass_held[v]=bass_held_count[v]=0;
++                if(bass_held_src[v]<=ORIGINAL_INPUT_KEYS)bass_held[v]=bass_held_count[v]=0;
+             }
+             s1_keyboard_hold[v]=(uint8_t)on;
+             continue;
+@@ -2621,8 +2640,12 @@
+            original_bass[v].kind==ORIGINAL_SOUND_SYNTHONE)continue;
+ #endif
+         if (velocity && SEQ_PART_OFF(&seq, TRK_BASS0 + v)) continue;
+-        if (velocity) bass_adapt_flags((int)v, (int)accent, (int)slide);
+         uint8_t previous = original_key_pitch[v][token];
++#if X0X_S1_KEYBOARD_HOLD
++        if(velocity && s1_keyboard_hold[v] && previous==pitch+1u &&
++           original_bass[v].kind==ORIGINAL_SOUND_SYNTHONE)velocity=0;
++#endif
++        if (velocity) bass_adapt_flags((int)v, (int)accent, (int)slide);
+         if (velocity) {
+             if (previous && !slide) (void)original_runtime_key(&original_bass[v], ORIGINAL_INPUT_KEYS, previous - 1u, 0);
+             if (original_runtime_key(&original_bass[v], ORIGINAL_INPUT_KEYS, pitch, velocity) != ORIGINAL_RUNTIME_OK) continue;

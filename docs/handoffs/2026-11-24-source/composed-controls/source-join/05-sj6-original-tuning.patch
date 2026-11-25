@@ -1,0 +1,308 @@
+--- a/firmware/src/dsp/s1c/s1c_scales.h
++++ b/firmware/src/dsp/s1c/s1c_scales.h
+@@ -1,6 +1,13 @@
+ /* SPDX-License-Identifier: GPL-3.0-only */
+ #pragma once
+ enum { S1C_SCALE_COUNT=14 };
++#if X0X_SJ6_SCALE_NATIVE
++#include <stdint.h>
++/* Byte-identical AudioKit scale table used by both compact engines. Split
++ * USER bytes are the existing project carrier, not a second tune bank. */
++float s1c_shared_scale_hz(unsigned index,int note,float a4,unsigned npo,
++                          const uint8_t *head,unsigned head_bytes,const uint8_t *tail);
++#endif
+ #if X0X_S1_USER_SCALE
+ enum { S1C_SCALE_USER=S1C_SCALE_COUNT,S1C_SCALE_MAX=S1C_SCALE_USER,
+        S1C_USER_NOTES=128,S1C_USER_BYTES=3*S1C_USER_NOTES,S1C_USER_NAME=12 };
+--- a/firmware/src/dsp/s1c/s1c.c
++++ b/firmware/src/dsp/s1c/s1c.c
+@@ -100,6 +100,32 @@
+ #include "s1c_scales.inc"
+ unsigned s1c_scale_npo(unsigned index){return index<S1C_SCALE_COUNT ? s1_scale[index].npo : 12u;}
+ const char *s1c_scale_name(unsigned index){return s1_scale_names+s1_scale[index<S1C_SCALE_COUNT?index:0u].name;}
++#if X0X_SJ6_SCALE_NATIVE
++float s1c_shared_scale_hz(unsigned index,int note,float a4,unsigned custom_npo,
++                          const uint8_t *head,unsigned head_bytes,const uint8_t *tail)
++{
++    const int user=index==S1C_SCALE_USER && custom_npo && head;
++    int npo=user ? (int)custom_npo : (index<S1C_SCALE_COUNT ? s1_scale[index].npo : 12u);
++    if(!user && index>=S1C_SCALE_COUNT)return a4*exp2f((note-69)/12.f);
++    const int steps=note-60; /* shared AudioKit AKTuningTable C4 anchor */
++    int octave=steps/npo, degree=steps%npo;
++    if(degree<0){degree+=npo;--octave;}
++    union {uint32_t u;float v;} q={.u=(uint32_t)(octave+127)<<23};
++    uint32_t word=UINT32_C(0x3f800000);
++    if(user){
++        for(unsigned k=0;k<3u;++k){
++            const unsigned j=3u*(unsigned)degree+k;
++            word|=(uint32_t)(j<head_bytes ? head[j] : tail[j-head_bytes])<<(8u*k);
++        }
++    }else{
++        const uint8_t *p=s1_scale_ratio+3u*(s1_scale[index].offset+(unsigned)degree);
++        word|=((uint32_t)p[2]<<16)|((uint32_t)p[1]<<8)|p[0];
++    }
++    union {uint32_t u;float v;} ratio={.u=word};
++    const float hz=ratio.v*q.v*(a4*0.5946035575013605f);
++    return hz<22050.f ? hz : 22050.f;
++}
++#endif
+ static float s1_scale_hz(const s1c *s,unsigned index,int note,float a4)
+ {
+ #if X0X_S1_USER_SCALE
+--- a/firmware/src/dsp/dnbx_core.h
++++ b/firmware/src/dsp/dnbx_core.h
+@@ -97,6 +97,9 @@
+ #if X0X_SJ6_VINTAGE_NATIVE
+     int16_t sj6_vintage_q8[DNBX_LAYERS]; /* signed cents × 256 for sounding note */
+ #endif
++#if X0X_SJ6_SCALE_NATIVE
++    float sj6_scale_hz;          /* note-on tuning; held bend never reselects tuning */
++#endif
+     uint8_t note, gate, age_rank, pedal_held;
+ } dnbx_voice;
+ typedef struct {
+@@ -109,6 +112,10 @@
+ #if X0X_SJ6_VINTAGE_NATIVE
+     uint32_t sj6_vintage_random;
+     uint16_t sj6_vintage_limit;
++#endif
++#if X0X_SJ6_SCALE_NATIVE
++    const uint8_t *sj6_scale_head,*sj6_scale_tail;  /* resident project arena */
++    uint8_t sj6_scale_index,sj6_scale_npo;
+ #endif
+     dnbx_layer layer[DNBX_LAYERS];
+     dnbx_voice voice[DNBX_VOICES];
+@@ -197,6 +204,10 @@
+ #if X0X_SJ6_VINTAGE_NATIVE
+ float dnbx_sj6_vintage_cents(unsigned position);
+ void dnbx_set_sj6_vintage(dnbx_part *,unsigned owner,unsigned position);
++#endif
++#if X0X_SJ6_SCALE_NATIVE
++void dnbx_set_sj6_scale(dnbx_part *,unsigned index,unsigned npo,
++                        const uint8_t *head,const uint8_t *tail);
+ #endif
+ int dnbx_note_on(dnbx_part *, unsigned note, unsigned velocity);
+ #if X0X_SJ6_RANDOM5_6_NATIVE
+--- a/firmware/src/dsp/dnbx_core.c
++++ b/firmware/src/dsp/dnbx_core.c
+@@ -87,6 +87,26 @@
+ #endif
+     return increment(note,tune,s->sample_rate);
+ }
++#if X0X_SJ6_SCALE_NATIVE
++#include "s1c/s1c_scales.h"
++void dnbx_set_sj6_scale(dnbx_part *s,unsigned index,unsigned npo,
++                         const uint8_t *head,const uint8_t *tail)
++{
++    if(!valid(s)||!s->superj6_amp_range||index>S1C_SCALE_MAX)return;
++    s->sj6_scale_index=(uint8_t)index;
++    s->sj6_scale_npo=(uint8_t)npo;
++    s->sj6_scale_head=head;
++    s->sj6_scale_tail=tail;
++}
++static void sj6_scale_attack(const dnbx_part *s,dnbx_voice *v)
++{
++    /* Use the current tuning only at the new key onset. A later wheel or
++     * layer tune edit transposes this base frequency, not another scale. */
++    v->sj6_scale_hz=s->sj6_scale_index ?
++        s1c_shared_scale_hz(s->sj6_scale_index,v->note,440.f,s->sj6_scale_npo,
++                           s->sj6_scale_head,320u,s->sj6_scale_tail) : 0.f;
++}
++#endif
+ #if X0X_SJ6_VINTAGE_NATIVE
+ /* Build9 Vintage knob ID123: fresh symmetric offsets on oscillator note
+  * attack. A change arms subsequent attacks; it doesn't retune held audio. */
+@@ -112,10 +132,24 @@
+     v->sj6_vintage_q8[l]=(int16_t)((u*(int32_t)s->sj6_vintage_limit)/32768);
+ }
+ 
++#endif
++#if X0X_SJ6_VINTAGE_NATIVE || X0X_SJ6_SCALE_NATIVE
+ static float voice_pitch_increment(const dnbx_part *s,const dnbx_voice *v,unsigned l,float tune)
+ {
++#if X0X_SJ6_VINTAGE_NATIVE
+     if(v->sj6_vintage_q8[l])
+         tune+=(float)v->sj6_vintage_q8[l]*(1.f/25600.f);
++#else
++    (void)l;
++#endif
++#if X0X_SJ6_SCALE_NATIVE
++    if(v->sj6_scale_hz){
++#if X0X_SJ6_BEND_TYPED_PROBE
++        tune+=s->superj6_bend_semitones;
++#endif
++        return fm_clampf(v->sj6_scale_hz*fm_exp2f(tune/12.f)/s->sample_rate,.000001f,.45f);
++    }
++#endif
+     return pitch_increment(s,v->note,tune);
+ }
+ #else
+@@ -559,6 +593,9 @@
+     for (unsigned i=0;i<DNBX_VOICES;i++) s->voice[i].age_rank=next_rank[i];
+     if (!retrigger) memset(v,0,sizeof *v);
+     v->note=(uint8_t)note; v->gate=1; v->age_rank=0; v->pedal_held=0;
++#if X0X_SJ6_SCALE_NATIVE
++    sj6_scale_attack(s,v);
++#endif
+     v->velocity=(float)velocity/127.0f;
+ #if X0X_SJ6_PITCH_ENV_NATIVE
+     if(s->sj6_pitch_depth
+@@ -598,6 +635,9 @@
+     if(!valid(s)||note>127u||!s->voice[0].gate)return -1;
+     dnbx_voice *v=&s->voice[0];
+     v->note=(uint8_t)note;
++#if X0X_SJ6_SCALE_NATIVE
++    sj6_scale_attack(s,v);
++#endif
+     for(unsigned l=0;l<DNBX_LAYERS;l++)
+         v->layer[l].increment=voice_pitch_increment(s,v,l,s->layer[l].params.tune_semitones);
+     return 0;
+@@ -616,6 +656,9 @@
+     dnbx_voice *v=&s->voice[0];
+     if(!voice_active(v))memset(v,0,sizeof *v);
+     v->note=(uint8_t)note;v->gate=1;v->pedal_held=0;v->age_rank=0;
++#if X0X_SJ6_SCALE_NATIVE
++    sj6_scale_attack(s,v);
++#endif
+     v->velocity=(float)vel/127.f;
+ #if X0X_SJ6_PITCH_ENV_NATIVE
+     if(s->sj6_pitch_depth
+--- a/firmware/src/app/sj6_137_host_witness.h
++++ b/firmware/src/app/sj6_137_host_witness.h
+@@ -634,7 +634,11 @@
+ #if DNBOX_TYPED_CONTROLS_NATIVE_TEST
+ #if X0X_S1_SCALE_NATIVE
+   unsigned tuning=s->v[T_MST][S1_SCALE_ROW+v][S1_SCALE_BYTE];
+-  if(tuning>S1C_SCALE_MAX || (tuning && !s1_init))return 0;
++  if(tuning>S1C_SCALE_MAX || (tuning && !s1_init
++#if X0X_SJ6_SCALE_NATIVE
++       && !j6_init
++#endif
++       ))return 0;
+ #if X0X_S1_USER_SCALE
+   if(!s1_user_valid(s,v))return 0;
+ #endif
+--- a/firmware/src/app/original_presets.inc
++++ b/firmware/src/app/original_presets.inc
+@@ -1479,7 +1479,35 @@
+     return low+(high-low)*(float)pos*(1.f/127.f);
+ }
+ #endif
++#if X0X_SJ6_SCALE_NATIVE
++static int sj6_scale_owner(const sound_t *s,unsigned v)
++{
++    return s && v<NBASS && live137(s,v) && original_bass[v].kind==ORIGINAL_SOUND_JUNO &&
++           !original_sound_sj6_factory(s->v[T_303][v]);
++}
++static void sj6_scale_apply(const sound_t *s,unsigned v)
++{
++    if(!sj6_scale_owner(s,v))return;
++    unsigned code=s->v[T_MST][S1_SCALE_ROW+v][S1_SCALE_BYTE],npo=0;
++    const uint8_t *head=0,*tail=0;
++    if(code==S1C_SCALE_USER){
++        /* Only the resident project can back the published USER pointers. */
++        if(s!=mot_base_snd || !(npo=s1_user_npo(s,v)))code=0;
++        else {
++            head=(const uint8_t *)&s->v[s1_user_head_target(v)]+S1_USER_ROW*NPARAMS_MAX;
++            tail=(const uint8_t *)&s->v[T_MIX]+s1_user_tail_row(v)*NPARAMS_MAX;
++        }
++    }
++    dnbx_set_sj6_scale(&original_bass[v].dsp.juno.synth.core,code,npo,head,tail);
++#if X0X_ARP_ENGINE
++    original_bass[v].arp.prm.npo=(uint8_t)(npo?npo:s1c_scale_npo(code));
++#endif
++}
++#endif
+ static void s1_typed_a4_apply(const sound_t *sound,unsigned owner) {
++#if X0X_SJ6_SCALE_NATIVE
++    if(sj6_scale_owner(sound,owner)){sj6_scale_apply(sound,owner);return;}
++#endif
+     if(live_s1_mod(sound,owner) && original_bass[owner].kind==ORIGINAL_SOUND_SYNTHONE) {
+         original_runtime_part *p=&original_bass[owner];
+         (void)s1c_front_set(&p->dsp.synthone.e,S1_A4_PARAM,s1_a4_hz(read137(sound,owner)[S1_A4_BYTE]));
+@@ -1522,16 +1550,22 @@
+     return ok;
+ }
+ #if X0X_S1_SCALE_NATIVE
++static int scale_editable_owner(const sound_t *s,unsigned owner)
++{
++#if X0X_SJ6_SCALE_NATIVE
++    if(sj6_scale_owner(s,owner))return 1;
++#endif
++    return s && owner<NBASS && live_s1_mod(s,owner) && original_bass[owner].kind==ORIGINAL_SOUND_SYNTHONE;
++}
+ int s1_typed_scale_choose(unsigned owner,unsigned code,int reset)
+ {
+-    if(code>S1C_SCALE_MAX || !live_s1_mod(mot_base_snd,owner))return 0;
++    if(code>S1C_SCALE_MAX || !scale_editable_owner(mot_base_snd,owner))return 0;
+ #if X0X_S1_USER_SCALE
+     if(code==S1C_SCALE_USER && !s1_user_npo(mot_base_snd,owner))return 0;
+ #endif
+     engine_project_hold(1);
+     int ok=!ui_project_busy() && s1_typed_tuple_editable() &&
+-           live_s1_mod(mot_base_snd,owner) && !engine_bass_preset_pending(owner) &&
+-           original_bass[owner].kind==ORIGINAL_SOUND_SYNTHONE;
++           scale_editable_owner(mot_base_snd,owner) && !engine_bass_preset_pending(owner);
+     if(ok){
+         sound_t *s=(sound_t *)mot_base_snd;
+         s->v[T_MST][S1_SCALE_ROW+owner][S1_SCALE_BYTE]=(uint8_t)code;
+@@ -1545,7 +1579,7 @@
+ #if X0X_S1_USER_SCALE
+ int s1_typed_user_import(unsigned owner,unsigned count,const uint8_t *name,const uint8_t *packed)
+ {
+-    if(!count || count>S1C_USER_NOTES || !live_s1_mod(mot_base_snd,owner))return 2;
++    if(!count || count>S1C_USER_NOTES || !scale_editable_owner(mot_base_snd,owner))return 2;
+     unsigned prev=0;
+     for(unsigned i=0;i<3u*count;i+=3u) {
+         const unsigned code=packed[i]|(unsigned)packed[i+1u]<<8|(unsigned)packed[i+2u]<<16;
+@@ -1556,8 +1590,7 @@
+         if(name[i] && (unsigned)(name[i]-32u)>94u)return 1;
+     engine_project_hold(1);
+     int ok=!ui_project_busy() && s1_typed_tuple_editable() &&
+-           live_s1_mod(mot_base_snd,owner) && !engine_bass_preset_pending(owner) &&
+-           original_bass[owner].kind==ORIGINAL_SOUND_SYNTHONE;
++           scale_editable_owner(mot_base_snd,owner) && !engine_bass_preset_pending(owner);
+     if(ok){
+         sound_t *s=(sound_t *)mot_base_snd;
+         uint8_t *h=(uint8_t *)&s->v[s1_user_head_target(owner)]+S1_USER_ROW*NPARAMS_MAX;
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -1089,7 +1089,12 @@
+     if(r.kind==R_S1CMP) return s1_cmp_position(r.b,r.c)<0 || !s1_typed_tuple_editable();
+ #if X0X_S1_KEYBOARD_HOLD
+ #if X0X_S1_SCALE_NATIVE
+-    if(r.kind==R_S1SCALE)return !live_s1_mod(&proj.sound,r.b) || !s1_typed_tuple_editable();
++    if(r.kind==R_S1SCALE)
++        return (!live_s1_mod(&proj.sound,r.b)
++#if X0X_SJ6_SCALE_NATIVE
++                && !(live137(&proj.sound,r.b) && engine_bass_bank(r.b)==ORIGINAL_SOUND_JUNO)
++#endif
++                ) || !s1_typed_tuple_editable();
+ #endif
+     if(r.kind==R_S1KEY_HOLD || r.kind==R_S1A4RESET)
+         return !live_s1_mod(&proj.sound,r.b) || !s1_typed_tuple_editable();
+@@ -3588,6 +3593,11 @@
+                 add_page(emit, PT_KEYS, PR(R_FREEPLAY,b,0,0), PR(R_S1WHITEKEYS,0,0,0), PR(R_S1MIDIVEL,0,0,0), NONE);
+             else
+ #endif
++#if X0X_SJ6_SCALE_NATIVE
++            if(live137(&proj.sound,(unsigned)b) && engine_bass_bank(b)==ORIGINAL_SOUND_JUNO)
++                add_page(emit, PT_KEYS, PR(R_FREEPLAY,b,0,0),PR(R_S1SCALE,T_303,b,0),NONE,NONE);
++            else
++#endif
+             add_page_refs(emit, PT_KEYS, refs, 1, b); } while (0);
+ #if X0X_ARP_HOOKS
+             if (arp_engine(b)) {                       /* 4: the 16 arp steps on the pads */
+@@ -5100,7 +5110,11 @@
+                 const uint32_t scale_off=__builtin_offsetof(sound_t,v)+
+                     ((T_MST*NVOICES_MAX+S1_SCALE_ROW+v)*NPARAMS_MAX+S1_SCALE_BYTE);
+                 undo_peek(&undo,entry,scale_off,&p,1u);
+-                if(p>S1C_SCALE_MAX || (p && !s1_typed_init_cell(target.cell[v]))){
++                if(p>S1C_SCALE_MAX || (p && !s1_typed_init_cell(target.cell[v])
++#if X0X_SJ6_SCALE_NATIVE
++                   && !(target.cell[v][29]==ORIGINAL_SOUND_JUNO && !original_sound_sj6_factory(target.cell[v]))
++#endif
++                   )){
+                     say("UNDO SCALE INVALID",0);engine_bass_edit_hold(0);return;
+                 }
+                 if(p!=proj.sound.v[T_MST][S1_SCALE_ROW+v][S1_SCALE_BYTE])undo_a4|=1u<<v;
