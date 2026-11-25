@@ -1,0 +1,135 @@
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -524,6 +524,11 @@
+        R_BT, R_BTSTAT, R_BTNAME, R_CKCH, R_CLKSRC, R_SMC_ROLE, R_SMC_MAP, R_BENGINE, R_BPRESET, R_BSTATUS, R_SECTION, R_PARTON, R_FINETUNE, R_QUEUEMUTE, R_BRKRATE, R_BPATSND, R_NOTELOCK };   /* R_TAPE: FX's one-knob TAPE (DIGI .. worn tape) */          /* R_HDR: a list's section header (a = its group), never selected */
+ #if X0X_SYNTHONE_PATCH
+ enum { R_S1PATCH = R_NOTELOCK + 1, R_S1LINK = R_NOTELOCK + 4 };
++#ifdef DNBOX_137_HOST_WITNESS
++enum { R_S1MODWHEEL = R_NOTELOCK + 5 };
++extern int s1_typed_mod_choose(unsigned,unsigned);
++extern int s1_typed_tuple_editable(void);
++#endif
+ #endif
+ #if X0X_ARP_HOOKS
+ enum { R_ARP = R_NOTELOCK + 2 };          /* a: ARP_F_* field, b: bass voice */
+@@ -703,6 +708,9 @@
+ static int pref_read_only(pref_t r)
+ {
+     if (r.kind == R_BSTATUS) return 1;
++#ifdef DNBOX_137_HOST_WITNESS
++    if (r.kind == R_S1MODWHEEL) return !live_s1_mod(&proj.sound,r.b) || !s1_typed_tuple_editable();
++#endif
+     /* A bank with a single preset (Synth One INIT) has nothing to choose. */
+     if (r.kind == R_BPRESET && original_sound_available_factories((unsigned)engine_bass_requested_bank(r.b)) <= 1u) return 1;
+     if (r.kind == R_ENG && r.a == T_303 && original_sound_is_performance(
+@@ -739,6 +747,13 @@
+     case R_SJ6KNOB: return sj6_knob_desc(r.c);
+ #endif
+ #if X0X_SYNTHONE_PATCH
++#ifdef DNBOX_137_HOST_WITNESS
++    case R_S1MODWHEEL: {
++        static const char *const values[] = {"CUTOFF","LFO1 RATE","LFO2 RATE"};
++        static const x0x_param_t pot = {"MOD WHEEL",2,0,values};
++        return &pot;
++    }
++#endif
+     case R_S1LINK: {
+         static const char *const values[] = {"OFF", "ON"};
+         static const x0x_param_t pot = {"LINK", 1, 0, values};
+@@ -865,6 +880,9 @@
+     case R_SJ6KNOB: return engine_superj6_knob_position(r.b, r.c);
+ #endif
+ #if X0X_SYNTHONE_PATCH
++#ifdef DNBOX_137_HOST_WITNESS
++    case R_S1MODWHEEL: return live_s1_mod(&proj.sound,r.b)?read137(&proj.sound,r.b)[3]:0;
++#endif
+     case R_S1LINK: {
+         s1_patch_value value;
+         if (s1_draw_patch && bidx() == r.b) return s1_draw_patch->filter_link;
+@@ -2291,7 +2309,7 @@
+ 
+ /* Pure navigation inputs: emit existing descriptors without keyboard clamping. */
+ #if X0X_SUPERJ6_BUILTIN_INIT || X0X_S1_EXTRA
+-enum { ORIG_PAGE_ENGINE = 128, ORIG_PAGE_S1_LINK = 254, ORIG_PAGE_NONE = 255 };
++enum { ORIG_PAGE_ENGINE = 128, ORIG_PAGE_S1_MODWHEEL = 253, ORIG_PAGE_S1_LINK = 254, ORIG_PAGE_NONE = 255 };
+ typedef struct { uint8_t title; uint8_t id[4]; } original_page_row_t;
+ __attribute__((noinline)) X0X_COLD static void add_original_extra_pages(
+     page_emitter_t *emit, const original_page_row_t *pages, unsigned count, int owner, unsigned kind)
+@@ -2303,6 +2321,10 @@
+             refs[col] = id == ORIG_PAGE_NONE ? NONE :
+ #if X0X_S1_EXTRA
+                 id == ORIG_PAGE_S1_LINK ? PR(R_S1LINK,T_303,owner,0) :
++#ifdef DNBOX_137_HOST_WITNESS
++                id == ORIG_PAGE_S1_MODWHEEL ?
++                    (live_s1_mod(&proj.sound,owner) ? PR(R_S1MODWHEEL,T_303,owner,0) : NONE) :
++#endif
+ #endif
+                 id >= ORIG_PAGE_ENGINE ? PR(R_ENG,T_303,owner,id - ORIG_PAGE_ENGINE) :
+                 PR(kind,T_303,owner,id);
+@@ -2431,7 +2453,11 @@
+                     {PT_LFO, {S1_LFO1_RATE, S1_LFO1_SHAPE, S1_LFO2_RATE, S1_LFO2_SHAPE}},
+                     {PT_TEMPO_SYNC, {S1_LFO_SYNC, S1_LFO1_DEPTH, S1_LFO2_DEPTH, ORIG_PAGE_NONE}},
+                     {PT_MOD_ROUTE, {S1_OSC_MIX_LFO, S1_RESONANCE_LFO, S1_FM_LFO, S1_AMP_DECAY_LFO}},
++#ifdef DNBOX_137_HOST_WITNESS
++                    {PT_PITCH_MOD, {S1_DETUNE_LFO, S1_PITCH_LFO, S1_TREMOLO_LFO, ORIG_PAGE_S1_MODWHEEL}},
++#else
+                     {PT_PITCH_MOD, {S1_DETUNE_LFO, S1_PITCH_LFO, S1_TREMOLO_LFO, ORIG_PAGE_NONE}},
++#endif
+                     {PT_EFFECT, {ORIG_PAGE_ENGINE + ORIGINAL_SYNTHONE_CRUSH, S1_DELAY_MIX, S1_REVERB_MIX, S1_REVERB_HP}},
+                     {PT_FX_BYPASS, {S1_DELAY_ON, S1_REVERB_ON, ORIG_PAGE_NONE, ORIG_PAGE_NONE}},
+                     {PT_OUTPUT, {S1_WIDEN, S1_PART_LEVEL, S1_VOICE_MODE, S1_MONO_GLIDE}},
+@@ -3189,6 +3215,11 @@
+         }
+ #ifdef DNBOX_137_HOST_WITNESS
+         extern int engine_bass_wheel_active(void);
++        if(undo_s1_mod && !s1_typed_tuple_editable()) {
++            say("PROJECT READ ONLY",0);
++            engine_bass_edit_hold(0);
++            return;
++        }
+         if(undo_s1_mod && engine_bass_wheel_active()) {
+             say("UNDO WAIT WHEEL",0);
+             engine_bass_edit_hold(0);
+@@ -4212,6 +4243,17 @@
+     }
+ #endif
+ #if X0X_SYNTHONE_PATCH
++#ifdef DNBOX_137_HOST_WITNESS
++    if (r.kind == R_S1MODWHEEL) {
++        if (pref_read_only(r)) return;
++        int old = pref_get(r), next = old + (e>0) - (e<0);
++        if (next>=0 && next<=2 && next!=old) {
++            if (s1_typed_mod_choose(r.b,(unsigned)next)) mark_dirty();
++            else say("MOD WHEEL BUSY",0);
++        }
++        return;
++    }
++#endif
+     if (r.kind == R_S1LINK) { s1_edit(r, (e > 0) - (e < 0), 1); return; }
+     if (r.kind == R_S1PATCH) { s1_edit(r, accel(knob, e, S1_PATCH_STEPS), 1); return; }
+ #endif
+--- a/firmware/src/app/original_presets.inc
++++ b/firmware/src/app/original_presets.inc
+@@ -402,10 +402,11 @@
+ #if defined(DNBOX_137_HOST_WITNESS)
+ #include "sj6_137_host_witness.h"
+ #endif
++extern int s1_typed_tuple_editable(void);
+ int s1_typed_mod_choose(unsigned owner,unsigned route) {
+     if (route>2 || !live_s1_mod(mot_base_snd,owner))return 0;
+     engine_project_hold(1);
+-    int ok=!ui_project_busy() && live_s1_mod(mot_base_snd,owner) &&
++    int ok=!ui_project_busy() && s1_typed_tuple_editable() && live_s1_mod(mot_base_snd,owner) &&
+            !note_lock_applied[owner] &&
+            !engine_bass_preset_pending(owner) && original_bass[owner].kind==ORIGINAL_SOUND_SYNTHONE;
+     if(ok) {
+--- a/firmware/src/app/project.c
++++ b/firmware/src/app/project.c
+@@ -65,6 +65,7 @@
+ static uint8_t stream_previous; /* per-object older-copy selection during recovery */
+ enum { TUPLE_SET_PREVIOUS = 1u << NSTREAM, TUPLE_SOUND_PREVIOUS = 2u << NSTREAM };
+ static uint8_t tuple_recovered; /* previous A/B tuple is playable but permanently read-only until latest coheres */
++int s1_typed_tuple_editable(void) {return !tuple_recovered && !project_incompatible;}
+ static uint8_t device_bt_pending;       /* independent of UI dirty/autosave and project reset/load */
+ static uint8_t settings_read_failed;    /* defaults must not replace unread stored settings */
+ static uint8_t settings_load_failed;    /* a Bluetooth retry alone cannot adopt fallback defaults */

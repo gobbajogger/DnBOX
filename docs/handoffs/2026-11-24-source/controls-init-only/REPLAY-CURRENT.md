@@ -36,3 +36,13 @@ experiments) as product code. Alternate MOD targets and other original
 controls still require source verification and end-to-end implementation.
 Native fit, no-dropouts, protected legacy storage, and actual release remain
 unqualified. No package, hardware write, or publication.
+
+## Most recent implemented increment
+After the exact b71f366f replay above, apply `../s1-init-reverb-lfo/s1-init-reverb-lfo.patch`
+with zero fuzz and no backups. Verify `S1-REVERB-LFO-POST.sha256` (ledger
+SHA-256 f74afed6ce7fc9087c4b1e3a8b2e53a3e5e5e2ad57fc1ea878ce5c49399b077b).
+This adds the original Synth One Reverb Mix LFO in the existing FX
+SWITCHES K3. No added page, second LINK or preset payload.
+The previously unused 15-byte code states preserve prior valid bytes.
+The earlier firmware refuses the new active state without writing.
+This is the current host-qualified implementation, not a native release.

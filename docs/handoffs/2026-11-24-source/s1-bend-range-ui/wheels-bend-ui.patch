@@ -1,0 +1,242 @@
+--- a/firmware/src/app/s1_patch.h
++++ b/firmware/src/app/s1_patch.h
+@@ -34,6 +34,10 @@
+     S1_PART_LEVEL = 40, S1_LFO1_DEPTH, S1_LFO2_DEPTH, S1_CUTOFF_LFO, S1_NOISE_LFO, S1_OSC_MIX_LFO, S1_RESONANCE_LFO, S1_FM_LFO, S1_AMP_DECAY_LFO, S1_OSC1_SEMI, S1_OSC2_SEMI, S1_OSC2_DETUNE, S1_VOICE_MODE, S1_MONO_GLIDE, S1_DELAY_ON, S1_REVERB_ON, S1_DETUNE_LFO, S1_PITCH_LFO, S1_TREMOLO_LFO,
+     S1_BASE_EDIT_FIRST = S1_PART_LEVEL, S1_BASE_EDIT_COUNT = 3, S1_BASE_EDIT_BYTE = 3
+ };
++#if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
++enum { S1_BEND_LO = S1_TREMOLO_LFO+1, S1_BEND_HI };
++static inline int s1_bend_slot(unsigned slot) { return slot-S1_BEND_LO < 2u; }
++#endif
+ /* Formerly invalid q7 top bits. Code zero keeps the exact program;
+  * codes 1..37 are the original integer stops -12..+24. */
+ enum { S1_COARSE_FIRST = S1_OSC1_SEMI, S1_COARSE_STEPS = 36, S1_COARSE_BITS = 6 };
+@@ -135,6 +139,9 @@
+ static inline unsigned s1_patch_steps(unsigned slot)
+ {
+ #if X0X_S1_EXTRA
++#if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
++    if (s1_bend_slot(slot)) return 24u;
++#endif
+     if (slot == S1_VOICE_MODE || s1_fx_gate_slot(slot)) return 1u;
+     if (slot == S1_MONO_GLIDE) return S1_GLIDE_STEPS;
+     if (slot == S1_OSC2_DETUNE) return S1_DETUNE_STEPS;
+--- a/firmware/src/app/s1c_part.c
++++ b/firmware/src/app/s1c_part.c
+@@ -121,6 +121,11 @@
+     part->filter_link = 0;
+ #endif
+     part->detm = e->t[P_DETM];
++#if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
++    part->bend_min = -12.f;
++    part->bend_max = 12.f;
++    part->bend_raw = 8192;
++#endif
+     part->held = 0;
+     if (part->arena)
+         s1c_attach(e, part->arena, part->wbuf, part->arena + S1C_RVB_BYTES, (int)(S1C_ARENA_BYTES - S1C_RVB_BYTES));
+@@ -146,6 +151,9 @@
+     part->held = 0;
+     part->damper = 0;
+     part->e.t[P_DETM] = part->detm;
++#if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
++    part->bend_raw = 8192;
++#endif
+ }
+ 
+ #if X0X_SYNTHONE_PATCH
+@@ -231,6 +239,13 @@
+ {
+     if (slot < S1_PATCH_COUNT) return &patch_parameters[slot];
+ #if X0X_S1_EXTRA
++#if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
++    static const s1_patch_descriptor bend_range[] = {
++        {"PB DOWN", -24.f, 0.f, 141, X0X_U_ST},
++        {"PB UP", 0.f, 24.f, 142, X0X_U_ST},
++    };
++    if (s1_bend_slot(slot)) return &bend_range[slot-S1_BEND_LO];
++#endif
+     if (slot == S1_CUTOFF_LFO) return &cutoff_lfo;
+     if (slot == S1_TREMOLO_LFO) return &tremolo_lfo;
+     if (slot == S1_PITCH_LFO) return &pitch_lfo;
+@@ -252,6 +267,9 @@
+     for (unsigned i = 0; i < S1_PATCH_COUNT; ++i)
+         if (patch_parameters[i].factory_id == id) return (int)i;
+ #if X0X_S1_EXTRA
++#if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
++    if (id-141u < 2u) return (int)(S1_BEND_LO+id-141u);
++#endif
+     if (id == P_CUTOFF_LFO) return S1_CUTOFF_LFO;
+     if (id == P_TREMOLO_LFO) return S1_TREMOLO_LFO;
+     if (id == P_PITCH_LFO) return S1_PITCH_LFO;
+@@ -280,6 +298,9 @@
+ 
+ float s1_part_patch_value(const s1_dry_part *part, unsigned slot)
+ {
++#if X0X_S1_EXTRA && defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
++    if (s1_bend_slot(slot)) return slot == S1_BEND_LO ? part->bend_min : part->bend_max;
++#endif
+     if (slot == S1_PATCH_COUNT) return part->filter_link;
+     if (part->filter_link && slot >= S1_FILTER_FIRST && slot < S1_AMP_FIRST)
+         return part->filter_unlinked[slot - S1_FILTER_FIRST];
+@@ -431,6 +452,25 @@
+     const float cutoff = 360.f * powf(7600.f / 120.f, (float)(127u-cc1) / 127.f);
+     (void)s1c_front_set(&part->e, P_CUT, cutoff);
+ }
++#if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
++/* Original signed bounds act only on the transient MIDI wheel word. */
++static void s1_bend_refresh(s1_dry_part *part)
++{
++    const unsigned raw = part->bend_raw;
++    float st = raw < 8192 ? part->bend_min * ((float)(8191u - raw) / 8191.f)
++                          : part->bend_max * ((float)(raw - 8192u) / 8192.f);
++    part->e.t[P_DETM] = st == 0.f ? part->detm : part->detm * fm_exp2f(st / 12.f);
++}
++int s1_part_bend_ranges(s1_dry_part *part, float min_st, float max_st)
++{
++    if (!part || !(min_st >= -24.f && min_st <= 0.f && max_st >= 0.f && max_st <= 24.f)) return 0;
++    part->bend_min = min_st;
++    part->bend_max = max_st;
++    s1_bend_refresh(part);
++    return 1;
++}
++#endif
++
+ int s1_part_param(s1_dry_part *part, unsigned id, float value)
+ {
+     if (id > 2 || !(value >= 0.0f && value <= 1.0f)) return 0;
+@@ -440,8 +480,16 @@
+         return 1;
+     }
+     if (id == 0) {
++#if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
++        /* Invert the existing normalized ingress exactly for all 14-bit MIDI
++         * words. The physical wheel/motion use this same receiver with q7. */
++        part->bend_raw = (uint16_t)(value < .5f ? value * 16384.f + .5f :
++            (value - .5f) * 16382.f + 8192.5f);
++        s1_bend_refresh(part);
++#else
+         /* +-2 semitones on the program's frequency multiplier (smoothed by the engine). */
+         part->e.t[P_DETM] = part->detm * fm_exp2f((value - 0.5f) * (4.0f / 12.0f));
++#endif
+         return 1;
+     }
+     part->damper = value >= 0.5f;
+--- a/firmware/src/app/s1c_part.h
++++ b/firmware/src/app/s1c_part.h
+@@ -8,6 +8,9 @@
+ #pragma once
+ #include "../dsp/s1c/s1c_config.h"
+ #include "../dsp/s1c/s1c.h"
++#if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE && !defined(X0X_HOST)
++#error "Volatile Synth One WHEELS range experiment is host-only"
++#endif
+ #if X0X_SYNTHONE_PATCH
+ #include "s1_patch.h"
+ #endif
+@@ -20,6 +23,10 @@
+     uint8_t *arena;            /* S1C_ARENA_BYTES, or NULL: no delay/reverb */
+     uint16_t program;          /* pack program, or S1_PART_INIT */
+     float detm;                /* program DETM: pitch bend scales it */
++#if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
++    float bend_min, bend_max;
++    uint16_t bend_raw;
++#endif
+ #if X0X_SYNTHONE_PATCH
+ #if X0X_S1_EXTRA
+     float extra_factory[S1_EXTRA_COUNT]; /* exact pack values for note-lock transitions */
+@@ -62,6 +69,9 @@
+ /* Original Init route (cutoff). Performance-only, no Sound or REC lane. */
+ void s1_part_mod_wheel(s1_dry_part *part, unsigned cc1);
+ int s1_part_note(s1_dry_part *part, unsigned key, unsigned velocity);
++#if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
++int s1_part_bend_ranges(s1_dry_part *, float min_st, float max_st);
++#endif
+ int s1_part_active(const s1_dry_part *part);
+ /* UI observation: loudest voice's amp envelope, filter envelope, stage (0 attack,
+  * 1 decay/sustain, 3 release) and gate. 0 when silent. */
+--- a/firmware/src/app/original_presets.inc
++++ b/firmware/src/app/original_presets.inc
+@@ -154,6 +154,14 @@
+         !((request & 0x80000000u) && request != bass_applied[voice])) {
+         if (s1_edit[voice].pending || note_lock_applied[voice]) status = S1_EDIT_BUSY;
+ #if X0X_S1_EXTRA
++#if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
++        else if (s1_bend_slot((unsigned)slot)) {
++            s1_edit[voice].slot = (uint8_t)slot;
++            s1_edit[voice].position = (uint8_t)position;
++            s1_edit[voice].pending = 1;
++            status = S1_EDIT_QUEUED;
++        }
++#endif
+         else if (slot == S1_LFO_SYNC &&
+                  s1_part_patch_value(&original_bass[voice].dsp.synthone, S1_LFO_SYNC) == (float)position)
+             status = S1_EDIT_REJECTED;
+@@ -215,6 +223,15 @@
+         sound_t *sound = (sound_t *)mot_base_snd;
+         uint8_t *cell = sound->v[T_303][v];
+ #if X0X_S1_EXTRA
++#if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
++        if (s1_bend_slot(s1_edit[v].slot)) {
++            s1_dry_part *part = &original_bass[v].dsp.synthone;
++            float pos = s1_edit[v].position;
++            (void)s1_part_bend_ranges(part, s1_edit[v].slot == S1_BEND_LO ? pos-24.f : part->bend_min,
++                                         s1_edit[v].slot == S1_BEND_HI ? pos : part->bend_max);
++            continue;
++        }
++#endif
+         if (s1_edit[v].slot >= S1_EXTRA_FIRST && !s1_base_edit_slot(s1_edit[v].slot)) {
+             uint8_t *extra = sound->v[T_303][S1_EXTRA_ROW + v];
+             s1_dry_part *part = &original_bass[v].dsp.synthone;
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -91,6 +91,9 @@
+     PT_XMOD,
+     PT_FX_BYPASS,
+     PT_PITCH_MOD,
++#if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
++    PT_WHEELS,
++#endif
+     PT_COUNT
+ } page_title_id_t;
+ 
+@@ -565,6 +568,9 @@
+ #endif
+     unsigned id = r.kind == R_S1LINK ? S1_LINK_ID : s1_patch_at(r.c)->factory_id;
+     int status = engine_s1_patch_set(r.b, owner.revision, id, (unsigned)value);
++#if X0X_S1_EXTRA && defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
++    if (status == S1_EDIT_QUEUED && r.kind == R_S1PATCH && s1_bend_slot(r.c)) return;
++#endif
+     if (status == S1_EDIT_QUEUED) mark_dirty();
+     else say(status == S1_EDIT_BUSY ? (owner.note_locked ? "NOTE LOCK" : "EDIT BUSY - RETRY") :
+              "PATCH CHANGED", 0);
+@@ -1571,6 +1577,9 @@
+             physical = owner.physical;
+         }
+ #if X0X_S1_EXTRA
++#if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
++        if (s1_bend_slot(r.c)) { put_i(num, (int)physical); put_s(unit, "st"); return; }
++#endif
+         if (s1_lfo_rate_slot(r.c) && owner.max_position < S1_PATCH_STEPS) {
+             static const uint8_t bars[] = {8, 6, 4, 3, 2, 1, 1};
+             unsigned div = owner.position;
+@@ -1876,6 +1885,9 @@
+     [PT_EFFECT] = "EFFECT",
+     [PT_FX_BYPASS] = "FX SWITCHES",
+     [PT_PITCH_MOD] = "PITCH MOD",
++#if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
++    [PT_WHEELS] = "WHEELS",
++#endif
+     [PT_ENVELOPE] = "ENVELOPE",
+     [PT_FILTER] = "FILTER",
+     [PT_FILTER_1] = "FILTER 1",
+@@ -2422,6 +2434,9 @@
+                     {PT_TEMPO_SYNC, {S1_LFO_SYNC, S1_LFO1_DEPTH, S1_LFO2_DEPTH, ORIG_PAGE_NONE}},
+                     {PT_MOD_ROUTE, {S1_OSC_MIX_LFO, S1_RESONANCE_LFO, S1_FM_LFO, S1_AMP_DECAY_LFO}},
+                     {PT_PITCH_MOD, {S1_DETUNE_LFO, S1_PITCH_LFO, S1_TREMOLO_LFO, ORIG_PAGE_NONE}},
++#if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
++                    {PT_WHEELS, {S1_BEND_LO, S1_BEND_HI, ORIG_PAGE_NONE, ORIG_PAGE_NONE}},
++#endif
+                     {PT_EFFECT, {ORIG_PAGE_ENGINE + ORIGINAL_SYNTHONE_CRUSH, S1_DELAY_MIX, S1_REVERB_MIX, S1_REVERB_HP}},
+                     {PT_FX_BYPASS, {S1_DELAY_ON, S1_REVERB_ON, ORIG_PAGE_NONE, ORIG_PAGE_NONE}},
+                     {PT_OUTPUT, {S1_WIDEN, S1_PART_LEVEL, S1_VOICE_MODE, S1_MONO_GLIDE}},
