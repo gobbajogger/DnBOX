@@ -1,0 +1,26 @@
+--- a/firmware/src/dsp/s1c/s1c.c
++++ b/firmware/src/dsp/s1c/s1c.c
+@@ -1101,13 +1101,17 @@
+ #if X0X_S1_DELAY_HISTORY_NATIVE
+     /* Existing boot/inactive paths may render before FX is attached. The
+      * real fixed-arena device binds before audio; keep a dry fallback. */
+-    if(s->pool && !s->ddec && s->rv.fb == -1.f && s->t[DLON]==0.f && s->t[RVON]!=0.f){
+-        memset(s->rv.m,0,S1C_RVB_BYTES);
+-        s->rv.fb=-2.f;
+-    }
+     if(s->pool && s->pool_bytes>=60){
+-        if(!s->ddec)dly_partition(s);
+-        else dly_regrid(s);
++        if(!s->ddec){
++            uint32_t mix;
++            __builtin_memcpy(&mix, &s->t[RVMIX], sizeof mix);
++            /* attach cleared the whole shared room arena. Adopt only on
++             * first partition of the immutable authored program, not on
++             * live mix/enable/delay edits. Floats here use canonical [0,1]. */
++            if(mix && mix<=0x3f800000u && s->rv.fb==-1.f && s->t[DLON]==0.f && s->t[RVON]!=0.f)
++                s->rv.fb=-2.f;
++            dly_partition(s);
++        }else dly_regrid(s);
+     }
+ #endif
+ #if !S1C_BUSFX && S1C_RVB && S1C_RVB_DEC > 1
