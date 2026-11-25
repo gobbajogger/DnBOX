@@ -1,0 +1,32 @@
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -1057,7 +1057,13 @@
+ static int16_t mod_ctl[NBASS] = {-1, -1};
+ static volatile uint8_t ext_touch[NBASS];           /* ISR -> UI: bit0 bend, bit1 mod moved by ext MIDI */
+ static int mod_param(int v)
+-{ return original_bass[v].kind == ORIGINAL_SOUND_JUNO ? 2 : original_bass[v].kind == ORIGINAL_SOUND_SYNTHONE ? -1 :
++{
++#if X0X_SUPERJ6_BUILTIN_INIT
++    /* Actual Build 9 default is a transient LFO1 rate receiver. It is
++     * not an old Chicago/Miami-style macro or a persistent REC lane. */
++    if (original_bass[v].kind == ORIGINAL_SOUND_JUNO) return -1;
++#endif
++    return original_bass[v].kind == ORIGINAL_SOUND_JUNO ? 2 : original_bass[v].kind == ORIGINAL_SOUND_SYNTHONE ? -1 :
+     original_bass[v].kind == ORIGINAL_SOUND_MIAMI ? ORIGINAL_MIAMI_WOBBLE_DEPTH : ORIGINAL_CHICAGO_CUTOFF; }
+ static float mix_level_from_pot(int v)
+ {
+@@ -1668,6 +1674,14 @@
+         return;
+     }
+ #endif
++#if X0X_SUPERJ6_BUILTIN_INIT
++    if (original_bass[v].kind == ORIGINAL_SOUND_JUNO) {
++        if (original_panel_ready(&original_bass[v], ORIGINAL_SOUND_JUNO) &&
++            juno6_set_mod_wheel(&original_bass[v].dsp.juno.synth, (unsigned)val))
++            mod_ctl[v] = (int16_t)val;
++        return;
++    }
++#endif
+     if (mod_param(v) < 0) return;
+     apply_param(T_303, v, mod_param(v), val);      /* the knob's own path */
+     mod_ctl[v] = (int16_t)val;                     /* after: apply_param from a knob clears it */

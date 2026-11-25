@@ -1,0 +1,97 @@
+--- a/firmware/src/dsp/juno6.h
++++ b/firmware/src/dsp/juno6.h
+@@ -89,7 +89,7 @@
+  float vibrato_depth, vibrato_ratio;
+  uint64_t lfo2_entropy_state;
+  float lfo2_hold_elapsed, lfo2_hold_period, lfo2_hold_sample;
+- uint8_t osc1_level_code;
++ uint8_t osc1_level_code, mod_wheel_lfo1; /* 0 untouched, 1..128 physical CC1 */
+ #endif
+ #endif
+ } juno6_t;
+@@ -132,6 +132,8 @@
+ void juno6_apply_knobs(juno6_t *s, unsigned mask, const uint8_t positions[SJ6_OSC_KNOBS]);
+ void juno6_apply_panel_envelopes(juno6_t *, unsigned mask, const uint8_t positions[SJ6_EXTRA_COUNT], int reset);
+ void juno6_apply_panel_master(juno6_t *, unsigned position);
++/* Transient Build-9 default MOD destination, LFO1 RATE. Audio owner only. */
++int juno6_set_mod_wheel(juno6_t *, unsigned value);
+ void juno6_set_lfo_words(juno6_t *, const juno6_lfo_words *, int reset_phase);
+ void juno6_set_panel_lfo(juno6_t *, unsigned lfo, int position, unsigned hz_mode);
+ void juno6_set_lfo_tempo(juno6_t *, float bpm);
+--- a/firmware/src/dsp/juno6_factory.inc
++++ b/firmware/src/dsp/juno6_factory.inc
+@@ -232,12 +232,17 @@
+     1.f, .5f, .3333f, .25f, .1667f, .125f
+ };
+ 
+-void juno6_read_lfo(const juno6_t *s, unsigned lfo, juno6_lfo_view *out)
++static void read_lfo(const juno6_t *s, unsigned lfo, unsigned wheel, juno6_lfo_view *out)
+ {
+     *out = (juno6_lfo_view){0};
+     out->phase = s->lfo_phase_q40[lfo];
+     if (dnbx_read_raw(&s->core, sj6_lfo_rate_id[lfo], &out->rate) == DNBX_OK) out->present |= 1u;
+     if (dnbx_read_raw(&s->core, 195u + lfo, &out->mode) == DNBX_OK) out->present |= 2u;
++    if (wheel) {
++        out->rate=(float)(wheel-1u)/127.f;
++        if (!(out->present&2u)) out->mode=1.f; /* Build-9 default Hz mode */
++        out->present=3u;
++    }
+     if (out->present == 3u) {
+         if (out->mode == 1.f) (void)dnbx_lfo_from_unit(out->rate, &out->hz);
+         else {
+@@ -247,6 +252,9 @@
+     }
+ }
+ 
++void juno6_read_lfo(const juno6_t *s,unsigned lfo,juno6_lfo_view *out)
++{ read_lfo(s,lfo,0,out); }
++
+ static void set_lfo_word(dnbx_part *core, unsigned id, int present, float raw)
+ {
+     if (present) (void)dnbx_store_raw(core, id, raw);
+@@ -302,7 +310,7 @@
+ static void prepare_lfo_step(juno6_t *s, unsigned lfo)
+ {
+     juno6_lfo_view view;
+-    juno6_read_lfo(s, lfo, &view);
++    read_lfo(s,lfo,lfo ? 0u:s->mod_wheel_lfo1,&view);
+     float advance = view.hz * ((float)SJ6_LFO_TURN / s->sample_rate) + .5f;
+     uint64_t step = sj6_lfo_unsigned_phase(advance);
+     s->lfo_step_q40[lfo] = step;
+@@ -313,6 +321,16 @@
+                           s->lfo_sync | bit : s->lfo_sync & ~bit);
+ }
+ 
++int juno6_set_mod_wheel(juno6_t *s,unsigned value)
++{
++    if (!s || !s->typed || value>127u) return 0;
++    if (s->mod_wheel_lfo1!=value+1u) {
++        s->mod_wheel_lfo1=(uint8_t)(value+1u);
++        prepare_lfo_step(s,0);
++    }
++    return 1;
++}
++
+ void juno6_set_lfo_tempo(juno6_t *s, float bpm)
+ {
+     if (bpm == s->lfo_tempo || bpm < 0.f || !sj6_lfo_finite(bpm)) return;
+@@ -324,6 +342,7 @@
+ void juno6_set_lfo_words(juno6_t *s, const juno6_lfo_words *words, int reset_phase)
+ {
+     if (reset_phase) {
++        s->mod_wheel_lfo1=0;
+         s->lfo2_hold_sample = s->lfo2_hold_elapsed = 0.f;
+         s->lfo2_pwm_until_tick = 0;
+     }
+@@ -340,8 +359,10 @@
+ 
+ void juno6_set_panel_lfo(juno6_t *s, unsigned lfo, int position, unsigned hz_mode)
+ {
+-    if (position >= 0)
++    if (position >= 0) {
++        if (lfo==0) s->mod_wheel_lfo1=0;
+         (void)dnbx_store_raw(&s->core, sj6_lfo_rate_id[lfo], position * (1.f / 127.f));
++    }
+     float old_mode;
+     /* Leave an equal authored mode word intact, including signed zero. */
+     if (dnbx_read_raw(&s->core, 195u + lfo, &old_mode) != DNBX_OK || old_mode != hz_mode)

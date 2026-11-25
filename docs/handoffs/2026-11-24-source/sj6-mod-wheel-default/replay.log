@@ -1,0 +1,12 @@
+juno6.c: OK
+juno6.h: OK
+juno6_factory.inc: OK
+dnbx_core.c: OK
+FAIL 9: juno6_set_mod_wheel
+patching file firmware/src/dsp/juno6.h
+patching file firmware/src/dsp/juno6_factory.inc
+juno6.c: OK
+juno6.h: OK
+juno6_factory.inc: OK
+PASS 512 held lane rate turns; DSP size 2992
+053eafaf8dee83efe151a3b8b14a232842dd5429b494a8a858595fffdf1671ad  /tmp/sj6-mod-replay.g33L5N/after.pcm

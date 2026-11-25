@@ -1,0 +1,105 @@
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -1646,8 +1646,15 @@
+ static void mod_apply(int v, int val)              /* ISR */
+ {
+     if ((unsigned)v >= NBASS) return;
+-    if (mod_param(v) < 0) return;
+     val = val < 0 ? 0 : val > 127 ? 127 : val;
++#if X0X_S1C
++    if (original_bass[v].kind == ORIGINAL_SOUND_SYNTHONE) {
++        if (original_panel_ready(&original_bass[v], ORIGINAL_SOUND_SYNTHONE))
++            s1_part_mod_wheel(&original_bass[v].dsp.synthone, (unsigned)val);
++        return;
++    }
++#endif
++    if (mod_param(v) < 0) return;
+     apply_param(T_303, v, mod_param(v), val);      /* the knob's own path */
+     mod_ctl[v] = (int16_t)val;                     /* after: apply_param from a knob clears it */
+ }
+@@ -2221,9 +2228,11 @@
+                 if (held) src_held[src] |= (uint16_t)(1u << k);
+                 else src_held[src] &= (uint16_t)~(1u << k);
+             } else if (ty == 0xb0 && d1 == 1) {
+-                PARAM_TRACE(PARAM_MIDI, T_303, k, mod_param(k), d2);
+-                mod_apply(k, d2);                      /* mod wheel CC1: cutoff / wobble depth */
+-                ext_touch[k] |= 2u;
++                int param = mod_param(k);
++                if (param >= 0)
++                    PARAM_TRACE(PARAM_MIDI, T_303, k, param, d2);
++                mod_apply(k, d2);                      /* same receiver as the physical wheel */
++                if (param >= 0) ext_touch[k] |= 2u;
+             } else if (ty == 0xb0 && d1 == 64) {
+                 /* damper: sustain pedal CC64 (no wheel mapping) */
+                 PARAM_TRACE(PARAM_MIDI, T_303, k,
+--- a/firmware/src/app/main_fm1.c
++++ b/firmware/src/app/main_fm1.c
+@@ -1080,10 +1080,11 @@
+         if (cut_part >= 0) {
+             /* mw 0 is down (closed / min depth). mw 127 is up (open / max depth). */
+             want = mw;
+-            PARAM_TRACE(PARAM_WHEEL_MOD, T_303, cut_part,
+-                        engine_bass_mod_param(cut_part), (int)want);
++            int param = engine_bass_mod_param(cut_part);
++            if (param >= 0)
++                PARAM_TRACE(PARAM_WHEEL_MOD, T_303, cut_part, param, (int)want);
+             engine_bass_mod(cut_part, (int)want);
+-            motion_touch(PR(R_ENG, T_303, cut_part, engine_bass_mod_param(cut_part)));
++            if (param >= 0) motion_touch(PR(R_ENG, T_303, cut_part, param));
+             if (!mw)
+                 cut_part = -1;
+         }
+@@ -1093,7 +1094,10 @@
+     for (int v = 0; v < NBASS; ++v) {
+         int t = engine_bass_ext_touch(v);
+         if (t & 1) motion_touch(PR(R_ENG, T_303, v, smk_pitch_parameter(v)));
+-        if (t & 2) motion_touch(PR(R_ENG, T_303, v, engine_bass_mod_param(v)));
++        if (t & 2) {
++            int param = engine_bass_mod_param(v);
++            if (param >= 0) motion_touch(PR(R_ENG, T_303, v, param));
++        }
+     }
+ #if X0X_BASS_PRESET_PREVIEW
+     engine_bass_wheel_owners((uint8_t)((bend_part >= 0 && bend_part < NBASS ? 1u << bend_part : 0u) |
+--- a/firmware/src/app/s1c_part.c
++++ b/firmware/src/app/s1c_part.c
+@@ -8,11 +8,12 @@
+ #include "original_sound.h"
+ #endif
+ #include <stddef.h>
++#include <math.h>
+ #include <string.h>
+ 
+ #define S1C_SR 44100.0f
+ /* Synth One factory parameter ids (s1c uses the same numbering). */
+-enum { P_MONO = 20, P_GLIDE = 21, P_DET2 = 30, P_DETM = 31, P_BCSR = 34, P_PAN_RATE = 36, P_DELAY_TIME = 43, P_CUTOFF_LFO = 48, P_RESONANCE_LFO = 49, P_OSC_MIX_LFO = 50, P_AMP_DECAY_LFO = 52, P_NOISE_LFO = 53, P_FM_LFO = 54, P_DETUNE_LFO = 55, P_PITCH_LFO = 57, P_TREMOLO_LFO = 59, P_TEMPO_SYNC = 139 };
++enum { P_CUT = 16, P_MONO = 20, P_GLIDE = 21, P_DET2 = 30, P_DETM = 31, P_BCSR = 34, P_PAN_RATE = 36, P_DELAY_TIME = 43, P_CUTOFF_LFO = 48, P_RESONANCE_LFO = 49, P_OSC_MIX_LFO = 50, P_AMP_DECAY_LFO = 52, P_NOISE_LFO = 53, P_FM_LFO = 54, P_DETUNE_LFO = 55, P_PITCH_LFO = 57, P_TREMOLO_LFO = 59, P_TEMPO_SYNC = 139 };
+ 
+ #if !X0X_SYNTH_CONTROLS_INIT_ONLY
+ static const uint8_t *s1_part_pack;
+@@ -422,6 +423,14 @@
+ }
+ #endif
+ 
++/* AudioKit Manager routes normalized CC1 to the inverted logarithmic
++ * 120..7600 scale, times 3. Front end clamps cutoff to 64..22050 Hz. */
++void s1_part_mod_wheel(s1_dry_part *part, unsigned cc1)
++{
++    if (cc1 > 127u) cc1 = 127u;
++    const float cutoff = 360.f * powf(7600.f / 120.f, (float)(127u-cc1) / 127.f);
++    (void)s1c_front_set(&part->e, P_CUT, cutoff);
++}
+ int s1_part_param(s1_dry_part *part, unsigned id, float value)
+ {
+     if (id > 2 || !(value >= 0.0f && value <= 1.0f)) return 0;
+--- a/firmware/src/app/s1c_part.h
++++ b/firmware/src/app/s1c_part.h
+@@ -59,6 +59,8 @@
+ #endif
+ #endif
+ int s1_part_param(s1_dry_part *part, unsigned id, float value);
++/* Original Init route (cutoff). Performance-only, no Sound or REC lane. */
++void s1_part_mod_wheel(s1_dry_part *part, unsigned cc1);
+ int s1_part_note(s1_dry_part *part, unsigned key, unsigned velocity);
+ int s1_part_active(const s1_dry_part *part);
+ /* UI observation: loudest voice's amp envelope, filter envelope, stage (0 attack,
