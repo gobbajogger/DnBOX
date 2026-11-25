@@ -1,0 +1,13 @@
+{
+  "data_initial_bytes": 178948,
+  "data_initial_sector_bytes": 180224,
+  "data_initial_sector_count": 44,
+  "with_ab_directory_bytes": 188416,
+  "update_append_bytes": 19766,
+  "transient_data_sector_bytes": 200704,
+  "verified_presets": 1546,
+  "torn_directory_cases": 4097,
+  "shipping": false,
+  "reclaim_note": "GC and bounded target decoder not implemented"
+}
+{"family": "all", "minimum": 2, "records": 1546, "raw": 178911, "standalone_sector_bytes": 233472, "shared_sector_upper_bytes": 180224, "checked": true}

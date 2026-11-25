@@ -11,15 +11,16 @@ p32=struct.Struct('<I')
 bh=struct.Struct('<4s8sHHI')
 record=struct.Struct('<8sHBB')
 def sect(n):return ((n+4095)//4096)
+LZMA_HISTORY = int(__import__('os').environ.get('DNBOX_TRIAL_HISTORY', '65536'))
 def codec(name, x, exact_size=None):
     if exact_size is None: 
         if name=='zlib':return zlib.compress(x,9)
-        if name=='lzma':return lzma.compress(x,format=lzma.FORMAT_RAW,filters=[dict(id=lzma.FILTER_LZMA2,dict_size=65536,preset=9|lzma.PRESET_EXTREME)])
+        if name=='lzma':return lzma.compress(x,format=lzma.FORMAT_RAW,filters=[dict(id=lzma.FILTER_LZMA2,dict_size=LZMA_HISTORY,preset=9|lzma.PRESET_EXTREME)])
         if name=='zstd':return zs.ZstdCompressor(level=19).compress(x)
         if name=='raw':return x
     else:
         if name=='zlib':y=zlib.decompress(x)
-        if name=='lzma':y=lzma.decompress(x,format=lzma.FORMAT_RAW,filters=[dict(id=lzma.FILTER_LZMA2,dict_size=65536)])
+        if name=='lzma':y=lzma.decompress(x,format=lzma.FORMAT_RAW,filters=[dict(id=lzma.FILTER_LZMA2,dict_size=LZMA_HISTORY)])
         if name=='zstd':y=zs.ZstdDecompressor().decompress(x,max_output_size=exact_size)
         if name=='raw':y=x
         assert len(y)==exact_size

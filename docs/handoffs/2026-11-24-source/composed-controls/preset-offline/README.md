@@ -22,3 +22,9 @@ This is 176 KiB of data (184 KiB including both directories) versus 112 KiB
 of usable pool. Replacement used 196 KiB transient data space in this scenario.
 There is no bounded on-device decoder, physical NOR migration or transactional
 garbage collection for this experiment. It is not a usable Elite/Pro build.
+
+The same dense bank trial with `DNBOX_TRIAL_HISTORY=4096` used 178,948 B
+before alignment, only 10 B more than the 64 KiB trial, and still used 44
+data sectors. The history parameter alone does not bound the decoder's total RAM.
+`COLUMN-TRIAL.md` describes a smaller alternative that encodes the full library
+as one stream and therefore cannot independently replace or remove a bank.
