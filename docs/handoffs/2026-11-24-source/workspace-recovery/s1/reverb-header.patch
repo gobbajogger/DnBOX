@@ -1,0 +1,20 @@
+--- a/firmware/src/app/s1_patch.h
++++ b/firmware/src/app/s1_patch.h
+@@ -123,7 +123,7 @@
+ /* Zero means unset in each phase. Panel and wet digits hold position + 1.
+  * LFO rate digits keep their existing absolute/free-or-division code. */
+ typedef struct {
+-    uint8_t panel[S1_EXTRA_COUNT], lfo[S1_LFO_COUNT], wet[S1_WET_COUNT], cutoff_lfo;
++    uint8_t panel[S1_EXTRA_COUNT], lfo[S1_LFO_COUNT], wet[S1_WET_COUNT], cutoff_lfo, reverb_mix_lfo;
+ } s1_extra_state;
+ int s1_extra_read(const uint8_t *data, s1_extra_state *state);
+ #else
+@@ -142,7 +142,7 @@
+     if (slot == S1_SUB_OCTAVE || slot == S1_SUB_WAVE) return 1;
+     if (slot == S1_FILTER_TYPE) return 2;
+     if (slot == S1_LFO_SYNC || slot == S1_WIDEN || slot == S1_MONO_LEGATO) return 1;
+-    if (slot - S1_LFO1_SHAPE < 2u || slot == S1_CUTOFF_LFO || slot == S1_DETUNE_LFO || slot == S1_PITCH_LFO || slot == S1_TREMOLO_LFO || s1_base_route_slot(slot) || s1_mod_ext_slot(slot)) return 3;
++    if (slot - S1_LFO1_SHAPE < 2u || slot == S1_CUTOFF_LFO || slot == S1_DETUNE_LFO || slot == S1_PITCH_LFO || slot == S1_TREMOLO_LFO || slot == S1_REVERB_MIX_LFO || s1_base_route_slot(slot) || s1_mod_ext_slot(slot)) return 3;
+ #endif
+     return slot == S1_PATCH_COUNT ? 1u : S1_PATCH_STEPS;
+ }

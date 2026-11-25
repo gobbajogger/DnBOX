@@ -1,0 +1,7 @@
+# Native Synth One FX controls (build-first)
+- **ID 58 Bitcrush LFO**: existing S1 owner b20 enum (off / LFO 1 / LFO 2 / both), edits use existing typed choose/undo path. Native per-capture rate follows the archived original cadence; per-capture math uses device fastmath rather than linking double-precision libm. Existing host code path remains untouched.
+- **ID 136 Reverb Wet Makeup**: existing S1 front-set destination routes to CWG after the wet compressor, before the wet/dry split. Owner-relative b46 is independent on both owners. Untouched b46=0 restores exact original binary32 1.88; range is .50–4.00×. The actual engine table gives ID 58 (0, 3, 0) and ID 136 (.5, 4, 1.8799999952316284).
+- Native EFFECT K4 gets Bitcrush LFO, with existing Reverb HP moved to native REVERB K2. REVERB K1 is Wet Makeup and K3/K4 keep the existing delay/reverb bypass; replacing the native FX BYPASS row preserves page count. Other contexts retain original shared descriptors.
+- Layer the transform only on a typed carrier already including archived first-row b20 and second-row b39. It checks all edit anchors before writing. Add X0X_S1_CRUSH_LFO_PROBE=1 to the guarded native flags.
+- Actual JieLi PI32v2 r3 object measurement for 73749f55 S1 DSP seam: 7747 B -> 7921 B text (+174 B); data 0 and BSS 68 unchanged. Guarded b46 storage header compile is independent and is not a production link.
+- No playback/device tests performed. This partial result does not assert fit of the combined Elite/Pro app images.

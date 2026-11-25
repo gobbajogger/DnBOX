@@ -1,0 +1,8 @@
+# SuperJ6 original zero Gate (source, fit-first)
+The original app has one Gate control, ID144 (0..100); do not add a switch or a per-step duplicate. Native Zero Gate extends the existing diagnostic positive Gate carrier, retains legacy b5 positive storage, and uses only the existing typed b13 Boolean marker. For a zero-duration step, keep the original note-on semantics and the already-established scheduler release behavior rather than turning it into a rest. A live edit/zero-only Undo may choose a new Gate, but must not recalculate a sounding step's deadline.
+
+Run `python recovery/gate/native-zero.py EXACT_JOINED_DONOR` before laying out fit-only S1SequencerParams or merging another app/UI overlay. The generator asserts all seven exact source hashes then emits the unified patch, PRE and POST. Split exact input directories can be passed in search order. For partial recovery only, `--partial` emits differently named products and must not be used as a release or whole-image candidate.
+
+Confirmed exact preimages: engine_arp.inc and typed_controls_trial.h under source/exact-files; S1Sequencer.c/h under gate/seq-preimages; sj6_137_host_witness.h under gate/witness-preimage; original_runtime.c under gate/runtime-preimage. ui.c is the only missing verified Zero Gate input at writing; expected bytes in native-zero.PRE.sha256. Do not treat the recovered older ui.c as complete.
+
+Build with X0X_SJ6_NATIVE_ZERO_GATE=1 alongside the existing linked typed diagnostic flags. The native scheduler, runtime and exact recovered Juno receiver compiled with real JieLi for the flag-off/flag-on cases. No whole firmware link, behavioral tests, Git writes, device work or publish were performed. See build-only.receipt.
