@@ -1,0 +1,102 @@
+--- a/firmware/src/dsp/sj6_native_room.h
++++ b/firmware/src/dsp/sj6_native_room.h
+@@ -4,9 +4,11 @@
+ #if X0X_SJ6_NATIVE_ROOM
+ enum { SJ6_ROOM_ENABLE, SJ6_ROOM_TYPE, SJ6_ROOM_SIZE, SJ6_ROOM_LOCUT,
+        SJ6_ROOM_MIX, SJ6_ROOM_WIDEN, SJ6_ROOM_RATE, SJ6_ROOM_DEPTH, SJ6_ROOM_COUNT };
+-enum { SJ6_ROOM_LINE = 113, SJ6_ROOM_WIDE = 441, SJ6_ROOM_STRIDE = 8 };
++enum { SJ6_ROOM_L0 = 61, SJ6_ROOM_L1 = 79, SJ6_ROOM_L2 = 97, SJ6_ROOM_L3 = 113,
++       SJ6_ROOM_RING_WORDS=SJ6_ROOM_L0+SJ6_ROOM_L1+SJ6_ROOM_L2+SJ6_ROOM_L3,
++       SJ6_ROOM_WIDE = 441, SJ6_ROOM_STRIDE = 8 };
+ typedef struct {
+-    int16_t ring[4][SJ6_ROOM_LINE], wide[SJ6_ROOM_WIDE];
++    int16_t ring[SJ6_ROOM_RING_WORDS], wide[SJ6_ROOM_WIDE];
+     float lo[2], acc[2], wet[2], last[2], pan_phase;
+     float hp_coeff, fb, mix, rate, depth, clock_bpm;
+     float fat_lp[2];  /* Fatten owns only the audible right-hand delay. */
+--- a/firmware/src/dsp/sj6_native_room.inc
++++ b/firmware/src/dsp/sj6_native_room.inc
+@@ -74,7 +74,9 @@
+ {
+     /* Two compact room responses: paired asymmetric combs and a four-line
+      * diffusing network. Neither stores or invokes the app's original IR. */
+-    static const uint8_t len[2][4]={{47,59,73,89},{61,79,97,113}};
++    static const uint8_t len[2][4]={{47,59,73,89},{SJ6_ROOM_L0,SJ6_ROOM_L1,SJ6_ROOM_L2,SJ6_ROOM_L3}};
++    static const uint16_t base[4]={0,SJ6_ROOM_L0,SJ6_ROOM_L0+SJ6_ROOM_L1,
++        SJ6_ROOM_L0+SJ6_ROOM_L1+SJ6_ROOM_L2};
+     const uint8_t *length=len[s->type];
+     float x[4],in[2],feedback[4];
+     for(unsigned c=0;c<2;++c){
+@@ -84,7 +86,7 @@
+         in[c]=y-s->lo[c];
+         s->last[c]=s->wet[c];
+     }
+-    for(unsigned i=0;i<4;++i)x[i]=(1.f/32767.f)*s->ring[i][s->pos[i]];
++    for(unsigned i=0;i<4;++i)x[i]=(1.f/32767.f)*s->ring[base[i]+s->pos[i]];
+     if(s->type){
+         feedback[0]=.5f*(x[0]+x[1]+x[2]+x[3]);
+         feedback[1]=.5f*(x[0]-x[1]+x[2]-x[3]);
+@@ -98,7 +100,7 @@
+         s->wet[1]=.55f*(x[1]+x[3]);
+     }
+     for(unsigned i=0;i<4;++i){
+-        s->ring[i][s->pos[i]]=sj6_room_pcm(.42f*in[i&1u]+s->fb*feedback[i]);
++        s->ring[base[i]+s->pos[i]]=sj6_room_pcm(.42f*in[i&1u]+s->fb*feedback[i]);
+         if(++s->pos[i]>=length[i])s->pos[i]=0;
+     }
+ }
+--- a/firmware/src/dsp/drum909.h
++++ b/firmware/src/dsp/drum909.h
+@@ -23,7 +23,7 @@
+ 
+ #define DR_MAX_PARAMS 11         /* most params any voice (or the kit) has (X0X: + PAN, the SD's DECAY, the BD's sends) */
+ #define DR_NZ_HIST 256           /* noise history kept across blocks (filter warm-up) */
+-#define DR_NZ_BUF (DR_NZ_HIST + 2 * 256)
++#define DR_NZ_BUF (DR_NZ_HIST + 256)
+ 
+ /* BD and SD: 9W9's er99_bt_t */
+ typedef struct {
+--- a/firmware/src/dsp/drum909.c
++++ b/firmware/src/dsp/drum909.c
+@@ -1114,7 +1114,7 @@
+ {
+     /* the shared noise, written on after the previous block so nz[-DR_NZ_HIST
+      * .. -1] is the noise before this block; the tail is moved to the front
+-     * only when the buffer runs out (every other 256-frame block) */
++     * only when room is needed for the next block; the forward copy is safe because its source starts at or after its destination. */
+     if (d->nz_pos + n > DR_NZ_BUF) {
+         for (int i = 0; i < DR_NZ_HIST; ++i)
+             d->nz_buf[i] = d->nz_buf[d->nz_pos - DR_NZ_HIST + i];
+--- a/firmware/src/lcd.c
++++ b/firmware/src/lcd.c
+@@ -193,7 +193,7 @@
+  * padled_flush() only sends when a colour changed. */
+ #define PADLED_N 16u
+ #define PADLED_LATCH 250u
+-static uint8_t padled_buf[PADLED_LATCH + PADLED_N * 24u] SMK_BIG;   /* (zeroed at boot: the latch stays 0) */
++static uint8_t padled_buf[PADLED_LATCH + PADLED_N * 24u];   /* (zeroed at boot: the latch stays 0) */
+ static uint32_t padled_rgb[PADLED_N];
+ static uint8_t padled_dirty = 1;
+ /* hardware pad (0..7 top row, 8..15 bottom row, left to right; smk_input.h SMK_PAD_OF_WHITE) -> position in
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -53,7 +53,7 @@
+ static volatile uint8_t eng_hit_step[NKIT][NDRUM];    /* the step that hit was on (UI: only a real hit lights) */
+ static float eng_hit_pk[NKIT][NDRUM];                 /* the envelope's peak since that hit (UI side) */
+ static uint32_t eng_hit_seen[NKIT][NDRUM];
+-int16_t eng_scope[SCOPE_N] X0X_POOL;
++int16_t eng_scope[SCOPE_N];
+ volatile uint32_t eng_scope_w;
+ 
+ static drum909_t d909 POOL;
+@@ -590,8 +590,8 @@
+ #define LIVE_KEY_Q 32u
+ typedef struct { uint32_t generation, word; } live_key_command_t;
+ typedef struct { uint32_t generation, context; uint8_t gate, token, pitch, arp, blocked; } live_key_owner_t;
+-static live_key_command_t live_key_q[LIVE_KEY_Q] POOL;
+-static live_key_owner_t live_key_owner[NBASS] POOL;
++static live_key_command_t live_key_q[LIVE_KEY_Q];
++static live_key_owner_t live_key_owner[NBASS];
+ static volatile uint8_t live_key_w, live_key_r, live_key_cancel;
+ static void live_key_retire(int voice,int release);
+ static void live_key_context_retire(int voice,int release);
