@@ -32,7 +32,7 @@
  #endif
  enum {S1_PAN_AMOUNT_BYTE=21,S1_PAN_RATE_BYTE=22,S1_PAN_RATE_BYTES=4};
  static inline uint32_t s1_pan_rate_word_bytes(const uint8_t *b){
-@@ -108,21 +121,267 @@
+@@ -108,21 +121,326 @@
  { return s->v[T_303][8+2u*owner+S1_DICT_BYTE/NPARAMS_MAX][S1_DICT_BYTE%NPARAMS_MAX]; }
  static inline void s1_dict_store(sound_t *s,unsigned owner,unsigned code)
  { s->v[T_303][8+2u*owner+S1_DICT_BYTE/NPARAMS_MAX][S1_DICT_BYTE%NPARAMS_MAX]=(uint8_t)code; }
@@ -131,7 +131,13 @@
 +static inline int sj6_aux_init(const sound_t *s,unsigned v)
 +{ return s->v[T_303][v][29]==ORIGINAL_SOUND_JUNO && !original_sound_sj6_factory(s->v[T_303][v]); }
 +static inline unsigned sj6_aux_max(unsigned k) {
-+ return k<2u?1u:k==3u?4u:k>=5u&&k<9u?2u:127u;
++ return k<2u?1u:k==3u?4u:k>=5u&&k<9u?
++#if X0X_SJ6_PITCH_ENV_NATIVE
++     6u:
++#else
++     5u:
++#endif
++     127u;
 +}
 +static inline int sj6_aux_valid(unsigned k,unsigned value)
 +{ return value<=(k<2u?2u:sj6_aux_max(k)); }
@@ -233,6 +239,41 @@
 +static inline void sj6_ota_write(sound_t *s,unsigned owner,unsigned value)
 +{ s->v[T_MST][SJ6_OTA_ROW+owner][SJ6_OTA_BYTE]=(uint8_t)value; }
 +#endif
++#if X0X_SJ6_NATIVE_LIMITER
++#include "../dsp/sj6_native_limiter.h"
++enum { SJ6_LIM_ROW=5, SJ6_LIM_BYTE=0 };
++_Static_assert(SJ6_LIM_ROW+NBASS<=NVOICES_MAX && SJ6_LIM_BYTE+SJ6_LIM_COUNT<=NPARAMS_MAX,
++               "The two SuperJ6 limiter payloads occupy unused master owner rows");
++static inline const uint8_t *sj6_limiter_read(const sound_t *s,unsigned owner)
++{ return s->v[T_MST][SJ6_LIM_ROW+owner]+SJ6_LIM_BYTE; }
++static inline uint8_t *sj6_limiter_write(sound_t *s,unsigned owner)
++{ return s->v[T_MST][SJ6_LIM_ROW+owner]+SJ6_LIM_BYTE; }
++#endif
++#if X0X_SJ6_NATIVE_CLASSIC
++#if !X0X_SJ6_NATIVE_J60
++#error "Native Classic Chorus requires the shared Chorus Version page"
++#endif
++enum { SJ6_CLASSIC_ROW=5, SJ6_CLASSIC_OFFSET=4,SJ6_CLASSIC_COUNT=3 };
++enum { SJ6_CLASSIC_RATE_ID=42,SJ6_CLASSIC_DEPTH_ID=43,SJ6_CLASSIC_MIX_ID=44 };
++_Static_assert(SJ6_CLASSIC_ROW+NBASS<=NVOICES_MAX && SJ6_CLASSIC_OFFSET+3u<=NPARAMS_MAX,
++               "Classic Chorus payload is independent of all J60 and limiter bytes");
++static inline const uint8_t *sj6_classic_native_code(const sound_t *s,unsigned v)
++{ return &s->v[T_MST][SJ6_CLASSIC_ROW+v][SJ6_CLASSIC_OFFSET]; }
++static inline uint8_t *sj6_classic_native_payload(sound_t *s,unsigned v)
++{ return &s->v[T_MST][SJ6_CLASSIC_ROW+v][SJ6_CLASSIC_OFFSET]; }
++static inline int sj6_classic_native_valid(const uint8_t *p)
++{ return p[0]<=128u && p[1]<=128u && p[2]<=128u; }
++#endif
++#if X0X_SJ6_SEQ_SETTINGS_NATIVE
++enum { SJ6_SEQ_SETTINGS_ROW=3, SJ6_SEQ_SETTINGS_OFFSET=28, SJ6_SEQ_SETTINGS_COUNT=2 };
++_Static_assert(SJ6_SEQ_SETTINGS_ROW+NBASS<=NVOICES_MAX &&
++               SJ6_SEQ_SETTINGS_OFFSET+SJ6_SEQ_SETTINGS_COUNT<=NPARAMS_MAX,
++               "independent typed settings rows");
++static inline const uint8_t *sj6_seq_settings_read(const sound_t *s,unsigned v)
++{ return s->v[T_MST][SJ6_SEQ_SETTINGS_ROW+v]+SJ6_SEQ_SETTINGS_OFFSET; }
++static inline uint8_t *sj6_seq_settings_write(sound_t *s,unsigned v)
++{ return s->v[T_MST][SJ6_SEQ_SETTINGS_ROW+v]+SJ6_SEQ_SETTINGS_OFFSET; }
++#endif
  static inline int canonical137(const sound_t *s) {
   for (unsigned v=0;v<2;++v) {
 +#if X0X_SJ6_NATIVE_J60
@@ -240,7 +281,25 @@
 +  if(!sj6_j60_valid(j60) ||
 +     ((j60[0]|j60[1]|j60[2]|j60[3])&&!sj6_j60_owner(s,v)))return 0;
 +#endif
++#if X0X_SJ6_NATIVE_CLASSIC
++  const uint8_t *classic=sj6_classic_native_code(s,v);
++  if(!sj6_classic_native_valid(classic) ||
++     ((classic[0]|classic[1]|classic[2])&&!sj6_j60_owner(s,v)))return 0;
++#endif
    const uint8_t *b=read137(s,v);
++#if X0X_SJ6_SEQ_SETTINGS_NATIVE
++  const uint8_t *seqcfg=sj6_seq_settings_read(s,v);
++  if(seqcfg[0]>1u || seqcfg[1]>1u ||
++     ((seqcfg[0]|seqcfg[1]) && (s->v[T_303][v][29]!=ORIGINAL_SOUND_JUNO ||
++         original_sound_sj6_factory(s->v[T_303][v])))) return 0;
++#endif
++#if X0X_SJ6_NATIVE_LIMITER
++  for(unsigned k=0;k<SJ6_LIM_COUNT;++k){
++    unsigned c=sj6_limiter_read(s,v)[k];
++    if(c>128u || (c && (s->v[T_303][v][29]!=ORIGINAL_SOUND_JUNO ||
++        original_sound_sj6_factory(s->v[T_303][v]))))return 0;
++  }
++#endif
 +#if X0X_SJ6_OTA_NATIVE
 +  unsigned ota=sj6_ota_read(s,v);
 +  if(ota>1u || (ota && (s->v[T_303][v][29]!=ORIGINAL_SOUND_JUNO ||
@@ -302,7 +361,7 @@
    if (b[0]!=137 || b[1]!=v || b[2]>127 || b[3]>2) return 0;
  #if DNBOX_TYPED_CONTROLS_NATIVE_TEST
  #if X0X_SJ6_VELOCITY_PORT
-@@ -156,21 +415,40 @@
+@@ -156,21 +474,40 @@
      if(x>S1_FB_LAST)return 0;
      continue;
     }
@@ -348,7 +407,7 @@
  #endif
  #if defined(X0X_S1_AUTOPAN_PROBE) && X0X_S1_AUTOPAN_PROBE
     if(i==S1_PAN_AMOUNT_BYTE){if(x>127)return 0;continue;}
-@@ -204,8 +482,56 @@
+@@ -204,8 +541,56 @@
      if(x && !s1_typed_init_cell(s->v[T_303][v]))return 0;
  #endif
      if(x>S1_DICT_MAX)return 0;

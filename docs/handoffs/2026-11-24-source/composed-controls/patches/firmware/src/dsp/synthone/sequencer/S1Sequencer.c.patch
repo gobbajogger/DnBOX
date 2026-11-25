@@ -1,6 +1,14 @@
 --- a/firmware/src/dsp/synthone/sequencer/S1Sequencer.c
 +++ b/firmware/src/dsp/synthone/sequencer/S1Sequencer.c
-@@ -34,8 +34,11 @@
+@@ -29,13 +29,19 @@
+     s->previousHeldNoteNumbersAECount = 0;
+     s->mBeatTime = 0;
+     s->mStepCounter = 0;
+     s->lastPosition = -1;
++#if X0X_SJ6_SEQ_SETTINGS_NATIVE
++    s->saga_wait_first=0;
++#endif
+     s->gateOpen = 0;
  #if defined(X0X_SJ6_GATE_DEADLINE_PROBE) && X0X_SJ6_GATE_DEADLINE_PROBE
      s->editGateLatched = 0;
  #elif X0X_SJ6_NATIVE_POSITIVE_GATE
@@ -12,7 +20,7 @@
  #if (defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE) || X0X_SJ6_NATIVE_RANDOM2
      s->saga_random_state=0;
  #endif
-@@ -53,8 +56,11 @@
+@@ -53,8 +59,11 @@
  #if defined(X0X_SJ6_GATE_DEADLINE_PROBE) && X0X_SJ6_GATE_DEADLINE_PROBE
      s->editGateLatched = 0;
  #elif X0X_SJ6_NATIVE_POSITIVE_GATE
@@ -24,7 +32,7 @@
  }
  
  void S1Sequencer_reset(S1Sequencer *s, int resetNotes, void *ctx, KeyOffCallback off)
-@@ -144,9 +150,13 @@
+@@ -144,9 +153,13 @@
  {
  #if defined(X0X_SJ6_GATE_DEADLINE_PROBE) && X0X_SJ6_GATE_DEADLINE_PROBE
      if (s->editGateLatched) return s->editGateTicks;
@@ -38,7 +46,7 @@
      (void)s;
      return p->gateTicks;
  }
-@@ -159,11 +169,18 @@
+@@ -159,11 +172,18 @@
          s->editGateTicks=p->gateTicks;
          s->editGateLatched=1;
      }
@@ -57,3 +65,54 @@
      p->seqGate=(uint8_t)percent;
      S1Sequencer_setStep(p,p->arpSeqTempoMultiplier);
  }
+@@ -202,8 +222,12 @@
+     const int arpSeqIsOn = p->arpIsOn == 1;
+     const int firstTimeAnyKeysHeld = s->previousHeldNoteNumbersAECount == 0 && heldNoteNumbersAECount > 0;
+     const int firstTimeNoKeysHeld = heldNoteNumbersAECount == 0 && s->previousHeldNoteNumbersAECount > 0;
+ 
++#if X0X_SJ6_SEQ_SETTINGS_NATIVE
++    if (p->saga_snap_native && (firstTimeAnyKeysHeld || firstTimeNoKeysHeld))
++        s->saga_wait_first=(uint8_t)(firstTimeAnyKeysHeld && p->clocked);
++#endif
+     // reset arp/seq when user goes from 0 to N, or N to 0 held keys
+     if (arpSeqIsOn && (firstTimeNoKeysHeld || firstTimeAnyKeysHeld)) {
+ #if X0X_SUPERJ6_BUILTIN_INIT
+         s->saga_index = 0;
+@@ -246,22 +270,37 @@
+                         !pulse &&
+ #endif
+                         firstTimeAnyKeysHeld
+ #if X0X_SUPERJ6_BUILTIN_INIT
++#if X0X_SJ6_SEQ_SETTINGS_NATIVE
++                        && !((p->saga_snap_native || p->saga_timing) && p->clocked)
++#else
+                         && !(p->saga_timing && p->clocked)
+ #endif
++#endif
+                        )) {
++#if X0X_SJ6_SEQ_SETTINGS_NATIVE
++            const unsigned first_snap=s->saga_wait_first;
++            s->saga_wait_first=0;
++#endif
+             // Turn off previous beat's notes even if arp is off
+             turnOffLastNotes(s, ctx, off);
+             // ARP/SEQ is ON, held notes
+             if (arpSeqIsOn && heldNoteNumbersAECount > 0) {
+                 const int size = sequenceSize(p, heldNoteNumbersAECount);
+                 // At least one key is held down, and a non-empty sequence has been created
+                 if (size > 0) {
+                     // DnBOX: SEQ follows the transport grid; ARP order starts on the press
++#if X0X_SJ6_SEQ_SETTINGS_NATIVE
++                    if (first_snap || firstTimeAnyKeysHeld || s->mStepCounter < s->mStepBase)
++                        s->mStepBase=s->mStepCounter;
++                    int seqNotePosition = (p->arpIsSequencer == 1 && !p->saga_snap_native ?
++                                           s->mStepCounter : s->mStepCounter-s->mStepBase) % size;
++#else
+                     if (firstTimeAnyKeysHeld || s->mStepCounter < s->mStepBase) s->mStepBase = s->mStepCounter;
+                     int seqNotePosition = (p->arpIsSequencer == 1 ? s->mStepCounter
+                                            : s->mStepCounter - s->mStepBase) % size;
++#endif
+ #if X0X_S1_FENCED_CLOCK
+                     if (pulse) seqNotePosition = pulse->index % size;
+ #endif
+ #if X0X_SUPERJ6_BUILTIN_INIT

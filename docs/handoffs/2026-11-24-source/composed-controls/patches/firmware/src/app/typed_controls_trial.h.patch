@@ -1,6 +1,6 @@
 --- a/firmware/src/app/typed_controls_trial.h
 +++ b/firmware/src/app/typed_controls_trial.h
-@@ -4,23 +4,40 @@
+@@ -4,23 +4,43 @@
   * or bench-only DSP. All translation units must use the same support flags. */
  #ifndef DNBOX_TYPED_CONTROLS_NATIVE_TEST
  #define DNBOX_TYPED_CONTROLS_NATIVE_TEST 0
@@ -12,6 +12,9 @@
 +#if !DNBOX_TYPED_CONTROLS_NATIVE_TEST
 +#error Native SuperJ6 source levels require the read-only typed carrier
 +#endif
++#endif
++#if X0X_SJ6_SEQ_SETTINGS_NATIVE && !DNBOX_TYPED_CONTROLS_NATIVE_TEST
++#error Native SuperJ6 sequencer settings require the typed carrier
 +#endif
  #if DNBOX_TYPED_CONTROLS_NATIVE_TEST != 0 && DNBOX_TYPED_CONTROLS_NATIVE_TEST != 1
  #error DNBOX_TYPED_CONTROLS_NATIVE_TEST must be 0 or 1

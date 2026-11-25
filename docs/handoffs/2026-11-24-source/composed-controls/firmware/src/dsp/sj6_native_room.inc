@@ -6,10 +6,29 @@
 float sj6_room_rate(unsigned word)
 {
     float u=(float)word*(1.f/127.f);
-    return .05f+7.95f*u*u;
+    /* Original free rate, authenticated Build9 conductor ID22. */
+    return 16.f*fm_powf(u,3.33f);
+}
+float sj6_room_rate_clocked(unsigned word,float bpm,int sync)
+{
+    if(!sync)return sj6_room_rate(word);
+    static const float grid[18]={64,48,32,24,16,12,8,6,4,3,2,1.5f,1,.5f,.3333f,.25f,.1667f,.125f};
+    const unsigned index=(17u*(127u-word)+63u)/127u;
+    return bpm>0.f ? (bpm*(1.f/240.f))*grid[index] : 0.f;
+}
+void original_runtime_sj6_room_clock(original_runtime_part *p,float bpm,int sync)
+{
+    if(!p || p->kind!=ORIGINAL_SOUND_JUNO || p->status!=ORIGINAL_RUNTIME_OK)return;
+    sj6_room_t *s=&p->dsp.juno.room;
+    if(s->clock_bpm==bpm && s->clock_sync==(unsigned)!!sync)return;
+    s->clock_bpm=bpm;s->clock_sync=(uint8_t)!!sync;
+    s->rate=sj6_room_rate_clocked(s->rate_code,bpm,sync)*(1.f/44100.f);
 }
 float sj6_room_locut(unsigned word)
-{ return 20.f*fm_exp2f((float)word*(6.64385619f/127.f)); }
+{
+    /* Independent wet HPF ID14, not the similarly scaled instrument HPF. */
+    return 800.f*fm_powf((float)word*(1.f/127.f),2.42f);
+}
 static void sj6_room_reset(sj6_room_t *s)
 {
     memset(s->ring,0,sizeof s->ring);
@@ -33,10 +52,11 @@ void original_runtime_sj6_room(original_runtime_part *p,const uint8_t word[SJ6_R
     s->enable=word[SJ6_ROOM_ENABLE];s->type=word[SJ6_ROOM_TYPE];
     s->widen=word[SJ6_ROOM_WIDEN];
     s->mix=(float)word[SJ6_ROOM_MIX]*(1.f/127.f);
-    s->fb=.46f+(.48f/127.f)*(float)word[SJ6_ROOM_SIZE];
+    s->fb=.4f+(.6f/127.f)*(float)word[SJ6_ROOM_SIZE];
     s->hp_coeff=1.f-fm_expf(-6.2831853f*sj6_room_locut(word[SJ6_ROOM_LOCUT])*
                               (SJ6_ROOM_STRIDE/44100.f));
-    s->rate=sj6_room_rate(word[SJ6_ROOM_RATE])*(1.f/44100.f);
+    s->rate_code=word[SJ6_ROOM_RATE];
+    s->rate=sj6_room_rate_clocked(s->rate_code,s->clock_bpm,s->clock_sync)*(1.f/44100.f);
     s->depth=(float)word[SJ6_ROOM_DEPTH]*(1.f/127.f);
 }
 static int16_t sj6_room_pcm(float x)

@@ -46,12 +46,27 @@
  {
      if (!valid(s)) return DNBX_E_UNINITIALIZED;
      if (enabled>1u) return DNBX_E_RANGE;
-@@ -383,8 +420,36 @@
+@@ -383,8 +420,55 @@
      if (!valid(s)) return DNBX_E_UNINITIALIZED;
      if (l>=DNBX_LAYERS || !p) return DNBX_E_ARGUMENT;
      *p=s->layer[l].params; return DNBX_OK;
  }
 +#if X0X_SJ6_PITCH_ENV_NATIVE
++#if X0X_SJ6_AUX_LFO_NATIVE
++/* The receiver's envelope must run when a routed depth crosses zero so
++ * an LFO never invents a new trigger at each 80 Hz parameter write. */
++void dnbx_route_sj6_pitch_env(dnbx_part *s,unsigned routed)
++{
++    if(!valid(s)||!s->superj6_amp_range)return;
++    if(routed && !s->sj6_pitch_routed && !s->sj6_pitch_depth)
++        for(unsigned i=0;i<DNBX_VOICES;i++) {
++            dnbx_voice *v=&s->voice[i];
++            memset(&v->sj6_pitch,0,sizeof v->sj6_pitch);
++            if(v->gate || v->pedal_held)envelope_on(&v->sj6_pitch,&s->sj6_pitch_param,s->sample_rate);
++        }
++    s->sj6_pitch_routed=(uint8_t)!!routed;
++}
++#endif
 +int dnbx_set_sj6_pitch_env(dnbx_part *s,const uint8_t code[5])
 +{
 +    if(!valid(s)||!s->superj6_amp_range)return 0;
@@ -69,7 +84,11 @@
 +    };
 +    /* Enabling depth on an already-held note starts a genuine pitch envelope.
 +     * Zero depth performs no extra work in the audio hot path. */
-+    if(code[4] && !s->sj6_pitch_depth)
++    if(code[4] && !s->sj6_pitch_depth
++#if X0X_SJ6_AUX_LFO_NATIVE
++       && !s->sj6_pitch_routed
++#endif
++      )
 +        for(unsigned i=0;i<DNBX_VOICES;i++) {
 +            dnbx_voice *v=&s->voice[i];
 +            memset(&v->sj6_pitch,0,sizeof v->sj6_pitch);
@@ -83,43 +102,55 @@
  {
      unsigned chosen=0; int found=0, retrigger=0;
      if (!valid(s)) return DNBX_E_UNINITIALIZED;
-@@ -423,8 +488,11 @@
+@@ -423,8 +507,15 @@
      for (unsigned i=0;i<DNBX_VOICES;i++) s->voice[i].age_rank=next_rank[i];
      if (!retrigger) memset(v,0,sizeof *v);
      v->note=(uint8_t)note; v->gate=1; v->age_rank=0; v->pedal_held=0;
      v->velocity=(float)velocity/127.0f;
 +#if X0X_SJ6_PITCH_ENV_NATIVE
-+    if(s->sj6_pitch_depth)envelope_on(&v->sj6_pitch,&s->sj6_pitch_param,s->sample_rate);
++    if(s->sj6_pitch_depth
++#if X0X_SJ6_AUX_LFO_NATIVE
++       || s->sj6_pitch_routed
++#endif
++      )envelope_on(&v->sj6_pitch,&s->sj6_pitch_param,s->sample_rate);
 +#endif
      for (unsigned l=0;l<DNBX_LAYERS;l++) {
          const dnbx_layer_params *p=&s->layer[l].params;
          v->layer[l].increment=pitch_increment(s,note,p->tune_semitones);
          envelope_on(&v->layer[l].amp,&p->amp,s->sample_rate);
-@@ -449,8 +517,11 @@
+@@ -449,8 +540,15 @@
      dnbx_voice *v=&s->voice[0];
      if(!voice_active(v))memset(v,0,sizeof *v);
      v->note=(uint8_t)note;v->gate=1;v->pedal_held=0;v->age_rank=0;
      v->velocity=(float)vel/127.f;
 +#if X0X_SJ6_PITCH_ENV_NATIVE
-+    if(s->sj6_pitch_depth)envelope_on(&v->sj6_pitch,&s->sj6_pitch_param,s->sample_rate);
++    if(s->sj6_pitch_depth
++#if X0X_SJ6_AUX_LFO_NATIVE
++       || s->sj6_pitch_routed
++#endif
++      )envelope_on(&v->sj6_pitch,&s->sj6_pitch_param,s->sample_rate);
 +#endif
      for(unsigned l=0;l<DNBX_LAYERS;l++){
          const dnbx_layer_params *p=&s->layer[l].params;
          v->layer[l].increment=pitch_increment(s,note,p->tune_semitones);
          envelope_on(&v->layer[l].amp,&p->amp,s->sample_rate);
-@@ -461,8 +532,11 @@
+@@ -461,8 +559,15 @@
  }
  #endif
  static void release_voice(dnbx_part *s,dnbx_voice *v)
  {
 +#if X0X_SJ6_PITCH_ENV_NATIVE
-+    if(s->sj6_pitch_depth)envelope_off(&v->sj6_pitch,&s->sj6_pitch_param,s->sample_rate);
++    if(s->sj6_pitch_depth
++#if X0X_SJ6_AUX_LFO_NATIVE
++       || s->sj6_pitch_routed
++#endif
++      )envelope_off(&v->sj6_pitch,&s->sj6_pitch_param,s->sample_rate);
 +#endif
      for (unsigned l=0;l<DNBX_LAYERS;l++) {
          envelope_off(&v->layer[l].amp,&s->layer[l].params.amp,s->sample_rate);
          dnbx_envelope_params linked;
          envelope_off(&v->layer[l].filter,filter_params(s,l,&linked),s->sample_rate);
-@@ -527,9 +601,58 @@
+@@ -527,9 +632,58 @@
  }
  #if DNBOX_TYPED_CONTROLS_NATIVE_TEST && X0X_SJ6_VELOCITY_PORT
  #include "sj6_velocity_fma.h"
@@ -179,7 +210,7 @@
      if (!valid(s)) return DNBX_E_UNINITIALIZED;
  #if !DNBX_DIAGNOSTIC_COUNTERS
      if (w) return DNBX_E_UNSUPPORTED;
-@@ -538,8 +661,21 @@
+@@ -538,8 +692,21 @@
      if (!n) return DNBX_OK;
      if (!left || !right || left==right) return DNBX_E_ARGUMENT;
      COUNT(w,frames,n);
@@ -201,7 +232,7 @@
  #if DNBOX_TYPED_CONTROLS_NATIVE_TEST && !X0X_SJ6_VELOCITY_PORT
      /* The admission profile rejects nonzero b2 and the host-only velocity
         flag. Do not approximate a different sounding filter in the trial. */
-@@ -553,8 +689,16 @@
+@@ -553,8 +720,16 @@
  #else
              filter_note[i] = fmaf(fvel,s->voice[i].velocity,inverse);
  #endif
@@ -218,14 +249,18 @@
      dnbx_envelope_params linked[DNBX_LAYERS];
      const dnbx_envelope_params *fp[DNBX_LAYERS];
      for (unsigned l=0;l<DNBX_LAYERS;l++) fp[l]=filter_params(s,l,&linked[l]);
-@@ -588,14 +732,26 @@
+@@ -588,14 +763,30 @@
              if (!voice_active(v)) continue;
              COUNT(w,active_voice_samples,1);
              float velocity=v->velocity;
              if (s->velocity_mode==DNBX_VELOCITY_SQUARED) velocity*=velocity;
 +#if X0X_SJ6_PITCH_ENV_NATIVE
 +            float pitch_ratio=1.f;
-+            if(s->sj6_pitch_depth) {
++            if(s->sj6_pitch_depth
++#if X0X_SJ6_AUX_LFO_NATIVE
++       || s->sj6_pitch_routed
++#endif
++      ) {
 +                float env=envelope_sample(&v->sj6_pitch,&s->sj6_pitch_param,s->sample_rate,w);
 +                pitch_ratio=fm_exp2f(env*(float)s->sj6_pitch_depth*(1.f/12.f));
 +            }
@@ -246,7 +281,7 @@
                  float amp=envelope_sample(&lv->amp,&p->amp,s->sample_rate,w);
                  float env=envelope_sample(&lv->filter,fp[l],s->sample_rate,w);
                  if (fvel != 0.f) env *= filter_note[i];
-@@ -603,17 +759,44 @@
+@@ -603,17 +794,44 @@
                      ? factory_oscillator(lv, p->waveform, width[l], w)
                      : oscillator(lv->phase,lv->increment,p->waveform,width[l],p->oscillator_mode,w);
                  if (osc_gain[l]!=1.f) x*=osc_gain[l];
@@ -292,7 +327,7 @@
  #endif
                  COUNT(w,layer_samples,1);
              }
-@@ -624,20 +807,23 @@
+@@ -624,20 +842,23 @@
              float x=mix[l]*(p->gain/6.0f);
              left[k]+=x*(.5f-.5f*p->pan); right[k]+=x*(.5f+.5f*p->pan);
          }
@@ -318,7 +353,7 @@
  #if X0X_SUPERJ6_BUILTIN_INIT
  int dnbx_render_pitch_osc_levels_velocity(dnbx_part *s, float *left, float *right, unsigned n, float ratio, float gain1,float gain2,float fvel)
  {
-@@ -647,17 +833,17 @@
+@@ -647,17 +868,17 @@
          !(gain2 >= 0.f && (gain2 <= .808f || gain2 == 1.f))) return DNBX_E_RANGE;
  #if DNBOX_TYPED_CONTROLS_NATIVE_TEST && X0X_SJ6_VELOCITY_PORT
      if (fvel!=0.f && !(fvel>=.008f && fvel<=1.1f)) return DNBX_E_RANGE;

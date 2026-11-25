@@ -71,7 +71,7 @@
      float rate,depth,from_rate,from_depth,to_rate,to_depth;
      uint32_t phase,increment,elapsed,depth_elapsed,duration;
      uint8_t tick, armed, dirty, tempo_sync, last_wheel_code;
-@@ -122,11 +153,27 @@
+@@ -122,11 +153,36 @@
  #if defined(X0X_SJ6_MONO32_PROBE) && X0X_SJ6_MONO32_PROBE
   uint32_t mono32_keys[4];
   uint8_t mono32_on,legato33_on,glide35_detent;
@@ -95,11 +95,20 @@
 +    uint16_t write,filled;
 +    uint8_t selected,reset;
 +} sj6_j60_t;
++#endif
++#if X0X_SJ6_NATIVE_CLASSIC
++enum { SJ6_CLASSIC_NATIVE_RING=1058 };
++typedef struct {
++    int16_t ring[2][SJ6_CLASSIC_NATIVE_RING];
++    float phase,current[3],target[3],step[3];
++    uint16_t pos,filled,left[3];
++    uint8_t code[3],typed,mode,quantum;
++} sj6_classic_native_t;
  #endif
  typedef struct {
   int16_t delay[JUNO6_CHORUS_SAMPLES];
   uint16_t write;
-@@ -135,9 +182,16 @@
+@@ -135,9 +191,23 @@
   uint8_t factory_mode, factory_pending;
  #endif
   uint32_t phase;
@@ -107,7 +116,14 @@
 +#if X0X_SJ6_NATIVE_J60
 + sj6_j60_t j60;
 +#endif
++#if X0X_SJ6_NATIVE_CLASSIC
++ sj6_classic_native_t classic_native;
++#endif
  } juno6_chorus_t;
++#if X0X_SJ6_NATIVE_CLASSIC
++void juno6_classic_native_config(juno6_chorus_t *,const uint8_t [3]);
++void juno6_classic_native_process(juno6_chorus_t *,float *,float *,unsigned);
++#endif
 +#if X0X_SJ6_NATIVE_J60
 +void juno6_j60_config(juno6_chorus_t *,const uint8_t [4]);
 +void juno6_j60_process(juno6_chorus_t *,float *,float *,unsigned);
@@ -116,7 +132,7 @@
  #if defined(X0X_SJ6_MONO32_PROBE) && X0X_SJ6_MONO32_PROBE
  int juno6_mono32_set(juno6_t*,unsigned);
  int juno6_legato33_set(juno6_t*,unsigned);
-@@ -178,9 +232,9 @@
+@@ -178,9 +248,9 @@
  #endif
  int juno6_set_mod_wheel(juno6_t *, unsigned value);
  /* ID179 original editor index; only source-qualified receivers are enabled. */
@@ -127,7 +143,7 @@
  int juno6_arm_alt3_free(juno6_t *,unsigned verified_ramp_frames,int tempo_sync);
  void juno6_alt3_process(juno6_t *,float *,float *,unsigned);
  #endif
-@@ -189,17 +243,35 @@
+@@ -189,17 +259,39 @@
  int juno6_configure_lfo1_pwm(juno6_t *,unsigned selector,unsigned enabled,float base,float amount);
  /* Bounded source ID181=1 (normal ID7 cutoff), Loop/Triangle only. */
  int juno6_configure_lfo1_cutoff(juno6_t *,float authored_base,float live_current,float amount);
@@ -158,14 +174,18 @@
 +#if X0X_SJ6_AUX_LFO_NATIVE
 +void juno6_set_aux_lfo(juno6_t *,const uint8_t code[13]);
 +float juno6_aux_delay_seconds(unsigned);
++float juno6_aux_capture_base(const juno6_t *,unsigned);
 +#endif
 +#if X0X_SJ6_NOISE_SUB_NATIVE
 +enum { SJ6_NOISE_LEVEL=98, SJ6_SUB_LEVEL=99 };
++#endif
++#if X0X_SJ6_SEQ_SETTINGS_NATIVE
++enum { SJ6_SEQ_START_SNAP=114, SJ6_SEQ_LOCK=115 };
  #endif
  void juno6_set_lfo_words(juno6_t *, const juno6_lfo_words *, int reset_phase);
  void juno6_set_panel_lfo(juno6_t *, unsigned lfo, int position, unsigned hz_mode);
  void juno6_set_lfo_tempo(juno6_t *, float bpm);
-@@ -212,8 +284,11 @@
+@@ -212,8 +304,11 @@
  /* Binary32 unit interval, including an authored negative zero. */
  static inline int juno6_unit_word_valid(uint32_t bits)
  { return bits <= UINT32_C(0x3f800000) || bits == UINT32_C(0x80000000); }

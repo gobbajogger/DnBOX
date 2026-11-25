@@ -13,7 +13,19 @@
  
  #if defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE
  #if !defined(X0X_HOST) || !defined(DNBOX_137_HOST_WITNESS) || !X0X_SJ6_ZERO_GATE_PROBE
-@@ -86,9 +86,12 @@
+@@ -46,8 +46,11 @@
+ };
+ 
+ /* The S1Parameter values S1Sequencer::process reads (S1Parameter.h ids). */
+ typedef struct {
++#if X0X_SJ6_SEQ_SETTINGS_NATIVE
++    uint8_t saga_snap_native;          /* external-only Juno start snap contract */
++#endif
+     uint8_t arpIsOn;                    /* 62 */
+     uint8_t arpIsSequencer;             /* 65 */
+     uint8_t arpDirection;               /* 60  ArpeggiatorMode */
+     uint8_t arpOctave;                  /* 63  0..3 */
+@@ -86,9 +89,15 @@
  #if defined(X0X_SJ6_GATE_DEADLINE_PROBE) && X0X_SJ6_GATE_DEADLINE_PROBE
      uint32_t editGateTicks;           /* already dispatched step's original deadline */
      uint8_t editGateLatched;
@@ -23,6 +35,9 @@
 +#if X0X_SJ6_NATIVE_ZERO_GATE
 +    uint8_t liveGateLatched;          /* zero is itself a deadline */
 +#endif
++#endif
++#if X0X_SJ6_SEQ_SETTINGS_NATIVE
++    uint8_t saga_wait_first;           /* no note dispatched before the first grid boundary */
  #endif
      uint8_t gateOpen;
      uint8_t sequencerLastNotesCount;

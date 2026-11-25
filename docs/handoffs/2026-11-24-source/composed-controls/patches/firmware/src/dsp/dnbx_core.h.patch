@@ -37,7 +37,7 @@
  } dnbx_voice;
  typedef struct {
      dnbx_layer_params params;
-@@ -103,8 +112,20 @@
+@@ -103,8 +112,23 @@
  #endif
  #if X0X_SJ6_MONO32_PROBE
      float sj6_glide_secs,sj6_glide_offset,sj6_glide_ratio;
@@ -46,6 +46,9 @@
 +#if X0X_SJ6_PITCH_ENV_NATIVE
 +    dnbx_envelope_params sj6_pitch_param;
 +    uint8_t sj6_pitch_depth;
++#if X0X_SJ6_AUX_LFO_NATIVE
++    uint8_t sj6_pitch_routed;
++#endif
 +#endif
 +#if X0X_SJ6_NOISE_SUB_NATIVE
 +    float sj6_noise_gain,sj6_sub_gain;
@@ -58,7 +61,7 @@
      uint8_t damper, velocity_mode, superj6_amp_range, filter_link;
  } dnbx_part;
  
-@@ -136,8 +157,11 @@
+@@ -136,8 +160,11 @@
  int dnbx_init(dnbx_part *, float sample_rate);
  int dnbx_init_superj6(dnbx_part *, float sample_rate); /* 8000 .. 192000 inclusive. */
  /* Typed SuperJ6 only: binary pre-note switch, no overwrite of independent settings. */
@@ -70,7 +73,7 @@
  void dnbx_apply_panel_envelopes(dnbx_part *, unsigned layer, const dnbx_envelope_params *amp,
                                  const dnbx_envelope_params *filter, unsigned linked);
  int dnbx_set_layer(dnbx_part *, unsigned layer, const dnbx_layer_params *);
-@@ -146,8 +170,14 @@
+@@ -146,8 +173,17 @@
   * note-off and returns DNBX_NOTE_OFF_ONLY. MIDI values outside 0..127 fail. */
  #if defined(X0X_SJ6_MONO32_PROBE) && X0X_SJ6_MONO32_PROBE
  int dnbx_superj6_mono_voice(dnbx_part*,unsigned,unsigned);
@@ -78,6 +81,9 @@
 +#endif
 +#if X0X_SJ6_PITCH_ENV_NATIVE
 +int dnbx_set_sj6_pitch_env(dnbx_part *,const uint8_t code[5]);
++#if X0X_SJ6_AUX_LFO_NATIVE
++void dnbx_route_sj6_pitch_env(dnbx_part *,unsigned);
++#endif
 +#endif
 +#if X0X_SJ6_NOISE_SUB_NATIVE
 +void dnbx_set_sj6_sources(dnbx_part *,unsigned owner,const uint8_t code[2]);

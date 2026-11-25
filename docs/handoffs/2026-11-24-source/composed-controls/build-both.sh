@@ -39,6 +39,7 @@ allowed={
  "-DX0X_SJ6_NATIVE_ROOM=1",
  "-DX0X_SJ6_NATIVE_J60=1", "-DX0X_SJ6_AUX_LFO_NATIVE=1", "-DX0X_SJ6_NOISE_SUB_NATIVE=1",
  "-DX0X_SJ6_OTA_NATIVE=1",
+ "-DX0X_SJ6_NATIVE_LIMITER=1", "-DX0X_SJ6_NATIVE_CLASSIC=1", "-DX0X_SJ6_SEQ_SETTINGS_NATIVE=1",
 }
 if not all(x in allowed for x in flags):
  raise SystemExit("Unknown control flag; validate the port before adding it to this wrapper")
