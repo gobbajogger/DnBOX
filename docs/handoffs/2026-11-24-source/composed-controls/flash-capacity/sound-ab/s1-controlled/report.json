@@ -1,0 +1,233 @@
+{
+  "scope": "aligned 16-bit corrected oracle preview vs headless private diagnostic, not full firmware, dry reference unavailable and spectral window is diagnostic",
+  "pairs": [
+    {
+      "id": 1,
+      "baseline_compact_repro_residual_db": -83.698,
+      "original_clipped_words": 0,
+      "reference_SHA256": "ac1e20a6c5ac56aecac989f69a4dcebb0534f7431718a108042adccff1598f70",
+      "older_vs_original": {
+        "whole_dB": [
+          -0.011,
+          -0.011
+        ],
+        "note_body_dB": -0.012,
+        "release_1p5s_dB": -0.001,
+        "last_1s_dB": -0.057,
+        "spectral_distance_db": [
+          1.226,
+          1.226
+        ],
+        "raw_residual_dB_rel_reference": -11.729
+      },
+      "recovered_vs_original": {
+        "whole_dB": [
+          -0.011,
+          -0.011
+        ],
+        "note_body_dB": -0.012,
+        "release_1p5s_dB": -0.001,
+        "last_1s_dB": -0.057,
+        "spectral_distance_db": [
+          1.226,
+          1.226
+        ],
+        "raw_residual_dB_rel_reference": -11.729
+      },
+      "changes_recovered_vs_baseline": {
+        "wet_residual_db": -302.03,
+        "dry_residual_db": -302.03
+      }
+    },
+    {
+      "id": 62,
+      "baseline_compact_repro_residual_db": -80.603,
+      "original_clipped_words": 0,
+      "reference_SHA256": "d412d11814fdd8a84aef57a85955ea9dc34b7745ca1b0e116a22a2583abc17bd",
+      "older_vs_original": {
+        "whole_dB": [
+          -3.842,
+          -4.339
+        ],
+        "note_body_dB": -1.735,
+        "release_1p5s_dB": -6.0,
+        "last_1s_dB": -6.555,
+        "spectral_distance_db": [
+          13.612,
+          15.676
+        ],
+        "raw_residual_dB_rel_reference": 1.308
+      },
+      "recovered_vs_original": {
+        "whole_dB": [
+          -3.403,
+          -4.19
+        ],
+        "note_body_dB": -1.607,
+        "release_1p5s_dB": -5.765,
+        "last_1s_dB": -6.299,
+        "spectral_distance_db": [
+          13.427,
+          15.431
+        ],
+        "raw_residual_dB_rel_reference": 1.357
+      },
+      "changes_recovered_vs_baseline": {
+        "wet_residual_db": -10.145,
+        "dry_residual_db": -297.832
+      }
+    },
+    {
+      "id": 113,
+      "baseline_compact_repro_residual_db": -80.938,
+      "original_clipped_words": 0,
+      "reference_SHA256": "04560b1e6307e6bdb5272791ced93c18f0ae53c0d992c96efac7669825015bae",
+      "older_vs_original": {
+        "whole_dB": [
+          -0.812,
+          1.229
+        ],
+        "note_body_dB": 0.324,
+        "release_1p5s_dB": -3.788,
+        "last_1s_dB": -4.697,
+        "spectral_distance_db": [
+          9.8,
+          8.525
+        ],
+        "raw_residual_dB_rel_reference": 1.374
+      },
+      "recovered_vs_original": {
+        "whole_dB": [
+          -0.812,
+          1.229
+        ],
+        "note_body_dB": 0.324,
+        "release_1p5s_dB": -3.788,
+        "last_1s_dB": -4.697,
+        "spectral_distance_db": [
+          9.8,
+          8.525
+        ],
+        "raw_residual_dB_rel_reference": 1.374
+      },
+      "changes_recovered_vs_baseline": {
+        "wet_residual_db": -299.841,
+        "dry_residual_db": -300.471
+      }
+    },
+    {
+      "id": 128,
+      "baseline_compact_repro_residual_db": -87.528,
+      "original_clipped_words": 0,
+      "reference_SHA256": "ab2ead1bd3527fcdaeaa609ffbaf6cb4d2668fb6cc0ba68f376a9c04927bb540",
+      "older_vs_original": {
+        "whole_dB": [
+          -0.52,
+          1.363
+        ],
+        "note_body_dB": 0.415,
+        "release_1p5s_dB": 1.434,
+        "last_1s_dB": 0.57,
+        "spectral_distance_db": [
+          1.855,
+          1.53
+        ],
+        "raw_residual_dB_rel_reference": 0.971
+      },
+      "recovered_vs_original": {
+        "whole_dB": [
+          -0.59,
+          1.045
+        ],
+        "note_body_dB": 0.172,
+        "release_1p5s_dB": 1.254,
+        "last_1s_dB": 1.25,
+        "spectral_distance_db": [
+          1.862,
+          1.479
+        ],
+        "raw_residual_dB_rel_reference": 1.143
+      },
+      "changes_recovered_vs_baseline": {
+        "wet_residual_db": -11.755,
+        "dry_residual_db": -308.052
+      }
+    },
+    {
+      "id": 278,
+      "baseline_compact_repro_residual_db": -75.352,
+      "original_clipped_words": 0,
+      "reference_SHA256": "852944b7aba4fd43e6d194060df103761dd8f02ad12b5e34e05c828cbc386bef",
+      "older_vs_original": {
+        "whole_dB": [
+          -0.623,
+          1.212
+        ],
+        "note_body_dB": 0.246,
+        "release_1p5s_dB": 0.337,
+        "last_1s_dB": -0.769,
+        "spectral_distance_db": [
+          4.173,
+          3.719
+        ],
+        "raw_residual_dB_rel_reference": 2.174
+      },
+      "recovered_vs_original": {
+        "whole_dB": [
+          -0.633,
+          1.144
+        ],
+        "note_body_dB": 0.195,
+        "release_1p5s_dB": 0.313,
+        "last_1s_dB": -0.804,
+        "spectral_distance_db": [
+          4.187,
+          3.644
+        ],
+        "raw_residual_dB_rel_reference": 2.146
+      },
+      "changes_recovered_vs_baseline": {
+        "wet_residual_db": -15.435,
+        "dry_residual_db": -297.506
+      }
+    },
+    {
+      "id": 435,
+      "baseline_compact_repro_residual_db": -86.551,
+      "original_clipped_words": 0,
+      "reference_SHA256": "2040a2afff2efff45c9b1c90a3fd464b91cf69d92aa9874c5d31ac9b3920e15a",
+      "older_vs_original": {
+        "whole_dB": [
+          0.081,
+          1.247
+        ],
+        "note_body_dB": 0.82,
+        "release_1p5s_dB": -0.25,
+        "last_1s_dB": 1.741,
+        "spectral_distance_db": [
+          4.879,
+          3.124
+        ],
+        "raw_residual_dB_rel_reference": -0.816
+      },
+      "recovered_vs_original": {
+        "whole_dB": [
+          0.082,
+          1.248
+        ],
+        "note_body_dB": 0.821,
+        "release_1p5s_dB": -0.247,
+        "last_1s_dB": 1.741,
+        "spectral_distance_db": [
+          4.828,
+          3.101
+        ],
+        "raw_residual_dB_rel_reference": -0.814
+      },
+      "changes_recovered_vs_baseline": {
+        "wet_residual_db": -38.638,
+        "dry_residual_db": -77.562
+      }
+    }
+  ]
+}
