@@ -1,0 +1,5 @@
+#!/bin/sh
+set -eu
+export X0X_SUPERJ6_FACTORY=1 X0X_S1C=1 X0X_SYNTHONE_PATCH=1 SAN_FLAGS='-fsanitize=undefined -fno-sanitize-recover=all'
+export X0X_HOST_DEFS='-DX0X_SUPERJ6_FACTORY=1 -DX0X_SUPERJ6_BUILTIN_INIT=1 -DX0X_ARP_HOOKS=1 -DX0X_SYNTHONE_PATCH=1 -DX0X_S1C=1 -DX0X_SYNTH_CONTROLS_INIT_ONLY=1'
+SMC_UI_OUT="$PWD/out" SMC_UI_TEST_FILE=tests/host/sj6_137_old.c sh tests/host/sj6-smc-ui.sh

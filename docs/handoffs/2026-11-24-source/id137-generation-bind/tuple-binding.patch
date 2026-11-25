@@ -1,0 +1,173 @@
+--- a/firmware/src/app/project.c
++++ b/firmware/src/app/project.c
+@@ -63,6 +63,8 @@
+ /* 1: unsupported, 2: damaged. Both retain flash until validated staged adoption. */
+ static uint8_t project_incompatible;
+ static uint8_t stream_previous; /* per-object older-copy selection during recovery */
++enum { TUPLE_SET_PREVIOUS = 1u << NSTREAM, TUPLE_SOUND_PREVIOUS = 2u << NSTREAM };
++static uint8_t tuple_recovered; /* previous A/B tuple is playable but permanently read-only until latest coheres */
+ static uint8_t device_bt_pending;       /* independent of UI dirty/autosave and project reset/load */
+ static uint8_t settings_read_failed;    /* defaults must not replace unread stored settings */
+ static uint8_t settings_load_failed;    /* a Bluetooth retry alone cannot adopt fallback defaults */
+@@ -129,13 +131,25 @@
+  * objects that changed: an autosave usually erases one or two sectors, not six */
+ static uint64_t stored_hash[OBJ_NOBJ];
+ static uint8_t stored_known[OBJ_NOBJ];
+-__attribute__((noinline)) static uint64_t hash_of(const uint8_t *p, uint32_t n)        /* FNV-1a, 64-bit */
++__attribute__((noinline)) static uint64_t hash_append(uint64_t h,const uint8_t *p,uint32_t n)
+ {
+-    uint64_t h = UINT64_C(14695981039346656037);
+-    while (n--)
+-        h = (h ^ *p++) * UINT64_C(1099511628211);
++    while (n--) h = (h ^ *p++) * UINT64_C(1099511628211);
+     return h;
+ }
++static uint64_t hash_of(const uint8_t *p,uint32_t n)
++{ return hash_append(UINT64_C(14695981039346656037),p,n); }
++static uint64_t tuple_hash(const project_t *pr,uint8_t part_off)
++{
++    settings_t set;
++    memcpy(&set,&pr->set,sizeof set);
++    /* The independently persisted device Bluetooth bit is not project data. */
++    set.bt &= ~1u;
++    uint8_t domain[2]={STREAM137,part_off};
++    uint64_t h=hash_of(domain,sizeof domain);
++    h=hash_append(h,(const uint8_t *)&set,sizeof set);
++    h=hash_append(h,(const uint8_t *)&pr->sound,sizeof pr->sound);
++    return hash_append(h,(const uint8_t *)pr+RAW_OFF,RAW_LEN);
++}
+ 
+ __attribute__((noinline)) static uint32_t get32(const uint8_t *p)
+ {
+@@ -168,7 +182,7 @@
+  * invalidate cached equality and block saves until a later read resolves it. */
+ static int read_settings_payload(void)
+ {
+-    int n = plat_store_load(OBJ_SET, io_buf, sizeof io_buf);
++    int n = plat_store_load(OBJ_SET | (stream_previous & TUPLE_SET_PREVIOUS ? PLAT_STORE_PREVIOUS : 0), io_buf, sizeof io_buf);
+     settings_read_failed = (uint8_t)(n < -1);
+     if (n < 0) stored_known[OBJ_SET] = 0;
+     return n;
+@@ -230,7 +244,7 @@
+ {
+     int n, rc;
+     if (!device_bt_pending) return 0;
+-    if (project_incompatible) return -9;
++    if (project_incompatible || tuple_recovered) return -9;
+     n = read_settings_payload();
+     if (n < -1) return n;                /* pending stays set: UI retries after I/O recovers */
+     if (n == -1) {
+@@ -263,7 +277,7 @@
+ 
+ static int load_sound(sound_t *dst, unsigned revision)
+ {
+-    int n = plat_store_load(OBJ_SOUND, io_buf, sizeof io_buf);
++    int n = plat_store_load(OBJ_SOUND | (stream_previous & TUPLE_SOUND_PREVIOUS ? PLAT_STORE_PREVIOUS : 0), io_buf, sizeof io_buf);
+     if (n < 0) return n;
+     if ((uint32_t)n != sizeof *dst + 4u || get32(io_buf) != (revision==REV137 ? SOUND137 : PROJ_FORMAT)) return -9;
+     __builtin_memcpy(dst, io_buf + 4u, sizeof *dst);
+@@ -339,8 +353,14 @@
+     lz_sink_t sink = {st_put, &o};
+     o.fill = STREAM_HDR;
+     put32(io_buf, o.format);
+-    put32(io_buf + 4, RAW_LEN);
+-    put32(io_buf + 8, crc);
++    if (o.format==STREAM137) {
++        uint64_t h=tuple_hash(&proj,part_off_live);
++        put32(io_buf+4,(uint32_t)h);
++        put32(io_buf+8,(uint32_t)(h>>32));
++    } else {
++        put32(io_buf+4,RAW_LEN);
++        put32(io_buf+8,crc);
++    }
+     put32(io_buf + 12, packed_len);
+     if (lz_compress(raw, RAW_LEN, &sink) || o.err || st_flush(&o))
+         return -3;
+@@ -457,9 +477,10 @@
+     uint8_t *raw = (uint8_t *)pr + RAW_OFF;
+     uint32_t crc = get32(io_buf + 8), plen = get32(io_buf + 12);
+     uint32_t raw_len = RAW_LEN;
++    uint64_t binding=(uint64_t)get32(io_buf+4)|((uint64_t)crc<<32);
+     st_in_t s = {0, n, STREAM_HDR, plen, format, 0};
+     lz_src_t src = {st_get, &s};
+-    if (n < (int)STREAM_HDR || get32(io_buf + 4) != raw_len || plen > STREAM_CAP)
++    if (n < (int)STREAM_HDR || (format!=STREAM137 && get32(io_buf + 4) != raw_len) || plen > STREAM_CAP)
+         return -1;
+     stored_known[STREAM_OBJ[0]] = 1;
+     stored_hash[STREAM_OBJ[0]] = hash_of(io_buf, (uint32_t)n);
+@@ -469,8 +490,10 @@
+      * and allow the boot-default autosave path to overwrite it. */
+     if (s.unsupported)
+         return -9;
+-    if (decode_rc || s.left || crc32_of(raw, raw_len) != crc)
++    if (decode_rc || s.left || (format!=STREAM137 && crc32_of(raw,raw_len)!=crc))
+         return -1;
++    if (format==STREAM137 && tuple_hash(pr,*part_off_of(pr))!=binding)
++        return -10; /* valid-sized inputs but not necessarily one project generation */
+     if ((format==STREAM137)!=(pr->set.snd_rev==REV137) || !stream_layout_ok(pr, format))
+         return -9;
+     stream_13_upgrade(pr, format);
+@@ -492,6 +515,27 @@
+ }
+ 
+ 
++/* Host witness. Search only A/B candidates in the same recognized typed
++ * wire. The streams that matter are those actually consumed by LZ. */
++static int read_typed_tuple(project_t *pr,unsigned mask,uint8_t independent_bt)
++{
++    settings_t set;
++    stream_previous=(uint8_t)mask;
++    int rc=load_settings(&set);
++    if (rc || set.snd_rev!=REV137) return -9;
++    uint8_t part_off=io_buf[4u+sizeof set];
++    pr->set=set;
++    *part_off_of(pr)=part_off;
++    rc=load_sound(&pr->sound,REV137);
++    if (rc) return -9;
++    int n=load_stream_object(0);
++    if (n<(int)STREAM_HDR || get32(io_buf)!=STREAM137) return -9;
++    rc=load_stream(pr,n,STREAM137);
++    if (rc) return rc;
++    pr->set.bt=(uint8_t)((pr->set.bt&~1u)|(independent_bt&1u));
++    return project_validate_for(pr);
++}
++
+ /* Objects are read into the candidate project; the original profile admits only
+  * a completely validated candidate and leaves safe defaults on every failure. */
+ static int read_project(project_t *pr)
+@@ -527,6 +571,26 @@
+             device_bt = (uint8_t)(1u | PROJ_BT_SMC_CENTRAL);
+ #endif
+     }
++    if (settings_present && pr->set.snd_rev==REV137) {
++        rc=read_typed_tuple(pr,0,device_bt);
++        stream_previous=0;
++        if (!rc) {
++            if (pr==&proj) tuple_recovered=0;
++            return 0;
++        }
++        /* Unsupported/newer envelopes are not rollback candidates. An
++         * exact-schema hash mismatch may have a coherent A/B before-image. */
++        if (rc!=-10 && rc!=-1) goto unsupported;
++        for(unsigned mask=1;mask<(4u<<NSTREAM);++mask) {
++            if (!read_typed_tuple(pr,mask,device_bt)) {
++                stream_previous=0;
++                memset(stored_known,0,sizeof stored_known);
++                tuple_recovered=1;
++                return 0;
++            }
++        }
++        goto unsupported;
++    }
+     rc = load_sound(&pr->sound,pr->set.snd_rev);
+     present |= rc != -1;
+     transient |= rc == -2 || rc == -8;
+@@ -873,7 +937,7 @@
+ #elif X0X_BASS_PRESET_PREVIEW
+     if(engine_bass_preview_changed()) return -9; /* no untagged preview writes */
+ #endif
+-    if (project_incompatible || !valid_rev137(proj.set.snd_rev) ||
++    if (project_incompatible || tuple_recovered || !valid_rev137(proj.set.snd_rev) ||
+         (proj.set.snd_rev==REV137 && !canonical137(&proj.sound)) || !stream_layout_ok(&proj, stream_format_of(&proj)))
+         return -9; /* not one settings/sound/pattern object may be rewritten */
+     if (settings_read_failed || settings_load_failed) return -8; /* retry load before saving fallback defaults */

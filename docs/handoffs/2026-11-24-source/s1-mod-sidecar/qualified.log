@@ -1,0 +1,3 @@
+PASS S1 MOD typed project save/reopen, real Undo/Redo, physical held owner + MIDI, V3 frozen onset and independent both-owner restore: 54 checks
+PASS exact ED_PROJECT BEGIN/VALIDATE/COMMIT/ABORT, no stage adoption, samples locked and zero writes on legacy reader
+PASS unchanged old project+BT and ED_PROJECT refuse exact new writer media; no object modified

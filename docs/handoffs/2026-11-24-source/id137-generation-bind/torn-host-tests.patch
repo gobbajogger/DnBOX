@@ -1,0 +1,125 @@
+--- a/host/x0x_host.c
++++ b/host/x0x_host.c
+@@ -195,6 +195,7 @@
+ static int store_len[OBJ_NOBJ] = {-1, -1, -1, -1, -1, -1, -1};
+ static uint32_t store_writes;
+ static int store_fail;
++static uint32_t store_cut_at=UINT32_MAX;
+ int plat_store_load(uint32_t obj, void *dst, uint32_t max)
+ {
+     int previous = (obj & PLAT_STORE_PREVIOUS) != 0;
+@@ -210,7 +211,7 @@
+ }
+ int plat_store_save(uint32_t obj, const void *src, uint32_t len)
+ {
+-    if (store_fail || obj >= OBJ_NOBJ || len > PLAT_STORE_MAX)
++    if (store_fail || store_writes==store_cut_at || obj >= OBJ_NOBJ || len > PLAT_STORE_MAX)
+         return -1;
+     store_previous_len[obj] = store_len[obj];
+     if (store_len[obj] >= 0)
+--- a/tests/host/sj6_137_carriage.c
++++ b/tests/host/sj6_137_carriage.c
+@@ -90,6 +90,15 @@
+  slot137(&proj.sound,v)[2]=(uint8_t)value;
+  return 1;
+ }
++static void fill_patterns(uint32_t seed)
++{
++    for(unsigned p=1;p<25;p++) for(unsigned b=0;b<NBASS;b++) for(unsigned k=0;k<NSTEPS;k++){
++        seed ^= seed<<13; seed ^= seed>>17; seed ^= seed<<5;
++        bstep_t *st=&proj.pat[p].bass[b].step[k];
++        st->note=(uint8_t)(seed&127u);st->velocity=(uint8_t)((seed>>8)&127u);
++        st->flags=(uint8_t)((seed>>24)&0xfcu)|G_NOTE;
++    }
++}
+ int main(void){
+  setup_tuning(0);ui.overlay=O_NONE;proj.set.bt|=PROJ_BT_CLK_IN;
+  memset(slot137(&proj.sound,0),0,32);memset(slot137(&proj.sound,1),0xa5,32);
+@@ -173,20 +182,77 @@
+  CHECK(!fclose(f));
+  play137(0,0,53,47);
+  play137(1,127,47,53);
+- /* LAB-ONLY RED: normal object CRCs and version markers cannot detect
+-    a valid previous typed SOUND combined with a valid new typed stream. */
+- CHECK(edit137(0,89));
+- proj.arr.lane[a].val[BASS_NOTE_TAG+11]=22;
+- CHECK(!project_save());
++ /* Old accepted 53+22. Inject every real virtual-store write cut and a
++    standalone transplanted previous SOUND. No actual hardware writes. */
++ static uint8_t a_current[sizeof store],a_previous[sizeof store_previous];
++ static int a_len[OBJ_NOBJ],a_previous_len[OBJ_NOBJ];
++ CHECK(!project_load());
++ CHECK(read137(&proj.sound,0)[2]==53 && proj.arr.lane[a].val[BASS_NOTE_TAG+11]==0);
++ fill_patterns(0x256bdec1u);
++ CHECK(!project_save()&&!project_load());
++ CHECK(store_len[OBJ_PAT1]>4);
++ const bstep_t a_note=proj.pat[1].bass[0].step[0];
++ memcpy(a_current,store,sizeof store);memcpy(a_previous,store_previous,sizeof store_previous);
++ memcpy(a_len,store_len,sizeof store_len);memcpy(a_previous_len,store_previous_len,sizeof store_previous_len);
++ const unsigned a_palette=proj.set.palette, b_palette=(a_palette+1)%6;
++ unsigned actual_writes=0;
++ for(unsigned cut=0;cut<8;++cut) {
++     memcpy(store,a_current,sizeof store);memcpy(store_previous,a_previous,sizeof store_previous);
++     memcpy(store_len,a_len,sizeof store_len);memcpy(store_previous_len,a_previous_len,sizeof store_previous_len);
++     CHECK(!project_load());
++     CHECK(read137(&proj.sound,0)[2]==53 && proj.arr.lane[a].val[BASS_NOTE_TAG+11]==0);
++     CHECK(edit137(0,89));
++     fill_patterns(0xf1cbd341u);
++     const bstep_t b_note=proj.pat[1].bass[0].step[0];
++     CHECK(memcmp(&a_note,&b_note,sizeof a_note));
++     proj.set.palette=(uint8_t)b_palette;
++     proj.arr.lane[a].val[BASS_NOTE_TAG+11]=22;
++     uint32_t before=store_writes;
++     store_cut_at=before+cut;
++     int rc=project_save();
++     store_cut_at=UINT32_MAX;
++     uint32_t after=store_writes;
++     CHECK(!project_load() && store_writes==after);
++     if(!rc){
++         actual_writes=after-before;
++         CHECK(actual_writes==cut && actual_writes>=4);
++         CHECK(read137(&proj.sound,0)[2]==89 && proj.arr.lane[a].val[BASS_NOTE_TAG+11]==22);
++         CHECK(proj.set.palette==b_palette);
++         CHECK(!memcmp(&proj.pat[1].bass[0].step[0],&b_note,sizeof b_note));
++         break;
++     }
++     CHECK(store_writes==before+cut);
++     const int old_tuple=read137(&proj.sound,0)[2]==53 && proj.arr.lane[a].val[BASS_NOTE_TAG+11]==0 &&
++                         proj.set.palette==a_palette;
++     const int new_tuple=read137(&proj.sound,0)[2]==89 && proj.arr.lane[a].val[BASS_NOTE_TAG+11]==22 &&
++                         proj.set.palette==b_palette;
++     CHECK(old_tuple || new_tuple);
++     CHECK(!memcmp(&proj.pat[1].bass[0].step[0],old_tuple?&a_note:&b_note,sizeof a_note));
++     if(cut && old_tuple) {
++         CHECK(project_save()==-9 && store_writes==after);
++         project_device_bt_set(!(proj.set.bt&1u));
++         CHECK(project_device_bt_save()==-9 && store_writes==after);
++     }
++     printf("PASS direct writer cut after %u commits, exact %s tuple and no read writes\n",cut,old_tuple?"old":"new");
++ }
++ CHECK(actual_writes);
++ /* BT bit0 is independently persisted by old API and not project identity. */
++ project_device_bt_set(!(proj.set.bt&1u));
++ CHECK(!project_device_bt_save() && !project_load());
++ CHECK(read137(&proj.sound,0)[2]==89 && proj.arr.lane[a].val[BASS_NOTE_TAG+11]==22);
++ /* Deliberate same-version Frankenstein with no coherent A/B before-image. */
+  CHECK(store_len[OBJ_SOUND]==store_previous_len[OBJ_SOUND]);
+  memcpy(store[OBJ_SOUND],store_previous[OBJ_SOUND],(size_t)store_len[OBJ_SOUND]);
+- CHECK(!project_load());
+- CHECK(read137(&proj.sound,0)[2]==53 && proj.arr.lane[a].val[BASS_NOTE_TAG+11]==22);
+- puts("EXPECTED RED product admission: same-version torn typed SOUND/stream accepted");
+- /* Typed storage cannot splice an old stream or sound into the new data. */
+- store[OBJ_PAT0][0]=13;
++ for(unsigned o=0;o<OBJ_NOBJ;o++)store_previous_len[o]=-1;
+  uint32_t w=store_writes;
+  CHECK(project_load()==-9 && project_save()==-9 && store_writes==w);
++ CHECK(project_storage_unsupported());
++ project_device_bt_set(!(proj.set.bt&1u));
++ CHECK(project_device_bt_save()==-9 && store_writes==w);
++ puts("PASS same-version mixed SOUND/stream with no coherent previous pair rejected read-only");
++ /* Unknown newer object is never taken as an older eligible tuple. */
++ store[OBJ_PAT0][0]=13;
++ CHECK(project_load()==-9 && project_save()==-9 && store_writes==w);
+  printf("PASS %u checks: physical all detents both owners, signed dual layer/AMP unity, real save/load/CRC, undo, V2 sequence onset/unlocked/Stop, ordinary opaque legacy retained\n",checks);
+  return 0;
+ }

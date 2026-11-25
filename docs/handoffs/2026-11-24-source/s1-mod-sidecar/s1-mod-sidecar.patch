@@ -1,0 +1,215 @@
+--- a/firmware/src/app/original_presets.inc
++++ b/firmware/src/app/original_presets.inc
+@@ -402,6 +402,25 @@
+ #if defined(DNBOX_137_HOST_WITNESS)
+ #include "sj6_137_host_witness.h"
+ #endif
++int s1_typed_mod_choose(unsigned owner,unsigned route) {
++    if (route>2 || !live_s1_mod(mot_base_snd,owner))return 0;
++    engine_project_hold(1);
++    int ok=!ui_project_busy() && live_s1_mod(mot_base_snd,owner) &&
++           !note_lock_applied[owner] &&
++           !engine_bass_preset_pending(owner) && original_bass[owner].kind==ORIGINAL_SOUND_SYNTHONE;
++    if(ok) {
++        slot137((sound_t *)mot_base_snd,owner)[3]=(uint8_t)route;
++        s1_part_mod_route(&original_bass[owner].dsp.synthone,route);
++    }
++    engine_project_hold(0);
++    return ok;
++}
++void s1_typed_mod_undo(unsigned mask) {
++    for(unsigned owner=0;owner<NBASS;owner++)if((mask&(1u<<owner)) &&
++       live_s1_mod(mot_base_snd,owner) && !note_lock_applied[owner] &&
++       original_bass[owner].kind==ORIGINAL_SOUND_SYNTHONE)
++        s1_part_mod_route(&original_bass[owner].dsp.synthone,read137(mot_base_snd,owner)[3]);
++}
+ void sj6_137_undo_apply(unsigned mask)
+ {
+     for(unsigned v=0;v<NBASS;++v)
+@@ -831,6 +850,13 @@
+ int engine_bass_note_validate(const lane_t *l);
+ int engine_bass_note_validate(const lane_t *l)
+ {
++    if(l->i==NOTE_S1_MOD) {
++        if(l->val[BASS_NOTE_TAG+11]>2 || !s1_typed_init_cell(l->val))return -1;
++        lane_t v1=*l;
++        v1.i=BASS_NOTE_VERSION;
++        v1.val[BASS_NOTE_TAG+11]=0;
++        return engine_bass_note_validate(&v1);
++    }
+     if(l->i==NOTE137) {
+         unsigned x=l->val[BASS_NOTE_TAG+11];
+         if(x>127 || l->val[29]!=ORIGINAL_SOUND_JUNO || original_sound_sj6_factory(l->val)!=0)return -1;
+@@ -921,6 +947,12 @@
+         next.val[BASS_NOTE_TAG+11]=effective && note_lock_applied[voice] ?
+             original_bass[voice].dsp.juno.synth.filter_velocity_position : read137(sound,voice)[2];
+     }
++    if(sound==&proj.sound && proj.set.snd_rev==REV137 && s1_typed_init_cell(next.val)) {
++        if(!canonical137(sound))return -1;
++        next.i=NOTE_S1_MOD;
++        next.val[BASS_NOTE_TAG+11]=effective && note_lock_applied[voice] ?
++            original_bass[voice].dsp.synthone.mod_wheel_route : read137(sound,voice)[3];
++    }
+     if(engine_bass_note_validate(&next))return -1;
+     lanes[k].used=0;
+     __asm__ volatile("" ::: "memory");
+@@ -991,6 +1023,8 @@
+     if (original_bass[v].kind == ORIGINAL_SOUND_SYNTHONE) {
+         const uint8_t *cell = mot_base_snd->v[T_303][v];
+         s1_part_apply_cell(&original_bass[v].dsp.synthone, cell);
++        s1_part_mod_route(&original_bass[v].dsp.synthone,
++                          live_s1_mod(mot_base_snd,v)?read137(mot_base_snd,v)[3]:0);
+ #if X0X_S1_EXTRA
+         s1_part_apply_extra(&original_bass[v].dsp.synthone, original_sound_edit_mask(cell) & S1_EXTRA_MARK ?
+                             mot_base_snd->v[T_303][S1_EXTRA_ROW+v] : NULL);
+@@ -1012,6 +1046,7 @@
+         int k=bass_note_find(mot.lane,seq.ppat[TRK_BASS0+v],v,eng_step[TRK_BASS0+v]);
+         if(k>=0 && mot.lane[k].val[29]==(uint8_t)original_bass[v].kind)l=&mot.lane[k];
+     }
++    if (l && (l->i==NOTE_S1_MOD) != live_s1_mod(mot_base_snd,v)) l=0;
+     if (l && ((l->i==NOTE137) != live137(mot_base_snd,v) ||
+               (l->i==NOTE137 && l->val[BASS_NOTE_TAG+11]>127))) l=0;
+     if(!l) { if(note_lock_applied[v])note_lock_restore(v); return; }
+@@ -1021,6 +1056,8 @@
+ #if X0X_SYNTHONE_PATCH
+     if (original_bass[v].kind == ORIGINAL_SOUND_SYNTHONE) {
+         s1_part_apply_cell(&original_bass[v].dsp.synthone, l->val);
++        s1_part_mod_route(&original_bass[v].dsp.synthone,
++                          l->i==NOTE_S1_MOD?l->val[BASS_NOTE_TAG+11]:0);
+ #if X0X_S1_EXTRA
+         s1_part_apply_extra(&original_bass[v].dsp.synthone, original_sound_edit_mask(l->val) & S1_EXTRA_MARK ?
+                             l->val+BASS_NOTE_USED : NULL);
+@@ -1102,6 +1139,8 @@
+         (original_sound_edit_mask(sound->v[T_303][v]) & S1_EXTRA_MARK))
+         s1_part_apply_extra(&original_bass[v].dsp.synthone, sound->v[T_303][S1_EXTRA_ROW+v]);
+ #endif
++    if (rc==ORIGINAL_RUNTIME_OK && live_s1_mod(sound,v))
++        s1_part_mod_route(&original_bass[v].dsp.synthone,read137(sound,v)[3]);
+     arp_adopt(v, sound, 0);
+     bass_named_preset[v] = (int16_t)bass_cell_preset(sound->v[T_303][v]);
+     original_seq_note[v] = -1;
+@@ -1268,6 +1307,8 @@
+ #endif
+         __builtin_memcpy(sound->v[T_303][v], next, sizeof next);
+         bass_tag_set(sound, v, bank, preset, 0);
++        if (live_s1_mod(sound,v))
++            s1_part_mod_route(&original_bass[v].dsp.synthone,read137(sound,v)[3]);
+         if (live137(sound,v)) juno6_set_filter_velocity(&original_bass[v].dsp.juno.synth,read137(sound,v)[2]);
+ #if X0X_SYNTHONE_PATCH
+         s1_patch_replaced(v);
+--- a/firmware/src/app/project.c
++++ b/firmware/src/app/project.c
+@@ -427,7 +427,8 @@
+ #if X0X_BASS_NOTE_SOUND
+             /* A lock on a step that is no longer a note is kept and never plays. */
+             if((format!=PROJ_STREAM_14 && format!=PROJ_STREAM_CHORD && format!=STREAM137) ||
+-               (l->i==NOTE137 && format!=STREAM137) ||
++               ((l->i==NOTE137 || l->i==NOTE_S1_MOD) && format!=STREAM137) ||
++               (format==STREAM137 && s1_typed_init_cell(l->val) && l->i!=NOTE_S1_MOD) ||
+                (format==STREAM137 && l->val[29]==ORIGINAL_SOUND_JUNO && !original_sound_sj6_factory(l->val) && l->i!=NOTE137) ||
+                engine_bass_note_validate(l))return 0;
+             for(int j=0;j<k;j++)if(arr->lane[j].used && arr->lane[j].t==l->t &&
+@@ -688,7 +689,8 @@
+             return -1;
+ #if X0X_BASS_NOTE_SOUND
+         if(l->t==BASS_NOTE_TARGET) {
+-            if((l->i==NOTE137 && s->snd_rev!=REV137) ||
++            if(((l->i==NOTE137 || l->i==NOTE_S1_MOD) && s->snd_rev!=REV137) ||
++               (s->snd_rev==REV137 && s1_typed_init_cell(l->val) && l->i!=NOTE_S1_MOD) ||
+                (s->snd_rev==REV137 && l->val[29]==ORIGINAL_SOUND_JUNO && !original_sound_sj6_factory(l->val) && l->i!=NOTE137) ||
+                engine_bass_note_validate(l))return -1;
+             for(int j=0;j<k;j++)if(p->arr.lane[j].used && p->arr.lane[j].t==l->t &&
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -3143,7 +3143,7 @@
+     undo_commit_stable();                       /* what was just done is a step too */
+ #if X0X_BASS_TAGGED_SOUND
+ #ifdef DNBOX_137_HOST_WITNESS
+-    unsigned undo_velocity137=0;
++    unsigned undo_velocity137=0,undo_s1_mod=0;
+ #endif
+     undo_wait=0;undo_bass_mask=0;
+     int entry=redo?undo.cur:undo.cur-1;
+@@ -3180,11 +3180,21 @@
+                 uint32_t off=cell+(8u+v)*NPARAMS_MAX+2u;
+                 undo_peek(&undo,entry,off,&p,1u);
+                 if (p!=read137(&proj.sound,v)[2] && p<=127) undo_velocity137|=1u<<v;
++                undo_peek(&undo,entry,off+1u,&p,1u);
++                if (p!=read137(&proj.sound,v)[3] && p<=2) undo_s1_mod|=1u<<v;
+             }
+ #endif
+             if(memcmp(target.cell[v],proj.sound.v[T_303][v],NPARAMS_MAX) ||
+                memcmp(&target.tag[v],&proj.sound.bass[v],sizeof target.tag[v]))undo_bass_mask|=1u<<v;
+         }
++#ifdef DNBOX_137_HOST_WITNESS
++        extern int engine_bass_wheel_active(void);
++        if(undo_s1_mod && engine_bass_wheel_active()) {
++            say("UNDO WAIT WHEEL",0);
++            engine_bass_edit_hold(0);
++            return;
++        }
++#endif
+         if(undo_bass_mask) {
+             engine_project_hold(1);
+             int ready=engine_bass_base_ready(undo_bass_mask,&target);
+@@ -3203,14 +3213,14 @@
+     }
+ #endif
+ #ifdef DNBOX_137_HOST_WITNESS
+-    if (undo_velocity137 && !undo_bass_mask) engine_project_hold(1);
++    if ((undo_velocity137 || undo_s1_mod) && !undo_bass_mask) engine_project_hold(1);
+ #endif
+     undo_lanes = 0;
+     if (!(redo ? undo_redo : undo_undo)(&undo, undo_changed, &lo, &hi)) {
+ #if X0X_BASS_TAGGED_SOUND
+         if(undo_bass_mask)engine_project_hold(0);
+ #ifdef DNBOX_137_HOST_WITNESS
+-        else if(undo_velocity137)engine_project_hold(0);
++        else if(undo_velocity137 || undo_s1_mod)engine_project_hold(0);
+ #endif
+ #endif
+ #if X0X_BASS_PRESET_PREVIEW
+@@ -3224,7 +3234,9 @@
+ #ifdef DNBOX_137_HOST_WITNESS
+     extern void sj6_137_undo_apply(unsigned);
+     if(undo_velocity137) sj6_137_undo_apply(undo_velocity137 & ~undo_bass_mask);
+-    if(undo_bass_mask || undo_velocity137) engine_project_hold(0);
++    extern void s1_typed_mod_undo(unsigned);
++    if(undo_s1_mod) s1_typed_mod_undo(undo_s1_mod & ~undo_bass_mask);
++    if(undo_bass_mask || undo_velocity137 || undo_s1_mod) engine_project_hold(0);
+ #else
+     if(undo_bass_mask) engine_project_hold(0);
+ #endif
+--- a/firmware/src/app/sj6_137_host_witness.h
++++ b/firmware/src/app/sj6_137_host_witness.h
+@@ -4,14 +4,14 @@
+ #endif
+ #pragma once
+ #include "x0x.h"
+-enum { REV137=0x70u, SOUND137=0x584a3656u, STREAM137=16u, NOTE137=2u };
++enum { REV137=0x70u, SOUND137=0x584a3656u, STREAM137=16u, NOTE137=2u, NOTE_S1_MOD=3u };
+ static inline uint8_t *slot137(sound_t *s,unsigned v) {return s->v[T_303][8+2*v];}
+ static inline const uint8_t *read137(const sound_t *s,unsigned v) {return s->v[T_303][8+2*v];}
+ static inline int canonical137(const sound_t *s) {
+  for (unsigned v=0;v<2;++v) {
+   const uint8_t *b=read137(s,v);
+-  if (b[0]!=137 || b[1]!=v || b[2]>127) return 0;
+-  for(unsigned i=3;i<64;i++) if (s->v[T_303][8+2*v+i/32][i%32]) return 0;
++  if (b[0]!=137 || b[1]!=v || b[2]>127 || b[3]>2) return 0;
++  for(unsigned i=4;i<64;i++) if (s->v[T_303][8+2*v+i/32][i%32]) return 0;
+  }
+  return 1;
+ }
+@@ -25,3 +25,12 @@
+         !original_sound_sj6_factory(s->v[T_303][v]);
+ }
+ static inline int valid_rev137(unsigned r) {return r==PROJ_SND_REV || r==REV137;}
++
++static inline int s1_typed_init_cell(const uint8_t *b){
++ return b[29]==ORIGINAL_SOUND_SYNTHONE && !original_sound_s1_program(b);
++}
++static inline int live_s1_mod(const sound_t *s,unsigned v) {
++ if(s!=&proj.sound || proj.set.snd_rev!=REV137 || v>=NBASS)return 0;
++ const uint8_t *r=read137(s,v);
++ return r[0]==137u && r[1]==v && r[3]<=2 && s1_typed_init_cell(s->v[T_303][v]);
++}
