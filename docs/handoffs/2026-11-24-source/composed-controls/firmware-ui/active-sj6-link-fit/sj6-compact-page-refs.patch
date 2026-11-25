@@ -1,0 +1,45 @@
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -2021,20 +2021,28 @@
+             int first_row = 0;
+ #if X0X_SUPERJ6_BUILTIN_INIT
+             if (kind == ORIGINAL_SOUND_JUNO) {
+-                add_page(emit, "OSCILLATOR", PR(R_SJ6KNOB,T_303,b,SJ6_WAVE1),
+-                         PR(R_SJ6KNOB,T_303,b,SJ6_WAVE2), PR(R_SJ6KNOB,T_303,b,SJ6_RANGE), NONE);
+-                add_page(emit, "PULSE WIDTH", PR(R_SJ6KNOB,T_303,b,SJ6_PWM1_ON),
+-                         PR(R_SJ6KNOB,T_303,b,SJ6_PWM1), PR(R_SJ6KNOB,T_303,b,SJ6_PWM2_ON),
+-                         PR(R_SJ6KNOB,T_303,b,SJ6_PWM2));
+-                add_page(emit, "FILTER", PR(R_ENG,T_303,b,2), PR(R_ENG,T_303,b,3),
+-                         PR(R_ENG,T_303,b,4), PR(R_SJ6KNOB,T_303,b,SJ6_FILTER_LINK));
+-                add_page(emit, "FILTER ADSR", PR(R_SJ6KNOB,T_303,b,SJ6_FILTER_ATTACK),
+-                         PR(R_SJ6KNOB,T_303,b,SJ6_FILTER_DECAY), PR(R_SJ6KNOB,T_303,b,SJ6_FILTER_SUSTAIN),
+-                         PR(R_SJ6KNOB,T_303,b,SJ6_FILTER_RELEASE));
+-                add_page(emit, "AMP ADSR", PR(R_SJ6KNOB,T_303,b,SJ6_AMP_ATTACK),
+-                         PR(R_SJ6KNOB,T_303,b,SJ6_AMP_DECAY), PR(R_SJ6KNOB,T_303,b,SJ6_AMP_SUSTAIN),
+-                         PR(R_SJ6KNOB,T_303,b,SJ6_AMP_RELEASE));
+-                add_page(emit, "OUTPUT", PR(R_ENG,T_303,b,9), NONE, NONE, NONE);
++                /* Common owner and track; packed records retain exact page order and slots. */
++                enum { ENGINE_REF = 128, NO_REF = 255 };
++                _Static_assert(SJ6_KNOBS < ENGINE_REF, "SuperJ6 UI ref codes");
++                static const uint8_t slots[][4] = {
++                    {SJ6_WAVE1, SJ6_WAVE2, SJ6_RANGE, NO_REF},
++                    {SJ6_PWM1_ON, SJ6_PWM1, SJ6_PWM2_ON, SJ6_PWM2},
++                    {ENGINE_REF + 2, ENGINE_REF + 3, ENGINE_REF + 4, SJ6_FILTER_LINK},
++                    {SJ6_FILTER_ATTACK, SJ6_FILTER_DECAY, SJ6_FILTER_SUSTAIN, SJ6_FILTER_RELEASE},
++                    {SJ6_AMP_ATTACK, SJ6_AMP_DECAY, SJ6_AMP_SUSTAIN, SJ6_AMP_RELEASE},
++                    {ENGINE_REF + 9, NO_REF, NO_REF, NO_REF},
++                };
++                static const char *const names[] = {
++                    "OSCILLATOR", "PULSE WIDTH", "FILTER", "FILTER ADSR", "AMP ADSR", "OUTPUT"
++                };
++                for (unsigned i = 0; i < sizeof slots / sizeof slots[0]; ++i) {
++                    pref_t refs[4];
++                    for (unsigned j = 0; j < 4; ++j) {
++                        const unsigned k = slots[i][j];
++                        refs[j] = k == NO_REF ? NONE : PR(k & ENGINE_REF ? R_ENG : R_SJ6KNOB, T_303, b, k & 127u);
++                    }
++                    add_page_refs(emit, names[i], refs, 0, 0);
++                }
+                 first_row = 3;
+             }
+ #endif

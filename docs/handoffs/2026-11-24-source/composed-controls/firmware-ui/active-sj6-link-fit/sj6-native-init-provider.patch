@@ -1,0 +1,16 @@
+--- a/tools/build.py
++++ b/tools/build.py
+@@ -471,6 +471,13 @@
+     flags = [*flags, "-DX0X_SYNTHONE_PATCH=" + synthone_patch]
+     if SUPERJ6_FACTORY == "1":
+         flags = [*flags, "-DX0X_SUPERJ6_FACTORY=1"]
++    sj6_builtin_init = os.environ.get("X0X_SUPERJ6_BUILTIN_INIT", "0")
++    if sj6_builtin_init not in ("0", "1"):
++        raise SystemExit("X0X_SUPERJ6_BUILTIN_INIT: 0 or 1")
++    if sj6_builtin_init == "1":
++        if not (BOARD == "smk37" and MODEL in ("elite", "pro") and SUPERJ6_FACTORY == "1"):
++            raise SystemExit("SuperJ6 built-in Init requires an Elite/Pro Factory provider")
++        flags = [*flags, "-DX0X_SUPERJ6_BUILTIN_INIT=1"]
+     if S1C == "1":
+         flags = [*flags, "-DX0X_S1C=1"]
+     chance_probe = os.environ.get("X0X_GFINAL_CHANCE_PROBE", "1")
