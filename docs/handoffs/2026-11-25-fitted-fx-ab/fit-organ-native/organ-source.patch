@@ -1,0 +1,119 @@
+--- a/firmware/src/dsp/s1c/s1c.c
++++ b/firmware/src/dsp/s1c/s1c.c
+@@ -1090,12 +1090,17 @@
+ #define ENV_GET(q, i) s->env[q][i]
+ #endif
+ 
++#include "revsc-proto.inc"
+ void s1c_render(s1c *s, float *outl, float *outr, unsigned n)
+ {
+     unsigned f, i;
+ #if X0X_S1_DELAY_HISTORY_NATIVE
+     /* Existing boot/inactive paths may render before FX is attached. The
+      * real fixed-arena device binds before audio; keep a dry fallback. */
++    if(s->pool && !s->ddec && s->rv.fb == -1.f && s->t[DLON]==0.f && s->t[RVON]!=0.f){
++        memset(s->rv.m,0,S1C_RVB_BYTES);
++        s->rv.fb=-2.f;
++    }
+     if(s->pool && s->pool_bytes>=60){
+         if(!s->ddec)dly_partition(s);
+         else dly_regrid(s);
+@@ -1405,6 +1410,18 @@
+         float wl, wr;
+ #if S1C_RVB
+ #if S1C_RVB_DEC > 1
++        if(s->rv.fb==-2.f){
++            s->ra[0]+=hl;s->ra[1]+=hr;
++            if(++s->rk>=7){
++                s->rk=0;s->r0[0]=s->r1[0];s->r0[1]=s->r1[1];
++                rv8(s,s->ra[0]*(1.f/7.f),s->ra[1]*(1.f/7.f),&s->r1[0],&s->r1[1]);
++                s->ra[0]=s->ra[1]=0.f;
++            }
++            float u=(float)s->rk*(1.f/7.f);
++            wl=s->r0[0]+(s->r1[0]-s->r0[0])*u;
++            wr=s->r0[1]+(s->r1[1]-s->r0[1])*u;
++            rv8_antimage_pair(s,&wl,&wr);
++        }else{
+         s->ra[0] += hl; s->ra[1] += hr;
+         if (++s->rk >= S1C_RVB_DEC) {
+             s->rk = 0; s->r0[0] = s->r1[0]; s->r0[1] = s->r1[1];
+@@ -1413,6 +1430,7 @@
+         }
+         { float u = (float)s->rk * (1.0f / S1C_RVB_DEC);
+           wl = s->r0[0] + (s->r1[0] - s->r0[0]) * u; wr = s->r0[1] + (s->r1[1] - s->r0[1]) * u; }
++        }
+ #else
+         rvb_compact(s, hl, hr, &wl, &wr);
+ #endif
+--- /dev/null
++++ b/firmware/src/dsp/s1c/revsc-proto.inc
+@@ -0,0 +1,69 @@
++/* Host-only experiment; room and delay now have independent histories.
++ * Step table is the existing DnBOX IMA codec table, GPL-3.0-only. */
++#if !defined(X0X_HOST) && !(X0X_S1_ORGAN_NATIVE_TRIAL && X0X_COLD_COMPANION_LAB)
++#error Organ DSP trial requires isolated guarded diagnostic flags
++#endif
++#if X0X_S1_ORGAN_NATIVE_TRIAL && !defined(X0X_HOST)
++#include "../ima_adpcm.h"
++#define rv8_steps IMA_STEP_T
++#define rv8_adj IMA_IDX_T
++#else
++static const int8_t rv8_adj[8]={-1,-1,-1,-1,2,4,6,8};
++static const int16_t rv8_steps[89] = {
++    7, 8, 9, 10, 11, 12, 13, 14, 16, 17, 19, 21, 23, 25, 28, 31, 34, 37, 41, 45, 50, 55, 60, 66, 73, 80, 88, 97,
++    107, 118, 130, 143, 157, 173, 190, 209, 230, 253, 279, 307, 337, 371, 408, 449, 494, 544, 598, 658, 724, 796,
++    876, 963, 1060, 1166, 1282, 1411, 1552, 1707, 1878, 2066, 2272, 2499, 2749, 3024, 3327, 3660, 4026, 4428,
++    4871, 5358, 5894, 6484, 7132, 7845, 8630, 9493, 10442, 11487, 12635, 13899, 15289, 16818, 18500, 20350,
++    22385, 24623, 27086, 29794, 32767};
++#endif
++typedef struct {
++  float y[8], interp[2][4];
++  uint16_t w[8];
++  int16_t pred[2][8];
++  uint8_t si[2][8], samples[1724];
++} rv8_owner;
++_Static_assert(sizeof(rv8_owner)<=S1C_RVB_BYTES,"independent reverb region");
++static const uint16_t rv8_lengths[8]={354,396,460,508,558,590,306,276};
++__attribute__((minsize)) static void rv8_step(unsigned c,int16_t *pred,uint8_t *index){
++ const int k=rv8_steps[*index];
++ int diff=(k>>3)+((c&4u)?k:0)+((c&2u)?k>>1:0)+((c&1u)?k>>2:0);
++ int x=*pred+((c&8u)?-diff:diff), i=(int)*index+rv8_adj[c&7u];
++ *pred=(int16_t)(x< -32768?-32768:x>32767?32767:x); *index=(uint8_t)(i<0?0:i>88?88:i);
++}
++static unsigned rv8_encode(float x,int16_t *pred,uint8_t *ix){
++ x*=4096.f; int target=(int)(x< -32768.f?-32768.f:x>32767.f?32767.f:x);
++ int diff=target-*pred,k=rv8_steps[*ix]; unsigned c=0;
++ if(diff<0){c=8;diff=-diff;}
++ if(diff>=k){c|=4;diff-=k;} if(diff>=k>>1){c|=2;diff-=k>>1;} if(diff>=k>>2)c|=1;
++ rv8_step(c,pred,ix); return c;
++}
++__attribute__((noinline,minsize)) static void rv8(s1c *s,float il,float ir,float *ol,float *orr){
++ rv8_owner *q=(void *)s->rv.m; float pressure=0,l=0,r=0;
++ for(unsigned i=0;i<8;++i)pressure+=q->y[i];
++ pressure*=.25f;
++ const float fb=s->t[RVFB], taper=fb<.5f?fb*2.f:1.f, gain=fb+.29f*(1.f-fb)*taper;
++ unsigned at=0;
++ for(unsigned i=0;i<8;++i){
++  unsigned w=q->w[i], shift=(w&1u)*4u; uint8_t *n=&q->samples[at+(w>>1)];
++  rv8_step((*n>>shift)&15u,&q->pred[0][i],&q->si[0][i]);
++  float x=q->pred[0][i]*(1.f/4096.f);
++  unsigned code=rv8_encode(pressure+((i&1)?ir:il)-q->y[i],&q->pred[1][i],&q->si[1][i]);
++  *n=(uint8_t)((*n&~(15u<<shift))|(code<<shift));
++  x*=gain; x+=.171572875f*(q->y[i]-x); q->y[i]=x; if(i&1)r+=x;else l+=x;
++  q->w[i]=(uint16_t)(w+1u==rv8_lengths[i]?0:w+1u);at+=rv8_lengths[i]>>1;
++ }
++ *ol=.35f*l;*orr=.35f*r;
++}
++
++/* Four cheap one-poles suppress reconstructed multirate images, not dry. */
++static void rv8_antimage_pair(s1c *s,float *left,float *right)
++{
++    rv8_owner *q=(void *)s->rv.m;
++    float l=*left,r=*right;
++    for(unsigned i=0;i<4;++i){
++        float *a=&q->interp[0][i],*b=&q->interp[1][i];
++        *a+=.38f*(l-*a); l=*a;
++        *b+=.38f*(r-*b); r=*b;
++    }
++    *left=l;*right=r;
++}

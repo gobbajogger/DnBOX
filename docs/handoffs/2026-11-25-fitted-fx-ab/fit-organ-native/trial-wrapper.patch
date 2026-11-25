@@ -1,0 +1,10 @@
+--- a/link-guarded-exact.py
++++ b/link-guarded-exact.py
+@@ -341,6 +341,7 @@
+ if os.environ.get('DNBOX_TANH_SPLIT_LAB') == '1':
+     b.CFLAGS.append('-DX0X_TANH_SPLIT_LAB=1')
+ b.CFLAGS += ["-DX0X_COLD_XDATA_TAIL_LAB=1"]
++b.CFLAGS.append('-DX0X_S1_ORGAN_NATIVE_TRIAL=1')
+ b.generate=lambda:None
+ b.build_loader=lambda:None
+ b.tc=seal
