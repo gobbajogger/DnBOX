@@ -1,0 +1,66 @@
+--- a/firmware/src/dsp/juno6.h
++++ b/firmware/src/dsp/juno6.h
+@@ -331,7 +331,7 @@
+ #endif
+ float juno6_aux_capture_base(const juno6_t *,unsigned);
+ #if X0X_SJ6_AUX_SEQ_NATIVE
+-unsigned juno6_aux_seq_values(const juno6_t *,uint8_t ids[4],float values[4]);
++unsigned juno6_aux_seq_values(const juno6_t *,uint8_t ids[5],float values[5]);
+ #endif
+ #endif
+ #if X0X_SJ6_NOISE_SUB_NATIVE
+--- a/firmware/src/dsp/juno6_factory.inc
++++ b/firmware/src/dsp/juno6_factory.inc
+@@ -1352,9 +1352,27 @@
+ #if X0X_SJ6_AUX_SEQ_NATIVE
+ /* Audio worker already evaluates the AU wave/delay/trigger state in its
+  * 80 Hz spans. Route those very values into the separate scheduler. */
+-__attribute__((noinline)) unsigned juno6_aux_seq_values(const juno6_t *s,uint8_t ids[4],float values[4])
++__attribute__((noinline)) unsigned juno6_aux_seq_values(const juno6_t *s,uint8_t ids[5],float values[5])
+ {
+     unsigned n=0;
++    const unsigned first=(unsigned)sj6_aux_destination_id(s->lfo1_aux_route);
++    if(sj6_aux_seq_id(first)
++#if X0X_SJ6_LFO1_DELAY_PORT
++       && !sj6_lfo1_waiting(s)
++#endif
++#if X0X_SJ6_LFO_TRIGGER_NATIVE
++       && sj6_trigger_live(s,0u)
++#endif
++#if X0X_SJ6_LFO1_WAVE_NATIVE
++       && !s->lfo1_disabled
++#endif
++      ){
++        const float a=sj6_effective_lfo_amount(s,0u);
++        if(a!=0.f){
++            ids[n]=(uint8_t)first;
++            values[n++]=fm_clampf(s->lfo1_aux_base*(1.f/127.f)+s->lfo1_aux_delta*a,0.f,1.f);
++        }
++    }
+     for(unsigned i=0;i<2u;i++){
+         const unsigned loop=i+1u;
+         if(!sj6_extra_lfo_on(s,loop) || !s->lfo_step_q40[loop] ||
+--- a/firmware/src/app/original_runtime.c
++++ b/firmware/src/app/original_runtime.c
+@@ -542,8 +542,8 @@
+  * Time is represented in the existing Q8 sample scheduler domain. */
+ static uint32_t sj6_aux_divtime(uint32_t beat,unsigned fine)
+ { return (uint32_t)(((uint64_t)beat*fine)/17u); }
+-static unsigned sj6_aux_arp_apply(S1SequencerParams *q,const uint8_t ids[4],
+-                                 const float raw[4],unsigned n)
++static unsigned sj6_aux_arp_apply(S1SequencerParams *q,const uint8_t ids[5],
++                                 const float raw[5],unsigned n)
+ {
+     unsigned fine=0;
+     for(unsigned i=0;i<n;i++) {
+@@ -1145,8 +1145,8 @@
+         const S1SequencerParams *active=&a->prm;
+ #if X0X_SJ6_AUX_SEQ_NATIVE
+         S1SequencerParams mod;
+-        uint8_t ids[4];
+-        float values[4];
++        uint8_t ids[5];
++        float values[5];
+         unsigned n=p->kind==ORIGINAL_SOUND_JUNO && p->dsp.juno.synth.typed ?
+             juno6_aux_seq_values(&p->dsp.juno.synth,ids,values) : 0u;
+         unsigned aux_div=0;
