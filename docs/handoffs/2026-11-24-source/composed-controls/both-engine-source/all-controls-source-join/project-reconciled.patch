@@ -1,0 +1,53 @@
+--- a/firmware/src/app/project.c
++++ b/firmware/src/app/project.c
+@@ -87,7 +87,7 @@
+     s->keysound = 0;
+     s->autosave_off = 0;
+     s->clk_out = 1;
+-    s->bt = (uint8_t)((device_bt & PROJ_DEVICE_BT) | PROJ_BT_CLK_IN);   /* CLOCK SOURCE AUTO */
++    s->bt = (uint8_t)((device_bt & PROJ_DEVICE_PREFS) | PROJ_BT_CLK_IN);   /* CLOCK SOURCE AUTO */
+     s->notes_out = 0;
+     s->bpm_x10 = 1250;
+     s->accent_q7 = 88;
+@@ -102,9 +102,11 @@
+ static void project_defaults_for(project_t *pr, uint8_t device_bt)
+ {
+     int i;
++    const uint8_t micro_keys=proj.set.ck_x1 & PROJ_S1_MICRO_KEYS;
+     __builtin_memset(pr, 0, sizeof *pr);
+     *part_off_of(pr) = 0;
+     project_settings_defaults(&pr->set, device_bt);
++    pr->set.ck_x1 |= micro_keys;
+     engine_sound_defaults(&pr->sound);
+     arrange_defaults(pr);
+     /* the 303 lines start empty, like the drums: OCT+ on TB-3PO (or keyboard mode) writes one */
+@@ -613,12 +615,14 @@
+         s->snd_rev != PROJ_SND_REV || s->palette > 5 || s->keyled > 2 || s->clk_out > 1 ||
+         s->notes_out > 1 || s->bpm_x10 < 200 || s->bpm_x10 > 2750 || s->accent_q7 > 127 ||
+         s->keysound > 1 || s->autosave_off > 1 || s->out_loud > 1 || s->usb_full > 1 ||
+-        (s->bt & 0xC0u) || !(s->bt & PROJ_BT_CLK_IN) || PROJ_CLK_SRC(s->bt) > SEQ_CLK_EXT ||
++        (s->bt & (0xC0u & ~PROJ_DEVICE_PREFS)) || !(s->bt & PROJ_BT_CLK_IN) || PROJ_CLK_SRC(s->bt) > SEQ_CLK_EXT ||
+         s->ck_ch < 2)
+         return -1;
+-    for (i = 0; i < 12; i++)
+-        if ((&s->ck_ch)[i] > CK_MAX[i])
+-            return -1;
++    for (i = 0; i < 12; i++) {
++        unsigned value=(&s->ck_ch)[i];
++        if(i==10) value&=~PROJ_S1_MICRO_KEYS;
++        if(value > CK_MAX[i]) return -1;
++    }
+     for (i = 0; i < NPARTS; i++)
+         if (s->midi_ch[i] > 17)
+             return -1;
+@@ -749,7 +753,9 @@
+ {
+     /* Device roles belong to this keyboard; loading music must not change its
+      * Bluetooth connection or opt-in control surface mode. */
+-    project_stage.set.bt = (uint8_t)((project_stage.set.bt & ~PROJ_DEVICE_BT) | (proj.set.bt & PROJ_DEVICE_BT));
++    project_stage.set.bt = (uint8_t)((project_stage.set.bt & ~PROJ_DEVICE_PREFS) | (proj.set.bt & PROJ_DEVICE_PREFS));
++    project_stage.set.ck_x1=(uint8_t)((project_stage.set.ck_x1 & ~PROJ_S1_MICRO_KEYS) |
++                                      (proj.set.ck_x1 & PROJ_S1_MICRO_KEYS));
+     __builtin_memcpy(&proj, &project_stage, sizeof proj);
+     part_off_live = part_off_staged;
+     project_incompatible = 0; /* explicitly validated import/reset is the recovery boundary */

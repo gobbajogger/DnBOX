@@ -1,0 +1,83 @@
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -440,6 +440,7 @@
+        R_BT, R_BTSTAT, R_BTNAME, R_CKCH, R_CLKSRC, R_SMC_ROLE, R_SMC_MAP, R_BENGINE, R_BPRESET, R_BSTATUS, R_SECTION, R_PARTON, R_FINETUNE, R_QUEUEMUTE, R_BRKRATE, R_BPATSND, R_NOTELOCK };   /* R_TAPE: FX's one-knob TAPE (DIGI .. worn tape) */          /* R_HDR: a list's section header (a = its group), never selected */
+ #if X0X_SYNTHONE_PATCH
+ enum { R_S1PATCH = R_NOTELOCK + 1, R_S1LINK = R_NOTELOCK + 4 };
++extern int s1_patch_slot(unsigned factory_id);
+ #endif
+ #if X0X_ARP_HOOKS
+ enum { R_ARP = R_NOTELOCK + 2 };          /* a: ARP_F_* field, b: bass voice */
+@@ -465,6 +466,7 @@
+ #if X0X_S1_SCALE_NATIVE && DNBOX_TYPED_CONTROLS_NATIVE_TEST
+ enum { R_S1SCALE=R_NOTELOCK+58 };
+ extern int s1_typed_scale_choose(unsigned,unsigned,int);
++extern const char *s1c_scale_name(unsigned);
+ #endif
+ #if X0X_SJ6_VINTAGE_NATIVE && X0X_SJ6_ALT3_NATIVE && DNBOX_TYPED_CONTROLS_NATIVE_TEST
+ enum { R_SJ6LIMITER=R_NOTELOCK+54 };
+@@ -4039,11 +4041,11 @@
+             undo_peek(&undo,entry,tag,target.tag[v].bytes,BASS_SOUND_TAG_BYTES);
+ #if X0X_SUPERJ6_BUILTIN_INIT
+             uint32_t ext = cell + ORIGINAL_SJ6_EXTRA_ROW * NPARAMS_MAX;
+-            undo_peek(&undo, entry, ext, target.sj6_extra[v], (ORIGINAL_SJ6_EXTRA_SIZE+ORIGINAL_SJ6_LFO_AUTHORED_SIZE));
++            undo_peek(&undo, entry, ext, target.sj6_extra[v], ORIGINAL_SJ6_EXT_USED);
+             if (((original_sound_edit_mask(target.cell[v]) |
+-                  original_sound_edit_mask(proj.sound.v[T_303][v])) & (ORIGINAL_SJ6_EXTRA_BIT|ORIGINAL_SJ6_AUTHORED_LFO_BIT)) &&
++                  original_sound_edit_mask(proj.sound.v[T_303][v])) & ORIGINAL_SJ6_EXT_BITS) &&
+                 memcmp(target.sj6_extra[v], proj.sound.v[T_303][ORIGINAL_SJ6_EXTRA_ROW + v],
+-                       (ORIGINAL_SJ6_EXTRA_SIZE+ORIGINAL_SJ6_LFO_AUTHORED_SIZE))) undo_bass_mask |= 1u << v;
++                       ORIGINAL_SJ6_EXT_USED)) undo_bass_mask |= 1u << v;
+ #endif
+ #if X0X_S1_EXTRA || X0X_SUPERJ6_BUILTIN_INIT
+             undo_peek(&undo, entry, cell + BASS_SHARED_EXTRA_ROW * NPARAMS_MAX,
+@@ -6537,6 +6539,17 @@
+ static uint8_t ui_step_lane;
+ static int step_lane_turn(int e);
+ 
++X0X_COLD static void ui_record_arm(int on)
++{
++    record_finish();
++    bass_step_cancel();                            /* key-up will now take the keyboard path */
++    memset(bass_rec_step, 0, sizeof bass_rec_step);
++    ui.rec = (uint8_t)on;
++    if (ui.rec && is_303())
++        ui.wpos[bidx()] = 0;
++    say(ui.rec ? "RECORD ON: KEYS + KNOBS" : "RECORD OFF", 0);
++}
++
+ X0X_COLD static void button_tap(int b)
+ {
+     if (ui.brk_choice_on) {
+@@ -6594,13 +6607,7 @@
+             ask(ACT_CLEAR_PART, ui.part, t, target);
+             break;
+         }
+-        record_finish();
+-        bass_step_cancel();                            /* key-up will now take the keyboard path */
+-        memset(bass_rec_step, 0, sizeof bass_rec_step);
+-        ui.rec = !ui.rec;
+-        if (ui.rec && is_303())
+-            ui.wpos[bidx()] = 0;
+-        say(ui.rec ? "RECORD ON: KEYS + KNOBS" : "RECORD OFF", 0);
++        ui_record_arm(!ui.rec);
+         break;
+     case B_HOME:                                      /* the pattern; again: the song (a list: back) */
+         if(ui.view==V_GLO && ui.overlay==O_LIST && ui.glo_section>=0) {global_back();break;}
+@@ -8165,13 +8172,14 @@
+     int len = bp->len < NSTEPS ? bp->len : NSTEPS;
+     int ph = seq.playing ? eng_step[TRK_BASS0 + b] : -1, lo = 127, hi = 0;
+ #if X0X_ARP_HOOKS
+-    if (arp)                                       /* only the step that really sounded (row 60 rule) */
+-    #if X0X_SJ6_ARP_ADAPTER_NATIVE && X0X_SUPERJ6_BUILTIN_INIT
++    if (arp) {                                     /* only the step that really sounded (row 60 rule) */
++#if X0X_SJ6_ARP_ADAPTER_NATIVE && X0X_SUPERJ6_BUILTIN_INIT
+         int sounding=as.on || (as.seq_on && engine_bass_bank(b)!=ORIGINAL_SOUND_SYNTHONE);
+ #else
+         int sounding=as.on;
+ #endif
+         ph = sounding && engine_arp_view((unsigned)b, &arp_ph, &age) && age < 250u ? (int)arp_ph : -1;
++    }
+ #endif
+     uint16_t col = part_col();
+     uint32_t lmarks = gen || arp ? 0 : lock_marks(-1, -1, ui.spage * 16);
