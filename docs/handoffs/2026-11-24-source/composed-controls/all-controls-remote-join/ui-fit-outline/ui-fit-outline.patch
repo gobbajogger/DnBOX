@@ -1,0 +1,901 @@
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -788,7 +788,7 @@
+     {"LENGTH", NSONG, 0, 0},
+ };
+ 
+-static int pref_read_only(pref_t r)
++__attribute__((noinline)) static int pref_read_only(pref_t r)
+ {
+ #if X0X_S1_SCALE_NATIVE && DNBOX_TYPED_CONTROLS_NATIVE_TEST
+     if(r.kind==R_S1SCALE){
+@@ -1034,7 +1034,7 @@
+     return slot<sizeof knobs/sizeof *knobs && knobs[slot].name ? &knobs[slot]:0;
+ }
+ #endif
+-static const x0x_param_t *pref_desc(pref_t r)
++__attribute__((noinline)) static const x0x_param_t *pref_desc(pref_t r)
+ {
+ #if DNBOX_TYPED_CONTROLS_NATIVE_TEST
+     static const char *const s1_env_lfo_names[]={"OFF","LFO 1","LFO 2","BOTH"};
+@@ -1570,150 +1570,238 @@
+     engine_set(target,voice,parameter,proj.sound.v[target][voice][parameter]);
+ }
+ 
+-X0X_COLD static void pref_set_impl(pref_t r, int v, int from_keyboard)
+-{
+-#if X0X_ARP_HOOKS
+-    if (r.kind == R_ARP) { arp_set(r.b, r.a, v); return; }
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++/* Common descriptor, range and owner/read-only admission before original
++ * type-specific callbacks. An absent kind is not an accepted write. */
++#if X0X_S1_FEEDBACK_PROBE
++static int typed_set_r_s1dlfb(pref_t r,int v){return (s1_typed_feedback_choose(r.b,(unsigned)v));}
+ #endif
+-#if X0X_SYNTHONE_PATCH
+-    if (r.kind == R_S1PATCH || r.kind == R_S1LINK) { s1_edit(r, v, 0); return; }
++#if 1
++static int typed_set_r_s1dlyres(pref_t r,int v){return (s1_delay_res_choose(r.b,(unsigned)v));}
+ #endif
+-#if X0X_BASS_PRESET_PREVIEW
+-    /* Freeze the active bank before reading its descriptor. The audio boundary
+-     * may otherwise replace Chicago with Miami between clamp and store. */
+-    int bass_edit = r.kind == R_ENG && r.a == T_303;
+-    if (bass_edit) engine_bass_edit_hold(1);
++#if 1
++static int typed_set_r_s1envlfo(pref_t r,int v){return (s1_env_lfo_choose(r.b,(unsigned)v));}
+ #endif
+-#if X0X_S1_SCALE_NATIVE && DNBOX_TYPED_CONTROLS_NATIVE_TEST
+-    if(r.kind==R_S1SCALE){
+-        if((unsigned)v<=S1C_SCALE_MAX && !pref_read_only(r) &&
+-           s1_typed_scale_choose(r.b,(unsigned)v,0))mark_dirty();
+-        return;
+-    }
++#if X0X_S1_DELAY_TRACK_TEST
++static int typed_set_r_s1dict(pref_t r,int v){return (s1_typed_dict_choose(r.b,(unsigned)v));}
+ #endif
+-#if X0X_SJ6_VINTAGE_NATIVE && X0X_SJ6_ALT3_NATIVE && DNBOX_TYPED_CONTROLS_NATIVE_TEST
+-    if(r.kind==R_SJ6LIMITER){
+-        if((unsigned)v<=127u && !pref_read_only(r) &&
+-           sj6_native_limiter_choose(r.b,r.c,(unsigned)v))mark_dirty();
+-        return;
+-    }
++#if X0X_S1_CRUSH_LFO_PROBE
++static int typed_set_r_s1crush(pref_t r,int v){return (s1_typed_crush_choose(r.b,(unsigned)v));}
++#endif
++#if 1
++static int typed_set_r_s1aa(pref_t r,int v){return (s1_aa_choose(r.b,(unsigned)v));}
++#endif
++#if 1
++static int typed_set_r_s1a4(pref_t r,int v){return (s1_typed_a4_choose(r.b,(unsigned)v+410u));}
++#endif
++#if 1
++static int typed_set_r_s1rvfb(pref_t r,int v){return (s1_typed_rvfb_choose(r.b,(unsigned)v));}
++#endif
++#if 1
++static int typed_set_r_s1trans(pref_t r,int v){return (s1_typed_trans_choose(r.b,v-24));}
++#endif
++#if X0X_S1_HALFTIME
++static int typed_set_r_s1half(pref_t r,int v){return (s1_half_choose(r.b,(unsigned)v));}
++#endif
++#if X0X_S1_KEYBOARD_HOLD
++static int typed_set_r_s1key_hold(pref_t r,int v){return (engine_s1_key_set_hold(r.b,v));}
++#endif
++#if X0X_S1_KEYBOARD_HOLD && X0X_S1_SCALE_NATIVE
++static int typed_set_r_s1a4reset(pref_t r,int v){return (v==1 && s1_typed_scale_choose(r.b,0,1));}
++#endif
++#if 1
++static int typed_set_r_s1modwheel(pref_t r,int v){return (s1_typed_mod_choose(r.b,(unsigned)v));}
++#endif
++#if X0X_SJ6_NATIVE_ROOM
++static int typed_set_r_sj6room(pref_t r,int v){return sj6_native_room_choose(r.b,r.c, (unsigned)v);}
++#endif
++#if X0X_SJ6_NATIVE_ROOM
++static int typed_set_r_sj6crush(pref_t r,int v){return sj6_crush_choose(r.b,r.c, (unsigned)v);}
++#endif
++#if X0X_SJ6_OTA_NATIVE
++static int typed_set_r_sj6ota(pref_t r,int v){return sj6_ota_choose(r.b, (unsigned)v);}
++#endif
++#if X0X_SJ6_NATIVE_UNISON
++static int typed_set_r_sj6unison(pref_t r,int v){return engine_sj6_unison_edit(r.b,r.c, (unsigned)v);}
++#endif
++#if X0X_SJ6_NATIVE_J60
++static int typed_set_r_sj6j60(pref_t r,int v){return engine_sj6_j60_edit(r.b,r.c, (unsigned)v);}
++#endif
++#if X0X_SJ6_PITCH_ENV_NATIVE
++static int typed_set_r_sj6pitch(pref_t r,int v){return sj6_pitch_choose(r.b,r.c, (unsigned)v);}
++#endif
++#if X0X_SJ6_VCF_PORT
++static int typed_set_r_sj6filter_extra(pref_t r,int v){return sj6_filter_control_choose(r.b,r.c, (unsigned)v);}
++#endif
++#if X0X_SJ6_AUX_LFO_NATIVE
++static int typed_set_r_sj6aux(pref_t r,int v){return sj6_aux_choose(r.b,r.c,(unsigned)(sj6_aux_field_route(r.c)?sj6_aux_route_wire((unsigned)v):v));}
+ #endif
+-#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
+-#define SJ6_TYPED_WRITE(kind,call) case kind: {const x0x_param_t *d=pref_desc(r); \
+-    if(d && (unsigned)v<=d->max && !pref_read_only(r) && (call))mark_dirty(); return;}
+-    switch(r.kind){
+ #if X0X_SJ6_BEND_TYPED_PROBE
+-    SJ6_TYPED_WRITE(R_SJ6PB,sj6_typed_pb_edit(r.b,r.c,(unsigned)v))
++static int typed_set_r_sj6pb(pref_t r,int v){return sj6_typed_pb_edit(r.b,r.c,(unsigned)v);}
+ #endif
+ #if X0X_SJ6_MOD_TYPED_PROBE
+-    SJ6_TYPED_WRITE(R_SJ6MOD,sj6_typed_mod_choose(r.b,(unsigned)v))
++static int typed_set_r_sj6mod(pref_t r,int v){return sj6_typed_mod_choose(r.b,(unsigned)v);}
+ #endif
+ #if X0X_SJ6_MONO32_PROBE
+-    SJ6_TYPED_WRITE(R_SJ6MONO32,engine_sj6_mono32_edit(r.b,r.c,(unsigned)v))
++static int typed_set_r_sj6mono32(pref_t r,int v){return engine_sj6_mono32_edit(r.b,r.c,(unsigned)v);}
+ #endif
+ #if X0X_SJ6_VELOCITY_SETTINGS
+-    SJ6_TYPED_WRITE(R_SJ6INPUTVEL,sj6_input_velocity_choose(r.b,r.c,(unsigned)v))
++static int typed_set_r_sj6inputvel(pref_t r,int v){return sj6_input_velocity_choose(r.b,r.c,(unsigned)v);}
+ #endif
+-    default:break;
+-    }
+-#undef SJ6_TYPED_WRITE
++#if 1
++static int typed_set_r_s1phaser(pref_t r,int v){return s1_phaser_choose(r.b,r.c,(unsigned)v);}
+ #endif
+-#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
+-    if(r.kind==R_S1PHASER || r.kind==R_S1CMP || r.kind==R_S1CWG
+-#if X0X_S1_AUTOPAN_PROBE
+-       || r.kind==R_S1PAN
++#if 1
++static int typed_set_r_s1cmp(pref_t r,int v){return s1_cmp_choose(r.b,r.c,(unsigned)v);}
+ #endif
+-       ){
+-        const x0x_param_t *d=pref_desc(r);
+-        if(!d || (unsigned)v>d->max || pref_read_only(r))return;
+-        int ok=0;
+-        switch(r.kind){
+-        case R_S1PHASER:ok=s1_phaser_choose(r.b,r.c,(unsigned)v);break;
+-        case R_S1CMP:ok=s1_cmp_choose(r.b,r.c,(unsigned)v);break;
+-        case R_S1CWG:ok=s1_typed_cwg_choose(r.b,(unsigned)v);break;
+-#if X0X_S1_AUTOPAN_PROBE
+-        case R_S1PAN:ok=s1_typed_pan_choose(r.b,r.c,(unsigned)v);break;
++#if 1
++static int typed_set_r_s1cwg(pref_t r,int v){return s1_typed_cwg_choose(r.b,(unsigned)v);}
+ #endif
+-        }
+-        if(ok)mark_dirty();
+-        return;
+-    }
++#if X0X_S1_AUTOPAN_PROBE
++static int typed_set_r_s1pan(pref_t r,int v){return s1_typed_pan_choose(r.b,r.c,(unsigned)v);}
+ #endif
+-#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++typedef int (*typed_set_fn)(pref_t,int);
++static typed_set_fn const typed_setters[]={
+ #if X0X_S1_FEEDBACK_PROBE
+-    if(r.kind==R_S1DLFB){const x0x_param_t *d=pref_desc(r); if(d && (unsigned)v<=d->max && !pref_read_only(r) && (s1_typed_feedback_choose(r.b,(unsigned)v)))mark_dirty(); return;}
++    [R_S1DLFB-R_NOTELOCK]=typed_set_r_s1dlfb,
+ #endif
+ #if 1
+-    if(r.kind==R_S1DLYRES){const x0x_param_t *d=pref_desc(r); if(d && (unsigned)v<=d->max && !pref_read_only(r) && (s1_delay_res_choose(r.b,(unsigned)v)))mark_dirty(); return;}
++    [R_S1DLYRES-R_NOTELOCK]=typed_set_r_s1dlyres,
+ #endif
+ #if 1
+-    if(r.kind==R_S1ENVLFO){const x0x_param_t *d=pref_desc(r); if(d && (unsigned)v<=d->max && !pref_read_only(r) && (s1_env_lfo_choose(r.b,(unsigned)v)))mark_dirty(); return;}
++    [R_S1ENVLFO-R_NOTELOCK]=typed_set_r_s1envlfo,
+ #endif
+ #if X0X_S1_DELAY_TRACK_TEST
+-    if(r.kind==R_S1DICT){const x0x_param_t *d=pref_desc(r); if(d && (unsigned)v<=d->max && !pref_read_only(r) && (s1_typed_dict_choose(r.b,(unsigned)v)))mark_dirty(); return;}
++    [R_S1DICT-R_NOTELOCK]=typed_set_r_s1dict,
+ #endif
+ #if X0X_S1_CRUSH_LFO_PROBE
+-    if(r.kind==R_S1CRUSH){const x0x_param_t *d=pref_desc(r); if(d && (unsigned)v<=d->max && !pref_read_only(r) && (s1_typed_crush_choose(r.b,(unsigned)v)))mark_dirty(); return;}
++    [R_S1CRUSH-R_NOTELOCK]=typed_set_r_s1crush,
+ #endif
+ #if 1
+-    if(r.kind==R_S1AA){const x0x_param_t *d=pref_desc(r); if(d && (unsigned)v<=d->max && !pref_read_only(r) && (s1_aa_choose(r.b,(unsigned)v)))mark_dirty(); return;}
++    [R_S1AA-R_NOTELOCK]=typed_set_r_s1aa,
+ #endif
+ #if 1
+-    if(r.kind==R_S1A4){const x0x_param_t *d=pref_desc(r); if(d && (unsigned)v<=d->max && !pref_read_only(r) && (s1_typed_a4_choose(r.b,(unsigned)v+410u)))mark_dirty(); return;}
++    [R_S1A4-R_NOTELOCK]=typed_set_r_s1a4,
+ #endif
+ #if 1
+-    if(r.kind==R_S1RVFB){const x0x_param_t *d=pref_desc(r); if(d && (unsigned)v<=d->max && !pref_read_only(r) && (s1_typed_rvfb_choose(r.b,(unsigned)v)))mark_dirty(); return;}
++    [R_S1RVFB-R_NOTELOCK]=typed_set_r_s1rvfb,
+ #endif
+ #if 1
+-    if(r.kind==R_S1TRANS){const x0x_param_t *d=pref_desc(r); if(d && (unsigned)v<=d->max && !pref_read_only(r) && (s1_typed_trans_choose(r.b,v-24)))mark_dirty(); return;}
++    [R_S1TRANS-R_NOTELOCK]=typed_set_r_s1trans,
+ #endif
+ #if X0X_S1_HALFTIME
+-    if(r.kind==R_S1HALF){const x0x_param_t *d=pref_desc(r); if(d && (unsigned)v<=d->max && !pref_read_only(r) && (s1_half_choose(r.b,(unsigned)v)))mark_dirty(); return;}
++    [R_S1HALF-R_NOTELOCK]=typed_set_r_s1half,
+ #endif
+ #if X0X_S1_KEYBOARD_HOLD
+-    if(r.kind==R_S1KEY_HOLD){const x0x_param_t *d=pref_desc(r); if(d && (unsigned)v<=d->max && !pref_read_only(r) && (engine_s1_key_set_hold(r.b,v)))mark_dirty(); return;}
++    [R_S1KEY_HOLD-R_NOTELOCK]=typed_set_r_s1key_hold,
+ #endif
+ #if X0X_S1_KEYBOARD_HOLD && X0X_S1_SCALE_NATIVE
+-    if(r.kind==R_S1A4RESET){const x0x_param_t *d=pref_desc(r); if(d && (unsigned)v<=d->max && !pref_read_only(r) && (v==1 && s1_typed_scale_choose(r.b,0,1)))mark_dirty(); return;}
++    [R_S1A4RESET-R_NOTELOCK]=typed_set_r_s1a4reset,
+ #endif
+ #if 1
+-    if(r.kind==R_S1MODWHEEL){const x0x_param_t *d=pref_desc(r); if(d && (unsigned)v<=d->max && !pref_read_only(r) && (s1_typed_mod_choose(r.b,(unsigned)v)))mark_dirty(); return;}
+-#endif
+-#if X0X_S1_DELAY_TIME_NATIVE
+-    if(r.kind==R_S1DLYTIME){
+-        if(v>=0 && !pref_read_only(r)){
+-            int rc=s1_delay_time_choose(r.b,(unsigned)v);
+-            if(rc>0)mark_dirty();else if(rc<0)say("DELAY TIME LIMIT",0);
+-        }
+-        return;
+-    }
+-#endif
++    [R_S1MODWHEEL-R_NOTELOCK]=typed_set_r_s1modwheel,
+ #endif
+-#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
+ #if X0X_SJ6_NATIVE_ROOM
+-    if(r.kind==R_SJ6ROOM){const x0x_param_t *d=pref_desc(r); if(d && (unsigned)v<=d->max && !pref_read_only(r) && sj6_native_room_choose(r.b,r.c, (unsigned)v))mark_dirty(); return;}
++    [R_SJ6ROOM-R_NOTELOCK]=typed_set_r_sj6room,
+ #endif
+ #if X0X_SJ6_NATIVE_ROOM
+-    if(r.kind==R_SJ6CRUSH){const x0x_param_t *d=pref_desc(r); if(d && (unsigned)v<=d->max && !pref_read_only(r) && sj6_crush_choose(r.b,r.c, (unsigned)v))mark_dirty(); return;}
++    [R_SJ6CRUSH-R_NOTELOCK]=typed_set_r_sj6crush,
+ #endif
+ #if X0X_SJ6_OTA_NATIVE
+-    if(r.kind==R_SJ6OTA){const x0x_param_t *d=pref_desc(r); if(d && (unsigned)v<=d->max && !pref_read_only(r) && sj6_ota_choose(r.b, (unsigned)v))mark_dirty(); return;}
++    [R_SJ6OTA-R_NOTELOCK]=typed_set_r_sj6ota,
+ #endif
+ #if X0X_SJ6_NATIVE_UNISON
+-    if(r.kind==R_SJ6UNISON){const x0x_param_t *d=pref_desc(r); if(d && (unsigned)v<=d->max && !pref_read_only(r) && engine_sj6_unison_edit(r.b,r.c, (unsigned)v))mark_dirty(); return;}
++    [R_SJ6UNISON-R_NOTELOCK]=typed_set_r_sj6unison,
+ #endif
+ #if X0X_SJ6_NATIVE_J60
+-    if(r.kind==R_SJ6J60){const x0x_param_t *d=pref_desc(r); if(d && (unsigned)v<=d->max && !pref_read_only(r) && engine_sj6_j60_edit(r.b,r.c, (unsigned)v))mark_dirty(); return;}
++    [R_SJ6J60-R_NOTELOCK]=typed_set_r_sj6j60,
+ #endif
+ #if X0X_SJ6_PITCH_ENV_NATIVE
+-    if(r.kind==R_SJ6PITCH){const x0x_param_t *d=pref_desc(r); if(d && (unsigned)v<=d->max && !pref_read_only(r) && sj6_pitch_choose(r.b,r.c, (unsigned)v))mark_dirty(); return;}
++    [R_SJ6PITCH-R_NOTELOCK]=typed_set_r_sj6pitch,
+ #endif
+ #if X0X_SJ6_VCF_PORT
+-    if(r.kind==R_SJ6FILTER_EXTRA){const x0x_param_t *d=pref_desc(r); if(d && (unsigned)v<=d->max && !pref_read_only(r) && sj6_filter_control_choose(r.b,r.c, (unsigned)v))mark_dirty(); return;}
++    [R_SJ6FILTER_EXTRA-R_NOTELOCK]=typed_set_r_sj6filter_extra,
+ #endif
+ #if X0X_SJ6_AUX_LFO_NATIVE
+-    if(r.kind==R_SJ6AUX){const x0x_param_t *d=pref_desc(r); if(d && (unsigned)v<=d->max && !pref_read_only(r) && sj6_aux_choose(r.b,r.c,(unsigned)(sj6_aux_field_route(r.c)?sj6_aux_route_wire((unsigned)v):v)))mark_dirty(); return;}
++    [R_SJ6AUX-R_NOTELOCK]=typed_set_r_sj6aux,
++#endif
++#if X0X_SJ6_BEND_TYPED_PROBE
++    [R_SJ6PB-R_NOTELOCK]=typed_set_r_sj6pb,
++#endif
++#if X0X_SJ6_MOD_TYPED_PROBE
++    [R_SJ6MOD-R_NOTELOCK]=typed_set_r_sj6mod,
++#endif
++#if X0X_SJ6_MONO32_PROBE
++    [R_SJ6MONO32-R_NOTELOCK]=typed_set_r_sj6mono32,
++#endif
++#if X0X_SJ6_VELOCITY_SETTINGS
++    [R_SJ6INPUTVEL-R_NOTELOCK]=typed_set_r_sj6inputvel,
++#endif
++#if 1
++    [R_S1PHASER-R_NOTELOCK]=typed_set_r_s1phaser,
+ #endif
++#if 1
++    [R_S1CMP-R_NOTELOCK]=typed_set_r_s1cmp,
++#endif
++#if 1
++    [R_S1CWG-R_NOTELOCK]=typed_set_r_s1cwg,
++#endif
++#if X0X_S1_AUTOPAN_PROBE
++    [R_S1PAN-R_NOTELOCK]=typed_set_r_s1pan,
++#endif
++};
++static __attribute__((noinline)) int pref_set_typed_value(pref_t r,int v)
++{
++    unsigned idx=(unsigned)r.kind-R_NOTELOCK;
++    if(idx>=sizeof typed_setters/sizeof *typed_setters || !typed_setters[idx])return 0;
++    const x0x_param_t *d=pref_desc(r);
++    if(d && (unsigned)v<=d->max && !pref_read_only(r) && typed_setters[idx](r,v))mark_dirty();
++    return 1;
++}
++#endif
++X0X_COLD static void pref_set_impl(pref_t r, int v, int from_keyboard)
++{
++#if X0X_ARP_HOOKS
++    if (r.kind == R_ARP) { arp_set(r.b, r.a, v); return; }
++#endif
++#if X0X_SYNTHONE_PATCH
++    if (r.kind == R_S1PATCH || r.kind == R_S1LINK) { s1_edit(r, v, 0); return; }
++#endif
++#if X0X_BASS_PRESET_PREVIEW
++    /* Freeze the active bank before reading its descriptor. The audio boundary
++     * may otherwise replace Chicago with Miami between clamp and store. */
++    int bass_edit = r.kind == R_ENG && r.a == T_303;
++    if (bass_edit) engine_bass_edit_hold(1);
++#endif
++#if X0X_S1_SCALE_NATIVE && DNBOX_TYPED_CONTROLS_NATIVE_TEST
++    if(r.kind==R_S1SCALE){
++        if((unsigned)v<=S1C_SCALE_MAX && !pref_read_only(r) &&
++           s1_typed_scale_choose(r.b,(unsigned)v,0))mark_dirty();
++        return;
++    }
++#endif
++#if X0X_SJ6_VINTAGE_NATIVE && X0X_SJ6_ALT3_NATIVE && DNBOX_TYPED_CONTROLS_NATIVE_TEST
++    if(r.kind==R_SJ6LIMITER){
++        if((unsigned)v<=127u && !pref_read_only(r) &&
++           sj6_native_limiter_choose(r.b,r.c,(unsigned)v))mark_dirty();
++        return;
++    }
++#endif
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++    if(pref_set_typed_value(r,v))return;
++#endif
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++#if X0X_S1_DELAY_TIME_NATIVE
++    if(r.kind==R_S1DLYTIME){
++        if(v>=0 && !pref_read_only(r)){
++            int rc=s1_delay_time_choose(r.b,(unsigned)v);
++            if(rc>0)mark_dirty();else if(rc<0)say("DELAY TIME LIMIT",0);
++        }
++        return;
++    }
++#endif
++#endif
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
+ #endif
+ #if X0X_SUPERJ6_BUILTIN_INIT
+     if(r.kind==R_SJ6KNOB){
+@@ -2561,7 +2649,7 @@
+     pages->title[i][k] = 0;
+ }
+ 
+-static void add_page(page_emitter_t *emit, const char *t,
++__attribute__((noinline)) static void add_page(page_emitter_t *emit, const char *t,
+                      pref_t a, pref_t b, pref_t c, pref_t d)
+ {
+     page_query_t *query = emit->query;
+@@ -2879,6 +2967,30 @@
+ }
+ 
+ /* Pure navigation inputs: emit existing descriptors without keyboard clamping. */
++/* Owner-page rows share one decoder. Packing is only a source descriptor:
++ * exact kind/a/b/c values and order stay identical at add_page. */
++#define QR(k,c) ((uint16_t)((k)*256u+(c)))
++typedef struct { const char *title; uint16_t ref[4]; } owner_page_row;
++static __attribute__((noinline)) void add_owner_pages(page_emitter_t *emit,
++        const owner_page_row *rows,unsigned n,uint8_t b)
++{
++    for(unsigned i=0;i<n;i++){
++        pref_t ref[4];
++        for(unsigned j=0;j<4;j++){
++            uint16_t word=rows[i].ref[j];
++            uint8_t kind=(uint8_t)(word>>8), c=(uint8_t)word;
++            ref[j]=word?PR(kind,T_303,b,c):NONE;
++#if X0X_ARP_HOOKS
++            if(kind==R_ARP)ref[j]=PR(R_ARP,c,b,0);
++#endif
++        }
++        add_page(emit,rows[i].title,ref[0],ref[1],ref[2],ref[3]);
++    }
++}
++#define OWNER_PAGE(name, ...) do { \
++    static const owner_page_row row={name,{__VA_ARGS__}}; \
++    add_owner_pages(emit,&row,1,b); \
++} while(0)
+ static void describe_pages(pages_t *out, page_query_t *query, int view, int p, int mixsel, const uint8_t *selection)
+ {
+     page_emitter_t output = {out, query, GR_NONE};
+@@ -2972,48 +3084,51 @@
+                 chicago ? UI_ORIGINAL_CHICAGO_PAGES : UI_ORIGINAL_MIAMI_PAGES;
+ #if X0X_SUPERJ6_BUILTIN_INIT
+             if(kind==ORIGINAL_SOUND_JUNO){
+-#define K(k) PR(R_SJ6KNOB,T_303,b,k)
+-#define E(k) PR(R_ENG,T_303,b,k)
+-                add_page(emit,"OSCILLATOR",K(SJ6_WAVE1),K(SJ6_WAVE2),K(SJ6_RANGE),K(SJ6_A_REFERENCE));
+-                add_page(emit,"PULSE WIDTH",K(SJ6_PWM1_ON),K(SJ6_PWM1),K(SJ6_PWM2_ON),K(SJ6_PWM2));
++#define K(k) QR(R_SJ6KNOB,k)
++#define E(k) QR(R_ENG,k)
++                static const owner_page_row rows[]={
++                {"OSCILLATOR",{K(SJ6_WAVE1),K(SJ6_WAVE2),K(SJ6_RANGE),K(SJ6_A_REFERENCE)}},
++                {"PULSE WIDTH",{K(SJ6_PWM1_ON),K(SJ6_PWM1),K(SJ6_PWM2_ON),K(SJ6_PWM2)}},
+ #if DNBOX_TYPED_CONTROLS_NATIVE_TEST && X0X_SJ6_VCF_PORT
+-                add_page(emit,"FILTER",E(2),E(3),PR(R_SJ6FILTER_EXTRA,T_303,b,1),K(SJ6_FILTER_LINK));
+-                add_page(emit,"FILTER MOD",
++                {"FILTER",{E(2),E(3),QR(R_SJ6FILTER_EXTRA,1),K(SJ6_FILTER_LINK)}},
++                {"FILTER MOD",{
+ #if X0X_SJ6_VELOCITY_PORT
+                          K(SJ6_FILTER_VELOCITY),
+ #else
+-                         NONE,
++                         0,
+ #endif
+-                         K(SJ6_VCF_LFO1_AMOUNT),PR(R_SJ6FILTER_EXTRA,T_303,b,0),NONE);
++                         K(SJ6_VCF_LFO1_AMOUNT),QR(R_SJ6FILTER_EXTRA,0),0}},
+ #else
+-                add_page(emit,"FILTER",E(2),E(3),E(4),K(SJ6_FILTER_LINK));
++                {"FILTER",{E(2),E(3),E(4),K(SJ6_FILTER_LINK)}},
+ #endif
+-                add_page(emit,"FILTER ADSR",K(SJ6_FILTER_ATTACK),K(SJ6_FILTER_DECAY),K(SJ6_FILTER_SUSTAIN),K(SJ6_FILTER_RELEASE));
+-                add_page(emit,"AMP ADSR",K(SJ6_AMP_ATTACK),K(SJ6_AMP_DECAY),K(SJ6_AMP_SUSTAIN),K(SJ6_AMP_RELEASE));
++                {"FILTER ADSR",{K(SJ6_FILTER_ATTACK),K(SJ6_FILTER_DECAY),K(SJ6_FILTER_SUSTAIN),K(SJ6_FILTER_RELEASE)}},
++                {"AMP ADSR",{K(SJ6_AMP_ATTACK),K(SJ6_AMP_DECAY),K(SJ6_AMP_SUSTAIN),K(SJ6_AMP_RELEASE)}},
+ #if X0X_SJ6_NOISE_SUB_NATIVE
+-                add_page(emit,"OSC MIX",K(SJ6_NOISE_LEVEL),K(SJ6_SUB_LEVEL),NONE,NONE);
++                {"OSC MIX",{K(SJ6_NOISE_LEVEL),K(SJ6_SUB_LEVEL),0,0}},
+ #endif
+-                add_page(emit,"OUTPUT",E(9),K(SJ6_MASTER_LEVEL),K(SJ6_OSC1_LEVEL),K(SJ6_OSC2_LEVEL));
+-                add_page(emit,"LFO RATE",K(SJ6_LFO1_RATE),K(SJ6_LFO2_RATE),K(SJ6_LFO3_RATE),K(SJ6_LFO2_SHAPE));
+-                add_page(emit,"LFO MODE",K(SJ6_LFO1_MODE),K(SJ6_LFO2_MODE),K(SJ6_LFO3_MODE),
++                {"OUTPUT",{E(9),K(SJ6_MASTER_LEVEL),K(SJ6_OSC1_LEVEL),K(SJ6_OSC2_LEVEL)}},
++                {"LFO RATE",{K(SJ6_LFO1_RATE),K(SJ6_LFO2_RATE),K(SJ6_LFO3_RATE),K(SJ6_LFO2_SHAPE)}},
++                {"LFO MODE",{K(SJ6_LFO1_MODE),K(SJ6_LFO2_MODE),K(SJ6_LFO3_MODE),
+ #if X0X_SJ6_LFO1_DELAY_PORT
+-                         K(SJ6_LFO1_DELAY));
++                         K(SJ6_LFO1_DELAY)}},
+ #else
+                          NONE);
+ #endif
+-                add_page(emit,"LFO2 PWM",K(SJ6_LFO2_RATE),K(SJ6_LFO2_PWM_DEPTH),K(SJ6_LFO2_PWM_ROUTE),K(SJ6_LFO2_PWM_BASE));
++                {"LFO2 PWM",{K(SJ6_LFO2_RATE),K(SJ6_LFO2_PWM_DEPTH),K(SJ6_LFO2_PWM_ROUTE),K(SJ6_LFO2_PWM_BASE)}},
+ #if X0X_SJ6_LFO1_WAVE_NATIVE
+-                add_page(emit,"LFO",K(SJ6_LFO1_ENABLE),K(SJ6_LFO1_SNAPBACK),K(SJ6_LFO1_WAVE),NONE);
++                {"LFO",{K(SJ6_LFO1_ENABLE),K(SJ6_LFO1_SNAPBACK),K(SJ6_LFO1_WAVE),0}},
+ #else
+-                add_page(emit,"LFO",E(10),E(11),NONE,NONE);
++                {"LFO",{E(10),E(11),0,0}},
+ #endif
+-                add_page(emit,"CHORUS",K(SJ6_CHORUS_I),K(SJ6_CHORUS_II),K(SJ6_CHORUS_RATE),K(SJ6_CHORUS_MIX));
++                {"CHORUS",{K(SJ6_CHORUS_I),K(SJ6_CHORUS_II),K(SJ6_CHORUS_RATE),K(SJ6_CHORUS_MIX)}},
+ #if X0X_SJ6_NATIVE_DELAY
+-                add_page(emit,"DELAY",K(SJ6_DELAY24),K(SJ6_DELAY25),K(SJ6_DELAY26),K(SJ6_DELAY27));
+-                add_page(emit,"DELAY CLOCK",K(SJ6_DELAYSYNC),NONE,NONE,NONE);
++                {"DELAY",{K(SJ6_DELAY24),K(SJ6_DELAY25),K(SJ6_DELAY26),K(SJ6_DELAY27)}},
++                {"DELAY CLOCK",{K(SJ6_DELAYSYNC),0,0,0}},
+ #endif
+-                add_page(emit,"VIBRATO",K(SJ6_VIBRATO_DEPTH),K(SJ6_VIBRATO_RATE),NONE,NONE);
+-                add_page(emit,"TUNING",K(SJ6_LAYER1_SEMI),K(SJ6_LAYER2_SEMI),K(SJ6_LAYER1_FINE),K(SJ6_LAYER2_FINE));
++                {"VIBRATO",{K(SJ6_VIBRATO_DEPTH),K(SJ6_VIBRATO_RATE),0,0}},
++                {"TUNING",{K(SJ6_LAYER1_SEMI),K(SJ6_LAYER2_SEMI),K(SJ6_LAYER1_FINE),K(SJ6_LAYER2_FINE)}},
++                };
++                add_owner_pages(emit,rows,sizeof rows/sizeof *rows,b);
+ #undef E
+ #undef K
+             } else
+@@ -3043,31 +3158,31 @@
+ #endif
+ #if X0X_SJ6_VINTAGE_NATIVE && X0X_SJ6_ALT3_NATIVE && DNBOX_TYPED_CONTROLS_NATIVE_TEST
+             if(kind==ORIGINAL_SOUND_JUNO && engine_superj6_knob_position(b,SJ6_TREM_DEPTH)>=0)
+-                add_page(emit,"FX MOTION",PR(R_SJ6KNOB,T_303,b,SJ6_TREM_DEPTH),
+-                         PR(R_SJ6KNOB,T_303,b,SJ6_TREM_RATE),PR(R_SJ6LIMITER,T_303,b,SJ6_RAGE_SLOT),
+-                         PR(R_SJ6LIMITER,T_303,b,SJ6_VINTAGE_SLOT));
++                OWNER_PAGE("FX MOTION",QR(R_SJ6KNOB,SJ6_TREM_DEPTH),
++                         QR(R_SJ6KNOB,SJ6_TREM_RATE),QR(R_SJ6LIMITER,SJ6_RAGE_SLOT),
++                         QR(R_SJ6LIMITER,SJ6_VINTAGE_SLOT));
+ #endif
+ #if DNBOX_TYPED_CONTROLS_NATIVE_TEST
+             if(kind==ORIGINAL_SOUND_JUNO && live137(&proj.sound,b)){
+ #if X0X_SJ6_BEND_TYPED_PROBE
+-                add_page(emit,"WHEELS",PR(R_SJ6PB,T_303,b,0),PR(R_SJ6PB,T_303,b,1),
++                OWNER_PAGE("WHEELS",QR(R_SJ6PB,0),QR(R_SJ6PB,1),
+ #if X0X_SJ6_MOD_TYPED_PROBE
+-                         PR(R_SJ6MOD,T_303,b,0),
++                         QR(R_SJ6MOD,0),
+ #else
+-                         NONE,
++                         0,
+ #endif
+ #if X0X_SJ6_VELOCITY_SETTINGS
+-                         PR(R_SJ6INPUTVEL,T_303,b,0));
++                         QR(R_SJ6INPUTVEL,0));
+ #else
+                          NONE);
+ #endif
+ #endif
+ #if X0X_SJ6_MONO32_PROBE
+                 if(engine_sj6_mono32_get(b,0)>=0)
+-                    add_page(emit,"VOICE",PR(R_SJ6MONO32,T_303,b,0),PR(R_SJ6MONO32,T_303,b,1),
+-                             PR(R_SJ6MONO32,T_303,b,2),
++                    OWNER_PAGE("VOICE",QR(R_SJ6MONO32,0),QR(R_SJ6MONO32,1),
++                             QR(R_SJ6MONO32,2),
+ #if X0X_SJ6_VELOCITY_SETTINGS
+-                             PR(R_SJ6INPUTVEL,T_303,b,1));
++                             QR(R_SJ6INPUTVEL,1));
+ #else
+                              NONE);
+ #endif
+@@ -3076,116 +3191,116 @@
+ #endif
+ #if DNBOX_TYPED_CONTROLS_NATIVE_TEST
+             if(kind==ORIGINAL_SOUND_SYNTHONE && live_s1_mod(&proj.sound,b)){
+-                add_page(emit,"PHASER",PR(R_S1PHASER,T_303,b,0),PR(R_S1PHASER,T_303,b,1),
+-                         PR(R_S1PHASER,T_303,b,2),PR(R_S1PHASER,T_303,b,3));
+-                add_page(emit,"MASTER CMP",PR(R_S1CMP,T_303,b,0),PR(R_S1CMP,T_303,b,3),
+-                         PR(R_S1CMP,T_303,b,6),PR(R_S1CMP,T_303,b,9));
+-                add_page(emit,"RV INPUT CMP",PR(R_S1CMP,T_303,b,1),PR(R_S1CMP,T_303,b,4),
+-                         PR(R_S1CMP,T_303,b,7),PR(R_S1CMP,T_303,b,10));
+-                add_page(emit,"WET CMP",PR(R_S1CMP,T_303,b,2),PR(R_S1CMP,T_303,b,5),
+-                         PR(R_S1CMP,T_303,b,8),PR(R_S1CMP,T_303,b,11));
+-                add_page(emit,"CMP GAIN",PR(R_S1CMP,T_303,b,12),PR(R_S1CMP,T_303,b,13),
+-                         PR(R_S1CWG,T_303,b,0),NONE);
++                OWNER_PAGE("PHASER",QR(R_S1PHASER,0),QR(R_S1PHASER,1),
++                         QR(R_S1PHASER,2),QR(R_S1PHASER,3));
++                OWNER_PAGE("MASTER CMP",QR(R_S1CMP,0),QR(R_S1CMP,3),
++                         QR(R_S1CMP,6),QR(R_S1CMP,9));
++                OWNER_PAGE("RV INPUT CMP",QR(R_S1CMP,1),QR(R_S1CMP,4),
++                         QR(R_S1CMP,7),QR(R_S1CMP,10));
++                OWNER_PAGE("WET CMP",QR(R_S1CMP,2),QR(R_S1CMP,5),
++                         QR(R_S1CMP,8),QR(R_S1CMP,11));
++                OWNER_PAGE("CMP GAIN",QR(R_S1CMP,12),QR(R_S1CMP,13),
++                         QR(R_S1CWG,0),0);
+ #if X0X_S1_AUTOPAN_PROBE
+-                add_page(emit,"AUTO PAN",PR(R_S1PAN,T_303,b,0),PR(R_S1PAN,T_303,b,1),NONE,NONE);
++                OWNER_PAGE("AUTO PAN",QR(R_S1PAN,0),QR(R_S1PAN,1),0,0);
+ #endif
+             }
+ #endif
+ #if X0X_SYNTHONE_PATCH
+             if(kind==ORIGINAL_SOUND_SYNTHONE)
+-                add_page(emit,"FILTER LINK",PR(R_S1LINK,T_303,b,0),NONE,NONE,NONE);
++                OWNER_PAGE("FILTER LINK",QR(R_S1LINK,0),0,0,0);
+ #endif
+ #if DNBOX_TYPED_CONTROLS_NATIVE_TEST
+ #if X0X_SJ6_NATIVE_ROOM
+             if(kind==ORIGINAL_SOUND_JUNO && sj6_native_room_get(b,SJ6_ROOM_ENABLE)>=0){
+-                add_page(emit,"REVERB",PR(R_SJ6ROOM,T_303,b,SJ6_ROOM_ENABLE),
+-                         PR(R_SJ6ROOM,T_303,b,SJ6_ROOM_SIZE),PR(R_SJ6ROOM,T_303,b,SJ6_ROOM_LOCUT),
+-                         PR(R_SJ6ROOM,T_303,b,SJ6_ROOM_MIX));
+-                add_page(emit,"STEREO FX",PR(R_SJ6ROOM,T_303,b,SJ6_ROOM_TYPE),
+-                         PR(R_SJ6ROOM,T_303,b,SJ6_ROOM_WIDEN),PR(R_SJ6ROOM,T_303,b,SJ6_ROOM_RATE),
+-                         PR(R_SJ6ROOM,T_303,b,SJ6_ROOM_DEPTH));
++                OWNER_PAGE("REVERB",QR(R_SJ6ROOM,SJ6_ROOM_ENABLE),
++                         QR(R_SJ6ROOM,SJ6_ROOM_SIZE),QR(R_SJ6ROOM,SJ6_ROOM_LOCUT),
++                         QR(R_SJ6ROOM,SJ6_ROOM_MIX));
++                OWNER_PAGE("STEREO FX",QR(R_SJ6ROOM,SJ6_ROOM_TYPE),
++                         QR(R_SJ6ROOM,SJ6_ROOM_WIDEN),QR(R_SJ6ROOM,SJ6_ROOM_RATE),
++                         QR(R_SJ6ROOM,SJ6_ROOM_DEPTH));
+             }
+ #endif
+ #endif
+ #if DNBOX_TYPED_CONTROLS_NATIVE_TEST
+             if(kind==ORIGINAL_SOUND_SYNTHONE && live_s1_mod(&proj.sound,b)){
+ #if X0X_S1_FENCED_CLOCK && X0X_ARP_HOOKS
+-                add_page(emit,"ARP PARAMS",PR(R_ARP,ARP_F_SOURCE_RATE,b,0),PR(R_ARP,ARP_F_SOURCE_FACTOR,b,0),NONE,NONE);
++                OWNER_PAGE("ARP PARAMS",QR(R_ARP,ARP_F_SOURCE_RATE),QR(R_ARP,ARP_F_SOURCE_FACTOR),0,0);
+ #endif
+-                add_page(emit,"DELAY",
++                OWNER_PAGE("DELAY",
+ #if X0X_S1_FEEDBACK_PROBE
+-                    PR(R_S1DLFB,T_303,b,0),
++                    QR(R_S1DLFB,0),
+ #else
+-                    NONE,
++                    0,
+ #endif
+ #if X0X_S1_DELAY_TRACK_TEST
+-                    PR(R_S1DICT,T_303,b,0),
++                    QR(R_S1DICT,0),
+ #else
+-                    NONE,
++                    0,
+ #endif
+ #if X0X_S1_DELAY_TIME_NATIVE
+-                    PR(R_S1DLYTIME,T_303,b,0),
++                    QR(R_S1DLYTIME,0),
+ #else
+-                    NONE,
++                    0,
+ #endif
+-                    PR(R_S1DLYRES,T_303,b,0));
+-                add_page(emit,"TUNING",PR(R_S1A4,T_303,b,0),PR(R_S1TRANS,T_303,b,0),
+-                    PR(R_S1AA,T_303,b,0),
++                    QR(R_S1DLYRES,0));
++                OWNER_PAGE("TUNING",QR(R_S1A4,0),QR(R_S1TRANS,0),
++                    QR(R_S1AA,0),
+ #if X0X_S1_KEYBOARD_HOLD && X0X_S1_SCALE_NATIVE
+-                    PR(R_S1A4RESET,T_303,b,0));
++                    QR(R_S1A4RESET,0));
+ #else
+                     NONE);
+ #endif
+-                add_page(emit,"REVERB",PR(R_S1RVFB,T_303,b,0),NONE,NONE,NONE);
+-                add_page(emit,"FILTER MOD",PR(R_S1ENVLFO,T_303,b,0),NONE,NONE,NONE);
+-                add_page(emit,"WHEELS",PR(R_S1MODWHEEL,T_303,b,0),NONE,NONE,NONE);
++                OWNER_PAGE("REVERB",QR(R_S1RVFB,0),0,0,0);
++                OWNER_PAGE("FILTER MOD",QR(R_S1ENVLFO,0),0,0,0);
++                OWNER_PAGE("WHEELS",QR(R_S1MODWHEEL,0),0,0,0);
+ #if X0X_S1_CRUSH_LFO_PROBE
+-                add_page(emit,"CRUSH MOD",PR(R_S1CRUSH,T_303,b,0),NONE,NONE,NONE);
++                OWNER_PAGE("CRUSH MOD",QR(R_S1CRUSH,0),0,0,0);
+ #endif
+ #if X0X_S1_KEYBOARD_HOLD
+-                add_page(emit,"KEY HOLD",PR(R_S1KEY_HOLD,T_303,b,0),
++                OWNER_PAGE("KEY HOLD",QR(R_S1KEY_HOLD,0),
+ #if X0X_S1_SCALE_NATIVE
+-                    PR(R_S1SCALE,T_303,b,0),
++                    QR(R_S1SCALE,0),
+ #else
+-                    NONE,
++                    0,
+ #endif
+ #if X0X_S1_HALFTIME
+-                    PR(R_S1HALF,T_303,b,0),
++                    QR(R_S1HALF,0),
+ #else
+-                    NONE,
++                    0,
+ #endif
+-                    NONE);
++                    0);
+ #endif
+             }
+ #endif
+ #if X0X_SUPERJ6_BUILTIN_INIT && DNBOX_TYPED_CONTROLS_NATIVE_TEST
+             if(kind==ORIGINAL_SOUND_JUNO && live137(&proj.sound,b)){
+-#define J(k,c) PR(k,T_303,b,c)
++#define J(k,c) QR(k,c)
+ #if X0X_SJ6_NATIVE_UNISON
+                 if(engine_sj6_unison_get(b,0)>=0)
+-                    add_page(emit,"UNISON",J(R_SJ6UNISON,0),J(R_SJ6UNISON,1),J(R_SJ6UNISON,2),J(R_SJ6UNISON,3));
++                    OWNER_PAGE("UNISON",J(R_SJ6UNISON,0),J(R_SJ6UNISON,1),J(R_SJ6UNISON,2),J(R_SJ6UNISON,3));
+ #endif
+ #if X0X_SJ6_NATIVE_J60
+                 if(engine_sj6_j60_get(b,0)>=0)
+-                    add_page(emit,"CHORUS J60",J(R_SJ6J60,0),J(R_SJ6J60,1),J(R_SJ6J60,2),J(R_SJ6J60,3));
++                    OWNER_PAGE("CHORUS J60",J(R_SJ6J60,0),J(R_SJ6J60,1),J(R_SJ6J60,2),J(R_SJ6J60,3));
+ #endif
+ #if X0X_SJ6_PITCH_ENV_NATIVE
+-                add_page(emit,"PITCH ADSR",J(R_SJ6PITCH,0),J(R_SJ6PITCH,1),J(R_SJ6PITCH,2),J(R_SJ6PITCH,3));
+-                add_page(emit,"PITCH MOD",J(R_SJ6PITCH,4),NONE,NONE,NONE);
++                OWNER_PAGE("PITCH ADSR",J(R_SJ6PITCH,0),J(R_SJ6PITCH,1),J(R_SJ6PITCH,2),J(R_SJ6PITCH,3));
++                OWNER_PAGE("PITCH MOD",J(R_SJ6PITCH,4),0,0,0);
+ #endif
+ #if X0X_SJ6_NATIVE_ROOM
+-                add_page(emit,"EFFECT",J(R_SJ6CRUSH,0),J(R_SJ6CRUSH,1),NONE,NONE);
++                OWNER_PAGE("EFFECT",J(R_SJ6CRUSH,0),J(R_SJ6CRUSH,1),0,0);
+ #endif
+ #if X0X_SJ6_OTA_NATIVE
+-                add_page(emit,"FILTER MODE",J(R_SJ6OTA,0),NONE,NONE,NONE);
++                OWNER_PAGE("FILTER MODE",J(R_SJ6OTA,0),0,0,0);
+ #endif
+ #if X0X_SJ6_AUX_LFO_NATIVE
+-                add_page(emit,"LFO SETUP",J(R_SJ6AUX,0),J(R_SJ6AUX,1),J(R_SJ6AUX,2),J(R_SJ6AUX,3));
+-                add_page(emit,"LFO ROUTING",J(R_SJ6AUX,5),J(R_SJ6AUX,6),J(R_SJ6AUX,7),J(R_SJ6AUX,8));
+-                add_page(emit,"LFO CONTROL",J(R_SJ6AUX,14),J(R_SJ6AUX,4),
++                OWNER_PAGE("LFO SETUP",J(R_SJ6AUX,0),J(R_SJ6AUX,1),J(R_SJ6AUX,2),J(R_SJ6AUX,3));
++                OWNER_PAGE("LFO ROUTING",J(R_SJ6AUX,5),J(R_SJ6AUX,6),J(R_SJ6AUX,7),J(R_SJ6AUX,8));
++                OWNER_PAGE("LFO CONTROL",J(R_SJ6AUX,14),J(R_SJ6AUX,4),
+ #if X0X_SJ6_LFO_TRIGGER_NATIVE
+                          J(R_SJ6AUX,12),J(R_SJ6AUX,13));
+-                add_page(emit,"LFO TRIGGER",J(R_SJ6AUX,9),J(R_SJ6AUX,10),J(R_SJ6AUX,11),NONE);
++                OWNER_PAGE("LFO TRIGGER",J(R_SJ6AUX,9),J(R_SJ6AUX,10),J(R_SJ6AUX,11),0);
+ #else
+                          NONE,NONE);
+ #endif
+@@ -3195,9 +3310,9 @@
+ #endif
+ #if X0X_SJ6_VINTAGE_NATIVE && X0X_SJ6_ALT3_NATIVE && DNBOX_TYPED_CONTROLS_NATIVE_TEST
+             if(kind==ORIGINAL_SOUND_JUNO && sj6_native_limiter_get(b,SJ6_LIM_THRESH)>=0)
+-                add_page(emit,"LIMITER",PR(R_SJ6LIMITER,T_303,b,SJ6_LIM_THRESH),
+-                         PR(R_SJ6LIMITER,T_303,b,SJ6_LIM_HEADROOM),PR(R_SJ6LIMITER,T_303,b,SJ6_LIM_ATTACK),
+-                         PR(R_SJ6LIMITER,T_303,b,SJ6_LIM_GAIN));
++                OWNER_PAGE("LIMITER",QR(R_SJ6LIMITER,SJ6_LIM_THRESH),
++                         QR(R_SJ6LIMITER,SJ6_LIM_HEADROOM),QR(R_SJ6LIMITER,SJ6_LIM_ATTACK),
++                         QR(R_SJ6LIMITER,SJ6_LIM_GAIN));
+ #endif
+             add_page(emit, "SOUND",PR(R_BENGINE,0,b,0),PR(R_BPRESET,0,b,0),PR(R_BSTATUS,0,b,0),NONE);
+         } else {
+@@ -3795,7 +3910,7 @@
+ }
+ 
+ /* a run of the project changed under the engine: the sound's pots go to the engine again */
+-static void undo_changed(uint32_t off, uint32_t len)
++__attribute__((noinline)) static void undo_changed(uint32_t off, uint32_t len)
+ {
+     const uint32_t s0 = __builtin_offsetof(project_t, sound), s1 = s0 + sizeof(proj.sound.v);
+     const uint32_t l0 = __builtin_offsetof(project_t, arr) + __builtin_offsetof(arrange_t, lane);
+@@ -3910,6 +4025,21 @@
+     return 1;
+ }
+ #endif
++#if X0X_BASS_TAGGED_SOUND && defined(DNBOX_137_HOST_WITNESS)
++static __attribute__((noinline)) int ui_undo_check(unsigned changed,
++        int (*ready)(unsigned),const char *message)
++{
++    if(!changed || ready(changed & ~undo_bass_mask))return 1;
++    engine_project_hold(0);
++    engine_bass_edit_hold(0);
++    say(message,0);
++    return 0;
++}
++static __attribute__((noinline)) void ui_undo_apply(unsigned changed,void (*apply)(unsigned))
++{
++    if(changed)apply(changed & ~undo_bass_mask);
++}
++#endif
+ static void do_undo(int redo)
+ {
+     record_finish();
+@@ -4467,50 +4597,30 @@
+ #endif
+ #endif
+ #if X0X_SJ6_MONO32_PROBE
+-    if(undo_sj6_voice&&!engine_sj6_voice_undo_ready(undo_sj6_voice&~undo_bass_mask)){
+-        engine_project_hold(0);engine_bass_edit_hold(0);say("UNDO WAIT VOICE",0);return;
+-    }
++    if(!ui_undo_check(undo_sj6_voice,engine_sj6_voice_undo_ready,"UNDO WAIT VOICE"))return;
+ #endif
+ #if defined(DNBOX_137_HOST_WITNESS) && X0X_S1_DELAY_TRACK_TEST
+ #if X0X_SJ6_VCF_PORT
+-    if(undo_vcf && !sj6_vcf_undo_ready(undo_vcf & ~undo_bass_mask)) {
+-        engine_project_hold(0);engine_bass_edit_hold(0);say("UNDO WAIT LFO1",0);return;
+-    }
++    if(!ui_undo_check(undo_vcf,sj6_vcf_undo_ready,"UNDO WAIT LFO1"))return;
+ #endif
+-    if(undo_dict && !s1_typed_dict_undo_ready(undo_dict & ~undo_bass_mask)) {
+-        engine_project_hold(0);engine_bass_edit_hold(0);say("UNDO WAIT IN CUTOFF",0);return;
+-    }
++    if(!ui_undo_check(undo_dict,s1_typed_dict_undo_ready,"UNDO WAIT IN CUTOFF"))return;
+ #endif
+ #if DNBOX_TYPED_CONTROLS_NATIVE_TEST
+ #if X0X_SJ6_NATIVE_ROOM
+-    if(undo_room && !sj6_native_room_undo_ready(undo_room & ~undo_bass_mask)){
+-        engine_project_hold(0);engine_bass_edit_hold(0);say("UNDO WAIT FX",0);return;
+-    }
++    if(!ui_undo_check(undo_room,sj6_native_room_undo_ready,"UNDO WAIT FX"))return;
+ #endif
+ #if X0X_SJ6_OTA_NATIVE
+-    if(undo_ota && !sj6_ota_undo_ready(undo_ota & ~undo_bass_mask)){
+-        engine_project_hold(0);engine_bass_edit_hold(0);say("UNDO WAIT FILTER",0);return;
+-    }
++    if(!ui_undo_check(undo_ota,sj6_ota_undo_ready,"UNDO WAIT FILTER"))return;
+ #endif
+ #if X0X_SJ6_NATIVE_LIMITER
+-    if(undo_limiter && !sj6_native_limiter_undo_ready(undo_limiter & ~undo_bass_mask)){
+-        engine_project_hold(0);engine_bass_edit_hold(0);say("UNDO WAIT LIMITER",0);return;
+-    }
++    if(!ui_undo_check(undo_limiter,sj6_native_limiter_undo_ready,"UNDO WAIT LIMITER"))return;
+ #endif
+-    if(undo_cmp && !s1_cmp_undo_ready(undo_cmp & ~undo_bass_mask)) {
+-        engine_project_hold(0);engine_bass_edit_hold(0);say("UNDO WAIT COMP",0);return;
+-    }
+-    if(undo_aa && !s1_aa_undo_ready(undo_aa & ~undo_bass_mask)) {
+-        engine_project_hold(0);engine_bass_edit_hold(0);say("UNDO WAIT ANTI-ALIAS",0);return;
+-    }
+-    if(undo_cwg && !s1_typed_cwg_undo_ready(undo_cwg & ~undo_bass_mask)) {
+-        engine_project_hold(0);engine_bass_edit_hold(0);say("UNDO WAIT WET MAKEUP",0);return;
+-    }
++    if(!ui_undo_check(undo_cmp,s1_cmp_undo_ready,"UNDO WAIT COMP"))return;
++    if(!ui_undo_check(undo_aa,s1_aa_undo_ready,"UNDO WAIT ANTI-ALIAS"))return;
++    if(!ui_undo_check(undo_cwg,s1_typed_cwg_undo_ready,"UNDO WAIT WET MAKEUP"))return;
+ #endif
+ #if DNBOX_TYPED_CONTROLS_NATIVE_TEST
+-    if(undo_phaser && !s1_phaser_undo_ready(undo_phaser & ~undo_bass_mask)) {
+-        engine_project_hold(0);engine_bass_edit_hold(0);say("UNDO WAIT PHASER",0);return;
+-    }
++    if(!ui_undo_check(undo_phaser,s1_phaser_undo_ready,"UNDO WAIT PHASER"))return;
+ #endif
+ #if X0X_S1_DELAY_TIME_NATIVE
+     if(undo_dlytime && !s1_delay_time_undo_ready(undo_dlytime & ~undo_bass_mask,undo_dlycode)) {
+@@ -4518,14 +4628,10 @@
+     }
+ #endif
+ #if X0X_SJ6_PITCH_ENV_NATIVE
+-    if(undo_pitch && !sj6_pitch_undo_ready(undo_pitch & ~undo_bass_mask)) {
+-        engine_project_hold(0);engine_bass_edit_hold(0);say("UNDO WAIT PITCH",0);return;
+-    }
++    if(!ui_undo_check(undo_pitch,sj6_pitch_undo_ready,"UNDO WAIT PITCH"))return;
+ #endif
+ #if X0X_SJ6_AUX_LFO_NATIVE
+-    if(undo_aux && !sj6_aux_undo_ready(undo_aux & ~undo_bass_mask)) {
+-        engine_project_hold(0);engine_bass_edit_hold(0);say("UNDO WAIT LFO",0);return;
+-    }
++    if(!ui_undo_check(undo_aux,sj6_aux_undo_ready,"UNDO WAIT LFO"))return;
+ #endif
+     undo_lanes = 0;
+     if (!(redo ? undo_redo : undo_undo)(&undo, undo_changed, &lo, &hi)) {
+@@ -4545,70 +4651,70 @@
+     if(undo_bass_mask) engine_bass_base_restore(undo_bass_mask);
+ #ifdef DNBOX_137_HOST_WITNESS
+     extern void sj6_137_undo_apply(unsigned);
+-    if(undo_velocity137) sj6_137_undo_apply(undo_velocity137 & ~undo_bass_mask);
++    ui_undo_apply(undo_velocity137,sj6_137_undo_apply);
+ #if defined(DNBOX_137_HOST_WITNESS) && defined(X0X_SJ6_MOD_TYPED_PROBE)
+-    if(undo_sj6_mod)sj6_typed_mod_undo(undo_sj6_mod & ~undo_bass_mask);
++    ui_undo_apply(undo_sj6_mod,sj6_typed_mod_undo);
+ #endif
+     extern void s1_typed_mod_undo(unsigned);
+-    if(undo_s1_mod) s1_typed_mod_undo(undo_s1_mod & ~undo_bass_mask);
+-    if(undo_a4) s1_typed_a4_undo(undo_a4 & ~undo_bass_mask);
+-    if(undo_rvfb) s1_typed_rvfb_undo(undo_rvfb & ~undo_bass_mask);
+-    if(undo_trans) s1_typed_trans_undo(undo_trans & ~undo_bass_mask);
++    ui_undo_apply(undo_s1_mod,s1_typed_mod_undo);
++    ui_undo_apply(undo_a4,s1_typed_a4_undo);
++    ui_undo_apply(undo_rvfb,s1_typed_rvfb_undo);
++    ui_undo_apply(undo_trans,s1_typed_trans_undo);
+ #if X0X_SJ6_MONO32_PROBE
+-    if(undo_sj6_voice)engine_sj6_voice_undo(undo_sj6_voice&~undo_bass_mask);
++    ui_undo_apply(undo_sj6_voice,engine_sj6_voice_undo);
+ #endif
+ #if X0X_SJ6_CLASSIC_I_PROBE
+-    if(undo_chorus_i)sj6_classic_i_undo(undo_chorus_i & ~undo_bass_mask);
++    ui_undo_apply(undo_chorus_i,sj6_classic_i_undo);
+ #endif
+ #if defined(X0X_S1_FEEDBACK_PROBE) && X0X_S1_FEEDBACK_PROBE
+-    if(undo_feedback)s1_typed_feedback_undo(undo_feedback & ~undo_bass_mask);
++    ui_undo_apply(undo_feedback,s1_typed_feedback_undo);
+ #endif
+ #if X0X_S1_DELAY_TRACK_TEST
+-    if(undo_dict)s1_typed_dict_undo(undo_dict&~undo_bass_mask);
++    ui_undo_apply(undo_dict,s1_typed_dict_undo);
+ #if X0X_SJ6_VCF_PORT
+-    if(undo_vcf)sj6_vcf_undo(undo_vcf&~undo_bass_mask);
++    ui_undo_apply(undo_vcf,sj6_vcf_undo);
+ #endif
+ #endif
+ #if DNBOX_TYPED_CONTROLS_NATIVE_TEST
+ #if X0X_SJ6_NATIVE_ROOM
+-    if(undo_room)sj6_native_room_undo(undo_room & ~undo_bass_mask);
++    ui_undo_apply(undo_room,sj6_native_room_undo);
+ #endif
+ #if X0X_SJ6_OTA_NATIVE
+-    if(undo_ota)sj6_ota_undo(undo_ota & ~undo_bass_mask);
++    ui_undo_apply(undo_ota,sj6_ota_undo);
+ #endif
+ #if X0X_SJ6_NATIVE_LIMITER
+-    if(undo_limiter)sj6_native_limiter_undo(undo_limiter & ~undo_bass_mask);
++    ui_undo_apply(undo_limiter,sj6_native_limiter_undo);
+ #endif
+-    if(undo_cmp)s1_cmp_undo(undo_cmp & ~undo_bass_mask);
+-    if(undo_aa)s1_aa_undo(undo_aa & ~undo_bass_mask);
+-    if(undo_cwg)s1_typed_cwg_undo(undo_cwg&~undo_bass_mask);
++    ui_undo_apply(undo_cmp,s1_cmp_undo);
++    ui_undo_apply(undo_aa,s1_aa_undo);
++    ui_undo_apply(undo_cwg,s1_typed_cwg_undo);
+ #endif
+ #if DNBOX_TYPED_CONTROLS_NATIVE_TEST
+-    if(undo_phaser)s1_phaser_undo(undo_phaser & ~undo_bass_mask);
++    ui_undo_apply(undo_phaser,s1_phaser_undo);
+ #endif
+ #if X0X_S1_DELAY_TIME_NATIVE
+-    if(undo_dlytime)s1_delay_time_undo(undo_dlytime & ~undo_bass_mask);
++    ui_undo_apply(undo_dlytime,s1_delay_time_undo);
+ #endif
+ #if X0X_SJ6_PITCH_ENV_NATIVE
+-    if(undo_pitch)sj6_pitch_undo(undo_pitch & ~undo_bass_mask);
++    ui_undo_apply(undo_pitch,sj6_pitch_undo);
+ #endif
+ #if X0X_SJ6_AUX_LFO_NATIVE
+-    if(undo_aux)sj6_aux_undo(undo_aux & ~undo_bass_mask);
++    ui_undo_apply(undo_aux,sj6_aux_undo);
+ #endif
+-    if(undo_crush) s1_typed_crush_undo(undo_crush & ~undo_bass_mask);
++    ui_undo_apply(undo_crush,s1_typed_crush_undo);
+ #if defined(X0X_S1_AUTOPAN_PROBE) && X0X_S1_AUTOPAN_PROBE
+-    if(undo_pan) s1_typed_pan_undo(undo_pan & ~undo_bass_mask);
++    ui_undo_apply(undo_pan,s1_typed_pan_undo);
+ #endif
+ #if X0X_S1_FENCED_CLOCK
+-    if(undo_clock) s1_typed_clock_undo(undo_clock & ~undo_bass_mask);
++    ui_undo_apply(undo_clock,s1_typed_clock_undo);
+ #endif
+ #if X0X_SJ6_ZERO_GATE_PROBE || X0X_SJ6_NATIVE_ZERO_GATE || X0X_SJ6_NATIVE_RANDOM2
+-    if(undo_zero) engine_sj6_zero_undo(undo_zero & ~undo_bass_mask);
++    ui_undo_apply(undo_zero,engine_sj6_zero_undo);
+ #endif
+ #if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
+-    if(undo_pb) s1_typed_pb_undo(undo_pb & ~undo_bass_mask);
++    ui_undo_apply(undo_pb,s1_typed_pb_undo);
+ #if defined(X0X_SJ6_BEND_TYPED_PROBE) && X0X_SJ6_BEND_TYPED_PROBE
+-    if(undo_sj6_pb) sj6_typed_pb_undo(undo_sj6_pb & ~undo_bass_mask);
++    ui_undo_apply(undo_sj6_pb,sj6_typed_pb_undo);
+ #endif
+ #endif
+     if(undo_bass_mask || typed_hold_changes) engine_project_hold(0);
+--- a/firmware/src/app/undo.c
++++ b/firmware/src/app/undo.c
+@@ -227,7 +227,7 @@
+ }
+ 
+ /* Read the bytes an entry would restore without changing history or its baseline. */
+-static inline void undo_peek(const undo_t *u,int k,uint32_t off,uint8_t *out,uint32_t len)
++static __attribute__((noinline)) void undo_peek(const undo_t *u,int k,uint32_t off,uint8_t *out,uint32_t len)
+ {
+     for(uint32_t i=0;i<len;i++)out[i]=u->region[off+i];
+     const uint8_t *e=u->pool+u->at[k];unsigned runs=ud_get16(e);e+=8;

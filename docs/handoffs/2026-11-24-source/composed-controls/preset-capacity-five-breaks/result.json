@@ -1,0 +1,213 @@
+{
+  "total_banks": 25,
+  "total_presets": 1546,
+  "shared_layout_with_five_BREAK_loops": [
+    {
+      "conditional_payload_KiB": 8,
+      "static_whole_banks": {
+        "count": 68,
+        "banks": [
+          {
+            "engine": "Synth One",
+            "bank": "Francis Preve",
+            "presets": 26,
+            "bytes": 3770,
+            "sectors": 1
+          },
+          {
+            "engine": "Synth One",
+            "bank": "Synth Tutorials",
+            "presets": 42,
+            "bytes": 3685,
+            "sectors": 1
+          }
+        ]
+      },
+      "same_size_single_bank_replace_reserve": {
+        "count": 42,
+        "banks": [
+          {
+            "engine": "Synth One",
+            "bank": "Synth Tutorials",
+            "presets": 42,
+            "bytes": 3685,
+            "sectors": 1
+          }
+        ]
+      },
+      "both_engines_same_size_replace_reserve": {
+        "count": 0,
+        "banks": []
+      }
+    },
+    {
+      "conditional_payload_KiB": 16,
+      "static_whole_banks": {
+        "count": 129,
+        "banks": [
+          {
+            "engine": "Synth One",
+            "bank": "Francis Preve",
+            "presets": 26,
+            "bytes": 3770,
+            "sectors": 1
+          },
+          {
+            "engine": "Synth One",
+            "bank": "Spidericemidas",
+            "presets": 61,
+            "bytes": 6801,
+            "sectors": 2
+          },
+          {
+            "engine": "Synth One",
+            "bank": "Synth Tutorials",
+            "presets": 42,
+            "bytes": 3685,
+            "sectors": 1
+          }
+        ]
+      },
+      "same_size_single_bank_replace_reserve": {
+        "count": 83,
+        "banks": [
+          {
+            "engine": "Synth One",
+            "bank": "Francis Preve",
+            "presets": 26,
+            "bytes": 3770,
+            "sectors": 1
+          },
+          {
+            "engine": "Synth One",
+            "bank": "Starter Bank",
+            "presets": 15,
+            "bytes": 1964,
+            "sectors": 1
+          },
+          {
+            "engine": "Synth One",
+            "bank": "Synth Tutorials",
+            "presets": 42,
+            "bytes": 3685,
+            "sectors": 1
+          }
+        ]
+      },
+      "both_engines_same_size_replace_reserve": {
+        "count": 83,
+        "banks": [
+          {
+            "engine": "SuperJ6",
+            "bank": "Sander R Wolff",
+            "presets": 15,
+            "bytes": 3257,
+            "sectors": 1
+          },
+          {
+            "engine": "Synth One",
+            "bank": "Francis Preve",
+            "presets": 26,
+            "bytes": 3770,
+            "sectors": 1
+          },
+          {
+            "engine": "Synth One",
+            "bank": "Synth Tutorials",
+            "presets": 42,
+            "bytes": 3685,
+            "sectors": 1
+          }
+        ]
+      }
+    },
+    {
+      "conditional_payload_KiB": 24,
+      "static_whole_banks": {
+        "count": 180,
+        "banks": [
+          {
+            "engine": "Synth One",
+            "bank": "Francis Preve",
+            "presets": 26,
+            "bytes": 3770,
+            "sectors": 1
+          },
+          {
+            "engine": "Synth One",
+            "bank": "Sound of Izrael 2",
+            "presets": 51,
+            "bytes": 7353,
+            "sectors": 2
+          },
+          {
+            "engine": "Synth One",
+            "bank": "Spidericemidas",
+            "presets": 61,
+            "bytes": 6801,
+            "sectors": 2
+          },
+          {
+            "engine": "Synth One",
+            "bank": "Synth Tutorials",
+            "presets": 42,
+            "bytes": 3685,
+            "sectors": 1
+          }
+        ]
+      },
+      "same_size_single_bank_replace_reserve": {
+        "count": 129,
+        "banks": [
+          {
+            "engine": "Synth One",
+            "bank": "Francis Preve",
+            "presets": 26,
+            "bytes": 3770,
+            "sectors": 1
+          },
+          {
+            "engine": "Synth One",
+            "bank": "Spidericemidas",
+            "presets": 61,
+            "bytes": 6801,
+            "sectors": 2
+          },
+          {
+            "engine": "Synth One",
+            "bank": "Synth Tutorials",
+            "presets": 42,
+            "bytes": 3685,
+            "sectors": 1
+          }
+        ]
+      },
+      "both_engines_same_size_replace_reserve": {
+        "count": 118,
+        "banks": [
+          {
+            "engine": "SuperJ6",
+            "bank": "Sander R Wolff",
+            "presets": 15,
+            "bytes": 3257,
+            "sectors": 1
+          },
+          {
+            "engine": "Synth One",
+            "bank": "Spidericemidas",
+            "presets": 61,
+            "bytes": 6801,
+            "sectors": 2
+          },
+          {
+            "engine": "Synth One",
+            "bank": "Synth Tutorials",
+            "presets": 42,
+            "bytes": 3685,
+            "sectors": 1
+          }
+        ]
+      }
+    }
+  ]
+}
