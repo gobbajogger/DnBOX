@@ -1,0 +1,52 @@
+--- a/firmware/src/dsp/dnbx_core.h
++++ b/firmware/src/dsp/dnbx_core.h
+@@ -1,10 +1,10 @@
+ /* SPDX-License-Identifier: GPL-3.0-only */
+ #ifndef DNBX_CORE_H
+ #define DNBX_CORE_H
+ #if defined(X0X_SJ6_BEND_TYPED_PROBE) && X0X_SJ6_BEND_TYPED_PROBE && \
+-    (!defined(X0X_HOST) || !defined(DNBOX_137_HOST_WITNESS) || !defined(X0X_S1_BEND_RANGE_PROBE))
+-#error "SuperJ6 typed bend is a composed host witness only"
++    ((!defined(X0X_HOST) && !DNBOX_TYPED_CONTROLS_NATIVE_TEST) || !defined(X0X_S1_BEND_RANGE_PROBE) || (defined(X0X_HOST) && !defined(DNBOX_137_HOST_WITNESS) && !DNBOX_TYPED_CONTROLS_NATIVE_TEST))
++#error "SuperJ6 typed bend requires the guarded typed carrier"
+ #endif
+ #include <stddef.h>
+ #include <stdint.h>
+ #ifdef __cplusplus
+@@ -83,8 +83,11 @@
+     dnbx_envelope_state amp, filter;
+ } dnbx_layer_voice;
+ typedef struct {
+     dnbx_layer_voice layer[DNBX_LAYERS];
++#if X0X_SJ6_PITCH_ENV_NATIVE
++    dnbx_envelope_state sj6_pitch;
++#endif
+     float velocity;
+     uint8_t note, gate, age_rank, pedal_held;
+ } dnbx_voice;
+ typedef struct {
+@@ -103,8 +106,12 @@
+ #endif
+ #if X0X_SJ6_MONO32_PROBE
+     float sj6_glide_secs,sj6_glide_offset,sj6_glide_ratio;
+     uint8_t sj6_glide_clock;
++#endif
++#if X0X_SJ6_PITCH_ENV_NATIVE
++    dnbx_envelope_params sj6_pitch_param;
++    uint8_t sj6_pitch_depth;
+ #endif
+     uint8_t damper, velocity_mode, superj6_amp_range, filter_link;
+ } dnbx_part;
+ 
+@@ -147,8 +154,11 @@
+ #if defined(X0X_SJ6_MONO32_PROBE) && X0X_SJ6_MONO32_PROBE
+ int dnbx_superj6_mono_voice(dnbx_part*,unsigned,unsigned);
+ int dnbx_superj6_legato_voice(dnbx_part*,unsigned);
+ #endif
++#if X0X_SJ6_PITCH_ENV_NATIVE
++int dnbx_set_sj6_pitch_env(dnbx_part *,const uint8_t code[5]);
++#endif
+ int dnbx_note_on(dnbx_part *, unsigned note, unsigned velocity);
+ int dnbx_note_off(dnbx_part *, unsigned note);
+ int dnbx_set_sustain(dnbx_part *, unsigned down); /* Strict boolean 0 or 1. */
+ /* Applies to new and existing notes, from the stored linear velocity. */

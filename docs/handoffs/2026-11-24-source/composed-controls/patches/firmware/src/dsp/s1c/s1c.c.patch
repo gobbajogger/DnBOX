@@ -61,7 +61,19 @@
      else if (ft == 2) fo = hp2(v->bq, y, v->ka1, v->ka4, v->ka5);
      else {
          float t = y - v->ka4 * v->bq[0] - v->ka5 * v->bq[1];
-@@ -757,8 +787,36 @@
+@@ -750,15 +780,46 @@
+ {
+ #if !S1C_BUSFX
+     if (manual && !s->delay_history) {
+         s->delay_history = 1;
+-        if (s->t[DLON] != 1.f) s->ddec = 0; /* expand legacy disabled/dummy ring once */
++        if (s->t[DLON] != 1.f
++#if X0X_S1_DELAY_TIME_NATIVE
++            && !s->delay_time_reserve
++#endif
++           ) s->ddec = 0; /* expand legacy disabled/dummy ring once */
+     }
+ #else
      (void)manual;
  #endif
      s1c_set(s, DLON, gate);
@@ -71,16 +83,15 @@
 +{
 +#if !S1C_BUSFX && S1C_EXT
 +    if(s->ddec<=0 || (!s->delay_history && s->t[DLON]<=0.f)) {
-+        /* Cold/inaudible: reserve both taps for the original maximum in the
-+         * existing arena. Never repartition a warm (even bypassed) Delay. */
-+        /* At the largest permitted decimation the full 2.5 s allocation
-+         * must still fit (including conservative stereo 2T+2T+T). */
-+        const float w=2.5f*s->sr/4094.f;
++        /* Cold/inaudible: a requested time can repartition the existing
++         * arena. Check the conservative stereo 2T+2T+T shape first. Do
++         * not impose the 2.5 s decimation on short delay times. */
++        const float w=t*s->sr/4094.f;
 +        const int a=((int)(2.f*w)+18)&~15,b=((int)w+18)&~15;
 +        if(!s->pool || s->pool_bytes<2*(2*a+b))return 0;
 +        if(cold_apply) {
 +            s->delay_time_reserve=1;
-+            s->delay_history=1;
++            if(s->t[DLON]>0.f)s->delay_history=1;
 +            s->ddec=0;
 +        }
 +        return 1;
@@ -98,19 +109,19 @@
  {
      int i;
  #if !S1C_BUSFX
-@@ -834,8 +892,11 @@
+@@ -834,8 +895,11 @@
      int fmt = s->dfmt, nl, dd, i;
  #endif
      float dt = s->t[DLT] > P(DLT) ? s->t[DLT] : P(DLT);
      float Tt = dt * s->sr * (s->delay_history ? 1.f : s->t[DLON]);
 +#if X0X_S1_DELAY_TIME_NATIVE
-+    if(s->delay_time_reserve)Tt=2.5f*s->sr;
++    if(s->delay_time_reserve)Tt=dt*s->sr;
 +#endif
      s->dmono = s->t[PANA] == 0.0f && s->t[PHMIX] == 0.0f;
      nl = s->dmono ? 2 : 3;
      for (dd = 1; dd < 4096; dd++) {
          float T = Tt / (float)dd;
-@@ -929,20 +990,22 @@
+@@ -929,20 +993,22 @@
          else for (i = 0; i < S1C_VOICES; i++) if (s->v[i].root != -1 && s->v[i].stage) y += voice_run(s, &s->v[i]);
  
          /* bitcrush (sample-and-hold), tremolo */
@@ -136,7 +147,7 @@
                  cr->idx += cr->inc;
                  cr->idx -= cr->n;
                  cr->n = 0.f;
-@@ -978,16 +1041,30 @@
+@@ -978,16 +1044,30 @@
              if ((f & 7) == 0) {
                  float pv = clampf(log2f(P(CUT)), 10.0f, 14.4284f);
                  float pc = 1.0f + (pv - 10.0f) * (1.0f / 4.4284f) * (P(DICT) - 1.0f);

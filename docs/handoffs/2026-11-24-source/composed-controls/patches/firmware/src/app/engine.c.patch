@@ -1,6 +1,6 @@
 --- a/firmware/src/app/engine.c
 +++ b/firmware/src/app/engine.c
-@@ -550,17 +550,17 @@
+@@ -550,17 +550,28 @@
  int engine_bass_motion_view(int v, float *phase, float *bipolar, float *current, float *target, int *active)
  { return (unsigned)v < NBASS && original_runtime_motion_view(&original_bass[v], phase, bipolar, current, target, active); }
  int engine_bass_env_view(int v, float adsr[4], float *level, int *state)
@@ -8,13 +8,24 @@
 -#if defined(X0X_HOST) && defined(X0X_SJ6_DELAY_WITNESS)
 +#if (defined(X0X_HOST) && defined(X0X_SJ6_DELAY_WITNESS)) || X0X_SJ6_NATIVE_DELAY
  static void sj6_typed_delay_apply(unsigned,float);
++#endif
++#if X0X_SJ6_NATIVE_UNISON
++static void sj6_typed_unison_apply(unsigned);
  #endif
  static void original_prepare_all(void)
  {
      float bpm=seq_tempo(&seq);
      for(int v=0;v<NBASS;++v){
++#if X0X_SJ6_LFO1_DELAY_PORT
++        original_runtime_part *part=&original_bass[v];
++        if (part->kind==ORIGINAL_SOUND_JUNO && live137(mot_base_snd,v))
++            juno6_lfo1_delay_set(&part->dsp.juno.synth,sj6_lfo1_delay_read(mot_base_snd,v));
++#endif
          (void)original_runtime_prepare(&original_bass[v],bpm);
 -#if defined(X0X_HOST) && defined(X0X_SJ6_DELAY_WITNESS)
++#if X0X_SJ6_NATIVE_UNISON
++        sj6_typed_unison_apply(v);
++#endif
 +#if (defined(X0X_HOST) && defined(X0X_SJ6_DELAY_WITNESS)) || X0X_SJ6_NATIVE_DELAY
          sj6_typed_delay_apply(v,bpm);
  #endif

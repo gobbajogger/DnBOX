@@ -1,7 +1,13 @@
 --- a/firmware/src/app/typed_controls_trial.h
 +++ b/firmware/src/app/typed_controls_trial.h
-@@ -7,10 +7,19 @@
+@@ -4,23 +4,35 @@
+  * or bench-only DSP. All translation units must use the same support flags. */
+ #ifndef DNBOX_TYPED_CONTROLS_NATIVE_TEST
+ #define DNBOX_TYPED_CONTROLS_NATIVE_TEST 0
  #endif
++#if X0X_SJ6_LFO1_DELAY_PORT && !DNBOX_TYPED_CONTROLS_NATIVE_TEST
++#error Native SuperJ6 ID91 requires the typed trial
++#endif
  #if DNBOX_TYPED_CONTROLS_NATIVE_TEST != 0 && DNBOX_TYPED_CONTROLS_NATIVE_TEST != 1
  #error DNBOX_TYPED_CONTROLS_NATIVE_TEST must be 0 or 1
  #endif
@@ -20,12 +26,13 @@
  #if DNBOX_TYPED_CONTROLS_NATIVE_TEST
  #if !X0X_SYNTHONE_PATCH || !X0X_S1C || !X0X_SUPERJ6_BUILTIN_INIT || \
      !X0X_S1_BEND_RANGE_PROBE || !X0X_S1_MOD_RATE_PROBE
-@@ -18,9 +27,9 @@
+ #error Native trial needs Synth One MOD and PB receivers and both engine profiles
  #endif
  #if X0X_SJ6_DELAY_WITNESS || (X0X_SJ6_FILTER_VEL_PROBE && !X0X_SJ6_VELOCITY_PORT) || X0X_SJ6_ALT3_WITNESS || \
      X0X_SJ6_ZERO_GATE_PROBE || X0X_SJ6_GATE_DEADLINE_PROBE || X0X_SJ6_RANDOM2_PROBE || \
-     X0X_SJ6_BEND_TYPED_PROBE || defined(X0X_SJ6_MOD_TYPED_PROBE) || X0X_SJ6_CLASSIC_I_PROBE || \
+-    X0X_SJ6_BEND_TYPED_PROBE || defined(X0X_SJ6_MOD_TYPED_PROBE) || X0X_SJ6_CLASSIC_I_PROBE || \
 -    X0X_S1_FENCED_CLOCK || X0X_S1_CRUSH_LFO_PROBE
++    (defined(X0X_SJ6_MOD_TYPED_PROBE) && !X0X_SJ6_ALT3_NATIVE) || X0X_SJ6_CLASSIC_I_PROBE || \
 +    (X0X_S1_FENCED_CLOCK && !X0X_S1_CLOCK_NATIVE)
  #error Bench-only or separate typed DSP is outside this read-only admission trial
  #endif

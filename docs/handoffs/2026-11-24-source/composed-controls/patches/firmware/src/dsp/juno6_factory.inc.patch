@@ -21,10 +21,162 @@
  {
      if(!s || !s->typed || (selector!=69u && selector!=70u) || enabled>1u ||
         !(base>=0.f && base<=1.f && amount>=0.f && amount<=1.f)) return 0;
-@@ -1426,4 +1438,6 @@
+@@ -490,9 +502,9 @@
+     (void)dnbx_store_raw(&s->core,89u,amount);
+     return 1;
+ }
+ 
+-#if defined(X0X_HOST) && defined(X0X_SJ6_ALT3_WITNESS)
++#if (defined(X0X_HOST) && defined(X0X_SJ6_ALT3_WITNESS)) || X0X_SJ6_ALT3_NATIVE
+ static float sj6_alt3_rate(float normalized,int synced,float tempo)
+ {
+     if (!synced) return 16.0f*fm_powf(normalized,3.33f);
+     static const double grid[18]={
+@@ -590,9 +602,9 @@
+      * wheel dispatch separately from restoring stored owner choice. */
+     s->mod_destination=(uint8_t)selected;
+     return 1;
+ #endif
+-#if defined(X0X_HOST) && defined(X0X_SJ6_ALT3_WITNESS)
++#if (defined(X0X_HOST) && defined(X0X_SJ6_ALT3_WITNESS)) || X0X_SJ6_ALT3_NATIVE
+     if(selected==3u) { if(!s->alt3.armed)return 0; }
+     else
+ #endif
+     if(selected>1u && selected!=4u && selected!=5u && (selected!=2u || !s->lfo1_pwm_route)) return 0;
+@@ -602,9 +614,9 @@
+ 
+ int juno6_set_mod_wheel(juno6_t *s,unsigned value)
+ {
+     if (!s || !s->typed || value>127u) return 0;
+-#if defined(X0X_HOST) && defined(X0X_SJ6_ALT3_WITNESS)
++#if (defined(X0X_HOST) && defined(X0X_SJ6_ALT3_WITNESS)) || X0X_SJ6_ALT3_NATIVE
+     if (s->mod_destination==3u) {
+         if(!s->alt3.armed || (s->alt3.tempo_sync && !(s->lfo_tempo>0.f)))return 0;
+         sj6_alt3_target(s,value);
+         return 1;
+@@ -643,19 +655,43 @@
+ void juno6_set_lfo_tempo(juno6_t *s, float bpm)
+ {
+     if (bpm == s->lfo_tempo || bpm < 0.f || !sj6_lfo_finite(bpm)) return;
+     s->lfo_tempo = bpm;
+-#if defined(X0X_HOST) && defined(X0X_SJ6_ALT3_WITNESS)
++#if (defined(X0X_HOST) && defined(X0X_SJ6_ALT3_WITNESS)) || X0X_SJ6_ALT3_NATIVE
+     if (s->alt3.armed && s->alt3.tempo_sync && s->alt3.last_wheel_code && bpm>0.f)
+         sj6_alt3_set_rate(s,.9f*((float)(s->alt3.last_wheel_code-1u)/127.f));
+ #endif
+     for (unsigned i = 0, sync = s->lfo_sync; sync; ++i, sync >>= 1)
+         if (sync & 1u) prepare_lfo_step(s, i);
+ }
+ 
++#if X0X_SJ6_LFO1_DELAY_PORT
++/* Build9 ID91 setter: 0x1000f73c0..7404 -> 3 * pow(unit,1.21).
++ * Its nominal 80 Hz worker starts the shared phase only once elapsed is
++ * strictly larger than the selected delay; it does not reset on the edit. */
++float juno6_lfo1_delay_seconds(unsigned position)
++{
++    return position ? 3.f*fm_powf((float)position/127.f,1.21f) : 0.f;
++}
++void juno6_lfo1_delay_set(juno6_t *s,unsigned position)
++{
++    if (!s->typed || position>127u || s->lfo1_delay_raw==position) return;
++    s->lfo1_delay_raw=(uint8_t)position;
++    unsigned ticks=(unsigned)(juno6_lfo1_delay_seconds(position)*80.f)+1u;
++    s->lfo1_delay_frames=position?(ticks*(unsigned)s->sample_rate+79u)/80u:0u;
++}
++static int sj6_lfo1_waiting(const juno6_t *s)
++{
++    return s->typed && s->lfo1_delay_raw && !s->lfo1_delay_started;
++}
++#endif
+ void juno6_set_lfo_words(juno6_t *s, const juno6_lfo_words *words, int reset_phase)
+ {
+     if (reset_phase) {
++#if X0X_SJ6_LFO1_DELAY_PORT
++        s->lfo1_delay_age=0;
++        s->lfo1_delay_started=0;
++#endif
+         s->mod_wheel_lfo1=s->mod_wheel_lfo2=0;
+         s->mod_wheel_cutoff_hz=0.f;
+         s->wheel_lfo1_amount=0;
+         s->lfo1_pwm_until_tick=0;
+@@ -1169,9 +1205,13 @@
+     return result;
+ }
+ #endif
+ 
++#if X0X_SJ6_LFO1_DELAY_PORT
++static int sj6_render_with_lfo(juno6_t *s,float *left,float *right,unsigned frames)
++#else
+ int juno6_render_stereo(juno6_t *s,float *left,float *right,unsigned frames)
++#endif
+ {
+ #if !X0X_SUPERJ6_BUILTIN_INIT
+  if(!s->typed){
+   stock_render(s,left,frames);
+@@ -1181,9 +1221,14 @@
+ #endif
+ #if X0X_SUPERJ6_BUILTIN_INIT
+  const float wheel_cutoff=s->mod_wheel_cutoff_hz;
+  float base[2];
+- const unsigned cut_route=s->lfo1_pwm_route==3;
++#if X0X_SJ6_LFO1_DELAY_PORT
++ const unsigned lfo1_ready=!sj6_lfo1_waiting(s);
++#else
++ const unsigned lfo1_ready=1;
++#endif
++ const unsigned cut_route=lfo1_ready && s->lfo1_pwm_route==3;
+  if (wheel_cutoff||cut_route) for(unsigned l=0;l<2;++l) {
+   base[l]=s->core.layer[l].params.cutoff_hz;
+   if(wheel_cutoff)s->core.layer[l].params.cutoff_hz=wheel_cutoff;
+  }
+@@ -1195,9 +1240,9 @@
+      left && right && left != right) {
+   rendered=render_lfo_pwm(s,1u,receiver,left,right,frames);
+  } else {
+   unsigned first=(unsigned)s->lfo1_pwm_route-1u;
+-  if(first<DNBX_LAYERS && s->core.layer[first].params.waveform==1.f &&
++  if(lfo1_ready && first<DNBX_LAYERS && s->core.layer[first].params.waveform==1.f &&
+      s->core.raw[210u+first]>.5f &&
+      frames && frames<=DNBX_MAX_FRAMES && left && right && left!=right)
+    rendered=render_lfo_pwm(s,0u,first,left,right,frames);
+   else {
+@@ -1213,9 +1258,9 @@
+  if (wheel_cutoff||cut_route) for(unsigned l=0;l<2;++l) s->core.layer[l].params.cutoff_hz=base[l];
+  if (rendered!=DNBX_OK)return 0;
+  /* Keep all three audio-clock phases independent of receiver and span. */
+  for (unsigned i = 0, running = s->lfo_running; running; ++i, running >>= 1)
+-  if (running & 1u) s->lfo_phase_q40[i] =
++  if ((running & 1u) && (i || lfo1_ready)) s->lfo_phase_q40[i] =
+       (s->lfo_phase_q40[i] + s->lfo_step_q40[i] * frames) & (SJ6_LFO_TURN - 1u);
+ #else
+  if (dnbx_render(&s->core,left,right,frames,0)!=DNBX_OK)return 0;
+ #endif
+@@ -1426,4 +1471,28 @@
          }
      }
  }
  #endif
 +
 +#include "juno6_delay_native.inc"
++
++#if X0X_SJ6_LFO1_DELAY_PORT
++int juno6_render_stereo(juno6_t *s,float *left,float *right,unsigned frames)
++{
++    if (s->typed && !s->lfo1_delay_started && frames && frames<=DNBX_MAX_FRAMES &&
++        left && right && left!=right) {
++        if (s->lfo1_delay_age>=s->lfo1_delay_frames) s->lfo1_delay_started=1;
++        else {
++            unsigned first=s->lfo1_delay_frames-s->lfo1_delay_age;
++            if (first>frames) first=frames;
++            if (!sj6_render_with_lfo(s,left,right,first)) return 0;
++            s->lfo1_delay_age+=first;
++            if (s->lfo1_delay_age>=s->lfo1_delay_frames) s->lfo1_delay_started=1;
++            if (first==frames) return 1;
++            left+=first;right+=first;frames-=first;
++        }
++    }
++    return sj6_render_with_lfo(s,left,right,frames);
++}
++#endif
++
++#include "juno6_unison_native.inc"

@@ -1,0 +1,144 @@
+--- a/firmware/src/dsp/dnbx_core.c
++++ b/firmware/src/dsp/dnbx_core.c
+@@ -383,8 +383,36 @@
+     if (!valid(s)) return DNBX_E_UNINITIALIZED;
+     if (l>=DNBX_LAYERS || !p) return DNBX_E_ARGUMENT;
+     *p=s->layer[l].params; return DNBX_OK;
+ }
++#if X0X_SJ6_PITCH_ENV_NATIVE
++int dnbx_set_sj6_pitch_env(dnbx_part *s,const uint8_t code[5])
++{
++    if(!valid(s)||!s->superj6_amp_range)return 0;
++    for(unsigned k=0;k<4u;k++)if(code[k]>127u)return 0;
++    if(code[4]>60u)return 0;
++    /* Build 9's actual setters: attack, decay and release use x^3.33;
++     * sustain x^2.5; rounded 0..60 semitones comes from parameter 57. */
++    const float a=code[0] ? (float)(code[0]-(code[0]<=64u))/127.f : .5f;
++    const float d=code[1] ? (float)(code[1]-(code[1]<=64u))/127.f : .5f;
++    const float u=(float)code[2]/127.f;
++    const float r=code[3] ? (float)(code[3]-(code[3]<=64u))/127.f : .5f;
++    s->sj6_pitch_param=(dnbx_envelope_params){
++        .attack_s=16.f*fm_powf(a,3.33f),.decay_s=24.f*fm_powf(d,3.33f),
++        .sustain=fm_powf(u,2.5f),.release_s=24.f*fm_powf(r,3.33f)
++    };
++    /* Enabling depth on an already-held note starts a genuine pitch envelope.
++     * Zero depth performs no extra work in the audio hot path. */
++    if(code[4] && !s->sj6_pitch_depth)
++        for(unsigned i=0;i<DNBX_VOICES;i++) {
++            dnbx_voice *v=&s->voice[i];
++            memset(&v->sj6_pitch,0,sizeof v->sj6_pitch);
++            if(v->gate || v->pedal_held)envelope_on(&v->sj6_pitch,&s->sj6_pitch_param,s->sample_rate);
++        }
++    s->sj6_pitch_depth=code[4];
++    return 1;
++}
++#endif
+ int dnbx_note_on(dnbx_part *s,unsigned note,unsigned velocity)
+ {
+     unsigned chosen=0; int found=0, retrigger=0;
+     if (!valid(s)) return DNBX_E_UNINITIALIZED;
+@@ -423,8 +451,11 @@
+     for (unsigned i=0;i<DNBX_VOICES;i++) s->voice[i].age_rank=next_rank[i];
+     if (!retrigger) memset(v,0,sizeof *v);
+     v->note=(uint8_t)note; v->gate=1; v->age_rank=0; v->pedal_held=0;
+     v->velocity=(float)velocity/127.0f;
++#if X0X_SJ6_PITCH_ENV_NATIVE
++    if(s->sj6_pitch_depth)envelope_on(&v->sj6_pitch,&s->sj6_pitch_param,s->sample_rate);
++#endif
+     for (unsigned l=0;l<DNBX_LAYERS;l++) {
+         const dnbx_layer_params *p=&s->layer[l].params;
+         v->layer[l].increment=pitch_increment(s,note,p->tune_semitones);
+         envelope_on(&v->layer[l].amp,&p->amp,s->sample_rate);
+@@ -449,8 +480,11 @@
+     dnbx_voice *v=&s->voice[0];
+     if(!voice_active(v))memset(v,0,sizeof *v);
+     v->note=(uint8_t)note;v->gate=1;v->pedal_held=0;v->age_rank=0;
+     v->velocity=(float)vel/127.f;
++#if X0X_SJ6_PITCH_ENV_NATIVE
++    if(s->sj6_pitch_depth)envelope_on(&v->sj6_pitch,&s->sj6_pitch_param,s->sample_rate);
++#endif
+     for(unsigned l=0;l<DNBX_LAYERS;l++){
+         const dnbx_layer_params *p=&s->layer[l].params;
+         v->layer[l].increment=pitch_increment(s,note,p->tune_semitones);
+         envelope_on(&v->layer[l].amp,&p->amp,s->sample_rate);
+@@ -461,8 +495,11 @@
+ }
+ #endif
+ static void release_voice(dnbx_part *s,dnbx_voice *v)
+ {
++#if X0X_SJ6_PITCH_ENV_NATIVE
++    if(s->sj6_pitch_depth)envelope_off(&v->sj6_pitch,&s->sj6_pitch_param,s->sample_rate);
++#endif
+     for (unsigned l=0;l<DNBX_LAYERS;l++) {
+         envelope_off(&v->layer[l].amp,&s->layer[l].params.amp,s->sample_rate);
+         dnbx_envelope_params linked;
+         envelope_off(&v->layer[l].filter,filter_params(s,l,&linked),s->sample_rate);
+@@ -554,8 +591,16 @@
+             filter_note[i] = fmaf(fvel,s->voice[i].velocity,inverse);
+ #endif
+     }
+ #endif
++#if X0X_SJ6_VCF_PORT
++    float track=0.f,strength=0.f,keyboard_ratio[DNBX_VOICES];
++    const int authored_track=dnbx_read_raw(s,131u,&track)==DNBX_OK && track>0.f;
++    const int authored_strength=dnbx_read_raw(s,136u,&strength)==DNBX_OK;
++    if(authored_track)
++        for(unsigned i=0;i<DNBX_VOICES;i++)
++            keyboard_ratio[i]=fm_exp2f(track*((float)s->voice[i].note-60.f)/12.f);
++#endif
+     dnbx_envelope_params linked[DNBX_LAYERS];
+     const dnbx_envelope_params *fp[DNBX_LAYERS];
+     for (unsigned l=0;l<DNBX_LAYERS;l++) fp[l]=filter_params(s,l,&linked[l]);
+     for (unsigned k=0;k<n;k++) {
+@@ -588,14 +633,26 @@
+             if (!voice_active(v)) continue;
+             COUNT(w,active_voice_samples,1);
+             float velocity=v->velocity;
+             if (s->velocity_mode==DNBX_VELOCITY_SQUARED) velocity*=velocity;
++#if X0X_SJ6_PITCH_ENV_NATIVE
++            float pitch_ratio=1.f;
++            if(s->sj6_pitch_depth) {
++                float env=envelope_sample(&v->sj6_pitch,&s->sj6_pitch_param,s->sample_rate,w);
++                pitch_ratio=fm_exp2f(env*(float)s->sj6_pitch_depth*(1.f/12.f));
++            }
++#endif
+             for (unsigned l=0;l<DNBX_LAYERS;l++) {
+                 dnbx_layer_voice *lv=&v->layer[l];
+                 const dnbx_layer_params *p=&s->layer[l].params;
++#if X0X_SJ6_MONO32_PROBE || X0X_SJ6_PITCH_ENV_NATIVE
++                const float nominal=lv->increment;
++#endif
+ #if X0X_SJ6_MONO32_PROBE
+-                const float nominal=lv->increment;
+                 if(!i&&s->sj6_glide_offset!=0.f)lv->increment*=s->sj6_glide_ratio;
++#endif
++#if X0X_SJ6_PITCH_ENV_NATIVE
++                if(pitch_ratio!=1.f)lv->increment=fm_minf(lv->increment*pitch_ratio,.45f);
+ #endif
+                 float amp=envelope_sample(&lv->amp,&p->amp,s->sample_rate,w);
+                 float env=envelope_sample(&lv->filter,fp[l],s->sample_rate,w);
+                 if (fvel != 0.f) env *= filter_note[i];
+@@ -605,15 +662,22 @@
+                 if (osc_gain[l]!=1.f) x*=osc_gain[l];
+                 x+=(lv->subphase<.5f?1.0f:-1.0f)*p->sub_gain;
+                 /* Existing DnBOX two-pole recurrence, with explicit saturation
+                  * guards to make a finite bound part of this candidate ABI. */
++#if X0X_SJ6_VCF_PORT
++                const float base=authored_track?p->cutoff_hz*keyboard_ratio[i]:p->cutoff_hz;
++                /* Compact filter's calibrated maximum is 7 kHz of envelope excursion. */
++                const float amount=authored_strength?7000.f*strength:p->filter_env_hz;
++                float a=fm_clampf(FM_TWO_PI*(base+env*amount)/s->sample_rate,.001f,.75f);
++#else
+                 float a=fm_clampf(FM_TWO_PI*(p->cutoff_hz+env*p->filter_env_hz)/s->sample_rate,.001f,.75f);
++#endif
+                 lv->filter_first=fm_clampf(lv->filter_first+a*(x-lv->filter_first-p->resonance*.8f*lv->filter_second),-4,4);
+                 lv->filter_second=fm_clampf(lv->filter_second+a*(lv->filter_first-lv->filter_second),-4,4);
+                 mix[l]+=velocity*amp*lv->filter_second;
+                 lv->phase+=lv->increment; if (lv->phase>=1) lv->phase-=1;
+                 lv->subphase+=lv->increment*.5f; if (lv->subphase>=1) lv->subphase-=1;
+-#if X0X_SJ6_MONO32_PROBE
++#if X0X_SJ6_MONO32_PROBE || X0X_SJ6_PITCH_ENV_NATIVE
+                 lv->increment=nominal;
+ #endif
+                 COUNT(w,layer_samples,1);
+             }
