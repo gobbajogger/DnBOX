@@ -1,0 +1,164 @@
+--- a/firmware/src/app/remote_dnr3.c
++++ b/firmware/src/app/remote_dnr3.c
+@@ -41,7 +41,7 @@
+ static uint32_t rd_n;
+ #define RD_N rd_n
+ #endif
+-enum { RD_HELLO = 0, RD_OPEN = 1, RD_KEEP = 6, RD_CLOSE = 7, RD_WATCH = 8, RD_DESCRIBE = 0x10, RD_PGET, RD_PSET,
++enum { RD_HELLO = 0, RD_OPEN = 1, RD_KEEP = 6, RD_CLOSE = 7, RD_WATCH = 8, RD_DESCRIBE = 0x10, RD_PGET, RD_PSET, RD_SYNTH_OWNER,
+        RD_SGET = 0x20, RD_SSET, RD_PART, RD_DUMP, RD_CUE, RD_TRANSPORT = 0x26, RD_TEMPO, RD_MUTE, RD_RECORD, RD_MGET, RD_MSET, RD_STATE = 0x30 };
+ enum { RS_OK, RS_QUEUED, RS_BAD, RS_BUSY, RS_STALE, RS_CONFLICT, RS_UNSUPPORTED, RS_FULL, RS_DENIED };
+ enum { RN_PARAM, RN_STEP, RN_CUE, RN_TRANSPORT, RN_MUTE, RN_VOICE, RN_POSITION, RN_PATTERN, RN_N };
+@@ -52,7 +52,7 @@
+ #define RD_SIZE
+ #endif
+ #if X0X_REMOTE_TYPED_SYNTH
+-#define RD_CAPS 0x1FFFu      /* negotiated original-ID synth descriptors */
++#define RD_CAPS 0x3FFFu      /* original-ID descriptors + explicit owner epoch */
+ enum { RD_SYNTH_LO=112, RD_SYNTH_HI=113, RD_SYNTH_UNIT_WRITABLE=0x60 };
+ RD_SIZE static int rd_typed(unsigned kind){return kind==RD_SYNTH_LO || kind==RD_SYNTH_HI;}
+ #else
+@@ -71,10 +71,6 @@
+     volatile uint32_t voice;
+     uint32_t voice_seen;
+     uint16_t cseq;
+-#if X0X_REMOTE_TYPED_SYNTH
+-    uint32_t synth_generation;
+-    uint16_t synth_key;
+-#endif
+     uint8_t active, watch, dirty, pend, cop, clen, np;
+     volatile uint8_t voice_arm;
+     uint8_t voice_generation;
+@@ -456,6 +452,9 @@
+ #define RW 0xC0u
+ static const uint8_t RD_OPS[RD_STATE + 1] = {
+     [RD_HELLO] = 2, [RD_OPEN] = 5, [RD_KEEP] = RL | 5, [RD_CLOSE] = RL | 5, [RD_WATCH] = RL | 9,
++#if X0X_REMOTE_TYPED_SYNTH
++    [RD_SYNTH_OWNER] = RL | 6,  /* lease u28, owner u7 */
++#endif
+     [RD_DESCRIBE] = 5, [RD_PGET] = 2, [RD_PSET] = RW | 13, [RD_SGET] = 4, [RD_SSET] = RW | 10, [RD_PART] = RW | 10,
+     [RD_DUMP] = 5, [RD_CUE] = RW | 7, [RD_TRANSPORT] = RW | 6, [RD_TEMPO] = RW | 7, [RD_MUTE] = RW | 8, [RD_RECORD] = RW | 6, [RD_MGET] = 3, [RD_MSET] = RW | 12, [RD_STATE] = 1};
+ 
+@@ -547,24 +546,43 @@
+ }
+ RD_SIZE static unsigned rd_synth_id(const uint8_t *e)
+ { return (unsigned)e[3]+(e[0]==RD_SYNTH_HI?128u:0u); }
+-static unsigned rd_synth_key(const uint8_t *e)
+-{ return 1u + rd_synth_id(e) + (((e[1]&1u)*2u+e[2])*256u); }
+-
+ RD_SIZE static int rd_synth_read(const uint8_t *e,const x0x_param_t **d)
+ {
+     if (!rd_synth_target(e) || rd_bass_guard(e[2],e[1])) return -1;
+     int queued;
+     return ui_remote_synth(e[1],e[2],rd_synth_id(e),0,0,d,&queued);
+ }
++/* A read is one coherent owner snapshot. Pending adoption cannot publish
++ * a partially read identity: unsettled replies deliberately use sentinels.
++ * The accepted generation comes from replacement-only engine publication. */
++RD_SIZE static int rd_synth_owner(unsigned v)
++{
++    if(v>=NBASS)return RS_BAD;
++    int bank=127, preset=-1, settled=0;
++    uint32_t generation=0;
++    engine_bass_edit_hold(1);
++    if(!REMOTE_DNR3_BUSY() && !engine_bass_preset_pending(v)){
++        bank=engine_bass_bank(v);
++        if(bank>=ORIGINAL_SOUND_SYNTHONE && bank<=ORIGINAL_SOUND_JUNO && !rd_bass_guard(v,bank)){
++            preset=engine_bass_preset_index(v);
++            generation=engine_remote_synth_generation(v);
++            settled=1;
++        }else bank=127;
++    }
++    engine_bass_edit_hold(0);
++    rd_b(v);rd_b((unsigned)bank);rd_u(preset<0 || preset>=0x3fff ? 0x3fffu : (uint32_t)preset,2);
++    rd_b((unsigned)settled);rd_u(generation,5);
++    return RS_OK;
++}
+ RD_SIZE static int rd_synth_write(const uint8_t *q)
+ {
+     int old,status,value;
+     const x0x_param_t *d;
+-    if(!rd_synth_target(q)||q[8]!=q[1]||rd_g(q+4,2)==0x3fffu)return RS_BAD;
++    if(!rd_synth_target(q)||q[8]!=q[1]||q[13]>15u||rd_g(q+4,2)==0x3fffu)return RS_BAD;
+     engine_bass_edit_hold(1);
+     status=rd_bass_guard(q[2],q[1]);
+     if(status)goto done;
+-    if(rd.synth_key!=rd_synth_key(q)||rd.synth_generation!=engine_remote_synth_generation(q[2])){
++    if(rd_g(q+9,5)!=engine_remote_synth_generation(q[2])){
+         status=RS_CONFLICT;goto done;
+     }
+     old=rd_synth_read(q,&d);
+@@ -579,7 +597,6 @@
+     }
+     status=queued ? RS_QUEUED : RS_OK;
+     rd.dirty=1;
+-    rd.synth_key=0;
+     rd_bytes(q,4,128);rd_u((uint32_t)value,2);
+ done:
+     engine_bass_edit_hold(0);
+@@ -647,9 +664,6 @@
+         rd_lease_wire = rd_wire;
+ #endif
+         rd.watch = rd.clen = rd.voice_arm = 0;
+-#if X0X_REMOTE_TYPED_SYNTH
+-        rd.synth_key=0;
+-#endif
+         rd.deadline = plat_ms() + RD_LEASE_MS;
+         rd_u(rd.epoch, 4);
+         rd_u(RD_LEASE_MS, 2);
+@@ -690,16 +704,8 @@
+         for (k = 0; k < a[0]; k++) {
+             const uint8_t *e = a + 1 + 4 * k;
+ #if X0X_REMOTE_TYPED_SYNTH
+-            if(rd_typed(e[0])){
+-                int observe=a[0]==1 && rd_synth_target(e) && rd.active;
+-                uint32_t generation=observe?engine_remote_synth_generation(e[2]):0;
+-                v=rd_synth_read(e,&d);
+-                if(observe){
+-                    rd.synth_key=v>=0 && generation==engine_remote_synth_generation(e[2])?
+-                        (uint16_t)rd_synth_key(e):0;
+-                    rd.synth_generation=generation;
+-                }
+-            }else
++            if(rd_typed(e[0])) v=rd_synth_read(e,&d);
++            else
+ #endif
+             v=rd_pget(e,&d);
+             rd_bytes(e, 4, 128);
+@@ -707,9 +713,13 @@
+             rd_u(v < 0 ? 0u : d->max, 2);
+         }
+         return 0;
++#if X0X_REMOTE_TYPED_SYNTH
++    case RD_SYNTH_OWNER:
++        return len==5u?rd_synth_owner(q[0]):RS_BAD;
++#endif
+     case RD_PSET:
+ #if X0X_REMOTE_TYPED_SYNTH
+-        if(rd_typed(q[0]))return len==13u?rd_synth_write(q):RS_BAD;
++        if(rd_typed(q[0]))return len==18u?rd_synth_write(q):RS_BAD;
+ #endif
+         if (len == 12u)                                  /* legacy parameter writes */
+             return rd_pset(q);
+@@ -895,7 +905,10 @@
+      * or an exact retransmission could undo a later physical gesture. */
+     if (op == RD_RECORD && p[13] == 2u)
+         f &= ~0x80u;
+-    if (f & 0x80u && rd.clen && rd.cop == op && rd.cseq == sq && rd.ccrc == crc
++    /* Typed writes never reuse an acknowledgement across an owner change.
++     * Identical replays still face lease, pending and compare-and-set guards. */
++    const int typed_write = op==RD_PSET && rd_typed(p[13]);
++    if (!typed_write && f & 0x80u && rd.clen && rd.cop == op && rd.cseq == sq && rd.ccrc == crc
+ #if X0X_REMOTE_BLE
+         && rd_wire == rd_lease_wire
+ #endif
+@@ -923,7 +936,8 @@
+     if (st && st!=RS_QUEUED)
+         RD_N = RD_HEAD;
+     rd_send((int)(op | 0x40u), sq, st);
+-    if ((st==RS_OK || st==RS_QUEUED) && f & 0x80u && RD_N <= sizeof rd.cache) {
++    if ((st==RS_OK || st==RS_QUEUED) && f & 0x80u && RD_N <= sizeof rd.cache &&
++        !(op==RD_PSET && rd_typed(p[13]))) {
+         memcpy(rd.cache, RD_OUT, RD_N);
+         rd.clen = (uint8_t)RD_N;
+         rd.cop = (uint8_t)op;
