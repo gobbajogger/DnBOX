@@ -1,0 +1,171 @@
+--- a/firmware/src/app/original_presets.inc
++++ b/firmware/src/app/original_presets.inc
+@@ -705,2 +705,13 @@
+ #if defined(X0X_SJ6_MONO32_PROBE) && X0X_SJ6_MONO32_PROBE
++static int sj6_voice_mode_set(unsigned v,unsigned mode)
++{
++ original_runtime_part *p=&original_bass[v];
++ juno6_t *s=&p->dsp.juno.synth;
++ if(s->mono32_on!=mode){
++    /* Soft receiver release below; cut only this owner's stale ingress. */
++    for(unsigned source=0;source<ORIGINAL_INPUT_COUNT;++source)
++       (void)original_runtime_cut_source(p,source);
++ }
++ return juno6_mono32_set(s,mode);
++}
+ static void sj6_voice_apply(const sound_t *sound,unsigned v)
+@@ -711,3 +722,3 @@
+  juno6_t *s=&original_bass[v].dsp.juno.synth;
+- if(!juno6_mono32_set(s,data[0]&1u))return;
++ if(!sj6_voice_mode_set(v,data[0]&1u))return;
+  (void)juno6_legato33_set(s,(data[0]>>1)&1u);
+@@ -715,9 +726,6 @@
+ }
+-int engine_sj6_voice_undo_ready(unsigned mask,unsigned mono_changed)
++int engine_sj6_voice_undo_ready(unsigned mask)
+ {
+- for(unsigned v=0;v<NBASS;v++)if((mask&(1u<<v))&&live137(mot_base_snd,v)&&original_bass[v].kind==ORIGINAL_SOUND_JUNO) {
+-  const juno6_t *s=&original_bass[v].dsp.juno.synth;
+-  if(note_lock_applied[v]||((mono_changed&(1u<<v))&&
+-     (s->core.damper||dnbx_active_voices(&s->core)!=0)))return 0;
+- }
++ for(unsigned v=0;v<NBASS;v++)
++  if((mask&(1u<<v))&&live137(mot_base_snd,v)&&original_bass[v].kind==ORIGINAL_SOUND_JUNO&&note_lock_applied[v])return 0;
+  return 1;
+@@ -743,3 +751,3 @@
+       field?juno6_legato33_set(&original_bass[v].dsp.juno.synth,on):
+-      juno6_mono32_set(&original_bass[v].dsp.juno.synth,on));
++      sj6_voice_mode_set(v,on));
+  if(ok){
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -606,3 +606,3 @@
+ extern int engine_sj6_mono32_edit(unsigned,unsigned,unsigned);
+-extern int engine_sj6_voice_undo_ready(unsigned,unsigned);
++extern int engine_sj6_voice_undo_ready(unsigned);
+ extern void engine_sj6_voice_undo(unsigned);
+@@ -3612,5 +3612,2 @@
+     unsigned undo_velocity137=0,undo_s1_mod=0,undo_a4=0,undo_rvfb=0,undo_trans=0,undo_crush=0,undo_delay=0,undo_pan=0,undo_feedback=0,undo_chorus_i=0,undo_sj6_voice=0;
+-#if X0X_SJ6_MONO32_PROBE
+-    unsigned undo_sj6_voice_mode=0;
+-#endif
+ #if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
+@@ -3722,3 +3719,2 @@
+                     undo_sj6_voice|=1u<<v;
+-                    if((voice_settings[0]^cur_voice[0])&1u)undo_sj6_voice_mode|=1u<<v;
+                 }
+@@ -3825,3 +3821,3 @@
+ #if X0X_SJ6_MONO32_PROBE
+-    if(undo_sj6_voice&&!engine_sj6_voice_undo_ready(undo_sj6_voice&~undo_bass_mask,undo_sj6_voice_mode)){
++    if(undo_sj6_voice&&!engine_sj6_voice_undo_ready(undo_sj6_voice&~undo_bass_mask)){
+         engine_project_hold(0);engine_bass_edit_hold(0);say("UNDO WAIT VOICE",0);return;
+--- a/firmware/src/dsp/juno6.h
++++ b/firmware/src/dsp/juno6.h
+@@ -122,3 +122,3 @@
+ #if defined(X0X_SJ6_MONO32_PROBE) && X0X_SJ6_MONO32_PROBE
+- uint32_t mono32_keys[128];
++ uint32_t mono32_keys[4];
+  uint8_t mono32_on,legato33_on,glide35_detent;
+--- a/firmware/src/dsp/juno6_factory.inc
++++ b/firmware/src/dsp/juno6_factory.inc
+@@ -31,6 +31,8 @@
+  if(s->mono32_on==on)return 1;
+- if(s->core.damper||dnbx_active_voices(&s->core)!=0)return 0;
+- if(s->mono32_on!=on)memset(s->mono32_keys,0,sizeof s->mono32_keys);
++ /* The Build9 conductor sends ordinary note-offs, not a hard kill.
++  * A released envelope and a pedal-held tail survive the mode switch. */
++ for(unsigned i=0;i<DNBX_VOICES;i++)if(s->core.voice[i].gate)
++   (void)dnbx_note_off(&s->core,s->core.voice[i].note);
++ memset(s->mono32_keys,0,sizeof s->mono32_keys);
+  s->mono32_on=(uint8_t)on;
+- if(!on)s->core.sj6_glide_offset=0.f;
+  return 1;
+@@ -47,5 +49,13 @@
+  s->core.sj6_glide_secs=(float)((double)((float)pos/127.f)*.5);
+- if(!pos)s->core.sj6_glide_offset=0.f;
++ /* Rate zero stops advancement, not the already-active pitch offset. */
+  return 1;
+ }
++static int mono_sounding_key(const juno6_t *s,unsigned note)
++{
++ return (s->mono32_keys[note>>5]>>(note&31u))&1u;
++}
++static int mono_has_keys(const juno6_t *s)
++{
++ return !!(s->mono32_keys[0]|s->mono32_keys[1]|s->mono32_keys[2]|s->mono32_keys[3]);
++}
+ static void sj6_mono_glide_start(juno6_t *s,unsigned note,int overlap)
+@@ -56,4 +66,24 @@
+  s->core.sj6_glide_offset=(next>-.01f&&next<.01f)?0.f:next;
++ if(!s->core.sj6_glide_offset)s->core.sj6_glide_ratio=1.f;
+  s->core.sj6_glide_clock=0;
+ }
++static void sj6_mono_released(juno6_t *s,unsigned note)
++{
++ if(!s->core.voice[0].gate||s->core.voice[0].note!=note)return;
++ for(unsigned k=0;k<128;k++)if(mono_sounding_key(s,k)){
++   sj6_mono_glide_start(s,k,1);
++   if(s->legato33_on)(void)dnbx_superj6_legato_voice(&s->core,k);
++   else (void)dnbx_superj6_mono_voice(&s->core,k,100);
++   return;
++ }
++ (void)dnbx_note_off(&s->core,note);
++}
++static int sj6_voice_pedal(juno6_t *s,unsigned down)
++{
++ const int was=s->core.damper;
++ int ok=dnbx_set_sustain(&s->core,down)==DNBX_OK;
++ if(ok&&was&&!down&&s->mono32_on&&s->core.voice[0].gate&&!mono_sounding_key(s,s->core.voice[0].note))
++    sj6_mono_released(s,s->core.voice[0].note);
++ return ok;
++}
+ #endif
+@@ -68,4 +98,5 @@
+   if(!velocity){juno6_note_off(s,note);return 1;}
+-  const int continuing=s->core.voice[0].gate&&!s->core.voice[0].pedal_held;
+-  if(s->mono32_keys[note]<UINT32_MAX)++s->mono32_keys[note];
++  /* The app coalesces duplicate ons by dispatching only the final off. */
++  const int continuing=s->core.voice[0].gate&&mono_has_keys(s);
++  s->mono32_keys[note>>5]|=UINT32_C(1)<<(note&31u);
+   sj6_mono_glide_start(s,note,continuing);
+@@ -81,11 +112,7 @@
+  if(s->mono32_on) {
+-  if(note>127||!s->mono32_keys[note])return;
+-  if(--s->mono32_keys[note]||s->core.voice[0].note!=note)return;
+-  for(unsigned k=0;k<128;k++)if(s->mono32_keys[k]){
+-   sj6_mono_glide_start(s,k,s->core.voice[0].gate);
+-   if(s->legato33_on&&s->core.voice[0].gate)(void)dnbx_superj6_legato_voice(&s->core,k);
+-   else (void)dnbx_superj6_mono_voice(&s->core,k,100);
+-   return;
+-  }
+-  (void)dnbx_note_off(&s->core,note);return;
++  if(note>127||!mono_sounding_key(s,note))return;
++  s->mono32_keys[note>>5]&=~(UINT32_C(1)<<(note&31u));
++  /* Actual original pedal defers dispatch of the physical key's off. */
++  if(!s->core.damper)sj6_mono_released(s,note);
++  return;
+  }
+@@ -108,3 +135,3 @@
+  memset(s->mono32_keys,0,sizeof s->mono32_keys);
+- s->core.sj6_glide_offset=0.f;s->core.sj6_glide_clock=0;
++ s->core.sj6_glide_offset=0.f;s->core.sj6_glide_ratio=1.f;s->core.sj6_glide_clock=0;
+ #endif
+@@ -827,3 +854,9 @@
+ #endif
+- if(id==17)return dnbx_set_sustain(&s->core,x>=.5f)==DNBX_OK;
++ if(id==17){
++#if X0X_SJ6_MONO32_PROBE
++  return sj6_voice_pedal(s,x>=.5f);
++#else
++  return dnbx_set_sustain(&s->core,x>=.5f)==DNBX_OK;
++#endif
++ }
+  if(id==9)return 1;
+--- a/firmware/src/dsp/dnbx_core.c
++++ b/firmware/src/dsp/dnbx_core.c
+@@ -408,2 +408,5 @@
+     dnbx_voice *v=&s->voice[chosen];
++#if X0X_SJ6_MONO32_PROBE
++    if(!chosen){s->sj6_glide_offset=0.f;s->sj6_glide_ratio=1.f;s->sj6_glide_clock=0;}
++#endif
+     uint8_t next_rank[DNBX_VOICES]={0};

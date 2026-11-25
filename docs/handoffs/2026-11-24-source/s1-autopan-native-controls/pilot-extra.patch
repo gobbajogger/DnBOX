@@ -1,0 +1,260 @@
+--- a/firmware/src/app/project.c
++++ b/firmware/src/app/project.c
+@@ -23,6 +23,9 @@
+ /* Reuses the UI undo shadow while an exclusive project operation is active. */
+ #ifdef DNBOX_137_HOST_WITNESS
+ #include "sj6_137_host_witness.h"
++#ifdef X0X_HOST
++#include <string.h>
++#endif
+ #endif
+ project_t project_stage X0X_POOL;
+ 
+@@ -163,7 +166,7 @@
+ static uint64_t tuple_hash(const project_t *pr,uint8_t part_off)
+ {
+     settings_t set;
+-    __builtin_memcpy(&set,&pr->set,sizeof set);
++    memcpy(&set,&pr->set,sizeof set);
+     /* The independently persisted device Bluetooth bit is not project data. */
+     set.bt &= ~1u;
+     uint8_t domain[2]={STREAM137,part_off};
+@@ -681,7 +684,7 @@
+         for(unsigned mask=1;mask<(4u<<NSTREAM);++mask) {
+             if (!read_typed_tuple(pr,mask,device_bt)) {
+                 stream_previous=0;
+-                __builtin_memset(stored_known,0,sizeof stored_known);
++                memset(stored_known,0,sizeof stored_known);
+                 tuple_recovered=1;
+                 return 0;
+             }
+--- a/firmware/src/dsp/dnbx_core.c
++++ b/firmware/src/dsp/dnbx_core.c
+@@ -507,11 +507,17 @@
+     COUNT(w,frames,n);
+     const float osc_gain[]={gain1,gain2};
+     float filter_note[DNBX_VOICES];
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++    /* The admission profile rejects nonzero b2 and the host-only velocity
++       flag. Do not approximate a different sounding filter in the trial. */
++    if(fvel != 0.f) return DNBX_E_UNSUPPORTED;
++#else
+     if (fvel != 0.f) {
+         float inverse = 1.f - fvel;
+         for (unsigned i = 0; i < DNBX_VOICES; ++i)
+             filter_note[i] = fmaf(fvel,s->voice[i].velocity,inverse);
+     }
++#endif
+     dnbx_envelope_params linked[DNBX_LAYERS];
+     const dnbx_envelope_params *fp[DNBX_LAYERS];
+     for (unsigned l=0;l<DNBX_LAYERS;l++) fp[l]=filter_params(s,l,&linked[l]);
+--- a/firmware/src/dsp/juno6_factory.inc
++++ b/firmware/src/dsp/juno6_factory.inc
+@@ -353,6 +353,10 @@
+ 
+ /* The normal (non-OTA) build-9 direct cutoff target. Source computes
+  * normalized division and square in Float, then multiplies and adds in Double. */
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++#include "sj6_cutoff_port.h"
++#include "sj6_lfo_double_port.h"
++#endif
+ static float sj6_normal_cutoff_hz(float x)
+ {
+     static const float hi[]={.1f,.3f,.5f,.7f,.9f};
+@@ -361,7 +365,11 @@
+     while (seg<5u && x>hi[seg]) ++seg;
+     float u=(x-(seg ? hi[seg-1u]:0.f))/((seg==0u||seg==5u)?.1f:.2f);
+     float squared=u*u;
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++    return sj6_cutoff_port_round(squared,base[seg],base[seg+1u]-base[seg]);
++#else
+     return (float)((double)base[seg]+(double)squared*(base[seg+1u]-base[seg]));
++#endif
+ }
+ 
+ float juno6_mod_cutoff_hz(unsigned value)
+@@ -839,12 +847,19 @@
+ static float osc_level_gain(unsigned code)
+ { return code ? ((float)(code-1u) / 127.f) * .808f : 1.f; }
+ 
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++#include "sj6_velocity_scale.inc"
++#endif
+ int juno6_set_filter_velocity(juno6_t *s,unsigned position)
+ {
+     if (position>127u) return 0;
++    s->filter_velocity_position=(uint8_t)position;
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++    s->filter_velocity_scale=sj6_velocity_scale[position];
++#else
+     const float raw=(float)position / 127.f;
+-    s->filter_velocity_position=(uint8_t)position;
+     s->filter_velocity_scale=(float)((double)raw * 1.1);
++#endif
+     return 1;
+ }
+ 
+@@ -951,11 +966,19 @@
+ {
+     const float amount=s->wheel_lfo1_amount ? (float)(s->wheel_lfo1_amount-1u)/127.f:s->core.raw[89u];
+     const float eps=0x1.0624dep-11f;
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++    if(amount>.01f) {
++#else
+     if((double)amount>.01) {
++#endif
+         unsigned index=((unsigned)(phase>>32)+64u)&255u;
+         float wave=index<128u ? index*(1.f/64.f)-1.f:3.f-index*(1.f/64.f);
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++        float target=sj6_lfo_port(s->lfo1_pwm_base,amount,(int)(wave*64.f));
++#else
+         double candidate=(double)s->lfo1_pwm_base+(double)wave*(double)amount*.5;
+         float target=(float)(candidate<0. ? 0.:candidate>1. ? 1.:candidate);
++#endif
+         s->lfo1_cut_target=target;
+         if(s->lfo1_cut_force) {
+             s->lfo1_cut_force=s->lfo1_cut_active=0;
+@@ -1025,8 +1048,12 @@
+         else {
+             unsigned rotated=(*index+64u)&255u;
+             float wave=rotated<128u ? rotated*(1.f/64.f)-1.f:3.f-rotated*(1.f/64.f);
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++            raw=sj6_lfo_port(base,depth,(int)(wave*64.f));
++#else
+             double v=(double)base+((double)wave*(double)depth)*.5;
+             raw=(float)(v<0. ? 0.:v>1. ? 1.:v);
++#endif
+         }
+         (void)dnbx_pwm_from_unit(raw, &layer->pulse_width);
+         unsigned count = until_tick / tick_hz;
+--- /dev/null
++++ b/firmware/src/dsp/sj6_cutoff_port.h
+@@ -0,0 +1,36 @@
++/* SPDX-License-Identifier: GPL-3.0-only */
++#pragma once
++#include <stdint.h>
++/* Build9 cutoff: round64(base + round64(square * span)), narrow to
++ * binary32. square >= 0, base>=20, 20<=base+span<=20000.
++ * The product of a binary32 significand and a uint16 is exact in
++ * binary64. Positive Q49 holds all retained double bits for base>=20;
++ * a sticky bit records any smaller fraction for the double rounding. */
++static inline float sj6_cutoff_port_round(float square,uint32_t base,uint32_t span)
++{
++    union {float f;uint32_t u;} s={.f=square}, result;
++    unsigned k=s.u>>23;
++    uint64_t p=(uint64_t)((s.u&0x7fffffu)|(k?0x800000u:0u))*span;
++    int shift=k ? (int)k-101 : -100;
++    uint64_t q=(uint64_t)base<<49;
++    unsigned sticky=0;
++    if(shift>=0) q+=p<<(unsigned)shift;
++    else{
++        unsigned r=(unsigned)-shift;
++        uint64_t retained=r>=64u?0:p>>r;
++        q+=retained;
++        sticky=p!=(r>=64u?0:retained<<r);
++    }
++    unsigned e=31u-(unsigned)__builtin_clz((uint32_t)(q>>49));
++    unsigned d=e-3;
++    uint64_t dv=q>>d, rem=q-(dv<<d), half=UINT64_C(1)<<(d-1);
++    dv+=rem>half||(rem==half&&(sticky||(dv&1u)));
++    q=dv<<d;
++    e=31u-(unsigned)__builtin_clz((uint32_t)(q>>49));
++    d=e+26;
++    uint64_t fv=q>>d;
++    rem=q-(fv<<d);half=UINT64_C(1)<<(d-1);
++    fv+=rem>half||(rem==half&&(fv&1u));
++    result.u=((e+126u)<<23)+(uint32_t)fv; /* carry into the next exponent naturally */
++    return result.f;
++}
+--- /dev/null
++++ b/firmware/src/dsp/sj6_velocity_scale.inc
+@@ -0,0 +1,35 @@
++/* Original Build9 velocity law, generated by generate-velocity.c. */
++static const float sj6_velocity_scale[128]={
++ 0x0p+0f, 0x1.1bd13cp-7f, 0x1.1bd13cp-6f, 0x1.a9b9dap-6f,
++ 0x1.1bd13cp-5f, 0x1.62c58cp-5f, 0x1.a9b9dap-5f, 0x1.f0ae2ap-5f,
++ 0x1.1bd13cp-4f, 0x1.3f4b64p-4f, 0x1.62c58cp-4f, 0x1.863fb4p-4f,
++ 0x1.a9b9dap-4f, 0x1.cd3402p-4f, 0x1.f0ae2ap-4f, 0x1.0a1428p-3f,
++ 0x1.1bd13cp-3f, 0x1.2d8e5p-3f, 0x1.3f4b64p-3f, 0x1.510878p-3f,
++ 0x1.62c58cp-3f, 0x1.74829ep-3f, 0x1.863fb4p-3f, 0x1.97fcc6p-3f,
++ 0x1.a9b9dap-3f, 0x1.bb76eep-3f, 0x1.cd3402p-3f, 0x1.def116p-3f,
++ 0x1.f0ae2ap-3f, 0x1.01359ep-2f, 0x1.0a1428p-2f, 0x1.12f2b2p-2f,
++ 0x1.1bd13cp-2f, 0x1.24afc6p-2f, 0x1.2d8e5p-2f, 0x1.366cd8p-2f,
++ 0x1.3f4b64p-2f, 0x1.4829eep-2f, 0x1.510878p-2f, 0x1.59e702p-2f,
++ 0x1.62c58cp-2f, 0x1.6ba414p-2f, 0x1.74829ep-2f, 0x1.7d6128p-2f,
++ 0x1.863fb4p-2f, 0x1.8f1e3ep-2f, 0x1.97fcc6p-2f, 0x1.a0db5p-2f,
++ 0x1.a9b9dap-2f, 0x1.b29864p-2f, 0x1.bb76eep-2f, 0x1.c45576p-2f,
++ 0x1.cd3402p-2f, 0x1.d6128cp-2f, 0x1.def116p-2f, 0x1.e7cfap-2f,
++ 0x1.f0ae2ap-2f, 0x1.f98cb2p-2f, 0x1.01359ep-1f, 0x1.05a4e2p-1f,
++ 0x1.0a1428p-1f, 0x1.0e836ep-1f, 0x1.12f2b2p-1f, 0x1.1761f8p-1f,
++ 0x1.1bd13cp-1f, 0x1.20408p-1f, 0x1.24afc6p-1f, 0x1.291f0ap-1f,
++ 0x1.2d8e5p-1f, 0x1.31fd94p-1f, 0x1.366cd8p-1f, 0x1.3adc1ep-1f,
++ 0x1.3f4b64p-1f, 0x1.43baaap-1f, 0x1.4829eep-1f, 0x1.4c9934p-1f,
++ 0x1.510878p-1f, 0x1.5577bcp-1f, 0x1.59e702p-1f, 0x1.5e5646p-1f,
++ 0x1.62c58cp-1f, 0x1.6734dp-1f, 0x1.6ba414p-1f, 0x1.70135ap-1f,
++ 0x1.74829ep-1f, 0x1.78f1e4p-1f, 0x1.7d6128p-1f, 0x1.81d06cp-1f,
++ 0x1.863fb4p-1f, 0x1.8aaef8p-1f, 0x1.8f1e3ep-1f, 0x1.938d82p-1f,
++ 0x1.97fcc6p-1f, 0x1.9c6c0cp-1f, 0x1.a0db5p-1f, 0x1.a54a96p-1f,
++ 0x1.a9b9dap-1f, 0x1.ae291ep-1f, 0x1.b29864p-1f, 0x1.b707a8p-1f,
++ 0x1.bb76eep-1f, 0x1.bfe632p-1f, 0x1.c45576p-1f, 0x1.c8c4bcp-1f,
++ 0x1.cd3402p-1f, 0x1.d1a348p-1f, 0x1.d6128cp-1f, 0x1.da81d2p-1f,
++ 0x1.def116p-1f, 0x1.e3605ap-1f, 0x1.e7cfap-1f, 0x1.ec3ee4p-1f,
++ 0x1.f0ae2ap-1f, 0x1.f51d6ep-1f, 0x1.f98cb2p-1f, 0x1.fdfbf8p-1f,
++ 0x1.01359ep+0f, 0x1.036d4p+0f, 0x1.05a4e2p+0f, 0x1.07dc86p+0f,
++ 0x1.0a1428p+0f, 0x1.0c4bccp+0f, 0x1.0e836ep+0f, 0x1.10bb1p+0f,
++ 0x1.12f2b2p+0f, 0x1.152a54p+0f, 0x1.1761f8p+0f, 0x1.19999ap+0f,
++};
+--- /dev/null
++++ b/firmware/src/dsp/sj6_lfo_double_port.h
+@@ -0,0 +1,51 @@
++/* SPDX-License-Identifier: GPL-3.0-only */
++#pragma once
++#include <stdint.h>
++static inline int sj6_msb64(uint64_t n) {
++    uint32_t hi=(uint32_t)(n>>32), lo=(uint32_t)n;
++    return hi ? 63-__builtin_clz(hi) : lo ? 31-__builtin_clz(lo) : -1;
++}
++static inline uint64_t sj6_qshift(uint64_t n,int shift,unsigned *tail) {
++    if(shift>=0) return n<<shift;
++    unsigned r=(unsigned)-shift;
++    uint64_t q=r<64 ? n>>r:0;
++    *tail=n!=(r<64?q<<r:0);
++    return q;
++}
++/* Exact binary32 endpoint of the original Double sum, for positive
++ * normalized base and depth and integer triangle sample -64..64. */
++static inline float sj6_lfo_port(float base,float depth,int sample) {
++    union {float f; uint32_t u;} b={.f=base}, d={.f=depth},out;
++    if(!sample||!d.u) return base;
++    unsigned be=b.u>>23, de=d.u>>23;
++    uint32_t bm=(b.u&0x7fffffu)|(be?0x800000u:0u);
++    uint32_t dm=((d.u&0x7fffffu)|(de?0x800000u:0u))*(uint32_t)(sample<0?-sample:sample);
++    int bx=be?(int)be-150:-149,dx=(de?(int)de-150:-149)-7;
++    int bh=bm?bx+sj6_msb64(bm):-200, dh=dx+sj6_msb64(dm);
++    int scale=60-(bh>dh?bh:dh);
++    unsigned bt=0, dt=0;
++    uint64_t bv=bm?sj6_qshift(bm,bx+scale,&bt):0;
++    uint64_t dv=sj6_qshift(dm,dx+scale,&dt);
++    int64_t pl=(int64_t)bv+(sample<0?-(int64_t)dv:(int64_t)dv);
++    if(pl<=0) return 0.f;
++    uint64_t q=(uint64_t)pl;
++    int sticky=(int)bt+(sample<0?-(int)dt:(int)dt);
++    int n=sj6_msb64(q)-52;
++    if(n>0) {
++        uint64_t top=q>>n, rem=q-(top<<n), half=UINT64_C(1)<<(n-1);
++        top+=rem>half||(rem==half&&(sticky>0||(sticky==0&&(top&1u))));
++        q=top<<n;
++    }
++    int h=sj6_msb64(q), e=h-scale;
++    if(e>=0) return 1.f;
++    n=e>=-126 ? h-23 : scale-149;
++    uint64_t top;
++    if(n>=64) return 0.f;
++    if(n<=0) top=q<<-n;
++    else {
++        top=q>>n;uint64_t rem=q-(top<<n), half=UINT64_C(1)<<(n-1);
++        top+=rem>half||(rem==half&&(top&1u));
++    }
++    out.u=(e>=-126?(uint32_t)(e+126)<<23:0)+(uint32_t)top;
++    return out.f;
++}
