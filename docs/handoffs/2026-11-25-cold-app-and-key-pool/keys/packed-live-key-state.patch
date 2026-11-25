@@ -1,0 +1,96 @@
+--- a/tree/firmware/src/app/ui.c
++++ b/tree/firmware/src/app/ui.c
+@@ -7258,7 +7258,9 @@
+ 
+ /* 37 physical identities, not indices into the legacy 27-key tables. */
+ typedef struct {
+-    uint8_t pitch[37],velocity[37],accent[37],down[37],order[37],n;
++    /* MIDI payloads are seven-bit. The free high pitch bit records an
++     * accepted press; high velocity bit stores the original accent. */
++    uint8_t pitch[37],velocity[37],order[37],n;
+     uint64_t suppressed;
+ } ui_live_keys_t;
+ static ui_live_keys_t live_keys[NBASS] X0X_POOL;
+@@ -7297,9 +7299,9 @@
+ static int live_send(int b,unsigned physical,int on,int slide)
+ {
+     ui_live_keys_t *k=&live_keys[b];
+-    if(engine_live_key(b,live_generation,(int)live_token(physical),k->pitch[physical],
+-        on?k->velocity[physical]:0,k->accent[physical],slide)) {
+-        if(on){live_intent|=(uint8_t)(1u<<b);live_intent_generation[b]=live_generation;k->down[physical]=2;}
++    if(engine_live_key(b,live_generation,(int)live_token(physical),k->pitch[physical]&127u,
++        on?(k->velocity[physical]&127u):0,k->velocity[physical]>>7,slide)) {
++        if(on){live_intent|=(uint8_t)(1u<<b);live_intent_generation[b]=live_generation;k->pitch[physical]|=128u;}
+         return 1;
+     }
+     ui_live_cancel_voice(b);return 0;
+@@ -7313,7 +7315,7 @@
+     int b=live_owner;ui_live_keys_t *k=&live_keys[b];
+     int owns=(live_intent&(1u<<b)) && live_intent_generation[b]==live_generation;
+     if(velocity) {
+-        if(k->down[physical] || (k->suppressed&bit))return;
++        if((k->pitch[physical]&128u) || (k->suppressed&bit))return;
+         if(k->n>=UI_BASS_HELD_MAX){k->suppressed|=bit;return;}
+ #if X0X_S1_KEYBOARD_HOLD
+         if((proj.set.bt & PROJ_S1_WHITE_KEYS) && engine_bass_bank(b)==ORIGINAL_SOUND_SYNTHONE) {
+@@ -7336,20 +7338,24 @@
+         }
+ #endif
+ #endif
+-        k->pitch[physical]=(uint8_t)pitch;k->velocity[physical]=(uint8_t)velocity;
+-        k->accent[physical]=(uint8_t)!!(ui.btn&(1u<<B_ENV));k->down[physical]=1;
++        /* A press is published synchronously from this foreground call;
++         * success sets its high bit, failure cancels the owner and clears
++         * its inventory. No persistent in-between DOWN state exists. */
++        const uint8_t p7=(uint8_t)pitch, v7=(uint8_t)velocity;
++        k->pitch[physical]=p7;
++        k->velocity[physical]=(uint8_t)(v7|((!!(ui.btn&(1u<<B_ENV)))<<7));
+         unsigned old=k->n;k->order[k->n++]=(uint8_t)physical;
+         (void)old;
++        if((p7|v7)&128u){ui_live_cancel_voice(b);return;}
+         if (!live_send(b, physical, 1, 0)) return;
+     } else {
+-        if(!k->down[physical])return;
++        if(!(k->pitch[physical]&128u))return;
+         unsigned i=0;while(i<k->n && k->order[i]!=physical)i++;
+-        int latest=i+1==k->n,active=k->down[physical]==2;k->down[physical]=0;
++        k->pitch[physical]&=127u;
+         if(i<k->n){for(unsigned j=i+1;j<k->n;j++)k->order[j-1]=k->order[j];k->n--;}
+-        (void)latest;
+-        if (owns && active && !live_send(b, physical, 0, 0)) return;
++        if (owns && !live_send(b, physical, 0, 0)) return;
+     }
+-    if(k->n){unsigned last=k->order[k->n-1];kbd_held_note[b]=k->pitch[last];kbd_held_key[b]=(uint8_t)live_token(last);}
++    if(k->n){unsigned last=k->order[k->n-1];kbd_held_note[b]=k->pitch[last]&127u;kbd_held_key[b]=(uint8_t)live_token(last);}
+     else kbd_held_note[b]=kbd_held_key[b]=0;
+     bass_rec_step[b]=0;
+ }
+@@ -7361,8 +7367,8 @@
+         int last=k->n?k->order[k->n-1]:-1;
+         /* Remove missing older keys first: fallback must never transiently
+          * resurrect another key already released in this same snapshot. */
+-        for(unsigned p=0;p<37;p++)if((int)p!=last && k->down[p] && !(physical&((uint64_t)1u<<p)))live_edge(p,0,0);
+-        if(last>=0 && k->down[last] && !(physical&((uint64_t)1u<<last)))live_edge((unsigned)last,0,0);
++        for(unsigned p=0;p<37;p++)if((int)p!=last && (k->pitch[p]&128u) && !(physical&((uint64_t)1u<<p)))live_edge(p,0,0);
++        if(last>=0 && (k->pitch[last]&128u) && !(physical&((uint64_t)1u<<last)))live_edge((unsigned)last,0,0);
+     }
+ }
+ /* Entry precedes controls; exit cuts off old publication on any context edit.
+@@ -7392,7 +7398,7 @@
+         plat_outer_keys(live_outer,&physical,&overflow,live_epoch,owner>=0,ui.oct,1);
+         live_octave=ui.oct;
+         if(owner>=0) {
+-            for(unsigned p=0;p<37;p++)if(!live_keys[owner].down[p] && (physical&((uint64_t)1u<<p)))
++            for(unsigned p=0;p<37;p++)if(!(live_keys[owner].pitch[p]&128u) && (physical&((uint64_t)1u<<p)))
+                 live_keys[owner].suppressed|=(uint64_t)1u<<p;
+         }
+         live_reconcile(physical);return;
+@@ -7420,7 +7426,7 @@
+     live_boundary(0);
+     /* A legacy pad/key press accepted before Free Play still owns its original
+      * release. It was never admitted into the new physical-key registry. */
+-    if(!down)for(int b=0;b<NBASS;b++)if(!live_keys[b].down[p] && !live_keys[b].n) {
++    if(!down)for(int b=0;b<NBASS;b++)if(!(live_keys[b].pitch[p]&128u) && !live_keys[b].n) {
+         int legacy=kbd_held_key[b]==key+1;
+         for(unsigned i=0;i<kbd_arp_n[b];i++)legacy|=kbd_arp_key[b][i]==key+1;
+         if(legacy){live_keys[b].suppressed&=~bit;return 0;}

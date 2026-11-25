@@ -1,0 +1,155 @@
+--- a/tree/firmware/src/app/sj6_137_host_witness.h
++++ b/tree/firmware/src/app/sj6_137_host_witness.h
+@@ -792,13 +792,19 @@
+ #endif
+     0u;
+ #undef OWNER_BIT
+-  uint64_t nonzero=0;
+-  for(unsigned i=4;i<64;i++){
+-   const uint8_t x=s->v[T_303][8+2*v+i/32][i%32];
+-   if(x>maxbyte[i])return 0;
+-   nonzero|=(uint64_t)!!x<<i;
++  /* The same exact bounds and ownership sets, scanned a real storage row
++   * at a time. No 64-bit per-byte shift/accumulation is needed on PI32. */
++  const uint64_t forbidden=(s1_init?0u:s1_only)|(j6_init?0u:j6_only);
++  for(unsigned row=0;row<2;row++){
++   const uint8_t *x=s->v[T_303][8u+2u*v+row], *limits=maxbyte+32u*row;
++   unsigned bits=row?(uint32_t)(forbidden>>32):(uint32_t)forbidden;
++   unsigned off=row?0u:4u;
++   bits>>=off;
++   for(unsigned i=off;i<32;i++,bits>>=1){
++    unsigned value=x[i];
++    if(value>limits[i] || (value && (bits&1u)))return 0;
++   }
+   }
+-  if((!s1_init && (nonzero&s1_only)) || (!j6_init && (nonzero&j6_only)))return 0;
+ #if X0X_SJ6_NATIVE_RANDOM2
+   if(b[SJ6_ARP_RANDOM_BYTE]==1u)return 0;
+ #endif
+--- a/tree/firmware/src/app/project.c
++++ b/tree/firmware/src/app/project.c
+@@ -815,15 +815,19 @@
+             return -1;
+     if (p->sound.v[T_FX][1][0] > 127)       /* UI's derived TAPE control */
+         return -1;
+-    for (t = 0; t < NTARGETS; t++)
+-        for (v = 0; v < engine_nvoices(t); v++)
+-            for (i = 0; i < engine_nparams(t, v); i++)
+-                if (
++    for (t = 0; t < NTARGETS; t++) {
+ #if X0X_BASS_TAGGED_SOUND
+-                    t!=T_303 &&
++        if(t==T_303)continue; /* already checked by engine_bass_sound_validate */
+ #endif
+-                    p->sound.v[t][v][i] > engine_param(t, v, i)->max)
++        const int voices=engine_nvoices(t);
++        for (v = 0; v < voices; v++) {
++            const int n=engine_nparams(t,v);
++            const uint8_t *value=p->sound.v[t][v];
++            for (i = 0; i < n; i++)
++                if (value[i] > engine_param(t, v, i)->max)
+                     return -1;
++        }
++    }
+     for (k = 0; k < NPAT; k++) {
+         const pattern_t *pat = &p->pat[k];
+         if (pat->swing > 100)
+@@ -881,16 +885,22 @@
+ #else
+             if(engine_bass_note_validate(l))return -1;
+ #endif
+-            for(int j=0;j<k;j++)if(p->arr.lane[j].used && p->arr.lane[j].t==l->t &&
+-                p->arr.lane[j].pat==l->pat && p->arr.lane[j].part==l->part && p->arr.lane[j].v==l->v)return -1;
+-            continue;
+-        }
++        } else
+ #endif
+         if(l->t==HELD_CHORD_TARGET) {
+             if(!held_chord_lane_valid(l))return -1;
+-            for(int j=0;j<k;j++)if(p->arr.lane[j].used && p->arr.lane[j].t==l->t &&
+-                p->arr.lane[j].pat==l->pat && p->arr.lane[j].part==l->part &&
+-                p->arr.lane[j].v==l->v && p->arr.lane[j].i==l->i)return -1;
++        }
++        if(l->t==HELD_CHORD_TARGET
++#if X0X_BASS_NOTE_SOUND
++           || l->t==BASS_NOTE_TARGET
++#endif
++        ) {
++            /* NOTE intentionally ignores its tagged index for ownership;
++             * held chord addresses include the index. Same duplicate rules. */
++            for(const lane_t *prior=p->arr.lane;prior<l;++prior)
++                if(prior->used && prior->t==l->t && prior->pat==l->pat &&
++                   prior->part==l->part && prior->v==l->v &&
++                   (l->t!=HELD_CHORD_TARGET || prior->i==l->i)) return -1;
+             continue;
+         }
+         if (l->t == T_PROB) {
+--- a/tree/firmware/src/dsp/juno6.c
++++ b/tree/firmware/src/dsp/juno6.c
+@@ -1,6 +1,14 @@
+ /* SPDX-License-Identifier: GPL-3.0-only */
+ #include "juno6.h"
+ #include "juno6_controls.h"
++#include "juno6_aux_catalog.h"
++const uint8_t sj6_aux_destination_ids[SJ6_AUX_ORIGINAL_LAST+1u]={
++        0,78,79,129,1,3,57,
++        207,7,36,66,65,23,22,108,37,26,27,25,132,133,135,136,134,131,35,124,207,
++        125,74,72,1,126,75,73,3,89,88,97,96,101,100,0,201,39,8,143,144,202,38,
++        103,104,60,61,14,15,13,145,147,148,149,150,151,152,153,154,155,156,
++        157,158,159,160,161,162,207,17,78,79
++    };
+ #include <math.h>
+ #include "fastmath.h"
+ #include <string.h>
+--- a/tree/firmware/src/dsp/juno6_aux_catalog.h
++++ b/tree/firmware/src/dsp/juno6_aux_catalog.h
+@@ -9,14 +9,8 @@
+ static inline int sj6_aux_seq_id(unsigned id)
+ { return id==65u || id==66u || (id>=143u && id<=145u) || (id>=147u && id<=162u); }
+ #endif
++extern const uint8_t sj6_aux_destination_ids[SJ6_AUX_ORIGINAL_LAST+1u];
+ static inline int sj6_aux_destination_id(unsigned route)
+ {
+-    static const uint8_t ids[]={
+-        0,78,79,129,1,3,57,
+-        207,7,36,66,65,23,22,108,37,26,27,25,132,133,135,136,134,131,35,124,207,
+-        125,74,72,1,126,75,73,3,89,88,97,96,101,100,0,201,39,8,143,144,202,38,
+-        103,104,60,61,14,15,13,145,147,148,149,150,151,152,153,154,155,156,
+-        157,158,159,160,161,162,207,17,78,79
+-    };
+-    return route && route<sizeof ids && ids[route]!=207u ? ids[route] : -1;
++    return route && route<sizeof sj6_aux_destination_ids && sj6_aux_destination_ids[route]!=207u ? sj6_aux_destination_ids[route] : -1;
+ }
+--- a/link-guarded-exact.py
++++ b/link-guarded-exact.py
+@@ -335,6 +335,7 @@
+ b.ORIGINAL_SYNTH_OZ_UNITS |= {'chicago_selector','chicago_arp_control','chicago_note_context','miami_geometry','miami_fx_conversion'}
+ b.CFLAGS.extend(Path(os.environ['DNBOX_CONTROL_FLAGS']).read_text().split())
+ if os.environ.get("DNBOX_CHICAGO_MOD_SPEED_COMPACT") == "1": b.CFLAGS.append("-DDNBOX_CHICAGO_MOD_SPEED_COMPACT=1")
++if os.environ.get("DNBOX_CHICAGO_DRIVE_COMPACT") == "1": b.CFLAGS.append("-DDNBOX_CHICAGO_DRIVE_COMPACT=1")
+ if os.environ.get("DNBOX_CHICAGO_MOD_PALETTE") == "1": b.CFLAGS.append("-DDNBOX_CHICAGO_MOD_PALETTE=1")
+ if os.environ.get("DNBOX_MIAMI_STOCK_CAP_COMPACT") == "1": b.CFLAGS.append("-DDNBOX_MIAMI_STOCK_CAP_COMPACT=1")
+ if os.environ.get("DNBOX_MIAMI_DECIMATOR_COMPACT") == "1": b.CFLAGS.append("-DDNBOX_MIAMI_DECIMATOR_COMPACT=1")
+--- a/tree/experiments/original_synth/chicago_drive.c
++++ b/tree/experiments/original_synth/chicago_drive.c
+@@ -1,6 +1,11 @@
+ /* SPDX-License-Identifier: GPL-3.0-only */
+ #include "chicago_drive.h"
+ #include "chicago_drive_private.h"
++#ifdef DNBOX_CHICAGO_DRIVE_COMPACT
++#define drive_word(i) ((i)==127u?32767:(int32_t)((i)*258u))
++#else
++#define drive_word(i) (original_drive_table[(i)])
++#endif
+ #include <limits.h>
+ #include <string.h>
+ static int32_t si(uint32_t u){return u<=INT32_MAX?(int32_t)u:(int32_t)((int64_t)u-4294967296LL);}
+@@ -16,7 +21,7 @@
+ void original_chicago_drive_reset(original_chicago_drive *s){if(!s)return;s->drive=shl(s->target_drive,15);s->gain=shl(s->target_gain,15);s->threshold=0;memset(s->previous_driven,0,sizeof s->previous_driven);memset(s->previous_nonlinear,0,sizeof s->previous_nonlinear);}
+ int original_chicago_drive_set(original_chicago_drive *s,unsigned parameter,unsigned value){
+  if(!s||value>127||(parameter!=2&&parameter!=3))return 0;
+- if(parameter==2){s->edit1=(uint8_t)value;s->target_drive=original_drive_table[value];}
++ if(parameter==2){s->edit1=(uint8_t)value;s->target_drive=drive_word(value);}
+  else{s->edit2=(uint8_t)value;s->target_gain=1279+asr(mul(original_drive_gain_table[value],31489),15);}
+  return 1;
+ }

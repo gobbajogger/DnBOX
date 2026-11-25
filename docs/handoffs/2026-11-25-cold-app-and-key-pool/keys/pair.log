@@ -1,0 +1,28 @@
+Miami decimator wet 128/128 exact a7d0f57804777b16ea8d658964f84e29a9846084af4e9c145116ba9ba4daa903; frequency 128/128 exact fd33324fa771553c8c45e339c372526a1b160a623cf5e5e252e005ced09d472f; stored 26 B, arithmetic on init/set only
+Miami stock cap: 129/129 exact binary32; full 30877e17… compact 91184fe7…
+gen_drum_samples: 110549 frames (55275 bytes of ADPCM, 221098 as int16) -> x0x_drum_samples.h; tanh 1026 packed 4104->3046 B + 19 pot curves lossless-predictor 9728->1387 B -> x0x_drum_tables.h
+gen_drum_samples: 110549 frames (55275 bytes of ADPCM, 221098 as int16) -> x0x_drum_samples.h; tanh 1026 packed 4104->3046 B + 19 pot curves lossless-predictor 9728->1387 B -> x0x_drum_tables.h
+XDATA linked-sha256 elite .rodata.original_sound_miami_params 216 17726c23f6103351fa1e999df7500e5ae483d3c4fc11602945013400627f931e
+slot3-metadata linked-sha256 elite .rodata.original_miami_mappings 480 1f73ab1035c1d55187b9d2c01565f5ce7164c8a076a381f2bd79b6df6d301811
+slot3-metadata linked-sha256 elite .rodata.original_chicago_mappings 464 c22fcdbca04bf027191c2dcb4485611767daf4b016928497c99235644018e118
+slot3-metadata linked-sha256 elite .rodata.sj6_knob_desc.knobs 504 894ad3f8ccb8f5c5f0cf6e2af7ff6a6e53265daf07cfd85923416ab31492ce0c
+slot3-metadata linked-sha256 elite .rodata.original_sound_juno_params 216 79a57d0691b3b8d810c2a2797e94613f7e189a42632c5a7e2b7f9ae30527636f
+slot3-metadata linked-sha256 elite .rodata.patch_parameters 496 d4b9d757a2edfb5631521ff89736d27c317c8dabc3b9d13d1c899db9ad4c8a77
+slot3-metadata linked-sha256 elite .rodata.sj6_aux_route_labels 276 6611fdd6c19c06eb51f3f45d704d0af6dce173c01a0d393d3c04cf45ccc44871
+slot3-metadata linked-sha256 elite .rodata.rd_panel_sj6_ref.fixed 312 4196b08f27c12512cb36c191ec75acb62ddc21d9c307b4b833b16aede8c08097
+slot3-metadata linked-sha256 elite .rodata.page_titles 344 dc033fbe5a0c4146f4263173985ea230e7d276746eaf242c460cc3a3201d78da
+slot3-metadata linked-sha256 elite .rodata.d9_cp_p 96 ddf903994a6107ade140e28d86ebcbf7799ad064b2b17eb1b1f83e73a9d0a0f5
+slot3-metadata span elite 32764 remaining 4
+guarded elite XIP 552176 free 496 pool usable 564 read-only FDATA 61432 diagnostic slot3 span 32764 slot3 free 4 read-only FITTAB 4072 header 443952440200000001000000d8ef00007def59ef930f0473536d9e07eab27c4b ELF d4765fd95f494fccbd260fb9c7fd629cc9df6f43031352f445f26c54f69cc030
+XDATA linked-sha256 pro .rodata.original_sound_miami_params 216 53eecd0e1c14f34fd65c360814c896afbe907e0aabc0ed22e0a1fbaa018beeba
+slot3-metadata linked-sha256 pro .rodata.original_miami_mappings 480 1f73ab1035c1d55187b9d2c01565f5ce7164c8a076a381f2bd79b6df6d301811
+slot3-metadata linked-sha256 pro .rodata.original_chicago_mappings 464 c22fcdbca04bf027191c2dcb4485611767daf4b016928497c99235644018e118
+slot3-metadata linked-sha256 pro .rodata.sj6_knob_desc.knobs 504 bdff87b7171d114f18eb2e82d50623ba102301be6d32db0e1fa362d98b7c916e
+slot3-metadata linked-sha256 pro .rodata.original_sound_juno_params 216 b801e55f84beefc8a93367d0c41ce5220ce622b5ad07f3f79c8b9b12b1039cf4
+slot3-metadata linked-sha256 pro .rodata.patch_parameters 496 a5b98d6867d4161dc3340a695f1d62c402238ee0eaf7895e22e3e1527bd4424e
+slot3-metadata linked-sha256 pro .rodata.sj6_aux_route_labels 276 d7f8e246e924643527aee958567772fc7db4f7654933864a5a3823fd1cff752c
+slot3-metadata linked-sha256 pro .rodata.rd_panel_sj6_ref.fixed 312 4196b08f27c12512cb36c191ec75acb62ddc21d9c307b4b833b16aede8c08097
+slot3-metadata linked-sha256 pro .rodata.page_titles 344 9f57cbf575a07b677603dfb32ebd54a6d389681a69677eb13adbca5d0663b3d7
+slot3-metadata linked-sha256 pro .rodata.d9_cp_p 96 d1747622d83d8a2abb13cbb121d066b90a04346dd8fbe2c9a60eefd45109e86b
+slot3-metadata span pro 32764 remaining 4
+guarded pro XIP 552164 free 508 pool usable 564 read-only FDATA 61432 diagnostic slot3 span 32764 slot3 free 4 read-only FITTAB 4072 header 443952440200000002000000d8ef00007def59efcae08cab961cb06738d834f6 ELF e05e523411eff9e3b631f6ceeb8a76b8ff5fd2c75b630242182dad7a3d1cede9
