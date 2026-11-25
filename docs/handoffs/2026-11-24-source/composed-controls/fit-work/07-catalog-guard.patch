@@ -1,0 +1,24 @@
+--- a/firmware/src/dsp/juno6_factory.inc
++++ b/firmware/src/dsp/juno6_factory.inc
+@@ -1368,6 +1368,13 @@
+ {
+     if(!route)return 1;
+     const int id=sj6_aux_destination_id(route);
++#if X0X_SJ6_NATIVE_LIMITER && X0X_SJ6_ALT3_NATIVE && X0X_SJ6_NATIVE_UNISON && \
++    X0X_SJ6_NATIVE_ROOM && X0X_SJ6_NATIVE_DELAY && X0X_SJ6_AUX_SEQ_NATIVE && \
++    X0X_SJ6_MONO32_PROBE && X0X_SJ6_NOISE_SUB_NATIVE
++    /* With every receiver compiled, the original table itself is the
++     * whitelist: all 68 live entries and six legacy aliases have routes. */
++    return id>=0;
++#else
+     return id>=0 && (route<7u || id==1 || id==3 || id==78 || id==79 ||
+            sj6_aux_fx_supported(id) || juno6_aux_core_supported((unsigned)id) ||
+            sj6_aux_servo_slot((unsigned)id)>=0
+@@ -1378,6 +1385,7 @@
+            || id==35
+ #endif
+            );
++#endif
+ }
+ float juno6_aux_master_gain(float raw){return master_from_raw(raw);}
+ __attribute__((noinline)) float juno6_aux_capture_base(const juno6_t *s,unsigned route)

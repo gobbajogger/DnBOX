@@ -1,0 +1,184 @@
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -3607,6 +3607,18 @@
+     }
+ }
+ #endif
++/* Fixed typed synth references share T_303 and the committed owner. Pack
++ * only kind and slot for each position; zero still emits a literal NONE. */
++static __attribute__((noinline,minsize)) void add_typed_bass_page(
++    page_emitter_t *emit, page_title_id_t title, int owner,const uint16_t *spec)
++{
++    pref_t refs[4];
++    for(unsigned i=0;i<4;i++){
++        unsigned k=spec[i];
++        refs[i]=k?PR(k>>8,T_303,owner,k&255u):NONE;
++    }
++    add_page_refs(emit,title,refs,0,0);
++}
+ static void describe_pages(pages_t *out, page_query_t *query, int view, int p, int mixsel, const uint8_t *selection)
+ {
+     page_emitter_t output = {out, query, GR_NONE};
+@@ -3774,67 +3786,72 @@
+                 add_original_extra_pages(emit, pages, sizeof pages / sizeof *pages, b, R_SJ6KNOB);
+ #if X0X_SJ6_LFO_TRIGGER_NATIVE
+                 if(live137(&proj.sound,b) && sj6_aux_init(&proj.sound,b))
+-                    add_page(emit,PT_SJ6_LFO_TRIGGER,PR(R_SJ6AUX,T_303,b,9),PR(R_SJ6AUX,T_303,b,10),
+-                        PR(R_SJ6AUX,T_303,b,11),PR(R_SJ6AUX,T_303,b,13));
++                    do { static const uint16_t c[]={((unsigned)R_SJ6AUX<<8)|(9),((unsigned)R_SJ6AUX<<8)|(10),((unsigned)R_SJ6AUX<<8)|(11),((unsigned)R_SJ6AUX<<8)|(13)};
++                    add_typed_bass_page(emit,PT_SJ6_LFO_TRIGGER,b,c); } while(0);
+ #endif
+ #if X0X_SJ6_PITCH_ENV_NATIVE
+                 _Static_assert(sizeof pages / sizeof *pages + 4u <= MAXPAGES,
+                                "Pitch ADSR and amount must leave ARP and SOUND pages");
+                 if(live137(&proj.sound,b) && sj6_pitch_init(&proj.sound,b)) {
+-                    add_page(emit,PT_SJ6_PITCH_ENV,PR(R_SJ6PITCH,T_303,b,0),PR(R_SJ6PITCH,T_303,b,1),
+-                        PR(R_SJ6PITCH,T_303,b,2),PR(R_SJ6PITCH,T_303,b,3));
++                    do { static const uint16_t c[]={((unsigned)R_SJ6PITCH<<8)|(0),((unsigned)R_SJ6PITCH<<8)|(1),((unsigned)R_SJ6PITCH<<8)|(2),((unsigned)R_SJ6PITCH<<8)|(3)};
++                    add_typed_bass_page(emit,PT_SJ6_PITCH_ENV,b,c); } while(0);
+ #if X0X_SJ6_AUX_LFO_NATIVE
+-                    if(sj6_aux_init(&proj.sound,b)) add_page(emit,PT_PITCH_MOD,PR(R_SJ6PITCH,T_303,b,4),
+-                        PR(R_SJ6AUX,T_303,b,7),PR(R_SJ6AUX,T_303,b,8),NONE);
++                    if(sj6_aux_init(&proj.sound,b)) do { static const uint16_t c[]={((unsigned)R_SJ6PITCH<<8)|(4),((unsigned)R_SJ6AUX<<8)|(7),((unsigned)R_SJ6AUX<<8)|(8),0};
++                    add_typed_bass_page(emit,PT_PITCH_MOD,b,c); } while(0);
+                     else
+ #endif
+-                    add_page(emit,PT_PITCH_MOD,PR(R_SJ6PITCH,T_303,b,4),NONE,NONE,NONE);
++                    do { static const uint16_t c[]={((unsigned)R_SJ6PITCH<<8)|(4),0,0,0};
++                    add_typed_bass_page(emit,PT_PITCH_MOD,b,c); } while(0);
+                 }
+ #endif
+ #if defined(X0X_SJ6_BEND_TYPED_PROBE) && X0X_SJ6_BEND_TYPED_PROBE
+                 if (live137(&proj.sound,b))
+ #if defined(DNBOX_137_HOST_WITNESS) && defined(X0X_SJ6_MOD_TYPED_PROBE)
+ #if X0X_SJ6_VELOCITY_SETTINGS
+-                    add_page(emit,PT_WHEELS,PR(R_SJ6PB,T_303,b,0),PR(R_SJ6PB,T_303,b,1),PR(R_SJ6MOD,T_303,b,0),PR(R_SJ6INPUTVEL,T_303,b,0));
++                    do { static const uint16_t c[]={((unsigned)R_SJ6PB<<8)|(0),((unsigned)R_SJ6PB<<8)|(1),((unsigned)R_SJ6MOD<<8)|(0),((unsigned)R_SJ6INPUTVEL<<8)|(0)};
++                    add_typed_bass_page(emit,PT_WHEELS,b,c); } while(0);
+ #else
+-                    add_page(emit,PT_WHEELS,PR(R_SJ6PB,T_303,b,0),PR(R_SJ6PB,T_303,b,1),PR(R_SJ6MOD,T_303,b,0),NONE);
++                    do { static const uint16_t c[]={((unsigned)R_SJ6PB<<8)|(0),((unsigned)R_SJ6PB<<8)|(1),((unsigned)R_SJ6MOD<<8)|(0),0};
++                    add_typed_bass_page(emit,PT_WHEELS,b,c); } while(0);
+ #endif
+ #else
+-                    add_page(emit,PT_WHEELS,PR(R_SJ6PB,T_303,b,0),PR(R_SJ6PB,T_303,b,1),NONE,NONE);
++                    do { static const uint16_t c[]={((unsigned)R_SJ6PB<<8)|(0),((unsigned)R_SJ6PB<<8)|(1),0,0};
++                    add_typed_bass_page(emit,PT_WHEELS,b,c); } while(0);
+ #endif
+ #endif
+ #if defined(X0X_SJ6_MONO32_PROBE) && X0X_SJ6_MONO32_PROBE
+ #if X0X_SJ6_VELOCITY_SETTINGS
+-                if(engine_sj6_mono32_get(b,0)>=0)add_page(emit,PT_VOICE,PR(R_SJ6MONO32,T_303,b,0),PR(R_SJ6MONO32,T_303,b,1),PR(R_SJ6MONO32,T_303,b,2),PR(R_SJ6INPUTVEL,T_303,b,1));
++                if(engine_sj6_mono32_get(b,0)>=0)do { static const uint16_t c[]={((unsigned)R_SJ6MONO32<<8)|(0),((unsigned)R_SJ6MONO32<<8)|(1),((unsigned)R_SJ6MONO32<<8)|(2),((unsigned)R_SJ6INPUTVEL<<8)|(1)};
++                    add_typed_bass_page(emit,PT_VOICE,b,c); } while(0);
+ #else
+-                if(engine_sj6_mono32_get(b,0)>=0)add_page(emit,PT_VOICE,PR(R_SJ6MONO32,T_303,b,0),PR(R_SJ6MONO32,T_303,b,1),PR(R_SJ6MONO32,T_303,b,2),NONE);
++                if(engine_sj6_mono32_get(b,0)>=0)do { static const uint16_t c[]={((unsigned)R_SJ6MONO32<<8)|(0),((unsigned)R_SJ6MONO32<<8)|(1),((unsigned)R_SJ6MONO32<<8)|(2),0};
++                    add_typed_bass_page(emit,PT_VOICE,b,c); } while(0);
+ #endif
+ #endif
+ #if X0X_SJ6_NATIVE_UNISON
+                 if(engine_sj6_unison_get(b,0)>=0)
+-                    add_page(emit, PT_SJ6_UNISON, PR(R_SJ6UNISON,T_303,b,0),PR(R_SJ6UNISON,T_303,b,1),
+-                             PR(R_SJ6UNISON,T_303,b,2),PR(R_SJ6UNISON,T_303,b,3));
++                    do { static const uint16_t c[]={((unsigned)R_SJ6UNISON<<8)|(0),((unsigned)R_SJ6UNISON<<8)|(1),((unsigned)R_SJ6UNISON<<8)|(2),((unsigned)R_SJ6UNISON<<8)|(3)};
++                    add_typed_bass_page(emit,PT_SJ6_UNISON,b,c); } while(0);
+ #endif
+ #if X0X_SJ6_NATIVE_ROOM
+                 if (live137(&proj.sound,b)){
+-                    add_page(emit,PT_SJ6_ROOM,PR(R_SJ6ROOM,T_303,b,SJ6_ROOM_ENABLE),
+-                        PR(R_SJ6ROOM,T_303,b,SJ6_ROOM_SIZE),PR(R_SJ6ROOM,T_303,b,SJ6_ROOM_LOCUT),
+-                        PR(R_SJ6ROOM,T_303,b,SJ6_ROOM_MIX));
+-                    add_page(emit,PT_SJ6_STEREO_FX,PR(R_SJ6ROOM,T_303,b,SJ6_ROOM_TYPE),
+-                        PR(R_SJ6ROOM,T_303,b,SJ6_ROOM_WIDEN),PR(R_SJ6ROOM,T_303,b,SJ6_ROOM_RATE),
+-                        PR(R_SJ6ROOM,T_303,b,SJ6_ROOM_DEPTH));
+-                    add_page(emit,PT_EFFECT,PR(R_SJ6CRUSH,T_303,b,0),PR(R_SJ6CRUSH,T_303,b,1),NONE,NONE);
++                    do { static const uint16_t c[]={((unsigned)R_SJ6ROOM<<8)|(SJ6_ROOM_ENABLE),((unsigned)R_SJ6ROOM<<8)|(SJ6_ROOM_SIZE),((unsigned)R_SJ6ROOM<<8)|(SJ6_ROOM_LOCUT),((unsigned)R_SJ6ROOM<<8)|(SJ6_ROOM_MIX)};
++                    add_typed_bass_page(emit,PT_SJ6_ROOM,b,c); } while(0);
++                    do { static const uint16_t c[]={((unsigned)R_SJ6ROOM<<8)|(SJ6_ROOM_TYPE),((unsigned)R_SJ6ROOM<<8)|(SJ6_ROOM_WIDEN),((unsigned)R_SJ6ROOM<<8)|(SJ6_ROOM_RATE),((unsigned)R_SJ6ROOM<<8)|(SJ6_ROOM_DEPTH)};
++                    add_typed_bass_page(emit,PT_SJ6_STEREO_FX,b,c); } while(0);
++                    do { static const uint16_t c[]={((unsigned)R_SJ6CRUSH<<8)|(0),((unsigned)R_SJ6CRUSH<<8)|(1),0,0};
++                    add_typed_bass_page(emit,PT_EFFECT,b,c); } while(0);
+                 }
+ #endif
+ #if X0X_SJ6_OTA_NATIVE
+                 if(live137(&proj.sound,b))
+-                    add_page(emit,PT_FILTER_MODE,PR(R_SJ6OTA,T_303,b,0),NONE,NONE,NONE);
++                    do { static const uint16_t c[]={((unsigned)R_SJ6OTA<<8)|(0),0,0,0};
++                    add_typed_bass_page(emit,PT_FILTER_MODE,b,c); } while(0);
+ #endif
+ #if X0X_SJ6_NATIVE_LIMITER
+                 if(live137(&proj.sound,b))
+-                    add_page(emit,PT_SJ6_LIMITER,PR(R_SJ6LIMITER,T_303,b,SJ6_LIM_THRESH),
+-                        PR(R_SJ6LIMITER,T_303,b,SJ6_LIM_HEADROOM),PR(R_SJ6LIMITER,T_303,b,SJ6_LIM_ATTACK),
+-                        PR(R_SJ6LIMITER,T_303,b,SJ6_LIM_GAIN));
++                    do { static const uint16_t c[]={((unsigned)R_SJ6LIMITER<<8)|(SJ6_LIM_THRESH),((unsigned)R_SJ6LIMITER<<8)|(SJ6_LIM_HEADROOM),((unsigned)R_SJ6LIMITER<<8)|(SJ6_LIM_ATTACK),((unsigned)R_SJ6LIMITER<<8)|(SJ6_LIM_GAIN)};
++                    add_typed_bass_page(emit,PT_SJ6_LIMITER,b,c); } while(0);
+ #endif
+                 first_row = UI_ORIGINAL_JUNO_PAGES;
+             }
+@@ -3930,18 +3947,18 @@
+ #else
+                         NONE);
+ #endif
+-                    add_page(emit,PT_REVERB,PR(R_S1CWG,T_303,b,0),PR(R_S1PATCH,T_303,b,S1_REVERB_HP),
+-                        PR(R_S1PATCH,T_303,b,S1_REVERB_MIX_LFO),PR(R_S1RVFB,T_303,b,0));
+-                    add_page(emit,PT_S1_MASTER_CMP,PR(R_S1CMP,T_303,b,0),PR(R_S1CMP,T_303,b,3),
+-                        PR(R_S1CMP,T_303,b,6),PR(R_S1CMP,T_303,b,9));
+-                    add_page(emit,PT_S1_RVIN_CMP,PR(R_S1CMP,T_303,b,1),PR(R_S1CMP,T_303,b,4),
+-                        PR(R_S1CMP,T_303,b,7),PR(R_S1CMP,T_303,b,10));
+-                    add_page(emit,PT_S1_WET_CMP,PR(R_S1CMP,T_303,b,2),PR(R_S1CMP,T_303,b,5),
+-                        PR(R_S1CMP,T_303,b,8),PR(R_S1CMP,T_303,b,11));
+-                    add_page(emit,PT_S1_CMP_GAIN,PR(R_S1CMP,T_303,b,12),PR(R_S1CMP,T_303,b,13),
+-                        PR(R_S1CWG,T_303,b,0),NONE);
+-                    add_page(emit,PT_FX_BYPASS,PR(R_S1PATCH,T_303,b,S1_DELAY_ON),
+-                        PR(R_S1PATCH,T_303,b,S1_REVERB_ON),NONE,NONE);
++                    do { static const uint16_t c[]={((unsigned)R_S1CWG<<8)|(0),((unsigned)R_S1PATCH<<8)|(S1_REVERB_HP),((unsigned)R_S1PATCH<<8)|(S1_REVERB_MIX_LFO),((unsigned)R_S1RVFB<<8)|(0)};
++                    add_typed_bass_page(emit,PT_REVERB,b,c); } while(0);
++                    do { static const uint16_t c[]={((unsigned)R_S1CMP<<8)|(0),((unsigned)R_S1CMP<<8)|(3),((unsigned)R_S1CMP<<8)|(6),((unsigned)R_S1CMP<<8)|(9)};
++                    add_typed_bass_page(emit,PT_S1_MASTER_CMP,b,c); } while(0);
++                    do { static const uint16_t c[]={((unsigned)R_S1CMP<<8)|(1),((unsigned)R_S1CMP<<8)|(4),((unsigned)R_S1CMP<<8)|(7),((unsigned)R_S1CMP<<8)|(10)};
++                    add_typed_bass_page(emit,PT_S1_RVIN_CMP,b,c); } while(0);
++                    do { static const uint16_t c[]={((unsigned)R_S1CMP<<8)|(2),((unsigned)R_S1CMP<<8)|(5),((unsigned)R_S1CMP<<8)|(8),((unsigned)R_S1CMP<<8)|(11)};
++                    add_typed_bass_page(emit,PT_S1_WET_CMP,b,c); } while(0);
++                    do { static const uint16_t c[]={((unsigned)R_S1CMP<<8)|(12),((unsigned)R_S1CMP<<8)|(13),((unsigned)R_S1CWG<<8)|(0),0};
++                    add_typed_bass_page(emit,PT_S1_CMP_GAIN,b,c); } while(0);
++                    do { static const uint16_t c[]={((unsigned)R_S1PATCH<<8)|(S1_DELAY_ON),((unsigned)R_S1PATCH<<8)|(S1_REVERB_ON),0,0};
++                    add_typed_bass_page(emit,PT_FX_BYPASS,b,c); } while(0);
+                     add_original_extra_pages(emit,s1_pages+effect_page+2,S1_EFFECT_PAGES-2,b,R_S1PATCH);
+                 } else
+ #endif
+@@ -3949,11 +3966,13 @@
+ #ifdef DNBOX_137_HOST_WITNESS
+ #if defined(X0X_S1_CRUSH_LFO_PROBE) && X0X_S1_CRUSH_LFO_PROBE
+ #if !DNBOX_TYPED_CONTROLS_NATIVE_TEST
+-                if (live_s1_mod(&proj.sound,b)) add_page(emit,PT_CRUSH_MOD,PR(R_S1CRUSH,T_303,b,0),NONE,NONE,NONE);
++                if (live_s1_mod(&proj.sound,b)) do { static const uint16_t c[]={((unsigned)R_S1CRUSH<<8)|(0),0,0,0};
++                    add_typed_bass_page(emit,PT_CRUSH_MOD,b,c); } while(0);
+ #endif
+ #endif
+ #if defined(X0X_S1_AUTOPAN_PROBE) && X0X_S1_AUTOPAN_PROBE
+-                if (live_s1_mod(&proj.sound,b)) add_page(emit,PT_AUTO_PAN,PR(R_S1PAN,T_303,b,0),PR(R_S1PAN,T_303,b,1),NONE,NONE);
++                if (live_s1_mod(&proj.sound,b)) do { static const uint16_t c[]={((unsigned)R_S1PAN<<8)|(0),((unsigned)R_S1PAN<<8)|(1),0,0};
++                    add_typed_bass_page(emit,PT_AUTO_PAN,b,c); } while(0);
+ #endif
+ #if X0X_S1_DELAY_TRACK_TEST
+                 /* Bind the owner from the described context, not the selected page. */
+@@ -3976,13 +3995,14 @@
+ #endif
+ #else
+ #if defined(X0X_S1_FEEDBACK_PROBE) && X0X_S1_FEEDBACK_PROBE
+-                if (live_s1_mod(&proj.sound,b)) add_page(emit,PT_DELAY,PR(R_S1DLFB,T_303,b,0),NONE,NONE,NONE);
++                if (live_s1_mod(&proj.sound,b)) do { static const uint16_t c[]={((unsigned)R_S1DLFB<<8)|(0),0,0,0};
++                    add_typed_bass_page(emit,PT_DELAY,b,c); } while(0);
+ #endif
+ #endif
+ #if DNBOX_TYPED_CONTROLS_NATIVE_TEST
+                 if (live_s1_mod(&proj.sound,b))
+-                    add_page(emit,PT_PHASER,PR(R_S1PHASER,T_303,b,0),PR(R_S1PHASER,T_303,b,1),
+-                        PR(R_S1PHASER,T_303,b,2),PR(R_S1PHASER,T_303,b,3));
++                    do { static const uint16_t c[]={((unsigned)R_S1PHASER<<8)|(0),((unsigned)R_S1PHASER<<8)|(1),((unsigned)R_S1PHASER<<8)|(2),((unsigned)R_S1PHASER<<8)|(3)};
++                    add_typed_bass_page(emit,PT_PHASER,b,c); } while(0);
+ #endif
+                 if (live_s1_mod(&proj.sound,b)) add_page(emit,PT_TUNING,PR(R_S1A4,T_303,b,0),PR(R_S1TRANS,T_303,b,0),
+ #if DNBOX_TYPED_CONTROLS_NATIVE_TEST

@@ -1,0 +1,256 @@
+--- a/firmware/src/dsp/dnbx_core.c
++++ b/firmware/src/dsp/dnbx_core.c
+@@ -580,6 +580,39 @@
+     return 1;
+ }
+ #endif
++/* Mono and poly use the same actual attack, including original routed
++ * oscillator masks, envelope retrigger, Vintage, and scale capture. */
++static __attribute__((noinline,minsize)) void note_attack(dnbx_part *s,dnbx_voice *v,unsigned velocity
++#if X0X_SJ6_SEQ_DEST_NATIVE
++    ,unsigned layers
++#endif
++    )
++{
++#if X0X_SJ6_SCALE_NATIVE
++    sj6_scale_attack(s,v);
++#endif
++    v->velocity=(float)velocity/127.0f;
++#if X0X_SJ6_PITCH_ENV_NATIVE
++    if(s->sj6_pitch_depth
++#if X0X_SJ6_AUX_LFO_NATIVE
++       || s->sj6_pitch_routed
++#endif
++      )envelope_on(&v->sj6_pitch,&s->sj6_pitch_param,s->sample_rate);
++#endif
++    for (unsigned l=0;l<DNBX_LAYERS;l++) {
++#if X0X_SJ6_SEQ_DEST_NATIVE
++        if (!(layers&(1u<<l))) continue;
++#endif
++        const dnbx_layer_params *p=&s->layer[l].params;
++#if X0X_SJ6_VINTAGE_NATIVE
++        sj6_vintage_attack(s,v,l);
++#endif
++        v->layer[l].increment=voice_pitch_increment(s,v,l,p->tune_semitones);
++        envelope_on(&v->layer[l].amp,&p->amp,s->sample_rate);
++        dnbx_envelope_params linked;
++        envelope_on(&v->layer[l].filter,filter_params(s,l,&linked),s->sample_rate);
++    }
++}
+ #if X0X_SJ6_RANDOM5_6_NATIVE
+ static __attribute__((noinline)) int note_on(dnbx_part *s,unsigned note,unsigned velocity,unsigned zero_on)
+ #else
+@@ -630,30 +663,11 @@
+ #if X0X_SJ6_SEQ_DEST_NATIVE
+     v->layer[0].amp.reserved=zero_on>1u ? (uint8_t)(4u | (zero_on>>1)) : 0u;
+ #endif
+-#if X0X_SJ6_SCALE_NATIVE
+-    sj6_scale_attack(s,v);
+-#endif
+-    v->velocity=(float)velocity/127.0f;
+-#if X0X_SJ6_PITCH_ENV_NATIVE
+-    if(s->sj6_pitch_depth
+-#if X0X_SJ6_AUX_LFO_NATIVE
+-       || s->sj6_pitch_routed
+-#endif
+-      )envelope_on(&v->sj6_pitch,&s->sj6_pitch_param,s->sample_rate);
+-#endif
+-    for (unsigned l=0;l<DNBX_LAYERS;l++) {
++    note_attack(s,v,velocity
+ #if X0X_SJ6_SEQ_DEST_NATIVE
+-        if (zero_on>1u && !((zero_on>>1)&(1u<<l))) continue;
+-#endif
+-        const dnbx_layer_params *p=&s->layer[l].params;
+-#if X0X_SJ6_VINTAGE_NATIVE
+-        sj6_vintage_attack(s,v,l);
++        ,zero_on>1u ? zero_on>>1 : 3u
+ #endif
+-        v->layer[l].increment=voice_pitch_increment(s,v,l,p->tune_semitones);
+-        envelope_on(&v->layer[l].amp,&p->amp,s->sample_rate);
+-        dnbx_envelope_params linked;
+-        envelope_on(&v->layer[l].filter,filter_params(s,l,&linked),s->sample_rate);
+-    }
++        );
+     return (int)chosen;
+ }
+ #if X0X_SJ6_RANDOM5_6_NATIVE
+@@ -696,30 +710,11 @@
+ #if X0X_SJ6_SEQ_DEST_NATIVE
+     v->layer[0].amp.reserved=(uint8_t)(layers&4u ? layers : 0u);
+ #endif
+-#if X0X_SJ6_SCALE_NATIVE
+-    sj6_scale_attack(s,v);
+-#endif
+-    v->velocity=(float)vel/127.f;
+-#if X0X_SJ6_PITCH_ENV_NATIVE
+-    if(s->sj6_pitch_depth
+-#if X0X_SJ6_AUX_LFO_NATIVE
+-       || s->sj6_pitch_routed
+-#endif
+-      )envelope_on(&v->sj6_pitch,&s->sj6_pitch_param,s->sample_rate);
+-#endif
+-    for(unsigned l=0;l<DNBX_LAYERS;l++){
++    note_attack(s,v,vel
+ #if X0X_SJ6_SEQ_DEST_NATIVE
+-        if (!(layers&(1u<<l))) continue;
++        ,layers
+ #endif
+-        const dnbx_layer_params *p=&s->layer[l].params;
+-#if X0X_SJ6_VINTAGE_NATIVE
+-        sj6_vintage_attack(s,v,l);
+-#endif
+-        v->layer[l].increment=voice_pitch_increment(s,v,l,p->tune_semitones);
+-        envelope_on(&v->layer[l].amp,&p->amp,s->sample_rate);
+-        dnbx_envelope_params linked;
+-        envelope_on(&v->layer[l].filter,filter_params(s,l,&linked),s->sample_rate);
+-    }
++        );
+     return 0;
+ }
+ #if X0X_SJ6_SEQ_DEST_NATIVE
+--- a/firmware/src/dsp/juno6_factory.inc
++++ b/firmware/src/dsp/juno6_factory.inc
+@@ -287,7 +287,7 @@
+ }
+ 
+ static float range_pitch(float x) { return x * 24.f - 12.f; }
+-static float typed_range_pitch(const juno6_t *s,float range)
++__attribute__((noinline,minsize)) static float typed_range_pitch(const juno6_t *s,float range)
+ {
+ #if X0X_SUPERJ6_BUILTIN_INIT
+ #if defined(X0X_SJ6_BEND_TYPED_PROBE) && X0X_SJ6_BEND_TYPED_PROBE
+@@ -319,7 +319,7 @@
+         (unsigned)(raw * SJ6_SEMI_MAX + .5f) : SJ6_SEMI_CENTER;
+ }
+ #endif
+-static float layer_tuning(const juno6_t *s, unsigned l, float pitch)
++__attribute__((noinline,minsize)) static float layer_tuning(const juno6_t *s, unsigned l, float pitch)
+ {
+ #if X0X_SUPERJ6_BUILTIN_INIT
+  const int semi = (int)juno6_layer_semi(s, l) - SJ6_SEMI_CENTER;
+@@ -330,7 +330,7 @@
+  return pitch;
+ }
+ 
+-static int apply_voice_tuning(juno6_t *s, float range)
++__attribute__((noinline,minsize)) static int apply_voice_tuning(juno6_t *s, float range)
+ {
+  const float pitch=typed_range_pitch(s,range);
+  for(unsigned l=0;l<DNBX_LAYERS;l++) {
+@@ -344,7 +344,7 @@
+ 
+ #if defined(X0X_SJ6_BEND_TYPED_PROBE) && X0X_SJ6_BEND_TYPED_PROBE
+ /* Original lower is a magnitude; the sign comes from normalized travel. */
+-static int sj6_pb_refresh(juno6_t *s)
++__attribute__((noinline,minsize)) static int sj6_pb_refresh(juno6_t *s)
+ {
+     float x=s->macro[16]-.5f;
+     return dnbx_set_superj6_bend(&s->core,2.f*x*(x<0.f?s->pb_down:s->pb_up))==DNBX_OK;
+@@ -397,7 +397,7 @@
+         out->hz=((s->lfo_tempo/60.f)*sj6_lfo_factors[out->division])*.25f;
+     }
+ }
+-static void read_lfo(const juno6_t *s, unsigned lfo, unsigned wheel, juno6_lfo_view *out)
++__attribute__((noinline,minsize)) static void read_lfo(const juno6_t *s, unsigned lfo, unsigned wheel, juno6_lfo_view *out)
+ {
+     *out = (juno6_lfo_view){0};
+     out->phase = s->lfo_phase_q40[lfo];
+@@ -414,7 +414,7 @@
+ void juno6_read_lfo(const juno6_t *s,unsigned lfo,juno6_lfo_view *out)
+ { read_lfo(s,lfo,0,out); }
+ 
+-static void set_lfo_word(dnbx_part *core, unsigned id, int present, float raw)
++__attribute__((noinline,minsize)) static void set_lfo_word(dnbx_part *core, unsigned id, int present, float raw)
+ {
+     if (present) (void)dnbx_store_raw(core, id, raw);
+     else {
+@@ -433,7 +433,7 @@
+     return (float)(position * 42949672u + (position * 96u + 50u) / 100u) * 0x1p-32f;
+ }
+ 
+-static void refresh_layer_tune(juno6_t *s, unsigned l)
++__attribute__((noinline,minsize)) static void refresh_layer_tune(juno6_t *s, unsigned l)
+ {
+     float range = .5f;
+     (void)dnbx_read_raw(&s->core, 86u, &range);
+@@ -971,17 +971,19 @@
+ 
+ static const uint8_t sj6_knob_ids[SJ6_OSC_KNOBS] = {82, 83, 86, 210, 78, 211, 79};
+ 
+-static float sj6_knob_raw(const juno6_t *s, unsigned slot)
++__attribute__((noinline,minsize)) static float sj6_knob_raw(const juno6_t *s, unsigned slot)
+ {
+     float raw = slot <= SJ6_WAVE2 ? 0x1.555556p-1f : slot == SJ6_RANGE ? .5f : 0.f;
+     (void)dnbx_read_raw(&s->core, sj6_knob_ids[slot], &raw);
+     return raw;
+ }
+ 
+-static void adsr_values_of(const dnbx_envelope_params *env, float out[4])
++__attribute__((noinline,minsize)) static float sj6_stage_raw(const dnbx_envelope_params *e,unsigned stage,unsigned filter)
+ {
+-    out[0] = env->attack_s; out[1] = env->decay_s;
+-    out[2] = env->sustain; out[3] = env->release_s;
++    if(stage==2u)return fm_powf(e->sustain,.4f);
++    float t=stage==0u?e->attack_s:stage==1u?e->decay_s:e->release_s;
++    return fm_clampf(fm_powf(fm_maxf(t-(filter && stage==3u?.202f:.002f),0.f)/
++                     (stage?23.998f:15.998f),1.f/(stage?3.35f:3.33f)),0.f,1.f);
+ }
+ 
+ unsigned juno6_knob_position(const juno6_t *s, unsigned slot)
+@@ -1010,13 +1012,8 @@
+         const dnbx_layer_params *p = &s->core.layer[0].params;
+         unsigned filter = slot >= SJ6_FILTER_ATTACK;
+         unsigned stage = slot - (filter ? SJ6_FILTER_ATTACK : SJ6_AMP_ATTACK);
+-        float values[4];
+-        adsr_values_of(filter ? &p->filter : &p->amp, values);
+-        float v = values[stage];
+-        if (stage == 2) v = fm_powf(v, .4f);
+-        else v = fm_powf(fm_maxf(v - (filter && stage == 3 ? .202f : .002f), 0.f) /
+-                        (stage == 0 ? 15.998f : 23.998f), 1.f / (stage == 0 ? 3.33f : 3.35f));
+-        return (unsigned)(fm_clampf(v, 0.f, 1.f) * 127.f + .5f);
++        const float v=sj6_stage_raw(filter?&p->filter:&p->amp,stage,filter);
++        return (unsigned)(fm_clampf(v,0.f,1.f)*127.f+.5f);
+     }
+     float raw = sj6_knob_raw(s, slot);
+     if (slot <= SJ6_WAVE2)
+@@ -1043,7 +1040,7 @@
+     if (mask & (1u << SJ6_RANGE)) juno6_apply_pre_note_range(s, p[SJ6_RANGE] * .5f);
+ }
+ 
+-static void apply_adsr(dnbx_envelope_params *env, unsigned mask, const float *physical)
++__attribute__((noinline,minsize)) static void apply_adsr(dnbx_envelope_params *env, unsigned mask, const float *physical)
+ {
+     if (mask & 1u) env->attack_s = physical[0];
+     if (mask & 2u) env->decay_s = physical[1];
+--- a/firmware/src/dsp/juno6_aux_core.inc
++++ b/firmware/src/dsp/juno6_aux_core.inc
+@@ -35,11 +35,9 @@
+     if(id==136u)return fm_clampf(p->filter_env_hz*(1.f/7000.f),0.f,1.f);
+     const unsigned filter=id>=132u, stage=id-(filter?132u:36u);
+     const dnbx_envelope_params *e=filter?&p->filter:&p->amp;
+-    if(stage==2u)return fm_powf(e->sustain,.4f);
+-    float t=stage==0u?e->attack_s:stage==1u?e->decay_s:e->release_s;
+-    if(filter && stage==3u)t-=.2f;
+-    return fm_clampf(fm_powf(fm_maxf(t-.002f,0.f)/
+-                     (stage?23.998f:15.998f),1.f/(stage?3.35f:3.33f)),0.f,1.f);
++    if(!filter || stage!=3u)return sj6_stage_raw(e,stage,filter);
++    return fm_clampf(fm_powf(fm_maxf((e->release_s-.2f)-.002f,0.f)/
++                     23.998f,1.f/3.35f),0.f,1.f);
+ }
+ typedef struct {
+     dnbx_layer_params layer[2];
+@@ -128,8 +126,12 @@
+         for(unsigned l=0;l<2u;l++){
+             dnbx_envelope_params amp=p->layer[l].params.amp,eg=p->layer[l].params.filter;
+             dnbx_envelope_params *e=filter?&eg:&amp;
+-            const float values[4]={physical,physical,physical,physical};
+-            apply_adsr(e,1u<<stage,values);
++            switch(stage){
++            case 0:e->attack_s=physical;break;
++            case 1:e->decay_s=physical;break;
++            case 2:e->sustain=physical;break;
++            default:e->release_s=physical;break;
++            }
+             dnbx_apply_panel_envelopes(p,l,&amp,&eg,p->filter_link);
+         }
+     }

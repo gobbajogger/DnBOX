@@ -1,0 +1,130 @@
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -1683,18 +1683,27 @@
+     remote_touch(0, (uint32_t)r->kind | (uint32_t)r->a << 8 | (uint32_t)r->b << 16 | (uint32_t)r->c << 24);
+ #endif
+ }
++/* Exact typed control admission, with the original per-control bounds.
++ * Not used for context-sensitive effects, ARP, actions or canonical adopt. */
++__attribute__((noinline)) X0X_COLD static void pref_choose2(pref_t r,int v,unsigned max,
++    int (*choose)(unsigned,unsigned))
++{
++    if(v>=0 && (unsigned)v<=max && !pref_read_only(r) && choose(r.b,(unsigned)v))mark_dirty();
++}
++__attribute__((noinline)) X0X_COLD static void pref_choose3(pref_t r,int v,unsigned max,
++    int (*choose)(unsigned,unsigned,unsigned))
++{
++    if(v>=0 && (unsigned)v<=max && !pref_read_only(r) && choose(r.b,r.c,(unsigned)v))mark_dirty();
++}
+ X0X_COLD static void pref_set_impl(pref_t r, int v, int from_keyboard)
+ {
+ #if X0X_SJ6_VCF_PORT
+-    if(r.kind==R_SJ6FILTER_EXTRA){
+-        if(v>=0 && v<=127 && !pref_read_only(r) && sj6_filter_control_choose(r.b,r.c,(unsigned)v))mark_dirty();
+-        return;
+-    }
++    if(r.kind==R_SJ6FILTER_EXTRA){pref_choose3(r,v,127,sj6_filter_control_choose);return;}
+ #endif
+ #if defined(DNBOX_137_HOST_WITNESS) && defined(X0X_SJ6_MOD_TYPED_PROBE)
+     if(r.kind==R_SJ6MOD){if(!pref_read_only(r)&&v!=pref_get(r)&&sj6_typed_mod_choose(r.b,(unsigned)v))mark_dirty();return;}
+ #if X0X_SJ6_VELOCITY_SETTINGS
+-    if(r.kind==R_SJ6INPUTVEL){if(v>=0&&!pref_read_only(r)&&sj6_input_velocity_choose(r.b,r.c,(unsigned)v))mark_dirty();return;}
++    if(r.kind==R_SJ6INPUTVEL){pref_choose3(r,v,~0u,sj6_input_velocity_choose);return;}
+ #endif
+ #endif
+ #if X0X_ARP_HOOKS
+@@ -1714,10 +1723,7 @@
+ #endif
+ #if X0X_SUPERJ6_BUILTIN_INIT
+ #if X0X_SJ6_PITCH_ENV_NATIVE
+-    if(r.kind==R_SJ6PITCH) {
+-        if(v>=0 && !pref_read_only(r) && sj6_pitch_choose(r.b,r.c,(unsigned)v))mark_dirty();
+-        return;
+-    }
++    if(r.kind==R_SJ6PITCH) {pref_choose3(r,v,~0u,sj6_pitch_choose);return;}
+ #endif
+ #if X0X_SJ6_AUX_LFO_NATIVE
+     if(r.kind==R_SJ6AUX){
+@@ -1736,19 +1742,16 @@
+ #if X0X_SYNTHONE_PATCH
+ #if DNBOX_TYPED_CONTROLS_NATIVE_TEST
+ #if X0X_SJ6_NATIVE_ROOM
+-    if(r.kind==R_SJ6CRUSH){
+-        if(v>=0 && !pref_read_only(r) && sj6_crush_choose(r.b,r.c,(unsigned)v))mark_dirty();
+-        return;
+-    }
+-    if(r.kind==R_SJ6ROOM){if(!pref_read_only(r) && v>=0 && sj6_native_room_choose(r.b,r.c,(unsigned)v))mark_dirty();return;}
++    if(r.kind==R_SJ6CRUSH){pref_choose3(r,v,~0u,sj6_crush_choose);return;}
++    if(r.kind==R_SJ6ROOM){pref_choose3(r,v,~0u,sj6_native_room_choose);return;}
+ #endif
+ #if X0X_SJ6_OTA_NATIVE
+-    if(r.kind==R_SJ6OTA){if(!pref_read_only(r) && v>=0 && v<=1 && sj6_ota_choose(r.b,(unsigned)v))mark_dirty();return;}
++    if(r.kind==R_SJ6OTA){pref_choose2(r,v,1,sj6_ota_choose);return;}
+ #endif
+ #if X0X_SJ6_NATIVE_LIMITER
+-    if(r.kind==R_SJ6LIMITER){if(!pref_read_only(r) && v>=0 && sj6_native_limiter_choose(r.b,r.c,(unsigned)v))mark_dirty();return;}
++    if(r.kind==R_SJ6LIMITER){pref_choose3(r,v,~0u,sj6_native_limiter_choose);return;}
+ #endif
+-    if(r.kind==R_S1CMP){if(!pref_read_only(r) && v>=0 && v<=127 && s1_cmp_choose(r.b,r.c,(unsigned)v))mark_dirty();return;}
++    if(r.kind==R_S1CMP){pref_choose3(r,v,127,s1_cmp_choose);return;}
+ #if X0X_S1_KEYBOARD_HOLD
+     if(r.kind==R_S1MIDIVEL){
+         if((unsigned)v<=1u) {
+@@ -1796,21 +1799,18 @@
+     }
+ #endif
+ #if X0X_S1_HALFTIME
+-    if(r.kind==R_S1HALF){
+-        if(v>=0 && v<=127 && !pref_read_only(r) && s1_half_choose(r.b,(unsigned)v))mark_dirty();
+-        return;
+-    }
++    if(r.kind==R_S1HALF){pref_choose2(r,v,127,s1_half_choose);return;}
+ #endif
+-    if(r.kind==R_S1AA){if(!pref_read_only(r) && v>=0 && v<=1 && s1_aa_choose(r.b,(unsigned)v))mark_dirty();return;}
+-    if(r.kind==R_S1CWG){if(!pref_read_only(r) && v>=0 && v<=S1_CWG_MAX && s1_typed_cwg_choose(r.b,(unsigned)v))mark_dirty();return;}
++    if(r.kind==R_S1AA){pref_choose2(r,v,1,s1_aa_choose);return;}
++    if(r.kind==R_S1CWG){pref_choose2(r,v,S1_CWG_MAX,s1_typed_cwg_choose);return;}
+ #if X0X_S1_CRUSH_LFO_PROBE
+-    if(r.kind==R_S1CRUSH){if(!pref_read_only(r) && v>=0 && v<=S1_CRUSH_LAST && s1_typed_crush_choose(r.b,(unsigned)v))mark_dirty();return;}
++    if(r.kind==R_S1CRUSH){pref_choose2(r,v,S1_CRUSH_LAST,s1_typed_crush_choose);return;}
+ #endif
+ #endif
+ #if DNBOX_TYPED_CONTROLS_NATIVE_TEST
+-    if(r.kind==R_S1DLYRES){if(!pref_read_only(r) && v>=0 && v<=S1_DELAY_RES_MAX && s1_delay_res_choose(r.b,(unsigned)v))mark_dirty();return;}
+-    if(r.kind==R_S1ENVLFO){if(!pref_read_only(r) && v>=0 && v<=S1_ENV_LFO_MAX && s1_env_lfo_choose(r.b,(unsigned)v))mark_dirty();return;}
+-    if(r.kind==R_S1PHASER){if(!pref_read_only(r) && v>=0 && v<=S1_PHASE_MAX && s1_phaser_choose(r.b,r.c,(unsigned)v))mark_dirty();return;}
++    if(r.kind==R_S1DLYRES){pref_choose2(r,v,S1_DELAY_RES_MAX,s1_delay_res_choose);return;}
++    if(r.kind==R_S1ENVLFO){pref_choose2(r,v,S1_ENV_LFO_MAX,s1_env_lfo_choose);return;}
++    if(r.kind==R_S1PHASER){pref_choose3(r,v,S1_PHASE_MAX,s1_phaser_choose);return;}
+ #endif
+ #if X0X_S1_DELAY_TIME_NATIVE
+     if(r.kind==R_S1DLYTIME){if(v>=0){int rc=s1_delay_time_choose(r.b,(unsigned)v);if(rc>0)mark_dirty();else if(rc<0)say("DELAY TIME LIMIT",0);}return;}
+@@ -6471,7 +6471,7 @@
+ #if X0X_SJ6_PITCH_ENV_NATIVE
+     if(r.kind==R_SJ6PITCH) {
+         const int pos=pref_get(r)+(e>0)-(e<0);
+-        if(e && pos>=0 && !pref_read_only(r) && sj6_pitch_choose(r.b,r.c,(unsigned)pos))mark_dirty();
++        if(e && pos>=0)pref_set(r,pos);
+         return;
+     }
+ #endif
+@@ -6654,17 +6654,14 @@
+     }
+     if(r.kind==R_S1PHASER){
+         int pos=pref_get(r)+(e>0)-(e<0);
+-        if(e && pos>=0 && pos<=S1_PHASE_MAX && !pref_read_only(r) && s1_phaser_choose(r.b,r.c,(unsigned)pos))mark_dirty();
++        if(e && pos>=0)pref_set(r,pos);
+         return;
+     }
+ #endif
+ #if X0X_S1_DELAY_TIME_NATIVE
+     if(r.kind==R_S1DLYTIME){
+         int pos=pref_get(r)+(e>0)-(e<0);
+-        if(e && pos>=0){
+-            int rc=s1_delay_time_choose(r.b,(unsigned)pos);
+-            if(rc>0)mark_dirty();else if(rc<0)say("DELAY TIME LIMIT",0);
+-        }
++        if(e && pos>=0)pref_set(r,pos);
+         return;
+     }
+ #endif

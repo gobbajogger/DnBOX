@@ -1,0 +1,71 @@
+--- a/firmware/src/app/original_runtime.c
++++ b/firmware/src/app/original_runtime.c
+@@ -991,38 +991,28 @@
+ /* Original MIDI transform: Float32 raw/127, then binary64 pow with
+  * 1/taper and truncate after multiplication by 127. Exact discrete map
+  * for Medium (1), Soft (.4), and Hard (4), including Float32 truncation. */
+-static const uint8_t sj6_midi_velocity[3][128]={
+-    {
+-        0,0,1,2,3,4,5,6,7,9,9,11,11,13,13,15,
+-        15,16,18,19,19,20,22,23,23,24,26,27,27,28,30,31,
+-        31,32,33,34,36,37,38,39,39,40,41,42,44,45,46,47,
+-        47,48,49,50,52,53,54,55,55,56,57,58,60,61,62,63,
+-        63,64,65,66,67,68,69,70,72,73,74,75,76,77,78,79,
+-        79,80,81,82,83,84,85,86,88,89,90,91,92,93,94,95,
+-        95,96,97,98,99,100,101,102,104,105,106,107,108,109,110,111,
+-        111,112,113,114,115,116,117,118,120,121,122,123,124,125,126,127,
+-    },
+-    {
+-        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+-        0,0,0,1,1,1,1,1,1,2,2,2,2,3,3,3,
+-        4,4,4,5,5,5,6,6,7,7,7,8,8,9,10,10,
+-        11,11,12,12,13,14,14,15,16,17,17,18,19,20,21,22,
+-        22,23,24,25,26,27,28,29,30,31,32,34,35,36,37,38,
+-        39,41,42,43,45,46,47,49,50,52,53,55,56,58,59,61,
+-        63,64,66,68,69,71,73,75,77,78,80,82,84,86,88,90,
+-        92,94,96,99,101,103,105,107,110,112,114,117,119,122,124,127,
+-    },
+-    {
+-        0,37,44,49,53,56,59,61,63,65,67,68,70,71,73,74,
+-        75,76,77,78,80,80,81,82,83,84,85,86,87,87,88,89,
+-        89,90,91,92,92,93,93,94,95,95,96,96,97,97,98,99,
+-        99,100,100,101,101,102,102,103,103,103,104,104,105,105,106,106,
+-        107,107,107,108,108,109,109,109,110,110,110,111,111,112,112,112,
+-        113,113,113,114,114,114,115,115,115,116,116,116,117,117,117,118,
+-        118,118,119,119,119,119,120,120,120,121,121,121,121,122,122,122,
+-        123,123,123,123,124,124,124,124,125,125,125,125,126,126,126,127,
+-    },
++static const uint32_t sj6_midi_medium_lsb[4]={0x333355feu,0x0f0f0f0fu,0x00ff00ffu,0x00ff00ffu};
++static const uint8_t sj6_midi_hard_head[8]={0,37,44,49,53,56,59,61};
++/* Groups of 8: first literal, followed by seven 2-bit exact deltas. */
++static const uint8_t sj6_midi_curved[31][3]={
++    {0,0,0},{0,0,0},{0,16,0},{1,1,1},
++    {4,16,4},{7,16,5},{11,68,17},{16,81,21},
++    {22,85,21},{30,101,21},{39,150,37},{50,102,38},
++    {63,105,42},{77,169,42},{92,186,42},{110,186,59},
++    {63,154,25},{75,149,20},{83,85,20},{89,21,17},
++    {95,68,20},{99,17,17},{103,68,4},{107,16,1},
++    {110,16,1},{113,16,4},{115,65,16},{118,4,4},
++    {120,1,1},{123,64,0},{125,64,16},
+ };
++static unsigned sj6_midi_velocity(unsigned curve,unsigned raw)
++{
++    if(!curve)return raw-((sj6_midi_medium_lsb[raw>>5]>>(raw&31u))&1u);
++    if(curve==2u && raw<8u)return sj6_midi_hard_head[raw];
++    const uint8_t *g=sj6_midi_curved[(raw>>3)+(curve==2u?15u:0u)];
++    unsigned value=g[0], digits=(unsigned)g[1] | ((unsigned)g[2]<<8);
++    for(unsigned i=raw&7u;i;--i,digits>>=2)value+=digits&3u;
++    return value;
++}
+ static int runtime_key_configured(original_runtime_part *p,unsigned source,unsigned key,unsigned velocity,unsigned code)
+ #endif
+ 
+@@ -1069,7 +1059,7 @@
+          * Its arp captures the authored velocity before this mapping. */
+         const unsigned curve=code%3u;
+         if(code<6u && source<ORIGINAL_INPUT_KEYS){
+-            velocity=sj6_midi_velocity[curve][velocity];
++            velocity=sj6_midi_velocity(curve,velocity);
+             /* A positive MIDI input can map to zero, while still meaning
+              * an attack and possessing a matching later Note Off. */
+             if(!velocity)return runtime_result(p,juno6_arp_zero_on(&p->dsp.juno.synth,(uint8_t)key));

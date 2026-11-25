@@ -1,0 +1,354 @@
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -2391,10 +2391,20 @@
+ }
+ 
+ /* the value, as a number and a unit ("-6" "dB"); a switch gives its name and no unit */
++static __attribute__((noinline,minsize)) void pref_integer_unit(
++    char *num,char *unit,int value,const char *suffix)
++{
++    put_i(num,value);put_s(unit,suffix);
++}
++static __attribute__((noinline,minsize)) void pref_decimal_unit(
++    char *num,char *unit,float value,int sign,const char *suffix)
++{
++    put_d1(num,value,sign);put_s(unit,suffix);
++}
+ X0X_COLD static void pref_value_of(pref_t r, int v, char *num, char *unit)
+ {
+ #if X0X_SJ6_AUX_LFO_NATIVE
+-    if(r.kind==R_SJ6AUX && r.c==4u){put_i(num,(int)(juno6_aux_delay_seconds((unsigned)v)*1000.f+.5f));put_s(unit,"ms");return;}
++    if(r.kind==R_SJ6AUX && r.c==4u){pref_integer_unit(num,unit,(int)(juno6_aux_delay_seconds((unsigned)v)*1000.f+.5f),"ms");return;}
+ #endif
+ #if X0X_S1_DELAY_TIME_NATIVE
+     if(r.kind==R_S1DLYTIME){
+@@ -2406,19 +2416,19 @@
+             if(pos<2u)put_s(num,pos?"1 BAR":"2 BAR");
+             else if(pos==2u)put_s(num,"1 BAR T");
+             else put_s(put_i(put_s(num,"1/"),1u<<((pos-1u)/2u)),!(pos&1u)?"T":"");
+-        } else {put_i(num,(int)(seconds*1000.f+.5f));put_s(unit,"ms");}
++        } else {pref_integer_unit(num,unit,(int)(seconds*1000.f+.5f),"ms");}
+         return;
+     }
+ #endif
+ #if DNBOX_TYPED_CONTROLS_NATIVE_TEST
+-    if(r.kind==R_S1DLYRES){put_i(num,(v*98+63)/127);put_s(unit,"%");return;}
++    if(r.kind==R_S1DLYRES){pref_integer_unit(num,unit,(v*98+63)/127,"%");return;}
+     if(r.kind==R_S1ENVLFO){
+         static const char *const labels[]={"OFF","LFO 1","LFO 2","BOTH"};
+         *unit=0;put_s(num,(unsigned)v<=S1_ENV_LFO_MAX?labels[v]:"--");return;
+     }
+     if(r.kind==R_S1PHASER){
+         float x=s1_phase_value(r.c,s1_phase_encode(r.c,(unsigned)v));
+-        if(r.c==0u || r.c==2u) {put_i(num,(int)(x*100.f+.5f));put_s(unit,"%");}
++        if(r.c==0u || r.c==2u) {pref_integer_unit(num,unit,(int)(x*100.f+.5f),"%");}
+         else {put_i(num,(int)(x+.5f));put_s(unit,r.c==1u?"/MIN":"Hz");}
+         return;
+     }
+@@ -2426,58 +2436,56 @@
+     const x0x_param_t *d = pref_desc(r);
+     *num = *unit = 0;
+ #if X0X_SJ6_ALT3_NATIVE
+-    if(r.kind==R_SJ6KNOB && r.c==SJ6_TREM_DEPTH){put_i(num,(v*100+63)/127);put_s(unit,"%");return;}
++    if(r.kind==R_SJ6KNOB && r.c==SJ6_TREM_DEPTH){pref_integer_unit(num,unit,(v*100+63)/127,"%");return;}
+     if(r.kind==R_SJ6KNOB && r.c==SJ6_TREM_RATE){
+         unsigned sync=0;
+ #if X0X_SJ6_NATIVE_DELAY
+         sync=engine_superj6_knob_position(r.b,SJ6_DELAYSYNC)>0;
+ #endif
+-        put_d1(num,juno6_alt3_panel_hz((unsigned)v,sync,seq_tempo(&seq)),0);
+-        put_s(unit,"Hz");return;
++        pref_decimal_unit(num,unit,juno6_alt3_panel_hz((unsigned)v,sync,seq_tempo(&seq)),0,"Hz");return;
+     }
+ #endif
+ #if X0X_SJ6_VCF_PORT
+-    if(r.kind==R_SJ6FILTER_EXTRA){put_i(num,(v*100+63)/127);put_s(unit,"%");return;}
++    if(r.kind==R_SJ6FILTER_EXTRA){pref_integer_unit(num,unit,(v*100+63)/127,"%");return;}
+ #endif
+ #if X0X_SJ6_NATIVE_ROOM
+-    if(r.kind==R_SJ6CRUSH && r.c){put_i(num,(v*100+63)/127);put_s(unit,"%");return;}
++    if(r.kind==R_SJ6CRUSH && r.c){pref_integer_unit(num,unit,(v*100+63)/127,"%");return;}
+ #endif
+ #if X0X_SJ6_MONO32_PROBE
+-    if(r.kind==R_SJ6MONO32&&r.c==2u){put_i(num,(500*v+63)/127);put_s(unit,"ms");return;}
++    if(r.kind==R_SJ6MONO32&&r.c==2u){pref_integer_unit(num,unit,(500*v+63)/127,"ms");return;}
+ #endif
+ #ifdef DNBOX_137_HOST_WITNESS
+ #if defined(X0X_S1_AUTOPAN_PROBE) && X0X_S1_AUTOPAN_PROBE
+     if(r.kind==R_S1PAN) {
+-        if(!r.c){put_i(num,(v*100+63)/127);put_s(unit,"%");return;}
++        if(!r.c){pref_integer_unit(num,unit,(v*100+63)/127,"%");return;}
+         unsigned pos,max;int sync;float hz;
+         if(!s1_typed_pan_read(r.b,&pos,&max,&sync,&hz)) {put_s(num,"--");return;}
+         if(sync) {
+             static const uint8_t bars[]={8,6,4,3,2,1,1};
+             if(pos<sizeof bars) put_s(put_i(num,bars[pos]),pos==6?" BAR T":" BAR");
+             else put_s(put_i(put_s(num,"1/"),1u<<((pos-5u)/2u)),!(pos&1u)?"T":"");
+-        } else if(hz<1.f){put_i(num,(int)(hz*1000.f+.5f));put_s(unit,"mHz");}
+-        else {put_d1(num,hz,0);put_s(unit,"Hz");}
++        } else if(hz<1.f){pref_integer_unit(num,unit,(int)(hz*1000.f+.5f),"mHz");}
++        else {pref_decimal_unit(num,unit,hz,0,"Hz");}
+         return;
+     }
+ #endif
+ #if X0X_S1_DELAY_TRACK_TEST
+-    if(r.kind==R_S1DICT) { put_i(num,50+v);put_s(unit,"%");return; }
++    if(r.kind==R_S1DICT) { pref_integer_unit(num,unit,50+v,"%");return; }
+ #endif
+ #if DNBOX_TYPED_CONTROLS_NATIVE_TEST
+ #if X0X_SJ6_NATIVE_ROOM
+     if(r.kind==R_SJ6ROOM && r.c<SJ6_ROOM_COUNT){
+         if(r.c==SJ6_ROOM_TYPE)put_s(num,v?"II":"I");
+         else if(sj6_room_max(r.c)==1u)put_s(num,v?"ON":"OFF");
+-        else if(r.c==SJ6_ROOM_LOCUT){put_i(num,(int)(sj6_room_locut((unsigned)v)+.5f));put_s(unit,"Hz");}
++        else if(r.c==SJ6_ROOM_LOCUT){pref_integer_unit(num,unit,(int)(sj6_room_locut((unsigned)v)+.5f),"Hz");}
+         else if(r.c==SJ6_ROOM_RATE){
+             int sync=0;
+ #if X0X_SJ6_NATIVE_DELAY
+             sync=engine_superj6_knob_position(r.b,SJ6_DELAYSYNC)>0;
+ #endif
+-            put_d1(num,sj6_room_rate_clocked((unsigned)v,seq_tempo(&seq),sync),0);
+-            put_s(unit,"Hz");
++            pref_decimal_unit(num,unit,sj6_room_rate_clocked((unsigned)v,seq_tempo(&seq),sync),0,"Hz");
+         }
+-        else {put_i(num,(100*v+63)/127);put_s(unit,"%");}
++        else {pref_integer_unit(num,unit,(100*v+63)/127,"%");}
+         return;
+     }
+ #endif
+@@ -2487,23 +2495,23 @@
+ #if X0X_SJ6_NATIVE_LIMITER
+ #if X0X_SJ6_VINTAGE_NATIVE
+     if(r.kind==R_SJ6LIMITER && r.c==SJ6_VINTAGE_SLOT){
+-        put_d1(num,dnbx_sj6_vintage_cents((unsigned)v),1);put_s(unit,"cent");return;
++        pref_decimal_unit(num,unit,dnbx_sj6_vintage_cents((unsigned)v),1,"cent");return;
+     }
+ #endif
+     if(r.kind==R_SJ6LIMITER && r.c<SJ6_LIM_COUNT){
+         unsigned c=(unsigned)v==sj6_limiter_position(r.c,0)?0u:(unsigned)v+1u;
+         float x=sj6_limiter_value(r.c,c);
+-        if(r.c==SJ6_LIM_ATTACK){put_d1(num,x*1000.f,0);put_s(unit,"ms");}
+-        else {put_d1(num,x,1);put_s(unit,"dB");}
++        if(r.c==SJ6_LIM_ATTACK){pref_decimal_unit(num,unit,x*1000.f,0,"ms");}
++        else {pref_decimal_unit(num,unit,x,1,"dB");}
+         return;
+     }
+ #endif
+     if(r.kind==R_S1CMP && r.c<S1_CMP_COUNT) {
+         float x=s1_cmp_physical(r.c,(unsigned)v);
+-        if(r.c<3u){put_d1(num,x,0);put_s(unit,":1");}
+-        else if(r.c<6u){put_d1(num,x,1);put_s(unit,"dB");}
+-        else if(r.c<12u){put_d1(num,x*1000.f,0);put_s(unit,"ms");}
+-        else {put_i(num,(int)(x*100.f+.5f));put_s(unit,"%");}
++        if(r.c<3u){pref_decimal_unit(num,unit,x,0,":1");}
++        else if(r.c<6u){pref_decimal_unit(num,unit,x,1,"dB");}
++        else if(r.c<12u){pref_decimal_unit(num,unit,x*1000.f,0,"ms");}
++        else {pref_integer_unit(num,unit,(int)(x*100.f+.5f),"%");}
+         return;
+     }
+ #if X0X_S1_KEYBOARD_HOLD
+@@ -2526,11 +2534,11 @@
+ #endif
+ #if X0X_S1_HALFTIME
+     if(r.kind==R_S1HALF){
+-        put_d1(num,s1_half_value((unsigned)v)*1000.f,1);put_s(unit,"ms");return;
++        pref_decimal_unit(num,unit,s1_half_value((unsigned)v)*1000.f,1,"ms");return;
+     }
+ #endif
+     if(r.kind==R_S1AA) { put_s(num,v?"ON":"OFF");return; }
+-    if(r.kind==R_S1CWG) { put_i(num,v==S1_CWG_INIT ? 188 : 50+(350*v+63)/127);put_s(unit,"%");return; }
++    if(r.kind==R_S1CWG) { pref_integer_unit(num,unit,v==S1_CWG_INIT ? 188 : 50+(350*v+63)/127,"%");return; }
+ #endif
+ #if defined(X0X_S1_FEEDBACK_PROBE) && X0X_S1_FEEDBACK_PROBE
+     if(r.kind==R_S1DLFB) {
+@@ -2540,29 +2548,29 @@
+         put_s(unit,"%");return;
+     }
+ #endif
+-    if(r.kind==R_S1TRANS) {put_i(num,v-24);put_s(unit,"st");return;}
+-    if(r.kind==R_S1RVFB) {put_i(num,(v*100+64)/128);put_s(unit,"%");return;}
+-    if(r.kind==R_S1A4) {put_i(num,v+410);put_s(unit,"Hz");return;}
++    if(r.kind==R_S1TRANS) {pref_integer_unit(num,unit,v-24,"st");return;}
++    if(r.kind==R_S1RVFB) {pref_integer_unit(num,unit,(v*100+64)/128,"%");return;}
++    if(r.kind==R_S1A4) {pref_integer_unit(num,unit,v+410,"Hz");return;}
+ #endif
+     if (!d || r.kind == R_ACT)
+         return;
+ #if X0X_ARP_HOOKS
+ #if X0X_S1_FENCED_CLOCK
+     if (r.kind == R_ARP && r.a == ARP_F_SOURCE_RATE) {
+-        put_i(num, v + 1); put_s(unit, "BPM"); return;
++        pref_integer_unit(num,unit,v + 1,"BPM"); return;
+     }
+ #endif
+     if (r.kind == R_ARP && r.a == ARP_F_GATE) {
+ #if (defined(X0X_SJ6_ZERO_GATE_PROBE) && X0X_SJ6_ZERO_GATE_PROBE) || X0X_SJ6_NATIVE_ZERO_GATE
+-        if(live137(&proj.sound,r.b)){put_i(num,v);put_s(unit,"%");return;}
++        if(live137(&proj.sound,r.b)){pref_integer_unit(num,unit,v,"%");return;}
+ #endif
+-        put_i(num, v + 1); put_s(unit, "%"); return;
++        pref_integer_unit(num,unit,v + 1,"%"); return;
+     }
+ #endif
+ #if X0X_SYNTHONE_PATCH
+ #if defined(X0X_SJ6_BEND_TYPED_PROBE) && X0X_SJ6_BEND_TYPED_PROBE
+     if (r.kind==R_SJ6PB) {
+-        put_i(num,pref_get(r)-(r.c?0:48)); put_s(unit,"st"); return;
++        pref_integer_unit(num,unit,pref_get(r)-(r.c?0:48),"st"); return;
+     }
+ #endif
+     if (r.kind == R_S1PATCH) {
+@@ -2577,7 +2585,7 @@
+         }
+ #if X0X_S1_EXTRA
+ #if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
+-        if (s1_bend_slot(r.c)) { put_i(num, (int)physical); put_s(unit, "st"); return; }
++        if (s1_bend_slot(r.c)) { pref_integer_unit(num,unit,(int)physical,"st"); return; }
+ #endif
+         if (s1_lfo_rate_slot(r.c) && owner.max_position < S1_PATCH_STEPS) {
+             static const uint8_t bars[] = {8, 6, 4, 3, 2, 1, 1};
+@@ -2601,8 +2609,8 @@
+         if (r.c == S1_SUB_WAVE) { put_s(num, physical > 0.f ? "SQUARE" : "SINE"); return; }
+         if (s1_fx_gate_slot(r.c)) { put_s(num, owner.position ? "ON" : "OFF"); return; }
+         if (r.c == S1_VOICE_MODE) { put_s(num, owner.position ? "MONO" : "POLY"); return; }
+-        if (r.c == S1_MONO_GLIDE) { put_i(num, (int)(1000.f*physical + .5f)); put_s(unit, "ms"); return; }
+-        if (r.c == S1_OSC2_DETUNE) { put_d1(num, physical, 1); put_s(unit, "Hz@C4"); return; }
++        if (r.c == S1_MONO_GLIDE) { pref_integer_unit(num,unit,(int)(1000.f*physical + .5f),"ms"); return; }
++        if (r.c == S1_OSC2_DETUNE) { pref_decimal_unit(num,unit,physical,1,"Hz@C4"); return; }
+         if (r.c == S1_FM_INDEX) { put_d1(num, physical, 0); return; }
+         if (r.c == S1_CUTOFF_LFO || r.c == S1_DETUNE_LFO || r.c == S1_PITCH_LFO || r.c == S1_TREMOLO_LFO || r.c == S1_REVERB_MIX_LFO || s1_mod_ext_slot(r.c) || s1_base_route_slot(r.c)) {
+             static const char *const sources[] = {"OFF", "LFO 1", "LFO 2", "BOTH"};
+@@ -2634,28 +2642,24 @@
+     if (r.kind == R_SJ6KNOB && !d->names) {
+         if ((r.c == SJ6_OSC2_LEVEL || r.c == SJ6_OSC1_LEVEL) && v == 128) { put_s(num,"INIT"); return; }
+         if (r.c == SJ6_LAYER1_FINE || r.c == SJ6_LAYER2_FINE) {
+-            put_i(num, v - SJ6_FINE_CENTER);
+-            put_s(unit, "ct");
++            pref_integer_unit(num,unit,v - SJ6_FINE_CENTER,"ct");
+             return;
+         }
+         if (r.c == SJ6_LAYER1_SEMI || r.c == SJ6_LAYER2_SEMI) {
+-            put_i(num, v - SJ6_SEMI_CENTER);
+-            put_s(unit, "st");
++            pref_integer_unit(num,unit,v - SJ6_SEMI_CENTER,"st");
+             return;
+         }
+         if (r.c == SJ6_A_REFERENCE) {
+             float hz;
+             if (engine_superj6_a_reference(r.b, &hz)) {
+-                put_d1(num, hz, 0);
+-                put_s(unit, "Hz");
++                pref_decimal_unit(num,unit,hz,0,"Hz");
+             } else put_s(num, "--");
+             return;
+         }
+ #if X0X_SJ6_LFO1_DELAY_PORT
+         if (r.c==SJ6_LFO1_DELAY) {
+             if(v<0){put_s(num,"--");return;}
+-            put_i(num,(int)(juno6_lfo1_delay_seconds((unsigned)v)*1000.f+.5f));
+-            put_s(unit,"ms");return;
++            pref_integer_unit(num,unit,(int)(juno6_lfo1_delay_seconds((unsigned)v)*1000.f+.5f),"ms");return;
+         }
+ #endif
+         if (r.c >= SJ6_LFO1_RATE && r.c <= SJ6_LFO3_RATE) {
+@@ -2673,11 +2677,9 @@
+                 put_s(unit, "bar");
+             } else if (lfo.hz > 0.f && lfo.hz < 1.f) {
+                 if (lfo.hz < .001f) put_s(num, "<1");
+-                else put_i(num, (int)(lfo.hz * 1000.f + .5f));
+-                put_s(unit, "mHz");
++                else pref_integer_unit(num,unit,(int)(lfo.hz * 1000.f + .5f),"mHz");
+             } else {
+-                put_d1(num, lfo.hz, 0);
+-                put_s(unit, "Hz");
++                pref_decimal_unit(num,unit,lfo.hz,0,"Hz");
+             }
+             return;
+         }
+@@ -2698,7 +2700,7 @@
+             return;
+         }
+         if (v < 0) put_s(num, "--");
+-        else { put_i(num, (v * 100 + 63) / 127); put_s(unit, "%"); }
++        else { pref_integer_unit(num,unit,(v * 100 + 63) / 127,"%"); }
+         return;
+     }
+ #endif
+@@ -2713,8 +2715,7 @@
+         if (v < 16)
+             put_s(num, "DIGI");
+         else {
+-            put_i(num, (v - 16) * 100 / 111);
+-            put_s(unit, "%");
++            pref_integer_unit(num,unit,(v - 16) * 100 / 111,"%");
+         }
+         return;
+     }
+@@ -2765,8 +2766,7 @@
+                 }
+                 return;
+             }
+-            put_i(num, v * 100 / 127);
+-            put_s(unit, "%");
++            pref_integer_unit(num,unit,v * 100 / 127,"%");
+             return;
+         }
+         /* 808 CB/CY/OH/CH DECAY: a time, not a % (FINAL-REFERENCES). drum808_param_si keeps a
+@@ -2783,15 +2783,14 @@
+         { float x = 0.0f; int u = engine_param_si(r.a, r.b, r.c, v, &x);
+           if (u != X0X_U_NONE) { unit_value(u, x, num, unit); return; } }
+         if (d->max == 127) {                             /* no raw 0..127 pot on screen */
+-            put_i(num, (v * 100 + 63) / 127);
+-            put_s(unit, "%");
++            pref_integer_unit(num,unit,(v * 100 + 63) / 127,"%");
+             return;
+         }
+         put_i(num, v);
+         return;
+     case R_DLEN:
+-    case R_BLEN: put_i(num, v + 1); put_s(unit, "steps"); return;
+-    case R_ACCENT: put_i(num,(v*100+63)/127);put_s(unit,"%");return;
++    case R_BLEN: pref_integer_unit(num,unit,v + 1,"steps"); return;
++    case R_ACCENT: pref_integer_unit(num,unit,(v*100+63)/127,"%");return;
+     case R_BTRANS: {
+         char *q = num;
+         if (v > 24)
+@@ -2800,7 +2799,7 @@
+         put_s(unit, "st");
+         return;
+     }
+-    case R_SWING: put_i(num, 50 + v / 4); put_s(unit, "%"); return;
++    case R_SWING: pref_integer_unit(num,unit,50 + v / 4,"%"); return;
+     case R_GEN:
+         if (r.c == G_OCTS || r.c == G_BASE)
+             put_i(num, v + 1);
+@@ -2808,16 +2807,14 @@
+             if (!v)
+                 put_s(num, "OFF");
+             else {
+-                put_i(num, v);
+-                put_s(unit, "bar");
++                pref_integer_unit(num,unit,v,"bar");
+             }
+         } else {
+-            put_i(num, v);
+-            put_s(unit, "%");
++            pref_integer_unit(num,unit,v,"%");
+         }
+         return;
+-    case R_BRKSET: put_i(num, v); put_s(unit, "%"); return;
+-    case R_TEMPO: put_i(num, v + 20); put_s(unit, "bpm"); return;
++    case R_BRKSET: pref_integer_unit(num,unit,v,"%"); return;
++    case R_TEMPO: pref_integer_unit(num,unit,v + 20,"bpm"); return;
+     case R_FINETUNE: {
+         int tsteps = v - 64, milli = tsteps * 625;
+         char *e = num;
+@@ -2845,7 +2842,7 @@
+     case R_MIDICH: if (v) put_i(num, v); else put_s(num, "OFF"); return;
+     case R_CKCH: put_i(num, v + 2); return;
+     case R_SREP: num[0] = 'x'; put_i(num + 1, v + 1); return;
+-    case R_SLEN: put_i(num, v); put_s(unit, "bar"); return;
++    case R_SLEN: pref_integer_unit(num,unit,v,"bar"); return;
+     default: put_i(num, v); return;
+     }
+ }

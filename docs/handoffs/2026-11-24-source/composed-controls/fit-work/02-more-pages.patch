@@ -1,0 +1,119 @@
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -3479,6 +3479,16 @@
+ }
+ 
+ /* Pure navigation inputs: emit existing descriptors without keyboard clamping. */
++/* Full bass routing template: first byte high bit marks the current owner.
++ * Fixed global references keep owner zero. No dynamic pref semantics. */
++static __attribute__((noinline,minsize)) void add_routed_bass_page(
++    page_emitter_t *emit,page_title_id_t title,int owner,const uint8_t c[4][3])
++{
++    pref_t refs[4];
++    for(unsigned i=0;i<4;i++)
++        refs[i]=PR(c[i][0]&127u,c[i][1],c[i][0]&128u?owner:0,c[i][2]);
++    add_page_refs(emit,title,refs,0,0);
++}
+ #if X0X_SUPERJ6_BUILTIN_INIT || X0X_S1_EXTRA
+ enum { ORIG_PAGE_ENGINE = 128, ORIG_PAGE_S1_HALF=246, ORIG_PAGE_S1_SCALE=247, ORIG_PAGE_S1_KEY_HOLD=248, ORIG_PAGE_SJ6_FILTER_TRACK=249, ORIG_PAGE_SJ6_FILTER_AMOUNT=250, ORIG_PAGE_S1_ENVLFO = 251, ORIG_PAGE_S1_RVFB = 252, ORIG_PAGE_S1_MODWHEEL = 253, ORIG_PAGE_S1_LINK = 254, ORIG_PAGE_NONE = 255 };
+ typedef struct { uint8_t title; uint8_t id[4]; } original_page_row_t;
+@@ -3570,16 +3580,16 @@
+             if(v==0){
+                 refs[2]=refs[3]=NONE;
+                 add_page_refs(emit,pages[row].title,refs,0,0);
+-                add_page(emit,PT_SJ6_J60,PR(R_SJ6J60,T_303,owner,0),PR(R_SJ6J60,T_303,owner,1),
+-                         PR(R_SJ6J60,T_303,owner,2),PR(R_SJ6J60,T_303,owner,3));
++                do { static const uint8_t c[4][3]={{R_SJ6J60|0x80u,T_303,0},{R_SJ6J60|0x80u,T_303,1},{R_SJ6J60|0x80u,T_303,2},{R_SJ6J60|0x80u,T_303,3}};
++                add_routed_bass_page(emit,PT_SJ6_J60,owner,c); } while(0);
+                 continue;
+             }
+ #endif
+             if(v>0){
+                 refs[2]=refs[3]=NONE;
+                 add_page_refs(emit,pages[row].title,refs,0,0);
+-                add_page(emit,PT_SJ6_J60,PR(R_SJ6J60,T_303,owner,0),PR(R_SJ6J60,T_303,owner,1),
+-                         PR(R_SJ6J60,T_303,owner,2),PR(R_SJ6J60,T_303,owner,3));
++                do { static const uint8_t c[4][3]={{R_SJ6J60|0x80u,T_303,0},{R_SJ6J60|0x80u,T_303,1},{R_SJ6J60|0x80u,T_303,2},{R_SJ6J60|0x80u,T_303,3}};
++                add_routed_bass_page(emit,PT_SJ6_J60,owner,c); } while(0);
+                 continue;
+             }
+             
+@@ -3590,11 +3600,12 @@
+             refs[2]=NONE;refs[3]=NONE;
+             add_page_refs(emit,pages[row].title,refs,0,0);
+             unsigned mode=ui_classic_i(owner);
+-            add_page(emit,PT_CHORUS_I_PARAMS+mode-JUNO6_CHORUS_I,PR(R_SJ6CLASSIC_I,T_303,owner,0),
+-                PR(R_SJ6CLASSIC_I,T_303,owner,1),PR(R_SJ6CLASSIC_I,T_303,owner,2),NONE);
++            do { static const uint8_t c[4][3]={{R_SJ6CLASSIC_I|0x80u,T_303,0},{R_SJ6CLASSIC_I|0x80u,T_303,1},{R_SJ6CLASSIC_I|0x80u,T_303,2},{0,0,0}};
++                add_routed_bass_page(emit,PT_CHORUS_I_PARAMS+mode-JUNO6_CHORUS_I,owner,c); } while(0);
+ #if X0X_SJ6_NATIVE_J60
+             if(engine_sj6_j60_get(owner,0)==0)
+-                add_page(emit,PT_SJ6_J60,PR(R_SJ6J60,T_303,owner,0),NONE,NONE,NONE);
++                do { static const uint8_t c[4][3]={{R_SJ6J60|0x80u,T_303,0},{0,0,0},{0,0,0},{0,0,0}};
++                add_routed_bass_page(emit,PT_SJ6_J60,owner,c); } while(0);
+ #endif
+             continue;
+         }
+@@ -3602,7 +3613,8 @@
+         add_page_refs(emit, pages[row].title, refs, 0, 0);
+ #if X0X_SJ6_NATIVE_J60
+         if(kind==R_SJ6KNOB && pages[row].title==PT_CHORUS && engine_sj6_j60_get(owner,0)==0)
+-            add_page(emit,PT_SJ6_J60,PR(R_SJ6J60,T_303,owner,0),NONE,NONE,NONE);
++            do { static const uint8_t c[4][3]={{R_SJ6J60|0x80u,T_303,0},{0,0,0},{0,0,0},{0,0,0}};
++                add_routed_bass_page(emit,PT_SJ6_J60,owner,c); } while(0);
+ #endif
+     }
+ }
+@@ -3642,7 +3654,8 @@
+             int b = p - PART_303A;
+             do { static const pref_t refs[4] = {PR(R_BLEN, 0, 0, 0), PR(R_BRATE, 0, 0, 0), PR(R_BDIR, 0, 0, 0), PR(R_BTRANS, 0, 0, 0)};
+             add_page_refs(emit, PT_SEQUENCE, refs, 1, b); } while (0);
+-            add_page(emit, PT_PRESET, PR(R_BPATSND, 0, b, 0), NONE, NONE, NONE);   /* 0.0.25: this pattern's bass preset */
++            do { static const uint8_t c[4][3]={{R_BPATSND|0x80u,0,0},{0,0,0},{0,0,0},{0,0,0}};
++                add_routed_bass_page(emit,PT_PRESET,b,c); } while(0);   /* 0.0.25: this pattern's bass preset */
+             emit->group = GR_NONE;                          /* (not the pattern's: no P1 in its name) */
+             do { static const pref_t refs[4] = {PR(R_FREEPLAY, 0, 0, 0), NONE, NONE, NONE};
+ #if X0X_S1_KEYBOARD_HOLD && DNBOX_TYPED_CONTROLS_NATIVE_TEST
+@@ -3929,14 +3942,14 @@
+                 add_original_extra_pages(emit, s1_pages, effect_page, b, R_S1PATCH);
+ #if X0X_ARP_HOOKS
+                 if (arp_engine(b))
+-                    add_page(emit, PT_ARPEGGIATOR, PR(R_ARP, ARP_F_ON, b, 0), PR(R_ARP, ARP_F_RANGE, b, 0),
+-                             PR(R_ARP, ARP_F_MODE, b, 0), PR(R_ARP, ARP_F_SPEED, b, 0));
++                    do { static const uint8_t c[4][3]={{R_ARP|0x80u,ARP_F_ON,0},{R_ARP|0x80u,ARP_F_RANGE,0},{R_ARP|0x80u,ARP_F_MODE,0},{R_ARP|0x80u,ARP_F_SPEED,0}};
++                add_routed_bass_page(emit,PT_ARPEGGIATOR,b,c); } while(0);
+ #endif
+ #if X0X_S1_FENCED_CLOCK && X0X_ARP_HOOKS
+                 _Static_assert(sizeof s1_pages / sizeof *s1_pages + 6u <= MAXPAGES,"Typed ARP PARAM capacity");
+                 if (arp_engine(b) && live_s1_mod(&proj.sound,b))
+-                    add_page(emit,PT_ARP_PARAM,PR(R_ARP,ARP_F_SOURCE_RATE,b,0),
+-                        PR(R_ARP,ARP_F_SOURCE_FACTOR,b,0),NONE,NONE);
++                    do { static const uint8_t c[4][3]={{R_ARP|0x80u,ARP_F_SOURCE_RATE,0},{R_ARP|0x80u,ARP_F_SOURCE_FACTOR,0},{0,0,0},{0,0,0}};
++                add_routed_bass_page(emit,PT_ARP_PARAM,b,c); } while(0);
+ #endif
+ #if DNBOX_TYPED_CONTROLS_NATIVE_TEST
+                 if (live_s1_mod(&proj.sound,b)) {
+@@ -4030,17 +4043,18 @@
+ #endif
+ #if X0X_ARP_HOOKS && !X0X_S1_EXTRA
+                 if (kind == ORIGINAL_SOUND_SYNTHONE && row == count - 1 && arp_engine(b))
+-                    add_page(emit, PT_ARPEGGIATOR, PR(R_ARP, ARP_F_ON, b, 0), PR(R_ARP, ARP_F_RANGE, b, 0),
+-                             PR(R_ARP, ARP_F_MODE, b, 0), PR(R_ARP, ARP_F_SPEED, b, 0));
++                    do { static const uint8_t c[4][3]={{R_ARP|0x80u,ARP_F_ON,0},{R_ARP|0x80u,ARP_F_RANGE,0},{R_ARP|0x80u,ARP_F_MODE,0},{R_ARP|0x80u,ARP_F_SPEED,0}};
++                add_routed_bass_page(emit,PT_ARPEGGIATOR,b,c); } while(0);
+ #endif
+                 add_page_refs(emit, titles[row],refs,0,0);
+             }
+ #if X0X_ARP_HOOKS
+             if (kind == ORIGINAL_SOUND_JUNO && arp_engine(b))
+-                add_page(emit, PT_ARPEGGIATOR, PR(R_ARP, ARP_F_ON, b, 0), PR(R_ARP, ARP_F_RANGE, b, 0),
+-                         PR(R_ARP, ARP_F_MODE, b, 0), PR(R_ARP, ARP_F_SPEED, b, 0));
++                do { static const uint8_t c[4][3]={{R_ARP|0x80u,ARP_F_ON,0},{R_ARP|0x80u,ARP_F_RANGE,0},{R_ARP|0x80u,ARP_F_MODE,0},{R_ARP|0x80u,ARP_F_SPEED,0}};
++                add_routed_bass_page(emit,PT_ARPEGGIATOR,b,c); } while(0);
+ #endif
+-            add_page(emit, PT_SOUND,PR(R_BENGINE,0,b,0),PR(R_BPRESET,0,b,0),PR(R_BSTATUS,0,b,0),NONE);
++            do { static const uint8_t c[4][3]={{R_BENGINE|0x80u,0,0},{R_BPRESET|0x80u,0,0},{R_BSTATUS|0x80u,0,0},{0,0,0}};
++                add_routed_bass_page(emit,PT_SOUND,b,c); } while(0);
+         } else {
+             emit->group = GR_PAT;                           /* (its groove and retrigs: SEQ) */
+             do { static const pref_t refs[4] = {PR(R_BRKSLOT, 0, 0, 0), PR(R_BRKSLOT, 1, 0, 0), PR(R_BRKSET, 0, 0, BRK_BCHANCE), PR(R_ENG, T_BRK, 0, 1)};
