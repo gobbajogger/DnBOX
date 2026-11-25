@@ -14,7 +14,7 @@ def digest(path):
     with path.open("rb") as handle:
         return sha256(handle.read()).hexdigest()
 
-def score(manifest, results):
+def score(manifest, results, require_threshold_pass=False):
     matrix = json.loads(manifest.read_text())
     if matrix.get("version") != 1 or not matrix.get("cases"):
         raise ValueError("expected a nonempty, version 1 FX capture matrix")
@@ -68,17 +68,34 @@ def score(manifest, results):
         for key in ("rate", "window", "tail", "arm-formats", "compact-leading-samples", "alignment-reason"):
             if key in case:
                 entry[key] = case[key]
+        suites = ("dry", "effect_wet_minus_dry", "tail")
+        if dest.is_file():
+            metrics = json.loads(dest.read_text())
+            thresholds = metrics.get("caller_thresholds", {})
+            entry["threshold_status"] = thresholds.get("status", "not_reported")
+            checks = thresholds.get("checks", {})
+            entry["threshold_cases_complete"] = all(
+                checks.get(name, {}).get("status") == "pass" for name in suites)
+        else:
+            entry["threshold_status"] = "invalid"
+            entry["threshold_cases_complete"] = False
         report.append(entry)
         # Save each completed case even if the next one fails to render or parse.
         (results / "index.json").write_text(json.dumps(report, indent=2, allow_nan=False) + "\n")
-    return int(any(row["comparator_exit"] for row in report))
+    return int(any(
+        row["comparator_exit"] or (require_threshold_pass and
+        (row["threshold_status"] != "pass" or not row["threshold_cases_complete"]))
+        for row in report))
 
 def main():
     parser = ArgumentParser(description=__doc__)
     parser.add_argument("matrix", type=Path)
     parser.add_argument("output_directory", type=Path)
+    parser.add_argument("--require-threshold-pass", action="store_true",
+                        help="require explicit passing dry, FX and tail null bounds in every case")
     args = parser.parse_args()
-    return score(args.matrix.resolve(strict=True), args.output_directory)
+    return score(args.matrix.resolve(strict=True), args.output_directory,
+                 args.require_threshold_pass)
 
 if __name__ == "__main__":
     raise SystemExit(main())

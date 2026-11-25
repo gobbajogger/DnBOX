@@ -42,3 +42,11 @@ supplied check; both-silent is inconclusive, not an exact parity pass. A/B
 status is JSON only; valid input returns 0 even on threshold failure, invalid
 input returns 2. This is not a release gate. `--self-test` synthesizes its own
 signals; it does not invoke either engine or contain private captures.
+
+For a deliberately strict comparison matrix, pass
+--require-threshold-pass to score_matrix.py and set all three numeric
+null bounds for every case. It exits 1 for failed, inconclusive or
+missing checks, even when the comparator parsed the input successfully.
+The matrix always records threshold status separately from process exit.
+Spectral deltas remain numeric evidence; this flag is a null gate only
+and does not certify an effect or a firmware release.

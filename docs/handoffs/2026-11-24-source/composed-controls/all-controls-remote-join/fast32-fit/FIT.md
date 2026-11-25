@@ -27,3 +27,12 @@ that order. Regenerate private p_a.h/p_e.h using the archived FAST32
 generator, copy both model headers, then make-fast32-wrapper.py against
 the guarded wrapper. All data and fit evidence are offline. No runtime
 qualification, behavior tests, playback or speed claim.
+
+Follow-up shared attack/ADSR, original MIDI/USB cold outlines, same gates,
+and exact cutoff batch on the combined UI/FAST32/RAM source:
+Elite +27,948 B, Pro +27,940 B, both still 8,224 B free POOL.
+The 909 buffer change advances the same sample sequence but its periodic
+history copy occurs more often for full 256-frame spans. Future timing
+qualification must cover quiet advance/rollover, quiet-to-active retrigger
+and active 909 spans on both boards, with exact old PCM comparison.
+This is a potential timing cost, not established performance regression.
