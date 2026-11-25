@@ -1,0 +1,81 @@
+{
+  "bytes": 4096,
+  "encoded_bytes": 4020,
+  "frames": 3840,
+  "format": "stereo IMA ADPCM 128-frame restart blocks; offline resampling",
+  "caveat": "the 76-byte difference is not credited as sufficient native workspace",
+  "cases": [
+    {
+      "seconds": 0.023622,
+      "input": "220 Hz",
+      "stride": 1,
+      "rate_hz": 44100.0,
+      "level_delta_db": -0.001,
+      "residual_db": -51.951
+    },
+    {
+      "seconds": 0.023622,
+      "input": "3 kHz",
+      "stride": 1,
+      "rate_hz": 44100.0,
+      "level_delta_db": 0.001,
+      "residual_db": -28.462
+    },
+    {
+      "seconds": 0.023622,
+      "input": "bright chord",
+      "stride": 1,
+      "rate_hz": 44100.0,
+      "level_delta_db": 0.0,
+      "residual_db": -36.65
+    },
+    {
+      "seconds": 0.496063,
+      "input": "220 Hz",
+      "stride": 6,
+      "rate_hz": 7350.0,
+      "level_delta_db": 0.0,
+      "residual_db": -35.699
+    },
+    {
+      "seconds": 0.496063,
+      "input": "3 kHz",
+      "stride": 6,
+      "rate_hz": 7350.0,
+      "level_delta_db": 0.091,
+      "residual_db": -15.01
+    },
+    {
+      "seconds": 0.496063,
+      "input": "bright chord",
+      "stride": 6,
+      "rate_hz": 7350.0,
+      "level_delta_db": -0.113,
+      "residual_db": -16.04
+    },
+    {
+      "seconds": 1.003937,
+      "input": "220 Hz",
+      "stride": 12,
+      "rate_hz": 3675.0,
+      "level_delta_db": -0.025,
+      "residual_db": -29.168
+    },
+    {
+      "seconds": 1.003937,
+      "input": "3 kHz",
+      "stride": 12,
+      "rate_hz": 3675.0,
+      "level_delta_db": -67.595,
+      "residual_db": -0.0
+    },
+    {
+      "seconds": 1.003937,
+      "input": "bright chord",
+      "stride": 12,
+      "rate_hz": 3675.0,
+      "level_delta_db": -0.295,
+      "residual_db": -10.163
+    }
+  ]
+}

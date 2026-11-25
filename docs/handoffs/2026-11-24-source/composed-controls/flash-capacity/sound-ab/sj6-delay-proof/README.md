@@ -58,3 +58,22 @@ corrects the fake Swift receiver's boolean recording. The patched delay entry
 was exercised with a ping-pong impulse. Full `render.py` still requires the
 bench's original dependencies and private assets; this receipt does not
 claim an end-to-end SuperJ6 render or an Elite/Pro flash or timing pass.
+
+## Same-storage codec experiment (offline)
+
+`codec_probe.py` tests 4-bit IMA ADPCM with per-channel predictor/index
+headers. A hypothetical 4,096 B stereo ring can store 3,840 stereo frames
+in 4,020 B including those headers. Keeping a restart block free allows
+7,350 stored frames/sec for the 496 ms echo. Its 3 kHz first-echo level
+now differs by +0.09 dB (about −15 dB waveform residual), rather than the
+compact path's −22.91 dB level difference. A synthetic bright chord shifts
+−0.11 dB in level, with about −16 dB waveform residual. At a one-second
+delay the same budget still cannot reproduce 3 kHz; overall chord level
+is insufficient evidence by itself.
+
+These are offline probes using Python's IMA codec and SciPy's zero-phase
+resampler, not demonstrated live firmware results. No scratch, filter or
+random decode cost is included in the 4,020 B. The encoded data budget is
+a lead for a streaming implementation; wet feedback, control moves,
+preset renders, memory ownership, and native timing are not qualified.
+Run `python codec_probe.py` with SciPy and Python 3.12 (audioop).
