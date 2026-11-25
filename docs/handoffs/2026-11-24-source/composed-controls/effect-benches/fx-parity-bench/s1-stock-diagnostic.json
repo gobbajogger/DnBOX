@@ -1,0 +1,53 @@
+{
+  "scope": "known stock 73749f55 only; actual upstream headless original. Comparative dry/wet at identical authored controls; no candidate result.",
+  "cases": [
+    {
+      "case": "synth-one-organ-delay",
+      "dry_null_dBFS": -57.67324079837451,
+      "wet_added_status": "both-silent",
+      "effect_null_dBFS": null,
+      "tail_added_peak_activity": "both-silent",
+      "tail_added_level_delta_dB": null
+    },
+    {
+      "case": "synth-one-organ-reverb",
+      "dry_null_dBFS": -57.67324079837451,
+      "wet_added_status": "ok",
+      "effect_null_dBFS": -21.5090434173841,
+      "tail_added_peak_activity": "ok",
+      "tail_added_level_delta_dB": -3.114633308541883
+    },
+    {
+      "case": "synth-one-organ-wet",
+      "dry_null_dBFS": -57.67324079837451,
+      "wet_added_status": "ok",
+      "effect_null_dBFS": -19.041042704250774,
+      "tail_added_peak_activity": "ok",
+      "tail_added_level_delta_dB": -1.4738221005590215
+    },
+    {
+      "case": "synth-one-pad-delay",
+      "dry_null_dBFS": -51.005873563583606,
+      "wet_added_status": "ok",
+      "effect_null_dBFS": -9.81886912368054,
+      "tail_added_peak_activity": "ok",
+      "tail_added_level_delta_dB": 0.29042075935104483
+    },
+    {
+      "case": "synth-one-pad-reverb",
+      "dry_null_dBFS": -51.005873563583606,
+      "wet_added_status": "ok",
+      "effect_null_dBFS": -34.06059846108267,
+      "tail_added_peak_activity": "ok",
+      "tail_added_level_delta_dB": 3.3680416139496345
+    },
+    {
+      "case": "synth-one-pad-wet",
+      "dry_null_dBFS": -51.005873563583606,
+      "wet_added_status": "ok",
+      "effect_null_dBFS": -10.327875083948935,
+      "tail_added_peak_activity": "ok",
+      "tail_added_level_delta_dB": -5.960850238872107
+    }
+  ]
+}

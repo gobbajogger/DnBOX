@@ -1,0 +1,40 @@
+{
+  "effect": "delay",
+  "rate": 44100,
+  "frames": 32768,
+  "stimulus": "impulse",
+  "stimulus_sha256": "717d241888fbf1b6b4cbabcb030f9fc32b7fe81aee6f5961ec9e66fbd39df227",
+  "reference": "prior Build9-verified original-equation C stereo delay kernel; settled 250 ms/120 BPM, no live ramp or original graph",
+  "compact": [
+    {
+      "max_abs": 0.5,
+      "rms": 0.00244140625,
+      "dry_bit_exact": true,
+      "tail_rms": 0.0
+    },
+    {
+      "max_abs": 0.050000011920928955,
+      "rms": 0.0005403635707175611,
+      "dry_bit_exact": false,
+      "tail_rms": 0.0005153507713742488
+    }
+  ],
+  "original": [
+    {
+      "max_abs": 0.5,
+      "rms": 0.00244140625,
+      "dry_bit_exact": true,
+      "tail_rms": 0.0
+    },
+    {
+      "max_abs": 0.44999998807907104,
+      "rms": 0.002467642231403979,
+      "dry_bit_exact": false,
+      "tail_rms": 0.0026250776390348853
+    }
+  ],
+  "null": {
+    "rms": 0.0024533157690564767,
+    "peak": 0.44824383861850947
+  }
+}

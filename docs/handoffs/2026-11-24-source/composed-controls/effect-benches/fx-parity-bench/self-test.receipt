@@ -1,0 +1,17 @@
+{
+  "self_test": "PASS",
+  "scope": "synthetic only",
+  "exact_null_rms": 0.0,
+  "expected_half_tail_db": -6.020599913279624,
+  "checks": [
+    "exact",
+    "effect-only delta",
+    "tail spectrum",
+    "stereo",
+    "supplied alignment",
+    "silent null",
+    "silent mismatch",
+    "three formats",
+    "NaN rejection"
+  ]
+}

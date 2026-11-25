@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "cases": [
+    {
+      "name": "synth-one-pad-delay",
+      "provenance": {
+        "original": "Original Synth One source commit and render flags",
+        "compact": "Exact DnBOX source revision, build flags and engine owner",
+        "stimulus": "Identical Pad preset, MIDI 60 velocity 100; 0.75 s held, 1.5 s release",
+        "effect": "Wet enables delay only; dry bypasses delay on the same patch"
+      },
+      "format": "f32le",
+      "rate": 44100,
+      "tail": "33075:99225",
+      "captures": {
+        "original-dry": "private/s1-pad-reference-dry.f32",
+        "original-wet": "private/s1-pad-reference-delay.f32",
+        "compact-dry": "private/s1-pad-compact-dry.f32",
+        "compact-wet": "private/s1-pad-compact-delay.f32"
+      }
+    },
+    {
+      "name": "superj6-delay-500ms",
+      "provenance": {
+        "original": "Original arm64 delay-kernel oracle from the private AU",
+        "compact": "Exact Compact SuperJ6 delay-kernel source revision and configuration",
+        "stimulus": "Identical stereo impulse or deterministic burst injected at the effect input",
+        "effect": "Delay only, 500 ms, matching feedback, wet mix and filter settings; bypass arms are the common untouched input"
+      },
+      "format": "f32le",
+      "rate": 44100,
+      "tail": "22050:88200",
+      "captures": {
+        "original-dry": "private/sj6-delay-reference-dry.f32",
+        "original-wet": "private/sj6-delay-reference-wet.f32",
+        "compact-dry": "private/sj6-delay-compact-dry.f32",
+        "compact-wet": "private/sj6-delay-compact-wet.f32"
+      }
+    }
+  ]
+}
