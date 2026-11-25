@@ -1,0 +1,7 @@
+# Synth One delay-off reverb experiments
+
+Verified authoritative 44.1k six-pair corrected reference. Baseline freshly rebuilt from ab-latest-headless controls source; matching Organ float stream confirmed against s1-controlled-ab. Existing release threshold <=1 dB, channel whole RMS <=1 dB, spectral <=3 dB; no baseline loss acceptable. No success claimed.
+
+90 precision/decay/colour combinations screened on Organ, 28 common whole-room variants run through all six, then 20 low-level positive bounded decay-compensation formulations run through all six. Global feedback extension tuned from fit time 1.5 to 1.95 and damping 1 to 1.6 reduced Organ tail error to +0.002 dB, but Sahara tail +1.25→+3.31 dB and Red Minor +1.74→+4.47 dB. Original-style four-line junction, higher-precision BFP staging, and quiet-only feedback did not pass target.
+
+partial-reverb-direct-source.patch tests a generic law on the true hard delay-off source path: when the network is fed from raw dry signal only, the cached line fit gets a longer decay and more HF damping. Cache key carries source mode; zero malloc, identical structure and owned 4,252/2,152-byte arena/pool. Rendered five unaffected fixtures proved bit-identical, not merely within tolerance. Organ's last-second level matches, but stereo error and spectral distance still exceed limits. Do not integrate as a completed fix. Native timing/fit and broader reverb-only cross-preset behavior not qualified.

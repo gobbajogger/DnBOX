@@ -1,0 +1,47 @@
+--- a/firmware/src/dsp/s1c/s1c.c
++++ b/firmware/src/dsp/s1c/s1c.c
+@@ -821,7 +821,7 @@
+     S1C_RVA(RVB_L0) + S1C_RVA(RVB_L1) + S1C_RVA(RVB_L2), S1C_RVA_WORDS};
+ float s1c_rvb_fit[3] = {1.0f, 1.0f, 1.0f};   /* host tools: fit applied at s1c_init */
+ #define FITV(s) ((s)->rv.fit)
+-#define rvb_compact(s, il, ir, ol, or_) s1u_rvb_run(&(s)->rv, (s)->t[RVFB], il, ir, ol, or_, (s)->sr / (float)S1C_RVB_DEC)
++#define rvb_compact(s, il, ir, ol, or_) s1u_rvb_run(&(s)->rv, (s)->t[RVFB], (s)->t[DLON] == 0.f, il, ir, ol, or_, (s)->sr / (float)S1C_RVB_DEC)
+ #endif
+ static void param_dirty(s1c *s)
+ {
+--- a/firmware/src/dsp/s1c/s1u.c
++++ b/firmware/src/dsp/s1c/s1u.c
+@@ -271,17 +271,20 @@
+         } else r->e[base >> 4] = -128;
+     }
+ }
+-void s1u_rvb_run(s1u_rvb *r, float fb, float il, float ir, float *ol, float *or_, float sr)
++void s1u_rvb_run(s1u_rvb *r, float fb, int direct, float il, float ir, float *ol, float *or_, float sr)
+ {
+     float y[4];
+     int n;
+-    if (fb != r->fb) {                    /* per-line gains when feedback changes */
++    const float law = direct ? -2.0f - fb : fb;
++    if (law != r->fb) {                   /* cache source mode and feedback together */
+         float lref = 0.068390f * sr, G = 0.70710678f;
+-        r->fb = fb;
++        float decay = direct ? r->fit[1] * 1.30f : r->fit[1];
++        float damping = direct ? r->fit[2] * 1.6f : r->fit[2];
++        r->fb = law;
+         for (n = 0; n < 4; n++) {
+             float q = (float)r->ln[n] / lref;
+-            r->g[n] = fb > 0.0f ? powf(fb, q / r->fit[1]) : 0.0f;
+-            float gn = powf(G, q * r->fit[2]);
++            r->g[n] = fb > 0.0f ? powf(fb, q / decay) : 0.0f;
++            float gn = powf(G, q * damping);
+             r->d[n] = (1.0f - gn) / (1.0f + gn);
+         }
+     }
+--- a/firmware/src/dsp/s1c/s1u.h
++++ b/firmware/src/dsp/s1c/s1u.h
+@@ -63,4 +63,4 @@
+ } s1u_rvb;
+ void s1u_rvb_init(s1u_rvb *r, const uint16_t len48[4], const uint16_t off[5], float sr);
+ void s1u_rvb_attach(s1u_rvb *r, void *mem);   /* off[4] + off[4] / 16 + 128 bytes, zeroed */
+-void s1u_rvb_run(s1u_rvb *r, float feedback, float il, float ir, float *ol, float *or_, float sr);
++void s1u_rvb_run(s1u_rvb *r, float feedback,int direct, float il, float ir, float *ol, float *or_, float sr);

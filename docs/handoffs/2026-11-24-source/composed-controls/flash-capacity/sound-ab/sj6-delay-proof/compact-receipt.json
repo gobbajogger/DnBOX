@@ -1,0 +1,53 @@
+{
+  "compact_sha256": "0e37c63cdef9d366cdf3def539fc0c925f80511635da8eca7a39e0ed66f9ea18",
+  "cases": [
+    {
+      "seconds": 0.023622047156095505,
+      "hz": 220,
+      "stride": 2,
+      "effective_rate_hz": 22050.0,
+      "level_error_db": -0.004,
+      "normalized_residual_db": -36.122
+    },
+    {
+      "seconds": 0.023622047156095505,
+      "hz": 3000,
+      "stride": 2,
+      "effective_rate_hz": 22050.0,
+      "level_error_db": -0.599,
+      "normalized_residual_db": -13.272
+    },
+    {
+      "seconds": 0.4960629940032959,
+      "hz": 220,
+      "stride": 32,
+      "effective_rate_hz": 1378.125,
+      "level_error_db": -1.095,
+      "normalized_residual_db": -6.579
+    },
+    {
+      "seconds": 0.4960629940032959,
+      "hz": 3000,
+      "stride": 32,
+      "effective_rate_hz": 1378.125,
+      "level_error_db": -22.906,
+      "normalized_residual_db": 0.018
+    },
+    {
+      "seconds": 1.003937005996704,
+      "hz": 220,
+      "stride": 64,
+      "effective_rate_hz": 689.0625,
+      "level_error_db": -4.285,
+      "normalized_residual_db": -1.447
+    },
+    {
+      "seconds": 1.003937005996704,
+      "hz": 3000,
+      "stride": 64,
+      "effective_rate_hz": 689.0625,
+      "level_error_db": -26.768,
+      "normalized_residual_db": 0.008
+    }
+  ]
+}

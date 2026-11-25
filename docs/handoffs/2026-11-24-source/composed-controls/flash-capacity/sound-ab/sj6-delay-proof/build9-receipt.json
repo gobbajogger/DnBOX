@@ -1,0 +1,117 @@
+{
+  "build9_core": [
+    {
+      "rate": 44100,
+      "ping": false,
+      "case": "pulse",
+      "pcm_words": 192,
+      "bit_equal": true
+    },
+    {
+      "rate": 44100,
+      "ping": false,
+      "case": "stereo_noise",
+      "pcm_words": 192,
+      "bit_equal": true
+    },
+    {
+      "rate": 44100,
+      "ping": false,
+      "case": "retime",
+      "pcm_words": 192,
+      "bit_equal": true
+    },
+    {
+      "rate": 44100,
+      "ping": false,
+      "case": "clamp",
+      "pcm_words": 192,
+      "bit_equal": true
+    },
+    {
+      "rate": 44100,
+      "ping": true,
+      "case": "pulse",
+      "pcm_words": 192,
+      "bit_equal": true
+    },
+    {
+      "rate": 44100,
+      "ping": true,
+      "case": "stereo_noise",
+      "pcm_words": 192,
+      "bit_equal": true
+    },
+    {
+      "rate": 44100,
+      "ping": true,
+      "case": "retime",
+      "pcm_words": 192,
+      "bit_equal": true
+    },
+    {
+      "rate": 44100,
+      "ping": true,
+      "case": "clamp",
+      "pcm_words": 192,
+      "bit_equal": true
+    },
+    {
+      "rate": 48000,
+      "ping": false,
+      "case": "pulse",
+      "pcm_words": 192,
+      "bit_equal": true
+    },
+    {
+      "rate": 48000,
+      "ping": false,
+      "case": "stereo_noise",
+      "pcm_words": 192,
+      "bit_equal": true
+    },
+    {
+      "rate": 48000,
+      "ping": false,
+      "case": "retime",
+      "pcm_words": 192,
+      "bit_equal": true
+    },
+    {
+      "rate": 48000,
+      "ping": false,
+      "case": "clamp",
+      "pcm_words": 192,
+      "bit_equal": true
+    },
+    {
+      "rate": 48000,
+      "ping": true,
+      "case": "pulse",
+      "pcm_words": 192,
+      "bit_equal": true
+    },
+    {
+      "rate": 48000,
+      "ping": true,
+      "case": "stereo_noise",
+      "pcm_words": 192,
+      "bit_equal": true
+    },
+    {
+      "rate": 48000,
+      "ping": true,
+      "case": "retime",
+      "pcm_words": 192,
+      "bit_equal": true
+    },
+    {
+      "rate": 48000,
+      "ping": true,
+      "case": "clamp",
+      "pcm_words": 192,
+      "bit_equal": true
+    }
+  ],
+  "words": 3072
+}
