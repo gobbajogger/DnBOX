@@ -1,0 +1,6 @@
+owner 0 ARP rate 200 clock factor 18
+owner 1 ARP rate 200 clock factor 17
+PASS original app ARP exact onsets 137/206, SMK ARP RATE/CLOCK FACTOR/GATE detents and live keys/audio, both owners: 738 assertions
+PASS held key across transported playback and STOP
+PASS held key across transported playback and STOP
+7b63e9ab255240a59f633d7271869cb7a36bfc39b4e641683f3c65ed421d2b36  transport.pcm

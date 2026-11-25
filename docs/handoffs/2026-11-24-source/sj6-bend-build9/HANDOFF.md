@@ -1,0 +1,12 @@
+# Original SuperJ6 Build9 Pitch Bend
+
+Authenticated local original Mach-O SHA256 a5243e50bda6bd44f463c6e63ea3137802142f55f3c1ea25a5a6e046acba81a1, inspected statically, not run.
+
+- Settings storyboard NIB labels MOD / PITCH WHEELS and Pitch bend lower/upper range, semitones. Actual PopUpMODController outlets 0x1002cb74c (upper), 0x1002cb780 (lower); ivar offsets 56/64. Setup writes Double 48 and zero to upper max/min (0x1002cbb40–64), zero and −48 to lower max/min (0x1002cbb80–a0). Stepper increment/decrement sends +1/-1 (0x10006bf10/bf74). Build9 does not use Synth One's ±24 detents.
+- Conductor initializes +2 binary32 for both magnitudes (0x100261578–588). Popup fallback +2/−2 independently confirms (0x1002a4218–4230). Current compact ±2 default is correct. AppSetting fields pitchBendUpperSemitones +88 / Lower +92 restore at 0x1002574d0–4ec. Popup callback writes Conductor ivars 0x10080a0f8/0x10080a100. No fabricated AU parameter IDs.
+- Original MIDI maps raw unsigned 0..16384 to 0..1 at 0x10001b370–38c, exponent 1. Normalized touch callback (neutral .5 confirmed at 0x100068634) and MIDI call 0x10027ca84, which commits 2 * (normalized - .5) * direction magnitude (0x10027caf4–cb60). Default MIDI 0 -> −2 st, 8192 -> 0 st, 16383 -> +1.99975586 st. Normalized touch 1 reaches +2 st. Only one neutral raw MIDI word.
+- The bend is stored to instrument core at 0x10027cb78, then 0x10027cb94 -> 0x1002b36b8 -> 0x1002af7ec broadcasts shared bend plus other tuning offsets to four distinct receiver slots (0x88, 0x90, 0x98, 0xa0). Calls 0x1002af844/890/8d4/908 all target 0x1005e5320, exact ObjC selector setPitchBend:.
+
+This scratch donor changes only the SuperJ6-built-in MIDI normalization in app/engine.c on exact source-mod-wheels b71f366f. Physical calibration/routing, Synth One ranges/storage, all other engines, base ±2, LINK, UI and project formats are unchanged. No new range control or preset field. Host replay extracts actual SMK ADC path and uses the real MIDI event queue. Both owners' held voices and each compact layer's pitch and actual phase increment were checked, with a distinct layer trim. Includes endpoints, both near-center words, held A/B view switch, other engines' route IDs, no saved mutation or writes. Predecessor fails 40 assertions; candidate passes 266 UBSan checks. No device, native fit, full original audio, or release claim.
+
+Reproduce in this directory: bash replay.sh red (nonzero expected), then bash replay.sh green (pass). Isolated copy self-cleans.

@@ -1,0 +1,25 @@
+juno6.c: OK
+juno6.h: OK
+juno6_factory.inc: OK
+dnbx_core.c: OK
+patching file firmware/src/dsp/juno6.h
+patching file firmware/src/dsp/juno6_factory.inc
+patching file firmware/src/dsp/juno6.h
+patching file firmware/src/dsp/juno6_factory.inc
+patching file firmware/src/dsp/juno6.h
+patching file firmware/src/dsp/juno6_factory.inc
+patching file firmware/src/dsp/juno6.h
+patching file firmware/src/dsp/juno6_factory.inc
+juno6.c: OK
+juno6.h: OK
+juno6_factory.inc: OK
+FAIL 13: juno6_configure_lfo1_cutoff
+patching file firmware/src/dsp/juno6.h
+patching file firmware/src/dsp/juno6_factory.inc
+juno6.c: OK
+juno6.h: OK
+juno6_factory.inc: OK
+owner=0 74/80 audible complete stereo blocks
+owner=1 74/80 audible complete stereo blocks
+PASS part size 3032
+b23b1a8bdf25f06b889c28044c460d3974c443294387dc11f2db2c5e1f545cd0  after.pcm

@@ -1,0 +1,129 @@
+--- a/firmware/src/dsp/juno6.h
++++ b/firmware/src/dsp/juno6.h
+@@ -89,6 +89,13 @@
+  float vibrato_depth, vibrato_ratio;
+  uint64_t lfo2_entropy_state;
+  float lfo2_hold_elapsed, lfo2_hold_period, lfo2_hold_sample;
++#if defined(X0X_HOST) && defined(X0X_SJ6_ALT3_WITNESS)
++ struct {
++    float rate,depth,from_rate,from_depth,to_rate,to_depth;
++    uint32_t phase,increment,elapsed,duration;
++    uint8_t tick, armed, dirty;
++ } alt3;
++#endif
+  uint8_t osc1_level_code, mod_destination, mod_wheel_lfo1; /* 0 untouched, 1..128 physical CC1 */
+ #endif
+ #endif
+@@ -140,6 +147,10 @@
+ int juno6_set_mod_wheel(juno6_t *, unsigned value);
+ /* ID179 original editor index; only source-qualified receivers are enabled. */
+ int juno6_set_mod_destination(juno6_t *, unsigned selected);
++#if defined(X0X_HOST) && defined(X0X_SJ6_ALT3_WITNESS)
++int juno6_arm_alt3_free(juno6_t *,unsigned verified_ramp_frames,int tempo_sync);
++void juno6_alt3_process(juno6_t *,float *,float *,unsigned);
++#endif
+ void juno6_set_lfo_words(juno6_t *, const juno6_lfo_words *, int reset_phase);
+ void juno6_set_panel_lfo(juno6_t *, unsigned lfo, int position, unsigned hz_mode);
+ void juno6_set_lfo_tempo(juno6_t *, float bpm);
+--- a/firmware/src/dsp/juno6_factory.inc
++++ b/firmware/src/dsp/juno6_factory.inc
+@@ -323,10 +323,73 @@
+ 
+ static float sj6_vibrato_depth(float unit) { return 12.f * fm_powf(unit,3.03f); }
+ 
++#if defined(X0X_HOST) && defined(X0X_SJ6_ALT3_WITNESS)
++int juno6_arm_alt3_free(juno6_t *s,unsigned verified_ramp_frames,int tempo_sync)
++{
++    if (!s || !s->typed || tempo_sync || verified_ramp_frames==0 || verified_ramp_frames>100000u)
++        return 0;
++    s->alt3.duration=verified_ramp_frames;
++    s->alt3.armed=1;
++    return 1;
++}
++static void sj6_alt3_target(juno6_t *s,unsigned value)
++{
++    const float u=(float)value/127.f;
++    s->alt3.to_rate=16.0f*fm_powf(.9f*u,3.33f);
++    s->alt3.to_depth=u;
++    s->alt3.dirty=1;
++}
++static float sj6_alt3_table(unsigned i)
++{
++    i &= 4095u;
++    float x=(float)i*(FM_TWO_PI/4096.f);
++    return .5f*fm_sin_pi(i>2048u ? x-FM_TWO_PI : x)+.5f;
++}
++void juno6_alt3_process(juno6_t *s,float *left,float *right,unsigned n)
++{
++    if (!s->alt3.armed) return;
++    for(unsigned i=0;i<n;i++){
++        if (!s->alt3.tick) {
++            if(s->alt3.dirty){
++                s->alt3.from_rate=s->alt3.rate;
++                s->alt3.from_depth=s->alt3.depth;
++                s->alt3.elapsed=0;
++                s->alt3.dirty=0;
++            }
++            if(s->alt3.elapsed>=s->alt3.duration){
++                s->alt3.rate=s->alt3.to_rate;s->alt3.depth=s->alt3.to_depth;
++            }else{
++                float u=(float)s->alt3.elapsed/(float)s->alt3.duration;
++                s->alt3.rate=fmaf(s->alt3.to_rate-s->alt3.from_rate,u,s->alt3.from_rate);
++                s->alt3.depth=fmaf(s->alt3.to_depth-s->alt3.from_depth,u,s->alt3.from_depth);
++                s->alt3.elapsed+=8u;
++            }
++            s->alt3.increment=(uint32_t)nearbyintf((s->alt3.rate*.5f)*(0x1p24f/s->sample_rate));
++        }
++        s->alt3.tick=(uint8_t)((s->alt3.tick+1u)&7u);
++        float *channel[2]={left+i,right+i};
++        for(unsigned ch=0;ch<2;ch++){
++            if(s->alt3.depth){
++                unsigned p=s->alt3.phase,ind=p>>12;
++                float a=sj6_alt3_table(ind),b=sj6_alt3_table(ind+1u);
++                float wave=fmaf(b-a,(p&4095u)*(1.f/4096.f),a);
++                *channel[ch]*=(1.f-s->alt3.depth*wave);
++            }
++            s->alt3.phase=(s->alt3.phase+s->alt3.increment)&0xffffffu;
++        }
++    }
++}
++#endif
++
+ int juno6_set_mod_destination(juno6_t *s,unsigned selected)
+ {
+     if (selected==6u) selected=0; /* Build-9 final segment aliases the default. */
+-    if (!s || !s->typed || selected>1u) return 0;
++    if (!s || !s->typed) return 0;
++#if defined(X0X_HOST) && defined(X0X_SJ6_ALT3_WITNESS)
++    if (selected>1u && !(selected==3u && s->alt3.armed)) return 0;
++#else
++    if (selected>1u) return 0;
++#endif
+     s->mod_destination=(uint8_t)selected;
+     return 1;
+ }
+@@ -334,6 +397,12 @@
+ int juno6_set_mod_wheel(juno6_t *s,unsigned value)
+ {
+     if (!s || !s->typed || value>127u) return 0;
++#if defined(X0X_HOST) && defined(X0X_SJ6_ALT3_WITNESS)
++    if (s->mod_destination==3u) {
++        sj6_alt3_target(s,value);
++        return 1;
++    }
++#endif
+     if (s->mod_destination==1u) {
+         s->vibrato_depth=sj6_vibrato_depth((float)value/127.f);
+         return 1;
+--- a/firmware/src/app/original_runtime.c
++++ b/firmware/src/app/original_runtime.c
+@@ -832,6 +832,9 @@
+ #if X0X_SUPERJ6_FACTORY
+         ok=juno6_render_stereo(&p->dsp.juno.synth,left,right,frames);
+         if(ok){
++#if defined(X0X_HOST) && defined(X0X_SJ6_ALT3_WITNESS)
++            juno6_alt3_process(&p->dsp.juno.synth,left,right,frames); /* after HPF, before downstream FX */
++#endif
+             juno6_chorus_process(&p->dsp.juno.chorus,left,right,frames);
+             /* The original master attenuator follows the instrument effects. */
+             float gain=p->dsp.juno.synth.master_gain;
