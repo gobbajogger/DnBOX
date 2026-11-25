@@ -1,0 +1,16 @@
+--- a/firmware/src/dsp/s1c/s1c_front.h
++++ b/firmware/src/dsp/s1c/s1c_front.h
+@@ -5,8 +5,13 @@
+ #ifndef S1C_FRONT_H
+ #define S1C_FRONT_H
+ #include "s1c.h"
+ int s1c_front_set(s1c *s, unsigned id, float value);   /* 1 = applied */
++#if X0X_S1_DELAY_TIME_NATIVE
++int s1c_front_delay_apply(s1c *,unsigned,int);
++int s1c_front_delay_read(const s1c *,unsigned *,unsigned *,float *);
++int s1c_delay_time_fit(s1c *,float,int);
++#endif
+ float s1c_front_clamp(unsigned id, float value);
+ void s1c_front_bounds(unsigned id, float *minimum, float *maximum);
+ #if X0X_SYNTHONE_PATCH
+ #if defined(X0X_S1_MOD_RATE_PROBE) && X0X_S1_MOD_RATE_PROBE

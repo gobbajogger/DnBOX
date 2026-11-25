@@ -1,0 +1,143 @@
+--- a/firmware/src/app/original_runtime.c
++++ b/firmware/src/app/original_runtime.c
+@@ -467,8 +467,10 @@
+ #if !defined(X0X_HOST) || !defined(DNBOX_137_HOST_WITNESS)
+ #error "Saga zero Gate is a composed host witness only"
+ #endif
+     if (p->kind==ORIGINAL_SOUND_JUNO) q->seqGate=c->gate;
++#elif X0X_SJ6_NATIVE_ZERO_GATE
++    if (p->kind==ORIGINAL_SOUND_JUNO && p->dsp.juno.synth.typed) q->seqGate=c->gate;
+ #endif
+ #if X0X_SUPERJ6_BUILTIN_INIT
+     q->saga_notes = p->kind == ORIGINAL_SOUND_JUNO;
+     q->saga_timing = q->saga_notes && c->division && c->division <= ARP_SAGA_DIVISIONS;
+@@ -489,26 +491,79 @@
+     q->patternRange = p->kind == ORIGINAL_SOUND_SYNTHONE ? 12 : 24;
+     q->clocked = 0;
+ }
+ #if X0X_S1_FENCED_CLOCK
++#if X0X_S1_CLOCK_NATIVE
++#include "s1_clock_bits.h"
++static uint32_t source_factor_bits(unsigned i)
++{
++    /* Exact binary32 values of original units[i] / 192.f. */
++    static const uint32_t f[] = {
++        0x41000000,0x40c00000,0x40800000,0x40400000,0x40000000,
++        0x3f800000,0x3f2aaaab,0x3f000000,0x3eaaaaab,0x3e800000,
++        0x3e2aaaab,0x3e000000,0x3daaaaab,0x3d800000,0x3d2aaaab,
++        0x3d000000,0x3caaaaab,0x3c800000,0x3c2aaaab
++    };
++    return f[i];
++}
++static uint32_t source_clock_rearm(original_runtime_arp *a, uint32_t *visible)
++{
++    uint32_t f = source_factor_bits(a->source_stop);
++    uint32_t k = s1_clock_step(a->source_phase, f, visible);
++    a->source_boundary = s1_clock_boundary(k + 1u, f);
++    return k;
++}
++#endif
+ int original_runtime_s1_clock(original_runtime_part *p, float bpm, unsigned factor)
+ {
++#if !X0X_S1_CLOCK_NATIVE
+     static const uint16_t units[]={1536,1152,768,576,384,192,128,96,64,48,32,24,16,12,8,6,4,3,2};
++#endif
+     if (!p || p->kind!=ORIGINAL_SOUND_SYNTHONE || p->status!=ORIGINAL_RUNTIME_OK ||
+-        !(bpm>=1.f && bpm<=200.f) || factor>=sizeof units/sizeof units[0]) return 0;
++        !(bpm>=1.f && bpm<=200.f) || factor>=19u) return 0;
+     original_runtime_arp *a=&p->arp;
++#if X0X_S1_CLOCK_NATIVE
++    /* The typed native editor/storage supports the complete original 1..200
++     * integer panel, not the separate fractional Ableton Link input. */
++    unsigned ibpm = (unsigned)bpm;
++    if ((float)ibpm != bpm) return 0;
++    if (!a->source_set) a->source_wait=!!a->nheld;
++    a->source_set=1; a->source_bpm=(uint8_t)ibpm; a->source_stop=(uint8_t)factor;
++    a->source_delta=s1_clock_delta_bits(bpm/60.f);
++    (void)source_clock_rearm(a, 0);
++#else
+     if (!a->source_set) a->source_wait=!!a->nheld;
+     a->source_set=1; a->source_bpm=bpm; a->source_stop=(uint8_t)factor;
+     a->source_delta=(bpm/60.f)/44100.;
+     a->source_factor=units[factor]/192.f;
++#endif
+     return 1;
+ }
+ static S1ClockPulse source_clock_sample(original_runtime_arp *a)
+ {
+     const int prev=a->seq.previousHeldNoteNumbersAECount, first=!prev&&a->nheld, on=a->prm.arpIsOn==1;
+     S1ClockPulse p={on&&(first||(prev&&!a->nheld)),0,0};
+-    if (p.reset) a->source_phase=0;
++    if (p.reset) {
++        a->source_phase=0;
++#if X0X_S1_CLOCK_NATIVE
++        a->source_boundary=0; /* next sample initializes exact boundary */
++#endif
++    }
+     if (on || (a->seq.sequencerLastNotesCount && !p.reset)) {
++#if X0X_S1_CLOCK_NATIVE
++        if (!a->source_boundary) (void)source_clock_rearm(a, 0);
++        a->source_phase = s1_clock_add(a->source_phase, a->source_delta);
++        const int crossed = a->source_phase >= a->source_boundary;
++        p.trigger = first || crossed;
++        if (p.trigger && on && a->nheld) {
++            uint32_t k;
++            (void)source_clock_rearm(a, &k);
++            if (k >= S1_CINTMAX) p.trigger=0;
++            else p.index=(int)k;
++        } else if (crossed) {
++            (void)source_clock_rearm(a, 0);
++        }
++#else
+         const double r0=__builtin_fmod(a->source_phase,a->source_factor);
+         a->source_phase+=a->source_delta;
+         const double r1=__builtin_fmod(a->source_phase,a->source_factor);
+         p.trigger=first||r1<r0;
+@@ -516,8 +571,9 @@
+             const double i=a->source_phase/a->source_factor;
+             if (i>=2147483648.) p.trigger=0;
+             else p.index=(int)i;
+         }
++#endif
+     }
+     return p;
+ }
+ #endif
+@@ -565,9 +621,13 @@
+ #if X0X_SJ6_NATIVE_POSITIVE_GATE
+ int original_runtime_sj6_live_gate(original_runtime_part *p,unsigned gate)
+ {
+     if(!p || p->status!=ORIGINAL_RUNTIME_OK || p->kind!=ORIGINAL_SOUND_JUNO ||
+-       !p->dsp.juno.synth.typed || gate<1u || gate>100u) return 0;
++       !p->dsp.juno.synth.typed || gate>100u
++#if !X0X_SJ6_NATIVE_ZERO_GATE
++       || gate<1u
++#endif
++       ) return 0;
+     p->arp.cfg.gate=(uint8_t)gate;
+     S1Sequencer_liveGate(&p->arp.seq,&p->arp.prm,gate);
+     return 1;
+ }
+@@ -880,8 +940,11 @@
+             !a->clk_beat && a->prm.seqGate==100;
+         if (!source_available) a->source_wait=!!a->source_set;
+         else if (a->source_wait && !a->nheld) {
+             a->source_wait=0; a->source_phase=0; a->prm.clocked=0;
++#if X0X_S1_CLOCK_NATIVE
++            a->source_boundary=0;
++#endif
+         }
+ #endif
+         for (unsigned i = 0; i < frames; ++i) {
+ #if X0X_S1_FENCED_CLOCK
+@@ -935,9 +998,9 @@
+                 juno6_chorus_process(&p->dsp.juno.chorus,left,right,frames);
+ #if X0X_SJ6_CLASSIC_I_PROBE
+             p->classic_i_sample+=frames;
+ #endif
+-#if defined(X0X_HOST) && defined(X0X_SJ6_DELAY_WITNESS)
++#if (defined(X0X_HOST) && defined(X0X_SJ6_DELAY_WITNESS)) || X0X_SJ6_NATIVE_DELAY
+             juno6_delay24_process(&p->dsp.juno.synth,left,right,frames);
+ #endif
+             /* The original master attenuator follows the instrument effects. */
+             float gain=p->dsp.juno.synth.master_gain;

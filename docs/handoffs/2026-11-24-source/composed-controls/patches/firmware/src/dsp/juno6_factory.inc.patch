@@ -1,0 +1,30 @@
+--- a/firmware/src/dsp/juno6_factory.inc
++++ b/firmware/src/dsp/juno6_factory.inc
+@@ -479,8 +479,20 @@
+     (void)dnbx_store_raw(&s->core,89u,amount);
+     return 1;
+ }
+ 
++#if X0X_SJ6_VCF_PORT
++/* Authored Init selector ID181=1 (normal cutoff) and ID180=0 are
++ * constructor state. Neither is a panel knob or a wheel destination. */
++int juno6_set_vcf_lfo1_amount(juno6_t *s,unsigned position)
++{
++    if (!s || !s->typed || position>127u) return 0;
++    const float amount=(float)position/127.f;
++    if(s->lfo1_pwm_route!=3u)
++        return juno6_configure_lfo1_cutoff(s,0.f,1.f,amount);
++    return dnbx_store_raw(&s->core,89u,amount)==DNBX_RAW_STORED_ONLY;
++}
++#endif
+ int juno6_configure_lfo1_pwm(juno6_t *s,unsigned selector,unsigned enabled,float base,float amount)
+ {
+     if(!s || !s->typed || (selector!=69u && selector!=70u) || enabled>1u ||
+        !(base>=0.f && base<=1.f && amount>=0.f && amount<=1.f)) return 0;
+@@ -1426,4 +1438,6 @@
+         }
+     }
+ }
+ #endif
++
++#include "juno6_delay_native.inc"

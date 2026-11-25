@@ -1,0 +1,171 @@
+--- a/firmware/src/dsp/s1c/s1c.c
++++ b/firmware/src/dsp/s1c/s1c.c
+@@ -1,6 +1,6 @@
+ /* SPDX-License-Identifier: GPL-3.0-only */
+-#if defined(X0X_S1_CRUSH_LFO_PROBE) && X0X_S1_CRUSH_LFO_PROBE
++#if defined(X0X_HOST) && defined(X0X_S1_CRUSH_LFO_PROBE) && X0X_S1_CRUSH_LFO_PROBE
+ #include <math.h>
+ #endif
+ /* Compact Synth One-style engine, written from scratch for DnBOX from the instrument's documented
+  * behaviour (control laws, envelope, voice allocation, arpeggiator, FX order). Judged by A/B only.
+@@ -447,13 +447,19 @@
+         const float kcut = P(CUT) * lfo10(s, P(LCUT)), kem = P(FENV) * lfo10(s, P(LFENV));
+         float cut = clampf(kcut - kcut * kem * (1.0f - v->fenv), 64.0f, 22050.0f);
+         if (ft == 0) {
+             float x = cut * (2.0f / s->sr); if (x > 1.0f) x = 1.0f;
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++            v->ka1 = kres; /* unused by LP; retain original KR resonance */
++#endif
+             v->kA = ladder_a(x);
+             v->kfb = kres * (3.98720139f + x * (3.68178143f - x * 3.93633599f));
+         } else if (ft == 1) {
+             float bw = 0.0625f * s->sr * (exp2f(clampf(1.0f - kres, 0.0f, 1.0f)) - 1.0f);
+             float cc = 1.0f / tanf(3.14159265f * bw / s->sr), d = 2.0f * cosf(TWO_PI * cut / s->sr), a1 = 1.0f / (1.0f + cc);
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++            v->kA = cc; /* unused by BP; retain original KR bandwidth */
++#endif
+             v->ka1 = a1; v->ka4 = -cc * d * a1; v->ka5 = (cc - 1.0f) * a1;
+         } else {
+             float cc = tanf(3.14159265f * cut / s->sr), a1 = 1.0f / (1.0f + 1.41421356f * cc + cc * cc);
+             v->ka1 = a1; v->ka4 = 2.0f * (cc * cc - 1.0f) * a1; v->ka5 = (1.0f - 1.41421356f * cc + cc * cc) * a1;
+@@ -477,8 +483,32 @@
+         y += ((float)(int32_t)s->rnd * (1.0f / 2147483648.0f)) * v->vamp * P(NOISEV) * lfo10(s, P(LNOISE));
+     }
+     y *= v->amp * v->kkey;
+     float fo;
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++    const float route=P(LFENV);
++    if(P(FENV)>0.f && ((route==1.f && P(L1A)>0.f) ||
++                      (route==2.f && P(L2A)>0.f) ||
++                      (route==3.f && (P(L1A)>0.f || P(L2A)>0.f)))) {
++        const float base=P(CUT)*lfo10(s,P(LCUT)), amount=P(FENV)*lfo10(s,route);
++        const float hz=clampf(base-base*amount*(1.f-v->fenv),64.f,22050.f);
++        if(ft==0){
++            float x=hz*(2.f/s->sr);if(x>1.f)x=1.f;
++            const float a=ladder_a(x),fb=v->ka1*(3.98720139f+x*(3.68178143f-x*3.93633599f));
++            fo=ladder(v->lp,y,a,fb);
++        } else if(ft==2){
++            const float cc=tanf(3.14159265f*hz/s->sr),a1=1.0f/(1.0f+1.41421356f*cc+cc*cc);
++            const float a4=2.0f*(cc*cc-1.0f)*a1,a5=(1.0f-1.41421356f*cc+cc*cc)*a1;
++            fo=hp2(v->bq,y,a1,a4,a5);
++        } else {
++            const float d=2.f*cosf(TWO_PI*hz/s->sr);
++            const float a4=-v->kA*d*v->ka1;
++            float t=y-a4*v->bq[0]-v->ka5*v->bq[1];
++            fo=t*v->ka1-v->ka1*v->bq[1];
++            v->bq[1]=v->bq[0];v->bq[0]=t;
++        }
++    } else
++#endif
+     if (ft == 0) fo = ladder(v->lp, y, v->kA, v->kfb);
+     else if (ft == 2) fo = hp2(v->bq, y, v->ka1, v->ka4, v->ka5);
+     else {
+         float t = y - v->ka4 * v->bq[0] - v->ka5 * v->bq[1];
+@@ -757,8 +787,36 @@
+     (void)manual;
+ #endif
+     s1c_set(s, DLON, gate);
+ }
++#if X0X_S1_DELAY_TIME_NATIVE
++int s1c_delay_time_fit(s1c *s,float t,int cold_apply)
++{
++#if !S1C_BUSFX && S1C_EXT
++    if(s->ddec<=0 || (!s->delay_history && s->t[DLON]<=0.f)) {
++        /* Cold/inaudible: reserve both taps for the original maximum in the
++         * existing arena. Never repartition a warm (even bypassed) Delay. */
++        /* At the largest permitted decimation the full 2.5 s allocation
++         * must still fit (including conservative stereo 2T+2T+T). */
++        const float w=2.5f*s->sr/4094.f;
++        const int a=((int)(2.f*w)+18)&~15,b=((int)w+18)&~15;
++        if(!s->pool || s->pool_bytes<2*(2*a+b))return 0;
++        if(cold_apply) {
++            s->delay_time_reserve=1;
++            s->delay_history=1;
++            s->ddec=0;
++        }
++        return 1;
++    }
++    const float w=t*s->sr/(float)s->ddec;
++    return 2.f*w<=(float)s->dl[0].len-2.f &&
++           (s->dmono || 2.f*w<=(float)s->dl[1].len-2.f) &&
++           w<=(float)s->dl[3].len-2.f;
++#else
++    (void)s;(void)t;(void)cold_apply;return 0;
++#endif
++}
++#endif
+ void s1c_init(s1c *s, float sr, const float init[150])
+ {
+     int i;
+ #if !S1C_BUSFX
+@@ -834,8 +892,11 @@
+     int fmt = s->dfmt, nl, dd, i;
+ #endif
+     float dt = s->t[DLT] > P(DLT) ? s->t[DLT] : P(DLT);
+     float Tt = dt * s->sr * (s->delay_history ? 1.f : s->t[DLON]);
++#if X0X_S1_DELAY_TIME_NATIVE
++    if(s->delay_time_reserve)Tt=2.5f*s->sr;
++#endif
+     s->dmono = s->t[PANA] == 0.0f && s->t[PHMIX] == 0.0f;
+     nl = s->dmono ? 2 : 3;
+     for (dd = 1; dd < 4096; dd++) {
+         float T = Tt / (float)dd;
+@@ -929,20 +990,22 @@
+         else for (i = 0; i < S1C_VOICES; i++) if (s->v[i].root != -1 && s->v[i].stage) y += voice_run(s, &s->v[i]);
+ 
+         /* bitcrush (sample-and-hold), tremolo */
+ #if defined(X0X_S1_CRUSH_LFO_PROBE) && X0X_S1_CRUSH_LFO_PROBE
+-#ifndef X0X_HOST
+-#error Synth One crush cadence witness is host only
+-#endif
+         float crush_route = P(LBC);
+         if (crush_route==1.f || crush_route==2.f || crush_route==3.f) {
+             /* The original clock is consumed only on capture. Evaluate the
+              * effective per-sample rate at that same sample, not at a prior
+              * control tick. Keep the original binary32 add/subtract order. */
+             s1u_crush *cr = &s->crush;
+             if (cr->idx <= cr->n) {
++#ifdef X0X_HOST
+                 float bsr = (float)log2(P(BCSR)) + 4.0f*lfo01(s,crush_route);
+                 s1u_crush_clock(cr,clampf((float)exp2(bsr),2048.0f,48000.0f),s->sr);
++#else
++                float bsr = log2f(P(BCSR)) + 4.0f*lfo01(s,crush_route);
++                s1u_crush_clock(cr,clampf(exp2f(bsr),2048.0f,48000.0f),s->sr);
++#endif
+                 cr->v = y;
+                 cr->idx += cr->inc;
+                 cr->idx -= cr->n;
+                 cr->n = 0.f;
+@@ -978,16 +1041,30 @@
+             if ((f & 7) == 0) {
+                 float pv = clampf(log2f(P(CUT)), 10.0f, 14.4284f);
+                 float pc = 1.0f + (pv - 10.0f) * (1.0f / 4.4284f) * (P(DICT) - 1.0f);
+                 float x = clampf(P(CUT) * pc, 64.0f, 22050.0f) * (2.0f / s->sr);
+-                s->dl_fc = ladder_a(x > 1.0f ? 1.0f : x);     /* the ladder coefficient, not Hz */
++                x = x > 1.0f ? 1.0f : x;
++                s->dl_fc = ladder_a(x);     /* the ladder coefficient, not Hz */
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++                s->dl_res_fb=P(DIRES)*(3.98720139f+x*(3.68178143f-x*3.93633599f));
++#endif
+             }
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++            dL = ladder(s->dlp[0], L, s->dl_fc, s->dl_res_fb);
++            dR = ladder(s->dlp[1], R, s->dl_fc, s->dl_res_fb);
++#else
+             dL = ladder(s->dlp[0], L, s->dl_fc, 0.0f); dR = ladder(s->dlp[1], R, s->dl_fc, 0.0f);
++#endif
+ #else
+             float pv = clampf(log2f(P(CUT)), 10.0f, 14.4284f);
+             float pc = 1.0f + (pv - 10.0f) * (1.0f / 4.4284f) * (P(DICT) - 1.0f);
+             float fc = clampf(P(CUT) * pc, 64.0f, 22050.0f);
+-            dL = moog(s->dlp[0], L, fc, 0.0f, s->sr); dR = moog(s->dlp[1], R, fc, 0.0f, s->sr);
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++            const float res=P(DIRES);
++#else
++            const float res=0.f;
++#endif
++            dL = moog(s->dlp[0], L, fc, res, s->sr); dR = moog(s->dlp[1], R, fc, res, s->sr);
+ #endif
+         }
+ #ifdef S1C_OPT_A
+ #if S1C_EXT

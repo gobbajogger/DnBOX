@@ -1,0 +1,20 @@
+--- a/firmware/src/app/original_runtime.h
++++ b/firmware/src/app/original_runtime.h
+@@ -37,12 +37,17 @@
+     S1Sequencer seq;
+     NoteNumber held[S1_SEQ_MAX_HELD];   /* heldNoteNumbersAE, newest first */
+     float bpm;
+ #if X0X_S1_FENCED_CLOCK
++#if X0X_S1_CLOCK_NATIVE
++    uint64_t source_phase, source_delta, source_boundary;
++    uint8_t source_stop, source_set, source_wait, source_bpm;
++#else
+     double source_phase, source_delta;
+     float source_factor, source_bpm;
+     uint8_t source_stop;
+     uint8_t source_set, source_wait;
++#endif
+ #endif
+     uint32_t age;                       /* frames since the last real note-on (H3) */
+     uint64_t clk_pos;                   /* transport position, Q8 samples (clk_beat != 0) */
+     uint32_t clk_beat;                  /* Q8 samples per beat; 0 = transport stopped */

@@ -1,0 +1,29 @@
+--- a/firmware/src/dsp/synthone/sequencer/S1Sequencer.h
++++ b/firmware/src/dsp/synthone/sequencer/S1Sequencer.h
+@@ -17,10 +17,10 @@
+ #if !defined(X0X_HOST) || !defined(X0X_SJ6_ZERO_GATE_PROBE)
+ #error "Saga deadline proof is host-only and requires the typed zero-Gate witness"
+ #endif
+ #endif
+-#if X0X_S1_FENCED_CLOCK && !defined(X0X_HOST)
+-#error "Original clock prototype is host-only"
++#if X0X_S1_FENCED_CLOCK && !defined(X0X_HOST) && !X0X_S1_CLOCK_NATIVE
++#error "Original clock prototype without the explicit native receiver"
+ #endif
+ 
+ #if defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE
+ #if !defined(X0X_HOST) || !defined(DNBOX_137_HOST_WITNESS) || !X0X_SJ6_ZERO_GATE_PROBE
+@@ -86,9 +86,12 @@
+ #if defined(X0X_SJ6_GATE_DEADLINE_PROBE) && X0X_SJ6_GATE_DEADLINE_PROBE
+     uint32_t editGateTicks;           /* already dispatched step's original deadline */
+     uint8_t editGateLatched;
+ #elif X0X_SJ6_NATIVE_POSITIVE_GATE
+-    uint32_t liveGateTicks;            /* prior active Saga gate; 0 unlatched */
++    uint32_t liveGateTicks;            /* prior active Saga deadline */
++#if X0X_SJ6_NATIVE_ZERO_GATE
++    uint8_t liveGateLatched;          /* zero is itself a deadline */
++#endif
+ #endif
+     uint8_t gateOpen;
+     uint8_t sequencerLastNotesCount;
+     uint8_t sequencerLastNotes[S1_SEQ_MAX_HELD];

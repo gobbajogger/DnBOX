@@ -1,0 +1,75 @@
+--- a/firmware/src/dsp/s1c/s1c_front.c
++++ b/firmware/src/dsp/s1c/s1c_front.c
+@@ -115,8 +115,54 @@
+         if (d < diff) { diff = d; best = t; }
+     }
+     return best;
+ }
++#if X0X_S1_DELAY_TIME_NATIVE
++/* 0 is the factory time; 1..128 are raw free positions; 129..143 are original
++ * synced divisions 2 bars through 1/64T. Relative knob edits use the current mode. */
++static int s1c_delay_resolve(const s1c *s, unsigned code, float *seconds)
++{
++    const float lo=MINV(F_DLT),hi=MAXV(F_DLT);
++    float t;
++    if(!code) t=s1c_front_init(F_DLT);
++    else if(code<=128u) t=lo+(hi-lo)*(float)(code-1u)*(1.f/127.f);
++    else if(code<=143u) t=rate_time(s->t[F_ARPRATE],F_TWOBARS+code-129u);
++    else return 0;
++    if(s->t[F_TSYNC]>0.f && code<=128u)
++        t=nearest_time(t,s->t[F_ARPRATE],lo,hi);
++    if(!(t>=lo && t<=hi))return 0;
++    *seconds=t;
++    return 1;
++}
++int s1c_front_delay_apply(s1c *s,unsigned code,int set)
++{
++    float t;
++    if(!s1c_delay_resolve(s,code,&t) || !s1c_delay_time_fit(s,t,set && code))return 0;
++    if(set) {
++        s->delay_time_code=(uint8_t)code;
++        s1c_set(s,F_DLT,t);
++    }
++    return 1;
++}
++int s1c_front_delay_read(const s1c *s,unsigned *pos,unsigned *max,float *seconds)
++{
++    const float t=s->t[F_DLT],lo=MINV(F_DLT),hi=MAXV(F_DLT);
++    *seconds=t;
++    if(s->t[F_TSYNC]<=0.f) {
++        *max=127u;
++        *pos=(unsigned)((s1c_front_clamp(F_DLT,t)-lo)*(127.f/(hi-lo))+.5f);
++        return 0;
++    }
++    unsigned best=F_RATES-1;
++    float error=1e9f;
++    for(unsigned n=F_TWOBARS;n<F_RATES;n++){
++        const float v=rate_time(s->t[F_ARPRATE],n),d=fabs_(v-t);
++        if(v>=lo && v<=hi && d<error){best=n;error=d;}
++    }
++    *pos=best-F_TWOBARS;*max=F_RATES-1-F_TWOBARS;
++    return error<1e-5f ? 1 : -1;
++}
++#endif
+ static float nearest_factor(float x)
+ {
+     float best = rate_factor(F_RATES - 1), diff = 1e9f;
+     for (int i = F_RATES - 1; i >= 0; i--) {
+@@ -176,9 +222,16 @@
+     if (id >= 150 || !(x == x) || x > 3.4e38f || x < -3.4e38f) return 0;
+     if (id == F_TSYNC || id == F_ARPRATE) {
+         put(s, id, x);
+         rate(s, F_L1R, s->t[F_L1R]); rate(s, F_L2R, s->t[F_L2R]);
+-        rate(s, F_PANF, s->t[F_PANF]); rate(s, F_DLT, s->t[F_DLT]);
++        rate(s, F_PANF, s->t[F_PANF]);
++#if X0X_S1_DELAY_TIME_NATIVE
++        if(s->delay_time_code) {
++            if(s->t[F_TSYNC]>0.f)
++                (void)s1c_front_delay_apply(s,s->delay_time_code,1);
++        } else
++#endif
++        rate(s, F_DLT, s->t[F_DLT]);
+     } else if (id == F_L1R || id == F_L2R || id == F_PANF || id == F_DLT || id == F_PB || id == F_TMULT)
+         rate(s, id, x);
+     else if (id == F_A4)
+         s1c_set(s, id, (float)(int)s1c_front_clamp(id, x));

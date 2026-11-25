@@ -1,0 +1,89 @@
+--- a/tools/build.py
++++ b/tools/build.py
+@@ -137,8 +137,21 @@
+     "firmware/src/app/original_sound.c",
+ ]
+ 
+ # Native and host front ends import this same source composition.
++def synth_controls_init_only():
++    # The combined development controls profile is bank-free by default.
++    # Explicit 0 is only for reproducing earlier banked build receipts.
++    dual_controls = (BOARD == "smk37" and MODEL in ("elite", "pro") and
++                     S1C == "1" and SUPERJ6_FACTORY == "1" and
++                     os.environ.get("X0X_SUPERJ6_BUILTIN_INIT") == "1" and
++                     synthone_patch_setting() == "1")
++    value = os.environ.get("X0X_SYNTH_CONTROLS_INIT_ONLY", "1" if dual_controls else "0")
++    if value not in ("0", "1"):
++        raise SystemExit("X0X_SYNTH_CONTROLS_INIT_ONLY: 0 or 1")
++    return value == "1"
++
++
+ SUPERJ6_FACTORY = os.environ.get("X0X_SUPERJ6_FACTORY", "0")
+ if SUPERJ6_FACTORY not in ("0", "1"):
+     raise SystemExit("X0X_SUPERJ6_FACTORY: 0 or 1")
+ if SUPERJ6_FACTORY == "1":
+@@ -471,10 +484,21 @@
+     synthone_patch = synthone_patch_setting()
+     flags = [*flags, "-DX0X_SYNTHONE_PATCH=" + synthone_patch]
+     if SUPERJ6_FACTORY == "1":
+         flags = [*flags, "-DX0X_SUPERJ6_FACTORY=1"]
++    sj6_builtin_init = os.environ.get("X0X_SUPERJ6_BUILTIN_INIT", "0")
++    if sj6_builtin_init not in ("0", "1") or sj6_builtin_init == "1" and SUPERJ6_FACTORY != "1":
++        raise SystemExit("X0X_SUPERJ6_BUILTIN_INIT requires X0X_SUPERJ6_FACTORY=1")
++    if sj6_builtin_init == "1":
++        flags = [*flags, "-DX0X_SUPERJ6_BUILTIN_INIT=1"]
+     if S1C == "1":
+         flags = [*flags, "-DX0X_S1C=1"]
++    init_only = synth_controls_init_only()
++    if init_only:
++        if not (BOARD == "smk37" and MODEL in ("elite", "pro") and
++                S1C == "1" and synthone_patch == "1" and sj6_builtin_init == "1"):
++            raise SystemExit("Init-only controls require SMK Elite/Pro, compact Synth One editor and built-in SuperJ6 Init")
++        flags = [*flags, "-DX0X_SYNTH_CONTROLS_INIT_ONLY=1"]
+     chance_probe = os.environ.get("X0X_GFINAL_CHANCE_PROBE", "1")
+     if chance_probe not in ("0", "1"):
+         raise SystemExit("X0X_GFINAL_CHANCE_PROBE: 0 or 1")
+     flags = [*flags, "-DX0X_GFINAL_CHANCE_PROBE=" + chance_probe]
+@@ -499,8 +523,10 @@
+     if original_synth:
+         original_flags = [*flags, *ORIGINAL_SYNTH_FLAGS]
+         original_o2 = [*o2, *ORIGINAL_SYNTH_FLAGS]
+         for u in (*ORIGINAL_SYNTH_UNITS, *ORIGINAL_SYNTH_BACKENDS):
++            if init_only and Path(u).stem == "s1pack":
++                continue
+             o = OUT / "original" / (Path(u).stem + ".o")
+             uf = original_o2 if Path(u).stem in ORIGINAL_SYNTH_O2_UNITS else original_flags
+             if Path(u).stem in ORIGINAL_SYNTH_OZ_UNITS:
+                 uf = ["-Oz" if flag == "-Os" else flag for flag in original_flags]
+@@ -533,9 +559,9 @@
+         require_original_synth_sources()
+     flags = [*CFLAGS, *FPU, *BOARD_DEFS[BOARD], "-Ifirmware/hal", "-Ifirmware/src",
+              f"-I{GEN.relative_to(SRC)}"]
+     factory_roots = []
+-    if SUPERJ6_FACTORY == "1":
++    if SUPERJ6_FACTORY == "1" and not synth_controls_init_only():
+         names = ["engine_superj6_factory_load"]
+         if synthone_patch_setting() != "1":
+             names.extend(("engine_superj6_edit", "engine_superj6_pre_note_wave"))
+         for name in names:
+@@ -775,9 +801,9 @@
+ def fdata_image():
+     """the FL_FDATA region the loader writes (the payload, then 0xFF to FL_FDATA_SIZE). SMK only; None
+     when the flash map has no FDATA or there is no payload."""
+     lo, hi = fdata_region()
+-    if BOARD != "smk37" or lo == hi:
++    if BOARD != "smk37" or lo == hi or synth_controls_init_only():
+         return None
+     raw = fdata_payload()
+     if raw is None:
+         raise SystemExit("FDATA flash map requires the tracked Synth One pack generator")
+@@ -1073,8 +1099,9 @@
+         used = struct.unpack_from("<I", fdata, 12)[0] if fdata[:4] == b"S1PK" else len(fdata.rstrip(b"\xff"))
+         print(f"FDATA: {used} B of {len(fdata)} (flash {fdata_region()[0]:#x}), {len(fdata) - used} B spare")
+         (OUT / "fdata.img").write_bytes(fdata)
+     elif fm1pkg_make.FDATA_SIZE and BOARD == "smk37":
++        (OUT / "fdata.img").unlink(missing_ok=True)  # never leave a stale package input
+         print(f"FDATA: {fm1pkg_make.FDATA_SIZE} B region, no payload in this tree (no fdata.bin entry)")
+     if errors:
+         raise SystemExit("build: checks failed")
+     pkg = fm1pkg_make.ufw(fm1pkg_make.flash_image(img, fm1pkg_make.KEY), ota, PRODUCT, xdata=xdata, fittab=fittab,

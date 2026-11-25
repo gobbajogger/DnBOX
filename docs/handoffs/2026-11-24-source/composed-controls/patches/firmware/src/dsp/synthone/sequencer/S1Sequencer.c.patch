@@ -1,0 +1,59 @@
+--- a/firmware/src/dsp/synthone/sequencer/S1Sequencer.c
++++ b/firmware/src/dsp/synthone/sequencer/S1Sequencer.c
+@@ -34,8 +34,11 @@
+ #if defined(X0X_SJ6_GATE_DEADLINE_PROBE) && X0X_SJ6_GATE_DEADLINE_PROBE
+     s->editGateLatched = 0;
+ #elif X0X_SJ6_NATIVE_POSITIVE_GATE
+     s->liveGateTicks=0;
++#if X0X_SJ6_NATIVE_ZERO_GATE
++    s->liveGateLatched=0;
++#endif
+ #endif
+ #if (defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE) || X0X_SJ6_NATIVE_RANDOM2
+     s->saga_random_state=0;
+ #endif
+@@ -53,8 +56,11 @@
+ #if defined(X0X_SJ6_GATE_DEADLINE_PROBE) && X0X_SJ6_GATE_DEADLINE_PROBE
+     s->editGateLatched = 0;
+ #elif X0X_SJ6_NATIVE_POSITIVE_GATE
+     s->liveGateTicks=0;
++#if X0X_SJ6_NATIVE_ZERO_GATE
++    s->liveGateLatched=0;
++#endif
+ #endif
+ }
+ 
+ void S1Sequencer_reset(S1Sequencer *s, int resetNotes, void *ctx, KeyOffCallback off)
+@@ -144,9 +150,13 @@
+ {
+ #if defined(X0X_SJ6_GATE_DEADLINE_PROBE) && X0X_SJ6_GATE_DEADLINE_PROBE
+     if (s->editGateLatched) return s->editGateTicks;
+ #elif X0X_SJ6_NATIVE_POSITIVE_GATE
++    #if X0X_SJ6_NATIVE_ZERO_GATE
++    if (s->liveGateLatched) return s->liveGateTicks;
++#else
+     if (s->liveGateTicks) return s->liveGateTicks;
++#endif
+ #endif
+     (void)s;
+     return p->gateTicks;
+ }
+@@ -159,11 +169,18 @@
+         s->editGateTicks=p->gateTicks;
+         s->editGateLatched=1;
+     }
+ #else
++#if X0X_SJ6_NATIVE_ZERO_GATE
++    if (s->gateOpen && s->sequencerLastNotesCount && !s->liveGateLatched) {
++        s->liveGateTicks=p->gateTicks;
++        s->liveGateLatched=1;
++    }
++#else
+     /* Positive legacy Gate has a nonzero threshold at the shortest legal step. */
+     if (s->gateOpen && s->sequencerLastNotesCount && !s->liveGateTicks)
+         s->liveGateTicks=p->gateTicks;
++#endif
+ #endif
+     p->seqGate=(uint8_t)percent;
+     S1Sequencer_setStep(p,p->arpSeqTempoMultiplier);
+ }

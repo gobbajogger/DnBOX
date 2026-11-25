@@ -1,0 +1,71 @@
+--- a/firmware/src/dsp/juno6.h
++++ b/firmware/src/dsp/juno6.h
+@@ -20,9 +20,13 @@
+        SJ6_FILTER_LINK, SJ6_MASTER_LEVEL, SJ6_LFO1_RATE, SJ6_LFO2_RATE, SJ6_LFO3_RATE,
+        SJ6_LFO2_PWM_DEPTH, SJ6_LFO2_PWM_ROUTE, SJ6_LFO1_MODE, SJ6_LFO2_MODE, SJ6_LFO3_MODE,
+        SJ6_CHORUS_I, SJ6_CHORUS_II, SJ6_CHORUS_RATE, SJ6_CHORUS_MIX,
+        SJ6_VIBRATO_DEPTH, SJ6_VIBRATO_RATE, SJ6_A_REFERENCE, SJ6_LFO2_SHAPE,
+-       SJ6_LAYER1_SEMI, SJ6_LAYER2_SEMI, SJ6_LAYER1_FINE, SJ6_LAYER2_FINE, SJ6_OSC2_LEVEL, SJ6_OSC1_LEVEL, SJ6_FILTER_VELOCITY, SJ6_KNOBS, SJ6_LFO2_PWM_BASE = SJ6_KNOBS };
++       SJ6_LAYER1_SEMI, SJ6_LAYER2_SEMI, SJ6_LAYER1_FINE, SJ6_LAYER2_FINE, SJ6_OSC2_LEVEL, SJ6_OSC1_LEVEL, SJ6_FILTER_VELOCITY,
++#if X0X_SJ6_VCF_PORT
++       SJ6_VCF_LFO1_AMOUNT,
++#endif
++       SJ6_KNOBS, SJ6_LFO2_PWM_BASE = SJ6_KNOBS };
+ enum { SJ6_LAYER1_SEMI_ID = 72, SJ6_LAYER2_SEMI_ID = 73, SJ6_SEMI_CENTER = 12, SJ6_SEMI_MAX = 24 };
+ enum { SJ6_LAYER1_FINE_ID = 74, SJ6_FINE_CENTER = 50, SJ6_FINE_MAX = 100 };
+ enum { SJ6_A_REFERENCE_ID = 206, SJ6_A_REFERENCE_STEPS = 100, SJ6_A_REFERENCE_DEFAULT = 60 };
+ enum { SJ6_LFO_COUNT = 3, SJ6_LFO_WORD_COUNT = 6, SJ6_LFO_DIVISIONS = 18 };
+@@ -100,8 +104,16 @@
+     float delay,delay_from,delay_target,fb_from,fb_target,bpm;
+     unsigned time_raw,fb_raw,sync,clock_refused,delay_elapsed,fb_elapsed;
+     unsigned enabled,mix,pending;
+  } delay24;
++#elif X0X_SJ6_NATIVE_DELAY
++ struct {
++    int16_t *tap;
++    float current,target,fb,fb_target,wet,wet_target,inv_stride,sum[2],step[3];
++    uint16_t ramp[3];
++    uint16_t stride,phase,pos,filled;
++    uint8_t tick,mix,clock_refused;
++ } delay24;
+ #endif
+  float lfo1_pwm_base, lfo1_cut_current, lfo1_cut_target;
+  int32_t lfo1_cut_until;
+  uint8_t lfo1_cut_active, lfo1_cut_force;
+@@ -189,16 +201,22 @@
+ int juno6_configure_lfo1_pwm(juno6_t *,unsigned selector,unsigned enabled,float base,float amount);
+ /* Bounded source ID181=1 (normal ID7 cutoff), Loop/Triangle only. */
+ int juno6_configure_lfo1_cutoff(juno6_t *,float authored_base,float live_current,float amount);
+ float juno6_mod_cutoff_hz(unsigned value);
+-#if defined(X0X_HOST) && defined(X0X_SJ6_DELAY_WITNESS)
++#if (defined(X0X_HOST) && defined(X0X_SJ6_DELAY_WITNESS)) || X0X_SJ6_NATIVE_DELAY
+ enum { SJ6_DELAY24=90, SJ6_DELAY27=91, SJ6_DELAY25=92, SJ6_DELAY26=93, SJ6_DELAYSYNC=94 };
++#if X0X_SJ6_NATIVE_DELAY
++enum { SJ6_NATIVE_DELAY_CAP=1024 };
++void juno6_delay_native_arm(juno6_t *,int16_t *);
++void juno6_delay_native_config(juno6_t *,const uint8_t [4],float);
++#else
+ int juno6_delay24_arm(juno6_t *,float *,float *,unsigned,float,unsigned);
+ int juno6_delay24_set(juno6_t *,unsigned,unsigned);
+-int juno6_delay25_can(const juno6_t *,unsigned,float,unsigned);
+ int juno6_delay25_profile(juno6_t *,unsigned,float,unsigned);
+ int juno6_delay25_clock(juno6_t *,float,unsigned);
+ unsigned juno6_delay_position(const juno6_t *,unsigned);
++#endif
++int juno6_delay25_can(const juno6_t *,unsigned,float,unsigned);
+ void juno6_delay24_process(juno6_t *,float *,float *,unsigned);
+ #endif
+ void juno6_set_lfo_words(juno6_t *, const juno6_lfo_words *, int reset_phase);
+ void juno6_set_panel_lfo(juno6_t *, unsigned lfo, int position, unsigned hz_mode);
+@@ -212,8 +230,11 @@
+ /* Binary32 unit interval, including an authored negative zero. */
+ static inline int juno6_unit_word_valid(uint32_t bits)
+ { return bits <= UINT32_C(0x3f800000) || bits == UINT32_C(0x80000000); }
+ int juno6_set_filter_velocity(juno6_t *, unsigned position);
++#if X0X_SJ6_VCF_PORT
++int juno6_set_vcf_lfo1_amount(juno6_t *, unsigned position);
++#endif
+ void juno6_set_vibrato_words(juno6_t *, const float values[2], unsigned present, int reset);
+ unsigned juno6_layer_fine(const juno6_t *, unsigned layer);
+ void juno6_set_layer_fine(juno6_t *, unsigned layer, unsigned position);
+ unsigned juno6_layer_semi(const juno6_t *, unsigned layer);

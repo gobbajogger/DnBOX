@@ -1,0 +1,30 @@
+--- a/firmware/src/dsp/s1c/s1c.h
++++ b/firmware/src/dsp/s1c/s1c.h
+@@ -137,9 +137,14 @@
+     s1u_lfo lfo[2];           /* LFO 1, LFO 2 */
+     float monof, monos, glide_c2, glide_h;
+     s1c_voice v[S1C_VOICES];
+     int8_t held[8][2]; uint8_t nheld, prev_held, mono_prev, play_idx;
+-    int8_t last[8]; uint8_t nlast, delay_history, pad[2];
++    int8_t last[8]; uint8_t nlast, delay_history;
++#if X0X_S1_DELAY_TIME_NATIVE
++    uint8_t delay_time_code, delay_time_reserve;
++#else
++    uint8_t pad[2];
++#endif
+ #if !defined(S1C_NO_SEQ) || !S1C_NO_SEQ
+     sdbl beat, beat_inc;
+     float beat_rate;
+     uint32_t beat_step;
+@@ -160,8 +165,11 @@
+     float rv_del[8], rv_inc[8], rv_acc[2], rv_o0[2], rv_o1[2];
+     int32_t rv_k;
+ #endif
+     float send_dly, send_rev, lfo_c2, hpk[3], dl_fc, hg[2];
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST && !S1C_BUSFX
++    float dl_res_fb;
++#endif
+ #if defined(X0X_S1_FEEDBACK_PROBE) && X0X_S1_FEEDBACK_PROBE
+ #if !defined(X0X_HOST) && !DNBOX_TYPED_CONTROLS_NATIVE_TEST
+ #error Synth One direct Delay Feedback requires an explicit native trial
+ #endif

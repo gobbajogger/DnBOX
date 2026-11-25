@@ -1,0 +1,2669 @@
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -25,8 +25,98 @@
+ #include "../dsp/fastmath.h"
+ #include "../dsp/juno6_controls.h"
+ #include "../dsp/master.h"
+ #include "../dsp/drum909.h"              /* this renderer directly uses DR_* and drum909_param_si */
++typedef enum {
++    PT_EMPTY,
++    PT_808_MIX,
++    PT_909_MIX,
++    PT_AMP_ADSR,
++    PT_AMP_ENVELOP,
++    PT_AMPLIFIER,
++    PT_ARP_SEQ,
++    PT_ARPEGGIATOR,
++#if X0X_S1_FENCED_CLOCK
++    PT_ARP_PARAM,
++#endif
++    PT_BAR,
++    PT_BD,
++    PT_CARRIER,
++    PT_CB,
++    PT_CH,
++    PT_CHORUS,
++#if X0X_SJ6_CLASSIC_I_PROBE
++    PT_CHORUS_I_PARAMS, PT_CHORUS_II_PARAMS, PT_CHORUS_BOTH_PARAMS,
++#endif
++    PT_CP,
++    PT_CR,
++    PT_CY,
++    PT_PHASER,
++    PT_DELAY,
++    PT_EFFECT,
++    PT_ENVELOPE,
++    PT_FILTER,
++    PT_FILTER_1,
++    PT_FILTER_2,
++    PT_FILTER_ADSR,
++    PT_FILTER_MODE,
++    PT_FM_NOISE,
++    PT_GENERATE,
++    PT_GROOVE,
++    PT_HT,
++    PT_KEYS,
++    PT_KIT,
++    PT_LFO,
++    PT_LFO_MODE,
++    PT_LFO_RATE,
++    PT_LFO_CHORUS,
++    PT_LFO2_PWM,
++    PT_LOOPS,
++    PT_LT,
++    PT_MASTER,
++    PT_MOD_ROUTE,
++    PT_MT,
++    PT_OH,
++    PT_OSC_MIX,
++    PT_OSCILLATOR,
++    PT_OUTPUT,
++    PT_PARTS,
++    PT_PERF,
++    PT_PERFORM,
++    PT_PRESET,
++    PT_PULSE_WIDTH,
++    PT_RD,
++    PT_RETRIG,
++    PT_REVERB,
++    PT_RS,
++    PT_SCALE,
++    PT_SD,
++    PT_SEQUENCE,
++    PT_SOUND,
++    PT_TEMPO_SYNC,
++    PT_TUNING,
++    PT_VIBRATO,
++    PT_VOICE,
++    PT_WAVE,
++    PT_WOBBLE,
++    PT_XMOD,
++    PT_FX_BYPASS,
++    PT_PITCH_MOD,
++#if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
++    PT_WHEELS,
++#endif
++#ifdef DNBOX_137_HOST_WITNESS
++    PT_FILTER_MOD,
++    PT_CRUSH_MOD,
++    PT_AUTO_PAN,
++#if (defined(X0X_HOST) && defined(X0X_SJ6_DELAY_WITNESS)) || X0X_SJ6_NATIVE_DELAY
++    PT_SJ6_DELAY,
++    PT_SJ6_DELAY_CLOCK,
++#endif
++#endif
++    PT_COUNT
++} page_title_id_t;
++
+ #include "ui_original_controls.h"
+ #if X0X_ORIGINAL_SYNTH
+ #include "miami_ms20.h"
+ #endif
+@@ -452,8 +542,93 @@
+        R_SLEN, R_STALLS, R_HDR, R_TAPE, R_MIDICH, R_OUTLOUD, R_SREP, R_BATT, R_USBFULL, R_FREEPLAY,
+        R_BT, R_BTSTAT, R_BTNAME, R_CKCH, R_CLKSRC, R_SMC_ROLE, R_SMC_MAP, R_BENGINE, R_BPRESET, R_BSTATUS, R_SECTION, R_PARTON, R_FINETUNE, R_QUEUEMUTE, R_BRKRATE, R_BPATSND, R_NOTELOCK };   /* R_TAPE: FX's one-knob TAPE (DIGI .. worn tape) */          /* R_HDR: a list's section header (a = its group), never selected */
+ #if X0X_SYNTHONE_PATCH
+ enum { R_S1PATCH = R_NOTELOCK + 1, R_S1LINK = R_NOTELOCK + 4 };
++#ifdef DNBOX_137_HOST_WITNESS
++enum { R_S1MODWHEEL = R_NOTELOCK + 5, R_S1A4 = R_NOTELOCK + 8, R_S1RVFB = R_NOTELOCK + 9, R_S1TRANS = R_NOTELOCK + 10, R_S1CRUSH = R_NOTELOCK + 11, R_S1PAN = R_NOTELOCK + 12, R_S1DLFB = R_NOTELOCK + 13 };
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++enum { R_S1PHASER=R_NOTELOCK+32, R_S1ENVLFO=R_NOTELOCK+33, R_S1DLYRES=R_NOTELOCK+45 };
++extern int s1_delay_res_get(unsigned);
++extern int s1_delay_res_choose(unsigned,unsigned);
++extern int s1_env_lfo_get(unsigned);
++extern int s1_env_lfo_choose(unsigned,unsigned);
++extern int s1_phaser_get(unsigned,unsigned);
++extern int s1_phaser_choose(unsigned,unsigned,unsigned);
++extern int s1_phaser_undo_ready(unsigned);
++extern void s1_phaser_undo(unsigned);
++#endif
++#if X0X_S1_DELAY_TRACK_TEST
++#if X0X_S1_DELAY_TIME_NATIVE
++enum { R_S1DLYTIME=R_NOTELOCK+34 };
++extern int s1_delay_time_read(unsigned,unsigned *,unsigned *,float *);
++extern int s1_delay_time_choose(unsigned,unsigned);
++extern int s1_delay_time_undo_ready(unsigned,const uint8_t *);
++extern void s1_delay_time_undo(unsigned);
++#endif
++enum { R_S1DICT=R_NOTELOCK+20 };
++extern int s1_typed_dict_position(unsigned);
++extern int s1_typed_dict_choose(unsigned,unsigned);
++extern void s1_typed_dict_undo(unsigned);
++extern int s1_typed_dict_undo_ready(unsigned);
++#endif
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++enum { R_S1CWG=R_NOTELOCK+31, R_S1AA=R_NOTELOCK+35 };
++extern int s1_aa_get(unsigned);
++extern int s1_aa_choose(unsigned,unsigned);
++extern int s1_aa_undo_ready(unsigned);
++extern void s1_aa_undo(unsigned);
++extern int s1_typed_cwg_position(unsigned);
++extern int s1_typed_cwg_choose(unsigned,unsigned);
++extern void s1_typed_cwg_undo(unsigned);
++extern int s1_typed_cwg_undo_ready(unsigned);
++#endif
++extern int s1_typed_trans_choose(unsigned,int);
++extern void s1_typed_trans_undo(unsigned);
++extern int s1_typed_crush_choose(unsigned,unsigned);
++extern void s1_typed_crush_undo(unsigned);
++#if defined(X0X_S1_FEEDBACK_PROBE) && X0X_S1_FEEDBACK_PROBE
++extern int s1_typed_feedback_choose(unsigned,unsigned);
++extern void s1_typed_feedback_undo(unsigned);
++#endif
++#if X0X_SJ6_CLASSIC_I_PROBE
++enum { R_SJ6CLASSIC_I = R_NOTELOCK+14 };
++extern int sj6_classic_i_choose(unsigned,unsigned,unsigned);
++extern void sj6_classic_i_undo(unsigned);
++static unsigned classic_layout_mode;
++static int ui_classic_i(unsigned v) {
++    if (!live137(&proj.sound,v)) return 0;
++    unsigned mode=original_sound_sj6_chorus(proj.sound.v[T_303][v]);
++    const uint8_t *row=read137(&proj.sound,v)+SJ6_CLASSIC_I_BYTE;
++    return mode>=JUNO6_CHORUS_I && mode<=JUNO6_CHORUS_BOTH &&
++        (row[0] || row[1] || row[2]) ? (int)mode : 0;
++}
++#endif
++#if defined(X0X_S1_AUTOPAN_PROBE) && X0X_S1_AUTOPAN_PROBE
++extern int s1_typed_pan_read(unsigned,unsigned*,unsigned*,int*,float*);
++extern int s1_typed_pan_choose(unsigned,int,unsigned);
++extern void s1_typed_pan_undo(unsigned);
++static unsigned s1_pan_pos(unsigned v,unsigned *max) {
++    unsigned pos=0;int sync;float hz;
++    if(!s1_typed_pan_read(v,&pos,max,&sync,&hz))*max=0;
++    return pos;
++}
++#endif
++extern int s1_typed_a4_choose(unsigned,unsigned);
++extern void s1_typed_a4_undo(unsigned);
++extern int s1_typed_rvfb_choose(unsigned,unsigned);
++extern void s1_typed_rvfb_undo(unsigned);
++#if defined(X0X_SJ6_BEND_TYPED_PROBE) && X0X_SJ6_BEND_TYPED_PROBE
++enum { R_SJ6PB = R_NOTELOCK + 6 };
++extern int sj6_typed_pb_edit(unsigned,unsigned,unsigned);
++#endif
++#if defined(DNBOX_137_HOST_WITNESS) && defined(X0X_SJ6_MOD_TYPED_PROBE)
++enum { R_SJ6MOD = R_NOTELOCK + 7 };
++extern int sj6_typed_mod_choose(unsigned,unsigned);
++extern void sj6_typed_mod_undo(unsigned);
++#endif
++extern int s1_typed_mod_choose(unsigned,unsigned);
++extern int s1_typed_tuple_editable(void);
++#endif
+ #endif
+ #if X0X_ARP_HOOKS
+ enum { R_ARP = R_NOTELOCK + 2 };          /* a: ARP_F_* field, b: bass voice */
+ static const x0x_param_t *arp_desc(unsigned field, unsigned owner);
+@@ -461,8 +636,15 @@
+ static void arp_set(unsigned voice, unsigned field, int v, int from_keyboard);
+ #endif
+ #if X0X_SUPERJ6_BUILTIN_INIT
+ enum { R_SJ6KNOB = R_NOTELOCK + 3 };
++#if defined(X0X_SJ6_MONO32_PROBE) && X0X_SJ6_MONO32_PROBE
++enum {R_SJ6MONO32=R_NOTELOCK+15};
++extern int engine_sj6_mono32_get(unsigned,unsigned);
++extern int engine_sj6_mono32_edit(unsigned,unsigned,unsigned);
++extern int engine_sj6_voice_undo_ready(unsigned);
++extern void engine_sj6_voice_undo(unsigned);
++#endif
+ #endif
+ typedef struct { uint8_t kind, a, b, c; } pref_t;
+ #define PR(k, a, b, c) ((pref_t){(k), (a), (b), (c)})
+ #define NONE PR(R_NONE, 0, 0, 0)
+@@ -504,8 +686,15 @@
+ #endif
+ #if X0X_SUPERJ6_BUILTIN_INIT
+ static const x0x_param_t *sj6_knob_desc(unsigned slot)
+ {
++#if (defined(X0X_HOST) && defined(X0X_SJ6_DELAY_WITNESS)) || X0X_SJ6_NATIVE_DELAY
++    static const char *const clocks[]={"FREE","SYNC"};
++    static const x0x_param_t clock={"CLOCK",1,0,clocks};
++    if(slot==SJ6_DELAYSYNC)return &clock;
++    static const x0x_param_t delay[4]={{"ENABLE",1,0,0},{"MIX",127,0,0},{"TIME",127,0,0},{"FEEDBACK",127,0,0}};
++    if(slot>=SJ6_DELAY24&&slot<=SJ6_DELAY26)return &delay[slot-SJ6_DELAY24];
++#endif
+     static const char *const wave[] = {"SINE", "TRI", "SAW", "SQ"};
+     static const char *const range[] = {"16FT", "8FT", "4FT"};
+     static const char *const enable[] = {"OFF", "ON"};
+     static const char *const pwm_route[] = {"OFF", "PWM 1", "PWM 2"};
+@@ -532,9 +721,14 @@
+         {"LAYER 1 SEMI", SJ6_SEMI_MAX, SJ6_SEMI_CENTER, 0},
+         {"LAYER 2 SEMI", SJ6_SEMI_MAX, SJ6_SEMI_CENTER, 0},
+         {"LAYER 1 FINE", SJ6_FINE_MAX, SJ6_FINE_CENTER, 0},
+         {"LAYER 2 FINE", SJ6_FINE_MAX, SJ6_FINE_CENTER, 0},
++        {"OSC 2 LVL", 127, 127, 0},
++        {"OSC 1 LVL", 127, 127, 0},
+         {"VELOCITY", 127, 0, 0},
++#if X0X_SJ6_VCF_PORT
++        {"LFO1 AMOUNT", 127, 0, 0},
++#endif
+         {"PWM BASE", SJ6_PWM_STEPS, 0, 0},
+     };
+     return slot < sizeof knobs / sizeof *knobs ? &knobs[slot] : 0;
+ }
+@@ -628,11 +822,64 @@
+ };
+ 
+ static int pref_read_only(pref_t r)
+ {
++#if X0X_S1_DELAY_TIME_NATIVE
++    if(r.kind==R_S1DLYTIME) {
++        unsigned pos,max;float seconds;
++        return !s1_typed_tuple_editable() || s1_delay_time_read(r.b,&pos,&max,&seconds)==-2;
++    }
++#endif
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++    if(r.kind==R_S1DLYRES)return s1_delay_res_get(r.b)<0 || !s1_typed_tuple_editable();
++    if(r.kind==R_S1ENVLFO)return s1_env_lfo_get(r.b)<0 || !s1_typed_tuple_editable();
++    if(r.kind==R_S1PHASER)return s1_phaser_get(r.b,r.c)<0 || !s1_typed_tuple_editable();
++#endif
++#if X0X_SJ6_CLASSIC_I_PROBE
++    if(r.kind==R_SJ6CLASSIC_I)return !ui_classic_i(r.b)||!s1_typed_tuple_editable();
++#endif
++#if (defined(X0X_HOST) && defined(X0X_SJ6_DELAY_WITNESS)) || X0X_SJ6_NATIVE_DELAY
++    if(r.kind==R_SJ6KNOB && r.c>=SJ6_DELAY24 && r.c<=SJ6_DELAYSYNC)
++        return !live137(&proj.sound,r.b)||!s1_typed_tuple_editable();
++#endif
++#if defined(DNBOX_137_HOST_WITNESS) && defined(X0X_SJ6_MOD_TYPED_PROBE)
++    if(r.kind==R_SJ6MOD)return !live137(&proj.sound,r.b)||!s1_typed_tuple_editable();
++#endif
++#if (defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE) || X0X_SJ6_NATIVE_RANDOM2
++    if (r.kind==R_ARP && r.a==ARP_F_MODE && live137(&proj.sound,r.b))
++        return !s1_typed_tuple_editable();
++#endif
++#if defined(X0X_SJ6_MONO32_PROBE) && X0X_SJ6_MONO32_PROBE
++    if(r.kind==R_SJ6MONO32)return engine_sj6_mono32_get(r.b,r.c)<0||!s1_typed_tuple_editable();
++#endif
+     if (r.kind == R_BSTATUS) return 1;
++#if defined(X0X_SJ6_BEND_TYPED_PROBE) && X0X_SJ6_BEND_TYPED_PROBE
++    if (r.kind==R_SJ6PB) return !live137(&proj.sound,r.b) || !s1_typed_tuple_editable();
++#endif
++#if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
++    if (r.kind==R_S1PATCH && s1_bend_slot(r.c))
++        return !live_s1_mod(&proj.sound,r.b) || !s1_typed_tuple_editable();
++#endif
++#ifdef DNBOX_137_HOST_WITNESS
++#if X0X_S1_FENCED_CLOCK
++    if(r.kind==R_ARP && (r.a==ARP_F_SOURCE_RATE || r.a==ARP_F_SOURCE_FACTOR))
++        return !live_s1_mod(&proj.sound,r.b) || !s1_typed_tuple_editable();
++#endif
++#if (defined(X0X_SJ6_ZERO_GATE_PROBE) && X0X_SJ6_ZERO_GATE_PROBE) || X0X_SJ6_NATIVE_ZERO_GATE
++    if(r.kind==R_ARP && r.a==ARP_F_GATE && live137(&proj.sound,r.b))
++        return !s1_typed_tuple_editable();
++#endif
++#if X0X_S1_DELAY_TRACK_TEST
++    if (r.kind==R_S1DICT) return s1_typed_dict_position(r.b)<0 || !s1_typed_tuple_editable();
++#endif
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++    if(r.kind==R_S1AA) return s1_aa_get(r.b)<0 || !s1_typed_tuple_editable();
++    if (r.kind==R_S1CWG) return s1_typed_cwg_position(r.b)<0 || !s1_typed_tuple_editable();
++#endif
++    if (r.kind == R_S1MODWHEEL || r.kind == R_S1A4 || r.kind == R_S1RVFB || r.kind == R_S1TRANS || r.kind == R_S1CRUSH || r.kind == R_S1PAN || r.kind == R_S1DLFB) return !live_s1_mod(&proj.sound,r.b) || !s1_typed_tuple_editable();
++#endif
+     /* A bank with a single preset (Synth One INIT) has nothing to choose. */
+-    if (r.kind == R_BPRESET && original_sound_factories((unsigned)engine_bass_requested_bank(r.b)) <= 1u) return 1;
++    if (r.kind == R_BPRESET && original_sound_available_factories((unsigned)engine_bass_requested_bank(r.b)) <= 1u) return 1;
+     if (r.kind == R_ENG && r.a == T_303 && original_sound_is_performance(
+         (unsigned)engine_bass_sound_bank(&proj.sound,r.b),r.c)) return 1;
+     return r.kind == R_BATT || r.kind == R_BTSTAT || r.kind == R_BTNAME;
+ }
+@@ -662,11 +909,69 @@
+ #if X0X_ARP_HOOKS
+     case R_ARP: return arp_desc(r.a, r.b);
+ #endif
+ #if X0X_SUPERJ6_BUILTIN_INIT
+-    case R_SJ6KNOB: return sj6_knob_desc(r.c);
++#if defined(X0X_SJ6_MONO32_PROBE) && X0X_SJ6_MONO32_PROBE
++    case R_SJ6MONO32: {static const x0x_param_t voice[]={{"MONO",1,0,ONOFF_N},{"LEGATO",1,0,ONOFF_N},{"GLIDE TIME",127,0,0}};return r.c<3?voice+r.c:0;}
++#endif
++    case R_SJ6KNOB:
++        return sj6_knob_desc(r.c);
+ #endif
+ #if X0X_SYNTHONE_PATCH
++#ifdef DNBOX_137_HOST_WITNESS
++#if defined(X0X_SJ6_BEND_TYPED_PROBE) && X0X_SJ6_BEND_TYPED_PROBE
++    case R_SJ6PB: {
++        static const x0x_param_t desc[2] = {{"PB DOWN",48,0,NULL},{"PB UP",48,0,NULL}};
++        return &desc[r.c];
++    }
++#endif
++#if defined(DNBOX_137_HOST_WITNESS) && defined(X0X_SJ6_MOD_TYPED_PROBE)
++    case R_SJ6MOD: {
++        static const char *const names[]={"LFO Rate","LFO>DCO","LFO>Cutoff","Tremolo","LFO2 Rate","CUTOFF"};
++        static const x0x_param_t desc={"MOD WHEEL DESTINATION",5,0,names};
++        return &desc;
++    }
++#endif
++#if defined(X0X_S1_AUTOPAN_PROBE) && X0X_S1_AUTOPAN_PROBE
++    case R_S1PAN: {
++        static const x0x_param_t amount={"AMOUNT",127,0,0};
++        static x0x_param_t rate={"RATE",127,0,0};
++        if(!live_s1_mod(&proj.sound,r.b))return NULL;
++        if(!r.c)return &amount;
++        unsigned max;(void)s1_pan_pos(r.b,&max);rate.max=(uint8_t)max;
++        return &rate;
++    }
++#endif
++#if X0X_S1_DELAY_TRACK_TEST
++    case R_S1DICT: {static const x0x_param_t pot={"IN CUTOFF",S1_DICT_MAX,S1_DICT_INIT,0};return &pot;}
++#endif
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++    case R_S1AA: {static const x0x_param_t pot={"ANTI-ALIAS",1,0,0};return &pot;}
++    case R_S1CWG: {static const x0x_param_t pot={"WET MAKEUP",S1_CWG_MAX,S1_CWG_INIT,0};return &pot;}
++#endif
++#if defined(X0X_S1_FEEDBACK_PROBE) && X0X_S1_FEEDBACK_PROBE
++    case R_S1DLFB: {static const x0x_param_t pot={"FEEDBACK",127,14,0};return &pot;}
++#endif
++    case R_S1CRUSH: {
++        static const char *const names[]={"OFF","LFO 1","LFO 2","BOTH"};
++        static const x0x_param_t pot={"CRUSH LFO",3,0,names};
++        return &pot;
++    }
++    case R_S1TRANS: {static const x0x_param_t pot={"TRANSPOSE",48,24,0};return &pot;}
++#if X0X_SJ6_CLASSIC_I_PROBE
++    case R_SJ6CLASSIC_I: {
++        static const x0x_param_t v[]={{"RATE",127,45,0},{"DEPTH",127,25,0},{"MIX",127,64,0}};
++        return r.c<3?v+r.c:0;
++    }
++#endif
++    case R_S1A4: {static const x0x_param_t pot={"A REF",60,30,0};return &pot;}
++    case R_S1RVFB: {static const x0x_param_t pot={"RV SIZE",128,64,0};return &pot;}
++    case R_S1MODWHEEL: {
++        static const char *const values[] = {"CUTOFF","LFO1 RATE","LFO2 RATE"};
++        static const x0x_param_t pot = {"MOD WHEEL",2,0,values};
++        return &pot;
++    }
++#endif
+     case R_S1LINK: {
+         static const char *const values[] = {"OFF", "ON"};
+         static const x0x_param_t pot = {"LINK", 1, 0, values};
+         return &pot;
+@@ -682,16 +987,40 @@
+ #endif
+     case R_BENGINE: return &BENGINE_P;
+     case R_BPRESET:
+         {
+-            unsigned max = original_sound_factories((unsigned)engine_bass_requested_bank(r.b));
++            unsigned max = original_sound_available_factories((unsigned)engine_bass_requested_bank(r.b));
+             BPRESET_P.max = max > 256u ? 255u : (uint8_t)(max ? max - 1u : 0u);
+         }
+         return &BPRESET_P;
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++    case R_S1DLYRES: {
++        static const x0x_param_t p={"INPUT RES",S1_DELAY_RES_MAX,0,0};
++        return &p;
++    }
++    case R_S1ENVLFO: {
++        static const x0x_param_t p={"ENV LFO",S1_ENV_LFO_MAX,0,0};
++        return &p;
++    }
++    case R_S1PHASER: {
++        static const x0x_param_t p[4]={{"MIX",127,0,0},{"RATE",127,5,0},
++            {"FEEDBACK",127,0,0},{"WIDTH",127,99,0}};
++        return r.c<S1_PHASE_COUNT?&p[r.c]:0;
++    }
++#endif
++#if X0X_S1_DELAY_TIME_NATIVE
++    case R_S1DLYTIME: {
++        static x0x_param_t d={"TIME",127,0,0};unsigned pos,max;float seconds;
++        d.max=s1_delay_time_read(r.b,&pos,&max,&seconds)==-2?127u:max;return &d;
++    }
++#endif
+     case R_BSTATUS: return &BSTATUS_P;
+-    case R_BPATSND:
+-        PATSND_P.max = (uint8_t)original_sound_factories((unsigned)engine_bass_requested_bank(r.b));
++    case R_BPATSND: {
++        unsigned bank = (unsigned)engine_bass_requested_bank(r.b);
++        /* The pattern wire can recall only Synth One INIT, not factory ordinals. */
++        PATSND_P.max = bank == ORIGINAL_SOUND_SYNTHONE ? 1u : (uint8_t)original_sound_available_factories(bank);
+         return &PATSND_P;
++    }
+     case R_NOTELOCK: return &NOTELOCK_P;
+     case R_ENG: return engine_param(r.a, r.b, r.c);
+     case R_GEN: return &GEN_P[r.c % NGEN];
+     case R_BRKSET: return breaks_param(r.c);
+@@ -785,11 +1114,62 @@
+ #if X0X_ARP_HOOKS
+     case R_ARP: return arp_get(r.b, r.a);
+ #endif
+ #if X0X_SUPERJ6_BUILTIN_INIT
+-    case R_SJ6KNOB: return engine_superj6_knob_position(r.b, r.c);
++#if defined(X0X_SJ6_MONO32_PROBE) && X0X_SJ6_MONO32_PROBE
++    case R_SJ6MONO32: {int p=engine_sj6_mono32_get(r.b,r.c);return p<0?0:p;}
++#endif
++    case R_SJ6KNOB:
++        return engine_superj6_knob_position(r.b, r.c);
+ #endif
+ #if X0X_SYNTHONE_PATCH
++#ifdef DNBOX_137_HOST_WITNESS
++#if defined(X0X_SJ6_BEND_TYPED_PROBE) && X0X_SJ6_BEND_TYPED_PROBE
++    case R_SJ6PB: {
++        unsigned magnitude=sj6_pb_decode(read137(&proj.sound,r.b)[SJ6_PB_DN_BYTE+r.c]);
++        return r.c ? (int)magnitude : (int)(SJ6_PB_LIMIT-magnitude);
++    }
++#endif
++#if defined(DNBOX_137_HOST_WITNESS) && defined(X0X_SJ6_MOD_TYPED_PROBE)
++    case R_SJ6MOD: return live137(&proj.sound,r.b)?read137(&proj.sound,r.b)[SJ6_MOD_BYTE]:0;
++#endif
++#if defined(X0X_S1_AUTOPAN_PROBE) && X0X_S1_AUTOPAN_PROBE
++    case R_S1PAN: {
++        unsigned max;
++        return !live_s1_mod(&proj.sound,r.b)?0 : r.c?(int)s1_pan_pos(r.b,&max) : read137(&proj.sound,r.b)[S1_PAN_AMOUNT_BYTE];
++    }
++#endif
++#if X0X_S1_DELAY_TRACK_TEST
++    case R_S1DICT: {int pos=s1_typed_dict_position(r.b);return pos>=0?pos:S1_DICT_INIT;}
++#endif
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++    case R_S1AA: return s1_aa_get(r.b)>0;
++    case R_S1CWG: {int pos=s1_typed_cwg_position(r.b);return pos>=0?pos:S1_CWG_INIT;}
++#endif
++#if defined(X0X_S1_FEEDBACK_PROBE) && X0X_S1_FEEDBACK_PROBE
++    case R_S1DLFB: {
++        unsigned code=live_s1_mod(&proj.sound,r.b)?read137(&proj.sound,r.b)[S1_FB_BYTE]:0;
++        return code?(int)code-1:14;
++    }
++#endif
++    case R_S1CRUSH: return live_s1_mod(&proj.sound,r.b)?read137(&proj.sound,r.b)[S1_CRUSH_BYTE]:0;
++    case R_S1TRANS: return live_s1_mod(&proj.sound,r.b)?s1_trans_st(read137(&proj.sound,r.b)[S1_TRANS_BYTE])+24:24;
++#if X0X_SJ6_CLASSIC_I_PROBE
++    case R_SJ6CLASSIC_I: {
++        unsigned v=read137(&proj.sound,r.b)[SJ6_CLASSIC_I_BYTE+r.c];
++        if(v && v!=SJ6_CLASSIC_I_DEFAULT)return (int)(v-1u);
++        unsigned m=ui_classic_i(r.b);
++        /* Nearest actual detent for the first relative move from the exact
++         * default sentinel; the receiver itself does not quantize defaults. */
++        static const uint8_t stops[3][3]={{45,25,64},{53,25,64},{65,25,70}};
++        return m>=JUNO6_CHORUS_I && m<=JUNO6_CHORUS_BOTH && r.c<3 ?
++            stops[m-JUNO6_CHORUS_I][r.c] : pref_desc(r)->def;
++    }
++#endif
++    case R_S1A4: return live_s1_mod(&proj.sound,r.b)?(int)s1_a4_hz(read137(&proj.sound,r.b)[S1_A4_BYTE])-410:30;
++    case R_S1RVFB: return live_s1_mod(&proj.sound,r.b)?(int)s1_rvfb_pos(read137(&proj.sound,r.b)[S1_RVFB_BYTE]):64;
++    case R_S1MODWHEEL: return live_s1_mod(&proj.sound,r.b)?read137(&proj.sound,r.b)[3]:0;
++#endif
+     case R_S1LINK: {
+         s1_patch_value value;
+         if (s1_draw_patch && bidx() == r.b) return s1_draw_patch->filter_link;
+         return s1_read(r, &value) ? value.position : 0;
+@@ -804,8 +1184,19 @@
+     }
+ #endif
+     case R_BENGINE: return engine_bass_requested_bank(r.b);
+     case R_BPRESET: return engine_bass_requested_preset(r.b);
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++    case R_S1DLYRES: {int v=s1_delay_res_get(r.b);return v>=0?v:0;}
++    case R_S1ENVLFO: {int v=s1_env_lfo_get(r.b);return v>=0?v:0;}
++    case R_S1PHASER: {int v=s1_phaser_get(r.b,r.c);return v>=0 ? v : s1_phase_init(r.c);}
++#endif
++#if X0X_S1_DELAY_TIME_NATIVE
++    case R_S1DLYTIME: {
++        unsigned pos,max;float seconds;
++        return s1_delay_time_read(r.b,&pos,&max,&seconds)==-2?0:(int)pos;
++    }
++#endif
+     case R_BSTATUS: return engine_bass_preset_pending(r.b) * 4 + engine_bass_status(r.b);
+     case R_ENG: return r.a == T_303 && r.b < NBASS ?
+         original_sound_panel_position(proj.sound.v[r.a][r.b], r.c) : proj.sound.v[r.a][r.b][r.c];
+     case R_SWING: return p->swing;
+@@ -899,8 +1290,11 @@
+ #endif
+ }
+ X0X_COLD static void pref_set_impl(pref_t r, int v, int from_keyboard)
+ {
++#if defined(DNBOX_137_HOST_WITNESS) && defined(X0X_SJ6_MOD_TYPED_PROBE)
++    if(r.kind==R_SJ6MOD){if(!pref_read_only(r)&&v!=pref_get(r)&&sj6_typed_mod_choose(r.b,(unsigned)v))mark_dirty();return;}
++#endif
+ #if X0X_ARP_HOOKS
+     if (r.kind == R_ARP) { arp_set(r.b, r.a, v, from_keyboard); return; }
+ #endif
+ #if X0X_SUPERJ6_BUILTIN_INIT
+@@ -909,8 +1303,23 @@
+         return;
+     }
+ #endif
+ #if X0X_SYNTHONE_PATCH
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++    if(r.kind==R_S1AA){if(!pref_read_only(r) && v>=0 && v<=1 && s1_aa_choose(r.b,(unsigned)v))mark_dirty();return;}
++    if(r.kind==R_S1CWG){if(!pref_read_only(r) && v>=0 && v<=S1_CWG_MAX && s1_typed_cwg_choose(r.b,(unsigned)v))mark_dirty();return;}
++#if X0X_S1_CRUSH_LFO_PROBE
++    if(r.kind==R_S1CRUSH){if(!pref_read_only(r) && v>=0 && v<=S1_CRUSH_LAST && s1_typed_crush_choose(r.b,(unsigned)v))mark_dirty();return;}
++#endif
++#endif
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++    if(r.kind==R_S1DLYRES){if(!pref_read_only(r) && v>=0 && v<=S1_DELAY_RES_MAX && s1_delay_res_choose(r.b,(unsigned)v))mark_dirty();return;}
++    if(r.kind==R_S1ENVLFO){if(!pref_read_only(r) && v>=0 && v<=S1_ENV_LFO_MAX && s1_env_lfo_choose(r.b,(unsigned)v))mark_dirty();return;}
++    if(r.kind==R_S1PHASER){if(!pref_read_only(r) && v>=0 && v<=S1_PHASE_MAX && s1_phaser_choose(r.b,r.c,(unsigned)v))mark_dirty();return;}
++#endif
++#if X0X_S1_DELAY_TIME_NATIVE
++    if(r.kind==R_S1DLYTIME){if(v>=0){int rc=s1_delay_time_choose(r.b,(unsigned)v);if(rc>0)mark_dirty();else if(rc<0)say("DELAY TIME LIMIT",0);}return;}
++#endif
+     if (r.kind == R_S1PATCH || r.kind == R_S1LINK) { s1_edit(r, v, 0); return; }
+ #endif
+ #if X0X_BASS_PRESET_PREVIEW
+     /* Freeze the active bank before reading its descriptor. The audio boundary
+@@ -928,9 +1337,9 @@
+     }
+     int vmax = d->max;
+ #if X0X_S1C
+     if (r.kind == R_BPRESET)
+-        vmax = (int)original_sound_factories((unsigned)engine_bass_requested_bank(r.b)) - 1;
++        vmax = (int)original_sound_available_factories((unsigned)engine_bass_requested_bank(r.b)) - 1;
+ #endif
+     v = v < 0 ? 0 : v > vmax ? vmax : v;
+     if (r.kind == R_BENGINE || r.kind == R_BPRESET) {
+         if (v == pref_get(r)) return;
+@@ -947,15 +1356,33 @@
+         pref_dirty(&r);
+         if (from_keyboard) build_pages();
+         return;
+     }
++    if (r.kind == R_BPATSND && engine_bass_requested_bank(r.b) == ORIGINAL_SOUND_SYNTHONE) {
++        unsigned ps = pat_of(PART_303A + (r.b & 1))->rsv[r.b & 1];
++        /* The upper stop is also a no-op for historical INIT aliases. */
++        if ((!v && !ps) || (v == 1 && ps >= 0xC1u && ps <= 0xC4u)) return;
++    }
++#if X0X_SUPERJ6_BUILTIN_INIT
++    if (r.kind == R_ENG && r.a == T_303 && r.c == ORIGINAL_SJ6_HPF_PANEL &&
++        proj.sound.v[T_303][r.b][29] == ORIGINAL_SOUND_JUNO && v == pref_get(r)) {
++#if X0X_BASS_PRESET_PREVIEW
++        if (bass_edit) engine_bass_edit_hold(0);
++#endif
++        return;
++    }
++#endif
+     pref_dirty(&r);
+     switch (r.kind) {
+     case R_ENG:
+         if (r.a == T_303) {
+             if (!original_sound_set(proj.sound.v[T_303][r.b],r.c,(unsigned)v)) {
+                 say("INVALID SOUND",0); break;
+             }
++#if X0X_SUPERJ6_BUILTIN_INIT
++            if (r.c == ORIGINAL_SJ6_HPF_PANEL && proj.sound.v[T_303][r.b][29] == ORIGINAL_SOUND_JUNO)
++                proj.sound.v[T_303][r.b][ORIGINAL_SJ6_HPF_LAW_BYTE] |= 128u;
++#endif
+             engine_bass_sound_refresh(&proj.sound,r.b);
+         } else
+         proj.sound.v[r.a][r.b][r.c] = (uint8_t)v;
+         engine_set(r.a, r.b, r.c, v);
+@@ -1363,9 +1790,19 @@
+     if ((kind == ORIGINAL_SOUND_CHICAGO && id == 2) || (kind == ORIGINAL_SOUND_MIAMI && id == 9)) {
+         float hz;                                     /* CUTOFF: the engine's base corner (Synths 91f6e4e9), else % */
+         if (engine_param_si(T_303, r.b, (int)id, value, &hz) == X0X_U_HZ) { unit_value(X0X_U_HZ, hz, num, unit); return 1; }
+     }
+-    if (kind == ORIGINAL_SOUND_JUNO) { juno_value_text(id, value, num, unit); return 1; }
++    if (kind == ORIGINAL_SOUND_JUNO) {
++#if X0X_SUPERJ6_BUILTIN_INIT
++        if (id == ORIGINAL_SJ6_HPF_PANEL && value > 0 &&
++            original_sound_sj6_hpf_authored(proj.sound.v[T_303][r.b])) {
++            unit_value(X0X_U_HZ, juno6_sj6_hpf_hz((value * (1.f/127.f))), num, unit);
++            return 1;
++        }
++#endif
++        juno_value_text(id, value, num, unit);
++        return 1;
++    }
+     if (kind == ORIGINAL_SOUND_SYNTHONE) { put_i(num,(value*100+63)/127); put_s(unit,"%"); return 1; }
+     if (ui_original_states(kind,id) || (kind == ORIGINAL_SOUND_CHICAGO && (id == 0 || id == 4)) ||
+         (kind == ORIGINAL_SOUND_MIAMI && id == 7)) {
+         v = original_text_view(r,value);
+@@ -1449,18 +1886,95 @@
+ 
+ /* the value, as a number and a unit ("-6" "dB"); a switch gives its name and no unit */
+ X0X_COLD static void pref_value_of(pref_t r, int v, char *num, char *unit)
+ {
++#if X0X_S1_DELAY_TIME_NATIVE
++    if(r.kind==R_S1DLYTIME){
++        *num=*unit=0;
++        unsigned pos,max;float seconds;
++        const int sync=s1_delay_time_read(r.b,&pos,&max,&seconds);
++        if(sync==-2){put_s(num,"--");return;}
++        if(sync==1){
++            if(pos<2u)put_s(num,pos?"1 BAR":"2 BAR");
++            else if(pos==2u)put_s(num,"1 BAR T");
++            else put_s(put_i(put_s(num,"1/"),1u<<((pos-1u)/2u)),!(pos&1u)?"T":"");
++        } else {put_i(num,(int)(seconds*1000.f+.5f));put_s(unit,"ms");}
++        return;
++    }
++#endif
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++    if(r.kind==R_S1DLYRES){put_i(num,(v*98+63)/127);put_s(unit,"%");return;}
++    if(r.kind==R_S1ENVLFO){
++        static const char *const labels[]={"OFF","LFO 1","LFO 2","BOTH"};
++        *unit=0;put_s(num,(unsigned)v<=S1_ENV_LFO_MAX?labels[v]:"--");return;
++    }
++    if(r.kind==R_S1PHASER){
++        float x=s1_phase_value(r.c,s1_phase_encode(r.c,(unsigned)v));
++        if(r.c==0u || r.c==2u) {put_i(num,(int)(x*100.f+.5f));put_s(unit,"%");}
++        else {put_i(num,(int)(x+.5f));put_s(unit,r.c==1u?"/MIN":"Hz");}
++        return;
++    }
++#endif
+     const x0x_param_t *d = pref_desc(r);
+     *num = *unit = 0;
++#if X0X_SJ6_MONO32_PROBE
++    if(r.kind==R_SJ6MONO32&&r.c==2u){put_i(num,(500*v+63)/127);put_s(unit,"ms");return;}
++#endif
++#ifdef DNBOX_137_HOST_WITNESS
++#if defined(X0X_S1_AUTOPAN_PROBE) && X0X_S1_AUTOPAN_PROBE
++    if(r.kind==R_S1PAN) {
++        if(!r.c){put_i(num,(v*100+63)/127);put_s(unit,"%");return;}
++        unsigned pos,max;int sync;float hz;
++        if(!s1_typed_pan_read(r.b,&pos,&max,&sync,&hz)) {put_s(num,"--");return;}
++        if(sync) {
++            static const uint8_t bars[]={8,6,4,3,2,1,1};
++            if(pos<sizeof bars) put_s(put_i(num,bars[pos]),pos==6?" BAR T":" BAR");
++            else put_s(put_i(put_s(num,"1/"),1u<<((pos-5u)/2u)),!(pos&1u)?"T":"");
++        } else if(hz<1.f){put_i(num,(int)(hz*1000.f+.5f));put_s(unit,"mHz");}
++        else {put_d1(num,hz,0);put_s(unit,"Hz");}
++        return;
++    }
++#endif
++#if X0X_S1_DELAY_TRACK_TEST
++    if(r.kind==R_S1DICT) { put_i(num,50+v);put_s(unit,"%");return; }
++#endif
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++    if(r.kind==R_S1AA) { put_s(num,v?"ON":"OFF");return; }
++    if(r.kind==R_S1CWG) { put_i(num,v==S1_CWG_INIT ? 188 : 50+(350*v+63)/127);put_s(unit,"%");return; }
++#endif
++#if defined(X0X_S1_FEEDBACK_PROBE) && X0X_S1_FEEDBACK_PROBE
++    if(r.kind==R_S1DLFB) {
++        unsigned code=live_s1_mod(&proj.sound,r.b)?read137(&proj.sound,r.b)[S1_FB_BYTE]:0;
++        unsigned tenths=code?(900u*(unsigned)v+63u)/127u:100u;
++        put_i(put_s(put_i(num,(int)(tenths/10u)),"."),(int)(tenths%10u));
++        put_s(unit,"%");return;
++    }
++#endif
++    if(r.kind==R_S1TRANS) {put_i(num,v-24);put_s(unit,"st");return;}
++    if(r.kind==R_S1RVFB) {put_i(num,(v*100+64)/128);put_s(unit,"%");return;}
++    if(r.kind==R_S1A4) {put_i(num,v+410);put_s(unit,"Hz");return;}
++#endif
+     if (!d || r.kind == R_ACT)
+         return;
+ #if X0X_ARP_HOOKS
++#if X0X_S1_FENCED_CLOCK
++    if (r.kind == R_ARP && r.a == ARP_F_SOURCE_RATE) {
++        put_i(num, v + 1); put_s(unit, "BPM"); return;
++    }
++#endif
+     if (r.kind == R_ARP && r.a == ARP_F_GATE) {
++#if (defined(X0X_SJ6_ZERO_GATE_PROBE) && X0X_SJ6_ZERO_GATE_PROBE) || X0X_SJ6_NATIVE_ZERO_GATE
++        if(live137(&proj.sound,r.b)){put_i(num,v);put_s(unit,"%");return;}
++#endif
+         put_i(num, v + 1); put_s(unit, "%"); return;
+     }
+ #endif
+ #if X0X_SYNTHONE_PATCH
++#if defined(X0X_SJ6_BEND_TYPED_PROBE) && X0X_SJ6_BEND_TYPED_PROBE
++    if (r.kind==R_SJ6PB) {
++        put_i(num,pref_get(r)-(r.c?0:48)); put_s(unit,"st"); return;
++    }
++#endif
+     if (r.kind == R_S1PATCH) {
+         const s1_patch_descriptor *patch = s1_patch_at(r.c);
+         s1_patch_value owner = {0};
+         float physical;
+@@ -1470,8 +1984,11 @@
+             if (!s1_read(r, &owner)) { put_s(num, "--"); return; }
+             physical = owner.physical;
+         }
+ #if X0X_S1_EXTRA
++#if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
++        if (s1_bend_slot(r.c)) { put_i(num, (int)physical); put_s(unit, "st"); return; }
++#endif
+         if (s1_lfo_rate_slot(r.c) && owner.max_position < S1_PATCH_STEPS) {
+             static const uint8_t bars[] = {8, 6, 4, 3, 2, 1, 1};
+             unsigned div = owner.position;
+             if (div < sizeof bars) put_s(put_i(num, bars[div]), div == 6 ? " BAR T" : " BAR");
+@@ -1490,10 +2007,14 @@
+             return;
+         }
+         if (r.c == S1_SUB_OCTAVE) { put_s(num, physical > 0.f ? "-24" : "-12"); put_s(unit, "st"); return; }
+         if (r.c == S1_SUB_WAVE) { put_s(num, physical > 0.f ? "SQUARE" : "SINE"); return; }
++        if (s1_fx_gate_slot(r.c)) { put_s(num, owner.position ? "ON" : "OFF"); return; }
++        if (r.c == S1_VOICE_MODE) { put_s(num, owner.position ? "MONO" : "POLY"); return; }
++        if (r.c == S1_MONO_GLIDE) { put_i(num, (int)(1000.f*physical + .5f)); put_s(unit, "ms"); return; }
++        if (r.c == S1_OSC2_DETUNE) { put_d1(num, physical, 1); put_s(unit, "Hz@C4"); return; }
+         if (r.c == S1_FM_INDEX) { put_d1(num, physical, 0); return; }
+-        if (r.c == S1_CUTOFF_LFO || s1_mod_ext_slot(r.c) || s1_base_route_slot(r.c)) {
++        if (r.c == S1_CUTOFF_LFO || r.c == S1_DETUNE_LFO || r.c == S1_PITCH_LFO || r.c == S1_TREMOLO_LFO || r.c == S1_REVERB_MIX_LFO || s1_mod_ext_slot(r.c) || s1_base_route_slot(r.c)) {
+             static const char *const sources[] = {"OFF", "LFO 1", "LFO 2", "BOTH"};
+             put_s(num, sources[owner.position & 3u]);
+             return;
+         }
+@@ -1512,9 +2033,16 @@
+         engine_bass_edit_hold(0);
+         return;
+     }
+ #if X0X_SUPERJ6_BUILTIN_INIT
++#if (defined(X0X_HOST) && defined(X0X_SJ6_DELAY_WITNESS)) || X0X_SJ6_NATIVE_DELAY
++    if(r.kind==R_SJ6KNOB && r.c==SJ6_DELAY25){
++        extern int engine_superj6_delay_clock_refused(unsigned);
++        if(engine_superj6_delay_clock_refused(r.b)){put_s(num,"TOO LONG");return;}
++    }
++#endif
+     if (r.kind == R_SJ6KNOB && !d->names) {
++        if ((r.c == SJ6_OSC2_LEVEL || r.c == SJ6_OSC1_LEVEL) && v == 128) { put_s(num,"INIT"); return; }
+         if (r.c == SJ6_LAYER1_FINE || r.c == SJ6_LAYER2_FINE) {
+             put_i(num, v - SJ6_FINE_CENTER);
+             put_s(unit, "ct");
+             return;
+@@ -1708,9 +2236,10 @@
+         unsigned ps = pat_of(PART_303A + (r.b & 1))->rsv[r.b & 1];
+         if (!ps) { put_s(num, "OFF"); return; }
+         unsigned kind, preset;
+         if (!bass_pattern_preset_decode(ps, &kind, &preset)) { put_s(num, "INVALID"); return; }
+-        num[0] = kind == ORIGINAL_SOUND_JUNO ? 'J' : kind == ORIGINAL_SOUND_SYNTHONE ? 'S' : kind == ORIGINAL_SOUND_MIAMI ? 'M' : 'C';
++        if (kind == ORIGINAL_SOUND_SYNTHONE) { put_s(num, "INIT"); return; }
++        num[0] = kind == ORIGINAL_SOUND_JUNO ? 'J' : kind == ORIGINAL_SOUND_MIAMI ? 'M' : 'C';
+         put_i(num + 1, (int)preset);
+         return;
+     }
+     case R_SBAR: put_i(num, v + 1); return;
+@@ -1728,23 +2257,150 @@
+     pref_value_of(r,pref_get(r),num,unit);
+ }
+ 
+ /* ===================================================================== pages === */
+-#define MAXPAGES 15
++#define MAXPAGES 24
+ /* page groups: whose values a page holds (the SEL list's headers, the header's colour) */
+ enum { GR_NONE, GR_TRACK, GR_TMIX, GR_KIT, GR_PAT, GR_SOUND, GR_MORE,
+        GR_MIDI, GR_AUDIO, GR_KEYS, GR_PROJECT, GR_SYSTEM, GR_BT };   /* (the last six: GLO's sections) */
+ #define MAXMORE 14
+ typedef struct {
+     pref_t r[MAXPAGES][4];
+-    char title[MAXPAGES][12];
+-    uint8_t group[MAXPAGES];
+-    int n;
+-    pref_t more[MAXMORE];              /* the screen's other knobs: only in SEL's list, under MORE */
+-    int nmore;
++    uint8_t title[MAXPAGES];
++    uint8_t packed_group[(MAXPAGES + 1u) / 2u];
++    uint8_t n, nmore;
+ } pages_t;
++_Static_assert(GR_BT < 16, "page group uses one nibble");
++static inline uint8_t page_group(const pages_t *p, unsigned page)
++{
++    return (uint8_t)((p->packed_group[page >> 1] >> ((page & 1u) * 4u)) & 15u);
++}
++static inline void page_group_set(pages_t *p, unsigned page, unsigned group)
++{
++    const unsigned shift = (page & 1u) * 4u;
++    uint8_t *const value = &p->packed_group[page >> 1];
++    *value = (uint8_t)((*value & ~(15u << shift)) | (group << shift));
++}
++enum { PAGE_REFS = MAXPAGES * 4 };
++_Static_assert(sizeof(pref_t) == 4 && sizeof(pages_t) <= 424,
++               "page materialization must fit the original POOL storage");
++_Static_assert(MAXMORE <= PAGE_REFS, "page and MORE refs share a bounded matrix");
+ static pages_t pg X0X_POOL;
+-typedef struct { pref_t r[4]; char title[12]; int page, n; } page_query_t;
++
++/* One immutable, exactly legacy-truncated label per typed page ID. */
++static const char *const page_titles[PT_COUNT] = {
++    [PT_EMPTY] = "",
++    [PT_808_MIX] = "808 MIX",
++    [PT_909_MIX] = "909 MIX",
++    [PT_AMP_ADSR] = "AMP ADSR",
++    [PT_AMP_ENVELOP] = "AMP ENVELOP",
++    [PT_AMPLIFIER] = "AMPLIFIER",
++    [PT_ARP_SEQ] = "ARP SEQ",
++    [PT_ARPEGGIATOR] = "ARPEGGIATOR",
++#if X0X_S1_FENCED_CLOCK
++    [PT_ARP_PARAM] = "ARP PARAM",
++#endif
++    [PT_BAR] = "BAR",
++    [PT_BD] = "BD",
++    [PT_CARRIER] = "CARRIER",
++    [PT_CB] = "CB",
++    [PT_CH] = "CH",
++    [PT_CHORUS] = "CHORUS",
++#if X0X_SJ6_CLASSIC_I_PROBE
++    [PT_CHORUS_I_PARAMS] = "CHORUS I",
++    [PT_CHORUS_II_PARAMS] = "CHORUS II",
++    [PT_CHORUS_BOTH_PARAMS] = "CHORUS BOTH",
++#endif
++#if (defined(X0X_HOST) && defined(X0X_SJ6_DELAY_WITNESS)) || X0X_SJ6_NATIVE_DELAY
++    [PT_SJ6_DELAY] = "DELAY",
++    [PT_SJ6_DELAY_CLOCK] = "DELAY CLOCK",
++#endif
++    [PT_CP] = "CP",
++    [PT_CR] = "CR",
++    [PT_CY] = "CY",
++    [PT_PHASER] = "PHASER",
++    [PT_DELAY] = "DELAY",
++    [PT_EFFECT] = "EFFECT",
++    [PT_FX_BYPASS] = "FX SWITCHES",
++    [PT_PITCH_MOD] = "PITCH MOD",
++#if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
++    [PT_WHEELS] = "WHEELS",
++#endif
++    [PT_ENVELOPE] = "ENVELOPE",
++    [PT_FILTER] = "FILTER",
++    [PT_FILTER_1] = "FILTER 1",
++    [PT_FILTER_2] = "FILTER 2",
++    [PT_FILTER_ADSR] = "FILTER ADSR",
++    [PT_FILTER_MODE] = "FILTER MODE",
++#ifdef DNBOX_137_HOST_WITNESS
++    [PT_FILTER_MOD] = "FILTER MOD",
++    [PT_CRUSH_MOD] = "CRUSH MOD",
++    [PT_AUTO_PAN] = "AUTO PAN",
++#endif
++    [PT_FM_NOISE] = "FM / NOISE",
++    [PT_GENERATE] = "GENERATE",
++    [PT_GROOVE] = "GROOVE",
++    [PT_HT] = "HT",
++    [PT_KEYS] = "KEYS",
++    [PT_KIT] = "KIT",
++    [PT_LFO] = "LFO",
++    [PT_LFO_MODE] = "LFO MODE",
++    [PT_LFO_RATE] = "LFO RATE",
++    [PT_LFO_CHORUS] = "LFO/CHORUS",
++    [PT_LFO2_PWM] = "LFO2 PWM",
++    [PT_LOOPS] = "LOOPS",
++    [PT_LT] = "LT",
++    [PT_MASTER] = "MASTER",
++    [PT_MOD_ROUTE] = "MOD ROUTE",
++    [PT_MT] = "MT",
++    [PT_OH] = "OH",
++    [PT_OSC_MIX] = "OSC MIX",
++    [PT_OSCILLATOR] = "OSCILLATOR",
++    [PT_OUTPUT] = "OUTPUT",
++    [PT_PARTS] = "PARTS",
++    [PT_PERF] = "PERF",
++    [PT_PERFORM] = "PERFORM",
++    [PT_PRESET] = "PRESET",
++    [PT_PULSE_WIDTH] = "PULSE WIDTH",
++    [PT_RD] = "RD",
++    [PT_RETRIG] = "RETRIG",
++    [PT_REVERB] = "REVERB",
++    [PT_RS] = "RS",
++    [PT_SCALE] = "SCALE",
++    [PT_SD] = "SD",
++    [PT_SEQUENCE] = "SEQUENCE",
++    [PT_SOUND] = "SOUND",
++    [PT_TEMPO_SYNC] = "TEMPO SYNC",
++    [PT_TUNING] = "TUNING",
++    [PT_VIBRATO] = "VIBRATO",
++    [PT_VOICE] = "VOICE",
++    [PT_WAVE] = "WAVE",
++    [PT_WOBBLE] = "WOBBLE",
++    [PT_XMOD] = "XMOD",
++};
++_Static_assert(PT_COUNT < 256, "page title IDs fit");
++static const char *page_title(const pages_t *p, int n)
++{ return page_titles[p->title[n]]; }
++static page_title_id_t drum_page_title(int t, int v)
++{
++    static const uint8_t n909[] = { PT_BD, PT_SD, PT_LT, PT_MT, PT_HT, PT_RS,
++                                  PT_CP, PT_CH, PT_OH, PT_CR, PT_RD, PT_KIT };
++    static const uint8_t n808[] = { PT_BD, PT_SD, PT_LT, PT_MT, PT_HT, PT_RS,
++                                  PT_CP, PT_CB, PT_CY, PT_OH, PT_CH, PT_KIT };
++    _Static_assert(sizeof n909 == DR_NUM + 1 && sizeof n808 == D8_NUM + 1,
++                   "drum title coverage");
++    if (t == T_909 && (unsigned)v < sizeof n909) return n909[v];
++    if (t == T_808 && (unsigned)v < sizeof n808) return n808[v];
++    return PT_EMPTY;
++}
++
++static pref_t *page_more(pages_t *pages, unsigned i)
++{
++    unsigned slot = PAGE_REFS - 1u - i;
++    return &pages->r[slot / 4u][slot % 4u];
++}
++typedef struct { pref_t r[4]; char title[12]; int page; uint8_t n, nmore; } page_query_t;
++_Static_assert(sizeof(page_query_t) == 36, "SMC query caches must not grow");
+ /* The descriptor emitter has one explicit output contract. Query mode records
+  * one requested page plus the count, without a second persistent page table. */
+ typedef struct {
+     pages_t *pages;
+@@ -1754,50 +2410,55 @@
+ 
+ static void more(page_emitter_t *emit, pref_t r)
+ {
+     pages_t *pages = emit->pages;
+-    if (pages && r.kind != R_NONE && pages->nmore < MAXMORE)
+-        pages->more[pages->nmore++] = r;
+-}
+-
+-static void title(pages_t *pages, int i, const char *s)
+-{
+-    int k = 0;
+-    while (s[k] && k < 11) {
+-        pages->title[i][k] = s[k];
+-        k++;
+-    }
+-    pages->title[i][k] = 0;
+-}
+-
+-static void add_page(page_emitter_t *emit, const char *t,
++    page_query_t *q = emit->query;
++    if (q && r.kind != R_NONE && q->nmore < MAXMORE && 4 * q->n + q->nmore < PAGE_REFS)
++        q->nmore++;
++    if (pages && r.kind != R_NONE && pages->nmore < MAXMORE &&
++        4 * pages->n + pages->nmore < PAGE_REFS)
++        *page_more(pages, pages->nmore++) = r;
++}
++
++/* Both page consumers write the same four refs and truncated title. Select
++ * the destination once, retaining each consumer's bounds and count. */
++static void add_page(page_emitter_t *emit, page_title_id_t title,
+                      pref_t a, pref_t b, pref_t c, pref_t d)
+ {
+     page_query_t *query = emit->query;
+     pages_t *pages = emit->pages;
++    pref_t *refs;
++    char *text;
+     if (query) {
+-        if (query->n == query->page) {
+-            query->r[0] = a;
+-            query->r[1] = b;
+-            query->r[2] = c;
+-            query->r[3] = d;
+-            unsigned i = 0;
+-            for (; t[i] && i < 11; i++)
+-                query->title[i] = t[i];
+-            query->title[i] = 0;
+-        }
++        if (query->n >= MAXPAGES || 4 * (query->n + 1) + query->nmore > PAGE_REFS) return;
++        if (query->n != query->page) {
++            query->n++;
++            return;
++        }
++        refs = query->r;
++        text = query->title;
++    } else {
++        if (pages->n >= MAXPAGES || 4 * (pages->n + 1) + pages->nmore > PAGE_REFS)
++            return;
++        refs = pages->r[pages->n];
++        text = 0;
++        pages->title[pages->n] = title;
++    }
++    refs[0] = a;
++    refs[1] = b;
++    refs[2] = c;
++    refs[3] = d;
++    if (query) {
++        unsigned i = 0;
++        const char *t = page_titles[title];
++        for (; i < 11 && t[i]; i++)
++            text[i] = t[i];
++        text[i] = 0;
+         query->n++;
+-        return;
+-    }
+-    if (pages->n >= MAXPAGES)
+-        return;
+-    pages->r[pages->n][0] = a;
+-    pages->r[pages->n][1] = b;
+-    pages->r[pages->n][2] = c;
+-    pages->r[pages->n][3] = d;
+-    title(pages, pages->n, t);
+-    pages->group[pages->n] = emit->group;
+-    pages->n++;
++    } else {
++        page_group_set(pages, pages->n, emit->group);
++        pages->n++;
++    }
+ }
+ 
+ static int name_is(const x0x_param_t *d, const char *n)
+ {
+@@ -1840,9 +2501,9 @@
+ { return r.kind==R_ENG && r.a==T_909 &&
+     ((r.b==DR_BD && r.c==2) || (r.b==DR_SD && r.c==3)); }
+ X0X_COLD static void add_track_pages(page_emitter_t *emit, int t, int v)
+ {
+-    const char *nm = engine_voice_name(t, v);
++    page_title_id_t nm = drum_page_title(t,v);
+     pref_t snd[NPARAMS_MAX];
+     int rank[NPARAMS_MAX];
+     int n = 0, i, j;
+     pref_t amp=NONE;
+@@ -1869,9 +2530,9 @@
+     }
+     emit->group = GR_TRACK;
+     for (i = 0; i < n; i += 4)
+         add_page(emit, nm, snd[i], i + 1 < n ? snd[i + 1] : NONE, i + 2 < n ? snd[i + 2] : NONE, i + 3 < n ? snd[i + 3] : NONE);
+-    if(amp.kind!=R_NONE)add_page(emit,"AMP ENVELOPE",amp,NONE,NONE,NONE);
++    if(amp.kind!=R_NONE)add_page(emit,PT_AMP_ENVELOP,amp,NONE,NONE,NONE);
+ }
+ 
+ /* where a screen's page is kept: per part on the part's screens (and TB-3PO), else one per screen */
+ static uint8_t *page_of(int view)
+@@ -1884,8 +2545,11 @@
+  * every value; the UI reads it each frame and queues edits with the revision. */
+ static const char *const ARP_MODE_N[] = {"UP", "DOWN", "UP+DN", "SEQ"
+ #if X0X_SUPERJ6_BUILTIN_INIT && !defined(X0X_ARP_FAKE_H)
+                                        , "UP+DN X2"
++#if X0X_SJ6_RANDOM2_PROBE || X0X_SJ6_NATIVE_RANDOM2
++                                       , "RANDOM2"
++#endif
+ #endif
+ };
+ static const char *const ARP_RANGE_N[] = {"1 OCT", "2 OCT", "3 OCT", "4 OCT"};
+ static const char *const ARP_SPEED_N[] = {"1/2", "3/8", "1/3", "1/4", "3/16", "1/6", "1/8", "1/12", "1/16", "1/32"};
+@@ -1899,16 +2563,37 @@
+ static uint8_t arp_edited;
+ static uint32_t arp_t0;
+ static const x0x_param_t *arp_desc(unsigned field, unsigned owner)
+ {
++#if X0X_S1_FENCED_CLOCK
++    static const char *const stops[]={"1/64 T","1/64","1/32 T","1/32","1/16 T","1/16","1/8 T","1/8",
++        "1/4 T","1/4","1/2 T","1/2","1 BAR T","1 BAR","2 BARS","3 BARS","4 BARS","6 BARS","8 BARS"};
++    static const x0x_param_t rate={"ARP RATE",199,119,0};
++    static const x0x_param_t factor={"CLOCK FACTOR",18,9,stops};
++    if (field==ARP_F_SOURCE_RATE||field==ARP_F_SOURCE_FACTOR)
++        return engine_bass_bank(owner) != ORIGINAL_SOUND_SYNTHONE ? 0 :
++            field==ARP_F_SOURCE_RATE ? &rate : &factor;
++#endif
+ #if X0X_SUPERJ6_BUILTIN_INIT && !defined(X0X_ARP_FAKE_H)
+-    static const x0x_param_t saga_mode = {"MODE", ARP_NMODES - 1, 0, ARP_MODE_N};
++    static const x0x_param_t saga_mode = {"MODE", ARP_UPDN_REPEAT, 0, ARP_MODE_N};
++#if (defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE) || X0X_SJ6_NATIVE_RANDOM2
++    if(field==ARP_F_MODE && live137(&proj.sound,owner)) {
++        static const x0x_param_t random_mode={"MODE",ARP_SAGA_RANDOM2,0,ARP_MODE_N};
++        return &random_mode;
++    }
++#endif
+     static const char *const beats[] = {"SPEED", "1/16", "3/32", "1/8", "3/16", "1/4",
+         "3/8", "1/2", "3/4", "1", "1.5", "2", "3", "4", "8", "12", "16", "24", "32"};
+     static const x0x_param_t division = {"BEATS", ARP_SAGA_DIVISIONS, 0, beats};
+     if ((field == ARP_F_MODE || field == ARP_F_DIVISION) &&
+         engine_bass_bank(owner) == ORIGINAL_SOUND_JUNO)
+         return field == ARP_F_MODE ? &saga_mode : &division;
++#if (defined(X0X_SJ6_ZERO_GATE_PROBE) && X0X_SJ6_ZERO_GATE_PROBE) || X0X_SJ6_NATIVE_ZERO_GATE
++    if (field==ARP_F_GATE && live137(&proj.sound,owner)) {
++        static const x0x_param_t gate={"GATE",100,100,0};
++        return &gate;
++    }
++#endif
+     if (field == ARP_F_DIVISION) return 0;
+ #else
+     (void)owner;
+ #endif
+@@ -1922,8 +2607,14 @@
+     return (kind == ORIGINAL_SOUND_JUNO || kind == ORIGINAL_SOUND_SYNTHONE) && engine_arp_settings_read((unsigned)b, &s);
+ }
+ static int arp_get(unsigned voice, unsigned field)
+ {
++#if X0X_S1_FENCED_CLOCK
++    if (field==ARP_F_SOURCE_RATE||field==ARP_F_SOURCE_FACTOR) {
++        int value=engine_arp_source_get(voice,field);
++        return value<0 ? 0 : field==ARP_F_SOURCE_RATE ? value-1 : 18-value;
++    }
++#endif
+     engine_arp_settings s;
+     if (!engine_arp_settings_read(voice, &s)) return 0;
+     switch (field) {
+     case ARP_F_ON: return s.on;
+@@ -1931,9 +2622,13 @@
+     case ARP_F_RANGE: return s.range ? s.range - 1 : 0;
+     case ARP_F_SPEED: return s.speed;
+     case ARP_F_LENGTH: return s.length ? s.length - 1 : 0;
+     case ARP_F_INTERVAL: return s.interval;
+-    case ARP_F_GATE: return s.gate ? s.gate - 1 : 0;
++    case ARP_F_GATE:
++#if (defined(X0X_SJ6_ZERO_GATE_PROBE) && X0X_SJ6_ZERO_GATE_PROBE) || X0X_SJ6_NATIVE_ZERO_GATE
++        if (live137(&proj.sound,voice)) return s.gate;
++#endif
++        return s.gate ? s.gate - 1 : 0;
+ #if X0X_SUPERJ6_BUILTIN_INIT && !defined(X0X_ARP_FAKE_H)
+     case ARP_F_DIVISION: return s.division;
+ #endif
+     }
+@@ -1948,23 +2643,37 @@
+ static uint32_t arp_limit_until;
+ static uint8_t arp_limit_owner, arp_limit_field;
+ static void arp_set(unsigned voice, unsigned field, int v, int from_keyboard)
+ {
++#if X0X_S1_FENCED_CLOCK
++    if (field==ARP_F_SOURCE_RATE||field==ARP_F_SOURCE_FACTOR) {
++        if (engine_arp_source_set(voice,field,field==ARP_F_SOURCE_RATE ? v+1 : 18-v))mark_dirty();
++        else say("ARP NOT CHANGED",0);
++        return;
++    }
++#endif
+     engine_arp_settings s;
+     if (!engine_arp_settings_read(voice, &s)) return;
+     /* A bound reached by the panel is not an edit or a global alert. Keep
+      * the hardware header live and explain the bound in the ARP status row. */
+     if (from_keyboard && (field == ARP_F_LENGTH || field == ARP_F_GATE) &&
+         voice == (unsigned)bidx() && arp_seq_page()) {
+-        if (v < 0 || v > ARP_P[field].max) {
++        if (v < 0 || v > arp_desc(field,voice)->max) {
+             arp_limit_owner = (uint8_t)voice;
+             arp_limit_field = (uint8_t)field;
+             arp_limit_until = plat_ms() + 900u;
+             return;
+         }
+         arp_limit_until = 0;
+     }
+-    if (field == ARP_F_RANGE || field == ARP_F_LENGTH || field == ARP_F_GATE) v++;
++#if (defined(X0X_SJ6_ZERO_GATE_PROBE) && X0X_SJ6_ZERO_GATE_PROBE) || X0X_SJ6_NATIVE_ZERO_GATE
++    const int typed_gate=field==ARP_F_GATE && live137(&proj.sound,voice);
++    if (typed_gate && !s1_typed_tuple_editable()) return;
++#endif
++#if !((defined(X0X_SJ6_ZERO_GATE_PROBE) && X0X_SJ6_ZERO_GATE_PROBE) || X0X_SJ6_NATIVE_ZERO_GATE)
++    const int typed_gate=0;
++#endif
++    if (field == ARP_F_RANGE || field == ARP_F_LENGTH || (field == ARP_F_GATE && !typed_gate)) v++;
+     if (engine_arp_set(voice, s.revision, field, v) == S1_EDIT_REJECTED) say("ARP NOT CHANGED", 0);
+ }
+ static void arp_step_edit(unsigned step, unsigned field, int v)
+ {
+@@ -2035,10 +2744,19 @@
+                 /* If simultaneous, use the highest struck key. */
+                 int key = 0;
+                 while (strikes >>= 1) ++key;
+                 int offset = 36 + key + 12 * ui.oct - UI_ARP_ROOT;
+-                if ((st.oct_mask >> arp_held) & 1u) offset -= 12;
+                 arp_edited = 1;   /* never toggle on pad release after editing */
++                if ((st.oct_mask >> arp_held) & 1u) {
++                    if (engine_bass_bank(bidx()) == ORIGINAL_SOUND_SYNTHONE) {
++                        /* Original OCT+ pushes signed offsets away from zero.
++                         * With boost on, the available pitches are -24..-13
++                         * and +12..+24; keep OCT+ when a key is in the gap. */
++                        if (offset >= -24 && offset <= -13) offset += 12;
++                        else if (offset >= 12 && offset <= 24) offset -= 12;
++                        else { say("OCT+ RANGE", 0); return; }
++                    } else offset -= 12;
++                }
+                 arp_step_edit((unsigned)arp_held, ARP_S_OFFSET, offset);
+             }
+         }
+         return;
+@@ -2066,9 +2784,9 @@
+ 
+ /* Immutable page descriptions avoid rebuilding four constant preference records at
+  * every call site. The only patched byte is the current part/voice/channel;
+  * NONE retains its all-zero record. This runs only during UI page construction. */
+-X0X_COLD __attribute__((noinline)) static void add_page_refs(page_emitter_t *emit, const char *t, const pref_t *refs, int axis, uint8_t value)
++X0X_COLD __attribute__((noinline)) static void add_page_refs(page_emitter_t *emit, page_title_id_t title, const pref_t *refs, int axis, uint8_t value)
+ {
+     pref_t row[4];
+     for (int i = 0; i < 4; i++) {
+         row[i] = refs[i];
+@@ -2076,9 +2794,9 @@
+             if (axis == 1) row[i].a = value;
+             if (axis == 2) row[i].b = value;
+         }
+     }
+-    add_page(emit, t, row[0], row[1], row[2], row[3]);
++    add_page(emit, title, row[0], row[1], row[2], row[3]);
+ }
+ 
+ X0X_COLD __attribute__((noinline)) static void more_refs(page_emitter_t *emit, const pref_t *refs, unsigned n, int axis, uint8_t value)
+ {
+@@ -2092,29 +2810,53 @@
+ }
+ 
+ /* Pure navigation inputs: emit existing descriptors without keyboard clamping. */
+ #if X0X_SUPERJ6_BUILTIN_INIT || X0X_S1_EXTRA
+-enum { ORIG_PAGE_ENGINE = 128, ORIG_PAGE_S1_LINK = 254, ORIG_PAGE_NONE = 255 };
+-typedef struct { const char *title; uint8_t id[4]; } original_page_row_t;
++enum { ORIG_PAGE_ENGINE = 128, ORIG_PAGE_S1_ENVLFO = 251, ORIG_PAGE_S1_RVFB = 252, ORIG_PAGE_S1_MODWHEEL = 253, ORIG_PAGE_S1_LINK = 254, ORIG_PAGE_NONE = 255 };
++typedef struct { uint8_t title; uint8_t id[4]; } original_page_row_t;
+ __attribute__((noinline)) X0X_COLD static void add_original_extra_pages(
+     page_emitter_t *emit, const original_page_row_t *pages, unsigned count, int owner, unsigned kind)
+ {
+     for (unsigned row = 0; row < count; ++row) {
++#if (defined(X0X_HOST) && defined(X0X_SJ6_DELAY_WITNESS)) || X0X_SJ6_NATIVE_DELAY
++        if((pages[row].title==PT_SJ6_DELAY||pages[row].title==PT_SJ6_DELAY_CLOCK) && engine_superj6_knob_position(owner,SJ6_DELAY24)<0)continue;
++#endif
++#if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
++        if (pages[row].title==PT_WHEELS && !live_s1_mod(&proj.sound,owner)) continue;
++#endif
+         pref_t refs[4];
+         for (unsigned col = 0; col < 4; ++col) {
+             unsigned id = pages[row].id[col];
+             refs[col] = id == ORIG_PAGE_NONE ? NONE :
+ #if X0X_S1_EXTRA
+                 id == ORIG_PAGE_S1_LINK ? PR(R_S1LINK,T_303,owner,0) :
++#ifdef DNBOX_137_HOST_WITNESS
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++                id == ORIG_PAGE_S1_ENVLFO ?
++                    (live_s1_mod(&proj.sound,owner) ? PR(R_S1ENVLFO,T_303,owner,0) : NONE) :
++#endif
++                id == ORIG_PAGE_S1_RVFB ?
++                    (live_s1_mod(&proj.sound,owner) ? PR(R_S1RVFB,T_303,owner,0) : NONE) :
++                id == ORIG_PAGE_S1_MODWHEEL ?
++                    (live_s1_mod(&proj.sound,owner) ? PR(R_S1MODWHEEL,T_303,owner,0) : NONE) :
++#endif
+ #endif
+                 id >= ORIG_PAGE_ENGINE ? PR(R_ENG,T_303,owner,id - ORIG_PAGE_ENGINE) :
+                 PR(kind,T_303,owner,id);
+         }
+ #ifdef DNBOX_137_HOST_WITNESS
+-        extern int sj6_137_fixture_lens;
+-        if (kind==R_SJ6KNOB && live137(&proj.sound,owner) &&
+-            sj6_137_fixture_lens && pages[row].title==PT_FILTER_ADSR)
+-            refs[0]=PR(kind,T_303,owner,SJ6_FILTER_VELOCITY);
++        if (pages[row].title==PT_FILTER_MOD &&
++            (kind!=R_SJ6KNOB || !live137(&proj.sound,owner))) continue;
++#endif
++#if X0X_SJ6_CLASSIC_I_PROBE
++        if(pages[row].title==PT_CHORUS && kind==R_SJ6KNOB && ui_classic_i(owner)) {
++            refs[2]=NONE;refs[3]=NONE;
++            add_page_refs(emit,pages[row].title,refs,0,0);
++            unsigned mode=ui_classic_i(owner);
++            add_page(emit,PT_CHORUS_I_PARAMS+mode-JUNO6_CHORUS_I,PR(R_SJ6CLASSIC_I,T_303,owner,0),
++                PR(R_SJ6CLASSIC_I,T_303,owner,1),PR(R_SJ6CLASSIC_I,T_303,owner,2),NONE);
++            continue;
++        }
+ #endif
+         add_page_refs(emit, pages[row].title, refs, 0, 0);
+     }
+ }
+@@ -2123,49 +2865,49 @@
+ {
+     page_emitter_t output = {out, query, GR_NONE};
+     page_emitter_t *emit = &output;
+     if (query)
+-        query->n = 0;
++        query->n = query->nmore = 0;
+     else
+         out->n = out->nmore = 0;
+     switch (view) {
+     case V_HOME:                                       /* the pattern: how the parts run through it */
+     case V_GLO:
+         do { static const pref_t refs[4] = {PR(R_TEMPO, 0, 0, 0), PR(R_SWING, 0, 0, 0), PR(R_ENG, T_MST, 0, MST_DJF), PR(R_ENG, T_MST, 0, MST_PUMP)};
+-            add_page_refs(emit, "PERFORM", refs, 0, 0); } while (0);
++            add_page_refs(emit, PT_PERFORM, refs, 0, 0); } while (0);
+         break;
+     case V_SEQ:                                        /* the part's steps: how its pattern runs */
+         emit->group = GR_PAT;
+         if (part_is_drum(p))
+             do { static const pref_t refs[4] = {PR(R_DLEN, 0, 0, 0), PR(R_DRATE, 0, 0, 0), NONE, NONE};
+-            add_page_refs(emit, "SEQUENCE", refs, 1, p); } while (0);   /* (the swing: HOME's, all parts') */
++            add_page_refs(emit, PT_SEQUENCE, refs, 1, p); } while (0);   /* (the swing: HOME's, all parts') */
+         else if (part_is_303(p)) {
+             int b = p - PART_303A;
+             do { static const pref_t refs[4] = {PR(R_BLEN, 0, 0, 0), PR(R_BRATE, 0, 0, 0), PR(R_BDIR, 0, 0, 0), PR(R_BTRANS, 0, 0, 0)};
+-            add_page_refs(emit, "SEQUENCE", refs, 1, b); } while (0);
+-            add_page(emit, "PRESET", PR(R_BPATSND, 0, b, 0), NONE, NONE, NONE);   /* 0.0.25: this pattern's bass preset */
++            add_page_refs(emit, PT_SEQUENCE, refs, 1, b); } while (0);
++            add_page(emit, PT_PRESET, PR(R_BPATSND, 0, b, 0), NONE, NONE, NONE);   /* 0.0.25: this pattern's bass preset */
+             emit->group = GR_NONE;                          /* (not the pattern's: no P1 in its name) */
+             do { static const pref_t refs[4] = {PR(R_FREEPLAY, 0, 0, 0), NONE, NONE, NONE};
+-            add_page_refs(emit, "KEYS", refs, 1, b); } while (0);
++            add_page_refs(emit, PT_KEYS, refs, 1, b); } while (0);
+ #if X0X_ARP_HOOKS
+             if (arp_engine(b)) {                       /* 4: the 16 arp steps on the pads */
+                 emit->group = GR_PAT;
+                 pref_t division = NONE;
+ #if X0X_SUPERJ6_BUILTIN_INIT && !defined(X0X_ARP_FAKE_H)
+                 if (engine_bass_bank(b) == ORIGINAL_SOUND_JUNO) division = PR(R_ARP, ARP_F_DIVISION, b, 0);
+ #endif
+-                add_page(emit, "ARP SEQ", PR(R_ARP, ARP_F_LENGTH, b, 0), PR(R_ARP, ARP_F_INTERVAL, b, 0), PR(R_ARP, ARP_F_GATE, b, 0), division);
++                add_page(emit, PT_ARP_SEQ, PR(R_ARP, ARP_F_LENGTH, b, 0), PR(R_ARP, ARP_F_INTERVAL, b, 0), PR(R_ARP, ARP_F_GATE, b, 0), division);
+                 emit->group = GR_NONE;
+             }
+ #endif
+         }
+         else {
+             do { static const pref_t refs[4] = {PR(R_BRKRATE, 0, 0, 0), NONE, NONE, NONE};
+-            add_page_refs(emit, "SEQUENCE", refs, 0, 0); } while (0);
++            add_page_refs(emit, PT_SEQUENCE, refs, 0, 0); } while (0);
+             do { static const pref_t refs[4] = {PR(R_BRKSET, 0, 0, BRK_COMPLEX), PR(R_BRKSET, 0, 0, BRK_ANCHOR), PR(R_BRKSET, 0, 0, BRK_ROLL), PR(R_BRKSET, 0, 0, BRK_FILL)};
+-            add_page_refs(emit, "GROOVE", refs, 0, 0); } while (0);
++            add_page_refs(emit, PT_GROOVE, refs, 0, 0); } while (0);
+             do { static const pref_t refs[4] = {PR(R_BRKSET, 0, 0, BRK_R2), PR(R_BRKSET, 0, 0, BRK_R3), PR(R_BRKSET, 0, 0, BRK_R4), PR(R_BRKSET, 0, 0, BRK_R8)};
+-            add_page_refs(emit, "RETRIG", refs, 0, 0); } while (0);
++            add_page_refs(emit, PT_RETRIG, refs, 0, 0); } while (0);
+             do { static const pref_t refs[] = {PR(R_BRKSET, 0, 0, BRK_PHRASE), PR(R_BRKSET, 0, 0, BRK_ALEN), PR(R_BRKSET, 0, 0, BRK_BLEN)};
+                 more_refs(emit, refs, 3, 0, 0); } while (0);
+         }
+         break;
+@@ -2175,75 +2917,206 @@
+             add_track_pages(emit, t, selection[p]);
+             emit->group = GR_KIT;
+             if (p == PART_909)                         /* (the kit's gain: the mixer's level does it) */
+                 do { static const pref_t refs[4] = {PR(R_ENG, T_909, NDRUM, 1), NONE, NONE, NONE};
+-            add_page_refs(emit, "KIT", refs, 0, 0); } while (0);
++            add_page_refs(emit, PT_KIT, refs, 0, 0); } while (0);
+             else
+                 do { static const pref_t refs[4] = {PR(R_ENG, T_808, NDRUM, 1), NONE, NONE, NONE};
+-            add_page_refs(emit, "KIT", refs, 0, 0); } while (0);
++            add_page_refs(emit, PT_KIT, refs, 0, 0); } while (0);
+         } else if (part_is_303(p)) {
+             int b = p - PART_303A;
+             emit->group = GR_SOUND;
+             int kind = engine_bass_bank(b), chicago = kind == ORIGINAL_SOUND_CHICAGO;
+             const int8_t (*rows)[4] = kind == ORIGINAL_SOUND_JUNO ? ui_original_juno_rows : kind == ORIGINAL_SOUND_SYNTHONE ? ui_original_synthone_rows :
+                 chicago ? ui_original_chicago_rows : ui_original_miami_rows;
+-            const char *const *titles = kind == ORIGINAL_SOUND_JUNO ? ui_original_juno_titles : kind == ORIGINAL_SOUND_SYNTHONE ? ui_original_synthone_titles :
++            const uint8_t *titles = kind == ORIGINAL_SOUND_JUNO ? ui_original_juno_titles : kind == ORIGINAL_SOUND_SYNTHONE ? ui_original_synthone_titles :
+                 chicago ? ui_original_chicago_titles : ui_original_miami_titles;
+             int count = kind == ORIGINAL_SOUND_JUNO ? UI_ORIGINAL_JUNO_PAGES : kind == ORIGINAL_SOUND_SYNTHONE ? UI_ORIGINAL_SYNTHONE_PAGES :
+                 chicago ? UI_ORIGINAL_CHICAGO_PAGES : UI_ORIGINAL_MIAMI_PAGES;
+             int first_row = 0;
+ #if X0X_SUPERJ6_BUILTIN_INIT
+             if (kind == ORIGINAL_SOUND_JUNO) {
+                 enum { SJ6_PAGE_ID_FITS = 1 / (SJ6_LFO2_PWM_BASE < ORIG_PAGE_ENGINE) };
+                 static const original_page_row_t pages[] = {
+-                    {"OSCILLATOR", {SJ6_WAVE1, SJ6_WAVE2, SJ6_RANGE, SJ6_A_REFERENCE}},
+-                    {"PULSE WIDTH", {SJ6_PWM1_ON, SJ6_PWM1, SJ6_PWM2_ON, SJ6_PWM2}},
+-                    {"FILTER", {ORIG_PAGE_ENGINE + 2, ORIG_PAGE_ENGINE + 3, ORIG_PAGE_ENGINE + 4, SJ6_FILTER_LINK}},
+-                    {"FILTER ADSR", {SJ6_FILTER_ATTACK, SJ6_FILTER_DECAY, SJ6_FILTER_SUSTAIN, SJ6_FILTER_RELEASE}},
+-                    {"AMP ADSR", {SJ6_AMP_ATTACK, SJ6_AMP_DECAY, SJ6_AMP_SUSTAIN, SJ6_AMP_RELEASE}},
+-                    {"OUTPUT", {ORIG_PAGE_ENGINE + 9, SJ6_MASTER_LEVEL, ORIG_PAGE_NONE, ORIG_PAGE_NONE}},
+-                    {"LFO RATE", {SJ6_LFO1_RATE, SJ6_LFO2_RATE, SJ6_LFO3_RATE, SJ6_LFO2_SHAPE}},
+-                    {"LFO MODE", {SJ6_LFO1_MODE, SJ6_LFO2_MODE, SJ6_LFO3_MODE, ORIG_PAGE_NONE}},
+-                    {"LFO2 PWM", {SJ6_LFO2_RATE, SJ6_LFO2_PWM_DEPTH, SJ6_LFO2_PWM_ROUTE, SJ6_LFO2_PWM_BASE}},
+-                    {"LFO", {ORIG_PAGE_ENGINE + 10, ORIG_PAGE_ENGINE + 11, ORIG_PAGE_NONE, ORIG_PAGE_NONE}},
+-                    {"CHORUS", {SJ6_CHORUS_I, SJ6_CHORUS_II, SJ6_CHORUS_RATE, SJ6_CHORUS_MIX}},
+-                    {"VIBRATO", {SJ6_VIBRATO_DEPTH, SJ6_VIBRATO_RATE, ORIG_PAGE_NONE, ORIG_PAGE_NONE}},
+-                    {"TUNING", {SJ6_LAYER1_SEMI, SJ6_LAYER2_SEMI, SJ6_LAYER1_FINE, SJ6_LAYER2_FINE}},
++                    {PT_OSCILLATOR, {SJ6_WAVE1, SJ6_WAVE2, SJ6_RANGE, SJ6_A_REFERENCE}},
++                    {PT_PULSE_WIDTH, {SJ6_PWM1_ON, SJ6_PWM1, SJ6_PWM2_ON, SJ6_PWM2}},
++                    {PT_FILTER, {ORIG_PAGE_ENGINE + 2, ORIG_PAGE_ENGINE + 3, ORIG_PAGE_ENGINE + 4, SJ6_FILTER_LINK}},
++                    {PT_FILTER_ADSR, {SJ6_FILTER_ATTACK, SJ6_FILTER_DECAY, SJ6_FILTER_SUSTAIN, SJ6_FILTER_RELEASE}},
++#ifdef DNBOX_137_HOST_WITNESS
++#if !DNBOX_TYPED_CONTROLS_NATIVE_TEST || X0X_SJ6_VELOCITY_PORT
++#if X0X_SJ6_VCF_PORT
++                    {PT_FILTER_MOD, {SJ6_FILTER_VELOCITY, SJ6_VCF_LFO1_AMOUNT, ORIG_PAGE_NONE, ORIG_PAGE_NONE}},
++#else
++                    {PT_FILTER_MOD, {SJ6_FILTER_VELOCITY, ORIG_PAGE_NONE, ORIG_PAGE_NONE, ORIG_PAGE_NONE}},
++#endif
++#endif
++#endif
++                    {PT_AMP_ADSR, {SJ6_AMP_ATTACK, SJ6_AMP_DECAY, SJ6_AMP_SUSTAIN, SJ6_AMP_RELEASE}},
++                    {PT_OUTPUT, {ORIG_PAGE_ENGINE + 9, SJ6_MASTER_LEVEL, SJ6_OSC1_LEVEL, SJ6_OSC2_LEVEL}},
++                    {PT_LFO_RATE, {SJ6_LFO1_RATE, SJ6_LFO2_RATE, SJ6_LFO3_RATE, SJ6_LFO2_SHAPE}},
++                    {PT_LFO_MODE, {SJ6_LFO1_MODE, SJ6_LFO2_MODE, SJ6_LFO3_MODE, ORIG_PAGE_NONE}},
++                    {PT_LFO2_PWM, {SJ6_LFO2_RATE, SJ6_LFO2_PWM_DEPTH, SJ6_LFO2_PWM_ROUTE, SJ6_LFO2_PWM_BASE}},
++                    {PT_LFO, {ORIG_PAGE_ENGINE + 10, ORIG_PAGE_ENGINE + 11, ORIG_PAGE_NONE, ORIG_PAGE_NONE}},
++                    {PT_CHORUS, {SJ6_CHORUS_I, SJ6_CHORUS_II, SJ6_CHORUS_RATE, SJ6_CHORUS_MIX}},
++#if (defined(X0X_HOST) && defined(X0X_SJ6_DELAY_WITNESS)) || X0X_SJ6_NATIVE_DELAY
++                    {PT_SJ6_DELAY, {SJ6_DELAY24, SJ6_DELAY25, SJ6_DELAY26, SJ6_DELAY27}},
++                    {PT_SJ6_DELAY_CLOCK, {SJ6_DELAYSYNC, ORIG_PAGE_NONE, ORIG_PAGE_NONE, ORIG_PAGE_NONE}},
++#endif
++                    {PT_VIBRATO, {SJ6_VIBRATO_DEPTH, SJ6_VIBRATO_RATE, ORIG_PAGE_NONE, ORIG_PAGE_NONE}},
++                    {PT_TUNING, {SJ6_LAYER1_SEMI, SJ6_LAYER2_SEMI, SJ6_LAYER1_FINE, SJ6_LAYER2_FINE}},
+                 };
+                 /* Leave room for the ARPEGGIATOR and the legacy SOUND selector
+                  * after the last synth control page. Query and device agree. */
+                 _Static_assert(sizeof pages / sizeof *pages + 2u <= MAXPAGES,
+                                "SuperJ6 pages must leave room for ARP and SOUND");
++#if X0X_SJ6_CLASSIC_I_PROBE
++                _Static_assert(sizeof pages / sizeof *pages + 3u <= MAXPAGES,"Classic I adjacent page capacity");
++#endif
+                 add_original_extra_pages(emit, pages, sizeof pages / sizeof *pages, b, R_SJ6KNOB);
++#if defined(X0X_SJ6_BEND_TYPED_PROBE) && X0X_SJ6_BEND_TYPED_PROBE
++                if (live137(&proj.sound,b))
++#if defined(DNBOX_137_HOST_WITNESS) && defined(X0X_SJ6_MOD_TYPED_PROBE)
++                    add_page(emit,PT_WHEELS,PR(R_SJ6PB,T_303,b,0),PR(R_SJ6PB,T_303,b,1),PR(R_SJ6MOD,T_303,b,0),NONE);
++#else
++                    add_page(emit,PT_WHEELS,PR(R_SJ6PB,T_303,b,0),PR(R_SJ6PB,T_303,b,1),NONE,NONE);
++#endif
++#endif
++#if defined(X0X_SJ6_MONO32_PROBE) && X0X_SJ6_MONO32_PROBE
++                if(engine_sj6_mono32_get(b,0)>=0)add_page(emit,PT_VOICE,PR(R_SJ6MONO32,T_303,b,0),PR(R_SJ6MONO32,T_303,b,1),PR(R_SJ6MONO32,T_303,b,2),NONE);
++#endif
+                 first_row = UI_ORIGINAL_JUNO_PAGES;
+             }
+ #endif
+ #if X0X_S1_EXTRA
+             if (kind == ORIGINAL_SOUND_SYNTHONE) {
+-                enum { S1_PAGE_ID_FITS = 1 / (S1_FILTER_ENV_LFO < ORIG_PAGE_ENGINE && S1_MONO_LEGATO < ORIG_PAGE_ENGINE) };
++                enum { S1_PAGE_ID_FITS = 1 / (S1_REVERB_MIX_LFO < ORIG_PAGE_ENGINE && S1_MONO_LEGATO < ORIG_PAGE_ENGINE) };
+                 static const original_page_row_t s1_pages[] = {
+-                    {"OSCILLATOR", {0, 1, S1_OSC1_MORPH, S1_OSC2_MORPH}},
+-                    {"OSC MIX", {S1_OSC2_LEVEL, S1_SUB_LEVEL, S1_SUB_OCTAVE, S1_SUB_WAVE}},
+-                    {"FM / NOISE", {S1_FM_LEVEL, S1_FM_INDEX, S1_NOISE_LEVEL, S1_NOISE_LFO}},
+-                    {"FILTER", {2, 3, 4, ORIG_PAGE_S1_LINK}},
+-                    {"FILTER MODE", {S1_FILTER_TYPE, S1_ADSR_TRACK, S1_CUTOFF_LFO, S1_FILTER_ENV_LFO}},
+-                    {"FILTER ADSR", {5, 6, 7, 8}},
+-                    {"AMP ADSR", {9, 10, 11, 12}},
+-                    {"VOICE", {S1_MONO_LEGATO, ORIG_PAGE_NONE, ORIG_PAGE_NONE, ORIG_PAGE_NONE}},
+-                    {"LFO", {S1_LFO1_RATE, S1_LFO1_SHAPE, S1_LFO2_RATE, S1_LFO2_SHAPE}},
+-                    {"TEMPO SYNC", {S1_LFO_SYNC, S1_LFO1_DEPTH, S1_LFO2_DEPTH, ORIG_PAGE_NONE}},
+-                    {"MOD ROUTE", {S1_OSC_MIX_LFO, S1_RESONANCE_LFO, S1_FM_LFO, S1_AMP_DECAY_LFO}},
+-                    {"EFFECT", {ORIG_PAGE_ENGINE + ORIGINAL_SYNTHONE_CRUSH, S1_DELAY_MIX, S1_REVERB_MIX, S1_REVERB_HP}},
+-                    {"OUTPUT", {S1_WIDEN, S1_PART_LEVEL, ORIG_PAGE_NONE, ORIG_PAGE_NONE}},
++                    {PT_OSCILLATOR, {0, 1, S1_OSC1_MORPH, S1_OSC2_MORPH}},
++                    {PT_OSC_MIX, {S1_OSC2_LEVEL, S1_SUB_LEVEL, S1_SUB_OCTAVE, S1_SUB_WAVE}},
++                    {PT_FM_NOISE, {S1_FM_LEVEL, S1_FM_INDEX, S1_NOISE_LEVEL, S1_NOISE_LFO}},
++                    {PT_FILTER, {2, 3, 4, ORIG_PAGE_S1_LINK}},
++                    {PT_FILTER_MODE, {S1_FILTER_TYPE, S1_ADSR_TRACK, S1_CUTOFF_LFO,
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++                        ORIG_PAGE_S1_ENVLFO}},
++#else
++                        ORIG_PAGE_NONE}},
++#endif
++                    {PT_FILTER_ADSR, {5, 6, 7, 8}},
++                    {PT_AMP_ADSR, {9, 10, 11, 12}},
++                    {PT_VOICE, {S1_MONO_LEGATO, S1_OSC1_SEMI, S1_OSC2_SEMI, S1_OSC2_DETUNE}},
++                    {PT_LFO, {S1_LFO1_RATE, S1_LFO1_SHAPE, S1_LFO2_RATE, S1_LFO2_SHAPE}},
++                    {PT_TEMPO_SYNC, {S1_LFO_SYNC, S1_LFO1_DEPTH, S1_LFO2_DEPTH, ORIG_PAGE_NONE}},
++                    {PT_MOD_ROUTE, {S1_OSC_MIX_LFO, S1_RESONANCE_LFO, S1_FM_LFO, S1_AMP_DECAY_LFO}},
++#ifdef DNBOX_137_HOST_WITNESS
++                    {PT_PITCH_MOD, {S1_DETUNE_LFO, S1_PITCH_LFO, S1_TREMOLO_LFO, ORIG_PAGE_S1_MODWHEEL}},
++#else
++                    {PT_PITCH_MOD, {S1_DETUNE_LFO, S1_PITCH_LFO, S1_TREMOLO_LFO, ORIG_PAGE_NONE}},
++#endif
++#if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
++                    {PT_WHEELS, {S1_BEND_LO, S1_BEND_HI, ORIG_PAGE_NONE, ORIG_PAGE_NONE}},
++#endif
++                    {PT_EFFECT, {ORIG_PAGE_ENGINE + ORIGINAL_SYNTHONE_CRUSH, S1_DELAY_MIX, S1_REVERB_MIX, S1_REVERB_HP}},
++#ifdef DNBOX_137_HOST_WITNESS
++                    {PT_FX_BYPASS, {S1_DELAY_ON, S1_REVERB_ON, S1_REVERB_MIX_LFO, ORIG_PAGE_S1_RVFB}},
++#else
++                    {PT_FX_BYPASS, {S1_DELAY_ON, S1_REVERB_ON, S1_REVERB_MIX_LFO, ORIG_PAGE_NONE}},
++#endif
++                    {PT_OUTPUT, {S1_WIDEN, S1_PART_LEVEL, S1_VOICE_MODE, S1_MONO_GLIDE}},
+                 };
+-                const unsigned effect_page = sizeof s1_pages / sizeof s1_pages[0] - 2;
++                _Static_assert(sizeof s1_pages / sizeof *s1_pages + 2u <= MAXPAGES,
++                               "Synth One pages must leave room for ARP and SOUND");
++#ifdef DNBOX_137_HOST_WITNESS
++                _Static_assert(sizeof s1_pages / sizeof *s1_pages + 6u
++#if defined(X0X_S1_FEEDBACK_PROBE) && X0X_S1_FEEDBACK_PROBE
++                               + 1u
++#endif
++                               <= MAXPAGES,
++                               "Typed S1 pages must leave room for WHEELS/TUNING/CRUSH/PAN/ARP/SOUND");
++#endif
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++                _Static_assert(sizeof s1_pages / sizeof *s1_pages + 7u
++#if X0X_S1_AUTOPAN_PROBE
++                               + 1u
++#endif
++                               <= MAXPAGES, "Native Synth One pages include REVERB and PHASER");
++#endif
++                enum { S1_EFFECT_PAGES = 3 };
++                const unsigned effect_page = sizeof s1_pages / sizeof s1_pages[0] - S1_EFFECT_PAGES;
+                 add_original_extra_pages(emit, s1_pages, effect_page, b, R_S1PATCH);
+ #if X0X_ARP_HOOKS
+                 if (arp_engine(b))
+-                    add_page(emit, "ARPEGGIATOR", PR(R_ARP, ARP_F_ON, b, 0), PR(R_ARP, ARP_F_RANGE, b, 0),
++                    add_page(emit, PT_ARPEGGIATOR, PR(R_ARP, ARP_F_ON, b, 0), PR(R_ARP, ARP_F_RANGE, b, 0),
+                              PR(R_ARP, ARP_F_MODE, b, 0), PR(R_ARP, ARP_F_SPEED, b, 0));
+ #endif
+-                add_original_extra_pages(emit, s1_pages + effect_page, 2, b, R_S1PATCH);
++#if X0X_S1_FENCED_CLOCK && X0X_ARP_HOOKS
++                _Static_assert(sizeof s1_pages / sizeof *s1_pages + 6u <= MAXPAGES,"Typed ARP PARAM capacity");
++                if (arp_engine(b) && live_s1_mod(&proj.sound,b))
++                    add_page(emit,PT_ARP_PARAM,PR(R_ARP,ARP_F_SOURCE_RATE,b,0),
++                        PR(R_ARP,ARP_F_SOURCE_FACTOR,b,0),NONE,NONE);
++#endif
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++                if (live_s1_mod(&proj.sound,b)) {
++                    add_page(emit,PT_EFFECT,PR(R_ENG,T_303,b,ORIGINAL_SYNTHONE_CRUSH),
++                        PR(R_S1PATCH,T_303,b,S1_DELAY_MIX),PR(R_S1PATCH,T_303,b,S1_REVERB_MIX),
++#if X0X_S1_CRUSH_LFO_PROBE
++                        PR(R_S1CRUSH,T_303,b,0));
++#else
++                        NONE);
++#endif
++                    add_page(emit,PT_REVERB,PR(R_S1CWG,T_303,b,0),PR(R_S1PATCH,T_303,b,S1_REVERB_HP),
++                        PR(R_S1PATCH,T_303,b,S1_REVERB_MIX_LFO),PR(R_S1RVFB,T_303,b,0));
++                    add_page(emit,PT_FX_BYPASS,PR(R_S1PATCH,T_303,b,S1_DELAY_ON),
++                        PR(R_S1PATCH,T_303,b,S1_REVERB_ON),NONE,NONE);
++                    add_original_extra_pages(emit,s1_pages+effect_page+2,S1_EFFECT_PAGES-2,b,R_S1PATCH);
++                } else
++#endif
++                add_original_extra_pages(emit, s1_pages + effect_page, S1_EFFECT_PAGES, b, R_S1PATCH);
++#ifdef DNBOX_137_HOST_WITNESS
++#if defined(X0X_S1_CRUSH_LFO_PROBE) && X0X_S1_CRUSH_LFO_PROBE
++#if !DNBOX_TYPED_CONTROLS_NATIVE_TEST
++                if (live_s1_mod(&proj.sound,b)) add_page(emit,PT_CRUSH_MOD,PR(R_S1CRUSH,T_303,b,0),NONE,NONE,NONE);
++#endif
++#endif
++#if defined(X0X_S1_AUTOPAN_PROBE) && X0X_S1_AUTOPAN_PROBE
++                if (live_s1_mod(&proj.sound,b)) add_page(emit,PT_AUTO_PAN,PR(R_S1PAN,T_303,b,0),PR(R_S1PAN,T_303,b,1),NONE,NONE);
++#endif
++#if X0X_S1_DELAY_TRACK_TEST
++                /* Bind the owner from the described context, not the selected page. */
++                if (live_s1_mod(&proj.sound,b)) add_page(emit,PT_DELAY,
++#if defined(X0X_S1_FEEDBACK_PROBE) && X0X_S1_FEEDBACK_PROBE
++                    PR(R_S1DLFB,T_303,b,0),
++#else
++                    NONE,
++#endif
++                    PR(R_S1DICT,T_303,b,0),
++#if X0X_S1_DELAY_TIME_NATIVE
++                    PR(R_S1DLYTIME,T_303,b,0),
++#else
++                    NONE,
++#endif
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++                    PR(R_S1DLYRES,T_303,b,0));
++#else
++                    NONE);
++#endif
++#else
++#if defined(X0X_S1_FEEDBACK_PROBE) && X0X_S1_FEEDBACK_PROBE
++                if (live_s1_mod(&proj.sound,b)) add_page(emit,PT_DELAY,PR(R_S1DLFB,T_303,b,0),NONE,NONE,NONE);
++#endif
++#endif
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++                if (live_s1_mod(&proj.sound,b))
++                    add_page(emit,PT_PHASER,PR(R_S1PHASER,T_303,b,0),PR(R_S1PHASER,T_303,b,1),
++                        PR(R_S1PHASER,T_303,b,2),PR(R_S1PHASER,T_303,b,3));
++#endif
++                if (live_s1_mod(&proj.sound,b)) add_page(emit,PT_TUNING,PR(R_S1A4,T_303,b,0),PR(R_S1TRANS,T_303,b,0),
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++                    PR(R_S1AA,T_303,b,0),
++#else
++                    NONE,
++#endif
++                    NONE);
++#endif
+             } else
+ #endif
+             for (int row = first_row; row < count; row++) {
+                 pref_t refs[4];
+@@ -2256,24 +3129,23 @@
+                 }
+ #endif
+ #if X0X_ARP_HOOKS && !X0X_S1_EXTRA
+                 if (kind == ORIGINAL_SOUND_SYNTHONE && row == count - 1 && arp_engine(b))
+-                    add_page(emit, "ARPEGGIATOR", PR(R_ARP, ARP_F_ON, b, 0), PR(R_ARP, ARP_F_RANGE, b, 0),
++                    add_page(emit, PT_ARPEGGIATOR, PR(R_ARP, ARP_F_ON, b, 0), PR(R_ARP, ARP_F_RANGE, b, 0),
+                              PR(R_ARP, ARP_F_MODE, b, 0), PR(R_ARP, ARP_F_SPEED, b, 0));
+ #endif
+                 add_page_refs(emit, titles[row],refs,0,0);
+             }
+ #if X0X_ARP_HOOKS
+             if (kind == ORIGINAL_SOUND_JUNO && arp_engine(b))
+-            if (kind == ORIGINAL_SOUND_JUNO && arp_engine(b))
+-                add_page(emit, "ARPEGGIATOR", PR(R_ARP, ARP_F_ON, b, 0), PR(R_ARP, ARP_F_RANGE, b, 0),
++                add_page(emit, PT_ARPEGGIATOR, PR(R_ARP, ARP_F_ON, b, 0), PR(R_ARP, ARP_F_RANGE, b, 0),
+                          PR(R_ARP, ARP_F_MODE, b, 0), PR(R_ARP, ARP_F_SPEED, b, 0));
+ #endif
+-            add_page(emit, "SOUND",PR(R_BENGINE,0,b,0),PR(R_BPRESET,0,b,0),PR(R_BSTATUS,0,b,0),NONE);
++            add_page(emit, PT_SOUND,PR(R_BENGINE,0,b,0),PR(R_BPRESET,0,b,0),PR(R_BSTATUS,0,b,0),NONE);
+         } else {
+             emit->group = GR_PAT;                           /* (its groove and retrigs: SEQ) */
+             do { static const pref_t refs[4] = {PR(R_BRKSLOT, 0, 0, 0), PR(R_BRKSLOT, 1, 0, 0), PR(R_BRKSET, 0, 0, BRK_BCHANCE), PR(R_ENG, T_BRK, 0, 1)};
+-            add_page_refs(emit, "LOOPS", refs, 0, 0); } while (0);
++            add_page_refs(emit, PT_LOOPS, refs, 0, 0); } while (0);
+             more(emit, PR(R_ENG, T_BRK, 0, 0));
+             more(emit, PR(R_BRKSLICE, 0, 0, 0));
+             more(emit, PR(R_BRKSLICE, 1, 0, 0));
+         }
+@@ -2281,54 +3153,54 @@
+     case V_GEN: {
+         int b = p - PART_303A;
+         emit->group = GR_PAT;
+         do { static const pref_t refs[4] = {PR(R_GEN, 0, 0, G_DENS), PR(R_GEN, 0, 0, G_ACC), PR(R_GEN, 0, 0, G_SLIDE), PR(R_GEN, 0, 0, G_OCTS)};
+-            add_page_refs(emit, "GENERATE", refs, 1, b); } while (0);
++            add_page_refs(emit, PT_GENERATE, refs, 1, b); } while (0);
+         do { static const pref_t refs[4] = {PR(R_GEN, 0, 0, G_ROOT), PR(R_GEN, 0, 0, G_SCALE), PR(R_GEN, 0, 0, G_BASE), PR(R_GEN, 0, 0, G_MUT)};
+-            add_page_refs(emit, "SCALE", refs, 1, b); } while (0);
++            add_page_refs(emit, PT_SCALE, refs, 1, b); } while (0);
+         break;
+     }
+     case V_FX:                                         /* (each part's sends: MIX's PARTS) */
+         do { static const pref_t refs[4] = {PR(R_ENG, T_FX, 0, FX_RV_DECAY), PR(R_ENG, T_FX, 0, FX_RV_TONE), PR(R_ENG, T_FX, 0, FX_RV_HPF), PR(R_ENG, T_FX, 0, FX_RV_LEVEL)};
+-            add_page_refs(emit, "REVERB", refs, 0, 0); } while (0);
++            add_page_refs(emit, PT_REVERB, refs, 0, 0); } while (0);
+         do { static const pref_t refs[4] = {PR(R_ENG, T_FX, 0, FX_DL_TIME), PR(R_ENG, T_FX, 0, FX_DL_FDBK), PR(R_ENG, T_FX, 0, FX_DL_TONE), PR(R_TAPE, 0, 0, 0)};
+-            add_page_refs(emit, "DELAY", refs, 0, 0); } while (0);
++            add_page_refs(emit, PT_DELAY, refs, 0, 0); } while (0);
+             do { static const pref_t refs[] = {PR(R_ENG, T_FX, 0, FX_RV_HPF), PR(R_ENG, T_FX, 0, FX_RV_LEVEL), PR(R_ENG, T_FX, 0, FX_DL_HPF), PR(R_ENG, T_FX, 0, FX_DL_LEVEL), PR(R_ENG, T_FX, 0, FX_DL_PING)};
+                 more_refs(emit, refs, 5, 0, 0); } while (0);
+         break;
+     case V_MIX:                                        /* a channel picked with a black key, its four knobs */
+         do { static const pref_t refs[4] = {PR(R_ENG, T_MIX, 0, MX_LEVEL), PR(R_ENG, T_MIX, 0, MX_PAN), PR(R_ENG, T_MIX, 0, MX_REV), PR(R_ENG, T_MIX, 0, MX_DLY)};
+-            add_page_refs(emit, "PARTS", refs, 2, mixsel); } while (0);
++            add_page_refs(emit, PT_PARTS, refs, 2, mixsel); } while (0);
+         for (p = 0; p < NKIT; p++) {                    /* each drum machine's tracks: LEVEL, PAN, REV, DLY */
+             int t = p ? T_808 : T_909, v = selection[p];
+-            add_page(emit, p ? "808 MIX" : "909 MIX", find_ref(t, v, "Level"), find_ref(t, v, "Pan"), find_ref(t, v, "Rev"),
++            add_page(emit, p ? PT_808_MIX : PT_909_MIX, find_ref(t, v, "Level"), find_ref(t, v, "Pan"), find_ref(t, v, "Rev"),
+                      find_ref(t, v, "Dly"));
+         }
+         do { static const pref_t refs[4] = {PR(R_ENG, T_FX, 0, FX_DRIVE), PR(R_ENG, T_MST, 0, MST_COMP1), PR(R_ENG, T_MST, 0, MST_PUMP), PR(R_ENG, T_MST, 0, MST_DJF)};
+-            add_page_refs(emit, "MASTER", refs, 0, 0); } while (0);
++            add_page_refs(emit, PT_MASTER, refs, 0, 0); } while (0);
+             do { static const pref_t refs[] = {PR(R_ENG, T_MST, 0, MST_THRESH), PR(R_ENG, T_MST, 0, MST_RATIO), PR(R_ENG, T_MST, 0, MST_ATTACK), PR(R_ENG, T_MST, 0, MST_RELEASE), PR(R_ENG, T_MST, 0, MST_MAKEUP), PR(R_ENG, T_MST, 0, MST_MIX), PR(R_ENG, T_MST, 0, MST_PUMPSRC), PR(R_ENG, T_MST, 0, MST_RESO), PR(R_ENG, T_MST, 0, MST_LIMIT), PR(R_ENG, T_FX, 0, FX_DIST), PR(R_ENG, T_FX, 0, FX_COMP), PR(R_ENG, T_FX, 0, FX_VOLUME)};
+                 more_refs(emit, refs, 12, 0, 0); } while (0);
+         /* sibling of MASTER: same knobs, post-master eng_scope wave (Baud Girl ≤10 Hz redraw) */
+         do { static const pref_t refs[4] = {PR(R_ENG, T_FX, 0, FX_DRIVE), PR(R_ENG, T_MST, 0, MST_COMP1), PR(R_ENG, T_MST, 0, MST_PUMP), PR(R_ENG, T_MST, 0, MST_DJF)};
+-            add_page_refs(emit, "WAVE", refs, 0, 0); } while (0);
++            add_page_refs(emit, PT_WAVE, refs, 0, 0); } while (0);
+         break;
+ #if X0X_UI_PERF
+     case V_PERF:
+         do { static const pref_t refs[4] = {PR(R_STALLS, 0, 0, 0), NONE, NONE, NONE};
+-            add_page_refs(emit, "PERF", refs, 0, 0); } while (0);
++            add_page_refs(emit, PT_PERF, refs, 0, 0); } while (0);
+         break;
+ #endif
+     case V_SONG:
+         do { static const pref_t refs[4] = {PR(R_SBAR, 0, 0, 0), PR(R_SPAT, PART_909, 0, 0), PR(R_SPAT, PART_808, 0, 0), PR(R_SPAT, PART_BRK, 0, 0)};
+-            add_page_refs(emit, "BAR", refs, 0, 0); } while (0);
++            add_page_refs(emit, PT_BAR, refs, 0, 0); } while (0);
+         do { static const pref_t refs[4] = {PR(R_SBAR, 0, 0, 0), PR(R_SPAT, PART_303B, 0, 0), PR(R_SPAT, PART_303A, 0, 0), PR(R_SREP, 0, 0, 0)};
+-            add_page_refs(emit, "BAR", refs, 0, 0); } while (0);
++            add_page_refs(emit, PT_BAR, refs, 0, 0); } while (0);
+         break;
+     default: break;
+     }
+     if ((query ? query->n : out->n) == 0)
+         do { static const pref_t refs[4] = {NONE, NONE, NONE, NONE};
+-            add_page_refs(emit, "", refs, 0, 0); } while (0);
++            add_page_refs(emit, PT_EMPTY, refs, 0, 0); } while (0);
+ }
+ 
+ static void build_pages(void)
+ {
+@@ -2338,8 +3210,11 @@
+     int keep_sound=ui.view==V_PART && is_303() && oldpage<pg.n &&
+         pg.r[oldpage][0].kind==R_BENGINE && pg.r[oldpage][0].b==b;
+ #endif
+     describe_pages(&pg, 0, ui.view, ui.part, ui.mixsel, ui.sel);
++#if X0X_SJ6_CLASSIC_I_PROBE
++    classic_layout_mode=ui.view==V_PART && is_303() ? ui_classic_i(bidx()) : 0;
++#endif
+     if (ui.view == V_PART && is_303()) original_page_bank = (uint8_t)engine_bass_bank(bidx());
+ #if X0X_BASS_PRESET_PREVIEW
+     if(!preserve && keep_sound) *page_of(ui.view)=(uint8_t)(pg.n-1);
+ #endif
+@@ -2388,28 +3263,44 @@
+ 
+ /* a drum machine's page of the selected track's own sound (not the whole kit's: SENDS, PART, KIT) */
+ static int track_page(void)
+ {
+-    int g = pg.group[cur_page()];
++    int g = page_group(&pg, cur_page());
+     return ui.view == V_PART && is_drum() && (g == GR_TRACK || g == GR_TMIX);
+ }
+ 
+ /* ===================================================================== lists === */
+ /* A list is rows of refs. SEL on a page opens the list of every page's knobs (the deep view);
+  * GLOBAL is a list of its own. SELECT moves, ALGORITHM changes, SEL runs an action. */
+-#define LIST_MAX 64
+-static pref_t list_rows[LIST_MAX] X0X_POOL;
++#define LIST_MAX 92
++typedef struct { uint8_t x, y, z; } list_ref_t;
++_Static_assert(R_NOTELOCK < 128 && sizeof(pages_t) + LIST_MAX * sizeof(list_ref_t) <= 700,
++               "pages plus list must not grow the original POOL footprint");
++static list_ref_t list_rows[LIST_MAX] X0X_POOL;
++static pref_t list_ref(unsigned i)
++{
++    list_ref_t x=list_rows[i];
++    unsigned a=(x.x >> 7) | ((x.y & 15u) << 1);
++    return PR(x.x & 127u, a >= 30 ? a + 224 : a, x.y >> 4, x.z);
++}
++static void list_push(pref_t r)
++{
++    unsigned a = r.a >= 254 ? r.a - 224 : r.a;  /* GEN's two live-part sentinels */
++    if (r.kind >= 128 || a >= 32 || (r.a >= 30 && r.a < 254) || r.b >= 16 || ui.list_n >= LIST_MAX) return;
++    list_rows[ui.list_n++] = (list_ref_t){r.kind | (a & 1u) << 7, (a >> 1) | r.b << 4, r.c};
++}
+ static char list_title[16];
+ 
+ static void list_add(pref_t r)
+ {
+     int i;
+     if (r.kind == R_NONE || ui.list_n >= LIST_MAX)
+         return;
+-    for (i = 0; i < ui.list_n; i++)                   /* a ref on two pages (LEVEL) lists once */
+-        if (list_rows[i].kind == r.kind && list_rows[i].a == r.a && list_rows[i].b == r.b && list_rows[i].c == r.c)
+-            return;
+-    list_rows[ui.list_n++] = r;
++    for (i = 0; i < ui.list_n; i++) {                 /* a ref on two pages (LEVEL) lists once */
++        pref_t old = list_ref(i);
++        if (old.kind == r.kind && old.a == r.a && old.b == r.b && old.c == r.c) return;
++    }
++    list_push(r);
+ }
+ 
+ /* a list section's name: whose values follow */
+ static void hdr_name(int g, char *t)
+@@ -2430,30 +3321,30 @@
+     default: put_s(put_s(t, part_name(ui.part)), ": SOUND"); break;
+     }
+ }
+ 
+-static int list_skip(int i) { return i < ui.list_n && list_rows[i].kind == R_HDR; }
++static int list_skip(int i) { return i < ui.list_n && list_ref(i).kind == R_HDR; }
+ 
+ static void open_list_of_pages(void)
+ {
+     if (ui.view == V_PART && is_303()) original_list_bank = original_page_bank;
+     int p, k, last = -1, groups = 0;
+     ui.list_n = 0;
+     for (p = 0; p < pg.n; p++)
+-        if (pg.group[p] != (p ? pg.group[p - 1] : GR_NONE))
++        if (page_group(&pg, p) != (p ? page_group(&pg, p - 1) : GR_NONE))
+             groups++;
+     for (p = 0; p < pg.n; p++) {
+-        if (groups > 1 && pg.group[p] != last && ui.list_n < LIST_MAX)
+-            list_rows[ui.list_n++] = PR(R_HDR, pg.group[p], 0, 0);
+-        last = pg.group[p];
++        if (groups > 1 && page_group(&pg, p) != last && ui.list_n < LIST_MAX)
++            list_push(PR(R_HDR, page_group(&pg, p), 0, 0));
++        last = page_group(&pg, p);
+         for (k = 0; k < 4; k++)
+             if (ui.view != V_FX || p || k < 2)         /* low cut / return shortcuts keep their MORE rows */
+                 list_add(pg.r[p][k]);
+     }
+     if (pg.nmore && ui.list_n < LIST_MAX)              /* the knobs no page has */
+-        list_rows[ui.list_n++] = PR(R_HDR, GR_MORE, 0, 0);
++        list_push(PR(R_HDR, GR_MORE, 0, 0));
+     for (k = 0; k < pg.nmore; k++)
+-        list_add(pg.more[k]);
++        list_add(*page_more(&pg, k));
+     if (ui.view == V_HOME)
+         list_add(PR(R_ACT, ui.home_live ? ACT_HOME_PATTERNS : ACT_HOME_LIVE, 0, 0));
+ #if X0X_UI_PERF
+     if (ui.view == V_PERF)
+@@ -2922,9 +3813,70 @@
+ #endif
+     undo_commit_stable();                       /* what was just done is a step too */
+ #if X0X_BASS_TAGGED_SOUND
+ #ifdef DNBOX_137_HOST_WITNESS
+-    unsigned undo_velocity137=0,undo_s1_mod=0;
++#if defined(DNBOX_137_HOST_WITNESS) && defined(X0X_SJ6_MOD_TYPED_PROBE)
++    unsigned undo_sj6_mod=0;
++#endif
++#if !defined(X0X_SJ6_MOD_TYPED_PROBE)
++    const unsigned undo_sj6_mod=0;
++#endif
++#if X0X_S1_FENCED_CLOCK
++    extern void s1_typed_clock_undo(unsigned);
++    unsigned undo_clock=0;
++#else
++    const unsigned undo_clock=0;
++#endif
++#if X0X_SJ6_ZERO_GATE_PROBE || X0X_SJ6_NATIVE_ZERO_GATE || X0X_SJ6_NATIVE_RANDOM2
++    extern void engine_sj6_zero_undo(unsigned);
++    unsigned undo_zero=0;
++#else
++    const unsigned undo_zero=0;
++#endif
++#if X0X_S1_DELAY_TRACK_TEST
++    unsigned undo_dict=0;
++#else
++    const unsigned undo_dict=0;
++#endif
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++    unsigned undo_cwg=0, undo_aa=0;
++#else
++    const unsigned undo_cwg=0, undo_aa=0;
++#endif
++#if X0X_SJ6_VCF_PORT
++    extern int sj6_vcf_undo_ready(unsigned);
++    extern void sj6_vcf_undo(unsigned);
++    unsigned undo_vcf=0;
++#else
++    const unsigned undo_vcf=0;
++#endif
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++    unsigned undo_phaser=0;
++#endif
++#if !DNBOX_TYPED_CONTROLS_NATIVE_TEST
++    const unsigned undo_phaser=0;
++#endif
++#if X0X_S1_DELAY_TIME_NATIVE
++    unsigned undo_dlytime=0;uint8_t undo_dlycode[NBASS]={0};
++#endif
++#if !X0X_S1_DELAY_TIME_NATIVE
++    const unsigned undo_dlytime=0;
++#endif
++    unsigned undo_velocity137=0,undo_s1_mod=0,undo_a4=0,undo_rvfb=0,undo_trans=0,undo_crush=0,undo_delay=0,undo_pan=0,undo_feedback=0,undo_chorus_i=0,undo_sj6_voice=0;
++#if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
++    extern int s1_typed_pb_undo_ready(unsigned);
++    extern void s1_typed_pb_undo(unsigned);
++    unsigned undo_pb=0;
++#if defined(X0X_SJ6_BEND_TYPED_PROBE) && X0X_SJ6_BEND_TYPED_PROBE
++    extern void sj6_typed_pb_undo(unsigned);
++    unsigned undo_sj6_pb=0;
++#endif
++#if !(defined(X0X_SJ6_BEND_TYPED_PROBE) && X0X_SJ6_BEND_TYPED_PROBE)
++    const unsigned undo_sj6_pb=0;
++#endif
++#else
++    const unsigned undo_pb=0,undo_sj6_pb=0;
++#endif
+ #endif
+     undo_wait=0;undo_bass_mask=0;
+     int entry=redo?undo.cur:undo.cur-1;
+     if(entry>=0 && entry<undo.n) {
+@@ -2957,19 +3909,175 @@
+ #ifdef DNBOX_137_HOST_WITNESS
+             if (proj.set.snd_rev==REV137) {
+                 uint8_t p;
+                 uint32_t off=cell+(8u+v)*NPARAMS_MAX+2u;
++#if X0X_S1_DELAY_TIME_NATIVE
++                undo_peek(&undo,entry,__builtin_offsetof(sound_t,v)+(T_303*NVOICES_MAX+8u+2u*v)*NPARAMS_MAX+S1_DELAY_TIME_BYTE,&undo_dlycode[v],1u);
++                if(undo_dlycode[v]>S1_DELAY_TIME_MAX){say("UNDO DELAY INVALID",0);engine_bass_edit_hold(0);return;}
++                if(undo_dlycode[v]!=*s1_delay_time_code(&proj.sound,v))undo_dlytime|=1u<<v;
++#endif
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++                uint8_t ph[S1_PHASE_COUNT];
++                const uint32_t typed_off=__builtin_offsetof(sound_t,v)+
++                        (T_303*NVOICES_MAX+8u+2u*v)*NPARAMS_MAX;
++                undo_peek(&undo,entry,typed_off+S1_DELAY_RES_BYTE,&p,1u);
++                if(p>S1_DELAY_RES_MAX){say("UNDO DELAY RES INVALID",0);engine_bass_edit_hold(0);return;}
++                if(p!=*s1_delay_res_read(&proj.sound,v))undo_phaser|=1u<<v;
++                undo_peek(&undo,entry,typed_off+S1_ENV_LFO_BYTE,&p,1u);
++                if(p>S1_ENV_LFO_MAX){say("UNDO ENV LFO INVALID",0);engine_bass_edit_hold(0);return;}
++                if(p!=*s1_env_lfo_read(&proj.sound,v))undo_phaser|=1u<<v;
++                undo_peek(&undo,entry,typed_off+S1_PHASE_BYTE,ph,sizeof ph);
++                for(unsigned k=0;k<S1_PHASE_COUNT;k++)
++                    if(ph[k]>S1_PHASE_MAX){say("UNDO PHASER INVALID",0);engine_bass_edit_hold(0);return;}
++                if(memcmp(ph,s1_phase_read(&proj.sound,v),sizeof ph))undo_phaser|=1u<<v;
++#endif
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++                const uint32_t aa_off=__builtin_offsetof(sound_t,v)+
++                    ((T_303*NVOICES_MAX+8u+2u*v)*NPARAMS_MAX+S1_AA_BYTE);
++                undo_peek(&undo,entry,aa_off,&p,1u);
++                if(p>1u){say("UNDO ANTI-ALIAS INVALID",0);engine_bass_edit_hold(0);return;}
++                if(p!=s1_aa_read(&proj.sound,v))undo_aa|=1u<<v;
++                undo_peek(&undo,entry,off-2u+S1_CWG_BYTE,&p,1u);
++                if(p>S1_CWG_MAX){say("UNDO WET MAKEUP INVALID",0);engine_bass_edit_hold(0);return;}
++                if(p!=s1_cwg_read(&proj.sound,v))undo_cwg|=1u<<v;
++#endif
++#if X0X_S1_DELAY_TRACK_TEST
++#if X0X_SJ6_VCF_PORT
++                const uint32_t vcf_off=__builtin_offsetof(sound_t,v)+
++                    ((T_303*NVOICES_MAX+8u+2u*v)*NPARAMS_MAX+SJ6_VCF_BYTE);
++                undo_peek(&undo,entry,vcf_off,&p,1u);
++                if(p>127u){say("UNDO LFO1 INVALID",0);engine_bass_edit_hold(0);return;}
++                if(p!=*sj6_vcf_code(&proj.sound,v))undo_vcf|=1u<<v;
++#endif
++                const uint32_t dict_off=off-2u+S1_DICT_BYTE;
++                undo_peek(&undo,entry,dict_off,&p,1u);
++                if(p>S1_DICT_MAX){say("UNDO IN CUTOFF INVALID",0);engine_bass_edit_hold(0);return;}
++                if(p!=s1_dict_read(&proj.sound,v))undo_dict|=1u<<v;
++#endif
++#if X0X_SJ6_CLASSIC_I_PROBE
++                uint8_t ci[SJ6_CLASSIC_I_COUNT];
++                undo_peek(&undo,entry,off+SJ6_CLASSIC_I_BYTE-2u,ci,sizeof ci);
++                if(memcmp(ci,read137(&proj.sound,v)+SJ6_CLASSIC_I_BYTE,sizeof ci)) {
++                  if(!sj6_classic_i_bytes_valid(ci)){say("UNDO CHORUS INVALID",0);engine_bass_edit_hold(0);return;}
++                  undo_chorus_i|=1u<<v;
++                }
++#endif
+                 undo_peek(&undo,entry,off,&p,1u);
+                 if (p!=read137(&proj.sound,v)[2] && p<=127) undo_velocity137|=1u<<v;
+                 undo_peek(&undo,entry,off+1u,&p,1u);
+                 if (p!=read137(&proj.sound,v)[3] && p<=2) undo_s1_mod|=1u<<v;
++#if X0X_S1_FENCED_CLOCK
++                uint8_t clock_value[S1_ARP_CLOCK_BYTES];
++                undo_peek(&undo,entry,off-2u+S1_ARP_CLOCK_BYTE,clock_value,sizeof clock_value);
++                if(memcmp(clock_value,read137(&proj.sound,v)+S1_ARP_CLOCK_BYTE,sizeof clock_value)) {
++                    if(!s1_clock_valid(clock_value)){
++                        say("UNDO CLOCK INVALID",0);engine_bass_edit_hold(0);return;
++                    }
++                    undo_clock|=1u<<v;
++                }
++#endif
++#if (defined(X0X_SJ6_ZERO_GATE_PROBE) && X0X_SJ6_ZERO_GATE_PROBE) || X0X_SJ6_NATIVE_ZERO_GATE
++                undo_peek(&undo,entry,off+SJ6_ARP_ZERO_BYTE-2u,&p,1u);
++                if(p>1u){say("UNDO GATE INVALID",0);engine_bass_edit_hold(0);return;}
++                if(p!=read137(&proj.sound,v)[SJ6_ARP_ZERO_BYTE])undo_zero|=1u<<v;
++#endif
++#if (defined(X0X_HOST) && defined(X0X_SJ6_DELAY_WITNESS)) || X0X_SJ6_NATIVE_DELAY
++                uint8_t dl[SJ6_DELAY_COUNT];
++                undo_peek(&undo,entry,off+SJ6_DELAY_BYTE-2u,dl,sizeof dl);
++                if(memcmp(dl,read137(&proj.sound,v)+SJ6_DELAY_BYTE,sizeof dl)){
++                    if(!sj6_delay_bytes_valid(dl)||!s1_typed_tuple_editable()){
++                        say("UNDO DELAY UNAVAILABLE",0);engine_bass_edit_hold(0);return;
++                    }
++                    undo_delay|=1u<<v;
++                }
++#endif
++#if defined(X0X_S1_AUTOPAN_PROBE) && X0X_S1_AUTOPAN_PROBE
++                uint8_t pan[1u+S1_PAN_RATE_BYTES];
++                undo_peek(&undo,entry,off+(S1_PAN_AMOUNT_BYTE-2u),pan,sizeof pan);
++                if(pan[0]>127u || !s1_pan_rate_valid(s1_pan_rate_word_bytes(pan+1u))){say("UNDO PAN INVALID",0);engine_bass_edit_hold(0);return;}
++                if(memcmp(pan,read137(&proj.sound,v)+S1_PAN_AMOUNT_BYTE,sizeof pan))undo_pan|=1u<<v;
++#endif
++#if X0X_SJ6_RANDOM2_PROBE || X0X_SJ6_NATIVE_RANDOM2
++                undo_peek(&undo,entry,off+SJ6_ARP_RANDOM_BYTE-2u,&p,1u);
++                if(p!=read137(&proj.sound,v)[SJ6_ARP_RANDOM_BYTE]){
++                    if(p!=0u && p!=2u){say("UNDO MODE INVALID",0);engine_bass_edit_hold(0);return;}
++                    undo_zero|=1u<<v;
++                }
++#endif
++#if X0X_SJ6_MONO32_PROBE
++                uint8_t voice_settings[2];
++                undo_peek(&undo,entry,off+SJ6_VOICE_BYTE-2u,voice_settings,sizeof voice_settings);
++                if(!sj6_voice_valid(v,voice_settings[0],voice_settings[1])){
++                    say("UNDO VOICE INVALID",0);engine_bass_edit_hold(0);return;
++                }
++                const uint8_t *cur_voice=sj6_voice_read(&proj.sound,v);
++                if(memcmp(voice_settings,cur_voice,sizeof voice_settings)){
++                    undo_sj6_voice|=1u<<v;
++                }
++#endif
++                undo_peek(&undo,entry,off+S1_TRANS_BYTE-2u,&p,1u);
++                if(p>S1_TRANS_LAST){say("UNDO TRANSPOSE INVALID",0);engine_bass_edit_hold(0);return;}
++                if(p!=read137(&proj.sound,v)[S1_TRANS_BYTE])undo_trans|=1u<<v;
++#if defined(X0X_S1_CRUSH_LFO_PROBE) && X0X_S1_CRUSH_LFO_PROBE
++                undo_peek(&undo,entry,off+S1_CRUSH_BYTE-2u,&p,1u);
++                if(p>S1_CRUSH_LAST){say("UNDO CRUSH INVALID",0);engine_bass_edit_hold(0);return;}
++                if(p!=read137(&proj.sound,v)[S1_CRUSH_BYTE])undo_crush|=1u<<v;
++#endif
++#if defined(X0X_S1_FEEDBACK_PROBE) && X0X_S1_FEEDBACK_PROBE
++                undo_peek(&undo,entry,off+(S1_FB_BYTE-2u),&p,1u);
++                if(p>S1_FB_LAST){say("UNDO FEEDBACK INVALID",0);engine_bass_edit_hold(0);return;}
++                if(p!=read137(&proj.sound,v)[S1_FB_BYTE])undo_feedback|=1u<<v;
++#endif
++                undo_peek(&undo,entry,off+(S1_A4_BYTE-2u),&p,1u);
++                if (p>S1_A4_MAX){say("UNDO A REF INVALID",0);engine_bass_edit_hold(0);return;}
++                if (p!=read137(&proj.sound,v)[S1_A4_BYTE]) undo_a4|=1u<<v;
++                undo_peek(&undo,entry,off+(S1_RVFB_BYTE-2u),&p,1u);
++                if (p>S1_RVFB_LAST){say("UNDO RV SIZE INVALID",0);engine_bass_edit_hold(0);return;}
++                if (p!=read137(&proj.sound,v)[S1_RVFB_BYTE]) undo_rvfb|=1u<<v;
++#if defined(DNBOX_137_HOST_WITNESS) && defined(X0X_SJ6_MOD_TYPED_PROBE)
++                undo_peek(&undo,entry,off+SJ6_MOD_BYTE-2u,&p,1u);
++                if(p!=read137(&proj.sound,v)[SJ6_MOD_BYTE]){
++                    if(p>SJ6_MOD_LAST){say("UNDO MOD INVALID",0);engine_bass_edit_hold(0);return;}
++                    undo_sj6_mod|=1u<<v;
++                }
++#endif
++
++#if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
++                uint8_t pb[2];
++                undo_peek(&undo,entry,off+2u,pb,sizeof pb);
++                const uint8_t *row=read137(&proj.sound,v);
++                if (pb[0]!=row[S1_PB_DN_BYTE] || pb[1]!=row[S1_PB_UP_BYTE]) {
++                    if (pb[0]>S1_PB_LAST || pb[1]>S1_PB_LAST) {
++                        say("UNDO RANGE INVALID",0);
++                        engine_bass_edit_hold(0);
++                        return;
++                    }
++                    undo_pb|=1u<<v;
++                }
++#if defined(X0X_SJ6_BEND_TYPED_PROBE) && X0X_SJ6_BEND_TYPED_PROBE
++                undo_peek(&undo,entry,off+SJ6_PB_DN_BYTE-2u,pb,sizeof pb);
++                if (pb[0]!=row[SJ6_PB_DN_BYTE] || pb[1]!=row[SJ6_PB_UP_BYTE]) {
++                    if (pb[0]>SJ6_PB_LIMIT || pb[1]>SJ6_PB_LIMIT) {
++                        say("UNDO RANGE INVALID",0);
++                        engine_bass_edit_hold(0);
++                        return;
++                    }
++                    undo_sj6_pb|=1u<<v;
++                }
++#endif
++#endif
+             }
+ #endif
+             if(memcmp(target.cell[v],proj.sound.v[T_303][v],NPARAMS_MAX) ||
+                memcmp(&target.tag[v],&proj.sound.bass[v],sizeof target.tag[v]))undo_bass_mask|=1u<<v;
+         }
+ #ifdef DNBOX_137_HOST_WITNESS
+         extern int engine_bass_wheel_active(void);
++        if((undo_s1_mod || undo_a4 || undo_rvfb || undo_trans || undo_crush || undo_delay || undo_pan || undo_feedback || undo_dlytime || undo_phaser || undo_aa || undo_cwg || undo_dict || undo_vcf || undo_chorus_i || undo_sj6_voice || undo_clock || undo_zero) && !s1_typed_tuple_editable()) {
++            say("PROJECT READ ONLY",0);
++            engine_bass_edit_hold(0);
++            return;
++        }
+         if(undo_s1_mod && engine_bass_wheel_active()) {
+             say("UNDO WAIT WHEEL",0);
+             engine_bass_edit_hold(0);
+             return;
+@@ -2992,16 +4100,59 @@
+         }
+     }
+ #endif
+ #ifdef DNBOX_137_HOST_WITNESS
+-    if ((undo_velocity137 || undo_s1_mod) && !undo_bass_mask) engine_project_hold(1);
++    if ((undo_velocity137 || undo_s1_mod || undo_pb || undo_sj6_pb || undo_sj6_mod || undo_a4 || undo_rvfb || undo_trans || undo_crush || undo_delay || undo_pan || undo_feedback || undo_dlytime || undo_phaser || undo_aa || undo_cwg || undo_dict || undo_vcf || undo_chorus_i || undo_sj6_voice || undo_clock || undo_zero) && !undo_bass_mask) engine_project_hold(1);
++#if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
++    /* Recheck while audio is held: a note-lock must not acquire the owner
++     * between validating history and publishing the typed scalar pair. */
++    if ((undo_pb || undo_sj6_pb || undo_sj6_mod) && !s1_typed_pb_undo_ready(undo_pb|undo_sj6_pb|undo_sj6_mod)) {
++        engine_project_hold(0);
++        engine_bass_edit_hold(0);
++        say("UNDO WAIT RANGE",0);
++        return;
++    }
++#endif
++#endif
++#if X0X_SJ6_MONO32_PROBE
++    if(undo_sj6_voice&&!engine_sj6_voice_undo_ready(undo_sj6_voice&~undo_bass_mask)){
++        engine_project_hold(0);engine_bass_edit_hold(0);say("UNDO WAIT VOICE",0);return;
++    }
++#endif
++#if defined(DNBOX_137_HOST_WITNESS) && X0X_S1_DELAY_TRACK_TEST
++#if X0X_SJ6_VCF_PORT
++    if(undo_vcf && !sj6_vcf_undo_ready(undo_vcf & ~undo_bass_mask)) {
++        engine_project_hold(0);engine_bass_edit_hold(0);say("UNDO WAIT LFO1",0);return;
++    }
++#endif
++    if(undo_dict && !s1_typed_dict_undo_ready(undo_dict & ~undo_bass_mask)) {
++        engine_project_hold(0);engine_bass_edit_hold(0);say("UNDO WAIT IN CUTOFF",0);return;
++    }
++#endif
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++    if(undo_aa && !s1_aa_undo_ready(undo_aa & ~undo_bass_mask)) {
++        engine_project_hold(0);engine_bass_edit_hold(0);say("UNDO WAIT ANTI-ALIAS",0);return;
++    }
++    if(undo_cwg && !s1_typed_cwg_undo_ready(undo_cwg & ~undo_bass_mask)) {
++        engine_project_hold(0);engine_bass_edit_hold(0);say("UNDO WAIT WET MAKEUP",0);return;
++    }
++#endif
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++    if(undo_phaser && !s1_phaser_undo_ready(undo_phaser & ~undo_bass_mask)) {
++        engine_project_hold(0);engine_bass_edit_hold(0);say("UNDO WAIT PHASER",0);return;
++    }
++#endif
++#if X0X_S1_DELAY_TIME_NATIVE
++    if(undo_dlytime && !s1_delay_time_undo_ready(undo_dlytime & ~undo_bass_mask,undo_dlycode)) {
++        engine_project_hold(0);engine_bass_edit_hold(0);say("UNDO WAIT DELAY",0);return;
++    }
+ #endif
+     undo_lanes = 0;
+     if (!(redo ? undo_redo : undo_undo)(&undo, undo_changed, &lo, &hi)) {
+ #if X0X_BASS_TAGGED_SOUND
+         if(undo_bass_mask)engine_project_hold(0);
+ #ifdef DNBOX_137_HOST_WITNESS
+-        else if(undo_velocity137 || undo_s1_mod)engine_project_hold(0);
++        else if(undo_velocity137 || undo_s1_mod || undo_pb || undo_sj6_pb || undo_sj6_mod || undo_a4 || undo_rvfb || undo_trans || undo_crush || undo_delay || undo_pan || undo_feedback || undo_dlytime || undo_phaser || undo_aa || undo_cwg || undo_dict || undo_vcf || undo_chorus_i || undo_sj6_voice || undo_clock || undo_zero)engine_project_hold(0);
+ #endif
+ #endif
+ #if X0X_BASS_PRESET_PREVIEW
+         engine_bass_edit_hold(0);
+@@ -3013,11 +4164,58 @@
+     if(undo_bass_mask) engine_bass_base_restore(undo_bass_mask);
+ #ifdef DNBOX_137_HOST_WITNESS
+     extern void sj6_137_undo_apply(unsigned);
+     if(undo_velocity137) sj6_137_undo_apply(undo_velocity137 & ~undo_bass_mask);
++#if defined(DNBOX_137_HOST_WITNESS) && defined(X0X_SJ6_MOD_TYPED_PROBE)
++    if(undo_sj6_mod)sj6_typed_mod_undo(undo_sj6_mod & ~undo_bass_mask);
++#endif
+     extern void s1_typed_mod_undo(unsigned);
+     if(undo_s1_mod) s1_typed_mod_undo(undo_s1_mod & ~undo_bass_mask);
+-    if(undo_bass_mask || undo_velocity137 || undo_s1_mod) engine_project_hold(0);
++    if(undo_a4) s1_typed_a4_undo(undo_a4 & ~undo_bass_mask);
++    if(undo_rvfb) s1_typed_rvfb_undo(undo_rvfb & ~undo_bass_mask);
++    if(undo_trans) s1_typed_trans_undo(undo_trans & ~undo_bass_mask);
++#if X0X_SJ6_MONO32_PROBE
++    if(undo_sj6_voice)engine_sj6_voice_undo(undo_sj6_voice&~undo_bass_mask);
++#endif
++#if X0X_SJ6_CLASSIC_I_PROBE
++    if(undo_chorus_i)sj6_classic_i_undo(undo_chorus_i & ~undo_bass_mask);
++#endif
++#if defined(X0X_S1_FEEDBACK_PROBE) && X0X_S1_FEEDBACK_PROBE
++    if(undo_feedback)s1_typed_feedback_undo(undo_feedback & ~undo_bass_mask);
++#endif
++#if X0X_S1_DELAY_TRACK_TEST
++    if(undo_dict)s1_typed_dict_undo(undo_dict&~undo_bass_mask);
++#if X0X_SJ6_VCF_PORT
++    if(undo_vcf)sj6_vcf_undo(undo_vcf&~undo_bass_mask);
++#endif
++#endif
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++    if(undo_aa)s1_aa_undo(undo_aa & ~undo_bass_mask);
++    if(undo_cwg)s1_typed_cwg_undo(undo_cwg&~undo_bass_mask);
++#endif
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++    if(undo_phaser)s1_phaser_undo(undo_phaser & ~undo_bass_mask);
++#endif
++#if X0X_S1_DELAY_TIME_NATIVE
++    if(undo_dlytime)s1_delay_time_undo(undo_dlytime & ~undo_bass_mask);
++#endif
++    if(undo_crush) s1_typed_crush_undo(undo_crush & ~undo_bass_mask);
++#if defined(X0X_S1_AUTOPAN_PROBE) && X0X_S1_AUTOPAN_PROBE
++    if(undo_pan) s1_typed_pan_undo(undo_pan & ~undo_bass_mask);
++#endif
++#if X0X_S1_FENCED_CLOCK
++    if(undo_clock) s1_typed_clock_undo(undo_clock & ~undo_bass_mask);
++#endif
++#if X0X_SJ6_ZERO_GATE_PROBE || X0X_SJ6_NATIVE_ZERO_GATE || X0X_SJ6_NATIVE_RANDOM2
++    if(undo_zero) engine_sj6_zero_undo(undo_zero & ~undo_bass_mask);
++#endif
++#if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
++    if(undo_pb) s1_typed_pb_undo(undo_pb & ~undo_bass_mask);
++#if defined(X0X_SJ6_BEND_TYPED_PROBE) && X0X_SJ6_BEND_TYPED_PROBE
++    if(undo_sj6_pb) sj6_typed_pb_undo(undo_sj6_pb & ~undo_bass_mask);
++#endif
++#endif
++    if(undo_bass_mask || undo_velocity137 || undo_s1_mod || undo_pb || undo_sj6_pb || undo_sj6_mod || undo_a4 || undo_rvfb || undo_trans || undo_crush || undo_delay || undo_pan || undo_feedback || undo_dlytime || undo_phaser || undo_aa || undo_cwg || undo_dict || undo_vcf || undo_chorus_i || undo_sj6_voice || undo_clock || undo_zero) engine_project_hold(0);
+ #else
+     if(undo_bass_mask) engine_project_hold(0);
+ #endif
+ #endif
+@@ -3057,8 +4255,11 @@
+ }
+ 
+ X0X_COLD int ui_project_save(void)
+ {
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++    return -9;
++#endif
+     int rc;
+ #if BOARD_SMK37
+     extern uint8_t smk_ck_flash_busy(void);
+ #endif
+@@ -3982,18 +5183,150 @@
+ }
+ 
+ static void turn_ref(pref_t r, int e, int knob)
+ {
++#if defined(DNBOX_137_HOST_WITNESS) && defined(X0X_SJ6_MOD_TYPED_PROBE)
++    if(r.kind==R_SJ6MOD) {
++        int next=pref_get(r)+(e>0)-(e<0);
++        if(e && next>=0 && next<=5)pref_set_impl(r,next,0);
++        return;
++    }
++#endif
+ #if X0X_SUPERJ6_BUILTIN_INIT
++#if defined(X0X_SJ6_MONO32_PROBE) && X0X_SJ6_MONO32_PROBE
++    if(r.kind==R_SJ6MONO32){
++        if(e&&!pref_read_only(r)){
++           int next=r.c==2u?pref_get(r)+(e>0?1:-1):e>0;
++           if(next>=0&&next<=(r.c==2u?127:1)&&next!=pref_get(r)&&
++               engine_sj6_mono32_edit(r.b,r.c,(unsigned)next))mark_dirty();
++        }
++        return;
++    }
++#endif
+     if (r.kind == R_SJ6KNOB) {
+         int max = (int)original_sound_sj6_max(r.c);
+         int delta = max <= SJ6_WAVE_STOPS ? (e > 0) - (e < 0) : accel(knob, e, max);
+         if (engine_superj6_knob_turn(r.b, r.c, delta, 1)) mark_dirty();
+         return;
+     }
+ #endif
+ #if X0X_SYNTHONE_PATCH
++#ifdef DNBOX_137_HOST_WITNESS
++#if defined(X0X_SJ6_BEND_TYPED_PROBE) && X0X_SJ6_BEND_TYPED_PROBE
++    if (r.kind==R_SJ6PB) {
++        if (pref_read_only(r)) return;
++        int before=pref_get(r), after=before+accel(knob,e,SJ6_PB_LIMIT);
++        after=after<0?0:after>SJ6_PB_LIMIT?SJ6_PB_LIMIT:after;
++        if (after!=before && sj6_typed_pb_edit(r.b,r.c,(unsigned)after)) mark_dirty();
++        return;
++    }
++#endif
++#if defined(X0X_S1_AUTOPAN_PROBE) && X0X_S1_AUTOPAN_PROBE
++    if (r.kind == R_S1PAN) {
++        if(pref_read_only(r))return;
++        unsigned max=127,pos=(unsigned)pref_get(r);
++        if(r.c)pos=s1_pan_pos(r.b,&max);
++        int next=(int)pos+(e>0)-(e<0);
++        if(next>=0 && (unsigned)next<=max && s1_typed_pan_choose(r.b,r.c,(unsigned)next))mark_dirty();
++        return;
++    }
++#endif
++#if X0X_S1_DELAY_TRACK_TEST
++    if(r.kind==R_S1DICT) {
++        if(e && !pref_read_only(r)) {
++            int next=pref_get(r)+(e>0?1:-1);
++            if(next>=0 && next<=S1_DICT_MAX && s1_typed_dict_choose(r.b,(unsigned)next))mark_dirty();
++        }
++        return;
++    }
++#endif
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++    if(r.kind==R_S1AA) {
++        if(e)pref_set_impl(r,e>0,1);
++        return;
++    }
++    if(r.kind==R_S1CWG) {
++        if(e && !pref_read_only(r)) {
++            int next=pref_get(r)+(e>0?1:-1);
++            if(next>=0 && next<=S1_CWG_MAX && s1_typed_cwg_choose(r.b,(unsigned)next))mark_dirty();
++        }
++        return;
++    }
++#endif
++#if defined(X0X_S1_FEEDBACK_PROBE) && X0X_S1_FEEDBACK_PROBE
++    if(r.kind==R_S1DLFB) {
++        if(pref_read_only(r))return;
++        int old=pref_get(r),next=old+(e>0)-(e<0);
++        if(next>=0 && next<=127 && s1_typed_feedback_choose(r.b,(unsigned)next))mark_dirty();
++        return;
++    }
++#endif
++    if (r.kind == R_S1CRUSH) {
++        if(pref_read_only(r))return;
++        int next=pref_get(r)+(e>0)-(e<0);
++        if(e && next>=0 && next<=3 && s1_typed_crush_choose(r.b,(unsigned)next))mark_dirty();
++        return;
++    }
++    if(r.kind==R_S1TRANS){
++        if(pref_read_only(r))return;
++        int next=pref_get(r)+(e>0)-(e<0);
++        if(e && next>=0 && next<=48 && s1_typed_trans_choose(r.b,next-24))mark_dirty();
++        return;
++    }
++#if X0X_SJ6_CLASSIC_I_PROBE
++    if(r.kind==R_SJ6CLASSIC_I) {
++        if(!pref_read_only(r) && e) {
++          int next=pref_get(r)+(e>0?1:-1);
++          if(next>=0 && next<=127 && sj6_classic_i_choose(r.b,r.c,next)) mark_dirty();
++        }
++        return;
++    }
++#endif
++    if (r.kind == R_S1A4 || r.kind == R_S1RVFB) {
++        if(pref_read_only(r))return;
++        int next=pref_get(r)+(e>0)-(e<0);
++        int ok=e && next>=0 && (r.kind==R_S1A4?
++            next<=60 && s1_typed_a4_choose(r.b,(unsigned)next+410):
++            next<=128 && s1_typed_rvfb_choose(r.b,(unsigned)next));
++        if(ok)mark_dirty();
++        return;
++    }
++    if (r.kind == R_S1MODWHEEL) {
++        if (pref_read_only(r)) return;
++        int old = pref_get(r), next = old + (e>0) - (e<0);
++        if (next>=0 && next<=2 && next!=old) {
++            if (s1_typed_mod_choose(r.b,(unsigned)next)) mark_dirty();
++            else say("MOD WHEEL BUSY",0);
++        }
++        return;
++    }
++#endif
+     if (r.kind == R_S1LINK) { s1_edit(r, (e > 0) - (e < 0), 1); return; }
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++    if(r.kind==R_S1DLYRES){
++        if(e)pref_set(r,pref_get(r)+(e>0)-(e<0));
++        return;
++    }
++    if(r.kind==R_S1ENVLFO){
++        if(e)pref_set(r,pref_get(r)+(e>0)-(e<0));
++        return;
++    }
++    if(r.kind==R_S1PHASER){
++        int pos=pref_get(r)+(e>0)-(e<0);
++        if(e && pos>=0 && pos<=S1_PHASE_MAX && !pref_read_only(r) && s1_phaser_choose(r.b,r.c,(unsigned)pos))mark_dirty();
++        return;
++    }
++#endif
++#if X0X_S1_DELAY_TIME_NATIVE
++    if(r.kind==R_S1DLYTIME){
++        int pos=pref_get(r)+(e>0)-(e<0);
++        if(e && pos>=0){
++            int rc=s1_delay_time_choose(r.b,(unsigned)pos);
++            if(rc>0)mark_dirty();else if(rc<0)say("DELAY TIME LIMIT",0);
++        }
++        return;
++    }
++#endif
+     if (r.kind == R_S1PATCH) { s1_edit(r, accel(knob, e, S1_PATCH_STEPS), 1); return; }
+ #endif
+     if (r.kind == R_BRKSLOT && !r.b) { (void)brk_choice_turn(r, e); return; }
+     brk_choice_cancel();
+@@ -4013,8 +5346,15 @@
+         if (bass_edit) engine_bass_edit_hold(0);
+ #endif
+         return;
+     }
++#if X0X_S1_FENCED_CLOCK
++    if (r.kind==R_ARP && (r.a==ARP_F_SOURCE_RATE || r.a==ARP_F_SOURCE_FACTOR)) {
++        // Source stepper buttons and factor stops advance one position per detent.
++        if(e) pref_set_impl(r,pref_get(r)+(e>0?1:-1),!accel_smc);
++        return;
++    }
++#endif
+     int switched=original_switch_turn(r,pref_get(r),e,1);
+     if(switched>=0)pref_set_impl(r,switched,!accel_smc);
+     else
+     {
+@@ -4842,10 +6182,10 @@
+             break;
+         s = t;
+     }
+     ui.list_sel = (uint8_t)s;
+-    if (list_rows[s].kind == R_BRKSLICE || list_rows[s].kind == R_BRKSLOT)
+-        ui.brk_count_target = (uint8_t)(list_rows[s].a != 0);
++    if (list_ref(s).kind == R_BRKSLICE || list_ref(s).kind == R_BRKSLOT)
++        ui.brk_count_target = (uint8_t)(list_ref(s).a != 0);
+     if (ui.list_sel < ui.list_top)
+         ui.list_top = ui.list_sel;
+     int visible = visible_list_rows();
+     if (ui.list_sel >= ui.list_top + visible)
+@@ -4853,9 +6193,9 @@
+ }
+ 
+ static void list_enter(void)
+ {
+-    pref_t r = list_rows[ui.list_sel];
++    pref_t r = list_ref(ui.list_sel);
+     if (r.kind == R_SECTION) {global_section(r.a);return;}
+     if (r.kind != R_ACT)
+         return;
+     if (r.a == ACT_CLEAR_PAT)
+@@ -4888,9 +6228,9 @@
+ {
+ #if BOARD_SMK37
+     smc_ui_cancel();
+ #endif
+-    pref_t r = list_rows[ui.list_sel];
++    pref_t r = list_ref(ui.list_sel);
+     if (d < 0 && ui.view == V_GLO && ui.glo_section >= 0) {
+         global_back();                                /* "<" leaves a settings section, as HOME */
+         return 1;                                     /* the held "<" must not edit the section index */
+     }
+@@ -5434,8 +6774,12 @@
+ {
+     uint32_t btn = plat_buttons(), keys = plat_keys(), ch, i;
+     unsigned panic_consume;
+     if(btn!=ui.btn || keys!=ui.keys)bass_layout_accept();
++#if X0X_SJ6_CLASSIC_I_PROBE
++    if(ui.view==V_PART && is_303() && classic_layout_mode!=(unsigned)ui_classic_i(bidx()))
++        build_pages();
++#endif
+ #if X0X_BASS_PRESET_PREVIEW
+     static int observed_bank[NBASS]={-1,-1};
+     for(int v=0;v<NBASS;v++) if(observed_bank[v]!=engine_bass_bank(v)) {
+         observed_bank[v]=engine_bass_bank(v);build_pages();
+@@ -5593,9 +6937,9 @@
+             plat_ms()-ui.down_t[B_SEQ]<HELP_HOLD) {
+             ui.btn_used|=1u<<B_SEQ;
+             (void)step_lane_turn(e);
+         } else if (ui.overlay == O_LIST) {
+-            turn_ref(list_rows[ui.list_sel], e, EN_ALGO);
++            turn_ref(list_ref(ui.list_sel), e, EN_ALGO);
+         } else if (ui.view == V_SEQ && is_303() && ui.held_step >= 0) {
+             bstep_t *st = &cur_pat()->bass[bidx()].step[ui.held_step];
+             int v = (int)bstep_velocity(st) + e;
+             st->velocity = (uint8_t)(v < 1 ? 1 : v > 127 ? 127 : v);
+@@ -6062,66 +7406,36 @@
+         }
+ }
+ static void dot(int32_t x, int32_t y, int32_t r, uint16_t c) { disc((float)x + 0.5f, (float)y + 0.5f, (float)r + 0.3f, c); }
+ 
+-/* atan2 in turns, 0..1 from +x going clockwise on screen (y down) */
+-static float turns(float y, float x)
+-{
+-    float ax = fm_fabsf(x), ay = fm_fabsf(y), a = ax < ay ? ax / (ay + 1e-9f) : ay / (ax + 1e-9f), s = a * a, r;
+-    r = ((-0.0464964749f * s + 0.15931422f) * s - 0.327622764f) * s * a + a;   /* atan on [0, 1] */
+-    if (ay > ax)
+-        r = 1.57079637f - r;
+-    if (x < 0.0f)
+-        r = FM_PI - r;
+-    if (y < 0.0f)
+-        r = FM_TWO_PI - r;
+-    return r * (1.0f / FM_TWO_PI);
+-}
+-
+-/* a knob: a 270-degree track from 7:30 to 4:30, thickness th, anti-aliased, round ends; the
+- * value filled from the start (or from the top, for a bipolar value) and a round handle */
+-#include "ui_arc8_geometry.h"
+-static void arc(int32_t cx, int32_t cy, int32_t r, float v, uint16_t track, uint16_t fill, int bipolar)
+-{
+-    const float th = 3.4f, a0 = 0.375f, sweep = 0.75f;  /* start at 135 degrees, in turns */
+-    float ro = (float)r, ri = ro - th, rm = ro - th * 0.5f, fx = (float)cx + 0.5f, fy = (float)cy + 0.5f;
+-    float lo = bipolar ? (v < 0.5f ? v : 0.5f) : 0.0f, hi = bipolar ? (v < 0.5f ? 0.5f : v) : v;
+-    int32_t x, y;
+-    v = fm_clampf(v, 0.0f, 1.0f);
+-    if (r == 8) {
+-        /* Keep original y/x order, exact float t bits and rounded coverage.
+-         * Caps/handle below and every other radius retain the original path. */
+-        for (unsigned i = 0; i < sizeof arc8_pixels / sizeof *arc8_pixels; ++i) {
+-            unsigned pixel = arc8_pixels[i];
+-            float t;
+-            memcpy(&t, &arc8_turns[i], sizeof t);
+-            px_blend(cx + (int)(pixel & 31u) - 8, cy + (int)((pixel >> 5) & 31u) - 8,
+-                     (t >= lo && t <= hi) ? fill : track, pixel >> 10);
+-        }
+-    } else for (y = -r - 1; y <= r + 1; y++)
+-        for (x = -r - 1; x <= r + 1; x++) {
+-            float dx = (float)x + 0.5f - 0.5f, dy = (float)y + 0.5f - 0.5f, d = fm_sqrtf(dx * dx + dy * dy), t, a;
+-            a = fm_clampf(ro + 0.5f - d, 0.0f, 1.0f) * fm_clampf(d - ri + 0.5f, 0.0f, 1.0f);
+-            if (a <= 0.0f)
+-                continue;
+-            t = turns(dy, dx) - a0;
+-            if (t < 0.0f)
+-                t += 1.0f;
+-            t /= sweep;
+-            if (t > 1.0f)
+-                continue;                              /* the gap at the bottom; the caps close it */
+-            px_blend(cx + x, cy + y, (t >= lo && t <= hi) ? fill : track, (uint32_t)(a * 16.0f + 0.5f));
+-        }
+-    {   /* round ends: the track's, then the fill's, then the handle */
+-        float e0 = (a0) * FM_TWO_PI, e1 = (a0 + sweep) * FM_TWO_PI, ev = (a0 + sweep * v) * FM_TWO_PI;
+-        float el = (a0 + sweep * lo) * FM_TWO_PI;
+-        disc(fx + fm_cosf(e0) * rm - 0.5f, fy + fm_sinf(e0) * rm - 0.5f, th * 0.5f, lo <= 0.0f && hi > 0.0f ? fill : track);
+-        disc(fx + fm_cosf(e1) * rm - 0.5f, fy + fm_sinf(e1) * rm - 0.5f, th * 0.5f, hi >= 1.0f ? fill : track);
+-        if (hi > lo)
+-            disc(fx + fm_cosf(el) * rm - 0.5f, fy + fm_sinf(el) * rm - 0.5f, th * 0.5f, fill);
+-        disc(fx + fm_cosf(ev) * rm - 0.5f, fy + fm_sinf(ev) * rm - 0.5f, th * 0.5f + 1.3f, C_BLACK);
+-        disc(fx + fm_cosf(ev) * rm - 0.5f, fy + fm_sinf(ev) * rm - 0.5f, th * 0.5f + 0.6f, C_WHITE);
+-    }
++/* The exact generated SMC geometry is packed as a raster delta, coverage
++ * index, and a discrete 0..127 control threshold. Caps and knob handle use
++ * the prior rendering arithmetic unchanged. */
++#include "ui_smc_arc8.h"
++static void smc_knob_arc(int cx, int cy, unsigned value, uint16_t track, uint16_t fill, int bipolar)
++{
++    unsigned pos = 0;
++    for (unsigned i = 0; i < sizeof smc_arc_pixels / sizeof smc_arc_pixels[0]; ++i) {
++        const unsigned geo = smc_arc_pixels[i][0], code = smc_arc_pixels[i][1];
++        pos += geo >> 3;
++        const unsigned stop = code & 127u;
++        const int lit = !code ? (bipolar || value >= 64u) :
++            (bipolar && !(code & 128u)) ? value < stop : value >= stop;
++        px_blend(cx + (int)(pos & 31u) - 8, cy + (int)(pos >> 5) - 8,
++            lit ? fill : track, smc_arc_alpha[geo & 7u]);
++    }
++    const float th = 3.4f, a0 = 0.375f, sweep = 0.75f;
++    const float rm = 8.f - th * .5f, fx = (float)cx + .5f, fy = (float)cy + .5f;
++    const float v = (float)value / 127.f;
++    const float lo = bipolar ? (v < .5f ? v : .5f) : 0.f, hi = bipolar ? (v < .5f ? .5f : v) : v;
++    float e0 = a0 * FM_TWO_PI, e1 = (a0 + sweep) * FM_TWO_PI, ev = (a0 + sweep * v) * FM_TWO_PI;
++    float el = (a0 + sweep * lo) * FM_TWO_PI;
++    disc(fx + fm_cosf(e0) * rm - .5f, fy + fm_sinf(e0) * rm - .5f, th * .5f, lo <= 0.f && hi > 0.f ? fill : track);
++    disc(fx + fm_cosf(e1) * rm - .5f, fy + fm_sinf(e1) * rm - .5f, th * .5f, hi >= 1.f ? fill : track);
++    if (hi > lo)
++        disc(fx + fm_cosf(el) * rm - .5f, fy + fm_sinf(el) * rm - .5f, th * .5f, fill);
++    disc(fx + fm_cosf(ev) * rm - .5f, fy + fm_sinf(ev) * rm - .5f, th * .5f + 1.3f, C_BLACK);
++    disc(fx + fm_cosf(ev) * rm - .5f, fy + fm_sinf(ev) * rm - .5f, th * .5f + .6f, C_WHITE);
+ }
+ 
+ static void play_icon(int32_t x, int32_t y, uint16_t c)
+ {
+@@ -6380,9 +7694,9 @@
+                 name=context_title;
+             }
+         }
+         int mix_kit=drum_mix_page();
+-        if(mix_kit>=0)name=pg.title[cur_page()];
++        if(mix_kit>=0)name=page_title(&pg, cur_page());
+         if(clip_mode)name="LP";
+         if(pickup)name=ui.msg;
+         sound_slab(0,0,240,HDR_H,0);
+         /* R22 r20 header: engine + voice in the part colour, not a filled badge. */
+@@ -6570,10 +7884,13 @@
+         memset(&arp_bp, 0, sizeof arp_bp);
+         arp_bp.len = as.length ? as.length : 16;
+         arp_bp.gen.root = UI_ARP_ROOT % 12;            /* offsets from the held root (C3 when none is held) */
+         arp_bp.gen.base_oct = (uint8_t)(UI_ARP_ROOT / 12 - 1);
++        const int signed_oct = engine_bass_bank(b) == ORIGINAL_SOUND_SYNTHONE;
+         for (c = 0; c < ARP_STEPS; c++) {
+-            arp_bp.step[c].note = (uint8_t)(UI_ARP_ROOT + ast.offset[c] + ((ast.oct_mask >> c) & 1u) * 12);
++            int off = ast.offset[c];
++            if ((ast.oct_mask >> c) & 1u) off += signed_oct && off < 0 ? -12 : 12;
++            arp_bp.step[c].note = (uint8_t)(UI_ARP_ROOT + off);
+             arp_bp.step[c].flags = (ast.on_mask >> c) & 1u ? G_NOTE : G_REST;
+         }
+         bp = &arp_bp;
+         held = arp_held;
+@@ -6747,9 +8064,9 @@
+ 
+ /* Control rows share the existing main/knob strips; no framebuffer or UI state is added. */
+ static UI_DRAW const char *matrix_group(int page)
+ {
+-    const char *t = pg.title[page];
++    const char *t = page_title(&pg, page);
+     if (!strcmp_s(t,"FX")) {
+         int ty=matrix_value(pg.r[page][0]);
+         return ty==CHI_FX_OFF?"FX / OFF":ty==CHI_FX_COMP?"FX / MASTER":"FX / INSERT";
+     }
+@@ -6844,11 +8161,11 @@
+ #if X0X_S1_EXTRA || X0X_SUPERJ6_BUILTIN_INIT
+     int bank = engine_bass_bank(bidx());
+     synth_page_marker = bank == ORIGINAL_SOUND_SYNTHONE || bank == ORIGINAL_SOUND_JUNO;
+     if (ui.touched >= 0 && (int32_t)(ui.touch_until - plat_ms()) > 0)
+-        synth_focus_row = bank == ORIGINAL_SOUND_JUNO ? !strcmp_s(pg.title[page],"LFO RATE") :
++        synth_focus_row = bank == ORIGINAL_SOUND_JUNO ? !strcmp_s(page_title(&pg, page),"LFO RATE") :
+             bank == ORIGINAL_SOUND_SYNTHONE &&
+-            (!strcmp_s(pg.title[page],"EFFECT") || !strcmp_s(pg.title[page],"OUTPUT"));
++            (!strcmp_s(page_title(&pg, page),"EFFECT") || !strcmp_s(page_title(&pg, page),"OUTPUT"));
+ #endif
+     uint16_t col=matrix_col();
+     if(night) cv_rect(0,0,240,band==2?KNOB_H:BAND_H,SOUND_BASE);
+     for (row=0;row<rows;row++) {
+@@ -7689,9 +9006,9 @@
+         char num[36], unit[8];
+         const x0x_param_t *d;
+         if (row >= ui.list_n)
+             break;
+-        r = list_rows[row];
++        r = list_ref(row);
+         if (r.kind == R_HDR) {                         /* a section: whose values follow */
+             char t[28];
+             hdr_name(r.a, t);
+             cv_text(8, vc(&FONT_XS, y + 4, 16), &FONT_XS, t, C_AMB);
+@@ -8111,10 +9428,10 @@
+     pref_t r;
+     int page = cur_page(), i = ui.touched;
+     if (ui.view != V_PART || !is_303() || i < 0 || i > 3 ||
+         (int32_t)(ui.touch_until - plat_ms()) <= 0 ||
+-        (strcmp_s(pg.title[page], "AMP ADSR") &&
+-         strcmp_s(pg.title[page], "FILTER ADSR"))) return 0;
++        (strcmp_s(page_title(&pg, page), "AMP ADSR") &&
++         strcmp_s(page_title(&pg, page), "FILTER ADSR"))) return 0;
+     r = pg.r[page][i];
+     return matrix_touch_matches(r, i);
+ }
+ 
+@@ -9777,10 +11094,10 @@
+ 
+ /* the knob row's tag: whose knobs these are (BD, 909 KIT, P3 PATTERN, 909 MIX: BD, 303A STEP 5) */
+ static UI_DRAW void knob_tag(char *t)
+ {
+-    int g = pg.group[cur_page()], dm = drum_mix_page();
+-    const char *ti = pg.title[cur_page()];
++    int g = page_group(&pg, cur_page()), dm = drum_mix_page();
++    const char *ti = page_title(&pg, cur_page());
+     if (lock_step() >= 0) {
+         put_i(put_s(put_s(t, is_drum() ? engine_voice_name(ui.part == PART_909 ? T_909 : T_808, ui.sel[ui.part])
+                                         : part_name(ui.part)), " P-LOCK STEP "), lock_step() + 1);
+     } else if (ui.view == V_SEQ && is_303() && ui.held_step >= 0) {
+@@ -9806,11 +11123,11 @@
+     else
+         put_s(t, ti);
+     {   /* a section over several pages (same name): which of them, "BD (1/2)" */
+         int p = cur_page(), a = p, b = p;
+-        while (a > 0 && !strcmp_s(pg.title[a - 1], ti))
++        while (a > 0 && !strcmp_s(page_title(&pg, a - 1), ti))
+             a--;
+-        while (b + 1 < pg.n && !strcmp_s(pg.title[b + 1], ti))
++        while (b + 1 < pg.n && !strcmp_s(page_title(&pg, b + 1), ti))
+             b++;
+         if (b > a) {
+             char *q = t;
+             while (*q)
+@@ -9821,8 +11138,72 @@
+ }
+ 
+ #include "ui_chance_probe.h"
+ #include "ui_break_layout_controls.h"
++/* Both front strips use exactly one live descriptor/lock/glyph/value pipeline.
++ * BRK retains its compact panel and translate-only canvas origin;
++ * drum MIX retains its own fader/telemetry appearance. */
++static UI_DRAW void draw_live_knob_strip(int pgi,int mix_kit,int is_break)
++{
++    static const int16_t break_centers[4]={32,90,149,207};
++    uint16_t col=mix_kit>=0?DRUM_MIX_ACCENT:part_col();
++    for(int i=0;i<4;i++){
++#if X0X_GFINAL_CHANCE_PROBE
++        if(is_break)chance_knob_status[i]=CHANCE_NOT_TARGET;
++#endif
++        pref_t r=pg.r[pgi][i];
++        const x0x_param_t *d=pref_desc(r);
++        if(!d)continue;
++        int cx=is_break?break_centers[i]:i*60+30,touched=ui.touched==i;
++        char num[16],unit[8];
++        const felucca_font_t *namefont=is_break?&FONT_T:&FONT_XS;
++        int val=0;
++        if(is_break)val=pref_get(r);
++        int label_y=is_break?vc(namefont,0,12):vc(namefont,mix_kit>=0&&i==0?66:13,10);
++        text_c(cx,label_y,namefont,caps_of(pref_name(r)),touched?C_WHITE:C_GRAY);
++        if(!is_break)val=pref_get(r);
++        int markerx=is_break?cx+24:cx+22,markery=is_break?5:17,rad=is_break?1:2;
++        if(lock_step()>=0){
++            int lv=lock_of(r,lock_step());
++            if(lv>=0)val=lv;
++            if(lockable(r))dot(markerx,markery,rad,lv>=0?C_AMB:C_LINE);
++        }else if(has_motion(r)){
++            int mv=motion_now(r);
++            if(mv>=0)val=mv;
++            dot(markerx,markery,rad,mv>=0?C_WHITE:C_DIM);
++        }
++        int oy=cv_oy,drawn=0;
++        if(is_break){
++            cv_oy-=13;
++#if X0X_GFINAL_CHANCE_PROBE
++            chance_knob_status[i]=(uint8_t)chance_native_knob(r,d,val,cx);
++            drawn=chance_knob_status[i]==CHANCE_DRAWN;
++#endif
++            if(!drawn)drawn=break_groove_pips(r,val,cx,col);
++        } else if(mix_kit>=0 && i==0) {
++            drum_mix_level(r,val);drawn=1;
++        }
++        if(!drawn && !perform_glyph(r,val,cx,col) && !control_glyph(r,val,cx,col) &&
++           d->names && d->max<12){
++            int n=d->max+1,pw=n>6?3:6,w=n*(pw+2)-2;
++            for(int k=0;k<n;k++)box(cx-w/2+k*(pw+2),33,pw,9,k==val?col:C_LINE);
++        }
++        cv_oy=oy;
++        pref_value_of(r,val,num,unit);
++        uint16_t ink=touched?C_WHITE:C_HI;
++        int y=vc(&FONT_B,is_break?39:53,13);
++        if(is_break){cell_value(cx,y,num,unit,ink);continue;}
++        if(r.kind==R_ENG && r.a==T_MST && r.c==MST_DJF){
++            uint8_t mode,cut;int res;filter_display(&mode,&cut,&res);
++            pref_value_of(PR(R_ENG,T_MST,0,MST_MODE),mode,num,unit);
++        }
++        if((r.kind==R_ENG && r.a==T_303) || r.kind==R_BENGINE || r.kind==R_BPRESET || r.kind==R_BSTATUS)
++            original_cell_value(cx,y,num,unit,ink);
++        else if(r.kind!=R_BDIR)
++            cell_value(cx-(r.kind==R_ENG && r.a==T_MST && r.c==MST_PUMP),y,num,unit,ink);
++    }
++}
++
+ static UI_DRAW void draw_knobs(void)
+ {
+     static uint32_t last_sig;
+     int i, pgi = cur_page();
+@@ -10238,8 +11619,11 @@
+  * audio before acquiring a hold; recheck after the hold for a queued Start.
+  * A failed write retries after 1 s. Reset/load must not drop this request. */
+ static void device_bt_save(void)
+ {
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++    return;
++#endif
+     int rc;
+     static uint32_t retry_at;
+     if (!project_device_bt_pending() || project_busy || perf_testing() ||
+         (retry_at && (int32_t)(plat_ms() - retry_at) < 0)) return;
+@@ -10284,8 +11668,11 @@
+  * audio. Only the objects that changed are written (project.c), usually one or two sectors. */
+ #define AUTOSAVE_GAP 20000u
+ static void autosave(void)
+ {
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++    return; /* not a persistent project session */
++#endif
+     uint32_t now = plat_ms();
+ #if BOARD_SMK37
+     extern uint8_t smk_ck_flash_busy(void), smk_clip_mode_on(void);
+ #endif
+@@ -10372,9 +11759,9 @@
+     }
+ #endif
+     if(ui.overlay!=O_LIST || ui.help) peer_scroll.active=0;
+     else { int visible=0;for(unsigned row=ui.list_top;row<ui.list_n && row<ui.list_top+6u;row++)
+-        if(list_rows[row].kind==R_BTNAME)visible=1;
++        if(list_ref(row).kind==R_BTNAME)visible=1;
+         if(!visible)peer_scroll.active=0; }
+     undo_tick();
+     pattern_sound_tick();
+     engine_note_lock_refresh();
