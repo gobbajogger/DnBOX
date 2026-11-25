@@ -1,0 +1,108 @@
+--- a/firmware/src/dsp/juno6.h
++++ b/firmware/src/dsp/juno6.h
+@@ -86,7 +86,7 @@
+  uint16_t lfo2_pwm;
+  uint8_t lfo_running, lfo_sync, lfo2_pwm_index, vibrato_left;
+  uint32_t lfo2_pwm_until_tick, vibrato_phase, vibrato_step;
+- float vibrato_depth, vibrato_ratio;
++ float vibrato_depth, vibrato_ratio, mod_wheel_cutoff_hz;
+  uint64_t lfo2_entropy_state;
+  float lfo2_hold_elapsed, lfo2_hold_period, lfo2_hold_sample;
+  uint8_t osc1_level_code, mod_destination, mod_wheel_lfo1, mod_wheel_lfo2; /* 0 untouched, 1..128 physical CC1 */
+@@ -140,6 +140,7 @@
+ int juno6_set_mod_wheel(juno6_t *, unsigned value);
+ /* ID179 original editor index; only source-qualified receivers are enabled. */
+ int juno6_set_mod_destination(juno6_t *, unsigned selected);
++float juno6_mod_cutoff_hz(unsigned value);
+ void juno6_set_lfo_words(juno6_t *, const juno6_lfo_words *, int reset_phase);
+ void juno6_set_panel_lfo(juno6_t *, unsigned lfo, int position, unsigned hz_mode);
+ void juno6_set_lfo_tempo(juno6_t *, float bpm);
+--- a/firmware/src/dsp/juno6_factory.inc
++++ b/firmware/src/dsp/juno6_factory.inc
+@@ -323,10 +323,25 @@
+ 
+ static float sj6_vibrato_depth(float unit) { return 12.f * fm_powf(unit,3.03f); }
+ 
++/* The normal (non-OTA) build-9 direct cutoff target. Source computes
++ * normalized division and square in Float, then multiplies and adds in Double. */
++float juno6_mod_cutoff_hz(unsigned value)
++{
++    if (value>127u) return 0.f;
++    const float x=(float)value/127.f;
++    static const float hi[]={.1f,.3f,.5f,.7f,.9f};
++    static const uint16_t base[]={20,30,200,600,4100,14400,20000};
++    unsigned seg=0;
++    while (seg<5u && x>hi[seg]) ++seg;
++    float u=(x-(seg ? hi[seg-1u]:0.f))/((seg==0u||seg==5u)?.1f:.2f);
++    float squared=u*u;
++    return (float)((double)base[seg]+(double)squared*(base[seg+1u]-base[seg]));
++}
++
+ int juno6_set_mod_destination(juno6_t *s,unsigned selected)
+ {
+     if (selected==6u) selected=0; /* Build-9 final segment aliases the default. */
+-    if (!s || !s->typed || (selected>1u && selected!=4u)) return 0;
++    if (!s || !s->typed || (selected>1u && selected!=4u && selected!=5u)) return 0;
+     s->mod_destination=(uint8_t)selected;
+     return 1;
+ }
+@@ -338,6 +353,10 @@
+         s->vibrato_depth=sj6_vibrato_depth((float)value/127.f);
+         return 1;
+     }
++    if (s->mod_destination==5u) {
++        s->mod_wheel_cutoff_hz=juno6_mod_cutoff_hz(value);
++        return 1;
++    }
+     const unsigned lfo = s->mod_destination==4u;
+     uint8_t *effective = lfo ? &s->mod_wheel_lfo2 : &s->mod_wheel_lfo1;
+     if (*effective!=value+1u) {
+@@ -359,6 +378,7 @@
+ {
+     if (reset_phase) {
+         s->mod_wheel_lfo1=s->mod_wheel_lfo2=0;
++        s->mod_wheel_cutoff_hz=0.f;
+         s->lfo2_hold_sample = s->lfo2_hold_elapsed = 0.f;
+         s->lfo2_pwm_until_tick = 0;
+     }
+@@ -548,6 +568,7 @@
+  if(id>=18)return 0;
+  s->macro[id]=x;
+  if(id==9)s->hpf=x;
++ if(id==2)s->mod_wheel_cutoff_hz=0.f;
+  #define JUNO6_APPLY_VALUE(stock,native) (native)
+ #else
+  #define JUNO6_LEGACY_ADSR(field, value) (p.amp.field = p.filter.field = (value))
+@@ -779,17 +800,28 @@
+  }
+ #endif
+ #if X0X_SUPERJ6_BUILTIN_INIT
++ const float wheel_cutoff=s->mod_wheel_cutoff_hz;
++ float base[2];
++ if (wheel_cutoff) for(unsigned l=0;l<2;++l) {
++  base[l]=s->core.layer[l].params.cutoff_hz;
++  s->core.layer[l].params.cutoff_hz=wheel_cutoff;
++ }
++ int rendered;
+  unsigned receiver = ((s->lfo2_pwm & SJ6_LFO2_PWM_ROUTE_MASK) >> SJ6_LFO2_PWM_ROUTE_SHIFT) - 1u;
+  if (receiver < DNBX_LAYERS && (s->lfo2_pwm & SJ6_LFO2_PWM_DEPTH_MASK) &&
+      (s->lfo_running & 2u) && s->core.layer[receiver].params.waveform == 1.f &&
+      s->core.raw[210u + receiver] > .5f && frames && frames <= DNBX_MAX_FRAMES &&
+      left && right && left != right) {
+-  if (render_lfo2_pwm(s,receiver,left,right,frames)!=DNBX_OK)return 0;
++  rendered=render_lfo2_pwm(s,receiver,left,right,frames);
+  } else {
+-  if (render_typed_span(s,left,right,frames)!=DNBX_OK)return 0;
+-  if ((s->lfo2_pwm >> SJ6_LFO2_PWM_SHAPE_SHIFT) == SJ6_LFO_HELD) sj6_held_bypass(s,frames);
+-  else s->lfo2_pwm_until_tick = 0;
++  rendered=render_typed_span(s,left,right,frames);
++  if (rendered==DNBX_OK) {
++   if ((s->lfo2_pwm >> SJ6_LFO2_PWM_SHAPE_SHIFT) == SJ6_LFO_HELD) sj6_held_bypass(s,frames);
++   else s->lfo2_pwm_until_tick = 0;
++  }
+  }
++ if (wheel_cutoff) for(unsigned l=0;l<2;++l) s->core.layer[l].params.cutoff_hz=base[l];
++ if (rendered!=DNBX_OK)return 0;
+  /* Keep all three audio-clock phases independent of receiver and span. */
+  for (unsigned i = 0, running = s->lfo_running; running; ++i, running >>= 1)
+   if (running & 1u) s->lfo_phase_q40[i] =

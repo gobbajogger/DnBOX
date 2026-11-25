@@ -1,0 +1,21 @@
+juno6.c: OK
+juno6.h: OK
+juno6_factory.inc: OK
+dnbx_core.c: OK
+patching file firmware/src/dsp/juno6.h
+patching file firmware/src/dsp/juno6_factory.inc
+patching file firmware/src/dsp/juno6.h
+patching file firmware/src/dsp/juno6_factory.inc
+juno6.c: OK
+juno6.h: OK
+juno6_factory.inc: OK
+FAIL 24: juno6_set_mod_destination(s,5)
+patching file firmware/src/dsp/juno6.h
+patching file firmware/src/dsp/juno6_factory.inc
+juno6.c: OK
+juno6.h: OK
+juno6_factory.inc: OK
+owner=0: 89/128 blocks differed from unchanged filter; source target executor exact
+owner=1: 89/128 blocks differed from unchanged filter; source target executor exact
+PASS DSP size 3000
+b23b1a8bdf25f06b889c28044c460d3974c443294387dc11f2db2c5e1f545cd0  after.pcm

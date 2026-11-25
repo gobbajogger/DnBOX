@@ -1,0 +1,87 @@
+--- a/tests/host/sj6_137_carriage.c
++++ b/tests/host/sj6_137_carriage.c
+@@ -3,7 +3,6 @@
+ #include "app/sj6_137_host_witness.h"
+ _Static_assert(sizeof(sound_t)==2712 && sizeof(project_t)==36420 && sizeof(lane_t)==72,"unchanged ABI");
+ static project_t witness;
+-int sj6_137_fixture_lens;
+ static int choose137(project_t *dst,const project_t *legacy)
+ {
+  if(legacy || dst!=&project_stage)return 0;
+@@ -21,18 +20,43 @@
+  }
+  return 1;
+ }
+-static void lens(unsigned v)
++static void panel137(unsigned v,int admitted)
+ {
+- ui.part=PART_303A+v;
+- sj6_137_fixture_lens=1;
+- visit("FILTER ADSR");
+- /* Fixture-only ref replacement: exercise the existing real K1 path without
+-    adding a product page, reassigning a product knob, or adding a gesture. */
+- CHECK(pg.r[cur_page()][0].b==v && pg.r[cur_page()][0].c==SJ6_FILTER_VELOCITY);
++ ui.view=V_PART;ui.part=PART_303A+v;build_pages();
++ unsigned g=0,d=0,m=0,mods=0;int adsr=-1,mod=-1;
++ for(int q=0;q<pg.n;q++){
++   const char *name=page_title(&pg,q);
++   mods+=!strcmp(name,"FILTER MOD");
++   for(unsigned k=0;k<4;k++){
++     const pref_t r=pg.r[q][k];
++     if(r.kind!=R_SJ6KNOB)continue;
++     if(r.c==SJ6_FILTER_LINK){
++       CHECK(k==3 && !strcmp(name,"FILTER") && r.b==v);
++       g++;
++     }
++     if(r.c>=SJ6_FILTER_ATTACK && r.c<=SJ6_FILTER_RELEASE){
++       CHECK(r.c==SJ6_FILTER_ATTACK+k && !strcmp(name,"FILTER ADSR") && r.b==v);
++       d++;adsr=q;
++     }
++     if(r.c==SJ6_FILTER_VELOCITY){
++       CHECK(k==0 && !strcmp(name,"FILTER MOD") && r.b==v && !strcmp(pref_desc(r)->name,"VELOCITY"));
++       m++;mod=q;
++     }
++   }
++ }
++ CHECK(g==1 && d==4 && m==(unsigned)admitted && mods==(unsigned)admitted);
++ if(!admitted)return;
++ CHECK(mod==adsr+1);
++ CHECK(!strcmp(page_title(&pg,pg.n-2),"ARPEGGIATOR") && !strcmp(page_title(&pg,pg.n-1),"SOUND"));
++ visit("FILTER MOD");
++ smc_select_part(PART_303A+v);smc_view(V_PART,mod);
++ CHECK(cur_page()==mod && smc_same(pg.r[mod][0],smc_knob_target(0)));
++ CHECK(pg.r[mod][1].kind==R_NONE && pg.r[mod][2].kind==R_NONE && pg.r[mod][3].kind==R_NONE);
++ char title[12];smc_page_name(mod,title);CHECK(!strcmp(title,"FILTER MOD"));
+ }
+ static void walk137(unsigned v,unsigned position)
+ {
+- lens(v);
++ panel137(v,1);
+  const unsigned start=parts[v]->filter_velocity_position;
+  const int delta=position>start?1:-1;
+  for(unsigned n=start;n!=position;n=(unsigned)((int)n+delta)) {
+@@ -105,6 +129,7 @@
+  witness=proj;
+  CHECK(!choose137(&project_stage,&proj) && !edit137(0,3) && !memcmp(&witness,&proj,sizeof proj));
+  CHECK(!project_save()); CHECK(!project_load()); 
++ for(unsigned v=0;v<NBASS;v++)panel137(v,0);
+  CHECK(!memcmp(slot137(&proj.sound,0),slot137(&witness.sound,0),32));
+  CHECK(!memcmp(slot137(&proj.sound,1),slot137(&witness.sound,1),32));
+  /* Avoid replacing even our synthetic existing fixture. Start on separately fresh virtual media. */
+@@ -117,7 +142,7 @@
+  for(unsigned v=0;v<2;++v){
+   const unsigned final=v ? 127:0;
+   const sound_t opaque=proj.sound;
+-  lens(v);
++  panel137(v,1);
+   for(unsigned det=1;det<128;++det) {
+    now_ms+=300;turn(0,1);render(1);
+    CHECK(parts[v]->filter_velocity_position==det && read137(&proj.sound,v)[2]==det);
+@@ -175,6 +200,7 @@
+  CHECK(!project_load());CHECK(!memcmp(&witness.sound,&proj.sound,sizeof(sound_t)));
+  CHECK(!memcmp(witness.arr.lane,proj.arr.lane,sizeof proj.arr.lane));
+  recover_audio137();positions(53,47);
++ for(unsigned v=0;v<NBASS;v++)panel137(v,1);
+  project_capture_stage();project_file_header(h);
+  FILE *f=fopen("out/media.bin","wb");CHECK(f);
+  CHECK(fwrite(h,sizeof h,1,f)==1&&fwrite(&project_stage,sizeof project_stage,1,f)==1&&

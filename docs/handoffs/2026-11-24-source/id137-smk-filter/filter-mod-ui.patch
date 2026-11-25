@@ -1,0 +1,45 @@
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -94,6 +94,9 @@
+     PT_XMOD,
+     PT_FX_BYPASS,
+     PT_PITCH_MOD,
++#ifdef DNBOX_137_HOST_WITNESS
++    PT_FILTER_MOD,
++#endif
+     PT_COUNT
+ } page_title_id_t;
+ 
+@@ -1886,6 +1889,9 @@
+     [PT_FILTER_2] = "FILTER 2",
+     [PT_FILTER_ADSR] = "FILTER ADSR",
+     [PT_FILTER_MODE] = "FILTER MODE",
++#ifdef DNBOX_137_HOST_WITNESS
++    [PT_FILTER_MOD] = "FILTER MOD",
++#endif
+     [PT_FM_NOISE] = "FM / NOISE",
+     [PT_GENERATE] = "GENERATE",
+     [PT_GROOVE] = "GROOVE",
+@@ -2308,10 +2314,8 @@
+                 PR(kind,T_303,owner,id);
+         }
+ #ifdef DNBOX_137_HOST_WITNESS
+-        extern int sj6_137_fixture_lens;
+-        if (kind==R_SJ6KNOB && live137(&proj.sound,owner) &&
+-            sj6_137_fixture_lens && pages[row].title==PT_FILTER_ADSR)
+-            refs[0]=PR(kind,T_303,owner,SJ6_FILTER_VELOCITY);
++        if (pages[row].title==PT_FILTER_MOD &&
++            (kind!=R_SJ6KNOB || !live137(&proj.sound,owner))) continue;
+ #endif
+         add_page_refs(emit, pages[row].title, refs, 0, 0);
+     }
+@@ -2398,6 +2402,9 @@
+                     {PT_PULSE_WIDTH, {SJ6_PWM1_ON, SJ6_PWM1, SJ6_PWM2_ON, SJ6_PWM2}},
+                     {PT_FILTER, {ORIG_PAGE_ENGINE + 2, ORIG_PAGE_ENGINE + 3, ORIG_PAGE_ENGINE + 4, SJ6_FILTER_LINK}},
+                     {PT_FILTER_ADSR, {SJ6_FILTER_ATTACK, SJ6_FILTER_DECAY, SJ6_FILTER_SUSTAIN, SJ6_FILTER_RELEASE}},
++#ifdef DNBOX_137_HOST_WITNESS
++                    {PT_FILTER_MOD, {SJ6_FILTER_VELOCITY, ORIG_PAGE_NONE, ORIG_PAGE_NONE, ORIG_PAGE_NONE}},
++#endif
+                     {PT_AMP_ADSR, {SJ6_AMP_ATTACK, SJ6_AMP_DECAY, SJ6_AMP_SUSTAIN, SJ6_AMP_RELEASE}},
+                     {PT_OUTPUT, {ORIG_PAGE_ENGINE + 9, SJ6_MASTER_LEVEL, SJ6_OSC1_LEVEL, SJ6_OSC2_LEVEL}},
+                     {PT_LFO_RATE, {SJ6_LFO1_RATE, SJ6_LFO2_RATE, SJ6_LFO3_RATE, SJ6_LFO2_SHAPE}},
