@@ -1,0 +1,39 @@
+--- a/firmware/src/dsp/juno6_factory.inc
++++ b/firmware/src/dsp/juno6_factory.inc
+@@ -690,6 +690,14 @@
+ 
+ #endif
+ 
++static int sj6_mod_lfo1_routed(const juno6_t *s)
++{
++#if X0X_SJ6_AUX_LFO_NATIVE
++    if(s->lfo1_aux_route)return s->lfo1_aux_route!=7u;
++#endif
++    return !!s->lfo1_pwm_route;
++}
++
+ __attribute__((noinline)) int juno6_set_mod_destination(juno6_t *s,unsigned selected)
+ {
+     if (selected==6u) selected=0; /* Build-9 final segment aliases the default. */
+@@ -705,7 +713,7 @@
+     if(selected==3u) { if(!s->alt3.armed)return 0; }
+     else
+ #endif
+-    if(selected>1u && selected!=4u && selected!=5u && (selected!=2u || !s->lfo1_pwm_route)) return 0;
++    if(selected>1u && selected!=4u && selected!=5u && (selected!=2u || !sj6_mod_lfo1_routed(s))) return 0;
+     s->mod_destination=(uint8_t)selected;
+     return 1;
+ }
+@@ -727,11 +735,7 @@
+         return 1;
+     }
+     if (s->mod_destination==2u) {
+-#if X0X_SJ6_AUX_LFO_NATIVE
+-        if(s->lfo1_aux_route?s->lfo1_aux_route==7u:!s->lfo1_pwm_route)return 0;
+-#else
+-        if(!s->lfo1_pwm_route) return 0;
+-#endif
++        if(!sj6_mod_lfo1_routed(s))return 0;
+         s->wheel_lfo1_amount=(uint8_t)(value+1u);
+         return 1;
+     }
