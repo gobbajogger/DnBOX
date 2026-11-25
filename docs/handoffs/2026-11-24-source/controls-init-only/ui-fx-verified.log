@@ -1,0 +1,3 @@
+PASS independent delay/reverb switches, owner-only PCM, preserved selected mixes and delay history and saved state; 17676 checks
+PASS older reader refuses both real persisted projects and attempted save; 104 checks
+PASS S1 both physical owner routes, independent OCT, reload and real backend notes 38 checks

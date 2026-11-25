@@ -1,0 +1,167 @@
+--- a/firmware/src/app/s1_patch.h
++++ b/firmware/src/app/s1_patch.h
+@@ -31,7 +31,7 @@
+     S1_EXTRA_BYTES = S1_FILTER_EXTRA_BYTES + 2,
+     S1_LFO_DIVISIONS = 19, S1_LFO_CODE_SYNC = 129,
+     S1_LFO_RATE_CODES = S1_LFO_CODE_SYNC + S1_LFO_DIVISIONS,
+-    S1_PART_LEVEL = 40, S1_LFO1_DEPTH, S1_LFO2_DEPTH, S1_CUTOFF_LFO, S1_NOISE_LFO, S1_OSC_MIX_LFO, S1_RESONANCE_LFO, S1_FM_LFO, S1_AMP_DECAY_LFO, S1_OSC1_SEMI, S1_OSC2_SEMI, S1_OSC2_DETUNE, S1_VOICE_MODE, S1_MONO_GLIDE,
++    S1_PART_LEVEL = 40, S1_LFO1_DEPTH, S1_LFO2_DEPTH, S1_CUTOFF_LFO, S1_NOISE_LFO, S1_OSC_MIX_LFO, S1_RESONANCE_LFO, S1_FM_LFO, S1_AMP_DECAY_LFO, S1_OSC1_SEMI, S1_OSC2_SEMI, S1_OSC2_DETUNE, S1_VOICE_MODE, S1_MONO_GLIDE, S1_DELAY_ON, S1_REVERB_ON,
+     S1_BASE_EDIT_FIRST = S1_PART_LEVEL, S1_BASE_EDIT_COUNT = 3, S1_BASE_EDIT_BYTE = 3
+ };
+ /* Formerly invalid q7 top bits. Code zero keeps the exact program;
+@@ -57,7 +57,9 @@
+ /* Radix five stores independent absent/explicit OFF/LFO1/LFO2/BOTH digits.
+  * FM-only codes 0..4 are identical to the preceding typed binding. */
+ enum { S1_MOD_EXT_BYTE = 30, S1_MOD_EXT_FIRST = S1_FM_LFO, S1_MOD_EXT_COUNT = 2,
+-       S1_MOD_RADIX = 5, S1_MOD_EXT_CODES = S1_MOD_RADIX * S1_MOD_RADIX };
++       S1_MOD_RADIX = 5, S1_ROUTE_EXT_CODES = S1_MOD_RADIX * S1_MOD_RADIX,
++       S1_FX_GATE_RADIX = 3, S1_MOD_EXT_CODES = S1_ROUTE_EXT_CODES * 9 };
++static inline int s1_fx_gate_slot(unsigned slot) { return slot-S1_DELAY_ON < 2u; }
+ static inline int s1_mod_ext_slot(unsigned slot) { return slot - S1_MOD_EXT_FIRST < S1_MOD_EXT_COUNT; }
+ static inline unsigned s1_mod_ext_divisor(unsigned slot) { return slot == S1_FM_LFO ? 1u : S1_MOD_RADIX; }
+ #define S1_EXTRA_MARK (UINT32_C(1) << 22)
+@@ -87,7 +89,7 @@
+ static inline int s1_base_route_slot(unsigned slot)
+ { return slot - S1_ROUTE_FIRST < S1_ROUTE_COUNT; }
+ static inline int s1_base_edit_slot(unsigned slot)
+-{ return slot - S1_VOICE_MODE < 2u || slot == S1_OSC2_DETUNE || s1_coarse_slot(slot) || s1_mod_ext_slot(slot) || s1_base_route_slot(slot) || slot - S1_BASE_EDIT_FIRST < S1_BASE_EDIT_COUNT; }
++{ return s1_fx_gate_slot(slot) || slot - S1_VOICE_MODE < 2u || slot == S1_OSC2_DETUNE || s1_coarse_slot(slot) || s1_mod_ext_slot(slot) || s1_base_route_slot(slot) || slot - S1_BASE_EDIT_FIRST < S1_BASE_EDIT_COUNT; }
+ float s1c_morph_preview(float position, uint32_t phase);
+ static inline unsigned s1_extra_bits(const uint8_t *data)
+ { return (unsigned)data[0] | (((unsigned)data[1] & 7u) << 8); }
+@@ -117,7 +119,7 @@
+ static inline unsigned s1_patch_steps(unsigned slot)
+ {
+ #if X0X_S1_EXTRA
+-    if (slot == S1_VOICE_MODE) return 1u;
++    if (slot == S1_VOICE_MODE || s1_fx_gate_slot(slot)) return 1u;
+     if (slot == S1_MONO_GLIDE) return S1_GLIDE_STEPS;
+     if (slot == S1_OSC2_DETUNE) return S1_DETUNE_STEPS;
+     if (s1_coarse_slot(slot)) return S1_COARSE_STEPS;
+--- a/firmware/src/app/original_sound.c
++++ b/firmware/src/app/original_sound.c
+@@ -1036,6 +1036,15 @@
+         }
+         return 1;
+     }
++    if (s1_fx_gate_slot(slot)) {
++        if (position > 1u) return 0;
++        unsigned code = cell[S1_MOD_EXT_BYTE];
++        unsigned divisor = S1_ROUTE_EXT_CODES * (slot == S1_DELAY_ON ? 1u : S1_FX_GATE_RADIX);
++        unsigned prior = code / divisor % S1_FX_GATE_RADIX;
++        cell[S1_MOD_EXT_BYTE] = (uint8_t)(code - prior*divisor + (position+1u)*divisor);
++        original_sound_put_mask(cell, original_sound_edit_mask(cell) | S1_MOD_EXT_MARK);
++        return 1;
++    }
+     if (s1_mod_ext_slot(slot)) {
+         if (position > 3u) return 0;
+         unsigned code = cell[S1_MOD_EXT_BYTE], divisor = s1_mod_ext_divisor(slot);
+--- a/firmware/src/app/s1c_part.c
++++ b/firmware/src/app/s1c_part.c
+@@ -90,6 +90,8 @@
+     part->clock_factory_pan = e->t[P_PAN_RATE];
+     part->clock_factory_delay = e->t[P_DELAY_TIME];
+     part->cutoff_lfo_factory = e->t[P_CUTOFF_LFO];
++    part->fx_gate_factory[0] = e->t[S1C_P_DLON];
++    part->fx_gate_factory[1] = e->t[S1C_P_RVON];
+     part->detune_factory = e->t[P_DET2];
+     part->voice_factory[0] = e->t[P_MONO];
+     part->voice_factory[1] = e->t[P_GLIDE];
+@@ -208,6 +210,10 @@
+     {"MONO GLIDE", 0, .2f, P_GLIDE, X0X_U_S},
+ };
+ static const s1_patch_descriptor detune = {"OSC 2 DETUNE", -4, 4, P_DET2, X0X_U_NONE};
++static const s1_patch_descriptor fx_gate[2] = {
++    {"DELAY", 0, 1, S1C_P_DLON, X0X_U_NONE},
++    {"REVERB", 0, 1, S1C_P_RVON, X0X_U_NONE},
++};
+ static const s1_patch_descriptor cutoff_lfo = {"CUTOFF LFO", 0, 3, P_CUTOFF_LFO, X0X_U_NONE};
+ enum { S1_CATALOG_EXTRA_COUNT = sizeof extra_parameters / sizeof extra_parameters[0] };
+ _Static_assert(S1_CATALOG_EXTRA_COUNT == S1_WET_FIRST - S1_EXTRA_FIRST + S1_WET_COUNT,
+@@ -219,6 +225,7 @@
+     if (slot < S1_PATCH_COUNT) return &patch_parameters[slot];
+ #if X0X_S1_EXTRA
+     if (slot == S1_CUTOFF_LFO) return &cutoff_lfo;
++    if (s1_fx_gate_slot(slot)) return &fx_gate[slot-S1_DELAY_ON];
+     if (slot == S1_OSC2_DETUNE) return &detune;
+     if (slot-S1_VOICE_MODE < 2u) return &voice_mode[slot-S1_VOICE_MODE];
+     if (s1_coarse_slot(slot)) return &coarse[slot-S1_COARSE_FIRST];
+@@ -236,6 +243,7 @@
+         if (patch_parameters[i].factory_id == id) return (int)i;
+ #if X0X_S1_EXTRA
+     if (id == P_CUTOFF_LFO) return S1_CUTOFF_LFO;
++    if (id == S1C_P_DLON || id == S1C_P_RVON) return id == S1C_P_DLON ? S1_DELAY_ON : S1_REVERB_ON;
+     if (id == P_DET2) return S1_OSC2_DETUNE;
+     if (id-P_MONO < 2u) return (int)(S1_VOICE_MODE+id-P_MONO);
+     if (id-3u < 2u) return (int)(S1_COARSE_FIRST+id-3u);
+@@ -362,6 +370,9 @@
+                 digit ? (float)(digit - 1u) : part->mod_ext_factory[i]);
+         mod_code /= S1_MOD_RADIX;
+     }
++    unsigned delay = mod_code % S1_FX_GATE_RADIX, reverb = mod_code / S1_FX_GATE_RADIX;
++    s1c_set_delay_gate(&part->e, delay ? (float)(delay-1u) : part->fx_gate_factory[0], delay != 0);
++    s1c_set(&part->e, S1C_P_RVON, reverb ? (float)(reverb-1u) : part->fx_gate_factory[1]);
+     uint8_t codes[S1_ROUTE_COUNT];
+     if (s1_route_decode(mask >> S1_ROUTE_SHIFT, codes))
+         for (unsigned i = 0; i < S1_ROUTE_COUNT; ++i)
+--- a/firmware/src/app/s1c_part.h
++++ b/firmware/src/app/s1c_part.h
+@@ -24,7 +24,7 @@
+ #if X0X_S1_EXTRA
+     float extra_factory[S1_EXTRA_COUNT]; /* exact pack values for note-lock transitions */
+     float lfo_factory[S1_LFO_COUNT], wet_factory[S1_WET_COUNT];
+-    float mod_ext_factory[S1_MOD_EXT_COUNT], coarse_factory[2], detune_factory, voice_factory[2];
++    float mod_ext_factory[S1_MOD_EXT_COUNT], coarse_factory[2], detune_factory, voice_factory[2], fx_gate_factory[2];
+     float clock_factory_pan, clock_factory_delay, cutoff_lfo_factory, route_factory[S1_ROUTE_COUNT], base_factory[S1_BASE_EDIT_COUNT];
+     uint16_t extra_live_mask;
+     uint8_t lfo_live_mask;
+--- a/firmware/src/dsp/s1c/s1c.c
++++ b/firmware/src/dsp/s1c/s1c.c
+@@ -747,6 +747,18 @@
+ #endif
+     if (id == PORT) s->port_c2 = exp2f(-1.0f / (s->sr * v));   /* 0.5^(1 / (sr v)) */
+ }
++void s1c_set_delay_gate(s1c *s, float gate, int manual)
++{
++#if !S1C_BUSFX
++    if (manual && !s->delay_history) {
++        s->delay_history = 1;
++        if (s->t[DLON] != 1.f) s->ddec = 0; /* expand legacy disabled/dummy ring once */
++    }
++#else
++    (void)manual;
++#endif
++    s1c_set(s, DLON, gate);
++}
+ void s1c_init(s1c *s, float sr, const float init[150])
+ {
+     int i;
+@@ -823,7 +835,7 @@
+     int fmt = s->dfmt, nl, dd, i;
+ #endif
+     float dt = s->t[DLT] > P(DLT) ? s->t[DLT] : P(DLT);
+-    float Tt = dt * s->sr * s->t[DLON];
++    float Tt = dt * s->sr * (s->delay_history ? 1.f : s->t[DLON]);
+     s->dmono = s->t[PANA] == 0.0f && s->t[PHMIX] == 0.0f;
+     nl = s->dmono ? 2 : 3;
+     for (dd = 1; dd < 4096; dd++) {
+--- a/firmware/src/dsp/s1c/s1c.h
++++ b/firmware/src/dsp/s1c/s1c.h
+@@ -138,7 +138,7 @@
+     float monof, monos, glide_c2, glide_h;
+     s1c_voice v[S1C_VOICES];
+     int8_t held[8][2]; uint8_t nheld, prev_held, mono_prev, play_idx;
+-    int8_t last[8]; uint8_t nlast, pad[3];
++    int8_t last[8]; uint8_t nlast, delay_history, pad[2];
+ #if !defined(S1C_NO_SEQ) || !S1C_NO_SEQ
+     sdbl beat, beat_inc;
+     float beat_rate;
+@@ -211,6 +211,8 @@
+ };
+ void s1c_init(s1c *s, float sr, const float init[150]);
+ void s1c_set(s1c *s, unsigned id, float v);
++/* Explicit panel bypass keeps processing the delay pool behind the mix. */
++void s1c_set_delay_gate(s1c *s, float gate, int manual);
+ void s1c_start(s1c *s, int note, int vel);
+ void s1c_stop(s1c *s, int note);
+ void s1c_stop_all(s1c *s);

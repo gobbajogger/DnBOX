@@ -1,0 +1,58 @@
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -89,6 +89,7 @@
+     PT_WAVE,
+     PT_WOBBLE,
+     PT_XMOD,
++    PT_FX_BYPASS,
+     PT_COUNT
+ } page_title_id_t;
+ 
+@@ -1566,6 +1567,7 @@
+         }
+         if (r.c == S1_SUB_OCTAVE) { put_s(num, physical > 0.f ? "-24" : "-12"); put_s(unit, "st"); return; }
+         if (r.c == S1_SUB_WAVE) { put_s(num, physical > 0.f ? "SQUARE" : "SINE"); return; }
++        if (s1_fx_gate_slot(r.c)) { put_s(num, owner.position ? "ON" : "OFF"); return; }
+         if (r.c == S1_VOICE_MODE) { put_s(num, owner.position ? "MONO" : "POLY"); return; }
+         if (r.c == S1_MONO_GLIDE) { put_i(num, (int)(1000.f*physical + .5f)); put_s(unit, "ms"); return; }
+         if (r.c == S1_OSC2_DETUNE) { put_d1(num, physical, 1); put_s(unit, "Hz@C4"); return; }
+@@ -1848,6 +1850,7 @@
+     [PT_CY] = "CY",
+     [PT_DELAY] = "DELAY",
+     [PT_EFFECT] = "EFFECT",
++    [PT_FX_BYPASS] = "FX SWITCHES",
+     [PT_ENVELOPE] = "ENVELOPE",
+     [PT_FILTER] = "FILTER",
+     [PT_FILTER_1] = "FILTER 1",
+@@ -2380,7 +2383,7 @@
+ #endif
+ #if X0X_S1_EXTRA
+             if (kind == ORIGINAL_SOUND_SYNTHONE) {
+-                enum { S1_PAGE_ID_FITS = 1 / (S1_MONO_GLIDE < ORIG_PAGE_ENGINE && S1_MONO_LEGATO < ORIG_PAGE_ENGINE) };
++                enum { S1_PAGE_ID_FITS = 1 / (S1_REVERB_ON < ORIG_PAGE_ENGINE && S1_MONO_LEGATO < ORIG_PAGE_ENGINE) };
+                 static const original_page_row_t s1_pages[] = {
+                     {PT_OSCILLATOR, {0, 1, S1_OSC1_MORPH, S1_OSC2_MORPH}},
+                     {PT_OSC_MIX, {S1_OSC2_LEVEL, S1_SUB_LEVEL, S1_SUB_OCTAVE, S1_SUB_WAVE}},
+@@ -2394,18 +2397,20 @@
+                     {PT_TEMPO_SYNC, {S1_LFO_SYNC, S1_LFO1_DEPTH, S1_LFO2_DEPTH, ORIG_PAGE_NONE}},
+                     {PT_MOD_ROUTE, {S1_OSC_MIX_LFO, S1_RESONANCE_LFO, S1_FM_LFO, S1_AMP_DECAY_LFO}},
+                     {PT_EFFECT, {ORIG_PAGE_ENGINE + ORIGINAL_SYNTHONE_CRUSH, S1_DELAY_MIX, S1_REVERB_MIX, S1_REVERB_HP}},
++                    {PT_FX_BYPASS, {S1_DELAY_ON, S1_REVERB_ON, ORIG_PAGE_NONE, ORIG_PAGE_NONE}},
+                     {PT_OUTPUT, {S1_WIDEN, S1_PART_LEVEL, S1_VOICE_MODE, S1_MONO_GLIDE}},
+                 };
+                 _Static_assert(sizeof s1_pages / sizeof *s1_pages + 2u <= MAXPAGES,
+                                "Synth One pages must leave room for ARP and SOUND");
+-                const unsigned effect_page = sizeof s1_pages / sizeof s1_pages[0] - 2;
++                enum { S1_EFFECT_PAGES = 3 };
++                const unsigned effect_page = sizeof s1_pages / sizeof s1_pages[0] - S1_EFFECT_PAGES;
+                 add_original_extra_pages(emit, s1_pages, effect_page, b, R_S1PATCH);
+ #if X0X_ARP_HOOKS
+                 if (arp_engine(b))
+                     add_page(emit, PT_ARPEGGIATOR, PR(R_ARP, ARP_F_ON, b, 0), PR(R_ARP, ARP_F_RANGE, b, 0),
+                              PR(R_ARP, ARP_F_MODE, b, 0), PR(R_ARP, ARP_F_SPEED, b, 0));
+ #endif
+-                add_original_extra_pages(emit, s1_pages + effect_page, 2, b, R_S1PATCH);
++                add_original_extra_pages(emit, s1_pages + effect_page, S1_EFFECT_PAGES, b, R_S1PATCH);
+             } else
+ #endif
+             for (int row = first_row; row < count; row++) {
