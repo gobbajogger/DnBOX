@@ -13,19 +13,42 @@
  
  #if defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE
  #if !defined(X0X_HOST) || !defined(DNBOX_137_HOST_WITNESS) || !X0X_SJ6_ZERO_GATE_PROBE
-@@ -46,8 +46,11 @@
+@@ -41,13 +41,22 @@
+ /* S1ArpModes.hpp */
+ enum ArpeggiatorMode { ArpeggiatorMode_Up = 0, ArpeggiatorMode_UpDown = 1, ArpeggiatorMode_Down = 2, ArpeggiatorMode_UpDownRepeat = 3
+ #if (defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE) || X0X_SJ6_NATIVE_RANDOM2
+     , ArpeggiatorMode_SagaRandom=4
++#if X0X_SJ6_RANDOM5_6_NATIVE
++    , ArpeggiatorMode_SagaRandom5=5, ArpeggiatorMode_SagaRandom6=6
++#endif
+ #endif
  };
  
  /* The S1Parameter values S1Sequencer::process reads (S1Parameter.h ids). */
  typedef struct {
 +#if X0X_SJ6_SEQ_SETTINGS_NATIVE
++    #if X0X_SJ6_SEQ_DEST_NATIVE
++    uint8_t saga_layers;              /* scheduler only; 0 default/BOTH */
++#endif
 +    uint8_t saga_snap_native;          /* external-only Juno start snap contract */
 +#endif
      uint8_t arpIsOn;                    /* 62 */
      uint8_t arpIsSequencer;             /* 65 */
      uint8_t arpDirection;               /* 60  ArpeggiatorMode */
      uint8_t arpOctave;                  /* 63  0..3 */
-@@ -86,9 +89,15 @@
+@@ -62,8 +71,11 @@
+     uint32_t arpBeatsPerSample;
+     uint32_t arpSeqTempoMultiplier;
+     /* SuperJ6 deltas (Synth One: 100, 12) */
+     uint8_t seqGate;                    /* % of a step a note sounds (SJ6 seqGate) */
++#if X0X_S1_SCALE_NATIVE
++    uint8_t npo; /* 0 legacy/12ET, positive S1 notes per octave */
++#endif
+     uint8_t patternRange;               /* |sequencerPattern| limit: S1 12, SJ6 24 */
+     uint32_t gateTicks;                 /* seqGate % of arpSeqTempoMultiplier (UINT32_MAX = 100 %) */
+     uint8_t clocked;                    /* DnBOX: transport clock owns mStepCounter / mBeatTime */
+ #if X0X_SUPERJ6_BUILTIN_INIT
+@@ -86,9 +98,15 @@
  #if defined(X0X_SJ6_GATE_DEADLINE_PROBE) && X0X_SJ6_GATE_DEADLINE_PROBE
      uint32_t editGateTicks;           /* already dispatched step's original deadline */
      uint8_t editGateLatched;

@@ -1,6 +1,6 @@
 --- a/firmware/src/app/engine_arp.inc
 +++ b/firmware/src/app/engine_arp.inc
-@@ -21,11 +21,11 @@
+@@ -21,23 +21,23 @@
  static void arp_store(unsigned v, const engine_arp_cfg *c)
  {
      if (!mot_base_snd) return;
@@ -14,9 +14,13 @@
          uint8_t prior_gate=block[5];
          if (block[0]!='A' || block[1]!=1u || prior_gate<1u || prior_gate>100u) prior_gate=100;
          slot137((sound_t *)mot_base_snd,v)[SJ6_ARP_ZERO_BYTE]=(uint8_t)typed_zero;
-@@ -35,9 +35,9 @@
+ #endif
+ #if (defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE) || X0X_SJ6_NATIVE_RANDOM2
+-        unsigned typed_random=c->mode==ARP_SAGA_RANDOM2;
++        unsigned typed_random=sj6_random_encode(c->mode);
          const uint8_t prior_mode=block[0]=='A' && block[1]==1u ? block[2]&0x46u : 0u;
-         slot137((sound_t *)mot_base_snd,v)[SJ6_ARP_RANDOM_BYTE]=(uint8_t)(typed_random ? 2u : 0u);
+-        slot137((sound_t *)mot_base_snd,v)[SJ6_ARP_RANDOM_BYTE]=(uint8_t)(typed_random ? 2u : 0u);
++        slot137((sound_t *)mot_base_snd,v)[SJ6_ARP_RANDOM_BYTE]=(uint8_t)typed_random;
  #endif
          engine_arp_block_encode(c,block);
 -#if defined(X0X_SJ6_ZERO_GATE_PROBE) && X0X_SJ6_ZERO_GATE_PROBE
@@ -54,8 +58,10 @@
          read137(sound,v)[SJ6_ARP_ZERO_BYTE]==1u) c.gate=0;
  #endif
  #if (defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE) || X0X_SJ6_NATIVE_RANDOM2
-     if (live137(sound,v) && original_bass[v].kind==ORIGINAL_SOUND_JUNO &&
-         read137(sound,v)[SJ6_ARP_RANDOM_BYTE]==2u) c.mode=ARP_SAGA_RANDOM2;
+-    if (live137(sound,v) && original_bass[v].kind==ORIGINAL_SOUND_JUNO &&
+-        read137(sound,v)[SJ6_ARP_RANDOM_BYTE]==2u) c.mode=ARP_SAGA_RANDOM2;
++    if (live137(sound,v) && original_bass[v].kind==ORIGINAL_SOUND_JUNO)
++        c.mode=sj6_random_decode(read137(sound,v)[SJ6_ARP_RANDOM_BYTE],c.mode);
      original_bass[v].arp.prm.saga_random_seed=v ? UINT32_C(0x243f6a88) : UINT32_C(0x85a308d3);
 +#endif
 +#if X0X_SJ6_SEQ_SETTINGS_NATIVE
@@ -74,7 +80,7 @@
      if (preset_change && c.amp2_mask) { c.amp2_mask = 0; arp_store((unsigned)v, &c); }
      arp_pending_flag[v] = 0;
      (void)original_runtime_arp_config(&original_bass[v], &c);
-@@ -117,10 +142,19 @@
+@@ -117,10 +142,22 @@
          if (!arp_clk_on) { arp_clk_beats = 0; start = 1; }
          else if (ph + per / 2u < arp_clk_prev) ++arp_clk_beats;      /* beat wrap (a tempo rescale is smaller) */
          arp_clk_on = 1; arp_clk_prev = ph;
@@ -85,6 +91,9 @@
 +#if X0X_SJ6_SEQ_SETTINGS_NATIVE
 +        int native=original_bass[v].kind==ORIGINAL_SOUND_JUNO && live137(mot_base_snd,v);
 +        original_bass[v].arp.prm.saga_snap_native=(uint8_t)native;
++#if X0X_SJ6_SEQ_DEST_NATIVE
++        original_bass[v].arp.prm.saga_layers=native ? sj6_dest_read(mot_base_snd,v) : 0u;
++#endif
 +        int linked=run && (!native || (seq.ext && seq.ext_period && sj6_seq_settings_read(mot_base_snd,v)[0]));
 +#else
 +        const int linked=run;
@@ -96,7 +105,7 @@
  static void arp_boundary(void)
  {
      for (unsigned v = 0; v < NBASS; ++v) {
-@@ -189,12 +223,12 @@
+@@ -189,12 +226,12 @@
                                        , ARP_SAGA_DIVISIONS
  #endif
      };
@@ -111,8 +120,13 @@
  #endif
      if (step == 0xFFu ? (field >= ARP_NF || (!zero_gate && value < lo[field]) || value > hi[field])
                        : (step >= ARP_STEPS || field > ARP_S_OCT ||
-@@ -208,9 +242,9 @@
-         && !(step==0xFFu && field==ARP_F_MODE && value==ARP_SAGA_RANDOM2 &&
+@@ -204,13 +241,13 @@
+     int status = S1_EDIT_REJECTED;
+     uint32_t request = bass_request[v];
+     if (arp_kind_ok(v) && revision == arp_revision[v]
+ #if (defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE) || X0X_SJ6_NATIVE_RANDOM2
+-        && !(step==0xFFu && field==ARP_F_MODE && value==ARP_SAGA_RANDOM2 &&
++        && !(step==0xFFu && field==ARP_F_MODE && sj6_random_encode(value) &&
               (original_bass[v].kind!=ORIGINAL_SOUND_JUNO || !live137(mot_base_snd,v)))
          && !(step==0xFFu && field==ARP_F_MODE && live137(mot_base_snd,v) && !s1_typed_tuple_editable())
  #endif
@@ -122,7 +136,7 @@
          && !(step==0xFFu && field==ARP_F_GATE && original_bass[v].kind==ORIGINAL_SOUND_JUNO &&
               live137(mot_base_snd,v) && !s1_typed_tuple_editable())
  #endif
-@@ -269,47 +303,82 @@
+@@ -269,47 +306,81 @@
      *step = s;
      *fired_age_ms = frames / 44u;    /* 44.1 kHz; display only */
      return 1;
@@ -149,8 +163,9 @@
 +        && (c->gate || (original_bass[v].kind==ORIGINAL_SOUND_JUNO && live137(mot_base_snd,v)))
 +#endif
  #if X0X_SJ6_NATIVE_RANDOM2
-         && !(live137(mot_base_snd,v) && read137(mot_base_snd,v)[SJ6_ARP_RANDOM_BYTE]==2u &&
-              c->mode!=ARP_SAGA_RANDOM2)
+-        && !(live137(mot_base_snd,v) && read137(mot_base_snd,v)[SJ6_ARP_RANDOM_BYTE]==2u &&
+-             c->mode!=ARP_SAGA_RANDOM2)
++        && !(live137(mot_base_snd,v) && c->mode!=sj6_random_decode(read137(mot_base_snd,v)[SJ6_ARP_RANDOM_BYTE],c->mode))
  #endif
         ) {
          if (project_hold) status = S1_EDIT_BUSY;
@@ -197,7 +212,8 @@
          if(read137(mot_base_snd,v)[SJ6_ARP_ZERO_BYTE]==1u)c.gate=0;
  #endif
  #if (defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE) || X0X_SJ6_NATIVE_RANDOM2
-         if(read137(mot_base_snd,v)[SJ6_ARP_RANDOM_BYTE]==2u)c.mode=ARP_SAGA_RANDOM2;
+-        if(read137(mot_base_snd,v)[SJ6_ARP_RANDOM_BYTE]==2u)c.mode=ARP_SAGA_RANDOM2;
++        c.mode=sj6_random_decode(read137(mot_base_snd,v)[SJ6_ARP_RANDOM_BYTE],c.mode);
  #endif
          arp_pending_flag[v]=0;
 -        (void)original_runtime_arp_config(&original_bass[v],&c);
@@ -210,7 +226,7 @@
      }
  }
  #endif
-@@ -317,26 +386,26 @@
+@@ -317,26 +388,26 @@
  {
      engine_arp_cfg c;
      if (v >= NBASS || !mot_base_snd) return S1_EDIT_REJECTED;
@@ -221,10 +237,13 @@
          read137(mot_base_snd,v)[SJ6_ARP_ZERO_BYTE]==1u) c.gate=0;
  #endif
  #if (defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE) || X0X_SJ6_NATIVE_RANDOM2
-     if(live137(mot_base_snd,v) && original_bass[v].kind==ORIGINAL_SOUND_JUNO &&
-        read137(mot_base_snd,v)[SJ6_ARP_RANDOM_BYTE]==2u)c.mode=ARP_SAGA_RANDOM2;
- #endif
+-    if(live137(mot_base_snd,v) && original_bass[v].kind==ORIGINAL_SOUND_JUNO &&
+-       read137(mot_base_snd,v)[SJ6_ARP_RANDOM_BYTE]==2u)c.mode=ARP_SAGA_RANDOM2;
+-#endif
 -    return arp_queue(v, &c);
++    if(live137(mot_base_snd,v) && original_bass[v].kind==ORIGINAL_SOUND_JUNO)
++        c.mode=sj6_random_decode(read137(mot_base_snd,v)[SJ6_ARP_RANDOM_BYTE],c.mode);
++#endif
 +    return arp_queue(v, &c, 0);
  }
  int engine_arp_preset(unsigned v, const engine_arp_cfg *c)

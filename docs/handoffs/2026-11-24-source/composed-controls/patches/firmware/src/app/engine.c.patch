@@ -1,6 +1,6 @@
 --- a/firmware/src/app/engine.c
 +++ b/firmware/src/app/engine.c
-@@ -550,17 +550,38 @@
+@@ -550,21 +550,18 @@
  int engine_bass_motion_view(int v, float *phase, float *bipolar, float *current, float *target, int *active)
  { return (unsigned)v < NBASS && original_runtime_motion_view(&original_bass[v], phase, bipolar, current, target, active); }
  int engine_bass_env_view(int v, float adsr[4], float *level, int *state)
@@ -8,17 +8,117 @@
 -#if defined(X0X_HOST) && defined(X0X_SJ6_DELAY_WITNESS)
 +#if (defined(X0X_HOST) && defined(X0X_SJ6_DELAY_WITNESS)) || X0X_SJ6_NATIVE_DELAY
  static void sj6_typed_delay_apply(unsigned,float);
-+#endif
+ #endif
+-static void original_prepare_all(void)
+-{
+-    float bpm=seq_tempo(&seq);
+-    for(int v=0;v<NBASS;++v){
+-        (void)original_runtime_prepare(&original_bass[v],bpm);
+-#if defined(X0X_HOST) && defined(X0X_SJ6_DELAY_WITNESS)
+-        sj6_typed_delay_apply(v,bpm);
+-#endif
+-    }
+-}
 +#if X0X_SJ6_NATIVE_UNISON
 +static void sj6_typed_unison_apply(unsigned);
 +#endif
 +#if X0X_SJ6_NATIVE_J60
 +static void sj6_typed_j60_apply(unsigned);
- #endif
- static void original_prepare_all(void)
++#endif
++
+ #ifdef X0X_HOST
+ unsigned engine_original_keys(int v, int latched)
  {
-     float bpm=seq_tempo(&seq);
-     for(int v=0;v<NBASS;++v){
+     if ((unsigned)v >= NBASS || original_bass[v].status != ORIGINAL_RUNTIME_OK) return 0;
+@@ -595,8 +592,14 @@
+ static volatile uint8_t live_key_w, live_key_r, live_key_cancel;
+ static void live_key_retire(int voice,int release);
+ static void live_key_context_retire(int voice,int release);
+ static void live_key_drain(void);
++#if X0X_S1_KEYBOARD_HOLD
++/* A keyboard mode, not CC64 or a sound/automation parameter. Audio owns
++ * applied modes; the main loop publishes ordered commands in the same FIFO. */
++static uint8_t s1_keyboard_hold[NBASS];
++#define LIVE_KEY_HOLD (1u << 23)
++#endif
+ 
+ X0X_COLD void engine_live_key_state(int voice,uint32_t *generation,int *arp,uint32_t *context)
+ {
+     if((unsigned)voice>=NBASS) { *generation=0;*arp=0;if(context)*context=0;return; }
+@@ -630,8 +633,34 @@
+     __asm__ volatile("" ::: "memory");live_key_w=(uint8_t)next;
+     plat_cq_unlock(flags);return 1;
+ }
+ 
++#if X0X_S1_KEYBOARD_HOLD
++X0X_COLD int engine_s1_key_hold(int voice)
++{
++    if((unsigned)voice>=NBASS)return 0;
++    uint32_t flags=plat_cq_lock();
++    int on=s1_keyboard_hold[voice];
++    plat_cq_unlock(flags);
++    return on;
++}
++X0X_COLD int engine_s1_key_set_hold(int voice,int on)
++{
++    if((unsigned)voice>=NBASS)return 0;
++    uint32_t flags=plat_cq_lock();
++    unsigned w=live_key_w,next=(w+1u)%LIVE_KEY_Q;
++    if(live_key_owner[voice].blocked || next==live_key_r){
++        /* Follow the normal fail-closed keyboard retirement on overflow. */
++        live_key_cancel|=(uint8_t)(1u<<voice);
++        plat_cq_unlock(flags);return 0;
++    }
++    live_key_q[w].generation=live_key_owner[voice].generation;
++    live_key_q[w].word=LIVE_KEY_HOLD|(uint32_t)voice|((uint32_t)!!on<<1);
++    __asm__ volatile("" ::: "memory");live_key_w=(uint8_t)next;
++    plat_cq_unlock(flags);return 1;
++}
++#endif
++
+ static breaks_t brk POOL;
+ /* These hooks are called only after the DSP admits an actual note/held
+  * slice. Isolated engine and DSP fixtures can link without DNR3. */
+ extern void remote_dnr3_voice(unsigned, unsigned, unsigned) __attribute__((weak));
+@@ -674,9 +703,9 @@
+ uint8_t engine_fx_muted(void) { return fx.muted; }
+ static master_t mst POOL; /* was BSS; pool after Chicago-insert union frees headroom */
+ /* Mix delay ring: 1.80 s @ 44.1 kHz (was 2.00 s / 88200). Recovers pool for product WBL1 + ≥8192 free. */
+ #define DLY_LEN 79200
+-static int16_t dly_buf[DLY_LEN] POOL;
++static fx_dly_word_t dly_buf[FX_DLY_WORDS(DLY_LEN)] POOL;
+ static volatile uint8_t project_hold, project_midi_drop;
+ void engine_project_hold(int hold)
+ {
+     __asm__ volatile("" ::: "memory");
+@@ -1048,8 +1077,11 @@
+     if(o->token || o->arp) {
+         bass_held[v]=bass_held_count[v]=0;
+     }
+     o->gate=o->token=o->pitch=o->arp=0;
++#if X0X_S1_KEYBOARD_HOLD
++    s1_keyboard_hold[v]=0;
++#endif
+     /* Never recycle a capability or discard another lane's queued release.
+      * Saturation blocks this lane until cold boot; warm reset does not rearm. */
+     if(o->generation==UINT32_MAX)o->blocked=1;
+     else o->generation++;
+@@ -2329,8 +2361,51 @@
+ }
+ #endif
+ 
+ #include "original_presets.inc"
++
++static void original_prepare_all(void)
++{
++    float bpm=seq_tempo(&seq);
++    for(int v=0;v<NBASS;++v){
++#if X0X_SJ6_LFO1_WAVE_NATIVE
++        if(original_bass[v].kind==ORIGINAL_SOUND_JUNO && live137(mot_base_snd,v))
++            juno6_lfo1_controls(&original_bass[v].dsp.juno.synth,
++                sj6_lfo1_wave_read(mot_base_snd,v),sj6_lfo1_option(mot_base_snd,v,0),
++                sj6_lfo1_option(mot_base_snd,v,1));
++#endif
 +#if X0X_SJ6_LFO1_DELAY_PORT
 +        original_runtime_part *part=&original_bass[v];
 +        if (part->kind==ORIGINAL_SOUND_JUNO && live137(mot_base_snd,v))
@@ -28,8 +128,18 @@
 +        if (original_bass[v].kind==ORIGINAL_SOUND_JUNO && live137(mot_base_snd,v))
 +            dnbx_set_sj6_sources(&original_bass[v].dsp.juno.synth.core,v,sj6_sources_read(mot_base_snd,v));
 +#endif
-         (void)original_runtime_prepare(&original_bass[v],bpm);
--#if defined(X0X_HOST) && defined(X0X_SJ6_DELAY_WITNESS)
++        (void)original_runtime_prepare(&original_bass[v],bpm);
++#if X0X_SJ6_ALT3_NATIVE
++        if(original_bass[v].kind==ORIGINAL_SOUND_JUNO && live137(mot_base_snd,v)){
++            const uint8_t *p=sj6_trem_read(mot_base_snd,v);
++            unsigned sync=0;
++#if X0X_SJ6_NATIVE_DELAY
++            sync=!!(read137(mot_base_snd,v)[SJ6_DELAY_BYTE]&SJ6_DELAY_SYNC_BIT);
++#endif
++            juno6_alt3_set_panel(&original_bass[v].dsp.juno.synth,
++                sj6_trem_position(p,0u),sj6_trem_position(p,1u),sync);
++        }
++#endif
 +#if X0X_SJ6_NATIVE_UNISON
 +        sj6_typed_unison_apply(v);
 +#endif
@@ -37,7 +147,37 @@
 +        sj6_typed_j60_apply(v);
 +#endif
 +#if (defined(X0X_HOST) && defined(X0X_SJ6_DELAY_WITNESS)) || X0X_SJ6_NATIVE_DELAY
-         sj6_typed_delay_apply(v,bpm);
- #endif
-     }
- }
++        sj6_typed_delay_apply(v,bpm);
++#endif
++    }
++}
+ #include "engine_arp.inc"
+ 
+ /* ---------------------------------------------------------------- render --- */
+ static void engine_notes_off_apply(void)
+@@ -2511,8 +2586,25 @@
+         unsigned v=c.word&1u,token=(c.word>>1)&63u,pitch=(c.word>>7)&127u;
+         unsigned velocity=(c.word>>14)&127u,accent=(c.word>>21)&1u,slide=(c.word>>22)&1u;
+         live_key_owner_t *o=&live_key_owner[v];
+         if(o->blocked || c.generation!=o->generation)continue;
++#if X0X_S1_KEYBOARD_HOLD
++        if(c.word&LIVE_KEY_HOLD) {
++            if(original_bass[v].kind != ORIGINAL_SOUND_SYNTHONE)continue;
++            unsigned on=(c.word>>1)&1u;
++            if(!on && s1_keyboard_hold[v]) {
++                /* Release this keyboard's admissions only. Runtime key-off
++                 * obeys a separately active damper, MIDI and ARP ownership. */
++                chi_live_note_off((int)v);
++                o->gate=o->token=o->pitch=o->arp=0;
++                if(bass_held_src[v]==ORIGINAL_INPUT_KEYS)bass_held[v]=bass_held_count[v]=0;
++            }
++            s1_keyboard_hold[v]=(uint8_t)on;
++            continue;
++        }
++        if(!velocity && s1_keyboard_hold[v] &&
++           original_bass[v].kind==ORIGINAL_SOUND_SYNTHONE)continue;
++#endif
+         if (velocity && SEQ_PART_OFF(&seq, TRK_BASS0 + v)) continue;
+         if (velocity) bass_adapt_flags((int)v, (int)accent, (int)slide);
+         uint8_t previous = original_key_pitch[v][token];
+         if (velocity) {

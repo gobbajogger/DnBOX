@@ -1,17 +1,131 @@
 --- a/firmware/src/app/original_runtime.c
 +++ b/firmware/src/app/original_runtime.c
-@@ -5,8 +5,10 @@
+@@ -5,8 +5,16 @@
  #if X0X_S1C
  #include "chicago_fx2_compact.h"
  #endif
  #include <string.h>
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++/* Keep one exact cold verifier in the existing non-LTO runtime object. */
++#define CANONICAL137_IMPL
++#include "sj6_137_host_witness.h"
++#undef CANONICAL137_IMPL
++#endif
 +#include "../dsp/sj6_native_limiter.inc"
 +#include "../dsp/sj6_native_room.inc"
  #if X0X_SJ6_CLASSIC_I_PROBE
  #include "../dsp/classic_i/classic.c"
  #include "../dsp/classic_i/wrapper.c"
  #endif
-@@ -467,8 +469,10 @@
+@@ -271,9 +279,9 @@
+     memset(b, 0, ARP_BLOCK_BYTES);
+     b[0] = 'A'; b[1] = 1u;
+     unsigned mode = arp_clamp(c->mode, 0, ARP_NMODES - 1u), flags = 0;
+ #if (defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE) || X0X_SJ6_NATIVE_RANDOM2
+-    if(mode==ARP_SAGA_RANDOM2) mode=ARP_UP;
++    if(sj6_random_encode(mode)) mode=ARP_UP;
+ #endif
+ #if X0X_SUPERJ6_BUILTIN_INIT
+     const unsigned division = c->division <= ARP_SAGA_DIVISIONS ? c->division : 0;
+     /* Reserved v1 header bits hold the extended mode and division. Older
+@@ -407,9 +415,42 @@
+ {
+     for (unsigned s = 0; s < ORIGINAL_INPUT_COUNT; ++s) if (live_source(s) && p->keys[s][key]) return 1;
+     return 0;
+ }
+-static void arp_key_on(void *ctx, int note, int velocity) { (void)runtime_note(ctx, (unsigned)note, (unsigned)velocity); }
++static void arp_key_on(void *ctx, int note, int velocity)
++{
++#if X0X_SJ6_LFO_TRIGGER_NATIVE
++    original_runtime_part *p=ctx;
++    if(p->kind==ORIGINAL_SOUND_JUNO && velocity)
++        juno6_lfo_trigger(&p->dsp.juno.synth,SJ6_LFO_EVENT_ARP);
++#endif
++#if X0X_SJ6_RANDOM5_6_NATIVE
++    original_runtime_part *zero_owner=ctx;
++#if X0X_SJ6_SEQ_DEST_NATIVE
++    unsigned layers=zero_owner->arp.prm.saga_layers;
++    if (layers && zero_owner->kind==ORIGINAL_SOUND_JUNO && zero_owner->dsp.juno.synth.typed) {
++#if X0X_SJ6_LFO_TRIGGER_NATIVE
++        if (!velocity)
++            juno6_lfo_trigger(&zero_owner->dsp.juno.synth,SJ6_LFO_EVENT_ARP);
++#endif
++        int ok=runtime_result(zero_owner,juno6_arp_routed_on(&zero_owner->dsp.juno.synth,
++                                   (uint8_t)note,(uint8_t)velocity,layers));
++        if (ok==ORIGINAL_RUNTIME_OK && velocity && engine_remote_bass_voice)
++            engine_remote_bass_voice(zero_owner,(unsigned)note,(unsigned)velocity);
++        return;
++    }
++#endif
++    /* Scheduler ON is distinct from a velocity-zero MIDI packet. */
++    if (!velocity && zero_owner->kind==ORIGINAL_SOUND_JUNO && zero_owner->dsp.juno.synth.typed) {
++#if X0X_SJ6_LFO_TRIGGER_NATIVE
++        juno6_lfo_trigger(&zero_owner->dsp.juno.synth,SJ6_LFO_EVENT_ARP);
++#endif
++        (void)runtime_result(zero_owner,juno6_arp_zero_on(&zero_owner->dsp.juno.synth,(uint8_t)note));
++        return;
++    }
++#endif
++    (void)runtime_note(ctx, (unsigned)note, (unsigned)velocity);
++}
+ static void arp_key_off(void *ctx, int note)
+ {
+     original_runtime_part *p = ctx;
+     if (!p->keys[ORIGINAL_INPUT_SEQUENCE][note]) (void)runtime_note(p, (unsigned)note, 0);
+@@ -439,8 +480,52 @@
+     return ticks > UINT32_MAX - S1_SAMPLE_TICKS ? UINT32_MAX - S1_SAMPLE_TICKS : (uint32_t)ticks;
+ }
+ #endif
+ static const uint8_t arp_ticks[ARP_NSPEED] = {48, 36, 32, 24, 18, 16, 12, 8, 6, 3};   /* 24 PPQN */
++#if X0X_SJ6_AUX_SEQ_NATIVE
++#if !X0X_SJ6_AUX_LFO_NATIVE || !X0X_SUPERJ6_BUILTIN_INIT
++#error SuperJ6 sequencer LFO targets require the native aux engine and Saga scheduler
++#endif
++float sj6_aux_arp_base(const original_runtime_part *p,unsigned id)
++{
++    const engine_arp_cfg *c=&p->arp.cfg;
++    switch(id) {
++        case 65: return (c->range?c->range-1u:0u)*(1.f/3.f);
++        case 66: return c->interval*(1.f/12.f);
++        case 143: {
++            unsigned beats=c->division ? saga_step(544u,c->division) :
++                544u*arp_ticks[c->speed<ARP_NSPEED?c->speed:ARP_SPEED_1_16]/24u;
++            const float knob=((float)beats*(1.f/544.f)-.3f)*(1.f/.7f);
++            return knob<0.f?0.f:knob>1.f?1.f:knob;
++        }
++        case 144:return c->gate*.01f;
++        case 145:return (c->length?c->length-1u:15u)*(1.f/15.f);
++        default:return id>=147u && id<=162u ?
++            (24.f+c->offset[id-147u])*(1.f/48.f) : 0.f;
++    }
++}
++/* Build9 Seq Division maps the normalized input to round((.3+.7*u)*17)/17.
++ * Time is represented in the existing Q8 sample scheduler domain. */
++static uint32_t sj6_aux_divtime(uint32_t beat,unsigned fine)
++{ return (uint32_t)(((uint64_t)beat*fine)/17u); }
++static unsigned sj6_aux_arp_apply(S1SequencerParams *q,const uint8_t ids[4],
++                                 const float raw[4],unsigned n)
++{
++    unsigned fine=0;
++    for(unsigned i=0;i<n;i++) {
++        const float v=raw[i];
++        switch(ids[i]) {
++            case 65:q->arpOctave=(uint8_t)(v*3.f+.5f);break;
++            case 66:q->arpInterval=(uint8_t)(v*12.f+.5f);break;
++            case 143:fine=(unsigned)((.3f+.7f*v)*17.f+.5f);break;
++            case 144:q->seqGate=(uint8_t)(v*100.f+.5f);break;
++            case 145:q->arpTotalSteps=(uint8_t)(v*15.f+1.5f);break;
++            default:q->sequencerPattern[ids[i]-147u]=(int8_t)((int)(v*48.f+.5f)-24);break;
++        }
++    }
++    return fine;
++}
++#endif
+ uint32_t engine_arp_step_frames(float bpm, unsigned speed)
+ {
+     const uint8_t *ticks = arp_ticks;
+     bpm = bpm < 20.f ? (bpm > 0.f ? 20.f : 120.f) : bpm > 275.f ? 275.f : bpm;
+@@ -467,15 +552,17 @@
  #if !defined(X0X_HOST) || !defined(DNBOX_137_HOST_WITNESS)
  #error "Saga zero Gate is a composed host witness only"
  #endif
@@ -22,8 +136,28 @@
  #if X0X_SUPERJ6_BUILTIN_INIT
      q->saga_notes = p->kind == ORIGINAL_SOUND_JUNO;
      q->saga_timing = q->saga_notes && c->division && c->division <= ARP_SAGA_DIVISIONS;
-@@ -489,26 +493,79 @@
+ #if (defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE) || X0X_SJ6_NATIVE_RANDOM2
+-    if (c->mode==ARP_SAGA_RANDOM2 && q->saga_notes)
+-        q->arpDirection=ArpeggiatorMode_SagaRandom;
++    if (q->saga_notes && sj6_random_encode(c->mode))
++        q->arpDirection=ArpeggiatorMode_SagaRandom+c->mode-ARP_SAGA_RANDOM2;
+ #endif
+     if (c->mode == ARP_UPDN_REPEAT)
+         q->arpDirection = q->saga_notes ? ArpeggiatorMode_UpDownRepeat : ArpeggiatorMode_UpDown;
+     if (q->saga_timing) {
+@@ -486,29 +573,90 @@
+     } else
+ #endif
+         S1Sequencer_setStep(q, S1_SAMPLE_TICKS * engine_arp_step_frames(p->arp.bpm, c->speed));
      q->patternRange = p->kind == ORIGINAL_SOUND_SYNTHONE ? 12 : 24;
++#if X0X_S1_SCALE_NATIVE && X0X_S1C
++    const s1c *s=&p->dsp.synthone.e;
++    q->npo=p->kind!=ORIGINAL_SOUND_SYNTHONE ? 0u :
++#if X0X_S1_USER_SCALE
++        s->tuning_index==S1C_SCALE_USER ? s->user_npo :
++#endif
++        (uint8_t)s1c_scale_npo(s->tuning_index);
++#endif
      q->clocked = 0;
  }
  #if X0X_S1_FENCED_CLOCK
@@ -104,7 +238,7 @@
          a->source_phase+=a->source_delta;
          const double r1=__builtin_fmod(a->source_phase,a->source_factor);
          p.trigger=first||r1<r0;
-@@ -516,15 +573,26 @@
+@@ -516,23 +664,42 @@
              const double i=a->source_phase/a->source_factor;
              if (i>=2147483648.) p.trigger=0;
              else p.index=(int)i;
@@ -131,7 +265,24 @@
      if (start) p->arp.clk_force = (uint8_t)arp_engaged(p);
  }
  /* Lock the sequencer to the transport: grid = beat * SPEED ticks / 24. */
-@@ -565,9 +633,13 @@
+-static void arp_follow_clock(original_runtime_arp *a)
++static void arp_follow_clock(original_runtime_arp *a
++#if X0X_SJ6_AUX_SEQ_NATIVE
++    ,unsigned aux_div
++#endif
++)
+ {
+     const unsigned sp = a->cfg.speed < ARP_NSPEED ? a->cfg.speed : ARP_SPEED_1_16;
+     uint32_t len;
++#if X0X_SJ6_AUX_SEQ_NATIVE
++    if(aux_div)len=sj6_aux_divtime(a->clk_beat,aux_div);
++    else
++#endif
+ #if X0X_SUPERJ6_BUILTIN_INIT
+     if (a->prm.saga_timing) len = saga_step(a->clk_beat, a->cfg.division);
+     else
+ #endif
+@@ -565,9 +732,13 @@
  #if X0X_SJ6_NATIVE_POSITIVE_GATE
  int original_runtime_sj6_live_gate(original_runtime_part *p,unsigned gate)
  {
@@ -146,7 +297,56 @@
      S1Sequencer_liveGate(&p->arp.seq,&p->arp.prm,gate);
      return 1;
  }
-@@ -739,8 +811,16 @@
+@@ -603,11 +774,23 @@
+     *step = (unsigned)p->arp.seq.lastPosition % ARP_STEPS;
+     *frames = p->arp.age;
+     return 1;
+ }
++#if X0X_SJ6_LFO_TRIGGER_NATIVE
++static void sj6_lfo_note_set_changed(original_runtime_part *p)
++{
++    if(p->kind!=ORIGINAL_SOUND_JUNO || !juno6_lfo_snapback_active(&p->dsp.juno.synth))return;
++    for(unsigned s=0;s<ORIGINAL_INPUT_COUNT;s++)
++        for(unsigned key=0;key<128u;key++)if(p->keys[s][key])return;
++    juno6_lfo_trigger(&p->dsp.juno.synth,SJ6_LFO_EVENT_EMPTY);
++}
++#endif
+ /* A live or sequenced key's count already went down: the arp, or the voice. */
+ static int live_off(original_runtime_part *p, unsigned source, unsigned key)
+ {
++#if X0X_SJ6_LFO_TRIGGER_NATIVE && X0X_ARP_ENGINE
++    sj6_lfo_note_set_changed(p);
++#endif
+     if (live_source(source) && arp_engaged(p)) {
+         if (!live_held(p, key)) arp_hold(p, key, 0);
+         return ORIGINAL_RUNTIME_OK;
+     }
+@@ -615,8 +798,11 @@
+ }
+ #else
+ static int live_off(original_runtime_part *p, unsigned source, unsigned key)
+ {
++#if X0X_SJ6_LFO_TRIGGER_NATIVE && X0X_ARP_ENGINE
++    sj6_lfo_note_set_changed(p);
++#endif
+     (void)source;
+     return key_held(p, key) ? ORIGINAL_RUNTIME_OK : runtime_note(p, key, 0);
+ }
+ #endif
+@@ -671,8 +857,12 @@
+             p->stale_ttl[source][key] = ORIGINAL_STALE_GRACE_TICKS;
+             ++p->stale_timers;
+         }
+         ++*held;
++#if X0X_SJ6_LFO_TRIGGER_NATIVE
++        if(p->kind==ORIGINAL_SOUND_JUNO)
++            juno6_lfo_trigger(&p->dsp.juno.synth,SJ6_LFO_EVENT_KEY);
++#endif
+ #if X0X_ARP_ENGINE
+         if (live_source(source) && arp_engaged(p)) {
+             p->arp.vel = (uint8_t)velocity;
+             arp_hold(p, key, velocity ? velocity : 1u);
+@@ -739,8 +929,16 @@
      if(p->kind==ORIGINAL_SOUND_JUNO){
          juno6_all_off(&p->dsp.juno.synth);
          memset(p->dsp.juno.chorus.delay,0,sizeof p->dsp.juno.chorus.delay);
@@ -163,7 +363,47 @@
          s1_part_all_off(&p->dsp.synthone);
          ok = 1;
      } else if (p->kind == ORIGINAL_SOUND_MIAMI) {
-@@ -880,8 +960,11 @@
+@@ -873,15 +1071,50 @@
+         /* S1Sequencer::process runs once per sample, as in S1DSPKernel; the
+          * block is split where it turns notes on or off. */
+         original_runtime_arp *a = &p->arp;
+         unsigned done = 0;
+-        if (a->clk_beat) arp_follow_clock(a);
++        const S1SequencerParams *active=&a->prm;
++#if X0X_SJ6_AUX_SEQ_NATIVE
++        S1SequencerParams mod;
++        uint8_t ids[4];
++        float values[4];
++        unsigned n=p->kind==ORIGINAL_SOUND_JUNO && p->dsp.juno.synth.typed ?
++            juno6_aux_seq_values(&p->dsp.juno.synth,ids,values) : 0u;
++        unsigned aux_div=0;
++        if(n) {
++            mod=a->prm;
++            aux_div=sj6_aux_arp_apply(&mod,ids,values,n);
++            active=&mod;
++        }
++#endif
++        if (a->clk_beat) arp_follow_clock(a
++#if X0X_SJ6_AUX_SEQ_NATIVE
++            ,aux_div
++#endif
++        );
++#if X0X_SJ6_AUX_SEQ_NATIVE
++        if(n) {
++            uint32_t period=a->prm.arpSeqTempoMultiplier;
++            mod.clocked=a->prm.clocked;
++            if(!a->clk_beat && aux_div) {
++                float bpm=a->bpm;
++                bpm=!(bpm>=20.f)?(bpm>0.f?20.f:120.f):bpm>275.f?275.f:bpm;
++                unsigned beat=(unsigned)((44100.f*60.f*S1_SAMPLE_TICKS)/bpm+.5f);
++                period=sj6_aux_divtime(beat,aux_div);
++            }
++            /* Cache the new duration for future attacks, not an existing latch. */
++            S1Sequencer_setStep(&mod,period);
++        }
++#endif
+ #if X0X_S1_FENCED_CLOCK
+         const int source_available=a->source_set && p->kind==ORIGINAL_SOUND_SYNTHONE &&
              !a->clk_beat && a->prm.seqGate==100;
          if (!source_available) a->source_wait=!!a->source_set;
          else if (a->source_wait && !a->nheld) {
@@ -175,11 +415,36 @@
  #endif
          for (unsigned i = 0; i < frames; ++i) {
  #if X0X_S1_FENCED_CLOCK
-@@ -915,18 +998,50 @@
+@@ -898,35 +1131,82 @@
+                 a->age+=a->age<UINT32_MAX;
+                 continue;
+             }
+ #endif
+-            if (S1Sequencer_willFire(&a->seq, &a->prm, a->nheld)) {
++            if (S1Sequencer_willFire(&a->seq, active, a->nheld)) {
+                 if (i > done && render_backend(p, w, left + done, right + done, i - done) != ORIGINAL_RUNTIME_OK)
+                     return p->status;
+                 done = i;
+                 int before = a->seq.mStepCounter, first = !a->seq.previousHeldNoteNumbersAECount && a->nheld;
+-                S1Sequencer_process(&a->seq, &a->prm, a->held, a->nheld, p, arp_key_on, arp_key_off);
++                S1Sequencer_process(&a->seq, active, a->held, a->nheld, p, arp_key_on, arp_key_off);
+                 if (p->status != ORIGINAL_RUNTIME_OK) return p->status;
+                 if (a->seq.gateOpen && (first || a->seq.mStepCounter != before)) { a->fired = 1; a->age = 0; }
+-            } else S1Sequencer_process(&a->seq, &a->prm, a->held, a->nheld, p, arp_key_on, arp_key_off);
++            } else S1Sequencer_process(&a->seq, active, a->held, a->nheld, p, arp_key_on, arp_key_off);
+             a->age += a->age < UINT32_MAX;
+         }
+         return frames > done ? render_backend(p, w, left + done, right + done, frames - done) : p->status;
+     }
  #endif
      return render_backend(p, w, left, right, frames);
  }
  
+-static int render_backend(original_runtime_part *p, original_runtime_workspace *w,
+-    float *left, float *right, unsigned frames)
+-{
+-    int ok;
+-    if(p->kind==ORIGINAL_SOUND_JUNO){
 +#if X0X_SJ6_NATIVE_ROOM
 +/* Build9 uses an independent AKDecimator with 30 percent wet and 1.3 gain.
 + * This compact receiver preserves the decimation control direction, rate law,
@@ -202,16 +467,33 @@
 +}
 +#endif
 +
- static int render_backend(original_runtime_part *p, original_runtime_workspace *w,
-     float *left, float *right, unsigned frames)
- {
-     int ok;
-     if(p->kind==ORIGINAL_SOUND_JUNO){
  #if X0X_SUPERJ6_FACTORY
-         ok=juno6_render_stereo(&p->dsp.juno.synth,left,right,frames);
-         if(ok){
+-        ok=juno6_render_stereo(&p->dsp.juno.synth,left,right,frames);
+-        if(ok){
 -#if defined(X0X_HOST) && defined(X0X_SJ6_ALT3_WITNESS)
++#if X0X_SJ6_AUX_LFO_NATIVE
++#include "../dsp/juno6_aux_catalog.h"
++#include "../dsp/juno6_aux_fx.h"
++float juno6_aux_master_gain(float);
 +#if (defined(X0X_HOST) && defined(X0X_SJ6_ALT3_WITNESS)) || X0X_SJ6_ALT3_NATIVE
++void juno6_alt3_process_mod(juno6_t *,float *,float *,unsigned,float,float);
++#endif
++#if X0X_SJ6_NATIVE_DELAY
++float juno6_aux_delay_frames(const juno6_t *,unsigned);
++#endif
++#endif
++static void sj6_run_effects(original_runtime_part *p,float *left,float *right,unsigned frames
++#if X0X_SJ6_AUX_LFO_NATIVE
++                            ,float gain,float detune,float stereo,float tremolo,float tremolo_rate
++#endif
++                            )
++{
++#if (defined(X0X_HOST) && defined(X0X_SJ6_ALT3_WITNESS)) || X0X_SJ6_ALT3_NATIVE
++#if X0X_SJ6_AUX_LFO_NATIVE
++            if(tremolo>=0.f || tremolo_rate>=0.f)
++                juno6_alt3_process_mod(&p->dsp.juno.synth,left,right,frames,tremolo,tremolo_rate);
++            else
++#endif
              juno6_alt3_process(&p->dsp.juno.synth,left,right,frames); /* after HPF, before downstream FX */
 +#endif
 +#if X0X_SJ6_NATIVE_J60
@@ -227,7 +509,7 @@
  #if X0X_SJ6_CLASSIC_I_PROBE
              if(p->classic_i_authored && p->dsp.juno.chorus.factory_mode>=JUNO6_CHORUS_OFF) {
                  classic_wrapper_process(&p->classic_i_effect,p->classic_i_sample,left,right,frames);
-@@ -935,10 +1050,20 @@
+@@ -935,17 +1215,158 @@
                  juno6_chorus_process(&p->dsp.juno.chorus,left,right,frames);
  #if X0X_SJ6_CLASSIC_I_PROBE
              p->classic_i_sample+=frames;
@@ -235,8 +517,13 @@
 -#if defined(X0X_HOST) && defined(X0X_SJ6_DELAY_WITNESS)
 +#if (defined(X0X_HOST) && defined(X0X_SJ6_DELAY_WITNESS)) || X0X_SJ6_NATIVE_DELAY
              juno6_delay24_process(&p->dsp.juno.synth,left,right,frames);
-+#endif
+ #endif
 +#if X0X_SJ6_NATIVE_UNISON
++            #if X0X_SJ6_AUX_LFO_NATIVE
++            if(detune>=0.f || stereo>=0.f)
++                juno6_unison_process_mod(&p->dsp.juno.synth,left,right,frames,detune,stereo);
++            else
++#endif
 +            juno6_unison_process(&p->dsp.juno.synth,left,right,frames);
 +#endif
 +#if X0X_SJ6_NATIVE_ROOM
@@ -245,7 +532,141 @@
 +#endif
 +#if X0X_SJ6_NATIVE_LIMITER
 +            sj6_limiter_process(&p->dsp.juno.limiter,left,right,frames);
- #endif
++#endif
              /* The original master attenuator follows the instrument effects. */
-             float gain=p->dsp.juno.synth.master_gain;
+-            float gain=p->dsp.juno.synth.master_gain;
++#if X0X_SJ6_AUX_LFO_NATIVE
++            if(gain<0.f)gain=p->dsp.juno.synth.master_gain;
++#else
++            const float gain=p->dsp.juno.synth.master_gain;
++#endif
              if(gain!=1.f) for(unsigned i=0;i<frames;++i){
+                 left[i]*=gain;
+                 right[i]*=gain;
+             }
++}
++#if X0X_SJ6_AUX_LFO_NATIVE
++/* A temporary receiver write is scoped to the actual audio it modulates.
++ * Do not use UI setters here: they could reset history or mutate project
++ * state. Audio filter/tape/feedback histories continue across every span. */
++static void sj6_run_modulated_effects(original_runtime_part *p,float *left,float *right,unsigned frames,
++                                      const uint8_t code[SJ6_AUX_FX_ROUTES])
++{
++    juno6_t *s=&p->dsp.juno.synth;
++    float gain=-1.f,detune=-1.f,stereo=-1.f;
++    float tremolo=-1.f,tremolo_rate=-1.f;
++#if X0X_SJ6_NATIVE_LIMITER
++    sj6_limiter_t *lim=&p->dsp.juno.limiter;
++    const sj6_limiter_t limiter_before=*lim;
++    unsigned limited=0;
++#endif
++#if X0X_SJ6_NATIVE_ROOM
++    sj6_room_t *room=&p->dsp.juno.room;
++    const float fb=room->fb,hp=room->hp_coeff,mix=room->mix,rate=room->rate,depth=room->depth,
++                crush=p->dsp.juno.crush.step;
++#endif
++#if X0X_SJ6_NATIVE_DELAY
++    float delay_saved[3]={s->delay24.current,s->delay24.fb,s->delay24.wet};
++    uint16_t delay_ramp[3]={s->delay24.ramp[0],s->delay24.ramp[1],s->delay24.ramp[2]};
++    unsigned delay_mask=0;
++    const uint8_t saved_refused=s->delay24.clock_refused;
++#endif
++    for(unsigned i=0;i<SJ6_AUX_FX_ROUTES;i++)if(code[i]){
++        const int id=sj6_aux_destination_id(juno6_aux_fx_route(s,i));
++        unsigned raw=code[i]-1u;
++        const float u=(float)raw*(1.f/127.f);
++        switch(id){
++        case 0:gain=juno6_aux_master_gain(u);break;
++#if X0X_SJ6_NATIVE_LIMITER
++        case 17:sj6_rage_apply(lim,u);limited=1u;break;
++#endif
++#if (defined(X0X_HOST) && defined(X0X_SJ6_ALT3_WITNESS)) || X0X_SJ6_ALT3_NATIVE
++        case 103:tremolo=u;break;
++        case 104:tremolo_rate=u;break;
++#endif
++#if X0X_SJ6_NATIVE_UNISON
++        case 60:detune=u;break;
++        case 61:stereo=u;break;
++#endif
++#if X0X_SJ6_NATIVE_ROOM
++        case 13:room->fb=.4f+.6f*u;break;
++        case 14:room->hp_coeff=1.f-fm_expf(-6.2831853f*sj6_room_locut(raw)*
++                                       (SJ6_ROOM_STRIDE/44100.f));break;
++        case 15:room->mix=u;break;
++        case 22:room->rate=sj6_room_rate_clocked(raw,room->clock_bpm,room->clock_sync)*
++                           (1.f/44100.f);break;
++        case 23:room->depth=u;break;
++        case 108:p->dsp.juno.crush.step=1.f/(1.f+31.f*fm_powf(u,1.23f));break;
++#endif
++#if X0X_SJ6_NATIVE_DELAY
++        case 25:{
++            float t=juno6_aux_delay_frames(s,raw);
++            if(t>0.f){s->delay24.current=t;s->delay24.clock_refused=0;delay_mask|=1u;}
++            break;
++        }
++        case 26:s->delay24.fb=.99f*u;delay_mask|=2u;break;
++        case 27:if(s->delay24.enabled){s->delay24.wet=.9f*fm_powf(u,1.1f);delay_mask|=4u;}break;
++#endif
++        default:break;
++        }
++    }
++#if X0X_SJ6_NATIVE_DELAY
++    for(unsigned k=0;k<3u;k++)if(delay_mask&(1u<<k))s->delay24.ramp[k]=0;
++#endif
++    sj6_run_effects(p,left,right,frames,gain,detune,stereo,tremolo,tremolo_rate);
++#if X0X_SJ6_NATIVE_LIMITER
++    if(limited){
++        const float live_gain=lim->gain;
++        *lim=limiter_before;
++        lim->gain=live_gain;
++    }
++#endif
++#if X0X_SJ6_NATIVE_DELAY
++    if(delay_mask&1u){s->delay24.current=delay_saved[0];s->delay24.clock_refused=saved_refused;}
++    if(delay_mask&2u)s->delay24.fb=delay_saved[1];
++    if(delay_mask&4u)s->delay24.wet=delay_saved[2];
++    for(unsigned k=0;k<3u;k++)if(delay_mask&(1u<<k))s->delay24.ramp[k]=delay_ramp[k];
++#endif
++#if X0X_SJ6_NATIVE_ROOM
++    room->fb=fb;room->hp_coeff=hp;room->mix=mix;room->rate=rate;room->depth=depth;
++    p->dsp.juno.crush.step=crush;
++#endif
++}
++#endif
++#endif
++
++static int render_backend(original_runtime_part *p, original_runtime_workspace *w,
++    float *left, float *right, unsigned frames)
++{
++    int ok;
++    if(p->kind==ORIGINAL_SOUND_JUNO){
++#if X0X_SUPERJ6_FACTORY
++#if X0X_SJ6_AUX_LFO_NATIVE
++        juno6_t *s=&p->dsp.juno.synth;
++        sj6_aux_fx_schedule sched;
++        sched.count=0;
++        for(unsigned i=0;i<SJ6_AUX_FX_ROUTES;i++)if(sj6_aux_fx_supported(sj6_aux_destination_id(juno6_aux_fx_route(s,i)))){
++            s->aux_fx_schedule=&sched;
++            break;
++        }
++        ok=juno6_render_stereo(s,left,right,frames);
++        s->aux_fx_schedule=0;
++        if(ok){
++            if(!sched.count)sj6_run_effects(p,left,right,frames,-1.f,-1.f,-1.f,-1.f,-1.f);
++            else {
++                if(sched.event[0].at)sj6_run_effects(p,left,right,sched.event[0].at,-1.f,-1.f,-1.f,-1.f,-1.f);
++                for(unsigned i=0;i<sched.count;i++){
++                    unsigned at=sched.event[i].at;
++                    unsigned to=i+1u<sched.count?sched.event[i+1u].at:frames;
++                    if(to>at)sj6_run_modulated_effects(p,left+at,right+at,to-at,sched.event[i].code);
++                }
++            }
++#else
++        ok=juno6_render_stereo(&p->dsp.juno.synth,left,right,frames);
++        if(ok){
++            sj6_run_effects(p,left,right,frames);
++#endif
+         }
+ #else
+         juno6_render(&p->dsp.juno.synth,left,frames);
+         memcpy(right,left,frames*sizeof *right);

@@ -9,7 +9,12 @@ void juno6_j60_config(juno6_chorus_t *c,const uint8_t b[4])
     sj6_j60_t *s=&c->j60;
     if(!b[0]) {s->selected=0;return;}
     if(!s->selected) {
-        memset(&s->phase,0,sizeof *s-sizeof s->ring);
+        memset(s,0,sizeof *s);
+#if X0X_SJ6_NATIVE_CLASSIC
+        /* The other version may next resume its controls and phase, but
+         * must not read 96 kHz BBD samples as the Classic input signal. */
+        c->classic_native.filled=c->classic_native.pos=0;
+#endif
         s->selected=1;
         s->rate=s->depth=s->mix=1.f;
     }
@@ -22,12 +27,12 @@ static inline int16_t j60_quantize(float x)
     /* Internal ring scale accommodates the wet analog feedback excursion. */
     return (int16_t)(fm_clampf(x,-7.999f,7.999f)*4096.f);
 }
-static inline float j60_ring(const sj6_j60_t *s,unsigned ch,float delay)
+static inline float j60_ring(const juno6_chorus_t *c,const sj6_j60_t *s,unsigned ch,float delay)
 {
     unsigned d=(unsigned)delay;
     if(d>s->filled)return 0.f;
-    float a=s->ring[ch][(s->write-d)&1023u];
-    float b=d<s->filled?s->ring[ch][(s->write-d-1u)&1023u]:0.f;
+    float a=c->mode_history[ch][(s->write-d)&1023u];
+    float b=d<s->filled?c->mode_history[ch][(s->write-d-1u)&1023u]:0.f;
     return (a+(b-a)*(delay-(float)d))*(1.f/4096.f);
 }
 static inline float j60_biquad(float x,float z[2])
@@ -37,7 +42,7 @@ static inline float j60_biquad(float x,float z[2])
     z[1]=.0792125556f*x-.533294672f*y;
     return y;
 }
-static void j60_core(sj6_j60_t *s,unsigned mode,const float in[2])
+static void j60_core(juno6_chorus_t *c,sj6_j60_t *s,unsigned mode,const float in[2])
 {
     const float ramp=1.f/1920.f; /* source 20 ms dezipper */
     s->rate+=(s->target[0]-s->rate)*ramp;
@@ -54,11 +59,11 @@ static void j60_core(sj6_j60_t *s,unsigned mode,const float in[2])
         float f=j60_biquad(j60_biquad(in[ch],s->lp[ch][0]),s->lp[ch][1]);
         float h=.9990192f*(f-s->hp_x[ch])+.9980384f*s->hp_y[ch];
         s->hp_x[ch]=f;s->hp_y[ch]=h;
-        s->ring[ch][s->write]=j60_quantize(h);
+        c->mode_history[ch][s->write]=j60_quantize(h);
         float ph=phase+((!ch && mode!=3u)?1.f:0.f);
         if(ph>1.f)ph-=2.f;
         float d=4.f+s->center+s->depth*displacement*.967567563f*fm_fabsf(ph);
-        float p=j60_ring(s,ch,d)-1.53846154f*s->post0[ch]-s->post1[ch];
+        float p=j60_ring(c,s,ch,d)-1.53846154f*s->post0[ch]-s->post1[ch];
         s->post0[ch]+=.533294672f*p;
         s->post1[ch]+=.533294672f*s->post0[ch];
         s->wet[ch]=s->post1[ch];
@@ -85,7 +90,7 @@ void juno6_j60_process(juno6_chorus_t *c,float *left,float *right,unsigned frame
             float fraction=next/ratio;
             float lerp[2]={s->prev[0]+(exact[0]-s->prev[0])*fraction,
                            s->prev[1]+(exact[1]-s->prev[1])*fraction};
-            j60_core(s,m-JUNO6_CHORUS_OFF,lerp);
+            j60_core(c,s,m-JUNO6_CHORUS_OFF,lerp);
             next+=1.f;
         }
         s->bridge=ratio-next+1.f;

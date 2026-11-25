@@ -34,7 +34,15 @@ def seal(tool,*args):
         assert len(data)==int(count)
         vals['.rodata.'+name]=data
     pair={k:len(v) for k,v in vals.items()}
-    held=''.join(' *('+n+')' for n in pair)
+    # Cold immutable stock program metadata, byte-identical to same-build
+    # APP references on both models. No payload fixtures or slot writes.
+    cold_factory={
+        '.rodata.original_chicago_factory_codes': (2005,'c4f2c076f7cd43735bdd0ade4265f89af86b7ceeac62f9e1d0946c032a21c9eb'),
+        '.rodata.original_chicago_factory_dictionary': (1236,'87921e3521e84543e7f0224a804139b6ddd57c5b8a5decdaa89e75d2f12b3577'),
+        '.rodata.original_chicago_factory_names': (879,'0283818ed72be42cab3ca326e1631fb231dd1bdb9343ac3e65ccd5cb49d5a281'),
+        '.rodata.original_program_value_words': (908,'5483735b4f2274809b5acd3b80b00bc1a7670e7cf04579faec7354c63bb9f668'),
+    }
+    held=''.join(' *('+n+')' for n in (*pair,*cold_factory))
     def link(header,companion):
         h=' '.join('LONG(0x%08x);'%x for x in struct.unpack('<8I',header))
         h2=' '.join('LONG(0x%08x);'%x for x in struct.unpack('<8I',companion))
@@ -69,6 +77,13 @@ def seal(tool,*args):
         assert sz==expected and 0x020AF000+32<=aa and aa+sz<=0x020AF000+len(z[-1]),(name,aa,sz)
         off=aa-0x020AF000
         assert z[-1][off:off+sz]==vals[name],name
+    for name,(expected,digest) in cold_factory.items():
+        entries=re.findall(r'^ '+re.escape(name)+r'\s+(0x[0-9a-f]+)\s+(0x[0-9a-f]+)',m,re.M)
+        assert len(entries)==1,(name,entries)
+        addr,size=map(lambda x:int(x,16),entries[0])
+        off=addr-0x020AF000
+        assert size==expected and off>=32 and off+size<=len(z[-1]),(name,addr,size)
+        assert hashlib.sha256(z[-1][off:off+size]).hexdigest()==digest,name
     src=(Path(b.OUT)/'gen/x0x_drum_samples.h').read_text()
     for name in names:
         addr,size=(int(x,16) for x in re.search(r'^ \.rodata\.x0x_smp_'+name+r'\s+(0x[0-9a-f]+)\s+(0x[0-9a-f]+)',m,re.M).groups())
@@ -76,7 +91,17 @@ def seal(tool,*args):
         data=bytes(int(v.strip(),0) for v in q.split(',') if v.strip())
         off=addr-0x020E1000
         assert off>=32 and len(data)==size and z[-2][off:off+size]==data
-    used=sum(map(len,z[:4]))
+    # Use the stock packer's load offsets, inter-section gaps and final marker,
+    # not merely the sum of the ELFs' extracted section lengths.
+    syms=real('common/bin/objdump','-t',elf)
+    end=len(z[0])
+    for data,name in zip(z[1:4],('_rt_load','_c1_load','_data_load')):
+        if not data: continue
+        load=int(re.search(r'^([0-9a-f]+) .*\s'+name+r'$',syms,re.M)[1],16)
+        offset=load-b.APP_XIP
+        assert load%4==0 and offset>=end,(name,offset,end)
+        end=offset+len(data)
+    used=((end+3)&~3)+4
     pool=int(re.search(r'^\.pool\s+0x[0-9a-f]+\s+0x([0-9a-f]+)',m,re.M)[1],16)
     print('guarded',b.MODEL,'XIP',used,'free',0x86ee0-used,'pool usable',0x54000-pool-8192,'read-only FDATA',len(z[-2]),'diagnostic slot3 span',len(z[-1]),'slot3 free',32768-len(z[-1]),'header',h.hex(),'ELF',hashlib.sha256(elf.read_bytes()).hexdigest(),flush=True)
     raise Stop

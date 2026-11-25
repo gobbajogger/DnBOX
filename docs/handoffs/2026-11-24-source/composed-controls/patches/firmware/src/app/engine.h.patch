@@ -1,0 +1,15 @@
+--- a/firmware/src/app/engine.h
++++ b/firmware/src/app/engine.h
+@@ -399,8 +399,12 @@
+  * state arp=-1 means serial-exhausted admission: fail closed until cold boot. */
+ void engine_live_key_state(int voice,uint32_t *generation,int *arp,uint32_t *context);
+ void engine_live_key_cancel(int voice);
+ int engine_live_key(int voice,uint32_t generation,int token,int pitch,int velocity,int accent,int slide);
++#if X0X_S1_KEYBOARD_HOLD
++int engine_s1_key_hold(int voice);
++int engine_s1_key_set_hold(int voice,int on);
++#endif
+ 
+ #if defined(X0X_HOST) && defined(X0X_LIVE_KEY_TEST)
+ /* Host fixture controls; not part of the firmware API. Match engine.c guards. */
+ void engine_live_key_force_serial(int voice,uint32_t generation,uint32_t context);

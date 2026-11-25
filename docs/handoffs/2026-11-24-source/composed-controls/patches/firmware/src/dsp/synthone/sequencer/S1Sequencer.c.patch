@@ -32,7 +32,22 @@
  }
  
  void S1Sequencer_reset(S1Sequencer *s, int resetNotes, void *ctx, KeyOffCallback off)
-@@ -144,9 +153,13 @@
+@@ -115,9 +124,13 @@
+         }
+         notes[slot] = (NoteNumber){(uint8_t)pitch, held[h].velocity};
+     }
+ #if (defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE) || X0X_SJ6_NATIVE_RANDOM2
+-    if (mode==ArpeggiatorMode_SagaRandom)
++    if (mode==ArpeggiatorMode_SagaRandom
++#if X0X_SJ6_RANDOM5_6_NATIVE
++        || mode==ArpeggiatorMode_SagaRandom5 || mode==ArpeggiatorMode_SagaRandom6
++#endif
++       )
+         index=(int)saga_random_index(&sequencer->saga_random_state,seed,(unsigned)size);
+     else
+ #endif
+     if (mode == ArpeggiatorMode_Down) index = size - 1 - index;
+@@ -144,9 +157,13 @@
  {
  #if defined(X0X_SJ6_GATE_DEADLINE_PROBE) && X0X_SJ6_GATE_DEADLINE_PROBE
      if (s->editGateLatched) return s->editGateTicks;
@@ -46,7 +61,7 @@
      (void)s;
      return p->gateTicks;
  }
-@@ -159,11 +172,18 @@
+@@ -159,11 +176,18 @@
          s->editGateTicks=p->gateTicks;
          s->editGateLatched=1;
      }
@@ -65,7 +80,7 @@
      p->seqGate=(uint8_t)percent;
      S1Sequencer_setStep(p,p->arpSeqTempoMultiplier);
  }
-@@ -202,8 +222,12 @@
+@@ -202,8 +226,12 @@
      const int arpSeqIsOn = p->arpIsOn == 1;
      const int firstTimeAnyKeysHeld = s->previousHeldNoteNumbersAECount == 0 && heldNoteNumbersAECount > 0;
      const int firstTimeNoKeysHeld = heldNoteNumbersAECount == 0 && s->previousHeldNoteNumbersAECount > 0;
@@ -78,7 +93,7 @@
      if (arpSeqIsOn && (firstTimeNoKeysHeld || firstTimeAnyKeysHeld)) {
  #if X0X_SUPERJ6_BUILTIN_INIT
          s->saga_index = 0;
-@@ -246,22 +270,37 @@
+@@ -246,22 +274,43 @@
                          !pulse &&
  #endif
                          firstTimeAnyKeysHeld
@@ -101,6 +116,12 @@
                  const int size = sequenceSize(p, heldNoteNumbersAECount);
                  // At least one key is held down, and a non-empty sequence has been created
                  if (size > 0) {
++#if X0X_S1_SCALE_NATIVE
++                    const int npo=p->npo?p->npo:12;
++                    const float npof=(float)npo/12.f;
++#else
++                    const int npo=12;
++#endif
                      // DnBOX: SEQ follows the transport grid; ARP order starts on the press
 +#if X0X_SJ6_SEQ_SETTINGS_NATIVE
 +                    if (first_snap || firstTimeAnyKeysHeld || s->mStepCounter < s->mStepBase)
@@ -116,3 +137,45 @@
                      if (pulse) seqNotePosition = pulse->index % size;
  #endif
  #if X0X_SUPERJ6_BUILTIN_INIT
+@@ -276,9 +325,12 @@
+                         const int onOff = p->sequencerNoteOn >> i & 1;
+                         const int octBoost = p->sequencerOctBoost >> i & 1;
+                         int nn = p->sequencerPattern[i];
+                         nn = nn < -p->patternRange ? -p->patternRange : nn > p->patternRange ? p->patternRange : nn;
+-                        const int nnob = (nn < 0) ? (nn - octBoost * 12) : (nn + octBoost * 12);
++#if X0X_S1_SCALE_NATIVE
++                        nn=(int)((float)nn*npof); /* original truncates each transposed step */
++#endif
++                        const int nnob = (nn < 0) ? (nn - octBoost * npo) : (nn + octBoost * npo);
+                         if (onOff == 1) {
+                             for (int h = 0; h < heldNoteNumbersAECount; ++h) {
+                                 int note = held[h].noteNumber + nnob;
+ #if X0X_SUPERJ6_BUILTIN_INIT
+@@ -303,10 +355,26 @@
+                                                          );
+                         else
+ #endif
+                             snn = arpNote(held, heldNoteNumbersAECount, p->arpOctave + 1,
+-                                          p->arpInterval, p->arpDirection, seqNotePosition);
++#if X0X_S1_SCALE_NATIVE
++                                          (int)((float)p->arpInterval*npof),
++#else
++                                          p->arpInterval,
++#endif
++                                          p->arpDirection, seqNotePosition);
+                         if (snn.noteNumber < S1_NUM_MIDI_NOTES) {
++#if X0X_SJ6_RANDOM5_6_NATIVE
++                            if (p->saga_notes && p->arpDirection>=ArpeggiatorMode_SagaRandom5) {
++                                /* Build9 updates currentStepIndex and wraps by
++                                 * seq length before Conductor sees the note-on. */
++                                unsigned step=(s->mStepCounter-s->mStepBase+1u)%(p->arpTotalSteps ? p->arpTotalSteps : 16u);
++                                if (p->arpDirection==ArpeggiatorMode_SagaRandom6 ?
++                                    !(step&3u) : step>1u &&
++                                    saga_random_index(&s->saga_random_state,p->saga_random_seed,100u)<50u)
++                                    snn.velocity=0;
++                            }
++#endif
+                             on(ctx, snn.noteNumber, snn.velocity);
+                             s->sequencerLastNotes[s->sequencerLastNotesCount++] = snn.noteNumber;
+                         }
+                     }

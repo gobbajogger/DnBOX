@@ -26,14 +26,14 @@ void juno6_classic_native_config(juno6_chorus_t *c,const uint8_t b[3])
     }
     s->mode=(uint8_t)m;
 }
-static inline float classic_native_tap(const sj6_classic_native_t *s,unsigned ch,float lag)
+static inline float classic_native_tap(const juno6_chorus_t *c,const sj6_classic_native_t *s,unsigned ch,float lag)
 {
     const unsigned n=(unsigned)lag;
     if(n>s->filled)return 0.f;
     int index=(int)s->pos-(int)n;
     if(index<0)index+=SJ6_CLASSIC_NATIVE_RING;
-    const float a=s->ring[ch][index], b=n==s->filled?0.f:
-        s->ring[ch][index?index-1:SJ6_CLASSIC_NATIVE_RING-1];
+    const float a=c->mode_history[ch][index], b=n==s->filled?0.f:
+        c->mode_history[ch][index?index-1:SJ6_CLASSIC_NATIVE_RING-1];
     return (a+(b-a)*(lag-(float)n))*(1.f/4096.f);
 }
 static inline float classic_native_lfo(float p)
@@ -60,14 +60,14 @@ void juno6_classic_native_process(juno6_chorus_t *c,float *l,float *r,unsigned f
         --s->quantum;
         const float phase=s->phase, mix=s->current[2];
         const float amp=(24.f-3.518f)*.5f*s->current[1], center=(24.f+3.518f)*.5f;
-        const float a=classic_native_tap(s,0,(center+amp*classic_native_lfo(phase))*ms);
-        const float b=classic_native_tap(s,1,(center+amp*classic_native_lfo(phase+.25f))*ms);
+        const float a=classic_native_tap(c,s,0,(center+amp*classic_native_lfo(phase))*ms);
+        const float b=classic_native_tap(c,s,1,(center+amp*classic_native_lfo(phase+.25f))*ms);
         const float x=l[i], y=r[i];
         /* Corrected source uses feedback *= 1 + .05*sin(...). At the
          * typed Init native carrier raw feedback is exactly zero; the
          * original shadow mode-offset assignments are not injected. */
-        s->ring[0][s->pos]=(int16_t)(fm_clampf(x,-7.999f,7.999f)*4096.f);
-        s->ring[1][s->pos]=(int16_t)(fm_clampf(y,-7.999f,7.999f)*4096.f);
+        c->mode_history[0][s->pos]=(int16_t)(fm_clampf(x,-7.999f,7.999f)*4096.f);
+        c->mode_history[1][s->pos]=(int16_t)(fm_clampf(y,-7.999f,7.999f)*4096.f);
         if(++s->pos>=SJ6_CLASSIC_NATIVE_RING)s->pos=0;
         if(s->filled<SJ6_CLASSIC_NATIVE_RING-1u)++s->filled;
         s->phase+=s->current[0]*inv_sr;

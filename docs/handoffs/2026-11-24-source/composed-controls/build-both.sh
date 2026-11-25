@@ -40,6 +40,13 @@ allowed={
  "-DX0X_SJ6_NATIVE_J60=1", "-DX0X_SJ6_AUX_LFO_NATIVE=1", "-DX0X_SJ6_NOISE_SUB_NATIVE=1",
  "-DX0X_SJ6_OTA_NATIVE=1",
  "-DX0X_SJ6_NATIVE_LIMITER=1", "-DX0X_SJ6_NATIVE_CLASSIC=1", "-DX0X_SJ6_SEQ_SETTINGS_NATIVE=1",
+ "-DX0X_SJ6_LFO1_WAVE_NATIVE=1",
+ "-DX0X_SJ6_LFO_TRIGGER_NATIVE=1",
+ "-DX0X_S1_KEYBOARD_HOLD=1",
+ "-DX0X_S1_SCALE_NATIVE=1", "-DX0X_SJ6_SEQ_DEST_NATIVE=1",
+ "-DX0X_S1_USER_SCALE=1", "-DX0X_S1_HALFTIME=1", "-DX0X_SJ6_AUX_SEQ_NATIVE=1",
+ "-DX0X_SJ6_RANDOM5_6_NATIVE=1",
+ "-DX0X_MIX_DELAY_PACK14=1",
 }
 if not all(x in allowed for x in flags):
  raise SystemExit("Unknown control flag; validate the port before adding it to this wrapper")
@@ -52,8 +59,8 @@ PYFLAGS
 fi
 export JIELI_TOOLCHAIN="$root/prereqs/jieli-linux-toolchains-20260730.1" PYTHONPATH="$out/src" D9_LAB_OUT="$out/src/labout" PYTHONDONTWRITEBYTECODE=1
 export X0X_SUPERJ6_FACTORY=1 X0X_SUPERJ6_BUILTIN_INIT=1 X0X_S1C=1 X0X_SYNTH_CONTROLS_INIT_ONLY=1 X0X_SYNTHONE_PATCH=1
-for model in elite pro; do
- case "$model" in elite) board=smk37-elite;;pro) board=smk37;; esac
+for model in ${BUILD_MODELS:-elite pro}; do
+ case "$model" in elite) board=smk37-elite;;pro) board=smk37;;*) exit 2;; esac
  src="$root/fw/build/$board/gen"; test -s "$src/x0x_drum_samples.h"
  mkdir -p "build/$board"; cp -a "$src" "build/$board/"
  python "$link" --board smk37 --model "$model" --sdk "$root/prereqs/sdk" >"$out/$model-link.log" 2>&1 || { tail -35 "$out/$model-link.log"; exit 1; }

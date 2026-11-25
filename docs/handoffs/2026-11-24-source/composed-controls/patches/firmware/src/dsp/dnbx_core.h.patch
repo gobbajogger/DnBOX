@@ -61,7 +61,7 @@
      uint8_t damper, velocity_mode, superj6_amp_range, filter_link;
  } dnbx_part;
  
-@@ -136,8 +160,11 @@
+@@ -136,20 +160,44 @@
  int dnbx_init(dnbx_part *, float sample_rate);
  int dnbx_init_superj6(dnbx_part *, float sample_rate); /* 8000 .. 192000 inclusive. */
  /* Typed SuperJ6 only: binary pre-note switch, no overwrite of independent settings. */
@@ -73,12 +73,16 @@
  void dnbx_apply_panel_envelopes(dnbx_part *, unsigned layer, const dnbx_envelope_params *amp,
                                  const dnbx_envelope_params *filter, unsigned linked);
  int dnbx_set_layer(dnbx_part *, unsigned layer, const dnbx_layer_params *);
-@@ -146,8 +173,17 @@
+ int dnbx_get_layer(const dnbx_part *, unsigned layer, dnbx_layer_params *);
++#if X0X_SJ6_AUX_LFO_NATIVE
++void dnbx_sj6_transient_bend(dnbx_part *,unsigned layer,float semitones);
++#endif
+ /* Positive velocity returns chosen voice index 0..5. Velocity 0 performs
   * note-off and returns DNBX_NOTE_OFF_ONLY. MIDI values outside 0..127 fail. */
  #if defined(X0X_SJ6_MONO32_PROBE) && X0X_SJ6_MONO32_PROBE
  int dnbx_superj6_mono_voice(dnbx_part*,unsigned,unsigned);
  int dnbx_superj6_legato_voice(dnbx_part*,unsigned);
-+#endif
+ #endif
 +#if X0X_SJ6_PITCH_ENV_NATIVE
 +int dnbx_set_sj6_pitch_env(dnbx_part *,const uint8_t code[5]);
 +#if X0X_SJ6_AUX_LFO_NATIVE
@@ -87,7 +91,18 @@
 +#endif
 +#if X0X_SJ6_NOISE_SUB_NATIVE
 +void dnbx_set_sj6_sources(dnbx_part *,unsigned owner,const uint8_t code[2]);
- #endif
++#endif
  int dnbx_note_on(dnbx_part *, unsigned note, unsigned velocity);
++#if X0X_SJ6_RANDOM5_6_NATIVE
++int dnbx_superj6_velocity_zero_on(dnbx_part *,unsigned note);
++#if X0X_SJ6_SEQ_DEST_NATIVE
++int dnbx_superj6_routed_on(dnbx_part*,unsigned note,unsigned vel,unsigned layers);
++#if X0X_SJ6_MONO32_PROBE
++int dnbx_superj6_mono_routed_on(dnbx_part*,unsigned note,unsigned vel,unsigned layers);
++#endif
++#endif
++#endif
  int dnbx_note_off(dnbx_part *, unsigned note);
  int dnbx_set_sustain(dnbx_part *, unsigned down); /* Strict boolean 0 or 1. */
+ /* Applies to new and existing notes, from the stored linear velocity. */
+ int dnbx_set_velocity_mode(dnbx_part *, unsigned mode);

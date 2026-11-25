@@ -1,6 +1,36 @@
 --- a/firmware/src/app/original_presets.inc
 +++ b/firmware/src/app/original_presets.inc
-@@ -168,8 +168,13 @@
+@@ -12,8 +12,29 @@
+ static volatile uint8_t bass_preview_dirty, bass_wheel_mask, bass_edit_depth;
+ #if X0X_SYNTHONE_PATCH || X0X_BASS_NOTE_SOUND
+ static volatile uint8_t note_lock_applied[NBASS];
+ #endif
++
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST || (defined(X0X_HOST) && defined(DNBOX_137_HOST_WITNESS))
++/* Cold authored-edit paths deliberately share these guards. Keep the
++ * same lock-before-check and per-ABI Undo admission at their call sites. */
++__attribute__((noinline))
++static int original_typed_edit_open(unsigned v)
++{
++    return s1_typed_tuple_editable() && !ui_project_busy() &&
++           !engine_bass_preset_pending(v) && !note_lock_applied[v];
++}
++
++__attribute__((noinline))
++static int original_typed_undo_open(unsigned mask)
++{
++    if(!s1_typed_tuple_editable())return 0;
++    for(unsigned v=0;v<NBASS;v++)
++        if((mask&(1u<<v)) && (note_lock_applied[v] || engine_bass_preset_pending(v)))return 0;
++    return 1;
++}
++#endif
++
+ #if X0X_SYNTHONE_PATCH
+ /* One main-loop edit per part. A new adoption invalidates its predecessor,
+  * even on a project reload or a new choice of the same named preset. */
+ static volatile uint32_t s1_patch_revision[NBASS];
+@@ -168,8 +189,13 @@
      /* Actual original Init (raw ID180 base 0; ID7 current 1; ID89 amount 0).
       * Prepare dormant state once; configuring at every edit would reset
       * in-flight alpha, phase or the most recent performance value. */
@@ -14,7 +44,7 @@
  }
  int sj6_typed_mod_choose(unsigned owner,unsigned route)
  {
-@@ -562,8 +567,11 @@
+@@ -562,8 +588,11 @@
      else {
          part->arp.source_set=0;
          part->arp.source_wait=0;
@@ -26,7 +56,19 @@
  }
  int engine_arp_source_get(unsigned owner,unsigned field)
  {
-@@ -800,8 +808,544 @@
+@@ -778,10 +807,9 @@
+ {
+     if(pos>S1_DICT_MAX || s1_typed_dict_position(owner)<0)return 0;
+     engine_project_hold(1);
+     int before=s1_typed_dict_position(owner);
+-    int ok=before>=0 && (unsigned)before!=pos && s1_typed_tuple_editable() &&
+-           !ui_project_busy() && !engine_bass_preset_pending(owner) && !note_lock_applied[owner];
++    int ok=before>=0 && (unsigned)before!=pos && original_typed_edit_open(owner);
+     if(ok) {
+         s1_dict_store((sound_t *)mot_base_snd,owner,s1_dict_encode(pos));
+         s1_typed_dict_apply(mot_base_snd,owner);
+     }
+@@ -800,11 +828,669 @@
  {
      for(unsigned v=0;v<NBASS;v++)if(mask&(1u<<v))s1_typed_dict_apply(mot_base_snd,v);
  }
@@ -53,8 +95,7 @@
 +    if(value>1u || s1_aa_get(owner)<0)return 0;
 +    engine_project_hold(1);
 +    int before=s1_aa_get(owner);
-+    int ok=before>=0 && (unsigned)before!=value && s1_typed_tuple_editable() &&
-+           !ui_project_busy() && !engine_bass_preset_pending(owner) && !note_lock_applied[owner];
++    int ok=before>=0 && (unsigned)before!=value && original_typed_edit_open(owner);
 +    if(ok) {
 +        s1_aa_store((sound_t *)mot_base_snd,owner,value);
 +        s1_aa_apply(mot_base_snd,owner);
@@ -107,8 +148,7 @@
 +    if(pos>127u || s1_cmp_position(owner,k)<0)return 0;
 +    engine_project_hold(1);
 +    int before=s1_cmp_position(owner,k);
-+    int ok=before>=0 && (unsigned)before!=pos && s1_typed_tuple_editable() &&
-+           !ui_project_busy() && !engine_bass_preset_pending(owner) && !note_lock_applied[owner];
++    int ok=before>=0 && (unsigned)before!=pos && original_typed_edit_open(owner);
 +    if(ok){
 +        const unsigned code=s1_cmp_encode(k,pos);
 +        s1_cmp_write((sound_t *)mot_base_snd,owner)[k]=(uint8_t)code;
@@ -155,8 +195,7 @@
 +    if(pos>(k?127u:1u) || sj6_crush_get(owner,k)<0)return 0;
 +    engine_project_hold(1);
 +    int before=sj6_crush_get(owner,k);
-+    int ok=before>=0 && (unsigned)before!=pos && s1_typed_tuple_editable() &&
-+        !ui_project_busy() && !engine_bass_preset_pending(owner) && !note_lock_applied[owner];
++    int ok=before>=0 && (unsigned)before!=pos && original_typed_edit_open(owner);
 +    if(ok){
 +        sj6_crush_write((sound_t*)mot_base_snd,owner)[k]=(uint8_t)pos;
 +        sj6_crush_apply(mot_base_snd,owner);
@@ -182,8 +221,7 @@
 +    if(slot>=SJ6_ROOM_COUNT || value>sj6_room_max(slot) || sj6_native_room_get(owner,slot)<0)return 0;
 +    engine_project_hold(1);
 +    int before=sj6_native_room_get(owner,slot);
-+    int ok=before>=0 && (unsigned)before!=value && s1_typed_tuple_editable() &&
-+           !ui_project_busy() && !engine_bass_preset_pending(owner) && !note_lock_applied[owner];
++    int ok=before>=0 && (unsigned)before!=value && original_typed_edit_open(owner);
 +    if(ok){
 +        sj6_room_write((sound_t *)mot_base_snd,owner)[slot]=(uint8_t)value;
 +        sj6_native_room_apply(mot_base_snd,owner);
@@ -221,8 +259,7 @@
 +    if(value>1u||sj6_ota_get(owner)<0)return 0;
 +    engine_project_hold(1);
 +    int before=sj6_ota_get(owner);
-+    int ok=before>=0 && (unsigned)before!=value && s1_typed_tuple_editable() &&
-+           !ui_project_busy() && !engine_bass_preset_pending(owner) && !note_lock_applied[owner];
++    int ok=before>=0 && (unsigned)before!=value && original_typed_edit_open(owner);
 +    if(ok){
 +        sj6_ota_write((sound_t *)mot_base_snd,owner,value);
 +        sj6_ota_apply(mot_base_snd,owner);
@@ -247,12 +284,20 @@
 +static void sj6_native_limiter_apply(const sound_t *sound,unsigned owner)
 +{
 +    if(live137(sound,owner) && original_bass[owner].kind==ORIGINAL_SOUND_JUNO)
++    {
 +        original_runtime_sj6_limiter(&original_bass[owner],sj6_limiter_read(sound,owner));
++        const unsigned rage=sj6_rage_read(sound,owner);
++        if(rage && rage<=128u)original_runtime_sj6_rage(&original_bass[owner],rage-1u);
++    }
 +}
 +int sj6_native_limiter_get(unsigned owner,unsigned slot)
 +{
-+    if(slot>=SJ6_LIM_COUNT || !live137(mot_base_snd,owner) ||
++    if(slot>SJ6_RAGE_SLOT || !live137(mot_base_snd,owner) ||
 +       original_bass[owner].kind!=ORIGINAL_SOUND_JUNO)return -1;
++    if(slot==SJ6_RAGE_SLOT){
++        unsigned code=sj6_rage_read(mot_base_snd,owner);
++        return code<=128u?(int)(code?code-1u:0u):-1;
++    }
 +    unsigned c=sj6_limiter_read(mot_base_snd,owner)[slot];
 +    return c<=128u?(int)sj6_limiter_position(slot,c):-1;
 +}
@@ -261,11 +306,17 @@
 +    if(value>127u || sj6_native_limiter_get(owner,slot)<0)return 0;
 +    engine_project_hold(1);
 +    int before=sj6_native_limiter_get(owner,slot);
-+    int ok=before>=0 && (unsigned)before!=value && s1_typed_tuple_editable() &&
-+           !ui_project_busy() && !engine_bass_preset_pending(owner) && !note_lock_applied[owner];
++    int ok=before>=0 && (unsigned)before!=value && original_typed_edit_open(owner);
 +    if(ok){
-+        unsigned init=sj6_limiter_position(slot,0);
-+        sj6_limiter_write((sound_t *)mot_base_snd,owner)[slot]=(uint8_t)(value==init?0u:value+1u);
++        if(slot==SJ6_RAGE_SLOT)
++            sj6_rage_write((sound_t *)mot_base_snd,owner,value+1u);
++        else {
++            unsigned init=sj6_limiter_position(slot,0);
++            sj6_limiter_write((sound_t *)mot_base_snd,owner)[slot]=(uint8_t)(value==init?0u:value+1u);
++            /* Both operate one stage. Preserve whichever policy was edited
++             * last rather than silently refusing the separate Bonus knobs. */
++            sj6_rage_write((sound_t *)mot_base_snd,owner,0u);
++        }
 +        sj6_native_limiter_apply(mot_base_snd,owner);
 +    }
 +    engine_project_hold(0);
@@ -306,8 +357,7 @@
 +    if(pos>S1_CWG_MAX || s1_typed_cwg_position(owner)<0)return 0;
 +    engine_project_hold(1);
 +    int before=s1_typed_cwg_position(owner);
-+    int ok=before>=0 && (unsigned)before!=pos && s1_typed_tuple_editable() &&
-+           !ui_project_busy() && !engine_bass_preset_pending(owner) && !note_lock_applied[owner];
++    int ok=before>=0 && (unsigned)before!=pos && original_typed_edit_open(owner);
 +    if(ok) {
 +        s1_cwg_store((sound_t *)mot_base_snd,owner,s1_cwg_encode(pos));
 +        s1_typed_cwg_apply(mot_base_snd,owner);
@@ -345,8 +395,7 @@
 +    if(code>S1_DELAY_RES_MAX || s1_delay_res_get(owner)<0)return 0;
 +    engine_project_hold(1);
 +    const int before=s1_delay_res_get(owner);
-+    const int ok=before>=0 && (unsigned)before!=code && s1_typed_tuple_editable() &&
-+           !ui_project_busy() && !engine_bass_preset_pending(owner) && !note_lock_applied[owner];
++    const int ok=before>=0 && (unsigned)before!=code && original_typed_edit_open(owner);
 +    if(ok) {
 +        *s1_delay_res_write((sound_t*)mot_base_snd,owner)=(uint8_t)code;
 +        s1_delay_res_apply_one(owner,code);
@@ -370,8 +419,7 @@
 +    if(code>S1_ENV_LFO_MAX || s1_env_lfo_get(owner)<0)return 0;
 +    engine_project_hold(1);
 +    const int before=s1_env_lfo_get(owner);
-+    const int ok=before>=0 && (unsigned)before!=code && s1_typed_tuple_editable() &&
-+           !ui_project_busy() && !engine_bass_preset_pending(owner) && !note_lock_applied[owner];
++    const int ok=before>=0 && (unsigned)before!=code && original_typed_edit_open(owner);
 +    if(ok) {
 +        *s1_env_lfo_write((sound_t*)mot_base_snd,owner)=(uint8_t)code;
 +        s1_env_lfo_apply_one(owner,code);
@@ -408,8 +456,7 @@
 +    if(pos>S1_PHASE_MAX || s1_phaser_get(owner,k)<0)return 0;
 +    engine_project_hold(1);
 +    int before=s1_phaser_get(owner,k);
-+    int ok=before>=0 && (unsigned)before!=pos && s1_typed_tuple_editable() &&
-+           !ui_project_busy() && !engine_bass_preset_pending(owner) && !note_lock_applied[owner];
++    int ok=before>=0 && (unsigned)before!=pos && original_typed_edit_open(owner);
 +    if(ok) {
 +        unsigned code=s1_phase_encode(k,pos);
 +        s1_phase_write((sound_t*)mot_base_snd,owner)[k]=(uint8_t)code;
@@ -499,8 +546,7 @@
 +    if(k>=SJ6_PITCH_COUNT || pos>sj6_pitch_max(k) || sj6_pitch_get(owner,k)<0)return 0;
 +    engine_project_hold(1);
 +    int before=sj6_pitch_get(owner,k);
-+    int ok=before>=0 && (unsigned)before!=pos && s1_typed_tuple_editable() &&
-+           !ui_project_busy() && !engine_bass_preset_pending(owner) && !note_lock_applied[owner];
++    int ok=before>=0 && (unsigned)before!=pos && original_typed_edit_open(owner);
 +    if(ok) {
 +        sj6_pitch_write((sound_t*)mot_base_snd,owner)[k]=(uint8_t)sj6_pitch_encode(k,pos);
 +        sj6_pitch_apply(mot_base_snd,owner);
@@ -510,10 +556,7 @@
 +}
 +int sj6_pitch_undo_ready(unsigned mask)
 +{
-+    if(!s1_typed_tuple_editable())return 0;
-+    for(unsigned v=0;v<NBASS;v++)
-+        if((mask&(1u<<v)) && (note_lock_applied[v] || engine_bass_preset_pending(v)))return 0;
-+    return 1;
++    return original_typed_undo_open(mask);
 +}
 +void sj6_pitch_undo(unsigned mask)
 +{
@@ -524,32 +567,123 @@
 +static void sj6_aux_apply(const sound_t *sound,unsigned v)
 +{
 +    if(live137(sound,v) && sj6_aux_init(sound,v) && original_bass[v].kind==ORIGINAL_SOUND_JUNO)
-+        juno6_set_aux_lfo(&original_bass[v].dsp.juno.synth,sj6_aux_read(sound,v));
++    {
++        const uint8_t *one=sj6_aux_lfo1_read(sound,v);
++        juno6_set_aux_lfo1(&original_bass[v].dsp.juno.synth,one[0],one[2]);
++        const uint8_t *row=sj6_aux_read(sound,v);
++#if X0X_SJ6_LFO_TRIGGER_NATIVE
++        uint8_t code[18];
++        memcpy(code,row,16u);code[16]=row[30];code[17]=row[31];
++        juno6_set_aux_lfo(&original_bass[v].dsp.juno.synth,code);
++#else
++        juno6_set_aux_lfo(&original_bass[v].dsp.juno.synth,row);
++#endif
++    }
 +}
 +int sj6_aux_get(unsigned v,unsigned k)
 +{
-+    if(k>=9u || !live137(mot_base_snd,v) || !sj6_aux_init(mot_base_snd,v) ||
++    if(k==14u){
++        if(v>=NBASS || !live137(mot_base_snd,v) || !sj6_aux_init(mot_base_snd,v) ||
++           original_bass[v].kind!=ORIGINAL_SOUND_JUNO)return -1;
++        unsigned route=sj6_aux_lfo1_read(mot_base_snd,v)[0];
++        if(route==SJ6_AUX_LFO1_NONE)return 0;
++        if(route)return (int)route;
++        unsigned legacy=original_bass[v].dsp.juno.synth.lfo1_pwm_route;
++        return legacy==1u?76:legacy==2u?77:8;
++    }
++    if(k>=
++#if X0X_SJ6_LFO_TRIGGER_NATIVE
++       14u
++#else
++       9u
++#endif
++       || !live137(mot_base_snd,v) || !sj6_aux_init(mot_base_snd,v) ||
 +       original_bass[v].kind!=ORIGINAL_SOUND_JUNO)return -1;
 +    const uint8_t *row=sj6_aux_read(mot_base_snd,v);
++#if X0X_SJ6_LFO_TRIGGER_NATIVE
++    if(k>=9u)return row[k>=12u?k+18u:k+4u];
++#endif
 +    if(k>=2u)return row[k];
 +    if(row[k])return row[k]==2u;
 +    return k==0u && (original_bass[v].dsp.juno.synth.lfo2_pwm&SJ6_LFO2_PWM_ROUTE_MASK);
 +}
++static float sj6_aux_authored_base(const sound_t *sound,unsigned v,unsigned route)
++{
++    const int id=sj6_aux_destination_id(route);
++    switch(id){
++    case 0:return fm_clampf(original_bass[v].dsp.juno.synth.master_gain*(1.f/.404f),0.f,1.f);
++#if X0X_SJ6_NATIVE_LIMITER
++    /* This original compound control starts at zero; Threshold/Gain edits
++     * are independent, never interpreted as a new Rage Amount. */
++    case 17:{unsigned c=sj6_rage_read(sound,v);return c?(c-1u)*(1.f/127.f):0.f;}
++#endif
++#if (defined(X0X_HOST) && defined(X0X_SJ6_ALT3_WITNESS)) || X0X_SJ6_ALT3_NATIVE
++    case 103:return sj6_trem_position(sj6_trem_read(sound,v),0u)*(1.f/127.f);
++    case 104:return sj6_trem_position(sj6_trem_read(sound,v),1u)*(1.f/127.f);
++#endif
++#if X0X_SJ6_NATIVE_ROOM
++    case 13:return sj6_room_read(sound,v)[SJ6_ROOM_SIZE]*(1.f/127.f);
++    case 14:return sj6_room_read(sound,v)[SJ6_ROOM_LOCUT]*(1.f/127.f);
++    case 15:return sj6_room_read(sound,v)[SJ6_ROOM_MIX]*(1.f/127.f);
++    case 22:return sj6_room_read(sound,v)[SJ6_ROOM_RATE]*(1.f/127.f);
++    case 23:return sj6_room_read(sound,v)[SJ6_ROOM_DEPTH]*(1.f/127.f);
++    case 108:return sj6_crush_code(sound,v)[1]*(1.f/127.f);
++#endif
++#if X0X_SJ6_NATIVE_DELAY
++    case 25:case 26:case 27:return read137(sound,v)[SJ6_DELAY_BYTE+(unsigned)id-24u]*(1.f/127.f);
++#endif
++#if X0X_SJ6_NATIVE_UNISON
++    case 60:{const unsigned b=sj6_unison_code(sound,v)[1];return b?(b-1u)*(1.f/127.f):.20912791f;}
++    case 61:return sj6_unison_code(sound,v)[2]*(1.f/127.f);
++#endif
++    default:
++#if X0X_SJ6_AUX_SEQ_NATIVE
++        if(sj6_aux_seq_id((unsigned)id))return sj6_aux_arp_base(&original_bass[v],(unsigned)id);
++#endif
++        return juno6_aux_capture_base(&original_bass[v].dsp.juno.synth,route);
++    }
++}
 +int sj6_aux_choose(unsigned v,unsigned k,unsigned pos)
 +{
++    if(k==14u){
++        if(!juno6_aux_destination_supported(pos) || sj6_aux_get(v,k)<0)return 0;
++        engine_project_hold(1);
++        int before=sj6_aux_get(v,k);
++        int ok=before>=0 && (unsigned)before!=pos && original_typed_edit_open(v);
++        if(ok){
++            uint8_t *r=(uint8_t*)sj6_aux_lfo1_read(mot_base_snd,v);
++            float base=pos?sj6_aux_authored_base(mot_base_snd,v,pos):0.f;
++            r[0]=(uint8_t)(pos?pos:SJ6_AUX_LFO1_NONE);
++            r[2]=(uint8_t)(fm_clampf(base,0.f,1.f)*127.f+.5f);
++            sj6_aux_apply(mot_base_snd,v);
++        }
++        engine_project_hold(0);
++        return ok;
++    }
++#if X0X_SJ6_LFO_TRIGGER_NATIVE
++    if(k>=14u || pos>(k>=9u?k<12u?3u:1u:sj6_aux_max(k)) || sj6_aux_get(v,k)<0)return 0;
++#else
 +    if(k>=9u || pos>sj6_aux_max(k) || sj6_aux_get(v,k)<0)return 0;
++#endif
++    if(k>=5u && k<9u && !juno6_aux_destination_supported(pos))return 0;
 +    engine_project_hold(1);
 +    int before=sj6_aux_get(v,k);
-+    int ok=before>=0 && (unsigned)before!=pos && s1_typed_tuple_editable() &&
-+          !ui_project_busy() && !engine_bass_preset_pending(v) && !note_lock_applied[v];
++    int ok=before>=0 && (unsigned)before!=pos && original_typed_edit_open(v);
 +    if(ok){
 +        uint8_t *row=sj6_aux_write((sound_t*)mot_base_snd,v);
++#if X0X_SJ6_LFO_TRIGGER_NATIVE
++        if(k>=9u)row[k>=12u?k+18u:k+4u]=(uint8_t)pos;else {
++#endif
 +        row[k]=(uint8_t)(k<2u?pos+1u:pos);
 +        if(k>=5u) {
 +            /* Original captures the chosen receiver's base before modulation. */
-+            float base=juno6_aux_capture_base(&original_bass[v].dsp.juno.synth,pos);
++            float base=pos?sj6_aux_authored_base(mot_base_snd,v,pos):0.f;
++            if(base<0.f)base=0.f;
 +            row[k+4u]=(uint8_t)(base*127.f+.5f);
 +        }
++#if X0X_SJ6_LFO_TRIGGER_NATIVE
++        }
++#endif
 +        sj6_aux_apply(mot_base_snd,v);
 +    }
 +    engine_project_hold(0);
@@ -557,21 +691,139 @@
 +}
 +int sj6_aux_undo_ready(unsigned mask)
 +{
-+    if(!s1_typed_tuple_editable())return 0;
-+    for(unsigned v=0;v<NBASS;v++)
-+        if((mask&(1u<<v)) && (note_lock_applied[v] || engine_bass_preset_pending(v)))return 0;
-+    return 1;
++    return original_typed_undo_open(mask);
 +}
 +void sj6_aux_undo(unsigned mask)
 +{
 +    for(unsigned v=0;v<NBASS;v++)if(mask&(1u<<v))sj6_aux_apply(mot_base_snd,v);
 +}
 +#endif
++#if X0X_S1_HALFTIME
++float s1_half_value(unsigned pos)
++{
++    if(pos==S1_HALF_DEFAULT)return s1c_front_init(S1_HALF_PARAM);
++    float low,high;s1c_front_bounds(S1_HALF_PARAM,&low,&high);
++    return low+(high-low)*(float)pos*(1.f/127.f);
++}
++#endif
  static void s1_typed_a4_apply(const sound_t *sound,unsigned owner) {
-     if(live_s1_mod(sound,owner) && original_bass[owner].kind==ORIGINAL_SOUND_SYNTHONE)
-         (void)s1c_front_set(&original_bass[owner].dsp.synthone.e,S1_A4_PARAM,s1_a4_hz(read137(sound,owner)[S1_A4_BYTE]));
+-    if(live_s1_mod(sound,owner) && original_bass[owner].kind==ORIGINAL_SOUND_SYNTHONE)
+-        (void)s1c_front_set(&original_bass[owner].dsp.synthone.e,S1_A4_PARAM,s1_a4_hz(read137(sound,owner)[S1_A4_BYTE]));
++    if(live_s1_mod(sound,owner) && original_bass[owner].kind==ORIGINAL_SOUND_SYNTHONE) {
++        original_runtime_part *p=&original_bass[owner];
++        (void)s1c_front_set(&p->dsp.synthone.e,S1_A4_PARAM,s1_a4_hz(read137(sound,owner)[S1_A4_BYTE]));
++#if X0X_S1_HALFTIME
++        unsigned half=s1_half_code(sound,owner);
++        (void)s1c_front_set(&p->dsp.synthone.e,S1_HALF_PARAM,s1_half_value(half?half-1u:S1_HALF_DEFAULT));
++#endif
++#if X0X_S1_SCALE_NATIVE
++        unsigned code=sound->v[T_MST][S1_SCALE_ROW+owner][S1_SCALE_BYTE];
++        p->dsp.synthone.e.tuning_index=(uint8_t)code;
++#if X0X_S1_USER_SCALE
++        s1c *e=&p->dsp.synthone.e;
++        if(code==S1C_SCALE_USER){
++            e->user_npo=(uint8_t)s1_user_npo(sound,owner);
++            memcpy(e->user_scale,(const uint8_t *)&sound->v[s1_user_head_target(owner)]+S1_USER_ROW*NPARAMS_MAX,S1_USER_HEAD);
++            memcpy(e->user_scale+S1_USER_HEAD,(const uint8_t *)&sound->v[T_MIX]+s1_user_tail_row(owner)*NPARAMS_MAX,S1_USER_TAIL);
++        }
++#endif
++#if X0X_ARP_ENGINE
++        p->arp.prm.npo=
++#if X0X_S1_USER_SCALE
++            code==S1C_SCALE_USER ? p->dsp.synthone.e.user_npo :
++#endif
++            (uint8_t)s1c_scale_npo(code);
++#endif
++#endif
++    }
  }
-@@ -946,8 +1490,74 @@
+ int s1_typed_a4_choose(unsigned owner,unsigned hz) {
+     if(hz<410 || hz>470 || !live_s1_mod(mot_base_snd,owner))return 0;
+     engine_project_hold(1);
+@@ -817,8 +1503,82 @@
+     }
+     engine_project_hold(0);
+     return ok;
+ }
++#if X0X_S1_SCALE_NATIVE
++int s1_typed_scale_choose(unsigned owner,unsigned code,int reset)
++{
++    if(code>S1C_SCALE_MAX || !live_s1_mod(mot_base_snd,owner))return 0;
++#if X0X_S1_USER_SCALE
++    if(code==S1C_SCALE_USER && !s1_user_npo(mot_base_snd,owner))return 0;
++#endif
++    engine_project_hold(1);
++    int ok=!ui_project_busy() && s1_typed_tuple_editable() &&
++           live_s1_mod(mot_base_snd,owner) && !engine_bass_preset_pending(owner) &&
++           original_bass[owner].kind==ORIGINAL_SOUND_SYNTHONE;
++    if(ok){
++        sound_t *s=(sound_t *)mot_base_snd;
++        s->v[T_MST][S1_SCALE_ROW+owner][S1_SCALE_BYTE]=(uint8_t)code;
++        if(reset)slot137(s,owner)[S1_A4_BYTE]=0;
++        s1_typed_a4_apply(s,owner);
++    }
++    engine_project_hold(0);
++    return ok;
++}
++#endif
++#if X0X_S1_USER_SCALE
++int s1_typed_user_import(unsigned owner,unsigned count,const uint8_t *name,const uint8_t *packed)
++{
++    if(!count || count>S1C_USER_NOTES || !live_s1_mod(mot_base_snd,owner))return 2;
++    unsigned prev=0;
++    for(unsigned i=0;i<count;i++) {
++        const uint8_t *p=packed+3u*i;
++        unsigned code=p[0]|(unsigned)p[1]<<8|(unsigned)p[2]<<16;
++        if(code>=0x800000u || (i && code<prev))return 1;
++        prev=code;
++    }
++    for(unsigned i=0;i<S1C_USER_NAME;i++)
++        if(name[i] && (name[i]<32u || name[i]>126u))return 1;
++    engine_project_hold(1);
++    int ok=!ui_project_busy() && s1_typed_tuple_editable() &&
++           live_s1_mod(mot_base_snd,owner) && !engine_bass_preset_pending(owner) &&
++           original_bass[owner].kind==ORIGINAL_SOUND_SYNTHONE;
++    if(ok){
++        sound_t *s=(sound_t *)mot_base_snd;
++        uint8_t *h=(uint8_t *)&s->v[s1_user_head_target(owner)]+S1_USER_ROW*NPARAMS_MAX;
++        uint8_t *t=(uint8_t *)&s->v[T_MIX]+s1_user_tail_row(owner)*NPARAMS_MAX;
++        unsigned n=count*3u;
++        unsigned head=n>S1_USER_HEAD?S1_USER_HEAD:n;
++        memset(h,0,S1_USER_HEAD);memset(t,0,S1_USER_TAIL);
++        memcpy(h,packed,head);
++        if(n>head)memcpy(t,packed+head,n-head);
++        uint8_t *m=s->v[T_MST][S1_SCALE_ROW+owner];
++        memcpy(m+S1_USER_ID,name,S1C_USER_NAME);
++        m[S1_USER_COUNT]=(uint8_t)count;
++        m[S1_SCALE_BYTE]=S1C_SCALE_USER;
++        s1_typed_a4_apply(s,owner);
++    }
++    engine_project_hold(0);
++    return ok?0:2;
++}
++#endif
++#if X0X_S1_HALFTIME
++int s1_half_choose(unsigned owner,unsigned position)
++{
++    if(position>127u || !live_s1_mod(mot_base_snd,owner))return 0;
++    engine_project_hold(1);
++    int ok=!ui_project_busy() && s1_typed_tuple_editable() &&
++           live_s1_mod(mot_base_snd,owner) && !engine_bass_preset_pending(owner) &&
++           original_bass[owner].kind==ORIGINAL_SOUND_SYNTHONE;
++    if(ok){
++        sound_t *s=(sound_t *)mot_base_snd;
++        s->v[T_MST][S1_HALF_ROW+owner][S1_HALF_BYTE]=(uint8_t)(position==S1_HALF_DEFAULT?0u:position+1u);
++        s1_typed_a4_apply(s,owner);
++    }
++    engine_project_hold(0);
++    return ok;
++}
++#endif
+ void s1_typed_a4_undo(unsigned mask) {
+     for(unsigned v=0;v<NBASS;v++)if(mask&(1u<<v))s1_typed_a4_apply(mot_base_snd,v);
+ }
+ static void s1_typed_trans_apply(const sound_t *sound,unsigned owner) {
+@@ -946,8 +1706,72 @@
         live_s1_mod(mot_base_snd,owner) && !note_lock_applied[owner] &&
         original_bass[owner].kind==ORIGINAL_SOUND_SYNTHONE)
          s1_part_mod_route(&original_bass[owner].dsp.synthone,read137(mot_base_snd,owner)[3]);
@@ -583,11 +835,10 @@
 +{
 +    dnbx_part *core=&original_bass[owner].dsp.juno.synth.core;
 +    if(!k) {
-+        (void)dnbx_store_raw(core,131u,code*(.25f/127.f));
++        (void)dnbx_store_raw(core,131u,code*(1.f/127.f));
 +    } else if (code) {
 +        const float normalized=(float)(code-1u)/127.f;
-+        const float strength=fm_powf(normalized,3.03f);
-+        (void)dnbx_store_raw(core,136u,strength);
++        (void)dnbx_store_raw(core,136u,normalized);
 +    } else {
 +        core->raw_present[136u/32u]&=~(UINT32_C(1)<<(136u%32u));
 +    }
@@ -606,8 +857,7 @@
 +    if(pos>127u || sj6_filter_control_get(owner,k)<0)return 0;
 +    engine_project_hold(1);
 +    int before=sj6_filter_control_get(owner,k);
-+    int ok=before>=0 && (unsigned)before!=pos && s1_typed_tuple_editable() &&
-+        !ui_project_busy() && !engine_bass_preset_pending(owner) && !note_lock_applied[owner];
++    int ok=before>=0 && (unsigned)before!=pos && original_typed_edit_open(owner);
 +    if(ok) {
 +        const unsigned code=pos+!!k;
 +        *(uint8_t *)sj6_filter_code(mot_base_snd,owner,k)=(uint8_t)code;
@@ -646,7 +896,7 @@
  {
      for(unsigned v=0;v<NBASS;++v)
          if ((mask&(1u<<v)) && live137(mot_base_snd,v)) {
-@@ -974,8 +1584,13 @@
+@@ -974,8 +1798,13 @@
      if (slot == SJ6_FILTER_VELOCITY) {
          return live137(mot_base_snd,owner) ?
              original_bass[owner].dsp.juno.synth.filter_velocity_position : -1;
@@ -660,7 +910,7 @@
      if (slot == SJ6_OSC2_LEVEL || slot == SJ6_OSC1_LEVEL) {
          if (bass_named_preset[owner] != 0) return -1;
          unsigned code=slot==SJ6_OSC2_LEVEL ? original_bass[owner].dsp.juno.synth.osc2_level_code :
-@@ -1027,15 +1642,20 @@
+@@ -1027,15 +1856,20 @@
      if (slot != SJ6_LFO2_PWM_BASE) return slot;
      return sj6_knob_position(owner, SJ6_LFO2_PWM_ROUTE) == 2 ? SJ6_PWM2 : SJ6_PWM1;
  }
@@ -682,7 +932,7 @@
  {
      switch(slot){
      case SJ6_DELAY24:case SJ6_DELAYSYNC:return 0; case SJ6_DELAY25:return 1;
-@@ -1061,8 +1681,19 @@
+@@ -1061,8 +1895,19 @@
      if(!live137(mot_base_snd,v)||original_bass[v].kind!=ORIGINAL_SOUND_JUNO)return;
      juno6_t *s=&original_bass[v].dsp.juno.synth;
      const uint8_t *bytes=read137(mot_base_snd,v)+SJ6_DELAY_BYTE;
@@ -702,7 +952,7 @@
          memset(sj6_delay_host_lines[v],0,sizeof sj6_delay_host_lines[v]);
          if(!juno6_delay24_arm(s,sj6_delay_host_lines[v][0],sj6_delay_host_lines[v][1],SJ6_DELAY_CAP,0.f,10000u))return;
      }
-@@ -1073,13 +1704,38 @@
+@@ -1073,13 +1918,71 @@
          if(slot==SJ6_DELAY25)continue;
          unsigned raw=sj6_delay_read(slot,bytes);
          if(raw!=juno6_delay_position(s,slot))(void)juno6_delay24_set(s,slot,raw);
@@ -713,11 +963,26 @@
  X0X_COLD int engine_superj6_knob_position(unsigned owner, unsigned slot)
  {
 -#if defined(X0X_HOST) && defined(X0X_SJ6_DELAY_WITNESS)
++#if X0X_SJ6_ALT3_NATIVE
++    if(owner<NBASS && slot>=SJ6_TREM_DEPTH && slot<=SJ6_TREM_RATE){
++        uint32_t lock=plat_cq_lock();
++        int p=live137(mot_base_snd,owner)&&sj6_knob_ready(owner) ?
++            (int)sj6_trem_position(sj6_trem_read(mot_base_snd,owner),slot-SJ6_TREM_DEPTH):-1;
++        plat_cq_unlock(lock);return p;
++    }
++#endif
 +#if X0X_SJ6_SEQ_SETTINGS_NATIVE
-+    if (owner<NBASS && (slot==SJ6_SEQ_START_SNAP || slot==SJ6_SEQ_LOCK)) {
++    if (owner<NBASS && SJ6_SEQ_SETTING_SLOT(slot)) {
 +        uint32_t lock=plat_cq_lock();
 +        int value=live137(mot_base_snd,owner) && sj6_knob_ready(owner) ?
-+            (int)sj6_seq_settings_read(mot_base_snd,owner)[slot-SJ6_SEQ_START_SNAP] : -1;
++#if X0X_SJ6_SEQ_DEST_NATIVE
++            (slot==SJ6_SEQ_DEST ? (int)sj6_dest_read(mot_base_snd,owner) :
++#endif
++            (int)sj6_seq_settings_read(mot_base_snd,owner)[slot-SJ6_SEQ_START_SNAP]
++#if X0X_SJ6_SEQ_DEST_NATIVE
++            )
++#endif
++            : -1;
 +        plat_cq_unlock(lock);return value;
 +    }
 +#endif
@@ -727,6 +992,24 @@
 +        int value=live137(mot_base_snd,owner) && sj6_knob_ready(owner) ?
 +            (int)sj6_sources_read(mot_base_snd,owner)[slot-SJ6_NOISE_LEVEL] : -1;
 +        plat_cq_unlock(lock);return value;
++    }
++#endif
++#if X0X_SJ6_LFO1_WAVE_NATIVE
++    if(owner<NBASS && (slot==SJ6_LFO1_ENABLE || slot==SJ6_LFO1_SNAPBACK)) {
++        uint32_t lock=plat_cq_lock();
++        const unsigned k=slot-SJ6_LFO1_ENABLE;
++        int r=-1;
++        if(live137(mot_base_snd,owner) && sj6_knob_ready(owner) &&
++           sj6_lfo1_wave_allowed(mot_base_snd->v[T_303][owner]))
++            r=(int)(sj6_lfo1_option(mot_base_snd,owner,k)^(k==0u));
++        plat_cq_unlock(lock);return r;
++    }
++    if(owner<NBASS && slot==SJ6_LFO1_WAVE) {
++        uint32_t lock=plat_cq_lock();
++        int r=live137(mot_base_snd,owner) && sj6_knob_ready(owner) &&
++            sj6_lfo1_wave_allowed(mot_base_snd->v[T_303][owner]) ?
++            (int)sj6_lfo1_wave_read(mot_base_snd,owner):-1;
++        plat_cq_unlock(lock);return r;
 +    }
 +#endif
 +#if X0X_SJ6_LFO1_DELAY_PORT
@@ -742,13 +1025,13 @@
          uint32_t lock=plat_cq_lock();
          int ret=live137(mot_base_snd,owner) && sj6_knob_ready(owner) &&
              original_bass[owner].dsp.juno.synth.delay24.tap ?
-@@ -1112,17 +1768,152 @@
+@@ -1112,17 +2015,195 @@
      }
      return value < 0 ? 0 : value > max ? max : value;
  }
  
 +#if X0X_SJ6_NATIVE_UNISON
-+static float sj6_unison_input[NBASS][2][SJ6_UNISON_HISTORY] X0X_POOL;
++static int16_t sj6_unison_input[NBASS][2][SJ6_UNISON_HISTORY] X0X_POOL;
 +static void sj6_typed_unison_apply(unsigned v)
 +{
 +    if(live137(mot_base_snd,v)&&sj6_unison_owner(mot_base_snd,v)&&sj6_knob_ready(v))
@@ -852,13 +1135,33 @@
  X0X_COLD int engine_superj6_knob_turn(unsigned owner, unsigned slot, int value, int relative)
  {
 -#if defined(X0X_HOST) && defined(X0X_SJ6_DELAY_WITNESS)
++#if X0X_SJ6_ALT3_NATIVE
++    if(owner<NBASS && slot>=SJ6_TREM_DEPTH && slot<=SJ6_TREM_RATE){
++        uint32_t lock=plat_cq_lock();int changed=0;
++        if(live137(mot_base_snd,owner)&&sj6_knob_can_turn(owner)&&original_typed_edit_open(owner)){
++            const unsigned k=slot-SJ6_TREM_DEPTH;
++            uint8_t *b=sj6_trem_write((sound_t*)mot_base_snd,owner);
++            const int before=(int)sj6_trem_position(b,k);
++            const int next=sj6_knob_target(before,value,127,relative);
++            if(next!=before){b[k]=(uint8_t)(k&&next!=64?next+1:k?0:next);changed=1;}
++        }
++        plat_cq_unlock(lock);return changed;
++    }
++#endif
 +#if X0X_SJ6_SEQ_SETTINGS_NATIVE
-+    if (owner<NBASS && (slot==SJ6_SEQ_START_SNAP || slot==SJ6_SEQ_LOCK)) {
++    if (owner<NBASS && SJ6_SEQ_SETTING_SLOT(slot)) {
 +        uint32_t lock=plat_cq_lock();int changed=0;
 +        if (live137(mot_base_snd,owner) && sj6_knob_can_turn(owner) &&
 +            !ui_project_busy() && s1_typed_tuple_editable()) {
-+            uint8_t *b=sj6_seq_settings_write((sound_t *)mot_base_snd,owner)+slot-SJ6_SEQ_START_SNAP;
-+            int next=sj6_knob_target(*b,value,1,relative);
++            unsigned top=1u;
++            uint8_t *b;
++#if X0X_SJ6_SEQ_DEST_NATIVE
++            if(slot==SJ6_SEQ_DEST) {
++                b=sj6_dest_write((sound_t *)mot_base_snd,owner);top=2u;
++            } else
++#endif
++                b=sj6_seq_settings_write((sound_t *)mot_base_snd,owner)+slot-SJ6_SEQ_START_SNAP;
++            int next=sj6_knob_target(*b,value,top,relative);
 +            if (next!=*b) {*b=(uint8_t)next;changed=1;}
 +        }
 +        plat_cq_unlock(lock);return changed;
@@ -872,6 +1175,29 @@
 +            uint8_t *b=sj6_sources_write((sound_t *)mot_base_snd,owner)+slot-SJ6_NOISE_LEVEL;
 +            int next=sj6_knob_target(*b,value,127,relative);
 +            if (next!=*b) {*b=(uint8_t)next;changed=1;}
++        }
++        plat_cq_unlock(lock);return changed;
++    }
++#endif
++#if X0X_SJ6_LFO1_WAVE_NATIVE
++    if(owner<NBASS && (slot==SJ6_LFO1_ENABLE || slot==SJ6_LFO1_SNAPBACK)) {
++        uint32_t lock=plat_cq_lock();int changed=0;
++        const unsigned k=slot-SJ6_LFO1_ENABLE;
++        if(live137(mot_base_snd,owner) && sj6_knob_can_turn(owner) &&
++           original_typed_edit_open(owner) && sj6_lfo1_wave_allowed(mot_base_snd->v[T_303][owner])) {
++            const int old=(int)(sj6_lfo1_option(mot_base_snd,owner,k)^(k==0u));
++            const int next=sj6_knob_target(old,value,1,relative);
++            if(next!=old){sj6_lfo1_option_store((sound_t*)mot_base_snd,owner,k,(unsigned)next^(k==0u));changed=1;}
++        }
++        plat_cq_unlock(lock);return changed;
++    }
++    if(owner<NBASS && slot==SJ6_LFO1_WAVE) {
++        uint32_t lock=plat_cq_lock();int changed=0;
++        if(live137(mot_base_snd,owner) && sj6_knob_can_turn(owner) && !ui_project_busy() &&
++           s1_typed_tuple_editable() && sj6_lfo1_wave_allowed(mot_base_snd->v[T_303][owner])) {
++            int before=(int)sj6_lfo1_wave_read(mot_base_snd,owner);
++            int next=sj6_knob_target(before,value,SJ6_LFO1_WAVE_MAX,relative);
++            if(next!=before){sj6_lfo1_wave_write((sound_t*)mot_base_snd,owner,(unsigned)next);changed=1;}
 +        }
 +        plat_cq_unlock(lock);return changed;
 +    }
@@ -896,7 +1222,7 @@
          uint32_t lock=plat_cq_lock();int changed=0;
          if(live137(mot_base_snd,owner) && sj6_knob_can_turn(owner) &&
             !ui_project_busy() && s1_typed_tuple_editable() &&
-@@ -1152,8 +1943,14 @@
+@@ -1152,8 +2233,14 @@
          int before = sj6_knob_position(owner, slot);
  #if (defined(X0X_HOST) && defined(X0X_SJ6_FILTER_VEL_PROBE)) || (DNBOX_TYPED_CONTROLS_NATIVE_TEST && X0X_SJ6_VELOCITY_PORT)
          if (slot == SJ6_FILTER_VELOCITY && before < 0) { plat_cq_unlock(lock); return 0; }
@@ -911,7 +1237,7 @@
          if (value != before && (slot < SJ6_VIBRATO_DEPTH || slot == SJ6_LFO2_SHAPE ||
              (slot >= SJ6_LAYER1_FINE ? original_sound_valid(mot_base_snd->v[T_303][owner]) :
               slot >= SJ6_LAYER1_SEMI ? sj6_semi_storage_ready(owner) :
-@@ -1294,8 +2091,16 @@
+@@ -1294,8 +2381,16 @@
                  (void)original_sound_set(cell, 13u + i, positions[2u + i]);
          }
          chorus->factory_mode = (uint8_t)(JUNO6_CHORUS_OFF + enabled);
@@ -928,7 +1254,7 @@
  #if X0X_SJ6_CLASSIC_I_PROBE
          if(prior!=chorus->factory_mode && (chorus_turns&3u) &&
              live137(sound,v) && s1_typed_tuple_editable()) {
-@@ -1380,8 +2185,17 @@
+@@ -1380,8 +2475,17 @@
                  juno6_set_filter_velocity(&original_bass[v].dsp.juno.synth,pos))
                  slot137((sound_t *)mot_base_snd,v)[2]=(uint8_t)pos;
          }
@@ -946,7 +1272,7 @@
                                               sj6_knob_bit(SJ6_LAYER2_SEMI) | sj6_knob_bit(SJ6_LAYER1_FINE) |
                                               sj6_knob_bit(SJ6_LAYER2_FINE) | sj6_knob_bit(SJ6_OSC2_LEVEL) | sj6_knob_bit(SJ6_OSC1_LEVEL));
          if (pending.word[0] || upper) sj6_knob_commit(v, pending.word[0], upper);
-@@ -1751,10 +2565,19 @@
+@@ -1751,10 +2855,19 @@
      sj6_locked_extra[v] = 0;
  #endif
      if (rc == ORIGINAL_RUNTIME_OK && original_bass[v].kind == ORIGINAL_SOUND_JUNO) {
@@ -966,7 +1292,7 @@
  #if defined(X0X_SJ6_BEND_TYPED_PROBE) && X0X_SJ6_BEND_TYPED_PROBE
          (void)sj6_pb_apply(v,sound);
  #endif
-@@ -1788,8 +2611,24 @@
+@@ -1788,8 +2901,24 @@
  #endif
  #if X0X_S1_DELAY_TRACK_TEST
      if(rc==ORIGINAL_RUNTIME_OK)s1_typed_dict_apply(sound,v);
@@ -991,7 +1317,7 @@
  #endif
  #if X0X_SJ6_CLASSIC_I_PROBE
      if(rc==ORIGINAL_RUNTIME_OK)sj6_classic_i_apply(sound,v);
-@@ -1806,8 +2645,11 @@
+@@ -1806,8 +2935,11 @@
      if(rc==ORIGINAL_RUNTIME_OK) {s1_typed_clock_apply(sound,v);s1_typed_clock_tones(sound,v);}
  #endif
  #if defined(X0X_S1_AUTOPAN_PROBE) && X0X_S1_AUTOPAN_PROBE
@@ -1003,15 +1329,22 @@
      bass_named_preset[v] = (int16_t)bass_cell_preset(sound->v[T_303][v]);
      original_seq_note[v] = -1;
      __builtin_memset(original_key_pitch[v], 0, sizeof original_key_pitch[v]);
-@@ -1970,13 +2812,43 @@
+@@ -1970,13 +3102,56 @@
  #endif
  #if X0X_S1_EXTRA || X0X_SUPERJ6_BUILTIN_INIT
          if (owned) memset(shared, 0, (unsigned)owned);
  #endif
 +#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
 +        memset(s1_cmp_write(sound,v),0,S1_CMP_COUNT);
++#if X0X_S1_HALFTIME
++        sound->v[T_MST][S1_HALF_ROW+v][S1_HALF_BYTE]=0;
++#endif
++#if X0X_S1_SCALE_NATIVE
++        sound->v[T_MST][S1_SCALE_ROW+v][S1_SCALE_BYTE]=0;
++#endif
 +#if X0X_SJ6_NATIVE_LIMITER
 +        memset(sj6_limiter_write(sound,v),0,SJ6_LIM_COUNT);
++        sj6_rage_write(sound,v,0u);
 +#endif
 +#if X0X_SJ6_OTA_NATIVE
 +        sj6_ota_write(sound,v,0);
@@ -1026,10 +1359,16 @@
 +#endif
 +#if X0X_SJ6_AUX_LFO_NATIVE
 +        memset(sj6_aux_write(sound,v),0,SJ6_AUX_BYTES);
++#if X0X_SJ6_LFO_TRIGGER_NATIVE
++        sj6_aux_write(sound,v)[30]=sj6_aux_write(sound,v)[31]=0;
++#endif
 +#endif
 +#if X0X_SJ6_SEQ_SETTINGS_NATIVE
 +        if (bank!=ORIGINAL_SOUND_JUNO || original_sound_sj6_factory(next))
 +            memset(sj6_seq_settings_write(sound,(unsigned)v),0,SJ6_SEQ_SETTINGS_COUNT);
++#if X0X_SJ6_SEQ_DEST_NATIVE
++            *sj6_dest_write(sound,(unsigned)v)=0;
++#endif
 +#endif
          __builtin_memcpy(sound->v[T_303][v], next, sizeof next);
          bass_tag_set(sound, v, bank, preset, 0);
@@ -1047,7 +1386,7 @@
          s1_typed_a4_apply(sound,v);
          s1_typed_rvfb_apply(sound,v);
          s1_typed_trans_apply(sound,v);
-@@ -1991,8 +2863,11 @@
+@@ -1991,8 +3166,11 @@
  #endif
  #endif
  #if defined(DNBOX_137_HOST_WITNESS) && (!DNBOX_TYPED_CONTROLS_NATIVE_TEST || X0X_SJ6_VELOCITY_PORT)
@@ -1059,7 +1398,7 @@
  #if defined(X0X_SJ6_BEND_TYPED_PROBE) && X0X_SJ6_BEND_TYPED_PROBE
          (void)sj6_pb_apply(v,sound);
  #endif
-@@ -2021,8 +2896,11 @@
+@@ -2021,8 +3199,11 @@
          s1_typed_clock_tones(sound,v);
  #endif
  #if defined(X0X_S1_AUTOPAN_PROBE) && X0X_S1_AUTOPAN_PROBE

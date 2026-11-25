@@ -4,7 +4,27 @@
  * the stereo input history between otherwise independent pitch-shift taps.
  */
 #if X0X_SJ6_NATIVE_UNISON
-void juno6_unison_config(juno6_t *s, const uint8_t b[4], float hist[2][SJ6_UNISON_HISTORY])
+static void sj6_unison_coeff(juno6_unison_t *u,float detune,float stereo)
+{
+    static const float pan[]={1.f,-.95f,.5f,-.59f,.33f};
+    unsigned type=u->code[3], taps=u->taps;
+    const float d=detune/(float)taps,x=detune*.02f*(float)taps;
+    for(unsigned i=0;i<taps;++i){
+        float st=type==5u?(d+3.f*x)*((i&1u)?-1.f:1.25f):
+                          (d+x)*((i&1u)?-1.f:1.f);
+        u->step[i]=1.f-fm_exp2f((float)(i+1u)*st*.0833333f);
+        u->pan[i]=pan[i]*stereo;
+    }
+}
+static float sj6_unison_detune(juno6_unison_t *u,float raw)
+{
+    if(raw<0.f){
+        if(!u->code[1])return .01f;
+        raw=(float)(u->code[1]-1u)/127.f;
+    }
+    return .5f*fm_powf(raw,2.5f);
+}
+void juno6_unison_config(juno6_t *s, const uint8_t b[4], int16_t hist[2][SJ6_UNISON_HISTORY])
 {
     juno6_unison_t *u=&s->unison;
     if (u->history==hist && !memcmp(u->code,b,4)) return;
@@ -16,20 +36,11 @@ void juno6_unison_config(juno6_t *s, const uint8_t b[4], float hist[2][SJ6_UNISO
     u->history=hist;
     unsigned type=b[3], voices=type<4u ? type+2u : 6u;
     if(!b[0]) { u->taps=0; return; }
-    static const float pan[]={1.f,-.95f,.5f,-.59f,.33f};
     static const float graph_gain[]={.55f,.86f,1.25f,1.65f,2.1f,2.4f};
-    float detune=b[1] ? .5f*fm_powf((float)(b[1]-1u)/127.f,2.5f):.01f;
-    float stereo=(float)b[2]/127.f;
     unsigned old=u->taps;
     u->taps=(uint8_t)(voices-1u);
-    const float d=detune/(float)(voices-1u), x=detune*.02f*(float)(voices-1u);
-    for(unsigned i=0;i<u->taps;++i) {
-        float semitones=type==5u ? (d+3.f*x)*((i&1u)?-1.f:1.25f) :
-                                               (d+x)*((i&1u)?-1.f:1.f);
-        u->step[i]=1.f-fm_exp2f((float)(i+1u)*semitones*.0833333f);
-        u->pan[i]=pan[i]*stereo;
-        if(i>=old)u->head[i]=0.f;
-    }
+    for(unsigned i=old;i<u->taps;++i)u->head[i]=0.f;
+    sj6_unison_coeff(u,sj6_unison_detune(u,-1.f),(float)b[2]/127.f);
     u->wet=graph_gain[type]/(float)voices;
     /* Dry graph unity when disabled is intentionally the established firmware
      * bypass, rather than applying the original graph's always-on trim. */
@@ -42,7 +53,7 @@ static inline float unison_read(const juno6_unison_t *u,unsigned ch,float lag)
     if(l>u->filled)return 0.f;
     const float a=u->history[ch][(u->pos-l)&(SJ6_UNISON_HISTORY-1u)];
     const float b=l>=u->filled?0.f:u->history[ch][(u->pos-l-1u)&(SJ6_UNISON_HISTORY-1u)];
-    return a+(b-a)*(lag-(float)l);
+    return (a+(b-a)*(lag-(float)l))*(1.f/2048.f);
 }
 void juno6_unison_process(juno6_t *s,float *l,float *r,unsigned n)
 {
@@ -50,8 +61,9 @@ void juno6_unison_process(juno6_t *s,float *l,float *r,unsigned n)
     if(!u->taps || !u->history)return;
     for(unsigned k=0;k<n;++k) {
         const float in_l=l[k], in_r=r[k];
-        u->history[0][u->pos]=in_l;
-        u->history[1][u->pos]=in_r;
+        /* Q4.11 with 24 dB input headroom. The dry path stays Float32. */
+        u->history[0][u->pos]=(int16_t)fm_clampf(in_l*2048.f,-32768.f,32767.f);
+        u->history[1][u->pos]=(int16_t)fm_clampf(in_r*2048.f,-32768.f,32767.f);
         float wet_l=0.f,wet_r=0.f;
         for(unsigned i=0;i<u->taps;++i) {
             float h=u->head[i]+u->step[i];
@@ -73,5 +85,18 @@ void juno6_unison_process(juno6_t *s,float *l,float *r,unsigned n)
         u->pos=(uint16_t)((u->pos+1u)&(SJ6_UNISON_HISTORY-1u));
         if(u->filled<SJ6_UNISON_HISTORY-1u)++u->filled;
     }
+}
+/* LFO receiver is transient; the shared phase heads and delay ring
+ * continue into the following span without restarting the authored effect. */
+void juno6_unison_process_mod(juno6_t *s,float *l,float *r,unsigned n,float detune,float stereo)
+{
+    juno6_unison_t *u=&s->unison;
+    if(!u->taps || !u->history)return;
+    if(detune<0.f && stereo<0.f){juno6_unison_process(s,l,r,n);return;}
+    float step[5],pan[5];
+    memcpy(step,u->step,sizeof step);memcpy(pan,u->pan,sizeof pan);
+    sj6_unison_coeff(u,sj6_unison_detune(u,detune),stereo<0.f?(float)u->code[2]/127.f:stereo);
+    juno6_unison_process(s,l,r,n);
+    memcpy(u->step,step,sizeof step);memcpy(u->pan,pan,sizeof pan);
 }
 #endif

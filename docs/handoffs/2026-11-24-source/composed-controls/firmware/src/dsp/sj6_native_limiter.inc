@@ -37,6 +37,25 @@ void original_runtime_sj6_limiter(original_runtime_part *p,const uint8_t b[SJ6_L
     s->attack=1.f-fm_expf(-1.f/(44100.f*sj6_limiter_value(SJ6_LIM_ATTACK,b[SJ6_LIM_ATTACK])));
     s->output_gain=fm_exp2f(per_db*sj6_limiter_value(SJ6_LIM_GAIN,b[SJ6_LIM_GAIN]));
 }
+/* Build9 ID17 controls the same individual stage as Threshold and Gain,
+ * but writes both via its own ranges and gates the effect at .01. */
+static void sj6_rage_apply(sj6_limiter_t *s,float u)
+{
+    const float db=.16609640474f;
+    const float width=s->threshold>0.f && s->inverse_knee>0.f?
+        1.f/(s->threshold*s->inverse_knee):.01157945f;
+    s->threshold=fm_exp2f(db*(-20.f+30.f*u));
+    s->inverse_knee=1.f/(s->threshold*width);
+    s->output_gain=fm_exp2f(db*(1.f+7.f*u));
+    if(!(s->attack>0.f))s->attack=.02242f;
+    if(!(s->gain>0.f))s->gain=1.f;
+    s->armed=u>.01f;
+}
+void original_runtime_sj6_rage(original_runtime_part *p,unsigned position)
+{
+    if(p && p->kind==ORIGINAL_SOUND_JUNO && p->status==ORIGINAL_RUNTIME_OK && position<=127u)
+        sj6_rage_apply(&p->dsp.juno.limiter,(float)position*(1.f/127.f));
+}
 static void sj6_limiter_process(sj6_limiter_t *s,float *l,float *r,unsigned frames)
 {
     if(!s->armed)return;

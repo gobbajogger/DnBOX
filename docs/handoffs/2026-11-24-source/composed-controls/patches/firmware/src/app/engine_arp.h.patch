@@ -1,0 +1,32 @@
+--- a/firmware/src/app/engine_arp.h
++++ b/firmware/src/app/engine_arp.h
+@@ -24,13 +24,29 @@
+ #if X0X_SUPERJ6_BUILTIN_INIT
+        ARP_UPDN_REPEAT,
+ #if (defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE) || X0X_SJ6_NATIVE_RANDOM2
+        ARP_SAGA_RANDOM2,
++#if X0X_SJ6_RANDOM5_6_NATIVE
++       ARP_SAGA_RANDOM, ARP_SAGA_RANDOM3,
++#endif
+ #endif
+ #endif
+        ARP_NMODES };      /* MODE knob order on screen */
+ #if X0X_SUPERJ6_BUILTIN_INIT
+ enum { ARP_SAGA_DIVISIONS = 18 }; /* Division 0 keeps the existing SPEED clock. */
++#endif
++#if X0X_SJ6_RANDOM5_6_NATIVE
++#if !X0X_SJ6_NATIVE_RANDOM2
++#error SuperJ6 Random 5/6 need the native typed Random carrier
++#endif
++static inline unsigned sj6_random_encode(unsigned mode)
++{ return mode>=ARP_SAGA_RANDOM2 && mode<=ARP_SAGA_RANDOM3 ? mode-ARP_SAGA_RANDOM2+2u : 0u; }
++static inline unsigned sj6_random_decode(unsigned code,unsigned fallback)
++{ return code>=2u && code<=4u ? code-2u+ARP_SAGA_RANDOM2 : fallback; }
++#elif X0X_SJ6_RANDOM2_PROBE || X0X_SJ6_NATIVE_RANDOM2
++static inline unsigned sj6_random_encode(unsigned mode) { return mode==ARP_SAGA_RANDOM2 ? 2u : 0u; }
++static inline unsigned sj6_random_decode(unsigned code,unsigned fallback)
++{ return code==2u ? ARP_SAGA_RANDOM2 : fallback; }
+ #endif
+ enum { ARP_NSPEED = 10, ARP_SPEED_1_16 = 8 };                   /* == CHI_ARP_NSPEED, CHI_ARP_SPD_1_16 */
+ 
+ typedef struct {

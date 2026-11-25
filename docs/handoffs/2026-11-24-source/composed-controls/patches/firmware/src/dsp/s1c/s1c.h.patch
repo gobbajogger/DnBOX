@@ -1,6 +1,18 @@
 --- a/firmware/src/dsp/s1c/s1c.h
 +++ b/firmware/src/dsp/s1c/s1c.h
-@@ -137,9 +137,14 @@
+@@ -3,8 +3,11 @@
+ #ifndef S1C_H
+ #define S1C_H
+ #include <stdint.h>
+ #include "s1u.h"
++#if X0X_S1_USER_SCALE
++#include "s1c_scales.h"
++#endif
+ #ifdef X0X_S1C
+ #include "s1c_config.h"     /* device build: fixed sizes */
+ #endif
+ #if !defined(S1C_NO_SEQ) || !S1C_NO_SEQ
+@@ -137,13 +140,21 @@
      s1u_lfo lfo[2];           /* LFO 1, LFO 2 */
      float monof, monos, glide_c2, glide_h;
      s1c_voice v[S1C_VOICES];
@@ -8,15 +20,22 @@
 -    int8_t last[8]; uint8_t nlast, delay_history, pad[2];
 +    int8_t last[8]; uint8_t nlast, delay_history;
 +#if X0X_S1_DELAY_TIME_NATIVE
-+    uint8_t delay_time_code, delay_time_reserve;
++    uint8_t delay_time_code, tuning_index;
 +#else
-+    uint8_t pad[2];
++    uint8_t tuning_index, pad;
 +#endif
  #if !defined(S1C_NO_SEQ) || !S1C_NO_SEQ
      sdbl beat, beat_inc;
      float beat_rate;
      uint32_t beat_step;
-@@ -160,8 +165,11 @@
++#endif
++#if X0X_S1_USER_SCALE
++    uint8_t user_scale[S1C_USER_BYTES], user_npo;
+ #endif
+     uint32_t rnd;
+     /* fx */
+     s1u_crush crush; s1u_phaser ph; float pan_ph;
+@@ -160,8 +171,11 @@
      float rv_del[8], rv_inc[8], rv_acc[2], rv_o0[2], rv_o1[2];
      int32_t rv_k;
  #endif
@@ -28,3 +47,17 @@
  #if !defined(X0X_HOST) && !DNBOX_TYPED_CONTROLS_NATIVE_TEST
  #error Synth One direct Delay Feedback requires an explicit native trial
  #endif
+@@ -221,8 +235,13 @@
+     S1C_P_PHMIX = 116, S1C_P_PHRATE = 117, S1C_P_PHFB = 118, S1C_P_PHW = 119,
+     S1C_P_WIDEN = 121
+ };
+ void s1c_init(s1c *s, float sr, const float init[150]);
++#if X0X_S1_SCALE_NATIVE
++#include "s1c_scales.h"
++unsigned s1c_scale_npo(unsigned index);
++const char *s1c_scale_name(unsigned index);
++#endif
+ void s1c_set(s1c *s, unsigned id, float v);
+ /* Explicit panel bypass keeps processing the delay pool behind the mix. */
+ void s1c_set_delay_gate(s1c *s, float gate, int manual);
+ void s1c_start(s1c *s, int note, int vel);

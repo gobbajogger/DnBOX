@@ -1,0 +1,60 @@
+--- a/firmware/src/app/editor.c
++++ b/firmware/src/app/editor.c
+@@ -18,9 +18,9 @@
+ #define ED_HDR2 0x4C
+ enum { ED_INFO = 1, ED_PROJECT = 9, ED_SMP_BEGIN = 11, ED_SMP_WRITE, ED_SMP_END, ED_SMP_ERASE, ED_SMP_INFO, ED_SMP_READ, ED_PING = 25,
+        ED_DIAG = 33, ED_BT_TEST = 34, ED_CTL_READ = 37, ED_INLOG = 38, ED_BOOT_INFO = 39,
+        ED_BOOT_BEGIN = 43, ED_BOOT_WRITE, ED_BOOT_READ, ED_BOOT_END, ED_BOOT_ABORT,
+-       ED_INSTALL = 48, ED_CAPTURE = 49, ED_XDATA = 50, /* 51 reserved: retired FITTAB read-back. */ ED_FDATA = 52 };
++       ED_INSTALL = 48, ED_CAPTURE = 49, ED_XDATA = 50, /* 51 reserved: retired FITTAB read-back. */ ED_FDATA = 52, ED_S1_TUNING=53 };
+ #include "../../../tools/mboot/session_wire.h"
+ #include "boot_screen.h"
+ #if BOARD_SMK37
+ #if X0X_S1C
+@@ -885,8 +885,31 @@
+         /* Even a refused/uncertain COMMIT cannot inherit a legacy IRQ request
+          * that arrived while the response was being queued. */
+         return;
+     }
++#if X0X_S1_USER_SCALE
++    case ED_S1_TUNING: {
++        /* Version 1: [op,owner] query, or [op,owner,count_minus_one,crc32 in 5x7,
++         * pack7(name[12]+3*NPO)] transactional RAM import. No save or flash writes. */
++        extern int s1_typed_user_import(unsigned,unsigned,const uint8_t *,const uint8_t *);
++        if(na<2u || a[1]>=NBASS || a[0]>1u){ed_b(1);break;}
++        unsigned owner=a[1];
++        if(a[0]==0u && na==2u){
++            ed_b(0);ed_b(1);ed_b(owner);ed_u(s1_user_npo(&proj.sound,owner),2);
++            for(unsigned i=0;i<S1C_USER_NAME;i++)ed_b(proj.sound.v[T_MST][S1_SCALE_ROW+owner][S1_USER_ID+i]);
++        }else if(a[0]==1u && na>=9u && a[2]<S1C_USER_NOTES && a[7]<=15u){
++            unsigned n=ed_unpack_exact(a+8,na-8,ed_smp_buf,S1C_USER_NAME+S1C_USER_BYTES);
++            if(n!=S1C_USER_NAME+3u*(1u+a[2]) || st_crc32(ed_smp_buf,n)!=ed_g(a+3,5)){
++                ed_b(1);break;
++            }
++            if(ed_project.mode || ui_project_busy() || ed_install_pending){ed_b(2);break;}
++            int rc=s1_typed_user_import(owner,1u+a[2],ed_smp_buf,ed_smp_buf+S1C_USER_NAME);
++            if(!rc)mark_dirty();
++            ed_b(rc);
++        }else ed_b(1);
++        break;
++    }
++#endif
+     case ED_PROJECT:
+         ed_project_handle(a, na);
+         break;
+     case ED_INFO:
+@@ -1167,9 +1190,13 @@
+         return 1;                                    /* this same pending frame belongs to ota_service() */
+     }
+     /* Boot writes are longer than the 64-byte stack copy below. A truncated
+      * frame would fail the check and must not be stored. */
+-    if (p[3] == ED_CAPTURE || p[3] == ED_PROJECT || (p[3] >= ED_SMP_BEGIN && p[3] <= ED_SMP_READ) || boot_cmd(p[3])) {
++    if (
++#if X0X_S1_USER_SCALE
++        p[3] == ED_S1_TUNING ||
++#endif
++        p[3] == ED_CAPTURE || p[3] == ED_PROJECT || (p[3] >= ED_SMP_BEGIN && p[3] <= ED_SMP_READ) || boot_cmd(p[3])) {
+         ed_handle(p, n);
+         ota_frame_done();
+         return 0;
+     }

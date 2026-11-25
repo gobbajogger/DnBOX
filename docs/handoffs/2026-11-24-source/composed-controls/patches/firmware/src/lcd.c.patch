@@ -1,0 +1,18 @@
+--- a/firmware/src/lcd.c
++++ b/firmware/src/lcd.c
+@@ -79,9 +79,14 @@
+     lcd_data(lcd_small + 4, 4);
+     lcd_cmd(0x2C);
+ }
+ 
+-#if BOARD_SMK37
++#if X0X_LCD_CANVAS_FILL_SCRATCH
++/* Full-screen fill calls retire the previous canvas; the next drawing
++ * route calls cv_begin before blitting. Wait on any read before reuse. */
++static uint16_t *lcd_fill_scratch(void);
++#define lcd_fillbuf (lcd_fill_scratch())
++#elif BOARD_SMK37
+ static uint16_t lcd_fillbuf[240] SMK_BIG;
+ #else
+ static uint16_t lcd_fillbuf[240];
+ #endif

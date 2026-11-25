@@ -44,6 +44,17 @@
      if chance_probe not in ("0", "1"):
          raise SystemExit("X0X_GFINAL_CHANCE_PROBE: 0 or 1")
      flags = [*flags, "-DX0X_GFINAL_CHANCE_PROBE=" + chance_probe]
+@@ -488,9 +512,9 @@
+     # Every admitted build is Chicago/Miami only. Keep the obsolete engine
+     # units out of the compilation plan, not behind unreachable switches.
+     for u in O2_UNITS:
+         o = OUT / "o2" / (u.replace("/", "_")[:-2] + ".o")
+-        unit_flags = [*o2, *ORIGINAL_SYNTH_FLAGS] if u == "app/engine.c" else o2
++        unit_flags = [*["-Oz" if f == "-Os" else f for f in flags], *ORIGINAL_SYNTH_FLAGS] if u == "app/engine.c" else o2
+         if u in OZ_UNITS:
+             unit_flags = [f if f != "-Os" else "-Oz" for f in flags]
+         if u in {"dsp/drum909.c", "dsp/master.c", "dsp/fxbus.c"}:
+             unit_flags = [f for f in unit_flags if f != "-flto"]
 @@ -499,8 +523,10 @@
      if original_synth:
          original_flags = [*flags, *ORIGINAL_SYNTH_FLAGS]

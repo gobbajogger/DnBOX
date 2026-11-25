@@ -32,7 +32,7 @@
  #endif
  enum {S1_PAN_AMOUNT_BYTE=21,S1_PAN_RATE_BYTE=22,S1_PAN_RATE_BYTES=4};
  static inline uint32_t s1_pan_rate_word_bytes(const uint8_t *b){
-@@ -108,21 +121,326 @@
+@@ -108,21 +121,471 @@
  { return s->v[T_303][8+2u*owner+S1_DICT_BYTE/NPARAMS_MAX][S1_DICT_BYTE%NPARAMS_MAX]; }
  static inline void s1_dict_store(sound_t *s,unsigned owner,unsigned code)
  { s->v[T_303][8+2u*owner+S1_DICT_BYTE/NPARAMS_MAX][S1_DICT_BYTE%NPARAMS_MAX]=(uint8_t)code; }
@@ -76,6 +76,49 @@
 +/* T_MST's actual DSP consumes only voice 0 (engine_nvoices). The untouched
 + * project rows 1 and 2 carry the two Synth One compressor edit payloads;
 + * no serialized size, map, revision, master bus pot or peer changes. */
++#if X0X_S1_SCALE_NATIVE
++#include "../dsp/s1c/s1c_scales.h"
++enum { S1_SCALE_ROW=5,S1_SCALE_BYTE=11 };
++_Static_assert(S1_SCALE_ROW+NBASS<=NVOICES_MAX && S1_SCALE_BYTE<NPARAMS_MAX,"Synth One scale carrier");
++#if X0X_S1_USER_SCALE
++/* T_FX owner 0, T_BRK owner 1: rows 2..11; neither engine reads them.
++ * Four more rows at T_MIX 6..9, after the SMC CUT sidecar row 5.
++ * Alias region is inside serialized Sound, never a writable flash map. */
++enum { S1_USER_ROW=2,S1_USER_HEAD=(NVOICES_MAX-S1_USER_ROW)*NPARAMS_MAX,
++       S1_USER_MIX=6,S1_USER_TAIL=S1C_USER_BYTES-S1_USER_HEAD,
++       S1_USER_COUNT=13,S1_USER_ID=14 };
++_Static_assert(NVOICES_MAX==12 && NPARAMS_MAX==32 && NPARTS==5 &&
++    S1_USER_HEAD==320 && S1_USER_TAIL==64 && S1_USER_MIX+2*NBASS<=NVOICES_MAX &&
++    S1_USER_ID+S1C_USER_NAME<=NPARAMS_MAX,"User tuning uses exact unused Sound rows");
++static inline unsigned s1_user_head_target(unsigned v){return v?T_BRK:T_FX;}
++static inline unsigned s1_user_tail_row(unsigned v){return S1_USER_MIX+2u*v;}
++static inline unsigned s1_user_npo(const sound_t*s,unsigned v){return s->v[T_MST][S1_SCALE_ROW+v][S1_USER_COUNT];}
++static int s1_user_valid(const sound_t *s,unsigned v)
++{
++    const uint8_t *m=s->v[T_MST][S1_SCALE_ROW+v];
++    const uint8_t *head=(const uint8_t *)&s->v[s1_user_head_target(v)]+S1_USER_ROW*NPARAMS_MAX;
++    const uint8_t *tail=(const uint8_t *)&s->v[T_MIX]+s1_user_tail_row(v)*NPARAMS_MAX;
++    unsigned count=m[S1_USER_COUNT];
++    if(count>S1C_USER_NOTES || (m[S1_SCALE_BYTE]==S1C_SCALE_USER && !count))return 0;
++    for(unsigned i=0;i<S1C_USER_NAME;i++){
++        unsigned c=m[S1_USER_ID+i];
++        if(c && (c<32u || c>126u))return 0;
++    }
++    unsigned prev=0,code=0;
++    for(unsigned i=0;i<3u*count;i++){
++        unsigned c=i<S1_USER_HEAD?head[i]:tail[i-S1_USER_HEAD];
++        code|=c<<(8u*(i%3u));
++        if(i%3u==2u){if(code>=0x800000u || (i>2u && code<prev))return 0;prev=code;code=0;}
++    }
++    return 1;
++}
++#endif
++#endif
++#if X0X_S1_HALFTIME
++enum { S1_HALF_ROW=5,S1_HALF_BYTE=12,S1_HALF_PARAM=144,S1_HALF_DEFAULT=13 };
++static inline unsigned s1_half_code(const sound_t *s,unsigned v)
++{ return s->v[T_MST][S1_HALF_ROW+v][S1_HALF_BYTE]; }
++#endif
 +enum { S1_CMP_ROW=1, S1_CMP_FIRST=122, S1_CMP_COUNT=14 };
 +_Static_assert(S1_CMP_ROW+NBASS<=NVOICES_MAX && S1_CMP_COUNT<=NPARAMS_MAX,
 +               "Synth One compressor rows fit the existing sound extent");
@@ -122,7 +165,14 @@
 +}
 +#endif
 +#if X0X_SJ6_AUX_LFO_NATIVE
-+enum { SJ6_AUX_ROW=3,SJ6_AUX_BYTES=13 };
++enum { SJ6_AUX_ROW=3,SJ6_AUX_BYTES=
++#if X0X_SJ6_LFO_TRIGGER_NATIVE
++    16
++#else
++    13
++#endif
++};
++
 +_Static_assert(SJ6_AUX_ROW+NBASS<=NVOICES_MAX && SJ6_AUX_BYTES<=NPARAMS_MAX,"Aux LFO rows");
 +static inline const uint8_t *sj6_aux_read(const sound_t *s,unsigned v)
 +{ return &s->v[T_MST][SJ6_AUX_ROW+v][0]; }
@@ -130,17 +180,25 @@
 +{ return &s->v[T_MST][SJ6_AUX_ROW+v][0]; }
 +static inline int sj6_aux_init(const sound_t *s,unsigned v)
 +{ return s->v[T_303][v][29]==ORIGINAL_SOUND_JUNO && !original_sound_sj6_factory(s->v[T_303][v]); }
++#include "../dsp/juno6_aux_catalog.h"
++int juno6_aux_destination_supported(unsigned);
++enum { SJ6_AUX_LFO1_ROW=5,SJ6_AUX_LFO1_OFF=20,SJ6_AUX_LFO1_NONE=7 };
++static inline const uint8_t *sj6_aux_lfo1_read(const sound_t *s,unsigned v)
++{ return &s->v[T_MST][SJ6_AUX_LFO1_ROW+v][SJ6_AUX_LFO1_OFF]; }
++static inline int sj6_aux_lfo1_valid(const uint8_t *p)
++{ return !p[1] && !p[3] && p[2]<=127u && (p[0] || !p[2]) &&
++         (p[0]==SJ6_AUX_LFO1_NONE || juno6_aux_destination_supported(p[0])); }
 +static inline unsigned sj6_aux_max(unsigned k) {
-+ return k<2u?1u:k==3u?4u:k>=5u&&k<9u?
-+#if X0X_SJ6_PITCH_ENV_NATIVE
-+     6u:
-+#else
-+     5u:
-+#endif
-+     127u;
++ return k<2u?1u:k==3u?4u:k>=5u&&k<9u?SJ6_AUX_ORIGINAL_LAST:127u;
 +}
 +static inline int sj6_aux_valid(unsigned k,unsigned value)
-+{ return value<=(k<2u?2u:sj6_aux_max(k)); }
++{
++#if X0X_SJ6_LFO_TRIGGER_NATIVE
++ if(k>=13u)return value<=(k<16u?3u:1u);
++#endif
++ if(k>=5u && k<9u)return juno6_aux_destination_supported(value);
++ return value<=(k<2u?2u:sj6_aux_max(k));
++}
 +#endif
  static inline int s1_typed_init_cell(const uint8_t *b);
 +#if X0X_SJ6_VCF_PORT
@@ -241,7 +299,13 @@
 +#endif
 +#if X0X_SJ6_NATIVE_LIMITER
 +#include "../dsp/sj6_native_limiter.h"
-+enum { SJ6_LIM_ROW=5, SJ6_LIM_BYTE=0 };
++enum { SJ6_LIM_ROW=5, SJ6_LIM_BYTE=0, SJ6_RAGE_BYTE=26,
++       SJ6_RAGE_SLOT=SJ6_LIM_COUNT };
++/* 0 preserves an untouched carrier; 1..128 encode an authored value. */
++static inline unsigned sj6_rage_read(const sound_t *s,unsigned owner)
++{ return s->v[T_MST][SJ6_LIM_ROW+owner][SJ6_RAGE_BYTE]; }
++static inline void sj6_rage_write(sound_t *s,unsigned owner,unsigned code)
++{ s->v[T_MST][SJ6_LIM_ROW+owner][SJ6_RAGE_BYTE]=(uint8_t)code; }
 +_Static_assert(SJ6_LIM_ROW+NBASS<=NVOICES_MAX && SJ6_LIM_BYTE+SJ6_LIM_COUNT<=NPARAMS_MAX,
 +               "The two SuperJ6 limiter payloads occupy unused master owner rows");
 +static inline const uint8_t *sj6_limiter_read(const sound_t *s,unsigned owner)
@@ -265,16 +329,61 @@
 +{ return p[0]<=128u && p[1]<=128u && p[2]<=128u; }
 +#endif
 +#if X0X_SJ6_SEQ_SETTINGS_NATIVE
-+enum { SJ6_SEQ_SETTINGS_ROW=3, SJ6_SEQ_SETTINGS_OFFSET=28, SJ6_SEQ_SETTINGS_COUNT=2 };
++enum { SJ6_SEQ_SETTINGS_ROW=3, SJ6_SEQ_SETTINGS_OFFSET=28, SJ6_SEQ_SETTINGS_COUNT=2  };
 +_Static_assert(SJ6_SEQ_SETTINGS_ROW+NBASS<=NVOICES_MAX &&
 +               SJ6_SEQ_SETTINGS_OFFSET+SJ6_SEQ_SETTINGS_COUNT<=NPARAMS_MAX,
 +               "independent typed settings rows");
++static inline int sj6_seq_settings_valid(const uint8_t *p)
++{
++    return p[0]<=1u && p[1]<=1u;
++}
++#if X0X_SJ6_SEQ_DEST_NATIVE
++enum { SJ6_DEST_ROW=5,SJ6_DEST_BYTE=28 };
++_Static_assert(SJ6_DEST_ROW+NBASS<=NVOICES_MAX && SJ6_DEST_BYTE<NPARAMS_MAX,
++               "Separate route bytes do not conflict with Snapback");
++static inline unsigned sj6_dest_read(const sound_t *s,unsigned v)
++{ return s->v[T_MST][SJ6_DEST_ROW+v][SJ6_DEST_BYTE]; }
++static inline uint8_t *sj6_dest_write(sound_t *s,unsigned v)
++{ return &s->v[T_MST][SJ6_DEST_ROW+v][SJ6_DEST_BYTE]; }
++#endif
 +static inline const uint8_t *sj6_seq_settings_read(const sound_t *s,unsigned v)
 +{ return s->v[T_MST][SJ6_SEQ_SETTINGS_ROW+v]+SJ6_SEQ_SETTINGS_OFFSET; }
 +static inline uint8_t *sj6_seq_settings_write(sound_t *s,unsigned v)
 +{ return s->v[T_MST][SJ6_SEQ_SETTINGS_ROW+v]+SJ6_SEQ_SETTINGS_OFFSET; }
 +#endif
++#if X0X_SJ6_LFO1_WAVE_NATIVE
++enum { SJ6_LFO1_WAVE_ROW=5, SJ6_LFO1_WAVE_OFFSET=7 };
++static inline unsigned sj6_lfo1_wave_read(const sound_t *s,unsigned owner)
++{ return s->v[T_MST][SJ6_LFO1_WAVE_ROW+owner][SJ6_LFO1_WAVE_OFFSET]; }
++static inline void sj6_lfo1_wave_write(sound_t *s,unsigned owner,unsigned code)
++{ s->v[T_MST][SJ6_LFO1_WAVE_ROW+owner][SJ6_LFO1_WAVE_OFFSET]=(uint8_t)code; }
++static inline unsigned sj6_lfo1_option(const sound_t *s,unsigned owner,unsigned k)
++{ return s->v[T_MST][SJ6_LFO1_WAVE_ROW+owner][SJ6_LFO1_WAVE_OFFSET+1u+k]; }
++static inline void sj6_lfo1_option_store(sound_t *s,unsigned owner,unsigned k,unsigned p)
++{ s->v[T_MST][SJ6_LFO1_WAVE_ROW+owner][SJ6_LFO1_WAVE_OFFSET+1u+k]=(uint8_t)p; }
++static inline int sj6_lfo1_wave_allowed(const uint8_t *owner)
++{ return owner[29]==ORIGINAL_SOUND_JUNO && !original_sound_sj6_factory(owner); }
++#endif
++#if X0X_SJ6_ALT3_NATIVE
++enum { SJ6_TREM_ROW=5, SJ6_TREM_OFFSET=24, SJ6_TREM_DEPTH=120, SJ6_TREM_RATE=121,
++       SJ6_TREM_DEPTH_ID=103, SJ6_TREM_RATE_ID=104 };
++_Static_assert(SJ6_TREM_ROW+NBASS<=NVOICES_MAX && SJ6_TREM_OFFSET+2u<=NPARAMS_MAX,
++               "SuperJ6 Tremolo is an independent owner effect");
++static inline const uint8_t *sj6_trem_read(const sound_t *s,unsigned v)
++{ return &s->v[T_MST][SJ6_TREM_ROW+v][SJ6_TREM_OFFSET]; }
++static inline uint8_t *sj6_trem_write(sound_t *s,unsigned v)
++{ return &s->v[T_MST][SJ6_TREM_ROW+v][SJ6_TREM_OFFSET]; }
++static inline unsigned sj6_trem_position(const uint8_t *p,unsigned k)
++{ return k ? p[1] ? p[1]-1u : 64u : p[0]; }
++#endif
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST && !defined(CANONICAL137_IMPL)
++int canonical137(const sound_t *s);
++#else
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++int canonical137(const sound_t *s) {
++#else
  static inline int canonical137(const sound_t *s) {
++#endif
   for (unsigned v=0;v<2;++v) {
 +#if X0X_SJ6_NATIVE_J60
 +  const uint8_t *j60=sj6_j60_code(s,v);
@@ -286,14 +395,34 @@
 +  if(!sj6_classic_native_valid(classic) ||
 +     ((classic[0]|classic[1]|classic[2])&&!sj6_j60_owner(s,v)))return 0;
 +#endif
++#if X0X_SJ6_LFO1_WAVE_NATIVE
++  unsigned wave=sj6_lfo1_wave_read(s,v);
++  const unsigned mute=sj6_lfo1_option(s,v,0),snap=sj6_lfo1_option(s,v,1);
++  if(wave>SJ6_LFO1_WAVE_MAX || mute>1u || snap>1u ||
++     ((wave|mute|snap) && !sj6_lfo1_wave_allowed(s->v[T_303][v])))return 0;
++#endif
    const uint8_t *b=read137(s,v);
++#if X0X_SJ6_ALT3_NATIVE
++  const uint8_t *trem=sj6_trem_read(s,v);
++  if(trem[0]>127u || trem[1]>128u || ((trem[0]|trem[1]) &&
++     (s->v[T_303][v][29]!=ORIGINAL_SOUND_JUNO || original_sound_sj6_factory(s->v[T_303][v]))))
++      return 0;
++#endif
 +#if X0X_SJ6_SEQ_SETTINGS_NATIVE
 +  const uint8_t *seqcfg=sj6_seq_settings_read(s,v);
-+  if(seqcfg[0]>1u || seqcfg[1]>1u ||
++  if(!sj6_seq_settings_valid(seqcfg) ||
 +     ((seqcfg[0]|seqcfg[1]) && (s->v[T_303][v][29]!=ORIGINAL_SOUND_JUNO ||
 +         original_sound_sj6_factory(s->v[T_303][v])))) return 0;
++#if X0X_SJ6_SEQ_DEST_NATIVE
++  unsigned dest=sj6_dest_read(s,v);
++  if(dest>2u || (dest && (s->v[T_303][v][29]!=ORIGINAL_SOUND_JUNO ||
++      original_sound_sj6_factory(s->v[T_303][v]))))return 0;
++#endif
 +#endif
 +#if X0X_SJ6_NATIVE_LIMITER
++  const unsigned rage=sj6_rage_read(s,v);
++  if(rage>128u || (rage && (s->v[T_303][v][29]!=ORIGINAL_SOUND_JUNO ||
++                        original_sound_sj6_factory(s->v[T_303][v]))))return 0;
 +  for(unsigned k=0;k<SJ6_LIM_COUNT;++k){
 +    unsigned c=sj6_limiter_read(s,v)[k];
 +    if(c>128u || (c && (s->v[T_303][v][29]!=ORIGINAL_SOUND_JUNO ||
@@ -312,9 +441,14 @@
 +         original_sound_sj6_factory(s->v[T_303][v])))) return 0;
 +#endif
 +#if X0X_SJ6_AUX_LFO_NATIVE
++  const uint8_t *r1=sj6_aux_lfo1_read(s,v);
++  if(!sj6_aux_lfo1_valid(r1) || ((r1[0]|r1[2])&&!sj6_aux_init(s,v)))return 0;
 +  const uint8_t *aux=sj6_aux_read(s,v);
 +  for(unsigned k=0;k<SJ6_AUX_BYTES;k++)
 +    if(!sj6_aux_valid(k,aux[k]) || (aux[k] && !sj6_aux_init(s,v)))return 0;
++#if X0X_SJ6_LFO_TRIGGER_NATIVE
++  if(aux[30]>1u || aux[31]>1u || ((aux[30]||aux[31]) && !sj6_aux_init(s,v)))return 0;
++#endif
 +#endif
 +#if X0X_SJ6_NATIVE_ROOM
 +  const uint8_t *crush=sj6_crush_code(s,v);
@@ -333,6 +467,17 @@
 +    if(pitch[k]>sj6_pitch_max(k) || (pitch[k] && !sj6_pitch_init(s,v)))return 0;
 +#endif
 +#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++#if X0X_S1_SCALE_NATIVE
++  unsigned tuning=s->v[T_MST][S1_SCALE_ROW+v][S1_SCALE_BYTE];
++  if(tuning>S1C_SCALE_MAX || (tuning && !s1_typed_init_cell(s->v[T_303][v])))return 0;
++#if X0X_S1_USER_SCALE
++  if(!s1_user_valid(s,v))return 0;
++#endif
++#endif
++#if X0X_S1_HALFTIME
++  unsigned half=s1_half_code(s,v);
++  if(half>128u || (half && !s1_typed_init_cell(s->v[T_303][v])))return 0;
++#endif
 +  for(unsigned k=0;k<S1_CMP_COUNT;k++){
 +   unsigned value=s1_cmp_read(s,v)[k];
 +   if(value>127u || (value && !s1_typed_init_cell(s->v[T_303][v])))return 0;
@@ -361,7 +506,7 @@
    if (b[0]!=137 || b[1]!=v || b[2]>127 || b[3]>2) return 0;
  #if DNBOX_TYPED_CONTROLS_NATIVE_TEST
  #if X0X_SJ6_VELOCITY_PORT
-@@ -156,21 +474,40 @@
+@@ -156,21 +619,40 @@
      if(x>S1_FB_LAST)return 0;
      continue;
     }
@@ -407,7 +552,21 @@
  #endif
  #if defined(X0X_S1_AUTOPAN_PROBE) && X0X_S1_AUTOPAN_PROBE
     if(i==S1_PAN_AMOUNT_BYTE){if(x>127)return 0;continue;}
-@@ -204,8 +541,56 @@
+@@ -186,9 +668,13 @@
+    }
+ #endif
+ #if (defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE) || X0X_SJ6_NATIVE_RANDOM2
+    if(i==SJ6_ARP_RANDOM_BYTE){
++#if X0X_SJ6_RANDOM5_6_NATIVE
++     if(x==1u || x>4u)return 0;
++#else
+      if(x!=0u && x!=2u)return 0;
++#endif
+ #if X0X_SJ6_NATIVE_RANDOM2
+      if(x && (s->v[T_303][v][29]!=ORIGINAL_SOUND_JUNO ||
+               original_sound_sj6_factory(s->v[T_303][v])))return 0;
+ #endif
+@@ -204,15 +690,64 @@
      if(x && !s1_typed_init_cell(s->v[T_303][v]))return 0;
  #endif
      if(x>S1_DICT_MAX)return 0;
@@ -464,3 +623,11 @@
  #endif
     if (x) return 0;
    }
+  }
+  return 1;
+ }
++#endif
+ /* Whole-carrier canonical admission occurs at stage validation. Audio only
+    does a constant-size candidate check at the existing owner boundary. */
+ static inline int live137(const sound_t *s,unsigned v) {
+  if(s!=&proj.sound || proj.set.snd_rev!=REV137 || v>=NBASS) return 0;

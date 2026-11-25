@@ -1,0 +1,94 @@
+--- a/firmware/src/dsp/fxbus.c
++++ b/firmware/src/dsp/fxbus.c
+@@ -164,14 +164,14 @@
+     }
+ }
+ 
+ /* Boot only (engine_init). fxbus_process and the reverb/delay ticks stay -O2. */
+-X0X_COLD void fxbus_init(fxbus_t *f, int16_t *dly_buf, int dly_len)
++X0X_COLD void fxbus_init(fxbus_t *f, fx_dly_word_t *dly_buf, int dly_len)
+ {
+     uint8_t *p = (uint8_t *)f;
+     for (unsigned i = 0; i < sizeof(*f); ++i)
+         p[i] = 0;
+-    for (int i = 0; i < dly_len; ++i)
++    for (unsigned i = 0; i < (unsigned)FX_DLY_WORDS(dly_len); ++i)
+         dly_buf[i] = 0;
+     f->dbuf = dly_buf;
+     f->dlen = dly_len;
+ 
+@@ -301,17 +301,50 @@
+ 
+ /* the line at d samples behind w, interpolated (X0X: the ping-pong tap).
+  * Outlined once: fx_delay calls this many times (mono + stereo / PING taps);
+  * one body beats N inlined copies on pi32 (-O2). */
+-__attribute__((noinline)) static float dl_tap(const int16_t *buf, int32_t len, float flen, int32_t w, float d)
++#if X0X_MIX_DELAY_PACK14
++/* Signed monotone compander: original Q11 precision through approximately
++ * ±3 full scale; headroom bins use 4 or 16 Q11 counts. No tap, rate or
++ * effect control changes, but hot signals must be compared before shipping. */
++static inline int32_t dl_get(const fx_dly_word_t *buf,unsigned i)
++{
++    unsigned bit=i*14u;
++    const uint8_t *p=buf+(bit>>3u);
++    unsigned code=((unsigned)p[0]|((unsigned)p[1]<<8u)|((unsigned)p[2]<<16u))>>(bit&7u);
++    unsigned mag=code&8191u;
++    if(mag>=6656u)mag=mag==8191u?32767u:8192u+(mag-6656u)*16u+7u;
++    else if(mag>=6144u)mag=6144u+(mag-6144u)*4u+1u;
++    return code&8192u ? -(int32_t)mag : (int32_t)mag;
++}
++static inline int32_t dl_write(fx_dly_word_t *buf,unsigned i,float v)
++{
++    int32_t sample=(int32_t)(v*2048.f);
++    if(sample>32767)sample=32767;
++    if(sample< -32767)sample=-32767;
++    unsigned mag=sample<0 ? (unsigned)-sample : (unsigned)sample;
++    if(mag>=8192u)mag=6656u+((mag-8192u)>>4u);
++    else if(mag>=6144u)mag=6144u+((mag-6144u)>>2u);
++    unsigned bit=i*14u,shift=bit&7u;
++    uint8_t *p=buf+(bit>>3u);
++    unsigned v24=(unsigned)p[0]|((unsigned)p[1]<<8u)|((unsigned)p[2]<<16u);
++    v24=(v24&~(16383u<<shift))|((mag|((sample<0)?8192u:0u))<<shift);
++    p[0]=(uint8_t)v24;p[1]=(uint8_t)(v24>>8u);p[2]=(uint8_t)(v24>>16u);
++    return sample;
++}
++#else
++static inline int32_t dl_get(const fx_dly_word_t *buf,unsigned i){return buf[i];}
++static inline int32_t dl_write(fx_dly_word_t *buf,unsigned i,float v){return sat12_store(&buf[i],v);}
++#endif
++__attribute__((noinline)) static float dl_tap(const fx_dly_word_t *buf, int32_t len, float flen, int32_t w, float d)
+ {
+     float rp = (float)w - d;
+     while (rp < 0.0f) rp += flen;
+     int32_t i0 = (int32_t)rp;
+     const float fr = rp - (float)i0;
+     if (i0 >= len) i0 -= len;
+     const int32_t i1 = i0 + 1 >= len ? 0 : i0 + 1;
+-    const float b0 = (float)buf[i0] * (1.0f / 2048.0f), b1 = (float)buf[i1] * (1.0f / 2048.0f);
++    const float b0 = (float)dl_get(buf,(unsigned)i0) * (1.0f / 2048.0f), b1 = (float)dl_get(buf,(unsigned)i1) * (1.0f / 2048.0f);
+     return b0 + (b1 - b0) * fr;
+ }
+ 
+ /* out_r 0: 9W9's mono delay. Else both sides get the echo, or with PING the left reads at the time and
+@@ -348,9 +381,9 @@
+             f->flut_ph += d9_inc(6.1f) * (uint32_t)n;
+             return;
+         }
+     }
+-    int16_t *buf = f->dbuf;
++    fx_dly_word_t *buf = f->dbuf;
+     const float flen = (float)len;
+     const int ping = out_r && f->dl_ping && 2.0f * fm_maxf(f->dcur, target) + 4.0f < flen;
+     const float lvl = f->muted & 2u ? 0.0f : f->dl_level;
+     int32_t quiet = f->dl_quiet;
+@@ -402,9 +435,9 @@
+             hp += (s - hp) * 0.0042725f;                          /* 30 Hz: no DC latch-up past unity */
+             s -= hp;
+             write = s;
+         }
+-        int32_t k = sat12_store(&buf[w], x + write);       /* 12-bit, toward zero */
++        int32_t k = dl_write(buf,(unsigned)w,x+write);    /* Q11, toward zero */
+         if (++w >= len) w = 0;
+         out[i] += y * lvl;
+         if (out_r)
+             out_r[i] += y2 * lvl;

@@ -8,7 +8,56 @@
  #endif
  /* Compact Synth One-style engine, written from scratch for DnBOX from the instrument's documented
   * behaviour (control laws, envelope, voice allocation, arpeggiator, FX order). Judged by A/B only.
-@@ -447,13 +447,19 @@
+@@ -95,13 +95,48 @@
+ #else
+ #define P(i) (s->c[i])
+ #endif
+ static float clampf(float x, float a, float b) { return x < a ? a : x > b ? b : x; }
++#if X0X_S1_SCALE_NATIVE
++#include "s1c_scales.inc"
++unsigned s1c_scale_npo(unsigned index){return index<S1C_SCALE_COUNT ? s1_scale[index].npo : 12u;}
++const char *s1c_scale_name(unsigned index){return index<S1C_SCALE_COUNT ? s1_scale[index].name : s1_scale[0].name;}
++static float s1_scale_hz(const s1c *s,unsigned index,int note,float a4)
++{
++#if X0X_S1_USER_SCALE
++    const int user=index==S1C_SCALE_USER && s->user_npo;
++    if(index==S1C_SCALE_USER && !user)return a4*exp2f((note-69)/12.f);
++    const int npo=user ? s->user_npo : s1_scale[index].npo;
++#else
++    const int npo=s1_scale[index].npo;
++#endif
++    const int steps=note-60; /* original AKTuningTable C4 anchor */
++    int octave=steps/npo, degree=steps%npo;
++    if(degree<0){degree+=npo;--octave;}
++    union {uint32_t u;float v;} q={.u=(uint32_t)(octave+127)<<23};
++    float ratio;
++#if X0X_S1_USER_SCALE
++    if(user){
++        const uint8_t *p=s->user_scale+3u*(unsigned)degree;
++        union {uint32_t u;float v;} normalized={
++            .u=UINT32_C(0x3f800000)|((uint32_t)p[2]<<16)|((uint32_t)p[1]<<8)|p[0]};
++        ratio=normalized.v;
++    }else
++#endif
++        ratio=s1_scale_ratio[s1_scale[index].offset+(unsigned)degree];
++    float hz=ratio*q.v*(a4*0.5946035575013605f);
++    return hz<22050.f ? hz : 22050.f;
++}
++#endif
+ static float note_hz(const s1c *s, int n)
+ {
+     n = n < 0 ? 0 : n > 127 ? 127 : n;
+     float ref = s->t[A4];
+     if (!(ref >= 410.f && ref <= 470.f)) ref = 440.f;
++#if X0X_S1_SCALE_NATIVE
++    if(s->tuning_index && s->tuning_index<=S1C_SCALE_MAX)
++        return s1_scale_hz(s,s->tuning_index,n,ref);
++#endif
+     return ref * exp2f((n - 69) / 12.0f);
+ }
+ static float lfo01(const s1c *s, float sel)
+ {
+@@ -447,13 +482,19 @@
          const float kcut = P(CUT) * lfo10(s, P(LCUT)), kem = P(FENV) * lfo10(s, P(LFENV));
          float cut = clampf(kcut - kcut * kem * (1.0f - v->fenv), 64.0f, 22050.0f);
          if (ft == 0) {
@@ -28,7 +77,7 @@
          } else {
              float cc = tanf(3.14159265f * cut / s->sr), a1 = 1.0f / (1.0f + 1.41421356f * cc + cc * cc);
              v->ka1 = a1; v->ka4 = 2.0f * (cc * cc - 1.0f) * a1; v->ka5 = (1.0f - 1.41421356f * cc + cc * cc) * a1;
-@@ -477,8 +483,32 @@
+@@ -477,8 +518,32 @@
          y += ((float)(int32_t)s->rnd * (1.0f / 2147483648.0f)) * v->vamp * P(NOISEV) * lfo10(s, P(LNOISE));
      }
      y *= v->amp * v->kkey;
@@ -61,7 +110,7 @@
      else if (ft == 2) fo = hp2(v->bq, y, v->ka1, v->ka4, v->ka5);
      else {
          float t = y - v->ka4 * v->bq[0] - v->ka5 * v->bq[1];
-@@ -750,15 +780,46 @@
+@@ -750,15 +815,46 @@
  {
  #if !S1C_BUSFX
      if (manual && !s->delay_history) {
@@ -109,7 +158,7 @@
  {
      int i;
  #if !S1C_BUSFX
-@@ -834,8 +895,11 @@
+@@ -834,8 +930,11 @@
      int fmt = s->dfmt, nl, dd, i;
  #endif
      float dt = s->t[DLT] > P(DLT) ? s->t[DLT] : P(DLT);
@@ -121,7 +170,7 @@
      nl = s->dmono ? 2 : 3;
      for (dd = 1; dd < 4096; dd++) {
          float T = Tt / (float)dd;
-@@ -929,20 +993,22 @@
+@@ -929,20 +1028,22 @@
          else for (i = 0; i < S1C_VOICES; i++) if (s->v[i].root != -1 && s->v[i].stage) y += voice_run(s, &s->v[i]);
  
          /* bitcrush (sample-and-hold), tremolo */
@@ -147,7 +196,7 @@
                  cr->idx += cr->inc;
                  cr->idx -= cr->n;
                  cr->n = 0.f;
-@@ -978,16 +1044,30 @@
+@@ -978,16 +1079,30 @@
              if ((f & 7) == 0) {
                  float pv = clampf(log2f(P(CUT)), 10.0f, 14.4284f);
                  float pc = 1.0f + (pv - 10.0f) * (1.0f / 4.4284f) * (P(DICT) - 1.0f);
