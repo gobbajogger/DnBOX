@@ -1,0 +1,91 @@
+--- a/firmware/src/app/sj6_137_host_witness.h
++++ b/firmware/src/app/sj6_137_host_witness.h
+@@ -475,6 +475,72 @@
+   const int s1_init=s1_typed_init_cell(cell);
+   (void)j6_init;(void)s1_init;
+ 
++  const uint8_t *b=read137(s,v);
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++  /* Fixed J6-only T_MST fields. A zero entry skips a field owned by S1,
++   * a reserved byte, or a dynamic validator below. */
++  static const uint8_t j6_master[3][32]={
++   {
++#if X0X_SJ6_PITCH_ENV_NATIVE
++    [SJ6_PITCH_OFFSET ... SJ6_PITCH_OFFSET+3]=127,[SJ6_PITCH_OFFSET+4]=60,
++#endif
++#if X0X_SJ6_NATIVE_ROOM
++    [SJ6_ROOM_BYTE+SJ6_ROOM_ENABLE]=1,[SJ6_ROOM_BYTE+SJ6_ROOM_TYPE]=1,
++    [SJ6_ROOM_BYTE+SJ6_ROOM_SIZE]=127,[SJ6_ROOM_BYTE+SJ6_ROOM_LOCUT]=127,
++    [SJ6_ROOM_BYTE+SJ6_ROOM_MIX]=127,[SJ6_ROOM_BYTE+SJ6_ROOM_WIDEN]=1,
++    [SJ6_ROOM_BYTE+SJ6_ROOM_RATE]=127,[SJ6_ROOM_BYTE+SJ6_ROOM_DEPTH]=127,
++#endif
++#if X0X_SJ6_NOISE_SUB_NATIVE
++    [SJ6_SOURCES_OFFSET]=127,[SJ6_SOURCES_OFFSET+1]=127,
++#endif
++   },{
++#if X0X_SJ6_NATIVE_J60
++    [SJ6_J60_OFFSET]=1,[SJ6_J60_OFFSET+1 ... SJ6_J60_OFFSET+3]=128,
++#endif
++#if X0X_SJ6_OTA_NATIVE
++    [SJ6_OTA_BYTE]=1,
++#endif
++#if X0X_SJ6_NATIVE_ROOM
++    [SJ6_CRUSH_BYTE]=1,[SJ6_CRUSH_BYTE+1]=127,
++#endif
++#if X0X_SJ6_SEQ_SETTINGS_NATIVE
++    [SJ6_SEQ_SETTINGS_OFFSET]=1,[SJ6_SEQ_SETTINGS_OFFSET+1]=1,
++#endif
++   },{
++#if X0X_SJ6_NATIVE_LIMITER
++    [SJ6_LIM_BYTE ... SJ6_LIM_BYTE+SJ6_LIM_COUNT-1]=128,[SJ6_RAGE_BYTE]=128,
++#endif
++#if X0X_SJ6_NATIVE_CLASSIC
++    [SJ6_CLASSIC_OFFSET ... SJ6_CLASSIC_OFFSET+SJ6_CLASSIC_COUNT-1]=128,
++#endif
++#if X0X_SJ6_LFO1_WAVE_NATIVE
++    [SJ6_LFO1_WAVE_OFFSET]=SJ6_LFO1_WAVE_MAX,
++    [SJ6_LFO1_WAVE_OFFSET+1]=1,[SJ6_LFO1_WAVE_OFFSET+2]=1,
++#endif
++#if X0X_SJ6_ALT3_NATIVE
++    [SJ6_TREM_OFFSET]=127,[SJ6_TREM_OFFSET+1]=128,
++#endif
++#if X0X_SJ6_SEQ_SETTINGS_NATIVE && X0X_SJ6_SEQ_DEST_NATIVE
++    [SJ6_DEST_BYTE]=2,
++#endif
++   }
++  };
++  for(unsigned row=0;row<3u;row++){
++    const uint8_t *x=s->v[T_MST][1u+v+2u*row], *bound=j6_master[row];
++    for(unsigned k=0;k<32u;k++)
++      if(bound[k] && (x[k]>bound[k] || (x[k] && !j6_init)))return 0;
++  }
++#if X0X_SJ6_AUX_LFO_NATIVE
++  const uint8_t *r1=sj6_aux_lfo1_read(s,v);
++  if(!sj6_aux_lfo1_valid(r1) || ((r1[0]|r1[2])&&!j6_init))return 0;
++  const uint8_t *aux=sj6_aux_read(s,v);
++  for(unsigned k=0;k<SJ6_AUX_BYTES;k++)
++    if(!sj6_aux_valid(k,aux[k]) || (aux[k] && !j6_init))return 0;
++#if X0X_SJ6_LFO_TRIGGER_NATIVE
++  if(aux[30]>1u || aux[31]>1u || ((aux[30]||aux[31]) && !j6_init))return 0;
++#endif
++#endif
++#else
+ #if X0X_SJ6_NATIVE_J60
+   const uint8_t *j60=sj6_j60_code(s,v);
+   if(!sj6_j60_valid(j60) ||
+@@ -491,7 +557,6 @@
+   if(wave>SJ6_LFO1_WAVE_MAX || mute>1u || snap>1u ||
+      ((wave|mute|snap) && !j6_init))return 0;
+ #endif
+-  const uint8_t *b=read137(s,v);
+ #if X0X_SJ6_ALT3_NATIVE
+   const uint8_t *trem=sj6_trem_read(s,v);
+   if(trem[0]>127u || trem[1]>128u || ((trem[0]|trem[1]) &&
+@@ -548,6 +613,7 @@
+   for(unsigned k=0;k<SJ6_PITCH_COUNT;k++)
+     if(pitch[k]>sj6_pitch_max(k) || (pitch[k] && !j6_init))return 0;
+ #endif
++#endif
+ #if DNBOX_TYPED_CONTROLS_NATIVE_TEST
+ #if X0X_S1_SCALE_NATIVE
+   unsigned tuning=s->v[T_MST][S1_SCALE_ROW+v][S1_SCALE_BYTE];

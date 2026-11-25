@@ -1,0 +1,36 @@
+--- a/firmware/src/dsp/s1c/s1c.c
++++ b/firmware/src/dsp/s1c/s1c.c
+@@ -1173,26 +1173,18 @@
+                 float x = clampf(P(CUT) * pc, 64.0f, 22050.0f) * (2.0f / s->sr);
+                 x = x > 1.0f ? 1.0f : x;
+                 s->dl_fc = ladder_a(x);     /* the ladder coefficient, not Hz */
+-#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
+-                s->dl_res_fb=P(DIRES)*(3.98720139f+x*(3.68178143f-x*3.93633599f));
+-#endif
+             }
+-#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
+-            dL = ladder(s->dlp[0], L, s->dl_fc, s->dl_res_fb);
+-            dR = ladder(s->dlp[1], R, s->dl_fc, s->dl_res_fb);
+-#else
+-            dL = ladder(s->dlp[0], L, s->dl_fc, 0.0f); dR = ladder(s->dlp[1], R, s->dl_fc, 0.0f);
+-#endif
++            /* Upstream DelFRes remains an editable target, but every audible
++             * low-pass path fixes delay input resonance to zero. Other filter
++             * types skip this delay input low-pass entirely. */
++            dL = ladder(s->dlp[0], L, s->dl_fc, 0.0f);
++            dR = ladder(s->dlp[1], R, s->dl_fc, 0.0f);
+ #else
+             float pv = clampf(log2f(P(CUT)), 10.0f, 14.4284f);
+             float pc = 1.0f + (pv - 10.0f) * (1.0f / 4.4284f) * (P(DICT) - 1.0f);
+             float fc = clampf(P(CUT) * pc, 64.0f, 22050.0f);
+-#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
+-            const float res=P(DIRES);
+-#else
+-            const float res=0.f;
+-#endif
+-            dL = moog(s->dlp[0], L, fc, res, s->sr); dR = moog(s->dlp[1], R, fc, res, s->sr);
++            dL = moog(s->dlp[0], L, fc, 0.0f, s->sr);
++            dR = moog(s->dlp[1], R, fc, 0.0f, s->sr);
+ #endif
+         }
+ #ifdef S1C_OPT_A

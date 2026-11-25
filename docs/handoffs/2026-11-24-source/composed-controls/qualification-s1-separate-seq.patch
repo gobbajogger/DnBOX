@@ -1,0 +1,161 @@
+--- a/firmware/src/app/engine_arp.inc
++++ b/firmware/src/app/engine_arp.inc
+@@ -21,9 +21,18 @@
+ #if X0X_SJ6_ARP_ADAPTER_NATIVE
+ static inline int sj6_typed_arp_owner(const sound_t *sound,unsigned v)
+ { return original_bass[v].kind==ORIGINAL_SOUND_JUNO && live137(sound,v); }
+-static void sj6_arp_adapt(engine_arp_cfg *c,int owner)
++static void arp_adapt(engine_arp_cfg *c,const sound_t *sound,unsigned v)
+ {
+-    if(!owner) {
++    if(original_bass[v].kind==ORIGINAL_SOUND_SYNTHONE) {
++        if(c->mode==ARP_SEQ) {
++            /* Old files stored SEQ as a direction value. Preserve that grid
++             * choice and recover its last saved direction (else default UP). */
++            c->seq_on=1;
++            c->mode=c->src_type<ARP_SEQ ? c->src_type : ARP_UP;
++        }
++        return;
++    }
++    if(!sj6_typed_arp_owner(sound,v)) {
+         c->seq_on=0;
+         if(c->division>ARP_SAGA_DIVISIONS)c->division=0;
+         return;
+@@ -100,14 +109,14 @@
+     original_bass[v].arp.prm.saga_random_seed=v ? UINT32_C(0x243f6a88) : UINT32_C(0x85a308d3);
+ #endif
+ #if X0X_SJ6_ARP_ADAPTER_NATIVE
+-    sj6_arp_adapt(&c,sj6_typed_arp_owner(sound,(unsigned)v));
++    arp_adapt(&c,sound,(unsigned)v);
+ #endif
+ #if X0X_SJ6_SEQ_SETTINGS_NATIVE
+     /* A built-in Init has no authored arp bank. Its unlocked sequence is
+      * the existing Init grid, without changing live ARP in another mode. */
+     if (preset_change &&
+ #if X0X_SJ6_ARP_ADAPTER_NATIVE
+-        c.seq_on &&
++        original_bass[v].kind==ORIGINAL_SOUND_JUNO && c.seq_on &&
+ #else
+         c.mode==ARP_SEQ &&
+ #endif
+@@ -294,8 +303,13 @@
+     uint32_t request = bass_request[v];
+     if (arp_kind_ok(v) && revision == arp_revision[v]
+ #if X0X_SJ6_ARP_ADAPTER_NATIVE
+-        && !(step==0xFFu && (field==ARP_F_SEQ_ENABLE || (native_speed && value>9)) &&
++        && !(step==0xFFu && field==ARP_F_SEQ_ENABLE &&
++             original_bass[v].kind!=ORIGINAL_SOUND_SYNTHONE &&
++             !sj6_typed_arp_owner(mot_base_snd,v))
++        && !(step==0xFFu && native_speed && value>9 &&
+              !sj6_typed_arp_owner(mot_base_snd,v))
++        && !(step==0xFFu && field==ARP_F_MODE && value>=ARP_SEQ &&
++             original_bass[v].kind==ORIGINAL_SOUND_SYNTHONE)
+         && !(step==0xFFu && sj6_typed_arp_owner(mot_base_snd,v) &&
+              ((field==ARP_F_MODE && value==ARP_SEQ) ||
+               ((field==ARP_F_ON || field==ARP_F_DIVISION || field==ARP_F_SPEED ||
+@@ -450,7 +464,7 @@
+         c.mode=sj6_random_decode(read137(mot_base_snd,v)[SJ6_ARP_RANDOM_BYTE],c.mode);
+ #endif
+ #if X0X_SJ6_ARP_ADAPTER_NATIVE
+-        sj6_arp_adapt(&c,1);
++        arp_adapt(&c,mot_base_snd,v);
+ #endif
+         arp_pending_flag[v]=0;
+ #if X0X_SJ6_NATIVE_ZERO_GATE
+@@ -476,7 +490,7 @@
+         c.mode=sj6_random_decode(read137(mot_base_snd,v)[SJ6_ARP_RANDOM_BYTE],c.mode);
+ #endif
+ #if X0X_SJ6_ARP_ADAPTER_NATIVE
+-    sj6_arp_adapt(&c,sj6_typed_arp_owner(mot_base_snd,v));
++    arp_adapt(&c,mot_base_snd,v);
+ #endif
+     return arp_queue(v, &c, 0);
+ }
+@@ -489,7 +503,7 @@
+     (void)engine_arp_block_decode(b, &n);
+ #if X0X_SJ6_ARP_ADAPTER_NATIVE
+     if(v>=NBASS)return S1_EDIT_REJECTED;
+-    sj6_arp_adapt(&n,sj6_typed_arp_owner(mot_base_snd,v));
++    arp_adapt(&n,mot_base_snd,v);
+ #endif
+     return arp_queue(v, &n, 1);
+ }
+--- a/firmware/src/app/original_runtime.c
++++ b/firmware/src/app/original_runtime.c
+@@ -411,16 +411,24 @@
+     switch (id) {
+     case 60: {
+         static const uint8_t dir[3] = {ARP_UP, ARP_UPDN, ARP_DOWN};
+-        if (c->mode != ARP_SEQ) c->mode = dir[arp_round(v, 0, 2)];
+-        c->src_type = dir[arp_round(v, 0, 2)];       /* remembered for SEQ off */
++        c->src_type = dir[arp_round(v, 0, 2)];
++#if X0X_SJ6_ARP_ADAPTER_NATIVE
++        c->mode = c->src_type;
++#else
++        if (c->mode != ARP_SEQ) c->mode = c->src_type;
++#endif
+         return 1;
+     }
+     case 61: c->interval = (uint8_t)arp_round(v, 0, 12); return 1;
+     case 62: c->on = v >= .5f; return 1;
+     case 63: c->range = (uint8_t)arp_round(v + 1.f, 1, 4); return 1;
+     case 65:
++#if X0X_SJ6_ARP_ADAPTER_NATIVE
++        c->seq_on = v >= .5f; /* original ARP ON is the separate master */
++#else
+         if (v >= .5f) c->mode = ARP_SEQ;
+         else if (c->mode == ARP_SEQ) c->mode = c->src_type <= ARP_UPDN ? c->src_type : ARP_UP;
++#endif
+         return 1;
+     case 66: c->length = (uint8_t)arp_round(v, 1, 16); return 1;
+     case 64: case 147: return 1;
+@@ -587,7 +595,8 @@
+     if(p->kind==ORIGINAL_SOUND_JUNO && p->dsp.juno.synth.typed) {
+         q->arpIsSequencer=c->seq_on || q->arpIsSequencer;
+         q->arpIsOn=c->on || c->seq_on;
+-    }
++    } else if(p->kind==ORIGINAL_SOUND_SYNTHONE)
++        q->arpIsSequencer=c->seq_on || q->arpIsSequencer;
+ #endif
+     q->arpDirection = dir[c->mode < 3 ? c->mode : 0];
+     q->arpOctave = (uint8_t)(c->range ? c->range - 1 : 0);
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -3129,11 +3129,16 @@
+ #if X0X_SUPERJ6_BUILTIN_INIT && !defined(X0X_ARP_FAKE_H)
+     static const x0x_param_t saga_mode = {"MODE", ARP_UPDN_REPEAT, 0, ARP_MODE_N};
+ #if X0X_SJ6_ARP_ADAPTER_NATIVE
++    static const x0x_param_t seq_enable={"SEQ ON",1,0,ONOFF_N};
++    if(engine_bass_bank(owner)==ORIGINAL_SOUND_SYNTHONE) {
++        static const x0x_param_t s1_direction={"DIRECTION",ARP_UPDN,0,ARP_MODE_N};
++        if(field==ARP_F_MODE)return &s1_direction;
++        if(field==ARP_F_SEQ_ENABLE)return &seq_enable;
++    }
+     if(live137(&proj.sound,owner) && engine_bass_bank(owner)==ORIGINAL_SOUND_JUNO) {
+         static const char *const types[]={"UP","DOWN","UP+DN","UP+DN X2","RANDOM","RANDOM2","RANDOM3"};
+         static const x0x_param_t orig_mode={"MODE",6,0,types};
+         static const x0x_param_t orig_speed={"SPEED",12,SJ6_RATE_DEFAULT,0};
+-        static const x0x_param_t seq_enable={"SEQ ON",1,0,ONOFF_N};
+         if(field==ARP_F_MODE)return &orig_mode;
+         if(field==ARP_F_SPEED)return &orig_speed;
+         if(field==ARP_F_SEQ_ENABLE)return &seq_enable;
+@@ -3552,6 +3557,10 @@
+                 pref_t division = NONE;
+ #if X0X_SUPERJ6_BUILTIN_INIT && !defined(X0X_ARP_FAKE_H)
+                 if (engine_bass_bank(b) == ORIGINAL_SOUND_JUNO) division = PR(R_ARP, ARP_F_DIVISION, b, 0);
++#if X0X_SJ6_ARP_ADAPTER_NATIVE
++                else if (engine_bass_bank(b) == ORIGINAL_SOUND_SYNTHONE)
++                    division = PR(R_ARP, ARP_F_SEQ_ENABLE, b, 0);
++#endif
+ #endif
+                 add_page(emit, PT_ARP_SEQ, PR(R_ARP, ARP_F_LENGTH, b, 0), PR(R_ARP, ARP_F_INTERVAL, b, 0), PR(R_ARP, ARP_F_GATE, b, 0), division);
+ #if X0X_SJ6_SEQ_SETTINGS_NATIVE
+@@ -9189,7 +9198,7 @@
+                 q = put_s(q, ARP_MODE_N[as.mode % ARP_NMODES]);
+             put_s(q, (as.on
+ #if X0X_SJ6_ARP_ADAPTER_NATIVE
+-                      || as.seq_on
++                      || (as.seq_on && engine_bass_bank(b)!=ORIGINAL_SOUND_SYNTHONE)
+ #endif
+                      ) ? "" : " OFF");
+         }

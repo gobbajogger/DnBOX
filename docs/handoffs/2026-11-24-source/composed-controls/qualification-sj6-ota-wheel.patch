@@ -1,0 +1,44 @@
+--- a/firmware/src/dsp/juno6_factory.inc
++++ b/firmware/src/dsp/juno6_factory.inc
+@@ -506,6 +506,28 @@
+ float juno6_mod_cutoff_hz(unsigned value)
+ { return value<=127u ? sj6_normal_cutoff_hz((float)value/127.f):0.f; }
+ 
++#if X0X_SJ6_OTA_NATIVE
++/* Build9 direct cutoff target 0x1000ee3bc. OTA continues from the normal
++ * Hz target through a rational transfer and both squared end trims. */
++static float sj6_ota_cutoff_hz(float normal)
++{
++#if defined(X0X_HOST) && !DNBOX_TYPED_CONTROLS_NATIVE_TEST
++    const double z=(double)normal-20.0;
++    const double lo=normal<30.f ? (30.0-normal)/10.0 : 0.0;
++    const double hi=normal>10000.f ? (normal-10000.0)/10000.0 : 0.0;
++    return (float)(20.0+(z*1.4795969434284197)/(1.0+(z*.47959694342841974)/19980.0)+
++                   hi*(hi*10000.0)-lo*(lo*17.0));
++#else
++    /* Native destination remains Float; do not link software Double. */
++    const float z=normal-20.f;
++    const float lo=normal<30.f ? (30.f-normal)*.1f : 0.f;
++    const float hi=normal>10000.f ? (normal-10000.f)*.0001f : 0.f;
++    return 20.f+(z*1.4795969434284197f)/(1.f+(z*.47959694342841974f)*(1.f/19980.f))+
++           hi*(hi*10000.f)-lo*(lo*17.f);
++#endif
++}
++#endif
++
+ int juno6_configure_lfo1_cutoff(juno6_t *s,float base,float current,float amount)
+ {
+     if(!s||!s->typed||!(base>=0.f&&base<=1.f&&current>=0.f&&current<=1.f&&amount>=0.f&&amount<=1.f))
+@@ -741,7 +763,11 @@
+     }
+     if (s->mod_destination==5u) {
+         float u=(float)value/127.f;
+-        s->mod_wheel_cutoff_hz=sj6_normal_cutoff_hz(u);
++        float hz=sj6_normal_cutoff_hz(u);
++#if X0X_SJ6_OTA_NATIVE
++        if(s->core.sj6_ota)hz=sj6_ota_cutoff_hz(hz);
++#endif
++        s->mod_wheel_cutoff_hz=hz;
+         if(s->lfo1_pwm_route==3) {
+             s->lfo1_cut_force=s->lfo1_cut_active;
+             s->lfo1_cut_active=0;
