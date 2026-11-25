@@ -1,0 +1,20 @@
+--- a/firmware/src/usb.c
++++ b/firmware/src/usb.c
+@@ -362,7 +362,7 @@
+  * full SXQ/MQ, but a refused Device Inquiry / intro must retry once space frees. */
+ static uint8_t usb_sx_reply, usb_sx_ch;
+ 
+-static void usb_sx_answer(void)
++__attribute__((noinline)) static void usb_sx_answer(void)
+ {
+     uint8_t m[35];
+     uint32_t i, n;
+@@ -692,7 +692,7 @@
+     e0_chunk();
+ }
+ 
+-static void ep0_service(void)
++__attribute__((noinline)) static void ep0_service(void)
+ {
+     static const uint8_t zero2[2];
+     uint32_t csr, i;

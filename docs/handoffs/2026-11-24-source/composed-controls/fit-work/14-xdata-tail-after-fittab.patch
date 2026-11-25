@@ -1,0 +1,29 @@
+--- a/firmware/src/app/main_fm1.c
++++ b/firmware/src/app/main_fm1.c
+@@ -2180,6 +2180,13 @@
+ #endif
+ extern const uint8_t cold_fittab_start[], cold_fittab_end[], cold_fittab_expected[];
+ #endif
++#if X0X_COLD_XDATA_TAIL_LAB
++#if !X0X_COLD_FITTAB_LAB || !X0X_SYNTH_CONTROLS_INIT_ONLY
++#error XDATA tail diagnostic requires guarded Init-only companions
++#endif
++extern const uint8_t cold_xdata_tail_start[], cold_xdata_tail_end[];
++extern const uint32_t cold_xdata_tail_crc;
++#endif
+ static uint8_t cold_lab_bad;
+ #endif
+ static void draw_safe_mode(void)
+@@ -2288,6 +2295,12 @@
+                 (uintptr_t)cold_fittab_end - (uintptr_t)cold_fittab_start,cold_fittab_expected))
+                 cold_lab_bad=FDATA_MISMATCH;
+ #endif
++#if X0X_COLD_XDATA_TAIL_LAB
++            if (!cold_lab_bad && x0x_crc32(cold_xdata_tail_start,
++                (uintptr_t)cold_xdata_tail_end - (uintptr_t)cold_xdata_tail_start)
++                != cold_xdata_tail_crc)
++                cold_lab_bad = FDATA_MISMATCH;
++#endif
+             if (!cold_lab_bad) {
+ #endif
+ #if BOARD_SMK37

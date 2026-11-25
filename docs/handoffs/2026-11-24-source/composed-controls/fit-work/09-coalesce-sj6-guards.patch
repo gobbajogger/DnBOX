@@ -1,0 +1,36 @@
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -2504,24 +2504,28 @@
+ {
+     float bpm=seq_tempo(&seq);
+     for(int v=0;v<NBASS;++v){
++#if X0X_SJ6_LFO1_WAVE_NATIVE || X0X_SJ6_LFO1_DELAY_PORT || X0X_SJ6_NOISE_SUB_NATIVE || X0X_SJ6_ALT3_NATIVE
++        original_runtime_part *part=&original_bass[v];
++        const int live_sj6=part->kind==ORIGINAL_SOUND_JUNO && live137(mot_base_snd,v);
++#endif
++#if X0X_SJ6_LFO1_WAVE_NATIVE || X0X_SJ6_LFO1_DELAY_PORT || X0X_SJ6_NOISE_SUB_NATIVE
++        if(live_sj6){
+ #if X0X_SJ6_LFO1_WAVE_NATIVE
+-        if(original_bass[v].kind==ORIGINAL_SOUND_JUNO && live137(mot_base_snd,v))
+             juno6_lfo1_controls(&original_bass[v].dsp.juno.synth,
+                 sj6_lfo1_wave_read(mot_base_snd,v),sj6_lfo1_option(mot_base_snd,v,0),
+                 sj6_lfo1_option(mot_base_snd,v,1));
+ #endif
+ #if X0X_SJ6_LFO1_DELAY_PORT
+-        original_runtime_part *part=&original_bass[v];
+-        if (part->kind==ORIGINAL_SOUND_JUNO && live137(mot_base_snd,v))
+             juno6_lfo1_delay_set(&part->dsp.juno.synth,sj6_lfo1_delay_read(mot_base_snd,v));
+ #endif
+ #if X0X_SJ6_NOISE_SUB_NATIVE
+-        if (original_bass[v].kind==ORIGINAL_SOUND_JUNO && live137(mot_base_snd,v))
+             dnbx_set_sj6_sources(&original_bass[v].dsp.juno.synth.core,v,sj6_sources_read(mot_base_snd,v));
++#endif
++        }
+ #endif
+         (void)original_runtime_prepare(&original_bass[v],bpm);
+ #if X0X_SJ6_ALT3_NATIVE
+-        if(original_bass[v].kind==ORIGINAL_SOUND_JUNO && live137(mot_base_snd,v)){
++        if(live_sj6){
+             const uint8_t *p=sj6_trem_read(mot_base_snd,v);
+             unsigned sync=0;
+ #if X0X_SJ6_NATIVE_DELAY

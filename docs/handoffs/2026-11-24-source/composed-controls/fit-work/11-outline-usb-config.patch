@@ -1,0 +1,56 @@
+--- a/firmware/src/usb.c
++++ b/firmware/src/usb.c
+@@ -504,7 +504,7 @@
+ static const uint8_t STR2[] = {18, 3, 'X', 0, '0', 0, 'X', 0, ' ', 0, 'F', 0, 'M', 0, '-', 0, '1', 0};   /* legacy */
+ #endif
+ 
+-static int get_desc(uint32_t wvalue, const uint8_t **d, uint16_t *l)
++__attribute__((noinline)) static int get_desc(uint32_t wvalue, const uint8_t **d, uint16_t *l)
+ {
+     switch (wvalue >> 8) {
+     case 1:
+@@ -578,7 +578,7 @@
+     sie_wr(S_TXCSR2, 0x40);                             /* ISO */
+ }
+ 
+-static void uac_stream(uint32_t alt)                    /* SET_INTERFACE, configuration, bus reset */
++__attribute__((noinline)) static void uac_stream(uint32_t alt)                    /* SET_INTERFACE, configuration, bus reset */
+ {
+     uac.go = 0;                                         /* the next render primes the ring again */
+     uac.flowing = 0;                                    /* ... once the host has taken a packet */
+@@ -597,7 +597,7 @@
+ #endif
+ 
+ #if FELUCCA_UAC
+-static void uac_out_stream(uint32_t alt)                /* SET_INTERFACE (IF3), configuration, bus reset */
++__attribute__((noinline)) static void uac_out_stream(uint32_t alt)                /* SET_INTERFACE (IF3), configuration, bus reset */
+ {
+     uo.go = 0;
+     RING_PUBLISH();
+@@ -617,7 +617,7 @@
+ }
+ #endif
+ 
+-static void ep1_config(void)
++__attribute__((noinline)) static void ep1_config(void)
+ {
+     fm1_usb_ep_txbuf(1, ep1tx);
+     fm1_usb_ep_rxbuf(1, ep1rx);
+@@ -1036,7 +1036,7 @@
+ static uint8_t usb_link_st;
+ #endif
+ 
+-static void ep1_rx(void)
++__attribute__((noinline)) static void ep1_rx(void)
+ {
+     uint32_t csr, n, i;
+     sie_wr(S_INDEX, 1);
+@@ -1137,7 +1137,7 @@
+     ep1tx[n + 3] = (uint8_t)(pkt >> 24);
+ }
+ 
+-static void ep1_tx(void)
++__attribute__((noinline)) static void ep1_tx(void)
+ {
+     uint32_t csr, n = 0;
+     /* Retry a sticky APC SysEx reply after TX drain frees ring space (ISR-safe). */

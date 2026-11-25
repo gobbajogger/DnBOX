@@ -1,0 +1,124 @@
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -6466,18 +6466,10 @@
+     }
+ #endif
+ #if X0X_SJ6_PITCH_ENV_NATIVE
+-    if(r.kind==R_SJ6PITCH) {
+-        const int pos=pref_get(r)+(e>0)-(e<0);
+-        if(e && pos>=0)pref_set(r,pos);
+-        return;
+-    }
++    if(r.kind==R_SJ6PITCH)goto TYPED_STEP_VALID;
+ #endif
+ #if X0X_SJ6_AUX_LFO_NATIVE
+-    if(r.kind==R_SJ6AUX){
+-        int pos=pref_get(r)+(e>0)-(e<0);
+-        if(e && pos>=0)pref_set(r,pos);
+-        return;
+-    }
++    if(r.kind==R_SJ6AUX)goto TYPED_STEP_VALID;
+ #endif
+     if (r.kind == R_SJ6KNOB) {
+         int max = (int)original_sound_sj6_max(r.c);
+@@ -6538,10 +6530,7 @@
+     }
+ #endif
+ #if X0X_SJ6_OTA_NATIVE
+-    if(r.kind==R_SJ6OTA){
+-        if(e)pref_set_impl(r,e>0,1);
+-        return;
+-    }
++    if(r.kind==R_SJ6OTA)goto TYPED_TOGGLE;
+ #endif
+ #if X0X_SJ6_NATIVE_LIMITER
+     if(r.kind==R_SJ6LIMITER){
+@@ -6559,30 +6548,15 @@
+     }
+ #if X0X_S1_KEYBOARD_HOLD
+ #if X0X_S1_SCALE_NATIVE
+-    if(r.kind==R_S1MICROKEYS){
+-        if(e)pref_set_impl(r,e>0,1);
+-        return;
+-    }
+-    if(r.kind==R_S1SCALE){
+-        if(e)pref_set_impl(r,pref_get(r)+(e>0)-(e<0),1);
+-        return;
+-    }
++    if(r.kind==R_S1MICROKEYS)goto TYPED_TOGGLE;
++    if(r.kind==R_S1SCALE)goto TYPED_STEP;
+ #endif
+-    if(r.kind==R_S1KEY_HOLD || r.kind==R_S1A4RESET || r.kind==R_S1WHITEKEYS || r.kind==R_S1MIDIVEL){
+-        if(e)pref_set_impl(r,e>0,1);
+-        return;
+-    }
++    if(r.kind==R_S1KEY_HOLD || r.kind==R_S1A4RESET || r.kind==R_S1WHITEKEYS || r.kind==R_S1MIDIVEL)goto TYPED_TOGGLE;
+ #endif
+ #if X0X_S1_HALFTIME
+-    if(r.kind==R_S1HALF){
+-        if(e)pref_set_impl(r,pref_get(r)+(e>0)-(e<0),1);
+-        return;
+-    }
++    if(r.kind==R_S1HALF)goto TYPED_STEP;
+ #endif
+-    if(r.kind==R_S1AA) {
+-        if(e)pref_set_impl(r,e>0,1);
+-        return;
+-    }
++    if(r.kind==R_S1AA)goto TYPED_TOGGLE;
+     if(r.kind==R_S1CWG) {
+         if(e && !pref_read_only(r)) {
+             int next=pref_get(r)+(e>0?1:-1);
+@@ -6641,26 +6615,12 @@
+ #endif
+     if (r.kind == R_S1LINK) { s1_edit(r, (e > 0) - (e < 0), 1); return; }
+ #if DNBOX_TYPED_CONTROLS_NATIVE_TEST
+-    if(r.kind==R_S1DLYRES){
+-        if(e)pref_set(r,pref_get(r)+(e>0)-(e<0));
+-        return;
+-    }
+-    if(r.kind==R_S1ENVLFO){
+-        if(e)pref_set(r,pref_get(r)+(e>0)-(e<0));
+-        return;
+-    }
+-    if(r.kind==R_S1PHASER){
+-        int pos=pref_get(r)+(e>0)-(e<0);
+-        if(e && pos>=0)pref_set(r,pos);
+-        return;
+-    }
++    if(r.kind==R_S1DLYRES)goto TYPED_STEP;
++    if(r.kind==R_S1ENVLFO)goto TYPED_STEP;
++    if(r.kind==R_S1PHASER)goto TYPED_STEP_VALID;
+ #endif
+ #if X0X_S1_DELAY_TIME_NATIVE
+-    if(r.kind==R_S1DLYTIME){
+-        int pos=pref_get(r)+(e>0)-(e<0);
+-        if(e && pos>=0)pref_set(r,pos);
+-        return;
+-    }
++    if(r.kind==R_S1DLYTIME)goto TYPED_STEP_VALID;
+ #endif
+     if (r.kind == R_S1PATCH) { s1_edit(r, accel(knob, e, S1_PATCH_STEPS), 1); return; }
+ #endif
+@@ -6720,6 +6680,21 @@
+ #if X0X_BASS_PRESET_PREVIEW
+     if (bass_edit) engine_bass_edit_hold(0);
+ #endif
++    return;
++#if X0X_SYNTHONE_PATCH || X0X_SUPERJ6_BUILTIN_INIT
++TYPED_STEP_VALID:
++    if(e){
++        const int pos=pref_get(r)+(e>0)-(e<0);
++        if(pos>=0)pref_set(r,pos);
++    }
++    return;
++TYPED_STEP:
++    if(e)pref_set(r,pref_get(r)+(e>0)-(e<0));
++    return;
++TYPED_TOGGLE:
++    if(e)pref_set(r,e>0);
++    return;
++#endif
+ }
+ 
+ static int rec_step(int track) { return seq_rec_step(&seq, track); }
