@@ -1,0 +1,385 @@
+--- a/firmware/src/app/s1_patch.h
++++ b/firmware/src/app/s1_patch.h
+@@ -10,6 +10,9 @@
+  * Storage slots are in descriptor order and must never be reordered. Existing
+  * OS11 INIT and historical eight-control cells use no bits in this range. */
+ enum { S1_PATCH_FIRST_BYTE = 8, S1_PATCH_COUNT = 13, S1_PATCH_STEPS = 127 };
++/* Panel link is a project option outside the upstream factory ID space. */
++enum { S1_LINK_BYTE = 6, S1_LINK_ID = 255, S1_FILTER_FIRST = 5, S1_AMP_FIRST = 9 };
++#define S1_LINK_MASK (UINT32_C(1) << 21)
+ #define S1_PATCH_MASK (((UINT32_C(1) << S1_PATCH_COUNT) - 1) << S1_PATCH_FIRST_BYTE)
+ 
+ typedef struct {
+@@ -32,6 +35,7 @@
+     uint32_t revision;
+     unsigned preset;
+     uint8_t note_locked;
++    uint8_t filter_link;
+     float physical[S1_PATCH_COUNT];
+ } s1_patch_snapshot;
+ 
+--- a/firmware/src/app/s1c_part.h
++++ b/firmware/src/app/s1c_part.h
+@@ -20,6 +20,10 @@
+     uint8_t *arena;            /* S1C_ARENA_BYTES, or NULL: no delay/reverb */
+     uint16_t program;          /* pack program, or S1_PART_INIT */
+     float detm;                /* program DETM: pitch bend scales it */
++#if X0X_SYNTHONE_PATCH
++    float filter_unlinked[4];
++    uint8_t filter_link;
++#endif
+     uint8_t damper, held;      /* held: voices kept sounding by the damper */
+ } s1_dry_part;
+ 
+--- a/firmware/src/app/s1c_part.c
++++ b/firmware/src/app/s1c_part.c
+@@ -76,6 +76,9 @@
+     /* The engine clears its voices when mono changes; a program load is not a change. */
+     e->mono_prev = (uint8_t)e->t[P_MONO];
+     part->program = (uint16_t)program;
++#if X0X_SYNTHONE_PATCH
++    part->filter_link = 0;
++#endif
+     part->detm = e->t[P_DETM];
+     part->held = 0;
+     if (part->arena)
+@@ -141,17 +144,31 @@
+ 
+ float s1_part_patch_value(const s1_dry_part *part, unsigned slot)
+ {
++    if (slot == S1_PATCH_COUNT) return part->filter_link;
++    if (part->filter_link && slot >= S1_FILTER_FIRST && slot < S1_AMP_FIRST)
++        return part->filter_unlinked[slot - S1_FILTER_FIRST];
+     return slot < S1_PATCH_COUNT ? part->e.t[patch_parameters[slot].factory_id] : 0.0f;
+ }
+ 
+ void s1_part_apply_cell(s1_dry_part *part, const uint8_t cell[32])
+ {
+     uint32_t mask = original_sound_edit_mask(cell);
++    if (part->filter_link)
++        for (unsigned i = 0; i < 4; ++i)
++            part->e.t[patch_parameters[S1_FILTER_FIRST + i].factory_id] = part->filter_unlinked[i];
+     for (unsigned i = 0; i < S1_PATCH_COUNT; ++i) {
+         unsigned byte = S1_PATCH_FIRST_BYTE + i;
+         if (mask & (UINT32_C(1) << byte))
+             (void)s1c_front_set(&part->e, patch_parameters[i].factory_id, s1_patch_physical(&patch_parameters[i], cell[byte]));
+     }
++    part->filter_link = (mask & S1_LINK_MASK) != 0;
++    if (part->filter_link)
++        for (unsigned i = 0; i < 4; ++i) {
++            unsigned filter_id = patch_parameters[S1_FILTER_FIRST + i].factory_id;
++            unsigned amp_id = patch_parameters[S1_AMP_FIRST + i].factory_id;
++            part->filter_unlinked[i] = part->e.t[filter_id];
++            part->e.t[filter_id] = part->e.t[amp_id];
++        }
+ }
+ #endif
+ 
+--- a/firmware/src/app/s1_dry_part.h
++++ b/firmware/src/app/s1_dry_part.h
+@@ -13,6 +13,7 @@
+     float bend, crush_interval, crush_next, crush_age, crush_last;
+ #if X0X_SYNTHONE_PATCH
+     s1_dry_controls patch;
++    uint8_t filter_link;
+ #endif
+ } s1_dry_part;
+ 
+--- a/firmware/src/app/s1_dry_part.c
++++ b/firmware/src/app/s1_dry_part.c
+@@ -74,6 +74,8 @@
+ 
+ float s1_part_patch_value(const s1_dry_part *part, unsigned slot)
+ {
++    if (slot == S1_PATCH_COUNT) return part->filter_link;
++    if (slot > S1_PATCH_COUNT) return 0.f;
+     const uint8_t *base = (const uint8_t *)&part->patch;
+     return *(const float *)(base + patch_parameters[slot].offset);
+ }
+@@ -90,8 +92,11 @@
+             *field = s1_patch_physical(s1_patch_at(i), cell[byte]);
+         }
+     }
+-    if (!memcmp(&next, &part->patch, sizeof next)) return;
++    unsigned link = (mask & S1_LINK_MASK) != 0;
++    if (link == part->filter_link && !memcmp(&next, &part->patch, sizeof next)) return;
+     part->patch = next;
++    part->filter_link = (uint8_t)link;
++    if (link) next.filter = next.amp;
+     for (unsigned i = 0; i < S1_CORE_VOICES; ++i)
+         if (part->voice[i].started) (void)s1_dry_configure(&part->voice[i], &next);
+ }
+@@ -223,7 +228,13 @@
+ 
+     s1_dry_voice *voice = &part->voice[slot];
+ #if X0X_SYNTHONE_PATCH
++    s1_dry_controls linked;
+     const s1_dry_controls *controls = &part->patch;
++    if (part->filter_link) {
++        linked = part->patch;
++        linked.filter = linked.amp;
++        controls = &linked;
++    }
+ #else
+     s1_dry_controls frozen;
+     s1_dry_frozen_controls(&frozen);
+--- a/firmware/src/app/original_sound.c
++++ b/firmware/src/app/original_sound.c
+@@ -271,10 +271,11 @@
+ #endif
+ #if X0X_SYNTHONE_PATCH
+     uint32_t mask = original_sound_edit_mask(cell);
+-    if (cell[29] == ORIGINAL_SOUND_SYNTHONE && (mask & S1_PATCH_MASK)) {
+-        if (mask & ~(S1_PATCH_MASK | 7u)) return 0;
++    if (cell[29] == ORIGINAL_SOUND_SYNTHONE && (mask & (S1_PATCH_MASK | S1_LINK_MASK))) {
++        if (mask & ~(S1_PATCH_MASK | S1_LINK_MASK | 7u)) return 0;
++        if (cell[S1_LINK_BYTE] != ((mask & S1_LINK_MASK) != 0)) return 0;
+         for (unsigned i = 0; i < 22; ++i) {
+-            if (cell[i] > 127u || (i >= 2 && !(mask & (UINT32_C(1) << i)) && cell[i])) return 0;
++            if (cell[i] > 127u || (i >= 2 && i != S1_LINK_BYTE && !(mask & (UINT32_C(1) << i)) && cell[i])) return 0;
+         }
+         return 1;
+     }
+@@ -332,8 +333,15 @@
+ #if X0X_SYNTHONE_PATCH
+ int original_sound_s1_set(uint8_t cell[ORIGINAL_SOUND_BYTES], unsigned slot, unsigned position)
+ {
+-    if (slot >= S1_PATCH_COUNT || position > S1_PATCH_STEPS ||
++    if (slot > S1_PATCH_COUNT || position > S1_PATCH_STEPS ||
+         !original_sound_valid(cell) || cell[29] != ORIGINAL_SOUND_SYNTHONE) return 0;
++    if (slot == S1_PATCH_COUNT) {
++        if (position > 1) return 0;
++        cell[S1_LINK_BYTE] = (uint8_t)position;
++        uint32_t mask = original_sound_edit_mask(cell);
++        original_sound_put_mask(cell, position ? mask | S1_LINK_MASK : mask & ~S1_LINK_MASK);
++        return 1;
++    }
+     unsigned byte = S1_PATCH_FIRST_BYTE + slot;
+     cell[byte] = (uint8_t)position;
+     original_sound_put_mask(cell, original_sound_edit_mask(cell) | (UINT32_C(1) << byte));
+--- a/firmware/src/app/original_runtime.c
++++ b/firmware/src/app/original_runtime.c
+@@ -47,7 +47,8 @@
+         }
+ #endif
+ #if X0X_SYNTHONE_PATCH
+-        if (original_sound_edit_mask(cell) & S1_PATCH_MASK) s1_part_apply_cell(&p->dsp.synthone, cell);
++        if (original_sound_edit_mask(cell) & (S1_PATCH_MASK | S1_LINK_MASK))
++            s1_part_apply_cell(&p->dsp.synthone, cell);
+ #endif
+         rc = ORIGINAL_RUNTIME_OK;
+     } else if (kind == ORIGINAL_SOUND_MIAMI)
+--- a/firmware/src/app/original_presets.inc
++++ b/firmware/src/app/original_presets.inc
+@@ -69,6 +69,7 @@
+         out->revision = s1_patch_identity(voice);
+         out->note_locked = note_lock_applied[voice];
+         out->preset = bass_named_preset[voice];
++        out->filter_link = (uint8_t)s1_part_patch_value(&owner->dsp.synthone, S1_PATCH_COUNT);
+         for (unsigned i = 0; i < S1_PATCH_COUNT; ++i)
+             out->physical[i] = s1_part_patch_value(&owner->dsp.synthone, i);
+     }
+@@ -106,12 +107,17 @@
+ int engine_s1_patch_read(unsigned voice, unsigned factory_id, s1_patch_value *out)
+ {
+     s1_patch_snapshot snapshot;
+-    int slot = s1_patch_slot(factory_id);
++    int slot = factory_id == S1_LINK_ID ? S1_PATCH_COUNT : s1_patch_slot(factory_id);
+     if (slot < 0 || !out || !engine_s1_patch_snapshot(voice, &snapshot)) return 0;
+-    const s1_patch_descriptor *d = s1_patch_at((unsigned)slot);
+     out->revision = snapshot.revision;
+     out->note_locked = snapshot.note_locked;
+     out->preset = snapshot.preset;
++    if (slot == S1_PATCH_COUNT) {
++        out->position = snapshot.filter_link;
++        out->physical = snapshot.filter_link;
++        return 1;
++    }
++    const s1_patch_descriptor *d = s1_patch_at((unsigned)slot);
+     out->physical = snapshot.physical[slot];
+     out->position = (uint8_t)((out->physical - d->minimum) *
+         (S1_PATCH_STEPS / (d->maximum - d->minimum)) + .5f);
+@@ -120,8 +126,9 @@
+ 
+ int engine_s1_patch_set(unsigned voice, uint32_t revision, unsigned factory_id, unsigned position)
+ {
+-    int slot = s1_patch_slot(factory_id);
+-    if (voice >= NBASS || slot < 0 || position > S1_PATCH_STEPS) return S1_EDIT_REJECTED;
++    int slot = factory_id == S1_LINK_ID ? S1_PATCH_COUNT : s1_patch_slot(factory_id);
++    if (voice >= NBASS || slot < 0 || position > (factory_id == S1_LINK_ID ? 1u : S1_PATCH_STEPS))
++        return S1_EDIT_REJECTED;
+     uint32_t lock = plat_cq_lock();
+     int status = S1_EDIT_REJECTED;
+     uint32_t request = bass_request[voice];
+@@ -168,7 +175,8 @@
+         uint8_t *cell = sound->v[T_303][v];
+         if (!original_sound_s1_set(cell, s1_edit[v].slot, s1_edit[v].position)) continue;
+         s1_part_apply_cell(&original_bass[v].dsp.synthone, cell);
+-        bass_tag_set(sound, v, ORIGINAL_SOUND_SYNTHONE, bass_named_preset[v], 1);
++        bass_tag_set(sound, v, ORIGINAL_SOUND_SYNTHONE, bass_named_preset[v],
++                     original_sound_edit_mask(cell) != 0);
+     }
+ }
+ #endif
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -449,7 +449,7 @@
+        R_SLEN, R_STALLS, R_HDR, R_TAPE, R_MIDICH, R_OUTLOUD, R_SREP, R_BATT, R_USBFULL, R_FREEPLAY,
+        R_BT, R_BTSTAT, R_BTNAME, R_CKCH, R_CLKSRC, R_SMC_ROLE, R_SMC_MAP, R_BENGINE, R_BPRESET, R_BSTATUS, R_SECTION, R_PARTON, R_FINETUNE, R_QUEUEMUTE, R_BRKRATE, R_BPATSND, R_NOTELOCK };   /* R_TAPE: FX's one-knob TAPE (DIGI .. worn tape) */          /* R_HDR: a list's section header (a = its group), never selected */
+ #if X0X_SYNTHONE_PATCH
+-enum { R_S1PATCH = R_NOTELOCK + 1 };
++enum { R_S1PATCH = R_NOTELOCK + 1, R_S1LINK = R_NOTELOCK + 4 };
+ #endif
+ #if X0X_ARP_HOOKS
+ enum { R_ARP = R_NOTELOCK + 2 };          /* a: ARP_F_* field, b: bass voice */
+@@ -477,6 +477,7 @@
+ static const s1_patch_snapshot *s1_draw_patch;
+ static int s1_read(pref_t r, s1_patch_value *value)
+ {
++    if (r.kind == R_S1LINK) return engine_s1_patch_read(r.b, S1_LINK_ID, value);
+     const s1_patch_descriptor *d = s1_patch_at(r.c);
+     return d && engine_s1_patch_read(r.b, d->factory_id, value);
+ }
+@@ -485,10 +486,11 @@
+     s1_patch_value owner;
+     if (!s1_read(r, &owner)) return;
+     if (relative) value += owner.position;
+-    if (value < 0) value = 0;
+-    if (value > S1_PATCH_STEPS) value = S1_PATCH_STEPS;
+-    const s1_patch_descriptor *d = s1_patch_at(r.c);
+-    int status = engine_s1_patch_set(r.b, owner.revision, d->factory_id, (unsigned)value);
++    int max = r.kind == R_S1LINK ? 1 : S1_PATCH_STEPS;
++    value = value < 0 ? 0 : value > max ? max : value;
++    if (r.kind == R_S1LINK && value == owner.position) return;
++    unsigned id = r.kind == R_S1LINK ? S1_LINK_ID : s1_patch_at(r.c)->factory_id;
++    int status = engine_s1_patch_set(r.b, owner.revision, id, (unsigned)value);
+     if (status == S1_EDIT_QUEUED) mark_dirty();
+     else say(status == S1_EDIT_BUSY ? (owner.note_locked ? "NOTE LOCK" : "EDIT BUSY - RETRY") :
+              "PATCH CHANGED", 0);
+@@ -2010,6 +2022,7 @@
+                 if (kind == ORIGINAL_SOUND_SYNTHONE && row + 1 < count) {
+                     for (int col=0; col<4; ++col)
+                         if (refs[col].kind != R_NONE) refs[col].kind = R_S1PATCH;
++                    if (row == 1) refs[3] = PR(R_S1LINK, T_303, b, 0);
+                 }
+ #endif
+ #if X0X_ARP_HOOKS
+@@ -8140,9 +8154,11 @@
+         int first=-1;
+         for(i=0;i<4;i++)if(e->slot[i]>=0){first=pg.r[p][e->slot[i]].c-i;break;}
+         if(first<0 || !engine_s1_patch_snapshot(bidx(),&v)){e->enabled=0;return;}
++        unsigned filter = first == S1_FILTER_FIRST;
++        if (filter && v.filter_link) first = S1_AMP_FIRST;
+         e->attack=v.physical[first];e->decay=v.physical[first+1];
+         e->sustain=v.physical[first+2];e->release=fm_maxf(v.physical[first+3],1e-4f);
+-        e->live_active=engine_s1_envelope_view(bidx(),first==5,&lv,&st,&held)&&st;
++        e->live_active=engine_s1_envelope_view(bidx(),filter,&lv,&st,&held)&&st;
+         /* Juno stage codes: 1 A, 2 D, 3 S (held at sustain), 4 R. */
+         e->live_stage=st==1?1:st==3?4:held&&lv-e->sustain<=.01f?3:2;
+         e->live_level=lv;e->live_gate=held;
+--- /dev/null
++++ b/tests/host/ui_synthone_filter_link_test.c
+@@ -0,0 +1,103 @@
++/* SPDX-License-Identifier: GPL-3.0-only */
++#define ARP_FIXTURE_MAIN retained_arp_main
++#include "ui_arp_engine_test.c"
++
++enum { FRAMES = 4096 };
++static int32_t dry[FRAMES * 2], linked[FRAMES * 2], replay[FRAMES * 2];
++
++static void visit(const char *title)
++{
++    for (int i = 0; i < pg.n; ++i) {
++        if (!strcmp(pg.title[cur_page()], title)) return;
++        now_ms += 160;
++        enc_acc[EN_SELECT] = 1;
++        input();
++    }
++    CHECK(0);
++}
++
++static void edit(int knob, int delta)
++{
++    now_ms += 160;
++    turn(knob, delta);
++}
++
++static void capture(unsigned owner, int32_t *pcm)
++{
++    engine_apply_sound(&proj.sound);
++    render(4);
++    engine_bass_on(owner, 57, 0, 0);
++    for (unsigned i = 0; i < FRAMES; i += 256) engine_render(pcm + i * 2, 256);
++    engine_bass_off(owner);
++    render(8);
++}
++
++static unsigned delta_pcm(const int32_t *a, const int32_t *b)
++{
++    unsigned changed = 0;
++    for (unsigned i = 0; i < FRAMES * 2; ++i) changed += a[i] != b[i];
++    return changed;
++}
++
++static void journey(unsigned owner)
++{
++    setup(V_PART, PART_303A + owner);
++    proj.set.bt |= PROJ_BT_CLK_IN;
++    CHECK(!engine_bass_select_preset(owner, ORIGINAL_SOUND_SYNTHONE, 0, &proj.sound));
++    for (unsigned n = 0; n < 1024 && engine_bass_preset_pending(owner); ++n) render(1);
++    CHECK(engine_bass_bank(owner) == ORIGINAL_SOUND_SYNTHONE);
++    build_pages();
++    visit("FILTER");
++    pref_t link = pg.r[cur_page()][3];
++    CHECK(pref_desc(link) && !strcmp(pref_desc(link)->name, "LINK"));
++    CHECK(pref_get(link) == 0);
++    uint8_t original[ORIGINAL_SOUND_BYTES];
++    memcpy(original, proj.sound.v[T_303][owner], sizeof original);
++    /* A LINK-only edit must survive recognition of historical slot-2 cells. */
++    edit(3, 1);
++    CHECK(!engine_bass_sound_validate(&proj.sound));
++    CHECK(!project_save());
++    CHECK(!project_load());
++    engine_apply_sound(&proj.sound);
++    CHECK(pref_get(link) == 1);
++    edit(3, -1);
++    CHECK(!memcmp(original, proj.sound.v[T_303][owner], sizeof original));
++
++    edit(2, 70);                 /* audible filter envelope depth */
++    visit("FILTER ADSR");
++    edit(0, 40);
++    capture(owner, dry);
++    s1_patch_snapshot before, on, after;
++    CHECK(engine_s1_patch_snapshot(owner, &before));
++    CHECK(before.physical[S1_FILTER_FIRST] != before.physical[S1_AMP_FIRST]);
++    uint8_t peer[ORIGINAL_SOUND_BYTES];
++    memcpy(peer, proj.sound.v[T_303][1-owner], sizeof peer);
++
++    visit("FILTER");
++    edit(3, 1);
++    CHECK(engine_s1_patch_snapshot(owner, &on) && on.filter_link);
++    CHECK(!memcmp(before.physical, on.physical, sizeof before.physical));
++    capture(owner, linked);
++    unsigned changed = delta_pcm(dry, linked);
++    CHECK(changed > FRAMES && !memcmp(peer, proj.sound.v[T_303][1-owner], sizeof peer));
++    CHECK(!project_save());
++    CHECK(!project_load());
++    capture(owner, replay);
++    CHECK(!delta_pcm(linked, replay));
++
++    edit(3, -1);
++    CHECK(engine_s1_patch_snapshot(owner, &after) && !after.filter_link);
++    CHECK(!memcmp(before.physical, after.physical, sizeof before.physical));
++    capture(owner, replay);
++    CHECK(!delta_pcm(dry, replay));
++    printf("owner=%u filter LINK changed %u/%u PCM samples, reload and unlink bit-exact\n",
++           owner, changed, FRAMES * 2);
++}
++
++int main(void)
++{
++    journey(0);
++    journey(1);
++    printf("PASS Synth One envelope LINK %u checks\n", checks);
++    return 0;
++}

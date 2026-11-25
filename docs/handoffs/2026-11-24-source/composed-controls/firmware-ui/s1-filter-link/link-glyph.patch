@@ -1,0 +1,59 @@
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -7768,6 +7768,25 @@
+     int e = cv_text(l, f == &FONT_T ? y : base_y(&FONT_T, y, &FONT_XS), f, num, ink);
+     if (wu) cv_text(e + 1, base_y(&FONT_T, y, &FONT_XS), &FONT_XS, unit, C_GRAY);
+ }
++#if X0X_SYNTHONE_PATCH
++/* Canonical G-FINAL LINK: separate/intersecting 1 px circular outlines.
++ * Exact 4x4 ink coverage mirrored about x=12.5/y=9; no decorative clock. */
++#include "ui_link_coverage.inc"
++static UI_DRAW void shared_link_glyph(int cx,int cy,unsigned linked,uint16_t ink)
++{
++    const uint8_t (*rows)[10]=ui_link_coverage[!!linked];
++    for(int dy=-4;dy<=4;dy++) {
++        const uint8_t *row=rows[dy<0?-dy:dy];
++        for(int x=0;x<10;x++) {
++            unsigned a=row[x];
++            if(a) {
++                px_blend(cx-10+x,cy+dy,ink,a);
++                px_blend(cx+9-x,cy+dy,ink,a);
++            }
++        }
++    }
++}
++#endif
+ static UI_DRAW void draw_param_widget(pref_t r, int x, int y, int width, int active, uint16_t col, int height, int night)
+ {
+     const x0x_param_t *d=pref_desc(r);
+@@ -7826,6 +7845,11 @@
+     }
+ #endif
+ #if X0X_SYNTHONE_PATCH
++    if (r.kind == R_S1LINK) {
++        shared_link_glyph(cx,y+(height>49?29:24),val>0,ink);
++        text_c(cx,y+(height>49?38:32),&FONT_B,val>0?"ON":"OFF",ink);
++        return;
++    }
+     if (r.kind == R_S1PATCH && s1_draw_patch && r.c < 2) {
+         /* Both controls scale oscillator 1 in Sound's admitted INIT voice.
+          * These bars show that source's configured and gated amplitudes. */
+--- /dev/null
++++ b/firmware/src/app/ui_link_coverage.inc
+@@ -0,0 +1,16 @@
++static const uint8_t ui_link_coverage[2][5][10] = {
++    {
++        {16, 0, 0, 0, 0, 0, 0, 0, 16, 0},
++        {14, 2, 0, 0, 0, 0, 0, 2, 14, 0},
++        {8, 11, 0, 0, 0, 0, 0, 11, 8, 0},
++        {1, 13, 11, 2, 0, 2, 11, 13, 1, 0},
++        {0, 1, 8, 14, 16, 14, 8, 1, 0, 0},
++    },
++    {
++        {0, 0, 16, 0, 0, 0, 0, 0, 0, 16},
++        {0, 0, 14, 2, 0, 0, 0, 0, 0, 14},
++        {0, 0, 8, 11, 0, 0, 0, 0, 0, 12},
++        {0, 0, 1, 13, 11, 2, 0, 2, 11, 13},
++        {0, 0, 0, 1, 8, 14, 16, 14, 8, 1},
++    },
++};

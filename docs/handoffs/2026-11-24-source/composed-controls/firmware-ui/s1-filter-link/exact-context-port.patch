@@ -1,0 +1,43 @@
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -607,6 +607,11 @@
+     case R_ARP: return arp_desc(r.a);
+ #endif
+ #if X0X_SYNTHONE_PATCH
++    case R_S1LINK: {
++        static const char *const values[] = {"OFF", "ON"};
++        static const x0x_param_t pot = {"LINK", 1, 0, values};
++        return &pot;
++    }
+     case R_S1PATCH: {
+         const s1_patch_descriptor *d = s1_patch_at(r.c);
+         static x0x_param_t pot = {0, S1_PATCH_STEPS, 0, 0};
+@@ -721,6 +726,11 @@
+     case R_ARP: return arp_get(r.b, r.a);
+ #endif
+ #if X0X_SYNTHONE_PATCH
++    case R_S1LINK: {
++        s1_patch_value value;
++        if (s1_draw_patch && bidx() == r.b) return s1_draw_patch->filter_link;
++        return s1_read(r, &value) ? value.position : 0;
++    }
+     case R_S1PATCH: {
+         const s1_patch_descriptor *d = s1_patch_at(r.c);
+         if (d && s1_draw_patch && bidx() == r.b)
+@@ -822,7 +832,7 @@
+     if (r.kind == R_ARP) { arp_set(r.b, r.a, v); return; }
+ #endif
+ #if X0X_SYNTHONE_PATCH
+-    if (r.kind == R_S1PATCH) { s1_edit(r, v, 0); return; }
++    if (r.kind == R_S1PATCH || r.kind == R_S1LINK) { s1_edit(r, v, 0); return; }
+ #endif
+ #if X0X_BASS_PRESET_PREVIEW
+     /* Freeze the active bank before reading its descriptor. The audio boundary
+@@ -3559,6 +3569,7 @@
+ static void turn_ref(pref_t r, int e, int knob)
+ {
+ #if X0X_SYNTHONE_PATCH
++    if (r.kind == R_S1LINK) { s1_edit(r, (e > 0) - (e < 0), 1); return; }
+     if (r.kind == R_S1PATCH) { s1_edit(r, accel(knob, e, S1_PATCH_STEPS), 1); return; }
+ #endif
+     if (r.kind == R_BRKSLOT && !r.b) { (void)brk_choice_turn(r, e); return; }
