@@ -93,7 +93,7 @@
      float rate,depth,from_rate,from_depth,to_rate,to_depth;
      uint32_t phase,increment,elapsed,depth_elapsed,duration;
 -    uint8_t tick, armed, dirty, tempo_sync, last_wheel_code;
-+    uint8_t tick, armed, dirty, tempo_sync, last_wheel_code, panel_rate;
++    uint8_t tick, armed, dirty, tempo_sync, last_wheel_code, panel_rate,panel_depth;
   } alt3;
  #endif
   uint8_t osc1_level_code, mod_destination, mod_wheel_lfo1, mod_wheel_lfo2;
@@ -179,7 +179,7 @@
  void juno6_all_off(juno6_t*);
  void juno6_render(juno6_t*,float*,unsigned);
  void juno6_chorus_init(juno6_chorus_t*,float);
-@@ -178,28 +274,84 @@
+@@ -178,28 +274,85 @@
  #endif
  int juno6_set_mod_wheel(juno6_t *, unsigned value);
  /* ID179 original editor index; only source-qualified receivers are enabled. */
@@ -189,6 +189,7 @@
  int juno6_arm_alt3_running(juno6_t *,unsigned verified_ramp_frames,int tempo_sync);
  int juno6_arm_alt3_free(juno6_t *,unsigned verified_ramp_frames,int tempo_sync);
 +int juno6_alt3_set_panel(juno6_t *,unsigned,unsigned,unsigned);
++float juno6_alt3_panel_hz(unsigned rate,unsigned sync,float bpm);
  void juno6_alt3_process(juno6_t *,float *,float *,unsigned);
  #endif
  /* Qualified original continuous Triangle LFO1 route only (selector 69/70).
@@ -267,7 +268,7 @@
  void juno6_set_lfo_words(juno6_t *, const juno6_lfo_words *, int reset_phase);
  void juno6_set_panel_lfo(juno6_t *, unsigned lfo, int position, unsigned hz_mode);
  void juno6_set_lfo_tempo(juno6_t *, float bpm);
-@@ -212,8 +364,11 @@
+@@ -212,8 +365,11 @@
  /* Binary32 unit interval, including an authored negative zero. */
  static inline int juno6_unit_word_valid(uint32_t bits)
  { return bits <= UINT32_C(0x3f800000) || bits == UINT32_C(0x80000000); }

@@ -1,6 +1,6 @@
 --- a/firmware/src/app/engine_arp.h
 +++ b/firmware/src/app/engine_arp.h
-@@ -24,13 +24,29 @@
+@@ -24,13 +24,37 @@
  #if X0X_SUPERJ6_BUILTIN_INIT
         ARP_UPDN_REPEAT,
  #if (defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE) || X0X_SJ6_NATIVE_RANDOM2
@@ -12,7 +12,16 @@
  #endif
         ARP_NMODES };      /* MODE knob order on screen */
  #if X0X_SUPERJ6_BUILTIN_INIT
- enum { ARP_SAGA_DIVISIONS = 18 }; /* Division 0 keeps the existing SPEED clock. */
+-enum { ARP_SAGA_DIVISIONS = 18 }; /* Division 0 keeps the existing SPEED clock. */
++enum { ARP_SAGA_DIVISIONS = 18 }; /* Division 0 keeps the existing legacy SPEED clock. */
++#if X0X_SJ6_ARP_ADAPTER_NATIVE
++#if !X0X_SJ6_RANDOM5_6_NATIVE || !X0X_SJ6_SEQ_SETTINGS_NATIVE
++#error Native panel adapter needs original modes 0..6 and the dedicated SEQ page
++#endif
++enum { SJ6_RATE_FIRST=19, SJ6_RATE_MAX=31, SJ6_RATE_DEFAULT=12 };
++#else
++enum { SJ6_RATE_MAX=ARP_SAGA_DIVISIONS };
++#endif
 +#endif
 +#if X0X_SJ6_RANDOM5_6_NATIVE
 +#if !X0X_SJ6_NATIVE_RANDOM2
@@ -30,3 +39,53 @@
  enum { ARP_NSPEED = 10, ARP_SPEED_1_16 = 8 };                   /* == CHI_ARP_NSPEED, CHI_ARP_SPD_1_16 */
  
  typedef struct {
+@@ -43,9 +67,12 @@
+     uint8_t interval;       /* 0..12 st between octave passes (12 = octave) */
+     uint8_t note_locked;    /* always 0: arp is not part of the note-lock cell */
+     uint8_t gate;           /* 1..100 % of a step */
+ #if X0X_SUPERJ6_BUILTIN_INIT
+-    uint8_t division;       /* SuperJ6: 0 SPEED, 1..18 Saga beat durations */
++    uint8_t division;       /* SuperJ6: 0 legacy, 1..18 divisions, 19..31 original fine Rate */
++#if X0X_SJ6_ARP_ADAPTER_NATIVE
++    uint8_t seq_on;
++#endif
+ #endif
+ } engine_arp_settings;
+ 
+ typedef struct {
+@@ -57,8 +84,11 @@
+ 
+ enum { ARP_F_ON, ARP_F_MODE, ARP_F_RANGE, ARP_F_SPEED, ARP_F_LENGTH, ARP_F_INTERVAL, ARP_F_GATE,
+ #if X0X_SUPERJ6_BUILTIN_INIT
+        ARP_F_DIVISION,
++#if X0X_SJ6_ARP_ADAPTER_NATIVE
++       ARP_F_SEQ_ENABLE,
++#endif
+ #endif
+ #if X0X_S1_FENCED_CLOCK
+        ARP_F_SOURCE_RATE, ARP_F_SOURCE_FACTOR,
+ #endif
+@@ -77,8 +107,11 @@
+     uint16_t on_mask, oct_mask;
+     uint8_t amp2_mask;                    /* bit n: SJ6 field 119 + n stored */
+ #if X0X_SUPERJ6_BUILTIN_INIT
+     uint8_t division;
++#if X0X_SJ6_ARP_ADAPTER_NATIVE
++    uint8_t seq_on;          /* Separate original Seq Enable; typed owner only. */
++#endif
+ #endif
+     uint16_t amp2[4];                     /* unit * 65535 */
+ } engine_arp_cfg;
+ void engine_arp_cfg_default(engine_arp_cfg *);
+@@ -87,8 +120,11 @@
+ void engine_arp_block_encode(const engine_arp_cfg *, uint8_t block[ARP_BLOCK_BYTES]);
+ /* Preset field decoders (pure). Return 1 when the id is an arp/seq/AMP2 field. */
+ int engine_arp_from_sj6(engine_arp_cfg *, unsigned id, float value);
+ int engine_arp_from_s1(engine_arp_cfg *, unsigned id, float value);
++#if X0X_SJ6_ARP_ADAPTER_NATIVE
++unsigned engine_sj6_rate_detent(const engine_arp_cfg *);
++#endif
+ /* Frames (44.1 kHz) per arp step at bpm for a SPEED index. */
+ uint32_t engine_arp_step_frames(float bpm, unsigned speed);
+ 
+ #if X0X_ARP_ENGINE

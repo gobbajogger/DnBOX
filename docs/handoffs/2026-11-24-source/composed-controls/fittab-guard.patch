@@ -1,0 +1,39 @@
+--- a/firmware/src/app/main_fm1.c
++++ b/firmware/src/app/main_fm1.c
+@@ -2174,6 +2174,12 @@
+ #if X0X_COLD_SLOT3_LAB
+ extern const uint8_t cold_slot3_start[], cold_slot3_end[], cold_slot3_expected[];
+ #endif
++#if X0X_COLD_FITTAB_LAB
++#if !X0X_COLD_SLOT3_LAB || !X0X_SYNTH_CONTROLS_INIT_ONLY
++#error FITTAB lab requires existing guarded storage and no factory synth banks
++#endif
++extern const uint8_t cold_fittab_start[], cold_fittab_end[], cold_fittab_expected[];
++#endif
+ static uint8_t cold_lab_bad;
+ #endif
+ static void draw_safe_mode(void)
+@@ -2277,6 +2283,11 @@
+                 (uintptr_t)cold_slot3_end - (uintptr_t)cold_slot3_start, cold_slot3_expected))
+                 cold_lab_bad = FDATA_MISMATCH;
+ #endif
++#if X0X_COLD_FITTAB_LAB
++            if (!cold_lab_bad && !cold_lab_valid(cold_fittab_start,
++                (uintptr_t)cold_fittab_end - (uintptr_t)cold_fittab_start,cold_fittab_expected))
++                cold_lab_bad=FDATA_MISMATCH;
++#endif
+             if (!cold_lab_bad) {
+ #endif
+ #if BOARD_SMK37
+@@ -2291,6 +2302,11 @@
+             } else {
+                 safe_mode = 1;
+             }
++#endif
++#if X0X_COLD_FITTAB_LAB
++        } else {
++            cold_lab_bad=FDATA_MISMATCH;
++            safe_mode=1; /* never start on unmapped relocated assets */
+ #endif
+         }
+     }

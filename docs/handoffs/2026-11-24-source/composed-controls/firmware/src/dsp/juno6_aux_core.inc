@@ -9,6 +9,15 @@ static int juno6_aux_core_supported(unsigned id)
 #endif
            ;
 }
+__attribute__((noinline)) static float sj6_aux_infer_cutoff(float hz)
+{
+    float a=0.f,b=1.f;
+    for(unsigned n=0;n<12u;n++){
+        const float x=(a+b)*.5f;
+        if(sj6_normal_cutoff_hz(x)<hz)a=x;else b=x;
+    }
+    return (a+b)*.5f;
+}
 static float juno6_aux_core_base(const juno6_t *s,unsigned id)
 {
     const dnbx_layer_params *p=&s->core.layer[0].params;
@@ -19,14 +28,7 @@ static float juno6_aux_core_base(const juno6_t *s,unsigned id)
     if(id==202u)return s->core.sj6_sub_code*(1.f/127.f);
 #endif
     if(dnbx_read_raw(&s->core,id,&raw)==DNBX_OK)return fm_clampf(raw,0.f,1.f);
-    if(id==7u) {
-        float a=0.f,b=1.f;
-        for(unsigned n=0;n<12u;n++){
-            const float x=(a+b)*.5f;
-            if(sj6_normal_cutoff_hz(x)<p->cutoff_hz)a=x;else b=x;
-        }
-        return (a+b)*.5f;
-    }
+    if(id==7u)return sj6_aux_infer_cutoff(p->cutoff_hz);
     if(id==8u)return p->resonance;
     if((id>=72u && id<=75u)||(id>=124u && id<=126u))return .5f;
     if(id==131u)return 0.f;
@@ -49,10 +51,9 @@ typedef struct {
     uint32_t present;
     unsigned active;
 } sj6_aux_core_saved;
-static void juno6_aux_core_apply(juno6_t *s,sj6_aux_core_saved *save,unsigned id,float raw)
+__attribute__((noinline,minsize)) static void juno6_aux_core_apply(juno6_t *s,sj6_aux_core_saved *save,unsigned id,float raw)
 {
     dnbx_part *p=&s->core;
-    if(!juno6_aux_core_supported(id))return;
     if(!save->active){
         for(unsigned l=0;l<2u;l++){
             save->layer[l]=p->layer[l].params;
@@ -114,7 +115,7 @@ static void juno6_aux_core_apply(juno6_t *s,sj6_aux_core_saved *save,unsigned id
         }
     }
 }
-static void juno6_aux_core_bends(juno6_t *s,const sj6_aux_core_saved *save)
+__attribute__((noinline,minsize)) static void juno6_aux_core_bends(juno6_t *s,const sj6_aux_core_saved *save)
 {
     if(!(save->active&0x1c0u))return;
     const float common=(save->active&64u)?save->bend[0]:0.f;
@@ -123,7 +124,7 @@ static void juno6_aux_core_bends(juno6_t *s,const sj6_aux_core_saved *save)
         dnbx_sj6_transient_bend(&s->core,l,common+local);
     }
 }
-static void juno6_aux_core_restore(juno6_t *s,const sj6_aux_core_saved *save)
+__attribute__((noinline,minsize)) static void juno6_aux_core_restore(juno6_t *s,const sj6_aux_core_saved *save)
 {
     dnbx_part *p=&s->core;
     if(!save->active)return;

@@ -20,7 +20,7 @@
 -    int8_t last[8]; uint8_t nlast, delay_history, pad[2];
 +    int8_t last[8]; uint8_t nlast, delay_history;
 +#if X0X_S1_DELAY_TIME_NATIVE
-+    uint8_t delay_time_code, tuning_index;
++    uint8_t delay_time_code, delay_time_reserve, tuning_index;
 +#else
 +    uint8_t tuning_index, pad;
 +#endif

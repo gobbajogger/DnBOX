@@ -6,6 +6,11 @@ real=b.tc
 class Stop(Exception):pass
 def seal(tool,*args):
     if tool!='pi32v2/bin/ld': return real(tool,*args)
+    if os.environ.get('DNBOX_CONTROL_BUILD_ONLY')=='1':
+        # Every translation unit was compiled with the actual model flags.
+        # Do not invoke the linker, report size, package, or run firmware.
+        print('compiled-controls',b.MODEL,flush=True)
+        raise Stop
     cmd=list(args)
     cmd.insert(cmd.index('--gc-sections'),'--relax')
     at=cmd.index('-T')+1

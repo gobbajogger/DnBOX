@@ -32,7 +32,7 @@
  #endif
  enum {S1_PAN_AMOUNT_BYTE=21,S1_PAN_RATE_BYTE=22,S1_PAN_RATE_BYTES=4};
  static inline uint32_t s1_pan_rate_word_bytes(const uint8_t *b){
-@@ -108,21 +121,471 @@
+@@ -108,30 +121,588 @@
  { return s->v[T_303][8+2u*owner+S1_DICT_BYTE/NPARAMS_MAX][S1_DICT_BYTE%NPARAMS_MAX]; }
  static inline void s1_dict_store(sound_t *s,unsigned owner,unsigned code)
  { s->v[T_303][8+2u*owner+S1_DICT_BYTE/NPARAMS_MAX][S1_DICT_BYTE%NPARAMS_MAX]=(uint8_t)code; }
@@ -385,102 +385,99 @@
  static inline int canonical137(const sound_t *s) {
 +#endif
   for (unsigned v=0;v<2;++v) {
++  const uint8_t *cell=s->v[T_303][v];
++  const int j6_init=cell[29]==ORIGINAL_SOUND_JUNO && !original_sound_sj6_factory(cell);
++  const int s1_init=s1_typed_init_cell(cell);
++  (void)j6_init;(void)s1_init;
++
 +#if X0X_SJ6_NATIVE_J60
 +  const uint8_t *j60=sj6_j60_code(s,v);
 +  if(!sj6_j60_valid(j60) ||
-+     ((j60[0]|j60[1]|j60[2]|j60[3])&&!sj6_j60_owner(s,v)))return 0;
++     ((j60[0]|j60[1]|j60[2]|j60[3])&&!j6_init))return 0;
 +#endif
 +#if X0X_SJ6_NATIVE_CLASSIC
 +  const uint8_t *classic=sj6_classic_native_code(s,v);
 +  if(!sj6_classic_native_valid(classic) ||
-+     ((classic[0]|classic[1]|classic[2])&&!sj6_j60_owner(s,v)))return 0;
++     ((classic[0]|classic[1]|classic[2])&&!j6_init))return 0;
 +#endif
 +#if X0X_SJ6_LFO1_WAVE_NATIVE
 +  unsigned wave=sj6_lfo1_wave_read(s,v);
 +  const unsigned mute=sj6_lfo1_option(s,v,0),snap=sj6_lfo1_option(s,v,1);
 +  if(wave>SJ6_LFO1_WAVE_MAX || mute>1u || snap>1u ||
-+     ((wave|mute|snap) && !sj6_lfo1_wave_allowed(s->v[T_303][v])))return 0;
++     ((wave|mute|snap) && !j6_init))return 0;
 +#endif
    const uint8_t *b=read137(s,v);
 +#if X0X_SJ6_ALT3_NATIVE
 +  const uint8_t *trem=sj6_trem_read(s,v);
 +  if(trem[0]>127u || trem[1]>128u || ((trem[0]|trem[1]) &&
-+     (s->v[T_303][v][29]!=ORIGINAL_SOUND_JUNO || original_sound_sj6_factory(s->v[T_303][v]))))
++     !j6_init))
 +      return 0;
 +#endif
 +#if X0X_SJ6_SEQ_SETTINGS_NATIVE
 +  const uint8_t *seqcfg=sj6_seq_settings_read(s,v);
 +  if(!sj6_seq_settings_valid(seqcfg) ||
-+     ((seqcfg[0]|seqcfg[1]) && (s->v[T_303][v][29]!=ORIGINAL_SOUND_JUNO ||
-+         original_sound_sj6_factory(s->v[T_303][v])))) return 0;
++     ((seqcfg[0]|seqcfg[1]) && !j6_init)) return 0;
 +#if X0X_SJ6_SEQ_DEST_NATIVE
 +  unsigned dest=sj6_dest_read(s,v);
-+  if(dest>2u || (dest && (s->v[T_303][v][29]!=ORIGINAL_SOUND_JUNO ||
-+      original_sound_sj6_factory(s->v[T_303][v]))))return 0;
++  if(dest>2u || (dest && !j6_init))return 0;
 +#endif
 +#endif
 +#if X0X_SJ6_NATIVE_LIMITER
 +  const unsigned rage=sj6_rage_read(s,v);
-+  if(rage>128u || (rage && (s->v[T_303][v][29]!=ORIGINAL_SOUND_JUNO ||
-+                        original_sound_sj6_factory(s->v[T_303][v]))))return 0;
++  if(rage>128u || (rage && !j6_init))return 0;
 +  for(unsigned k=0;k<SJ6_LIM_COUNT;++k){
 +    unsigned c=sj6_limiter_read(s,v)[k];
-+    if(c>128u || (c && (s->v[T_303][v][29]!=ORIGINAL_SOUND_JUNO ||
-+        original_sound_sj6_factory(s->v[T_303][v]))))return 0;
++    if(c>128u || (c && !j6_init))return 0;
 +  }
 +#endif
 +#if X0X_SJ6_OTA_NATIVE
 +  unsigned ota=sj6_ota_read(s,v);
-+  if(ota>1u || (ota && (s->v[T_303][v][29]!=ORIGINAL_SOUND_JUNO ||
-+      original_sound_sj6_factory(s->v[T_303][v]))))return 0;
++  if(ota>1u || (ota && !j6_init))return 0;
 +#endif
 +#if X0X_SJ6_NOISE_SUB_NATIVE
 +  const uint8_t *sources=sj6_sources_read(s,v);
 +  if(sources[0]>127u || sources[1]>127u ||
-+     ((sources[0]|sources[1]) && (s->v[T_303][v][29]!=ORIGINAL_SOUND_JUNO ||
-+         original_sound_sj6_factory(s->v[T_303][v])))) return 0;
++     ((sources[0]|sources[1]) && !j6_init)) return 0;
 +#endif
 +#if X0X_SJ6_AUX_LFO_NATIVE
 +  const uint8_t *r1=sj6_aux_lfo1_read(s,v);
-+  if(!sj6_aux_lfo1_valid(r1) || ((r1[0]|r1[2])&&!sj6_aux_init(s,v)))return 0;
++  if(!sj6_aux_lfo1_valid(r1) || ((r1[0]|r1[2])&&!j6_init))return 0;
 +  const uint8_t *aux=sj6_aux_read(s,v);
 +  for(unsigned k=0;k<SJ6_AUX_BYTES;k++)
-+    if(!sj6_aux_valid(k,aux[k]) || (aux[k] && !sj6_aux_init(s,v)))return 0;
++    if(!sj6_aux_valid(k,aux[k]) || (aux[k] && !j6_init))return 0;
 +#if X0X_SJ6_LFO_TRIGGER_NATIVE
-+  if(aux[30]>1u || aux[31]>1u || ((aux[30]||aux[31]) && !sj6_aux_init(s,v)))return 0;
++  if(aux[30]>1u || aux[31]>1u || ((aux[30]||aux[31]) && !j6_init))return 0;
 +#endif
 +#endif
 +#if X0X_SJ6_NATIVE_ROOM
 +  const uint8_t *crush=sj6_crush_code(s,v);
 +  if(crush[0]>1u || crush[1]>127u ||
-+     ((crush[0]|crush[1]) && (s->v[T_303][v][29]!=ORIGINAL_SOUND_JUNO ||
-+      original_sound_sj6_factory(s->v[T_303][v]))))return 0;
++     ((crush[0]|crush[1]) && !j6_init))return 0;
 +  for(unsigned k=0;k<SJ6_ROOM_COUNT;++k){
 +    unsigned code=sj6_room_read(s,v)[k];
-+    if(code>sj6_room_max(k) || (code && (s->v[T_303][v][29]!=ORIGINAL_SOUND_JUNO ||
-+        original_sound_sj6_factory(s->v[T_303][v]))))return 0;
++    if(code>sj6_room_max(k) || (code && !j6_init))return 0;
 +  }
 +#endif
 +#if X0X_SJ6_PITCH_ENV_NATIVE
 +  const uint8_t *pitch=sj6_pitch_read(s,v);
 +  for(unsigned k=0;k<SJ6_PITCH_COUNT;k++)
-+    if(pitch[k]>sj6_pitch_max(k) || (pitch[k] && !sj6_pitch_init(s,v)))return 0;
++    if(pitch[k]>sj6_pitch_max(k) || (pitch[k] && !j6_init))return 0;
 +#endif
 +#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
 +#if X0X_S1_SCALE_NATIVE
 +  unsigned tuning=s->v[T_MST][S1_SCALE_ROW+v][S1_SCALE_BYTE];
-+  if(tuning>S1C_SCALE_MAX || (tuning && !s1_typed_init_cell(s->v[T_303][v])))return 0;
++  if(tuning>S1C_SCALE_MAX || (tuning && !s1_init))return 0;
 +#if X0X_S1_USER_SCALE
 +  if(!s1_user_valid(s,v))return 0;
 +#endif
 +#endif
 +#if X0X_S1_HALFTIME
 +  unsigned half=s1_half_code(s,v);
-+  if(half>128u || (half && !s1_typed_init_cell(s->v[T_303][v])))return 0;
++  if(half>128u || (half && !s1_init))return 0;
 +#endif
 +  for(unsigned k=0;k<S1_CMP_COUNT;k++){
 +   unsigned value=s1_cmp_read(s,v)[k];
-+   if(value>127u || (value && !s1_typed_init_cell(s->v[T_303][v])))return 0;
++   if(value>127u || (value && !s1_init))return 0;
 +  }
 +#endif
  #if X0X_SJ6_MONO32_PROBE
@@ -493,31 +490,158 @@
 -#if defined(X0X_HOST) && defined(X0X_SJ6_DELAY_WITNESS)
 +#if X0X_S1_CLOCK_NATIVE
 +  if(b[S1_ARP_CLOCK_BYTE+2u] &&
-+     (s->v[T_303][v][29]!=ORIGINAL_SOUND_SYNTHONE || original_sound_s1_program(s->v[T_303][v]))) return 0;
++     !s1_init) return 0;
 +#endif
 +#endif
 +#if (defined(X0X_HOST) && defined(X0X_SJ6_DELAY_WITNESS)) || X0X_SJ6_NATIVE_DELAY
    if(!sj6_delay_bytes_valid(b+SJ6_DELAY_BYTE))return 0;
 +#if X0X_SJ6_NATIVE_DELAY
 +  if ((b[16] | b[17] | b[18] | b[19]) &&
-+      (s->v[T_303][v][29]!=ORIGINAL_SOUND_JUNO || original_sound_sj6_factory(s->v[T_303][v]))) return 0;
++      !j6_init) return 0;
 +#endif
  #endif
    if (b[0]!=137 || b[1]!=v || b[2]>127 || b[3]>2) return 0;
  #if DNBOX_TYPED_CONTROLS_NATIVE_TEST
  #if X0X_SJ6_VELOCITY_PORT
-@@ -156,21 +619,40 @@
+-  if(b[2] && (s->v[T_303][v][29]!=ORIGINAL_SOUND_JUNO || original_sound_sj6_factory(s->v[T_303][v])))return 0;
++  if(b[2] && !j6_init)return 0;
+ #else
+   if (b[2]) return 0; /* SuperJ6 Filter Velocity receiver not in this slice */
+ #endif
+ #endif
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++  /* Exact wire bounds. A zero bound keeps every reserved byte zero. The
++   * unrestricted groups were already validated independently above. */
++  static const uint8_t maxbyte[64] = {
++#if X0X_S1_BEND_RANGE_PROBE
++    [S1_PB_DN_BYTE]=S1_PB_LAST,[S1_PB_UP_BYTE]=S1_PB_LAST,
++#endif
++    [S1_A4_BYTE]=S1_A4_MAX,[S1_RVFB_BYTE]=S1_RVFB_LAST,
++    [S1_TRANS_BYTE]=S1_TRANS_LAST,
++#if X0X_S1_FENCED_CLOCK
++    [S1_ARP_CLOCK_BYTE ... S1_ARP_CLOCK_BYTE+S1_ARP_CLOCK_BYTES-1]=255,
++#endif
++#if X0X_SJ6_BEND_TYPED_PROBE
++    [SJ6_PB_DN_BYTE]=SJ6_PB_LIMIT,[SJ6_PB_UP_BYTE]=SJ6_PB_LIMIT,
++#endif
++#ifdef X0X_SJ6_MOD_TYPED_PROBE
++    [SJ6_MOD_BYTE]=SJ6_MOD_LAST,
++#endif
++#if X0X_S1_FEEDBACK_PROBE
++    [S1_FB_BYTE]=S1_FB_LAST,
++#endif
++#if X0X_SJ6_LFO1_DELAY_PORT
++    [SJ6_LFO1_DELAY_BYTE]=SJ6_LFO1_DELAY_MAX,
++#endif
++#if X0X_SJ6_NATIVE_ZERO_GATE
++    [SJ6_ARP_ZERO_BYTE]=1,
++#endif
++#if X0X_S1_CRUSH_LFO_PROBE
++    [S1_CRUSH_BYTE]=S1_CRUSH_LAST,
++#endif
++#if X0X_SJ6_NATIVE_DELAY
++    [SJ6_DELAY_BYTE ... SJ6_DELAY_BYTE+SJ6_DELAY_COUNT-1]=255,
++#endif
++#if X0X_S1_AUTOPAN_PROBE
++    [S1_PAN_AMOUNT_BYTE]=127,
++    [S1_PAN_RATE_BYTE ... S1_PAN_RATE_BYTE+S1_PAN_RATE_BYTES-1]=255,
++#endif
++#if X0X_SJ6_NATIVE_RANDOM2
++#if X0X_SJ6_RANDOM5_6_NATIVE
++    [SJ6_ARP_RANDOM_BYTE]=4,
++#else
++    [SJ6_ARP_RANDOM_BYTE]=2,
++#endif
++#endif
++#if X0X_SJ6_MONO32_PROBE
++    [SJ6_VOICE_BYTE]=255,[SJ6_GLIDE_BYTE]=255,
++#endif
++#if X0X_S1_DELAY_TRACK_TEST
++    [S1_DICT_BYTE]=S1_DICT_MAX,
++#endif
++#if X0X_SJ6_VCF_PORT
++    [SJ6_KEY_TRACK_BYTE]=127,[SJ6_ENV_STRENGTH_BYTE]=128,[SJ6_VCF_BYTE]=127,
++#endif
++    [S1_AA_BYTE]=1,[S1_CWG_BYTE]=S1_CWG_MAX,
++    [S1_DELAY_RES_BYTE]=S1_DELAY_RES_MAX,[S1_ENV_LFO_BYTE]=S1_ENV_LFO_MAX,
++    [S1_PHASE_BYTE ... S1_PHASE_BYTE+S1_PHASE_COUNT-1]=S1_PHASE_MAX,
++#if X0X_S1_DELAY_TIME_NATIVE
++    [S1_DELAY_TIME_BYTE]=S1_DELAY_TIME_MAX,
++#endif
++#if X0X_SJ6_NATIVE_UNISON
++    [SJ6_UNISON_BYTE]=1,[SJ6_UNISON_BYTE+1]=128,[SJ6_UNISON_BYTE+2]=127,[SJ6_UNISON_BYTE+3]=5,
++#endif
++  };
++#define OWNER_BIT(i) (UINT64_C(1)<<(i))
++  const uint64_t s1_only =
++#if X0X_S1_FEEDBACK_PROBE
++    OWNER_BIT(S1_FB_BYTE)|
++#endif
++#if X0X_S1_CRUSH_LFO_PROBE
++    OWNER_BIT(S1_CRUSH_BYTE)|
++#endif
++#if X0X_S1_DELAY_TRACK_TEST
++    OWNER_BIT(S1_DICT_BYTE)|
++#endif
++#if X0X_S1_DELAY_TIME_NATIVE
++    OWNER_BIT(S1_DELAY_TIME_BYTE)|
++#endif
++    OWNER_BIT(S1_AA_BYTE)|OWNER_BIT(S1_CWG_BYTE)|OWNER_BIT(S1_DELAY_RES_BYTE)|
++    OWNER_BIT(S1_ENV_LFO_BYTE)|((OWNER_BIT(S1_PHASE_COUNT)-1u)<<S1_PHASE_BYTE);
++  const uint64_t j6_only =
++#if X0X_SJ6_LFO1_DELAY_PORT
++    OWNER_BIT(SJ6_LFO1_DELAY_BYTE)|
++#endif
++#if X0X_SJ6_NATIVE_ZERO_GATE
++    OWNER_BIT(SJ6_ARP_ZERO_BYTE)|
++#endif
++#if X0X_SJ6_NATIVE_RANDOM2
++    OWNER_BIT(SJ6_ARP_RANDOM_BYTE)|
++#endif
++#if X0X_SJ6_VCF_PORT
++    OWNER_BIT(SJ6_KEY_TRACK_BYTE)|OWNER_BIT(SJ6_ENV_STRENGTH_BYTE)|OWNER_BIT(SJ6_VCF_BYTE)|
++#endif
++#if X0X_SJ6_NATIVE_UNISON
++    ((OWNER_BIT(4)-1u)<<SJ6_UNISON_BYTE)|
++#endif
++    0u;
++#undef OWNER_BIT
++  uint64_t nonzero=0;
++  for(unsigned i=4;i<64;i++){
++   const uint8_t x=s->v[T_303][8+2*v+i/32][i%32];
++   if(x>maxbyte[i])return 0;
++   nonzero|=(uint64_t)!!x<<i;
++  }
++  if((!s1_init && (nonzero&s1_only)) || (!j6_init && (nonzero&j6_only)))return 0;
++#if X0X_SJ6_NATIVE_RANDOM2
++  if(b[SJ6_ARP_RANDOM_BYTE]==1u)return 0;
++#endif
++#if X0X_S1_AUTOPAN_PROBE
++  if(!s1_pan_rate_valid(s1_pan_rate_word(b)))return 0;
++#endif
++#else
+ #if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
+   if (b[S1_PB_DN_BYTE]>S1_PB_LAST || b[S1_PB_UP_BYTE]>S1_PB_LAST) return 0;
+   for(unsigned i=6;i<64;i++)
+ #else
+@@ -150,27 +721,45 @@
+ #endif
+ #if defined(X0X_S1_FEEDBACK_PROBE) && X0X_S1_FEEDBACK_PROBE
+    if(i==S1_FB_BYTE) {
+ #if DNBOX_TYPED_CONTROLS_NATIVE_TEST
+-    if(x && !s1_typed_init_cell(s->v[T_303][v]))return 0;
++    if(x && !s1_init)return 0;
+ #endif
      if(x>S1_FB_LAST)return 0;
      continue;
-    }
- #endif
-+#if X0X_SJ6_LFO1_DELAY_PORT
-+   if(i==SJ6_LFO1_DELAY_BYTE) {
-+     if(x>SJ6_LFO1_DELAY_MAX || (x && (s->v[T_303][v][29]!=ORIGINAL_SOUND_JUNO ||
-+         original_sound_sj6_factory(s->v[T_303][v])))) return 0;
-+     continue;
 +   }
 +#endif
++#if X0X_SJ6_LFO1_DELAY_PORT
++   if(i==SJ6_LFO1_DELAY_BYTE) {
++     if(x>SJ6_LFO1_DELAY_MAX || (x && !j6_init)) return 0;
++     continue;
+    }
+ #endif
     if(i==S1_A4_BYTE) {if(x>S1_A4_MAX)return 0;continue;}
     if(i==S1_RVFB_BYTE) {if(x>S1_RVFB_LAST)return 0;continue;}
  #if X0X_S1_FENCED_CLOCK
@@ -529,7 +653,7 @@
 +   if(i==SJ6_ARP_ZERO_BYTE){
 +    if(x>1u)return 0;
 +#if X0X_SJ6_NATIVE_ZERO_GATE
-+    if(x && (s->v[T_303][v][29]!=ORIGINAL_SOUND_JUNO || original_sound_sj6_factory(s->v[T_303][v])))return 0;
++    if(x && !j6_init)return 0;
 +#endif
 +    continue;
 +   }
@@ -541,7 +665,7 @@
 -#if defined(X0X_HOST) && defined(X0X_SJ6_DELAY_WITNESS)
 +   if(i==S1_CRUSH_BYTE){
 +#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
-+     if(x && !s1_typed_init_cell(s->v[T_303][v]))return 0;
++     if(x && !s1_init)return 0;
 +#endif
 +     if(x>S1_CRUSH_LAST)return 0;
 +     continue;
@@ -552,7 +676,7 @@
  #endif
  #if defined(X0X_S1_AUTOPAN_PROBE) && X0X_S1_AUTOPAN_PROBE
     if(i==S1_PAN_AMOUNT_BYTE){if(x>127)return 0;continue;}
-@@ -186,9 +668,13 @@
+@@ -186,12 +775,15 @@
     }
  #endif
  #if (defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE) || X0X_SJ6_NATIVE_RANDOM2
@@ -563,66 +687,76 @@
       if(x!=0u && x!=2u)return 0;
 +#endif
  #if X0X_SJ6_NATIVE_RANDOM2
-      if(x && (s->v[T_303][v][29]!=ORIGINAL_SOUND_JUNO ||
-               original_sound_sj6_factory(s->v[T_303][v])))return 0;
+-     if(x && (s->v[T_303][v][29]!=ORIGINAL_SOUND_JUNO ||
+-              original_sound_sj6_factory(s->v[T_303][v])))return 0;
++     if(x && !j6_init)return 0;
  #endif
-@@ -204,15 +690,64 @@
-     if(x && !s1_typed_init_cell(s->v[T_303][v]))return 0;
+      continue;
+    }
+ #endif
+@@ -200,19 +792,69 @@
+ #endif
+ #if X0X_S1_DELAY_TRACK_TEST
+    if(i==S1_DICT_BYTE){
+ #if DNBOX_TYPED_CONTROLS_NATIVE_TEST
+-    if(x && !s1_typed_init_cell(s->v[T_303][v]))return 0;
++    if(x && !s1_init)return 0;
  #endif
      if(x>S1_DICT_MAX)return 0;
      continue;
-+   }
-+#endif
+    }
+ #endif
 +#if X0X_SJ6_VCF_PORT
 +   if(i==SJ6_KEY_TRACK_BYTE || i==SJ6_ENV_STRENGTH_BYTE) {
 +     const unsigned limit=i==SJ6_KEY_TRACK_BYTE?127u:128u;
-+     if(x>limit || (x && !sj6_vcf_init(s,v)))return 0;
++     if(x>limit || (x && !j6_init))return 0;
 +     continue;
 +   }
 +   if(i==SJ6_VCF_BYTE) {
-+     if(x>127u || (x && !sj6_vcf_init(s,v)))return 0;
++     if(x>127u || (x && !j6_init))return 0;
 +     continue;
 +   }
 +#endif
 +#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
 +   if(i==S1_AA_BYTE){
-+     if(x>1u || (x && !s1_typed_init_cell(s->v[T_303][v])))return 0;
++     if(x>1u || (x && !s1_init))return 0;
 +     continue;
 +   }
 +   if(i==S1_CWG_BYTE){
-+     if(x>S1_CWG_MAX || (x && !s1_typed_init_cell(s->v[T_303][v])))return 0;
++     if(x>S1_CWG_MAX || (x && !s1_init))return 0;
 +     continue;
 +   }
 +#endif
 +#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
 +   if(i==S1_DELAY_RES_BYTE){
-+     if(x>S1_DELAY_RES_MAX || (x && !s1_typed_init_cell(s->v[T_303][v])))return 0;
++     if(x>S1_DELAY_RES_MAX || (x && !s1_init))return 0;
 +     continue;
 +   }
 +   if(i==S1_ENV_LFO_BYTE){
-+     if(x>S1_ENV_LFO_MAX || (x && !s1_typed_init_cell(s->v[T_303][v])))return 0;
++     if(x>S1_ENV_LFO_MAX || (x && !s1_init))return 0;
 +     continue;
 +   }
 +   if(i>=S1_PHASE_BYTE && i<S1_PHASE_BYTE+S1_PHASE_COUNT){
-+     if(x>S1_PHASE_MAX || (x && !s1_typed_init_cell(s->v[T_303][v])))return 0;
++     if(x>S1_PHASE_MAX || (x && !s1_init))return 0;
 +     continue;
 +   }
 +#endif
 +#if X0X_S1_DELAY_TIME_NATIVE
 +   if(i==S1_DELAY_TIME_BYTE) {
-+     if(x>S1_DELAY_TIME_MAX || (x && !s1_typed_init_cell(s->v[T_303][v])))return 0;
++     if(x>S1_DELAY_TIME_MAX || (x && !s1_init))return 0;
 +     continue;
 +   }
 +#endif
 +#if X0X_SJ6_NATIVE_UNISON
 +   if(i>=SJ6_UNISON_BYTE && i<SJ6_UNISON_BYTE+4u){
 +     static const uint8_t bound[]={1,128,127,5};
-+     if(x>bound[i-SJ6_UNISON_BYTE] || (x&&!sj6_unison_owner(s,v)))return 0;
++     if(x>bound[i-SJ6_UNISON_BYTE] || (x&&!j6_init))return 0;
 +     continue;
-    }
- #endif
++   }
++#endif
     if (x) return 0;
    }
++#endif
   }
   return 1;
  }

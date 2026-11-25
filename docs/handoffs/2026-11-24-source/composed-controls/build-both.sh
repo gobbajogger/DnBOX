@@ -16,11 +16,17 @@ mkdir -p "$out/src"
 for f in firmware experiments tools; do cp -a "$(realpath "$donor/$f")" "$out/src/"; done
 for f in assets ble; do ln -s "$(realpath "$donor/$f")" "$out/src/$f"; done
 cd "$out/src"
-patch --fuzz=0 --no-backup-if-mismatch -s -p1 < "$here/all-controls-fit-first/params-layout.patch"
+if [[ "${DNBOX_CONTROL_BUILD_ONLY:-0}" != 1 ]]; then
+  python3 "$here/compact-sequencer-layout.py"
+fi
 link="$here/all-controls-fit-first/link-fit.py"
 if [[ "$profile" == slot3 ]]; then
  patch --fuzz=0 --no-backup-if-mismatch -s -p1 < "$here/combined-slot3-fit/slot3-fit-guard.patch"
  link="${FORWARD_SLOT3_LINK:-$here/combined-slot3-fit/link-slot3.py}"
+ if [[ "${DNBOX_FITTAB_TRIAL:-0}" == 1 ]]; then
+   patch --fuzz=0 --no-backup-if-mismatch -s -p1 < "$here/fittab-guard.patch"
+   link="$here/link-fittab-forward.py"
+ fi
 fi
 if [[ -n "${ADD_CONTROL_FLAGS:-}" ]]; then
  python3 - "$link" "$out/combined-link.py" "$ADD_CONTROL_FLAGS" <<'PYFLAGS'
@@ -45,6 +51,8 @@ allowed={
  "-DX0X_S1_KEYBOARD_HOLD=1",
  "-DX0X_S1_SCALE_NATIVE=1", "-DX0X_SJ6_SEQ_DEST_NATIVE=1",
  "-DX0X_S1_USER_SCALE=1", "-DX0X_S1_HALFTIME=1", "-DX0X_SJ6_AUX_SEQ_NATIVE=1",
+ "-DX0X_SJ6_ARP_ADAPTER_NATIVE=1",
+ "-DX0X_S1_DELAY_HISTORY_NATIVE=1",
  "-DX0X_SJ6_RANDOM5_6_NATIVE=1",
  "-DX0X_MIX_DELAY_PACK14=1",
 }
@@ -64,5 +72,9 @@ for model in ${BUILD_MODELS:-elite pro}; do
  src="$root/fw/build/$board/gen"; test -s "$src/x0x_drum_samples.h"
  mkdir -p "build/$board"; cp -a "$src" "build/$board/"
  python "$link" --board smk37 --model "$model" --sdk "$root/prereqs/sdk" >"$out/$model-link.log" 2>&1 || { tail -35 "$out/$model-link.log"; exit 1; }
- grep '^guarded' "$out/$model-link.log"
+ if [[ "${DNBOX_CONTROL_BUILD_ONLY:-0}" == 1 ]]; then
+  grep '^compiled-controls' "$out/$model-link.log"
+ else
+  grep '^guarded' "$out/$model-link.log"
+ fi
 done

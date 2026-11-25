@@ -1,6 +1,29 @@
 --- a/firmware/src/app/engine_arp.inc
 +++ b/firmware/src/app/engine_arp.inc
-@@ -21,23 +21,23 @@
+@@ -17,27 +17,46 @@
+     const original_runtime_part *p = &original_bass[v];
+     return p->status == ORIGINAL_RUNTIME_OK &&
+            (p->kind == ORIGINAL_SOUND_JUNO || p->kind == ORIGINAL_SOUND_SYNTHONE);
+ }
++#if X0X_SJ6_ARP_ADAPTER_NATIVE
++static inline int sj6_typed_arp_owner(const sound_t *sound,unsigned v)
++{ return original_bass[v].kind==ORIGINAL_SOUND_JUNO && live137(sound,v); }
++static void sj6_arp_adapt(engine_arp_cfg *c,int owner)
++{
++    if(!owner) {
++        c->seq_on=0;
++        if(c->division>ARP_SAGA_DIVISIONS)c->division=0;
++        return;
++    }
++    if(c->mode==ARP_SEQ) {
++        /* Compatibility: prior DnBOX used a coupled SEQ/ARP-ON mode. */
++        if(!c->seq_on)c->seq_on=c->on;
++        unsigned t=c->src_type;
++        c->mode=(uint8_t)(t<ARP_SEQ?t:t<7u?t+1u:ARP_UP);
++    }
++    if(c->seq_on)c->on=0;
++}
++#endif
  static void arp_store(unsigned v, const engine_arp_cfg *c)
  {
      if (!mot_base_snd) return;
@@ -29,7 +52,7 @@
  #endif
  #if (defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE) || X0X_SJ6_NATIVE_RANDOM2
          /* Keep the dormant deterministic mode and ordinary wire unchanged. */
-@@ -47,22 +47,47 @@
+@@ -47,22 +66,64 @@
      }
  #endif
      engine_arp_block_encode(c,block);
@@ -39,8 +62,13 @@
 + * Oscillator envelope words and non-SEQ ARP settings are not part of LOCK. */
 +static void sj6_seq_keep(engine_arp_cfg *dst,const engine_arp_cfg *old)
 +{
++#if X0X_SJ6_ARP_ADAPTER_NATIVE
++    dst->seq_on=old->seq_on;
++    if(dst->seq_on)dst->on=0;
++#else
 +    if (old->mode==ARP_SEQ) {dst->on=old->on;dst->mode=ARP_SEQ;}
 +    else if(dst->mode==ARP_SEQ) {dst->on=old->on;dst->mode=old->mode;}
++#endif
 +    dst->division=old->division;dst->length=old->length;dst->gate=old->gate;
 +    dst->on_mask=old->on_mask;dst->oct_mask=old->oct_mask;
 +    __builtin_memcpy(dst->offset,old->offset,sizeof dst->offset);
@@ -64,14 +92,26 @@
 +        c.mode=sj6_random_decode(read137(sound,v)[SJ6_ARP_RANDOM_BYTE],c.mode);
      original_bass[v].arp.prm.saga_random_seed=v ? UINT32_C(0x243f6a88) : UINT32_C(0x85a308d3);
 +#endif
++#if X0X_SJ6_ARP_ADAPTER_NATIVE
++    sj6_arp_adapt(&c,sj6_typed_arp_owner(sound,(unsigned)v));
++#endif
 +#if X0X_SJ6_SEQ_SETTINGS_NATIVE
 +    /* A built-in Init has no authored arp bank. Its unlocked sequence is
 +     * the existing Init grid, without changing live ARP in another mode. */
-+    if (preset_change && c.mode==ARP_SEQ && live137(sound,(unsigned)v) &&
++    if (preset_change &&
++#if X0X_SJ6_ARP_ADAPTER_NATIVE
++        c.seq_on &&
++#else
++        c.mode==ARP_SEQ &&
++#endif
++        live137(sound,(unsigned)v) &&
 +        !sj6_seq_settings_read(sound,(unsigned)v)[1]) {
 +        engine_arp_cfg init;
 +        engine_arp_cfg_default(&init);
 +        c.on=0;c.gate=init.gate;c.division=init.division;c.length=init.length;
++#if X0X_SJ6_ARP_ADAPTER_NATIVE
++        c.seq_on=0;
++#endif
 +        c.on_mask=init.on_mask;c.oct_mask=init.oct_mask;
 +        __builtin_memcpy(c.offset,init.offset,sizeof c.offset);
 +        arp_store((unsigned)v,&c);
@@ -80,7 +120,7 @@
      if (preset_change && c.amp2_mask) { c.amp2_mask = 0; arp_store((unsigned)v, &c); }
      arp_pending_flag[v] = 0;
      (void)original_runtime_arp_config(&original_bass[v], &c);
-@@ -117,10 +142,22 @@
+@@ -117,10 +178,22 @@
          if (!arp_clk_on) { arp_clk_beats = 0; start = 1; }
          else if (ph + per / 2u < arp_clk_prev) ++arp_clk_beats;      /* beat wrap (a tempo rescale is smaller) */
          arp_clk_on = 1; arp_clk_prev = ph;
@@ -105,8 +145,34 @@
  static void arp_boundary(void)
  {
      for (unsigned v = 0; v < NBASS; ++v) {
-@@ -189,12 +226,12 @@
+@@ -163,11 +236,18 @@
+ int engine_arp_settings_read(unsigned v, engine_arp_settings *out)
+ {
+     engine_arp_cfg c; uint32_t rev;
+     if (!out || !arp_snapshot(v, &c, &rev)) return 0;
+-    *out = (engine_arp_settings){rev, c.on, c.mode, c.range, c.speed, c.length, c.interval, 0, c.gate
++    unsigned speed=c.speed;
++#if X0X_SJ6_ARP_ADAPTER_NATIVE
++    if(sj6_typed_arp_owner(mot_base_snd,v))speed=engine_sj6_rate_detent(&c);
++#endif
++    *out = (engine_arp_settings){rev, c.on, c.mode, c.range, speed, c.length, c.interval, 0, c.gate
+ #if X0X_SUPERJ6_BUILTIN_INIT
+                                  , c.division
++#if X0X_SJ6_ARP_ADAPTER_NATIVE
++                                 , c.seq_on
++#endif
+ #endif
+     };
+     return 1;
+ }
+@@ -186,31 +266,48 @@
+     static const uint8_t lo[ARP_NF] = {0, 0, 1, 0, 1, 0, 1};
+     static const uint8_t hi[ARP_NF] = {1, ARP_NMODES - 1, 4, 9, 16, 12, 100
+ #if X0X_SUPERJ6_BUILTIN_INIT
                                        , ARP_SAGA_DIVISIONS
++#if X0X_SJ6_ARP_ADAPTER_NATIVE
++                                      , 1
++#endif
  #endif
      };
      if (v >= NBASS) return S1_EDIT_REJECTED;
@@ -118,12 +184,29 @@
 +#if !((defined(X0X_SJ6_ZERO_GATE_PROBE) && X0X_SJ6_ZERO_GATE_PROBE) || X0X_SJ6_NATIVE_ZERO_GATE)
      const int zero_gate=0;
  #endif
-     if (step == 0xFFu ? (field >= ARP_NF || (!zero_gate && value < lo[field]) || value > hi[field])
+-    if (step == 0xFFu ? (field >= ARP_NF || (!zero_gate && value < lo[field]) || value > hi[field])
++#if X0X_SJ6_ARP_ADAPTER_NATIVE
++    const int native_speed=step==0xFFu && field==ARP_F_SPEED;
++    const int above_top=native_speed ? value>12 : field<ARP_NF && value>hi[field];
++#else
++    const int above_top=field<ARP_NF && value>hi[field];
++#endif
++    if (step == 0xFFu ? (field >= ARP_NF || (!zero_gate && value < lo[field]) || above_top)
                        : (step >= ARP_STEPS || field > ARP_S_OCT ||
-@@ -204,13 +241,13 @@
+                          (field == ARP_S_OFFSET ? (value < -24 || value > 24) : (value < 0 || value > 1))))
+         return S1_EDIT_REJECTED;
+     uint32_t lock = plat_cq_lock();
      int status = S1_EDIT_REJECTED;
      uint32_t request = bass_request[v];
      if (arp_kind_ok(v) && revision == arp_revision[v]
++#if X0X_SJ6_ARP_ADAPTER_NATIVE
++        && !(step==0xFFu && (field==ARP_F_SEQ_ENABLE || (native_speed && value>9)) &&
++             !sj6_typed_arp_owner(mot_base_snd,v))
++        && !(step==0xFFu && sj6_typed_arp_owner(mot_base_snd,v) &&
++             ((field==ARP_F_MODE && value==ARP_SEQ) ||
++              ((field==ARP_F_ON || field==ARP_F_DIVISION || field==ARP_F_SPEED ||
++                field==ARP_F_SEQ_ENABLE) && !s1_typed_tuple_editable())))
++#endif
  #if (defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE) || X0X_SJ6_NATIVE_RANDOM2
 -        && !(step==0xFFu && field==ARP_F_MODE && value==ARP_SAGA_RANDOM2 &&
 +        && !(step==0xFFu && field==ARP_F_MODE && sj6_random_encode(value) &&
@@ -136,7 +219,43 @@
          && !(step==0xFFu && field==ARP_F_GATE && original_bass[v].kind==ORIGINAL_SOUND_JUNO &&
               live137(mot_base_snd,v) && !s1_typed_tuple_editable())
  #endif
-@@ -269,47 +306,81 @@
+@@ -240,15 +337,30 @@
+             } else {
+                 uint8_t *f[ARP_NF] = {&c->on, &c->mode, &c->range, &c->speed, &c->length, &c->interval, &c->gate
+ #if X0X_SUPERJ6_BUILTIN_INIT
+                                      , &c->division
++#if X0X_SJ6_ARP_ADAPTER_NATIVE
++                                     , &c->seq_on
++#endif
+ #endif
+                 };
+-                *f[field] = (uint8_t)value;
+-#if X0X_SUPERJ6_BUILTIN_INIT
+-                if (field == ARP_F_SPEED && original_bass[v].kind == ORIGINAL_SOUND_JUNO)
+-                    c->division = 0;
+-#endif
++#if X0X_SJ6_ARP_ADAPTER_NATIVE
++                if(sj6_typed_arp_owner(mot_base_snd,v)) {
++                    if(field==ARP_F_SPEED)c->division=(uint8_t)(SJ6_RATE_FIRST+value);
++                    else {
++                        *f[field]=(uint8_t)value;
++                        if(value && field==ARP_F_ON)c->seq_on=0;
++                        if(value && field==ARP_F_SEQ_ENABLE)c->on=0;
++                    }
++                } else
++#endif
++                {
++                    *f[field] = (uint8_t)value;
++#if X0X_SUPERJ6_BUILTIN_INIT
++                    if (field == ARP_F_SPEED && original_bass[v].kind == ORIGINAL_SOUND_JUNO)
++                        c->division = 0;
++#endif
++                }
+             }
+             arp_pending_flag[v] = 1;
+             status = S1_EDIT_QUEUED;
+         }
+@@ -269,47 +381,84 @@
      *step = s;
      *fired_age_ms = frames / 44u;    /* 44.1 kHz; display only */
      return 1;
@@ -214,6 +333,9 @@
  #if (defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE) || X0X_SJ6_NATIVE_RANDOM2
 -        if(read137(mot_base_snd,v)[SJ6_ARP_RANDOM_BYTE]==2u)c.mode=ARP_SAGA_RANDOM2;
 +        c.mode=sj6_random_decode(read137(mot_base_snd,v)[SJ6_ARP_RANDOM_BYTE],c.mode);
++#endif
++#if X0X_SJ6_ARP_ADAPTER_NATIVE
++        sj6_arp_adapt(&c,1);
  #endif
          arp_pending_flag[v]=0;
 -        (void)original_runtime_arp_config(&original_bass[v],&c);
@@ -226,7 +348,7 @@
      }
  }
  #endif
-@@ -317,26 +388,26 @@
+@@ -317,26 +466,33 @@
  {
      engine_arp_cfg c;
      if (v >= NBASS || !mot_base_snd) return S1_EDIT_REJECTED;
@@ -244,6 +366,9 @@
 +    if(live137(mot_base_snd,v) && original_bass[v].kind==ORIGINAL_SOUND_JUNO)
 +        c.mode=sj6_random_decode(read137(mot_base_snd,v)[SJ6_ARP_RANDOM_BYTE],c.mode);
 +#endif
++#if X0X_SJ6_ARP_ADAPTER_NATIVE
++    sj6_arp_adapt(&c,sj6_typed_arp_owner(mot_base_snd,v));
++#endif
 +    return arp_queue(v, &c, 0);
  }
  int engine_arp_preset(unsigned v, const engine_arp_cfg *c)
@@ -254,6 +379,10 @@
      engine_arp_block_encode(c, b);                 /* normalise domains through the codec */
      (void)engine_arp_block_decode(b, &n);
 -    return arp_queue(v, &n);
++#if X0X_SJ6_ARP_ADAPTER_NATIVE
++    if(v>=NBASS)return S1_EDIT_REJECTED;
++    sj6_arp_adapt(&n,sj6_typed_arp_owner(mot_base_snd,v));
++#endif
 +    return arp_queue(v, &n, 1);
  }
  #else

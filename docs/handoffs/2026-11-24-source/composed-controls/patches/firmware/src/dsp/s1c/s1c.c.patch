@@ -8,7 +8,7 @@
  #endif
  /* Compact Synth One-style engine, written from scratch for DnBOX from the instrument's documented
   * behaviour (control laws, envelope, voice allocation, arpeggiator, FX order). Judged by A/B only.
-@@ -95,13 +95,48 @@
+@@ -95,13 +95,47 @@
  #else
  #define P(i) (s->c[i])
  #endif
@@ -16,7 +16,7 @@
 +#if X0X_S1_SCALE_NATIVE
 +#include "s1c_scales.inc"
 +unsigned s1c_scale_npo(unsigned index){return index<S1C_SCALE_COUNT ? s1_scale[index].npo : 12u;}
-+const char *s1c_scale_name(unsigned index){return index<S1C_SCALE_COUNT ? s1_scale[index].name : s1_scale[0].name;}
++const char *s1c_scale_name(unsigned index){return s1_scale_names+s1_scale[index<S1C_SCALE_COUNT?index:0u].name;}
 +static float s1_scale_hz(const s1c *s,unsigned index,int note,float a4)
 +{
 +#if X0X_S1_USER_SCALE
@@ -30,16 +30,15 @@
 +    int octave=steps/npo, degree=steps%npo;
 +    if(degree<0){degree+=npo;--octave;}
 +    union {uint32_t u;float v;} q={.u=(uint32_t)(octave+127)<<23};
-+    float ratio;
++    const uint8_t *p;
 +#if X0X_S1_USER_SCALE
-+    if(user){
-+        const uint8_t *p=s->user_scale+3u*(unsigned)degree;
-+        union {uint32_t u;float v;} normalized={
-+            .u=UINT32_C(0x3f800000)|((uint32_t)p[2]<<16)|((uint32_t)p[1]<<8)|p[0]};
-+        ratio=normalized.v;
-+    }else
++    if(user)p=s->user_scale+3u*(unsigned)degree;
++    else
 +#endif
-+        ratio=s1_scale_ratio[s1_scale[index].offset+(unsigned)degree];
++        p=s1_scale_ratio+3u*(s1_scale[index].offset+(unsigned)degree);
++    union {uint32_t u;float v;} normalized={
++        .u=UINT32_C(0x3f800000)|((uint32_t)p[2]<<16)|((uint32_t)p[1]<<8)|p[0]};
++    const float ratio=normalized.v;
 +    float hz=ratio*q.v*(a4*0.5946035575013605f);
 +    return hz<22050.f ? hz : 22050.f;
 +}
@@ -57,7 +56,19 @@
  }
  static float lfo01(const s1c *s, float sel)
  {
-@@ -447,13 +482,19 @@
+@@ -145,9 +179,11 @@
+     for (unsigned i = 0; i < S1C_VOICES; i++) voice_clear(&s->v[i]);
+     s->nlast = 0; s->prev_held = 0;
+ #if !S1C_BUSFX
+ #if S1C_EXT
++#if !X0X_S1_DELAY_HISTORY_NATIVE
+     s->ddec = 0;     /* re-partition (clears the lines) */
++#endif
+ #else
+     for (unsigned i = 0; i < 4; i++) { memset(s->dl[i].buf, 0, sizeof s->dbuf[0]); s->dl[i].prev = 0.0f; }
+ #endif
+ #endif
+@@ -447,13 +483,19 @@
          const float kcut = P(CUT) * lfo10(s, P(LCUT)), kem = P(FENV) * lfo10(s, P(LFENV));
          float cut = clampf(kcut - kcut * kem * (1.0f - v->fenv), 64.0f, 22050.0f);
          if (ft == 0) {
@@ -77,7 +88,7 @@
          } else {
              float cc = tanf(3.14159265f * cut / s->sr), a1 = 1.0f / (1.0f + 1.41421356f * cc + cc * cc);
              v->ka1 = a1; v->ka4 = 2.0f * (cc * cc - 1.0f) * a1; v->ka5 = (1.0f - 1.41421356f * cc + cc * cc) * a1;
-@@ -477,8 +518,32 @@
+@@ -477,8 +519,32 @@
          y += ((float)(int32_t)s->rnd * (1.0f / 2147483648.0f)) * v->vamp * P(NOISEV) * lfo10(s, P(LNOISE));
      }
      y *= v->amp * v->kkey;
@@ -110,17 +121,19 @@
      else if (ft == 2) fo = hp2(v->bq, y, v->ka1, v->ka4, v->ka5);
      else {
          float t = y - v->ka4 * v->bq[0] - v->ka5 * v->bq[1];
-@@ -750,15 +815,46 @@
+@@ -750,15 +816,55 @@
  {
  #if !S1C_BUSFX
      if (manual && !s->delay_history) {
          s->delay_history = 1;
 -        if (s->t[DLON] != 1.f) s->ddec = 0; /* expand legacy disabled/dummy ring once */
++#if !X0X_S1_DELAY_HISTORY_NATIVE
 +        if (s->t[DLON] != 1.f
 +#if X0X_S1_DELAY_TIME_NATIVE
 +            && !s->delay_time_reserve
 +#endif
 +           ) s->ddec = 0; /* expand legacy disabled/dummy ring once */
++#endif
      }
  #else
      (void)manual;
@@ -130,7 +143,14 @@
 +#if X0X_S1_DELAY_TIME_NATIVE
 +int s1c_delay_time_fit(s1c *s,float t,int cold_apply)
 +{
-+#if !S1C_BUSFX && S1C_EXT
++#if X0X_S1_DELAY_HISTORY_NATIVE
++    /* Validate the bounded arena, never the history's current time span.
++     * Growth is owned by render's block boundary, never a destructive
++     * partition from a UI or BPM writer. */
++    if(!s->pool || s->pool_bytes<60 || !(t>0.f && t<=2.5f))return 0;
++    if(cold_apply)s->delay_history=1;
++    return 1;
++#elif !S1C_BUSFX && S1C_EXT
 +    if(s->ddec<=0 || (!s->delay_history && s->t[DLON]<=0.f)) {
 +        /* Cold/inaudible: a requested time can repartition the existing
 +         * arena. Check the conservative stereo 2T+2T+T shape first. Do
@@ -158,7 +178,84 @@
  {
      int i;
  #if !S1C_BUSFX
-@@ -834,8 +930,11 @@
+@@ -823,8 +929,76 @@
+ #define ENV_GET(q, i) h16_get(s->env[(q) * s->e_cap + (i)])
+ #ifndef S1C_EXT_EB
+ #define S1C_EXT_EB 16
+ #endif
++#if X0X_S1_DELAY_HISTORY_NATIVE
++#if !S1C_DL_H16 || S1C_HFR || S1C_DLN!=5 || S1C_BUSFX || !S1C_EXT
++#error "Native elastic history needs the three independent external half-float delay lines"
++#endif
++/* Fixed 2T+2T+T stereo partition. Variable spacing controls coverage,
++ * not the write capacity, so no event can reallocate or clear the ring. */
++static int dly_needed(const s1c *s,float time)
++{
++    const int usable=s->dl[3].len-2;
++    float exact=time*s->sr/(float)usable;
++    int whole=(int)exact;
++    return whole<1 ? 1 : whole+(exact>(float)whole);
++}
++static void dly_partition(s1c *s)
++{
++    const int short_line=(s->pool_bytes/2)/5;
++    uint16_t *pool=(uint16_t *)(void *)s->pool;
++    const unsigned active[3]={0,1,3};
++    memset(s->pool,0,(size_t)s->pool_bytes);
++    memset(s->dl,0,sizeof s->dl);
++    for(unsigned k=0;k<3;k++){
++        s1c_dline *d=&s->dl[active[k]];
++        d->buf=(int16_t *)(void *)pool;d->len=(k<2?2:1)*short_line;
++        pool+=d->len;
++    }
++    s->dmono=0; /* AutoPan/Phaser can diverge at any point during playback. */
++    s->ddec=dly_needed(s,s->t[DLT]>P(DLT)?s->t[DLT]:P(DLT));
++    s->dk=0;s->da[0]=s->da[1]=s->d0[0]=s->d0[1]=s->d1[0]=s->d1[1]=0.f;
++}
++static void delay_reverse(uint16_t *a,int i,int j)
++{
++    while(i<j){uint16_t x=a[i];a[i++]=a[j];a[j--]=x;}
++}
++static void dly_regrid(s1c *s)
++{
++    const int old=s->ddec;
++    const int need=dly_needed(s,s->t[DLT]>P(DLT)?s->t[DLT]:P(DLT));
++    if(need<=old)return;
++    unsigned stride=1;
++    while((unsigned)old*stride<(unsigned)need)stride<<=1;
++    const unsigned active[3]={0,1,3};
++    for(unsigned k=0;k<3;k++){
++        s1c_dline *d=&s->dl[active[k]];
++        uint16_t *b=(uint16_t *)(void *)d->buf;
++        const int n=d->len,w=d->w;
++        if(w){
++            delay_reverse(b,0,w-1);delay_reverse(b,w,n-1);delay_reverse(b,0,n-1);
++        } /* Now oldest first; newest at n-1. */
++        int from=n,to=n;
++        /* Read complete chronological groups, newest first. Reading all
++         * values in each group before writing the group end makes aliasing
++         * safe. Older unavailable time is silence, not wrapped repeats. */
++        while(from>0){
++            float sum=0.f;
++            for(unsigned j=0;j<stride && from>0;j++)sum+=h16_get(b[--from]);
++            b[--to]=h16_put(sum/(float)stride);
++        }
++        if(to)memset(b,0,(size_t)to*sizeof *b);
++        d->w=0;
++    }
++    /* Keep the outgoing interpolant continuous at the rate step; preserve
++     * both input accumulators and the three feedback values. */
++    const float phase=(float)s->dk/(float)old;
++    for(unsigned k=0;k<2;k++)
++        s->d0[k]=s->d1[k]=s->d0[k]+(s->d1[k]-s->d0[k])*phase;
++    s->ddec=(int)((unsigned)old*stride);
++}
++#else
+ /* Carve the delay lines and HF envelope rings from the pool: the lowest decimation whose exact line
+  * lengths (2T, 2T unless mono, T; +3, block-aligned) and rings fit. Clears every line. */
+ static void dly_partition(s1c *s)
+ {
+@@ -834,8 +1008,11 @@
      int fmt = s->dfmt, nl, dd, i;
  #endif
      float dt = s->t[DLT] > P(DLT) ? s->t[DLT] : P(DLT);
@@ -170,7 +267,34 @@
      nl = s->dmono ? 2 : 3;
      for (dd = 1; dd < 4096; dd++) {
          float T = Tt / (float)dd;
-@@ -929,20 +1028,22 @@
+@@ -869,8 +1046,9 @@
+     s->dd_set = 0; s->e_w = s->e_bn = 0;
+     for (i = 0; i < 3; i++) s->e_bacc[i] = s->e_out[i] = 0.0f;
+ #endif
+ }
++#endif
+ void s1c_attach(s1c *s, void *rvb, uint16_t *wbuf, uint8_t *pool, int pool_bytes)
+ {
+     s1u_rvb_attach(&s->rv, rvb);
+     s->wid.buf = wbuf; s->pool = pool; s->pool_bytes = pool_bytes & ~3;
+@@ -884,8 +1062,16 @@
+ 
+ void s1c_render(s1c *s, float *outl, float *outr, unsigned n)
+ {
+     unsigned f, i;
++#if X0X_S1_DELAY_HISTORY_NATIVE
++    /* Existing boot/inactive paths may render before FX is attached. The
++     * real fixed-arena device binds before audio; keep a dry fallback. */
++    if(s->pool && s->pool_bytes>=60){
++        if(!s->ddec)dly_partition(s);
++        else dly_regrid(s);
++    }
++#endif
+     int mono = s->t[MONO] > 0.0f;
+     if (mono) { if (s->v[0].stage == 2 && s->v[0].amp < 0.01f) voice_clear(&s->v[0]); }
+     else for (i = 0; i < S1C_VOICES; i++) if (s->v[i].stage == 2 && s->v[i].amp < 0.01f) voice_clear(&s->v[i]);
+     float c2 = s->port_c2, c1 = 1.0f - c2;
+@@ -929,20 +1115,22 @@
          else for (i = 0; i < S1C_VOICES; i++) if (s->v[i].root != -1 && s->v[i].stage) y += voice_run(s, &s->v[i]);
  
          /* bitcrush (sample-and-hold), tremolo */
@@ -196,7 +320,18 @@
                  cr->idx += cr->inc;
                  cr->idx -= cr->n;
                  cr->n = 0.f;
-@@ -978,16 +1079,30 @@
+@@ -971,28 +1159,48 @@
+         /* phaser */
+         s1u_phaser_run(&s->ph, &L, &R, P(PHMIX), P(PHRATE), P(PHW), P(PHFB), s->sr);
+ #if !S1C_BUSFX
+         /* ping-pong delay with tracking low-pass on its input */
++#if X0X_S1_DELAY_HISTORY_NATIVE
++        float mL=L,mR=R;
++        if(s->ddec>0) {
++#endif
+         float dL = L, dR = R;
+         if (P(FTYPE) == 0.0f) {
+ #if S1C_FAST
              if ((f & 7) == 0) {
                  float pv = clampf(log2f(P(CUT)), 10.0f, 14.4284f);
                  float pc = 1.0f + (pv - 10.0f) * (1.0f / 4.4284f) * (P(DICT) - 1.0f);
@@ -229,3 +364,25 @@
          }
  #ifdef S1C_OPT_A
  #if S1C_EXT
++#if !X0X_S1_DELAY_HISTORY_NATIVE
+         if (s->ddec == 0) dly_partition(s);
++#endif
+         if (0) {
+ #else
+         if (s->ddec == 0) {   /* fit 6T line samples (8-bit) into what the reverb leaves of 158,400 B */
+ #endif
+@@ -1151,9 +1359,14 @@
+ #endif
+         }
+         float dm = P(DLMIX) * P(DLON);
+         if (dd > 1) { oL *= S1C_DL_WET; oRR *= S1C_DL_WET; }
++#if X0X_S1_DELAY_HISTORY_NATIVE
++        mL=(1.f-dm)*L+dm*oL; mR=(1.f-dm)*R+dm*oRR;
++        }
++#else
+         float mL = (1.0f - dm) * L + dm * oL, mR = (1.0f - dm) * R + dm * oRR;
++#endif
+         /* reverb: high-pass, pre-gain, input compressor, network, wet compressor */
+ #if S1C_FAST
+         if ((f & 7) == 0) {
+             float cc = tanf(3.14159265f * P(RVHP) / s->sr), a1 = 1.0f / (1.0f + 1.41421356f * cc + cc * cc);

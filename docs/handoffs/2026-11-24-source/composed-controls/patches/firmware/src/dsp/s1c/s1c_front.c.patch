@@ -1,6 +1,6 @@
 --- a/firmware/src/dsp/s1c/s1c_front.c
 +++ b/firmware/src/dsp/s1c/s1c_front.c
-@@ -115,8 +115,54 @@
+@@ -115,8 +115,58 @@
          if (d < diff) { diff = d; best = t; }
      }
      return best;
@@ -13,10 +13,14 @@
 +    const float lo=MINV(F_DLT),hi=MAXV(F_DLT);
 +    float t;
 +    if(!code) t=s1c_front_init(F_DLT);
-+    else if(code<=128u) t=lo+(hi-lo)*(float)(code-1u)*(1.f/127.f);
-+    else if(code<=143u) t=rate_time(s->t[F_ARPRATE],F_TWOBARS+code-129u);
++    else if(code<=128u) {
++        /* Original Effects knob goes to setDependentParameter, which
++         * applies the 0.4 dependent taper's reciprocal exponent. */
++        t=lo+(hi-lo)*powf((float)(code-1u)/127.f,2.5f);
++    } else if(code<=143u) t=rate_time(s->t[F_ARPRATE],F_TWOBARS+code-129u);
 +    else return 0;
-+    if(s->t[F_TSYNC]>0.f && code<=128u)
++    t=s1c_front_clamp(F_DLT,t);
++    if(s->t[F_TSYNC]>0.f)
 +        t=nearest_time(t,s->t[F_ARPRATE],lo,hi);
 +    if(!(t>=lo && t<=hi))return 0;
 +    *seconds=t;
@@ -38,7 +42,7 @@
 +    *seconds=t;
 +    if(s->t[F_TSYNC]<=0.f) {
 +        *max=127u;
-+        *pos=(unsigned)((s1c_front_clamp(F_DLT,t)-lo)*(127.f/(hi-lo))+.5f);
++        *pos=(unsigned)(127.f*powf((s1c_front_clamp(F_DLT,t)-lo)/(hi-lo),.4f)+.5f);
 +        return 0;
 +    }
 +    unsigned best=F_RATES-1;
@@ -47,7 +51,7 @@
 +        const float v=rate_time(s->t[F_ARPRATE],n),d=fabs_(v-t);
 +        if(v>=lo && v<=hi && d<error){best=n;error=d;}
 +    }
-+    *pos=best-F_TWOBARS;*max=F_RATES-1-F_TWOBARS;
++    *pos=F_RATES-1u-best;*max=F_RATES-1u-F_TWOBARS;
 +    return error<1e-5f ? 1 : -1;
 +}
 +#endif
@@ -55,7 +59,7 @@
  {
      float best = rate_factor(F_RATES - 1), diff = 1e9f;
      for (int i = F_RATES - 1; i >= 0; i--) {
-@@ -176,9 +222,16 @@
+@@ -176,9 +226,21 @@
      if (id >= 150 || !(x == x) || x > 3.4e38f || x < -3.4e38f) return 0;
      if (id == F_TSYNC || id == F_ARPRATE) {
          put(s, id, x);
@@ -64,8 +68,13 @@
 +        rate(s, F_PANF, s->t[F_PANF]);
 +#if X0X_S1_DELAY_TIME_NATIVE
 +        if(s->delay_time_code) {
-+            if(s->t[F_TSYNC]>0.f)
-+                (void)s1c_front_delay_apply(s,s->delay_time_code,1);
++            if(s->t[F_TSYNC]>0.f) {
++                /* Original tempo changes re-snap current physical seconds
++                 * against the new grid, not against the old knob detent. */
++                const float lo=MINV(F_DLT),hi=MAXV(F_DLT);
++                const float target=nearest_time(s1c_front_clamp(F_DLT,s->t[F_DLT]),s->t[F_ARPRATE],lo,hi);
++                if(target>=lo && target<=hi && s1c_delay_time_fit(s,target,1))s1c_set(s,F_DLT,target);
++            }
 +        } else
 +#endif
 +        rate(s, F_DLT, s->t[F_DLT]);
