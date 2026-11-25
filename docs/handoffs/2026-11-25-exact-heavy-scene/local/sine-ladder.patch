@@ -1,0 +1,52 @@
+--- a/firmware/src/dsp/s1c/s1u.c
++++ b/firmware/src/dsp/s1c/s1u.c
+@@ -62,18 +62,15 @@
+     0.980785251f, 0.985277653f, 0.989176512f, 0.992479563f, 0.99518472f, 0.997290432f, 0.99879545f, 0.999698818f,
+     1.0f
+ };
+-static float sin_at(uint32_t i)                 /* sin(i * 2 pi / 256) for i in 0..256, from a quarter wave */
+-{
+-    uint32_t k = i & 127u;
+-    float v = sin_q[k <= 64u ? k : 128u - k];
+-    return (i & 128u) ? -v : v;
+-}
+ float s1u_sin(uint32_t ph)
+ {
+-    uint32_t i = ph >> 24;
+-    float f = (float)(ph & 0xFFFFFFu) * (1.0f / 16777216.0f);
+-    float a = sin_at(i);
+-    return a + f * (sin_at(i + 1u) - a);
++    const uint32_t i=ph>>24, q=i&63u;
++    const float *p=sin_q+((i&64u)?64u-q:q);
++    float a=p[0], b=p[(i&64u)?-1:1];
++    if(i&128u)a=-a;
++    if((i+1u)&128u)b=-b;
++    const float f=(float)(ph&0xFFFFFFu)*(1.0f/16777216.0f);
++    return a+f*(b-a);
+ }
+ 
+ /* ---- LFO ---- */
+@@ -94,14 +91,15 @@
+ }
+ float s1u_ladder(float *h, float in, float A, float fb)
+ {
+-    float o = 0.0f;
+-    for (int k = 0; k < 2; k++) {
+-        float tmp = h[3], v = in - fb * 0.5f * (h[3] + h[4]);
+-        float z1 = v + A * (h[0] - v), z2 = z1 + A * (h[1] - z1), z3 = z2 + A * (h[2] - z2), z4 = z3 + A * (h[3] - z3);
+-        h[0] = z1; h[1] = z2; h[2] = z3; h[3] = z4; h[4] = tmp;
+-        o += z4;
+-    }
+-    return 0.5f * o;
++    const float last = h[3], feedback=fb*0.5f;
++    float v = in-feedback*(last+h[4]);
++    const float z1=v+A*(h[0]-v), z2=z1+A*(h[1]-z1);
++    const float z3=z2+A*(h[2]-z2), z4=z3+A*(last-z3);
++    v = in-feedback*(z4+last);
++    const float w1=v+A*(z1-v), w2=w1+A*(z2-w1);
++    const float w3=w2+A*(z3-w2), w4=w3+A*(z4-w3);
++    h[0]=w1; h[1]=w2; h[2]=w3; h[3]=w4; h[4]=z4;
++    return 0.5f*((0.0f+z4)+w4);
+ }
+ float s1u_hp2(float *z, float x, float a1, float a4, float a5)
+ {
