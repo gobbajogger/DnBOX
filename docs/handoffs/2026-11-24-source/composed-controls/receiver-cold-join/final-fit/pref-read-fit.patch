@@ -1,0 +1,272 @@
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -788,8 +788,143 @@
+     {"LENGTH", NSONG, 0, 0},
+ };
+ 
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++/* Keep a single original live getter shared by presentation and edit admission.
++ * A missing lookup entry remains a legacy/unsupported kind. */
++#if X0X_SJ6_VINTAGE_NATIVE && X0X_SJ6_ALT3_NATIVE
++static int typed_read_sj6limiter(pref_t r){return sj6_native_limiter_get(r.b,r.c);}
++#endif
++#if X0X_SJ6_MONO32_PROBE
++static int typed_read_sj6mono32(pref_t r){return engine_sj6_mono32_get(r.b,r.c);}
++#endif
++#if 1
++static int typed_read_s1phaser(pref_t r){return s1_phaser_get(r.b,r.c);}
++#endif
++#if 1
++static int typed_read_s1cmp(pref_t r){return s1_cmp_position(r.b,r.c);}
++#endif
++#if 1
++static int typed_read_s1cwg(pref_t r){return s1_typed_cwg_position(r.b);}
++#endif
++#if X0X_SJ6_NATIVE_ROOM
++static int typed_read_sj6room(pref_t r){return sj6_native_room_get(r.b,r.c);}
++#endif
++#if X0X_SJ6_NATIVE_ROOM
++static int typed_read_sj6crush(pref_t r){return sj6_crush_get(r.b,r.c);}
++#endif
++#if X0X_SJ6_OTA_NATIVE
++static int typed_read_sj6ota(pref_t r){return sj6_ota_get(r.b);}
++#endif
++#if X0X_SJ6_NATIVE_UNISON
++static int typed_read_sj6unison(pref_t r){return engine_sj6_unison_get(r.b,r.c);}
++#endif
++#if X0X_SJ6_NATIVE_J60
++static int typed_read_sj6j60(pref_t r){return engine_sj6_j60_get(r.b,r.c);}
++#endif
++#if X0X_SJ6_PITCH_ENV_NATIVE
++static int typed_read_sj6pitch(pref_t r){return sj6_pitch_get(r.b,r.c);}
++#endif
++#if X0X_SJ6_VCF_PORT
++static int typed_read_sj6filter_extra(pref_t r){return sj6_filter_control_get(r.b,r.c);}
++#endif
++#if X0X_SJ6_AUX_LFO_NATIVE
++static int typed_read_sj6aux(pref_t r){return sj6_aux_get(r.b,r.c);}
++#endif
++typedef int (*typed_read_fn)(pref_t);
++static typed_read_fn const typed_readers[]={
++#if X0X_SJ6_VINTAGE_NATIVE && X0X_SJ6_ALT3_NATIVE
++    [0]=typed_read_sj6limiter,
++#endif
++#if X0X_SJ6_MONO32_PROBE
++    [1]=typed_read_sj6mono32,
++#endif
++#if 1
++    [2]=typed_read_s1phaser,
++#endif
++#if 1
++    [3]=typed_read_s1cmp,
++#endif
++#if 1
++    [4]=typed_read_s1cwg,
++#endif
++#if X0X_SJ6_NATIVE_ROOM
++    [5]=typed_read_sj6room,
++#endif
++#if X0X_SJ6_NATIVE_ROOM
++    [6]=typed_read_sj6crush,
++#endif
++#if X0X_SJ6_OTA_NATIVE
++    [7]=typed_read_sj6ota,
++#endif
++#if X0X_SJ6_NATIVE_UNISON
++    [8]=typed_read_sj6unison,
++#endif
++#if X0X_SJ6_NATIVE_J60
++    [9]=typed_read_sj6j60,
++#endif
++#if X0X_SJ6_PITCH_ENV_NATIVE
++    [10]=typed_read_sj6pitch,
++#endif
++#if X0X_SJ6_VCF_PORT
++    [11]=typed_read_sj6filter_extra,
++#endif
++#if X0X_SJ6_AUX_LFO_NATIVE
++    [12]=typed_read_sj6aux,
++#endif
++};
++static const uint8_t typed_read_codes[]={
++#if X0X_SJ6_VINTAGE_NATIVE && X0X_SJ6_ALT3_NATIVE
++    [R_SJ6LIMITER-R_NOTELOCK]=1u,
++#endif
++#if X0X_SJ6_MONO32_PROBE
++    [R_SJ6MONO32-R_NOTELOCK]=2u,
++#endif
++#if 1
++    [R_S1PHASER-R_NOTELOCK]=3u,
++#endif
++#if 1
++    [R_S1CMP-R_NOTELOCK]=4u,
++#endif
++#if 1
++    [R_S1CWG-R_NOTELOCK]=5u,
++#endif
++#if X0X_SJ6_NATIVE_ROOM
++    [R_SJ6ROOM-R_NOTELOCK]=134u,
++#endif
++#if X0X_SJ6_NATIVE_ROOM
++    [R_SJ6CRUSH-R_NOTELOCK]=135u,
++#endif
++#if X0X_SJ6_OTA_NATIVE
++    [R_SJ6OTA-R_NOTELOCK]=136u,
++#endif
++#if X0X_SJ6_NATIVE_UNISON
++    [R_SJ6UNISON-R_NOTELOCK]=137u,
++#endif
++#if X0X_SJ6_NATIVE_J60
++    [R_SJ6J60-R_NOTELOCK]=138u,
++#endif
++#if X0X_SJ6_PITCH_ENV_NATIVE
++    [R_SJ6PITCH-R_NOTELOCK]=139u,
++#endif
++#if X0X_SJ6_VCF_PORT
++    [R_SJ6FILTER_EXTRA-R_NOTELOCK]=140u,
++#endif
++#if X0X_SJ6_AUX_LFO_NATIVE
++    [R_SJ6AUX-R_NOTELOCK]=141u,
++#endif
++};
++static __attribute__((noinline)) unsigned typed_read_find(unsigned kind)
++{
++    unsigned i=kind-R_NOTELOCK;
++    return i<sizeof typed_read_codes?typed_read_codes[i]:0;
++}
++#endif
+ __attribute__((noinline)) static int pref_read_only(pref_t r)
+ {
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++    unsigned code=typed_read_find(r.kind);
++    if(code)return ((code&128u) && r.b>=NBASS) || typed_readers[(code&127u)-1u](r)<0 || !s1_typed_tuple_editable();
++#endif
+ #if X0X_S1_SCALE_NATIVE && DNBOX_TYPED_CONTROLS_NATIVE_TEST
+     if(r.kind==R_S1SCALE){
+         if(r.b>=NBASS || !s1_typed_tuple_editable())return 1;
+@@ -800,7 +935,6 @@
+     }
+ #endif
+ #if X0X_SJ6_VINTAGE_NATIVE && X0X_SJ6_ALT3_NATIVE && DNBOX_TYPED_CONTROLS_NATIVE_TEST
+-    if(r.kind==R_SJ6LIMITER)return sj6_native_limiter_get(r.b,r.c)<0 || !s1_typed_tuple_editable();
+ #endif
+ #if DNBOX_TYPED_CONTROLS_NATIVE_TEST
+     switch(r.kind){
+@@ -818,15 +952,11 @@
+                !live137(&proj.sound,r.b) || !s1_typed_tuple_editable();
+ #endif
+ #if X0X_SJ6_MONO32_PROBE
+-    case R_SJ6MONO32:return engine_sj6_mono32_get(r.b,r.c)<0 || !s1_typed_tuple_editable();
+ #endif
+     default:break;
+     }
+ #endif
+ #if DNBOX_TYPED_CONTROLS_NATIVE_TEST
+-    if(r.kind==R_S1PHASER)return s1_phaser_get(r.b,r.c)<0 || !s1_typed_tuple_editable();
+-    if(r.kind==R_S1CMP)return s1_cmp_position(r.b,r.c)<0 || !s1_typed_tuple_editable();
+-    if(r.kind==R_S1CWG)return s1_typed_cwg_position(r.b)<0 || !s1_typed_tuple_editable();
+ #if X0X_S1_AUTOPAN_PROBE
+     if(r.kind==R_S1PAN)return r.b>=NBASS || !live_s1_mod(&proj.sound,r.b) || !s1_typed_tuple_editable();
+ #endif
+@@ -878,28 +1008,20 @@
+ #endif
+ #if DNBOX_TYPED_CONTROLS_NATIVE_TEST
+ #if X0X_SJ6_NATIVE_ROOM
+-    if(r.kind==R_SJ6ROOM)return r.b>=NBASS || sj6_native_room_get(r.b,r.c)<0 || !s1_typed_tuple_editable();
+ #endif
+ #if X0X_SJ6_NATIVE_ROOM
+-    if(r.kind==R_SJ6CRUSH)return r.b>=NBASS || sj6_crush_get(r.b,r.c)<0 || !s1_typed_tuple_editable();
+ #endif
+ #if X0X_SJ6_OTA_NATIVE
+-    if(r.kind==R_SJ6OTA)return r.b>=NBASS || sj6_ota_get(r.b)<0 || !s1_typed_tuple_editable();
+ #endif
+ #if X0X_SJ6_NATIVE_UNISON
+-    if(r.kind==R_SJ6UNISON)return r.b>=NBASS || engine_sj6_unison_get(r.b,r.c)<0 || !s1_typed_tuple_editable();
+ #endif
+ #if X0X_SJ6_NATIVE_J60
+-    if(r.kind==R_SJ6J60)return r.b>=NBASS || engine_sj6_j60_get(r.b,r.c)<0 || !s1_typed_tuple_editable();
+ #endif
+ #if X0X_SJ6_PITCH_ENV_NATIVE
+-    if(r.kind==R_SJ6PITCH)return r.b>=NBASS || sj6_pitch_get(r.b,r.c)<0 || !s1_typed_tuple_editable();
+ #endif
+ #if X0X_SJ6_VCF_PORT
+-    if(r.kind==R_SJ6FILTER_EXTRA)return r.b>=NBASS || sj6_filter_control_get(r.b,r.c)<0 || !s1_typed_tuple_editable();
+ #endif
+ #if X0X_SJ6_AUX_LFO_NATIVE
+-    if(r.kind==R_SJ6AUX)return r.b>=NBASS || sj6_aux_get(r.b,r.c)<0 || !s1_typed_tuple_editable();
+ #endif
+ #endif
+ #if X0X_SUPERJ6_BUILTIN_INIT
+@@ -1347,6 +1469,17 @@
+     if (r.kind == R_BRKSLOT && ui.brk_choice_on && r.a == ui.brk_choice_bank &&
+         seq.ppat[PART_BRK] == ui.brk_choice_pat) return ui.brk_choice_slot;
+     pattern_t *p = pref_pattern(r);
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++    unsigned code=typed_read_find(r.kind);
++    if(code){
++        int x=typed_readers[(code&127u)-1u](r);
++        if(x<0)return r.kind==R_S1PHASER?(int)s1_phase_init(r.c):0;
++#if X0X_SJ6_AUX_LFO_NATIVE
++        if(r.kind==R_SJ6AUX && sj6_aux_field_route(r.c))return (int)sj6_aux_route_detent((unsigned)x);
++#endif
++        return x;
++    }
++#endif
+     switch (r.kind) {
+ #if X0X_ARP_HOOKS
+     case R_ARP: return arp_get(r.b, r.a);
+@@ -1424,7 +1557,6 @@
+     case R_S1SCALE:return proj.sound.v[T_MST][S1_SCALE_ROW+r.b][S1_SCALE_BYTE];
+ #endif
+ #if X0X_SJ6_VINTAGE_NATIVE && X0X_SJ6_ALT3_NATIVE && DNBOX_TYPED_CONTROLS_NATIVE_TEST
+-    case R_SJ6LIMITER: {int p=sj6_native_limiter_get(r.b,r.c);return p>=0?p:0;}
+ #endif
+ #if DNBOX_TYPED_CONTROLS_NATIVE_TEST
+ #if X0X_SJ6_BEND_TYPED_PROBE
+@@ -1438,7 +1570,6 @@
+     case R_SJ6MOD:return r.b<NBASS && live137(&proj.sound,r.b)?read137(&proj.sound,r.b)[SJ6_MOD_BYTE]:0;
+ #endif
+ #if X0X_SJ6_MONO32_PROBE
+-    case R_SJ6MONO32:{int p=engine_sj6_mono32_get(r.b,r.c);return p<0?0:p;}
+ #endif
+ #if X0X_SJ6_VELOCITY_SETTINGS
+     case R_SJ6INPUTVEL:{
+@@ -1449,9 +1580,6 @@
+ #endif
+ #endif
+ #if DNBOX_TYPED_CONTROLS_NATIVE_TEST
+-    case R_S1PHASER:{int x=s1_phaser_get(r.b,r.c);return x>=0?x:(int)s1_phase_init(r.c);}
+-    case R_S1CMP:{int x=s1_cmp_position(r.b,r.c);return x>=0?x:0;}
+-    case R_S1CWG:{int x=s1_typed_cwg_position(r.b);return x>=0?x:0;}
+ #if X0X_S1_AUTOPAN_PROBE
+     case R_S1PAN:{
+         unsigned max;
+@@ -1508,28 +1636,20 @@
+ #endif
+ #if DNBOX_TYPED_CONTROLS_NATIVE_TEST
+ #if X0X_SJ6_NATIVE_ROOM
+-    case R_SJ6ROOM:{int x=sj6_native_room_get(r.b,r.c);return x<0?0:x;}
+ #endif
+ #if X0X_SJ6_NATIVE_ROOM
+-    case R_SJ6CRUSH:{int x=sj6_crush_get(r.b,r.c);return x<0?0:x;}
+ #endif
+ #if X0X_SJ6_OTA_NATIVE
+-    case R_SJ6OTA:{int x=sj6_ota_get(r.b);return x<0?0:x;}
+ #endif
+ #if X0X_SJ6_NATIVE_UNISON
+-    case R_SJ6UNISON:{int x=engine_sj6_unison_get(r.b,r.c);return x<0?0:x;}
+ #endif
+ #if X0X_SJ6_NATIVE_J60
+-    case R_SJ6J60:{int x=engine_sj6_j60_get(r.b,r.c);return x<0?0:x;}
+ #endif
+ #if X0X_SJ6_PITCH_ENV_NATIVE
+-    case R_SJ6PITCH:{int x=sj6_pitch_get(r.b,r.c);return x<0?0:x;}
+ #endif
+ #if X0X_SJ6_VCF_PORT
+-    case R_SJ6FILTER_EXTRA:{int x=sj6_filter_control_get(r.b,r.c);return x<0?0:x;}
+ #endif
+ #if X0X_SJ6_AUX_LFO_NATIVE
+-    case R_SJ6AUX:{int x=sj6_aux_get(r.b,r.c);return x<0?0:sj6_aux_field_route(r.c)?(int)sj6_aux_route_detent((unsigned)x):x;}
+ #endif
+ #endif
+ #if X0X_SUPERJ6_BUILTIN_INIT
