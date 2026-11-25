@@ -1,0 +1,10 @@
+s1u
+  [38] .text.s1u_autopan_authored PROGBITS        00000000 000920 0000b4 00  AX  0   0  2
+s1c_front
+         U s1c_set
+  [27] .text.s1c_front_pan_stops PROGBITS        00000000 000652 000036 00  AX  0   0  2
+  [29] .text.s1c_front_pan_select PROGBITS        00000000 000688 000048 00  AX  0   0  2
+  [31] .text.s1c_front_pan_position PROGBITS        00000000 0006d0 00006a 00  AX  0   0  2
+  [33] .text.s1c_front_pan_sync PROGBITS        00000000 00073a 000010 00  AX  0   0  2
+  [39] .rodata.s1_pan_detent_hz PROGBITS        00000000 000a4c 000200 00   A  0   0  4
+  [40] .rodata.s1_pan_boundary_hz PROGBITS        00000000 000c4c 0001fc 00   A  0   0  4

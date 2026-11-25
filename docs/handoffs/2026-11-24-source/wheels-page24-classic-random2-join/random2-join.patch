@@ -1,0 +1,301 @@
+--- a/firmware/src/app/engine_arp.h
++++ b/firmware/src/app/engine_arp.h
+@@ -23,6 +23,9 @@
+ enum { ARP_UP, ARP_DOWN, ARP_UPDN, ARP_SEQ,
+ #if X0X_SUPERJ6_BUILTIN_INIT
+        ARP_UPDN_REPEAT,
++#if defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE
++       ARP_SAGA_RANDOM2,
++#endif
+ #endif
+        ARP_NMODES };      /* MODE knob order on screen */
+ #if X0X_SUPERJ6_BUILTIN_INIT
+--- a/firmware/src/app/engine_arp.inc
++++ b/firmware/src/app/engine_arp.inc
+@@ -22,14 +22,27 @@
+ {
+     if (!mot_base_snd) return;
+     uint8_t *block=ARP_SLOT((sound_t *)mot_base_snd,v);
+-#if defined(X0X_SJ6_ZERO_GATE_PROBE) && X0X_SJ6_ZERO_GATE_PROBE
++#if (defined(X0X_SJ6_ZERO_GATE_PROBE) && X0X_SJ6_ZERO_GATE_PROBE) || (defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE)
+     if (original_bass[v].kind==ORIGINAL_SOUND_JUNO && live137(mot_base_snd,v)) {
+-        const unsigned typed_zero = c->gate==0;
+-        uint8_t prior=block[5];
+-        if (block[0]!='A' || block[1]!=1u || prior<1u || prior>100u) prior=100;
++#if defined(X0X_SJ6_ZERO_GATE_PROBE) && X0X_SJ6_ZERO_GATE_PROBE
++        unsigned typed_zero=c->gate==0;
++        uint8_t prior_gate=block[5];
++        if (block[0]!='A' || block[1]!=1u || prior_gate<1u || prior_gate>100u) prior_gate=100;
+         slot137((sound_t *)mot_base_snd,v)[SJ6_ARP_ZERO_BYTE]=(uint8_t)typed_zero;
++#endif
++#if defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE
++        unsigned typed_random=c->mode==ARP_SAGA_RANDOM2;
++        const uint8_t prior_mode=block[0]=='A' && block[1]==1u ? block[2]&0x46u : 0u;
++        slot137((sound_t *)mot_base_snd,v)[SJ6_ARP_RANDOM_BYTE]=(uint8_t)(typed_random ? 2u : 0u);
++#endif
+         engine_arp_block_encode(c,block);
+-        if(typed_zero) block[5]=prior;  /* preserve prior positive value and the other engine's legacy readback */
++#if defined(X0X_SJ6_ZERO_GATE_PROBE) && X0X_SJ6_ZERO_GATE_PROBE
++        if(typed_zero) block[5]=prior_gate;
++#endif
++#if defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE
++        /* Keep the dormant deterministic mode and ordinary wire unchanged. */
++        if(typed_random) block[2]=(uint8_t)((block[2]&~0x46u)|prior_mode);
++#endif
+         return;
+     }
+ #endif
+@@ -45,6 +58,11 @@
+     if (original_bass[v].kind==ORIGINAL_SOUND_JUNO && live137(sound,v) &&
+         read137(sound,v)[SJ6_ARP_ZERO_BYTE]==1u) c.gate=0;
+ #endif
++#if defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE
++    if (live137(sound,v) && original_bass[v].kind==ORIGINAL_SOUND_JUNO &&
++        read137(sound,v)[SJ6_ARP_RANDOM_BYTE]==2u) c.mode=ARP_SAGA_RANDOM2;
++    original_bass[v].arp.prm.saga_random_seed=v ? UINT32_C(0x243f6a88) : UINT32_C(0x85a308d3);
++#endif
+     if (preset_change && c.amp2_mask) { c.amp2_mask = 0; arp_store((unsigned)v, &c); }
+     arp_pending_flag[v] = 0;
+     (void)original_runtime_arp_config(&original_bass[v], &c);
+@@ -184,6 +202,11 @@
+     int status = S1_EDIT_REJECTED;
+     uint32_t request = bass_request[v];
+     if (arp_kind_ok(v) && revision == arp_revision[v]
++#if defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE
++        && !(step==0xFFu && field==ARP_F_MODE && value==ARP_SAGA_RANDOM2 &&
++             (original_bass[v].kind!=ORIGINAL_SOUND_JUNO || !live137(mot_base_snd,v)))
++        && !(step==0xFFu && field==ARP_F_MODE && live137(mot_base_snd,v) && !s1_typed_tuple_editable())
++#endif
+ #if defined(X0X_SJ6_ZERO_GATE_PROBE) && X0X_SJ6_ZERO_GATE_PROBE
+         && (!zero_gate || (original_bass[v].kind==ORIGINAL_SOUND_JUNO && live137(mot_base_snd,v)))
+         && !(step==0xFFu && field==ARP_F_GATE && original_bass[v].kind==ORIGINAL_SOUND_JUNO &&
+@@ -268,6 +291,9 @@
+         engine_arp_cfg c;
+         (void)engine_arp_block_decode(ARP_SLOT(mot_base_snd,v),&c);
+         if(read137(mot_base_snd,v)[SJ6_ARP_ZERO_BYTE]==1u)c.gate=0;
++#if defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE
++        if(read137(mot_base_snd,v)[SJ6_ARP_RANDOM_BYTE]==2u)c.mode=ARP_SAGA_RANDOM2;
++#endif
+         arp_pending_flag[v]=0;
+         (void)original_runtime_arp_config(&original_bass[v],&c);
+         ++arp_revision[v];
+@@ -283,6 +309,10 @@
+     if (live137(mot_base_snd,v) && original_bass[v].kind==ORIGINAL_SOUND_JUNO &&
+         read137(mot_base_snd,v)[SJ6_ARP_ZERO_BYTE]==1u) c.gate=0;
+ #endif
++#if defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE
++    if(live137(mot_base_snd,v) && original_bass[v].kind==ORIGINAL_SOUND_JUNO &&
++       read137(mot_base_snd,v)[SJ6_ARP_RANDOM_BYTE]==2u)c.mode=ARP_SAGA_RANDOM2;
++#endif
+     return arp_queue(v, &c);
+ }
+ int engine_arp_preset(unsigned v, const engine_arp_cfg *c)
+--- a/firmware/src/app/original_runtime.c
++++ b/firmware/src/app/original_runtime.c
+@@ -271,6 +271,9 @@
+     memset(b, 0, ARP_BLOCK_BYTES);
+     b[0] = 'A'; b[1] = 1u;
+     unsigned mode = arp_clamp(c->mode, 0, ARP_NMODES - 1u), flags = 0;
++#if defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE
++    if(mode==ARP_SAGA_RANDOM2) mode=ARP_UP;
++#endif
+ #if X0X_SUPERJ6_BUILTIN_INIT
+     const unsigned division = c->division <= ARP_SAGA_DIVISIONS ? c->division : 0;
+     /* Reserved v1 header bits hold the extended mode and division. Older
+@@ -469,6 +472,10 @@
+ #if X0X_SUPERJ6_BUILTIN_INIT
+     q->saga_notes = p->kind == ORIGINAL_SOUND_JUNO;
+     q->saga_timing = q->saga_notes && c->division && c->division <= ARP_SAGA_DIVISIONS;
++#if defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE
++    if (c->mode==ARP_SAGA_RANDOM2 && q->saga_notes)
++        q->arpDirection=ArpeggiatorMode_SagaRandom;
++#endif
+     if (c->mode == ARP_UPDN_REPEAT)
+         q->arpDirection = q->saga_notes ? ArpeggiatorMode_UpDownRepeat : ArpeggiatorMode_UpDown;
+     if (q->saga_timing) {
+--- a/firmware/src/app/sj6_137_host_witness.h
++++ b/firmware/src/app/sj6_137_host_witness.h
+@@ -78,6 +78,9 @@
+  return b[0]<=SJ6_CLASSIC_I_DEFAULT && b[1]<=SJ6_CLASSIC_I_DEFAULT && b[2]<=SJ6_CLASSIC_I_DEFAULT;
+ }
+ #endif
++#if defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE
++enum { SJ6_ARP_RANDOM_BYTE=26 };
++#endif
+ static inline int canonical137(const sound_t *s) {
+  for (unsigned v=0;v<2;++v) {
+   const uint8_t *b=read137(s,v);
+@@ -136,6 +139,9 @@
+      continue;
+    }
+ #endif
++#if defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE
++   if(i==SJ6_ARP_RANDOM_BYTE){if(x!=0u && x!=2u)return 0;continue;}
++#endif
+    if (x) return 0;
+   }
+  }
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -791,6 +791,10 @@
+ #if defined(DNBOX_137_HOST_WITNESS) && defined(X0X_SJ6_MOD_TYPED_PROBE)
+     if(r.kind==R_SJ6MOD)return !live137(&proj.sound,r.b)||!s1_typed_tuple_editable();
+ #endif
++#if defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE
++    if (r.kind==R_ARP && r.a==ARP_F_MODE && live137(&proj.sound,r.b))
++        return !s1_typed_tuple_editable();
++#endif
+     if (r.kind == R_BSTATUS) return 1;
+ #if defined(X0X_SJ6_BEND_TYPED_PROBE) && X0X_SJ6_BEND_TYPED_PROBE
+     if (r.kind==R_SJ6PB) return !live137(&proj.sound,r.b) || !s1_typed_tuple_editable();
+@@ -2367,6 +2371,9 @@
+ static const char *const ARP_MODE_N[] = {"UP", "DOWN", "UP+DN", "SEQ"
+ #if X0X_SUPERJ6_BUILTIN_INIT && !defined(X0X_ARP_FAKE_H)
+                                        , "UP+DN X2"
++#if defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE
++                                       , "RANDOM2"
++#endif
+ #endif
+ };
+ static const char *const ARP_RANGE_N[] = {"1 OCT", "2 OCT", "3 OCT", "4 OCT"};
+@@ -2392,7 +2399,13 @@
+             field==ARP_F_SOURCE_RATE ? &rate : &factor;
+ #endif
+ #if X0X_SUPERJ6_BUILTIN_INIT && !defined(X0X_ARP_FAKE_H)
+-    static const x0x_param_t saga_mode = {"MODE", ARP_NMODES - 1, 0, ARP_MODE_N};
++    static const x0x_param_t saga_mode = {"MODE", ARP_UPDN_REPEAT, 0, ARP_MODE_N};
++#if defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE
++    if(field==ARP_F_MODE && live137(&proj.sound,owner)) {
++        static const x0x_param_t random_mode={"MODE",ARP_SAGA_RANDOM2,0,ARP_MODE_N};
++        return &random_mode;
++    }
++#endif
+     static const char *const beats[] = {"SPEED", "1/16", "3/32", "1/8", "3/16", "1/4",
+         "3/8", "1/2", "3/4", "1", "1.5", "2", "3", "4", "8", "12", "16", "24", "32"};
+     static const x0x_param_t division = {"BEATS", ARP_SAGA_DIVISIONS, 0, beats};
+@@ -3666,6 +3679,13 @@
+                 if(pan[0]>127u || !s1_pan_rate_valid(s1_pan_rate_word_bytes(pan+1u))){say("UNDO PAN INVALID",0);engine_bass_edit_hold(0);return;}
+                 if(memcmp(pan,read137(&proj.sound,v)+S1_PAN_AMOUNT_BYTE,sizeof pan))undo_pan|=1u<<v;
+ #endif
++#if defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE
++                undo_peek(&undo,entry,off+SJ6_ARP_RANDOM_BYTE-2u,&p,1u);
++                if(p!=read137(&proj.sound,v)[SJ6_ARP_RANDOM_BYTE]){
++                    if(p!=0u && p!=2u){say("UNDO MODE INVALID",0);engine_bass_edit_hold(0);return;}
++                    undo_zero|=1u<<v;
++                }
++#endif
+                 undo_peek(&undo,entry,off+S1_TRANS_BYTE-2u,&p,1u);
+                 if(p>S1_TRANS_LAST){say("UNDO TRANSPOSE INVALID",0);engine_bass_edit_hold(0);return;}
+                 if(p!=read137(&proj.sound,v)[S1_TRANS_BYTE])undo_trans|=1u<<v;
+--- a/firmware/src/dsp/synthone/sequencer/S1Sequencer.c
++++ b/firmware/src/dsp/synthone/sequencer/S1Sequencer.c
+@@ -34,6 +34,9 @@
+ #if defined(X0X_SJ6_GATE_DEADLINE_PROBE) && X0X_SJ6_GATE_DEADLINE_PROBE
+     s->editGateLatched = 0;
+ #endif
++#if defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE
++    s->saga_random_state=0;
++#endif
+     s->sequencerLastNotesCount = 0;
+ #if X0X_SUPERJ6_BUILTIN_INIT
+     s->saga_index = 0;
+@@ -76,10 +79,26 @@
+ static unsigned saga_clip(int note)
+ { return note < 0 ? 0u : note >= S1_NUM_MIDI_NOTES ? S1_NUM_MIDI_NOTES - 1u : (unsigned)note; }
+ 
++#if defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE
++/* Fresh uniform Fisher–Yates followed by reading ONE element has this
++ * marginal distribution. Do not retain a shuffled bag across steps. */
++static unsigned saga_random_index(uint32_t *state,uint32_t seed,unsigned count)
++{
++    const uint32_t limit=UINT32_MAX-UINT32_MAX%count;
++    uint32_t x=*state ? *state : seed ? seed : UINT32_C(0x9e3779b9);
++    do { x^=x<<13; x^=x>>17; x^=x<<5; } while(x>limit);
++    *state=x;
++    return (x-1u)%count;
++}
++#endif
+ /* The original sorts the pitches across all tiers before choosing a note.
+  * Sort only on an event, with bounded scratch and no second clock/state machine. */
+ static NoteNumber saga_note(const NoteNumber *held, int count, int octaves,
+-                           int interval, int mode, int index)
++                           int interval, int mode, int index
++#if defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE
++                           , S1Sequencer *sequencer,uint32_t seed
++#endif
++)
+ {
+     NoteNumber notes[S1_SEQ_MAX_HELD * 4];
+     int size = 0;
+@@ -92,6 +111,11 @@
+         }
+         notes[slot] = (NoteNumber){(uint8_t)pitch, held[h].velocity};
+     }
++#if defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE
++    if (mode==ArpeggiatorMode_SagaRandom)
++        index=(int)saga_random_index(&sequencer->saga_random_state,seed,(unsigned)size);
++    else
++#endif
+     if (mode == ArpeggiatorMode_Down) index = size - 1 - index;
+     else {
+         if (mode == ArpeggiatorMode_UpDownRepeat) index /= 2;
+@@ -260,7 +284,11 @@
+                         NoteNumber snn;
+ #if X0X_SUPERJ6_BUILTIN_INIT
+                         if (p->saga_notes) snn = saga_note(held, heldNoteNumbersAECount, p->arpOctave + 1,
+-                                                         p->arpInterval, p->arpDirection, seqNotePosition);
++                                                         p->arpInterval, p->arpDirection, seqNotePosition
++#if defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE
++                                                         , s,p->saga_random_seed
++#endif
++                                                         );
+                         else
+ #endif
+                             snn = arpNote(held, heldNoteNumbersAECount, p->arpOctave + 1,
+--- a/firmware/src/dsp/synthone/sequencer/S1Sequencer.h
++++ b/firmware/src/dsp/synthone/sequencer/S1Sequencer.h
+@@ -22,6 +22,11 @@
+ #error "Original clock prototype is host-only"
+ #endif
+ 
++#if defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE
++#if !defined(X0X_HOST) || !defined(DNBOX_137_HOST_WITNESS) || !X0X_SJ6_ZERO_GATE_PROBE
++#error "Build9 RANDOM2 proof is a composed host witness only"
++#endif
++#endif
+ #define S1_NUM_MIDI_NOTES 128
+ #define S1_SEQ_MAX_HELD 8          /* DnBOX: held keys tracked (source: 128) */
+ #define S1_SEQ_STEPS 16
+@@ -31,7 +36,11 @@
+ typedef struct { uint8_t noteNumber, velocity; } NoteNumber;     /* heldNoteNumbersAE entry */
+ 
+ /* S1ArpModes.hpp */
+-enum ArpeggiatorMode { ArpeggiatorMode_Up = 0, ArpeggiatorMode_UpDown = 1, ArpeggiatorMode_Down = 2, ArpeggiatorMode_UpDownRepeat = 3 };
++enum ArpeggiatorMode { ArpeggiatorMode_Up = 0, ArpeggiatorMode_UpDown = 1, ArpeggiatorMode_Down = 2, ArpeggiatorMode_UpDownRepeat = 3
++#if defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE
++    , ArpeggiatorMode_SagaRandom=4
++#endif
++};
+ 
+ /* The S1Parameter values S1Sequencer::process reads (S1Parameter.h ids). */
+ typedef struct {
+@@ -55,6 +64,9 @@
+     uint32_t gateTicks;                 /* seqGate % of arpSeqTempoMultiplier (UINT32_MAX = 100 %) */
+     uint8_t clocked;                    /* DnBOX: transport clock owns mStepCounter / mBeatTime */
+ #if X0X_SUPERJ6_BUILTIN_INIT
++#if defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE
++    uint32_t saga_random_seed;
++#endif
+     uint8_t saga_notes, saga_timing;    /* SuperJ6 pitch law and optional original grid */
+ #endif
+ } S1SequencerParams;
+@@ -76,6 +88,9 @@
+     uint8_t sequencerLastNotesCount;
+     uint8_t sequencerLastNotes[S1_SEQ_MAX_HELD];
+ #if X0X_SUPERJ6_BUILTIN_INIT
++#if defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE
++    uint32_t saga_random_state;
++#endif
+     uint8_t saga_index;
+ #endif
+ } S1Sequencer;

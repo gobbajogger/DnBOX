@@ -1,0 +1,156 @@
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -602,2 +602,7 @@
+ enum { R_SJ6KNOB = R_NOTELOCK + 3 };
++#if defined(X0X_SJ6_MONO32_PROBE) && X0X_SJ6_MONO32_PROBE
++enum {R_SJ6MONO32=R_NOTELOCK+15};
++extern int engine_sj6_mono32_get(unsigned);
++extern int engine_sj6_mono32_edit(unsigned,unsigned);
++#endif
+ #if defined(X0X_HOST) && defined(DNBOX_NOISE_PHYSICAL_WITNESS)
+@@ -797,2 +802,5 @@
+ #endif
++#if defined(X0X_SJ6_MONO32_PROBE) && X0X_SJ6_MONO32_PROBE
++    if(r.kind==R_SJ6MONO32)return engine_sj6_mono32_get(r.b)<0||!s1_typed_tuple_editable();
++#endif
+     if (r.kind == R_BSTATUS) return 1;
+@@ -849,2 +857,5 @@
+ #if X0X_SUPERJ6_BUILTIN_INIT
++#if defined(X0X_SJ6_MONO32_PROBE) && X0X_SJ6_MONO32_PROBE
++    case R_SJ6MONO32: {static const x0x_param_t mono={"MONO",1,0,ONOFF_N};return &mono;}
++#endif
+     case R_SJ6KNOB:
+@@ -1029,2 +1040,5 @@
+ #if X0X_SUPERJ6_BUILTIN_INIT
++#if defined(X0X_SJ6_MONO32_PROBE) && X0X_SJ6_MONO32_PROBE
++    case R_SJ6MONO32: return engine_sj6_mono32_get(r.b)>0;
++#endif
+     case R_SJ6KNOB:
+@@ -2801,2 +2815,5 @@
+ #endif
++#if defined(X0X_SJ6_MONO32_PROBE) && X0X_SJ6_MONO32_PROBE
++                if(engine_sj6_mono32_get(b)>=0)add_page(emit,PT_VOICE,PR(R_SJ6MONO32,T_303,b,0),NONE,NONE,NONE);
++#endif
+                 first_row = UI_ORIGINAL_JUNO_PAGES;
+@@ -4811,2 +4828,8 @@
+ #if X0X_SUPERJ6_BUILTIN_INIT
++#if defined(X0X_SJ6_MONO32_PROBE) && X0X_SJ6_MONO32_PROBE
++    if(r.kind==R_SJ6MONO32){
++        if(e&&!pref_read_only(r))(void)engine_sj6_mono32_edit(r.b,e>0);
++        return;
++    }
++#endif
+     if (r.kind == R_SJ6KNOB) {
+--- a/firmware/src/app/original_presets.inc
++++ b/firmware/src/app/original_presets.inc
+@@ -704,2 +704,18 @@
+ #endif
++#if defined(X0X_SJ6_MONO32_PROBE) && X0X_SJ6_MONO32_PROBE
++int engine_sj6_mono32_get(unsigned v)
++{
++ if(v>=NBASS||!live137(mot_base_snd,v)||original_bass[v].kind!=ORIGINAL_SOUND_JUNO)return -1;
++ return original_bass[v].dsp.juno.synth.mono32_on;
++}
++int engine_sj6_mono32_edit(unsigned v,unsigned on)
++{
++ if(engine_sj6_mono32_get(v)<0 || on>1u)return 0;
++ engine_project_hold(1);
++ int ok=engine_sj6_mono32_get(v)>=0&&!ui_project_busy()&&s1_typed_tuple_editable()&&
++     !engine_bass_preset_pending(v)&&!note_lock_applied[v]&&
++     juno6_mono32_set(&original_bass[v].dsp.juno.synth,on);
++ engine_project_hold(0);return ok;
++}
++#endif
+ static void s1_typed_a4_apply(const sound_t *sound,unsigned owner) {
+--- a/firmware/src/dsp/dnbx_core.c
++++ b/firmware/src/dsp/dnbx_core.c
+@@ -432,2 +432,20 @@
+ }
++#if defined(X0X_SJ6_MONO32_PROBE) && X0X_SJ6_MONO32_PROBE
++int dnbx_superj6_mono_voice(dnbx_part *s,unsigned note,unsigned vel)
++{
++    if(!valid(s)||note>127u||!vel||vel>127u)return -1;
++    dnbx_voice *v=&s->voice[0];
++    if(!voice_active(v))memset(v,0,sizeof *v);
++    v->note=(uint8_t)note;v->gate=1;v->pedal_held=0;v->age_rank=0;
++    v->velocity=(float)vel/127.f;
++    for(unsigned l=0;l<DNBX_LAYERS;l++){
++        const dnbx_layer_params *p=&s->layer[l].params;
++        v->layer[l].increment=pitch_increment(s,note,p->tune_semitones);
++        envelope_on(&v->layer[l].amp,&p->amp,s->sample_rate);
++        dnbx_envelope_params linked;
++        envelope_on(&v->layer[l].filter,filter_params(s,l,&linked),s->sample_rate);
++    }
++    return 0;
++}
++#endif
+ static void release_voice(dnbx_part *s,dnbx_voice *v)
+--- a/firmware/src/dsp/dnbx_core.h
++++ b/firmware/src/dsp/dnbx_core.h
+@@ -142,2 +142,5 @@
+  * note-off and returns DNBX_NOTE_OFF_ONLY. MIDI values outside 0..127 fail. */
++#if defined(X0X_SJ6_MONO32_PROBE) && X0X_SJ6_MONO32_PROBE
++int dnbx_superj6_mono_voice(dnbx_part*,unsigned,unsigned);
++#endif
+ int dnbx_note_on(dnbx_part *, unsigned note, unsigned velocity);
+--- a/firmware/src/dsp/juno6.h
++++ b/firmware/src/dsp/juno6.h
+@@ -121,2 +121,6 @@
+ #endif
++#if defined(X0X_SJ6_MONO32_PROBE) && X0X_SJ6_MONO32_PROBE
++ uint32_t mono32_keys[128];
++ uint8_t mono32_on;
++#endif
+ } juno6_t;
+@@ -136,2 +140,5 @@
+ void juno6_init(juno6_t*,float);
++#if defined(X0X_SJ6_MONO32_PROBE) && X0X_SJ6_MONO32_PROBE
++int juno6_mono32_set(juno6_t*,unsigned);
++#endif
+ int juno6_note_on(juno6_t*,uint8_t,uint8_t);
+--- a/firmware/src/dsp/juno6_factory.inc
++++ b/firmware/src/dsp/juno6_factory.inc
+@@ -23,2 +23,13 @@
+ }
++#if defined(X0X_SJ6_MONO32_PROBE) && X0X_SJ6_MONO32_PROBE
++#ifndef X0X_HOST
++#error scoped SuperJ6 Mono32 is host-only
++#endif
++int juno6_mono32_set(juno6_t *s,unsigned on)
++{
++ if(!s||on>1u||s->core.damper||dnbx_active_voices(&s->core)!=0)return 0;
++ if(s->mono32_on!=on)memset(s->mono32_keys,0,sizeof s->mono32_keys);
++ s->mono32_on=(uint8_t)on;return 1;
++}
++#endif
+ int juno6_note_on(juno6_t *s,uint8_t note,uint8_t velocity)
+@@ -28,2 +39,10 @@
+ #endif
++#if defined(X0X_SJ6_MONO32_PROBE) && X0X_SJ6_MONO32_PROBE
++ if(s->mono32_on){
++  if(note>127||velocity>127)return 0;
++  if(!velocity){juno6_note_off(s,note);return 1;}
++  if(s->mono32_keys[note]<UINT32_MAX)++s->mono32_keys[note];
++  return dnbx_superj6_mono_voice(&s->core,note,velocity)==0;
++ }
++#endif
+  return dnbx_note_on(&s->core,note,velocity)>=0;
+@@ -32,2 +51,12 @@
+ {
++#if defined(X0X_SJ6_MONO32_PROBE) && X0X_SJ6_MONO32_PROBE
++ if(s->mono32_on) {
++  if(note>127||!s->mono32_keys[note])return;
++  if(--s->mono32_keys[note]||s->core.voice[0].note!=note)return;
++  for(unsigned k=0;k<128;k++)if(s->mono32_keys[k]){
++   (void)dnbx_superj6_mono_voice(&s->core,k,100);return;
++  }
++  (void)dnbx_note_off(&s->core,note);return;
++ }
++#endif
+ #if X0X_SUPERJ6_BUILTIN_INIT
+@@ -46,2 +75,5 @@
+ #endif
++#if defined(X0X_SJ6_MONO32_PROBE) && X0X_SJ6_MONO32_PROBE
++ memset(s->mono32_keys,0,sizeof s->mono32_keys);
++#endif
+  (void)dnbx_all_off(&s->core);
