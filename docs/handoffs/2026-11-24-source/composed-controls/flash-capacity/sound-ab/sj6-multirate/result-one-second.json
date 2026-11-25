@@ -1,0 +1,112 @@
+{
+  "source_sha256": "7cfc7b4cf81e17eb41026159cc0fb8dc3ef2b33c7ebc544ac7f393c9acbeeb7c",
+  "state_bytes": 4060,
+  "ring_bytes": 3948,
+  "host_coeff_bytes": 320,
+  "delay_frames": 44100,
+  "stride": 10,
+  "fir_taps": 37,
+  "fir_cutoff_hz": 1980.0,
+  "feedback": 0.62,
+  "variable_callback_sizes": true,
+  "worst_decoded_frames_per_output_sample_after_time_edits": 55,
+  "edits_change_output": true,
+  "comparison": [
+    {
+      "signal": "220",
+      "repeat": 1,
+      "level_db": 0.013,
+      "residual_db": -25.098
+    },
+    {
+      "signal": "220",
+      "repeat": 2,
+      "level_db": 0.024,
+      "residual_db": -25.068
+    },
+    {
+      "signal": "220",
+      "repeat": 3,
+      "level_db": 0.034,
+      "residual_db": -25.051
+    },
+    {
+      "signal": "220",
+      "repeat": 4,
+      "level_db": 0.058,
+      "residual_db": -23.195
+    },
+    {
+      "signal": "3000",
+      "repeat": 1,
+      "level_db": -18.091,
+      "residual_db": 0.074
+    },
+    {
+      "signal": "3000",
+      "repeat": 2,
+      "level_db": -19.734,
+      "residual_db": 0.052
+    },
+    {
+      "signal": "3000",
+      "repeat": 3,
+      "level_db": -23.057,
+      "residual_db": 0.025
+    },
+    {
+      "signal": "3000",
+      "repeat": 4,
+      "level_db": -24.695,
+      "residual_db": 0.018
+    },
+    {
+      "signal": "5050",
+      "repeat": 1,
+      "level_db": -60.48,
+      "residual_db": 0.0
+    },
+    {
+      "signal": "5050",
+      "repeat": 2,
+      "level_db": -61.265,
+      "residual_db": 0.0
+    },
+    {
+      "signal": "5050",
+      "repeat": 3,
+      "level_db": -61.957,
+      "residual_db": 0.0
+    },
+    {
+      "signal": "5050",
+      "repeat": 4,
+      "level_db": -60.027,
+      "residual_db": 0.0
+    },
+    {
+      "signal": "chord",
+      "repeat": 1,
+      "level_db": -0.801,
+      "residual_db": -9.647
+    },
+    {
+      "signal": "chord",
+      "repeat": 2,
+      "level_db": -1.01,
+      "residual_db": -8.515
+    },
+    {
+      "signal": "chord",
+      "repeat": 3,
+      "level_db": -1.449,
+      "residual_db": -7.579
+    },
+    {
+      "signal": "chord",
+      "repeat": 4,
+      "level_db": -1.79,
+      "residual_db": -7.334
+    }
+  ]
+}

@@ -1,0 +1,112 @@
+{
+  "source_sha256": "7cfc7b4cf81e17eb41026159cc0fb8dc3ef2b33c7ebc544ac7f393c9acbeeb7c",
+  "state_bytes": 4092,
+  "ring_bytes": 3948,
+  "host_coeff_bytes": 160,
+  "delay_frames": 21876,
+  "stride": 5,
+  "fir_taps": 37,
+  "fir_cutoff_hz": 4000.0,
+  "feedback": 0.62,
+  "variable_callback_sizes": true,
+  "worst_decoded_frames_per_output_sample_after_time_edits": 55,
+  "edits_change_output": true,
+  "comparison": [
+    {
+      "signal": "220",
+      "repeat": 1,
+      "level_db": 0.015,
+      "residual_db": -31.904
+    },
+    {
+      "signal": "220",
+      "repeat": 2,
+      "level_db": -0.016,
+      "residual_db": -30.035
+    },
+    {
+      "signal": "220",
+      "repeat": 3,
+      "level_db": -0.031,
+      "residual_db": -27.959
+    },
+    {
+      "signal": "220",
+      "repeat": 4,
+      "level_db": -0.066,
+      "residual_db": -26.541
+    },
+    {
+      "signal": "3000",
+      "repeat": 1,
+      "level_db": -0.545,
+      "residual_db": -10.429
+    },
+    {
+      "signal": "3000",
+      "repeat": 2,
+      "level_db": -1.025,
+      "residual_db": -6.901
+    },
+    {
+      "signal": "3000",
+      "repeat": 3,
+      "level_db": -1.503,
+      "residual_db": -5.286
+    },
+    {
+      "signal": "3000",
+      "repeat": 4,
+      "level_db": -1.944,
+      "residual_db": -4.192
+    },
+    {
+      "signal": "5050",
+      "repeat": 1,
+      "level_db": -20.108,
+      "residual_db": -0.139
+    },
+    {
+      "signal": "5050",
+      "repeat": 2,
+      "level_db": -24.186,
+      "residual_db": -0.01
+    },
+    {
+      "signal": "5050",
+      "repeat": 3,
+      "level_db": -26.231,
+      "residual_db": 0.046
+    },
+    {
+      "signal": "5050",
+      "repeat": 4,
+      "level_db": -26.78,
+      "residual_db": 0.026
+    },
+    {
+      "signal": "chord",
+      "repeat": 1,
+      "level_db": -0.136,
+      "residual_db": -13.964
+    },
+    {
+      "signal": "chord",
+      "repeat": 2,
+      "level_db": -0.248,
+      "residual_db": -11.577
+    },
+    {
+      "signal": "chord",
+      "repeat": 3,
+      "level_db": -0.38,
+      "residual_db": -10.783
+    },
+    {
+      "signal": "chord",
+      "repeat": 4,
+      "level_db": -0.361,
+      "residual_db": -9.994
+    }
+  ]
+}
