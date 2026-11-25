@@ -1,0 +1,25 @@
+--- a/firmware/src/app/main_fm1.c
++++ b/firmware/src/app/main_fm1.c
+@@ -963,8 +963,9 @@
+ static int smk_pitch_parameter(int v)
+ {
+ #if X0X_BASS_PRESET_PREVIEW
+-    if (engine_bass_bank(v) == ORIGINAL_SOUND_SYNTHONE)
+-        return (int)original_sound_bend_id(ORIGINAL_SOUND_SYNTHONE);
++    const unsigned bank = (unsigned)engine_bass_bank(v);
++    if (bank <= ORIGINAL_SOUND_JUNO)
++        return (int)original_sound_bend_id(bank);
+ #endif
+     return engine_bass_is_wobble(v) ? ORIGINAL_MIAMI_PITCH_BEND : ORIGINAL_CHICAGO_PITCH_BEND;
+ }
+@@ -972,8 +973,8 @@
+ /* The wheels (mux C address 4 = pitch, 5 = mod), self-calibrating as in the reference port: the pitch wheel's
+  * rest is its centre (taken at power-on, followed slowly while it rests), each wheel's range grows to what it
+  * has reached. On a 303 (the part on screen) they play its sound without changing what is saved.
+- * Pitch wheel = the selected engine's bend (Chicago CHI_PBEND / Miami W_PITCH_BEND).
+- * Both span ±2 semitones; release restores that engine's own saved bend, never TUNE.
++ * Pitch wheel = the selected engine's bend, with its existing receiver range.
++ * Release restores that engine's own saved bend, never TUNE.
+  * With REC on and playing, a pitch-wheel move records the bend motion lane.
+  * Mod wheel = Chicago cutoff on native303; Miami/WBL1 wobble depth on a live WBL1 voice.
+  * Chicago: replaces the cutoff knob (BASS303_CUTOFF before master). Down closes (0); up opens (127).
