@@ -1,0 +1,13 @@
+# Alias and initial resident identity experiments (offline only)
+
+Reproduce with exact authorized SuperJ6/Synth One ZIPs (never commit archive/model bytes) and the generic cab25d44 'source/' extractor next to these scripts, including its native field catalog.
+
+```sh
+DNBOX_TRIAL_HISTORY=4096 OPENBLAS_NUM_THREADS=1 python escape_lanes.py "$J6_ZIP" "$S1_ZIP" --dense-head --journal --aliases
+DNBOX_TRIAL_HISTORY=4096 OPENBLAS_NUM_THREADS=1 python escape_lanes.py "$J6_ZIP" "$S1_ZIP" --dense-head --journal --implicit-id
+```
+
+- Exact audit: no repeated native field IDs within an original ordered program. SuperJ6 has 33 corpus-constant fields (already zero-bit singleton or effectively so), Synth One none. Entire ordered state repeats 19 times among Synth One presets and zero among SuperJ6. Immutable full-state aliases preserve all old and current IDs and allow bank removal, but 180,091 B aligned is **1,143 B larger** than the current 178,948 B and still 44 data sectors.
+- Separate initial production native identity option: factory records may inherit stable identity from existing bank ID plus immutable exact source position. There are no duplicate positions in an original bank. This saves an explicit 8-byte ID per factory preset, not original native parameter bytes. It tests a host SHA-256-derived opaque ID variant; a first production native lookup could keep the exact collision-free (unique bank ID, u16 source ordinal) composite to avoid adding SHA code. A bank whose factory position changes but whose programs must retain IDs uses original explicit-record mode. A moved-record witness decoded the same stable identity at the new position, choosing explicit bank bytes (19,770 B vs 18,396 B for the example).
+- All 1,546 exact names, source positions, field layouts and 221,013 original ordered binary32 words round-trip, with independent bank replacement/removal and 4,097 torn directory cases. Old DNB2 stable ID values are deliberately not present in implicit mode. The source UUIDs are random-shaped 36-char IDs (640 unique SuperJ6, 882 unique of 906 Synth One), so the old DNB2 IDs require the original UID/archive mapping. Exact original manifest recovery was demonstrated in host memory using the authoritative corpus; no deployment assumes on-device re-derivation of those old IDs. Older project references require an explicitly qualified migration if the resident identity scheme is introduced.
+- Result: 166,689 B padded resident data vs 178,948 B; 41 sectors/164 KiB data, 172 KiB including both A/B directories, 184 KiB transient data for the tested replacement. Still 52 KiB over the intended 112 KiB pool and 20 KiB over the hypothetical fully reclaimed two-slot 144 KiB. No firmware/native decode, hardware, or Git changes.
