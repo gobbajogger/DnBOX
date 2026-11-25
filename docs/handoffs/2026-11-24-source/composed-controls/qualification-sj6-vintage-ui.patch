@@ -1,0 +1,147 @@
+--- a/firmware/src/app/sj6_137_host_witness.h
++++ b/firmware/src/app/sj6_137_host_witness.h
+@@ -386,6 +386,16 @@
+ #include "../dsp/sj6_native_limiter.h"
+ enum { SJ6_LIM_ROW=5, SJ6_LIM_BYTE=0, SJ6_RAGE_BYTE=26,
+        SJ6_RAGE_SLOT=SJ6_LIM_COUNT };
++#if X0X_SJ6_VINTAGE_NATIVE
++enum { SJ6_VINTAGE_BYTE=27, SJ6_VINTAGE_SLOT=SJ6_RAGE_SLOT+1 };
++#define SJ6_FX_MOTION_LAST SJ6_VINTAGE_SLOT
++static inline unsigned sj6_vintage_read(const sound_t *s,unsigned owner)
++{ return s->v[T_MST][SJ6_LIM_ROW+owner][SJ6_VINTAGE_BYTE]; }
++static inline void sj6_vintage_write(sound_t *s,unsigned owner,unsigned code)
++{ s->v[T_MST][SJ6_LIM_ROW+owner][SJ6_VINTAGE_BYTE]=(uint8_t)code; }
++#else
++#define SJ6_FX_MOTION_LAST SJ6_RAGE_SLOT
++#endif
+ /* 0 preserves an untouched carrier; 1..128 encode an authored value. */
+ static inline unsigned sj6_rage_read(const sound_t *s,unsigned owner)
+ { return s->v[T_MST][SJ6_LIM_ROW+owner][SJ6_RAGE_BYTE]; }
+@@ -509,6 +519,9 @@
+    },{
+ #if X0X_SJ6_NATIVE_LIMITER
+     [SJ6_LIM_BYTE ... SJ6_LIM_BYTE+SJ6_LIM_COUNT-1]=128,[SJ6_RAGE_BYTE]=128,
++#if X0X_SJ6_VINTAGE_NATIVE
++    [SJ6_VINTAGE_BYTE]=127,
++#endif
+ #endif
+ #if X0X_SJ6_NATIVE_CLASSIC
+     [SJ6_CLASSIC_OFFSET ... SJ6_CLASSIC_OFFSET+SJ6_CLASSIC_COUNT-1]=128,
+@@ -575,6 +588,10 @@
+ #if X0X_SJ6_NATIVE_LIMITER
+   const unsigned rage=sj6_rage_read(s,v);
+   if(rage>128u || (rage && !j6_init))return 0;
++#if X0X_SJ6_VINTAGE_NATIVE
++  const unsigned vintage=sj6_vintage_read(s,v);
++  if(vintage>127u || (vintage && !j6_init))return 0;
++#endif
+   for(unsigned k=0;k<SJ6_LIM_COUNT;++k){
+     unsigned c=sj6_limiter_read(s,v)[k];
+     if(c>128u || (c && !j6_init))return 0;
+--- a/firmware/src/app/original_presets.inc
++++ b/firmware/src/app/original_presets.inc
+@@ -1042,14 +1042,23 @@
+     if(live137(sound,owner) && original_bass[owner].kind==ORIGINAL_SOUND_JUNO)
+     {
+         original_runtime_sj6_limiter(&original_bass[owner],sj6_limiter_read(sound,owner));
++#if X0X_SJ6_VINTAGE_NATIVE
++        dnbx_set_sj6_vintage(&original_bass[owner].dsp.juno.synth.core,owner,sj6_vintage_read(sound,owner));
++#endif
+         const unsigned rage=sj6_rage_read(sound,owner);
+         if(rage && rage<=128u)original_runtime_sj6_rage(&original_bass[owner],rage-1u);
+     }
+ }
+ int sj6_native_limiter_get(unsigned owner,unsigned slot)
+ {
+-    if(slot>SJ6_RAGE_SLOT || !live137(mot_base_snd,owner) ||
++    if(slot>SJ6_FX_MOTION_LAST || !live137(mot_base_snd,owner) ||
+        original_bass[owner].kind!=ORIGINAL_SOUND_JUNO)return -1;
++#if X0X_SJ6_VINTAGE_NATIVE
++    if(slot==SJ6_VINTAGE_SLOT){
++        unsigned code=sj6_vintage_read(mot_base_snd,owner);
++        return code<=127u?(int)code:-1;
++    }
++#endif
+     if(slot==SJ6_RAGE_SLOT){
+         unsigned code=sj6_rage_read(mot_base_snd,owner);
+         return code<=128u?(int)(code?code-1u:0u):-1;
+@@ -1064,6 +1073,14 @@
+     int before=sj6_native_limiter_get(owner,slot);
+     int ok=before>=0 && (unsigned)before!=value && original_typed_edit_open(owner);
+     if(ok){
++#if X0X_SJ6_VINTAGE_NATIVE
++        if(slot==SJ6_VINTAGE_SLOT){
++            sj6_vintage_write((sound_t *)mot_base_snd,owner,value);
++            dnbx_set_sj6_vintage(&original_bass[owner].dsp.juno.synth.core,owner,value);
++            engine_project_hold(0);
++            return 1;
++        }
++#endif
+         if(slot==SJ6_RAGE_SLOT)
+             sj6_rage_write((sound_t *)mot_base_snd,owner,value+1u);
+         else {
+@@ -3115,6 +3132,9 @@
+ #if X0X_SJ6_NATIVE_LIMITER
+         memset(sj6_limiter_write(sound,v),0,SJ6_LIM_COUNT);
+         sj6_rage_write(sound,v,0u);
++#if X0X_SJ6_VINTAGE_NATIVE
++        sj6_vintage_write(sound,v,0u);
++#endif
+ #endif
+ #if X0X_SJ6_OTA_NATIVE
+         sj6_ota_write(sound,v,0);
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -1188,11 +1188,14 @@
+ #endif
+ #if X0X_SJ6_NATIVE_LIMITER
+     case R_SJ6LIMITER: {
+-        static const x0x_param_t pot[SJ6_LIM_COUNT+1]={
++        static const x0x_param_t pot[SJ6_FX_MOTION_LAST+1]={
+             {"THRESHOLD",127,57,0},{"HEADROOM",127,0,0},{"ATTACK",127,0,0},{"GAIN",127,64,0},
+-            {"RAGE AMOUNT",127,0,0}
++            {"RAGE AMOUNT",127,0,0},
++#if X0X_SJ6_VINTAGE_NATIVE
++            {"VINTAGE",127,0,0}
++#endif
+         };
+-        return r.c<=SJ6_RAGE_SLOT?&pot[r.c]:NULL;
++        return r.c<=SJ6_FX_MOTION_LAST?&pot[r.c]:NULL;
+     }
+ #endif
+     case R_S1CMP: {
+@@ -2412,6 +2415,11 @@
+     if(r.kind==R_SJ6OTA){put_s(num,v?"JUNO OTA":"NORMAL");return;}
+ #endif
+ #if X0X_SJ6_NATIVE_LIMITER
++#if X0X_SJ6_VINTAGE_NATIVE
++    if(r.kind==R_SJ6LIMITER && r.c==SJ6_VINTAGE_SLOT){
++        put_d1(num,dnbx_sj6_vintage_cents((unsigned)v),1);put_s(unit,"cent");return;
++    }
++#endif
+     if(r.kind==R_SJ6LIMITER && r.c<SJ6_LIM_COUNT){
+         unsigned c=(unsigned)v==sj6_limiter_position(r.c,0)?0u:(unsigned)v+1u;
+         float x=sj6_limiter_value(r.c,c);
+@@ -3430,6 +3438,11 @@
+                 if(pages[row].title==PT_SJ6_TREMOLO && col==2u){
+                     refs[col]=PR(R_SJ6LIMITER,T_303,owner,SJ6_RAGE_SLOT);continue;
+                 }
++#if X0X_SJ6_VINTAGE_NATIVE
++                if(pages[row].title==PT_SJ6_TREMOLO && col==3u){
++                    refs[col]=PR(R_SJ6LIMITER,T_303,owner,SJ6_VINTAGE_SLOT);continue;
++                }
++#endif
+ #endif
+             }
+             /* Fill only previously empty knobs of the existing page matrix. */
+@@ -4920,6 +4933,10 @@
+                 undo_peek(&undo,entry,lim_off+SJ6_RAGE_BYTE-SJ6_LIM_BYTE,&rage,1u);
+                 if(rage>128u){say("UNDO LIMITER INVALID",0);engine_bass_edit_hold(0);return;}
+                 if(rage!=sj6_rage_read(&proj.sound,v))undo_limiter|=1u<<v;
++#if X0X_SJ6_VINTAGE_NATIVE
++                if(!undo_bounded_field(entry,lim_off+SJ6_VINTAGE_BYTE-SJ6_LIM_BYTE,127u,
++                    sj6_vintage_read(&proj.sound,v),1u<<v,&undo_limiter,"UNDO VINTAGE INVALID"))return;
++#endif
+ #endif
+                 uint8_t cmp[S1_CMP_COUNT];
+                 const uint32_t cmp_off=__builtin_offsetof(sound_t,v)+

@@ -1,0 +1,25 @@
+--- a/combined-link.py
++++ b/combined-link.py
+@@ -32,12 +32,14 @@
+     extra_fdata={
+         '.rodata.APC40_PAD_OWNER': (384,'e39797151468677c6e5735ca61944df77925e46cf7cfe30ff3ab687181795de7'),
+     }
++    extra_fdata.update({'.rodata.s1_scale': (42, 'c48df03d6ee9b920df3ed2bc10cd6c1176c92693b6a04f7b491822e88533bceb'), '.rodata.SMCFX_SUIT': (64, 'd771e79a36c32fca060c4165f842b1565b67b0afccf5b78b2d3629347cc29d49')})
+     exact_fittab={
+         '.rodata.original_miami_n513_bits': (2052,'4880416fdae25c3fef0c3885c358f65a5f42d4470f0f6e7d8d8922a115de800c'),
+         '.rodata.original_chicago_packed_e_offset': (1026,'b4c167230d8964dc8c0a06c6e1681b7a98768822bc8abee009f78bb1e8dbe823'),
+         '.rodata.compact_miami_factory_codes': (480,'6393cd72abdd5e07b0dff12191907d89857e00db50fecb981ac62c1081e99f67'),
+         '.rodata.compact_miami_names': (339,'43d7f6dad8ad1bd8b14630dc857dc6bd1ff1ccf3047ac9f23d271917a9cfaf80'),
+     }
++    exact_fittab.update({'.rodata.s1c_iinit': (150, 'cbb81dd5ecfee5c26520ccc38241c6e6bd7cd79ea2b9b50bd213c49710904a4e')})
+     tables+=''.join(' *('+n+')' for n in (*relocated,*extra_fdata))
+     ft=''.join(' *('+n+')' for n in exact_fittab)
+     syms=('text','ram_text','c1_text','data','lab_fittab','xdata','lab_fdata','lab_slot3')
+@@ -61,6 +63,7 @@
+         '.rodata.original_chicago_factory_names': (879,'0283818ed72be42cab3ca326e1631fb231dd1bdb9343ac3e65ccd5cb49d5a281'),
+         '.rodata.original_program_value_words': (908,'5483735b4f2274809b5acd3b80b00bc1a7670e7cf04579faec7354c63bb9f668'),
+     }
++    cold_factory.update({'.rodata.s1_scale_ratio': (360, 'fcf13207a079d2bad1fd2df5d93a296ff5625ab37b8a12dd9ce81839d74bbbc7'), '.rodata.s1_scale_names': (113, '17fbf474592eee7619571810c7e7e502ab9f0dcd46de93f18d641b91b1262abc')})
+     cold_factory.update({
+         '.rodata.original_chicago_packed_a_offset': (1026,'080f99526318fbc82901d2dd87bdecd618ada4ee33bb642d6296df6c2917183e'),
+         '.rodata.original_chicago_eq_amplitude': (512,'be9953b585250950df04653089e243d84869ba2e4a711ea46494e5a528dcccc2'),

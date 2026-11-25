@@ -1,0 +1,137 @@
+--- a/firmware/src/dsp/dnbx_core.h
++++ b/firmware/src/dsp/dnbx_core.h
+@@ -94,6 +94,9 @@
+ #if X0X_SJ6_NOISE_SUB_NATIVE
+     float sj6_sub_phase;
+ #endif
++#if X0X_SJ6_VINTAGE_NATIVE
++    int16_t sj6_vintage_q8[DNBX_LAYERS]; /* signed cents × 256 for sounding note */
++#endif
+     uint8_t note, gate, age_rank, pedal_held;
+ } dnbx_voice;
+ typedef struct {
+@@ -103,6 +106,10 @@
+ typedef struct {
+     uint32_t magic;
+     float sample_rate;
++#if X0X_SJ6_VINTAGE_NATIVE
++    uint32_t sj6_vintage_random;
++    uint16_t sj6_vintage_limit;
++#endif
+     dnbx_layer layer[DNBX_LAYERS];
+     dnbx_voice voice[DNBX_VOICES];
+     float raw[DNBX_RAW_CONTROLS];
+@@ -187,6 +194,10 @@
+ #if X0X_SJ6_NOISE_SUB_NATIVE
+ void dnbx_set_sj6_sources(dnbx_part *,unsigned owner,const uint8_t code[2]);
+ #endif
++#if X0X_SJ6_VINTAGE_NATIVE
++float dnbx_sj6_vintage_cents(unsigned position);
++void dnbx_set_sj6_vintage(dnbx_part *,unsigned owner,unsigned position);
++#endif
+ int dnbx_note_on(dnbx_part *, unsigned note, unsigned velocity);
+ #if X0X_SJ6_RANDOM5_6_NATIVE
+ int dnbx_superj6_velocity_zero_on(dnbx_part *,unsigned note);
+--- a/firmware/src/dsp/dnbx_core.c
++++ b/firmware/src/dsp/dnbx_core.c
+@@ -87,6 +87,40 @@
+ #endif
+     return increment(note,tune,s->sample_rate);
+ }
++#if X0X_SJ6_VINTAGE_NATIVE
++/* Build9 Vintage knob ID123: fresh symmetric offsets on oscillator note
++ * attack. A change arms subsequent attacks; it doesn't retune held audio. */
++float dnbx_sj6_vintage_cents(unsigned position)
++{ return 5.f*fm_powf((float)position*(1.f/127.f),2.02f); }
++
++void dnbx_set_sj6_vintage(dnbx_part *s,unsigned owner,unsigned position)
++{
++    if(!valid(s)||!s->superj6_amp_range||position>127u)return;
++    s->sj6_vintage_limit=(uint16_t)(256.f*dnbx_sj6_vintage_cents(position)+.5f);
++    if(!s->sj6_vintage_random)
++        s->sj6_vintage_random=owner ? UINT32_C(0x6c8e9cf5) : UINT32_C(0x71da45b3);
++}
++
++static void sj6_vintage_attack(dnbx_part *s,dnbx_voice *v,unsigned l)
++{
++    if(!s->sj6_vintage_limit){v->sj6_vintage_q8[l]=0;return;}
++    uint32_t x=s->sj6_vintage_random;
++    x^=x<<13;x^=x>>17;x^=x<<5;s->sj6_vintage_random=x;
++    /* Two independent draws for two triggered oscillator layers.
++     * Quantization is under 0.004 cents. Never touch noise RNG or bend. */
++    const int32_t u=(int32_t)(x>>16)-32768;
++    v->sj6_vintage_q8[l]=(int16_t)((u*(int32_t)s->sj6_vintage_limit)/32768);
++}
++
++static float voice_pitch_increment(const dnbx_part *s,const dnbx_voice *v,unsigned l,float tune)
++{
++    if(v->sj6_vintage_q8[l])
++        tune+=(float)v->sj6_vintage_q8[l]*(1.f/25600.f);
++    return pitch_increment(s,v->note,tune);
++}
++#else
++#define voice_pitch_increment(s,v,l,tune) pitch_increment(s,(v)->note,tune)
++#endif
+ #if X0X_SJ6_AUX_LFO_NATIVE
+ void dnbx_sj6_transient_bend(dnbx_part *s,unsigned l,float semitones)
+ {
+@@ -94,7 +128,7 @@
+     const float tune=s->layer[l].params.tune_semitones+semitones;
+     for(unsigned i=0;i<DNBX_VOICES;i++)
+         if(voice_active(&s->voice[i]))
+-            s->voice[i].layer[l].increment=pitch_increment(s,s->voice[i].note,tune);
++            s->voice[i].layer[l].increment=voice_pitch_increment(s,&s->voice[i],l,tune);
+ }
+ #endif
+ #if defined(X0X_SJ6_BEND_TYPED_PROBE) && X0X_SJ6_BEND_TYPED_PROBE
+@@ -107,7 +141,7 @@
+     for (unsigned i=0; i<DNBX_VOICES; ++i)
+         if (voice_active(&s->voice[i]))
+             for (unsigned l=0; l<DNBX_LAYERS; ++l)
+-                s->voice[i].layer[l].increment=pitch_increment(s,s->voice[i].note,s->layer[l].params.tune_semitones);
++                s->voice[i].layer[l].increment=voice_pitch_increment(s,&s->voice[i],l,s->layer[l].params.tune_semitones);
+     return DNBX_OK;
+ }
+ #endif
+@@ -418,7 +452,7 @@
+     s->layer[layer].params=*p;
+     for (unsigned i=0;i<DNBX_VOICES;i++) {
+         dnbx_layer_voice *v=&s->voice[i].layer[layer];
+-        v->increment=pitch_increment(s,s->voice[i].note,p->tune_semitones);
++        v->increment=voice_pitch_increment(s,&s->voice[i],layer,p->tune_semitones);
+         /* A running timed segment retains its cached endpoint/rate. */
+         if (v->amp.stage==DNBX_ENV_SUSTAIN) v->amp.level=v->amp.curve=p->amp.sustain;
+         if (v->filter.stage==DNBX_ENV_SUSTAIN) v->filter.level=v->filter.curve=s->filter_link?p->amp.sustain:p->filter.sustain;
+@@ -538,7 +572,10 @@
+         if (zero_on>1u && !((zero_on>>1)&(1u<<l))) continue;
+ #endif
+         const dnbx_layer_params *p=&s->layer[l].params;
+-        v->layer[l].increment=pitch_increment(s,note,p->tune_semitones);
++#if X0X_SJ6_VINTAGE_NATIVE
++        sj6_vintage_attack(s,v,l);
++#endif
++        v->layer[l].increment=voice_pitch_increment(s,v,l,p->tune_semitones);
+         envelope_on(&v->layer[l].amp,&p->amp,s->sample_rate);
+         dnbx_envelope_params linked;
+         envelope_on(&v->layer[l].filter,filter_params(s,l,&linked),s->sample_rate);
+@@ -562,7 +599,7 @@
+     dnbx_voice *v=&s->voice[0];
+     v->note=(uint8_t)note;
+     for(unsigned l=0;l<DNBX_LAYERS;l++)
+-        v->layer[l].increment=pitch_increment(s,note,s->layer[l].params.tune_semitones);
++        v->layer[l].increment=voice_pitch_increment(s,v,l,s->layer[l].params.tune_semitones);
+     return 0;
+ }
+ #if X0X_SJ6_SEQ_DEST_NATIVE
+@@ -592,7 +629,10 @@
+         if (!(layers&(1u<<l))) continue;
+ #endif
+         const dnbx_layer_params *p=&s->layer[l].params;
+-        v->layer[l].increment=pitch_increment(s,note,p->tune_semitones);
++#if X0X_SJ6_VINTAGE_NATIVE
++        sj6_vintage_attack(s,v,l);
++#endif
++        v->layer[l].increment=voice_pitch_increment(s,v,l,p->tune_semitones);
+         envelope_on(&v->layer[l].amp,&p->amp,s->sample_rate);
+         dnbx_envelope_params linked;
+         envelope_on(&v->layer[l].filter,filter_params(s,l,&linked),s->sample_rate);
