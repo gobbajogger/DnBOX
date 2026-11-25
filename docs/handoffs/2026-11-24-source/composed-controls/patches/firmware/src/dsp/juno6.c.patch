@@ -1,0 +1,9 @@
+--- a/firmware/src/dsp/juno6.c
++++ b/firmware/src/dsp/juno6.c
+@@ -194,4 +194,6 @@
+ 
+ #if X0X_SUPERJ6_FACTORY
+ #include "juno6_factory.inc"
+ #endif
++
++#include "juno6_j60_native.inc"

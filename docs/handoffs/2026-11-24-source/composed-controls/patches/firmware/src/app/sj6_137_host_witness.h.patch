@@ -32,7 +32,7 @@
  #endif
  enum {S1_PAN_AMOUNT_BYTE=21,S1_PAN_RATE_BYTE=22,S1_PAN_RATE_BYTES=4};
  static inline uint32_t s1_pan_rate_word_bytes(const uint8_t *b){
-@@ -108,21 +121,183 @@
+@@ -108,21 +121,267 @@
  { return s->v[T_303][8+2u*owner+S1_DICT_BYTE/NPARAMS_MAX][S1_DICT_BYTE%NPARAMS_MAX]; }
  static inline void s1_dict_store(sound_t *s,unsigned owner,unsigned code)
  { s->v[T_303][8+2u*owner+S1_DICT_BYTE/NPARAMS_MAX][S1_DICT_BYTE%NPARAMS_MAX]=(uint8_t)code; }
@@ -121,6 +121,21 @@
 +    unsigned d=sj6_pitch_default(k); return code ? code-(code<=d) : d;
 +}
 +#endif
++#if X0X_SJ6_AUX_LFO_NATIVE
++enum { SJ6_AUX_ROW=3,SJ6_AUX_BYTES=13 };
++_Static_assert(SJ6_AUX_ROW+NBASS<=NVOICES_MAX && SJ6_AUX_BYTES<=NPARAMS_MAX,"Aux LFO rows");
++static inline const uint8_t *sj6_aux_read(const sound_t *s,unsigned v)
++{ return &s->v[T_MST][SJ6_AUX_ROW+v][0]; }
++static inline uint8_t *sj6_aux_write(sound_t *s,unsigned v)
++{ return &s->v[T_MST][SJ6_AUX_ROW+v][0]; }
++static inline int sj6_aux_init(const sound_t *s,unsigned v)
++{ return s->v[T_303][v][29]==ORIGINAL_SOUND_JUNO && !original_sound_sj6_factory(s->v[T_303][v]); }
++static inline unsigned sj6_aux_max(unsigned k) {
++ return k<2u?1u:k==3u?4u:k>=5u&&k<9u?2u:127u;
++}
++static inline int sj6_aux_valid(unsigned k,unsigned value)
++{ return value<=(k<2u?2u:sj6_aux_max(k)); }
++#endif
  static inline int s1_typed_init_cell(const uint8_t *b);
 +#if X0X_SJ6_VCF_PORT
 +enum { SJ6_VCF_BYTE=47 };
@@ -174,10 +189,79 @@
 +static inline unsigned sj6_room_max(unsigned slot)
 +{ return slot==SJ6_ROOM_ENABLE || slot==SJ6_ROOM_TYPE || slot==SJ6_ROOM_WIDEN ? 1u : 127u; }
 +#endif
++#if X0X_SJ6_NATIVE_J60
++enum { SJ6_J60_ROW=3,SJ6_J60_OFFSET=16,SJ6_J60_COUNT=4 };
++enum { SJ6_J60_VERSION_ID=208, SJ6_J60_RATE_ID=215, SJ6_J60_DEPTH_ID=216, SJ6_J60_MIX_ID=217 };
++_Static_assert(SJ6_J60_ROW+NBASS <= NVOICES_MAX && SJ6_J60_OFFSET+SJ6_J60_COUNT <= NPARAMS_MAX,
++               "J60 project fields fit their disjoint typed master row");
++static inline const uint8_t *sj6_j60_code(const sound_t *s,unsigned v)
++{ return &s->v[T_MST][SJ6_J60_ROW+v][SJ6_J60_OFFSET]; }
++static inline uint8_t *sj6_j60_payload(sound_t *s,unsigned v)
++{ return &s->v[T_MST][SJ6_J60_ROW+v][SJ6_J60_OFFSET]; }
++static inline int sj6_j60_owner(const sound_t *s,unsigned v)
++{
++ return s && s->v[T_303][v][29]==ORIGINAL_SOUND_JUNO &&
++        !original_sound_sj6_factory(s->v[T_303][v]);
++}
++static inline int sj6_j60_valid(const uint8_t *b)
++{ return b[0]<=1u&&b[1]<=128u&&b[2]<=128u&&b[3]<=128u; }
++#endif
++#if X0X_SJ6_NATIVE_ROOM
++enum { SJ6_CRUSH_ROW=3, SJ6_CRUSH_BYTE=24, SJ6_CRUSH_ID=107, SJ6_CRUSH_AMOUNT_ID=108 };
++_Static_assert(SJ6_CRUSH_ROW+NBASS<=NVOICES_MAX && SJ6_CRUSH_BYTE+2u<=NPARAMS_MAX,
++               "SuperJ6 Crush uses the designated owner bytes");
++static inline const uint8_t *sj6_crush_code(const sound_t *s,unsigned owner)
++{ return &s->v[T_MST][SJ6_CRUSH_ROW+owner][SJ6_CRUSH_BYTE]; }
++static inline uint8_t *sj6_crush_write(sound_t *s,unsigned owner)
++{ return &s->v[T_MST][SJ6_CRUSH_ROW+owner][SJ6_CRUSH_BYTE]; }
++#endif
++#if X0X_SJ6_NOISE_SUB_NATIVE
++enum { SJ6_SOURCES_ROW=1, SJ6_SOURCES_OFFSET=29, SJ6_SOURCES_COUNT=2 };
++_Static_assert(SJ6_SOURCES_ROW+NBASS<=NVOICES_MAX && SJ6_SOURCES_OFFSET+SJ6_SOURCES_COUNT<=NPARAMS_MAX,
++               "Juno independent source levels fit the typed owner row");
++static inline const uint8_t *sj6_sources_read(const sound_t *s,unsigned owner)
++{ return s->v[T_MST][SJ6_SOURCES_ROW+owner]+SJ6_SOURCES_OFFSET; }
++static inline uint8_t *sj6_sources_write(sound_t *s,unsigned owner)
++{ return s->v[T_MST][SJ6_SOURCES_ROW+owner]+SJ6_SOURCES_OFFSET; }
++#endif
++#if X0X_SJ6_OTA_NATIVE
++enum { SJ6_OTA_ROW=3, SJ6_OTA_BYTE=21 };
++_Static_assert(SJ6_OTA_ROW+NBASS<=NVOICES_MAX && SJ6_OTA_BYTE<NPARAMS_MAX,
++               "SuperJ6 OTA occupies reserved owner row offset 21");
++static inline unsigned sj6_ota_read(const sound_t *s,unsigned owner)
++{ return s->v[T_MST][SJ6_OTA_ROW+owner][SJ6_OTA_BYTE]; }
++static inline void sj6_ota_write(sound_t *s,unsigned owner,unsigned value)
++{ s->v[T_MST][SJ6_OTA_ROW+owner][SJ6_OTA_BYTE]=(uint8_t)value; }
++#endif
  static inline int canonical137(const sound_t *s) {
   for (unsigned v=0;v<2;++v) {
++#if X0X_SJ6_NATIVE_J60
++  const uint8_t *j60=sj6_j60_code(s,v);
++  if(!sj6_j60_valid(j60) ||
++     ((j60[0]|j60[1]|j60[2]|j60[3])&&!sj6_j60_owner(s,v)))return 0;
++#endif
    const uint8_t *b=read137(s,v);
++#if X0X_SJ6_OTA_NATIVE
++  unsigned ota=sj6_ota_read(s,v);
++  if(ota>1u || (ota && (s->v[T_303][v][29]!=ORIGINAL_SOUND_JUNO ||
++      original_sound_sj6_factory(s->v[T_303][v]))))return 0;
++#endif
++#if X0X_SJ6_NOISE_SUB_NATIVE
++  const uint8_t *sources=sj6_sources_read(s,v);
++  if(sources[0]>127u || sources[1]>127u ||
++     ((sources[0]|sources[1]) && (s->v[T_303][v][29]!=ORIGINAL_SOUND_JUNO ||
++         original_sound_sj6_factory(s->v[T_303][v])))) return 0;
++#endif
++#if X0X_SJ6_AUX_LFO_NATIVE
++  const uint8_t *aux=sj6_aux_read(s,v);
++  for(unsigned k=0;k<SJ6_AUX_BYTES;k++)
++    if(!sj6_aux_valid(k,aux[k]) || (aux[k] && !sj6_aux_init(s,v)))return 0;
++#endif
 +#if X0X_SJ6_NATIVE_ROOM
++  const uint8_t *crush=sj6_crush_code(s,v);
++  if(crush[0]>1u || crush[1]>127u ||
++     ((crush[0]|crush[1]) && (s->v[T_303][v][29]!=ORIGINAL_SOUND_JUNO ||
++      original_sound_sj6_factory(s->v[T_303][v]))))return 0;
 +  for(unsigned k=0;k<SJ6_ROOM_COUNT;++k){
 +    unsigned code=sj6_room_read(s,v)[k];
 +    if(code>sj6_room_max(k) || (code && (s->v[T_303][v][29]!=ORIGINAL_SOUND_JUNO ||
@@ -218,7 +302,7 @@
    if (b[0]!=137 || b[1]!=v || b[2]>127 || b[3]>2) return 0;
  #if DNBOX_TYPED_CONTROLS_NATIVE_TEST
  #if X0X_SJ6_VELOCITY_PORT
-@@ -156,21 +331,40 @@
+@@ -156,21 +415,40 @@
      if(x>S1_FB_LAST)return 0;
      continue;
     }
@@ -264,7 +348,7 @@
  #endif
  #if defined(X0X_S1_AUTOPAN_PROBE) && X0X_S1_AUTOPAN_PROBE
     if(i==S1_PAN_AMOUNT_BYTE){if(x>127)return 0;continue;}
-@@ -204,8 +398,56 @@
+@@ -204,8 +482,56 @@
      if(x && !s1_typed_init_cell(s->v[T_303][v]))return 0;
  #endif
      if(x>S1_DICT_MAX)return 0;

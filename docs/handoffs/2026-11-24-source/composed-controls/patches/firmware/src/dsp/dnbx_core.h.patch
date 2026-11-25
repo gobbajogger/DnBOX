@@ -13,7 +13,15 @@
  #include <stddef.h>
  #include <stdint.h>
  #ifdef __cplusplus
-@@ -83,8 +83,11 @@
+@@ -78,14 +78,23 @@
+     uint8_t stage, tick_left, timed_stage, reserved;
+ } dnbx_envelope_state;
+ typedef struct {
+     float phase, increment, subphase, filter_first, filter_second;
++#if X0X_SJ6_OTA_NATIVE
++    float ota_tail[2];
++#endif
+     float oscillator_history[4];
      dnbx_envelope_state amp, filter;
  } dnbx_layer_voice;
  typedef struct {
@@ -22,10 +30,14 @@
 +    dnbx_envelope_state sj6_pitch;
 +#endif
      float velocity;
++#if X0X_SJ6_NOISE_SUB_NATIVE
++    float sj6_sub_phase;
++#endif
      uint8_t note, gate, age_rank, pedal_held;
  } dnbx_voice;
  typedef struct {
-@@ -103,8 +106,12 @@
+     dnbx_layer_params params;
+@@ -103,8 +112,20 @@
  #endif
  #if X0X_SJ6_MONO32_PROBE
      float sj6_glide_secs,sj6_glide_offset,sj6_glide_ratio;
@@ -34,19 +46,42 @@
 +#if X0X_SJ6_PITCH_ENV_NATIVE
 +    dnbx_envelope_params sj6_pitch_param;
 +    uint8_t sj6_pitch_depth;
++#endif
++#if X0X_SJ6_NOISE_SUB_NATIVE
++    float sj6_noise_gain,sj6_sub_gain;
++    uint32_t sj6_noise_random;
++    uint8_t sj6_noise_code,sj6_sub_code;
++#endif
++#if X0X_SJ6_OTA_NATIVE
++    uint8_t sj6_ota;
  #endif
      uint8_t damper, velocity_mode, superj6_amp_range, filter_link;
  } dnbx_part;
  
-@@ -147,8 +154,11 @@
+@@ -136,8 +157,11 @@
+ int dnbx_init(dnbx_part *, float sample_rate);
+ int dnbx_init_superj6(dnbx_part *, float sample_rate); /* 8000 .. 192000 inclusive. */
+ /* Typed SuperJ6 only: binary pre-note switch, no overwrite of independent settings. */
+ int dnbx_set_filter_link(dnbx_part *, unsigned);
++#if X0X_SJ6_OTA_NATIVE
++int dnbx_set_sj6_ota(dnbx_part *,unsigned);
++#endif
+ /* Prevalidated physical panel settings, applied at the audio boundary. */
+ void dnbx_apply_panel_envelopes(dnbx_part *, unsigned layer, const dnbx_envelope_params *amp,
+                                 const dnbx_envelope_params *filter, unsigned linked);
+ int dnbx_set_layer(dnbx_part *, unsigned layer, const dnbx_layer_params *);
+@@ -146,8 +170,14 @@
+  * note-off and returns DNBX_NOTE_OFF_ONLY. MIDI values outside 0..127 fail. */
  #if defined(X0X_SJ6_MONO32_PROBE) && X0X_SJ6_MONO32_PROBE
  int dnbx_superj6_mono_voice(dnbx_part*,unsigned,unsigned);
  int dnbx_superj6_legato_voice(dnbx_part*,unsigned);
- #endif
++#endif
 +#if X0X_SJ6_PITCH_ENV_NATIVE
 +int dnbx_set_sj6_pitch_env(dnbx_part *,const uint8_t code[5]);
 +#endif
++#if X0X_SJ6_NOISE_SUB_NATIVE
++void dnbx_set_sj6_sources(dnbx_part *,unsigned owner,const uint8_t code[2]);
+ #endif
  int dnbx_note_on(dnbx_part *, unsigned note, unsigned velocity);
  int dnbx_note_off(dnbx_part *, unsigned note);
  int dnbx_set_sustain(dnbx_part *, unsigned down); /* Strict boolean 0 or 1. */
- /* Applies to new and existing notes, from the stored linear velocity. */

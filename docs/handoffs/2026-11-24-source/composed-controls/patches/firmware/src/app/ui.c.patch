@@ -1,6 +1,6 @@
 --- a/firmware/src/app/ui.c
 +++ b/firmware/src/app/ui.c
-@@ -25,8 +25,102 @@
+@@ -25,8 +25,105 @@
  #include "../dsp/fastmath.h"
  #include "../dsp/juno6_controls.h"
  #include "../dsp/master.h"
@@ -96,6 +96,9 @@
 +#if X0X_SJ6_NATIVE_UNISON
 +    PT_SJ6_UNISON,
 +#endif
++#if X0X_SJ6_NATIVE_J60
++    PT_SJ6_J60,
++#endif
 +    PT_COUNT
 +} page_title_id_t;
 +
@@ -103,7 +106,7 @@
  #if X0X_ORIGINAL_SYNTH
  #include "miami_ms20.h"
  #endif
-@@ -452,8 +546,112 @@
+@@ -452,8 +549,128 @@
         R_SLEN, R_STALLS, R_HDR, R_TAPE, R_MIDICH, R_OUTLOUD, R_SREP, R_BATT, R_USBFULL, R_FREEPLAY,
         R_BT, R_BTSTAT, R_BTNAME, R_CKCH, R_CLKSRC, R_SMC_ROLE, R_SMC_MAP, R_BENGINE, R_BPRESET, R_BSTATUS, R_SECTION, R_PARTON, R_FINETUNE, R_QUEUEMUTE, R_BRKRATE, R_BPATSND, R_NOTELOCK };   /* R_TAPE: FX's one-knob TAPE (DIGI .. worn tape) */          /* R_HDR: a list's section header (a = its group), never selected */
  #if X0X_SYNTHONE_PATCH
@@ -136,6 +139,13 @@
 +extern int sj6_pitch_undo_ready(unsigned);
 +extern void sj6_pitch_undo(unsigned);
 +#endif
++#if X0X_SJ6_AUX_LFO_NATIVE
++enum { R_SJ6AUX=R_NOTELOCK+50 };
++extern int sj6_aux_get(unsigned,unsigned);
++extern int sj6_aux_choose(unsigned,unsigned,unsigned);
++extern int sj6_aux_undo_ready(unsigned);
++extern void sj6_aux_undo(unsigned);
++#endif
 +enum { R_S1DICT=R_NOTELOCK+20 };
 +extern int s1_typed_dict_position(unsigned);
 +extern int s1_typed_dict_choose(unsigned,unsigned);
@@ -145,11 +155,20 @@
 +#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
 +enum { R_S1CWG=R_NOTELOCK+31, R_S1AA=R_NOTELOCK+35, R_S1CMP=R_NOTELOCK+46 };
 +#if X0X_SJ6_NATIVE_ROOM
-+enum { R_SJ6ROOM=R_NOTELOCK+49 };
++enum { R_SJ6ROOM=R_NOTELOCK+49, R_SJ6CRUSH=R_NOTELOCK+53 };
++extern int sj6_crush_get(unsigned,unsigned);
++extern int sj6_crush_choose(unsigned,unsigned,unsigned);
 +extern int sj6_native_room_get(unsigned,unsigned);
 +extern int sj6_native_room_choose(unsigned,unsigned,unsigned);
 +extern int sj6_native_room_undo_ready(unsigned);
 +extern void sj6_native_room_undo(unsigned);
++#endif
++#if X0X_SJ6_OTA_NATIVE
++enum { R_SJ6OTA=R_NOTELOCK+51 };
++extern int sj6_ota_get(unsigned);
++extern int sj6_ota_choose(unsigned,unsigned);
++extern int sj6_ota_undo_ready(unsigned);
++extern void sj6_ota_undo(unsigned);
 +#endif
 +extern int s1_cmp_position(unsigned,unsigned);
 +extern int s1_cmp_choose(unsigned,unsigned,unsigned);
@@ -216,11 +235,16 @@
  #if X0X_ARP_HOOKS
  enum { R_ARP = R_NOTELOCK + 2 };          /* a: ARP_F_* field, b: bass voice */
  static const x0x_param_t *arp_desc(unsigned field, unsigned owner);
-@@ -461,8 +659,25 @@
+@@ -461,8 +678,30 @@
  static void arp_set(unsigned voice, unsigned field, int v, int from_keyboard);
  #endif
  #if X0X_SUPERJ6_BUILTIN_INIT
  enum { R_SJ6KNOB = R_NOTELOCK + 3 };
++#if X0X_SJ6_NATIVE_J60
++enum { R_SJ6J60=R_NOTELOCK+37 };
++extern int engine_sj6_j60_get(unsigned,unsigned);
++extern int engine_sj6_j60_edit(unsigned,unsigned,unsigned);
++#endif
 +#if X0X_SJ6_VCF_PORT
 +enum { R_SJ6FILTER_EXTRA=R_NOTELOCK+48 };
 +extern int sj6_filter_control_get(unsigned,unsigned);
@@ -242,11 +266,17 @@
  typedef struct { uint8_t kind, a, b, c; } pref_t;
  #define PR(k, a, b, c) ((pref_t){(k), (a), (b), (c)})
  #define NONE PR(R_NONE, 0, 0, 0)
-@@ -504,8 +719,21 @@
+@@ -504,8 +743,27 @@
  #endif
  #if X0X_SUPERJ6_BUILTIN_INIT
  static const x0x_param_t *sj6_knob_desc(unsigned slot)
  {
++#if X0X_SJ6_NOISE_SUB_NATIVE
++    if(slot==SJ6_NOISE_LEVEL || slot==SJ6_SUB_LEVEL) {
++        static const x0x_param_t sources[2]={{"NOISE",127,0,0},{"SUB",127,0,0}};
++        return &sources[slot-SJ6_NOISE_LEVEL];
++    }
++#endif
 +#if X0X_SJ6_LFO1_DELAY_PORT
 +    if(slot==SJ6_LFO1_DELAY) {
 +        static const x0x_param_t delay={"LFO1 DELAY",SJ6_LFO1_DELAY_MAX,0,0};
@@ -264,7 +294,7 @@
      static const char *const range[] = {"16FT", "8FT", "4FT"};
      static const char *const enable[] = {"OFF", "ON"};
      static const char *const pwm_route[] = {"OFF", "PWM 1", "PWM 2"};
-@@ -532,9 +760,14 @@
+@@ -532,9 +790,14 @@
          {"LAYER 1 SEMI", SJ6_SEMI_MAX, SJ6_SEMI_CENTER, 0},
          {"LAYER 2 SEMI", SJ6_SEMI_MAX, SJ6_SEMI_CENTER, 0},
          {"LAYER 1 FINE", SJ6_FINE_MAX, SJ6_FINE_CENTER, 0},
@@ -279,11 +309,18 @@
      };
      return slot < sizeof knobs / sizeof *knobs ? &knobs[slot] : 0;
  }
-@@ -628,11 +861,81 @@
+@@ -628,11 +891,95 @@
  };
  
  static int pref_read_only(pref_t r)
  {
++#if X0X_SJ6_NOISE_SUB_NATIVE
++    if(r.kind==R_SJ6KNOB && (r.c==SJ6_NOISE_LEVEL || r.c==SJ6_SUB_LEVEL))
++        return !live137(&proj.sound,r.b) || !s1_typed_tuple_editable();
++#endif
++#if X0X_SJ6_AUX_LFO_NATIVE
++    if(r.kind==R_SJ6AUX)return sj6_aux_get(r.b,r.c)<0 || !s1_typed_tuple_editable();
++#endif
 +#if X0X_SJ6_VCF_PORT
 +    if(r.kind==R_SJ6FILTER_EXTRA)return sj6_filter_control_get(r.b,r.c)<0 || !s1_typed_tuple_editable();
 +#endif
@@ -325,6 +362,9 @@
 +#if X0X_SJ6_NATIVE_UNISON
 +    if(r.kind==R_SJ6UNISON)return engine_sj6_unison_get(r.b,r.c)<0 || !s1_typed_tuple_editable();
 +#endif
++#if X0X_SJ6_NATIVE_J60
++    if(r.kind==R_SJ6J60)return engine_sj6_j60_get(r.b,r.c)<0 || !s1_typed_tuple_editable();
++#endif
      if (r.kind == R_BSTATUS) return 1;
 +#if defined(X0X_SJ6_BEND_TYPED_PROBE) && X0X_SJ6_BEND_TYPED_PROBE
 +    if (r.kind==R_SJ6PB) return !live137(&proj.sound,r.b) || !s1_typed_tuple_editable();
@@ -347,7 +387,11 @@
 +#endif
 +#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
 +#if X0X_SJ6_NATIVE_ROOM
++    if(r.kind==R_SJ6CRUSH)return sj6_crush_get(r.b,r.c)<0 || !s1_typed_tuple_editable();
 +    if(r.kind==R_SJ6ROOM)return sj6_native_room_get(r.b,r.c)<0 || !s1_typed_tuple_editable();
++#endif
++#if X0X_SJ6_OTA_NATIVE
++    if(r.kind==R_SJ6OTA)return sj6_ota_get(r.b)<0 || !s1_typed_tuple_editable();
 +#endif
 +    if(r.kind==R_S1CMP) return s1_cmp_position(r.b,r.c)<0 || !s1_typed_tuple_editable();
 +    if(r.kind==R_S1AA) return s1_aa_get(r.b)<0 || !s1_typed_tuple_editable();
@@ -362,7 +406,7 @@
          (unsigned)engine_bass_sound_bank(&proj.sound,r.b),r.c)) return 1;
      return r.kind == R_BATT || r.kind == R_BTSTAT || r.kind == R_BTNAME;
  }
-@@ -662,11 +965,85 @@
+@@ -662,11 +1009,92 @@
  #if X0X_ARP_HOOKS
      case R_ARP: return arp_desc(r.a, r.b);
  #endif
@@ -404,6 +448,10 @@
 +#endif
 +#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
 +#if X0X_SJ6_NATIVE_ROOM
++    case R_SJ6CRUSH:{
++        static const x0x_param_t p[2]={{"CRUSH",1,0,ONOFF_N},{"AMOUNT",127,0,0}};
++        return r.c<2u ? &p[r.c] : 0;
++    }
 +    case R_SJ6ROOM: {
 +        static const x0x_param_t pot[SJ6_ROOM_COUNT]={
 +            {"REVERB",1,0,0},{"ROOM TYPE",1,0,0},{"SIZE",127,0,0},{"LOW CUT",127,0,0},
@@ -411,6 +459,9 @@
 +        };
 +        return r.c<SJ6_ROOM_COUNT?&pot[r.c]:NULL;
 +    }
++#endif
++#if X0X_SJ6_OTA_NATIVE
++    case R_SJ6OTA: {static const x0x_param_t pot={"FILTER TYPE",1,0,0};return &pot;}
 +#endif
 +    case R_S1CMP: {
 +        static const x0x_param_t pot[]={
@@ -449,7 +500,7 @@
          static const char *const values[] = {"OFF", "ON"};
          static const x0x_param_t pot = {"LINK", 1, 0, values};
          return &pot;
-@@ -679,19 +1056,63 @@
+@@ -679,19 +1107,82 @@
          pot.max = (uint8_t)s1_patch_steps(r.c);
          return &pot;
      }
@@ -458,6 +509,14 @@
 +    case R_SJ6UNISON: {
 +        static const x0x_param_t p[]={{"ENABLE",1,0,ONOFF_N},{"DETUNE",127,27,0},
 +                                    {"STEREO",127,0,0},{"TYPE",5,0,0}};
++        return r.c<4u ? p+r.c : 0;
++    }
++#endif
++#if X0X_SJ6_NATIVE_J60
++    case R_SJ6J60: {
++        static const char *const models[]={"LEGACY","J60 V2"};
++        static const x0x_param_t p[]={{"VERSION",1,0,models},{"RATE",127,64,0},
++                                    {"DEPTH",127,64,0},{"MIX",127,127,0}};
 +        return r.c<4u ? p+r.c : 0;
 +    }
 +#endif
@@ -503,6 +562,17 @@
 +        return r.c<2u ? &p[r.c] : 0;
 +    }
 +#endif
++#if X0X_SJ6_AUX_LFO_NATIVE
++    case R_SJ6AUX: {
++        static const char *const wave[]={"TRI","UP","DOWN","SQUARE","S&H"};
++        static const char *const route[]={"OFF","PWM 1","PWM 2"};
++        static const x0x_param_t d[9]={{"LFO 2 ON",1,0,ONOFF_N},{"LFO 3 ON",1,0,ONOFF_N},
++            {"LFO 3 AMOUNT",127,0,0},{"LFO 3 WAVE",4,0,wave},{"LFO 3 DELAY",127,0,0},
++            {"LFO 2 DEST A",2,0,route},{"LFO 2 DEST B",2,0,route},
++            {"LFO 3 DEST A",2,0,route},{"LFO 3 DEST B",2,0,route}};
++        return r.c<9u?&d[r.c]:NULL;
++    }
++#endif
      case R_BSTATUS: return &BSTATUS_P;
 -    case R_BPATSND:
 -        PATSND_P.max = (uint8_t)original_sound_factories((unsigned)engine_bass_requested_bank(r.b));
@@ -516,7 +586,7 @@
      case R_ENG: return engine_param(r.a, r.b, r.c);
      case R_GEN: return &GEN_P[r.c % NGEN];
      case R_BRKSET: return breaks_param(r.c);
-@@ -785,11 +1206,66 @@
+@@ -785,11 +1276,70 @@
  #if X0X_ARP_HOOKS
      case R_ARP: return arp_get(r.b, r.a);
  #endif
@@ -550,7 +620,11 @@
 +#endif
 +#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
 +#if X0X_SJ6_NATIVE_ROOM
++    case R_SJ6CRUSH:{int p=sj6_crush_get(r.b,r.c);return p>=0?p:0;}
 +    case R_SJ6ROOM: {int pos=sj6_native_room_get(r.b,r.c);return pos>=0?pos:0;}
++#endif
++#if X0X_SJ6_OTA_NATIVE
++    case R_SJ6OTA: return sj6_ota_get(r.b)>0;
 +#endif
 +    case R_S1CMP: {int pos=s1_cmp_position(r.b,r.c);return pos>=0 ? pos : 0;}
 +    case R_S1AA: return s1_aa_get(r.b)>0;
@@ -584,13 +658,16 @@
          s1_patch_value value;
          if (s1_draw_patch && bidx() == r.b) return s1_draw_patch->filter_link;
          return s1_read(r, &value) ? value.position : 0;
-@@ -802,10 +1278,33 @@
+@@ -802,10 +1352,39 @@
          s1_patch_value value;
          return s1_read(r, &value) ? value.position : 0;
      }
  #endif
 +#if X0X_SJ6_NATIVE_UNISON
 +    case R_SJ6UNISON:{int i=engine_sj6_unison_get(r.b,r.c);return i>=0?i:0;}
++#endif
++#if X0X_SJ6_NATIVE_J60
++    case R_SJ6J60:{int i=engine_sj6_j60_get(r.b,r.c);return i>=0?i:0;}
 +#endif
      case R_BENGINE: return engine_bass_requested_bank(r.b);
      case R_BPRESET: return engine_bass_requested_preset(r.b);
@@ -614,11 +691,14 @@
 +        int p=sj6_filter_control_get(r.b,r.c);return p>=0?p:0;
 +    }
 +#endif
++#if X0X_SJ6_AUX_LFO_NATIVE
++    case R_SJ6AUX: {int v=sj6_aux_get(r.b,r.c);return v>=0?v:0;}
++#endif
      case R_BSTATUS: return engine_bass_preset_pending(r.b) * 4 + engine_bass_status(r.b);
      case R_ENG: return r.a == T_303 && r.b < NBASS ?
          original_sound_panel_position(proj.sound.v[r.a][r.b], r.c) : proj.sound.v[r.a][r.b][r.c];
      case R_SWING: return p->swing;
-@@ -899,18 +1398,58 @@
+@@ -899,18 +1478,74 @@
  #endif
  }
  X0X_COLD static void pref_set_impl(pref_t r, int v, int from_keyboard)
@@ -641,12 +721,21 @@
 +        return;
 +    }
 +#endif
++#if X0X_SJ6_NATIVE_J60
++    if(r.kind==R_SJ6J60){
++        if(v>=0 && engine_sj6_j60_edit(r.b,r.c,(unsigned)v)){mark_dirty();if(!r.c)build_pages();}
++        return;
++    }
++#endif
  #if X0X_SUPERJ6_BUILTIN_INIT
 +#if X0X_SJ6_PITCH_ENV_NATIVE
 +    if(r.kind==R_SJ6PITCH) {
 +        if(v>=0 && !pref_read_only(r) && sj6_pitch_choose(r.b,r.c,(unsigned)v))mark_dirty();
 +        return;
 +    }
++#endif
++#if X0X_SJ6_AUX_LFO_NATIVE
++    if(r.kind==R_SJ6AUX){if(v>=0 && !pref_read_only(r) && sj6_aux_choose(r.b,r.c,(unsigned)v))mark_dirty();return;}
 +#endif
      if (r.kind == R_SJ6KNOB) {
          if (engine_superj6_knob_turn(r.b, r.c, v, 0)) mark_dirty();
@@ -656,7 +745,14 @@
  #if X0X_SYNTHONE_PATCH
 +#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
 +#if X0X_SJ6_NATIVE_ROOM
++    if(r.kind==R_SJ6CRUSH){
++        if(v>=0 && !pref_read_only(r) && sj6_crush_choose(r.b,r.c,(unsigned)v))mark_dirty();
++        return;
++    }
 +    if(r.kind==R_SJ6ROOM){if(!pref_read_only(r) && v>=0 && sj6_native_room_choose(r.b,r.c,(unsigned)v))mark_dirty();return;}
++#endif
++#if X0X_SJ6_OTA_NATIVE
++    if(r.kind==R_SJ6OTA){if(!pref_read_only(r) && v>=0 && v<=1 && sj6_ota_choose(r.b,(unsigned)v))mark_dirty();return;}
 +#endif
 +    if(r.kind==R_S1CMP){if(!pref_read_only(r) && v>=0 && v<=127 && s1_cmp_choose(r.b,r.c,(unsigned)v))mark_dirty();return;}
 +    if(r.kind==R_S1AA){if(!pref_read_only(r) && v>=0 && v<=1 && s1_aa_choose(r.b,(unsigned)v))mark_dirty();return;}
@@ -677,7 +773,7 @@
  #endif
  #if X0X_BASS_PRESET_PREVIEW
      /* Freeze the active bank before reading its descriptor. The audio boundary
-@@ -928,9 +1467,9 @@
+@@ -928,9 +1563,9 @@
      }
      int vmax = d->max;
  #if X0X_S1C
@@ -688,7 +784,7 @@
      v = v < 0 ? 0 : v > vmax ? vmax : v;
      if (r.kind == R_BENGINE || r.kind == R_BPRESET) {
          if (v == pref_get(r)) return;
-@@ -947,15 +1486,33 @@
+@@ -947,15 +1582,33 @@
          pref_dirty(&r);
          if (from_keyboard) build_pages();
          return;
@@ -722,7 +818,7 @@
          } else
          proj.sound.v[r.a][r.b][r.c] = (uint8_t)v;
          engine_set(r.a, r.b, r.c, v);
-@@ -1363,9 +1920,19 @@
+@@ -1363,9 +2016,19 @@
      if ((kind == ORIGINAL_SOUND_CHICAGO && id == 2) || (kind == ORIGINAL_SOUND_MIAMI && id == 9)) {
          float hz;                                     /* CUTOFF: the engine's base corner (Synths 91f6e4e9), else % */
          if (engine_param_si(T_303, r.b, (int)id, value, &hz) == X0X_U_HZ) { unit_value(X0X_U_HZ, hz, num, unit); return 1; }
@@ -743,11 +839,14 @@
      if (ui_original_states(kind,id) || (kind == ORIGINAL_SOUND_CHICAGO && (id == 0 || id == 4)) ||
          (kind == ORIGINAL_SOUND_MIAMI && id == 7)) {
          v = original_text_view(r,value);
-@@ -1449,18 +2016,113 @@
+@@ -1449,18 +2112,119 @@
  
  /* the value, as a number and a unit ("-6" "dB"); a switch gives its name and no unit */
  X0X_COLD static void pref_value_of(pref_t r, int v, char *num, char *unit)
  {
++#if X0X_SJ6_AUX_LFO_NATIVE
++    if(r.kind==R_SJ6AUX && r.c==4u){put_i(num,(int)(juno6_aux_delay_seconds((unsigned)v)*1000.f+.5f));put_s(unit,"ms");return;}
++#endif
 +#if X0X_S1_DELAY_TIME_NATIVE
 +    if(r.kind==R_S1DLYTIME){
 +        *num=*unit=0;
@@ -809,6 +908,9 @@
 +        return;
 +    }
 +#endif
++#if X0X_SJ6_OTA_NATIVE
++    if(r.kind==R_SJ6OTA){put_s(num,v?"JUNO OTA":"NORMAL");return;}
++#endif
 +    if(r.kind==R_S1CMP && r.c<S1_CMP_COUNT) {
 +        float x=s1_cmp_physical(r.c,(unsigned)v);
 +        if(r.c<3u){put_d1(num,x,0);put_s(unit,":1");}
@@ -857,7 +959,7 @@
          const s1_patch_descriptor *patch = s1_patch_at(r.c);
          s1_patch_value owner = {0};
          float physical;
-@@ -1470,8 +2132,11 @@
+@@ -1470,8 +2234,11 @@
              if (!s1_read(r, &owner)) { put_s(num, "--"); return; }
              physical = owner.physical;
          }
@@ -869,7 +971,7 @@
              static const uint8_t bars[] = {8, 6, 4, 3, 2, 1, 1};
              unsigned div = owner.position;
              if (div < sizeof bars) put_s(put_i(num, bars[div]), div == 6 ? " BAR T" : " BAR");
-@@ -1490,10 +2155,14 @@
+@@ -1490,10 +2257,14 @@
              return;
          }
          if (r.c == S1_SUB_OCTAVE) { put_s(num, physical > 0.f ? "-24" : "-12"); put_s(unit, "st"); return; }
@@ -885,7 +987,7 @@
              put_s(num, sources[owner.position & 3u]);
              return;
          }
-@@ -1512,9 +2181,16 @@
+@@ -1512,9 +2283,16 @@
          engine_bass_edit_hold(0);
          return;
      }
@@ -902,7 +1004,7 @@
              put_i(num, v - SJ6_FINE_CENTER);
              put_s(unit, "ct");
              return;
-@@ -1531,8 +2207,15 @@
+@@ -1531,8 +2309,15 @@
                  put_s(unit, "Hz");
              } else put_s(num, "--");
              return;
@@ -918,7 +1020,7 @@
              juno6_lfo_view lfo;
              if (!engine_superj6_lfo_view(r.b, r.c - SJ6_LFO1_RATE, &lfo) || lfo.present != 3u)
                  put_s(num, "--");
-@@ -1708,9 +2391,10 @@
+@@ -1708,9 +2493,10 @@
          unsigned ps = pat_of(PART_303A + (r.b & 1))->rsv[r.b & 1];
          if (!ps) { put_s(num, "OFF"); return; }
          unsigned kind, preset;
@@ -930,7 +1032,7 @@
          return;
      }
      case R_SBAR: put_i(num, v + 1); return;
-@@ -1728,23 +2412,164 @@
+@@ -1728,23 +2514,167 @@
      pref_value_of(r,pref_get(r),num,unit);
  }
  
@@ -978,6 +1080,9 @@
 +static const char *const page_titles[PT_COUNT] = {
 +#if X0X_SJ6_NATIVE_UNISON
 +    [PT_SJ6_UNISON]="UNISON",
++#endif
++#if X0X_SJ6_NATIVE_J60
++    [PT_SJ6_J60]="CHORUS SET",
 +#endif
 +    [PT_EMPTY] = "",
 +    [PT_808_MIX] = "808 MIX",
@@ -1102,7 +1207,7 @@
   * one requested page plus the count, without a second persistent page table. */
  typedef struct {
      pages_t *pages;
-@@ -1754,50 +2579,55 @@
+@@ -1754,50 +2684,55 @@
  
  static void more(page_emitter_t *emit, pref_t r)
  {
@@ -1194,7 +1299,7 @@
  
  static int name_is(const x0x_param_t *d, const char *n)
  {
-@@ -1840,9 +2670,9 @@
+@@ -1840,9 +2775,9 @@
  { return r.kind==R_ENG && r.a==T_909 &&
      ((r.b==DR_BD && r.c==2) || (r.b==DR_SD && r.c==3)); }
  X0X_COLD static void add_track_pages(page_emitter_t *emit, int t, int v)
@@ -1205,7 +1310,7 @@
      int rank[NPARAMS_MAX];
      int n = 0, i, j;
      pref_t amp=NONE;
-@@ -1869,9 +2699,9 @@
+@@ -1869,9 +2804,9 @@
      }
      emit->group = GR_TRACK;
      for (i = 0; i < n; i += 4)
@@ -1216,7 +1321,7 @@
  
  /* where a screen's page is kept: per part on the part's screens (and TB-3PO), else one per screen */
  static uint8_t *page_of(int view)
-@@ -1884,8 +2714,11 @@
+@@ -1884,8 +2819,11 @@
   * every value; the UI reads it each frame and queues edits with the revision. */
  static const char *const ARP_MODE_N[] = {"UP", "DOWN", "UP+DN", "SEQ"
  #if X0X_SUPERJ6_BUILTIN_INIT && !defined(X0X_ARP_FAKE_H)
@@ -1228,7 +1333,7 @@
  };
  static const char *const ARP_RANGE_N[] = {"1 OCT", "2 OCT", "3 OCT", "4 OCT"};
  static const char *const ARP_SPEED_N[] = {"1/2", "3/8", "1/3", "1/4", "3/16", "1/6", "1/8", "1/12", "1/16", "1/32"};
-@@ -1899,16 +2732,37 @@
+@@ -1899,16 +2837,37 @@
  static uint8_t arp_edited;
  static uint32_t arp_t0;
  static const x0x_param_t *arp_desc(unsigned field, unsigned owner)
@@ -1267,7 +1372,7 @@
  #else
      (void)owner;
  #endif
-@@ -1922,8 +2776,14 @@
+@@ -1922,8 +2881,14 @@
      return (kind == ORIGINAL_SOUND_JUNO || kind == ORIGINAL_SOUND_SYNTHONE) && engine_arp_settings_read((unsigned)b, &s);
  }
  static int arp_get(unsigned voice, unsigned field)
@@ -1282,7 +1387,7 @@
      if (!engine_arp_settings_read(voice, &s)) return 0;
      switch (field) {
      case ARP_F_ON: return s.on;
-@@ -1931,9 +2791,13 @@
+@@ -1931,9 +2896,13 @@
      case ARP_F_RANGE: return s.range ? s.range - 1 : 0;
      case ARP_F_SPEED: return s.speed;
      case ARP_F_LENGTH: return s.length ? s.length - 1 : 0;
@@ -1297,7 +1402,7 @@
      case ARP_F_DIVISION: return s.division;
  #endif
      }
-@@ -1948,23 +2812,37 @@
+@@ -1948,23 +2917,37 @@
  static uint32_t arp_limit_until;
  static uint8_t arp_limit_owner, arp_limit_field;
  static void arp_set(unsigned voice, unsigned field, int v, int from_keyboard)
@@ -1337,7 +1442,7 @@
  }
  static void arp_step_edit(unsigned step, unsigned field, int v)
  {
-@@ -2035,10 +2913,19 @@
+@@ -2035,10 +3018,19 @@
                  /* If simultaneous, use the highest struck key. */
                  int key = 0;
                  while (strikes >>= 1) ++key;
@@ -1358,7 +1463,7 @@
              }
          }
          return;
-@@ -2066,9 +2953,9 @@
+@@ -2066,9 +3058,9 @@
  
  /* Immutable page descriptions avoid rebuilding four constant preference records at
   * every call site. The only patched byte is the current part/voice/channel;
@@ -1369,7 +1474,7 @@
      pref_t row[4];
      for (int i = 0; i < 4; i++) {
          row[i] = refs[i];
-@@ -2076,9 +2963,9 @@
+@@ -2076,9 +3068,9 @@
              if (axis == 1) row[i].a = value;
              if (axis == 2) row[i].b = value;
          }
@@ -1380,7 +1485,7 @@
  
  X0X_COLD __attribute__((noinline)) static void more_refs(page_emitter_t *emit, const pref_t *refs, unsigned n, int axis, uint8_t value)
  {
-@@ -2092,29 +2979,57 @@
+@@ -2092,80 +3084,141 @@
  }
  
  /* Pure navigation inputs: emit existing descriptors without keyboard clamping. */
@@ -1402,6 +1507,18 @@
          pref_t refs[4];
          for (unsigned col = 0; col < 4; ++col) {
              unsigned id = pages[row].id[col];
++#if X0X_SJ6_AUX_LFO_NATIVE
++            /* Fill only previously empty knobs of the existing page matrix. */
++            if(kind==R_SJ6KNOB && id==ORIG_PAGE_NONE && live137(&proj.sound,owner) && sj6_aux_init(&proj.sound,owner)) {
++                int aux=pages[row].title==PT_LFO && col>=2u ? (int)col-2 :
++                        pages[row].title==PT_VIBRATO && col>=2u ? (int)col :
++#if X0X_SJ6_NATIVE_DELAY
++                        pages[row].title==PT_SJ6_DELAY_CLOCK && col>=1u ? (int)col+3 :
++#endif
++                        -1;
++                if(aux>=0){refs[col]=PR(R_SJ6AUX,T_303,owner,(unsigned)aux);continue;}
++            }
++#endif
              refs[col] = id == ORIG_PAGE_NONE ? NONE :
 +#if X0X_SJ6_VCF_PORT
 +                (id==ORIG_PAGE_SJ6_FILTER_TRACK || id==ORIG_PAGE_SJ6_FILTER_AMOUNT) ?
@@ -1431,6 +1548,19 @@
 +        if (pages[row].title==PT_FILTER_MOD &&
 +            (kind!=R_SJ6KNOB || !live137(&proj.sound,owner))) continue;
 +#endif
++#if X0X_SJ6_NATIVE_J60
++        if(kind==R_SJ6KNOB&&pages[row].title==PT_CHORUS){
++            int v=engine_sj6_j60_get(owner,0);
++            if(v>0){
++                refs[2]=refs[3]=NONE;
++                add_page_refs(emit,pages[row].title,refs,0,0);
++                add_page(emit,PT_SJ6_J60,PR(R_SJ6J60,T_303,owner,0),PR(R_SJ6J60,T_303,owner,1),
++                         PR(R_SJ6J60,T_303,owner,2),PR(R_SJ6J60,T_303,owner,3));
++                continue;
++            }
++            
++        }
++#endif
 +#if X0X_SJ6_CLASSIC_I_PROBE
 +        if(pages[row].title==PT_CHORUS && kind==R_SJ6KNOB && ui_classic_i(owner)) {
 +            refs[2]=NONE;refs[3]=NONE;
@@ -1438,13 +1568,22 @@
 +            unsigned mode=ui_classic_i(owner);
 +            add_page(emit,PT_CHORUS_I_PARAMS+mode-JUNO6_CHORUS_I,PR(R_SJ6CLASSIC_I,T_303,owner,0),
 +                PR(R_SJ6CLASSIC_I,T_303,owner,1),PR(R_SJ6CLASSIC_I,T_303,owner,2),NONE);
++#if X0X_SJ6_NATIVE_J60
++            if(engine_sj6_j60_get(owner,0)==0)
++                add_page(emit,PT_SJ6_J60,PR(R_SJ6J60,T_303,owner,0),NONE,NONE,NONE);
++#endif
 +            continue;
 +        }
  #endif
          add_page_refs(emit, pages[row].title, refs, 0, 0);
++#if X0X_SJ6_NATIVE_J60
++        if(kind==R_SJ6KNOB && pages[row].title==PT_CHORUS && engine_sj6_j60_get(owner,0)==0)
++            add_page(emit,PT_SJ6_J60,PR(R_SJ6J60,T_303,owner,0),NONE,NONE,NONE);
++#endif
      }
  }
-@@ -2123,49 +3038,49 @@
+ #endif
+ static void describe_pages(pages_t *out, page_query_t *query, int view, int p, int mixsel, const uint8_t *selection)
  {
      page_emitter_t output = {out, query, GR_NONE};
      page_emitter_t *emit = &output;
@@ -1504,7 +1643,7 @@
                  more_refs(emit, refs, 3, 0, 0); } while (0);
          }
          break;
-@@ -2175,75 +3090,242 @@
+@@ -2175,75 +3228,255 @@
              add_track_pages(emit, t, selection[p]);
              emit->group = GR_KIT;
              if (p == PART_909)                         /* (the kit's gain: the mixer's level does it) */
@@ -1558,6 +1697,9 @@
 +#endif
 +#endif
 +                    {PT_AMP_ADSR, {SJ6_AMP_ATTACK, SJ6_AMP_DECAY, SJ6_AMP_SUSTAIN, SJ6_AMP_RELEASE}},
++#if X0X_SJ6_NOISE_SUB_NATIVE
++                    {PT_OSC_MIX, {SJ6_NOISE_LEVEL, SJ6_SUB_LEVEL, ORIG_PAGE_NONE, ORIG_PAGE_NONE}},
++#endif
 +                    {PT_OUTPUT, {ORIG_PAGE_ENGINE + 9, SJ6_MASTER_LEVEL, SJ6_OSC1_LEVEL, SJ6_OSC2_LEVEL}},
 +                    {PT_LFO_RATE, {SJ6_LFO1_RATE, SJ6_LFO2_RATE, SJ6_LFO3_RATE, SJ6_LFO2_SHAPE}},
 +#if X0X_SJ6_LFO1_DELAY_PORT
@@ -1589,6 +1731,11 @@
 +                if(live137(&proj.sound,b) && sj6_pitch_init(&proj.sound,b)) {
 +                    add_page(emit,PT_SJ6_PITCH_ENV,PR(R_SJ6PITCH,T_303,b,0),PR(R_SJ6PITCH,T_303,b,1),
 +                        PR(R_SJ6PITCH,T_303,b,2),PR(R_SJ6PITCH,T_303,b,3));
++#if X0X_SJ6_AUX_LFO_NATIVE
++                    if(sj6_aux_init(&proj.sound,b)) add_page(emit,PT_PITCH_MOD,PR(R_SJ6PITCH,T_303,b,4),
++                        PR(R_SJ6AUX,T_303,b,7),PR(R_SJ6AUX,T_303,b,8),NONE);
++                    else
++#endif
 +                    add_page(emit,PT_PITCH_MOD,PR(R_SJ6PITCH,T_303,b,4),NONE,NONE,NONE);
 +                }
 +#endif
@@ -1616,7 +1763,12 @@
 +                    add_page(emit,PT_SJ6_STEREO_FX,PR(R_SJ6ROOM,T_303,b,SJ6_ROOM_TYPE),
 +                        PR(R_SJ6ROOM,T_303,b,SJ6_ROOM_WIDEN),PR(R_SJ6ROOM,T_303,b,SJ6_ROOM_RATE),
 +                        PR(R_SJ6ROOM,T_303,b,SJ6_ROOM_DEPTH));
++                    add_page(emit,PT_EFFECT,PR(R_SJ6CRUSH,T_303,b,0),PR(R_SJ6CRUSH,T_303,b,1),NONE,NONE);
 +                }
++#endif
++#if X0X_SJ6_OTA_NATIVE
++                if(live137(&proj.sound,b))
++                    add_page(emit,PT_FILTER_MODE,PR(R_SJ6OTA,T_303,b,0),NONE,NONE,NONE);
 +#endif
                  first_row = UI_ORIGINAL_JUNO_PAGES;
              }
@@ -1780,7 +1932,7 @@
  #endif
              for (int row = first_row; row < count; row++) {
                  pref_t refs[4];
-@@ -2256,24 +3338,23 @@
+@@ -2256,24 +3489,23 @@
                  }
  #endif
  #if X0X_ARP_HOOKS && !X0X_S1_EXTRA
@@ -1809,7 +1961,7 @@
              more(emit, PR(R_BRKSLICE, 0, 0, 0));
              more(emit, PR(R_BRKSLICE, 1, 0, 0));
          }
-@@ -2281,54 +3362,54 @@
+@@ -2281,54 +3513,54 @@
      case V_GEN: {
          int b = p - PART_303A;
          emit->group = GR_PAT;
@@ -1876,7 +2028,7 @@
  
  static void build_pages(void)
  {
-@@ -2338,8 +3419,11 @@
+@@ -2338,8 +3570,11 @@
      int keep_sound=ui.view==V_PART && is_303() && oldpage<pg.n &&
          pg.r[oldpage][0].kind==R_BENGINE && pg.r[oldpage][0].b==b;
  #endif
@@ -1888,7 +2040,7 @@
  #if X0X_BASS_PRESET_PREVIEW
      if(!preserve && keep_sound) *page_of(ui.view)=(uint8_t)(pg.n-1);
  #endif
-@@ -2388,28 +3472,48 @@
+@@ -2388,28 +3623,48 @@
  
  /* a drum machine's page of the selected track's own sound (not the whole kit's: SENDS, PART, KIT) */
  static int track_page(void)
@@ -1944,7 +2096,7 @@
  
  /* a list section's name: whose values follow */
  static void hdr_name(int g, char *t)
-@@ -2430,30 +3534,30 @@
+@@ -2430,30 +3685,30 @@
      default: put_s(put_s(t, part_name(ui.part)), ": SOUND"); break;
      }
  }
@@ -1982,7 +2134,7 @@
          list_add(PR(R_ACT, ui.home_live ? ACT_HOME_PATTERNS : ACT_HOME_LIVE, 0, 0));
  #if X0X_UI_PERF
      if (ui.view == V_PERF)
-@@ -2922,9 +4026,87 @@
+@@ -2922,9 +4177,104 @@
  #endif
      undo_commit_stable();                       /* what was just done is a step too */
  #if X0X_BASS_TAGGED_SOUND
@@ -2013,6 +2165,11 @@
 +#endif
 +#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
 +    unsigned undo_cwg=0, undo_aa=0, undo_cmp=0;
++#if X0X_SJ6_OTA_NATIVE
++    unsigned undo_ota=0;
++#else
++    const unsigned undo_ota=0;
++#endif
 +#if X0X_SJ6_NATIVE_ROOM
 +    unsigned undo_room=0;
 +#else
@@ -2020,6 +2177,7 @@
 +#endif
 +#else
 +    const unsigned undo_cwg=0, undo_aa=0, undo_cmp=0;
++    const unsigned undo_ota=0;
 +    const unsigned undo_room=0;
 +#endif
 +#if X0X_SJ6_VCF_PORT
@@ -2052,6 +2210,17 @@
 +#if !X0X_SJ6_PITCH_ENV_NATIVE
 +    const unsigned undo_pitch=0;
 +#endif
++#if X0X_SJ6_NATIVE_J60
++    unsigned undo_j60=0;
++#else
++    const unsigned undo_j60=0;
++#endif
++#if X0X_SJ6_AUX_LFO_NATIVE
++    unsigned undo_aux=0;
++#endif
++#if !X0X_SJ6_AUX_LFO_NATIVE
++    const unsigned undo_aux=0;
++#endif
 +    unsigned undo_velocity137=0,undo_s1_mod=0,undo_a4=0,undo_rvfb=0,undo_trans=0,undo_crush=0,undo_delay=0,undo_pan=0,undo_feedback=0,undo_chorus_i=0,undo_sj6_voice=0;
 +#if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
 +    extern int s1_typed_pb_undo_ready(unsigned);
@@ -2071,11 +2240,32 @@
      undo_wait=0;undo_bass_mask=0;
      int entry=redo?undo.cur:undo.cur-1;
      if(entry>=0 && entry<undo.n) {
-@@ -2957,19 +4139,223 @@
+@@ -2956,20 +4306,268 @@
+ #endif
  #ifdef DNBOX_137_HOST_WITNESS
              if (proj.set.snd_rev==REV137) {
                  uint8_t p;
++#if X0X_SJ6_NATIVE_J60
++                uint8_t j60[4];
++                const uint32_t j60_off=__builtin_offsetof(sound_t,v)+
++                    ((T_MST*NVOICES_MAX+SJ6_J60_ROW+v)*NPARAMS_MAX+SJ6_J60_OFFSET);
++                undo_peek(&undo,entry,j60_off,j60,sizeof j60);
++                if(!sj6_j60_valid(j60) ||
++                   ((j60[0]|j60[1]|j60[2]|j60[3]) &&
++                    (target.cell[v][29]!=ORIGINAL_SOUND_JUNO || original_sound_sj6_factory(target.cell[v])))){
++                    say("UNDO CHORUS INVALID",0);engine_bass_edit_hold(0);return;
++                }
++                if(memcmp(j60,sj6_j60_code(&proj.sound,v),sizeof j60))undo_j60|=1u<<v;
++#endif
                  uint32_t off=cell+(8u+v)*NPARAMS_MAX+2u;
++#if X0X_SJ6_AUX_LFO_NATIVE
++                uint8_t aux[SJ6_AUX_BYTES];
++                uint32_t aux_off=__builtin_offsetof(sound_t,v)+((T_MST*NVOICES_MAX+SJ6_AUX_ROW+v)*NPARAMS_MAX);
++                undo_peek(&undo,entry,aux_off,aux,sizeof aux);
++                for(unsigned k=0;k<SJ6_AUX_BYTES;k++)
++                    if(!sj6_aux_valid(k,aux[k])){say("UNDO LFO INVALID",0);engine_bass_edit_hold(0);return;}
++                if(memcmp(aux,sj6_aux_read(&proj.sound,v),sizeof aux))undo_aux|=1u<<v;
++#endif
 +#if X0X_SJ6_PITCH_ENV_NATIVE
 +                uint8_t pitch[SJ6_PITCH_COUNT];
 +                uint32_t pitch_off=__builtin_offsetof(sound_t,v)+
@@ -2118,6 +2308,16 @@
 +                if(memcmp(ph,s1_phase_read(&proj.sound,v),sizeof ph))undo_phaser|=1u<<v;
 +#endif
 +#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++#if X0X_SJ6_NOISE_SUB_NATIVE
++                uint8_t sources[SJ6_SOURCES_COUNT];
++                const uint32_t sources_off=__builtin_offsetof(sound_t,v)+
++                    ((T_MST*NVOICES_MAX+SJ6_SOURCES_ROW+v)*NPARAMS_MAX+SJ6_SOURCES_OFFSET);
++                undo_peek(&undo,entry,sources_off,sources,sizeof sources);
++                if(sources[0]>127u || sources[1]>127u) {
++                    say("UNDO OSC SOURCE INVALID",0);engine_bass_edit_hold(0);return;
++                }
++                if(memcmp(sources,sj6_sources_read(&proj.sound,v),sizeof sources))undo_delay|=1u<<v;
++#endif
 +#if X0X_SJ6_NATIVE_ROOM
 +                uint8_t room[SJ6_ROOM_COUNT];
 +                const uint32_t room_off=__builtin_offsetof(sound_t,v)+
@@ -2126,6 +2326,20 @@
 +                for(unsigned k=0;k<SJ6_ROOM_COUNT;k++)
 +                    if(room[k]>sj6_room_max(k)){say("UNDO FX INVALID",0);engine_bass_edit_hold(0);return;}
 +                if(memcmp(room,sj6_room_read(&proj.sound,v),sizeof room))undo_room|=1u<<v;
++                uint8_t crush[2];
++                const uint32_t crush_off=__builtin_offsetof(sound_t,v)+
++                    ((T_MST*NVOICES_MAX+SJ6_CRUSH_ROW+v)*NPARAMS_MAX+SJ6_CRUSH_BYTE);
++                undo_peek(&undo,entry,crush_off,crush,sizeof crush);
++                if(crush[0]>1u || crush[1]>127u){say("UNDO CRUSH INVALID",0);engine_bass_edit_hold(0);return;}
++                if(memcmp(crush,sj6_crush_code(&proj.sound,v),sizeof crush))undo_room|=1u<<v;
++#endif
++#if X0X_SJ6_OTA_NATIVE
++                uint8_t ota;
++                const uint32_t ota_off=__builtin_offsetof(sound_t,v)+
++                    ((T_MST*NVOICES_MAX+SJ6_OTA_ROW+v)*NPARAMS_MAX+SJ6_OTA_BYTE);
++                undo_peek(&undo,entry,ota_off,&ota,1u);
++                if(ota>1u){say("UNDO FILTER INVALID",0);engine_bass_edit_hold(0);return;}
++                if(ota!=sj6_ota_read(&proj.sound,v))undo_ota|=1u<<v;
 +#endif
 +                uint8_t cmp[S1_CMP_COUNT];
 +                const uint32_t cmp_off=__builtin_offsetof(sound_t,v)+
@@ -2286,7 +2500,7 @@
          }
  #ifdef DNBOX_137_HOST_WITNESS
          extern int engine_bass_wheel_active(void);
-+        if((undo_s1_mod || undo_a4 || undo_rvfb || undo_trans || undo_crush || undo_delay || undo_pan || undo_feedback || undo_pitch || undo_dlytime || undo_phaser || undo_room || undo_cmp || undo_aa || undo_cwg || undo_dict || undo_vcf || undo_chorus_i || undo_sj6_unison || undo_sj6_voice || undo_clock || undo_zero) && !s1_typed_tuple_editable()) {
++        if((undo_s1_mod || undo_a4 || undo_rvfb || undo_trans || undo_crush || undo_delay || undo_pan || undo_feedback || undo_aux || undo_pitch || undo_dlytime || undo_phaser || undo_ota || undo_room || undo_cmp || undo_aa || undo_cwg || undo_dict || undo_vcf || undo_chorus_i || undo_sj6_unison || undo_j60 || undo_sj6_voice || undo_clock || undo_zero) && !s1_typed_tuple_editable()) {
 +            say("PROJECT READ ONLY",0);
 +            engine_bass_edit_hold(0);
 +            return;
@@ -2295,13 +2509,13 @@
              say("UNDO WAIT WHEEL",0);
              engine_bass_edit_hold(0);
              return;
-@@ -2992,16 +4378,72 @@
+@@ -2992,16 +4590,82 @@
          }
      }
  #endif
  #ifdef DNBOX_137_HOST_WITNESS
 -    if ((undo_velocity137 || undo_s1_mod) && !undo_bass_mask) engine_project_hold(1);
-+    if ((undo_velocity137 || undo_s1_mod || undo_pb || undo_sj6_pb || undo_sj6_mod || undo_a4 || undo_rvfb || undo_trans || undo_crush || undo_delay || undo_pan || undo_feedback || undo_pitch || undo_dlytime || undo_phaser || undo_room || undo_cmp || undo_aa || undo_cwg || undo_dict || undo_vcf || undo_chorus_i || undo_sj6_unison || undo_sj6_voice || undo_clock || undo_zero) && !undo_bass_mask) engine_project_hold(1);
++    if ((undo_velocity137 || undo_s1_mod || undo_pb || undo_sj6_pb || undo_sj6_mod || undo_a4 || undo_rvfb || undo_trans || undo_crush || undo_delay || undo_pan || undo_feedback || undo_aux || undo_pitch || undo_dlytime || undo_phaser || undo_ota || undo_room || undo_cmp || undo_aa || undo_cwg || undo_dict || undo_vcf || undo_chorus_i || undo_sj6_unison || undo_j60 || undo_sj6_voice || undo_clock || undo_zero) && !undo_bass_mask) engine_project_hold(1);
 +#if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
 +    /* Recheck while audio is held: a note-lock must not acquire the owner
 +     * between validating history and publishing the typed scalar pair. */
@@ -2334,6 +2548,11 @@
 +        engine_project_hold(0);engine_bass_edit_hold(0);say("UNDO WAIT FX",0);return;
 +    }
 +#endif
++#if X0X_SJ6_OTA_NATIVE
++    if(undo_ota && !sj6_ota_undo_ready(undo_ota & ~undo_bass_mask)){
++        engine_project_hold(0);engine_bass_edit_hold(0);say("UNDO WAIT FILTER",0);return;
++    }
++#endif
 +    if(undo_cmp && !s1_cmp_undo_ready(undo_cmp & ~undo_bass_mask)) {
 +        engine_project_hold(0);engine_bass_edit_hold(0);say("UNDO WAIT COMP",0);return;
 +    }
@@ -2358,6 +2577,11 @@
 +    if(undo_pitch && !sj6_pitch_undo_ready(undo_pitch & ~undo_bass_mask)) {
 +        engine_project_hold(0);engine_bass_edit_hold(0);say("UNDO WAIT PITCH",0);return;
 +    }
++#endif
++#if X0X_SJ6_AUX_LFO_NATIVE
++    if(undo_aux && !sj6_aux_undo_ready(undo_aux & ~undo_bass_mask)) {
++        engine_project_hold(0);engine_bass_edit_hold(0);say("UNDO WAIT LFO",0);return;
++    }
  #endif
      undo_lanes = 0;
      if (!(redo ? undo_redo : undo_undo)(&undo, undo_changed, &lo, &hi)) {
@@ -2365,12 +2589,12 @@
          if(undo_bass_mask)engine_project_hold(0);
  #ifdef DNBOX_137_HOST_WITNESS
 -        else if(undo_velocity137 || undo_s1_mod)engine_project_hold(0);
-+        else if(undo_velocity137 || undo_s1_mod || undo_pb || undo_sj6_pb || undo_sj6_mod || undo_a4 || undo_rvfb || undo_trans || undo_crush || undo_delay || undo_pan || undo_feedback || undo_pitch || undo_dlytime || undo_phaser || undo_room || undo_cmp || undo_aa || undo_cwg || undo_dict || undo_vcf || undo_chorus_i || undo_sj6_unison || undo_sj6_voice || undo_clock || undo_zero)engine_project_hold(0);
++        else if(undo_velocity137 || undo_s1_mod || undo_pb || undo_sj6_pb || undo_sj6_mod || undo_a4 || undo_rvfb || undo_trans || undo_crush || undo_delay || undo_pan || undo_feedback || undo_aux || undo_pitch || undo_dlytime || undo_phaser || undo_ota || undo_room || undo_cmp || undo_aa || undo_cwg || undo_dict || undo_vcf || undo_chorus_i || undo_sj6_unison || undo_j60 || undo_sj6_voice || undo_clock || undo_zero)engine_project_hold(0);
  #endif
  #endif
  #if X0X_BASS_PRESET_PREVIEW
          engine_bass_edit_hold(0);
-@@ -3013,11 +4455,65 @@
+@@ -3013,11 +4677,71 @@
      if(undo_bass_mask) engine_bass_base_restore(undo_bass_mask);
  #ifdef DNBOX_137_HOST_WITNESS
      extern void sj6_137_undo_apply(unsigned);
@@ -2403,6 +2627,9 @@
 +#if X0X_SJ6_NATIVE_ROOM
 +    if(undo_room)sj6_native_room_undo(undo_room & ~undo_bass_mask);
 +#endif
++#if X0X_SJ6_OTA_NATIVE
++    if(undo_ota)sj6_ota_undo(undo_ota & ~undo_bass_mask);
++#endif
 +    if(undo_cmp)s1_cmp_undo(undo_cmp & ~undo_bass_mask);
 +    if(undo_aa)s1_aa_undo(undo_aa & ~undo_bass_mask);
 +    if(undo_cwg)s1_typed_cwg_undo(undo_cwg&~undo_bass_mask);
@@ -2415,6 +2642,9 @@
 +#endif
 +#if X0X_SJ6_PITCH_ENV_NATIVE
 +    if(undo_pitch)sj6_pitch_undo(undo_pitch & ~undo_bass_mask);
++#endif
++#if X0X_SJ6_AUX_LFO_NATIVE
++    if(undo_aux)sj6_aux_undo(undo_aux & ~undo_bass_mask);
 +#endif
 +    if(undo_crush) s1_typed_crush_undo(undo_crush & ~undo_bass_mask);
 +#if defined(X0X_S1_AUTOPAN_PROBE) && X0X_S1_AUTOPAN_PROBE
@@ -2432,12 +2662,12 @@
 +    if(undo_sj6_pb) sj6_typed_pb_undo(undo_sj6_pb & ~undo_bass_mask);
 +#endif
 +#endif
-+    if(undo_bass_mask || undo_velocity137 || undo_s1_mod || undo_pb || undo_sj6_pb || undo_sj6_mod || undo_a4 || undo_rvfb || undo_trans || undo_crush || undo_delay || undo_pan || undo_feedback || undo_pitch || undo_dlytime || undo_phaser || undo_room || undo_cmp || undo_aa || undo_cwg || undo_dict || undo_vcf || undo_chorus_i || undo_sj6_unison || undo_sj6_voice || undo_clock || undo_zero) engine_project_hold(0);
++    if(undo_bass_mask || undo_velocity137 || undo_s1_mod || undo_pb || undo_sj6_pb || undo_sj6_mod || undo_a4 || undo_rvfb || undo_trans || undo_crush || undo_delay || undo_pan || undo_feedback || undo_aux || undo_pitch || undo_dlytime || undo_phaser || undo_ota || undo_room || undo_cmp || undo_aa || undo_cwg || undo_dict || undo_vcf || undo_chorus_i || undo_sj6_unison || undo_j60 || undo_sj6_voice || undo_clock || undo_zero) engine_project_hold(0);
  #else
      if(undo_bass_mask) engine_project_hold(0);
  #endif
  #endif
-@@ -3057,8 +4553,11 @@
+@@ -3057,8 +4781,11 @@
  }
  
  X0X_COLD int ui_project_save(void)
@@ -2449,7 +2679,7 @@
  #if BOARD_SMK37
      extern uint8_t smk_ck_flash_busy(void);
  #endif
-@@ -3982,19 +5481,190 @@
+@@ -3982,19 +5709,218 @@
  }
  
  static void turn_ref(pref_t r, int e, int knob)
@@ -2464,6 +2694,17 @@
 +#if X0X_SJ6_NATIVE_UNISON
 +    if(r.kind==R_SJ6UNISON){
 +        int before=engine_sj6_unison_get(r.b,r.c);
++        const x0x_param_t *d=pref_desc(r);
++        if(e && before>=0 && d){
++            int next=before+(e>0?1:-1);
++            if(next>=0 && next<=d->max)pref_set_impl(r,next,!accel_smc);
++        }
++        return;
++    }
++#endif
++#if X0X_SJ6_NATIVE_J60
++    if(r.kind==R_SJ6J60){
++        int before=engine_sj6_j60_get(r.b,r.c);
 +        const x0x_param_t *d=pref_desc(r);
 +        if(e && before>=0 && d){
 +            int next=before+(e>0?1:-1);
@@ -2487,6 +2728,13 @@
 +    if(r.kind==R_SJ6PITCH) {
 +        const int pos=pref_get(r)+(e>0)-(e<0);
 +        if(e && pos>=0 && !pref_read_only(r) && sj6_pitch_choose(r.b,r.c,(unsigned)pos))mark_dirty();
++        return;
++    }
++#endif
++#if X0X_SJ6_AUX_LFO_NATIVE
++    if(r.kind==R_SJ6AUX){
++        int pos=pref_get(r)+(e>0)-(e<0);
++        if(e && pos>=0 && !pref_read_only(r) && sj6_aux_choose(r.b,r.c,(unsigned)pos))mark_dirty();
 +        return;
 +    }
 +#endif
@@ -2529,12 +2777,22 @@
 +#endif
 +#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
 +#if X0X_SJ6_NATIVE_ROOM
++    if(r.kind==R_SJ6CRUSH){
++        if(e)pref_set(r,pref_get(r)+(r.c?accel(knob,e,127):(e>0)-(e<0)));
++        return;
++    }
 +    if(r.kind==R_SJ6ROOM){
 +        if(e && !pref_read_only(r)){
 +            int limit=(int)sj6_room_max(r.c);
 +            int next=limit==1?(e>0):pref_get(r)+accel(knob,e,limit);
 +            pref_set_impl(r,next<0?0:next>limit?limit:next,1);
 +        }
++        return;
++    }
++#endif
++#if X0X_SJ6_OTA_NATIVE
++    if(r.kind==R_SJ6OTA){
++        if(e)pref_set_impl(r,e>0,1);
 +        return;
 +    }
 +#endif
@@ -2640,7 +2898,7 @@
      if (r.kind == R_BRKSLOT && !r.b) { (void)brk_choice_turn(r, e); return; }
      brk_choice_cancel();
  #if X0X_BASS_PRESET_PREVIEW
-@@ -4013,8 +5683,15 @@
+@@ -4013,8 +5939,15 @@
          if (bass_edit) engine_bass_edit_hold(0);
  #endif
          return;
@@ -2656,7 +2914,7 @@
      if(switched>=0)pref_set_impl(r,switched,!accel_smc);
      else
      {
-@@ -4842,10 +6519,10 @@
+@@ -4842,10 +6775,10 @@
              break;
          s = t;
      }
@@ -2669,7 +2927,7 @@
          ui.list_top = ui.list_sel;
      int visible = visible_list_rows();
      if (ui.list_sel >= ui.list_top + visible)
-@@ -4853,9 +6530,9 @@
+@@ -4853,9 +6786,9 @@
  }
  
  static void list_enter(void)
@@ -2680,7 +2938,7 @@
      if (r.kind != R_ACT)
          return;
      if (r.a == ACT_CLEAR_PAT)
-@@ -4888,9 +6565,9 @@
+@@ -4888,9 +6821,9 @@
  {
  #if BOARD_SMK37
      smc_ui_cancel();
@@ -2691,7 +2949,7 @@
          global_back();                                /* "<" leaves a settings section, as HOME */
          return 1;                                     /* the held "<" must not edit the section index */
      }
-@@ -5434,8 +7111,12 @@
+@@ -5434,8 +7367,12 @@
  {
      uint32_t btn = plat_buttons(), keys = plat_keys(), ch, i;
      unsigned panic_consume;
@@ -2704,7 +2962,7 @@
      static int observed_bank[NBASS]={-1,-1};
      for(int v=0;v<NBASS;v++) if(observed_bank[v]!=engine_bass_bank(v)) {
          observed_bank[v]=engine_bass_bank(v);build_pages();
-@@ -5593,9 +7274,9 @@
+@@ -5593,9 +7530,9 @@
              plat_ms()-ui.down_t[B_SEQ]<HELP_HOLD) {
              ui.btn_used|=1u<<B_SEQ;
              (void)step_lane_turn(e);
@@ -2715,7 +2973,7 @@
              bstep_t *st = &cur_pat()->bass[bidx()].step[ui.held_step];
              int v = (int)bstep_velocity(st) + e;
              st->velocity = (uint8_t)(v < 1 ? 1 : v > 127 ? 127 : v);
-@@ -6062,66 +7743,36 @@
+@@ -6062,66 +7999,36 @@
          }
  }
  static void dot(int32_t x, int32_t y, int32_t r, uint16_t c) { disc((float)x + 0.5f, (float)y + 0.5f, (float)r + 0.3f, c); }
@@ -2810,7 +3068,7 @@
  
  static void play_icon(int32_t x, int32_t y, uint16_t c)
  {
-@@ -6380,9 +8031,9 @@
+@@ -6380,9 +8287,9 @@
                  name=context_title;
              }
          }
@@ -2821,7 +3079,7 @@
          if(pickup)name=ui.msg;
          sound_slab(0,0,240,HDR_H,0);
          /* R22 r20 header: engine + voice in the part colour, not a filled badge. */
-@@ -6570,10 +8221,13 @@
+@@ -6570,10 +8477,13 @@
          memset(&arp_bp, 0, sizeof arp_bp);
          arp_bp.len = as.length ? as.length : 16;
          arp_bp.gen.root = UI_ARP_ROOT % 12;            /* offsets from the held root (C3 when none is held) */
@@ -2836,7 +3094,7 @@
          }
          bp = &arp_bp;
          held = arp_held;
-@@ -6747,9 +8401,9 @@
+@@ -6747,9 +8657,9 @@
  
  /* Control rows share the existing main/knob strips; no framebuffer or UI state is added. */
  static UI_DRAW const char *matrix_group(int page)
@@ -2847,7 +3105,7 @@
          int ty=matrix_value(pg.r[page][0]);
          return ty==CHI_FX_OFF?"FX / OFF":ty==CHI_FX_COMP?"FX / MASTER":"FX / INSERT";
      }
-@@ -6844,11 +8498,11 @@
+@@ -6844,11 +8754,11 @@
  #if X0X_S1_EXTRA || X0X_SUPERJ6_BUILTIN_INIT
      int bank = engine_bass_bank(bidx());
      synth_page_marker = bank == ORIGINAL_SOUND_SYNTHONE || bank == ORIGINAL_SOUND_JUNO;
@@ -2861,7 +3119,7 @@
      uint16_t col=matrix_col();
      if(night) cv_rect(0,0,240,band==2?KNOB_H:BAND_H,SOUND_BASE);
      for (row=0;row<rows;row++) {
-@@ -7689,9 +9343,9 @@
+@@ -7689,9 +9599,9 @@
          char num[36], unit[8];
          const x0x_param_t *d;
          if (row >= ui.list_n)
@@ -2872,7 +3130,7 @@
              char t[28];
              hdr_name(r.a, t);
              cv_text(8, vc(&FONT_XS, y + 4, 16), &FONT_XS, t, C_AMB);
-@@ -8111,10 +9765,10 @@
+@@ -8111,10 +10021,10 @@
      pref_t r;
      int page = cur_page(), i = ui.touched;
      if (ui.view != V_PART || !is_303() || i < 0 || i > 3 ||
@@ -2885,7 +3143,7 @@
      return matrix_touch_matches(r, i);
  }
  
-@@ -9777,10 +11431,10 @@
+@@ -9777,10 +11687,10 @@
  
  /* the knob row's tag: whose knobs these are (BD, 909 KIT, P3 PATTERN, 909 MIX: BD, 303A STEP 5) */
  static UI_DRAW void knob_tag(char *t)
@@ -2898,7 +3156,7 @@
          put_i(put_s(put_s(t, is_drum() ? engine_voice_name(ui.part == PART_909 ? T_909 : T_808, ui.sel[ui.part])
                                          : part_name(ui.part)), " P-LOCK STEP "), lock_step() + 1);
      } else if (ui.view == V_SEQ && is_303() && ui.held_step >= 0) {
-@@ -9806,11 +11460,11 @@
+@@ -9806,11 +11716,11 @@
      else
          put_s(t, ti);
      {   /* a section over several pages (same name): which of them, "BD (1/2)" */
@@ -2912,7 +3170,7 @@
          if (b > a) {
              char *q = t;
              while (*q)
-@@ -9821,8 +11475,72 @@
+@@ -9821,8 +11731,72 @@
  }
  
  #include "ui_chance_probe.h"
@@ -2985,7 +3243,7 @@
  {
      static uint32_t last_sig;
      int i, pgi = cur_page();
-@@ -10238,8 +11956,11 @@
+@@ -10238,8 +12212,11 @@
   * audio before acquiring a hold; recheck after the hold for a queued Start.
   * A failed write retries after 1 s. Reset/load must not drop this request. */
  static void device_bt_save(void)
@@ -2997,7 +3255,7 @@
      static uint32_t retry_at;
      if (!project_device_bt_pending() || project_busy || perf_testing() ||
          (retry_at && (int32_t)(plat_ms() - retry_at) < 0)) return;
-@@ -10284,8 +12005,11 @@
+@@ -10284,8 +12261,11 @@
   * audio. Only the objects that changed are written (project.c), usually one or two sectors. */
  #define AUTOSAVE_GAP 20000u
  static void autosave(void)
@@ -3009,7 +3267,7 @@
  #if BOARD_SMK37
      extern uint8_t smk_ck_flash_busy(void), smk_clip_mode_on(void);
  #endif
-@@ -10372,9 +12096,9 @@
+@@ -10372,9 +12352,9 @@
      }
  #endif
      if(ui.overlay!=O_LIST || ui.help) peer_scroll.active=0;

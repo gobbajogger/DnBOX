@@ -154,7 +154,37 @@
  #endif
          for (unsigned i = 0; i < frames; ++i) {
  #if X0X_S1_FENCED_CLOCK
-@@ -923,9 +992,9 @@
+@@ -915,18 +984,45 @@
+ #endif
+     return render_backend(p, w, left, right, frames);
+ }
+ 
++#if X0X_SJ6_NATIVE_ROOM
++/* Build9 uses an independent AKDecimator with 30 percent wet and 1.3 gain.
++ * This compact receiver preserves the decimation control direction, rate law,
++ * wet path and warm timing without claiming the Apple AU's DSP bit identity. */
++static void sj6_crush_process(original_runtime_part *p,float *left,float *right,unsigned frames)
++{
++    if(!p->dsp.juno.crush.active)return;
++    const float step=p->dsp.juno.crush.step;
++    float phase=p->dsp.juno.crush.phase;
++    float l=p->dsp.juno.crush.hold[0],r=p->dsp.juno.crush.hold[1];
++    for(unsigned i=0;i<frames;++i){
++        phase+=step;
++        if(phase>=1.f){phase-=1.f;l=left[i];r=right[i];}
++        left[i]=1.3f*(.7f*left[i]+.3f*l);
++        right[i]=1.3f*(.7f*right[i]+.3f*r);
++    }
++    p->dsp.juno.crush.phase=phase;
++    p->dsp.juno.crush.hold[0]=l;
++    p->dsp.juno.crush.hold[1]=r;
++}
++#endif
++
+ static int render_backend(original_runtime_part *p, original_runtime_workspace *w,
+     float *left, float *right, unsigned frames)
+ {
+     int ok;
      if(p->kind==ORIGINAL_SOUND_JUNO){
  #if X0X_SUPERJ6_FACTORY
          ok=juno6_render_stereo(&p->dsp.juno.synth,left,right,frames);
@@ -162,10 +192,16 @@
 -#if defined(X0X_HOST) && defined(X0X_SJ6_ALT3_WITNESS)
 +#if (defined(X0X_HOST) && defined(X0X_SJ6_ALT3_WITNESS)) || X0X_SJ6_ALT3_NATIVE
              juno6_alt3_process(&p->dsp.juno.synth,left,right,frames); /* after HPF, before downstream FX */
++#endif
++#if X0X_SJ6_NATIVE_J60
++            if(p->dsp.juno.chorus.j60.selected)
++                juno6_j60_process(&p->dsp.juno.chorus,left,right,frames);
++            else
  #endif
  #if X0X_SJ6_CLASSIC_I_PROBE
              if(p->classic_i_authored && p->dsp.juno.chorus.factory_mode>=JUNO6_CHORUS_OFF) {
-@@ -935,10 +1004,16 @@
+                 classic_wrapper_process(&p->classic_i_effect,p->classic_i_sample,left,right,frames);
+@@ -935,10 +1031,17 @@
                  juno6_chorus_process(&p->dsp.juno.chorus,left,right,frames);
  #if X0X_SJ6_CLASSIC_I_PROBE
              p->classic_i_sample+=frames;
@@ -178,6 +214,7 @@
 +            juno6_unison_process(&p->dsp.juno.synth,left,right,frames);
 +#endif
 +#if X0X_SJ6_NATIVE_ROOM
++            sj6_crush_process(p,left,right,frames);
 +            sj6_room_process(&p->dsp.juno.room,left,right,frames);
  #endif
              /* The original master attenuator follows the instrument effects. */

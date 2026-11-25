@@ -1,12 +1,17 @@
 --- a/firmware/src/app/typed_controls_trial.h
 +++ b/firmware/src/app/typed_controls_trial.h
-@@ -4,23 +4,35 @@
+@@ -4,23 +4,40 @@
   * or bench-only DSP. All translation units must use the same support flags. */
  #ifndef DNBOX_TYPED_CONTROLS_NATIVE_TEST
  #define DNBOX_TYPED_CONTROLS_NATIVE_TEST 0
  #endif
 +#if X0X_SJ6_LFO1_DELAY_PORT && !DNBOX_TYPED_CONTROLS_NATIVE_TEST
 +#error Native SuperJ6 ID91 requires the typed trial
++#endif
++#if X0X_SJ6_NOISE_SUB_NATIVE
++#if !DNBOX_TYPED_CONTROLS_NATIVE_TEST
++#error Native SuperJ6 source levels require the read-only typed carrier
++#endif
 +#endif
  #if DNBOX_TYPED_CONTROLS_NATIVE_TEST != 0 && DNBOX_TYPED_CONTROLS_NATIVE_TEST != 1
  #error DNBOX_TYPED_CONTROLS_NATIVE_TEST must be 0 or 1

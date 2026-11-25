@@ -10,7 +10,7 @@
  #if X0X_SJ6_CLASSIC_I_PROBE
  #ifndef X0X_HOST
  #error scoped classic I host only
-@@ -23,9 +24,15 @@
+@@ -23,9 +24,16 @@
         ORIGINAL_RUNTIME_NEEDS_FX = -1, ORIGINAL_RUNTIME_FAULT = -2 };
  typedef union {
      original_chicago_backend chicago;
@@ -21,13 +21,14 @@
 +        juno6_chorus_t chorus;
 +#if X0X_SJ6_NATIVE_ROOM
 +        sj6_room_t room;
++        struct {float step,phase,hold[2];uint8_t active;} crush;
 +#endif
 +    } juno;
      s1_dry_part synthone;
  } original_runtime_backend;
  /* Shared live arp / ARP SEQ for SYNTHONE and JUNO owners (engine_arp.h). Live
   * sources feed held[]; SEQUENCE playback bypasses it. Audio context only. */
-@@ -37,12 +44,17 @@
+@@ -37,12 +45,17 @@
      S1Sequencer seq;
      NoteNumber held[S1_SEQ_MAX_HELD];   /* heldNoteNumbersAE, newest first */
      float bpm;
@@ -45,7 +46,7 @@
      uint32_t age;                       /* frames since the last real note-on (H3) */
      uint64_t clk_pos;                   /* transport position, Q8 samples (clk_beat != 0) */
      uint32_t clk_beat;                  /* Q8 samples per beat; 0 = transport stopped */
-@@ -81,8 +93,13 @@
+@@ -81,8 +94,13 @@
  /* Call on an initialized or zero-initialized part before cold replacement;
   * externally owned Chicago resources must be retired before overwriting it. */
  int original_runtime_retire(original_runtime_part *);

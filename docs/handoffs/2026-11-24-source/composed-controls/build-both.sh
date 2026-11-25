@@ -37,6 +37,8 @@ allowed={
  "-DX0X_SJ6_LFO1_DELAY_PORT=1", "-DX0X_SJ6_NATIVE_UNISON=1", "-DX0X_SJ6_PITCH_ENV_NATIVE=1",
  "-DX0X_SJ6_BEND_TYPED_PROBE=1", "-DX0X_SJ6_MOD_TYPED_PROBE=1", "-DX0X_SJ6_ALT3_NATIVE=1",
  "-DX0X_SJ6_NATIVE_ROOM=1",
+ "-DX0X_SJ6_NATIVE_J60=1", "-DX0X_SJ6_AUX_LFO_NATIVE=1", "-DX0X_SJ6_NOISE_SUB_NATIVE=1",
+ "-DX0X_SJ6_OTA_NATIVE=1",
 }
 if not all(x in allowed for x in flags):
  raise SystemExit("Unknown control flag; validate the port before adding it to this wrapper")

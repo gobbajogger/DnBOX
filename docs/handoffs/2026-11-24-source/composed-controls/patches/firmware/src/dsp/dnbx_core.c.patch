@@ -1,6 +1,52 @@
 --- a/firmware/src/dsp/dnbx_core.c
 +++ b/firmware/src/dsp/dnbx_core.c
-@@ -383,8 +383,36 @@
+@@ -336,8 +336,45 @@
+     tmp->attack_s=p->amp.attack_s; tmp->decay_s=p->amp.decay_s;
+     tmp->sustain=p->amp.sustain; tmp->release_s=p->amp.release_s;
+     return tmp;
+ }
++#if X0X_SJ6_OTA_NATIVE
++int dnbx_set_sj6_ota(dnbx_part *s,unsigned value)
++{
++    if(!valid(s)||!s->superj6_amp_range||value>1u)return 0;
++    if(s->sj6_ota==value)return 1;
++    s->sj6_ota=(uint8_t)value;
++    /* Original selects a different filter history. Rearm the target without
++     * resetting oscillator phase, ADSR gate or the other bass owner. */
++    for(unsigned v=0;v<DNBX_VOICES;++v)
++        for(unsigned l=0;l<DNBX_LAYERS;++l){
++            dnbx_layer_voice *p=&s->voice[v].layer[l];
++            p->filter_first=p->filter_second=p->ota_tail[0]=p->ota_tail[1]=0.f;
++        }
++    return 1;
++}
++static inline float sj6_ota_stage(float input,float *state,float g)
++{
++    float v=g*fm_tanhf(input-*state);
++    float y=*state+v;
++    *state=y+v;
++    return y;
++}
++static __attribute__((noinline)) float sj6_ota_filter(dnbx_layer_voice *v,float x,
++                                                       float rad,float resonance)
++{
++    /* Original OTA mode is a nonlinear, resonance-fed four-stage ladder,
++     * not the normal two-stage recurrence or the independent ID28 HPF.
++     * Compact discrete-time approximation: reused cutoff/envelope path,
++     * bounded resonance, and a single update per stage at board rate. */
++    float g=.5f*rad/(1.f+.5f*rad);
++    float input=x-(3.85f*fm_clampf(resonance,0.f,1.f))*v->ota_tail[1];
++    float y=sj6_ota_stage(input,&v->filter_first,g);
++    y=sj6_ota_stage(y,&v->filter_second,g);
++    y=sj6_ota_stage(y,&v->ota_tail[0],g);
++    return sj6_ota_stage(y,&v->ota_tail[1],g);
++}
++#endif
+ int dnbx_set_filter_link(dnbx_part *s,unsigned enabled)
+ {
+     if (!valid(s)) return DNBX_E_UNINITIALIZED;
+     if (enabled>1u) return DNBX_E_RANGE;
+@@ -383,8 +420,36 @@
      if (!valid(s)) return DNBX_E_UNINITIALIZED;
      if (l>=DNBX_LAYERS || !p) return DNBX_E_ARGUMENT;
      *p=s->layer[l].params; return DNBX_OK;
@@ -37,7 +83,7 @@
  {
      unsigned chosen=0; int found=0, retrigger=0;
      if (!valid(s)) return DNBX_E_UNINITIALIZED;
-@@ -423,8 +451,11 @@
+@@ -423,8 +488,11 @@
      for (unsigned i=0;i<DNBX_VOICES;i++) s->voice[i].age_rank=next_rank[i];
      if (!retrigger) memset(v,0,sizeof *v);
      v->note=(uint8_t)note; v->gate=1; v->age_rank=0; v->pedal_held=0;
@@ -49,7 +95,7 @@
          const dnbx_layer_params *p=&s->layer[l].params;
          v->layer[l].increment=pitch_increment(s,note,p->tune_semitones);
          envelope_on(&v->layer[l].amp,&p->amp,s->sample_rate);
-@@ -449,8 +480,11 @@
+@@ -449,8 +517,11 @@
      dnbx_voice *v=&s->voice[0];
      if(!voice_active(v))memset(v,0,sizeof *v);
      v->note=(uint8_t)note;v->gate=1;v->pedal_held=0;v->age_rank=0;
@@ -61,7 +107,7 @@
          const dnbx_layer_params *p=&s->layer[l].params;
          v->layer[l].increment=pitch_increment(s,note,p->tune_semitones);
          envelope_on(&v->layer[l].amp,&p->amp,s->sample_rate);
-@@ -461,8 +495,11 @@
+@@ -461,8 +532,11 @@
  }
  #endif
  static void release_voice(dnbx_part *s,dnbx_voice *v)
@@ -73,11 +119,94 @@
          envelope_off(&v->layer[l].amp,&s->layer[l].params.amp,s->sample_rate);
          dnbx_envelope_params linked;
          envelope_off(&v->layer[l].filter,filter_params(s,l,&linked),s->sample_rate);
-@@ -554,8 +591,16 @@
+@@ -527,9 +601,58 @@
+ }
+ #if DNBOX_TYPED_CONTROLS_NATIVE_TEST && X0X_SJ6_VELOCITY_PORT
+ #include "sj6_velocity_fma.h"
+ #endif
+-static int render_with_osc_gains(dnbx_part *s,float *left,float *right,unsigned n,dnbx_work *w,float gain1,float gain2,float fvel)
++#if X0X_SJ6_NOISE_SUB_NATIVE
++/* IDs 201/202 have independent source gains; their Build9 graph setters
++ * read a common normalized input but use different gain laws. */
++void dnbx_set_sj6_sources(dnbx_part *s,unsigned owner,const uint8_t code[2])
++{
++    if (!s->superj6_amp_range || code[0]>127u || code[1]>127u) return;
++    if (code[0]!=s->sj6_noise_code) {
++        float x=(float)code[0]/127.f;
++        s->sj6_noise_code=code[0];
++        s->sj6_noise_gain=.707f*x*x*fm_sqrtf(x);
++    }
++    if (code[1]!=s->sj6_sub_code) {
++        s->sj6_sub_code=code[1];
++        s->sj6_sub_gain=(.808f/127.f)*(float)code[1];
++    }
++    if (!s->sj6_noise_random)
++        s->sj6_noise_random=owner ? UINT32_C(0xd1b54a35) : UINT32_C(0x9e3779b9);
++}
++
++/* Phase-coherent tonal approximation of the source's octave-down Juno Sub,
++ * with the original MySub.sfz key boundaries. Four measured spectral levels
++ * per zone, quantized to 1/128; no original sample words are included here. */
++static const uint8_t sj6_sub_harmonic[12][4]={
++    {92,22,10,6},{94,19,11,5},{88,17,10,5},{66,13,7,4},
++    {65,12,7,4},{56,14,8,5},{62,16,9,7},{49,14,7,4},
++    {53,16,9,6},{52,12,3,1},{32,3,1,1},{35,2,0,0}
++};
++static unsigned sj6_sub_zone(unsigned note)
++{ return note<34u ? 0u : note>=94u ? 11u : (note-34u)/6u+1u; }
++static inline float sj6_synthesize_sub(float phase,float step,const uint8_t *h)
++{
++    float fundamental=fm_sin_turns(phase), sq=fundamental*fundamental;
++    float out=h[0];
++    if(step<.15f) {
++        out+=h[1]*(3.f-4.f*sq);
++        if(step<.09f) {
++            out+=h[2]*(5.f+sq*(-20.f+16.f*sq));
++            if(step<(.45f/7.f))out+=h[3]*(7.f+sq*(-56.f+sq*(112.f-64.f*sq)));
++        }
++    }
++    return (fundamental*(1.f/128.f))*out;
++}
++static inline float sj6_noise_next(uint32_t *state)
++{
++    uint32_t x=*state;
++    x^=x<<13; x^=x>>17; x^=x<<5; *state=x;
++    return (float)((int32_t)(x>>8)-8388608)*(1.f/8388608.f);
++}
++#endif
++static int render_with_osc_gains(dnbx_part *s,float *left,float *right,unsigned n,dnbx_work *w,float gain1,float gain2,float fvel,float source_bend)
+ {
+     if (!valid(s)) return DNBX_E_UNINITIALIZED;
+ #if !DNBX_DIAGNOSTIC_COUNTERS
+     if (w) return DNBX_E_UNSUPPORTED;
+@@ -538,8 +661,21 @@
+     if (!n) return DNBX_OK;
+     if (!left || !right || left==right) return DNBX_E_ARGUMENT;
+     COUNT(w,frames,n);
+     const float osc_gain[]={gain1,gain2};
++#if X0X_SJ6_NOISE_SUB_NATIVE
++    float sj6_steps[DNBX_VOICES];
++    const uint8_t *sj6_harmonics[DNBX_VOICES];
++    uint32_t sj6_noise=s->sj6_noise_random;
++    if(s->sj6_sub_gain)
++        for(unsigned i=0;i<DNBX_VOICES;++i) {
++            unsigned note=s->voice[i].note;
++            sj6_steps[i]=.5f*pitch_increment(s,note,0.f)*source_bend;
++            sj6_harmonics[i]=sj6_sub_harmonic[sj6_sub_zone(note)];
++        }
++#else
++    (void)source_bend;
++#endif
+     float filter_note[DNBX_VOICES];
+ #if DNBOX_TYPED_CONTROLS_NATIVE_TEST && !X0X_SJ6_VELOCITY_PORT
+     /* The admission profile rejects nonzero b2 and the host-only velocity
+        flag. Do not approximate a different sounding filter in the trial. */
+@@ -553,8 +689,16 @@
+ #else
              filter_note[i] = fmaf(fvel,s->voice[i].velocity,inverse);
  #endif
      }
- #endif
++#endif
 +#if X0X_SJ6_VCF_PORT
 +    float track=0.f,strength=0.f,keyboard_ratio[DNBX_VOICES];
 +    const int authored_track=dnbx_read_raw(s,131u,&track)==DNBX_OK && track>0.f;
@@ -85,12 +214,11 @@
 +    if(authored_track)
 +        for(unsigned i=0;i<DNBX_VOICES;i++)
 +            keyboard_ratio[i]=fm_exp2f(track*((float)s->voice[i].note-60.f)/12.f);
-+#endif
+ #endif
      dnbx_envelope_params linked[DNBX_LAYERS];
      const dnbx_envelope_params *fp[DNBX_LAYERS];
      for (unsigned l=0;l<DNBX_LAYERS;l++) fp[l]=filter_params(s,l,&linked[l]);
-     for (unsigned k=0;k<n;k++) {
-@@ -588,14 +633,26 @@
+@@ -588,14 +732,26 @@
              if (!voice_active(v)) continue;
              COUNT(w,active_voice_samples,1);
              float velocity=v->velocity;
@@ -118,9 +246,25 @@
                  float amp=envelope_sample(&lv->amp,&p->amp,s->sample_rate,w);
                  float env=envelope_sample(&lv->filter,fp[l],s->sample_rate,w);
                  if (fvel != 0.f) env *= filter_note[i];
-@@ -605,15 +662,22 @@
+@@ -603,17 +759,44 @@
+                     ? factory_oscillator(lv, p->waveform, width[l], w)
+                     : oscillator(lv->phase,lv->increment,p->waveform,width[l],p->oscillator_mode,w);
                  if (osc_gain[l]!=1.f) x*=osc_gain[l];
                  x+=(lv->subphase<.5f?1.0f:-1.0f)*p->sub_gain;
++#if X0X_SJ6_NOISE_SUB_NATIVE
++                if(!l) {
++                    if(s->sj6_noise_gain) x+=s->sj6_noise_gain*sj6_noise_next(&sj6_noise);
++                    if(s->sj6_sub_gain) {
++                        float step=sj6_steps[i];
++#if X0X_SJ6_PITCH_ENV_NATIVE
++                        step*=pitch_ratio;
++#endif
++                        x+=s->sj6_sub_gain*sj6_synthesize_sub(v->sj6_sub_phase,step,sj6_harmonics[i]);
++                        v->sj6_sub_phase+=step;
++                        if(v->sj6_sub_phase>=1.f) v->sj6_sub_phase-=1.f;
++                    }
++                }
++#endif
                  /* Existing DnBOX two-pole recurrence, with explicit saturation
                   * guards to make a finite bound part of this candidate ABI. */
 +#if X0X_SJ6_VCF_PORT
@@ -131,9 +275,15 @@
 +#else
                  float a=fm_clampf(FM_TWO_PI*(p->cutoff_hz+env*p->filter_env_hz)/s->sample_rate,.001f,.75f);
 +#endif
++#if X0X_SJ6_OTA_NATIVE
++                if(s->sj6_ota)mix[l]+=velocity*amp*sj6_ota_filter(lv,x,a,p->resonance);
++                else
++#endif
++                {
                  lv->filter_first=fm_clampf(lv->filter_first+a*(x-lv->filter_first-p->resonance*.8f*lv->filter_second),-4,4);
                  lv->filter_second=fm_clampf(lv->filter_second+a*(lv->filter_first-lv->filter_second),-4,4);
                  mix[l]+=velocity*amp*lv->filter_second;
++                }
                  lv->phase+=lv->increment; if (lv->phase>=1) lv->phase-=1;
                  lv->subphase+=lv->increment*.5f; if (lv->subphase>=1) lv->subphase-=1;
 -#if X0X_SJ6_MONO32_PROBE
@@ -142,3 +292,49 @@
  #endif
                  COUNT(w,layer_samples,1);
              }
+@@ -624,20 +807,23 @@
+             float x=mix[l]*(p->gain/6.0f);
+             left[k]+=x*(.5f-.5f*p->pan); right[k]+=x*(.5f+.5f*p->pan);
+         }
+     }
++#if X0X_SJ6_NOISE_SUB_NATIVE
++    s->sj6_noise_random=sj6_noise;
++#endif
+     return DNBX_OK;
+ }
+ int dnbx_render(dnbx_part *s,float *left,float *right,unsigned n,dnbx_work *w)
+ {
+-    return render_with_osc_gains(s,left,right,n,w,1.f,1.f,0.f);
++    return render_with_osc_gains(s,left,right,n,w,1.f,1.f,0.f,1.f);
+ }
+ int dnbx_render_superj6_osc2(dnbx_part *s,float *left,float *right,unsigned n,float gain)
+ {
+     if (!valid(s)) return DNBX_E_UNINITIALIZED;
+     if (!s->superj6_amp_range) return DNBX_E_UNSUPPORTED;
+     if (!(gain >= 0.f && gain <= .808f)) return DNBX_E_RANGE;
+-    return render_with_osc_gains(s,left,right,n,0,1.f,gain,0.f);
++    return render_with_osc_gains(s,left,right,n,0,1.f,gain,0.f,1.f);
+ }
+ #if X0X_SUPERJ6_BUILTIN_INIT
+ int dnbx_render_pitch_osc_levels_velocity(dnbx_part *s, float *left, float *right, unsigned n, float ratio, float gain1,float gain2,float fvel)
+ {
+@@ -647,17 +833,17 @@
+         !(gain2 >= 0.f && (gain2 <= .808f || gain2 == 1.f))) return DNBX_E_RANGE;
+ #if DNBOX_TYPED_CONTROLS_NATIVE_TEST && X0X_SJ6_VELOCITY_PORT
+     if (fvel!=0.f && !(fvel>=.008f && fvel<=1.1f)) return DNBX_E_RANGE;
+ #endif
+-    if (ratio == 1.f) return render_with_osc_gains(s,left,right,n,0,gain1,gain2,fvel);
++    if (ratio == 1.f) return render_with_osc_gains(s,left,right,n,0,gain1,gain2,fvel,ratio);
+     float nominal[DNBX_VOICES][DNBX_LAYERS];
+     for (unsigned i = 0; i < DNBX_VOICES; ++i)
+         for (unsigned l = 0; l < DNBX_LAYERS; ++l) {
+             float *step = &s->voice[i].layer[l].increment;
+             nominal[i][l] = *step;
+             *step = fm_minf(*step * ratio, .45f);
+         }
+-    int result = render_with_osc_gains(s,left,right,n,0,gain1,gain2,fvel);
++    int result = render_with_osc_gains(s,left,right,n,0,gain1,gain2,fvel,ratio);
+     for (unsigned i = 0; i < DNBX_VOICES; ++i)
+         for (unsigned l = 0; l < DNBX_LAYERS; ++l)
+             s->voice[i].layer[l].increment = nominal[i][l];
+     return result;

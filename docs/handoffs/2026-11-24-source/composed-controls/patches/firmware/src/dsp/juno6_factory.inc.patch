@@ -54,7 +54,7 @@
          if(!s->alt3.armed || (s->alt3.tempo_sync && !(s->lfo_tempo>0.f)))return 0;
          sj6_alt3_target(s,value);
          return 1;
-@@ -643,19 +655,43 @@
+@@ -643,19 +655,47 @@
  void juno6_set_lfo_tempo(juno6_t *s, float bpm)
  {
      if (bpm == s->lfo_tempo || bpm < 0.f || !sj6_lfo_finite(bpm)) return;
@@ -91,6 +91,10 @@
  void juno6_set_lfo_words(juno6_t *s, const juno6_lfo_words *words, int reset_phase)
  {
      if (reset_phase) {
++#if X0X_SJ6_AUX_LFO_NATIVE
++        s->aux_lfo3_age=s->aux_lfo_until[0]=s->aux_lfo_until[1]=0;
++        s->aux_lfo3_entropy=s->aux_lfo3_held_turn=0;
++#endif
 +#if X0X_SJ6_LFO1_DELAY_PORT
 +        s->lfo1_delay_age=0;
 +        s->lfo1_delay_started=0;
@@ -99,7 +103,126 @@
          s->mod_wheel_cutoff_hz=0.f;
          s->wheel_lfo1_amount=0;
          s->lfo1_pwm_until_tick=0;
-@@ -1169,9 +1205,13 @@
+@@ -966,9 +1006,13 @@
+     return dnbx_render_pitch_osc_levels_velocity(&s->core,left,right,frames,1.f,
+                                        osc_level_gain(s->osc1_level_code),osc_level_gain(s->osc2_level_code),s->filter_velocity_scale);
+ }
+ 
++#if X0X_SJ6_AUX_LFO_NATIVE
++static int render_typed_span_raw(juno6_t *s, float *left, float *right, unsigned frames)
++#else
+ static int render_typed_span(juno6_t *s, float *left, float *right, unsigned frames)
++#endif
+ {
+     if ((!s->vibrato_step && !s->vibrato_phase && !s->vibrato_left) ||
+         !frames || frames > DNBX_MAX_FRAMES || !left || !right || left == right)
+         return render_typed_dry(s,left,right,frames);
+@@ -1042,8 +1086,104 @@
+                        s->lfo2_hold_period, sj6_held_next, s);
+ }
+ /* Advance the held clock when its mapped audio destination is bypassed; no
+  * typed-render split, so muted/invalid routes do not change audio work. */
++#if X0X_SJ6_AUX_LFO_NATIVE
++float juno6_aux_delay_seconds(unsigned code)
++{ return 3.f*fm_powf((float)code*(1.f/127.f),1.21f); }
++void juno6_set_aux_lfo(juno6_t *s,const uint8_t code[13])
++{
++    for(unsigned i=0;i<13u;i++)s->aux_lfo[i]=code[i];
++    unsigned timers=(unsigned)(juno6_aux_delay_seconds(code[4])*80.f)+1u;
++    s->aux_delay_frames=code[4]?(timers*(unsigned)s->sample_rate+79u)/80u:0u;
++}
++static int sj6_extra_lfo_on(const juno6_t *s,unsigned loop)
++{
++    return s->aux_lfo[loop-1u]==2u ||
++        (loop==1u && !s->aux_lfo[0] && (s->lfo2_pwm & SJ6_LFO2_PWM_ROUTE_MASK));
++}
++static int sj6_extra_lfo_route(const juno6_t *s,unsigned loop)
++{
++    unsigned k=(loop-1u)*2u+5u;
++    return s->aux_lfo[k] || s->aux_lfo[k+1u];
++}
++static float sj6_held3_next(juno6_t *s)
++{
++    uint32_t x=s->aux_lfo3_entropy;
++    if(!x)x=(uint32_t)(s->lfo2_entropy_state ^ 0x9e3779b9u);
++    x^=x<<13;x^=x>>17;x^=x<<5;
++    s->aux_lfo3_entropy=x;
++    return (float)(x>>8)*(1.f/8388608.f)-1.f;
++}
++static int render_typed_span(juno6_t *s,float *left,float *right,unsigned frames)
++{
++    const unsigned sr=(unsigned)s->sample_rate;
++    const int on2=sj6_extra_lfo_on(s,1u) && sj6_extra_lfo_route(s,1u) && s->lfo_step_q40[1];
++    const int on3=sj6_extra_lfo_on(s,2u) && sj6_extra_lfo_route(s,2u) && s->aux_lfo[2] && s->lfo_step_q40[2];
++    if(!(on2 || on3) || !frames || frames>DNBX_MAX_FRAMES || !left || !right || left==right) {
++        s->aux_lfo_cursor+=(uint16_t)frames;
++        return render_typed_span_raw(s,left,right,frames);
++    }
++    while(frames) {
++        unsigned n=frames;
++        const uint32_t age=s->aux_lfo3_age+s->aux_lfo_cursor;
++        if(on3 && age<s->aux_delay_frames) {
++            uint32_t rem=s->aux_delay_frames-age;
++            if(n>rem)n=rem;
++        }
++        const unsigned phase3=age>=s->aux_delay_frames?
++            s->aux_lfo_cursor-(s->aux_lfo3_age<s->aux_delay_frames ? s->aux_delay_frames-s->aux_lfo3_age : 0u):0u;
++        const int enabled[2]={on2,on3 && age>=s->aux_delay_frames};
++        unsigned wrote=0;
++        float saved_width[2],saved_depth[2];
++        for(unsigned i=0;i<2u;i++)if(enabled[i]){
++            const unsigned k=i+1u;
++            const uint64_t phase=s->lfo_phase_q40[k]+s->lfo_step_q40[k]*(i?phase3:s->aux_lfo_cursor);
++            uint32_t rem=s->aux_lfo_until[i];
++            if(rem<80u){
++                unsigned ix=(uint8_t)(phase>>32);
++                unsigned shape=i?s->aux_lfo[3]:s->lfo2_pwm>>SJ6_LFO2_PWM_SHAPE_SHIFT;
++                if(shape==SJ6_LFO_HELD) {
++                    if(!i) {
++                        sj6_held_80hz(s);
++                        s->aux_lfo_delta[i]=s->lfo2_hold_sample*.5f;
++                    } else {
++                        unsigned turn=ix;
++                        if(!s->aux_lfo3_entropy || turn<s->aux_lfo3_held_turn)
++                            s->aux_lfo_delta[i]=sj6_held3_next(s)*.5f;
++                        s->aux_lfo3_held_turn=turn;
++                    }
++                } else s->aux_lfo_delta[i]=lfo2_pwm_delta(shape,ix,1.f);
++                rem+=sr;
++                s->aux_lfo_until[i]=(uint32_t)rem;
++            }
++            unsigned span=rem/80u;
++            if(n>span)n=span;
++            float amount=(float)(i?s->aux_lfo[2]:(s->lfo2_pwm&SJ6_LFO2_PWM_DEPTH_MASK))*(1.f/127.f);
++            for(unsigned j=i*2u;j<i*2u+2u;j++){
++                unsigned dst=(unsigned)s->aux_lfo[5u+j]-1u;
++                if(dst>=2u || amount==0.f || s->core.layer[dst].params.waveform!=1.f ||
++                   s->core.raw[210u+dst]<=.5f)continue;
++                dnbx_layer_params *p=&s->core.layer[dst].params;
++                if(!(wrote&(1u<<dst))) {saved_width[dst]=p->pulse_width;saved_depth[dst]=p->lfo_pwm_depth;}
++                wrote|=1u<<dst;
++                const float raw=fm_clampf((float)s->aux_lfo[9u+j]*(1.f/127.f)+s->aux_lfo_delta[i]*amount,0.f,1.f);
++                (void)dnbx_pwm_from_unit(raw,&p->pulse_width);
++                p->lfo_pwm_depth=0.f;
++            }
++        }
++        int rc=render_typed_span_raw(s,left,right,n);
++        for(unsigned k=0;k<2u;k++){
++            if(wrote&(1u<<k)){s->core.layer[k].params.pulse_width=saved_width[k];s->core.layer[k].params.lfo_pwm_depth=saved_depth[k];}
++            if(enabled[k])s->aux_lfo_until[k]-=(uint32_t)(n*80u);
++        }
++        if(rc!=DNBX_OK)return rc;
++        s->aux_lfo_cursor+=(uint16_t)n;
++        frames-=n;left+=n;right+=n;
++    }
++    return DNBX_OK;
++}
++#endif
+ static void sj6_held_bypass(juno6_t *s, unsigned frames)
+ {
+     unsigned until = s->lfo2_pwm_until_tick;
+     while (frames) {
+@@ -1169,9 +1309,13 @@
      return result;
  }
  #endif
@@ -113,10 +236,14 @@
  #if !X0X_SUPERJ6_BUILTIN_INIT
   if(!s->typed){
    stock_render(s,left,frames);
-@@ -1181,9 +1221,14 @@
+@@ -1180,24 +1324,36 @@
+  }
  #endif
  #if X0X_SUPERJ6_BUILTIN_INIT
   const float wheel_cutoff=s->mod_wheel_cutoff_hz;
++#if X0X_SJ6_AUX_LFO_NATIVE
++ s->aux_lfo_cursor=0;
++#endif
   float base[2];
 - const unsigned cut_route=s->lfo1_pwm_route==3;
 +#if X0X_SJ6_LFO1_DELAY_PORT
@@ -129,7 +256,16 @@
    base[l]=s->core.layer[l].params.cutoff_hz;
    if(wheel_cutoff)s->core.layer[l].params.cutoff_hz=wheel_cutoff;
   }
-@@ -1195,9 +1240,9 @@
+  int rendered;
+  unsigned receiver = ((s->lfo2_pwm & SJ6_LFO2_PWM_ROUTE_MASK) >> SJ6_LFO2_PWM_ROUTE_SHIFT) - 1u;
+  if (receiver < DNBX_LAYERS && (s->lfo2_pwm & SJ6_LFO2_PWM_DEPTH_MASK) &&
+-     (s->lfo_running & 2u) && s->core.layer[receiver].params.waveform == 1.f &&
++     (s->lfo_running & 2u) &&
++#if X0X_SJ6_AUX_LFO_NATIVE
++     sj6_extra_lfo_on(s,1u) && !sj6_extra_lfo_route(s,1u) &&
++#endif
++     s->core.layer[receiver].params.waveform == 1.f &&
+      s->core.raw[210u + receiver] > .5f && frames && frames <= DNBX_MAX_FRAMES &&
       left && right && left != right) {
    rendered=render_lfo_pwm(s,1u,receiver,left,right,frames);
   } else {
@@ -140,18 +276,43 @@
       frames && frames<=DNBX_MAX_FRAMES && left && right && left!=right)
     rendered=render_lfo_pwm(s,0u,first,left,right,frames);
    else {
-@@ -1213,9 +1258,9 @@
+@@ -1205,18 +1361,32 @@
+       sj6_render_lfo1_cutoff(s,left,right,frames):render_typed_span(s,left,right,frames);
+    if(rendered==DNBX_OK) s->lfo1_pwm_until_tick=0;
+   }
+   if (rendered==DNBX_OK) {
+-   if ((s->lfo2_pwm >> SJ6_LFO2_PWM_SHAPE_SHIFT) == SJ6_LFO_HELD) sj6_held_bypass(s,frames);
++   if ((s->lfo2_pwm >> SJ6_LFO2_PWM_SHAPE_SHIFT) == SJ6_LFO_HELD
++#if X0X_SJ6_AUX_LFO_NATIVE
++        && sj6_extra_lfo_on(s,1u) && !sj6_extra_lfo_route(s,1u)
++#endif
++      ) sj6_held_bypass(s,frames);
+    else s->lfo2_pwm_until_tick = 0;
+   }
+  }
   if (wheel_cutoff||cut_route) for(unsigned l=0;l<2;++l) s->core.layer[l].params.cutoff_hz=base[l];
   if (rendered!=DNBX_OK)return 0;
   /* Keep all three audio-clock phases independent of receiver and span. */
   for (unsigned i = 0, running = s->lfo_running; running; ++i, running >>= 1)
 -  if (running & 1u) s->lfo_phase_q40[i] =
-+  if ((running & 1u) && (i || lfo1_ready)) s->lfo_phase_q40[i] =
-       (s->lfo_phase_q40[i] + s->lfo_step_q40[i] * frames) & (SJ6_LFO_TURN - 1u);
+-      (s->lfo_phase_q40[i] + s->lfo_step_q40[i] * frames) & (SJ6_LFO_TURN - 1u);
++  if ((running & 1u) && (i || lfo1_ready)) {
++   unsigned phase_frames=frames;
++#if X0X_SJ6_AUX_LFO_NATIVE
++   if(i && s->aux_lfo[i-1u]==1u)continue;
++   if(i==2u && s->aux_lfo3_age<s->aux_delay_frames) {
++       uint32_t remaining=s->aux_delay_frames-s->aux_lfo3_age;
++       phase_frames=frames>remaining?frames-remaining:0u;
++       s->aux_lfo3_age+=frames;
++   }
++#endif
++   s->lfo_phase_q40[i]=(s->lfo_phase_q40[i]+s->lfo_step_q40[i]*phase_frames)&(SJ6_LFO_TURN-1u);
++  }
  #else
   if (dnbx_render(&s->core,left,right,frames,0)!=DNBX_OK)return 0;
  #endif
-@@ -1426,4 +1471,28 @@
+  float hp_hz = s->hpf > 0.f ? 15+2000*s->hpf*s->hpf : 0.f;
+@@ -1426,4 +1596,28 @@
          }
      }
  }
