@@ -1,0 +1,26 @@
+--- a/tests/host/synth_arp_hooks_test.c
++++ b/tests/host/synth_arp_hooks_test.c
+@@ -19,6 +19,7 @@
+ #define CHECK(x) do { if (!(x)) { fprintf(stderr, "%s:%d: CHECK(%s)\n", __FILE__, __LINE__, #x); exit(1); } } while (0)
+ 
+ static uint64_t arp_t_frame;
++static uint64_t pcm_digest=UINT64_C(1469598103934665603);
+ static struct { uint64_t at; int key, vel; } ev[4096];
+ static unsigned nev;
+ static void (*on_hook)(int key, int vel);
+@@ -38,7 +39,7 @@
+ static void render(unsigned frames)
+ {
+     int32_t buf[512];
+-    while (frames) { unsigned n = fine ? 1 : frames > 256 ? 256 : frames; engine_render(buf, n); arp_t_frame += n; frames -= n; }
++    while (frames) { unsigned n = fine ? 1 : frames > 256 ? 256 : frames; engine_render(buf, n); for (unsigned k=0;k<2u*n;k++) pcm_digest=(pcm_digest^(uint32_t)buf[k])*UINT64_C(1099511628211); arp_t_frame += n; frames -= n; }
+ }
+ static void block(void) { render(256); }
+ static void select_bank(unsigned part, unsigned bank, unsigned preset)
+@@ -554,5 +555,6 @@
+     sj6_amp2();
+ #endif
+     puts("synth-arp-hooks: PASS");
++    printf("render_pcm_digest=%016llx\n",(unsigned long long)pcm_digest);
+     return 0;
+ }

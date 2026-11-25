@@ -1,0 +1,54 @@
+--- a/firmware/src/dsp/synthone/sequencer/S1Sequencer.c
++++ b/firmware/src/dsp/synthone/sequencer/S1Sequencer.c
+@@ -203,6 +203,25 @@
+     p->gateTicks = p->seqGate >= 100 ? UINT32_MAX : (uint32_t)((uint64_t)ticks * p->seqGate / 100u);
+ }
+ 
++/* Consume only non-event internal clock samples. An impending overflow,
++ * malformed threshold or held-key boundary stays on the existing scalar
++ * path. Never crosses a beat or live early gate, even for an empty step. */
++int S1Sequencer_skipQuiet(S1Sequencer *s,const S1SequencerParams *p,int held,unsigned cap)
++{
++    if ((held==0) != (s->previousHeldNoteNumbersAECount==0)) return 0;
++    if (p->arpIsOn==1 || s->sequencerLastNotesCount) {
++        /* All runtime providers use S1_SAMPLE_TICKS. Leave other
++         * configurations on the original per-sample path. */
++        if (p->arpBeatsPerSample!=S1_SAMPLE_TICKS || cap>256u) return 0;
++        const uint32_t from=s->mBeatTime, to=from+cap*S1_SAMPLE_TICKS;
++        if (to<from || to>=p->arpSeqTempoMultiplier ||
++            (s->gateOpen && to>=gateLength(s,p))) return 0;
++        s->mBeatTime=to;
++    }
++    if (cap) s->previousHeldNoteNumbersAECount=held;
++    return (int)cap;
++}
++
+ int S1Sequencer_willFire(const S1Sequencer *s, const S1SequencerParams *p, int heldCount)
+ {
+     const int arpSeqIsOn = p->arpIsOn == 1;
+--- a/firmware/src/dsp/synthone/sequencer/S1Sequencer.h
++++ b/firmware/src/dsp/synthone/sequencer/S1Sequencer.h
+@@ -122,6 +122,7 @@
+ void S1Sequencer_reset(S1Sequencer *, int resetNotes, void *ctx, KeyOffCallback off);
+ /* 1 if process() would turn notes on or off at this sample (lets the caller
+  * render up to the event first). Pure. */
++int S1Sequencer_skipQuiet(S1Sequencer *,const S1SequencerParams *,int held,unsigned cap);
+ int S1Sequencer_willFire(const S1Sequencer *, const S1SequencerParams *, int heldCount);
+ /* One sample of S1Sequencer::process. held = heldNoteNumbersAE (newest first). */
+ void S1Sequencer_process(S1Sequencer *, const S1SequencerParams *, const NoteNumber *held, int heldCount,
+--- a/firmware/src/app/original_runtime.c
++++ b/firmware/src/app/original_runtime.c
+@@ -1351,6 +1351,13 @@
+ #endif
+         }
+ #endif
++#if X0X_S1_FENCED_CLOCK
++        if (!source_available || a->source_wait)
++#endif
++        if (S1Sequencer_skipQuiet(&a->seq,active,a->nheld,frames)) {
++            a->age+=frames>UINT32_MAX-a->age?UINT32_MAX-a->age:frames;
++            return render_backend(p,w,left,right,frames);
++        }
+         for (unsigned i = 0; i < frames; ++i) {
+ #if X0X_S1_FENCED_CLOCK
+             if (source_available && !a->source_wait) {
