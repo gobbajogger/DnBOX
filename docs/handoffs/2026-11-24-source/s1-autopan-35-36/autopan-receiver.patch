@@ -1,0 +1,122 @@
+--- a/firmware/src/dsp/s1c/s1c.c
++++ b/firmware/src/dsp/s1c/s1c.c
+@@ -988,6 +988,10 @@
+         y *= lfo10(s, P(LTREM));
+         /* autopan, equal power */
+         float L, R;
++#if defined(X0X_S1_AUTOPAN_PROBE) && X0X_S1_AUTOPAN_PROBE
++        if(s->pan_authored) s1u_autopan_authored(&s->pan_ph, y, P(PANF), P(PANA), s->sr, &L, &R);
++        else
++#endif
+         s1u_autopan(&s->pan_ph, y, P(PANF), P(PANA), s->sr, &L, &R);
+         /* phaser */
+         s1u_phaser_run(&s->ph, &L, &R, P(PHMIX), P(PHRATE), P(PHW), P(PHFB), s->sr);
+--- a/firmware/src/dsp/s1c/s1c.h
++++ b/firmware/src/dsp/s1c/s1c.h
+@@ -147,6 +147,12 @@
+     uint32_t rnd;
+     /* fx */
+     s1u_crush crush; s1u_phaser ph; float pan_ph;
++#if defined(X0X_S1_AUTOPAN_PROBE) && X0X_S1_AUTOPAN_PROBE
++#ifndef X0X_HOST
++#error Synth One autopan cadence witness is host only
++#endif
++    uint8_t pan_authored;
++#endif
+     float dlp[2][5], hp_y[2][2], cmp[3][2][4];
+ #if !S1C_RVB
+     float rv_fs[8], rv_g, rv_damp;
+--- a/firmware/src/dsp/s1c/s1u.c
++++ b/firmware/src/dsp/s1c/s1u.c
+@@ -2,6 +2,9 @@
+ /* Synth One shared units (see s1u.h). The control laws are the compact engine's; moving them here
+  * changes no output (checked bit-exact against the inline versions on the device configuration). */
+ #include "s1u.h"
++#if defined(X0X_S1_AUTOPAN_PROBE) && X0X_S1_AUTOPAN_PROBE
++#include <math.h>
++#endif
+ #ifdef X0X_S1C
+ #include "s1c_config.h"
+ #endif
+@@ -172,6 +175,22 @@
+     *l = y * s1u_sin(pa + 0x40000000u); *r = y * s1u_sin(pa);
+ }
+ 
++#if defined(X0X_S1_AUTOPAN_PROBE) && X0X_S1_AUTOPAN_PROBE
++/* Same mono->stereo seam and equal-power law; store original Q24 phase
++ * exactly in the existing float lane. Never reset phase at control edits. */
++void s1u_autopan_authored(float *ph, float y, float rate, float amount, float sr, float *l, float *r)
++{
++    const uint32_t mask = 0xFFFFFFu;
++    uint32_t a = (uint32_t)(*ph * 16777216.f) & mask;
++    float pan = s1u_sin(a << 8) * amount;
++    uint32_t inc = (uint32_t)lrintf(rate * (float)(16777216.0 / sr));
++    *ph = (float)((a + inc) & mask) * (1.f / 16777216.f);
++    uint32_t pa = (uint32_t)((1.f + pan) * 0.125f * 4294967296.f);
++    *l = y*s1u_sin(pa + 0x40000000u);
++    *r = y*s1u_sin(pa);
++}
++#endif
++
+ /* ---- half floats ---- */
+ typedef union { float f; uint32_t u; } s1u_fb;
+ uint16_t s1u_h16_put(float x)
+--- a/firmware/src/dsp/s1c/s1u.h
++++ b/firmware/src/dsp/s1c/s1u.h
+@@ -40,6 +40,9 @@
+ 
+ /* ---- auto-pan: equal power, rate in Hz, amount 0..1 ---- */
+ void s1u_autopan(float *ph, float y, float rate, float amount, float sr, float *l, float *r);
++#if defined(X0X_S1_AUTOPAN_PROBE) && X0X_S1_AUTOPAN_PROBE
++void s1u_autopan_authored(float *ph, float y, float rate, float amount, float sr, float *l, float *r);
++#endif
+ 
+ /* ---- widen: the right channel through three h16 Schroeder allpasses, crossfaded by amount ---- */
+ typedef struct { uint16_t *buf; const int16_t *len; int32_t w[3]; } s1u_widen;
+--- a/firmware/src/dsp/s1c/s1c_front.c
++++ b/firmware/src/dsp/s1c/s1c_front.c
+@@ -133,6 +133,31 @@
+     } else
+         put(s, id, x);
+ }
++#if defined(X0X_S1_AUTOPAN_PROBE) && X0X_S1_AUTOPAN_PROBE
++unsigned s1c_front_pan_stops(const s1c *s)
++{
++    if (s->t[F_TSYNC]<=0.f) return 127;
++    int j=F_RATES-1;
++    while(j>0 && 1.f/rate_time(s->t[F_ARPRATE],j)>MAXV(F_PANF)) --j;
++    return (unsigned)j;
++}
++int s1c_front_pan_select(s1c *s,unsigned pos)
++{
++    if(pos>s1c_front_pan_stops(s)) return 0;
++    const float lo=MINV(F_PANF),hi=MAXV(F_PANF);
++    const float v=s->t[F_TSYNC]>0.f ? 1.f/rate_time(s->t[F_ARPRATE],(int)pos)
++                                    : lo+(hi-lo)*powf((float)pos/127.f,2.5f);
++    return s1c_front_set(s,F_PANF,v);
++}
++unsigned s1c_front_pan_position(const s1c *s)
++{
++    const float lo=MINV(F_PANF),hi=MAXV(F_PANF);
++    const float hz=s1c_front_clamp(F_PANF,s->t[F_PANF]);
++    return s->t[F_TSYNC]>0.f ? (unsigned)nearest_division(hz,s->t[F_ARPRATE],lo,hi) :
++           (unsigned)(127.f*powf((hz-lo)/(hi-lo),.4f)+.5f);
++}
++int s1c_front_pan_sync(const s1c *s){return s->t[F_TSYNC]>0.f;}
++#endif
+ int s1c_front_set(s1c *s, unsigned id, float x)
+ {
+     if (id >= 150 || !(x == x) || x > 3.4e38f || x < -3.4e38f) return 0;
+--- a/firmware/src/dsp/s1c/s1c_front.h
++++ b/firmware/src/dsp/s1c/s1c_front.h
+@@ -18,3 +18,10 @@
+ #endif
+ float s1c_front_init(unsigned id);                    /* INIT value of a parameter */
+ #endif
++
++#if defined(X0X_S1_AUTOPAN_PROBE) && X0X_S1_AUTOPAN_PROBE
++unsigned s1c_front_pan_stops(const s1c *);
++int s1c_front_pan_select(s1c *,unsigned);
++unsigned s1c_front_pan_position(const s1c *);
++int s1c_front_pan_sync(const s1c *);
++#endif

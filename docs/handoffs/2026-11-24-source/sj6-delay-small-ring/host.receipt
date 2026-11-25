@@ -1,0 +1,5 @@
+float host CPU only (UBSan, 2,048,000 owner frames): 148.6 ms
+packed host CPU only (UBSan, 2,048,000 owner frames): 103.4 ms
+A: Sync @120: first echo 2067 frames (same float timing); wet SNR 45.48 dB, max error 0.000874
+B: Free @raw9: first echo 4687 frames (same float timing); wet SNR 41.45 dB, max error 0.001075
+PASS packed 12-bit actual two-owner DSP trajectory: 33084 B stereo total vs float 88224 B; exact dry/clock refusal/history, opposite channels, canaries, range fault

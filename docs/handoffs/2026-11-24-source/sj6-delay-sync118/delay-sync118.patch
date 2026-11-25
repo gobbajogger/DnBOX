@@ -1,0 +1,254 @@
+--- a/firmware/src/app/original_presets.inc
++++ b/firmware/src/app/original_presets.inc
+@@ -626,15 +626,32 @@
+ 
+ #if defined(X0X_HOST) && defined(X0X_SJ6_DELAY_WITNESS)
+ /* Only the disposable typed app registers these independent float lines. */
+-enum { SJ6_DELAY_CAP=66151 };
++#ifndef X0X_SJ6_DELAY_CAP
++#define X0X_SJ6_DELAY_CAP 66151u
++#endif
++enum { SJ6_DELAY_CAP=X0X_SJ6_DELAY_CAP };
+ static float sj6_delay_host_lines[NBASS][2][SJ6_DELAY_CAP];
+ static unsigned sj6_delay_byte(unsigned slot)
+ {
+     switch(slot){
+-    case SJ6_DELAY24:return 0; case SJ6_DELAY25:return 1;
++    case SJ6_DELAY24:case SJ6_DELAYSYNC:return 0; case SJ6_DELAY25:return 1;
+     case SJ6_DELAY26:return 2; default:return 3;
+     }
+ }
++static unsigned sj6_delay_read(unsigned slot,const uint8_t *b)
++{
++    if(slot==SJ6_DELAY24)return !!(b[0]&SJ6_DELAY_ENABLE_BIT);
++    if(slot==SJ6_DELAYSYNC)return !!(b[0]&SJ6_DELAY_SYNC_BIT);
++    return b[sj6_delay_byte(slot)];
++}
++int engine_superj6_delay_clock_refused(unsigned v)
++{
++    if(v>=NBASS)return 0;
++    uint32_t lock=plat_cq_lock();
++    int refused=live137(mot_base_snd,v)&&original_bass[v].kind==ORIGINAL_SOUND_JUNO&&
++        original_bass[v].dsp.juno.synth.delay24.clock_refused;
++    plat_cq_unlock(lock);return refused;
++}
+ static void sj6_typed_delay_apply(unsigned v,float bpm)
+ {
+     if(!live137(mot_base_snd,v)||original_bass[v].kind!=ORIGINAL_SOUND_JUNO)return;
+@@ -645,11 +662,12 @@
+         memset(sj6_delay_host_lines[v],0,sizeof sj6_delay_host_lines[v]);
+         if(!juno6_delay24_arm(s,sj6_delay_host_lines[v][0],sj6_delay_host_lines[v][1],SJ6_DELAY_CAP,0.f,10000u))return;
+     }
+-    /* Scope: free-time profile; synchronized audition is a separate host
+-     * witness. No recalled state can overrun this qualified geometry. */
+-    if(!juno6_delay25_clock(s,bpm,0))return;
++    /* A live tempo or reopen may make the accepted project time too long.
++     * Fail dry without rewriting the recorded mode/value; continue history. */
++    s->delay24.clock_refused=!juno6_delay25_profile(s,bytes[1],bpm,!!(bytes[0]&SJ6_DELAY_SYNC_BIT));
+     for(unsigned slot=SJ6_DELAY24;slot<=SJ6_DELAY26;++slot){
+-        unsigned raw=bytes[sj6_delay_byte(slot)];
++        if(slot==SJ6_DELAY25)continue;
++        unsigned raw=sj6_delay_read(slot,bytes);
+         if(raw!=juno6_delay_position(s,slot))(void)juno6_delay24_set(s,slot,raw);
+     }
+ }
+@@ -657,11 +675,11 @@
+ X0X_COLD int engine_superj6_knob_position(unsigned owner, unsigned slot)
+ {
+ #if defined(X0X_HOST) && defined(X0X_SJ6_DELAY_WITNESS)
+-    if(owner<NBASS && slot>=SJ6_DELAY24 && slot<=SJ6_DELAY26){
++    if(owner<NBASS && slot>=SJ6_DELAY24 && slot<=SJ6_DELAYSYNC){
+         uint32_t lock=plat_cq_lock();
+         int ret=live137(mot_base_snd,owner) && sj6_knob_ready(owner) &&
+             original_bass[owner].dsp.juno.synth.delay24.tap ?
+-            read137(mot_base_snd,owner)[SJ6_DELAY_BYTE+sj6_delay_byte(slot)] : -1;
++            (int)sj6_delay_read(slot,read137(mot_base_snd,owner)+SJ6_DELAY_BYTE) : -1;
+         plat_cq_unlock(lock);return ret;
+     }
+ #endif
+@@ -700,14 +718,24 @@
+ X0X_COLD int engine_superj6_knob_turn(unsigned owner, unsigned slot, int value, int relative)
+ {
+ #if defined(X0X_HOST) && defined(X0X_SJ6_DELAY_WITNESS)
+-    if(owner<NBASS && slot>=SJ6_DELAY24 && slot<=SJ6_DELAY26){
++    if(owner<NBASS && slot>=SJ6_DELAY24 && slot<=SJ6_DELAYSYNC){
+         uint32_t lock=plat_cq_lock();int changed=0;
+         if(live137(mot_base_snd,owner) && sj6_knob_can_turn(owner) &&
+            !ui_project_busy() && s1_typed_tuple_editable() &&
+            original_bass[owner].dsp.juno.synth.delay24.tap){
+-            uint8_t *pos=slot137((sound_t *)mot_base_snd,owner)+SJ6_DELAY_BYTE+sj6_delay_byte(slot);
+-            int next=sj6_knob_target(*pos,value,slot==SJ6_DELAY24?1:127,relative);
+-            if(next!=*pos){*pos=(uint8_t)next;changed=1;}
++            uint8_t *b=slot137((sound_t *)mot_base_snd,owner)+SJ6_DELAY_BYTE;
++            unsigned before=sj6_delay_read(slot,b);
++            unsigned bit=slot==SJ6_DELAY24?SJ6_DELAY_ENABLE_BIT:slot==SJ6_DELAYSYNC?SJ6_DELAY_SYNC_BIT:0;
++            unsigned next=(unsigned)sj6_knob_target((int)before,value,bit?1:127,relative);
++            unsigned sync=slot==SJ6_DELAYSYNC?next:!!(b[0]&SJ6_DELAY_SYNC_BIT);
++            unsigned raw=slot==SJ6_DELAY25?next:b[1];
++            if(next!=before && ((slot!=SJ6_DELAYSYNC&&slot!=SJ6_DELAY25) ||
++                juno6_delay25_can(&original_bass[owner].dsp.juno.synth,raw,seq_tempo(&seq),sync))){
++                if(bit)b[0]=(uint8_t)((b[0]&~bit)|(next?bit:0));
++                else b[sj6_delay_byte(slot)]=(uint8_t)next;
++                changed=1;
++            }
++
+         }
+         plat_cq_unlock(lock);return changed;
+     }
+--- a/firmware/src/app/sj6_137_host_witness.h
++++ b/firmware/src/app/sj6_137_host_witness.h
+@@ -25,10 +25,10 @@
+ enum { SJ6_MOD_BYTE=14, SJ6_MOD_LAST=5 };
+ #endif
+ #if defined(X0X_HOST) && defined(X0X_SJ6_DELAY_WITNESS)
+-enum { SJ6_DELAY_BYTE=16, SJ6_DELAY_COUNT=4 };
++enum { SJ6_DELAY_BYTE=16, SJ6_DELAY_COUNT=4, SJ6_DELAY_ENABLE_BIT=1, SJ6_DELAY_SYNC_BIT=2 };
+ _Static_assert(SJ6_DELAY_BYTE+SJ6_DELAY_COUNT<=NPARAMS_MAX,"single owner row");
+ static inline int sj6_delay_bytes_valid(const uint8_t *b) {
+- return b[0]<=1u && b[1]<=127u && b[2]<=127u && b[3]<=127u;
++ return b[0]<=3u && b[1]<=127u && b[2]<=127u && b[3]<=127u;
+ }
+ #endif
+ static inline int canonical137(const sound_t *s) {
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -96,6 +96,7 @@
+     PT_PITCH_MOD,
+ #if defined(X0X_HOST) && defined(X0X_SJ6_DELAY_WITNESS)
+     PT_SJ6_DELAY,
++    PT_SJ6_DELAY_CLOCK,
+ #endif
+ #ifdef DNBOX_137_HOST_WITNESS
+     PT_FILTER_MOD,
+@@ -600,6 +601,9 @@
+ static const x0x_param_t *sj6_knob_desc(unsigned slot)
+ {
+ #if defined(X0X_HOST) && defined(X0X_SJ6_DELAY_WITNESS)
++    static const char *const clocks[]={"FREE","SYNC"};
++    static const x0x_param_t clock={"CLOCK",1,0,clocks};
++    if(slot==SJ6_DELAYSYNC)return &clock;
+     static const x0x_param_t delay[4]={{"ENABLE",1,0,0},{"MIX",127,0,0},{"TIME",127,0,0},{"FEEDBACK",127,0,0}};
+     if(slot>=SJ6_DELAY24&&slot<=SJ6_DELAY26)return &delay[slot-SJ6_DELAY24];
+ #endif
+@@ -730,7 +734,7 @@
+ static int pref_read_only(pref_t r)
+ {
+ #if defined(X0X_HOST) && defined(X0X_SJ6_DELAY_WITNESS)
+-    if(r.kind==R_SJ6KNOB && r.c>=SJ6_DELAY24 && r.c<=SJ6_DELAY26)
++    if(r.kind==R_SJ6KNOB && r.c>=SJ6_DELAY24 && r.c<=SJ6_DELAYSYNC)
+         return !live137(&proj.sound,r.b)||!s1_typed_tuple_editable();
+ #endif
+ #if defined(DNBOX_137_HOST_WITNESS) && defined(X0X_SJ6_MOD_TYPED_PROBE)
+@@ -1708,6 +1712,12 @@
+         return;
+     }
+ #if X0X_SUPERJ6_BUILTIN_INIT
++#if defined(X0X_HOST) && defined(X0X_SJ6_DELAY_WITNESS)
++    if(r.kind==R_SJ6KNOB && r.c==SJ6_DELAY25){
++        extern int engine_superj6_delay_clock_refused(unsigned);
++        if(engine_superj6_delay_clock_refused(r.b)){put_s(num,"TOO LONG");return;}
++    }
++#endif
+     if (r.kind == R_SJ6KNOB && !d->names) {
+         if ((r.c == SJ6_OSC2_LEVEL || r.c == SJ6_OSC1_LEVEL) && v == 128) { put_s(num,"INIT"); return; }
+         if (r.c == SJ6_LAYER1_FINE || r.c == SJ6_LAYER2_FINE) {
+@@ -1962,6 +1972,7 @@
+     [PT_CHORUS] = "CHORUS",
+ #if defined(X0X_HOST) && defined(X0X_SJ6_DELAY_WITNESS)
+     [PT_SJ6_DELAY] = "DELAY",
++    [PT_SJ6_DELAY_CLOCK] = "DELAY CLOCK",
+ #endif
+     [PT_CP] = "CP",
+     [PT_CR] = "CR",
+@@ -2394,7 +2405,7 @@
+ {
+     for (unsigned row = 0; row < count; ++row) {
+ #if defined(X0X_HOST) && defined(X0X_SJ6_DELAY_WITNESS)
+-        if(pages[row].title==PT_SJ6_DELAY && engine_superj6_knob_position(owner,SJ6_DELAY24)<0)continue;
++        if((pages[row].title==PT_SJ6_DELAY||pages[row].title==PT_SJ6_DELAY_CLOCK) && engine_superj6_knob_position(owner,SJ6_DELAY24)<0)continue;
+ #endif
+ #if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
+         if (pages[row].title==PT_WHEELS && !live_s1_mod(&proj.sound,owner)) continue;
+@@ -2514,6 +2525,7 @@
+                     {PT_CHORUS, {SJ6_CHORUS_I, SJ6_CHORUS_II, SJ6_CHORUS_RATE, SJ6_CHORUS_MIX}},
+ #if defined(X0X_HOST) && defined(X0X_SJ6_DELAY_WITNESS)
+                     {PT_SJ6_DELAY, {SJ6_DELAY24, SJ6_DELAY25, SJ6_DELAY26, SJ6_DELAY27}},
++                    {PT_SJ6_DELAY_CLOCK, {SJ6_DELAYSYNC, ORIG_PAGE_NONE, ORIG_PAGE_NONE, ORIG_PAGE_NONE}},
+ #endif
+                     {PT_VIBRATO, {SJ6_VIBRATO_DEPTH, SJ6_VIBRATO_RATE, ORIG_PAGE_NONE, ORIG_PAGE_NONE}},
+                     {PT_TUNING, {SJ6_LAYER1_SEMI, SJ6_LAYER2_SEMI, SJ6_LAYER1_FINE, SJ6_LAYER2_FINE}},
+--- a/firmware/src/dsp/juno6.h
++++ b/firmware/src/dsp/juno6.h
+@@ -182,9 +182,11 @@
+ int juno6_configure_lfo1_cutoff(juno6_t *,float authored_base,float live_current,float amount);
+ float juno6_mod_cutoff_hz(unsigned value);
+ #if defined(X0X_HOST) && defined(X0X_SJ6_DELAY_WITNESS)
+-enum { SJ6_DELAY24=90, SJ6_DELAY27=91, SJ6_DELAY25=92, SJ6_DELAY26=93 };
++enum { SJ6_DELAY24=90, SJ6_DELAY27=91, SJ6_DELAY25=92, SJ6_DELAY26=93, SJ6_DELAYSYNC=94 };
+ int juno6_delay24_arm(juno6_t *,float *,float *,unsigned,float,unsigned);
+ int juno6_delay24_set(juno6_t *,unsigned,unsigned);
++int juno6_delay25_can(const juno6_t *,unsigned,float,unsigned);
++int juno6_delay25_profile(juno6_t *,unsigned,float,unsigned);
+ int juno6_delay25_clock(juno6_t *,float,unsigned);
+ unsigned juno6_delay_position(const juno6_t *,unsigned);
+ void juno6_delay24_process(juno6_t *,float *,float *,unsigned);
+--- a/firmware/src/dsp/juno6_factory.inc
++++ b/firmware/src/dsp/juno6_factory.inc
+@@ -1191,7 +1191,7 @@
+     s->delay24.dry=s->delay24.target=1.f;s->delay24.elapsed=10000u;
+     return 1;
+ }
+-static int delay25_target(juno6_t *s,unsigned raw,float bpm,unsigned sync)
++static float delay25_frames(const juno6_t *s,unsigned raw,float bpm,unsigned sync)
+ {
+     static const float grid[18]={0,.0234375f,.03125f,.046875f,.0625f,.09375f,
+         .125f,.1875f,.25f,.375f,.5f,.75f,1,2,3,4,6,8};
+@@ -1203,31 +1203,43 @@
+     if(!(frames<=s->delay24.capacity-1u) || frames<0.f)return 0;
+     /* Causal fixture interpolation requires one frame at zero time. */
+     if(frames<1.f)frames=1.f;
++    return frames;
++}
++int juno6_delay25_can(const juno6_t *s,unsigned raw,float bpm,unsigned sync)
++{
++    return s&&s->delay24.tap&&delay25_frames(s,raw,bpm,sync)>0.f;
++}
++int juno6_delay25_profile(juno6_t *s,unsigned raw,float bpm,unsigned sync)
++{
++    if(!s||!s->delay24.tap)return 0;
++    const float frames=delay25_frames(s,raw,bpm,sync);
++    if(!(frames>0.f))return 0;
+     if(frames!=s->delay24.delay_target){
+         s->delay24.delay_from=s->delay24.delay;
+         s->delay24.delay_target=frames;s->delay24.delay_elapsed=0;
+     }
++    s->delay24.time_raw=raw;s->delay24.bpm=bpm;s->delay24.sync=sync;
++    s->delay24.clock_refused=0;
+     return 1;
+ }
+ int juno6_delay25_clock(juno6_t *s,float bpm,unsigned sync)
+ {
+-    if(!s||!s->delay24.tap||!delay25_target(s,s->delay24.time_raw,bpm,sync))return 0;
+-    s->delay24.bpm=bpm;s->delay24.sync=sync;
+-    return 1;
++    return s&&juno6_delay25_profile(s,s->delay24.time_raw,bpm,sync);
+ }
+ unsigned juno6_delay_position(const juno6_t *s,unsigned slot)
+ {
+     if(slot==SJ6_DELAY24)return s->delay24.enabled;
+     if(slot==SJ6_DELAY25)return s->delay24.time_raw;
+     if(slot==SJ6_DELAY26)return s->delay24.fb_raw;
++    if(slot==SJ6_DELAYSYNC)return s->delay24.sync;
+     return s->delay24.mix;
+ }
+ int juno6_delay24_set(juno6_t *s,unsigned slot,unsigned pos)
+ {
+     if(!s||!s->delay24.tap)return 0;
+     if(slot==SJ6_DELAY25){
+-        if(s->delay24.clock_refused || !delay25_target(s,pos,s->delay24.bpm,s->delay24.sync))return 0;
+-        s->delay24.time_raw=pos;return 1;
++        if(s->delay24.clock_refused)return 0;
++        return juno6_delay25_profile(s,pos,s->delay24.bpm,s->delay24.sync);
+     }
+     if(slot==SJ6_DELAY26 && pos<=127u){
+         float fb=.99f*((float)pos/127.f);

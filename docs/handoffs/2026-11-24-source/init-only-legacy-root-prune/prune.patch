@@ -1,0 +1,15 @@
+--- a/tools/build.py
++++ b/tools/build.py
+@@ -559,7 +559,11 @@
+     flags = [*CFLAGS, *FPU, *BOARD_DEFS[BOARD], "-Ifirmware/hal", "-Ifirmware/src",
+              f"-I{GEN.relative_to(SRC)}"]
+     factory_roots = []
+-    if SUPERJ6_FACTORY == "1":
++    # The Init-only controls build has no factory decoder call path. Do not
++    # retain bank/admission test entry points that the app never references.
++    # Ordinary reachable panel and performance paths are still linked by the
++    # compiler, and the explicit historical banked profile keeps its roots.
++    if SUPERJ6_FACTORY == "1" and not synth_controls_init_only():
+         names = ["engine_superj6_factory_load", "engine_superj6_factory_load_amp1", "engine_superj6_amp1_read", "engine_superj6_amp1_edit", "engine_superj6_filter_link"]
+         if synthone_patch_setting() != "1":
+             names.extend(("engine_superj6_edit", "engine_superj6_pre_note_wave"))
