@@ -1,0 +1,5 @@
+# Audible A/B evidence, not a current candidate pass
+
+Run the analysis on the owner's `dot-handoff-1340.zip`. The seven WIP stereo pairs are 2 seconds original, 0.5 seconds silence, 2 seconds compact at 48 kHz. The last 0.5 s of Pad #062 is about 24.55 dB down at 4–12 kHz (windowed spectral energy); Organ #113 is only 0.24 dB down in total RMS but spectral balance still differs. These are historical listening excerpts, not the full-tail release score and not renders from the rebuilt control paths. Preserve the exact same preset bytes, MIDI stimulus, reset, gain and rate in both future arms and score dry and fully authentic FX separately.
+
+Private SuperJ6 AU and supplied ARM64 bench recovered and original build-9 14-program input selection reran. The supplied bench executes original voice DSP but replaces several wet FX and does not tick LFO/arp/seq timers; it cannot certify the complete sound. The restored Linux runtime lacks its Unicorn/Capstone dependencies. The full-instrument Apple-host S4 and current DnBOX captures remain unqualified. No original binary, resources or WAVs here.
