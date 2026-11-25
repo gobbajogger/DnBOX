@@ -1,0 +1,702 @@
+--- a/firmware/src/app/original_presets.inc
++++ b/firmware/src/app/original_presets.inc
+@@ -65,13 +65,21 @@
+     for(unsigned v=0;v<NBASS;v++)
+         if(mask&(1u<<v))apply(mot_base_snd,v);
+ }
++static __attribute__((noinline)) int original_typed_s1_carrier(const sound_t *s,unsigned v)
++{
++    return live_s1_mod(s,v);
++}
++static __attribute__((noinline)) int original_typed_sj6_carrier(const sound_t *s,unsigned v)
++{
++    return live137(s,v);
++}
+ static __attribute__((noinline)) int original_typed_s1_live(const sound_t *s,unsigned v)
+ {
+-    return live_s1_mod(s,v) && original_bass[v].kind==ORIGINAL_SOUND_SYNTHONE;
++    return original_typed_s1_carrier(s,v) && original_bass[v].kind==ORIGINAL_SOUND_SYNTHONE;
+ }
+ static __attribute__((noinline)) int original_typed_sj6_live(const sound_t *s,unsigned v)
+ {
+-    return live137(s,v) && original_bass[v].kind==ORIGINAL_SOUND_JUNO;
++    return original_typed_sj6_carrier(s,v) && original_bass[v].kind==ORIGINAL_SOUND_JUNO;
+ }
+ __attribute__((noinline))
+ static int original_typed_undo_open(unsigned mask)
+@@ -81,6 +89,9 @@
+         if((mask&(1u<<v)) && (note_lock_applied[v] || engine_bass_preset_pending(v)))return 0;
+     return 1;
+ }
++#else
++#define original_typed_s1_carrier live_s1_mod
++#define original_typed_sj6_carrier live137
+ #endif
+ 
+ #if X0X_SYNTHONE_PATCH
+@@ -92,7 +103,7 @@
+ static int sj6_configured_key(unsigned v,unsigned source,unsigned note,unsigned velocity)
+ {
+     original_runtime_part *part=&original_bass[v];
+-    if(velocity && part->kind==ORIGINAL_SOUND_JUNO && live137(mot_base_snd,v))
++    if(velocity && part->kind==ORIGINAL_SOUND_JUNO && original_typed_sj6_carrier(mot_base_snd,v))
+         return original_runtime_sj6_key(part,source,note,velocity,sj6_input_vel(mot_base_snd,v));
+     return original_runtime_key(part,source,note,velocity);
+ }
+@@ -217,7 +228,7 @@
+ #if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
+ static void s1_pb_load(unsigned v, const sound_t *sound)
+ {
+-    if (!live_s1_mod(sound,v)) return;
++    if (!original_typed_s1_carrier(sound,v)) return;
+     const uint8_t *row = read137(sound,v);
+     if (row[S1_PB_DN_BYTE]>S1_PB_LAST || row[S1_PB_UP_BYTE]>S1_PB_LAST) return;
+     (void)s1_part_bend_ranges(&original_bass[v].dsp.synthone,
+@@ -235,9 +246,9 @@
+ }
+ int sj6_typed_pb_edit(unsigned owner,unsigned up,unsigned pos)
+ {
+-    if (up>1 || pos>SJ6_PB_LIMIT || !live137(mot_base_snd,owner)) return 0;
++    if (up>1 || pos>SJ6_PB_LIMIT || !original_typed_sj6_carrier(mot_base_snd,owner)) return 0;
+     engine_project_hold(1);
+-    int ok=live137(mot_base_snd,owner) && s1_typed_tuple_editable() && !ui_project_busy() &&
++    int ok=original_typed_sj6_carrier(mot_base_snd,owner) && s1_typed_tuple_editable() && !ui_project_busy() &&
+            !note_lock_applied[owner] && !engine_bass_preset_pending(owner) &&
+            original_bass[owner].kind==ORIGINAL_SOUND_JUNO &&
+            original_bass[owner].status==ORIGINAL_RUNTIME_OK;
+@@ -278,9 +289,9 @@
+ }
+ int sj6_typed_mod_choose(unsigned owner,unsigned route)
+ {
+-    if(route>SJ6_MOD_LAST || !live137(mot_base_snd,owner))return 0;
++    if(route>SJ6_MOD_LAST || !original_typed_sj6_carrier(mot_base_snd,owner))return 0;
+     engine_project_hold(1);
+-    int ok=live137(mot_base_snd,owner)&&s1_typed_tuple_editable()&&!ui_project_busy()
++    int ok=original_typed_sj6_carrier(mot_base_snd,owner)&&s1_typed_tuple_editable()&&!ui_project_busy()
+         &&!note_lock_applied[owner]&&!engine_bass_preset_pending(owner)
+         &&original_bass[owner].kind==ORIGINAL_SOUND_JUNO;
+     if(ok){
+@@ -321,7 +332,7 @@
+         return 0;
+     }
+ #if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
+-    if (s1_bend_slot((unsigned)slot) && !live_s1_mod(mot_base_snd,voice)) {
++    if (s1_bend_slot((unsigned)slot) && !original_typed_s1_carrier(mot_base_snd,voice)) {
+         plat_cq_unlock(lock);
+         return 0;
+     }
+@@ -363,7 +374,7 @@
+ #if X0X_S1_EXTRA
+ #if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
+         else if (s1_bend_slot((unsigned)slot)) {
+-            if (!live_s1_mod(mot_base_snd,voice) || !s1_typed_tuple_editable() || ui_project_busy()) {
++            if (!original_typed_s1_carrier(mot_base_snd,voice) || !s1_typed_tuple_editable() || ui_project_busy()) {
+                 plat_cq_unlock(lock);
+                 return S1_EDIT_REJECTED;
+             }
+@@ -435,7 +446,7 @@
+ #if X0X_S1_EXTRA
+ #if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
+         if (s1_bend_slot(s1_edit[v].slot)) {
+-            if (!live_s1_mod(sound,v) || !s1_typed_tuple_editable() || ui_project_busy()) continue;
++            if (!original_typed_s1_carrier(sound,v) || !s1_typed_tuple_editable() || ui_project_busy()) continue;
+             slot137(sound,v)[s1_edit[v].slot == S1_BEND_LO ? S1_PB_DN_BYTE : S1_PB_UP_BYTE] =
+                 (uint8_t)s1_pb_encode(s1_edit[v].position);
+             s1_pb_load(v,sound);
+@@ -458,7 +469,7 @@
+ #if defined(X0X_S1_AUTOPAN_PROBE) && X0X_S1_AUTOPAN_PROBE
+             /* The admitted physical clock edit owns its refreshed dependent
+                normalized display and actual Hz snapshot, not another write. */
+-            if(slot==S1_LFO_SYNC && live_s1_mod(sound,v) &&
++            if(slot==S1_LFO_SYNC && original_typed_s1_carrier(sound,v) &&
+                s1_pan_rate_word(read137(sound,v)))
+                 s1_pan_rate_put(slot137(sound,v),part->e.t[36]);
+ #endif
+@@ -662,7 +673,7 @@
+     original_runtime_part *part=&original_bass[v];
+     if (part->kind!=ORIGINAL_SOUND_SYNTHONE) return;
+     const uint8_t *p=read137(sound,v)+S1_ARP_CLOCK_BYTE;
+-    if(live_s1_mod(sound,v) && s1_clock_valid(p) && p[2])
++    if(original_typed_s1_carrier(sound,v) && s1_clock_valid(p) && p[2])
+         (void)original_runtime_s1_clock(part,s1_clock_bpm(p),p[2]-1u);
+     else {
+         part->arp.source_set=0;
+@@ -675,7 +686,7 @@
+ }
+ int engine_arp_source_get(unsigned owner,unsigned field)
+ {
+-    if (!live_s1_mod(mot_base_snd,owner)) return -1;
++    if (!original_typed_s1_carrier(mot_base_snd,owner)) return -1;
+     const uint8_t *p=read137(mot_base_snd,owner)+S1_ARP_CLOCK_BYTE;
+     if (!s1_clock_valid(p)) return -1;
+     if (field==ARP_F_SOURCE_RATE) return p[2] ? s1_clock_bpm(p) : 120;
+@@ -686,9 +697,9 @@
+ {
+     if (field==ARP_F_SOURCE_RATE ? value<1||value>200 :
+         field!=ARP_F_SOURCE_FACTOR || value<0||value>18) return 0;
+-    if(!live_s1_mod(mot_base_snd,owner))return 0;
++    if(!original_typed_s1_carrier(mot_base_snd,owner))return 0;
+     engine_project_hold(1);
+-    int ok=!ui_project_busy() && s1_typed_tuple_editable() && live_s1_mod(mot_base_snd,owner) &&
++    int ok=!ui_project_busy() && s1_typed_tuple_editable() && original_typed_s1_carrier(mot_base_snd,owner) &&
+         !engine_bass_preset_pending(owner) && original_bass[owner].kind==ORIGINAL_SOUND_SYNTHONE;
+     if(ok) {
+         uint8_t *p=slot137((sound_t *)mot_base_snd,owner)+S1_ARP_CLOCK_BYTE;
+@@ -716,7 +727,7 @@
+         s1_typed_clock_apply(mot_base_snd,v);
+         s1_typed_clock_tones(mot_base_snd,v);
+ #if defined(X0X_S1_AUTOPAN_PROBE) && X0X_S1_AUTOPAN_PROBE
+-        if(live_s1_mod(mot_base_snd,v)&&s1_pan_rate_word(read137(mot_base_snd,v)))
++        if(original_typed_s1_carrier(mot_base_snd,v)&&s1_pan_rate_word(read137(mot_base_snd,v)))
+             s1_typed_pan_apply(mot_base_snd,v,1);
+ #endif
+     }
+@@ -735,9 +746,9 @@
+ }
+ int s1_typed_feedback_choose(unsigned v,unsigned pos)
+ {
+-    if(pos>127 || !live_s1_mod(mot_base_snd,v))return 0;
++    if(pos>127 || !original_typed_s1_carrier(mot_base_snd,v))return 0;
+     engine_project_hold(1);
+-    int ok=live_s1_mod(mot_base_snd,v) && s1_typed_tuple_editable() && !ui_project_busy() &&
++    int ok=original_typed_s1_carrier(mot_base_snd,v) && s1_typed_tuple_editable() && !ui_project_busy() &&
+            !engine_bass_preset_pending(v) && original_bass[v].kind==ORIGINAL_SOUND_SYNTHONE;
+     if(ok) {
+         slot137((sound_t *)mot_base_snd,v)[S1_FB_BYTE]=(uint8_t)(pos+1u);
+@@ -893,7 +904,7 @@
+ }
+ int s1_typed_dict_undo_ready(unsigned mask)
+ {
+-    return original_typed_live_undo_open(mask,live_s1_mod);
++    return original_typed_live_undo_open(mask,original_typed_s1_carrier);
+ }
+ void s1_typed_dict_undo(unsigned mask)
+ {
+@@ -929,7 +940,7 @@
+ }
+ int s1_aa_undo_ready(unsigned mask)
+ {
+-    return original_typed_live_undo_open(mask,live_s1_mod);
++    return original_typed_live_undo_open(mask,original_typed_s1_carrier);
+ }
+ void s1_aa_undo(unsigned mask)
+ {
+@@ -975,7 +986,7 @@
+ }
+ int s1_cmp_undo_ready(unsigned mask)
+ {
+-    return original_typed_live_undo_open(mask,live_s1_mod);
++    return original_typed_live_undo_open(mask,original_typed_s1_carrier);
+ }
+ void s1_cmp_undo(unsigned mask)
+ {
+@@ -1036,7 +1047,7 @@
+ }
+ int sj6_native_room_undo_ready(unsigned mask)
+ {
+-    return original_typed_live_undo_open(mask,live137);
++    return original_typed_live_undo_open(mask,original_typed_sj6_carrier);
+ }
+ void sj6_native_room_undo(unsigned mask)
+ {
+@@ -1069,7 +1080,7 @@
+ }
+ int sj6_ota_undo_ready(unsigned mask)
+ {
+-    return original_typed_live_undo_open(mask,live137);
++    return original_typed_live_undo_open(mask,original_typed_sj6_carrier);
+ }
+ void sj6_ota_undo(unsigned mask)
+ {
+@@ -1132,7 +1143,7 @@
+ }
+ int sj6_native_limiter_undo_ready(unsigned mask)
+ {
+-    return original_typed_live_undo_open(mask,live137);
++    return original_typed_live_undo_open(mask,original_typed_sj6_carrier);
+ }
+ void sj6_native_limiter_undo(unsigned mask)
+ {
+@@ -1167,7 +1178,7 @@
+ }
+ int s1_typed_cwg_undo_ready(unsigned mask)
+ {
+-    return original_typed_live_undo_open(mask,live_s1_mod);
++    return original_typed_live_undo_open(mask,original_typed_s1_carrier);
+ }
+ void s1_typed_cwg_undo(unsigned mask)
+ {
+@@ -1251,7 +1262,7 @@
+ }
+ int s1_phaser_undo_ready(unsigned mask)
+ {
+-    return original_typed_live_undo_open(mask,live_s1_mod);
++    return original_typed_live_undo_open(mask,original_typed_s1_carrier);
+ }
+ void s1_phaser_undo(unsigned mask)
+ {
+@@ -1309,14 +1320,14 @@
+ #if X0X_SJ6_PITCH_ENV_NATIVE
+ static void sj6_pitch_apply(const sound_t *sound,unsigned owner)
+ {
+-    if(live137(sound,owner) && sj6_pitch_init(sound,owner) &&
++    if(original_typed_sj6_carrier(sound,owner) && sj6_pitch_init(sound,owner) &&
+        original_bass[owner].kind==ORIGINAL_SOUND_JUNO)
+         (void)dnbx_set_sj6_pitch_env(&original_bass[owner].dsp.juno.synth.core,
+                                    sj6_pitch_read(sound,owner));
+ }
+ int sj6_pitch_get(unsigned owner,unsigned k)
+ {
+-    if(k>=SJ6_PITCH_COUNT || !live137(mot_base_snd,owner) || !sj6_pitch_init(mot_base_snd,owner) ||
++    if(k>=SJ6_PITCH_COUNT || !original_typed_sj6_carrier(mot_base_snd,owner) || !sj6_pitch_init(mot_base_snd,owner) ||
+        original_bass[owner].kind!=ORIGINAL_SOUND_JUNO)return -1;
+     return (int)sj6_pitch_decode(k,sj6_pitch_read(mot_base_snd,owner)[k]);
+ }
+@@ -1342,7 +1353,7 @@
+ #if X0X_SJ6_AUX_LFO_NATIVE
+ static void sj6_aux_apply(const sound_t *sound,unsigned v)
+ {
+-    if(live137(sound,v) && sj6_aux_init(sound,v) && original_bass[v].kind==ORIGINAL_SOUND_JUNO)
++    if(original_typed_sj6_carrier(sound,v) && sj6_aux_init(sound,v) && original_bass[v].kind==ORIGINAL_SOUND_JUNO)
+     {
+         const uint8_t *one=sj6_aux_lfo1_read(sound,v);
+         juno6_set_aux_lfo1(&original_bass[v].dsp.juno.synth,one[0],one[2]);
+@@ -1359,7 +1370,7 @@
+ int sj6_aux_get(unsigned v,unsigned k)
+ {
+     if(k==14u){
+-        if(v>=NBASS || !live137(mot_base_snd,v) || !sj6_aux_init(mot_base_snd,v) ||
++        if(v>=NBASS || !original_typed_sj6_carrier(mot_base_snd,v) || !sj6_aux_init(mot_base_snd,v) ||
+            original_bass[v].kind!=ORIGINAL_SOUND_JUNO)return -1;
+         unsigned route=sj6_aux_lfo1_read(mot_base_snd,v)[0];
+         if(route==SJ6_AUX_LFO1_NONE)return 0;
+@@ -1373,7 +1384,7 @@
+ #else
+        9u
+ #endif
+-       || !live137(mot_base_snd,v) || !sj6_aux_init(mot_base_snd,v) ||
++       || !original_typed_sj6_carrier(mot_base_snd,v) || !sj6_aux_init(mot_base_snd,v) ||
+        original_bass[v].kind!=ORIGINAL_SOUND_JUNO)return -1;
+     const uint8_t *row=sj6_aux_read(mot_base_snd,v);
+ #if X0X_SJ6_LFO_TRIGGER_NATIVE
+@@ -1540,10 +1551,10 @@
+     }
+ }
+ int s1_typed_a4_choose(unsigned owner,unsigned hz) {
+-    if(hz<410 || hz>470 || !live_s1_mod(mot_base_snd,owner))return 0;
++    if(hz<410 || hz>470 || !original_typed_s1_carrier(mot_base_snd,owner))return 0;
+     engine_project_hold(1);
+     int ok=!ui_project_busy() && s1_typed_tuple_editable() &&
+-           live_s1_mod(mot_base_snd,owner) && !engine_bass_preset_pending(owner) &&
++           original_typed_s1_carrier(mot_base_snd,owner) && !engine_bass_preset_pending(owner) &&
+            original_bass[owner].kind==ORIGINAL_SOUND_SYNTHONE;
+     if(ok) {
+         slot137((sound_t *)mot_base_snd,owner)[S1_A4_BYTE]=(uint8_t)s1_a4_code(hz);
+@@ -1618,10 +1629,10 @@
+ #if X0X_S1_HALFTIME
+ int s1_half_choose(unsigned owner,unsigned position)
+ {
+-    if(position>127u || !live_s1_mod(mot_base_snd,owner))return 0;
++    if(position>127u || !original_typed_s1_carrier(mot_base_snd,owner))return 0;
+     engine_project_hold(1);
+     int ok=!ui_project_busy() && s1_typed_tuple_editable() &&
+-           live_s1_mod(mot_base_snd,owner) && !engine_bass_preset_pending(owner) &&
++           original_typed_s1_carrier(mot_base_snd,owner) && !engine_bass_preset_pending(owner) &&
+            original_bass[owner].kind==ORIGINAL_SOUND_SYNTHONE;
+     if(ok){
+         sound_t *s=(sound_t *)mot_base_snd;
+@@ -1640,10 +1651,10 @@
+         (void)s1c_front_set(&original_bass[owner].dsp.synthone.e,S1_TRANS_PARAM,s1_trans_st(read137(sound,owner)[S1_TRANS_BYTE]));
+ }
+ int s1_typed_trans_choose(unsigned owner,int st) {
+-    if(st < -24 || st > 24 || !live_s1_mod(mot_base_snd,owner))return 0;
++    if(st < -24 || st > 24 || !original_typed_s1_carrier(mot_base_snd,owner))return 0;
+     engine_project_hold(1);
+     int ok=!ui_project_busy() && s1_typed_tuple_editable() &&
+-           live_s1_mod(mot_base_snd,owner) && !engine_bass_preset_pending(owner) &&
++           original_typed_s1_carrier(mot_base_snd,owner) && !engine_bass_preset_pending(owner) &&
+            original_bass[owner].kind==ORIGINAL_SOUND_SYNTHONE;
+     if(ok) {
+         slot137((sound_t *)mot_base_snd,owner)[S1_TRANS_BYTE]=(uint8_t)s1_trans_code(st);
+@@ -1707,10 +1718,10 @@
+         (void)s1c_front_set(&original_bass[owner].dsp.synthone.e,S1_CRUSH_PARAM,read137(sound,owner)[S1_CRUSH_BYTE]);
+ }
+ int s1_typed_crush_choose(unsigned owner,unsigned choice) {
+-    if(choice>S1_CRUSH_LAST || !live_s1_mod(mot_base_snd,owner))return 0;
++    if(choice>S1_CRUSH_LAST || !original_typed_s1_carrier(mot_base_snd,owner))return 0;
+     engine_project_hold(1);
+     int ok=!ui_project_busy() && s1_typed_tuple_editable() &&
+-           live_s1_mod(mot_base_snd,owner) && !engine_bass_preset_pending(owner) &&
++           original_typed_s1_carrier(mot_base_snd,owner) && !engine_bass_preset_pending(owner) &&
+            original_bass[owner].kind==ORIGINAL_SOUND_SYNTHONE;
+     if(ok) {
+         slot137((sound_t *)mot_base_snd,owner)[S1_CRUSH_BYTE]=(uint8_t)choice;
+@@ -1727,10 +1738,10 @@
+         (void)s1c_front_set(&original_bass[owner].dsp.synthone.e,S1C_P_RVFB,(float)s1_rvfb_pos(read137(sound,owner)[S1_RVFB_BYTE])*(1.f/128.f));
+ }
+ int s1_typed_rvfb_choose(unsigned owner,unsigned pos) {
+-    if(pos>S1_RVFB_LAST || !live_s1_mod(mot_base_snd,owner))return 0;
++    if(pos>S1_RVFB_LAST || !original_typed_s1_carrier(mot_base_snd,owner))return 0;
+     engine_project_hold(1);
+     int ok=!ui_project_busy() && s1_typed_tuple_editable() &&
+-           live_s1_mod(mot_base_snd,owner) && !engine_bass_preset_pending(owner) &&
++           original_typed_s1_carrier(mot_base_snd,owner) && !engine_bass_preset_pending(owner) &&
+            original_bass[owner].kind==ORIGINAL_SOUND_SYNTHONE;
+     if(ok) {
+         slot137((sound_t *)mot_base_snd,owner)[S1_RVFB_BYTE]=(uint8_t)s1_rvfb_code(pos);
+@@ -1743,9 +1754,9 @@
+     original_typed_undo_apply(mask,s1_typed_rvfb_apply);
+ }
+ int s1_typed_mod_choose(unsigned owner,unsigned route) {
+-    if (route>2 || !live_s1_mod(mot_base_snd,owner))return 0;
++    if (route>2 || !original_typed_s1_carrier(mot_base_snd,owner))return 0;
+     engine_project_hold(1);
+-    int ok=!ui_project_busy() && s1_typed_tuple_editable() && live_s1_mod(mot_base_snd,owner) &&
++    int ok=!ui_project_busy() && s1_typed_tuple_editable() && original_typed_s1_carrier(mot_base_snd,owner) &&
+            !note_lock_applied[owner] &&
+            !engine_bass_preset_pending(owner) && original_bass[owner].kind==ORIGINAL_SOUND_SYNTHONE;
+     if(ok) {
+@@ -1757,7 +1768,7 @@
+ }
+ void s1_typed_mod_undo(unsigned mask) {
+     for(unsigned owner=0;owner<NBASS;owner++)if((mask&(1u<<owner)) &&
+-       live_s1_mod(mot_base_snd,owner) && !note_lock_applied[owner] &&
++       original_typed_s1_carrier(mot_base_snd,owner) && !note_lock_applied[owner] &&
+        original_bass[owner].kind==ORIGINAL_SOUND_SYNTHONE)
+         s1_part_mod_route(&original_bass[owner].dsp.synthone,read137(mot_base_snd,owner)[3]);
+ }
+@@ -1781,7 +1792,7 @@
+ }
+ int sj6_filter_control_get(unsigned owner,unsigned k)
+ {
+-    if(k>1u || !live137(mot_base_snd,owner) || !sj6_vcf_init(mot_base_snd,owner) ||
++    if(k>1u || !original_typed_sj6_carrier(mot_base_snd,owner) || !sj6_vcf_init(mot_base_snd,owner) ||
+        original_bass[owner].kind!=ORIGINAL_SOUND_JUNO)return -1;
+     unsigned code=*sj6_filter_code(mot_base_snd,owner,k);
+     if(code>(k?128u:127u))return -1;
+@@ -1801,9 +1812,9 @@
+ }
+ static int sj6_vcf_apply(const sound_t *s,unsigned v)
+ {
+-    if(live137(s,v) && sj6_vcf_init(s,v) && original_bass[v].kind==ORIGINAL_SOUND_JUNO)
++    if(original_typed_sj6_carrier(s,v) && sj6_vcf_init(s,v) && original_bass[v].kind==ORIGINAL_SOUND_JUNO)
+         for(unsigned k=0;k<2u;++k)sj6_filter_apply_one(v,k,*sj6_filter_code(s,v,k));
+-    return live137(s,v) && sj6_vcf_init(s,v) &&
++    return original_typed_sj6_carrier(s,v) && sj6_vcf_init(s,v) &&
+         original_bass[v].kind==ORIGINAL_SOUND_JUNO &&
+         juno6_set_vcf_lfo1_amount(&original_bass[v].dsp.juno.synth,*sj6_vcf_code(s,v));
+ }
+@@ -1814,7 +1825,7 @@
+ int sj6_vcf_undo_ready(unsigned mask)
+ {
+     for(unsigned v=0;v<NBASS;++v)
+-        if((mask&(1u<<v)) && (!live137(mot_base_snd,v) ||
++        if((mask&(1u<<v)) && (!original_typed_sj6_carrier(mot_base_snd,v) ||
+             !sj6_vcf_init(mot_base_snd,v) || note_lock_applied[v] ||
+             engine_bass_preset_pending(v) || original_bass[v].kind!=ORIGINAL_SOUND_JUNO))return 0;
+     return 1;
+@@ -1828,7 +1839,7 @@
+ void sj6_137_undo_apply(unsigned mask)
+ {
+     for(unsigned v=0;v<NBASS;++v)
+-        if ((mask&(1u<<v)) && live137(mot_base_snd,v)) {
++        if ((mask&(1u<<v)) && original_typed_sj6_carrier(mot_base_snd,v)) {
+             sj6_knob_mask[v].word[1]&=~sj6_knob_bit(SJ6_FILTER_VELOCITY);
+             if (!note_lock_applied[v] && original_bass[v].kind==ORIGINAL_SOUND_JUNO)
+                 juno6_set_filter_velocity(&original_bass[v].dsp.juno.synth,read137(mot_base_snd,v)[2]);
+@@ -1850,13 +1861,13 @@
+ #endif
+ #if (defined(X0X_HOST) && defined(X0X_SJ6_FILTER_VEL_PROBE)) || (DNBOX_TYPED_CONTROLS_NATIVE_TEST && X0X_SJ6_VELOCITY_PORT)
+     if (slot == SJ6_FILTER_VELOCITY) {
+-        return live137(mot_base_snd,owner) ?
++        return original_typed_sj6_carrier(mot_base_snd,owner) ?
+             original_bass[owner].dsp.juno.synth.filter_velocity_position : -1;
+     }
+ #endif
+ #if X0X_SJ6_VCF_PORT
+     if(slot==SJ6_VCF_LFO1_AMOUNT)
+-        return live137(mot_base_snd,owner) && sj6_vcf_init(mot_base_snd,owner) ?
++        return original_typed_sj6_carrier(mot_base_snd,owner) && sj6_vcf_init(mot_base_snd,owner) ?
+             *sj6_vcf_code(mot_base_snd,owner) : -1;
+ #endif
+     if (slot == SJ6_OSC2_LEVEL || slot == SJ6_OSC1_LEVEL) {
+@@ -1981,7 +1992,7 @@
+ #if X0X_SJ6_ALT3_NATIVE
+     if(owner<NBASS && slot>=SJ6_TREM_DEPTH && slot<=SJ6_TREM_RATE){
+         uint32_t lock=plat_cq_lock();
+-        int p=live137(mot_base_snd,owner)&&sj6_knob_ready(owner) ?
++        int p=original_typed_sj6_carrier(mot_base_snd,owner)&&sj6_knob_ready(owner) ?
+             (int)sj6_trem_position(sj6_trem_read(mot_base_snd,owner),slot-SJ6_TREM_DEPTH):-1;
+         plat_cq_unlock(lock);return p;
+     }
+@@ -1989,7 +2000,7 @@
+ #if X0X_SJ6_SEQ_SETTINGS_NATIVE
+     if (owner<NBASS && SJ6_SEQ_SETTING_SLOT(slot)) {
+         uint32_t lock=plat_cq_lock();
+-        int value=live137(mot_base_snd,owner) && sj6_knob_ready(owner) ?
++        int value=original_typed_sj6_carrier(mot_base_snd,owner) && sj6_knob_ready(owner) ?
+ #if X0X_SJ6_SEQ_DEST_NATIVE
+             (slot==SJ6_SEQ_DEST ? (int)sj6_dest_read(mot_base_snd,owner) :
+ #endif
+@@ -2004,7 +2015,7 @@
+ #if X0X_SJ6_NOISE_SUB_NATIVE
+     if (owner<NBASS && (slot==SJ6_NOISE_LEVEL || slot==SJ6_SUB_LEVEL)) {
+         uint32_t lock=plat_cq_lock();
+-        int value=live137(mot_base_snd,owner) && sj6_knob_ready(owner) ?
++        int value=original_typed_sj6_carrier(mot_base_snd,owner) && sj6_knob_ready(owner) ?
+             (int)sj6_sources_read(mot_base_snd,owner)[slot-SJ6_NOISE_LEVEL] : -1;
+         plat_cq_unlock(lock);return value;
+     }
+@@ -2014,14 +2025,14 @@
+         uint32_t lock=plat_cq_lock();
+         const unsigned k=slot-SJ6_LFO1_ENABLE;
+         int r=-1;
+-        if(live137(mot_base_snd,owner) && sj6_knob_ready(owner) &&
++        if(original_typed_sj6_carrier(mot_base_snd,owner) && sj6_knob_ready(owner) &&
+            sj6_lfo1_wave_allowed(mot_base_snd->v[T_303][owner]))
+             r=(int)(sj6_lfo1_option(mot_base_snd,owner,k)^(k==0u));
+         plat_cq_unlock(lock);return r;
+     }
+     if(owner<NBASS && slot==SJ6_LFO1_WAVE) {
+         uint32_t lock=plat_cq_lock();
+-        int r=live137(mot_base_snd,owner) && sj6_knob_ready(owner) &&
++        int r=original_typed_sj6_carrier(mot_base_snd,owner) && sj6_knob_ready(owner) &&
+             sj6_lfo1_wave_allowed(mot_base_snd->v[T_303][owner]) ?
+             (int)sj6_lfo1_wave_read(mot_base_snd,owner):-1;
+         plat_cq_unlock(lock);return r;
+@@ -2030,7 +2041,7 @@
+ #if X0X_SJ6_LFO1_DELAY_PORT
+     if (owner<NBASS && slot==SJ6_LFO1_DELAY) {
+         uint32_t lock=plat_cq_lock();
+-        int value=live137(mot_base_snd,owner) && sj6_knob_ready(owner) ?
++        int value=original_typed_sj6_carrier(mot_base_snd,owner) && sj6_knob_ready(owner) ?
+             (int)sj6_lfo1_delay_read(mot_base_snd,owner) : -1;
+         plat_cq_unlock(lock);return value;
+     }
+@@ -2038,7 +2049,7 @@
+ #if (defined(X0X_HOST) && defined(X0X_SJ6_DELAY_WITNESS)) || X0X_SJ6_NATIVE_DELAY
+     if(owner<NBASS && slot>=SJ6_DELAY24 && slot<=SJ6_DELAYSYNC){
+         uint32_t lock=plat_cq_lock();
+-        int ret=live137(mot_base_snd,owner) && sj6_knob_ready(owner) &&
++        int ret=original_typed_sj6_carrier(mot_base_snd,owner) && sj6_knob_ready(owner) &&
+             original_bass[owner].dsp.juno.synth.delay24.tap ?
+             (int)sj6_delay_read(slot,read137(mot_base_snd,owner)+SJ6_DELAY_BYTE) : -1;
+         plat_cq_unlock(lock);return ret;
+@@ -2074,7 +2085,7 @@
+ static int16_t sj6_unison_input[NBASS][2][SJ6_UNISON_HISTORY] X0X_POOL;
+ static void sj6_typed_unison_apply(unsigned v)
+ {
+-    if(live137(mot_base_snd,v)&&sj6_unison_owner(mot_base_snd,v)&&sj6_knob_ready(v))
++    if(original_typed_sj6_carrier(mot_base_snd,v)&&sj6_unison_owner(mot_base_snd,v)&&sj6_knob_ready(v))
+         juno6_unison_config(&original_bass[v].dsp.juno.synth,
+                            sj6_unison_code(mot_base_snd,v),sj6_unison_input[v]);
+ }
+@@ -2083,7 +2094,7 @@
+     if(slot>=4u||v>=NBASS)return -1;
+     uint32_t lock=plat_cq_lock();
+     int result=-1;
+-    if(live137(mot_base_snd,v)&&sj6_unison_owner(mot_base_snd,v)&&sj6_knob_ready(v)) {
++    if(original_typed_sj6_carrier(mot_base_snd,v)&&sj6_unison_owner(mot_base_snd,v)&&sj6_knob_ready(v)) {
+         const uint8_t *b=sj6_unison_code(mot_base_snd,v);
+         result=slot==1u?(b[1]?(int)b[1]-1:27):b[slot];
+     }
+@@ -2095,7 +2106,7 @@
+     if(slot>=4u||v>=NBASS||value>max[slot])return 0;
+     uint32_t lock=plat_cq_lock();
+     int changed=0;
+-    if(live137(mot_base_snd,v)&&sj6_unison_owner(mot_base_snd,v)&&sj6_knob_can_turn(v)&&
++    if(original_typed_sj6_carrier(mot_base_snd,v)&&sj6_unison_owner(mot_base_snd,v)&&sj6_knob_can_turn(v)&&
+        !ui_project_busy()&&s1_typed_tuple_editable()){
+         uint8_t *b=sj6_unison_payload((sound_t*)mot_base_snd,v);
+         unsigned before=slot==1u?(b[1]?b[1]-1u:27u):b[slot];
+@@ -2120,7 +2131,7 @@
+ static unsigned sj6_j60_default(unsigned k){return k? k==3u?127u:64u : 0u;}
+ static void sj6_typed_j60_apply(unsigned v)
+ {
+-    if(live137(mot_base_snd,v)&&sj6_j60_owner(mot_base_snd,v)&&sj6_knob_ready(v)){
++    if(original_typed_sj6_carrier(mot_base_snd,v)&&sj6_j60_owner(mot_base_snd,v)&&sj6_knob_ready(v)){
+         juno6_chorus_t *const c=&original_bass[v].dsp.juno.chorus;
+         juno6_j60_config(c,sj6_j60_code(mot_base_snd,v));
+ #if X0X_SJ6_NATIVE_CLASSIC
+@@ -2132,7 +2143,7 @@
+ {
+     if(v>=NBASS||k>=4u)return -1;
+     uint32_t lock=plat_cq_lock();int r=-1;
+-    if(live137(mot_base_snd,v)&&sj6_j60_owner(mot_base_snd,v)&&sj6_knob_ready(v)){
++    if(original_typed_sj6_carrier(mot_base_snd,v)&&sj6_j60_owner(mot_base_snd,v)&&sj6_knob_ready(v)){
+ #if X0X_SJ6_NATIVE_CLASSIC
+         if(k && !sj6_j60_code(mot_base_snd,v)[0]){
+             unsigned q=sj6_classic_native_code(mot_base_snd,v)[k-1u];
+@@ -2149,7 +2160,7 @@
+ {
+     if(v>=NBASS||k>=4u||p>(k?127u:1u))return 0;
+     uint32_t lock=plat_cq_lock();int ok=0;
+-    if(live137(mot_base_snd,v)&&sj6_j60_owner(mot_base_snd,v)&&sj6_knob_can_turn(v)&&
++    if(original_typed_sj6_carrier(mot_base_snd,v)&&sj6_j60_owner(mot_base_snd,v)&&sj6_knob_can_turn(v)&&
+        !ui_project_busy()&&s1_typed_tuple_editable()){
+ #if X0X_SJ6_NATIVE_CLASSIC
+         if(k && !sj6_j60_code(mot_base_snd,v)[0]){
+@@ -2177,7 +2188,7 @@
+ #if X0X_SJ6_ALT3_NATIVE
+     if(owner<NBASS && slot>=SJ6_TREM_DEPTH && slot<=SJ6_TREM_RATE){
+         uint32_t lock=plat_cq_lock();int changed=0;
+-        if(live137(mot_base_snd,owner)&&sj6_knob_can_turn(owner)&&original_typed_edit_open(owner)){
++        if(original_typed_sj6_carrier(mot_base_snd,owner)&&sj6_knob_can_turn(owner)&&original_typed_edit_open(owner)){
+             const unsigned k=slot-SJ6_TREM_DEPTH;
+             uint8_t *b=sj6_trem_write((sound_t*)mot_base_snd,owner);
+             const int before=(int)sj6_trem_position(b,k);
+@@ -2190,7 +2201,7 @@
+ #if X0X_SJ6_SEQ_SETTINGS_NATIVE
+     if (owner<NBASS && SJ6_SEQ_SETTING_SLOT(slot)) {
+         uint32_t lock=plat_cq_lock();int changed=0;
+-        if (live137(mot_base_snd,owner) && sj6_knob_can_turn(owner) &&
++        if (original_typed_sj6_carrier(mot_base_snd,owner) && sj6_knob_can_turn(owner) &&
+             !ui_project_busy() && s1_typed_tuple_editable()) {
+             unsigned top=1u;
+             uint8_t *b;
+@@ -2209,7 +2220,7 @@
+ #if X0X_SJ6_NOISE_SUB_NATIVE
+     if (owner<NBASS && (slot==SJ6_NOISE_LEVEL || slot==SJ6_SUB_LEVEL)) {
+         uint32_t lock=plat_cq_lock();int changed=0;
+-        if (live137(mot_base_snd,owner) && sj6_knob_can_turn(owner) &&
++        if (original_typed_sj6_carrier(mot_base_snd,owner) && sj6_knob_can_turn(owner) &&
+             !ui_project_busy() && s1_typed_tuple_editable()) {
+             uint8_t *b=sj6_sources_write((sound_t *)mot_base_snd,owner)+slot-SJ6_NOISE_LEVEL;
+             int next=sj6_knob_target(*b,value,127,relative);
+@@ -2222,7 +2233,7 @@
+     if(owner<NBASS && (slot==SJ6_LFO1_ENABLE || slot==SJ6_LFO1_SNAPBACK)) {
+         uint32_t lock=plat_cq_lock();int changed=0;
+         const unsigned k=slot-SJ6_LFO1_ENABLE;
+-        if(live137(mot_base_snd,owner) && sj6_knob_can_turn(owner) &&
++        if(original_typed_sj6_carrier(mot_base_snd,owner) && sj6_knob_can_turn(owner) &&
+            original_typed_edit_open(owner) && sj6_lfo1_wave_allowed(mot_base_snd->v[T_303][owner])) {
+             const int old=(int)(sj6_lfo1_option(mot_base_snd,owner,k)^(k==0u));
+             const int next=sj6_knob_target(old,value,1,relative);
+@@ -2232,7 +2243,7 @@
+     }
+     if(owner<NBASS && slot==SJ6_LFO1_WAVE) {
+         uint32_t lock=plat_cq_lock();int changed=0;
+-        if(live137(mot_base_snd,owner) && sj6_knob_can_turn(owner) && !ui_project_busy() &&
++        if(original_typed_sj6_carrier(mot_base_snd,owner) && sj6_knob_can_turn(owner) && !ui_project_busy() &&
+            s1_typed_tuple_editable() && sj6_lfo1_wave_allowed(mot_base_snd->v[T_303][owner])) {
+             int before=(int)sj6_lfo1_wave_read(mot_base_snd,owner);
+             int next=sj6_knob_target(before,value,SJ6_LFO1_WAVE_MAX,relative);
+@@ -2244,7 +2255,7 @@
+ #if X0X_SJ6_LFO1_DELAY_PORT
+     if (owner<NBASS && slot==SJ6_LFO1_DELAY) {
+         uint32_t lock=plat_cq_lock();int changed=0;
+-        if (live137(mot_base_snd,owner) && sj6_knob_can_turn(owner) &&
++        if (original_typed_sj6_carrier(mot_base_snd,owner) && sj6_knob_can_turn(owner) &&
+             !ui_project_busy() && s1_typed_tuple_editable()) {
+             int before=sj6_lfo1_delay_read(mot_base_snd,owner);
+             int next=sj6_knob_target(before,value,SJ6_LFO1_DELAY_MAX,relative);
+@@ -2259,7 +2270,7 @@
+ #if (defined(X0X_HOST) && defined(X0X_SJ6_DELAY_WITNESS)) || X0X_SJ6_NATIVE_DELAY
+     if(owner<NBASS && slot>=SJ6_DELAY24 && slot<=SJ6_DELAYSYNC){
+         uint32_t lock=plat_cq_lock();int changed=0;
+-        if(live137(mot_base_snd,owner) && sj6_knob_can_turn(owner) &&
++        if(original_typed_sj6_carrier(mot_base_snd,owner) && sj6_knob_can_turn(owner) &&
+            !ui_project_busy() && s1_typed_tuple_editable() &&
+            original_bass[owner].dsp.juno.synth.delay24.tap){
+             uint8_t *b=slot137((sound_t *)mot_base_snd,owner)+SJ6_DELAY_BYTE;
+@@ -2438,7 +2449,7 @@
+         original_sound_sj6_chorus_store(cell, chorus->factory_mode);
+ #if X0X_SJ6_NATIVE_CLASSIC
+         if(prior!=chorus->factory_mode && enabled && (chorus_turns&3u) &&
+-           live137(sound,v) && sj6_j60_owner(sound,v) && s1_typed_tuple_editable() &&
++           original_typed_sj6_carrier(sound,v) && sj6_j60_owner(sound,v) && s1_typed_tuple_editable() &&
+            !sj6_j60_code(sound,v)[0]) {
+             /* The original buttons apply the newly entered mode's defaults. */
+             memset(sj6_classic_native_payload(sound,v),0,3);
+@@ -2447,7 +2458,7 @@
+         if (!prior || chorus_turns >> 2) original_runtime_sj6_chorus(&original_bass[v], cell);
+ #if X0X_SJ6_CLASSIC_I_PROBE
+         if(prior!=chorus->factory_mode && (chorus_turns&3u) &&
+-            live137(sound,v) && s1_typed_tuple_editable()) {
++            original_typed_sj6_carrier(sound,v) && s1_typed_tuple_editable()) {
+             if(chorus->factory_mode>=JUNO6_CHORUS_I) {
+                 /* One original active trio; new mode reapplies its defaults. */
+                 uint8_t *typed=slot137(sound,v)+SJ6_CLASSIC_I_BYTE;
+@@ -2525,7 +2536,7 @@
+ #if (defined(X0X_HOST) && defined(X0X_SJ6_FILTER_VEL_PROBE)) || (DNBOX_TYPED_CONTROLS_NATIVE_TEST && X0X_SJ6_VELOCITY_PORT)
+         if (pending.word[1] & sj6_knob_bit(SJ6_FILTER_VELOCITY)) {
+             unsigned pos=sj6_knob_value[v][SJ6_FILTER_VELOCITY];
+-            if (!bass_named_preset[v] && live137(mot_base_snd,v) && pos<=127 &&
++            if (!bass_named_preset[v] && original_typed_sj6_carrier(mot_base_snd,v) && pos<=127 &&
+                 juno6_set_filter_velocity(&original_bass[v].dsp.juno.synth,pos))
+                 slot137((sound_t *)mot_base_snd,v)[2]=(uint8_t)pos;
+         }
+@@ -2533,7 +2544,7 @@
+ #if X0X_SJ6_VCF_PORT
+         if(pending.word[1] & sj6_knob_bit(SJ6_VCF_LFO1_AMOUNT)) {
+             unsigned pos=sj6_knob_value[v][SJ6_VCF_LFO1_AMOUNT];
+-            if(!bass_named_preset[v] && live137(mot_base_snd,v) && sj6_vcf_init(mot_base_snd,v) &&
++            if(!bass_named_preset[v] && original_typed_sj6_carrier(mot_base_snd,v) && sj6_vcf_init(mot_base_snd,v) &&
+                s1_typed_tuple_editable() &&
+                juno6_set_vcf_lfo1_amount(&original_bass[v].dsp.juno.synth,pos))
+                 *(uint8_t *)sj6_vcf_code(mot_base_snd,v)=(uint8_t)pos;
+@@ -2773,7 +2784,7 @@
+     const uint8_t *base = mot_base_snd->v[T_303][v];
+     const uint8_t *cell = lock ? lock->val : base;
+ #if defined(DNBOX_137_HOST_WITNESS) && (!DNBOX_TYPED_CONTROLS_NATIVE_TEST || X0X_SJ6_VELOCITY_PORT)
+-    if (live137(mot_base_snd,v)) {
++    if (original_typed_sj6_carrier(mot_base_snd,v)) {
+         unsigned position=lock && lock->i==NOTE137 ? lock->val[BASS_NOTE_TAG+11] : read137(mot_base_snd,v)[2];
+         juno6_set_filter_velocity(&part->dsp.juno.synth,position);
+     }
+@@ -2810,7 +2821,7 @@
+         s1_part_apply_cell(&original_bass[v].dsp.synthone, cell);
+ #ifdef DNBOX_137_HOST_WITNESS
+         s1_part_mod_route(&original_bass[v].dsp.synthone,
+-                          live_s1_mod(mot_base_snd,v)?read137(mot_base_snd,v)[3]:0);
++                          original_typed_s1_carrier(mot_base_snd,v)?read137(mot_base_snd,v)[3]:0);
+ #endif
+ #if X0X_S1_EXTRA
+         s1_part_apply_extra(&original_bass[v].dsp.synthone, original_sound_edit_mask(cell) & S1_EXTRA_MARK ?
+@@ -2834,8 +2845,8 @@
+         if(k>=0 && mot.lane[k].val[29]==(uint8_t)original_bass[v].kind)l=&mot.lane[k];
+     }
+ #ifdef DNBOX_137_HOST_WITNESS
+-    if (l && (l->i==NOTE_S1_MOD) != live_s1_mod(mot_base_snd,v)) l=0;
+-    if (l && ((l->i==NOTE137) != live137(mot_base_snd,v) ||
++    if (l && (l->i==NOTE_S1_MOD) != original_typed_s1_carrier(mot_base_snd,v)) l=0;
++    if (l && ((l->i==NOTE137) != original_typed_sj6_carrier(mot_base_snd,v) ||
+               (l->i==NOTE137 && l->val[BASS_NOTE_TAG+11]>127))) l=0;
+ #endif
+     if(!l) { if(note_lock_applied[v])note_lock_restore(v); return; }
+@@ -2920,7 +2931,7 @@
+         sj6_pitch_apply(sound,v);
+ #endif
+ #if defined(DNBOX_137_HOST_WITNESS) && (!DNBOX_TYPED_CONTROLS_NATIVE_TEST || X0X_SJ6_VELOCITY_PORT)
+-        if (live137(sound,v)) juno6_set_filter_velocity(&original_bass[v].dsp.juno.synth,read137(sound,v)[2]);
++        if (original_typed_sj6_carrier(sound,v)) juno6_set_filter_velocity(&original_bass[v].dsp.juno.synth,read137(sound,v)[2]);
+ #if X0X_SJ6_VCF_PORT
+         (void)sj6_vcf_apply(sound,v);
+ #endif
+@@ -2951,7 +2962,7 @@
+         s1_part_apply_extra(&original_bass[v].dsp.synthone, sound->v[T_303][S1_EXTRA_ROW+v]);
+ #endif
+ #ifdef DNBOX_137_HOST_WITNESS
+-    if (rc==ORIGINAL_RUNTIME_OK && live_s1_mod(sound,v))
++    if (rc==ORIGINAL_RUNTIME_OK && original_typed_s1_carrier(sound,v))
+         s1_part_mod_route(&original_bass[v].dsp.synthone,read137(sound,v)[3]);
+ #if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
+     if (rc==ORIGINAL_RUNTIME_OK) s1_pb_load(v,sound);
+@@ -3225,14 +3236,14 @@
+ #if defined(X0X_S1_FEEDBACK_PROBE) && X0X_S1_FEEDBACK_PROBE
+         s1_typed_feedback_apply(sound,v);
+ #endif
+-        if (live_s1_mod(sound,v))
++        if (original_typed_s1_carrier(sound,v))
+             s1_part_mod_route(&original_bass[v].dsp.synthone,read137(sound,v)[3]);
+ #if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
+-        if (live_s1_mod(sound,v)) s1_pb_load(v,sound);
++        if (original_typed_s1_carrier(sound,v)) s1_pb_load(v,sound);
+ #endif
+ #endif
+ #if defined(DNBOX_137_HOST_WITNESS) && (!DNBOX_TYPED_CONTROLS_NATIVE_TEST || X0X_SJ6_VELOCITY_PORT)
+-        if (live137(sound,v)) juno6_set_filter_velocity(&original_bass[v].dsp.juno.synth,read137(sound,v)[2]);
++        if (original_typed_sj6_carrier(sound,v)) juno6_set_filter_velocity(&original_bass[v].dsp.juno.synth,read137(sound,v)[2]);
+ #if X0X_SJ6_VCF_PORT
+         (void)sj6_vcf_apply(sound,v);
+ #endif

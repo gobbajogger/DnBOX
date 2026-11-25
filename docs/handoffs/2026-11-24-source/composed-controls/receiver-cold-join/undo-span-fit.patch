@@ -1,0 +1,363 @@
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -4040,6 +4040,28 @@
+     if(changed)apply(changed & ~undo_bass_mask);
+ }
+ #endif
++#if X0X_BASS_TAGGED_SOUND && defined(DNBOX_137_HOST_WITNESS)
++static __attribute__((noinline)) void ui_undo_invalid(const char *message)
++{
++    say(message,0);
++    engine_bass_edit_hold(0);
++}
++static __attribute__((noinline)) int ui_undo_span(int entry,unsigned offset,
++    const uint8_t *old,unsigned len,unsigned max,unsigned (*bound)(unsigned),
++    unsigned mask,unsigned *changed,const char *message)
++{
++    uint8_t bytes[NPARAMS_MAX];
++    undo_peek(&undo,entry,offset,bytes,len);
++    for(unsigned k=0;k<len;k++) if(bytes[k]>(bound?bound(k):max)){
++        ui_undo_invalid(message);return 0;
++    }
++    if(memcmp(bytes,old,len))*changed|=mask;
++    return 1;
++}
++#if X0X_SJ6_AUX_LFO_NATIVE
++_Static_assert(NPARAMS_MAX>=SJ6_AUX_BYTES,"Undo helper row size");
++#endif
++#endif
+ static void do_undo(int redo)
+ {
+     record_finish();
+@@ -4202,7 +4224,7 @@
+                 if(!sj6_classic_native_valid(classic) ||
+                    ((classic[0]|classic[1]|classic[2]) &&
+                     (target.cell[v][29]!=ORIGINAL_SOUND_JUNO || original_sound_sj6_factory(target.cell[v])))){
+-                    say("UNDO LEGACY CHORUS INVALID",0);engine_bass_edit_hold(0);return;
++                    ui_undo_invalid("UNDO LEGACY CHORUS INVALID");return;
+                 }
+                 if(memcmp(classic,sj6_classic_native_code(&proj.sound,v),sizeof classic))undo_j60|=1u<<v;
+ #endif
+@@ -4210,7 +4232,7 @@
+                 if(!sj6_j60_valid(j60) ||
+                    ((j60[0]|j60[1]|j60[2]|j60[3]) &&
+                     (target.cell[v][29]!=ORIGINAL_SOUND_JUNO || original_sound_sj6_factory(target.cell[v])))){
+-                    say("UNDO CHORUS INVALID",0);engine_bass_edit_hold(0);return;
++                    ui_undo_invalid("UNDO CHORUS INVALID");return;
+                 }
+                 if(memcmp(j60,sj6_j60_code(&proj.sound,v),sizeof j60))undo_j60|=1u<<v;
+ #endif
+@@ -4223,30 +4245,26 @@
+                 if(!sj6_aux_lfo1_valid(lfo1_route) ||
+                    ((lfo1_route[0]|lfo1_route[2]) &&
+                     (target.cell[v][29]!=ORIGINAL_SOUND_JUNO || original_sound_sj6_factory(target.cell[v])))){
+-                    say("UNDO LFO1 ROUTE INVALID",0);engine_bass_edit_hold(0);return;
++                    ui_undo_invalid("UNDO LFO1 ROUTE INVALID");return;
+                 }
+                 if(memcmp(lfo1_route,sj6_aux_lfo1_read(&proj.sound,v),sizeof lfo1_route))undo_aux|=1u<<v;
+                 uint8_t aux[SJ6_AUX_BYTES];
+                 uint32_t aux_off=__builtin_offsetof(sound_t,v)+((T_MST*NVOICES_MAX+SJ6_AUX_ROW+v)*NPARAMS_MAX);
+                 undo_peek(&undo,entry,aux_off,aux,sizeof aux);
+                 for(unsigned k=0;k<SJ6_AUX_BYTES;k++)
+-                    if(!sj6_aux_valid(k,aux[k])){say("UNDO LFO INVALID",0);engine_bass_edit_hold(0);return;}
++                    if(!sj6_aux_valid(k,aux[k])){ui_undo_invalid("UNDO LFO INVALID");return;}
+                 if(memcmp(aux,sj6_aux_read(&proj.sound,v),sizeof aux))undo_aux|=1u<<v;
+ #if X0X_SJ6_LFO_TRIGGER_NATIVE
+                 uint8_t snaps[2];
+                 undo_peek(&undo,entry,aux_off+30u,snaps,sizeof snaps);
+-                if(snaps[0]>1u||snaps[1]>1u){say("UNDO SNAP INVALID",0);engine_bass_edit_hold(0);return;}
++                if(snaps[0]>1u||snaps[1]>1u){ui_undo_invalid("UNDO SNAP INVALID");return;}
+                 if(memcmp(snaps,sj6_aux_read(&proj.sound,v)+30u,sizeof snaps))undo_aux|=1u<<v;
+ #endif
+ #endif
+ #if X0X_SJ6_PITCH_ENV_NATIVE
+-                uint8_t pitch[SJ6_PITCH_COUNT];
+                 uint32_t pitch_off=__builtin_offsetof(sound_t,v)+
+                     ((T_MST*NVOICES_MAX+SJ6_PITCH_ROW+v)*NPARAMS_MAX+SJ6_PITCH_OFFSET);
+-                undo_peek(&undo,entry,pitch_off,pitch,sizeof pitch);
+-                for(unsigned k=0;k<SJ6_PITCH_COUNT;k++)
+-                    if(pitch[k]>sj6_pitch_max(k)){say("UNDO PITCH INVALID",0);engine_bass_edit_hold(0);return;}
+-                if(memcmp(pitch,sj6_pitch_read(&proj.sound,v),sizeof pitch))undo_pitch|=1u<<v;
++                if(!ui_undo_span(entry,pitch_off,sj6_pitch_read(&proj.sound,v),SJ6_PITCH_COUNT,0,sj6_pitch_max,1u<<v,&undo_pitch,"UNDO PITCH INVALID"))return;
+ #endif
+ #if X0X_SJ6_NATIVE_UNISON
+                 uint8_t uni[4];
+@@ -4256,25 +4274,21 @@
+                 if(uni[0]>1u || uni[1]>128u || uni[2]>127u || uni[3]>5u ||
+                    ((uni[0]|uni[1]|uni[2]|uni[3]) &&
+                     (target.cell[v][29]!=ORIGINAL_SOUND_JUNO || original_sound_sj6_factory(target.cell[v])))){
+-                    say("UNDO UNISON INVALID",0);engine_bass_edit_hold(0);return;
++                    ui_undo_invalid("UNDO UNISON INVALID");return;
+                 }
+                 if(memcmp(uni,sj6_unison_code(&proj.sound,v),sizeof uni))undo_sj6_unison|=1u<<v;
+ #endif
+ #if X0X_S1_DELAY_TIME_NATIVE
+                 undo_peek(&undo,entry,__builtin_offsetof(sound_t,v)+(T_303*NVOICES_MAX+8u+2u*v)*NPARAMS_MAX+S1_DELAY_TIME_BYTE,&undo_dlycode[v],1u);
+-                if(undo_dlycode[v]>S1_DELAY_TIME_MAX){say("UNDO DELAY INVALID",0);engine_bass_edit_hold(0);return;}
++                if(undo_dlycode[v]>S1_DELAY_TIME_MAX){ui_undo_invalid("UNDO DELAY INVALID");return;}
+                 if(undo_dlycode[v]!=*s1_delay_time_code(&proj.sound,v))undo_dlytime|=1u<<v;
+ #endif
+ #if DNBOX_TYPED_CONTROLS_NATIVE_TEST
+-                uint8_t ph[S1_PHASE_COUNT];
+                 const uint32_t typed_off=__builtin_offsetof(sound_t,v)+
+                         (T_303*NVOICES_MAX+8u+2u*v)*NPARAMS_MAX;
+                 if(!undo_bounded_field(entry,typed_off+S1_DELAY_RES_BYTE,S1_DELAY_RES_MAX,*s1_delay_res_read(&proj.sound,v),1u<<v,&undo_phaser,"UNDO DELAY RES INVALID"))return;
+                 if(!undo_bounded_field(entry,typed_off+S1_ENV_LFO_BYTE,S1_ENV_LFO_MAX,*s1_env_lfo_read(&proj.sound,v),1u<<v,&undo_phaser,"UNDO ENV LFO INVALID"))return;
+-                undo_peek(&undo,entry,typed_off+S1_PHASE_BYTE,ph,sizeof ph);
+-                for(unsigned k=0;k<S1_PHASE_COUNT;k++)
+-                    if(ph[k]>S1_PHASE_MAX){say("UNDO PHASER INVALID",0);engine_bass_edit_hold(0);return;}
+-                if(memcmp(ph,s1_phase_read(&proj.sound,v),sizeof ph))undo_phaser|=1u<<v;
++                if(!ui_undo_span(entry,typed_off+S1_PHASE_BYTE,s1_phase_read(&proj.sound,v),S1_PHASE_COUNT,S1_PHASE_MAX,0,1u<<v,&undo_phaser,"UNDO PHASER INVALID"))return;
+ #endif
+ #if DNBOX_TYPED_CONTROLS_NATIVE_TEST
+ #if X0X_SJ6_NOISE_SUB_NATIVE
+@@ -4283,7 +4297,7 @@
+                     ((T_MST*NVOICES_MAX+SJ6_SOURCES_ROW+v)*NPARAMS_MAX+SJ6_SOURCES_OFFSET);
+                 undo_peek(&undo,entry,sources_off,sources,sizeof sources);
+                 if(sources[0]>127u || sources[1]>127u) {
+-                    say("UNDO OSC SOURCE INVALID",0);engine_bass_edit_hold(0);return;
++                    ui_undo_invalid("UNDO OSC SOURCE INVALID");return;
+                 }
+                 if(memcmp(sources,sj6_sources_read(&proj.sound,v),sizeof sources))undo_delay|=1u<<v;
+ #endif
+@@ -4293,7 +4307,7 @@
+                     ((T_MST*NVOICES_MAX+SJ6_SEQ_SETTINGS_ROW+v)*NPARAMS_MAX+SJ6_SEQ_SETTINGS_OFFSET);
+                 undo_peek(&undo,entry,seqcfg_off,seqcfg,sizeof seqcfg);
+                 if(!sj6_seq_settings_valid(seqcfg)) {
+-                    say("UNDO SEQ SETUP INVALID",0);engine_bass_edit_hold(0);return;
++                    ui_undo_invalid("UNDO SEQ SETUP INVALID");return;
+                 }
+                 if(memcmp(seqcfg,sj6_seq_settings_read(&proj.sound,v),sizeof seqcfg))undo_delay|=1u<<v;
+ #if X0X_SJ6_SEQ_DEST_NATIVE
+@@ -4301,23 +4315,19 @@
+                 const uint32_t dest_off=__builtin_offsetof(sound_t,v)+
+                     ((T_MST*NVOICES_MAX+SJ6_DEST_ROW+v)*NPARAMS_MAX+SJ6_DEST_BYTE);
+                 undo_peek(&undo,entry,dest_off,&dest,1u);
+-                if(dest>2u){say("UNDO SEQ DEST INVALID",0);engine_bass_edit_hold(0);return;}
++                if(dest>2u){ui_undo_invalid("UNDO SEQ DEST INVALID");return;}
+                 if(dest!=sj6_dest_read(&proj.sound,v))undo_delay|=1u<<v;
+ #endif
+ #endif
+ #if X0X_SJ6_NATIVE_ROOM
+-                uint8_t room[SJ6_ROOM_COUNT];
+                 const uint32_t room_off=__builtin_offsetof(sound_t,v)+
+                     ((T_MST*NVOICES_MAX+SJ6_ROOM_ROW+v)*NPARAMS_MAX+SJ6_ROOM_BYTE);
+-                undo_peek(&undo,entry,room_off,room,sizeof room);
+-                for(unsigned k=0;k<SJ6_ROOM_COUNT;k++)
+-                    if(room[k]>sj6_room_max(k)){say("UNDO FX INVALID",0);engine_bass_edit_hold(0);return;}
+-                if(memcmp(room,sj6_room_read(&proj.sound,v),sizeof room))undo_room|=1u<<v;
++                if(!ui_undo_span(entry,room_off,sj6_room_read(&proj.sound,v),SJ6_ROOM_COUNT,0,sj6_room_max,1u<<v,&undo_room,"UNDO FX INVALID"))return;
+                 uint8_t crush[2];
+                 const uint32_t crush_off=__builtin_offsetof(sound_t,v)+
+                     ((T_MST*NVOICES_MAX+SJ6_CRUSH_ROW+v)*NPARAMS_MAX+SJ6_CRUSH_BYTE);
+                 undo_peek(&undo,entry,crush_off,crush,sizeof crush);
+-                if(crush[0]>1u || crush[1]>127u){say("UNDO CRUSH INVALID",0);engine_bass_edit_hold(0);return;}
++                if(crush[0]>1u || crush[1]>127u){ui_undo_invalid("UNDO CRUSH INVALID");return;}
+                 if(memcmp(crush,sj6_crush_code(&proj.sound,v),sizeof crush))undo_room|=1u<<v;
+ #endif
+ #if X0X_SJ6_OTA_NATIVE
+@@ -4325,17 +4335,13 @@
+                 const uint32_t ota_off=__builtin_offsetof(sound_t,v)+
+                     ((T_MST*NVOICES_MAX+SJ6_OTA_ROW+v)*NPARAMS_MAX+SJ6_OTA_BYTE);
+                 undo_peek(&undo,entry,ota_off,&ota,1u);
+-                if(ota>1u){say("UNDO FILTER INVALID",0);engine_bass_edit_hold(0);return;}
++                if(ota>1u){ui_undo_invalid("UNDO FILTER INVALID");return;}
+                 if(ota!=sj6_ota_read(&proj.sound,v))undo_ota|=1u<<v;
+ #endif
+ #if X0X_SJ6_NATIVE_LIMITER
+-                uint8_t lim[SJ6_LIM_COUNT];
+                 const uint32_t lim_off=__builtin_offsetof(sound_t,v)+
+                     ((T_MST*NVOICES_MAX+SJ6_LIM_ROW+v)*NPARAMS_MAX+SJ6_LIM_BYTE);
+-                undo_peek(&undo,entry,lim_off,lim,sizeof lim);
+-                for(unsigned k=0;k<SJ6_LIM_COUNT;k++)
+-                    if(lim[k]>128u){say("UNDO LIMITER INVALID",0);engine_bass_edit_hold(0);return;}
+-                if(memcmp(lim,sj6_limiter_read(&proj.sound,v),sizeof lim))undo_limiter|=1u<<v;
++                if(!ui_undo_span(entry,lim_off,sj6_limiter_read(&proj.sound,v),SJ6_LIM_COUNT,128u,0,1u<<v,&undo_limiter,"UNDO LIMITER INVALID"))return;
+ #if X0X_SJ6_VINTAGE_NATIVE
+                 if(!undo_bounded_field(entry,lim_off+SJ6_VINTAGE_BYTE-SJ6_LIM_BYTE,127u,
+                     sj6_vintage_read(&proj.sound,v),1u<<v,&undo_limiter,"UNDO VINTAGE INVALID"))return;
+@@ -4346,16 +4352,12 @@
+ #endif
+                 uint8_t rage;
+                 undo_peek(&undo,entry,lim_off+SJ6_RAGE_BYTE-SJ6_LIM_BYTE,&rage,1u);
+-                if(rage>128u){say("UNDO LIMITER INVALID",0);engine_bass_edit_hold(0);return;}
++                if(rage>128u){ui_undo_invalid("UNDO LIMITER INVALID");return;}
+                 if(rage!=sj6_rage_read(&proj.sound,v))undo_limiter|=1u<<v;
+ #endif
+-                uint8_t cmp[S1_CMP_COUNT];
+                 const uint32_t cmp_off=__builtin_offsetof(sound_t,v)+
+                     ((T_MST*NVOICES_MAX+S1_CMP_ROW+v)*NPARAMS_MAX);
+-                undo_peek(&undo,entry,cmp_off,cmp,sizeof cmp);
+-                for(unsigned k=0;k<sizeof cmp;k++)
+-                    if(cmp[k]>127u){say("UNDO COMP INVALID",0);engine_bass_edit_hold(0);return;}
+-                if(memcmp(cmp,s1_cmp_read(&proj.sound,v),sizeof cmp))undo_cmp|=1u<<v;
++                if(!ui_undo_span(entry,cmp_off,s1_cmp_read(&proj.sound,v),S1_CMP_COUNT,127u,0,1u<<v,&undo_cmp,"UNDO COMP INVALID"))return;
+                 const uint32_t aa_off=__builtin_offsetof(sound_t,v)+
+                     ((T_303*NVOICES_MAX+8u+2u*v)*NPARAMS_MAX+S1_AA_BYTE);
+                 if(!undo_bounded_field(entry,aa_off,1u,s1_aa_read(&proj.sound,v),1u<<v,&undo_aa,"UNDO ANTI-ALIAS INVALID"))return;
+@@ -4366,7 +4368,7 @@
+                     ((T_MST*NVOICES_MAX+SJ6_LFO1_WAVE_ROW+v)*NPARAMS_MAX+SJ6_LFO1_WAVE_OFFSET);
+                 undo_peek(&undo,entry,wave_off,&p,1u);
+                 if(p>SJ6_LFO1_WAVE_MAX || (p && !sj6_lfo1_wave_allowed(target.cell[v]))){
+-                    say("UNDO LFO WAVE INVALID",0);engine_bass_edit_hold(0);return;
++                    ui_undo_invalid("UNDO LFO WAVE INVALID");return;
+                 }
+                 if(p!=sj6_lfo1_wave_read(&proj.sound,v))undo_delay|=1u<<v;
+ #if X0X_SJ6_ALT3_NATIVE
+@@ -4376,14 +4378,14 @@
+                 undo_peek(&undo,entry,trem_off,trem,sizeof trem);
+                 if(trem[0]>127u || trem[1]>128u || ((trem[0]|trem[1]) &&
+                    !sj6_lfo1_wave_allowed(target.cell[v]))){
+-                    say("UNDO TREMOLO INVALID",0);engine_bass_edit_hold(0);return;
++                    ui_undo_invalid("UNDO TREMOLO INVALID");return;
+                 }
+                 if(memcmp(trem,sj6_trem_read(&proj.sound,v),sizeof trem))undo_delay|=1u<<v;
+ #endif
+                 for(unsigned k=0;k<2u;++k) {
+                     undo_peek(&undo,entry,wave_off+1u+k,&p,1u);
+                     if(p>1u || (p && !sj6_lfo1_wave_allowed(target.cell[v]))) {
+-                        say("UNDO LFO SWITCH INVALID",0);engine_bass_edit_hold(0);return;
++                        ui_undo_invalid("UNDO LFO SWITCH INVALID");return;
+                     }
+                     if(p!=sj6_lfo1_option(&proj.sound,v,k))undo_delay|=1u<<v;
+                 }
+@@ -4399,7 +4401,7 @@
+                 const uint32_t filter_off=vcf_off-SJ6_VCF_BYTE;
+                 for(unsigned k=0;k<2u;++k) {
+                     undo_peek(&undo,entry,filter_off+(k?SJ6_ENV_STRENGTH_BYTE:SJ6_KEY_TRACK_BYTE),&p,1u);
+-                    if(p>(k?128u:127u)){say("UNDO FILTER INVALID",0);engine_bass_edit_hold(0);return;}
++                    if(p>(k?128u:127u)){ui_undo_invalid("UNDO FILTER INVALID");return;}
+                     if(p!=*sj6_filter_code(&proj.sound,v,k))undo_vcf|=1u<<v;
+                 }
+ #endif
+@@ -4410,7 +4412,7 @@
+                 uint8_t ci[SJ6_CLASSIC_I_COUNT];
+                 undo_peek(&undo,entry,off+SJ6_CLASSIC_I_BYTE-2u,ci,sizeof ci);
+                 if(memcmp(ci,read137(&proj.sound,v)+SJ6_CLASSIC_I_BYTE,sizeof ci)) {
+-                  if(!sj6_classic_i_bytes_valid(ci)){say("UNDO CHORUS INVALID",0);engine_bass_edit_hold(0);return;}
++                  if(!sj6_classic_i_bytes_valid(ci)){ui_undo_invalid("UNDO CHORUS INVALID");return;}
+                   undo_chorus_i|=1u<<v;
+                 }
+ #endif
+@@ -4423,7 +4425,7 @@
+                 undo_peek(&undo,entry,off-2u+S1_ARP_CLOCK_BYTE,clock_value,sizeof clock_value);
+                 if(memcmp(clock_value,read137(&proj.sound,v)+S1_ARP_CLOCK_BYTE,sizeof clock_value)) {
+                     if(!s1_clock_valid(clock_value)){
+-                        say("UNDO CLOCK INVALID",0);engine_bass_edit_hold(0);return;
++                        ui_undo_invalid("UNDO CLOCK INVALID");return;
+                     }
+                     undo_clock|=1u<<v;
+                 }
+@@ -4436,7 +4438,7 @@
+                 undo_peek(&undo,entry,off+SJ6_DELAY_BYTE-2u,dl,sizeof dl);
+                 if(memcmp(dl,read137(&proj.sound,v)+SJ6_DELAY_BYTE,sizeof dl)){
+                     if(!sj6_delay_bytes_valid(dl)||!s1_typed_tuple_editable()){
+-                        say("UNDO DELAY UNAVAILABLE",0);engine_bass_edit_hold(0);return;
++                        ui_undo_invalid("UNDO DELAY UNAVAILABLE");return;
+                     }
+                     undo_delay|=1u<<v;
+                 }
+@@ -4444,13 +4446,13 @@
+ #if defined(X0X_S1_AUTOPAN_PROBE) && X0X_S1_AUTOPAN_PROBE
+                 uint8_t pan[1u+S1_PAN_RATE_BYTES];
+                 undo_peek(&undo,entry,off+(S1_PAN_AMOUNT_BYTE-2u),pan,sizeof pan);
+-                if(pan[0]>127u || !s1_pan_rate_valid(s1_pan_rate_word_bytes(pan+1u))){say("UNDO PAN INVALID",0);engine_bass_edit_hold(0);return;}
++                if(pan[0]>127u || !s1_pan_rate_valid(s1_pan_rate_word_bytes(pan+1u))){ui_undo_invalid("UNDO PAN INVALID");return;}
+                 if(memcmp(pan,read137(&proj.sound,v)+S1_PAN_AMOUNT_BYTE,sizeof pan))undo_pan|=1u<<v;
+ #endif
+ #if X0X_SJ6_RANDOM2_PROBE || X0X_SJ6_NATIVE_RANDOM2
+                 undo_peek(&undo,entry,off+SJ6_ARP_RANDOM_BYTE-2u,&p,1u);
+                 if(p!=read137(&proj.sound,v)[SJ6_ARP_RANDOM_BYTE]){
+-                    if(p!=0u && p!=2u){say("UNDO MODE INVALID",0);engine_bass_edit_hold(0);return;}
++                    if(p!=0u && p!=2u){ui_undo_invalid("UNDO MODE INVALID");return;}
+                     undo_zero|=1u<<v;
+                 }
+ #endif
+@@ -4458,7 +4460,7 @@
+                 uint8_t voice_settings[2];
+                 undo_peek(&undo,entry,off+SJ6_VOICE_BYTE-2u,voice_settings,sizeof voice_settings);
+                 if(!sj6_voice_valid(v,voice_settings[0],voice_settings[1])){
+-                    say("UNDO VOICE INVALID",0);engine_bass_edit_hold(0);return;
++                    ui_undo_invalid("UNDO VOICE INVALID");return;
+                 }
+                 const uint8_t *cur_voice=sj6_voice_read(&proj.sound,v);
+                 if(memcmp(voice_settings,cur_voice,sizeof voice_settings)){
+@@ -4478,7 +4480,7 @@
+                     ((T_MST*NVOICES_MAX+S1_HALF_ROW+v)*NPARAMS_MAX+S1_HALF_BYTE);
+                 undo_peek(&undo,entry,half_off,&p,1u);
+                 if(p>128u || (p && !s1_typed_init_cell(target.cell[v]))){
+-                    say("UNDO SMOOTH INVALID",0);engine_bass_edit_hold(0);return;
++                    ui_undo_invalid("UNDO SMOOTH INVALID");return;
+                 }
+                 if(p!=s1_half_code(&proj.sound,v))undo_a4|=1u<<v;
+ #endif
+@@ -4491,7 +4493,7 @@
+                    && !(target.cell[v][29]==ORIGINAL_SOUND_JUNO && !original_sound_sj6_factory(target.cell[v]))
+ #endif
+                    )){
+-                    say("UNDO SCALE INVALID",0);engine_bass_edit_hold(0);return;
++                    ui_undo_invalid("UNDO SCALE INVALID");return;
+                 }
+                 if(p!=proj.sound.v[T_MST][S1_SCALE_ROW+v][S1_SCALE_BYTE])undo_a4|=1u<<v;
+ #if X0X_S1_USER_SCALE
+@@ -4499,7 +4501,7 @@
+                 const uint32_t base=__builtin_offsetof(sound_t,v);
+                 undo_peek(&undo,entry,scale_off+S1_USER_COUNT-S1_SCALE_BYTE,&target_user_count,1u);
+                 if(target_user_count>S1C_USER_NOTES || (p==S1C_SCALE_USER && !target_user_count)){
+-                    say("UNDO USER SCALE INVALID",0);engine_bass_edit_hold(0);return;
++                    ui_undo_invalid("UNDO USER SCALE INVALID");return;
+                 }
+                 const unsigned m=(unsigned)(scale_off+S1_USER_COUNT-S1_SCALE_BYTE);
+                 const unsigned h=base+(s1_user_head_target(v)*NVOICES_MAX+S1_USER_ROW)*NPARAMS_MAX;
+@@ -4513,7 +4515,7 @@
+ #if defined(DNBOX_137_HOST_WITNESS) && defined(X0X_SJ6_MOD_TYPED_PROBE)
+                 undo_peek(&undo,entry,off+SJ6_MOD_BYTE-2u,&p,1u);
+                 if(p!=read137(&proj.sound,v)[SJ6_MOD_BYTE]){
+-                    if(p>SJ6_MOD_LAST){say("UNDO MOD INVALID",0);engine_bass_edit_hold(0);return;}
++                    if(p>SJ6_MOD_LAST){ui_undo_invalid("UNDO MOD INVALID");return;}
+                     undo_sj6_mod|=1u<<v;
+                 }
+ #endif
+@@ -4524,9 +4526,7 @@
+                 const uint8_t *row=read137(&proj.sound,v);
+                 if (pb[0]!=row[S1_PB_DN_BYTE] || pb[1]!=row[S1_PB_UP_BYTE]) {
+                     if (pb[0]>S1_PB_LAST || pb[1]>S1_PB_LAST) {
+-                        say("UNDO RANGE INVALID",0);
+-                        engine_bass_edit_hold(0);
+-                        return;
++                        ui_undo_invalid("UNDO RANGE INVALID");return;
+                     }
+                     undo_pb|=1u<<v;
+                 }
+@@ -4534,9 +4534,7 @@
+                 undo_peek(&undo,entry,off+SJ6_PB_DN_BYTE-2u,pb,sizeof pb);
+                 if (pb[0]!=row[SJ6_PB_DN_BYTE] || pb[1]!=row[SJ6_PB_UP_BYTE]) {
+                     if (pb[0]>SJ6_PB_LIMIT || pb[1]>SJ6_PB_LIMIT) {
+-                        say("UNDO RANGE INVALID",0);
+-                        engine_bass_edit_hold(0);
+-                        return;
++                        ui_undo_invalid("UNDO RANGE INVALID");return;
+                     }
+                     undo_sj6_pb|=1u<<v;
+                 }
+@@ -4552,18 +4550,14 @@
+         const unsigned typed_only_changes=undo_s1_mod | undo_a4 | undo_rvfb | undo_trans | undo_crush | undo_delay | undo_pan | undo_feedback | undo_aux | undo_pitch | undo_dlytime | undo_phaser | undo_limiter | undo_ota | undo_room | undo_cmp | undo_aa | undo_cwg | undo_dict | undo_vcf | undo_chorus_i | undo_sj6_unison | undo_j60 | undo_sj6_voice | undo_clock | undo_zero | undo_sj6_input_vel;
+         typed_hold_changes=typed_only_changes|undo_velocity137|undo_pb|undo_sj6_pb|undo_sj6_mod;
+         if(typed_only_changes && !s1_typed_tuple_editable()) {
+-            say("PROJECT READ ONLY",0);
+-            engine_bass_edit_hold(0);
+-            return;
++            ui_undo_invalid("PROJECT READ ONLY");return;
+         }
+         /* No live per-group publication API exists for these three historical
+          * sidecars. Use the existing held base restore on the affected
+          * owners, including its active-note/lock/input admission. */
+         undo_bass_mask |= undo_delay | undo_sj6_unison | undo_j60;
+         if(undo_s1_mod && engine_bass_wheel_active()) {
+-            say("UNDO WAIT WHEEL",0);
+-            engine_bass_edit_hold(0);
+-            return;
++            ui_undo_invalid("UNDO WAIT WHEEL");return;
+         }
+ #endif
+         if(undo_bass_mask) {

@@ -1,0 +1,512 @@
+--- a/firmware/src/app/original_presets.inc
++++ b/firmware/src/app/original_presets.inc
+@@ -59,6 +59,20 @@
+     return 1;
+ }
+ 
++static __attribute__((noinline)) void original_typed_undo_apply(
++    unsigned mask, void (*apply)(const sound_t *,unsigned))
++{
++    for(unsigned v=0;v<NBASS;v++)
++        if(mask&(1u<<v))apply(mot_base_snd,v);
++}
++static __attribute__((noinline)) int original_typed_s1_live(const sound_t *s,unsigned v)
++{
++    return live_s1_mod(s,v) && original_bass[v].kind==ORIGINAL_SOUND_SYNTHONE;
++}
++static __attribute__((noinline)) int original_typed_sj6_live(const sound_t *s,unsigned v)
++{
++    return live137(s,v) && original_bass[v].kind==ORIGINAL_SOUND_JUNO;
++}
+ __attribute__((noinline))
+ static int original_typed_undo_open(unsigned mask)
+ {
+@@ -86,7 +100,7 @@
+ {
+     if(v>=NBASS || (field?pos>2u:pos>1u))return 0;
+     engine_project_hold(1);
+-    int ok=live137(mot_base_snd,v) && original_bass[v].kind==ORIGINAL_SOUND_JUNO &&
++    int ok=original_typed_sj6_live(mot_base_snd,v) &&
+            original_typed_edit_open(v);
+     if(ok){
+         unsigned code=sj6_input_vel(mot_base_snd,v);
+@@ -213,7 +227,7 @@
+ #if defined(X0X_SJ6_BEND_TYPED_PROBE) && X0X_SJ6_BEND_TYPED_PROBE
+ static int sj6_pb_apply(unsigned owner,const sound_t *sound)
+ {
+-    if (!live137(sound,owner) || original_bass[owner].kind!=ORIGINAL_SOUND_JUNO) return 0;
++    if (!original_typed_sj6_live(sound,owner)) return 0;
+     const uint8_t *row=read137(sound,owner);
+     return row[SJ6_PB_DN_BYTE]<=SJ6_PB_LIMIT && row[SJ6_PB_UP_BYTE]<=SJ6_PB_LIMIT &&
+            juno6_set_bend_ranges(&original_bass[owner].dsp.juno.synth,
+@@ -247,7 +261,7 @@
+ #if defined(X0X_SJ6_MOD_TYPED_PROBE)
+ static int sj6_typed_mod_apply(unsigned owner,const sound_t *sound)
+ {
+-    if(!live137(sound,owner) || original_bass[owner].kind!=ORIGINAL_SOUND_JUNO)return 0;
++    if(!original_typed_sj6_live(sound,owner))return 0;
+     unsigned route=read137(sound,owner)[SJ6_MOD_BYTE];
+     if(route>SJ6_MOD_LAST)return 0;
+     juno6_t *s=&original_bass[owner].dsp.juno.synth;
+@@ -629,7 +643,7 @@
+ #endif
+ static void s1_typed_clock_tones(const sound_t *sound,unsigned v)
+ {
+-    if(!live_s1_mod(sound,v) || original_bass[v].kind!=ORIGINAL_SOUND_SYNTHONE)return;
++    if(!original_typed_s1_live(sound,v))return;
+     const uint8_t *p=read137(sound,v)+S1_ARP_CLOCK_BYTE;
+     if(!s1_clock_valid(p))return;
+     s1c *e=&original_bass[v].dsp.synthone.e;
+@@ -711,7 +725,7 @@
+ #if defined(X0X_S1_FEEDBACK_PROBE) && X0X_S1_FEEDBACK_PROBE
+ static void s1_typed_feedback_apply(const sound_t *sound,unsigned v)
+ {
+-    if(!live_s1_mod(sound,v)||original_bass[v].kind!=ORIGINAL_SOUND_SYNTHONE)return;
++    if(!original_typed_s1_live(sound,v))return;
+     s1c *e=&original_bass[v].dsp.synthone.e;
+     unsigned code=read137(sound,v)[S1_FB_BYTE];
+     /* Fresh typed Init is already source-direct before its first render,
+@@ -734,7 +748,7 @@
+ }
+ void s1_typed_feedback_undo(unsigned mask)
+ {
+-    for(unsigned v=0;v<NBASS;v++)if(mask&(1u<<v))s1_typed_feedback_apply(mot_base_snd,v);
++    original_typed_undo_apply(mask,s1_typed_feedback_apply);
+ }
+ #endif
+ #if X0X_SJ6_CLASSIC_I_PROBE
+@@ -743,7 +757,7 @@
+  return v<NBASS && original_bass[v].classic_i_authored ? &original_bass[v].classic_i_effect : 0;
+ }
+ static int sj6_classic_i_active(const sound_t *sound,unsigned v) {
+- return live137(sound,v) && original_bass[v].kind==ORIGINAL_SOUND_JUNO &&
++ return original_typed_sj6_live(sound,v) &&
+    original_bass[v].dsp.juno.chorus.factory_mode>=JUNO6_CHORUS_I &&
+    original_bass[v].dsp.juno.chorus.factory_mode<=JUNO6_CHORUS_BOTH;
+ }
+@@ -806,7 +820,7 @@
+ }
+ static void sj6_voice_apply(const sound_t *sound,unsigned v)
+ {
+- if(!live137(sound,v)||original_bass[v].kind!=ORIGINAL_SOUND_JUNO)return;
++ if(!original_typed_sj6_live(sound,v))return;
+  const uint8_t *data=sj6_voice_read(sound,v);
+  if(!sj6_voice_valid(v,data[0],data[1]))return;
+  juno6_t *s=&original_bass[v].dsp.juno.synth;
+@@ -817,7 +831,7 @@
+ int engine_sj6_voice_undo_ready(unsigned mask)
+ {
+  for(unsigned v=0;v<NBASS;v++)
+-  if((mask&(1u<<v))&&live137(mot_base_snd,v)&&original_bass[v].kind==ORIGINAL_SOUND_JUNO&&note_lock_applied[v])return 0;
++  if((mask&(1u<<v))&&original_typed_sj6_live(mot_base_snd,v)&&note_lock_applied[v])return 0;
+  return 1;
+ }
+ void engine_sj6_voice_undo(unsigned mask)
+@@ -826,7 +840,7 @@
+ }
+ int engine_sj6_mono32_get(unsigned v,unsigned field)
+ {
+- if(v>=NBASS||!live137(mot_base_snd,v)||original_bass[v].kind!=ORIGINAL_SOUND_JUNO)return -1;
++ if(v>=NBASS||!original_typed_sj6_live(mot_base_snd,v))return -1;
+  if(field>2u)return -1;
+  const juno6_t *s=&original_bass[v].dsp.juno.synth;
+  return field==2u?s->glide35_detent:field?s->legato33_on:s->mono32_on;
+@@ -854,7 +868,7 @@
+ /* An Init-owned Delay input ratio, never a T_MIX or global FX address. */
+ static void s1_typed_dict_apply(const sound_t *sound,unsigned owner)
+ {
+-    if(live_s1_mod(sound,owner) && original_bass[owner].kind==ORIGINAL_SOUND_SYNTHONE) {
++    if(original_typed_s1_live(sound,owner)) {
+         unsigned code=s1_dict_read(sound,owner);
+         if(code<=S1_DICT_MAX)
+             (void)s1c_front_set(&original_bass[owner].dsp.synthone.e,S1_DICT_PARAM,
+@@ -863,8 +877,7 @@
+ }
+ int s1_typed_dict_position(unsigned owner)
+ {
+-    if(!live_s1_mod(mot_base_snd,owner) ||
+-       original_bass[owner].kind!=ORIGINAL_SOUND_SYNTHONE) return -1;
++    if(!original_typed_s1_live(mot_base_snd,owner)) return -1;
+     unsigned code=s1_dict_read(mot_base_snd,owner);
+     return code<=S1_DICT_MAX ? (int)s1_dict_decode(code) : -1;
+ }
+@@ -884,7 +897,7 @@
+ }
+ void s1_typed_dict_undo(unsigned mask)
+ {
+-    for(unsigned v=0;v<NBASS;v++)if(mask&(1u<<v))s1_typed_dict_apply(mot_base_snd,v);
++    original_typed_undo_apply(mask,s1_typed_dict_apply);
+ }
+ #endif
+ #if DNBOX_TYPED_CONTROLS_NATIVE_TEST
+@@ -892,7 +905,7 @@
+  * in both rate paths. Only the UI/storage receiver was previously absent. */
+ static void s1_aa_apply(const sound_t *sound,unsigned owner)
+ {
+-    if(live_s1_mod(sound,owner) && original_bass[owner].kind==ORIGINAL_SOUND_SYNTHONE) {
++    if(original_typed_s1_live(sound,owner)) {
+         unsigned value=s1_aa_read(sound,owner);
+         if(value<=1u)
+             (void)s1c_front_set(&original_bass[owner].dsp.synthone.e,S1_AA_PARAM,(float)value);
+@@ -900,7 +913,7 @@
+ }
+ int s1_aa_get(unsigned owner)
+ {
+-    if(!live_s1_mod(mot_base_snd,owner) || original_bass[owner].kind!=ORIGINAL_SOUND_SYNTHONE)return -1;
++    if(!original_typed_s1_live(mot_base_snd,owner))return -1;
+     unsigned value=s1_aa_read(mot_base_snd,owner);
+     return value<=1u ? (int)value : -1;
+ }
+@@ -920,7 +933,7 @@
+ }
+ void s1_aa_undo(unsigned mask)
+ {
+-    for(unsigned v=0;v<NBASS;v++)if(mask&(1u<<v))s1_aa_apply(mot_base_snd,v);
++    original_typed_undo_apply(mask,s1_aa_apply);
+ }
+ /* The three detector/ballistic paths are already independent in s1c_render.
+  * Apply these exact physical DSP IDs rather than synthesizing a master macro. */
+@@ -939,14 +952,13 @@
+ }
+ static void s1_cmp_apply(const sound_t *sound,unsigned owner)
+ {
+-    if(!live_s1_mod(sound,owner) || original_bass[owner].kind!=ORIGINAL_SOUND_SYNTHONE)return;
++    if(!original_typed_s1_live(sound,owner))return;
+     const uint8_t *row=s1_cmp_read(sound,owner);
+     for(unsigned k=0;k<S1_CMP_COUNT;k++)if(row[k]<=127u)s1_cmp_set(owner,k,row[k]);
+ }
+ int s1_cmp_position(unsigned owner,unsigned k)
+ {
+-    if(k>=S1_CMP_COUNT || !live_s1_mod(mot_base_snd,owner) ||
+-       original_bass[owner].kind!=ORIGINAL_SOUND_SYNTHONE)return -1;
++    if(k>=S1_CMP_COUNT || !original_typed_s1_live(mot_base_snd,owner))return -1;
+     const unsigned code=s1_cmp_read(mot_base_snd,owner)[k];
+     return code<=127u ? (int)s1_cmp_decode(k,code) : -1;
+ }
+@@ -967,12 +979,12 @@
+ }
+ void s1_cmp_undo(unsigned mask)
+ {
+-    for(unsigned v=0;v<NBASS;v++)if(mask&(1u<<v))s1_cmp_apply(mot_base_snd,v);
++    original_typed_undo_apply(mask,s1_cmp_apply);
+ }
+ #if X0X_SJ6_NATIVE_ROOM
+ static void sj6_crush_apply(const sound_t *sound,unsigned owner)
+ {
+-    if(!live137(sound,owner) || original_bass[owner].kind!=ORIGINAL_SOUND_JUNO)return;
++    if(!original_typed_sj6_live(sound,owner))return;
+     original_runtime_part *p=&original_bass[owner];
+     const uint8_t *b=sj6_crush_code(sound,owner);
+     /* Original conductor ID108: d=.0606*pow(unit,1.23). Map d to
+@@ -985,7 +997,7 @@
+ }
+ int sj6_crush_get(unsigned owner,unsigned k)
+ {
+-    if(k>1u || !live137(mot_base_snd,owner) || original_bass[owner].kind!=ORIGINAL_SOUND_JUNO)
++    if(k>1u || !original_typed_sj6_live(mot_base_snd,owner))
+         return -1;
+     unsigned b=sj6_crush_code(mot_base_snd,owner)[k];
+     return b<=(k?127u:1u)?(int)b:-1;
+@@ -1003,13 +1015,12 @@
+ static void sj6_native_room_apply(const sound_t *sound,unsigned owner)
+ {
+     sj6_crush_apply(sound,owner);
+-    if(live137(sound,owner) && original_bass[owner].kind==ORIGINAL_SOUND_JUNO)
++    if(original_typed_sj6_live(sound,owner))
+         original_runtime_sj6_room(&original_bass[owner],sj6_room_read(sound,owner));
+ }
+ int sj6_native_room_get(unsigned owner,unsigned slot)
+ {
+-    if(slot>=SJ6_ROOM_COUNT || !live137(mot_base_snd,owner) ||
+-       original_bass[owner].kind!=ORIGINAL_SOUND_JUNO)return -1;
++    if(slot>=SJ6_ROOM_COUNT || !original_typed_sj6_live(mot_base_snd,owner))return -1;
+     unsigned value=sj6_room_read(mot_base_snd,owner)[slot];
+     return value<=sj6_room_max(slot)?(int)value:-1;
+ }
+@@ -1029,20 +1040,20 @@
+ }
+ void sj6_native_room_undo(unsigned mask)
+ {
+-    for(unsigned v=0;v<NBASS;v++)if(mask&(1u<<v))sj6_native_room_apply(mot_base_snd,v);
++    original_typed_undo_apply(mask,sj6_native_room_apply);
+ }
+ #endif
+ #if X0X_SJ6_OTA_NATIVE
+ static void sj6_ota_apply(const sound_t *sound,unsigned owner)
+ {
+-    if(live137(sound,owner) && original_bass[owner].kind==ORIGINAL_SOUND_JUNO) {
++    if(original_typed_sj6_live(sound,owner)) {
+         juno6_t *s=&original_bass[owner].dsp.juno.synth;
+         (void)juno6_sj6_set_ota(s,sj6_ota_read(sound,owner));
+     }
+ }
+ int sj6_ota_get(unsigned owner)
+ {
+-    if(!live137(mot_base_snd,owner)||original_bass[owner].kind!=ORIGINAL_SOUND_JUNO)return -1;
++    if(!original_typed_sj6_live(mot_base_snd,owner))return -1;
+     unsigned value=sj6_ota_read(mot_base_snd,owner);
+     return value<=1u?(int)value:-1;
+ }
+@@ -1062,13 +1073,13 @@
+ }
+ void sj6_ota_undo(unsigned mask)
+ {
+-    for(unsigned v=0;v<NBASS;v++)if(mask&(1u<<v))sj6_ota_apply(mot_base_snd,v);
++    original_typed_undo_apply(mask,sj6_ota_apply);
+ }
+ #endif
+ #if X0X_SJ6_NATIVE_LIMITER
+ static void sj6_native_limiter_apply(const sound_t *sound,unsigned owner)
+ {
+-    if(live137(sound,owner) && original_bass[owner].kind==ORIGINAL_SOUND_JUNO)
++    if(original_typed_sj6_live(sound,owner))
+     {
+         original_runtime_sj6_limiter(&original_bass[owner],sj6_limiter_read(sound,owner));
+ #if X0X_SJ6_VINTAGE_NATIVE
+@@ -1080,8 +1091,7 @@
+ }
+ int sj6_native_limiter_get(unsigned owner,unsigned slot)
+ {
+-    if(slot>SJ6_FX_MOTION_LAST || !live137(mot_base_snd,owner) ||
+-       original_bass[owner].kind!=ORIGINAL_SOUND_JUNO)return -1;
++    if(slot>SJ6_FX_MOTION_LAST || !original_typed_sj6_live(mot_base_snd,owner))return -1;
+ #if X0X_SJ6_VINTAGE_NATIVE
+     if(slot==SJ6_VINTAGE_SLOT){
+         unsigned code=sj6_vintage_read(mot_base_snd,owner);
+@@ -1126,13 +1136,13 @@
+ }
+ void sj6_native_limiter_undo(unsigned mask)
+ {
+-    for(unsigned v=0;v<NBASS;v++)if(mask&(1u<<v))sj6_native_limiter_apply(mot_base_snd,v);
++    original_typed_undo_apply(mask,sj6_native_limiter_apply);
+ }
+ #endif
+ /* Owner-local wet compressor makeup, not main gain or reverb input. */
+ static void s1_typed_cwg_apply(const sound_t *sound,unsigned owner)
+ {
+-    if(live_s1_mod(sound,owner) && original_bass[owner].kind==ORIGINAL_SOUND_SYNTHONE) {
++    if(original_typed_s1_live(sound,owner)) {
+         unsigned code=s1_cwg_read(sound,owner);
+         if(code<=S1_CWG_MAX)
+             (void)s1c_front_set(&original_bass[owner].dsp.synthone.e,S1_CWG_PARAM,
+@@ -1141,8 +1151,7 @@
+ }
+ int s1_typed_cwg_position(unsigned owner)
+ {
+-    if(!live_s1_mod(mot_base_snd,owner) ||
+-       original_bass[owner].kind!=ORIGINAL_SOUND_SYNTHONE) return -1;
++    if(!original_typed_s1_live(mot_base_snd,owner)) return -1;
+     unsigned code=s1_cwg_read(mot_base_snd,owner);
+     return code<=S1_CWG_MAX ? (int)s1_cwg_decode(code) : -1;
+ }
+@@ -1162,7 +1171,7 @@
+ }
+ void s1_typed_cwg_undo(unsigned mask)
+ {
+-    for(unsigned v=0;v<NBASS;v++)if(mask&(1u<<v))s1_typed_cwg_apply(mot_base_snd,v);
++    original_typed_undo_apply(mask,s1_typed_cwg_apply);
+ }
+ #endif
+ #if DNBOX_TYPED_CONTROLS_NATIVE_TEST
+@@ -1172,8 +1181,7 @@
+ }
+ int s1_delay_res_get(unsigned owner)
+ {
+-    if(!live_s1_mod(mot_base_snd,owner) ||
+-       original_bass[owner].kind!=ORIGINAL_SOUND_SYNTHONE)return -1;
++    if(!original_typed_s1_live(mot_base_snd,owner))return -1;
+     unsigned code=*s1_delay_res_read(mot_base_snd,owner);
+     return code<=S1_DELAY_RES_MAX ? (int)code : -1;
+ }
+@@ -1193,8 +1201,7 @@
+ }
+ int s1_env_lfo_get(unsigned owner)
+ {
+-    if(!live_s1_mod(mot_base_snd,owner) ||
+-       original_bass[owner].kind!=ORIGINAL_SOUND_SYNTHONE)return -1;
++    if(!original_typed_s1_live(mot_base_snd,owner))return -1;
+     unsigned code=*s1_env_lfo_read(mot_base_snd,owner);
+     return code<=S1_ENV_LFO_MAX ? (int)code : -1;
+ }
+@@ -1215,7 +1222,7 @@
+ }
+ static void s1_phaser_apply(const sound_t *sound,unsigned owner)
+ {
+-    if(live_s1_mod(sound,owner) && original_bass[owner].kind==ORIGINAL_SOUND_SYNTHONE) {
++    if(original_typed_s1_live(sound,owner)) {
+         unsigned res=*s1_delay_res_read(sound,owner);
+         if(res<=S1_DELAY_RES_MAX)s1_delay_res_apply_one(owner,res);
+         unsigned route=*s1_env_lfo_read(sound,owner);
+@@ -1227,8 +1234,7 @@
+ }
+ int s1_phaser_get(unsigned owner,unsigned k)
+ {
+-    if(k>=S1_PHASE_COUNT || !live_s1_mod(mot_base_snd,owner) ||
+-       original_bass[owner].kind!=ORIGINAL_SOUND_SYNTHONE)return -1;
++    if(k>=S1_PHASE_COUNT || !original_typed_s1_live(mot_base_snd,owner))return -1;
+     unsigned code=s1_phase_read(mot_base_snd,owner)[k];
+     return code<=S1_PHASE_MAX ? (int)s1_phase_position(k,code) : -1;
+ }
+@@ -1249,13 +1255,13 @@
+ }
+ void s1_phaser_undo(unsigned mask)
+ {
+-    for(unsigned v=0;v<NBASS;v++)if(mask&(1u<<v))s1_phaser_apply(mot_base_snd,v);
++    original_typed_undo_apply(mask,s1_phaser_apply);
+ }
+ #endif
+ #if X0X_S1_DELAY_TIME_NATIVE
+ static void s1_delay_time_apply(const sound_t *sound,unsigned v)
+ {
+-    if(live_s1_mod(sound,v) && original_bass[v].kind==ORIGINAL_SOUND_SYNTHONE) {
++    if(original_typed_s1_live(sound,v)) {
+         s1c *e=&original_bass[v].dsp.synthone.e;
+         unsigned code=*s1_delay_time_code(sound,v);
+         if(code || e->delay_time_code)(void)s1c_front_delay_apply(e,code,1);
+@@ -1263,7 +1269,7 @@
+ }
+ int s1_delay_time_read(unsigned v,unsigned *pos,unsigned *max,float *seconds)
+ {
+-    if(!live_s1_mod(mot_base_snd,v) || original_bass[v].kind!=ORIGINAL_SOUND_SYNTHONE)return -2;
++    if(!original_typed_s1_live(mot_base_snd,v))return -2;
+     return s1c_front_delay_read(&original_bass[v].dsp.synthone.e,pos,max,seconds);
+ }
+ int s1_delay_time_choose(unsigned v,unsigned pos)
+@@ -1290,15 +1296,14 @@
+ {
+     if(!s1_typed_tuple_editable())return 0;
+     for(unsigned v=0;v<NBASS;v++)
+-        if((mask&(1u<<v)) && (!live_s1_mod(mot_base_snd,v) ||
+-           original_bass[v].kind!=ORIGINAL_SOUND_SYNTHONE || note_lock_applied[v] ||
++        if((mask&(1u<<v)) && (!original_typed_s1_live(mot_base_snd,v) || note_lock_applied[v] ||
+            engine_bass_preset_pending(v) ||
+            !s1c_front_delay_apply(&original_bass[v].dsp.synthone.e,before[v],0)))return 0;
+     return 1;
+ }
+ void s1_delay_time_undo(unsigned mask)
+ {
+-    for(unsigned v=0;v<NBASS;v++)if(mask&(1u<<v))s1_delay_time_apply(mot_base_snd,v);
++    original_typed_undo_apply(mask,s1_delay_time_apply);
+ }
+ #endif
+ #if X0X_SJ6_PITCH_ENV_NATIVE
+@@ -1331,7 +1336,7 @@
+ }
+ void sj6_pitch_undo(unsigned mask)
+ {
+-    for(unsigned v=0;v<NBASS;v++)if(mask&(1u<<v))sj6_pitch_apply(mot_base_snd,v);
++    original_typed_undo_apply(mask,sj6_pitch_apply);
+ }
+ #endif
+ #if X0X_SJ6_AUX_LFO_NATIVE
+@@ -1466,7 +1471,7 @@
+ }
+ void sj6_aux_undo(unsigned mask)
+ {
+-    for(unsigned v=0;v<NBASS;v++)if(mask&(1u<<v))sj6_aux_apply(mot_base_snd,v);
++    original_typed_undo_apply(mask,sj6_aux_apply);
+ }
+ #endif
+ #if X0X_S1_HALFTIME
+@@ -1480,7 +1485,7 @@
+ #if X0X_SJ6_SCALE_NATIVE
+ static int sj6_scale_owner(const sound_t *s,unsigned v)
+ {
+-    return s && v<NBASS && live137(s,v) && original_bass[v].kind==ORIGINAL_SOUND_JUNO &&
++    return s && v<NBASS && original_typed_sj6_live(s,v) &&
+            !original_sound_sj6_factory(s->v[T_303][v]);
+ }
+ static void sj6_scale_apply(const sound_t *s,unsigned v)
+@@ -1506,7 +1511,7 @@
+ #if X0X_SJ6_SCALE_NATIVE
+     if(sj6_scale_owner(sound,owner)){sj6_scale_apply(sound,owner);return;}
+ #endif
+-    if(live_s1_mod(sound,owner) && original_bass[owner].kind==ORIGINAL_SOUND_SYNTHONE) {
++    if(original_typed_s1_live(sound,owner)) {
+         original_runtime_part *p=&original_bass[owner];
+         (void)s1c_front_set(&p->dsp.synthone.e,S1_A4_PARAM,s1_a4_hz(read137(sound,owner)[S1_A4_BYTE]));
+ #if X0X_S1_HALFTIME
+@@ -1553,7 +1558,7 @@
+ #if X0X_SJ6_SCALE_NATIVE
+     if(sj6_scale_owner(s,owner))return 1;
+ #endif
+-    return s && owner<NBASS && live_s1_mod(s,owner) && original_bass[owner].kind==ORIGINAL_SOUND_SYNTHONE;
++    return s && owner<NBASS && original_typed_s1_live(s,owner);
+ }
+ int s1_typed_scale_choose(unsigned owner,unsigned code,int reset)
+ {
+@@ -1628,10 +1633,10 @@
+ }
+ #endif
+ void s1_typed_a4_undo(unsigned mask) {
+-    for(unsigned v=0;v<NBASS;v++)if(mask&(1u<<v))s1_typed_a4_apply(mot_base_snd,v);
++    original_typed_undo_apply(mask,s1_typed_a4_apply);
+ }
+ static void s1_typed_trans_apply(const sound_t *sound,unsigned owner) {
+-    if(live_s1_mod(sound,owner) && original_bass[owner].kind==ORIGINAL_SOUND_SYNTHONE)
++    if(original_typed_s1_live(sound,owner))
+         (void)s1c_front_set(&original_bass[owner].dsp.synthone.e,S1_TRANS_PARAM,s1_trans_st(read137(sound,owner)[S1_TRANS_BYTE]));
+ }
+ int s1_typed_trans_choose(unsigned owner,int st) {
+@@ -1648,12 +1653,12 @@
+     return ok;
+ }
+ void s1_typed_trans_undo(unsigned mask) {
+-    for(unsigned v=0;v<NBASS;v++)if(mask&(1u<<v))s1_typed_trans_apply(mot_base_snd,v);
++    original_typed_undo_apply(mask,s1_typed_trans_apply);
+ }
+ #if defined(X0X_S1_AUTOPAN_PROBE) && X0X_S1_AUTOPAN_PROBE
+ static s1_dry_part *s1_pan_owner(const sound_t *sound,unsigned v)
+ {
+-    return live_s1_mod(sound,v) && original_bass[v].kind==ORIGINAL_SOUND_SYNTHONE
++    return original_typed_s1_live(sound,v)
+             ? &original_bass[v].dsp.synthone : 0;
+ }
+ static void s1_typed_pan_apply(const sound_t *sound,unsigned v,int force_rate)
+@@ -1698,7 +1703,7 @@
+ }
+ #endif
+ static void s1_typed_crush_apply(const sound_t *sound,unsigned owner) {
+-    if(live_s1_mod(sound,owner) && original_bass[owner].kind==ORIGINAL_SOUND_SYNTHONE)
++    if(original_typed_s1_live(sound,owner))
+         (void)s1c_front_set(&original_bass[owner].dsp.synthone.e,S1_CRUSH_PARAM,read137(sound,owner)[S1_CRUSH_BYTE]);
+ }
+ int s1_typed_crush_choose(unsigned owner,unsigned choice) {
+@@ -1715,10 +1720,10 @@
+     return ok;
+ }
+ void s1_typed_crush_undo(unsigned mask) {
+-    for(unsigned v=0;v<NBASS;v++)if(mask&(1u<<v))s1_typed_crush_apply(mot_base_snd,v);
++    original_typed_undo_apply(mask,s1_typed_crush_apply);
+ }
+ static void s1_typed_rvfb_apply(const sound_t *sound,unsigned owner) {
+-    if(live_s1_mod(sound,owner) && original_bass[owner].kind==ORIGINAL_SOUND_SYNTHONE)
++    if(original_typed_s1_live(sound,owner))
+         (void)s1c_front_set(&original_bass[owner].dsp.synthone.e,S1C_P_RVFB,(float)s1_rvfb_pos(read137(sound,owner)[S1_RVFB_BYTE])*(1.f/128.f));
+ }
+ int s1_typed_rvfb_choose(unsigned owner,unsigned pos) {
+@@ -1735,7 +1740,7 @@
+     return ok;
+ }
+ void s1_typed_rvfb_undo(unsigned mask) {
+-    for(unsigned v=0;v<NBASS;v++)if(mask&(1u<<v))s1_typed_rvfb_apply(mot_base_snd,v);
++    original_typed_undo_apply(mask,s1_typed_rvfb_apply);
+ }
+ int s1_typed_mod_choose(unsigned owner,unsigned route) {
+     if (route>2 || !live_s1_mod(mot_base_snd,owner))return 0;
+@@ -1935,13 +1940,13 @@
+ {
+     if(v>=NBASS)return 0;
+     uint32_t lock=plat_cq_lock();
+-    int refused=live137(mot_base_snd,v)&&original_bass[v].kind==ORIGINAL_SOUND_JUNO&&
++    int refused=original_typed_sj6_live(mot_base_snd,v)&&
+         original_bass[v].dsp.juno.synth.delay24.clock_refused;
+     plat_cq_unlock(lock);return refused;
+ }
+ static void sj6_typed_delay_apply(unsigned v,float bpm)
+ {
+-    if(!live137(mot_base_snd,v)||original_bass[v].kind!=ORIGINAL_SOUND_JUNO)return;
++    if(!original_typed_sj6_live(mot_base_snd,v))return;
+     juno6_t *s=&original_bass[v].dsp.juno.synth;
+     const uint8_t *bytes=read137(mot_base_snd,v)+SJ6_DELAY_BYTE;
+     if(!sj6_delay_bytes_valid(bytes))return;
