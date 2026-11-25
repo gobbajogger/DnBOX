@@ -1,0 +1,32 @@
+elite huff-only
+.lab_fdata      0x00000000020e1000     0xdea8
+.lab_slot3      0x00000000020af000     0x7388
+.lab_fittab     0x00000000020fa000      0xf73
+.text           0x0000000002000120    0x88c58
+.bss            0x0000000001c08290    0x17cc4
+.pool           0x0000000001c20000    0x51e64
+region `XIP' overflowed by 11548 bytes
+elite relocated
+.lab_fdata      0x00000000020e1000     0xee4c
+.lab_slot3      0x00000000020af000     0x7388
+.lab_fittab     0x00000000020fa000      0xf73
+.text           0x0000000002000120    0x87cb4
+.bss            0x0000000001c08290    0x17cc4
+.pool           0x0000000001c20000    0x51e64
+region `XIP' overflowed by 7544 bytes
+pro huff-only
+.lab_fdata      0x00000000020e1000     0xdea8
+.lab_slot3      0x00000000020af000     0x7388
+.lab_fittab     0x00000000020fa000      0xf73
+.text           0x0000000002000120    0x88c4c
+.bss            0x0000000001c08290    0x17cc4
+.pool           0x0000000001c20000    0x51e64
+region `XIP' overflowed by 11536 bytes
+pro relocated
+.lab_fdata      0x00000000020e1000     0xee4c
+.lab_slot3      0x00000000020af000     0x7388
+.lab_fittab     0x00000000020fa000      0xf73
+.text           0x0000000002000120    0x87cac
+.bss            0x0000000001c08290    0x17cc4
+.pool           0x0000000001c20000    0x51e64
+region `XIP' overflowed by 7536 bytes

@@ -1,0 +1,186 @@
+--- a/tools/gen_drum_samples.py
++++ b/tools/gen_drum_samples.py
+@@ -23,6 +23,7 @@
+ The tables header is written next to the samples header.
+ """
+ import hashlib
++import heapq
+ import json
+ import math
+ import struct
+@@ -236,6 +237,57 @@
+     Path(target.name).replace(path)
+ 
+ 
++def huffman_cymbals(samples):
++    """Deterministic shared 6-bit-prefix coding of the exact IMA nibbles."""
++    nibbles = [[(data[i >> 1] >> (4 * (i & 1))) & 15 for i in range(n)]
++               for _, n, data in samples]
++    counts = [0] * 16
++    for voice in nibbles:
++        for x in voice:
++            counts[x] += 1
++    heap = [(n, (x,)) for x, n in enumerate(counts)]
++    heapq.heapify(heap)
++    lens = [0] * 16
++    while len(heap) > 1:
++        a, kids_a = heapq.heappop(heap)
++        b, kids_b = heapq.heappop(heap)
++        kids = kids_a + kids_b
++        for x in kids:
++            lens[x] += 1
++        heapq.heappush(heap, (a + b, kids))
++    assert max(lens) == 6
++    lookup = [0] * 64
++    codes = [0] * 16
++    code = previous = 0
++    for x in sorted(range(16), key=lambda x: (lens[x], x)):
++        n = lens[x]
++        code <<= n - previous
++        bit_order = sum(((code >> k) & 1) << (n - 1 - k) for k in range(n))
++        codes[x] = bit_order
++        for entry in range(bit_order, 64, 1 << n):
++            assert lookup[entry] == 0
++            lookup[entry] = (n << 4) | x
++        code += 1
++        previous = n
++    assert all(lookup)
++    output = []
++    for (name, _, _), voice in zip(samples, nibbles):
++        raw = bytearray()
++        word = bits = 0
++        for x in voice:
++            word |= codes[x] << bits
++            bits += lens[x]
++            if bits >= 8:
++                raw.append(word & 255)
++                word >>= 8
++                bits -= 8
++        if bits:
++            raw.append(word)
++        raw.append(0)  # final fixed 2-byte lookahead may reach this guard byte
++        output.append((name, raw))
++    return lookup, output
++
++
+ def main():
+     out_s = Path(sys.argv[1]) if len(sys.argv) > 1 else SRC / "build" / "gen" / "x0x_drum_samples.h"
+     out_t = out_s.parent / "x0x_drum_tables.h"
+@@ -249,6 +301,7 @@
+     total = nbytes = 0
+     encoded_dir = ASSETS / "encoded"
+     manifest = json.loads((encoded_dir / "manifest.json").read_text())
++    streams, plain = [], []
+     for name, fn in SAMPLES:
+         wav = ASSETS / fn
+         pcm, bits = read_wav(wav)
+@@ -262,8 +315,12 @@
+         nbytes += len(data)
+         hdr.append(f"/* {fn}: {len(pcm)} frames, source {bits}-bit, {len(data)} B of ADPCM */")
+         hdr.append(f"#define {name.upper()}_LEN {len(pcm)}u")
+-        hdr.append(arr("uint8_t", name, list(data), per=24))
+-        hdr.append("")
++        streams.append((name, len(pcm), data))
++        plain.append(arr("uint8_t", name, list(data), per=24))
++    lut, packed = huffman_cymbals(streams)
++    hdr += ["", "#if X0X_909_HUFF_DIAG", arr("uint8_t", "x0x_smp_huff_lut", lut, per=16)]
++    hdr += [arr("uint8_t", name, list(data), per=24) for name,data in packed]
++    hdr += ["#else", *plain, "#endif", ""]
+     write_header(out_s, "\n".join(hdr))
+ 
+     tab = [f32(math.tanh(TANH_MAX * i / TANH_N)) for i in range(TANH_N + 2)]
+--- a/firmware/src/dsp/ima_adpcm.h
++++ b/firmware/src/dsp/ima_adpcm.h
+@@ -32,9 +32,8 @@
+     0,0,0,0,0,0,0,0, 0,0,1,1,0,0,1,1,
+     0,1,0,1,0,1,0,1, 0,1,1,2,0,1,1,2
+ };
+-static inline int32_t ima_decode(const uint8_t *d, uint32_t i, int32_t *pred, int32_t *idx)
++static inline int32_t ima_decode_code(uint32_t code, int32_t *pred, int32_t *idx)
+ {
+-    uint32_t byte = d[i >> 1], code = (i & 1u) ? (byte >> 4) : (byte & 15u);
+     uint32_t mag = code & 7u;
+     int32_t step = IMA_STEP_T[*idx];
+     int32_t delta = ((step * (int32_t)(2u * mag + 1u)) >> 3) - IMA_ROUND_CORR[((step & 7) << 3) | mag];
+@@ -44,3 +43,8 @@
+     *idx = x < 0 ? 0 : x > 88 ? 88 : x;
+     return *pred;
+ }
++static inline int32_t ima_decode(const uint8_t *d, uint32_t i, int32_t *pred, int32_t *idx)
++{
++    uint32_t byte = d[i >> 1], code = (i & 1u) ? (byte >> 4) : (byte & 15u);
++    return ima_decode_code(code, pred, idx);
++}
+--- a/firmware/src/dsp/drum909.h
++++ b/firmware/src/dsp/drum909.h
+@@ -82,6 +82,9 @@
+     const uint8_t *adpcm;         /* IMA ADPCM, 44.1 kHz (ima_adpcm.h) */
+     uint32_t len;                 /* samples */
+     uint32_t dk;                  /* samples decoded so far; h0, h1 = samples dk - 2, dk - 1 */
++#if X0X_909_HUFF_DIAG
++    uint32_t huff_bit;            /* next exact sequential IMA nibble's bit cursor */
++#endif
+     int32_t pred, idx;            /* decoder state after dk samples */
+     int32_t h0, h1;
+     uint32_t pos, frac;           /* 32.32 read position */
+--- a/firmware/src/dsp/drum909.c
++++ b/firmware/src/dsp/drum909.c
+@@ -700,6 +700,9 @@
+         s->pos = 0;
+         s->frac = 0;
+         s->dk = 0;                                 /* decode again from the start */
++#if X0X_909_HUFF_DIAG
++        s->huff_bit = 0;
++#endif
+         s->pred = s->idx = 0;
+         s->h0 = s->h1 = 0;
+         s->playing = 1;
+@@ -1018,6 +1021,26 @@
+     d9_emit_block(bus, m);
+ }
+ 
++#if X0X_909_HUFF_DIAG
++#if !X0X_COLD_COMPANION_LAB
++#error "Huffman 909 diagnostic requires the verified read-only companion"
++#endif
++static inline int32_t d9_smp_decode(d9_smp_t *s, const uint8_t *stream)
++{
++    const uint32_t cursor = s->huff_bit;
++    const uint8_t *p = stream + (cursor >> 3);
++    const unsigned bits = p[0] | ((unsigned)p[1] << 8);
++    const unsigned e = x0x_smp_huff_lut[(bits >> (cursor & 7u)) & 63u];
++    s->huff_bit = cursor + (e >> 4);
++    ++s->dk;
++    return ima_decode_code(e & 15u, &s->pred, &s->idx);
++}
++#else
++static inline int32_t d9_smp_decode(d9_smp_t *s, const uint8_t *stream)
++{
++    return ima_decode(stream, s->dk++, &s->pred, &s->idx);
++}
++#endif
+ /* Hats, ride, crash (render_sampler) */
+ static void d9_render_smp(d9_smp_t *s, const d9_bus_t *bus, int n)
+ {
+@@ -1038,10 +1061,10 @@
+         s->pos < len && (unsigned)m < len - s->pos &&
+         (s->dk == s->pos || s->dk == s->pos + 1u)) {
+         if (s->dk == s->pos)
+-            s->h1 = ima_decode(adpcm, s->dk++, &s->pred, &s->idx);
++            s->h1 = d9_smp_decode(s, adpcm);
+         for (int i = 0; i < m; ++i) {
+             s->h0 = s->h1;
+-            s->h1 = ima_decode(adpcm, s->dk++, &s->pred, &s->idx);
++            s->h1 = d9_smp_decode(s, adpcm);
+             const float v = (float)s->h0 * (1.0f / 32768.0f);
+             bus->y[i] = v * d9_env_tick(&s->out);
+         }
+@@ -1053,7 +1076,7 @@
+                 const uint32_t need = s->pos + 2 < len ? s->pos + 2 : len;
+                 while (s->dk < need) {
+                     s->h0 = s->h1;
+-                    s->h1 = ima_decode(adpcm, s->dk++, &s->pred, &s->idx);
++                    s->h1 = d9_smp_decode(s, adpcm);
+                 }
+                 const int last = s->pos + 1 >= len;
+                 const float a = (float)(last ? s->h1 : s->h0) * (1.0f / 32768.0f);

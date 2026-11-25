@@ -1,0 +1,28 @@
+.lab_fdata      0x00000000020e1000     0xee28
+.lab_slot3      0x00000000020af000     0x7fcc
+.lab_fittab     0x00000000020fa000      0xf73
+.bss            0x0000000001c08290    0x17cc4
+.pool           0x0000000001c20000    0x51e64
+.xdata          0x00000000020a9000     0x1e12
+huff-tanh-slot3-fit/elite.log:region `XIP' overflowed by 3876 bytes
+huff-tanh-slot3-fit/pro.log:region `XIP' overflowed by 3868 bytes
+slot3-metadata map-only elite .rodata.original_miami_mappings 0x20b6388 480
+slot3-metadata map-only elite .rodata.original_chicago_mappings 0x20b6568 464
+slot3-metadata map-only elite .rodata.sj6_knob_desc.knobs 0x20b6738 504
+slot3-metadata map-only elite .rodata.extra_parameters 0x20b6930 336
+slot3-metadata map-only elite .rodata.original_sound_juno_params 0x20b6a80 216
+slot3-metadata map-only elite .rodata.patch_parameters 0x20b6b58 208
+slot3-metadata map-only elite .rodata.sj6_aux_route_labels 0x20b6c28 276
+slot3-metadata map-only elite .rodata.rd_panel_sj6_ref.fixed 0x20b6d3c 312
+slot3-metadata map-only elite .rodata.page_titles 0x20b6e74 344
+slot3-metadata span elite 32716 remaining 52
+slot3-metadata map-only pro .rodata.original_miami_mappings 0x20b6388 480
+slot3-metadata map-only pro .rodata.original_chicago_mappings 0x20b6568 464
+slot3-metadata map-only pro .rodata.sj6_knob_desc.knobs 0x20b6738 504
+slot3-metadata map-only pro .rodata.extra_parameters 0x20b6930 336
+slot3-metadata map-only pro .rodata.original_sound_juno_params 0x20b6a80 216
+slot3-metadata map-only pro .rodata.patch_parameters 0x20b6b58 208
+slot3-metadata map-only pro .rodata.sj6_aux_route_labels 0x20b6c28 276
+slot3-metadata map-only pro .rodata.rd_panel_sj6_ref.fixed 0x20b6d3c 312
+slot3-metadata map-only pro .rodata.page_titles 0x20b6e74 344
+slot3-metadata span pro 32716 remaining 52

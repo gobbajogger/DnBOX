@@ -1,0 +1,171 @@
+--- a/link-guarded-exact.py
++++ b/link-guarded-exact.py
+@@ -22,16 +22,49 @@
+     out.mkdir(parents=True,exist_ok=True)
+     elf=out/'never-install.elf'; ld=out/'lab.ld'; mp=out/'lab.map'
+     cmd[at]=ld;cmd[-1]=elf
+-    names=('crash','ride','hh')
++    names=('crash','ride','hh','huff_lut')
+     tables=''.join(' *(.rodata.x0x_smp_'+n+')' for n in names)
+     relocated={'.rodata.x0x_tanh_raw':0x1008,
+                '.rodata.s1_pan_detent_hz':0x200,
+                '.rodata.s1_pan_boundary_hz':0x1fc,
+                '.rodata.sj6_velocity_scale':0x200}
++    split = os.environ.get('DNBOX_TANH_SPLIT_LAB') == '1'
++    if split:
++        relocated.pop('.rodata.x0x_tanh_raw')
++        relocated.update({'.rodata.x0x_tanh_lab_head':1600,'.rodata.x0x_tanh_lab_tail':1252})
+     assert b.synth_controls_init_only(), 'FITTAB lab is only allowed with factory banks absent'
+     extra_fdata={
+         '.rodata.APC40_PAD_OWNER': (384,'e39797151468677c6e5735ca61944df77925e46cf7cfe30ff3ab687181795de7'),
+     }
++    if split:
++        extra_fdata.update({
++            '.rodata.x0x_tanh_lab_head':(1600,'9cce98ce40e37b6b28e389229844eca61b153116956a1d9afc350f5c5c4defea'),
++            '.rodata.x0x_tanh_lab_tail':(1252,'6f4f3d420d74dc070615a53c0aeca829dbe778619041ac122f9b12872a5f9a27'),
++        })
++    if os.environ.get("DNBOX_TANH_REFILL_LAB") == "1":
++        assert split, "LCD refill requires space created by guarded split tanh"
++        extra_fdata.update({
++            '.rodata.arc8_turns': (504,'7d880cfad5a08b1760af9a3f67a03229309b03c1c7af0c85174923f1a8b77d3a'),
++            '.rodata.arc8_pixels': (252,'8b06d9f6f7e16d0166044f12ca428ddef76dfe07919c24c5d6177ba6d8a31f09'),
++            '.rodata.APC40_LCD565': (256,'e6f130e761b3873e33657f9c5ef885d4530c51b4f95e8865601f911921c614e3'),
++            '.rodata.CORNER_PACKED': (204,'532a5b143a9620ac6ac6b67372bc9ae48cb76d569dc7a033b6b3a87c45c9c339'),
++        })
++    extra_fdata.update({
++        '.rodata.DV_XY_PACKED': (1385, 'b85232afb0bc55f0b01d3785f2930de3a673728118120fecaabc0a402351037f'),
++        '.rodata.DV_POLY_PACKED': (243, '5da4d1b265a7d90cb991cc65ea4db116fbf0dbe41ae32c4b871fa9aead369596'),
++        '.rodata.UI_PICTOGRAM_LOW': (333, '438de1bb3b27ed49f6f2f76c21d3b8ec009690163e5fd3c7faa33d56be077d00'),
++        '.rodata.UI_PICTOGRAM_HIGH': (42, '4a89d56faa589463ada908d4b98bb40093ec8399a34f8f1c386134c8577209bc'),
++        '.rodata.brk_retrigger_groups': (975, '7a6cd0bcb6560b738184b183ecc9d183ca3110308a3f135decaab79b4b03afdc'),
++        '.rodata.original_chicago_eq_sin': (512, '9656f4300eb60486c3542b370804dfe85fd7bc749f386db50c1afed5d86b8ff9'),
++        '.rodata.original_chicago_eq_cos': (512, '09e31976123fe609ffc6da59f59318694d8bafeb66c1d4e05fe78f4be173675c'),
++    })
++    streams={
++        'crash':(19851,'c8b8b64a14351a07f4a4b4d2fdc340a5674e5d1d20be1b4c91fd8d3fd1b0ad22'),
++        'ride':(21746,'6be8363921814de87fb5037f3604634ef68064f0f8a60226f7f0ffa56f5113b3'),
++        'hh':(9286,'36877ea6c212f0741faafadb29e9da7133684723315770fb81fbc33f373c9c3d'),
++        'huff_lut':(64,'3f72e3302a803c88212bf4babde1d93833f39c39695aee3e33bc97b2af744a19'),
++    }
++    cold909_end=32+sum(n for n,_ in streams.values())
+     exact_fittab={
+         '.rodata.sin_q': (260,'a8156345a2fb982e49e5ffdffcb65c88f2f75d0b39d72a6263e6a59ee62a6484'),
+         '.rodata.original_sound_upper_value': (256,'cf0919cc8b865aef649cf1b20dceb5f734742977c831e4f7102ef59610d30d71'),
+@@ -41,7 +74,7 @@
+         '.rodata.compact_miami_factory_codes': (480,'6393cd72abdd5e07b0dff12191907d89857e00db50fecb981ac62c1081e99f67'),
+         '.rodata.compact_miami_names': (339,'43d7f6dad8ad1bd8b14630dc857dc6bd1ff1ccf3047ac9f23d271917a9cfaf80'),
+     }
+-    tables+=''.join(' *('+n+')' for n in (*relocated,*extra_fdata))
++    tables+=''.join(' *('+n+')' for n in dict.fromkeys((*relocated,*extra_fdata)))
+     ft=''.join(' *('+n+')' for n in exact_fittab)
+     syms=('text','ram_text','c1_text','data','lab_fittab','xdata','lab_fdata','lab_slot3')
+     vals={}
+@@ -68,7 +101,46 @@
+     cold_factory.update({
+         '.rodata.original_chicago_eq_amplitude': (512,'be9953b585250950df04653089e243d84869ba2e4a711ea46494e5a528dcccc2'),
+     })
+-    held=''.join(' *('+n+')' for n in (*pair,*cold_factory))
++    slot3_metadata={
++        '.rodata.original_miami_mappings':480,
++        '.rodata.original_chicago_mappings':464,
++        '.rodata.sj6_knob_desc.knobs':504,
++        '.rodata.extra_parameters':336,
++        '.rodata.original_sound_juno_params':216,
++        '.rodata.patch_parameters':208,
++        '.rodata.sj6_aux_route_labels':276,
++        '.rodata.rd_panel_sj6_ref.fixed':312,
++        '.rodata.page_titles':344,
++    } if os.environ.get("D9_LAB_SLOT3_METADATA")=="1" else {}
++    # These are linker input sections, not reserialized structs. PIE/absolute
++    # internal references keep the native linker relocation records and actual
++    # referenced output symbols. Linked bytes join the existing whole-companion seal.
++    held=''.join(' *('+n+')' for n in (*pair,*cold_factory,*slot3_metadata))
++    def audit_meta(image=None, blank=None):
++        if not slot3_metadata:return
++        m=mp.read_text()
++        match=re.search(r'^\.lab_slot3\s+(0x[0-9a-f]+)\s+(0x[0-9a-f]+)',m,re.M)
++        assert match
++        base,sz=map(lambda x:int(x,16),match.groups())
++        assert base==0x020af000 and 32<=sz<=0x8000
++        begin=base+32
++        seen=[]
++        for name,expected in slot3_metadata.items():
++            entries=re.findall(r'^ '+re.escape(name)+r'\s+(0x[0-9a-f]+)\s+(0x[0-9a-f]+)',m,re.M)
++            assert len(entries)==1,(name,entries)
++            addr,n=map(lambda x:int(x,16),entries[0]); off=addr-base
++            assert n==expected and begin<=addr and addr+n<=base+sz,(name,addr,n)
++            seen.append((addr,addr+n))
++            if image is not None:
++                assert len(image)==len(blank)==sz
++                assert image[off:off+n]==blank[off:off+n]
++                print('slot3-metadata linked-sha256',b.MODEL,name,n,
++                      hashlib.sha256(image[off:off+n]).hexdigest(),flush=True)
++            else:
++                print('slot3-metadata map-only',b.MODEL,name,hex(addr),n,flush=True)
++        for (_,end),(next_start,_) in zip(sorted(seen),sorted(seen)[1:]):
++            assert end<=next_start
++        print('slot3-metadata span',b.MODEL,sz,'remaining',0x8000-sz,flush=True)
+     def link(header,companion,fittab):
+         h=' '.join('LONG(0x%08x);'%x for x in struct.unpack('<8I',header))
+         h2=' '.join('LONG(0x%08x);'%x for x in struct.unpack('<8I',companion))
+@@ -78,12 +150,17 @@
+         s=s.replace(' *(.rodata*) . = ALIGN(4); _etext', ' *(.rodata*) . = ALIGN(4); cold_lab_expected = .; '+h+' cold_slot3_expected = .; '+h2+' cold_fittab_expected = .; '+h3+' . = ALIGN(4); _etext')
+         assert s!=script and s.count('cold_lab_')==3 and s.count('cold_slot3_')==3 and s.count('cold_fittab_')==3
+         ld.write_text(s)
+-        real(tool,*cmd,'-Map='+str(mp))
++        if mp.exists():mp.unlink() # Never certify a stale failed-link map.
++        try:
++            real(tool,*cmd,'-Map='+str(mp))
++        except SystemExit:
++            if mp.is_file():audit_meta()
++            raise
+         for n in syms: real('common/bin/objcopy','-O','binary','-j','.'+n,elf,out/(n+'.bin'))
+         return [(out/(n+'.bin')).read_bytes() for n in syms]
+     a=link(bytes(32),bytes(32),bytes(32))
+     p,p2,p3=(a[-2][32:],a[-1][32:],a[4][32:])
+-    assert 55307+sum(relocated.values())<=len(a[-2])<=61440
++    assert cold909_end+sum(relocated.values())<=len(a[-2])<=61440
+     assert 32+sum(pair.values())<=len(a[-1])<=32768
+     assert 32+sum(v[0] for v in exact_fittab.values())<=len(a[4])<=4096
+     assert a[-2][:32]==a[-1][:32]==a[4][:32]==bytes(32)
+@@ -99,10 +176,11 @@
+     assert z[0][:n]+bytes(96)+z[0][n+96:]==a[0] and z[1:4]==a[1:4] and z[5]==a[5]
+     assert z[4]==h3+p3
+     assert z[-2]==h+p and z[-1]==h2+p2
++    audit_meta(z[-1],a[-1])
+     m=mp.read_text()
+     for name,expected in relocated.items():
+         aa,sz=(int(x,16) for x in re.search(r'^ '+re.escape(name)+r'\s+(0x[0-9a-f]+)\s+(0x[0-9a-f]+)',m,re.M).groups())
+-        assert sz==expected and 0x020E1000+55307<=aa and aa+sz<=0x020E1000+len(z[-2]),(name,aa,sz)
++        assert sz==expected and 0x020E1000+cold909_end<=aa and aa+sz<=0x020E1000+len(z[-2]),(name,aa,sz)
+     for name,expected in pair.items():
+         aa,sz=(int(x,16) for x in re.search(r'^ '+re.escape(name)+r'\s+(0x[0-9a-f]+)\s+(0x[0-9a-f]+)',m,re.M).groups())
+         assert sz==expected and 0x020AF000+32<=aa and aa+sz<=0x020AF000+len(z[-1]),(name,aa,sz)
+@@ -128,7 +206,8 @@
+         q=re.search(r'x0x_smp_'+name+r'\[\d+\] = \{([^}]+)\}',src)[1]
+         data=bytes(int(v.strip(),0) for v in q.split(',') if v.strip())
+         off=addr-0x020E1000
+-        assert off>=32 and len(data)==size and z[-2][off:off+size]==data
++        assert 32<=off<=cold909_end-size and (size,hashlib.sha256(data).hexdigest())==streams[name]
++        assert len(data)==size and z[-2][off:off+size]==data
+     # Use the stock packer's load offsets, inter-section gaps and final marker,
+     # not merely the sum of the ELFs' extracted section lengths.
+     syms=real('common/bin/objdump','-t',elf)
+@@ -143,7 +222,7 @@
+     pool=int(re.search(r'^\.pool\s+0x[0-9a-f]+\s+0x([0-9a-f]+)',m,re.M)[1],16)
+     print('guarded',b.MODEL,'XIP',used,'free',0x86ee0-used,'pool usable',0x54000-pool-8192,'read-only FDATA',len(z[-2]),'diagnostic slot3 span',len(z[-1]),'slot3 free',32768-len(z[-1]),'read-only FITTAB',len(z[4]),'header',h.hex(),'ELF',hashlib.sha256(elf.read_bytes()).hexdigest(),flush=True)
+     raise Stop
+-b.CFLAGS += ['-DX0X_COLD_COMPANION_LAB=1','-DX0X_COLD_SLOT3_LAB=1','-DX0X_COLD_FITTAB_LAB=1']
++b.CFLAGS += ['-DX0X_COLD_COMPANION_LAB=1','-DX0X_COLD_SLOT3_LAB=1','-DX0X_COLD_FITTAB_LAB=1','-DX0X_909_HUFF_DIAG=1']
+ b.CFLAGS.extend(["-DX0X_S1_FEEDBACK_PROBE=1","-DX0X_S1_DELAY_TRACK_TEST=1","-DX0X_SJ6_FILTER_VEL_PROBE=1","-DX0X_SJ6_VELOCITY_PORT=1","-DX0X_SJ6_NATIVE_RANDOM2=1"])
+ b.CFLAGS.append("-DX0X_SJ6_NATIVE_POSITIVE_GATE=1")
+ b.CFLAGS += ["-DDNBOX_TYPED_CONTROLS_NATIVE_TEST=1","-DX0X_S1_MOD_RATE_PROBE=1","-DX0X_S1_BEND_RANGE_PROBE=1","-DX0X_S1_AUTOPAN_PROBE=1","-DX0X_S1_AUTOPAN_PORT=1","-DX0X_SJ6_MONO32_PROBE=1"]
+@@ -152,6 +231,8 @@
+ b.ORIGINAL_SYNTH_OZ_UNITS |= {'chicago_selector','chicago_arp_control','chicago_note_context','miami_geometry','miami_fx_conversion'}
+ b.CFLAGS.extend(Path(os.environ['DNBOX_CONTROL_FLAGS']).read_text().split())
+ b.CFLAGS.append('-DX0X_CHICAGO_FAST32=1')
++if os.environ.get('DNBOX_TANH_SPLIT_LAB') == '1':
++    b.CFLAGS.append('-DX0X_TANH_SPLIT_LAB=1')
+ b.generate=lambda:None
+ b.build_loader=lambda:None
+ b.tc=seal

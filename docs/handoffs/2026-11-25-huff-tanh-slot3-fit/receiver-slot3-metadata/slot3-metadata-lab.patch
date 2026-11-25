@@ -1,0 +1,72 @@
+--- a/link-guarded-exact.py
++++ b/link-guarded-exact.py
+@@ -68,7 +68,46 @@
+     cold_factory.update({
+         '.rodata.original_chicago_eq_amplitude': (512,'be9953b585250950df04653089e243d84869ba2e4a711ea46494e5a528dcccc2'),
+     })
+-    held=''.join(' *('+n+')' for n in (*pair,*cold_factory))
++    slot3_metadata={
++        '.rodata.original_miami_mappings':480,
++        '.rodata.original_chicago_mappings':464,
++        '.rodata.sj6_knob_desc.knobs':504,
++        '.rodata.extra_parameters':336,
++        '.rodata.original_sound_juno_params':216,
++        '.rodata.patch_parameters':208,
++        '.rodata.sj6_aux_route_labels':276,
++        '.rodata.rd_panel_sj6_ref.fixed':312,
++        '.rodata.page_titles':344,
++    } if os.environ.get("D9_LAB_SLOT3_METADATA")=="1" else {}
++    # These are linker input sections, not reserialized structs. PIE/absolute
++    # internal references keep the native linker relocation records and actual
++    # referenced output symbols. Linked bytes join the existing whole-companion seal.
++    held=''.join(' *('+n+')' for n in (*pair,*cold_factory,*slot3_metadata))
++    def audit_meta(image=None, blank=None):
++        if not slot3_metadata:return
++        m=mp.read_text()
++        match=re.search(r'^\.lab_slot3\s+(0x[0-9a-f]+)\s+(0x[0-9a-f]+)',m,re.M)
++        assert match
++        base,sz=map(lambda x:int(x,16),match.groups())
++        assert base==0x020af000 and 32<=sz<=0x8000
++        begin=base+32
++        seen=[]
++        for name,expected in slot3_metadata.items():
++            entries=re.findall(r'^ '+re.escape(name)+r'\s+(0x[0-9a-f]+)\s+(0x[0-9a-f]+)',m,re.M)
++            assert len(entries)==1,(name,entries)
++            addr,n=map(lambda x:int(x,16),entries[0]); off=addr-base
++            assert n==expected and begin<=addr and addr+n<=base+sz,(name,addr,n)
++            seen.append((addr,addr+n))
++            if image is not None:
++                assert len(image)==len(blank)==sz
++                assert image[off:off+n]==blank[off:off+n]
++                print('slot3-metadata linked-sha256',b.MODEL,name,n,
++                      hashlib.sha256(image[off:off+n]).hexdigest(),flush=True)
++            else:
++                print('slot3-metadata map-only',b.MODEL,name,hex(addr),n,flush=True)
++        for (_,end),(next_start,_) in zip(sorted(seen),sorted(seen)[1:]):
++            assert end<=next_start
++        print('slot3-metadata span',b.MODEL,sz,'remaining',0x8000-sz,flush=True)
+     def link(header,companion,fittab):
+         h=' '.join('LONG(0x%08x);'%x for x in struct.unpack('<8I',header))
+         h2=' '.join('LONG(0x%08x);'%x for x in struct.unpack('<8I',companion))
+@@ -78,7 +117,12 @@
+         s=s.replace(' *(.rodata*) . = ALIGN(4); _etext', ' *(.rodata*) . = ALIGN(4); cold_lab_expected = .; '+h+' cold_slot3_expected = .; '+h2+' cold_fittab_expected = .; '+h3+' . = ALIGN(4); _etext')
+         assert s!=script and s.count('cold_lab_')==3 and s.count('cold_slot3_')==3 and s.count('cold_fittab_')==3
+         ld.write_text(s)
+-        real(tool,*cmd,'-Map='+str(mp))
++        if mp.exists():mp.unlink() # Never certify a stale failed-link map.
++        try:
++            real(tool,*cmd,'-Map='+str(mp))
++        except SystemExit:
++            if mp.is_file():audit_meta()
++            raise
+         for n in syms: real('common/bin/objcopy','-O','binary','-j','.'+n,elf,out/(n+'.bin'))
+         return [(out/(n+'.bin')).read_bytes() for n in syms]
+     a=link(bytes(32),bytes(32),bytes(32))
+@@ -99,6 +143,7 @@
+     assert z[0][:n]+bytes(96)+z[0][n+96:]==a[0] and z[1:4]==a[1:4] and z[5]==a[5]
+     assert z[4]==h3+p3
+     assert z[-2]==h+p and z[-1]==h2+p2
++    audit_meta(z[-1],a[-1])
+     m=mp.read_text()
+     for name,expected in relocated.items():
+         aa,sz=(int(x,16) for x in re.search(r'^ '+re.escape(name)+r'\s+(0x[0-9a-f]+)\s+(0x[0-9a-f]+)',m,re.M).groups())

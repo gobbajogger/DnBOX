@@ -1,0 +1,64 @@
+--- a/tools/gen_drum_samples.py
++++ b/tools/gen_drum_samples.py
+@@ -110,6 +110,20 @@
+     return "\n".join(lines)
+ 
+ 
++def tanh_split_decl(tab):
++    split=400
++    bits=[bits32(x) for x in tab]
++    assert len(bits)==1026 and all(b&0xffff0000==0x3f7f0000 for b in bits[split:])
++    head=b"".join(struct.pack("<I",b) for b in bits[:split])
++    tail=b"".join(struct.pack("<H",b&0xffff) for b in bits[split:])
++    assert hashlib.sha256(head).hexdigest()=="9cce98ce40e37b6b28e389229844eca61b153116956a1d9afc350f5c5c4defea"
++    assert hashlib.sha256(tail).hexdigest()=="6f4f3d420d74dc070615a53c0aeca829dbe778619041ac122f9b12872a5f9a27"
++    assert head+b"".join(struct.pack("<I",0x3f7f0000|(b&0xffff)) for b in bits[split:])==b"".join(struct.pack("<I",b) for b in bits)
++    return "\n".join(["#define X0X_TANH_LAB_SPLIT 400",
++        arr("float","x0x_tanh_lab_head",tab[:split],cfloat,per=6,shared=True),
++        arr("uint16_t","x0x_tanh_lab_tail",[b&0xffff for b in bits[split:]],lambda b:f"0x{b:04x}u",per=10,shared=True)])
++
++
+ def pot_exp(lo, hi, pot):
+     """er99_pot_to_value for an EXP pot, in float as 9W9 evaluates it"""
+     ratio = f32(f32(hi) / f32(lo))
+@@ -295,6 +309,7 @@
+           " * Retain the packed representation above for the old decoder oracle.",
+           " * cfloat emits a decimal literal that round-trips to the same binary32. */",
+           arr("float", "x0x_tanh_raw", tab, cfloat, per=6, shared=True),
++          "#if X0X_TANH_SPLIT_LAB", tanh_split_decl(tab), "#endif",
+           "/* Exact binary32 table entry i (0 .. X0X_TANH_N+1). Hot-path inline. */",
+           "static inline float x0x_tanh_value(unsigned i)",
+           "{",
+--- a/firmware/src/dsp/drum909_dsp.h
++++ b/firmware/src/dsp/drum909_dsp.h
+@@ -239,8 +239,30 @@
+ {
+     const int32_t i = (int32_t)a;
+     const float fr = a - (float)i;
++#if X0X_TANH_SPLIT_LAB
++#if !X0X_COLD_COMPANION_LAB
++#error split tanh is restricted to the guarded read-only companion lab
++#endif
++    float t0, t1;
++    const unsigned n = (unsigned)i;
++    if (n < X0X_TANH_LAB_SPLIT - 1u) {
++        t0 = x0x_tanh_lab_head[n];
++        t1 = x0x_tanh_lab_head[n + 1u];
++    } else {
++        union { uint32_t u; float f; } tail;
++        tail.u = 0x3f7f0000u | x0x_tanh_lab_tail[n + 1u - X0X_TANH_LAB_SPLIT];
++        t1 = tail.f;
++        if (n == X0X_TANH_LAB_SPLIT - 1u) {
++            t0 = x0x_tanh_lab_head[n];
++        } else {
++            tail.u = 0x3f7f0000u | x0x_tanh_lab_tail[n - X0X_TANH_LAB_SPLIT];
++            t0 = tail.f;
++        }
++    }
++#else
+     const float t0 = x0x_tanh_raw[(unsigned)i];
+     const float t1 = x0x_tanh_raw[(unsigned)i + 1u];
++#endif
+     return t0 + (t1 - t0) * fr;
+ }
+ 

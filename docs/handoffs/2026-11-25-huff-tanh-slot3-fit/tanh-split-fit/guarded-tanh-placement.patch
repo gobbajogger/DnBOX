@@ -1,0 +1,48 @@
+--- a/link-guarded-exact.py
++++ b/link-guarded-exact.py
+@@ -28,10 +28,27 @@
+                '.rodata.s1_pan_detent_hz':0x200,
+                '.rodata.s1_pan_boundary_hz':0x1fc,
+                '.rodata.sj6_velocity_scale':0x200}
++    split = os.environ.get('DNBOX_TANH_SPLIT_LAB') == '1'
++    if split:
++        relocated.pop('.rodata.x0x_tanh_raw')
++        relocated.update({'.rodata.x0x_tanh_lab_head':1600,'.rodata.x0x_tanh_lab_tail':1252})
+     assert b.synth_controls_init_only(), 'FITTAB lab is only allowed with factory banks absent'
+     extra_fdata={
+         '.rodata.APC40_PAD_OWNER': (384,'e39797151468677c6e5735ca61944df77925e46cf7cfe30ff3ab687181795de7'),
+     }
++    if split:
++        extra_fdata.update({
++            '.rodata.x0x_tanh_lab_head':(1600,'9cce98ce40e37b6b28e389229844eca61b153116956a1d9afc350f5c5c4defea'),
++            '.rodata.x0x_tanh_lab_tail':(1252,'6f4f3d420d74dc070615a53c0aeca829dbe778619041ac122f9b12872a5f9a27'),
++        })
++    if os.environ.get("DNBOX_TANH_REFILL_LAB") == "1":
++        assert split, "LCD refill requires space created by guarded split tanh"
++        extra_fdata.update({
++            '.rodata.arc8_turns': (504,'7d880cfad5a08b1760af9a3f67a03229309b03c1c7af0c85174923f1a8b77d3a'),
++            '.rodata.arc8_pixels': (252,'8b06d9f6f7e16d0166044f12ca428ddef76dfe07919c24c5d6177ba6d8a31f09'),
++            '.rodata.APC40_LCD565': (256,'e6f130e761b3873e33657f9c5ef885d4530c51b4f95e8865601f911921c614e3'),
++            '.rodata.CORNER_PACKED': (204,'532a5b143a9620ac6ac6b67372bc9ae48cb76d569dc7a033b6b3a87c45c9c339'),
++        })
+     exact_fittab={
+         '.rodata.sin_q': (260,'a8156345a2fb982e49e5ffdffcb65c88f2f75d0b39d72a6263e6a59ee62a6484'),
+         '.rodata.original_sound_upper_value': (256,'cf0919cc8b865aef649cf1b20dceb5f734742977c831e4f7102ef59610d30d71'),
+@@ -41,7 +58,7 @@
+         '.rodata.compact_miami_factory_codes': (480,'6393cd72abdd5e07b0dff12191907d89857e00db50fecb981ac62c1081e99f67'),
+         '.rodata.compact_miami_names': (339,'43d7f6dad8ad1bd8b14630dc857dc6bd1ff1ccf3047ac9f23d271917a9cfaf80'),
+     }
+-    tables+=''.join(' *('+n+')' for n in (*relocated,*extra_fdata))
++    tables+=''.join(' *('+n+')' for n in dict.fromkeys((*relocated,*extra_fdata)))
+     ft=''.join(' *('+n+')' for n in exact_fittab)
+     syms=('text','ram_text','c1_text','data','lab_fittab','xdata','lab_fdata','lab_slot3')
+     vals={}
+@@ -152,6 +169,8 @@
+ b.ORIGINAL_SYNTH_OZ_UNITS |= {'chicago_selector','chicago_arp_control','chicago_note_context','miami_geometry','miami_fx_conversion'}
+ b.CFLAGS.extend(Path(os.environ['DNBOX_CONTROL_FLAGS']).read_text().split())
+ b.CFLAGS.append('-DX0X_CHICAGO_FAST32=1')
++if os.environ.get('DNBOX_TANH_SPLIT_LAB') == '1':
++    b.CFLAGS.append('-DX0X_TANH_SPLIT_LAB=1')
+ b.generate=lambda:None
+ b.build_loader=lambda:None
+ b.tc=seal
