@@ -1,0 +1,15 @@
+A4 anchors only; published output before any holdout files opened.
+Captures: Sine 9866049c450e552c000042b24d3f3dff2679e5f4a3aa02a27d55e266de526817
+Tri 53ee9f04ddee0016f49f87408e2701cb537698397861cbfbc0fdf9d58430d79d
+44100 Hz on=16384 off=60484 projection [25000,55000), OSC2 alone fader .808 fixed vel87 Vintage0.
+Coefficient manifest c6c5c20d76ff1bd3c140e99ce3365a4686465e784f0f34de3f7fb38874990a6b a4.private.json (retained locally only)
+C host binaries:
+3b013e85f517fdd51c26c31bda0f18d4d32fc11ac0d219cf56d6a3cc345e9251 case-128.private.so
+0ac52d754a846f7fb2154555965ac444809ae4515494a241f6fc56ce1a6668cf case-64.private.so
+No original-associated binary/table/PCM included in any deliverable.
+bd68bfebaee23cddf8ef16f30ffd9a18e6554a0548d96a3f3baa7d5ec13d764d  sj6-spectrum-anchor/generate.py
+5376fecc9d688a976f5c93eeed66d0cee59c08cd6e6f65f9c3463733d88fe291  sj6-spectrum-anchor/stage.c
+20715a6e67b1d4ad068acfece5a5ab37c41804a2e158dd53fc8a6b6d049f08d5  sj6-spectrum-anchor/score.py
+6a8aecef5fe88f1ae8f9e0f6a3474c3a7d9671c63983946a1db8f6f0e53a68bc  sj6-spectrum-anchor/check.sh
+4ad680ce187aca1316b2af259176f226388e44e23385f7cd1525080d2dfb0777  sj6-wavetable-scope/selector.h
+4b80c9efa5d116ab71e63ba0597235e10ca9a4ea442a2c46a86c0306a08f0b42  sj6-wave-carrier/sj6_main_4x.h

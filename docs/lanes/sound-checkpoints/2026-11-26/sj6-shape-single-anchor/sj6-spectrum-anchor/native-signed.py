@@ -1,0 +1,45 @@
+"""Signed chronological hold only, exact capture hashes, no fitted gain or phase.
+Known fixed linear prefix/output; diagnostic not the complete original voice.
+One-note envelope is settled in qualifying windows. Unknown startup/release
+and any remaining whole-route gain are explicitly excluded, not simulated.
+"""
+import io, argparse, ctypes as c, hashlib, json, tarfile
+import numpy as np
+from scipy.signal import lfilter
+from generate import hp
+def db(x):return float(20*np.log10(x))
+parser=argparse.ArgumentParser()
+parser.add_argument('model')
+parser.add_argument('archive')
+a=parser.parse_args()
+f=c.c_float
+so=c.CDLL(a.model).sj6_anchor_run
+so.argtypes=[c.POINTER(f),c.c_uint,f,c.POINTER(f),c.c_uint]
+coef=[float.fromhex(s) for s in '0x1.851d9c7caa4aap-1 0x1.851d9c7caa4aap+0 0x1.851d9c7caa4aap-1 0x1.7cb2883c57ccap+0 0x1.1b116179f9916p-1'.split()]
+result=[]
+with tarfile.open(a.archive) as t:
+ for tf in t:
+    if not tf.name.startswith('./native/native-jupiter-sine-gain-authored-band-') or not tf.name.endswith('/capture.json'):continue
+    m=json.load(t.extractfile(tf))
+    note=m['schedule'][0]['note']
+    assert m['calibration_cue']=='jupiter-band-map-v1' and [(e['frame'],e['note']) for e in m['schedule']]==[(16384,note),(60484,note)]
+    k=m['forced_controls']
+    for id_,v in {'7':1,'8':0,'11':0,'17':0,'23':0,'32':1,'33':0,'40':0,'41':0,'59':0,'107':0,'108':0,'109':0,'123':0,'129':1,'131':0,'205':1,'209':0}.items():assert k[id_]==v,(id_,k[id_])
+    pcm=np.load(io.BytesIO(t.extractfile(tf.name.rsplit('/',1)[0]+'/output.npy').read()),allow_pickle=False)
+    assert hashlib.sha256(pcm.tobytes()).hexdigest()==m['pcm_sha256']
+    shape=m['ablation_arm'].split('-')[1]
+    y=(f*(55000-16384))(); s=(f*17)()
+    so(s,shape=='tri',(440*2**((note-69)/12))/44100,y,len(y))
+    z=np.ctypeslib.as_array(y).astype('f8')*((5./6)*.808*87/127)
+    for b,a in [(coef[:3],[1,*coef[3:]]),(hp[:3],[1,*hp[3:]]),([1,-1],[1,-float.fromhex('0x1.fd70a4p-1')])]:
+        z=lfilter(b,a,z)
+    q=np.array([float.fromhex('0x1.6a09e5e333598p-1'),float.fromhex('0x1.6a09e6ecb41fep-1')])*float(np.float32(.85))*float(np.float32(.404*m['actual_master']))
+    z=lfilter([1,-1],[1,-float.fromhex('0x1.ff7ceep-1')],z)[25000-16384:,None]*q
+    r=pcm[:,25000:55000].T.astype('f8')
+    n=np.linalg.norm(r,axis=0)
+    result.append(dict(note=note,shape=shape,repeat=m['repeat'],scope='known-stage constructed signed held output; not full owner',
+                       candidate_vs_native_level_db=[db(x) for x in np.linalg.norm(z,axis=0)/n],
+                       candidate_vs_native_signed_residual_dbr=[db(x) for x in np.linalg.norm(z-r,axis=0)/n],
+                       source_pcm_sha256=m['pcm_sha256']))
+assert len(result)==26
+print(json.dumps(result,indent=2))
