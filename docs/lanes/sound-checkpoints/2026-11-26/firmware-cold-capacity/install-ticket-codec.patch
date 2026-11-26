@@ -1,0 +1,20 @@
+--- a/firmware/src/app/editor.c
++++ b/firmware/src/app/editor.c
+@@ -825,7 +825,7 @@
+     }
+     if (!any) { ed_b(1); return 0; }
+     if (op != 1u)
+-        for (k = 0; k < 4u; k++) ticket |= (uint32_t)a[1u + ED_INSTALL_TOKEN + k] << (7u * k);
++        ticket = ed_g(a + 1u + ED_INSTALL_TOKEN, 4);
+     same = ed_install.state && !memcmp(ed_install.token, a + 1, ED_INSTALL_TOKEN);
+     if (op == 1u) {
+         if (same) {
+@@ -849,7 +849,7 @@
+     }
+     ed_b(rc);
+     for (k = 0; k < ED_INSTALL_TOKEN; k++) ed_b(a[k + 1u]);
+-    for (k = 0; k < 4u; k++) ed_b(ticket >> (7u * k));
++    ed_u(ticket, 4);
+     return start;
+ }
+ 
