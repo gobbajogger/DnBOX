@@ -1,0 +1,73 @@
+{
+  "armed_code_and_table_size_B": [
+    20725,
+    20793
+  ],
+  "N_samples_per_case": 8192,
+  "results": [
+    {
+      "mode": "triangle",
+      "base_ticks": 257622,
+      "new_ticks": 242696,
+      "saved_pct": 5.793759849702277,
+      "phase": 5143279,
+      "pcm_words_fnv32": 3451845563
+    },
+    {
+      "mode": "square",
+      "base_ticks": 609590,
+      "new_ticks": 606733,
+      "saved_pct": 0.46867566725175935,
+      "phase": 3488495,
+      "pcm_words_fnv32": 1403322951
+    },
+    {
+      "mode": "pulse",
+      "base_ticks": 538671,
+      "new_ticks": 535807,
+      "saved_pct": 0.5316788911970386,
+      "phase": 15801071,
+      "pcm_words_fnv32": 2153873458
+    },
+    {
+      "mode": "saw",
+      "base_ticks": 367818,
+      "new_ticks": 366384,
+      "saved_pct": 0.38986672756635077,
+      "phase": 3488495,
+      "pcm_words_fnv32": 3590947878
+    },
+    {
+      "mode": "morph sweep",
+      "base_ticks": 807304,
+      "new_ticks": 798977,
+      "saved_pct": 1.0314577903738864,
+      "phase": 3488495,
+      "pcm_words_fnv32": 253470541
+    },
+    {
+      "mode": "unbandlimited",
+      "base_ticks": 349551,
+      "new_ticks": 346277,
+      "saved_pct": 0.9366301340862992,
+      "phase": 3488495,
+      "pcm_words_fnv32": 2802774713
+    },
+    {
+      "mode": "high-band morph",
+      "base_ticks": 693627,
+      "new_ticks": 689334,
+      "saved_pct": 0.6189205437504596,
+      "phase": 9886447,
+      "pcm_words_fnv32": 1248934466
+    },
+    {
+      "mode": "wrapped morph",
+      "base_ticks": 898219,
+      "new_ticks": 893927,
+      "saved_pct": 0.47783447021272096,
+      "phase": 1227503,
+      "pcm_words_fnv32": 2601739829
+    }
+  ]
+}

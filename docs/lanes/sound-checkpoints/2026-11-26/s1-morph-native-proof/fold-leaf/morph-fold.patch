@@ -1,0 +1,21 @@
+--- a/morph-paired.inc
++++ b/morph-paired.inc
+@@ -22,7 +22,17 @@
+     const unsigned q=(p+1u)&4095u;
+     if(row<4u)return (sample_pair){stored_lattice(row,p),stored_lattice(row,q)};
+     float sa,sb;
+-    unsigned x=fold_index(row&3u,p,&sa), y=fold_index(row&3u,q,&sb);
++    const unsigned shape=row&3u;
++    unsigned x=fold_index(shape,p,&sa), y;
++    /* Reuse the first folded sample and sign inside monotonic runs.
++     * Inclusive corners, sign flips and wrap fall back to original. */
++    if(shape < 2u && ((p&1023u)!=0 && (p&1023u)!=1023u)) {
++        y=(p&1024u)?x-1u:x+1u;
++        sb=sa;
++    } else if(shape==3u && p!=2048u && p!=4095u) {
++        y=p<2048u?x+1u:x-1u;
++        sb=sa;
++    } else y=fold_index(shape,q,&sb);
+     unsigned r=row-4,shift=morph_rows[r].shift, k=x>>shift;
+     if (k!=(y>>shift)) return (sample_pair){stored_lattice(row,p),stored_lattice(row,q)};
+     unsigned span=(1u<<shift),u=x&(span-1u),v=y&(span-1u);
