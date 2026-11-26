@@ -1,0 +1,20 @@
+{
+  "eng_plan": 4,
+  "eng_c1_mask": 4,
+  "eng_stage": 0,
+  "eng_c1_next": 0,
+  "eng_job_arg": 1048064,
+  "eng_808_split": 1,
+  "safe_mode": 0,
+  "audio_xruns": 64,
+  "job_cost_24M_per_256_frames": [
+    78991,
+    5688,
+    86978,
+    24004,
+    3887
+  ],
+  "stack_region_bytes": 4352,
+  "stack_untouched_at_bottom": 2476,
+  "stack_high_water_bytes": 1876
+}

@@ -1,0 +1,12 @@
+{
+  "half": 384,
+  "worst_us": 13096,
+  "latched_ms": 5412,
+  "components_us": {
+    "block admission": 48.666666666666664,
+    "dry voice/clock plus inline control ticks": 2330.75,
+    "wet FX/drive/master": 736.7083333333334,
+    "stereo result copies": 23.916666666666668
+  },
+  "sum_scoped_us": 3140.0416666666665
+}

@@ -1,0 +1,12 @@
+equal executable byte strings (not proved relocation-equivalent); functions scanned 1813; conservative upper bound 384 B
+[('boot_u32', 33699884, 24), ('fittab_rd32', 33758482, 24), ('get32', 33711958, 24), ('xdata_rd32', 33695700, 24)]
+[('original_sound_is_performance', 33568836, 48), ('original_sound_is_performance.1526', 33587434, 48)]
+[('sj6_j60_owner', 33587610, 40), ('sj6_unison_owner', 33720814, 40)]
+[('sj6_aux_init', 33562936, 36), ('sj6_vcf_init', 33719474, 36)]
+[('sj6_aux_destination_id', 33562630, 32), ('sj6_aux_destination_id.1187', 33562662, 32)]
+[('s1_coarse_code', 33572086, 30), ('s1_coarse_code', 34055594, 30)]
+[('unit_control', 33588240, 28), ('unit_control.1408', 33615654, 28)]
+[('rng_next', 33594026, 26), ('rng_u32', 33596526, 26)]
+[('bstep_velocity', 33783094, 24), ('bstep_velocity.140', 33608036, 24)]
+[('original_sound_sj6_factory', 33712686, 24), ('original_sound_sj6_factory.911', 33589416, 24)]
+[('makeup_db', 34042748, 24), ('pump_db', 34042772, 24)]

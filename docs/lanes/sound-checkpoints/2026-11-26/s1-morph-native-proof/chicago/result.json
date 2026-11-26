@@ -1,0 +1,33 @@
+{
+  "scope": "Raw PI32v2 same kernel; 16,384 frames per case; no audio scheduler",
+  "rows": [
+    {
+      "mode": "held, no xmod",
+      "baseline_ticks": 574842,
+      "candidate_ticks": 543211,
+      "saving_pct": 5.502555484811479,
+      "output_hash": "0xf19713b2"
+    },
+    {
+      "mode": "held, xmod",
+      "baseline_ticks": 657036,
+      "candidate_ticks": 656283,
+      "saving_pct": 0.11460559238763172,
+      "output_hash": "0x18d0045a"
+    },
+    {
+      "mode": "ramps, no xmod",
+      "baseline_ticks": 799681,
+      "candidate_ticks": 788602,
+      "saving_pct": 1.3854274391913775,
+      "output_hash": "0x79a1e4b8"
+    },
+    {
+      "mode": "ramps, xmod",
+      "baseline_ticks": 880258,
+      "candidate_ticks": 883915,
+      "saving_pct": -0.4154463804929918,
+      "output_hash": "0xfc8c5165"
+    }
+  ]
+}

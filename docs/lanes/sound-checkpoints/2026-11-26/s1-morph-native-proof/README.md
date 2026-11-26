@@ -77,3 +77,29 @@ parallel last sampler probe did not link (196/184 B overflow even before fail-cl
 atomic state publication). It isn't included as a patch. A future offload may use the
 5,120 B workspace's trailing region *only* while the selected workspace is reserved by
 stage order and after proving timeout-safe publication; unrestricted overlap is unsupported.
+
+## Chicago scope: informative negative, no adoption
+The dry oscillator's slave base conversion and unmodulated saturated phase delta are
+span-invariant; the parameter path and original rounding, sync resets, XMOD, filters
+and sound options were kept. The real C reference guard passed 4,344 complete sample/
+state comparisons at -Os and again with ASan/UBSan (LeakSanitizer unavailable in the
+sandbox); extra full unsigned increments test F32 boundary/saturation and signed-zero
+XMOD. Real PI32 isolated 16,384-frame cases retained exact PCM hashes: held without XMOD
+5.50% faster, held XMOD 0.11% faster, moving ramps without XMOD 1.39% faster,
+moving ramps with XMOD 0.42% slower. App free XIP dropped 80 B (200/212 B remains);
+pool unchanged. Strict loaded results (same no-write/zero-skip runner) remained mixed:
+Elite 13,239us/52 late; Pro 12,919us/54 late. Neither clears 10,809us and 0 late.
+
+Separate instrumented worst-half snapshots were Elite 13,294us and Pro 13,096us.
+Chicago scoped parts (us): dry/clock/control 1883/2331, wet/master 604/737,
+admission 52/49, stereo copy 24/24. Only constituent timing, no claim of matching
+uninstrumented phase or all misses. Detached binary duplicate scan gave 384 B gross upper
+bound, not legally reclaimable code; four unaligned cold little-endian readers account for
+72 B maximum even before calls/relocations. No unsafe 909 offload was linked or run.
+
+## Scheduler split and 909 state-publication bounds
+Pricing the existing worker 808 BD/SD prefix in the stage model, with separate measured full versus split 808 work, leaves the original DSP, mixer order, event subdivision and guards untouched. Actual app margins +232/+244 B and +564 B above POOL_MIN. Strict same loaded scene: 12,889us/64 Elite and 13,043us/34 Pro, healthy second core, 4 readbacks, 319,488 PCM frames and zero skips or writes. Against retained worker result 12,916/51 and 13,130/53, mixed, not adopted. Active endpoint mask on both 0x04.
+
+Sound changes when merely coalescing loads: the existing C 909 renderer differs at cut points even with no note change; 256 vs 128+128 changes 256 raw float words from frame128 and final owner state, and five other cuts demonstrate the same. Preserve the 2x256 DMA partition and exact event cuts.
+
+Native unlinked layout: isolated 140-B voice shadow, 4-B completion word and 220 float samples in existing 1,024-B scratch tail after 808 metals, no growth of 5,120-B workspace. Host one-voice prepare+serial commit is bit-identical in 3,200 cases, half discarding shadow, keeping live state untouched and retrying original serial path. Future firmware must consume this in the serial normal voice-mix position before 808/selected workspace's owner reuses the tail. Only the serial owner commits. Missing publication requires existing guarded stop/join before retry/reuse. No proof for >220 frames or shipping live inter-core handoff; the early pre-safety offload exceeded XIP and was never run.

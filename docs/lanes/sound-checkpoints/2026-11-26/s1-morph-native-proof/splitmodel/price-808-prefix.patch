@@ -1,0 +1,86 @@
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -3003,6 +3003,7 @@
+ static volatile uint8_t eng_c1_next;                   /* core 1: the next of its jobs to start */
+ static uint8_t eng_c1_mask;                            /* jobs on core 1 this stretch (bit per JB_*) */
+ static uint8_t eng_plan;                               /* the plan in force (the same bits) */
++static uint32_t eng_808_prefix_cost, eng_808_full_cost; /* measured ticks per 256 */
+ static uint32_t eng_job_cost[JB_N];                    /* ticks per 256 frames when active */
+ static uint32_t eng_job_arg;                           /* this stretch's n, 808 mask and window offset */
+ static uint8_t eng_job_solo;
+@@ -3032,11 +3033,12 @@
+ 
+ static void job_cost(int j, uint32_t ticks, uint32_t n)
+ {
+-    uint32_t c, e = eng_job_cost[j];
++    uint32_t *slot = j==JB_808 && !eng_808_split ? &eng_808_full_cost : &eng_job_cost[j];
++    uint32_t c, e = *slot;
+     if (n < 64u)
+         return;                                         /* a short stretch is mostly set-up */
+     c = ticks * 256u / n;
+-    eng_job_cost[j] = c > e ? c : e - ((e - c) >> 4);   /* rise at once, fall over ~16 stretches */
++    *slot = c > e ? c : e - ((e - c) >> 4);   /* rise at once, fall over ~16 stretches */
+ }
+ 
+ static void mix_808(float *left808, float *right808, uint32_t n, uint8_t solo_parts)
+@@ -3291,8 +3293,15 @@
+ {
+     int j;
+     (void)arg;
+-    if (eng_808_split && !eng_808_body)
++    if (eng_808_split && !eng_808_body) {
++        uint32_t begin=plat_ticks24(), n=eng_job_arg&255u;
+         d808_body_run();
++        if (!n) n=256;
++        if (n>=64) {
++            uint32_t c=(plat_ticks24()-begin)*256u/n, e=eng_808_prefix_cost;
++            eng_808_prefix_cost=c>e?c:e-((e-c)>>4);
++        }
++    }
+     for (j = eng_c1_next; j < JB_N; j++) {
+         if (!(eng_c1_mask & (1u << j)))
+             continue;
+@@ -3340,15 +3349,18 @@
+  * A job renders as soon as its core is free; only its mix (about 1/16 of it) waits for the
+  * part before it (run_job: render, stage_wait, mix). Counting the whole job as waiting made
+  * every split with the 303s apart cost the same as one core, so 909-only won the tie. */
+-static uint32_t plan_cost(uint32_t m, const uint32_t *c)
++static uint32_t plan_cost(uint32_t m, const uint32_t *c, uint32_t body, uint32_t full)
+ {
+     uint32_t t[2] = {0u, m ? ENG_C1_LAT : 0u}, s, x;
+     int k, j;
++    uint32_t prefix=(m && !(m&(1u<<JB_808))) ? body : 0;
++    t[1]+=prefix;
+     k = (int)(m & 1u); t[k] += c[JB_909]; s = t[k];
+     for (j = JB_808; j <= JB_B; j++) {
+         k = (int)(m >> j & 1u);
+-        x = c[j] >> 4;
+-        t[k] += c[j] - x;                               /* render */
++        uint32_t cost=j==JB_808 && !prefix ? full : c[j];
++        x = cost >> 4;
++        t[k] += cost - x;                               /* render */
+         if (t[k] < s) t[k] = s;                         /* the part before it mixed */
+         t[k] += x; s = t[k];                            /* its mix */
+     }
+@@ -3386,12 +3398,19 @@
+         c[j] = (act >> j & 1u) ? eng_job_cost[j] * nn / 256u : 0u;
+     uint32_t allowed = act & ok;
+     best &= allowed;
+-    bc = plan_cost(best, c);
++    uint32_t body=0,full=0;
++    if (act&(1u<<JB_808)) {
++        body=eng_808_prefix_cost*nn/256u;
++        full=eng_808_full_cost*nn/256u;
++        if(!full) full=c[JB_808]+body;
++        if(!c[JB_808]) c[JB_808]=full>body?full-body:0;
++    }
++    bc = plan_cost(best, c,body,full);
+     cost = bc;
+     /* Visit allowed masks in their original ascending order, preserving ties. */
+     m = 0;
+     do {
+-        uint32_t k = plan_cost(m, c);
++        uint32_t k = plan_cost(m, c,body,full);
+         if (k < bc) { bc = k; best = m; }
+         m = (m - allowed) & allowed;
+     } while (m);

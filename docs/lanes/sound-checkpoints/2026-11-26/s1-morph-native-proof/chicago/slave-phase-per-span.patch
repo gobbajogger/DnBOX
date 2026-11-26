@@ -1,0 +1,92 @@
+--- a/experiments/original_synth/chicago_mp4.c
++++ b/experiments/original_synth/chicago_mp4.c
+@@ -69,24 +69,34 @@
+  return value;
+ }
+ static inline float ck_phase(uint32_t u){return (float)(int32_t)u*0x1p-31f;}
++/* The prepared master/slave increments and XMOD control are immutable for a
++ * span admitted without a control tick. Cache the source float conversion and
++ * exact saturated truncation; the integer bit pattern is not the raw increment. */
++static inline uint32_t ck_slave_delta(float b){
++ float step=ck_clamp(b,-1,1)*0x1p31f;
++ return (uint32_t)(step>=0x1p31f?INT32_MAX:(int32_t)step);
++}
++struct ck_slave_plan {float base[2];uint32_t step[2];};
++
+ static inline float ck_xadvance(original_ramp *r){float n=r->current+r->delta;if((r->delta>0)!=(r->target>n))n=r->target;r->current=n;return n;}
+ /* One sample. Locals stand in for the voice state; the caller loads and
+  * stores them once per span. Commit order matches the original: phases,
+  * gain ramps and noise advance before the filter checks; the filter state
+  * changes only when every filter value is finite. */
+ static inline __attribute__((always_inline)) int ck_step(const original_prepared_oscillators *p,float vco_gain,
++ const struct ck_slave_plan *plan,
+  uint32_t phase[4],original_ramp og[4],original_ramp st[2],original_ramp *ngr,uint32_t *nsp,
+  float H[5],original_ramp *ra,original_ramp *re,original_ramp *rr,uint32_t *lo,uint32_t *ro){
+  const original_osc_controls *c=&p->controls;float w[4],gain[4];
+  for(unsigned i=0;i<4;i++)gain[i]=og[i].current;
+  for(unsigned i=0;i<4;i+=2){
+   uint32_t old=phase[i];phase[i]-=c->increment[i];
+-  float b=(float)c->increment[i+1]*0x1p-31f,step;
+-  if(gain[i]!=0.0f||c->xmod!=0.0f){
+-   w[i]=ck_wave(c->shape[i],ck_phase(phase[i]),c->width[i],p->correction[i],p->triangle[i]);
+-   float a=w[i]*c->xmod;step=ck_clamp(a+b,-1,1)*0x1p31f;
+-  }else{w[i]=0.0f;step=ck_clamp(b,-1,1)*0x1p31f;}
+-  phase[i+1]-=(uint32_t)(step>=0x1p31f?INT32_MAX:(int32_t)step);
++  uint32_t step=plan->step[i>>1];
++  const int modulated=c->xmod!=0.0f;
++  w[i]=(gain[i]!=0.0f||modulated)?
++    ck_wave(c->shape[i],ck_phase(phase[i]),c->width[i],p->correction[i],p->triangle[i]):0.0f;
++  if(modulated) step=ck_slave_delta(w[i]*c->xmod+plan->base[i>>1]);
++  phase[i+1]-=step;
+   if((int32_t)phase[i]>(int32_t)old)phase[i+1]=0x7fffffffu;
+   w[i+1]=gain[i+1]!=0.0f?ck_wave(c->shape[i+1],ck_phase(phase[i+1]),c->width[i+1],p->correction[i+1],p->triangle[i+1]):0.0f;
+  }
+@@ -110,17 +120,18 @@
+  * a zero delta: advance()/ck_xadvance return the held value and write it
+  * back unchanged. Constants stay in registers; the ramps are not touched. */
+ static inline __attribute__((always_inline)) int ck_step_hold(const original_prepared_oscillators *p,float vco_gain,
++ const struct ck_slave_plan *plan,
+  uint32_t phase[4],const float gain[4],float ng,float A,float E,float R,float sl,float sr,
+  uint32_t *nsp,float H[5],uint32_t *lo,uint32_t *ro){
+  const original_osc_controls *c=&p->controls;float w[4];
+  for(unsigned i=0;i<4;i+=2){
+   uint32_t old=phase[i];phase[i]-=c->increment[i];
+-  float b=(float)c->increment[i+1]*0x1p-31f,step;
+-  if(gain[i]!=0.0f||c->xmod!=0.0f){
+-   w[i]=ck_wave(c->shape[i],ck_phase(phase[i]),c->width[i],p->correction[i],p->triangle[i]);
+-   float a=w[i]*c->xmod;step=ck_clamp(a+b,-1,1)*0x1p31f;
+-  }else{w[i]=0.0f;step=ck_clamp(b,-1,1)*0x1p31f;}
+-  phase[i+1]-=(uint32_t)(step>=0x1p31f?INT32_MAX:(int32_t)step);
++  uint32_t step=plan->step[i>>1];
++  const int modulated=c->xmod!=0.0f;
++  w[i]=(gain[i]!=0.0f||modulated)?
++    ck_wave(c->shape[i],ck_phase(phase[i]),c->width[i],p->correction[i],p->triangle[i]):0.0f;
++  if(modulated) step=ck_slave_delta(w[i]*c->xmod+plan->base[i>>1]);
++  phase[i+1]-=step;
+   if((int32_t)phase[i]>(int32_t)old)phase[i+1]=0x7fffffffu;
+   w[i+1]=gain[i+1]!=0.0f?ck_wave(c->shape[i+1],ck_phase(phase[i+1]),c->width[i+1],p->correction[i+1],p->triangle[i+1]):0.0f;
+  }
+@@ -143,6 +154,11 @@
+ int original_chicago_voice_span(original_voice_gain *vg,original_oscillators *ph,const original_prepared_oscillators *p,
+  original_ramp *noise_gain,uint32_t *noise_state,float vco_gain,original_chicago_mp4 *f,uint32_t *left,uint32_t *right,uint32_t n){
+  if(!p->ready||!f->prepared)return 0;
++ struct ck_slave_plan plan;
++ for(unsigned i=0;i<2;i++){
++  plan.base[i]=(float)p->controls.increment[2*i+1]*0x1p-31f;
++  plan.step[i]=ck_slave_delta(plan.base[i]);
++ }
+  uint32_t phase[4]={ph->phase[0],ph->phase[1],ph->phase[2],ph->phase[3]};
+  original_ramp og[4]={vg->oscillator[0],vg->oscillator[1],vg->oscillator[2],vg->oscillator[3]},st[2]={vg->stereo[0],vg->stereo[1]};
+  original_ramp ngr=*noise_gain,ra=f->a,re=f->e,rr=f->resonance;uint32_t ns=*noise_state;
+@@ -153,9 +169,9 @@
+     ramp_held(&st[0])&&ramp_held(&st[1])&&ramp_held(&ngr)){
+   float gain[4]={og[0].current,og[1].current,og[2].current,og[3].current};
+   float A=ra.target,E=re.target,R=rr.target,sl=st[0].current,sr=st[1].current,ng=ngr.current;
+-  for(uint32_t k=0;k<n;k++)if(!ck_step_hold(p,vco_gain,phase,gain,ng,A,E,R,sl,sr,&ns,H,left+k,right+k)){ok=0;break;}
++  for(uint32_t k=0;k<n;k++)if(!ck_step_hold(p,vco_gain,&plan,phase,gain,ng,A,E,R,sl,sr,&ns,H,left+k,right+k)){ok=0;break;}
+  }else{
+-  for(uint32_t k=0;k<n;k++)if(!ck_step(p,vco_gain,phase,og,st,&ngr,&ns,H,&ra,&re,&rr,left+k,right+k)){ok=0;break;}
++  for(uint32_t k=0;k<n;k++)if(!ck_step(p,vco_gain,&plan,phase,og,st,&ngr,&ns,H,&ra,&re,&rr,left+k,right+k)){ok=0;break;}
+  }
+  for(unsigned i=0;i<4;i++){ph->phase[i]=phase[i];vg->oscillator[i]=og[i];}
+  vg->stereo[0]=st[0];vg->stereo[1]=st[1];*noise_gain=ngr;*noise_state=ns;
