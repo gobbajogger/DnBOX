@@ -1,0 +1,56 @@
+original
+00000000 00000030 t paired_fma
+00000000 000000f2 t clock_2x
+00000000 0000010c T physical_tick
+         U fm_tanhf
+         U original_fma_compact_bits
+         U original_fma_finite_bits_reference
+53:	r5 = r11 / r3 (f)  #
+90:	r10 = r13 / r0 (f)
+original-new
+00000000 00000030 t paired_fma
+00000000 000000ea t clock_2x
+00000000 00000126 T physical_tick
+         U fm_tanhf
+         U original_fma_compact_bits
+         U original_fma_finite_bits_reference
+89:	r10 = r13 / r0 (f)
+177:	r5 = r3 / r5 (f)
+packed
+00000000 00000030 t paired_fma
+00000000 000000ee t clock_2x
+00000000 00000106 T physical_tick
+         U fm_tanhf
+         U original_fma_compact_bits
+         U original_fma_finite_bits_reference
+53:	r5 = r11 / r3 (f)  #
+90:	r10 = r13 / r0 (f)
+packed-new
+00000000 00000030 t paired_fma
+00000000 000000e6 t clock_2x
+00000000 00000122 T physical_tick
+         U fm_tanhf
+         U original_fma_compact_bits
+         U original_fma_finite_bits_reference
+89:	r10 = r13 / r0 (f)
+174:	r7 = r3 / r7 (f)
+separate
+00000000 00000024 T admit
+00000000 00000030 t paired_fma
+00000000 000000ee t clock_2x
+00000000 0000012c t physical_tick
+         U fm_tanhf
+         U original_fma_compact_bits
+         U original_fma_finite_bits_reference
+54:	r6 = r10 / r0 (f)  #
+90:	r11 = r13 / r0 (f)
+separate-new
+00000000 00000024 T admit
+00000000 00000030 t paired_fma
+00000000 000000e6 t clock_2x
+00000000 00000144 t physical_tick
+         U fm_tanhf
+         U original_fma_compact_bits
+         U original_fma_finite_bits_reference
+89:	r10 = r13 / r0 (f)
+178:	r6 = r0 / r6 (f)

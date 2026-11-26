@@ -658,3 +658,14 @@ latched C1 fault. PCM and note admission differ, and final endpoint
 ownership cannot identify how many private computations were discarded
 or replayed serially. Reject and do not repeat on Pro; the fit proof
 does not authorize activation or an asserted bottleneck.
+
+The [exact two-clock normalization hoist](sj6-ota-coeff-hoist-exact/README.md)
+keeps the authenticated split-state waveform and parameters unchanged.
+Original, packed, and transposed layouts compare bit-for-bit before and
+after on 741,090 signed original-window samples and 24,576 changing
+coefficient/blend frames (including complete state). Target assembly
+now performs the normalization division once, not twice, per output
+frame; four nonlinear pole reciprocals per 2× evaluation are untouched.
+The smallest transposed PI32 variant is 630 B vs 622 B. This is
+object-only; native wall-time benefit and complete APP fit not measured.
+Leave off until guarded playback can be qualified.
