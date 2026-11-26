@@ -1,0 +1,28 @@
+ablation-0
+1 57 RMS -1.414 dB peak -1.254 dB h1phase -1.043 delta +5.012 per_harmonic_dB [-1.416, -1.318, -1.124]
+1 69 RMS -1.419 dB peak -1.319 dB h1phase -2.114 delta +4.917 per_harmonic_dB [-1.421, -1.356, -1.226]
+2 57 RMS -3.492 dB peak -0.850 dB h1phase +88.957 delta +5.012 per_harmonic_dB [-3.687, -3.65, -3.588, -3.503, -3.394, -3.263]
+2 69 RMS -3.555 dB peak -1.413 dB h1phase +87.886 delta +4.917 per_harmonic_dB [-3.691, -3.667, -3.627, -3.57, -3.497, -3.407]
+3 57 RMS -0.635 dB peak +1.831 dB h1phase +88.957 delta +5.012 per_harmonic_dB [-0.761, -0.663, -0.469]
+3 69 RMS -0.677 dB peak +1.373 dB h1phase +87.885 delta +4.917 per_harmonic_dB [-0.766, -0.701, -0.571]
+post-0
+1 57 RMS -1.419 dB peak -1.322 dB h1phase -2.240 delta +3.815 per_harmonic_dB [-1.42, -1.352, -1.218]
+1 69 RMS -1.437 dB peak -1.458 dB h1phase -4.506 delta +2.525 per_harmonic_dB [-1.436, -1.491, -1.595]
+2 57 RMS -3.587 dB peak -3.439 dB h1phase +87.760 delta +3.815 per_harmonic_dB [-3.691, -3.665, -3.623, -3.564, -3.488, -3.398]
+2 69 RMS -3.746 dB peak -4.187 dB h1phase +85.494 delta +2.526 per_harmonic_dB [-3.706, -3.727, -3.762, -3.808, -3.865, -3.931]
+3 57 RMS -0.698 dB peak -0.542 dB h1phase +87.760 delta +3.815 per_harmonic_dB [-0.765, -0.697, -0.563]
+3 69 RMS -0.806 dB peak -1.000 dB h1phase +85.494 delta +2.526 per_harmonic_dB [-0.781, -0.836, -0.939]
+post-3
+1 57 RMS -1.419 dB peak -1.322 dB h1phase -2.240 delta +3.815 per_harmonic_dB [-1.42, -1.352, -1.218]
+1 69 RMS -1.437 dB peak -1.458 dB h1phase -4.506 delta +2.525 per_harmonic_dB [-1.436, -1.491, -1.595]
+2 57 RMS +0.116 dB peak +0.335 dB h1phase +87.093 delta +3.148 per_harmonic_dB [0.009, 0.035, 0.078, 0.138, 0.214, 0.306]
+2 69 RMS -0.040 dB peak -0.414 dB h1phase +84.182 delta +1.214 per_harmonic_dB [-0.007, -0.026, -0.058, -0.1, -0.153, -0.212]
+3 57 RMS -0.698 dB peak -0.542 dB h1phase +87.760 delta +3.815 per_harmonic_dB [-0.765, -0.697, -0.563]
+3 69 RMS -0.806 dB peak -1.000 dB h1phase +85.494 delta +2.526 per_harmonic_dB [-0.781, -0.836, -0.939]
+exact-normal-3
+1 57 RMS -1.414 dB peak -1.259 dB h1phase -1.307 delta +4.748 per_harmonic_dB [-1.416, -1.318, -1.125]
+1 69 RMS -1.419 dB peak -1.330 dB h1phase -2.643 delta +4.388 per_harmonic_dB [-1.421, -1.358, -1.231]
+2 57 RMS +0.207 dB peak +2.951 dB h1phase +88.026 delta +4.081 per_harmonic_dB [0.012, 0.05, 0.112, 0.197, 0.307, 0.44]
+2 69 RMS +0.143 dB peak +2.386 dB h1phase +86.045 delta +3.076 per_harmonic_dB [0.008, 0.034, 0.076, 0.135, 0.211, 0.304]
+3 57 RMS -0.639 dB peak +1.696 dB h1phase +88.693 delta +4.748 per_harmonic_dB [-0.761, -0.663, -0.47]
+3 69 RMS -0.686 dB peak +1.238 dB h1phase +87.357 delta +4.388 per_harmonic_dB [-0.766, -0.703, -0.576]

@@ -1,0 +1,12 @@
+# SuperJ6 Tri/Saw/PWM warmed carrier evidence
+
+Source-only, no product candidate. `bash run.sh` logs prefilter; `bash ablate.sh` shifts only source Saw producer and sourced constructor independently; `bash post.sh` taps post-stock compact Normal, `bash exact-normal.sh` characterizes separately retained ancestor Normal 20k/1, and `bash clock.sh` replaces only clock/4× halfband on all tested shapes (raw stock shape remains). Each uses pinned DSP donor and temporary read-only test tap; `python3 score.py` prints independently supplied original CoreSampler return-PCM comparisons. No empirical gain, shift, time adjustment, or PCM in archive. Old clock and real source reset order documented by original actual existing owner probes; abstract 4× helper is an explicitly scoped host reproduction with fresh independent history at the only note ingress.
+
+Same 44.1k/16,384 warm, A3/A4 velocity87, .808 isolated fader, no sub/noise, normal filter, cutoff 20k, physical PWM 50%, relative [4410,22050). Both typed left/right owners agree exactly on all metrics. Native comparison values are post original receiver filter, so score against compact post boundary, not raw. Actual test C projects 8 complex terms (each line wave# OSC# MIDI note RMS peak DC then cos/sin pairs). No WAV null given original independent aggregate proof.
+
+- Compact native stock Normal leaves Tri RMS −1.42/−1.44 dB, PWM −.70/−.81, Saw −3.59/−3.75 dB.
+- Source-backed 4× + exact Saw constructor setting 1.5309427976608276 yields Saw h1 +.009/−.007 dB and h2..6 within .31 dB, RMS +.116/−.040, but peak +.335/−.414 dB and shared h1 residual +3.148°/+1.214°. Before compact cutoff instead, peak mismatch was +35–43%; wrong boundary. 4× alone leaves RMS essentially unmoved.
+- Starting from real zero-reset source clock (no alignment) and applying F32 quarter-step plus exact dual halfband changes h1 phase −.667°/−1.312° across all 3 stock shape families. More mismatch remains than this causal phase change resolves. No per-wave phase option.
+- Recovered historical Normal 20k/damping1 makes Saw peak +2.95/+2.39 dB, regress from compact Normal. It is not the known current full filter route at this published cue. Do not use historical coefficient as a shipping substitute, nor infer trace-wide phase from RMS.
+
+Next source boundary would require current actual pre/post same-frame generated and filter receiver taps with decoded current DSP flags. No target size/timing or signed final AU equivalence claim.
