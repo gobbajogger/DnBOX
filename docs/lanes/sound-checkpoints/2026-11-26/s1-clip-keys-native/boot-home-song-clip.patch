@@ -1,0 +1,449 @@
+--- a/firmware/src/gfx.c
++++ b/firmware/src/gfx.c
+@@ -450,12 +450,14 @@
+     int custom = pay && pay[0] == BOOT_KIND_CUSTOM;
+     int picture = custom && (pay[1] & BOOT_F_PIC);
+     boot_lines(pay,title,subtitle);
+-    for (int band=0; band<2; ++band) {
+-        cv_begin(240,120,C_BLACK);
+-        if (picture) for (unsigned y=0; y<BOOT_PIC_H; ++y)
++    for (int band=0; band<3; ++band) {
++        cv_begin(240,80,C_BLACK);
++        /* Only source rows intersecting this immutable boot strip. */
++        unsigned first = band ? (unsigned)band * 80u - 20u : 0u;
++        if (picture) for (unsigned y=first; y<BOOT_PIC_H && y+20u<(unsigned)(band+1)*80u; ++y)
+             for (unsigned x=0; x<BOOT_PIC_W; ++x)
+-                if (boot_pix(pay+BOOT_PAY_FIXED,x,y)) cv_pset((int)x,(int)y+20-band*120,C_HI);
+-        cv_blit(0,(uint32_t)band*120u);
++                if (boot_pix(pay+BOOT_PAY_FIXED,x,y)) cv_pset((int)x,(int)y+20-band*80,C_HI);
++        cv_blit(0,(uint32_t)band*80u);
+     }
+     /* B supports lowercase; M deliberately contains capitals/numbers only. */
+     draw_text_box(0,picture?137:96,240,&FONT_B,title,C_HI,1);
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -9119,6 +9119,149 @@
+     }
+ }
+ 
++
++/* Experimental opt-in only. Other 138-row routes still require CV_ROWS=138.
++ * The split must stay on old dirty-tile boundaries, not at semantic row 69. */
++#if X0X_UI_HOME_STRIP_SPIKE
++#if defined(X0X_HOST)
++static uint8_t home_strip_fixture_use_full;
++#endif
++typedef struct {
++ size_t bank;
++ char status[24];
++ char names[NPARTS][24];
++ uint8_t part[NPARTS], flags[NPARTS][16], strength[NPARTS][16][8];
++ uint16_t color[6], part_color[NPARTS];
++} home_snapshot;
++static int take_home(home_snapshot *h) {
++ int c0=ui.pbank*16;
++ int state=save_state();
++ h->bank=c0;
++ const char *status=state==SAVE_SAVED?"SAVED":header_save_label(state);
++ for(size_t i=0;;++i){
++    if(i==sizeof h->status)return 0;
++    if(!(h->status[i]=status[i]))break;
++ }
++ h->color[0]=SOUND_GRAY;h->color[1]=SOUND_FACE;h->color[2]=UI_N_SIDE;
++ h->color[3]=C_WHITE;h->color[4]=C_AMB;h->color[5]=C_BLACK;
++ for(int pos=0;pos<NPARTS;pos++) {
++    int p=part_at(pos),cur=seq.ppat[p],cue=seq_cue_of(&seq,p);
++    h->part[pos]=(uint8_t)p;h->part_color[pos]=PART_COL[p];
++    const char *name=part_display(p);
++    if(tw(&FONT_T,name)>HOME_X0-11)name=part_s(p);
++    for(size_t i=0;;++i){
++        if(i==sizeof h->names[pos])return 0;
++        if(!(h->names[pos][i]=name[i]))break;
++    }
++    for(int c=0;c<16;c++) {
++      int pattern=c0+c;
++      int on=part_used(&proj.pat[pattern],p);
++      unsigned f=(cur==pattern)|((cue==pattern&&cue!=cur&&(ui.frame&16u))?2:0)|(on?4:0);
++      if(seq.chain_a!=seq.chain_b&&pattern>=(seq.chain_a<seq.chain_b?seq.chain_a:seq.chain_b)&&
++          pattern<=(seq.chain_a<seq.chain_b?seq.chain_b:seq.chain_a)) f|=8;
++      h->flags[pos][c]=(uint8_t)f;
++      if(on) home_pattern_strength8(&proj.pat[pattern],proj.arr.lane,pattern,p,
++          proj.set.accent_q7,T_VEL,h->strength[pos][c]);
++    }
++ }
++ return 1;
++}
++static void draw_home_snapshot(int band,const home_snapshot *h) {
++ int off=band*BAND_H,c0=(int)h->bank;char title[24];
++ put_i(put_s(put_i(put_s(title,"PATTERNS "),c0+1),"-"),c0+16);
++ cv_text(8,6-off,&FONT_T,title,h->color[0]);
++ int sw=tw(&FONT_T,h->status)+10;
++ rbox(237-sw,3-off,sw,14,7,h->color[1]);
++ text_r(232,6-off,&FONT_T,h->status,h->color[0]);
++ rbox(3,20-off,234,112,UI_PANEL_RADIUS,h->color[1]);
++ for(int c=0;c<16;c++) {
++    char n[4];put_i(n,c0+c+1);text_c(HOME_X0+5+c*12,24-off,&FONT_T,n,h->color[0]);
++ }
++ for(int pos=0;pos<NPARTS;pos++) {
++    int y=38+pos*18-off;
++    cv_text(9,y+1,&FONT_T,h->names[pos],h->part_color[pos]);
++    for(int c=0;c<16;c++) {
++      int x=HOME_X0+c*12;unsigned f=h->flags[pos][c];
++      rbox(x,y,10,12,2,h->color[2]);
++      if(f&1)rframe(x,y,10,12,2,h->part_color[pos]);
++      if(f&2)rframe(x,y,10,12,2,h->color[3]);
++      if(f&4)for(int i=0;i<8;i++){
++        uint8_t v=h->strength[pos][c][i];
++        if(v)cv_rect(x+1+i,y+4,1,3,
++          blend(h->color[5],h->part_color[pos],home_glyph_brightness(v,f&1)));
++      }
++      if(f&8)cv_rect(x,y+14,10,1,h->color[4]);
++    }
++ }
++}
++
++enum { HOME_STRIP_SPLIT = 80 };
++_Static_assert(HOME_STRIP_SPLIT % X0X_LCD_TILE_H == 0 &&
++               HOME_STRIP_SPLIT <= KNOB_H &&
++               MAIN_ROWS-HOME_STRIP_SPLIT <= KNOB_H, "Home physical strips");
++typedef void (*main_strip_painter)(int band, const void *view);
++static UI_DRAW void commit_main_strips(uint16_t bg, main_strip_painter paint, const void *view)
++{
++    /* Arm this single logical region once. A returning input callback can
++     * invalidate the whole frame by clearing blit_hash/cv_tile_valid while
++     * DMA is in progress. Never rearm it on strip two. */
++    const int force = !blit_hash[1] || !cv_tile_valid[1];
++    blit_hash[1] = 1u;
++    cv_tile_valid[1] = 1u;
++    for (int top = 0; top < MAIN_ROWS; top += HOME_STRIP_SPLIT) {
++        int size = MAIN_ROWS-top > HOME_STRIP_SPLIT ? HOME_STRIP_SPLIT : MAIN_ROWS-top;
++        cv_begin(240, (unsigned)size, bg);
++        for (int b = 0; b < 2; ++b) {
++            int a = b * BAND_H - top;
++            cv_oy = a;
++            cv_y0 = a > 0 ? a : 0;
++            cv_y1 = a+BAND_H < size ? a+BAND_H : size;
++            if (cv_y0 < cv_y1) paint(b, view);
++        }
++        const cv_lcd_pos_t pos = {0, MAIN_Y + (unsigned)top};
++        x0x_lcd_tile_commit(cv_px, (unsigned)size,
++            main_tileh + ((unsigned)top / X0X_LCD_TILE_H) * X0X_LCD_TILE_COLS,
++            force, cv_lcd_emit, (void *)&pos);
++    }
++}
++typedef void (*full_strip_painter)(const void *view);
++static UI_DRAW void commit_full_strips(uint16_t bg, full_strip_painter paint, const void *view)
++{
++    const int force = !blit_hash[1] || !cv_tile_valid[1];
++    blit_hash[1] = cv_tile_valid[1] = 1u;
++    for (unsigned top = 0; top < MAIN_ROWS; top += HOME_STRIP_SPLIT) {
++        const unsigned rows = MAIN_ROWS-top > HOME_STRIP_SPLIT ? HOME_STRIP_SPLIT : MAIN_ROWS-top;
++        cv_begin(240, rows, bg);   /* waits for prior asynchronous transfer */
++        cv_oy = -(int)top;
++        cv_y0 = 0;
++        cv_y1 = (int)rows;
++        paint(view);
++        const cv_lcd_pos_t pos = {0, MAIN_Y + top};
++        x0x_lcd_tile_commit(cv_px, rows, main_tileh + (top / X0X_LCD_TILE_H) * X0X_LCD_TILE_COLS,
++                            force, cv_lcd_emit, (void *)&pos);
++        /* A callback can invalidate the region. Don't re-arm before strip 2. */
++    }
++}
++static void paint_clip_wait(const void *view)
++{
++    const uint16_t *ink = view;
++    text_c(120, 34, &FONT_B, "WAITING FOR", ink[0]);
++    text_c(120, 56, &FONT_B, "LOOPY PRO", ink[0]);
++    text_c(120, 86, &FONT_XS, "USB OR BLUETOOTH", ink[1]);
++}
++static void paint_home_strip(int band, const void *view)
++{
++    draw_home_snapshot(band, view);
++}
++static UI_DRAW int commit_home_strips(void)
++{
++    home_snapshot h;
++    if (!take_home(&h)) return 0;   /* copy limits may not change fallback pixels */
++    commit_main_strips(h.color[5], paint_home_strip, &h);
++    return 1;
++}
++#endif
++
+ /* SONG: a table of bars, twelve rows across the two bands (the first is the heading) */
+ static UI_DRAW void draw_song(int band)
+ {
+@@ -9162,6 +9305,88 @@
+     }
+ }
+ 
++/* Song's finite 11-bar window is independent of the whole project storage.
++ * Capture sequencer playhead/record ink and visible cells before any DMA. */
++#if X0X_UI_HOME_STRIP_SPIKE
++typedef struct {
++    int top, sel, len, playing_pos;
++    uint16_t bg, gray, dim, white, face, edge, select, select_edge, side, play;
++    uint16_t part_color[NPARTS];
++    uint8_t part[NPARTS];
++    char name[NPARTS][24];
++    song_bar_t bar[11];
++} song_strip_snapshot;
++
++static int take_song_strip(song_strip_snapshot *v)
++{
++    const song_t *sg = song();
++    v->sel = ui.song_sel;
++    v->top = v->sel > 5 ? v->sel - 5 : 0;
++    v->len = sg->len;
++    v->playing_pos = seq.song_on && seq.playing?seq.song_pos:-1;
++    v->bg=C_BLACK; v->gray=C_GRAY; v->dim=C_DIM; v->white=C_WHITE;
++    v->face=SOUND_FACE; v->edge=SOUND_EDGE; v->side=SOUND_SIDE;
++    v->select=SOUND_SELECT; v->select_edge=SOUND_SELECT_EDGE;
++    v->play=seq.song_rec?RGB(255,80,70):v->white;
++    for (int pos=0;pos<NPARTS;++pos) {
++        int part=part_at(pos);
++        const char *name=part_fit(part,&FONT_XS,35);
++        v->part[pos]=(uint8_t)part;
++        v->part_color[pos]=PART_COL[part];
++        for(size_t i=0;;++i){
++            if(i==sizeof v->name[pos])return 0;
++            if(!(v->name[pos][i]=name[i]))break;
++        }
++    }
++    for(int row=0;row<11 && v->top+row<v->len && v->top+row<NSONG;++row)
++        v->bar[row]=sg->bar[v->top+row];
++    return 1;
++}
++static void paint_song_strip(int band, const void *view)
++{
++    const song_strip_snapshot *v=view;
++    for(int r=0;r<6;++r){
++        int row=band*6+r, y=r*11, k=v->top+row-1;
++        char t[8];
++        if(!row){
++            cv_text(4,vc(&FONT_XS,y,11),&FONT_XS,"BAR",v->gray);
++            for(int pos=0;pos<NPARTS;++pos)
++                text_c(58+pos*36,vc(&FONT_XS,y,11),&FONT_XS,v->name[pos],v->part_color[pos]);
++            continue;
++        }
++        if(k>v->len||k>=NSONG)break;
++        int selected=k==v->sel;
++        surface_panel(0,y,236,11,selected,selected?v->select:v->face,
++                      selected?v->select_edge:v->edge,v->side);
++        put_i(t,k+1);
++        cv_text(4,vc(&FONT_XS,y,11),&FONT_XS,t,selected?v->white:v->gray);
++        if(k==v->playing_pos)play_icon(26,y+1,v->play);
++        if(k==v->len){
++            cv_text(50,vc(&FONT_XS,y,11),&FONT_XS,k?"END":"EMPTY",selected?v->white:v->dim);
++            continue;
++        }
++        const song_bar_t *bar=&v->bar[row-1];
++        for(int pos=0;pos<NPARTS;++pos){
++            int part=v->part[pos], muted=bar->mute>>part&1u;
++            t[0]='P';
++            put_i(t+1,bar->pat[part]+1);
++            text_c(58+pos*36,vc(&FONT_XS,y,11),&FONT_XS,muted?"-":t,muted?v->dim:v->part_color[pos]);
++        }
++        if(SONG_REP(bar)>1){
++            t[0]='x';put_i(t+1,SONG_REP(bar));
++            text_r(238,vc(&FONT_XS,y,11),&FONT_XS,t,v->white);
++        }
++    }
++}
++static UI_DRAW int commit_song_strips(void)
++{
++    song_strip_snapshot view;
++    if(!take_song_strip(&view))return 0;
++    commit_main_strips(view.bg,paint_song_strip,&view);
++    return 1;
++}
++#endif
++
+ /* Continuous send track with an explicit setting thumb, including zero/max. */
+ static UI_DRAW void night_send(int x,int y,int w,int value,uint16_t col)
+ {
+@@ -9877,26 +10102,46 @@
+         if (smk_clip_mode_on() && ui.overlay == O_NONE && !ui.help && smk_clip_wait()) {
+             if (!clip_wait_on) {                  /* CLP-80: no Loopy host: the waiting screen, not the grid */
+                 clip_wait_on = 1u;
++#if X0X_UI_HOME_STRIP_SPIKE
++                const uint16_t ink[] = { C_WHITE, C_GRAY };
++                commit_full_strips(C_BLACK, paint_clip_wait, ink);
++#else
+                 cv_begin(240, 2 * BAND_H, C_BLACK);
+                 cv_band(0, 2 * BAND_H);
+                 text_c(120, 34, &FONT_B, "WAITING FOR", C_WHITE);
+                 text_c(120, 56, &FONT_B, "LOOPY PRO", C_WHITE);
+                 text_c(120, 86, &FONT_XS, "USB OR BLUETOOTH", C_GRAY);
+                 cv_commit_rect(1, 0, MAIN_Y);
++#endif
+             }
+             smk_clip_lcd_force();                 /* the grid draws at once when a host comes */
+             return;
+         }
+         clip_wait_on = 0u;
+         if (smk_clip_mode_on() && ui.overlay == O_NONE && !ui.help) {
++#if X0X_UI_HOME_STRIP_SPIKE && !defined(X0X_HOST)
++            extern int smk_clip_render_strips(void);
++            (void)smk_clip_render_strips();      /* clip and Keys routes have finite shared capacity */
++#else
+             if (smk_clip_lcd_draw(240u, 2u * BAND_H))
+                 cv_commit_rect(1, 0, MAIN_Y);
++#endif
+             return;
+         }
+         if (smk_clip_mode_on())
+             smk_clip_lcd_force();   /* a menu (for example GLO) is on the screen: draw the grid again after it */
+     }
+ #endif
++#if X0X_UI_HOME_STRIP_SPIKE && !X0X_UI_CLIP_ONLY_PROBE
++    if (!readout && !ui.help && ui.overlay == O_NONE
++#if defined(X0X_HOST)
++        && !home_strip_fixture_use_full
++#endif
++       ) {
++        if (ui.view == V_HOME && !ui.home_live && commit_home_strips()) return;
++        if (ui.view == V_SONG && commit_song_strips()) return;
++    }
++#endif
+     cv_begin(240, 2 * BAND_H, C_BLACK);           /* both bands, then one transfer: no tear between them */
+     for (band = 0; band < 2; band++) {
+         cv_band(band * BAND_H, BAND_H);
+--- a/firmware/src/app/main_fm1.c
++++ b/firmware/src/app/main_fm1.c
+@@ -695,6 +695,84 @@
+     }
+     return 1u;
+ }
++#if X0X_UI_HOME_STRIP_SPIKE
++typedef struct {
++    uint8_t cols, rows, ox, oy, has, view;
++    uint8_t velocity[SMK_APC40_CLIP_COUNT], flags[SMK_APC40_CLIP_COUNT], in_view[SMK_APC40_CLIP_COUNT];
++    uint16_t white, black, dim;
++} clip_grid_strip;
++_Static_assert(sizeof(clip_grid_strip) == 132u, "bounded visible Clip snapshot");
++static void paint_clip_grid(const void *view)
++{
++    const clip_grid_strip *snap = view;
++    const uint32_t w = 240u, h = MAIN_ROWS;
++        smk_apc40_lcd_map_t m = smk_apc40_lcd_map(snap->cols, snap->rows, snap->ox, snap->oy,
++                                                  snap->has, (uint16_t)w, (uint16_t)h);
++        int32_t p = m.pitch, gap = p >= 24 ? 3 : 2;
++        uint8_t col, row;
++        for (row = 0u; row < m.nrows; row++)
++            for (col = 0u; col < m.ncols; col++) {
++                /* The highest APC row is the top Loopy row: draw it on top. */
++                int32_t x = m.x0 + (int32_t)col * p, y = m.y0 + (int32_t)smk_apc40_lcd_screen_row(&m, (uint8_t)(m.row0 + row)) * p;
++                uint8_t n = (uint8_t)((m.row0 + row) * SMK_APC40_SOURCE_COLS + m.col0 + col);
++                uint8_t v = snap->velocity[n];
++                /* The Akai colour as plain RGB565. An idle shade: half of the full shade (CLP-05). */
++                uint16_t c = smk_clip_lcd565(v);
++                int32_t q = p / 4;
++                if (snap->in_view[n])
++                    cv_rect(x, y, p, p, snap->white);
++                cv_rect(x + gap, y + gap, p - 2 * gap, p - 2 * gap, snap->black);
++                if (v)
++                    cv_rect(x + gap + 1, y + gap + 1, p - 2 * gap - 2, p - 2 * gap - 2, c);
++                else
++                    cv_rect(x + p / 2 - 2, y + p / 2 - 2, 4, 4, snap->dim);
++                if (snap->flags[n] & SMK_APC40_CELL_QUEUED)
++                    cv_rect(x + p / 2 - q / 2, y + p / 2 - q / 2, q, q, snap->white);
++            }
++}
++static int ck_commit_page_strips(void);
++int smk_clip_render_strips(void)
++{
++    static uint32_t last_ms, last_sig;
++    const uint32_t now=fm1_ms;
++    if (ck_page_on()) {
++        if (now-last_ms < SMK_CLIP_LCD_MIN_MS) return 1;
++        last_ms=now;
++        was_on=0;
++        return ck_commit_page_strips();
++    }
++    clip_grid_strip v;
++    uint32_t sig=2166136261u;
++    {
++        uint32_t f=irq_save();
++        /* Copy only the LCD raw cells; never paint, map or hash with IRQ held. */
++        for (unsigned n=0;n<SMK_APC40_CLIP_COUNT;++n) {
++            v.velocity[n]=apc_led_velocity[n];
++            v.flags[n]=apc_cell_flags[n] & SMK_APC40_CELL_QUEUED;
++        }
++        v.cols=apc_cols; v.rows=apc_rows; v.ox=apc_origin_col; v.oy=apc_origin_row;
++        v.has=apc_view_has_clips; v.view=apc_view;
++        irq_restore(f);
++    }
++    v.white=C_WHITE; v.black=C_BLACK; v.dim=C_DIM;
++    for (unsigned n=0;n<SMK_APC40_CLIP_COUNT;++n) {
++        v.in_view[n]=0;
++        sig=(sig^v.velocity[n])*16777619u;
++        sig=(sig^v.flags[n])*16777619u;
++    }
++    for (unsigned pad=0;pad<SMK_APC40_PAD_COUNT;++pad) {
++        uint8_t n=smk_apc40_note_for_pad_view(v.cols,v.rows,v.ox,v.oy,v.view,pad);
++        if (n<SMK_APC40_CLIP_COUNT) v.in_view[n]=1;
++    }
++    for (unsigned n=0;n<SMK_APC40_CLIP_COUNT;++n) sig=(sig^v.in_view[n])*16777619u;
++    sig=(sig^((uint32_t)v.cols|((uint32_t)v.rows<<8)|((uint32_t)v.ox<<16)|((uint32_t)v.oy<<24)))*16777619u;
++    sig=(sig^v.has)*16777619u;
++    if (was_on && ((sig==last_sig && now-last_ms<1000u) || now-last_ms<SMK_CLIP_LCD_MIN_MS)) return 1;
++    was_on=1; last_sig=sig; last_ms=now;
++    commit_full_strips(v.black,paint_clip_grid,&v);
++    return 1;
++}
++#endif
+ /* Called from the USB interrupt (usb_poll, 2 kHz). The cell state and the burst
+  * state change only in this interrupt, so the main loop only reads them. */
+ void smk_apc_usb_tick(void)
+@@ -1912,6 +1990,51 @@
+         col[k] = CK_BIT(cp->keys, k) ? c : CK_BLK(k) ? RGB(25, 25, 25) : RGB(60, 60, 60);
+     ck_kbd(10, 76, 10, 46, CK_NKEY, col);
+ }
++#if X0X_UI_HOME_STRIP_SPIKE
++typedef struct {
++    uint8_t pg, selected, value[9];
++    uint16_t white, gray, black;
++    uint16_t col[CK_NKEY];
++} ck_strip_page;
++static void ck_paint_page_strips(const void *data)
++{
++    const ck_strip_page *v=data;
++    const uint32_t pg=v->pg, count=pg==2u?9u:4u;
++    const uint16_t c=CK_MODE_C[pg];
++    char t[12];
++    for (unsigned n=0;n<count;++n) {
++        const unsigned f=CK_PAGE_FIELDS[pg][n];
++        const int32_t x=4+(int32_t)(n/5u)*120, y=2+(int32_t)(n%5u)*12;
++        if (f==v->selected) rbox(x-2,y,116,12,3,dim(c,4));
++        cv_text(x,vc(&FONT_T,y,12),&FONT_T,ck_nm(CK_FLD_N,f),v->gray);
++        cv_text(x+44,vc(&FONT_XS,y,12),&FONT_XS,ck_val_txt(f,v->value[n],t),v->white);
++    }
++    /* Same draw order as ck_kbd: full white shapes before black edges. */
++    for (unsigned pass=0;pass<2u;++pass) for (unsigned k=0;k<CK_NKEY;++k) {
++        if (CK_BLK(k)!=pass) continue;
++        const int32_t x=ck_key_x(k,10,10);
++        if (pass) {
++            cv_rect(x-1,76,8,46*3/5+1,v->black);
++            cv_rect(x,76,6,46*3/5,v->col[k]);
++        } else cv_rect(x,76,9,46,v->col[k]);
++    }
++}
++static int ck_commit_page_strips(void)
++{
++    CK_BASE;
++    ck_strip_page v;
++    const uint32_t pg=(cp->pg&3u)-1u;
++    if (pg>2u) return 0;
++    v.pg=(uint8_t)pg; v.selected=(uint8_t)(cp->pg>>4);
++    const unsigned count=pg==2u?9u:4u;
++    for (unsigned n=0;n<count;++n) v.value[n]=(uint8_t)ck_get(CK_PAGE_FIELDS[pg][n]);
++    for (unsigned k=0;k<CK_NKEY;++k)
++        v.col[k]=CK_BIT(cp->keys,k)?CK_MODE_C[pg]:CK_BLK(k)?RGB(25,25,25):RGB(60,60,60);
++    v.black=C_BLACK; v.gray=C_GRAY; v.white=C_WHITE;
++    commit_full_strips(v.black,ck_paint_page_strips,&v);
++    return 1;
++}
++#endif
+ /* every main loop pass (also between frames, for the arp timing) */
+ CK_FN void smk_ck_poll(void)
+ {

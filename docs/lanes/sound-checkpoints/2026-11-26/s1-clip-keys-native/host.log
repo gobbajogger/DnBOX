@@ -1,0 +1,14 @@
+font T: BarlowSemiCondensed-SemiBold.ttf 10px h 12, digit adv 5, 1105 B
+font XS: BarlowSemiCondensed-SemiBold.ttf 12px h 15, digit adv 6, 1571 B
+font S: BarlowSemiCondensed-Medium.ttf 15px h 16, digit adv 7, 1981 B
+font B: BarlowSemiCondensed-Bold.ttf 15px h 16, digit adv 8, 2039 B
+font M: BarlowSemiCondensed-SemiBold.ttf 23px h 24, digit adv 12, 2091 B
+font L: BarlowSemiCondensed-Bold.ttf 31px h 32, digit adv 16, 1685 B
+font set barlow: 10691 B (approx)
+In file included from /tmp/tmp.YXogroeSLI/actual-clip-key-host.inc:111,
+                 from /workspace/scratch/3a7051e761a0/ui-canvas-clip-wired/verify-render.c:1:
+/tmp/tmp.YXogroeSLI/ck_a.inc:38:1: warning: ‘minsize’ attribute directive ignored [-Wattributes]
+   38 | {
+      | ^
+6 WAITING palettes byte-exact; frame throttles and immediate Grid return exercised
+300 full target caller Clip/Keys host comparisons: every DMA window/payload, dirty hash and >82-row canary byte-exact; simulated callback invalidation retained

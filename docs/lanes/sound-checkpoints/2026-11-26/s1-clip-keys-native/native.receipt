@@ -1,0 +1,31 @@
+all routes prototype v1
+ui-canvas-clip-wired/v1-elite.log:/workspace/scratch/3a7051e761a0/prereqs/jieli-linux-toolchains-20260730.1/pi32v2/bin/ld: region `XIP' overflowed by 2664 bytes
+ui-canvas-clip-wired/v1-pro.log:/workspace/scratch/3a7051e761a0/prereqs/jieli-linux-toolchains-20260730.1/pi32v2/bin/ld: region `XIP' overflowed by 2656 bytes
+all routes prototype v2
+ui-canvas-clip-wired/v2-elite.log:/workspace/scratch/3a7051e761a0/prereqs/jieli-linux-toolchains-20260730.1/pi32v2/bin/ld: region `XIP' overflowed by 1400 bytes
+ui-canvas-clip-wired/v2-pro.log:/workspace/scratch/3a7051e761a0/prereqs/jieli-linux-toolchains-20260730.1/pi32v2/bin/ld: region `XIP' overflowed by 1392 bytes
+contained Boot+Clip-only actual guarded result
+ui-canvas-clip-wired/elite.log:guarded elite XIP 551916 free 756 pool usable 564 read-only FDATA 61432 diagnostic slot3 span 32764 slot3 free 4 read-only FITTAB 4072 header 443952440200000001000000d8ef00007def59ef4d7794f3e7b1de24c44786e9 ELF c0f80d1df032dec19b5f5b9bb13a65bc89c3ffa435b5e22aa1921763ee68c02a
+ui-canvas-clip-wired/pro.log:guarded pro XIP 551908 free 764 pool usable 564 read-only FDATA 61432 diagnostic slot3 span 32764 slot3 free 4 read-only FITTAB 4072 header 443952440200000002000000d8ef00007def59efdd43bf048bb3338ca8a8efaa ELF c3db3aa7c9e1fa49a06bfa0196fc30017f88a31d29f09cd5ba7b758e9ef35f6f
+c0f80d1df032dec19b5f5b9bb13a65bc89c3ffa435b5e22aa1921763ee68c02a  ui-canvas-clip-wired/tree/widen-native/elite/never-install.elf
+02003b76 00000164 t ck_paint_page_strips
+020416ce 00000094 t commit_full_strips
+0204005e 00000056 t cv_lcd_full
+01c20000 000102c0 b cv_px
+02044d0a 0000031a t draw_home
+02044926 0000031a t draw_home_live
+020461ca 000002c4 t draw_song
+02003cf6 000001f8 t paint_clip_grid
+020036e4 00000050 t paint_clip_wait
+02053104 00000d84 t smc_ui_grid
+c3db3aa7c9e1fa49a06bfa0196fc30017f88a31d29f09cd5ba7b758e9ef35f6f  ui-canvas-clip-wired/tree/widen-native/pro/never-install.elf
+02003b76 00000164 t ck_paint_page_strips
+020416ce 00000094 t commit_full_strips
+0204005e 00000056 t cv_lcd_full
+01c20000 000102c0 b cv_px
+02044d0a 0000031a t draw_home
+02044926 0000031a t draw_home_live
+020461ca 000002c4 t draw_song
+02003cf6 000001f8 t paint_clip_grid
+020036e4 00000050 t paint_clip_wait
+02053104 00000d84 t smc_ui_grid
