@@ -1,0 +1,21 @@
+--- a/firmware/src/dsp/s1c/s1c.c
++++ b/firmware/src/dsp/s1c/s1c.c
+@@ -519,9 +519,15 @@
+     float o1 = morph_held(&v->ph[0], v->ki1, P(I1), bl) * v->vamp * P(VOL1);
+     float o2 = morph_held(&v->ph[1], v->ki2, P(I2), bl) * v->vamp * P(VOL2);
+     float y = (1.0f - v->kbal) * o1 + v->kbal * o2;
+-    float sub = sine_t(v->ph[2]);
+-    v->ph[2] += v->kis;
+-    y += P(SUBSQ) != 0.0f ? (sub > 0.0f ? P(SUBV) : -P(SUBV)) : sub * v->vamp * P(SUBV) * 3.0f;
++    const float sublev=P(SUBV);
++    const uint32_t subphase=v->ph[2];
++    v->ph[2]+=v->kis; /* keep phase warm even at silent sub level */
++    const s1c_fb voicesum={.f=y},subword={.f=sublev};
++    const unsigned mag=voicesum.u&0x7fffffffu;
++    if((subword.u&0x7fffffffu)!=0u || mag-0x00800000u>=0x7f000000u){
++        const float sub=sine_t(subphase);
++        y+=P(SUBSQ)!=0.0f ? (sub>0.0f?sublev:-sublev) : sub*v->vamp*sublev*3.0f;
++    }
+     if (P(FMV) != 0.0f) {
+         float mod = sine_t(v->mph) * v->kff * v->kidx;
+         v->mph += v->kif;

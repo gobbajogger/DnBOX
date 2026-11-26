@@ -1,0 +1,41 @@
+
+Symbol table '.symtab' contains 38 entries:
+   Num:    Value  Size Type    Bind   Vis      Ndx Name
+     0: 00000000     0 NOTYPE  LOCAL  DEFAULT  UND 
+     1: 02000120     0 SECTION LOCAL  DEFAULT    1 .text
+     2: 01c09000     0 SECTION LOCAL  DEFAULT    2 .bss
+     3: 00000000     0 FILE    LOCAL  DEFAULT  ABS bench.c
+     4: 02000c44     0 NOTYPE  LOCAL  DEFAULT    1 .GJTIE27_0_0_
+     5: 02000c40     0 NOTYPE  LOCAL  DEFAULT    1 .GJTIS27_0_0_
+     6: 020004a0    72 FUNC    LOCAL  DEFAULT    1 fold_index
+     7: 01c09000    24 OBJECT  LOCAL  DEFAULT    2 hashes
+     8: 02001c5a 18185 OBJECT  LOCAL  DEFAULT    1 morph_bytes
+     9: 02001b3a   288 OBJECT  LOCAL  DEFAULT    1 morph_rows
+    10: 01c09018  2048 OBJECT  LOCAL  DEFAULT    2 out
+    11: 020001f0   172 FUNC    LOCAL  DEFAULT    1 prep_morph
+    12: 02006364    52 OBJECT  LOCAL  DEFAULT    1 prep_morph.limits
+    13: 01c09818  2712 OBJECT  LOCAL  DEFAULT    2 s
+    14: 02001b0c    46 OBJECT  LOCAL  DEFAULT    1 s1c_smid
+    15: 02000736   164 FUNC    LOCAL  DEFAULT    1 shared_shape
+    16: 0200029c   516 FUNC    LOCAL  DEFAULT    1 stored_lattice
+    17: 020004e8   590 FUNC    LOCAL  DEFAULT    1 stored_pair
+    18: 020007da   330 FUNC    LOCAL  DEFAULT    1 tick_morph
+    19: 02000a90  2664 FUNC    LOCAL  DEFAULT    1 voice_run_kr
+    20: 00000000     0 FILE    LOCAL  DEFAULT  ABS /workspace/scratch/3a7051e761a0/s1-morph-native-909txn-tick-shadow/tree/firmware/src/dsp/s1c/s1u.c
+    21: 02006398   260 OBJECT  LOCAL  DEFAULT    1 sin_q
+    22: 02000a20    70 FUNC    WEAK   DEFAULT    1 fm_wrap_pi
+    23: 02001856    92 FUNC    WEAK   DEFAULT    1 fm_expf
+    24: 0200195e    90 FUNC    GLOBAL DEFAULT    1 s1u_sin
+    25: 02000138    28 FUNC    WEAK   DEFAULT    1 fm_floorf
+    26: 02001a04   168 FUNC    GLOBAL DEFAULT    1 s1u_ladder
+    27: 02000924   154 FUNC    WEAK   DEFAULT    1 fm_log2f
+    28: 02000120     0 NOTYPE  GLOBAL DEFAULT    1 _start
+    29: 020009be    98 FUNC    WEAK   DEFAULT    1 fm_sin_pi
+    30: 02000a66    42 FUNC    WEAK   DEFAULT    1 fm_cosf
+    31: 02001ae0     0 FUNC    GLOBAL DEFAULT    1 memset
+    32: 020001ba    54 FUNC    WEAK   DEFAULT    1 fm_exp2f
+    33: 02000154   102 FUNC    WEAK   DEFAULT    1 fm_exp2_nf
+    34: 020014f8   862 FUNC    GLOBAL DEFAULT    1 bench
+    35: 020018b2   172 FUNC    GLOBAL DEFAULT    1 s1u_env_step
+    36: 02001aac    52 FUNC    GLOBAL DEFAULT    1 s1u_hp2
+    37: 020019b8    76 FUNC    GLOBAL DEFAULT    1 s1u_ladder_a

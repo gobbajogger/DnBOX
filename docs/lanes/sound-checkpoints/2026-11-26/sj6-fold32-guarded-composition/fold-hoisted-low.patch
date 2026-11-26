@@ -1,0 +1,130 @@
+--- a/firmware/src/dsp/dnbx_core.c
++++ b/firmware/src/dsp/dnbx_core.c
+@@ -1,3 +1,4 @@
++#define SJ6_WAVE_PROBE 1
+ /* SPDX-License-Identifier: GPL-3.0-only */
+ /* Clean analytic candidate using permitted DnBOX juno6.c oscillator, two-pole
+  * filter, and allocator primitives plus permitted DnBOX fastmath.h. No original
+@@ -247,6 +248,62 @@
+                     - (1.f - 2.f * width));
+ }
+ 
++#if SJ6_WAVE_PROBE
++/* Standalone clean diagnostic stage, not a firmware route. */
++#include <assert.h>
++#include "selector.h"
++
++#include "fold-data.h"
++
++typedef struct {
++    sj6_band band;
++    unsigned shape;
++} owner;
++static inline float lookup(unsigned s,unsigned row,unsigned p,unsigned q,float f){
++    float x=TBL[TBL_MAP[s][row]][p],y=TBL[TBL_MAP[s][row]][q];
++    return x+f*(y-x);
++}
++static inline float shape_lookup(float phase,float unused,void *v){
++    (void)unused;
++    owner *o=v;
++    float x=phase*TBL_N;
++    unsigned i=(unsigned)x;
++    float f=x-i;
++    i&=TBL_N-1;
++    unsigned j=(i+1)&(TBL_N-1);
++    float a=lookup(o->shape,o->band.row,i,j,f);
++    if(o->band.blend>0.f){
++        float b=lookup(o->shape,o->band.row+1u,i,j,f);
++        a+=o->band.blend*(b-a);
++    }
++    float natural=o->shape?.495f*1.17878819f*(8.f/(3.14159265358979323846f*3.14159265358979323846f)):.5f*1.2377909421920776f;
++    return a*(natural*TBL_GAIN[o->shape]);
++}
++
++static int route_shape(unsigned mode,float shape){
++  return mode==DNBX_OSC_SUPERJ6 && shape<2.f/3.f;
++}
++static float probe_shape(dnbx_layer_voice *v,unsigned shape){
++    const float step=v->increment,q=.25f*step;
++    float p=v->phase;
++    /* Delay's first and third coefficients derived from the exact physical filter. */
++    float *cache=v->oscillator_history; /* existing 4 Float32 history words */
++    if(step!=cache[0]){
++        const sj6_band b=sj6_wavetable_band(step);
++        cache[0]=step;
++        cache[1]=step*(0x1.f10bbbb0d49f9p-1f + 0x1.ce59426102823p+0f*step*step);
++        cache[2]=(float)b.row;cache[3]=b.blend;
++    }
++    float pdel=p-cache[1];
++    if(pdel<0.f)pdel+=1.f;
++    const float q1=p+q,q2=q1+q,q3=q2+q,q4=q3+q;
++    if(q4<1.f)p=q4; /* monotonic positive phases prove no earlier wrap */
++    else for(unsigned j=0;j<4;j++){p+=q;if(p>=1.f)p-=1.f;}
++    v->phase=p;
++    owner o={{(unsigned)cache[2],cache[3]},shape};
++    return shape_lookup(pdel,q,&o);
++}
++#endif
+ static float factory_oscillator(dnbx_layer_voice *voice, float wave, float width, dnbx_work *w)
+ {
+     unsigned stop = (unsigned)(wave * 3.f);
+@@ -517,10 +574,16 @@
+     if (!valid(s)) return DNBX_E_UNINITIALIZED;
+     if (layer>=DNBX_LAYERS || !p) return DNBX_E_ARGUMENT;
+     if (!params_valid(p,s->superj6_amp_range)) return DNBX_E_RANGE;
++#if SJ6_WAVE_PROBE
++    int reset=route_shape(p->oscillator_mode,p->waveform)!=route_shape(s->layer[layer].params.oscillator_mode,s->layer[layer].params.waveform);
++#endif
+     s->layer[layer].params=*p;
+     for (unsigned i=0;i<DNBX_VOICES;i++) {
+         dnbx_layer_voice *v=&s->voice[i].layer[layer];
+         v->increment=voice_pitch_increment(s,&s->voice[i],layer,p->tune_semitones);
++#if SJ6_WAVE_PROBE
++        if(reset)memset(v->oscillator_history,0,sizeof v->oscillator_history);
++#endif
+         /* A running timed segment retains its cached endpoint/rate. */
+         if (v->amp.stage==DNBX_ENV_SUSTAIN) v->amp.level=v->amp.curve=p->amp.sustain;
+         if (v->filter.stage==DNBX_ENV_SUSTAIN) v->filter.level=v->filter.curve=filter_sustain(s,layer);
+@@ -945,6 +1008,14 @@
+     dnbx_envelope_params linked[DNBX_LAYERS];
+     const dnbx_envelope_params *fp[DNBX_LAYERS];
+     for (unsigned l=0;l<DNBX_LAYERS;l++) fp[l]=filter_params(s,l,&linked[l]);
++#if SJ6_WAVE_PROBE
++    int folded[2];
++    for(unsigned l=0;l<2;l++){
++        const dnbx_layer_params *a=&s->layer[l].params;
++        folded[l]=route_shape(a->oscillator_mode,a->waveform)?(int)(a->waveform*3.f):-1;
++    }
++#endif
++
+     for (unsigned k=0;k<n;k++) {
+ #if X0X_SJ6_MONO32_PROBE
+         if(s->sj6_glide_offset!=0.f&&s->sj6_glide_secs>0.f){
+@@ -1002,7 +1073,13 @@
+                 float amp=envelope_sample(&lv->amp,&p->amp,s->sample_rate,w);
+                 float env=envelope_sample(&lv->filter,fp[l],s->sample_rate,w);
+                 if (fvel != 0.f) env *= filter_note[i];
+-                float x = p->oscillator_mode == DNBX_OSC_SUPERJ6
++#if SJ6_WAVE_PROBE
++                const int fold=folded[l];
++                float x = fold>=0 ? probe_shape(lv,(unsigned)fold) :
++#else
++                float x =
++#endif
++                    p->oscillator_mode == DNBX_OSC_SUPERJ6
+                     ? factory_oscillator(lv, p->waveform, width[l], w)
+                     : oscillator(lv->phase,lv->increment,p->waveform,width[l],p->oscillator_mode,w);
+                 if (osc_gain[l]!=1.f) x*=osc_gain[l];
+@@ -1040,7 +1117,11 @@
+                 lv->filter_second=fm_clampf(lv->filter_second+a*(lv->filter_first-lv->filter_second),-4,4);
+                 mix[l]+=velocity*amp*lv->filter_second;
+                 }
+-                lv->phase+=lv->increment; if (lv->phase>=1) lv->phase-=1;
++#if SJ6_WAVE_PROBE
++                if(fold<0)
++#endif
++                {lv->phase+=lv->increment; if(lv->phase>=1)lv->phase-=1;}
++
+                 lv->subphase+=lv->increment*.5f; if (lv->subphase>=1) lv->subphase-=1;
+ #if X0X_SJ6_MONO32_PROBE || X0X_SJ6_PITCH_ENV_NATIVE
+                 lv->increment=nominal;

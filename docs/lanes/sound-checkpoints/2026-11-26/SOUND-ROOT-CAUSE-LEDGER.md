@@ -76,6 +76,14 @@ changing the rounding rule.
   bytes over hoisted Fold32, zero pool, same dry signatures. It is not
   an exact fallback waveform or integrated dropout pass.
   [Warm handoff proof](sj6-fold32-warm-phase-handoff/live/README.md).
+  The actual S1+Low+909+cold(+64 B) composition at +832/+844 B APP
+  was independently verified. Hoisted Fold32 alone (without the
+  separate +128 B warm handoff addition) fails the real strict links
+  by 64 B Elite / 56 B Pro, or 68/60 including the final marker.
+  Local Fold and Low edits commute byte-for-byte; actual host guards
+  passed for all shapes, Low/Center/High, no Sub change, Saw/PWM,
+  hold/bend and release. Do not ship or assume arithmetic budgets.
+  [Composed evidence](sj6-fold32-guarded-composition/FOLD-COMPOSED.md).
   [Independent authentic holds](https://github.com/gobbajogger/DnBOX/commit/17ec80e3).
 - **Upstream dry differences vary by patch.** The AU references for
   Brainwave, Solidify and Raw J106 have matched cue/UID, fresh instances
@@ -241,6 +249,29 @@ that percentage on the whole render or count its tiny leaf linker size
 as actual APP. The new exact-source triangle hunk must be retested on
 the later future-worker donor and measured in a fresh serialized scene.
 [First fit pair results and 909 proof](strict-fitted-pair-and-909-leaf/).
+
+On the exact S1+Low Range+909 diagnostic pair (APP +768/+780 B), the
+unchanged serialized scene yielded Elite 14,817 µs/87 xruns and Pro
+14,603 µs/104 xruns. The producer-anchor issue remains; there is no
+single-candidate timing attribution from these numbers. The private
+donor retains a **verify-only 909 future**: it computes a private
+909 voice on Core1, then recomputes the actual voice and compares
+state/PCM on Core0 before emitting original. Confirmed 1,638/1,561
+exact duplicate verifications, 95 unavailable on each, and zero
+state/PCM mismatches. This is superfluous measurement work, not the
+fixed-head change. Test removing only that duplicate diagnostic path
+on the same pinned inputs and unchanged actual C1 plan. An instrumented
+Elite late DMA ordinal 419 had ~748 µs nested TIMER5, which cannot
+explain the full overrun (>13.59 ms even without those ticks).
+There is no evidence to disable required interrupts.
+
+The exact Synth One silent-Sub fast path saves ~603 µs in a six-voice
+512-frame *isolated* zero-Sub case; audible or exact-zero main fallback
+can be slower by up to 97 µs. Saved end-of-run SUBV reads as zero with
+all voices no longer active; that does **not** prove eligibility in
+the worst half. Only test admission after contemporaneous active
+signed owner counters on a clearly non-timing witness.
+[Exact idle-Sub proof](s1-silent-sub-scoped/README.md).
 
 ## Release boundary
 

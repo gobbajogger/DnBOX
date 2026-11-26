@@ -1,0 +1,3 @@
+Guarded uncompressed Fold32 over exact +832/+844 fused pair. Local hunks commute byte-for-byte with the untouched Low preparation slice. Signed same-donor host four-layer waveform × Low/Center/High guards pass; no original sample inputs in archive. Actual strict boards overflow +64/+56 B respectively, never-install only. Retain private exact fold-data.h and selector.h generated with Fold32 32x8 inputs; hashes in FOLD.sha. Use existing linked guards and matching regions without repacking or moving any storage.
+
+The paired -64/-56 B receipt is strict ld XIP overflow before the emitter's 4-byte packer marker; projected with marker -68/-60 B. Phase-handoff's separate +128 B is ABSENT from this exact Hoisted candidate, not counted here. 

@@ -1,0 +1,129 @@
+{
+  "scope": "no asset export, fixed global one-ms RC on existing generated Sub waveform; current real compiled original receiver, projected common control/timing with all cold note events retained, no terminal phase/time/gain fit",
+  "core_sha": "6d163d79202e866d2fda96e36f752bd386641b5ae2d0b1f829a254d26b652850",
+  "auth_older_container_sha": "ec994e3fabf42b2761d7ca3799f87dacb4ac12670e2909451ff14f78b9a5f740",
+  "cube_full_source": {
+    "onset_36": {
+      "bare": {
+        "level_delta_db": -0.12148614516290056,
+        "signed_dbr": 4.424923153478478,
+        "reference_rms": 0.21807092461507077
+      },
+      "fixed_rc": {
+        "level_delta_db": -0.38321543676436,
+        "signed_dbr": 4.67374362276421,
+        "reference_rms": 0.21807092461507077
+      }
+    },
+    "held_36": {
+      "bare": {
+        "level_delta_db": -0.1899911183679902,
+        "signed_dbr": 4.19993322839649,
+        "reference_rms": 0.19982004808038253
+      },
+      "fixed_rc": {
+        "level_delta_db": -0.46286030797661754,
+        "signed_dbr": 4.5583862353554,
+        "reference_rms": 0.19982004808038253
+      }
+    },
+    "release_36": {
+      "bare": {
+        "level_delta_db": -0.2958345933508942,
+        "signed_dbr": 4.1471817936774205,
+        "reference_rms": 0.1524651542674508
+      },
+      "fixed_rc": {
+        "level_delta_db": -0.5575088117310361,
+        "signed_dbr": 4.530338330200399,
+        "reference_rms": 0.1524651542674508
+      }
+    },
+    "pending_54": {
+      "bare": {
+        "level_delta_db": -0.30389303731336814,
+        "signed_dbr": -1.5952932173291845,
+        "reference_rms": 0.059810514948677965
+      },
+      "fixed_rc": {
+        "level_delta_db": -2.205940598146163,
+        "signed_dbr": -0.5395493854249834,
+        "reference_rms": 0.059810514948677965
+      }
+    },
+    "onset_54": {
+      "bare": {
+        "level_delta_db": 0.8157430886155358,
+        "signed_dbr": 5.234186797877712,
+        "reference_rms": 0.13526125602801267
+      },
+      "fixed_rc": {
+        "level_delta_db": -0.8324138686724336,
+        "signed_dbr": 3.332664150705173,
+        "reference_rms": 0.13526125602801267
+      }
+    },
+    "held_54": {
+      "bare": {
+        "level_delta_db": 0.4574427573201753,
+        "signed_dbr": 5.298493688928705,
+        "reference_rms": 0.12848788881728934
+      },
+      "fixed_rc": {
+        "level_delta_db": -1.0825281908884583,
+        "signed_dbr": 3.448894743769339,
+        "reference_rms": 0.12848788881728934
+      }
+    },
+    "release_54": {
+      "bare": {
+        "level_delta_db": 0.4176814877414581,
+        "signed_dbr": 5.317302507995797,
+        "reference_rms": 0.0763798387488405
+      },
+      "fixed_rc": {
+        "level_delta_db": -1.081609735205601,
+        "signed_dbr": 3.46878532171146,
+        "reference_rms": 0.0763798387488405
+      }
+    }
+  },
+  "blind_key72_source": {
+    "onset_72": {
+      "bare": {
+        "level_delta_db": -0.17751727088757419,
+        "signed_dbr": -5.09735494496558,
+        "reference_rms": 0.18614615145548283
+      },
+      "fixed_rc": {
+        "level_delta_db": -5.818399238008346,
+        "signed_dbr": -4.03619587153061,
+        "reference_rms": 0.18614615145548283
+      }
+    },
+    "held_72": {
+      "bare": {
+        "level_delta_db": -0.17747614738335438,
+        "signed_dbr": -6.1238685813189235,
+        "reference_rms": 0.13269948804517515
+      },
+      "fixed_rc": {
+        "level_delta_db": -7.046321206999563,
+        "signed_dbr": -3.11191420152859,
+        "reference_rms": 0.13269948804517515
+      }
+    },
+    "release_72": {
+      "bare": {
+        "level_delta_db": -0.20046918398939048,
+        "signed_dbr": -6.935427556537578,
+        "reference_rms": 0.09848862405132595
+      },
+      "fixed_rc": {
+        "level_delta_db": -7.13943989624169,
+        "signed_dbr": -2.886046370733495,
+        "reference_rms": 0.09848862405132595
+      }
+    }
+  }
+}
