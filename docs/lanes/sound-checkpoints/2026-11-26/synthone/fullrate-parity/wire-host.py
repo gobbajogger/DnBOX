@@ -133,9 +133,14 @@ a='        /* bitcrush (sample-and-hold), tremolo */\n'
 s=exact(s,a,a+"""#if S1_CRUSH_EXACT
         /* Source steps the sample-index accumulator in two ordered
          * binary32 operations, including when there is no LFO. */
+#if S1_CRUSH_SOURCE_FLOAT
+        extern float source_crusher_rate(float,float);
+        const float native_rate=source_crusher_rate(P(BCSR),lfo01(s,P(LBC)));
+#else
         float rate_log=(float)log2((double)P(BCSR));
         rate_log+=4.f*lfo01(s,P(LBC));
         const float native_rate=clampf((float)exp2((double)rate_log),2048.f,48000.f);
+#endif
         s1u_crush *cr=&s->crush;
         cr->inc=s->sr/native_rate;
         if(cr->inc<1.f)cr->inc=1.f;
@@ -225,6 +230,8 @@ s=exact(s,a+'\n','''#if S1_ROOM_EXACT
 '''+a+'\n')
 p.write_text(s)
 p=base/'render.c';s=p.read_text()
+# Match the original's single tail span; splitting at a non-block boundary changes voice retirement.
+s=exact(s,'    render(33075,out);\n    render(33075,out);','    render(66150,out);')
 s=exact(s,'    if(argc!=5)return 2;',"    if(argc!=5)return 2;\n#if S1_MORPH_EXACT\n    if(!exact_morph_load())return 6;\n#endif")
 s='#include "exact-room.h"\n#include "exact-delay.h"\n#include "exact-filter.h"\n#include "exact-morph.h"\n#include "exact-aux.h"\n#include "exact-stereo.h"\n'+s
 a='    free(pack);'
@@ -244,4 +251,16 @@ s=exact(s,a,'''#if S1_ROOM_EXACT
     exact_stereo_drop(part.e.host_exact_stereo);
 #endif
 '''+a)
+p.write_text(s)
+
+p=base/'dsp/s1c/s1u.c';s='#include <math.h>\n'+p.read_text()
+a='static float pole(float t, float sr) { return t <= 0.0f ? 0.0f : expf(-1.0f / (t * sr)); }'
+s=exact(s,a,"""#if S1_ENVELOPE_EXACT
+static float pole(float t,float sr){return (float)exp(-1.0/(double)(t*sr));}
+#else
+"""+a+"\n#endif")
+a='e->a = pole(atk * 0.6f, sr);'
+s=exact(s,a,"""e->a = pole(S1_ENVELOPE_EXACT ? (float)((double)atk*.6) : atk*.6f, sr);""")
+a='e->mode == S1U_E_ATK && e->y > 0.99f'
+s=exact(s,a,'e->mode == S1U_E_ATK && (S1_ENVELOPE_EXACT ? (double)e->y > .99 : e->y > .99f)')
 p.write_text(s)

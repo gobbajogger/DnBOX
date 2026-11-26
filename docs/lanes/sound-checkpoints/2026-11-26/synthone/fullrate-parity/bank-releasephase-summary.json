@@ -1,0 +1,178 @@
+{
+  "old": {
+    "count": 906,
+    "both_waveform_at_most_dbr": {
+      "-20": 906,
+      "-40": 897,
+      "-60": 833,
+      "-80": 524
+    },
+    "max_abs_level_db": 0.0021376169497889343,
+    "bit_identical": 33,
+    "worst": {
+      "id": 527,
+      "label": "527: Digital Ocean arena 4252",
+      "residual_dbr": [
+        -29.862205811088494,
+        -28.881512524920446
+      ]
+    }
+  },
+  "new": {
+    "count": 906,
+    "both_waveform_at_most_dbr": {
+      "-20": 906,
+      "-40": 906,
+      "-60": 891,
+      "-80": 710
+    },
+    "max_abs_level_db": 0.0017017932957052516,
+    "bit_identical": 41,
+    "worst": {
+      "id": 193,
+      "label": "193: Arcade Lead arena 4252",
+      "residual_dbr": [
+        -47.56407373687477,
+        -47.564052112590424
+      ]
+    }
+  },
+  "prior_outliers": {
+    "repaired": 9,
+    "rows": [
+      {
+        "id": 75,
+        "before": [
+          -39.47282309173937,
+          -40.606536694275604
+        ],
+        "after": [
+          -94.06597930699266,
+          -94.9242640953236
+        ]
+      },
+      {
+        "id": 90,
+        "before": [
+          -38.72958994343865,
+          -39.334851628101895
+        ],
+        "after": [
+          -97.14391407340445,
+          -97.10285024583692
+        ]
+      },
+      {
+        "id": 329,
+        "before": [
+          -35.1956725915729,
+          -35.631268349965396
+        ],
+        "after": [
+          -71.7499491680609,
+          -72.16771632257802
+        ]
+      },
+      {
+        "id": 527,
+        "before": [
+          -29.862205811088494,
+          -28.881512524920446
+        ],
+        "after": [
+          -76.45133821005685,
+          -75.91401020991447
+        ]
+      },
+      {
+        "id": 579,
+        "before": [
+          -39.96051584417559,
+          -41.184226770059674
+        ],
+        "after": [
+          -85.79491466533199,
+          -86.18409631438587
+        ]
+      },
+      {
+        "id": 616,
+        "before": [
+          -37.71093621388489,
+          -42.59570305888392
+        ],
+        "after": [
+          -78.50653269396246,
+          -79.43103271735454
+        ]
+      },
+      {
+        "id": 619,
+        "before": [
+          -41.38343751408924,
+          -39.499345195760355
+        ],
+        "after": [
+          -81.04448622212821,
+          -81.61834365748676
+        ]
+      },
+      {
+        "id": 650,
+        "before": [
+          -39.77910621164646,
+          -38.50732684027881
+        ],
+        "after": [
+          -70.52133658988797,
+          -70.29662370736204
+        ]
+      },
+      {
+        "id": 655,
+        "before": [
+          -39.68091562736778,
+          -38.34274843693359
+        ],
+        "after": [
+          -69.51785772400557,
+          -68.86580903472213
+        ]
+      }
+    ]
+  },
+  "new_outliers": [],
+  "same_reference_pcm": 906,
+  "old_run": {
+    "scope": "Whole stereo cold-start six-note host renders, in matching command ordinal. Optional authenticated authored tuning and note tape; no project change, hardware, or fit.",
+    "mode": "wet",
+    "same_note_tape": true,
+    "tuning_rows": 23,
+    "count": 906,
+    "source_bank_rows": 906,
+    "identity_sha256": "583a2477205ccf04b363c344bc9300897200c9e78f0bf634b9233622b0f83780",
+    "inputs": {
+      "recovered-sound/s1-room-parity/unified-exactenv2/original": "2b6a520a454df06f7e6d331d8049537e92a609a35a8d14baa16c0447dbcd935f",
+      "recovered-sound/s1-room-parity/unified-exactenv2/candidate": "f398a5c69705cd120568ee7bf1972602dbfb9962b402deb707c338c99a55c8e6",
+      "s1-fx-parity/reference-build/factory-inputs/public-morphs.f32": "0d35b5422cb5d3e0e349a66c9e0a50f2980b6287e68f8d94f55640d3f8168bd5",
+      "recovered-sound/s1-room-parity/aligned-commands.bin": "622050ebc18a4dc98461d68f0f56b76924868b64c98bb370153c98cf3e577b41",
+      "recovered-sound/s1-bank-replay/original-private/pack.private": "d5e003e878ab46d6051d6cff16be557fbdfde7fccaa9255e4217bb5ffb51fa43"
+    }
+  },
+  "new_run": {
+    "scope": "Whole stereo cold-start six-note host renders, in matching command ordinal. Optional authenticated authored tuning and note tape; no project change, hardware, or fit.",
+    "mode": "wet",
+    "same_note_tape": true,
+    "tuning_rows": 23,
+    "count": 906,
+    "source_bank_rows": 906,
+    "identity_sha256": "583a2477205ccf04b363c344bc9300897200c9e78f0bf634b9233622b0f83780",
+    "inputs": {
+      "recovered-sound/s1-room-parity/unified-releasephase/original": "2b6a520a454df06f7e6d331d8049537e92a609a35a8d14baa16c0447dbcd935f",
+      "recovered-sound/s1-room-parity/unified-releasephase/candidate": "5b313656fedb02a4623baa0fd66456d14896622e0c889d90acdaa06f455491a2",
+      "s1-fx-parity/reference-build/factory-inputs/public-morphs.f32": "0d35b5422cb5d3e0e349a66c9e0a50f2980b6287e68f8d94f55640d3f8168bd5",
+      "recovered-sound/s1-room-parity/aligned-commands.bin": "622050ebc18a4dc98461d68f0f56b76924868b64c98bb370153c98cf3e577b41",
+      "recovered-sound/s1-bank-replay/original-private/pack.private": "d5e003e878ab46d6051d6cff16be557fbdfde7fccaa9255e4217bb5ffb51fa43"
+    }
+  }
+}

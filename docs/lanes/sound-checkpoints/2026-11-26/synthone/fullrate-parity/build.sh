@@ -27,11 +27,11 @@ for arm in ${S1_PARITY_ARMS:-compact room room-master room-delay room-delay-mast
   if [[ $arm == *-lfo* ]]; then lfo=1; fi
   if [[ $arm == *-pitch ]]; then pitch=1; fi
   if [[ $arm == room-delay* ]]; then delay=1; fi
-  cc -std=gnu11 -O2 -ffunction-sections -fdata-sections -include "$T/dsp/s1c/s1c.h" -DS1_WIDEN_ORACLE=1 -DS1_ROOM_EXACT=$exact -DS1_ROOM_EXACT_MASTER=$master -DS1_DELAY_EXACT=$delay -DS1_NOISE_EXACT=$noise -DS1_FILTER_EXACT=$filter -DS1_MORPH_EXACT=$morph -DS1_AUX_EXACT=$aux -DS1_CRUSH_EXACT=$crush -DS1_STEREO_EXACT=$stereo -DS1_LFO_EXACT=$lfo -DS1_PITCH_EXACT=$pitch \
+  cc -std=gnu11 -O2 -ffunction-sections -fdata-sections -include "$T/dsp/s1c/s1c.h" -DS1_WIDEN_ORACLE=1 -DS1_ROOM_EXACT=$exact -DS1_ROOM_EXACT_MASTER=$master -DS1_DELAY_EXACT=$delay -DS1_NOISE_EXACT=$noise -DS1_FILTER_EXACT=$filter -DS1_MORPH_EXACT=$morph -DS1_AUX_EXACT=$aux -DS1_CRUSH_EXACT=$crush -DS1_STEREO_EXACT=$stereo -DS1_LFO_EXACT=$lfo -DS1_PITCH_EXACT=$pitch -DS1_CRUSH_SOURCE_FLOAT=${EXACT_CRUSH_FLOAT:-0} -DS1_ENVELOPE_EXACT=${EXACT_ENV:-0} \
      -DX0X_HOST -DX0X_ORIGINAL_SYNTH=1 -DX0X_S1C=1 -DX0X_SYNTHONE_PATCH=1 "${opts[@]}" -DX0X_SUPERJ6_BUILTIN_INIT=1 -DDNBOX_TYPED_CONTROLS_NATIVE_TEST=1 \
      -DX0X_S1_BEND_RANGE_PROBE=1 -DX0X_S1_MOD_RATE_PROBE=1 -DX0X_S1_FEEDBACK_PROBE=1 \
      -DORIGINAL_USE_SOFT_FMA -ffp-contract=off -fno-fast-math -DNO_LIBSNDFILE -I"$D" -I"$M/../lib/faust" -I"$H" -I"$H/lib/dr_wav" \
      -I"$T/dsp" -Ifirmware/src -Ifirmware/src/app -Ifirmware/src/dsp -Ibuild/gen \
      "$T/render.c" "$T/part.c" "$T/dsp/s1c/"{s1c,s1u,s1c_front}.c firmware/src/dsp/s1pack/s1pack.c \
-     "$D/"{exact-room,exact-delay,exact-filter,exact-morph,exact-aux,exact-stereo}.c "$M/"{revsc,compressor,vdelay,pan2,phaser}.c "$H/modules/"{buthp,butbp,base,crossfade,moogladder,ftbl,osc,fosc}.c -Wl,--gc-sections -lm -o "$T/$arm"
+     "$D/"{exact-room,exact-delay,exact-filter,exact-morph,exact-aux,exact-stereo,source-crusher-rate}.c "$M/"{revsc,compressor,vdelay,pan2,phaser}.c "$H/modules/"{buthp,butbp,base,crossfade,moogladder,ftbl,osc,fosc}.c -Wl,--gc-sections -lm -o "$T/$arm"
 done
