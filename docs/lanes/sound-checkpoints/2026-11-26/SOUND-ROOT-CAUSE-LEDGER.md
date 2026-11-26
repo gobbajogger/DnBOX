@@ -624,3 +624,11 @@ before the declared wrap. These are source-zone labels, not public
 MIDI. The script fails closed on missing windows or wrong source pin;
 a non-rejected result is not parity and says nothing about reinstalled
 firmware. Keep actual cursor and project storage checks separate.
+
+### Current XY selectors are not continuous DSP inputs
+The [executed current selector and resolver paths](sj6-current-xy-destination/README.md)
+keep #203/#204 as distinct destination choices. Their setter writes
+only the selector byte; the live resolver maps Filter to #7/#8, not
+the separate legacy #129/#130. Ten destination pairs verified. Do not
+insert an automatic note-time or preset-load modulation from the
+selector value. This does not close the gesture dynamics.
