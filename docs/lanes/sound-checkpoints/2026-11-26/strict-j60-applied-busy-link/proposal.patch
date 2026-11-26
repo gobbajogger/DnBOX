@@ -1,0 +1,138 @@
+--- a/firmware/src/app/main_fm1.c
++++ b/firmware/src/app/main_fm1.c
+@@ -26,6 +26,14 @@
+     uint32_t crash_seen;                            /* the crash count already reported at a boot */
+ } x0x_dbg __attribute__((section(".noinit")));
+ static uint8_t safe_mode;
++#if DNBOX_LAB_MISSED_BUSY
++#if !X0X_COLD_COMPANION_LAB
++#error busy recorder cannot be present in an installable image
++#endif
++/* packed ordinal/class then elapsed us, first and worst true DMA misses */
++volatile uint32_t lab_miss_busy[6] X0X_POOL __attribute__((aligned(4)));
++#define lab_busy_core (lab_miss_busy+4)
++#endif
+ #if X0X_DEBUG
+ /* development: the slowest block since boot, taken apart (read over USB: tools/fm1_debug.py) */
+ extern volatile uint32_t eng_dbg_wait, eng_dbg_nsub;
+@@ -100,9 +108,27 @@
+     fm1_audio_ack_aux(p);
+     if (p & FM1_AUDIO_HALF) {
+         uint32_t half = fm1_audio_free_half();
++#if DNBOX_LAB_MISSED_BUSY
++        lab_busy_core[0]=lab_busy_core[1]=0;
++#endif
+         render_block(&abuf[half * HALF_WORDS]);
+         fm1_audio_ack_half();
+         if (fm1_audio_free_half() != half) {
++#if DNBOX_LAB_MISSED_BUSY
++            /* Keep the exact ordinal over the supported diagnostic scope;
++             * never silently wrap a packed 16-bit half. Mark incomplete above it. */
++            unsigned o=x0x_dbg.halves, us=x0x_dbg.last_us;
++            if (o && o<=65536u) {
++                uint32_t cls=lab_busy_core[0]|lab_busy_core[1];
++                uint32_t row=((o-1u)<<16)|cls;
++                if (!x0x_dbg.late) { lab_miss_busy[0]=row; lab_miss_busy[1]=us; }
++                if (!x0x_dbg.late || us>lab_miss_busy[3]) {
++                    lab_miss_busy[2]=row; lab_miss_busy[3]=us;
++                }
++            } else {
++                lab_miss_busy[3]=~0u;
++            }
++#endif
+ #if X0X_DEBUG
+             x0x_worst.late_in++;
+ #endif
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -2993,6 +2993,10 @@
+ enum { JB_909, JB_808, JB_A, JB_B, JB_BRK, JB_N };
+ static int brk_silent_now = 1;
+ static uint8_t d808_was_active;
++#if DNBOX_LAB_MISSED_BUSY
++extern volatile uint32_t lab_miss_busy[6];
++#define lab_busy_core (lab_miss_busy+4)
++#endif
+ /* each bass's L/R, and bass B's own workspace (A keeps original_workspace): XPOOL, which
+  * either core may write (core 0's stacks are closed to core 1's writes, fm1_guard.h) */
+ static float eng_bass_buf[2 * NBASS][256] X0X_XPOOL;
+@@ -3139,6 +3143,9 @@
+     uint8_t solo_parts = eng_job_solo;
+     uint32_t solo = smc_solo_state;
+     int active = 1;
++#if DNBOX_LAB_MISSED_BUSY
++    unsigned bass_when = 0, marks = 0;
++#endif
+     float *left808 = t0 + offset, *right808 = tr + offset;
+     if (j == JB_909) {
+         PROF_T(p9);
+@@ -3215,12 +3222,21 @@
+         PROF_T(pb);
+         (void)original_runtime_prepare(&original_bass[bv], seq_tempo(&seq));
+         bass_adapt_pre(bv, (unsigned)n);
++#if DNBOX_LAB_MISSED_BUSY
++        bass_when=(unsigned)original_runtime_active(&original_bass[bv]);
++#endif
+         int status = original_runtime_render(&original_bass[bv], bv ? &original_workspace_b : &original_workspace,
+                                              bb[bv], bb[1-bv], n);
+         bass_adapt_post(bv, bb[bv], bb[1-bv], (unsigned)n);
+         if (!core)
+             PROF_ADD(2 + bv, pb);
+         bass_render_ok[bv] = (uint8_t)(status == ORIGINAL_RUNTIME_OK);   /* recorder: core 0, after */
++#if DNBOX_LAB_MISSED_BUSY
++        if (status == ORIGINAL_RUNTIME_OK && (bass_when || original_runtime_active(&original_bass[bv])))
++            marks=1u<<(3u+(unsigned)bv*4u+(original_bass[bv].kind&3u));
++        if (status != ORIGINAL_RUNTIME_OK) marks|=1u<<13;
++
++#endif
+         if (status == ORIGINAL_RUNTIME_OK) {
+             /* One coherent request decision per sub-block. Once note ownership is
+              * gone, fade residual insert output over 512 samples. Cancellation or
+@@ -3288,6 +3304,13 @@
+     }
+     if (active)
+         job_cost(j, plat_ticks24() - tk - wt, n);
++#if DNBOX_LAB_MISSED_BUSY
++    if (active && j==JB_909) marks|=1u;
++    if (active && j==JB_808) marks|=2u;
++    if (active && j==JB_BRK) marks|=4u;
++    if (core && marks) marks|=1u<<11;
++    lab_busy_core[core]|=marks;
++#endif
+     return 1;
+ }
+ 
+@@ -3300,8 +3323,12 @@
+     /* Real platform: the worker keeps this frame until all its bass jobs
+      * finish after stage 1. Existing takeover cannot enter before stage 1.
+      * Host runs core1 synchronously, so it leaves this opt-in unadvertised. */
+-    if (eng_808_split && !eng_808_body)
++    if (eng_808_split && !eng_808_body) {
+         d808_body_run();
++#if DNBOX_LAB_MISSED_BUSY
++        lab_busy_core[1]|=1u<<12;
++#endif
++    }
+     for (j = eng_c1_next; j < JB_N; j++) {
+         if (!(eng_c1_mask & (1u << j)))
+             continue;
+@@ -3339,6 +3366,9 @@
+         eng_c1_next = (uint8_t)j;
+         if (j == JB_BRK)
+             brk_midi_count = eng_brk_mark;               /* drop a failed remote job's descriptors */
++#if DNBOX_LAB_MISSED_BUSY
++        lab_busy_core[0]|=1u<<15;
++#endif
+         (void)run_job(j, 0);
+         eng_c1_next = (uint8_t)(j + 1);
+     }
+@@ -3615,6 +3645,9 @@
+     const uint32_t f=d8_frame;
+     if (f==65536u || f==69632u || f==73728u) {
+         d9_test_timeline[0]=f;
++#if DNBOX_LAB_MISSED_BUSY
++        lab_busy_core[0]|=1u<<14;
++#endif
+         s_drum(0,0,DR_RD,1.0f);
+         s_drum(0,0,DR_CH,0.75f);
+         s_drum(0,0,DR_BD,1.0f);

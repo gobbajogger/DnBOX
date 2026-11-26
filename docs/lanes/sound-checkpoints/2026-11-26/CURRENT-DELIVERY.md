@@ -12,7 +12,11 @@ isolated kernel timing, or partial link into a release claim.
   adoption on staging alone, and rejects 200 malformed cases.
   The [real Synth One owner transaction](s1-host-bank-adoption/README.md)
   then applies and renders all 906 on host. All 14 legacy holdouts
-  hash-match, and invalid dispatch preserves the prior owner.
+  hash-match. The [late-field rollback proof](s1-host-bank-late-rollback/README.md)
+  rejects a bad final field after staging and preserves held note,
+  live wet history and exact active identity. Eight independent
+  held/FX cases have 66,048 identical continuation stereo frames,
+  and the 14 legacy holdout UIDs are independently unique.
   SuperJ6 dispatcher, mapped storage, native pool/APP and playback
   remain open; this is not a firmware bank import or full audio match.
   The [exact SuperJ6 corpus routing map](sj6-bank-dispatch-map/README.md)
@@ -54,7 +58,14 @@ isolated kernel timing, or partial link into a release claim.
   tape and project bytes, no flash writes. This test retains embedded
   legacy hits and does not establish a verified active SuperJ6 owner,
   leading owner state, or producer-frame anchoring. Do not infer the
-  J60 changes caused the observed timing differences.
+  J60 changes caused the observed timing differences. A separate
+  [24-byte recorder build](strict-j60-applied-busy-link/README.md)
+  preserves the hard margin and matches both flag-off images exactly.
+  Its [instrumented diagnostic](strict-j60-applied-busy-diagnostic/README.md)
+  finds active 909/808/BREAK/Chicago and completed C1 808 prefix
+  in both worst halves. This is lower-bound job occupancy, not timing
+  by job; missing endpoint-active Synth One/SuperJ6 bits do not rule
+  out work inside a span. The instrumented image cannot qualify timing.
 
 - **Matched combined memory:** on the guarded warm donor with both engines,
   exact shared tables and the unused Synth One lease layout, the

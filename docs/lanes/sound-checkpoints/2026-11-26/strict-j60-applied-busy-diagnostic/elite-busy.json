@@ -1,0 +1,78 @@
+{
+  "model": "elite",
+  "elf": "1570eabfbfc984964d92ce7e0f9f46c16d834b84d2c06440cbf9cb7d5503be57",
+  "ram": "f54059af338d28c5b6a54e56621fb6ee9760e66726ef8b4de354850aaf75de24",
+  "unchanged_disposable_nor": "7d19cb8fd3f9a7bcc079aadcede41f2e8eb5b241d8c36d28934dab6f8f93ecd6",
+  "scene": "d08718b1521119b252b5cca0c5e1db6981ea25a5a0b31b6ead60dceccb3f6271",
+  "project_input_records": {
+    "0": "6dba601a055f8b4fdb1845afe394a2cf8ea276d3ddbcb7f78e57abd51c2e11c4",
+    "1": "7ce5d61d8c0d91c2b0de7755cf5554ab16d282abc8b37f6b3cbe520cdfeb0a7c",
+    "2": "0721f7f8e9dbae200816cdd3163bc2b269d7e0fc1a4c97178fb2f023dac300fc",
+    "3": "98c30fab8d1344b2c49d60f04a6580fa1cb9200a91190eaba2650794dc16d55d",
+    "5": "95007581752b53ba86aa71487c16283305579c136bfee771698b8f496adea7fd",
+    "6": "5f582b8c9bc55f93cbc410f448991500852f467a6b84448e92fc562127a13ba1"
+  },
+  "first_actual_miss": {
+    "half_ordinal": 360,
+    "renderer_work_frame_interval": [
+      184320,
+      184832
+    ],
+    "elapsed_us": 13713,
+    "mask": "0x1087",
+    "applied_busy_flags": [
+      "909_active_completed",
+      "808_active_kit_branch",
+      "BREAK_non_silent",
+      "B_Chicago_active",
+      "C1_808_prefix_called"
+    ]
+  },
+  "worst_actual_miss": {
+    "half_ordinal": 391,
+    "renderer_work_frame_interval": [
+      200192,
+      200704
+    ],
+    "elapsed_us": 14360,
+    "mask": "0x1087",
+    "applied_busy_flags": [
+      "909_active_completed",
+      "808_active_kit_branch",
+      "BREAK_non_silent",
+      "B_Chicago_active",
+      "C1_808_prefix_called"
+    ]
+  },
+  "aggregate": {
+    "worst_us": 14360,
+    "halves": 542,
+    "raw_late": 81,
+    "xruns": 81,
+    "skipped_cycles": 0,
+    "peak": 13170,
+    "frames": 319488,
+    "sealed_boot": true,
+    "settled_owner_readbacks": 4,
+    "meets_timing": false,
+    "core1": {
+      "enabled": 1,
+      "gave_up": 0,
+      "alive": 1,
+      "dispatched": 4460,
+      "finished": 4459,
+      "bad_mailbox": 0
+    },
+    "accepted": false
+  },
+  "valid_owner_points": 4,
+  "valid_owner_before_external_tape": 0,
+  "first_valid_owner_reply_ms": 3043,
+  "legacy_timeline_words": [
+    73728,
+    1066398905,
+    0,
+    311892
+  ],
+  "caveat": "Instrumented only; intervals counted in completed renderer work, not absolute DAC/producer input alignment. Job flags are completed-work lower bound; no matched causal A/B, no release. No claim of live SuperJ6 when not observed."
+}
