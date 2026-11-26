@@ -67,3 +67,15 @@ populated waveform; do not derive precise oscillator amplitude parity
 from its numerical proximity. The genuine later pre-Normal sine
 fundamental was about .3422; its comparison requires the downstream
 owner and envelope convention rather than an assumed unity route.
+
+A correctly disabled original Crusher can have a nonzero stored Amount.
+Across 12 bare native stereo onset/held/release amplitude pairs, physical
+Final Mix 0 with Decimation 0 versus 6.06% was bit-identical over
+1,671,168 signed Float32 words. BASS: Solidify dry explicitly wrote public
+Enable 1→0, retains Amount .03187546, and has Lo-Fi zero. Its other
+documented FX and Unison are inactive. The existing diagnostic #108==0
+rule consequently need not exclude this one pinned dry case from testing
+the physical connected zero suffix. This is not a new general route,
+inferred startup state or active Crusher result.
+
+Run: python3 check-disabled-amount.py native/bare ../sj6-native-factory-cross/program-1-dry/capture.json

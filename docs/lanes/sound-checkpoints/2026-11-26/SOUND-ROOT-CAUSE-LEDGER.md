@@ -101,6 +101,15 @@ changing the rounding rule.
   edits, original MIDI PB/CC1 and actual ADC wheel scanner (simulated input),
   all 740 state rows and normal Saw/PWM digests while Fold was live.
   [Control regression](sj6-fold32-smk-control-regression/README.md).
+  On actual whole saved Solidify dry, the Fold correction restores
+  a previously missing pre-FX harmonic (stock near −93 dBc, Fold
+  ~−31 and original ~−30). Physically scoped source sum then reduces
+  whole level gap −27.03→−5.45 dB, spectral RMS 13.83→6.61 dB;
+  early and late dry signed release instead regress. Do not introduce
+  the common sum solely as a meter correction. The saved Solidify
+  disabled-Enable state has a stored nonzero Amount; 12 authenticated
+  Mix0 dose pairs are bit exact, admitting one guarded physical
+  suffix diagnostic if no effects/Unison or already active taps.
   [Independent authentic holds](https://github.com/gobbajogger/DnBOX/commit/17ec80e3).
 - **Upstream dry differences vary by patch.** The AU references for
   Brainwave, Solidify and Raw J106 have matched cue/UID, fresh instances
@@ -201,7 +210,15 @@ changing the rounding rule.
   composite evidence, not a knob gain to apply. Original Raw Saw at
   this tested fixed scope ignores PWM width like the compact Saw;
   isolated relative harmonics already match closely. Do not change
-  width or a global gate time to cover this.'
+  width or a global gate time to cover this.
+  In-memory authentic Sub-carrier injection at actual existing note
+  ownership moved Raw joined-physical-suffix single-release from
+  +3.98 to −3.72 dBr, late tail +9.40 to −4.36 and whole −1.45 to
+  −3.55 dBr. It fixes part of the initial pole amplitudes/signs.
+  Without the physical suffix that same injection regresses the
+  center-only release. Do not copy the original samples to firmware;
+  this is a diagnostic confirmation of carrier × physical route,
+  not a production or fully matching implementation.'
 - **Unresolved:** source owner of the gain between the calibrated Crusher
   and Apple's compressor input; which missing or misrouted per-program
   states dominate different dry patches; delay-bandwidth correction that

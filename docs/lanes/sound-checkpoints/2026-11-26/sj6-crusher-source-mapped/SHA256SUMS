@@ -1,3 +1,4 @@
+1f23e40793d00170c261f8a8ba16e5f99f8db74adea5066e069cef44b88289e0  ./disabled-amount-result.json
 b2302012990b54d49dcfed89ed65e60cdbb207dced8d7c9c132a8d5e4fd091ac  ./native/bare/sine-3-a0.0-m0.npy
 967af749627dfa741bad9d5062472e4e8bdb2804a74e3eef5aeb2c384eba685f  ./native/bare/sine-1-a6.06-m0.npy
 8742e955742d3c8fab666bb1c045547cc7788003dab9b7e3c6516662c274f3ff  ./native/bare/sine-6-a6.06-m0.npy
@@ -58,10 +59,11 @@ a23ac527d99f09681ddc9daf556acf9a1231426c7192cec9abfc183d2d85c198  ./native/live/
 43171aa7e46863c46e95600a2defb189189bf02a0fcc85fcf088962220547456  ./native/live/status.txt
 6edb4d0697750a223327df8598c75b103f65fe73f234eb9ba22da5bf4f158110  ./native/live/native-jupiter-sine-gain-authored-crusher-live-baseline/output.npy
 9f63d9d3878fbabeed412c6a20ffe3e3371b55b830a8834c684a6f050274cd1f  ./native/live/native-jupiter-sine-gain-authored-crusher-live-baseline/capture.json
+24d6a2c863c17e003229c1cc55d302fe073b20a4c1a8616a2cabb06aa6381884  ./check-disabled-amount.py
 218e8aab8702e6929af0db469bb67a2251bc5a1934ebcd91587718bdc87ceb2a  ./live-scored.json
 0290da802be58fd2645e6341633b9c2571df8ee6522d41497d1e3776419e9abd  ./bench-bare.swift
 b12958f35c9b16412ca3fcc56811665b6c8e698f8cd8fb7b331fbf9ddaf51c4e  ./reconcile-dry.py
-c7b10cbac4f4cf972de3fe0622a64e7bba4e6889783d74711c9e489a968d0ad0  ./README.md
+a7f8f0e8361c58bcd009a9e0e298449646582a6fff90e0247f28091674b904cc  ./README.md
 401dfad660b5f9957f6805c7aa4c5a48fd49758e9f37cb41228b512a60afcbaa  ./reconciled-dry.json
 d29c2ee500dfbe716890ecee52fababc7118afba8f40fb06351a0097e9373853  ./scored.json
 e93a577953408104483da0f8ea3c9262280d11d6f05273e6ff698d47c53b3e53  ./bench-live.swift
