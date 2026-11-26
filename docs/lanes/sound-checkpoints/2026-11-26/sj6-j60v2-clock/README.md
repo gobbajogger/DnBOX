@@ -43,3 +43,15 @@ the signed tap index: `x[q-32+j]`, `j=-31..32`. Up can read after host
 65 upstream and 64 downstream historical frames/channel. Pruning to
 `j=-23..24` still needs 57 upstream and 56 downstream because the center
 does not move. The C test proves these maximum ages for both tested rates.
+
+`sh run-bridge48-test.sh` generates coefficients offline and tests a
+factored C leaf against an independent unfactored stereo sample-index
+oracle over 4,096 host frames / 8,191 middle callbacks. Maximum absolute
+error was 5.96046448e−8. Unlike write-before-step in the generic bridge,
+the exact 48 kHz specialization emits the predecessor odd 96 kHz sample
+before writing host input n, inside the same host n callback. This
+proves that specialization needs only 64/64 history slots and 196 bytes
+of coefficient data. The callback test supplies an identity middle, not
+the proprietary effect. Separately, the real compiled middle remained
+within −137 dBr, including bright stereo, and 128/127 partitions and
+Mix 0 passed in the signed host oracle. No firmware timing or fit claim.
