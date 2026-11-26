@@ -1,0 +1,119 @@
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -3012,6 +3012,14 @@
+  * metals' voices on core 0 in parallel, mid lanes and metal mix after the body
+  * is visible. No added audio latency; the sums are the same bits. */
+ extern volatile uint32_t d9_test_timeline[4];
++#if DNBOX_LAB_FIRST_CUE_REUSE
++#if !X0X_COLD_COMPANION_LAB || !defined(X0X_CORE_PLAN) || X0X_CORE_PLAN != 4
++#error first-cue reuse is diagnostic and requires the fixed warm 909/808 Core0 plan
++#endif
++#if DNBOX_LAB_MISSED_BUSY || DNBOX_LAB_FIRST_CUE
++#error do not combine first-cue word reuse with other attribution recorders
++#endif
++#endif
+ static uint8_t eng_808_split;
+ static volatile uint8_t eng_808_body;                  /* 1: BD+SD is in left808/right808 */
+ static float eng_vol;                                  /* this callback's master volume (render_sub may master) */
+@@ -3151,10 +3159,18 @@
+         } else {
+             drum909_render_st_cleared(&d909,dry_l,dry_r,rev,dly,(int)n,
+                         smc_audible_drums(solo,PART_909));
++#if DNBOX_LAB_FIRST_CUE_REUSE
++            if (!core && d8_frame==65536u && n>8u && d9_test_timeline[0]==0xa0000000u) {
++                uint32_t bits; __builtin_memcpy(&bits,&dry_l[8],4);
++                d9_test_timeline[1]=bits;
++                d9_test_timeline[0]=0xa0000001u;
++            }
++#else
+             if (d8_frame==73728u) {
+                 { uint32_t bits; __builtin_memcpy(&bits,&dry_l[8],4); d9_test_timeline[1]=bits; }
+                 { uint32_t bits; __builtin_memcpy(&bits,&rev[8],4); d9_test_timeline[2]=bits; }
+             }
++#endif
+             mix_targets(PART_909, mix_level[PART_909], solo_parts);
+             bfx_shape(PART_909, dry_l, dry_r, rev, dly, 4, (int)n);
+             for (i = 0; i < n; i++)                       /* kit send: filtered sides, still centred */
+@@ -3193,6 +3209,13 @@
+                 drum808_render_st_masked(&d808, left808, right808, t1, t2, (int)n, (uint16_t)(arg >> 9 & 0x7FFu));
+                 bfx_shape(PART_808, left808, right808, t1, t2, 4, (int)n);
+             }
++#if DNBOX_LAB_FIRST_CUE_REUSE
++            if (!core && d8_frame==65536u && n>8u && d9_test_timeline[0]==0xa0000001u) {
++                uint32_t bits; __builtin_memcpy(&bits,&left808[8],4);
++                d9_test_timeline[2]=bits;
++                d9_test_timeline[0]=0xa0000003u;
++            }
++#endif
+         } else {
+             active = 0;
+             drum808_pan_settle(&d808);
+@@ -3614,7 +3637,11 @@
+ {
+     const uint32_t f=d8_frame;
+     if (f==65536u || f==69632u || f==73728u) {
++#if DNBOX_LAB_FIRST_CUE_REUSE
++        if (f==65536u) d9_test_timeline[0]=0xa0000000u;
++#else
+         d9_test_timeline[0]=f;
++#endif
+         s_drum(0,0,DR_RD,1.0f);
+         s_drum(0,0,DR_CH,0.75f);
+         s_drum(0,0,DR_BD,1.0f);
+@@ -3713,8 +3740,10 @@
+                           (int)(n - eng_mastered), vol);
+         PROF_ADD(6, pt);
+     }
++#if !DNBOX_LAB_FIRST_CUE_REUSE
+     if (d8_frame==73984u)
+         d9_test_timeline[3]=(uint32_t)(int32_t)(out_l[8]*out_scale);
++#endif
+     {   /* globals in registers: the stores below cannot reload them per sample */
+         const float lim = out_lim, scale = out_scale;
+         for (i = 0; i < n; i++) {
+--- a/firmware/src/app/main_fm1.c
++++ b/firmware/src/app/main_fm1.c
+@@ -26,6 +26,10 @@
+     uint32_t crash_seen;                            /* the crash count already reported at a boot */
+ } x0x_dbg __attribute__((section(".noinit")));
+ static uint8_t safe_mode;
++#if DNBOX_LAB_FIRST_CUE_REUSE
++extern volatile uint32_t d9_test_timeline[4];
++_Static_assert(REND_FRAMES==256u && HALF_FRAMES==512u,"first cue marker size");
++#endif
+ #if X0X_DEBUG
+ /* development: the slowest block since boot, taken apart (read over USB: tools/fm1_debug.py) */
+ extern volatile uint32_t eng_dbg_wait, eng_dbg_nsub;
+@@ -55,6 +59,12 @@
+             engine_volume(o + 2u * k, REND_FRAMES);     /* USB AUDIO FULL: the MASTER knob after the tap */
+ #if FELUCCA_UAC
+             uac_out_mix(o + 2u * k, REND_FRAMES);   /* USB audio from the host, after the tap and MASTER */
++#endif
++#if DNBOX_LAB_FIRST_CUE_REUSE
++            if (d9_test_timeline[0]==0xa0000003u) {
++                d9_test_timeline[3]=(uint32_t)o[2u*k+16u];
++                d9_test_timeline[0]=0xb0000003u | ((k>>8)<<2);
++            }
+ #endif
+         }
+     }
+@@ -102,7 +112,19 @@
+         uint32_t half = fm1_audio_free_half();
+         render_block(&abuf[half * HALF_WORDS]);
+         fm1_audio_ack_half();
++#if DNBOX_LAB_FIRST_CUE_REUSE
++        const uint32_t exit_half=fm1_audio_free_half();  /* original endpoint read */
++        const uint32_t cue=d9_test_timeline[0];
++        if ((cue&0xfffffffbu)==0xb0000003u) {
++            const uint32_t o=x0x_dbg.halves;
++            d9_test_timeline[0]=o && o<=65536u ?
++                0xc0000003u | (cue&4u) | (half<<8) | (exit_half<<9) | ((o-1u)<<11) :
++                0xffffffffu;
++        }
++        if (exit_half != half) {
++#else
+         if (fm1_audio_free_half() != half) {
++#endif
+ #if X0X_DEBUG
+             x0x_worst.late_in++;
+ #endif

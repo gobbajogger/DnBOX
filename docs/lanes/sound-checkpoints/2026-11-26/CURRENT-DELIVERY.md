@@ -6,6 +6,21 @@ isolated kernel timing, or partial link into a release claim.
 
 ## Latest measured results
 
+- **Bank tuning state, host witness only.** An
+  [identity-bound sidecar fixture](s1-tuning-typed-host/README.md)
+  distinguishes absent tuning, explicit 12ET, and real 3-/19-degree
+  custom records. All 512 actual owner-frequency checks are within
+  .00033 cents of the independent source math. Absent tuning
+  inherits the established scale; other records change only the
+  detached owner under test. No project state or A4/queue-mute
+  storage change. Current DNL2 still drops metadata.
+- **Alternative first-cue recorder.** The
+  [zero-new-source-byte variant](909-first-cue-reuse/README.md)
+  reuses all 16 B of an otherwise diagnostic-only warm marker.
+  It binds two drum bus words and a final DMA word to the producer
+  and half decisions. It does not bind actual DAC consumption.
+  Dry apply and fail-closed parser pass; no link or replay.
+
 - **SuperJ6 internal history storage, not pool recovery.** The
   [offset-preserving gap proof](sj6-stock-gap/GAPS.md) reserves
   264 aligned bytes per exclusive typed/Juno owner without moving
