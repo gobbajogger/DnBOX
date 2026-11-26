@@ -104,7 +104,11 @@ isolated kernel timing, or partial link into a release claim.
   C0, preserving sum order. The guarded engine TU compiles (+346 B
   named text, +20 B BSS); twelve extracted C cases reject unsafe
   takeover and nine abstract orders preserve barriers. No paired
-  link, target PCM, or timing yet. Separate
+  target PCM or timing yet. The
+  [paired native thin links](owner909-early-chicago-link/NATIVE-THIN.md)
+  now fit with +24/+36 B APP, same 52 B spendable pool and
+  unchanged XPOOL. Exact same thin OFF baselines are +520/+532,
+  so scheduler delta costs 496 B. No release proof. Separate
   [active host DSP proof](owner909-early-chicago/owner-fixture.log)
   compares 6.81 MB of exact outputs/states over 192 active
   spans, with actual host overlap on 124; it does not cover

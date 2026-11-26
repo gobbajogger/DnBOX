@@ -1,0 +1,84 @@
+39986b42b39fe3e300cdf8a7fb60996ef475580118c664f7efac4961d9d82918  lab-cold-0-2/elite/never-install.elf
+df5831a1a84f8b52198f9af9112ac44a97c12759743d710d4f2b35d215db4570  lab-cold-0-2/pro/never-install.elf
+/workspace/scratch/3a7051e761a0/owner909-early-chicago/native-elite.Pvx4/tree/firmware/src/app/engine.c: OK
+patching file firmware/src/app/engine.c
+3b00043b4e7ed9c6953c6a8f05f573c4ab45d070e87e8b282e4a591380eea962  cold-build.sh
+a84411c4ad2187867029afad053ba9b0d523a1d120b3719e579a0ecf98d058fc  link.py
+0d03f1427618d891d10803e05b32c5ca665741319a896722ac20db47a7c1c27d  /workspace/scratch/3a7051e761a0/sj6-j60-right-native/wet-lease.patch
+72881761b841b82030117c337fb702e50c6eaaf9cfb0633aeae87affb120dbfc  /workspace/scratch/3a7051e761a0/sj6-j60-right-native/table-share.patch
+430f272a0e332563e9931a3cb75341e90c1d7af8fa30173710766164dc11b9f2  /workspace/scratch/3a7051e761a0/sj6-j60-right-native/j60-post.patch
+5a1e8552d063909b769cc41289d8b399ef365c8d7e608e493e3ab0edc7b00ce9  /workspace/scratch/3a7051e761a0/all-controls-remote-join/compile-flags.txt
+354:b.CFLAGS.extend(["-DDNBOX_S1_WET_LEASE_LAB=1","-DDNBOX_S1_WET_LEASE_USE=0","-DDNBX_EXPERIMENT_J60_POST=1", "-DDNBX_EXPERIMENT_J60_RIGHT_TRAJECTORY=1","-DX0X_DIAG_OWNER909_EARLY_CHICAGO="+os.environ["DNBX_OWNER909_SWITCH"]])
+check_locked_settings: 20 settings ok
+firmware/src/app/engine.c:299:34: warning: suggest braces around initialization of subobject [-Wmissing-braces]
+    sj6_factory_motion motion = {0};
+                                 ^
+                                 {}
+firmware/src/app/engine.c:299:34: warning: suggest braces around initialization of subobject [-Wmissing-braces]
+    sj6_factory_motion motion = {0};
+                                 ^
+                                 {}
+2 warnings generated.
+firmware/src/dsp/juno6.c:191:29: warning: suggest braces around initialization of subobject [-Wmissing-braces]
+ juno6_envelope_snapshot v={0};
+                            ^
+                            {}
+In file included from firmware/src/dsp/juno6.c:204:
+firmware/src/dsp/juno6_factory.inc:2047:33: warning: suggest braces around initialization of subobject [-Wmissing-braces]
+ juno6_envelope_snapshot value={0};
+                                ^
+                                {}
+2 warnings generated.
+firmware/src/dsp/s1c/s1c.c:1162:15: warning: unused variable 'x' [-Wunused-variable]
+        float x;
+              ^
+1 warning generated.
+firmware/src/app/original_sound.c:429:30: warning: suggest braces around initialization of subobject [-Wmissing-braces]
+    *out = (juno6_lfo_words){0};
+                             ^
+                             {}
+firmware/src/app/original_sound.c:961:28: warning: suggest braces around initialization of subobject [-Wmissing-braces]
+    s1_extra_state next = {0};
+                           ^
+                           {}
+2 warnings generated.
+quarantine morph section elite 20372 fc111ab31296ad3897716dd98578372ef9063db5f4cb9c5e9a34e2c2269065bd
+quarantine morph section elite 20372 fc111ab31296ad3897716dd98578372ef9063db5f4cb9c5e9a34e2c2269065bd
+XDATA linked-sha256 elite .rodata.original_sound_chicago_params 264 84b2ecf8ae67951607fe55140dea5b73d1f276bfcaccb39a660affe3100e6b72
+XDATA linked-sha256 elite .rodata.original_sound_miami_params 216 ec47d037be5799670226f5c58d304d500a1af1c37751a9f2bae47cffad21aa6d
+slot3-metadata linked-sha256 elite .rodata.original_miami_mappings 480 1f73ab1035c1d55187b9d2c01565f5ce7164c8a076a381f2bd79b6df6d301811
+slot3-metadata linked-sha256 elite .rodata.original_chicago_mappings 464 c22fcdbca04bf027191c2dcb4485611767daf4b016928497c99235644018e118
+slot3-metadata linked-sha256 elite .rodata.sj6_knob_desc.knobs 504 5eef92163566e09a129c6aa4274226fc2f34a72aa4a77fdbae197b3a3f1c1737
+slot3-metadata linked-sha256 elite .rodata.original_sound_juno_params 216 aa491624e48baef639f6e8a730456f189306d09e7bba20a0bfb99ec9554ec330
+slot3-metadata linked-sha256 elite .rodata.patch_parameters 496 fab8f3962aaa1858edf11bcdfc186077a77c0f55e7d8ec7e97bf511899db46b8
+slot3-metadata linked-sha256 elite .rodata.sj6_aux_route_labels 276 9f3ec238f31b061e996f9ce72a3533ca1b0bc3303baac7218feb9efb596bc2d6
+slot3-metadata linked-sha256 elite .rodata.rd_panel_sj6_ref.fixed 312 4196b08f27c12512cb36c191ec75acb62ddc21d9c307b4b833b16aede8c08097
+slot3-metadata linked-sha256 elite .rodata.page_titles 344 0f2dc0e2acb623fe738440422d48d59f9ed2bad4c933c63541d1fa32846167a2
+slot3-metadata linked-sha256 elite .rodata.d9_cp_p 96 d4d2382ddff1d8b45c7bfb4fbf8f1f918cd115521ed391555932bdace15c1936
+slot3-metadata span elite 32764 remaining 4
+guarded elite XIP 552648 free 24 pool usable 564 read-only FDATA 61432 diagnostic slot3 span 32764 slot3 free 4 read-only FITTAB 4072 header 443952440200000001000000d8ef00007def59efc1f0e09786a53612a5b35612 ELF 16253badc055ad7bcae4a43ad0e091df445e3e4c3448ae900fa775529a2a917d
+{
+  "mode": "candidate",
+  "model": "elite",
+  "off": "aa2cacb33abf17bf35b287db214f82185f0bbc8a226f2daad63fb814ce66ac69",
+  "on": "16253badc055ad7bcae4a43ad0e091df445e3e4c3448ae900fa775529a2a917d",
+  "app_max": 552672,
+  "off_app_free": 520,
+  "on_app_free": 24,
+  "raw_pool_delta": 0,
+  "ordinary_bss_delta": 32,
+  "ordinary_gap_before_pool": 124,
+  "pool_actual_free": 8756,
+  "remaining_beyond_hard_8704": 52,
+  "xpool_unchanged": true,
+  "guarded_companions_equivalent_except_proven_text_and_named_object_pointer_relocations": true,
+  "relocation_count": {
+    ".lab_fdata": 0,
+    ".lab_slot3": 288,
+    ".lab_fittab": 0,
+    ".xdata": 41
+  },
+  "link_only": true
+}
+16253badc055ad7bcae4a43ad0e091df445e3e4c3448ae900fa775529a2a917d  tree/lab-cold-0-2/elite/never-install.elf
+f78fb8ed7a175c222dd181e484ddf8df0c72949ace302fafa1ef16990f0d6e40  tree/lab-cold-0-2/elite/lab.map
