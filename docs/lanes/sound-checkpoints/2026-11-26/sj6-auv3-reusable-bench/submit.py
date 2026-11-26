@@ -8,7 +8,7 @@ import tempfile
 
 parser=argparse.ArgumentParser(description=__doc__)
 parser.add_argument("id")
-parser.add_argument("profile",choices=("master","fanin","static","physical","dynamic","jupiter-gain"))
+parser.add_argument("profile",choices=("master","fanin","static","physical","dynamic","jupiter-gain","jupiter-response"))
 parser.add_argument("--root",type=Path,default=Path.home()/"DnBOX-AU-Bench")
 parser.add_argument("--step",action="append",default=[],metavar="FRAME:VALUE")
 args=parser.parse_args()

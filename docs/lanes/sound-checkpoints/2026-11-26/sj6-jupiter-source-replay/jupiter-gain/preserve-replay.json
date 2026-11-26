@@ -1,0 +1,165 @@
+{
+  "executable_sha256": "6d163d79202e866d2fda96e36f752bd386641b5ae2d0b1f829a254d26b652850",
+  "capture_archive_sha256": "b0580a3f13c9070cb34f589015d345c022d32e2557e3af541bb60a5526289cb0",
+  "cutoff_configuration_sha256": "c5cffc17f3e0d5a61ad53727c8c55243fef348151dc8d9263b7e8cb5ee30fad4",
+  "suffix_sha256": "4d1d9eb81432a082398acced46fbab1a89fe767b6d1fdc0c57bd0a1750b16c38",
+  "cases": {
+    "1": {
+      "original_stem_rms": [
+        0.19568721543143547,
+        0.19568721543143547
+      ],
+      "original_native_full_rms": [
+        0.08244266548295653,
+        0.0824426690128253
+      ],
+      "original_native_repeat_rms": [
+        0.08246259622783365,
+        0.08246259990764641
+      ],
+      "original_native_half_rms": [
+        0.04323165831668835,
+        0.04323166019373552
+      ],
+      "diagnostic_bypass": {
+        "authored": {
+          "rms": [
+            0.01767906136909702,
+            0.017679062131832925
+          ],
+          "relative_db": [
+            -13.373856425686315,
+            -13.373856422842398
+          ],
+          "same_cue_signed_null": [
+            0.437879395628436,
+            0.4378793969483947
+          ]
+        },
+        "half": {
+          "rms": [
+            0.00883953068454851,
+            0.008839531065916463
+          ],
+          "relative_db": [
+            -13.787453743514222,
+            -13.787453745901852
+          ],
+          "same_cue_signed_null": [
+            1.0971995400067744,
+            1.0971995433149904
+          ]
+        }
+      },
+      "diagnostic_active_zero": {
+        "authored": {
+          "rms": [
+            0.017667698492217068,
+            0.017667699262294202
+          ],
+          "relative_db": [
+            -13.379440909148858,
+            -13.379440902454798
+          ],
+          "same_cue_signed_null": [
+            0.30205262661510046,
+            0.302052629577747
+          ]
+        },
+        "half": {
+          "rms": [
+            0.008833849246108534,
+            0.008833849631147101
+          ],
+          "relative_db": [
+            -13.793038226976766,
+            -13.793038225514248
+          ],
+          "same_cue_signed_null": [
+            1.0085118097109977,
+            1.0085118130440038
+          ]
+        }
+      }
+    },
+    "2": {
+      "original_stem_rms": [
+        0.19568721543143547,
+        0.19568721543143547
+      ],
+      "original_native_full_rms": [
+        0.08547805568225465,
+        0.08547805931537585
+      ],
+      "original_native_repeat_rms": [
+        0.08344364382731545,
+        0.08344364753250179
+      ],
+      "original_native_half_rms": [
+        0.04324047707073636,
+        0.04324047896827913
+      ],
+      "diagnostic_bypass": {
+        "authored": {
+          "rms": [
+            0.01767906136909702,
+            0.017679062131832925
+          ],
+          "relative_db": [
+            -13.687908631833203,
+            -13.687908626275041
+          ],
+          "same_cue_signed_null": [
+            -0.5110359273444673,
+            -0.5110359285341795
+          ]
+        },
+        "half": {
+          "rms": [
+            0.00883953068454851,
+            0.008839531065916463
+          ],
+          "relative_db": [
+            -13.789225382998517,
+            -13.789225389426266
+          ],
+          "same_cue_signed_null": [
+            -0.3183869292730746,
+            -0.3183869302772963
+          ]
+        }
+      },
+      "diagnostic_active_zero": {
+        "authored": {
+          "rms": [
+            0.017667698492217068,
+            0.017667699262294202
+          ],
+          "relative_db": [
+            -13.693493115295748,
+            -13.693493105887438
+          ],
+          "same_cue_signed_null": [
+            -0.6576701848869584,
+            -0.6576701856094604
+          ]
+        },
+        "half": {
+          "rms": [
+            0.008833849246108534,
+            0.008833849631147101
+          ],
+          "relative_db": [
+            -13.79480986646106,
+            -13.794809869038664
+          ],
+          "same_cue_signed_null": [
+            -0.4638510590079184,
+            -0.4638510588351203
+          ]
+        }
+      }
+    }
+  },
+  "scope": "True current Mac ARM64 isolated generated Sine core. Same signed cue, conditional 5/6\u2192HP10 Q1\u2192optional connected zero Crusher (no external Booster)\u2192source-inspired settled suffix; not a full native internal render. No new fitted gain/time/pan."
+}

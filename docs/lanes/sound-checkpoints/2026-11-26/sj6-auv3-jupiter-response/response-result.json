@@ -1,0 +1,185 @@
+{
+  "both_muted_peak": 0.0,
+  "cases": {
+    "response-f1000": {
+      "early": {
+        "native_rms": [
+          0.08542036334606794,
+          0.08542036714643712
+        ],
+        "native_vs_reference_db": 0.0,
+        "relative_deviation_db": 0.0,
+        "source_receiver_expected_db": 0.0
+      },
+      "late": {
+        "native_rms": [
+          0.08547140934275306,
+          0.08547141301113574
+        ],
+        "native_vs_reference_db": 0.0,
+        "relative_deviation_db": 0.0,
+        "source_receiver_expected_db": 0.0
+      }
+    },
+    "response-f125": {
+      "early": {
+        "native_rms": [
+          0.010309068930008602,
+          0.010309069376273737
+        ],
+        "native_vs_reference_db": -18.366839424065635,
+        "relative_deviation_db": -0.3050396842267631,
+        "source_receiver_expected_db": -18.06179973983887
+      },
+      "late": {
+        "native_rms": [
+          0.010300601505979187,
+          0.010300601947746688
+        ],
+        "native_vs_reference_db": -18.379165579188204,
+        "relative_deviation_db": -0.31736583934933194,
+        "source_receiver_expected_db": -18.06179973983887
+      }
+    },
+    "response-f250": {
+      "early": {
+        "native_rms": [
+          0.02085266273304967,
+          0.020852663649554844
+        ],
+        "native_vs_reference_db": -12.247997908922779,
+        "relative_deviation_db": -0.20679808236353026,
+        "source_receiver_expected_db": -12.041199826559248
+      },
+      "late": {
+        "native_rms": [
+          0.02086514900010228,
+          0.02086514989269353
+        ],
+        "native_vs_reference_db": -12.24798749510647,
+        "relative_deviation_db": -0.20678766854722141,
+        "source_receiver_expected_db": -12.041199826559248
+      }
+    },
+    "response-f500": {
+      "early": {
+        "native_rms": [
+          0.04321101743122764,
+          0.043211019405512884
+        ],
+        "native_vs_reference_db": -5.919338439694785,
+        "relative_deviation_db": 0.10126147358483895,
+        "source_receiver_expected_db": -6.020599913279624
+      },
+      "late": {
+        "native_rms": [
+          0.04323531285442193,
+          0.0432353146987695
+        ],
+        "native_vs_reference_db": -5.919645185307027,
+        "relative_deviation_db": 0.10095472797259752,
+        "source_receiver_expected_db": -6.020599913279624
+      }
+    },
+    "response-v127": {
+      "early": {
+        "native_rms": [
+          0.12566749413131703,
+          0.12566749958182077
+        ],
+        "native_vs_reference_db": 3.2440665476243185,
+        "relative_deviation_db": -0.041622819122448806,
+        "source_receiver_expected_db": 3.2856893667467673
+      },
+      "late": {
+        "native_rms": [
+          0.12569212365700333,
+          0.1256921291593707
+        ],
+        "native_vs_reference_db": 3.24957634116593,
+        "relative_deviation_db": -0.03611302558083729,
+        "source_receiver_expected_db": 3.2856893667467673
+      }
+    },
+    "response-v32": {
+      "early": {
+        "native_rms": [
+          0.031156637198880417,
+          0.031156638563211506
+        ],
+        "native_vs_reference_db": -8.869381008866625,
+        "relative_deviation_db": -0.18199552289237353,
+        "source_receiver_expected_db": -8.687385485974252
+      },
+      "late": {
+        "native_rms": [
+          0.03117526317775319,
+          0.03117526449459204
+        ],
+        "native_vs_reference_db": -8.860382377105624,
+        "relative_deviation_db": -0.17299689113137262,
+        "source_receiver_expected_db": -8.687385485974252
+      }
+    },
+    "response-v64": {
+      "early": {
+        "native_rms": [
+          0.062360984402444385,
+          0.0623609870372043
+        ],
+        "native_vs_reference_db": -2.842133316922772,
+        "relative_deviation_db": -0.1753477442281448,
+        "source_receiver_expected_db": -2.6667855726946272
+      },
+      "late": {
+        "native_rms": [
+          0.062327144534324634,
+          0.06232714719125682
+        ],
+        "native_vs_reference_db": -2.8430403337228496,
+        "relative_deviation_db": -0.17625476102822235,
+        "source_receiver_expected_db": -2.6667855726946272
+      }
+    },
+    "response-v64-repeat": {
+      "early": {
+        "native_rms": [
+          0.062360979646081845,
+          0.062360982437701766
+        ],
+        "native_vs_reference_db": -2.8421339684841094,
+        "relative_deviation_db": -0.17534839578948214,
+        "source_receiver_expected_db": -2.6667855726946272
+      },
+      "late": {
+        "native_rms": [
+          0.06232717583518905,
+          0.06232717859504662
+        ],
+        "native_vs_reference_db": -2.8430359644744114,
+        "relative_deviation_db": -0.1762503917797842,
+        "source_receiver_expected_db": -2.6667855726946272
+      }
+    },
+    "response-v87": {
+      "early": {
+        "native_rms": [
+          0.08650070108807506,
+          0.08650070496543688
+        ],
+        "native_vs_reference_db": 0.0,
+        "relative_deviation_db": 0.0,
+        "source_receiver_expected_db": 0.0
+      },
+      "late": {
+        "native_rms": [
+          0.08646279035773523,
+          0.0864627940709583
+        ],
+        "native_vs_reference_db": 0.0,
+        "relative_deviation_db": 0.0,
+        "source_receiver_expected_db": 0.0
+      }
+    }
+  }
+}

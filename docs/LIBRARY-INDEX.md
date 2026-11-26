@@ -87,3 +87,4 @@ The separate small SuperJ6 addendum adds the independently qualified pre-note la
 | Library name | Size (bytes) | SHA256 | Recovery |
 | --- | ---: | --- | --- |
 | `SJ6-Direct-AUv3-Jupiter-Sine-Gain.tgz` | 5,822,562 | `b0580a3f13c9070cb34f589015d345c022d32e2557e3af541bb60a5526289cb0` | Download by name, verify SHA-256 and run `python3 score_gain.py .`. [The seven native references and source in Git](lanes/sound-checkpoints/2026-11-26/sj6-auv3-jupiter-gain/). |
+| `SJ6-Direct-AUv3-Jupiter-Fader-Velocity.tgz` | 8,744,122 | `14bd1fcf442fe4bc389652da0ae1052bb46f570c60d15bba7f6f0f3544a61467` | Download by name, verify SHA-256 and run `python3 score_response.py .`. [All ten original references and reusable source](lanes/sound-checkpoints/2026-11-26/sj6-auv3-jupiter-response/). |

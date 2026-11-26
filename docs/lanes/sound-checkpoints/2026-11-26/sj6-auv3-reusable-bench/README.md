@@ -32,3 +32,7 @@ No app binary is stored in Git.
 Version 2 adds a fixed `jupiter-gain` calibration profile without changing
 the app ID. It runs seven neutralized factory Jupiter Sine direct AUv3
 references, without editing a user preset or touching an output device.
+Version 3 adds a data-only `jupiter-response` job for the exact neutral
+fader and MIDI velocity slope experiments, preserving the same app ID
+and all six previous profiles. After upgrading once, enqueue with
+`python3 submit.py other-test jupiter-response` without relaunching.

@@ -23,7 +23,11 @@ let profiles: [String:BenchProfile] = [
     "dynamic": BenchProfile(run:capture_dynamic,sequence:physicalSequence),
     "jupiter-gain": BenchProfile(run:capture_gain,sequence:[
         ("osc1-only","authored"),("osc1-only","half"),("osc2-only","authored"),("osc2-only","half"),
-        ("osc1-only-repeat","authored"),("osc2-only-repeat","authored"),("both-muted","authored")])
+        ("osc1-only-repeat","authored"),("osc2-only-repeat","authored"),("both-muted","authored")]),
+    "jupiter-response": BenchProfile(run:capture_gain,sequence:[
+        ("response-f125","authored"),("response-f250","authored"),("response-f500","authored"),("response-f1000","authored"),
+        ("response-v32","authored"),("response-v64","authored"),("response-v87","authored"),("response-v127","authored"),
+        ("response-v64-repeat","authored"),("both-muted","authored")])
 ]
 
 final class Bench: NSObject, NSApplicationDelegate, NSWindowDelegate {
