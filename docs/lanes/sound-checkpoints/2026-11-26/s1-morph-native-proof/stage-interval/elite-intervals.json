@@ -1,0 +1,108 @@
+{
+  "elf_sha256": "3681b8cea9ef8a8fa7a3ce4e1658fa14adb8d93780a72f7f157dfacdd8dcc224",
+  "worst_half": 572,
+  "worst_us": 13038,
+  "ms": 7838,
+  "masks": [
+    "0x4"
+  ],
+  "spans": [
+    {
+      "span_enter": 0.0,
+      "dispatched": 28.0,
+      "c1_enter": 37.0,
+      "c1_after808": 139.33333333333334,
+      "c0_after909": 490.0,
+      "c1_done": 572.3333333333334,
+      "c0_jobs_returned": 774.6666666666666,
+      "joined": 781.3333333333334,
+      "recorder_done": 785.3333333333334,
+      "mix_ready": 798.0,
+      "shared_fx_published": null,
+      "end_span": 876.6666666666666,
+      "job_gate_us": 781.3333333333334,
+      "recorder_us": 4.0,
+      "post_join_mix_us": 12.666666666666629,
+      "tail_us": 78.66666666666663,
+      "c1_tail_idle_before_mix_us": 225.66666666666663
+    },
+    {
+      "span_enter": 1396.0,
+      "dispatched": 1426.6666666666667,
+      "c1_enter": 1431.0,
+      "c1_after808": 1755.6666666666667,
+      "c0_after909": 4268.333333333333,
+      "c1_done": 4972.0,
+      "c0_jobs_returned": 6191.666666666667,
+      "joined": 6198.333333333333,
+      "recorder_done": 6202.333333333333,
+      "mix_ready": 6259.0,
+      "shared_fx_published": null,
+      "end_span": 6587.666666666667,
+      "job_gate_us": 4802.333333333333,
+      "recorder_us": 4.0,
+      "post_join_mix_us": 56.66666666666697,
+      "tail_us": 328.66666666666697,
+      "c1_tail_idle_before_mix_us": 1287.0
+    },
+    {
+      "span_enter": 7345.333333333333,
+      "dispatched": 7378.333333333333,
+      "c1_enter": 7386.0,
+      "c1_after808": 7736.333333333333,
+      "c0_after909": 10178.666666666666,
+      "c1_done": 11446.333333333334,
+      "c0_jobs_returned": 12091.333333333334,
+      "joined": 12098.0,
+      "recorder_done": 12102.0,
+      "mix_ready": 12164.0,
+      "shared_fx_published": 12525.666666666666,
+      "end_span": 12791.333333333334,
+      "job_gate_us": 4752.666666666667,
+      "recorder_us": 4.0,
+      "post_join_mix_us": 62.0,
+      "tail_us": 627.3333333333339,
+      "c1_tail_idle_before_mix_us": 717.6666666666661
+    }
+  ],
+  "active_measured_us_per_core": [
+    10201.666666666666,
+    7358.958333333333
+  ],
+  "job_exec_us": [
+    [
+      6105.916666666667,
+      406.7083333333333,
+      0.0,
+      3365.0833333333335,
+      323.9583333333333
+    ],
+    [
+      0.0,
+      0.0,
+      7358.958333333333,
+      0.0,
+      0.0
+    ]
+  ],
+  "ordered_wait_us": [
+    5.0,
+    0.0
+  ],
+  "measured_job_gate_wall_us": 10336.333333333334,
+  "other_time_not_in_job_gate_us": 2701.666666666666,
+  "perfect_fractional_job_balancing_bound_us": 8780.3125,
+  "optimistic_fixed_tail_total_us": 11481.979166666666,
+  "minimum_additional_latency_reduction_us": 672.9791666666661,
+  "already_split_808_body_interval_us": 777.3333333333331,
+  "optimistic_total_including_already_split_808_us": 11870.645833333332,
+  "additional_cut_after_perfect_balance_including_808_us": 1061.6458333333321,
+  "total_recorder_us": 12.0,
+  "total_mix_between_jobs_and_fx_us": 131.3333333333336,
+  "total_tail_fx_master_us": 1034.6666666666674,
+  "assumptions": [
+    "Instrumented, not a release equivalence check. Each core local interval includes any nested IRQ and traces.",
+    "Total is an optimistic necessary bound at measured job demand if tail stays as source-order barriers currently require; no assumptions about overlapping absolute times counted twice.",
+    "Unmeasured 808 body (between C1 start/after808), orchestration and mix/upload are absent from freely balanceable work, so perfect job balancing is not an achievable predicted speedup."
+  ]
+}
