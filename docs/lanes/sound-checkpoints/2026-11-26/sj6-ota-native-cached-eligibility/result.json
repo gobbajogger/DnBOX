@@ -1,0 +1,76 @@
+{
+  "custody": "Six already captured direct-stage archives; only positive sole Main1 and externally zero other sources listed",
+  "projection_source_sha": "47da1cd1b9baa2e778d0e5f03ffc443c1151abc9839aac97873aa20515b1ee38",
+  "dsp_source_sha": "70d0aa0ea1cf2192e50cd51b45dffe01533cde368c0a1778959d39312b0ce759",
+  "results": {
+    "SJ6-AUv3-Chord-Cutoff-Timing.tgz": [],
+    "SJ6-Brainwave-Direct-AUv3-Fanin.tgz": [
+      {
+        "arm": "native-warm-brainwave-fanin-authored-osc1-only/capture.json",
+        "capture_sha": "2f955497b62cbc4f7e10aeb808d5ab3620fc3154df3b4bea422c5c073a95447f",
+        "terminal_pcm_sha": "6ecb17e06cff9b58297518799f7f626130416beb96f0dffc1d127673b2d42f21",
+        "params_endpoint_exact": true,
+        "frames": 148684,
+        "warm_frames": 16384,
+        "endpoint_subset": {
+          "1": 1,
+          "3": 0,
+          "7": 0.3345831036567688,
+          "8": 0.4141378700733185,
+          "129": 0.4000000059604645,
+          "130": 0.4141378700733185,
+          "131": 0.5313359498977661,
+          "136": 0.4559931755065918,
+          "137": 0.9064822196960449,
+          "179": 0,
+          "181": 1,
+          "183": 0,
+          "185": 38,
+          "187": 0,
+          "189": 15,
+          "191": 0,
+          "201": 0,
+          "202": 0,
+          "209": 0
+        },
+        "admitted_to_ota": false,
+        "first_failure": "Public filter-model selector 209 is Normal, not OTA"
+      },
+      {
+        "arm": "native-warm-brainwave-fanin-authored-osc1-only-repeat/capture.json",
+        "capture_sha": "370c4ed93f313d8f9baf3daab8701d6e889c7caa16028a12797079e371fa3cb0",
+        "terminal_pcm_sha": "cfb27992c7b50956fe77ad1b81a85d8a1561b8e48f0725498d09a78a06095bfb",
+        "params_endpoint_exact": true,
+        "frames": 148684,
+        "warm_frames": 16384,
+        "endpoint_subset": {
+          "1": 1,
+          "3": 0,
+          "7": 0.3345831036567688,
+          "8": 0.4141378700733185,
+          "129": 0.4000000059604645,
+          "130": 0.4141378700733185,
+          "131": 0.5313359498977661,
+          "136": 0.4559931755065918,
+          "137": 0.9064822196960449,
+          "179": 0,
+          "181": 1,
+          "183": 0,
+          "185": 38,
+          "187": 0,
+          "189": 15,
+          "191": 0,
+          "201": 0,
+          "202": 0,
+          "209": 0
+        },
+        "admitted_to_ota": false,
+        "first_failure": "Public filter-model selector 209 is Normal, not OTA"
+      }
+    ],
+    "SJ6-Brainwave-Direct-AUv3-Master.tgz": [],
+    "SJ6-Direct-AUv3-Dynamic-Cutoff.tgz": [],
+    "SJ6-Direct-AUv3-OSC2-Static.tgz": [],
+    "SJ6-Direct-AUv3-Physical-Cutoff.tgz": []
+  }
+}

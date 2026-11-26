@@ -707,3 +707,23 @@ release despite near-equal total level (−.088 dB). All source windows
 below −20 dBr need 538,118 B before sector/reserve accounting. No
 coefficients or audio were kept for redistribution. Reject this
 candidate independently of the earlier continuous or predictor codecs.
+
+### Main OTA local arithmetic: large isolated runtime recovery
+The [bare PI32](sj6-ota-bare-no-fma/README.md) retained the same
+transposed/hoisted leaf, but used two ordinary Float32 operations
+instead of the software-FMA call, with compiler contraction off.
+One non-DMA 512-frame synthetic segment took 2,827,071→49,617
+24-MHz TIMER4 ticks (56.98×); output checksums are not expected to
+be identical. In the [two genuine Main leaf inputs](sj6-ota-no-fma-auth/README.md),
+123,515 samples each, the worst signed window vs the fused model
+is −138.17 dBr, maximum harmonic phase change .0000153°, and
+the tail windows pass the same scoped tolerance. Plain vs volatile
+product matches in 200,448 dynamic frames. No claim of full signal,
+current sampler eligibility, hardware playback, or release.
+
+The [archived Main-only capture admission scan](sj6-ota-native-cached-eligibility/README.md)
+found two Main-only Brainwave renders. They use Normal, not OTA, and
+cannot qualify a native OTA route. No switch to the separate arithmetic
+outside that scoped filter can be inferred. Keep product fallback
+untouched; capture a real eligible case or explicitly use narrower
+diagnostics while the native guards are implemented.

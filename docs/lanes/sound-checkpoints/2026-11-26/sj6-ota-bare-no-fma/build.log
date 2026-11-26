@@ -1,0 +1,15 @@
+<diagnostic-worktree>/restored-gate/fm1-live-ba83317a: OK
+29d9a01a998711032697263603144b0cbca5e79812e4ce138137f9076901c29f  <diagnostic-worktree>/s1-native-909-ride-boundary/start.S
+4821123206c20a39b25226fb3261bf08adaeb918e1522920aef4351df274df82  <diagnostic-worktree>/s1-native-909-ride-boundary/bench.ld
+c5da1c0dcab0b926bd7f642416f175dd1576960966fad85096bf3bc9b4689873  <diagnostic-worktree>/sj6-raw-main-ota/physical.c
+78d91766c5578ac4f0242302dd55e6da57e636b439f68d5f3c7fe1a4b5167de3  <diagnostic-worktree>/sj6-ota-history/wire.py
+c991e45e1f4f9455474bf9fdc3267256bb0520d29c674f87a5c104a8c4d3cac4  <diagnostic-worktree>/sj6-ota-history/exact-share.h
+e972bd9a75f487e8b6374def97aee4b8b1152087b0b3bef851f0912310ad713c  <diagnostic-worktree>/sj6-ota-history/tanhreuse/fast.h
+a8a3e9ee0125fd8cba5079fb3326e7e2990deb61a8bb6d3e27850ac822a6485f  <diagnostic-worktree>/sj6-ota-history/transposed-auth/upstream.py
+201d7f72974ac0bfae15cbcc8b80560b11411d2c138ba6d593e4a06aa77dc1dd  <diagnostic-worktree>/sj6-ota-history/hoist/wire.py
+         U fm_tanhf
+         U memset
+020001ce 000000e6 t clock_2x
+02000498 000000d2 t clock_2x
+020002b4 000001e4 T measure_split
+0200056a 000001ac T measure_transposed

@@ -1,0 +1,101 @@
+{
+  "scope": "F32 changing g/blend, immutable exact allpass bank privately resolved, two interleaved owners, freeze/reset",
+  "rows": [
+    {
+      "rate": 32000,
+      "peak": 0.001,
+      "frames": 12528,
+      "exact": true
+    },
+    {
+      "rate": 32000,
+      "peak": 0.5,
+      "frames": 12528,
+      "exact": true
+    },
+    {
+      "rate": 32000,
+      "peak": 2.0,
+      "frames": 12528,
+      "exact": true
+    },
+    {
+      "rate": 32000,
+      "peak": 12.0,
+      "frames": 12528,
+      "exact": true
+    },
+    {
+      "rate": 44100,
+      "peak": 0.001,
+      "frames": 12528,
+      "exact": true
+    },
+    {
+      "rate": 44100,
+      "peak": 0.5,
+      "frames": 12528,
+      "exact": true
+    },
+    {
+      "rate": 44100,
+      "peak": 2.0,
+      "frames": 12528,
+      "exact": true
+    },
+    {
+      "rate": 44100,
+      "peak": 12.0,
+      "frames": 12528,
+      "exact": true
+    },
+    {
+      "rate": 48000,
+      "peak": 0.001,
+      "frames": 12528,
+      "exact": true
+    },
+    {
+      "rate": 48000,
+      "peak": 0.5,
+      "frames": 12528,
+      "exact": true
+    },
+    {
+      "rate": 48000,
+      "peak": 2.0,
+      "frames": 12528,
+      "exact": true
+    },
+    {
+      "rate": 48000,
+      "peak": 12.0,
+      "frames": 12528,
+      "exact": true
+    },
+    {
+      "rate": 96000,
+      "peak": 0.001,
+      "frames": 12528,
+      "exact": true
+    },
+    {
+      "rate": 96000,
+      "peak": 0.5,
+      "frames": 12528,
+      "exact": true
+    },
+    {
+      "rate": 96000,
+      "peak": 2.0,
+      "frames": 12528,
+      "exact": true
+    },
+    {
+      "rate": 96000,
+      "peak": 12.0,
+      "frames": 12528,
+      "exact": true
+    }
+  ]
+}
