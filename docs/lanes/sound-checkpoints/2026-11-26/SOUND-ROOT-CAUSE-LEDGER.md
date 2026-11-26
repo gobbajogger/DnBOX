@@ -614,3 +614,13 @@ Keeping four cycles quadruples the private payload without meaningful
 whole-run improvement. This rejects stationary repetition for the full
 Sub bank, not the real cursor, and is not a claim about a codec or
 a short-cycle technique for other sources. No original media is stored.
+
+The frozen [Sub early rejection screen](sj6-sub-stationary-cycle/screen.py)
+requires all 12 source roots, strike, early body, blind loop head/tail
+and both real loop boundaries plus the whole pinned Raw cue. In both
+stationary control arms, four upper roots (78/84/90/96) are at least as
+bad as silence in one window. Roots 84/90/96 also fail immediately
+before the declared wrap. These are source-zone labels, not public
+MIDI. The script fails closed on missing windows or wrong source pin;
+a non-rejected result is not parity and says nothing about reinstalled
+firmware. Keep actual cursor and project storage checks separate.
