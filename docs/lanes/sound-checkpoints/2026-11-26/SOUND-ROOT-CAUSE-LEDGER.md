@@ -698,3 +698,12 @@ screen gets 105,804 B only with unindexed whole-zone streams; even coarse
 BREAK/preset allocation. Lossless predictors on the quantized stream
 did not solve it. This rejects the tried source format, not all codecs.
 No source or transformed audio payload retained or committed.
+
+The [independent lapped source transform](sj6-sub-mdct/README.md)
+reconstructs all 12 source zones at full precision before sparsifying.
+The best 112,991 B candidate is only −11.65 dBr worst at source;
+actual Raw isolated Sub renders −17.83 dBr whole and −7.95 final
+release despite near-equal total level (−.088 dB). All source windows
+below −20 dBr need 538,118 B before sector/reserve accounting. No
+coefficients or audio were kept for redistribution. Reject this
+candidate independently of the earlier continuous or predictor codecs.
