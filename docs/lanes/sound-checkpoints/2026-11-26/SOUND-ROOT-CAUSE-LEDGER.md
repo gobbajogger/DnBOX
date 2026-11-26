@@ -84,6 +84,17 @@ changing the rounding rule.
   passed for all shapes, Low/Center/High, no Sub change, Saw/PWM,
   hold/bend and release. Do not ship or assume arithmetic budgets.
   [Composed evidence](sj6-fold32-guarded-composition/FOLD-COMPOSED.md).
+  Exact cold companion serialization moved this to −52/−44 B including
+  marker. The next real paired link now **does fit**: the Chicago factory
+  name offset checkpoints save enough exact APP (10,001 name validation
+  cases) for +72 B Elite/+80 B Pro with +564 pool. This is the exact
+  oscillator plus S1 phaser plus Low Sub guarded pair, not the separate
+  phase-handoff cost and not sound/zero-dropout qualification.
+  [Both-engine fit receipt](guarded-both-engines-fold32-fit/NAMES.md).
+  The isolated full SMK host A/B passed all 16 arp steps, held pad/knob
+  edits, original MIDI PB/CC1 and actual ADC wheel scanner (simulated input),
+  all 740 state rows and normal Saw/PWM digests while Fold was live.
+  [Control regression](sj6-fold32-smk-control-regression/README.md).
   [Independent authentic holds](https://github.com/gobbajogger/DnBOX/commit/17ec80e3).
 - **Upstream dry differences vary by patch.** The AU references for
   Brainwave, Solidify and Raw J106 have matched cue/UID, fresh instances

@@ -1,0 +1,17 @@
+--- a/experiments/original_synth/chicago_program.c
++++ b/experiments/original_synth/chicago_program.c
+@@ -70,7 +70,13 @@
+ #ifdef ORIGINAL_CHICAGO_EXPANDED_FACTORY
+  return original_chicago_factory_name[factory];
+ #else
+- return original_chicago_factory_names+original_chicago_factory_name_offset[factory];
++ /* Eight-name checkpoints retain pointers into the immutable packed blob.
++  * NUL scanning is bounded to seven preceding names. */
++ static const uint16_t checkpoints[11]={0, 86, 182, 262, 350, 448, 536, 616, 688, 766, 869};
++ const char *name=original_chicago_factory_names+checkpoints[factory>>3];
++ for(unsigned i=factory&7u;i;i--)
++  while(*name++){}
++ return name;
+ #endif
+ }
+ int original_chicago_program_routing(const original_chicago_program *p,original_chicago_routing *out){

@@ -1,0 +1,129 @@
+{
+  "scope": "no asset export, frozen 7-harmonic per-zone synthesis from disjoint original SFZ loop-body windows at true source timing (descriptors in memory only); current real compiled original receiver, projected common control/timing with all cold note events retained, no terminal phase/time/gain fit",
+  "core_sha": "6d163d79202e866d2fda96e36f752bd386641b5ae2d0b1f829a254d26b652850",
+  "auth_older_container_sha": "ec994e3fabf42b2761d7ca3799f87dacb4ac12670e2909451ff14f78b9a5f740",
+  "cube_full_source": {
+    "onset_36": {
+      "bare": {
+        "level_delta_db": -0.12148614516290056,
+        "signed_dbr": 4.424923153478478,
+        "reference_rms": 0.21807092461507077
+      },
+      "basis7": {
+        "level_delta_db": 0.08572334159982495,
+        "signed_dbr": -17.856976610708454,
+        "reference_rms": 0.21807092461507077
+      }
+    },
+    "held_36": {
+      "bare": {
+        "level_delta_db": -0.1899911183679902,
+        "signed_dbr": 4.19993322839649,
+        "reference_rms": 0.19982004808038253
+      },
+      "basis7": {
+        "level_delta_db": -0.09773658188637493,
+        "signed_dbr": -16.378552381868513,
+        "reference_rms": 0.19982004808038253
+      }
+    },
+    "release_36": {
+      "bare": {
+        "level_delta_db": -0.2958345933508942,
+        "signed_dbr": 4.1471817936774205,
+        "reference_rms": 0.1524651542674508
+      },
+      "basis7": {
+        "level_delta_db": -0.08818655091916457,
+        "signed_dbr": -16.93233508322564,
+        "reference_rms": 0.1524651542674508
+      }
+    },
+    "pending_54": {
+      "bare": {
+        "level_delta_db": -0.30389303731336814,
+        "signed_dbr": -1.5952932173291845,
+        "reference_rms": 0.059810514948677965
+      },
+      "basis7": {
+        "level_delta_db": -0.2778287019548904,
+        "signed_dbr": -12.653961389431965,
+        "reference_rms": 0.059810514948677965
+      }
+    },
+    "onset_54": {
+      "bare": {
+        "level_delta_db": 0.8157430886155358,
+        "signed_dbr": 5.234186797877712,
+        "reference_rms": 0.13526125602801267
+      },
+      "basis7": {
+        "level_delta_db": 0.38271870780779593,
+        "signed_dbr": -6.750411644717774,
+        "reference_rms": 0.13526125602801267
+      }
+    },
+    "held_54": {
+      "bare": {
+        "level_delta_db": 0.4574427573201753,
+        "signed_dbr": 5.298493688928705,
+        "reference_rms": 0.12848788881728934
+      },
+      "basis7": {
+        "level_delta_db": -0.13304150547764193,
+        "signed_dbr": -13.264048014176613,
+        "reference_rms": 0.12848788881728934
+      }
+    },
+    "release_54": {
+      "bare": {
+        "level_delta_db": 0.4176814877414581,
+        "signed_dbr": 5.317302507995797,
+        "reference_rms": 0.0763798387488405
+      },
+      "basis7": {
+        "level_delta_db": -0.18711974008046636,
+        "signed_dbr": -12.727046265976362,
+        "reference_rms": 0.0763798387488405
+      }
+    }
+  },
+  "blind_key73_source": {
+    "onset_73": {
+      "bare": {
+        "level_delta_db": -0.10189303330499437,
+        "signed_dbr": -5.259649285352472,
+        "reference_rms": 0.19549861945722294
+      },
+      "basis7": {
+        "level_delta_db": -0.0036882029114795514,
+        "signed_dbr": -2.2242494330672753,
+        "reference_rms": 0.19549861945722294
+      }
+    },
+    "held_73": {
+      "bare": {
+        "level_delta_db": -0.17385693487978052,
+        "signed_dbr": -6.2407183541828655,
+        "reference_rms": 0.13262062981682093
+      },
+      "basis7": {
+        "level_delta_db": -0.006934052976555288,
+        "signed_dbr": 0.9136062453532237,
+        "reference_rms": 0.13262062981682093
+      }
+    },
+    "release_73": {
+      "bare": {
+        "level_delta_db": -0.18613539025690962,
+        "signed_dbr": -7.101719724391816,
+        "reference_rms": 0.10138665124426394
+      },
+      "basis7": {
+        "level_delta_db": -0.012357589370524447,
+        "signed_dbr": 1.2287096974684006,
+        "reference_rms": 0.10138665124426394
+      }
+    }
+  }
+}
