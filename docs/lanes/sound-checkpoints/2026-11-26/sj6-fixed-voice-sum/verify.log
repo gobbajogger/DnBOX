@@ -1,0 +1,30 @@
+firmware/src/dsp/dnbx_core.h: OK
+firmware/src/dsp/dnbx_core.c: OK
+/tmp/tmp.fDshCbrdw1/firmware/src/dsp/dnbx_core.c:590:1: warning: ‘minsize’ attribute directive ignored [-Wattributes]
+  590 | {
+      | ^
+OSC1 centre isolated | level delta 0.000000000 dB | peak 0.023022791
+OSC2 centre isolated | level delta 0.000000000 dB | peak 0.023022791
+six distinct notes natural | float peak 0.170169160 | NORMAL PCM24 peak 713741 cut 0/10240 | LOUD PCM24 peak 1427482 cut 0/10240
+six distinct notes coherent | float peak 0.201968834 | NORMAL PCM24 peak 847118 cut 0/10240 | LOUD PCM24 peak 1694237 cut 0/10240
+all 256 one-Sine 127-velocity fixtures single-path peak 0.033666633; no clipping
+continuously held key69, total=1 | delta=0.00000000 dB | release settle blocks=0
+continuously held key69, total=3 | delta=0.00000000 dB | release settle blocks=0
+continuously held key69, total=6 | delta=0.00000000 dB | release settle blocks=0
+continuously held key69, total=3 | delta=0.00000000 dB | release settle blocks=104
+continuously held key69, total=1 | delta=0.00000000 dB | release settle blocks=104
+centre, both OSCs, release, muted, panned/nonzero/alternate refusals, six voice, clip checks PASS
+/tmp/tmp.fDshCbrdw1/firmware/src/dsp/dnbx_core.c:590:1: warning: ‘minsize’ attribute directive ignored [-Wattributes]
+  590 | {
+      | ^
+OSC1 centre isolated | level delta 21.583624662 dB | peak 0.276273489
+OSC2 centre isolated | level delta 21.583624662 dB | peak 0.276273489
+six distinct notes natural | float peak 2.042029858 | NORMAL PCM24 peak 8388606 cut 13/10240 | LOUD PCM24 peak 8388607 cut 1659/10240
+six distinct notes coherent | float peak 2.423625946 | NORMAL PCM24 peak 8388606 cut 3917/10240 | LOUD PCM24 peak 8388607 cut 7461/10240
+all 256 one-Sine 127-velocity fixtures single-path peak 0.403999567; no clipping
+continuously held key69, total=1 | delta=21.58362468 dB | release settle blocks=0
+continuously held key69, total=3 | delta=21.58362466 dB | release settle blocks=0
+continuously held key69, total=6 | delta=21.58362469 dB | release settle blocks=0
+continuously held key69, total=3 | delta=21.58362469 dB | release settle blocks=104
+continuously held key69, total=1 | delta=21.58362469 dB | release settle blocks=104
+centre, both OSCs, release, muted, panned/nonzero/alternate refusals, six voice, clip checks PASS
