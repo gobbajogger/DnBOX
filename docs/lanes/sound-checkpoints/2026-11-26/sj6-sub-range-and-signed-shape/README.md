@@ -34,3 +34,17 @@ synthesis from the compact host, not a proprietary asset.
 python3 native-sub-shape.py ../sj6-direct-auv3-fanin \
   --compact compact-generated/range-corrected-sub.f32le
 ```
+
+## Independent established second zone from the same cue
+
+The last chord destination (incoming 67, admitted as mono, Low Range key
+55/SFZ root 54) gives a second source zone without a new capture. Use
+frames 58,000–79,499, well past the timed sample handoff. Native and its
+repeat measure 97.683/97.682 Hz, −30.80 dBFS H1, and relative H3 phase
++149.08°. The corrected compact measures 98.200 Hz, −56.57 dBFS H1 and
+relative H3 phase −179.56°. For the preceding root, the original relative
+H3 phase is −18.70°, while compact is again about −180°. Relative
+phases cancel a uniform time shift, so the remaining substitution isn't
+one fixed delay. Per-zone sample tone and/or zone-specific receiver
+behavior still need isolation. This is not a later application of a
+time offset, pitch calibration or preset fix.

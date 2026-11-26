@@ -127,6 +127,11 @@ changing the rounding rule.
   not enough to explain the remainder. Resetting on the authentic
   pending commit frame without fixing the carrier/state worsened
   signed chord and release; do not adopt it alone.
+  Independent established adjacent cue (source key55 / SFZ root54)
+  shows the original H3 relative phase changing from −18.70° to
+  +149.08°, while corrected compact stays near −180° on both.
+  This is after canceling a global gain/time shift; don't use a single
+  phase compensation across sample zones.
   [Exact source and signed scorer](sj6-sub-range-and-signed-shape/README.md).
 - **Unresolved:** source owner of the gain between the calibrated Crusher
   and Apple's compressor input; which missing or misrouted per-program

@@ -40,13 +40,30 @@ def describe(sig):
 x,m=read(a.reference/'native-warm-brainwave-fanin-authored-sub-only')
 xr,mr=read(a.reference/'native-warm-brainwave-fanin-authored-sub-only-repeat')
 assert m['schedule']==mr['schedule']
+def established_high_zone(sig):
+    # Last chord destination is key 67, low Range chooses 55 / root 54.
+    # Use an established absolute frame range, separate from the pending commit.
+    lo,hi=58000,79500
+    z=sig[lo:hi]*np.hanning(hi-lo)
+    mag=np.abs(np.fft.rfft(z,n=441000))
+    j=int(850+np.argmax(mag[850:1090]))
+    q=np.log(mag[j-1:j+2])
+    f=(j+.5*(q[0]-q[-1])/(q[0]-2*q[1]+q[-1]))*.1
+    c=h(sig,lo,hi,f,16384)
+    n=np.arange(1,len(c)+1)
+    rel=c*np.exp(-1j*n*np.angle(c[0]))/abs(c[0])
+    return {"Hz":float(f),"H1_dBFS":db(c[0]),"H3_H5_H7_H9_dBc":[db(rel[j]) for j in [2,4,6,8]],
+            "H3_H5_H7_H9_relative_degrees":[float(np.angle(rel[j],deg=True)) for j in [2,4,6,8]],
+            "frames":[lo,hi]}
 out={'original':describe(x),'original_repeat':describe(xr),'original_pcm_sha':m['pcm_sha256'],
+     'established_next_zone':{'original':established_high_zone(x),'original_repeat':established_high_zone(xr)},
      'signed_repeat_dBr':db(np.linalg.norm(x-xr)/np.linalg.norm(x))}
 if a.compact:
     y=np.fromfile(a.compact,'<f4')
     assert y.size==x.size*2
     out['compact_range_corrected']=describe(y.reshape(-1,2).astype(np.float64).mean(axis=1))
     yc=y.reshape(-1,2).astype(np.float64).mean(axis=1)
+    out['established_next_zone']['compact_range_corrected']=established_high_zone(yc)
     out['compact_signed_dBr']=db(np.linalg.norm(x-yc)/np.linalg.norm(x))
     out['signed_windows']={}
     for at,end in [(0,128),(128,512),(512,2048),(2048,8192),(8192,22050),(22050,33075)]:
