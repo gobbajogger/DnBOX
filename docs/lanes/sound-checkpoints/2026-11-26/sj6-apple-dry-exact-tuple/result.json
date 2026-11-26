@@ -1,0 +1,91 @@
+{
+  "component": "aufx/dist/appl",
+  "component_version": 67072,
+  "rate": 44100,
+  "results": [
+    {
+      "peak": 0.025,
+      "compared_stereo_frames": 69632,
+      "dc_residual_db": -133.31499827945055,
+      "bypass_residual_db": -21.942258452612897,
+      "dc_max_abs": 1.1175870895385742e-08
+    },
+    {
+      "peak": 0.05,
+      "compared_stereo_frames": 69632,
+      "dc_residual_db": -133.31499827945055,
+      "bypass_residual_db": -21.942258452612897,
+      "dc_max_abs": 2.2351741790771484e-08
+    },
+    {
+      "peak": 0.1,
+      "compared_stereo_frames": 69632,
+      "dc_residual_db": -133.31499827945055,
+      "bypass_residual_db": -21.942258452612897,
+      "dc_max_abs": 4.470348358154297e-08
+    },
+    {
+      "peak": 0.15,
+      "compared_stereo_frames": 69632,
+      "dc_residual_db": -132.0077209003784,
+      "bypass_residual_db": -21.94226007359934,
+      "dc_max_abs": 7.450580596923828e-08
+    },
+    {
+      "peak": 0.2,
+      "compared_stereo_frames": 69632,
+      "dc_residual_db": -133.31499827945055,
+      "bypass_residual_db": -21.942258452612897,
+      "dc_max_abs": 8.940696716308594e-08
+    },
+    {
+      "peak": 0.3,
+      "compared_stereo_frames": 69632,
+      "dc_residual_db": -132.0077209003784,
+      "bypass_residual_db": -21.94226007359934,
+      "dc_max_abs": 1.4901161193847656e-07
+    },
+    {
+      "peak": 0.4,
+      "compared_stereo_frames": 69632,
+      "dc_residual_db": -133.31499827945055,
+      "bypass_residual_db": -21.942258452612897,
+      "dc_max_abs": 1.7881393432617188e-07
+    },
+    {
+      "peak": 0.5,
+      "compared_stereo_frames": 69632,
+      "dc_residual_db": -133.37247775972423,
+      "bypass_residual_db": -21.942257296704778,
+      "dc_max_abs": 1.7881393432617188e-07
+    },
+    {
+      "peak": 0.65,
+      "compared_stereo_frames": 69632,
+      "dc_residual_db": -128.44032011992908,
+      "bypass_residual_db": -21.942259566346184,
+      "dc_max_abs": 4.172325134277344e-07
+    },
+    {
+      "peak": 0.8,
+      "compared_stereo_frames": 69632,
+      "dc_residual_db": -133.31499827945055,
+      "bypass_residual_db": -21.942258452612897,
+      "dc_max_abs": 3.5762786865234375e-07
+    },
+    {
+      "peak": 1,
+      "compared_stereo_frames": 69632,
+      "dc_residual_db": -133.37247775972423,
+      "bypass_residual_db": -21.942257296704778,
+      "dc_max_abs": 3.5762786865234375e-07
+    },
+    {
+      "peak": 1.2,
+      "compared_stereo_frames": 69632,
+      "dc_residual_db": -132.0077209003784,
+      "bypass_residual_db": -21.94226007359934,
+      "dc_max_abs": 5.960464477539062e-07
+    }
+  ]
+}
