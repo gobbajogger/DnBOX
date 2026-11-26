@@ -22,7 +22,14 @@ isolated kernel timing, or partial link into a release claim.
   different phase and waveform; clock alone cannot match source
   audio. Exact data from the original would amount to over 7.8 MB
   of uncompressed PCM16 across 12 zones; it is not included. A
-  bounded read-only source adapter and exact holdouts are next.
+  [bounded read-only source adapter](sj6-sub-pool-provider/README.md)
+  now replaces just the current source sampler leaf. With the
+  separately held decoded RAM source, all 123,515 source reads
+  and complete 148,684-frame authored/dry host renders match the
+  unmodified source adapter word-for-word; refused reads are atomic.
+  This qualifies the data/clock boundary, not a compact media model
+  or installed parity. Total conditional authored/dry level is
+  still about 13 dB low, and some release windows regress.
 - **Whole guarded 909 trial failed.** The new
   [paired replay](drum909-warm-replay/README.md) saved 112 B in
   each native link but did not qualify: 14,278 µs/79 late Elite and

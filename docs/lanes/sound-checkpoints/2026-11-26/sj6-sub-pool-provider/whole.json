@@ -1,0 +1,630 @@
+{
+  "engine_sha": "6d163d79202e866d2fda96e36f752bd386641b5ae2d0b1f829a254d26b652850",
+  "same_words_between_authored_and_dry_per_route": true,
+  "same_partitions_all": true,
+  "dry_bypass_word_exact": true,
+  "reference_hashes": {
+    "authored": "9cc279dc61f6a504e1c234cd90db37f7c16c0cc9377a33e1165e6a75f7cf7b21",
+    "dry": "905e705042416acd2a5404594706608c6bd0a35b0783013ef4bbf977fe170002",
+    "authored-repeat": "9cc279dc61f6a504e1c234cd90db37f7c16c0cc9377a33e1165e6a75f7cf7b21"
+  },
+  "arms": [
+    "old unmodified analytic compact center reference",
+    "current compiled source sampler + conditional physical suffix + current J60",
+    "same, Sub helper fully replaced by host external read-pair provider"
+  ],
+  "sub_guarded_source_exact": true,
+  "controls": {
+    "known_raw_J60_profile": {
+      "40": 1,
+      "41": 0,
+      "208": 1,
+      "215": 0.5,
+      "216": 0.5,
+      "217": 1
+    },
+    "authored_physical_leaf_in_call_order": [
+      1,
+      1,
+      1,
+      1,
+      0
+    ]
+  },
+  "reached": {
+    "dry": [
+      {
+        "mode": null,
+        "partitions": 0,
+        "frames": 0,
+        "input_chronological_sha": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "replaced_chronological_sha": null,
+        "output_sha": "dfc9d0c6a2038638a1d1c6304b39c80094781c386862be67a4e2fdd7892b23e5"
+      },
+      {
+        "mode": 1,
+        "partitions": 1164,
+        "frames": 148684,
+        "input_chronological_sha": "e893b72b220de9d6c6388fc7a26f5d422f20b6e32756e80a44fa0675c51f8209",
+        "replaced_chronological_sha": "e893b72b220de9d6c6388fc7a26f5d422f20b6e32756e80a44fa0675c51f8209",
+        "output_sha": "e56a658452a7e982533f33c2c7d008ded10f1a0a834fd0a4fb1e588fed59867c"
+      },
+      {
+        "mode": 1,
+        "partitions": 1164,
+        "frames": 148684,
+        "input_chronological_sha": "e893b72b220de9d6c6388fc7a26f5d422f20b6e32756e80a44fa0675c51f8209",
+        "replaced_chronological_sha": "e893b72b220de9d6c6388fc7a26f5d422f20b6e32756e80a44fa0675c51f8209",
+        "output_sha": "e56a658452a7e982533f33c2c7d008ded10f1a0a834fd0a4fb1e588fed59867c"
+      }
+    ],
+    "authored": [
+      {
+        "mode": null,
+        "partitions": 0,
+        "frames": 0,
+        "input_chronological_sha": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "replaced_chronological_sha": null,
+        "output_sha": "95323852127a83847b994f5c9812aedffc6039d47a8f25521a5c5664275ffc04"
+      },
+      {
+        "mode": 2,
+        "partitions": 1164,
+        "frames": 148684,
+        "input_chronological_sha": "e893b72b220de9d6c6388fc7a26f5d422f20b6e32756e80a44fa0675c51f8209",
+        "replaced_chronological_sha": "71458c4a0694064352b6ae07ccfaffb1fcb7dc722f30fea3997a286c7c465316",
+        "output_sha": "94bdd31052aa5fdf5a139e0548abb0fedc44ea3b5a3c9824e464236be97a492d"
+      },
+      {
+        "mode": 2,
+        "partitions": 1164,
+        "frames": 148684,
+        "input_chronological_sha": "e893b72b220de9d6c6388fc7a26f5d422f20b6e32756e80a44fa0675c51f8209",
+        "replaced_chronological_sha": "71458c4a0694064352b6ae07ccfaffb1fcb7dc722f30fea3997a286c7c465316",
+        "output_sha": "94bdd31052aa5fdf5a139e0548abb0fedc44ea3b5a3c9824e464236be97a492d"
+      }
+    ]
+  },
+  "windows": {
+    "attack": {
+      "authored": [
+        {
+          "signed_dbr": 1.2384052170777835,
+          "level_db": -4.761163827388329
+        },
+        {
+          "signed_dbr": -2.147879552218109,
+          "level_db": -12.94568103132361
+        },
+        {
+          "signed_dbr": -2.147879552218109,
+          "level_db": -12.94568103132361
+        }
+      ],
+      "dry": [
+        {
+          "signed_dbr": 0.3618655401482813,
+          "level_db": -6.518931776309912
+        },
+        {
+          "signed_dbr": -2.1045178508144193,
+          "level_db": -13.101386547213366
+        },
+        {
+          "signed_dbr": -2.1045178508144193,
+          "level_db": -13.101386547213366
+        }
+      ],
+      "authored_minus_dry": [
+        {
+          "signed_dbr": 0.015476544105304664,
+          "level_db": -8.12324384660588,
+          "mid": {
+            "signed_dbr": -0.008111614371816334,
+            "level_db": -8.112058471060873
+          },
+          "side": {
+            "signed_dbr": 0.5719601671528641,
+            "level_db": -8.415524802511717
+          }
+        },
+        {
+          "signed_dbr": -1.979592764515864,
+          "level_db": -13.656581377848852,
+          "mid": {
+            "signed_dbr": -1.9826486812684287,
+            "level_db": -13.642404119201505
+          },
+          "side": {
+            "signed_dbr": -1.9031703982145445,
+            "level_db": -14.030629941657294
+          }
+        },
+        {
+          "signed_dbr": -1.979592764515864,
+          "level_db": -13.656581377848852,
+          "mid": {
+            "signed_dbr": -1.9826486812684287,
+            "level_db": -13.642404119201505
+          },
+          "side": {
+            "signed_dbr": -1.9031703982145445,
+            "level_db": -14.030629941657294
+          }
+        }
+      ],
+      "actual_local_prefix_deltas": {
+        "dry": [
+          {
+            "signed_dbr": 0.8708384080208635,
+            "level_db": -6.582454770903453
+          },
+          {
+            "signed_dbr": 0.8708384080208635,
+            "level_db": -6.582454770903453
+          }
+        ],
+        "authored": [
+          {
+            "signed_dbr": 1.0602526317175518,
+            "level_db": -8.18451720393528
+          },
+          {
+            "signed_dbr": 1.0602526317175518,
+            "level_db": -8.18451720393528
+          }
+        ]
+      }
+    },
+    "held": {
+      "authored": [
+        {
+          "signed_dbr": 1.3551018016978833,
+          "level_db": -4.795872278646499
+        },
+        {
+          "signed_dbr": -2.1623796320884514,
+          "level_db": -12.864925982930892
+        },
+        {
+          "signed_dbr": -2.1623796320884514,
+          "level_db": -12.864925982930892
+        }
+      ],
+      "dry": [
+        {
+          "signed_dbr": 0.4243431552518341,
+          "level_db": -6.564641908544498
+        },
+        {
+          "signed_dbr": -2.1054939443527787,
+          "level_db": -13.080599647909732
+        },
+        {
+          "signed_dbr": -2.1054939443527787,
+          "level_db": -13.080599647909732
+        }
+      ],
+      "authored_minus_dry": [
+        {
+          "signed_dbr": 0.09975860262563212,
+          "level_db": -8.150667378925645,
+          "mid": {
+            "signed_dbr": 0.18422163546719317,
+            "level_db": -8.181452966505786
+          },
+          "side": {
+            "signed_dbr": -0.6955195938435722,
+            "level_db": -7.896849902886027
+          }
+        },
+        {
+          "signed_dbr": -1.9784719143564875,
+          "level_db": -13.61147889571747,
+          "mid": {
+            "signed_dbr": -1.9870758449022956,
+            "level_db": -13.573717461136834
+          },
+          "side": {
+            "signed_dbr": -1.9058453489571245,
+            "level_db": -13.947282254688407
+          }
+        },
+        {
+          "signed_dbr": -1.9784719143564875,
+          "level_db": -13.61147889571747,
+          "mid": {
+            "signed_dbr": -1.9870758449022956,
+            "level_db": -13.573717461136834
+          },
+          "side": {
+            "signed_dbr": -1.9058453489571245,
+            "level_db": -13.947282254688407
+          }
+        }
+      ],
+      "actual_local_prefix_deltas": {
+        "dry": [
+          {
+            "signed_dbr": 0.9204117715026661,
+            "level_db": -6.515957739365233
+          },
+          {
+            "signed_dbr": 0.9204117715026661,
+            "level_db": -6.515957739365233
+          }
+        ],
+        "authored": [
+          {
+            "signed_dbr": 1.1686542412749858,
+            "level_db": -8.069053704284395
+          },
+          {
+            "signed_dbr": 1.1686542412749858,
+            "level_db": -8.069053704284395
+          }
+        ]
+      }
+    },
+    "first-release": {
+      "authored": [
+        {
+          "signed_dbr": -1.1907483157150307,
+          "level_db": -1.881054615703641
+        },
+        {
+          "signed_dbr": -2.6765327921266957,
+          "level_db": -10.789220129199164
+        },
+        {
+          "signed_dbr": -2.6765327921266957,
+          "level_db": -10.789220129199164
+        }
+      ],
+      "dry": [
+        {
+          "signed_dbr": -6.489421512189604,
+          "level_db": -1.9282029370316085
+        },
+        {
+          "signed_dbr": -2.799332823200496,
+          "level_db": -10.588941778540498
+        },
+        {
+          "signed_dbr": -2.799332823200496,
+          "level_db": -10.588941778540498
+        }
+      ],
+      "authored_minus_dry": [
+        {
+          "signed_dbr": 0.054112647889649625,
+          "level_db": -3.28270812898471,
+          "mid": {
+            "signed_dbr": 0.04137968137130445,
+            "level_db": -3.2142129087444453
+          },
+          "side": {
+            "signed_dbr": 0.11338586974922184,
+            "level_db": -3.6194928752875377
+          }
+        },
+        {
+          "signed_dbr": -2.4537143421188876,
+          "level_db": -11.22549215108818,
+          "mid": {
+            "signed_dbr": -2.4262779918190325,
+            "level_db": -11.31413196799355
+          },
+          "side": {
+            "signed_dbr": -2.584865581922264,
+            "level_db": -10.832019370958461
+          }
+        },
+        {
+          "signed_dbr": -2.4537143421188876,
+          "level_db": -11.22549215108818,
+          "mid": {
+            "signed_dbr": -2.4262779918190325,
+            "level_db": -11.31413196799355
+          },
+          "side": {
+            "signed_dbr": -2.584865581922264,
+            "level_db": -10.832019370958461
+          }
+        }
+      ],
+      "actual_local_prefix_deltas": {
+        "dry": [
+          {
+            "signed_dbr": -2.4469631803691994,
+            "level_db": -8.66073884150889
+          },
+          {
+            "signed_dbr": -2.4469631803691994,
+            "level_db": -8.66073884150889
+          }
+        ],
+        "authored": [
+          {
+            "signed_dbr": -0.29549586915808923,
+            "level_db": -8.908165513495524
+          },
+          {
+            "signed_dbr": -0.29549586915808923,
+            "level_db": -8.908165513495524
+          }
+        ]
+      }
+    },
+    "chord": {
+      "authored": [
+        {
+          "signed_dbr": 0.963007740405068,
+          "level_db": -6.8635311938143495
+        },
+        {
+          "signed_dbr": -2.1085680266224243,
+          "level_db": -13.059827982883876
+        },
+        {
+          "signed_dbr": -2.1085680266224243,
+          "level_db": -13.059827982883876
+        }
+      ],
+      "dry": [
+        {
+          "signed_dbr": -1.915630181949279,
+          "level_db": -8.599648388592067
+        },
+        {
+          "signed_dbr": -2.0340127565714266,
+          "level_db": -13.39147449447957
+        },
+        {
+          "signed_dbr": -2.0340127565714266,
+          "level_db": -13.39147449447957
+        }
+      ],
+      "authored_minus_dry": [
+        {
+          "signed_dbr": 0.5371695341025979,
+          "level_db": -11.338875759048115,
+          "mid": {
+            "signed_dbr": 0.6244749883395574,
+            "level_db": -12.291912158775824
+          },
+          "side": {
+            "signed_dbr": 0.03594807588348725,
+            "level_db": -8.205170656541416
+          }
+        },
+        {
+          "signed_dbr": -2.011968152578379,
+          "level_db": -13.458008962424637,
+          "mid": {
+            "signed_dbr": -2.0293576387497843,
+            "level_db": -13.375715454613017
+          },
+          "side": {
+            "signed_dbr": -1.9197966936266027,
+            "level_db": -13.928549442157898
+          }
+        },
+        {
+          "signed_dbr": -2.011968152578379,
+          "level_db": -13.458008962424637,
+          "mid": {
+            "signed_dbr": -2.0293576387497843,
+            "level_db": -13.375715454613017
+          },
+          "side": {
+            "signed_dbr": -1.9197966936266027,
+            "level_db": -13.928549442157898
+          }
+        }
+      ],
+      "actual_local_prefix_deltas": {
+        "dry": [
+          {
+            "signed_dbr": -2.0563173963801935,
+            "level_db": -4.7918261058875045
+          },
+          {
+            "signed_dbr": -2.0563173963801935,
+            "level_db": -4.7918261058875045
+          }
+        ],
+        "authored": [
+          {
+            "signed_dbr": 1.2187637507199547,
+            "level_db": -6.1962967890695255
+          },
+          {
+            "signed_dbr": 1.2187637507199547,
+            "level_db": -6.1962967890695255
+          }
+        ]
+      }
+    },
+    "final-release": {
+      "authored": [
+        {
+          "signed_dbr": -0.09840219670851424,
+          "level_db": -10.564947865407245
+        },
+        {
+          "signed_dbr": -1.9710704754865616,
+          "level_db": -13.691751137057771
+        },
+        {
+          "signed_dbr": -1.9710704754865616,
+          "level_db": -13.691751137057771
+        }
+      ],
+      "dry": [
+        {
+          "signed_dbr": -2.8510862026005994,
+          "level_db": -9.831814832432137
+        },
+        {
+          "signed_dbr": -1.8413391796163396,
+          "level_db": -14.222919356003931
+        },
+        {
+          "signed_dbr": -1.8413391796163396,
+          "level_db": -14.222919356003931
+        }
+      ],
+      "authored_minus_dry": [
+        {
+          "signed_dbr": -0.026701910572315704,
+          "level_db": -13.379656208640965,
+          "mid": {
+            "signed_dbr": 0.1823449166837256,
+            "level_db": -16.082639002025648
+          },
+          "side": {
+            "signed_dbr": -0.4038772544632958,
+            "level_db": -10.871573854111665
+          }
+        },
+        {
+          "signed_dbr": -1.9248036034874796,
+          "level_db": -13.877274291935677,
+          "mid": {
+            "signed_dbr": -1.8885922125837038,
+            "level_db": -14.012829435262876
+          },
+          "side": {
+            "signed_dbr": -1.9865803981384833,
+            "level_db": -13.657782531096478
+          }
+        },
+        {
+          "signed_dbr": -1.9248036034874796,
+          "level_db": -13.877274291935677,
+          "mid": {
+            "signed_dbr": -1.8885922125837038,
+            "level_db": -14.012829435262876
+          },
+          "side": {
+            "signed_dbr": -1.9865803981384833,
+            "level_db": -13.657782531096478
+          }
+        }
+      ],
+      "actual_local_prefix_deltas": {
+        "dry": [
+          {
+            "signed_dbr": -6.214494307201871,
+            "level_db": -4.391104523571794
+          },
+          {
+            "signed_dbr": -6.214494307201871,
+            "level_db": -4.391104523571794
+          }
+        ],
+        "authored": [
+          {
+            "signed_dbr": 1.0413123448164994,
+            "level_db": -3.1268032716505267
+          },
+          {
+            "signed_dbr": 1.0413123448164994,
+            "level_db": -3.1268032716505267
+          }
+        ]
+      }
+    },
+    "full": {
+      "authored": [
+        {
+          "signed_dbr": 1.010231726176478,
+          "level_db": -6.288132918189039
+        },
+        {
+          "signed_dbr": -2.110587276189916,
+          "level_db": -13.061327262444573
+        },
+        {
+          "signed_dbr": -2.110587276189916,
+          "level_db": -13.061327262444573
+        }
+      ],
+      "dry": [
+        {
+          "signed_dbr": -1.4444188461197285,
+          "level_db": -8.180051489800732
+        },
+        {
+          "signed_dbr": -2.0432089704946392,
+          "level_db": -13.352757492021581
+        },
+        {
+          "signed_dbr": -2.0432089704946392,
+          "level_db": -13.352757492021581
+        }
+      ],
+      "authored_minus_dry": [
+        {
+          "signed_dbr": 0.4655942432590472,
+          "level_db": -10.783490952607199,
+          "mid": {
+            "signed_dbr": 0.5648522545497339,
+            "level_db": -11.521860981623055
+          },
+          "side": {
+            "signed_dbr": -0.12182468794968933,
+            "level_db": -8.098677371182088
+          }
+        },
+        {
+          "signed_dbr": -1.9995931666613238,
+          "level_db": -13.522174008671728,
+          "mid": {
+            "signed_dbr": -2.0132698069772603,
+            "level_db": -13.456345580978834
+          },
+          "side": {
+            "signed_dbr": -1.9255037610219004,
+            "level_db": -13.90122154285135
+          }
+        },
+        {
+          "signed_dbr": -1.9995931666613238,
+          "level_db": -13.522174008671728,
+          "mid": {
+            "signed_dbr": -2.0132698069772603,
+            "level_db": -13.456345580978834
+          },
+          "side": {
+            "signed_dbr": -1.9255037610219004,
+            "level_db": -13.90122154285135
+          }
+        }
+      ],
+      "actual_local_prefix_deltas": {
+        "dry": [
+          {
+            "signed_dbr": -1.148841270510068,
+            "level_db": -5.172706002220849
+          },
+          {
+            "signed_dbr": -1.148841270510068,
+            "level_db": -5.172706002220849
+          }
+        ],
+        "authored": [
+          {
+            "signed_dbr": 1.1590346831104774,
+            "level_db": -6.773194344255536
+          },
+          {
+            "signed_dbr": 1.1590346831104774,
+            "level_db": -6.773194344255536
+          }
+        ]
+      }
+    }
+  }
+}

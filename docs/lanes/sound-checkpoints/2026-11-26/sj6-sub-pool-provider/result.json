@@ -1,0 +1,40 @@
+{
+  "pin": "6d163d79202e866d2fda96e36f752bd386641b5ae2d0b1f829a254d26b652850",
+  "original_current_sub_sha": "9ab95b764bc75ab233f74283faef1ccd6f24c7bfaae1cefcf4684b846884d4b7",
+  "external_read_pair_sub_sha": "9ab95b764bc75ab233f74283faef1ccd6f24c7bfaae1cefcf4684b846884d4b7",
+  "logical_replacement": {
+    "active_helper_calls": 123515,
+    "actual_commits": 4,
+    "gate_edges": 0,
+    "loops": 0,
+    "first_commits": [
+      [
+        36,
+        16384,
+        0.9999998807907104,
+        1.0
+      ],
+      [
+        48,
+        49459,
+        0.9999998807907104,
+        1.0
+      ],
+      [
+        52,
+        49459,
+        0.8908987641334534,
+        1.0
+      ],
+      [
+        55,
+        49459,
+        1.0594631433486938,
+        1.0
+      ]
+    ]
+  },
+  "exact_signed_all_frames": true,
+  "real_source_array_copied_into_host_adapter": false,
+  "unconditional_fallback": false
+}

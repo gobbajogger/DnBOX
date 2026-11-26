@@ -1,0 +1,86 @@
+{
+  "build": "6d163d79202e866d2fda96e36f752bd386641b5ae2d0b1f829a254d26b652850",
+  "actual_PC": "0x1003b8224",
+  "cases": [
+    {
+      "shape": [
+        43,
+        1
+      ],
+      "gate": 0,
+      "reached": 111,
+      "wraps": 0,
+      "words_sha": "1185a594cd6abe4839b4a4b9bbc37b73a430daf95b129252a0c9bcb022c0ddea"
+    },
+    {
+      "shape": [
+        43,
+        1
+      ],
+      "gate": 1,
+      "reached": 1024,
+      "wraps": 43,
+      "words_sha": "670b8a5e78969bbff79f569f374aee85952435dce052a4a607f86434bd5a20b5"
+    },
+    {
+      "shape": [
+        43,
+        2
+      ],
+      "gate": 0,
+      "reached": 111,
+      "wraps": 0,
+      "words_sha": "c7923f0d2684fb12676f5c0da09506075fdcd595b36c00083a05f73d6cb17429"
+    },
+    {
+      "shape": [
+        43,
+        2
+      ],
+      "gate": 1,
+      "reached": 1024,
+      "wraps": 43,
+      "words_sha": "f273f8adf30ec3a7bb613c1815b1629e4b99c53219593f306c5247be1ac62c7e"
+    },
+    {
+      "shape": [
+        257,
+        1
+      ],
+      "gate": 0,
+      "reached": 681,
+      "wraps": 0,
+      "words_sha": "1854d54b5416f9b0cdd6db8e2ef16efedc50f43ac5763696e8ed2714222bb0b6"
+    },
+    {
+      "shape": [
+        257,
+        1
+      ],
+      "gate": 1,
+      "reached": 1024,
+      "wraps": 4,
+      "words_sha": "0cd2c3a6caa8ecec0a14a435b7a343bc709a1ce8067a9fb67f2e9c1581f076f9"
+    },
+    {
+      "shape": [
+        257,
+        2
+      ],
+      "gate": 0,
+      "reached": 681,
+      "wraps": 0,
+      "words_sha": "34992410af24e797f4beb965f6788f8e31141a1005fd541a66e93728ef1b98ab"
+    },
+    {
+      "shape": [
+        257,
+        2
+      ],
+      "gate": 1,
+      "reached": 1024,
+      "wraps": 4,
+      "words_sha": "ef7e393d7e90d8cb48a869c04bbbb46fe522f2693c91b7035d139dd63609a085"
+    }
+  ]
+}
