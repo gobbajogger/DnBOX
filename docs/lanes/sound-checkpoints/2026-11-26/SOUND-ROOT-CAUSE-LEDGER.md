@@ -99,7 +99,11 @@ changing the rounding rule.
   agreed, but this implementation adds 176 application bytes and
   1,089–1,155 µs per 256-frame two-owner block. **Reject it as written**.
   Native disassembly identified an out-of-line memcpy on each tap;
-  an ABI-proven no-copy bit carrier may be worth one independent test.
+  the ABI-proven no-copy bit carrier was tested. It produced identical
+  E4M11 PCM on both boards and recovered 881–942 µs versus memcpy,
+  but still adds 208–214 µs per 256-frame two-owner call and 144 B
+  application flash vs Q15, with no extra RAM. It is not admitted without
+  verifying that much populated-scene margin. [No-copy native receipt](sj6-classic-e4m11-nocopy/sj6-e4m11-nocopy/README.md).
   Straight bfloat16 is ruled out separately: the same-size store was
   around −56…−57 dBr and degraded the quiet cue.
   [Native memcpy rejection](sj6-classic-e4m11-native-rejection/sj6-e4m11-native/README.md),

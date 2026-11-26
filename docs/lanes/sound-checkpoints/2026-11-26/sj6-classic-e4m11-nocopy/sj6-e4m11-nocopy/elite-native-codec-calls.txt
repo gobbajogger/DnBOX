@@ -1,0 +1,8 @@
+sj6_hist_decode:
+chorus_read:
+ 2061672:    bf ea e0 ff       	call -64 <sj6_hist_decode : 2061636 >
+ 2061696:    bf ea ce ff       	call -100 <sj6_hist_decode : 2061636 >
+juno6_chorus_process:
+ 2061774:    80 ea 08 85       	call 68112 <fm_sinf : 2072188 >
+ 20617be:    bf ea 4c ff       		call -360 <chorus_read : 206165a >
+ 2061806:    bf ea 28 ff       		call -432 <chorus_read : 206165a >

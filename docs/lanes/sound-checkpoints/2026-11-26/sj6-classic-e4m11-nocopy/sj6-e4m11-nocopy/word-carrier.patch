@@ -1,0 +1,18 @@
+--- original-memcpy/history.h
++++ no-copy/history.h
+@@ -1,9 +1,12 @@
+ #ifndef SJ6_DIAGNOSTIC_SHORT_RING_H
+ #define SJ6_DIAGNOSTIC_SHORT_RING_H
+ #include <stdint.h>
+-#include <string.h>
+-static inline uint32_t sj6_float_word(float x) {uint32_t bits;memcpy(&bits,&x,4);return bits;}
+-static inline float sj6_word_float(uint32_t bits) {float x;memcpy(&x,&bits,4);return x;}
++#include <float.h>
++_Static_assert(sizeof(float)==sizeof(uint32_t) && sizeof(float)==4, "binary32 width");
++_Static_assert(FLT_RADIX==2 && FLT_MANT_DIG==24 && FLT_MIN_EXP==-125 && FLT_MAX_EXP==128, "binary32 layout");
++typedef union {float f; uint32_t u;} sj6_f32_bits;
++static inline uint32_t sj6_float_word(float x) {return ((sj6_f32_bits){.f=x}).u;}
++static inline float sj6_word_float(uint32_t bits) {return ((sj6_f32_bits){.u=bits}).f;}
+ /* Diagnostic signed E4M11; first positive normal is 2^-8, upper finite
+  * limit 128-2^-5. For a sample strictly below 128, rounding can reach the
+  * saturation endpoint. Quiet values use an exact 2^-19 grid. */
