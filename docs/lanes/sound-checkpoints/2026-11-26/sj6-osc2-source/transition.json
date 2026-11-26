@@ -1,0 +1,198 @@
+{
+  "scope": "Scoped actual current original oscillator2 source profile and isolated direct native PCM at fixed note events. Dynamic current Swift cutoff/LFO are not emulated, HP optional model only; no fitted pitch/shift or gain.",
+  "original_sha": "6d163d79202e866d2fda96e36f752bd386641b5ae2d0b1f829a254d26b652850",
+  "captured_reference_sha": "19fbfe527999e0ebe5c7f86dc28f6076eabef9a49b31f1acaf4dcd9f9146f0fb",
+  "case": {
+    "actual_4x_profile": {
+      "profile_loaded": true,
+      "factor": 4,
+      "receiver_cutoff_stimulus_hz": 300.0,
+      "leaf_pcm_sha": "5329b3634a1c2b62dfa25df28393542649ec2b9caf2af5b436a4e53554ad5081",
+      "windows": {
+        "held": {
+          "candidate_leaf_rms": 0.1553769379181506,
+          "real_auv3_terminal_rms": 0.028324720023094434,
+          "suffix_terminal_level_db": -8.88037506681774,
+          "suffix_terminal_null_dbr": -1.8255727057124072,
+          "suffix_signed_corr": 0.6568661463771843,
+          "external_model_hpf_terminal_level_db": -8.883871995442297,
+          "external_model_hpf_terminal_null_dbr": -2.856187056207224
+        },
+        "pre_chord": {
+          "candidate_leaf_rms": 0.009733960214022733,
+          "real_auv3_terminal_rms": 0.009823249998035112,
+          "suffix_terminal_level_db": -23.008272403158756,
+          "suffix_terminal_null_dbr": -0.44700337479232277,
+          "suffix_signed_corr": 0.7267990151769299,
+          "external_model_hpf_terminal_level_db": -12.171980972819066,
+          "external_model_hpf_terminal_null_dbr": -2.3984740390625836
+        },
+        "start_pending": {
+          "candidate_leaf_rms": 0.015934816239242894,
+          "real_auv3_terminal_rms": 0.00767271811263405,
+          "suffix_terminal_level_db": -12.481846020447975,
+          "suffix_terminal_null_dbr": -2.22900323501883,
+          "suffix_signed_corr": 0.9635019855384485,
+          "external_model_hpf_terminal_level_db": -7.8272186385808995,
+          "external_model_hpf_terminal_null_dbr": -4.411383998797929
+        },
+        "near_commit": {
+          "candidate_leaf_rms": 0.01856031631135782,
+          "real_auv3_terminal_rms": 0.001515856124765834,
+          "suffix_terminal_level_db": 0.07339365078756602,
+          "suffix_terminal_null_dbr": 4.661953496063076,
+          "suffix_signed_corr": -0.45039061420151416,
+          "external_model_hpf_terminal_level_db": 0.34427780822730225,
+          "external_model_hpf_terminal_null_dbr": 4.581201155658535
+        },
+        "crossing": {
+          "candidate_leaf_rms": 0.14771761559038038,
+          "real_auv3_terminal_rms": 0.02487213682270767,
+          "suffix_terminal_level_db": -8.57333687703271,
+          "suffix_terminal_null_dbr": -3.998549943409569,
+          "suffix_signed_corr": 0.9936854522020159,
+          "external_model_hpf_terminal_level_db": -9.105523398915105,
+          "external_model_hpf_terminal_null_dbr": -3.698457963636357
+        },
+        "following": {
+          "candidate_leaf_rms": 0.1997052336841752,
+          "real_auv3_terminal_rms": 0.02369338639033546,
+          "suffix_terminal_level_db": -6.36899393441391,
+          "suffix_terminal_null_dbr": -3.53592579341965,
+          "suffix_signed_corr": 0.8199625068649361,
+          "external_model_hpf_terminal_level_db": -8.848680296003662,
+          "external_model_hpf_terminal_null_dbr": -3.02130533139263
+        },
+        "late": {
+          "candidate_leaf_rms": 0.19843936473588722,
+          "real_auv3_terminal_rms": 0.03841340261649323,
+          "suffix_terminal_level_db": -9.16809522467833,
+          "suffix_terminal_null_dbr": -1.7697415211252716,
+          "suffix_signed_corr": 0.6548611820232245,
+          "external_model_hpf_terminal_level_db": -9.051272380746271,
+          "external_model_hpf_terminal_null_dbr": -2.4283072428057633
+        }
+      },
+      "taps": {
+        "generated_profile": {
+          "count": 52224,
+          "mean": -0.006195632253371847,
+          "rms": 0.2956586129670977
+        },
+        "pre_decimation": {
+          "count": 52224,
+          "mean": -0.006195632253371847,
+          "rms": 0.2956586129670977
+        },
+        "hb1_even": {
+          "count": 13056,
+          "mean": -0.0062350234310740256,
+          "rms": 0.2956566185843876
+        },
+        "hb1_odd": {
+          "count": 13056,
+          "mean": -0.006204983480588535,
+          "rms": 0.29564531127902804
+        },
+        "hb2": {
+          "count": 13056,
+          "mean": -0.006268752027000291,
+          "rms": 0.2956131143128817
+        }
+      }
+    },
+    "profile_not_loaded": {
+      "profile_loaded": false,
+      "factor": 4,
+      "receiver_cutoff_stimulus_hz": 300.0,
+      "leaf_pcm_sha": "5d771f3bc8665c0712568bd8b68d9c972aadbfea4b014b3195a17c7d1571e92d",
+      "windows": {
+        "held": {
+          "candidate_leaf_rms": 0.10149103603590684,
+          "real_auv3_terminal_rms": 0.028324720023094434,
+          "suffix_terminal_level_db": -12.579552224518194,
+          "suffix_terminal_null_dbr": -1.269592942424368,
+          "suffix_signed_corr": 0.6568660311909352,
+          "external_model_hpf_terminal_level_db": -12.583048942381517,
+          "external_model_hpf_terminal_null_dbr": -1.8315584348821048
+        },
+        "pre_chord": {
+          "candidate_leaf_rms": 0.006358150835665627,
+          "real_auv3_terminal_rms": 0.009823249998035112,
+          "suffix_terminal_level_db": -26.70745658479762,
+          "suffix_terminal_null_dbr": -0.2919748213269858,
+          "suffix_signed_corr": 0.7267982889145904,
+          "external_model_hpf_terminal_level_db": -15.871154912727699,
+          "external_model_hpf_terminal_null_dbr": -1.4930824311926019
+        },
+        "start_pending": {
+          "candidate_leaf_rms": 0.010408496367048268,
+          "real_auv3_terminal_rms": 0.00767271811263405,
+          "suffix_terminal_level_db": -16.181029449006832,
+          "suffix_terminal_null_dbr": -1.3967204468829943,
+          "suffix_signed_corr": 0.963501931421964,
+          "external_model_hpf_terminal_level_db": -11.52639715207429,
+          "external_model_hpf_terminal_null_dbr": -2.6281806908340997
+        },
+        "near_commit": {
+          "candidate_leaf_rms": 0.012123450949774165,
+          "real_auv3_terminal_rms": 0.001515856124765834,
+          "suffix_terminal_level_db": -3.6257814412884724,
+          "suffix_terminal_null_dbr": 3.0692026926142226,
+          "suffix_signed_corr": -0.4503920967399976,
+          "external_model_hpf_terminal_level_db": -3.3549022613421373,
+          "external_model_hpf_terminal_null_dbr": 2.9606796800027246
+        },
+        "crossing": {
+          "candidate_leaf_rms": 0.0964878992173431,
+          "real_auv3_terminal_rms": 0.02487213682270767,
+          "suffix_terminal_level_db": -12.272526713958667,
+          "suffix_terminal_null_dbr": -2.39975179731271,
+          "suffix_signed_corr": 0.9936854710211576,
+          "external_model_hpf_terminal_level_db": -12.804713663387536,
+          "external_model_hpf_terminal_null_dbr": -2.2350843541319274
+        },
+        "following": {
+          "candidate_leaf_rms": 0.13044551626401713,
+          "real_auv3_terminal_rms": 0.02369338639033546,
+          "suffix_terminal_level_db": -10.06820406771565,
+          "suffix_terminal_null_dbr": -2.3365651634980242,
+          "suffix_signed_corr": 0.8199647823143308,
+          "external_model_hpf_terminal_level_db": -12.547887613373835,
+          "external_model_hpf_terminal_null_dbr": -1.9175713755650294
+        },
+        "late": {
+          "candidate_leaf_rms": 0.12961901908007786,
+          "real_auv3_terminal_rms": 0.03841340261649323,
+          "suffix_terminal_level_db": -12.867274802779647,
+          "suffix_terminal_null_dbr": -1.2265824351678962,
+          "suffix_signed_corr": 0.6548618069073444,
+          "external_model_hpf_terminal_level_db": -12.750455747547083,
+          "external_model_hpf_terminal_null_dbr": -1.598596565601447
+        }
+      },
+      "taps": {
+        "pre_decimation": {
+          "count": 52224,
+          "mean": -0.011902761781432977,
+          "rms": 0.5680056421256454
+        },
+        "hb1_even": {
+          "count": 13056,
+          "mean": -0.0119784508060768,
+          "rms": 0.5680018070595187
+        },
+        "hb1_odd": {
+          "count": 13056,
+          "mean": -0.011920736883437057,
+          "rms": 0.5679800845054862
+        },
+        "hb2": {
+          "count": 13056,
+          "mean": -0.01204325003993884,
+          "rms": 0.5679182268420961
+        }
+      }
+    }
+  }
+}

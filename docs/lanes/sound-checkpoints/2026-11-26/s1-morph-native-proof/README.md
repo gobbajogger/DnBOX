@@ -66,3 +66,14 @@ figures. Its single observed worst half (12,823us at 5412ms) distributes 10,316u
 (909 6,082 + Chicago 3,515 + other jobs), 8,097us S1 on core 1 and only 16/71us actual
 ordered mix waits. Extra 808 prefix outside run_job and tail/master/IRQ overhead not counted.
 Do not add the two core sums. No per-original-miss attribution is claimed.
+
+The separate Pro trace (13,238us at 5122ms, 56 late vs 53 uninstrumented) confirms 909
+5,969us and Chicago 2,923us local, S1 7,624us worker; core0 ordered waits 1,102us, unlike
+Elite. Snapshot records only the observed worst half, not all misses. The 909 Huffman/IMA
+span-local rewrite retains exact complete 909 state and all four output buses after 41,600
+calls each at O0 and O2, but the strict native result is mixed: 12,810us/48 Elite;
+13,149us/64 Pro, zero skips or writes. Don't adopt as a timing fix. The exploratory
+parallel last sampler probe did not link (196/184 B overflow even before fail-closed
+atomic state publication). It isn't included as a patch. A future offload may use the
+5,120 B workspace's trailing region *only* while the selected workspace is reserved by
+stage order and after proving timeout-safe publication; unrestricted overlap is unsupported.

@@ -1,0 +1,247 @@
+{
+  "hb_actual_constant_input": {
+    "generated_profile": {
+      "count": 52224,
+      "min": -0.5202829837799072,
+      "max": 0.5203256011009216,
+      "mean": -0.006195632253371847
+    },
+    "pre_decimation": {
+      "count": 52224,
+      "min": 0.25,
+      "max": 0.25,
+      "mean": 0.25
+    },
+    "hb1_even": {
+      "count": 13056,
+      "min": 0.25,
+      "max": 0.25,
+      "mean": 0.25
+    },
+    "hb1_odd": {
+      "count": 13056,
+      "min": 0.2499999850988388,
+      "max": 0.2499999850988388,
+      "mean": 0.2499999850988388
+    },
+    "hb2": {
+      "count": 13056,
+      "min": 0.2499999701976776,
+      "max": 0.25,
+      "mean": 0.2499999850988388
+    }
+  },
+  "scope": "actual modern OSC2 leaf and authentic native output, distinct boundaries, guarded source-only downstream incl optional model HP, no fitted parameters or assumed whole match",
+  "original_sha": "6d163d79202e866d2fda96e36f752bd386641b5ae2d0b1f829a254d26b652850",
+  "captured_reference_sha": "19fbfe527999e0ebe5c7f86dc28f6076eabef9a49b31f1acaf4dcd9f9146f0fb",
+  "case": {
+    "actual_4x_profile": {
+      "profile_loaded": true,
+      "factor": 4,
+      "receiver_cutoff_stimulus_hz": 300.0,
+      "leaf_pcm_sha": "07e05c06ce36b87281af0119d815b5930ac41b994cc62e13c4607a61e1054379",
+      "windows": {
+        "attack": {
+          "candidate_leaf_rms": 0.16567200898283918,
+          "real_auv3_terminal_rms": 0.029742612143569495,
+          "suffix_terminal_level_db": -8.955040324235101,
+          "suffix_terminal_null_dbr": -1.4521934212107754,
+          "suffix_signed_corr": 0.5767774188920458,
+          "external_model_hpf_terminal_level_db": -9.075371292904178,
+          "external_model_hpf_terminal_null_dbr": -2.374951732737064
+        },
+        "held": {
+          "candidate_leaf_rms": 0.1553769379181506,
+          "real_auv3_terminal_rms": 0.028324720023094434,
+          "suffix_terminal_level_db": -8.88037506681774,
+          "suffix_terminal_null_dbr": -1.8255727057124072,
+          "suffix_signed_corr": 0.6568661463771843,
+          "external_model_hpf_terminal_level_db": -8.883871995442297,
+          "external_model_hpf_terminal_null_dbr": -2.856187056207224
+        }
+      },
+      "taps": {
+        "generated_profile": {
+          "count": 52224,
+          "mean": -0.006195632253371847,
+          "rms": 0.2956586129670977
+        },
+        "pre_decimation": {
+          "count": 52224,
+          "mean": -0.006195632253371847,
+          "rms": 0.2956586129670977
+        },
+        "hb1_even": {
+          "count": 13056,
+          "mean": -0.0062350234310740256,
+          "rms": 0.2956566185843876
+        },
+        "hb1_odd": {
+          "count": 13056,
+          "mean": -0.006204983480588535,
+          "rms": 0.29564531127902804
+        },
+        "hb2": {
+          "count": 13056,
+          "mean": -0.006268752027000291,
+          "rms": 0.2956131143128817
+        }
+      }
+    },
+    "profile_not_loaded": {
+      "profile_loaded": false,
+      "factor": 4,
+      "receiver_cutoff_stimulus_hz": 300.0,
+      "leaf_pcm_sha": "324544aa535ec13ec3a3ed4d257e343ac6bd196f62ee6644892c03baa91c994d",
+      "windows": {
+        "attack": {
+          "candidate_leaf_rms": 0.10821561616518807,
+          "real_auv3_terminal_rms": 0.029742612143569495,
+          "suffix_terminal_level_db": -12.654223880710166,
+          "suffix_terminal_null_dbr": -1.0483456805911182,
+          "suffix_signed_corr": 0.5767788649765383,
+          "external_model_hpf_terminal_level_db": -12.774552573890954,
+          "external_model_hpf_terminal_null_dbr": -1.5687539254433354
+        },
+        "held": {
+          "candidate_leaf_rms": 0.10149103603590684,
+          "real_auv3_terminal_rms": 0.028324720023094434,
+          "suffix_terminal_level_db": -12.579552224518194,
+          "suffix_terminal_null_dbr": -1.269592942424368,
+          "suffix_signed_corr": 0.6568660311909352,
+          "external_model_hpf_terminal_level_db": -12.583048942381517,
+          "external_model_hpf_terminal_null_dbr": -1.8315584348821048
+        }
+      },
+      "taps": {
+        "pre_decimation": {
+          "count": 52224,
+          "mean": -0.011902761781432977,
+          "rms": 0.5680056421256454
+        },
+        "hb1_even": {
+          "count": 13056,
+          "mean": -0.0119784508060768,
+          "rms": 0.5680018070595187
+        },
+        "hb1_odd": {
+          "count": 13056,
+          "mean": -0.011920736883437057,
+          "rms": 0.5679800845054862
+        },
+        "hb2": {
+          "count": 13056,
+          "mean": -0.01204325003993884,
+          "rms": 0.5679182268420961
+        }
+      }
+    },
+    "one_x_rate_control": {
+      "profile_loaded": true,
+      "factor": 1,
+      "receiver_cutoff_stimulus_hz": 300.0,
+      "leaf_pcm_sha": "c7aaf0f9bea2e61acefddc9dc14ef43c90cd872a146c8f9ae6ed04048d7db52a",
+      "windows": {
+        "attack": {
+          "candidate_leaf_rms": 0.16557558533520633,
+          "real_auv3_terminal_rms": 0.029742612143569495,
+          "suffix_terminal_level_db": -8.959152437034586,
+          "suffix_terminal_null_dbr": -1.4462002456785532,
+          "suffix_signed_corr": 0.5754953164646742,
+          "external_model_hpf_terminal_level_db": -9.079118377956895,
+          "external_model_hpf_terminal_null_dbr": -2.359844113806828
+        },
+        "held": {
+          "candidate_leaf_rms": 0.15535247219745263,
+          "real_auv3_terminal_rms": 0.028324720023094434,
+          "suffix_terminal_level_db": -8.882054024618924,
+          "suffix_terminal_null_dbr": -1.8668153227607378,
+          "suffix_signed_corr": 0.6655537135377911,
+          "external_model_hpf_terminal_level_db": -8.886164160387708,
+          "external_model_hpf_terminal_null_dbr": -2.8945931797723428
+        }
+      },
+      "taps": {}
+    },
+    "two_x_rate_control": {
+      "profile_loaded": true,
+      "factor": 2,
+      "receiver_cutoff_stimulus_hz": 300.0,
+      "leaf_pcm_sha": "41d13fa38ee5147e69962c62169da5f3564d1ec7936e7ffdfb6bf0e89a504150",
+      "windows": {
+        "attack": {
+          "candidate_leaf_rms": 0.16563721552972532,
+          "real_auv3_terminal_rms": 0.029742612143569495,
+          "suffix_terminal_level_db": -8.956586596911816,
+          "suffix_terminal_null_dbr": -1.4498138207115376,
+          "suffix_signed_corr": 0.5762665386848295,
+          "external_model_hpf_terminal_level_db": -9.07675044581865,
+          "external_model_hpf_terminal_null_dbr": -2.368934431001879
+        },
+        "held": {
+          "candidate_leaf_rms": 0.1553661766815092,
+          "real_auv3_terminal_rms": 0.028324720023094434,
+          "suffix_terminal_level_db": -8.881174965810724,
+          "suffix_terminal_null_dbr": -1.8631153179949689,
+          "suffix_signed_corr": 0.6647519440108567,
+          "external_model_hpf_terminal_level_db": -8.885110683756832,
+          "external_model_hpf_terminal_null_dbr": -2.8918615580034244
+        }
+      },
+      "taps": {}
+    },
+    "held_lowcut_probe": {
+      "profile_loaded": true,
+      "factor": 4,
+      "receiver_cutoff_stimulus_hz": 211.95989990234375,
+      "leaf_pcm_sha": "b6db9ece186d002962f3d7d5a9b6ba9b4a62e0d5616b7f71a00cec86106455f4",
+      "windows": {
+        "attack": {
+          "candidate_leaf_rms": 0.17000749350775593,
+          "real_auv3_terminal_rms": 0.029742612143569495,
+          "suffix_terminal_level_db": -8.716890541481995,
+          "suffix_terminal_null_dbr": -1.8087961852394092,
+          "suffix_signed_corr": 0.6479221153795649,
+          "external_model_hpf_terminal_level_db": -8.831552898089628,
+          "external_model_hpf_terminal_null_dbr": -2.903685864741306
+        },
+        "held": {
+          "candidate_leaf_rms": 0.15619971085762524,
+          "real_auv3_terminal_rms": 0.028324720023094434,
+          "suffix_terminal_level_db": -8.834690358663208,
+          "suffix_terminal_null_dbr": -1.7430753009601214,
+          "suffix_signed_corr": 0.6378969653347737,
+          "external_model_hpf_terminal_level_db": -8.839798017479481,
+          "external_model_hpf_terminal_null_dbr": -2.7629239088706905
+        }
+      },
+      "taps": {
+        "generated_profile": {
+          "count": 52224,
+          "mean": -0.006195632253371847,
+          "rms": 0.2956586129670977
+        },
+        "pre_decimation": {
+          "count": 52224,
+          "mean": -0.006195632253371847,
+          "rms": 0.2956586129670977
+        },
+        "hb1_even": {
+          "count": 13056,
+          "mean": -0.0062350234310740256,
+          "rms": 0.2956566185843876
+        },
+        "hb1_odd": {
+          "count": 13056,
+          "mean": -0.006204983480588535,
+          "rms": 0.29564531127902804
+        },
+        "hb2": {
+          "count": 13056,
+          "mean": -0.006268752027000291,
+          "rms": 0.2956131143128817
+        }
+      }
+    }
+  }
+}

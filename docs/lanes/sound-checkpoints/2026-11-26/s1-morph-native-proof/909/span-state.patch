@@ -1,0 +1,45 @@
+--- a/firmware/src/dsp/drum909.c
++++ b/firmware/src/dsp/drum909.c
+@@ -1060,6 +1060,34 @@
+     if (m > 0 && s->inc == 1u && !(s->incf | s->frac) &&
+         s->pos < len && (unsigned)m < len - s->pos &&
+         (s->dk == s->pos || s->dk == s->pos + 1u)) {
++#if X0X_909_HUFF_DIAG
++        /* The span is the only observer of this voice until it is mixed.
++         * Hold Huffman/IMA state, lookahead and envelope in independent locals;
++         * reload/save each once at the actual same span boundary. */
++        uint32_t bit=s->huff_bit, dk=s->dk;
++        int32_t pred=s->pred, ix=s->idx, h0=s->h0, h1=s->h1;
++        d9_env_t env=s->out;
++        if (dk==s->pos) {
++            const uint8_t *p=adpcm+(bit>>3);
++            const unsigned word=p[0]|(unsigned)p[1]<<8;
++            const unsigned e=x0x_smp_huff_lut[(word>>(bit&7u))&63u];
++            bit+=e>>4;
++            h1=ima_decode_code(e&15u,&pred,&ix);
++            ++dk;
++        }
++        float *y=bus->y;
++        for(int i=0;i<m;i++) {
++            const uint8_t *p=adpcm+(bit>>3);
++            const unsigned word=p[0]|(unsigned)p[1]<<8;
++            const unsigned e=x0x_smp_huff_lut[(word>>(bit&7u))&63u];
++            bit+=e>>4;
++            h0=h1; h1=ima_decode_code(e&15u,&pred,&ix);
++            y[i]=((float)h0*(1.0f/32768.0f))*d9_env_tick(&env);
++        }
++        s->huff_bit=bit; s->dk=dk+(unsigned)m;
++        s->pred=pred; s->idx=ix; s->h0=h0; s->h1=h1;
++        s->out=env;
++#else
+         if (s->dk == s->pos)
+             s->h1 = d9_smp_decode(s, adpcm);
+         for (int i = 0; i < m; ++i) {
+@@ -1068,6 +1096,7 @@
+             const float v = (float)s->h0 * (1.0f / 32768.0f);
+             bus->y[i] = v * d9_env_tick(&s->out);
+         }
++#endif
+         s->pos += (unsigned)m;
+     } else {
+         for (int i = 0; i < m; ++i) {

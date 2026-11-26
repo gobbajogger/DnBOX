@@ -1,0 +1,155 @@
+{
+  "newest_executable_sha": "6d163d79202e866d2fda96e36f752bd386641b5ae2d0b1f829a254d26b652850",
+  "source_capture_sha": "82d0348669ebecb49245ee83fcb44c2a8576b9a2a5599e2f4591e671646bd5b8",
+  "scope": "Actual current Swift normalized closure -> actual current AKSampler masterVolume property -> instrument AU physical address0 message -> actual DSP setParameter, using minimal host layout; no AU render or inference.",
+  "cases": {
+    "OSC1": {
+      "authoring_parameter": "1",
+      "authoring_readback": 1,
+      "expected_transfer_top": 0.808,
+      "expected_transfer_power": 1.0,
+      "rows": [
+        [
+          0.125,
+          0.10100000351667404
+        ],
+        [
+          0.25,
+          0.20200000703334808
+        ],
+        [
+          0.5,
+          0.40400001406669617
+        ],
+        [
+          0.75,
+          0.6060000061988831
+        ],
+        [
+          0.875,
+          0.7070000171661377
+        ],
+        [
+          1.0,
+          0.8080000281333923
+        ],
+        [
+          0.0,
+          0.0
+        ]
+      ]
+    },
+    "OSC2": {
+      "authoring_parameter": "3",
+      "authoring_readback": 1,
+      "expected_transfer_top": 0.808,
+      "expected_transfer_power": 1.0,
+      "rows": [
+        [
+          0.125,
+          0.10100000351667404
+        ],
+        [
+          0.25,
+          0.20200000703334808
+        ],
+        [
+          0.5,
+          0.40400001406669617
+        ],
+        [
+          0.75,
+          0.6060000061988831
+        ],
+        [
+          0.875,
+          0.7070000171661377
+        ],
+        [
+          1.0,
+          0.8080000281333923
+        ],
+        [
+          0.0,
+          0.0
+        ]
+      ]
+    },
+    "Sub": {
+      "authoring_parameter": "202",
+      "authoring_readback": 0.726973295211792,
+      "expected_transfer_top": 0.808,
+      "expected_transfer_power": 1.0,
+      "rows": [
+        [
+          0.125,
+          0.10100000351667404
+        ],
+        [
+          0.25,
+          0.20200000703334808
+        ],
+        [
+          0.5,
+          0.40400001406669617
+        ],
+        [
+          0.75,
+          0.6060000061988831
+        ],
+        [
+          0.875,
+          0.7070000171661377
+        ],
+        [
+          1.0,
+          0.8080000281333923
+        ],
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.726973295211792,
+          0.5873944163322449
+        ]
+      ]
+    },
+    "Noise": {
+      "authoring_parameter": "201",
+      "authoring_readback": 0,
+      "expected_transfer_top": 0.707,
+      "expected_transfer_power": 2.5,
+      "rows": [
+        [
+          0.125,
+          0.003905660007148981
+        ],
+        [
+          0.25,
+          0.022093750536441803
+        ],
+        [
+          0.5,
+          0.1249811202287674
+        ],
+        [
+          0.75,
+          0.34440746903419495
+        ],
+        [
+          0.875,
+          0.5063368678092957
+        ],
+        [
+          1.0,
+          0.7070000171661377
+        ],
+        [
+          0.0,
+          0.0
+        ]
+      ]
+    }
+  }
+}

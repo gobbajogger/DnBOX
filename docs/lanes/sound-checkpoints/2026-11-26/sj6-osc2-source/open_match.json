@@ -1,0 +1,51 @@
+{
+  "scope": "matched actual current normalized static/open OSC2 capture and original current guest source, ideal or approximate external Apple HP, no real internal buses or sample corrections.",
+  "received_physical_cutoff_hz": 20000.001953125,
+  "results": {
+    "attack": {
+      "source_db": -9.962160271913165,
+      "source_null_dbr": -0.9925687951535044,
+      "source_cor": 0.48044466316365764,
+      "model_hpf_db": -10.100613590465448,
+      "model_hpf_null_dbr": -1.7099099207689354,
+      "native_repeat_null": -94.35601994711938,
+      "native_open_vs_authored_db": 0.27459708390817683
+    },
+    "held": {
+      "source_db": -10.455927673637431,
+      "source_null_dbr": -1.0543369402033325,
+      "source_cor": 0.5092071974209275,
+      "model_hpf_db": -10.46401842798364,
+      "model_hpf_null_dbr": -1.6120066711853305,
+      "native_repeat_null": -72.52421421019977,
+      "native_open_vs_authored_db": 1.139556536307785
+    },
+    "before_chord": {
+      "source_db": -23.291750257188784,
+      "source_null_dbr": -0.42798916991653513,
+      "source_cor": 0.7196882840714676,
+      "model_hpf_db": -12.700627258024051,
+      "model_hpf_null_dbr": -2.203511448544723,
+      "native_repeat_null": -77.71553715909933,
+      "native_open_vs_authored_db": 0.6169122431962266
+    },
+    "near_crossing": {
+      "source_db": 1.1296715783478324,
+      "source_null_dbr": 4.8747929927251725,
+      "source_cor": -0.3403869269759917,
+      "model_hpf_db": 1.3874435223265416,
+      "model_hpf_null_dbr": 4.7740864552379465,
+      "native_repeat_null": -66.85767127518405,
+      "native_open_vs_authored_db": -1.3731174459206317
+    },
+    "crossing": {
+      "source_db": -9.021009206580748,
+      "source_null_dbr": -3.6145675438464004,
+      "source_cor": 0.9750230361308803,
+      "model_hpf_db": -9.747744387602172,
+      "model_hpf_null_dbr": -3.201832892606687,
+      "native_repeat_null": -94.34840118624055,
+      "native_open_vs_authored_db": 0.005016285410431972
+    }
+  }
+}

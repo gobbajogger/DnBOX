@@ -52,3 +52,10 @@ The separate small SuperJ6 addendum adds the independently qualified pre-note la
 | `SJ6-Brainwave-Warm-Main-Sub.native.private.tgz` | 1,950,019 | `9db19abc7c56183e745e1f3de150559b319dabda4817ebd30af9a9db356c4b53` | Download by name, verify SHA-256, and extract into a new directory. The dual-published PCM files are the `repeat-*` fixtures in the [Git bench](lanes/sound-checkpoints/2026-11-26/sj6-direct-auv3-master/). |
 | `SJ6-Brainwave-Direct-AUv3-Fanin.tgz` | 7,779,940 | `d3821515187f4c086cde7ecbff57bafbae216fbd86becd1ff356fb1fe4a5df9f` | Download by name, verify SHA-256, extract and run `python3 score_fanin.py .`. The same eight PCM arrays are in the [Git bench](lanes/sound-checkpoints/2026-11-26/sj6-direct-auv3-fanin/). |
 | `SJ6-Direct-AUv3-OSC2-Static.tgz` | 1,973,203 | `6cc8622334a017bcdfb53b3364ceb106abd2ae26a05e730df752bfb336603384` | Download by name, verify SHA-256, extract and run `python3 score_reference.py`. Both PCM arrays are in the [Git bench](lanes/sound-checkpoints/2026-11-26/sj6-direct-auv3-osc2-static/). |
+
+## Exact Sound diagnostic source — 2026-11-26
+
+| Library name | Size (bytes) | SHA256 | Recovery |
+| --- | ---: | --- | --- |
+| `DnBOX-S1-Native-Morph-Worker-Proof.source-only.tgz` (v1) | 54,662 | `6aa132658a012d58e8e0ae666a3c2edb6392539510722d7eb9641d0388f32db9` | Download the listed version, verify SHA-256, extract into a new directory and check the inner hashes. See the [source and timing results in Git](lanes/sound-checkpoints/2026-11-26/s1-morph-native-proof/). |
+| `SJ6-Current-OSC2-and-Fader-Proof.source-only.tgz` | 62,876 | `f1ea9656685a3a30f53a511f6f538d25bb178e0509445c0cf2d2bbd984bb81b5` | Download by name, verify SHA-256, extract and verify the inner hashes by folder. See the [OSC2 source and A/B in Git](lanes/sound-checkpoints/2026-11-26/sj6-osc2-source/). Contains no original binary. |
