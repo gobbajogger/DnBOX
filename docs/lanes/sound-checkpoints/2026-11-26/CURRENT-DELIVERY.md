@@ -31,11 +31,14 @@ isolated kernel timing, or partial link into a release claim.
   spend the lease on the rejected H16 rate-only change. Each lease lives
   only while its slot is Synth One; hold all reserves and test timing.
 - SuperJ6: source-verified [OTA fader order](sj6-ota-fader-order/README.md)
-  and [Crusher control receiver](sj6-crusher-physical-receiver/README.md)
-  explain independent mismatches. The OTA isolated Main-only cold guard
-  reproduces fader scaling, but is no solution for the existing shared
-  Sub nonlinear state. Physical control law and ordered writes are proven;
-  they do not prove native audio or let us infer an unknown live graph.
+  fixes an isolated control law, not the whole shared Sub waveform.
+  [Installed Crusher dispatch](sj6-crusher-source-mapped/README.md)
+  identifies #108 as Amount, #109 as metadata-only Lo-Fi, and hidden
+  #110 as Mix. Earlier standalone tests paired the physical setters
+  with the wrong public labels; the optional #109 route is frozen.
+  The [zero-wet Apple leaf](sj6-apple-dry-exact-tuple/README.md) is now
+  supported directly at the tested 0 Decimation / 100% internal mix
+  tuple, but it does not establish the installed graph or fit.
 
 ## Earlier checkpoints
 
