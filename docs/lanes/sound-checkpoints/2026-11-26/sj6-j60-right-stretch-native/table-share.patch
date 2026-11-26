@@ -1,0 +1,265 @@
+--- a/firmware/src/dsp/juno6_factory.inc
++++ b/firmware/src/dsp/juno6_factory.inc
+@@ -632,6 +632,7 @@
+ }
+ 
+ #if (defined(X0X_HOST) && defined(X0X_SJ6_ALT3_WITNESS)) || X0X_SJ6_ALT3_NATIVE
++#include "control_grids_shared.h"
+ static float sj6_alt3_rate(float normalized,int synced,float tempo)
+ {
+     if (!synced) return 16.0f*fm_powf(normalized,3.33f);
+@@ -643,11 +644,8 @@
+     return (float)(((double)tempo/60.0*grid[index])*.25);
+ #else
+     /* Native PI32v2 has no floating-point widening runtime. */
+-    static const float grid[18]={
+-        64,48,32,24,16,12,8,6,4,3,2,1.5f,1,.5f,.3333f,.25f,.1667f,.125f
+-    };
+     const unsigned index=(unsigned)((1.f-normalized)*17.f+.5f);
+-    return (tempo*(1.f/240.f))*grid[index];
++    return (tempo*(1.f/240.f))*dnbox_sj6_native_grid[index];
+ #endif
+ }
+ int juno6_arm_alt3_running(juno6_t *s,unsigned verified_ramp_frames,int tempo_sync)
+--- a/firmware/src/dsp/sj6_native_room.inc
++++ b/firmware/src/dsp/sj6_native_room.inc
+@@ -9,12 +9,12 @@
+     /* Original free rate, authenticated Build9 conductor ID22. */
+     return 16.f*fm_powf(u,3.33f);
+ }
++#include "control_grids_shared.h"
+ float sj6_room_rate_clocked(unsigned word,float bpm,int sync)
+ {
+     if(!sync)return sj6_room_rate(word);
+-    static const float grid[18]={64,48,32,24,16,12,8,6,4,3,2,1.5f,1,.5f,.3333f,.25f,.1667f,.125f};
+     const unsigned index=(17u*(127u-word)+63u)/127u;
+-    return bpm>0.f ? (bpm*(1.f/240.f))*grid[index] : 0.f;
++    return bpm>0.f ? (bpm*(1.f/240.f))*dnbox_sj6_native_grid[index] : 0.f;
+ }
+ void original_runtime_sj6_room_clock(original_runtime_part *p,float bpm,int sync)
+ {
+--- a/firmware/src/dsp/fxbus.c
++++ b/firmware/src/dsp/fxbus.c
+@@ -2,6 +2,7 @@
+ /* Send reverb, synced delay and master stage: a port of 9W9's er99_verb_tick,
+  * er99_dly_tick, master distortion and master_glue (GPL-3.0). See fxbus.h. */
+ #include "fxbus.h"
++#include "control_grids_shared.h"
+ #include "../x0x_cold.h"          /* X0X_COLD: fxbus_init is boot only, not the send/render */
+ 
+ static const int32_t fx_cl[4] = { 1116, 1188, 1277, 1356 };
+@@ -10,10 +11,7 @@
+ #define FX_RV_QUIET (1356 + 8192)          /* combs silent this long: the allpass tail is < -140 dB */
+ 
+ /* 1/32 1/16T 1/16 1/8T 1/16. 1/8 1/4T 1/8. 1/4 1/2T 1/4. 1/2 1/2. (in beats) */
+-static const float fx_beats[13] = {
+-    0.125f, 1.0f / 6.0f, 0.25f, 1.0f / 3.0f, 0.375f, 0.5f, 2.0f / 3.0f,
+-    0.75f, 1.0f, 4.0f / 3.0f, 1.5f, 2.0f, 3.0f
+-};
++
+ 
+ /* ---- parameters ---- */
+ enum { CV_LIN, CV_EXP, CV_SW };
+@@ -89,7 +87,7 @@
+     if (i < 0) i = 0;
+     if (i > 12) i = 12;
+     const float bpm = f->bpm >= 20.0f ? f->bpm : 120.0f;
+-    float ms = fx_beats[i] * 60000.0f / bpm;
++    float ms = dnbox_delay_beats[i] * 60000.0f / bpm;
+     const float max_ms = (float)(f->dlen - 256) / D9_SR * 1000.0f;
+     while (ms > max_ms)                 /* longer than the line (1/2. under 90 BPM): half of it, */
+         ms *= 0.5f;                     /* which is still on the beat; cutting it short is not */
+--- a/firmware/src/app/chicago_bpmdly.h
++++ b/firmware/src/app/chicago_bpmdly.h
+@@ -43,15 +43,13 @@
+ }
+ 
+ /* Same beat grid as fxbus DlTime 0..12. */
++#include "../dsp/control_grids_shared.h"
+ static inline float chi_bpmdly_beats(uint8_t div)
+ {
+-    static const float beats[13] = {
+-        0.125f, 1.0f / 6.0f, 0.25f, 1.0f / 3.0f, 0.375f, 0.5f, 2.0f / 3.0f,
+-        0.75f,  1.0f,        4.0f / 3.0f, 1.5f,  2.0f,  3.0f
+-    };
++    
+     if (div > 12)
+         div = 12;
+-    return beats[div];
++    return dnbox_delay_beats[div];
+ }
+ 
+ static inline void chi_bpmdly_set_bpm(chi_bpmdly_t *d, uint8_t e1, uint8_t e2, float sr, float bpm)
+--- a/firmware/src/dsp/master.c
++++ b/firmware/src/dsp/master.c
+@@ -13,13 +13,14 @@
+  * glides so a fast sweep does not zipper (ReBirth's PCF idea: sweep the whole mix).
+  * Limiter: instant-attack peak follower, ~150 ms release, then a tanh knee above -1 dBFS. */
+ #include "master.h"
++#include "control_grids_shared.h"
+ #include "../x0x_cold.h"
+ #include "fastmath.h"
+ 
+ #define FS 44100.0f
+ 
+ static const char *const RATIO_N[] = {"1:1", "1.5:1", "2:1", "3:1", "4:1", "6:1", "8:1", "12:1", "20:1", "INF"};
+-static const float RATIO_V[] = {1.0f, 1.5f, 2.0f, 3.0f, 4.0f, 6.0f, 8.0f, 12.0f, 20.0f, 1e6f};
++
+ static const char *const SRC_N[] = {"909", "808", "BOTH"};
+ static const char *const MODE_N[] = {"OFF", "LP", "BP", "HP"};
+ static const char *const ONOFF_N[] = {"OFF", "ON"};
+@@ -63,7 +64,7 @@
+ /* Pot/init path only — master_process reads precomputed coefs (X0X_COLD) */
+ X0X_COLD static void comp_coefs(master_t *m)
+ {
+-    float ratio = RATIO_V[m->pot[MST_RATIO] % 10];
++    float ratio = dnbox_master_ratio[m->pot[MST_RATIO] % 10];
+     m->thr_db = thresh_db(m->pot[MST_THRESH]);
+     m->slope = 1.0f - 1.0f / ratio;
+     m->knee = 6.0f;
+@@ -120,7 +121,7 @@
+ {
+     float x = (float)v * (1.0f / 127.0f), thr = -4.0f - 28.0f * x, mk;
+     int ri = v ? 1 + (int)(x * 4.0f + 0.5f) : 0;
+-    mk = ri ? fm_minf(-thr * (1.0f - 1.0f / RATIO_V[ri]) * 0.85f, 24.0f) : 0.0f;
++    mk = ri ? fm_minf(-thr * (1.0f - 1.0f / dnbox_master_ratio[ri]) * 0.85f, 24.0f) : 0.0f;
+     *thresh = (uint8_t)((thr + 48.0f) * (127.0f / 48.0f) + 0.5f);
+     *ratio = (uint8_t)ri;
+     *makeup = (uint8_t)(mk * (127.0f / 24.0f) + 0.5f);
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -22,6 +22,7 @@
+ #include "../dsp/fastmath.h"
+ #include "../dsp/juno6_controls.h"
+ #include "../dsp/master.h"
++#include "../dsp/control_grids_shared.h"
+ #include "../dsp/drum909.h"              /* this renderer directly uses DR_* and drum909_param_si */
+ #include "ui_original_controls.h"
+ #if X0X_ORIGINAL_SYNTH
+@@ -1034,6 +1035,7 @@
+ #if X0X_SUPERJ6_BUILTIN_INIT
+ static const x0x_param_t *sj6_knob_desc(unsigned slot)
+ {
++    static const char *const lfo_wave[]={"TRI","RAMP UP","RAMP DOWN","SQUARE","S&H"};
+ #if X0X_SJ6_ALT3_NATIVE
+     if(slot==SJ6_TREM_DEPTH || slot==SJ6_TREM_RATE) {
+         static const x0x_param_t trem[]={{"DEPTH",127,0,0},{"RATE",127,64,0}};
+@@ -1067,8 +1069,7 @@
+         return &toggle[slot-SJ6_LFO1_ENABLE];
+     }
+     if(slot==SJ6_LFO1_WAVE){
+-        static const char *const names[]={"TRI","RAMP UP","RAMP DOWN","SQUARE","S&H"};
+-        static const x0x_param_t wave={"LFO1 WAVE",SJ6_LFO1_WAVE_MAX,0,names};return &wave;
++        static const x0x_param_t wave={"LFO1 WAVE",SJ6_LFO1_WAVE_MAX,0,lfo_wave};return &wave;
+     }
+ #endif
+ #if X0X_SJ6_LFO1_DELAY_PORT
+@@ -1089,7 +1090,6 @@
+     static const char *const enable[] = {"OFF", "ON"};
+     static const char *const pwm_route[]={"OFF","PWM 1","PWM 2"};
+     static const char *const clock_mode[]={"FREE","SYNC"};
+-    static const char *const lfo_wave[]={"TRI","RAMP UP","RAMP DOWN","SQUARE","S&H"};
+     static const x0x_param_t knobs[SJ6_KNOBS+1] = {
+         {"WAVE 1", SJ6_WAVE_STOPS, 2, wave}, {"WAVE 2", SJ6_WAVE_STOPS, 2, wave},
+         {"RANGE", SJ6_RANGE_STOPS, 1, range},
+@@ -10869,9 +10869,9 @@
+ {
+  const x0x_param_t *d=pref_desc(r);int q=d&&d->max?(val*127+d->max/2)/d->max:0,left=cx-18;
+  if(r.kind==R_ENG && r.a==T_MST && r.c==MST_COMP1) {
+-  static const float ratios[]={1,1.5f,2,3,4,6,8,12,20,1e6f};
++  
+   int py=48, ratio=engine_master_get(MST_RATIO), mix=engine_master_get(MST_MIX);
+-  float t=-48.0f+48.0f*engine_master_get(MST_THRESH)/127.0f, slope=1.0f-1.0f/ratios[(unsigned)ratio<10u?ratio:0];
++  float t=-48.0f+48.0f*engine_master_get(MST_THRESH)/127.0f, slope=1.0f-1.0f/dnbox_master_ratio[(unsigned)ratio<10u?ratio:0];
+   cv_line(left,48,cx+18,28,C_LINE);
+   for(int i=1;i<=36;i++) {
+    float input=-48.0f+48.0f*i/36.0f;
+--- a/firmware/src/dsp/ima_adpcm.h
++++ b/firmware/src/dsp/ima_adpcm.h
+@@ -26,12 +26,16 @@
+ #endif
+ 
+ /* decode nibble i of d; updates the decoder state and returns the new sample */
+-static const uint8_t IMA_ROUND_CORR[64] = {
++#ifdef X0X_IMA_TABLES_DEFINE
++const uint8_t IMA_ROUND_CORR[64] = {
+     0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,
+     0,0,0,0,0,0,0,0, 0,1,0,1,0,1,0,1,
+     0,0,0,0,0,0,0,0, 0,0,1,1,0,0,1,1,
+     0,1,0,1,0,1,0,1, 0,1,1,2,0,1,1,2
+ };
++#else
++extern const uint8_t IMA_ROUND_CORR[64];
++#endif
+ static inline int32_t ima_decode_code(uint32_t code, int32_t *pred, int32_t *idx)
+ {
+     uint32_t mag = code & 7u;
+--- a/firmware/src/dsp/drum808.c
++++ b/firmware/src/dsp/drum808.c
+@@ -2293,21 +2293,30 @@
+     }
+ }
+ 
++/* Use one field-offset table, rather than four copies of the fixed
++ * stock object's pointer table created by target LTO. No voice state is
++ * changed, and the function still works with arbitrary kit instances. */
++#include <stddef.h>
+ static int voice_active(const drum808_t *d, int l)
+ {
+-    switch (l) {
+-    case L_BD: return d->bd.active;
+-    case L_SD: return d->sd.active;
+-    case L_T0: case L_T1: case L_T2: return d->tom[l - L_T0].active;
+-    case L_RS: return d->rs.active;
+-    case L_CL: return d->cl.active;
+-    case L_MA: return d->ma.active;
+-    case L_CP: return d->cp.active;
+-    case L_CB: return d->cb.active;
+-    case L_CH: return d->ch.active;
+-    case L_OH: return d->oh.active;
+-    default: return d->cy.active;
+-    }
++    static const uint16_t active_at[L_NUM] = {
++        offsetof(drum808_t,bd.active),
++        offsetof(drum808_t,sd.active),
++        offsetof(drum808_t,tom[0].active),
++        offsetof(drum808_t,tom[1].active),
++        offsetof(drum808_t,tom[2].active),
++        offsetof(drum808_t,rs.active),
++        offsetof(drum808_t,cl.active),
++        offsetof(drum808_t,ma.active),
++        offsetof(drum808_t,cp.active),
++        offsetof(drum808_t,cb.active),
++        offsetof(drum808_t,ch.active),
++        offsetof(drum808_t,oh.active),
++        offsetof(drum808_t,cy.active),
++    };
++    _Static_assert(sizeof(drum808_t) <= UINT16_MAX,"voice active offset must fit");
++    unsigned i=(unsigned)l < L_NUM ? (unsigned)l : L_CY;
++    return ((const unsigned char *)d)[active_at[i]];
+ }
+ 
+ /* The panel reads the envelope. Each 8W8 voice owns its release and
+@@ -2348,6 +2357,9 @@
+ int drum808_active(const drum808_t *d)
+ {
+     int l;
++#if defined(__clang__)
++#pragma clang loop unroll(disable)
++#endif
+     for (l = 0; l < L_NUM; l++)
+         if (lane_on(d, l))
+             return 1;
+--- /dev/null
++++ b/firmware/src/dsp/control_grids_shared.h
+@@ -0,0 +1,10 @@
++/* SPDX-License-Identifier: GPL-3.0-only */
++#pragma once
++__attribute__((weak)) const float dnbox_sj6_native_grid[18]={
++        64,48,32,24,16,12,8,6,4,3,2,1.5f,1,.5f,.3333f,.25f,.1667f,.125f
++    };
++__attribute__((weak)) const float dnbox_delay_beats[13] = {
++    0.125f, 1.0f / 6.0f, 0.25f, 1.0f / 3.0f, 0.375f, 0.5f, 2.0f / 3.0f,
++    0.75f, 1.0f, 4.0f / 3.0f, 1.5f, 2.0f, 3.0f
++};
++__attribute__((weak)) const float dnbox_master_ratio[] = {1.0f, 1.5f, 2.0f, 3.0f, 4.0f, 6.0f, 8.0f, 12.0f, 20.0f, 1e6f};

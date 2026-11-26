@@ -1,0 +1,88 @@
+--- a/firmware/src/app/original_runtime.h
++++ b/firmware/src/app/original_runtime.h
+@@ -37,9 +37,23 @@
+         sj6_room_t room;
+         struct {float step,phase,hold[2];uint8_t active;} crush;
+ #endif
++#if DNBOX_S1_WET_LEASE_LAB
++        int16_t unison_history[2][SJ6_UNISON_HISTORY];
++#endif
+     } juno;
+     s1_dry_part synthone;
++#if DNBOX_S1_WET_LEASE_LAB
++    struct { s1_dry_part base; uint8_t delay[6784]; } s1_wet_lease;
++#endif
+ } original_runtime_backend;
++#if DNBOX_S1_WET_LEASE_LAB
++_Static_assert(X0X_S1C && X0X_SJ6_NATIVE_UNISON, "both typed roles required");
++#ifndef X0X_HOST
++_Static_assert(__builtin_offsetof(original_runtime_backend,juno.unison_history)==10544, "original Juno prefix invariant");
++_Static_assert(__builtin_offsetof(original_runtime_backend,s1_wet_lease.delay)==7856, "original S1 prefix invariant");
++_Static_assert(sizeof(original_runtime_backend)==14640,"guarded no-growth role histories");
++#endif
++#endif
+ /* Shared live arp / ARP SEQ for SYNTHONE and JUNO owners (engine_arp.h). Live
+  * sources feed held[]; SEQUENCE playback bypasses it. Audio context only. */
+ #if X0X_ARP_ENGINE
+--- a/firmware/src/app/original_presets.inc
++++ b/firmware/src/app/original_presets.inc
+@@ -2076,12 +2076,19 @@
+ }
+ 
+ #if X0X_SJ6_NATIVE_UNISON
++#if !DNBOX_S1_WET_LEASE_LAB
+ static int16_t sj6_unison_input[NBASS][2][SJ6_UNISON_HISTORY] X0X_POOL;
++#endif
+ static void sj6_typed_unison_apply(unsigned v)
+ {
+     if(original_typed_sj6_carrier(mot_base_snd,v)&&sj6_unison_owner(mot_base_snd,v)&&sj6_knob_ready(v))
+         juno6_unison_config(&original_bass[v].dsp.juno.synth,
+-                           sj6_unison_code(mot_base_snd,v),sj6_unison_input[v]);
++                           sj6_unison_code(mot_base_snd,v),
++#if DNBOX_S1_WET_LEASE_LAB
++                           original_bass[v].dsp.juno.unison_history);
++#else
++                           sj6_unison_input[v]);
++#endif
+ }
+ X0X_COLD int engine_sj6_unison_get(unsigned v,unsigned slot)
+ {
+--- a/firmware/src/app/original_runtime.c
++++ b/firmware/src/app/original_runtime.c
+@@ -73,6 +73,10 @@
+          * reverb lines and delay pool live there (retire re-initialises it). */
+         if (!fx || !fx->context) return p->status = ORIGINAL_RUNTIME_NEEDS_FX;
+         s1_part_bind(&p->dsp.synthone, fx->context);
++#if DNBOX_S1_WET_LEASE_LAB && DNBOX_S1_WET_LEASE_USE
++        p->dsp.synthone.e.pool=p->dsp.s1_wet_lease.delay;
++        p->dsp.synthone.e.pool_bytes=(int)sizeof p->dsp.s1_wet_lease.delay;
++#endif
+         {
+             unsigned program = original_sound_s1_program(cell);
+             /* A missing pack or program plays INIT: still a valid, selectable sound. */
+--- a/firmware/src/app/s1c_part.c
++++ b/firmware/src/app/s1c_part.c
+@@ -79,6 +79,11 @@
+     s1c *e = &part->e;
+     int ok = 1;
+     if (program != S1_PART_INIT && program >= s1_part_programs()) { program = S1_PART_INIT; ok = 0; }
++#if DNBOX_S1_WET_LEASE_LAB && DNBOX_S1_WET_LEASE_USE
++    /* A cold program reload keeps the caller's physical lease. */
++    uint8_t *const owned_delay=e->pool;
++    const int owned_bytes=e->pool_bytes;
++#endif
+     load_init(e);
+ #if !X0X_SYNTH_CONTROLS_INIT_ONLY
+     if (program != S1_PART_INIT) {
+@@ -131,7 +136,11 @@
+ #endif
+     part->held = 0;
+     if (part->arena)
++#if DNBOX_S1_WET_LEASE_LAB && DNBOX_S1_WET_LEASE_USE
++        s1c_attach(e, part->arena, part->wbuf, owned_delay, owned_bytes);
++#else
+         s1c_attach(e, part->arena, part->wbuf, part->arena + S1C_RVB_BYTES, (int)(S1C_ARENA_BYTES - S1C_RVB_BYTES));
++#endif
+     return ok;
+ }
+ 

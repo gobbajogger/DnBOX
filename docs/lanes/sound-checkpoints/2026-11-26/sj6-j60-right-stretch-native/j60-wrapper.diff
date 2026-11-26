@@ -1,0 +1,8 @@
+@@ -347,6 +347,7 @@
+ b.ORIGINAL_SYNTH_OZ_UNITS |= {'chicago_selector','chicago_arp_control','chicago_note_context','miami_geometry','miami_fx_conversion'}
+ b.CFLAGS.extend(Path(os.environ['DNBOX_CONTROL_FLAGS']).read_text().split())
+ b.CFLAGS.extend(["-DDNBOX_S1_WET_LEASE_LAB=1","-DDNBOX_S1_WET_LEASE_USE=0"])
++b.CFLAGS.append("-DDNBX_EXPERIMENT_J60_POST=1")
+ if os.environ.get("DNBOX_CHICAGO_MOD_SPEED_COMPACT") == "1": b.CFLAGS.append("-DDNBOX_CHICAGO_MOD_SPEED_COMPACT=1")
+ if os.environ.get("DNBOX_CHICAGO_DRIVE_COMPACT") == "1": b.CFLAGS.append("-DDNBOX_CHICAGO_DRIVE_COMPACT=1")
+ if os.environ.get("DNBOX_CHICAGO_MOD_PALETTE") == "1": b.CFLAGS.append("-DDNBOX_CHICAGO_MOD_PALETTE=1")

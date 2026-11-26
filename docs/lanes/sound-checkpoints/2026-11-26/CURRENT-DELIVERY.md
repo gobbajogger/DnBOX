@@ -16,7 +16,11 @@ isolated kernel timing, or partial link into a release claim.
   At identical input and with corrected post filtering, the right-only
   change improves mode-I signed residual from −19.97 to −34.34 dBr held,
   and from −18.68 to −27.90 dBr on the chord. Independent II/Both held
-  out well, but a linked budget and full audio test remain pending.
+  out well. [Matched linked pair](sj6-j60-right-stretch-native/README.md)
+  costs 48 B APP and no pool memory, leaving 584 B Elite / 596 B Pro
+  and +564 B above reserve. This does not establish native timing or
+  whole-preset parity. The [third-term trial](sj6-raw-j60-right-combined/result.json)
+  still leaves the substitute direct bridge overshooting; keep it off.
 
 - **J60V2 post-delay coefficient:** the original wet integrators use
   0.2516540875; compact reused 0.533294672 from the *input* biquad.

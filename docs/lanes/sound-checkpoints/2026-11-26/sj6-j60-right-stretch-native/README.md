@@ -1,0 +1,8 @@
+# J60 right-stretch capacity (guarded native only)
+This archive contains only source, logic and paired link readback. No ELF or PCM. Rebuild from workspace root with bash sj6-j60-right-native/warm.sh, writing stdout/stderr to sj6-j60-right-native/warm.log; then python3 sj6-j60-right-native/verify.py warm.
+ 
+Baseline strict warm donor /tmp/phaser-warm-own.Y0XNbQ links Elite 39986b42b39fe3e300cdf8a7fb60996ef475580118c664f7efac4961d9d82918 and Pro df5831a1a84f8b52198f9af9112ac44a97c12759743d710d4f2b35d215db4570. Exact previous warm tables + dormant lease + approved coefficient sources are reconstructed from archived pure deltas. Right-line source proof is sibling sj6-j60-read/right-stretch-host.patch. apply.py requires the exact single original source-line preimage and permits non-host explicitly only for this isolated diagnostic. Right feature stays default OFF; exact prior stock+post-only ELF is an enforced comparator. Layout-only lease is LAB=1, USE=0 both arms. No enabled delay, packaging, hardware or merge.
+ 
+Independent fallback (not warm): run.sh elite and pro, then verify.py independent. Both branches link exact guarded donor and accepted wet-post scalar, not the live app. Both readbacks retain symbol addresses, APP link cost, FDATA/FITTAB/slot3 guards, Reserve8192 and pool headroom. Audio from the sibling archived host witness is separate proof for modes I/II/Both and bypass, not device timing or a bit-perfect synth claim.
+
+Measured warm links: +48 APP each, remaining 584/596 B Elite/Pro, unchanged +564 B over 8192 POOL_MIN; all read-only region extents unchanged. Linked routine grows 42 B with 6 B final layout rounding.

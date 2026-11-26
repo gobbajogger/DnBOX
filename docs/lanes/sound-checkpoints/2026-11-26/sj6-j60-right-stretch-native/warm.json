@@ -1,0 +1,143 @@
+{
+  "donor": "warm",
+  "results": {
+    "elite": {
+      "off_elf_exact_pin": true,
+      "elf_sha": [
+        "6e7878f91f4c2f4d4fe5a8c3112d69845406a9a644a1c31dfa42a121dad01a33",
+        "0ffdc7faf4f8ecace4e119accce10ecb64dac16122d2586d323c388da305bd7c"
+      ],
+      "off_on_app_used": [
+        552040,
+        552088
+      ],
+      "off_on_app_free": [
+        632,
+        584
+      ],
+      "app_delta_bytes": 48,
+      "pool_extra_above_8192_bytes": 564,
+      "fdata_slot3_slot3_free_fittab_sizes_unchanged": [
+        61432,
+        32764,
+        4,
+        4072
+      ],
+      "native_symbols_off_on": [
+        {
+          "juno6_j60_process": [
+            "0x2065fd2",
+            1062
+          ],
+          "_pool_start": [
+            "0x1c20000",
+            0
+          ],
+          "_pool_end": [
+            "0x1c71dcc",
+            0
+          ],
+          "_xpool_start": [
+            "0x1c75200",
+            0
+          ],
+          "_xpool_end": [
+            "0x1c77600",
+            0
+          ]
+        },
+        {
+          "juno6_j60_process": [
+            "0x2065fd2",
+            1104
+          ],
+          "_pool_start": [
+            "0x1c20000",
+            0
+          ],
+          "_pool_end": [
+            "0x1c71dcc",
+            0
+          ],
+          "_xpool_start": [
+            "0x1c75200",
+            0
+          ],
+          "_xpool_end": [
+            "0x1c77600",
+            0
+          ]
+        }
+      ]
+    },
+    "pro": {
+      "off_elf_exact_pin": true,
+      "elf_sha": [
+        "5937ef79add726e8fb8d5a493324b3401a136e81d64c8cb0611999ed505d48c5",
+        "ddbcae26a746c6ee2f4ccae382ceb4762d06f42d3544875862dcb75f94c3ea51"
+      ],
+      "off_on_app_used": [
+        552028,
+        552076
+      ],
+      "off_on_app_free": [
+        644,
+        596
+      ],
+      "app_delta_bytes": 48,
+      "pool_extra_above_8192_bytes": 564,
+      "fdata_slot3_slot3_free_fittab_sizes_unchanged": [
+        61432,
+        32764,
+        4,
+        4072
+      ],
+      "native_symbols_off_on": [
+        {
+          "juno6_j60_process": [
+            "0x2065fd2",
+            1062
+          ],
+          "_pool_start": [
+            "0x1c20000",
+            0
+          ],
+          "_pool_end": [
+            "0x1c71dcc",
+            0
+          ],
+          "_xpool_start": [
+            "0x1c75200",
+            0
+          ],
+          "_xpool_end": [
+            "0x1c77600",
+            0
+          ]
+        },
+        {
+          "juno6_j60_process": [
+            "0x2065fd2",
+            1104
+          ],
+          "_pool_start": [
+            "0x1c20000",
+            0
+          ],
+          "_pool_end": [
+            "0x1c71dcc",
+            0
+          ],
+          "_xpool_start": [
+            "0x1c75200",
+            0
+          ],
+          "_xpool_end": [
+            "0x1c77600",
+            0
+          ]
+        }
+      ]
+    }
+  }
+}
