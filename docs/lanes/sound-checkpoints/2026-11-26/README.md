@@ -14,7 +14,10 @@ No patch is enabled merely by adding these files to the sound branch.
   leaves 72 B XIP on Elite, 84 B on Pro, and 564 B of usable pool above
   the 8 KiB reserve on each in the guarded diagnostic link. The tested
   engine fits the existing backend union. The separate BFP attempt
-  overflowed by 228/216 B. Native timing/audio are not qualified.
+  overflowed by 228/216 B. The independently compiled in-engine half-history
+  replay preserves all 264,600 left samples and the entire room trace; the
+  right last-second residual is −42.5144 dBr against the original. Both-board
+  native timing and audio qualification are still outstanding.
 - A general rate-then-bit-depth selector reduces Mushroom's right
   spectral error from 4.14 to 2.65 dB (bar: 3 dB) without preset edits.
   Hall Drone is cadence-limited and Deeper Space Pad precision-limited.
