@@ -6,6 +6,35 @@ isolated kernel timing, or partial link into a release claim.
 
 ## Latest measured results
 
+- **Original Raw post-voice owners, guarded host only.** The actual
+  current OTA cutoff setter produces physical 30,000.0078125 Hz for
+  this cue. Separately captured Main and Sub state and program
+  chronology were joined at the app's proven unity mixer before the
+  compact instrument HP. Dry solo summation matches the joined result
+  below −143 dBr. Original post-voice substitution improves held and
+  complete comparisons, but worsens the first signed release. A
+  separately guarded HP10/zero-Crusher before J60 and final DC after
+  the unchanged master recovers that first release (authored +1.090
+  → −6.048 dBr, dry +0.827 → −5.272), but worsens authored chord,
+  final release and whole. No adoption. Source-only archive receipts:
+  10,072 B, SHA256 `ad08cba363dd5dfd05a4330722c1d74ea23c95233fe5c42f3598a46870ff05ed`;
+  12,011 B, SHA256 `33338b9df37da383b76489a7d67f7857b647303106fe642f4d8a56b8bb162fcd`.
+  Do not infer the complete installed graph or export original audio.
+
+- **SuperJ6 distinct factory controls.** #203/#204 select independent
+  performance XY destinations, not sequencer pads. Original setter
+  dispatch and Pad Lock restore keep the two fields separate; every
+  one of the 640 original presets stores distinct values. Existing AU
+  setter/loaded-state proof does not verify XY movement or enable a
+  firmware editor. Archive SHA256
+  `e448e6f9837bced7de5c55576270d134ea9e15ac50134cc341419f2b047267a9`.
+  Original cold order sends #7/#8 before #129/#130, but that is not
+  alias precedence. Actual #7 writes cutoff address 36; the distinct
+  #129 harmonic cutoff uses address 6. #8 writes resonance on four
+  nodes plus a separate compensation mixer. Complete public #130
+  dispatch is not yet proven. Keep all fields separate and refuse
+  unsupported factory restores.
+
 - **Downloadable preset transaction on host:** the [actual immutable
   DNL2 reader](dnl2-immutable-staging/README.md) validates all 1,546
   presets and 221,013 ordered exact parameter words, never claims
