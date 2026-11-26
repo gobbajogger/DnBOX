@@ -768,3 +768,31 @@ matches the separately verified host reconstruction, not the original
 full instrument. Reject activation; no all-window improvement, no
 firmware timing/binary fit evidence, and no re-testing the same chorus
 contrast merely to assert a ship pass.
+
+### Verified Raw Main release-envelope mismatch and independent Sub replacement
+The [release law experiment](sj6-main-exact-release-law/README.md)
+proves four 40-call sensor differences, exactly 39 nonzero AMP frames
+plus one zero bookkeeping frame per note. Original and compact MIDI
+gates align. A real source-law correction matches 2,240 active
+original release-envelope words in each cue, without changing stock
+Sub or held notes. It does not close the whole render; the two dry
+owner-release windows worsen slightly. Do not promote it on its own.
+The [separate source counterfactual](sj6-ota-history/sub-counter/README.md)
+replaces only the already-filtered Sub stream in the same release-law
+Main context. Held/chord and whole signed errors substantially improve;
+first dry and authored owner release regress and the gross level
+difference remains. Phase at this upstream source is causal, but
+no constant gain, polarity or arbitrary time shift is licensed.
+Native original at the shared pre-HP/Crusher boundary remains absent.
+
+### Measured 1/4/6 active bare-object timing, not an integrated firmware pass
+The [matching stock/physical replay](sj6-ota-bare-active/README.md)
+measures six-voice 64,264→237,510 TIMER4 ticks over 512 frames. The
+independent [linearized zero-feedback shadow](sj6-ota-bare-tangent/README.md)
+reduces its cost to 114,685. The [paired pole schedule](sj6-ota-bare-tangent-pair/README.md)
+preserves the tangent checksums at 1/4/6 active voices and reduces
+six-voice time to 72,354. This leaves about 337 µs per 512 frames
+above stock in this independent test instead of 2.10 ms. These are
+bare synthetic filters, no Sub, DMA, scheduler, controls or installed
+app. The tangent scope still must not be used for arbitrary feedback,
+unqualified levels or as a substitute for a full two-model gate.

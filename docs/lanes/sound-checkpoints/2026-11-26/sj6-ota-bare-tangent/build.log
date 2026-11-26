@@ -1,0 +1,25 @@
+<diagnostic-worktree>/restored-gate/fm1-live-ba83317a: OK
+/tmp/phaser-warm-own.Y0XNbQ/tree/firmware/src/dsp/dnbx_core.c: OK
+70d0aa0ea1cf2192e50cd51b45dffe01533cde368c0a1778959d39312b0ce759  /tmp/phaser-warm-own.Y0XNbQ/tree/firmware/src/dsp/dnbx_core.c
+8bd49ada1e2cf9f56570038ad505cbc46b9917bfbe70a5f9fc1caec8aa85f610  <diagnostic-worktree>/sj6-ota-bare-tangent/full.c
+29d9a01a998711032697263603144b0cbca5e79812e4ce138137f9076901c29f  <diagnostic-worktree>/s1-native-909-ride-boundary/start.S
+4821123206c20a39b25226fb3261bf08adaeb918e1522920aef4351df274df82  <diagnostic-worktree>/s1-native-909-ride-boundary/bench.ld
+<diagnostic-worktree>/sj6-ota-bare-tangent/full.c: OK
+7a6599f3cf9912373f2d356ae67585db231b368705ff80d4c54321eba01de071  <diagnostic-worktree>/sj6-ota-bare-tangent/tangent-auth.py
+         U memset
+         U memset
+020006ae 00000130 T candidate
+02000248 00000086 t clock_2x
+0200051c 00000192 t clock_2x
+020002ce 00000196 T stock
+dump 0x1c10000: 00004f1f af7f2fb5 00009e7f 08e73264
+020006d2 00000130 T candidate
+0200026c 00000086 t clock_2x
+02000540 00000192 t clock_2x
+020002f2 00000196 T stock
+dump 0x1c10000: 00012c7d 1472bdaa 00026c0e ecfc96f4
+020006d2 00000130 T candidate
+0200026c 00000086 t clock_2x
+02000540 00000192 t clock_2x
+020002f2 00000196 T stock
+dump 0x1c10000: 0001bffd 7739089b 00039fc5 c9f4b548

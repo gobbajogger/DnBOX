@@ -1,0 +1,23 @@
+<diagnostic-worktree>/restored-gate/fm1-live-ba83317a: OK
+70d0aa0ea1cf2192e50cd51b45dffe01533cde368c0a1778959d39312b0ce759  /tmp/phaser-warm-own.Y0XNbQ/tree/firmware/src/dsp/dnbx_core.c
+8bd49ada1e2cf9f56570038ad505cbc46b9917bfbe70a5f9fc1caec8aa85f610  <diagnostic-worktree>/sj6-ota-bare-active/full.c
+29d9a01a998711032697263603144b0cbca5e79812e4ce138137f9076901c29f  <diagnostic-worktree>/s1-native-909-ride-boundary/start.S
+4821123206c20a39b25226fb3261bf08adaeb918e1522920aef4351df274df82  <diagnostic-worktree>/s1-native-909-ride-boundary/bench.ld
+<diagnostic-worktree>/sj6-ota-bare-active/full.c: OK
+         U memset
+         U memset
+0200083e 00000130 T candidate
+020006ac 00000192 t clock_2x
+02000300 00000356 t sj6_ota_filter
+02000656 00000056 T stock
+dump 0x1c10000: 00002df3 bf864b7d 00009e7f 08e73264
+02000862 00000130 T candidate
+020006d0 00000192 t clock_2x
+02000324 00000356 t sj6_ota_filter
+0200067a 00000056 T stock
+dump 0x1c10000: 0000a8dc fa40ed9a 00026c0e ecfc96f4
+02000862 00000130 T candidate
+020006d0 00000192 t clock_2x
+02000324 00000356 t sj6_ota_filter
+0200067a 00000056 T stock
+dump 0x1c10000: 0000fb08 8cc98fe0 00039fc6 c9f4b548

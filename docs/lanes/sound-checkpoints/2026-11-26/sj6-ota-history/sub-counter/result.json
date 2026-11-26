@@ -1,0 +1,410 @@
+{
+  "source": "6d163d79202e866d2fda96e36f752bd386641b5ae2d0b1f829a254d26b652850",
+  "actual_sub_sha": "9ab95b764bc75ab233f74283faef1ccd6f24c7bfaae1cefcf4684b846884d4b7",
+  "ref_stereo_controls_same": true,
+  "scope": "same authentic release-corrected compact Main + intact stock Sub owner, replace only stock audible Sub with actual current source stereo already post OTA/AMP at proven centered fan-in, no FX/gain/control/clock changes; no installed private stage assumption",
+  "rows": {
+    "dry": {
+      "windows": {
+        "attack": {
+          "mixed_terminal": {
+            "stock": {
+              "signed_dbr": 0.1266232634636211,
+              "level_db": -6.414504477173177,
+              "signed_cosine": 0.2079578875659866
+            },
+            "independent_actual_sub": {
+              "signed_dbr": -1.742555514801497,
+              "level_db": -6.695501550498166,
+              "signed_cosine": 0.5885246850371353
+            },
+            "sub_muted": {
+              "signed_dbr": -1.8614542254100699,
+              "level_db": -10.032063540536324,
+              "signed_cosine": 0.7107384765316554
+            }
+          },
+          "true_vs_stock_sub_at_mix": {
+            "signed_dbr": 5.219541852726924,
+            "level_db": 0.502009551913835,
+            "signed_cosine": -0.5680548420731606
+          }
+        },
+        "hold": {
+          "mixed_terminal": {
+            "stock": {
+              "signed_dbr": 0.17655190696467257,
+              "level_db": -6.545299379475226,
+              "signed_cosine": 0.1912712242079479
+            },
+            "independent_actual_sub": {
+              "signed_dbr": -1.7561228372714532,
+              "level_db": -6.697705851704403,
+              "signed_cosine": 0.5908141747693895
+            },
+            "sub_muted": {
+              "signed_dbr": -1.848656854678227,
+              "level_db": -10.218911141508531,
+              "signed_cosine": 0.7162981476668369
+            }
+          },
+          "true_vs_stock_sub_at_mix": {
+            "signed_dbr": 5.153367239923753,
+            "level_db": 0.21293784463895493,
+            "signed_cosine": -0.5980051383221379
+          }
+        },
+        "owner1": {
+          "mixed_terminal": {
+            "stock": {
+              "signed_dbr": -6.41534292057756,
+              "level_db": -2.045599206343425,
+              "signed_cosine": 0.8834111209425095
+            },
+            "independent_actual_sub": {
+              "signed_dbr": 0.803821328935318,
+              "level_db": -13.171651179234258,
+              "signed_cosine": -0.35342234201261186
+            },
+            "sub_muted": {
+              "signed_dbr": -3.3149950708177327,
+              "level_db": -8.776157610413742,
+              "signed_cosine": 0.9152324150731714
+            }
+          },
+          "true_vs_stock_sub_at_mix": {
+            "signed_dbr": 5.5225102620988595,
+            "level_db": -0.9086771256210249,
+            "signed_cosine": -0.9744758507508287
+          }
+        },
+        "after1": {
+          "mixed_terminal": {
+            "stock": {
+              "signed_dbr": 0.024212662485238165,
+              "level_db": -44.41906386728333,
+              "signed_cosine": -0.46192922414930226
+            },
+            "independent_actual_sub": {
+              "signed_dbr": 0.0,
+              "level_db": null,
+              "signed_cosine": null
+            },
+            "sub_muted": {
+              "signed_dbr": 0.0,
+              "level_db": null,
+              "signed_cosine": null
+            }
+          },
+          "true_vs_stock_sub_at_mix": {
+            "stock_active": true,
+            "genuine_active": false
+          }
+        },
+        "second hold": {
+          "mixed_terminal": {
+            "stock": {
+              "signed_dbr": -2.213286560715992,
+              "level_db": -8.466262693066241,
+              "signed_cosine": 0.7177793376832895
+            },
+            "independent_actual_sub": {
+              "signed_dbr": -3.3705988038551125,
+              "level_db": -8.441929455190056,
+              "signed_cosine": 0.902532924710483
+            },
+            "sub_muted": {
+              "signed_dbr": -2.544668629647566,
+              "level_db": -10.36362327742544,
+              "signed_cosine": 0.8827021834450761
+            }
+          },
+          "true_vs_stock_sub_at_mix": {
+            "signed_dbr": 4.857078956569902,
+            "level_db": 0.5835187286928722,
+            "signed_cosine": -0.42828901853088275
+          }
+        },
+        "owner2": {
+          "mixed_terminal": {
+            "stock": {
+              "signed_dbr": -3.3552231028512747,
+              "level_db": -9.453358307598526,
+              "signed_cosine": 0.9674110664311462
+            },
+            "independent_actual_sub": {
+              "signed_dbr": -2.846796923747416,
+              "level_db": -10.363138532854686,
+              "signed_cosine": 0.9443362072225114
+            },
+            "sub_muted": {
+              "signed_dbr": -2.565843951064069,
+              "level_db": -11.591472766703417,
+              "signed_cosine": 0.9788610806177866
+            }
+          },
+          "true_vs_stock_sub_at_mix": {
+            "signed_dbr": 2.7872641970246823,
+            "level_db": 2.3878367789361934,
+            "signed_cosine": 0.3164129104241844
+          }
+        },
+        "after2": {
+          "mixed_terminal": {
+            "stock": {
+              "signed_dbr": 0.18332594911004207,
+              "level_db": -27.524622390995745,
+              "signed_cosine": -0.49164650307197943
+            },
+            "independent_actual_sub": {
+              "signed_dbr": 0.0,
+              "level_db": null,
+              "signed_cosine": null
+            },
+            "sub_muted": {
+              "signed_dbr": 0.0,
+              "level_db": null,
+              "signed_cosine": null
+            }
+          },
+          "true_vs_stock_sub_at_mix": {
+            "stock_active": true,
+            "genuine_active": false
+          }
+        },
+        "full": {
+          "mixed_terminal": {
+            "stock": {
+              "signed_dbr": -1.7305826811853622,
+              "level_db": -8.060522436120237,
+              "signed_cosine": 0.6133375095323091
+            },
+            "independent_actual_sub": {
+              "signed_dbr": -3.041400765701834,
+              "level_db": -8.10666819771068,
+              "signed_cosine": 0.8368914246776091
+            },
+            "sub_muted": {
+              "signed_dbr": -2.4302204220343215,
+              "level_db": -10.317933043917835,
+              "signed_cosine": 0.8552905334891592
+            }
+          },
+          "true_vs_stock_sub_at_mix": {
+            "signed_dbr": 4.957457723431343,
+            "level_db": 0.48821228058430366,
+            "signed_cosine": -0.4785680097405769
+          }
+        }
+      },
+      "stock_sub_hash": "7bd0d8d7c565aa58f9598fdfd49d04c224d3fe97e1f52b0aec7a8ab6ff7b0398",
+      "main_and_stock_owner_trace": "5dd9e633dbe545edb424b9e2e6537f7a78092a4159aa7a8602936db481f4fcf4",
+      "mix_sha": [
+        "fab842d7a83f78076fe904e73c7f44faedde6ada497751e8a7c8fd9f69595282",
+        "c997f96c6835a6ad7cb446dccbb0c0a4025b32245b960633992eefc7d62f21d0",
+        "8a73eb0413eb4c35d1416e524242bcd76e6fb5100c4e827c11af36dfa0af49e6"
+      ]
+    },
+    "authored": {
+      "windows": {
+        "attack": {
+          "mixed_terminal": {
+            "stock": {
+              "signed_dbr": 1.189401577842669,
+              "level_db": -4.6975692035344,
+              "signed_cosine": 0.02060075698717442
+            },
+            "independent_actual_sub": {
+              "signed_dbr": -1.752729075006712,
+              "level_db": -5.0354451384773204,
+              "signed_cosine": 0.5764948625466213
+            },
+            "sub_muted": {
+              "signed_dbr": -1.6012060317723174,
+              "level_db": -8.850333923403657,
+              "signed_cosine": 0.6076065387414933
+            }
+          },
+          "true_vs_stock_sub_at_mix": {
+            "signed_dbr": 5.219541852726924,
+            "level_db": 0.502009551913835,
+            "signed_cosine": -0.5680548420731606
+          }
+        },
+        "hold": {
+          "mixed_terminal": {
+            "stock": {
+              "signed_dbr": 1.3046422852447634,
+              "level_db": -4.791343618952691,
+              "signed_cosine": -0.016157430200254296
+            },
+            "independent_actual_sub": {
+              "signed_dbr": -1.6831372703049756,
+              "level_db": -4.9687324548496345,
+              "signed_cosine": 0.5668270246982111
+            },
+            "sub_muted": {
+              "signed_dbr": -1.540640886658722,
+              "level_db": -9.148898517818896,
+              "signed_cosine": 0.6025205990425763
+            }
+          },
+          "true_vs_stock_sub_at_mix": {
+            "signed_dbr": 5.153367239923753,
+            "level_db": 0.21293784463895493,
+            "signed_cosine": -0.5980051383221379
+          }
+        },
+        "owner1": {
+          "mixed_terminal": {
+            "stock": {
+              "signed_dbr": -0.9127225020018265,
+              "level_db": -1.7680317499654474,
+              "signed_cosine": 0.5240824477010564
+            },
+            "independent_actual_sub": {
+              "signed_dbr": 1.0758874255718256,
+              "level_db": -9.63228927300299,
+              "signed_cosine": -0.2611093449480003
+            },
+            "sub_muted": {
+              "signed_dbr": -2.4486423216880784,
+              "level_db": -8.343490761418597,
+              "signed_cosine": 0.7544422768527385
+            }
+          },
+          "true_vs_stock_sub_at_mix": {
+            "signed_dbr": 5.5225102620988595,
+            "level_db": -0.9086771256210249,
+            "signed_cosine": -0.9744758507508287
+          }
+        },
+        "after1": {
+          "mixed_terminal": {
+            "stock": {
+              "signed_dbr": 4.397018767576208,
+              "level_db": -0.4507177136542846,
+              "signed_cosine": -0.4481184834023146
+            },
+            "independent_actual_sub": {
+              "signed_dbr": -0.6433536785514493,
+              "level_db": -5.902672240445,
+              "signed_cosine": 0.38924823451872786
+            },
+            "sub_muted": {
+              "signed_dbr": 0.902954385431328,
+              "level_db": -13.850191041272705,
+              "signed_cosine": -0.4677351687297015
+            }
+          },
+          "true_vs_stock_sub_at_mix": {
+            "stock_active": true,
+            "genuine_active": false
+          }
+        },
+        "second hold": {
+          "mixed_terminal": {
+            "stock": {
+              "signed_dbr": 1.1312438154203948,
+              "level_db": -6.717078493436834,
+              "signed_cosine": -0.09165624547410663
+            },
+            "independent_actual_sub": {
+              "signed_dbr": -0.42921801247704694,
+              "level_db": -6.819764739080015,
+              "signed_cosine": 0.33119802498768897
+            },
+            "sub_muted": {
+              "signed_dbr": 0.45872580991136724,
+              "level_db": -9.548154130745804,
+              "signed_cosine": -0.0006618857437617868
+            }
+          },
+          "true_vs_stock_sub_at_mix": {
+            "signed_dbr": 4.857078956569902,
+            "level_db": 0.5835187286928722,
+            "signed_cosine": -0.42828901853088275
+          }
+        },
+        "owner2": {
+          "mixed_terminal": {
+            "stock": {
+              "signed_dbr": 0.17667378111756715,
+              "level_db": -10.26130930596516,
+              "signed_cosine": 0.0857749953088384
+            },
+            "independent_actual_sub": {
+              "signed_dbr": 0.2456721638568836,
+              "level_db": -9.158170142049121,
+              "signed_cosine": 0.09068512712833811
+            },
+            "sub_muted": {
+              "signed_dbr": 0.5772764692881778,
+              "level_db": -11.349515175100205,
+              "signed_cosine": -0.12719893051241662
+            }
+          },
+          "true_vs_stock_sub_at_mix": {
+            "signed_dbr": 2.7872641970246823,
+            "level_db": 2.3878367789361934,
+            "signed_cosine": 0.3164129104241844
+          }
+        },
+        "after2": {
+          "mixed_terminal": {
+            "stock": {
+              "signed_dbr": 1.1270121389394245,
+              "level_db": -14.544081991923623,
+              "signed_cosine": -0.6967670879904514
+            },
+            "independent_actual_sub": {
+              "signed_dbr": -1.8779816088480163,
+              "level_db": -10.50796811652682,
+              "signed_cosine": 0.7376434964661753
+            },
+            "sub_muted": {
+              "signed_dbr": 0.2637199952702668,
+              "level_db": -21.04025055542305,
+              "signed_cosine": -0.3084966324093128
+            }
+          },
+          "true_vs_stock_sub_at_mix": {
+            "stock_active": true,
+            "genuine_active": false
+          }
+        },
+        "full": {
+          "mixed_terminal": {
+            "stock": {
+              "signed_dbr": 1.1251118340283672,
+              "level_db": -6.179368132621893,
+              "signed_cosine": -0.05570340077145507
+            },
+            "independent_actual_sub": {
+              "signed_dbr": -0.6980141774743234,
+              "level_db": -6.327246338279546,
+              "signed_cosine": 0.39513597365869324
+            },
+            "sub_muted": {
+              "signed_dbr": 0.013564920363466446,
+              "level_db": -9.358182690572239,
+              "signed_cosine": 0.16564571481688833
+            }
+          },
+          "true_vs_stock_sub_at_mix": {
+            "signed_dbr": 4.957457723431343,
+            "level_db": 0.48821228058430366,
+            "signed_cosine": -0.4785680097405769
+          }
+        }
+      },
+      "stock_sub_hash": "7bd0d8d7c565aa58f9598fdfd49d04c224d3fe97e1f52b0aec7a8ab6ff7b0398",
+      "main_and_stock_owner_trace": "5dd9e633dbe545edb424b9e2e6537f7a78092a4159aa7a8602936db481f4fcf4",
+      "mix_sha": [
+        "b85d66c927ed1bf8ab01d32746360c7029d17fa0b2e4b0e18870f64bdc005adb",
+        "1e16c333826cad350c30b7da1dc38bf362aa218eace0c450fc4600275b84d710",
+        "8f97159f99d03ce93d8b5a71140345d42f3250c138f1260831866571c8c71351"
+      ]
+    }
+  }
+}
