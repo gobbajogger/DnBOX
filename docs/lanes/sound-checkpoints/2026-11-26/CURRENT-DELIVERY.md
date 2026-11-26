@@ -6,6 +6,35 @@ isolated kernel timing, or partial link into a release claim.
 
 ## Latest measured results
 
+- **Timing trial rejected after actual two-model fit.** The
+  [single-emitter 909 terminal branch](909-terminal-native-rejected/FOLLOW-THROUGH.md)
+  linked at +8 B Elite and +20 B Pro with pool 8,756 intact. Its one
+  strict Elite comparison regressed 14,288→17,339 µs and 86→232
+  late blocks. No adoption, no Pro replay, and no causal attribution
+  without matched applied input/fallback telemetry. Continue from
+  the serial anchor, not this worker. Paired native main-engine
+  and zero-dropout criteria still fail.
+- **Smaller Main stage and exact live setup, not whole-engine parity.**
+  The [52 B transposed diagnostic](sj6-ota-transposed-auth/README.md)
+  saves 12 B per voice relative to the already compact 64 B model,
+  uses 622 B isolated PI32 code (18 B less), and adds eight ordinary
+  multiplies per frame. On both original signed cutoff tapes, its
+  worst window differs from the 64 B model by −138.10 dBr. The
+  dormant layout fits existing reserved internal storage. Separately,
+  the [live control state](sj6-ota-exact-live-coeff/README.md) matches
+  48 requests and 520 original ticks, but adds 172 B before math;
+  native fit, runtime and caller guards are not qualified.
+- **SuperJ6 Sub still open.** A [short-cycle substitute](sj6-sub-stationary-cycle/README.md)
+  looks close during the first held note but fails the authentic
+  chord and final release. The reusable upper-zone screen rejects it
+  even before the terminal comparison. Do not revisit master, forced
+  default XY modulation, or stationary source loops. The shared
+  installed pre-Unison mixer remains unobserved.
+- **Separate cold APP recovery pending actual link.** The
+  [two batched UI banks](fw-cold-ui-page-batching/README.md) emit
+  the exact 32 host rows and reduce isolated PI32 object text by
+  240 B. Count only the linked delta; no UI or DSP change assumed.
+
 - **Bank tuning state, host witness only.** An
   [identity-bound sidecar fixture](s1-tuning-typed-host/README.md)
   distinguishes absent tuning, explicit 12ET, and real 3-/19-degree
