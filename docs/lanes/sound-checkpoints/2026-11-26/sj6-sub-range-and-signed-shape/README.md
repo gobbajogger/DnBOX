@@ -48,3 +48,15 @@ phases cancel a uniform time shift, so the remaining substitution isn't
 one fixed delay. Per-zone sample tone and/or zone-specific receiver
 behavior still need isolation. This is not a later application of a
 time offset, pitch calibration or preset fix.
+
+The paired state semantics do not make the terminal H3 phase a raw
+oscillator parameter. The independently verified physical HP10 + .995
+connected zero-Crusher + .999 DC suffix rotates the relative H3 by
+about +156.09° (first zone) and −79.30° (second). Inverting these stage
+responses from the terminal returns −174.79° and −131.62°. The independent
+actual original Core replay with authorized older sample data in memory
+observed −174.73°/−133.83° after the sampler; chronological forward replay
+then predicted the signed terminal phase to about .04°/1.2°. Therefore
+a large initial phase diagnosis belongs to named physical filters, not
+a tuned phase shift or an individual patch setting. A distinct level
+deficit and second-zone waveform/cursor differences still remain.

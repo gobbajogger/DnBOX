@@ -1,0 +1,63 @@
+--- a/firmware/src/dsp/s1c/phaser-match-lab.inc
++++ b/firmware/src/dsp/s1c/phaser-match-lab.inc
+@@ -25,6 +25,23 @@
+ 
+ }
+ 
++#if DNBOX_S1_MATCHED_PHASER_F32
++#include <string.h>
++static __attribute__((noinline)) void initphaser(phaser* p,int rate){
++    /* Source outer wrapper only initializes from a cold zeroed owner.
++     * Fill shared zero state, then exactly the original unmodified fields.
++     * Width/rate/feedback are written before the first compute call. */
++    memset(p,0,sizeof *p);
++    p->fSamplingFreq=rate;
++    p->iConst0=min(192000,max(1,rate));
++    p->fConst1=1.f/(float)p->iConst0;
++    p->fConst2=.10472f/(float)p->iConst0;
++    p->fHslider1=1.f;
++    p->fHslider3=1.5f;
++    p->fHslider4=100.f;
++    p->fHslider5=800.f;
++}
++#else
+ static void instanceInitphaser(phaser* dsp, int samplingFreq) {
+ 	dsp->fSamplingFreq = samplingFreq;
+ 	dsp->fHslider0 = (FAUSTFLOAT)0.;
+@@ -167,6 +184,7 @@
+ 	instanceInitphaser(dsp, samplingFreq);
+ }
+ 
++#endif
+ #if DNBOX_PH_COEF
+ static unsigned ph_word(float f){unsigned u; __builtin_memcpy(&u,&f,4); return u;}
+ #if DNBOX_PH_FASTCTL
+@@ -251,6 +269,20 @@
+  counts[lane]++;fallback[lane]+=falls;
+ }
+ #endif
++#if DNBOX_S1_MATCHED_PHASER_F32
++static inline float ph_cosprod(float v,float x,int lane){
++    (void)lane;
++    const unsigned ux=ph_word(x)&0x7fffffffu, uv=ph_word(v)&0x7fffffffu;
++    if(ux<=0x3f200000u && !(ux && ux<0x00800000u) && uv<0x7f800000u){
++        const float c=fc_lowcos(x);
++        /* Coefficient is >= cos(.625) and positive. A full normal
++         * recurrence operand cannot produce a tiny result here. */
++        if(uv>=0x01000000u)return v*c;
++        return fc_product(v,c);
++    }
++    return fc_product(v,fc_full(x));
++}
++#else
+ static __attribute__((noinline)) float ph_cosprod(float v,float x,int lane) {
+ #if DNBOX_PH_COS || DNBOX_PH_COS_TRACE
+  unsigned ux=ph_word(x)&0x7fffffffu, raw=ph_word(v),uv=raw&0x7fffffffu;
+@@ -287,6 +319,7 @@
+  return (float)((double)v*cos((double)x));
+ #endif
+ }
++#endif
+ 
+ #if DNBOX_S1_MATCHED_PHASER_F32
+ #ifndef S1_PH_SHARED_INLINE

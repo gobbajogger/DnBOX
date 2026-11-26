@@ -1,0 +1,66 @@
+--- a/tools/gen_font.py
++++ b/tools/gen_font.py
+@@ -374,8 +374,32 @@
+                     prefix.append(128 | subtables.index(sub))
+             prefixes.append(prefix)
+         assert len(subtables) < 128
+-        for cname, table, width in [("FONT_ALPHA_PREFIX", prefixes, 16),
+-                                     ("FONT_ALPHA_SUB", subtables, 8)]:
++        # A leading two-bit code occupies four prefixes; keep one copy.
++        # This compact form is admitted only when every generated row has it.
++        prefix_compact = all(row[:4] == row[:1] * 4 for row in prefixes)
++        if prefix_compact:
++            prefixes = [row[:1] + row[4:] for row in prefixes]
++            lines.append("#define FONT_ALPHA_PREFIX_QUAD 1")
++        # A suffix code of at most six bits repeats its value for two
++        # seven-bit peeks. Keep rare full-width rows in their own suffix.
++        paired = [i for i, row in enumerate(subtables) if row[0::2] == row[1::2]]
++        wide = [i for i, row in enumerate(subtables) if row[0::2] != row[1::2]]
++        suffix_compact = len(paired) >= 8
++        tables = []
++        if suffix_compact:
++            order = paired + wide
++            remap = {old: new for new, old in enumerate(order)}
++            prefixes = [[128 | remap[v & 127] if v & 128 else v for v in row]
++                        for row in prefixes]
++            lines.append(f"#define FONT_ALPHA_SUB_PAIRS {len(paired)}u")
++            tables.append(("FONT_ALPHA_SUB_PAIR", [subtables[i][0::2] for i in paired], 4))
++            if wide:
++                lines.append("#define FONT_ALPHA_SUB_WIDE 1")
++                tables.append(("FONT_ALPHA_SUB_FULL", [subtables[i] for i in wide], 8))
++        else:
++            tables.append(("FONT_ALPHA_SUB", subtables, 8))
++        for cname, table, width in [
++                ("FONT_ALPHA_PREFIX", prefixes, 13 if prefix_compact else 16), *tables]:
+             lines.append(f"static const uint8_t {cname}[{len(table)}][{width}] = {{")
+             for row in table:
+                 lines.append("    {" + ", ".join(map(str, row)) + "},")
+--- a/firmware/src/gfx.c
++++ b/firmware/src/gfx.c
+@@ -340,8 +340,24 @@
+                     code_left+=8u;
+                 }
+                 uint32_t peek=(code_bits>>(code_left-7u))&127u;
+-                uint32_t entry=FONT_ALPHA_PREFIX[above[gx]][peek>>3];
+-                if (entry&128u) entry=FONT_ALPHA_SUB[entry&127u][peek&7u];
++                unsigned prefix=peek>>3;
++#ifdef FONT_ALPHA_PREFIX_QUAD
++                prefix=prefix<4u?0u:prefix-3u;
++#endif
++                uint32_t entry=FONT_ALPHA_PREFIX[above[gx]][prefix];
++                if (entry&128u) {
++#ifdef FONT_ALPHA_SUB_PAIRS
++                    unsigned row=entry&127u;
++#ifdef FONT_ALPHA_SUB_WIDE
++                    if (row>=FONT_ALPHA_SUB_PAIRS)
++                        entry=FONT_ALPHA_SUB_FULL[row-FONT_ALPHA_SUB_PAIRS][peek&7u];
++                    else
++#endif
++                        entry=FONT_ALPHA_SUB_PAIR[row][(peek&7u)>>1];
++#else
++                    entry=FONT_ALPHA_SUB[entry&127u][peek&7u];
++#endif
++                }
+                 code_left-=entry>>4;
+                 a=entry&15u;
+                 above[gx]=(uint8_t)a;

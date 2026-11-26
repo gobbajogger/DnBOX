@@ -1,0 +1,9 @@
+.text           0x0000000002000120    0x85d84
+.ram_text       0x0000000001c00400      0xabc load address 0x0000000002085ea4
+.c1_text        0x0000000001c00ebc      0x260 load address 0x0000000002086960
+.data           0x0000000001c08000      0x288 load address 0x0000000002086bc0
+                0x0000000001c08290                _bss_start = .
+                0x0000000001c1ff84                _bss_end = .
+.pool           0x0000000001c20000    0x51dcc
+                0x0000000001c20000                _pool_start = .
+                0x0000000001c71dcc                _pool_end = .

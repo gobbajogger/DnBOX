@@ -132,6 +132,12 @@ changing the rounding rule.
   +149.08°, while corrected compact stays near −180° on both.
   This is after canceling a global gain/time shift; don't use a single
   phase compensation across sample zones.
+  The original scoped HP10 → connected crusher DC .995 → terminal DC .999
+  accounts for most terminal rotation; direct chronological original-Core
+  replay matches held H3 phase to about .04° and 1.2° respectively.
+  Inverse terminal equivalents are −174.79° and −131.62°; actual source
+  sampler postfilter −174.73° and −133.83°. Avoid fitting terminal phase
+  as a direct oscillator correction. [Chronological suffix proof](sj6-sub-physical-suffix/sj6-sub-body/README.md).
   [Exact source and signed scorer](sj6-sub-range-and-signed-shape/README.md).
 - **Unresolved:** source owner of the gain between the calibrated Crusher
   and Apple's compressor input; which missing or misrouted per-program
@@ -200,6 +206,18 @@ changing the rounding rule.
   matched stock donor, unchanged pool. This is a ∼10 KiB reduction
   against the double variant, not a firmware fit. Next isolate the
   structural wrapper/library contributions in the new map.
+  Sharing the exact stereo recurrence then saved 736 B in the paired
+  Elite map; cold factoring saved another 464 B each, with 906/906
+  before/after wet PCM and live arp bit-identical. Combining the
+  separately verified exact font (+160 B) and grouped cold changes
+  (+1,280 B) in a **fresh guarded paired link actually fits**:
+  +528 B Elite/+540 B Pro APP, +564 usable pool above reserve.
+  This is INIT-only never-install diagnostics. The full combined synth
+  product and zero dropout remain unverified.
+  [Strict failed map](s1-phaser-no-soft-double/README.md),
+  [shared recurrence](s1-phaser-shared-recurrence/README.md),
+  [cold exact](s1-phaser-cold-factoring/README.md),
+  [verified guarded pair](s1-phaser-guarded-el-pro-fit/GROUP.md).
 
 ## Release boundary
 

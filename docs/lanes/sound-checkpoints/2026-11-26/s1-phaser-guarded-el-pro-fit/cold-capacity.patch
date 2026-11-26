@@ -1,0 +1,751 @@
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -4363,6 +4363,17 @@
+ extern int sj6_pitch_undo_ready(unsigned mask);
+ extern void sj6_typed_mod_undo(unsigned mask);
+ #if X0X_BASS_TAGGED_SOUND && defined(DNBOX_137_HOST_WITNESS)
++/* All cold typed-Undo field messages are exact "UNDO <field> INVALID". */
++static __attribute__((noinline)) X0X_COLD void undo_field_message(const char *field)
++{
++    put_s(put_s(put_s(ui.msg,"UNDO "),field)," INVALID");
++    ui.msg_until=plat_ms()+1300u;
++}
++static __attribute__((noinline)) X0X_COLD void undo_field_invalid(const char *field)
++{
++    undo_field_message(field);
++    engine_bass_edit_hold(0);
++}
+ __attribute__((noinline)) X0X_COLD static int undo_bounded_field(
+     int entry,uint32_t offset,unsigned limit,unsigned old,unsigned owner_bit,
+     unsigned *changed,const char *message)
+@@ -4370,7 +4381,7 @@
+     uint8_t value;
+     undo_peek(&undo,entry,offset,&value,1u);
+     if(value>limit) {
+-        say(message,0);engine_bass_edit_hold(0);return 0;
++        undo_field_invalid(message);return 0;
+     }
+     if(value!=old)*changed|=owner_bit;
+     return 1;
+@@ -4383,7 +4394,7 @@
+     if(!changed || ready(changed & ~undo_bass_mask))return 1;
+     engine_project_hold(0);
+     engine_bass_edit_hold(0);
+-    say(message,0);
++    say("UNDO WAIT ",message);
+     return 0;
+ }
+ static __attribute__((noinline)) void ui_undo_apply(unsigned changed,void (*apply)(unsigned))
+@@ -4404,7 +4415,7 @@
+     uint8_t bytes[NPARAMS_MAX];
+     undo_peek(&undo,entry,offset,bytes,len);
+     for(unsigned k=0;k<len;k++) if(bytes[k]>(bound?bound(k):max)){
+-        ui_undo_invalid(message);return 0;
++        undo_field_invalid(message);return 0;
+     }
+     if(memcmp(bytes,old,len))*changed|=mask;
+     return 1;
+@@ -4579,7 +4590,7 @@
+                 if(!sj6_classic_native_valid(classic) ||
+                    ((classic[0]|classic[1]|classic[2]) &&
+                     !undo_j6_init)){
+-                    ui_undo_invalid("UNDO LEGACY CHORUS INVALID");return;
++                    undo_field_invalid("LEGACY CHORUS");return;
+                 }
+                 if(memcmp(classic,sj6_classic_native_code(&proj.sound,v),sizeof classic))undo_j60|=1u<<v;
+ #endif
+@@ -4587,7 +4598,7 @@
+                 if(!sj6_j60_valid(j60) ||
+                    ((j60[0]|j60[1]|j60[2]|j60[3]) &&
+                     !undo_j6_init)){
+-                    ui_undo_invalid("UNDO CHORUS INVALID");return;
++                    undo_field_invalid("CHORUS");return;
+                 }
+                 if(memcmp(j60,sj6_j60_code(&proj.sound,v),sizeof j60))undo_j60|=1u<<v;
+ #endif
+@@ -4600,26 +4611,26 @@
+                 if(!sj6_aux_lfo1_valid(lfo1_route) ||
+                    ((lfo1_route[0]|lfo1_route[2]) &&
+                     !undo_j6_init)){
+-                    ui_undo_invalid("UNDO LFO1 ROUTE INVALID");return;
++                    undo_field_invalid("LFO1 ROUTE");return;
+                 }
+                 if(memcmp(lfo1_route,sj6_aux_lfo1_read(&proj.sound,v),sizeof lfo1_route))undo_aux|=1u<<v;
+                 uint8_t aux[SJ6_AUX_BYTES];
+                 uint32_t aux_off=__builtin_offsetof(sound_t,v)+((T_MST*NVOICES_MAX+SJ6_AUX_ROW+v)*NPARAMS_MAX);
+                 undo_peek(&undo,entry,aux_off,aux,sizeof aux);
+                 for(unsigned k=0;k<SJ6_AUX_BYTES;k++)
+-                    if(!sj6_aux_valid(k,aux[k])){ui_undo_invalid("UNDO LFO INVALID");return;}
++                    if(!sj6_aux_valid(k,aux[k])){undo_field_invalid("LFO");return;}
+                 if(memcmp(aux,sj6_aux_read(&proj.sound,v),sizeof aux))undo_aux|=1u<<v;
+ #if X0X_SJ6_LFO_TRIGGER_NATIVE
+                 uint8_t snaps[2];
+                 undo_peek(&undo,entry,aux_off+30u,snaps,sizeof snaps);
+-                if(snaps[0]>1u||snaps[1]>1u){ui_undo_invalid("UNDO SNAP INVALID");return;}
++                if(snaps[0]>1u||snaps[1]>1u){undo_field_invalid("SNAP");return;}
+                 if(memcmp(snaps,sj6_aux_read(&proj.sound,v)+30u,sizeof snaps))undo_aux|=1u<<v;
+ #endif
+ #endif
+ #if X0X_SJ6_PITCH_ENV_NATIVE
+                 uint32_t pitch_off=__builtin_offsetof(sound_t,v)+
+                     ((T_MST*NVOICES_MAX+SJ6_PITCH_ROW+v)*NPARAMS_MAX+SJ6_PITCH_OFFSET);
+-                if(!ui_undo_span(entry,pitch_off,sj6_pitch_read(&proj.sound,v),SJ6_PITCH_COUNT,0,sj6_pitch_max,1u<<v,&undo_pitch,"UNDO PITCH INVALID"))return;
++                if(!ui_undo_span(entry,pitch_off,sj6_pitch_read(&proj.sound,v),SJ6_PITCH_COUNT,0,sj6_pitch_max,1u<<v,&undo_pitch,"PITCH"))return;
+ #endif
+ #if X0X_SJ6_NATIVE_UNISON
+                 uint8_t uni[4];
+@@ -4629,85 +4640,85 @@
+                 if(uni[0]>1u || uni[1]>128u || uni[2]>127u || uni[3]>5u ||
+                    ((uni[0]|uni[1]|uni[2]|uni[3]) &&
+                     !undo_j6_init)){
+-                    ui_undo_invalid("UNDO UNISON INVALID");return;
++                    undo_field_invalid("UNISON");return;
+                 }
+                 if(memcmp(uni,sj6_unison_code(&proj.sound,v),sizeof uni))undo_sj6_unison|=1u<<v;
+ #endif
+ #if X0X_S1_DELAY_TIME_NATIVE
+                 undo_peek(&undo,entry,__builtin_offsetof(sound_t,v)+(T_303*NVOICES_MAX+8u+2u*v)*NPARAMS_MAX+S1_DELAY_TIME_BYTE,&undo_dlycode[v],1u);
+-                if(undo_dlycode[v]>S1_DELAY_TIME_MAX){ui_undo_invalid("UNDO DELAY INVALID");return;}
++                if(undo_dlycode[v]>S1_DELAY_TIME_MAX){undo_field_invalid("DELAY");return;}
+                 if(undo_dlycode[v]!=*s1_delay_time_code(&proj.sound,v))undo_dlytime|=1u<<v;
+ #endif
+ #if DNBOX_TYPED_CONTROLS_NATIVE_TEST
+                 const uint32_t typed_off=__builtin_offsetof(sound_t,v)+
+                         (T_303*NVOICES_MAX+8u+2u*v)*NPARAMS_MAX;
+-                if(!undo_bounded_field(entry,typed_off+S1_DELAY_RES_BYTE,S1_DELAY_RES_MAX,*s1_delay_res_read(&proj.sound,v),1u<<v,&undo_phaser,"UNDO DELAY RES INVALID"))return;
+-                if(!undo_bounded_field(entry,typed_off+S1_ENV_LFO_BYTE,S1_ENV_LFO_MAX,*s1_env_lfo_read(&proj.sound,v),1u<<v,&undo_phaser,"UNDO ENV LFO INVALID"))return;
+-                if(!ui_undo_span(entry,typed_off+S1_PHASE_BYTE,s1_phase_read(&proj.sound,v),S1_PHASE_COUNT,S1_PHASE_MAX,0,1u<<v,&undo_phaser,"UNDO PHASER INVALID"))return;
++                if(!undo_bounded_field(entry,typed_off+S1_DELAY_RES_BYTE,S1_DELAY_RES_MAX,*s1_delay_res_read(&proj.sound,v),1u<<v,&undo_phaser,"DELAY RES"))return;
++                if(!undo_bounded_field(entry,typed_off+S1_ENV_LFO_BYTE,S1_ENV_LFO_MAX,*s1_env_lfo_read(&proj.sound,v),1u<<v,&undo_phaser,"ENV LFO"))return;
++                if(!ui_undo_span(entry,typed_off+S1_PHASE_BYTE,s1_phase_read(&proj.sound,v),S1_PHASE_COUNT,S1_PHASE_MAX,0,1u<<v,&undo_phaser,"PHASER"))return;
+ #endif
+ #if DNBOX_TYPED_CONTROLS_NATIVE_TEST
+ #if X0X_SJ6_NOISE_SUB_NATIVE
+                 const uint32_t sources_off=__builtin_offsetof(sound_t,v)+
+                     ((T_MST*NVOICES_MAX+SJ6_SOURCES_ROW+v)*NPARAMS_MAX+SJ6_SOURCES_OFFSET);
+-                if(!ui_undo_span(entry,sources_off,sj6_sources_read(&proj.sound,v),SJ6_SOURCES_COUNT,127u,0,1u<<v,&undo_delay,"UNDO OSC SOURCE INVALID"))return;
++                if(!ui_undo_span(entry,sources_off,sj6_sources_read(&proj.sound,v),SJ6_SOURCES_COUNT,127u,0,1u<<v,&undo_delay,"OSC SOURCE"))return;
+ #endif
+ #if X0X_SJ6_SEQ_SETTINGS_NATIVE
+                 const uint32_t seqcfg_off=__builtin_offsetof(sound_t,v)+
+                     ((T_MST*NVOICES_MAX+SJ6_SEQ_SETTINGS_ROW+v)*NPARAMS_MAX+SJ6_SEQ_SETTINGS_OFFSET);
+-                if(!ui_undo_span(entry,seqcfg_off,sj6_seq_settings_read(&proj.sound,v),SJ6_SEQ_SETTINGS_COUNT,1u,0,1u<<v,&undo_delay,"UNDO SEQ SETUP INVALID"))return;
++                if(!ui_undo_span(entry,seqcfg_off,sj6_seq_settings_read(&proj.sound,v),SJ6_SEQ_SETTINGS_COUNT,1u,0,1u<<v,&undo_delay,"SEQ SETUP"))return;
+ #if X0X_SJ6_SEQ_DEST_NATIVE
+                 const uint32_t dest_off=__builtin_offsetof(sound_t,v)+
+                     ((T_MST*NVOICES_MAX+SJ6_DEST_ROW+v)*NPARAMS_MAX+SJ6_DEST_BYTE);
+                 if(!undo_bounded_field(entry,dest_off,2u,sj6_dest_read(&proj.sound,v),
+-                    1u<<v,&undo_delay,"UNDO SEQ DEST INVALID"))return;
++                    1u<<v,&undo_delay,"SEQ DEST"))return;
+ #endif
+ #endif
+ #if X0X_SJ6_NATIVE_ROOM
+                 const uint32_t room_off=__builtin_offsetof(sound_t,v)+
+                     ((T_MST*NVOICES_MAX+SJ6_ROOM_ROW+v)*NPARAMS_MAX+SJ6_ROOM_BYTE);
+-                if(!ui_undo_span(entry,room_off,sj6_room_read(&proj.sound,v),SJ6_ROOM_COUNT,0,sj6_room_max,1u<<v,&undo_room,"UNDO FX INVALID"))return;
++                if(!ui_undo_span(entry,room_off,sj6_room_read(&proj.sound,v),SJ6_ROOM_COUNT,0,sj6_room_max,1u<<v,&undo_room,"FX"))return;
+                 uint8_t crush[2];
+                 const uint32_t crush_off=__builtin_offsetof(sound_t,v)+
+                     ((T_MST*NVOICES_MAX+SJ6_CRUSH_ROW+v)*NPARAMS_MAX+SJ6_CRUSH_BYTE);
+                 undo_peek(&undo,entry,crush_off,crush,sizeof crush);
+-                if(crush[0]>1u || crush[1]>127u){ui_undo_invalid("UNDO CRUSH INVALID");return;}
++                if(crush[0]>1u || crush[1]>127u){undo_field_invalid("CRUSH");return;}
+                 if(memcmp(crush,sj6_crush_code(&proj.sound,v),sizeof crush))undo_room|=1u<<v;
+ #endif
+ #if X0X_SJ6_OTA_NATIVE
+                 const uint32_t ota_off=__builtin_offsetof(sound_t,v)+
+                     ((T_MST*NVOICES_MAX+SJ6_OTA_ROW+v)*NPARAMS_MAX+SJ6_OTA_BYTE);
+                 if(!undo_bounded_field(entry,ota_off,1u,sj6_ota_read(&proj.sound,v),
+-                    1u<<v,&undo_ota,"UNDO FILTER INVALID"))return;
++                    1u<<v,&undo_ota,"FILTER"))return;
+ #endif
+ #if X0X_SJ6_NATIVE_LIMITER
+                 const uint32_t lim_off=__builtin_offsetof(sound_t,v)+
+                     ((T_MST*NVOICES_MAX+SJ6_LIM_ROW+v)*NPARAMS_MAX+SJ6_LIM_BYTE);
+-                if(!ui_undo_span(entry,lim_off,sj6_limiter_read(&proj.sound,v),SJ6_LIM_COUNT,128u,0,1u<<v,&undo_limiter,"UNDO LIMITER INVALID"))return;
++                if(!ui_undo_span(entry,lim_off,sj6_limiter_read(&proj.sound,v),SJ6_LIM_COUNT,128u,0,1u<<v,&undo_limiter,"LIMITER"))return;
+ #if X0X_SJ6_VINTAGE_NATIVE
+                 if(!undo_bounded_field(entry,lim_off+SJ6_VINTAGE_BYTE-SJ6_LIM_BYTE,127u,
+-                    sj6_vintage_read(&proj.sound,v),1u<<v,&undo_limiter,"UNDO VINTAGE INVALID"))return;
++                    sj6_vintage_read(&proj.sound,v),1u<<v,&undo_limiter,"VINTAGE"))return;
+ #endif
+ #if X0X_SJ6_VELOCITY_SETTINGS
+                 if(!undo_bounded_field(entry,lim_off+SJ6_INPUT_VEL_BYTE-SJ6_LIM_BYTE,SJ6_INPUT_VEL_MAX,
+-                    sj6_input_vel(&proj.sound,v),1u<<v,&undo_sj6_input_vel,"UNDO VELOCITY INVALID"))return;
++                    sj6_input_vel(&proj.sound,v),1u<<v,&undo_sj6_input_vel,"VELOCITY"))return;
+ #endif
+                 if(!undo_bounded_field(entry,lim_off+SJ6_RAGE_BYTE-SJ6_LIM_BYTE,128u,sj6_rage_read(&proj.sound,v),
+-                    1u<<v,&undo_limiter,"UNDO LIMITER INVALID"))return;
++                    1u<<v,&undo_limiter,"LIMITER"))return;
+ #endif
+                 const uint32_t cmp_off=__builtin_offsetof(sound_t,v)+
+                     ((T_MST*NVOICES_MAX+S1_CMP_ROW+v)*NPARAMS_MAX);
+-                if(!ui_undo_span(entry,cmp_off,s1_cmp_read(&proj.sound,v),S1_CMP_COUNT,127u,0,1u<<v,&undo_cmp,"UNDO COMP INVALID"))return;
++                if(!ui_undo_span(entry,cmp_off,s1_cmp_read(&proj.sound,v),S1_CMP_COUNT,127u,0,1u<<v,&undo_cmp,"COMP"))return;
+                 const uint32_t aa_off=__builtin_offsetof(sound_t,v)+
+                     ((T_303*NVOICES_MAX+8u+2u*v)*NPARAMS_MAX+S1_AA_BYTE);
+-                if(!undo_bounded_field(entry,aa_off,1u,s1_aa_read(&proj.sound,v),1u<<v,&undo_aa,"UNDO ANTI-ALIAS INVALID"))return;
+-                if(!undo_bounded_field(entry,off-2u+S1_CWG_BYTE,S1_CWG_MAX,s1_cwg_read(&proj.sound,v),1u<<v,&undo_cwg,"UNDO WET MAKEUP INVALID"))return;
++                if(!undo_bounded_field(entry,aa_off,1u,s1_aa_read(&proj.sound,v),1u<<v,&undo_aa,"ANTI-ALIAS"))return;
++                if(!undo_bounded_field(entry,off-2u+S1_CWG_BYTE,S1_CWG_MAX,s1_cwg_read(&proj.sound,v),1u<<v,&undo_cwg,"WET MAKEUP"))return;
+ #endif
+ #if X0X_SJ6_LFO1_WAVE_NATIVE
+                 const uint32_t wave_off=__builtin_offsetof(sound_t,v)+
+                     ((T_MST*NVOICES_MAX+SJ6_LFO1_WAVE_ROW+v)*NPARAMS_MAX+SJ6_LFO1_WAVE_OFFSET);
+                 undo_peek(&undo,entry,wave_off,&p,1u);
+                 if(p>SJ6_LFO1_WAVE_MAX || (p && !undo_j6_init)){
+-                    ui_undo_invalid("UNDO LFO WAVE INVALID");return;
++                    undo_field_invalid("LFO WAVE");return;
+                 }
+                 if(p!=sj6_lfo1_wave_read(&proj.sound,v))undo_delay|=1u<<v;
+ #if X0X_SJ6_ALT3_NATIVE
+@@ -4717,41 +4728,41 @@
+                 undo_peek(&undo,entry,trem_off,trem,sizeof trem);
+                 if(trem[0]>127u || trem[1]>128u || ((trem[0]|trem[1]) &&
+                    !undo_j6_init)){
+-                    ui_undo_invalid("UNDO TREMOLO INVALID");return;
++                    undo_field_invalid("TREMOLO");return;
+                 }
+                 if(memcmp(trem,sj6_trem_read(&proj.sound,v),sizeof trem))undo_delay|=1u<<v;
+ #endif
+                 for(unsigned k=0;k<2u;++k) {
+                     undo_peek(&undo,entry,wave_off+1u+k,&p,1u);
+                     if(p>1u || (p && !undo_j6_init)) {
+-                        ui_undo_invalid("UNDO LFO SWITCH INVALID");return;
++                        undo_field_invalid("LFO SWITCH");return;
+                     }
+                     if(p!=sj6_lfo1_option(&proj.sound,v,k))undo_delay|=1u<<v;
+                 }
+ #endif
+ #if X0X_SJ6_LFO1_DELAY_PORT
+-                if(!undo_bounded_field(entry,off-2u+SJ6_LFO1_DELAY_BYTE,SJ6_LFO1_DELAY_MAX,sj6_lfo1_delay_read(&proj.sound,v),1u<<v,&undo_delay,"UNDO LFO DELAY INVALID"))return;
++                if(!undo_bounded_field(entry,off-2u+SJ6_LFO1_DELAY_BYTE,SJ6_LFO1_DELAY_MAX,sj6_lfo1_delay_read(&proj.sound,v),1u<<v,&undo_delay,"LFO DELAY"))return;
+ #endif
+ #if X0X_S1_DELAY_TRACK_TEST
+ #if X0X_SJ6_VCF_PORT
+                 const uint32_t vcf_off=__builtin_offsetof(sound_t,v)+
+                     ((T_303*NVOICES_MAX+8u+2u*v)*NPARAMS_MAX+SJ6_VCF_BYTE);
+-                if(!undo_bounded_field(entry,vcf_off,127u,*sj6_vcf_code(&proj.sound,v),1u<<v,&undo_vcf,"UNDO LFO1 INVALID"))return;
++                if(!undo_bounded_field(entry,vcf_off,127u,*sj6_vcf_code(&proj.sound,v),1u<<v,&undo_vcf,"LFO1"))return;
+                 const uint32_t filter_off=vcf_off-SJ6_VCF_BYTE;
+                 for(unsigned k=0;k<2u;++k) {
+                     undo_peek(&undo,entry,filter_off+(k?SJ6_ENV_STRENGTH_BYTE:SJ6_KEY_TRACK_BYTE),&p,1u);
+-                    if(p>(k?128u:127u)){ui_undo_invalid("UNDO FILTER INVALID");return;}
++                    if(p>(k?128u:127u)){undo_field_invalid("FILTER");return;}
+                     if(p!=*sj6_filter_code(&proj.sound,v,k))undo_vcf|=1u<<v;
+                 }
+ #endif
+                 const uint32_t dict_off=off-2u+S1_DICT_BYTE;
+-                if(!undo_bounded_field(entry,dict_off,S1_DICT_MAX,s1_dict_read(&proj.sound,v),1u<<v,&undo_dict,"UNDO IN CUTOFF INVALID"))return;
++                if(!undo_bounded_field(entry,dict_off,S1_DICT_MAX,s1_dict_read(&proj.sound,v),1u<<v,&undo_dict,"IN CUTOFF"))return;
+ #endif
+ #if X0X_SJ6_CLASSIC_I_PROBE
+                 uint8_t ci[SJ6_CLASSIC_I_COUNT];
+                 undo_peek(&undo,entry,off+SJ6_CLASSIC_I_BYTE-2u,ci,sizeof ci);
+                 if(memcmp(ci,read137(&proj.sound,v)+SJ6_CLASSIC_I_BYTE,sizeof ci)) {
+-                  if(!sj6_classic_i_bytes_valid(ci)){ui_undo_invalid("UNDO CHORUS INVALID");return;}
++                  if(!sj6_classic_i_bytes_valid(ci)){undo_field_invalid("CHORUS");return;}
+                   undo_chorus_i|=1u<<v;
+                 }
+ #endif
+@@ -4764,13 +4775,13 @@
+                 undo_peek(&undo,entry,off-2u+S1_ARP_CLOCK_BYTE,clock_value,sizeof clock_value);
+                 if(memcmp(clock_value,read137(&proj.sound,v)+S1_ARP_CLOCK_BYTE,sizeof clock_value)) {
+                     if(!s1_clock_valid(clock_value)){
+-                        ui_undo_invalid("UNDO CLOCK INVALID");return;
++                        undo_field_invalid("CLOCK");return;
+                     }
+                     undo_clock|=1u<<v;
+                 }
+ #endif
+ #if (defined(X0X_SJ6_ZERO_GATE_PROBE) && X0X_SJ6_ZERO_GATE_PROBE) || X0X_SJ6_NATIVE_ZERO_GATE
+-                if(!undo_bounded_field(entry,off+SJ6_ARP_ZERO_BYTE-2u,1u,read137(&proj.sound,v)[SJ6_ARP_ZERO_BYTE],1u<<v,&undo_zero,"UNDO GATE INVALID"))return;
++                if(!undo_bounded_field(entry,off+SJ6_ARP_ZERO_BYTE-2u,1u,read137(&proj.sound,v)[SJ6_ARP_ZERO_BYTE],1u<<v,&undo_zero,"GATE"))return;
+ #endif
+ #if (defined(X0X_HOST) && defined(X0X_SJ6_DELAY_WITNESS)) || X0X_SJ6_NATIVE_DELAY
+                 uint8_t dl[SJ6_DELAY_COUNT];
+@@ -4785,13 +4796,13 @@
+ #if defined(X0X_S1_AUTOPAN_PROBE) && X0X_S1_AUTOPAN_PROBE
+                 uint8_t pan[1u+S1_PAN_RATE_BYTES];
+                 undo_peek(&undo,entry,off+(S1_PAN_AMOUNT_BYTE-2u),pan,sizeof pan);
+-                if(pan[0]>127u || !s1_pan_rate_valid(s1_pan_rate_word_bytes(pan+1u))){ui_undo_invalid("UNDO PAN INVALID");return;}
++                if(pan[0]>127u || !s1_pan_rate_valid(s1_pan_rate_word_bytes(pan+1u))){undo_field_invalid("PAN");return;}
+                 if(memcmp(pan,read137(&proj.sound,v)+S1_PAN_AMOUNT_BYTE,sizeof pan))undo_pan|=1u<<v;
+ #endif
+ #if X0X_SJ6_RANDOM2_PROBE || X0X_SJ6_NATIVE_RANDOM2
+                 undo_peek(&undo,entry,off+SJ6_ARP_RANDOM_BYTE-2u,&p,1u);
+                 if(p!=read137(&proj.sound,v)[SJ6_ARP_RANDOM_BYTE]){
+-                    if(p!=0u && p!=2u){ui_undo_invalid("UNDO MODE INVALID");return;}
++                    if(p!=0u && p!=2u){undo_field_invalid("MODE");return;}
+                     undo_zero|=1u<<v;
+                 }
+ #endif
+@@ -4799,27 +4810,27 @@
+                 uint8_t voice_settings[2];
+                 undo_peek(&undo,entry,off+SJ6_VOICE_BYTE-2u,voice_settings,sizeof voice_settings);
+                 if(!sj6_voice_valid(v,voice_settings[0],voice_settings[1])){
+-                    ui_undo_invalid("UNDO VOICE INVALID");return;
++                    undo_field_invalid("VOICE");return;
+                 }
+                 const uint8_t *cur_voice=sj6_voice_read(&proj.sound,v);
+                 if(memcmp(voice_settings,cur_voice,sizeof voice_settings)){
+                     undo_sj6_voice|=1u<<v;
+                 }
+ #endif
+-                if(!undo_bounded_field(entry,off+S1_TRANS_BYTE-2u,S1_TRANS_LAST,read137(&proj.sound,v)[S1_TRANS_BYTE],1u<<v,&undo_trans,"UNDO TRANSPOSE INVALID"))return;
++                if(!undo_bounded_field(entry,off+S1_TRANS_BYTE-2u,S1_TRANS_LAST,read137(&proj.sound,v)[S1_TRANS_BYTE],1u<<v,&undo_trans,"TRANSPOSE"))return;
+ #if defined(X0X_S1_CRUSH_LFO_PROBE) && X0X_S1_CRUSH_LFO_PROBE
+-                if(!undo_bounded_field(entry,off+S1_CRUSH_BYTE-2u,S1_CRUSH_LAST,read137(&proj.sound,v)[S1_CRUSH_BYTE],1u<<v,&undo_crush,"UNDO CRUSH INVALID"))return;
++                if(!undo_bounded_field(entry,off+S1_CRUSH_BYTE-2u,S1_CRUSH_LAST,read137(&proj.sound,v)[S1_CRUSH_BYTE],1u<<v,&undo_crush,"CRUSH"))return;
+ #endif
+ #if defined(X0X_S1_FEEDBACK_PROBE) && X0X_S1_FEEDBACK_PROBE
+-                if(!undo_bounded_field(entry,off+(S1_FB_BYTE-2u),S1_FB_LAST,read137(&proj.sound,v)[S1_FB_BYTE],1u<<v,&undo_feedback,"UNDO FEEDBACK INVALID"))return;
++                if(!undo_bounded_field(entry,off+(S1_FB_BYTE-2u),S1_FB_LAST,read137(&proj.sound,v)[S1_FB_BYTE],1u<<v,&undo_feedback,"FEEDBACK"))return;
+ #endif
+-                if(!undo_bounded_field(entry,off+(S1_A4_BYTE-2u),S1_A4_MAX,read137(&proj.sound,v)[S1_A4_BYTE],1u<<v,&undo_a4,"UNDO A REF INVALID"))return;
++                if(!undo_bounded_field(entry,off+(S1_A4_BYTE-2u),S1_A4_MAX,read137(&proj.sound,v)[S1_A4_BYTE],1u<<v,&undo_a4,"A REF"))return;
+ #if X0X_S1_HALFTIME
+                 const uint32_t half_off=__builtin_offsetof(sound_t,v)+
+                     ((T_MST*NVOICES_MAX+S1_HALF_ROW+v)*NPARAMS_MAX+S1_HALF_BYTE);
+                 undo_peek(&undo,entry,half_off,&p,1u);
+                 if(p>128u || (p && !undo_s1_init)){
+-                    ui_undo_invalid("UNDO SMOOTH INVALID");return;
++                    undo_field_invalid("SMOOTH");return;
+                 }
+                 if(p!=s1_half_code(&proj.sound,v))undo_a4|=1u<<v;
+ #endif
+@@ -4832,7 +4843,7 @@
+                    && !undo_j6_init
+ #endif
+                    )){
+-                    ui_undo_invalid("UNDO SCALE INVALID");return;
++                    undo_field_invalid("SCALE");return;
+                 }
+                 if(p!=proj.sound.v[T_MST][S1_SCALE_ROW+v][S1_SCALE_BYTE])undo_a4|=1u<<v;
+ #if X0X_S1_USER_SCALE
+@@ -4840,7 +4851,7 @@
+                 const uint32_t base=__builtin_offsetof(sound_t,v);
+                 undo_peek(&undo,entry,scale_off+S1_USER_COUNT-S1_SCALE_BYTE,&target_user_count,1u);
+                 if(target_user_count>S1C_USER_NOTES || (p==S1C_SCALE_USER && !target_user_count)){
+-                    ui_undo_invalid("UNDO USER SCALE INVALID");return;
++                    undo_field_invalid("USER SCALE");return;
+                 }
+                 const unsigned m=(unsigned)(scale_off+S1_USER_COUNT-S1_SCALE_BYTE);
+                 const unsigned h=base+(s1_user_head_target(v)*NVOICES_MAX+S1_USER_ROW)*NPARAMS_MAX;
+@@ -4850,11 +4861,11 @@
+                    s1_undo_range_diff(&undo,entry,t,t+S1_USER_TAIL))undo_a4|=1u<<v;
+ #endif
+ #endif
+-                if(!undo_bounded_field(entry,off+(S1_RVFB_BYTE-2u),S1_RVFB_LAST,read137(&proj.sound,v)[S1_RVFB_BYTE],1u<<v,&undo_rvfb,"UNDO RV SIZE INVALID"))return;
++                if(!undo_bounded_field(entry,off+(S1_RVFB_BYTE-2u),S1_RVFB_LAST,read137(&proj.sound,v)[S1_RVFB_BYTE],1u<<v,&undo_rvfb,"RV SIZE"))return;
+ #if defined(DNBOX_137_HOST_WITNESS) && defined(X0X_SJ6_MOD_TYPED_PROBE)
+                 undo_peek(&undo,entry,off+SJ6_MOD_BYTE-2u,&p,1u);
+                 if(p!=read137(&proj.sound,v)[SJ6_MOD_BYTE]){
+-                    if(p>SJ6_MOD_LAST){ui_undo_invalid("UNDO MOD INVALID");return;}
++                    if(p>SJ6_MOD_LAST){undo_field_invalid("MOD");return;}
+                     undo_sj6_mod|=1u<<v;
+                 }
+ #endif
+@@ -4865,7 +4876,7 @@
+                 const uint8_t *row=read137(&proj.sound,v);
+                 if (pb[0]!=row[S1_PB_DN_BYTE] || pb[1]!=row[S1_PB_UP_BYTE]) {
+                     if (pb[0]>S1_PB_LAST || pb[1]>S1_PB_LAST) {
+-                        ui_undo_invalid("UNDO RANGE INVALID");return;
++                        undo_field_invalid("RANGE");return;
+                     }
+                     undo_pb|=1u<<v;
+                 }
+@@ -4873,7 +4884,7 @@
+                 undo_peek(&undo,entry,off+SJ6_PB_DN_BYTE-2u,pb,sizeof pb);
+                 if (pb[0]!=row[SJ6_PB_DN_BYTE] || pb[1]!=row[SJ6_PB_UP_BYTE]) {
+                     if (pb[0]>SJ6_PB_LIMIT || pb[1]>SJ6_PB_LIMIT) {
+-                        ui_undo_invalid("UNDO RANGE INVALID");return;
++                        undo_field_invalid("RANGE");return;
+                     }
+                     undo_sj6_pb|=1u<<v;
+                 }
+@@ -4930,30 +4941,30 @@
+ #endif
+ #endif
+ #if X0X_SJ6_MONO32_PROBE
+-    if(!ui_undo_check(undo_sj6_voice,engine_sj6_voice_undo_ready,"UNDO WAIT VOICE"))return;
++    if(!ui_undo_check(undo_sj6_voice,engine_sj6_voice_undo_ready,"VOICE"))return;
+ #endif
+ #if defined(DNBOX_137_HOST_WITNESS) && X0X_S1_DELAY_TRACK_TEST
+ #if X0X_SJ6_VCF_PORT
+-    if(!ui_undo_check(undo_vcf,sj6_vcf_undo_ready,"UNDO WAIT LFO1"))return;
++    if(!ui_undo_check(undo_vcf,sj6_vcf_undo_ready,"LFO1"))return;
+ #endif
+-    if(!ui_undo_check(undo_dict,s1_typed_dict_undo_ready,"UNDO WAIT IN CUTOFF"))return;
++    if(!ui_undo_check(undo_dict,s1_typed_dict_undo_ready,"IN CUTOFF"))return;
+ #endif
+ #if DNBOX_TYPED_CONTROLS_NATIVE_TEST
+ #if X0X_SJ6_NATIVE_ROOM
+-    if(!ui_undo_check(undo_room,sj6_native_room_undo_ready,"UNDO WAIT FX"))return;
++    if(!ui_undo_check(undo_room,sj6_native_room_undo_ready,"FX"))return;
+ #endif
+ #if X0X_SJ6_OTA_NATIVE
+-    if(!ui_undo_check(undo_ota,sj6_ota_undo_ready,"UNDO WAIT FILTER"))return;
++    if(!ui_undo_check(undo_ota,sj6_ota_undo_ready,"FILTER"))return;
+ #endif
+ #if X0X_SJ6_NATIVE_LIMITER
+-    if(!ui_undo_check(undo_limiter,sj6_native_limiter_undo_ready,"UNDO WAIT LIMITER"))return;
++    if(!ui_undo_check(undo_limiter,sj6_native_limiter_undo_ready,"LIMITER"))return;
+ #endif
+-    if(!ui_undo_check(undo_cmp,s1_cmp_undo_ready,"UNDO WAIT COMP"))return;
+-    if(!ui_undo_check(undo_aa,s1_aa_undo_ready,"UNDO WAIT ANTI-ALIAS"))return;
+-    if(!ui_undo_check(undo_cwg,s1_typed_cwg_undo_ready,"UNDO WAIT WET MAKEUP"))return;
++    if(!ui_undo_check(undo_cmp,s1_cmp_undo_ready,"COMP"))return;
++    if(!ui_undo_check(undo_aa,s1_aa_undo_ready,"ANTI-ALIAS"))return;
++    if(!ui_undo_check(undo_cwg,s1_typed_cwg_undo_ready,"WET MAKEUP"))return;
+ #endif
+ #if DNBOX_TYPED_CONTROLS_NATIVE_TEST
+-    if(!ui_undo_check(undo_phaser,s1_phaser_undo_ready,"UNDO WAIT PHASER"))return;
++    if(!ui_undo_check(undo_phaser,s1_phaser_undo_ready,"PHASER"))return;
+ #endif
+ #if X0X_S1_DELAY_TIME_NATIVE
+     if(undo_dlytime && !s1_delay_time_undo_ready(undo_dlytime & ~undo_bass_mask,undo_dlycode)) {
+@@ -4961,10 +4972,10 @@
+     }
+ #endif
+ #if X0X_SJ6_PITCH_ENV_NATIVE
+-    if(!ui_undo_check(undo_pitch,sj6_pitch_undo_ready,"UNDO WAIT PITCH"))return;
++    if(!ui_undo_check(undo_pitch,sj6_pitch_undo_ready,"PITCH"))return;
+ #endif
+ #if X0X_SJ6_AUX_LFO_NATIVE
+-    if(!ui_undo_check(undo_aux,sj6_aux_undo_ready,"UNDO WAIT LFO"))return;
++    if(!ui_undo_check(undo_aux,sj6_aux_undo_ready,"LFO"))return;
+ #endif
+     undo_lanes = 0;
+     if (!(redo ? undo_redo : undo_undo)(&undo, undo_changed, &lo, &hi)) {
+--- a/firmware/src/app/project.c
++++ b/firmware/src/app/project.c
+@@ -492,6 +492,24 @@
+ 
+ /* No frozen snapshot layout is reinterpreted as ordinary motion or endpoints.
+  * Streams 1/2/3 never assigned the upper flags nibble. */
++/* Shared immutable-data scan: held chords compare index, legacy per-step
++ * note locks retain their original index-independent ownership. */
++static __attribute__((noinline)) int project_lane_duplicate(const lane_t *first,const lane_t *l,unsigned chord)
++{
++    for (const lane_t *q=first;q<l;++q)
++        if(q->used && q->t==l->t && q->pat==l->pat && q->part==l->part &&
++           q->v==l->v && (!chord || q->i==l->i)) return 1;
++    return 0;
++}
++#if X0X_BASS_NOTE_SOUND && defined(DNBOX_137_HOST_WITNESS)
++static __attribute__((noinline)) int project_note_invalid(const lane_t *l,unsigned is137)
++{
++    return ((l->i==NOTE137 || l->i==NOTE_S1_MOD) && !is137) ||
++           (is137 && s1_typed_init_cell(l->val) && l->i!=NOTE_S1_MOD) ||
++           (is137 && l->val[29]==ORIGINAL_SOUND_JUNO && !original_sound_sj6_factory(l->val) && l->i!=NOTE137) ||
++           engine_bass_note_validate(l);
++}
++#endif
+ static int stream_parts_ok(const pattern_t *pat,const arrange_t *arr,uint32_t format)
+ {
+     int p, b, k;
+@@ -519,9 +537,7 @@
+ #else
+             if(format!=PROJ_STREAM_CHORD || !held_chord_lane_valid(l))return 0;
+ #endif
+-            for(int j=0;j<k;j++)if(arr->lane[j].used && arr->lane[j].t==l->t &&
+-                arr->lane[j].pat==l->pat && arr->lane[j].part==l->part &&
+-                arr->lane[j].v==l->v && arr->lane[j].i==l->i)return 0;
++            if(project_lane_duplicate(arr->lane,l,1u))return 0;
+         }
+         if(l->t==0xfeu)return 0; /* frozen historical contract remains unsupported */
+         if(l->t==0xfdu) {
+@@ -529,15 +545,11 @@
+             /* A lock on a step that is no longer a note is kept and never plays. */
+ #ifdef DNBOX_137_HOST_WITNESS
+             if((format!=PROJ_STREAM_14 && format!=PROJ_STREAM_CHORD && format!=STREAM137) ||
+-               ((l->i==NOTE137 || l->i==NOTE_S1_MOD) && format!=STREAM137) ||
+-               (format==STREAM137 && s1_typed_init_cell(l->val) && l->i!=NOTE_S1_MOD) ||
+-               (format==STREAM137 && l->val[29]==ORIGINAL_SOUND_JUNO && !original_sound_sj6_factory(l->val) && l->i!=NOTE137) ||
+-               engine_bass_note_validate(l))return 0;
++               project_note_invalid(l,format==STREAM137))return 0;
+ #else
+             if((format!=PROJ_STREAM_14 && format!=PROJ_STREAM_CHORD) || engine_bass_note_validate(l))return 0;
+ #endif
+-            for(int j=0;j<k;j++)if(arr->lane[j].used && arr->lane[j].t==l->t &&
+-                arr->lane[j].pat==l->pat && arr->lane[j].part==l->part && arr->lane[j].v==l->v)return 0;
++            if(project_lane_duplicate(arr->lane,l,0u))return 0;
+ #else
+             return 0;
+ #endif
+@@ -790,6 +802,23 @@
+  * Unused sound cells and motion lanes are opaque, just as they are in storage.
+  * Break slot indices are resolved against the companion's complete sample manifest:
+  * a slot may not exist here yet, because sample restoration follows this check. */
++static __attribute__((noinline)) int project_bounds_valid(const void *record, const uint8_t (*ranges)[2], unsigned n)
++{
++    const uint8_t *bytes = record;
++    for (; n; n--, ranges++)
++        if (bytes[(*ranges)[0]] > (*ranges)[1]) return 0;
++    return 1;
++}
++_Static_assert(__builtin_offsetof(bpart_t,gen.mutate_bars) <= 255, "bass byte offsets");
++static const uint8_t bass_bounds[][2] = {
++    {__builtin_offsetof(bpart_t,len), NSTEPS}, {__builtin_offsetof(bpart_t,rate), NRATES-1},
++    {__builtin_offsetof(bpart_t,dir), NDIRS-1}, {__builtin_offsetof(bpart_t,transpose),48},
++    {__builtin_offsetof(bpart_t,gen.density),100}, {__builtin_offsetof(bpart_t,gen.accent),100},
++    {__builtin_offsetof(bpart_t,gen.slide),100}, {__builtin_offsetof(bpart_t,gen.oct_range),3},
++    {__builtin_offsetof(bpart_t,gen.root),11}, {__builtin_offsetof(bpart_t,gen.scale), TB3PO_NSCALES-1},
++    {__builtin_offsetof(bpart_t,gen.base_oct),4}, {__builtin_offsetof(bpart_t,gen.mutate_bars),16},
++};
++
+ static int project_validate_for(const project_t *p)
+ {
+     const settings_t *s = &p->set;
+@@ -801,15 +830,29 @@
+ #endif
+     if (s->magic != PROJ_MAGIC || s->format != PROJ_FORMAT || s->stereo != PROJ_STEREO ||
+ #ifdef DNBOX_137_HOST_WITNESS
+-        !valid_rev137(s->snd_rev) || (s->snd_rev==REV137 && !canonical137(&p->sound)) || s->palette > 5 || s->keyled > 2 || s->clk_out > 1 ||
++        !valid_rev137(s->snd_rev) || (s->snd_rev==REV137 && !canonical137(&p->sound)) || 
+ #else
+-        s->snd_rev != PROJ_SND_REV || s->palette > 5 || s->keyled > 2 || s->clk_out > 1 ||
++        s->snd_rev != PROJ_SND_REV || 
+ #endif
+-        s->notes_out > 1 || s->bpm_x10 < 200 || s->bpm_x10 > 2750 || s->accent_q7 > 127 ||
+-        s->keysound > 1 || s->autosave_off > 1 || s->out_loud > 1 || s->usb_full > 1 ||
++        s->bpm_x10 < 200 || s->bpm_x10 > 2750 || 
++        
+         (s->bt & (0xC0u & ~PROJ_DEVICE_PREFS)) || !(s->bt & PROJ_BT_CLK_IN) || PROJ_CLK_SRC(s->bt) > SEQ_CLK_EXT ||
+         s->ck_ch < 2)
+         return -1;
++    static const uint8_t limits[][2] = {
++        {__builtin_offsetof(settings_t,palette),5},
++        {__builtin_offsetof(settings_t,keyled),2},
++        {__builtin_offsetof(settings_t,clk_out),1},
++        {__builtin_offsetof(settings_t,notes_out),1},
++        {__builtin_offsetof(settings_t,accent_q7),127},
++        {__builtin_offsetof(settings_t,keysound),1},
++        {__builtin_offsetof(settings_t,autosave_off),1},
++        {__builtin_offsetof(settings_t,out_loud),1},
++        {__builtin_offsetof(settings_t,usb_full),1},
++    };
++    _Static_assert(sizeof(settings_t)<=256, "project byte limits store offsets in u8");
++    if (!project_bounds_valid(s, limits, sizeof limits / sizeof *limits))
++        return -1;
+     for (i = 0; i < 12; i++) {
+         unsigned value=(&s->ck_ch)[i];
+         if(i==10) value&=~PROJ_S1_MICRO_KEYS;
+@@ -847,10 +890,8 @@
+                 return -1;
+         for (b = 0; b < NBASS; b++) {
+             const bpart_t *bp = &pat->bass[b];
+-            const tb3po_cfg_t *g = &bp->gen;
+-            if (!bp->len || bp->len > NSTEPS || bp->rate >= NRATES || bp->dir >= NDIRS || bp->transpose > 48 ||
+-                g->density > 100 || g->accent > 100 || g->slide > 100 || !g->oct_range || g->oct_range > 3 ||
+-                g->root > 11 || g->scale >= TB3PO_NSCALES || g->base_oct > 4 || g->mutate_bars > 16)
++            if (!bp->len || !bp->gen.oct_range ||
++                !project_bounds_valid(bp, bass_bounds, sizeof bass_bounds / sizeof *bass_bounds))
+                 return -1;
+             for (i = 0; i < NSTEPS; i++)
+                 if (bp->step[i].note > 127 || bp->step[i].velocity > 127 ||
+@@ -883,10 +924,7 @@
+ #if X0X_BASS_NOTE_SOUND
+         if(l->t==BASS_NOTE_TARGET) {
+ #ifdef DNBOX_137_HOST_WITNESS
+-            if(((l->i==NOTE137 || l->i==NOTE_S1_MOD) && s->snd_rev!=REV137) ||
+-               (s->snd_rev==REV137 && s1_typed_init_cell(l->val) && l->i!=NOTE_S1_MOD) ||
+-               (s->snd_rev==REV137 && l->val[29]==ORIGINAL_SOUND_JUNO && !original_sound_sj6_factory(l->val) && l->i!=NOTE137) ||
+-               engine_bass_note_validate(l))return -1;
++            if(project_note_invalid(l,s->snd_rev==REV137))return -1;
+ #else
+             if(engine_bass_note_validate(l))return -1;
+ #endif
+@@ -902,10 +940,7 @@
+         ) {
+             /* NOTE intentionally ignores its tagged index for ownership;
+              * held chord addresses include the index. Same duplicate rules. */
+-            for(const lane_t *prior=p->arr.lane;prior<l;++prior)
+-                if(prior->used && prior->t==l->t && prior->pat==l->pat &&
+-                   prior->part==l->part && prior->v==l->v &&
+-                   (l->t!=HELD_CHORD_TARGET || prior->i==l->i)) return -1;
++            if(project_lane_duplicate(p->arr.lane,l,l->t==HELD_CHORD_TARGET))return -1;
+             continue;
+         }
+         if (l->t == T_PROB) {
+--- a/firmware/src/app/editor.c
++++ b/firmware/src/app/editor.c
+@@ -69,7 +69,6 @@
+     if (ed_n < sizeof ed_out - 1u)
+         ed_out[ed_n++] = (uint8_t)(v & 0x7Fu);
+ }
+-#if X0X_REMOTE_DNR3
+ /* Fixed-width little-endian 7-bit fields in editor and Remote frames. */
+ static __attribute__((noinline)) void ed_u(uint32_t v, int n)
+ {
+@@ -83,7 +82,6 @@
+         v = v << 7 | a[n];
+     return v;
+ }
+-#endif
+ static void ed_str(const char *s, uint32_t max)
+ {
+     uint32_t i;
+@@ -147,15 +145,13 @@
+ /* Offset is 21 bits; count is in byte pairs. Invalid offsets send no reply. */
+ static int ed_read_area(const uint8_t *base, uint32_t size, const uint8_t *a)
+ {
+-    uint32_t off = (uint32_t)a[0] | (uint32_t)a[1] << 7 | (uint32_t)a[2] << 14;
++    uint32_t off = ed_g(a,3);
+     uint32_t count = a[3] > ED_READ_MAX / 2u ? ED_READ_MAX : a[3] * 2u;
+     if (off >= size)
+         return 0;
+     if (count > size - off)
+         count = size - off;
+-    ed_b(off);
+-    ed_b(off >> 7);
+-    ed_b(off >> 14);
++    ed_u(off,3);
+     ed_put7(base + off, count);
+     return 1;
+ }
+@@ -229,11 +225,8 @@
+     return 1;
+ }
+ 
+-static uint32_t ed_u21(const uint8_t *a)
+-{
+-    return (uint32_t)a[0] | (uint32_t)a[1] << 7 | (uint32_t)a[2] << 14;
+-}
+-static void ed_w21(uint32_t v) { ed_b(v); ed_b(v >> 7); ed_b(v >> 14); }
++#define ed_u21(a) ed_g((a),3)
++#define ed_w21(v) ed_u((v),3)
+ static uint8_t *ed_project_byte(uint32_t off)
+ {
+     return off < PROJECT_FILE_HDR ? &ed_project.header[off] : (uint8_t *)&project_stage + off - PROJECT_FILE_HDR;
+@@ -610,7 +603,7 @@
+ #include "fm1_debug.h"
+ static uint32_t ed_u35(const uint8_t *a)
+ {
+-    return (uint32_t)a[0] | (uint32_t)a[1] << 7 | (uint32_t)a[2] << 14 | (uint32_t)a[3] << 21 | (uint32_t)a[4] << 28;
++    return ed_g(a,5);
+ }
+ static void ed_w35(uint32_t v)
+ {
+@@ -732,7 +725,7 @@
+             ed_b(1);
+             return;
+         }
+-        off = (uint32_t)a[0] | (uint32_t)a[1] << 7 | (uint32_t)a[2] << 14;
++        off = ed_g(a,3);
+         len = boot_u32(sec + 12);
+         n = a[3] > ED_READ_MAX / 2u ? ED_READ_MAX : a[3] * 2u;
+         if (off >= len) {
+@@ -742,9 +735,7 @@
+         if (n > len - off)
+             n = len - off;
+         ed_b(0);
+-        ed_b(off);
+-        ed_b(off >> 7);
+-        ed_b(off >> 14);
++        ed_u(off,3);
+         ed_put7(sec + BOOT_PAY_OFF + off, n);
+         return;
+     }
+@@ -783,12 +774,10 @@
+     if (cmd == ED_BOOT_WRITE) {
+         uint32_t off = 0, n;
+         if (na >= 3u)
+-            off = (uint32_t)a[0] | (uint32_t)a[1] << 7 | (uint32_t)a[2] << 14;
++            off = ed_g(a,3);
+         n = na >= 3u ? ed_unpack_exact(a + 3, na - 3u, ed_smp_buf, 256u) : 0u;
+         rc = boot_write(&bst, off, n ? ed_smp_buf : 0, n, fm1_ms);
+-        ed_b(off);
+-        ed_b(off >> 7);
+-        ed_b(off >> 14);
++        ed_u(off,3);
+         boot_finish(rc);
+         return;
+     }
+@@ -929,8 +918,7 @@
+         uint32_t k;
+         ed_b(gfx_xdata_ok);
+         for (k = 0; k < XDATA_HDR; k++) {
+-            ed_b(h[k]);
+-            ed_b(h[k] >> 7);
++            ed_u(h[k],2);
+         }
+         break;
+     }
+@@ -944,8 +932,7 @@
+         uint32_t k;
+         ed_b(blob ? 1 : 0);
+         for (k = 0; k < FITTAB_HDR; k++) {
+-            ed_b(h[k]);
+-            ed_b(h[k] >> 7);
++            ed_u(h[k],2);
+         }
+         break;
+     }
+@@ -963,8 +950,7 @@
+ #endif
+         for (k = 0; k < FL_FDATA_HDR; k++) {
+             uint32_t v = FL_FDATA_SIZE ? h[k] : 0xFFu;
+-            ed_b(v);
+-            ed_b(v >> 7);
++            ed_u(v,2);
+         }
+         break;
+     }
+@@ -981,11 +967,7 @@
+ #endif
+         ed_b(nw);
+         for (k = 0; k < nw; k++) {
+-            ed_b(w[k]);
+-            ed_b(w[k] >> 7);
+-            ed_b(w[k] >> 14);
+-            ed_b(w[k] >> 21);
+-            ed_b(w[k] >> 28);
++            ed_u(w[k],5);
+         }
+         break;
+     }
+@@ -1010,7 +992,7 @@
+         uint32_t off, len, rc = 0, took;
+         if (na < 5u || a[0] >= SMP_USER_SLOTS || !flash_ok)
+             return;
+-        off = (uint32_t)a[1] | (uint32_t)a[2] << 7 | (uint32_t)a[3] << 14;
++        off = ed_g(a+1,3);
+         len = ed_unpack_exact(a + 4, na - 4u, ed_smp_buf, 256u);
+         if (off < SMP_USER_DATA || (off & 0xFFu) || !len || off + len > SMP_USER_SIZE(a[0]))
+             rc = 1;
+@@ -1035,9 +1017,7 @@
+             }
+         }
+         ed_b(a[0]);
+-        ed_b(off);
+-        ed_b(off >> 7);
+-        ed_b(off >> 14);
++        ed_u(off,3);
+         ed_b(rc);
+         break;
+     }
+@@ -1104,8 +1084,7 @@
+             v[1] = SMP_USER_SIZE(i) / 0x1000u;
+             v[2] = usr_nz[i] ? (h->data_len + 1023u) / 1024u : 0u;
+             for (j = 0; j < 3u; j++) {
+-                ed_b(v[j]);
+-                ed_b(v[j] >> 7);
++                ed_u(v[j],2);
+             }
+         }
+         break;
+@@ -1130,11 +1109,7 @@
+             ed_b(words);
+             for (k = 0; k < words; k++) {
+                 uint32_t v = k < nt ? t[k] : op == 3u ? fm1_t5w.hits : g[k - nt];
+-                ed_b(v);
+-                ed_b(v >> 7);
+-                ed_b(v >> 14);
+-                ed_b(v >> 21);
+-                ed_b(v >> 28);
++                ed_u(v,5);
+             }
+             break;
+         }

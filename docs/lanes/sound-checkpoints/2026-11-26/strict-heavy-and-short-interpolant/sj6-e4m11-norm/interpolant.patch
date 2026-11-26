@@ -1,0 +1,11 @@
+--- nocopy/native-patch.py
++++ unscaled/native-patch.py
+@@ -10,7 +10,7 @@
+     s=c.read_text()
+     s=s.replace('#include <string.h>','#include <string.h>\n#include "block-history.h"',1)
+     a='return ((float)c->delay[a] * (1 - frac) + (float)c->delay[b] * frac) / 32768.0f;'
+-    b='return (sj6_hist_decode(c->delay[a])*32768.f*(1-frac)+sj6_hist_decode(c->delay[b])*32768.f*frac)/32768.f;'
++    b='return sj6_hist_decode(c->delay[a])*(1-frac)+sj6_hist_decode(c->delay[b])*frac;'
+     assert s.count(a)==1;s=s.replace(a,b)
+     a='c->delay[write] = (int16_t)clampf(in * 32767, -32768, 32767);'
+     b='c->delay[write]=sj6_hist_encode(in);'

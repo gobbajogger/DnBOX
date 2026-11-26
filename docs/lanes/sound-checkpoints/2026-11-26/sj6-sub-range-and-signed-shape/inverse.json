@@ -1,0 +1,88 @@
+{
+  "root36": {
+    "frequency_hz": 32.689724678839944,
+    "h1_suffix_phase_deg": 77.87488590493712,
+    "h1_gain_dB": -3.1259164914575526,
+    "rows": [
+      {
+        "harmonic": 3,
+        "terminal_phase_deg": -18.704904994742694,
+        "source_equivalent_relative_phase_deg": -174.79342865952682,
+        "suffix_relative_phase_deg": 156.08852366478413,
+        "terminal_dBc": -10.237931239319327,
+        "source_equivalent_dBc": -12.88688762836675,
+        "suffix_relative_gain_dB": 2.6489563890474246
+      },
+      {
+        "harmonic": 5,
+        "terminal_phase_deg": 16.5099404856088,
+        "source_equivalent_relative_phase_deg": 27.763640375740408,
+        "suffix_relative_phase_deg": -11.2536998901316,
+        "terminal_dBc": -16.161476852837687,
+        "source_equivalent_dBc": -19.12502368286312,
+        "suffix_relative_gain_dB": 2.9635468300254337
+      },
+      {
+        "harmonic": 7,
+        "terminal_phase_deg": 59.91791109610463,
+        "source_equivalent_relative_phase_deg": -127.96210298477001,
+        "suffix_relative_phase_deg": -172.11998591912538,
+        "terminal_dBc": -19.68589586365313,
+        "source_equivalent_dBc": -22.740649100815922,
+        "suffix_relative_gain_dB": 3.0547532371627923
+      },
+      {
+        "harmonic": 9,
+        "terminal_phase_deg": 104.76748917103184,
+        "source_equivalent_relative_phase_deg": 75.50761962969563,
+        "suffix_relative_phase_deg": 29.25986954133623,
+        "terminal_dBc": -21.92701742267914,
+        "source_equivalent_dBc": -25.01991552185239,
+        "suffix_relative_gain_dB": 3.09289809917325
+      }
+    ]
+  },
+  "root54": {
+    "frequency_hz": 97.68311599529473,
+    "h1_suffix_phase_deg": 29.824828024313938,
+    "h1_gain_dB": -0.48070183569941216,
+    "rows": [
+      {
+        "harmonic": 3,
+        "terminal_phase_deg": 149.0758961912017,
+        "source_equivalent_relative_phase_deg": -131.6232792085492,
+        "suffix_relative_phase_deg": -79.3008246002491,
+        "terminal_dBc": -13.317311493939034,
+        "source_equivalent_dBc": -13.764530160292415,
+        "suffix_relative_gain_dB": 0.4472186663533812
+      },
+      {
+        "harmonic": 5,
+        "terminal_phase_deg": -47.36427677490709,
+        "source_equivalent_relative_phase_deg": 95.64518932079761,
+        "suffix_relative_phase_deg": -143.00946609570474,
+        "terminal_dBc": -18.536126131879065,
+        "source_equivalent_dBc": -19.021377942589016,
+        "suffix_relative_gain_dB": 0.48525181070995066
+      },
+      {
+        "harmonic": 7,
+        "terminal_phase_deg": 95.07713174466154,
+        "source_equivalent_relative_phase_deg": -60.51739215664678,
+        "suffix_relative_phase_deg": 155.59452390130832,
+        "terminal_dBc": -22.941266129345372,
+        "source_equivalent_dBc": -23.43706011362865,
+        "suffix_relative_gain_dB": 0.4957939842832777
+      },
+      {
+        "harmonic": 9,
+        "terminal_phase_deg": -122.19360532090211,
+        "source_equivalent_relative_phase_deg": 142.83325576026635,
+        "suffix_relative_phase_deg": 94.97313891883152,
+        "terminal_dBc": -26.867513317883404,
+        "source_equivalent_dBc": -27.367653698576937,
+        "suffix_relative_gain_dB": 0.5001403806935335
+      }
+    ]
+  }
+}

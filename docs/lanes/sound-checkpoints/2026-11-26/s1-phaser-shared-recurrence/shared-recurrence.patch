@@ -1,0 +1,81 @@
+--- a/firmware/src/dsp/s1c/phaser-match-lab.inc
++++ b/firmware/src/dsp/s1c/phaser-match-lab.inc
+@@ -288,6 +288,49 @@
+ #endif
+ }
+ 
++#if DNBOX_S1_MATCHED_PHASER_F32
++#ifndef S1_PH_SHARED_INLINE
++#define S1_PH_SHARED_INLINE 0
++#endif
++#if S1_PH_SHARED_INLINE
++static inline __attribute__((always_inline)) float notch_lane(
++#else
++static __attribute__((noinline)) float notch_lane(
++#endif
++ float r[4][3],float *hist,float x,float a,const float scales[4],float f4,float f5,float fb)
++{
++    float t=ph_cosprod(r[0][1],scales[0]*a,0);
++    r[0][0]=0.f-(((f5*t)+(f4*r[0][2]))-(x+(fb*hist[1])));
++    for(unsigned j=1;j<4;j++){
++        const float n=ph_cosprod(r[j][1],scales[j]*a,0);
++        r[j][0]=(f5*(t-n))+(r[j-1][2]+(f4*(r[j-1][0]-r[j][2])));
++        t=n;
++    }
++    hist[0]=(f4*r[3][0])+((f5*t)+r[3][2]);
++    for(unsigned j=0;j<4;j++){r[j][2]=r[j][1];r[j][1]=r[j][0];}
++    hist[1]=hist[0];
++    /* Original immutable 0 dB gain, Vibrato and polarity. Retain signed
++     * 0*input + feedback at the source wet output (not just feedback). */
++    return (0.f*x)+hist[0];
++}
++static void computephaser(phaser*p,int count,float**in,float**out)
++{
++    ph_slow(p);
++    const float rate=p->fConst1;
++    const float scales[4]={rate*1.5f,rate*2.25f,rate*3.375f,rate*5.0625f};
++    const float base=6.28319f*100.f,edge=.5f*((6.28319f*800.f)-base);
++    const float f4=p->pole*p->pole,f5=0.f-2.f*p->pole;
++    for(int i=0;i<count;i++){
++        p->iVec0[0]=1;
++        p->fRec5[0]=(p->rsin*p->fRec6[1])+(p->rcos*p->fRec5[1]);
++        p->fRec6[0]=(1.f+((p->rcos*p->fRec6[1])+((0.f-p->rsin)*p->fRec5[1])))-(float)p->iVec0[1];
++        out[0][i]=notch_lane(p->ph_lane[0],p->fRec0,in[0][i],edge*(1.f-p->fRec5[0])+base,scales,f4,f5,p->fHslider7);
++        out[1][i]=notch_lane(p->ph_lane[1],p->fRec7,in[1][i],edge*(1.f-p->fRec6[0])+base,scales,f4,f5,p->fHslider7);
++        p->iVec0[1]=p->iVec0[0];
++        p->fRec5[1]=p->fRec5[0];p->fRec6[1]=p->fRec6[0];
++    }
++}
++#else
+ static void computephaser(phaser* dsp, int count, FAUSTFLOAT** inputs, FAUSTFLOAT** outputs) {
+ 	FAUSTFLOAT* input0 = inputs[0];
+ 	FAUSTFLOAT* input1 = inputs[1];
+@@ -389,6 +432,7 @@
+ 
+ }
+ 
++#endif
+ 
+ void s1u_phaser_run(s1u_phaser *p,float *l,float *r,float pm,float rate,float width,float fb,float sr)
+ {
+--- a/firmware/src/dsp/s1c/s1u.h
++++ b/firmware/src/dsp/s1c/s1u.h
+@@ -35,6 +35,8 @@
+  unsigned tags[3], valid;
+  float gain, pole, rsin, rcos;
+ 
++    union {
++      struct {
+ 	float fRec4[3];
+ 	float fRec3[3];
+ 	float fRec2[3];
+@@ -43,6 +45,9 @@
+ 	float fRec10[3];
+ 	float fRec9[3];
+ 	float fRec8[3];
++      };
++      float ph_lane[2][4][3];
++    };
+ 	int iVec0[2];
+ 	float fRec5[2];
+ 	float fRec6[2];

@@ -1,0 +1,61 @@
+{
+  "changed": [
+    {
+      "section": ".rodata.fc_broad.inv",
+      "base": 0,
+      "new": 24,
+      "delta": 24
+    },
+    {
+      "section": ".text.fc_broad",
+      "base": 0,
+      "new": 308,
+      "delta": 308
+    },
+    {
+      "section": ".text.fc_lowcos",
+      "base": 0,
+      "new": 78,
+      "delta": 78
+    },
+    {
+      "section": ".text.fc_lowsin",
+      "base": 0,
+      "new": 82,
+      "delta": 82
+    },
+    {
+      "section": ".text.fc_product",
+      "base": 0,
+      "new": 208,
+      "delta": 208
+    },
+    {
+      "section": ".text.fc_window",
+      "base": 0,
+      "new": 38,
+      "delta": 38
+    },
+    {
+      "section": ".text.ph_cosprod",
+      "base": 0,
+      "new": 204,
+      "delta": 204
+    },
+    {
+      "section": ".text.phaser_ch",
+      "base": 314,
+      "new": 0,
+      "delta": -314
+    },
+    {
+      "section": ".text.s1_part_render",
+      "base": 4900,
+      "new": 6830,
+      "delta": 1930
+    }
+  ],
+  "subtotal": 2558,
+  "load_image_delta": 2552,
+  "alignment_delta": -6
+}

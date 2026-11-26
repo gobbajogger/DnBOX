@@ -1,0 +1,67 @@
+--- a/firmware/src/dsp/s1c/s1u.c
++++ b/firmware/src/dsp/s1c/s1u.c
+@@ -129,6 +129,9 @@
+ }
+ 
+ /* ---- phaser ---- */
++#if DNBOX_S1_MATCHED_PHASER_LAB
++#include "phaser-match-lab.inc"
++#else
+ static float phaser_ch(float r[4][3], float *fb, float in, float lfo, float width, float fbk, float sr)
+ {
+     float w = 0.5f * (S1U_TWO_PI * 800.0f - S1U_TWO_PI * 100.0f) * (1.0f - lfo) + S1U_TWO_PI * 100.0f;
+@@ -156,6 +159,8 @@
+     *l = (1.0f - pm) * *l + pm * pl; *r = (1.0f - pm) * *r + pm * pr;
+ }
+ 
++#endif
++
+ /* ---- bit-crush ---- */
+ void s1u_crush_clock(s1u_crush *c, float hz, float sr)
+ {
+--- a/firmware/src/dsp/s1c/s1u.h
++++ b/firmware/src/dsp/s1c/s1u.h
+@@ -30,7 +30,43 @@
+ float s1u_comp(float *st /* [4] */, float x, const s1u_cc *k, int upd);
+ 
+ /* ---- phaser: four notch allpasses with feedback, notch sweep 100..800 Hz, stereo LFO (sin/cos) ---- */
++#if DNBOX_S1_MATCHED_PHASER_LAB
++typedef struct {
++ unsigned tags[3], valid;
++ float gain, pole, rsin, rcos;
++
++	float fRec4[3];
++	float fRec3[3];
++	float fRec2[3];
++	float fRec1[3];
++	float fRec11[3];
++	float fRec10[3];
++	float fRec9[3];
++	float fRec8[3];
++	int iVec0[2];
++	float fRec5[2];
++	float fRec6[2];
++	float fRec0[2];
++	float fRec7[2];
++	float fHslider0;
++	float fCheckbox0;
++	float fHslider1;
++	int fSamplingFreq;
++	int iConst0;
++	float fConst1;
++	float fHslider2;
++	float fHslider3;
++	float fHslider4;
++	float fHslider5;
++	float fConst2;
++	float fHslider6;
++	float fHslider7;
++	float fCheckbox1;
++
++} s1u_phaser;
++#else
+ typedef struct { float ph, rec[2][4][3], out[2]; } s1u_phaser;
++#endif
+ void s1u_phaser_run(s1u_phaser *p, float *l, float *r, float mix, float rate, float width_hz, float feedback, float sr);
+ 
+ /* ---- bit-crush: sample-and-hold at clock_hz (2048..48000), set the clock at block rate ---- */

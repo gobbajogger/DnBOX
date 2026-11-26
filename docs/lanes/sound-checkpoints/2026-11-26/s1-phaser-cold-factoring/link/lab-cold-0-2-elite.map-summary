@@ -1,0 +1,43 @@
+.text           0x0000000002000120    0x862cc
+ *(SORT(.text.crt0))
+--
+ .text.initphaser
+                0x0000000002070cea       0x58 /tmp/lto-llvm-a7bf7f.o
+ .text.fc_lowsin
+                0x0000000002070d42       0x52 /tmp/lto-llvm-a7bf7f.o
+ .text.fc_lowcos
+                0x0000000002070d94       0x4e /tmp/lto-llvm-a7bf7f.o
+ .text.fc_window
+                0x0000000002070de2       0x26 /tmp/lto-llvm-a7bf7f.o
+ .text.fc_broad
+                0x0000000002070e08      0x134 /tmp/lto-llvm-a7bf7f.o
+ .text.fc_product
+                0x0000000002070f3c       0xd0 /tmp/lto-llvm-a7bf7f.o
+ .text.ph_cosprod
+                0x000000000207100c       0x52 /tmp/lto-llvm-a7bf7f.o
+ .text.notch_lane
+                0x000000000207105e       0xd6 /tmp/lto-llvm-a7bf7f.o
+--
+ .text.s1_part_render
+                0x0000000002071340     0x153e /tmp/lto-llvm-a7bf7f.o
+--
+.ram_text       0x0000000001c00400      0xabc load address 0x00000000020863ec
+                0x0000000001c00400                _rt_start = .
+--
+.c1_text        0x0000000001c00ebc      0x260 load address 0x0000000002086ea8
+                0x0000000001c00ebc                _c1_start = .
+--
+.data           0x0000000001c08000      0x288 load address 0x0000000002087108
+                0x0000000001c08000                . = ALIGN (0x4)
+--
+                0x0000000001c08290                _bss_start = .
+ *(SORT(.bss*))
+--
+                0x0000000001c1ff84                _bss_end = .
+
+.pool           0x0000000001c20000    0x51dcc
+                0x0000000001c20000                _pool_start = .
+ *(SORT(.pool*))
+--
+                0x0000000001c71dcc                _pool_end = .
+

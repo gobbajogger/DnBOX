@@ -1,0 +1,264 @@
+--- a/tests/host/project_stage_test.c
++++ b/tests/host/project_stage_test.c
+@@ -849,8 +849,261 @@
+     CHECK(get32(h + 16) == PROJ_FORMAT);
+ }
+ 
++static int base_stream_parts_ok(const pattern_t *pat,const arrange_t *arr,uint32_t format)
++{
++    int p, b, k;
++    for (p = 0; p < NPAT; p++) {
++        /* Validate old meanings before migration: old mode 1 is not count code 1. */
++        if (pat[p].brk.slice_mode > (format < 8u ? 1u : 15u)) return 0;
++        for (k = 0; k < 16; k++)
++            if (pat[p].brk.slice[k] > (format < 8u ? 8u : 32u)) return 0;
++    }
++    for (p = 0; p < NPAT; p++)
++        for (b = 0; b < NBASS; b++)
++            for (k = 0; k < NSTEPS; k++) {
++                unsigned f = pat[p].bass[b].step[k].flags;
++                if ((f & BS_GATE_MASK) > G_TIE ||
++                    (format < 6u && (f >> BS_END_SHIFT)) ||
++                    ((f >> BS_END_SHIFT) && (f & BS_GATE_MASK) == G_REST))
++                    return 0;
++            }
++    for (k = 0; k < NLANE; k++) {
++        const lane_t *l=&arr->lane[k];
++        if(!l->used)continue;
++        if(l->t==HELD_CHORD_TARGET) {
++#ifdef DNBOX_137_HOST_WITNESS
++            if((format!=PROJ_STREAM_CHORD && format!=STREAM137) || !held_chord_lane_valid(l))return 0;
++#else
++            if(format!=PROJ_STREAM_CHORD || !held_chord_lane_valid(l))return 0;
++#endif
++            for(int j=0;j<k;j++)if(arr->lane[j].used && arr->lane[j].t==l->t &&
++                arr->lane[j].pat==l->pat && arr->lane[j].part==l->part &&
++                arr->lane[j].v==l->v && arr->lane[j].i==l->i)return 0;
++        }
++        if(l->t==0xfeu)return 0; /* frozen historical contract remains unsupported */
++        if(l->t==0xfdu) {
++#if X0X_BASS_NOTE_SOUND
++            /* A lock on a step that is no longer a note is kept and never plays. */
++#ifdef DNBOX_137_HOST_WITNESS
++            if((format!=PROJ_STREAM_14 && format!=PROJ_STREAM_CHORD && format!=STREAM137) ||
++               ((l->i==NOTE137 || l->i==NOTE_S1_MOD) && format!=STREAM137) ||
++               (format==STREAM137 && s1_typed_init_cell(l->val) && l->i!=NOTE_S1_MOD) ||
++               (format==STREAM137 && l->val[29]==ORIGINAL_SOUND_JUNO && !original_sound_sj6_factory(l->val) && l->i!=NOTE137) ||
++               engine_bass_note_validate(l))return 0;
++#else
++            if((format!=PROJ_STREAM_14 && format!=PROJ_STREAM_CHORD) || engine_bass_note_validate(l))return 0;
++#endif
++            for(int j=0;j<k;j++)if(arr->lane[j].used && arr->lane[j].t==l->t &&
++                arr->lane[j].pat==l->pat && arr->lane[j].part==l->part && arr->lane[j].v==l->v)return 0;
++#else
++            return 0;
++#endif
++        }
++    }
++    return 1;
++}
++static int base_project_validate(const project_t *p)
++{
++    const settings_t *s = &p->set;
++    uint32_t length, break_velocity_patterns = 0;
++    int t, v, i, k, b;
++#if X0X_BASS_TAGGED_SOUND
++    int bass_status=engine_bass_sound_validate(&p->sound);
++    if(bass_status)return bass_status;
++#endif
++    if (s->magic != PROJ_MAGIC || s->format != PROJ_FORMAT || s->stereo != PROJ_STEREO ||
++#ifdef DNBOX_137_HOST_WITNESS
++        !valid_rev137(s->snd_rev) || (s->snd_rev==REV137 && !canonical137(&p->sound)) || s->palette > 5 || s->keyled > 2 || s->clk_out > 1 ||
++#else
++        s->snd_rev != PROJ_SND_REV || s->palette > 5 || s->keyled > 2 || s->clk_out > 1 ||
++#endif
++        s->notes_out > 1 || s->bpm_x10 < 200 || s->bpm_x10 > 2750 || s->accent_q7 > 127 ||
++        s->keysound > 1 || s->autosave_off > 1 || s->out_loud > 1 || s->usb_full > 1 ||
++        (s->bt & (0xC0u & ~PROJ_DEVICE_PREFS)) || !(s->bt & PROJ_BT_CLK_IN) || PROJ_CLK_SRC(s->bt) > SEQ_CLK_EXT ||
++        s->ck_ch < 2)
++        return -1;
++    for (i = 0; i < 12; i++) {
++        unsigned value=(&s->ck_ch)[i];
++        if(i==10) value&=~PROJ_S1_MICRO_KEYS;
++        if(value > CK_MAX[i]) return -1;
++    }
++    for (i = 0; i < NPARTS; i++)
++        if (s->midi_ch[i] > 17)
++            return -1;
++    if (p->sound.v[T_FX][1][0] > 127)       /* UI's derived TAPE control */
++        return -1;
++    for (t = 0; t < NTARGETS; t++) {
++#if X0X_BASS_TAGGED_SOUND
++        if(t==T_303)continue; /* already checked by engine_bass_sound_validate */
++#endif
++        const int voices=engine_nvoices(t);
++        for (v = 0; v < voices; v++) {
++            const int n=engine_nparams(t,v);
++            const uint8_t *value=p->sound.v[t][v];
++            for (i = 0; i < n; i++)
++                if (value[i] > engine_param(t, v, i)->max)
++                    return -1;
++        }
++    }
++    for (k = 0; k < NPAT; k++) {
++        const pattern_t *pat = &p->pat[k];
++        if (pat->swing > 100)
++            return -1;
++        for (b = 0; b < NBASS; b++) {           /* schema-14: same one-byte preset field */
++            unsigned kind, preset;
++            if (!bass_pattern_preset_decode(pat->rsv[b], &kind, &preset))
++                return -1;
++        }
++        for (b = 0; b < NKIT; b++)
++            if (!pat->drum[b].len || pat->drum[b].len > NSTEPS || pat->drum[b].rate >= NRATES)
++                return -1;
++        for (b = 0; b < NBASS; b++) {
++            const bpart_t *bp = &pat->bass[b];
++            const tb3po_cfg_t *g = &bp->gen;
++            if (!bp->len || bp->len > NSTEPS || bp->rate >= NRATES || bp->dir >= NDIRS || bp->transpose > 48 ||
++                g->density > 100 || g->accent > 100 || g->slide > 100 || !g->oct_range || g->oct_range > 3 ||
++                g->root > 11 || g->scale >= TB3PO_NSCALES || g->base_oct > 4 || g->mutate_bars > 16)
++                return -1;
++            for (i = 0; i < NSTEPS; i++)
++                if (bp->step[i].note > 127 || bp->step[i].velocity > 127 ||
++                    bstep_gate(&bp->step[i]) > G_TIE ||
++                    ((bp->step[i].flags >> BS_END_SHIFT) && bstep_gate(&bp->step[i]) == G_REST))
++                    return -1;
++        }
++        for (i = 0; i < BRK_NSET; i++)
++            if (pat->brk.set[i] > breaks_param(i)->max)
++                return -1;
++        for (i = 0; i < 16; i++)
++            if (pat->brk.slice[i] > 32)
++                return -1;
++        if (pat->brk.slice_mode > 15)
++            return -1;
++    }
++    if (p->arr.song.len > NSONG)
++        return -1;
++    for (k = 0; k < p->arr.song.len; k++)
++        for (i = 0; i < NPARTS; i++)
++            if (p->arr.song.bar[k].pat[i] >= NPAT)
++                return -1;
++    for (k = 0; k < NLANE; k++) {
++        const lane_t *l = &p->arr.lane[k];
++        int max;
++        if (!l->used)
++            continue;
++        if (l->used != 1 || l->pat >= NPAT || l->part >= NPARTS)
++            return -1;
++#if X0X_BASS_NOTE_SOUND
++        if(l->t==BASS_NOTE_TARGET) {
++#ifdef DNBOX_137_HOST_WITNESS
++            if(((l->i==NOTE137 || l->i==NOTE_S1_MOD) && s->snd_rev!=REV137) ||
++               (s->snd_rev==REV137 && s1_typed_init_cell(l->val) && l->i!=NOTE_S1_MOD) ||
++               (s->snd_rev==REV137 && l->val[29]==ORIGINAL_SOUND_JUNO && !original_sound_sj6_factory(l->val) && l->i!=NOTE137) ||
++               engine_bass_note_validate(l))return -1;
++#else
++            if(engine_bass_note_validate(l))return -1;
++#endif
++        } else
++#endif
++        if(l->t==HELD_CHORD_TARGET) {
++            if(!held_chord_lane_valid(l))return -1;
++        }
++        if(l->t==HELD_CHORD_TARGET
++#if X0X_BASS_NOTE_SOUND
++           || l->t==BASS_NOTE_TARGET
++#endif
++        ) {
++            /* NOTE intentionally ignores its tagged index for ownership;
++             * held chord addresses include the index. Same duplicate rules. */
++            for(const lane_t *prior=p->arr.lane;prior<l;++prior)
++                if(prior->used && prior->t==l->t && prior->pat==l->pat &&
++                   prior->part==l->part && prior->v==l->v &&
++                   (l->t!=HELD_CHORD_TARGET || prior->i==l->i)) return -1;
++            continue;
++        }
++        if (l->t == T_PROB) {
++            if ((l->v >> 4) != l->part || (l->v & 15) >= (l->part < NKIT ? NDRUM : 1) || l->i)
++                return -1;
++            max = PROB_COND + PROB_NCOND - 1;
++        } else if (l->t == T_VEL) {
++            /* BREAK has one sequenced hit owner. 303 steps keep bstep.velocity. */
++            if ((l->part >= NKIT && l->part != PART_BRK) || (l->v >> 4) != l->part ||
++                (l->v & 15) >= (l->part == PART_BRK ? 1 : NDRUM) || l->i)
++                return -1;
++            if (l->part == PART_BRK) {
++                uint32_t pattern = 1u << l->pat;
++                if (break_velocity_patterns & pattern) return -1;
++                break_velocity_patterns |= pattern;
++            }
++            max = 127;
++        } else {
++            if (l->t >= NTARGETS || l->v >= engine_nvoices(l->t) ||
++#if X0X_BASS_TAGGED_SOUND
++                (l->t==T_303?!engine_bass_bank_param(engine_bass_sound_bank(&p->sound,l->v),l->i):l->i>=engine_nparams(l->t,l->v))
++#else
++                l->i>=engine_nparams(l->t,l->v)
++#endif
++                )
++                return -1;
++            max =
++#if X0X_BASS_TAGGED_SOUND
++                l->t==T_303?engine_bass_bank_param(engine_bass_sound_bank(&p->sound,l->v),l->i)->max:
++#endif
++                engine_param(l->t, l->v, l->i)->max;
++        }
++        for (i = 0; i < NSTEPS; i++)
++            if (l->val[i] != MOT_NONE && l->val[i] > max)
++                return -1;
++    }
++    return measure_project(p, &length);
++}
++
++static void test_exact_eligibility(void)
++{
++    static const unsigned off[]={
++      offsetof(settings_t,palette),offsetof(settings_t,keyled),offsetof(settings_t,clk_out),
++      offsetof(settings_t,notes_out),offsetof(settings_t,accent_q7),offsetof(settings_t,keysound),
++      offsetof(settings_t,autosave_off),offsetof(settings_t,out_loud),offsetof(settings_t,usb_full)
++    };
++    fixture("whole project eligibility exact fallback/current");
++    project_reset_stage();
++    for(unsigned f=0;f<sizeof off/sizeof off[0];++f){
++        uint8_t *p=(uint8_t *)&project_stage.set+off[f],saved=*p;
++        for(unsigned b=0;b<256;++b){
++           *p=(uint8_t)b;
++           CHECK(base_project_validate(&project_stage)==project_validate_for(&project_stage));
++        }
++        *p=saved;
++    }
++    const unsigned boff[] = {
++      offsetof(bpart_t,len),offsetof(bpart_t,rate),offsetof(bpart_t,dir),offsetof(bpart_t,transpose),
++      offsetof(bpart_t,gen.density),offsetof(bpart_t,gen.accent),offsetof(bpart_t,gen.slide),
++      offsetof(bpart_t,gen.oct_range),offsetof(bpart_t,gen.root),offsetof(bpart_t,gen.scale),
++      offsetof(bpart_t,gen.base_oct),offsetof(bpart_t,gen.mutate_bars)
++    };
++    for(unsigned part=0;part<NBASS;++part)
++      for(unsigned f=0;f<sizeof boff/sizeof boff[0];++f){
++        uint8_t *p=(uint8_t *)&project_stage.pat[0].bass[part]+boff[f],saved=*p;
++        for(unsigned b=0;b<256;++b){
++           *p=(uint8_t)b;
++           CHECK(base_project_validate(&project_stage)==project_validate_for(&project_stage));
++        }
++        *p=saved;
++      }
++    for(unsigned k=0;k<64u;++k){
++        lane_t *l=project_stage.arr.lane;
++        memset(l,0,sizeof project_stage.arr.lane);
++        l[0].used=1;l[0].pat=(uint8_t)(k/32);l[0].part=(uint8_t)(k%NPARTS);
++        l[0].t=(k&1)?HELD_CHORD_TARGET:0xfdu;l[0].i=k/4;l[0].v=k/8;
++        l[1]=l[0];l[1].i^=k>>3;
++        for(unsigned ver=1;ver<24;++ver)
++          CHECK(base_stream_parts_ok(project_stage.pat,&project_stage.arr,ver)==
++                stream_parts_ok(project_stage.pat,&project_stage.arr,ver));
++        CHECK(base_project_validate(&project_stage)==project_validate_for(&project_stage));
++    }
++}
+ int main(void)
+ {
++    test_exact_eligibility();
+     test_defaults();
+     test_rates_format();
+     test_save_export_load();

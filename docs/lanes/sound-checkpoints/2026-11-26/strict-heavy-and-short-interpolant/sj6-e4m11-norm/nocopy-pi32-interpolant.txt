@@ -1,0 +1,40 @@
+chorus_read:
+ 206165a:    75 04             	[--sp] = {rets, r5, r4}
+ 206165c:    03 16             	r3 = r0
+ 206165e:    3f e5              <unknown instruction>
+ 2061660:    5f 42             	r7 = b[r5+2] (u)
+ 2061662:    15 1f             	r5 = r1 - r4
+ 2061664:    50 17             	r0 = r5.b0 (u)
+ 2061666:    d8 ed 38 00       	r0 = h[r3+r0<<1] (u)
+ 206166a:    3f e5              <unknown instruction>
+ 206166c:    9f 14              <unknown instruction>
+ 206166e:    3f e5              <unknown instruction>
+ 2061670:    21 41             	if (r1 == 0) goto 130 <juno6_chorus_process+0x44 : 20616f4 >
+ 2061672:    bf ea e0 ff       	call -64 <sj6_hist_decode : 2061636 >
+ 2061676:    60 e0 7e 15       	r1 = 0x3F800000
+ 206167a:    3f e5              <unknown instruction>
+ 206167c:    11 24             	r1 = -28
+ 206167e:    01 e1 ff 50       	r1 = r5 + 255
+ 2061682:    11 17             	r1 = r1.b0 (u)
+ 2061684:    d8 ed 38 11       	r1 = h[r3+r1<<1] (u)
+ 2061688:    60 e0 8e 34       	r3 = 0x47000000
+ 206168c:    3f e5              <unknown instruction>
+ 206168e:    02 03             	rep 2 r2 {
+ 2061690:    3f e5              <unknown instruction>
+ 2061692:    22 50             		if (r2 == 0) goto 160
+                               	} <juno6_chorus_process+0x84 : 2061734 >
+ 2061694:    10 16             	r0 = r1
+ 2061696:    bf ea ce ff       	call -100 <sj6_hist_decode : 2061636 >
+ 206169a:    3f e5              <unknown instruction>
+ 206169c:    02 03             	rep 2 r2 {
+ 206169e:    3f e5              <unknown instruction>
+ 20616a0:    42 00             		sevl
+                               	}
+ 20616a2:    3f e5              <unknown instruction>
+ 20616a4:    50 00              <unknown instruction>
+ 20616a6:    e1 e0 71 34       	r1 = r3 + 0xF1000000
+ 20616aa:    3f e5              <unknown instruction>
+ 20616ac:    02 01             	tbb [r2]
+ 20616ae:    55 04             	{pc, r5, r4} = [sp++]
+
+
