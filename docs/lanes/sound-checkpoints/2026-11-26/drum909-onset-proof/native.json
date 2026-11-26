@@ -1,0 +1,75 @@
+{
+  "armed_code_and_table_size_B": [
+    71128,
+    71016
+  ],
+  "N_samples_per_case": 128,
+  "directly_compared_bytes": 69216,
+  "owner_bytes_per_span": 6604,
+  "results": [
+    {
+      "mode": "0",
+      "base_ticks": 8822,
+      "new_ticks": 8560,
+      "saved_pct": 2.9698481070052143,
+      "phase": 1225917067,
+      "pcm_words_fnv32": 1419937327
+    },
+    {
+      "mode": "1",
+      "base_ticks": 5889,
+      "new_ticks": 5629,
+      "saved_pct": 4.415011037527594,
+      "phase": 1803311564,
+      "pcm_words_fnv32": 1033344531
+    },
+    {
+      "mode": "2",
+      "base_ticks": 6062,
+      "new_ticks": 5832,
+      "saved_pct": 3.7941273507093367,
+      "phase": 3758417314,
+      "pcm_words_fnv32": 2365400947
+    },
+    {
+      "mode": "3",
+      "base_ticks": 5900,
+      "new_ticks": 5671,
+      "saved_pct": 3.8813559322033897,
+      "phase": 632348277,
+      "pcm_words_fnv32": 1569689499
+    },
+    {
+      "mode": "4",
+      "base_ticks": 7474,
+      "new_ticks": 7242,
+      "saved_pct": 3.104094193203104,
+      "phase": 756966192,
+      "pcm_words_fnv32": 2275739663
+    },
+    {
+      "mode": "5",
+      "base_ticks": 5829,
+      "new_ticks": 5599,
+      "saved_pct": 3.945788299879911,
+      "phase": 670416823,
+      "pcm_words_fnv32": 43769769
+    },
+    {
+      "mode": "6",
+      "base_ticks": 6002,
+      "new_ticks": 5772,
+      "saved_pct": 3.8320559813395536,
+      "phase": 127935218,
+      "pcm_words_fnv32": 2365400947
+    },
+    {
+      "mode": "7",
+      "base_ticks": 5840,
+      "new_ticks": 5611,
+      "saved_pct": 3.921232876712329,
+      "phase": 3516347790,
+      "pcm_words_fnv32": 1569689499
+    }
+  ]
+}

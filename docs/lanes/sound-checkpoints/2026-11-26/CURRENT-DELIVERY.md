@@ -22,6 +22,13 @@ isolated kernel timing, or partial link into a release claim.
   differs at frame 65,600 on both. Without producer phase proof,
   these outcomes are not attributable; park the patch. The additive
   exact Q15 scale leaf was too small to change the gate conclusion.
+  [Exact first-cue 909 isolation](drum909-onset-proof/README.md)
+  compared all 69,216 direct bytes of active four-bus output and
+  owner evolution (only relocatable stream pointer words masked).
+  Those bytes matched. The archived Pro candidate has 1,024
+  extra zero frames at onset, not proof of exactly two DMA
+  misses or an external tape issue. The mixed/ALNK boundary
+  remains unattributed.
 
 - **Synth One filter-envelope sharing, guarded.** The
   [paired native link and signed-PCM matrix](s1-shared-fenv/README.md)
