@@ -1,0 +1,19 @@
+
+s1-morph-compact/private/shared-tight/shared-leaf.pi32v2.o:	file format ELF32-pi32v2
+
+Sections:
+Idx Name          Size      Address          Type
+  0               00000000 0000000000000000 
+  1 .strtab       000000e9 0000000000000000 
+  2 .text         00000000 0000000000000000 TEXT DATA 
+  3 .text.exact_morph_load 00000004 0000000000000000 TEXT DATA 
+  4 .text.stored_lattice 00000204 0000000000000000 TEXT DATA 
+  5 .rela.text.stored_lattice 00000018 0000000000000000 
+  6 .text.lattice 0000007c 0000000000000000 TEXT DATA 
+  7 .rela.text.lattice 0000003c 0000000000000000 
+  8 .text.exact_morph_sample 000000ec 0000000000000000 TEXT DATA 
+  9 .rela.text.exact_morph_sample 00000048 0000000000000000 
+ 10 .rodata.exact_morph_sample.limits 00000034 0000000000000000 DATA 
+ 11 .rodata.morph_rows 00000120 0000000000000000 DATA 
+ 12 .rodata.morph_bytes 00004708 0000000000000000 DATA 
+ 13 .symtab       000000a0 0000000000000000 

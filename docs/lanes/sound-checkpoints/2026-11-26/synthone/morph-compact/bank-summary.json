@@ -1,0 +1,78 @@
+{
+  "old": {
+    "count": 906,
+    "both_waveform_at_most_dbr": {
+      "-20": 906,
+      "-40": 906,
+      "-60": 891,
+      "-80": 710
+    },
+    "max_abs_level_db": 0.0017017932957052516,
+    "bit_identical": 41,
+    "worst": {
+      "id": 193,
+      "label": "193: Arcade Lead arena 4252",
+      "residual_dbr": [
+        -47.56407373687477,
+        -47.564052112590424
+      ]
+    }
+  },
+  "new": {
+    "count": 906,
+    "both_waveform_at_most_dbr": {
+      "-20": 906,
+      "-40": 906,
+      "-60": 890,
+      "-80": 706
+    },
+    "max_abs_level_db": 0.0017017932957052516,
+    "bit_identical": 39,
+    "worst": {
+      "id": 193,
+      "label": "193: Arcade Lead arena 4252",
+      "residual_dbr": [
+        -47.56407373687477,
+        -47.564052112590424
+      ]
+    }
+  },
+  "prior_outliers": {
+    "repaired": 0,
+    "rows": []
+  },
+  "new_outliers": [],
+  "same_reference_pcm": 906,
+  "old_run": {
+    "scope": "Whole stereo cold-start six-note host renders, in matching command ordinal. Optional authenticated authored tuning and note tape; no project change, hardware, or fit.",
+    "mode": "wet",
+    "same_note_tape": true,
+    "tuning_rows": 23,
+    "count": 906,
+    "source_bank_rows": 906,
+    "identity_sha256": "583a2477205ccf04b363c344bc9300897200c9e78f0bf634b9233622b0f83780",
+    "inputs": {
+      "recovered-sound/s1-room-parity/unified-releasephase/original": "2b6a520a454df06f7e6d331d8049537e92a609a35a8d14baa16c0447dbcd935f",
+      "recovered-sound/s1-room-parity/unified-releasephase/candidate": "5b313656fedb02a4623baa0fd66456d14896622e0c889d90acdaa06f455491a2",
+      "s1-fx-parity/reference-build/factory-inputs/public-morphs.f32": "0d35b5422cb5d3e0e349a66c9e0a50f2980b6287e68f8d94f55640d3f8168bd5",
+      "recovered-sound/s1-room-parity/aligned-commands.bin": "622050ebc18a4dc98461d68f0f56b76924868b64c98bb370153c98cf3e577b41",
+      "recovered-sound/s1-bank-replay/original-private/pack.private": "d5e003e878ab46d6051d6cff16be557fbdfde7fccaa9255e4217bb5ffb51fa43"
+    }
+  },
+  "new_run": {
+    "scope": "Whole stereo cold-start six-note host renders, in matching command ordinal. Optional authenticated authored tuning and note tape; no project change, hardware, or fit.",
+    "mode": "wet",
+    "same_note_tape": true,
+    "tuning_rows": 23,
+    "count": 906,
+    "source_bank_rows": 906,
+    "identity_sha256": "583a2477205ccf04b363c344bc9300897200c9e78f0bf634b9233622b0f83780",
+    "inputs": {
+      "recovered-sound/s1-room-parity/unified-releasephase/original": "2b6a520a454df06f7e6d331d8049537e92a609a35a8d14baa16c0447dbcd935f",
+      "s1-morph-compact/private/shared-tight/build/candidate": "fb391d7f59eca8aedc35fc6e260aebacdf6496cbe85a68abe1b254f11028bba0",
+      "s1-fx-parity/reference-build/factory-inputs/public-morphs.f32": "0d35b5422cb5d3e0e349a66c9e0a50f2980b6287e68f8d94f55640d3f8168bd5",
+      "recovered-sound/s1-room-parity/aligned-commands.bin": "622050ebc18a4dc98461d68f0f56b76924868b64c98bb370153c98cf3e577b41",
+      "recovered-sound/s1-bank-replay/original-private/pack.private": "d5e003e878ab46d6051d6cff16be557fbdfde7fccaa9255e4217bb5ffb51fa43"
+    }
+  }
+}
