@@ -1,0 +1,266 @@
+{
+  "original_leaf": "6d163d79202e866d2fda96e36f752bd386641b5ae2d0b1f829a254d26b652850",
+  "input_sha": {
+    "0-dry": "78e254d6155aeb1331116e4222f96002f812d81eeee2a8ce34dcd6b0f9b00360",
+    "0-authored": "78e254d6155aeb1331116e4222f96002f812d81eeee2a8ce34dcd6b0f9b00360",
+    "2-dry": "83f737330a90595aa466e62ff787ccd28d0e33a36914ef1d3312c1dbfd9b1e7a",
+    "2-authored": "83f737330a90595aa466e62ff787ccd28d0e33a36914ef1d3312c1dbfd9b1e7a"
+  },
+  "each_comparison_same_input": true,
+  "inactive_identity_exact": true,
+  "scope": "Variant only swaps current original J60 leaf, with candidate typed controls and all other typed stages untouched. Paired 0=compact J60,1=current original. Model 0=stock Main OTA,2=physical Main with independently clocked compact Sub.",
+  "windows": {
+    "attack": {
+      "stock-dry": [
+        {
+          "signed_dbr": 0.36186554014828504,
+          "level_db": -6.518931776309914
+        },
+        {
+          "signed_dbr": 0.36186554014828504,
+          "level_db": -6.518931776309914
+        }
+      ],
+      "stock-authored": [
+        {
+          "signed_dbr": 1.2384052170777884,
+          "level_db": -4.76116382738833
+        },
+        {
+          "signed_dbr": 0.9069700340959772,
+          "level_db": -6.039893452416937
+        }
+      ],
+      "separate_actual_sum-dry": [
+        {
+          "signed_dbr": 0.12662327364121148,
+          "level_db": -6.414504495183763
+        },
+        {
+          "signed_dbr": 0.12662327364121148,
+          "level_db": -6.414504495183763
+        }
+      ],
+      "separate_actual_sum-authored": [
+        {
+          "signed_dbr": 1.1894021654140203,
+          "level_db": -4.6975681876751265
+        },
+        {
+          "signed_dbr": 0.6815247875132007,
+          "level_db": -5.985737846360054
+        }
+      ]
+    },
+    "held": {
+      "stock-dry": [
+        {
+          "signed_dbr": 0.42434315525184696,
+          "level_db": -6.564641908544505
+        },
+        {
+          "signed_dbr": 0.42434315525184696,
+          "level_db": -6.564641908544505
+        }
+      ],
+      "stock-authored": [
+        {
+          "signed_dbr": 1.3551018016978933,
+          "level_db": -4.795872278646503
+        },
+        {
+          "signed_dbr": 0.9902293979896531,
+          "level_db": -6.048843598158599
+        }
+      ],
+      "separate_actual_sum-dry": [
+        {
+          "signed_dbr": 0.17655191002195006,
+          "level_db": -6.545299383017418
+        },
+        {
+          "signed_dbr": 0.17655191002195006,
+          "level_db": -6.545299383017418
+        }
+      ],
+      "separate_actual_sum-authored": [
+        {
+          "signed_dbr": 1.3046423966568947,
+          "level_db": -4.791343652179647
+        },
+        {
+          "signed_dbr": 0.7712872018154459,
+          "level_db": -6.044145323111332
+        }
+      ]
+    },
+    "release": {
+      "stock-dry": [
+        {
+          "signed_dbr": -6.489421512189601,
+          "level_db": -1.9282029370316094
+        },
+        {
+          "signed_dbr": -6.489421512189601,
+          "level_db": -1.9282029370316094
+        }
+      ],
+      "stock-authored": [
+        {
+          "signed_dbr": -1.1907483157150316,
+          "level_db": -1.8810546157036432
+        },
+        {
+          "signed_dbr": -3.0884988512877127,
+          "level_db": -1.7113472325022905
+        }
+      ],
+      "separate_actual_sum-dry": [
+        {
+          "signed_dbr": -6.380282734857897,
+          "level_db": -1.9269662407899872
+        },
+        {
+          "signed_dbr": -6.380282734857897,
+          "level_db": -1.9269662407899872
+        }
+      ],
+      "separate_actual_sum-authored": [
+        {
+          "signed_dbr": -0.7919993940174425,
+          "level_db": -1.6403572966553224
+        },
+        {
+          "signed_dbr": -2.680840467439529,
+          "level_db": -1.3600413776762537
+        }
+      ]
+    },
+    "chord": {
+      "stock-dry": [
+        {
+          "signed_dbr": -1.9156301819492727,
+          "level_db": -8.599648388592072
+        },
+        {
+          "signed_dbr": -1.9156301819492727,
+          "level_db": -8.599648388592072
+        }
+      ],
+      "stock-authored": [
+        {
+          "signed_dbr": 0.9630077404050748,
+          "level_db": -6.863531193814349
+        },
+        {
+          "signed_dbr": -1.7169600253080914,
+          "level_db": -8.100555756556581
+        }
+      ],
+      "separate_actual_sum-dry": [
+        {
+          "signed_dbr": -2.2132865587326687,
+          "level_db": -8.46626269676435
+        },
+        {
+          "signed_dbr": -2.2132865587326687,
+          "level_db": -8.46626269676435
+        }
+      ],
+      "separate_actual_sum-authored": [
+        {
+          "signed_dbr": 1.1312439021521725,
+          "level_db": -6.717078388733566
+        },
+        {
+          "signed_dbr": -1.9998233276046702,
+          "level_db": -7.9524402301839086
+        }
+      ]
+    },
+    "tail": {
+      "stock-dry": [
+        {
+          "signed_dbr": -2.851086202600598,
+          "level_db": -9.831814832432133
+        },
+        {
+          "signed_dbr": -2.851086202600598,
+          "level_db": -9.831814832432133
+        }
+      ],
+      "stock-authored": [
+        {
+          "signed_dbr": -0.09840219670851424,
+          "level_db": -10.564947865407234
+        },
+        {
+          "signed_dbr": -2.3764136437690104,
+          "level_db": -10.94019086827332
+        }
+      ],
+      "separate_actual_sum-dry": [
+        {
+          "signed_dbr": -3.4129456853320006,
+          "level_db": -9.324203330739326
+        },
+        {
+          "signed_dbr": -3.4129456853320006,
+          "level_db": -9.324203330739326
+        }
+      ],
+      "separate_actual_sum-authored": [
+        {
+          "signed_dbr": 0.1847350871273951,
+          "level_db": -10.157087649488671
+        },
+        {
+          "signed_dbr": -2.7488183249699154,
+          "level_db": -10.582111523917138
+        }
+      ]
+    },
+    "full": {
+      "stock-dry": [
+        {
+          "signed_dbr": -1.4444188461197274,
+          "level_db": -8.180051489800736
+        },
+        {
+          "signed_dbr": -1.4444188461197274,
+          "level_db": -8.180051489800736
+        }
+      ],
+      "stock-authored": [
+        {
+          "signed_dbr": 1.0102317261764695,
+          "level_db": -6.288132918189034
+        },
+        {
+          "signed_dbr": -0.9243277377590015,
+          "level_db": -7.53458832686746
+        }
+      ],
+      "separate_actual_sum-dry": [
+        {
+          "signed_dbr": -1.7306567708396994,
+          "level_db": -8.060174160603935
+        },
+        {
+          "signed_dbr": -1.7306567708396994,
+          "level_db": -8.060174160603935
+        }
+      ],
+      "separate_actual_sum-authored": [
+        {
+          "signed_dbr": 1.1251399301357423,
+          "level_db": -6.178943414368358
+        },
+        {
+          "signed_dbr": -1.1842140424986216,
+          "level_db": -7.424660092037043
+        }
+      ]
+    }
+  }
+}

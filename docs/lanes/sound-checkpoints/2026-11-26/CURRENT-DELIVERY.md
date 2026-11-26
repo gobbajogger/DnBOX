@@ -16,6 +16,12 @@ isolated kernel timing, or partial link into a release claim.
   +1.01 to +1.13 dBr with the current compact chorus. The isolated
   PI32 object is 582 B text plus unresolved calls and 84 B per mono
   state; no linked fit or timing proof. Keep as oracle, not adoption.
+  [Separate current original J60 control](sj6-main-ota-current-j60/j60control.json)
+  uses identical input within each Main arm, authentic stopped
+  bypass, and 1,164 original partitions. With the original J60
+  the Main-only improvement returns (whole authored −0.924 to
+  −1.184 dBr). The first release regresses and absolute output
+  is still about 7.4 dB low. Not a deployable combined fix.
 
 - **Raw active-voice root localization.** The
   [same-input native and compact taps](sj6-raw-voice-stage/README.md)
@@ -80,6 +86,11 @@ isolated kernel timing, or partial link into a release claim.
   active notes save 24–38 µs / 64 frames on routed cases, but a
   single note costs 13–16 µs more. Keep the guard off pending a
   selective variant and actual heavy playback qualification.
+  A distinct [bounds table change](s1-control-bounds-only/table-only.md)
+  gives +48 B on each paired build with **no FENV optimization**,
+  keeping +632/+644 B APP and the existing pool. All 150 bounds
+  checks and 906 signed host fingerprints are unchanged. It has
+  no DSP hot-path use; no full playback timing test yet.
 - **What remains in SuperJ6 Raw.** In the reconstructed pre-chorus
   path with the genuine current J60 leaf, the [relative chorus level
   is within 0.17 dB](sj6-postvoice-split/README.md). The absolute dry
