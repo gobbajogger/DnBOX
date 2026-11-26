@@ -1,0 +1,2 @@
+Cold boot: 84 palette/validated payload cases, all 57,600 RGB565 pixels identical; pixel bytes unchanged; largest DMA 57,600 to 38,400 B, one extra boot-only window. Payload protected through DMA completion; above 82 rows untouched.
+Whole draw_main entry: 24 cold/callback full RGB565 frames and exact windows/hashes, 45 cold/0 stable/26 dirty. Real key ingress and reset cache preservation, fenced pending DMA, 82-row canaries. Home snapshot 904 host B.
