@@ -24,7 +24,7 @@ with tarfile.open(path) as t:
 cond=e.calloc(0x700);inst=e.calloc(0x700);core=e.calloc(0x700)
 e.w64(0x10082ea30,0x100);e.w64(cond+0x100,inst);e.w64(inst+0x20,core)
 e.w64(0x1008145a0,0x300);e.w64(0x1008145b0,0x320);e.w64(0x10080cab0,0x380)
-defs=[('OSC1','1',0x1000ee548,0x1007e3b98,.808,1.),('OSC2','3',0x1000ee56c,0x1007e3ba8,.808,1.),('Sub','202',0x1000ee590,0x1007e3bb0,.808,1.),('Noise','201',0x1000ee524,0x1007e3bb8,.707,2.5)]
+defs=[('OSC1','1',0x1000ee56c,0x1007e3ba8,.808,1.),('OSC2','3',0x1000ee590,0x1007e3bb0,.808,1.),('Sub','202',0x1000ee548,0x1007e3b98,.808,1.),('Noise','201',0x1000ee524,0x1007e3bb8,.707,2.5)]
 who={};dsp={}
 for i,(label,_id,_,off,_max,_) in enumerate(defs):
  o=w.new_obj('_TtC8AudioKit9AKSampler',size=0x500);o.native_imps={'setMasterVolume:':0x100556a34}
@@ -48,6 +48,6 @@ for label,pid,pc,off,top,power in defs:
   expected=f32(top*pow(f32(val),power))
   assert calls==[(label,0,expected)],(label,val,calls,expected,w.msglog[-4:])
   rows.append([val,calls[0][2]])
- cases[label]={'authoring_parameter':pid,'authoring_readback':raw[pid],'expected_transfer_top':top,'expected_transfer_power':power,'rows':rows}
+ cases[label]={'authoring_parameter':pid,'authoring_readback':raw[pid],'expected_transfer_top':top,'expected_transfer_power':power,'native_sender':hex(pc),'core_ivar_offset_global':hex(off),'rows':rows}
 assert not e.unknown
 print(json.dumps(dict(newest_executable_sha=sha(BIN),source_capture_sha=sha(path),scope='Actual current Swift normalized closure -> actual current AKSampler masterVolume property -> instrument AU physical address0 message -> actual DSP setParameter, using minimal host layout; no AU render or inference.',cases=cases),indent=2))

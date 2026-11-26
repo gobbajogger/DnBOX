@@ -52,3 +52,64 @@ global gain, an octave mistake, and loss during halfband averaging.
 The live connected Apple transfer at the same absolute input level,
 and exact modern app-time loaded oscillator/filter branch, are distinct
 unknowns. No equalization, authored changes, inferred gain or skew adopted.
+
+## Corrected physical vs harmonic cutoff route and paired direct AU proof
+
+The previous #129-only wavestream never established physical filter open.
+Current registration readback helpers identify #7 by Core normalized cutoff
+and #129 by oscillator harmonic filterCutoff. In modern Normal, actual
+#7 dispatch 0x1000eeca8 updates all source lanes' addr36,
+211.95989990234375 at .3345831036567688 and 20000.001953125 at 1.
+The independent harmonic DSP addr6 changed 4→10 with exactly zero
+waveform difference in this controlled OSC2 Normal replay.
+The corrected same-physical arm is -9.0642 dB held versus the #129-only
+native capture. Actual #83 .6666666865348816 drives enum2, Saw on,
+other shapes off and physical DSP selector2 on OSC2.
+
+The additional actual native #7 archive SHA 9581a0d4…5f09b was
+scored with actual fixed-source DSP cutoff arms 211.96 / 300 / 20,000.
+First 128-frame signed difference correlation is .97305; held AU
+difference is -79.98 dBr versus source -4.58 dBr. This localizes
+difference to physical filter state retention after initial onset or
+a different route that dominates after. It does not establish the
+specific live setter. The live stage generator tests step at24576
+and restore61440, with pure actual compiled source prediction.
+
+## First-note cutoff base restoration and active rollback
+
+Current app first-note branch .018b44..c18 tests empty held-note list,
+LFO1 delay >= .01s, and real LFO1 destination enum7. Current source
+constructs its destination list at .059d9c, maps public #181 index1 to
+enum7, and setter .0f8ddc maps real #91 to .851302187571 s. Actual note
+source invokes .269e74 using stored #180 base without rewriting public #7.
+Actual .269fa8 elapsed-time smoothing (tau .015) sends real sampler addr36
+settled near 211.96 Hz, with the nominal audio-block tick test. In held,
+short-delay and non-cutoff-destination guards do not trigger. The source
+owner also verifies active direct #7 rollback applies a relative change
+to its separate live target, clamping target from .33458 to zero in this
+particular verified control sequence, without an immediate physical write.
+The actual timer then converges toward 20 Hz. This is generalized source
+behavior, not a per-preset tuning or CPU/timer claim.
+
+note_filter_owner.py independently observes current compiled slot36 and
+live Normal-filter coefficient inputs through source voice commit without
+an app-originated write: physical inputs stay at known 211 or 20,000
+integer Hz through chord; only the direct two control commands write them.
+The higher-level app note relatch is therefore necessary to reproduce the
+real original dynamic held/chord convergence for this set of inputs.
+
+cutoff_latch_model.py is independent comparison control logic, not original
+app code and not enabled in target firmware. verify_latch_model.py checks
+all four source guard traces plus active rollback. score_live_latch.py
+compares exact newest static + dynamic native archives and both no-latch
+and causal candidates, using real callback sample-block elapsed time as
+a tested control scheduler, without claiming native Apple timer cadence.
+
+- Dynamic held after chord: baseline contrast -2.92 dBr, modeled causal
+  restore -53.72 dBr, actual native -59.22 dBr.
+- Static-open held: baseline contrast -4.59 dBr, causal restore -137.24,
+  actual native -78.48 dBr (at repeat noise floor for that fixture).
+- Dynamic restore while held: baseline incorrectly ~0 dB, candidate
+  -16.22 dB, true native -29.99 dB. Absolute candidate-v-native level error
+  on that arm improves +19.79 to +3.57 dB. Ordinary authored held waveform
+  remains approximately 9–10 dB low; no whole-preset sound match claimed.

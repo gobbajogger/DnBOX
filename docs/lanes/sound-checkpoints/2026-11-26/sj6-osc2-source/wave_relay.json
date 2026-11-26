@@ -1,0 +1,118 @@
+{
+  "scope": "Actual app-facing waveform index conversion, channel owner, actual Swift selector (virtual intermediary bridged to exact DSP C setter); no case-specific tuning.",
+  "source": "6d163d79202e866d2fda96e36f752bd386641b5ae2d0b1f829a254d26b652850",
+  "cases": {
+    "0.6666666865348816": {
+      "stored_enum": 2,
+      "mode_choice": [
+        2
+      ],
+      "observed_property_packet": [
+        [
+          "setIsSineOsc:",
+          false
+        ],
+        [
+          "setIsTriOsc:",
+          false
+        ],
+        [
+          "setIsSawOsc:",
+          true
+        ],
+        [
+          "setPwmWidth:",
+          0.5
+        ],
+        [
+          "setIsPWM:",
+          false
+        ]
+      ]
+    },
+    "0.3333333432674408": {
+      "stored_enum": 1,
+      "mode_choice": [
+        1
+      ],
+      "observed_property_packet": [
+        [
+          "setIsSineOsc:",
+          false
+        ],
+        [
+          "setIsTriOsc:",
+          true
+        ],
+        [
+          "setIsSawOsc:",
+          false
+        ],
+        [
+          "setPwmWidth:",
+          0.5
+        ],
+        [
+          "setIsPWM:",
+          false
+        ]
+      ]
+    },
+    "0.0": {
+      "stored_enum": 0,
+      "mode_choice": [
+        0
+      ],
+      "observed_property_packet": [
+        [
+          "setIsSineOsc:",
+          true
+        ],
+        [
+          "setIsTriOsc:",
+          false
+        ],
+        [
+          "setIsSawOsc:",
+          false
+        ],
+        [
+          "setPwmWidth:",
+          0.5
+        ],
+        [
+          "setIsPWM:",
+          false
+        ]
+      ]
+    },
+    "1.0": {
+      "stored_enum": 3,
+      "mode_choice": [
+        3
+      ],
+      "observed_property_packet": [
+        [
+          "setIsSineOsc:",
+          false
+        ],
+        [
+          "setIsTriOsc:",
+          false
+        ],
+        [
+          "setIsSawOsc:",
+          false
+        ],
+        [
+          "setPwmWidth:",
+          0.5
+        ],
+        [
+          "setIsPWM:",
+          true
+        ]
+      ]
+    }
+  }
+}

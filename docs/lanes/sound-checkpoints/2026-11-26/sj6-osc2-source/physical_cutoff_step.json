@@ -1,0 +1,24 @@
+{
+  "scope": "Actual modern DSP #36 fixed lower vs wide physical cutoff, same OSC2 readbacks, shape and cue; no private full app route asserted.",
+  "source": "6d163d79202e866d2fda96e36f752bd386641b5ae2d0b1f829a254d26b652850",
+  "low_hz": 211.95989990234375,
+  "open_hz": 20000.001953125,
+  "windows": {
+    "attack": {
+      "actual_leaf_cutoff_static_change_db": -1.1030396761661105,
+      "actual_leaf_cutoff_static_delta_dbr": -5.516122249113154
+    },
+    "held": {
+      "actual_leaf_cutoff_static_change_db": -1.3617093206456563,
+      "actual_leaf_cutoff_static_delta_dbr": -4.661820068160515
+    },
+    "near_crossing": {
+      "actual_leaf_cutoff_static_change_db": -0.9675544293682232,
+      "actual_leaf_cutoff_static_delta_dbr": -17.470442182772658
+    },
+    "crossing": {
+      "actual_leaf_cutoff_static_change_db": 0.8442201754469535,
+      "actual_leaf_cutoff_static_delta_dbr": -8.074841348157157
+    }
+  }
+}

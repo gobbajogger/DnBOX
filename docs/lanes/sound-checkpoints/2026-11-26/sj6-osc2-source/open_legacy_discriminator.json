@@ -1,0 +1,53 @@
+{
+  "scope": "matched actual current normalized static/open OSC2 capture and original current guest source, ideal or approximate external Apple HP, no real internal buses or sample corrections.",
+  "received_physical_cutoff_hz": 211.95989990234375,
+  "legacy_parameter_7": 0.3345831036567688,
+  "same_cue_harmonic_slot_6_from_4_to_10_max_abs": 0.0,
+  "results": {
+    "attack": {
+      "source_db": -8.784894590546866,
+      "source_null_dbr": -1.8377994605066952,
+      "source_cor": 0.6561779876245277,
+      "model_hpf_db": -8.894784782766914,
+      "model_hpf_null_dbr": -2.897729742019486,
+      "native_repeat_null": -94.35601994711938,
+      "native_open_vs_authored_db": 0.27459708390817683
+    },
+    "held": {
+      "source_db": -9.064196560112736,
+      "source_null_dbr": -2.0602336203846914,
+      "source_cor": 0.7123474593508209,
+      "model_hpf_db": -9.06082924360803,
+      "model_hpf_null_dbr": -2.940118030799569,
+      "native_repeat_null": -72.52421421019977,
+      "native_open_vs_authored_db": 1.139556536307785
+    },
+    "before_chord": {
+      "source_db": -21.59289452658031,
+      "source_null_dbr": -0.5985386669994567,
+      "source_cor": 0.8149068051491999,
+      "model_hpf_db": -11.865031397486662,
+      "model_hpf_null_dbr": -2.4953717498851073,
+      "native_repeat_null": -77.71553715909933,
+      "native_open_vs_authored_db": 0.6169122431962266
+    },
+    "near_crossing": {
+      "source_db": 1.9762393609533968,
+      "source_null_dbr": 5.540788944475526,
+      "source_cor": -0.40039035254230027,
+      "model_hpf_db": 2.303405560137316,
+      "model_hpf_null_dbr": 5.509326209830197,
+      "native_repeat_null": -66.85767127518405,
+      "native_open_vs_authored_db": -1.3731174459206317
+    },
+    "crossing": {
+      "source_db": -9.691342463378517,
+      "source_null_dbr": -3.3532020359719086,
+      "source_cor": 0.9847272676585956,
+      "model_hpf_db": -10.114413213874256,
+      "model_hpf_null_dbr": -3.1923857312713553,
+      "native_repeat_null": -94.34840118624055,
+      "native_open_vs_authored_db": 0.005016285410431972
+    }
+  }
+}

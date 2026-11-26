@@ -1,0 +1,137 @@
+{
+  "scope": "Actual current #7 base setter with disabled LFO and actual shared cutoff setter through actual Swift AKSampler closure to physical DSP addr36. No enclosing panel snapshot watcher asserted.",
+  "actual_executable": "6d163d79202e866d2fda96e36f752bd386641b5ae2d0b1f829a254d26b652850",
+  "rows": [
+    {
+      "public_input": 0.4000000059604645,
+      "executed_real_receiver_writes": [
+        [
+          "Sub",
+          36,
+          300.0
+        ],
+        [
+          "OSC1",
+          36,
+          300.0
+        ],
+        [
+          "OSC2",
+          36,
+          300.0
+        ],
+        [
+          "Noise",
+          36,
+          300.0
+        ]
+      ]
+    },
+    {
+      "public_input": 1.0,
+      "executed_real_receiver_writes": [
+        [
+          "Sub",
+          36,
+          20000.001953125
+        ],
+        [
+          "OSC1",
+          36,
+          20000.001953125
+        ],
+        [
+          "OSC2",
+          36,
+          20000.001953125
+        ],
+        [
+          "Noise",
+          36,
+          20000.001953125
+        ]
+      ]
+    },
+    {
+      "public_input": 0.4000000059604645,
+      "executed_real_receiver_writes": [
+        [
+          "Sub",
+          36,
+          300.0
+        ],
+        [
+          "OSC1",
+          36,
+          300.0
+        ],
+        [
+          "OSC2",
+          36,
+          300.0
+        ],
+        [
+          "Noise",
+          36,
+          300.0
+        ]
+      ]
+    }
+  ],
+  "legacy": [
+    {
+      "normalized": 0.3345831036567688,
+      "legacy_core_level": 0.3345831036567688,
+      "lfobase_inst_110_unchanged": 0.3345831036567688,
+      "physical": [
+        [
+          "Sub",
+          36,
+          211.95989990234375
+        ],
+        [
+          "OSC1",
+          36,
+          211.95989990234375
+        ],
+        [
+          "OSC2",
+          36,
+          211.95989990234375
+        ],
+        [
+          "Noise",
+          36,
+          211.95989990234375
+        ]
+      ]
+    },
+    {
+      "normalized": 1.0,
+      "legacy_core_level": 1.0,
+      "lfobase_inst_110_unchanged": 0.3345831036567688,
+      "physical": [
+        [
+          "Sub",
+          36,
+          20000.001953125
+        ],
+        [
+          "OSC1",
+          36,
+          20000.001953125
+        ],
+        [
+          "OSC2",
+          36,
+          20000.001953125
+        ],
+        [
+          "Noise",
+          36,
+          20000.001953125
+        ]
+      ]
+    }
+  ]
+}
