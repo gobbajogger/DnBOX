@@ -21,6 +21,12 @@ isolated kernel timing, or partial link into a release claim.
   but regresses first release from −1.191 to +1.634 dBr. Dry first
   release also regresses. No authorized original audio data was
   exported; no preset change or candidate enable.
+  [Authentic Sub retirement](sj6-sub-authentic-retirement/README.md)
+  leaves the cursor continuous and naturally ends 39 frames earlier
+  than the compact cue. The source AHDSHR law reproduces 560 release
+  words exactly, but [Sub-only application](sj6-warm-sub-amp/README.md)
+  barely changes whole signed error and regresses the final wet release.
+  Do not hard-code a 39-frame trim or enable a different envelope.
 - **Fresh paired emulator diagnostic did not qualify.**
   [Exact warm J60 linked pair](strict-warm-j60-timing/README.md):
   Elite 14,269 µs / 63 late, Pro 14,322 µs / 61 late. Same external

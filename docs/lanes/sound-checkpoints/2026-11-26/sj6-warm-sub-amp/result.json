@@ -1,0 +1,323 @@
+{
+  "binary": "6d163d79202e866d2fda96e36f752bd386641b5ae2d0b1f829a254d26b652850",
+  "actual_amp_release_sender": [
+    {
+      "received": 0.0,
+      "release_physical_word": 0.0020000000949949026,
+      "link": false,
+      "actual_calls": [
+        [
+          "Sub",
+          15,
+          0.0020000000949949026
+        ],
+        [
+          "OSC1",
+          15,
+          0.0020000000949949026
+        ],
+        [
+          "Noise",
+          15,
+          0.0020000000949949026
+        ],
+        [
+          "Other",
+          15,
+          0.0
+        ],
+        [
+          "OSC2",
+          15,
+          0.0
+        ]
+      ],
+      "isolated_callbacks": []
+    },
+    {
+      "received": 0.10000000149011612,
+      "release_physical_word": 0.012719512917101383,
+      "link": false,
+      "actual_calls": [
+        [
+          "Sub",
+          15,
+          0.012719512917101383
+        ],
+        [
+          "OSC1",
+          15,
+          0.012719512917101383
+        ],
+        [
+          "Noise",
+          15,
+          0.012719512917101383
+        ]
+      ],
+      "isolated_callbacks": []
+    },
+    {
+      "received": 0.125,
+      "release_physical_word": 0.024637246504426003,
+      "link": false,
+      "actual_calls": [
+        [
+          "Sub",
+          15,
+          0.024637246504426003
+        ],
+        [
+          "OSC1",
+          15,
+          0.024637246504426003
+        ],
+        [
+          "Noise",
+          15,
+          0.024637246504426003
+        ]
+      ],
+      "isolated_callbacks": []
+    },
+    {
+      "received": 0.550000011920929,
+      "release_physical_word": 3.240844488143921,
+      "link": false,
+      "actual_calls": [
+        [
+          "Sub",
+          15,
+          3.240844488143921
+        ],
+        [
+          "OSC1",
+          15,
+          3.240844488143921
+        ],
+        [
+          "Noise",
+          15,
+          3.240844488143921
+        ]
+      ],
+      "isolated_callbacks": []
+    },
+    {
+      "received": 1.0,
+      "release_physical_word": 24.0,
+      "link": false,
+      "actual_calls": [
+        [
+          "Sub",
+          15,
+          24.0
+        ],
+        [
+          "OSC1",
+          15,
+          24.0
+        ],
+        [
+          "Noise",
+          15,
+          24.0
+        ]
+      ],
+      "isolated_callbacks": []
+    },
+    {
+      "received": 0.10000000149011612,
+      "release_physical_word": 0.012719512917101383,
+      "link": true,
+      "actual_calls": [
+        [
+          "Sub",
+          15,
+          0.012719512917101383
+        ],
+        [
+          "OSC1",
+          15,
+          0.012719512917101383
+        ],
+        [
+          "Other",
+          15,
+          0.012719512917101383
+        ],
+        [
+          "OSC2",
+          15,
+          0.012719512917101383
+        ],
+        [
+          "Sub",
+          15,
+          24.0
+        ],
+        [
+          "OSC1",
+          15,
+          24.0
+        ],
+        [
+          "Noise",
+          15,
+          0.012719512917101383
+        ],
+        [
+          "Sub",
+          15,
+          0.012719512917101383
+        ],
+        [
+          "OSC1",
+          15,
+          0.012719512917101383
+        ]
+      ],
+      "isolated_callbacks": [
+        "UI",
+        "notify",
+        "UI",
+        "linked filter release, separate",
+        "notify"
+      ]
+    }
+  ],
+  "source_shape_model_error_dbr": null,
+  "shape_last_nonzero_frame": 38992,
+  "source_shape_exact_original_amp_words": 560,
+  "source_shape_compact_source_owned_delta": 39,
+  "release_shape_control_only": true,
+  "first_hold_samples_bit_exact": true,
+  "sub_mute_bit_exact": true,
+  "orig_and_compact_cursors": [
+    38432,
+    38433,
+    38434,
+    38435,
+    38449,
+    38450,
+    38562,
+    38690,
+    38946,
+    38993,
+    38994,
+    39033,
+    39034
+  ],
+  "windows": {
+    "held": {
+      "authored": [
+        {
+          "signed_dbr": -0.7413002257719565,
+          "level_db": -4.714577757389683
+        },
+        {
+          "signed_dbr": -0.7413002257719565,
+          "level_db": -4.714577757389683
+        }
+      ],
+      "dry": [
+        {
+          "signed_dbr": -0.7785973919317674,
+          "level_db": -6.4922298189875125
+        },
+        {
+          "signed_dbr": -0.7785973919317674,
+          "level_db": -6.4922298189875125
+        }
+      ]
+    },
+    "first-release": {
+      "authored": [
+        {
+          "signed_dbr": 1.634004687080704,
+          "level_db": -8.875606220715412
+        },
+        {
+          "signed_dbr": 1.527940591077719,
+          "level_db": -9.040976324839008
+        }
+      ],
+      "dry": [
+        {
+          "signed_dbr": 0.9486030337402962,
+          "level_db": -12.32259306070567
+        },
+        {
+          "signed_dbr": 0.8173183210439536,
+          "level_db": -12.730777124951782
+        }
+      ]
+    },
+    "chord": {
+      "authored": [
+        {
+          "signed_dbr": -0.6332137469432546,
+          "level_db": -6.945050778676386
+        },
+        {
+          "signed_dbr": -0.6332137469432546,
+          "level_db": -6.945050778676386
+        }
+      ],
+      "dry": [
+        {
+          "signed_dbr": -2.815817867061931,
+          "level_db": -8.565441170485427
+        },
+        {
+          "signed_dbr": -2.815817867061931,
+          "level_db": -8.565441170485427
+        }
+      ]
+    },
+    "final-release": {
+      "authored": [
+        {
+          "signed_dbr": -0.1537479295358373,
+          "level_db": -9.580872069924487
+        },
+        {
+          "signed_dbr": -0.14586998993825817,
+          "level_db": -9.621663012020068
+        }
+      ],
+      "dry": [
+        {
+          "signed_dbr": -2.1322210732636733,
+          "level_db": -11.007055202504215
+        },
+        {
+          "signed_dbr": -2.1368582503371965,
+          "level_db": -11.056848063847706
+        }
+      ]
+    },
+    "full": {
+      "authored": [
+        {
+          "signed_dbr": -0.647363387241997,
+          "level_db": -6.316391565500306
+        },
+        {
+          "signed_dbr": -0.6474939829573036,
+          "level_db": -6.316537387692145
+        }
+      ],
+      "dry": [
+        {
+          "signed_dbr": -2.3817753922466514,
+          "level_db": -8.148680493767218
+        },
+        {
+          "signed_dbr": -2.3818670584781585,
+          "level_db": -8.148764473939728
+        }
+      ]
+    }
+  }
+}
