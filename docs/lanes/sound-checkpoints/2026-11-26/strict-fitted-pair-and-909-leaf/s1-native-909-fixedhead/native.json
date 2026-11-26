@@ -1,0 +1,73 @@
+{
+  "armed_code_and_table_size_B": [
+    3632,
+    2216
+  ],
+  "N_samples_per_case": 8192,
+  "results": [
+    {
+      "mode": "kick 1.6",
+      "base_ticks": 41525,
+      "new_ticks": 35423,
+      "saved_pct": 14.694762191450932,
+      "phase": 1952546816,
+      "pcm_words_fnv32": 1206349592
+    },
+    {
+      "mode": "snare 2",
+      "base_ticks": 37060,
+      "new_ticks": 31049,
+      "saved_pct": 16.219643820831084,
+      "phase": 2454265855,
+      "pcm_words_fnv32": 2318021571
+    },
+    {
+      "mode": "tom 2",
+      "base_ticks": 36995,
+      "new_ticks": 30953,
+      "saved_pct": 16.331936748209216,
+      "phase": 3742769152,
+      "pcm_words_fnv32": 1981164400
+    },
+    {
+      "mode": "triangle corpus 2",
+      "base_ticks": 36993,
+      "new_ticks": 30951,
+      "saved_pct": 16.332819722650232,
+      "phase": 3033079808,
+      "pcm_words_fnv32": 832602641
+    },
+    {
+      "mode": "both near zero",
+      "base_ticks": 66343,
+      "new_ticks": 54640,
+      "saved_pct": 17.640142893749154,
+      "phase": 8192,
+      "pcm_words_fnv32": 334343645
+    },
+    {
+      "mode": "both near sign mirror",
+      "base_ticks": 72807,
+      "new_ticks": 61133,
+      "saved_pct": 16.034172538354827,
+      "phase": 2147491840,
+      "pcm_words_fnv32": 2673114947
+    },
+    {
+      "mode": "both cross mirror",
+      "base_ticks": 72807,
+      "new_ticks": 61134,
+      "saved_pct": 16.032799044047962,
+      "phase": 2147491839,
+      "pcm_words_fnv32": 77378141
+    },
+    {
+      "mode": "exact phase corner",
+      "base_ticks": 72807,
+      "new_ticks": 61133,
+      "saved_pct": 16.034172538354827,
+      "phase": 1073741825,
+      "pcm_words_fnv32": 3166903749
+    }
+  ]
+}

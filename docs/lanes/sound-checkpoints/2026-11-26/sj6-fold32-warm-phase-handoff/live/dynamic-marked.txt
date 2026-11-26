@@ -1,0 +1,8 @@
+mute guards 21 zero blocks 61 exact audible blocks
+switch 0 1 0x1.becfb2p-1 0x1.c5caf4p-1 -0x1.38b3fcp-4 9206effc
+switch 1 3 0x1.dabcbap-1 0x1.e1b7fcp-1 -0x1.17f1b4p-2 14fb6306
+switch 2 3 0x1.f6a9cp-1 0x1.c512a2p-1 0x1.7f57dp-6 3d415435
+switch 3 2 0x1.da0468p-1 0x1.e0ffaap-1 -0x1.d4554p-6 78bc6699
+switch 4 0 0x1.f5f17p-1 0x1.fcecb2p-1 0x1.b0c594p-3 de17b76b
+steal slot 0 old 48 new 68 cold phase exact, ten survivor lanes exact
+PWM width-only changes signed OSC1, OSC2 exact, no phase jump; bend-only advances original compact clock

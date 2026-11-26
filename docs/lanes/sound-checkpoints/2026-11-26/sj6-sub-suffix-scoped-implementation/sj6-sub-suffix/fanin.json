@@ -1,0 +1,40 @@
+{
+  "scope": "Retiring Sub phase and active key retained until exact independent source-prep crossing. No audio envelope or gain adjustment.",
+  "pcm_native": "1148c1a20945b8a4dca47dbfd6f174c60b0676a0d4a5e748e6aea4f40b382984",
+  "before": "e964cce406e21c3470a32059e825171c63ff749fe399b456f80339c13cc98ced",
+  "after": "ba07a3c6f78355412e74ac295673f29a1a647c9db73a53635a9b925058a6b2aa",
+  "windows": {
+    "held": {
+      "exact_vs_before_level": -2.936819471924585,
+      "candidate_vs_native_level_before": -26.313076172974917,
+      "candidate_vs_native_level_after": -29.249895644899503,
+      "before_signed": 0.34440304769961744,
+      "after_signed": 0.10499464498141886,
+      "exact_vs_before_signed": 0.5078350352639218
+    },
+    "pending": {
+      "exact_vs_before_level": -0.3961330574302767,
+      "candidate_vs_native_level_before": -22.97082672179847,
+      "candidate_vs_native_level_after": -23.366959779228743,
+      "before_signed": 0.01865404881537067,
+      "after_signed": -0.14139248909852029,
+      "exact_vs_before_signed": -6.63342127573752
+    },
+    "chord": {
+      "exact_vs_before_level": -0.44906486710987825,
+      "candidate_vs_native_level_before": -27.922322980439603,
+      "candidate_vs_native_level_after": -28.371387847549485,
+      "before_signed": -0.13766763461216716,
+      "after_signed": -0.1660069731526297,
+      "exact_vs_before_signed": -6.141757130817787
+    },
+    "release": {
+      "exact_vs_before_level": -0.4532836199723681,
+      "candidate_vs_native_level_before": -27.723060574432985,
+      "candidate_vs_native_level_after": -28.176344194405353,
+      "before_signed": -0.34288407391341363,
+      "after_signed": -0.2992082480210446,
+      "exact_vs_before_signed": -6.163511624474136
+    }
+  }
+}

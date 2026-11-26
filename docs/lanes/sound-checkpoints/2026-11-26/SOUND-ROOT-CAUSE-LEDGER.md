@@ -69,6 +69,13 @@ changing the rounding rule.
   paired dry tests; slowest candidate 12,115.79 µs sequential, still
   outside 10,909 µs. It adds 900 application bytes and no pool.
   [Exact paired comparison and rejected alternatives](sj6-fold32-hoisted-native/fold-compare.md).
+  Already-folded voices can also retain the correct four-quarter phase
+  clock across a held switch through Saw/PWM. Verified exact phase at
+  four switch boundaries, unchanged cold Saw/PWM, muted output and voice
+  steal guards. The new shared end-of-step ownership adds +128 application
+  bytes over hoisted Fold32, zero pool, same dry signatures. It is not
+  an exact fallback waveform or integrated dropout pass.
+  [Warm handoff proof](sj6-fold32-warm-phase-handoff/live/README.md).
   [Independent authentic holds](https://github.com/gobbajogger/DnBOX/commit/17ec80e3).
 - **Upstream dry differences vary by patch.** The AU references for
   Brainwave, Solidify and Raw J106 have matched cue/UID, fresh instances
@@ -218,6 +225,22 @@ changing the rounding rule.
   [shared recurrence](s1-phaser-shared-recurrence/README.md),
   [cold exact](s1-phaser-cold-factoring/README.md),
   [verified guarded pair](s1-phaser-guarded-el-pro-fit/GROUP.md).
+
+## Timing after the first actual S1 phaser fit
+
+Exact never-install pair Elite 8aeaa2e6… / Pro 23970350… replayed the
+sealed unchanged 922-event tape, zero skips, actual audio and no NOR
+changes. Elite max 14,617 µs, 73 late/xruns; Pro 14,741 µs, 84 late/xruns.
+Both fail independently of the missing rendered-frame anchor. Valid
+point owner readbacks do not establish per-producer onset. Previously
+observed exclusive load Core0 roughly 6 ms 909 + ~3 ms Chicago; Core1
+~7.4 ms Synth One plus 808 prefix, with no proved safe IRQ removal.
+The 909 triangle direct head optimization is exact over 56,000 state and
+four-bus spans, 14.7–17.6% faster per isolated diode kernel. Do not figure
+that percentage on the whole render or count its tiny leaf linker size
+as actual APP. The new exact-source triangle hunk must be retested on
+the later future-worker donor and measured in a fresh serialized scene.
+[First fit pair results and 909 proof](strict-fitted-pair-and-909-leaf/).
 
 ## Release boundary
 

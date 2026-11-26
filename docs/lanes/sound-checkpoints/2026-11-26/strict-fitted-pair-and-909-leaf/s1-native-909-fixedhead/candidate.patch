@@ -1,0 +1,37 @@
+--- a/drum909.c
++++ b/drum909.c
+@@ -33,10 +33,24 @@
+ /* These two callers take only d9_tri: its rounded integer fold gives [-1,1].
+  * Both fixed drives therefore stay inside the real interpolation table. */
+ _Static_assert(2 * ((int)X0X_TANH_SCALE + 1) <= X0X_TANH_N, "fixed triangle drives must fit the tanh table");
++/* The only callers are fixed 1.6x and 2.0x diodes with |input| <= 1.
++ * Both lookup taps stay below the first packed-tail cell at index 400. */
++D9_INLINE float d9_fixed_triangle_table(float a)
++{
++#if X0X_TANH_SPLIT_LAB && X0X_TANH_LAB_SPLIT > 257
++    _Static_assert(X0X_TANH_LAB_SPLIT > 2 * ((int)X0X_TANH_SCALE + 1) + 1, "re-prove fixed triangle tap range");
++    const int32_t i=(int32_t)a;
++    const float fr=a-(float)i;
++    const float t0=x0x_tanh_lab_head[(unsigned)i],t1=x0x_tanh_lab_head[(unsigned)i+1u];
++    return t0+(t1-t0)*fr;
++#else
++    return d9_tanh_table(a);
++#endif
++}
+ D9_INLINE float d9_triangle_diode(float x, float drive, float gain)
+ {
+     const float u = drive * x;
+-    const float t = d9_tanh_table(fm_fabsf(u) * X0X_TANH_SCALE);
++    const float t = d9_fixed_triangle_table(fm_fabsf(u) * X0X_TANH_SCALE);
+     return (u < 0.0f ? -t : t) * gain;
+ }
+ D9_INLINE float d9_diode16(float x) { return d9_triangle_diode(x, 1.6f, D9_INV_TANH_1_6); }
+@@ -49,7 +63,7 @@
+         return d9_triangle_diode(d9_tri(phase), 2.0f, D9_INV_TANH_2_0);
+     const uint32_t folded = phase ^ (uint32_t)((int32_t)phase >> 31);
+     const float coordinate = (float)(int32_t)folded * 0x1p-22f - 256.0f;
+-    const float result = d9_tanh_table(fm_fabsf(coordinate));
++    const float result = d9_fixed_triangle_table(fm_fabsf(coordinate));
+     return (coordinate < 0.0f ? -result : result) * D9_INV_TANH_2_0;
+ }
+ /* d9_shape with the diode (every voice's default type) inline, tanh included */

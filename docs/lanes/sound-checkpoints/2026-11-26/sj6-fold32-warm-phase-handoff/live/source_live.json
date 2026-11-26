@@ -1,0 +1,136 @@
+{
+  "source": "6d163d79202e866d2fda96e36f752bd386641b5ae2d0b1f829a254d26b652850",
+  "scope": "current actual compiled original generated sampler; real mode setter, fixed oscillator controls, no full app or downloaded table authority",
+  "owners": [
+    {
+      "owner": 1,
+      "phase": {
+        "1": {
+          "pre_phase": 0.8726783394813538,
+          "after_set_phase": 0.8726783394813538,
+          "first_after_prep": 0.8805974125862122,
+          "last_after_render": 0.9272211194038391,
+          "rms": 0.2167980504619856,
+          "held_digest": "be67a04cd2add2a33c739ed34bbe0eb236d443bf9186734f0e5435ab8be6777c"
+        },
+        "3": {
+          "pre_phase": 0.9272211194038391,
+          "after_set_phase": 0.9272211194038391,
+          "first_after_prep": 0.9351401925086975,
+          "last_after_render": 0.9817638397216797,
+          "rms": 0.3231285784835524,
+          "held_digest": "feb7c6fe980ac187defcd29a3a754fac61b63752418684427e6baf83faccdfd5"
+        },
+        "2": {
+          "pre_phase": 0.9817638397216797,
+          "after_set_phase": 0.9817638397216797,
+          "first_after_prep": 0.9896829128265381,
+          "last_after_render": 0.03630632534623146,
+          "rms": 0.26633743614049493,
+          "held_digest": "38376f72d1465b2dc186654b42f6f7e33ba60cfcc18d19b7bf8103de1fdfa485"
+        },
+        "0": {
+          "pre_phase": 0.03630632534623146,
+          "after_set_phase": 0.03630632534623146,
+          "first_after_prep": 0.044225338846445084,
+          "last_after_render": 0.0908486396074295,
+          "rms": 0.1401944824066972,
+          "held_digest": "405f1bc34f9b08c3ee9de7e1eba9826b3cc8f58e8f4f5b15cff3f2b9b1abe4b8"
+        }
+      },
+      "held": {
+        "1": {
+          "equal": false,
+          "relative_rms": 0.5408207774162292
+        },
+        "3": {
+          "equal": false,
+          "relative_rms": 1.3048878908157349
+        },
+        "2": {
+          "equal": false,
+          "relative_rms": 0.9028388857841492
+        },
+        "0": {
+          "equal": false,
+          "relative_rms": 0.011821160092949867
+        }
+      },
+      "simultaneous": {
+        "65": {
+          "equal": false,
+          "relative_rms": 1.3053170442581177
+        },
+        "71": {
+          "equal": false,
+          "relative_rms": 1.3055553436279297
+        }
+      }
+    },
+    {
+      "owner": 2,
+      "phase": {
+        "1": {
+          "pre_phase": 0.8726783394813538,
+          "after_set_phase": 0.8726783394813538,
+          "first_after_prep": 0.8805974125862122,
+          "last_after_render": 0.9272211194038391,
+          "rms": 0.2167980504619856,
+          "held_digest": "be67a04cd2add2a33c739ed34bbe0eb236d443bf9186734f0e5435ab8be6777c"
+        },
+        "3": {
+          "pre_phase": 0.9272211194038391,
+          "after_set_phase": 0.9272211194038391,
+          "first_after_prep": 0.9351401925086975,
+          "last_after_render": 0.9817638397216797,
+          "rms": 0.3231285784835524,
+          "held_digest": "feb7c6fe980ac187defcd29a3a754fac61b63752418684427e6baf83faccdfd5"
+        },
+        "2": {
+          "pre_phase": 0.9817638397216797,
+          "after_set_phase": 0.9817638397216797,
+          "first_after_prep": 0.9896829128265381,
+          "last_after_render": 0.03630632534623146,
+          "rms": 0.26633743614049493,
+          "held_digest": "38376f72d1465b2dc186654b42f6f7e33ba60cfcc18d19b7bf8103de1fdfa485"
+        },
+        "0": {
+          "pre_phase": 0.03630632534623146,
+          "after_set_phase": 0.03630632534623146,
+          "first_after_prep": 0.044225338846445084,
+          "last_after_render": 0.0908486396074295,
+          "rms": 0.1401944824066972,
+          "held_digest": "405f1bc34f9b08c3ee9de7e1eba9826b3cc8f58e8f4f5b15cff3f2b9b1abe4b8"
+        }
+      },
+      "held": {
+        "1": {
+          "equal": false,
+          "relative_rms": 0.5408207774162292
+        },
+        "3": {
+          "equal": false,
+          "relative_rms": 1.3048878908157349
+        },
+        "2": {
+          "equal": false,
+          "relative_rms": 0.9028388857841492
+        },
+        "0": {
+          "equal": false,
+          "relative_rms": 0.011821160092949867
+        }
+      },
+      "simultaneous": {
+        "65": {
+          "equal": false,
+          "relative_rms": 1.3053170442581177
+        },
+        "71": {
+          "equal": false,
+          "relative_rms": 1.3055553436279297
+        }
+      }
+    }
+  ]
+}
