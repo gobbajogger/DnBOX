@@ -129,8 +129,11 @@ isolated kernel timing, or partial link into a release claim.
   preserves complete 909 owner and four-bus words across 256
   active host spans, including not-ready and stale tokens.
   Its 4,660 B private workspace fits the native 5,120 B A area
-  only with a proven active-A barrier. No integrated ownership or
-  timing claim. Separate
+  only with a proven active-A barrier. [Host extracted scheduler](owner909-terminal-integration/README.md)
+  now verifies A workspace release before a hostile active-A
+  consumer, 40 nonwaiting serial decisions, and twelve guard
+  faults. It uses actual embedded kernels but an A test stub,
+  not a product S1/timing claim. Native relink pending. Separate
   [active host DSP proof](owner909-early-chicago/owner-fixture.log)
   compares 6.81 MB of exact outputs/states over 192 active
   spans, with actual host overlap on 124; it does not cover
