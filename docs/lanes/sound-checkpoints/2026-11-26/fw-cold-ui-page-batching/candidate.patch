@@ -1,0 +1,101 @@
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -3563,10 +3563,11 @@
+ #endif
+ #if DNBOX_TYPED_CONTROLS_NATIVE_TEST
+             if(kind==ORIGINAL_SOUND_SYNTHONE && live_s1_mod(&proj.sound,b)){
++static const owner_page_row pages[]={
+ #if X0X_S1_FENCED_CLOCK && X0X_ARP_HOOKS
+-                OWNER_PAGE(PT_ARP_PARAMS,QR(R_ARP,ARP_F_SOURCE_RATE),QR(R_ARP,ARP_F_SOURCE_FACTOR),0,0);
++                {PT_ARP_PARAMS,{QR(R_ARP,ARP_F_SOURCE_RATE),QR(R_ARP,ARP_F_SOURCE_FACTOR),0,0}},
+ #endif
+-                OWNER_PAGE(PT_DELAY,
++                {PT_DELAY,{
+ #if X0X_S1_FEEDBACK_PROBE
+                     QR(R_S1DLFB,0),
+ #else
+@@ -3582,22 +3583,22 @@
+ #else
+                     0,
+ #endif
+-                    QR(R_S1DLYRES,0));
+-                OWNER_PAGE(PT_TUNING,QR(R_S1A4,0),QR(R_S1TRANS,0),
++                    QR(R_S1DLYRES,0)}},
++                {PT_TUNING,{QR(R_S1A4,0),QR(R_S1TRANS,0),
+                     QR(R_S1AA,0),
+ #if X0X_S1_KEYBOARD_HOLD && X0X_S1_SCALE_NATIVE
+-                    QR(R_S1A4RESET,0));
++                    QR(R_S1A4RESET,0)}},
+ #else
+-                    NONE);
++                    0}},
+ #endif
+-                OWNER_PAGE(PT_REVERB,QR(R_S1RVFB,0),0,0,0);
+-                OWNER_PAGE(PT_FILTER_MOD,QR(R_S1ENVLFO,0),0,0,0);
+-                OWNER_PAGE(PT_WHEELS,QR(R_S1MODWHEEL,0),0,0,0);
++                {PT_REVERB,{QR(R_S1RVFB,0),0,0,0}},
++                {PT_FILTER_MOD,{QR(R_S1ENVLFO,0),0,0,0}},
++                {PT_WHEELS,{QR(R_S1MODWHEEL,0),0,0,0}},
+ #if X0X_S1_CRUSH_LFO_PROBE
+-                OWNER_PAGE(PT_CRUSH_MOD,QR(R_S1CRUSH,0),0,0,0);
++                {PT_CRUSH_MOD,{QR(R_S1CRUSH,0),0,0,0}},
+ #endif
+ #if X0X_S1_KEYBOARD_HOLD
+-                OWNER_PAGE(PT_KEY_HOLD,QR(R_S1KEY_HOLD,0),
++                {PT_KEY_HOLD,{QR(R_S1KEY_HOLD,0),
+ #if X0X_S1_SCALE_NATIVE
+                     QR(R_S1SCALE,0),
+ #else
+@@ -3608,8 +3609,10 @@
+ #else
+                     0,
+ #endif
+-                    0);
++                    0}},
+ #endif
++};
++add_owner_pages(emit,pages,sizeof pages/sizeof pages[0],b);
+             }
+ #endif
+ #if X0X_SUPERJ6_BUILTIN_INIT && DNBOX_TYPED_CONTROLS_NATIVE_TEST
+@@ -3623,27 +3626,30 @@
+                 if(engine_sj6_j60_get(b,0)>=0)
+                     OWNER_PAGE(PT_CHORUS_J60,J(R_SJ6J60,0),J(R_SJ6J60,1),J(R_SJ6J60,2),J(R_SJ6J60,3));
+ #endif
++static const owner_page_row pages[]={
+ #if X0X_SJ6_PITCH_ENV_NATIVE
+-                OWNER_PAGE(PT_PITCH_ADSR,J(R_SJ6PITCH,0),J(R_SJ6PITCH,1),J(R_SJ6PITCH,2),J(R_SJ6PITCH,3));
+-                OWNER_PAGE(PT_PITCH_MOD,J(R_SJ6PITCH,4),0,0,0);
++                {PT_PITCH_ADSR,{J(R_SJ6PITCH,0),J(R_SJ6PITCH,1),J(R_SJ6PITCH,2),J(R_SJ6PITCH,3)}},
++                {PT_PITCH_MOD,{J(R_SJ6PITCH,4),0,0,0}},
+ #endif
+ #if X0X_SJ6_NATIVE_ROOM
+-                OWNER_PAGE(PT_EFFECT,J(R_SJ6CRUSH,0),J(R_SJ6CRUSH,1),0,0);
++                {PT_EFFECT,{J(R_SJ6CRUSH,0),J(R_SJ6CRUSH,1),0,0}},
+ #endif
+ #if X0X_SJ6_OTA_NATIVE
+-                OWNER_PAGE(PT_FILTER_MODE,J(R_SJ6OTA,0),0,0,0);
++                {PT_FILTER_MODE,{J(R_SJ6OTA,0),0,0,0}},
+ #endif
+ #if X0X_SJ6_AUX_LFO_NATIVE
+-                OWNER_PAGE(PT_LFO_SETUP,J(R_SJ6AUX,0),J(R_SJ6AUX,1),J(R_SJ6AUX,2),J(R_SJ6AUX,3));
+-                OWNER_PAGE(PT_LFO_ROUTING,J(R_SJ6AUX,5),J(R_SJ6AUX,6),J(R_SJ6AUX,7),J(R_SJ6AUX,8));
+-                OWNER_PAGE(PT_LFO_CONTROL,J(R_SJ6AUX,14),J(R_SJ6AUX,4),
++                {PT_LFO_SETUP,{J(R_SJ6AUX,0),J(R_SJ6AUX,1),J(R_SJ6AUX,2),J(R_SJ6AUX,3)}},
++                {PT_LFO_ROUTING,{J(R_SJ6AUX,5),J(R_SJ6AUX,6),J(R_SJ6AUX,7),J(R_SJ6AUX,8)}},
++                {PT_LFO_CONTROL,{J(R_SJ6AUX,14),J(R_SJ6AUX,4),
+ #if X0X_SJ6_LFO_TRIGGER_NATIVE
+-                         J(R_SJ6AUX,12),J(R_SJ6AUX,13));
+-                OWNER_PAGE(PT_LFO_TRIGGER,J(R_SJ6AUX,9),J(R_SJ6AUX,10),J(R_SJ6AUX,11),0);
++                         J(R_SJ6AUX,12),J(R_SJ6AUX,13)}},
++                {PT_LFO_TRIGGER,{J(R_SJ6AUX,9),J(R_SJ6AUX,10),J(R_SJ6AUX,11),0}},
+ #else
+-                         NONE,NONE);
++                         0,0}},
+ #endif
+ #endif
++};
++add_owner_pages(emit,pages,sizeof pages/sizeof pages[0],b);
+ #undef J
+             }
+ #endif
