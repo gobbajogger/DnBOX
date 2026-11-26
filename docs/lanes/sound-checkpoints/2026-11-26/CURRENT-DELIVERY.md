@@ -159,7 +159,11 @@ isolated kernel timing, or partial link into a release claim.
   not a product S1/timing claim. The
   [actual Elite ON native link](909-terminal-native-rejected/NATIVE-REJECTION.md)
   overflows APP by 436 B; OFF recreated word-exact. No Pro
-  attempt, emulator run, or verified saving. Separate
+  attempt or emulator run. A focused
+  [duplicate-plumbing cleanup](909-terminal-object-dedup/OBJECT-SIZES.md)
+  recovers 226 isolated PI32 bytes without changing the extracted
+  lifecycle and audio test. It does not establish equivalent
+  APP recovery or prove the 436 B full overflow closed. Separate
   [active host DSP proof](owner909-early-chicago/owner-fixture.log)
   compares 6.81 MB of exact outputs/states over 192 active
   spans, with actual host overlap on 124; it does not cover
