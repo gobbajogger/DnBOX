@@ -587,3 +587,10 @@ blocks leave only .0702 bit/input sample for all residue and need
 1,024 B of warmed two-block PCM per cursor. Reject this format for an
 exact complete bank; no universal compressor or authorized external
 asset claim. No original media in the archive.
+
+### Current public legacy filter observers
+The [source-authenticated current callbacks](sj6-legacy-filter-observers/README.md)
+show 129 and 130 are retained as distinct public parameters, but neither
+reaches a DSP write through their shared observed preset callback. Do
+not attach their old internal sampler property proofs to current public
+dispatch or alias the values to actual cutoff/resonance 7 and 8.
