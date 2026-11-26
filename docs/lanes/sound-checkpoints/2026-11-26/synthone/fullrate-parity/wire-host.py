@@ -87,6 +87,19 @@ s=exact(s,a,"""#if S1_MORPH_EXACT
 #else
 """+a+"""
 #endif""")
+a='    return ref * exp2f((n - 69) / 12.0f);'
+s=exact(s,a,"""#if S1_PITCH_EXACT
+    return (float)((double)ref*exp2(((double)n-69.0)/12.0));
+#else
+"""+a+"\n#endif")
+a='        if (gh != s->glide_h) { s->glide_h = gh; s->glide_c2 = gh > 0.0f ? powf(0.5f, 1.0f / (s->sr * gh)) : 0.0f; }'
+s=exact(s,a,"""#if S1_PITCH_EXACT
+        if(gh!=s->glide_h){
+            s->glide_h=gh;
+            s->glide_c2=gh>0.f?(float)pow(.5,(double)((1.f/s->sr)/gh)):0.f;
+        }
+#else
+"""+a+"\n#endif")
 a="static const uint8_t smooth_bits[19]"
 s=exact(s,a,"""#if S1_LFO_EXACT
 static void source_lfo_tick(s1u_lfo *l,float rate,float shape,float amount,float c2,float sr){

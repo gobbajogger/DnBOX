@@ -14,8 +14,8 @@ test -r "$H/soundpipe.h" && test -r "$M/compressor.c"
 L="$R/restored-handoff/docs/handoffs/2026-11-24-source/composed-controls"
 read -ra opts <<<"$(grep -o -- '-DX0X_S1[A-Z0-9_]*=1' "$L/FLAGS.txt"|xargs)"
 cd "$SRC"
-for arm in ${S1_PARITY_ARMS:-compact room room-master room-delay room-delay-master room-delay-master-noise room-delay-master-noise-filter room-delay-master-noise-filter-morph room-delay-master-noise-filter-morph-aux room-delay-master-noise-filter-morph-aux-crush room-delay-master-noise-filter-morph-aux-crush-stereo room-delay-master-noise-filter-morph-aux-crush-stereo-lfo}; do
-  exact=0; master=0; delay=0; noise=0; filter=0; morph=0; aux=0; crush=0; stereo=0; lfo=0
+for arm in ${S1_PARITY_ARMS:-compact room room-master room-delay room-delay-master room-delay-master-noise room-delay-master-noise-filter room-delay-master-noise-filter-morph room-delay-master-noise-filter-morph-aux room-delay-master-noise-filter-morph-aux-crush room-delay-master-noise-filter-morph-aux-crush-stereo room-delay-master-noise-filter-morph-aux-crush-stereo-lfo room-delay-master-noise-filter-morph-aux-crush-stereo-lfo-pitch}; do
+  exact=0; master=0; delay=0; noise=0; filter=0; morph=0; aux=0; crush=0; stereo=0; lfo=0; pitch=0
   if [[ $arm != compact ]]; then exact=1; fi
   if [[ $arm == *-master* ]]; then master=1; fi
   if [[ $arm == *-noise* ]]; then noise=1; fi
@@ -24,9 +24,10 @@ for arm in ${S1_PARITY_ARMS:-compact room room-master room-delay room-delay-mast
   if [[ $arm == *-aux* ]]; then aux=1; fi
   if [[ $arm == *-crush* ]]; then crush=1; fi
   if [[ $arm == *-stereo* ]]; then stereo=1; fi
-  if [[ $arm == *-lfo ]]; then lfo=1; fi
+  if [[ $arm == *-lfo* ]]; then lfo=1; fi
+  if [[ $arm == *-pitch ]]; then pitch=1; fi
   if [[ $arm == room-delay* ]]; then delay=1; fi
-  cc -std=gnu11 -O2 -ffunction-sections -fdata-sections -include "$T/dsp/s1c/s1c.h" -DS1_WIDEN_ORACLE=1 -DS1_ROOM_EXACT=$exact -DS1_ROOM_EXACT_MASTER=$master -DS1_DELAY_EXACT=$delay -DS1_NOISE_EXACT=$noise -DS1_FILTER_EXACT=$filter -DS1_MORPH_EXACT=$morph -DS1_AUX_EXACT=$aux -DS1_CRUSH_EXACT=$crush -DS1_STEREO_EXACT=$stereo -DS1_LFO_EXACT=$lfo \
+  cc -std=gnu11 -O2 -ffunction-sections -fdata-sections -include "$T/dsp/s1c/s1c.h" -DS1_WIDEN_ORACLE=1 -DS1_ROOM_EXACT=$exact -DS1_ROOM_EXACT_MASTER=$master -DS1_DELAY_EXACT=$delay -DS1_NOISE_EXACT=$noise -DS1_FILTER_EXACT=$filter -DS1_MORPH_EXACT=$morph -DS1_AUX_EXACT=$aux -DS1_CRUSH_EXACT=$crush -DS1_STEREO_EXACT=$stereo -DS1_LFO_EXACT=$lfo -DS1_PITCH_EXACT=$pitch \
      -DX0X_HOST -DX0X_ORIGINAL_SYNTH=1 -DX0X_S1C=1 -DX0X_SYNTHONE_PATCH=1 "${opts[@]}" -DX0X_SUPERJ6_BUILTIN_INIT=1 -DDNBOX_TYPED_CONTROLS_NATIVE_TEST=1 \
      -DX0X_S1_BEND_RANGE_PROBE=1 -DX0X_S1_MOD_RATE_PROBE=1 -DX0X_S1_FEEDBACK_PROBE=1 \
      -DORIGINAL_USE_SOFT_FMA -ffp-contract=off -fno-fast-math -DNO_LIBSNDFILE -I"$D" -I"$M/../lib/faust" -I"$H" -I"$H/lib/dr_wav" \

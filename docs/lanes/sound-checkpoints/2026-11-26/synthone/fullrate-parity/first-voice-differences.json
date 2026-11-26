@@ -1,0 +1,192 @@
+{
+  "180": {
+    "frame": {
+      "worst_abs": 0.0,
+      "first": null
+    },
+    "target": {
+      "worst_abs": 0.0,
+      "first": null
+    },
+    "smoothed_pitch": {
+      "worst_abs": 4.57763671875e-05,
+      "first": {
+        "frame": 0,
+        "ref": 102.94103240966797,
+        "test": 102.9410171508789
+      }
+    },
+    "root": {
+      "worst_abs": 0.0,
+      "first": null
+    },
+    "gate": {
+      "worst_abs": 0.0,
+      "first": null
+    },
+    "amp": {
+      "worst_abs": 2.384185791015625e-07,
+      "first": null
+    },
+    "filter_env": {
+      "worst_abs": 3.2782554626464844e-07,
+      "first": null
+    },
+    "lfo1": {
+      "worst_abs": 0.0,
+      "first": null
+    },
+    "lfo2": {
+      "worst_abs": 0.0,
+      "first": null
+    },
+    "dry": {
+      "worst_abs": 0.006242029368877411,
+      "first": {
+        "frame": 131,
+        "ref": 0.0003861548029817641,
+        "test": 0.00038738109287805855
+      }
+    },
+    "cutoff": {
+      "worst_abs": 0.0,
+      "first": null
+    },
+    "stage": {
+      "worst_abs": 0.0,
+      "first": null
+    }
+  },
+  "459": {
+    "frame": {
+      "worst_abs": 0.0,
+      "first": null
+    },
+    "target": {
+      "worst_abs": 0.0,
+      "first": null
+    },
+    "smoothed_pitch": {
+      "worst_abs": 0.0,
+      "first": null
+    },
+    "root": {
+      "worst_abs": 0.0,
+      "first": null
+    },
+    "gate": {
+      "worst_abs": 0.0,
+      "first": null
+    },
+    "amp": {
+      "worst_abs": 0.0,
+      "first": null
+    },
+    "filter_env": {
+      "worst_abs": 0.0,
+      "first": null
+    },
+    "lfo1": {
+      "worst_abs": 0.0,
+      "first": null
+    },
+    "lfo2": {
+      "worst_abs": 0.0,
+      "first": null
+    },
+    "dry": {
+      "worst_abs": 0.09622960723936558,
+      "first": {
+        "frame": 247,
+        "ref": 0.007256849203258753,
+        "test": 0.007257946766912937
+      }
+    },
+    "cutoff": {
+      "worst_abs": 0.0,
+      "first": null
+    },
+    "stage": {
+      "worst_abs": 0.0,
+      "first": null
+    }
+  },
+  "475": {
+    "frame": {
+      "worst_abs": 0.0,
+      "first": null
+    },
+    "target": {
+      "worst_abs": 0.000244140625,
+      "first": {
+        "frame": 128,
+        "ref": 130.8127899169922,
+        "test": 130.81277465820312
+      }
+    },
+    "smoothed_pitch": {
+      "worst_abs": 0.0430908203125,
+      "first": {
+        "frame": 9,
+        "ref": 261.6255798339844,
+        "test": 261.6256103515625
+      }
+    },
+    "root": {
+      "worst_abs": 80.0,
+      "first": {
+        "frame": 246450,
+        "ref": -1.0,
+        "test": 79.0
+      }
+    },
+    "gate": {
+      "worst_abs": 0.0,
+      "first": null
+    },
+    "amp": {
+      "worst_abs": 0.009939800016582012,
+      "first": {
+        "frame": 246450,
+        "ref": 0.0,
+        "test": 0.009939800016582012
+      }
+    },
+    "filter_env": {
+      "worst_abs": 2.1232757717370987e-05,
+      "first": {
+        "frame": 246452,
+        "ref": 0.005702924448996782,
+        "test": 0.005701672751456499
+      }
+    },
+    "lfo1": {
+      "worst_abs": 0.0,
+      "first": null
+    },
+    "lfo2": {
+      "worst_abs": 0.0,
+      "first": null
+    },
+    "dry": {
+      "worst_abs": 1.0200820118188858,
+      "first": {
+        "frame": 377,
+        "ref": 0.015944723039865494,
+        "test": 0.015942083671689034
+      }
+    },
+    "cutoff": {
+      "worst_abs": 0.0,
+      "first": null
+    },
+    "stage": {
+      "worst_abs": 2.0,
+      "first": {
+        "frame": 246450,
+        "ref": 0.0,
+        "test": 2.0
+      }
+    }
+  }
+}
