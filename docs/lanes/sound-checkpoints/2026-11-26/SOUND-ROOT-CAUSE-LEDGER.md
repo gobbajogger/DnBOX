@@ -39,9 +39,18 @@ Do not fit individual presets, a master gain, or an arbitrary time shift.
   must be reported. New one-at-a-time probes: #180 first-note correction
   shifts Brainwave's overall gap by under .008 dB; higher-precision ADSR
   ingress shifts whole RMS at most .006 dB. Neither explains the large
-  drop. Keep active missing routing/control investigations separate
+  drop. The documented 10 Hz high-pass floor also changes whole level
+  at most .071 dB. Keep active missing routing/control investigations separate
   from the sample-history and oscillator corrections.
   [Original captures and scope](sj6-native-factory-cross/README.md).
+- **The compact dry mixer explains only part of the loss.** At unchanged
+  Master and typed settings, removing only the fixed six-voice divisor
+  recovers ~15.6 dB. Restoring unity duplication only for centered layers
+  recovers another ~6.0 dB. Brainwave, Solidify and Raw remain 24.55,
+  7.23 and 16.17 dB too quiet, respectively, with strong remaining
+  spectral differences. Solidify's signed waveform residual worsens.
+  No tested dry cue clips, but this is not proof of full FX or dynamic
+  control headroom. Do not call the mixer experiment a sound fix.
 - **Unresolved:** source owner of the gain between the calibrated Crusher
   and Apple's compressor input; which missing or misrouted per-program
   states dominate different dry patches; delay-bandwidth correction that
