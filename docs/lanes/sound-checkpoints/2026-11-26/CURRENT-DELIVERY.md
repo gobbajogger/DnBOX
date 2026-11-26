@@ -19,6 +19,12 @@ isolated kernel timing, or partial link into a release claim.
   final release and whole. No adoption. Source-only archive receipts:
   10,072 B, SHA256 `ad08cba363dd5dfd05a4330722c1d74ea23c95233fe5c42f3598a46870ff05ed`;
   12,011 B, SHA256 `33338b9df37da383b76489a7d67f7857b647303106fe642f4d8a56b8bb162fcd`.
+  The [current original J60 leaf](sj6-postvoice-j60/README.md)
+  on that exact same upstream PCM/partition sequence improves authored
+  full signed error from −0.452 to −3.923 dBr and final release from
+  +0.608 to −3.651, with exact dry passthrough. First release regresses
+  and absolute authored level remains 8.47 dB low. Full current J60
+  contributes materially; it does not explain dry or level remaining.
   Do not infer the complete installed graph or export original audio.
 
 - **SuperJ6 distinct factory controls.** #203/#204 select independent
@@ -26,7 +32,10 @@ isolated kernel timing, or partial link into a release claim.
   dispatch and Pad Lock restore keep the two fields separate; every
   one of the 640 original presets stores distinct values. Existing AU
   setter/loaded-state proof does not verify XY movement or enable a
-  firmware editor. Archive SHA256
+  firmware editor. [Reached XY gesture source](sj6-xy-gesture/README.md)
+  uses independent contexts and forwards each gesture's last mapped
+  values on release in the verified leaf. Do not invent a common
+  musical reset or a sequencer mapping. Archive SHA256
   `e448e6f9837bced7de5c55576270d134ea9e15ac50134cc341419f2b047267a9`.
   Original cold order sends #7/#8 before #129/#130, but that is not
   alias precedence. Actual #7 writes cutoff address 36; the distinct

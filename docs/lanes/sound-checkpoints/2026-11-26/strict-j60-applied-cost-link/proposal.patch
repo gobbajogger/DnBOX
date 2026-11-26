@@ -1,0 +1,79 @@
+--- a/firmware/src/app/main_fm1.c
++++ b/firmware/src/app/main_fm1.c
+@@ -31,7 +31,15 @@
+ #error busy recorder cannot be present in an installable image
+ #endif
+ /* packed ordinal/class then elapsed us, first and worst true DMA misses */
+-volatile uint32_t lab_miss_busy[6] X0X_POOL __attribute__((aligned(4)));
++#if DNBOX_LAB_MISSED_COST
++#if !DNBOX_LAB_MISSED_BUSY
++#error cost probe needs the linked busy witness
++#endif
++#define LAB_BUSY_WORDS 10
++#else
++#define LAB_BUSY_WORDS 6
++#endif
++volatile uint32_t lab_miss_busy[LAB_BUSY_WORDS] X0X_POOL __attribute__((aligned(4)));
+ #define lab_busy_core (lab_miss_busy+4)
+ #endif
+ #if X0X_DEBUG
+@@ -110,6 +118,9 @@
+         uint32_t half = fm1_audio_free_half();
+ #if DNBOX_LAB_MISSED_BUSY
+         lab_busy_core[0]=lab_busy_core[1]=0;
++#if DNBOX_LAB_MISSED_COST
++        lab_miss_busy[6]=lab_miss_busy[7]=0;
++#endif
+ #endif
+         render_block(&abuf[half * HALF_WORDS]);
+         fm1_audio_ack_half();
+@@ -124,6 +135,10 @@
+                 if (!x0x_dbg.late) { lab_miss_busy[0]=row; lab_miss_busy[1]=us; }
+                 if (!x0x_dbg.late || us>lab_miss_busy[3]) {
+                     lab_miss_busy[2]=row; lab_miss_busy[3]=us;
++#if DNBOX_LAB_MISSED_COST
++                    lab_miss_busy[8]=lab_miss_busy[6];
++                    lab_miss_busy[9]=lab_miss_busy[7];
++#endif
+                 }
+             } else {
+                 lab_miss_busy[3]=~0u;
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -2994,7 +2994,15 @@
+ static int brk_silent_now = 1;
+ static uint8_t d808_was_active;
+ #if DNBOX_LAB_MISSED_BUSY
+-extern volatile uint32_t lab_miss_busy[6];
++#if DNBOX_LAB_MISSED_COST
++#if !DNBOX_LAB_MISSED_BUSY
++#error cost probe needs the linked busy witness
++#endif
++#define LAB_BUSY_WORDS 10
++#else
++#define LAB_BUSY_WORDS 6
++#endif
++extern volatile uint32_t lab_miss_busy[LAB_BUSY_WORDS];
+ #define lab_busy_core (lab_miss_busy+4)
+ #endif
+ /* each bass's L/R, and bass B's own workspace (A keeps original_workspace): XPOOL, which
+@@ -3302,8 +3310,19 @@
+         if (!core)
+             PROF_ADD(PR_BRK, pk);
+     }
++#if DNBOX_LAB_MISSED_BUSY && DNBOX_LAB_MISSED_COST
++    if (active) {
++        uint32_t elapsed=plat_ticks24() - tk - wt;
++        job_cost(j, elapsed, n);
++        if (!core) {
++            if (j==JB_909) lab_miss_busy[6]+=elapsed;
++            else if (marks&((1u<<3)|(1u<<7))) lab_miss_busy[7]+=elapsed;
++        }
++    }
++#else
+     if (active)
+         job_cost(j, plat_ticks24() - tk - wt, n);
++#endif
+ #if DNBOX_LAB_MISSED_BUSY
+     if (active && j==JB_909) marks|=1u;
+     if (active && j==JB_808) marks|=2u;
