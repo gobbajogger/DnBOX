@@ -604,3 +604,13 @@ and the last update snaps to target. This is not a replacement for all
 live paths. The PI32 caller and clock alone need 172 B, before three
 unresolved math dependencies and a 24 B descriptor. Native memory and the
 sample path remain unqualified; do not adopt the cold-only shortcut.
+
+### Stationary short-cycle Sub holdout rejection
+A [literal short-cycle replacement](sj6-sub-stationary-cycle/README.md)
+tracks one low held note at −47.37 dBr and first release at −72.54 dBr,
+but loses the chord at −12.27 dBr and final release at −3.31 dBr. Full
+output is −13.41 dBr despite near-equal absolute level (+.017 dB).
+Keeping four cycles quadruples the private payload without meaningful
+whole-run improvement. This rejects stationary repetition for the full
+Sub bank, not the real cursor, and is not a claim about a codec or
+a short-cycle technique for other sources. No original media is stored.
