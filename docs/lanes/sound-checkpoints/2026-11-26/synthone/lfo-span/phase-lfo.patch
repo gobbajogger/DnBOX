@@ -1,0 +1,56 @@
+--- a/firmware/src/dsp/s1c/s1u.c
++++ b/firmware/src/dsp/s1c/s1u.c
+@@ -77,9 +77,9 @@
+ }
+ 
+ /* ---- LFO ---- */
+-void s1u_lfo_tick(s1u_lfo *l, float rate_hz, int shape, float amount, float c2, float sr)
+-{
+-    l->ph += rate_hz / sr; if (l->ph >= 1.0f) l->ph -= 1.0f;
++void s1u_lfo_tick(s1u_lfo *l, float ph_step, int shape, float amount, float c2)
++{
++    l->ph += ph_step; if (l->ph >= 1.0f) l->ph -= 1.0f;
+     float ph = l->ph;
+     float x = shape == 0 ? s1u_sin((uint32_t)(ph * 4294967296.0f)) :
+               shape == 1 ? (ph > 0.5f ? 1.0f : -1.0f) : shape == 2 ? (ph - 0.5f) * 2.0f : (0.5f - ph) * 2.0f;
+--- a/firmware/src/dsp/s1c/s1u.h
++++ b/firmware/src/dsp/s1c/s1u.h
+@@ -14,7 +14,7 @@
+ /* ---- LFO: sine / square / saw up / saw down, smoothed, unipolar outputs ----
+  * o01 = 0..amount (adds), o10 = 1-amount..1 (scales). */
+ typedef struct { float ph, sm, o01, o10; } s1u_lfo;
+-void s1u_lfo_tick(s1u_lfo *l, float rate_hz, int shape, float amount, float smooth_c2, float sr);
++void s1u_lfo_tick(s1u_lfo *l, float ph_step, int shape, float amount, float smooth_c2);
+ 
+ /* ---- table sine: ph is a 32-bit phase (one turn = 2^32) ---- */
+ float s1u_sin(uint32_t ph);
+--- a/firmware/src/dsp/s1c/s1c.c
++++ b/firmware/src/dsp/s1c/s1c.c
+@@ -1150,6 +1150,11 @@
+         }
+     }
+ #endif
++#if S1C_CSM && S1C_NO_SEQ
++    /* L1R/L2R are not smoothed in this configuration. Program and tempo
++     * ingress are serialized by the render owner outside this span. */
++    const float lfo_step1 = P(L1R) / s->sr, lfo_step2 = P(L2R) / s->sr;
++#endif
+     for (f = 0; f < n; f++) {
+ #if S1C_FAST
+         int cu = (f & 3) == 0;
+@@ -1177,8 +1182,13 @@
+         /* LFOs */
+         float x;
+         float lc2 = s->lfo_c2;
+-        s1u_lfo_tick(&s->lfo[0], P(L1R), (int)P(L1I), P(L1A), lc2, s->sr);
+-        s1u_lfo_tick(&s->lfo[1], P(L2R), (int)P(L2I), P(L2A), lc2, s->sr);
++#if S1C_CSM && S1C_NO_SEQ
++        s1u_lfo_tick(&s->lfo[0], lfo_step1, (int)P(L1I), P(L1A), lc2);
++        s1u_lfo_tick(&s->lfo[1], lfo_step2, (int)P(L2I), P(L2A), lc2);
++#else
++        s1u_lfo_tick(&s->lfo[0], P(L1R) / s->sr, (int)P(L1I), P(L1A), lc2);
++        s1u_lfo_tick(&s->lfo[1], P(L2R) / s->sr, (int)P(L2I), P(L2A), lc2);
++#endif
+ #if !S1C_NO_SEQ
+         sequencer(s);
+ #endif

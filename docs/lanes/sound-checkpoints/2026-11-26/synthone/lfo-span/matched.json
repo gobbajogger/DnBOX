@@ -1,0 +1,96 @@
+{
+  "elite": {
+    "scene_sha256": "d08718b1521119b252b5cca0c5e1db6981ea25a5a0b31b6ead60dceccb3f6271",
+    "old": {
+      "worst_us": 15558,
+      "halves": 584,
+      "raw_late": 39,
+      "xruns": 39,
+      "skipped_cycles": 0,
+      "peak": 13144,
+      "frames": 319488,
+      "sealed_boot": true,
+      "settled_owner_readbacks": 4,
+      "meets_timing": false,
+      "core1": {
+        "enabled": 1,
+        "gave_up": 0,
+        "alive": 1,
+        "dispatched": 1830,
+        "finished": 1829,
+        "bad_mailbox": 0
+      },
+      "accepted": false
+    },
+    "trial": {
+      "worst_us": 15404,
+      "halves": 473,
+      "raw_late": 150,
+      "xruns": 150,
+      "skipped_cycles": 0,
+      "peak": 13183,
+      "frames": 319488,
+      "sealed_boot": true,
+      "settled_owner_readbacks": 4,
+      "meets_timing": false,
+      "core1": {
+        "enabled": 1,
+        "gave_up": 0,
+        "alive": 1,
+        "dispatched": 1540,
+        "finished": 1539,
+        "bad_mailbox": 0
+      },
+      "accepted": false
+    },
+    "delta_us": -154,
+    "delta_xruns": 111
+  },
+  "pro": {
+    "scene_sha256": "d08718b1521119b252b5cca0c5e1db6981ea25a5a0b31b6ead60dceccb3f6271",
+    "old": {
+      "worst_us": 15793,
+      "halves": 570,
+      "raw_late": 53,
+      "xruns": 53,
+      "skipped_cycles": 0,
+      "peak": 13159,
+      "frames": 319488,
+      "sealed_boot": true,
+      "settled_owner_readbacks": 4,
+      "meets_timing": false,
+      "core1": {
+        "enabled": 1,
+        "gave_up": 0,
+        "alive": 1,
+        "dispatched": 1767,
+        "finished": 1766,
+        "bad_mailbox": 0
+      },
+      "accepted": false
+    },
+    "trial": {
+      "worst_us": 15409,
+      "halves": 489,
+      "raw_late": 134,
+      "xruns": 134,
+      "skipped_cycles": 0,
+      "peak": 13190,
+      "frames": 319488,
+      "sealed_boot": true,
+      "settled_owner_readbacks": 4,
+      "meets_timing": false,
+      "core1": {
+        "enabled": 1,
+        "gave_up": 0,
+        "alive": 1,
+        "dispatched": 1614,
+        "finished": 1613,
+        "bad_mailbox": 0
+      },
+      "accepted": false
+    },
+    "delta_us": -384,
+    "delta_xruns": 81
+  }
+}

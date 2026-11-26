@@ -1,0 +1,33 @@
+{
+  "scope": "Static original Mac 0.999.8 build 9; no full AU render",
+  "source_sha": "1d6edf2bf5dd30906b148e10f50e2470a9f55d13d7f64ab3515e3c2294f1c257",
+  "limiter": {
+    "slot": 192,
+    "constructor": "0x1003e24c0",
+    "instrument_constructor_set": [
+      -20,
+      5,
+      0.001,
+      0.05,
+      0
+    ],
+    "initialize": {
+      "attack_s": 0.001,
+      "release_s": 0.05,
+      "threshold_db": -12,
+      "headroom_db": 0.1,
+      "overall_gain_setting_db": 1
+    },
+    "feeds_reverb_mixer_slot": 112
+  },
+  "master_amplifier": {
+    "slot": 208,
+    "setGain": 0.85
+  },
+  "registry": {
+    "superj6": false,
+    "apple_highpass": false,
+    "apple_dynamics": false,
+    "total": 0
+  }
+}

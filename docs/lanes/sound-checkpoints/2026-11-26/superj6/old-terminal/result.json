@@ -1,0 +1,103 @@
+{
+  "original_sha": "a5243e50bda6bd44f463c6e63ea3137802142f55f3c1ea25a5a6e046acba81a1",
+  "known_input_sha": "44e9590f71bf2341d7ac0c480eb290015f84555ae873b2d0082395bc84189df4",
+  "scope": "Original old ARM64 terminal DC DSP only; real DSP ctor/register/process; active flags imposed; original AU full graph is not offered",
+  "arms": [
+    {
+      "rate": 44100,
+      "requested_pole": null,
+      "real_state_pole": [
+        0.9990000128746033,
+        0.9990000128746033
+      ],
+      "actual_output_sha256": "821cc102086defb68e2d377490fa1b965e72546435a993a44e35f1a34c9e2af6",
+      "float32_fma_expected_exact_samples": 1026,
+      "windows": {
+        "step": {
+          "raw_relative_db": -0.4036625431797703,
+          "peak_out": 0.7300000190734863
+        },
+        "bypass": {
+          "raw_relative_db": 0.0,
+          "peak_out": 1.899999976158142
+        },
+        "alternation": {
+          "raw_relative_db": 0.12443393616894326,
+          "peak_out": 0.7519209384918213
+        }
+      }
+    },
+    {
+      "rate": 44100,
+      "requested_pole": 0.999,
+      "real_state_pole": [
+        0.9990000128746033,
+        0.9990000128746033
+      ],
+      "actual_output_sha256": "821cc102086defb68e2d377490fa1b965e72546435a993a44e35f1a34c9e2af6",
+      "float32_fma_expected_exact_samples": 1026,
+      "windows": {
+        "step": {
+          "raw_relative_db": -0.4036625431797703,
+          "peak_out": 0.7300000190734863
+        },
+        "bypass": {
+          "raw_relative_db": 0.0,
+          "peak_out": 1.899999976158142
+        },
+        "alternation": {
+          "raw_relative_db": 0.12443393616894326,
+          "peak_out": 0.7519209384918213
+        }
+      }
+    },
+    {
+      "rate": 48000,
+      "requested_pole": null,
+      "real_state_pole": [
+        0.9990000128746033,
+        0.9990000128746033
+      ],
+      "actual_output_sha256": "821cc102086defb68e2d377490fa1b965e72546435a993a44e35f1a34c9e2af6",
+      "float32_fma_expected_exact_samples": 1026,
+      "windows": {
+        "step": {
+          "raw_relative_db": -0.4036625431797703,
+          "peak_out": 0.7300000190734863
+        },
+        "bypass": {
+          "raw_relative_db": 0.0,
+          "peak_out": 1.899999976158142
+        },
+        "alternation": {
+          "raw_relative_db": 0.12443393616894326,
+          "peak_out": 0.7519209384918213
+        }
+      }
+    },
+    {
+      "rate": 48000,
+      "requested_pole": 0.999,
+      "real_state_pole": [
+        0.9990000128746033,
+        0.9990000128746033
+      ],
+      "actual_output_sha256": "821cc102086defb68e2d377490fa1b965e72546435a993a44e35f1a34c9e2af6",
+      "float32_fma_expected_exact_samples": 1026,
+      "windows": {
+        "step": {
+          "raw_relative_db": -0.4036625431797703,
+          "peak_out": 0.7300000190734863
+        },
+        "bypass": {
+          "raw_relative_db": 0.0,
+          "peak_out": 1.899999976158142
+        },
+        "alternation": {
+          "raw_relative_db": 0.12443393616894326,
+          "peak_out": 0.7519209384918213
+        }
+      }
+    }
+  ]
+}
