@@ -1,0 +1,155 @@
+{
+  "source": "6d163d79202e866d2fda96e36f752bd386641b5ae2d0b1f829a254d26b652850",
+  "native_capture": "1bec364fa3118259d1f666af72dabaa322eb135f4a264538fb212eacbf8b02d3",
+  "score": {
+    "before": {
+      "before": {
+        "native": {
+          "level_db": 3.369426492751111e-05,
+          "null_dbr": -43.99650704955198
+        },
+        "model": {
+          "level_db": 0.0,
+          "null_dbr": -555.6666740712485
+        },
+        "authored_absolute": {
+          "level_db": -9.074022352305331,
+          "null_dbr": -2.94129122905478
+        },
+        "native_repeat": {
+          "level_db": -6.983621181855379e-07,
+          "null_dbr": -85.19551348775599
+        }
+      },
+      "near_crossing": {
+        "native": {
+          "level_db": 0.35266478770479365,
+          "null_dbr": -17.21984229944826
+        },
+        "model": {
+          "level_db": 0.031176403317209875,
+          "null_dbr": -21.864125716492726
+        },
+        "authored_absolute": {
+          "level_db": -5.474684660943362,
+          "null_dbr": -3.8823786927514883
+        },
+        "native_repeat": {
+          "level_db": 4.0453445776305965e-05,
+          "null_dbr": -97.3628670103119
+        }
+      },
+      "whole_chord_held": {
+        "native": {
+          "level_db": 5.615428616509692e-05,
+          "null_dbr": -56.7820943171077
+        },
+        "model": {
+          "level_db": 0.000751045242419828,
+          "null_dbr": -57.63837915034317
+        },
+        "authored_absolute": {
+          "level_db": -9.998048384013074,
+          "null_dbr": -3.0406696223116603
+        },
+        "native_repeat": {
+          "level_db": 4.3184236469879865e-06,
+          "null_dbr": -65.3122846365593
+        }
+      },
+      "restored": {
+        "native": {
+          "level_db": -13.013422239312494,
+          "null_dbr": 0.28793293760560285
+        },
+        "model": {
+          "level_db": -3.8947992713748874,
+          "null_dbr": 1.6828361078192722
+        },
+        "authored_absolute": {
+          "level_db": -10.231139070562438,
+          "null_dbr": -2.8321146540873277
+        },
+        "native_repeat": {
+          "level_db": 7.239879167403481e-07,
+          "null_dbr": -67.71238596474407
+        }
+      }
+    },
+    "after": {
+      "before": {
+        "native": {
+          "level_db": 2.528334170848889e-05,
+          "null_dbr": -83.5332499159445
+        },
+        "model": {
+          "level_db": 0.0,
+          "null_dbr": -555.6666740712485
+        },
+        "authored_absolute": {
+          "level_db": -9.074025824260142,
+          "null_dbr": -2.9412026786204857
+        },
+        "native_repeat": {
+          "level_db": 2.4510132682722435e-05,
+          "null_dbr": -83.52686511395889
+        }
+      },
+      "near_crossing": {
+        "native": {
+          "level_db": 0.008018072665415125,
+          "null_dbr": -17.811207008295145
+        },
+        "model": {
+          "level_db": -0.14236770869519527,
+          "null_dbr": -22.35145009028869
+        },
+        "authored_absolute": {
+          "level_db": -5.474607066451515,
+          "null_dbr": -3.8822666790081457
+        },
+        "native_repeat": {
+          "level_db": -7.872172304597882e-05,
+          "null_dbr": -94.35694619682992
+        }
+      },
+      "whole_chord_held": {
+        "native": {
+          "level_db": -2.658843829693716,
+          "null_dbr": -1.8890046749473586
+        },
+        "model": {
+          "level_db": -2.5273428412594696,
+          "null_dbr": -2.25585974170614
+        },
+        "authored_absolute": {
+          "level_db": -9.998052227599302,
+          "null_dbr": -3.0403208681061806
+        },
+        "native_repeat": {
+          "level_db": -5.913846380118651e-06,
+          "null_dbr": -65.84730809257846
+        }
+      },
+      "restored": {
+        "native": {
+          "level_db": -5.4742713703169384e-05,
+          "null_dbr": -64.36182633618625
+        },
+        "model": {
+          "level_db": -0.0002444772421854336,
+          "null_dbr": -65.1366100495177
+        },
+        "authored_absolute": {
+          "level_db": -10.231147593752487,
+          "null_dbr": -2.8312817619728587
+        },
+        "native_repeat": {
+          "level_db": 2.8811091818480176e-06,
+          "null_dbr": -64.20521360933074
+        }
+      }
+    }
+  },
+  "scope": "Source-derived comparison-only timing holdout; exact actual ARM leaf replay and actual native independent held difference, no fit."
+}

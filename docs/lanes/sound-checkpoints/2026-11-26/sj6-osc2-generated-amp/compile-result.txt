@@ -1,0 +1,6 @@
+Apple clang version 21.0.0 (clang-2100.3.34.2)
+16cce5cd0deec6c393c06935b4939bb4a2163efa25b100f318f8e68b157088bc
+6c2775711ba8ace00878ee8c850220229be721e4c070c72d442f7fd90bea6110  donor-off.o
+6c2775711ba8ace00878ee8c850220229be721e4c070c72d442f7fd90bea6110  patch-off.o
+35769e9ea06fb47a29e819337f4dd2d0e0ef531b382f9676fd5f14684c544a43  patch-on.o
+PASS default-disabled compiler output exact; optional generated OSC2 proof compiles
