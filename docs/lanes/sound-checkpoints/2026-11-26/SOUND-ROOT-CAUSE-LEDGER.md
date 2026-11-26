@@ -687,3 +687,14 @@ The same compact cutoff clamp cannot distinguish .75 from two physical
 profiles and live AUX can override the saved value within a span.
 Keep the newly proven 52 B native storage dormant. A lab cannot mute
 Sub silently or switch filter mid-note to pass.
+
+### Actual original Sub source multirate and restart bound
+The [private-source codec measurement](sj6-sub-source-rate-distortion/README.md)
+uses the exact pinned twelve-keyzone media already present in the original
+app, not tempo stretches of output renders. Cheapest continuous stream
+screened at −40 dBr worst signed window needs 129,577 B. A weaker −30
+screen gets 105,804 B only with unindexed whole-zone streams; even coarse
+32,768-word resets raise that to 182,833 B before decoder and installed
+BREAK/preset allocation. Lossless predictors on the quantized stream
+did not solve it. This rejects the tried source format, not all codecs.
+No source or transformed audio payload retained or committed.
