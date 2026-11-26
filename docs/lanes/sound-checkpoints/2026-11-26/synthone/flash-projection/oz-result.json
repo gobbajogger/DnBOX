@@ -1,0 +1,179 @@
+{
+  "baseline-engine": {
+    "allocated_flash_sections": {
+      "text": 12580,
+      "read_only": 1156,
+      "initialized_data": 20
+    },
+    "bytes": 13756,
+    "unresolved": [
+      "log",
+      "getenv",
+      "memcpy",
+      "__extendsfdf2",
+      "abort",
+      "exp2",
+      "__divdf3",
+      "fread",
+      "fopen",
+      "memset",
+      "__truncdfsf2",
+      "strcmp",
+      "fwrite"
+    ]
+  },
+  "matched-engine": {
+    "allocated_flash_sections": {
+      "text": 17128,
+      "read_only": 1182,
+      "initialized_data": 16
+    },
+    "bytes": 18326,
+    "unresolved": [
+      "strcpy",
+      "round",
+      "__fpclassifyf",
+      "__floatdisf",
+      "atof",
+      "fprintf",
+      "sp_randmt_seed",
+      "realloc",
+      "fread",
+      "fclose",
+      "fgetc",
+      "_impure_ptr",
+      "strlen",
+      "sp_randmt_compute",
+      "free",
+      "fabs",
+      "log",
+      "sqrt",
+      "exp2f",
+      "__gtdf2",
+      "getenv",
+      "memcpy",
+      "__floatsidf",
+      "__ltdf2",
+      "malloc",
+      "__assert_func",
+      "__fixunsdfsi",
+      "__extendsfdf2",
+      "__adddf3",
+      "abort",
+      "__floatunsidf",
+      "__fixdfsi",
+      "calloc",
+      "lrintf",
+      "cos",
+      "tanh",
+      "exp2",
+      "sin",
+      "pow",
+      "log10",
+      "log2f",
+      "__divdf3",
+      "__muldf3",
+      "fopen",
+      "memset",
+      "__truncdfsf2",
+      "exp",
+      "tan",
+      "sprintf",
+      "fwrite",
+      "__gedf2",
+      "__subdf3"
+    ]
+  },
+  "baseline-engine-with-runtime": {
+    "allocated_flash_sections": {
+      "text": 19844,
+      "read_only": 1205,
+      "initialized_data": 20
+    },
+    "bytes": 21069,
+    "unresolved": [
+      "getenv",
+      "abort",
+      "fread",
+      "fopen",
+      "fwrite"
+    ]
+  },
+  "matched-engine-with-runtime": {
+    "allocated_flash_sections": {
+      "text": 33198,
+      "read_only": 1784,
+      "initialized_data": 16
+    },
+    "bytes": 34998,
+    "unresolved": [
+      "fprintf",
+      "sp_randmt_seed",
+      "realloc",
+      "fread",
+      "_calloc_r",
+      "fclose",
+      "fgetc",
+      "sp_randmt_compute",
+      "free",
+      "getenv",
+      "malloc",
+      "__assert_func",
+      "abort",
+      "calloc",
+      "fopen",
+      "sprintf",
+      "fwrite"
+    ]
+  },
+  "fx-subgraph": {
+    "allocated_flash_sections": {
+      "text": 7916,
+      "read_only": 500
+    },
+    "bytes": 8416,
+    "unresolved": [
+      "fprintf",
+      "_impure_ptr",
+      "fwrite",
+      "fabs",
+      "sqrt",
+      "sp_gen_sine",
+      "sp_ftbl_destroy",
+      "__floatsidf",
+      "__ltdf2",
+      "malloc",
+      "__assert_func",
+      "__extendsfdf2",
+      "__adddf3",
+      "abort",
+      "sp_osc_init",
+      "__fixdfsi",
+      "calloc",
+      "cos",
+      "tanh",
+      "sp_ftbl_create",
+      "sin",
+      "pow",
+      "log10",
+      "log2f",
+      "__divdf3",
+      "__muldf3",
+      "sp_osc_compute",
+      "memset",
+      "sp_osc_create",
+      "__truncdfsf2",
+      "exp",
+      "tan",
+      "sprintf",
+      "sp_osc_destroy",
+      "__gedf2",
+      "__subdf3",
+      "free"
+    ]
+  },
+  "deltas": {
+    "": 4570,
+    "-with-runtime": 13929
+  }
+}

@@ -1,0 +1,106 @@
+{
+  "4700": {
+    "first_paired_pcm_difference_frame": 65600,
+    "usb_receipts_identical": false,
+    "old": {
+      "worst_us": 11492,
+      "halves": 338,
+      "raw_late": 0,
+      "xruns": 0,
+      "skipped_cycles": 0,
+      "peak": 13107,
+      "frames": 173568,
+      "sealed_boot": true,
+      "settled_owner_readbacks": 2,
+      "meets_timing": false,
+      "core1": {
+        "enabled": 1,
+        "gave_up": 0,
+        "alive": 1,
+        "dispatched": 677,
+        "finished": 677,
+        "bad_mailbox": 0
+      },
+      "accepted": false
+    },
+    "new": {
+      "worst_us": 13223,
+      "halves": 259,
+      "raw_late": 79,
+      "xruns": 79,
+      "skipped_cycles": 0,
+      "peak": 13114,
+      "frames": 173568,
+      "sealed_boot": true,
+      "settled_owner_readbacks": 2,
+      "meets_timing": false,
+      "core1": {
+        "enabled": 1,
+        "gave_up": 0,
+        "alive": 1,
+        "dispatched": 519,
+        "finished": 519,
+        "bad_mailbox": 0
+      },
+      "accepted": false
+    },
+    "diagnostic_worst_lift_tuple": [
+      238,
+      146191,
+      10045
+    ],
+    "usable_for_attribution": false
+  },
+  "4850": {
+    "first_paired_pcm_difference_frame": 65600,
+    "usb_receipts_identical": false,
+    "old": {
+      "worst_us": 11963,
+      "halves": 350,
+      "raw_late": 1,
+      "xruns": 1,
+      "skipped_cycles": 0,
+      "peak": 13107,
+      "frames": 180224,
+      "sealed_boot": true,
+      "settled_owner_readbacks": 2,
+      "meets_timing": false,
+      "core1": {
+        "enabled": 1,
+        "gave_up": 0,
+        "alive": 1,
+        "dispatched": 701,
+        "finished": 701,
+        "bad_mailbox": 0
+      },
+      "accepted": false
+    },
+    "new": {
+      "worst_us": 15505,
+      "halves": 266,
+      "raw_late": 86,
+      "xruns": 86,
+      "skipped_cycles": 0,
+      "peak": 13114,
+      "frames": 180224,
+      "sealed_boot": true,
+      "settled_owner_readbacks": 2,
+      "meets_timing": false,
+      "core1": {
+        "enabled": 1,
+        "gave_up": 0,
+        "alive": 1,
+        "dispatched": 532,
+        "finished": 532,
+        "bad_mailbox": 0
+      },
+      "accepted": false
+    },
+    "diagnostic_worst_lift_tuple": [
+      264,
+      145503,
+      74430
+    ],
+    "usable_for_attribution": false
+  }
+}

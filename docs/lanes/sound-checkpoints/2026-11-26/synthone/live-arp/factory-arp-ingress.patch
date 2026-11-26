@@ -1,0 +1,197 @@
+--- a/firmware/src/dsp/synthone/sequencer/S1Sequencer.h
++++ b/firmware/src/dsp/synthone/sequencer/S1Sequencer.h
+@@ -72,6 +72,9 @@
+ #endif
+     uint8_t arpInterval;                /* 61  0..12 */
+     uint8_t arpTotalSteps;              /* 66  1..16 */
++#if X0X_S1_FACTORY_ARP_INGRESS
++    const float *s1FactoryPitch;        /* owning Synth One's t[]; NULL for user project and Saga */
++#endif
+     uint8_t seqGate;                    /* % of a step a note sounds (SJ6 seqGate) */
+     uint8_t patternRange;               /* |sequencerPattern| limit: S1 12, SJ6 24 */
+     uint8_t clocked;                    /* DnBOX: transport clock owns mStepCounter / mBeatTime */
+--- a/firmware/src/dsp/synthone/sequencer/S1Sequencer.c
++++ b/firmware/src/dsp/synthone/sequencer/S1Sequencer.c
+@@ -332,6 +332,11 @@
+                         int nn = p->sequencerPattern[i];
+                         nn = nn < -p->patternRange ? -p->patternRange : nn > p->patternRange ? p->patternRange : nn;
+ #if X0X_S1_SCALE_NATIVE
++#if X0X_S1_FACTORY_ARP_INGRESS
++                        if (p->s1FactoryPitch)
++                            nn=(int)(p->s1FactoryPitch[67u+i]*npof);
++                        else
++#endif
+                         nn=(int)((float)nn*npof); /* original truncates each transposed step */
+ #endif
+                         const int nnob = (nn < 0) ? (nn - octBoost * npo) : (nn + octBoost * npo);
+@@ -362,7 +367,12 @@
+ #endif
+                             snn = arpNote(held, heldNoteNumbersAECount, p->arpOctave + 1,
+ #if X0X_S1_SCALE_NATIVE
++#if X0X_S1_FACTORY_ARP_INGRESS
++                                          (int)((p->s1FactoryPitch ? p->s1FactoryPitch[61] :
++                                                       (float)p->arpInterval)*npof),
++#else
+                                           (int)((float)p->arpInterval*npof),
++#endif
+ #else
+                                           p->arpInterval,
+ #endif
+--- a/firmware/src/app/original_runtime.h
++++ b/firmware/src/app/original_runtime.h
+@@ -168,6 +168,10 @@
+ #endif
+ #if X0X_S1_FENCED_CLOCK
+ int original_runtime_s1_clock(original_runtime_part *, float, unsigned);
++#if X0X_S1_FACTORY_ARP_INGRESS
++int original_runtime_s1_factory_cfg(const original_runtime_part *, engine_arp_cfg *, int saved, int pending);
++int original_runtime_s1_factory_clock(original_runtime_part *);
++#endif
+ int engine_host_s1_clock(unsigned, float, unsigned);
+ #endif
+ int original_runtime_arp_view(const original_runtime_part *, unsigned *step, uint32_t *frames);
+--- a/firmware/src/app/original_runtime.c
++++ b/firmware/src/app/original_runtime.c
+@@ -419,7 +419,15 @@
+ #endif
+         return 1;
+     }
+-    case 61: c->interval = (uint8_t)arp_round(v, 0, 12); return 1;
++    case 61:
++#if X0X_S1_FACTORY_ARP_INGRESS
++        /* Factory UI mirror only; the sequencer keeps the authored float
++         * until after notes-per-octave scaling. Manual project values unchanged. */
++        c->interval = v < 0.f ? 0u : v > 12.f ? 12u : (uint8_t)v;
++#else
++        c->interval = (uint8_t)arp_round(v, 0, 12);
++#endif
++        return 1;
+     case 62: c->on = v >= .5f; return 1;
+     case 63: c->range = (uint8_t)arp_round(v + 1.f, 1, 4); return 1;
+     case 65:
+@@ -704,6 +712,41 @@
+ #endif
+     return 1;
+ }
++#if X0X_S1_FACTORY_ARP_INGRESS
++#if !X0X_S1C || !X0X_S1_CLOCK_NATIVE || !X0X_S1_SCALE_NATIVE || !X0X_SJ6_ARP_ADAPTER_NATIVE || X0X_SYNTH_CONTROLS_INIT_ONLY
++#error Factory fallback requires real Synth One pack, native source clock, scale and separate ARP/SEQ receiver
++#endif
++static int s1_factory_stop(const float *v)
++{
++    union { float f; uint32_t u; } value = {.f=v[147]};
++    for (unsigned i=0;i<19u;++i)
++        if (source_factor_bits(i)==value.u) return (int)i;
++    return -1;
++}
++int original_runtime_s1_factory_cfg(const original_runtime_part *p, engine_arp_cfg *next, int saved, int pending)
++{
++    if (saved || pending || !p || !next || p->kind!=ORIGINAL_SOUND_SYNTHONE || p->status!=ORIGINAL_RUNTIME_OK ||
++        p->dsp.synthone.program==S1_PART_INIT ||
++        p->dsp.synthone.program>=s1_part_programs()) return 0;
++    const float *v=p->dsp.synthone.e.t;
++    const float bpm=v[64];
++    if (v[62]!=1.f || !(bpm>=1.f&&bpm<=200.f) || bpm!=(float)(unsigned)bpm ||
++        s1_factory_stop(v)<0 || !(v[61]>=0.f&&v[61]<=12.f)) return 0;
++    for (unsigned i=67;i<=82;++i) if (!(v[i]>=-12.f&&v[i]<=12.f)) return 0;
++    engine_arp_cfg cfg;
++    engine_arp_cfg_default(&cfg);
++    for (unsigned i=60;i<=114;++i) if (!engine_arp_from_s1(&cfg,i,v[i])) return 0;
++    *next=cfg;
++    return 1;
++}
++int original_runtime_s1_factory_clock(original_runtime_part *p)
++{
++    const float *v=p->arp.prm.s1FactoryPitch;
++    if (!v) return 0;
++    const int i=s1_factory_stop(v);
++    return i>=0 && original_runtime_s1_clock(p,v[64],(unsigned)i);
++}
++#endif
+ static S1ClockPulse source_clock_sample(original_runtime_arp *a)
+ {
+     const int prev=a->seq.previousHeldNoteNumbersAECount, first=!prev&&a->nheld, on=a->prm.arpIsOn==1;
+@@ -858,6 +901,9 @@
+ #endif
+     if (was) S1Sequencer_reset(&a->seq, 0, p, arp_key_off);
+     a->cfg = *c;
++#if X0X_S1_FACTORY_ARP_INGRESS
++    a->prm.s1FactoryPitch = NULL; /* Project/edit re-admission supersedes the factory fallback. */
++#endif
+     if (!ok) return 0;
+     arp_params(p);
+     int now = arp_engaged(p);
+--- a/firmware/src/app/engine_arp.inc
++++ b/firmware/src/app/engine_arp.inc
+@@ -98,7 +98,12 @@
+ static void arp_adopt(int v, const sound_t *sound, int preset_change)
+ {
+     engine_arp_cfg c;
++#if X0X_S1_FACTORY_ARP_INGRESS
++    const int saved=engine_arp_block_decode(sound ? ARP_SLOT(sound, v) : NULL, &c);
++    const int factory=sound && original_runtime_s1_factory_cfg(&original_bass[v], &c,saved,arp_pending_flag[v]);
++#else
+     (void)engine_arp_block_decode(sound ? ARP_SLOT(sound, v) : NULL, &c);
++#endif
+ #if (defined(X0X_SJ6_ZERO_GATE_PROBE) && X0X_SJ6_ZERO_GATE_PROBE) || X0X_SJ6_NATIVE_ZERO_GATE
+     if (original_bass[v].kind==ORIGINAL_SOUND_JUNO && live137(sound,v) &&
+         read137(sound,v)[SJ6_ARP_ZERO_BYTE]==1u) c.gate=0;
+@@ -109,7 +114,10 @@
+     original_bass[v].arp.prm.saga_random_seed=v ? UINT32_C(0x243f6a88) : UINT32_C(0x85a308d3);
+ #endif
+ #if X0X_SJ6_ARP_ADAPTER_NATIVE
+-    arp_adapt(&c,sound,(unsigned)v);
++#if X0X_S1_FACTORY_ARP_INGRESS
++    if (!factory)
++#endif
++        arp_adapt(&c,sound,(unsigned)v);
+ #endif
+ #if X0X_SJ6_SEQ_SETTINGS_NATIVE
+     /* A built-in Init has no authored arp bank. Its unlocked sequence is
+@@ -135,7 +143,12 @@
+ #endif
+     if (preset_change && c.amp2_mask) { c.amp2_mask = 0; arp_store((unsigned)v, &c); }
+     arp_pending_flag[v] = 0;
+-    (void)original_runtime_arp_config(&original_bass[v], &c);
++    const int admitted=original_runtime_arp_config(&original_bass[v], &c);
++#if X0X_S1_FACTORY_ARP_INGRESS
++    if (factory && admitted) original_bass[v].arp.prm.s1FactoryPitch=original_bass[v].dsp.synthone.e.t;
++#else
++    (void)admitted;
++#endif
+ #if X0X_SUPERJ6_FACTORY
+     original_runtime_part *part = &original_bass[v];
+     if (c.amp2_mask && part->kind == ORIGINAL_SOUND_JUNO && part->status == ORIGINAL_RUNTIME_OK)
+@@ -209,6 +222,9 @@
+         if (!arp_pending_flag[v]) continue;
+         arp_pending_flag[v] = 0;
+         if (!arp_kind_ok(v)) continue;
++#if X0X_S1_FACTORY_ARP_INGRESS
++        const int was_factory=original_bass[v].arp.prm.s1FactoryPitch!=NULL;
++#endif
+         engine_arp_cfg c = arp_pending[v];
+         c.amp2_mask = original_bass[v].arp.cfg.amp2_mask;          /* AMP2 is not an arp edit */
+         __builtin_memcpy(c.amp2, original_bass[v].arp.cfg.amp2, sizeof c.amp2);
+@@ -220,6 +236,10 @@
+ #endif
+             (void)original_runtime_arp_config(&original_bass[v], &c);
+         arp_store(v, &c);
++#if X0X_S1_FACTORY_ARP_INGRESS
++        if (was_factory && !original_bass[v].arp.prm.s1FactoryPitch)
++            s1_typed_clock_apply(mot_base_snd,v);
++#endif
+         ++arp_revision[v];
+     }
+ }
+--- a/firmware/src/app/original_presets.inc
++++ b/firmware/src/app/original_presets.inc
+@@ -675,6 +675,9 @@
+     const uint8_t *p=read137(sound,v)+S1_ARP_CLOCK_BYTE;
+     if(original_typed_s1_carrier(sound,v) && s1_clock_valid(p) && p[2])
+         (void)original_runtime_s1_clock(part,s1_clock_bpm(p),p[2]-1u);
++#if X0X_S1_FACTORY_ARP_INGRESS
++    else if (original_runtime_s1_factory_clock(part)) return; /* transient; no project writes */
++#endif
+     else {
+         part->arp.source_set=0;
+         part->arp.source_wait=0;
