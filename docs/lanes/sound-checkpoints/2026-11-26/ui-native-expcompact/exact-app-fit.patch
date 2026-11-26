@@ -1,0 +1,105 @@
+--- a/tools/gen_drum_samples.py
++++ b/tools/gen_drum_samples.py
+@@ -152,30 +152,41 @@
+     return (bits32(q) + ((n & 0xffffffff) << 23)) & 0xffffffff
+ 
+ def _lossless_exp_block():
+-    corrections, minima = [], []
++    corrections, minima, layouts = [], [], []
+     for row, (_name, lo, hi) in enumerate(EXP_RANGES):
+         expected = [bits32(pot_exp(lo, hi, pot)) for pot in range(128)]
+         raw = [word - _exp_predictor_word(row, pot) for pot, word in enumerate(expected)]
+         minimum = min(raw)
+         assert -128 <= minimum <= 127 and max(raw) - minimum < 16, (row, min(raw), max(raw))
+         minima.append(minimum)
+-        for pot in range(0, 128, 2):
+-            corrections.append((raw[pot] - minimum) | ((raw[pot+1] - minimum) << 4))
++        # Minimum per row is unchanged; reduce only unused high bit planes.
++        width = (max(raw) - minimum).bit_length()
++        assert 2 <= width <= 4
++        start = len(corrections)
++        assert start % 16 == 0 and start < 4096 and -9 <= minimum <= 0
++        layouts.append(((start // 16) << 6) | ((minimum+9) << 2) | (width - 2))
++        bits = sum((delta - minimum) << (k * width) for k, delta in enumerate(raw))
++        corrections.extend(bits.to_bytes(16 * width, "little"))
+         for pot, word in enumerate(expected):
+-            packed = corrections[row * 64 + pot // 2]
+-            delta = minimum + ((packed >> ((pot & 1) * 4)) & 15)
++            bit = pot * width
++            idx = start + (bit >> 3)
++            packed = corrections[idx] | (corrections[idx+1] << 8 if (bit & 7)+width > 8 else 0)
++            delta = minimum + ((packed >> (bit & 7)) & ((1 << width)-1))
+             assert (_exp_predictor_word(row, pot) + delta) & 0xffffffff == word
+     lines = ["#ifdef X0X_DRUM_TABLES_DEFINE",
+              "static const uint32_t x0x_exp_predictor_args[X0X_EXP_COUNT][2] = {"]
+     lines += [f"    {{0x{a:08x}u, 0x{b:08x}u}}," for a, b in _EXP_PREDICTOR_BITS]
+-    lines += ["};", arr("int8_t", "x0x_exp_correction_min", minima),
+-              arr("uint8_t", "x0x_exp_corrections", corrections),
++    lines += ["};", 
++              arr("uint8_t", "x0x_exp_corrections", corrections + [0]),
++              arr("uint16_t", "x0x_exp_layout", layouts),
+               "/* Same row/pot domain and original binary32 outputs; no pow/libm. */",
+               "__attribute__((noinline)) float x0x_pot_exp_value(unsigned row, unsigned pot)",
+               "{",
+               "    union { uint32_t u; float f; } a, b, result;",
+-              "    unsigned packed = x0x_exp_corrections[row * 64u + (pot >> 1)];",
+-              "    int32_t correction = (int32_t)x0x_exp_correction_min[row] + (int32_t)((packed >> ((pot & 1u) * 4u)) & 15u);",
++              "    unsigned layout = x0x_exp_layout[row], width = (layout & 3u)+2u;",
++              "    unsigned bit = pot * width, i = ((layout >> 6) << 4) + (bit >> 3);",
++              "    unsigned packed = x0x_exp_corrections[i] | (unsigned)x0x_exp_corrections[i+1u] << 8;",
++              "    int32_t correction = (int32_t)(((layout >> 2)&15u) + ((packed >> (bit & 7u)) & ((1u<<width)-1u))) - 9;",
+               "    a.u = x0x_exp_predictor_args[row][0];",
+               "    b.u = x0x_exp_predictor_args[row][1];",
+               "    /* All2432 admitted inputs are finite and inside the exp clamps;",
+@@ -199,7 +210,7 @@
+               "    return result.f;",
+               "}", "#else",
+               "float x0x_pot_exp_value(unsigned row, unsigned pot);", "#endif", ""]
+-    return lines, 19 * 8 + len(minima) + len(corrections)
++    return lines, 19 * 8 + len(corrections) + 2*len(layouts)+1
+ 
+ 
+ def pack_tanh_runs(tab):
+--- a/experiments/original_synth/voice_gain.c
++++ b/experiments/original_synth/voice_gain.c
+@@ -10,26 +10,21 @@
+ #else
+ #define ref_fma fmaf
+ #endif
+-static const float control_span_inverse[64] = {
+-    0x1p+0f,     0x1p-1f,     0x1.555556p-2f,     0x1p-2f,
+-    0x1.99999ap-3f,     0x1.555556p-3f,     0x1.24924ap-3f,     0x1p-3f,
+-    0x1.c71c72p-4f,     0x1.99999ap-4f,     0x1.745d18p-4f,     0x1.555556p-4f,
+-    0x1.3b13b2p-4f,     0x1.24924ap-4f,     0x1.111112p-4f,     0x1p-4f,
+-    0x1.e1e1e2p-5f,     0x1.c71c72p-5f,     0x1.af286cp-5f,     0x1.99999ap-5f,
+-    0x1.861862p-5f,     0x1.745d18p-5f,     0x1.642c86p-5f,     0x1.555556p-5f,
+-    0x1.47ae14p-5f,     0x1.3b13b2p-5f,     0x1.2f684cp-5f,     0x1.24924ap-5f,
+-    0x1.1a7b96p-5f,     0x1.111112p-5f,     0x1.08421p-5f,     0x1p-5f,
+-    0x1.f07c2p-6f,     0x1.e1e1e2p-6f,     0x1.d41d42p-6f,     0x1.c71c72p-6f,
+-    0x1.bacf92p-6f,     0x1.af286cp-6f,     0x1.a41a42p-6f,     0x1.99999ap-6f,
+-    0x1.8f9c18p-6f,     0x1.861862p-6f,     0x1.7d05f4p-6f,     0x1.745d18p-6f,
+-    0x1.6c16c2p-6f,     0x1.642c86p-6f,     0x1.5c9882p-6f,     0x1.555556p-6f,
+-    0x1.4e5e0ap-6f,     0x1.47ae14p-6f,     0x1.414142p-6f,     0x1.3b13b2p-6f,
+-    0x1.3521dp-6f,     0x1.2f684cp-6f,     0x1.29e412p-6f,     0x1.24924ap-6f,
+-    0x1.1f7048p-6f,     0x1.1a7b96p-6f,     0x1.15b1e6p-6f,     0x1.111112p-6f,
+-    0x1.0c9714p-6f,     0x1.08421p-6f,     0x1.041042p-6f,     0x1p-6f,
+-
++static const float control_span_odd_inverse[32] = {
++    0x1p+0f, 0x1.555556p-2f, 0x1.99999ap-3f, 0x1.24924ap-3f, 0x1.c71c72p-4f, 0x1.745d18p-4f, 0x1.3b13b2p-4f, 0x1.111112p-4f, 0x1.e1e1e2p-5f, 0x1.af286cp-5f, 0x1.861862p-5f, 0x1.642c86p-5f, 0x1.47ae14p-5f, 0x1.2f684cp-5f, 0x1.1a7b96p-5f, 0x1.08421p-5f, 0x1.f07c2p-6f, 0x1.d41d42p-6f, 0x1.bacf92p-6f, 0x1.a41a42p-6f, 0x1.8f9c18p-6f, 0x1.7d05f4p-6f, 0x1.6c16c2p-6f, 0x1.5c9882p-6f, 0x1.4e5e0ap-6f, 0x1.414142p-6f, 0x1.3521dp-6f, 0x1.29e412p-6f, 0x1.1f7048p-6f, 0x1.15b1e6p-6f, 0x1.0c9714p-6f, 0x1.041042p-6f
+ };
+-static float duration_inverse(uint32_t D){return D>=1u&&D<=64u?control_span_inverse[D-1u]:1.0f/(float)D;}
++static float duration_inverse(uint32_t D)
++{
++ if(D==64u)return 0x1p-6f;
++ if(D>=1u&&D<=64u){
++  unsigned n=0;
++  while(!(D&1u)){D>>=1;++n;}
++  union{float f;uint32_t u;}v={.f=control_span_odd_inverse[D>>1]};
++  v.u-=n<<23;
++  return v.f;
++ }
++ return 1.0f/(float)D;
++}
+ static float clamp(float x,float lo,float hi){return x<lo?lo:x>hi?hi:x;}
+ static void target(original_ramp *r,float t,float inverse){r->target=t;r->delta=inverse*(t-r->current);}
+ static float advance(original_ramp *r){
