@@ -1,0 +1,486 @@
+{
+  "elite": {
+    "baseline": {
+      "worst_us": 15840,
+      "halves": 518,
+      "raw_late": 105,
+      "xruns": 105,
+      "skipped_cycles": 0,
+      "peak": 13203,
+      "frames": 319488,
+      "sealed_boot": true,
+      "settled_owner_readbacks": 4,
+      "meets_timing": false,
+      "core1": {
+        "enabled": 1,
+        "gave_up": 0,
+        "alive": 1,
+        "dispatched": 1649,
+        "finished": 1648,
+        "bad_mailbox": 0
+      },
+      "accepted": false
+    },
+    "trial": {
+      "worst_us": 15558,
+      "halves": 584,
+      "raw_late": 39,
+      "xruns": 39,
+      "skipped_cycles": 0,
+      "peak": 13144,
+      "frames": 319488,
+      "sealed_boot": true,
+      "settled_owner_readbacks": 4,
+      "meets_timing": false,
+      "core1": {
+        "enabled": 1,
+        "gave_up": 0,
+        "alive": 1,
+        "dispatched": 1830,
+        "finished": 1829,
+        "bad_mailbox": 0
+      },
+      "accepted": false
+    },
+    "baseline_owner": {
+      "count": 4,
+      "owners": [
+        {
+          "ms": 3241,
+          "seq": 11,
+          "bank": 2,
+          "status": 1,
+          "cutoff": 115,
+          "bankB": 0,
+          "statusB": 1,
+          "arp": 1
+        },
+        {
+          "ms": 4122,
+          "seq": 12,
+          "bank": 2,
+          "status": 1,
+          "cutoff": 115,
+          "bankB": 0,
+          "statusB": 1,
+          "arp": 1
+        },
+        {
+          "ms": 5713,
+          "seq": 13,
+          "bank": 2,
+          "status": 1,
+          "cutoff": 115,
+          "bankB": 0,
+          "statusB": 1,
+          "arp": 1
+        },
+        {
+          "ms": 7834,
+          "seq": 14,
+          "bank": 2,
+          "status": 1,
+          "cutoff": 115,
+          "bankB": 0,
+          "statusB": 1,
+          "arp": 1
+        }
+      ],
+      "allScheduledOwnerReadbacksAgree": false
+    },
+    "trial_owner": {
+      "count": 4,
+      "owners": [
+        {
+          "ms": 3311,
+          "seq": 11,
+          "bank": 2,
+          "status": 1,
+          "cutoff": 115,
+          "bankB": 0,
+          "statusB": 1,
+          "arp": 1
+        },
+        {
+          "ms": 4541,
+          "seq": 12,
+          "bank": 2,
+          "status": 1,
+          "cutoff": 115,
+          "bankB": 0,
+          "statusB": 1,
+          "arp": 1
+        },
+        {
+          "ms": 5699,
+          "seq": 13,
+          "bank": 2,
+          "status": 1,
+          "cutoff": 115,
+          "bankB": 0,
+          "statusB": 1,
+          "arp": 1
+        },
+        {
+          "ms": 7823,
+          "seq": 14,
+          "bank": 2,
+          "status": 1,
+          "cutoff": 115,
+          "bankB": 0,
+          "statusB": 1,
+          "arp": 1
+        }
+      ],
+      "allScheduledOwnerReadbacksAgree": false
+    },
+    "seed_baseline": "582ce0a7ceb3b0f45425dde061a9819079c95de52af9d267ce7aab076a096e3e",
+    "seed_trial": "d9953d21980f6ae7dc26296c8b513618f11389db87beb54430ff7c2d3377ff31",
+    "identical_project_sectors": {
+      "0": "1f106929ca5ce3c332d290bb13833173ee2438f65787241383fca07f433a6c81",
+      "1": "9686dc397538451dce323af247adf2db04276fcc3d2a0559fd133ee088bac710",
+      "2": "963c1c088c7b1974d93b5e2a01841d9f97aeba924699b12a5dcc7c38357e8144",
+      "3": "cd6650c58aa0ed801b65f07d6d1cd63960322ab334c2e637b7eae597811b6845",
+      "5": "aaf28bab950eba276d449a694d2562fbbd934b1011b33c07fe1bcf6f9cd4a755",
+      "6": "dec876492683dac4044d24ee8293ad51c913838d64aecf3c749c6fb82dbfae40"
+    },
+    "identical_scene_sha256": "d08718b1521119b252b5cca0c5e1db6981ea25a5a0b31b6ead60dceccb3f6271",
+    "delta_us": -282,
+    "delta_xruns": -66,
+    "bf16": {
+      "worst_us": 15342,
+      "halves": 491,
+      "raw_late": 132,
+      "xruns": 132,
+      "skipped_cycles": 0,
+      "peak": 13166,
+      "frames": 319488,
+      "sealed_boot": true,
+      "settled_owner_readbacks": 5,
+      "meets_timing": false,
+      "core1": {
+        "enabled": 1,
+        "gave_up": 0,
+        "alive": 1,
+        "dispatched": 1618,
+        "finished": 1617,
+        "bad_mailbox": 0
+      },
+      "accepted": false
+    },
+    "bf16_elf": "e37e7d55b6a143ca281341fd98d254057ea23ffd2a50109615f38ba81d684d48",
+    "bf16_seed": "e54ac50776fd78c4439ba173a9254a86d2b29e9bf43cb86765e7bef56eceb195",
+    "bf16_witness": {
+      "target": 1.0,
+      "position": 22,
+      "embedded_history_pointer": true,
+      "history_bytes": 4410,
+      "nonzero_samples": 0,
+      "hash_history": "cd9b6364071a17dbbb7894211400e187f6e60fd3363b577628cdaf2a313554ae",
+      "nor_changes": 0,
+      "c1_stack_free_bytes": 2176,
+      "owner": {
+        "count": 5,
+        "owners": [
+          {
+            "ms": 2290,
+            "seq": 10,
+            "bank": 2,
+            "status": 1,
+            "cutoff": 115,
+            "bankB": 0,
+            "statusB": 1,
+            "arp": 1
+          },
+          {
+            "ms": 3022,
+            "seq": 11,
+            "bank": 2,
+            "status": 1,
+            "cutoff": 115,
+            "bankB": 0,
+            "statusB": 1,
+            "arp": 1
+          },
+          {
+            "ms": 4123,
+            "seq": 12,
+            "bank": 2,
+            "status": 1,
+            "cutoff": 115,
+            "bankB": 0,
+            "statusB": 1,
+            "arp": 1
+          },
+          {
+            "ms": 5689,
+            "seq": 13,
+            "bank": 2,
+            "status": 1,
+            "cutoff": 115,
+            "bankB": 0,
+            "statusB": 1,
+            "arp": 1
+          },
+          {
+            "ms": 7860,
+            "seq": 14,
+            "bank": 2,
+            "status": 1,
+            "cutoff": 115,
+            "bankB": 0,
+            "statusB": 1,
+            "arp": 1
+          }
+        ],
+        "allScheduledOwnerReadbacksAgree": true
+      }
+    },
+    "bf16_minus_h16_us": -216,
+    "bf16_minus_h16_xruns": 93,
+    "bf16_minus_old_us": -498,
+    "bf16_minus_old_xruns": 27
+  },
+  "pro": {
+    "baseline": {
+      "worst_us": 15801,
+      "halves": 515,
+      "raw_late": 108,
+      "xruns": 108,
+      "skipped_cycles": 0,
+      "peak": 13221,
+      "frames": 319488,
+      "sealed_boot": true,
+      "settled_owner_readbacks": 4,
+      "meets_timing": false,
+      "core1": {
+        "enabled": 1,
+        "gave_up": 0,
+        "alive": 1,
+        "dispatched": 1643,
+        "finished": 1642,
+        "bad_mailbox": 0
+      },
+      "accepted": false
+    },
+    "trial": {
+      "worst_us": 15793,
+      "halves": 570,
+      "raw_late": 53,
+      "xruns": 53,
+      "skipped_cycles": 0,
+      "peak": 13159,
+      "frames": 319488,
+      "sealed_boot": true,
+      "settled_owner_readbacks": 4,
+      "meets_timing": false,
+      "core1": {
+        "enabled": 1,
+        "gave_up": 0,
+        "alive": 1,
+        "dispatched": 1767,
+        "finished": 1766,
+        "bad_mailbox": 0
+      },
+      "accepted": false
+    },
+    "baseline_owner": {
+      "count": 4,
+      "owners": [
+        {
+          "ms": 3136,
+          "seq": 11,
+          "bank": 2,
+          "status": 1,
+          "cutoff": 115,
+          "bankB": 0,
+          "statusB": 1,
+          "arp": 1
+        },
+        {
+          "ms": 4128,
+          "seq": 12,
+          "bank": 2,
+          "status": 1,
+          "cutoff": 115,
+          "bankB": 0,
+          "statusB": 1,
+          "arp": 1
+        },
+        {
+          "ms": 5751,
+          "seq": 13,
+          "bank": 2,
+          "status": 1,
+          "cutoff": 115,
+          "bankB": 0,
+          "statusB": 1,
+          "arp": 1
+        },
+        {
+          "ms": 7843,
+          "seq": 14,
+          "bank": 2,
+          "status": 1,
+          "cutoff": 115,
+          "bankB": 0,
+          "statusB": 1,
+          "arp": 1
+        }
+      ],
+      "allScheduledOwnerReadbacksAgree": false
+    },
+    "trial_owner": {
+      "count": 4,
+      "owners": [
+        {
+          "ms": 3416,
+          "seq": 11,
+          "bank": 2,
+          "status": 1,
+          "cutoff": 115,
+          "bankB": 0,
+          "statusB": 1,
+          "arp": 1
+        },
+        {
+          "ms": 4437,
+          "seq": 12,
+          "bank": 2,
+          "status": 1,
+          "cutoff": 115,
+          "bankB": 0,
+          "statusB": 1,
+          "arp": 1
+        },
+        {
+          "ms": 5656,
+          "seq": 13,
+          "bank": 2,
+          "status": 1,
+          "cutoff": 115,
+          "bankB": 0,
+          "statusB": 1,
+          "arp": 1
+        },
+        {
+          "ms": 7814,
+          "seq": 14,
+          "bank": 2,
+          "status": 1,
+          "cutoff": 115,
+          "bankB": 0,
+          "statusB": 1,
+          "arp": 1
+        }
+      ],
+      "allScheduledOwnerReadbacksAgree": false
+    },
+    "seed_baseline": "1eded4d5181dec8e568964fd128ea82e7d5d43966b2cf5e055856ee5b8b04e77",
+    "seed_trial": "487e879c06aa19fc67ed809f6cbfa15fc1d80759b90326c2e0c3cc39b3271600",
+    "identical_project_sectors": {
+      "0": "1f106929ca5ce3c332d290bb13833173ee2438f65787241383fca07f433a6c81",
+      "1": "9686dc397538451dce323af247adf2db04276fcc3d2a0559fd133ee088bac710",
+      "2": "963c1c088c7b1974d93b5e2a01841d9f97aeba924699b12a5dcc7c38357e8144",
+      "3": "cd6650c58aa0ed801b65f07d6d1cd63960322ab334c2e637b7eae597811b6845",
+      "5": "aaf28bab950eba276d449a694d2562fbbd934b1011b33c07fe1bcf6f9cd4a755",
+      "6": "dec876492683dac4044d24ee8293ad51c913838d64aecf3c749c6fb82dbfae40"
+    },
+    "identical_scene_sha256": "d08718b1521119b252b5cca0c5e1db6981ea25a5a0b31b6ead60dceccb3f6271",
+    "delta_us": -8,
+    "delta_xruns": -55,
+    "bf16": {
+      "worst_us": 15335,
+      "halves": 477,
+      "raw_late": 146,
+      "xruns": 146,
+      "skipped_cycles": 0,
+      "peak": 13167,
+      "frames": 319488,
+      "sealed_boot": true,
+      "settled_owner_readbacks": 5,
+      "meets_timing": false,
+      "core1": {
+        "enabled": 1,
+        "gave_up": 0,
+        "alive": 1,
+        "dispatched": 1550,
+        "finished": 1549,
+        "bad_mailbox": 0
+      },
+      "accepted": false
+    },
+    "bf16_elf": "f104104cea7aaa84953b8e8ae3e7e2caca8263c13f0a1df2779574f096dabea1",
+    "bf16_seed": "9156a3ad3d3d493f8cff4e3139e4d5e22054f6481f7bd80b7ec7b72f4f1ed515",
+    "bf16_witness": {
+      "target": 1.0,
+      "position": 1674,
+      "embedded_history_pointer": true,
+      "history_bytes": 4410,
+      "nonzero_samples": 0,
+      "hash_history": "cd9b6364071a17dbbb7894211400e187f6e60fd3363b577628cdaf2a313554ae",
+      "nor_changes": 0,
+      "c1_stack_free_bytes": 2176,
+      "owner": {
+        "count": 5,
+        "owners": [
+          {
+            "ms": 2289,
+            "seq": 10,
+            "bank": 2,
+            "status": 1,
+            "cutoff": 115,
+            "bankB": 0,
+            "statusB": 1,
+            "arp": 1
+          },
+          {
+            "ms": 3009,
+            "seq": 11,
+            "bank": 2,
+            "status": 1,
+            "cutoff": 115,
+            "bankB": 0,
+            "statusB": 1,
+            "arp": 1
+          },
+          {
+            "ms": 4122,
+            "seq": 12,
+            "bank": 2,
+            "status": 1,
+            "cutoff": 115,
+            "bankB": 0,
+            "statusB": 1,
+            "arp": 1
+          },
+          {
+            "ms": 5761,
+            "seq": 13,
+            "bank": 2,
+            "status": 1,
+            "cutoff": 115,
+            "bankB": 0,
+            "statusB": 1,
+            "arp": 1
+          },
+          {
+            "ms": 7848,
+            "seq": 14,
+            "bank": 2,
+            "status": 1,
+            "cutoff": 115,
+            "bankB": 0,
+            "statusB": 1,
+            "arp": 1
+          }
+        ],
+        "allScheduledOwnerReadbacksAgree": true
+      }
+    },
+    "bf16_minus_h16_us": -458,
+    "bf16_minus_h16_xruns": 93,
+    "bf16_minus_old_us": -466,
+    "bf16_minus_old_xruns": 38
+  }
+}

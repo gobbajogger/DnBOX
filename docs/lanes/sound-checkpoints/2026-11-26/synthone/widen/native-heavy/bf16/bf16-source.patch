@@ -1,0 +1,15 @@
+--- a/firmware/src/dsp/s1c/s1c.c
++++ b/firmware/src/dsp/s1c/s1c.c
+@@ -1493,8 +1493,10 @@
+         /* Source WIDEN: one postmaster right delay, unconditionally clocked. */
+         uint16_t *history=s->wid.buf;
+         const unsigned pos=(unsigned)s->wpos;
+-        const float delayed=h16_get(history[pos]);
+-        history[pos]=h16_put(R);
++        /* BF16 keeps the entire binary32 exponent range for quiet tails. */
++        const union {uint32_t u; float f;} stored={.u=(uint32_t)history[pos]<<16}, in={.f=R};
++        const float delayed=stored.f;
++        history[pos]=(uint16_t)((in.u+0x7fffu+((in.u>>16)&1u))>>16);
+         s->wpos=(int32_t)(pos+1u==2205u?0u:pos+1u);
+         const float widen=P(WIDEN);
+         R=widen*delayed+(1.f-widen)*R;

@@ -52,3 +52,9 @@ No patch is enabled merely by adding these files to the sound branch.
 
 This checkpoint tracks source, replay inputs that are control/timing data,
 and measured results. The supplied original AU binary is not committed.
+
+### Extended qualification: BF16, paired RevSC and Home strip
+- BF16 now has per-preset 906-program host storage-control receipts. It is not a valid native timing improvement: both strict native boards showed more dropouts even with a lower observed peak. The observer refused the diagnostic protected overlay before replay, so the failure is not attributed to any particular stage. See `synthone/widen/native-heavy/bf16/BF16.md`.
+- Full-rate paired reverb preserves the original time-base. A 37,152 B history meets the isolated Organ return's spectral threshold, but still exceeds available memory. See `synthone/reverb/paired-history/`.
+- The actual default Home 80+58-row host proof is bit-identical with a stable snapshot and catches intentional mid-frame state tearing. It contributes no target RAM budget yet. See `firmware/home-strip/`.
+- These changes are reproducibility material only; they do not select a shipping candidate, enable code in production, change a release gate, or publish firmware.

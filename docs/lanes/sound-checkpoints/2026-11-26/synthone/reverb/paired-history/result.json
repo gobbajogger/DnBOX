@@ -1,0 +1,1580 @@
+{
+  "scope": "full-rate RevSC exact room input; reconstruct every tap independently; no alignment or side effects",
+  "frames_warm_included": 264728,
+  "source_phase_sha256": "66a6d9c2fea5d6329165f240f24be8fbe46211ab67338a1111c6af6cc53a7aaf",
+  "full_16_bit_stateless": {
+    "history_bytes": 49392,
+    "metrics": {
+      "whole": {
+        "whole_dB": [
+          0.0,
+          0.0
+        ],
+        "note_body_dB": 0.0,
+        "release_1p5s_dB": 0.0,
+        "last_1s_dB": -0.0,
+        "spectral_distance_db": [
+          2.457,
+          2.899
+        ],
+        "raw_residual_dB_rel_reference": -54.934
+      },
+      "onset": {
+        "source_rms": [
+          0.0009114643731771964,
+          0.0008306429966279722
+        ],
+        "level_db": [
+          -4.0080617542402295e-05,
+          0.0003496673148582562
+        ],
+        "raw_db": [
+          -56.30580266862453,
+          -54.308014849237196
+        ]
+      },
+      "held": {
+        "source_rms": [
+          0.30681425141301094,
+          0.31612278412479067
+        ],
+        "level_db": [
+          0.00019111379700105383,
+          6.728142556430933e-05
+        ],
+        "raw_db": [
+          -55.03763028481778,
+          -54.91978240340991
+        ]
+      },
+      "release_first_100ms": {
+        "source_rms": [
+          0.4087983751356334,
+          0.4722749557290686
+        ],
+        "level_db": [
+          -6.205405249913985e-05,
+          0.0003271511740253643
+        ],
+        "raw_db": [
+          -56.08757512572967,
+          -56.37732839010029
+        ]
+      },
+      "release_mid": {
+        "source_rms": [
+          0.23607282180095635,
+          0.24640162801629256
+        ],
+        "level_db": [
+          -0.00010633743480054322,
+          -7.765199804310279e-05
+        ],
+        "raw_db": [
+          -53.818420845562756,
+          -54.029207906302055
+        ]
+      },
+      "last_second": {
+        "source_rms": [
+          0.05357406873456107,
+          0.05283571359370223
+        ],
+        "level_db": [
+          0.00010496008742652033,
+          -0.0002363228948631233
+        ],
+        "raw_db": [
+          -51.76794398808486,
+          -51.54417075274785
+        ]
+      }
+    }
+  },
+  "pair_formats": {
+    "64-64": {
+      "stats": {
+        "format": [
+          64,
+          64
+        ],
+        "ring_slots": 24690,
+        "history_bytes_including_pending": 197632,
+        "state_bytes": 440,
+        "pairs": 1059197,
+        "tail_singletons": 573,
+        "double_roundtrip_mismatches": 0,
+        "double_roundtrip_max_error": 0,
+        "double_roundtrip_max_relative_error": 0,
+        "band_energy": [
+          229458.28726777047,
+          641.5289597976341
+        ],
+        "band_peak": [
+          2.3881094455718994,
+          0.9343088865280151
+        ],
+        "codec_error_energy": [
+          0,
+          0
+        ],
+        "saturations": [
+          0,
+          0
+        ],
+        "nonzero_to_zero": [
+          0,
+          0
+        ],
+        "diff_vs_sum_energy_db": -25.534874815761803
+      },
+      "sha256": "1829fa0bff837154d88351d907fafe3e631e915a6c476d0f0b63d99204b10451",
+      "vs_source": {
+        "formal": {
+          "whole_dB": [
+            0.0,
+            0.0
+          ],
+          "note_body_dB": 0.0,
+          "release_1p5s_dB": 0.0,
+          "last_1s_dB": 0.0,
+          "spectral_distance_db": [
+            0.0,
+            0.0
+          ],
+          "raw_residual_dB_rel_reference": -308.963
+        },
+        "windows": {
+          "first_100ms": {
+            "level_db": [
+              0.0,
+              0.0
+            ],
+            "rel_raw_db": [
+              -760.0,
+              -760.0
+            ]
+          },
+          "body": {
+            "level_db": [
+              0.0,
+              0.0
+            ],
+            "rel_raw_db": [
+              -760.0,
+              -760.0
+            ]
+          },
+          "release_front_100ms": {
+            "level_db": [
+              0.0,
+              0.0
+            ],
+            "rel_raw_db": [
+              -760.0,
+              -760.0
+            ]
+          },
+          "release_mid": {
+            "level_db": [
+              0.0,
+              0.0
+            ],
+            "rel_raw_db": [
+              -760.0,
+              -760.0
+            ]
+          },
+          "release_last_second": {
+            "level_db": [
+              0.0,
+              0.0
+            ],
+            "rel_raw_db": [
+              -760.0,
+              -760.0
+            ]
+          }
+        }
+      }
+    },
+    "16-16": {
+      "stats": {
+        "format": [
+          16,
+          16
+        ],
+        "ring_slots": 24690,
+        "history_bytes_including_pending": 49472,
+        "state_bytes": 440,
+        "pairs": 1059197,
+        "tail_singletons": 573,
+        "double_roundtrip_mismatches": 0,
+        "double_roundtrip_max_error": 0,
+        "double_roundtrip_max_relative_error": 0,
+        "band_energy": [
+          229456.85556570365,
+          641.6232754703302
+        ],
+        "band_peak": [
+          2.3892762660980225,
+          0.9353076219558716
+        ],
+        "codec_error_energy": [
+          0.6316323715032274,
+          0.00176091484088825
+        ],
+        "saturations": [
+          0,
+          0
+        ],
+        "nonzero_to_zero": [
+          0,
+          0
+        ],
+        "diff_vs_sum_energy_db": -25.53420927807434
+      },
+      "sha256": "a9900ca907ce6d3abf404c152fdd9ad0f3968b21773a4e7fb9ac5c8f706b5250",
+      "vs_source": {
+        "formal": {
+          "whole_dB": [
+            -0.0,
+            -0.0
+          ],
+          "note_body_dB": -0.0,
+          "release_1p5s_dB": -0.001,
+          "last_1s_dB": -0.001,
+          "spectral_distance_db": [
+            2.848,
+            3.237
+          ],
+          "raw_residual_dB_rel_reference": -53.13
+        },
+        "windows": {
+          "first_100ms": {
+            "level_db": [
+              -0.0009783830728389144,
+              0.0003475902746944764
+            ],
+            "rel_raw_db": [
+              -55.575538228213716,
+              -53.29325263637725
+            ]
+          },
+          "body": {
+            "level_db": [
+              -4.895606687803694e-05,
+              -0.0001008734285714826
+            ],
+            "rel_raw_db": [
+              -53.22952726235708,
+              -53.1505049582264
+            ]
+          },
+          "release_front_100ms": {
+            "level_db": [
+              -0.0009079215920344899,
+              -0.0006086063107627259
+            ],
+            "rel_raw_db": [
+              -54.165235943709575,
+              -54.77573525798951
+            ]
+          },
+          "release_mid": {
+            "level_db": [
+              -0.00033265224906854445,
+              -0.00038379412575124114
+            ],
+            "rel_raw_db": [
+              -51.90941001030779,
+              -52.03574353831193
+            ]
+          },
+          "release_last_second": {
+            "level_db": [
+              -0.00037606561753679424,
+              -0.0010836118686316687
+            ],
+            "rel_raw_db": [
+              -49.395052055141555,
+              -49.307540968755475
+            ]
+          }
+        }
+      }
+    },
+    "16-12": {
+      "stats": {
+        "format": [
+          16,
+          12
+        ],
+        "ring_slots": 24690,
+        "history_bytes_including_pending": 43312,
+        "state_bytes": 440,
+        "pairs": 1059197,
+        "tail_singletons": 573,
+        "double_roundtrip_mismatches": 0,
+        "double_roundtrip_max_error": 0,
+        "double_roundtrip_max_relative_error": 0,
+        "band_energy": [
+          229453.47604043354,
+          641.635291138211
+        ],
+        "band_peak": [
+          2.3895273208618164,
+          0.9327918291091919
+        ],
+        "codec_error_energy": [
+          0.6326121984343459,
+          0.007043381078733014
+        ],
+        "saturations": [
+          0,
+          0
+        ],
+        "nonzero_to_zero": [
+          0,
+          0
+        ],
+        "diff_vs_sum_energy_db": -25.534063983618548
+      },
+      "sha256": "4fd0f6091c3de542c3eb0e69fa85ef97b69ce94197f75ff5d19c83a84116ef69",
+      "vs_source": {
+        "formal": {
+          "whole_dB": [
+            -0.0,
+            -0.0
+          ],
+          "note_body_dB": -0.0,
+          "release_1p5s_dB": 0.0,
+          "last_1s_dB": -0.001,
+          "spectral_distance_db": [
+            2.893,
+            3.281
+          ],
+          "raw_residual_dB_rel_reference": -53.106
+        },
+        "windows": {
+          "first_100ms": {
+            "level_db": [
+              -0.0009477721599245567,
+              0.00035397396389954655
+            ],
+            "rel_raw_db": [
+              -55.578179620884434,
+              -53.284275967979504
+            ]
+          },
+          "body": {
+            "level_db": [
+              -0.0001094964310179557,
+              -9.84156800033047e-05
+            ],
+            "rel_raw_db": [
+              -53.20680340411579,
+              -53.142505826946504
+            ]
+          },
+          "release_front_100ms": {
+            "level_db": [
+              0.00011790994987839881,
+              4.48261640674258e-05
+            ],
+            "rel_raw_db": [
+              -54.38304363614937,
+              -54.78606156483963
+            ]
+          },
+          "release_mid": {
+            "level_db": [
+              0.00015228703564725108,
+              4.637180119124858e-05
+            ],
+            "rel_raw_db": [
+              -51.704428713580306,
+              -51.878441392467984
+            ]
+          },
+          "release_last_second": {
+            "level_db": [
+              -0.001198221864171739,
+              -0.000871913605006039
+            ],
+            "rel_raw_db": [
+              -49.30689425692349,
+              -49.19063190952706
+            ]
+          }
+        }
+      }
+    },
+    "16-8": {
+      "stats": {
+        "format": [
+          16,
+          8
+        ],
+        "ring_slots": 24690,
+        "history_bytes_including_pending": 37152,
+        "state_bytes": 440,
+        "pairs": 1059197,
+        "tail_singletons": 573,
+        "double_roundtrip_mismatches": 0,
+        "double_roundtrip_max_error": 0,
+        "double_roundtrip_max_relative_error": 0,
+        "band_energy": [
+          229452.48296464985,
+          641.7640565440587
+        ],
+        "band_peak": [
+          2.390080451965332,
+          0.9327049851417542
+        ],
+        "codec_error_energy": [
+          0.6310970251301654,
+          0.4516227355449133
+        ],
+        "saturations": [
+          0,
+          0
+        ],
+        "nonzero_to_zero": [
+          0,
+          16653
+        ],
+        "diff_vs_sum_energy_db": -25.53317371878823
+      },
+      "sha256": "2f66318bdd39a02625af2c57d020c201a9cf437e0bc7cbf35dc93510063b6f56",
+      "vs_source": {
+        "formal": {
+          "whole_dB": [
+            -0.0,
+            -0.0
+          ],
+          "note_body_dB": -0.0,
+          "release_1p5s_dB": -0.0,
+          "last_1s_dB": -0.001,
+          "spectral_distance_db": [
+            3.838,
+            4.305
+          ],
+          "raw_residual_dB_rel_reference": -52.259
+        },
+        "windows": {
+          "first_100ms": {
+            "level_db": [
+              -0.0010047843870694382,
+              -2.7749231135635376e-06
+            ],
+            "rel_raw_db": [
+              -49.88673919364608,
+              -49.141273031447426
+            ]
+          },
+          "body": {
+            "level_db": [
+              -0.00011257759148786745,
+              -8.752475355540247e-05
+            ],
+            "rel_raw_db": [
+              -52.379835860495774,
+              -52.310922829825934
+            ]
+          },
+          "release_front_100ms": {
+            "level_db": [
+              -0.0004439601830188088,
+              -0.00042605449869245217
+            ],
+            "rel_raw_db": [
+              -53.13982614960498,
+              -53.605946036159686
+            ]
+          },
+          "release_mid": {
+            "level_db": [
+              -0.000339347706194522,
+              -7.53983027352937e-06
+            ],
+            "rel_raw_db": [
+              -50.784909839003646,
+              -50.92850780198916
+            ]
+          },
+          "release_last_second": {
+            "level_db": [
+              -0.0005069027609084357,
+              -0.0006407184719127541
+            ],
+            "rel_raw_db": [
+              -48.616203290357305,
+              -48.33507979259249
+            ]
+          }
+        }
+      }
+    },
+    "12-8": {
+      "stats": {
+        "format": [
+          12,
+          8
+        ],
+        "ring_slots": 24690,
+        "history_bytes_including_pending": 30960,
+        "state_bytes": 440,
+        "pairs": 1059197,
+        "tail_singletons": 573,
+        "double_roundtrip_mismatches": 0,
+        "double_roundtrip_max_error": 0,
+        "double_roundtrip_max_relative_error": 0,
+        "band_energy": [
+          229462.1748989049,
+          642.1288078659909
+        ],
+        "band_peak": [
+          2.3903775215148926,
+          0.9337631464004517
+        ],
+        "codec_error_energy": [
+          2.5215332819518013,
+          0.4511334544011416
+        ],
+        "saturations": [
+          0,
+          0
+        ],
+        "nonzero_to_zero": [
+          0,
+          16500
+        ],
+        "diff_vs_sum_energy_db": -25.5308895148329
+      },
+      "sha256": "e0f56a99abf3888116c7e4a7acb30b00b2fe1abf64b50bf5c4b919cd94cfdaf5",
+      "vs_source": {
+        "formal": {
+          "whole_dB": [
+            0.0,
+            0.0
+          ],
+          "note_body_dB": 0.0,
+          "release_1p5s_dB": -0.0,
+          "last_1s_dB": -0.0,
+          "spectral_distance_db": [
+            6.859,
+            7.44
+          ],
+          "raw_residual_dB_rel_reference": -46.829
+        },
+        "windows": {
+          "first_100ms": {
+            "level_db": [
+              0.00038316772018323885,
+              -0.0009475743793420372
+            ],
+            "rel_raw_db": [
+              -47.813865078046604,
+              -46.498774754092544
+            ]
+          },
+          "body": {
+            "level_db": [
+              0.00018411086770098775,
+              0.00043814271996447593
+            ],
+            "rel_raw_db": [
+              -46.94453618079525,
+              -46.857133061663234
+            ]
+          },
+          "release_front_100ms": {
+            "level_db": [
+              -0.0008178850352547984,
+              -0.00037903470256041045
+            ],
+            "rel_raw_db": [
+              -47.477113547962084,
+              -48.69423233679914
+            ]
+          },
+          "release_mid": {
+            "level_db": [
+              0.00026082255245574274,
+              -0.00022613634285341451
+            ],
+            "rel_raw_db": [
+              -45.52802051580194,
+              -45.57015650781408
+            ]
+          },
+          "release_last_second": {
+            "level_db": [
+              0.00039115039180085217,
+              -0.0008088878681894213
+            ],
+            "rel_raw_db": [
+              -43.05066636787198,
+              -43.04915572147372
+            ]
+          }
+        }
+      }
+    },
+    "8-8": {
+      "stats": {
+        "format": [
+          8,
+          8
+        ],
+        "ring_slots": 24690,
+        "history_bytes_including_pending": 24784,
+        "state_bytes": 440,
+        "pairs": 1059197,
+        "tail_singletons": 573,
+        "double_roundtrip_mismatches": 0,
+        "double_roundtrip_max_error": 0,
+        "double_roundtrip_max_relative_error": 0,
+        "band_energy": [
+          228923.57434838978,
+          669.4474839584782
+        ],
+        "band_peak": [
+          2.4059242010116577,
+          0.9319721460342407
+        ],
+        "codec_error_energy": [
+          160.92756776269957,
+          0.4713591779189062
+        ],
+        "saturations": [
+          0,
+          0
+        ],
+        "nonzero_to_zero": [
+          482,
+          16255
+        ],
+        "diff_vs_sum_energy_db": -25.339740045880248
+      },
+      "sha256": "2cde467703fab9b1c09bfa83cff4641b16edc02c0789d92217b9b816de47c072",
+      "vs_source": {
+        "formal": {
+          "whole_dB": [
+            -0.014000000432133675,
+            -0.014000000432133675
+          ],
+          "note_body_dB": -0.013,
+          "release_1p5s_dB": -0.019,
+          "last_1s_dB": -0.037,
+          "spectral_distance_db": [
+            21.004,
+            21.691
+          ],
+          "raw_residual_dB_rel_reference": -29.035
+        },
+        "windows": {
+          "first_100ms": {
+            "level_db": [
+              -0.0520661341125791,
+              -0.03333572117714118
+            ],
+            "rel_raw_db": [
+              -31.29937494929849,
+              -29.841071688227792
+            ]
+          },
+          "body": {
+            "level_db": [
+              -0.013159444220787218,
+              -0.013700542579926332
+            ],
+            "rel_raw_db": [
+              -29.120333356476593,
+              -29.04276021756861
+            ]
+          },
+          "release_front_100ms": {
+            "level_db": [
+              -0.013376503865972129,
+              -0.019298832672710393
+            ],
+            "rel_raw_db": [
+              -30.177919502758837,
+              -30.810538865059023
+            ]
+          },
+          "release_mid": {
+            "level_db": [
+              -0.01969455040527348,
+              -0.018971012336686126
+            ],
+            "rel_raw_db": [
+              -27.88623900023112,
+              -28.149452471484132
+            ]
+          },
+          "release_last_second": {
+            "level_db": [
+              -0.03544467050666598,
+              -0.03792419186689406
+            ],
+            "rel_raw_db": [
+              -25.242366515932304,
+              -25.276423917379866
+            ]
+          }
+        }
+      }
+    },
+    "h16-16": {
+      "stats": {
+        "format": [
+          16,
+          16
+        ],
+        "ring_slots": 24690,
+        "history_bytes_including_pending": 49472,
+        "state_bytes": 440,
+        "pairs": 1059197,
+        "tail_singletons": 573,
+        "double_roundtrip_mismatches": 0,
+        "double_roundtrip_max_error": 0,
+        "double_roundtrip_max_relative_error": 0,
+        "band_energy": [
+          229458.48429285805,
+          641.5315761470512
+        ],
+        "band_peak": [
+          2.3880980014801025,
+          0.9343219995498657
+        ],
+        "codec_error_energy": [
+          0.009855091442351966,
+          2.7635752810969746e-05
+        ],
+        "saturations": [
+          0,
+          0
+        ],
+        "nonzero_to_zero": [
+          0,
+          0
+        ],
+        "diff_vs_sum_energy_db": -25.53486083303524
+      },
+      "sha256": "5e64269abafee274a1619167a8c865850246c27377fdb547f028d167553b2072",
+      "vs_source": {
+        "formal": {
+          "whole_dB": [
+            -0.0,
+            -0.0
+          ],
+          "note_body_dB": 0.0,
+          "release_1p5s_dB": -0.0,
+          "last_1s_dB": -0.0,
+          "spectral_distance_db": [
+            0.066,
+            0.077
+          ],
+          "raw_residual_dB_rel_reference": -71.144
+        },
+        "windows": {
+          "first_100ms": {
+            "level_db": [
+              -8.302126851949637e-05,
+              0.00015686634235547538
+            ],
+            "rel_raw_db": [
+              -73.79138839976059,
+              -72.08321043380941
+            ]
+          },
+          "body": {
+            "level_db": [
+              1.4408569041744577e-05,
+              -1.5525022234336284e-06
+            ],
+            "rel_raw_db": [
+              -71.22307026916633,
+              -71.16416692648042
+            ]
+          },
+          "release_front_100ms": {
+            "level_db": [
+              -4.660114631449567e-05,
+              1.4450763461318872e-05
+            ],
+            "rel_raw_db": [
+              -72.51032396999746,
+              -72.82318808831786
+            ]
+          },
+          "release_mid": {
+            "level_db": [
+              -6.999197920225043e-06,
+              -1.4550501075696307e-05
+            ],
+            "rel_raw_db": [
+              -69.9654981220338,
+              -70.1404596222356
+            ]
+          },
+          "release_last_second": {
+            "level_db": [
+              -2.579552940256499e-05,
+              -4.1212850016385774e-05
+            ],
+            "rel_raw_db": [
+              -67.47177979796497,
+              -67.27024509960634
+            ]
+          }
+        }
+      }
+    },
+    "h16-12": {
+      "stats": {
+        "format": [
+          16,
+          12
+        ],
+        "ring_slots": 24690,
+        "history_bytes_including_pending": 43312,
+        "state_bytes": 440,
+        "pairs": 1059197,
+        "tail_singletons": 573,
+        "double_roundtrip_mismatches": 0,
+        "double_roundtrip_max_error": 0,
+        "double_roundtrip_max_relative_error": 0,
+        "band_energy": [
+          229458.38194785526,
+          641.5322663170427
+        ],
+        "band_peak": [
+          2.3881592750549316,
+          0.9343051910400391
+        ],
+        "codec_error_energy": [
+          0.009868515702630368,
+          0.0070435541182941805
+        ],
+        "saturations": [
+          0,
+          0
+        ],
+        "nonzero_to_zero": [
+          0,
+          0
+        ],
+        "diff_vs_sum_energy_db": -25.534854223750642
+      },
+      "sha256": "d9ad588796ca45e3cfb4fc6f8923bd21a152547d4918ca1811d6a15788b10807",
+      "vs_source": {
+        "formal": {
+          "whole_dB": [
+            -0.0,
+            0.0
+          ],
+          "note_body_dB": 0.0,
+          "release_1p5s_dB": 0.0,
+          "last_1s_dB": 0.0,
+          "spectral_distance_db": [
+            0.08,
+            0.097
+          ],
+          "raw_residual_dB_rel_reference": -70.266
+        },
+        "windows": {
+          "first_100ms": {
+            "level_db": [
+              -6.73888204542362e-05,
+              0.00016064370654045838
+            ],
+            "rel_raw_db": [
+              -73.62300870910589,
+              -71.94246783680374
+            ]
+          },
+          "body": {
+            "level_db": [
+              -7.891063743172745e-07,
+              -1.1440369026590437e-06
+            ],
+            "rel_raw_db": [
+              -70.36341913358616,
+              -70.32628569114146
+            ]
+          },
+          "release_front_100ms": {
+            "level_db": [
+              -4.69264372447238e-06,
+              7.130604803843244e-05
+            ],
+            "rel_raw_db": [
+              -70.94641987356975,
+              -71.46538231257317
+            ]
+          },
+          "release_mid": {
+            "level_db": [
+              0.00010406765205536952,
+              2.6104806797726855e-05
+            ],
+            "rel_raw_db": [
+              -68.9546393922514,
+              -69.05796982535881
+            ]
+          },
+          "release_last_second": {
+            "level_db": [
+              4.8602723978517165e-05,
+              5.550053415612374e-05
+            ],
+            "rel_raw_db": [
+              -66.78246877093046,
+              -66.49197730919862
+            ]
+          }
+        }
+      }
+    },
+    "h16-8": {
+      "stats": {
+        "format": [
+          16,
+          8
+        ],
+        "ring_slots": 24690,
+        "history_bytes_including_pending": 37152,
+        "state_bytes": 440,
+        "pairs": 1059197,
+        "tail_singletons": 573,
+        "double_roundtrip_mismatches": 0,
+        "double_roundtrip_max_error": 0,
+        "double_roundtrip_max_relative_error": 0,
+        "band_energy": [
+          229455.52407390458,
+          641.6445490632954
+        ],
+        "band_peak": [
+          2.387881875038147,
+          0.9339649081230164
+        ],
+        "codec_error_energy": [
+          0.009869430035618588,
+          0.4517729666049872
+        ],
+        "saturations": [
+          0,
+          0
+        ],
+        "nonzero_to_zero": [
+          0,
+          16703
+        ],
+        "diff_vs_sum_energy_db": -25.534040084940738
+      },
+      "sha256": "0fc20223fe2e2b532f5cb08ab126be83656267b776bcebe98806c809862deb64",
+      "vs_source": {
+        "formal": {
+          "whole_dB": [
+            -0.0,
+            -0.0
+          ],
+          "note_body_dB": -0.0,
+          "release_1p5s_dB": -0.0,
+          "last_1s_dB": -0.0,
+          "spectral_distance_db": [
+            1.536,
+            1.78
+          ],
+          "raw_residual_dB_rel_reference": -59.294
+        },
+        "windows": {
+          "first_100ms": {
+            "level_db": [
+              -8.581393045024724e-05,
+              -3.926553769201998e-05
+            ],
+            "rel_raw_db": [
+              -51.331061520710826,
+              -51.324448874196676
+            ]
+          },
+          "body": {
+            "level_db": [
+              -5.515933363011475e-05,
+              -5.9386997488388726e-05
+            ],
+            "rel_raw_db": [
+              -59.45400097844729,
+              -59.58364088427093
+            ]
+          },
+          "release_front_100ms": {
+            "level_db": [
+              2.7051142802090132e-05,
+              -2.667376558055596e-05
+            ],
+            "rel_raw_db": [
+              -58.79273672167614,
+              -58.65133234251183
+            ]
+          },
+          "release_mid": {
+            "level_db": [
+              -6.444267169694473e-05,
+              -0.0001354202680730742
+            ],
+            "rel_raw_db": [
+              -57.15264504648705,
+              -57.073452942583714
+            ]
+          },
+          "release_last_second": {
+            "level_db": [
+              -0.0003698574046954927,
+              -0.0003828146321315074
+            ],
+            "rel_raw_db": [
+              -55.89809498805852,
+              -55.54398475547729
+            ]
+          }
+        }
+      }
+    },
+    "h16-6": {
+      "stats": {
+        "format": [
+          16,
+          6
+        ],
+        "ring_slots": 24690,
+        "history_bytes_including_pending": 34056,
+        "state_bytes": 440,
+        "pairs": 1059197,
+        "tail_singletons": 573,
+        "double_roundtrip_mismatches": 0,
+        "double_roundtrip_max_error": 0,
+        "double_roundtrip_max_relative_error": 0,
+        "band_energy": [
+          229454.7464168269,
+          642.6500779431573
+        ],
+        "band_peak": [
+          2.388653874397278,
+          0.9344643354415894
+        ],
+        "codec_error_energy": [
+          0.00983409209037928,
+          5.44396785024581
+        ],
+        "saturations": [
+          0,
+          0
+        ],
+        "nonzero_to_zero": [
+          0,
+          345812
+        ],
+        "diff_vs_sum_energy_db": -25.527224812297824
+      },
+      "sha256": "b7fc1a00522fe0de931232af795a765f6e8c1239856d6a7ed0cfd609c20c2aa3",
+      "vs_source": {
+        "formal": {
+          "whole_dB": [
+            -0.0,
+            -0.0
+          ],
+          "note_body_dB": -0.0,
+          "release_1p5s_dB": -0.0,
+          "last_1s_dB": -0.001,
+          "spectral_distance_db": [
+            8.306,
+            8.59
+          ],
+          "raw_residual_dB_rel_reference": -49.025
+        },
+        "windows": {
+          "first_100ms": {
+            "level_db": [
+              0.0004895474960521889,
+              -0.0013206797238911737
+            ],
+            "rel_raw_db": [
+              -39.545167593710815,
+              -38.30103086008893
+            ]
+          },
+          "body": {
+            "level_db": [
+              -6.368998533078313e-05,
+              -9.595371750045866e-05
+            ],
+            "rel_raw_db": [
+              -49.57713247999465,
+              -49.7975696590093
+            ]
+          },
+          "release_front_100ms": {
+            "level_db": [
+              3.067799227424083e-05,
+              -5.591296232523057e-05
+            ],
+            "rel_raw_db": [
+              -50.66367326651302,
+              -51.341792737344406
+            ]
+          },
+          "release_mid": {
+            "level_db": [
+              -0.00018644764517171495,
+              -0.00027304624410881496
+            ],
+            "rel_raw_db": [
+              -46.850223182574446,
+              -47.0754069681001
+            ]
+          },
+          "release_last_second": {
+            "level_db": [
+              -0.0009276131587331912,
+              -0.001148503442595008
+            ],
+            "rel_raw_db": [
+              -36.02231394327268,
+              -36.02663212015817
+            ]
+          }
+        }
+      }
+    },
+    "14-4": {
+      "stats": {
+        "format": [
+          14,
+          4
+        ],
+        "ring_slots": 24690,
+        "history_bytes_including_pending": 27880,
+        "state_bytes": 440,
+        "pairs": 1059197,
+        "tail_singletons": 573,
+        "double_roundtrip_mismatches": 0,
+        "double_roundtrip_max_error": 0,
+        "double_roundtrip_max_relative_error": 0,
+        "band_energy": [
+          229390.8916858246,
+          655.2522579594365
+        ],
+        "band_peak": [
+          2.3915557861328125,
+          0.9353248476982117
+        ],
+        "codec_error_energy": [
+          0.03949605036099845,
+          70.96245568090264
+        ],
+        "saturations": [
+          0,
+          0
+        ],
+        "nonzero_to_zero": [
+          6,
+          667304
+        ],
+        "diff_vs_sum_energy_db": -25.441676434111933
+      },
+      "sha256": "837de207268eed1e1939b97baea206e3e569044e7eb15a6711106f2c1494657c",
+      "vs_source": {
+        "formal": {
+          "whole_dB": [
+            -0.0020000000949949026,
+            -0.0010000000474974513
+          ],
+          "note_body_dB": -0.001,
+          "release_1p5s_dB": -0.005,
+          "last_1s_dB": -0.044,
+          "spectral_distance_db": [
+            16.185,
+            16.55
+          ],
+          "raw_residual_dB_rel_reference": -38.284
+        },
+        "windows": {
+          "first_100ms": {
+            "level_db": [
+              -0.005145547633846066,
+              -0.0013155454605192564
+            ],
+            "rel_raw_db": [
+              -36.204921116694486,
+              -38.284872365873476
+            ]
+          },
+          "body": {
+            "level_db": [
+              -0.001398916735282349,
+              -0.001080883581079359
+            ],
+            "rel_raw_db": [
+              -38.62519349643232,
+              -38.77168793276517
+            ]
+          },
+          "release_front_100ms": {
+            "level_db": [
+              -0.0017082698231341673,
+              -0.002237042976598956
+            ],
+            "rel_raw_db": [
+              -39.28109665302605,
+              -39.68323790339991
+            ]
+          },
+          "release_mid": {
+            "level_db": [
+              -0.002573502307913109,
+              -0.003651681019029555
+            ],
+            "rel_raw_db": [
+              -35.25231038095964,
+              -35.57039720318659
+            ]
+          },
+          "release_last_second": {
+            "level_db": [
+              -0.042426486769688014,
+              -0.04506728703820752
+            ],
+            "rel_raw_db": [
+              -28.960707690062463,
+              -28.730549902217668
+            ]
+          }
+        }
+      }
+    },
+    "13-4": {
+      "stats": {
+        "format": [
+          13,
+          4
+        ],
+        "ring_slots": 24690,
+        "history_bytes_including_pending": 26328,
+        "state_bytes": 440,
+        "pairs": 1059197,
+        "tail_singletons": 573,
+        "double_roundtrip_mismatches": 0,
+        "double_roundtrip_max_error": 0,
+        "double_roundtrip_max_relative_error": 0,
+        "band_energy": [
+          229394.51097075286,
+          655.3266169838585
+        ],
+        "band_peak": [
+          2.389695882797241,
+          0.9344038367271423
+        ],
+        "codec_error_energy": [
+          0.1574316068477013,
+          70.9676714964002
+        ],
+        "saturations": [
+          0,
+          0
+        ],
+        "nonzero_to_zero": [
+          14,
+          666956
+        ],
+        "diff_vs_sum_energy_db": -25.441252139679357
+      },
+      "sha256": "0cebea522aacc3879a12eacebf8c2ced177cbff4c08302057dca234e964fd779",
+      "vs_source": {
+        "formal": {
+          "whole_dB": [
+            -0.0020000000949949026,
+            -0.0010000000474974513
+          ],
+          "note_body_dB": -0.001,
+          "release_1p5s_dB": -0.005,
+          "last_1s_dB": -0.043,
+          "spectral_distance_db": [
+            16.183,
+            16.56
+          ],
+          "raw_residual_dB_rel_reference": -38.265
+        },
+        "windows": {
+          "first_100ms": {
+            "level_db": [
+              -0.005520521206936236,
+              -0.0018409860988971363
+            ],
+            "rel_raw_db": [
+              -36.20204380228679,
+              -38.26570419537337
+            ]
+          },
+          "body": {
+            "level_db": [
+              -0.001407728691574359,
+              -0.0010056823400941565
+            ],
+            "rel_raw_db": [
+              -38.60896296785798,
+              -38.74727073169785
+            ]
+          },
+          "release_front_100ms": {
+            "level_db": [
+              -0.001477760161146936,
+              -0.0018614998115890102
+            ],
+            "rel_raw_db": [
+              -39.17667088560871,
+              -39.85549409183688
+            ]
+          },
+          "release_mid": {
+            "level_db": [
+              -0.0016884322429138684,
+              -0.0033470430258256785
+            ],
+            "rel_raw_db": [
+              -35.25101822991595,
+              -35.567152628902996
+            ]
+          },
+          "release_last_second": {
+            "level_db": [
+              -0.04193290496501692,
+              -0.0438993828060561
+            ],
+            "rel_raw_db": [
+              -28.928311452579475,
+              -28.65124287143108
+            ]
+          }
+        }
+      }
+    },
+    "12-5": {
+      "stats": {
+        "format": [
+          12,
+          5
+        ],
+        "ring_slots": 24690,
+        "history_bytes_including_pending": 26328,
+        "state_bytes": 440,
+        "pairs": 1059197,
+        "tail_singletons": 573,
+        "double_roundtrip_mismatches": 0,
+        "double_roundtrip_max_error": 0,
+        "double_roundtrip_max_relative_error": 0,
+        "band_energy": [
+          229442.72100267274,
+          645.737688785831
+        ],
+        "band_peak": [
+          2.392295479774475,
+          0.9331839680671692
+        ],
+        "codec_error_energy": [
+          0.63248419426089,
+          20.034927733360842
+        ],
+        "saturations": [
+          0,
+          0
+        ],
+        "nonzero_to_zero": [
+          37,
+          488244
+        ],
+        "diff_vs_sum_energy_db": -25.50618149446381
+      },
+      "sha256": "73d8d1703cdf253acdf38d162f979e11e4c2086cb5fc32a21cd2e66cf99ccad3",
+      "vs_source": {
+        "formal": {
+          "whole_dB": [
+            -0.0,
+            -0.0
+          ],
+          "note_body_dB": -0.0,
+          "release_1p5s_dB": -0.001,
+          "last_1s_dB": -0.008,
+          "spectral_distance_db": [
+            12.499,
+            12.835
+          ],
+          "raw_residual_dB_rel_reference": -43.067
+        },
+        "windows": {
+          "first_100ms": {
+            "level_db": [
+              -0.006292408492556911,
+              -0.0005541563774354973
+            ],
+            "rel_raw_db": [
+              -36.15111041140877,
+              -38.230970709090364
+            ]
+          },
+          "body": {
+            "level_db": [
+              -0.0001601606685187666,
+              -0.00022365898779879914
+            ],
+            "rel_raw_db": [
+              -43.455568605627406,
+              -43.66476991507803
+            ]
+          },
+          "release_front_100ms": {
+            "level_db": [
+              -7.429139965606693e-05,
+              0.0004628303612790725
+            ],
+            "rel_raw_db": [
+              -44.65556294518069,
+              -44.979772861996814
+            ]
+          },
+          "release_mid": {
+            "level_db": [
+              -0.00045351735713331035,
+              -0.0008278725197160912
+            ],
+            "rel_raw_db": [
+              -40.6496440051394,
+              -40.84183228324651
+            ]
+          },
+          "release_last_second": {
+            "level_db": [
+              -0.007948736140317552,
+              -0.0074277506509165155
+            ],
+            "rel_raw_db": [
+              -31.791992284487186,
+              -31.5852506792324
+            ]
+          }
+        }
+      }
+    },
+    "11-6": {
+      "stats": {
+        "format": [
+          11,
+          6
+        ],
+        "ring_slots": 24690,
+        "history_bytes_including_pending": 26328,
+        "state_bytes": 440,
+        "pairs": 1059197,
+        "tail_singletons": 573,
+        "double_roundtrip_mismatches": 0,
+        "double_roundtrip_max_error": 0,
+        "double_roundtrip_max_relative_error": 0,
+        "band_energy": [
+          229445.91446047253,
+          643.0017352377217
+        ],
+        "band_peak": [
+          2.3898106813430786,
+          0.938095211982727
+        ],
+        "codec_error_energy": [
+          2.5292155697910386,
+          5.450636082953979
+        ],
+        "saturations": [
+          0,
+          0
+        ],
+        "nonzero_to_zero": [
+          56,
+          345694
+        ],
+        "diff_vs_sum_energy_db": -25.524681840682305
+      },
+      "sha256": "07d02a69a3978ea16f3a3ff1a9979a35ada1a1e4793c67572bd8e450a1ef098a",
+      "vs_source": {
+        "formal": {
+          "whole_dB": [
+            -0.0,
+            -0.0010000000474974513
+          ],
+          "note_body_dB": -0.0,
+          "release_1p5s_dB": -0.001,
+          "last_1s_dB": -0.003,
+          "spectral_distance_db": [
+            9.829,
+            10.3
+          ],
+          "raw_residual_dB_rel_reference": -44.954
+        },
+        "windows": {
+          "first_100ms": {
+            "level_db": [
+              0.0009486775950110563,
+              -0.002770315244820735
+            ],
+            "rel_raw_db": [
+              -39.10386802401955,
+              -37.78511031015569
+            ]
+          },
+          "body": {
+            "level_db": [
+              -5.922541793717852e-05,
+              -0.0004192108560345347
+            ],
+            "rel_raw_db": [
+              -45.23286554441056,
+              -45.23053777205472
+            ]
+          },
+          "release_front_100ms": {
+            "level_db": [
+              -0.0015665707260795808,
+              -0.002060331023677474
+            ],
+            "rel_raw_db": [
+              -46.3919936182035,
+              -46.94616026433458
+            ]
+          },
+          "release_mid": {
+            "level_db": [
+              -0.0012274244882322701,
+              -0.00046226791522600293
+            ],
+            "rel_raw_db": [
+              -43.38635286849059,
+              -43.53474510403541
+            ]
+          },
+          "release_last_second": {
+            "level_db": [
+              -0.002143472366250238,
+              -0.004609938620398764
+            ],
+            "rel_raw_db": [
+              -35.329886854805615,
+              -35.263389583864615
+            ]
+          }
+        }
+      }
+    }
+  }
+}

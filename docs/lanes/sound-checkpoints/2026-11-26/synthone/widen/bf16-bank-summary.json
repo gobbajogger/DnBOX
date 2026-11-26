@@ -1,0 +1,20 @@
+{
+  "scope": "Same independent compact host baseline/control/room path, only source 50 ms right-history storage format; not authentic full-preset comparison or target timing.",
+  "count": 906,
+  "left_exact_count": 906,
+  "whole_exact_count": 677,
+  "errors": [],
+  "worst_right_peak_error": {
+    "preset": "359: JEC Deep Mono Pad arena 4252",
+    "value": 0.031221389770507812
+  },
+  "worst_right_raw_dbr": {
+    "preset": "316: JEC Ambient Pizz 2 arena 4252",
+    "value": -55.08605268578794
+  },
+  "worst_right_tail_raw_dbr": {
+    "preset": "316: JEC Ambient Pizz 2 arena 4252",
+    "value": -54.612120120735064
+  },
+  "native_result": "Not adopted: strict same-scene BF16 increases XRUN from 39 to 132 (Elite) and 53 to 146 (Pro)."
+}
