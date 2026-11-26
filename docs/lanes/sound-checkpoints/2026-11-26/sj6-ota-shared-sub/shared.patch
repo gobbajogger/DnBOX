@@ -1,0 +1,69 @@
+--- donor/typed.c
++++ witness/typed-shared.c
+@@ -527,6 +527,8 @@
+         if(e->stage==DNBX_ENV_SUSTAIN)e->level=e->curve=target;
+     }
+ }
++/* Host tape holds one independent .OTA sub state for the single fixture owner. */
++static float host_ota_sub[DNBX_VOICES][4];
+ static inline float sj6_ota_stage(float input,float *state,float g)
+ {
+     float v=g*fm_tanhf(input-*state);
+@@ -731,7 +733,10 @@
+                  (s->voice[j].age_rank==s->voice[i].age_rank && j<i))) next_rank[i]++;
+     }
+     for (unsigned i=0;i<DNBX_VOICES;i++) s->voice[i].age_rank=next_rank[i];
+-    if (!retrigger) memset(v,0,sizeof *v);
++    if (!retrigger){
++        memset(v,0,sizeof *v);
++        if(HOST_OTA_SPLIT_SUB)memset(host_ota_sub[chosen],0,sizeof host_ota_sub[chosen]);
++    }
+     v->note=(uint8_t)note; v->gate=1; v->age_rank=0; v->pedal_held=0;
+ #if X0X_SJ6_SEQ_DEST_NATIVE
+     v->layer[0].amp.reserved=zero_on>1u ? (uint8_t)(4u | (zero_on>>1)) : 0u;
+@@ -1086,9 +1091,16 @@
+                     : oscillator(lv->phase,lv->increment,p->waveform,width[l],p->oscillator_mode,w);
+                 /* Current source fader is outside its asymmetric OTA.
+                  * A shared Sub/noise input cannot be separated here. */
+-                const int gain_after=HOST_OTA_GAIN_AFTER && s->superj6_amp_range && s->sj6_ota &&
++                float separate_sub=0.f;
++                const int split_sub=HOST_OTA_SPLIT_SUB && s->superj6_amp_range && s->sj6_ota &&
++                   !s->sj6_noise_gain && s->sj6_sub_gain && !authored_track &&
++                   authored_strength && strength==0.f &&
++                   s->layer[0].params.oscillator_mode==DNBX_OSC_SUPERJ6 &&
++                   s->layer[1].params.oscillator_mode==DNBX_OSC_SUPERJ6 &&
++                   s->layer[0].params.sub_gain==0.f && s->layer[1].params.sub_gain==0.f;
++                const int gain_after=(HOST_OTA_GAIN_AFTER || split_sub) && s->superj6_amp_range && s->sj6_ota &&
+                     p->oscillator_mode==DNBX_OSC_SUPERJ6 &&
+-                    p->sub_gain==0.f && !s->sj6_noise_gain && !s->sj6_sub_gain;
++                    p->sub_gain==0.f && !s->sj6_noise_gain && (!s->sj6_sub_gain || split_sub);
+                 if (!gain_after && osc_gain[l]!=1.f) x*=osc_gain[l];
+                 extern float carrier_tap[2][128], raw_tap[2][128];
+                 carrier_tap[l][k]+=velocity*amp*x;
+@@ -1103,7 +1115,9 @@
+ #if X0X_SJ6_PITCH_ENV_NATIVE
+                         step*=pitch_ratio;
+ #endif
+-                        x+=s->sj6_sub_gain*sj6_synthesize_sub(v->sj6_sub_phase,step,sj6_harmonics[i]);
++                        const float carrier=sj6_synthesize_sub(v->sj6_sub_phase,step,sj6_harmonics[i]);
++                        if(split_sub)separate_sub=carrier;
++                        else x+=s->sj6_sub_gain*carrier;
+                         v->sj6_sub_phase+=step;
+                         if(v->sj6_sub_phase>=1.f) v->sj6_sub_phase-=1.f;
+                     }
+@@ -1123,6 +1137,15 @@
+                 if(s->sj6_ota){
+                     float y=sj6_ota_filter(lv,x,a,p->resonance);
+                     if(gain_after)y*=osc_gain[l];
++                    if(split_sub && !l){
++                        float *h=host_ota_sub[i];
++                        const float g=.5f*a/(1.f+.5f*a);
++                        float h0=separate_sub-(3.85f*fm_clampf(p->resonance,0.f,1.f))*h[3];
++                        for(unsigned j=0;j<4;j++)h0=sj6_ota_stage(h0,h+j,g);
++                        y+=s->sj6_sub_gain*h0;
++                        extern unsigned split_sub_count;
++                        split_sub_count++;
++                    }
+                     mix[l]+=velocity*amp*y;
+                 }
+                 else

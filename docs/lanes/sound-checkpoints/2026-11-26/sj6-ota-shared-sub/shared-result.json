@@ -1,0 +1,702 @@
+{
+  "0": {
+    "pre": {
+      "attack": {
+        "all_independent_sum_dbr": -62.03325653902261,
+        "half_main_independent_sum_dbr": -72.66949469912669,
+        "sub_27_53_dbr": -120.66560764634343
+      },
+      "single_hold": {
+        "all_independent_sum_dbr": -61.84010662615927,
+        "half_main_independent_sum_dbr": -72.61293840783365,
+        "sub_27_53_dbr": -120.35586144505352
+      },
+      "single_release": {
+        "all_independent_sum_dbr": -62.641425506315684,
+        "half_main_independent_sum_dbr": -77.39638907752907,
+        "sub_27_53_dbr": -128.54075822427396
+      },
+      "chord_hold": {
+        "all_independent_sum_dbr": -48.469526724750516,
+        "half_main_independent_sum_dbr": -59.22869514978671,
+        "sub_27_53_dbr": -90.93531394608952
+      },
+      "early_tail": {
+        "all_independent_sum_dbr": -47.72569793769547,
+        "half_main_independent_sum_dbr": -55.23015852536381,
+        "sub_27_53_dbr": -84.34588846180094
+      }
+    },
+    "final": {
+      "attack": {
+        "all_independent_sum_dbr": -62.03326668658795,
+        "half_main_independent_sum_dbr": -72.6695061565847,
+        "sub_27_53_dbr": -120.66453509854969
+      },
+      "single_hold": {
+        "all_independent_sum_dbr": -61.840110737146894,
+        "half_main_independent_sum_dbr": -72.61293884641388,
+        "sub_27_53_dbr": -120.35008195312543
+      },
+      "single_release": {
+        "all_independent_sum_dbr": -62.64142009165164,
+        "half_main_independent_sum_dbr": -77.3963915605796,
+        "sub_27_53_dbr": -128.47386160274394
+      },
+      "chord_hold": {
+        "all_independent_sum_dbr": -48.469525061271696,
+        "half_main_independent_sum_dbr": -59.22869342464778,
+        "sub_27_53_dbr": -90.93524982418678
+      },
+      "early_tail": {
+        "all_independent_sum_dbr": -47.72570525043488,
+        "half_main_independent_sum_dbr": -55.23020830983925,
+        "sub_27_53_dbr": -84.34584120874858
+      }
+    },
+    "dry": {
+      "attack": [
+        {
+          "level_db": -36.22373325806872,
+          "signed_dbr": -0.07035236556481933,
+          "spectrum_db": 32.884457000390604
+        },
+        {
+          "level_db": -36.223733764583145,
+          "signed_dbr": -0.07035236372784896,
+          "spectrum_db": 32.884456516987946
+        }
+      ],
+      "single_hold": [
+        {
+          "level_db": -37.16990080406421,
+          "signed_dbr": -0.05732363970120187,
+          "spectrum_db": 33.937505074478324
+        },
+        {
+          "level_db": -37.1699012460434,
+          "signed_dbr": -0.05732363644921041,
+          "spectrum_db": 33.93750496833709
+        }
+      ],
+      "single_release": [
+        {
+          "level_db": -39.07801333374491,
+          "signed_dbr": -0.036697013404092454,
+          "spectrum_db": 26.7723460517512
+        },
+        {
+          "level_db": -39.07800864517323,
+          "signed_dbr": -0.036697045012939876,
+          "spectrum_db": 26.772347343321552
+        }
+      ],
+      "chord_attack": [
+        {
+          "level_db": -37.15514827948816,
+          "signed_dbr": -0.0739725013282147,
+          "spectrum_db": 37.30415465822893
+        },
+        {
+          "level_db": -37.15514862645157,
+          "signed_dbr": -0.07397249857143395,
+          "spectrum_db": 37.30415421059501
+        }
+      ],
+      "chord_hold": [
+        {
+          "level_db": -37.97172665095119,
+          "signed_dbr": -0.06001101768736048,
+          "spectrum_db": 37.671739515928856
+        },
+        {
+          "level_db": -37.971727020702176,
+          "signed_dbr": -0.06001101536478163,
+          "spectrum_db": 37.671739513762915
+        }
+      ],
+      "early_tail": [
+        {
+          "level_db": -35.98159619276161,
+          "signed_dbr": -0.11340530393268788,
+          "spectrum_db": 34.26209447011847
+        },
+        {
+          "level_db": -35.98159671339785,
+          "signed_dbr": -0.11340529584450396,
+          "spectrum_db": 34.26209468774592
+        }
+      ],
+      "late_tail": [
+        {
+          "level_db": -600.0,
+          "signed_dbr": 0.0,
+          "spectrum_db": null
+        },
+        {
+          "level_db": -600.0,
+          "signed_dbr": 0.0,
+          "spectrum_db": null
+        }
+      ],
+      "whole": [
+        {
+          "level_db": -37.75032297544121,
+          "signed_dbr": -0.06087682662358135,
+          "spectrum_db": 38.48854115525624
+        },
+        {
+          "level_db": -37.75032335654336,
+          "signed_dbr": -0.060876824088261054,
+          "spectrum_db": 38.488541253126925
+        }
+      ]
+    },
+    "authored": {
+      "attack": [
+        {
+          "level_db": -37.245789102139724,
+          "signed_dbr": -0.0019182072932989985,
+          "spectrum_db": 30.293055016793357
+        },
+        {
+          "level_db": -36.82120280242212,
+          "signed_dbr": -0.011901842707357124,
+          "spectrum_db": 30.149615553912184
+        }
+      ],
+      "single_hold": [
+        {
+          "level_db": -38.2466652645399,
+          "signed_dbr": -0.01048255620410746,
+          "spectrum_db": 30.609196176192466
+        },
+        {
+          "level_db": -38.66197121171795,
+          "signed_dbr": -0.0006278594904418005,
+          "spectrum_db": 31.640324710734646
+        }
+      ],
+      "single_release": [
+        {
+          "level_db": -38.958345143687175,
+          "signed_dbr": -0.010325888629774111,
+          "spectrum_db": 26.187783679490988
+        },
+        {
+          "level_db": -39.563572061623105,
+          "signed_dbr": 0.014853694359771711,
+          "spectrum_db": 24.897034430935655
+        }
+      ],
+      "chord_attack": [
+        {
+          "level_db": -36.4575794833524,
+          "signed_dbr": 0.022273922165433436,
+          "spectrum_db": 36.2481769688125
+        },
+        {
+          "level_db": -36.26092756566038,
+          "signed_dbr": 0.018276131442779873,
+          "spectrum_db": 35.460166971096214
+        }
+      ],
+      "chord_hold": [
+        {
+          "level_db": -34.94846668250968,
+          "signed_dbr": 0.020176166579857373,
+          "spectrum_db": 37.119285048911856
+        },
+        {
+          "level_db": -34.842122595627735,
+          "signed_dbr": 0.01854641199290737,
+          "spectrum_db": 37.555174762270035
+        }
+      ],
+      "early_tail": [
+        {
+          "level_db": -36.67399482603281,
+          "signed_dbr": 0.04886765113850469,
+          "spectrum_db": 33.21812731841946
+        },
+        {
+          "level_db": -34.12203371304265,
+          "signed_dbr": 0.0364097836590664,
+          "spectrum_db": 33.4695394580128
+        }
+      ],
+      "late_tail": [
+        {
+          "level_db": -600.0,
+          "signed_dbr": 0.0,
+          "spectrum_db": null
+        },
+        {
+          "level_db": -600.0,
+          "signed_dbr": 0.0,
+          "spectrum_db": null
+        }
+      ],
+      "whole": [
+        {
+          "level_db": -35.752771804725974,
+          "signed_dbr": 0.013635923319069326,
+          "spectrum_db": 35.94782181290222
+        },
+        {
+          "level_db": -35.747083610208136,
+          "signed_dbr": 0.013790324346998175,
+          "spectrum_db": 36.482650795798186
+        }
+      ]
+    },
+    "authored-repeat": {
+      "attack": [
+        {
+          "level_db": -37.245789102139724,
+          "signed_dbr": -0.0019182072932989985,
+          "spectrum_db": 30.293055016793357
+        },
+        {
+          "level_db": -36.82120280242212,
+          "signed_dbr": -0.011901842707357124,
+          "spectrum_db": 30.149615553912184
+        }
+      ],
+      "single_hold": [
+        {
+          "level_db": -38.2466652645399,
+          "signed_dbr": -0.01048255620410746,
+          "spectrum_db": 30.609196176192466
+        },
+        {
+          "level_db": -38.66197121171795,
+          "signed_dbr": -0.0006278594904418005,
+          "spectrum_db": 31.640324710734646
+        }
+      ],
+      "single_release": [
+        {
+          "level_db": -38.958345143687175,
+          "signed_dbr": -0.010325888629774111,
+          "spectrum_db": 26.187783679490988
+        },
+        {
+          "level_db": -39.563572061623105,
+          "signed_dbr": 0.014853694359771711,
+          "spectrum_db": 24.897034430935655
+        }
+      ],
+      "chord_attack": [
+        {
+          "level_db": -36.4575794833524,
+          "signed_dbr": 0.022273922165433436,
+          "spectrum_db": 36.2481769688125
+        },
+        {
+          "level_db": -36.26092756566038,
+          "signed_dbr": 0.018276131442779873,
+          "spectrum_db": 35.460166971096214
+        }
+      ],
+      "chord_hold": [
+        {
+          "level_db": -34.94846668250968,
+          "signed_dbr": 0.020176166579857373,
+          "spectrum_db": 37.119285048911856
+        },
+        {
+          "level_db": -34.842122595627735,
+          "signed_dbr": 0.01854641199290737,
+          "spectrum_db": 37.555174762270035
+        }
+      ],
+      "early_tail": [
+        {
+          "level_db": -36.67399482603281,
+          "signed_dbr": 0.04886765113850469,
+          "spectrum_db": 33.21812731841946
+        },
+        {
+          "level_db": -34.12203371304265,
+          "signed_dbr": 0.0364097836590664,
+          "spectrum_db": 33.4695394580128
+        }
+      ],
+      "late_tail": [
+        {
+          "level_db": -600.0,
+          "signed_dbr": 0.0,
+          "spectrum_db": null
+        },
+        {
+          "level_db": -600.0,
+          "signed_dbr": 0.0,
+          "spectrum_db": null
+        }
+      ],
+      "whole": [
+        {
+          "level_db": -35.752771804725974,
+          "signed_dbr": 0.013635923319069326,
+          "spectrum_db": 35.94782181290222
+        },
+        {
+          "level_db": -35.747083610208136,
+          "signed_dbr": 0.013790324346998175,
+          "spectrum_db": 36.482650795798186
+        }
+      ]
+    }
+  },
+  "1": {
+    "pre": {
+      "attack": {
+        "all_independent_sum_dbr": -140.43405027410265,
+        "half_main_independent_sum_dbr": -141.37761809620596,
+        "sub_27_53_dbr": -143.45650635323724
+      },
+      "single_hold": {
+        "all_independent_sum_dbr": -140.62760374442877,
+        "half_main_independent_sum_dbr": -141.66476993636107,
+        "sub_27_53_dbr": -143.78431996956036
+      },
+      "single_release": {
+        "all_independent_sum_dbr": -137.15754958084295,
+        "half_main_independent_sum_dbr": -141.06723448612877,
+        "sub_27_53_dbr": -143.52483286420042
+      },
+      "chord_hold": {
+        "all_independent_sum_dbr": -137.33111321539707,
+        "half_main_independent_sum_dbr": -137.95794486932633,
+        "sub_27_53_dbr": -141.73105920851552
+      },
+      "early_tail": {
+        "all_independent_sum_dbr": -140.6442297642546,
+        "half_main_independent_sum_dbr": -140.54883311720528,
+        "sub_27_53_dbr": -139.58144435892427
+      }
+    },
+    "final": {
+      "attack": {
+        "all_independent_sum_dbr": -138.75809158651407,
+        "half_main_independent_sum_dbr": -139.78232545221647,
+        "sub_27_53_dbr": -142.43840080958367
+      },
+      "single_hold": {
+        "all_independent_sum_dbr": -138.75455501486945,
+        "half_main_independent_sum_dbr": -139.9375134580971,
+        "sub_27_53_dbr": -142.64681521534106
+      },
+      "single_release": {
+        "all_independent_sum_dbr": -135.06868343539549,
+        "half_main_independent_sum_dbr": -138.31606701474806,
+        "sub_27_53_dbr": -142.7131611327801
+      },
+      "chord_hold": {
+        "all_independent_sum_dbr": -136.42513113224686,
+        "half_main_independent_sum_dbr": -137.08396518872624,
+        "sub_27_53_dbr": -141.14234486474749
+      },
+      "early_tail": {
+        "all_independent_sum_dbr": -139.9827619148836,
+        "half_main_independent_sum_dbr": -140.0483601812067,
+        "sub_27_53_dbr": -139.37062592371484
+      }
+    },
+    "dry": {
+      "attack": [
+        {
+          "level_db": -36.226824653503215,
+          "signed_dbr": -0.07009990338570225,
+          "spectrum_db": 32.90193662611955
+        },
+        {
+          "level_db": -36.22682516001765,
+          "signed_dbr": -0.07009990155831518,
+          "spectrum_db": 32.90193614182859
+        }
+      ],
+      "single_hold": [
+        {
+          "level_db": -37.173085195381276,
+          "signed_dbr": -0.05710853114562629,
+          "spectrum_db": 33.958093146472464
+        },
+        {
+          "level_db": -37.173085637360465,
+          "signed_dbr": -0.05710852790918329,
+          "spectrum_db": 33.95809303894618
+        }
+      ],
+      "single_release": [
+        {
+          "level_db": -39.080386950257896,
+          "signed_dbr": -0.036639876543650654,
+          "spectrum_db": 26.778486527630257
+        },
+        {
+          "level_db": -39.08038226168622,
+          "signed_dbr": -0.03663990803971998,
+          "spectrum_db": 26.77848781818046
+        }
+      ],
+      "chord_attack": [
+        {
+          "level_db": -37.16566101946097,
+          "signed_dbr": -0.07349704442384272,
+          "spectrum_db": 37.343341921247436
+        },
+        {
+          "level_db": -37.165661366424374,
+          "signed_dbr": -0.07349704169186727,
+          "spectrum_db": 37.34334147072163
+        }
+      ],
+      "chord_hold": [
+        {
+          "level_db": -37.97716039060071,
+          "signed_dbr": -0.059588410774485394,
+          "spectrum_db": 37.71529556742941
+        },
+        {
+          "level_db": -37.977160760351694,
+          "signed_dbr": -0.05958840845356726,
+          "spectrum_db": 37.71529557554063
+        }
+      ],
+      "early_tail": [
+        {
+          "level_db": -36.013013448198386,
+          "signed_dbr": -0.1124415047536036,
+          "spectrum_db": 34.29275469356257
+        },
+        {
+          "level_db": -36.01301396883463,
+          "signed_dbr": -0.11244149674615457,
+          "spectrum_db": 34.29275491134261
+        }
+      ],
+      "late_tail": [
+        {
+          "level_db": -600.0,
+          "signed_dbr": 0.0,
+          "spectrum_db": null
+        },
+        {
+          "level_db": -600.0,
+          "signed_dbr": 0.0,
+          "spectrum_db": null
+        }
+      ],
+      "whole": [
+        {
+          "level_db": -37.75582501845879,
+          "signed_dbr": -0.06048390988119148,
+          "spectrum_db": 38.53526766536134
+        },
+        {
+          "level_db": -37.75582539956095,
+          "signed_dbr": -0.06048390735410884,
+          "spectrum_db": 38.535267761739256
+        }
+      ]
+    },
+    "authored": {
+      "attack": [
+        {
+          "level_db": -37.251430374454586,
+          "signed_dbr": -0.0019287401199333185,
+          "spectrum_db": 30.311452670595564
+        },
+        {
+          "level_db": -36.82597650388894,
+          "signed_dbr": -0.011893929379952631,
+          "spectrum_db": 30.16415876843174
+        }
+      ],
+      "single_hold": [
+        {
+          "level_db": -38.25162819103178,
+          "signed_dbr": -0.010470099876263921,
+          "spectrum_db": 30.626489205360933
+        },
+        {
+          "level_db": -38.66789773331254,
+          "signed_dbr": -0.0006453345875230293,
+          "spectrum_db": 31.66115291258744
+        }
+      ],
+      "single_release": [
+        {
+          "level_db": -38.95619994819855,
+          "signed_dbr": -0.010375588796777779,
+          "spectrum_db": 26.17975358838393
+        },
+        {
+          "level_db": -39.56652105090089,
+          "signed_dbr": 0.014825916031284078,
+          "spectrum_db": 24.88815656306155
+        }
+      ],
+      "chord_attack": [
+        {
+          "level_db": -36.47026192370108,
+          "signed_dbr": 0.022024719827056997,
+          "spectrum_db": 36.317698450379766
+        },
+        {
+          "level_db": -36.27043938782084,
+          "signed_dbr": 0.018031208887522954,
+          "spectrum_db": 35.50407326782172
+        }
+      ],
+      "chord_hold": [
+        {
+          "level_db": -34.954687038865124,
+          "signed_dbr": 0.019895165608455372,
+          "spectrum_db": 37.1811360772184
+        },
+        {
+          "level_db": -34.84768845797673,
+          "signed_dbr": 0.018296255100292126,
+          "spectrum_db": 37.617124517764445
+        }
+      ],
+      "early_tail": [
+        {
+          "level_db": -36.70157079856083,
+          "signed_dbr": 0.04849732589275398,
+          "spectrum_db": 33.30374218841081
+        },
+        {
+          "level_db": -34.145210164222405,
+          "signed_dbr": 0.0359930340662764,
+          "spectrum_db": 33.51268626377161
+        }
+      ],
+      "late_tail": [
+        {
+          "level_db": -600.0,
+          "signed_dbr": 0.0,
+          "spectrum_db": null
+        },
+        {
+          "level_db": -600.0,
+          "signed_dbr": 0.0,
+          "spectrum_db": null
+        }
+      ],
+      "whole": [
+        {
+          "level_db": -35.75926971187848,
+          "signed_dbr": 0.013438331951331935,
+          "spectrum_db": 36.001157192298294
+        },
+        {
+          "level_db": -35.75320042585251,
+          "signed_dbr": 0.013589970838562011,
+          "spectrum_db": 36.53977000070126
+        }
+      ]
+    },
+    "authored-repeat": {
+      "attack": [
+        {
+          "level_db": -37.251430374454586,
+          "signed_dbr": -0.0019287401199333185,
+          "spectrum_db": 30.311452670595564
+        },
+        {
+          "level_db": -36.82597650388894,
+          "signed_dbr": -0.011893929379952631,
+          "spectrum_db": 30.16415876843174
+        }
+      ],
+      "single_hold": [
+        {
+          "level_db": -38.25162819103178,
+          "signed_dbr": -0.010470099876263921,
+          "spectrum_db": 30.626489205360933
+        },
+        {
+          "level_db": -38.66789773331254,
+          "signed_dbr": -0.0006453345875230293,
+          "spectrum_db": 31.66115291258744
+        }
+      ],
+      "single_release": [
+        {
+          "level_db": -38.95619994819855,
+          "signed_dbr": -0.010375588796777779,
+          "spectrum_db": 26.17975358838393
+        },
+        {
+          "level_db": -39.56652105090089,
+          "signed_dbr": 0.014825916031284078,
+          "spectrum_db": 24.88815656306155
+        }
+      ],
+      "chord_attack": [
+        {
+          "level_db": -36.47026192370108,
+          "signed_dbr": 0.022024719827056997,
+          "spectrum_db": 36.317698450379766
+        },
+        {
+          "level_db": -36.27043938782084,
+          "signed_dbr": 0.018031208887522954,
+          "spectrum_db": 35.50407326782172
+        }
+      ],
+      "chord_hold": [
+        {
+          "level_db": -34.954687038865124,
+          "signed_dbr": 0.019895165608455372,
+          "spectrum_db": 37.1811360772184
+        },
+        {
+          "level_db": -34.84768845797673,
+          "signed_dbr": 0.018296255100292126,
+          "spectrum_db": 37.617124517764445
+        }
+      ],
+      "early_tail": [
+        {
+          "level_db": -36.70157079856083,
+          "signed_dbr": 0.04849732589275398,
+          "spectrum_db": 33.30374218841081
+        },
+        {
+          "level_db": -34.145210164222405,
+          "signed_dbr": 0.0359930340662764,
+          "spectrum_db": 33.51268626377161
+        }
+      ],
+      "late_tail": [
+        {
+          "level_db": -600.0,
+          "signed_dbr": 0.0,
+          "spectrum_db": null
+        },
+        {
+          "level_db": -600.0,
+          "signed_dbr": 0.0,
+          "spectrum_db": null
+        }
+      ],
+      "whole": [
+        {
+          "level_db": -35.75926971187848,
+          "signed_dbr": 0.013438331951331935,
+          "spectrum_db": 36.001157192298294
+        },
+        {
+          "level_db": -35.75320042585251,
+          "signed_dbr": 0.013589970838562011,
+          "spectrum_db": 36.53977000070126
+        }
+      ]
+    }
+  }
+}

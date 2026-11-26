@@ -1,0 +1,12 @@
+
+/tmp/sj6-fx-native.o:	file format ELF32-pi32v2
+
+SYMBOL TABLE:
+00000000         *UND*		 00000000 
+00000000 l    df *ABS*		 00000000 /tmp/sj6-fx-native.c
+00000000 l       .rodata		 00000060 sj6_fx_fix
+000000b6 gw    F .text		 00000066 fm_exp2_nf
+0000011c gw    F .text		 00000036 fm_exp2f
+0000009a gw    F .text		 0000001c fm_floorf
+00000000 gw    F .text		 0000009a fm_log2f
+00000152 g     F .text		 00000142 probe
