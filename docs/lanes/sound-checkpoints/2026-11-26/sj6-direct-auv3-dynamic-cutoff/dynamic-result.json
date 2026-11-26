@@ -1,0 +1,74 @@
+{
+  "first-step-128": {
+    "bounds": [
+      24576,
+      24704
+    ],
+    "difference_dbr": 3.83555162,
+    "level_db": 3.66627138,
+    "repeat_dbr": {
+      "physical-authored": -92.73253855,
+      "physical-open": -503.85963737
+    }
+  },
+  "held-after-restore": {
+    "bounds": [
+      64000,
+      80000
+    ],
+    "difference_dbr": 0.14297769,
+    "level_db": -29.99310656,
+    "repeat_dbr": {
+      "physical-authored": -64.38291176,
+      "physical-open": -84.10269266
+    }
+  },
+  "held-after-step": {
+    "bounds": [
+      30000,
+      37634
+    ],
+    "difference_dbr": -3.2559462,
+    "level_db": -1.74520265,
+    "repeat_dbr": {
+      "physical-authored": -88.14203471,
+      "physical-open": -132.37818304
+    }
+  },
+  "next-chord": {
+    "bounds": [
+      53971,
+      61440
+    ],
+    "difference_dbr": -59.21953711,
+    "level_db": 0.00016959,
+    "repeat_dbr": {
+      "physical-authored": -68.72992659,
+      "physical-open": -97.48564735
+    }
+  },
+  "pre-step": {
+    "bounds": [
+      22000,
+      24576
+    ],
+    "difference_dbr": -99.22548624,
+    "level_db": -1.437e-05,
+    "repeat_dbr": {
+      "physical-authored": -94.91882452,
+      "physical-open": -507.19406193
+    }
+  },
+  "restore-128": {
+    "bounds": [
+      61440,
+      61568
+    ],
+    "difference_dbr": -11.00838656,
+    "level_db": 0.56022845,
+    "repeat_dbr": {
+      "physical-authored": -64.66512737,
+      "physical-open": -95.8685788
+    }
+  }
+}
