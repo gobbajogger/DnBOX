@@ -13,7 +13,13 @@ isolated kernel timing, or partial link into a release claim.
   and leaves bypass exact. [Matched guarded native links](sj6-j60-wet-native/README.md)
   show **zero** APP or pool growth, one reached F32 literal change, and
   bit-identical flag-off Elite/Pro images. No production enable, native
-  playback timing, or whole-preset pass; the bridge and release gates remain.
+  playback timing, or whole-preset pass. A separate
+  [actual reached host counter](sj6-j60-composed-clock/README.md)
+  establishes nominal 96 kHz wet updates under 44.1 kHz Raw playback
+  (323,665 updates over 148,684 frames on both coefficient arms, zero
+  in exact bypass, versus 323,664 on the old original). The 44.1 kHz
+  bridge quality and release gates remain; the [43-tap combined
+  trial](sj6-raw-j60-combined/README.md) still overshoots and stays off.
 
 - **Raw J106 chorus, same input:** the [original J60V2 leaf replay](sj6-j60-same-input-cause/README.md)
   on the identical compact pre-chorus signal closes the wet center chord

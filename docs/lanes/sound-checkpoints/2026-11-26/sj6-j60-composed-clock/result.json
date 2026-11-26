@@ -1,0 +1,274 @@
+{
+  "receipt": {
+    "0-dry": {
+      "calls": 1164,
+      "outer": 148684,
+      "emitted": 148684,
+      "post_per_channel": 0,
+      "internal_bound_input": 0,
+      "effective_clock_hz": 0.0,
+      "first": [
+        [
+          128,
+          0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          256,
+          0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          384,
+          0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "last": [
+        [
+          148454,
+          0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          148582,
+          0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          148684,
+          0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "partition_counts": {
+        "128": 1160,
+        "34": 1,
+        "17": 1,
+        "51": 1,
+        "102": 1
+      },
+      "max_abs_count_vs_ideal": 0.0,
+      "parts_sha": "531efe040e0913c2525bacce4f2a87eba1e89ec470440afef63260e6629b3a0e",
+      "pre_in_sha": "f6cbbca6b4607fdb7cdadcb185de6c2660942734b60b0097224af6cbffa09298",
+      "post_sha": "f6cbbca6b4607fdb7cdadcb185de6c2660942734b60b0097224af6cbffa09298",
+      "output_sha": "65e66b2587d5a90bf07cffed896843804a7e483281aa6779b9cab8e935f89b87",
+      "output_bit_exact_stock_reference": true
+    },
+    "0-authored": {
+      "calls": 1164,
+      "outer": 148684,
+      "emitted": 148684,
+      "post_per_channel": 323665,
+      "internal_bound_input": 323665,
+      "effective_clock_hz": 95999.74778725351,
+      "first": [
+        [
+          128,
+          278,
+          -0.6394557823129503,
+          0.0,
+          0.63946533203125
+        ],
+        [
+          256,
+          557,
+          -0.2789115646259006,
+          0.63946533203125,
+          0.2789306640625
+        ],
+        [
+          384,
+          835,
+          -0.9183673469387941,
+          0.2789306640625,
+          0.91839599609375
+        ]
+      ],
+      "last": [
+        [
+          148454,
+          323165,
+          -0.17006802721880376,
+          0.5416784286499023,
+          0.18114376068115234
+        ],
+        [
+          148582,
+          323443,
+          -0.8095238095265813,
+          0.18114376068115234,
+          0.8206090927124023
+        ],
+        [
+          148684,
+          323665,
+          -0.8503401360358112,
+          0.8206090927124023,
+          0.8614330291748047
+        ]
+      ],
+      "partition_counts": {
+        "128": 1160,
+        "34": 1,
+        "17": 1,
+        "51": 1,
+        "102": 1
+      },
+      "max_abs_count_vs_ideal": 0.993197278912703,
+      "parts_sha": "531efe040e0913c2525bacce4f2a87eba1e89ec470440afef63260e6629b3a0e",
+      "pre_in_sha": "f6cbbca6b4607fdb7cdadcb185de6c2660942734b60b0097224af6cbffa09298",
+      "post_sha": "03d50cad64fab73f4ef7492b0f92d5fc0acb96e3dfdc7fede90a42718b4d2de9",
+      "output_sha": "2b2c6dcdac9dbbb41c84cedb18da1635a01ca1603f34c1839937a4b91b5db229",
+      "output_bit_exact_stock_reference": true
+    },
+    "1-dry": {
+      "calls": 1164,
+      "outer": 148684,
+      "emitted": 148684,
+      "post_per_channel": 0,
+      "internal_bound_input": 0,
+      "effective_clock_hz": 0.0,
+      "first": [
+        [
+          128,
+          0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          256,
+          0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          384,
+          0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "last": [
+        [
+          148454,
+          0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          148582,
+          0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          148684,
+          0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "partition_counts": {
+        "128": 1160,
+        "34": 1,
+        "17": 1,
+        "51": 1,
+        "102": 1
+      },
+      "max_abs_count_vs_ideal": 0.0,
+      "parts_sha": "531efe040e0913c2525bacce4f2a87eba1e89ec470440afef63260e6629b3a0e",
+      "pre_in_sha": "f6cbbca6b4607fdb7cdadcb185de6c2660942734b60b0097224af6cbffa09298",
+      "post_sha": "f6cbbca6b4607fdb7cdadcb185de6c2660942734b60b0097224af6cbffa09298",
+      "output_sha": "65e66b2587d5a90bf07cffed896843804a7e483281aa6779b9cab8e935f89b87",
+      "output_bit_exact_stock_reference": true
+    },
+    "1-authored": {
+      "calls": 1164,
+      "outer": 148684,
+      "emitted": 148684,
+      "post_per_channel": 323665,
+      "internal_bound_input": 323665,
+      "effective_clock_hz": 95999.74778725351,
+      "first": [
+        [
+          128,
+          278,
+          -0.6394557823129503,
+          0.0,
+          0.63946533203125
+        ],
+        [
+          256,
+          557,
+          -0.2789115646259006,
+          0.63946533203125,
+          0.2789306640625
+        ],
+        [
+          384,
+          835,
+          -0.9183673469387941,
+          0.2789306640625,
+          0.91839599609375
+        ]
+      ],
+      "last": [
+        [
+          148454,
+          323165,
+          -0.17006802721880376,
+          0.5416784286499023,
+          0.18114376068115234
+        ],
+        [
+          148582,
+          323443,
+          -0.8095238095265813,
+          0.18114376068115234,
+          0.8206090927124023
+        ],
+        [
+          148684,
+          323665,
+          -0.8503401360358112,
+          0.8206090927124023,
+          0.8614330291748047
+        ]
+      ],
+      "partition_counts": {
+        "128": 1160,
+        "34": 1,
+        "17": 1,
+        "51": 1,
+        "102": 1
+      },
+      "max_abs_count_vs_ideal": 0.993197278912703,
+      "parts_sha": "531efe040e0913c2525bacce4f2a87eba1e89ec470440afef63260e6629b3a0e",
+      "pre_in_sha": "f6cbbca6b4607fdb7cdadcb185de6c2660942734b60b0097224af6cbffa09298",
+      "post_sha": "768d1c66bd53d411dc07d0fd4372a5dcb5f26199d4b36cd8edaf4476c3da0d67",
+      "output_sha": "0103288ff5f9d1a12e56aa3cbbd3de70155c8869061dfe90fb828cc77f69e57c",
+      "output_bit_exact_stock_reference": false
+    }
+  },
+  "partitions_and_all_counts_match_between_macro_arms": true,
+  "scope": "actual compiled composed 44.1 host runtime J60 counters, not timing or hardware"
+}
