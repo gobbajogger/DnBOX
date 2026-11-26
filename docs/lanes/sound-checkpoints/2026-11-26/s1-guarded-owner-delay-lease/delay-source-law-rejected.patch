@@ -1,0 +1,20 @@
+--- a/firmware/src/dsp/s1c/s1c.c
++++ b/firmware/src/dsp/s1c/s1c.c
+@@ -1281,7 +1281,7 @@
+ #define S1C_DL_WET 1.0f
+ #endif
+         /* compact lines lose level per repeat (decimation, interpolation): feedback and wet trim, by ear */
+-        float T = P(DLT) * s->sr / (float)dd, fbk = P(DLFB) * (1.0f + S1C_DL_FBK * (float)(dd > 1)), oL, oRR;
++        float T = P(DLT) * s->sr / (float)dd, fbk = P(DLFB), oL, oRR;
+         if (fbk > S1C_DL_FBMAX) fbk = S1C_DL_FBMAX;
+ #if defined(X0X_S1_FEEDBACK_PROBE) && X0X_S1_FEEDBACK_PROBE
+         if(s->delay_feedback_direct)fbk=P(DLFB);
+@@ -1407,7 +1407,7 @@
+ #endif
+         }
+         float dm = P(DLMIX) * P(DLON);
+-        if (dd > 1) { oL *= S1C_DL_WET; oRR *= S1C_DL_WET; }
++        /* Original delay has no rate-dependent wet trim. */
+ #if X0X_S1_DELAY_HISTORY_NATIVE
+         mL=(1.f-dm)*L+dm*oL; mR=(1.f-dm)*R+dm*oRR;
+         }

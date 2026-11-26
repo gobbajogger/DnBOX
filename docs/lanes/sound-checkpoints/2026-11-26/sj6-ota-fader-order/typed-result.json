@@ -1,0 +1,50 @@
+{
+  "0-pre": {
+    "a_64_127_dBr": -47.991715099982116,
+    "b_64_127_dBr": -47.991715099982116,
+    "sum_difference_dBr": -600.0,
+    "peakA": 0.015390420332551003,
+    "peakB": 0.015390420332551003
+  },
+  "0-final": {
+    "a_64_127_dBr": -47.991715338711025,
+    "b_64_127_dBr": -47.991715338711025,
+    "sum_difference_dBr": -600.0,
+    "peakA": 0.005280943121761084,
+    "peakB": 0.005280943121761084
+  },
+  "1-pre": {
+    "a_64_127_dBr": -144.41058500939022,
+    "b_64_127_dBr": -144.41058500939022,
+    "sum_difference_dBr": -600.0,
+    "peakA": 0.015390421263873577,
+    "peakB": 0.015390421263873577
+  },
+  "1-final": {
+    "a_64_127_dBr": -143.0456897999789,
+    "b_64_127_dBr": -143.0456897999789,
+    "sum_difference_dBr": -600.0,
+    "peakA": 0.005280943587422371,
+    "peakB": 0.005280943587422371
+  },
+  "typed_final_sha256": {
+    "0-0-dry.final": "eac703ef6a28059695957bf791cb3517b776489f86738d98a004a6fb4cc320ee",
+    "0-1-dry.final": "98ceabf9bc1fa3b9b8377ec2ad0ba054ac1b9347142e123ef4d58746dd1b2f15",
+    "0-2-dry.final": "94d3be11ca63ad663a142686a3f8ee5426ad7cd2df86add8ec547c176ef881d6",
+    "0-a-full.final": "6f54adf07c7db8359b4e54d200f835fe3a09134a2884f8c2dc034449aed6210e",
+    "0-a-half.final": "e12c9e179d7735abf88cbc35bc900e780c5df5f7af0d65b37a7dfe9f101892d5",
+    "0-a-zero.final": "20d1f5de46f1c1ca5189d30877977de90efec1920626ca934cc146e565990272",
+    "0-b-full.final": "6f54adf07c7db8359b4e54d200f835fe3a09134a2884f8c2dc034449aed6210e",
+    "0-b-half.final": "e12c9e179d7735abf88cbc35bc900e780c5df5f7af0d65b37a7dfe9f101892d5",
+    "0-both.final": "de1e38309347e34196107635f3c303362c209c4850ed3152a9b420223f43d0a6",
+    "1-0-dry.final": "eac703ef6a28059695957bf791cb3517b776489f86738d98a004a6fb4cc320ee",
+    "1-1-dry.final": "98ceabf9bc1fa3b9b8377ec2ad0ba054ac1b9347142e123ef4d58746dd1b2f15",
+    "1-2-dry.final": "94d3be11ca63ad663a142686a3f8ee5426ad7cd2df86add8ec547c176ef881d6",
+    "1-a-full.final": "161ae2c8feabb6495097d9a7e1c3264cabb3e43dcc2d93355856e4243a2aba90",
+    "1-a-half.final": "ef2ef7b321ebc61c434f4aca0b17ceb23e65ee13bf1f8b438f4edaa92a00dd96",
+    "1-a-zero.final": "20d1f5de46f1c1ca5189d30877977de90efec1920626ca934cc146e565990272",
+    "1-b-full.final": "161ae2c8feabb6495097d9a7e1c3264cabb3e43dcc2d93355856e4243a2aba90",
+    "1-b-half.final": "ef2ef7b321ebc61c434f4aca0b17ceb23e65ee13bf1f8b438f4edaa92a00dd96",
+    "1-both.final": "9ec179c57ecf6b8311346083c54ecede7e20e2566a38a58f05d07259b4cf1c01"
+  }
+}

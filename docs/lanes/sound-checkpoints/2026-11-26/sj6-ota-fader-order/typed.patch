@@ -1,0 +1,29 @@
+--- donor/compose.c
++++ witness/typed.c
+@@ -1084,7 +1084,12 @@
+                     p->oscillator_mode == DNBX_OSC_SUPERJ6
+                     ? factory_oscillator(lv, p->waveform, width[l], w)
+                     : oscillator(lv->phase,lv->increment,p->waveform,width[l],p->oscillator_mode,w);
+-                if (osc_gain[l]!=1.f) x*=osc_gain[l];
++                /* Current source fader is outside its asymmetric OTA.
++                 * A shared Sub/noise input cannot be separated here. */
++                const int gain_after=HOST_OTA_GAIN_AFTER && s->superj6_amp_range && s->sj6_ota &&
++                    p->oscillator_mode==DNBX_OSC_SUPERJ6 &&
++                    p->sub_gain==0.f && !s->sj6_noise_gain && !s->sj6_sub_gain;
++                if (!gain_after && osc_gain[l]!=1.f) x*=osc_gain[l];
+                 extern float carrier_tap[2][128], raw_tap[2][128];
+                 carrier_tap[l][k]+=velocity*amp*x;
+                 raw_tap[l][k]+=x;
+@@ -1115,7 +1120,11 @@
+                 float a=fm_clampf(FM_TWO_PI*(p->cutoff_hz+env*p->filter_env_hz)/s->sample_rate,.001f,.75f);
+ #endif
+ #if X0X_SJ6_OTA_NATIVE
+-                if(s->sj6_ota)mix[l]+=velocity*amp*sj6_ota_filter(lv,x,a,p->resonance);
++                if(s->sj6_ota){
++                    float y=sj6_ota_filter(lv,x,a,p->resonance);
++                    if(gain_after)y*=osc_gain[l];
++                    mix[l]+=velocity*amp*y;
++                }
+                 else
+ #endif
+                 {
