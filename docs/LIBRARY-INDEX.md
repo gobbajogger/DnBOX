@@ -43,3 +43,9 @@ The separate small SuperJ6 addendum adds the independently qualified pre-note la
 | [SPLIT-MANIFEST.json](https://chatgpt.com/library?file_id=libfile_fde3_f-71bff0b76e1c8191a595b2bd70119511_2021479872048191acbfdca1f870a539&account_id=personal) | 2,179 | `5eac9577021debd27e9fcf6d3be76032929a9cadf0ad3de33e0da6a53e825763` | Ordered byte lengths and hashes for both parts and the reconstructed archive. |
 | [DnBOX-Sound-SuperJ6-ID36-addendum.tar.gz](https://chatgpt.com/library?file_id=libfile_fde3_f-ffbba022a2e88191976d92efd3966bd4_2021479872048191acbfdca1f870a539&account_id=personal) | 14,888 | `76ea897b4788a7e7f2d510dfa4fe70b93879c4cbe6e0f150048fa33852437041` | Exact SuperJ6 ID 36 field-adapter source, focused tests, original failures, guarded replay, review and source manifest. Applies after the main archive. |
 | [SPLIT-README.md](https://chatgpt.com/library?file_id=libfile_fde3_f-5a0c03f708048191b8e6bee00c115d6f_2021479872048191acbfdca1f870a539&account_id=personal) | 4,633 | `efbd9490645cfb463a0f3a82aecfcd2579935f90d154a925e7223d062ccbb3bb` | Restore, verification and content-boundary instructions for the main archive. |
+
+## SuperJ6 direct AUv3 reference renders — 2026-11-26
+
+| Library name | Size (bytes) | SHA256 | Recovery |
+| --- | ---: | --- | --- |
+| `SJ6-Brainwave-Direct-AUv3-Master.tgz` | 3,889,120 | `82d0348669ebecb49245ee83fcb44c2a8576b9a2a5599e2f4591e671646bd5b8` | Download by name from ChatGPT Library, verify SHA-256, extract into a new directory, and run the bundled `python3 score.py` with NumPy. The four render arrays are also in the [Git bench](lanes/sound-checkpoints/2026-11-26/sj6-direct-auv3-master/). |

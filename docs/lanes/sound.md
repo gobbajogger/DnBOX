@@ -1,5 +1,13 @@
 # Sound lane
 
+## Reference audio preservation
+
+Save DnBOX reference audio renders in both Git and ChatGPT Library. Use Git
+LFS for files of 50 MB or more under RULES.md §13. The original SuperJ6 app
+and plug-in installers stay out of Git. The
+[direct SuperJ6 AUv3 bench](sound-checkpoints/2026-11-26/sj6-direct-auv3-master/)
+includes all four original reference renders and can score them from a checkout.
+
 ## Draft #985 populated playback and original effects
 
 The [engine qualification report](../sound/engine-qualification.md) tracks the four populated 360 MHz scenes, effects coverage and the S4 pairs. The Chicago overlap correction passes its level and harmonic checks across the measured transition, and 64 onset offsets select the preceding pitch. Both parts have an independent Synth One rate reducer with 128 original-stage comparisons. The seven-engine effects matrix, final populated deadlines and 14 full original stereo pairs remain open. Use the original build-9 app and its embedded AU for S4. The release banks supply the selections directly.

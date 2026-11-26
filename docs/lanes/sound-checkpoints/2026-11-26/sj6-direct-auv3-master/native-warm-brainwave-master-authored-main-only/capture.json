@@ -1,0 +1,78 @@
+{
+  "ablation_arm": "main-only",
+  "actual_master": 0.3150142729282379,
+  "authored_master": 0.3150142729282379,
+  "build": 9,
+  "component": "aumu/j6ct/AuPr",
+  "component_version": 67072,
+  "frames": 148684,
+  "installed_au_sha256": "1d6edf2bf5dd30906b148e10f50e2470a9f55d13d7f64ab3515e3c2294f1c257",
+  "master_factor": 1,
+  "master_mode": "authored",
+  "muted_parameter_ids": [
+    "neonverbEnable",
+    "neonunison",
+    "neonsubVolume"
+  ],
+  "pcm_sha256": "3025be3ed725a888d1f5af10ef83cdc969fa237fa0612b82ee18a1dd0db25100",
+  "peak": [
+    0.3036857545375824,
+    0.3036857843399048
+  ],
+  "preset_name": "BRAINWAVE MONO BASS",
+  "rate": 44100,
+  "reference": "official native Mac Synth One J6 only; distinct from iOS oracle",
+  "s4_input_sha256": "17b7b5389af054fd713c31acadbf170955c4146628872c9482ed23ce07f33943",
+  "schedule": [
+    {
+      "action": "on",
+      "frame": 16384,
+      "note": 48,
+      "velocity": 100
+    },
+    {
+      "action": "off",
+      "frame": 38434,
+      "note": 48,
+      "velocity": 0
+    },
+    {
+      "action": "on",
+      "frame": 49459,
+      "note": 60,
+      "velocity": 96
+    },
+    {
+      "action": "on",
+      "frame": 49459,
+      "note": 64,
+      "velocity": 80
+    },
+    {
+      "action": "on",
+      "frame": 49459,
+      "note": 67,
+      "velocity": 88
+    },
+    {
+      "action": "off",
+      "frame": 82534,
+      "note": 60,
+      "velocity": 0
+    },
+    {
+      "action": "off",
+      "frame": 82534,
+      "note": 64,
+      "velocity": 0
+    },
+    {
+      "action": "off",
+      "frame": 82534,
+      "note": 67,
+      "velocity": 0
+    }
+  ],
+  "version": "0.999.8",
+  "warm_frames": 16384
+}
