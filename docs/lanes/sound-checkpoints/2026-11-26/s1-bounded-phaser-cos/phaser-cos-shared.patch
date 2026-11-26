@@ -1,0 +1,78 @@
+--- a/AudioKit/Core/Soundpipe/modules/phaser.c
++++ b/AudioKit/Core/Soundpipe/modules/phaser.c
+@@ -244,6 +244,41 @@
+     dsp->valid=1;
+ }
+ #endif
++/* Source notch arguments are already float32. Guard unsupported ranges by
++ * exact Float32 exponent/magnitude, including nonzero subnormal inputs;
++ * preserve the original double cosine and product outside the proof. */
++#if DNBOX_PH_COS_TRACE
++#include <stdio.h>
++static float peak[8], lower[8];
++static unsigned long counts[8], fallback[8];
++static void ph_trace_done(void) {
++ for(int i=0;i<8;i++) fprintf(stderr,"PHCOS %d %lu %a %a %lu\n",i,counts[i],(double)lower[i],(double)peak[i],fallback[i]);
++}
++static void ph_trace(int lane,float x,int falls){
++ if(counts[0]==0&&lane==0)atexit(ph_trace_done);
++ if(!counts[lane]||x<lower[lane])lower[lane]=x;
++ if(!counts[lane]||x>peak[lane])peak[lane]=x;
++ counts[lane]++;fallback[lane]+=falls;
++}
++#endif
++static __attribute__((noinline)) float ph_cosprod(float v,float x,int lane) {
++#if DNBOX_PH_COS || DNBOX_PH_COS_TRACE
++ unsigned ux=ph_word(x)&0x7fffffffu, uv=ph_word(v)&0x7fffffffu;
++ int outside=ux>0x3f200000u || (ux && ux<0x00800000u) || uv<0x01000000u || uv>=0x7f800000u;
++#if DNBOX_PH_COS_TRACE
++ ph_trace(lane,x,outside);
++#endif
++#if DNBOX_PH_COS
++ if(!outside) {
++     const float z=x*x;
++     const float q=-0.5f+z*(0x1.555556p-5f+z*(-0x1.6c16c2p-10f+z*(0x1.a01a02p-16f+z*-0x1.27e4fcp-22f)));
++     return v*(1.f+z*q);
++ }
++#endif
++#endif
++ return (float)((double)v*cos((double)x));
++}
++
+ void computephaser(phaser* dsp, int count, FAUSTFLOAT** inputs, FAUSTFLOAT** outputs) {
+ 	FAUSTFLOAT* input0 = inputs[0];
+ 	FAUSTFLOAT* input1 = inputs[1];
+@@ -295,25 +330,25 @@
+ 			dsp->fRec5[0] = ((fSlow12 * dsp->fRec6[1]) + (fSlow13 * dsp->fRec5[1]));
+ 			dsp->fRec6[0] = ((1.f + ((fSlow13 * dsp->fRec6[1]) + (fSlow14 * dsp->fRec5[1]))) - (float)dsp->iVec0[1]);
+ 			float fTemp1 = ((fSlow10 * (1.f - dsp->fRec5[0])) + fSlow9);
+-			float fTemp2 = (dsp->fRec4[1] * cos((fSlow7 * fTemp1)));
++			float fTemp2 = ph_cosprod(dsp->fRec4[1], fSlow7 * fTemp1, 0);
+ 			dsp->fRec4[0] = (0.f - (((fSlow5 * fTemp2) + (fSlow4 * dsp->fRec4[2])) - ((fSlow0 * fTemp0) + (fSlow15 * dsp->fRec0[1]))));
+-			float fTemp3 = (dsp->fRec3[1] * cos((fSlow16 * fTemp1)));
++			float fTemp3 = ph_cosprod(dsp->fRec3[1], fSlow16 * fTemp1, 1);
+ 			dsp->fRec3[0] = ((fSlow5 * (fTemp2 - fTemp3)) + (dsp->fRec4[2] + (fSlow4 * (dsp->fRec4[0] - dsp->fRec3[2]))));
+-			float fTemp4 = (dsp->fRec2[1] * cos((fSlow17 * fTemp1)));
++			float fTemp4 = ph_cosprod(dsp->fRec2[1], fSlow17 * fTemp1, 2);
+ 			dsp->fRec2[0] = ((fSlow5 * (fTemp3 - fTemp4)) + (dsp->fRec3[2] + (fSlow4 * (dsp->fRec3[0] - dsp->fRec2[2]))));
+-			float fTemp5 = (dsp->fRec1[1] * cos((fSlow18 * fTemp1)));
++			float fTemp5 = ph_cosprod(dsp->fRec1[1], fSlow18 * fTemp1, 3);
+ 			dsp->fRec1[0] = ((fSlow5 * (fTemp4 - fTemp5)) + (dsp->fRec2[2] + (fSlow4 * (dsp->fRec2[0] - dsp->fRec1[2]))));
+ 			dsp->fRec0[0] = ((fSlow4 * dsp->fRec1[0]) + ((fSlow5 * fTemp5) + dsp->fRec1[2]));
+ 			output0[i] = (FAUSTFLOAT)((fSlow0 * (fSlow2 * fTemp0)) + (dsp->fRec0[0] * fSlow19));
+ 			float fTemp6 = (float)input1[i];
+ 			float fTemp7 = ((fSlow10 * (1.f - dsp->fRec6[0])) + fSlow9);
+-			float fTemp8 = (dsp->fRec11[1] * cos((fSlow7 * fTemp7)));
++			float fTemp8 = ph_cosprod(dsp->fRec11[1], fSlow7 * fTemp7, 4);
+ 			dsp->fRec11[0] = (0.f - (((fSlow5 * fTemp8) + (fSlow4 * dsp->fRec11[2])) - ((fSlow0 * fTemp6) + (fSlow15 * dsp->fRec7[1]))));
+-			float fTemp9 = (dsp->fRec10[1] * cos((fSlow16 * fTemp7)));
++			float fTemp9 = ph_cosprod(dsp->fRec10[1], fSlow16 * fTemp7, 5);
+ 			dsp->fRec10[0] = ((fSlow5 * (fTemp8 - fTemp9)) + (dsp->fRec11[2] + (fSlow4 * (dsp->fRec11[0] - dsp->fRec10[2]))));
+-			float fTemp10 = (dsp->fRec9[1] * cos((fSlow17 * fTemp7)));
++			float fTemp10 = ph_cosprod(dsp->fRec9[1], fSlow17 * fTemp7, 6);
+ 			dsp->fRec9[0] = ((fSlow5 * (fTemp9 - fTemp10)) + (dsp->fRec10[2] + (fSlow4 * (dsp->fRec10[0] - dsp->fRec9[2]))));
+-			float fTemp11 = (dsp->fRec8[1] * cos((fSlow18 * fTemp7)));
++			float fTemp11 = ph_cosprod(dsp->fRec8[1], fSlow18 * fTemp7, 7);
+ 			dsp->fRec8[0] = ((fSlow5 * (fTemp10 - fTemp11)) + (dsp->fRec9[2] + (fSlow4 * (dsp->fRec9[0] - dsp->fRec8[2]))));
+ 			dsp->fRec7[0] = ((fSlow4 * dsp->fRec8[0]) + ((fSlow5 * fTemp11) + dsp->fRec8[2]));
+ 			output1[i] = (FAUSTFLOAT)((fSlow0 * (fSlow2 * fTemp6)) + (dsp->fRec7[0] * fSlow19));

@@ -1,0 +1,53 @@
+--- a/firmware/src/app/editor.c
++++ b/firmware/src/app/editor.c
+@@ -143,7 +143,7 @@
+     }
+ }
+ /* Offset is 21 bits; count is in byte pairs. Invalid offsets send no reply. */
+-static int ed_read_area(const uint8_t *base, uint32_t size, const uint8_t *a)
++static __attribute__((noinline)) int ed_read_area_impl(const uint8_t *base, uint32_t size, const uint8_t *a, unsigned status)
+ {
+     uint32_t off = ed_g(a,3);
+     uint32_t count = a[3] > ED_READ_MAX / 2u ? ED_READ_MAX : a[3] * 2u;
+@@ -151,10 +151,15 @@
+         return 0;
+     if (count > size - off)
+         count = size - off;
++    if (status) ed_b(0);
+     ed_u(off,3);
+     ed_put7(base + off, count);
+     return 1;
+ }
++static int ed_read_area(const uint8_t *base, uint32_t size, const uint8_t *a)
++{
++    return ed_read_area_impl(base, size, a, 0);
++}
+ /* Sample/project chunk staging: 512 B, live only for the duration of one ed_handle
+  * (fill then consume; no cross-message retention). On the device this aliases the
+  * main-loop scratch at OTA_DEC_OFF (x0x.c ED_SMP_SCRATCH), the same call-scoped
+@@ -720,23 +725,9 @@
+     }
+     if (cmd == ED_BOOT_READ) {
+         const uint8_t *sec = boot_shown();
+-        uint32_t off, n, len;
+-        if (na < 4u || !sec) {
+-            ed_b(1);
+-            return;
+-        }
+-        off = ed_g(a,3);
+-        len = boot_u32(sec + 12);
+-        n = a[3] > ED_READ_MAX / 2u ? ED_READ_MAX : a[3] * 2u;
+-        if (off >= len) {
++        if (na < 4u || !sec ||
++            !ed_read_area_impl(sec + BOOT_PAY_OFF, boot_u32(sec + 12), a, 1))
+             ed_b(1);
+-            return;
+-        }
+-        if (n > len - off)
+-            n = len - off;
+-        ed_b(0);
+-        ed_u(off,3);
+-        ed_put7(sec + BOOT_PAY_OFF + off, n);
+         return;
+     }
+     if (cmd == ED_BOOT_BEGIN) {

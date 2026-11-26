@@ -1,0 +1,233 @@
+{
+  "BRAINWAVE MONO BASS": {
+    "base": {
+      "level_dB": [
+        -46.16560529088286,
+        -46.16560570730314
+      ],
+      "residual_dBr": [
+        -0.010361410182808312,
+        -0.010361409781922327
+      ],
+      "spectral_rms_dB": [
+        30.74060871059946,
+        30.740609003389597
+      ],
+      "meters": "gain 0x1.04a3eap-3 pre_fx 0x1.f16c24p-6 0x1.f16c24p-6 pre_master 0x1.ce2f4ep-7 0x1.ce2f4ep-7 above1 0/0 above7.999 0/0",
+      "peak": [
+        0.0017950531328096986,
+        0.0017950531328096986
+      ],
+      "clip_count": [
+        0,
+        0
+      ],
+      "matches_previous_projection": true,
+      "sha": "eac703ef6a28059695957bf791cb3517b776489f86738d98a004a6fb4cc320ee"
+    },
+    "divisor": {
+      "level_dB": [
+        -30.570497425455343,
+        -30.57049784187564
+      ],
+      "residual_dBr": [
+        -0.059534212204678194,
+        -0.059534210061805856
+      ],
+      "spectral_rms_dB": [
+        25.691813913628803,
+        25.691814303051803
+      ],
+      "meters": "gain 0x1.04a3eap-3 pre_fx 0x1.75111ap-3 0x1.75111ap-3 pre_master 0x1.5acb1ap-4 0x1.5acb1ap-4 above1 0/0 above7.999 0/0",
+      "peak": [
+        0.010775127448141575,
+        0.010775127448141575
+      ],
+      "clip_count": [
+        0,
+        0
+      ],
+      "matches_previous_projection": false,
+      "sha": "3eae20fe1e32ca7a8b3d56baaac1cc30a2eae695fde9950622ef540fb20bfa3c"
+    },
+    "center": {
+      "level_dB": [
+        -24.54641607029511,
+        -24.5464164867154
+      ],
+      "residual_dBr": [
+        -0.11210758027623138,
+        -0.11210757668427554
+      ],
+      "spectral_rms_dB": [
+        22.899419490741156,
+        22.899419944457236
+      ],
+      "meters": "gain 0x1.04a3eap-3 pre_fx 0x1.75111ap-2 0x1.75111ap-2 pre_master 0x1.5ad948p-3 0x1.5ad948p-3 above1 0/0 above7.999 0/0",
+      "peak": [
+        0.02155369706451893,
+        0.02155369706451893
+      ],
+      "clip_count": [
+        0,
+        0
+      ],
+      "matches_previous_projection": false,
+      "sha": "05de2e602e1df5ed38ded37764464f88fd1b7b487bc2a4cf945d5537a84d062a"
+    }
+  },
+  "BASS: Solidify": {
+    "base": {
+      "level_dB": [
+        -28.810705537123575,
+        -28.81070594692023
+      ],
+      "residual_dBr": [
+        0.016845459316351678,
+        0.016845458379530606
+      ],
+      "spectral_rms_dB": [
+        15.353364819711711,
+        15.35336505700038
+      ],
+      "meters": "gain 0x1.fd8e96p-3 pre_fx 0x1.1322a4p-5 0x1.1322a4p-5 pre_master 0x1.1322a4p-5 0x1.1322a4p-5 above1 0/0 above7.999 0/0",
+      "peak": [
+        0.008356399834156036,
+        0.008356399834156036
+      ],
+      "clip_count": [
+        0,
+        0
+      ],
+      "matches_previous_projection": true,
+      "sha": "27e26a58ef754ac2bb14b9be26fb406f91d57ab0c737e0f837ac35348f8c2783"
+    },
+    "divisor": {
+      "level_dB": [
+        -13.247680787704574,
+        -13.24768119750123
+      ],
+      "residual_dBr": [
+        0.2643862796649546,
+        0.26438625914376873
+      ],
+      "spectral_rms_dB": [
+        12.976454406226209,
+        12.976454674526058
+      ],
+      "meters": "gain 0x1.fd8e96p-3 pre_fx 0x1.9cb3f4p-3 0x1.9cb3f4p-3 pre_master 0x1.9cb3f4p-3 0x1.9cb3f4p-3 above1 0/0 above7.999 0/0",
+      "peak": [
+        0.05013839155435562,
+        0.05013839155435562
+      ],
+      "clip_count": [
+        0,
+        0
+      ],
+      "matches_previous_projection": false,
+      "sha": "8d4231790a955827775d0a14af9e71bde98804fb73053c8304ac56f2d5104555"
+    },
+    "center": {
+      "level_dB": [
+        -7.22708087442495,
+        -7.227081284221604
+      ],
+      "residual_dBr": [
+        0.8643727631085862,
+        0.8643726955645277
+      ],
+      "spectral_rms_dB": [
+        11.792300036465008,
+        11.792300312049012
+      ],
+      "meters": "gain 0x1.fd8e96p-3 pre_fx 0x1.9cb3f4p-2 0x1.9cb3f4p-2 pre_master 0x1.9cb3f4p-2 0x1.9cb3f4p-2 above1 0/0 above7.999 0/0",
+      "peak": [
+        0.10027678310871124,
+        0.10027678310871124
+      ],
+      "clip_count": [
+        0,
+        0
+      ],
+      "matches_previous_projection": false,
+      "sha": "4eaeb39a293b72b2f3d9359d55d1faf801bca7cb88a87b8e861f5c5c9247ebf9"
+    }
+  },
+  "Raw J106 101": {
+    "base": {
+      "level_dB": [
+        -37.750322975441016,
+        -37.75032335654317
+      ],
+      "residual_dBr": [
+        -0.060876826623736724,
+        -0.06087682408834845
+      ],
+      "spectral_rms_dB": [
+        38.48854115525624,
+        38.488541253126925
+      ],
+      "meters": "gain 0x1.5f5df4p-2 pre_fx 0x1.f02c8p-6 0x1.f02c8p-6 pre_master 0x1.f02c8p-6 0x1.f02c8p-6 above1 0/0 above7.999 0/0",
+      "peak": [
+        0.010391420684754848,
+        0.010391420684754848
+      ],
+      "clip_count": [
+        0,
+        0
+      ],
+      "matches_previous_projection": true,
+      "sha": "94d3be11ca63ad663a142686a3f8ee5426ad7cd2df86add8ec547c176ef881d6"
+    },
+    "divisor": {
+      "level_dB": [
+        -22.187298219066665,
+        -22.18729860016882
+      ],
+      "residual_dBr": [
+        -0.35496029302154686,
+        -0.3549602788265991
+      ],
+      "spectral_rms_dB": [
+        32.62188415095894,
+        32.62188427099438
+      ],
+      "meters": "gain 0x1.5f5df4p-2 pre_fx 0x1.74216p-3 0x1.74216p-3 pre_master 0x1.74216p-3 0x1.74216p-3 above1 0/0 above7.999 0/0",
+      "peak": [
+        0.06234852597117424,
+        0.06234852597117424
+      ],
+      "clip_count": [
+        0,
+        0
+      ],
+      "matches_previous_projection": false,
+      "sha": "4b2c6f291a04da5ab1aaea1600112b278520c3a0b64ed34363ac97657fdef5ce"
+    },
+    "center": {
+      "level_dB": [
+        -16.16669830578704,
+        -16.166698686889195
+      ],
+      "residual_dBr": [
+        -0.6797135269528863,
+        -0.679713501745197
+      ],
+      "spectral_rms_dB": [
+        30.03516157200485,
+        30.03516169132374
+      ],
+      "meters": "gain 0x1.5f5df4p-2 pre_fx 0x1.74216p-2 0x1.74216p-2 pre_master 0x1.74216p-2 0x1.74216p-2 above1 0/0 above7.999 0/0",
+      "peak": [
+        0.12469705194234848,
+        0.12469705194234848
+      ],
+      "clip_count": [
+        0,
+        0
+      ],
+      "matches_previous_projection": false,
+      "sha": "721b411f19d44e8b4073d88800fa29b84f1743b0c39fa8a47d79f2c86d2d5541"
+    }
+  }
+}

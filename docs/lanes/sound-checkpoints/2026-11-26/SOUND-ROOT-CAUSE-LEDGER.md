@@ -29,7 +29,12 @@ Do not fit individual presets, a master gain, or an arbitrary time shift.
   blind holds went from −79.45° to ~0° for Sine and +4.14° to ~0° for Triangle;
   all 24 Saw/PWM guards were bit-identical. This is evidence for the
   oscillator repair, not a direct observation of a private in-app stage.
-  Absolute deficit remains and target execution/fit still need testing.
+  The packed-float implementation is **rejected on target**: the same
+  24-layer-voice simulator leaf took 18,131.54 µs vs 4,019.5 µs for
+  stock 2×, before lookup, envelope, filters or arp. It exceeds the whole
+  budget. The remaining waveform candidate must avoid running this 4×
+  float loop, even though this was a useful diagnostic.
+  [Donor A/B](sj6-halfband-packed-donor/README.md).
   [Independent authentic holds](https://github.com/gobbajogger/DnBOX/commit/17ec80e3).
 - **Upstream dry differences vary by patch.** The AU references for
   Brainwave, Solidify and Raw J106 have matched cue/UID, fresh instances
@@ -42,13 +47,16 @@ Do not fit individual presets, a master gain, or an arbitrary time shift.
   drop. The documented 10 Hz high-pass floor also changes whole level
   at most .071 dB. Keep active missing routing/control investigations separate
   from the sample-history and oscillator corrections.
-  [Original captures and scope](sj6-native-factory-cross/README.md).
+  [Original captures](sj6-native-factory-cross/README.md),
+  [compact projection](sj6-compact-factory-cross/sj6-cross-preset/README.md),
+  [per-control tests](sj6-factory-control-primitives/sj6-cross-preset/PRIMITIVES.md).
 - **The compact dry mixer explains only part of the loss.** At unchanged
   Master and typed settings, removing only the fixed six-voice divisor
   recovers ~15.6 dB. Restoring unity duplication only for centered layers
   recovers another ~6.0 dB. Brainwave, Solidify and Raw remain 24.55,
   7.23 and 16.17 dB too quiet, respectively, with strong remaining
   spectral differences. Solidify's signed waveform residual worsens.
+  [Exact typed diagnostic](sj6-typed-mixer-diagnostic/sj6-mixer-diagnostic/README.md).
   No tested dry cue clips, but this is not proof of full FX or dynamic
   control headroom. Do not call the mixer experiment a sound fix.
 - **Unresolved:** source owner of the gain between the calibrated Crusher
@@ -78,6 +86,8 @@ Do not fit individual presets, a master gain, or an arbitrary time shift.
   age-dependent RevSC alternative retained exact recent words but lost
   16–17 dB on the Organ tail and about 16 dB on Pad's first-echo midrange.
   This is about known representations, not a proof all codecs are impossible.
+  [RAM liveness](s1-fx-ram-liveness-and-age/ram-liveness/README.md),
+  [rejected age model](s1-fx-ram-liveness-and-age/ram-age-model/README.md).
 - **Phaser optimization is real, but not full timing/fit.** Exact cached
   invariant math matched 906/906. The bounded cosine candidate precisely
   retained musical behavior on 906 host renders with very low error and
@@ -86,12 +96,17 @@ Do not fit individual presets, a master gain, or an arbitrary time shift.
   continuously smoothed Width/Rate caused repeated fallback. Signed
   subnormal rounding and bounded coefficient math now have isolated
   and live-edit proofs; do not treat the earlier 906 run as proving the
-  latest combined candidate. [Exact initial baseline](s1-phaser-invariant-coefficients/README.md).
+  latest combined candidate. [Exact initial baseline](s1-phaser-invariant-coefficients/README.md),
+  [bounded cosine](s1-bounded-phaser-cos/README.md),
+  [signed tiny rounding](s1-phaser-tiny-rne/README.md).
 
 ## Release boundary
 
 These are lab diagnostics. A host proof or a leaf emulator measurement
 does not qualify full Elite/Pro fit, cold stack, or populated 0 dropouts.
+The direct-write storage variant and boot/editor sharing are candidate-only
+(16 B further saving, still 52/44 B over in the guarded diagnostic; no
+native high-water and whole timing).
 Keep arp and all agreed controls, never use PSRAM, and enforce the protected
 pool/headroom. No release until the combined target gate passes. Add a row
 and its evidence here whenever a hypothesis is rejected or corrected.

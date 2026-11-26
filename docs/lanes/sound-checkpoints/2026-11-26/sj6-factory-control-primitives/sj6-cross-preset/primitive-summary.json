@@ -1,0 +1,170 @@
+{
+  "1": {
+    "0-authored.private.f32": {
+      "first_different_frame": 38589,
+      "signed_vs_baseline_dbr": -45.34841959913361,
+      "all_sample_words_equal": false,
+      "native_whole_level_change_db": [
+        -0.0077038924908165995,
+        -0.00727914199750046
+      ]
+    },
+    "0-dry.private.f32": {
+      "first_different_frame": 38589,
+      "signed_vs_baseline_dbr": -45.38447285031723,
+      "all_sample_words_equal": false,
+      "native_whole_level_change_db": [
+        -0.007549396065350322,
+        -0.007549396065336111
+      ]
+    },
+    "1-authored.private.f32": {
+      "first_different_frame": null,
+      "signed_vs_baseline_dbr": null,
+      "all_sample_words_equal": true,
+      "native_whole_level_change_db": [
+        0.0,
+        0.0
+      ]
+    },
+    "1-dry.private.f32": {
+      "first_different_frame": null,
+      "signed_vs_baseline_dbr": null,
+      "all_sample_words_equal": true,
+      "native_whole_level_change_db": [
+        0.0,
+        0.0
+      ]
+    },
+    "2-authored.private.f32": {
+      "first_different_frame": null,
+      "signed_vs_baseline_dbr": null,
+      "all_sample_words_equal": true,
+      "native_whole_level_change_db": [
+        0.0,
+        0.0
+      ]
+    },
+    "2-dry.private.f32": {
+      "first_different_frame": null,
+      "signed_vs_baseline_dbr": null,
+      "all_sample_words_equal": true,
+      "native_whole_level_change_db": [
+        0.0,
+        0.0
+      ]
+    }
+  },
+  "2": {
+    "0-authored.private.f32": {
+      "first_different_frame": 16384,
+      "signed_vs_baseline_dbr": -38.738887129556254,
+      "all_sample_words_equal": false,
+      "native_whole_level_change_db": [
+        -0.0049423511949271415,
+        -0.006086063147975551
+      ]
+    },
+    "0-dry.private.f32": {
+      "first_different_frame": 16384,
+      "signed_vs_baseline_dbr": -38.7485742702643,
+      "all_sample_words_equal": false,
+      "native_whole_level_change_db": [
+        -0.005644862988056332,
+        -0.005644862988056332
+      ]
+    },
+    "1-authored.private.f32": {
+      "first_different_frame": 16385,
+      "signed_vs_baseline_dbr": -51.63397221065438,
+      "all_sample_words_equal": false,
+      "native_whole_level_change_db": [
+        -0.0018288683104721315,
+        -0.0018288683104685788
+      ]
+    },
+    "1-dry.private.f32": {
+      "first_different_frame": 16385,
+      "signed_vs_baseline_dbr": -51.63394761028593,
+      "all_sample_words_equal": false,
+      "native_whole_level_change_db": [
+        -0.0018288508670991632,
+        -0.0018288508670956105
+      ]
+    },
+    "2-authored.private.f32": {
+      "first_different_frame": 38434,
+      "signed_vs_baseline_dbr": -51.95982412514787,
+      "all_sample_words_equal": false,
+      "native_whole_level_change_db": [
+        -0.000420698941354658,
+        -0.0006284566222447552
+      ]
+    },
+    "2-dry.private.f32": {
+      "first_different_frame": 38434,
+      "signed_vs_baseline_dbr": -52.68955034890388,
+      "all_sample_words_equal": false,
+      "native_whole_level_change_db": [
+        -0.0006727638911030454,
+        -0.0006727638911030454
+      ]
+    }
+  },
+  "4": {
+    "0-authored.private.f32": {
+      "first_different_frame": 16384,
+      "signed_vs_baseline_dbr": -17.49966186874208,
+      "all_sample_words_equal": false,
+      "native_whole_level_change_db": [
+        0.05948573156526038,
+        0.058062401322168
+      ]
+    },
+    "0-dry.private.f32": {
+      "first_different_frame": 16384,
+      "signed_vs_baseline_dbr": -17.555057112146056,
+      "all_sample_words_equal": false,
+      "native_whole_level_change_db": [
+        0.05806990332553852,
+        0.05806990332555273
+      ]
+    },
+    "1-authored.private.f32": {
+      "first_different_frame": 16385,
+      "signed_vs_baseline_dbr": -17.230402380695097,
+      "all_sample_words_equal": false,
+      "native_whole_level_change_db": [
+        0.0713207014326862,
+        0.07132070143268976
+      ]
+    },
+    "1-dry.private.f32": {
+      "first_different_frame": 16385,
+      "signed_vs_baseline_dbr": -17.230494081120874,
+      "all_sample_words_equal": false,
+      "native_whole_level_change_db": [
+        0.07131926878563632,
+        0.07131926878563632
+      ]
+    },
+    "2-authored.private.f32": {
+      "first_different_frame": 16384,
+      "signed_vs_baseline_dbr": -29.546524235060573,
+      "all_sample_words_equal": false,
+      "native_whole_level_change_db": [
+        0.004712312519004058,
+        0.003987880930978349
+      ]
+    },
+    "2-dry.private.f32": {
+      "first_different_frame": 16384,
+      "signed_vs_baseline_dbr": -28.262047689703813,
+      "all_sample_words_equal": false,
+      "native_whole_level_change_db": [
+        0.005834819046619089,
+        0.005834819046619089
+      ]
+    }
+  }
+}

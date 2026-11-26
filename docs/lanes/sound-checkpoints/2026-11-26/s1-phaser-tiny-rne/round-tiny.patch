@@ -1,0 +1,37 @@
+--- a/AudioKit/Core/Soundpipe/modules/phaser.c
++++ b/AudioKit/Core/Soundpipe/modules/phaser.c
+@@ -263,8 +263,8 @@
+ #endif
+ static __attribute__((noinline)) float ph_cosprod(float v,float x,int lane) {
+ #if DNBOX_PH_COS || DNBOX_PH_COS_TRACE
+- unsigned ux=ph_word(x)&0x7fffffffu, uv=ph_word(v)&0x7fffffffu;
+- int outside=ux>0x3f200000u || (ux && ux<0x00800000u) || uv<0x01000000u || uv>=0x7f800000u;
++ unsigned ux=ph_word(x)&0x7fffffffu, raw=ph_word(v),uv=raw&0x7fffffffu;
++ int outside=ux>0x3f200000u || (ux && ux<0x00800000u) || uv>=0x7f800000u;
+ #if DNBOX_PH_COS_TRACE
+  ph_trace(lane,x,outside);
+ #endif
+@@ -272,7 +272,22 @@
+  if(!outside) {
+      const float z=x*x;
+      const float q=-0.5f+z*(0x1.555556p-5f+z*(-0x1.6c16c2p-10f+z*(0x1.a01a02p-16f+z*-0x1.27e4fcp-22f)));
+-     return v*(1.f+z*q);
++     const float c=1.f+z*q;
++     if(uv<0x01000000u){
++         if(!uv)return v; /* cosine positive; preserve signed zero. */
++         /* Low-magnitude Float32 payload represents v/2^-149 exactly
++          * (both subnormal and first normal bin). Quantize once, ties-even. */
++         const unsigned cw=ph_word(c);
++         if(cw==0x3f800000u)return v;
++         const uint32_t cm=0x00800000u|(cw&0x007fffffu);
++         const uint64_t p=(uint64_t)uv*cm;
++         unsigned q=(unsigned)(p>>24),r=(unsigned)p&0x00ffffffu;
++         q+=(r>0x00800000u || (r==0x00800000u && (q&1u)));
++         const unsigned result=(raw&0x80000000u)|q;
++         float out;
++         __builtin_memcpy(&out,&result,4);return out;
++     }
++     return v*c;
+  }
+ #endif
+ #endif

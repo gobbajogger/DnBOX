@@ -1,0 +1,102 @@
+--- a/firmware/src/storage.c
++++ b/firmware/src/storage.c
+@@ -161,45 +161,6 @@
+     return 0;
+ }
+ 
+-/* the current copy: the valid one with the highest seq (A on a tie), -1 when
+- * neither is valid. Headers first, so only the winner's payload is read (it
+- * is left in st_buf); *h gets its header. */
+-static int st_current(uint32_t obj, st_hdr_t *h)
+-{
+-    st_hdr_t a, b;
+-    int ra = st_head(obj, 0, &a), rb = st_head(obj, 1, &b), rc;
+-    int va = ra == 0, vb = rb == 0;
+-    /* An unread copy may be newer: do not mistake I/O failure for CRC damage
+-     * and silently adopt older settings that a later toggle would overwrite. */
+-    if (ra == -2 || rb == -2) return -2;
+-    if (vb && (!va || b.seq > a.seq)) {
+-        rc = st_body(obj, 1, &b);
+-        if (rc == -2) return rc;
+-        if (rc == 0) {
+-            *h = b;
+-            return 1;
+-        }
+-        vb = 0;
+-    }
+-    if (va) {
+-        rc = st_body(obj, 0, &a);
+-        if (rc == -2) return rc;
+-        if (rc == 0) {
+-            *h = a;
+-            return 0;
+-        }
+-    }
+-    if (vb) {
+-        rc = st_body(obj, 1, &b);
+-        if (rc == -2) return rc;
+-        if (rc == 0) {
+-            *h = b;
+-            return 1;
+-        }
+-    }
+-    return -1;
+-}
+-
+ /* Body CRC of one copy, through a stack window. Does not write st_buf: the
+  * project object buffer is that same array, and it already holds the bytes
+  * about to be saved. */
+@@ -219,29 +180,35 @@
+     return (~c) == h->crc;
+ }
+ 
+-/* The current copy (0 or 1), or -1. Same rule as st_current: the valid body
+- * with the highest seq, copy A on a tie. *seq is that copy's seq. */
+-static int st_pick(uint32_t obj, uint32_t *seq)
++/* Both cold callers share ordering and payload fallback. Load treats unread
++ * headers/bodies as inconclusive; save preserves pending st_buf and retains
++ * its existing streaming CRC probe and failure policy. */
++static __attribute__((noinline)) int st_choose(uint32_t obj, void *result, unsigned loading)
+ {
+-    st_hdr_t a, b;
+-    int va = st_head(obj, 0, &a) == 0, vb = st_head(obj, 1, &b) == 0;
+-    if (vb && (!va || b.seq > a.seq)) {
+-        if (st_body_ok(obj, 1, &b)) {
+-            *seq = b.seq;
+-            return 1;
++    st_hdr_t hdr[2];
++    int ra = st_head(obj, 0, &hdr[0]), rb = st_head(obj, 1, &hdr[1]);
++    unsigned first, valid = (ra == 0) | (unsigned)(rb == 0) << 1;
++    if (loading && (ra == -2 || rb == -2)) return -2;
++    first = (valid & 2u) && (!(valid & 1u) || hdr[1].seq > hdr[0].seq);
++    for (unsigned k = 0; k < 2; ++k) {
++        unsigned copy = first ^ k;
++        if (!(valid & (1u << copy))) continue;
++        int rc = loading ? st_body(obj, copy, &hdr[copy]) :
++                           (st_body_ok(obj, copy, &hdr[copy]) ? 0 : -1);
++        if (rc == -2) return -2;
++        if (rc == 0) {
++            if (loading) *(st_hdr_t *)result = hdr[copy];
++            else *(uint32_t *)result = hdr[copy].seq;
++            return (int)copy;
+         }
+-        vb = 0;
+-    }
+-    if (va && st_body_ok(obj, 0, &a)) {
+-        *seq = a.seq;
+-        return 0;
+-    }
+-    if (vb && st_body_ok(obj, 1, &b)) {
+-        *seq = b.seq;
+-        return 1;
+     }
+     return -1;
+ }
++static int st_current(uint32_t obj, st_hdr_t *h) { return st_choose(obj, h, 1); }
++static int st_pick(uint32_t obj, uint32_t *seq)
++{
++    return st_choose(obj, seq, 0);
++}
+ 
+ /* Length, -1 only for confirmed erased headers, -2 unreadable (I/O), -3 readable
+  * but damaged committed data, -8 busy. Integration of #790 and #810: I/O and busy
