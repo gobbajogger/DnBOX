@@ -6,6 +6,15 @@ isolated kernel timing, or partial link into a release claim.
 
 ## Latest measured results
 
+- **Potential SuperJ6 RAM recovery, not yet linked.** The
+  [guarded stock-only layout](sj6-stock-layout/README.md) removes
+  268 B per runtime owner only when a legacy route cannot be
+  entered. Default stock preprocessed source stays identical and
+  guarded Raw dry/wet match 148,684 signed host frames. The target
+  type layout is measured; 536 B across both owners is an estimate
+  until paired links confirm the pool. It is not room for the full
+  original filter or qualification of target playback.
+
 - **SuperJ6 Main physical OTA is now independently reconstructed.**
   The [same-input leaf and full typed Raw controls](sj6-raw-main-ota/README.md)
   prove the original two-substep/all-pass/filter/decimator corrects

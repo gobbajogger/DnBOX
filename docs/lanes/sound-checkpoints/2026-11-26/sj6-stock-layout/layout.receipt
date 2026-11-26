@@ -1,0 +1,34 @@
+elite 0
+00000000 00000074 R dnbx_one_layer
+00005958 00002930 R juno_variant
+0000a0c4 00000048 R knob_word_cells
+0000a10c 00005f68 R owners_two
+00003028 00002930 R runtime_backend
+00000074 00002fb4 R runtime_part
+00008288 00001e3c R s1_variant
+elite 1
+00000000 00000074 R dnbx_one_layer
+00005740 00002824 R juno_variant
+00009da0 00000048 R knob_word_cells
+00009de8 00005d50 R owners_two
+00002f1c 00002824 R runtime_backend
+00000074 00002ea8 R runtime_part
+00007f64 00001e3c R s1_variant
+pro 0
+00000000 00000074 R dnbx_one_layer
+00005958 00002930 R juno_variant
+0000a0c4 00000048 R knob_word_cells
+0000a10c 00005f68 R owners_two
+00003028 00002930 R runtime_backend
+00000074 00002fb4 R runtime_part
+00008288 00001e3c R s1_variant
+pro 1
+00000000 00000074 R dnbx_one_layer
+00005740 00002824 R juno_variant
+00009da0 00000048 R knob_word_cells
+00009de8 00005d50 R owners_two
+00002f1c 00002824 R runtime_backend
+00000074 00002ea8 R runtime_part
+00007f64 00001e3c R s1_variant
+317e9a1fef94c40810802df7b31ff4e521bf0e39e4b19786176732c17b38e640  /workspace/scratch/3a7051e761a0/sj6-stock-layout/scratch.F003/pre-before
+firmware/src/dsp/juno6.h:80:2: error: #error stock Juno layout may be reclaimed only when factory INIT owns all voices
