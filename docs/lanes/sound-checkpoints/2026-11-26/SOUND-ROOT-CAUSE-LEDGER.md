@@ -755,3 +755,16 @@ signed layout states plus 655,360 sticky guard rejections verified.
 No product lifetime guarantee, real owner binding or safe live
 PitchEnv takeover inferred. Main–Sub composition host and native
 timing remain separately open.
+
+### Actual typed Raw connected lab preserves stock Sub and still fails wet
+The [real Main filter caller](sj6-ota-raw-connected-lab/README.md)
+exercised 123,675 active frames per authenticated cue with a caller-local
+immutable guard and the exact independent stock Sub recurrence.
+The stock Sub stream is bit-exact, OFF and Sub-only are unchanged,
+and wrong cutoff/pitch requests fail closed. With compact chorus, dry
+whole −1.444→−1.731 dBr and late −2.851→−3.413, while authored
+whole +1.010→+1.125 and first/late release regress. New path closely
+matches the separately verified host reconstruction, not the original
+full instrument. Reject activation; no all-window improvement, no
+firmware timing/binary fit evidence, and no re-testing the same chorus
+contrast merely to assert a ship pass.

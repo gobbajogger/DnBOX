@@ -1,0 +1,16 @@
+{
+  "cutoff": {
+    "failed_closed": true,
+    "frames_before_abort": 15872,
+    "reason": [
+      "first active resolved cutoff did not match immutable cold fingerprint"
+    ]
+  },
+  "pitch": {
+    "failed_closed": true,
+    "frames_before_abort": 0,
+    "reason": [
+      "cold bind refused nonzero PitchEnv depth"
+    ]
+  }
+}
