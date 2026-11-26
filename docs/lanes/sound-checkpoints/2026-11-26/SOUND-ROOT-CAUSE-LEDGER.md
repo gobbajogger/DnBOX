@@ -186,6 +186,12 @@ changing the rounding rule.
   without clipping; legacy Classic saturated 1,368 of 10,240. This is
   a signal-stage risk, not a universal saturation bound.
   [Joined route rejection](sj6-sub-joined-phase-rejected/README.md).
+  Raw release physical pole test: original is already effectively
+  **unforced** after ~13 ms, modal residual ~−116…−121 dBr; the compact
+  pre-filter input stops at +13.537 ms. The failure comes predominantly
+  from differing source waveform/state driving the HP before release,
+  plus subsequent exact tail state, not a long absent envelope or
+  permission to mute the filter. [Source-causal test](sj6-raw-unforced-release/README.md).
 - **Unresolved:** source owner of the gain between the calibrated Crusher
   and Apple's compressor input; which missing or misrouted per-program
   states dominate different dry patches; delay-bandwidth correction that
