@@ -1,0 +1,4 @@
+5,000 distinct touches with 4,999 restored: stock kept old entry plus new 14-byte Undo entry; exact undo/redo
+5,000 net bytes genuinely different: stock clears history and retains edit, no rollback
+Original C decoder: 911-byte packed stream fills 33668 bytes; true 24704-byte history reference
+Malformed beyond-produced distance rejected, not wrapped
