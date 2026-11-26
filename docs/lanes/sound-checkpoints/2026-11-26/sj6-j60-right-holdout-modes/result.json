@@ -1,0 +1,220 @@
+{
+  "bypass": {
+    "frames_exact": [
+      38400,
+      38400,
+      38400
+    ],
+    "same_ref_input_sha": "77939cd1ccb3e4a53433fbd3559a3aebd60a40a2c381f08d3e06e83df09d7349"
+  },
+  "2": {
+    "entered_sha": "77939cd1ccb3e4a53433fbd3559a3aebd60a40a2c381f08d3e06e83df09d7349",
+    "source_wet_sha": "24434962e9cfac27baf89842d07095ec15a3b92ff8065f19c17c3cd132b2bc19",
+    "frames": 38400,
+    "reached_phase_drive_by_channel": [
+      [
+        {
+          "inner_frame": 0,
+          "abs_right_phase": 1.7583333828952163e-05,
+          "entered_tap_phase_drive": 0.9675505499365378
+        },
+        {
+          "inner_frame": 1023,
+          "abs_right_phase": 0.01800534315407276,
+          "entered_tap_phase_drive": 0.9501461770034351
+        },
+        {
+          "inner_frame": 4097,
+          "abs_right_phase": 0.07205662131309509,
+          "entered_tap_phase_drive": 0.8978479135180747
+        },
+        {
+          "inner_frame": 8191,
+          "abs_right_phase": 0.1440429389476776,
+          "entered_tap_phase_drive": 0.8281962875950378
+        },
+        {
+          "inner_frame": 16384,
+          "abs_right_phase": 0.28810349106788635,
+          "entered_tap_phase_drive": 0.688807970255653
+        },
+        {
+          "inner_frame": 25603,
+          "abs_right_phase": 0.4502045810222626,
+          "entered_tap_phase_drive": 0.5319642136888534
+        },
+        {
+          "inner_frame": 32123,
+          "abs_right_phase": 0.5648481845855713,
+          "entered_tap_phase_drive": 0.4210387815755646
+        },
+        {
+          "inner_frame": 38399,
+          "abs_right_phase": 0.675201416015625,
+          "entered_tap_phase_drive": 0.31426457437161254
+        }
+      ],
+      [
+        {
+          "inner_frame": 0,
+          "abs_right_phase": 1.7583333828952163e-05,
+          "entered_tap_phase_drive": 1.7583333828952163e-05
+        },
+        {
+          "inner_frame": 1023,
+          "abs_right_phase": 0.01800534315407276,
+          "entered_tap_phase_drive": 0.01800534315407276
+        },
+        {
+          "inner_frame": 4097,
+          "abs_right_phase": 0.07205662131309509,
+          "entered_tap_phase_drive": 0.07205662131309509
+        },
+        {
+          "inner_frame": 8191,
+          "abs_right_phase": 0.1440429389476776,
+          "entered_tap_phase_drive": 0.1440429389476776
+        },
+        {
+          "inner_frame": 16384,
+          "abs_right_phase": 0.28810349106788635,
+          "entered_tap_phase_drive": 0.28810349106788635
+        },
+        {
+          "inner_frame": 25603,
+          "abs_right_phase": 0.4502045810222626,
+          "entered_tap_phase_drive": 0.4502045810222626
+        },
+        {
+          "inner_frame": 32123,
+          "abs_right_phase": 0.5648481845855713,
+          "entered_tap_phase_drive": 0.5648481845855713
+        },
+        {
+          "inner_frame": 38399,
+          "abs_right_phase": 0.675201416015625,
+          "entered_tap_phase_drive": 0.675201416015625
+        }
+      ]
+    ],
+    "signed_dbr": {
+      "attack": [
+        -23.554576281404845,
+        -27.571120648847774
+      ],
+      "held": [
+        -16.619521724534096,
+        -27.680711316656105
+      ],
+      "tail": [
+        -13.215787109974645,
+        -27.091391981660514
+      ]
+    }
+  },
+  "3": {
+    "entered_sha": "77939cd1ccb3e4a53433fbd3559a3aebd60a40a2c381f08d3e06e83df09d7349",
+    "source_wet_sha": "98114b123404f7ade10bc29f2f73fae7a47206c1881513db76b0eee81df1ade5",
+    "frames": 38400,
+    "reached_phase_drive_by_channel": [
+      [
+        {
+          "inner_frame": 0,
+          "abs_right_phase": 0.0001921666698763147,
+          "entered_tap_phase_drive": 0.00018593423646205134
+        },
+        {
+          "inner_frame": 1023,
+          "abs_right_phase": 0.19678303599357605,
+          "entered_tap_phase_drive": 0.19040088257604568
+        },
+        {
+          "inner_frame": 4097,
+          "abs_right_phase": 0.7875035405158997,
+          "entered_tap_phase_drive": 0.7619628815508408
+        },
+        {
+          "inner_frame": 8191,
+          "abs_right_phase": 0.4286433160305023,
+          "entered_tap_phase_drive": 0.414741368687872
+        },
+        {
+          "inner_frame": 16384,
+          "abs_right_phase": 0.8571872711181641,
+          "entered_tap_phase_drive": 0.8293865989504223
+        },
+        {
+          "inner_frame": 25603,
+          "abs_right_phase": 0.909982442855835,
+          "entered_tap_phase_drive": 0.880469494606807
+        },
+        {
+          "inner_frame": 32123,
+          "abs_right_phase": 0.15777921676635742,
+          "entered_tap_phase_drive": 0.1526620522586732
+        },
+        {
+          "inner_frame": 38399,
+          "abs_right_phase": 0.6379890441894531,
+          "entered_tap_phase_drive": 0.6172975047070884
+        }
+      ],
+      [
+        {
+          "inner_frame": 0,
+          "abs_right_phase": 0.0001921666698763147,
+          "entered_tap_phase_drive": 0.0001921666698763147
+        },
+        {
+          "inner_frame": 1023,
+          "abs_right_phase": 0.19678303599357605,
+          "entered_tap_phase_drive": 0.19678303599357605
+        },
+        {
+          "inner_frame": 4097,
+          "abs_right_phase": 0.7875035405158997,
+          "entered_tap_phase_drive": 0.7875035405158997
+        },
+        {
+          "inner_frame": 8191,
+          "abs_right_phase": 0.4286433160305023,
+          "entered_tap_phase_drive": 0.4286433160305023
+        },
+        {
+          "inner_frame": 16384,
+          "abs_right_phase": 0.8571872711181641,
+          "entered_tap_phase_drive": 0.8571872711181641
+        },
+        {
+          "inner_frame": 25603,
+          "abs_right_phase": 0.909982442855835,
+          "entered_tap_phase_drive": 0.909982442855835
+        },
+        {
+          "inner_frame": 32123,
+          "abs_right_phase": 0.15777921676635742,
+          "entered_tap_phase_drive": 0.15777921676635742
+        },
+        {
+          "inner_frame": 38399,
+          "abs_right_phase": 0.6379890441894531,
+          "entered_tap_phase_drive": 0.6379890441894531
+        }
+      ]
+    ],
+    "signed_dbr": {
+      "attack": [
+        -25.218236407437175,
+        -27.667443949901003
+      ],
+      "held": [
+        -25.663807574317786,
+        -27.711733183630276
+      ],
+      "tail": [
+        -26.415469127686922,
+        -27.97921496411746
+      ]
+    }
+  }
+}
