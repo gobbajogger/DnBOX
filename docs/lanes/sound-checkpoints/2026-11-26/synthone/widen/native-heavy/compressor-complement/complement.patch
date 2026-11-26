@@ -1,0 +1,32 @@
+--- a/firmware/src/dsp/s1c/s1u.c
++++ b/firmware/src/dsp/s1c/s1u.c
+@@ -116,11 +116,16 @@
+     k->s1 = atk > 0.0f ? expf(-2.0f / (sr * atk)) : 0.0f; k->s3 = atk > 0.0f ? expf(-1.0f / (sr * atk)) : 0.0f;
+     k->s4 = rel > 0.0f ? expf(-1.0f / (sr * rel)) : 0.0f; k->s2 = (1.0f - k->s1) * (1.0f / ratio - 1.0f);
+     k->thr = thr;
++    k->s3_complement = 1.0f - k->s3;
++    k->s4_complement = 1.0f - k->s4;
+ }
+ float s1u_comp(float *st, float x, const s1u_cc *k, int upd)
+ {
+-    float ax = fabsf(x), a = st[0] > ax ? k->s4 : k->s3;
+-    st[0] = st[0] * a + (1.0f - a) * ax;
++    const float ax = fabsf(x);
++    const int release = st[0] > ax;
++    const float a = release ? k->s4 : k->s3;
++    const float b = release ? k->s4_complement : k->s3_complement;
++    st[0] = st[0] * a + b * ax;
+     if (upd) {
+         float over = st[0] > 0.0f ? 6.02059991f * log2f(st[0]) - k->thr : 0.0f;
+         st[2] = over > 0.0f ? over : 0.0f;
+--- a/firmware/src/dsp/s1c/s1u.h
++++ b/firmware/src/dsp/s1c/s1u.h
+@@ -25,7 +25,7 @@
+ float s1u_hp2(float *z /* [2] */, float x, float a1, float a4, float a5);  /* biquad high-pass core */
+ 
+ /* ---- compressor: per-block coefficients, per-sample run; upd: refresh the gain law (every 4th sample) ---- */
+-typedef struct { float s1, s2, s3, s4, thr; } s1u_cc;
++typedef struct { float s1, s2, s3, s4, thr, s3_complement, s4_complement; } s1u_cc;
+ void s1u_comp_coef(s1u_cc *k, float ratio, float thr_db, float atk_s, float rel_s, float sr);
+ float s1u_comp(float *st /* [4] */, float x, const s1u_cc *k, int upd);
+ 

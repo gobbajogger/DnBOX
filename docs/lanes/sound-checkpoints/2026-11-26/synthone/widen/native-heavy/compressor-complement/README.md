@@ -1,0 +1,5 @@
+Host diagnostic. Cache the attack and release subtraction as binary32 once when recalculating coefficients; retain the old sample cadence and operations with the same operands. The two complements add 8 B per local coefficient object; there is no new persistent state. The test links the real old and changed source independently, against 1,048,576 steps with coefficient changes. To reproduce, copy exact baseline s1u.c and s1u.h into both base/ and trial/, apply complement.patch to trial/ with path stripping so these two filenames are patched, then run verify.sh.
+
+Actual guarded link has 56 B free XIP Elite and 68 B Pro with the same 564 B remaining above the pool reserve. This does not prove playback timing, and there is no release change. The matching, unprofiled native timing script runs this complement-only candidate against the same H16 control scene.
+
+Matched replay: 15,491 µs / 101 underruns on Elite versus H16's 15,558 / 39; 15,488 µs / 99 on Pro versus 15,793 / 53. Zero skipped cycles and unchanged virtual flash on both. Lower peak with more underruns is not a timing improvement; do not adopt.

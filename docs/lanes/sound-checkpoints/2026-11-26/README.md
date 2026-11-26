@@ -58,3 +58,6 @@ and measured results. The supplied original AU binary is not committed.
 - Full-rate paired reverb preserves the original time-base. A 37,152 B history meets the isolated Organ return's spectral threshold, but still exceeds available memory. See `synthone/reverb/paired-history/`.
 - The actual default Home 80+58-row host proof is bit-identical with a stable snapshot and catches intentional mid-frame state tearing. It contributes no target RAM budget yet. See `firmware/home-strip/`.
 - These changes are reproducibility material only; they do not select a shipping candidate, enable code in production, change a release gate, or publish firmware.
+
+### Timing attribution and isolated exact-kernel trials
+The sampled Elite replay is not observationally neutral. Matched strict replays of two independently tested numerical simplifications also lowered peak but increased underruns. Do not carry either into a release by looking at maximum block time alone. The ordered Core 1 join model and host test are recorded as a design lead only; it is not connected to firmware and does not prove hardware drain acknowledgment.
