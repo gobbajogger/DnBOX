@@ -178,6 +178,14 @@ changing the rounding rule.
   4.7–6.3 dB remains after accounting for the divisor, including that
   filter loss. Nothing here attributes the remainder to the limiter.
   [Absolute stage proof](sj6-sub-absolute-decomposition/README.md).
+  Joining the scoped upstream mixer and physical phase suffix does not
+  qualify the sound: only saved Raw dry passed both route predicates;
+  sustain improved but signed release regressed from −6.49 to +3.98 dBr.
+  Five refused arms were bit-identical to mixer-only. Genuine six-voice
+  overload tested two history paths: typed Classic Q12 wrote 20,480
+  without clipping; legacy Classic saturated 1,368 of 10,240. This is
+  a signal-stage risk, not a universal saturation bound.
+  [Joined route rejection](sj6-sub-joined-phase-rejected/README.md).
 - **Unresolved:** source owner of the gain between the calibrated Crusher
   and Apple's compressor input; which missing or misrouted per-program
   states dominate different dry patches; delay-bandwidth correction that
@@ -296,6 +304,17 @@ claiming a controlled causal timing delta. This is the donor for the
 later actual Fold/warm fitting pair, not that pair's timing result.
 [Exact no-shadow evidence](strict-909-no-shadow/strict-fit-range909/serial-without-shadow/README.md).
 
+Exact latest warm-phase + Fold INIT-only guarded pair (+252/+260 B
+APP; +564 pool) used matched regions and unchanged sealed 922 events.
+Elite 11,976 µs / 1 xrun; Pro 14,509 µs / 70 xruns. Both actually
+fail, even though Elite is much closer. Audio is nonzero; C1 active,
+zero skips, exact virtual NOR unchanged. No producer anchor.
+A separate active silent-Sub meter found no matched live owner-A
+render/canary at all, so the silent-Sub speedup was **not** admitted
+and cannot explain Elite/Pro from these captures. Prioritize proving
+actual Pro late-half work rather than rerunning identical aggregate
+scenes. [Exact warm pair and meter](strict-warm-fold-timing/strict-fit-warmfold/proof/README.md).
+
 The exact Synth One silent-Sub fast path saves ~603 µs in a six-voice
 512-frame *isolated* zero-Sub case; audible or exact-zero main fallback
 can be slower by up to 97 µs. Saved end-of-run SUBV reads as zero with
@@ -311,6 +330,14 @@ does not qualify full Elite/Pro fit, cold stack, or populated 0 dropouts.
 The direct-write storage variant and boot/editor sharing are candidate-only
 (16 B further saving, still 52/44 B over in the guarded diagnostic; no
 native high-water and whole timing).
+Do not treat INIT-only as downloadable preset admission: the strict
+companion guards currently reject INIT_ONLY=0, and the original S1
+pack reader expects the FDATA base where the fitting donor has D9RD.
+The recovered cab25d44 prototype pool overlaps live BREAK slot 2
+and 909 FDATA including both directory sectors. Do not overwrite
+either or silently enable a new USB endpoint. A legally mapped,
+guarded provider/installer arrangement is still required.
+
 Keep arp and all agreed controls, never use PSRAM, and enforce the protected
 pool/headroom. No release until the combined target gate passes. Add a row
 and its evidence here whenever a hypothesis is rejected or corrected.

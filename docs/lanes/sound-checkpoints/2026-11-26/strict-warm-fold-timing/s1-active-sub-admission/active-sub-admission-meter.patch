@@ -1,0 +1,52 @@
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -63,6 +63,11 @@
+ static uint8_t brk_preview_audio_on, brk_preview_pattern;
+ static void brk_preview_interrupt(void);
+ static original_runtime_part original_bass[NBASS] POOL;
++#if DNBOX_S1_SUB_ADMISSION_METER
++/* Immutable real owner identity, usable by the renderer on either core. */
++const s1c *const s1_sub_meter_owner=&original_bass[0].dsp.synthone.e;
++#endif
++
+ static int original_panel_ready(const original_runtime_part *part, unsigned kind)
+ {
+     return part->kind == kind && part->status == ORIGINAL_RUNTIME_OK;
+--- a/firmware/src/dsp/s1c/s1c.c
++++ b/firmware/src/dsp/s1c/s1c.c
+@@ -468,6 +468,12 @@
+ #if S1C_KR > 1
+ /* Cheap voice: pitch, LFO, key-tracking and filter coefficients at control rate (every S1C_KR
+  * samples), sines from a 256-point table, the filter envelope still per sample in the cutoff. */
++#if DNBOX_S1_SUB_ADMISSION_METER
++extern const s1c *const s1_sub_meter_owner;
++/* Diagnostic only; never use this instrumentation image as a performance
++ * comparator. One writer: the settled Synth One A owner audio renderer. */
++__attribute__((used)) volatile uint32_t s1_sub_meter[6];
++#endif
+ static float voice_run_kr(s1c *s, s1c_voice *v)
+ {
+     int mono = P(MONO) > 0.0f, ft = (int)P(FTYPE);
+@@ -519,6 +525,22 @@
+     float o1 = morph_held(&v->ph[0], v->ki1, P(I1), bl) * v->vamp * P(VOL1);
+     float o2 = morph_held(&v->ph[1], v->ki2, P(I2), bl) * v->vamp * P(VOL2);
+     float y = (1.0f - v->kbal) * o1 + v->kbal * o2;
++#if DNBOX_S1_SUB_ADMISSION_METER
++    if(s==s1_sub_meter_owner){
++        /* Compute exactly the candidate's condition from this same active
++         * voice sample before the original unmodified sub calculation. */
++        const s1c_fb av={.f=P(SUBV)}, yv={.f=y};
++        const uint32_t ov=yv.u&0x7fffffffu;
++        const unsigned lifted=(av.u&0x7fffffffu)!=0;
++        const unsigned normal=(ov-0x00800000u)<0x7f000000u;
++        const unsigned now=++s1_sub_meter[0]; /* observed active voice calls */
++        s1_sub_meter[1]+=lifted;
++        s1_sub_meter[2]+=!normal;
++        s1_sub_meter[3]+=!lifted && normal;
++        if(lifted && s1_sub_meter[4]==0)s1_sub_meter[4]=now;
++        s1_sub_meter[5]=0x53315355u;
++    }
++#endif
+     float sub = sine_t(v->ph[2]);
+     v->ph[2] += v->kis;
+     y += P(SUBSQ) != 0.0f ? (sub > 0.0f ? P(SUBV) : -P(SUBV)) : sub * v->vamp * P(SUBV) * 3.0f;

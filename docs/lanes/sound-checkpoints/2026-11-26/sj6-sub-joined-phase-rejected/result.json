@@ -1,0 +1,490 @@
+{
+  "programs": {
+    "0-dry": {
+      "name": "BRAINWAVE MONO BASS",
+      "blocked_by": {
+        "59": 1,
+        "108": 0.11941517889499664
+      },
+      "rejection_no_op": true,
+      "peaks": {
+        "base": {
+          "suffix": false,
+          "instrument_master": 0.12726576626300812,
+          "pre_fx": 0.031079061329364777,
+          "pre_master": 0.014999132603406906,
+          "output": 0.0019088761182501912,
+          "ring_n": 0,
+          "ring_clips": 0,
+          "ring_peak_code": 0.0
+        },
+        "center": {
+          "suffix": false,
+          "instrument_master": 0.12726576626300812,
+          "pre_fx": 0.37294870615005493,
+          "pre_master": 0.1806318461894989,
+          "output": 0.022988250479102135,
+          "ring_n": 0,
+          "ring_clips": 0,
+          "ring_peak_code": 0.0
+        },
+        "joined": {
+          "suffix": false,
+          "instrument_master": 0.12726576626300812,
+          "pre_fx": 0.37294870615005493,
+          "pre_master": 0.1806318461894989,
+          "output": 0.022988250479102135,
+          "ring_n": 0,
+          "ring_clips": 0,
+          "ring_peak_code": 0.0
+        }
+      }
+    },
+    "0-authored": {
+      "name": "BRAINWAVE MONO BASS",
+      "blocked_by": {
+        "11": 1,
+        "59": 1,
+        "108": 0.11941517889499664
+      },
+      "rejection_no_op": true,
+      "peaks": {
+        "base": {
+          "suffix": false,
+          "instrument_master": 0.12726576626300812,
+          "pre_fx": 0.031079061329364777,
+          "pre_master": 0.012855681590735912,
+          "output": 0.001636088127270341,
+          "ring_n": 0,
+          "ring_clips": 0,
+          "ring_peak_code": 0.0
+        },
+        "center": {
+          "suffix": false,
+          "instrument_master": 0.12726576626300812,
+          "pre_fx": 0.37294870615005493,
+          "pre_master": 0.15454648435115814,
+          "output": 0.019668476656079292,
+          "ring_n": 0,
+          "ring_clips": 0,
+          "ring_peak_code": 0.0
+        },
+        "joined": {
+          "suffix": false,
+          "instrument_master": 0.12726576626300812,
+          "pre_fx": 0.37294870615005493,
+          "pre_master": 0.15454648435115814,
+          "output": 0.019668476656079292,
+          "ring_n": 0,
+          "ring_clips": 0,
+          "ring_peak_code": 0.0
+        }
+      }
+    },
+    "1-dry": {
+      "name": "BASS: Solidify",
+      "blocked_by": {
+        "108": 0.03187546133995056
+      },
+      "rejection_no_op": true,
+      "peaks": {
+        "base": {
+          "suffix": false,
+          "instrument_master": 0.2488071173429489,
+          "pre_fx": 0.03358585387468338,
+          "pre_master": 0.03358585387468338,
+          "output": 0.008356399834156036,
+          "ring_n": 0,
+          "ring_clips": 0,
+          "ring_peak_code": 0.0
+        },
+        "center": {
+          "suffix": false,
+          "instrument_master": 0.2488071173429489,
+          "pre_fx": 0.4030302166938782,
+          "pre_master": 0.4030302166938782,
+          "output": 0.10027678310871124,
+          "ring_n": 0,
+          "ring_clips": 0,
+          "ring_peak_code": 0.0
+        },
+        "joined": {
+          "suffix": false,
+          "instrument_master": 0.2488071173429489,
+          "pre_fx": 0.4030302166938782,
+          "pre_master": 0.4030302166938782,
+          "output": 0.10027678310871124,
+          "ring_n": 0,
+          "ring_clips": 0,
+          "ring_peak_code": 0.0
+        }
+      }
+    },
+    "1-authored": {
+      "name": "BASS: Solidify",
+      "blocked_by": {
+        "107": 1,
+        "108": 0.03187546133995056
+      },
+      "rejection_no_op": true,
+      "peaks": {
+        "base": {
+          "suffix": false,
+          "instrument_master": 0.2488071173429489,
+          "pre_fx": 0.03358585387468338,
+          "pre_master": 0.043661609292030334,
+          "output": 0.010863319039344788,
+          "ring_n": 0,
+          "ring_clips": 0,
+          "ring_peak_code": 0.0
+        },
+        "center": {
+          "suffix": false,
+          "instrument_master": 0.2488071173429489,
+          "pre_fx": 0.4030302166938782,
+          "pre_master": 0.5239392518997192,
+          "output": 0.13035981357097626,
+          "ring_n": 0,
+          "ring_clips": 0,
+          "ring_peak_code": 0.0
+        },
+        "joined": {
+          "suffix": false,
+          "instrument_master": 0.2488071173429489,
+          "pre_fx": 0.4030302166938782,
+          "pre_master": 0.5239392518997192,
+          "output": 0.13035981357097626,
+          "ring_n": 0,
+          "ring_clips": 0,
+          "ring_peak_code": 0.0
+        }
+      }
+    },
+    "2-dry": {
+      "name": "Raw J106 101",
+      "blocked_by": {},
+      "rejection_no_op": null,
+      "peaks": {
+        "base": {
+          "suffix": true,
+          "instrument_master": 0.3431318402290344,
+          "pre_fx": 0.05088340491056442,
+          "pre_master": 0.05088340491056442,
+          "output": 0.017459716647863388,
+          "ring_n": 0,
+          "ring_clips": 0,
+          "ring_peak_code": 0.0
+        },
+        "center": {
+          "suffix": true,
+          "instrument_master": 0.3431318402290344,
+          "pre_fx": 0.6106008291244507,
+          "pre_master": 0.6106008291244507,
+          "output": 0.20951658487319946,
+          "ring_n": 0,
+          "ring_clips": 0,
+          "ring_peak_code": 0.0
+        },
+        "joined": {
+          "suffix": true,
+          "instrument_master": 0.3431318402290344,
+          "pre_fx": 0.6106008291244507,
+          "pre_master": 0.7393946051597595,
+          "output": 0.262085884809494,
+          "ring_n": 0,
+          "ring_clips": 0,
+          "ring_peak_code": 0.0
+        }
+      },
+      "signed": {
+        "base": {
+          "whole": {
+            "level_db": -29.763676149954144,
+            "signed_dbr": -0.15559612747485177
+          },
+          "held": {
+            "level_db": -28.1482665657151,
+            "signed_dbr": -0.03617598036728603
+          },
+          "release": {
+            "level_db": -23.51182760519042,
+            "signed_dbr": -0.5238661180589015
+          },
+          "chord": {
+            "level_db": -30.18327305002504,
+            "signed_dbr": -0.17849827436700055
+          }
+        },
+        "center": {
+          "whole": {
+            "level_db": -8.180051489800741,
+            "signed_dbr": -1.4444188461197274
+          },
+          "held": {
+            "level_db": -6.564641908544507,
+            "signed_dbr": 0.42434315525184696
+          },
+          "release": {
+            "level_db": -1.9282029370316094,
+            "signed_dbr": -6.489421512189601
+          },
+          "chord": {
+            "level_db": -8.599648388592072,
+            "signed_dbr": -1.9156301819492738
+          }
+        },
+        "joined": {
+          "whole": {
+            "level_db": -8.844230623652598,
+            "signed_dbr": -1.4472846067107694
+          },
+          "held": {
+            "level_db": -8.40232098405371,
+            "signed_dbr": -1.0070720285145867
+          },
+          "release": {
+            "level_db": -1.3857543956345844,
+            "signed_dbr": 3.9824372426845063
+          },
+          "chord": {
+            "level_db": -8.937421404645836,
+            "signed_dbr": -1.5180639766052593
+          }
+        }
+      }
+    },
+    "2-authored": {
+      "name": "Raw J106 101",
+      "blocked_by": {
+        "40": 1
+      },
+      "rejection_no_op": true,
+      "peaks": {
+        "base": {
+          "suffix": false,
+          "instrument_master": 0.3431318402290344,
+          "pre_fx": 0.05088340491056442,
+          "pre_master": 0.10155247151851654,
+          "output": 0.03484588488936424,
+          "ring_n": 0,
+          "ring_clips": 0,
+          "ring_peak_code": 0.0
+        },
+        "center": {
+          "suffix": false,
+          "instrument_master": 0.3431318402290344,
+          "pre_fx": 0.6106008291244507,
+          "pre_master": 1.219877004623413,
+          "output": 0.4185786545276642,
+          "ring_n": 0,
+          "ring_clips": 0,
+          "ring_peak_code": 0.0
+        },
+        "joined": {
+          "suffix": false,
+          "instrument_master": 0.3431318402290344,
+          "pre_fx": 0.6106008291244507,
+          "pre_master": 1.219877004623413,
+          "output": 0.4185786545276642,
+          "ring_n": 0,
+          "ring_clips": 0,
+          "ring_peak_code": 0.0
+        }
+      }
+    }
+  },
+  "stress": {
+    "bypass-1": {
+      "base": {
+        "suffix": true,
+        "instrument_master": 0.3431318402290344,
+        "pre_fx": 0.033637288957834244,
+        "pre_master": 0.033637288957834244,
+        "output": 0.01154202502220869,
+        "ring_n": 0,
+        "ring_clips": 0,
+        "ring_peak_code": 0.0
+      },
+      "center": {
+        "suffix": true,
+        "instrument_master": 0.3431318402290344,
+        "pre_fx": 0.40364745259284973,
+        "pre_master": 0.40364745259284973,
+        "output": 0.138504296541214,
+        "ring_n": 0,
+        "ring_clips": 0,
+        "ring_peak_code": 0.0
+      },
+      "joined": {
+        "suffix": true,
+        "instrument_master": 0.3431318402290344,
+        "pre_fx": 0.40364745259284973,
+        "pre_master": 0.41658324003219604,
+        "output": 0.14225389063358307,
+        "ring_n": 0,
+        "ring_clips": 0,
+        "ring_peak_code": 0.0
+      }
+    },
+    "bypass-6": {
+      "base": {
+        "suffix": true,
+        "instrument_master": 0.3431318402290344,
+        "pre_fx": 0.18099091947078705,
+        "pre_master": 0.18099091947078705,
+        "output": 0.0621037483215332,
+        "ring_n": 0,
+        "ring_clips": 0,
+        "ring_peak_code": 0.0
+      },
+      "center": {
+        "suffix": true,
+        "instrument_master": 0.3431318402290344,
+        "pre_fx": 2.1718909740448,
+        "pre_master": 2.1718909740448,
+        "output": 0.7452449202537537,
+        "ring_n": 0,
+        "ring_clips": 0,
+        "ring_peak_code": 0.0
+      },
+      "joined": {
+        "suffix": true,
+        "instrument_master": 0.3431318402290344,
+        "pre_fx": 2.1718909740448,
+        "pre_master": 1.8507941961288452,
+        "output": 0.6340629458427429,
+        "ring_n": 0,
+        "ring_clips": 0,
+        "ring_peak_code": 0.0
+      }
+    },
+    "classic-1": {
+      "base": {
+        "suffix": false,
+        "instrument_master": 0.3431318402290344,
+        "pre_fx": 0.033637288957834244,
+        "pre_master": 0.0374981053173542,
+        "output": 0.012866794131696224,
+        "ring_n": 20480,
+        "ring_clips": 0,
+        "ring_peak_code": 137.778
+      },
+      "center": {
+        "suffix": false,
+        "instrument_master": 0.3431318402290344,
+        "pre_fx": 0.40364745259284973,
+        "pre_master": 0.4509912431240082,
+        "output": 0.15474945306777954,
+        "ring_n": 20480,
+        "ring_clips": 0,
+        "ring_peak_code": 1653.34
+      },
+      "joined": {
+        "suffix": false,
+        "instrument_master": 0.3431318402290344,
+        "pre_fx": 0.40364745259284973,
+        "pre_master": 0.4509912431240082,
+        "output": 0.15474945306777954,
+        "ring_n": 20480,
+        "ring_clips": 0,
+        "ring_peak_code": 1653.34
+      }
+    },
+    "classic-6": {
+      "base": {
+        "suffix": false,
+        "instrument_master": 0.3431318402290344,
+        "pre_fx": 0.18099091947078705,
+        "pre_master": 0.17558245360851288,
+        "output": 0.06024793162941933,
+        "ring_n": 20480,
+        "ring_clips": 0,
+        "ring_peak_code": 741.339
+      },
+      "center": {
+        "suffix": false,
+        "instrument_master": 0.3431318402290344,
+        "pre_fx": 2.1718909740448,
+        "pre_master": 2.1076500415802,
+        "output": 0.7232018113136292,
+        "ring_n": 20480,
+        "ring_clips": 0,
+        "ring_peak_code": 8896.07
+      },
+      "joined": {
+        "suffix": false,
+        "instrument_master": 0.3431318402290344,
+        "pre_fx": 2.1718909740448,
+        "pre_master": 2.1076500415802,
+        "output": 0.7232018113136292,
+        "ring_n": 20480,
+        "ring_clips": 0,
+        "ring_peak_code": 8896.07
+      }
+    },
+    "classic-legacy-1": {
+      "base": {
+        "suffix": false,
+        "instrument_master": 0.3431318402290344,
+        "pre_fx": 0.033637288957834244,
+        "pre_master": 0.030684413388371468,
+        "output": 0.010528799146413803,
+        "ring_n": 10240,
+        "ring_clips": 0,
+        "ring_peak_code": 1102.19
+      },
+      "center": {
+        "suffix": false,
+        "instrument_master": 0.3431318402290344,
+        "pre_fx": 0.40364745259284973,
+        "pre_master": 0.3683258891105652,
+        "output": 0.12638433277606964,
+        "ring_n": 10240,
+        "ring_clips": 0,
+        "ring_peak_code": 13226.3
+      },
+      "joined": {
+        "suffix": false,
+        "instrument_master": 0.3431318402290344,
+        "pre_fx": 0.40364745259284973,
+        "pre_master": 0.3683258891105652,
+        "output": 0.12638433277606964,
+        "ring_n": 10240,
+        "ring_clips": 0,
+        "ring_peak_code": 13226.3
+      }
+    },
+    "classic-legacy-6": {
+      "base": {
+        "suffix": false,
+        "instrument_master": 0.3431318402290344,
+        "pre_fx": 0.18099091947078705,
+        "pre_master": 0.1371682584285736,
+        "output": 0.04706679657101631,
+        "ring_n": 10240,
+        "ring_clips": 0,
+        "ring_peak_code": 5930.53
+      },
+      "center": {
+        "suffix": false,
+        "instrument_master": 0.3431318402290344,
+        "pre_fx": 2.1718909740448,
+        "pre_master": 1.4383742809295654,
+        "output": 0.49355199933052063,
+        "ring_n": 10240,
+        "ring_clips": 1368,
+        "ring_peak_code": 71166.4
+      },
+      "joined": {
+        "suffix": false,
+        "instrument_master": 0.3431318402290344,
+        "pre_fx": 2.1718909740448,
+        "pre_master": 1.4383742809295654,
+        "output": 0.49355199933052063,
+        "ring_n": 10240,
+        "ring_clips": 1368,
+        "ring_peak_code": 71166.4
+      }
+    }
+  }
+}
