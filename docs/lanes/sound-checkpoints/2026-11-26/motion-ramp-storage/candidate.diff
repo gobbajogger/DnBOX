@@ -1,0 +1,35 @@
+--- a/firmware/src/seq/motion.h
++++ b/firmware/src/seq/motion.h
+@@ -38,8 +38,7 @@
+ typedef struct {
+     uint8_t gen;                      /* lane gen this runtime belongs to */
+     uint8_t applied;                  /* value playback set, MOT_NONE = the engine has the base / knob */
+-    uint8_t from, to, ramp;           /* the ramp across the current step */
+-    uint8_t part_parity;              /* parity of the step the ramp started on */
++    uint8_t from, to, ramp;           /* 0 off; 1 even step; 2 odd step */
+     volatile uint8_t rec_req, hold_req;
+     uint8_t rec_last;                 /* the step a gesture last wrote, MOT_NONE = no gesture */
+     uint8_t rec_quiet;                /* steps since */
+--- a/firmware/src/seq/motion.c
++++ b/firmware/src/seq/motion.c
+@@ -112,10 +112,9 @@
+         if (v == MOT_NONE && m->restore) to_base(m, l, r);
+         else put(m, l, r, v == MOT_NONE ? m->base(m->ctx, l->t, l->v, l->i) : v);
+         nv = l->val[next];
+-        r->ramp = (uint8_t)(v != MOT_NONE && nv != MOT_NONE && nv != v);
++        r->ramp = v != MOT_NONE && nv != MOT_NONE && nv != v ? (uint8_t)(1u + (step & 1)) : 0;
+         r->from = (uint8_t)v;
+         r->to = (uint8_t)nv;
+-        r->part_parity = (uint8_t)(step & 1);
+     }
+ }
+ 
+@@ -130,7 +129,7 @@
+         uint32_t L, a;
+         if (!r->ramp || !l->used || (l->t==0xfdu || l->t==0xfcu) || r->gen != l->gen || l->part >= MOT_PARTS)
+             continue;
+-        L = m->len[l->part][r->part_parity];
++        L = m->len[l->part][r->ramp - 1u];
+         if (!L)
+             continue;                                  /* the first step: no length yet */
+         a = m->age[l->part];
