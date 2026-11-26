@@ -1,0 +1,140 @@
+--- a/firmware/src/dsp/dnbx_core.c
++++ b/firmware/src/dsp/dnbx_core.c
+@@ -444,6 +444,9 @@
+ int dnbx_set_sj6_ota(dnbx_part *s,unsigned value)
+ {
+     if(!valid(s)||!s->superj6_amp_range||value>1u)return 0;
++#if defined(X0X_HOST) && DNBX_HOST_SJ6_FILTER_MODE
++    if(s->sj6_mode_test.armed){s->sj6_mode_test.request=(uint8_t)value;return 1;}
++#endif
+     if(s->sj6_ota==value)return 1;
+     s->sj6_ota=(uint8_t)value;
+     /* Original selects a different filter history. Rearm the target without
+@@ -887,6 +890,10 @@
+     if (!left || !right || left==right) return DNBX_E_ARGUMENT;
+     COUNT(w,frames,n);
+     const float osc_gain[]={gain1,gain2};
++#if defined(X0X_HOST) && DNBX_HOST_SJ6_FILTER_MODE && X0X_SJ6_OTA_NATIVE
++    const unsigned mode_moving=s->sj6_mode_test.armed &&
++        (s->sj6_ota!=s->sj6_mode_test.request || s->sj6_mode_test.gain<1.f);
++#endif
+ #if X0X_SJ6_NOISE_SUB_NATIVE
+     float sj6_steps[DNBX_VOICES];
+     const uint8_t *sj6_harmonics[DNBX_VOICES];
+@@ -938,6 +945,16 @@
+     const dnbx_envelope_params *fp[DNBX_LAYERS];
+     for (unsigned l=0;l<DNBX_LAYERS;l++) fp[l]=filter_params(s,l,&linked[l]);
+     for (unsigned k=0;k<n;k++) {
++#if defined(X0X_HOST) && DNBX_HOST_SJ6_FILTER_MODE && X0X_SJ6_OTA_NATIVE
++        if(mode_moving && s->sj6_mode_test.in_tile==0u &&
++           s->sj6_ota!=s->sj6_mode_test.request && s->sj6_mode_test.gain<=0.f){
++            s->sj6_ota=s->sj6_mode_test.request;
++            for(unsigned q=0;q<DNBX_VOICES;q++)for(unsigned l=0;l<DNBX_LAYERS;l++){
++                dnbx_layer_voice *lv=&s->voice[q].layer[l];
++                lv->filter_first=lv->filter_second=lv->ota_tail[0]=lv->ota_tail[1]=0.f;
++            }
++        }
++#endif
+ #if X0X_SJ6_MONO32_PROBE
+         if(s->sj6_glide_offset!=0.f&&s->sj6_glide_secs>0.f){
+             if(!s->sj6_glide_clock) {
+@@ -1028,10 +1045,22 @@
+                 else
+ #endif
+                 {
++#if defined(X0X_HOST) && DNBX_HOST_SJ6_FILTER_MODE && X0X_SJ6_OTA_NATIVE
++                if(s->sj6_mode_test.armed){
++                    const float x1=lv->filter_first,x2=lv->filter_second;
++                    const float y1=lv->ota_tail[0],y2=lv->ota_tail[1];
++                    const float y=(s->sj6_mode_test.b0*((x+x2)+(x1+x1))-s->sj6_mode_test.a1*y1)-s->sj6_mode_test.a2*y2;
++                    lv->filter_first=x;lv->filter_second=x1;
++                    lv->ota_tail[0]=y;lv->ota_tail[1]=y1;
++                    mix[l]+=velocity*amp*y;
++                } else
++#endif
++                {
+                 lv->filter_first=fm_clampf(lv->filter_first+a*(x-lv->filter_first-p->resonance*.8f*lv->filter_second),-4,4);
+                 lv->filter_second=fm_clampf(lv->filter_second+a*(lv->filter_first-lv->filter_second),-4,4);
+                 mix[l]+=velocity*amp*lv->filter_second;
+                 }
++                }
+                 lv->phase+=lv->increment; if (lv->phase>=1) lv->phase-=1;
+                 lv->subphase+=lv->increment*.5f; if (lv->subphase>=1) lv->subphase-=1;
+ #if X0X_SJ6_MONO32_PROBE || X0X_SJ6_PITCH_ENV_NATIVE
+@@ -1046,10 +1075,25 @@
+             float x=mix[l]*(p->gain/6.0f);
+             left[k]+=x*(.5f-.5f*p->pan); right[k]+=x*(.5f+.5f*p->pan);
+         }
++#if defined(X0X_HOST) && DNBX_HOST_SJ6_FILTER_MODE && X0X_SJ6_OTA_NATIVE
++        if(mode_moving){
++            float g=s->sj6_mode_test.gain;
++            if(s->sj6_ota!=s->sj6_mode_test.request)g=fm_maxf(0.f,g-s->sj6_mode_test.step);
++            else if(g<1.f)g=fm_minf(1.f,g+s->sj6_mode_test.step);
++            s->sj6_mode_test.gain=g;
++            left[k]*=g;right[k]*=g;
++            s->sj6_mode_test.in_tile=(uint8_t)((s->sj6_mode_test.in_tile+1u)&15u);
++        }
++#endif
+     }
+ #if X0X_SJ6_NOISE_SUB_NATIVE
+     s->sj6_noise_random=sj6_noise;
+ #endif
++#if defined(X0X_HOST) && DNBX_HOST_SJ6_FILTER_MODE && X0X_SJ6_OTA_NATIVE
++    /* Same tile position as per-sample counter, no cutoff/LFO change. */
++    if(s->sj6_mode_test.armed && !mode_moving)
++        s->sj6_mode_test.in_tile=(uint8_t)((s->sj6_mode_test.in_tile+n)&15u);
++#endif
+     return DNBX_OK;
+ }
+ int dnbx_render(dnbx_part *s,float *left,float *right,unsigned n,dnbx_work *w)
+--- a/firmware/src/dsp/dnbx_core.h
++++ b/firmware/src/dsp/dnbx_core.h
+@@ -149,6 +149,13 @@
+     float sj6_ota_sustain[DNBX_LAYERS];
+     uint8_t sj6_ota;
+ #endif
++#if defined(X0X_HOST) && DNBX_HOST_SJ6_FILTER_MODE && X0X_SJ6_OTA_NATIVE
++    struct {
++        float gain, step;
++        float b0, a1, a2; /* fixture supplied; no firmware coefficient law */
++        uint8_t armed, request, in_tile;
++    } sj6_mode_test;
++#endif
+     uint8_t damper, velocity_mode, superj6_amp_range, filter_link;
+ } dnbx_part;
+ 
+--- a/firmware/src/dsp/juno6_factory.inc
++++ b/firmware/src/dsp/juno6_factory.inc
+@@ -582,6 +582,10 @@
+ #if X0X_SJ6_OTA_NATIVE
+ void juno6_sj6_set_ota(juno6_t *s,unsigned mode)
+ {
++#if defined(X0X_HOST) && DNBX_HOST_SJ6_FILTER_MODE
++    /* Diagnostic receiver only. No application cutoff/ADSR mapping change. */
++    if(s->core.sj6_mode_test.armed){(void)dnbx_set_sj6_ota(&s->core,mode);return;}
++#endif
+     if(mode==s->core.sj6_ota || !dnbx_set_sj6_ota(&s->core,mode))return;
+     /* Original model selection re-evaluates the real knob/current target. */
+     const float hz=sj6_cutoff_hz(s,s->macro[2]);
+@@ -1973,6 +1977,11 @@
+ int juno6_render_stereo(juno6_t *s,float *left,float *right,unsigned frames)
+ #endif
+ {
++#if !X0X_SJ6_LFO1_DELAY_PORT
++#if defined(X0X_HOST) && DNBX_HOST_SJ6_FILTER_MODE && X0X_SJ6_OTA_NATIVE
++ if(s->core.sj6_mode_test.armed)s->core.sj6_mode_test.in_tile=0;
++#endif
++#endif
+ #if !X0X_SUPERJ6_BUILTIN_INIT
+  if(!s->typed){
+   stock_render(s,left,frames);
+@@ -2295,6 +2304,9 @@
+ #if X0X_SJ6_LFO1_DELAY_PORT
+ int juno6_render_stereo(juno6_t *s,float *left,float *right,unsigned frames)
+ {
++#if defined(X0X_HOST) && DNBX_HOST_SJ6_FILTER_MODE && X0X_SJ6_OTA_NATIVE
++ if(s->core.sj6_mode_test.armed)s->core.sj6_mode_test.in_tile=0;
++#endif
+     if (s->typed && !s->lfo1_delay_started && frames && frames<=DNBX_MAX_FRAMES &&
+         left && right && left!=right) {
+         if (s->lfo1_delay_age>=s->lfo1_delay_frames) s->lfo1_delay_started=1;
