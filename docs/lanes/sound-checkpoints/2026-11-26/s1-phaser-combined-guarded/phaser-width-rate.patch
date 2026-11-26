@@ -1,0 +1,53 @@
+--- a/AudioKit/Core/Soundpipe/modules/phaser.c
++++ b/AudioKit/Core/Soundpipe/modules/phaser.c
+@@ -225,6 +225,27 @@
+ 
+ #if DNBOX_PH_COEF
+ static unsigned ph_word(float f){unsigned u; __builtin_memcpy(&u,&f,4); return u;}
++#if DNBOX_PH_FASTCTL
++static float ph_pole(float a){
++    const unsigned w=ph_word(a),z=w&0x7fffffffu;
++    if((w>>31) && z>=0x00800000u && z<=0x3ec00000u)
++        return 1.f+a*(1.f+a*(.5f+a*(0x1.555556p-3f+
++                a*(0x1.555556p-5f+a*(0x1.111112p-7f+
++                a*(0x1.6c16c2p-10f+a*(0x1.a01a02p-13f+a*0x1.a01a02p-16f)))))));
++    return (float)exp((double)a);
++}
++static void ph_rotation(float a,float *s,float *c){
++    const unsigned z=ph_word(a)&0x7fffffffu;
++    if(z>=0x00800000u && z<=0x3c800000u){
++        const float a2=a*a;
++        *s=a+a*a2*(-0x1.555556p-3f+a2*0x1.111112p-7f);
++        *c=1.f+a2*(-.5f+a2*0x1.555556p-5f);
++    }else{
++        *s=(float)sin((double)a);
++        *c=(float)cos((double)a);
++    }
++}
++#endif
+ static void ph_slow(phaser*dsp){
+     const float gain=(float)dsp->fHslider0,width=(float)dsp->fHslider2,bpm=(float)dsp->fHslider6;
+     const unsigned g=ph_word(gain),w=ph_word(width),b=ph_word(bpm);
+@@ -233,12 +254,21 @@
+         dsp->tags[0]=g;
+     }
+     if(!dsp->valid||w!=dsp->tags[1]){
+-        dsp->pole=exp(dsp->fConst1*(0.f-(3.14159f*width)));
++        const float a=dsp->fConst1*(0.f-(3.14159f*width));
++#if DNBOX_PH_FASTCTL
++        dsp->pole=ph_pole(a);
++#else
++        dsp->pole=exp(a);
++#endif
+         dsp->tags[1]=w;
+     }
+     if(!dsp->valid||b!=dsp->tags[2]){
+         const float angle=dsp->fConst2*bpm;
++#if DNBOX_PH_FASTCTL
++        ph_rotation(angle,&dsp->rsin,&dsp->rcos);
++#else
+         dsp->rsin=sin(angle);dsp->rcos=cos(angle);
++#endif
+         dsp->tags[2]=b;
+     }
+     dsp->valid=1;

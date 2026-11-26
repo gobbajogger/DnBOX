@@ -27,7 +27,12 @@ still locked. The one-sided 3 kHz RMS stayed .6201 versus .000047 in the
 floating reference, and stereo/fuller chord tests also failed to decay.
 Do not reopen simple rounding, truncation or one serial error state as a
 release fix. The model's fixed ~.505 s coverage independently fails the
-full delay range.
+full delay range. Independent reproducible stochastic rounding also
+removed exact repeated states but remained unusable: the one-sided
+3 kHz echo was 0.024–0.026 RMS instead of .000047 at repeat 201, about
+54 dBr above the linear reference, and quiet DC noise and near-full
+overshoot grew. Do not retry four-bit recursive history simply by
+changing the rounding rule.
 
 ## SuperJ6: confirmed mechanisms and active tests
 
@@ -42,7 +47,8 @@ full delay range.
   The packed-float implementation is **rejected on target**: the same
   24-layer-voice simulator leaf took 18,131.54 µs vs 4,019.5 µs for
   stock 2×, before lookup, envelope, filters or arp. It exceeds the whole
-  budget. The 4× Q14 integer variant also measured 17.21 ms in the
+  budget. [Paired native rejection](sj6-halfband-native-rejection/replay-elite1.log).
+  The 4× Q14 integer variant also measured 17.21 ms in the
   comparable leaf, so switching arithmetic alone did not save this loop.
   The remaining waveform candidate must avoid running this 4×
   float loop, even though this was a useful diagnostic.
@@ -65,6 +71,9 @@ full delay range.
   source-backed AMP-before-IIR diagnostic shifted held level at most .004
   dB, so it does not explain a broad settled-level deficit. It matters on
   transitions (Raw dry tail about +.40 dB on that probe).
+  [AMP-order receipts](sj6-amp-before-filter/sj6-cross-preset/AMP-INGRESS.md).
+  Replacing the immutable open Normal filter for qualified Solidify was
+  also under .002 dB in whole-level change, so it is not the large loss.
 - **The compact dry mixer explains only part of the loss.** At unchanged
   Master and typed settings, removing only the fixed six-voice divisor
   recovers ~15.6 dB. Restoring unity duplication only for centered layers
@@ -120,7 +129,9 @@ full delay range.
   worst whole error −75.88 dBFS RMS. Release admission is an independent
   problem: 108 B compact owner vs 224 B matched owner in the checked
   layouts, and shipping verification disallows soft-double routines
-  still invoked by guarded exact fallback and Level preparation. Do not
+  still invoked by guarded exact fallback and Level preparation.
+  [Combined proof](s1-phaser-combined-guarded/README.md).
+  Do not
   bypass that restriction or misreport the isolated fixture as target fit.
 
 ## Release boundary
