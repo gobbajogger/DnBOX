@@ -24,10 +24,18 @@ isolated kernel timing, or partial link into a release claim.
   legacy diagnostic drum injections beyond that tape and cannot qualify.
   Pro's measured Core 0 wait for Synth One at the A-before-B barrier was
   only 8.625 µs. Do not claim release, and do not repeat the same probe.
-- Synth One: typed per-owner RAM union is being validated separately for
-  a larger delay history; these bytes are not available to all engines
-  at once and the exact effect does not yet fit. Preserve arpeggiator,
-  controls, reserve and protected partitions.
+- Synth One: the [typed 6,784 B per-owner delay lease](s1-guarded-owner-delay-lease/README.md)
+  now links Elite and Pro with +364/+372 B APP free and unchanged
+  +564 B pool above reserve. Disabled-use comparison preserves four S1
+  renders and 146,864 stereo SuperJ6 Unison frames bit for bit. Do not
+  spend the lease on the rejected H16 rate-only change. Each lease lives
+  only while its slot is Synth One; hold all reserves and test timing.
+- SuperJ6: source-verified [OTA fader order](sj6-ota-fader-order/README.md)
+  and [Crusher control receiver](sj6-crusher-physical-receiver/README.md)
+  explain independent mismatches. The OTA isolated Main-only cold guard
+  reproduces fader scaling, but is no solution for the existing shared
+  Sub nonlinear state. Physical control law and ordered writes are proven;
+  they do not prove native audio or let us infer an unknown live graph.
 
 ## Earlier checkpoints
 

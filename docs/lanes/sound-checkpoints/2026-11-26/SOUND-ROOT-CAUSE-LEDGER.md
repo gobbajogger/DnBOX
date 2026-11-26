@@ -417,6 +417,27 @@ signed owner counters on a clearly non-timing witness.
   Raw and Brainwave were signed exact untouched. [Source and
   measurements](sj6-solidify-sine-phase/README.md).
 
+- **Post-OTA fader is source-proven.** The original Main receiver keeps
+  the same 512 pre/post-filter words while halving the output fader
+  outside the nonlinear filter. The compact cold Main-only trial changes
+  its signed half-law error from −47.99 to −144.41 dBr pre-FX; the
+  original Normal scales before its linear IIR and must stay separate.
+  Do not move a fader across the shared nonlinear Sub route.
+  [Isolated proof](sj6-ota-fader-order/README.md).
+- **Crusher mapping, not an inferred preset state.** The source maps
+  public #108 to wet and #109 to cadence, then the actual Apple receiver
+  applies physical percent. #108=.25 yields wet 12.5%; #109=1 yields
+  decimation 6.06% and rounding zero; #107 rewrites default wet and
+  Booster level without rewriting cadence. Unknown graph state remains
+  unknown despite correct scalar wires.
+  [Original instruction trace](sj6-crusher-physical-receiver/README.md).
+- **Real owner-buffer reuse, not a timing pass.** Reusing mutually
+  exclusive owner storage instead of adding RAM provides 6,784 B of
+  Synth One delay history per active slot while retaining complete
+  SuperJ6 Unison. The lease alone preserves samples. Using that space
+  for a rate-only H16 change worsened some release tails and is rejected.
+  [Matched guarded layouts](s1-guarded-owner-delay-lease/README.md).
+
 ## Release boundary
 
 These are lab diagnostics. A host proof or a leaf emulator measurement
