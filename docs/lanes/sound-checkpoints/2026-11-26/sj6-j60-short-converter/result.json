@@ -1,0 +1,445 @@
+{
+  "binary": "6d163d79202e866d2fda96e36f752bd386641b5ae2d0b1f829a254d26b652850",
+  "columns": [
+    "signed_dbr",
+    "level_db"
+  ],
+  "exact_current_96k_middle": true,
+  "source": "exact currently regenerated Raw postvoice, guard physical suffix, exact physical J60 input digest and real callback schedule",
+  "signed_dry_bypass_bit_exact": true,
+  "clock": "actual converter table and rationals unmodified, only helper returns changed",
+  "windows": {
+    "attack": {
+      "compact": {
+        "same_input_current_J60_delta": [
+          -0.6446117392513439,
+          -1.0934351070815278
+        ],
+        "installed_authored_absolute": [
+          -1.6312052738119964,
+          -11.69426491203251
+        ],
+        "installed_authored_minus_dry": [
+          -0.641836758317711,
+          -14.750016484930377
+        ]
+      },
+      "oracle": {
+        "same_input_current_J60_delta": [
+          null,
+          0.0
+        ],
+        "installed_authored_absolute": [
+          -2.1478795522181033,
+          -12.945681031323609
+        ],
+        "installed_authored_minus_dry": [
+          -1.979592764515858,
+          -13.656581377848852
+        ]
+      },
+      "4": {
+        "same_input_current_J60_delta": [
+          -41.67176851880649,
+          -0.005302324846253723
+        ],
+        "installed_authored_absolute": [
+          -2.1467985470241677,
+          -12.9487214571778
+        ],
+        "installed_authored_minus_dry": [
+          -1.9780631899893542,
+          -13.661883702695105
+        ]
+      },
+      "8": {
+        "same_input_current_J60_delta": [
+          -42.224814140029395,
+          -0.00396794299973415
+        ],
+        "installed_authored_absolute": [
+          -2.1470124902229126,
+          -12.948115445851105
+        ],
+        "installed_authored_minus_dry": [
+          -1.9784384712476228,
+          -13.660549320848585
+        ]
+      },
+      "16": {
+        "same_input_current_J60_delta": [
+          -48.36795077234642,
+          -0.0007033635954938687
+        ],
+        "installed_authored_absolute": [
+          -2.1477176015673716,
+          -12.946114025293307
+        ],
+        "installed_authored_minus_dry": [
+          -1.9793778095331431,
+          -13.657284741444345
+        ]
+      }
+    },
+    "held": {
+      "compact": {
+        "same_input_current_J60_delta": [
+          -0.6866373967664262,
+          -1.061319127187427
+        ],
+        "installed_authored_absolute": [
+          -1.635438087897895,
+          -11.624207194274568
+        ],
+        "installed_authored_minus_dry": [
+          -0.6477377061684796,
+          -14.672798022904898
+        ]
+      },
+      "oracle": {
+        "same_input_current_J60_delta": [
+          null,
+          0.0
+        ],
+        "installed_authored_absolute": [
+          -2.162379632088439,
+          -12.864925982930892
+        ],
+        "installed_authored_minus_dry": [
+          -1.9784719143564886,
+          -13.61147889571747
+        ]
+      },
+      "4": {
+        "same_input_current_J60_delta": [
+          -41.82745297427424,
+          -0.005158993664007586
+        ],
+        "installed_authored_absolute": [
+          -2.161324339529431,
+          -12.867902373466373
+        ],
+        "installed_authored_minus_dry": [
+          -1.977001630858532,
+          -13.616637889381478
+        ]
+      },
+      "8": {
+        "same_input_current_J60_delta": [
+          -42.32873652882519,
+          -0.003881744091311821
+        ],
+        "installed_authored_absolute": [
+          -2.161529249950651,
+          -12.867309388279264
+        ],
+        "installed_authored_minus_dry": [
+          -1.977353023049846,
+          -13.615360639808783
+        ]
+      },
+      "16": {
+        "same_input_current_J60_delta": [
+          -48.52774760023849,
+          -0.0006849933725613191
+        ],
+        "installed_authored_absolute": [
+          -2.1622193695955176,
+          -12.865346422230523
+        ],
+        "installed_authored_minus_dry": [
+          -1.9782611320085708,
+          -13.612163889090032
+        ]
+      }
+    },
+    "first-release": {
+      "compact": {
+        "same_input_current_J60_delta": [
+          -4.69456409956769,
+          0.5344862725320955
+        ],
+        "installed_authored_absolute": [
+          -3.1664845608528336,
+          -9.684473743107274
+        ],
+        "installed_authored_minus_dry": [
+          -2.465236689547254,
+          -10.691005878556085
+        ]
+      },
+      "oracle": {
+        "same_input_current_J60_delta": [
+          null,
+          0.0
+        ],
+        "installed_authored_absolute": [
+          -2.6765327921266966,
+          -10.789220129199164
+        ],
+        "installed_authored_minus_dry": [
+          -2.4537143421188876,
+          -11.22549215108818
+        ]
+      },
+      "4": {
+        "same_input_current_J60_delta": [
+          -49.86798937562942,
+          -0.001315430233789776
+        ],
+        "installed_authored_absolute": [
+          -2.676317147923313,
+          -10.789850121207486
+        ],
+        "installed_authored_minus_dry": [
+          -2.453273152755311,
+          -11.22680758132197
+        ]
+      },
+      "8": {
+        "same_input_current_J60_delta": [
+          -50.673488049810906,
+          -0.000796570573265817
+        ],
+        "installed_authored_absolute": [
+          -2.6763520783101082,
+          -10.789620468941267
+        ],
+        "installed_authored_minus_dry": [
+          -2.45339710804552,
+          -11.226288721661444
+        ]
+      },
+      "16": {
+        "same_input_current_J60_delta": [
+          -57.395664862419224,
+          -0.00011547504611518894
+        ],
+        "installed_authored_absolute": [
+          -2.6764962709987756,
+          -10.789281066312563
+        ],
+        "installed_authored_minus_dry": [
+          -2.453653738143275,
+          -11.225607626134293
+        ]
+      }
+    },
+    "chord": {
+      "compact": {
+        "same_input_current_J60_delta": [
+          1.079685754514981,
+          -2.7673990333982683
+        ],
+        "installed_authored_absolute": [
+          -0.1614828726247548,
+          -11.821751467284205
+        ],
+        "installed_authored_minus_dry": [
+          -0.04031245325738472,
+          -16.225407995822906
+        ]
+      },
+      "oracle": {
+        "same_input_current_J60_delta": [
+          null,
+          0.0
+        ],
+        "installed_authored_absolute": [
+          -2.1085680266224207,
+          -13.059827982883874
+        ],
+        "installed_authored_minus_dry": [
+          -2.0119681525783846,
+          -13.458008962424637
+        ]
+      },
+      "4": {
+        "same_input_current_J60_delta": [
+          -38.89566787068918,
+          -0.009559206043679177
+        ],
+        "installed_authored_absolute": [
+          -2.104570923872523,
+          -13.071612766078598
+        ],
+        "installed_authored_minus_dry": [
+          -2.0090888525916166,
+          -13.467568168468315
+        ]
+      },
+      "8": {
+        "same_input_current_J60_delta": [
+          -39.410580557045364,
+          -0.007453913364913561
+        ],
+        "installed_authored_absolute": [
+          -2.1052147451667818,
+          -13.069532572594406
+        ],
+        "installed_authored_minus_dry": [
+          -2.009669462797648,
+          -13.465462875789552
+        ]
+      },
+      "16": {
+        "same_input_current_J60_delta": [
+          -45.569831912883245,
+          -0.001338825716024194
+        ],
+        "installed_authored_absolute": [
+          -2.107930333872867,
+          -13.061571750867229
+        ],
+        "installed_authored_minus_dry": [
+          -2.0115314414791587,
+          -13.459347788140661
+        ]
+      }
+    },
+    "final-release": {
+      "compact": {
+        "same_input_current_J60_delta": [
+          2.4404532154859955,
+          -2.351664125116245
+        ],
+        "installed_authored_absolute": [
+          0.2404797370000642,
+          -13.433957178387658
+        ],
+        "installed_authored_minus_dry": [
+          0.2093240351864112,
+          -16.22893841705193
+        ]
+      },
+      "oracle": {
+        "same_input_current_J60_delta": [
+          null,
+          0.0
+        ],
+        "installed_authored_absolute": [
+          -1.9710704754865604,
+          -13.691751137057764
+        ],
+        "installed_authored_minus_dry": [
+          -1.9248036034874811,
+          -13.87727429193568
+        ]
+      },
+      "4": {
+        "same_input_current_J60_delta": [
+          -37.35588999710193,
+          -0.015818272079677058
+        ],
+        "installed_authored_absolute": [
+          -1.965927846551188,
+          -13.710466007880967
+        ],
+        "installed_authored_minus_dry": [
+          -1.9206521770284077,
+          -13.893092564015362
+        ]
+      },
+      "8": {
+        "same_input_current_J60_delta": [
+          -37.92278475478004,
+          -0.012115625976047194
+        ],
+        "installed_authored_absolute": [
+          -1.9667954143783175,
+          -13.706687569754958
+        ],
+        "installed_authored_minus_dry": [
+          -1.9214882088206797,
+          -13.88938991791173
+        ]
+      },
+      "16": {
+        "same_input_current_J60_delta": [
+          -44.22672150823019,
+          -0.0019532790488968844
+        ],
+        "installed_authored_absolute": [
+          -1.9703305059272256,
+          -13.694189015276931
+        ],
+        "installed_authored_minus_dry": [
+          -1.924233455720086,
+          -13.87922757098458
+        ]
+      }
+    },
+    "full": {
+      "compact": {
+        "same_input_current_J60_delta": [
+          0.9281015730404539,
+          -2.5280257844194924
+        ],
+        "installed_authored_absolute": [
+          -0.4774356789154298,
+          -11.816025760968493
+        ],
+        "installed_authored_minus_dry": [
+          -0.10616342824676446,
+          -16.050199793091206
+        ]
+      },
+      "oracle": {
+        "same_input_current_J60_delta": [
+          null,
+          0.0
+        ],
+        "installed_authored_absolute": [
+          -2.110587276189923,
+          -13.061327262444575
+        ],
+        "installed_authored_minus_dry": [
+          -1.9995931666613223,
+          -13.522174008671715
+        ]
+      },
+      "4": {
+        "same_input_current_J60_delta": [
+          -39.33891503888259,
+          -0.008705145615936249
+        ],
+        "installed_authored_absolute": [
+          -2.107449355394555,
+          -13.07054573537788
+        ],
+        "installed_authored_minus_dry": [
+          -1.9970086770684436,
+          -13.53087915428765
+        ]
+      },
+      "8": {
+        "same_input_current_J60_delta": [
+          -39.85279263174391,
+          -0.006781911184445791
+        ],
+        "installed_authored_absolute": [
+          -2.107959140320968,
+          -13.068917266863027
+        ],
+        "installed_authored_minus_dry": [
+          -1.9975344868105271,
+          -13.52895591985616
+        ]
+      },
+      "16": {
+        "same_input_current_J60_delta": [
+          -46.01619926484072,
+          -0.0012136968358811046
+        ],
+        "installed_authored_absolute": [
+          -2.1100906798753587,
+          -13.062684810439848
+        ],
+        "installed_authored_minus_dry": [
+          -1.999204192553416,
+          -13.523387705507595
+        ]
+      }
+    }
+  }
+}
