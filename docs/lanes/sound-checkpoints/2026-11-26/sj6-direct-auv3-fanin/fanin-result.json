@@ -1,0 +1,125 @@
+{
+  "scope": "Terminal warm only, dry control closures. Summability cannot establish absolute gain, failure needs state/input-dependent diagnostic before changing module.",
+  "windows": {
+    "held": {
+      "unweighted_sum_vs_all": {
+        "level_db": -0.00023710085147887462,
+        "null_dbr": -65.38910404606548
+      },
+      "native_repeats": {
+        "all": {
+          "level_db": 0.00019919111853224732,
+          "null_dbr": -51.28444584234455
+        },
+        "osc1-only": {
+          "level_db": -3.4508124712507456e-06,
+          "null_dbr": -68.95717377947311
+        },
+        "osc2-only": {
+          "level_db": -1.6673200262932726e-07,
+          "null_dbr": -123.0786030501747
+        },
+        "sub-only": {
+          "level_db": 0.00018061102313018837,
+          "null_dbr": -50.07454588537442
+        }
+      }
+    },
+    "pending": {
+      "unweighted_sum_vs_all": {
+        "level_db": -0.0009901078825532575,
+        "null_dbr": -56.94893704635102
+      },
+      "native_repeats": {
+        "all": {
+          "level_db": 0.002979002394121982,
+          "null_dbr": -67.10499750407521
+        },
+        "osc1-only": {
+          "level_db": -0.0008896141940154501,
+          "null_dbr": -68.02496544739827
+        },
+        "osc2-only": {
+          "level_db": -3.4212132331692973e-06,
+          "null_dbr": -122.98680218087527
+        },
+        "sub-only": {
+          "level_db": 0.004433334681529164,
+          "null_dbr": -45.87990825734856
+        }
+      }
+    },
+    "commit": {
+      "unweighted_sum_vs_all": {
+        "level_db": 0.0007150264019224209,
+        "null_dbr": -72.10881250660418
+      },
+      "native_repeats": {
+        "all": {
+          "level_db": -0.0008396483183993691,
+          "null_dbr": -76.21995990842893
+        },
+        "osc1-only": {
+          "level_db": 5.038591716736884e-05,
+          "null_dbr": -96.98937944158683
+        },
+        "osc2-only": {
+          "level_db": 9.242962227957771e-07,
+          "null_dbr": -138.04900609245985
+        },
+        "sub-only": {
+          "level_db": -0.008284828776451883,
+          "null_dbr": -42.43337116601144
+        }
+      }
+    },
+    "chord": {
+      "unweighted_sum_vs_all": {
+        "level_db": 3.1603352926914886e-06,
+        "null_dbr": -62.808074850138816
+      },
+      "native_repeats": {
+        "all": {
+          "level_db": -0.000595845377192818,
+          "null_dbr": -50.752162485678724
+        },
+        "osc1-only": {
+          "level_db": -5.580853172573577e-07,
+          "null_dbr": -50.58766634766358
+        },
+        "osc2-only": {
+          "level_db": 4.042910836061341e-06,
+          "null_dbr": -67.0921129002642
+        },
+        "sub-only": {
+          "level_db": 9.494661170900866e-06,
+          "null_dbr": -51.87061981612495
+        }
+      }
+    },
+    "release": {
+      "unweighted_sum_vs_all": {
+        "level_db": -0.0010756800791776086,
+        "null_dbr": -49.71803070968303
+      },
+      "native_repeats": {
+        "all": {
+          "level_db": 0.0009672453220373357,
+          "null_dbr": -38.602986883172235
+        },
+        "osc1-only": {
+          "level_db": -7.410033794779154e-06,
+          "null_dbr": -48.396696060829065
+        },
+        "osc2-only": {
+          "level_db": 2.7956728203613877e-06,
+          "null_dbr": -62.860429592828815
+        },
+        "sub-only": {
+          "level_db": -6.495093954939381e-06,
+          "null_dbr": -51.516359477801714
+        }
+      }
+    }
+  }
+}
