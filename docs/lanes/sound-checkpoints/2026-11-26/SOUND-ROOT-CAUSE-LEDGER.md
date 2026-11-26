@@ -594,3 +594,13 @@ show 129 and 130 are retained as distinct public parameters, but neither
 reaches a DSP write through their shared observed preset callback. Do
 not attach their old internal sampler property proofs to current public
 dispatch or alias the values to actual cutoff/resonance 7 and 8.
+
+### Exact Main OTA live coefficient state
+The [receiver and control-clock witness](sj6-ota-exact-live-coeff/README.md)
+matches 48 requests and 520 update frames against the actual original
+receiver and frame updater. First load is immediate, equal log-frequency
+targets retain the ramp, a changed target starts at the current value,
+and the last update snaps to target. This is not a replacement for all
+live paths. The PI32 caller and clock alone need 172 B, before three
+unresolved math dependencies and a 24 B descriptor. Native memory and the
+sample path remain unqualified; do not adopt the cold-only shortcut.
