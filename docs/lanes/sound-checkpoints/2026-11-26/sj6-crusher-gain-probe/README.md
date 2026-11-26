@@ -1,5 +1,12 @@
 # SuperJ6 independent level probe: Apple Distortion
 
+> **Superseded interpretation:** The installed capture labels called the
+> public #108 changes Mix. The authenticated AU tree and DSP dispatch show
+> #108 is Amount, #109 is a no-op on the tested path, and enabling the effect
+> sets the private Mix to 30%. The PCM remains valid, but the interpretation
+> of the denominators and apparent bare mismatch below is obsolete. See the
+> [source-mapped comparison](../sj6-crusher-source-mapped/README.md).
+
 The native Apple effect responds nonlinearly at publicly reachable Crusher
 settings even with Rounding zero. The installed SuperJ6 AUv3 does **not**
 produce the same wet/dry response as that bare setting. Do not infer its

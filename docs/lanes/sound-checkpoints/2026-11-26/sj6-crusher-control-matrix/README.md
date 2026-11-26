@@ -1,5 +1,12 @@
 # Original SuperJ6 Crusher Mix / Amount matrix
 
+> **Superseded interpretation:** The installed capture labels called the
+> public #108 changes Mix. The authenticated AU tree and DSP dispatch show
+> #108 is Amount, #109 is a no-op on the tested path, and enabling the effect
+> sets the private Mix to 30%. The PCM remains valid, but the interpretation
+> of the denominators and apparent bare mismatch below is obsolete. See the
+> [source-mapped comparison](../sj6-crusher-source-mapped/README.md).
+
 Original installed AUv3 and standalone Apple effect, both 44.1 kHz with
 128-frame callbacks over the held analysis window. The installed arm
 sets only public controls, verifies complete readback, and holds the

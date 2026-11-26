@@ -1,0 +1,143 @@
+{
+  "f250": {
+    "peak_phase_estimate": 0.06783892646160537,
+    "dB_at_estimate": -1.1377464511411455,
+    "observed_dB": -1.3415328345615571,
+    "observed_phase_deg": -16.346571914068793,
+    "magnitude_delta_dB": -0.20378638342041167,
+    "other_curve_at_estimate": [
+      1.6965416483402986,
+      1.6418951895225937
+    ]
+  },
+  "f500": {
+    "peak_phase_estimate": 0.1395050821932726,
+    "dB_at_estimate": -1.110878987472861,
+    "observed_dB": -1.0144281575279015,
+    "observed_phase_deg": -15.781730038869464,
+    "magnitude_delta_dB": 0.09645082994495957,
+    "other_curve_at_estimate": [
+      1.666475316704919,
+      1.5890600112236404
+    ]
+  },
+  "f1000": {
+    "peak_phase_estimate": 0.27617338299740535,
+    "dB_at_estimate": -1.0625387567728268,
+    "observed_dB": -0.9692753281461148,
+    "observed_phase_deg": -14.812706121147281,
+    "magnitude_delta_dB": 0.093263428626712,
+    "other_curve_at_estimate": [
+      1.6172750607495394,
+      1.4981157060831019
+    ]
+  },
+  "mid_enable_static": {
+    "peak_phase_estimate": 0.15732011500604487,
+    "dB_at_estimate": 4.39928827982632,
+    "observed_dB": 4.435314491585583,
+    "observed_phase_deg": 1.5764541609198188,
+    "magnitude_delta_dB": 0.03602621175926313,
+    "other_curve_at_estimate": [
+      0.8806078102121939,
+      -15.64713522919112
+    ]
+  },
+  "mid_enable_held": {
+    "peak_phase_estimate": 0.14986083710118941,
+    "dB_at_estimate": 4.414054090339514,
+    "observed_dB": 4.4488075005651195,
+    "observed_phase_deg": 1.581591201697663,
+    "magnitude_delta_dB": 0.03475341022560574,
+    "other_curve_at_estimate": [
+      0.8803345754325278,
+      -15.70193685683467
+    ]
+  },
+  "matched_bare_table": [
+    {
+      "input_peak": 0.025,
+      "amount_ratio_dB": -1.154223085592874,
+      "amount_phase_deg": -16.70133634390815,
+      "enable_ratio_dB": 4.689742635346325,
+      "enable_phase_deg": 1.6750369010201591
+    },
+    {
+      "input_peak": 0.05,
+      "amount_ratio_dB": -1.1445349496053647,
+      "amount_phase_deg": -16.491035350433215,
+      "enable_ratio_dB": 4.631071562106409,
+      "enable_phase_deg": 1.6553977416425874
+    },
+    {
+      "input_peak": 0.1,
+      "amount_ratio_dB": -1.125521132827387,
+      "amount_phase_deg": -16.086124671880473,
+      "enable_ratio_dB": 4.519107283168545,
+      "enable_phase_deg": 1.6175519885669885
+    },
+    {
+      "input_peak": 0.15,
+      "amount_ratio_dB": -1.106993302052523,
+      "amount_phase_deg": -15.70086457860715,
+      "enable_ratio_dB": 4.413759098834876,
+      "enable_phase_deg": 1.5814908342021456
+    },
+    {
+      "input_peak": 0.2,
+      "amount_ratio_dB": -1.0889497481226316,
+      "amount_phase_deg": -15.333866591747228,
+      "enable_ratio_dB": 4.31443279313555,
+      "enable_phase_deg": 1.547087868687481
+    },
+    {
+      "input_peak": 0.3,
+      "amount_ratio_dB": -1.0542940047020177,
+      "amount_phase_deg": -14.649689980321556,
+      "enable_ratio_dB": 4.131816910771946,
+      "enable_phase_deg": 1.482797481839299
+    },
+    {
+      "input_peak": 0.4,
+      "amount_ratio_dB": -1.0214880095253966,
+      "amount_phase_deg": -14.024743138950758,
+      "enable_ratio_dB": 3.9677544820627446,
+      "enable_phase_deg": 1.423870323000476
+    },
+    {
+      "input_peak": 0.5,
+      "amount_ratio_dB": -0.9904442870811337,
+      "amount_phase_deg": -13.451634483015932,
+      "enable_ratio_dB": 3.819464808638143,
+      "enable_phase_deg": 1.3696399279227847
+    },
+    {
+      "input_peak": 0.65,
+      "amount_ratio_dB": -0.9469678894052785,
+      "amount_phase_deg": -12.675834859891452,
+      "enable_ratio_dB": 3.621822870475084,
+      "enable_phase_deg": 1.2959040862266737
+    },
+    {
+      "input_peak": 0.8,
+      "amount_ratio_dB": -0.9068963911276398,
+      "amount_phase_deg": -11.985762936777254,
+      "enable_ratio_dB": 3.448821373572064,
+      "enable_phase_deg": 1.2299632211685558
+    },
+    {
+      "input_peak": 1.0,
+      "amount_ratio_dB": -0.8582016462840157,
+      "amount_phase_deg": -11.176025859719322,
+      "enable_ratio_dB": 3.2489491673005952,
+      "enable_phase_deg": 1.1521194843424016
+    },
+    {
+      "input_peak": 1.2,
+      "amount_ratio_dB": -0.8142736633683072,
+      "amount_phase_deg": -10.470048028397752,
+      "enable_ratio_dB": 3.0772601665431045,
+      "enable_phase_deg": 1.0838069353421849
+    }
+  ]
+}
