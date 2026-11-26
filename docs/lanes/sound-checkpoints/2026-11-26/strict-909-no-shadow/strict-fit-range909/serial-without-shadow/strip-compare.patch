@@ -1,0 +1,101 @@
+--- a/firmware/src/dsp/drum909.c
++++ b/firmware/src/dsp/drum909.c
+@@ -1170,19 +1170,7 @@
+     if (n > 0) (void)d9_noise_span(d, n);
+ }
+ 
+-extern void plat_cpu2_sync(void);
+-volatile unsigned d9_verify_missed, d9_verify_good, d9_verify_state, d9_verify_pcm;
+-
+-void drum909_future_run(d9_future_t *f, int n)
+-{
+-    d9_bus_t b={.y=f->pcm};
+-    unsigned count=(unsigned)(n < f->voice.mute ? n : f->voice.mute);
+-    d9_render_smp(&f->voice,&b,n);
+-    plat_cpu2_sync();
+-    f->frames=count;
+-}
+-static void d9_render(drum909_t *d, float *dry, float *rev, float *dly, int n, uint16_t audible_tracks,
+-                      unsigned wanted, d9_future_t *volatile *pending)
++static void d9_render(drum909_t *d, float *dry, float *rev, float *dly, int n, uint16_t audible_tracks)
+ {
+     d9_bus_t bus;
+     float y[256];
+@@ -1218,28 +1206,7 @@
+         d9_smp_t *s = &d->smp[order[k] - DR_CH];
+         if (s->mute > 0) {
+             d9_bus(&bus, d, order[k], dry, rev, dly, audible_tracks);
+-            d9_future_t *future=0;
+-            if (pending && wanted==order[k]) {
+-                plat_cpu2_sync();
+-                future=*pending;
+-            }
+-            if (future) {
+-                plat_cpu2_sync();
+-                float *dry=bus.dry;
+-                bus.dry=0;
+-                d9_render_smp(s,&bus,n);
+-                if (__builtin_memcmp(s,&future->voice,sizeof(*s)))
+-                    ++d9_verify_state;
+-                else if (__builtin_memcmp(y,future->pcm,future->frames*sizeof(*y)))
+-                    ++d9_verify_pcm;
+-                else
+-                    ++d9_verify_good;
+-                bus.dry=dry;
+-                d9_emit_block(&bus,(int)future->frames);
+-            } else {
+-                if (pending && wanted==order[k]) ++d9_verify_missed;
+-                d9_render_smp(s, &bus, n);
+-            }
++            d9_render_smp(s, &bus, n);
+         }
+     }
+ }
+@@ -1247,7 +1214,7 @@
+ void drum909_render(drum909_t *d, float *dry, float *rev, float *dly, int n)
+ {
+     d9_dry_r = 0;
+-    d9_render(d, dry, rev, dly, n, 0x7FFu,0,0);
++    d9_render(d, dry, rev, dly, n, 0x7FFu);
+ }
+ 
+ /* All callers share pan, noise and serial voice state. The engine's 909 job
+@@ -1255,7 +1222,7 @@
+  * get the same sequence of binary32 additions, and the mono render computes
+  * that sequence once. Other callers may already have unequal bus contents. */
+ static void d9_render_st_masked(drum909_t *d, float *dry_l, float *dry_r, float *rev, float *dly,
+-                                int n, uint16_t audible_tracks, int cleared, unsigned v, d9_future_t *volatile *pending)
++                                int n, uint16_t audible_tracks, int cleared)
+ {
+     int duplicate = cleared;
+     if (n > 256) n = 256;
+@@ -1272,7 +1239,7 @@
+         }
+     }
+     d9_dry_r = duplicate ? 0 : dry_r;
+-    d9_render(d, dry_l, rev, dly, n, audible_tracks,v,pending);
++    d9_render(d, dry_l, rev, dly, n, audible_tracks);
+     if (duplicate && n > 0)
+         __builtin_memcpy(dry_r, dry_l, (unsigned)n * sizeof *dry_l);
+     d9_dry_r = 0;
+@@ -1281,18 +1248,12 @@
+ void drum909_render_st_cleared(drum909_t *d, float *dry_l, float *dry_r, float *rev, float *dly,
+                                int n, uint16_t audible_tracks)
+ {
+-    d9_render_st_masked(d, dry_l, dry_r, rev, dly, n, audible_tracks,1,0,0);
++    d9_render_st_masked(d, dry_l, dry_r, rev, dly, n, audible_tracks,1);
+ }
+-void drum909_render_st_future(drum909_t *d,float *l,float *r,float *rev,float *dly,
+-                             int n,uint16_t mask,unsigned v,d9_future_t *volatile *pending)
+-{
+-    d9_render_st_masked(d,l,r,rev,dly,n,mask,1,v,pending);
+-}
+-
+ void drum909_render_st_masked(drum909_t *d, float *dry_l, float *dry_r, float *rev, float *dly,
+                               int n, uint16_t audible_tracks)
+ {
+-    d9_render_st_masked(d, dry_l, dry_r, rev, dly, n, audible_tracks,0,0,0);
++    d9_render_st_masked(d, dry_l, dry_r, rev, dly, n, audible_tracks,0);
+ }
+ 
+ void drum909_render_st(drum909_t *d, float *dry_l, float *dry_r, float *rev, float *dly, int n)

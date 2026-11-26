@@ -1,0 +1,74 @@
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -3012,9 +3012,7 @@
+  * metals' voices on core 0 in parallel, mid lanes and metal mix after the body
+  * is visible. No added audio latency; the sums are the same bits. */
+ extern volatile uint32_t d9_test_timeline[4];
+-static uint8_t eng_808_split, eng_d9_voice;
+-static d9_smp_t *eng_d9_seed;
+-static d9_future_t *volatile eng_d9_ready;
++static uint8_t eng_808_split;
+ static volatile uint8_t eng_808_body;                  /* 1: BD+SD is in left808/right808 */
+ static float eng_vol;                                  /* this callback's master volume (render_sub may master) */
+ static uint8_t eng_master_done;                        /* 1: this stretch ran the master */
+@@ -3151,8 +3149,8 @@
+             drum909_advance_noise(&d909, (int)n);       /* retain the exact restart noise/history */
+             drum909_pan_settle(&d909);                    /* silent: pans move at once, no glide */
+         } else {
+-            drum909_render_st_future(&d909,dry_l,dry_r,rev,dly,(int)n,
+-                        smc_audible_drums(solo,PART_909),eng_d9_voice,&eng_d9_ready);
++            drum909_render_st_cleared(&d909,dry_l,dry_r,rev,dly,(int)n,
++                        smc_audible_drums(solo,PART_909));
+             if (d8_frame==73728u) {
+                 { uint32_t bits; __builtin_memcpy(&bits,&dry_l[8],4); d9_test_timeline[1]=bits; }
+                 { uint32_t bits; __builtin_memcpy(&bits,&rev[8],4); d9_test_timeline[2]=bits; }
+@@ -3299,22 +3297,11 @@
+ {
+     int j;
+     (void)arg;
+-    d9_future_t future;
+-#ifndef X0X_HOST
+-    if (eng_d9_seed) {
+-        future.voice=*eng_d9_seed;
+-        drum909_future_run(&future,(int)(eng_job_arg & 0xffu));
+-        eng_sync();
+-        eng_d9_ready=&future;
+-        eng_sync();
+-    }
+-#endif
+     /* Real platform: the worker keeps this frame until all its bass jobs
+      * finish after stage 1. Existing takeover cannot enter before stage 1.
+      * Host runs core1 synchronously, so it leaves this opt-in unadvertised. */
+     if (eng_808_split && !eng_808_body)
+         d808_body_run();
+-    (void)future;
+     for (j = eng_c1_next; j < JB_N; j++) {
+         if (!(eng_c1_mask & (1u << j)))
+             continue;
+@@ -3483,26 +3470,11 @@
+     /* 808 stays on core 0 and core 1 has other work: move the BD+SD prefix */
+     eng_808_split = (uint8_t)(!(m & (1u << JB_808)) && m && drum808_active(&d808));
+     eng_808_body = (uint8_t)!eng_808_split;
+-    eng_d9_seed=0;
+-    eng_d9_ready=0;
+-    if (n<=D9_FUTURE_MAX && !(m & (1u<<JB_909)) && (m & ((1u<<JB_A)|(1u<<JB_B)))) {
+-        /* Prefer the more expensive cymbals; choose before worker dispatch.
+-         * Core 1 sees a private copy, never a pointer into the live kit. */
+-        for (unsigned v=DR_RD;v>=DR_CH;--v) {
+-            d9_smp_t *s=&d909.smp[v-DR_CH];
+-            if (!s->playing || s->mute<=0) continue;
+-            d9_future_t *f=(m&(1u<<JB_A))?&original_workspace.future.voice:&original_workspace_b.future.voice;
+-            f->voice=*s;
+-            eng_d9_voice=(uint8_t)v; eng_d9_seed=&f->voice;
+-            break;
+-        }
+-    }
+     eng_sync();
+     if (m && !plat_cpu2_run(core2_jobs, 0u)) {
+         eng_c1_mask = 0;                              /* one core: all of it here */
+         eng_808_split = 0;
+         eng_808_body = 1;
+-        eng_d9_seed = 0;
+     }
+ #if X0X_DEBUG
+     eng_dbg_nsub++;

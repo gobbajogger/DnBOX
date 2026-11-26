@@ -1,0 +1,127 @@
+{
+  "scope": "Same cue, absolute original isolated latest compiled Sub receiver with hash-matched old authorized sample media, versus actual compact with admitted typed projection; current physical projected receiver settings not equivalent to absent full live LFO graph. Compact pre-IIR VCA is explicitly counterfactual multiplication for measurement only, output unchanged. Last-column reducer algebra does not qualify matched downstream chain or limiter.",
+  "core": "6d163d79202e866d2fda96e36f752bd386641b5ae2d0b1f829a254d26b652850",
+  "asset": "ec994e3fabf42b2761d7ca3799f87dacb4ac12670e2909451ff14f78b9a5f740",
+  "native": "1148c1a20945b8a4dca47dbfd6f174c60b0676a0d4a5e748e6aea4f40b382984",
+  "compact_terminal": "e964cce406e21c3470a32059e825171c63ff749fe399b456f80339c13cc98ced",
+  "commit": [
+    49875,
+    55
+  ],
+  "windows": {
+    "first_hold": {
+      "frames": [
+        24576,
+        37634
+      ],
+      "stage_levels": {
+        "original_pre_iir": {
+          "rms": 0.19755976997323046,
+          "peak": 0.2366226315498352
+        },
+        "original_post_iir": {
+          "rms": 0.1998200480803825,
+          "peak": 0.23887798190116882
+        },
+        "compact_carrier_with_fader": {
+          "rms": 0.3132618454807625,
+          "peak": 0.37296581268310547
+        },
+        "compact_pre_iir_with_equivalent_vca": {
+          "rms": 0.19624950080923112,
+          "peak": 0.24287329614162445
+        },
+        "compact_post_iir_vca": {
+          "rms": 0.1509728659955796,
+          "peak": 0.18474207818508148
+        },
+        "compact_layer_sum": {
+          "rms": 0.1509728659955796,
+          "peak": 0.18474207818508148
+        },
+        "compact_reducer_l": {
+          "rms": 0.012581072457733504,
+          "peak": 0.01539517380297184
+        },
+        "compact_reducer_r": {
+          "rms": 0.012581072457733504,
+          "peak": 0.01539517380297184
+        },
+        "compact_final": {
+          "rms": 0.0016011398266460774,
+          "peak": 0.001959278481081128
+        },
+        "native_final": {
+          "rms": 0.03311944666852761,
+          "peak": 0.08540072292089462
+        },
+        "native_repeat": {
+          "rms": 0.03312013594429534,
+          "peak": 0.08539798110723495
+        }
+      },
+      "compact_equiv_pre_vs_orig_pre_db": -0.05779902198758739,
+      "compact_voice_vs_orig_voice_db": -2.4348031914386885,
+      "compact_actual_reducer_db": -21.583624719747547,
+      "compact_vs_native_final_db": -26.31307624163582,
+      "compact_unity_after_reducer_only_vs_native_db": -4.729451521888272
+    },
+    "second_hold": {
+      "frames": [
+        53971,
+        81434
+      ],
+      "stage_levels": {
+        "original_pre_iir": {
+          "rms": 0.12311737273147075,
+          "peak": 0.19211652874946594
+        },
+        "original_post_iir": {
+          "rms": 0.1284878888172893,
+          "peak": 0.19113114476203918
+        },
+        "compact_carrier_with_fader": {
+          "rms": 0.21535441784623652,
+          "peak": 0.26141518354415894
+        },
+        "compact_pre_iir_with_equivalent_vca": {
+          "rms": 0.1322360307272324,
+          "peak": 0.17430253326892853
+        },
+        "compact_post_iir_vca": {
+          "rms": 0.10112255374260662,
+          "peak": 0.130642369389534
+        },
+        "compact_layer_sum": {
+          "rms": 0.10112255374260662,
+          "peak": 0.130642369389534
+        },
+        "compact_reducer_l": {
+          "rms": 0.008426879744406581,
+          "peak": 0.010886864736676216
+        },
+        "compact_reducer_r": {
+          "rms": 0.008426879744406581,
+          "peak": 0.010886864736676216
+        },
+        "compact_final": {
+          "rms": 0.0010724533079259763,
+          "peak": 0.0013855252182111144
+        },
+        "native_final": {
+          "rms": 0.026698970706455116,
+          "peak": 0.05890370532870293
+        },
+        "native_repeat": {
+          "rms": 0.026698999959535005,
+          "peak": 0.058906182646751404
+        }
+      },
+      "compact_equiv_pre_vs_orig_pre_db": 0.6206093089942979,
+      "compact_voice_vs_orig_voice_db": -2.0802832913193576,
+      "compact_actual_reducer_db": -21.58362464692507,
+      "compact_vs_native_final_db": -27.922322514683536,
+      "compact_unity_after_reducer_only_vs_native_db": -6.338697867758466
+    }
+  }
+}

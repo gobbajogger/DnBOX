@@ -91,6 +91,12 @@ changing the rounding rule.
   oscillator plus S1 phaser plus Low Sub guarded pair, not the separate
   phase-handoff cost and not sound/zero-dropout qualification.
   [Both-engine fit receipt](guarded-both-engines-fold32-fit/NAMES.md).
+  New no-shadow composition brings hoisted Fold32 to +348/+356 APP with
+  the same +564 pool. The subsequently measured warm handoff adds 96 B
+  on this exact donor, leaving **+252/+260 B APP** marker-inclusive.
+  The actual source clocks and held mode/pad/bend guards passed,
+  but this is INIT-only, with the native full scene run pending at seal.
+  [Exact warm paired link](guarded-warm-fold32-pair/WARM.md).
   The isolated full SMK host A/B passed all 16 arp steps, held pad/knob
   edits, original MIDI PB/CC1 and actual ADC wheel scanner (simulated input),
   all 740 state rows and normal Saw/PWM digests while Fold was live.
@@ -165,6 +171,13 @@ changing the rounding rule.
   sampler postfilter −174.73° and −133.83°. Avoid fitting terminal phase
   as a direct oscillator correction. [Chronological suffix proof](sj6-sub-physical-suffix/sj6-sub-body/README.md).
   [Exact source and signed scorer](sj6-sub-range-and-signed-shape/README.md).
+  Current original Core + authorized media in RAM, at matched held Sub
+  input, shows carrier RMS within .63 dB of compact across the two zones.
+  Compact post-voice filter path loses about 2.1–2.4 dB relative to the
+  original receiver; the exact mixer divisor causes 21.58 dB. About
+  4.7–6.3 dB remains after accounting for the divisor, including that
+  filter loss. Nothing here attributes the remainder to the limiter.
+  [Absolute stage proof](sj6-sub-absolute-decomposition/README.md).
 - **Unresolved:** source owner of the gain between the calibrated Crusher
   and Apple's compressor input; which missing or misrouted per-program
   states dominate different dry patches; delay-bandwidth correction that
@@ -275,6 +288,13 @@ on the same pinned inputs and unchanged actual C1 plan. An instrumented
 Elite late DMA ordinal 419 had ~748 µs nested TIMER5, which cannot
 explain the full overrun (>13.59 ms even without those ticks).
 There is no evidence to disable required interrupts.
+The actual no-shadow serial pair preserved 56,000 signed state/four-bus
+host comparisons and recovered 480 B APP. It still failed unchanged
+922-event no-write diagnostics: 14,301 µs/79 xruns Elite and 14,394 µs/77
+Pro. Missing producer-anchor/unequal positive owner observations prevent
+claiming a controlled causal timing delta. This is the donor for the
+later actual Fold/warm fitting pair, not that pair's timing result.
+[Exact no-shadow evidence](strict-909-no-shadow/strict-fit-range909/serial-without-shadow/README.md).
 
 The exact Synth One silent-Sub fast path saves ~603 µs in a six-voice
 512-frame *isolated* zero-Sub case; audible or exact-zero main fallback

@@ -1,0 +1,94 @@
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -3524,6 +3524,15 @@
+ #if X0X_DEBUG
+     eng_dbg_wait += plat_ticks24() - w0;              /* now: core 0's whole job span */
+ #endif
++#if X0X_LATE_WITNESS
++    extern volatile uint32_t lab_half_plans;
++    extern volatile uint8_t lab_half_spans,lab_half_extra;
++    lab_half_plans|=1u<<eng_c1_mask; /* actually planned after dispatch fail path */
++    lab_half_spans++;
++    if(eng_808_split)lab_half_extra|=1u;
++    if(m && !eng_c1_mask)lab_half_extra|=2u;
++    if(eng_c1_waited==1)lab_half_extra|=4u; /* attempted join without confirmed finish */
++#endif
+     brk_midi_drain();
+     for (j = 0; j < NBASS; j++)                       /* the recorder (shared with the sequencer): core 0 */
+         if (bass_render_ok[j]) original_rec_recover_off(j);
+--- a/firmware/src/app/main_fm1.c
++++ b/firmware/src/app/main_fm1.c
+@@ -26,6 +26,22 @@
+     uint32_t crash_seen;                            /* the crash count already reported at a boot */
+ } x0x_dbg __attribute__((section(".noinit")));
+ static uint8_t safe_mode;
++#if X0X_LATE_WITNESS
++#if !X0X_COLD_COMPANION_LAB
++#error late witness is restricted to diagnostic images
++#endif
++/* SRAM observation, never transmitted or written to NOR. */
++struct late_row {
++    uint32_t half_ordinal, elapsed_us, nested_24m_ticks, plan_bits;
++    uint8_t dma_before, dma_after, spans, extra;
++};
++static volatile uint32_t lab_half_nested X0X_POOL;
++volatile uint32_t lab_half_plans X0X_POOL;
++volatile uint8_t lab_half_spans X0X_POOL;
++volatile uint8_t lab_half_extra X0X_POOL; /* at least one prefix split / fallback */
++volatile uint32_t lab_late_count X0X_POOL;
++volatile struct late_row lab_late_worst X0X_POOL;
++#endif
+ #if X0X_DEBUG
+ /* development: the slowest block since boot, taken apart (read over USB: tools/fm1_debug.py) */
+ extern volatile uint32_t eng_dbg_wait, eng_dbg_nsub;
+@@ -38,6 +54,9 @@
+ static void render_block(int32_t *o)                /* ALNK0: one half, measured */
+ {
+     uint32_t t0 = fm1_ticks(), us, budget = HALF_FRAMES * 1000000u / FS;
++#if X0X_LATE_WITNESS
++    lab_half_nested=lab_half_plans=lab_half_spans=lab_half_extra=0;
++#endif
+     x0x_dbg.in_audio = 1;
+ #if FELUCCA_UAC
+     uac_render_start();
+@@ -102,7 +121,18 @@
+         uint32_t half = fm1_audio_free_half();
+         render_block(&abuf[half * HALF_WORDS]);
+         fm1_audio_ack_half();
++#if X0X_LATE_WITNESS
++        uint32_t now_half=fm1_audio_free_half(); /* original decision point */
++        if (now_half != half) {
++            uint32_t slot=lab_late_count;
++            if(slot==0u || x0x_dbg.last_us>lab_late_worst.elapsed_us)
++                lab_late_worst=(struct late_row){
++                    x0x_dbg.halves-1u,x0x_dbg.last_us,lab_half_nested,lab_half_plans,
++                    (uint8_t)half,(uint8_t)now_half,lab_half_spans,lab_half_extra};
++            lab_late_count=slot+1u;
++#else
+         if (fm1_audio_free_half() != half) {
++#endif
+ #if X0X_DEBUG
+             x0x_worst.late_in++;
+ #endif
+@@ -139,6 +169,10 @@
+ #if X0X_DEBUG
+     uint32_t tt0 = fm1_ticks();
+ #endif
++#if X0X_LATE_WITNESS
++    const uint32_t lab_nested=x0x_dbg.in_audio;
++    const uint32_t lab_entry=lab_nested?fm1_ticks():0u;
++#endif
+     fm1_timer5_ack();
+ #if X0X_BLE
+     fm1_t5w_begin();                                /* test 22: who changes this frame */
+@@ -198,6 +232,10 @@
+     if (x0x_dbg.in_audio)
+         dbg_tmr += fm1_ticks() - tt0;
+ #endif
++#if X0X_LATE_WITNESS
++    if(lab_nested)
++        lab_half_nested += fm1_ticks()-lab_entry;
++#endif
+ #if X0X_LCD_TRACE
+     lcd_trace_record(LCD_T_TIMER5, (fm1_ticks() - lcd_t5_started) / FM1_TICKS_PER_US);
+ #endif

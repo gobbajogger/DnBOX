@@ -1,0 +1,55 @@
+--- a/firmware/src/dsp/dnbx_core.c
++++ b/firmware/src/dsp/dnbx_core.c
+@@ -283,6 +283,16 @@
+ static int route_shape(unsigned mode,float shape){
+   return mode==DNBX_OSC_SUPERJ6 && shape<2.f/3.f;
+ }
++static inline float source_clock_step(float p,float q){
++    const float q1=p+q,q2=q1+q,q3=q2+q,q4=q3+q;
++    if(q4<1.f)return q4;
++    for(unsigned j=0;j<4;j++){p+=q;if(p>=1.f)p-=1.f;}
++    return p;
++}
++/* Reserved filter-envelope owner byte is not used for typed routing; do not
++ * borrow AMP reserved because the sequencer owns it. Fresh voice memset
++ * already clears this marker on allocation or steal. */
++enum { SJ6_CLOCK_HELD = 0x80 };
+ static float probe_shape(dnbx_layer_voice *v,unsigned shape){
+     const float step=v->increment,q=.25f*step;
+     float p=v->phase;
+@@ -296,10 +306,7 @@
+     }
+     float pdel=p-cache[1];
+     if(pdel<0.f)pdel+=1.f;
+-    const float q1=p+q,q2=q1+q,q3=q2+q,q4=q3+q;
+-    if(q4<1.f)p=q4; /* monotonic positive phases prove no earlier wrap */
+-    else for(unsigned j=0;j<4;j++){p+=q;if(p>=1.f)p-=1.f;}
+-    v->phase=p;
++    /* Advance once in the shared render-stage owner below. */
+     owner o={{(unsigned)cache[2],cache[3]},shape};
+     return shape_lookup(pdel,q,&o);
+ }
+@@ -582,7 +589,11 @@
+         dnbx_layer_voice *v=&s->voice[i].layer[layer];
+         v->increment=voice_pitch_increment(s,&s->voice[i],layer,p->tune_semitones);
+ #if SJ6_WAVE_PROBE
+-        if(reset)memset(v->oscillator_history,0,sizeof v->oscillator_history);
++        if(reset){
++            memset(v->oscillator_history,0,sizeof v->oscillator_history);
++            if(p->oscillator_mode==DNBX_OSC_SUPERJ6 && p->waveform>=2.f/3.f && v->amp.stage!=DNBX_ENV_IDLE)
++                v->filter.reserved|=SJ6_CLOCK_HELD;
++        }
+ #endif
+         /* A running timed segment retains its cached endpoint/rate. */
+         if (v->amp.stage==DNBX_ENV_SUSTAIN) v->amp.level=v->amp.curve=p->amp.sustain;
+@@ -1118,7 +1129,9 @@
+                 mix[l]+=velocity*amp*lv->filter_second;
+                 }
+ #if SJ6_WAVE_PROBE
+-                if(fold<0)
++                if(fold>=0 || ((lv->filter.reserved&SJ6_CLOCK_HELD) && p->oscillator_mode==DNBX_OSC_SUPERJ6))
++                    lv->phase=source_clock_step(lv->phase,.25f*lv->increment);
++                else
+ #endif
+                 {lv->phase+=lv->increment; if(lv->phase>=1)lv->phase-=1;}
+ 

@@ -1,0 +1,18 @@
+{
+  "worst_late_ordinal": 419,
+  "elapsed_us": 14342,
+  "nested_timer5_ticks": 17951,
+  "plans": [
+    4
+  ],
+  "before_dma": 0,
+  "after_dma": 1,
+  "spans": 5,
+  "had_808_prefix": true,
+  "launch_fallback": false,
+  "open_join": true,
+  "late_count": 83,
+  "elf": "01091e8603828e7b1570a94b0880df80ede458358a978f04a79a3db6a11e3ee1",
+  "ram_sha": "14a284bb85a2bd6f8cc348b166db0ecaa869161c04a170993a6953db207e7850",
+  "comparison": "instrumented scope only; no external event anchor"
+}
