@@ -1,0 +1,72 @@
+{
+  "selectors": {
+    "0x10079b880": "setMix:",
+    "0x10079b280": "setDecimation:",
+    "0x10079bc60": "setRounding:",
+    "0x10079b488": "setFinalMix:",
+    "0x10079b500": "setGain:"
+  },
+  "build9_panel_ids": {
+    "107": "neoncrushEnable",
+    "108": "neoncrushAmount",
+    "109": "neoncrushBitRate"
+  },
+  "callback_edges": {
+    "0x1002737c8": [
+      "bl",
+      "#0x1000f1440"
+    ],
+    "0x10027387c": [
+      "bl",
+      "#0x1000f1500"
+    ],
+    "0x100273970": [
+      "bl",
+      "#0x1000f1598"
+    ]
+  },
+  "mapper_edges": {
+    "0x1000f154c": [
+      "movk",
+      "x8, #0x7ae1, lsl #16"
+    ],
+    "0x1000f1540": [
+      "movk",
+      "x8, #0x3faf, lsl #48"
+    ],
+    "0x1000f1554": [
+      "movk",
+      "x8, #0x3ff3, lsl #48"
+    ],
+    "0x1000f1564": [
+      "bl",
+      "#0x1004a67d0"
+    ],
+    "0x1000f156c": [
+      "bl",
+      "#0x100603c40"
+    ],
+    "0x1000f1594": [
+      "b",
+      "#0x1006063c0"
+    ],
+    "0x1000f15e4": [
+      "fmov",
+      "d2, #1.50000000"
+    ],
+    "0x1000f15ec": [
+      "bl",
+      "#0x1004a67d0"
+    ],
+    "0x1000f15f4": [
+      "bl",
+      "#0x100605440"
+    ]
+  },
+  "apple_native_parameters": {
+    "3": "Decimation",
+    "4": "Rounding",
+    "5": "Decimation Mix",
+    "15": "Wet/Dry Mix"
+  }
+}

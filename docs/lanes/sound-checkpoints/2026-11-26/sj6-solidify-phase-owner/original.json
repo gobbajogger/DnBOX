@@ -1,0 +1,74 @@
+{
+  "binary": "6d163d79202e866d2fda96e36f752bd386641b5ae2d0b1f829a254d26b652850",
+  "scope": "Authentic executable, neutral controlled generated Mono+Legato with same ranged cue landmarks; not active factory Vintage entropy or terminal AU.",
+  "cases": {
+    "fresh_chord": [
+      {
+        "frame": 16384,
+        "hit": "before_first_prep_after_events",
+        "stage": 2,
+        "phase": 0.0,
+        "key": 36,
+        "freq": 0.0
+      },
+      {
+        "frame": 38434,
+        "hit": "before_first_prep_after_events",
+        "stage": 7,
+        "phase": 0.7036037445068359,
+        "key": 36,
+        "freq": 0.0
+      },
+      {
+        "frame": 49459,
+        "hit": "before_first_prep_after_events",
+        "stage": 2,
+        "phase": 0.0,
+        "key": 55,
+        "freq": 0.0
+      },
+      {
+        "frame": 82534,
+        "hit": "before_first_prep_after_events",
+        "stage": 7,
+        "phase": 0.9976165294647217,
+        "key": 55,
+        "freq": 0.0
+      }
+    ],
+    "held_then_legato": [
+      {
+        "frame": 16384,
+        "hit": "before_first_prep_after_events",
+        "stage": 2,
+        "phase": 0.0,
+        "key": 36,
+        "freq": 0.0
+      },
+      {
+        "frame": 49459,
+        "hit": "before_first_prep_after_events",
+        "stage": 5,
+        "phase": 0.05541859567165375,
+        "key": 55,
+        "freq": 0.0
+      },
+      {
+        "frame": 66150,
+        "hit": "before_first_prep_after_events",
+        "stage": 5,
+        "phase": 0.2364395409822464,
+        "key": 55,
+        "freq": 0.0
+      },
+      {
+        "frame": 82534,
+        "hit": "before_first_prep_after_events",
+        "stage": 7,
+        "phase": 0.053035203367471695,
+        "key": 55,
+        "freq": 0.0
+      }
+    ]
+  }
+}
