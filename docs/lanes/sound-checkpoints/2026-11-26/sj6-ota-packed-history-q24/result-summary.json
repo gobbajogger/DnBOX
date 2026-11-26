@@ -1,0 +1,126 @@
+{
+  "q24-up": {
+    "cases": 128,
+    "words": 1048576,
+    "worst": {
+      "case": [
+        0,
+        3.0,
+        1e-06,
+        0.0
+      ],
+      "frames": 8192,
+      "dbr": -107.09030631498679,
+      "peak_error": 9.038103598868474e-12,
+      "baseline_sha256": "1375eff81a132e20f438401ed3ffaf4005d5df1a8fde46f4cf58859facccde36",
+      "candidate_sha256": "efb1d22e6f2a4430444e327bf834696485ba73bd747304aea16946160fa4223e"
+    },
+    "best": {
+      "case": [
+        3,
+        0.31277143955230713,
+        1e-06,
+        1.0
+      ],
+      "frames": 8192,
+      "dbr": -128.85368622093455,
+      "peak_error": 6.252776074688882e-13,
+      "baseline_sha256": "ea3a198da0aa8068409af8c106d361450dd18dc7062d025d74843bd33fda2532",
+      "candidate_sha256": "54885c89d6d5697fe20d27bbf260ee4bf5c567a551e68977c28d2b919eb90129"
+    },
+    "scope": "synthetic fixed all-pass coefficients only; not original renders or target qualification"
+  },
+  "q24-both": {
+    "cases": 128,
+    "words": 1048576,
+    "worst": {
+      "case": [
+        0,
+        3.0,
+        1e-06,
+        0.0
+      ],
+      "frames": 8192,
+      "dbr": -103.75066896138762,
+      "peak_error": 1.5575096767861396e-11,
+      "baseline_sha256": "1375eff81a132e20f438401ed3ffaf4005d5df1a8fde46f4cf58859facccde36",
+      "candidate_sha256": "c95a1f2a6e22e24d36dfa427a215caca17efe645509e1a06daea16fe457940ff"
+    },
+    "best": {
+      "case": [
+        3,
+        0.31277143955230713,
+        6.0,
+        1.0
+      ],
+      "frames": 8192,
+      "dbr": -117.28777205603605,
+      "peak_error": 1.239776611328125e-05,
+      "baseline_sha256": "a1b30b53acc3f7946e932f6f4d35ffa2f4fffa750ca28ebdfc85a5934919b18c",
+      "candidate_sha256": "9247dd109eb93645f7fc98a2265314f010af268a375e3df85b9e965340916d81"
+    },
+    "scope": "synthetic fixed all-pass coefficients only; not original renders or target qualification"
+  },
+  "ap-half-0": {
+    "cases": 128,
+    "words": 1048576,
+    "worst": {
+      "case": [
+        3,
+        3.0,
+        1e-06,
+        0.0
+      ],
+      "frames": 8192,
+      "dbr": -20.86201076295522,
+      "peak_error": 1.0944609130092431e-07,
+      "baseline_sha256": "1299c822bc5e677a72ac17ce11e5246a8f7b256d8bf8be3f6ea26748f334ff8c",
+      "candidate_sha256": "876fc6969771fa46fddc857a029d758ea84f8b46c6ec12aa3086da59b5e39051"
+    },
+    "best": {
+      "case": [
+        3,
+        0.004,
+        0.05,
+        0.0
+      ],
+      "frames": 8192,
+      "dbr": -112.91209747030096,
+      "peak_error": 4.284083843231201e-08,
+      "baseline_sha256": "6703761b6cbe2d9779e9590ce945e1748940c109a8e0532f9d529f5207a555e3",
+      "candidate_sha256": "05f5f919c30315fcd1622af8005add9c928fcf36e0764c24fd1f1093c19aad62"
+    },
+    "scope": "synthetic fixed all-pass coefficients only; not original renders or target qualification"
+  },
+  "ap-half-8": {
+    "cases": 128,
+    "words": 1048576,
+    "worst": {
+      "case": [
+        3,
+        3.0,
+        1e-06,
+        0.0
+      ],
+      "frames": 8192,
+      "dbr": -62.2894549378364,
+      "peak_error": 9.88904957921477e-10,
+      "baseline_sha256": "1299c822bc5e677a72ac17ce11e5246a8f7b256d8bf8be3f6ea26748f334ff8c",
+      "candidate_sha256": "1ab4fa0f9bd78cfe03df1dc0d1d4370895f490703d5b9f4cf17563babee14873"
+    },
+    "best": {
+      "case": [
+        3,
+        0.004,
+        0.05,
+        0.0
+      ],
+      "frames": 8192,
+      "dbr": -112.64788716812264,
+      "peak_error": 4.936009645462036e-08,
+      "baseline_sha256": "6703761b6cbe2d9779e9590ce945e1748940c109a8e0532f9d529f5207a555e3",
+      "candidate_sha256": "07d3674597d4875d8426f457dd686fdde34eb4df27193c18b477350377d8c227"
+    },
+    "scope": "synthetic fixed all-pass coefficients only; not original renders or target qualification"
+  }
+}
