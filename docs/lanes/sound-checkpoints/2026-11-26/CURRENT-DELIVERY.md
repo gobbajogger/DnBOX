@@ -6,6 +6,15 @@ isolated kernel timing, or partial link into a release claim.
 
 ## Latest measured results
 
+- **J60V2 post-delay coefficient:** the original wet integrators use
+  0.2516540875; compact reused 0.533294672 from the *input* biquad.
+  The isolated correction improves all five same-input 96 kHz windows
+  (the final tail −13.09 → −20.79 dBr), also improves modes II and Both,
+  and leaves bypass exact. [Matched guarded native links](sj6-j60-wet-native/README.md)
+  show **zero** APP or pool growth, one reached F32 literal change, and
+  bit-identical flag-off Elite/Pro images. No production enable, native
+  playback timing, or whole-preset pass; the bridge and release gates remain.
+
 - **Raw J106 chorus, same input:** the [original J60V2 leaf replay](sj6-j60-same-input-cause/README.md)
   on the identical compact pre-chorus signal closes the wet center chord
   gap from 3.67 dB to 0.15 dB, and the tail gap from 6.20 dB to 1.08 dB.
