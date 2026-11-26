@@ -1,0 +1,206 @@
+{
+  "baseline_bytes": true,
+  "Sub_only_bytes": true,
+  "rate": 44100,
+  "admitted_samples": 123675,
+  "unchanged_J60": "actual typed post+right all arms; not original J60 unit replay",
+  "slots": [
+    "stock",
+    "changes only marginal Main with stock nonlinear cross terms",
+    "independent Main+Sub OTA before existing owner amp/part mixer; Main physical recurrence, Sub unchanged compact carrier and legacy OTA law, independently clocked"
+  ],
+  "windows": {
+    "attack": {
+      "stock": {
+        "dry": {
+          "signed_dbr": 0.36186554014828504,
+          "level_db": -6.518931776309914
+        },
+        "authored": {
+          "signed_dbr": 1.2384052170777884,
+          "level_db": -4.76116382738833
+        }
+      },
+      "marginal": {
+        "dry": {
+          "signed_dbr": 0.12660099189688473,
+          "level_db": -6.414513224088903
+        },
+        "authored": {
+          "signed_dbr": 1.1893847030119014,
+          "level_db": -4.697553466032366
+        }
+      },
+      "separate_actual_sum": {
+        "dry": {
+          "signed_dbr": 0.12662327364121148,
+          "level_db": -6.414504495183763
+        },
+        "authored": {
+          "signed_dbr": 1.1894021654140203,
+          "level_db": -4.6975681876751265
+        }
+      }
+    },
+    "held": {
+      "stock": {
+        "dry": {
+          "signed_dbr": 0.42434315525184696,
+          "level_db": -6.564641908544505
+        },
+        "authored": {
+          "signed_dbr": 1.3551018016978933,
+          "level_db": -4.795872278646503
+        }
+      },
+      "marginal": {
+        "dry": {
+          "signed_dbr": 0.176528742892927,
+          "level_db": -6.545310351128373
+        },
+        "authored": {
+          "signed_dbr": 1.3046207482542869,
+          "level_db": -4.7913473234503
+        }
+      },
+      "separate_actual_sum": {
+        "dry": {
+          "signed_dbr": 0.17655191002195006,
+          "level_db": -6.545299383017418
+        },
+        "authored": {
+          "signed_dbr": 1.3046423966568947,
+          "level_db": -4.791343652179647
+        }
+      }
+    },
+    "release": {
+      "stock": {
+        "dry": {
+          "signed_dbr": -6.489421512189601,
+          "level_db": -1.9282029370316094
+        },
+        "authored": {
+          "signed_dbr": -1.1907483157150316,
+          "level_db": -1.8810546157036432
+        }
+      },
+      "marginal": {
+        "dry": {
+          "signed_dbr": -6.380099278017849,
+          "level_db": -1.9270152337426802
+        },
+        "authored": {
+          "signed_dbr": -0.7920889304722961,
+          "level_db": -1.6403255149099176
+        }
+      },
+      "separate_actual_sum": {
+        "dry": {
+          "signed_dbr": -6.380282734857897,
+          "level_db": -1.9269662407899872
+        },
+        "authored": {
+          "signed_dbr": -0.7919993940174425,
+          "level_db": -1.6403572966553224
+        }
+      }
+    },
+    "chord": {
+      "stock": {
+        "dry": {
+          "signed_dbr": -1.9156301819492727,
+          "level_db": -8.599648388592072
+        },
+        "authored": {
+          "signed_dbr": 0.9630077404050748,
+          "level_db": -6.863531193814349
+        }
+      },
+      "marginal": {
+        "dry": {
+          "signed_dbr": -2.2135227743054973,
+          "level_db": -8.466547446080957
+        },
+        "authored": {
+          "signed_dbr": 1.130946412850741,
+          "level_db": -6.717406353509227
+        }
+      },
+      "separate_actual_sum": {
+        "dry": {
+          "signed_dbr": -2.2132865587326687,
+          "level_db": -8.46626269676435
+        },
+        "authored": {
+          "signed_dbr": 1.1312439021521725,
+          "level_db": -6.717078388733566
+        }
+      }
+    },
+    "tail": {
+      "stock": {
+        "dry": {
+          "signed_dbr": -2.851086202600598,
+          "level_db": -9.831814832432133
+        },
+        "authored": {
+          "signed_dbr": -0.09840219670851424,
+          "level_db": -10.564947865407234
+        }
+      },
+      "marginal": {
+        "dry": {
+          "signed_dbr": -3.410341969707419,
+          "level_db": -9.328425597376665
+        },
+        "authored": {
+          "signed_dbr": 0.18368653756304704,
+          "level_db": -10.161057528687225
+        }
+      },
+      "separate_actual_sum": {
+        "dry": {
+          "signed_dbr": -3.4129456853320006,
+          "level_db": -9.324203330739326
+        },
+        "authored": {
+          "signed_dbr": 0.1847350871273951,
+          "level_db": -10.157087649488671
+        }
+      }
+    },
+    "full": {
+      "stock": {
+        "dry": {
+          "signed_dbr": -1.4444188461197274,
+          "level_db": -8.180051489800736
+        },
+        "authored": {
+          "signed_dbr": 1.0102317261764695,
+          "level_db": -6.288132918189034
+        }
+      },
+      "marginal": {
+        "dry": {
+          "signed_dbr": -1.7308483395742005,
+          "level_db": -8.060345700642431
+        },
+        "authored": {
+          "signed_dbr": 1.1249386701115829,
+          "level_db": -6.17910677885293
+        }
+      },
+      "separate_actual_sum": {
+        "dry": {
+          "signed_dbr": -1.7306567708396994,
+          "level_db": -8.060174160603935
+        },
+        "authored": {
+          "signed_dbr": 1.1251399301357423,
+          "level_db": -6.178943414368358
+        }
+      }
+    }
+  }
+}

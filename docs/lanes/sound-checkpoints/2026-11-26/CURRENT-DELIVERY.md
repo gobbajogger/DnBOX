@@ -6,6 +6,17 @@ isolated kernel timing, or partial link into a release claim.
 
 ## Latest measured results
 
+- **SuperJ6 Main physical OTA is now independently reconstructed.**
+  The [same-input leaf and full typed Raw controls](sj6-raw-main-ota/README.md)
+  prove the original two-substep/all-pass/filter/decimator corrects
+  the isolated phase error, reaching roughly −141 dBr residual
+  across four keys at original 30 kHz and −126 to −131 dBr at an
+  independent lower cutoff. On the whole warm compact Raw the dry
+  signed error improves from −1.44 to −1.73 dBr, but wet goes from
+  +1.01 to +1.13 dBr with the current compact chorus. The isolated
+  PI32 object is 582 B text plus unresolved calls and 84 B per mono
+  state; no linked fit or timing proof. Keep as oracle, not adoption.
+
 - **Raw active-voice root localization.** The
   [same-input native and compact taps](sj6-raw-voice-stage/README.md)
   isolate two distinct discrepancies. Sub held fundamental is

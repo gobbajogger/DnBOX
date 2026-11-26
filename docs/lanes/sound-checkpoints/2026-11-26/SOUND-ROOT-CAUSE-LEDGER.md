@@ -554,3 +554,10 @@ through the post-voice reference. Individual post-voice magnitudes
 are close. These observations do not identify how the installed
 terminal path creates its remaining amplitude gap and do not
 establish all-preset parity.
+
+### SuperJ6 Main causal OTA test
+The [same-input current receiver intervention](sj6-raw-main-ota/README.md)
+moves the measured phase before AMP, with nonlinear phase across
+harmonics and keys, not a fixed delay. The physical oracle passes
+two cutoff ranges. The combined typed compact whole Raw is still
+not a match and the new leaf is not carried in production.
