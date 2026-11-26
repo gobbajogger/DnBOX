@@ -16,6 +16,11 @@ isolated kernel timing, or partial link into a release claim.
   whole error (+0.017 → +1.010 dBr) and held/chord, so is not a
   release fix. Its narrow no-clipping case does not cover dual-owner
   aggregate headroom or old FX history. It stays off.
+  [Actual original Sub carrier in RAM only](sj6-warm-sub-carrier/README.md)
+  improves the centered authored whole from +1.010 to −0.647 dBr
+  but regresses first release from −1.191 to +1.634 dBr. Dry first
+  release also regresses. No authorized original audio data was
+  exported; no preset change or candidate enable.
 - **Fresh paired emulator diagnostic did not qualify.**
   [Exact warm J60 linked pair](strict-warm-j60-timing/README.md):
   Elite 14,269 µs / 63 late, Pro 14,322 µs / 61 late. Same external

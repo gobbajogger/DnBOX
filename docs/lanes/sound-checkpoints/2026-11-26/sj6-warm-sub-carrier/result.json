@@ -1,0 +1,176 @@
+{
+  "controls_compact_fixture_sha": [
+    "95c7603f7dfc5ea914f6dc3ca12cbd77e41b2861475b4870a2d3a9221483bc9b",
+    "c0a493273eaea57f78f7aa3f5bb4abcc75b201c6a438071e9665c52a2eb2862e"
+  ],
+  "real_app_ref_sha": {
+    "authored": "9cc279dc61f6a504e1c234cd90db37f7c16c0cc9377a33e1165e6a75f7cf7b21",
+    "dry": "905e705042416acd2a5404594706608c6bd0a35b0783013ef4bbf977fe170002",
+    "authored-repeat": "9cc279dc61f6a504e1c234cd90db37f7c16c0cc9377a33e1165e6a75f7cf7b21"
+  },
+  "original_sub_map_sha": "3668ef83c102b4952a19bc6fd5adc585eb69d0eff4dd4743be9488b0771fc75d",
+  "original_sub_data_sha": "ec994e3fabf42b2761d7ca3799f87dacb4ac12670e2909451ff14f78b9a5f740",
+  "authentic_sub_samples_only_in_memory": true,
+  "baseline_warm_center_off_exact": true,
+  "muted_control_guard_exact_sha": "4d80f25652976777663efe35f804bee619ddc9ac64cdf7af5b363a77770dd31b",
+  "count_by_arm": {
+    "authored": [
+      {
+        "reads": 0,
+        "loops": 0,
+        "resets": 4
+      },
+      {
+        "reads": 123675,
+        "loops": 0,
+        "resets": 4
+      }
+    ],
+    "dry": [
+      {
+        "reads": 0,
+        "loops": 0,
+        "resets": 4
+      },
+      {
+        "reads": 123675,
+        "loops": 0,
+        "resets": 4
+      }
+    ]
+  },
+  "windows": {
+    "attack": {
+      "authored": [
+        {
+          "signed_dbr": 1.2384052170777835,
+          "level_db": -4.76116365099797
+        },
+        {
+          "signed_dbr": -0.7890467918420083,
+          "level_db": -4.7394883840087365
+        }
+      ],
+      "dry": [
+        {
+          "signed_dbr": 0.3618655401482813,
+          "level_db": -6.518931594458824
+        },
+        {
+          "signed_dbr": -0.7460668580175795,
+          "level_db": -6.427292749681021
+        }
+      ]
+    },
+    "held": {
+      "authored": [
+        {
+          "signed_dbr": 1.3551018016978833,
+          "level_db": -4.795871817195353
+        },
+        {
+          "signed_dbr": -0.7413002257719565,
+          "level_db": -4.714577757389683
+        }
+      ],
+      "dry": [
+        {
+          "signed_dbr": 0.4243431552518341,
+          "level_db": -6.5646417204057155
+        },
+        {
+          "signed_dbr": -0.7785973919317674,
+          "level_db": -6.4922298189875125
+        }
+      ]
+    },
+    "release": {
+      "authored": [
+        {
+          "signed_dbr": -1.1907483157150307,
+          "level_db": -1.8810539110836777
+        },
+        {
+          "signed_dbr": 1.634004687080704,
+          "level_db": -8.875606220715412
+        }
+      ],
+      "dry": [
+        {
+          "signed_dbr": -6.489421512189604,
+          "level_db": -1.9282027288613506
+        },
+        {
+          "signed_dbr": 0.9486030337402962,
+          "level_db": -12.32259306070567
+        }
+      ]
+    },
+    "chord": {
+      "authored": [
+        {
+          "signed_dbr": 0.963007740405068,
+          "level_db": -6.863531612965453
+        },
+        {
+          "signed_dbr": -0.6332137469432546,
+          "level_db": -6.945050778676386
+        }
+      ],
+      "dry": [
+        {
+          "signed_dbr": -1.915630181949279,
+          "level_db": -8.599647913038192
+        },
+        {
+          "signed_dbr": -2.815817867061931,
+          "level_db": -8.565441170485427
+        }
+      ]
+    },
+    "tail": {
+      "authored": [
+        {
+          "signed_dbr": -0.09840219670851424,
+          "level_db": -10.564947596303881
+        },
+        {
+          "signed_dbr": -0.1537479295358373,
+          "level_db": -9.580872069924487
+        }
+      ],
+      "dry": [
+        {
+          "signed_dbr": -2.8510862026005994,
+          "level_db": -9.831814408354806
+        },
+        {
+          "signed_dbr": -2.1322210732636733,
+          "level_db": -11.007055202504215
+        }
+      ]
+    },
+    "full": {
+      "authored": [
+        {
+          "signed_dbr": 1.010231726176478,
+          "level_db": -6.28813322999696
+        },
+        {
+          "signed_dbr": -0.647363387241997,
+          "level_db": -6.316391565500306
+        }
+      ],
+      "dry": [
+        {
+          "signed_dbr": -1.4444188461197285,
+          "level_db": -8.180051650765494
+        },
+        {
+          "signed_dbr": -2.3817753922466514,
+          "level_db": -8.148680493767218
+        }
+      ]
+    }
+  }
+}
