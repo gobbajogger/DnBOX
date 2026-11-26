@@ -1,0 +1,14 @@
+firmware/src/dsp/dnbx_core.h: OK
+firmware/src/dsp/dnbx_core.c: OK
+fixed=0 n=1 coherent=0 classic=0 ringOver=0 pre=0.023052929 postfx=0.023052929 masterOff=0.023052929 masterOn=0.023052929 hardChanged=0 PCM24 normal/loud off 96690/193381 on 96690/193381 writerCuts 0,0,0,0
+fixed=0 n=6 coherent=0 classic=0 ringOver=0 pre=0.156900406 postfx=0.156900406 masterOff=0.156900406 masterOn=0.156900406 hardChanged=0 PCM24 normal/loud off 658087/1316175 on 658087/1316175 writerCuts 0,0,0,0
+fixed=0 n=6 coherent=1 classic=0 ringOver=0 pre=0.201911896 postfx=0.201911896 masterOff=0.201911896 masterOn=0.201911896 hardChanged=0 PCM24 normal/loud off 846879/1693759 on 846879/1693759 writerCuts 0,0,0,0
+fixed=0 n=1 coherent=0 classic=1 ringOver=0 pre=0.023052929 postfx=0.022547763 masterOff=0.015356014 masterOn=0.015356014 hardChanged=0 PCM24 normal/loud off 64407/128815 on 64407/128815 writerCuts 0,0,0,0
+fixed=0 n=6 coherent=0 classic=1 ringOver=0 pre=0.156900406 postfx=0.118601918 masterOff=0.097051829 masterOn=0.097051829 hardChanged=0 PCM24 normal/loud off 407064/814129 on 407064/814129 writerCuts 0,0,0,0
+fixed=0 n=6 coherent=1 classic=1 ringOver=0 pre=0.201911896 postfx=0.197504133 masterOff=0.134547532 masterOn=0.134547532 hardChanged=0 PCM24 normal/loud off 564333/1128666 on 564333/1128666 writerCuts 0,0,0,0
+fixed=1 n=1 coherent=0 classic=0 ringOver=0 pre=0.276635140 postfx=0.276635140 masterOff=0.276635140 masterOn=0.276635140 hardChanged=0 PCM24 normal/loud off 1160291/2320583 on 1160291/2320583 writerCuts 0,0,0,0
+fixed=1 n=6 coherent=0 classic=0 ringOver=0 pre=1.882804871 postfx=1.882804871 masterOff=1.000000000 masterOn=0.801123559 hardChanged=1560 PCM24 normal/loud off 4194303/8388607 on 3360155/6720310 writerCuts 0,0,0,0
+fixed=1 n=6 coherent=1 classic=0 ringOver=0 pre=2.422942638 postfx=2.422942638 masterOff=1.000000000 masterOn=0.800903201 hardChanged=7440 PCM24 normal/loud off 4194303/8388607 on 3359230/6718462 writerCuts 0,0,0,0
+fixed=1 n=1 coherent=0 classic=1 ringOver=0 pre=0.276635140 postfx=0.270590186 masterOff=0.184340239 masterOn=0.184340239 hardChanged=0 PCM24 normal/loud off 773178/1546357 on 773178/1546357 writerCuts 0,0,0,0
+fixed=1 n=6 coherent=0 classic=1 ringOver=1560 pre=1.882804871 postfx=1.220291138 masterOff=1.000000000 masterOn=0.800295830 hardChanged=114 PCM24 normal/loud off 4194303/8388607 on 3356683/6713367 writerCuts 0,0,0,0
+fixed=1 n=6 coherent=1 classic=1 ringOver=7440 pre=2.422942638 postfx=1.711470246 masterOff=1.000000000 masterOn=0.800365925 hardChanged=1838 PCM24 normal/loud off 4194303/8388607 on 3356977/6713955 writerCuts 0,0,0,0

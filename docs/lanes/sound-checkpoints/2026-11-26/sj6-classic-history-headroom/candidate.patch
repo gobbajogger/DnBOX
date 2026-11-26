@@ -1,0 +1,77 @@
+--- a/firmware/src/dsp/dnbx_core.h
++++ b/firmware/src/dsp/dnbx_core.h
+@@ -150,6 +150,9 @@
+     uint8_t sj6_ota;
+ #endif
+     uint8_t damper, velocity_mode, superj6_amp_range, filter_link;
++#if defined(X0X_HOST) && DNBX_HOST_SJ6_FIXED_SOURCE_ROUTE
++    uint8_t sj6_host_fixed_source; /* diagnostic owner only, zero when initialized */
++#endif
+ } dnbx_part;
+ 
+ /* Optional caller-owned render-only semantic counters. They count dnbx_render
+--- a/firmware/src/dsp/dnbx_core.c
++++ b/firmware/src/dsp/dnbx_core.c
+@@ -887,6 +887,49 @@
+     if (!left || !right || left==right) return DNBX_E_ARGUMENT;
+     COUNT(w,frames,n);
+     const float osc_gain[]={gain1,gain2};
++#if defined(X0X_HOST) && DNBX_HOST_SJ6_FIXED_SOURCE_ROUTE
++    int source_out=-1;
++    if(s->sj6_host_fixed_source && s->superj6_amp_range && s->sample_rate==44100.f &&
++       fvel==0.f && source_bend==1.f) {
++        float strength=0.f, tracking=0.f;
++        (void)dnbx_read_raw(s,136u,&strength);
++        (void)dnbx_read_raw(s,131u,&tracking);
++#if X0X_SJ6_NOISE_SUB_NATIVE
++        if(s->sj6_noise_gain==0.f && s->sj6_sub_gain==0.f)
++#endif
++#if X0X_SJ6_OTA_NATIVE
++        if(!s->sj6_ota)
++#endif
++#if X0X_SJ6_MONO32_PROBE
++        if(s->sj6_glide_offset==0.f)
++#endif
++#if X0X_SJ6_PITCH_ENV_NATIVE
++        if(!s->sj6_pitch_depth
++#if X0X_SJ6_AUX_LFO_NATIVE
++           && !s->sj6_pitch_routed
++#endif
++          )
++#endif
++        if(strength==0.f && tracking==0.f)
++            for(unsigned q=0;q<DNBX_LAYERS;q++) {
++                const dnbx_layer_params *a=&s->layer[q].params,*b=&s->layer[q^1u].params;
++                int quiet=1;
++                for(unsigned v=0;v<DNBX_VOICES;v++){
++                    const dnbx_layer_voice *other=&s->voice[v].layer[q^1u];
++                    if(voice_active(&s->voice[v]) &&
++                       (other->filter_first!=0.f || other->filter_second!=0.f))
++                        quiet=0;
++                }
++                /* Muting an input is not proof its old filter output is zero. */
++                if(osc_gain[q]>0.f && osc_gain[q^1u]==0.f &&
++                   a->oscillator_mode==DNBX_OSC_SUPERJ6 && a->waveform==0.f &&
++                   a->pan==0.f && a->gain==1.f && a->sub_gain==0.f &&
++                   b->sub_gain==0.f && a->resonance==0.f && a->filter_env_hz==0.f &&
++                   quiet)
++                    source_out=(int)q;
++            }
++    }
++#endif
+ #if X0X_SJ6_NOISE_SUB_NATIVE
+     float sj6_steps[DNBX_VOICES];
+     const uint8_t *sj6_harmonics[DNBX_VOICES];
+@@ -1040,6 +1083,12 @@
+                 COUNT(w,layer_samples,1);
+             }
+         }
++#if defined(X0X_HOST) && DNBX_HOST_SJ6_FIXED_SOURCE_ROUTE
++        if(source_out>=0) {
++            left[k]=right[k]=mix[source_out];
++            continue;
++        }
++#endif
+         left[k]=0; right[k]=0;
+         for (unsigned l=0;l<DNBX_LAYERS;l++) {
+             const dnbx_layer_params *p=&s->layer[l].params;
