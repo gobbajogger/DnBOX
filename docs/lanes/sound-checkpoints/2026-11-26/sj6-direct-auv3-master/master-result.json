@@ -1,0 +1,98 @@
+{
+  "main-only": {
+    "PCM_SHA256": [
+      "3025be3ed725a888d1f5af10ef83cdc969fa237fa0612b82ee18a1dd0db25100",
+      "404605739aa7d185cf65bee3a899c00acc47e96be823a7a604e2e93b05373c7c"
+    ],
+    "master": [
+      0.3150142729282379,
+      0.15750713646411896
+    ],
+    "windows": {
+      "after-release": {
+        "bounds": [
+          82534,
+          148684
+        ],
+        "correlation": 0.9999109421118377,
+        "double_half_residual_dBr": -37.493156847876214,
+        "half_vs_authored_dB": -6.021571446183475
+      },
+      "chord-hold": {
+        "bounds": [
+          55000,
+          80000
+        ],
+        "correlation": 0.9999952161116785,
+        "double_half_residual_dBr": -50.191854588866704,
+        "half_vs_authored_dB": -6.020554487905319
+      },
+      "single-hold": {
+        "bounds": [
+          21000,
+          38000
+        ],
+        "correlation": 0.9999649512512246,
+        "double_half_residual_dBr": -41.542026671465145,
+        "half_vs_authored_dB": -6.019787497529171
+      },
+      "whole": {
+        "bounds": [
+          0,
+          148684
+        ],
+        "correlation": 0.9999684708432194,
+        "double_half_residual_dBr": -42.00223042946152,
+        "half_vs_authored_dB": -6.020199917421738
+      }
+    }
+  },
+  "sub-only": {
+    "PCM_SHA256": [
+      "64529b4f397e5b2c2349636e698c770f1ea1b751acde226a9f138546f0038f29",
+      "3f8745ce142ba0ea4f8ef6947a26632a16ef47bed8448a60879cfb352d950278"
+    ],
+    "master": [
+      0.3150142729282379,
+      0.15750713646411896
+    ],
+    "windows": {
+      "after-release": {
+        "bounds": [
+          82534,
+          148684
+        ],
+        "correlation": 0.9999876236060132,
+        "double_half_residual_dBr": -46.06374286025043,
+        "half_vs_authored_dB": -6.020571757593926
+      },
+      "chord-hold": {
+        "bounds": [
+          55000,
+          80000
+        ],
+        "correlation": 0.9999974105993562,
+        "double_half_residual_dBr": -52.857693318568664,
+        "half_vs_authored_dB": -6.020580168949174
+      },
+      "single-hold": {
+        "bounds": [
+          21000,
+          38000
+        ],
+        "correlation": 0.9999992118419238,
+        "double_half_residual_dBr": -58.02356642153328,
+        "half_vs_authored_dB": -6.020599303018033
+      },
+      "whole": {
+        "bounds": [
+          0,
+          148684
+        ],
+        "correlation": 0.999997171989275,
+        "double_half_residual_dBr": -52.47488027991853,
+        "half_vs_authored_dB": -6.020585600180992
+      }
+    }
+  }
+}
