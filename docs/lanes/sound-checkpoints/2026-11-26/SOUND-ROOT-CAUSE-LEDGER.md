@@ -744,3 +744,14 @@ The [new pure Main capture attempt](sj6-ota-direct-main-preflight/README.md)
 compiled but never entered the offline app, so no new Mac dependency
 or original PCM claim. Continue with intact signed stored evidence
 and controlled Main + preserved-stock-Sub diagnostics.
+
+An independent [cold diagnostic pitch lease](sj6-ota-pitch-lease-lab/README.md)
+preserves full Float32 histories without packed-error change, but only
+when the real Raw typed owner proves PitchEnv completely idle. It
+closes a measured 44 B two-owner layout deficit in that scoped
+diagnostic: 9×148,684 genuine host frames completed with no pitch
+state consumers, unchanged saved witness, and 65,536 independent
+signed layout states plus 655,360 sticky guard rejections verified.
+No product lifetime guarantee, real owner binding or safe live
+PitchEnv takeover inferred. Main–Sub composition host and native
+timing remain separately open.

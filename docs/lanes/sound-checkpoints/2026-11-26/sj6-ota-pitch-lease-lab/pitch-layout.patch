@@ -1,0 +1,19 @@
+--- a/firmware/src/dsp/dnbx_core.h
++++ b/firmware/src/dsp/dnbx_core.h
+@@ -93,8 +93,16 @@
+ typedef struct {
+     dnbx_layer_voice layer[DNBX_LAYERS];
+ #if X0X_SJ6_PITCH_ENV_NATIVE
++#if defined(DNBX_DIAGNOSTIC_SJ6_PITCH_LEASE) && DNBX_DIAGNOSTIC_SJ6_PITCH_LEASE
++    /* Layout only. A closed fixture must qualify exclusive lifetime first. */
++    union {
++        dnbx_envelope_state sj6_pitch;
++        struct {float pole2, pole3;} ota_main_lease;
++    };
++#else
+     dnbx_envelope_state sj6_pitch;
+ #endif
++#endif
+     float velocity;
+ #if X0X_SJ6_NOISE_SUB_NATIVE
+     float sj6_sub_phase;
