@@ -11,7 +11,11 @@ isolated kernel timing, or partial link into a release claim.
   public control readbacks and exact MIDI/callback schedule. The guarded
   J60 fixes improve whole signed error only from −15.907 to −15.912 dBFS;
   authored level remains 27.89 dB low and dry remains byte-identical,
-  29.76 dB low. Focus on the authenticated dry voice path, not master gain.
+  29.76 dB low. [Separate guarded centered source arithmetic](sj6-warm-center-source-trial/README.md)
+  recovers 21.6 dB without master edits, but worsens signed authored
+  whole error (+0.017 → +1.010 dBr) and held/chord, so is not a
+  release fix. Its narrow no-clipping case does not cover dual-owner
+  aggregate headroom or old FX history. It stays off.
 - **Fresh paired emulator diagnostic did not qualify.**
   [Exact warm J60 linked pair](strict-warm-j60-timing/README.md):
   Elite 14,269 µs / 63 late, Pro 14,322 µs / 61 late. Same external

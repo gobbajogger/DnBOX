@@ -1,0 +1,242 @@
+{
+  "meta_keys": [
+    "active",
+    "after",
+    "authored",
+    "authored_overlap",
+    "authored_readback_mismatch",
+    "bank_file_sha256",
+    "blocks",
+    "component",
+    "component_version",
+    "cue_sha256",
+    "dry_control_identifiers",
+    "frames",
+    "mode",
+    "pcm_sha256",
+    "rate",
+    "schedule",
+    "wanted",
+    "warm_frames"
+  ],
+  "original_sha": {
+    "dry": "905e705042416acd2a5404594706608c6bd0a35b0783013ef4bbf977fe170002",
+    "authored": "9cc279dc61f6a504e1c234cd90db37f7c16c0cc9377a33e1165e6a75f7cf7b21",
+    "authored-repeat": "9cc279dc61f6a504e1c234cd90db37f7c16c0cc9377a33e1165e6a75f7cf7b21"
+  },
+  "compact_sha": {
+    "both-authored": "fafd89fad65d9585fc9ff7f19ef468d4dcf4bf27218d31443f5445e223712d22",
+    "both-dry": "9266f01c2f93b70c736f79b3a519d65776921f73fed68a275c6f3ecf2d691bf4",
+    "center-authored": "95323852127a83847b994f5c9812aedffc6039d47a8f25521a5c5664275ffc04",
+    "center-dry": "dfc9d0c6a2038638a1d1c6304b39c80094781c386862be67a4e2fdd7892b23e5"
+  },
+  "unsupported_pan_guard_bit_identical": true,
+  "unsupported_guard": {
+    "both": [
+      [
+        "center 0 0 bbd 647330 0 0x1.2362f8p-4",
+        "gain 0x1.5f5df4p-2 pre_fx 0x1.38a0acp-5 0x1.0485e6p-4 pre_master 0x1.2171f4p-4 0x1.0672bp-3 above1 0/0 above7.999 0/0"
+      ],
+      "61ddfe67dc838e1337cb9c8eab8036c62e5ef2f2edadf683ca1cd2078a3a700f"
+    ],
+    "center": [
+      [
+        "center 0 148684 bbd 647330 0 0x1.2362f8p-4",
+        "gain 0x1.5f5df4p-2 pre_fx 0x1.38a0acp-5 0x1.0485e6p-4 pre_master 0x1.2171f4p-4 0x1.0672bp-3 above1 0/0 above7.999 0/0"
+      ],
+      "61ddfe67dc838e1337cb9c8eab8036c62e5ef2f2edadf683ca1cd2078a3a700f"
+    ]
+  },
+  "authored_repeat_bit_identical": true,
+  "schedule": [
+    [
+      16384,
+      48,
+      100
+    ],
+    [
+      38434,
+      48,
+      0
+    ],
+    [
+      49459,
+      60,
+      96
+    ],
+    [
+      49459,
+      64,
+      80
+    ],
+    [
+      49459,
+      67,
+      88
+    ],
+    [
+      82534,
+      60,
+      0
+    ],
+    [
+      82534,
+      64,
+      0
+    ],
+    [
+      82534,
+      67,
+      0
+    ]
+  ],
+  "matching_native_cue_sha256": "17b7b5389af054fd713c31acadbf170955c4146628872c9482ed23ce07f33943",
+  "exact_partitions": 1164,
+  "controls_compact_fixture_sha": [
+    "95c7603f7dfc5ea914f6dc3ca12cbd77e41b2861475b4870a2d3a9221483bc9b",
+    "c0a493273eaea57f78f7aa3f5bb4abcc75b201c6a438071e9665c52a2eb2862e"
+  ],
+  "shared_normalized_binary32_exact_for_both_arms": 170,
+  "compact_only_normalized_ids": [],
+  "native_only_normalized_ids": [],
+  "scene_trace": {
+    "both-authored": [
+      "center 0 0 bbd 647330 0 0x1.d237f6p-5",
+      "gain 0x1.5f5df4p-2 pre_fx 0x1.a0d63cp-5 0x1.a0d63cp-5 pre_master 0x1.81f058p-4 0x1.a3cbcep-4 above1 0/0 above7.999 0/0"
+    ],
+    "both-dry": [
+      "center 0 0 bbd 0 0 0x0p+0",
+      "gain 0x1.5f5df4p-2 pre_fx 0x1.a0d63cp-5 0x1.a0d63cp-5 pre_master 0x1.a0d63cp-5 0x1.a0d63cp-5 above1 0/0 above7.999 0/0"
+    ],
+    "center-authored": [
+      "center 148684 0 bbd 647330 0 0x1.5da9f8p-1",
+      "gain 0x1.5f5df4p-2 pre_fx 0x1.38a0acp-1 0x1.38a0acp-1 pre_master 0x1.22096cp+0 0x1.3b57b8p+0 above1 0/329 above7.999 0/0"
+    ],
+    "center-dry": [
+      "center 148684 0 bbd 0 0 0x0p+0",
+      "gain 0x1.5f5df4p-2 pre_fx 0x1.38a0acp-1 0x1.38a0acp-1 pre_master 0x1.38a0acp-1 0x1.38a0acp-1 above1 0/0 above7.999 0/0"
+    ]
+  },
+  "windows": {
+    "attack": {
+      "both": {
+        "authored_signed_dbr": 0.00807082269477463,
+        "dry_signed_dbr": -0.042709037938225294,
+        "authored_level_vs_ref_db": -26.37303018263826,
+        "dry_level_vs_ref_db": -28.102556426436518,
+        "authored_vs_both_absolute_dBFS": null,
+        "actual_condition_delta_vs_actual_AU_dbr": -0.04995003002329525,
+        "absolute_ref_error_dBFS": -14.428571548482648
+      },
+      "center": {
+        "authored_signed_dbr": 1.2384052170777835,
+        "dry_signed_dbr": 0.3618655401482813,
+        "authored_level_vs_ref_db": -4.761163827388329,
+        "dry_level_vs_ref_db": -6.518931776309912,
+        "authored_vs_both_absolute_dBFS": -19.95100842116267,
+        "actual_condition_delta_vs_actual_AU_dbr": 0.015476544105304664,
+        "absolute_ref_error_dBFS": -13.198237154099639
+      }
+    },
+    "held": {
+      "both": {
+        "authored_signed_dbr": 0.021995872826498952,
+        "dry_signed_dbr": -0.03617598036729475,
+        "authored_level_vs_ref_db": -26.40783141010383,
+        "dry_level_vs_ref_db": -28.14826656571511,
+        "authored_vs_both_absolute_dBFS": null,
+        "actual_condition_delta_vs_actual_AU_dbr": -0.04248781251038169,
+        "absolute_ref_error_dBFS": -14.11280241475537
+      },
+      "center": {
+        "authored_signed_dbr": 1.3551018016978833,
+        "dry_signed_dbr": 0.4243431552518341,
+        "authored_level_vs_ref_db": -4.795872278646499,
+        "dry_level_vs_ref_db": -6.564641908544498,
+        "authored_vs_both_absolute_dBFS": -19.683864469891134,
+        "actual_condition_delta_vs_actual_AU_dbr": 0.09975860262563212,
+        "absolute_ref_error_dBFS": -12.779696485883987
+      }
+    },
+    "release": {
+      "both": {
+        "authored_signed_dbr": -0.3113335154620238,
+        "dry_signed_dbr": -0.5238661180589046,
+        "authored_level_vs_ref_db": -23.532716515263647,
+        "dry_level_vs_ref_db": -23.511827605190415,
+        "authored_vs_both_absolute_dBFS": null,
+        "actual_condition_delta_vs_actual_AU_dbr": -0.15233624089803957,
+        "absolute_ref_error_dBFS": -35.8854840448666
+      },
+      "center": {
+        "authored_signed_dbr": -1.1907483157150307,
+        "dry_signed_dbr": -6.489421512189604,
+        "authored_level_vs_ref_db": -1.8810546157036399,
+        "dry_level_vs_ref_db": -1.9282029370316085,
+        "authored_vs_both_absolute_dBFS": -38.20473658525414,
+        "actual_condition_delta_vs_actual_AU_dbr": 0.054112647889649625,
+        "absolute_ref_error_dBFS": -36.7648988451196
+      }
+    },
+    "chord": {
+      "both": {
+        "authored_signed_dbr": 0.02153390186994718,
+        "dry_signed_dbr": -0.1784982743669976,
+        "authored_level_vs_ref_db": -28.464539252053758,
+        "dry_level_vs_ref_db": -30.18327305002504,
+        "authored_vs_both_absolute_dBFS": null,
+        "actual_condition_delta_vs_actual_AU_dbr": 0.023231916940696692,
+        "absolute_ref_error_dBFS": -11.32669901484918
+      },
+      "center": {
+        "authored_signed_dbr": 0.963007740405068,
+        "dry_signed_dbr": -1.915630181949279,
+        "authored_level_vs_ref_db": -6.8635311938143495,
+        "dry_level_vs_ref_db": -8.599648388592067,
+        "authored_vs_both_absolute_dBFS": -18.965950358486158,
+        "actual_condition_delta_vs_actual_AU_dbr": 0.5371695341025979,
+        "absolute_ref_error_dBFS": -10.385225176314059
+      }
+    },
+    "tail": {
+      "both": {
+        "authored_signed_dbr": -0.036872736483003224,
+        "dry_signed_dbr": -0.21386466527910847,
+        "authored_level_vs_ref_db": -32.19844582092519,
+        "dry_level_vs_ref_db": -31.415439482166143,
+        "authored_vs_both_absolute_dBFS": null,
+        "actual_condition_delta_vs_actual_AU_dbr": -0.016971466214450222,
+        "absolute_ref_error_dBFS": -32.929576597238665
+      },
+      "center": {
+        "authored_signed_dbr": -0.09840219670851424,
+        "dry_signed_dbr": -2.8510862026005994,
+        "authored_level_vs_ref_db": -10.564947865407245,
+        "dry_level_vs_ref_db": -9.831814832432139,
+        "authored_vs_both_absolute_dBFS": -44.208823527342204,
+        "actual_condition_delta_vs_actual_AU_dbr": -0.026701910572315704,
+        "absolute_ref_error_dBFS": -32.99110605746418
+      }
+    },
+    "full": {
+      "both": {
+        "authored_signed_dbr": 0.016687858295186157,
+        "dry_signed_dbr": -0.155596127474839,
+        "authored_level_vs_ref_db": -27.893149716373152,
+        "dry_level_vs_ref_db": -29.76367614995415,
+        "authored_vs_both_absolute_dBFS": null,
+        "actual_condition_delta_vs_actual_AU_dbr": 0.013270688032715035,
+        "absolute_ref_error_dBFS": -15.912246654560589
+      },
+      "center": {
+        "authored_signed_dbr": 1.010231726176478,
+        "dry_signed_dbr": -1.4444188461197285,
+        "authored_level_vs_ref_db": -6.288132918189039,
+        "dry_level_vs_ref_db": -8.180051489800732,
+        "authored_vs_both_absolute_dBFS": -22.97088994653725,
+        "actual_condition_delta_vs_actual_AU_dbr": 0.4655942432590472,
+        "absolute_ref_error_dBFS": -14.9187027866793
+      }
+    }
+  }
+}
