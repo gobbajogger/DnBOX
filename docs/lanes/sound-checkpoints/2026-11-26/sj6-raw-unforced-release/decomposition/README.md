@@ -1,0 +1,4 @@
+# Raw J106 single release: inherited history versus gated source drive
+From lane scratch, `bash sj6-raw-modal-decomp/run.sh` generates exact original_runtime compact center and connected suffix waveforms at the authenticated dry cue, plus a fixed linear modal decomposition. SciPy double precision implements the actual HP10 and downstream .995/.999 pole recurrences; f32 original-runtime unchanged. Verify algebraic sum and real render residual before reporting. This is not a proposed zero-input or reset policy; absence of post-note-off drive is only a mathematical component of the attribution. Main/physical Sub have independently owned original voices and share the existing compact VCA; cannot replace one isolated old Main stage with a purported whole Raw original release. No fit or terminal gain adjustment.
+
+Only generated compact PCM may be separately delivered using the explicit /tmp manifest. This archive has no waveform content.

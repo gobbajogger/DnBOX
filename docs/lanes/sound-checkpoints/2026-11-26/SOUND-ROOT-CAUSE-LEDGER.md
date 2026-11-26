@@ -192,6 +192,16 @@ changing the rounding rule.
   from differing source waveform/state driving the HP before release,
   plus subsequent exact tail state, not a long absent envelope or
   permission to mute the filter. [Source-causal test](sj6-raw-unforced-release/README.md).
+  Exact generated compact tapes show inherited pre-off state alone
+  already +4.75 dBr versus original release and opposing polarity.
+  The forced compact release and inherited state reinforce, not cancel.
+  A fixed-clock held lattice (before off) plus verified suffix inverse
+  shows the main-dominant second harmonic is about 3.8 dB too weak
+  relative to Sub, and its relative phase differs. This is conditional
+  composite evidence, not a knob gain to apply. Original Raw Saw at
+  this tested fixed scope ignores PWM width like the compact Saw;
+  isolated relative harmonics already match closely. Do not change
+  width or a global gate time to cover this.'
 - **Unresolved:** source owner of the gain between the calibrated Crusher
   and Apple's compressor input; which missing or misrouted per-program
   states dominate different dry patches; delay-bandwidth correction that

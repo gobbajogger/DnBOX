@@ -1,0 +1,11 @@
+{
+  "schema": "interleaved little-endian stereo Float32 at 44100",
+  "abs_begin_frame": 34324,
+  "abs_end_excluded_frame": 49459,
+  "noteoff_abs_frame": 38434,
+  "last_nonzero_compact_abs_frame": 39031,
+  "PCM_SHA256": {
+    "center-only.f32": "22b603fc37b3510b9f08fa80f86e439b4c9d9e085019fbedc9041dd208bc563a",
+    "center-plus-hp-dc.f32": "042f43062376108f9d3c03108b1107efee8695768eada6739c8f934e2dc1fe97"
+  }
+}

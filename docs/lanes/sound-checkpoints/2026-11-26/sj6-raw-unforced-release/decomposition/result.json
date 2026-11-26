@@ -1,0 +1,91 @@
+{
+  "windows": {
+    "release": {
+      "rms_native": 0.007055975962430239,
+      "rms_center_input": 0.005651281215250492,
+      "rms_full": 0.006015467457473278,
+      "rms_inherited_only": 0.005483080005893418,
+      "rms_compact_release_only": 0.0048643885646077484,
+      "inherited_only_signed_vs_native_dbr": 4.747381369412211,
+      "total_actual_vs_native_dbr": 3.982437227036998,
+      "drive_only_signed_vs_native_dbr": -0.6023729572803075,
+      "float_replay_error_dbr": -99.10286483834328,
+      "drive_vs_inherited_dbr": -1.03992648105216,
+      "corr_inherited_and_drive": -0.3288170532601841,
+      "corr_inherited_native": -0.88775888008966,
+      "corr_drive_native": 0.43863102273873683
+    },
+    "0-16ms": {
+      "rms_native": 0.0278395377099514,
+      "rms_center_input": 0.022348156198859215,
+      "rms_full": 0.023409388959407806,
+      "rms_inherited_only": 0.021565299855434046,
+      "rms_compact_release_only": 0.019132106516190434,
+      "inherited_only_signed_vs_native_dbr": 4.740326107662734,
+      "total_actual_vs_native_dbr": 3.9329870192777223,
+      "drive_only_signed_vs_native_dbr": -0.6551945029577524,
+      "float_replay_error_dbr": -101.56787216177634,
+      "drive_vs_inherited_dbr": -1.0398542217216271,
+      "corr_inherited_and_drive": -0.34307044645159046,
+      "corr_inherited_native": -0.8899044533036078,
+      "corr_drive_native": 0.4454982893433205
+    },
+    "16-50ms": {
+      "rms_native": 0.001237527932971716,
+      "rms_center_input": 0.0,
+      "rms_full": 0.0028430097736418247,
+      "rms_inherited_only": 0.00151776006827413,
+      "rms_compact_release_only": 0.0013401162379897906,
+      "inherited_only_signed_vs_native_dbr": 6.198114072872967,
+      "total_actual_vs_native_dbr": 9.571484956551087,
+      "drive_only_signed_vs_native_dbr": 5.1754567857110425,
+      "float_replay_error_dbr": -88.74346474035362,
+      "drive_vs_inherited_dbr": -1.0812130600523475,
+      "corr_inherited_and_drive": 0.9790535749595567,
+      "corr_inherited_native": -0.6778601153410239,
+      "corr_drive_native": -0.5171232711829985
+    },
+    "50-100ms": {
+      "rms_native": 0.0002921300765592605,
+      "rms_center_input": 0.0,
+      "rms_full": 0.00045832947944290936,
+      "rms_inherited_only": 0.00023965075803043958,
+      "rms_compact_release_only": 0.00023413069907103604,
+      "inherited_only_signed_vs_native_dbr": 4.18183277539408,
+      "total_actual_vs_native_dbr": 6.600003129986978,
+      "drive_only_signed_vs_native_dbr": 2.566142537069199,
+      "float_replay_error_dbr": -79.01965833684993,
+      "drive_vs_inherited_dbr": -0.20240890358674005,
+      "corr_inherited_and_drive": 0.8713803612868122,
+      "corr_inherited_native": -0.5767638754476192,
+      "corr_drive_native": -0.10183343577025447
+    },
+    "100-200ms": {
+      "rms_native": 4.9667636631056666e-05,
+      "rms_center_input": 0.0,
+      "rms_full": 7.065249519655481e-05,
+      "rms_inherited_only": 3.855118248056385e-05,
+      "rms_compact_release_only": 3.5001558973576395e-05,
+      "inherited_only_signed_vs_native_dbr": 4.26329900712434,
+      "total_actual_vs_native_dbr": 6.394805754417075,
+      "drive_only_signed_vs_native_dbr": 2.4716328406109063,
+      "float_replay_error_dbr": -82.44708966220118,
+      "drive_vs_inherited_dbr": -0.8390063079776364,
+      "corr_inherited_and_drive": 0.8448501181608354,
+      "corr_inherited_native": -0.6869672523904076,
+      "corr_drive_native": -0.1916217756768641
+    }
+  },
+  "witness": {
+    "schema": "interleaved little-endian stereo Float32 at 44100",
+    "abs_begin_frame": 34324,
+    "abs_end_excluded_frame": 49459,
+    "noteoff_abs_frame": 38434,
+    "last_nonzero_compact_abs_frame": 39031,
+    "PCM_SHA256": {
+      "center-only.f32": "22b603fc37b3510b9f08fa80f86e439b4c9d9e085019fbedc9041dd208bc563a",
+      "center-plus-hp-dc.f32": "042f43062376108f9d3c03108b1107efee8695768eada6739c8f934e2dc1fe97"
+    }
+  },
+  "master": 0.3431318402290344
+}

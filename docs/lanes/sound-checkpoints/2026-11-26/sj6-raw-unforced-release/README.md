@@ -30,3 +30,22 @@ Match the signal driving it and measure the first release intervals.
 ```sh
 python3 free-tail.py ../sj6-native-factory-cross
 ```
+
+The generated compact cue includes exact center-only and physical-suffix
+outputs, fixed PCM hashes and explicit absolute begin/end. A companion
+fixed MIDI-frequency lattice measures preceding held frames 34,324–38,433
+without changing time or gain. The inverse scoped original suffix gives
+first harmonic (mainly Sub) −18.99 dBFS and second harmonic (mainly Main)
+−18.19 dBFS. Compact after the tried center sum is −24.70 and −27.72,
+respectively. The relative Main weight is about 3.8 dB weaker and its
+relative phase differs (−90.16° vs +20.89°). This is a composite signal
+and conditional stage de-embedding, not a true private tap or proof of
+which owner changes note-start phase. Separate authenticated Saw width
+test found no pulse-width response/control bug at this actual Saw
+detent; do not use it to change pulse width on the Raw preset. Reconcile
+actual Main/Sub signal ownership and inheritance of filter state.
+
+```sh
+python3 held-sub-and-main.py ../sj6-native-factory-cross/program-2-dry compact-generated
+shasum -a 256 -c decomposition/SHA256SUMS  # run from decomposition/ for relative rows
+```
