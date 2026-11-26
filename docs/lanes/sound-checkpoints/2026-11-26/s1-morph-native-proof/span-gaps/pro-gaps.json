@@ -1,0 +1,16 @@
+{
+  "worst_half": 539,
+  "worst_us": 13191,
+  "wall_ms": 7571,
+  "narrow_windows_us": {
+    "pre_first_prepare": 5.208333333333333,
+    "first_prepare": 29.666666666666668,
+    "frame0_queues_arp_boundary_actions": 146.70833333333334,
+    "between_span_poll_until_render": 56.375,
+    "after_render_prepare": 148.20833333333334,
+    "after_prepare_seq_advance_brk_midi": 569.6666666666666,
+    "block_output_master_remainder": 521.5416666666666,
+    "pcm_output_scope_meters": 95.75
+  },
+  "total_us": 1573.125
+}
