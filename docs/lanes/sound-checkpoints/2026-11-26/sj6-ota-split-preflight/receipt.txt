@@ -1,0 +1,13 @@
+a
+00000000 0000001c W fm_floorf
+00000000 00000036 W fm_exp2f
+00000000 00000066 W fm_exp2_nf
+00000000 000000dc T sj6_ota_stage
+b
+00000000 00000022 T fallback_shared
+c
+00000000 0000001c W fm_floorf
+00000000 00000036 W fm_exp2f
+00000000 00000066 W fm_exp2_nf
+00000000 000000c6 T fm_tanhf
+262144 signed output words and 262144 state words bit-identical

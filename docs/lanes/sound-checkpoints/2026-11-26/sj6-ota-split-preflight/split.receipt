@@ -1,0 +1,15 @@
+tick
+00000000 00000030 t paired_fma
+00000000 000000ee t clock_2x
+00000000 00000106 T physical_tick
+         U fm_tanhf
+         U original_fma_compact_bits
+         U original_fma_finite_bits_reference
+split
+00000000 00000030 t paired_fma
+00000000 000000ee t clock_2x
+00000000 00000162 T admit_split
+         U fm_tanhf
+         U original_fma_compact_bits
+         U original_fma_finite_bits_reference
+64299 signed samples bit-identical across all six independent voices; 1237 disabled views left all owner bytes unchanged

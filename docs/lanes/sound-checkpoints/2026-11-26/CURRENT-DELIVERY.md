@@ -50,6 +50,13 @@ isolated kernel timing, or partial link into a release claim.
   wrapper/owner costs. This is sonically promising for the
   observed zero-feedback scope but still fails measured flash
   headroom; nonzero feedback or full-engine parity not proven.
+  The [explicit split placement](sj6-ota-split-preflight/README.md)
+  is bit-exact against contiguous history on 64,299 outputs and
+  rejects 1,237 illegal masks without mutating owner state. Its
+  aggregate object is 640 B. Factoring the existing inline
+  stock tanh fallback 220→34 B yields a nominal +454 B, but
+  actual coefficient, route, and ownership glue remain unpriced.
+  Only 4 pool bytes would remain before alignment. No fit claim.
 
 - **SuperJ6 Main physical OTA is now independently reconstructed.**
   The [same-input leaf and full typed Raw controls](sj6-raw-main-ota/README.md)
@@ -133,7 +140,10 @@ isolated kernel timing, or partial link into a release claim.
   now verifies A workspace release before a hostile active-A
   consumer, 40 nonwaiting serial decisions, and twelve guard
   faults. It uses actual embedded kernels but an A test stub,
-  not a product S1/timing claim. Native relink pending. Separate
+  not a product S1/timing claim. The
+  [actual Elite ON native link](909-terminal-native-rejected/NATIVE-REJECTION.md)
+  overflows APP by 436 B; OFF recreated word-exact. No Pro
+  attempt, emulator run, or verified saving. Separate
   [active host DSP proof](owner909-early-chicago/owner-fixture.log)
   compares 6.81 MB of exact outputs/states over 192 active
   spans, with actual host overlap on 124; it does not cover
