@@ -1,0 +1,157 @@
+{
+  "corpus": [
+    {
+      "file_sha": "0aaf6375083dfb2bb1224fe690340ed2eff4ad978f878d099e2c19913af60603",
+      "records": [
+        {
+          "receipt": "./program-2-authored/capture.json",
+          "component": "aumu/j6ct/AuPr",
+          "rate": 44100,
+          "frames": 148684,
+          "described_source": null,
+          "explicit_acquisition": null,
+          "profile": null,
+          "cue": "17b7b5389af054fd713c31acadbf170955c4146628872c9482ed23ce07f33943",
+          "sha": "9cc279dc61f6a504e1c234cd90db37f7c16c0cc9377a33e1165e6a75f7cf7b21",
+          "source_class": "native installed terminal stereo only"
+        },
+        {
+          "receipt": "./program-2-authored-repeat/capture.json",
+          "component": "aumu/j6ct/AuPr",
+          "rate": 44100,
+          "frames": 148684,
+          "described_source": null,
+          "explicit_acquisition": null,
+          "profile": null,
+          "cue": "17b7b5389af054fd713c31acadbf170955c4146628872c9482ed23ce07f33943",
+          "sha": "9cc279dc61f6a504e1c234cd90db37f7c16c0cc9377a33e1165e6a75f7cf7b21",
+          "source_class": "native installed terminal stereo only"
+        },
+        {
+          "receipt": "./program-2-dry/capture.json",
+          "component": "aumu/j6ct/AuPr",
+          "rate": 44100,
+          "frames": 148684,
+          "described_source": null,
+          "explicit_acquisition": null,
+          "profile": null,
+          "cue": "17b7b5389af054fd713c31acadbf170955c4146628872c9482ed23ce07f33943",
+          "sha": "905e705042416acd2a5404594706608c6bd0a35b0783013ef4bbf977fe170002",
+          "source_class": "native installed terminal stereo only"
+        }
+      ]
+    },
+    {
+      "file_sha": "444407d73a7dad329d7b3818ebc2445664b98d2a294cb97db40ab85d80bc895a",
+      "records": [
+        {
+          "receipt": "chain/candidate-hpf/capture.json",
+          "component": "aufx/hpas/appl",
+          "rate": 44100,
+          "frames": 148684,
+          "described_source": "SuperJ6.instrument.HiPass-in",
+          "explicit_acquisition": "Apple HiPass leaf; current J6 internal PCM not observed",
+          "profile": "external source-bound warm Brainwave tape; native 10 Hz floor, 0 dB resonance",
+          "cue": null,
+          "sha": "1d91604fda38b2cc8aaf0146375f24152ce1a899fdb54e0b939ca9f3c1d4a1d3",
+          "source_class": "independent Apple leaf on external renderer tape, not private AU node"
+        },
+        {
+          "receipt": "chain/before-crusher/capture.json",
+          "component": "aufx/dist/appl",
+          "rate": 44100,
+          "frames": 148684,
+          "described_source": "SuperJ6.conductor.BitCrusher-in",
+          "explicit_acquisition": "Apple AUDistortion decimator leaf; current J6 node not proven",
+          "profile": "external Brainwave S4 prefix; native connected FinalMix0 with mapped Decimation amount .44387007 percent",
+          "cue": null,
+          "sha": "837b2cd2ddeb7622b0190982aa2698e145854c8b8f2f06f7798a75ed8c826340",
+          "source_class": "independent Apple leaf on external renderer tape, not private AU node"
+        },
+        {
+          "receipt": "chain/before-hpf/capture.json",
+          "component": "aufx/hpas/appl",
+          "rate": 44100,
+          "frames": 148684,
+          "described_source": "SuperJ6.instrument.HiPass-in",
+          "explicit_acquisition": "Apple HiPass leaf; current J6 internal PCM not observed",
+          "profile": "external source-bound warm Brainwave tape; native 10 Hz floor, 0 dB resonance",
+          "cue": null,
+          "sha": "2c88b98af86f8b870489dec68706b83f1718f9fb318d7da80207d5fed7ca13a9",
+          "source_class": "independent Apple leaf on external renderer tape, not private AU node"
+        },
+        {
+          "receipt": "chain/candidate-crusher/capture.json",
+          "component": "aufx/dist/appl",
+          "rate": 44100,
+          "frames": 148684,
+          "described_source": "SuperJ6.conductor.BitCrusher-in",
+          "explicit_acquisition": "Apple AUDistortion decimator leaf; current J6 node not proven",
+          "profile": "external Brainwave S4 prefix; native connected FinalMix0 with mapped Decimation amount .44387007 percent",
+          "cue": null,
+          "sha": "07b39e292e2c5b54e2f356e853deaaef554739de031fef3a494c5ab34d0d74d9",
+          "source_class": "independent Apple leaf on external renderer tape, not private AU node"
+        },
+        {
+          "receipt": "stems/native-sub/capture.json",
+          "component": "aufx/dist/appl",
+          "rate": 44100,
+          "frames": 148684,
+          "described_source": "SuperJ6.conductor.BitCrusher-in",
+          "explicit_acquisition": "Apple AUDistortion decimator leaf; current J6 node not proven",
+          "profile": "external Brainwave S4 prefix; native connected FinalMix0 with mapped Decimation amount .44387007 percent",
+          "cue": null,
+          "sha": "a48fe22c7f561104ae241843614a3d6cf7b96cc534d04deef68e9273ca3d79bc",
+          "source_class": "independent Apple leaf on external renderer tape, not private AU node"
+        },
+        {
+          "receipt": "stems/native-main/capture.json",
+          "component": "aufx/dist/appl",
+          "rate": 44100,
+          "frames": 148684,
+          "described_source": "SuperJ6.conductor.BitCrusher-in",
+          "explicit_acquisition": "Apple AUDistortion decimator leaf; current J6 node not proven",
+          "profile": "external Brainwave S4 prefix; native connected FinalMix0 with mapped Decimation amount .44387007 percent",
+          "cue": null,
+          "sha": "9f54a92244c7cd3f51e7e0e966cb70cf14b19083e30393a9d44ed8a18d6ccd44",
+          "source_class": "independent Apple leaf on external renderer tape, not private AU node"
+        }
+      ]
+    },
+    {
+      "file_sha": "0ce56bbedd2b7627edec53809a6887f53ef98a02529854829c730d58b5ecd8cc",
+      "records": [
+        {
+          "receipt": "native-main/capture.json",
+          "component": "aufx/dist/appl",
+          "rate": 44100,
+          "frames": 148684,
+          "described_source": "SuperJ6.conductor.BitCrusher-in",
+          "explicit_acquisition": "Apple AUDistortion decimator leaf; current J6 node not proven",
+          "profile": "external Brainwave S4 prefix; native connected FinalMix0 with mapped Decimation amount .44387007 percent",
+          "cue": null,
+          "sha": "9f54a92244c7cd3f51e7e0e966cb70cf14b19083e30393a9d44ed8a18d6ccd44",
+          "source_class": "independent Apple leaf on external renderer tape, not private AU node"
+        },
+        {
+          "receipt": "native-sub/capture.json",
+          "component": "aufx/dist/appl",
+          "rate": 44100,
+          "frames": 148684,
+          "described_source": "SuperJ6.conductor.BitCrusher-in",
+          "explicit_acquisition": "Apple AUDistortion decimator leaf; current J6 node not proven",
+          "profile": "external Brainwave S4 prefix; native connected FinalMix0 with mapped Decimation amount .44387007 percent",
+          "cue": null,
+          "sha": "a48fe22c7f561104ae241843614a3d6cf7b96cc534d04deef68e9273ca3d79bc",
+          "source_class": "independent Apple leaf on external renderer tape, not private AU node"
+        }
+      ]
+    }
+  ],
+  "first_shared_missing": "signed installed oscSection AVAudioMixerNode stereo out ahead of Unison and instrument HP, Raw current cue, no stage inferred",
+  "strongest_matched_relative_control": {
+    "description": "True current in-process J60 enabled vs bypass genuine endpoint, conditional rebuilt source path and authored full/cold dry. Not a shared installed pre-J60 node capture.",
+    "expected_gap_db": -0.16941651665014668
+  },
+  "no_other_new_audio_request": true
+}

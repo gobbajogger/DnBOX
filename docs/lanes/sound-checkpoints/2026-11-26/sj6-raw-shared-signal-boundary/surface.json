@@ -1,0 +1,56 @@
+{
+  "current_binary": "6d163d79202e866d2fda96e36f752bd386641b5ae2d0b1f829a254d26b652850",
+  "component_interfaces": {
+    "_TtC10SuperJ6_AU23KingOfDigital_AudioUnit": {
+      "initWithComponentDescription:options:error:": "0x1000be2b4",
+      "dealloc": "0x1000be744",
+      "factoryPresets": "0x1000be858",
+      "currentPreset": "0x1000bea58",
+      "setCurrentPreset:": "0x1000bee48",
+      "supportsUserPresets": "0x1000bef74",
+      "fullState": "0x1000bef7c",
+      "setFullState:": "0x1000bfa28",
+      "shouldChangeToFormat:forBus:": "0x1000c37b4",
+      "allocateRenderResourcesAndReturnError:": "0x1000c484c",
+      "deallocateRenderResources": "0x1000c49ec",
+      "reset": "0x1000c4a30",
+      "canProcessInPlace": "0x1000c5d50",
+      "parametersForOverviewWithCount:": "0x1000c64ec",
+      ".cxx_destruct": "0x1000be768"
+    },
+    "_TtC10SuperJ6_AU24AKAUv3ExtensionAudioUnit": {
+      "parameterTree": "0x1000c69bc",
+      "setParameterTree:": "0x1000c6a24",
+      "internalRenderBlock": "0x1000c6aa0",
+      "outputBusses": "0x1000c6c5c",
+      "supportedViewConfigurations:": "0x1000c6f94",
+      "allocateRenderResourcesAndReturnError:": "0x1000c723c",
+      "deallocateRenderResources": "0x1000c7340",
+      "initWithComponentDescription:options:error:": "0x1000c7538",
+      ".cxx_destruct": "0x1000c75f0"
+    },
+    "_TtC8AudioKit7AKMixer": {
+      "volume": "0x10047b5b4",
+      "setVolume:": "0x10047b638",
+      "pan": "0x10047b714",
+      "setPan:": "0x10047b798",
+      "isStarted": "0x10047b88c",
+      "init": "0x10047b944",
+      "init:": "0x10047bbb0",
+      "start": "0x10047bc3c",
+      "stop": "0x10047bcd0",
+      "detach": "0x10047bec0",
+      "connectWithInput:bus:": "0x10047bf88",
+      "connectWithInput:": "0x10047c060",
+      "initWithAvAudioUnit:attach:": "0x10047c0f0",
+      "initWithAvAudioNode:attach:": "0x10047c124",
+      ".cxx_destruct": "0x10047c198"
+    }
+  },
+  "reachable_readback": "terminal outputBusses/render block, parameters and preset state only on this archived interface; no exposed oscSection node selector",
+  "inner_mixer_field": "AKMixer.mixerAU is private graph object state, not provided by bench readback",
+  "archived_host_source": [
+    "./factory.swift"
+  ],
+  "limitation": "selector/source audit of available readback, not a runtime Apple framework reverse-engineer. Existing bench does not offer private mixer access; no use of process memory, mock frames, injection or device."
+}

@@ -566,3 +566,13 @@ moves the measured phase before AMP, with nonlinear phase across
 harmonics and keys, not a fixed delay. The physical oracle passes
 two cutoff ranges. The combined typed compact whole Raw is still
 not a match and the new leaf is not carried in production.
+
+### Installed shared oscillator-mixer evidence boundary
+The [exact current constructor and available readback audit](sj6-raw-shared-signal-boundary/README.md)
+prove the ordered oscillator connections but reach an Apple mixer
+allocation before any installed internal samples can be read. The
+missing signal is signed stereo from this mixer, before Unison and
+the instrument high-pass. Cached Raw terminal returns and separate
+Apple-leaf captures must not be called installed internal taps.
+No alternate private capture was made; continue with verified
+prefilter/leaf scope without a guessed level correction.

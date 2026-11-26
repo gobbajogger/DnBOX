@@ -1,0 +1,19 @@
+{
+  "binary": "6d163d79202e866d2fda96e36f752bd386641b5ae2d0b1f829a254d26b652850",
+  "cached_raw_graph_execution": false,
+  "actual_pcm_frames": 0,
+  "roles": [
+    "MainA",
+    "MainB",
+    "Sub",
+    "Noise"
+  ],
+  "reached": [
+    "CoreGeneratorBank actual ordered AKSampler inputs",
+    "AKMixer initialized with all four current lane nodes",
+    "Reached actual AKMixer init",
+    "First opaque audio-owned boundary: AVAudioMixerNode allocWithZone; no host audio callback / no samples"
+  ],
+  "missing": "Actual installed oscSection AVAudioMixerNode output PCM immediately before instrument Unison and instrument HP; no substitution for absent Apple node",
+  "guards": "read-only constructor slice, synthetic object metadata/retain allocation, original ordered array and wrapper dispatch, explicitly stop at external Apple allocation; no fake format or zero audio"
+}
