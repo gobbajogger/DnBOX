@@ -1,0 +1,232 @@
+{
+  "binary": "6d163d79202e866d2fda96e36f752bd386641b5ae2d0b1f829a254d26b652850",
+  "gate": "Covers identical admitted Note event fragment, does not assert top conductor produces these masks",
+  "vintage": [
+    {
+      "frame": 16384,
+      "key": 36,
+      "admitted_layer_mask": 3,
+      "entropy_words": 2,
+      "draws": 2,
+      "physical_source_calls": [
+        [
+          36,
+          1,
+          -0.025542307976105363
+        ],
+        [
+          36,
+          2,
+          0.0
+        ]
+      ]
+    },
+    {
+      "frame": 49459,
+      "key": 48,
+      "admitted_layer_mask": 3,
+      "entropy_words": 2,
+      "draws": 2,
+      "physical_source_calls": [
+        [
+          48,
+          1,
+          0.025542307976105363
+        ],
+        [
+          48,
+          2,
+          -0.017028205317403577
+        ]
+      ]
+    },
+    {
+      "frame": 49459,
+      "key": 52,
+      "admitted_layer_mask": 3,
+      "entropy_words": 3,
+      "draws": 2,
+      "physical_source_calls": [
+        [
+          52,
+          1,
+          0.00851410265870179
+        ],
+        [
+          52,
+          2,
+          -0.00851410265870179
+        ]
+      ]
+    },
+    {
+      "frame": 49459,
+      "key": 55,
+      "admitted_layer_mask": 3,
+      "entropy_words": 2,
+      "draws": 2,
+      "physical_source_calls": [
+        [
+          55,
+          1,
+          0.017028205317403573
+        ],
+        [
+          55,
+          2,
+          -0.025542307976105363
+        ]
+      ]
+    },
+    {
+      "frame": 66000,
+      "key": 57,
+      "admitted_layer_mask": 1,
+      "entropy_words": 1,
+      "draws": 1,
+      "physical_source_calls": [
+        [
+          57,
+          1,
+          0.0
+        ]
+      ]
+    },
+    {
+      "frame": 66100,
+      "key": 59,
+      "admitted_layer_mask": 2,
+      "entropy_words": 1,
+      "draws": 1,
+      "physical_source_calls": [
+        [
+          59,
+          2,
+          0.025542307976105363
+        ]
+      ]
+    },
+    {
+      "frame": 66200,
+      "key": 61,
+      "admitted_layer_mask": 0,
+      "entropy_words": 0,
+      "draws": 0,
+      "physical_source_calls": []
+    }
+  ],
+  "zero": [
+    {
+      "frame": 16384,
+      "key": 36,
+      "admitted_layer_mask": 3,
+      "entropy_words": 2,
+      "draws": 2,
+      "physical_source_calls": [
+        [
+          36,
+          1,
+          0.0
+        ],
+        [
+          36,
+          2,
+          0.0
+        ]
+      ]
+    },
+    {
+      "frame": 49459,
+      "key": 48,
+      "admitted_layer_mask": 3,
+      "entropy_words": 3,
+      "draws": 2,
+      "physical_source_calls": [
+        [
+          48,
+          1,
+          0.0
+        ],
+        [
+          48,
+          2,
+          0.0
+        ]
+      ]
+    },
+    {
+      "frame": 49459,
+      "key": 52,
+      "admitted_layer_mask": 3,
+      "entropy_words": 2,
+      "draws": 2,
+      "physical_source_calls": [
+        [
+          52,
+          1,
+          0.0
+        ],
+        [
+          52,
+          2,
+          0.0
+        ]
+      ]
+    },
+    {
+      "frame": 49459,
+      "key": 55,
+      "admitted_layer_mask": 3,
+      "entropy_words": 2,
+      "draws": 2,
+      "physical_source_calls": [
+        [
+          55,
+          1,
+          0.0
+        ],
+        [
+          55,
+          2,
+          0.0
+        ]
+      ]
+    },
+    {
+      "frame": 66000,
+      "key": 57,
+      "admitted_layer_mask": 1,
+      "entropy_words": 1,
+      "draws": 1,
+      "physical_source_calls": [
+        [
+          57,
+          1,
+          0.0
+        ]
+      ]
+    },
+    {
+      "frame": 66100,
+      "key": 59,
+      "admitted_layer_mask": 2,
+      "entropy_words": 2,
+      "draws": 1,
+      "physical_source_calls": [
+        [
+          59,
+          2,
+          0.0
+        ]
+      ]
+    },
+    {
+      "frame": 66200,
+      "key": 61,
+      "admitted_layer_mask": 0,
+      "entropy_words": 0,
+      "draws": 0,
+      "physical_source_calls": []
+    }
+  ]
+}

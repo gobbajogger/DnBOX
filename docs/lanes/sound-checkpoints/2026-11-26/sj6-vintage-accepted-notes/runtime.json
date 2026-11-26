@@ -1,0 +1,60 @@
+{
+  "0-dry": {
+    "unchanged": true
+  },
+  "1-dry": {
+    "first_changed_frame": 49461,
+    "scope": "fixed compact PRNG seed only; original entropy not matched, diagnostic only",
+    "rows": {
+      "first_hold": {
+        "before_vs_saved": -1.422293558727683,
+        "after_vs_saved": -1.422293558727683,
+        "after_vs_before": null
+      },
+      "first_release": {
+        "before_vs_saved": 0.9848484244708906,
+        "after_vs_saved": 0.9848484244708906,
+        "after_vs_before": null
+      },
+      "chord": {
+        "before_vs_saved": 0.09114516928247206,
+        "after_vs_saved": -2.526858354382548,
+        "after_vs_before": -2.252150677902655
+      },
+      "final_early": {
+        "before_vs_saved": 3.314846204280333,
+        "after_vs_saved": 0.7106163291581723,
+        "after_vs_before": 0.857780958826107
+      }
+    }
+  },
+  "1-authored": {
+    "first_changed_frame": 49461,
+    "scope": "fixed compact PRNG seed only; original entropy not matched, diagnostic only",
+    "rows": {
+      "first_hold": {
+        "before_vs_saved": -0.047087777502309525,
+        "after_vs_saved": -0.047087777502309525,
+        "after_vs_before": null
+      },
+      "first_release": {
+        "before_vs_saved": 1.4296195617664156,
+        "after_vs_saved": 1.4296195617664156,
+        "after_vs_before": null
+      },
+      "chord": {
+        "before_vs_saved": -2.9871398906968736,
+        "after_vs_saved": -3.050206725181793,
+        "after_vs_before": -2.2522038955310832
+      },
+      "final_early": {
+        "before_vs_saved": -2.217306640612367,
+        "after_vs_saved": -2.0392459892660457,
+        "after_vs_before": 0.8604447244814629
+      }
+    }
+  },
+  "2-dry": {
+    "unchanged": true
+  }
+}

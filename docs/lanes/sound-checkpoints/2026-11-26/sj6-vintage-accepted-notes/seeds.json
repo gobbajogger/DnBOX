@@ -1,0 +1,554 @@
+{
+  "same_frame:0x71da45b3:authored": {
+    "final_params_retained": [
+      "630",
+      "-332",
+      "0x1.23ae9ap-8",
+      "0x1.230cb6p-9"
+    ],
+    "final_params_drawn": [
+      "-61",
+      "-115",
+      "0x1.233a46p-8",
+      "0x1.233132p-9"
+    ],
+    "actual_gate_and_amp_state_words_equal": true,
+    "rows": {
+      "same_cue_attack": {
+        "redraw_vs_retain": null,
+        "before_vs_native": -2.078319099908886,
+        "after_vs_native": -2.078319099908886
+      },
+      "first_release": {
+        "redraw_vs_retain": null,
+        "before_vs_native": 0.9866934190168606,
+        "after_vs_native": 0.9866934190168606
+      },
+      "chord": {
+        "redraw_vs_retain": -2.252150677902655,
+        "before_vs_native": 0.09114516928247206,
+        "after_vs_native": -2.526858354382548
+      },
+      "final_early": {
+        "redraw_vs_retain": 0.857780958826107,
+        "before_vs_native": 3.314846204280333,
+        "after_vs_native": 0.7106163291581723
+      },
+      "final_tail": {
+        "redraw_vs_retain": null,
+        "before_vs_native": -2.892982399659862e-15,
+        "after_vs_native": -2.892982399659862e-15
+      }
+    }
+  },
+  "same_frame:0x71da45b3:zero": {
+    "final_params_retained": [
+      "0",
+      "0",
+      "0x1.23448ap-8",
+      "0x1.234488p-9"
+    ],
+    "final_params_drawn": [
+      "0",
+      "0",
+      "0x1.23448ap-8",
+      "0x1.234488p-9"
+    ],
+    "actual_gate_and_amp_state_words_equal": true,
+    "rows": {
+      "same_cue_attack": {
+        "redraw_vs_retain": null
+      },
+      "first_release": {
+        "redraw_vs_retain": null
+      },
+      "chord": {
+        "redraw_vs_retain": null
+      },
+      "final_early": {
+        "redraw_vs_retain": null
+      },
+      "final_tail": {
+        "redraw_vs_retain": null
+      }
+    }
+  },
+  "same_frame:0x243f6a88:authored": {
+    "final_params_retained": [
+      "-412",
+      "623",
+      "0x1.22ff4p-8",
+      "0x1.23ad6cp-9"
+    ],
+    "final_params_drawn": [
+      "318",
+      "-709",
+      "0x1.237a0ep-8",
+      "0x1.22cd58p-9"
+    ],
+    "actual_gate_and_amp_state_words_equal": true,
+    "rows": {
+      "same_cue_attack": {
+        "redraw_vs_retain": null,
+        "before_vs_native": -2.376020995621366,
+        "after_vs_native": -2.376020995621366
+      },
+      "first_release": {
+        "redraw_vs_retain": null,
+        "before_vs_native": -0.7394572000427752,
+        "after_vs_native": -0.7394572000427752
+      },
+      "chord": {
+        "redraw_vs_retain": -1.1260058685757819,
+        "before_vs_native": -4.153789285286339,
+        "after_vs_native": -0.7531743089019733
+      },
+      "final_early": {
+        "redraw_vs_retain": 5.535923841978866,
+        "before_vs_native": -2.2408699154378544,
+        "after_vs_native": 2.585454931519337
+      },
+      "final_tail": {
+        "redraw_vs_retain": null,
+        "before_vs_native": -2.892982399659862e-15,
+        "after_vs_native": -2.892982399659862e-15
+      }
+    }
+  },
+  "same_frame:0x243f6a88:zero": {
+    "final_params_retained": [
+      "0",
+      "0",
+      "0x1.23448ap-8",
+      "0x1.234488p-9"
+    ],
+    "final_params_drawn": [
+      "0",
+      "0",
+      "0x1.23448ap-8",
+      "0x1.234488p-9"
+    ],
+    "actual_gate_and_amp_state_words_equal": true,
+    "rows": {
+      "same_cue_attack": {
+        "redraw_vs_retain": null
+      },
+      "first_release": {
+        "redraw_vs_retain": null
+      },
+      "chord": {
+        "redraw_vs_retain": null
+      },
+      "final_early": {
+        "redraw_vs_retain": null
+      },
+      "final_tail": {
+        "redraw_vs_retain": null
+      }
+    }
+  },
+  "same_frame:0xa5a5a5a5:authored": {
+    "final_params_retained": [
+      "-328",
+      "579",
+      "0x1.230d5ep-8",
+      "0x1.23a604p-9"
+    ],
+    "final_params_drawn": [
+      "252",
+      "161",
+      "0x1.236ef4p-8",
+      "0x1.235fap-9"
+    ],
+    "actual_gate_and_amp_state_words_equal": true,
+    "rows": {
+      "same_cue_attack": {
+        "redraw_vs_retain": null,
+        "before_vs_native": -2.132663552869019,
+        "after_vs_native": -2.132663552869019
+      },
+      "first_release": {
+        "redraw_vs_retain": null,
+        "before_vs_native": 0.8435104536752862,
+        "after_vs_native": 0.8435104536752862
+      },
+      "chord": {
+        "redraw_vs_retain": -3.475435932149811,
+        "before_vs_native": -3.914457460975135,
+        "after_vs_native": -1.3358589902644133
+      },
+      "final_early": {
+        "redraw_vs_retain": 3.340399836363459,
+        "before_vs_native": -1.7482005716493074,
+        "after_vs_native": 1.8728192494136
+      },
+      "final_tail": {
+        "redraw_vs_retain": null,
+        "before_vs_native": -2.892982399659862e-15,
+        "after_vs_native": -2.892982399659862e-15
+      }
+    }
+  },
+  "same_frame:0xa5a5a5a5:zero": {
+    "final_params_retained": [
+      "0",
+      "0",
+      "0x1.23448ap-8",
+      "0x1.234488p-9"
+    ],
+    "final_params_drawn": [
+      "0",
+      "0",
+      "0x1.23448ap-8",
+      "0x1.234488p-9"
+    ],
+    "actual_gate_and_amp_state_words_equal": true,
+    "rows": {
+      "same_cue_attack": {
+        "redraw_vs_retain": null
+      },
+      "first_release": {
+        "redraw_vs_retain": null
+      },
+      "chord": {
+        "redraw_vs_retain": null
+      },
+      "final_early": {
+        "redraw_vs_retain": null
+      },
+      "final_tail": {
+        "redraw_vs_retain": null
+      }
+    }
+  },
+  "same_frame:0x9e3779b9:authored": {
+    "final_params_retained": [
+      "-29",
+      "-861",
+      "0x1.233faap-8",
+      "0x1.22b3d4p-9"
+    ],
+    "final_params_drawn": [
+      "396",
+      "851",
+      "0x1.23873p-8",
+      "0x1.23d3d8p-9"
+    ],
+    "actual_gate_and_amp_state_words_equal": true,
+    "rows": {
+      "same_cue_attack": {
+        "redraw_vs_retain": null,
+        "before_vs_native": -2.1769301786528636,
+        "after_vs_native": -2.1769301786528636
+      },
+      "first_release": {
+        "redraw_vs_retain": null,
+        "before_vs_native": 0.5603334608512005,
+        "after_vs_native": 0.5603334608512005
+      },
+      "chord": {
+        "redraw_vs_retain": -3.764951350116184,
+        "before_vs_native": -2.0130752643290144,
+        "after_vs_native": -0.9132602166085312
+      },
+      "final_early": {
+        "redraw_vs_retain": -1.409071684342615,
+        "before_vs_native": 1.189818946878038,
+        "after_vs_native": 1.6602694216429899
+      },
+      "final_tail": {
+        "redraw_vs_retain": null,
+        "before_vs_native": -2.892982399659862e-15,
+        "after_vs_native": -2.892982399659862e-15
+      }
+    }
+  },
+  "same_frame:0x9e3779b9:zero": {
+    "final_params_retained": [
+      "0",
+      "0",
+      "0x1.23448ap-8",
+      "0x1.234488p-9"
+    ],
+    "final_params_drawn": [
+      "0",
+      "0",
+      "0x1.23448ap-8",
+      "0x1.234488p-9"
+    ],
+    "actual_gate_and_amp_state_words_equal": true,
+    "rows": {
+      "same_cue_attack": {
+        "redraw_vs_retain": null
+      },
+      "first_release": {
+        "redraw_vs_retain": null
+      },
+      "chord": {
+        "redraw_vs_retain": null
+      },
+      "final_early": {
+        "redraw_vs_retain": null
+      },
+      "final_tail": {
+        "redraw_vs_retain": null
+      }
+    }
+  },
+  "staggered:0x71da45b3:authored": {
+    "final_params_retained": [
+      "630",
+      "-332",
+      "0x1.23ae9ap-8",
+      "0x1.230cb6p-9"
+    ],
+    "final_params_drawn": [
+      "-61",
+      "-115",
+      "0x1.233a46p-8",
+      "0x1.233132p-9"
+    ],
+    "actual_gate_and_amp_state_words_equal": true,
+    "rows": {
+      "same_cue_attack": {
+        "redraw_vs_retain": null
+      },
+      "first_release": {
+        "redraw_vs_retain": null
+      },
+      "chord": {
+        "redraw_vs_retain": -2.2753642514979315
+      },
+      "final_early": {
+        "redraw_vs_retain": 0.7295712163074501
+      },
+      "final_tail": {
+        "redraw_vs_retain": null
+      }
+    }
+  },
+  "staggered:0x71da45b3:zero": {
+    "final_params_retained": [
+      "0",
+      "0",
+      "0x1.23448ap-8",
+      "0x1.234488p-9"
+    ],
+    "final_params_drawn": [
+      "0",
+      "0",
+      "0x1.23448ap-8",
+      "0x1.234488p-9"
+    ],
+    "actual_gate_and_amp_state_words_equal": true,
+    "rows": {
+      "same_cue_attack": {
+        "redraw_vs_retain": null
+      },
+      "first_release": {
+        "redraw_vs_retain": null
+      },
+      "chord": {
+        "redraw_vs_retain": null
+      },
+      "final_early": {
+        "redraw_vs_retain": null
+      },
+      "final_tail": {
+        "redraw_vs_retain": null
+      }
+    }
+  },
+  "staggered:0x243f6a88:authored": {
+    "final_params_retained": [
+      "-412",
+      "623",
+      "0x1.22ff4p-8",
+      "0x1.23ad6cp-9"
+    ],
+    "final_params_drawn": [
+      "318",
+      "-709",
+      "0x1.237a0ep-8",
+      "0x1.22cd58p-9"
+    ],
+    "actual_gate_and_amp_state_words_equal": true,
+    "rows": {
+      "same_cue_attack": {
+        "redraw_vs_retain": null
+      },
+      "first_release": {
+        "redraw_vs_retain": null
+      },
+      "chord": {
+        "redraw_vs_retain": -1.173811943734954
+      },
+      "final_early": {
+        "redraw_vs_retain": 6.479605919480406
+      },
+      "final_tail": {
+        "redraw_vs_retain": null
+      }
+    }
+  },
+  "staggered:0x243f6a88:zero": {
+    "final_params_retained": [
+      "0",
+      "0",
+      "0x1.23448ap-8",
+      "0x1.234488p-9"
+    ],
+    "final_params_drawn": [
+      "0",
+      "0",
+      "0x1.23448ap-8",
+      "0x1.234488p-9"
+    ],
+    "actual_gate_and_amp_state_words_equal": true,
+    "rows": {
+      "same_cue_attack": {
+        "redraw_vs_retain": null
+      },
+      "first_release": {
+        "redraw_vs_retain": null
+      },
+      "chord": {
+        "redraw_vs_retain": null
+      },
+      "final_early": {
+        "redraw_vs_retain": null
+      },
+      "final_tail": {
+        "redraw_vs_retain": null
+      }
+    }
+  },
+  "staggered:0xa5a5a5a5:authored": {
+    "final_params_retained": [
+      "-328",
+      "579",
+      "0x1.230d5ep-8",
+      "0x1.23a604p-9"
+    ],
+    "final_params_drawn": [
+      "252",
+      "161",
+      "0x1.236ef4p-8",
+      "0x1.235fap-9"
+    ],
+    "actual_gate_and_amp_state_words_equal": true,
+    "rows": {
+      "same_cue_attack": {
+        "redraw_vs_retain": null
+      },
+      "first_release": {
+        "redraw_vs_retain": null
+      },
+      "chord": {
+        "redraw_vs_retain": -3.5166692836662556
+      },
+      "final_early": {
+        "redraw_vs_retain": 4.187974157817105
+      },
+      "final_tail": {
+        "redraw_vs_retain": null
+      }
+    }
+  },
+  "staggered:0xa5a5a5a5:zero": {
+    "final_params_retained": [
+      "0",
+      "0",
+      "0x1.23448ap-8",
+      "0x1.234488p-9"
+    ],
+    "final_params_drawn": [
+      "0",
+      "0",
+      "0x1.23448ap-8",
+      "0x1.234488p-9"
+    ],
+    "actual_gate_and_amp_state_words_equal": true,
+    "rows": {
+      "same_cue_attack": {
+        "redraw_vs_retain": null
+      },
+      "first_release": {
+        "redraw_vs_retain": null
+      },
+      "chord": {
+        "redraw_vs_retain": null
+      },
+      "final_early": {
+        "redraw_vs_retain": null
+      },
+      "final_tail": {
+        "redraw_vs_retain": null
+      }
+    }
+  },
+  "staggered:0x9e3779b9:authored": {
+    "final_params_retained": [
+      "-29",
+      "-861",
+      "0x1.233faap-8",
+      "0x1.22b3d4p-9"
+    ],
+    "final_params_drawn": [
+      "396",
+      "851",
+      "0x1.23873p-8",
+      "0x1.23d3d8p-9"
+    ],
+    "actual_gate_and_amp_state_words_equal": true,
+    "rows": {
+      "same_cue_attack": {
+        "redraw_vs_retain": null
+      },
+      "first_release": {
+        "redraw_vs_retain": null
+      },
+      "chord": {
+        "redraw_vs_retain": -3.7782856725490017
+      },
+      "final_early": {
+        "redraw_vs_retain": -3.024003029594926
+      },
+      "final_tail": {
+        "redraw_vs_retain": null
+      }
+    }
+  },
+  "staggered:0x9e3779b9:zero": {
+    "final_params_retained": [
+      "0",
+      "0",
+      "0x1.23448ap-8",
+      "0x1.234488p-9"
+    ],
+    "final_params_drawn": [
+      "0",
+      "0",
+      "0x1.23448ap-8",
+      "0x1.234488p-9"
+    ],
+    "actual_gate_and_amp_state_words_equal": true,
+    "rows": {
+      "same_cue_attack": {
+        "redraw_vs_retain": null
+      },
+      "first_release": {
+        "redraw_vs_retain": null
+      },
+      "chord": {
+        "redraw_vs_retain": null
+      },
+      "final_early": {
+        "redraw_vs_retain": null
+      },
+      "final_tail": {
+        "redraw_vs_retain": null
+      }
+    }
+  }
+}

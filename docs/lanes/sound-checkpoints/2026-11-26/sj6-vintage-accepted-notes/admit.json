@@ -1,0 +1,189 @@
+{
+  "binary": "6d163d79202e866d2fda96e36f752bd386641b5ae2d0b1f829a254d26b652850",
+  "scope": "Actual current event admission from note ledger plus per-owner native detune sends. Caller/mode bit and minimal ledger layout are supplied for differential authored semantics; no claim of the saved AU instance actor metadata.",
+  "cases": [
+    {
+      "key": 36,
+      "poly_dedup_override_mode_bit": 0,
+      "ledger_provided": [],
+      "requested": 3,
+      "expected_pass": 3,
+      "actual_outputs": [
+        [
+          36,
+          1,
+          -0.025542307976105363
+        ],
+        [
+          36,
+          2,
+          0.0
+        ]
+      ]
+    },
+    {
+      "key": 48,
+      "poly_dedup_override_mode_bit": 0,
+      "ledger_provided": [
+        [
+          36,
+          3,
+          0
+        ]
+      ],
+      "requested": 3,
+      "expected_pass": 3,
+      "actual_outputs": [
+        [
+          48,
+          1,
+          0.025542307976105363
+        ],
+        [
+          48,
+          2,
+          -0.017028205317403577
+        ]
+      ]
+    },
+    {
+      "key": 52,
+      "poly_dedup_override_mode_bit": 0,
+      "ledger_provided": [
+        [
+          48,
+          3,
+          0
+        ]
+      ],
+      "requested": 3,
+      "expected_pass": 3,
+      "actual_outputs": [
+        [
+          52,
+          1,
+          0.00851410265870179
+        ],
+        [
+          52,
+          2,
+          -0.00851410265870179
+        ]
+      ]
+    },
+    {
+      "key": 55,
+      "poly_dedup_override_mode_bit": 0,
+      "ledger_provided": [
+        [
+          48,
+          3,
+          0
+        ],
+        [
+          52,
+          3,
+          0
+        ]
+      ],
+      "requested": 3,
+      "expected_pass": 3,
+      "actual_outputs": [
+        [
+          55,
+          1,
+          0.017028205317403573
+        ],
+        [
+          55,
+          2,
+          -0.025542307976105363
+        ]
+      ]
+    },
+    {
+      "key": 55,
+      "poly_dedup_override_mode_bit": 0,
+      "ledger_provided": [
+        [
+          55,
+          3,
+          0
+        ]
+      ],
+      "requested": 3,
+      "expected_pass": 0,
+      "actual_outputs": []
+    },
+    {
+      "key": 55,
+      "poly_dedup_override_mode_bit": 0,
+      "ledger_provided": [
+        [
+          55,
+          1,
+          0
+        ]
+      ],
+      "requested": 3,
+      "expected_pass": 2,
+      "actual_outputs": [
+        [
+          55,
+          2,
+          0.0
+        ]
+      ]
+    },
+    {
+      "key": 55,
+      "poly_dedup_override_mode_bit": 0,
+      "ledger_provided": [
+        [
+          55,
+          3,
+          1
+        ]
+      ],
+      "requested": 3,
+      "expected_pass": 3,
+      "actual_outputs": [
+        [
+          55,
+          1,
+          0.025542307976105363
+        ],
+        [
+          55,
+          2,
+          -0.017028205317403577
+        ]
+      ]
+    },
+    {
+      "key": 55,
+      "poly_dedup_override_mode_bit": 1,
+      "ledger_provided": [
+        [
+          55,
+          3,
+          0
+        ]
+      ],
+      "requested": 3,
+      "expected_pass": 3,
+      "actual_outputs": [
+        [
+          55,
+          1,
+          0.00851410265870179
+        ],
+        [
+          55,
+          2,
+          -0.00851410265870179
+        ]
+      ]
+    }
+  ]
+}

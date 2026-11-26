@@ -438,6 +438,27 @@ signed owner counters on a clearly non-timing witness.
   for a rate-only H16 change worsened some release tails and is rejected.
   [Matched guarded layouts](s1-guarded-owner-delay-lease/README.md).
 
+- **Vintage draw lifecycle is audible, not a standalone match.** Current
+  original admission redraws independently per newly accepted oscillator;
+  held duplicate events do not automatically redraw. A typed guarded
+  test left all 64 AMP/gate checkpoints and all eight zero-Vintage pairs
+  exact. Four predeclared seeds moved Solidify's dry final-release error
+  in opposite directions; one improved while three worsened. Do not
+  select a seed to fit a saved render or reset the oscillator at note-off.
+  [Source and seeded comparisons](sj6-vintage-accepted-notes/README.md).
+- **Static Normal history alone ruled out.** At the actual open 20 kHz
+  / Q1 source case, timed note-offs leave the original IIR histories
+  untouched. The recurrence matched all 1,408 samples; substituting it
+  did not repair Solidify's signed final release. This does not excuse
+  unverified live modulation or eliminate other upstream state.
+  [Scoped replay](sj6-solidify-static-filter/README.md).
+- **No cheap general Synth One history folding remains.** The compact
+  delay already shares the short right paths. Exact-real folding moves
+  only a few units in the last place, not exact Float32 equality. Actual
+  left and right long writes in the covered tests are identical only
+  during startup silence; never alias these histories on Mono alone.
+  [Source-state lower bound](s1-delay-state-minimality/README.md).
+
 ## Release boundary
 
 These are lab diagnostics. A host proof or a leaf emulator measurement
