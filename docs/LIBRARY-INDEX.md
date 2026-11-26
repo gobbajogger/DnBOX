@@ -67,3 +67,9 @@ The separate small SuperJ6 addendum adds the independently qualified pre-note la
 | `SJ6-Direct-AUv3-Physical-Cutoff.tgz` | 3,931,882 | `9581a0d4b230b6242723d12f2b58fd09d73f1474ea65f85cf9de3db28cf5f09b` | Download by name, verify SHA-256, extract, and run `python3 score_cutoff.py`. See the [Git bench](lanes/sound-checkpoints/2026-11-26/sj6-direct-auv3-physical-cutoff/) for the same four PCM arrays. |
 | `SJ6-Direct-AUv3-Dynamic-Cutoff.tgz` | 3,942,919 | `6f007e4e30abd5c91b11a1013a24b2d66e18412c874b4c368192d5b4743c1413` | Download by name, verify SHA-256, extract and run `python3 score_dynamic.py`. The same four renders are in the [Git bench](lanes/sound-checkpoints/2026-11-26/sj6-direct-auv3-dynamic-cutoff/). |
 | `SJ6-AUv3-Chord-Cutoff-Timing.tgz` | 7,878,301 | `1bec364fa3118259d1f666af72dabaa322eb135f4a264538fb212eacbf8b02d3` | Download by name, verify SHA-256 and run `python3 score.py .` after extraction. All eight original PCM arrays are also in the [Git bench](lanes/sound-checkpoints/2026-11-26/sj6-auv3-chord-cutoff-timing/). |
+
+## SuperJ6 portable HP and connected zero-Crusher references — 2026-11-26
+
+| Library name | Size (bytes) | SHA256 | Recovery |
+| --- | ---: | --- | --- |
+| `SJ6-Portable-HP-Zero-Crusher-References.tgz` | 11,703,710 | `444407d73a7dad329d7b3818ebc2445664b98d2a294cb97db40ab85d80bc895a` | Download by name, verify SHA-256, extract and run `bash verify.sh` (C compiler and NumPy). The same references and compact source are in the [Git bench](lanes/sound-checkpoints/2026-11-26/sj6-portable-hp-zero-crusher/). |

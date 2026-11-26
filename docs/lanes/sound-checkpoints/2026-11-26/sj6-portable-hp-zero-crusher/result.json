@@ -1,0 +1,138 @@
+{
+  "before-chain": {
+    "compact": {
+      "max_abs": 6.2175095081329346e-06,
+      "residual_dbr": -101.0420365
+    },
+    "input_sha256": "2c88b98af86f8b870489dec68706b83f1718f9fb318d7da80207d5fed7ca13a9",
+    "output_sha256": "64e62da06e73704dc7a2d100fcd2b7fe58f27e48078ec4adf4da7ef3c08d69f4"
+  },
+  "before-crusher": {
+    "compact_partition_exact": {
+      "max_abs": 2.980232238769531e-07,
+      "residual_dbr": -128.03185046
+    },
+    "float": {
+      "max_abs": 2.980232238769531e-07,
+      "residual_dbr": -128.03185046
+    },
+    "input_sha256": "837b2cd2ddeb7622b0190982aa2698e145854c8b8f2f06f7798a75ed8c826340",
+    "output_sha256": "64e62da06e73704dc7a2d100fcd2b7fe58f27e48078ec4adf4da7ef3c08d69f4",
+    "reference": {
+      "max_abs": 2.980232238769531e-07,
+      "residual_dbr": -132.32885688
+    },
+    "stable": {
+      "max_abs": 2.980232238769531e-07,
+      "residual_dbr": -128.03185046
+    }
+  },
+  "before-hpf": {
+    "compact_partition_exact": {
+      "max_abs": 2.6814639568328857e-05,
+      "residual_dbr": -89.20654607
+    },
+    "float": {
+      "max_abs": 0.0007730347570031881,
+      "residual_dbr": -57.92255794
+    },
+    "input_sha256": "2c88b98af86f8b870489dec68706b83f1718f9fb318d7da80207d5fed7ca13a9",
+    "output_sha256": "837b2cd2ddeb7622b0190982aa2698e145854c8b8f2f06f7798a75ed8c826340",
+    "reference": {
+      "max_abs": 1.4901161193847656e-08,
+      "residual_dbr": -190.06450867
+    },
+    "stable": {
+      "max_abs": 2.6814639568328857e-05,
+      "residual_dbr": -89.20654607
+    }
+  },
+  "candidate-chain": {
+    "compact": {
+      "max_abs": 6.8284571170806885e-06,
+      "residual_dbr": -99.28661642
+    },
+    "input_sha256": "1d91604fda38b2cc8aaf0146375f24152ce1a899fdb54e0b939ca9f3c1d4a1d3",
+    "output_sha256": "d9dab8327c72cc6c4a70f02467a2c216e101b86702be08171605c4c821f6c924"
+  },
+  "candidate-crusher": {
+    "compact_partition_exact": {
+      "max_abs": 3.2782554626464844e-07,
+      "residual_dbr": -128.02525103
+    },
+    "float": {
+      "max_abs": 3.2782554626464844e-07,
+      "residual_dbr": -128.02525103
+    },
+    "input_sha256": "07b39e292e2c5b54e2f356e853deaaef554739de031fef3a494c5ab34d0d74d9",
+    "output_sha256": "d9dab8327c72cc6c4a70f02467a2c216e101b86702be08171605c4c821f6c924",
+    "reference": {
+      "max_abs": 2.384185791015625e-07,
+      "residual_dbr": -132.51049436
+    },
+    "stable": {
+      "max_abs": 3.2782554626464844e-07,
+      "residual_dbr": -128.02525103
+    }
+  },
+  "candidate-hpf": {
+    "compact_partition_exact": {
+      "max_abs": 2.4765729904174805e-05,
+      "residual_dbr": -87.79889549
+    },
+    "float": {
+      "max_abs": 0.0007196217775344849,
+      "residual_dbr": -58.95846812
+    },
+    "input_sha256": "1d91604fda38b2cc8aaf0146375f24152ce1a899fdb54e0b939ca9f3c1d4a1d3",
+    "output_sha256": "07b39e292e2c5b54e2f356e853deaaef554739de031fef3a494c5ab34d0d74d9",
+    "reference": {
+      "max_abs": 2.9802322387695312e-08,
+      "residual_dbr": -180.45787108
+    },
+    "stable": {
+      "max_abs": 2.4765729904174805e-05,
+      "residual_dbr": -87.79889549
+    }
+  },
+  "native-main": {
+    "compact_partition_exact": {
+      "max_abs": 4.172325134277344e-07,
+      "residual_dbr": -127.69019349
+    },
+    "float": {
+      "max_abs": 4.172325134277344e-07,
+      "residual_dbr": -127.69019349
+    },
+    "input_sha256": "9f54a92244c7cd3f51e7e0e966cb70cf14b19083e30393a9d44ed8a18d6ccd44",
+    "output_sha256": "e4c6376970b4fa3f520ddae809151871a3db80b484a03c4835d2c5635408f3c2",
+    "reference": {
+      "max_abs": 2.980232238769531e-07,
+      "residual_dbr": -132.66160579
+    },
+    "stable": {
+      "max_abs": 4.172325134277344e-07,
+      "residual_dbr": -127.69019349
+    }
+  },
+  "native-sub": {
+    "compact_partition_exact": {
+      "max_abs": 2.086162567138672e-07,
+      "residual_dbr": -123.99462975
+    },
+    "float": {
+      "max_abs": 2.086162567138672e-07,
+      "residual_dbr": -123.99462975
+    },
+    "input_sha256": "a48fe22c7f561104ae241843614a3d6cf7b96cc534d04deef68e9273ca3d79bc",
+    "output_sha256": "6b9fcf674cb368317bfd6b941dcfd19d1480b47d0be2d865afb5182a1dd5e677",
+    "reference": {
+      "max_abs": 1.341104507446289e-07,
+      "residual_dbr": -131.78481692
+    },
+    "stable": {
+      "max_abs": 2.086162567138672e-07,
+      "residual_dbr": -123.99462975
+    }
+  }
+}
