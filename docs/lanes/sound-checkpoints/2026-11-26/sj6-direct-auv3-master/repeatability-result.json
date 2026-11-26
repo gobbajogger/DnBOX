@@ -1,0 +1,54 @@
+{
+  "main-only": {
+    "attack": {
+      "level_delta_db": 2.501e-05,
+      "residual_dbr": -64.50561415
+    },
+    "chord": {
+      "level_delta_db": 4.124e-05,
+      "residual_dbr": -41.72140625
+    },
+    "release": {
+      "level_delta_db": -0.00051819,
+      "residual_dbr": -37.39048072
+    },
+    "single": {
+      "level_delta_db": -0.00019865,
+      "residual_dbr": -38.97852251
+    },
+    "transition": {
+      "level_delta_db": -0.00062988,
+      "residual_dbr": -47.47442006
+    },
+    "whole": {
+      "level_delta_db": -0.00029402,
+      "residual_dbr": -39.28082193
+    }
+  },
+  "sub-only": {
+    "attack": {
+      "level_delta_db": -1.72e-06,
+      "residual_dbr": -95.8886306
+    },
+    "chord": {
+      "level_delta_db": 9.72e-06,
+      "residual_dbr": -59.75675534
+    },
+    "release": {
+      "level_delta_db": 1.227e-05,
+      "residual_dbr": -48.11593814
+    },
+    "single": {
+      "level_delta_db": -4.6e-07,
+      "residual_dbr": -73.78834094
+    },
+    "transition": {
+      "level_delta_db": 8.09e-05,
+      "residual_dbr": -73.89226474
+    },
+    "whole": {
+      "level_delta_db": 3e-06,
+      "residual_dbr": -56.95108492
+    }
+  }
+}

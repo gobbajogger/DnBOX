@@ -17,3 +17,12 @@ against the checked-in report, run `python3 score.py | diff -u master-result.jso
 
 Reference renders are saved in both Git and ChatGPT Library. The separate
 Library archive also preserves the full capture receipts.
+
+## Repeatability of the native reference
+
+`python3 repeatability.py` verifies the audio hashes and matched capture
+metadata, then scores the earlier native repeat against the latest authored
+capture for each path. Whole-render level changes were −0.000294 dB for Main
+and +0.000003 dB for Sub. Around chord onset, the waveform residuals were
+−47.47 and −73.89 dBr respectively. These are measured source-repeatability
+figures for this cue, not firmware acceptance thresholds.

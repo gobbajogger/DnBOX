@@ -49,3 +49,4 @@ The separate small SuperJ6 addendum adds the independently qualified pre-note la
 | Library name | Size (bytes) | SHA256 | Recovery |
 | --- | ---: | --- | --- |
 | `SJ6-Brainwave-Direct-AUv3-Master.tgz` | 3,889,120 | `82d0348669ebecb49245ee83fcb44c2a8576b9a2a5599e2f4591e671646bd5b8` | Download by name from ChatGPT Library, verify SHA-256, extract into a new directory, and run the bundled `python3 score.py` with NumPy. The four render arrays are also in the [Git bench](lanes/sound-checkpoints/2026-11-26/sj6-direct-auv3-master/). |
+| `SJ6-Brainwave-Warm-Main-Sub.native.private.tgz` | 1,950,019 | `9db19abc7c56183e745e1f3de150559b319dabda4817ebd30af9a9db356c4b53` | Download by name, verify SHA-256, and extract into a new directory. The dual-published PCM files are the `repeat-*` fixtures in the [Git bench](lanes/sound-checkpoints/2026-11-26/sj6-direct-auv3-master/). |
