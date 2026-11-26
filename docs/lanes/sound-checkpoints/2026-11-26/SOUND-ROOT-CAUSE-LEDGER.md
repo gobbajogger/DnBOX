@@ -669,3 +669,12 @@ frame; four nonlinear pole reciprocals per 2× evaluation are untouched.
 The smallest transposed PI32 variant is 630 B vs 622 B. This is
 object-only; native wall-time benefit and complete APP fit not measured.
 Leave off until guarded playback can be qualified.
+
+### Verified cold APP capacity on both serial images
+The [independent cold page batching](fw-cold-ui-page-batch-native/README.md)
+recovers 240 APP bytes on each exact serial donor, not the rejected
+909 scheduler. Remaining APP 760 B Elite and 772 B Pro. POOL 8,756 B
+unchanged (52 beyond the hard reserve); XPOOL and ordinary BSS unchanged.
+All 73 pre-link DSP/engine/original/sequencer object pairs and linked
+fixed-region projections match the specified verification. This is
+resource evidence, not a playback, sound or whole-roadmap pass.

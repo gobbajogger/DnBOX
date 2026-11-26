@@ -30,10 +30,11 @@ isolated kernel timing, or partial link into a release claim.
   even before the terminal comparison. Do not revisit master, forced
   default XY modulation, or stationary source loops. The shared
   installed pre-Unison mixer remains unobserved.
-- **Separate cold APP recovery pending actual link.** The
-  [two batched UI banks](fw-cold-ui-page-batching/README.md) emit
-  the exact 32 host rows and reduce isolated PI32 object text by
-  240 B. Count only the linked delta; no UI or DSP change assumed.
+- **Cold APP recovery verified on both serial donors.** The
+  [actual paired links](fw-cold-ui-page-batch-native/README.md)
+  recover 240 B on each, leaving 760 B Elite and 772 B Pro. Pool
+  8,756, BSS and XPOOL are unchanged. All 73 pre-link engine/DSP/
+  sequencer/original objects match; no target playback was run.
 
 - **Bank tuning state, host witness only.** An
   [identity-bound sidecar fixture](s1-tuning-typed-host/README.md)
