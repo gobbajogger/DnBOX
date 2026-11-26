@@ -1,0 +1,56 @@
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -3530,19 +3530,22 @@
+ #endif
+ #if DNBOX_TYPED_CONTROLS_NATIVE_TEST
+             if(kind==ORIGINAL_SOUND_SYNTHONE && live_s1_mod(&proj.sound,b)){
+-                OWNER_PAGE(PT_PHASER,QR(R_S1PHASER,0),QR(R_S1PHASER,1),
+-                         QR(R_S1PHASER,2),QR(R_S1PHASER,3));
+-                OWNER_PAGE(PT_MASTER_CMP,QR(R_S1CMP,0),QR(R_S1CMP,3),
+-                         QR(R_S1CMP,6),QR(R_S1CMP,9));
+-                OWNER_PAGE(PT_RV_INPUT_CM,QR(R_S1CMP,1),QR(R_S1CMP,4),
+-                         QR(R_S1CMP,7),QR(R_S1CMP,10));
+-                OWNER_PAGE(PT_WET_CMP,QR(R_S1CMP,2),QR(R_S1CMP,5),
+-                         QR(R_S1CMP,8),QR(R_S1CMP,11));
+-                OWNER_PAGE(PT_CMP_GAIN,QR(R_S1CMP,12),QR(R_S1CMP,13),
+-                         QR(R_S1CWG,0),0);
++static const owner_page_row pages[]={
++                {PT_PHASER,{QR(R_S1PHASER,0),QR(R_S1PHASER,1),
++                         QR(R_S1PHASER,2),QR(R_S1PHASER,3)}},
++                {PT_MASTER_CMP,{QR(R_S1CMP,0),QR(R_S1CMP,3),
++                         QR(R_S1CMP,6),QR(R_S1CMP,9)}},
++                {PT_RV_INPUT_CM,{QR(R_S1CMP,1),QR(R_S1CMP,4),
++                         QR(R_S1CMP,7),QR(R_S1CMP,10)}},
++                {PT_WET_CMP,{QR(R_S1CMP,2),QR(R_S1CMP,5),
++                         QR(R_S1CMP,8),QR(R_S1CMP,11)}},
++                {PT_CMP_GAIN,{QR(R_S1CMP,12),QR(R_S1CMP,13),
++                         QR(R_S1CWG,0),0}},
+ #if X0X_S1_AUTOPAN_PROBE
+-                OWNER_PAGE(PT_AUTO_PAN,QR(R_S1PAN,0),QR(R_S1PAN,1),0,0);
++                {PT_AUTO_PAN,{QR(R_S1PAN,0),QR(R_S1PAN,1),0,0}},
+ #endif
++};
++add_owner_pages(emit,pages,sizeof pages/sizeof pages[0],b);
+             }
+ #endif
+ #if X0X_SYNTHONE_PATCH
+@@ -3552,12 +3555,15 @@
+ #if DNBOX_TYPED_CONTROLS_NATIVE_TEST
+ #if X0X_SJ6_NATIVE_ROOM
+             if(kind==ORIGINAL_SOUND_JUNO && sj6_native_room_get(b,SJ6_ROOM_ENABLE)>=0){
+-                OWNER_PAGE(PT_REVERB,QR(R_SJ6ROOM,SJ6_ROOM_ENABLE),
++static const owner_page_row pages[]={
++                {PT_REVERB,{QR(R_SJ6ROOM,SJ6_ROOM_ENABLE),
+                          QR(R_SJ6ROOM,SJ6_ROOM_SIZE),QR(R_SJ6ROOM,SJ6_ROOM_LOCUT),
+-                         QR(R_SJ6ROOM,SJ6_ROOM_MIX));
+-                OWNER_PAGE(PT_STEREO_FX,QR(R_SJ6ROOM,SJ6_ROOM_TYPE),
++                         QR(R_SJ6ROOM,SJ6_ROOM_MIX)}},
++                {PT_STEREO_FX,{QR(R_SJ6ROOM,SJ6_ROOM_TYPE),
+                          QR(R_SJ6ROOM,SJ6_ROOM_WIDEN),QR(R_SJ6ROOM,SJ6_ROOM_RATE),
+-                         QR(R_SJ6ROOM,SJ6_ROOM_DEPTH));
++                         QR(R_SJ6ROOM,SJ6_ROOM_DEPTH)}},
++};
++add_owner_pages(emit,pages,sizeof pages/sizeof pages[0],b);
+             }
+ #endif
+ #endif

@@ -678,3 +678,12 @@ unchanged (52 beyond the hard reserve); XPOOL and ordinary BSS unchanged.
 All 73 pre-link DSP/engine/original/sequencer object pairs and linked
 fixed-region projections match the specified verification. This is
 resource evidence, not a playback, sound or whole-roadmap pass.
+
+The [Main-only native activation check](sj6-ota-main-active-guard/README.md)
+rejected the current Raw matched fixture: it uses active Sub, which
+the stock native render adds into Main before OTA. The original single
+Main leaf is independently authenticated but not this combined input.
+The same compact cutoff clamp cannot distinguish .75 from two physical
+profiles and live AUX can override the saved value within a span.
+Keep the newly proven 52 B native storage dormant. A lab cannot mute
+Sub silently or switch filter mid-note to pass.

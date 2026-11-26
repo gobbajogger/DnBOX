@@ -1,0 +1,55 @@
+{
+  "authorized_fixture_sha": "0aaf6375083dfb2bb1224fe690340ed2eff4ad978f878d099e2c19913af60603",
+  "typed_fixture_sha": "c0a493273eaea57f78f7aa3f5bb4abcc75b201c6a438071e9665c52a2eb2862e",
+  "source_anchors": {
+    "dnbx_core.c": {
+      "sha": "70d0aa0ea1cf2192e50cd51b45dffe01533cde368c0a1778959d39312b0ce759",
+      "sites": {
+        "s->sj6_sub_gain=(.808f/127.f)*(float)code[1]": [
+          917
+        ],
+        "if (!retrigger) memset(v,0,sizeof *v);": [
+          735
+        ],
+        "x+=s->sj6_sub_gain*sj6_synthesize_sub": [
+          1106
+        ],
+        "base+env*amount": [
+          1118
+        ],
+        "mix[l]+=velocity*amp*sj6_ota_filter": [
+          1123
+        ]
+      }
+    },
+    "juno6_factory.inc": {
+      "sha": "05fed3d98e96751e19d6598a8c02110e9e7e4d9e1c96a53fae44955a7a004968",
+      "sites": {
+        "juno6_sj6_panel_cutoff_hz(float raw,unsigned mode)": [
+          573
+        ],
+        "case 129:{": [
+          1639
+        ],
+        "juno6_aux_core_apply(": [
+          1654
+        ],
+        "int rc=render_typed_span_raw": [
+          1665
+        ],
+        "params.cutoff_hz=saved_cutoff[0]": [
+          1671
+        ]
+      }
+    }
+  },
+  "admitted": false,
+  "owner_first_failure": "Authored and typed fixture #202 nonzero; routed compact Sub injected into Main before the OTA site",
+  "original_public_202": 0.42036011815071106,
+  "compact_public_202": 0.420360118,
+  "clamp_alias": [
+    30000.0078125,
+    8510.4130859375
+  ],
+  "scope": "cold registered Native lab only; no activation proposed"
+}
