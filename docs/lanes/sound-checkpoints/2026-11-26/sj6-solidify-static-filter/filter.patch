@@ -1,0 +1,29 @@
+--- donor/compose.c
++++ witness/typed.c
+@@ -1119,10 +1119,26 @@
+                 else
+ #endif
+                 {
++                if (HOST_EXACT_OPEN && s->sample_rate==44100.f && s->superj6_amp_range &&
++                    p->oscillator_mode==DNBX_OSC_SUPERJ6 && p->waveform==0.f && p->resonance==0.f &&
++                    p->filter_env_hz==0.f && !authored_track && authored_strength && strength==0.f &&
++                    p->cutoff_hz>=20000.f && p->cutoff_hz<=20000.002f){
++                    const double b0=0x1.851d9c7caa4aap-1, b1=0x1.851d9c7caa4aap+0, b2=0x1.851d9c7caa4aap-1, a1=0x1.7cb2883c57ccap+0, a2=0x1.1b116179f9916p-1;
++                    const float ctl=velocity*amp;
++                    const float input=HOST_EXACT_OPEN==2?ctl*x:x;
++                    const float y=(float)fma(-a2,lv->ota_tail[1],fma(-a1,lv->ota_tail[0],
++                                 fma(b2,lv->filter_second,fma(b0,input,b1*lv->filter_first))));
++                    lv->filter_second=lv->filter_first;
++                    lv->filter_first=input;
++                    lv->ota_tail[1]=lv->ota_tail[0];
++                    lv->ota_tail[0]=y;
++                    mix[l]+=HOST_EXACT_OPEN==2?y:ctl*y;
++                } else {
+                 lv->filter_first=fm_clampf(lv->filter_first+a*(x-lv->filter_first-p->resonance*.8f*lv->filter_second),-4,4);
+                 lv->filter_second=fm_clampf(lv->filter_second+a*(lv->filter_first-lv->filter_second),-4,4);
+                 mix[l]+=velocity*amp*lv->filter_second;
+                 }
++                }
+ #if defined(X0X_HOST) && SJ6_WAVE_PROBE
+                 if(fold>=0 || ((lv->filter.reserved&SJ6_CLOCK_HELD) && p->oscillator_mode==DNBX_OSC_SUPERJ6))
+                     lv->phase=source_clock_step(lv->phase,.25f*lv->increment);

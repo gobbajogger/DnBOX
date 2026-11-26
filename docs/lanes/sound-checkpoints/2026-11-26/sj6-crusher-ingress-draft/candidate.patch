@@ -1,0 +1,32 @@
+--- a/firmware/src/app/original_presets.inc
++++ b/firmware/src/app/original_presets.inc
+@@ -1013,10 +1013,18 @@
+     unsigned b=sj6_crush_code(mot_base_snd,owner)[k];
+     return b<=(k?127u:1u)?(int)b:-1;
+ }
++#if X0X_HOST && defined(SJ6_CRUSH_EDGE_WITNESS)
++extern void sj6_crush_ingress_accepted(unsigned owner,unsigned panel_id,unsigned code,float canonical);
++extern void sj6_crush_ingress_revoke(unsigned owner);
++#endif
+ static __attribute__((noinline)) void sj6_crush_choose_store(unsigned owner, unsigned k, unsigned pos)
+ {
+     sj6_crush_write((sound_t*)mot_base_snd,owner)[k]=(uint8_t)pos;
+     sj6_crush_apply(mot_base_snd,owner);
++#if X0X_HOST && defined(SJ6_CRUSH_EDGE_WITNESS)
++    /* Project hold remains active in original_typed_indexed_choose. */
++    sj6_crush_ingress_accepted(owner,107u+k,k?pos:pos*127u,k?unit_control(pos):(float)pos);
++#endif
+ }
+ X0X_COLD int sj6_crush_choose(unsigned owner,unsigned k,unsigned pos)
+ {
+@@ -1051,6 +1059,10 @@
+ }
+ X0X_COLD void sj6_native_room_undo(unsigned mask)
+ {
++#if X0X_HOST && defined(SJ6_CRUSH_EDGE_WITNESS)
++    for(unsigned owner=0;owner<NBASS;owner++)
++        if(mask&(1u<<owner))sj6_crush_ingress_revoke(owner);
++#endif
+     original_typed_undo_apply(mask,sj6_native_room_apply);
+ }
+ #endif
