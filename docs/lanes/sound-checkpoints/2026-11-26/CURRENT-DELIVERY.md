@@ -57,6 +57,13 @@ isolated kernel timing, or partial link into a release claim.
   stock tanh fallback 220→34 B yields a nominal +454 B, but
   actual coefficient, route, and ownership glue remain unpriced.
   Only 4 pool bytes would remain before alignment. No fit claim.
+  The [reached receiver setup](sj6-native-cutoff-law/README.md)
+  now reproduces all 84 cutoff/rate coefficient checks and
+  observes a real 16-frame coefficient ramp. The compact sender
+  cannot provide the equivalent original coefficient; the
+  smallest tested new setup alone is 112 B with up to 31 ULP
+  difference, already exceeding the remaining 50/62 B before
+  helpers or live admission. Do not link/promote the current plan.
 
 - **SuperJ6 Main physical OTA is now independently reconstructed.**
   The [same-input leaf and full typed Raw controls](sj6-raw-main-ota/README.md)
