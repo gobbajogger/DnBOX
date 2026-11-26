@@ -1,0 +1,94 @@
+{
+  "raw_attrs_not_effective_after_sync": true,
+  "raw_all": 906,
+  "authored_active": 606,
+  "outside_public_raw": [],
+  "named": [
+    {
+      "id": 62,
+      "name": "Irresistible Forces Pad",
+      "time": 0.21621620655059814,
+      "on": true,
+      "mix_gt_zero": true
+    },
+    {
+      "id": 113,
+      "name": "Dark Theater Organ",
+      "time": 0.125,
+      "on": false,
+      "mix_gt_zero": true
+    },
+    {
+      "id": 151,
+      "name": "BB Kubrick Hall Drone",
+      "time": 0.5615994930267334,
+      "on": true,
+      "mix_gt_zero": true
+    },
+    {
+      "id": 366,
+      "name": "Deeper Space Pad",
+      "time": 0.19086986780166626,
+      "on": true,
+      "mix_gt_zero": true
+    },
+    {
+      "id": 369,
+      "name": "Irresistible Forces Pad",
+      "time": 0.21621620655059814,
+      "on": true,
+      "mix_gt_zero": true
+    }
+  ],
+  "active_intervals": [
+    {
+      "lt_or_eq": 0.05,
+      "counts": 45
+    },
+    {
+      "lt_or_eq": 0.1,
+      "counts": 90
+    },
+    {
+      "lt_or_eq": 0.15,
+      "counts": 173
+    },
+    {
+      "lt_or_eq": 0.2162,
+      "counts": 255
+    },
+    {
+      "lt_or_eq": 0.25,
+      "counts": 325
+    },
+    {
+      "lt_or_eq": 0.5,
+      "counts": 535
+    },
+    {
+      "lt_or_eq": 1,
+      "counts": 588
+    },
+    {
+      "lt_or_eq": 1.5,
+      "counts": 603
+    },
+    {
+      "lt_or_eq": 2,
+      "counts": 604
+    },
+    {
+      "lt_or_eq": 2.5,
+      "counts": 606
+    },
+    {
+      "lt_or_eq": 5,
+      "counts": 606
+    }
+  ],
+  "f32_public_min": 0.00036281178472563624,
+  "min_placements": [
+    393,
+    793
+  ]
+}

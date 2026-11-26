@@ -1,0 +1,26 @@
+{
+  "window_core_weight": {
+    "0": 1458976,
+    "1": 1458976,
+    "m0": 3310,
+    "m1": 690
+  },
+  "core0_d9_analog_and_noise_inlined": 326731,
+  "core0_d9_sampled_four_voices_inlined": 88709,
+  "analog_inlined_PC_windows": {
+    "init_noise": 6890,
+    "BD": 45942,
+    "SD": 65001,
+    "tom_group": 175133,
+    "rim_and_clap_dispatch": 33765
+  },
+  "core0_d9_named_helpers": {
+    "d9_emit_block": 22346,
+    "d9_render_clap": 35430,
+    "d9_render_st_masked": 1381,
+    "d9_bus": 1411,
+    "d9_shape_other": 0,
+    "d9_warm": 10417
+  },
+  "caveat": "Native PC weights in a 17ms wall window, not cycles of the single worst audio half. Inlined sampled voice loop shares one body per CH/OH/CR/RD; cannot split individual voices by PC. Shared helpers/flash cache misses not attributed to callers."
+}
