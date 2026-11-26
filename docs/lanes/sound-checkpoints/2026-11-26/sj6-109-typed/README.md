@@ -1,5 +1,14 @@
 # SuperJ6 #109 BIT RATE editor/carrier isolation
 
+**Do not adopt the control/address labels in this historical witness.**
+This experiment proves standalone setter and receiver behavior, not which
+installed AU parameter reaches the setter. The stronger
+[source-mapped installed evidence](../sj6-crusher-source-mapped/README.md)
+traces public #108 to the Amount/Decimation path, public #109 to a
+metadata-only path, and internal #110 (not a registered public control)
+to the Mix path. The earlier direct-call lab bound the laws to the wrong
+addresses. Do not expose #109 as a decimation control on this evidence.
+
 Host-only source draft. No firmware default, graph admission, actual DSP
 writes, website publication, or native linker claim.
 

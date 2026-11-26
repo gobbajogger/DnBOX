@@ -1,5 +1,14 @@
 # Crusher canonical typed ingress, warm diagnostic only
 
+**Do not adopt the control/address labels in this historical witness.**
+This experiment proves standalone setter and receiver behavior, not which
+installed AU parameter reaches the setter. The stronger
+[source-mapped installed evidence](../sj6-crusher-source-mapped/README.md)
+traces public #108 to the Amount/Decimation path, public #109 to a
+metadata-only path, and internal #110 (not a registered public control)
+to the Mix path. The earlier direct-call lab bound the laws to the wrong
+addresses. Do not expose #109 as a decimation control on this evidence.
+
 Pinned local firmware source hashes in pins.txt. Present on-unit Effect
 page uses CRUSH (two positions 0/1), AMOUNT (integer 0..127), backed by
 pref_set_impl → pref_set_typed_value → typed_1 → sj6_crush_choose. SMC and

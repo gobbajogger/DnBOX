@@ -1,5 +1,14 @@
 # Same Build9 physical Crusher receiver
 
+**Do not adopt the control/address labels in this historical witness.**
+This experiment proves standalone setter and receiver behavior, not which
+installed AU parameter reaches the setter. The stronger
+[source-mapped installed evidence](../sj6-crusher-source-mapped/README.md)
+traces public #108 to the Amount/Decimation path, public #109 to a
+metadata-only path, and internal #110 (not a registered public control)
+to the Mix path. The earlier direct-call lab bound the laws to the wrong
+addresses. Do not expose #109 as a decimation control on this evidence.
+
 Original SHA 6d163d79…; class_ro points to AudioKit.AKDecimator method list
 0x10060f5a8, whose Objective-C selectors resolve to source instructions.
 All setters share a [0,1] clamped ×100 Float64 → Float32 handoff to imported

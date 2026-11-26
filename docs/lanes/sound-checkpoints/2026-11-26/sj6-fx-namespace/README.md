@@ -1,5 +1,14 @@
 # Crusher namespace and source law, not firmware admission
 
+**Do not adopt the control/address labels in this historical witness.**
+This experiment proves standalone setter and receiver behavior, not which
+installed AU parameter reaches the setter. The stronger
+[source-mapped installed evidence](../sj6-crusher-source-mapped/README.md)
+traces public #108 to the Amount/Decimation path, public #109 to a
+metadata-only path, and internal #110 (not a registered public control)
+to the Mix path. The earlier direct-call lab bound the laws to the wrong
+addresses. Do not expose #109 as a decimation control on this evidence.
+
 Build9 ARM64 SHA 6d163d79…, genuine aumu/j6ct/AuPr parameter tree and
 separately loaded aufx/dist/appl leaf are distinct namespaces. The checker
 verifies actual active parameter IDs/names, Objective-C selector references,

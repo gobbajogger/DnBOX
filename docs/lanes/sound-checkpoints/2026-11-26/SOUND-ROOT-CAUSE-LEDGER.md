@@ -356,6 +356,18 @@ the worst half. Only test admission after contemporaneous active
 signed owner counters on a clearly non-timing witness.
 [Exact idle-Sub proof](s1-silent-sub-scoped/README.md).
 
+## Crusher address correction (supersedes standalone caller labels)
+
+A detached ARM64 setter invocation proves its physical operation, not its
+public address. The installed registration and dispatch evidence pins
+#107 Enable, #108 Amount (Decimation + Rounding), #109 Lo-Fi metadata,
+and internal-only #110 Mix, with the exact call edges in
+[the source-mapped signed receipt](sj6-crusher-source-mapped/README.md).
+The drafts labelling #109 as Decimation are frozen. Their guarded carrier
+proof does not authorize any public or saved format change. The exact
+Apple zero-wet physical leaf and the installed explicit #107 disable
+order remain verified independently.
+
 ## Further root-cause narrowing
 
 - **SuperJ6 J60V2, not Classic.** On the Raw J106 authored case, Chorus I
