@@ -1,0 +1,96 @@
+{
+  "sine": {
+    "repeat_dBr": -300.0,
+    "ladder": [
+      {
+        "input_peak": 0.05,
+        "wet_vs_dry_dBr": -1.1732979639011163,
+        "wet_gain_dB": -1.2260101814089386,
+        "wet_normalized_residual_dBr": -19.05501492580965
+      },
+      {
+        "input_peak": 0.1,
+        "wet_vs_dry_dBr": -1.2675769416607785,
+        "wet_gain_dB": -1.5391660374274103,
+        "wet_normalized_residual_dBr": -22.90887594586088
+      },
+      {
+        "input_peak": 0.2,
+        "wet_vs_dry_dBr": -1.413686348783849,
+        "wet_gain_dB": -2.130071468284581,
+        "wet_normalized_residual_dBr": -300.0
+      },
+      {
+        "input_peak": 0.4,
+        "wet_vs_dry_dBr": -1.582703304237506,
+        "wet_gain_dB": -3.1928874607469666,
+        "wet_normalized_residual_dBr": -18.640995874083345
+      },
+      {
+        "input_peak": 0.8,
+        "wet_vs_dry_dBr": -1.6572496459797197,
+        "wet_gain_dB": -4.966607139641853,
+        "wet_normalized_residual_dBr": -10.976817362377885
+      },
+      {
+        "input_peak": 1.2,
+        "wet_vs_dry_dBr": -1.5933832097809115,
+        "wet_gain_dB": -6.416497893160976,
+        "wet_normalized_residual_dBr": -8.073547641269322
+      },
+      {
+        "input_peak": 0.2,
+        "wet_vs_dry_dBr": -1.413686348783849,
+        "wet_gain_dB": -2.130071468284581,
+        "wet_normalized_residual_dBr": -300.0
+      }
+    ]
+  },
+  "harmonic": {
+    "repeat_dBr": -300.0,
+    "ladder": [
+      {
+        "input_peak": 0.05,
+        "wet_vs_dry_dBr": -0.6200112293480495,
+        "wet_gain_dB": -1.381809959540588,
+        "wet_normalized_residual_dBr": -19.705573627063572
+      },
+      {
+        "input_peak": 0.1,
+        "wet_vs_dry_dBr": -0.710706260330251,
+        "wet_gain_dB": -1.6722198435555922,
+        "wet_normalized_residual_dBr": -23.537143630015898
+      },
+      {
+        "input_peak": 0.2,
+        "wet_vs_dry_dBr": -0.8588638184002333,
+        "wet_gain_dB": -2.2225510511384745,
+        "wet_normalized_residual_dBr": -300.0
+      },
+      {
+        "input_peak": 0.4,
+        "wet_vs_dry_dBr": -1.0550688850721466,
+        "wet_gain_dB": -3.219991148820693,
+        "wet_normalized_residual_dBr": -19.16048117405371
+      },
+      {
+        "input_peak": 0.8,
+        "wet_vs_dry_dBr": -1.2144939495590148,
+        "wet_gain_dB": -4.905374044177242,
+        "wet_normalized_residual_dBr": -11.396431756437266
+      },
+      {
+        "input_peak": 1.2,
+        "wet_vs_dry_dBr": -1.2305322379252464,
+        "wet_gain_dB": -6.3007738402295175,
+        "wet_normalized_residual_dBr": -8.423865811990705
+      },
+      {
+        "input_peak": 0.2,
+        "wet_vs_dry_dBr": -0.8588638184002333,
+        "wet_gain_dB": -2.2225510511384745,
+        "wet_normalized_residual_dBr": -300.0
+      }
+    ]
+  }
+}
