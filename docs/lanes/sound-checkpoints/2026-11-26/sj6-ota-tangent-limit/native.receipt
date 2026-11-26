@@ -1,0 +1,7 @@
+00000000 00000026 T prepare_tile
+00000000 00000030 t paired_fma
+00000000 00000092 t clock_2x
+00000000 00000146 T admit_split
+         U original_fma_compact_bits
+         U original_fma_finite_bits_reference
+64299 signed samples bit-identical vs contiguous tangent; 1237 disabled views left all owner bytes unchanged; prepared tile once/128

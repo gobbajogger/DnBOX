@@ -64,6 +64,15 @@ isolated kernel timing, or partial link into a release claim.
   smallest tested new setup alone is 112 B with up to 31 ULP
   difference, already exceeding the remaining 50/62 B before
   helpers or live admission. Do not link/promote the current plan.
+  A distinct [small-signal tangent limit](sj6-ota-tangent-limit/README.md)
+  preserves the two-stage clock and replaces nonlinear live
+  arithmetic solely as an isolated experiment. Its real two
+  cutoff tapes are −141.4/−116.7 dBr relative to the exact
+  leaf, but hostile amplitudes expose rising error (e.g. −97.0
+  dBr at peak 2). Measured 558 B split object still has only
+  nominal 20/32 B after an approximate stage setup, before
+  authentic admission / ramp / alignment. No certified safe
+  pre-note bound, not a full engine match or shipping option.
 
 - **SuperJ6 Main physical OTA is now independently reconstructed.**
   The [same-input leaf and full typed Raw controls](sj6-raw-main-ota/README.md)
