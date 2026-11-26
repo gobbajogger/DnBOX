@@ -1,0 +1,126 @@
+{
+  "wet_prior_vs_return_exact_channel_words": 647328,
+  "new_wet_writes_changed_frames": 190856,
+  "old_bypass_identity": true,
+  "stock_tap_exact": true,
+  "input_sha": "a36817e8b5ca4b8176fb3903fa68356431a38658d4b1faa627c0500fc41e6e45",
+  "schedule_sha": "531efe040e0913c2525bacce4f2a87eba1e89ec470440afef63260e6629b3a0e",
+  "notes": "Build9 genuine 96k wet is observed by exact register/memory tap sequence. Candidate uses old post1 and old mix at the exact update clock, no fitted time shifting or direct-path experiment. 44.1k host bridge and isolated Raw J60-I only.",
+  "rows": {
+    "attack": {
+      "stock": {
+        "signed_dbr": -2.099776054745319,
+        "per_lr_dbr": [
+          -2.2099588354461965,
+          -1.993191044297756
+        ]
+      },
+      "post_and_right": {
+        "signed_dbr": -2.366609452810915,
+        "per_lr_dbr": [
+          -2.369328371655814,
+          -2.3639145345450725
+        ]
+      },
+      "post_right_latch": {
+        "signed_dbr": -2.4103667651069336,
+        "per_lr_dbr": [
+          -2.413472375400678,
+          -2.4072888415755163
+        ]
+      }
+    },
+    "held": {
+      "stock": {
+        "signed_dbr": -2.09819387354701,
+        "per_lr_dbr": [
+          -2.2819534611433268,
+          -1.9226122277299729
+        ]
+      },
+      "post_and_right": {
+        "signed_dbr": -2.4265293680513316,
+        "per_lr_dbr": [
+          -2.4399218546011463,
+          -2.413233394309663
+        ]
+      },
+      "post_right_latch": {
+        "signed_dbr": -2.4699565706141122,
+        "per_lr_dbr": [
+          -2.4835972383802267,
+          -2.456414974046999
+        ]
+      }
+    },
+    "release": {
+      "stock": {
+        "signed_dbr": -7.187706449547261,
+        "per_lr_dbr": [
+          -7.092818895254,
+          -7.25893500148317
+        ]
+      },
+      "post_and_right": {
+        "signed_dbr": -7.741550473744928,
+        "per_lr_dbr": [
+          -7.309952730073675,
+          -8.08928162219499
+        ]
+      },
+      "post_right_latch": {
+        "signed_dbr": -7.804725472347652,
+        "per_lr_dbr": [
+          -7.375548735915655,
+          -8.150324378263216
+        ]
+      }
+    },
+    "chord": {
+      "stock": {
+        "signed_dbr": 1.9105926202887664,
+        "per_lr_dbr": [
+          1.8404359856817858,
+          1.9797321188172283
+        ]
+      },
+      "post_and_right": {
+        "signed_dbr": 1.6599528780212105,
+        "per_lr_dbr": [
+          1.7009066604679326,
+          1.6185496711094967
+        ]
+      },
+      "post_right_latch": {
+        "signed_dbr": 1.6213872326863483,
+        "per_lr_dbr": [
+          1.663216214060168,
+          1.5790906111562504
+        ]
+      }
+    },
+    "tail": {
+      "stock": {
+        "signed_dbr": 3.6092234480984193,
+        "per_lr_dbr": [
+          3.77096547555481,
+          3.395437269911616
+        ]
+      },
+      "post_and_right": {
+        "signed_dbr": 3.390608442321618,
+        "per_lr_dbr": [
+          3.643041947620516,
+          3.048452265921348
+        ]
+      },
+      "post_right_latch": {
+        "signed_dbr": 3.3468239664779147,
+        "per_lr_dbr": [
+          3.6112229295786706,
+          2.9872394146746073
+        ]
+      }
+    }
+  }
+}

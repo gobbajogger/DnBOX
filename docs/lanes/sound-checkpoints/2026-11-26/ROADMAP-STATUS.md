@@ -34,8 +34,10 @@ candidate catalog:
 
 This verifies stable asset bytes, not deployment or real browser guard
 behavior. The original backup preserved ADPCM zone identity, not WAV
-filenames. The provenance does not supply the three real BREAK names;
-do not invent them or infer from waveform similarity.
+filenames. The unverified labels are BR1 zone 1, BR1 zone 2, and BR2 zone 1.
+The previously correlated labels Hot Pants (BR1 zone 3) and Tasty (BR2
+zone 2) do not identify them. Keep the three positional names until
+a trusted mapping exists; do not infer from waveform similarity.
 
 ## Firmware drafts
 
