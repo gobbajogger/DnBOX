@@ -1,0 +1,23 @@
+BASE
+.lab_fdata      0x00000000020e1000     0xeff8
+.lab_slot3      0x00000000020af000     0x7ffc
+.lab_fittab     0x00000000020fa000      0xfe8
+.lab_morph      0x00000000020cd000     0x4f94
+.xdata          0x00000000020a9000     0x1ff4
+.text           0x0000000002000120    0x85dd4
+.ram_text       0x0000000001c00400      0xabc load address 0x0000000002085ef4
+.c1_text        0x0000000001c00ebc      0x260 load address 0x00000000020869b0
+.data           0x0000000001c08000      0x288 load address 0x0000000002086c10
+.bss            0x0000000001c08290    0x17cc4
+TRANSACTION
+.lab_fdata      0x00000000020e1000     0xeff8
+.lab_slot3      0x00000000020af000     0x7ffc
+.lab_fittab     0x00000000020fa000      0xfe8
+.lab_morph      0x00000000020cd000     0x4f94
+.xdata          0x00000000020a9000     0x1ff4
+.text           0x0000000002000120    0x85f94
+.ram_text       0x0000000001c00400      0xabc load address 0x00000000020860b4
+.c1_text        0x0000000001c00ebc      0x260 load address 0x0000000002086b70
+.data           0x0000000001c08000      0x288 load address 0x0000000002086dd0
+.bss            0x0000000001c08290    0x17cd4
+/workspace/scratch/3a7051e761a0/prereqs/jieli-linux-toolchains-20260730.1/pi32v2/bin/ld: region `XIP' overflowed by 88 bytes

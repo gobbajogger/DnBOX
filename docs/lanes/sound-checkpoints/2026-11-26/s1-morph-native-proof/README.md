@@ -184,3 +184,10 @@ the same two-owner sum is 5,295,480 B before additional control state and paddin
 Current 564 B above protected 8192 B pool or hypothetical replacement total
 9,068 B (both 4,252 B wet arenas plus usable slack; required width and reserve held)
 does not fit. No mutable flash state, protected region storage or on-device actions.
+
+## Transactional 909 sampled voice future
+Source and matched receipts are in `transaction/`. No untracked region, leaked
+worker state, new deadline spin on core0, or hardware writes. Guarded native APP
+overflows by 100 B Elite/88 B Pro; no emulator attempted. Full host kit equality
+passes 16,000 cases, including canonical summation and unavailable future paths.
+See `transaction/RECEIPT.md` for admission, bailout, source replay and timing limits.
