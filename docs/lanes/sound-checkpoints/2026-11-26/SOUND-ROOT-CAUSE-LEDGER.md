@@ -62,6 +62,13 @@ changing the rounding rule.
   application flash and no extra pool. This is useful but does **not**
   fit our combined build or clear its timing. [Leaf](sj6-fold64-q8-leaf/FOLD-RESULT.md),
   [paired dry evidence](sj6-fold64-q8-full-dry/FOLD-RESULT.md).
+  **Hoisted Fold32** trades 6.98 dB Triangle relative shape fidelity
+  against Fold64 median but is still 18.49 dB better than stock on
+  that metric. Hoisting it changes no audio from the unhoisted Fold32.
+  Both Sine and Triangle are now faster than stock in the same four
+  paired dry tests; slowest candidate 12,115.79 µs sequential, still
+  outside 10,909 µs. It adds 900 application bytes and no pool.
+  [Exact paired comparison and rejected alternatives](sj6-fold32-hoisted-native/fold-compare.md).
   [Independent authentic holds](https://github.com/gobbajogger/DnBOX/commit/17ec80e3).
 - **Upstream dry differences vary by patch.** The AU references for
   Brainwave, Solidify and Raw J106 have matched cue/UID, fresh instances
@@ -166,7 +173,15 @@ changing the rounding rule.
   119.575 seconds, from drift in the source rotor. The combined 906
   capture length alone cannot justify removing that guard. Private
   Level is fixed 0 dB and can use exactly 1; preserving longer valid
-  sessions still needs a no-soft-double finite range reducer.
+  sessions still needed a no-soft-double finite range reducer. The new
+  192-bit Payne–Hanek guarded Float32 route preserved finite range
+  and signed-tiny behavior; six million tested words max cosine error
+  1.07e−7, and native signed-product error ≤5.96e−8. Actual strict Elite
+  firmware linked without soft-double calls but **still exceeded APP
+  by 2,112 B** (2,116 B with the packer marker), up 2,552 B over the
+  matched stock donor, unchanged pool. This is a ∼10 KiB reduction
+  against the double variant, not a firmware fit. Next isolate the
+  structural wrapper/library contributions in the new map.
 
 ## Release boundary
 

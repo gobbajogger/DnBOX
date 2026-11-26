@@ -1,0 +1,245 @@
+{
+  "stock": {
+    "xip_used": 549888,
+    "xip_free": 2784,
+    "pool_free": 564,
+    "elf_sha256": "163a2a1f7cbdad0fbd118c7e5ed411362d80517e0b6af1d67210f43447df57d6",
+    "cases": [
+      {
+        "fixture": "sine_fixed",
+        "part_state_bytes": 2936,
+        "per_layer_osc_history_bytes": 16,
+        "timer_hz": 24000000,
+        "frames": 256,
+        "owners": 2,
+        "mean_us": 12674.265625,
+        "max_us": 12719.625,
+        "min_us": 12662.458333333334,
+        "digest": "0c51dfa9"
+      },
+      {
+        "fixture": "sine_bend",
+        "part_state_bytes": 2936,
+        "per_layer_osc_history_bytes": 16,
+        "timer_hz": 24000000,
+        "frames": 256,
+        "owners": 2,
+        "mean_us": 12677.078125,
+        "max_us": 12722.458333333334,
+        "min_us": 12666.375,
+        "digest": "d2a2e679"
+      },
+      {
+        "fixture": "triangle_fixed",
+        "part_state_bytes": 2936,
+        "per_layer_osc_history_bytes": 16,
+        "timer_hz": 24000000,
+        "frames": 256,
+        "owners": 2,
+        "mean_us": 15869.979166666666,
+        "max_us": 15915.625,
+        "min_us": 15858.083333333334,
+        "digest": "18926969"
+      },
+      {
+        "fixture": "triangle_bend",
+        "part_state_bytes": 2936,
+        "per_layer_osc_history_bytes": 16,
+        "timer_hz": 24000000,
+        "frames": 256,
+        "owners": 2,
+        "mean_us": 15872.052083333334,
+        "max_us": 15913.416666666666,
+        "min_us": 15863.208333333334,
+        "digest": "23bb33f9"
+      }
+    ]
+  },
+  "cached_fold64": {
+    "xip_used": 551044,
+    "xip_free": 1628,
+    "pool_free": 564,
+    "elf_sha256": "25a2bd85f9e045bbf39a5ed46112946a7262ca6db513fc467c1c2b81fa7578c9",
+    "cases": [
+      {
+        "fixture": "sine_fixed",
+        "part_state_bytes": 2936,
+        "per_layer_osc_history_bytes": 16,
+        "timer_hz": 24000000,
+        "frames": 256,
+        "owners": 2,
+        "mean_us": 12777.390625,
+        "max_us": 12823.916666666666,
+        "min_us": 12764.791666666666,
+        "digest": "59908431"
+      },
+      {
+        "fixture": "sine_bend",
+        "part_state_bytes": 2936,
+        "per_layer_osc_history_bytes": 16,
+        "timer_hz": 24000000,
+        "frames": 256,
+        "owners": 2,
+        "mean_us": 12633.453125,
+        "max_us": 12764.958333333334,
+        "min_us": 12536.541666666666,
+        "digest": "46e46939"
+      },
+      {
+        "fixture": "triangle_fixed",
+        "part_state_bytes": 2936,
+        "per_layer_osc_history_bytes": 16,
+        "timer_hz": 24000000,
+        "frames": 256,
+        "owners": 2,
+        "mean_us": 12866.984375,
+        "max_us": 12913.5,
+        "min_us": 12854.375,
+        "digest": "930864b9"
+      },
+      {
+        "fixture": "triangle_bend",
+        "part_state_bytes": 2936,
+        "per_layer_osc_history_bytes": 16,
+        "timer_hz": 24000000,
+        "frames": 256,
+        "owners": 2,
+        "mean_us": 12723.057291666666,
+        "max_us": 12854.583333333334,
+        "min_us": 12626.125,
+        "digest": "a580f90d"
+      }
+    ]
+  },
+  "delta": {
+    "xip_used": 1156,
+    "pool_free": 0
+  },
+  "diagnostic_only": "360MHz PI32 firmware simulator. 2 sequential typed dry parts, 6 actual gated voices each, both layers, 256 frames each; outer effects, scheduler and ARP not timed. No physical app flash writes or production claim.",
+  "cached_fold32": {
+    "xip_used": 550692,
+    "xip_free": 1980,
+    "pool_free": 564,
+    "elf_sha256": "78a3e43dc2187872af10ad78fba3dd5b1ad80368fa981ded4284893a1b9f6279",
+    "cases": [
+      {
+        "fixture": "sine_fixed",
+        "part_state_bytes": 2936,
+        "per_layer_osc_history_bytes": 16,
+        "timer_hz": 24000000,
+        "frames": 256,
+        "owners": 2,
+        "mean_us": 12777.390625,
+        "max_us": 12823.916666666666,
+        "min_us": 12764.791666666666,
+        "digest": "332397f1"
+      },
+      {
+        "fixture": "sine_bend",
+        "part_state_bytes": 2936,
+        "per_layer_osc_history_bytes": 16,
+        "timer_hz": 24000000,
+        "frames": 256,
+        "owners": 2,
+        "mean_us": 12633.453125,
+        "max_us": 12764.958333333334,
+        "min_us": 12536.541666666666,
+        "digest": "d53423d1"
+      },
+      {
+        "fixture": "triangle_fixed",
+        "part_state_bytes": 2936,
+        "per_layer_osc_history_bytes": 16,
+        "timer_hz": 24000000,
+        "frames": 256,
+        "owners": 2,
+        "mean_us": 12866.984375,
+        "max_us": 12913.5,
+        "min_us": 12854.375,
+        "digest": "a05d786d"
+      },
+      {
+        "fixture": "triangle_bend",
+        "part_state_bytes": 2936,
+        "per_layer_osc_history_bytes": 16,
+        "timer_hz": 24000000,
+        "frames": 256,
+        "owners": 2,
+        "mean_us": 12723.057291666666,
+        "max_us": 12854.583333333334,
+        "min_us": 12626.125,
+        "digest": "f0f40c75"
+      }
+    ],
+    "delta_xip_used_vs_stock": 804,
+    "delta_pool_free_vs_stock": 0
+  },
+  "hoisted_fold32": {
+    "xip_used": 550788,
+    "xip_free": 1884,
+    "pool_free": 564,
+    "elf_sha256": "52459d7cdb3791530686d521de6a4b75c09b6a622360768324338c7298335cf9",
+    "cases": [
+      {
+        "fixture": "sine_fixed",
+        "part_state_bytes": 2936,
+        "per_layer_osc_history_bytes": 16,
+        "timer_hz": 24000000,
+        "frames": 256,
+        "owners": 2,
+        "mean_us": 11979.692708333334,
+        "max_us": 12026.208333333334,
+        "min_us": 11967.083333333334,
+        "digest": "332397f1"
+      },
+      {
+        "fixture": "sine_bend",
+        "part_state_bytes": 2936,
+        "per_layer_osc_history_bytes": 16,
+        "timer_hz": 24000000,
+        "frames": 256,
+        "owners": 2,
+        "mean_us": 11835.760416666666,
+        "max_us": 11967.291666666666,
+        "min_us": 11738.833333333334,
+        "digest": "d53423d1"
+      },
+      {
+        "fixture": "triangle_fixed",
+        "part_state_bytes": 2936,
+        "per_layer_osc_history_bytes": 16,
+        "timer_hz": 24000000,
+        "frames": 256,
+        "owners": 2,
+        "mean_us": 12069.296875,
+        "max_us": 12115.791666666666,
+        "min_us": 12056.708333333334,
+        "digest": "a05d786d"
+      },
+      {
+        "fixture": "triangle_bend",
+        "part_state_bytes": 2936,
+        "per_layer_osc_history_bytes": 16,
+        "timer_hz": 24000000,
+        "frames": 256,
+        "owners": 2,
+        "mean_us": 11925.364583333334,
+        "max_us": 12056.875,
+        "min_us": 11828.458333333334,
+        "digest": "f0f40c75"
+      }
+    ],
+    "delta_xip_used_vs_stock": 900,
+    "delta_pool_free_vs_stock": 0
+  },
+  "sixtyfour_app_cost": {
+    "table_rows": 768,
+    "map": 14,
+    "gain": 8,
+    "hot_render": 232,
+    "lookup": 58,
+    "layer_write": 52,
+    "route_guard": 30,
+    "alignment": -6
+  }
+}
