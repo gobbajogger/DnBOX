@@ -1,0 +1,10 @@
+# Raw J106 original Unison-off and settled AutoPan feed into current original J60
+
+The new test uses the exact same current post-OTA Main+Sub tapes regenerated and verified in process memory, exact Raw factory control readbacks, and actual current ARM64 J60 leaf as the prior postvoice/J60 A/B. It inserts independent source-pinned settled stages at actual connected positions: 5/6 float Unison-off through gain before instrument HP, and exact signed current zero-depth AutoPan after active zero-Crusher. Includes neither-stage, each isolated stage, both, and same 1164 partitions in authored/dry. Fatten, delay, chorus II and room are not enabled in this fixed profile. AutoPan primitive is separately called in the pinned current executable and matches 2,054 signed Float32 words including ±0. Settled graph order and Unison branch source evidence: recovered-sound/checkpoint/dnbox-sound-bench/source-wiring/superj6/whole-host/{README.md,real-tape.c,admission.py}. Original installed FX internal buffers are not directly exposed. No new control/gain fit or changes to firmware.
+
+Reproduce in intact source workspace:
+    bash sj6-postvoice-split/run.sh > sj6-postvoice-split/result.json
+    PYTHONPATH=/tmp/sj6-owner-packages:$PWD/ab-effects-readonly/sj6-fullbench/bench python3 sj6-postvoice-split/pan.py
+    python3 sj6-postvoice-split/audit.py
+
+Unison-off loses 1.584 dB, settled pan 3.010 dB, together 4.594 dB, in both references. No substantive change to signed cosine (.976896 authored, .980400 dry) or full relative chorus strength (authored−dry vs each own dry, −.16942 dB relative to actual original; held −.531 dB, chord −.067 dB). Dry now 13.353 dB below native; authored 13.061 dB below. This rules out these missing pre-J60 stages as a cure or cause for the remaining phase/level gap in this conditional join. The already matched true chorus change relative to dry does not establish absolute parity. No current production adoption or release/device claim. Archive contains only written source and receipts; no binaries or sample audio.
