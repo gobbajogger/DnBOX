@@ -36,3 +36,13 @@ valid arms and 5,951 out-of-range owner/voice arms preserve data and return
 signed negative zero. This verifies the layout logic only, not that the
 actual native linked offsets, all owners, controls, extra coefficient
 descriptors or real target timing qualify. No pitch state borrowing.
+
+The two signed original-receiver input profiles were also exercised by
+a scalar translation of both packing forms; the independent original
+receiver was actual compiled code. In the four Raw/Main pitches at two
+cutoffs, packing both directions gave a worst in-cue −104.98 dBr vs
+translated unpacked, and −100.23 dBr on a separate 4,096-zero-frame
+continuation. That continuation is not a claim of indefinite tail
+stability. Authenticated replay requires the same existing private
+receiver benches; auth-scalar.py contains the exact scoped replay
+recipe, not compiled candidate C or target evidence.
