@@ -15,6 +15,11 @@ isolated kernel timing, or partial link into a release claim.
   hash-match, and invalid dispatch preserves the prior owner.
   SuperJ6 dispatcher, mapped storage, native pool/APP and playback
   remain open; this is not a firmware bank import or full audio match.
+  The [exact SuperJ6 corpus routing map](sj6-bank-dispatch-map/README.md)
+  counts 76,120 values on visible typed editor routes, 6,400 covered
+  only by host projection, and 8,029 without an authenticated factory
+  receiver. No complete preset is currently admissible. Do not remap
+  conflicting filter aliases or silently drop pad/limiter fields.
 - **Authentic stage improvements are not sufficient:** the exact
   [Main pre-OTA carrier](sj6-warm-authentic-main/README.md) improves
   Raw dry and first release with the authentic Sub unchanged, but

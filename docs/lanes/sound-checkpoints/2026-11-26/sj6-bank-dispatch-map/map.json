@@ -1,0 +1,1700 @@
+{
+  "coverage": {
+    "native_ui_route": 76120,
+    "unsupported": 8029,
+    "conditional_diagnostic": 6400,
+    "programs": 640
+  },
+  "program_conditions": {
+    "has_uncovered": 640,
+    "has_nonzero_uncovered": 640,
+    "has_unsupported": 640,
+    "has_nonzero_unsupported": 640
+  },
+  "patterns": {
+    "aliases_compared": 640,
+    "cutoff_disagrees": 640,
+    "res_disagrees": 128,
+    "neonglideEnable_nonzero": 0,
+    "neonflangerEnable_nonzero": 0,
+    "neonringMod_nonzero": 0,
+    "neonoscSync_nonzero": 0,
+    "neonphaserEnable_nonzero": 0,
+    "neondistortionEnable_nonzero": 0,
+    "neonfilterLinkEnable_nonzero": 0,
+    "neonfilterRezBoostEnable_nonzero": 0,
+    "neonkeyLockEnable_nonzero": 0,
+    "neonlimiterAmount_nonzero": 99,
+    "neontubeRageAmount_nonzero": 0
+  },
+  "rows": [
+    {
+      "id": 0,
+      "name": "neonvolumeControl",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6KNOB",
+      "present": 640,
+      "nonzero": 640
+    },
+    {
+      "id": 1,
+      "name": "neonpulseVolume",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6KNOB",
+      "present": 640,
+      "nonzero": 625
+    },
+    {
+      "id": 2,
+      "name": "neonlayer1OscMode",
+      "scope": "unsupported",
+      "native_route": null
+    },
+    {
+      "id": 3,
+      "name": "neonsawVolume",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6KNOB",
+      "present": 640,
+      "nonzero": 566
+    },
+    {
+      "id": 4,
+      "name": "neonlayer2OscMode",
+      "scope": "unsupported",
+      "native_route": null
+    },
+    {
+      "id": 5,
+      "name": "neonlayer1Sound",
+      "scope": "unsupported",
+      "native_route": null,
+      "present": 640,
+      "nonzero": 0
+    },
+    {
+      "id": 6,
+      "name": "neonlayer2Sound",
+      "scope": "unsupported",
+      "native_route": null,
+      "present": 640,
+      "nonzero": 0
+    },
+    {
+      "id": 7,
+      "name": "neoncutoffLayer1",
+      "scope": "native_ui_route",
+      "native_route": "R_ENG",
+      "present": 640,
+      "nonzero": 607
+    },
+    {
+      "id": 8,
+      "name": "neonresonanceLayer1",
+      "scope": "native_ui_route",
+      "native_route": "R_ENG",
+      "present": 640,
+      "nonzero": 561
+    },
+    {
+      "id": 9,
+      "name": "neoncutoffLayer2",
+      "scope": "unsupported",
+      "native_route": null
+    },
+    {
+      "id": 10,
+      "name": "neonresonanceLayer2",
+      "scope": "unsupported",
+      "native_route": null
+    },
+    {
+      "id": 11,
+      "name": "neonverbEnable",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6ROOM",
+      "present": 640,
+      "nonzero": 558
+    },
+    {
+      "id": 12,
+      "name": "neonverbTypeII",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6ROOM",
+      "present": 400,
+      "nonzero": 162
+    },
+    {
+      "id": 13,
+      "name": "neonverbSize",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6ROOM",
+      "present": 640,
+      "nonzero": 635
+    },
+    {
+      "id": 14,
+      "name": "neonverbLoCut",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6ROOM",
+      "present": 640,
+      "nonzero": 439
+    },
+    {
+      "id": 15,
+      "name": "neonverbMix",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6ROOM",
+      "present": 640,
+      "nonzero": 634
+    },
+    {
+      "id": 16,
+      "name": "neonstereoWiden",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6ROOM",
+      "present": 315,
+      "nonzero": 34
+    },
+    {
+      "id": 17,
+      "name": "neoncompressorAmount",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6LIMITER",
+      "present": 366,
+      "nonzero": 209
+    },
+    {
+      "id": 18,
+      "name": "neoncompThreshold",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6LIMITER",
+      "present": 1,
+      "nonzero": 1
+    },
+    {
+      "id": 19,
+      "name": "neoncompHeadroom",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6LIMITER",
+      "present": 1,
+      "nonzero": 0
+    },
+    {
+      "id": 20,
+      "name": "neoncompAttack",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6LIMITER",
+      "present": 1,
+      "nonzero": 0
+    },
+    {
+      "id": 21,
+      "name": "neoncompPostGain",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6LIMITER",
+      "present": 1,
+      "nonzero": 1
+    },
+    {
+      "id": 22,
+      "name": "neonautopanRate",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6ROOM",
+      "present": 640,
+      "nonzero": 407
+    },
+    {
+      "id": 23,
+      "name": "neonautopanDepth",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6ROOM",
+      "present": 640,
+      "nonzero": 408
+    },
+    {
+      "id": 24,
+      "name": "neondelayEnable",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6KNOB",
+      "present": 640,
+      "nonzero": 469
+    },
+    {
+      "id": 25,
+      "name": "neondelayTime",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6KNOB",
+      "present": 640,
+      "nonzero": 625
+    },
+    {
+      "id": 26,
+      "name": "neondelayFeedback",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6KNOB",
+      "present": 640,
+      "nonzero": 623
+    },
+    {
+      "id": 27,
+      "name": "neondelayMix",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6KNOB",
+      "present": 640,
+      "nonzero": 633
+    },
+    {
+      "id": 28,
+      "name": "neonhighPassCutoff",
+      "scope": "native_ui_route",
+      "native_route": "R_ENG",
+      "present": 640,
+      "nonzero": 343
+    },
+    {
+      "id": 29,
+      "name": "neonhighPassRez",
+      "scope": "unsupported",
+      "native_route": null
+    },
+    {
+      "id": 30,
+      "name": "neonbandPassWidth",
+      "scope": "unsupported",
+      "native_route": null
+    },
+    {
+      "id": 31,
+      "name": "neonfreeFormHertz",
+      "scope": "unsupported",
+      "native_route": null
+    },
+    {
+      "id": 32,
+      "name": "neonmonoEnable",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6MONO32",
+      "present": 640,
+      "nonzero": 270
+    },
+    {
+      "id": 33,
+      "name": "neonlegatoEnable",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6MONO32",
+      "present": 592,
+      "nonzero": 60
+    },
+    {
+      "id": 34,
+      "name": "neonglideEnable",
+      "scope": "unsupported",
+      "native_route": null
+    },
+    {
+      "id": 35,
+      "name": "neonglideTime",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6MONO32",
+      "present": 640,
+      "nonzero": 203
+    },
+    {
+      "id": 36,
+      "name": "neonattack",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6KNOB",
+      "present": 640,
+      "nonzero": 479
+    },
+    {
+      "id": 37,
+      "name": "neondecay",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6KNOB",
+      "present": 640,
+      "nonzero": 626
+    },
+    {
+      "id": 38,
+      "name": "neonsustain",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6KNOB",
+      "present": 640,
+      "nonzero": 485
+    },
+    {
+      "id": 39,
+      "name": "neonrelease",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6KNOB",
+      "present": 640,
+      "nonzero": 621
+    },
+    {
+      "id": 40,
+      "name": "neonchorusIEnable",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6KNOB",
+      "present": 640,
+      "nonzero": 243
+    },
+    {
+      "id": 41,
+      "name": "neonchorusIIEnable",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6KNOB",
+      "present": 640,
+      "nonzero": 140
+    },
+    {
+      "id": 42,
+      "name": "neonchorusRate",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6J60 Classic-conditional",
+      "present": 26,
+      "nonzero": 26
+    },
+    {
+      "id": 43,
+      "name": "neonchorusDepth",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6J60 Classic-conditional",
+      "present": 26,
+      "nonzero": 26
+    },
+    {
+      "id": 44,
+      "name": "neonchorusMix",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6J60 Classic-conditional",
+      "present": 26,
+      "nonzero": 26
+    },
+    {
+      "id": 45,
+      "name": "neonlayer1LowNote",
+      "scope": "unsupported",
+      "native_route": null
+    },
+    {
+      "id": 46,
+      "name": "neonlayer1HighNote",
+      "scope": "unsupported",
+      "native_route": null
+    },
+    {
+      "id": 47,
+      "name": "neonlayer2LowNote",
+      "scope": "unsupported",
+      "native_route": null
+    },
+    {
+      "id": 48,
+      "name": "neonlayer2HighNote",
+      "scope": "unsupported",
+      "native_route": null
+    },
+    {
+      "id": 49,
+      "name": "neonflangerEnable",
+      "scope": "unsupported",
+      "native_route": null
+    },
+    {
+      "id": 50,
+      "name": "neonflangerRate",
+      "scope": "unsupported",
+      "native_route": null
+    },
+    {
+      "id": 51,
+      "name": "neonflangerDepth",
+      "scope": "unsupported",
+      "native_route": null
+    },
+    {
+      "id": 52,
+      "name": "neonringMod",
+      "scope": "unsupported",
+      "native_route": null
+    },
+    {
+      "id": 53,
+      "name": "neonringModDepth",
+      "scope": "unsupported",
+      "native_route": null
+    },
+    {
+      "id": 54,
+      "name": "neonringModMix",
+      "scope": "unsupported",
+      "native_route": null
+    },
+    {
+      "id": 55,
+      "name": "neonfmDrumMode",
+      "scope": "unsupported",
+      "native_route": null
+    },
+    {
+      "id": 56,
+      "name": "neonfmModTime",
+      "scope": "unsupported",
+      "native_route": null
+    },
+    {
+      "id": 57,
+      "name": "neonfmModCents",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6PITCH",
+      "present": 26,
+      "nonzero": 0
+    },
+    {
+      "id": 58,
+      "name": "neonfmDestination",
+      "scope": "unsupported",
+      "native_route": null
+    },
+    {
+      "id": 59,
+      "name": "neonunison",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6UNISON",
+      "present": 640,
+      "nonzero": 418
+    },
+    {
+      "id": 60,
+      "name": "neonunisonDetune",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6UNISON",
+      "present": 640,
+      "nonzero": 620
+    },
+    {
+      "id": 61,
+      "name": "neonunisonStereo",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6UNISON",
+      "present": 640,
+      "nonzero": 364
+    },
+    {
+      "id": 62,
+      "name": "neonunisonType",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6UNISON",
+      "present": 640,
+      "nonzero": 349
+    },
+    {
+      "id": 63,
+      "name": "neonarpEnable",
+      "scope": "native_ui_route",
+      "native_route": "ARP_F_ON",
+      "present": 640,
+      "nonzero": 110
+    },
+    {
+      "id": 64,
+      "name": "neonarpType",
+      "scope": "native_ui_route",
+      "native_route": "ARP_F_MODE",
+      "present": 640,
+      "nonzero": 185
+    },
+    {
+      "id": 65,
+      "name": "neonarpOctave",
+      "scope": "native_ui_route",
+      "native_route": "ARP_F_RANGE",
+      "present": 640,
+      "nonzero": 606
+    },
+    {
+      "id": 66,
+      "name": "neonarpInterval",
+      "scope": "native_ui_route",
+      "native_route": "ARP_F_INTERVAL",
+      "present": 640,
+      "nonzero": 603
+    },
+    {
+      "id": 67,
+      "name": "neonoscSync",
+      "scope": "unsupported",
+      "native_route": null
+    },
+    {
+      "id": 68,
+      "name": "neonphaserEnable",
+      "scope": "unsupported",
+      "native_route": null
+    },
+    {
+      "id": 69,
+      "name": "neonphaserSpeed",
+      "scope": "unsupported",
+      "native_route": null
+    },
+    {
+      "id": 70,
+      "name": "neonphaserFeedback",
+      "scope": "unsupported",
+      "native_route": null
+    },
+    {
+      "id": 71,
+      "name": "neonphaserNotch",
+      "scope": "unsupported",
+      "native_route": null
+    },
+    {
+      "id": 72,
+      "name": "neonlayer1Semi",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6KNOB",
+      "present": 640,
+      "nonzero": 570
+    },
+    {
+      "id": 73,
+      "name": "neonlayer2Semi",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6KNOB",
+      "present": 640,
+      "nonzero": 506
+    },
+    {
+      "id": 74,
+      "name": "neonlayer1Detune",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6KNOB",
+      "present": 640,
+      "nonzero": 640
+    },
+    {
+      "id": 75,
+      "name": "neonlayer2Detune",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6KNOB",
+      "present": 640,
+      "nonzero": 640
+    },
+    {
+      "id": 76,
+      "name": "neonlayer1Pan",
+      "scope": "unsupported",
+      "native_route": null
+    },
+    {
+      "id": 77,
+      "name": "neonlayer2Pan",
+      "scope": "unsupported",
+      "native_route": null
+    },
+    {
+      "id": 78,
+      "name": "neonlayer1PWM",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6KNOB",
+      "present": 25,
+      "nonzero": 1
+    },
+    {
+      "id": 79,
+      "name": "neonlayer2PWM",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6KNOB",
+      "present": 25,
+      "nonzero": 1
+    },
+    {
+      "id": 80,
+      "name": "neonlayer1RetroMode",
+      "scope": "unsupported",
+      "native_route": null
+    },
+    {
+      "id": 81,
+      "name": "neonlayer2RetroMode",
+      "scope": "unsupported",
+      "native_route": null
+    },
+    {
+      "id": 82,
+      "name": "neonlayer1Waveform",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6KNOB",
+      "present": 640,
+      "nonzero": 495
+    },
+    {
+      "id": 83,
+      "name": "neonlayer2Waveform",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6KNOB",
+      "present": 640,
+      "nonzero": 415
+    },
+    {
+      "id": 84,
+      "name": "neonlayer1FilterType",
+      "scope": "unsupported",
+      "native_route": null
+    },
+    {
+      "id": 85,
+      "name": "neonlayer2FilterType",
+      "scope": "unsupported",
+      "native_route": null
+    },
+    {
+      "id": 86,
+      "name": "neonoscRange",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6KNOB",
+      "present": 640,
+      "nonzero": 448
+    },
+    {
+      "id": 87,
+      "name": "neonlfo1Enable",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6KNOB",
+      "present": 640,
+      "nonzero": 632
+    },
+    {
+      "id": 88,
+      "name": "neonlfo1Rate",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6KNOB",
+      "present": 640,
+      "nonzero": 577
+    },
+    {
+      "id": 89,
+      "name": "neonlfo1Amount",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6KNOB",
+      "present": 640,
+      "nonzero": 327
+    },
+    {
+      "id": 90,
+      "name": "neonlfo1Amount2",
+      "scope": "unsupported",
+      "native_route": null
+    },
+    {
+      "id": 91,
+      "name": "neonlfo1DelayTime",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6KNOB",
+      "present": 640,
+      "nonzero": 204
+    },
+    {
+      "id": 92,
+      "name": "neonlfo2DelayTime",
+      "scope": "unsupported",
+      "native_route": null
+    },
+    {
+      "id": 93,
+      "name": "neonlfo3DelayTime",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6AUX",
+      "present": 640,
+      "nonzero": 149
+    },
+    {
+      "id": 94,
+      "name": "neonlfo1Waveform",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6KNOB",
+      "present": 640,
+      "nonzero": 0
+    },
+    {
+      "id": 95,
+      "name": "neonlfo2Enable",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6AUX",
+      "present": 640,
+      "nonzero": 481
+    },
+    {
+      "id": 96,
+      "name": "neonlfo2Rate",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6KNOB",
+      "present": 640,
+      "nonzero": 500
+    },
+    {
+      "id": 97,
+      "name": "neonlfo2Amount",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6KNOB",
+      "present": 640,
+      "nonzero": 627
+    },
+    {
+      "id": 98,
+      "name": "neonlfo2Waveform",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6KNOB",
+      "present": 640,
+      "nonzero": 233
+    },
+    {
+      "id": 99,
+      "name": "neonlfo3Enable",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6AUX",
+      "present": 640,
+      "nonzero": 475
+    },
+    {
+      "id": 100,
+      "name": "neonlfo3Rate",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6KNOB",
+      "present": 640,
+      "nonzero": 603
+    },
+    {
+      "id": 101,
+      "name": "neonlfo3Amount",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6AUX",
+      "present": 640,
+      "nonzero": 633
+    },
+    {
+      "id": 102,
+      "name": "neonlfo3Waveform",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6AUX",
+      "present": 640,
+      "nonzero": 205
+    },
+    {
+      "id": 103,
+      "name": "neontremoloDepth",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6KNOB",
+      "present": 640,
+      "nonzero": 196
+    },
+    {
+      "id": 104,
+      "name": "neontremoloRate",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6KNOB",
+      "present": 640,
+      "nonzero": 598
+    },
+    {
+      "id": 105,
+      "name": "neonvibratoSemitones",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6KNOB",
+      "present": 640,
+      "nonzero": 333
+    },
+    {
+      "id": 106,
+      "name": "neonvibratoRate",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6KNOB",
+      "present": 640,
+      "nonzero": 581
+    },
+    {
+      "id": 107,
+      "name": "neoncrushEnable",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6CRUSH",
+      "present": 640,
+      "nonzero": 292
+    },
+    {
+      "id": 108,
+      "name": "neoncrushAmount",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6CRUSH",
+      "present": 640,
+      "nonzero": 241
+    },
+    {
+      "id": 109,
+      "name": "neoncrushBitRate",
+      "scope": "unsupported",
+      "native_route": null,
+      "present": 640,
+      "nonzero": 0
+    },
+    {
+      "id": 110,
+      "name": "neoncrushMix",
+      "scope": "unsupported",
+      "native_route": null
+    },
+    {
+      "id": 111,
+      "name": "neondistortionEnable",
+      "scope": "unsupported",
+      "native_route": null
+    },
+    {
+      "id": 112,
+      "name": "neondistortionAmount",
+      "scope": "unsupported",
+      "native_route": null
+    },
+    {
+      "id": 113,
+      "name": "neondistortionMix",
+      "scope": "unsupported",
+      "native_route": null
+    },
+    {
+      "id": 114,
+      "name": "neonlayerMix",
+      "scope": "unsupported",
+      "native_route": null
+    },
+    {
+      "id": 115,
+      "name": "neonadsrLinkEnable",
+      "scope": "conditional_diagnostic",
+      "native_route": null,
+      "present": 640,
+      "nonzero": 640
+    },
+    {
+      "id": 116,
+      "name": "neonadsrFilterLinkEnable",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6KNOB",
+      "present": 640,
+      "nonzero": 118
+    },
+    {
+      "id": 117,
+      "name": "neonfilterLinkEnable",
+      "scope": "unsupported",
+      "native_route": null
+    },
+    {
+      "id": 118,
+      "name": "neonisTempoSyncd",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6KNOB",
+      "present": 640,
+      "nonzero": 346
+    },
+    {
+      "id": 119,
+      "name": "neonattack2",
+      "scope": "conditional_diagnostic",
+      "native_route": null,
+      "present": 640,
+      "nonzero": 478
+    },
+    {
+      "id": 120,
+      "name": "neondecay2",
+      "scope": "conditional_diagnostic",
+      "native_route": null,
+      "present": 640,
+      "nonzero": 625
+    },
+    {
+      "id": 121,
+      "name": "neonsustain2",
+      "scope": "conditional_diagnostic",
+      "native_route": null,
+      "present": 640,
+      "nonzero": 485
+    },
+    {
+      "id": 122,
+      "name": "neonrelease2",
+      "scope": "conditional_diagnostic",
+      "native_route": null,
+      "present": 640,
+      "nonzero": 621
+    },
+    {
+      "id": 123,
+      "name": "neonvintageMode",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6LIMITER",
+      "present": 640,
+      "nonzero": 354
+    },
+    {
+      "id": 124,
+      "name": "neonglobalBend",
+      "scope": "unsupported",
+      "native_route": null,
+      "present": 640,
+      "nonzero": 640
+    },
+    {
+      "id": 125,
+      "name": "neonlayer1Bend",
+      "scope": "unsupported",
+      "native_route": null,
+      "present": 640,
+      "nonzero": 640
+    },
+    {
+      "id": 126,
+      "name": "neonlayer2Bend",
+      "scope": "unsupported",
+      "native_route": null,
+      "present": 640,
+      "nonzero": 640
+    },
+    {
+      "id": 127,
+      "name": "neonfilterRezBoostEnable",
+      "scope": "unsupported",
+      "native_route": null
+    },
+    {
+      "id": 128,
+      "name": "neonfilterEnable",
+      "scope": "unsupported",
+      "native_route": null
+    },
+    {
+      "id": 129,
+      "name": "neonfilterCutoff",
+      "scope": "unsupported",
+      "native_route": null,
+      "present": 640,
+      "nonzero": 640
+    },
+    {
+      "id": 130,
+      "name": "neonfilterRez",
+      "scope": "unsupported",
+      "native_route": null,
+      "present": 640,
+      "nonzero": 477
+    },
+    {
+      "id": 131,
+      "name": "neonfilterTracking",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6FILTER_EXTRA",
+      "present": 640,
+      "nonzero": 368
+    },
+    {
+      "id": 132,
+      "name": "neonfilterAttack",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6KNOB",
+      "present": 640,
+      "nonzero": 520
+    },
+    {
+      "id": 133,
+      "name": "neonfilterDecay",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6KNOB",
+      "present": 640,
+      "nonzero": 626
+    },
+    {
+      "id": 134,
+      "name": "neonfilterSustain",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6KNOB",
+      "present": 640,
+      "nonzero": 460
+    },
+    {
+      "id": 135,
+      "name": "neonfilterRelease",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6KNOB",
+      "present": 640,
+      "nonzero": 640
+    },
+    {
+      "id": 136,
+      "name": "neonfilterStrength",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6FILTER_EXTRA",
+      "present": 640,
+      "nonzero": 571
+    },
+    {
+      "id": 137,
+      "name": "neonfilterVelocity",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6KNOB",
+      "present": 640,
+      "nonzero": 243
+    },
+    {
+      "id": 138,
+      "name": "neonpitchAttack",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6PITCH",
+      "present": 26,
+      "nonzero": 26
+    },
+    {
+      "id": 139,
+      "name": "neonpitchDecay",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6PITCH",
+      "present": 26,
+      "nonzero": 26
+    },
+    {
+      "id": 140,
+      "name": "neonpitchSustain",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6PITCH",
+      "present": 26,
+      "nonzero": 0
+    },
+    {
+      "id": 141,
+      "name": "neonpitchRelease",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6PITCH",
+      "present": 26,
+      "nonzero": 26
+    },
+    {
+      "id": 142,
+      "name": "neonseqEnable",
+      "scope": "native_ui_route",
+      "native_route": "ARP_F_SEQ_ENABLE",
+      "present": 640,
+      "nonzero": 122
+    },
+    {
+      "id": 143,
+      "name": "neonseqDivision",
+      "scope": "native_ui_route",
+      "native_route": "ARP_F_SPEED",
+      "present": 640,
+      "nonzero": 640
+    },
+    {
+      "id": 144,
+      "name": "neonseqGate",
+      "scope": "native_ui_route",
+      "native_route": "ARP_F_GATE",
+      "present": 640,
+      "nonzero": 631
+    },
+    {
+      "id": 145,
+      "name": "neonseqTotalSteps",
+      "scope": "native_ui_route",
+      "native_route": "ARP_F_LENGTH",
+      "present": 493,
+      "nonzero": 493
+    },
+    {
+      "id": 146,
+      "name": "neonseqDestination",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6KNOB",
+      "present": 147,
+      "nonzero": 0
+    },
+    {
+      "id": 147,
+      "name": "neonseqStep1Offset",
+      "scope": "native_ui_route",
+      "native_route": "engine_arp_step_set",
+      "present": 493,
+      "nonzero": 485
+    },
+    {
+      "id": 148,
+      "name": "neonseqStep2Offset",
+      "scope": "native_ui_route",
+      "native_route": "engine_arp_step_set",
+      "present": 493,
+      "nonzero": 490
+    },
+    {
+      "id": 149,
+      "name": "neonseqStep3Offset",
+      "scope": "native_ui_route",
+      "native_route": "engine_arp_step_set",
+      "present": 493,
+      "nonzero": 490
+    },
+    {
+      "id": 150,
+      "name": "neonseqStep4Offset",
+      "scope": "native_ui_route",
+      "native_route": "engine_arp_step_set",
+      "present": 493,
+      "nonzero": 487
+    },
+    {
+      "id": 151,
+      "name": "neonseqStep5Offset",
+      "scope": "native_ui_route",
+      "native_route": "engine_arp_step_set",
+      "present": 493,
+      "nonzero": 491
+    },
+    {
+      "id": 152,
+      "name": "neonseqStep6Offset",
+      "scope": "native_ui_route",
+      "native_route": "engine_arp_step_set",
+      "present": 493,
+      "nonzero": 489
+    },
+    {
+      "id": 153,
+      "name": "neonseqStep7Offset",
+      "scope": "native_ui_route",
+      "native_route": "engine_arp_step_set",
+      "present": 493,
+      "nonzero": 491
+    },
+    {
+      "id": 154,
+      "name": "neonseqStep8Offset",
+      "scope": "native_ui_route",
+      "native_route": "engine_arp_step_set",
+      "present": 493,
+      "nonzero": 492
+    },
+    {
+      "id": 155,
+      "name": "neonseqStep9Offset",
+      "scope": "native_ui_route",
+      "native_route": "engine_arp_step_set",
+      "present": 493,
+      "nonzero": 488
+    },
+    {
+      "id": 156,
+      "name": "neonseqStep10Offset",
+      "scope": "native_ui_route",
+      "native_route": "engine_arp_step_set",
+      "present": 493,
+      "nonzero": 489
+    },
+    {
+      "id": 157,
+      "name": "neonseqStep11Offset",
+      "scope": "native_ui_route",
+      "native_route": "engine_arp_step_set",
+      "present": 493,
+      "nonzero": 488
+    },
+    {
+      "id": 158,
+      "name": "neonseqStep12Offset",
+      "scope": "native_ui_route",
+      "native_route": "engine_arp_step_set",
+      "present": 493,
+      "nonzero": 490
+    },
+    {
+      "id": 159,
+      "name": "neonseqStep13Offset",
+      "scope": "native_ui_route",
+      "native_route": "engine_arp_step_set",
+      "present": 493,
+      "nonzero": 489
+    },
+    {
+      "id": 160,
+      "name": "neonseqStep14Offset",
+      "scope": "native_ui_route",
+      "native_route": "engine_arp_step_set",
+      "present": 493,
+      "nonzero": 488
+    },
+    {
+      "id": 161,
+      "name": "neonseqStep15Offset",
+      "scope": "native_ui_route",
+      "native_route": "engine_arp_step_set",
+      "present": 493,
+      "nonzero": 489
+    },
+    {
+      "id": 162,
+      "name": "neonseqStep16Offset",
+      "scope": "native_ui_route",
+      "native_route": "engine_arp_step_set",
+      "present": 493,
+      "nonzero": 486
+    },
+    {
+      "id": 163,
+      "name": "neonseqStep1Toggle",
+      "scope": "native_ui_route",
+      "native_route": "engine_arp_step_set",
+      "present": 493,
+      "nonzero": 488
+    },
+    {
+      "id": 164,
+      "name": "neonseqStep2Toggle",
+      "scope": "native_ui_route",
+      "native_route": "engine_arp_step_set",
+      "present": 493,
+      "nonzero": 449
+    },
+    {
+      "id": 165,
+      "name": "neonseqStep3Toggle",
+      "scope": "native_ui_route",
+      "native_route": "engine_arp_step_set",
+      "present": 493,
+      "nonzero": 470
+    },
+    {
+      "id": 166,
+      "name": "neonseqStep4Toggle",
+      "scope": "native_ui_route",
+      "native_route": "engine_arp_step_set",
+      "present": 493,
+      "nonzero": 468
+    },
+    {
+      "id": 167,
+      "name": "neonseqStep5Toggle",
+      "scope": "native_ui_route",
+      "native_route": "engine_arp_step_set",
+      "present": 493,
+      "nonzero": 468
+    },
+    {
+      "id": 168,
+      "name": "neonseqStep6Toggle",
+      "scope": "native_ui_route",
+      "native_route": "engine_arp_step_set",
+      "present": 493,
+      "nonzero": 453
+    },
+    {
+      "id": 169,
+      "name": "neonseqStep7Toggle",
+      "scope": "native_ui_route",
+      "native_route": "engine_arp_step_set",
+      "present": 493,
+      "nonzero": 475
+    },
+    {
+      "id": 170,
+      "name": "neonseqStep8Toggle",
+      "scope": "native_ui_route",
+      "native_route": "engine_arp_step_set",
+      "present": 493,
+      "nonzero": 463
+    },
+    {
+      "id": 171,
+      "name": "neonseqStep9Toggle",
+      "scope": "native_ui_route",
+      "native_route": "engine_arp_step_set",
+      "present": 493,
+      "nonzero": 477
+    },
+    {
+      "id": 172,
+      "name": "neonseqStep10Toggle",
+      "scope": "native_ui_route",
+      "native_route": "engine_arp_step_set",
+      "present": 493,
+      "nonzero": 467
+    },
+    {
+      "id": 173,
+      "name": "neonseqStep11Toggle",
+      "scope": "native_ui_route",
+      "native_route": "engine_arp_step_set",
+      "present": 493,
+      "nonzero": 473
+    },
+    {
+      "id": 174,
+      "name": "neonseqStep12Toggle",
+      "scope": "native_ui_route",
+      "native_route": "engine_arp_step_set",
+      "present": 493,
+      "nonzero": 473
+    },
+    {
+      "id": 175,
+      "name": "neonseqStep13Toggle",
+      "scope": "native_ui_route",
+      "native_route": "engine_arp_step_set",
+      "present": 493,
+      "nonzero": 472
+    },
+    {
+      "id": 176,
+      "name": "neonseqStep14Toggle",
+      "scope": "native_ui_route",
+      "native_route": "engine_arp_step_set",
+      "present": 493,
+      "nonzero": 471
+    },
+    {
+      "id": 177,
+      "name": "neonseqStep15Toggle",
+      "scope": "native_ui_route",
+      "native_route": "engine_arp_step_set",
+      "present": 493,
+      "nonzero": 479
+    },
+    {
+      "id": 178,
+      "name": "neonseqStep16Toggle",
+      "scope": "native_ui_route",
+      "native_route": "engine_arp_step_set",
+      "present": 493,
+      "nonzero": 465
+    },
+    {
+      "id": 179,
+      "name": "neonmodwheelDestination",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6MOD",
+      "present": 640,
+      "nonzero": 152
+    },
+    {
+      "id": 180,
+      "name": "neonlfo1Dest1BaseValue",
+      "scope": "conditional_diagnostic",
+      "native_route": null,
+      "present": 640,
+      "nonzero": 613
+    },
+    {
+      "id": 181,
+      "name": "neonlfo1Dest1Param",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6AUX",
+      "present": 640,
+      "nonzero": 640
+    },
+    {
+      "id": 182,
+      "name": "neonlfo1Dest2BaseValue",
+      "scope": "unsupported",
+      "native_route": null,
+      "present": 640,
+      "nonzero": 0
+    },
+    {
+      "id": 183,
+      "name": "neonlfo1Dest2Param",
+      "scope": "unsupported",
+      "native_route": null,
+      "present": 640,
+      "nonzero": 0
+    },
+    {
+      "id": 184,
+      "name": "neonlfo2Dest1BaseValue",
+      "scope": "conditional_diagnostic",
+      "native_route": null,
+      "present": 640,
+      "nonzero": 473
+    },
+    {
+      "id": 185,
+      "name": "neonlfo2Dest1Param",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6AUX",
+      "present": 640,
+      "nonzero": 485
+    },
+    {
+      "id": 186,
+      "name": "neonlfo2Dest2BaseValue",
+      "scope": "conditional_diagnostic",
+      "native_route": null,
+      "present": 640,
+      "nonzero": 310
+    },
+    {
+      "id": 187,
+      "name": "neonlfo2Dest2Param",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6AUX",
+      "present": 640,
+      "nonzero": 292
+    },
+    {
+      "id": 188,
+      "name": "neonlfo3Dest1BaseValue",
+      "scope": "conditional_diagnostic",
+      "native_route": null,
+      "present": 640,
+      "nonzero": 452
+    },
+    {
+      "id": 189,
+      "name": "neonlfo3Dest1Param",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6AUX",
+      "present": 640,
+      "nonzero": 452
+    },
+    {
+      "id": 190,
+      "name": "neonlfo3Dest2BaseValue",
+      "scope": "conditional_diagnostic",
+      "native_route": null,
+      "present": 640,
+      "nonzero": 287
+    },
+    {
+      "id": 191,
+      "name": "neonlfo3Dest2Param",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6AUX",
+      "present": 640,
+      "nonzero": 281
+    },
+    {
+      "id": 192,
+      "name": "neonlfo1Mode",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6AUX",
+      "present": 640,
+      "nonzero": 0
+    },
+    {
+      "id": 193,
+      "name": "neonlfo2Mode",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6AUX",
+      "present": 640,
+      "nonzero": 120
+    },
+    {
+      "id": 194,
+      "name": "neonlfo3Mode",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6AUX",
+      "present": 640,
+      "nonzero": 146
+    },
+    {
+      "id": 195,
+      "name": "neonlfo1HzEnable",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6KNOB",
+      "present": 640,
+      "nonzero": 495
+    },
+    {
+      "id": 196,
+      "name": "neonlfo2HzEnable",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6KNOB",
+      "present": 640,
+      "nonzero": 351
+    },
+    {
+      "id": 197,
+      "name": "neonlfo3HzEnable",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6KNOB",
+      "present": 640,
+      "nonzero": 388
+    },
+    {
+      "id": 198,
+      "name": "neonlfoSnapbackEnable",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6KNOB",
+      "present": 640,
+      "nonzero": 0
+    },
+    {
+      "id": 199,
+      "name": "neonlfo2SnapbackEnable",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6AUX",
+      "present": 640,
+      "nonzero": 0
+    },
+    {
+      "id": 200,
+      "name": "neonlfo3SnapbackEnable",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6AUX",
+      "present": 640,
+      "nonzero": 109
+    },
+    {
+      "id": 201,
+      "name": "neonnoiseVolume",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6KNOB",
+      "present": 640,
+      "nonzero": 455
+    },
+    {
+      "id": 202,
+      "name": "neonsubVolume",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6KNOB",
+      "present": 640,
+      "nonzero": 460
+    },
+    {
+      "id": 203,
+      "name": "neonpad1Destination",
+      "scope": "unsupported",
+      "native_route": null,
+      "present": 640,
+      "nonzero": 632
+    },
+    {
+      "id": 204,
+      "name": "neonpad2Destination",
+      "scope": "unsupported",
+      "native_route": null,
+      "present": 640,
+      "nonzero": 638
+    },
+    {
+      "id": 205,
+      "name": "neonfixedVelocityEnable",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6INPUTVEL",
+      "present": 640,
+      "nonzero": 622
+    },
+    {
+      "id": 206,
+      "name": "neonaTuning",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6KNOB",
+      "present": 26,
+      "nonzero": 26
+    },
+    {
+      "id": 207,
+      "name": "neonempty",
+      "scope": "unsupported",
+      "native_route": null
+    },
+    {
+      "id": 208,
+      "name": "neonchorusVersion",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6J60",
+      "present": 68,
+      "nonzero": 22
+    },
+    {
+      "id": 209,
+      "name": "neonfilterType",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6OTA",
+      "present": 25,
+      "nonzero": 13
+    },
+    {
+      "id": 210,
+      "name": "neonlayer1PWMEnable",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6KNOB",
+      "present": 25,
+      "nonzero": 1
+    },
+    {
+      "id": 211,
+      "name": "neonlayer2PWMEnable",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6KNOB",
+      "present": 25,
+      "nonzero": 1
+    },
+    {
+      "id": 212,
+      "name": "neonkeyLockEnable",
+      "scope": "unsupported",
+      "native_route": null,
+      "present": 25,
+      "nonzero": 0
+    },
+    {
+      "id": 213,
+      "name": "neonkeyLockRoot",
+      "scope": "unsupported",
+      "native_route": null,
+      "present": 25,
+      "nonzero": 0
+    },
+    {
+      "id": 214,
+      "name": "neonkeyLockScale",
+      "scope": "unsupported",
+      "native_route": null,
+      "present": 25,
+      "nonzero": 0
+    },
+    {
+      "id": 215,
+      "name": "neonj60v2Rate",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6J60 conditional"
+    },
+    {
+      "id": 216,
+      "name": "neonj60v2Depth",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6J60 conditional"
+    },
+    {
+      "id": 217,
+      "name": "neonj60v2Mix",
+      "scope": "native_ui_route",
+      "native_route": "R_SJ6J60 conditional"
+    },
+    {
+      "id": 218,
+      "name": "neonlimiterAmount",
+      "scope": "unsupported",
+      "native_route": null,
+      "present": 240,
+      "nonzero": 99
+    },
+    {
+      "id": 219,
+      "name": "neontubeRageAmount",
+      "scope": "unsupported",
+      "native_route": null,
+      "present": 34,
+      "nonzero": 0
+    }
+  ]
+}
