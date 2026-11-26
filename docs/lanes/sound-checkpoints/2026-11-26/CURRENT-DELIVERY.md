@@ -15,6 +15,14 @@ isolated kernel timing, or partial link into a release claim.
   Held individual post-voice RMS differs only +0.06/+0.21 dB.
   Not a master-volume fix. Native Sub cursor/onset and Main voice
   processing need separate source-faithful fixes; terminal parity is open.
+  The [authentic Sub cursor](sj6-sub-current-cursor/README.md)
+  reaches 123,515 real Raw frames across four keys. An independent
+  host leaf reproduces all 8,192 cursor and signed-sample test pairs
+  exactly. Independent input tapes with identical clocks produce
+  different phase and waveform; clock alone cannot match source
+  audio. Exact data from the original would amount to over 7.8 MB
+  of uncompressed PCM16 across 12 zones; it is not included. A
+  bounded read-only source adapter and exact holdouts are next.
 - **Whole guarded 909 trial failed.** The new
   [paired replay](drum909-warm-replay/README.md) saved 112 B in
   each native link but did not qualify: 14,278 µs/79 late Elite and

@@ -1,0 +1,32 @@
+{
+  "metadata_scope": "aggregate only; no SFZ entries, PCM, paths, exact individually reconstructible table or original assets exported",
+  "distinct_zones": 12,
+  "distinct_media": 12,
+  "source_rates_hz": [
+    44100
+  ],
+  "decoded_PCM16_mono_total": 7812906,
+  "decoded_F32_mono_total": 15625812,
+  "region_frames_min_max": [
+    273015,
+    346250
+  ],
+  "loop_span_frames_min_max": [
+    97096,
+    170337
+  ],
+  "hypothetical_metadata_only_bytes": {
+    "bytes_per_descriptor": 24,
+    "total": 288,
+    "fields": [
+      "storage locator u32",
+      "stored frame count u32",
+      "end frame u32",
+      "loop start u32",
+      "loop stop u32",
+      "rate encoding+root+region bounds+flags u32; only if rates are represented by verified independent rate index"
+    ]
+  },
+  "hot_path": "two mono sample words, float-to-double conversion, exact weighted lerp plus gain,narrow once; double cursor FMA; strict gated wrap only. Timing and cache architecture unmeasured",
+  "media_policy": "Provider API fails closed if missing; storage source/authorization not established for adoption"
+}
