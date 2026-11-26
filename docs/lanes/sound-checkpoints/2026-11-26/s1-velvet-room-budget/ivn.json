@@ -1,0 +1,495 @@
+{
+  "published": {
+    "combLengthsAt44100": [
+      7760,
+      8080,
+      8240,
+      8560
+    ],
+    "liveCellsPerInput": 32640,
+    "taps": 408,
+    "monoOpsSample": 802,
+    "models": [
+      {
+        "decimation": 1,
+        "wordBits": 4,
+        "inputLanes": 1,
+        "owners": 2,
+        "roomHistoryPerOwner": 16320,
+        "statePerOwnerIncludingOptimisticDigest": 16808,
+        "totalTwoOwnersHistory": 32640,
+        "opCallbacksOneOwner": 410624,
+        "bandLimitHz": 22050.0
+      },
+      {
+        "decimation": 1,
+        "wordBits": 4,
+        "inputLanes": 2,
+        "owners": 2,
+        "roomHistoryPerOwner": 32640,
+        "statePerOwnerIncludingOptimisticDigest": 33600,
+        "totalTwoOwnersHistory": 65280,
+        "opCallbacksOneOwner": 821248,
+        "bandLimitHz": 22050.0
+      },
+      {
+        "decimation": 1,
+        "wordBits": 8,
+        "inputLanes": 1,
+        "owners": 2,
+        "roomHistoryPerOwner": 32640,
+        "statePerOwnerIncludingOptimisticDigest": 33128,
+        "totalTwoOwnersHistory": 65280,
+        "opCallbacksOneOwner": 410624,
+        "bandLimitHz": 22050.0
+      },
+      {
+        "decimation": 1,
+        "wordBits": 8,
+        "inputLanes": 2,
+        "owners": 2,
+        "roomHistoryPerOwner": 65280,
+        "statePerOwnerIncludingOptimisticDigest": 66240,
+        "totalTwoOwnersHistory": 130560,
+        "opCallbacksOneOwner": 821248,
+        "bandLimitHz": 22050.0
+      },
+      {
+        "decimation": 1,
+        "wordBits": 16,
+        "inputLanes": 1,
+        "owners": 2,
+        "roomHistoryPerOwner": 65280,
+        "statePerOwnerIncludingOptimisticDigest": 65768,
+        "totalTwoOwnersHistory": 130560,
+        "opCallbacksOneOwner": 410624,
+        "bandLimitHz": 22050.0
+      },
+      {
+        "decimation": 1,
+        "wordBits": 16,
+        "inputLanes": 2,
+        "owners": 2,
+        "roomHistoryPerOwner": 130560,
+        "statePerOwnerIncludingOptimisticDigest": 131520,
+        "totalTwoOwnersHistory": 261120,
+        "opCallbacksOneOwner": 821248,
+        "bandLimitHz": 22050.0
+      },
+      {
+        "decimation": 2,
+        "wordBits": 4,
+        "inputLanes": 1,
+        "owners": 2,
+        "roomHistoryPerOwner": 8160,
+        "statePerOwnerIncludingOptimisticDigest": 8588,
+        "totalTwoOwnersHistory": 16320,
+        "opCallbacksOneOwner": 205312,
+        "bandLimitHz": 11025.0
+      },
+      {
+        "decimation": 2,
+        "wordBits": 4,
+        "inputLanes": 2,
+        "owners": 2,
+        "roomHistoryPerOwner": 16320,
+        "statePerOwnerIncludingOptimisticDigest": 17160,
+        "totalTwoOwnersHistory": 32640,
+        "opCallbacksOneOwner": 410624,
+        "bandLimitHz": 11025.0
+      },
+      {
+        "decimation": 2,
+        "wordBits": 8,
+        "inputLanes": 1,
+        "owners": 2,
+        "roomHistoryPerOwner": 16320,
+        "statePerOwnerIncludingOptimisticDigest": 16748,
+        "totalTwoOwnersHistory": 32640,
+        "opCallbacksOneOwner": 205312,
+        "bandLimitHz": 11025.0
+      },
+      {
+        "decimation": 2,
+        "wordBits": 8,
+        "inputLanes": 2,
+        "owners": 2,
+        "roomHistoryPerOwner": 32640,
+        "statePerOwnerIncludingOptimisticDigest": 33480,
+        "totalTwoOwnersHistory": 65280,
+        "opCallbacksOneOwner": 410624,
+        "bandLimitHz": 11025.0
+      },
+      {
+        "decimation": 2,
+        "wordBits": 16,
+        "inputLanes": 1,
+        "owners": 2,
+        "roomHistoryPerOwner": 32640,
+        "statePerOwnerIncludingOptimisticDigest": 33068,
+        "totalTwoOwnersHistory": 65280,
+        "opCallbacksOneOwner": 205312,
+        "bandLimitHz": 11025.0
+      },
+      {
+        "decimation": 2,
+        "wordBits": 16,
+        "inputLanes": 2,
+        "owners": 2,
+        "roomHistoryPerOwner": 65280,
+        "statePerOwnerIncludingOptimisticDigest": 66120,
+        "totalTwoOwnersHistory": 130560,
+        "opCallbacksOneOwner": 410624,
+        "bandLimitHz": 11025.0
+      },
+      {
+        "decimation": 4,
+        "wordBits": 4,
+        "inputLanes": 1,
+        "owners": 2,
+        "roomHistoryPerOwner": 4080,
+        "statePerOwnerIncludingOptimisticDigest": 4478,
+        "totalTwoOwnersHistory": 8160,
+        "opCallbacksOneOwner": 102656,
+        "bandLimitHz": 5512.5
+      },
+      {
+        "decimation": 4,
+        "wordBits": 4,
+        "inputLanes": 2,
+        "owners": 2,
+        "roomHistoryPerOwner": 8160,
+        "statePerOwnerIncludingOptimisticDigest": 8940,
+        "totalTwoOwnersHistory": 16320,
+        "opCallbacksOneOwner": 205312,
+        "bandLimitHz": 5512.5
+      },
+      {
+        "decimation": 4,
+        "wordBits": 8,
+        "inputLanes": 1,
+        "owners": 2,
+        "roomHistoryPerOwner": 8160,
+        "statePerOwnerIncludingOptimisticDigest": 8558,
+        "totalTwoOwnersHistory": 16320,
+        "opCallbacksOneOwner": 102656,
+        "bandLimitHz": 5512.5
+      },
+      {
+        "decimation": 4,
+        "wordBits": 8,
+        "inputLanes": 2,
+        "owners": 2,
+        "roomHistoryPerOwner": 16320,
+        "statePerOwnerIncludingOptimisticDigest": 17100,
+        "totalTwoOwnersHistory": 32640,
+        "opCallbacksOneOwner": 205312,
+        "bandLimitHz": 5512.5
+      },
+      {
+        "decimation": 4,
+        "wordBits": 16,
+        "inputLanes": 1,
+        "owners": 2,
+        "roomHistoryPerOwner": 16320,
+        "statePerOwnerIncludingOptimisticDigest": 16718,
+        "totalTwoOwnersHistory": 32640,
+        "opCallbacksOneOwner": 102656,
+        "bandLimitHz": 5512.5
+      },
+      {
+        "decimation": 4,
+        "wordBits": 16,
+        "inputLanes": 2,
+        "owners": 2,
+        "roomHistoryPerOwner": 32640,
+        "statePerOwnerIncludingOptimisticDigest": 33420,
+        "totalTwoOwnersHistory": 65280,
+        "opCallbacksOneOwner": 205312,
+        "bandLimitHz": 5512.5
+      },
+      {
+        "decimation": 8,
+        "wordBits": 4,
+        "inputLanes": 1,
+        "owners": 2,
+        "roomHistoryPerOwner": 2040,
+        "statePerOwnerIncludingOptimisticDigest": 2426,
+        "totalTwoOwnersHistory": 4080,
+        "opCallbacksOneOwner": 51328,
+        "bandLimitHz": 2756.25
+      },
+      {
+        "decimation": 8,
+        "wordBits": 4,
+        "inputLanes": 2,
+        "owners": 2,
+        "roomHistoryPerOwner": 4080,
+        "statePerOwnerIncludingOptimisticDigest": 4836,
+        "totalTwoOwnersHistory": 8160,
+        "opCallbacksOneOwner": 102656,
+        "bandLimitHz": 2756.25
+      },
+      {
+        "decimation": 8,
+        "wordBits": 8,
+        "inputLanes": 1,
+        "owners": 2,
+        "roomHistoryPerOwner": 4080,
+        "statePerOwnerIncludingOptimisticDigest": 4466,
+        "totalTwoOwnersHistory": 8160,
+        "opCallbacksOneOwner": 51328,
+        "bandLimitHz": 2756.25
+      },
+      {
+        "decimation": 8,
+        "wordBits": 8,
+        "inputLanes": 2,
+        "owners": 2,
+        "roomHistoryPerOwner": 8160,
+        "statePerOwnerIncludingOptimisticDigest": 8916,
+        "totalTwoOwnersHistory": 16320,
+        "opCallbacksOneOwner": 102656,
+        "bandLimitHz": 2756.25
+      },
+      {
+        "decimation": 8,
+        "wordBits": 16,
+        "inputLanes": 1,
+        "owners": 2,
+        "roomHistoryPerOwner": 8160,
+        "statePerOwnerIncludingOptimisticDigest": 8546,
+        "totalTwoOwnersHistory": 16320,
+        "opCallbacksOneOwner": 51328,
+        "bandLimitHz": 2756.25
+      },
+      {
+        "decimation": 8,
+        "wordBits": 16,
+        "inputLanes": 2,
+        "owners": 2,
+        "roomHistoryPerOwner": 16320,
+        "statePerOwnerIncludingOptimisticDigest": 17076,
+        "totalTwoOwnersHistory": 32640,
+        "opCallbacksOneOwner": 102656,
+        "bandLimitHz": 2756.25
+      }
+    ],
+    "optimisticPackedTapFlashBytes": 816,
+    "tenOctaveAndShelvesFloatCoefficients": 848,
+    "sparseTablesOmittedExtraForExtraStereoBanks": true
+  },
+  "VFDN2020": {
+    "publishedVN15OpsSample": 1296,
+    "publishedOVNOpsSample": 1776,
+    "publishedEqualFdnOpsSample": 848,
+    "publishedCoreCells": 48544,
+    "publishedCoreFourBitFullRate": 24272,
+    "quarterRateCoreCells": 12144,
+    "quarterRateExtraReadInputAndOutputCellsUpperForSingleStereoFedCore": 1998,
+    "quarterRateFourBitCoreAndIndependentHistories": 7071.0,
+    "holdoutQualified": false
+  },
+  "source": [
+    {
+      "fb": 0.47,
+      "cold_anti_nonzero": true,
+      "antiToCommonLateDb": -0.04497454738459382,
+      "bands": [
+        {
+          "hz": [
+            160,
+            900
+          ],
+          "late_band_dbfs": -99.19429323162412,
+          "fromImpulseToE30s": 0.443015873015873,
+          "fromImpulseToE60s": 0.7981179138321995,
+          "capturedIRSeconds": 16,
+          "edgeNearWindowEnd": false
+        },
+        {
+          "hz": [
+            1000,
+            4000
+          ],
+          "late_band_dbfs": -94.02852147405454,
+          "fromImpulseToE30s": 0.4392517006802721,
+          "fromImpulseToE60s": 0.7794104308390023,
+          "capturedIRSeconds": 16,
+          "edgeNearWindowEnd": false
+        },
+        {
+          "hz": [
+            5000,
+            16000
+          ],
+          "late_band_dbfs": -92.91576142622935,
+          "fromImpulseToE30s": 0.4026757369614512,
+          "fromImpulseToE60s": 0.7068253968253968,
+          "capturedIRSeconds": 16,
+          "edgeNearWindowEnd": false
+        }
+      ]
+    },
+    {
+      "fb": 0.72,
+      "cold_anti_nonzero": true,
+      "antiToCommonLateDb": -0.08125709787631592,
+      "bands": [
+        {
+          "hz": [
+            160,
+            900
+          ],
+          "late_band_dbfs": -89.67012013518273,
+          "fromImpulseToE30s": 0.8395464852607709,
+          "fromImpulseToE60s": 1.613310657596372,
+          "capturedIRSeconds": 16,
+          "edgeNearWindowEnd": false
+        },
+        {
+          "hz": [
+            1000,
+            4000
+          ],
+          "late_band_dbfs": -84.77659151510544,
+          "fromImpulseToE30s": 0.8119501133786848,
+          "fromImpulseToE60s": 1.545873015873016,
+          "capturedIRSeconds": 16,
+          "edgeNearWindowEnd": false
+        },
+        {
+          "hz": [
+            5000,
+            16000
+          ],
+          "late_band_dbfs": -84.2285839799313,
+          "fromImpulseToE30s": 0.6619727891156463,
+          "fromImpulseToE60s": 1.293809523809524,
+          "capturedIRSeconds": 16,
+          "edgeNearWindowEnd": false
+        }
+      ]
+    },
+    {
+      "fb": 0.89,
+      "cold_anti_nonzero": true,
+      "antiToCommonLateDb": -0.07183902264763203,
+      "bands": [
+        {
+          "hz": [
+            160,
+            900
+          ],
+          "late_band_dbfs": -82.63874452575885,
+          "fromImpulseToE30s": 2.143356009070295,
+          "fromImpulseToE60s": 4.228480725623583,
+          "capturedIRSeconds": 16,
+          "edgeNearWindowEnd": false
+        },
+        {
+          "hz": [
+            1000,
+            4000
+          ],
+          "late_band_dbfs": -78.03158643059953,
+          "fromImpulseToE30s": 1.9298185941043084,
+          "fromImpulseToE60s": 3.85827664399093,
+          "capturedIRSeconds": 16,
+          "edgeNearWindowEnd": false
+        },
+        {
+          "hz": [
+            5000,
+            16000
+          ],
+          "late_band_dbfs": -78.74484222228165,
+          "fromImpulseToE30s": 1.3073696145124718,
+          "fromImpulseToE60s": 2.8670068027210887,
+          "capturedIRSeconds": 16,
+          "edgeNearWindowEnd": false
+        }
+      ]
+    },
+    {
+      "fb": 0.96,
+      "cold_anti_nonzero": true,
+      "antiToCommonLateDb": -0.06372507913092128,
+      "bands": [
+        {
+          "hz": [
+            160,
+            900
+          ],
+          "late_band_dbfs": -77.48147125076383,
+          "fromImpulseToE30s": 5.760884353741496,
+          "fromImpulseToE60s": 11.51390022675737,
+          "capturedIRSeconds": 16,
+          "edgeNearWindowEnd": false
+        },
+        {
+          "hz": [
+            1000,
+            4000
+          ],
+          "late_band_dbfs": -73.4512164875463,
+          "fromImpulseToE30s": 4.762018140589569,
+          "fromImpulseToE60s": 9.927142857142856,
+          "capturedIRSeconds": 16,
+          "edgeNearWindowEnd": false
+        },
+        {
+          "hz": [
+            5000,
+            16000
+          ],
+          "late_band_dbfs": -76.02041139582087,
+          "fromImpulseToE30s": 2.5542403628117913,
+          "fromImpulseToE60s": 6.529569160997732,
+          "capturedIRSeconds": 16,
+          "edgeNearWindowEnd": false
+        }
+      ]
+    },
+    {
+      "fb": 0.985,
+      "cold_anti_nonzero": true,
+      "antiToCommonLateDb": -0.09765611114924033,
+      "bands": [
+        {
+          "hz": [
+            160,
+            900
+          ],
+          "late_band_dbfs": -73.20376645201424,
+          "fromImpulseToE30s": 13.869160997732425,
+          "fromImpulseToE60s": 15.995759637188208,
+          "capturedIRSeconds": 16,
+          "edgeNearWindowEnd": true
+        },
+        {
+          "hz": [
+            1000,
+            4000
+          ],
+          "late_band_dbfs": -70.29248472963835,
+          "fromImpulseToE30s": 10.852448979591836,
+          "fromImpulseToE60s": 15.975260770975057,
+          "capturedIRSeconds": 16,
+          "edgeNearWindowEnd": true
+        },
+        {
+          "hz": [
+            5000,
+            16000
+          ],
+          "late_band_dbfs": -74.76683843259623,
+          "fromImpulseToE30s": 4.584444444444444,
+          "fromImpulseToE60s": 13.83514739229025,
+          "capturedIRSeconds": 16,
+          "edgeNearWindowEnd": false
+        }
+      ]
+    }
+  ]
+}
