@@ -1,0 +1,5 @@
+{"fixture": "one_note_high", "history_owner_layer_abi": 116, "runtime_part_abi": 12212, "timer_hz": 24000000, "span": 256, "owners": 2, "mean_us": 2845.2291666666665, "max_us": 2848.125, "digest": "46718b71", "edge_blocks": "00000000"}
+{"fixture": "actual_dual_owner_mode_and_cutoff_receipt", "history_owner_layer_abi": 116, "runtime_part_abi": 12212, "timer_hz": 24000000, "span": 16, "owners": 2, "mean_us": 221.04557291666666, "max_us": 249.58333333333334, "digest": "1af6c015", "edge_blocks": "00040628"}
+{"fixture": "six_voice_high", "history_owner_layer_abi": 116, "runtime_part_abi": 12212, "timer_hz": 24000000, "span": 256, "owners": 2, "mean_us": 12677.838541666666, "max_us": 12680.875, "digest": "188d1951", "edge_blocks": "00000000"}
+{"fixture": "six_voice_low", "history_owner_layer_abi": 116, "runtime_part_abi": 12212, "timer_hz": 24000000, "span": 256, "owners": 2, "mean_us": 12575.427083333334, "max_us": 12578.458333333334, "digest": "8ce99749", "edge_blocks": "00000000"}
+flash: 0 erases / programs

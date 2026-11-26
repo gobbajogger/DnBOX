@@ -1,0 +1,45 @@
+check_locked_settings: 20 settings ok
+firmware/src/app/engine.c:299:34: warning: suggest braces around initialization of subobject [-Wmissing-braces]
+    sj6_factory_motion motion = {0};
+                                 ^
+                                 {}
+firmware/src/app/engine.c:299:34: warning: suggest braces around initialization of subobject [-Wmissing-braces]
+    sj6_factory_motion motion = {0};
+                                 ^
+                                 {}
+2 warnings generated.
+firmware/src/dsp/juno6.c:191:29: warning: suggest braces around initialization of subobject [-Wmissing-braces]
+ juno6_envelope_snapshot v={0};
+                            ^
+                            {}
+In file included from firmware/src/dsp/juno6.c:204:
+firmware/src/dsp/juno6_factory.inc:2058:33: warning: suggest braces around initialization of subobject [-Wmissing-braces]
+ juno6_envelope_snapshot value={0};
+                                ^
+                                {}
+2 warnings generated.
+firmware/src/dsp/s1c/s1c.c:1163:15: warning: unused variable 'x' [-Wunused-variable]
+        float x;
+              ^
+1 warning generated.
+firmware/src/app/original_sound.c:429:30: warning: suggest braces around initialization of subobject [-Wmissing-braces]
+    *out = (juno6_lfo_words){0};
+                             ^
+                             {}
+firmware/src/app/original_sound.c:961:28: warning: suggest braces around initialization of subobject [-Wmissing-braces]
+    s1_extra_state next = {0};
+                           ^
+                           {}
+2 warnings generated.
+XDATA linked-sha256 pro .rodata.original_sound_chicago_params 264 6f6d1e0fc62cd1b0fe5c2b96639bd3569d2cc428553d3b443bd4f3ca02169ad4
+XDATA linked-sha256 pro .rodata.original_sound_miami_params 216 6e714acb49c9206e8fa8262f9834655288170b1fc6c632e289c7a79a6051f09d
+slot3-metadata linked-sha256 pro .rodata.original_miami_mappings 480 1f73ab1035c1d55187b9d2c01565f5ce7164c8a076a381f2bd79b6df6d301811
+slot3-metadata linked-sha256 pro .rodata.original_chicago_mappings 464 c22fcdbca04bf027191c2dcb4485611767daf4b016928497c99235644018e118
+slot3-metadata linked-sha256 pro .rodata.sj6_knob_desc.knobs 504 5202606a60254c56e31ed77895618baa52d37fc8564ee04ad285e299fd81f603
+slot3-metadata linked-sha256 pro .rodata.original_sound_juno_params 216 6b5f9af97f42a2910ddd81790adeeee8d0cbeb509fdc2a0608ef48fcf5c1dfb1
+slot3-metadata linked-sha256 pro .rodata.patch_parameters 496 8f491237be3927969dc5351ea0a5dbb9c05227cd8d4c4439cd6a7818b250fbec
+slot3-metadata linked-sha256 pro .rodata.sj6_aux_route_labels 276 0a53d7e368e4c8997613f656128ab477aee4200d6e70319e2caf94fb63a3ff2e
+slot3-metadata linked-sha256 pro .rodata.page_titles 344 3ff54af177f32482a015fc6ad3d9478e9d4580a15da7589cec327383623735e1
+slot3-metadata linked-sha256 pro .rodata.d9_cp_p 96 80b6e63a116bf04ec551acc0affb4f633cd57b870e2a72e353543a8304f76124
+slot3-metadata span pro 32452 remaining 316
+guarded pro XIP 549992 free 2680 pool usable 564 read-only FDATA 61432 diagnostic slot3 span 32452 slot3 free 316 read-only FITTAB 4072 header 443952440200000002000000d8ef00007def59ef677c5dbdb3816e67cd817664 ELF 1e9d1e15931fb85aa7feed06f5fbb88d76a62da9e75fd706122d0ea4019a08db
