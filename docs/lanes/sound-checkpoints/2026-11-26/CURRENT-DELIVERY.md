@@ -43,6 +43,13 @@ isolated kernel timing, or partial link into a release claim.
   and stress output words still match. The 622 B native object
   and at least 688 B of absent tanhf/expm1f code exceed APP
   before extra dependencies. No native clock or OTA admission.
+  A separate [existing tanh reuse](sj6-ota-tanh-reuse/README.md)
+  yields −154.7/−148.7 dBr relative to the exact leaf on the
+  two rendered cutoff tapes, worst stress −143.6 dBr. Its
+  promoted-helper object is 622 B (no libm), before native
+  wrapper/owner costs. This is sonically promising for the
+  observed zero-feedback scope but still fails measured flash
+  headroom; nonzero feedback or full-engine parity not proven.
 
 - **SuperJ6 Main physical OTA is now independently reconstructed.**
   The [same-input leaf and full typed Raw controls](sj6-raw-main-ota/README.md)
@@ -112,7 +119,12 @@ isolated kernel timing, or partial link into a release claim.
   [paired native thin links](owner909-early-chicago-link/NATIVE-THIN.md)
   now fit with +24/+36 B APP, same 52 B spendable pool and
   unchanged XPOOL. Exact same thin OFF baselines are +520/+532,
-  so scheduler delta costs 496 B. No release proof. Separate
+  so scheduler delta costs 496 B. The only
+  [matched isolated Elite replay](909-owner-overlap-elite-replay/README.md)
+  records 14,288 µs/86 late OFF and 14,736 µs/64 ON with no
+  NOR writes, skipped cycles, or partial owner trap. Changed
+  first healthy read time and PCM prevent causal comparison.
+  Neither arm passes, no Pro timing, hold. Separate
   [active host DSP proof](owner909-early-chicago/owner-fixture.log)
   compares 6.81 MB of exact outputs/states over 192 active
   spans, with actual host overlap on 124; it does not cover

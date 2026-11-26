@@ -1,0 +1,41 @@
+
+/workspace/scratch/3a7051e761a0/sj6-ota-history/tmp.70DbGt/q.o:	file format ELF32-pi32v2
+
+Sections:
+Idx Name          Size      Address          Type
+  0               00000000 0000000000000000 
+  1 .strtab       00000119 0000000000000000 
+  2 .text         00000000 0000000000000000 TEXT DATA 
+  3 .text.paired_fma 00000030 0000000000000000 TEXT DATA 
+  4 .rela.text.paired_fma 00000018 0000000000000000 
+  5 .text.fm_floorf 0000001c 0000000000000000 TEXT DATA 
+  6 .text.fm_exp2_nf 00000066 0000000000000000 TEXT DATA 
+  7 .text.fm_exp2f 00000036 0000000000000000 TEXT DATA 
+  8 .rela.text.fm_exp2f 00000018 0000000000000000 
+  9 .text.clock_2x 0000019e 0000000000000000 TEXT DATA 
+ 10 .rela.text.clock_2x 00000048 0000000000000000 
+ 11 .text.physical_replay 00000150 0000000000000000 TEXT DATA 
+ 12 .rela.text.physical_replay 00000084 0000000000000000 
+ 13 .symtab       000000b0 0000000000000000 
+         U memset
+         U original_fma_compact_bits
+         U original_fma_finite_bits_reference
+
+/workspace/scratch/3a7051e761a0/sj6-ota-history/tmp.70DbGt/q.o:	file format ELF32-pi32v2
+
+Sections:
+Idx Name          Size      Address          Type
+  0               00000000 0000000000000000 
+  1 .strtab       000000ed 0000000000000000 
+  2 .text         00000000 0000000000000000 TEXT DATA 
+  3 .text.paired_fma 00000030 0000000000000000 TEXT DATA 
+  4 .rela.text.paired_fma 00000018 0000000000000000 
+  5 .text.clock_2x 000000ee 0000000000000000 TEXT DATA 
+  6 .rela.text.clock_2x 00000048 0000000000000000 
+  7 .text.physical_replay 00000150 0000000000000000 TEXT DATA 
+  8 .rela.text.physical_replay 00000084 0000000000000000 
+  9 .symtab       00000090 0000000000000000 
+         U fm_tanhf
+         U memset
+         U original_fma_compact_bits
+         U original_fma_finite_bits_reference

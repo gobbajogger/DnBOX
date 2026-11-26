@@ -1,0 +1,277 @@
+{
+  "reached_tanh_peak": 0.31023603677749634,
+  "calls": {
+    "compact": 3955540,
+    "fallback": 250796,
+    "bad": 0
+  },
+  "original_bytes": 84,
+  "new_bytes": 64,
+  "all_raw_words_equal": false,
+  "rows": {
+    "0.31277143955230713:32000:1e-05": {
+      "words": 4360,
+      "max_abs": 0.0,
+      "signed_ratio_db": null,
+      "signed_bias": 0.0,
+      "state_max_abs": 0.0,
+      "state_signed_max_per_owner": [
+        0.0,
+        0.0
+      ]
+    },
+    "0.31277143955230713:32000:0.5": {
+      "words": 4360,
+      "max_abs": 8.940696716308594e-08,
+      "signed_ratio_db": -143.78812328665967,
+      "signed_bias": 3.6842378770607874e-10,
+      "state_max_abs": 0.0,
+      "state_signed_max_per_owner": [
+        0.0,
+        0.0
+      ]
+    },
+    "0.31277143955230713:32000:12.0": {
+      "words": 4360,
+      "max_abs": 1.9073486328125e-06,
+      "signed_ratio_db": -143.60697989406685,
+      "signed_bias": 9.714484795791294e-09,
+      "state_max_abs": 3.725290298461914e-09,
+      "state_signed_max_per_owner": [
+        0.0,
+        0.0
+      ]
+    },
+    "0.31277143955230713:44100:1e-05": {
+      "words": 4360,
+      "max_abs": 0.0,
+      "signed_ratio_db": null,
+      "signed_bias": 0.0,
+      "state_max_abs": 0.0,
+      "state_signed_max_per_owner": [
+        0.0,
+        0.0
+      ]
+    },
+    "0.31277143955230713:44100:0.5": {
+      "words": 4360,
+      "max_abs": 8.940696716308594e-08,
+      "signed_ratio_db": -144.08309769119103,
+      "signed_bias": -2.1784817864007634e-10,
+      "state_max_abs": 2.3283064365386963e-10,
+      "state_signed_max_per_owner": [
+        0.0,
+        5.820766091346741e-11
+      ]
+    },
+    "0.31277143955230713:44100:12.0": {
+      "words": 4360,
+      "max_abs": 2.86102294921875e-06,
+      "signed_ratio_db": -144.1366057007965,
+      "signed_bias": -6.330163226625241e-09,
+      "state_max_abs": 1.4901161193847656e-08,
+      "state_signed_max_per_owner": [
+        0.0,
+        1.4901161193847656e-08
+      ]
+    },
+    "0.31277143955230713:48000:1e-05": {
+      "words": 4360,
+      "max_abs": 0.0,
+      "signed_ratio_db": null,
+      "signed_bias": 0.0,
+      "state_max_abs": 0.0,
+      "state_signed_max_per_owner": [
+        0.0,
+        0.0
+      ]
+    },
+    "0.31277143955230713:48000:0.5": {
+      "words": 4360,
+      "max_abs": 8.940696716308594e-08,
+      "signed_ratio_db": -145.36467012827086,
+      "signed_bias": 1.5155352447011055e-10,
+      "state_max_abs": 0.0,
+      "state_signed_max_per_owner": [
+        0.0,
+        0.0
+      ]
+    },
+    "0.31277143955230713:48000:12.0": {
+      "words": 4360,
+      "max_abs": 1.9073486328125e-06,
+      "signed_ratio_db": -143.98320380273705,
+      "signed_bias": 3.924344478328841e-09,
+      "state_max_abs": 3.725290298461914e-09,
+      "state_signed_max_per_owner": [
+        0.0,
+        0.0
+      ]
+    },
+    "0.31277143955230713:96000:1e-05": {
+      "words": 4360,
+      "max_abs": 0.0,
+      "signed_ratio_db": null,
+      "signed_bias": 0.0,
+      "state_max_abs": 0.0,
+      "state_signed_max_per_owner": [
+        0.0,
+        0.0
+      ]
+    },
+    "0.31277143955230713:96000:0.5": {
+      "words": 4360,
+      "max_abs": 8.940696716308594e-08,
+      "signed_ratio_db": -145.57190639050455,
+      "signed_bias": 2.5129588929628698e-11,
+      "state_max_abs": 4.656612873077393e-10,
+      "state_signed_max_per_owner": [
+        0.0,
+        0.0
+      ]
+    },
+    "0.31277143955230713:96000:12.0": {
+      "words": 4360,
+      "max_abs": 2.86102294921875e-06,
+      "signed_ratio_db": -145.0941933386967,
+      "signed_bias": 1.0007125146071846e-08,
+      "state_max_abs": 0.0,
+      "state_signed_max_per_owner": [
+        0.0,
+        0.0
+      ]
+    },
+    "1.8208369016647339:32000:1e-05": {
+      "words": 4360,
+      "max_abs": 0.0,
+      "signed_ratio_db": null,
+      "signed_bias": 0.0,
+      "state_max_abs": 0.0,
+      "state_signed_max_per_owner": [
+        0.0,
+        0.0
+      ]
+    },
+    "1.8208369016647339:32000:0.5": {
+      "words": 4360,
+      "max_abs": 8.940696716308594e-08,
+      "signed_ratio_db": -147.08896632609083,
+      "signed_bias": 1.1548079516089291e-12,
+      "state_max_abs": 2.3283064365386963e-10,
+      "state_signed_max_per_owner": [
+        0.0,
+        2.3283064365386963e-10
+      ]
+    },
+    "1.8208369016647339:32000:12.0": {
+      "words": 4360,
+      "max_abs": 1.9073486328125e-06,
+      "signed_ratio_db": -146.45848367010566,
+      "signed_bias": -4.11429369839233e-09,
+      "state_max_abs": 3.725290298461914e-09,
+      "state_signed_max_per_owner": [
+        1.862645149230957e-09,
+        3.725290298461914e-09
+      ]
+    },
+    "1.8208369016647339:44100:1e-05": {
+      "words": 4360,
+      "max_abs": 0.0,
+      "signed_ratio_db": null,
+      "signed_bias": 0.0,
+      "state_max_abs": 0.0,
+      "state_signed_max_per_owner": [
+        0.0,
+        0.0
+      ]
+    },
+    "1.8208369016647339:44100:0.5": {
+      "words": 4360,
+      "max_abs": 5.960464477539063e-08,
+      "signed_ratio_db": -147.39170204471927,
+      "signed_bias": -1.5407758086723267e-10,
+      "state_max_abs": 4.656612873077393e-10,
+      "state_signed_max_per_owner": [
+        4.656612873077393e-10,
+        0.0
+      ]
+    },
+    "1.8208369016647339:44100:12.0": {
+      "words": 4360,
+      "max_abs": 1.9073486328125e-06,
+      "signed_ratio_db": -147.2480727636402,
+      "signed_bias": 5.9698631457232554e-09,
+      "state_max_abs": 1.4901161193847656e-08,
+      "state_signed_max_per_owner": [
+        1.4901161193847656e-08,
+        0.0
+      ]
+    },
+    "1.8208369016647339:48000:1e-05": {
+      "words": 4360,
+      "max_abs": 0.0,
+      "signed_ratio_db": null,
+      "signed_bias": 0.0,
+      "state_max_abs": 0.0,
+      "state_signed_max_per_owner": [
+        0.0,
+        0.0
+      ]
+    },
+    "1.8208369016647339:48000:0.5": {
+      "words": 4360,
+      "max_abs": 8.940696716308594e-08,
+      "signed_ratio_db": -148.54995110132452,
+      "signed_bias": 3.245477607354112e-11,
+      "state_max_abs": 2.3283064365386963e-10,
+      "state_signed_max_per_owner": [
+        2.3283064365386963e-10,
+        0.0
+      ]
+    },
+    "1.8208369016647339:48000:12.0": {
+      "words": 4360,
+      "max_abs": 2.0265579223632812e-06,
+      "signed_ratio_db": -146.58645799504387,
+      "signed_bias": -1.010356829800737e-10,
+      "state_max_abs": 0.0,
+      "state_signed_max_per_owner": [
+        0.0,
+        0.0
+      ]
+    },
+    "1.8208369016647339:96000:1e-05": {
+      "words": 4360,
+      "max_abs": 0.0,
+      "signed_ratio_db": null,
+      "signed_bias": 0.0,
+      "state_max_abs": 0.0,
+      "state_signed_max_per_owner": [
+        0.0,
+        0.0
+      ]
+    },
+    "1.8208369016647339:96000:0.5": {
+      "words": 4360,
+      "max_abs": 8.940696716308594e-08,
+      "signed_ratio_db": -147.3896695436943,
+      "signed_bias": 4.985032244286406e-11,
+      "state_max_abs": 2.3283064365386963e-10,
+      "state_signed_max_per_owner": [
+        0.0,
+        0.0
+      ]
+    },
+    "1.8208369016647339:96000:12.0": {
+      "words": 4360,
+      "max_abs": 1.9073486328125e-06,
+      "signed_ratio_db": -147.5914122755341,
+      "signed_bias": 2.0598035750039127e-09,
+      "state_max_abs": 1.4901161193847656e-08,
+      "state_signed_max_per_owner": [
+        0.0,
+        0.0
+      ]
+    }
+  }
+}
