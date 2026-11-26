@@ -27,7 +27,11 @@ isolated kernel timing, or partial link into a release claim.
   [paired native link and signed-PCM matrix](s1-shared-fenv/README.md)
   recover 48 B APP (+300/+308 B vs +252/+260 B) on this fitted donor.
   The protected pool is unchanged and all 24 focused host PCM cases
-  are exact. No native timing proof or combined production claim.
+  are exact. On the [newer matching J60-right donor](s1-shared-fenv-right/right-readme.md)
+  the same single patch recovers 48 B in each paired native link
+  (+584/+596 to +632/+644); both entire 906-program signed host
+  logs are byte-identical, including 14 legacy and 8 wet rollback
+  witnesses. Keep these receipts separate from target timing.
 - **What remains in SuperJ6 Raw.** In the reconstructed pre-chorus
   path with the genuine current J60 leaf, the [relative chorus level
   is within 0.17 dB](sj6-postvoice-split/README.md). The absolute dry
