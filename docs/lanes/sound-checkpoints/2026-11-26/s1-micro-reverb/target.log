@@ -1,0 +1,36 @@
+
+micro.pi32.o:	file format ELF32-pi32v2
+
+Sections:
+Idx Name          Size      Address          Type
+  0               00000000 0000000000000000 
+  1 .strtab       00000104 0000000000000000 
+  2 .text         0000040e 0000000000000000 TEXT DATA 
+  3 .rela.text    0000009c 0000000000000000 
+  4 .rodata.cst16 00000020 0000000000000000 DATA 
+  5 .rodata.cst32 00000020 0000000000000000 DATA 
+  6 .rodata       00000018 0000000000000000 DATA 
+  7 .data         00000010 0000000000000000 DATA 
+  8 .symtab       00000180 0000000000000000 
+00000000 00000010 d .L_MergedGlobals
+000000e0 0000005a t ago
+         U calloc
+00000038 0000004c t filter
+00000000 00000018 r filter.c
+         U free
+00000008 00000004 d late_gain
+0000000c 00000004 d late_in
+00000000 00000010 r lens
+00000000 00000012 T micro_config
+00000034 00000004 T micro_drop
+00000018 0000001c T micro_new
+000003e0 0000002e T micro_run
+00000012 00000006 T micro_size
+0000013a 000002a6 T micro_tick
+00000010 00000010 r ofs
+00000000 00000004 d pow_scale
+         U powf
+000000be 00000022 t read8
+00000004 00000004 d shelf
+00000084 0000003a t store8
+00000000 00000020 r trace

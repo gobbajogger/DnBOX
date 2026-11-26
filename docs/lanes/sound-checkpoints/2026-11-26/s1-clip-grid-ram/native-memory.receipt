@@ -1,0 +1,82 @@
+elite
+858311ce404ca5b806547ecd0faf1252fbb9a6d27e0d96d7cec2a64b389bf2c3  s1-v8-font-exact/tree/widen-native/elite/never-install.elf
+  [ 7] .ram_sink         NOBITS          01c00000 000300 000400 00  WA  0   0  1
+  [ 8] .ram_text         PROGBITS        01c00400 086300 000abc 00  AX  0   0  2
+  [ 9] .c1_text          PROGBITS        01c00ebc 086dbc 000260 00  AX  0   0  2
+  [10] .data             PROGBITS        01c08000 087100 000288 00  WA  0   0 64
+  [11] .c1stack          NOBITS          01c74000 000400 001200 00  WA  0   0  8
+  [12] .bss              NOBITS          01c08290 000390 017cc4 00  WA  0   0 16
+  [13] .pool             NOBITS          01c20000 000500 051dcc 00  WA  0   0  4
+  [14] .xpool            NOBITS          01c75200 000700 002400 00  WA  0   0  4
+  [15] .noinit           NOBITS          01c7c000 000700 000134 00  WA  0   0  4
+  [16] .ble_ram          NOBITS          01c7c400 000600 000f30 00  WA  0   0 64
+01c153d8 00002000 b abuf
+01c08a10 00000028 b apc_cell_flags
+01c08a38 00000028 b apc_cell_tick
+01c08a60 00000028 b apc_led_channel
+01c089e8 00000028 b apc_led_velocity
+01c7c500 00000d70 b ble_r
+01c1b96c 00001000 b cq
+01c1f16e 00000600 b cv_lcd_txbuf
+01c20000 000102c0 b cv_px
+01c50058 00021d69 b dly_buf
+01c76600 00001000 b eng_bass_buf
+01c094f8 00000078 b header_tileh
+01c0a800 00000168 b knob_tileh
+01c3a880 00000288 b list_rows
+01c1874c 0000021c b main_tileh
+01c3bed8 00005f68 b original_bass
+01c4df20 00002138 b original_fx
+01c08ab0 00000028 b original_fx_owner
+01c4ab20 00001400 b original_workspace
+01c75200 00001400 b original_workspace_b
+01c39208 000002c8 b pg
+01c0c0a4 00008e44 b proj
+01c303c0 00008e44 b project_stage
+01c4bf20 00002000 b sj6_unison_input
+01c0b1a4 00000f00 b st_buf
+01c19968 00001800 b ua_ring
+01c395c8 0000109c b undo
+01c18968 00001000 b uo_ring
+01c173d8 00001000 b x0x_main_scratch
+pro
+b06fabbc9f7ea8ac8ad34c026fdd15debbc9c5776867c56d396afa02a3611067  s1-v8-font-exact/tree/widen-native/pro/never-install.elf
+  [ 7] .ram_sink         NOBITS          01c00000 000300 000400 00  WA  0   0  1
+  [ 8] .ram_text         PROGBITS        01c00400 086300 000abc 00  AX  0   0  2
+  [ 9] .c1_text          PROGBITS        01c00ebc 086dbc 000260 00  AX  0   0  2
+  [10] .data             PROGBITS        01c08000 087100 000288 00  WA  0   0 64
+  [11] .c1stack          NOBITS          01c74000 000400 001200 00  WA  0   0  8
+  [12] .bss              NOBITS          01c08290 000390 017cc4 00  WA  0   0 16
+  [13] .pool             NOBITS          01c20000 000500 051dcc 00  WA  0   0  4
+  [14] .xpool            NOBITS          01c75200 000700 002400 00  WA  0   0  4
+  [15] .noinit           NOBITS          01c7c000 000700 000134 00  WA  0   0  4
+  [16] .ble_ram          NOBITS          01c7c400 000600 000f2c 00  WA  0   0 64
+01c153d8 00002000 b abuf
+01c08a10 00000028 b apc_cell_flags
+01c08a38 00000028 b apc_cell_tick
+01c08a60 00000028 b apc_led_channel
+01c089e8 00000028 b apc_led_velocity
+01c7c500 00000d6c b ble_r
+01c1b96c 00001000 b cq
+01c1f16e 00000600 b cv_lcd_txbuf
+01c20000 000102c0 b cv_px
+01c50058 00021d69 b dly_buf
+01c76600 00001000 b eng_bass_buf
+01c094f8 00000078 b header_tileh
+01c0a800 00000168 b knob_tileh
+01c3a880 00000288 b list_rows
+01c1874c 0000021c b main_tileh
+01c3bed8 00005f68 b original_bass
+01c4df20 00002138 b original_fx
+01c08ab0 00000028 b original_fx_owner
+01c4ab20 00001400 b original_workspace
+01c75200 00001400 b original_workspace_b
+01c39208 000002c8 b pg
+01c0c0a4 00008e44 b proj
+01c303c0 00008e44 b project_stage
+01c4bf20 00002000 b sj6_unison_input
+01c0b1a4 00000f00 b st_buf
+01c19968 00001800 b ua_ring
+01c395c8 0000109c b undo
+01c18968 00001000 b uo_ring
+01c173d8 00001000 b x0x_main_scratch
