@@ -1,0 +1,4335 @@
+{
+  "ablation_arm" : "compressor-pulse-f1000-on",
+  "actual_master" : 0.44618064165115356,
+  "authored_master" : 0.44618064165115356,
+  "buffers" : [
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    68,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    8
+  ],
+  "build" : 9,
+  "bundle_id" : "com.audiokitpro.superj6.superj6AU",
+  "calibration_cue" : "jupiter-compressor-A4-v1",
+  "command_velocity" : 87,
+  "component" : "aumu\/j6ct\/AuPr",
+  "component_version" : 67072,
+  "fixed_velocity" : true,
+  "fixture_config_sha256" : "17b7b5389af054fd713c31acadbf170955c4146628872c9482ed23ce07f33943",
+  "forced_controls" : {
+    "1" : 0,
+    "3" : 1,
+    "7" : 1,
+    "8" : 0,
+    "11" : 0,
+    "16" : 0,
+    "17" : 0.019999999552965164,
+    "22" : 0,
+    "23" : 0,
+    "24" : 0,
+    "28" : 0,
+    "32" : 1,
+    "33" : 0,
+    "40" : 0,
+    "41" : 0,
+    "59" : 0,
+    "82" : 0,
+    "83" : 1,
+    "87" : 0,
+    "91" : 0,
+    "95" : 0,
+    "99" : 0,
+    "103" : 0,
+    "107" : 0,
+    "108" : 0,
+    "109" : 0,
+    "123" : 0,
+    "129" : 1,
+    "130" : 0,
+    "131" : 0,
+    "136" : 0,
+    "137" : 0,
+    "201" : 0,
+    "202" : 0,
+    "205" : 1,
+    "209" : 0
+  },
+  "frames" : 148684,
+  "installed_au_sha256" : "1d6edf2bf5dd30906b148e10f50e2470a9f55d13d7f64ab3515e3c2294f1c257",
+  "master_factor" : 1,
+  "master_mode" : "authored",
+  "observed_state" : {
+    "lastLoadedPreset.name" : "Jupiter Sine",
+    "lastLoadedPreset.uid" : "5A84A4E4-B9C5-41C3-853E-BB4D43D48850"
+  },
+  "os" : "Version 27.2 (Build 26B5112a)",
+  "osc2_fader" : 1,
+  "parameter_readback_after" : [
+    {
+      "address" : "0",
+      "display" : "Main Volume",
+      "identifier" : "neonvolumeControl",
+      "value" : 0.44618064165115356
+    },
+    {
+      "address" : "7",
+      "display" : "Cutoff",
+      "identifier" : "neoncutoffLayer1",
+      "value" : 1
+    },
+    {
+      "address" : "8",
+      "display" : "Rez",
+      "identifier" : "neonresonanceLayer1",
+      "value" : 0
+    },
+    {
+      "address" : "11",
+      "display" : "Verb Enable",
+      "identifier" : "neonverbEnable",
+      "value" : 0
+    },
+    {
+      "address" : "13",
+      "display" : "Verb Size",
+      "identifier" : "neonverbSize",
+      "value" : 0.66956102848052979
+    },
+    {
+      "address" : "14",
+      "display" : "Verb LoCut",
+      "identifier" : "neonverbLoCut",
+      "value" : 0
+    },
+    {
+      "address" : "15",
+      "display" : "Verb Level",
+      "identifier" : "neonverbMix",
+      "value" : 0.72136574983596802
+    },
+    {
+      "address" : "24",
+      "display" : "Delay Enable",
+      "identifier" : "neondelayEnable",
+      "value" : 0
+    },
+    {
+      "address" : "25",
+      "display" : "Delay Time",
+      "identifier" : "neondelayTime",
+      "value" : 0.12673170864582062
+    },
+    {
+      "address" : "26",
+      "display" : "Delay Feedback Taps",
+      "identifier" : "neondelayFeedback",
+      "value" : 0.31268301606178284
+    },
+    {
+      "address" : "27",
+      "display" : "Delay Mix",
+      "identifier" : "neondelayMix",
+      "value" : 0.20624412596225739
+    },
+    {
+      "address" : "86",
+      "display" : "OSC Range",
+      "identifier" : "neonoscRange",
+      "value" : 0.5
+    },
+    {
+      "address" : "12",
+      "display" : "Verb Type II",
+      "identifier" : "neonverbTypeII",
+      "value" : 1
+    },
+    {
+      "address" : "118",
+      "display" : "Tempo Sync",
+      "identifier" : "neonisTempoSyncd",
+      "value" : 1
+    },
+    {
+      "address" : "22",
+      "display" : "Autopan Rate",
+      "identifier" : "neonautopanRate",
+      "value" : 0
+    },
+    {
+      "address" : "23",
+      "display" : "Autopan Depth",
+      "identifier" : "neonautopanDepth",
+      "value" : 0
+    },
+    {
+      "address" : "17",
+      "display" : "Compressor",
+      "identifier" : "neoncompressorAmount",
+      "value" : 0.019999999552965164
+    },
+    {
+      "address" : "16",
+      "display" : "Stereo Widen",
+      "identifier" : "neonstereoWiden",
+      "value" : 0
+    },
+    {
+      "address" : "32",
+      "display" : "Mono Mode",
+      "identifier" : "neonmonoEnable",
+      "value" : 1
+    },
+    {
+      "address" : "33",
+      "display" : "Legato Mode",
+      "identifier" : "neonlegatoEnable",
+      "value" : 0
+    },
+    {
+      "address" : "35",
+      "display" : "Glide Time",
+      "identifier" : "neonglideTime",
+      "value" : 0
+    },
+    {
+      "address" : "1",
+      "display" : "OSC 1 Volume",
+      "identifier" : "neonpulseVolume",
+      "value" : 0
+    },
+    {
+      "address" : "3",
+      "display" : "OSC 2 Volume",
+      "identifier" : "neonsawVolume",
+      "value" : 1
+    },
+    {
+      "address" : "201",
+      "display" : "Noise Volume",
+      "identifier" : "neonnoiseVolume",
+      "value" : 0
+    },
+    {
+      "address" : "202",
+      "display" : "Sub Volume",
+      "identifier" : "neonsubVolume",
+      "value" : 0
+    },
+    {
+      "address" : "28",
+      "display" : "Hi-Pass Cutoff",
+      "identifier" : "neonhighPassCutoff",
+      "value" : 0
+    },
+    {
+      "address" : "63",
+      "display" : "Arp",
+      "identifier" : "neonarpEnable",
+      "value" : 0
+    },
+    {
+      "address" : "64",
+      "display" : "Arp Type",
+      "identifier" : "neonarpType",
+      "value" : 0.34333333373069763
+    },
+    {
+      "address" : "65",
+      "display" : "Arp Range",
+      "identifier" : "neonarpOctave",
+      "value" : 0.66666668653488159
+    },
+    {
+      "address" : "66",
+      "display" : "Arp Interval",
+      "identifier" : "neonarpInterval",
+      "value" : 1
+    },
+    {
+      "address" : "142",
+      "display" : "Sequencer",
+      "identifier" : "neonseqEnable",
+      "value" : 0
+    },
+    {
+      "address" : "144",
+      "display" : "Arp & Seq Gate",
+      "identifier" : "neonseqGate",
+      "value" : 0.90494680404663086
+    },
+    {
+      "address" : "143",
+      "display" : "Arp & Seq Rate",
+      "identifier" : "neonseqDivision",
+      "value" : 0.66386556625366211
+    },
+    {
+      "address" : "145",
+      "display" : "Seq Total Steps",
+      "identifier" : "neonseqTotalSteps",
+      "value" : 0.46666666865348816
+    },
+    {
+      "address" : "36",
+      "display" : "ADSR Attack",
+      "identifier" : "neonattack",
+      "value" : 0
+    },
+    {
+      "address" : "37",
+      "display" : "ADSR Decay",
+      "identifier" : "neondecay",
+      "value" : 0
+    },
+    {
+      "address" : "38",
+      "display" : "ADSR Sustain",
+      "identifier" : "neonsustain",
+      "value" : 1
+    },
+    {
+      "address" : "39",
+      "display" : "ADSR Release",
+      "identifier" : "neonrelease",
+      "value" : 0.56364536285400391
+    },
+    {
+      "address" : "115",
+      "display" : "ADSR Link",
+      "identifier" : "neonadsrLinkEnable",
+      "value" : 1
+    },
+    {
+      "address" : "116",
+      "display" : "Filter ADSR",
+      "identifier" : "neonadsrFilterLinkEnable",
+      "value" : 1
+    },
+    {
+      "address" : "119",
+      "display" : "Layer 2 Attack",
+      "identifier" : "neonattack2",
+      "value" : 0
+    },
+    {
+      "address" : "120",
+      "display" : "Layer 2 Decay",
+      "identifier" : "neondecay2",
+      "value" : 0
+    },
+    {
+      "address" : "121",
+      "display" : "Layer 2 Sustain",
+      "identifier" : "neonsustain2",
+      "value" : 1
+    },
+    {
+      "address" : "122",
+      "display" : "Layer 2 Release",
+      "identifier" : "neonrelease2",
+      "value" : 0.56364536285400391
+    },
+    {
+      "address" : "40",
+      "display" : "Chorus I",
+      "identifier" : "neonchorusIEnable",
+      "value" : 0
+    },
+    {
+      "address" : "41",
+      "display" : "Chorus II",
+      "identifier" : "neonchorusIIEnable",
+      "value" : 0
+    },
+    {
+      "address" : "42",
+      "display" : "Chorus Rate",
+      "identifier" : "neonchorusRate",
+      "value" : 0.40400001406669617
+    },
+    {
+      "address" : "43",
+      "display" : "Chorus Depth",
+      "identifier" : "neonchorusDepth",
+      "value" : 0.20200000703334808
+    },
+    {
+      "address" : "44",
+      "display" : "Chorus Mix",
+      "identifier" : "neonchorusMix",
+      "value" : 0.50499999523162842
+    },
+    {
+      "address" : "208",
+      "display" : "Chorus",
+      "identifier" : "neonchorusVersion",
+      "value" : 1
+    },
+    {
+      "address" : "59",
+      "display" : "Unison",
+      "identifier" : "neonunison",
+      "value" : 0
+    },
+    {
+      "address" : "60",
+      "display" : "Unison Detune",
+      "identifier" : "neonunisonDetune",
+      "value" : 0
+    },
+    {
+      "address" : "61",
+      "display" : "Unison Stereo",
+      "identifier" : "neonunisonStereo",
+      "value" : 0.74224388599395752
+    },
+    {
+      "address" : "62",
+      "display" : "Unison Voices",
+      "identifier" : "neonunisonType",
+      "value" : 1
+    },
+    {
+      "address" : "57",
+      "display" : "Pitch Mod",
+      "identifier" : "neonfmModCents",
+      "value" : 0
+    },
+    {
+      "address" : "129",
+      "display" : "Harmonic Cutoff",
+      "identifier" : "neonfilterCutoff",
+      "value" : 1
+    },
+    {
+      "address" : "130",
+      "display" : "Harmonic Filter Rez",
+      "identifier" : "neonfilterRez",
+      "value" : 0
+    },
+    {
+      "address" : "131",
+      "display" : "Filter KeyTracking",
+      "identifier" : "neonfilterTracking",
+      "value" : 0
+    },
+    {
+      "address" : "132",
+      "display" : "Filter Attack",
+      "identifier" : "neonfilterAttack",
+      "value" : 0
+    },
+    {
+      "address" : "133",
+      "display" : "Filter Decay",
+      "identifier" : "neonfilterDecay",
+      "value" : 0
+    },
+    {
+      "address" : "134",
+      "display" : "Filter Sustain",
+      "identifier" : "neonfilterSustain",
+      "value" : 1
+    },
+    {
+      "address" : "135",
+      "display" : "Filter Release",
+      "identifier" : "neonfilterRelease",
+      "value" : 0.56364536285400391
+    },
+    {
+      "address" : "136",
+      "display" : "Filter Envelope",
+      "identifier" : "neonfilterStrength",
+      "value" : 0
+    },
+    {
+      "address" : "137",
+      "display" : "Filter Velocity",
+      "identifier" : "neonfilterVelocity",
+      "value" : 0
+    },
+    {
+      "address" : "138",
+      "display" : "Pitch Attack",
+      "identifier" : "neonpitchAttack",
+      "value" : 0.5
+    },
+    {
+      "address" : "139",
+      "display" : "Pitch Decay",
+      "identifier" : "neonpitchDecay",
+      "value" : 0.5
+    },
+    {
+      "address" : "140",
+      "display" : "Pitch Sustain",
+      "identifier" : "neonpitchSustain",
+      "value" : 0
+    },
+    {
+      "address" : "141",
+      "display" : "Pitch Release",
+      "identifier" : "neonpitchRelease",
+      "value" : 0.5
+    },
+    {
+      "address" : "72",
+      "display" : "OSC 1 Tune",
+      "identifier" : "neonlayer1Semi",
+      "value" : 0.5
+    },
+    {
+      "address" : "73",
+      "display" : "OSC 2 Tune",
+      "identifier" : "neonlayer2Semi",
+      "value" : 0.5
+    },
+    {
+      "address" : "74",
+      "display" : "OSC 1 Detune",
+      "identifier" : "neonlayer1Detune",
+      "value" : 0.5
+    },
+    {
+      "address" : "75",
+      "display" : "OSC 2 Detune",
+      "identifier" : "neonlayer2Detune",
+      "value" : 0.5
+    },
+    {
+      "address" : "206",
+      "display" : "A Tuning",
+      "identifier" : "neonaTuning",
+      "value" : 0.60000002384185791
+    },
+    {
+      "address" : "212",
+      "display" : "Scale Lock",
+      "identifier" : "neonkeyLockEnable",
+      "value" : 0
+    },
+    {
+      "address" : "213",
+      "display" : "Scale Root",
+      "identifier" : "neonkeyLockRoot",
+      "value" : 0
+    },
+    {
+      "address" : "214",
+      "display" : "Scale Mode",
+      "identifier" : "neonkeyLockScale",
+      "value" : 0
+    },
+    {
+      "address" : "82",
+      "display" : "OSC 1 Waveform",
+      "identifier" : "neonlayer1Waveform",
+      "value" : 0
+    },
+    {
+      "address" : "83",
+      "display" : "OSC 2 Waveform",
+      "identifier" : "neonlayer2Waveform",
+      "value" : 1
+    },
+    {
+      "address" : "104",
+      "display" : "LFO Rate (Tremolo)",
+      "identifier" : "neontremoloRate",
+      "value" : 0.38868287205696106
+    },
+    {
+      "address" : "103",
+      "display" : "LFO Depth (Tremolo)",
+      "identifier" : "neontremoloDepth",
+      "value" : 0
+    },
+    {
+      "address" : "105",
+      "display" : "LFO > DCO",
+      "identifier" : "neonvibratoSemitones",
+      "value" : 0
+    },
+    {
+      "address" : "106",
+      "display" : "Vibrato Rate",
+      "identifier" : "neonvibratoRate",
+      "value" : 0.26551231741905212
+    },
+    {
+      "address" : "107",
+      "display" : "Crush Enable",
+      "identifier" : "neoncrushEnable",
+      "value" : 0
+    },
+    {
+      "address" : "108",
+      "display" : "Crush",
+      "identifier" : "neoncrushAmount",
+      "value" : 0
+    },
+    {
+      "address" : "109",
+      "display" : "Lo-Fi",
+      "identifier" : "neoncrushBitRate",
+      "value" : 0
+    },
+    {
+      "address" : "5",
+      "display" : "OSC 1 Waveform",
+      "identifier" : "neonlayer1Sound",
+      "value" : 0
+    },
+    {
+      "address" : "6",
+      "display" : "OSC 2 Waveform",
+      "identifier" : "neonlayer2Sound",
+      "value" : 0
+    },
+    {
+      "address" : "203",
+      "display" : "Pad 1 Destination",
+      "identifier" : "neonpad1Destination",
+      "value" : 3
+    },
+    {
+      "address" : "204",
+      "display" : "Pad 2 Destination",
+      "identifier" : "neonpad2Destination",
+      "value" : 2
+    },
+    {
+      "address" : "147",
+      "display" : "Seq Step 1",
+      "identifier" : "neonseqStep1Offset",
+      "value" : 0.5
+    },
+    {
+      "address" : "148",
+      "display" : "Seq Step 2",
+      "identifier" : "neonseqStep2Offset",
+      "value" : 0.75
+    },
+    {
+      "address" : "149",
+      "display" : "Seq Step 3",
+      "identifier" : "neonseqStep3Offset",
+      "value" : 0.5
+    },
+    {
+      "address" : "150",
+      "display" : "Seq Step 4",
+      "identifier" : "neonseqStep4Offset",
+      "value" : 0.75
+    },
+    {
+      "address" : "151",
+      "display" : "Seq Step 5",
+      "identifier" : "neonseqStep5Offset",
+      "value" : 0.5
+    },
+    {
+      "address" : "152",
+      "display" : "Seq Step 6",
+      "identifier" : "neonseqStep6Offset",
+      "value" : 0.75
+    },
+    {
+      "address" : "153",
+      "display" : "Seq Step 7",
+      "identifier" : "neonseqStep7Offset",
+      "value" : 0.5
+    },
+    {
+      "address" : "154",
+      "display" : "Seq Step 8",
+      "identifier" : "neonseqStep8Offset",
+      "value" : 0.75
+    },
+    {
+      "address" : "155",
+      "display" : "Seq Step 9",
+      "identifier" : "neonseqStep9Offset",
+      "value" : 0.5
+    },
+    {
+      "address" : "156",
+      "display" : "Seq Step 10",
+      "identifier" : "neonseqStep10Offset",
+      "value" : 0.75
+    },
+    {
+      "address" : "157",
+      "display" : "Seq Step 11",
+      "identifier" : "neonseqStep11Offset",
+      "value" : 0.5
+    },
+    {
+      "address" : "158",
+      "display" : "Seq Step 12",
+      "identifier" : "neonseqStep12Offset",
+      "value" : 0.75
+    },
+    {
+      "address" : "159",
+      "display" : "Seq Step 13",
+      "identifier" : "neonseqStep13Offset",
+      "value" : 0.5
+    },
+    {
+      "address" : "160",
+      "display" : "Seq Step 14",
+      "identifier" : "neonseqStep14Offset",
+      "value" : 0.75
+    },
+    {
+      "address" : "161",
+      "display" : "Seq Step 15",
+      "identifier" : "neonseqStep15Offset",
+      "value" : 0.5
+    },
+    {
+      "address" : "162",
+      "display" : "Seq Step 16",
+      "identifier" : "neonseqStep16Offset",
+      "value" : 0.75
+    },
+    {
+      "address" : "163",
+      "display" : "SeqStep 1 On",
+      "identifier" : "neonseqStep1Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "164",
+      "display" : "SeqStep 2 On",
+      "identifier" : "neonseqStep2Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "165",
+      "display" : "SeqStep 3 On",
+      "identifier" : "neonseqStep3Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "166",
+      "display" : "SeqStep 4 On",
+      "identifier" : "neonseqStep4Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "167",
+      "display" : "SeqStep 5 On",
+      "identifier" : "neonseqStep5Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "168",
+      "display" : "SeqStep 6 On",
+      "identifier" : "neonseqStep6Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "169",
+      "display" : "SeqStep 7 On",
+      "identifier" : "neonseqStep7Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "170",
+      "display" : "SeqStep 8 On",
+      "identifier" : "neonseqStep8Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "171",
+      "display" : "SeqStep 9 On",
+      "identifier" : "neonseqStep9Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "172",
+      "display" : "SeqStep 10 On",
+      "identifier" : "neonseqStep10Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "173",
+      "display" : "SeqStep 11 On",
+      "identifier" : "neonseqStep11Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "174",
+      "display" : "SeqStep 12 On",
+      "identifier" : "neonseqStep12Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "175",
+      "display" : "SeqStep 13 On",
+      "identifier" : "neonseqStep13Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "176",
+      "display" : "SeqStep 14 On",
+      "identifier" : "neonseqStep14Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "177",
+      "display" : "SeqStep 15 On",
+      "identifier" : "neonseqStep15Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "178",
+      "display" : "SeqStep 16 On",
+      "identifier" : "neonseqStep16Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "179",
+      "display" : "Modwheel Dest",
+      "identifier" : "neonmodwheelDestination",
+      "value" : 0
+    },
+    {
+      "address" : "181",
+      "display" : "LFO1 Dest 1",
+      "identifier" : "neonlfo1Dest1Param",
+      "value" : 1
+    },
+    {
+      "address" : "180",
+      "display" : "LFO1 Dest 1 BaseValue",
+      "identifier" : "neonlfo1Dest1BaseValue",
+      "value" : 1
+    },
+    {
+      "address" : "183",
+      "display" : "LFO1 Dest 2",
+      "identifier" : "neonlfo1Dest2Param",
+      "value" : 0
+    },
+    {
+      "address" : "182",
+      "display" : "LFO1 Dest 2 BaseValue",
+      "identifier" : "neonlfo1Dest2BaseValue",
+      "value" : 0
+    },
+    {
+      "address" : "88",
+      "display" : "LFO1 Rate",
+      "identifier" : "neonlfo1Rate",
+      "value" : 0.066575661301612854
+    },
+    {
+      "address" : "89",
+      "display" : "LFO > Filter",
+      "identifier" : "neonlfo1Amount",
+      "value" : 0
+    },
+    {
+      "address" : "91",
+      "display" : "LFO1 DelayTime",
+      "identifier" : "neonlfo1DelayTime",
+      "value" : 0
+    },
+    {
+      "address" : "93",
+      "display" : "LFO3 DelayTime",
+      "identifier" : "neonlfo3DelayTime",
+      "value" : 0
+    },
+    {
+      "address" : "94",
+      "display" : "LFO1 Wave",
+      "identifier" : "neonlfo1Waveform",
+      "value" : 0
+    },
+    {
+      "address" : "185",
+      "display" : "LFO2 Dest 1",
+      "identifier" : "neonlfo2Dest1Param",
+      "value" : 0
+    },
+    {
+      "address" : "184",
+      "display" : "LFO2 Dest 1 BaseValue",
+      "identifier" : "neonlfo2Dest1BaseValue",
+      "value" : 0
+    },
+    {
+      "address" : "187",
+      "display" : "LFO2 Dest 2",
+      "identifier" : "neonlfo2Dest2Param",
+      "value" : 0
+    },
+    {
+      "address" : "186",
+      "display" : "LFO2 Dest 2 BaseValue",
+      "identifier" : "neonlfo2Dest2BaseValue",
+      "value" : 0
+    },
+    {
+      "address" : "96",
+      "display" : "LFO2 Rate",
+      "identifier" : "neonlfo2Rate",
+      "value" : 1
+    },
+    {
+      "address" : "97",
+      "display" : "LFO2 Depth",
+      "identifier" : "neonlfo2Amount",
+      "value" : 0.5
+    },
+    {
+      "address" : "98",
+      "display" : "LFO2 Wave",
+      "identifier" : "neonlfo2Waveform",
+      "value" : 0
+    },
+    {
+      "address" : "189",
+      "display" : "LFO3 Dest 1",
+      "identifier" : "neonlfo3Dest1Param",
+      "value" : 0
+    },
+    {
+      "address" : "188",
+      "display" : "LFO3 Dest 1 BaseValue",
+      "identifier" : "neonlfo3Dest1BaseValue",
+      "value" : 0
+    },
+    {
+      "address" : "191",
+      "display" : "LFO3 Dest 2",
+      "identifier" : "neonlfo3Dest2Param",
+      "value" : 0
+    },
+    {
+      "address" : "190",
+      "display" : "LFO3 Dest 2 BaseValue",
+      "identifier" : "neonlfo3Dest2BaseValue",
+      "value" : 0
+    },
+    {
+      "address" : "100",
+      "display" : "LFO3 Rate",
+      "identifier" : "neonlfo3Rate",
+      "value" : 0.010999999940395355
+    },
+    {
+      "address" : "101",
+      "display" : "LFO3 Depth",
+      "identifier" : "neonlfo3Amount",
+      "value" : 0.5
+    },
+    {
+      "address" : "102",
+      "display" : "LFO3 Wave",
+      "identifier" : "neonlfo3Waveform",
+      "value" : 0
+    },
+    {
+      "address" : "192",
+      "display" : "LFO1 Mode",
+      "identifier" : "neonlfo1Mode",
+      "value" : 0
+    },
+    {
+      "address" : "193",
+      "display" : "LFO2 Mode",
+      "identifier" : "neonlfo2Mode",
+      "value" : 0
+    },
+    {
+      "address" : "194",
+      "display" : "LFO3 Mode",
+      "identifier" : "neonlfo3Mode",
+      "value" : 0
+    },
+    {
+      "address" : "123",
+      "display" : "Retro Tuning",
+      "identifier" : "neonvintageMode",
+      "value" : 0
+    },
+    {
+      "address" : "124",
+      "display" : "Global Bend",
+      "identifier" : "neonglobalBend",
+      "value" : 0.5
+    },
+    {
+      "address" : "125",
+      "display" : "Osc 1 Bend",
+      "identifier" : "neonlayer1Bend",
+      "value" : 0.5
+    },
+    {
+      "address" : "126",
+      "display" : "Osc 2 Bend",
+      "identifier" : "neonlayer2Bend",
+      "value" : 0.5
+    },
+    {
+      "address" : "198",
+      "display" : "LFO1 Snapback",
+      "identifier" : "neonlfoSnapbackEnable",
+      "value" : 0
+    },
+    {
+      "address" : "199",
+      "display" : "LFO2 Snapback",
+      "identifier" : "neonlfo2SnapbackEnable",
+      "value" : 0
+    },
+    {
+      "address" : "200",
+      "display" : "LFO3 Snapback",
+      "identifier" : "neonlfo3SnapbackEnable",
+      "value" : 0
+    },
+    {
+      "address" : "195",
+      "display" : "LFO1 Hz Mode",
+      "identifier" : "neonlfo1HzEnable",
+      "value" : 1
+    },
+    {
+      "address" : "196",
+      "display" : "LFO2 Hz Mode",
+      "identifier" : "neonlfo2HzEnable",
+      "value" : 1
+    },
+    {
+      "address" : "197",
+      "display" : "LFO3 Hz Mode",
+      "identifier" : "neonlfo3HzEnable",
+      "value" : 1
+    },
+    {
+      "address" : "87",
+      "display" : "LFO1 Enable",
+      "identifier" : "neonlfo1Enable",
+      "value" : 0
+    },
+    {
+      "address" : "95",
+      "display" : "LFO2 Enable",
+      "identifier" : "neonlfo2Enable",
+      "value" : 0
+    },
+    {
+      "address" : "99",
+      "display" : "LFO3 Enable",
+      "identifier" : "neonlfo3Enable",
+      "value" : 0
+    },
+    {
+      "address" : "205",
+      "display" : "Fixed Velocity",
+      "identifier" : "neonfixedVelocityEnable",
+      "value" : 1
+    },
+    {
+      "address" : "209",
+      "display" : "Filter Type",
+      "identifier" : "neonfilterType",
+      "value" : 0
+    },
+    {
+      "address" : "78",
+      "display" : "OSC 1 PWM",
+      "identifier" : "neonlayer1PWM",
+      "value" : 0
+    },
+    {
+      "address" : "79",
+      "display" : "OSC 2 PWM",
+      "identifier" : "neonlayer2PWM",
+      "value" : 0
+    },
+    {
+      "address" : "210",
+      "display" : "OSC 1 PWM Enable",
+      "identifier" : "neonlayer1PWMEnable",
+      "value" : 0
+    },
+    {
+      "address" : "211",
+      "display" : "OSC 2 PWM Enable",
+      "identifier" : "neonlayer2PWMEnable",
+      "value" : 0
+    },
+    {
+      "address" : "215",
+      "display" : "J60 Speed",
+      "identifier" : "neonj60v2Rate",
+      "value" : 0.5
+    },
+    {
+      "address" : "216",
+      "display" : "J60 Depth",
+      "identifier" : "neonj60v2Depth",
+      "value" : 0.5
+    },
+    {
+      "address" : "217",
+      "display" : "J60 Mix",
+      "identifier" : "neonj60v2Mix",
+      "value" : 1
+    }
+  ],
+  "parameters" : [
+    {
+      "address" : "0",
+      "display" : "Main Volume",
+      "identifier" : "neonvolumeControl",
+      "value" : 0.44618064165115356
+    },
+    {
+      "address" : "7",
+      "display" : "Cutoff",
+      "identifier" : "neoncutoffLayer1",
+      "value" : 1
+    },
+    {
+      "address" : "8",
+      "display" : "Rez",
+      "identifier" : "neonresonanceLayer1",
+      "value" : 0
+    },
+    {
+      "address" : "11",
+      "display" : "Verb Enable",
+      "identifier" : "neonverbEnable",
+      "value" : 0
+    },
+    {
+      "address" : "13",
+      "display" : "Verb Size",
+      "identifier" : "neonverbSize",
+      "value" : 0.66956102848052979
+    },
+    {
+      "address" : "14",
+      "display" : "Verb LoCut",
+      "identifier" : "neonverbLoCut",
+      "value" : 0
+    },
+    {
+      "address" : "15",
+      "display" : "Verb Level",
+      "identifier" : "neonverbMix",
+      "value" : 0.72136574983596802
+    },
+    {
+      "address" : "24",
+      "display" : "Delay Enable",
+      "identifier" : "neondelayEnable",
+      "value" : 0
+    },
+    {
+      "address" : "25",
+      "display" : "Delay Time",
+      "identifier" : "neondelayTime",
+      "value" : 0.12673170864582062
+    },
+    {
+      "address" : "26",
+      "display" : "Delay Feedback Taps",
+      "identifier" : "neondelayFeedback",
+      "value" : 0.31268301606178284
+    },
+    {
+      "address" : "27",
+      "display" : "Delay Mix",
+      "identifier" : "neondelayMix",
+      "value" : 0.20624412596225739
+    },
+    {
+      "address" : "86",
+      "display" : "OSC Range",
+      "identifier" : "neonoscRange",
+      "value" : 0.5
+    },
+    {
+      "address" : "12",
+      "display" : "Verb Type II",
+      "identifier" : "neonverbTypeII",
+      "value" : 1
+    },
+    {
+      "address" : "118",
+      "display" : "Tempo Sync",
+      "identifier" : "neonisTempoSyncd",
+      "value" : 1
+    },
+    {
+      "address" : "22",
+      "display" : "Autopan Rate",
+      "identifier" : "neonautopanRate",
+      "value" : 0
+    },
+    {
+      "address" : "23",
+      "display" : "Autopan Depth",
+      "identifier" : "neonautopanDepth",
+      "value" : 0
+    },
+    {
+      "address" : "17",
+      "display" : "Compressor",
+      "identifier" : "neoncompressorAmount",
+      "value" : 0.019999999552965164
+    },
+    {
+      "address" : "16",
+      "display" : "Stereo Widen",
+      "identifier" : "neonstereoWiden",
+      "value" : 0
+    },
+    {
+      "address" : "32",
+      "display" : "Mono Mode",
+      "identifier" : "neonmonoEnable",
+      "value" : 1
+    },
+    {
+      "address" : "33",
+      "display" : "Legato Mode",
+      "identifier" : "neonlegatoEnable",
+      "value" : 0
+    },
+    {
+      "address" : "35",
+      "display" : "Glide Time",
+      "identifier" : "neonglideTime",
+      "value" : 0
+    },
+    {
+      "address" : "1",
+      "display" : "OSC 1 Volume",
+      "identifier" : "neonpulseVolume",
+      "value" : 0
+    },
+    {
+      "address" : "3",
+      "display" : "OSC 2 Volume",
+      "identifier" : "neonsawVolume",
+      "value" : 1
+    },
+    {
+      "address" : "201",
+      "display" : "Noise Volume",
+      "identifier" : "neonnoiseVolume",
+      "value" : 0
+    },
+    {
+      "address" : "202",
+      "display" : "Sub Volume",
+      "identifier" : "neonsubVolume",
+      "value" : 0
+    },
+    {
+      "address" : "28",
+      "display" : "Hi-Pass Cutoff",
+      "identifier" : "neonhighPassCutoff",
+      "value" : 0
+    },
+    {
+      "address" : "63",
+      "display" : "Arp",
+      "identifier" : "neonarpEnable",
+      "value" : 0
+    },
+    {
+      "address" : "64",
+      "display" : "Arp Type",
+      "identifier" : "neonarpType",
+      "value" : 0.34333333373069763
+    },
+    {
+      "address" : "65",
+      "display" : "Arp Range",
+      "identifier" : "neonarpOctave",
+      "value" : 0.66666668653488159
+    },
+    {
+      "address" : "66",
+      "display" : "Arp Interval",
+      "identifier" : "neonarpInterval",
+      "value" : 1
+    },
+    {
+      "address" : "142",
+      "display" : "Sequencer",
+      "identifier" : "neonseqEnable",
+      "value" : 0
+    },
+    {
+      "address" : "144",
+      "display" : "Arp & Seq Gate",
+      "identifier" : "neonseqGate",
+      "value" : 0.90494680404663086
+    },
+    {
+      "address" : "143",
+      "display" : "Arp & Seq Rate",
+      "identifier" : "neonseqDivision",
+      "value" : 0.66386556625366211
+    },
+    {
+      "address" : "145",
+      "display" : "Seq Total Steps",
+      "identifier" : "neonseqTotalSteps",
+      "value" : 0.46666666865348816
+    },
+    {
+      "address" : "36",
+      "display" : "ADSR Attack",
+      "identifier" : "neonattack",
+      "value" : 0
+    },
+    {
+      "address" : "37",
+      "display" : "ADSR Decay",
+      "identifier" : "neondecay",
+      "value" : 0
+    },
+    {
+      "address" : "38",
+      "display" : "ADSR Sustain",
+      "identifier" : "neonsustain",
+      "value" : 1
+    },
+    {
+      "address" : "39",
+      "display" : "ADSR Release",
+      "identifier" : "neonrelease",
+      "value" : 0.56364536285400391
+    },
+    {
+      "address" : "115",
+      "display" : "ADSR Link",
+      "identifier" : "neonadsrLinkEnable",
+      "value" : 1
+    },
+    {
+      "address" : "116",
+      "display" : "Filter ADSR",
+      "identifier" : "neonadsrFilterLinkEnable",
+      "value" : 1
+    },
+    {
+      "address" : "119",
+      "display" : "Layer 2 Attack",
+      "identifier" : "neonattack2",
+      "value" : 0
+    },
+    {
+      "address" : "120",
+      "display" : "Layer 2 Decay",
+      "identifier" : "neondecay2",
+      "value" : 0
+    },
+    {
+      "address" : "121",
+      "display" : "Layer 2 Sustain",
+      "identifier" : "neonsustain2",
+      "value" : 1
+    },
+    {
+      "address" : "122",
+      "display" : "Layer 2 Release",
+      "identifier" : "neonrelease2",
+      "value" : 0.56364536285400391
+    },
+    {
+      "address" : "40",
+      "display" : "Chorus I",
+      "identifier" : "neonchorusIEnable",
+      "value" : 0
+    },
+    {
+      "address" : "41",
+      "display" : "Chorus II",
+      "identifier" : "neonchorusIIEnable",
+      "value" : 0
+    },
+    {
+      "address" : "42",
+      "display" : "Chorus Rate",
+      "identifier" : "neonchorusRate",
+      "value" : 0.40400001406669617
+    },
+    {
+      "address" : "43",
+      "display" : "Chorus Depth",
+      "identifier" : "neonchorusDepth",
+      "value" : 0.20200000703334808
+    },
+    {
+      "address" : "44",
+      "display" : "Chorus Mix",
+      "identifier" : "neonchorusMix",
+      "value" : 0.50499999523162842
+    },
+    {
+      "address" : "208",
+      "display" : "Chorus",
+      "identifier" : "neonchorusVersion",
+      "value" : 1
+    },
+    {
+      "address" : "59",
+      "display" : "Unison",
+      "identifier" : "neonunison",
+      "value" : 0
+    },
+    {
+      "address" : "60",
+      "display" : "Unison Detune",
+      "identifier" : "neonunisonDetune",
+      "value" : 0
+    },
+    {
+      "address" : "61",
+      "display" : "Unison Stereo",
+      "identifier" : "neonunisonStereo",
+      "value" : 0.74224388599395752
+    },
+    {
+      "address" : "62",
+      "display" : "Unison Voices",
+      "identifier" : "neonunisonType",
+      "value" : 1
+    },
+    {
+      "address" : "57",
+      "display" : "Pitch Mod",
+      "identifier" : "neonfmModCents",
+      "value" : 0
+    },
+    {
+      "address" : "129",
+      "display" : "Harmonic Cutoff",
+      "identifier" : "neonfilterCutoff",
+      "value" : 1
+    },
+    {
+      "address" : "130",
+      "display" : "Harmonic Filter Rez",
+      "identifier" : "neonfilterRez",
+      "value" : 0
+    },
+    {
+      "address" : "131",
+      "display" : "Filter KeyTracking",
+      "identifier" : "neonfilterTracking",
+      "value" : 0
+    },
+    {
+      "address" : "132",
+      "display" : "Filter Attack",
+      "identifier" : "neonfilterAttack",
+      "value" : 0
+    },
+    {
+      "address" : "133",
+      "display" : "Filter Decay",
+      "identifier" : "neonfilterDecay",
+      "value" : 0
+    },
+    {
+      "address" : "134",
+      "display" : "Filter Sustain",
+      "identifier" : "neonfilterSustain",
+      "value" : 1
+    },
+    {
+      "address" : "135",
+      "display" : "Filter Release",
+      "identifier" : "neonfilterRelease",
+      "value" : 0.56364536285400391
+    },
+    {
+      "address" : "136",
+      "display" : "Filter Envelope",
+      "identifier" : "neonfilterStrength",
+      "value" : 0
+    },
+    {
+      "address" : "137",
+      "display" : "Filter Velocity",
+      "identifier" : "neonfilterVelocity",
+      "value" : 0
+    },
+    {
+      "address" : "138",
+      "display" : "Pitch Attack",
+      "identifier" : "neonpitchAttack",
+      "value" : 0.5
+    },
+    {
+      "address" : "139",
+      "display" : "Pitch Decay",
+      "identifier" : "neonpitchDecay",
+      "value" : 0.5
+    },
+    {
+      "address" : "140",
+      "display" : "Pitch Sustain",
+      "identifier" : "neonpitchSustain",
+      "value" : 0
+    },
+    {
+      "address" : "141",
+      "display" : "Pitch Release",
+      "identifier" : "neonpitchRelease",
+      "value" : 0.5
+    },
+    {
+      "address" : "72",
+      "display" : "OSC 1 Tune",
+      "identifier" : "neonlayer1Semi",
+      "value" : 0.5
+    },
+    {
+      "address" : "73",
+      "display" : "OSC 2 Tune",
+      "identifier" : "neonlayer2Semi",
+      "value" : 0.5
+    },
+    {
+      "address" : "74",
+      "display" : "OSC 1 Detune",
+      "identifier" : "neonlayer1Detune",
+      "value" : 0.5
+    },
+    {
+      "address" : "75",
+      "display" : "OSC 2 Detune",
+      "identifier" : "neonlayer2Detune",
+      "value" : 0.5
+    },
+    {
+      "address" : "206",
+      "display" : "A Tuning",
+      "identifier" : "neonaTuning",
+      "value" : 0.60000002384185791
+    },
+    {
+      "address" : "212",
+      "display" : "Scale Lock",
+      "identifier" : "neonkeyLockEnable",
+      "value" : 0
+    },
+    {
+      "address" : "213",
+      "display" : "Scale Root",
+      "identifier" : "neonkeyLockRoot",
+      "value" : 0
+    },
+    {
+      "address" : "214",
+      "display" : "Scale Mode",
+      "identifier" : "neonkeyLockScale",
+      "value" : 0
+    },
+    {
+      "address" : "82",
+      "display" : "OSC 1 Waveform",
+      "identifier" : "neonlayer1Waveform",
+      "value" : 0
+    },
+    {
+      "address" : "83",
+      "display" : "OSC 2 Waveform",
+      "identifier" : "neonlayer2Waveform",
+      "value" : 1
+    },
+    {
+      "address" : "104",
+      "display" : "LFO Rate (Tremolo)",
+      "identifier" : "neontremoloRate",
+      "value" : 0.38868287205696106
+    },
+    {
+      "address" : "103",
+      "display" : "LFO Depth (Tremolo)",
+      "identifier" : "neontremoloDepth",
+      "value" : 0
+    },
+    {
+      "address" : "105",
+      "display" : "LFO > DCO",
+      "identifier" : "neonvibratoSemitones",
+      "value" : 0
+    },
+    {
+      "address" : "106",
+      "display" : "Vibrato Rate",
+      "identifier" : "neonvibratoRate",
+      "value" : 0.26551231741905212
+    },
+    {
+      "address" : "107",
+      "display" : "Crush Enable",
+      "identifier" : "neoncrushEnable",
+      "value" : 0
+    },
+    {
+      "address" : "108",
+      "display" : "Crush",
+      "identifier" : "neoncrushAmount",
+      "value" : 0
+    },
+    {
+      "address" : "109",
+      "display" : "Lo-Fi",
+      "identifier" : "neoncrushBitRate",
+      "value" : 0
+    },
+    {
+      "address" : "5",
+      "display" : "OSC 1 Waveform",
+      "identifier" : "neonlayer1Sound",
+      "value" : 0
+    },
+    {
+      "address" : "6",
+      "display" : "OSC 2 Waveform",
+      "identifier" : "neonlayer2Sound",
+      "value" : 0
+    },
+    {
+      "address" : "203",
+      "display" : "Pad 1 Destination",
+      "identifier" : "neonpad1Destination",
+      "value" : 3
+    },
+    {
+      "address" : "204",
+      "display" : "Pad 2 Destination",
+      "identifier" : "neonpad2Destination",
+      "value" : 2
+    },
+    {
+      "address" : "147",
+      "display" : "Seq Step 1",
+      "identifier" : "neonseqStep1Offset",
+      "value" : 0.5
+    },
+    {
+      "address" : "148",
+      "display" : "Seq Step 2",
+      "identifier" : "neonseqStep2Offset",
+      "value" : 0.75
+    },
+    {
+      "address" : "149",
+      "display" : "Seq Step 3",
+      "identifier" : "neonseqStep3Offset",
+      "value" : 0.5
+    },
+    {
+      "address" : "150",
+      "display" : "Seq Step 4",
+      "identifier" : "neonseqStep4Offset",
+      "value" : 0.75
+    },
+    {
+      "address" : "151",
+      "display" : "Seq Step 5",
+      "identifier" : "neonseqStep5Offset",
+      "value" : 0.5
+    },
+    {
+      "address" : "152",
+      "display" : "Seq Step 6",
+      "identifier" : "neonseqStep6Offset",
+      "value" : 0.75
+    },
+    {
+      "address" : "153",
+      "display" : "Seq Step 7",
+      "identifier" : "neonseqStep7Offset",
+      "value" : 0.5
+    },
+    {
+      "address" : "154",
+      "display" : "Seq Step 8",
+      "identifier" : "neonseqStep8Offset",
+      "value" : 0.75
+    },
+    {
+      "address" : "155",
+      "display" : "Seq Step 9",
+      "identifier" : "neonseqStep9Offset",
+      "value" : 0.5
+    },
+    {
+      "address" : "156",
+      "display" : "Seq Step 10",
+      "identifier" : "neonseqStep10Offset",
+      "value" : 0.75
+    },
+    {
+      "address" : "157",
+      "display" : "Seq Step 11",
+      "identifier" : "neonseqStep11Offset",
+      "value" : 0.5
+    },
+    {
+      "address" : "158",
+      "display" : "Seq Step 12",
+      "identifier" : "neonseqStep12Offset",
+      "value" : 0.75
+    },
+    {
+      "address" : "159",
+      "display" : "Seq Step 13",
+      "identifier" : "neonseqStep13Offset",
+      "value" : 0.5
+    },
+    {
+      "address" : "160",
+      "display" : "Seq Step 14",
+      "identifier" : "neonseqStep14Offset",
+      "value" : 0.75
+    },
+    {
+      "address" : "161",
+      "display" : "Seq Step 15",
+      "identifier" : "neonseqStep15Offset",
+      "value" : 0.5
+    },
+    {
+      "address" : "162",
+      "display" : "Seq Step 16",
+      "identifier" : "neonseqStep16Offset",
+      "value" : 0.75
+    },
+    {
+      "address" : "163",
+      "display" : "SeqStep 1 On",
+      "identifier" : "neonseqStep1Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "164",
+      "display" : "SeqStep 2 On",
+      "identifier" : "neonseqStep2Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "165",
+      "display" : "SeqStep 3 On",
+      "identifier" : "neonseqStep3Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "166",
+      "display" : "SeqStep 4 On",
+      "identifier" : "neonseqStep4Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "167",
+      "display" : "SeqStep 5 On",
+      "identifier" : "neonseqStep5Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "168",
+      "display" : "SeqStep 6 On",
+      "identifier" : "neonseqStep6Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "169",
+      "display" : "SeqStep 7 On",
+      "identifier" : "neonseqStep7Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "170",
+      "display" : "SeqStep 8 On",
+      "identifier" : "neonseqStep8Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "171",
+      "display" : "SeqStep 9 On",
+      "identifier" : "neonseqStep9Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "172",
+      "display" : "SeqStep 10 On",
+      "identifier" : "neonseqStep10Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "173",
+      "display" : "SeqStep 11 On",
+      "identifier" : "neonseqStep11Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "174",
+      "display" : "SeqStep 12 On",
+      "identifier" : "neonseqStep12Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "175",
+      "display" : "SeqStep 13 On",
+      "identifier" : "neonseqStep13Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "176",
+      "display" : "SeqStep 14 On",
+      "identifier" : "neonseqStep14Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "177",
+      "display" : "SeqStep 15 On",
+      "identifier" : "neonseqStep15Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "178",
+      "display" : "SeqStep 16 On",
+      "identifier" : "neonseqStep16Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "179",
+      "display" : "Modwheel Dest",
+      "identifier" : "neonmodwheelDestination",
+      "value" : 0
+    },
+    {
+      "address" : "181",
+      "display" : "LFO1 Dest 1",
+      "identifier" : "neonlfo1Dest1Param",
+      "value" : 1
+    },
+    {
+      "address" : "180",
+      "display" : "LFO1 Dest 1 BaseValue",
+      "identifier" : "neonlfo1Dest1BaseValue",
+      "value" : 1
+    },
+    {
+      "address" : "183",
+      "display" : "LFO1 Dest 2",
+      "identifier" : "neonlfo1Dest2Param",
+      "value" : 0
+    },
+    {
+      "address" : "182",
+      "display" : "LFO1 Dest 2 BaseValue",
+      "identifier" : "neonlfo1Dest2BaseValue",
+      "value" : 0
+    },
+    {
+      "address" : "88",
+      "display" : "LFO1 Rate",
+      "identifier" : "neonlfo1Rate",
+      "value" : 0.066575661301612854
+    },
+    {
+      "address" : "89",
+      "display" : "LFO > Filter",
+      "identifier" : "neonlfo1Amount",
+      "value" : 0
+    },
+    {
+      "address" : "91",
+      "display" : "LFO1 DelayTime",
+      "identifier" : "neonlfo1DelayTime",
+      "value" : 0
+    },
+    {
+      "address" : "93",
+      "display" : "LFO3 DelayTime",
+      "identifier" : "neonlfo3DelayTime",
+      "value" : 0
+    },
+    {
+      "address" : "94",
+      "display" : "LFO1 Wave",
+      "identifier" : "neonlfo1Waveform",
+      "value" : 0
+    },
+    {
+      "address" : "185",
+      "display" : "LFO2 Dest 1",
+      "identifier" : "neonlfo2Dest1Param",
+      "value" : 0
+    },
+    {
+      "address" : "184",
+      "display" : "LFO2 Dest 1 BaseValue",
+      "identifier" : "neonlfo2Dest1BaseValue",
+      "value" : 0
+    },
+    {
+      "address" : "187",
+      "display" : "LFO2 Dest 2",
+      "identifier" : "neonlfo2Dest2Param",
+      "value" : 0
+    },
+    {
+      "address" : "186",
+      "display" : "LFO2 Dest 2 BaseValue",
+      "identifier" : "neonlfo2Dest2BaseValue",
+      "value" : 0
+    },
+    {
+      "address" : "96",
+      "display" : "LFO2 Rate",
+      "identifier" : "neonlfo2Rate",
+      "value" : 1
+    },
+    {
+      "address" : "97",
+      "display" : "LFO2 Depth",
+      "identifier" : "neonlfo2Amount",
+      "value" : 0.5
+    },
+    {
+      "address" : "98",
+      "display" : "LFO2 Wave",
+      "identifier" : "neonlfo2Waveform",
+      "value" : 0
+    },
+    {
+      "address" : "189",
+      "display" : "LFO3 Dest 1",
+      "identifier" : "neonlfo3Dest1Param",
+      "value" : 0
+    },
+    {
+      "address" : "188",
+      "display" : "LFO3 Dest 1 BaseValue",
+      "identifier" : "neonlfo3Dest1BaseValue",
+      "value" : 0
+    },
+    {
+      "address" : "191",
+      "display" : "LFO3 Dest 2",
+      "identifier" : "neonlfo3Dest2Param",
+      "value" : 0
+    },
+    {
+      "address" : "190",
+      "display" : "LFO3 Dest 2 BaseValue",
+      "identifier" : "neonlfo3Dest2BaseValue",
+      "value" : 0
+    },
+    {
+      "address" : "100",
+      "display" : "LFO3 Rate",
+      "identifier" : "neonlfo3Rate",
+      "value" : 0.010999999940395355
+    },
+    {
+      "address" : "101",
+      "display" : "LFO3 Depth",
+      "identifier" : "neonlfo3Amount",
+      "value" : 0.5
+    },
+    {
+      "address" : "102",
+      "display" : "LFO3 Wave",
+      "identifier" : "neonlfo3Waveform",
+      "value" : 0
+    },
+    {
+      "address" : "192",
+      "display" : "LFO1 Mode",
+      "identifier" : "neonlfo1Mode",
+      "value" : 0
+    },
+    {
+      "address" : "193",
+      "display" : "LFO2 Mode",
+      "identifier" : "neonlfo2Mode",
+      "value" : 0
+    },
+    {
+      "address" : "194",
+      "display" : "LFO3 Mode",
+      "identifier" : "neonlfo3Mode",
+      "value" : 0
+    },
+    {
+      "address" : "123",
+      "display" : "Retro Tuning",
+      "identifier" : "neonvintageMode",
+      "value" : 0
+    },
+    {
+      "address" : "124",
+      "display" : "Global Bend",
+      "identifier" : "neonglobalBend",
+      "value" : 0.5
+    },
+    {
+      "address" : "125",
+      "display" : "Osc 1 Bend",
+      "identifier" : "neonlayer1Bend",
+      "value" : 0.5
+    },
+    {
+      "address" : "126",
+      "display" : "Osc 2 Bend",
+      "identifier" : "neonlayer2Bend",
+      "value" : 0.5
+    },
+    {
+      "address" : "198",
+      "display" : "LFO1 Snapback",
+      "identifier" : "neonlfoSnapbackEnable",
+      "value" : 0
+    },
+    {
+      "address" : "199",
+      "display" : "LFO2 Snapback",
+      "identifier" : "neonlfo2SnapbackEnable",
+      "value" : 0
+    },
+    {
+      "address" : "200",
+      "display" : "LFO3 Snapback",
+      "identifier" : "neonlfo3SnapbackEnable",
+      "value" : 0
+    },
+    {
+      "address" : "195",
+      "display" : "LFO1 Hz Mode",
+      "identifier" : "neonlfo1HzEnable",
+      "value" : 1
+    },
+    {
+      "address" : "196",
+      "display" : "LFO2 Hz Mode",
+      "identifier" : "neonlfo2HzEnable",
+      "value" : 1
+    },
+    {
+      "address" : "197",
+      "display" : "LFO3 Hz Mode",
+      "identifier" : "neonlfo3HzEnable",
+      "value" : 1
+    },
+    {
+      "address" : "87",
+      "display" : "LFO1 Enable",
+      "identifier" : "neonlfo1Enable",
+      "value" : 0
+    },
+    {
+      "address" : "95",
+      "display" : "LFO2 Enable",
+      "identifier" : "neonlfo2Enable",
+      "value" : 0
+    },
+    {
+      "address" : "99",
+      "display" : "LFO3 Enable",
+      "identifier" : "neonlfo3Enable",
+      "value" : 0
+    },
+    {
+      "address" : "205",
+      "display" : "Fixed Velocity",
+      "identifier" : "neonfixedVelocityEnable",
+      "value" : 1
+    },
+    {
+      "address" : "209",
+      "display" : "Filter Type",
+      "identifier" : "neonfilterType",
+      "value" : 0
+    },
+    {
+      "address" : "78",
+      "display" : "OSC 1 PWM",
+      "identifier" : "neonlayer1PWM",
+      "value" : 0
+    },
+    {
+      "address" : "79",
+      "display" : "OSC 2 PWM",
+      "identifier" : "neonlayer2PWM",
+      "value" : 0
+    },
+    {
+      "address" : "210",
+      "display" : "OSC 1 PWM Enable",
+      "identifier" : "neonlayer1PWMEnable",
+      "value" : 0
+    },
+    {
+      "address" : "211",
+      "display" : "OSC 2 PWM Enable",
+      "identifier" : "neonlayer2PWMEnable",
+      "value" : 0
+    },
+    {
+      "address" : "215",
+      "display" : "J60 Speed",
+      "identifier" : "neonj60v2Rate",
+      "value" : 0.5
+    },
+    {
+      "address" : "216",
+      "display" : "J60 Depth",
+      "identifier" : "neonj60v2Depth",
+      "value" : 0.5
+    },
+    {
+      "address" : "217",
+      "display" : "J60 Mix",
+      "identifier" : "neonj60v2Mix",
+      "value" : 1
+    }
+  ],
+  "pcm_sha256" : "2a027b57eb8ceb54e1f77331d27a7cb0fcbdaf0619a617bc1baf5f256b62fc87",
+  "peak" : [
+    0.021709654480218887,
+    0.021709658205509186
+  ],
+  "pre_mute_parameters" : [
+    {
+      "address" : "0",
+      "display" : "Main Volume",
+      "identifier" : "neonvolumeControl",
+      "value" : 0.44618064165115356
+    },
+    {
+      "address" : "7",
+      "display" : "Cutoff",
+      "identifier" : "neoncutoffLayer1",
+      "value" : 1
+    },
+    {
+      "address" : "8",
+      "display" : "Rez",
+      "identifier" : "neonresonanceLayer1",
+      "value" : 0.021717559546232224
+    },
+    {
+      "address" : "11",
+      "display" : "Verb Enable",
+      "identifier" : "neonverbEnable",
+      "value" : 1
+    },
+    {
+      "address" : "13",
+      "display" : "Verb Size",
+      "identifier" : "neonverbSize",
+      "value" : 0.66956102848052979
+    },
+    {
+      "address" : "14",
+      "display" : "Verb LoCut",
+      "identifier" : "neonverbLoCut",
+      "value" : 0
+    },
+    {
+      "address" : "15",
+      "display" : "Verb Level",
+      "identifier" : "neonverbMix",
+      "value" : 0.72136574983596802
+    },
+    {
+      "address" : "24",
+      "display" : "Delay Enable",
+      "identifier" : "neondelayEnable",
+      "value" : 0
+    },
+    {
+      "address" : "25",
+      "display" : "Delay Time",
+      "identifier" : "neondelayTime",
+      "value" : 0.12673170864582062
+    },
+    {
+      "address" : "26",
+      "display" : "Delay Feedback Taps",
+      "identifier" : "neondelayFeedback",
+      "value" : 0.31268301606178284
+    },
+    {
+      "address" : "27",
+      "display" : "Delay Mix",
+      "identifier" : "neondelayMix",
+      "value" : 0.20624412596225739
+    },
+    {
+      "address" : "86",
+      "display" : "OSC Range",
+      "identifier" : "neonoscRange",
+      "value" : 0.5
+    },
+    {
+      "address" : "12",
+      "display" : "Verb Type II",
+      "identifier" : "neonverbTypeII",
+      "value" : 1
+    },
+    {
+      "address" : "118",
+      "display" : "Tempo Sync",
+      "identifier" : "neonisTempoSyncd",
+      "value" : 1
+    },
+    {
+      "address" : "22",
+      "display" : "Autopan Rate",
+      "identifier" : "neonautopanRate",
+      "value" : 0.2341463714838028
+    },
+    {
+      "address" : "23",
+      "display" : "Autopan Depth",
+      "identifier" : "neonautopanDepth",
+      "value" : 0.15921950340270996
+    },
+    {
+      "address" : "17",
+      "display" : "Compressor",
+      "identifier" : "neoncompressorAmount",
+      "value" : 0
+    },
+    {
+      "address" : "16",
+      "display" : "Stereo Widen",
+      "identifier" : "neonstereoWiden",
+      "value" : 1
+    },
+    {
+      "address" : "32",
+      "display" : "Mono Mode",
+      "identifier" : "neonmonoEnable",
+      "value" : 0
+    },
+    {
+      "address" : "33",
+      "display" : "Legato Mode",
+      "identifier" : "neonlegatoEnable",
+      "value" : 0
+    },
+    {
+      "address" : "35",
+      "display" : "Glide Time",
+      "identifier" : "neonglideTime",
+      "value" : 0
+    },
+    {
+      "address" : "1",
+      "display" : "OSC 1 Volume",
+      "identifier" : "neonpulseVolume",
+      "value" : 1
+    },
+    {
+      "address" : "3",
+      "display" : "OSC 2 Volume",
+      "identifier" : "neonsawVolume",
+      "value" : 0
+    },
+    {
+      "address" : "201",
+      "display" : "Noise Volume",
+      "identifier" : "neonnoiseVolume",
+      "value" : 0.15207357704639435
+    },
+    {
+      "address" : "202",
+      "display" : "Sub Volume",
+      "identifier" : "neonsubVolume",
+      "value" : 0
+    },
+    {
+      "address" : "28",
+      "display" : "Hi-Pass Cutoff",
+      "identifier" : "neonhighPassCutoff",
+      "value" : 0
+    },
+    {
+      "address" : "63",
+      "display" : "Arp",
+      "identifier" : "neonarpEnable",
+      "value" : 0
+    },
+    {
+      "address" : "64",
+      "display" : "Arp Type",
+      "identifier" : "neonarpType",
+      "value" : 0.34333333373069763
+    },
+    {
+      "address" : "65",
+      "display" : "Arp Range",
+      "identifier" : "neonarpOctave",
+      "value" : 0.66666668653488159
+    },
+    {
+      "address" : "66",
+      "display" : "Arp Interval",
+      "identifier" : "neonarpInterval",
+      "value" : 1
+    },
+    {
+      "address" : "142",
+      "display" : "Sequencer",
+      "identifier" : "neonseqEnable",
+      "value" : 0
+    },
+    {
+      "address" : "144",
+      "display" : "Arp & Seq Gate",
+      "identifier" : "neonseqGate",
+      "value" : 0.90494680404663086
+    },
+    {
+      "address" : "143",
+      "display" : "Arp & Seq Rate",
+      "identifier" : "neonseqDivision",
+      "value" : 0.66386556625366211
+    },
+    {
+      "address" : "145",
+      "display" : "Seq Total Steps",
+      "identifier" : "neonseqTotalSteps",
+      "value" : 0.46666666865348816
+    },
+    {
+      "address" : "36",
+      "display" : "ADSR Attack",
+      "identifier" : "neonattack",
+      "value" : 0
+    },
+    {
+      "address" : "37",
+      "display" : "ADSR Decay",
+      "identifier" : "neondecay",
+      "value" : 0
+    },
+    {
+      "address" : "38",
+      "display" : "ADSR Sustain",
+      "identifier" : "neonsustain",
+      "value" : 1
+    },
+    {
+      "address" : "39",
+      "display" : "ADSR Release",
+      "identifier" : "neonrelease",
+      "value" : 0.56364536285400391
+    },
+    {
+      "address" : "115",
+      "display" : "ADSR Link",
+      "identifier" : "neonadsrLinkEnable",
+      "value" : 1
+    },
+    {
+      "address" : "116",
+      "display" : "Filter ADSR",
+      "identifier" : "neonadsrFilterLinkEnable",
+      "value" : 1
+    },
+    {
+      "address" : "119",
+      "display" : "Layer 2 Attack",
+      "identifier" : "neonattack2",
+      "value" : 0
+    },
+    {
+      "address" : "120",
+      "display" : "Layer 2 Decay",
+      "identifier" : "neondecay2",
+      "value" : 0
+    },
+    {
+      "address" : "121",
+      "display" : "Layer 2 Sustain",
+      "identifier" : "neonsustain2",
+      "value" : 1
+    },
+    {
+      "address" : "122",
+      "display" : "Layer 2 Release",
+      "identifier" : "neonrelease2",
+      "value" : 0.56364536285400391
+    },
+    {
+      "address" : "40",
+      "display" : "Chorus I",
+      "identifier" : "neonchorusIEnable",
+      "value" : 0
+    },
+    {
+      "address" : "41",
+      "display" : "Chorus II",
+      "identifier" : "neonchorusIIEnable",
+      "value" : 0
+    },
+    {
+      "address" : "42",
+      "display" : "Chorus Rate",
+      "identifier" : "neonchorusRate",
+      "value" : 0.40400001406669617
+    },
+    {
+      "address" : "43",
+      "display" : "Chorus Depth",
+      "identifier" : "neonchorusDepth",
+      "value" : 0.20200000703334808
+    },
+    {
+      "address" : "44",
+      "display" : "Chorus Mix",
+      "identifier" : "neonchorusMix",
+      "value" : 0.50499999523162842
+    },
+    {
+      "address" : "208",
+      "display" : "Chorus",
+      "identifier" : "neonchorusVersion",
+      "value" : 1
+    },
+    {
+      "address" : "59",
+      "display" : "Unison",
+      "identifier" : "neonunison",
+      "value" : 0
+    },
+    {
+      "address" : "60",
+      "display" : "Unison Detune",
+      "identifier" : "neonunisonDetune",
+      "value" : 0
+    },
+    {
+      "address" : "61",
+      "display" : "Unison Stereo",
+      "identifier" : "neonunisonStereo",
+      "value" : 0.74224388599395752
+    },
+    {
+      "address" : "62",
+      "display" : "Unison Voices",
+      "identifier" : "neonunisonType",
+      "value" : 1
+    },
+    {
+      "address" : "57",
+      "display" : "Pitch Mod",
+      "identifier" : "neonfmModCents",
+      "value" : 0
+    },
+    {
+      "address" : "129",
+      "display" : "Harmonic Cutoff",
+      "identifier" : "neonfilterCutoff",
+      "value" : 0.40000000596046448
+    },
+    {
+      "address" : "130",
+      "display" : "Harmonic Filter Rez",
+      "identifier" : "neonfilterRez",
+      "value" : 0.021717559546232224
+    },
+    {
+      "address" : "131",
+      "display" : "Filter KeyTracking",
+      "identifier" : "neonfilterTracking",
+      "value" : 0
+    },
+    {
+      "address" : "132",
+      "display" : "Filter Attack",
+      "identifier" : "neonfilterAttack",
+      "value" : 0
+    },
+    {
+      "address" : "133",
+      "display" : "Filter Decay",
+      "identifier" : "neonfilterDecay",
+      "value" : 0
+    },
+    {
+      "address" : "134",
+      "display" : "Filter Sustain",
+      "identifier" : "neonfilterSustain",
+      "value" : 1
+    },
+    {
+      "address" : "135",
+      "display" : "Filter Release",
+      "identifier" : "neonfilterRelease",
+      "value" : 0.56364536285400391
+    },
+    {
+      "address" : "136",
+      "display" : "Filter Envelope",
+      "identifier" : "neonfilterStrength",
+      "value" : 0
+    },
+    {
+      "address" : "137",
+      "display" : "Filter Velocity",
+      "identifier" : "neonfilterVelocity",
+      "value" : 0
+    },
+    {
+      "address" : "138",
+      "display" : "Pitch Attack",
+      "identifier" : "neonpitchAttack",
+      "value" : 0.5
+    },
+    {
+      "address" : "139",
+      "display" : "Pitch Decay",
+      "identifier" : "neonpitchDecay",
+      "value" : 0.5
+    },
+    {
+      "address" : "140",
+      "display" : "Pitch Sustain",
+      "identifier" : "neonpitchSustain",
+      "value" : 0
+    },
+    {
+      "address" : "141",
+      "display" : "Pitch Release",
+      "identifier" : "neonpitchRelease",
+      "value" : 0.5
+    },
+    {
+      "address" : "72",
+      "display" : "OSC 1 Tune",
+      "identifier" : "neonlayer1Semi",
+      "value" : 0.5
+    },
+    {
+      "address" : "73",
+      "display" : "OSC 2 Tune",
+      "identifier" : "neonlayer2Semi",
+      "value" : 0.5
+    },
+    {
+      "address" : "74",
+      "display" : "OSC 1 Detune",
+      "identifier" : "neonlayer1Detune",
+      "value" : 0.5
+    },
+    {
+      "address" : "75",
+      "display" : "OSC 2 Detune",
+      "identifier" : "neonlayer2Detune",
+      "value" : 0.5
+    },
+    {
+      "address" : "206",
+      "display" : "A Tuning",
+      "identifier" : "neonaTuning",
+      "value" : 0.60000002384185791
+    },
+    {
+      "address" : "212",
+      "display" : "Scale Lock",
+      "identifier" : "neonkeyLockEnable",
+      "value" : 0
+    },
+    {
+      "address" : "213",
+      "display" : "Scale Root",
+      "identifier" : "neonkeyLockRoot",
+      "value" : 0
+    },
+    {
+      "address" : "214",
+      "display" : "Scale Mode",
+      "identifier" : "neonkeyLockScale",
+      "value" : 0
+    },
+    {
+      "address" : "82",
+      "display" : "OSC 1 Waveform",
+      "identifier" : "neonlayer1Waveform",
+      "value" : 0
+    },
+    {
+      "address" : "83",
+      "display" : "OSC 2 Waveform",
+      "identifier" : "neonlayer2Waveform",
+      "value" : 0
+    },
+    {
+      "address" : "104",
+      "display" : "LFO Rate (Tremolo)",
+      "identifier" : "neontremoloRate",
+      "value" : 0.38868287205696106
+    },
+    {
+      "address" : "103",
+      "display" : "LFO Depth (Tremolo)",
+      "identifier" : "neontremoloDepth",
+      "value" : 0
+    },
+    {
+      "address" : "105",
+      "display" : "LFO > DCO",
+      "identifier" : "neonvibratoSemitones",
+      "value" : 0
+    },
+    {
+      "address" : "106",
+      "display" : "Vibrato Rate",
+      "identifier" : "neonvibratoRate",
+      "value" : 0.26551231741905212
+    },
+    {
+      "address" : "107",
+      "display" : "Crush Enable",
+      "identifier" : "neoncrushEnable",
+      "value" : 0
+    },
+    {
+      "address" : "108",
+      "display" : "Crush",
+      "identifier" : "neoncrushAmount",
+      "value" : 0
+    },
+    {
+      "address" : "109",
+      "display" : "Lo-Fi",
+      "identifier" : "neoncrushBitRate",
+      "value" : 0
+    },
+    {
+      "address" : "5",
+      "display" : "OSC 1 Waveform",
+      "identifier" : "neonlayer1Sound",
+      "value" : 0
+    },
+    {
+      "address" : "6",
+      "display" : "OSC 2 Waveform",
+      "identifier" : "neonlayer2Sound",
+      "value" : 0
+    },
+    {
+      "address" : "203",
+      "display" : "Pad 1 Destination",
+      "identifier" : "neonpad1Destination",
+      "value" : 3
+    },
+    {
+      "address" : "204",
+      "display" : "Pad 2 Destination",
+      "identifier" : "neonpad2Destination",
+      "value" : 2
+    },
+    {
+      "address" : "147",
+      "display" : "Seq Step 1",
+      "identifier" : "neonseqStep1Offset",
+      "value" : 0.5
+    },
+    {
+      "address" : "148",
+      "display" : "Seq Step 2",
+      "identifier" : "neonseqStep2Offset",
+      "value" : 0.75
+    },
+    {
+      "address" : "149",
+      "display" : "Seq Step 3",
+      "identifier" : "neonseqStep3Offset",
+      "value" : 0.5
+    },
+    {
+      "address" : "150",
+      "display" : "Seq Step 4",
+      "identifier" : "neonseqStep4Offset",
+      "value" : 0.75
+    },
+    {
+      "address" : "151",
+      "display" : "Seq Step 5",
+      "identifier" : "neonseqStep5Offset",
+      "value" : 0.5
+    },
+    {
+      "address" : "152",
+      "display" : "Seq Step 6",
+      "identifier" : "neonseqStep6Offset",
+      "value" : 0.75
+    },
+    {
+      "address" : "153",
+      "display" : "Seq Step 7",
+      "identifier" : "neonseqStep7Offset",
+      "value" : 0.5
+    },
+    {
+      "address" : "154",
+      "display" : "Seq Step 8",
+      "identifier" : "neonseqStep8Offset",
+      "value" : 0.75
+    },
+    {
+      "address" : "155",
+      "display" : "Seq Step 9",
+      "identifier" : "neonseqStep9Offset",
+      "value" : 0.5
+    },
+    {
+      "address" : "156",
+      "display" : "Seq Step 10",
+      "identifier" : "neonseqStep10Offset",
+      "value" : 0.75
+    },
+    {
+      "address" : "157",
+      "display" : "Seq Step 11",
+      "identifier" : "neonseqStep11Offset",
+      "value" : 0.5
+    },
+    {
+      "address" : "158",
+      "display" : "Seq Step 12",
+      "identifier" : "neonseqStep12Offset",
+      "value" : 0.75
+    },
+    {
+      "address" : "159",
+      "display" : "Seq Step 13",
+      "identifier" : "neonseqStep13Offset",
+      "value" : 0.5
+    },
+    {
+      "address" : "160",
+      "display" : "Seq Step 14",
+      "identifier" : "neonseqStep14Offset",
+      "value" : 0.75
+    },
+    {
+      "address" : "161",
+      "display" : "Seq Step 15",
+      "identifier" : "neonseqStep15Offset",
+      "value" : 0.5
+    },
+    {
+      "address" : "162",
+      "display" : "Seq Step 16",
+      "identifier" : "neonseqStep16Offset",
+      "value" : 0.75
+    },
+    {
+      "address" : "163",
+      "display" : "SeqStep 1 On",
+      "identifier" : "neonseqStep1Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "164",
+      "display" : "SeqStep 2 On",
+      "identifier" : "neonseqStep2Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "165",
+      "display" : "SeqStep 3 On",
+      "identifier" : "neonseqStep3Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "166",
+      "display" : "SeqStep 4 On",
+      "identifier" : "neonseqStep4Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "167",
+      "display" : "SeqStep 5 On",
+      "identifier" : "neonseqStep5Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "168",
+      "display" : "SeqStep 6 On",
+      "identifier" : "neonseqStep6Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "169",
+      "display" : "SeqStep 7 On",
+      "identifier" : "neonseqStep7Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "170",
+      "display" : "SeqStep 8 On",
+      "identifier" : "neonseqStep8Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "171",
+      "display" : "SeqStep 9 On",
+      "identifier" : "neonseqStep9Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "172",
+      "display" : "SeqStep 10 On",
+      "identifier" : "neonseqStep10Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "173",
+      "display" : "SeqStep 11 On",
+      "identifier" : "neonseqStep11Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "174",
+      "display" : "SeqStep 12 On",
+      "identifier" : "neonseqStep12Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "175",
+      "display" : "SeqStep 13 On",
+      "identifier" : "neonseqStep13Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "176",
+      "display" : "SeqStep 14 On",
+      "identifier" : "neonseqStep14Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "177",
+      "display" : "SeqStep 15 On",
+      "identifier" : "neonseqStep15Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "178",
+      "display" : "SeqStep 16 On",
+      "identifier" : "neonseqStep16Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "179",
+      "display" : "Modwheel Dest",
+      "identifier" : "neonmodwheelDestination",
+      "value" : 0
+    },
+    {
+      "address" : "181",
+      "display" : "LFO1 Dest 1",
+      "identifier" : "neonlfo1Dest1Param",
+      "value" : 1
+    },
+    {
+      "address" : "180",
+      "display" : "LFO1 Dest 1 BaseValue",
+      "identifier" : "neonlfo1Dest1BaseValue",
+      "value" : 1
+    },
+    {
+      "address" : "183",
+      "display" : "LFO1 Dest 2",
+      "identifier" : "neonlfo1Dest2Param",
+      "value" : 0
+    },
+    {
+      "address" : "182",
+      "display" : "LFO1 Dest 2 BaseValue",
+      "identifier" : "neonlfo1Dest2BaseValue",
+      "value" : 0
+    },
+    {
+      "address" : "88",
+      "display" : "LFO1 Rate",
+      "identifier" : "neonlfo1Rate",
+      "value" : 0.066575661301612854
+    },
+    {
+      "address" : "89",
+      "display" : "LFO > Filter",
+      "identifier" : "neonlfo1Amount",
+      "value" : 0
+    },
+    {
+      "address" : "91",
+      "display" : "LFO1 DelayTime",
+      "identifier" : "neonlfo1DelayTime",
+      "value" : 0.54337042570114136
+    },
+    {
+      "address" : "93",
+      "display" : "LFO3 DelayTime",
+      "identifier" : "neonlfo3DelayTime",
+      "value" : 0
+    },
+    {
+      "address" : "94",
+      "display" : "LFO1 Wave",
+      "identifier" : "neonlfo1Waveform",
+      "value" : 0
+    },
+    {
+      "address" : "185",
+      "display" : "LFO2 Dest 1",
+      "identifier" : "neonlfo2Dest1Param",
+      "value" : 0
+    },
+    {
+      "address" : "184",
+      "display" : "LFO2 Dest 1 BaseValue",
+      "identifier" : "neonlfo2Dest1BaseValue",
+      "value" : 0
+    },
+    {
+      "address" : "187",
+      "display" : "LFO2 Dest 2",
+      "identifier" : "neonlfo2Dest2Param",
+      "value" : 0
+    },
+    {
+      "address" : "186",
+      "display" : "LFO2 Dest 2 BaseValue",
+      "identifier" : "neonlfo2Dest2BaseValue",
+      "value" : 0
+    },
+    {
+      "address" : "96",
+      "display" : "LFO2 Rate",
+      "identifier" : "neonlfo2Rate",
+      "value" : 1
+    },
+    {
+      "address" : "97",
+      "display" : "LFO2 Depth",
+      "identifier" : "neonlfo2Amount",
+      "value" : 0.5
+    },
+    {
+      "address" : "98",
+      "display" : "LFO2 Wave",
+      "identifier" : "neonlfo2Waveform",
+      "value" : 0
+    },
+    {
+      "address" : "189",
+      "display" : "LFO3 Dest 1",
+      "identifier" : "neonlfo3Dest1Param",
+      "value" : 0
+    },
+    {
+      "address" : "188",
+      "display" : "LFO3 Dest 1 BaseValue",
+      "identifier" : "neonlfo3Dest1BaseValue",
+      "value" : 0
+    },
+    {
+      "address" : "191",
+      "display" : "LFO3 Dest 2",
+      "identifier" : "neonlfo3Dest2Param",
+      "value" : 0
+    },
+    {
+      "address" : "190",
+      "display" : "LFO3 Dest 2 BaseValue",
+      "identifier" : "neonlfo3Dest2BaseValue",
+      "value" : 0
+    },
+    {
+      "address" : "100",
+      "display" : "LFO3 Rate",
+      "identifier" : "neonlfo3Rate",
+      "value" : 0.010999999940395355
+    },
+    {
+      "address" : "101",
+      "display" : "LFO3 Depth",
+      "identifier" : "neonlfo3Amount",
+      "value" : 0.5
+    },
+    {
+      "address" : "102",
+      "display" : "LFO3 Wave",
+      "identifier" : "neonlfo3Waveform",
+      "value" : 0
+    },
+    {
+      "address" : "192",
+      "display" : "LFO1 Mode",
+      "identifier" : "neonlfo1Mode",
+      "value" : 0
+    },
+    {
+      "address" : "193",
+      "display" : "LFO2 Mode",
+      "identifier" : "neonlfo2Mode",
+      "value" : 0
+    },
+    {
+      "address" : "194",
+      "display" : "LFO3 Mode",
+      "identifier" : "neonlfo3Mode",
+      "value" : 0
+    },
+    {
+      "address" : "123",
+      "display" : "Retro Tuning",
+      "identifier" : "neonvintageMode",
+      "value" : 0.51512187719345093
+    },
+    {
+      "address" : "124",
+      "display" : "Global Bend",
+      "identifier" : "neonglobalBend",
+      "value" : 0.5
+    },
+    {
+      "address" : "125",
+      "display" : "Osc 1 Bend",
+      "identifier" : "neonlayer1Bend",
+      "value" : 0.5
+    },
+    {
+      "address" : "126",
+      "display" : "Osc 2 Bend",
+      "identifier" : "neonlayer2Bend",
+      "value" : 0.5
+    },
+    {
+      "address" : "198",
+      "display" : "LFO1 Snapback",
+      "identifier" : "neonlfoSnapbackEnable",
+      "value" : 0
+    },
+    {
+      "address" : "199",
+      "display" : "LFO2 Snapback",
+      "identifier" : "neonlfo2SnapbackEnable",
+      "value" : 0
+    },
+    {
+      "address" : "200",
+      "display" : "LFO3 Snapback",
+      "identifier" : "neonlfo3SnapbackEnable",
+      "value" : 0
+    },
+    {
+      "address" : "195",
+      "display" : "LFO1 Hz Mode",
+      "identifier" : "neonlfo1HzEnable",
+      "value" : 1
+    },
+    {
+      "address" : "196",
+      "display" : "LFO2 Hz Mode",
+      "identifier" : "neonlfo2HzEnable",
+      "value" : 1
+    },
+    {
+      "address" : "197",
+      "display" : "LFO3 Hz Mode",
+      "identifier" : "neonlfo3HzEnable",
+      "value" : 1
+    },
+    {
+      "address" : "87",
+      "display" : "LFO1 Enable",
+      "identifier" : "neonlfo1Enable",
+      "value" : 1
+    },
+    {
+      "address" : "95",
+      "display" : "LFO2 Enable",
+      "identifier" : "neonlfo2Enable",
+      "value" : 0
+    },
+    {
+      "address" : "99",
+      "display" : "LFO3 Enable",
+      "identifier" : "neonlfo3Enable",
+      "value" : 0
+    },
+    {
+      "address" : "205",
+      "display" : "Fixed Velocity",
+      "identifier" : "neonfixedVelocityEnable",
+      "value" : 1
+    },
+    {
+      "address" : "209",
+      "display" : "Filter Type",
+      "identifier" : "neonfilterType",
+      "value" : 0
+    },
+    {
+      "address" : "78",
+      "display" : "OSC 1 PWM",
+      "identifier" : "neonlayer1PWM",
+      "value" : 0
+    },
+    {
+      "address" : "79",
+      "display" : "OSC 2 PWM",
+      "identifier" : "neonlayer2PWM",
+      "value" : 0
+    },
+    {
+      "address" : "210",
+      "display" : "OSC 1 PWM Enable",
+      "identifier" : "neonlayer1PWMEnable",
+      "value" : 0
+    },
+    {
+      "address" : "211",
+      "display" : "OSC 2 PWM Enable",
+      "identifier" : "neonlayer2PWMEnable",
+      "value" : 0
+    },
+    {
+      "address" : "215",
+      "display" : "J60 Speed",
+      "identifier" : "neonj60v2Rate",
+      "value" : 0.5
+    },
+    {
+      "address" : "216",
+      "display" : "J60 Depth",
+      "identifier" : "neonj60v2Depth",
+      "value" : 0.5
+    },
+    {
+      "address" : "217",
+      "display" : "J60 Mix",
+      "identifier" : "neonj60v2Mix",
+      "value" : 1
+    }
+  ],
+  "preset_name" : "Jupiter Sine",
+  "preset_name_after" : "Jupiter Sine",
+  "preset_number" : -1,
+  "preset_number_after" : -1,
+  "rate" : 44100,
+  "reference" : "official native Mac Synth One J6 only; distinct from iOS oracle",
+  "repeat" : false,
+  "s4_pinned_identity" : {
+    "bank" : "Intro Bank",
+    "program" : "Jupiter Sine",
+    "program_uid" : "5A84A4E4-B9C5-41C3-853E-BB4D43D48850"
+  },
+  "schedule" : [
+    {
+      "action" : "on",
+      "frame" : 16384,
+      "note" : 69,
+      "velocity" : 87
+    },
+    {
+      "action" : "off",
+      "frame" : 60484,
+      "note" : 69,
+      "velocity" : 0
+    }
+  ],
+  "state_keys" : [
+    "appStatePreset",
+    "lastLoadedPreset",
+    "manufacturer",
+    "selectedBankName",
+    "startSnap",
+    "subtype",
+    "type",
+    "version"
+  ],
+  "version" : "0.999.8",
+  "warm_frames" : 16384
+}
