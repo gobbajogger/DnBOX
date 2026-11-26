@@ -1,0 +1,228 @@
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -63,6 +63,43 @@
+ static uint8_t brk_preview_audio_on, brk_preview_pattern;
+ static void brk_preview_interrupt(void);
+ static original_runtime_part original_bass[NBASS] POOL;
++#if X0X_SJ6_EXACT_ZERO_LEAF
++_Static_assert(NBASS==2, "one independent HP/Crusher state per physical bass owner");
++_Static_assert(sizeof(sj6_zero_fx_channel[2])==48, "measured exact leaf state");
++/* Plain zero-initialized BSS, never POOL, preview scratch or borrowed FX. */
++static sj6_zero_fx_channel original_sj6_zero_leaf[NBASS][2];
++static uint8_t original_sj6_zero_profile[NBASS];
++static unsigned sj6_zero_owner(const original_runtime_part *owner)
++{
++    if(owner==&original_bass[0])return 0;
++    if(owner==&original_bass[1])return 1;
++    return NBASS;
++}
++sj6_zero_fx_channel *engine_sj6_zero_leaf(const original_runtime_part *owner)
++{
++    const unsigned v=sj6_zero_owner(owner);
++    return v<NBASS && original_sj6_zero_profile[v] ? original_sj6_zero_leaf[v] : NULL;
++}
++void engine_sj6_zero_clear(const original_runtime_part *owner,unsigned revoke_profile)
++{
++    const unsigned v=sj6_zero_owner(owner);
++    if(v>=NBASS)return;
++    memset(original_sj6_zero_leaf[v],0,sizeof original_sj6_zero_leaf[v]);
++    if(revoke_profile)original_sj6_zero_profile[v]=0;
++}
++int engine_sj6_zero_pin(const original_runtime_part *owner,const float physical[8])
++{
++    const unsigned v=sj6_zero_owner(owner);
++    if(v>=NBASS)return 0;
++    /* Trusted source readback only: [HP Hz,Q dB, Distortion #3,#4,#5,#15, authored Lo-Fi #109, connected-not-bypassed proof].
++     * The recovered two-byte project carrier cannot authenticate these. */
++    const unsigned exact=physical && physical[0]==10.f && physical[1]==0.f &&
++        physical[2]==.44387006759643555f && physical[3]==0.f &&
++        physical[4]==0.f && physical[5]==0.f && physical[6]==0.f && physical[7]==1.f;
++    original_sj6_zero_profile[v]=(uint8_t)exact;
++    return (int)exact;
++}
++#endif
+ static int original_panel_ready(const original_runtime_part *part, unsigned kind)
+ {
+     return part->kind == kind && part->status == ORIGINAL_RUNTIME_OK;
+--- a/firmware/src/app/original_runtime.c
++++ b/firmware/src/app/original_runtime.c
+@@ -54,6 +54,9 @@
+     unsigned factory = (unsigned)original_sound_factory_source(kind, ordinal);
+     /* The old active union is intentionally retired at this explicit cold
+      * boundary. A caller must inspect the returned admission result. */
++#if X0X_SJ6_EXACT_ZERO_LEAF
++    engine_sj6_zero_clear(p,1);
++#endif
+     memset(p, 0, sizeof *p);
+     p->kind = (uint8_t)kind;
+     int rc;
+@@ -169,6 +172,9 @@
+         (void)original_chicago_fx2_compact_init((original_chicago_fx2_compact *)(void *)p->dsp.synthone.arena);
+         p->dsp.synthone.arena = NULL;
+     }
++#endif
++#if X0X_SJ6_EXACT_ZERO_LEAF
++    engine_sj6_zero_clear(p,1);
+ #endif
+     p->status = ORIGINAL_RUNTIME_INVALID;
+     return ORIGINAL_RUNTIME_OK;
+@@ -1188,6 +1194,9 @@
+     int ok;
+     if(p->kind==ORIGINAL_SOUND_JUNO){
+         juno6_all_off(&p->dsp.juno.synth);
++#if X0X_SJ6_EXACT_ZERO_LEAF
++        engine_sj6_zero_clear(p,0);
++#endif
+         memset(p->dsp.juno.chorus.delay,0,sizeof p->dsp.juno.chorus.delay);
+         p->dsp.juno.chorus.write=0;ok=1;
+ #if X0X_SJ6_NATIVE_LIMITER
+@@ -1445,12 +1454,69 @@
+ float juno6_aux_delay_frames(const juno6_t *,unsigned);
+ #endif
+ #endif
++#if X0X_SJ6_EXACT_ZERO_LEAF
++#if !X0X_SJ6_NATIVE_ROOM || !X0X_SUPERJ6_BUILTIN_INIT || !X0X_SJ6_AUX_LFO_NATIVE
++#error Exact zero leaf needs the typed SuperJ6 FX owner and native room/Crusher controls
++#endif
++static sj6_zero_fx_channel *sj6_zero_leaf_admit(original_runtime_part *p)
++{
++    juno6_t *s=&p->dsp.juno.synth;
++    /* -1 is the typed HP panel's authored zero, NOT the legacy/bypass 0.
++     * The old phase-free HP renderer does nothing at this typed sentinel. */
++    if(!s->typed || s->core.sample_rate!=44100.f || s->hpf!=-1.f ||
++       p->dsp.juno.crush.active || p->dsp.juno.crush.step!=1.f)return NULL;
++    /* Actual current #107=0 sets AU wet=0 and Booster unity; it
++     * does not prove a genuine AU bypass. Distinguish it by owner proof.
++     * Admission is per span; a modulated nonzero rate returns to legacy. */
++    return engine_sj6_zero_leaf(p);
++}
++static void sj6_exact_hp(sj6_zero_fx_channel *state,float *l,float *r,unsigned n)
++{
++    for(unsigned i=0;i<n;i++){
++        l[i]=sj6_hp10_44100(state,l[i]);
++        r[i]=sj6_hp10_44100(state+1,r[i]);
++    }
++}
++static void sj6_exact_zero_crusher(sj6_zero_fx_channel *state,float *l,float *r,unsigned n)
++{
++    for(unsigned i=0;i<n;i++){
++        l[i]=sj6_zero_crusher_44100(state,l[i]);
++        r[i]=sj6_zero_crusher_44100(state+1,r[i]);
++    }
++}
++#endif
++#if X0X_SJ6_NATIVE_UNISON
++static void sj6_unison_span(original_runtime_part *p,float *left,float *right,unsigned frames
++#if X0X_SJ6_AUX_LFO_NATIVE
++                            ,const float *mod
++#endif
++                            )
++{
++#if X0X_SJ6_AUX_LFO_NATIVE
++    if(mod && (mod[1]>=0.f || mod[2]>=0.f))
++        juno6_unison_process_mod(&p->dsp.juno.synth,left,right,frames,mod[1],mod[2]);
++    else
++#endif
++    juno6_unison_process(&p->dsp.juno.synth,left,right,frames);
++}
++#endif
+ static void sj6_run_effects(original_runtime_part *p,float *left,float *right,unsigned frames
+ #if X0X_SJ6_AUX_LFO_NATIVE
+                             ,const float *mod
+ #endif
+                             )
+ {
++#if X0X_SJ6_EXACT_ZERO_LEAF
++    /* Authentic local prefix: Unison -> instrument HP -> premod ->
++     * Crusher/booster. Remaining stock downstream stages are unchanged. */
++    sj6_zero_fx_channel *leaf=sj6_zero_leaf_admit(p);
++    if(leaf) {
++#if X0X_SJ6_NATIVE_UNISON
++        sj6_unison_span(p,left,right,frames,mod);
++#endif
++        sj6_exact_hp(leaf,left,right,frames);
++    }
++#endif
+ #if (defined(X0X_HOST) && defined(X0X_SJ6_ALT3_WITNESS)) || X0X_SJ6_ALT3_NATIVE
+ #if X0X_SJ6_AUX_LFO_NATIVE
+             if(mod && (mod[3]>=0.f || mod[4]>=0.f))
+@@ -1459,6 +1525,9 @@
+ #endif
+             juno6_alt3_process(&p->dsp.juno.synth,left,right,frames); /* after HPF, before downstream FX */
+ #endif
++#if X0X_SJ6_EXACT_ZERO_LEAF
++            if(leaf)sj6_exact_zero_crusher(leaf,left,right,frames);
++#endif
+ #if X0X_SJ6_NATIVE_J60
+             if(p->dsp.juno.chorus.j60.selected)
+                 juno6_j60_process(&p->dsp.juno.chorus,left,right,frames);
+@@ -1482,14 +1551,19 @@
+             juno6_delay24_process(&p->dsp.juno.synth,left,right,frames);
+ #endif
+ #if X0X_SJ6_NATIVE_UNISON
+-            #if X0X_SJ6_AUX_LFO_NATIVE
+-            if(mod && (mod[1]>=0.f || mod[2]>=0.f))
+-                juno6_unison_process_mod(&p->dsp.juno.synth,left,right,frames,mod[1],mod[2]);
+-            else
+-#endif
+-            juno6_unison_process(&p->dsp.juno.synth,left,right,frames);
++#if X0X_SJ6_EXACT_ZERO_LEAF
++            if(!leaf)
++#endif
++            sj6_unison_span(p,left,right,frames
++#if X0X_SJ6_AUX_LFO_NATIVE
++                            ,mod
++#endif
++                            );
+ #endif
+ #if X0X_SJ6_NATIVE_ROOM
++#if X0X_SJ6_EXACT_ZERO_LEAF
++            if(!leaf)
++#endif
+             sj6_crush_process(p,left,right,frames);
+             sj6_room_process(&p->dsp.juno.room,left,right,frames);
+ #endif
+--- a/firmware/src/app/original_runtime.h
++++ b/firmware/src/app/original_runtime.h
+@@ -87,6 +87,12 @@
+     uint8_t kind;
+     int8_t status;
+ } original_runtime_part;
++#if X0X_SJ6_EXACT_ZERO_LEAF
++#include "../dsp/sj6_hp_zero_leaf.h"
++sj6_zero_fx_channel *engine_sj6_zero_leaf(const original_runtime_part *);
++void engine_sj6_zero_clear(const original_runtime_part *,unsigned);
++int engine_sj6_zero_pin(const original_runtime_part *,const float physical[8]);
++#endif
+ typedef union {
+     float metal[4][256]; /* split 808 render, before the owning bass uses this space */
+     struct { uint32_t left[256], right[256]; int16_t converted[2][256], scratch[4][256]; } chicago;
+--- /dev/null
++++ b/firmware/src/dsp/sj6_hp_zero_leaf.h
+@@ -0,0 +1,26 @@
++#ifndef DNBOX_SJ6_44K_ZERO_LEAF
++#define DNBOX_SJ6_44K_ZERO_LEAF
++/* Active Apple-style HP 10 Hz/0dB plus amount-zero distortion DC response,
++ * scoped to the verified 44.1 kHz profile. Caller owns a separate initialized
++ * state for each live audio channel; unrelated controls must not select it. */
++typedef struct {
++    float hp_x, hp_dx, hp_y, hp_dy, crusher_x, crusher_y;
++} sj6_zero_fx_channel;
++static inline float sj6_hp10_44100(sj6_zero_fx_channel *s, float x)
++{
++    const float dx=x-s->hp_x;
++    const float dy=0x1.ffa2ap-1f*(dx-s->hp_dx)-0x1.10427p-19f*s->hp_y+0x1.ff4564p-1f*s->hp_dy;
++    s->hp_y+=dy;
++    s->hp_x=x;
++    s->hp_dx=dx;
++    s->hp_dy=dy;
++    return s->hp_y;
++}
++static inline float sj6_zero_crusher_44100(sj6_zero_fx_channel *s,float x)
++{
++    const float y=(x-s->crusher_x)+0x1.fd70a4p-1f*s->crusher_y;
++    s->crusher_x=x;
++    s->crusher_y=y;
++    return y;
++}
++#endif

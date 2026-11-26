@@ -1,0 +1,33 @@
+{
+  "scope": "same authenticated signed post-Unison/pre-HP input, actual compact runtime HP and Crusher paths, native exact HP\u2192Distortion reference at connected zero and source-proven unity Booster. Other downstream effects explicitly off. Not full instrument parity.",
+  "arms": {
+    "before": {
+      "legacy": {
+        "gain_db": 0.4550447482287196,
+        "residual_dbr": -6.74984181966101,
+        "max_abs": 0.3324224278330803,
+        "output_sha256": "2c88b98af86f8b870489dec68706b83f1718f9fb318d7da80207d5fed7ca13a9"
+      },
+      "guarded": {
+        "gain_db": 2.575971854950807e-06,
+        "residual_dbr": -101.04203653253167,
+        "max_abs": 6.2175095081329346e-06,
+        "output_sha256": "b57e9aeddf8bf20675834abcac1ce893ffb145de662af7e1d49f89708726be4a"
+      }
+    },
+    "candidate": {
+      "legacy": {
+        "gain_db": 0.4551963439444161,
+        "residual_dbr": -6.7484724729582135,
+        "max_abs": 0.3325124904513359,
+        "output_sha256": "1d91604fda38b2cc8aaf0146375f24152ce1a899fdb54e0b939ca9f3c1d4a1d3"
+      },
+      "guarded": {
+        "gain_db": 2.4099301459630074e-06,
+        "residual_dbr": -99.2866165076311,
+        "max_abs": 6.8284571170806885e-06,
+        "output_sha256": "04912b1ffc7dfaccc1e841fe96e0b02e6553b7ecdcfcd4371fd7ba60f528bca0"
+      }
+    }
+  }
+}
