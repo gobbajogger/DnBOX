@@ -59,3 +59,9 @@ The separate small SuperJ6 addendum adds the independently qualified pre-note la
 | --- | ---: | --- | --- |
 | `DnBOX-S1-Native-Morph-Worker-Proof.source-only.tgz` (v1) | 54,662 | `6aa132658a012d58e8e0ae666a3c2edb6392539510722d7eb9641d0388f32db9` | Download the listed version, verify SHA-256, extract into a new directory and check the inner hashes. See the [source and timing results in Git](lanes/sound-checkpoints/2026-11-26/s1-morph-native-proof/). |
 | `SJ6-Current-OSC2-and-Fader-Proof.source-only.tgz` | 62,876 | `f1ea9656685a3a30f53a511f6f538d25bb178e0509445c0cf2d2bbd984bb81b5` | Download by name, verify SHA-256, extract and verify the inner hashes by folder. See the [OSC2 source and A/B in Git](lanes/sound-checkpoints/2026-11-26/sj6-osc2-source/). Contains no original binary. |
+
+## SuperJ6 physical cutoff A/B — 2026-11-26
+
+| Library name | Size (bytes) | SHA256 | Recovery |
+| --- | ---: | --- | --- |
+| `SJ6-Direct-AUv3-Physical-Cutoff.tgz` | 3,931,882 | `9581a0d4b230b6242723d12f2b58fd09d73f1474ea65f85cf9de3db28cf5f09b` | Download by name, verify SHA-256, extract, and run `python3 score_cutoff.py`. See the [Git bench](lanes/sound-checkpoints/2026-11-26/sj6-direct-auv3-physical-cutoff/) for the same four PCM arrays. |

@@ -1,0 +1,52 @@
+{
+  "held_harmonic_level_delta_db": {
+    "1": -9.045e-06,
+    "2": -2.4794e-05,
+    "3": -1.9188e-05,
+    "4": -1.9993e-05,
+    "5": -3.1374e-05,
+    "6": -3.0853e-05
+  },
+  "windows": {
+    "after": {
+      "difference_dbr": -56.358575423,
+      "open_vs_authored_db": -8.052e-06,
+      "repeat_dbr": {
+        "authored": -60.87189134,
+        "open": -59.756843063
+      }
+    },
+    "attack": {
+      "difference_dbr": -3.810615685,
+      "open_vs_authored_db": -0.35977663,
+      "repeat_dbr": {
+        "authored": -96.654977568,
+        "open": -99.718581544
+      }
+    },
+    "commit": {
+      "difference_dbr": -99.836132028,
+      "open_vs_authored_db": 5.3552e-05,
+      "repeat_dbr": {
+        "authored": -98.507476152,
+        "open": -104.16343254
+      }
+    },
+    "held": {
+      "difference_dbr": -79.978434098,
+      "open_vs_authored_db": -1.74e-05,
+      "repeat_dbr": {
+        "authored": -75.396182603,
+        "open": -83.358396184
+      }
+    },
+    "pending": {
+      "difference_dbr": -83.467801108,
+      "open_vs_authored_db": -0.000212527,
+      "repeat_dbr": {
+        "authored": -79.647018731,
+        "open": -86.81401761
+      }
+    }
+  }
+}
