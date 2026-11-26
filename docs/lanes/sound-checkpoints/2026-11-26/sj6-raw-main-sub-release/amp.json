@@ -1,0 +1,308 @@
+{
+  "dry": {
+    "notes": {
+      "48": {
+        "first": 38434,
+        "last_nonzero": 38992,
+        "last": 39033,
+        "release_amp_hash": "25cc729679fa7cf30c4d9532a4015115c2cbfb11caefb339c8183dbd73e03efd",
+        "first_amp": [
+          0.9916878938674927,
+          0.9833757877349854,
+          0.975063681602478,
+          0.9667515754699707,
+          0.9584394693374634,
+          0.950127363204956
+        ],
+        "last_amp": [
+          0.00020207720808684826,
+          0.0001347181387245655,
+          6.735906936228275e-05,
+          0.0
+        ]
+      },
+      "60": {
+        "first": 82534,
+        "last_nonzero": 83092,
+        "last": 83133,
+        "release_amp_hash": "d7307efb414bf16ba4105484ab13912acd10c4e573be04fac2e4b18c3058a194",
+        "first_amp": [
+          0.9916880130767822,
+          0.9833759069442749,
+          0.9750638008117676,
+          0.9667516946792603,
+          0.9584395885467529,
+          0.9501274824142456
+        ],
+        "last_amp": [
+          0.00020207720808684826,
+          0.0001347181387245655,
+          6.735906936228275e-05,
+          0.0
+        ]
+      },
+      "64": {
+        "first": 82534,
+        "last_nonzero": 83092,
+        "last": 83133,
+        "release_amp_hash": "d7307efb414bf16ba4105484ab13912acd10c4e573be04fac2e4b18c3058a194",
+        "first_amp": [
+          0.9916880130767822,
+          0.9833759069442749,
+          0.9750638008117676,
+          0.9667516946792603,
+          0.9584395885467529,
+          0.9501274824142456
+        ],
+        "last_amp": [
+          0.00020207720808684826,
+          0.0001347181387245655,
+          6.735906936228275e-05,
+          0.0
+        ]
+      },
+      "67": {
+        "first": 82534,
+        "last_nonzero": 83092,
+        "last": 83133,
+        "release_amp_hash": "d7307efb414bf16ba4105484ab13912acd10c4e573be04fac2e4b18c3058a194",
+        "first_amp": [
+          0.9916880130767822,
+          0.9833759069442749,
+          0.9750638008117676,
+          0.9667516946792603,
+          0.9584395885467529,
+          0.9501274824142456
+        ],
+        "last_amp": [
+          0.00020207720808684826,
+          0.0001347181387245655,
+          6.735906936228275e-05,
+          0.0
+        ]
+      }
+    },
+    "stock_Sub_words_exact": 123675,
+    "postowner": {
+      "first": {
+        "owner_calls": 40,
+        "Main_AMP_nonzero": 0,
+        "compared_preHP_nonzero": [
+          38,
+          0
+        ],
+        "compared_preHP_L2": [
+          0.0019721435382962227,
+          0.0
+        ]
+      },
+      "final": {
+        "owner_calls": 120,
+        "Main_AMP_nonzero": 0,
+        "compared_preHP_nonzero": [
+          114,
+          0
+        ],
+        "compared_preHP_L2": [
+          0.0021515812259167433,
+          0.0
+        ]
+      }
+    },
+    "scores": {
+      "attack": {
+        "stock_connected": 0.1266232634636211,
+        "modeled_Main_release": 0.1266232634636211,
+        "relative": null
+      },
+      "hold": {
+        "stock_connected": 0.17655190696467257,
+        "modeled_Main_release": 0.17655190696467257,
+        "relative": null
+      },
+      "owner1": {
+        "stock_connected": -6.41534292057756,
+        "modeled_Main_release": -6.382598524009096,
+        "relative": -33.07235657959098
+      },
+      "after1": {
+        "stock_connected": 0.024212662485238165,
+        "modeled_Main_release": 0.0,
+        "relative": 0.0
+      },
+      "second hold": {
+        "stock_connected": -2.213286560715992,
+        "modeled_Main_release": -2.213286560715992,
+        "relative": null
+      },
+      "owner2": {
+        "stock_connected": -3.3552231028512747,
+        "modeled_Main_release": -3.339970729120159,
+        "relative": -31.128831852318267
+      },
+      "after2": {
+        "stock_connected": 0.18332594911004207,
+        "modeled_Main_release": 0.0,
+        "relative": 0.0
+      },
+      "full": {
+        "stock_connected": -1.7305826811853622,
+        "modeled_Main_release": -1.7305634441080926,
+        "relative": -58.39175972803993
+      }
+    }
+  },
+  "authored": {
+    "notes": {
+      "48": {
+        "first": 38434,
+        "last_nonzero": 38992,
+        "last": 39033,
+        "release_amp_hash": "25cc729679fa7cf30c4d9532a4015115c2cbfb11caefb339c8183dbd73e03efd",
+        "first_amp": [
+          0.9916878938674927,
+          0.9833757877349854,
+          0.975063681602478,
+          0.9667515754699707,
+          0.9584394693374634,
+          0.950127363204956
+        ],
+        "last_amp": [
+          0.00020207720808684826,
+          0.0001347181387245655,
+          6.735906936228275e-05,
+          0.0
+        ]
+      },
+      "60": {
+        "first": 82534,
+        "last_nonzero": 83092,
+        "last": 83133,
+        "release_amp_hash": "d7307efb414bf16ba4105484ab13912acd10c4e573be04fac2e4b18c3058a194",
+        "first_amp": [
+          0.9916880130767822,
+          0.9833759069442749,
+          0.9750638008117676,
+          0.9667516946792603,
+          0.9584395885467529,
+          0.9501274824142456
+        ],
+        "last_amp": [
+          0.00020207720808684826,
+          0.0001347181387245655,
+          6.735906936228275e-05,
+          0.0
+        ]
+      },
+      "64": {
+        "first": 82534,
+        "last_nonzero": 83092,
+        "last": 83133,
+        "release_amp_hash": "d7307efb414bf16ba4105484ab13912acd10c4e573be04fac2e4b18c3058a194",
+        "first_amp": [
+          0.9916880130767822,
+          0.9833759069442749,
+          0.9750638008117676,
+          0.9667516946792603,
+          0.9584395885467529,
+          0.9501274824142456
+        ],
+        "last_amp": [
+          0.00020207720808684826,
+          0.0001347181387245655,
+          6.735906936228275e-05,
+          0.0
+        ]
+      },
+      "67": {
+        "first": 82534,
+        "last_nonzero": 83092,
+        "last": 83133,
+        "release_amp_hash": "d7307efb414bf16ba4105484ab13912acd10c4e573be04fac2e4b18c3058a194",
+        "first_amp": [
+          0.9916880130767822,
+          0.9833759069442749,
+          0.9750638008117676,
+          0.9667516946792603,
+          0.9584395885467529,
+          0.9501274824142456
+        ],
+        "last_amp": [
+          0.00020207720808684826,
+          0.0001347181387245655,
+          6.735906936228275e-05,
+          0.0
+        ]
+      }
+    },
+    "stock_Sub_words_exact": 123675,
+    "postowner": {
+      "first": {
+        "owner_calls": 40,
+        "Main_AMP_nonzero": 0,
+        "compared_preHP_nonzero": [
+          38,
+          0
+        ],
+        "compared_preHP_L2": [
+          0.0019721435382962227,
+          0.0
+        ]
+      },
+      "final": {
+        "owner_calls": 120,
+        "Main_AMP_nonzero": 0,
+        "compared_preHP_nonzero": [
+          114,
+          0
+        ],
+        "compared_preHP_L2": [
+          0.0021515812259167433,
+          0.0
+        ]
+      }
+    },
+    "scores": {
+      "attack": {
+        "stock_connected": 1.189401577842669,
+        "modeled_Main_release": 1.189401577842669,
+        "relative": null
+      },
+      "hold": {
+        "stock_connected": 1.3046422852447634,
+        "modeled_Main_release": 1.3046422852447634,
+        "relative": null
+      },
+      "owner1": {
+        "stock_connected": -0.9127225020018265,
+        "modeled_Main_release": -0.9196836530003412,
+        "relative": -35.60682108585026
+      },
+      "after1": {
+        "stock_connected": 4.397018767576208,
+        "modeled_Main_release": 4.315857054494398,
+        "relative": -33.05489615705159
+      },
+      "second hold": {
+        "stock_connected": 1.1312438154203948,
+        "modeled_Main_release": 1.1312438154203948,
+        "relative": null
+      },
+      "owner2": {
+        "stock_connected": 0.17667378111756715,
+        "modeled_Main_release": 0.17942046033564987,
+        "relative": -32.06263045521461
+      },
+      "after2": {
+        "stock_connected": 1.1270121389394245,
+        "modeled_Main_release": 0.5875766585385269,
+        "relative": -6.748193366082965
+      },
+      "full": {
+        "stock_connected": 1.1251118340283672,
+        "modeled_Main_release": 1.1251124407359592,
+        "relative": -57.98543520868029
+      }
+    }
+  }
+}

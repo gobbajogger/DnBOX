@@ -1,0 +1,1344 @@
+{
+  "witnessed_independent_source_sha": "e3aec4d10d0b7dc336bcbed81360f8a485df458e903625edadcfe1fdf7db5d06",
+  "installed_reference_sha": "905e705042416acd2a5404594706608c6bd0a35b0783013ef4bbf977fe170002",
+  "stages": [
+    "pre_HP",
+    "after_HP",
+    "prechorus_after_Crusher",
+    "pre_Dc",
+    "terminal"
+  ],
+  "scope": "Identical warmed HP/Crusher/terminal state initialization and ordered input chronology; real original compiled voices without unavailable installed AVAudioMixerNode sum tap; different pre-HP input leads to different chronological internal states.",
+  "windows": {
+    "hold": {
+      "0": {
+        "conditional_same_stage": {
+          "pre_HP": {
+            "connected_vs_source": {
+              "error_dbr": 2.6751355867618836,
+              "level_delta": 0.19584163691756312,
+              "residual": 40.9614583723752,
+              "reference_norm": 30.103613629976294
+            },
+            "stock_vs_source": {
+              "error_dbr": 2.720348622875502,
+              "level_delta": 0.17649910728187587,
+              "residual": 41.17523272077935,
+              "reference_norm": 30.103613629976294
+            }
+          },
+          "after_HP": {
+            "connected_vs_source": {
+              "error_dbr": 2.6751355867618836,
+              "level_delta": 0.19584163691756312,
+              "residual": 40.9614583723752,
+              "reference_norm": 30.103613629976294
+            },
+            "stock_vs_source": {
+              "error_dbr": 2.720348622875502,
+              "level_delta": 0.17649910728187587,
+              "residual": 41.17523272077935,
+              "reference_norm": 30.103613629976294
+            }
+          },
+          "prechorus_after_Crusher": {
+            "connected_vs_source": {
+              "error_dbr": 2.6751355867618836,
+              "level_delta": 0.19584163691756312,
+              "residual": 40.9614583723752,
+              "reference_norm": 30.103613629976294
+            },
+            "stock_vs_source": {
+              "error_dbr": 2.720348622875502,
+              "level_delta": 0.17649910728187587,
+              "residual": 41.17523272077935,
+              "reference_norm": 30.103613629976294
+            }
+          },
+          "pre_Dc": {
+            "connected_vs_source": {
+              "error_dbr": 2.675135584722886,
+              "level_delta": 0.19584163320584744,
+              "residual": 14.055180590771066,
+              "reference_norm": 10.329508345552206
+            },
+            "stock_vs_source": {
+              "error_dbr": 2.7203486202804013,
+              "level_delta": 0.17649910413656714,
+              "residual": 14.128533375433365,
+              "reference_norm": 10.329508345552206
+            }
+          },
+          "terminal": {
+            "connected_vs_source": {
+              "error_dbr": 2.675135584722886,
+              "level_delta": 0.19584163320584744,
+              "residual": 14.055180590771066,
+              "reference_norm": 10.329508345552206
+            },
+            "stock_vs_source": {
+              "error_dbr": 2.7203486202804013,
+              "level_delta": 0.17649910413656714,
+              "residual": 14.128533375433365,
+              "reference_norm": 10.329508345552206
+            }
+          }
+        },
+        "terminal_vs_current_official": {
+          "source": {
+            "error_dbr": -1.73371066441012,
+            "level_delta": -6.741141012681072,
+            "residual": 18.384472287043664,
+            "reference_norm": 22.445883345466342
+          },
+          "connected": {
+            "error_dbr": 0.17655190696467257,
+            "level_delta": -6.545299379475226,
+            "residual": 22.906793292996227,
+            "reference_norm": 22.445883345466342
+          },
+          "stock": {
+            "error_dbr": 0.42434315525184696,
+            "level_delta": -6.564641908544505,
+            "residual": 23.569689389358718,
+            "reference_norm": 22.445883345466342
+          }
+        }
+      },
+      "1": {
+        "conditional_same_stage": {
+          "pre_HP": {
+            "connected_vs_source": {
+              "error_dbr": 2.6751355867618836,
+              "level_delta": 0.19584163691756312,
+              "residual": 40.9614583723752,
+              "reference_norm": 30.103613629976294
+            },
+            "stock_vs_source": {
+              "error_dbr": 2.720348622875502,
+              "level_delta": 0.17649910728187587,
+              "residual": 41.17523272077935,
+              "reference_norm": 30.103613629976294
+            }
+          },
+          "after_HP": {
+            "connected_vs_source": {
+              "error_dbr": 2.8165802286685713,
+              "level_delta": 0.19645004880864436,
+              "residual": 42.76962804626241,
+              "reference_norm": 30.924768834358613
+            },
+            "stock_vs_source": {
+              "error_dbr": 2.858743178749213,
+              "level_delta": 0.17931483639989443,
+              "residual": 42.97774461489349,
+              "reference_norm": 30.924768834358613
+            }
+          },
+          "prechorus_after_Crusher": {
+            "connected_vs_source": {
+              "error_dbr": 1.4313097546188944,
+              "level_delta": 0.12288870275410006,
+              "residual": 29.332515891571703,
+              "reference_norm": 24.8761878051866
+            },
+            "stock_vs_source": {
+              "error_dbr": 1.5176806797353115,
+              "level_delta": 0.09219835982617315,
+              "residual": 29.625648168489175,
+              "reference_norm": 24.8761878051866
+            }
+          },
+          "pre_Dc": {
+            "connected_vs_source": {
+              "error_dbr": 1.431309754540634,
+              "level_delta": 0.12288870534825042,
+              "residual": 10.064920156841165,
+              "reference_norm": 8.535812099908801
+            },
+            "stock_vs_source": {
+              "error_dbr": 1.5176806765660715,
+              "level_delta": 0.09219835395309636,
+              "residual": 10.165503170837052,
+              "reference_norm": 8.535812099908801
+            }
+          },
+          "terminal": {
+            "connected_vs_source": {
+              "error_dbr": 1.3282903499077083,
+              "level_delta": 0.11576287131693182,
+              "residual": 9.845042642935876,
+              "reference_norm": 8.448956693903897
+            },
+            "stock_vs_source": {
+              "error_dbr": 1.4185473582160002,
+              "level_delta": 0.08435136404051786,
+              "residual": 9.947878034932701,
+              "reference_norm": 8.448956693903897
+            }
+          }
+        },
+        "terminal_vs_current_official": {
+          "source": {
+            "error_dbr": -3.912444071931498,
+            "level_delta": -8.486672348094226,
+            "residual": 14.305877368280763,
+            "reference_norm": 22.445883345466342
+          },
+          "connected": {
+            "error_dbr": -1.087633711066718,
+            "level_delta": -8.370909476777292,
+            "residual": 19.804095682769084,
+            "reference_norm": 22.445883345466342
+          },
+          "stock": {
+            "error_dbr": -1.0070720285145867,
+            "level_delta": -8.40232098405371,
+            "residual": 19.988633269010577,
+            "reference_norm": 22.445883345466342
+          }
+        }
+      }
+    },
+    "first_16": {
+      "0": {
+        "conditional_same_stage": {
+          "pre_HP": {
+            "connected_vs_source": {
+              "error_dbr": 12.64726609153918,
+              "level_delta": 10.343620961767401,
+              "residual": 1.4692512185115756,
+              "reference_norm": 0.3425569277706708
+            },
+            "stock_vs_source": {
+              "error_dbr": 12.450324636703034,
+              "level_delta": 10.086225874654446,
+              "residual": 1.4363126545658347,
+              "reference_norm": 0.3425569277706708
+            }
+          },
+          "after_HP": {
+            "connected_vs_source": {
+              "error_dbr": 12.64726609153918,
+              "level_delta": 10.343620961767401,
+              "residual": 1.4692512185115756,
+              "reference_norm": 0.3425569277706708
+            },
+            "stock_vs_source": {
+              "error_dbr": 12.450324636703034,
+              "level_delta": 10.086225874654446,
+              "residual": 1.4363126545658347,
+              "reference_norm": 0.3425569277706708
+            }
+          },
+          "prechorus_after_Crusher": {
+            "connected_vs_source": {
+              "error_dbr": 12.64726609153918,
+              "level_delta": 10.343620961767401,
+              "residual": 1.4692512185115756,
+              "reference_norm": 0.3425569277706708
+            },
+            "stock_vs_source": {
+              "error_dbr": 12.450324636703034,
+              "level_delta": 10.086225874654446,
+              "residual": 1.4363126545658347,
+              "reference_norm": 0.3425569277706708
+            }
+          },
+          "pre_Dc": {
+            "connected_vs_source": {
+              "error_dbr": 12.647266138092201,
+              "level_delta": 10.343621021609275,
+              "residual": 0.5041468736831547,
+              "reference_norm": 0.11754218821982158
+            },
+            "stock_vs_source": {
+              "error_dbr": 12.450324667046504,
+              "level_delta": 10.086225913077902,
+              "residual": 0.49284460271752994,
+              "reference_norm": 0.11754218821982158
+            }
+          },
+          "terminal": {
+            "connected_vs_source": {
+              "error_dbr": 12.647266138092201,
+              "level_delta": 10.343621021609275,
+              "residual": 0.5041468736831547,
+              "reference_norm": 0.11754218821982158
+            },
+            "stock_vs_source": {
+              "error_dbr": 12.450324667046504,
+              "level_delta": 10.086225913077902,
+              "residual": 0.49284460271752994,
+              "reference_norm": 0.11754218821982158
+            }
+          }
+        },
+        "terminal_vs_current_official": {
+          "source": {
+            "error_dbr": 2.9917295203236676,
+            "level_delta": -7.675364062167574,
+            "residual": 0.40137327362648284,
+            "reference_norm": 0.28442120665978743
+          },
+          "connected": {
+            "error_dbr": -8.646677709601807,
+            "level_delta": 2.668256959441701,
+            "residual": 0.10510614050792128,
+            "reference_norm": 0.28442120665978743
+          },
+          "stock": {
+            "error_dbr": -9.631499425844567,
+            "level_delta": 2.4108618509103272,
+            "residual": 0.09383978483091827,
+            "reference_norm": 0.28442120665978743
+          }
+        }
+      },
+      "1": {
+        "conditional_same_stage": {
+          "pre_HP": {
+            "connected_vs_source": {
+              "error_dbr": 12.64726609153918,
+              "level_delta": 10.343620961767401,
+              "residual": 1.4692512185115756,
+              "reference_norm": 0.3425569277706708
+            },
+            "stock_vs_source": {
+              "error_dbr": 12.450324636703034,
+              "level_delta": 10.086225874654446,
+              "residual": 1.4363126545658347,
+              "reference_norm": 0.3425569277706708
+            }
+          },
+          "after_HP": {
+            "connected_vs_source": {
+              "error_dbr": 11.5621879575397,
+              "level_delta": 8.899423579290001,
+              "residual": 1.3182751712220235,
+              "reference_norm": 0.3482544500781031
+            },
+            "stock_vs_source": {
+              "error_dbr": 11.452637515479092,
+              "level_delta": 8.750580522881581,
+              "residual": 1.3017528897143713,
+              "reference_norm": 0.3482544500781031
+            }
+          },
+          "prechorus_after_Crusher": {
+            "connected_vs_source": {
+              "error_dbr": -6.22900436804953,
+              "level_delta": 1.538817841868052,
+              "residual": 0.08359911437973698,
+              "reference_norm": 0.17125840506235565
+            },
+            "stock_vs_source": {
+              "error_dbr": -5.090027658099262,
+              "level_delta": 2.681160023909903,
+              "residual": 0.09531264290870939,
+              "reference_norm": 0.17125840506235565
+            }
+          },
+          "pre_Dc": {
+            "connected_vs_source": {
+              "error_dbr": -6.22900428607127,
+              "level_delta": 1.5388179922630338,
+              "residual": 0.028685518170289727,
+              "reference_norm": 0.0587642115626987
+            },
+            "stock_vs_source": {
+              "error_dbr": -5.090027801747345,
+              "level_delta": 2.6811601062810277,
+              "residual": 0.03270480195012094,
+              "reference_norm": 0.0587642115626987
+            }
+          },
+          "terminal": {
+            "connected_vs_source": {
+              "error_dbr": -1.301887749532773,
+              "level_delta": -11.690015189201672,
+              "residual": 0.08244697763554673,
+              "reference_norm": 0.0957787417199295
+            },
+            "stock_vs_source": {
+              "error_dbr": -2.794461440443902,
+              "level_delta": -8.741324185822085,
+              "residual": 0.06942982254320243,
+              "reference_norm": 0.0957787417199295
+            }
+          }
+        },
+        "terminal_vs_current_official": {
+          "source": {
+            "error_dbr": -3.557142613298682,
+            "level_delta": -9.453856946586525,
+            "residual": 0.18884471879922168,
+            "reference_norm": 0.28442120665978743
+          },
+          "connected": {
+            "error_dbr": -0.503300005116399,
+            "level_delta": -21.143872135788197,
+            "residual": 0.26840893838192914,
+            "reference_norm": 0.28442120665978743
+          },
+          "stock": {
+            "error_dbr": -0.9505906875348675,
+            "level_delta": -18.19518113240861,
+            "residual": 0.25493674718414583,
+            "reference_norm": 0.28442120665978743
+          }
+        }
+      }
+    },
+    "first_560": {
+      "0": {
+        "conditional_same_stage": {
+          "pre_HP": {
+            "connected_vs_source": {
+              "error_dbr": 12.483595022239138,
+              "level_delta": 11.233920318506662,
+              "residual": 2.824461834029389,
+              "reference_norm": 0.6710516669583164
+            },
+            "stock_vs_source": {
+              "error_dbr": 12.496692139470355,
+              "level_delta": 11.232683067812193,
+              "residual": 2.828723943376461,
+              "reference_norm": 0.6710516669583164
+            }
+          },
+          "after_HP": {
+            "connected_vs_source": {
+              "error_dbr": 12.483595022239138,
+              "level_delta": 11.233920318506662,
+              "residual": 2.824461834029389,
+              "reference_norm": 0.6710516669583164
+            },
+            "stock_vs_source": {
+              "error_dbr": 12.496692139470355,
+              "level_delta": 11.232683067812193,
+              "residual": 2.828723943376461,
+              "reference_norm": 0.6710516669583164
+            }
+          },
+          "prechorus_after_Crusher": {
+            "connected_vs_source": {
+              "error_dbr": 12.483595022239138,
+              "level_delta": 11.233920318506662,
+              "residual": 2.824461834029389,
+              "reference_norm": 0.6710516669583164
+            },
+            "stock_vs_source": {
+              "error_dbr": 12.496692139470355,
+              "level_delta": 11.232683067812193,
+              "residual": 2.828723943376461,
+              "reference_norm": 0.6710516669583164
+            }
+          },
+          "pre_Dc": {
+            "connected_vs_source": {
+              "error_dbr": 12.48359501297175,
+              "level_delta": 11.233920308789244,
+              "residual": 0.9691627876025906,
+              "reference_norm": 0.2302591938163248
+            },
+            "stock_vs_source": {
+              "error_dbr": 12.49669213664429,
+              "level_delta": 11.232683066806022,
+              "residual": 0.97062525374717,
+              "reference_norm": 0.2302591938163248
+            }
+          },
+          "terminal": {
+            "connected_vs_source": {
+              "error_dbr": 12.48359501297175,
+              "level_delta": 11.233920308789244,
+              "residual": 0.9691627876025906,
+              "reference_norm": 0.2302591938163248
+            },
+            "stock_vs_source": {
+              "error_dbr": 12.49669213664429,
+              "level_delta": 11.232683066806022,
+              "residual": 0.97062525374717,
+              "reference_norm": 0.2302591938163248
+            }
+          }
+        },
+        "terminal_vs_current_official": {
+          "source": {
+            "error_dbr": 0.8347430096938195,
+            "level_delta": -13.11359585972022,
+            "residual": 1.147186224324534,
+            "reference_norm": 1.042069710927774
+          },
+          "connected": {
+            "error_dbr": -6.5432883794133385,
+            "level_delta": -1.8796755509309737,
+            "residual": 0.4906054335494787,
+            "reference_norm": 1.042069710927774
+          },
+          "stock": {
+            "error_dbr": -6.658042899082378,
+            "level_delta": -1.8809127929141973,
+            "residual": 0.48416637844369026,
+            "reference_norm": 1.042069710927774
+          }
+        }
+      },
+      "1": {
+        "conditional_same_stage": {
+          "pre_HP": {
+            "connected_vs_source": {
+              "error_dbr": 12.483595022239138,
+              "level_delta": 11.233920318506662,
+              "residual": 2.824461834029389,
+              "reference_norm": 0.6710516669583164
+            },
+            "stock_vs_source": {
+              "error_dbr": 12.496692139470355,
+              "level_delta": 11.232683067812193,
+              "residual": 2.828723943376461,
+              "reference_norm": 0.6710516669583164
+            }
+          },
+          "after_HP": {
+            "connected_vs_source": {
+              "error_dbr": 12.613930101164534,
+              "level_delta": 11.521213293748524,
+              "residual": 2.782036888481452,
+              "reference_norm": 0.651128011641225
+            },
+            "stock_vs_source": {
+              "error_dbr": 12.544836626306013,
+              "level_delta": 11.407252440732815,
+              "residual": 2.7599944610201943,
+              "reference_norm": 0.651128011641225
+            }
+          },
+          "prechorus_after_Crusher": {
+            "connected_vs_source": {
+              "error_dbr": 8.763459372265075,
+              "level_delta": 5.905175190946734,
+              "residual": 3.5010799469503766,
+              "reference_norm": 1.2765242202752374
+            },
+            "stock_vs_source": {
+              "error_dbr": 8.40441728571536,
+              "level_delta": 5.487163271601666,
+              "residual": 3.3593087692070718,
+              "reference_norm": 1.2765242202752374
+            }
+          },
+          "pre_Dc": {
+            "connected_vs_source": {
+              "error_dbr": 8.763459380053234,
+              "level_delta": 5.905175204438922,
+              "residual": 1.2013320065656528,
+              "reference_norm": 0.4380161049831664
+            },
+            "stock_vs_source": {
+              "error_dbr": 8.404417293635012,
+              "level_delta": 5.487163290198799,
+              "residual": 1.1526858014086419,
+              "reference_norm": 0.4380161049831664
+            }
+          },
+          "terminal": {
+            "connected_vs_source": {
+              "error_dbr": 8.28824926223499,
+              "level_delta": 4.977197977968755,
+              "residual": 1.354597201966908,
+              "reference_norm": 0.5216722208716515
+            },
+            "stock_vs_source": {
+              "error_dbr": 7.93442499025296,
+              "level_delta": 4.5284446406634595,
+              "residual": 1.3005257652421465,
+              "reference_norm": 0.5216722208716515
+            }
+          }
+        },
+        "terminal_vs_current_official": {
+          "source": {
+            "error_dbr": -5.260411618622255,
+            "level_delta": -6.009981233487176,
+            "residual": 0.5686907860214026,
+            "reference_norm": 1.042069710927774
+          },
+          "connected": {
+            "error_dbr": 4.255102487402718,
+            "level_delta": -1.032783255518422,
+            "residual": 1.7007947129063326,
+            "reference_norm": 1.042069710927774
+          },
+          "stock": {
+            "error_dbr": 3.9525139800086926,
+            "level_delta": -1.4815365928237156,
+            "residual": 1.6425646489389598,
+            "reference_norm": 1.042069710927774
+          }
+        }
+      }
+    },
+    "after_first": {
+      "0": {
+        "conditional_same_stage": {
+          "pre_HP": {
+            "connected_vs_source": {
+              "error_dbr": null,
+              "level_delta": null,
+              "residual": 0.0015244746470890029,
+              "reference_norm": 0.0
+            },
+            "stock_vs_source": {
+              "error_dbr": null,
+              "level_delta": null,
+              "residual": 0.0017252823613109543,
+              "reference_norm": 0.0
+            }
+          },
+          "after_HP": {
+            "connected_vs_source": {
+              "error_dbr": null,
+              "level_delta": null,
+              "residual": 0.0015244746470890029,
+              "reference_norm": 0.0
+            },
+            "stock_vs_source": {
+              "error_dbr": null,
+              "level_delta": null,
+              "residual": 0.0017252823613109543,
+              "reference_norm": 0.0
+            }
+          },
+          "prechorus_after_Crusher": {
+            "connected_vs_source": {
+              "error_dbr": null,
+              "level_delta": null,
+              "residual": 0.0015244746470890029,
+              "reference_norm": 0.0
+            },
+            "stock_vs_source": {
+              "error_dbr": null,
+              "level_delta": null,
+              "residual": 0.0017252823613109543,
+              "reference_norm": 0.0
+            }
+          },
+          "pre_Dc": {
+            "connected_vs_source": {
+              "error_dbr": null,
+              "level_delta": null,
+              "residual": 0.0005230957924823817,
+              "reference_norm": 0.0
+            },
+            "stock_vs_source": {
+              "error_dbr": null,
+              "level_delta": null,
+              "residual": 0.0005919993138005228,
+              "reference_norm": 0.0
+            }
+          },
+          "terminal": {
+            "connected_vs_source": {
+              "error_dbr": null,
+              "level_delta": null,
+              "residual": 0.0005230957924823817,
+              "reference_norm": 0.0
+            },
+            "stock_vs_source": {
+              "error_dbr": null,
+              "level_delta": null,
+              "residual": 0.0005919993138005228,
+              "reference_norm": 0.0
+            }
+          }
+        },
+        "terminal_vs_current_official": {
+          "source": {
+            "error_dbr": 0.0,
+            "level_delta": null,
+            "residual": 0.10903934666731488,
+            "reference_norm": 0.10903934666731488
+          },
+          "connected": {
+            "error_dbr": 0.019062351045370827,
+            "level_delta": -46.38004027738067,
+            "residual": 0.1092789109358643,
+            "reference_norm": 0.10903934666731488
+          },
+          "stock": {
+            "error_dbr": 0.02159057544917576,
+            "level_delta": -45.30524074685559,
+            "residual": 0.10931072366131522,
+            "reference_norm": 0.10903934666731488
+          }
+        }
+      },
+      "1": {
+        "conditional_same_stage": {
+          "pre_HP": {
+            "connected_vs_source": {
+              "error_dbr": null,
+              "level_delta": null,
+              "residual": 0.0015244746470890029,
+              "reference_norm": 0.0
+            },
+            "stock_vs_source": {
+              "error_dbr": null,
+              "level_delta": null,
+              "residual": 0.0017252823613109543,
+              "reference_norm": 0.0
+            }
+          },
+          "after_HP": {
+            "connected_vs_source": {
+              "error_dbr": 11.382276888572244,
+              "level_delta": 8.786276523699048,
+              "residual": 1.8198130524211005,
+              "reference_norm": 0.49080946718668284
+            },
+            "stock_vs_source": {
+              "error_dbr": 11.218641959771425,
+              "level_delta": 8.559160535231756,
+              "residual": 1.78585021003432,
+              "reference_norm": 0.49080946718668284
+            }
+          },
+          "prechorus_after_Crusher": {
+            "connected_vs_source": {
+              "error_dbr": 7.869297361677639,
+              "level_delta": 4.9577177926910485,
+              "residual": 0.48760062363464046,
+              "reference_norm": 0.1970604110347472
+            },
+            "stock_vs_source": {
+              "error_dbr": 7.767588481940559,
+              "level_delta": 4.726344135161757,
+              "residual": 0.4819242813517808,
+              "reference_norm": 0.1970604110347472
+            }
+          },
+          "pre_Dc": {
+            "connected_vs_source": {
+              "error_dbr": 7.869297349069255,
+              "level_delta": 4.957717775184497,
+              "residual": 0.16731129941401277,
+              "reference_norm": 0.06761770162510593
+            },
+            "stock_vs_source": {
+              "error_dbr": 7.7675884679371885,
+              "level_delta": 4.726344115660818,
+              "residual": 0.16536356561266044,
+              "reference_norm": 0.06761770162510593
+            }
+          },
+          "terminal": {
+            "connected_vs_source": {
+              "error_dbr": 10.358031211309173,
+              "level_delta": 8.477728117152276,
+              "residual": 0.2065606108091671,
+              "reference_norm": 0.06268244793147283
+            },
+            "stock_vs_source": {
+              "error_dbr": 10.162638849255629,
+              "level_delta": 8.182992870689066,
+              "residual": 0.20196582645842337,
+              "reference_norm": 0.06268244793147283
+            }
+          }
+        },
+        "terminal_vs_current_official": {
+          "source": {
+            "error_dbr": -6.5356418932670515,
+            "level_delta": -4.808745841564977,
+            "residual": 0.05138083360514715,
+            "reference_norm": 0.10903934666731488
+          },
+          "connected": {
+            "error_dbr": 6.23404080936672,
+            "level_delta": 3.6689822755872967,
+            "residual": 0.22350399028747417,
+            "reference_norm": 0.10903934666731488
+          },
+          "stock": {
+            "error_dbr": 6.096655207860802,
+            "level_delta": 3.3742470291240876,
+            "residual": 0.2199966162667733,
+            "reference_norm": 0.10903934666731488
+          }
+        }
+      }
+    },
+    "final_16": {
+      "0": {
+        "conditional_same_stage": {
+          "pre_HP": {
+            "connected_vs_source": {
+              "error_dbr": -8.792646555043738,
+              "level_delta": 0.6719872146717644,
+              "residual": 0.4730162065359072,
+              "reference_norm": 1.3016923382195347
+            },
+            "stock_vs_source": {
+              "error_dbr": -9.08753568405325,
+              "level_delta": -1.6425872136688562,
+              "residual": 0.45722668006565,
+              "reference_norm": 1.3016923382195347
+            }
+          },
+          "after_HP": {
+            "connected_vs_source": {
+              "error_dbr": -8.792646555043738,
+              "level_delta": 0.6719872146717644,
+              "residual": 0.4730162065359072,
+              "reference_norm": 1.3016923382195347
+            },
+            "stock_vs_source": {
+              "error_dbr": -9.08753568405325,
+              "level_delta": -1.6425872136688562,
+              "residual": 0.45722668006565,
+              "reference_norm": 1.3016923382195347
+            }
+          },
+          "prechorus_after_Crusher": {
+            "connected_vs_source": {
+              "error_dbr": -8.792646555043738,
+              "level_delta": 0.6719872146717644,
+              "residual": 0.4730162065359072,
+              "reference_norm": 1.3016923382195347
+            },
+            "stock_vs_source": {
+              "error_dbr": -9.08753568405325,
+              "level_delta": -1.6425872136688562,
+              "residual": 0.45722668006565,
+              "reference_norm": 1.3016923382195347
+            }
+          },
+          "pre_Dc": {
+            "connected_vs_source": {
+              "error_dbr": -8.792646892629207,
+              "level_delta": 0.6719871853745351,
+              "residual": 0.16230691565347138,
+              "reference_norm": 0.44665208895223074
+            },
+            "stock_vs_source": {
+              "error_dbr": -9.087535853414822,
+              "level_delta": -1.642587262078816,
+              "residual": 0.1568890296099838,
+              "reference_norm": 0.44665208895223074
+            }
+          },
+          "terminal": {
+            "connected_vs_source": {
+              "error_dbr": -8.792646892629207,
+              "level_delta": 0.6719871853745351,
+              "residual": 0.16230691565347138,
+              "reference_norm": 0.44665208895223074
+            },
+            "stock_vs_source": {
+              "error_dbr": -9.087535853414822,
+              "level_delta": -1.642587262078816,
+              "residual": 0.1568890296099838,
+              "reference_norm": 0.44665208895223074
+            }
+          }
+        },
+        "terminal_vs_current_official": {
+          "source": {
+            "error_dbr": -2.518409216332755,
+            "level_delta": -11.158303085682597,
+            "residual": 1.207713894933642,
+            "reference_norm": 1.6139293658853293
+          },
+          "connected": {
+            "error_dbr": -2.9932545396729826,
+            "level_delta": -10.48631590030806,
+            "residual": 1.1434621586526161,
+            "reference_norm": 1.6139293658853293
+          },
+          "stock": {
+            "error_dbr": -1.9433028083363915,
+            "level_delta": -12.800890347761413,
+            "residual": 1.2903852298910417,
+            "reference_norm": 1.6139293658853293
+          }
+        }
+      },
+      "1": {
+        "conditional_same_stage": {
+          "pre_HP": {
+            "connected_vs_source": {
+              "error_dbr": -8.792646555043738,
+              "level_delta": 0.6719872146717644,
+              "residual": 0.4730162065359072,
+              "reference_norm": 1.3016923382195347
+            },
+            "stock_vs_source": {
+              "error_dbr": -9.08753568405325,
+              "level_delta": -1.6425872136688562,
+              "residual": 0.45722668006565,
+              "reference_norm": 1.3016923382195347
+            }
+          },
+          "after_HP": {
+            "connected_vs_source": {
+              "error_dbr": -10.15268144269248,
+              "level_delta": 0.26247845659431945,
+              "residual": 0.42262334762772147,
+              "reference_norm": 1.3601523553249606
+            },
+            "stock_vs_source": {
+              "error_dbr": -9.082488302764656,
+              "level_delta": -2.0137579315259373,
+              "residual": 0.47803879475238503,
+              "reference_norm": 1.3601523553249606
+            }
+          },
+          "prechorus_after_Crusher": {
+            "connected_vs_source": {
+              "error_dbr": -12.022568852092057,
+              "level_delta": -0.5580961992557412,
+              "residual": 0.3706838722629857,
+              "reference_norm": 1.4795584741270706
+            },
+            "stock_vs_source": {
+              "error_dbr": -8.558366401574247,
+              "level_delta": -2.7258425842192575,
+              "residual": 0.5523493072465562,
+              "reference_norm": 1.4795584741270706
+            }
+          },
+          "pre_Dc": {
+            "connected_vs_source": {
+              "error_dbr": -12.02256872899272,
+              "level_delta": -0.5580960615924133,
+              "residual": 0.12719344015464423,
+              "reference_norm": 0.5076836184380074
+            },
+            "stock_vs_source": {
+              "error_dbr": -8.558366607943755,
+              "level_delta": -2.725842503921699,
+              "residual": 0.189528628429227,
+              "reference_norm": 0.5076836184380074
+            }
+          },
+          "terminal": {
+            "connected_vs_source": {
+              "error_dbr": -12.161398780232517,
+              "level_delta": -0.7005354956502527,
+              "residual": 0.12704924542848692,
+              "reference_norm": 0.5152785084758386
+            },
+            "stock_vs_source": {
+              "error_dbr": -8.438034563685221,
+              "level_delta": -2.844705301936314,
+              "residual": 0.1950474607906009,
+              "reference_norm": 0.5152785084758386
+            }
+          }
+        },
+        "terminal_vs_current_official": {
+          "source": {
+            "error_dbr": -3.2102244592022773,
+            "level_delta": -9.916849894575678,
+            "residual": 1.1152527448853218,
+            "reference_norm": 1.6139293658853293
+          },
+          "connected": {
+            "error_dbr": -2.9435784287677387,
+            "level_delta": -10.61738539022593,
+            "residual": 1.150020553692065,
+            "reference_norm": 1.6139293658853293
+          },
+          "stock": {
+            "error_dbr": -1.9957628934165073,
+            "level_delta": -12.761555196511992,
+            "residual": 1.2826151904205834,
+            "reference_norm": 1.6139293658853293
+          }
+        }
+      }
+    },
+    "final_560": {
+      "0": {
+        "conditional_same_stage": {
+          "pre_HP": {
+            "connected_vs_source": {
+              "error_dbr": -7.04262946546822,
+              "level_delta": 1.0631818317202726,
+              "residual": 0.9235838538535918,
+              "reference_norm": 2.0778194401377714
+            },
+            "stock_vs_source": {
+              "error_dbr": -6.739814290393199,
+              "level_delta": 0.5555695348235454,
+              "residual": 0.9563505031757598,
+              "reference_norm": 2.0778194401377714
+            }
+          },
+          "after_HP": {
+            "connected_vs_source": {
+              "error_dbr": -7.04262946546822,
+              "level_delta": 1.0631818317202726,
+              "residual": 0.9235838538535918,
+              "reference_norm": 2.0778194401377714
+            },
+            "stock_vs_source": {
+              "error_dbr": -6.739814290393199,
+              "level_delta": 0.5555695348235454,
+              "residual": 0.9563505031757598,
+              "reference_norm": 2.0778194401377714
+            }
+          },
+          "prechorus_after_Crusher": {
+            "connected_vs_source": {
+              "error_dbr": -7.04262946546822,
+              "level_delta": 1.0631818317202726,
+              "residual": 0.9235838538535918,
+              "reference_norm": 2.0778194401377714
+            },
+            "stock_vs_source": {
+              "error_dbr": -6.739814290393199,
+              "level_delta": 0.5555695348235454,
+              "residual": 0.9563505031757598,
+              "reference_norm": 2.0778194401377714
+            }
+          },
+          "pre_Dc": {
+            "connected_vs_source": {
+              "error_dbr": -7.042629533096488,
+              "level_delta": 1.0631818286989896,
+              "residual": 0.3169110253073655,
+              "reference_norm": 0.7129660090495386
+            },
+            "stock_vs_source": {
+              "error_dbr": -6.73981432055136,
+              "level_delta": 0.5555695377269696,
+              "residual": 0.3281543073295642,
+              "reference_norm": 0.7129660090495386
+            }
+          },
+          "terminal": {
+            "connected_vs_source": {
+              "error_dbr": -7.042629533096488,
+              "level_delta": 1.0631818286989896,
+              "residual": 0.3169110253073655,
+              "reference_norm": 0.7129660090495386
+            },
+            "stock_vs_source": {
+              "error_dbr": -6.73981432055136,
+              "level_delta": 0.5555695377269696,
+              "residual": 0.3281543073295642,
+              "reference_norm": 0.7129660090495386
+            }
+          }
+        },
+        "terminal_vs_current_official": {
+          "source": {
+            "error_dbr": -2.8070908171843816,
+            "level_delta": -10.38671137398641,
+            "residual": 1.7062782428251129,
+            "reference_norm": 2.357243212399027
+          },
+          "connected": {
+            "error_dbr": -3.413764975360957,
+            "level_delta": -9.32352954528742,
+            "residual": 1.5911683993712398,
+            "reference_norm": 2.357243212399027
+          },
+          "stock": {
+            "error_dbr": -2.851727654897926,
+            "level_delta": -9.83114183625944,
+            "residual": 1.697532161273836,
+            "reference_norm": 2.357243212399027
+          }
+        }
+      },
+      "1": {
+        "conditional_same_stage": {
+          "pre_HP": {
+            "connected_vs_source": {
+              "error_dbr": -7.04262946546822,
+              "level_delta": 1.0631818317202726,
+              "residual": 0.9235838538535918,
+              "reference_norm": 2.0778194401377714
+            },
+            "stock_vs_source": {
+              "error_dbr": -6.739814290393199,
+              "level_delta": 0.5555695348235454,
+              "residual": 0.9563505031757598,
+              "reference_norm": 2.0778194401377714
+            }
+          },
+          "after_HP": {
+            "connected_vs_source": {
+              "error_dbr": -5.966325620084093,
+              "level_delta": 0.6787007158384071,
+              "residual": 1.093029981624347,
+              "reference_norm": 2.1724428268066363
+            },
+            "stock_vs_source": {
+              "error_dbr": -5.8051862521346385,
+              "level_delta": 0.18032399624598594,
+              "residual": 1.113496979089757,
+              "reference_norm": 2.1724428268066363
+            }
+          },
+          "prechorus_after_Crusher": {
+            "connected_vs_source": {
+              "error_dbr": -6.1866591137125315,
+              "level_delta": 0.05580744634963253,
+              "residual": 1.1032064111197233,
+              "reference_norm": 2.2490014358097654
+            },
+            "stock_vs_source": {
+              "error_dbr": -5.958078040732859,
+              "level_delta": -0.4358960448328929,
+              "residual": 1.132624184356224,
+              "reference_norm": 2.2490014358097654
+            }
+          },
+          "pre_Dc": {
+            "connected_vs_source": {
+              "error_dbr": -6.186659086634972,
+              "level_delta": 0.055807488250873824,
+              "residual": 0.3785452459755577,
+              "reference_norm": 0.7717039988916344
+            },
+            "stock_vs_source": {
+              "error_dbr": -5.95807809222539,
+              "level_delta": -0.43589603416379985,
+              "residual": 0.3886394171254655,
+              "reference_norm": 0.7717039988916344
+            }
+          },
+          "terminal": {
+            "connected_vs_source": {
+              "error_dbr": -6.108639467545021,
+              "level_delta": -0.02595289024957014,
+              "residual": 0.38503931138649833,
+              "reference_norm": 0.7779237762405662
+            },
+            "stock_vs_source": {
+              "error_dbr": -5.899434074711678,
+              "level_delta": -0.5159531756805408,
+              "residual": 0.3944258241024573,
+              "reference_norm": 0.7779237762405662
+            }
+          }
+        },
+        "terminal_vs_current_official": {
+          "source": {
+            "error_dbr": -3.3884229791541927,
+            "level_delta": -9.629346970607886,
+            "residual": 1.5958175794010738,
+            "reference_norm": 2.357243212399027
+          },
+          "connected": {
+            "error_dbr": -2.7897517587684146,
+            "level_delta": -9.655299860857456,
+            "residual": 1.7096877735181963,
+            "reference_norm": 2.357243212399027
+          },
+          "stock": {
+            "error_dbr": -2.45377953122846,
+            "level_delta": -10.145300146288426,
+            "residual": 1.7771145281855618,
+            "reference_norm": 2.357243212399027
+          }
+        }
+      }
+    },
+    "after_final": {
+      "0": {
+        "conditional_same_stage": {
+          "pre_HP": {
+            "connected_vs_source": {
+              "error_dbr": null,
+              "level_delta": null,
+              "residual": 0.001027695067241054,
+              "reference_norm": 0.0
+            },
+            "stock_vs_source": {
+              "error_dbr": null,
+              "level_delta": null,
+              "residual": 0.0012642755719392362,
+              "reference_norm": 0.0
+            }
+          },
+          "after_HP": {
+            "connected_vs_source": {
+              "error_dbr": null,
+              "level_delta": null,
+              "residual": 0.001027695067241054,
+              "reference_norm": 0.0
+            },
+            "stock_vs_source": {
+              "error_dbr": null,
+              "level_delta": null,
+              "residual": 0.0012642755719392362,
+              "reference_norm": 0.0
+            }
+          },
+          "prechorus_after_Crusher": {
+            "connected_vs_source": {
+              "error_dbr": null,
+              "level_delta": null,
+              "residual": 0.001027695067241054,
+              "reference_norm": 0.0
+            },
+            "stock_vs_source": {
+              "error_dbr": null,
+              "level_delta": null,
+              "residual": 0.0012642755719392362,
+              "reference_norm": 0.0
+            }
+          },
+          "pre_Dc": {
+            "connected_vs_source": {
+              "error_dbr": null,
+              "level_delta": null,
+              "residual": 0.00035263490260386795,
+              "reference_norm": 0.0
+            },
+            "stock_vs_source": {
+              "error_dbr": null,
+              "level_delta": null,
+              "residual": 0.0004338132012620879,
+              "reference_norm": 0.0
+            }
+          },
+          "terminal": {
+            "connected_vs_source": {
+              "error_dbr": null,
+              "level_delta": null,
+              "residual": 0.00035263490260386795,
+              "reference_norm": 0.0
+            },
+            "stock_vs_source": {
+              "error_dbr": null,
+              "level_delta": null,
+              "residual": 0.0004338132012620879,
+              "reference_norm": 0.0
+            }
+          }
+        },
+        "terminal_vs_current_official": {
+          "source": {
+            "error_dbr": 0.0,
+            "level_delta": null,
+            "residual": 0.029375915662097345,
+            "reference_norm": 0.029375915662097345
+          },
+          "connected": {
+            "error_dbr": 0.03967685000986252,
+            "level_delta": -38.41332235173105,
+            "residual": 0.029510410801765863,
+            "reference_norm": 0.029375915662097345
+          },
+          "stock": {
+            "error_dbr": 0.0514544510612119,
+            "level_delta": -36.6137729776318,
+            "residual": 0.029550452479007804,
+            "reference_norm": 0.029375915662097345
+          }
+        }
+      },
+      "1": {
+        "conditional_same_stage": {
+          "pre_HP": {
+            "connected_vs_source": {
+              "error_dbr": null,
+              "level_delta": null,
+              "residual": 0.001027695067241054,
+              "reference_norm": 0.0
+            },
+            "stock_vs_source": {
+              "error_dbr": null,
+              "level_delta": null,
+              "residual": 0.0012642755719392362,
+              "reference_norm": 0.0
+            }
+          },
+          "after_HP": {
+            "connected_vs_source": {
+              "error_dbr": 5.821737866071574,
+              "level_delta": 8.587784508036375,
+              "residual": 0.13963559073608248,
+              "reference_norm": 0.07143470134495335
+            },
+            "stock_vs_source": {
+              "error_dbr": 4.777592779698427,
+              "level_delta": 7.896886501700281,
+              "residual": 0.12381945050903356,
+              "reference_norm": 0.07143470134495335
+            }
+          },
+          "prechorus_after_Crusher": {
+            "connected_vs_source": {
+              "error_dbr": 6.547957514812425,
+              "level_delta": 4.877648952643325,
+              "residual": 0.07464889068868644,
+              "reference_norm": 0.035125740017700385
+            },
+            "stock_vs_source": {
+              "error_dbr": 5.938781513604957,
+              "level_delta": 4.020401020213123,
+              "residual": 0.06959283973937662,
+              "reference_norm": 0.035125740017700385
+            }
+          },
+          "pre_Dc": {
+            "connected_vs_source": {
+              "error_dbr": 6.54795752195348,
+              "level_delta": 4.877648962608367,
+              "residual": 0.025614411231960885,
+              "reference_norm": 0.01205275980125152
+            },
+            "stock_vs_source": {
+              "error_dbr": 5.938781519187102,
+              "level_delta": 4.020401031414042,
+              "residual": 0.023879519161221427,
+              "reference_norm": 0.01205275980125152
+            }
+          },
+          "terminal": {
+            "connected_vs_source": {
+              "error_dbr": 9.523011852125787,
+              "level_delta": 8.839479854994972,
+              "residual": 0.03276802358382727,
+              "reference_norm": 0.010947114357996382
+            },
+            "stock_vs_source": {
+              "error_dbr": 8.905120130248033,
+              "level_delta": 8.115499912451083,
+              "residual": 0.030517971382507343,
+              "reference_norm": 0.010947114357996382
+            }
+          }
+        },
+        "terminal_vs_current_official": {
+          "source": {
+            "error_dbr": -3.8186100677312855,
+            "level_delta": -8.573835154887432,
+            "residual": 0.018926090361879675,
+            "reference_norm": 0.029375915662097345
+          },
+          "connected": {
+            "error_dbr": 4.2547908210271,
+            "level_delta": 0.2656447001075403,
+            "residual": 0.047943634486574196,
+            "reference_norm": 0.029375915662097345
+          },
+          "stock": {
+            "error_dbr": 3.9038969504491368,
+            "level_delta": -0.45833524243634843,
+            "residual": 0.04604540107281839,
+            "reference_norm": 0.029375915662097345
+          }
+        }
+      }
+    }
+  }
+}
