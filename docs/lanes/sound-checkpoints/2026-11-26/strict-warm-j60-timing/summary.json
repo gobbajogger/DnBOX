@@ -1,0 +1,183 @@
+{
+  "unchanged_tape_events": 922,
+  "paired_project_records_exact": true,
+  "result": [
+    {
+      "model": "elite",
+      "elf": "0ffdc7faf4f8ecace4e119accce10ecb64dac16122d2586d323c388da305bd7c",
+      "nor": "93ee4e301955951b1b9c227ed745b83f994d1af309f1558f597221ed094b383e",
+      "tape": "d08718b1521119b252b5cca0c5e1db6981ea25a5a0b31b6ead60dceccb3f6271",
+      "project_input_records": {
+        "0": "6dba601a055f8b4fdb1845afe394a2cf8ea276d3ddbcb7f78e57abd51c2e11c4",
+        "1": "7ce5d61d8c0d91c2b0de7755cf5554ab16d282abc8b37f6b3cbe520cdfeb0a7c",
+        "2": "0721f7f8e9dbae200816cdd3163bc2b269d7e0fc1a4c97178fb2f023dac300fc",
+        "3": "98c30fab8d1344b2c49d60f04a6580fa1cb9200a91190eaba2650794dc16d55d",
+        "5": "95007581752b53ba86aa71487c16283305579c136bfee771698b8f496adea7fd",
+        "6": "5f582b8c9bc55f93cbc410f448991500852f467a6b84448e92fc562127a13ba1"
+      },
+      "legacy_hit_timeline_words": [
+        73728,
+        1066398905,
+        0,
+        307902
+      ],
+      "prior_to_tape_owner": 0,
+      "first_valid_owner_ms": 2998,
+      "raw_result": {
+        "worst_us": 14269,
+        "halves": 560,
+        "raw_late": 63,
+        "xruns": 63,
+        "skipped_cycles": 0,
+        "peak": 13169,
+        "frames": 319488,
+        "sealed_boot": true,
+        "settled_owner_readbacks": 4,
+        "meets_timing": false,
+        "core1": {
+          "enabled": 1,
+          "gave_up": 0,
+          "alive": 1,
+          "dispatched": 4619,
+          "finished": 4618,
+          "bad_mailbox": 0
+        },
+        "accepted": false
+      },
+      "owner": [
+        {
+          "ms": 2998,
+          "seq": 11,
+          "bank": 2,
+          "status": 1,
+          "cutoff": 115,
+          "bankB": 0,
+          "statusB": 1,
+          "arp": 1
+        },
+        {
+          "ms": 4121,
+          "seq": 12,
+          "bank": 2,
+          "status": 1,
+          "cutoff": 115,
+          "bankB": 0,
+          "statusB": 1,
+          "arp": 1
+        },
+        {
+          "ms": 5745,
+          "seq": 13,
+          "bank": 2,
+          "status": 1,
+          "cutoff": 115,
+          "bankB": 0,
+          "statusB": 1,
+          "arp": 1
+        },
+        {
+          "ms": 7813,
+          "seq": 14,
+          "bank": 2,
+          "status": 1,
+          "cutoff": 115,
+          "bankB": 0,
+          "statusB": 1,
+          "arp": 1
+        }
+      ],
+      "pcm": "8ae4e21c482f028127a265e6f43662d25507faf168b311a1648a4d69ed102957",
+      "ram": "f83a32cae85345ce26d1611e69b418bfdefcb19bd98d6cf4e9c2cb99c24be116",
+      "unchanged_disposable_virtual_nor": true
+    },
+    {
+      "model": "pro",
+      "elf": "ddbcae26a746c6ee2f4ccae382ceb4762d06f42d3544875862dcb75f94c3ea51",
+      "nor": "9c64bf8db352fb274df93c01466c9216e3793e9f997617d541b97724fb20ea98",
+      "tape": "d08718b1521119b252b5cca0c5e1db6981ea25a5a0b31b6ead60dceccb3f6271",
+      "project_input_records": {
+        "0": "6dba601a055f8b4fdb1845afe394a2cf8ea276d3ddbcb7f78e57abd51c2e11c4",
+        "1": "7ce5d61d8c0d91c2b0de7755cf5554ab16d282abc8b37f6b3cbe520cdfeb0a7c",
+        "2": "0721f7f8e9dbae200816cdd3163bc2b269d7e0fc1a4c97178fb2f023dac300fc",
+        "3": "98c30fab8d1344b2c49d60f04a6580fa1cb9200a91190eaba2650794dc16d55d",
+        "5": "95007581752b53ba86aa71487c16283305579c136bfee771698b8f496adea7fd",
+        "6": "5f582b8c9bc55f93cbc410f448991500852f467a6b84448e92fc562127a13ba1"
+      },
+      "legacy_hit_timeline_words": [
+        73728,
+        1066398905,
+        0,
+        307902
+      ],
+      "prior_to_tape_owner": 0,
+      "first_valid_owner_ms": 3008,
+      "raw_result": {
+        "worst_us": 14322,
+        "halves": 562,
+        "raw_late": 61,
+        "xruns": 61,
+        "skipped_cycles": 0,
+        "peak": 13168,
+        "frames": 319488,
+        "sealed_boot": true,
+        "settled_owner_readbacks": 4,
+        "meets_timing": false,
+        "core1": {
+          "enabled": 1,
+          "gave_up": 0,
+          "alive": 1,
+          "dispatched": 4634,
+          "finished": 4633,
+          "bad_mailbox": 0
+        },
+        "accepted": false
+      },
+      "owner": [
+        {
+          "ms": 3008,
+          "seq": 11,
+          "bank": 2,
+          "status": 1,
+          "cutoff": 115,
+          "bankB": 0,
+          "statusB": 1,
+          "arp": 1
+        },
+        {
+          "ms": 4156,
+          "seq": 12,
+          "bank": 2,
+          "status": 1,
+          "cutoff": 115,
+          "bankB": 0,
+          "statusB": 1,
+          "arp": 1
+        },
+        {
+          "ms": 5875,
+          "seq": 13,
+          "bank": 2,
+          "status": 1,
+          "cutoff": 115,
+          "bankB": 0,
+          "statusB": 1,
+          "arp": 1
+        },
+        {
+          "ms": 7822,
+          "seq": 14,
+          "bank": 2,
+          "status": 1,
+          "cutoff": 115,
+          "bankB": 0,
+          "statusB": 1,
+          "arp": 1
+        }
+      ],
+      "pcm": "1c7beb78a4e8cf92a996ef5761e536646ed537064711be89e3bb160f2005a61f",
+      "ram": "277811c371e8566bac7a9e5d05db0751ef062f3d1237bb69879e474fac6a277c",
+      "unchanged_disposable_virtual_nor": true
+    }
+  ],
+  "scope": "strict runner diagnostic, not release: no producer-frame admission; embedded existing diagnostic triggers measured separately."
+}

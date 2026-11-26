@@ -1,0 +1,15 @@
+--- a/web/product-site/remote/app.mjs
++++ b/web/product-site/remote/app.mjs
+@@ -765,6 +765,12 @@
+  fwColumns([abs%(drumValues('909').R_DLEN+1),abs%(drumValues('808').R_DLEN+1),127,127,abs%16]);
+ }
+ function fwProtocol(event){
++ // STOP is independently authoritative even if its separate cleared
++ // POSITION notification was lost. Never infer a column from TRANSPORT.
++ if(event.kind===NOTIFY_KIND.TRANSPORT&&event.fields.playing===0){
++  fwPositions=null;fwLastStep=null;fwClearColumns();
++  $('play')?.classList.remove('beat');
++ }
+  if(event.kind===NOTIFY_KIND.POSITION){
+   fwPositions=event.fields.step_pos;
+   fwColumns(fwPositions);

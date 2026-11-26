@@ -1,0 +1,272 @@
+{
+  "meta_keys": [
+    "active",
+    "after",
+    "authored",
+    "authored_overlap",
+    "authored_readback_mismatch",
+    "bank_file_sha256",
+    "blocks",
+    "component",
+    "component_version",
+    "cue_sha256",
+    "dry_control_identifiers",
+    "frames",
+    "mode",
+    "pcm_sha256",
+    "rate",
+    "schedule",
+    "wanted",
+    "warm_frames"
+  ],
+  "original_sha": {
+    "dry": "905e705042416acd2a5404594706608c6bd0a35b0783013ef4bbf977fe170002",
+    "authored": "9cc279dc61f6a504e1c234cd90db37f7c16c0cc9377a33e1165e6a75f7cf7b21",
+    "authored-repeat": "9cc279dc61f6a504e1c234cd90db37f7c16c0cc9377a33e1165e6a75f7cf7b21"
+  },
+  "compact_sha": {
+    "stock-authored": "715f0ac7f57861b2eec8c56bb6498974c86d197e01636713009f1cb5bcba653b",
+    "stock-dry": "9266f01c2f93b70c736f79b3a519d65776921f73fed68a275c6f3ecf2d691bf4",
+    "post-authored": "a7c5ba4995289e217cde5f4f784203a8f262654f1d34e5c18dbf27af543e6e9c",
+    "post-dry": "9266f01c2f93b70c736f79b3a519d65776921f73fed68a275c6f3ecf2d691bf4",
+    "both-authored": "fafd89fad65d9585fc9ff7f19ef468d4dcf4bf27218d31443f5445e223712d22",
+    "both-dry": "9266f01c2f93b70c736f79b3a519d65776921f73fed68a275c6f3ecf2d691bf4"
+  },
+  "dry_flags_bit_identical": true,
+  "authored_repeat_bit_identical": true,
+  "schedule": [
+    [
+      16384,
+      48,
+      100
+    ],
+    [
+      38434,
+      48,
+      0
+    ],
+    [
+      49459,
+      60,
+      96
+    ],
+    [
+      49459,
+      64,
+      80
+    ],
+    [
+      49459,
+      67,
+      88
+    ],
+    [
+      82534,
+      60,
+      0
+    ],
+    [
+      82534,
+      64,
+      0
+    ],
+    [
+      82534,
+      67,
+      0
+    ]
+  ],
+  "matching_native_cue_sha256": "17b7b5389af054fd713c31acadbf170955c4146628872c9482ed23ce07f33943",
+  "exact_partitions": 1164,
+  "controls_compact_fixture_sha": [
+    "95c7603f7dfc5ea914f6dc3ca12cbd77e41b2861475b4870a2d3a9221483bc9b",
+    "c0a493273eaea57f78f7aa3f5bb4abcc75b201c6a438071e9665c52a2eb2862e"
+  ],
+  "shared_normalized_binary32_exact_for_both_arms": 170,
+  "compact_only_normalized_ids": [],
+  "native_only_normalized_ids": [],
+  "scene_trace": {
+    "stock-authored": "gain 0x1.5f5df4p-2",
+    "stock-dry": "gain 0x1.5f5df4p-2",
+    "post-authored": "gain 0x1.5f5df4p-2",
+    "post-dry": "gain 0x1.5f5df4p-2",
+    "both-authored": "gain 0x1.5f5df4p-2",
+    "both-dry": "gain 0x1.5f5df4p-2"
+  },
+  "windows": {
+    "attack": {
+      "stock": {
+        "authored_signed_dbr": 0.007051079220349653,
+        "dry_signed_dbr": -0.042709037938225294,
+        "authored_level_vs_ref_db": -26.353290732042602,
+        "dry_level_vs_ref_db": -28.102556426436518,
+        "authored_vs_stock_absolute_dBFS": null,
+        "actual_condition_delta_vs_actual_AU_dbr": -0.05014108187371755,
+        "absolute_ref_error_dBFS": -14.42959129195707
+      },
+      "post": {
+        "authored_signed_dbr": 0.007565883919581181,
+        "dry_signed_dbr": -0.042709037938225294,
+        "authored_level_vs_ref_db": -26.36514894366949,
+        "dry_level_vs_ref_db": -28.102556426436518,
+        "authored_vs_stock_absolute_dBFS": -73.18936186107354,
+        "actual_condition_delta_vs_actual_AU_dbr": -0.05004898674657911,
+        "absolute_ref_error_dBFS": -14.42907648725784
+      },
+      "both": {
+        "authored_signed_dbr": 0.00807082269477463,
+        "dry_signed_dbr": -0.042709037938225294,
+        "authored_level_vs_ref_db": -26.37303018263826,
+        "dry_level_vs_ref_db": -28.102556426436518,
+        "authored_vs_stock_absolute_dBFS": -67.45045133526047,
+        "actual_condition_delta_vs_actual_AU_dbr": -0.04995003002329525,
+        "absolute_ref_error_dBFS": -14.428571548482648
+      }
+    },
+    "held": {
+      "stock": {
+        "authored_signed_dbr": 0.02137868157585357,
+        "dry_signed_dbr": -0.03617598036729475,
+        "authored_level_vs_ref_db": -26.38409696524363,
+        "dry_level_vs_ref_db": -28.14826656571511,
+        "authored_vs_stock_absolute_dBFS": null,
+        "actual_condition_delta_vs_actual_AU_dbr": -0.04252569206908482,
+        "absolute_ref_error_dBFS": -14.113419606006017
+      },
+      "post": {
+        "authored_signed_dbr": 0.02181450266902038,
+        "dry_signed_dbr": -0.03617598036729475,
+        "authored_level_vs_ref_db": -26.3955172357727,
+        "dry_level_vs_ref_db": -28.14826656571511,
+        "authored_vs_stock_absolute_dBFS": -72.86498491339445,
+        "actual_condition_delta_vs_actual_AU_dbr": -0.042460368254069264,
+        "absolute_ref_error_dBFS": -14.11298378491285
+      },
+      "both": {
+        "authored_signed_dbr": 0.021995872826498952,
+        "dry_signed_dbr": -0.03617598036729475,
+        "authored_level_vs_ref_db": -26.40783141010383,
+        "dry_level_vs_ref_db": -28.14826656571511,
+        "authored_vs_stock_absolute_dBFS": -64.96610357069937,
+        "actual_condition_delta_vs_actual_AU_dbr": -0.04248781251038169,
+        "absolute_ref_error_dBFS": -14.11280241475537
+      }
+    },
+    "release": {
+      "stock": {
+        "authored_signed_dbr": -0.3050935461980515,
+        "dry_signed_dbr": -0.5238661180589046,
+        "authored_level_vs_ref_db": -23.535574151358528,
+        "dry_level_vs_ref_db": -23.511827605190415,
+        "authored_vs_stock_absolute_dBFS": null,
+        "actual_condition_delta_vs_actual_AU_dbr": -0.14216272908054522,
+        "absolute_ref_error_dBFS": -35.87924407560263
+      },
+      "post": {
+        "authored_signed_dbr": -0.30764794706403253,
+        "dry_signed_dbr": -0.5238661180589046,
+        "authored_level_vs_ref_db": -23.528130147141756,
+        "dry_level_vs_ref_db": -23.511827605190415,
+        "authored_vs_stock_absolute_dBFS": -98.07524955472788,
+        "actual_condition_delta_vs_actual_AU_dbr": -0.14599756699541655,
+        "absolute_ref_error_dBFS": -35.88179847646861
+      },
+      "both": {
+        "authored_signed_dbr": -0.3113335154620238,
+        "dry_signed_dbr": -0.5238661180589046,
+        "authored_level_vs_ref_db": -23.532716515263647,
+        "dry_level_vs_ref_db": -23.511827605190415,
+        "authored_vs_stock_absolute_dBFS": -88.71933688639963,
+        "actual_condition_delta_vs_actual_AU_dbr": -0.15233624089803957,
+        "absolute_ref_error_dBFS": -35.8854840448666
+      }
+    },
+    "chord": {
+      "stock": {
+        "authored_signed_dbr": 0.028183297304785797,
+        "dry_signed_dbr": -0.1784982743669976,
+        "authored_level_vs_ref_db": -28.42292823204572,
+        "dry_level_vs_ref_db": -30.18327305002504,
+        "authored_vs_stock_absolute_dBFS": null,
+        "actual_condition_delta_vs_actual_AU_dbr": 0.026005965692681106,
+        "absolute_ref_error_dBFS": -11.320049619414341
+      },
+      "post": {
+        "authored_signed_dbr": 0.024775104801757816,
+        "dry_signed_dbr": -0.1784982743669976,
+        "authored_level_vs_ref_db": -28.456789495002077,
+        "dry_level_vs_ref_db": -30.18327305002504,
+        "authored_vs_stock_absolute_dBFS": -64.22373410454267,
+        "actual_condition_delta_vs_actual_AU_dbr": 0.024414567594062114,
+        "absolute_ref_error_dBFS": -11.32345781191737
+      },
+      "both": {
+        "authored_signed_dbr": 0.02153390186994718,
+        "dry_signed_dbr": -0.1784982743669976,
+        "authored_level_vs_ref_db": -28.464539252053758,
+        "dry_level_vs_ref_db": -30.18327305002504,
+        "authored_vs_stock_absolute_dBFS": -57.68328037058393,
+        "actual_condition_delta_vs_actual_AU_dbr": 0.023231916940696692,
+        "absolute_ref_error_dBFS": -11.32669901484918
+      }
+    },
+    "tail": {
+      "stock": {
+        "authored_signed_dbr": -0.03157265947922823,
+        "dry_signed_dbr": -0.21386466527910847,
+        "authored_level_vs_ref_db": -32.205084701464614,
+        "dry_level_vs_ref_db": -31.415439482166143,
+        "authored_vs_stock_absolute_dBFS": null,
+        "actual_condition_delta_vs_actual_AU_dbr": -0.013740991855049543,
+        "absolute_ref_error_dBFS": -32.9242765202349
+      },
+      "post": {
+        "authored_signed_dbr": -0.03517262998900908,
+        "dry_signed_dbr": -0.21386466527910847,
+        "authored_level_vs_ref_db": -32.21942434062495,
+        "dry_level_vs_ref_db": -31.415439482166143,
+        "authored_vs_stock_absolute_dBFS": -84.38535438456249,
+        "actual_condition_delta_vs_actual_AU_dbr": -0.0158944494971621,
+        "absolute_ref_error_dBFS": -32.92787649074467
+      },
+      "both": {
+        "authored_signed_dbr": -0.036872736483003224,
+        "dry_signed_dbr": -0.21386466527910847,
+        "authored_level_vs_ref_db": -32.19844582092519,
+        "dry_level_vs_ref_db": -31.415439482166143,
+        "authored_vs_stock_absolute_dBFS": -81.9041180358475,
+        "actual_condition_delta_vs_actual_AU_dbr": -0.016971466214450222,
+        "absolute_ref_error_dBFS": -32.929576597238665
+      }
+    },
+    "full": {
+      "stock": {
+        "authored_signed_dbr": 0.02160788303665716,
+        "dry_signed_dbr": -0.155596127474839,
+        "authored_level_vs_ref_db": -27.8702035148931,
+        "dry_level_vs_ref_db": -29.76367614995415,
+        "authored_vs_stock_absolute_dBFS": null,
+        "actual_condition_delta_vs_actual_AU_dbr": 0.015578620664417796,
+        "absolute_ref_error_dBFS": -15.907326629819119
+      },
+      "post": {
+        "authored_signed_dbr": 0.019319682666713096,
+        "dry_signed_dbr": -0.155596127474839,
+        "authored_level_vs_ref_db": -27.893082294883254,
+        "dry_level_vs_ref_db": -29.76367614995415,
+        "authored_vs_stock_absolute_dBFS": -69.80012779530561,
+        "actual_condition_delta_vs_actual_AU_dbr": 0.014349681052709637,
+        "absolute_ref_error_dBFS": -15.909614830189064
+      },
+      "both": {
+        "authored_signed_dbr": 0.016687858295186157,
+        "dry_signed_dbr": -0.155596127474839,
+        "authored_level_vs_ref_db": -27.893149716373152,
+        "dry_level_vs_ref_db": -29.76367614995415,
+        "authored_vs_stock_absolute_dBFS": -62.810324751543675,
+        "actual_condition_delta_vs_actual_AU_dbr": 0.013270688032715035,
+        "absolute_ref_error_dBFS": -15.912246654560589
+      }
+    }
+  }
+}

@@ -18,6 +18,14 @@ Browser with real platform MIDI and native end-to-end transport remains
 unverified. Existing Chromium wrapper has no executable. Do not conflate
 an exact JavaScript DOM adapter with browser qualification.
 
+The [separate STOP regression](remote-stop-lost-position/README.md)
+drops an actual stop POSITION while delivering confirmed stopped
+TRANSPORT. The pinned app leaves stale lane markers; the guarded fix
+clears them without synthesizing POSITION or authoring any edits.
+Disconnect also clears a held VOICE highlight in the same fixture.
+This patch is preserved as source evidence, not pushed to the owner
+lane or deployed. Full native/browser qualification remains open.
+
 ## Installer
 
 [DnBOX-nightly #208](https://github.com/gobbajogger/DnBOX-nightly/pull/208)

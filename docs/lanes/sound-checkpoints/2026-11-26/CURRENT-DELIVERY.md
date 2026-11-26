@@ -6,6 +6,20 @@ isolated kernel timing, or partial link into a release claim.
 
 ## Latest measured results
 
+- **Fresh played-through screen did not qualify.** [Full composed Raw
+  original A/B](sj6-warm-authored-terminal/README.md) checks all 170
+  public control readbacks and exact MIDI/callback schedule. The guarded
+  J60 fixes improve whole signed error only from −15.907 to −15.912 dBFS;
+  authored level remains 27.89 dB low and dry remains byte-identical,
+  29.76 dB low. Focus on the authenticated dry voice path, not master gain.
+- **Fresh paired emulator diagnostic did not qualify.**
+  [Exact warm J60 linked pair](strict-warm-j60-timing/README.md):
+  Elite 14,269 µs / 63 late, Pro 14,322 µs / 61 late. Same external
+  tape and project bytes, no flash writes. This test retains embedded
+  legacy hits and does not establish a verified active SuperJ6 owner,
+  leading owner state, or producer-frame anchoring. Do not infer the
+  J60 changes caused the observed timing differences.
+
 - **Matched combined memory:** on the guarded warm donor with both engines,
   exact shared tables and the unused Synth One lease layout, the
   [reached J60 coefficient pair](warm-j60-lease-tables-fit/README.md)
