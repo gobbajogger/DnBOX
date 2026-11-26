@@ -1,0 +1,42 @@
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -2975,6 +2975,23 @@
+     meter(b, m, mix_level[b], n);
+ }
+ 
++#include "mix909.inc"
++__attribute__((noinline)) static int mix909_settled(unsigned n)
++{
++    const glide_t *s=mix_glide[PART_909];
++    float g[GL_N];
++    for(unsigned j=0;j<GL_N;j++){
++        float c=s[j].cur;
++        if(c!=s[j].tgt)return 0;
++        g[j]=c;
++    }
++    if (g[GL_L]==1.f || g[GL_R]==1.f || g[GL_VREV]==1.f || g[GL_VDLY]==1.f)
++        return 0;                           /* original fast skips are cheaper at unity */
++    part_peak[PART_909]=fm1_909_mix_settled(dry_l,dry_r,rev,dly,n,g,
++                    mix_level[PART_909],part_peak[PART_909]);
++    return 1;
++}
++
+ /* ---- the two cores' jobs, balanced per stretch ----
+  * Five jobs: the 909 (renders straight into dry_l..dly, the mix's first term), the 808
+  * (its L/R in the stretch's out_l/out_r window, its sends in t1/t2), bass A and bass B
+@@ -3151,6 +3168,7 @@
+             drum909_render_st_cleared(&d909, dry_l, dry_r, rev, dly, (int)n, smc_audible_drums(solo, PART_909));
+             mix_targets(PART_909, mix_level[PART_909], solo_parts);
+             bfx_shape(PART_909, dry_l, dry_r, rev, dly, 4, (int)n);
++            if (!mix909_settled(n)) {
+             for (i = 0; i < n; i++)                       /* kit send: filtered sides, still centred */
+                 mono[i] = (dry_l[i] + dry_r[i]) * 0.5f;
+             scale_glide(dry_l, &mix_glide[PART_909][GL_L], n);   /* then the part's PAN over the kit */
+@@ -3158,6 +3176,7 @@
+             scale_glide(rev, &mix_glide[PART_909][GL_VREV], n);
+             scale_glide(dly, &mix_glide[PART_909][GL_VDLY], n);
+             kit_sends(PART_909, mono, n);
++            }
+         }
+         if (!core)
+             PROF_ADD(PR_909, p9);

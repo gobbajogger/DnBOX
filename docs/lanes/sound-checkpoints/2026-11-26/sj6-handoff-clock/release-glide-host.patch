@@ -1,0 +1,20 @@
+--- a/juno6_factory.inc
++++ b/juno6_factory.inc
+@@ -107,7 +107,16 @@
+   /* The app coalesces duplicate ons by dispatching only the final off. */
+   const int continuing=s->core.voice[0].gate&&mono_has_keys(s);
+   s->mono32_keys[note>>5]|=UINT32_C(1)<<(note&31u);
+-  sj6_mono_glide_start(s,note,continuing);
++  int glide_from_owner=continuing;
++#if defined(X0X_HOST) && defined(DNBX_HOST_MAIN_SOURCE_ORACLE) && defined(DNBOX_HOST_RELEASE_GLIDE_WITNESS)
++  /* Independent AMP owner can still be audible after held keys go empty.
++   * Keep glide from that owner; do not grant Legato eligibility. */
++  if(!continuing && !s->core.voice[0].gate && s->core.main_oracle.enabled &&
++     s->core.main_oracle.seen &&
++     s->core.main_oracle.amp[0].stage>=6 && s->core.main_oracle.amp[1].stage>=6)
++      glide_from_owner=1;
++#endif
++  sj6_mono_glide_start(s,note,glide_from_owner);
+   if(continuing&&s->legato33_on) {
+ #if X0X_SJ6_SEQ_DEST_NATIVE
+    /* A real direct note that retargets the one Mono voice takes over

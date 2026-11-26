@@ -1,0 +1,43 @@
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -2975,6 +2975,24 @@
+     meter(b, m, mix_level[b], n);
+ }
+ 
++#include "mix909.inc"
++__attribute__((noinline)) static int mix909_common(unsigned n)
++{
++    glide_t *s=mix_glide[PART_909];
++    float c=s[GL_L].cur,t=s[GL_L].tgt;
++    if ((c==1.f && t==1.f) || c!=c || t!=t ||
++        s[GL_REV].cur!=0.f || s[GL_REV].tgt!=0.f || s[GL_DLY].cur!=0.f || s[GL_DLY].tgt!=0.f) return 0;
++    unsigned bc=fm1_mix_bits(c),bt=fm1_mix_bits(t);
++    for(unsigned j=GL_R;j<GL_N;j++){
++        if(j==GL_REV||j==GL_DLY)continue;
++        if(fm1_mix_bits(s[j].cur)!=bc || fm1_mix_bits(s[j].tgt)!=bt)return 0;
++    }
++    part_peak[PART_909]=fm1_909_mix_common(dry_l,dry_r,rev,dly,n,&c,t,
++                    mix_level[PART_909],part_peak[PART_909]);
++    s[GL_L].cur=s[GL_R].cur=s[GL_VREV].cur=s[GL_VDLY].cur=c;
++    return 1;
++}
++
+ /* ---- the two cores' jobs, balanced per stretch ----
+  * Five jobs: the 909 (renders straight into dry_l..dly, the mix's first term), the 808
+  * (its L/R in the stretch's out_l/out_r window, its sends in t1/t2), bass A and bass B
+@@ -3151,6 +3169,7 @@
+             drum909_render_st_cleared(&d909, dry_l, dry_r, rev, dly, (int)n, smc_audible_drums(solo, PART_909));
+             mix_targets(PART_909, mix_level[PART_909], solo_parts);
+             bfx_shape(PART_909, dry_l, dry_r, rev, dly, 4, (int)n);
++            if (!mix909_common(n)) {
+             for (i = 0; i < n; i++)                       /* kit send: filtered sides, still centred */
+                 mono[i] = (dry_l[i] + dry_r[i]) * 0.5f;
+             scale_glide(dry_l, &mix_glide[PART_909][GL_L], n);   /* then the part's PAN over the kit */
+@@ -3158,6 +3177,7 @@
+             scale_glide(rev, &mix_glide[PART_909][GL_VREV], n);
+             scale_glide(dly, &mix_glide[PART_909][GL_VDLY], n);
+             kit_sends(PART_909, mono, n);
++            }
+         }
+         if (!core)
+             PROF_ADD(PR_909, p9);

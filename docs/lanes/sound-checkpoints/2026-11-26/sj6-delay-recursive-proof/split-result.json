@@ -1,0 +1,7132 @@
+{
+  "host_state_bytes": 4040,
+  "preserved_midpoint_region": "3k complex carrier plus independent DC band; no EQ/gain-matching",
+  "cue_source_sha256": "bcfce38842c85e3e1aaf704824693a042ff513c68e824c1af2ecc189e1c88e9a",
+  "guard": {
+    "0.0": false,
+    "0.001": false,
+    "0.248": true,
+    "0.496": true,
+    "0.5": true,
+    "0.503": true,
+    "0.6": false,
+    "1.5": false,
+    "16": false
+  },
+  "tone": [
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 220,
+      "cutoff": 350,
+      "fb_raw": 0,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -0.40349781440884935,
+        "highspur_db": -35.078442081804546,
+        "spur_hz": 1617.681884765625,
+        "wave_residual_dbr": -25.709490072900635
+      },
+      "compact": {
+        "carrier_db": -0.27367909614780533,
+        "highspur_db": -42.712740662131864,
+        "spur_hz": 2535.53466796875,
+        "wave_residual_dbr": -12.64222948972252
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 220,
+      "cutoff": 520,
+      "fb_raw": 0,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -0.403535238081596,
+        "highspur_db": -35.065740623426464,
+        "spur_hz": 1617.681884765625,
+        "wave_residual_dbr": -25.706418042606828
+      },
+      "compact": {
+        "carrier_db": -0.27367909614780533,
+        "highspur_db": -42.712740662131864,
+        "spur_hz": 2535.53466796875,
+        "wave_residual_dbr": -12.64222948972252
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 220,
+      "cutoff": 600,
+      "fb_raw": 0,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -0.403519627260353,
+        "highspur_db": -35.052938877667465,
+        "spur_hz": 1617.681884765625,
+        "wave_residual_dbr": -25.700791198503914
+      },
+      "compact": {
+        "carrier_db": -0.27367909614780533,
+        "highspur_db": -42.712740662131864,
+        "spur_hz": 2535.53466796875,
+        "wave_residual_dbr": -12.64222948972252
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 220,
+      "cutoff": 350,
+      "fb_raw": 64,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -0.40349781440884935,
+        "highspur_db": -35.078442081804546,
+        "spur_hz": 1617.681884765625,
+        "wave_residual_dbr": -25.709490072900635
+      },
+      "compact": {
+        "carrier_db": -0.27367909614780533,
+        "highspur_db": -42.712740662131864,
+        "spur_hz": 2535.53466796875,
+        "wave_residual_dbr": -12.64222948972252
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 220,
+      "cutoff": 350,
+      "fb_raw": 64,
+      "repeat": 2,
+      "recursive": {
+        "carrier_db": -0.8131142891571124,
+        "highspur_db": -35.47924251273068,
+        "spur_hz": 1617.681884765625,
+        "wave_residual_dbr": -20.52436139041951
+      },
+      "compact": {
+        "carrier_db": -0.5469241593321613,
+        "highspur_db": -42.98780629112751,
+        "spur_hz": 2535.53466796875,
+        "wave_residual_dbr": -6.832771772609751
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 220,
+      "cutoff": 350,
+      "fb_raw": 64,
+      "repeat": 4,
+      "recursive": {
+        "carrier_db": -1.6484516716219435,
+        "highspur_db": -36.32621925908247,
+        "spur_hz": 1617.681884765625,
+        "wave_residual_dbr": -14.994139325466458
+      },
+      "compact": {
+        "carrier_db": -1.1011942665928323,
+        "highspur_db": -43.54564847954744,
+        "spur_hz": 2535.53466796875,
+        "wave_residual_dbr": -1.3322646073858635
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 220,
+      "cutoff": 520,
+      "fb_raw": 64,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -0.403535238081596,
+        "highspur_db": -35.065740623426464,
+        "spur_hz": 1617.681884765625,
+        "wave_residual_dbr": -25.706418042606828
+      },
+      "compact": {
+        "carrier_db": -0.27367909614780533,
+        "highspur_db": -42.712740662131864,
+        "spur_hz": 2535.53466796875,
+        "wave_residual_dbr": -12.64222948972252
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 220,
+      "cutoff": 520,
+      "fb_raw": 64,
+      "repeat": 2,
+      "recursive": {
+        "carrier_db": -0.8134330109148545,
+        "highspur_db": -35.401973371489284,
+        "spur_hz": 1617.681884765625,
+        "wave_residual_dbr": -20.518852774670577
+      },
+      "compact": {
+        "carrier_db": -0.5469241593321613,
+        "highspur_db": -42.98780629112751,
+        "spur_hz": 2535.53466796875,
+        "wave_residual_dbr": -6.832771772609751
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 220,
+      "cutoff": 520,
+      "fb_raw": 64,
+      "repeat": 4,
+      "recursive": {
+        "carrier_db": -1.6484756714901674,
+        "highspur_db": -36.318614846549224,
+        "spur_hz": 1617.681884765625,
+        "wave_residual_dbr": -14.99364765311155
+      },
+      "compact": {
+        "carrier_db": -1.1011942665928323,
+        "highspur_db": -43.54564847954744,
+        "spur_hz": 2535.53466796875,
+        "wave_residual_dbr": -1.3322646073858635
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 220,
+      "cutoff": 600,
+      "fb_raw": 64,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -0.403519627260353,
+        "highspur_db": -35.052938877667465,
+        "spur_hz": 1617.681884765625,
+        "wave_residual_dbr": -25.700791198503914
+      },
+      "compact": {
+        "carrier_db": -0.27367909614780533,
+        "highspur_db": -42.712740662131864,
+        "spur_hz": 2535.53466796875,
+        "wave_residual_dbr": -12.64222948972252
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 220,
+      "cutoff": 600,
+      "fb_raw": 64,
+      "repeat": 2,
+      "recursive": {
+        "carrier_db": -0.8130387056579602,
+        "highspur_db": -35.40890631104803,
+        "spur_hz": 1617.681884765625,
+        "wave_residual_dbr": -20.52223614618527
+      },
+      "compact": {
+        "carrier_db": -0.5469241593321613,
+        "highspur_db": -42.98780629112751,
+        "spur_hz": 2535.53466796875,
+        "wave_residual_dbr": -6.832771772609751
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 220,
+      "cutoff": 600,
+      "fb_raw": 64,
+      "repeat": 4,
+      "recursive": {
+        "carrier_db": -1.6485163092966748,
+        "highspur_db": -36.26738045334064,
+        "spur_hz": 1617.681884765625,
+        "wave_residual_dbr": -14.990996302383465
+      },
+      "compact": {
+        "carrier_db": -1.1011942665928323,
+        "highspur_db": -43.54564847954744,
+        "spur_hz": 2535.53466796875,
+        "wave_residual_dbr": -1.3322646073858635
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 220,
+      "cutoff": 350,
+      "fb_raw": 106,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -0.40349781440884935,
+        "highspur_db": -35.078442081804546,
+        "spur_hz": 1617.681884765625,
+        "wave_residual_dbr": -25.709490072900635
+      },
+      "compact": {
+        "carrier_db": -0.27367909614780533,
+        "highspur_db": -42.712740662131864,
+        "spur_hz": 2535.53466796875,
+        "wave_residual_dbr": -12.64222948972252
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 220,
+      "cutoff": 350,
+      "fb_raw": 106,
+      "repeat": 2,
+      "recursive": {
+        "carrier_db": -0.8070911252561677,
+        "highspur_db": -35.46755451298608,
+        "spur_hz": 1617.681884765625,
+        "wave_residual_dbr": -20.594909052937783
+      },
+      "compact": {
+        "carrier_db": -0.5462572648346622,
+        "highspur_db": -42.98714293840359,
+        "spur_hz": 2535.53466796875,
+        "wave_residual_dbr": -6.832875802153666
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 220,
+      "cutoff": 350,
+      "fb_raw": 106,
+      "repeat": 4,
+      "recursive": {
+        "carrier_db": -1.6209901631816868,
+        "highspur_db": -36.2904517220053,
+        "spur_hz": 1617.681884765625,
+        "wave_residual_dbr": -15.142130748361183
+      },
+      "compact": {
+        "carrier_db": -1.093134449167902,
+        "highspur_db": -43.53766799313635,
+        "spur_hz": 2535.53466796875,
+        "wave_residual_dbr": -1.3297500110671159
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 220,
+      "cutoff": 520,
+      "fb_raw": 106,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -0.403535238081596,
+        "highspur_db": -35.065740623426464,
+        "spur_hz": 1617.681884765625,
+        "wave_residual_dbr": -25.706418042606828
+      },
+      "compact": {
+        "carrier_db": -0.27367909614780533,
+        "highspur_db": -42.712740662131864,
+        "spur_hz": 2535.53466796875,
+        "wave_residual_dbr": -12.64222948972252
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 220,
+      "cutoff": 520,
+      "fb_raw": 106,
+      "repeat": 2,
+      "recursive": {
+        "carrier_db": -0.8074699148780851,
+        "highspur_db": -35.40028109053956,
+        "spur_hz": 1617.681884765625,
+        "wave_residual_dbr": -20.588448290702203
+      },
+      "compact": {
+        "carrier_db": -0.5462572648346622,
+        "highspur_db": -42.98714293840359,
+        "spur_hz": 2535.53466796875,
+        "wave_residual_dbr": -6.832875802153666
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 220,
+      "cutoff": 520,
+      "fb_raw": 106,
+      "repeat": 4,
+      "recursive": {
+        "carrier_db": -1.624472291139748,
+        "highspur_db": -36.25237944124503,
+        "spur_hz": 1617.681884765625,
+        "wave_residual_dbr": -15.12335602232233
+      },
+      "compact": {
+        "carrier_db": -1.093134449167902,
+        "highspur_db": -43.53766799313635,
+        "spur_hz": 2535.53466796875,
+        "wave_residual_dbr": -1.3297500110671159
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 220,
+      "cutoff": 600,
+      "fb_raw": 106,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -0.403519627260353,
+        "highspur_db": -35.052938877667465,
+        "spur_hz": 1617.681884765625,
+        "wave_residual_dbr": -25.700791198503914
+      },
+      "compact": {
+        "carrier_db": -0.27367909614780533,
+        "highspur_db": -42.712740662131864,
+        "spur_hz": 2535.53466796875,
+        "wave_residual_dbr": -12.64222948972252
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 220,
+      "cutoff": 600,
+      "fb_raw": 106,
+      "repeat": 2,
+      "recursive": {
+        "carrier_db": -0.8070989997833207,
+        "highspur_db": -35.40642195946626,
+        "spur_hz": 1617.681884765625,
+        "wave_residual_dbr": -20.591323380722724
+      },
+      "compact": {
+        "carrier_db": -0.5462572648346622,
+        "highspur_db": -42.98714293840359,
+        "spur_hz": 2535.53466796875,
+        "wave_residual_dbr": -6.832875802153666
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 220,
+      "cutoff": 600,
+      "fb_raw": 106,
+      "repeat": 4,
+      "recursive": {
+        "carrier_db": -1.6175683291011342,
+        "highspur_db": -36.22328153516015,
+        "spur_hz": 1617.681884765625,
+        "wave_residual_dbr": -15.152364396917166
+      },
+      "compact": {
+        "carrier_db": -1.093134449167902,
+        "highspur_db": -43.53766799313635,
+        "spur_hz": 2535.53466796875,
+        "wave_residual_dbr": -1.3297500110671159
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 700,
+      "cutoff": 350,
+      "fb_raw": 0,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -5.607448802038598,
+        "highspur_db": -14.093175868289832,
+        "spur_hz": 1138.568115234375,
+        "wave_residual_dbr": -4.693304035203461
+      },
+      "compact": {
+        "carrier_db": -2.816108315078745,
+        "highspur_db": -21.533459818017604,
+        "spur_hz": 2056.4208984375,
+        "wave_residual_dbr": -3.2674062016276544
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 700,
+      "cutoff": 520,
+      "fb_raw": 0,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -5.607007231551905,
+        "highspur_db": -14.093603051659382,
+        "spur_hz": 1138.568115234375,
+        "wave_residual_dbr": -4.694190123342256
+      },
+      "compact": {
+        "carrier_db": -2.816108315078745,
+        "highspur_db": -21.533459818017604,
+        "spur_hz": 2056.4208984375,
+        "wave_residual_dbr": -3.2674062016276544
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 700,
+      "cutoff": 600,
+      "fb_raw": 0,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -5.608245874671216,
+        "highspur_db": -14.092238196071431,
+        "spur_hz": 1138.568115234375,
+        "wave_residual_dbr": -4.693272930441685
+      },
+      "compact": {
+        "carrier_db": -2.816108315078745,
+        "highspur_db": -21.533459818017604,
+        "spur_hz": 2056.4208984375,
+        "wave_residual_dbr": -3.2674062016276544
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 700,
+      "cutoff": 350,
+      "fb_raw": 64,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -5.607448802038598,
+        "highspur_db": -14.093175868289832,
+        "spur_hz": 1138.568115234375,
+        "wave_residual_dbr": -4.693304035203461
+      },
+      "compact": {
+        "carrier_db": -2.816108315078745,
+        "highspur_db": -21.533459818017604,
+        "spur_hz": 2056.4208984375,
+        "wave_residual_dbr": -3.2674062016276544
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 700,
+      "cutoff": 350,
+      "fb_raw": 64,
+      "repeat": 2,
+      "recursive": {
+        "carrier_db": -10.44164038175431,
+        "highspur_db": -18.91843951758848,
+        "spur_hz": 1138.568115234375,
+        "wave_residual_dbr": -1.6614717992616743
+      },
+      "compact": {
+        "carrier_db": -5.423921688906971,
+        "highspur_db": -24.14159216222967,
+        "spur_hz": 2056.4208984375,
+        "wave_residual_dbr": 0.7357088750488714
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 700,
+      "cutoff": 350,
+      "fb_raw": 64,
+      "repeat": 4,
+      "recursive": {
+        "carrier_db": -20.08926836901384,
+        "highspur_db": -28.552210239158494,
+        "spur_hz": 1138.568115234375,
+        "wave_residual_dbr": 0.1092661845929844
+      },
+      "compact": {
+        "carrier_db": -10.656974845864855,
+        "highspur_db": -29.37527423511359,
+        "spur_hz": 2056.4208984375,
+        "wave_residual_dbr": 2.1985358381990014
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 700,
+      "cutoff": 520,
+      "fb_raw": 64,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -5.607007231551905,
+        "highspur_db": -14.093603051659382,
+        "spur_hz": 1138.568115234375,
+        "wave_residual_dbr": -4.694190123342256
+      },
+      "compact": {
+        "carrier_db": -2.816108315078745,
+        "highspur_db": -21.533459818017604,
+        "spur_hz": 2056.4208984375,
+        "wave_residual_dbr": -3.2674062016276544
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 700,
+      "cutoff": 520,
+      "fb_raw": 64,
+      "repeat": 2,
+      "recursive": {
+        "carrier_db": -10.435352257802766,
+        "highspur_db": -18.928910746196955,
+        "spur_hz": 1138.568115234375,
+        "wave_residual_dbr": -1.656331218439484
+      },
+      "compact": {
+        "carrier_db": -5.423921688906971,
+        "highspur_db": -24.14159216222967,
+        "spur_hz": 2056.4208984375,
+        "wave_residual_dbr": 0.7357088750488714
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 700,
+      "cutoff": 520,
+      "fb_raw": 64,
+      "repeat": 4,
+      "recursive": {
+        "carrier_db": -20.068423044069025,
+        "highspur_db": -28.51986090718153,
+        "spur_hz": 1138.568115234375,
+        "wave_residual_dbr": 0.11104412102935333
+      },
+      "compact": {
+        "carrier_db": -10.656974845864855,
+        "highspur_db": -29.37527423511359,
+        "spur_hz": 2056.4208984375,
+        "wave_residual_dbr": 2.1985358381990014
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 700,
+      "cutoff": 600,
+      "fb_raw": 64,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -5.608245874671216,
+        "highspur_db": -14.092238196071431,
+        "spur_hz": 1138.568115234375,
+        "wave_residual_dbr": -4.693272930441685
+      },
+      "compact": {
+        "carrier_db": -2.816108315078745,
+        "highspur_db": -21.533459818017604,
+        "spur_hz": 2056.4208984375,
+        "wave_residual_dbr": -3.2674062016276544
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 700,
+      "cutoff": 600,
+      "fb_raw": 64,
+      "repeat": 2,
+      "recursive": {
+        "carrier_db": -10.427748686328904,
+        "highspur_db": -18.927411644477434,
+        "spur_hz": 1138.568115234375,
+        "wave_residual_dbr": -1.6616667537615455
+      },
+      "compact": {
+        "carrier_db": -5.423921688906971,
+        "highspur_db": -24.14159216222967,
+        "spur_hz": 2056.4208984375,
+        "wave_residual_dbr": 0.7357088750488714
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 700,
+      "cutoff": 600,
+      "fb_raw": 64,
+      "repeat": 4,
+      "recursive": {
+        "carrier_db": -20.06080213377397,
+        "highspur_db": -28.533122938153127,
+        "spur_hz": 1138.568115234375,
+        "wave_residual_dbr": 0.10888478566834588
+      },
+      "compact": {
+        "carrier_db": -10.656974845864855,
+        "highspur_db": -29.37527423511359,
+        "spur_hz": 2056.4208984375,
+        "wave_residual_dbr": 2.1985358381990014
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 700,
+      "cutoff": 350,
+      "fb_raw": 106,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -5.607448802038598,
+        "highspur_db": -14.093175868289832,
+        "spur_hz": 1138.568115234375,
+        "wave_residual_dbr": -4.693304035203461
+      },
+      "compact": {
+        "carrier_db": -2.816108315078745,
+        "highspur_db": -21.533459818017604,
+        "spur_hz": 2056.4208984375,
+        "wave_residual_dbr": -3.2674062016276544
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 700,
+      "cutoff": 350,
+      "fb_raw": 106,
+      "repeat": 2,
+      "recursive": {
+        "carrier_db": -10.432954339213214,
+        "highspur_db": -18.909672120583597,
+        "spur_hz": 1138.568115234375,
+        "wave_residual_dbr": -1.6567898178772364
+      },
+      "compact": {
+        "carrier_db": -5.423040811092481,
+        "highspur_db": -24.14071098897532,
+        "spur_hz": 2056.4208984375,
+        "wave_residual_dbr": 0.7358525272612506
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 700,
+      "cutoff": 350,
+      "fb_raw": 106,
+      "repeat": 4,
+      "recursive": {
+        "carrier_db": -20.070104052207057,
+        "highspur_db": -28.53218140768147,
+        "spur_hz": 1138.568115234375,
+        "wave_residual_dbr": 0.10850132482628433
+      },
+      "compact": {
+        "carrier_db": -10.640439369610341,
+        "highspur_db": -29.35874331442041,
+        "spur_hz": 2056.4208984375,
+        "wave_residual_dbr": 2.2021268844607893
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 700,
+      "cutoff": 520,
+      "fb_raw": 106,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -5.607007231551905,
+        "highspur_db": -14.093603051659382,
+        "spur_hz": 1138.568115234375,
+        "wave_residual_dbr": -4.694190123342256
+      },
+      "compact": {
+        "carrier_db": -2.816108315078745,
+        "highspur_db": -21.533459818017604,
+        "spur_hz": 2056.4208984375,
+        "wave_residual_dbr": -3.2674062016276544
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 700,
+      "cutoff": 520,
+      "fb_raw": 106,
+      "repeat": 2,
+      "recursive": {
+        "carrier_db": -10.426596943420387,
+        "highspur_db": -18.920172552963503,
+        "spur_hz": 1138.568115234375,
+        "wave_residual_dbr": -1.6517164999175236
+      },
+      "compact": {
+        "carrier_db": -5.423040811092481,
+        "highspur_db": -24.14071098897532,
+        "spur_hz": 2056.4208984375,
+        "wave_residual_dbr": 0.7358525272612506
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 700,
+      "cutoff": 520,
+      "fb_raw": 106,
+      "repeat": 4,
+      "recursive": {
+        "carrier_db": -20.060693425305452,
+        "highspur_db": -28.513313093989122,
+        "spur_hz": 1138.568115234375,
+        "wave_residual_dbr": 0.11041641505188154
+      },
+      "compact": {
+        "carrier_db": -10.640439369610341,
+        "highspur_db": -29.35874331442041,
+        "spur_hz": 2056.4208984375,
+        "wave_residual_dbr": 2.2021268844607893
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 700,
+      "cutoff": 600,
+      "fb_raw": 106,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -5.608245874671216,
+        "highspur_db": -14.092238196071431,
+        "spur_hz": 1138.568115234375,
+        "wave_residual_dbr": -4.693272930441685
+      },
+      "compact": {
+        "carrier_db": -2.816108315078745,
+        "highspur_db": -21.533459818017604,
+        "spur_hz": 2056.4208984375,
+        "wave_residual_dbr": -3.2674062016276544
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 700,
+      "cutoff": 600,
+      "fb_raw": 106,
+      "repeat": 2,
+      "recursive": {
+        "carrier_db": -10.425031035964569,
+        "highspur_db": -18.92452527647557,
+        "spur_hz": 1138.568115234375,
+        "wave_residual_dbr": -1.658967869253951
+      },
+      "compact": {
+        "carrier_db": -5.423040811092481,
+        "highspur_db": -24.14071098897532,
+        "spur_hz": 2056.4208984375,
+        "wave_residual_dbr": 0.7358525272612506
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 700,
+      "cutoff": 600,
+      "fb_raw": 106,
+      "repeat": 4,
+      "recursive": {
+        "carrier_db": -20.070309564746175,
+        "highspur_db": -28.543919701607905,
+        "spur_hz": 1138.568115234375,
+        "wave_residual_dbr": 0.1087303808051874
+      },
+      "compact": {
+        "carrier_db": -10.640439369610341,
+        "highspur_db": -29.35874331442041,
+        "spur_hz": 2056.4208984375,
+        "wave_residual_dbr": 2.2021268844607893
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 1000,
+      "cutoff": 350,
+      "fb_raw": 0,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -17.749720752122354,
+        "highspur_db": -14.679619737678191,
+        "spur_hz": 837.103271484375,
+        "wave_residual_dbr": -0.727690752478249
+      },
+      "compact": {
+        "carrier_db": -5.888026451065374,
+        "highspur_db": -15.71116472232938,
+        "spur_hz": 1754.9560546875,
+        "wave_residual_dbr": -0.9768153830341972
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 1000,
+      "cutoff": 520,
+      "fb_raw": 0,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -17.751051612111098,
+        "highspur_db": -14.679125859105561,
+        "spur_hz": 837.103271484375,
+        "wave_residual_dbr": -0.727130623519807
+      },
+      "compact": {
+        "carrier_db": -5.888026451065374,
+        "highspur_db": -15.71116472232938,
+        "spur_hz": 1754.9560546875,
+        "wave_residual_dbr": -0.9768153830341972
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 1000,
+      "cutoff": 600,
+      "fb_raw": 0,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -17.752150355359234,
+        "highspur_db": -14.679815118816393,
+        "spur_hz": 837.103271484375,
+        "wave_residual_dbr": -0.7261033451854716
+      },
+      "compact": {
+        "carrier_db": -5.888026451065374,
+        "highspur_db": -15.71116472232938,
+        "spur_hz": 1754.9560546875,
+        "wave_residual_dbr": -0.9768153830341972
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 1000,
+      "cutoff": 350,
+      "fb_raw": 64,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -17.749720752122354,
+        "highspur_db": -14.679619737678191,
+        "spur_hz": 837.103271484375,
+        "wave_residual_dbr": -0.727690752478249
+      },
+      "compact": {
+        "carrier_db": -5.888026451065374,
+        "highspur_db": -15.71116472232938,
+        "spur_hz": 1754.9560546875,
+        "wave_residual_dbr": -0.9768153830341972
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 1000,
+      "cutoff": 350,
+      "fb_raw": 64,
+      "repeat": 2,
+      "recursive": {
+        "carrier_db": -24.868447193029873,
+        "highspur_db": -21.800050607840383,
+        "spur_hz": 837.103271484375,
+        "wave_residual_dbr": 0.014803470788440598
+      },
+      "compact": {
+        "carrier_db": -10.68279403523755,
+        "highspur_db": -20.51167909552193,
+        "spur_hz": 1754.9560546875,
+        "wave_residual_dbr": 1.328573747714801
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 1000,
+      "cutoff": 350,
+      "fb_raw": 64,
+      "repeat": 4,
+      "recursive": {
+        "carrier_db": -38.65353082730147,
+        "highspur_db": -35.60158441289046,
+        "spur_hz": 837.103271484375,
+        "wave_residual_dbr": 0.10252328243728434
+      },
+      "compact": {
+        "carrier_db": -20.315094758505747,
+        "highspur_db": -30.154948121405603,
+        "spur_hz": 1754.9560546875,
+        "wave_residual_dbr": 0.5708565677491375
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 1000,
+      "cutoff": 520,
+      "fb_raw": 64,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -17.751051612111098,
+        "highspur_db": -14.679125859105561,
+        "spur_hz": 837.103271484375,
+        "wave_residual_dbr": -0.727130623519807
+      },
+      "compact": {
+        "carrier_db": -5.888026451065374,
+        "highspur_db": -15.71116472232938,
+        "spur_hz": 1754.9560546875,
+        "wave_residual_dbr": -0.9768153830341972
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 1000,
+      "cutoff": 520,
+      "fb_raw": 64,
+      "repeat": 2,
+      "recursive": {
+        "carrier_db": -24.884101541627224,
+        "highspur_db": -21.798785786677442,
+        "spur_hz": 837.103271484375,
+        "wave_residual_dbr": 0.017941142889887903
+      },
+      "compact": {
+        "carrier_db": -10.68279403523755,
+        "highspur_db": -20.51167909552193,
+        "spur_hz": 1754.9560546875,
+        "wave_residual_dbr": 1.328573747714801
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 1000,
+      "cutoff": 520,
+      "fb_raw": 64,
+      "repeat": 4,
+      "recursive": {
+        "carrier_db": -38.73174029236931,
+        "highspur_db": -35.64472759413742,
+        "spur_hz": 837.103271484375,
+        "wave_residual_dbr": 0.10183969858605867
+      },
+      "compact": {
+        "carrier_db": -20.315094758505747,
+        "highspur_db": -30.154948121405603,
+        "spur_hz": 1754.9560546875,
+        "wave_residual_dbr": 0.5708565677491375
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 1000,
+      "cutoff": 600,
+      "fb_raw": 64,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -17.752150355359234,
+        "highspur_db": -14.679815118816393,
+        "spur_hz": 837.103271484375,
+        "wave_residual_dbr": -0.7261033451854716
+      },
+      "compact": {
+        "carrier_db": -5.888026451065374,
+        "highspur_db": -15.71116472232938,
+        "spur_hz": 1754.9560546875,
+        "wave_residual_dbr": -0.9768153830341972
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 1000,
+      "cutoff": 600,
+      "fb_raw": 64,
+      "repeat": 2,
+      "recursive": {
+        "carrier_db": -24.870977408281824,
+        "highspur_db": -21.788593837989264,
+        "spur_hz": 837.103271484375,
+        "wave_residual_dbr": 0.01615851369889303
+      },
+      "compact": {
+        "carrier_db": -10.68279403523755,
+        "highspur_db": -20.51167909552193,
+        "spur_hz": 1754.9560546875,
+        "wave_residual_dbr": 1.328573747714801
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 1000,
+      "cutoff": 600,
+      "fb_raw": 64,
+      "repeat": 4,
+      "recursive": {
+        "carrier_db": -38.80239327002692,
+        "highspur_db": -35.71242807735043,
+        "spur_hz": 837.103271484375,
+        "wave_residual_dbr": 0.1012512412548622
+      },
+      "compact": {
+        "carrier_db": -20.315094758505747,
+        "highspur_db": -30.154948121405603,
+        "spur_hz": 1754.9560546875,
+        "wave_residual_dbr": 0.5708565677491375
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 1000,
+      "cutoff": 350,
+      "fb_raw": 106,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -17.749720752122354,
+        "highspur_db": -14.679619737678191,
+        "spur_hz": 837.103271484375,
+        "wave_residual_dbr": -0.727690752478249
+      },
+      "compact": {
+        "carrier_db": -5.888026451065374,
+        "highspur_db": -15.71116472232938,
+        "spur_hz": 1754.9560546875,
+        "wave_residual_dbr": -0.9768153830341972
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 1000,
+      "cutoff": 350,
+      "fb_raw": 106,
+      "repeat": 2,
+      "recursive": {
+        "carrier_db": -24.89847611792968,
+        "highspur_db": -21.829773903001787,
+        "spur_hz": 837.103271484375,
+        "wave_residual_dbr": 0.014408597762435433
+      },
+      "compact": {
+        "carrier_db": -10.68156612894201,
+        "highspur_db": -20.5104326749493,
+        "spur_hz": 1754.9560546875,
+        "wave_residual_dbr": 1.3287843382268352
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 1000,
+      "cutoff": 350,
+      "fb_raw": 106,
+      "repeat": 4,
+      "recursive": {
+        "carrier_db": -39.24828978614268,
+        "highspur_db": -36.19017406500521,
+        "spur_hz": 837.103271484375,
+        "wave_residual_dbr": 0.09525591547485633
+      },
+      "compact": {
+        "carrier_db": -20.277511049251157,
+        "highspur_db": -30.11737055070016,
+        "spur_hz": 1757.647705078125,
+        "wave_residual_dbr": 0.5732084391807195
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 1000,
+      "cutoff": 520,
+      "fb_raw": 106,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -17.751051612111098,
+        "highspur_db": -14.679125859105561,
+        "spur_hz": 837.103271484375,
+        "wave_residual_dbr": -0.727130623519807
+      },
+      "compact": {
+        "carrier_db": -5.888026451065374,
+        "highspur_db": -15.71116472232938,
+        "spur_hz": 1754.9560546875,
+        "wave_residual_dbr": -0.9768153830341972
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 1000,
+      "cutoff": 520,
+      "fb_raw": 106,
+      "repeat": 2,
+      "recursive": {
+        "carrier_db": -24.912398756520126,
+        "highspur_db": -21.827260987907607,
+        "spur_hz": 837.103271484375,
+        "wave_residual_dbr": 0.01725190298417609
+      },
+      "compact": {
+        "carrier_db": -10.68156612894201,
+        "highspur_db": -20.5104326749493,
+        "spur_hz": 1754.9560546875,
+        "wave_residual_dbr": 1.3287843382268352
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 1000,
+      "cutoff": 520,
+      "fb_raw": 106,
+      "repeat": 4,
+      "recursive": {
+        "carrier_db": -39.29157324478692,
+        "highspur_db": -36.20917782381294,
+        "spur_hz": 837.103271484375,
+        "wave_residual_dbr": 0.09510024398184956
+      },
+      "compact": {
+        "carrier_db": -20.277511049251157,
+        "highspur_db": -30.11737055070016,
+        "spur_hz": 1757.647705078125,
+        "wave_residual_dbr": 0.5732084391807195
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 1000,
+      "cutoff": 600,
+      "fb_raw": 106,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -17.752150355359234,
+        "highspur_db": -14.679815118816393,
+        "spur_hz": 837.103271484375,
+        "wave_residual_dbr": -0.7261033451854716
+      },
+      "compact": {
+        "carrier_db": -5.888026451065374,
+        "highspur_db": -15.71116472232938,
+        "spur_hz": 1754.9560546875,
+        "wave_residual_dbr": -0.9768153830341972
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 1000,
+      "cutoff": 600,
+      "fb_raw": 106,
+      "repeat": 2,
+      "recursive": {
+        "carrier_db": -24.89962790144609,
+        "highspur_db": -21.816779130514867,
+        "spur_hz": 837.103271484375,
+        "wave_residual_dbr": 0.015503240929685334
+      },
+      "compact": {
+        "carrier_db": -10.68156612894201,
+        "highspur_db": -20.5104326749493,
+        "spur_hz": 1754.9560546875,
+        "wave_residual_dbr": 1.3287843382268352
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 1000,
+      "cutoff": 600,
+      "fb_raw": 106,
+      "repeat": 4,
+      "recursive": {
+        "carrier_db": -39.259504800638986,
+        "highspur_db": -36.18651929418735,
+        "spur_hz": 837.103271484375,
+        "wave_residual_dbr": 0.09563381689980409
+      },
+      "compact": {
+        "carrier_db": -20.277511049251157,
+        "highspur_db": -30.11737055070016,
+        "spur_hz": 1757.647705078125,
+        "wave_residual_dbr": 0.5732084391807195
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 2600,
+      "cutoff": 350,
+      "fb_raw": 0,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -11.644339155273153,
+        "highspur_db": -16.19539525829272,
+        "spur_hz": 3517.987060546875,
+        "wave_residual_dbr": -1.7231283025389552
+      },
+      "compact": {
+        "carrier_db": -73.22647194450494,
+        "highspur_db": -24.436864721291315,
+        "spur_hz": 156.11572265625,
+        "wave_residual_dbr": 0.01741620951581871
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 2600,
+      "cutoff": 520,
+      "fb_raw": 0,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -6.214765798595731,
+        "highspur_db": -10.727175971493846,
+        "spur_hz": 3517.987060546875,
+        "wave_residual_dbr": -4.208717789262247
+      },
+      "compact": {
+        "carrier_db": -73.22647194450494,
+        "highspur_db": -24.436864721291315,
+        "spur_hz": 156.11572265625,
+        "wave_residual_dbr": 0.01741620951581871
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 2600,
+      "cutoff": 600,
+      "fb_raw": 0,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -5.88771697790909,
+        "highspur_db": -10.397304301657718,
+        "spur_hz": 3517.987060546875,
+        "wave_residual_dbr": -4.5673741195344775
+      },
+      "compact": {
+        "carrier_db": -73.22647194450494,
+        "highspur_db": -24.436864721291315,
+        "spur_hz": 156.11572265625,
+        "wave_residual_dbr": 0.01741620951581871
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 2600,
+      "cutoff": 350,
+      "fb_raw": 64,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -11.644339155273153,
+        "highspur_db": -16.19539525829272,
+        "spur_hz": 3517.987060546875,
+        "wave_residual_dbr": -1.7231283025389552
+      },
+      "compact": {
+        "carrier_db": -73.22647194450494,
+        "highspur_db": -24.436864721291315,
+        "spur_hz": 156.11572265625,
+        "wave_residual_dbr": 0.01741620951581871
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 2600,
+      "cutoff": 350,
+      "fb_raw": 64,
+      "repeat": 2,
+      "recursive": {
+        "carrier_db": -21.437875711711413,
+        "highspur_db": -26.02194437029741,
+        "spur_hz": 3520.6787109375,
+        "wave_residual_dbr": -0.2287423990634057
+      },
+      "compact": {
+        "carrier_db": -73.29903000948339,
+        "highspur_db": -24.508311766351305,
+        "spur_hz": 156.11572265625,
+        "wave_residual_dbr": 0.015060852180646797
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 2600,
+      "cutoff": 350,
+      "fb_raw": 64,
+      "repeat": 4,
+      "recursive": {
+        "carrier_db": -40.41130262306508,
+        "highspur_db": -44.837686437914726,
+        "spur_hz": 3520.6787109375,
+        "wave_residual_dbr": 0.053816568915417494
+      },
+      "compact": {
+        "carrier_db": -73.55445618884963,
+        "highspur_db": -24.760602588890816,
+        "spur_hz": 156.11572265625,
+        "wave_residual_dbr": 0.016291836017616752
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 2600,
+      "cutoff": 520,
+      "fb_raw": 64,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -6.214765798595731,
+        "highspur_db": -10.727175971493846,
+        "spur_hz": 3517.987060546875,
+        "wave_residual_dbr": -4.208717789262247
+      },
+      "compact": {
+        "carrier_db": -73.22647194450494,
+        "highspur_db": -24.436864721291315,
+        "spur_hz": 156.11572265625,
+        "wave_residual_dbr": 0.01741620951581871
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 2600,
+      "cutoff": 520,
+      "fb_raw": 64,
+      "repeat": 2,
+      "recursive": {
+        "carrier_db": -9.217931435100931,
+        "highspur_db": -13.749097646365449,
+        "spur_hz": 3517.987060546875,
+        "wave_residual_dbr": -2.5782885813499683
+      },
+      "compact": {
+        "carrier_db": -73.29903000948339,
+        "highspur_db": -24.508311766351305,
+        "spur_hz": 156.11572265625,
+        "wave_residual_dbr": 0.015060852180646797
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 2600,
+      "cutoff": 520,
+      "fb_raw": 64,
+      "repeat": 4,
+      "recursive": {
+        "carrier_db": -15.165261171320765,
+        "highspur_db": -19.695529123534932,
+        "spur_hz": 3517.987060546875,
+        "wave_residual_dbr": -0.7431002934341385
+      },
+      "compact": {
+        "carrier_db": -73.55445618884963,
+        "highspur_db": -24.760602588890816,
+        "spur_hz": 156.11572265625,
+        "wave_residual_dbr": 0.016291836017616752
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 2600,
+      "cutoff": 600,
+      "fb_raw": 64,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -5.88771697790909,
+        "highspur_db": -10.397304301657718,
+        "spur_hz": 3517.987060546875,
+        "wave_residual_dbr": -4.5673741195344775
+      },
+      "compact": {
+        "carrier_db": -73.22647194450494,
+        "highspur_db": -24.436864721291315,
+        "spur_hz": 156.11572265625,
+        "wave_residual_dbr": 0.01741620951581871
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 2600,
+      "cutoff": 600,
+      "fb_raw": 64,
+      "repeat": 2,
+      "recursive": {
+        "carrier_db": -8.154369258511172,
+        "highspur_db": -12.66533860931151,
+        "spur_hz": 3517.987060546875,
+        "wave_residual_dbr": -3.1534177082964447
+      },
+      "compact": {
+        "carrier_db": -73.29903000948339,
+        "highspur_db": -24.508311766351305,
+        "spur_hz": 156.11572265625,
+        "wave_residual_dbr": 0.015060852180646797
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 2600,
+      "cutoff": 600,
+      "fb_raw": 64,
+      "repeat": 4,
+      "recursive": {
+        "carrier_db": -12.588930064536537,
+        "highspur_db": -17.10478958944955,
+        "spur_hz": 3517.987060546875,
+        "wave_residual_dbr": -1.170627808730771
+      },
+      "compact": {
+        "carrier_db": -73.55445618884963,
+        "highspur_db": -24.760602588890816,
+        "spur_hz": 156.11572265625,
+        "wave_residual_dbr": 0.016291836017616752
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 2600,
+      "cutoff": 350,
+      "fb_raw": 106,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -11.644339155273153,
+        "highspur_db": -16.19539525829272,
+        "spur_hz": 3517.987060546875,
+        "wave_residual_dbr": -1.7231283025389552
+      },
+      "compact": {
+        "carrier_db": -73.22647194450494,
+        "highspur_db": -24.436864721291315,
+        "spur_hz": 156.11572265625,
+        "wave_residual_dbr": 0.01741620951581871
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 2600,
+      "cutoff": 350,
+      "fb_raw": 106,
+      "repeat": 2,
+      "recursive": {
+        "carrier_db": -21.467293771760566,
+        "highspur_db": -26.051876304080643,
+        "spur_hz": 3520.6787109375,
+        "wave_residual_dbr": -0.22980128050523088
+      },
+      "compact": {
+        "carrier_db": -73.2893133699252,
+        "highspur_db": -24.49856127722676,
+        "spur_hz": 156.11572265625,
+        "wave_residual_dbr": 0.015092895113288478
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 2600,
+      "cutoff": 350,
+      "fb_raw": 106,
+      "repeat": 4,
+      "recursive": {
+        "carrier_db": -40.863661282769215,
+        "highspur_db": -45.33217893064617,
+        "spur_hz": 3520.6787109375,
+        "wave_residual_dbr": 0.05421788646544932
+      },
+      "compact": {
+        "carrier_db": -73.42927435127618,
+        "highspur_db": -24.636636588302956,
+        "spur_hz": 156.11572265625,
+        "wave_residual_dbr": 0.01672176071808284
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 2600,
+      "cutoff": 520,
+      "fb_raw": 106,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -6.214765798595731,
+        "highspur_db": -10.727175971493846,
+        "spur_hz": 3517.987060546875,
+        "wave_residual_dbr": -4.208717789262247
+      },
+      "compact": {
+        "carrier_db": -73.22647194450494,
+        "highspur_db": -24.436864721291315,
+        "spur_hz": 156.11572265625,
+        "wave_residual_dbr": 0.01741620951581871
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 2600,
+      "cutoff": 520,
+      "fb_raw": 106,
+      "repeat": 2,
+      "recursive": {
+        "carrier_db": -9.191905465879241,
+        "highspur_db": -13.724401255896163,
+        "spur_hz": 3517.987060546875,
+        "wave_residual_dbr": -2.5855680429301713
+      },
+      "compact": {
+        "carrier_db": -73.2893133699252,
+        "highspur_db": -24.49856127722676,
+        "spur_hz": 156.11572265625,
+        "wave_residual_dbr": 0.015092895113288478
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 2600,
+      "cutoff": 520,
+      "fb_raw": 106,
+      "repeat": 4,
+      "recursive": {
+        "carrier_db": -15.22064076847652,
+        "highspur_db": -19.751230162611865,
+        "spur_hz": 3517.987060546875,
+        "wave_residual_dbr": -0.735829926106632
+      },
+      "compact": {
+        "carrier_db": -73.42927435127618,
+        "highspur_db": -24.636636588302956,
+        "spur_hz": 156.11572265625,
+        "wave_residual_dbr": 0.01672176071808284
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 2600,
+      "cutoff": 600,
+      "fb_raw": 106,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -5.88771697790909,
+        "highspur_db": -10.397304301657718,
+        "spur_hz": 3517.987060546875,
+        "wave_residual_dbr": -4.5673741195344775
+      },
+      "compact": {
+        "carrier_db": -73.22647194450494,
+        "highspur_db": -24.436864721291315,
+        "spur_hz": 156.11572265625,
+        "wave_residual_dbr": 0.01741620951581871
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 2600,
+      "cutoff": 600,
+      "fb_raw": 106,
+      "repeat": 2,
+      "recursive": {
+        "carrier_db": -8.146274987721519,
+        "highspur_db": -12.657681923466475,
+        "spur_hz": 3517.987060546875,
+        "wave_residual_dbr": -3.16050065868372
+      },
+      "compact": {
+        "carrier_db": -73.2893133699252,
+        "highspur_db": -24.49856127722676,
+        "spur_hz": 156.11572265625,
+        "wave_residual_dbr": 0.015092895113288478
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 2600,
+      "cutoff": 600,
+      "fb_raw": 106,
+      "repeat": 4,
+      "recursive": {
+        "carrier_db": -12.662191926845471,
+        "highspur_db": -17.17586596140991,
+        "spur_hz": 3517.987060546875,
+        "wave_residual_dbr": -1.163199144359481
+      },
+      "compact": {
+        "carrier_db": -73.42927435127618,
+        "highspur_db": -24.636636588302956,
+        "spur_hz": 156.11572265625,
+        "wave_residual_dbr": 0.01672176071808284
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 3000,
+      "cutoff": 350,
+      "fb_raw": 0,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": 0.11234353975942615,
+        "highspur_db": -50.23604579304202,
+        "spur_hz": 675.604248046875,
+        "wave_residual_dbr": -34.893409746197314
+      },
+      "compact": {
+        "carrier_db": -65.54695357760335,
+        "highspur_db": -21.987509773817415,
+        "spur_hz": 244.940185546875,
+        "wave_residual_dbr": 0.02302143705932073
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 3000,
+      "cutoff": 520,
+      "fb_raw": 0,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": 0.1020392164903902,
+        "highspur_db": -50.167723234237044,
+        "spur_hz": 675.604248046875,
+        "wave_residual_dbr": -35.100102653057625
+      },
+      "compact": {
+        "carrier_db": -65.54695357760335,
+        "highspur_db": -21.987509773817415,
+        "spur_hz": 244.940185546875,
+        "wave_residual_dbr": 0.02302143705932073
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 3000,
+      "cutoff": 600,
+      "fb_raw": 0,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": 0.10280880736336685,
+        "highspur_db": -50.20742752484714,
+        "spur_hz": 675.604248046875,
+        "wave_residual_dbr": -35.098541892096364
+      },
+      "compact": {
+        "carrier_db": -65.54695357760335,
+        "highspur_db": -21.987509773817415,
+        "spur_hz": 244.940185546875,
+        "wave_residual_dbr": 0.02302143705932073
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 3000,
+      "cutoff": 350,
+      "fb_raw": 64,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": 0.11234353975942615,
+        "highspur_db": -50.23604579304202,
+        "spur_hz": 675.604248046875,
+        "wave_residual_dbr": -34.893409746197314
+      },
+      "compact": {
+        "carrier_db": -65.54695357760335,
+        "highspur_db": -21.987509773817415,
+        "spur_hz": 244.940185546875,
+        "wave_residual_dbr": 0.02302143705932073
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 3000,
+      "cutoff": 350,
+      "fb_raw": 64,
+      "repeat": 2,
+      "recursive": {
+        "carrier_db": 0.2226621095194378,
+        "highspur_db": -49.51334028371768,
+        "spur_hz": 3192.29736328125,
+        "wave_residual_dbr": -30.294258878243234
+      },
+      "compact": {
+        "carrier_db": -65.77869800710695,
+        "highspur_db": -22.220227059375045,
+        "spur_hz": 244.940185546875,
+        "wave_residual_dbr": 0.029975938606102846
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 3000,
+      "cutoff": 350,
+      "fb_raw": 64,
+      "repeat": 4,
+      "recursive": {
+        "carrier_db": 0.5006512506087576,
+        "highspur_db": -47.95854503021986,
+        "spur_hz": 2721.258544921875,
+        "wave_residual_dbr": -23.87523835045456
+      },
+      "compact": {
+        "carrier_db": -66.32105132472503,
+        "highspur_db": -22.764302758179973,
+        "spur_hz": 244.940185546875,
+        "wave_residual_dbr": 0.0224771881640111
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 3000,
+      "cutoff": 520,
+      "fb_raw": 64,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": 0.1020392164903902,
+        "highspur_db": -50.167723234237044,
+        "spur_hz": 675.604248046875,
+        "wave_residual_dbr": -35.100102653057625
+      },
+      "compact": {
+        "carrier_db": -65.54695357760335,
+        "highspur_db": -21.987509773817415,
+        "spur_hz": 244.940185546875,
+        "wave_residual_dbr": 0.02302143705932073
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 3000,
+      "cutoff": 520,
+      "fb_raw": 64,
+      "repeat": 2,
+      "recursive": {
+        "carrier_db": 0.22644292412661718,
+        "highspur_db": -47.377043070454796,
+        "spur_hz": 3192.29736328125,
+        "wave_residual_dbr": -29.964813281265215
+      },
+      "compact": {
+        "carrier_db": -65.77869800710695,
+        "highspur_db": -22.220227059375045,
+        "spur_hz": 244.940185546875,
+        "wave_residual_dbr": 0.029975938606102846
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 3000,
+      "cutoff": 520,
+      "fb_raw": 64,
+      "repeat": 4,
+      "recursive": {
+        "carrier_db": 0.486861491143857,
+        "highspur_db": -49.98087487820605,
+        "spur_hz": 3291.888427734375,
+        "wave_residual_dbr": -24.19458182376232
+      },
+      "compact": {
+        "carrier_db": -66.32105132472503,
+        "highspur_db": -22.764302758179973,
+        "spur_hz": 244.940185546875,
+        "wave_residual_dbr": 0.0224771881640111
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 3000,
+      "cutoff": 600,
+      "fb_raw": 64,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": 0.10280880736336685,
+        "highspur_db": -50.20742752484714,
+        "spur_hz": 675.604248046875,
+        "wave_residual_dbr": -35.098541892096364
+      },
+      "compact": {
+        "carrier_db": -65.54695357760335,
+        "highspur_db": -21.987509773817415,
+        "spur_hz": 244.940185546875,
+        "wave_residual_dbr": 0.02302143705932073
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 3000,
+      "cutoff": 600,
+      "fb_raw": 64,
+      "repeat": 2,
+      "recursive": {
+        "carrier_db": 0.23459435035287846,
+        "highspur_db": -49.033168287522635,
+        "spur_hz": 2796.624755859375,
+        "wave_residual_dbr": -29.675653785911642
+      },
+      "compact": {
+        "carrier_db": -65.77869800710695,
+        "highspur_db": -22.220227059375045,
+        "spur_hz": 244.940185546875,
+        "wave_residual_dbr": 0.029975938606102846
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 3000,
+      "cutoff": 600,
+      "fb_raw": 64,
+      "repeat": 4,
+      "recursive": {
+        "carrier_db": 0.5030592794384027,
+        "highspur_db": -47.56033706646798,
+        "spur_hz": 2791.241455078125,
+        "wave_residual_dbr": -23.74576835164352
+      },
+      "compact": {
+        "carrier_db": -66.32105132472503,
+        "highspur_db": -22.764302758179973,
+        "spur_hz": 244.940185546875,
+        "wave_residual_dbr": 0.0224771881640111
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 3000,
+      "cutoff": 350,
+      "fb_raw": 106,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": 0.11234353975942615,
+        "highspur_db": -50.23604579304202,
+        "spur_hz": 675.604248046875,
+        "wave_residual_dbr": -34.893409746197314
+      },
+      "compact": {
+        "carrier_db": -65.54695357760335,
+        "highspur_db": -21.987509773817415,
+        "spur_hz": 244.940185546875,
+        "wave_residual_dbr": 0.02302143705932073
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 3000,
+      "cutoff": 350,
+      "fb_raw": 106,
+      "repeat": 2,
+      "recursive": {
+        "carrier_db": 0.23291595487485045,
+        "highspur_db": -52.55417572122588,
+        "spur_hz": 3270.355224609375,
+        "wave_residual_dbr": -30.245307416717615
+      },
+      "compact": {
+        "carrier_db": -65.77322381488432,
+        "highspur_db": -22.21477193929394,
+        "spur_hz": 244.940185546875,
+        "wave_residual_dbr": 0.030009990298246695
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 3000,
+      "cutoff": 350,
+      "fb_raw": 106,
+      "repeat": 4,
+      "recursive": {
+        "carrier_db": 0.5359307554207905,
+        "highspur_db": -45.92729558916605,
+        "spur_hz": 2818.157958984375,
+        "wave_residual_dbr": -23.381874255766935
+      },
+      "compact": {
+        "carrier_db": -66.2324483550378,
+        "highspur_db": -22.675933926127048,
+        "spur_hz": 244.940185546875,
+        "wave_residual_dbr": 0.02292849374228703
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 3000,
+      "cutoff": 520,
+      "fb_raw": 106,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": 0.1020392164903902,
+        "highspur_db": -50.167723234237044,
+        "spur_hz": 675.604248046875,
+        "wave_residual_dbr": -35.100102653057625
+      },
+      "compact": {
+        "carrier_db": -65.54695357760335,
+        "highspur_db": -21.987509773817415,
+        "spur_hz": 244.940185546875,
+        "wave_residual_dbr": 0.02302143705932073
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 3000,
+      "cutoff": 520,
+      "fb_raw": 106,
+      "repeat": 2,
+      "recursive": {
+        "carrier_db": 0.23012073098494454,
+        "highspur_db": -50.67302126421219,
+        "spur_hz": 2831.6162109375,
+        "wave_residual_dbr": -30.279350125921045
+      },
+      "compact": {
+        "carrier_db": -65.77322381488432,
+        "highspur_db": -22.21477193929394,
+        "spur_hz": 244.940185546875,
+        "wave_residual_dbr": 0.030009990298246695
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 3000,
+      "cutoff": 520,
+      "fb_raw": 106,
+      "repeat": 4,
+      "recursive": {
+        "carrier_db": 0.5326837974767102,
+        "highspur_db": -46.89875898524748,
+        "spur_hz": 2839.691162109375,
+        "wave_residual_dbr": -23.486777656259665
+      },
+      "compact": {
+        "carrier_db": -66.2324483550378,
+        "highspur_db": -22.675933926127048,
+        "spur_hz": 244.940185546875,
+        "wave_residual_dbr": 0.02292849374228703
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 3000,
+      "cutoff": 600,
+      "fb_raw": 106,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": 0.10280880736336685,
+        "highspur_db": -50.20742752484714,
+        "spur_hz": 675.604248046875,
+        "wave_residual_dbr": -35.098541892096364
+      },
+      "compact": {
+        "carrier_db": -65.54695357760335,
+        "highspur_db": -21.987509773817415,
+        "spur_hz": 244.940185546875,
+        "wave_residual_dbr": 0.02302143705932073
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 3000,
+      "cutoff": 600,
+      "fb_raw": 106,
+      "repeat": 2,
+      "recursive": {
+        "carrier_db": 0.23548674479462522,
+        "highspur_db": -50.458018591728646,
+        "spur_hz": 3203.06396484375,
+        "wave_residual_dbr": -30.11232144454462
+      },
+      "compact": {
+        "carrier_db": -65.77322381488432,
+        "highspur_db": -22.21477193929394,
+        "spur_hz": 244.940185546875,
+        "wave_residual_dbr": 0.030009990298246695
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 3000,
+      "cutoff": 600,
+      "fb_raw": 106,
+      "repeat": 4,
+      "recursive": {
+        "carrier_db": 0.5368328642792178,
+        "highspur_db": -46.49391448483813,
+        "spur_hz": 2839.691162109375,
+        "wave_residual_dbr": -23.400920964722086
+      },
+      "compact": {
+        "carrier_db": -66.2324483550378,
+        "highspur_db": -22.675933926127048,
+        "spur_hz": 244.940185546875,
+        "wave_residual_dbr": 0.02292849374228703
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 3400,
+      "cutoff": 350,
+      "fb_raw": 0,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -11.569975980548037,
+        "highspur_db": -16.116250164663878,
+        "spur_hz": 2481.70166015625,
+        "wave_residual_dbr": -1.7292201689556954
+      },
+      "compact": {
+        "carrier_db": -45.497551268319405,
+        "highspur_db": -16.608183909870363,
+        "spur_hz": 643.304443359375,
+        "wave_residual_dbr": 0.05500091681137173
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 3400,
+      "cutoff": 520,
+      "fb_raw": 0,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -6.14346672895611,
+        "highspur_db": -10.657215537847422,
+        "spur_hz": 2481.70166015625,
+        "wave_residual_dbr": -4.227310726797892
+      },
+      "compact": {
+        "carrier_db": -45.497551268319405,
+        "highspur_db": -16.608183909870363,
+        "spur_hz": 643.304443359375,
+        "wave_residual_dbr": 0.05500091681137173
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 3400,
+      "cutoff": 600,
+      "fb_raw": 0,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -5.816444722931783,
+        "highspur_db": -10.328384229369815,
+        "spur_hz": 2481.70166015625,
+        "wave_residual_dbr": -4.592597711138923
+      },
+      "compact": {
+        "carrier_db": -45.497551268319405,
+        "highspur_db": -16.608183909870363,
+        "spur_hz": 643.304443359375,
+        "wave_residual_dbr": 0.05500091681137173
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 3400,
+      "cutoff": 350,
+      "fb_raw": 64,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -11.569975980548037,
+        "highspur_db": -16.116250164663878,
+        "spur_hz": 2481.70166015625,
+        "wave_residual_dbr": -1.7292201689556954
+      },
+      "compact": {
+        "carrier_db": -45.497551268319405,
+        "highspur_db": -16.608183909870363,
+        "spur_hz": 643.304443359375,
+        "wave_residual_dbr": 0.05500091681137173
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 3400,
+      "cutoff": 350,
+      "fb_raw": 64,
+      "repeat": 2,
+      "recursive": {
+        "carrier_db": -21.292673176590494,
+        "highspur_db": -25.93052099928193,
+        "spur_hz": 2481.70166015625,
+        "wave_residual_dbr": -0.22719151959697947
+      },
+      "compact": {
+        "carrier_db": -47.587658575771705,
+        "highspur_db": -18.696133519371664,
+        "spur_hz": 643.304443359375,
+        "wave_residual_dbr": 0.09293079428096757
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 3400,
+      "cutoff": 350,
+      "fb_raw": 64,
+      "repeat": 4,
+      "recursive": {
+        "carrier_db": -39.788825278069,
+        "highspur_db": -44.235313710938144,
+        "spur_hz": 2479.010009765625,
+        "wave_residual_dbr": 0.06433627818690825
+      },
+      "compact": {
+        "carrier_db": -51.850880590240706,
+        "highspur_db": -22.955214169875894,
+        "spur_hz": 643.304443359375,
+        "wave_residual_dbr": 0.04419586379629896
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 3400,
+      "cutoff": 520,
+      "fb_raw": 64,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -6.14346672895611,
+        "highspur_db": -10.657215537847422,
+        "spur_hz": 2481.70166015625,
+        "wave_residual_dbr": -4.227310726797892
+      },
+      "compact": {
+        "carrier_db": -45.497551268319405,
+        "highspur_db": -16.608183909870363,
+        "spur_hz": 643.304443359375,
+        "wave_residual_dbr": 0.05500091681137173
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 3400,
+      "cutoff": 520,
+      "fb_raw": 64,
+      "repeat": 2,
+      "recursive": {
+        "carrier_db": -9.090502706611426,
+        "highspur_db": -13.589213657218265,
+        "spur_hz": 2481.70166015625,
+        "wave_residual_dbr": -2.5904848689932076
+      },
+      "compact": {
+        "carrier_db": -47.587658575771705,
+        "highspur_db": -18.696133519371664,
+        "spur_hz": 643.304443359375,
+        "wave_residual_dbr": 0.09293079428096757
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 3400,
+      "cutoff": 520,
+      "fb_raw": 64,
+      "repeat": 4,
+      "recursive": {
+        "carrier_db": -14.946180621178142,
+        "highspur_db": -19.463034513770133,
+        "spur_hz": 2481.70166015625,
+        "wave_residual_dbr": -0.729422595703902
+      },
+      "compact": {
+        "carrier_db": -51.850880590240706,
+        "highspur_db": -22.955214169875894,
+        "spur_hz": 643.304443359375,
+        "wave_residual_dbr": 0.04419586379629896
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 3400,
+      "cutoff": 600,
+      "fb_raw": 64,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -5.816444722931783,
+        "highspur_db": -10.328384229369815,
+        "spur_hz": 2481.70166015625,
+        "wave_residual_dbr": -4.592597711138923
+      },
+      "compact": {
+        "carrier_db": -45.497551268319405,
+        "highspur_db": -16.608183909870363,
+        "spur_hz": 643.304443359375,
+        "wave_residual_dbr": 0.05500091681137173
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 3400,
+      "cutoff": 600,
+      "fb_raw": 64,
+      "repeat": 2,
+      "recursive": {
+        "carrier_db": -7.999196750452483,
+        "highspur_db": -12.520919865913935,
+        "spur_hz": 2481.70166015625,
+        "wave_residual_dbr": -3.189453152255023
+      },
+      "compact": {
+        "carrier_db": -47.587658575771705,
+        "highspur_db": -18.696133519371664,
+        "spur_hz": 643.304443359375,
+        "wave_residual_dbr": 0.09293079428096757
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 3400,
+      "cutoff": 600,
+      "fb_raw": 64,
+      "repeat": 4,
+      "recursive": {
+        "carrier_db": -12.327972844767963,
+        "highspur_db": -16.850763040572346,
+        "spur_hz": 2481.70166015625,
+        "wave_residual_dbr": -1.1619568178621595
+      },
+      "compact": {
+        "carrier_db": -51.850880590240706,
+        "highspur_db": -22.955214169875894,
+        "spur_hz": 643.304443359375,
+        "wave_residual_dbr": 0.04419586379629896
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 3400,
+      "cutoff": 350,
+      "fb_raw": 106,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -11.569975980548037,
+        "highspur_db": -16.116250164663878,
+        "spur_hz": 2481.70166015625,
+        "wave_residual_dbr": -1.7292201689556954
+      },
+      "compact": {
+        "carrier_db": -45.497551268319405,
+        "highspur_db": -16.608183909870363,
+        "spur_hz": 643.304443359375,
+        "wave_residual_dbr": 0.05500091681137173
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 3400,
+      "cutoff": 350,
+      "fb_raw": 106,
+      "repeat": 2,
+      "recursive": {
+        "carrier_db": -21.304479871411264,
+        "highspur_db": -25.94061793263282,
+        "spur_hz": 2481.70166015625,
+        "wave_residual_dbr": -0.23020690031166677
+      },
+      "compact": {
+        "carrier_db": -47.582954371273644,
+        "highspur_db": -18.69143506372986,
+        "spur_hz": 643.304443359375,
+        "wave_residual_dbr": 0.0930096742297881
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 3400,
+      "cutoff": 350,
+      "fb_raw": 106,
+      "repeat": 4,
+      "recursive": {
+        "carrier_db": -40.580718739247,
+        "highspur_db": -44.995424827057604,
+        "spur_hz": 2479.010009765625,
+        "wave_residual_dbr": 0.05737221411132063
+      },
+      "compact": {
+        "carrier_db": -51.76886968057944,
+        "highspur_db": -22.87306423204686,
+        "spur_hz": 643.304443359375,
+        "wave_residual_dbr": 0.044802620717923756
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 3400,
+      "cutoff": 520,
+      "fb_raw": 106,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -6.14346672895611,
+        "highspur_db": -10.657215537847422,
+        "spur_hz": 2481.70166015625,
+        "wave_residual_dbr": -4.227310726797892
+      },
+      "compact": {
+        "carrier_db": -45.497551268319405,
+        "highspur_db": -16.608183909870363,
+        "spur_hz": 643.304443359375,
+        "wave_residual_dbr": 0.05500091681137173
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 3400,
+      "cutoff": 520,
+      "fb_raw": 106,
+      "repeat": 2,
+      "recursive": {
+        "carrier_db": -9.079243570900271,
+        "highspur_db": -13.57940504929025,
+        "spur_hz": 2481.70166015625,
+        "wave_residual_dbr": -2.5915341522006754
+      },
+      "compact": {
+        "carrier_db": -47.582954371273644,
+        "highspur_db": -18.69143506372986,
+        "spur_hz": 643.304443359375,
+        "wave_residual_dbr": 0.0930096742297881
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 3400,
+      "cutoff": 520,
+      "fb_raw": 106,
+      "repeat": 4,
+      "recursive": {
+        "carrier_db": -15.003176540783386,
+        "highspur_db": -19.521080536852146,
+        "spur_hz": 2481.70166015625,
+        "wave_residual_dbr": -0.7274531858354555
+      },
+      "compact": {
+        "carrier_db": -51.76886968057944,
+        "highspur_db": -22.87306423204686,
+        "spur_hz": 643.304443359375,
+        "wave_residual_dbr": 0.044802620717923756
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 3400,
+      "cutoff": 600,
+      "fb_raw": 106,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -5.816444722931783,
+        "highspur_db": -10.328384229369815,
+        "spur_hz": 2481.70166015625,
+        "wave_residual_dbr": -4.592597711138923
+      },
+      "compact": {
+        "carrier_db": -45.497551268319405,
+        "highspur_db": -16.608183909870363,
+        "spur_hz": 643.304443359375,
+        "wave_residual_dbr": 0.05500091681137173
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 3400,
+      "cutoff": 600,
+      "fb_raw": 106,
+      "repeat": 2,
+      "recursive": {
+        "carrier_db": -8.01467798073194,
+        "highspur_db": -12.536964296933697,
+        "spur_hz": 2481.70166015625,
+        "wave_residual_dbr": -3.1820202116453027
+      },
+      "compact": {
+        "carrier_db": -47.582954371273644,
+        "highspur_db": -18.69143506372986,
+        "spur_hz": 643.304443359375,
+        "wave_residual_dbr": 0.0930096742297881
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 3400,
+      "cutoff": 600,
+      "fb_raw": 106,
+      "repeat": 4,
+      "recursive": {
+        "carrier_db": -12.394604196599532,
+        "highspur_db": -16.91672613083918,
+        "spur_hz": 2481.70166015625,
+        "wave_residual_dbr": -1.1648442130662264
+      },
+      "compact": {
+        "carrier_db": -51.76886968057944,
+        "highspur_db": -22.87306423204686,
+        "spur_hz": 643.304443359375,
+        "wave_residual_dbr": 0.044802620717923756
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 6000,
+      "cutoff": 350,
+      "fb_raw": 0,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -300.0,
+        "highspur_db": -300.0,
+        "spur_hz": 0.0,
+        "wave_residual_dbr": 0.0
+      },
+      "compact": {
+        "carrier_db": -65.97850304197769,
+        "highspur_db": -22.426152312035633,
+        "spur_hz": 487.188720703125,
+        "wave_residual_dbr": 0.02056636698894223
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 6000,
+      "cutoff": 520,
+      "fb_raw": 0,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -107.13272218653115,
+        "highspur_db": -63.23833787933787,
+        "spur_hz": 3243.438720703125,
+        "wave_residual_dbr": 4.34883179121992e-05
+      },
+      "compact": {
+        "carrier_db": -65.97850304197769,
+        "highspur_db": -22.426152312035633,
+        "spur_hz": 487.188720703125,
+        "wave_residual_dbr": 0.02056636698894223
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 6000,
+      "cutoff": 600,
+      "fb_raw": 0,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -100.24522249110062,
+        "highspur_db": -56.63154050772679,
+        "spur_hz": 3243.438720703125,
+        "wave_residual_dbr": -2.951005401651399e-05
+      },
+      "compact": {
+        "carrier_db": -65.97850304197769,
+        "highspur_db": -22.426152312035633,
+        "spur_hz": 487.188720703125,
+        "wave_residual_dbr": 0.02056636698894223
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 6000,
+      "cutoff": 350,
+      "fb_raw": 64,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -300.0,
+        "highspur_db": -300.0,
+        "spur_hz": 0.0,
+        "wave_residual_dbr": 0.0
+      },
+      "compact": {
+        "carrier_db": -65.97850304197769,
+        "highspur_db": -22.426152312035633,
+        "spur_hz": 487.188720703125,
+        "wave_residual_dbr": 0.02056636698894223
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 6000,
+      "cutoff": 350,
+      "fb_raw": 64,
+      "repeat": 2,
+      "recursive": {
+        "carrier_db": -300.0,
+        "highspur_db": -300.0,
+        "spur_hz": 0.0,
+        "wave_residual_dbr": 0.0
+      },
+      "compact": {
+        "carrier_db": -66.82967457167753,
+        "highspur_db": -23.275788851035536,
+        "spur_hz": 487.188720703125,
+        "wave_residual_dbr": 0.01854973655774188
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 6000,
+      "cutoff": 350,
+      "fb_raw": 64,
+      "repeat": 4,
+      "recursive": {
+        "carrier_db": -300.0,
+        "highspur_db": -300.0,
+        "spur_hz": 0.0,
+        "wave_residual_dbr": 0.0
+      },
+      "compact": {
+        "carrier_db": -68.65713236386699,
+        "highspur_db": -25.100040100246638,
+        "spur_hz": 487.188720703125,
+        "wave_residual_dbr": 0.01652126963551649
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 6000,
+      "cutoff": 520,
+      "fb_raw": 64,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -107.13272218653115,
+        "highspur_db": -63.23833787933787,
+        "spur_hz": 3243.438720703125,
+        "wave_residual_dbr": 4.34883179121992e-05
+      },
+      "compact": {
+        "carrier_db": -65.97850304197769,
+        "highspur_db": -22.426152312035633,
+        "spur_hz": 487.188720703125,
+        "wave_residual_dbr": 0.02056636698894223
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 6000,
+      "cutoff": 520,
+      "fb_raw": 64,
+      "repeat": 2,
+      "recursive": {
+        "carrier_db": -300.0,
+        "highspur_db": -300.0,
+        "spur_hz": 0.0,
+        "wave_residual_dbr": 0.0
+      },
+      "compact": {
+        "carrier_db": -66.82967457167753,
+        "highspur_db": -23.275788851035536,
+        "spur_hz": 487.188720703125,
+        "wave_residual_dbr": 0.01854973655774188
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 6000,
+      "cutoff": 520,
+      "fb_raw": 64,
+      "repeat": 4,
+      "recursive": {
+        "carrier_db": -300.0,
+        "highspur_db": -300.0,
+        "spur_hz": 0.0,
+        "wave_residual_dbr": 0.0
+      },
+      "compact": {
+        "carrier_db": -68.65713236386699,
+        "highspur_db": -25.100040100246638,
+        "spur_hz": 487.188720703125,
+        "wave_residual_dbr": 0.01652126963551649
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 6000,
+      "cutoff": 600,
+      "fb_raw": 64,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -100.24522249110062,
+        "highspur_db": -56.63154050772679,
+        "spur_hz": 3243.438720703125,
+        "wave_residual_dbr": -2.951005401651399e-05
+      },
+      "compact": {
+        "carrier_db": -65.97850304197769,
+        "highspur_db": -22.426152312035633,
+        "spur_hz": 487.188720703125,
+        "wave_residual_dbr": 0.02056636698894223
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 6000,
+      "cutoff": 600,
+      "fb_raw": 64,
+      "repeat": 2,
+      "recursive": {
+        "carrier_db": -105.7748887098229,
+        "highspur_db": -61.67696233229972,
+        "spur_hz": 3243.438720703125,
+        "wave_residual_dbr": 1.760244062261711e-05
+      },
+      "compact": {
+        "carrier_db": -66.82967457167753,
+        "highspur_db": -23.275788851035536,
+        "spur_hz": 487.188720703125,
+        "wave_residual_dbr": 0.01854973655774188
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 6000,
+      "cutoff": 600,
+      "fb_raw": 64,
+      "repeat": 4,
+      "recursive": {
+        "carrier_db": -300.0,
+        "highspur_db": -300.0,
+        "spur_hz": 0.0,
+        "wave_residual_dbr": 0.0
+      },
+      "compact": {
+        "carrier_db": -68.65713236386699,
+        "highspur_db": -25.100040100246638,
+        "spur_hz": 487.188720703125,
+        "wave_residual_dbr": 0.01652126963551649
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 6000,
+      "cutoff": 350,
+      "fb_raw": 106,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -300.0,
+        "highspur_db": -300.0,
+        "spur_hz": 0.0,
+        "wave_residual_dbr": 0.0
+      },
+      "compact": {
+        "carrier_db": -65.97850304197769,
+        "highspur_db": -22.426152312035633,
+        "spur_hz": 487.188720703125,
+        "wave_residual_dbr": 0.02056636698894223
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 6000,
+      "cutoff": 350,
+      "fb_raw": 106,
+      "repeat": 2,
+      "recursive": {
+        "carrier_db": -300.0,
+        "highspur_db": -300.0,
+        "spur_hz": 0.0,
+        "wave_residual_dbr": 0.0
+      },
+      "compact": {
+        "carrier_db": -66.82203805648685,
+        "highspur_db": -23.26806028233552,
+        "spur_hz": 487.188720703125,
+        "wave_residual_dbr": 0.018583833073938908
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 6000,
+      "cutoff": 350,
+      "fb_raw": 106,
+      "repeat": 4,
+      "recursive": {
+        "carrier_db": -300.0,
+        "highspur_db": -300.0,
+        "spur_hz": 0.0,
+        "wave_residual_dbr": 0.0
+      },
+      "compact": {
+        "carrier_db": -68.52759266409817,
+        "highspur_db": -24.9704126372678,
+        "spur_hz": 487.188720703125,
+        "wave_residual_dbr": 0.016956350078446078
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 6000,
+      "cutoff": 520,
+      "fb_raw": 106,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -107.13272218653115,
+        "highspur_db": -63.23833787933787,
+        "spur_hz": 3243.438720703125,
+        "wave_residual_dbr": 4.34883179121992e-05
+      },
+      "compact": {
+        "carrier_db": -65.97850304197769,
+        "highspur_db": -22.426152312035633,
+        "spur_hz": 487.188720703125,
+        "wave_residual_dbr": 0.02056636698894223
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 6000,
+      "cutoff": 520,
+      "fb_raw": 106,
+      "repeat": 2,
+      "recursive": {
+        "carrier_db": -105.01570464411367,
+        "highspur_db": -61.09852059453391,
+        "spur_hz": 3243.438720703125,
+        "wave_residual_dbr": -1.708475589482253e-05
+      },
+      "compact": {
+        "carrier_db": -66.82203805648685,
+        "highspur_db": -23.26806028233552,
+        "spur_hz": 487.188720703125,
+        "wave_residual_dbr": 0.018583833073938908
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 6000,
+      "cutoff": 520,
+      "fb_raw": 106,
+      "repeat": 4,
+      "recursive": {
+        "carrier_db": -100.76107993016814,
+        "highspur_db": -56.819592216555684,
+        "spur_hz": 3243.438720703125,
+        "wave_residual_dbr": 9.629526837090764e-05
+      },
+      "compact": {
+        "carrier_db": -68.52759266409817,
+        "highspur_db": -24.9704126372678,
+        "spur_hz": 487.188720703125,
+        "wave_residual_dbr": 0.016956350078446078
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 6000,
+      "cutoff": 600,
+      "fb_raw": 106,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -100.24522249110062,
+        "highspur_db": -56.63154050772679,
+        "spur_hz": 3243.438720703125,
+        "wave_residual_dbr": -2.951005401651399e-05
+      },
+      "compact": {
+        "carrier_db": -65.97850304197769,
+        "highspur_db": -22.426152312035633,
+        "spur_hz": 487.188720703125,
+        "wave_residual_dbr": 0.02056636698894223
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 6000,
+      "cutoff": 600,
+      "fb_raw": 106,
+      "repeat": 2,
+      "recursive": {
+        "carrier_db": -99.80450505437501,
+        "highspur_db": -56.18750233448229,
+        "spur_hz": 3243.438720703125,
+        "wave_residual_dbr": -2.5886006894930938e-05
+      },
+      "compact": {
+        "carrier_db": -66.82203805648685,
+        "highspur_db": -23.26806028233552,
+        "spur_hz": 487.188720703125,
+        "wave_residual_dbr": 0.018583833073938908
+      }
+    },
+    {
+      "raw": 21,
+      "time_ms": 248.03149700164795,
+      "f": 6000,
+      "cutoff": 600,
+      "fb_raw": 106,
+      "repeat": 4,
+      "recursive": {
+        "carrier_db": -95.50150048375284,
+        "highspur_db": -51.918295314913095,
+        "spur_hz": 3243.438720703125,
+        "wave_residual_dbr": 1.8637877195398318e-05
+      },
+      "compact": {
+        "carrier_db": -68.52759266409817,
+        "highspur_db": -24.9704126372678,
+        "spur_hz": 487.188720703125,
+        "wave_residual_dbr": 0.016956350078446078
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 220,
+      "cutoff": 350,
+      "fb_raw": 0,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -0.4031104258809071,
+        "highspur_db": -35.07591682020093,
+        "spur_hz": 1617.681884765625,
+        "wave_residual_dbr": -25.71291859526484
+      },
+      "compact": {
+        "carrier_db": -1.1027854260392387,
+        "highspur_db": -29.939383515896942,
+        "spur_hz": 1157.40966796875,
+        "wave_residual_dbr": -6.58274508076274
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 220,
+      "cutoff": 520,
+      "fb_raw": 0,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -0.40314755945054237,
+        "highspur_db": -35.06322712083461,
+        "spur_hz": 1617.681884765625,
+        "wave_residual_dbr": -25.709858464869196
+      },
+      "compact": {
+        "carrier_db": -1.1027854260392387,
+        "highspur_db": -29.939383515896942,
+        "spur_hz": 1157.40966796875,
+        "wave_residual_dbr": -6.58274508076274
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 220,
+      "cutoff": 600,
+      "fb_raw": 0,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -0.4031324444318895,
+        "highspur_db": -35.05037768195044,
+        "spur_hz": 1617.681884765625,
+        "wave_residual_dbr": -25.704224400278434
+      },
+      "compact": {
+        "carrier_db": -1.1027854260392387,
+        "highspur_db": -29.939383515896942,
+        "spur_hz": 1157.40966796875,
+        "wave_residual_dbr": -6.58274508076274
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 220,
+      "cutoff": 350,
+      "fb_raw": 64,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -0.4031104258809071,
+        "highspur_db": -35.07591682020093,
+        "spur_hz": 1617.681884765625,
+        "wave_residual_dbr": -25.71291859526484
+      },
+      "compact": {
+        "carrier_db": -1.1027854260392387,
+        "highspur_db": -29.939383515896942,
+        "spur_hz": 1157.40966796875,
+        "wave_residual_dbr": -6.58274508076274
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 220,
+      "cutoff": 350,
+      "fb_raw": 64,
+      "repeat": 2,
+      "recursive": {
+        "carrier_db": -0.8139817441531104,
+        "highspur_db": -35.50464824302745,
+        "spur_hz": 1617.681884765625,
+        "wave_residual_dbr": -20.508222697985083
+      },
+      "compact": {
+        "carrier_db": -2.180769995099734,
+        "highspur_db": -31.02483349497561,
+        "spur_hz": 1157.40966796875,
+        "wave_residual_dbr": -1.4144947552070186
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 220,
+      "cutoff": 350,
+      "fb_raw": 64,
+      "repeat": 4,
+      "recursive": {
+        "carrier_db": -1.6379956269075606,
+        "highspur_db": -36.31392150648208,
+        "spur_hz": 1617.681884765625,
+        "wave_residual_dbr": -15.059935647815582
+      },
+      "compact": {
+        "carrier_db": -4.3502441485486045,
+        "highspur_db": -33.209071855173015,
+        "spur_hz": 1157.40966796875,
+        "wave_residual_dbr": 2.5286111090330143
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 220,
+      "cutoff": 520,
+      "fb_raw": 64,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -0.40314755945054237,
+        "highspur_db": -35.06322712083461,
+        "spur_hz": 1617.681884765625,
+        "wave_residual_dbr": -25.709858464869196
+      },
+      "compact": {
+        "carrier_db": -1.1027854260392387,
+        "highspur_db": -29.939383515896942,
+        "spur_hz": 1157.40966796875,
+        "wave_residual_dbr": -6.58274508076274
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 220,
+      "cutoff": 520,
+      "fb_raw": 64,
+      "repeat": 2,
+      "recursive": {
+        "carrier_db": -0.8137674530753425,
+        "highspur_db": -35.54305245868389,
+        "spur_hz": 1617.681884765625,
+        "wave_residual_dbr": -20.506318855783164
+      },
+      "compact": {
+        "carrier_db": -2.180769995099734,
+        "highspur_db": -31.02483349497561,
+        "spur_hz": 1157.40966796875,
+        "wave_residual_dbr": -1.4144947552070186
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 220,
+      "cutoff": 520,
+      "fb_raw": 64,
+      "repeat": 4,
+      "recursive": {
+        "carrier_db": -1.6373726643545763,
+        "highspur_db": -36.303102942050224,
+        "spur_hz": 1617.681884765625,
+        "wave_residual_dbr": -15.061960090503687
+      },
+      "compact": {
+        "carrier_db": -4.3502441485486045,
+        "highspur_db": -33.209071855173015,
+        "spur_hz": 1157.40966796875,
+        "wave_residual_dbr": 2.5286111090330143
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 220,
+      "cutoff": 600,
+      "fb_raw": 64,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -0.4031324444318895,
+        "highspur_db": -35.05037768195044,
+        "spur_hz": 1617.681884765625,
+        "wave_residual_dbr": -25.704224400278434
+      },
+      "compact": {
+        "carrier_db": -1.1027854260392387,
+        "highspur_db": -29.939383515896942,
+        "spur_hz": 1157.40966796875,
+        "wave_residual_dbr": -6.58274508076274
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 220,
+      "cutoff": 600,
+      "fb_raw": 64,
+      "repeat": 2,
+      "recursive": {
+        "carrier_db": -0.8140233005423627,
+        "highspur_db": -35.520684008029995,
+        "spur_hz": 1617.681884765625,
+        "wave_residual_dbr": -20.501603240797852
+      },
+      "compact": {
+        "carrier_db": -2.180769995099734,
+        "highspur_db": -31.02483349497561,
+        "spur_hz": 1157.40966796875,
+        "wave_residual_dbr": -1.4144947552070186
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 220,
+      "cutoff": 600,
+      "fb_raw": 64,
+      "repeat": 4,
+      "recursive": {
+        "carrier_db": -1.6378949726072023,
+        "highspur_db": -36.36930913681823,
+        "spur_hz": 1617.681884765625,
+        "wave_residual_dbr": -15.056473493206655
+      },
+      "compact": {
+        "carrier_db": -4.3502441485486045,
+        "highspur_db": -33.209071855173015,
+        "spur_hz": 1157.40966796875,
+        "wave_residual_dbr": 2.5286111090330143
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 220,
+      "cutoff": 350,
+      "fb_raw": 106,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -0.4031104258809071,
+        "highspur_db": -35.07591682020093,
+        "spur_hz": 1617.681884765625,
+        "wave_residual_dbr": -25.71291859526484
+      },
+      "compact": {
+        "carrier_db": -1.1027854260392387,
+        "highspur_db": -29.939383515896942,
+        "spur_hz": 1157.40966796875,
+        "wave_residual_dbr": -6.58274508076274
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 220,
+      "cutoff": 350,
+      "fb_raw": 106,
+      "repeat": 2,
+      "recursive": {
+        "carrier_db": -0.8007508493309383,
+        "highspur_db": -35.49847018781524,
+        "spur_hz": 1617.681884765625,
+        "wave_residual_dbr": -20.65623542922024
+      },
+      "compact": {
+        "carrier_db": -2.180299060852666,
+        "highspur_db": -31.02436676561801,
+        "spur_hz": 1157.40966796875,
+        "wave_residual_dbr": -1.414404581772815
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 220,
+      "cutoff": 350,
+      "fb_raw": 106,
+      "repeat": 4,
+      "recursive": {
+        "carrier_db": -1.6109350761921628,
+        "highspur_db": -36.318851499360974,
+        "spur_hz": 1617.681884765625,
+        "wave_residual_dbr": -15.205518380495223
+      },
+      "compact": {
+        "carrier_db": -4.339855557688235,
+        "highspur_db": -33.198820565398975,
+        "spur_hz": 1157.40966796875,
+        "wave_residual_dbr": 2.531948367743304
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 220,
+      "cutoff": 520,
+      "fb_raw": 106,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -0.40314755945054237,
+        "highspur_db": -35.06322712083461,
+        "spur_hz": 1617.681884765625,
+        "wave_residual_dbr": -25.709858464869196
+      },
+      "compact": {
+        "carrier_db": -1.1027854260392387,
+        "highspur_db": -29.939383515896942,
+        "spur_hz": 1157.40966796875,
+        "wave_residual_dbr": -6.58274508076274
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 220,
+      "cutoff": 520,
+      "fb_raw": 106,
+      "repeat": 2,
+      "recursive": {
+        "carrier_db": -0.8004841828209464,
+        "highspur_db": -35.5270030389861,
+        "spur_hz": 1617.681884765625,
+        "wave_residual_dbr": -20.656941072146093
+      },
+      "compact": {
+        "carrier_db": -2.180299060852666,
+        "highspur_db": -31.02436676561801,
+        "spur_hz": 1157.40966796875,
+        "wave_residual_dbr": -1.414404581772815
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 220,
+      "cutoff": 520,
+      "fb_raw": 106,
+      "repeat": 4,
+      "recursive": {
+        "carrier_db": -1.6104294531290066,
+        "highspur_db": -36.296229660593006,
+        "spur_hz": 1617.681884765625,
+        "wave_residual_dbr": -15.208987533412673
+      },
+      "compact": {
+        "carrier_db": -4.339855557688235,
+        "highspur_db": -33.198820565398975,
+        "spur_hz": 1157.40966796875,
+        "wave_residual_dbr": 2.531948367743304
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 220,
+      "cutoff": 600,
+      "fb_raw": 106,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -0.4031324444318895,
+        "highspur_db": -35.05037768195044,
+        "spur_hz": 1617.681884765625,
+        "wave_residual_dbr": -25.704224400278434
+      },
+      "compact": {
+        "carrier_db": -1.1027854260392387,
+        "highspur_db": -29.939383515896942,
+        "spur_hz": 1157.40966796875,
+        "wave_residual_dbr": -6.58274508076274
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 220,
+      "cutoff": 600,
+      "fb_raw": 106,
+      "repeat": 2,
+      "recursive": {
+        "carrier_db": -0.8007487079752195,
+        "highspur_db": -35.513477732271625,
+        "spur_hz": 1617.681884765625,
+        "wave_residual_dbr": -20.651167791704573
+      },
+      "compact": {
+        "carrier_db": -2.180299060852666,
+        "highspur_db": -31.02436676561801,
+        "spur_hz": 1157.40966796875,
+        "wave_residual_dbr": -1.414404581772815
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 220,
+      "cutoff": 600,
+      "fb_raw": 106,
+      "repeat": 4,
+      "recursive": {
+        "carrier_db": -1.6097969626916753,
+        "highspur_db": -36.40178793592525,
+        "spur_hz": 1617.681884765625,
+        "wave_residual_dbr": -15.20652156422053
+      },
+      "compact": {
+        "carrier_db": -4.339855557688235,
+        "highspur_db": -33.198820565398975,
+        "spur_hz": 1157.40966796875,
+        "wave_residual_dbr": 2.531948367743304
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 700,
+      "cutoff": 350,
+      "fb_raw": 0,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -5.603508973661197,
+        "highspur_db": -14.088567357719795,
+        "spur_hz": 1138.568115234375,
+        "wave_residual_dbr": -4.693679967275503
+      },
+      "compact": {
+        "carrier_db": -11.012185214866863,
+        "highspur_db": -28.7702638685283,
+        "spur_hz": 2067.1875,
+        "wave_residual_dbr": 0.5547476574291909
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 700,
+      "cutoff": 520,
+      "fb_raw": 0,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -5.603068269862917,
+        "highspur_db": -14.088992776772486,
+        "spur_hz": 1138.568115234375,
+        "wave_residual_dbr": -4.694564316091434
+      },
+      "compact": {
+        "carrier_db": -11.012185214866863,
+        "highspur_db": -28.7702638685283,
+        "spur_hz": 2067.1875,
+        "wave_residual_dbr": 0.5547476574291909
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 700,
+      "cutoff": 600,
+      "fb_raw": 0,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -5.60430998185479,
+        "highspur_db": -14.087614724102943,
+        "spur_hz": 1138.568115234375,
+        "wave_residual_dbr": -4.6936453061907795
+      },
+      "compact": {
+        "carrier_db": -11.012185214866863,
+        "highspur_db": -28.7702638685283,
+        "spur_hz": 2067.1875,
+        "wave_residual_dbr": 0.5547476574291909
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 700,
+      "cutoff": 350,
+      "fb_raw": 64,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -5.603508973661197,
+        "highspur_db": -14.088567357719795,
+        "spur_hz": 1138.568115234375,
+        "wave_residual_dbr": -4.693679967275503
+      },
+      "compact": {
+        "carrier_db": -11.012185214866863,
+        "highspur_db": -28.7702638685283,
+        "spur_hz": 2067.1875,
+        "wave_residual_dbr": 0.5547476574291909
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 700,
+      "cutoff": 350,
+      "fb_raw": 64,
+      "repeat": 2,
+      "recursive": {
+        "carrier_db": -11.619483912841709,
+        "highspur_db": -20.085643337341402,
+        "spur_hz": 1138.568115234375,
+        "wave_residual_dbr": -1.37443915483637
+      },
+      "compact": {
+        "carrier_db": -17.544999968497535,
+        "highspur_db": -35.30702551019014,
+        "spur_hz": 2067.1875,
+        "wave_residual_dbr": 1.0607871790467505
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 700,
+      "cutoff": 350,
+      "fb_raw": 64,
+      "repeat": 4,
+      "recursive": {
+        "carrier_db": -23.63780947437872,
+        "highspur_db": -26.695217760738984,
+        "spur_hz": 2974.273681640625,
+        "wave_residual_dbr": 0.13656679063683588
+      },
+      "compact": {
+        "carrier_db": -30.694480295201238,
+        "highspur_db": -48.4407196813371,
+        "spur_hz": 2067.1875,
+        "wave_residual_dbr": -0.06161227249986392
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 700,
+      "cutoff": 520,
+      "fb_raw": 64,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -5.603068269862917,
+        "highspur_db": -14.088992776772486,
+        "spur_hz": 1138.568115234375,
+        "wave_residual_dbr": -4.694564316091434
+      },
+      "compact": {
+        "carrier_db": -11.012185214866863,
+        "highspur_db": -28.7702638685283,
+        "spur_hz": 2067.1875,
+        "wave_residual_dbr": 0.5547476574291909
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 700,
+      "cutoff": 520,
+      "fb_raw": 64,
+      "repeat": 2,
+      "recursive": {
+        "carrier_db": -11.597800195522925,
+        "highspur_db": -20.101820394397,
+        "spur_hz": 1138.568115234375,
+        "wave_residual_dbr": -1.37969528617909
+      },
+      "compact": {
+        "carrier_db": -17.544999968497535,
+        "highspur_db": -35.30702551019014,
+        "spur_hz": 2067.1875,
+        "wave_residual_dbr": 1.0607871790467505
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 700,
+      "cutoff": 520,
+      "fb_raw": 64,
+      "repeat": 4,
+      "recursive": {
+        "carrier_db": -23.547202730833238,
+        "highspur_db": -26.994403602021947,
+        "spur_hz": 2974.273681640625,
+        "wave_residual_dbr": 0.13927868733630558
+      },
+      "compact": {
+        "carrier_db": -30.694480295201238,
+        "highspur_db": -48.4407196813371,
+        "spur_hz": 2067.1875,
+        "wave_residual_dbr": -0.06161227249986392
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 700,
+      "cutoff": 600,
+      "fb_raw": 64,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -5.60430998185479,
+        "highspur_db": -14.087614724102943,
+        "spur_hz": 1138.568115234375,
+        "wave_residual_dbr": -4.6936453061907795
+      },
+      "compact": {
+        "carrier_db": -11.012185214866863,
+        "highspur_db": -28.7702638685283,
+        "spur_hz": 2067.1875,
+        "wave_residual_dbr": 0.5547476574291909
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 700,
+      "cutoff": 600,
+      "fb_raw": 64,
+      "repeat": 2,
+      "recursive": {
+        "carrier_db": -11.616171169661131,
+        "highspur_db": -20.07167668708434,
+        "spur_hz": 1138.568115234375,
+        "wave_residual_dbr": -1.3799999286916016
+      },
+      "compact": {
+        "carrier_db": -17.544999968497535,
+        "highspur_db": -35.30702551019014,
+        "spur_hz": 2067.1875,
+        "wave_residual_dbr": 1.0607871790467505
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 700,
+      "cutoff": 600,
+      "fb_raw": 64,
+      "repeat": 4,
+      "recursive": {
+        "carrier_db": -23.630918896661363,
+        "highspur_db": -27.06744422424817,
+        "spur_hz": 2974.273681640625,
+        "wave_residual_dbr": 0.13601024264058575
+      },
+      "compact": {
+        "carrier_db": -30.694480295201238,
+        "highspur_db": -48.4407196813371,
+        "spur_hz": 2067.1875,
+        "wave_residual_dbr": -0.06161227249986392
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 700,
+      "cutoff": 350,
+      "fb_raw": 106,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -5.603508973661197,
+        "highspur_db": -14.088567357719795,
+        "spur_hz": 1138.568115234375,
+        "wave_residual_dbr": -4.693679967275503
+      },
+      "compact": {
+        "carrier_db": -11.012185214866863,
+        "highspur_db": -28.7702638685283,
+        "spur_hz": 2067.1875,
+        "wave_residual_dbr": 0.5547476574291909
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 700,
+      "cutoff": 350,
+      "fb_raw": 106,
+      "repeat": 2,
+      "recursive": {
+        "carrier_db": -11.62662932972303,
+        "highspur_db": -20.09293581755809,
+        "spur_hz": 1138.568115234375,
+        "wave_residual_dbr": -1.3731947473514703
+      },
+      "compact": {
+        "carrier_db": -17.54383466988573,
+        "highspur_db": -35.30639123820205,
+        "spur_hz": 2067.1875,
+        "wave_residual_dbr": 1.0609548786151852
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 700,
+      "cutoff": 350,
+      "fb_raw": 106,
+      "repeat": 4,
+      "recursive": {
+        "carrier_db": -23.673504450123836,
+        "highspur_db": -26.915525984735595,
+        "spur_hz": 2974.273681640625,
+        "wave_residual_dbr": 0.13690314851027152
+      },
+      "compact": {
+        "carrier_db": -30.624202163469416,
+        "highspur_db": -48.392532815359615,
+        "spur_hz": 2067.1875,
+        "wave_residual_dbr": -0.06200333490283766
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 700,
+      "cutoff": 520,
+      "fb_raw": 106,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -5.603068269862917,
+        "highspur_db": -14.088992776772486,
+        "spur_hz": 1138.568115234375,
+        "wave_residual_dbr": -4.694564316091434
+      },
+      "compact": {
+        "carrier_db": -11.012185214866863,
+        "highspur_db": -28.7702638685283,
+        "spur_hz": 2067.1875,
+        "wave_residual_dbr": 0.5547476574291909
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 700,
+      "cutoff": 520,
+      "fb_raw": 106,
+      "repeat": 2,
+      "recursive": {
+        "carrier_db": -11.605069536270916,
+        "highspur_db": -20.10911970881381,
+        "spur_hz": 1138.568115234375,
+        "wave_residual_dbr": -1.3784695418269768
+      },
+      "compact": {
+        "carrier_db": -17.54383466988573,
+        "highspur_db": -35.30639123820205,
+        "spur_hz": 2067.1875,
+        "wave_residual_dbr": 1.0609548786151852
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 700,
+      "cutoff": 520,
+      "fb_raw": 106,
+      "repeat": 4,
+      "recursive": {
+        "carrier_db": -23.646113938451656,
+        "highspur_db": -27.113314963609888,
+        "spur_hz": 2974.273681640625,
+        "wave_residual_dbr": 0.1376125151403382
+      },
+      "compact": {
+        "carrier_db": -30.624202163469416,
+        "highspur_db": -48.392532815359615,
+        "spur_hz": 2067.1875,
+        "wave_residual_dbr": -0.06200333490283766
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 700,
+      "cutoff": 600,
+      "fb_raw": 106,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -5.60430998185479,
+        "highspur_db": -14.087614724102943,
+        "spur_hz": 1138.568115234375,
+        "wave_residual_dbr": -4.6936453061907795
+      },
+      "compact": {
+        "carrier_db": -11.012185214866863,
+        "highspur_db": -28.7702638685283,
+        "spur_hz": 2067.1875,
+        "wave_residual_dbr": 0.5547476574291909
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 700,
+      "cutoff": 600,
+      "fb_raw": 106,
+      "repeat": 2,
+      "recursive": {
+        "carrier_db": -11.623023451296863,
+        "highspur_db": -20.07892045140208,
+        "spur_hz": 1138.568115234375,
+        "wave_residual_dbr": -1.378333628354458
+      },
+      "compact": {
+        "carrier_db": -17.54383466988573,
+        "highspur_db": -35.30639123820205,
+        "spur_hz": 2067.1875,
+        "wave_residual_dbr": 1.0609548786151852
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 700,
+      "cutoff": 600,
+      "fb_raw": 106,
+      "repeat": 4,
+      "recursive": {
+        "carrier_db": -23.645426221888926,
+        "highspur_db": -27.212430489634368,
+        "spur_hz": 2974.273681640625,
+        "wave_residual_dbr": 0.13561370592121055
+      },
+      "compact": {
+        "carrier_db": -30.624202163469416,
+        "highspur_db": -48.392532815359615,
+        "spur_hz": 2067.1875,
+        "wave_residual_dbr": -0.06200333490283766
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 1000,
+      "cutoff": 350,
+      "fb_raw": 0,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -17.74164518853481,
+        "highspur_db": -14.671792690776597,
+        "spur_hz": 837.103271484375,
+        "wave_residual_dbr": -0.7278230495154797
+      },
+      "compact": {
+        "carrier_db": -28.625049162392706,
+        "highspur_db": -11.786217952118331,
+        "spur_hz": 379.522705078125,
+        "wave_residual_dbr": 0.46403779968099634
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 1000,
+      "cutoff": 520,
+      "fb_raw": 0,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -17.742971751847776,
+        "highspur_db": -14.671300486553498,
+        "spur_hz": 837.103271484375,
+        "wave_residual_dbr": -0.7272623490916972
+      },
+      "compact": {
+        "carrier_db": -28.625049162392706,
+        "highspur_db": -11.786217952118331,
+        "spur_hz": 379.522705078125,
+        "wave_residual_dbr": 0.46403779968099634
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 1000,
+      "cutoff": 600,
+      "fb_raw": 0,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -17.744081945580096,
+        "highspur_db": -14.671988777558912,
+        "spur_hz": 837.103271484375,
+        "wave_residual_dbr": -0.726230552240274
+      },
+      "compact": {
+        "carrier_db": -28.625049162392706,
+        "highspur_db": -11.786217952118331,
+        "spur_hz": 379.522705078125,
+        "wave_residual_dbr": 0.46403779968099634
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 1000,
+      "cutoff": 350,
+      "fb_raw": 64,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -17.74164518853481,
+        "highspur_db": -14.671792690776597,
+        "spur_hz": 837.103271484375,
+        "wave_residual_dbr": -0.7278230495154797
+      },
+      "compact": {
+        "carrier_db": -28.625049162392706,
+        "highspur_db": -11.786217952118331,
+        "spur_hz": 379.522705078125,
+        "wave_residual_dbr": 0.46403779968099634
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 1000,
+      "cutoff": 350,
+      "fb_raw": 64,
+      "repeat": 2,
+      "recursive": {
+        "carrier_db": -28.030437017139835,
+        "highspur_db": -24.96643485377062,
+        "spur_hz": 837.103271484375,
+        "wave_residual_dbr": 0.3223248271819176
+      },
+      "compact": {
+        "carrier_db": -31.651213659370647,
+        "highspur_db": -14.809383772163422,
+        "spur_hz": 376.8310546875,
+        "wave_residual_dbr": 0.3293549014356506
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 1000,
+      "cutoff": 350,
+      "fb_raw": 64,
+      "repeat": 4,
+      "recursive": {
+        "carrier_db": -48.01332849613134,
+        "highspur_db": -36.68639535972099,
+        "spur_hz": 2836.99951171875,
+        "wave_residual_dbr": -0.029386221822474592
+      },
+      "compact": {
+        "carrier_db": -37.761187199947436,
+        "highspur_db": -20.890916316216455,
+        "spur_hz": 376.8310546875,
+        "wave_residual_dbr": -0.0682825576285613
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 1000,
+      "cutoff": 520,
+      "fb_raw": 64,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -17.742971751847776,
+        "highspur_db": -14.671300486553498,
+        "spur_hz": 837.103271484375,
+        "wave_residual_dbr": -0.7272623490916972
+      },
+      "compact": {
+        "carrier_db": -28.625049162392706,
+        "highspur_db": -11.786217952118331,
+        "spur_hz": 379.522705078125,
+        "wave_residual_dbr": 0.46403779968099634
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 1000,
+      "cutoff": 520,
+      "fb_raw": 64,
+      "repeat": 2,
+      "recursive": {
+        "carrier_db": -28.029558088544032,
+        "highspur_db": -24.908759863963617,
+        "spur_hz": 837.103271484375,
+        "wave_residual_dbr": 0.3218977930288367
+      },
+      "compact": {
+        "carrier_db": -31.651213659370647,
+        "highspur_db": -14.809383772163422,
+        "spur_hz": 376.8310546875,
+        "wave_residual_dbr": 0.3293549014356506
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 1000,
+      "cutoff": 520,
+      "fb_raw": 64,
+      "repeat": 4,
+      "recursive": {
+        "carrier_db": -47.58524612090356,
+        "highspur_db": -35.2839260556821,
+        "spur_hz": 2836.99951171875,
+        "wave_residual_dbr": -0.029889087102380196
+      },
+      "compact": {
+        "carrier_db": -37.761187199947436,
+        "highspur_db": -20.890916316216455,
+        "spur_hz": 376.8310546875,
+        "wave_residual_dbr": -0.0682825576285613
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 1000,
+      "cutoff": 600,
+      "fb_raw": 64,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -17.744081945580096,
+        "highspur_db": -14.671988777558912,
+        "spur_hz": 837.103271484375,
+        "wave_residual_dbr": -0.726230552240274
+      },
+      "compact": {
+        "carrier_db": -28.625049162392706,
+        "highspur_db": -11.786217952118331,
+        "spur_hz": 379.522705078125,
+        "wave_residual_dbr": 0.46403779968099634
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 1000,
+      "cutoff": 600,
+      "fb_raw": 64,
+      "repeat": 2,
+      "recursive": {
+        "carrier_db": -28.030511189890266,
+        "highspur_db": -24.956752569232435,
+        "spur_hz": 837.103271484375,
+        "wave_residual_dbr": 0.32239067637457075
+      },
+      "compact": {
+        "carrier_db": -31.651213659370647,
+        "highspur_db": -14.809383772163422,
+        "spur_hz": 376.8310546875,
+        "wave_residual_dbr": 0.3293549014356506
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 1000,
+      "cutoff": 600,
+      "fb_raw": 64,
+      "repeat": 4,
+      "recursive": {
+        "carrier_db": -47.938532774198165,
+        "highspur_db": -34.795376013841654,
+        "spur_hz": 2836.99951171875,
+        "wave_residual_dbr": -0.028358763243651934
+      },
+      "compact": {
+        "carrier_db": -37.761187199947436,
+        "highspur_db": -20.890916316216455,
+        "spur_hz": 376.8310546875,
+        "wave_residual_dbr": -0.0682825576285613
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 1000,
+      "cutoff": 350,
+      "fb_raw": 106,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -17.74164518853481,
+        "highspur_db": -14.671792690776597,
+        "spur_hz": 837.103271484375,
+        "wave_residual_dbr": -0.7278230495154797
+      },
+      "compact": {
+        "carrier_db": -28.625049162392706,
+        "highspur_db": -11.786217952118331,
+        "spur_hz": 379.522705078125,
+        "wave_residual_dbr": 0.46403779968099634
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 1000,
+      "cutoff": 350,
+      "fb_raw": 106,
+      "repeat": 2,
+      "recursive": {
+        "carrier_db": -28.00240048978184,
+        "highspur_db": -24.938102331460833,
+        "spur_hz": 837.103271484375,
+        "wave_residual_dbr": 0.323359399984249
+      },
+      "compact": {
+        "carrier_db": -31.6487317809848,
+        "highspur_db": -14.806981057276689,
+        "spur_hz": 376.8310546875,
+        "wave_residual_dbr": 0.3294844989804495
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 1000,
+      "cutoff": 350,
+      "fb_raw": 106,
+      "repeat": 4,
+      "recursive": {
+        "carrier_db": -48.31124191558138,
+        "highspur_db": -37.26665092897879,
+        "spur_hz": 2836.99951171875,
+        "wave_residual_dbr": -0.028568088980413735
+      },
+      "compact": {
+        "carrier_db": -37.70673901386186,
+        "highspur_db": -20.83673601692884,
+        "spur_hz": 376.8310546875,
+        "wave_residual_dbr": -0.06847562775887917
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 1000,
+      "cutoff": 520,
+      "fb_raw": 106,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -17.742971751847776,
+        "highspur_db": -14.671300486553498,
+        "spur_hz": 837.103271484375,
+        "wave_residual_dbr": -0.7272623490916972
+      },
+      "compact": {
+        "carrier_db": -28.625049162392706,
+        "highspur_db": -11.786217952118331,
+        "spur_hz": 379.522705078125,
+        "wave_residual_dbr": 0.46403779968099634
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 1000,
+      "cutoff": 520,
+      "fb_raw": 106,
+      "repeat": 2,
+      "recursive": {
+        "carrier_db": -28.01074221610979,
+        "highspur_db": -24.88829177183838,
+        "spur_hz": 837.103271484375,
+        "wave_residual_dbr": 0.32246749980172074
+      },
+      "compact": {
+        "carrier_db": -31.6487317809848,
+        "highspur_db": -14.806981057276689,
+        "spur_hz": 376.8310546875,
+        "wave_residual_dbr": 0.3294844989804495
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 1000,
+      "cutoff": 520,
+      "fb_raw": 106,
+      "repeat": 4,
+      "recursive": {
+        "carrier_db": -48.008790360422495,
+        "highspur_db": -36.23833957471216,
+        "spur_hz": 2836.99951171875,
+        "wave_residual_dbr": -0.028730151079984237
+      },
+      "compact": {
+        "carrier_db": -37.70673901386186,
+        "highspur_db": -20.83673601692884,
+        "spur_hz": 376.8310546875,
+        "wave_residual_dbr": -0.06847562775887917
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 1000,
+      "cutoff": 600,
+      "fb_raw": 106,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -17.744081945580096,
+        "highspur_db": -14.671988777558912,
+        "spur_hz": 837.103271484375,
+        "wave_residual_dbr": -0.726230552240274
+      },
+      "compact": {
+        "carrier_db": -28.625049162392706,
+        "highspur_db": -11.786217952118331,
+        "spur_hz": 379.522705078125,
+        "wave_residual_dbr": 0.46403779968099634
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 1000,
+      "cutoff": 600,
+      "fb_raw": 106,
+      "repeat": 2,
+      "recursive": {
+        "carrier_db": -28.00425535873266,
+        "highspur_db": -24.929790132863786,
+        "spur_hz": 837.103271484375,
+        "wave_residual_dbr": 0.3234022966779496
+      },
+      "compact": {
+        "carrier_db": -31.6487317809848,
+        "highspur_db": -14.806981057276689,
+        "spur_hz": 376.8310546875,
+        "wave_residual_dbr": 0.3294844989804495
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 1000,
+      "cutoff": 600,
+      "fb_raw": 106,
+      "repeat": 4,
+      "recursive": {
+        "carrier_db": -48.248057125554084,
+        "highspur_db": -35.27249937183329,
+        "spur_hz": 2836.99951171875,
+        "wave_residual_dbr": -0.027812358540548476
+      },
+      "compact": {
+        "carrier_db": -37.70673901386186,
+        "highspur_db": -20.83673601692884,
+        "spur_hz": 376.8310546875,
+        "wave_residual_dbr": -0.06847562775887917
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 2600,
+      "cutoff": 350,
+      "fb_raw": 0,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -11.592608380268643,
+        "highspur_db": -16.14223556903762,
+        "spur_hz": 3517.987060546875,
+        "wave_residual_dbr": -1.7330292822273234
+      },
+      "compact": {
+        "carrier_db": -73.64862718889022,
+        "highspur_db": -24.807048715654368,
+        "spur_hz": 156.11572265625,
+        "wave_residual_dbr": 0.015918735076694866
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 2600,
+      "cutoff": 520,
+      "fb_raw": 0,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -6.165822338807257,
+        "highspur_db": -10.678689467186064,
+        "spur_hz": 3517.987060546875,
+        "wave_residual_dbr": -4.229191756682234
+      },
+      "compact": {
+        "carrier_db": -73.64862718889022,
+        "highspur_db": -24.807048715654368,
+        "spur_hz": 156.11572265625,
+        "wave_residual_dbr": 0.015918735076694866
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 2600,
+      "cutoff": 600,
+      "fb_raw": 0,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -5.836838778939395,
+        "highspur_db": -10.345571461119572,
+        "spur_hz": 3517.987060546875,
+        "wave_residual_dbr": -4.589445473527418
+      },
+      "compact": {
+        "carrier_db": -73.64862718889022,
+        "highspur_db": -24.807048715654368,
+        "spur_hz": 156.11572265625,
+        "wave_residual_dbr": 0.015918735076694866
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 2600,
+      "cutoff": 350,
+      "fb_raw": 64,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -11.592608380268643,
+        "highspur_db": -16.14223556903762,
+        "spur_hz": 3517.987060546875,
+        "wave_residual_dbr": -1.7330292822273234
+      },
+      "compact": {
+        "carrier_db": -73.64862718889022,
+        "highspur_db": -24.807048715654368,
+        "spur_hz": 156.11572265625,
+        "wave_residual_dbr": 0.015918735076694866
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 2600,
+      "cutoff": 350,
+      "fb_raw": 64,
+      "repeat": 2,
+      "recursive": {
+        "carrier_db": -21.323954061233138,
+        "highspur_db": -25.925549889516915,
+        "spur_hz": 3520.6787109375,
+        "wave_residual_dbr": -0.12552128724413825
+      },
+      "compact": {
+        "carrier_db": -74.08631396262474,
+        "highspur_db": -25.241021545099244,
+        "spur_hz": 156.11572265625,
+        "wave_residual_dbr": 0.01154471430416969
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 2600,
+      "cutoff": 350,
+      "fb_raw": 64,
+      "repeat": 4,
+      "recursive": {
+        "carrier_db": -40.12132642502991,
+        "highspur_db": -42.444968363452,
+        "spur_hz": 156.11572265625,
+        "wave_residual_dbr": 0.0809614281150227
+      },
+      "compact": {
+        "carrier_db": -75.10175960144228,
+        "highspur_db": -26.248797460207864,
+        "spur_hz": 156.11572265625,
+        "wave_residual_dbr": 0.011730843723655088
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 2600,
+      "cutoff": 520,
+      "fb_raw": 64,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -6.165822338807257,
+        "highspur_db": -10.678689467186064,
+        "spur_hz": 3517.987060546875,
+        "wave_residual_dbr": -4.229191756682234
+      },
+      "compact": {
+        "carrier_db": -73.64862718889022,
+        "highspur_db": -24.807048715654368,
+        "spur_hz": 156.11572265625,
+        "wave_residual_dbr": 0.015918735076694866
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 2600,
+      "cutoff": 520,
+      "fb_raw": 64,
+      "repeat": 2,
+      "recursive": {
+        "carrier_db": -9.637931834934042,
+        "highspur_db": -14.16785137372311,
+        "spur_hz": 3517.987060546875,
+        "wave_residual_dbr": -1.877334648398822
+      },
+      "compact": {
+        "carrier_db": -74.08631396262474,
+        "highspur_db": -25.241021545099244,
+        "spur_hz": 156.11572265625,
+        "wave_residual_dbr": 0.01154471430416969
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 2600,
+      "cutoff": 520,
+      "fb_raw": 64,
+      "repeat": 4,
+      "recursive": {
+        "carrier_db": -16.61748421303805,
+        "highspur_db": -21.156355631106432,
+        "spur_hz": 3517.987060546875,
+        "wave_residual_dbr": 0.22309475116278638
+      },
+      "compact": {
+        "carrier_db": -75.10175960144228,
+        "highspur_db": -26.248797460207864,
+        "spur_hz": 156.11572265625,
+        "wave_residual_dbr": 0.011730843723655088
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 2600,
+      "cutoff": 600,
+      "fb_raw": 64,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -5.836838778939395,
+        "highspur_db": -10.345571461119572,
+        "spur_hz": 3517.987060546875,
+        "wave_residual_dbr": -4.589445473527418
+      },
+      "compact": {
+        "carrier_db": -73.64862718889022,
+        "highspur_db": -24.807048715654368,
+        "spur_hz": 156.11572265625,
+        "wave_residual_dbr": 0.015918735076694866
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 2600,
+      "cutoff": 600,
+      "fb_raw": 64,
+      "repeat": 2,
+      "recursive": {
+        "carrier_db": -9.043373427614695,
+        "highspur_db": -13.574857435347038,
+        "spur_hz": 3517.987060546875,
+        "wave_residual_dbr": -2.219191075783326
+      },
+      "compact": {
+        "carrier_db": -74.08631396262474,
+        "highspur_db": -25.241021545099244,
+        "spur_hz": 156.11572265625,
+        "wave_residual_dbr": 0.01154471430416969
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 2600,
+      "cutoff": 600,
+      "fb_raw": 64,
+      "repeat": 4,
+      "recursive": {
+        "carrier_db": -15.447163070943652,
+        "highspur_db": -19.984562622197938,
+        "spur_hz": 3517.987060546875,
+        "wave_residual_dbr": 0.19360082702189088
+      },
+      "compact": {
+        "carrier_db": -75.10175960144228,
+        "highspur_db": -26.248797460207864,
+        "spur_hz": 156.11572265625,
+        "wave_residual_dbr": 0.011730843723655088
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 2600,
+      "cutoff": 350,
+      "fb_raw": 106,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -11.592608380268643,
+        "highspur_db": -16.14223556903762,
+        "spur_hz": 3517.987060546875,
+        "wave_residual_dbr": -1.7330292822273234
+      },
+      "compact": {
+        "carrier_db": -73.64862718889022,
+        "highspur_db": -24.807048715654368,
+        "spur_hz": 156.11572265625,
+        "wave_residual_dbr": 0.015918735076694866
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 2600,
+      "cutoff": 350,
+      "fb_raw": 106,
+      "repeat": 2,
+      "recursive": {
+        "carrier_db": -21.370830299160133,
+        "highspur_db": -25.97194999570279,
+        "spur_hz": 3520.6787109375,
+        "wave_residual_dbr": -0.12628399148152297
+      },
+      "compact": {
+        "carrier_db": -74.0808587340183,
+        "highspur_db": -25.235199738786797,
+        "spur_hz": 156.11572265625,
+        "wave_residual_dbr": 0.011559191179843569
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 2600,
+      "cutoff": 350,
+      "fb_raw": 106,
+      "repeat": 4,
+      "recursive": {
+        "carrier_db": -40.62857246838143,
+        "highspur_db": -45.09586776487643,
+        "spur_hz": 3520.6787109375,
+        "wave_residual_dbr": 0.0743792468959276
+      },
+      "compact": {
+        "carrier_db": -74.95989701987357,
+        "highspur_db": -26.106149106514522,
+        "spur_hz": 156.11572265625,
+        "wave_residual_dbr": 0.012081376634570016
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 2600,
+      "cutoff": 520,
+      "fb_raw": 106,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -6.165822338807257,
+        "highspur_db": -10.678689467186064,
+        "spur_hz": 3517.987060546875,
+        "wave_residual_dbr": -4.229191756682234
+      },
+      "compact": {
+        "carrier_db": -73.64862718889022,
+        "highspur_db": -24.807048715654368,
+        "spur_hz": 156.11572265625,
+        "wave_residual_dbr": 0.015918735076694866
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 2600,
+      "cutoff": 520,
+      "fb_raw": 106,
+      "repeat": 2,
+      "recursive": {
+        "carrier_db": -9.643061174359733,
+        "highspur_db": -14.17353608893723,
+        "spur_hz": 3517.987060546875,
+        "wave_residual_dbr": -1.8778275597619793
+      },
+      "compact": {
+        "carrier_db": -74.0808587340183,
+        "highspur_db": -25.235199738786797,
+        "spur_hz": 156.11572265625,
+        "wave_residual_dbr": 0.011559191179843569
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 2600,
+      "cutoff": 520,
+      "fb_raw": 106,
+      "repeat": 4,
+      "recursive": {
+        "carrier_db": -16.6197959486787,
+        "highspur_db": -21.156559267389646,
+        "spur_hz": 3517.987060546875,
+        "wave_residual_dbr": 0.21930646360767722
+      },
+      "compact": {
+        "carrier_db": -74.95989701987357,
+        "highspur_db": -26.106149106514522,
+        "spur_hz": 156.11572265625,
+        "wave_residual_dbr": 0.012081376634570016
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 2600,
+      "cutoff": 600,
+      "fb_raw": 106,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -5.836838778939395,
+        "highspur_db": -10.345571461119572,
+        "spur_hz": 3517.987060546875,
+        "wave_residual_dbr": -4.589445473527418
+      },
+      "compact": {
+        "carrier_db": -73.64862718889022,
+        "highspur_db": -24.807048715654368,
+        "spur_hz": 156.11572265625,
+        "wave_residual_dbr": 0.015918735076694866
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 2600,
+      "cutoff": 600,
+      "fb_raw": 106,
+      "repeat": 2,
+      "recursive": {
+        "carrier_db": -9.02007587250085,
+        "highspur_db": -13.550704227470636,
+        "spur_hz": 3517.987060546875,
+        "wave_residual_dbr": -2.234203543103805
+      },
+      "compact": {
+        "carrier_db": -74.0808587340183,
+        "highspur_db": -25.235199738786797,
+        "spur_hz": 156.11572265625,
+        "wave_residual_dbr": 0.011559191179843569
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 2600,
+      "cutoff": 600,
+      "fb_raw": 106,
+      "repeat": 4,
+      "recursive": {
+        "carrier_db": -15.422715638517563,
+        "highspur_db": -19.955959783855757,
+        "spur_hz": 3517.987060546875,
+        "wave_residual_dbr": 0.19024842443979853
+      },
+      "compact": {
+        "carrier_db": -74.95989701987357,
+        "highspur_db": -26.106149106514522,
+        "spur_hz": 156.11572265625,
+        "wave_residual_dbr": 0.012081376634570016
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 3000,
+      "cutoff": 350,
+      "fb_raw": 0,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": 0.17875399558383764,
+        "highspur_db": -50.17011601372581,
+        "spur_hz": 675.604248046875,
+        "wave_residual_dbr": -32.28763162517339
+      },
+      "compact": {
+        "carrier_db": -66.57042698609901,
+        "highspur_db": -22.9482975011431,
+        "spur_hz": 244.940185546875,
+        "wave_residual_dbr": 0.01837821871890324
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 3000,
+      "cutoff": 520,
+      "fb_raw": 0,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": 0.16845113824606783,
+        "highspur_db": -50.10087134513705,
+        "spur_hz": 675.604248046875,
+        "wave_residual_dbr": -32.542476717535195
+      },
+      "compact": {
+        "carrier_db": -66.57042698609901,
+        "highspur_db": -22.9482975011431,
+        "spur_hz": 244.940185546875,
+        "wave_residual_dbr": 0.01837821871890324
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 3000,
+      "cutoff": 600,
+      "fb_raw": 0,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": 0.16922224497036928,
+        "highspur_db": -50.14108647960538,
+        "spur_hz": 675.604248046875,
+        "wave_residual_dbr": -32.52071917827838
+      },
+      "compact": {
+        "carrier_db": -66.57042698609901,
+        "highspur_db": -22.9482975011431,
+        "spur_hz": 244.940185546875,
+        "wave_residual_dbr": 0.01837821871890324
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 3000,
+      "cutoff": 350,
+      "fb_raw": 64,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": 0.17875399558383764,
+        "highspur_db": -50.17011601372581,
+        "spur_hz": 675.604248046875,
+        "wave_residual_dbr": -32.28763162517339
+      },
+      "compact": {
+        "carrier_db": -66.57042698609901,
+        "highspur_db": -22.9482975011431,
+        "spur_hz": 244.940185546875,
+        "wave_residual_dbr": 0.01837821871890324
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 3000,
+      "cutoff": 350,
+      "fb_raw": 64,
+      "repeat": 2,
+      "recursive": {
+        "carrier_db": 0.34425582510871455,
+        "highspur_db": -46.32907092471923,
+        "spur_hz": 675.604248046875,
+        "wave_residual_dbr": -27.071646242301853
+      },
+      "compact": {
+        "carrier_db": -67.72634754255735,
+        "highspur_db": -24.10800710301224,
+        "spur_hz": 244.940185546875,
+        "wave_residual_dbr": 0.014671159313552984
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 3000,
+      "cutoff": 350,
+      "fb_raw": 64,
+      "repeat": 4,
+      "recursive": {
+        "carrier_db": 0.8110667008325119,
+        "highspur_db": -44.61294398699931,
+        "spur_hz": 675.604248046875,
+        "wave_residual_dbr": -19.961543510533833
+      },
+      "compact": {
+        "carrier_db": -70.17203028705688,
+        "highspur_db": -26.560719143236966,
+        "spur_hz": 244.940185546875,
+        "wave_residual_dbr": 0.012438099144299532
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 3000,
+      "cutoff": 520,
+      "fb_raw": 64,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": 0.16845113824606783,
+        "highspur_db": -50.10087134513705,
+        "spur_hz": 675.604248046875,
+        "wave_residual_dbr": -32.542476717535195
+      },
+      "compact": {
+        "carrier_db": -66.57042698609901,
+        "highspur_db": -22.9482975011431,
+        "spur_hz": 244.940185546875,
+        "wave_residual_dbr": 0.01837821871890324
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 3000,
+      "cutoff": 520,
+      "fb_raw": 64,
+      "repeat": 2,
+      "recursive": {
+        "carrier_db": 0.3262600292938279,
+        "highspur_db": -46.25494460808091,
+        "spur_hz": 675.604248046875,
+        "wave_residual_dbr": -27.484079985613235
+      },
+      "compact": {
+        "carrier_db": -67.72634754255735,
+        "highspur_db": -24.10800710301224,
+        "spur_hz": 244.940185546875,
+        "wave_residual_dbr": 0.014671159313552984
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 3000,
+      "cutoff": 520,
+      "fb_raw": 64,
+      "repeat": 4,
+      "recursive": {
+        "carrier_db": 0.8043008676338771,
+        "highspur_db": -44.60539999744189,
+        "spur_hz": 675.604248046875,
+        "wave_residual_dbr": -20.019340084164217
+      },
+      "compact": {
+        "carrier_db": -70.17203028705688,
+        "highspur_db": -26.560719143236966,
+        "spur_hz": 244.940185546875,
+        "wave_residual_dbr": 0.012438099144299532
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 3000,
+      "cutoff": 600,
+      "fb_raw": 64,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": 0.16922224497036928,
+        "highspur_db": -50.14108647960538,
+        "spur_hz": 675.604248046875,
+        "wave_residual_dbr": -32.52071917827838
+      },
+      "compact": {
+        "carrier_db": -66.57042698609901,
+        "highspur_db": -22.9482975011431,
+        "spur_hz": 244.940185546875,
+        "wave_residual_dbr": 0.01837821871890324
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 3000,
+      "cutoff": 600,
+      "fb_raw": 64,
+      "repeat": 2,
+      "recursive": {
+        "carrier_db": 0.3299934821937114,
+        "highspur_db": -46.25191289090837,
+        "spur_hz": 675.604248046875,
+        "wave_residual_dbr": -27.31127232076291
+      },
+      "compact": {
+        "carrier_db": -67.72634754255735,
+        "highspur_db": -24.10800710301224,
+        "spur_hz": 244.940185546875,
+        "wave_residual_dbr": 0.014671159313552984
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 3000,
+      "cutoff": 600,
+      "fb_raw": 64,
+      "repeat": 4,
+      "recursive": {
+        "carrier_db": 0.7892467385074999,
+        "highspur_db": -44.37173119221187,
+        "spur_hz": 675.604248046875,
+        "wave_residual_dbr": -20.165274279977115
+      },
+      "compact": {
+        "carrier_db": -70.17203028705688,
+        "highspur_db": -26.560719143236966,
+        "spur_hz": 244.940185546875,
+        "wave_residual_dbr": 0.012438099144299532
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 3000,
+      "cutoff": 350,
+      "fb_raw": 106,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": 0.17875399558383764,
+        "highspur_db": -50.17011601372581,
+        "spur_hz": 675.604248046875,
+        "wave_residual_dbr": -32.28763162517339
+      },
+      "compact": {
+        "carrier_db": -66.57042698609901,
+        "highspur_db": -22.9482975011431,
+        "spur_hz": 244.940185546875,
+        "wave_residual_dbr": 0.01837821871890324
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 3000,
+      "cutoff": 350,
+      "fb_raw": 106,
+      "repeat": 2,
+      "recursive": {
+        "carrier_db": 0.36462045172491575,
+        "highspur_db": -46.38267903308425,
+        "spur_hz": 675.604248046875,
+        "wave_residual_dbr": -26.68993082940458
+      },
+      "compact": {
+        "carrier_db": -67.71717831213606,
+        "highspur_db": -24.099009298604837,
+        "spur_hz": 244.940185546875,
+        "wave_residual_dbr": 0.014704237371227585
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 3000,
+      "cutoff": 350,
+      "fb_raw": 106,
+      "repeat": 4,
+      "recursive": {
+        "carrier_db": 0.7390013380082947,
+        "highspur_db": -44.725923083740895,
+        "spur_hz": 675.604248046875,
+        "wave_residual_dbr": -20.70662088198286
+      },
+      "compact": {
+        "carrier_db": -70.03320508261008,
+        "highspur_db": -26.422577639103658,
+        "spur_hz": 244.940185546875,
+        "wave_residual_dbr": 0.012785501767976657
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 3000,
+      "cutoff": 520,
+      "fb_raw": 106,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": 0.16845113824606783,
+        "highspur_db": -50.10087134513705,
+        "spur_hz": 675.604248046875,
+        "wave_residual_dbr": -32.542476717535195
+      },
+      "compact": {
+        "carrier_db": -66.57042698609901,
+        "highspur_db": -22.9482975011431,
+        "spur_hz": 244.940185546875,
+        "wave_residual_dbr": 0.01837821871890324
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 3000,
+      "cutoff": 520,
+      "fb_raw": 106,
+      "repeat": 2,
+      "recursive": {
+        "carrier_db": 0.3410948714722692,
+        "highspur_db": -46.3194130637855,
+        "spur_hz": 675.604248046875,
+        "wave_residual_dbr": -27.271896156076654
+      },
+      "compact": {
+        "carrier_db": -67.71717831213606,
+        "highspur_db": -24.099009298604837,
+        "spur_hz": 244.940185546875,
+        "wave_residual_dbr": 0.014704237371227585
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 3000,
+      "cutoff": 520,
+      "fb_raw": 106,
+      "repeat": 4,
+      "recursive": {
+        "carrier_db": 0.727185123806995,
+        "highspur_db": -44.75126846078922,
+        "spur_hz": 675.604248046875,
+        "wave_residual_dbr": -20.846505075041684
+      },
+      "compact": {
+        "carrier_db": -70.03320508261008,
+        "highspur_db": -26.422577639103658,
+        "spur_hz": 244.940185546875,
+        "wave_residual_dbr": 0.012785501767976657
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 3000,
+      "cutoff": 600,
+      "fb_raw": 106,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": 0.16922224497036928,
+        "highspur_db": -50.14108647960538,
+        "spur_hz": 675.604248046875,
+        "wave_residual_dbr": -32.52071917827838
+      },
+      "compact": {
+        "carrier_db": -66.57042698609901,
+        "highspur_db": -22.9482975011431,
+        "spur_hz": 244.940185546875,
+        "wave_residual_dbr": 0.01837821871890324
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 3000,
+      "cutoff": 600,
+      "fb_raw": 106,
+      "repeat": 2,
+      "recursive": {
+        "carrier_db": 0.3489526881712421,
+        "highspur_db": -46.34798984098771,
+        "spur_hz": 675.604248046875,
+        "wave_residual_dbr": -27.002105613558342
+      },
+      "compact": {
+        "carrier_db": -67.71717831213606,
+        "highspur_db": -24.099009298604837,
+        "spur_hz": 244.940185546875,
+        "wave_residual_dbr": 0.014704237371227585
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 3000,
+      "cutoff": 600,
+      "fb_raw": 106,
+      "repeat": 4,
+      "recursive": {
+        "carrier_db": 0.737940154662242,
+        "highspur_db": -44.89645447858764,
+        "spur_hz": 675.604248046875,
+        "wave_residual_dbr": -20.664312918625146
+      },
+      "compact": {
+        "carrier_db": -70.03320508261008,
+        "highspur_db": -26.422577639103658,
+        "spur_hz": 244.940185546875,
+        "wave_residual_dbr": 0.012785501767976657
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 3400,
+      "cutoff": 350,
+      "fb_raw": 0,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -11.482086659678783,
+        "highspur_db": -16.02692327573193,
+        "spur_hz": 2481.70166015625,
+        "wave_residual_dbr": -1.7434091857370124
+      },
+      "compact": {
+        "carrier_db": -53.254360330973654,
+        "highspur_db": -24.27352410109501,
+        "spur_hz": 643.304443359375,
+        "wave_residual_dbr": 0.019788490739968027
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 3400,
+      "cutoff": 520,
+      "fb_raw": 0,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -6.058357120117486,
+        "highspur_db": -10.57256479417017,
+        "spur_hz": 2481.70166015625,
+        "wave_residual_dbr": -4.25869114464147
+      },
+      "compact": {
+        "carrier_db": -53.254360330973654,
+        "highspur_db": -24.27352410109501,
+        "spur_hz": 643.304443359375,
+        "wave_residual_dbr": 0.019788490739968027
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 3400,
+      "cutoff": 600,
+      "fb_raw": 0,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -5.729400627196347,
+        "highspur_db": -10.240484742705453,
+        "spur_hz": 2481.70166015625,
+        "wave_residual_dbr": -4.627864016457652
+      },
+      "compact": {
+        "carrier_db": -53.254360330973654,
+        "highspur_db": -24.27352410109501,
+        "spur_hz": 643.304443359375,
+        "wave_residual_dbr": 0.019788490739968027
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 3400,
+      "cutoff": 350,
+      "fb_raw": 64,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -11.482086659678783,
+        "highspur_db": -16.02692327573193,
+        "spur_hz": 2481.70166015625,
+        "wave_residual_dbr": -1.7434091857370124
+      },
+      "compact": {
+        "carrier_db": -53.254360330973654,
+        "highspur_db": -24.27352410109501,
+        "spur_hz": 643.304443359375,
+        "wave_residual_dbr": 0.019788490739968027
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 3400,
+      "cutoff": 350,
+      "fb_raw": 64,
+      "repeat": 2,
+      "recursive": {
+        "carrier_db": -21.108672455391797,
+        "highspur_db": -25.648073326108726,
+        "spur_hz": 2481.70166015625,
+        "wave_residual_dbr": -0.12371879795977926
+      },
+      "compact": {
+        "carrier_db": -59.466471588012794,
+        "highspur_db": -30.48416923588813,
+        "spur_hz": 643.304443359375,
+        "wave_residual_dbr": -0.0012032631482436363
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 3400,
+      "cutoff": 350,
+      "fb_raw": 64,
+      "repeat": 4,
+      "recursive": {
+        "carrier_db": -39.52181886080733,
+        "highspur_db": -44.065824171161964,
+        "spur_hz": 2481.70166015625,
+        "wave_residual_dbr": 0.08640791506545686
+      },
+      "compact": {
+        "carrier_db": -72.36276767975383,
+        "highspur_db": -43.37615523745066,
+        "spur_hz": 643.304443359375,
+        "wave_residual_dbr": -0.0014435215375236065
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 3400,
+      "cutoff": 520,
+      "fb_raw": 64,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -6.058357120117486,
+        "highspur_db": -10.57256479417017,
+        "spur_hz": 2481.70166015625,
+        "wave_residual_dbr": -4.25869114464147
+      },
+      "compact": {
+        "carrier_db": -53.254360330973654,
+        "highspur_db": -24.27352410109501,
+        "spur_hz": 643.304443359375,
+        "wave_residual_dbr": 0.019788490739968027
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 3400,
+      "cutoff": 520,
+      "fb_raw": 64,
+      "repeat": 2,
+      "recursive": {
+        "carrier_db": -9.449698568898896,
+        "highspur_db": -13.962873856270354,
+        "spur_hz": 2481.70166015625,
+        "wave_residual_dbr": -1.8637542838785892
+      },
+      "compact": {
+        "carrier_db": -59.466471588012794,
+        "highspur_db": -30.48416923588813,
+        "spur_hz": 643.304443359375,
+        "wave_residual_dbr": -0.0012032631482436363
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 3400,
+      "cutoff": 520,
+      "fb_raw": 64,
+      "repeat": 4,
+      "recursive": {
+        "carrier_db": -16.169445836497573,
+        "highspur_db": -20.68803130420724,
+        "spur_hz": 2481.70166015625,
+        "wave_residual_dbr": 0.2719809838573512
+      },
+      "compact": {
+        "carrier_db": -72.36276767975383,
+        "highspur_db": -43.37615523745066,
+        "spur_hz": 643.304443359375,
+        "wave_residual_dbr": -0.0014435215375236065
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 3400,
+      "cutoff": 600,
+      "fb_raw": 64,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -5.729400627196347,
+        "highspur_db": -10.240484742705453,
+        "spur_hz": 2481.70166015625,
+        "wave_residual_dbr": -4.627864016457652
+      },
+      "compact": {
+        "carrier_db": -53.254360330973654,
+        "highspur_db": -24.27352410109501,
+        "spur_hz": 643.304443359375,
+        "wave_residual_dbr": 0.019788490739968027
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 3400,
+      "cutoff": 600,
+      "fb_raw": 64,
+      "repeat": 2,
+      "recursive": {
+        "carrier_db": -8.819528583998373,
+        "highspur_db": -13.308828626074424,
+        "spur_hz": 2481.70166015625,
+        "wave_residual_dbr": -2.2295572086398883
+      },
+      "compact": {
+        "carrier_db": -59.466471588012794,
+        "highspur_db": -30.48416923588813,
+        "spur_hz": 643.304443359375,
+        "wave_residual_dbr": -0.0012032631482436363
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 3400,
+      "cutoff": 600,
+      "fb_raw": 64,
+      "repeat": 4,
+      "recursive": {
+        "carrier_db": -14.961819342999194,
+        "highspur_db": -19.481219010217924,
+        "spur_hz": 2481.70166015625,
+        "wave_residual_dbr": 0.2480180586346638
+      },
+      "compact": {
+        "carrier_db": -72.36276767975383,
+        "highspur_db": -43.37615523745066,
+        "spur_hz": 643.304443359375,
+        "wave_residual_dbr": -0.0014435215375236065
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 3400,
+      "cutoff": 350,
+      "fb_raw": 106,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -11.482086659678783,
+        "highspur_db": -16.02692327573193,
+        "spur_hz": 2481.70166015625,
+        "wave_residual_dbr": -1.7434091857370124
+      },
+      "compact": {
+        "carrier_db": -53.254360330973654,
+        "highspur_db": -24.27352410109501,
+        "spur_hz": 643.304443359375,
+        "wave_residual_dbr": 0.019788490739968027
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 3400,
+      "cutoff": 350,
+      "fb_raw": 106,
+      "repeat": 2,
+      "recursive": {
+        "carrier_db": -21.163760891023987,
+        "highspur_db": -25.704785538115274,
+        "spur_hz": 2481.70166015625,
+        "wave_residual_dbr": -0.12125778569717668
+      },
+      "compact": {
+        "carrier_db": -59.45988422950628,
+        "highspur_db": -30.477443165916668,
+        "spur_hz": 643.304443359375,
+        "wave_residual_dbr": -0.0011986030296704702
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 3400,
+      "cutoff": 350,
+      "fb_raw": 106,
+      "repeat": 4,
+      "recursive": {
+        "carrier_db": -40.2646884329324,
+        "highspur_db": -44.76583172378607,
+        "spur_hz": 2479.010009765625,
+        "wave_residual_dbr": 0.07843956645646494
+      },
+      "compact": {
+        "carrier_db": -71.96546566402736,
+        "highspur_db": -42.9792883712258,
+        "spur_hz": 643.304443359375,
+        "wave_residual_dbr": -0.0014927131911658012
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 3400,
+      "cutoff": 520,
+      "fb_raw": 106,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -6.058357120117486,
+        "highspur_db": -10.57256479417017,
+        "spur_hz": 2481.70166015625,
+        "wave_residual_dbr": -4.25869114464147
+      },
+      "compact": {
+        "carrier_db": -53.254360330973654,
+        "highspur_db": -24.27352410109501,
+        "spur_hz": 643.304443359375,
+        "wave_residual_dbr": 0.019788490739968027
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 3400,
+      "cutoff": 520,
+      "fb_raw": 106,
+      "repeat": 2,
+      "recursive": {
+        "carrier_db": -9.436987599120368,
+        "highspur_db": -13.95003236867038,
+        "spur_hz": 2481.70166015625,
+        "wave_residual_dbr": -1.8661793279845873
+      },
+      "compact": {
+        "carrier_db": -59.45988422950628,
+        "highspur_db": -30.477443165916668,
+        "spur_hz": 643.304443359375,
+        "wave_residual_dbr": -0.0011986030296704702
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 3400,
+      "cutoff": 520,
+      "fb_raw": 106,
+      "repeat": 4,
+      "recursive": {
+        "carrier_db": -16.211832669735003,
+        "highspur_db": -20.729610129663705,
+        "spur_hz": 2481.70166015625,
+        "wave_residual_dbr": 0.2711982042023065
+      },
+      "compact": {
+        "carrier_db": -71.96546566402736,
+        "highspur_db": -42.9792883712258,
+        "spur_hz": 643.304443359375,
+        "wave_residual_dbr": -0.0014927131911658012
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 3400,
+      "cutoff": 600,
+      "fb_raw": 106,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -5.729400627196347,
+        "highspur_db": -10.240484742705453,
+        "spur_hz": 2481.70166015625,
+        "wave_residual_dbr": -4.627864016457652
+      },
+      "compact": {
+        "carrier_db": -53.254360330973654,
+        "highspur_db": -24.27352410109501,
+        "spur_hz": 643.304443359375,
+        "wave_residual_dbr": 0.019788490739968027
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 3400,
+      "cutoff": 600,
+      "fb_raw": 106,
+      "repeat": 2,
+      "recursive": {
+        "carrier_db": -8.84867438334747,
+        "highspur_db": -13.33758792884571,
+        "spur_hz": 2481.70166015625,
+        "wave_residual_dbr": -2.2360571473397375
+      },
+      "compact": {
+        "carrier_db": -59.45988422950628,
+        "highspur_db": -30.477443165916668,
+        "spur_hz": 643.304443359375,
+        "wave_residual_dbr": -0.0011986030296704702
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 3400,
+      "cutoff": 600,
+      "fb_raw": 106,
+      "repeat": 4,
+      "recursive": {
+        "carrier_db": -15.042845246304488,
+        "highspur_db": -19.56166147788729,
+        "spur_hz": 2481.70166015625,
+        "wave_residual_dbr": 0.23198614161469375
+      },
+      "compact": {
+        "carrier_db": -71.96546566402736,
+        "highspur_db": -42.9792883712258,
+        "spur_hz": 643.304443359375,
+        "wave_residual_dbr": -0.0014927131911658012
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 6000,
+      "cutoff": 350,
+      "fb_raw": 0,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -300.0,
+        "highspur_db": -300.0,
+        "spur_hz": 0.0,
+        "wave_residual_dbr": 0.0
+      },
+      "compact": {
+        "carrier_db": -70.23119595579841,
+        "highspur_db": -26.393076403272282,
+        "spur_hz": 487.188720703125,
+        "wave_residual_dbr": 0.00887124899346474
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 6000,
+      "cutoff": 520,
+      "fb_raw": 0,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -106.88345315188057,
+        "highspur_db": -62.955930445436756,
+        "spur_hz": 3243.438720703125,
+        "wave_residual_dbr": 4.5559184762677314e-05
+      },
+      "compact": {
+        "carrier_db": -70.23119595579841,
+        "highspur_db": -26.393076403272282,
+        "spur_hz": 487.188720703125,
+        "wave_residual_dbr": 0.00887124899346474
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 6000,
+      "cutoff": 600,
+      "fb_raw": 0,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -99.88565047599715,
+        "highspur_db": -56.34862616410591,
+        "spur_hz": 3243.438720703125,
+        "wave_residual_dbr": -3.0545496328980146e-05
+      },
+      "compact": {
+        "carrier_db": -70.23119595579841,
+        "highspur_db": -26.393076403272282,
+        "spur_hz": 487.188720703125,
+        "wave_residual_dbr": 0.00887124899346474
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 6000,
+      "cutoff": 350,
+      "fb_raw": 64,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -300.0,
+        "highspur_db": -300.0,
+        "spur_hz": 0.0,
+        "wave_residual_dbr": 0.0
+      },
+      "compact": {
+        "carrier_db": -70.23119595579841,
+        "highspur_db": -26.393076403272282,
+        "spur_hz": 487.188720703125,
+        "wave_residual_dbr": 0.00887124899346474
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 6000,
+      "cutoff": 350,
+      "fb_raw": 64,
+      "repeat": 2,
+      "recursive": {
+        "carrier_db": -300.0,
+        "highspur_db": -300.0,
+        "spur_hz": 0.0,
+        "wave_residual_dbr": 0.0
+      },
+      "compact": {
+        "carrier_db": -74.19558762292652,
+        "highspur_db": -30.3527725785943,
+        "spur_hz": 487.188720703125,
+        "wave_residual_dbr": 0.00472859677452781
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 6000,
+      "cutoff": 350,
+      "fb_raw": 64,
+      "repeat": 4,
+      "recursive": {
+        "carrier_db": -300.0,
+        "highspur_db": -300.0,
+        "spur_hz": 0.0,
+        "wave_residual_dbr": 0.0
+      },
+      "compact": {
+        "carrier_db": -82.62007318487521,
+        "highspur_db": -38.769087980504246,
+        "spur_hz": 487.188720703125,
+        "wave_residual_dbr": 4.866548411264992e-05
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 6000,
+      "cutoff": 520,
+      "fb_raw": 64,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -106.88345315188057,
+        "highspur_db": -62.955930445436756,
+        "spur_hz": 3243.438720703125,
+        "wave_residual_dbr": 4.5559184762677314e-05
+      },
+      "compact": {
+        "carrier_db": -70.23119595579841,
+        "highspur_db": -26.393076403272282,
+        "spur_hz": 487.188720703125,
+        "wave_residual_dbr": 0.00887124899346474
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 6000,
+      "cutoff": 520,
+      "fb_raw": 64,
+      "repeat": 2,
+      "recursive": {
+        "carrier_db": -300.0,
+        "highspur_db": -300.0,
+        "spur_hz": 0.0,
+        "wave_residual_dbr": 0.0
+      },
+      "compact": {
+        "carrier_db": -74.19558762292652,
+        "highspur_db": -30.3527725785943,
+        "spur_hz": 487.188720703125,
+        "wave_residual_dbr": 0.00472859677452781
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 6000,
+      "cutoff": 520,
+      "fb_raw": 64,
+      "repeat": 4,
+      "recursive": {
+        "carrier_db": -300.0,
+        "highspur_db": -300.0,
+        "spur_hz": 0.0,
+        "wave_residual_dbr": 0.0
+      },
+      "compact": {
+        "carrier_db": -82.62007318487521,
+        "highspur_db": -38.769087980504246,
+        "spur_hz": 487.188720703125,
+        "wave_residual_dbr": 4.866548411264992e-05
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 6000,
+      "cutoff": 600,
+      "fb_raw": 64,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -99.88565047599715,
+        "highspur_db": -56.34862616410591,
+        "spur_hz": 3243.438720703125,
+        "wave_residual_dbr": -3.0545496328980146e-05
+      },
+      "compact": {
+        "carrier_db": -70.23119595579841,
+        "highspur_db": -26.393076403272282,
+        "spur_hz": 487.188720703125,
+        "wave_residual_dbr": 0.00887124899346474
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 6000,
+      "cutoff": 600,
+      "fb_raw": 64,
+      "repeat": 2,
+      "recursive": {
+        "carrier_db": -105.13308343990917,
+        "highspur_db": -61.11699815244337,
+        "spur_hz": 3243.438720703125,
+        "wave_residual_dbr": 5.591351160911539e-05
+      },
+      "compact": {
+        "carrier_db": -74.19558762292652,
+        "highspur_db": -30.3527725785943,
+        "spur_hz": 487.188720703125,
+        "wave_residual_dbr": 0.00472859677452781
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 6000,
+      "cutoff": 600,
+      "fb_raw": 64,
+      "repeat": 4,
+      "recursive": {
+        "carrier_db": -300.0,
+        "highspur_db": -300.0,
+        "spur_hz": 0.0,
+        "wave_residual_dbr": 0.0
+      },
+      "compact": {
+        "carrier_db": -82.62007318487521,
+        "highspur_db": -38.769087980504246,
+        "spur_hz": 487.188720703125,
+        "wave_residual_dbr": 4.866548411264992e-05
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 6000,
+      "cutoff": 350,
+      "fb_raw": 106,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -300.0,
+        "highspur_db": -300.0,
+        "spur_hz": 0.0,
+        "wave_residual_dbr": 0.0
+      },
+      "compact": {
+        "carrier_db": -70.23119595579841,
+        "highspur_db": -26.393076403272282,
+        "spur_hz": 487.188720703125,
+        "wave_residual_dbr": 0.00887124899346474
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 6000,
+      "cutoff": 350,
+      "fb_raw": 106,
+      "repeat": 2,
+      "recursive": {
+        "carrier_db": -300.0,
+        "highspur_db": -300.0,
+        "spur_hz": 0.0,
+        "wave_residual_dbr": 0.0
+      },
+      "compact": {
+        "carrier_db": -74.18360616897026,
+        "highspur_db": -30.341037717072755,
+        "spur_hz": 487.188720703125,
+        "wave_residual_dbr": 0.004742050141626031
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 6000,
+      "cutoff": 350,
+      "fb_raw": 106,
+      "repeat": 4,
+      "recursive": {
+        "carrier_db": -300.0,
+        "highspur_db": -300.0,
+        "spur_hz": 0.0,
+        "wave_residual_dbr": 0.0
+      },
+      "compact": {
+        "carrier_db": -82.19024051994323,
+        "highspur_db": -38.33844586671713,
+        "spur_hz": 487.188720703125,
+        "wave_residual_dbr": 7.869298722314164e-05
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 6000,
+      "cutoff": 520,
+      "fb_raw": 106,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -106.88345315188057,
+        "highspur_db": -62.955930445436756,
+        "spur_hz": 3243.438720703125,
+        "wave_residual_dbr": 4.5559184762677314e-05
+      },
+      "compact": {
+        "carrier_db": -70.23119595579841,
+        "highspur_db": -26.393076403272282,
+        "spur_hz": 487.188720703125,
+        "wave_residual_dbr": 0.00887124899346474
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 6000,
+      "cutoff": 520,
+      "fb_raw": 106,
+      "repeat": 2,
+      "recursive": {
+        "carrier_db": -101.89456153659464,
+        "highspur_db": -58.352245514739664,
+        "spur_hz": 3243.438720703125,
+        "wave_residual_dbr": 3.106310644097712e-05
+      },
+      "compact": {
+        "carrier_db": -74.18360616897026,
+        "highspur_db": -30.341037717072755,
+        "spur_hz": 487.188720703125,
+        "wave_residual_dbr": 0.004742050141626031
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 6000,
+      "cutoff": 520,
+      "fb_raw": 106,
+      "repeat": 4,
+      "recursive": {
+        "carrier_db": -100.30962419691471,
+        "highspur_db": -56.147638259983026,
+        "spur_hz": 3181.53076171875,
+        "wave_residual_dbr": 5.073634972880228e-05
+      },
+      "compact": {
+        "carrier_db": -82.19024051994323,
+        "highspur_db": -38.33844586671713,
+        "spur_hz": 487.188720703125,
+        "wave_residual_dbr": 7.869298722314164e-05
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 6000,
+      "cutoff": 600,
+      "fb_raw": 106,
+      "repeat": 1,
+      "recursive": {
+        "carrier_db": -99.88565047599715,
+        "highspur_db": -56.34862616410591,
+        "spur_hz": 3243.438720703125,
+        "wave_residual_dbr": -3.0545496328980146e-05
+      },
+      "compact": {
+        "carrier_db": -70.23119595579841,
+        "highspur_db": -26.393076403272282,
+        "spur_hz": 487.188720703125,
+        "wave_residual_dbr": 0.00887124899346474
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 6000,
+      "cutoff": 600,
+      "fb_raw": 106,
+      "repeat": 2,
+      "recursive": {
+        "carrier_db": -96.82166813316194,
+        "highspur_db": -53.283857663913594,
+        "spur_hz": 3243.438720703125,
+        "wave_residual_dbr": 0.0001480664767647135
+      },
+      "compact": {
+        "carrier_db": -74.18360616897026,
+        "highspur_db": -30.341037717072755,
+        "spur_hz": 487.188720703125,
+        "wave_residual_dbr": 0.004742050141626031
+      }
+    },
+    {
+      "raw": 42,
+      "time_ms": 496.0629940032959,
+      "f": 6000,
+      "cutoff": 600,
+      "fb_raw": 106,
+      "repeat": 4,
+      "recursive": {
+        "carrier_db": -93.78127628351864,
+        "highspur_db": -50.24562987016238,
+        "spur_hz": 3243.438720703125,
+        "wave_residual_dbr": -9.992041245012526e-05
+      },
+      "compact": {
+        "carrier_db": -82.19024051994323,
+        "highspur_db": -38.33844586671713,
+        "spur_hz": 487.188720703125,
+        "wave_residual_dbr": 7.869298722314164e-05
+      }
+    }
+  ],
+  "impulse": [
+    {
+      "raw": 21,
+      "phase": 0,
+      "cutoff": 350,
+      "ref": {
+        "peak_offset": 0,
+        "energy_centroid": 0.05056179253551818
+      },
+      "recursive": {
+        "peak_offset": 0,
+        "energy_centroid": 2.6197379641016596
+      },
+      "compact": {
+        "peak_offset": 15,
+        "energy_centroid": 15.188894342618369
+      }
+    },
+    {
+      "raw": 21,
+      "phase": 0,
+      "cutoff": 520,
+      "ref": {
+        "peak_offset": 0,
+        "energy_centroid": 0.05056179253551818
+      },
+      "recursive": {
+        "peak_offset": 0,
+        "energy_centroid": 6.671846764098518
+      },
+      "compact": {
+        "peak_offset": 15,
+        "energy_centroid": 15.188894342618369
+      }
+    },
+    {
+      "raw": 21,
+      "phase": 0,
+      "cutoff": 600,
+      "ref": {
+        "peak_offset": 0,
+        "energy_centroid": 0.05056179253551818
+      },
+      "recursive": {
+        "peak_offset": 0,
+        "energy_centroid": 8.337973522173343
+      },
+      "compact": {
+        "peak_offset": 15,
+        "energy_centroid": 15.188894342618369
+      }
+    },
+    {
+      "raw": 21,
+      "phase": 5,
+      "cutoff": 350,
+      "ref": {
+        "peak_offset": 0,
+        "energy_centroid": 0.05056179253733717
+      },
+      "recursive": {
+        "peak_offset": 0,
+        "energy_centroid": 2.0938182501213305
+      },
+      "compact": {
+        "peak_offset": 10,
+        "energy_centroid": 10.188894342618369
+      }
+    },
+    {
+      "raw": 21,
+      "phase": 5,
+      "cutoff": 520,
+      "ref": {
+        "peak_offset": 0,
+        "energy_centroid": 0.05056179253733717
+      },
+      "recursive": {
+        "peak_offset": 0,
+        "energy_centroid": 4.070184064352361
+      },
+      "compact": {
+        "peak_offset": 10,
+        "energy_centroid": 10.188894342618369
+      }
+    },
+    {
+      "raw": 21,
+      "phase": 5,
+      "cutoff": 600,
+      "ref": {
+        "peak_offset": 0,
+        "energy_centroid": 0.05056179253733717
+      },
+      "recursive": {
+        "peak_offset": 0,
+        "energy_centroid": 7.057741146989429
+      },
+      "compact": {
+        "peak_offset": 10,
+        "energy_centroid": 10.188894342618369
+      }
+    },
+    {
+      "raw": 21,
+      "phase": 13,
+      "cutoff": 350,
+      "ref": {
+        "peak_offset": 0,
+        "energy_centroid": 0.05056179253551818
+      },
+      "recursive": {
+        "peak_offset": 15,
+        "energy_centroid": 6.274341649597773
+      },
+      "compact": {
+        "peak_offset": 2,
+        "energy_centroid": 2.1888943426183687
+      }
+    },
+    {
+      "raw": 21,
+      "phase": 13,
+      "cutoff": 520,
+      "ref": {
+        "peak_offset": 0,
+        "energy_centroid": 0.05056179253551818
+      },
+      "recursive": {
+        "peak_offset": 0,
+        "energy_centroid": 1.0339245532213681
+      },
+      "compact": {
+        "peak_offset": 2,
+        "energy_centroid": 2.1888943426183687
+      }
+    },
+    {
+      "raw": 21,
+      "phase": 13,
+      "cutoff": 600,
+      "ref": {
+        "peak_offset": 0,
+        "energy_centroid": 0.05056179253551818
+      },
+      "recursive": {
+        "peak_offset": 0,
+        "energy_centroid": 3.8457717755954945
+      },
+      "compact": {
+        "peak_offset": 2,
+        "energy_centroid": 2.1888943426183687
+      }
+    },
+    {
+      "raw": 21,
+      "phase": 21,
+      "cutoff": 350,
+      "ref": {
+        "peak_offset": 0,
+        "energy_centroid": 0.05056179253551818
+      },
+      "recursive": {
+        "peak_offset": 1,
+        "energy_centroid": 6.093946555909497
+      },
+      "compact": {
+        "peak_offset": 10,
+        "energy_centroid": 10.188894342618369
+      }
+    },
+    {
+      "raw": 21,
+      "phase": 21,
+      "cutoff": 520,
+      "ref": {
+        "peak_offset": 0,
+        "energy_centroid": 0.05056179253551818
+      },
+      "recursive": {
+        "peak_offset": 0,
+        "energy_centroid": -2.6249151618048927
+      },
+      "compact": {
+        "peak_offset": 10,
+        "energy_centroid": 10.188894342618369
+      }
+    },
+    {
+      "raw": 21,
+      "phase": 21,
+      "cutoff": 600,
+      "ref": {
+        "peak_offset": 0,
+        "energy_centroid": 0.05056179253551818
+      },
+      "recursive": {
+        "peak_offset": 0,
+        "energy_centroid": -2.1237245950578654
+      },
+      "compact": {
+        "peak_offset": 10,
+        "energy_centroid": 10.188894342618369
+      }
+    },
+    {
+      "raw": 21,
+      "phase": 32,
+      "cutoff": 350,
+      "ref": {
+        "peak_offset": 0,
+        "energy_centroid": 0.05056179253551818
+      },
+      "recursive": {
+        "peak_offset": 0,
+        "energy_centroid": 6.316736540080456
+      },
+      "compact": {
+        "peak_offset": 15,
+        "energy_centroid": 15.188894342618369
+      }
+    },
+    {
+      "raw": 21,
+      "phase": 32,
+      "cutoff": 520,
+      "ref": {
+        "peak_offset": 0,
+        "energy_centroid": 0.05056179253551818
+      },
+      "recursive": {
+        "peak_offset": 0,
+        "energy_centroid": 4.9096979360674595
+      },
+      "compact": {
+        "peak_offset": 15,
+        "energy_centroid": 15.188894342618369
+      }
+    },
+    {
+      "raw": 21,
+      "phase": 32,
+      "cutoff": 600,
+      "ref": {
+        "peak_offset": 0,
+        "energy_centroid": 0.05056179253551818
+      },
+      "recursive": {
+        "peak_offset": -14,
+        "energy_centroid": -2.343670775560895
+      },
+      "compact": {
+        "peak_offset": 15,
+        "energy_centroid": 15.188894342618369
+      }
+    },
+    {
+      "raw": 42,
+      "phase": 0,
+      "cutoff": 350,
+      "ref": {
+        "peak_offset": 0,
+        "energy_centroid": 0.26470585485731135
+      },
+      "recursive": {
+        "peak_offset": 0,
+        "energy_centroid": 2.8104084002807213
+      },
+      "compact": {
+        "peak_offset": 31,
+        "energy_centroid": 31.378822602764558
+      }
+    },
+    {
+      "raw": 42,
+      "phase": 0,
+      "cutoff": 520,
+      "ref": {
+        "peak_offset": 0,
+        "energy_centroid": 0.26470585485731135
+      },
+      "recursive": {
+        "peak_offset": 1,
+        "energy_centroid": 6.861216838715336
+      },
+      "compact": {
+        "peak_offset": 31,
+        "energy_centroid": 31.378822602764558
+      }
+    },
+    {
+      "raw": 42,
+      "phase": 0,
+      "cutoff": 600,
+      "ref": {
+        "peak_offset": 0,
+        "energy_centroid": 0.26470585485731135
+      },
+      "recursive": {
+        "peak_offset": 1,
+        "energy_centroid": 8.528622746911424
+      },
+      "compact": {
+        "peak_offset": 31,
+        "energy_centroid": 31.378822602764558
+      }
+    },
+    {
+      "raw": 42,
+      "phase": 5,
+      "cutoff": 350,
+      "ref": {
+        "peak_offset": 0,
+        "energy_centroid": 0.2647058548536734
+      },
+      "recursive": {
+        "peak_offset": 0,
+        "energy_centroid": 2.284909374677227
+      },
+      "compact": {
+        "peak_offset": 26,
+        "energy_centroid": 26.378822602764558
+      }
+    },
+    {
+      "raw": 42,
+      "phase": 5,
+      "cutoff": 520,
+      "ref": {
+        "peak_offset": 0,
+        "energy_centroid": 0.2647058548536734
+      },
+      "recursive": {
+        "peak_offset": 0,
+        "energy_centroid": 4.260222249537037
+      },
+      "compact": {
+        "peak_offset": 26,
+        "energy_centroid": 26.378822602764558
+      }
+    },
+    {
+      "raw": 42,
+      "phase": 5,
+      "cutoff": 600,
+      "ref": {
+        "peak_offset": 0,
+        "energy_centroid": 0.2647058548536734
+      },
+      "recursive": {
+        "peak_offset": 0,
+        "energy_centroid": 7.248210428762832
+      },
+      "compact": {
+        "peak_offset": 26,
+        "energy_centroid": 26.378822602764558
+      }
+    },
+    {
+      "raw": 42,
+      "phase": 13,
+      "cutoff": 350,
+      "ref": {
+        "peak_offset": 0,
+        "energy_centroid": 0.2647058548536734
+      },
+      "recursive": {
+        "peak_offset": 15,
+        "energy_centroid": 6.466947099823301
+      },
+      "compact": {
+        "peak_offset": 18,
+        "energy_centroid": 18.378822602764558
+      }
+    },
+    {
+      "raw": 42,
+      "phase": 13,
+      "cutoff": 520,
+      "ref": {
+        "peak_offset": 0,
+        "energy_centroid": 0.2647058548536734
+      },
+      "recursive": {
+        "peak_offset": 0,
+        "energy_centroid": 1.225117381196469
+      },
+      "compact": {
+        "peak_offset": 18,
+        "energy_centroid": 18.378822602764558
+      }
+    },
+    {
+      "raw": 42,
+      "phase": 13,
+      "cutoff": 600,
+      "ref": {
+        "peak_offset": 0,
+        "energy_centroid": 0.2647058548536734
+      },
+      "recursive": {
+        "peak_offset": 1,
+        "energy_centroid": 4.036998165931436
+      },
+      "compact": {
+        "peak_offset": 18,
+        "energy_centroid": 18.378822602764558
+      }
+    },
+    {
+      "raw": 42,
+      "phase": 21,
+      "cutoff": 350,
+      "ref": {
+        "peak_offset": 0,
+        "energy_centroid": 0.2647058548536734
+      },
+      "recursive": {
+        "peak_offset": 1,
+        "energy_centroid": 6.285239662131062
+      },
+      "compact": {
+        "peak_offset": 10,
+        "energy_centroid": 10.378822602764558
+      }
+    },
+    {
+      "raw": 42,
+      "phase": 21,
+      "cutoff": 520,
+      "ref": {
+        "peak_offset": 0,
+        "energy_centroid": 0.2647058548536734
+      },
+      "recursive": {
+        "peak_offset": 1,
+        "energy_centroid": -2.434349639686843
+      },
+      "compact": {
+        "peak_offset": 10,
+        "energy_centroid": 10.378822602764558
+      }
+    },
+    {
+      "raw": 42,
+      "phase": 21,
+      "cutoff": 600,
+      "ref": {
+        "peak_offset": 0,
+        "energy_centroid": 0.2647058548536734
+      },
+      "recursive": {
+        "peak_offset": 0,
+        "energy_centroid": -1.9329827882465906
+      },
+      "compact": {
+        "peak_offset": 10,
+        "energy_centroid": 10.378822602764558
+      }
+    },
+    {
+      "raw": 42,
+      "phase": 32,
+      "cutoff": 350,
+      "ref": {
+        "peak_offset": 0,
+        "energy_centroid": 0.2647058548536734
+      },
+      "recursive": {
+        "peak_offset": 15,
+        "energy_centroid": 6.507598105912621
+      },
+      "compact": {
+        "peak_offset": 31,
+        "energy_centroid": 31.378822602768196
+      }
+    },
+    {
+      "raw": 42,
+      "phase": 32,
+      "cutoff": 520,
+      "ref": {
+        "peak_offset": 0,
+        "energy_centroid": 0.2647058548536734
+      },
+      "recursive": {
+        "peak_offset": 0,
+        "energy_centroid": 5.099588639412104
+      },
+      "compact": {
+        "peak_offset": 31,
+        "energy_centroid": 31.378822602768196
+      }
+    },
+    {
+      "raw": 42,
+      "phase": 32,
+      "cutoff": 600,
+      "ref": {
+        "peak_offset": 0,
+        "energy_centroid": 0.2647058548536734
+      },
+      "recursive": {
+        "peak_offset": -14,
+        "energy_centroid": -2.15435370927662
+      },
+      "compact": {
+        "peak_offset": 31,
+        "energy_centroid": 31.378822602768196
+      }
+    }
+  ],
+  "real_cue": [
+    {
+      "raw": 21,
+      "fb_raw": 64,
+      "ping": 0,
+      "cutoff": 350,
+      "recursive": {
+        "tail_level_delta_dB": -5.870673427422972,
+        "tail_residual_dBr": -1.8608732182476984,
+        "tail_band_level_dB": [
+          -3.8705955739684943,
+          -22.382985429184124,
+          -6.042630479896501,
+          -10.766582854959942
+        ],
+        "tail_band_residual_dBr": [
+          -4.874869558256448,
+          0.17949480578604474,
+          -0.09687949247839883,
+          0.3561919925983495
+        ]
+      },
+      "compact": {
+        "tail_level_delta_dB": -3.814971018847716,
+        "tail_residual_dBr": 0.27595099891163477,
+        "tail_band_level_dB": [
+          -1.9042796516581737,
+          -14.633139975940743,
+          -16.53805812735611,
+          -5.942814130126023
+        ],
+        "tail_band_residual_dBr": [
+          0.17316656517531157,
+          0.8823103629114784,
+          0.09861107343924037,
+          0.987068461809507
+        ]
+      }
+    },
+    {
+      "raw": 21,
+      "fb_raw": 64,
+      "ping": 0,
+      "cutoff": 520,
+      "recursive": {
+        "tail_level_delta_dB": -5.861464896111648,
+        "tail_residual_dBr": -1.8573756534959773,
+        "tail_band_level_dB": [
+          -3.8626968581884586,
+          -22.40758419945092,
+          -4.122258517605053,
+          -9.442555007834061
+        ],
+        "tail_band_residual_dBr": [
+          -4.875026780810475,
+          0.18241054529949782,
+          -0.060836082998746155,
+          0.4725233309789422
+        ]
+      },
+      "compact": {
+        "tail_level_delta_dB": -3.814971018847716,
+        "tail_residual_dBr": 0.27595099891163477,
+        "tail_band_level_dB": [
+          -1.9042796516581737,
+          -14.633139975940743,
+          -16.53805812735611,
+          -5.942814130126023
+        ],
+        "tail_band_residual_dBr": [
+          0.17316656517531157,
+          0.8823103629114784,
+          0.09861107343924037,
+          0.987068461809507
+        ]
+      }
+    },
+    {
+      "raw": 21,
+      "fb_raw": 64,
+      "ping": 0,
+      "cutoff": 600,
+      "recursive": {
+        "tail_level_delta_dB": -5.8559381605750636,
+        "tail_residual_dBr": -1.8581078836392304,
+        "tail_band_level_dB": [
+          -3.8404221691555183,
+          -22.39931628029787,
+          -3.6554197498575496,
+          -9.067142701360126
+        ],
+        "tail_band_residual_dBr": [
+          -4.884715162640917,
+          0.180684181899165,
+          0.23582424937510177,
+          0.5612588417821384
+        ]
+      },
+      "compact": {
+        "tail_level_delta_dB": -3.814971018847716,
+        "tail_residual_dBr": 0.27595099891163477,
+        "tail_band_level_dB": [
+          -1.9042796516581737,
+          -14.633139975940743,
+          -16.53805812735611,
+          -5.942814130126023
+        ],
+        "tail_band_residual_dBr": [
+          0.17316656517531157,
+          0.8823103629114784,
+          0.09861107343924037,
+          0.987068461809507
+        ]
+      }
+    },
+    {
+      "raw": 21,
+      "fb_raw": 64,
+      "ping": 1,
+      "cutoff": 350,
+      "recursive": {
+        "tail_level_delta_dB": -5.636809116762416,
+        "tail_residual_dBr": -2.94344045753085,
+        "tail_band_level_dB": [
+          -4.906775466280345,
+          -26.932594792596262,
+          -2.752021680622829,
+          -15.562390165800368
+        ],
+        "tail_band_residual_dBr": [
+          -4.36304696692252,
+          0.047415249725619946,
+          -1.158746362231383,
+          0.10618405362096198
+        ]
+      }
+    },
+    {
+      "raw": 21,
+      "fb_raw": 64,
+      "ping": 1,
+      "cutoff": 520,
+      "recursive": {
+        "tail_level_delta_dB": -5.637922716238104,
+        "tail_residual_dBr": -2.9439432457556087,
+        "tail_band_level_dB": [
+          -4.907764251850121,
+          -26.91089976192562,
+          -2.503436318826733,
+          -14.594561163894426
+        ],
+        "tail_band_residual_dBr": [
+          -4.363349363648374,
+          0.04834410290151607,
+          -1.9146538938350806,
+          0.12781375399495915
+        ]
+      }
+    },
+    {
+      "raw": 21,
+      "fb_raw": 64,
+      "ping": 1,
+      "cutoff": 600,
+      "recursive": {
+        "tail_level_delta_dB": -5.634951784063082,
+        "tail_residual_dBr": -2.9429623997666505,
+        "tail_band_level_dB": [
+          -4.90386194169653,
+          -26.90375348059124,
+          -1.891755841675654,
+          -13.704064116675392
+        ],
+        "tail_band_residual_dBr": [
+          -4.365628766906117,
+          0.046630015655526796,
+          -1.8018811894202367,
+          0.17428461456150401
+        ]
+      }
+    },
+    {
+      "raw": 21,
+      "fb_raw": 106,
+      "ping": 0,
+      "cutoff": 350,
+      "recursive": {
+        "tail_level_delta_dB": -4.067496329848331,
+        "tail_residual_dBr": -3.3047601165477873,
+        "tail_band_level_dB": [
+          -2.742230474372686,
+          -35.85553676826993,
+          -6.999372381563712,
+          -25.612877085276658
+        ],
+        "tail_band_residual_dBr": [
+          -5.8012754034295355,
+          0.017351670460560388,
+          -0.9252669461097789,
+          0.007366770654129596
+        ]
+      },
+      "compact": {
+        "tail_level_delta_dB": -3.6082777299515816,
+        "tail_residual_dBr": 0.2043693853996026,
+        "tail_band_level_dB": [
+          -2.293801752466252,
+          -24.697146541668637,
+          -31.337809477413945,
+          -22.644815293973647
+        ],
+        "tail_band_residual_dBr": [
+          0.5415598177190386,
+          -0.11072230325160753,
+          0.0032674398797957363,
+          0.02432962835109851
+        ]
+      }
+    },
+    {
+      "raw": 21,
+      "fb_raw": 106,
+      "ping": 0,
+      "cutoff": 520,
+      "recursive": {
+        "tail_level_delta_dB": -4.055926179637636,
+        "tail_residual_dBr": -3.3164101120248852,
+        "tail_band_level_dB": [
+          -2.737092980662226,
+          -35.871094886932816,
+          -6.438737971115946,
+          -22.35296315437685
+        ],
+        "tail_band_residual_dBr": [
+          -5.809383232279642,
+          0.01566991022289009,
+          -1.8587141302301857,
+          0.007288597629939701
+        ]
+      },
+      "compact": {
+        "tail_level_delta_dB": -3.6082777299515816,
+        "tail_residual_dBr": 0.2043693853996026,
+        "tail_band_level_dB": [
+          -2.293801752466252,
+          -24.697146541668637,
+          -31.337809477413945,
+          -22.644815293973647
+        ],
+        "tail_band_residual_dBr": [
+          0.5415598177190386,
+          -0.11072230325160753,
+          0.0032674398797957363,
+          0.02432962835109851
+        ]
+      }
+    },
+    {
+      "raw": 21,
+      "fb_raw": 106,
+      "ping": 0,
+      "cutoff": 600,
+      "recursive": {
+        "tail_level_delta_dB": -4.051410063118249,
+        "tail_residual_dBr": -3.312722654754339,
+        "tail_band_level_dB": [
+          -2.732133033268841,
+          -35.83211271229802,
+          -5.382062216248993,
+          -18.5189747444418
+        ],
+        "tail_band_residual_dBr": [
+          -5.806426553531621,
+          0.015287654263983957,
+          -1.879013603206607,
+          0.019635124041032834
+        ]
+      },
+      "compact": {
+        "tail_level_delta_dB": -3.6082777299515816,
+        "tail_residual_dBr": 0.2043693853996026,
+        "tail_band_level_dB": [
+          -2.293801752466252,
+          -24.697146541668637,
+          -31.337809477413945,
+          -22.644815293973647
+        ],
+        "tail_band_residual_dBr": [
+          0.5415598177190386,
+          -0.11072230325160753,
+          0.0032674398797957363,
+          0.02432962835109851
+        ]
+      }
+    },
+    {
+      "raw": 21,
+      "fb_raw": 106,
+      "ping": 1,
+      "cutoff": 350,
+      "recursive": {
+        "tail_level_delta_dB": -3.4418555329166884,
+        "tail_residual_dBr": -4.216770852304782,
+        "tail_band_level_dB": [
+          -2.5599053013144872,
+          -32.45322126512365,
+          -4.757849028924416,
+          -22.20583583886149
+        ],
+        "tail_band_residual_dBr": [
+          -6.4164641363629125,
+          0.007262994913642379,
+          -1.8805812432309956,
+          0.0250561309620495
+        ]
+      }
+    },
+    {
+      "raw": 21,
+      "fb_raw": 106,
+      "ping": 1,
+      "cutoff": 520,
+      "recursive": {
+        "tail_level_delta_dB": -3.4439179359595173,
+        "tail_residual_dBr": -4.218502348775869,
+        "tail_band_level_dB": [
+          -2.5662613689609044,
+          -32.421260242742605,
+          -4.360583900039302,
+          -21.278637275956626
+        ],
+        "tail_band_residual_dBr": [
+          -6.409364654430334,
+          0.007141615278154158,
+          -2.663222085408013,
+          0.021516170341137314
+        ]
+      }
+    },
+    {
+      "raw": 21,
+      "fb_raw": 106,
+      "ping": 1,
+      "cutoff": 600,
+      "recursive": {
+        "tail_level_delta_dB": -3.433191865461556,
+        "tail_residual_dBr": -4.218532640415848,
+        "tail_band_level_dB": [
+          -2.5563995944374223,
+          -32.41028896119737,
+          -3.6374831619694525,
+          -19.325815186559872
+        ],
+        "tail_band_residual_dBr": [
+          -6.418256502223716,
+          0.006737700007072078,
+          -2.5328232611080086,
+          0.029426185766856756
+        ]
+      }
+    },
+    {
+      "raw": 42,
+      "fb_raw": 64,
+      "ping": 0,
+      "cutoff": 350,
+      "recursive": {
+        "tail_level_delta_dB": -3.777133601588129,
+        "tail_residual_dBr": -3.9756591933066785,
+        "tail_band_level_dB": [
+          -2.6797821366245786,
+          -22.237182352642524,
+          -2.789973669520132,
+          -14.519685101692918
+        ],
+        "tail_band_residual_dBr": [
+          -7.654443633623612,
+          0.08076218743512587,
+          -2.447631233089376,
+          0.14714858839161618
+        ]
+      },
+      "compact": {
+        "tail_level_delta_dB": -5.751994417740139,
+        "tail_residual_dBr": 0.7762490054386748,
+        "tail_band_level_dB": [
+          -4.68700239840748,
+          -24.883513207575135,
+          -28.222651480981398,
+          -20.424237038726716
+        ],
+        "tail_band_residual_dBr": [
+          1.2411709742045984,
+          0.03105587216942475,
+          0.014431115554036946,
+          0.04851710782407072
+        ]
+      }
+    },
+    {
+      "raw": 42,
+      "fb_raw": 64,
+      "ping": 0,
+      "cutoff": 520,
+      "recursive": {
+        "tail_level_delta_dB": -3.7756254150003947,
+        "tail_residual_dBr": -3.9748508160139777,
+        "tail_band_level_dB": [
+          -2.6832207615046193,
+          -22.221460222363145,
+          -2.2215767790249408,
+          -12.38754039196211
+        ],
+        "tail_band_residual_dBr": [
+          -7.651448446793453,
+          0.07896743134607151,
+          -3.2795820976731047,
+          0.25901720031494135
+        ]
+      },
+      "compact": {
+        "tail_level_delta_dB": -5.751994417740139,
+        "tail_residual_dBr": 0.7762490054386748,
+        "tail_band_level_dB": [
+          -4.68700239840748,
+          -24.883513207575135,
+          -28.222651480981398,
+          -20.424237038726716
+        ],
+        "tail_band_residual_dBr": [
+          1.2411709742045984,
+          0.03105587216942475,
+          0.014431115554036946,
+          0.04851710782407072
+        ]
+      }
+    },
+    {
+      "raw": 42,
+      "fb_raw": 64,
+      "ping": 0,
+      "cutoff": 600,
+      "recursive": {
+        "tail_level_delta_dB": -3.76625909234774,
+        "tail_residual_dBr": -3.9720122731215355,
+        "tail_band_level_dB": [
+          -2.6845278470614655,
+          -22.232012123528463,
+          -1.442036458244159,
+          -11.654747419985291
+        ],
+        "tail_band_residual_dBr": [
+          -7.651597599098274,
+          0.07444672110776102,
+          -2.549616119727389,
+          0.3365178476949931
+        ]
+      },
+      "compact": {
+        "tail_level_delta_dB": -5.751994417740139,
+        "tail_residual_dBr": 0.7762490054386748,
+        "tail_band_level_dB": [
+          -4.68700239840748,
+          -24.883513207575135,
+          -28.222651480981398,
+          -20.424237038726716
+        ],
+        "tail_band_residual_dBr": [
+          1.2411709742045984,
+          0.03105587216942475,
+          0.014431115554036946,
+          0.04851710782407072
+        ]
+      }
+    },
+    {
+      "raw": 42,
+      "fb_raw": 64,
+      "ping": 1,
+      "cutoff": 350,
+      "recursive": {
+        "tail_level_delta_dB": -2.190668720201993,
+        "tail_residual_dBr": -6.06325583720139,
+        "tail_band_level_dB": [
+          -1.5718629054280455,
+          -25.044525879119,
+          -2.9923280050064083,
+          -15.694580711835503
+        ],
+        "tail_band_residual_dBr": [
+          -9.67454114248645,
+          0.044149585944933234,
+          -2.8462592958833035,
+          0.1132380958555785
+        ]
+      }
+    },
+    {
+      "raw": 42,
+      "fb_raw": 64,
+      "ping": 1,
+      "cutoff": 520,
+      "recursive": {
+        "tail_level_delta_dB": -2.1863845494287815,
+        "tail_residual_dBr": -6.06465078801496,
+        "tail_band_level_dB": [
+          -1.5695058907250934,
+          -24.983172073948538,
+          -2.3766834375997963,
+          -13.11246841882464
+        ],
+        "tail_band_residual_dBr": [
+          -9.682191755527645,
+          0.04227045929748671,
+          -3.7450272465240007,
+          0.1828694944830969
+        ]
+      }
+    },
+    {
+      "raw": 42,
+      "fb_raw": 64,
+      "ping": 1,
+      "cutoff": 600,
+      "recursive": {
+        "tail_level_delta_dB": -2.186085562291603,
+        "tail_residual_dBr": -6.058348494108663,
+        "tail_band_level_dB": [
+          -1.5686879324895626,
+          -25.02348020880885,
+          -1.5821613988294894,
+          -12.176286380489268
+        ],
+        "tail_band_residual_dBr": [
+          -9.67839880889681,
+          0.039751279787461284,
+          -2.9271598474868203,
+          0.27548153087943
+        ]
+      }
+    },
+    {
+      "raw": 42,
+      "fb_raw": 106,
+      "ping": 0,
+      "cutoff": 350,
+      "recursive": {
+        "tail_level_delta_dB": -2.634121573421235,
+        "tail_residual_dBr": -5.186006048911201,
+        "tail_band_level_dB": [
+          -1.7322143991184675,
+          -27.194823746970496,
+          -3.1238905846304634,
+          -17.70892773175537
+        ],
+        "tail_band_residual_dBr": [
+          -8.797598167074035,
+          0.03679198215577778,
+          -2.5341390262569403,
+          0.08834367979280061
+        ]
+      },
+      "compact": {
+        "tail_level_delta_dB": -3.528175777004499,
+        "tail_residual_dBr": 0.5529222515780972,
+        "tail_band_level_dB": [
+          -2.6354389578707793,
+          -28.990896448558953,
+          -30.224232566595504,
+          -23.69879635048178
+        ],
+        "tail_band_residual_dBr": [
+          0.7887590369396655,
+          -0.0016230588165226075,
+          0.011363832355397703,
+          0.026728002749882185
+        ]
+      }
+    },
+    {
+      "raw": 42,
+      "fb_raw": 106,
+      "ping": 0,
+      "cutoff": 520,
+      "recursive": {
+        "tail_level_delta_dB": -2.6417286924223515,
+        "tail_residual_dBr": -5.186586404787697,
+        "tail_band_level_dB": [
+          -1.7434571241462573,
+          -27.260529186990503,
+          -2.5066602179290243,
+          -14.848417352788832
+        ],
+        "tail_band_residual_dBr": [
+          -8.792871586202262,
+          0.032688392263715726,
+          -3.3260626489396916,
+          0.11875301954173392
+        ]
+      },
+      "compact": {
+        "tail_level_delta_dB": -3.528175777004499,
+        "tail_residual_dBr": 0.5529222515780972,
+        "tail_band_level_dB": [
+          -2.6354389578707793,
+          -28.990896448558953,
+          -30.224232566595504,
+          -23.69879635048178
+        ],
+        "tail_band_residual_dBr": [
+          0.7887590369396655,
+          -0.0016230588165226075,
+          0.011363832355397703,
+          0.026728002749882185
+        ]
+      }
+    },
+    {
+      "raw": 42,
+      "fb_raw": 106,
+      "ping": 0,
+      "cutoff": 600,
+      "recursive": {
+        "tail_level_delta_dB": -2.6360043199152567,
+        "tail_residual_dBr": -5.181591158445256,
+        "tail_band_level_dB": [
+          -1.739789754118434,
+          -27.16519314850543,
+          -1.6925198320840544,
+          -13.715091917632654
+        ],
+        "tail_band_residual_dBr": [
+          -8.795077595572176,
+          0.03279405977166913,
+          -2.5883950308374497,
+          0.1793805454947486
+        ]
+      },
+      "compact": {
+        "tail_level_delta_dB": -3.528175777004499,
+        "tail_residual_dBr": 0.5529222515780972,
+        "tail_band_level_dB": [
+          -2.6354389578707793,
+          -28.990896448558953,
+          -30.224232566595504,
+          -23.69879635048178
+        ],
+        "tail_band_residual_dBr": [
+          0.7887590369396655,
+          -0.0016230588165226075,
+          0.011363832355397703,
+          0.026728002749882185
+        ]
+      }
+    },
+    {
+      "raw": 42,
+      "fb_raw": 106,
+      "ping": 1,
+      "cutoff": 350,
+      "recursive": {
+        "tail_level_delta_dB": -2.1202896745032485,
+        "tail_residual_dBr": -6.1496274622521,
+        "tail_band_level_dB": [
+          -1.4653181420525692,
+          -27.51640913871841,
+          -3.1673501295237045,
+          -17.188315053679077
+        ],
+        "tail_band_residual_dBr": [
+          -9.49599072552556,
+          0.030167312685993514,
+          -2.783586605502995,
+          0.07950108066045666
+        ]
+      }
+    },
+    {
+      "raw": 42,
+      "fb_raw": 106,
+      "ping": 1,
+      "cutoff": 520,
+      "recursive": {
+        "tail_level_delta_dB": -2.1160156285194174,
+        "tail_residual_dBr": -6.152040218221297,
+        "tail_band_level_dB": [
+          -1.4617563057619272,
+          -27.447378533038638,
+          -2.4873500240442725,
+          -14.347203500427316
+        ],
+        "tail_band_residual_dBr": [
+          -9.502505525086764,
+          0.028371040775767138,
+          -3.5944886893105075,
+          0.12079106970646025
+        ]
+      }
+    },
+    {
+      "raw": 42,
+      "fb_raw": 106,
+      "ping": 1,
+      "cutoff": 600,
+      "recursive": {
+        "tail_level_delta_dB": -2.1136492574888046,
+        "tail_residual_dBr": -6.149360003456664,
+        "tail_band_level_dB": [
+          -1.4621590738916546,
+          -27.461119318911187,
+          -1.6632697174545186,
+          -13.266172518711304
+        ],
+        "tail_band_residual_dBr": [
+          -9.506543983419895,
+          0.027836768966312677,
+          -2.824777348145137,
+          0.1836219888680362
+        ]
+      }
+    }
+  ]
+}

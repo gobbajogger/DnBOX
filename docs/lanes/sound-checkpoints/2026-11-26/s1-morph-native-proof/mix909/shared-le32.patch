@@ -1,0 +1,69 @@
+--- a/firmware/src/app/boot_screen.h
++++ b/firmware/src/app/boot_screen.h
+@@ -85,10 +85,15 @@
+ {
+     return (uint32_t)p[0] | (uint32_t)p[1] << 8;
+ }
++#if DNBOX_SHARED_LE32_LAB
++extern uint32_t dnbox_read_le32(const uint8_t *p);
++#define boot_u32 dnbox_read_le32
++#else
+ static uint32_t boot_u32(const uint8_t *p)
+ {
+     return (uint32_t)p[0] | (uint32_t)p[1] << 8 | (uint32_t)p[2] << 16 | (uint32_t)p[3] << 24;
+ }
++#endif
+ static void boot_p16(uint8_t *p, uint32_t v)
+ {
+     p[0] = (uint8_t)v;
+--- a/firmware/src/app/fittab.h
++++ b/firmware/src/app/fittab.h
+@@ -25,10 +25,15 @@
+ _Static_assert(FITTAB_LEN == FITTAB_BYTES, "FITTAB_LEN is 694 programs x 2 B");
+ #endif
+ 
++#if DNBOX_SHARED_LE32_LAB
++extern uint32_t dnbox_read_le32(const uint8_t *p);
++#define fittab_rd32 dnbox_read_le32
++#else
+ static uint32_t fittab_rd32(const uint8_t *p)
+ {
+     return (uint32_t)p[0] | ((uint32_t)p[1] << 8) | ((uint32_t)p[2] << 16) | ((uint32_t)p[3] << 24);
+ }
++#endif
+ 
+ /* Pointer to the want_len-byte blob at p + FITTAB_HDR when the header is valid and matches
+  * want_len / want_id; otherwise NULL (absent: erased, damaged, or a different build). The
+--- a/firmware/src/app/xdata.h
++++ b/firmware/src/app/xdata.h
+@@ -15,10 +15,15 @@
+ _Static_assert(FL_XDATA_MAGIC == XDATA_MAGIC && FL_XDATA_HDR == XDATA_HDR, "XDATA header: flash map and xdata.h agree");
+ #endif
+ 
++#if DNBOX_SHARED_LE32_LAB
++extern uint32_t dnbox_read_le32(const uint8_t *p);
++#define xdata_rd32 dnbox_read_le32
++#else
+ static uint32_t xdata_rd32(const uint8_t *p)
+ {
+     return (uint32_t)p[0] | ((uint32_t)p[1] << 8) | ((uint32_t)p[2] << 16) | ((uint32_t)p[3] << 24);
+ }
++#endif
+ 
+ /* 1: the region at p (room bytes) holds exactly the blob of want_len bytes with build id want_id */
+ static uint8_t xdata_valid(const uint8_t *p, uint32_t room, uint32_t want_len, uint32_t want_id)
+--- a/firmware/src/app/project.c
++++ b/firmware/src/app/project.c
+@@ -179,7 +179,12 @@
+ #endif
+ }
+ 
++#if DNBOX_SHARED_LE32_LAB
++#define get32 dnbox_read_le32
++__attribute__((noinline)) uint32_t dnbox_read_le32(const uint8_t *p)
++#else
+ __attribute__((noinline)) static uint32_t get32(const uint8_t *p)
++#endif
+ {
+     return (uint32_t)p[0] | (uint32_t)p[1] << 8 | (uint32_t)p[2] << 16 | (uint32_t)p[3] << 24;
+ }

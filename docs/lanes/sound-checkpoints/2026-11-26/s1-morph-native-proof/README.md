@@ -103,3 +103,36 @@ Pricing the existing worker 808 BD/SD prefix in the stage model, with separate m
 Sound changes when merely coalescing loads: the existing C 909 renderer differs at cut points even with no note change; 256 vs 128+128 changes 256 raw float words from frame128 and final owner state, and five other cuts demonstrate the same. Preserve the 2x256 DMA partition and exact event cuts.
 
 Native unlinked layout: isolated 140-B voice shadow, 4-B completion word and 220 float samples in existing 1,024-B scratch tail after 808 metals, no growth of 5,120-B workspace. Host one-voice prepare+serial commit is bit-identical in 3,200 cases, half discarding shadow, keeping live state untouched and retrying original serial path. Future firmware must consume this in the serial normal voice-mix position before 808/selected workspace's owner reuses the tail. Only the serial owner commits. Missing publication requires existing guarded stop/join before retry/reuse. No proof for >220 frames or shipping live inter-core handoff; the early pre-safety offload exceeded XIP and was never run.
+
+## 909 post-mix exact-state variants
+The ordered 909 output lane computes centered mono before pan, four separate scale
+glides, kit sends, and the meter. Fusing arbitrary settled gains was byte-identical
+but more than doubled the native leaf time at unity/no sends. Selective fusion retained
+the original unity/track fallback and achieved 19.83% faster leaf at attenuation/no
+sends or 34.61% with sends, with native raw per-case hashes exact. Its whole strict
+results remained mixed: Elite 13,266us/39 late, Pro 13,192us/59.
+
+Current probe demonstrated that all four L/R and voice-send lanes share the same
+Float32 moving recurrence in some real terminal snapshots, with settled zero kit
+sends. The common variant checks exact bit agreement, preserves each lane's final
+gain commit and mixer ordering, and keeps the complete existing fallback on
+nonzero kit sends, unequal lanes, unity, or uncertain state. Exact host 20,000
+comparisons and ASan/UBSan pass, including both movement and plateaux.
+Native 131,072-frame leaf per mode preserves all output fingerprints and is 35.32%
+faster for common settled and 49.59% for common moving (about 86us per active
+512-frame half at the measured operator rate; not a whole-block timing result).
+Both untouched fallbacks add <=0.35% in the isolated leaf.
+
+Unchanged companion and protected ranges. The cold duplicate-only measured savings
+are exactly 64 B app on both boards (344/356 B free vs 280/292 B). This simply uses one
+identical unaligned little-endian decoder for four existing parser roles, with identical
+caller validations and no lift to any region size/reserve. It was not a timing fix:
+whole strict cold-only 13,210us/57 Elite, 13,000us/66 Pro. The common 909 arm needs
+336 B of app relative to this cold-only link, leaving 8 B Elite, 20 B Pro. Pool remains
+564 B above mandated 8,192 B. No production migration approval is implied.
+
+Whole strict common-gain result: Elite 12,888us / 57 late, Pro 12,991us / 40 late.
+Both terminal snapshots satisfy the fast-route guard, 4 settled owner readbacks and
+319,488 PCM frames each. Zero skipped cycles, virtual erases or writes. The exact
+mix pass improves vs cold-reader-only test but not the original baseline on every
+metric (Elite +6 late, Pro -13). Release target is still unfulfilled; keep diagnostic.

@@ -1,0 +1,33 @@
+{
+  "scope": "PI32 native raw leaf, 512\u00d7256 audio frames per arm per case; no devices/scheduler",
+  "rows": [
+    {
+      "mode": "unity fallback",
+      "baseline_ticks": 364460,
+      "candidate_ticks": 366686,
+      "saving_percent": -0.6107666136201504,
+      "hash": "0x5320a7a1"
+    },
+    {
+      "mode": "common settled",
+      "baseline_ticks": 821342,
+      "candidate_ticks": 701687,
+      "saving_percent": 14.568231017042839,
+      "hash": "0x26255100"
+    },
+    {
+      "mode": "common moving with sends",
+      "baseline_ticks": 1415719,
+      "candidate_ticks": 814708,
+      "saving_percent": 42.452704244274464,
+      "hash": "0xd98a5c27"
+    },
+    {
+      "mode": "individual-lane fallback",
+      "baseline_ticks": 1415718,
+      "candidate_ticks": 1418506,
+      "saving_percent": -0.19693187485078242,
+      "hash": "0xd0e9c16a"
+    }
+  ]
+}
