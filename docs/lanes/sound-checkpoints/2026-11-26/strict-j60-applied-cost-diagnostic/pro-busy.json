@@ -1,0 +1,89 @@
+{
+  "model": "pro",
+  "elf": "476017c9a395cd9bcd596a322987ca0894eb300f0962db9dda1e6a4b7cb30f07",
+  "ram": "629294e1b97a825c4ab16d458139a4139577eb5aea16bdf74d6d96003fb8e5ae",
+  "unchanged_disposable_nor": "9bd34b851f4499bc4b3fa93d98c4e2306ab57e354255e2ef41d15b3b21417336",
+  "scene": "d08718b1521119b252b5cca0c5e1db6981ea25a5a0b31b6ead60dceccb3f6271",
+  "project_input_records": {
+    "0": "6dba601a055f8b4fdb1845afe394a2cf8ea276d3ddbcb7f78e57abd51c2e11c4",
+    "1": "7ce5d61d8c0d91c2b0de7755cf5554ab16d282abc8b37f6b3cbe520cdfeb0a7c",
+    "2": "0721f7f8e9dbae200816cdd3163bc2b269d7e0fc1a4c97178fb2f023dac300fc",
+    "3": "98c30fab8d1344b2c49d60f04a6580fa1cb9200a91190eaba2650794dc16d55d",
+    "5": "95007581752b53ba86aa71487c16283305579c136bfee771698b8f496adea7fd",
+    "6": "5f582b8c9bc55f93cbc410f448991500852f467a6b84448e92fc562127a13ba1"
+  },
+  "first_actual_miss": {
+    "half_ordinal": 360,
+    "renderer_work_frame_interval": [
+      184320,
+      184832
+    ],
+    "elapsed_us": 13956,
+    "mask": "0x1087",
+    "applied_busy_flags": [
+      "909_active_completed",
+      "808_active_kit_branch",
+      "BREAK_non_silent",
+      "B_Chicago_active",
+      "C1_808_prefix_called"
+    ]
+  },
+  "worst_actual_miss": {
+    "half_ordinal": 391,
+    "renderer_work_frame_interval": [
+      200192,
+      200704
+    ],
+    "elapsed_us": 14618,
+    "mask": "0x1087",
+    "applied_busy_flags": [
+      "909_active_completed",
+      "808_active_kit_branch",
+      "BREAK_non_silent",
+      "B_Chicago_active",
+      "C1_808_prefix_called"
+    ]
+  },
+  "worst_half_elapsed_decomposition": {
+    "ordinal": 391,
+    "denominator_24MHz_ticks_floor": 350832,
+    "elapsed_909_c0_ticks": 152389,
+    "elapsed_Chicago_c0_ticks": 94882,
+    "elapsed_909_c0_us": 6349.541666666667,
+    "elapsed_Chicago_c0_us": 3953.4166666666665,
+    "measured_group_proportion_floor_denominator": 0.7048131299311351,
+    "unassigned_elapsed_us_lower_using_whole_us_timer": 4315.041666666667,
+    "note": "Two disjoint completed C0 run_job intervals, explicit stage_wait deducted; eligible Chicago endpoint active, internal nested TIMER5 may inflate both. Remainder contains other jobs, waits, mix/FX, IRQ and recorder; not unused CPU or headroom. No elapsed counters at first miss."
+  },
+  "aggregate": {
+    "worst_us": 14618,
+    "halves": 550,
+    "raw_late": 73,
+    "xruns": 73,
+    "skipped_cycles": 0,
+    "peak": 13165,
+    "frames": 319488,
+    "sealed_boot": true,
+    "settled_owner_readbacks": 4,
+    "meets_timing": false,
+    "core1": {
+      "enabled": 1,
+      "gave_up": 0,
+      "alive": 1,
+      "dispatched": 4528,
+      "finished": 4527,
+      "bad_mailbox": 0
+    },
+    "accepted": false
+  },
+  "valid_owner_points": 4,
+  "valid_owner_before_external_tape": 0,
+  "first_valid_owner_reply_ms": 2962,
+  "legacy_timeline_words": [
+    73728,
+    1066398905,
+    0,
+    307902
+  ],
+  "caveat": "Instrumented only; intervals counted in completed renderer work, not absolute DAC/producer input alignment. Job flags are completed-work lower bound; no matched causal A/B, no release. No claim of live SuperJ6 when not observed."
+}

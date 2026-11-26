@@ -1,0 +1,107 @@
+{
+  "current_bin": "6d163d79202e866d2fda96e36f752bd386641b5ae2d0b1f829a254d26b652850",
+  "capture": "0aaf6375083dfb2bb1224fe690340ed2eff4ad978f878d099e2c19913af60603",
+  "actual_raw_live_17": {
+    "dry": 0.0,
+    "authored": 0.0,
+    "authored-repeat": 0.0
+  },
+  "source_raw_sender": "0x1000f1a5c",
+  "exact_vtable_stop": "0x1003e2674",
+  "cases": [
+    {
+      "raw": 0.5,
+      "prior": [
+        0,
+        0,
+        0.625
+      ],
+      "after_started": 1,
+      "gave": [
+        0.375,
+        0.625
+      ],
+      "written": [
+        [
+          0,
+          0.375
+        ],
+        [
+          1,
+          0.625
+        ]
+      ],
+      "processor_writes": [
+        [
+          "threshold_db",
+          -5.0
+        ],
+        [
+          "wet_makeup_db",
+          4.5
+        ]
+      ],
+      "separate_room_refresh": 1
+    },
+    {
+      "raw": 0.0,
+      "prior": [
+        1,
+        0.625,
+        0.125
+      ],
+      "after_started": 0,
+      "gave": [
+        1.0,
+        0.0
+      ],
+      "written": [
+        [
+          0,
+          1.0
+        ],
+        [
+          1,
+          0.0
+        ]
+      ],
+      "processor_writes": [
+        [
+          "threshold_db",
+          -20.0
+        ],
+        [
+          "wet_makeup_db",
+          1.0
+        ]
+      ],
+      "separate_room_refresh": 1
+    },
+    {
+      "raw": 0.0,
+      "prior": [
+        0,
+        0,
+        0.625
+      ],
+      "after_started": 0,
+      "gave": [
+        1.0,
+        0.0
+      ],
+      "written": [],
+      "processor_writes": [
+        [
+          "threshold_db",
+          -20.0
+        ],
+        [
+          "wet_makeup_db",
+          1.0
+        ]
+      ],
+      "separate_room_refresh": 0
+    }
+  ],
+  "scope": "Executed original app public sender, original wrapper start/stop, actual Swift mix and real AKMixer setter; threshold/masterGain observation at actual wrapper endpoint; separate room refresh intercepted. No full AU sample or stalled wet-core behavior claim."
+}

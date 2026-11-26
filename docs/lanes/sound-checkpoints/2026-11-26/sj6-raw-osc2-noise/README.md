@@ -1,0 +1,2 @@
+# Raw oscillator 2 and noise, scoped source result
+Raw's actual current setters both write +0.0. In separate reached original leaves, both 8,192-frame signed stereo outputs are zero; positive guards produce audio. This rules out these two active sources for the pinned Raw scope, not for other presets or whole application graph. The script needs the authorized local original; do not commit or redistribute that binary.

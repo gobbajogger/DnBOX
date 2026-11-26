@@ -1,0 +1,2 @@
+# Raw compressor send, scoped source result
+Raw's original public #17=0 keeps the actual parallel mixer [dry 1, wet 0] and clears started on the stop path; stale cached mix .625 and detector makeup do not leak via that mixer. The positive #17=.5 transition reaches [.375,.625]. This does not prove the kernel stops clocking. The script needs the authorized local original; do not commit or redistribute that binary.

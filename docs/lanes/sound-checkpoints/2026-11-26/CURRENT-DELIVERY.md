@@ -6,6 +6,23 @@ isolated kernel timing, or partial link into a release claim.
 
 ## Latest measured results
 
+- **New guarded 909 state promotion, not yet full-scene.** The
+  [plain-decoder and Huffman traces](drum909-state-promotion/README.md)
+  match complete owner state and four buses on 112,000 host spans.
+  Eight isolated real PI32 sampler cases stay exact and improve
+  2.96–9.34%, 1.66–11.68 µs per 128-frame sampler, with 80 B less
+  leaf text/table. This is not whole-firmware size or timing.
+- **Measured heavy replay attribution.** In the [instrumented trial](strict-j60-applied-cost-diagnostic/README.md)
+  Elite was 14,327 µs / 75 late; Pro was 14,618 µs / 73 late.
+  Measured 909 + Chicago account for 71.4% / 70.5% of those
+  specific worst blocks respectively. Timer interruptions and recorder
+  effects are not separated; these are not causal or release numbers.
+- **Raw negative evidence.** Actual current Raw
+  [oscillator 2 and noise](sj6-raw-osc2-noise/README.md) are silent in
+  their own original leaves, and
+  [compressor mute](sj6-raw-comp-muted/README.md) leaves no stale wet
+  path. Neither is a plausible remaining level source in this cue.
+
 - **Original Raw post-voice owners, guarded host only.** The actual
   [current OTA cutoff setter](sj6-warm-post-voice-sum/README.md) produces physical 30,000.0078125 Hz for
   this cue. Separately captured Main and Sub state and program

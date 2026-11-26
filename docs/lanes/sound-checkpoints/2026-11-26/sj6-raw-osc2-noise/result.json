@@ -1,0 +1,32 @@
+{
+  "executable": "6d163d79202e866d2fda96e36f752bd386641b5ae2d0b1f829a254d26b652850",
+  "source_capture": "0aaf6375083dfb2bb1224fe690340ed2eff4ad978f878d099e2c19913af60603",
+  "original_terminal_sha": {
+    "dry": "905e705042416acd2a5404594706608c6bd0a35b0783013ef4bbf977fe170002",
+    "authored": "9cc279dc61f6a504e1c234cd90db37f7c16c0cc9377a33e1165e6a75f7cf7b21",
+    "authored-repeat": "9cc279dc61f6a504e1c234cd90db37f7c16c0cc9377a33e1165e6a75f7cf7b21"
+  },
+  "result": {
+    "OSC2": {
+      "sender": "0x1000ee590",
+      "parameter": 3,
+      "authored_and_dry_exact_word": 0.0,
+      "positive_probe": 0.40400001406669617,
+      "positive_peak": 0.12234650552272797,
+      "retarget_last_nonzero_128_block": -1,
+      "settled_mute_exact_stereo_zero_frames": 4096,
+      "reattack_peak": 0.10487288981676102
+    },
+    "Noise": {
+      "sender": "0x1000ee524",
+      "parameter": 201,
+      "authored_and_dry_exact_word": 0.0,
+      "positive_probe": 0.1249811202287674,
+      "positive_peak": 0.03784901648759842,
+      "retarget_last_nonzero_128_block": -1,
+      "settled_mute_exact_stereo_zero_frames": 4096,
+      "reattack_peak": 0.032443393021821976
+    }
+  },
+  "scope": "actual-current native normalized sender -> actual Swift sampler setter -> actual compiled Core receiver and active synthetic source marker. No full installed internal PCM or unrelated modulation claim. Existing verified native four-lane source summing is separate."
+}

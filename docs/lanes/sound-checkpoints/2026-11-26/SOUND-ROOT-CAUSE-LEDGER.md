@@ -7,6 +7,12 @@ Do not fit individual presets, a master gain, or an arbitrary time shift.
 
 ## SuperJ6: ruled out or insufficient
 
+Raw's actual current [OSC2 and noise](sj6-raw-osc2-noise/README.md)
+are silent in reached original outputs with positive controls; the
+[compressor send is truly muted](sj6-raw-comp-muted/README.md), even
+with nonzero cached blend. These are scoped results; do not retry
+those three as explanations for Raw's remaining level gap.
+
 | Do not retest as the root cause | What actually ruled it out |
 | --- | --- |
 | **Master volume. Leave it unchanged.** | The authenticated current original maps the raw master linearly to `.404 × raw`; the separate late Booster is .85. The matched dry and compressed native outputs agree with the already documented output-scaling evidence. Master changes cannot restore source waveform, phase or missing bandwidth. [Source](superj6/master-boundary/CURRENT-MASTER.md), [forced-state comparison](sj6-crusher-compressor-cross/README.md). |
