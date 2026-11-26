@@ -1,0 +1,50 @@
+{
+  "cold_repeat0": {
+    "off_h1_peak": 0.05966221627940518,
+    "on_h1_peak": 0.01903779026599792,
+    "on_over_off_h1": {
+      "dB": -9.921656882088326,
+      "deg": 160.50141350983176
+    },
+    "on_over_off_rms_dB": -9.920822322744526,
+    "compressor_equivalent_peak": 0.39006317811678987
+  },
+  "zero_repeat0": {
+    "off_h1_peak": 0.058241688873997,
+    "on_h1_peak": 0.019037783202715642,
+    "on_over_off_h1": {
+      "dB": -9.712351662810576,
+      "deg": 160.50141332713736
+    },
+    "on_over_off_rms_dB": -9.711517099579863,
+    "compressor_equivalent_peak": 0.3810398375678231
+  },
+  "zero_repeat1": {
+    "off_h1_peak": 0.06037248016566117,
+    "on_h1_peak": 0.019037783202715642,
+    "on_over_off_h1": {
+      "dB": -10.024452812368365,
+      "deg": 160.50141346238695
+    },
+    "on_over_off_rms_dB": -10.023618250429722,
+    "compressor_equivalent_peak": 0.39449480504193724
+  },
+  "one_repeat0": {
+    "off_h1_peak": 0.0983488880509888,
+    "on_h1_peak": 0.0190425419619474,
+    "on_over_off_h1": {
+      "dB": -14.260890656072698,
+      "deg": 160.49785913192997
+    },
+    "on_over_off_rms_dB": -14.25988799736347,
+    "compressor_equivalent_peak": 0.6435069016518277
+  },
+  "forced_off_vs_cold_off": {
+    "dB": -0.20930844186298175,
+    "deg": 2.6279000886702156e-07
+  },
+  "forced_enable_vs_forced_off": {
+    "dB": 4.5507098811176006,
+    "deg": 1.5803004510360115
+  }
+}
