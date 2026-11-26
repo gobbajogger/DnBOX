@@ -1,0 +1,130 @@
+{
+  "executable": "6d163d79202e866d2fda96e36f752bd386641b5ae2d0b1f829a254d26b652850",
+  "voice_mixer_input_order": [
+    "OSC1",
+    "OSC2",
+    "Sub",
+    "Noise"
+  ],
+  "constructor_booster_write_outside_array": [
+    [
+      "osc1Booster",
+      0.5
+    ],
+    [
+      "osc2Booster",
+      0.5
+    ]
+  ],
+  "old_pcm_comparison_scope": "native terminal vs selected compact stage, not common-input internal source data",
+  "raw_postvoice_mixer_validated_volume": 1.0,
+  "positive_resonance_guard_volume": 0.858578622341156,
+  "master_kept": 0.3431318402290344,
+  "official_ref_sha": "905e705042416acd2a5404594706608c6bd0a35b0783013ef4bbf977fe170002",
+  "windows": {
+    "held": {
+      "center": {
+        "level_db": -6.564641908544498,
+        "signed_dbr": 0.42434315525183225,
+        "rms": 0.05612292764216512,
+        "peak": 0.08919329941272736
+      },
+      "Hpf": {
+        "level_db": -6.32806956649388,
+        "signed_dbr": 0.48589704060193706,
+        "rms": 0.05767252087965757,
+        "peak": 0.11279455572366714
+      },
+      "Crusher": {
+        "level_db": -8.30563874930174,
+        "signed_dbr": -0.7656013730032032,
+        "rms": 0.045929368671172845,
+        "peak": 0.1463559865951538
+      },
+      "Final": {
+        "level_db": -8.40232098405372,
+        "signed_dbr": -1.0070720285145984,
+        "rms": 0.04542096575230115,
+        "peak": 0.15333880484104156
+      }
+    },
+    "release_0_16ms": {
+      "center": {
+        "level_db": -1.908406952991074,
+        "signed_dbr": -6.5585390709881475,
+        "rms": 0.022348155515797278,
+        "peak": 0.06979956477880478
+      },
+      "Hpf": {
+        "level_db": -1.6385542389710306,
+        "signed_dbr": -0.14146475433547556,
+        "rms": 0.02305336468773158,
+        "peak": 0.06202772632241249
+      },
+      "Crusher": {
+        "level_db": -2.058341423457209,
+        "signed_dbr": 3.3982012220154925,
+        "rms": 0.021965695623626994,
+        "peak": 0.054359178990125656
+      },
+      "Final": {
+        "level_db": -1.5054393594399837,
+        "signed_dbr": 3.9329872149818765,
+        "rms": 0.023409388248212606,
+        "peak": 0.0575532391667366
+      }
+    },
+    "release_16_50ms": {
+      "center": {
+        "level_db": null,
+        "signed_dbr": 0.0,
+        "rms": 0.0,
+        "peak": 0.0
+      },
+      "Hpf": {
+        "level_db": 14.406180141103714,
+        "signed_dbr": 14.261843066176096,
+        "rms": 0.006499261689643578,
+        "peak": 0.01342511735856533
+      },
+      "Crusher": {
+        "level_db": 3.79214511133012,
+        "signed_dbr": 7.903016646393671,
+        "rms": 0.0019149713131418934,
+        "peak": 0.0024415927473455667
+      },
+      "Final": {
+        "level_db": 7.224466632185459,
+        "signed_dbr": 9.571484593455658,
+        "rms": 0.002843009746341514,
+        "peak": 0.004022753331810236
+      }
+    },
+    "release_50_100ms": {
+      "center": {
+        "level_db": null,
+        "signed_dbr": 0.0,
+        "rms": 0.0,
+        "peak": 0.0
+      },
+      "Hpf": {
+        "level_db": 16.59491820401603,
+        "signed_dbr": 17.125521198913592,
+        "rms": 0.001973886450518609,
+        "peak": 0.002816584426909685
+      },
+      "Crusher": {
+        "level_db": 3.889800572502484,
+        "signed_dbr": 8.152165524686803,
+        "rms": 0.00045715795815563564,
+        "peak": 0.0011663766345009208
+      },
+      "Final": {
+        "level_db": 3.9120308026803152,
+        "signed_dbr": 6.600003189820439,
+        "rms": 0.00045832948383114696,
+        "peak": 0.0006436582189053297
+      }
+    }
+  }
+}

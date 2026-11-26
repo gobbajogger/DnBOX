@@ -1,0 +1,18 @@
+--- a/firmware/src/dsp/juno6_j60_native.inc
++++ b/firmware/src/dsp/juno6_j60_native.inc
+@@ -64,8 +64,13 @@
+         if(ph>1.f)ph-=2.f;
+         float d=4.f+s->center+s->depth*displacement*.967567563f*fm_fabsf(ph);
+         float p=j60_ring(c,s,ch,d)-1.53846154f*s->post0[ch]-s->post1[ch];
+-        s->post0[ch]+=.533294672f*p;
+-        s->post1[ch]+=.533294672f*s->post0[ch];
++#if defined(X0X_HOST) && X0X_HOST && defined(DNBX_HOST_J60_AUTHENTIC_POST) && DNBX_HOST_J60_AUTHENTIC_POST
++        const float post_step=.2516540875455158f;
++#else
++        const float post_step=.533294672f;
++#endif
++        s->post0[ch]+=post_step*p;
++        s->post1[ch]+=post_step*s->post0[ch];
+         s->wet[ch]=s->post1[ch];
+     }
+     s->write=(uint16_t)((s->write+1u)&1023u);

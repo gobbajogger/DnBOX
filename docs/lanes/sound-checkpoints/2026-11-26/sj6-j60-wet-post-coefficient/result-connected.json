@@ -1,0 +1,317 @@
+{
+  "connected_44100_stock_matches_real_pinned_route_exactly": true,
+  "connected": {
+    "stock": {
+      "attack": {
+        "wet_signed_to_old_same_input_dbr": -2.099776054745319,
+        "wet_level_delta_db": 1.1959770520545505,
+        "whole_terminal_current_native_context_dbr": 0.007051079220357361
+      },
+      "held": {
+        "wet_signed_to_old_same_input_dbr": -2.09819387354701,
+        "wet_level_delta_db": 1.1851747976258458,
+        "whole_terminal_current_native_context_dbr": 0.021378681575859343
+      },
+      "release": {
+        "wet_signed_to_old_same_input_dbr": -7.187706449547261,
+        "wet_level_delta_db": 0.5575151880021971,
+        "whole_terminal_current_native_context_dbr": -0.30509354619805257
+      },
+      "chord": {
+        "wet_signed_to_old_same_input_dbr": 1.9105926202887664,
+        "wet_level_delta_db": 1.2191787799673037,
+        "whole_terminal_current_native_context_dbr": 0.028183297304780027
+      },
+      "tail": {
+        "wet_signed_to_old_same_input_dbr": 3.6092234480984193,
+        "wet_level_delta_db": 0.3177524677004301,
+        "whole_terminal_current_native_context_dbr": -0.03157265947922823
+      }
+    },
+    "post": {
+      "attack": {
+        "wet_signed_to_old_same_input_dbr": -2.2532411164593906,
+        "wet_level_delta_db": 1.1863365992187909,
+        "whole_terminal_current_native_context_dbr": 0.007565883919585034
+      },
+      "held": {
+        "wet_signed_to_old_same_input_dbr": -2.248637271155232,
+        "wet_level_delta_db": 1.1762404435803913,
+        "whole_terminal_current_native_context_dbr": 0.021814502669028072
+      },
+      "release": {
+        "wet_signed_to_old_same_input_dbr": -7.385462007317632,
+        "wet_level_delta_db": 0.5754661578524901,
+        "whole_terminal_current_native_context_dbr": -0.30764794706403353
+      },
+      "chord": {
+        "wet_signed_to_old_same_input_dbr": 1.7741338305651664,
+        "wet_level_delta_db": 1.1952620143854746,
+        "whole_terminal_current_native_context_dbr": 0.024775104801753968
+      },
+      "tail": {
+        "wet_signed_to_old_same_input_dbr": 3.4495253674594863,
+        "wet_level_delta_db": 0.2609515057920942,
+        "whole_terminal_current_native_context_dbr": -0.03517262998901005
+      }
+    }
+  },
+  "same_96k_samples": 323664,
+  "pre_input_sha": "59235e639119826ee40414cb4bc46c6ea1e0d2d0159ae148e93992118c11cc45",
+  "original_wet_sha": "78e7715422eb77c61946992e8c12ed3993b870f6d0f4905fca5f2a90f62094f1",
+  "original_source_sha": "a5243e50bda6bd44f463c6e63ea3137802142f55f3c1ea25a5a6e046acba81a1",
+  "windows": {
+    "stock": {
+      "attack": {
+        "signed_stereo_dbr": -19.012017371533737,
+        "per_channel_dbr": [
+          -23.922658536002558,
+          -16.780691599419654
+        ],
+        "delta_level_db": -0.06549329287025801
+      },
+      "held": {
+        "signed_stereo_dbr": -17.204241655890016,
+        "per_channel_dbr": [
+          -24.08845732035421,
+          -14.670831741045356
+        ],
+        "delta_level_db": -0.06676079868402172
+      },
+      "release": {
+        "signed_stereo_dbr": -23.007031850817,
+        "per_channel_dbr": [
+          -27.27581744567265,
+          -21.4054947978331
+        ],
+        "delta_level_db": -0.1940749566169384
+      },
+      "chord": {
+        "signed_stereo_dbr": -14.431163403022193,
+        "per_channel_dbr": [
+          -17.19786501680608,
+          -12.755432218208371
+        ],
+        "delta_level_db": -0.02210907982126009
+      },
+      "tail": {
+        "signed_stereo_dbr": -13.091736121369195,
+        "per_channel_dbr": [
+          -12.509318735835127,
+          -14.107409341357748
+        ],
+        "delta_level_db": -0.09140370136953344
+      }
+    },
+    "phase": {
+      "attack": {
+        "signed_stereo_dbr": -19.072784637333026,
+        "per_channel_dbr": [
+          -23.549177161928945,
+          -16.929815845155794
+        ],
+        "delta_level_db": -0.06543707768433304
+      },
+      "held": {
+        "signed_stereo_dbr": -17.277504793166887,
+        "per_channel_dbr": [
+          -23.57471950046985,
+          -14.816285528069812
+        ],
+        "delta_level_db": -0.06673745052839883
+      },
+      "release": {
+        "signed_stereo_dbr": -23.06514001965222,
+        "per_channel_dbr": [
+          -27.062886073596587,
+          -21.515492203539036
+        ],
+        "delta_level_db": -0.1944075626857408
+      },
+      "chord": {
+        "signed_stereo_dbr": -14.146740971337673,
+        "per_channel_dbr": [
+          -19.33707241679918,
+          -11.850161437274178
+        ],
+        "delta_level_db": -0.022006973138327605
+      },
+      "tail": {
+        "signed_stereo_dbr": -13.57685418955617,
+        "per_channel_dbr": [
+          -14.833174443771679,
+          -12.225529246890645
+        ],
+        "delta_level_db": -0.09514584055635981
+      }
+    },
+    "delay": {
+      "attack": {
+        "signed_stereo_dbr": -19.01200661717073,
+        "per_channel_dbr": [
+          -23.922618495502807,
+          -16.780686453760808
+        ],
+        "delta_level_db": -0.06549327457636983
+      },
+      "held": {
+        "signed_stereo_dbr": -17.204239876959868,
+        "per_channel_dbr": [
+          -24.088490831486865,
+          -14.670825942287003
+        ],
+        "delta_level_db": -0.06676080767121463
+      },
+      "release": {
+        "signed_stereo_dbr": -23.007028877504816,
+        "per_channel_dbr": [
+          -27.27583349220478,
+          -21.405488316710372
+        ],
+        "delta_level_db": -0.19407494292380176
+      },
+      "chord": {
+        "signed_stereo_dbr": -14.431155551451063,
+        "per_channel_dbr": [
+          -17.197853407863327,
+          -12.75542571676944
+        ],
+        "delta_level_db": -0.02210909283257042
+      },
+      "tail": {
+        "signed_stereo_dbr": -13.091722357167018,
+        "per_channel_dbr": [
+          -12.509301098794026,
+          -14.107403707671653
+        ],
+        "delta_level_db": -0.09140362537979704
+      }
+    },
+    "phase-delay": {
+      "attack": {
+        "signed_stereo_dbr": -19.072776107257976,
+        "per_channel_dbr": [
+          -23.54915646289666,
+          -16.929809943613357
+        ],
+        "delta_level_db": -0.06543704339508455
+      },
+      "held": {
+        "signed_stereo_dbr": -17.27750301500775,
+        "per_channel_dbr": [
+          -23.574750452490427,
+          -14.81627941058022
+        ],
+        "delta_level_db": -0.06673744544793088
+      },
+      "release": {
+        "signed_stereo_dbr": -23.065139080850724,
+        "per_channel_dbr": [
+          -27.062902493102953,
+          -21.515487816243176
+        ],
+        "delta_level_db": -0.1944073929358582
+      },
+      "chord": {
+        "signed_stereo_dbr": -14.146733912603366,
+        "per_channel_dbr": [
+          -19.337057218985368,
+          -11.85015582938094
+        ],
+        "delta_level_db": -0.022006976654810797
+      },
+      "tail": {
+        "signed_stereo_dbr": -13.576841680185849,
+        "per_channel_dbr": [
+          -14.833150552153317,
+          -12.225525810366882
+        ],
+        "delta_level_db": -0.09514626008987322
+      }
+    },
+    "post": {
+      "attack": {
+        "signed_stereo_dbr": -23.084587613629644,
+        "per_channel_dbr": [
+          -35.596599506235634,
+          -20.215266803186278
+        ],
+        "delta_level_db": -0.07487500651441359
+      },
+      "held": {
+        "signed_stereo_dbr": -19.96921797554792,
+        "per_channel_dbr": [
+          -36.02366968463805,
+          -17.021408588839762
+        ],
+        "delta_level_db": -0.07585698914048962
+      },
+      "release": {
+        "signed_stereo_dbr": -24.74340392943503,
+        "per_channel_dbr": [
+          -29.638635566163835,
+          -23.03558887762812
+        ],
+        "delta_level_db": -0.18041161967292685
+      },
+      "chord": {
+        "signed_stereo_dbr": -18.675270972094847,
+        "per_channel_dbr": [
+          -25.05260287792567,
+          -16.19739080979391
+        ],
+        "delta_level_db": -0.04630652908970148
+      },
+      "tail": {
+        "signed_stereo_dbr": -20.78847720813988,
+        "per_channel_dbr": [
+          -20.01505247019591,
+          -22.234752128777696
+        ],
+        "delta_level_db": -0.12155127406294855
+      }
+    },
+    "all": {
+      "attack": {
+        "signed_stereo_dbr": -23.279181144368785,
+        "per_channel_dbr": [
+          -34.5268109255868,
+          -20.452225489089102
+        ],
+        "delta_level_db": -0.07482682722362963
+      },
+      "held": {
+        "signed_stereo_dbr": -20.15071946508803,
+        "per_channel_dbr": [
+          -34.53678054061819,
+          -17.22848156433509
+        ],
+        "delta_level_db": -0.07583627854279036
+      },
+      "release": {
+        "signed_stereo_dbr": -24.845933552536657,
+        "per_channel_dbr": [
+          -29.526484189591535,
+          -23.172541585403547
+        ],
+        "delta_level_db": -0.1807494172960329
+      },
+      "chord": {
+        "signed_stereo_dbr": -17.803105096028197,
+        "per_channel_dbr": [
+          -31.804309800702715,
+          -14.88139759515714
+        ],
+        "delta_level_db": -0.0462016393632509
+      },
+      "tail": {
+        "signed_stereo_dbr": -21.184933856229765,
+        "per_channel_dbr": [
+          -26.878527273548446,
+          -18.043362937981836
+        ],
+        "delta_level_db": -0.12652295050277573
+      }
+    }
+  }
+}
