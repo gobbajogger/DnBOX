@@ -1,0 +1,16 @@
+--- a/firmware/src/dsp/juno6_j60_native.inc
++++ b/firmware/src/dsp/juno6_j60_native.inc
+@@ -62,7 +62,12 @@
+         c->mode_history[ch][s->write]=j60_quantize(h);
+         float ph=phase+((!ch && mode!=3u)?1.f:0.f);
+         if(ph>1.f)ph-=2.f;
+-        float d=4.f+s->center+s->depth*displacement*.967567563f*fm_fabsf(ph);
++#if defined(X0X_HOST) && X0X_HOST && defined(DNBX_EXPERIMENT_J60_RIGHT_TRAJECTORY) && DNBX_EXPERIMENT_J60_RIGHT_TRAJECTORY
++        const float stretch=ch==1u ? 1.f : .967567563f;
++#else
++        const float stretch=.967567563f;
++#endif
++        float d=4.f+s->center+s->depth*displacement*stretch*fm_fabsf(ph);
+         float p=j60_ring(c,s,ch,d)-1.53846154f*s->post0[ch]-s->post1[ch];
+         s->post0[ch]+=.533294672f*p;
+         s->post1[ch]+=.533294672f*s->post0[ch];

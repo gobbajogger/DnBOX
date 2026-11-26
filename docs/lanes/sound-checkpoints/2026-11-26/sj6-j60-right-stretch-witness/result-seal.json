@@ -1,0 +1,396 @@
+{
+  "same_96k_frames": 323664,
+  "same_input_sha": "59235e639119826ee40414cb4bc46c6ea1e0d2d0159ae148e93992118c11cc45",
+  "real_source_write_history_sha": "fcd0544003a243a78115f161f7fac5ac779302e968817382f5951f9a365073cd",
+  "original_taps_sha": "ca51c777ef86aba9c0f77d15f0758ad49f6739f17f69887aaba3d309fae75c68",
+  "ring_auth_reconstruct_both_words_exact": true,
+  "persistent": {
+    "first_both_channels_256_steps_abs_position_gt_0p01": 25077,
+    "signed_deltas_at_first": [
+      -0.010005820125570608,
+      3.2902297973632812
+    ],
+    "source_position": [
+      147.40023409160995,
+      319.94409942626953
+    ],
+    "compact_position": [
+      147.39022827148438,
+      323.2343292236328
+    ]
+  },
+  "windows": {
+    "compact_trajectory_exact_history": {
+      "attack": {
+        "wet_signed_dbr": -23.157179749838257,
+        "read_signed_dbr": -23.74423247433304,
+        "position_offset_samples_mean": [
+          -0.18039234877957172,
+          5.476812641620636
+        ],
+        "position_offset_samples_maxabs": [
+          0.23353674794987,
+          6.158805847167969
+        ]
+      },
+      "held": {
+        "wet_signed_dbr": -19.997098001961252,
+        "read_signed_dbr": -20.140619387289536,
+        "position_offset_samples_mean": [
+          -0.25823842822742865,
+          8.692858817776044
+        ],
+        "position_offset_samples_maxabs": [
+          0.25907008152717026,
+          11.202018737792969
+        ]
+      },
+      "release": {
+        "wet_signed_dbr": -26.43275852926176,
+        "read_signed_dbr": -26.663571260985716,
+        "position_offset_samples_mean": [
+          0.0669579582888967,
+          11.640433288256327
+        ],
+        "position_offset_samples_maxabs": [
+          0.5091033505258338,
+          12.712974548339844
+        ]
+      },
+      "chord": {
+        "wet_signed_dbr": -18.668514253664366,
+        "read_signed_dbr": -19.490219660962328,
+        "position_offset_samples_mean": [
+          1.2316771318039859,
+          4.902693465886972
+        ],
+        "position_offset_samples_maxabs": [
+          1.3992398032389701,
+          9.115142822265625
+        ]
+      },
+      "tail": {
+        "wet_signed_dbr": -20.96769676725222,
+        "read_signed_dbr": -24.949934856352453,
+        "position_offset_samples_mean": [
+          -0.1292931890933011,
+          1.9199835716502567
+        ],
+        "position_offset_samples_maxabs": [
+          1.4656271135168026,
+          5.331905364990234
+        ]
+      }
+    },
+    "original_pos_exact_history": {
+      "attack": {
+        "wet_signed_dbr": -36.398575853655764,
+        "read_signed_dbr": null,
+        "position_offset_samples_mean": [
+          0.0,
+          0.0
+        ],
+        "position_offset_samples_maxabs": [
+          0.0,
+          0.0
+        ]
+      },
+      "held": {
+        "wet_signed_dbr": -36.436133955341134,
+        "read_signed_dbr": null,
+        "position_offset_samples_mean": [
+          0.0,
+          0.0
+        ],
+        "position_offset_samples_maxabs": [
+          0.0,
+          0.0
+        ]
+      },
+      "release": {
+        "wet_signed_dbr": -44.87614443840444,
+        "read_signed_dbr": null,
+        "position_offset_samples_mean": [
+          0.0,
+          0.0
+        ],
+        "position_offset_samples_maxabs": [
+          0.0,
+          0.0
+        ]
+      },
+      "chord": {
+        "wet_signed_dbr": -32.052487768656384,
+        "read_signed_dbr": null,
+        "position_offset_samples_mean": [
+          0.0,
+          0.0
+        ],
+        "position_offset_samples_maxabs": [
+          0.0,
+          0.0
+        ]
+      },
+      "tail": {
+        "wet_signed_dbr": -28.025465269786018,
+        "read_signed_dbr": null,
+        "position_offset_samples_mean": [
+          0.0,
+          0.0
+        ],
+        "position_offset_samples_maxabs": [
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "original_read_exact_value": {
+      "attack": {
+        "wet_signed_dbr": -36.398575853655764,
+        "read_signed_dbr": null,
+        "position_offset_samples_mean": [
+          0.0,
+          0.0
+        ],
+        "position_offset_samples_maxabs": [
+          0.0,
+          0.0
+        ]
+      },
+      "held": {
+        "wet_signed_dbr": -36.436133955341134,
+        "read_signed_dbr": null,
+        "position_offset_samples_mean": [
+          0.0,
+          0.0
+        ],
+        "position_offset_samples_maxabs": [
+          0.0,
+          0.0
+        ]
+      },
+      "release": {
+        "wet_signed_dbr": -44.87614443840444,
+        "read_signed_dbr": null,
+        "position_offset_samples_mean": [
+          0.0,
+          0.0
+        ],
+        "position_offset_samples_maxabs": [
+          0.0,
+          0.0
+        ]
+      },
+      "chord": {
+        "wet_signed_dbr": -32.052487768656384,
+        "read_signed_dbr": null,
+        "position_offset_samples_mean": [
+          0.0,
+          0.0
+        ],
+        "position_offset_samples_maxabs": [
+          0.0,
+          0.0
+        ]
+      },
+      "tail": {
+        "wet_signed_dbr": -28.025465269786018,
+        "read_signed_dbr": null,
+        "position_offset_samples_mean": [
+          0.0,
+          0.0
+        ],
+        "position_offset_samples_maxabs": [
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "source_right_multiplier_only": {
+      "attack": {
+        "wet_signed_dbr": -36.21865458785737,
+        "read_signed_dbr": -49.7305768056355,
+        "position_offset_samples_mean": [
+          -0.18039234877957172,
+          0.18641406774520874
+        ],
+        "position_offset_samples_maxabs": [
+          0.23353674794987,
+          0.24132537841796875
+        ]
+      },
+      "held": {
+        "wet_signed_dbr": -36.10883696832349,
+        "read_signed_dbr": -47.081796207678295,
+        "position_offset_samples_mean": [
+          -0.25823842822742865,
+          0.2669175221522649
+        ],
+        "position_offset_samples_maxabs": [
+          0.25907008152717026,
+          0.26772308349609375
+        ]
+      },
+      "release": {
+        "wet_signed_dbr": -44.53486247714706,
+        "read_signed_dbr": -55.74067012293835,
+        "position_offset_samples_mean": [
+          0.0669579582888967,
+          -0.06918761475880941
+        ],
+        "position_offset_samples_maxabs": [
+          0.5091033505258338,
+          0.52618408203125
+        ]
+      },
+      "chord": {
+        "wet_signed_dbr": -27.997715367178927,
+        "read_signed_dbr": -29.055646753735793,
+        "position_offset_samples_mean": [
+          1.2316771318039859,
+          -1.2729705922114543
+        ],
+        "position_offset_samples_maxabs": [
+          1.3992398032389701,
+          1.4461326599121094
+        ]
+      },
+      "tail": {
+        "wet_signed_dbr": -22.33724063075504,
+        "read_signed_dbr": -24.1727350726859,
+        "position_offset_samples_mean": [
+          -0.1292931890933011,
+          0.3831846783575117
+        ],
+        "position_offset_samples_maxabs": [
+          1.4656271135168026,
+          1.8000907897949219
+        ]
+      }
+    },
+    "stock_Q12_corrected_post": {
+      "attack": {
+        "wet_signed_dbr": -23.084587613629644,
+        "read_signed_dbr": -23.636827336495006,
+        "position_offset_samples_mean": [
+          -0.18039234877957172,
+          5.476812641620636
+        ],
+        "position_offset_samples_maxabs": [
+          0.23353674794987,
+          6.158805847167969
+        ]
+      },
+      "held": {
+        "wet_signed_dbr": -19.96921797554792,
+        "read_signed_dbr": -20.102740920402248,
+        "position_offset_samples_mean": [
+          -0.25823842822742865,
+          8.692858817776044
+        ],
+        "position_offset_samples_maxabs": [
+          0.25907008152717026,
+          11.202018737792969
+        ]
+      },
+      "release": {
+        "wet_signed_dbr": -24.74340392943503,
+        "read_signed_dbr": -24.820755821969215,
+        "position_offset_samples_mean": [
+          0.0669579582888967,
+          11.640433288256327
+        ],
+        "position_offset_samples_maxabs": [
+          0.5091033505258338,
+          12.712974548339844
+        ]
+      },
+      "chord": {
+        "wet_signed_dbr": -18.675270972094847,
+        "read_signed_dbr": -19.491010322081607,
+        "position_offset_samples_mean": [
+          1.2316771318039859,
+          4.902693465886972
+        ],
+        "position_offset_samples_maxabs": [
+          1.3992398032389701,
+          9.115142822265625
+        ]
+      },
+      "tail": {
+        "wet_signed_dbr": -20.78847720813988,
+        "read_signed_dbr": -24.40630651095709,
+        "position_offset_samples_mean": [
+          -0.1292931890933011,
+          1.9199835716502567
+        ],
+        "position_offset_samples_maxabs": [
+          1.4656271135168026,
+          5.331905364990234
+        ]
+      }
+    },
+    "source_right_multiplier_only_Q12": {
+      "attack": {
+        "wet_signed_dbr": -34.42693770915916,
+        "read_signed_dbr": -37.8938751988501,
+        "position_offset_samples_mean": [
+          -0.18039234877957172,
+          0.18641406774520874
+        ],
+        "position_offset_samples_maxabs": [
+          0.23353674794987,
+          0.24132537841796875
+        ]
+      },
+      "held": {
+        "wet_signed_dbr": -34.338663261576016,
+        "read_signed_dbr": -37.77867651627313,
+        "position_offset_samples_mean": [
+          -0.25823842822742865,
+          0.2669175221522649
+        ],
+        "position_offset_samples_maxabs": [
+          0.25907008152717026,
+          0.26772308349609375
+        ]
+      },
+      "release": {
+        "wet_signed_dbr": -30.129777950248318,
+        "read_signed_dbr": -30.00034629990141,
+        "position_offset_samples_mean": [
+          0.0669579582888967,
+          -0.06918761475880941
+        ],
+        "position_offset_samples_maxabs": [
+          0.5091033505258338,
+          0.52618408203125
+        ]
+      },
+      "chord": {
+        "wet_signed_dbr": -27.904168744363314,
+        "read_signed_dbr": -28.90094828333585,
+        "position_offset_samples_mean": [
+          1.2316771318039859,
+          -1.2729705922114543
+        ],
+        "position_offset_samples_maxabs": [
+          1.3992398032389701,
+          1.4461326599121094
+        ]
+      },
+      "tail": {
+        "wet_signed_dbr": -22.11929375969803,
+        "read_signed_dbr": -23.786790070780278,
+        "position_offset_samples_mean": [
+          -0.1292931890933011,
+          0.3831846783575117
+        ],
+        "position_offset_samples_maxabs": [
+          1.4656271135168026,
+          1.8000907897949219
+        ]
+      }
+    }
+  }
+}

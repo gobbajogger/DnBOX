@@ -6,6 +6,18 @@ isolated kernel timing, or partial link into a release claim.
 
 ## Latest measured results
 
+- **Matched combined memory:** on the guarded warm donor with both engines,
+  exact shared tables and the unused Synth One lease layout, the
+  [reached J60 coefficient pair](warm-j60-lease-tables-fit/README.md)
+  still leaves **632 B Elite / 644 B Pro APP** and 564 B above the
+  protected pool reserve. No native timing or production qualification.
+- **J60 right-hand delay depth:** [the actual original tap](sj6-j60-right-stretch-witness/README.md)
+  applies the left correction factor only on the left; right uses 1.0.
+  At identical input and with corrected post filtering, the right-only
+  change improves mode-I signed residual from −19.97 to −34.34 dBr held,
+  and from −18.68 to −27.90 dBr on the chord. Independent II/Both held
+  out well, but a linked budget and full audio test remain pending.
+
 - **J60V2 post-delay coefficient:** the original wet integrators use
   0.2516540875; compact reused 0.533294672 from the *input* biquad.
   The isolated correction improves all five same-input 96 kHz windows
