@@ -1,0 +1,1751 @@
+{
+  "installed_capture_pin": "1d6edf2bf5dd30906b148e10f50e2470a9f55d13d7f64ab3515e3c2294f1c257",
+  "capture_pcm_sha": "1148c1a20945b8a4dca47dbfd6f174c60b0676a0d4a5e748e6aea4f40b382984",
+  "capture_repeat_pcm_sha": "0270a16184f3dd94b241cc80d2133f904469ce6578478a99b3b427d44c82a0ab",
+  "reference_repeat_floor": {
+    "attack": {
+      "signed_dbr": -76.2382876940249,
+      "level_db": 1.6311428715153432e-05
+    },
+    "held": {
+      "signed_dbr": -50.78770717123256,
+      "level_db": 1.1775423599526353e-05
+    },
+    "first_release": {
+      "signed_dbr": -45.91922993155758,
+      "level_db": 0.0003519470092414734
+    },
+    "chord": {
+      "signed_dbr": -52.035270492467376,
+      "level_db": 9.075478641976367e-07
+    },
+    "final_release": {
+      "signed_dbr": -81.67426617456019,
+      "level_db": -3.1226132377998424e-05
+    },
+    "full": {
+      "signed_dbr": -50.3719482470226,
+      "level_db": 2.6463480387737064e-05
+    }
+  },
+  "sample_rate": 44100,
+  "trials": [
+    {
+      "factor": 2,
+      "encoded_stereo_sample_words": 148684,
+      "bits": 0,
+      "theoretical_stereo_bytes": 0,
+      "assumed_zero_phase_integer_origin": true,
+      "metrics": {
+        "attack": {
+          "signed_dbr": -115.13936258627696,
+          "level_db": 1.2970884927586243e-06
+        },
+        "held": {
+          "signed_dbr": -95.03576038938867,
+          "level_db": 1.2031333058954932e-06
+        },
+        "first_release": {
+          "signed_dbr": -93.24321473770381,
+          "level_db": 9.083665723451941e-07
+        },
+        "chord": {
+          "signed_dbr": -82.80025653977162,
+          "level_db": 3.005686147914936e-06
+        },
+        "final_release": {
+          "signed_dbr": -76.25446344199709,
+          "level_db": 2.2930813069895427e-06
+        },
+        "full": {
+          "signed_dbr": -83.71971487938664,
+          "level_db": 1.922541728951013e-06
+        }
+      }
+    },
+    {
+      "factor": 2,
+      "encoded_stereo_sample_words": 148684,
+      "bits": 8,
+      "theoretical_stereo_bytes": 148684,
+      "assumed_zero_phase_integer_origin": true,
+      "metrics": {
+        "attack": {
+          "signed_dbr": -23.245566156262605,
+          "level_db": 0.04432123029836547
+        },
+        "held": {
+          "signed_dbr": -23.870112532619856,
+          "level_db": -0.004406356735500772
+        },
+        "first_release": {
+          "signed_dbr": -23.446401026394735,
+          "level_db": 0.0024254616536231346
+        },
+        "chord": {
+          "signed_dbr": -21.526155455296163,
+          "level_db": 0.1193472247041043
+        },
+        "final_release": {
+          "signed_dbr": -19.664328325843996,
+          "level_db": 0.15388100327381077
+        },
+        "full": {
+          "signed_dbr": -19.877465942555165,
+          "level_db": 0.06142350655508014
+        }
+      }
+    },
+    {
+      "factor": 2,
+      "encoded_stereo_sample_words": 148684,
+      "bits": 12,
+      "theoretical_stereo_bytes": 223026,
+      "assumed_zero_phase_integer_origin": true,
+      "metrics": {
+        "attack": {
+          "signed_dbr": -47.27215392898711,
+          "level_db": 0.0003410870472959122
+        },
+        "held": {
+          "signed_dbr": -47.63746206099448,
+          "level_db": -0.00012268322240015548
+        },
+        "first_release": {
+          "signed_dbr": -47.09798314911918,
+          "level_db": -0.0008841506549110875
+        },
+        "chord": {
+          "signed_dbr": -45.95702775181745,
+          "level_db": 1.4340936386250194e-05
+        },
+        "final_release": {
+          "signed_dbr": -45.2693937115912,
+          "level_db": -0.0032067035535162563
+        },
+        "full": {
+          "signed_dbr": -43.79907800443383,
+          "level_db": 8.266357482295705e-05
+        }
+      }
+    },
+    {
+      "factor": 2,
+      "encoded_stereo_sample_words": 148684,
+      "bits": 16,
+      "theoretical_stereo_bytes": 297368,
+      "assumed_zero_phase_integer_origin": true,
+      "metrics": {
+        "attack": {
+          "signed_dbr": -71.61058412754488,
+          "level_db": 3.9708511376118324e-05
+        },
+        "held": {
+          "signed_dbr": -71.74334799330762,
+          "level_db": -2.222230244052168e-05
+        },
+        "first_release": {
+          "signed_dbr": -71.49573275897714,
+          "level_db": 1.7882478471064146e-05
+        },
+        "chord": {
+          "signed_dbr": -69.65410067999541,
+          "level_db": 1.698219787365239e-05
+        },
+        "final_release": {
+          "signed_dbr": -68.5266557908314,
+          "level_db": -3.8678241297945646e-05
+        },
+        "full": {
+          "signed_dbr": -67.77322442180767,
+          "level_db": -1.1680898406463511e-05
+        }
+      }
+    },
+    {
+      "factor": 3,
+      "encoded_stereo_sample_words": 99124,
+      "bits": 0,
+      "theoretical_stereo_bytes": 0,
+      "assumed_zero_phase_integer_origin": true,
+      "metrics": {
+        "attack": {
+          "signed_dbr": -99.4220437875645,
+          "level_db": 5.272667474558224e-06
+        },
+        "held": {
+          "signed_dbr": -79.71017248340422,
+          "level_db": 3.936894728888594e-06
+        },
+        "first_release": {
+          "signed_dbr": -72.93281433598207,
+          "level_db": 2.724947535088318e-06
+        },
+        "chord": {
+          "signed_dbr": -66.88037658728342,
+          "level_db": 9.141972547044965e-06
+        },
+        "final_release": {
+          "signed_dbr": -61.30287517572695,
+          "level_db": 3.6854776907253235e-06
+        },
+        "full": {
+          "signed_dbr": -68.49027311431635,
+          "level_db": 5.877270645024355e-06
+        }
+      }
+    },
+    {
+      "factor": 3,
+      "encoded_stereo_sample_words": 99124,
+      "bits": 8,
+      "theoretical_stereo_bytes": 99124,
+      "assumed_zero_phase_integer_origin": true,
+      "metrics": {
+        "attack": {
+          "signed_dbr": -23.28345543399276,
+          "level_db": 0.029469842503946332
+        },
+        "held": {
+          "signed_dbr": -23.89180130973962,
+          "level_db": -0.0068114978719924744
+        },
+        "first_release": {
+          "signed_dbr": -23.380254835010838,
+          "level_db": -0.004968996377490262
+        },
+        "chord": {
+          "signed_dbr": -21.552025841697784,
+          "level_db": 0.1205993178057696
+        },
+        "final_release": {
+          "signed_dbr": -19.734318670980652,
+          "level_db": 0.18881829135161
+        },
+        "full": {
+          "signed_dbr": -19.88470361085981,
+          "level_db": 0.059034165026696984
+        }
+      }
+    },
+    {
+      "factor": 3,
+      "encoded_stereo_sample_words": 99124,
+      "bits": 12,
+      "theoretical_stereo_bytes": 148686,
+      "assumed_zero_phase_integer_origin": true,
+      "metrics": {
+        "attack": {
+          "signed_dbr": -47.241419421660645,
+          "level_db": 0.0008951918426755912
+        },
+        "held": {
+          "signed_dbr": -47.70148253173204,
+          "level_db": 2.478120427838558e-06
+        },
+        "first_release": {
+          "signed_dbr": -47.285880369517564,
+          "level_db": 0.0014690297191090333
+        },
+        "chord": {
+          "signed_dbr": -45.78337366229181,
+          "level_db": -0.0004078692056448789
+        },
+        "final_release": {
+          "signed_dbr": -44.91404197857061,
+          "level_db": -0.0019659420242523853
+        },
+        "full": {
+          "signed_dbr": -43.771313684304296,
+          "level_db": 7.652376279283616e-05
+        }
+      }
+    },
+    {
+      "factor": 3,
+      "encoded_stereo_sample_words": 99124,
+      "bits": 16,
+      "theoretical_stereo_bytes": 198248,
+      "assumed_zero_phase_integer_origin": true,
+      "metrics": {
+        "attack": {
+          "signed_dbr": -71.70069887219239,
+          "level_db": 1.1227469024477567e-05
+        },
+        "held": {
+          "signed_dbr": -71.05053043150147,
+          "level_db": 1.1987057485685065e-05
+        },
+        "first_release": {
+          "signed_dbr": -69.08000424265232,
+          "level_db": 0.00013649225600958665
+        },
+        "chord": {
+          "signed_dbr": -65.13501836053015,
+          "level_db": 7.555840451610368e-05
+        },
+        "final_release": {
+          "signed_dbr": -60.54713255351378,
+          "level_db": 0.00012379257353959018
+        },
+        "full": {
+          "signed_dbr": -65.17002758382063,
+          "level_db": 2.1709606653168017e-05
+        }
+      }
+    },
+    {
+      "factor": 4,
+      "encoded_stereo_sample_words": 74342,
+      "bits": 0,
+      "theoretical_stereo_bytes": 0,
+      "assumed_zero_phase_integer_origin": true,
+      "metrics": {
+        "attack": {
+          "signed_dbr": -91.91253816591998,
+          "level_db": 1.0208695671241343e-05
+        },
+        "held": {
+          "signed_dbr": -71.19062623001452,
+          "level_db": 5.849055549446743e-06
+        },
+        "first_release": {
+          "signed_dbr": -64.21262090384595,
+          "level_db": 3.0307027802190664e-06
+        },
+        "chord": {
+          "signed_dbr": -58.52649851379659,
+          "level_db": 7.6632937254911e-06
+        },
+        "final_release": {
+          "signed_dbr": -51.86689660979568,
+          "level_db": -3.250369297209034e-05
+        },
+        "full": {
+          "signed_dbr": -59.697765046524765,
+          "level_db": 4.116807454266458e-06
+        }
+      }
+    },
+    {
+      "factor": 4,
+      "encoded_stereo_sample_words": 74342,
+      "bits": 8,
+      "theoretical_stereo_bytes": 74342,
+      "assumed_zero_phase_integer_origin": true,
+      "metrics": {
+        "attack": {
+          "signed_dbr": -23.309757733995937,
+          "level_db": 0.04763852253206003
+        },
+        "held": {
+          "signed_dbr": -23.90854439226677,
+          "level_db": 0.0003666343855585828
+        },
+        "first_release": {
+          "signed_dbr": -23.53711940569946,
+          "level_db": 0.0004756169310971038
+        },
+        "chord": {
+          "signed_dbr": -21.556015790629232,
+          "level_db": 0.12270972012278136
+        },
+        "final_release": {
+          "signed_dbr": -19.719926208247994,
+          "level_db": 0.16068378463686894
+        },
+        "full": {
+          "signed_dbr": -19.901346698498102,
+          "level_db": 0.06422318001021007
+        }
+      }
+    },
+    {
+      "factor": 4,
+      "encoded_stereo_sample_words": 74342,
+      "bits": 12,
+      "theoretical_stereo_bytes": 111513,
+      "assumed_zero_phase_integer_origin": true,
+      "metrics": {
+        "attack": {
+          "signed_dbr": -47.32843969798957,
+          "level_db": -0.0006560660839559101
+        },
+        "held": {
+          "signed_dbr": -47.66764270535188,
+          "level_db": 0.000313931671162502
+        },
+        "first_release": {
+          "signed_dbr": -46.84070964230951,
+          "level_db": -0.0024503087454023353
+        },
+        "chord": {
+          "signed_dbr": -45.500232581200535,
+          "level_db": 0.0004748388362959742
+        },
+        "final_release": {
+          "signed_dbr": -44.000605902816254,
+          "level_db": 0.003095262084491443
+        },
+        "full": {
+          "signed_dbr": -43.673242209207636,
+          "level_db": 0.0003734653375654001
+        }
+      }
+    },
+    {
+      "factor": 4,
+      "encoded_stereo_sample_words": 74342,
+      "bits": 16,
+      "theoretical_stereo_bytes": 148684,
+      "assumed_zero_phase_integer_origin": true,
+      "metrics": {
+        "attack": {
+          "signed_dbr": -71.7109781248059,
+          "level_db": 4.45720680905307e-05
+        },
+        "held": {
+          "signed_dbr": -68.43273858103862,
+          "level_db": -4.2821008274326674e-05
+        },
+        "first_release": {
+          "signed_dbr": -63.56455277123412,
+          "level_db": -0.00029109154538738374
+        },
+        "chord": {
+          "signed_dbr": -58.21630005121839,
+          "level_db": 8.365373703232522e-06
+        },
+        "final_release": {
+          "signed_dbr": -51.789355730222724,
+          "level_db": -5.2301655459267604e-05
+        },
+        "full": {
+          "signed_dbr": -59.08400442954516,
+          "level_db": -2.3232976198111445e-05
+        }
+      }
+    },
+    {
+      "factor": 6,
+      "encoded_stereo_sample_words": 49562,
+      "bits": 0,
+      "theoretical_stereo_bytes": 0,
+      "assumed_zero_phase_integer_origin": true,
+      "metrics": {
+        "attack": {
+          "signed_dbr": -81.90686996728274,
+          "level_db": 2.0328280142569403e-05
+        },
+        "held": {
+          "signed_dbr": -60.65814142868021,
+          "level_db": 5.119369331515837e-06
+        },
+        "first_release": {
+          "signed_dbr": -55.68716285612225,
+          "level_db": -1.1520963818104484e-05
+        },
+        "chord": {
+          "signed_dbr": -48.257177251947,
+          "level_db": -7.466257829838118e-05
+        },
+        "final_release": {
+          "signed_dbr": -41.25257344136492,
+          "level_db": -0.0005402786817191905
+        },
+        "full": {
+          "signed_dbr": -49.251754205805355,
+          "level_db": -6.21408457874141e-05
+        }
+      }
+    },
+    {
+      "factor": 6,
+      "encoded_stereo_sample_words": 49562,
+      "bits": 8,
+      "theoretical_stereo_bytes": 49562,
+      "assumed_zero_phase_integer_origin": true,
+      "metrics": {
+        "attack": {
+          "signed_dbr": -23.302006228541146,
+          "level_db": 0.03823575107505732
+        },
+        "held": {
+          "signed_dbr": -23.894550981357547,
+          "level_db": -0.008201007511506613
+        },
+        "first_release": {
+          "signed_dbr": -23.607581404180955,
+          "level_db": 0.01432901454600801
+        },
+        "chord": {
+          "signed_dbr": -21.592476189711427,
+          "level_db": 0.12369131190977478
+        },
+        "final_release": {
+          "signed_dbr": -19.593919772847368,
+          "level_db": 0.08259632224561504
+        },
+        "full": {
+          "signed_dbr": -19.908309246284,
+          "level_db": 0.05891386911784335
+        }
+      }
+    },
+    {
+      "factor": 6,
+      "encoded_stereo_sample_words": 49562,
+      "bits": 12,
+      "theoretical_stereo_bytes": 74343,
+      "assumed_zero_phase_integer_origin": true,
+      "metrics": {
+        "attack": {
+          "signed_dbr": -47.05917053959802,
+          "level_db": 0.0020753934405100287
+        },
+        "held": {
+          "signed_dbr": -47.51465740928693,
+          "level_db": -8.32440611628023e-05
+        },
+        "first_release": {
+          "signed_dbr": -46.41551897195038,
+          "level_db": -0.000574021038837857
+        },
+        "chord": {
+          "signed_dbr": -43.87741688681003,
+          "level_db": -8.708737740389598e-05
+        },
+        "final_release": {
+          "signed_dbr": -39.86813093560653,
+          "level_db": -0.0069212235258982275
+        },
+        "full": {
+          "signed_dbr": -42.72254096927598,
+          "level_db": 8.222493940426231e-06
+        }
+      }
+    },
+    {
+      "factor": 6,
+      "encoded_stereo_sample_words": 49562,
+      "bits": 16,
+      "theoretical_stereo_bytes": 99124,
+      "assumed_zero_phase_integer_origin": true,
+      "metrics": {
+        "attack": {
+          "signed_dbr": -71.37809782578374,
+          "level_db": 0.00019308946274992537
+        },
+        "held": {
+          "signed_dbr": -60.34348499468858,
+          "level_db": -1.2884342866249366e-05
+        },
+        "first_release": {
+          "signed_dbr": -55.51473013186764,
+          "level_db": -6.132652199662044e-05
+        },
+        "chord": {
+          "signed_dbr": -48.23037871624767,
+          "level_db": -5.189110607473203e-05
+        },
+        "final_release": {
+          "signed_dbr": -41.23815473442595,
+          "level_db": -0.0004095511111648887
+        },
+        "full": {
+          "signed_dbr": -49.19448688504914,
+          "level_db": -6.382594938967998e-05
+        }
+      }
+    },
+    {
+      "factor": 8,
+      "encoded_stereo_sample_words": 37172,
+      "bits": 0,
+      "theoretical_stereo_bytes": 0,
+      "assumed_zero_phase_integer_origin": true,
+      "metrics": {
+        "attack": {
+          "signed_dbr": -75.69214521555,
+          "level_db": 3.0763228966258446e-05
+        },
+        "held": {
+          "signed_dbr": -53.77509253557385,
+          "level_db": -1.2158372923349662e-05
+        },
+        "first_release": {
+          "signed_dbr": -49.461718053052586,
+          "level_db": -8.987730598734464e-05
+        },
+        "chord": {
+          "signed_dbr": -40.79834642614507,
+          "level_db": -0.0005446294014714733
+        },
+        "final_release": {
+          "signed_dbr": -32.71618127345815,
+          "level_db": -0.00367067507459508
+        },
+        "full": {
+          "signed_dbr": -41.82053948913257,
+          "level_db": -0.00043382332307486223
+        }
+      }
+    },
+    {
+      "factor": 8,
+      "encoded_stereo_sample_words": 37172,
+      "bits": 8,
+      "theoretical_stereo_bytes": 37172,
+      "assumed_zero_phase_integer_origin": true,
+      "metrics": {
+        "attack": {
+          "signed_dbr": -23.241384900110177,
+          "level_db": 0.04172589614647755
+        },
+        "held": {
+          "signed_dbr": -23.940468529700464,
+          "level_db": -0.005726247586631266
+        },
+        "first_release": {
+          "signed_dbr": -23.576591394597855,
+          "level_db": 0.016059775367425685
+        },
+        "chord": {
+          "signed_dbr": -21.53946456643626,
+          "level_db": 0.1237540462595895
+        },
+        "final_release": {
+          "signed_dbr": -19.62387831408195,
+          "level_db": 0.12265377990889045
+        },
+        "full": {
+          "signed_dbr": -19.88972873855676,
+          "level_db": 0.06407931547454745
+        }
+      }
+    },
+    {
+      "factor": 8,
+      "encoded_stereo_sample_words": 37172,
+      "bits": 12,
+      "theoretical_stereo_bytes": 55758,
+      "assumed_zero_phase_integer_origin": true,
+      "metrics": {
+        "attack": {
+          "signed_dbr": -47.43178453342382,
+          "level_db": -0.00018154137635179612
+        },
+        "held": {
+          "signed_dbr": -46.695588463771614,
+          "level_db": -0.0009551012166347793
+        },
+        "first_release": {
+          "signed_dbr": -45.22382328401798,
+          "level_db": -0.00308563276421961
+        },
+        "chord": {
+          "signed_dbr": -39.53741459315137,
+          "level_db": -8.049716436165858e-07
+        },
+        "final_release": {
+          "signed_dbr": -32.433413770543076,
+          "level_db": 0.004279842565329138
+        },
+        "full": {
+          "signed_dbr": -39.67345801760489,
+          "level_db": -0.0005270172921588039
+        }
+      }
+    },
+    {
+      "factor": 8,
+      "encoded_stereo_sample_words": 37172,
+      "bits": 16,
+      "theoretical_stereo_bytes": 74344,
+      "assumed_zero_phase_integer_origin": true,
+      "metrics": {
+        "attack": {
+          "signed_dbr": -70.31398366863088,
+          "level_db": -8.310948830211315e-05
+        },
+        "held": {
+          "signed_dbr": -53.71531490360222,
+          "level_db": -9.330757540805666e-05
+        },
+        "first_release": {
+          "signed_dbr": -49.42453499878099,
+          "level_db": -0.0003250958467890935
+        },
+        "chord": {
+          "signed_dbr": -40.791630976314664,
+          "level_db": -0.0005901504974678213
+        },
+        "final_release": {
+          "signed_dbr": -32.714977800193786,
+          "level_db": -0.004000895028167344
+        },
+        "full": {
+          "signed_dbr": -41.80879913261256,
+          "level_db": -0.0004945182865999248
+        }
+      }
+    },
+    {
+      "factor": 12,
+      "encoded_stereo_sample_words": 24782,
+      "bits": 0,
+      "theoretical_stereo_bytes": 0,
+      "assumed_zero_phase_integer_origin": true,
+      "metrics": {
+        "attack": {
+          "signed_dbr": -66.62571094446763,
+          "level_db": 2.4676892757602544e-05
+        },
+        "held": {
+          "signed_dbr": -43.829201571008404,
+          "level_db": -0.0002645761566148941
+        },
+        "first_release": {
+          "signed_dbr": -39.18733314674489,
+          "level_db": -0.001233116579089674
+        },
+        "chord": {
+          "signed_dbr": -29.858747681750152,
+          "level_db": -0.007003950400776481
+        },
+        "final_release": {
+          "signed_dbr": -22.858178902603207,
+          "level_db": -0.035109968525903056
+        },
+        "full": {
+          "signed_dbr": -31.23252690821992,
+          "level_db": -0.0048770249994798745
+        }
+      }
+    },
+    {
+      "factor": 12,
+      "encoded_stereo_sample_words": 24782,
+      "bits": 8,
+      "theoretical_stereo_bytes": 24782,
+      "assumed_zero_phase_integer_origin": true,
+      "metrics": {
+        "attack": {
+          "signed_dbr": -23.20538889080752,
+          "level_db": 0.056535504834299005
+        },
+        "held": {
+          "signed_dbr": -23.854214306412626,
+          "level_db": 0.021729069236839677
+        },
+        "first_release": {
+          "signed_dbr": -23.412261531358833,
+          "level_db": 0.12534993476466322
+        },
+        "chord": {
+          "signed_dbr": -21.04426948335536,
+          "level_db": 0.13091413126205975
+        },
+        "final_release": {
+          "signed_dbr": -18.12329641636716,
+          "level_db": 0.17932934015745622
+        },
+        "full": {
+          "signed_dbr": -19.627715119993482,
+          "level_db": 0.07317577466313994
+        }
+      }
+    },
+    {
+      "factor": 12,
+      "encoded_stereo_sample_words": 24782,
+      "bits": 12,
+      "theoretical_stereo_bytes": 37173,
+      "assumed_zero_phase_integer_origin": true,
+      "metrics": {
+        "attack": {
+          "signed_dbr": -46.90610341628654,
+          "level_db": 0.0013066455749707472
+        },
+        "held": {
+          "signed_dbr": -42.32001415905544,
+          "level_db": 0.0004958167808825593
+        },
+        "first_release": {
+          "signed_dbr": -38.45568580602351,
+          "level_db": -0.0018910544917072718
+        },
+        "chord": {
+          "signed_dbr": -29.748451252578775,
+          "level_db": -0.006477563652829227
+        },
+        "final_release": {
+          "signed_dbr": -22.812153865974704,
+          "level_db": -0.034742289220098053
+        },
+        "full": {
+          "signed_dbr": -30.99461658647297,
+          "level_db": -0.004302802200268765
+        }
+      }
+    },
+    {
+      "factor": 12,
+      "encoded_stereo_sample_words": 24782,
+      "bits": 16,
+      "theoretical_stereo_bytes": 49564,
+      "assumed_zero_phase_integer_origin": true,
+      "metrics": {
+        "attack": {
+          "signed_dbr": -65.37335240243725,
+          "level_db": 0.00029697362710896135
+        },
+        "held": {
+          "signed_dbr": -43.822546133414335,
+          "level_db": -0.00030556921568288106
+        },
+        "first_release": {
+          "signed_dbr": -39.16938522152321,
+          "level_db": -0.001541449281929729
+        },
+        "chord": {
+          "signed_dbr": -29.85825656864414,
+          "level_db": -0.007055507077477311
+        },
+        "final_release": {
+          "signed_dbr": -22.859154756586957,
+          "level_db": -0.03574967278713861
+        },
+        "full": {
+          "signed_dbr": -31.231758452725515,
+          "level_db": -0.0049178197297481355
+        }
+      }
+    },
+    {
+      "factor": 16,
+      "encoded_stereo_sample_words": 18586,
+      "bits": 0,
+      "theoretical_stereo_bytes": 0,
+      "assumed_zero_phase_integer_origin": true,
+      "metrics": {
+        "attack": {
+          "signed_dbr": -59.605495510378205,
+          "level_db": 2.525423541430923e-05
+        },
+        "held": {
+          "signed_dbr": -36.19780668629163,
+          "level_db": -0.0018223670340536072
+        },
+        "first_release": {
+          "signed_dbr": -27.52866458379232,
+          "level_db": -0.010170135522048526
+        },
+        "chord": {
+          "signed_dbr": -23.490303850766473,
+          "level_db": -0.026328612797302805
+        },
+        "final_release": {
+          "signed_dbr": -18.488384760443097,
+          "level_db": -0.07017457564868854
+        },
+        "full": {
+          "signed_dbr": -25.535483229861637,
+          "level_db": -0.0158961543719065
+        }
+      }
+    },
+    {
+      "factor": 16,
+      "encoded_stereo_sample_words": 18586,
+      "bits": 8,
+      "theoretical_stereo_bytes": 18586,
+      "assumed_zero_phase_integer_origin": true,
+      "metrics": {
+        "attack": {
+          "signed_dbr": -23.415166749316644,
+          "level_db": 0.04311185639712824
+        },
+        "held": {
+          "signed_dbr": -23.830541803077097,
+          "level_db": -0.010554049803284296
+        },
+        "first_release": {
+          "signed_dbr": -22.211491171369975,
+          "level_db": -0.020186679243480103
+        },
+        "chord": {
+          "signed_dbr": -19.5093293813143,
+          "level_db": 0.09102797061287601
+        },
+        "final_release": {
+          "signed_dbr": -16.22647603463718,
+          "level_db": 0.04475294909381317
+        },
+        "full": {
+          "signed_dbr": -18.933002208613665,
+          "level_db": 0.046551824515394705
+        }
+      }
+    },
+    {
+      "factor": 16,
+      "encoded_stereo_sample_words": 18586,
+      "bits": 12,
+      "theoretical_stereo_bytes": 27879,
+      "assumed_zero_phase_integer_origin": true,
+      "metrics": {
+        "attack": {
+          "signed_dbr": -47.24736792615033,
+          "level_db": -0.002370487451927562
+        },
+        "held": {
+          "signed_dbr": -35.87641867154047,
+          "level_db": -0.0016518652387786962
+        },
+        "first_release": {
+          "signed_dbr": -27.525605434594226,
+          "level_db": -0.008017579333370986
+        },
+        "chord": {
+          "signed_dbr": -23.4665906928652,
+          "level_db": -0.026916949143467355
+        },
+        "final_release": {
+          "signed_dbr": -18.47208504887019,
+          "level_db": -0.06353603177122472
+        },
+        "full": {
+          "signed_dbr": -25.470625559079807,
+          "level_db": -0.016551464969643347
+        }
+      }
+    },
+    {
+      "factor": 16,
+      "encoded_stereo_sample_words": 18586,
+      "bits": 16,
+      "theoretical_stereo_bytes": 37172,
+      "assumed_zero_phase_integer_origin": true,
+      "metrics": {
+        "attack": {
+          "signed_dbr": -59.308231997787274,
+          "level_db": 0.00034284056722950736
+        },
+        "held": {
+          "signed_dbr": -36.196417846036056,
+          "level_db": -0.0018690390291658298
+        },
+        "first_release": {
+          "signed_dbr": -27.52810487295299,
+          "level_db": -0.009813540345427075
+        },
+        "chord": {
+          "signed_dbr": -23.490256528575074,
+          "level_db": -0.02625718052766911
+        },
+        "final_release": {
+          "signed_dbr": -18.488807156596035,
+          "level_db": -0.07036096563447633
+        },
+        "full": {
+          "signed_dbr": -25.53508478432821,
+          "level_db": -0.01586244404109851
+        }
+      }
+    },
+    {
+      "factor": 24,
+      "encoded_stereo_sample_words": 12392,
+      "bits": 0,
+      "theoretical_stereo_bytes": 0,
+      "assumed_zero_phase_integer_origin": true,
+      "metrics": {
+        "attack": {
+          "signed_dbr": -51.96264354024354,
+          "level_db": 0.00013648784010335268
+        },
+        "held": {
+          "signed_dbr": -25.882994325251012,
+          "level_db": -0.015540553458591568
+        },
+        "first_release": {
+          "signed_dbr": -20.698566297296747,
+          "level_db": -0.03980928376501906
+        },
+        "chord": {
+          "signed_dbr": -17.955499897658243,
+          "level_db": -0.08503732668667036
+        },
+        "final_release": {
+          "signed_dbr": -15.502389697458874,
+          "level_db": -0.13777898900773755
+        },
+        "full": {
+          "signed_dbr": -20.38397102475478,
+          "level_db": -0.04790243926452223
+        }
+      }
+    },
+    {
+      "factor": 24,
+      "encoded_stereo_sample_words": 12392,
+      "bits": 8,
+      "theoretical_stereo_bytes": 12392,
+      "assumed_zero_phase_integer_origin": true,
+      "metrics": {
+        "attack": {
+          "signed_dbr": -23.030152899089515,
+          "level_db": 0.0034044448129858782
+        },
+        "held": {
+          "signed_dbr": -21.788204033215088,
+          "level_db": 0.02964227968174097
+        },
+        "first_release": {
+          "signed_dbr": -18.535627601969345,
+          "level_db": 0.11372199819307774
+        },
+        "chord": {
+          "signed_dbr": -16.33282828599079,
+          "level_db": 0.027131689346988515
+        },
+        "final_release": {
+          "signed_dbr": -14.383308738938323,
+          "level_db": -0.056807055753762235
+        },
+        "full": {
+          "signed_dbr": -17.148034722824733,
+          "level_db": 0.02718142427879181
+        }
+      }
+    },
+    {
+      "factor": 24,
+      "encoded_stereo_sample_words": 12392,
+      "bits": 12,
+      "theoretical_stereo_bytes": 18588,
+      "assumed_zero_phase_integer_origin": true,
+      "metrics": {
+        "attack": {
+          "signed_dbr": -45.90944963076396,
+          "level_db": -0.0004929184263039955
+        },
+        "held": {
+          "signed_dbr": -25.862582715757693,
+          "level_db": -0.016065535729092723
+        },
+        "first_release": {
+          "signed_dbr": -20.676150395842853,
+          "level_db": -0.02995871196710767
+        },
+        "chord": {
+          "signed_dbr": -17.953185968395477,
+          "level_db": -0.0817738408014308
+        },
+        "final_release": {
+          "signed_dbr": -15.495539275275831,
+          "level_db": -0.136141867436831
+        },
+        "full": {
+          "signed_dbr": -20.36735201338376,
+          "level_db": -0.04732400079432001
+        }
+      }
+    },
+    {
+      "factor": 24,
+      "encoded_stereo_sample_words": 12392,
+      "bits": 16,
+      "theoretical_stereo_bytes": 24784,
+      "assumed_zero_phase_integer_origin": true,
+      "metrics": {
+        "attack": {
+          "signed_dbr": -51.91829519084176,
+          "level_db": 0.00026353592351008597
+        },
+        "held": {
+          "signed_dbr": -25.88355310815254,
+          "level_db": -0.015580432543787073
+        },
+        "first_release": {
+          "signed_dbr": -20.698468240158654,
+          "level_db": -0.04047820195095801
+        },
+        "chord": {
+          "signed_dbr": -17.95530721838916,
+          "level_db": -0.08499473019709132
+        },
+        "final_release": {
+          "signed_dbr": -15.501910903880557,
+          "level_db": -0.1370652221995067
+        },
+        "full": {
+          "signed_dbr": -20.38385662694315,
+          "level_db": -0.047899958305641574
+        }
+      }
+    },
+    {
+      "factor": 32,
+      "encoded_stereo_sample_words": 9294,
+      "bits": 0,
+      "theoretical_stereo_bytes": 0,
+      "assumed_zero_phase_integer_origin": true,
+      "metrics": {
+        "attack": {
+          "signed_dbr": -45.748908876876854,
+          "level_db": 0.0003766046227279251
+        },
+        "held": {
+          "signed_dbr": -21.68032493992616,
+          "level_db": -0.03754105677071335
+        },
+        "first_release": {
+          "signed_dbr": -19.370991422455198,
+          "level_db": -0.05546863410682495
+        },
+        "chord": {
+          "signed_dbr": -15.299242056985584,
+          "level_db": -0.14722244864404116
+        },
+        "final_release": {
+          "signed_dbr": -14.342608708829838,
+          "level_db": -0.16163521789250238
+        },
+        "full": {
+          "signed_dbr": -17.834424341098355,
+          "level_db": -0.0818446177965055
+        }
+      }
+    },
+    {
+      "factor": 32,
+      "encoded_stereo_sample_words": 9294,
+      "bits": 8,
+      "theoretical_stereo_bytes": 9294,
+      "assumed_zero_phase_integer_origin": true,
+      "metrics": {
+        "attack": {
+          "signed_dbr": -23.782432036508908,
+          "level_db": 0.002782527943189365
+        },
+        "held": {
+          "signed_dbr": -19.524706874402685,
+          "level_db": -0.038964897489781006
+        },
+        "first_release": {
+          "signed_dbr": -18.13573236328734,
+          "level_db": -0.19565243279461542
+        },
+        "chord": {
+          "signed_dbr": -14.385919554206449,
+          "level_db": 0.010387161684213927
+        },
+        "final_release": {
+          "signed_dbr": -13.097193841810814,
+          "level_db": 0.2638159279643609
+        },
+        "full": {
+          "signed_dbr": -15.747044616379718,
+          "level_db": -0.0002753127633064364
+        }
+      }
+    },
+    {
+      "factor": 32,
+      "encoded_stereo_sample_words": 9294,
+      "bits": 12,
+      "theoretical_stereo_bytes": 13941,
+      "assumed_zero_phase_integer_origin": true,
+      "metrics": {
+        "attack": {
+          "signed_dbr": -43.215177830174156,
+          "level_db": -0.012001008203164111
+        },
+        "held": {
+          "signed_dbr": -21.67544738115805,
+          "level_db": -0.0348809618503402
+        },
+        "first_release": {
+          "signed_dbr": -19.377061636928254,
+          "level_db": -0.056222036550639634
+        },
+        "chord": {
+          "signed_dbr": -15.294528176679524,
+          "level_db": -0.14622642904000432
+        },
+        "final_release": {
+          "signed_dbr": -14.327553698475812,
+          "level_db": -0.14365211755903054
+        },
+        "full": {
+          "signed_dbr": -17.82376458262817,
+          "level_db": -0.08153169228522045
+        }
+      }
+    },
+    {
+      "factor": 32,
+      "encoded_stereo_sample_words": 9294,
+      "bits": 16,
+      "theoretical_stereo_bytes": 18588,
+      "assumed_zero_phase_integer_origin": true,
+      "metrics": {
+        "attack": {
+          "signed_dbr": -45.73110224135404,
+          "level_db": -0.00010374586476744844
+        },
+        "held": {
+          "signed_dbr": -21.680258056810125,
+          "level_db": -0.03754199192860336
+        },
+        "first_release": {
+          "signed_dbr": -19.37083281451495,
+          "level_db": -0.05578003901675867
+        },
+        "chord": {
+          "signed_dbr": -15.29910879178825,
+          "level_db": -0.14724392685187598
+        },
+        "final_release": {
+          "signed_dbr": -14.342462795942595,
+          "level_db": -0.16116488163313714
+        },
+        "full": {
+          "signed_dbr": -17.834329251061007,
+          "level_db": -0.08184533696520523
+        }
+      }
+    },
+    {
+      "factor": 48,
+      "encoded_stereo_sample_words": 6196,
+      "bits": 0,
+      "theoretical_stereo_bytes": 0,
+      "assumed_zero_phase_integer_origin": true,
+      "metrics": {
+        "attack": {
+          "signed_dbr": -34.8222317660177,
+          "level_db": -0.0013698310149511763
+        },
+        "held": {
+          "signed_dbr": -17.62452382728579,
+          "level_db": -0.0879170083326352
+        },
+        "first_release": {
+          "signed_dbr": -17.889408065583986,
+          "level_db": -0.07935573622027117
+        },
+        "chord": {
+          "signed_dbr": -12.557170919613805,
+          "level_db": -0.2629439802949141
+        },
+        "final_release": {
+          "signed_dbr": -12.537361405766585,
+          "level_db": -0.2766326575374126
+        },
+        "full": {
+          "signed_dbr": -15.053131834227749,
+          "level_db": -0.14875003869616238
+        }
+      }
+    },
+    {
+      "factor": 48,
+      "encoded_stereo_sample_words": 6196,
+      "bits": 8,
+      "theoretical_stereo_bytes": 6196,
+      "assumed_zero_phase_integer_origin": true,
+      "metrics": {
+        "attack": {
+          "signed_dbr": -23.21403169164291,
+          "level_db": -0.06272192470852463
+        },
+        "held": {
+          "signed_dbr": -16.54272151927206,
+          "level_db": -0.0632831781607137
+        },
+        "first_release": {
+          "signed_dbr": -16.150135029506888,
+          "level_db": -0.1625963857477693
+        },
+        "chord": {
+          "signed_dbr": -12.060128416662145,
+          "level_db": -0.2347147418133681
+        },
+        "final_release": {
+          "signed_dbr": -11.827482055634224,
+          "level_db": -0.28840216925414897
+        },
+        "full": {
+          "signed_dbr": -13.839477936907025,
+          "level_db": -0.12343949827743576
+        }
+      }
+    },
+    {
+      "factor": 48,
+      "encoded_stereo_sample_words": 6196,
+      "bits": 12,
+      "theoretical_stereo_bytes": 9294,
+      "assumed_zero_phase_integer_origin": true,
+      "metrics": {
+        "attack": {
+          "signed_dbr": -34.47849805096454,
+          "level_db": 0.00302329072435926
+        },
+        "held": {
+          "signed_dbr": -17.622303275032543,
+          "level_db": -0.08683562918372452
+        },
+        "first_release": {
+          "signed_dbr": -17.88502471442881,
+          "level_db": -0.08344136925076358
+        },
+        "chord": {
+          "signed_dbr": -12.555504723229124,
+          "level_db": -0.26466538275361
+        },
+        "final_release": {
+          "signed_dbr": -12.539404987814898,
+          "level_db": -0.26048327881395505
+        },
+        "full": {
+          "signed_dbr": -15.048526721817694,
+          "level_db": -0.14788627001642862
+        }
+      }
+    },
+    {
+      "factor": 48,
+      "encoded_stereo_sample_words": 6196,
+      "bits": 16,
+      "theoretical_stereo_bytes": 12392,
+      "assumed_zero_phase_integer_origin": true,
+      "metrics": {
+        "attack": {
+          "signed_dbr": -34.81472545654474,
+          "level_db": -0.001623151352451758
+        },
+        "held": {
+          "signed_dbr": -17.624548914612987,
+          "level_db": -0.08826930396315058
+        },
+        "first_release": {
+          "signed_dbr": -17.88912853249165,
+          "level_db": -0.07925248051835794
+        },
+        "chord": {
+          "signed_dbr": -12.557259215433023,
+          "level_db": -0.26303764017586784
+        },
+        "final_release": {
+          "signed_dbr": -12.537572531293788,
+          "level_db": -0.2772863051271734
+        },
+        "full": {
+          "signed_dbr": -15.053179932525785,
+          "level_db": -0.1488479097925261
+        }
+      }
+    },
+    {
+      "factor": 64,
+      "encoded_stereo_sample_words": 4648,
+      "bits": 0,
+      "theoretical_stereo_bytes": 0,
+      "assumed_zero_phase_integer_origin": true,
+      "metrics": {
+        "attack": {
+          "signed_dbr": -24.557663345869504,
+          "level_db": -0.0288898314259929
+        },
+        "held": {
+          "signed_dbr": -15.611141406738696,
+          "level_db": -0.13272580974988196
+        },
+        "first_release": {
+          "signed_dbr": -16.433428986313483,
+          "level_db": -0.09821629838392715
+        },
+        "chord": {
+          "signed_dbr": -11.70798774477796,
+          "level_db": -0.33880673543071366
+        },
+        "final_release": {
+          "signed_dbr": -12.262893026688895,
+          "level_db": -0.3542631639492258
+        },
+        "full": {
+          "signed_dbr": -13.89815489388042,
+          "level_db": -0.20409855500623547
+        }
+      }
+    },
+    {
+      "factor": 64,
+      "encoded_stereo_sample_words": 4648,
+      "bits": 8,
+      "theoretical_stereo_bytes": 4648,
+      "assumed_zero_phase_integer_origin": true,
+      "metrics": {
+        "attack": {
+          "signed_dbr": -21.273643943849972,
+          "level_db": 0.10286493629745924
+        },
+        "held": {
+          "signed_dbr": -15.012441019693552,
+          "level_db": -0.06530881455954324
+        },
+        "first_release": {
+          "signed_dbr": -15.810317107241254,
+          "level_db": -0.1278842552125144
+        },
+        "chord": {
+          "signed_dbr": -11.233440413439123,
+          "level_db": -0.1929144871746461
+        },
+        "final_release": {
+          "signed_dbr": -11.861543415997371,
+          "level_db": -0.608914650516055
+        },
+        "full": {
+          "signed_dbr": -12.929636107247033,
+          "level_db": -0.1196655118504168
+        }
+      }
+    },
+    {
+      "factor": 64,
+      "encoded_stereo_sample_words": 4648,
+      "bits": 12,
+      "theoretical_stereo_bytes": 6972,
+      "assumed_zero_phase_integer_origin": true,
+      "metrics": {
+        "attack": {
+          "signed_dbr": -24.610865949086577,
+          "level_db": -0.03489985407831712
+        },
+        "held": {
+          "signed_dbr": -15.607817031393651,
+          "level_db": -0.13438949533727257
+        },
+        "first_release": {
+          "signed_dbr": -16.447229563911293,
+          "level_db": -0.10358789144437698
+        },
+        "chord": {
+          "signed_dbr": -11.706868013963483,
+          "level_db": -0.3390518842977844
+        },
+        "final_release": {
+          "signed_dbr": -12.266760298655191,
+          "level_db": -0.35756912482385317
+        },
+        "full": {
+          "signed_dbr": -13.894039756037097,
+          "level_db": -0.20436459026297302
+        }
+      }
+    },
+    {
+      "factor": 64,
+      "encoded_stereo_sample_words": 4648,
+      "bits": 16,
+      "theoretical_stereo_bytes": 9296,
+      "assumed_zero_phase_integer_origin": true,
+      "metrics": {
+        "attack": {
+          "signed_dbr": -24.559261905163407,
+          "level_db": -0.0287388610391899
+        },
+        "held": {
+          "signed_dbr": -15.611130176352287,
+          "level_db": -0.13269934783575443
+        },
+        "first_release": {
+          "signed_dbr": -16.434299068721874,
+          "level_db": -0.09842433372723627
+        },
+        "chord": {
+          "signed_dbr": -11.707863173697472,
+          "level_db": -0.3389503967548134
+        },
+        "final_release": {
+          "signed_dbr": -12.26319636578554,
+          "level_db": -0.353183758612354
+        },
+        "full": {
+          "signed_dbr": -13.898103924105518,
+          "level_db": -0.2041508711242215
+        }
+      }
+    },
+    {
+      "factor": 96,
+      "encoded_stereo_sample_words": 3098,
+      "bits": 0,
+      "theoretical_stereo_bytes": 0,
+      "assumed_zero_phase_integer_origin": true,
+      "metrics": {
+        "attack": {
+          "signed_dbr": -12.785981512283438,
+          "level_db": -0.3071550539226855
+        },
+        "held": {
+          "signed_dbr": -13.979406185019457,
+          "level_db": -0.19850375849275426
+        },
+        "first_release": {
+          "signed_dbr": -14.79748461788966,
+          "level_db": -0.14779740878770034
+        },
+        "chord": {
+          "signed_dbr": -9.534450047516948,
+          "level_db": -0.5313921687519414
+        },
+        "final_release": {
+          "signed_dbr": -9.715019862415268,
+          "level_db": -0.5063518309722055
+        },
+        "full": {
+          "signed_dbr": -11.354399125170767,
+          "level_db": -0.34609619891058957
+        }
+      }
+    },
+    {
+      "factor": 96,
+      "encoded_stereo_sample_words": 3098,
+      "bits": 8,
+      "theoretical_stereo_bytes": 3098,
+      "assumed_zero_phase_integer_origin": true,
+      "metrics": {
+        "attack": {
+          "signed_dbr": -12.48564177120498,
+          "level_db": -0.27814434838558727
+        },
+        "held": {
+          "signed_dbr": -13.525842016762743,
+          "level_db": -0.11553605262212766
+        },
+        "first_release": {
+          "signed_dbr": -14.242918142844323,
+          "level_db": -0.030842811560991345
+        },
+        "chord": {
+          "signed_dbr": -9.26819173909412,
+          "level_db": -0.5125802365611716
+        },
+        "final_release": {
+          "signed_dbr": -9.410518302947866,
+          "level_db": -0.13200463534773038
+        },
+        "full": {
+          "signed_dbr": -10.803876855213879,
+          "level_db": -0.28714278604014476
+        }
+      }
+    },
+    {
+      "factor": 96,
+      "encoded_stereo_sample_words": 3098,
+      "bits": 12,
+      "theoretical_stereo_bytes": 4647,
+      "assumed_zero_phase_integer_origin": true,
+      "metrics": {
+        "attack": {
+          "signed_dbr": -12.777118960182754,
+          "level_db": -0.3059156719777716
+        },
+        "held": {
+          "signed_dbr": -13.975781003626633,
+          "level_db": -0.19895495533250462
+        },
+        "first_release": {
+          "signed_dbr": -14.78922612846114,
+          "level_db": -0.13764088491947327
+        },
+        "chord": {
+          "signed_dbr": -9.533932227311086,
+          "level_db": -0.5291260734329993
+        },
+        "final_release": {
+          "signed_dbr": -9.714522572465949,
+          "level_db": -0.49574415827314067
+        },
+        "full": {
+          "signed_dbr": -11.352078118061016,
+          "level_db": -0.3443321702448871
+        }
+      }
+    },
+    {
+      "factor": 96,
+      "encoded_stereo_sample_words": 3098,
+      "bits": 16,
+      "theoretical_stereo_bytes": 6196,
+      "assumed_zero_phase_integer_origin": true,
+      "metrics": {
+        "attack": {
+          "signed_dbr": -12.785677971771376,
+          "level_db": -0.30673312278065934
+        },
+        "held": {
+          "signed_dbr": -13.979331733588902,
+          "level_db": -0.19850316989345795
+        },
+        "first_release": {
+          "signed_dbr": -14.798610409584638,
+          "level_db": -0.14781464828519067
+        },
+        "chord": {
+          "signed_dbr": -9.534429784491179,
+          "level_db": -0.5313529377548959
+        },
+        "final_release": {
+          "signed_dbr": -9.715187904404086,
+          "level_db": -0.5043838334067509
+        },
+        "full": {
+          "signed_dbr": -11.354355773843599,
+          "level_db": -0.34602845924670633
+        }
+      }
+    },
+    {
+      "factor": 128,
+      "encoded_stereo_sample_words": 2324,
+      "bits": 0,
+      "theoretical_stereo_bytes": 0,
+      "assumed_zero_phase_integer_origin": true,
+      "metrics": {
+        "attack": {
+          "signed_dbr": -9.54719581986277,
+          "level_db": -0.6376661768861105
+        },
+        "held": {
+          "signed_dbr": -12.881233840453056,
+          "level_db": -0.27185143254952376
+        },
+        "first_release": {
+          "signed_dbr": -14.235906207066837,
+          "level_db": -0.2286482631781718
+        },
+        "chord": {
+          "signed_dbr": -9.09983445860254,
+          "level_db": -0.5852988896857536
+        },
+        "final_release": {
+          "signed_dbr": -9.630306172921822,
+          "level_db": -0.45377852995546253
+        },
+        "full": {
+          "signed_dbr": -10.630028100681981,
+          "level_db": -0.4237924057664905
+        }
+      }
+    },
+    {
+      "factor": 128,
+      "encoded_stereo_sample_words": 2324,
+      "bits": 8,
+      "theoretical_stereo_bytes": 2324,
+      "assumed_zero_phase_integer_origin": true,
+      "metrics": {
+        "attack": {
+          "signed_dbr": -9.5149254507851,
+          "level_db": -0.38509204764857263
+        },
+        "held": {
+          "signed_dbr": -12.47535400713311,
+          "level_db": -0.31741120214652274
+        },
+        "first_release": {
+          "signed_dbr": -14.019955001158419,
+          "level_db": -0.11000945008845983
+        },
+        "chord": {
+          "signed_dbr": -8.836227060806403,
+          "level_db": -0.6032554832346771
+        },
+        "final_release": {
+          "signed_dbr": -9.449871237919321,
+          "level_db": -0.07469442466926472
+        },
+        "full": {
+          "signed_dbr": -10.153512364264765,
+          "level_db": -0.39746174463358325
+        }
+      }
+    },
+    {
+      "factor": 128,
+      "encoded_stereo_sample_words": 2324,
+      "bits": 12,
+      "theoretical_stereo_bytes": 3486,
+      "assumed_zero_phase_integer_origin": true,
+      "metrics": {
+        "attack": {
+          "signed_dbr": -9.548212224133106,
+          "level_db": -0.6237614756397113
+        },
+        "held": {
+          "signed_dbr": -12.880334130418198,
+          "level_db": -0.2696669183645518
+        },
+        "first_release": {
+          "signed_dbr": -14.233410208970557,
+          "level_db": -0.26688687689603335
+        },
+        "chord": {
+          "signed_dbr": -9.097937239718613,
+          "level_db": -0.5868873562015832
+        },
+        "final_release": {
+          "signed_dbr": -9.62912107831022,
+          "level_db": -0.44803878151211707
+        },
+        "full": {
+          "signed_dbr": -10.62758297760104,
+          "level_db": -0.4232900297350918
+        }
+      }
+    },
+    {
+      "factor": 128,
+      "encoded_stereo_sample_words": 2324,
+      "bits": 16,
+      "theoretical_stereo_bytes": 4648,
+      "assumed_zero_phase_integer_origin": true,
+      "metrics": {
+        "attack": {
+          "signed_dbr": -9.547092576460116,
+          "level_db": -0.6372017471404569
+        },
+        "held": {
+          "signed_dbr": -12.88115777778258,
+          "level_db": -0.27161633625855897
+        },
+        "first_release": {
+          "signed_dbr": -14.235782443118536,
+          "level_db": -0.2274989785037836
+        },
+        "chord": {
+          "signed_dbr": -9.099825502144782,
+          "level_db": -0.585230884144911
+        },
+        "final_release": {
+          "signed_dbr": -9.63001614074296,
+          "level_db": -0.4572708510135791
+        },
+        "full": {
+          "signed_dbr": -10.629962084330312,
+          "level_db": -0.4236606187774633
+        }
+      }
+    }
+  ],
+  "scope": "already rendered Sub-only Brainwave terminal, not actual raw sample zones or native decoder; no publishing original or derivative data"
+}
