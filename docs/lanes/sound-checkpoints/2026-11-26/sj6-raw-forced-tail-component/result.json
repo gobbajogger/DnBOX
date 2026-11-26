@@ -1,0 +1,49 @@
+{
+  "scope": "historical signed compact physical-suffix proof only; no reset, current-branch or original shared-tap claim",
+  "windows": {
+    "owner_release": {
+      "baseline": {
+        "signed_dbr": 3.9525139800086926,
+        "level_db": -1.4815365928237156
+      },
+      "conditional_no_extra_drive": {
+        "signed_dbr": 3.9525139800086926,
+        "level_db": -1.4815365928237156
+      },
+      "extra_drive_rms": 0.0
+    },
+    "next_464_frames": {
+      "baseline": {
+        "signed_dbr": 2.105551788525203,
+        "level_db": 0.7060852128892748
+      },
+      "conditional_no_extra_drive": {
+        "signed_dbr": 2.0886348862740785,
+        "level_db": 0.694818129197604
+      },
+      "extra_drive_rms": 1.884170107200226e-05
+    },
+    "remaining_tail": {
+      "baseline": {
+        "signed_dbr": 9.317764288106542,
+        "level_db": 6.021536361795945
+      },
+      "conditional_no_extra_drive": {
+        "signed_dbr": 9.318606522831256,
+        "level_db": 6.022600763878546
+      },
+      "extra_drive_rms": 1.8064730857556479e-07
+    },
+    "whole_release": {
+      "baseline": {
+        "signed_dbr": 3.9824372426845027,
+        "level_db": -1.3857543956345888
+      },
+      "conditional_no_extra_drive": {
+        "signed_dbr": 3.9823715165927913,
+        "level_db": -1.3858595121471584
+      },
+      "extra_drive_rms": 3.869185991411998e-06
+    }
+  }
+}
