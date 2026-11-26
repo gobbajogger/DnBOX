@@ -576,3 +576,14 @@ the instrument high-pass. Cached Raw terminal returns and separate
 Apple-leaf captures must not be called installed internal taps.
 No alternate private capture was made; continue with verified
 prefilter/leaf scope without a guessed level correction.
+
+### Full-bank lossless Sub provider bound
+The [cache-only block prototype](sj6-sub-progressive/README.md)
+decodes 294,912 independent signed words exactly and emits no storage
+read at playback. The entire original Sub bank would require 68.12:1
+compression even if it used all 112 KiB of the pool. The tested
+small-block headers alone exceed capacity at 64/128 frames; 256-frame
+blocks leave only .0702 bit/input sample for all residue and need
+1,024 B of warmed two-block PCM per cursor. Reject this format for an
+exact complete bank; no universal compressor or authorized external
+asset claim. No original media in the archive.

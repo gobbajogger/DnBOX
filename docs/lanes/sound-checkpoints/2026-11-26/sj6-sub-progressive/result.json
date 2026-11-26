@@ -1,0 +1,188 @@
+{
+  "input": "independently authored synthetic PCM16 only",
+  "all_words_exact": 294912,
+  "pool_bytes_best_case": 114688,
+  "decoded_pcm16": 7812906,
+  "required_ratio": 68.12313406808036,
+  "codec": "finite second-difference pack or raw/constant; frame count trust from bound owner",
+  "results": {
+    "64:zero": {
+      "reached": 24576,
+      "rejected_truncated_blocks": 384,
+      "payload_modes": [
+        0,
+        384,
+        0
+      ],
+      "encoded_bytes_including_header_and_index": 2016,
+      "compression_ratio": 24.38095238095238,
+      "hash": "e827bb3a7f85d0c50a3634f26609a3b9695a4f60f3d6a9a7ef8198058f56006c"
+    },
+    "64:low_sine_exact_PCM16": {
+      "reached": 24576,
+      "rejected_truncated_blocks": 384,
+      "payload_modes": [
+        0,
+        0,
+        384
+      ],
+      "encoded_bytes_including_header_and_index": 12120,
+      "compression_ratio": 4.0554455445544555,
+      "hash": "4fca2fcf4c4a49c36e06d17d365d53e15f242d7fb7b853959e7948e22da8ff60"
+    },
+    "64:multi_sine_exact_PCM16": {
+      "reached": 24576,
+      "rejected_truncated_blocks": 384,
+      "payload_modes": [
+        0,
+        0,
+        384
+      ],
+      "encoded_bytes_including_header_and_index": 25756,
+      "compression_ratio": 1.9083708650411555,
+      "hash": "3f48017accd67ecf65ec4672be27b2be26bcfb223ca353835509d82b88166cf7"
+    },
+    "64:broadband_iid_PCM16": {
+      "reached": 24576,
+      "rejected_truncated_blocks": 384,
+      "payload_modes": [
+        384,
+        0,
+        0
+      ],
+      "encoded_bytes_including_header_and_index": 50400,
+      "compression_ratio": 0.9752380952380952,
+      "hash": "ac2f2773b1a2dbed470695edfb8f8e43521693842ebaea644a5697ae71f39d2b"
+    },
+    "128:zero": {
+      "reached": 24576,
+      "rejected_truncated_blocks": 192,
+      "payload_modes": [
+        0,
+        192,
+        0
+      ],
+      "encoded_bytes_including_header_and_index": 1008,
+      "compression_ratio": 48.76190476190476,
+      "hash": "5f400d0237ee29afee4441d49a000baeaef15f87800153576580d3801ec899d9"
+    },
+    "128:low_sine_exact_PCM16": {
+      "reached": 24576,
+      "rejected_truncated_blocks": 192,
+      "payload_modes": [
+        0,
+        0,
+        192
+      ],
+      "encoded_bytes_including_header_and_index": 11145,
+      "compression_ratio": 4.410228802153432,
+      "hash": "8f4d8073e9a59693f97c70b43e8a92b37ef130636e3d3f7073899e82bf2de8c8"
+    },
+    "128:multi_sine_exact_PCM16": {
+      "reached": 24576,
+      "rejected_truncated_blocks": 192,
+      "payload_modes": [
+        0,
+        0,
+        192
+      ],
+      "encoded_bytes_including_header_and_index": 25776,
+      "compression_ratio": 1.9068901303538175,
+      "hash": "ad5667e4f2701b7a7a73b38e49abb3c5973f6e5b73f5a3f9ac4660d529a0a21f"
+    },
+    "128:broadband_iid_PCM16": {
+      "reached": 24576,
+      "rejected_truncated_blocks": 192,
+      "payload_modes": [
+        192,
+        0,
+        0
+      ],
+      "encoded_bytes_including_header_and_index": 49776,
+      "compression_ratio": 0.9874638379942141,
+      "hash": "b33fd98bb1c19d0a92eddd11a47e0f74ef25d1d53fcecd30f279e81273b2e212"
+    },
+    "256:zero": {
+      "reached": 24576,
+      "rejected_truncated_blocks": 96,
+      "payload_modes": [
+        0,
+        96,
+        0
+      ],
+      "encoded_bytes_including_header_and_index": 504,
+      "compression_ratio": 97.52380952380952,
+      "hash": "fcc56147d8cbffadac6f9beb3009d51d32599ed61edc1c19a964747f9bbd197f"
+    },
+    "256:low_sine_exact_PCM16": {
+      "reached": 24576,
+      "rejected_truncated_blocks": 96,
+      "payload_modes": [
+        0,
+        0,
+        96
+      ],
+      "encoded_bytes_including_header_and_index": 10659,
+      "compression_ratio": 4.611314382212215,
+      "hash": "e80f4b78ec6a60284fedd7c1bd6501bcb56f9e2f37924a4a110c304da79a35f5"
+    },
+    "256:multi_sine_exact_PCM16": {
+      "reached": 24576,
+      "rejected_truncated_blocks": 96,
+      "payload_modes": [
+        0,
+        0,
+        96
+      ],
+      "encoded_bytes_including_header_and_index": 25176,
+      "compression_ratio": 1.9523355576739752,
+      "hash": "dc7323ea0157565c5c572b9f3c6d87e63858027a29072837eec0cd6d3fa00ba5"
+    },
+    "256:broadband_iid_PCM16": {
+      "reached": 24576,
+      "rejected_truncated_blocks": 96,
+      "payload_modes": [
+        96,
+        0,
+        0
+      ],
+      "encoded_bytes_including_header_and_index": 49464,
+      "compression_ratio": 0.9936923823386705,
+      "hash": "7e3b8f8c5713188568ae0470cf8b28c744622866d4421d2e454e2cf0b856d48e"
+    }
+  },
+  "candidate_storage_floor": {
+    "64": {
+      "blocks_optimistic": 61039,
+      "ideal_per_block_seed_bytes": 3,
+      "min_any_design_with_per_block_seed_and_16_restart_index_B": 198665,
+      "this_format_zero_only_B": 320743,
+      "bit_budget_per_input_frame": 0.0,
+      "cache_bytes_one_voice_pair": 256,
+      "cache_bytes_six_voice": 1536,
+      "cache_bytes_two_six_voice": 3072
+    },
+    "128": {
+      "blocks_optimistic": 30520,
+      "ideal_per_block_seed_bytes": 3,
+      "min_any_design_with_per_block_seed_and_16_restart_index_B": 99480,
+      "this_format_zero_only_B": 160520,
+      "bit_budget_per_input_frame": 0.0,
+      "cache_bytes_one_voice_pair": 512,
+      "cache_bytes_six_voice": 3072,
+      "cache_bytes_two_six_voice": 6144
+    },
+    "256": {
+      "blocks_optimistic": 15260,
+      "ideal_per_block_seed_bytes": 3,
+      "min_any_design_with_per_block_seed_and_16_restart_index_B": 49884,
+      "this_format_zero_only_B": 80404,
+      "bit_budget_per_input_frame": 0.07020998332758643,
+      "cache_bytes_one_voice_pair": 1024,
+      "cache_bytes_six_voice": 6144,
+      "cache_bytes_two_six_voice": 12288
+    }
+  },
+  "ready_pair_hit_and_miss_atomic": true,
+  "no_timing_or_real_asset_compression_claim": true
+}
