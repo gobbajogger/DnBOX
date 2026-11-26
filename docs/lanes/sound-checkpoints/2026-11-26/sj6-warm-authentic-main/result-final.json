@@ -1,0 +1,358 @@
+{
+  "binary": "6d163d79202e866d2fda96e36f752bd386641b5ae2d0b1f829a254d26b652850",
+  "source_controls": {
+    "0": 0.8080000281333923,
+    "1": 0,
+    "2": 0,
+    "3": 0,
+    "7": 0,
+    "8": 0,
+    "9": 0,
+    "10": 0.0020000000949949026,
+    "11": 0,
+    "12": 0.0020047882571816444,
+    "13": 1.0,
+    "14": 0,
+    "15": 0.012719512917101383,
+    "20": 1,
+    "25": 0,
+    "28": 0,
+    "29": 0,
+    "32": 1,
+    "36": 20000,
+    "37": 440.0,
+    "38": 1,
+    "39": 0,
+    "40": 0,
+    "41": 1,
+    "42": 0,
+    "43": 0,
+    "44": 0,
+    "51": 1
+  },
+  "source_keys": [
+    36,
+    48,
+    52,
+    55
+  ],
+  "source_preOTA_hash": "7ab7581651b9de789ca29dfb3b2da12741f81adf182bee745eab80f6a872490a",
+  "raw_reference_main_from_generated_saw_actual_current_submitted_source": true,
+  "exactly_same_pinned_render_input_control_words": 170,
+  "mapped_velocity_scope": "authentic note receiver86, compact retains its existing same-cue MIDI ingress (nominal87), no new velocity correction",
+  "baseline_terminal_equal_prior": true,
+  "original_reference_sha": {
+    "authored": "9cc279dc61f6a504e1c234cd90db37f7c16c0cc9377a33e1165e6a75f7cf7b21",
+    "dry": "905e705042416acd2a5404594706608c6bd0a35b0783013ef4bbf977fe170002",
+    "authored-repeat": "9cc279dc61f6a504e1c234cd90db37f7c16c0cc9377a33e1165e6a75f7cf7b21"
+  },
+  "guards": {
+    "main_muted_exact_hash": "4903c2dd49f7991f7f3a9bd647fdbb4b5c09a2ae26b73e0710bc21ef240d1ab5",
+    "quiet_before_note_exact": true
+  },
+  "full_read_counts": {
+    "authored": [
+      {
+        "reads": 123675,
+        "loops": 0,
+        "resets": 4,
+        "main_all_used_per_key": [
+          22650,
+          33675,
+          33675,
+          33675
+        ],
+        "main_source_present_per_key": [
+          22610,
+          33635,
+          33635,
+          33635
+        ],
+        "main_stock_vs_actual_preOTA_dbr_by_key": [
+          -14.19908168727327,
+          -12.986668300100268,
+          -13.516774412772307,
+          -13.243289969103813
+        ]
+      },
+      {
+        "reads": 123675,
+        "loops": 0,
+        "resets": 4,
+        "main_all_used_per_key": [
+          22650,
+          33675,
+          33675,
+          33675
+        ],
+        "main_source_present_per_key": [
+          22610,
+          33635,
+          33635,
+          33635
+        ],
+        "main_stock_vs_actual_preOTA_dbr_by_key": [
+          -14.19908168727327,
+          -12.986668300100268,
+          -13.516774412772307,
+          -13.243289969103813
+        ]
+      }
+    ],
+    "dry": [
+      {
+        "reads": 123675,
+        "loops": 0,
+        "resets": 4,
+        "main_all_used_per_key": [
+          22650,
+          33675,
+          33675,
+          33675
+        ],
+        "main_source_present_per_key": [
+          22610,
+          33635,
+          33635,
+          33635
+        ],
+        "main_stock_vs_actual_preOTA_dbr_by_key": [
+          -14.19908168727327,
+          -12.986668300100268,
+          -13.516774412772307,
+          -13.243289969103813
+        ]
+      },
+      {
+        "reads": 123675,
+        "loops": 0,
+        "resets": 4,
+        "main_all_used_per_key": [
+          22650,
+          33675,
+          33675,
+          33675
+        ],
+        "main_source_present_per_key": [
+          22610,
+          33635,
+          33635,
+          33635
+        ],
+        "main_stock_vs_actual_preOTA_dbr_by_key": [
+          -14.19908168727327,
+          -12.986668300100268,
+          -13.516774412772307,
+          -13.243289969103813
+        ]
+      }
+    ]
+  },
+  "isolate_main_scope": "separate Main-only same compact terminal comparison. No actual installed Main-only native render on this exact schedule; no fabricated terminal score.",
+  "isolated_main_counts": [
+    {
+      "reads": 0,
+      "loops": 0,
+      "resets": 4,
+      "main_all_used_per_key": [
+        22650,
+        33675,
+        33675,
+        33675
+      ],
+      "main_source_present_per_key": [
+        22610,
+        33635,
+        33635,
+        33635
+      ],
+      "main_stock_vs_actual_preOTA_dbr_by_key": [
+        -14.19908168727327,
+        -12.986668300100268,
+        -13.516774412772307,
+        -13.243289969103813
+      ]
+    },
+    {
+      "reads": 0,
+      "loops": 0,
+      "resets": 4,
+      "main_all_used_per_key": [
+        22650,
+        33675,
+        33675,
+        33675
+      ],
+      "main_source_present_per_key": [
+        22610,
+        33635,
+        33635,
+        33635
+      ],
+      "main_stock_vs_actual_preOTA_dbr_by_key": [
+        -14.19908168727327,
+        -12.986668300100268,
+        -13.516774412772307,
+        -13.243289969103813
+      ]
+    }
+  ],
+  "windows": {
+    "attack": {
+      "authored": [
+        {
+          "signed_dbr": -0.7890467918420083,
+          "level_db": -4.7394883840087365
+        },
+        {
+          "signed_dbr": -0.953692653962265,
+          "level_db": -3.933157016866684
+        }
+      ],
+      "dry": [
+        {
+          "signed_dbr": -0.7460668580175795,
+          "level_db": -6.427292749681021
+        },
+        {
+          "signed_dbr": -0.9355801189223865,
+          "level_db": -5.543004024671979
+        }
+      ],
+      "compact_main_only_boundary": {
+        "same_donor_source_substitution_delta_dbr": -12.451057473812812,
+        "level_delta_db": 1.8518064554805516
+      }
+    },
+    "held": {
+      "authored": [
+        {
+          "signed_dbr": -0.7413002257719565,
+          "level_db": -4.714577757389683
+        },
+        {
+          "signed_dbr": -0.9070715656150548,
+          "level_db": -3.954980013913783
+        }
+      ],
+      "dry": [
+        {
+          "signed_dbr": -0.7785973919317674,
+          "level_db": -6.4922298189875125
+        },
+        {
+          "signed_dbr": -0.9761306870428071,
+          "level_db": -5.6186920206783935
+        }
+      ],
+      "compact_main_only_boundary": {
+        "same_donor_source_substitution_delta_dbr": -12.46870048832151,
+        "level_delta_db": 1.8508832976728598
+      }
+    },
+    "release": {
+      "authored": [
+        {
+          "signed_dbr": 1.634004687080704,
+          "level_db": -8.875606220715412
+        },
+        {
+          "signed_dbr": 1.0578530889727964,
+          "level_db": -10.174335967953066
+        }
+      ],
+      "dry": [
+        {
+          "signed_dbr": 0.9486030337402962,
+          "level_db": -12.32259306070567
+        },
+        {
+          "signed_dbr": 0.31605103788710076,
+          "level_db": -12.676738099965059
+        }
+      ],
+      "compact_main_only_boundary": {
+        "same_donor_source_substitution_delta_dbr": -12.511545839563606,
+        "level_delta_db": 1.845571994337033
+      }
+    },
+    "chord": {
+      "authored": [
+        {
+          "signed_dbr": -0.6332137469432546,
+          "level_db": -6.945050778676386
+        },
+        {
+          "signed_dbr": -0.444817625165423,
+          "level_db": -5.89578605858649
+        }
+      ],
+      "dry": [
+        {
+          "signed_dbr": -2.815817867061931,
+          "level_db": -8.565441170485427
+        },
+        {
+          "signed_dbr": -3.3398349612022873,
+          "level_db": -7.303430889827975
+        }
+      ],
+      "compact_main_only_boundary": {
+        "same_donor_source_substitution_delta_dbr": -12.288484504607883,
+        "level_delta_db": 1.8536559268169617
+      }
+    },
+    "tail": {
+      "authored": [
+        {
+          "signed_dbr": -0.1537479295358373,
+          "level_db": -9.580872069924487
+        },
+        {
+          "signed_dbr": -0.01044266859852704,
+          "level_db": -8.155075851076797
+        }
+      ],
+      "dry": [
+        {
+          "signed_dbr": -2.1322210732636733,
+          "level_db": -11.007055202504215
+        },
+        {
+          "signed_dbr": -2.541775785859831,
+          "level_db": -9.427579415374556
+        }
+      ],
+      "compact_main_only_boundary": {
+        "same_donor_source_substitution_delta_dbr": -12.276010113433344,
+        "level_delta_db": 1.806750797254877
+      }
+    },
+    "full": {
+      "authored": [
+        {
+          "signed_dbr": -0.647363387241997,
+          "level_db": -6.316391565500306
+        },
+        {
+          "signed_dbr": -0.5466418403840754,
+          "level_db": -5.342433158079446
+        }
+      ],
+      "dry": [
+        {
+          "signed_dbr": -2.3817753922466514,
+          "level_db": -8.148680493767218
+        },
+        {
+          "signed_dbr": -2.8250671821299926,
+          "level_db": -6.974401721988171
+        }
+      ],
+      "compact_main_only_boundary": {
+        "same_donor_source_substitution_delta_dbr": -12.330504097155677,
+        "level_delta_db": 1.852885863232713
+      }
+    }
+  }
+}

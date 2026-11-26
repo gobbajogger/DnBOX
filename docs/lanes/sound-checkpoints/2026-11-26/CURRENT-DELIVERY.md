@@ -6,6 +6,22 @@ isolated kernel timing, or partial link into a release claim.
 
 ## Latest measured results
 
+- **Downloadable preset transaction on host:** the [actual immutable
+  DNL2 reader](dnl2-immutable-staging/README.md) validates all 1,546
+  presets and 221,013 ordered exact parameter words, never claims
+  adoption on staging alone, and rejects 200 malformed cases.
+  The [real Synth One owner transaction](s1-host-bank-adoption/README.md)
+  then applies and renders all 906 on host. All 14 legacy holdouts
+  hash-match, and invalid dispatch preserves the prior owner.
+  SuperJ6 dispatcher, mapped storage, native pool/APP and playback
+  remain open; this is not a firmware bank import or full audio match.
+- **Authentic stage improvements are not sufficient:** the exact
+  [Main pre-OTA carrier](sj6-warm-authentic-main/README.md) improves
+  Raw dry and first release with the authentic Sub unchanged, but
+  worsens the complete effects-on result. Separate Sub OTA
+  [independent-state candidate](sj6-warm-ota-split/result.json)
+  barely moves measurements, so do not spend its 96 B or widen scope.
+
 - **Fresh played-through screen did not qualify.** [Full composed Raw
   original A/B](sj6-warm-authored-terminal/README.md) checks all 170
   public control readbacks and exact MIDI/callback schedule. The guarded

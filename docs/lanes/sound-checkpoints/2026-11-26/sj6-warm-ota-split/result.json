@@ -1,0 +1,169 @@
+{
+  "mode": "one actual host owner; raw carrier in private RAM only; source-shaped release after Sub OTA instead of pre-shaping carrier; known native terminal only",
+  "source_off_baseline_verified": true,
+  "mute_exact": true,
+  "entry_counts": {
+    "authored": [
+      {
+        "reads": 123675,
+        "loops": 0,
+        "resets": 4,
+        "split": 0
+      },
+      {
+        "reads": 123675,
+        "loops": 0,
+        "resets": 4,
+        "split": 123675
+      }
+    ],
+    "dry": [
+      {
+        "reads": 123675,
+        "loops": 0,
+        "resets": 4,
+        "split": 0
+      },
+      {
+        "reads": 123675,
+        "loops": 0,
+        "resets": 4,
+        "split": 123675
+      }
+    ]
+  },
+  "windows": {
+    "attack": {
+      "authored": [
+        {
+          "signed_dbr": -0.7890467918420083,
+          "level_db": -4.739488674090082
+        },
+        {
+          "signed_dbr": -0.7888201457367814,
+          "level_db": -4.7396145774300225
+        }
+      ],
+      "dry": [
+        {
+          "signed_dbr": -0.7460668580175795,
+          "level_db": -6.427292595104273
+        },
+        {
+          "signed_dbr": -0.7431645459027364,
+          "level_db": -6.427486786634514
+        }
+      ]
+    },
+    "held": {
+      "authored": [
+        {
+          "signed_dbr": -0.7413002257719565,
+          "level_db": -4.714577491265147
+        },
+        {
+          "signed_dbr": -0.7411460349657959,
+          "level_db": -4.714647781023409
+        }
+      ],
+      "dry": [
+        {
+          "signed_dbr": -0.7785973919317674,
+          "level_db": -6.492229519422387
+        },
+        {
+          "signed_dbr": -0.7758275795135157,
+          "level_db": -6.4924012621333045
+        }
+      ]
+    },
+    "first-release": {
+      "authored": [
+        {
+          "signed_dbr": 1.527940591077719,
+          "level_db": -9.040976598249175
+        },
+        {
+          "signed_dbr": 1.5212819658939882,
+          "level_db": -9.05743046734976
+        }
+      ],
+      "dry": [
+        {
+          "signed_dbr": 0.8173183210439536,
+          "level_db": -12.730776901614401
+        },
+        {
+          "signed_dbr": 0.8067646982101924,
+          "level_db": -12.770456160586846
+        }
+      ]
+    },
+    "chord": {
+      "authored": [
+        {
+          "signed_dbr": -0.6332137469432546,
+          "level_db": -6.945050467199182
+        },
+        {
+          "signed_dbr": -0.6362775652600673,
+          "level_db": -6.945896800913126
+        }
+      ],
+      "dry": [
+        {
+          "signed_dbr": -2.815817867061931,
+          "level_db": -8.565441074322571
+        },
+        {
+          "signed_dbr": -2.8087887859092477,
+          "level_db": -8.566174997155176
+        }
+      ]
+    },
+    "final-release": {
+      "authored": [
+        {
+          "signed_dbr": -0.14586998993825817,
+          "level_db": -9.621662906176518
+        },
+        {
+          "signed_dbr": -0.1505451224759049,
+          "level_db": -9.630848535772339
+        }
+      ],
+      "dry": [
+        {
+          "signed_dbr": -2.1368582503371965,
+          "level_db": -11.056848118671983
+        },
+        {
+          "signed_dbr": -2.1230049410128435,
+          "level_db": -11.075491340265199
+        }
+      ]
+    },
+    "full": {
+      "authored": [
+        {
+          "signed_dbr": -0.6474939829573036,
+          "level_db": -6.316537609607776
+        },
+        {
+          "signed_dbr": -0.6497460314916634,
+          "level_db": -6.31712260599456
+        }
+      ],
+      "dry": [
+        {
+          "signed_dbr": -2.3818670584781585,
+          "level_db": -8.148764726888794
+        },
+        {
+          "signed_dbr": -2.375850166671863,
+          "level_db": -8.149388163881072
+        }
+      ]
+    }
+  }
+}
