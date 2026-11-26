@@ -648,3 +648,13 @@ six voices, with separately owned poles and no pool credit. Both
 target layouts retain all verified offsets. Control clock, live
 route/feedback guards, and actual CPU/flash fit remain open. No product
 enablement.
+
+### Four-terminal 909 worker: real fit and strict replay rejection
+The [exact one-emitter terminal trial](909-terminal-native-rejected/FOLLOW-THROUGH.md)
+fits at +8 B Elite and +20 B Pro APP, 8,756 B measured pool on both.
+The one same-tape Elite measurement made the worst block 14,288→17,339
+µs and late blocks 86→232. Both arms had zero skips; no flash writes or
+latched C1 fault. PCM and note admission differ, and final endpoint
+ownership cannot identify how many private computations were discarded
+or replayed serially. Reject and do not repeat on Pro; the fit proof
+does not authorize activation or an asserted bottleneck.

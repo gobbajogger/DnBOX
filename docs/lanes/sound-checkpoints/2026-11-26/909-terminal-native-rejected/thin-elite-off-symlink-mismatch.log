@@ -2,10 +2,10 @@
 df5831a1a84f8b52198f9af9112ac44a97c12759743d710d4f2b35d215db4570  lab-cold-0-2/pro/never-install.elf
 3b00043b4e7ed9c6953c6a8f05f573c4ab45d070e87e8b282e4a591380eea962  cold-build.sh
 a84411c4ad2187867029afad053ba9b0d523a1d120b3719e579a0ecf98d058fc  link.py
-0d03f1427618d891d10803e05b32c5ca665741319a896722ac20db47a7c1c27d  /workspace/scratch/3a7051e761a0/sj6-j60-right-native/wet-lease.patch
-72881761b841b82030117c337fb702e50c6eaaf9cfb0633aeae87affb120dbfc  /workspace/scratch/3a7051e761a0/sj6-j60-right-native/table-share.patch
-430f272a0e332563e9931a3cb75341e90c1d7af8fa30173710766164dc11b9f2  /workspace/scratch/3a7051e761a0/sj6-j60-right-native/j60-post.patch
-5a1e8552d063909b769cc41289d8b399ef365c8d7e608e493e3ab0edc7b00ce9  /workspace/scratch/3a7051e761a0/all-controls-remote-join/compile-flags.txt
+0d03f1427618d891d10803e05b32c5ca665741319a896722ac20db47a7c1c27d  <diagnostic-worktree>/sj6-j60-right-native/wet-lease.patch
+72881761b841b82030117c337fb702e50c6eaaf9cfb0633aeae87affb120dbfc  <diagnostic-worktree>/sj6-j60-right-native/table-share.patch
+430f272a0e332563e9931a3cb75341e90c1d7af8fa30173710766164dc11b9f2  <diagnostic-worktree>/sj6-j60-right-native/j60-post.patch
+5a1e8552d063909b769cc41289d8b399ef365c8d7e608e493e3ab0edc7b00ce9  <diagnostic-worktree>/all-controls-remote-join/compile-flags.txt
 354:b.CFLAGS.extend(["-DDNBOX_S1_WET_LEASE_LAB=1","-DDNBOX_S1_WET_LEASE_USE=0","-DDNBX_EXPERIMENT_J60_POST=1", "-DDNBX_EXPERIMENT_J60_RIGHT_TRAJECTORY=1","-DX0X_DIAG_909_TERMINAL_GROUP="+os.environ["DNBX_TERMINAL909_SWITCH"]])
 check_locked_settings: 20 settings ok
 firmware/src/app/engine.c:299:34: warning: suggest braces around initialization of subobject [-Wmissing-braces]

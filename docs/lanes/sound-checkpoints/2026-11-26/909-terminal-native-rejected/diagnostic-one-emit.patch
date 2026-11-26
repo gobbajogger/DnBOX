@@ -1,0 +1,392 @@
+--- a/firmware/src/dsp/drum909.c
++++ b/firmware/src/dsp/drum909.c
+@@ -1056,6 +1056,70 @@
+ }
+ #endif
+ /* Hats, ride, crash (render_sampler) */
++#if X0X_DIAG_909_TERMINAL_GROUP
++static int d9_render_pcm(d9_smp_t *s,float *y,int n)
++{
++    if (!s->playing)
++        return 0;
++    const int m = n < s->mute ? n : s->mute;
++    s->mute -= m;
++    d9_env_anchor(&s->out);
++    const int drive = s->drive > 0.25f;
++    const float pre = 1.0f + s->drive * 0.5f;
++    const uint8_t *adpcm = s->adpcm;
++    const uint32_t len = s->len;
++    /* At the native sample rate, interpolation at fraction zero yields the
++     * exact integer sample. Keep the decoder's ordinary one-sample lookahead,
++     * including the priming nibble on a new hit. Endpoints, non-integral rates
++     * and an unaligned decoder take the general path. */
++    if (m > 0 && s->inc == 1u && !(s->incf | s->frac) &&
++        s->pos < len && (unsigned)m < len - s->pos &&
++        (s->dk == s->pos || s->dk == s->pos + 1u)) {
++        if (s->dk == s->pos)
++            s->h1 = d9_smp_decode(s, adpcm);
++        for (int i = 0; i < m; ++i) {
++            s->h0 = s->h1;
++            s->h1 = d9_smp_decode(s, adpcm);
++            const float v = (float)s->h0 * (1.0f / 32768.0f);
++            y[i] = v * d9_env_tick(&s->out);
++        }
++        s->pos += (unsigned)m;
++    } else {
++        for (int i = 0; i < m; ++i) {
++            float v = 0.0f;
++            if (s->pos < len) {
++                const uint32_t need = s->pos + 2 < len ? s->pos + 2 : len;
++                while (s->dk < need) {
++                    s->h0 = s->h1;
++                    s->h1 = d9_smp_decode(s, adpcm);
++                }
++                const int last = s->pos + 1 >= len;
++                const float a = (float)(last ? s->h1 : s->h0) * (1.0f / 32768.0f);
++                const float b = last ? 0.0f : (float)s->h1 * (1.0f / 32768.0f);
++                const float fr = (float)s->frac * (1.0f / 4294967296.0f);
++                v = a + (b - a) * fr;
++                const uint32_t f2 = s->frac + s->incf;
++                s->pos += s->inc + (f2 < s->frac);
++                s->frac = f2;
++            }
++            y[i] = v * d9_env_tick(&s->out);
++        }
++    }
++    /* Drive reads this voice's decoded output in the original sample order.
++     * Its crush history is disjoint from the decoder and its output envelope. */
++    if (drive) {
++        if (s->shape.type == 0) {
++            const float k = s->shape.k, g = s->shape.g;
++            for (int i = 0; i < m; ++i)
++                y[i] = d9_tanh_inline(k * (y[i] * pre)) * g;
++        } else {
++            for (int i = 0; i < m; ++i)
++                y[i] = d9_shape_other(&s->shape, y[i] * pre, s->crush_st);
++        }
++    }
++    return m;
++}
++#else
+ static void d9_render_smp(d9_smp_t *s, const d9_bus_t *bus, int n)
+ {
+     if (!s->playing)
+@@ -1118,6 +1182,7 @@
+     }
+     d9_emit_block(bus, m);
+ }
++#endif
+ 
+ static float *d9_dry_r;         /* the render in progress: its right side (0: mono) */
+ static float d9_pl0[DR_NUM], d9_pr0[DR_NUM];   /* each voice's pan where this block starts */
+@@ -1170,7 +1235,29 @@
+     if (n > 0) (void)d9_noise_span(d, n);
+ }
+ 
+-static void d9_render(drum909_t *d, float *dry, float *rev, float *dly, int n, uint16_t audible_tracks)
++#if X0X_DIAG_909_TERMINAL_GROUP
++/* Never-install diagnostic. */
++extern void plat_cpu2_sync(void);
++void drum909_terminal_begin(terminal_future*f,const drum909_t*d,unsigned token)
++{
++    __builtin_memcpy(f->voices,d->smp,sizeof f->voices);
++    f->ready=token; /* published by core dispatch after snapshot */
++}
++void drum909_terminal_compute(terminal_future*f,int n,unsigned token)
++{
++    for(unsigned i=0;i<4;i++)
++        if(f->voices[i].mute>0)
++            (void)d9_render_pcm(&f->voices[i],f->mono[i],n);
++    plat_cpu2_sync();
++    f->ready=token|1u;
++    plat_cpu2_sync();
++}
++#endif
++static void d9_render(drum909_t *d, float *dry, float *rev, float *dly, int n, uint16_t audible_tracks
++#if X0X_DIAG_909_TERMINAL_GROUP
++                      ,terminal_future *future,unsigned expected
++#endif
++                     )
+ {
+     d9_bus_t bus;
+     float y[256];
+@@ -1202,11 +1289,30 @@
+         d9_render_clap(&d->clap, nz, &bus, n);
+     }
+     static const uint8_t order[4] = { DR_OH, DR_RD, DR_CR, DR_CH };
++ #if X0X_DIAG_909_TERMINAL_GROUP
++    const int prepared = future && future->ready==(expected|1u);
++    if(prepared) plat_cpu2_sync(); /* acquire before private state/stem dereference */
++#endif
+     for (int k = 0; k < 4; ++k) {
+         d9_smp_t *s = &d->smp[order[k] - DR_CH];
+         if (s->mute > 0) {
+             d9_bus(&bus, d, order[k], dry, rev, dly, audible_tracks);
+-            d9_render_smp(s, &bus, n);
++#if X0X_DIAG_909_TERMINAL_GROUP
++            int count;
++            if(prepared && s->playing) {
++                count=s->mute<n?s->mute:n;
++                unsigned i=(unsigned)order[k]-DR_CH;
++                *s=future->voices[i];
++                bus.y=future->mono[i];
++            } else {
++                bus.y=y;
++                count=d9_render_pcm(s,y,n);
++            }
++            if(count) d9_emit_block(&bus,count);
++            bus.y=y;
++#else
++            d9_render_smp(s,&bus,n);
++#endif
+         }
+     }
+ }
+@@ -1214,7 +1320,11 @@
+ void drum909_render(drum909_t *d, float *dry, float *rev, float *dly, int n)
+ {
+     d9_dry_r = 0;
+-    d9_render(d, dry, rev, dly, n, 0x7FFu);
++    d9_render(d, dry, rev, dly, n, 0x7FFu
++#if X0X_DIAG_909_TERMINAL_GROUP
++                ,0,0
++#endif
++                );
+ }
+ 
+ /* All callers share pan, noise and serial voice state. The engine's 909 job
+@@ -1222,7 +1332,11 @@
+  * get the same sequence of binary32 additions, and the mono render computes
+  * that sequence once. Other callers may already have unequal bus contents. */
+ static void d9_render_st_masked(drum909_t *d, float *dry_l, float *dry_r, float *rev, float *dly,
+-                                int n, uint16_t audible_tracks, int cleared)
++                                int n, uint16_t audible_tracks, int cleared
++#if X0X_DIAG_909_TERMINAL_GROUP
++                      ,terminal_future *future,unsigned expected
++#endif
++                     )
+ {
+     int duplicate = cleared;
+     if (n > 256) n = 256;
+@@ -1239,21 +1353,40 @@
+         }
+     }
+     d9_dry_r = duplicate ? 0 : dry_r;
+-    d9_render(d, dry_l, rev, dly, n, audible_tracks);
++    d9_render(d, dry_l, rev, dly, n, audible_tracks
++#if X0X_DIAG_909_TERMINAL_GROUP
++                ,future,expected
++#endif
++                );
+     if (duplicate && n > 0)
+         __builtin_memcpy(dry_r, dry_l, (unsigned)n * sizeof *dry_l);
+     d9_dry_r = 0;
+ }
+ 
++#if X0X_DIAG_909_TERMINAL_GROUP
++void drum909_render_st_terminal(drum909_t*d,float*l,float*r,float*v,float*y,int n,uint16_t tracks,
++                                terminal_future*f,unsigned token)
++{
++    d9_render_st_masked(d,l,r,v,y,n,tracks,1,f,token);
++}
++#endif
+ void drum909_render_st_cleared(drum909_t *d, float *dry_l, float *dry_r, float *rev, float *dly,
+                                int n, uint16_t audible_tracks)
+ {
+-    d9_render_st_masked(d, dry_l, dry_r, rev, dly, n, audible_tracks,1);
++    d9_render_st_masked(d, dry_l, dry_r, rev, dly, n, audible_tracks,1
++#if X0X_DIAG_909_TERMINAL_GROUP
++                ,0,0
++#endif
++                );
+ }
+ void drum909_render_st_masked(drum909_t *d, float *dry_l, float *dry_r, float *rev, float *dly,
+                               int n, uint16_t audible_tracks)
+ {
+-    d9_render_st_masked(d, dry_l, dry_r, rev, dly, n, audible_tracks,0);
++    d9_render_st_masked(d, dry_l, dry_r, rev, dly, n, audible_tracks,0
++#if X0X_DIAG_909_TERMINAL_GROUP
++                ,0,0
++#endif
++                );
+ }
+ 
+ void drum909_render_st(drum909_t *d, float *dry_l, float *dry_r, float *rev, float *dly, int n)
+@@ -1312,3 +1445,4 @@
+  }
+  *out=v;return 1;
+ }
++
+--- a/firmware/src/dsp/drum909.h
++++ b/firmware/src/dsp/drum909.h
+@@ -119,6 +119,16 @@
+     uint8_t pots[DR_NUM + 1][DR_MAX_PARAMS];
+ };
+ typedef struct drum909 drum909_t;
++#if X0X_DIAG_909_TERMINAL_GROUP
++typedef struct {
++    d9_smp_t voices[4];
++    float mono[4][256];
++    volatile uint32_t ready;
++} terminal_future;
++void drum909_terminal_begin(terminal_future *,const drum909_t *,unsigned);
++void drum909_terminal_compute(terminal_future *,int,unsigned);
++void drum909_render_st_terminal(drum909_t *,float *,float *,float *,float *,int,uint16_t,terminal_future *,unsigned);
++#endif
+ 
+ void drum909_init(drum909_t *d);
+ void drum909_trigger(drum909_t *d, int voice, float vel);
+--- a/firmware/src/app/original_runtime.h
++++ b/firmware/src/app/original_runtime.h
+@@ -86,6 +86,9 @@
+     int8_t status;
+ } original_runtime_part;
+ typedef union {
++#if X0X_DIAG_909_TERMINAL_GROUP
++    terminal_future terminal;
++#endif
+     float metal[4][256]; /* split 808 render, before the owning bass uses this space */
+     struct { float prefix[4][256]; d9_future_t voice; } future;
+     struct { uint32_t left[256], right[256]; int16_t converted[2][256], scratch[4][256]; } chicago;
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -3012,6 +3012,14 @@
+  * metals' voices on core 0 in parallel, mid lanes and metal mix after the body
+  * is visible. No added audio latency; the sums are the same bits. */
+ extern volatile uint32_t d9_test_timeline[4];
++#if X0X_DIAG_909_TERMINAL_GROUP
++_Static_assert(sizeof(terminal_future)<=5120
++  && __alignof__(terminal_future)>=4
++  && __builtin_offsetof(terminal_future,ready)%4==0,"909 group must fit A workspace and align readiness");
++static uint32_t eng_terminal_token;           /* C0 only before dispatch/after halt */
++static volatile uint32_t eng_terminal_claim;  /* sole C1 claimant after dispatch */
++static volatile uint32_t eng_terminal_fault;  /* C0 failure reason for diagnostic */
++#endif
+ static uint8_t eng_808_split;
+ static volatile uint8_t eng_808_body;                  /* 1: BD+SD is in left808/right808 */
+ static float eng_vol;                                  /* this callback's master volume (render_sub may master) */
+@@ -3030,6 +3038,21 @@
+ /* both cores see each other's writes (fm1: csync; one core: the call is the barrier) */
+ __attribute__((weak)) void plat_cpu2_sync(void) {}
+ #define eng_sync() plat_cpu2_sync()
++#if X0X_DIAG_909_TERMINAL_GROUP
++__attribute__((noinline))
++static void terminal_check_halted(void)
++{
++    if (!eng_terminal_token)
++        return;
++    eng_sync(); /* call only after worker was held or joined */
++    uint32_t claim=eng_terminal_claim;
++    if ((claim==1u && !eng_808_body) || (claim==2u && eng_stage<3u)) {
++        eng_terminal_fault=claim;
++        eng_sync();
++        __builtin_trap(); /* never replay partially mutable original prefix/A */
++    }
++}
++#endif
+ 
+ static void job_cost(int j, uint32_t ticks, uint32_t n)
+ {
+@@ -3124,6 +3147,9 @@
+                 eng_c1_waited = 1;
+                 (void)plat_cpu2_wait();
+             }
++#if X0X_DIAG_909_TERMINAL_GROUP
++            terminal_check_halted();
++#endif
+             if (!eng_808_body)
+                 d808_body_run();
+             return eng_808_body ? 0 : 1;
+@@ -3149,7 +3175,13 @@
+             drum909_advance_noise(&d909, (int)n);       /* retain the exact restart noise/history */
+             drum909_pan_settle(&d909);                    /* silent: pans move at once, no glide */
+         } else {
+-            drum909_render_st_cleared(&d909,dry_l,dry_r,rev,dly,(int)n,
++#if X0X_DIAG_909_TERMINAL_GROUP
++            if (eng_terminal_token)
++                drum909_render_st_terminal(&d909,dry_l,dry_r,rev,dly,(int)n,
++                    smc_audible_drums(solo,PART_909),&original_workspace.terminal,eng_terminal_token);
++            else
++#endif
++                drum909_render_st_cleared(&d909,dry_l,dry_r,rev,dly,(int)n,
+                         smc_audible_drums(solo,PART_909));
+             if (d8_frame==73728u) {
+                 { uint32_t bits; __builtin_memcpy(&bits,&dry_l[8],4); d9_test_timeline[1]=bits; }
+@@ -3300,8 +3332,26 @@
+     /* Real platform: the worker keeps this frame until all its bass jobs
+      * finish after stage 1. Existing takeover cannot enter before stage 1.
+      * Host runs core1 synchronously, so it leaves this opt-in unadvertised. */
+-    if (eng_808_split && !eng_808_body)
++    if (eng_808_split && !eng_808_body) {
++#if X0X_DIAG_909_TERMINAL_GROUP
++        if(eng_terminal_token) {
++            eng_terminal_claim=1;
++            eng_sync(); /* claim before first mutable 808 prefix write */
++        }
++#endif
+         d808_body_run();
++    }
++#if X0X_DIAG_909_TERMINAL_GROUP
++    if(eng_terminal_token) {
++        const unsigned n=eng_job_arg & 255u;
++        drum909_terminal_compute(&original_workspace.terminal,(int)(n?n:256u),eng_terminal_token);
++        /* A is active: private producer is already joined on this worker,
++         * and A cannot reuse the same workspace until C0 has consumed OR
++         * taken the nonwaiting serial fallback and published stage 1. */
++        if(stage_wait(1,1)) return;
++        eng_sync(); /* acquire even if stage_wait returned via its fast path */
++    }
++#endif
+     for (j = eng_c1_next; j < JB_N; j++) {
+         if (!(eng_c1_mask & (1u << j)))
+             continue;
+@@ -3313,6 +3363,12 @@
+         if (eng_stage < (j == JB_808 ? 1u : j == JB_A ? 2u : j == JB_B ? 3u : 0u))
+             return;
+ #endif
++#if X0X_DIAG_909_TERMINAL_GROUP
++        if(eng_terminal_token && j==JB_A) {
++            eng_terminal_claim=2;
++            eng_sync(); /* claim before actual A or its live output side effects */
++        }
++#endif
+         if (!run_job(j, 1))
+             return;
+         eng_c1_next = (uint8_t)(j + 1);
+@@ -3333,6 +3389,11 @@
+         (void)plat_cpu2_wait();
+     }
+     eng_sync();
++#if X0X_DIAG_909_TERMINAL_GROUP
++    terminal_check_halted();
++    if(eng_terminal_token && eng_stage>=3u)
++        eng_c1_next=JB_N; /* completed A cannot replay, even with old next index */
++#endif
+     for (j = eng_c1_next; j < JB_N && eng_stage < s; j++) {
+         if (!(eng_c1_mask & (1u << j)))
+             continue;
+@@ -3470,11 +3531,24 @@
+     /* 808 stays on core 0 and core 1 has other work: move the BD+SD prefix */
+     eng_808_split = (uint8_t)(!(m & (1u << JB_808)) && m && drum808_active(&d808));
+     eng_808_body = (uint8_t)!eng_808_split;
++#if X0X_DIAG_909_TERMINAL_GROUP
++    eng_terminal_token=0;
++    eng_terminal_claim=0; /* previous worker already held/joined */
++#ifndef X0X_HOST
++    if (m==(1u<<JB_A) && n && n<=256 && drum909_active(&d909)) {
++        eng_terminal_token=0x80000000u | ((d8_frame&0x3fffffu)<<9) | ((n-1u)<<1);
++        drum909_terminal_begin(&original_workspace.terminal,&d909,eng_terminal_token);
++    }
++#endif
++#endif
+     eng_sync();
+     if (m && !plat_cpu2_run(core2_jobs, 0u)) {
+         eng_c1_mask = 0;                              /* one core: all of it here */
+         eng_808_split = 0;
+         eng_808_body = 1;
++#if X0X_DIAG_909_TERMINAL_GROUP
++        eng_terminal_token=0;
++#endif
+     }
+ #if X0X_DEBUG
+     eng_dbg_nsub++;

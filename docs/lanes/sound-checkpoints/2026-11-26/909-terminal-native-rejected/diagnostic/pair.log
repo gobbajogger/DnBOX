@@ -1,0 +1,33 @@
+restored-gate/fm1-live-ba83317a: OK
+restored-harness-inspect/dot-gate-harness.zip: OK
+fw/experiments/sound-hardware-v1/strict-timing/heavy.keys: OK
+out/DnBOX-0.0.27-SMK37-elite-73749f55-test.fwsc: OK
+out/DnBOX-0.0.27-SMK37-pro-73749f55-test.fwsc: OK
+remote-typed-load/tree/build/smk37-elite/x0x.elf: OK
+922 events; archive runner matches byte-for-byte
+{"finalPartABank": 2, "finalArpOn": true, "arpOctaves": 2}
+readonly owner probes: 1300:f07d444e030007000100033e0c255909f7;2060:f07d444e03110a00190006290000002b00000070020010290001002b0001007002003e0434343d05f7;2900:f07d444e03110b00190006290000002b00000070020010290001002b0001007002003e20062b2503f7;4100:f07d444e03110c00190006290000002b00000070020010290001002b0001007002003e1d1533360cf7;5650:f07d444e03110d00190006290000002b00000070020010290001002b0001007002003e39272c2e0af7;7800:f07d444e03110e00190006290000002b00000070020010290001002b0001007002003e55710d0600f7
+<diagnostic-worktree>/owner909-terminal-integration/diagnostic/dnbox-emulator-only-pair.xSco/off.elf: OK
+{"mode": "off", "claim_fields": {"eng_stage": "0x1c08600", "eng_808_body": "0x1c08305"}}
+<diagnostic-worktree>/owner909-terminal-integration/diagnostic/dnbox-emulator-only-pair.xSco/off.bin: OK
+{"sealed_firmware": true, "installed_project_owner": "synthetic S1 A/arp 2 octaves", "all_other_projected_bytes_equal": true}
+preflight elite off ELF aa2cacb33abf17bf35b287db214f82185f0bbc8a226f2daad63fb814ce66ac69, seed 190bffd3cb4f74f0cf7b796e05aa2645904c478a4980c95e9df825aaf074abe2, 922 original events
+<diagnostic-worktree>/owner909-terminal-integration/diagnostic/dnbox-emulator-only-pair.xSco/on.elf: OK
+{"mode": "on", "claim_fields": {"eng_terminal_claim": "0x1c08608", "eng_terminal_fault": "0x1c0861c", "eng_stage": "0x1c08600", "eng_808_body": "0x1c08305"}}
+<diagnostic-worktree>/owner909-terminal-integration/diagnostic/dnbox-emulator-only-pair.xSco/on.bin: OK
+{"sealed_firmware": true, "installed_project_owner": "synthetic S1 A/arp 2 octaves", "all_other_projected_bytes_equal": true}
+preflight elite on ELF 9f496f11476209a779044f9467b00133c67472670a7bddb8ab0b9bd6a3392d2d, seed b1e7d75bacb776bd9b0528ab266b11885fb0311e8241a5ba706fd1a3a16dc855, 922 original events
+<diagnostic-worktree>/owner909-terminal-integration/diagnostic/dnbox-emulator-only-pair.xSco/off.bin: OK
+{"sealed_firmware": true, "installed_project_owner": "synthetic S1 A/arp 2 octaves", "all_other_projected_bytes_equal": true}
+{"mode": "off", "whole_NOR_unchanged": null, "claim": null, "partial_fault": null, "no_erase_program_log": true, "fault_lines": []}
+190bffd3cb4f74f0cf7b796e05aa2645904c478a4980c95e9df825aaf074abe2  <diagnostic-worktree>/owner909-terminal-integration/diagnostic/dnbox-emulator-only-pair.xSco/shot/disposable.bin
+d08718b1521119b252b5cca0c5e1db6981ea25a5a0b31b6ead60dceccb3f6271  <diagnostic-worktree>/owner909-terminal-integration/diagnostic/dnbox-emulator-only-pair.xSco/shot/scene.keys
+41a6143049f27c1e850c74dcdae4024c162e952fef06507578cfb0f434c6f196  <diagnostic-worktree>/owner909-terminal-integration/diagnostic/dnbox-emulator-only-pair.xSco/shot/audio.s16le
+{"worst_us": 14288, "halves": 537, "raw_late": 86, "xruns": 86, "skipped_cycles": 0, "peak": 13157, "frames": 319488, "sealed_boot": true, "settled_owner_readbacks": 4, "meets_timing": false, "core1": {"enabled": 1, "gave_up": 0, "alive": 1, "dispatched": 4416, "finished": 4415, "bad_mailbox": 0}, "accepted": false}
+<diagnostic-worktree>/owner909-terminal-integration/diagnostic/dnbox-emulator-only-pair.xSco/on.bin: OK
+{"sealed_firmware": true, "installed_project_owner": "synthetic S1 A/arp 2 octaves", "all_other_projected_bytes_equal": true}
+{"mode": "on", "whole_NOR_unchanged": null, "claim": 2, "partial_fault": 0, "recent_terminal_token": 2249916670, "recent_worker_mask": 4, "recent_mix_stage": 2, "partial_fault_meaning": "no latched partial owner failure in final RAM", "no_erase_program_log": true, "fault_lines": []}
+b1e7d75bacb776bd9b0528ab266b11885fb0311e8241a5ba706fd1a3a16dc855  <diagnostic-worktree>/owner909-terminal-integration/diagnostic/dnbox-emulator-only-pair.xSco/shot/disposable.bin
+d08718b1521119b252b5cca0c5e1db6981ea25a5a0b31b6ead60dceccb3f6271  <diagnostic-worktree>/owner909-terminal-integration/diagnostic/dnbox-emulator-only-pair.xSco/shot/scene.keys
+f7211810a6596518a8563acc8adc18b5499c6d479e3929f77c90bd95ba7859a6  <diagnostic-worktree>/owner909-terminal-integration/diagnostic/dnbox-emulator-only-pair.xSco/shot/audio.s16le
+{"worst_us": 17339, "halves": 390, "raw_late": 232, "xruns": 232, "skipped_cycles": 0, "peak": 13137, "frames": 319488, "sealed_boot": true, "settled_owner_readbacks": 4, "meets_timing": false, "core1": {"enabled": 1, "gave_up": 0, "alive": 1, "dispatched": 3213, "finished": 3212, "bad_mailbox": 0}, "accepted": false}

@@ -1,0 +1,5 @@
+patching file firmware/src/dsp/drum909.c
+patching file firmware/src/dsp/drum909.h
+patching file firmware/src/app/original_runtime.h
+patching file firmware/src/app/engine.c
+80 real moved 909 + 808-prefix owner-state/bus spans; 80 active A scratch reuses after stage1; 40 proven nonwaiting private late (20 paused after real private render before ready release), 12 actual guard cases including completed/no replay
