@@ -46,3 +46,11 @@ continuation. That continuation is not a claim of indefinite tail
 stability. Authenticated replay requires the same existing private
 receiver benches; auth-scalar.py contains the exact scoped replay
 recipe, not compiled candidate C or target evidence.
+
+An optional aligned-storage variant (run-aligned.sh) packs four Q24
+words in three named aligned integers and updates each independent
+group together, with no unaligned or crossing accesses. It reproduces
+the earlier contiguous three-byte implementation on all 1,048,576
+signed synthetic output samples. It is a source-only option if the
+current independently benchmarked shared helper later fails the fit;
+no native savings claimed and it is not required by the layout proof.
