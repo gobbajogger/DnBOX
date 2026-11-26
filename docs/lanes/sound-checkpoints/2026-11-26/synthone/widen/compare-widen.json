@@ -1,0 +1,77 @@
+{
+  "scope": "exact trace-original 2205-frame postmaster right-channel delay compared independently to original output; compact trial only preexisting full-rate source room return",
+  "verification": {
+    "original_bucket_trace_matches_pcm_exactly": true,
+    "compact_left_unchanged": true,
+    "source_delay_at_44100": 2205,
+    "compact_old_widen": "three short h16 allpasses 31,73,131"
+  },
+  "windows": {
+    "whole": {
+      "allpass": {
+        "level_db": [
+          -0.0003951075277347138,
+          -0.0016056081614804355
+        ],
+        "raw_dbr": [
+          -35.30172507531625,
+          3.4488206100487067
+        ]
+      },
+      "source_delay": {
+        "level_db": [
+          -0.0003951075277347138,
+          0.0008814862493591801
+        ],
+        "raw_dbr": [
+          -35.30172507531625,
+          -32.2809083698623
+        ]
+      }
+    },
+    "release": {
+      "allpass": {
+        "level_db": [
+          0.0035969280994000022,
+          -1.3981181735782853
+        ],
+        "raw_dbr": [
+          -43.18866862302028,
+          3.454124951133795
+        ]
+      },
+      "source_delay": {
+        "level_db": [
+          0.0035969280994000022,
+          -0.003907215969061096
+        ],
+        "raw_dbr": [
+          -43.18866862302028,
+          -41.81160193957747
+        ]
+      }
+    },
+    "late": {
+      "allpass": {
+        "level_db": [
+          0.008745442663257613,
+          -1.7940920453629574
+        ],
+        "raw_dbr": [
+          -42.554040035826816,
+          3.261388847588173
+        ]
+      },
+      "source_delay": {
+        "level_db": [
+          0.008745442663257613,
+          0.007399108733082679
+        ],
+        "raw_dbr": [
+          -42.554040035826816,
+          -42.522403573886066
+        ]
+      }
+    }
+  }
+}

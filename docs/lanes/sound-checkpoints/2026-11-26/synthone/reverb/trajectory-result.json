@@ -1,0 +1,160 @@
+{
+  "matched_input_frames": 264728,
+  "fixed_codec_topology_bit_exact": true,
+  "extra_decode_bytes": 512,
+  "trajectory_all_lags_in_bounds": [
+    7.152740478515625,
+    25.78118896484375
+  ],
+  "sha256": {
+    "original-wet.tap": "09d3fcf1ed1c92bc441b3c1c37dcda796c99ec3b6b08b6e8769205cd1e079716",
+    "compact-matched.tap": "694c6c84cfbb3c881fd606efa05b88e000fc6cdff382ab3bc8e286cd19e0916a",
+    "compact-trajectory-fixed.tap": "694c6c84cfbb3c881fd606efa05b88e000fc6cdff382ab3bc8e286cd19e0916a",
+    "compact-trajectory-modulated.tap": "84cb541921ef6f8fe1121f9d1a345c6131346102d7ef6e738a607d6b4b13e5a6",
+    "trajectory.raw": "66a6d9c2fea5d6329165f240f24be8fbe46211ab67338a1111c6af6cc53a7aaf"
+  },
+  "room_return": {
+    "fixed": {
+      "absolute": {
+        "whole_dB": [
+          -0.2680000066757202,
+          -0.08799999952316284
+        ],
+        "note_body_dB": -0.257,
+        "release_1p5s_dB": -0.445,
+        "last_1s_dB": 0.8,
+        "spectral_distance_db": [
+          5.999,
+          6.219
+        ],
+        "raw_residual_dB_rel_reference": 1.906
+      },
+      "onset": {
+        "level_db": [
+          7.927300481039461,
+          7.949686375260436
+        ],
+        "raw_db": [
+          3.800919845536048,
+          3.7175996193639547
+        ]
+      },
+      "early": {
+        "level_db": [
+          -0.6188909428137013,
+          -1.2872344165907446
+        ],
+        "raw_db": [
+          -0.010357844016654141,
+          1.3333235757373616
+        ]
+      },
+      "mid": {
+        "level_db": [
+          -0.22264204189876627,
+          -0.17802953774493338
+        ],
+        "raw_db": [
+          3.2343990581210798,
+          3.839508851298138
+        ]
+      },
+      "last_second": {
+        "level_db": [
+          0.35488360133910074,
+          1.2145710276826096
+        ],
+        "raw_db": [
+          3.1580427763156047,
+          4.218739544525977
+        ]
+      }
+    },
+    "modulated": {
+      "absolute": {
+        "whole_dB": [
+          -0.24400000274181366,
+          -0.2619999945163727
+        ],
+        "note_body_dB": -0.204,
+        "release_1p5s_dB": -1.014,
+        "last_1s_dB": -0.39,
+        "spectral_distance_db": [
+          6.859,
+          6.761
+        ],
+        "raw_residual_dB_rel_reference": 3.109
+      },
+      "onset": {
+        "level_db": [
+          7.553119438108078,
+          8.2071710987735
+        ],
+        "raw_db": [
+          3.1874214793493088,
+          4.1406457430198405
+        ]
+      },
+      "early": {
+        "level_db": [
+          -1.3294028827735527,
+          -2.350824832715702
+        ],
+        "raw_db": [
+          2.3756522621351515,
+          1.9071906934746723
+        ]
+      },
+      "mid": {
+        "level_db": [
+          -0.6423480515202583,
+          -0.31901057452569825
+        ],
+        "raw_db": [
+          3.8777389542766176,
+          3.545113806876868
+        ]
+      },
+      "last_second": {
+        "level_db": [
+          0.12388055508835433,
+          -0.9896388794803903
+        ],
+        "raw_db": [
+          2.704077255249403,
+          3.056865003373828
+        ]
+      }
+    }
+  },
+  "whole_output": {
+    "fixed": {
+      "whole_dB": [
+        -0.49399998784065247,
+        0.2980000078678131
+      ],
+      "note_body_dB": -0.185,
+      "release_1p5s_dB": 0.162,
+      "last_1s_dB": -0.231,
+      "spectral_distance_db": [
+        2.549,
+        2.768
+      ],
+      "raw_residual_dB_rel_reference": 1.253
+    },
+    "modulated": {
+      "whole_dB": [
+        0.40700000524520874,
+        0.2800000011920929
+      ],
+      "note_body_dB": 0.39,
+      "release_1p5s_dB": 0.016,
+      "last_1s_dB": -1.417,
+      "spectral_distance_db": [
+        2.339,
+        2.272
+      ],
+      "raw_residual_dB_rel_reference": 1.247
+    }
+  }
+}

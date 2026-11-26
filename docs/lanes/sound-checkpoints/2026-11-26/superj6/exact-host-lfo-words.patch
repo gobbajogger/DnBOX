@@ -1,0 +1,38 @@
+--- a/juno6.h
++++ b/juno6.h
+@@ -105,6 +105,10 @@
+  uint8_t lfo1_aux_route,lfo1_aux_base;
+  uint32_t aux_lfo3_age,aux_delay_frames,aux_lfo_until[2],aux_lfo3_entropy;
+  float aux_lfo_delta[2];
++#ifdef DNBX_HOST_MAIN_SOURCE_ORACLE
++ float host_lfo_amount[3],host_lfo_base[5];
++ unsigned host_lfo_words_valid;
++#endif
+  float aux_servo[6];
+  uint8_t aux_servo_mask;
+  uint16_t aux_lfo_cursor;
+--- a/juno6_factory.inc
++++ b/juno6_factory.inc
+@@ -1346,6 +1346,9 @@
+ {
+ #if X0X_SJ6_AUX_LFO_NATIVE
+     if(s->aux_servo_mask&(8u<<loop))return s->aux_servo[3u+loop];
++#ifdef DNBX_HOST_MAIN_SOURCE_ORACLE
++    if(s->host_lfo_words_valid&&loop>0u&&loop<3u)return s->host_lfo_amount[loop];
++#endif
+     if(loop==2u)return s->aux_lfo[2]*(1.f/127.f);
+ #endif
+     if(loop)return (s->lfo2_pwm&SJ6_LFO2_PWM_DEPTH_MASK)*(1.f/127.f);
+@@ -1619,7 +1622,11 @@
+                 unsigned route=juno6_aux_fx_route(s,j);
+                 if(!route || amount==0.f)continue;
+                 const unsigned base=k?s->aux_lfo[8u+j]:s->lfo1_aux_base;
+-                const float raw=fm_clampf(base*(1.f/127.f)+*delta*amount,0.f,1.f);
++                float base_word=base*(1.f/127.f);
++#ifdef DNBX_HOST_MAIN_SOURCE_ORACLE
++                if(s->host_lfo_words_valid&&k)base_word=s->host_lfo_base[j];
++#endif
++                const float raw=fm_clampf(base_word+*delta*amount,0.f,1.f);
+                 const int target=sj6_aux_destination_id(route);
+                 if(s->aux_fx_schedule && sj6_aux_fx_supported(target)) {
+                     fx_words[j]=(uint8_t)(raw*127.f+.5f)+1u;

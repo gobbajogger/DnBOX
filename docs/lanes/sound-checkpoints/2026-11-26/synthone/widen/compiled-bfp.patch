@@ -1,0 +1,49 @@
+--- a/dsp/s1c/s1c.c
++++ b/dsp/s1c/s1c.c
+@@ -917,6 +917,9 @@
+     int n, off = 0;
+ #endif
+     memset(s, 0, sizeof *s);
++#if defined(X0X_HOST) && defined(S1_WIDEN_ORACLE)
++    s1_widen_bfp8_clear(&s->widen_bfp);
++#endif
+ #if S1C_FAST
+     s1c_nsm = 0; for (i = 0; i < 150; i++) if (smoothed((unsigned)i)) s1c_sm[s1c_nsm++] = (uint8_t)i;
+ #endif
+@@ -1487,16 +1490,7 @@
+         /* Source Soundpipe delay: 50 ms, feedback zero, after master. */
+ #if defined(X0X_HOST) && defined(S1_WIDEN_ORACLE)
+         assert(s->sr==44100.f);
+-        unsigned w=s->widen_oracle_pos;
+-        float d=s->widen_oracle_ring[w];
+-        s->widen_oracle_ring[w]=R;
+-        s->widen_oracle_pos=w+1u==2205u?0u:w+1u;
+-        const float a=P(WIDEN);
+-        const float tap[]={L,R,a,d};
+-        static FILE *wtrace;
+-        if(!wtrace && getenv("WIDEN_TRACE"))wtrace=fopen(getenv("WIDEN_TRACE"),"wb");
+-        if(wtrace && fwrite(tap,sizeof(float),4,wtrace)!=4)abort();
+-        R=a*d+(1.f-a)*R;
++        R=s1_widen_bfp8_next(&s->widen_bfp,R,P(WIDEN));
+ #elif WAP_L0
+         R = s1u_widen_run(&s->wid, R, P(WIDEN));
+ #else
+--- a/dsp/s1c/s1c.h
++++ b/dsp/s1c/s1c.h
+@@ -1,3 +1,6 @@
++#if defined(X0X_HOST) && defined(S1_WIDEN_ORACLE)
++#include "widen_bfp.h"
++#endif
+ /* SPDX-License-Identifier: GPL-3.0-only */
+ /* Compact Synth One-style engine (written from scratch for DnBOX; judged by A/B only). */
+ #ifndef S1C_H
+@@ -187,8 +190,7 @@
+ #endif
+     int32_t wpos, wlen;
+ #if defined(X0X_HOST) && defined(S1_WIDEN_ORACLE)
+-    unsigned widen_oracle_pos;
+-    float widen_oracle_ring[2205];
++    s1_widen_bfp8 widen_bfp;
+ #endif
+ 
+ #if WAP_L0 && S1C_EXT

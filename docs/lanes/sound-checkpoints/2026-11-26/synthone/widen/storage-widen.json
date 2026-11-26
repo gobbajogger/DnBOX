@@ -1,0 +1,233 @@
+{
+  "f32": {
+    "history_bytes": 8820,
+    "whole": {
+      "vs_original_dbr": -32.28090836985905,
+      "new_noise_vs_f32_dbr": -633.4833801283725
+    },
+    "late": {
+      "vs_original_dbr": -42.52240357388548,
+      "new_noise_vs_f32_dbr": -613.1841035627584
+    }
+  },
+  "f16": {
+    "history_bytes": 4410,
+    "whole": {
+      "vs_original_dbr": -32.28058823712101,
+      "new_noise_vs_f32_dbr": -73.71577680575902
+    },
+    "late": {
+      "vs_original_dbr": -42.515709484780075,
+      "new_noise_vs_f32_dbr": -73.52993643763867
+    }
+  },
+  "f12": {
+    "history_bytes": 3308,
+    "whole": {
+      "vs_original_dbr": -32.20144316074291,
+      "new_noise_vs_f32_dbr": -49.584615548059354
+    },
+    "late": {
+      "vs_original_dbr": -41.724243288110216,
+      "new_noise_vs_f32_dbr": -49.484527970706665
+    }
+  },
+  "f10": {
+    "history_bytes": 2757,
+    "whole": {
+      "vs_original_dbr": -31.15337914250525,
+      "new_noise_vs_f32_dbr": -37.61092988115663
+    },
+    "late": {
+      "vs_original_dbr": -36.19540360030419,
+      "new_noise_vs_f32_dbr": -37.38834693374802
+    }
+  },
+  "f8": {
+    "history_bytes": 2205,
+    "whole": {
+      "vs_original_dbr": -24.783221073342368,
+      "new_noise_vs_f32_dbr": -25.62585606070598
+    },
+    "late": {
+      "vs_original_dbr": -25.209028595316397,
+      "new_noise_vs_f32_dbr": -25.276362009361826
+    }
+  },
+  "mulaw8": {
+    "history_bytes": 2205,
+    "whole": {
+      "vs_original_dbr": -31.18914254314426,
+      "new_noise_vs_f32_dbr": -37.75403651276478
+    },
+    "late": {
+      "vs_original_dbr": -35.95826693855199,
+      "new_noise_vs_f32_dbr": -37.07285651020093
+    }
+  },
+  "bfp6x8": {
+    "history_bytes": 1932,
+    "whole": {
+      "vs_original_dbr": -30.782310594785738,
+      "new_noise_vs_f32_dbr": -36.14528432109074
+    },
+    "late": {
+      "vs_original_dbr": -34.67160652458643,
+      "new_noise_vs_f32_dbr": -35.42857092789514
+    }
+  },
+  "bfp6x16": {
+    "history_bytes": 1794,
+    "whole": {
+      "vs_original_dbr": -30.463278758518108,
+      "new_noise_vs_f32_dbr": -35.12834272944669
+    },
+    "late": {
+      "vs_original_dbr": -33.65447984544773,
+      "new_noise_vs_f32_dbr": -34.25322809884032
+    }
+  },
+  "bfp6x32": {
+    "history_bytes": 1725,
+    "whole": {
+      "vs_original_dbr": -30.024064891086848,
+      "new_noise_vs_f32_dbr": -33.932203282769166
+    },
+    "late": {
+      "vs_original_dbr": -32.43396284440783,
+      "new_noise_vs_f32_dbr": -32.88172227125533
+    }
+  },
+  "bfp7x8": {
+    "history_bytes": 2208,
+    "whole": {
+      "vs_original_dbr": -31.849282879539345,
+      "new_noise_vs_f32_dbr": -42.1580623599678
+    },
+    "late": {
+      "vs_original_dbr": -38.8988388732314,
+      "new_noise_vs_f32_dbr": -41.42344778476389
+    }
+  },
+  "bfp7x16": {
+    "history_bytes": 2070,
+    "whole": {
+      "vs_original_dbr": -31.746115357891526,
+      "new_noise_vs_f32_dbr": -41.16539618561198
+    },
+    "late": {
+      "vs_original_dbr": -38.1318435662186,
+      "new_noise_vs_f32_dbr": -40.220450033418295
+    }
+  },
+  "bfp7x32": {
+    "history_bytes": 2001,
+    "whole": {
+      "vs_original_dbr": -31.59231719175823,
+      "new_noise_vs_f32_dbr": -39.964794341168755
+    },
+    "late": {
+      "vs_original_dbr": -37.29524994555619,
+      "new_noise_vs_f32_dbr": -38.97073058961469
+    }
+  },
+  "bfp8x8": {
+    "history_bytes": 2484,
+    "whole": {
+      "vs_original_dbr": -32.17068488652281,
+      "new_noise_vs_f32_dbr": -48.191536287161526
+    },
+    "late": {
+      "vs_original_dbr": -41.348190817315704,
+      "new_noise_vs_f32_dbr": -47.52295778778726
+    }
+  },
+  "bfp8x16": {
+    "history_bytes": 2346,
+    "whole": {
+      "vs_original_dbr": -32.14108185138549,
+      "new_noise_vs_f32_dbr": -47.18039590551683
+    },
+    "late": {
+      "vs_original_dbr": -41.01682950029583,
+      "new_noise_vs_f32_dbr": -46.321959025034865
+    }
+  },
+  "bfp8x32": {
+    "history_bytes": 2277,
+    "whole": {
+      "vs_original_dbr": -32.10052148456014,
+      "new_noise_vs_f32_dbr": -45.990071444222124
+    },
+    "late": {
+      "vs_original_dbr": -40.60167229950157,
+      "new_noise_vs_f32_dbr": -44.953043657289804
+    }
+  },
+  "bfp9x8": {
+    "history_bytes": 2760,
+    "whole": {
+      "vs_original_dbr": -32.2523388366835,
+      "new_noise_vs_f32_dbr": -54.207602049447004
+    },
+    "late": {
+      "vs_original_dbr": -42.160098266303194,
+      "new_noise_vs_f32_dbr": -53.51003225034469
+    }
+  },
+  "bfp9x16": {
+    "history_bytes": 2622,
+    "whole": {
+      "vs_original_dbr": -32.24510693343694,
+      "new_noise_vs_f32_dbr": -53.20734634706361
+    },
+    "late": {
+      "vs_original_dbr": -42.087033303568866,
+      "new_noise_vs_f32_dbr": -52.34627194283391
+    }
+  },
+  "bfp9x32": {
+    "history_bytes": 2553,
+    "whole": {
+      "vs_original_dbr": -32.23286402718209,
+      "new_noise_vs_f32_dbr": -52.01237963290295
+    },
+    "late": {
+      "vs_original_dbr": -41.95231211036003,
+      "new_noise_vs_f32_dbr": -51.0241479698023
+    }
+  },
+  "bfp10x8": {
+    "history_bytes": 3036,
+    "whole": {
+      "vs_original_dbr": -32.27421302403603,
+      "new_noise_vs_f32_dbr": -60.246637154289495
+    },
+    "late": {
+      "vs_original_dbr": -42.43593126422706,
+      "new_noise_vs_f32_dbr": -59.498560121836384
+    }
+  },
+  "bfp10x16": {
+    "history_bytes": 2898,
+    "whole": {
+      "vs_original_dbr": -32.272654252369975,
+      "new_noise_vs_f32_dbr": -59.24302627536732
+    },
+    "late": {
+      "vs_original_dbr": -42.42459457049982,
+      "new_noise_vs_f32_dbr": -58.2543758100713
+    }
+  },
+  "bfp10x32": {
+    "history_bytes": 2829,
+    "whole": {
+      "vs_original_dbr": -32.26978021793315,
+      "new_noise_vs_f32_dbr": -58.04657595198571
+    },
+    "late": {
+      "vs_original_dbr": -42.37832008793067,
+      "new_noise_vs_f32_dbr": -56.9508173935792
+    }
+  }
+}

@@ -1,0 +1,1073 @@
+{
+  "scope": "Authentic original-source graph on both sides; candidate changes only fed delay engine, not restored compact voices or device",
+  "cases": [
+    {
+      "stock_row": 1,
+      "name": "Dat Bomb Bass, Yo",
+      "arms": {
+        "original": {
+          "hash": "29355c10a128c289d018059a8986e48ea5783812e3b376a79cdbd8a3dadfb5b6",
+          "receipt": [
+            "original 1 wet 264600 frames, delay on 0 mix 0.194966, reverb on 0 mix 0"
+          ],
+          "metrics": {
+            "whole_dB": [
+              0.0,
+              0.0
+            ],
+            "note_body_dB": 0.0,
+            "release_1p5s_dB": 0.0,
+            "last_1s_dB": 0.0,
+            "spectral_distance_db": [
+              0.0,
+              0.0
+            ],
+            "raw_residual_dB_rel_reference": -302.041
+          }
+        },
+        "shape0": {
+          "hash": "29355c10a128c289d018059a8986e48ea5783812e3b376a79cdbd8a3dadfb5b6",
+          "receipt": [
+            "original 1 wet 264600 frames, delay on 0 mix 0.194966, reverb on 0 mix 0",
+            "scope portable original-source delay isolated policy mode=ADPCM bits=4 stride=2 cadence=22050.000000 shape=0 max_owned_t=0.43482992 bytes=25704 taps_out=0 invalid=0 rejected=0 accepted=264598"
+          ],
+          "metrics": {
+            "whole_dB": [
+              0.0,
+              0.0
+            ],
+            "note_body_dB": 0.0,
+            "release_1p5s_dB": 0.0,
+            "last_1s_dB": 0.0,
+            "spectral_distance_db": [
+              0.0,
+              0.0
+            ],
+            "raw_residual_dB_rel_reference": -302.041
+          }
+        },
+        "shape1024": {
+          "hash": "29355c10a128c289d018059a8986e48ea5783812e3b376a79cdbd8a3dadfb5b6",
+          "receipt": [
+            "original 1 wet 264600 frames, delay on 0 mix 0.194966, reverb on 0 mix 0",
+            "scope portable original-source delay isolated policy mode=ADPCM bits=6 stride=2 cadence=22050.000000 shape=1024 max_owned_t=0.29287982 bytes=25600 taps_out=0 invalid=0 rejected=0 accepted=264598"
+          ],
+          "metrics": {
+            "whole_dB": [
+              0.0,
+              0.0
+            ],
+            "note_body_dB": 0.0,
+            "release_1p5s_dB": 0.0,
+            "last_1s_dB": 0.0,
+            "spectral_distance_db": [
+              0.0,
+              0.0
+            ],
+            "raw_residual_dB_rel_reference": -302.041
+          }
+        },
+        "shape1152": {
+          "hash": "29355c10a128c289d018059a8986e48ea5783812e3b376a79cdbd8a3dadfb5b6",
+          "receipt": [
+            "original 1 wet 264600 frames, delay on 0 mix 0.194966, reverb on 0 mix 0",
+            "scope portable original-source delay isolated policy mode=ADPCM bits=6 stride=2 cadence=22050.000000 shape=1152 max_owned_t=0.29287982 bytes=25600 taps_out=0 invalid=0 rejected=0 accepted=264598"
+          ],
+          "metrics": {
+            "whole_dB": [
+              0.0,
+              0.0
+            ],
+            "note_body_dB": 0.0,
+            "release_1p5s_dB": 0.0,
+            "last_1s_dB": 0.0,
+            "spectral_distance_db": [
+              0.0,
+              0.0
+            ],
+            "raw_residual_dB_rel_reference": -302.041
+          }
+        }
+      }
+    },
+    {
+      "stock_row": 62,
+      "name": "Irresistible Forces Pad",
+      "arms": {
+        "original": {
+          "hash": "513256ed0b89958c0accd522461ba25c808f75451b12cafcc9fb898ffa76a881",
+          "receipt": [
+            "original 62 wet 264600 frames, delay on 0.99981 mix 0.768108, reverb on 0.99981 mix 0.147469"
+          ],
+          "metrics": {
+            "whole_dB": [
+              0.0,
+              0.0
+            ],
+            "note_body_dB": 0.0,
+            "release_1p5s_dB": 0.0,
+            "last_1s_dB": 0.0,
+            "spectral_distance_db": [
+              0.0,
+              0.0
+            ],
+            "raw_residual_dB_rel_reference": -308.364
+          }
+        },
+        "shape0": {
+          "hash": "b5514af386c3325fa6ea9b796e99104029ee659d3a123f402d9534a858497990",
+          "receipt": [
+            "original 62 wet 264600 frames, delay on 0.99981 mix 0.768108, reverb on 0.99981 mix 0.147469",
+            "scope portable original-source delay isolated policy mode=ADPCM bits=4 stride=1 cadence=44100.000000 shape=0 max_owned_t=0.21741496 bytes=25704 taps_out=0 invalid=0 rejected=0 accepted=264598"
+          ],
+          "metrics": {
+            "whole_dB": [
+              -0.008,
+              0.017
+            ],
+            "note_body_dB": 0.012,
+            "release_1p5s_dB": 0.016,
+            "last_1s_dB": 0.017,
+            "spectral_distance_db": [
+              0.98,
+              1.782
+            ],
+            "raw_residual_dB_rel_reference": -27.359
+          }
+        },
+        "shape1024": {
+          "hash": "b5514af386c3325fa6ea9b796e99104029ee659d3a123f402d9534a858497990",
+          "receipt": [
+            "original 62 wet 264600 frames, delay on 0.99981 mix 0.768108, reverb on 0.99981 mix 0.147469",
+            "scope portable original-source delay isolated policy mode=ADPCM bits=4 stride=1 cadence=44100.000000 shape=1024 max_owned_t=0.21741496 bytes=25704 taps_out=0 invalid=0 rejected=0 accepted=264598"
+          ],
+          "metrics": {
+            "whole_dB": [
+              -0.008,
+              0.017
+            ],
+            "note_body_dB": 0.012,
+            "release_1p5s_dB": 0.016,
+            "last_1s_dB": 0.017,
+            "spectral_distance_db": [
+              0.98,
+              1.782
+            ],
+            "raw_residual_dB_rel_reference": -27.359
+          }
+        },
+        "shape1152": {
+          "hash": "30fafb7e17cce72c5e552ab6c11444afee3920c1a3d35242346414f407b5f5d2",
+          "receipt": [
+            "original 62 wet 264600 frames, delay on 0.99981 mix 0.768108, reverb on 0.99981 mix 0.147469",
+            "scope portable original-source delay isolated policy mode=ADPCM bits=4 stride=1 cadence=44100.000000 shape=1152 max_owned_t=0.21741496 bytes=25704 taps_out=0 invalid=0 rejected=0 accepted=264598"
+          ],
+          "metrics": {
+            "whole_dB": [
+              0.035,
+              0.07
+            ],
+            "note_body_dB": 0.067,
+            "release_1p5s_dB": 0.067,
+            "last_1s_dB": 0.071,
+            "spectral_distance_db": [
+              1.181,
+              1.741
+            ],
+            "raw_residual_dB_rel_reference": -26.448
+          }
+        }
+      }
+    },
+    {
+      "stock_row": 113,
+      "name": "Dark Theater Organ",
+      "arms": {
+        "original": {
+          "hash": "45338ec7ae208d8bcd615ec33fa1771eebbcbdc00ecc412f19c6a7b80589276b",
+          "receipt": [
+            "original 113 wet 264600 frames, delay on 0 mix 0.219331, reverb on 0.99981 mix 0.227484"
+          ],
+          "metrics": {
+            "whole_dB": [
+              0.0,
+              0.0
+            ],
+            "note_body_dB": 0.0,
+            "release_1p5s_dB": 0.0,
+            "last_1s_dB": 0.0,
+            "spectral_distance_db": [
+              0.0,
+              0.0
+            ],
+            "raw_residual_dB_rel_reference": -299.588
+          }
+        },
+        "shape0": {
+          "hash": "45338ec7ae208d8bcd615ec33fa1771eebbcbdc00ecc412f19c6a7b80589276b",
+          "receipt": [
+            "original 113 wet 264600 frames, delay on 0 mix 0.219331, reverb on 0.99981 mix 0.227484",
+            "scope portable original-source delay isolated policy mode=ADPCM bits=4 stride=1 cadence=44100.000000 shape=0 max_owned_t=0.21741496 bytes=25704 taps_out=0 invalid=0 rejected=0 accepted=264598"
+          ],
+          "metrics": {
+            "whole_dB": [
+              0.0,
+              0.0
+            ],
+            "note_body_dB": 0.0,
+            "release_1p5s_dB": 0.0,
+            "last_1s_dB": 0.0,
+            "spectral_distance_db": [
+              0.0,
+              0.0
+            ],
+            "raw_residual_dB_rel_reference": -299.588
+          }
+        },
+        "shape1024": {
+          "hash": "45338ec7ae208d8bcd615ec33fa1771eebbcbdc00ecc412f19c6a7b80589276b",
+          "receipt": [
+            "original 113 wet 264600 frames, delay on 0 mix 0.219331, reverb on 0.99981 mix 0.227484",
+            "scope portable original-source delay isolated policy mode=ADPCM bits=5 stride=1 cadence=44100.000000 shape=1024 max_owned_t=0.17546485 bytes=25704 taps_out=0 invalid=0 rejected=0 accepted=264598"
+          ],
+          "metrics": {
+            "whole_dB": [
+              0.0,
+              0.0
+            ],
+            "note_body_dB": 0.0,
+            "release_1p5s_dB": 0.0,
+            "last_1s_dB": 0.0,
+            "spectral_distance_db": [
+              0.0,
+              0.0
+            ],
+            "raw_residual_dB_rel_reference": -299.588
+          }
+        },
+        "shape1152": {
+          "hash": "45338ec7ae208d8bcd615ec33fa1771eebbcbdc00ecc412f19c6a7b80589276b",
+          "receipt": [
+            "original 113 wet 264600 frames, delay on 0 mix 0.219331, reverb on 0.99981 mix 0.227484",
+            "scope portable original-source delay isolated policy mode=ADPCM bits=5 stride=1 cadence=44100.000000 shape=1152 max_owned_t=0.17546485 bytes=25704 taps_out=0 invalid=0 rejected=0 accepted=264598"
+          ],
+          "metrics": {
+            "whole_dB": [
+              0.0,
+              0.0
+            ],
+            "note_body_dB": 0.0,
+            "release_1p5s_dB": 0.0,
+            "last_1s_dB": 0.0,
+            "spectral_distance_db": [
+              0.0,
+              0.0
+            ],
+            "raw_residual_dB_rel_reference": -299.588
+          }
+        }
+      }
+    },
+    {
+      "stock_row": 128,
+      "name": "Sahara Future Lead",
+      "arms": {
+        "original": {
+          "hash": "c6356817c7c904b2b7ff687839869a6b9c8040265b1f3ebdc4d7c64a99feac2c",
+          "receipt": [
+            "original 128 wet 264600 frames, delay on 0.99981 mix 0.21497, reverb on 0.99981 mix 0.197431"
+          ],
+          "metrics": {
+            "whole_dB": [
+              0.0,
+              0.0
+            ],
+            "note_body_dB": 0.0,
+            "release_1p5s_dB": 0.0,
+            "last_1s_dB": 0.0,
+            "spectral_distance_db": [
+              0.0,
+              0.0
+            ],
+            "raw_residual_dB_rel_reference": -307.036
+          }
+        },
+        "shape0": {
+          "hash": "4b7436c156dfd999248d0dfd57fd18f60925e08e02a602b1a0688b6835a594ce",
+          "receipt": [
+            "original 128 wet 264600 frames, delay on 0.99981 mix 0.21497, reverb on 0.99981 mix 0.197431",
+            "scope portable original-source delay isolated policy mode=ADPCM bits=4 stride=1 cadence=44100.000000 shape=0 max_owned_t=0.21741496 bytes=25704 taps_out=0 invalid=0 rejected=0 accepted=264598"
+          ],
+          "metrics": {
+            "whole_dB": [
+              0.003,
+              0.007
+            ],
+            "note_body_dB": -0.002,
+            "release_1p5s_dB": 0.062,
+            "last_1s_dB": 0.047,
+            "spectral_distance_db": [
+              0.12,
+              0.158
+            ],
+            "raw_residual_dB_rel_reference": -27.402
+          }
+        },
+        "shape1024": {
+          "hash": "3159d74760a970cf76058afcbe54152ad49b40353360f1dc8cf94385ce0f5e02",
+          "receipt": [
+            "original 128 wet 264600 frames, delay on 0.99981 mix 0.21497, reverb on 0.99981 mix 0.197431",
+            "scope portable original-source delay isolated policy mode=ADPCM bits=6 stride=1 cadence=44100.000000 shape=1024 max_owned_t=0.14643991 bytes=25600 taps_out=0 invalid=0 rejected=0 accepted=264598"
+          ],
+          "metrics": {
+            "whole_dB": [
+              0.003,
+              0.008
+            ],
+            "note_body_dB": -0.002,
+            "release_1p5s_dB": 0.065,
+            "last_1s_dB": 0.045,
+            "spectral_distance_db": [
+              0.122,
+              0.162
+            ],
+            "raw_residual_dB_rel_reference": -27.162
+          }
+        },
+        "shape1152": {
+          "hash": "0d95026b051d9a2c0af41b2d5800bf3c1fcf85281d0d55d01e8cab82fcdb5d0a",
+          "receipt": [
+            "original 128 wet 264600 frames, delay on 0.99981 mix 0.21497, reverb on 0.99981 mix 0.197431",
+            "scope portable original-source delay isolated policy mode=ADPCM bits=6 stride=1 cadence=44100.000000 shape=1152 max_owned_t=0.14643991 bytes=25600 taps_out=0 invalid=0 rejected=0 accepted=264598"
+          ],
+          "metrics": {
+            "whole_dB": [
+              -0.002,
+              0.003
+            ],
+            "note_body_dB": -0.003,
+            "release_1p5s_dB": 0.031,
+            "last_1s_dB": 0.019,
+            "spectral_distance_db": [
+              0.159,
+              0.187
+            ],
+            "raw_residual_dB_rel_reference": -26.279
+          }
+        }
+      }
+    },
+    {
+      "stock_row": 154,
+      "name": "BB Stunned By Splendor Drone",
+      "arms": {
+        "original": {
+          "hash": "e52a6412cd4802c1ffe2bf72f4db9ae924e0668aa915935879cfcc4b8d1205ec",
+          "receipt": [
+            "original 154 wet 264600 frames, delay on 0.99981 mix 0.99981, reverb on 0.99981 mix 0.744975"
+          ],
+          "metrics": {
+            "whole_dB": [
+              0.0,
+              0.0
+            ],
+            "note_body_dB": 0.0,
+            "release_1p5s_dB": 0.0,
+            "last_1s_dB": 0.0,
+            "spectral_distance_db": [
+              0.0,
+              0.0
+            ],
+            "raw_residual_dB_rel_reference": -293.615
+          }
+        },
+        "shape0": {
+          "hash": "04850b6039eec121494706ae9b06cc1fbe65eb9fc55fa43b90c1440f71b18d7e",
+          "receipt": [
+            "original 154 wet 264600 frames, delay on 0.99981 mix 0.99981, reverb on 0.99981 mix 0.744975",
+            "scope portable original-source delay isolated policy mode=F16 bits=16 stride=1 cadence=44100.000000 shape=0 max_owned_t=0.058208618 bytes=25790 taps_out=0 invalid=0 rejected=0 accepted=264598"
+          ],
+          "metrics": {
+            "whole_dB": [
+              -0.022,
+              -0.026
+            ],
+            "note_body_dB": -0.025,
+            "release_1p5s_dB": -0.029,
+            "last_1s_dB": -0.029,
+            "spectral_distance_db": [
+              0.071,
+              0.119
+            ],
+            "raw_residual_dB_rel_reference": -49.555
+          }
+        },
+        "shape1024": {
+          "hash": "04850b6039eec121494706ae9b06cc1fbe65eb9fc55fa43b90c1440f71b18d7e",
+          "receipt": [
+            "original 154 wet 264600 frames, delay on 0.99981 mix 0.99981, reverb on 0.99981 mix 0.744975",
+            "scope portable original-source delay isolated policy mode=F16 bits=16 stride=1 cadence=44100.000000 shape=1024 max_owned_t=0.058208618 bytes=25790 taps_out=0 invalid=0 rejected=0 accepted=264598"
+          ],
+          "metrics": {
+            "whole_dB": [
+              -0.022,
+              -0.026
+            ],
+            "note_body_dB": -0.025,
+            "release_1p5s_dB": -0.029,
+            "last_1s_dB": -0.029,
+            "spectral_distance_db": [
+              0.071,
+              0.119
+            ],
+            "raw_residual_dB_rel_reference": -49.555
+          }
+        },
+        "shape1152": {
+          "hash": "04850b6039eec121494706ae9b06cc1fbe65eb9fc55fa43b90c1440f71b18d7e",
+          "receipt": [
+            "original 154 wet 264600 frames, delay on 0.99981 mix 0.99981, reverb on 0.99981 mix 0.744975",
+            "scope portable original-source delay isolated policy mode=F16 bits=16 stride=1 cadence=44100.000000 shape=1152 max_owned_t=0.058208618 bytes=25790 taps_out=0 invalid=0 rejected=0 accepted=264598"
+          ],
+          "metrics": {
+            "whole_dB": [
+              -0.022,
+              -0.026
+            ],
+            "note_body_dB": -0.025,
+            "release_1p5s_dB": -0.029,
+            "last_1s_dB": -0.029,
+            "spectral_distance_db": [
+              0.071,
+              0.119
+            ],
+            "raw_residual_dB_rel_reference": -49.555
+          }
+        }
+      }
+    },
+    {
+      "stock_row": 188,
+      "name": "Interlocked",
+      "arms": {
+        "original": {
+          "hash": "1f48119e6ff108698be999bfb6c3db990683aeceb3c8d44261b2e5c5614164cf",
+          "receipt": [
+            "original 188 wet 264600 frames, delay on 0 mix 0.107485, reverb on 0.99981 mix 0.367368"
+          ],
+          "metrics": {
+            "whole_dB": [
+              0.0,
+              0.0
+            ],
+            "note_body_dB": 0.0,
+            "release_1p5s_dB": 0.0,
+            "last_1s_dB": 0.0,
+            "spectral_distance_db": [
+              0.0,
+              0.0
+            ],
+            "raw_residual_dB_rel_reference": -297.021
+          }
+        },
+        "shape0": {
+          "hash": "1f48119e6ff108698be999bfb6c3db990683aeceb3c8d44261b2e5c5614164cf",
+          "receipt": [
+            "original 188 wet 264600 frames, delay on 0 mix 0.107485, reverb on 0.99981 mix 0.367368",
+            "scope portable original-source delay isolated policy mode=ADPCM bits=4 stride=1 cadence=44100.000000 shape=0 max_owned_t=0.21741496 bytes=25704 taps_out=0 invalid=0 rejected=0 accepted=264598"
+          ],
+          "metrics": {
+            "whole_dB": [
+              0.0,
+              0.0
+            ],
+            "note_body_dB": 0.0,
+            "release_1p5s_dB": 0.0,
+            "last_1s_dB": 0.0,
+            "spectral_distance_db": [
+              0.0,
+              0.0
+            ],
+            "raw_residual_dB_rel_reference": -297.021
+          }
+        },
+        "shape1024": {
+          "hash": "1f48119e6ff108698be999bfb6c3db990683aeceb3c8d44261b2e5c5614164cf",
+          "receipt": [
+            "original 188 wet 264600 frames, delay on 0 mix 0.107485, reverb on 0.99981 mix 0.367368",
+            "scope portable original-source delay isolated policy mode=ADPCM bits=4 stride=1 cadence=44100.000000 shape=1024 max_owned_t=0.21741496 bytes=25704 taps_out=0 invalid=0 rejected=0 accepted=264598"
+          ],
+          "metrics": {
+            "whole_dB": [
+              0.0,
+              0.0
+            ],
+            "note_body_dB": 0.0,
+            "release_1p5s_dB": 0.0,
+            "last_1s_dB": 0.0,
+            "spectral_distance_db": [
+              0.0,
+              0.0
+            ],
+            "raw_residual_dB_rel_reference": -297.021
+          }
+        },
+        "shape1152": {
+          "hash": "1f48119e6ff108698be999bfb6c3db990683aeceb3c8d44261b2e5c5614164cf",
+          "receipt": [
+            "original 188 wet 264600 frames, delay on 0 mix 0.107485, reverb on 0.99981 mix 0.367368",
+            "scope portable original-source delay isolated policy mode=ADPCM bits=4 stride=1 cadence=44100.000000 shape=1152 max_owned_t=0.21741496 bytes=25704 taps_out=0 invalid=0 rejected=0 accepted=264598"
+          ],
+          "metrics": {
+            "whole_dB": [
+              0.0,
+              0.0
+            ],
+            "note_body_dB": 0.0,
+            "release_1p5s_dB": 0.0,
+            "last_1s_dB": 0.0,
+            "spectral_distance_db": [
+              0.0,
+              0.0
+            ],
+            "raw_residual_dB_rel_reference": -297.021
+          }
+        }
+      }
+    },
+    {
+      "stock_row": 191,
+      "name": "Mushroom",
+      "arms": {
+        "original": {
+          "hash": "7259cbd614e343fb4ff6a1c3e20bc236af826ec0554d002b8cf6cf142f6a26bc",
+          "receipt": [
+            "original 191 wet 264600 frames, delay on 0.99981 mix 0.739666, reverb on 0.99981 mix 0.732461"
+          ],
+          "metrics": {
+            "whole_dB": [
+              0.0,
+              0.0
+            ],
+            "note_body_dB": 0.0,
+            "release_1p5s_dB": 0.0,
+            "last_1s_dB": 0.0,
+            "spectral_distance_db": [
+              0.0,
+              0.0
+            ],
+            "raw_residual_dB_rel_reference": -299.065
+          }
+        },
+        "shape0": {
+          "hash": "abfaa2fa71e622e94cad3c33a498e9bc33dc78a3941fe97afafae54ad184f14b",
+          "receipt": [
+            "original 191 wet 264600 frames, delay on 0.99981 mix 0.739666, reverb on 0.99981 mix 0.732461",
+            "scope portable original-source delay isolated policy mode=ADPCM bits=4 stride=4 cadence=11025.000000 shape=0 max_owned_t=0.86965984 bytes=25704 taps_out=0 invalid=0 rejected=0 accepted=264598"
+          ],
+          "metrics": {
+            "whole_dB": [
+              -0.004,
+              -0.002
+            ],
+            "note_body_dB": -0.002,
+            "release_1p5s_dB": -0.004,
+            "last_1s_dB": -0.004,
+            "spectral_distance_db": [
+              2.712,
+              4.139
+            ],
+            "raw_residual_dB_rel_reference": -36.351
+          }
+        },
+        "shape1024": {
+          "hash": "c7472c238ec906c94ccbc1c5d464c7c91a61e0ba95a226db02642f32501b2e20",
+          "receipt": [
+            "original 191 wet 264600 frames, delay on 0.99981 mix 0.739666, reverb on 0.99981 mix 0.732461",
+            "scope portable original-source delay isolated policy mode=ADPCM bits=5 stride=4 cadence=11025.000000 shape=1024 max_owned_t=0.70185941 bytes=25704 taps_out=0 invalid=0 rejected=0 accepted=264598"
+          ],
+          "metrics": {
+            "whole_dB": [
+              -0.004,
+              -0.003
+            ],
+            "note_body_dB": -0.002,
+            "release_1p5s_dB": -0.004,
+            "last_1s_dB": -0.005,
+            "spectral_distance_db": [
+              1.7,
+              2.65
+            ],
+            "raw_residual_dB_rel_reference": -36.505
+          }
+        },
+        "shape1152": {
+          "hash": "9480de7b91ebc12cfacccc8cb7be6d181dc5dfb811763415cdf99d49d21a06d8",
+          "receipt": [
+            "original 191 wet 264600 frames, delay on 0.99981 mix 0.739666, reverb on 0.99981 mix 0.732461",
+            "scope portable original-source delay isolated policy mode=ADPCM bits=5 stride=4 cadence=11025.000000 shape=1152 max_owned_t=0.70185941 bytes=25704 taps_out=0 invalid=0 rejected=0 accepted=264598"
+          ],
+          "metrics": {
+            "whole_dB": [
+              0.013,
+              0.009
+            ],
+            "note_body_dB": 0.012,
+            "release_1p5s_dB": 0.008,
+            "last_1s_dB": 0.008,
+            "spectral_distance_db": [
+              1.774,
+              2.867
+            ],
+            "raw_residual_dB_rel_reference": -33.61
+          }
+        }
+      }
+    },
+    {
+      "stock_row": 289,
+      "name": "JEC Atmostrings 2",
+      "arms": {
+        "original": {
+          "hash": "542e908d91cc196c93eb6f93be0a49831c1bec8dc3be3b15dee36695bdb3b655",
+          "receipt": [
+            "original 289 wet 264600 frames, delay on 0.99981 mix 0.256826, reverb on 0.99981 mix 0.194966"
+          ],
+          "metrics": {
+            "whole_dB": [
+              0.0,
+              0.0
+            ],
+            "note_body_dB": 0.0,
+            "release_1p5s_dB": 0.0,
+            "last_1s_dB": 0.0,
+            "spectral_distance_db": [
+              0.0,
+              0.0
+            ],
+            "raw_residual_dB_rel_reference": -293.905
+          }
+        },
+        "shape0": {
+          "hash": "4f6b83cc33f60821c5f6b0c7ae163674468dd4b79a2ec75afae928ea55adaa94",
+          "receipt": [
+            "original 289 wet 264600 frames, delay on 0.99981 mix 0.256826, reverb on 0.99981 mix 0.194966",
+            "scope portable original-source delay isolated policy mode=ADPCM bits=4 stride=2 cadence=22050.000000 shape=0 max_owned_t=0.43482992 bytes=25704 taps_out=0 invalid=0 rejected=0 accepted=264598"
+          ],
+          "metrics": {
+            "whole_dB": [
+              -0.064,
+              -0.221
+            ],
+            "note_body_dB": -0.085,
+            "release_1p5s_dB": -0.348,
+            "last_1s_dB": -0.624,
+            "spectral_distance_db": [
+              1.734,
+              1.663
+            ],
+            "raw_residual_dB_rel_reference": -15.565
+          }
+        },
+        "shape1024": {
+          "hash": "38a271efaffa91ebea8cf1b8ade37d7878569fcb2eb19ee946a82d7cb453ef93",
+          "receipt": [
+            "original 289 wet 264600 frames, delay on 0.99981 mix 0.256826, reverb on 0.99981 mix 0.194966",
+            "scope portable original-source delay isolated policy mode=ADPCM bits=5 stride=2 cadence=22050.000000 shape=1024 max_owned_t=0.35092971 bytes=25704 taps_out=0 invalid=0 rejected=0 accepted=264598"
+          ],
+          "metrics": {
+            "whole_dB": [
+              -0.065,
+              -0.226
+            ],
+            "note_body_dB": -0.086,
+            "release_1p5s_dB": -0.357,
+            "last_1s_dB": -0.639,
+            "spectral_distance_db": [
+              1.742,
+              1.686
+            ],
+            "raw_residual_dB_rel_reference": -15.402
+          }
+        },
+        "shape1152": {
+          "hash": "f8cbda195ef68876624a974f860d33c881d00f832e393d4f24304c62adb5a54e",
+          "receipt": [
+            "original 289 wet 264600 frames, delay on 0.99981 mix 0.256826, reverb on 0.99981 mix 0.194966",
+            "scope portable original-source delay isolated policy mode=ADPCM bits=5 stride=2 cadence=22050.000000 shape=1152 max_owned_t=0.35092971 bytes=25704 taps_out=0 invalid=0 rejected=0 accepted=264598"
+          ],
+          "metrics": {
+            "whole_dB": [
+              -0.042,
+              -0.158
+            ],
+            "note_body_dB": -0.064,
+            "release_1p5s_dB": -0.225,
+            "last_1s_dB": -0.33,
+            "spectral_distance_db": [
+              2.086,
+              1.92
+            ],
+            "raw_residual_dB_rel_reference": -15.198
+          }
+        }
+      }
+    },
+    {
+      "stock_row": 435,
+      "name": "Red Minor",
+      "arms": {
+        "original": {
+          "hash": "e18651f84707a92d3491ae0d7c706b8ab27a55a566f2116c3f0b9d95f1760ccd",
+          "receipt": [
+            "original 435 wet 264600 frames, delay on 0.99981 mix 0, reverb on 0.99981 mix 0.29873"
+          ],
+          "metrics": {
+            "whole_dB": [
+              0.0,
+              0.0
+            ],
+            "note_body_dB": 0.0,
+            "release_1p5s_dB": 0.0,
+            "last_1s_dB": 0.0,
+            "spectral_distance_db": [
+              0.0,
+              0.0
+            ],
+            "raw_residual_dB_rel_reference": -306.895
+          }
+        },
+        "shape0": {
+          "hash": "e18651f84707a92d3491ae0d7c706b8ab27a55a566f2116c3f0b9d95f1760ccd",
+          "receipt": [
+            "original 435 wet 264600 frames, delay on 0.99981 mix 0, reverb on 0.99981 mix 0.29873",
+            "scope portable original-source delay isolated policy mode=ADPCM bits=4 stride=1 cadence=44100.000000 shape=0 max_owned_t=0.21741496 bytes=25704 taps_out=0 invalid=0 rejected=0 accepted=264598"
+          ],
+          "metrics": {
+            "whole_dB": [
+              0.0,
+              0.0
+            ],
+            "note_body_dB": 0.0,
+            "release_1p5s_dB": 0.0,
+            "last_1s_dB": 0.0,
+            "spectral_distance_db": [
+              0.0,
+              0.0
+            ],
+            "raw_residual_dB_rel_reference": -306.895
+          }
+        },
+        "shape1024": {
+          "hash": "e18651f84707a92d3491ae0d7c706b8ab27a55a566f2116c3f0b9d95f1760ccd",
+          "receipt": [
+            "original 435 wet 264600 frames, delay on 0.99981 mix 0, reverb on 0.99981 mix 0.29873",
+            "scope portable original-source delay isolated policy mode=ADPCM bits=6 stride=1 cadence=44100.000000 shape=1024 max_owned_t=0.14643991 bytes=25600 taps_out=0 invalid=0 rejected=0 accepted=264598"
+          ],
+          "metrics": {
+            "whole_dB": [
+              0.0,
+              0.0
+            ],
+            "note_body_dB": 0.0,
+            "release_1p5s_dB": 0.0,
+            "last_1s_dB": 0.0,
+            "spectral_distance_db": [
+              0.0,
+              0.0
+            ],
+            "raw_residual_dB_rel_reference": -306.895
+          }
+        },
+        "shape1152": {
+          "hash": "e18651f84707a92d3491ae0d7c706b8ab27a55a566f2116c3f0b9d95f1760ccd",
+          "receipt": [
+            "original 435 wet 264600 frames, delay on 0.99981 mix 0, reverb on 0.99981 mix 0.29873",
+            "scope portable original-source delay isolated policy mode=ADPCM bits=6 stride=1 cadence=44100.000000 shape=1152 max_owned_t=0.14643991 bytes=25600 taps_out=0 invalid=0 rejected=0 accepted=264598"
+          ],
+          "metrics": {
+            "whole_dB": [
+              0.0,
+              0.0
+            ],
+            "note_body_dB": 0.0,
+            "release_1p5s_dB": 0.0,
+            "last_1s_dB": 0.0,
+            "spectral_distance_db": [
+              0.0,
+              0.0
+            ],
+            "raw_residual_dB_rel_reference": -306.895
+          }
+        }
+      }
+    },
+    {
+      "stock_row": 151,
+      "name": "BB Kubrick Hall Drone",
+      "arms": {
+        "original": {
+          "hash": "18e7a69a84651f8697ffa675ac2f78c076a6ad168ec2271386d24d599cc636a5",
+          "receipt": [
+            "original 151 wet 264600 frames, delay on 0.99981 mix 0.83485, reverb on 0.99981 mix 0.799962"
+          ],
+          "metrics": {
+            "whole_dB": [
+              0.0,
+              0.0
+            ],
+            "note_body_dB": 0.0,
+            "release_1p5s_dB": 0.0,
+            "last_1s_dB": 0.0,
+            "spectral_distance_db": [
+              0.0,
+              0.0
+            ],
+            "raw_residual_dB_rel_reference": -296.565
+          }
+        },
+        "shape0": {
+          "hash": "adcc695aaafd82c8e1eb87644920d62731233bfde3c145b60254085ad87352cd",
+          "receipt": [
+            "original 151 wet 264600 frames, delay on 0.99981 mix 0.83485, reverb on 0.99981 mix 0.799962",
+            "scope portable original-source delay isolated policy mode=ADPCM bits=4 stride=4 cadence=11025.000000 shape=0 max_owned_t=0.86965984 bytes=25704 taps_out=0 invalid=0 rejected=0 accepted=264598"
+          ],
+          "metrics": {
+            "whole_dB": [
+              -0.035,
+              -0.054
+            ],
+            "note_body_dB": -0.064,
+            "release_1p5s_dB": -0.04,
+            "last_1s_dB": -0.046,
+            "spectral_distance_db": [
+              8.501,
+              8.84
+            ],
+            "raw_residual_dB_rel_reference": -21.065
+          }
+        },
+        "shape1024": {
+          "hash": "3d290ce0a0f0a8a1de23a1ed144494223fd664299744bd6bbfe10b774fa35730",
+          "receipt": [
+            "original 151 wet 264600 frames, delay on 0.99981 mix 0.83485, reverb on 0.99981 mix 0.799962",
+            "scope portable original-source delay isolated policy mode=ADPCM bits=5 stride=4 cadence=11025.000000 shape=1024 max_owned_t=0.70185941 bytes=25704 taps_out=0 invalid=0 rejected=0 accepted=264598"
+          ],
+          "metrics": {
+            "whole_dB": [
+              -0.036,
+              -0.054
+            ],
+            "note_body_dB": -0.063,
+            "release_1p5s_dB": -0.041,
+            "last_1s_dB": -0.049,
+            "spectral_distance_db": [
+              8.608,
+              9.018
+            ],
+            "raw_residual_dB_rel_reference": -20.948
+          }
+        },
+        "shape1152": {
+          "hash": "73089f93c2599f635b6591b4d234f085fd427870e5b71e156ad6973bd75198fd",
+          "receipt": [
+            "original 151 wet 264600 frames, delay on 0.99981 mix 0.83485, reverb on 0.99981 mix 0.799962",
+            "scope portable original-source delay isolated policy mode=ADPCM bits=5 stride=4 cadence=11025.000000 shape=1152 max_owned_t=0.70185941 bytes=25704 taps_out=0 invalid=0 rejected=0 accepted=264598"
+          ],
+          "metrics": {
+            "whole_dB": [
+              0.017,
+              0.025
+            ],
+            "note_body_dB": 0.018,
+            "release_1p5s_dB": 0.024,
+            "last_1s_dB": 0.028,
+            "spectral_distance_db": [
+              8.632,
+              9.054
+            ],
+            "raw_residual_dB_rel_reference": -22.162
+          }
+        }
+      }
+    },
+    {
+      "stock_row": 366,
+      "name": "Deeper Space Pad",
+      "arms": {
+        "original": {
+          "hash": "d904aadd85c6e844acd2447c945eb93bc98c4e3978b96fe6107dd83c048a4623",
+          "receipt": [
+            "original 366 wet 264600 frames, delay on 0.99981 mix 0.777209, reverb on 0.99981 mix 0.99981"
+          ],
+          "metrics": {
+            "whole_dB": [
+              0.0,
+              0.0
+            ],
+            "note_body_dB": 0.0,
+            "release_1p5s_dB": 0.0,
+            "last_1s_dB": 0.0,
+            "spectral_distance_db": [
+              0.0,
+              0.0
+            ],
+            "raw_residual_dB_rel_reference": -302.243
+          }
+        },
+        "shape0": {
+          "hash": "8bd0c61831ff876c7c89275c3b37ab673810eed4f8d976e1654122075e78976f",
+          "receipt": [
+            "original 366 wet 264600 frames, delay on 0.99981 mix 0.777209, reverb on 0.99981 mix 0.99981",
+            "scope portable original-source delay isolated policy mode=ADPCM bits=4 stride=1 cadence=44100.000000 shape=0 max_owned_t=0.21741496 bytes=25704 taps_out=0 invalid=0 rejected=0 accepted=264598"
+          ],
+          "metrics": {
+            "whole_dB": [
+              0.002,
+              0.002
+            ],
+            "note_body_dB": 0.001,
+            "release_1p5s_dB": 0.002,
+            "last_1s_dB": 0.002,
+            "spectral_distance_db": [
+              7.41,
+              10.474
+            ],
+            "raw_residual_dB_rel_reference": -43.063
+          }
+        },
+        "shape1024": {
+          "hash": "8bd0c61831ff876c7c89275c3b37ab673810eed4f8d976e1654122075e78976f",
+          "receipt": [
+            "original 366 wet 264600 frames, delay on 0.99981 mix 0.777209, reverb on 0.99981 mix 0.99981",
+            "scope portable original-source delay isolated policy mode=ADPCM bits=4 stride=1 cadence=44100.000000 shape=1024 max_owned_t=0.21741496 bytes=25704 taps_out=0 invalid=0 rejected=0 accepted=264598"
+          ],
+          "metrics": {
+            "whole_dB": [
+              0.002,
+              0.002
+            ],
+            "note_body_dB": 0.001,
+            "release_1p5s_dB": 0.002,
+            "last_1s_dB": 0.002,
+            "spectral_distance_db": [
+              7.41,
+              10.474
+            ],
+            "raw_residual_dB_rel_reference": -43.063
+          }
+        },
+        "shape1152": {
+          "hash": "a1b6012b3abfd17772d254f1c54ab351f3fcfed86818dd63c9ee9a878392c73b",
+          "receipt": [
+            "original 366 wet 264600 frames, delay on 0.99981 mix 0.777209, reverb on 0.99981 mix 0.99981",
+            "scope portable original-source delay isolated policy mode=ADPCM bits=4 stride=1 cadence=44100.000000 shape=1152 max_owned_t=0.21741496 bytes=25704 taps_out=0 invalid=0 rejected=0 accepted=264598"
+          ],
+          "metrics": {
+            "whole_dB": [
+              -0.035,
+              -0.04
+            ],
+            "note_body_dB": -0.041,
+            "release_1p5s_dB": -0.038,
+            "last_1s_dB": -0.04,
+            "spectral_distance_db": [
+              12.863,
+              15.574
+            ],
+            "raw_residual_dB_rel_reference": -27.292
+          }
+        }
+      }
+    },
+    {
+      "stock_row": 464,
+      "name": "Ad Infinitum",
+      "arms": {
+        "original": {
+          "hash": "6ff914b195228171c11b981e60c95f336715f3fc2915ef564e9305f1fda2188e",
+          "receipt": [
+            "original 464 wet 264600 frames, delay on 0.99981 mix 0.430508, reverb on 0.99981 mix 0.374953"
+          ],
+          "metrics": {
+            "whole_dB": [
+              0.0,
+              0.0
+            ],
+            "note_body_dB": 0.0,
+            "release_1p5s_dB": 0.0,
+            "last_1s_dB": 0.0,
+            "spectral_distance_db": [
+              0.0,
+              0.0
+            ],
+            "raw_residual_dB_rel_reference": -309.6
+          }
+        },
+        "shape0": {
+          "hash": "6a30432c1c17f1027c9d610c941aa8f7c1437cd51508bf0be4b57a9e29eead0b",
+          "receipt": [
+            "original 464 wet 264600 frames, delay on 0.99981 mix 0.430508, reverb on 0.99981 mix 0.374953",
+            "scope portable original-source delay isolated policy mode=ADPCM bits=4 stride=2 cadence=22050.000000 shape=0 max_owned_t=0.43482992 bytes=25704 taps_out=0 invalid=0 rejected=0 accepted=264598"
+          ],
+          "metrics": {
+            "whole_dB": [
+              -0.001,
+              -0.0
+            ],
+            "note_body_dB": 0.0,
+            "release_1p5s_dB": -0.002,
+            "last_1s_dB": -0.002,
+            "spectral_distance_db": [
+              0.227,
+              0.383
+            ],
+            "raw_residual_dB_rel_reference": -44.094
+          }
+        },
+        "shape1024": {
+          "hash": "6a30432c1c17f1027c9d610c941aa8f7c1437cd51508bf0be4b57a9e29eead0b",
+          "receipt": [
+            "original 464 wet 264600 frames, delay on 0.99981 mix 0.430508, reverb on 0.99981 mix 0.374953",
+            "scope portable original-source delay isolated policy mode=ADPCM bits=4 stride=2 cadence=22050.000000 shape=1024 max_owned_t=0.43482992 bytes=25704 taps_out=0 invalid=0 rejected=0 accepted=264598"
+          ],
+          "metrics": {
+            "whole_dB": [
+              -0.001,
+              -0.0
+            ],
+            "note_body_dB": 0.0,
+            "release_1p5s_dB": -0.002,
+            "last_1s_dB": -0.002,
+            "spectral_distance_db": [
+              0.227,
+              0.383
+            ],
+            "raw_residual_dB_rel_reference": -44.094
+          }
+        },
+        "shape1152": {
+          "hash": "380d332f83c72c5a470473ce66ca7d2e8d426a66eb07a6714daf64618748f36b",
+          "receipt": [
+            "original 464 wet 264600 frames, delay on 0.99981 mix 0.430508, reverb on 0.99981 mix 0.374953",
+            "scope portable original-source delay isolated policy mode=ADPCM bits=4 stride=2 cadence=22050.000000 shape=1152 max_owned_t=0.43482992 bytes=25704 taps_out=0 invalid=0 rejected=0 accepted=264598"
+          ],
+          "metrics": {
+            "whole_dB": [
+              0.001,
+              0.002
+            ],
+            "note_body_dB": -0.001,
+            "release_1p5s_dB": 0.006,
+            "last_1s_dB": 0.007,
+            "spectral_distance_db": [
+              1.249,
+              1.553
+            ],
+            "raw_residual_dB_rel_reference": -30.128
+          }
+        }
+      }
+    }
+  ]
+}

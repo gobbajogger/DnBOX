@@ -1,0 +1,341 @@
+--- a/dnbx_core.c
++++ b/dnbx_core.c
+@@ -266,6 +266,75 @@
+     return .5f * (first + second);
+ }
+ 
++#ifdef DNBX_HOST_MAIN_SOURCE_ORACLE
++typedef struct {unsigned stop; float width, scale; unsigned armed; dnbx_work *work;} main_shape_ctx;
++static float main_oracle_shape(float phase,float step,void *context)
++{
++    main_shape_ctx *c=context;
++    if(c->armed)
++        return shape(2,phase,step,c->width,DNBX_OSC_STOCK_BLEP,c->work)*c->scale;
++    return factory_shape(c->stop,phase,step,c->width,c->work);
++}
++int dnbx_host_main_oracle_setup(dnbx_part *s,const float (*raw)[4])
++{
++    if(!valid(s)||!s->superj6_amp_range||!raw||dnbx_active_voices(s)) return DNBX_E_ARGUMENT;
++    for(unsigned l=0;l<2;l++)for(unsigned j=0;j<4;j++)
++        if(!range(raw[l][j],0.f,1.f)) return DNBX_E_RANGE;
++    /* This is a diagnostic route. Do not apply Main ownership to Sub, Noise,
++       or OTA until those independent receiver paths are staged. */
++#if X0X_SJ6_NOISE_SUB_NATIVE
++    if(s->sj6_sub_gain!=0.f||s->sj6_noise_gain!=0.f) return DNBX_E_UNSUPPORTED;
++#endif
++#if X0X_SJ6_OTA_NATIVE
++    if(s->sj6_ota) return DNBX_E_UNSUPPORTED;
++#endif
++    memset(&s->main_oracle,0,sizeof s->main_oracle);
++    for(unsigned l=0;l<2;l++)
++        sj6_amp_config_panel(&s->main_oracle.amp[l],s->sample_rate,
++                             raw[l][0],raw[l][1],raw[l][2],raw[l][3]);
++    s->main_oracle.enabled=1;
++    return DNBX_OK;
++}
++#endif
++#ifdef DNBX_HOST_MAIN_SOURCE_ORACLE
++/* Not a preset law: install measured/source-correct coefficients at the
++ * external prep boundaries, with no other per-voice state mutation. */
++int dnbx_host_main_normal_coeff(dnbx_part *s,unsigned l,sj6_normal_coeff c)
++{
++    if(!valid(s)||!s->main_oracle.enabled||l>=2u) return DNBX_E_ARGUMENT;
++    if(!isfinite(c.b0)||!isfinite(c.b1)||!isfinite(c.b2)||
++       !isfinite(c.a1)||!isfinite(c.a2)) return DNBX_E_RANGE;
++    s->main_oracle.normal_coeff[l]=c;
++    s->main_oracle.normal_set|=1u<<l;
++    return DNBX_OK;
++}
++#endif
++#ifdef DNBX_HOST_MAIN_SOURCE_ORACLE
++int dnbx_host_main_normal_dynamic(dnbx_part *s,unsigned l,dnbx_host_sj6_normal_inputs d)
++{
++    if(!valid(s)||!s->main_oracle.enabled||s->main_oracle.seen||l>=2u) return DNBX_E_ARGUMENT;
++    if(!range(d.base_hz,0,22050)||!range(d.strength,0,1)||!range(d.velocity_amount,0,1.1f)||
++       !range(d.track,0,1)||!range(d.damping,0,10)||!range(d.attack_s,0,24)||
++       !range(d.decay_s,0,24)||!range(d.sustain,0,1)||!range(d.release_s,0,25)||d.follow_provider_cutoff>1u||d.follow_provider_resonance_strength>1u) return DNBX_E_RANGE;
++    s->main_oracle.normal_inputs[l]=d;
++    s->main_oracle.min_provider_base[l]=22050.f;
++    s->main_oracle.min_strength[l]=1.f;
++    s->main_oracle.min_damping[l]=10.f;
++    sj6_filter_config(&s->main_oracle.filter[l],s->sample_rate,d.attack_s,d.decay_s,d.sustain,d.release_s);
++    s->main_oracle.dynamic_normal|=1u<<l;
++    return DNBX_OK;
++}
++#endif
++#ifdef DNBX_HOST_MAIN_SOURCE_ORACLE
++int dnbx_host_main_source_gain(dnbx_part *s,unsigned l,float gain)
++{
++    if(!valid(s)||!s->main_oracle.enabled||l>=2u||s->main_oracle.seen) return DNBX_E_ARGUMENT;
++    if(!range(gain,0,1)) return DNBX_E_RANGE;
++    s->main_oracle.source_gain[l]=gain;
++    s->main_oracle.prehalfband_mask|=1u<<l;
++    return DNBX_OK;
++}
++#endif
+ static void enter_stage(dnbx_envelope_state *e, const dnbx_envelope_params *p,
+                         unsigned stage, float sr, dnbx_work *w)
+ {
+@@ -705,6 +774,24 @@
+ #endif
+        )return -1;
+     dnbx_voice *v=&s->voice[0];
++#ifdef DNBX_HOST_MAIN_SOURCE_ORACLE
++    if(s->main_oracle.enabled) {
++        s->main_oracle.pending_velocity=v->velocity;
++        for(unsigned l=0;l<2;l++) {
++            if(s->main_oracle.seen && s->main_oracle.amp[l].stage) {
++                sj6_amp_restart(&s->main_oracle.amp[l]);
++                if(s->main_oracle.dynamic_normal&(1u<<l))sj6_filter_restart(&s->main_oracle.filter[l]);
++                s->main_oracle.pending |= 1u<<l;
++            } else {
++                memset(&s->main_oracle.osc[l],0,sizeof s->main_oracle.osc[l]);
++                sj6_amp_on(&s->main_oracle.amp[l]);
++                if(s->main_oracle.dynamic_normal&(1u<<l))sj6_filter_on(&s->main_oracle.filter[l]);
++                s->main_oracle.pending &= ~(1u<<l);
++            }
++        }
++        s->main_oracle.seen=1;
++    }
++#endif
+     if(!voice_active(v))memset(v,0,sizeof *v);
+     v->note=(uint8_t)note;v->gate=1;v->pedal_held=0;v->age_rank=0;
+ #if X0X_SJ6_SEQ_DEST_NATIVE
+@@ -727,6 +814,13 @@
+ static void release_layers(dnbx_part *s,dnbx_voice *v,unsigned mask)
+ {
+     for (unsigned l=0;l<DNBX_LAYERS;l++) if (mask&(1u<<l)) {
++#ifdef DNBX_HOST_MAIN_SOURCE_ORACLE
++        if(s->main_oracle.enabled && v==&s->voice[0] && s->main_oracle.seen){
++            sj6_amp_off(&s->main_oracle.amp[l]);
++            if(s->main_oracle.dynamic_normal&(1u<<l))sj6_filter_off(&s->main_oracle.filter[l]);
++            s->main_oracle.pending &= ~(1u<<l);
++        }
++#endif
+         envelope_off(&v->layer[l].amp,&s->layer[l].params.amp,s->sample_rate);
+         dnbx_envelope_params linked;
+         envelope_off(&v->layer[l].filter,filter_params(s,l,&linked),s->sample_rate);
+@@ -885,6 +979,12 @@
+     if (n>DNBX_MAX_FRAMES) return DNBX_E_RANGE;
+     if (!n) return DNBX_OK;
+     if (!left || !right || left==right) return DNBX_E_ARGUMENT;
++#ifdef DNBX_HOST_MAIN_SOURCE_ORACLE
++    if(s->main_oracle.enabled){
++        const uint64_t pos=s->main_oracle.pos, first=s->main_oracle.cb.first;
++        if(pos<first||pos-first+n>s->main_oracle.cb.span) return DNBX_E_RANGE;
++    }
++#endif
+     COUNT(w,frames,n);
+     const float osc_gain[]={gain1,gain2};
+ #if X0X_SJ6_NOISE_SUB_NATIVE
+@@ -938,6 +1038,14 @@
+     const dnbx_envelope_params *fp[DNBX_LAYERS];
+     for (unsigned l=0;l<DNBX_LAYERS;l++) fp[l]=filter_params(s,l,&linked[l]);
+     for (unsigned k=0;k<n;k++) {
++#ifdef DNBX_HOST_MAIN_SOURCE_ORACLE
++        if(s->main_oracle.enabled&&s->main_oracle.pos+k<s->main_oracle.tap_len){
++            const uint64_t t=s->main_oracle.pos+k;
++            for(unsigned l=0;l<2;l++)
++                if(s->main_oracle.main_filtered[l])s->main_oracle.main_filtered[l][t]=0;
++            if(s->main_oracle.osc_sum)s->main_oracle.osc_sum[t]=0;
++        }
++#endif
+ #if X0X_SJ6_MONO32_PROBE
+         if(s->sj6_glide_offset!=0.f&&s->sj6_glide_secs>0.f){
+             if(!s->sj6_glide_clock) {
+@@ -997,6 +1105,76 @@
+                 float x = p->oscillator_mode == DNBX_OSC_SUPERJ6
+                     ? factory_oscillator(lv, p->waveform, width[l], w)
+                     : oscillator(lv->phase,lv->increment,p->waveform,width[l],p->oscillator_mode,w);
++#ifdef DNBX_HOST_MAIN_SOURCE_ORACLE
++                unsigned source_amp_before_history=0;
++                float source_amp_after_history=1.f;
++                if(!i&&s->main_oracle.enabled&&s->main_oracle.seen&&p->oscillator_mode==DNBX_OSC_SUPERJ6){
++                    const uint64_t t=s->main_oracle.pos+k;
++                    const unsigned prep=sj6_source_prep_frames(s->main_oracle.cb,t);
++                    if(prep&&sj6_amp_prep(&s->main_oracle.amp[l],prep)&&(s->main_oracle.pending&(1u<<l))){
++                        memset(&s->main_oracle.osc[l],0,sizeof s->main_oracle.osc[l]);
++                        s->main_oracle.commit[l]=t;
++                        s->main_oracle.pending&=~(1u<<l);
++                    }
++                    if(prep&&(s->main_oracle.dynamic_normal&(1u<<l))){
++                        const dnbx_host_sj6_normal_inputs d=s->main_oracle.normal_inputs[l];
++                        const float shape=sj6_filter_prep(&s->main_oracle.filter[l]);
++                        /* Through this entry point pitch/velocity are the
++                           compact adapter's actual values, not an old-IPA trace. */
++                        /* Live LFO/cutoff updates are owned by typed
++                           provider. Read them at the original prep clock. */
++                        const float base=d.follow_provider_cutoff?p->cutoff_hz:d.base_hz;
++                        if(d.follow_provider_cutoff){
++                            s->main_oracle.min_provider_base[l]=fminf(s->main_oracle.min_provider_base[l],base);
++                            s->main_oracle.max_provider_base[l]=fmaxf(s->main_oracle.max_provider_base[l],base);
++                        }
++                        float strength=d.strength,damping=d.damping,raw;
++                        if(d.follow_provider_resonance_strength){
++                            damping=sj6_filter_damping_panel(p->resonance);
++                            if(dnbx_read_raw(s,136u,&raw)==DNBX_OK)strength=sj6_filter_strength_panel(raw);
++                            s->main_oracle.min_strength[l]=fminf(s->main_oracle.min_strength[l],strength);
++                            s->main_oracle.max_strength[l]=fmaxf(s->main_oracle.max_strength[l],strength);
++                            s->main_oracle.min_damping[l]=fminf(s->main_oracle.min_damping[l],damping);
++                            s->main_oracle.max_damping[l]=fmaxf(s->main_oracle.max_damping[l],damping);
++                        }
++                        const double cutoff=sj6_normal_cutoff(base,strength,d.velocity_amount,
++                                                        v->velocity,shape,d.track,lv->increment*s->sample_rate);
++                        (void)dnbx_host_main_normal_coeff(s,l,sj6_normal_coefficients(s->sample_rate,cutoff,damping));
++                    }
++                    amp=sj6_amp_sample(&s->main_oracle.amp[l]);
++                    const unsigned stop=(unsigned)(p->waveform*3.f);
++                    source_amp_before_history=stop==2u&&(s->main_oracle.normal_set&(1u<<l))
++                                                   &&(s->main_oracle.prehalfband_mask&(1u<<l));
++                    float scale=0.f;
++                    if(source_amp_before_history){
++                        const float vel=s->main_oracle.pending&(1u<<l)?s->main_oracle.pending_velocity:v->velocity;
++                        const float t=amp*(s->main_oracle.source_gain[l]*vel);
++                        /* The executed generated-saw branch bypasses the
++                           analytic waveform's pre-history multiply. Keep the
++                           shape scale separate from the two explicit gain
++                           multiplications on the final halfband output. */
++                        const float voice_scale=(t*.5f)*.68f;
++                        const float generated_profile=1.5309427976608276f;
++                        if(s->main_oracle.ablate_scale_inside_halfband)
++                            scale=generated_profile*voice_scale;
++                        else {
++                            scale=generated_profile;
++                            source_amp_after_history=voice_scale;
++                        }
++                    }
++                    main_shape_ctx ctx={stop,width[l],scale,source_amp_before_history,w};
++                    if(stop){
++                        x=sj6_main_4x_sample(&s->main_oracle.osc[l],lv->increment,main_oracle_shape,&ctx);
++                        if(source_amp_after_history!=1.f)x*=source_amp_after_history;
++                    }else{
++                        x=.5f*shape(0,s->main_oracle.osc[l].phase,lv->increment,width[l],DNBX_OSC_STOCK_BLEP,w);
++                        s->main_oracle.osc[l].phase=sj6_phase_add(s->main_oracle.osc[l].phase,lv->increment);
++                    }
++                }
++#endif
++#ifdef DNBX_HOST_MAIN_SOURCE_ORACLE
++                if (!source_amp_before_history)
++#endif
+                 if (osc_gain[l]!=1.f) x*=osc_gain[l];
+                 x+=(lv->subphase<.5f?1.0f:-1.0f)*p->sub_gain;
+ #if X0X_SJ6_NOISE_SUB_NATIVE
+@@ -1028,10 +1206,34 @@
+                 else
+ #endif
+                 {
++#ifdef DNBX_HOST_MAIN_SOURCE_ORACLE
++                if(!i&&s->main_oracle.enabled&&s->main_oracle.seen&&
++                   (s->main_oracle.normal_set&(1u<<l))&&p->oscillator_mode==DNBX_OSC_SUPERJ6){
++                    const float y=sj6_normal_receiver(&s->main_oracle.normal_hist[l],
++                              &s->main_oracle.normal_coeff[l],source_amp_before_history?x:amp*x);
++                    mix[l]+=source_amp_before_history?y:velocity*y;
++                    if(source_amp_before_history&&s->main_oracle.pos+k<s->main_oracle.tap_len){
++                        const uint64_t t=s->main_oracle.pos+k;
++                        if(s->main_oracle.main_filtered[l])s->main_oracle.main_filtered[l][t]=y;
++                        /* Old source Normal owns its oscillator-bus volume
++                           separately to filter damping. This follows the
++                           live provider resonance, without compact /6 buses. */
++                        if(s->main_oracle.osc_sum){
++                            if(!l)s->main_oracle.osc_sum[t]=y;
++                            else {
++                                const float bus=(float)(1.-.49881276637272776*pow((double)p->resonance,1.5));
++                                s->main_oracle.osc_sum[t]=(s->main_oracle.osc_sum[t]+y)*bus;
++                            }
++                        }
++                    }
++                } else
++#endif
++                {
+                 lv->filter_first=fm_clampf(lv->filter_first+a*(x-lv->filter_first-p->resonance*.8f*lv->filter_second),-4,4);
+                 lv->filter_second=fm_clampf(lv->filter_second+a*(lv->filter_first-lv->filter_second),-4,4);
+                 mix[l]+=velocity*amp*lv->filter_second;
+                 }
++                }
+                 lv->phase+=lv->increment; if (lv->phase>=1) lv->phase-=1;
+                 lv->subphase+=lv->increment*.5f; if (lv->subphase>=1) lv->subphase-=1;
+ #if X0X_SJ6_MONO32_PROBE || X0X_SJ6_PITCH_ENV_NATIVE
+@@ -1050,6 +1252,9 @@
+ #if X0X_SJ6_NOISE_SUB_NATIVE
+     s->sj6_noise_random=sj6_noise;
+ #endif
++#ifdef DNBX_HOST_MAIN_SOURCE_ORACLE
++    if(s->main_oracle.enabled)s->main_oracle.pos+=n;
++#endif
+     return DNBX_OK;
+ }
+ int dnbx_render(dnbx_part *s,float *left,float *right,unsigned n,dnbx_work *w)
+--- a/dnbx_core.h
++++ b/dnbx_core.h
+@@ -1,3 +1,16 @@
++#ifdef DNBX_HOST_MAIN_SOURCE_ORACLE
++#ifndef X0X_HOST
++#error "Main source oracle is host-only"
++#endif
++#include "sj6_main_4x.h"
++#include "source_callback_clock.h"
++#include "warm_amp.h"
++#include "normal_receiver.h"
++#include "filter_adsr.h"
++#include "filter_panel.h"
++#include "normal_coeff.h"
++#include "normal_cutoff.h"
++#endif
+ /* SPDX-License-Identifier: GPL-3.0-only */
+ #ifndef DNBX_CORE_H
+ #define DNBX_CORE_H
+@@ -69,6 +82,13 @@
+     float pan;              /* -1 left, 0 equal half gains, +1 right. */
+     uint32_t oscillator_mode; /* Stock BLEP, raw, or a discrete factory oscillator. */
+ } dnbx_layer_params;
++#ifdef DNBX_HOST_MAIN_SOURCE_ORACLE
++typedef struct {
++    float base_hz, strength, velocity_amount, track, damping;
++    float attack_s, decay_s, sustain, release_s;
++    unsigned follow_provider_cutoff, follow_provider_resonance_strength;
++} dnbx_host_sj6_normal_inputs;
++#endif
+ 
+ /* Public layout supports static allocation; fields below are implementation
+  * state and must not be modified by a caller. No mutable global state.
+@@ -150,6 +170,27 @@
+     uint8_t sj6_ota;
+ #endif
+     uint8_t damper, velocity_mode, superj6_amp_range, filter_link;
++#ifdef DNBX_HOST_MAIN_SOURCE_ORACLE
++    struct {
++        sj6_warm_amp amp[2];
++        sj6_filter_adsr filter[2];
++        dnbx_host_sj6_normal_inputs normal_inputs[2];
++        unsigned dynamic_normal, prehalfband_mask;
++        float source_gain[2], pending_velocity;
++        unsigned ablate_scale_inside_halfband;
++        float *main_filtered[2], *osc_sum;
++        uint64_t tap_len;
++        sj6_main_4x osc[2];
++        sj6_normal_hist normal_hist[2];
++        sj6_normal_coeff normal_coeff[2];
++        unsigned normal_set;
++        float min_provider_base[2],max_provider_base[2];
++        float min_strength[2],max_strength[2],min_damping[2],max_damping[2];
++        sj6_source_cb cb;
++        uint64_t pos, commit[2];
++        unsigned enabled, seen, pending;
++    } main_oracle;
++#endif
+ } dnbx_part;
+ 
+ /* Optional caller-owned render-only semantic counters. They count dnbx_render
+@@ -171,6 +212,12 @@
+ } dnbx_voice_snapshot;
+ 
+ uint32_t dnbx_abi_version(void);
++#ifdef DNBX_HOST_MAIN_SOURCE_ORACLE
++int dnbx_host_main_oracle_setup(dnbx_part *, const float (*raw)[4]);
++int dnbx_host_main_normal_coeff(dnbx_part *, unsigned, sj6_normal_coeff);
++int dnbx_host_main_normal_dynamic(dnbx_part *, unsigned, dnbx_host_sj6_normal_inputs);
++int dnbx_host_main_source_gain(dnbx_part *, unsigned, float);
++#endif
+ /* Returns1 when render counters are available, otherwise0. */
+ uint32_t dnbx_diagnostic_counters_enabled(void);
+ size_t dnbx_part_size(void);

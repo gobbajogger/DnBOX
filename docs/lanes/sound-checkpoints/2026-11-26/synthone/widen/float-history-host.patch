@@ -1,0 +1,44 @@
+--- a/dsp/s1c/s1c.h
++++ b/dsp/s1c/s1c.h
+@@ -186,6 +186,11 @@
+     float ra[2], r0[2], r1[2]; int32_t rk;
+ #endif
+     int32_t wpos, wlen;
++#if defined(X0X_HOST) && defined(S1_WIDEN_ORACLE)
++    unsigned widen_oracle_pos;
++    float widen_oracle_ring[2205];
++#endif
++
+ #if WAP_L0 && S1C_EXT
+     s1u_widen wid;
+ #elif WAP_L0
+--- a/dsp/s1c/s1c.c
++++ b/dsp/s1c/s1c.c
+@@ -1,3 +1,4 @@
++#include <assert.h>
+ #include <stdio.h>
+ #include <stdlib.h>
+ static void room_feed(float*l,float*r){
+@@ -1483,8 +1484,20 @@
+         L *= 2.0f * P(MVOL); R *= 2.0f * P(MVOL);
+ #endif
+         L = comp(s->cmp[0][0], L, &cm) * P(CMG); R = comp(s->cmp[0][1], R, &cm) * P(CMG);
+-        /* widen: the right channel through three allpasses, crossfaded */
+-#if WAP_L0
++        /* Source Soundpipe delay: 50 ms, feedback zero, after master. */
++#if defined(X0X_HOST) && defined(S1_WIDEN_ORACLE)
++        assert(s->sr==44100.f);
++        unsigned w=s->widen_oracle_pos;
++        float d=s->widen_oracle_ring[w];
++        s->widen_oracle_ring[w]=R;
++        s->widen_oracle_pos=w+1u==2205u?0u:w+1u;
++        const float a=P(WIDEN);
++        const float tap[]={L,R,a,d};
++        static FILE *wtrace;
++        if(!wtrace && getenv("WIDEN_TRACE"))wtrace=fopen(getenv("WIDEN_TRACE"),"wb");
++        if(wtrace && fwrite(tap,sizeof(float),4,wtrace)!=4)abort();
++        R=a*d+(1.f-a)*R;
++#elif WAP_L0
+         R = s1u_widen_run(&s->wid, R, P(WIDEN));
+ #else
+         {

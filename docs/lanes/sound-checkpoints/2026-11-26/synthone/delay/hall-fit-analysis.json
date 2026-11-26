@@ -1,0 +1,1729 @@
+{
+  "scope": "Hall raw original-source delay tap and final waveform; no shift or fitted gain, observed echo lags only",
+  "hall": {
+    "d4-F32": {
+      "delay_tap_bands": [
+        {
+          "frequencies": [
+            20,
+            500
+          ],
+          "ref_band_pct": [
+            91.10093993506032,
+            92.20957070133194
+          ],
+          "residual_band_pct": [
+            0.027549012708825156,
+            0.15004854629109426
+          ],
+          "error_dBr_band": [
+            -65.60855713751022,
+            -57.43953856137382
+          ],
+          "level_dB_band": [
+            -0.0033374576697036357,
+            -0.005977748319277273
+          ]
+        },
+        {
+          "frequencies": [
+            500,
+            2000
+          ],
+          "ref_band_pct": [
+            8.277886194446822,
+            7.159527625383818
+          ],
+          "residual_band_pct": [
+            1.2548043423272535,
+            4.178606201820356
+          ],
+          "error_dBr_band": [
+            -38.6078233373309,
+            -31.892625729423404
+          ],
+          "level_dB_band": [
+            -0.07358618680891103,
+            -0.1253265888919242
+          ]
+        },
+        {
+          "frequencies": [
+            2000,
+            5000
+          ],
+          "ref_band_pct": [
+            0.4640762854946799,
+            0.4420861475640544
+          ],
+          "residual_band_pct": [
+            29.389599063500064,
+            47.73418857334511
+          ],
+          "error_dBr_band": [
+            -12.398346102298905,
+            -9.220870106483071
+          ],
+          "level_dB_band": [
+            -1.8522846194044722,
+            -2.7401228731367806
+          ]
+        },
+        {
+          "frequencies": [
+            5000,
+            5512.5
+          ],
+          "ref_band_pct": [
+            0.0358309650739726,
+            0.010739516255342278
+          ],
+          "residual_band_pct": [
+            17.87501798003975,
+            6.343523296298279
+          ],
+          "error_dBr_band": [
+            -3.4345091362559215,
+            -1.8406382883156878
+          ],
+          "level_dB_band": [
+            -7.0188142701173675,
+            -5.983650093137641
+          ]
+        },
+        {
+          "frequencies": [
+            5512.5,
+            7191
+          ],
+          "ref_band_pct": [
+            0.035803472403866166,
+            0.037787179320168486
+          ],
+          "residual_band_pct": [
+            30.032910397351554,
+            26.232539944006973
+          ],
+          "error_dBr_band": [
+            -1.1776662370062683,
+            -1.139137800160221
+          ],
+          "level_dB_band": [
+            -8.830571032832736,
+            -11.074579360845018
+          ]
+        },
+        {
+          "frequencies": [
+            7191,
+            16000
+          ],
+          "ref_band_pct": [
+            0.01908871604425273,
+            0.016848720096416504
+          ],
+          "residual_band_pct": [
+            21.14081540803541,
+            15.195638562997438
+          ],
+          "error_dBr_band": [
+            0.029061212505684053,
+            -0.00257608734832015
+          ],
+          "level_dB_band": [
+            -13.594451585984842,
+            -14.444794742747959
+          ]
+        },
+        {
+          "frequencies": [
+            16000,
+            22051
+          ],
+          "ref_band_pct": [
+            0.0001593572339532511,
+            0.00010062433530879718
+          ],
+          "residual_band_pct": [
+            0.2793036049738194,
+            0.16545476156582722
+          ],
+          "error_dBr_band": [
+            2.0226586301021374,
+            2.6056659723547906
+          ],
+          "level_dB_band": [
+            -2.2685838141661447,
+            -0.9964912658357644
+          ]
+        }
+      ],
+      "whole_mix_bands": [
+        {
+          "frequencies": [
+            20,
+            500
+          ],
+          "ref_band_pct": [
+            77.22226038183881,
+            79.99952702807921
+          ],
+          "residual_band_pct": [
+            0.0358610888007483,
+            0.09104776198778623
+          ],
+          "error_dBr_band": [
+            -60.0023575337734,
+            -55.53753402183822
+          ],
+          "level_dB_band": [
+            -0.004253816435638705,
+            -0.0076304546297339525
+          ]
+        },
+        {
+          "frequencies": [
+            500,
+            2000
+          ],
+          "ref_band_pct": [
+            21.08955398920946,
+            18.572255466091384
+          ],
+          "residual_band_pct": [
+            2.6115786574455693,
+            4.782996007829864
+          ],
+          "error_dBr_band": [
+            -35.742809993520325,
+            -31.990998883209745
+          ],
+          "level_dB_band": [
+            -0.08157289039984354,
+            -0.11893151608719969
+          ]
+        },
+        {
+          "frequencies": [
+            2000,
+            5000
+          ],
+          "ref_band_pct": [
+            1.438150440926605,
+            1.197271294923531
+          ],
+          "residual_band_pct": [
+            39.15132408466881,
+            51.60673417905839
+          ],
+          "error_dBr_band": [
+            -12.321745793563563,
+            -9.754214515278626
+          ],
+          "level_dB_band": [
+            -1.7738961204500423,
+            -2.4822601568125564
+          ]
+        },
+        {
+          "frequencies": [
+            5000,
+            5512.5
+          ],
+          "ref_band_pct": [
+            0.099440748494633,
+            0.028329364572050732
+          ],
+          "residual_band_pct": [
+            19.38457481576602,
+            6.6385854253283805
+          ],
+          "error_dBr_band": [
+            -3.772248199613381,
+            -2.4009654310936095
+          ],
+          "level_dB_band": [
+            -6.3481474607783355,
+            -5.848737491107499
+          ]
+        },
+        {
+          "frequencies": [
+            5512.5,
+            7191
+          ],
+          "ref_band_pct": [
+            0.07109376603461479,
+            0.08361653724847355
+          ],
+          "residual_band_pct": [
+            23.785722579268366,
+            25.09111929480097
+          ],
+          "error_dBr_band": [
+            -1.4263188629670829,
+            -1.3270740102405287
+          ],
+          "level_dB_band": [
+            -7.234428466798487,
+            -10.168017870222563
+          ]
+        },
+        {
+          "frequencies": [
+            7191,
+            16000
+          ],
+          "ref_band_pct": [
+            0.03473441554181098,
+            0.02975134404903488
+          ],
+          "residual_band_pct": [
+            14.931956807611332,
+            11.715308383252458
+          ],
+          "error_dBr_band": [
+            -0.3375998554057137,
+            -0.14688123007078746
+          ],
+          "level_dB_band": [
+            -9.598133540894873,
+            -11.632295904742385
+          ]
+        },
+        {
+          "frequencies": [
+            16000,
+            22051
+          ],
+          "ref_band_pct": [
+            0.00020068215767431603,
+            0.00012273124424062488
+          ],
+          "residual_band_pct": [
+            0.09898191360270148,
+            0.07420890966673496
+          ],
+          "error_dBr_band": [
+            0.25930368993710323,
+            1.715656557276194
+          ],
+          "level_dB_band": [
+            -1.2627912761214255,
+            -0.8669090105000582
+          ]
+        }
+      ]
+    },
+    "rational-F32": {
+      "delay_tap_bands": [
+        {
+          "frequencies": [
+            20,
+            500
+          ],
+          "ref_band_pct": [
+            91.10093993506032,
+            92.20957070133194
+          ],
+          "residual_band_pct": [
+            0.027911423231355988,
+            0.1380169582990286
+          ],
+          "error_dBr_band": [
+            -68.44607706868145,
+            -60.04905048527981
+          ],
+          "level_dB_band": [
+            -0.0025289729716926053,
+            -0.0045251949080693365
+          ]
+        },
+        {
+          "frequencies": [
+            500,
+            2000
+          ],
+          "ref_band_pct": [
+            8.277886194446822,
+            7.159527625383818
+          ],
+          "residual_band_pct": [
+            1.006438735596343,
+            3.209107072751411
+          ],
+          "error_dBr_band": [
+            -42.459989391049106,
+            -35.285616618485136
+          ],
+          "level_dB_band": [
+            -0.053194047100573814,
+            -0.08998931586220282
+          ]
+        },
+        {
+          "frequencies": [
+            2000,
+            5000
+          ],
+          "ref_band_pct": [
+            0.4640762854946799,
+            0.4420861475640544
+          ],
+          "residual_band_pct": [
+            19.460517266998014,
+            36.84140443404466
+          ],
+          "error_dBr_band": [
+            -17.08301827763352,
+            -12.592322295856711
+          ],
+          "level_dB_band": [
+            -1.1123274669050764,
+            -1.7738391840298458
+          ]
+        },
+        {
+          "frequencies": [
+            5000,
+            5512.5
+          ],
+          "ref_band_pct": [
+            0.0358309650739726,
+            0.010739516255342278
+          ],
+          "residual_band_pct": [
+            13.324716870524526,
+            4.980123720194656
+          ],
+          "error_dBr_band": [
+            -7.604673471253656,
+            -5.138060880786343
+          ],
+          "level_dB_band": [
+            -4.247861131373741,
+            -5.456308410819962
+          ]
+        },
+        {
+          "frequencies": [
+            5512.5,
+            7191
+          ],
+          "ref_band_pct": [
+            0.035803472403866166,
+            0.037787179320168486
+          ],
+          "residual_band_pct": [
+            28.91151077583565,
+            30.535629835583922
+          ],
+          "error_dBr_band": [
+            -4.237211935882225,
+            -2.7259909265280937
+          ],
+          "level_dB_band": [
+            -7.007228590313534,
+            -8.863860403671833
+          ]
+        },
+        {
+          "frequencies": [
+            7191,
+            16000
+          ],
+          "ref_band_pct": [
+            0.01908871604425273,
+            0.016848720096416504
+          ],
+          "residual_band_pct": [
+            36.74409035683115,
+            24.063004412381556
+          ],
+          "error_dBr_band": [
+            -0.4645604843914492,
+            -0.2527856519863193
+          ],
+          "level_dB_band": [
+            -8.962692265631812,
+            -11.134976053136768
+          ]
+        },
+        {
+          "frequencies": [
+            16000,
+            22051
+          ],
+          "ref_band_pct": [
+            0.0001593572339532511,
+            0.00010062433530879718
+          ],
+          "residual_band_pct": [
+            0.5247988700513483,
+            0.232711791378049
+          ],
+          "error_dBr_band": [
+            1.8675427722062707,
+            1.8405386435614006
+          ],
+          "level_dB_band": [
+            -2.698185185541719,
+            -2.7628673560323054
+          ]
+        }
+      ],
+      "whole_mix_bands": [
+        {
+          "frequencies": [
+            20,
+            500
+          ],
+          "ref_band_pct": [
+            77.22226038183881,
+            79.99952702807921
+          ],
+          "residual_band_pct": [
+            0.03821115622228498,
+            0.08725090030792579
+          ],
+          "error_dBr_band": [
+            -62.72057882634904,
+            -58.19296098643713
+          ],
+          "level_dB_band": [
+            -0.0032033921523585153,
+            -0.005747497599295084
+          ]
+        },
+        {
+          "frequencies": [
+            500,
+            2000
+          ],
+          "ref_band_pct": [
+            21.08955398920946,
+            18.572255466091384
+          ],
+          "residual_band_pct": [
+            2.2591738722176955,
+            3.78256916376113
+          ],
+          "error_dBr_band": [
+            -39.366232904691486,
+            -35.480563673252966
+          ],
+          "level_dB_band": [
+            -0.058923035724880994,
+            -0.08494070422654401
+          ]
+        },
+        {
+          "frequencies": [
+            2000,
+            5000
+          ],
+          "ref_band_pct": [
+            1.438150440926605,
+            1.197271294923531
+          ],
+          "residual_band_pct": [
+            30.070082232979072,
+            41.54274253319558
+          ],
+          "error_dBr_band": [
+            -16.461752549685265,
+            -13.166760024536554
+          ],
+          "level_dB_band": [
+            -1.0947821974638468,
+            -1.6025282446352098
+          ]
+        },
+        {
+          "frequencies": [
+            5000,
+            5512.5
+          ],
+          "ref_band_pct": [
+            0.099440748494633,
+            0.028329364572050732
+          ],
+          "residual_band_pct": [
+            15.215793191368974,
+            5.4854599321962665
+          ],
+          "error_dBr_band": [
+            -7.8177533974589295,
+            -5.700023824824436
+          ],
+          "level_dB_band": [
+            -3.9333942105259316,
+            -4.928720905496613
+          ]
+        },
+        {
+          "frequencies": [
+            5512.5,
+            7191
+          ],
+          "ref_band_pct": [
+            0.07109376603461479,
+            0.08361653724847355
+          ],
+          "residual_band_pct": [
+            25.767751534712414,
+            29.71538511295296
+          ],
+          "error_dBr_band": [
+            -4.072605484499262,
+            -3.06289411594048
+          ],
+          "level_dB_band": [
+            -6.158369743409825,
+            -7.965527713048224
+          ]
+        },
+        {
+          "frequencies": [
+            7191,
+            16000
+          ],
+          "ref_band_pct": [
+            0.03473441554181098,
+            0.02975134404903488
+          ],
+          "residual_band_pct": [
+            26.463356139099727,
+            19.277666535449466
+          ],
+          "error_dBr_band": [
+            -0.8462062610411679,
+            -0.4543072288539872
+          ],
+          "level_dB_band": [
+            -7.322725463307186,
+            -9.641222026393478
+          ]
+        },
+        {
+          "frequencies": [
+            16000,
+            22051
+          ],
+          "ref_band_pct": [
+            0.00020068215767431603,
+            0.00012273124424062488
+          ],
+          "residual_band_pct": [
+            0.18562764373594628,
+            0.10892521074743382
+          ],
+          "error_dBr_band": [
+            -0.0037166177084116195,
+            0.9119467554806171
+          ],
+          "level_dB_band": [
+            -1.6962947740638767,
+            -2.282452184129777
+          ]
+        }
+      ]
+    },
+    "full-F32": {
+      "delay_tap_bands": [
+        {
+          "frequencies": [
+            20,
+            500
+          ],
+          "ref_band_pct": [
+            91.10093993506032,
+            92.20957070133194
+          ],
+          "residual_band_pct": [
+            0.0,
+            2.797298268645611
+          ],
+          "error_dBr_band": [
+            -400.0,
+            -159.36692790399752
+          ],
+          "level_dB_band": [
+            0.0,
+            -2.6392095021998896e-09
+          ]
+        },
+        {
+          "frequencies": [
+            500,
+            2000
+          ],
+          "ref_band_pct": [
+            8.277886194446822,
+            7.159527625383818
+          ],
+          "residual_band_pct": [
+            0.0,
+            8.268135898338684
+          ],
+          "error_dBr_band": [
+            -400.0,
+            -143.56132329765714
+          ],
+          "level_dB_band": [
+            0.0,
+            2.907888008336864e-09
+          ]
+        },
+        {
+          "frequencies": [
+            2000,
+            5000
+          ],
+          "ref_band_pct": [
+            0.4640762854946799,
+            0.4420861475640544
+          ],
+          "residual_band_pct": [
+            0.0,
+            16.579043268172143
+          ],
+          "error_dBr_band": [
+            -400.0,
+            -128.44603008697186
+          ],
+          "level_dB_band": [
+            0.0,
+            4.5260855984605975e-08
+          ]
+        },
+        {
+          "frequencies": [
+            5000,
+            5512.5
+          ],
+          "ref_band_pct": [
+            0.0358309650739726,
+            0.010739516255342278
+          ],
+          "residual_band_pct": [
+            0.0,
+            2.716238407355906
+          ],
+          "error_dBr_band": [
+            -400.0,
+            -120.1567240072853
+          ],
+          "level_dB_band": [
+            0.0,
+            6.722130187381785e-08
+          ]
+        },
+        {
+          "frequencies": [
+            5512.5,
+            7191
+          ],
+          "ref_band_pct": [
+            0.035803472403866166,
+            0.037787179320168486
+          ],
+          "residual_band_pct": [
+            0.0,
+            9.136535500988176
+          ],
+          "error_dBr_band": [
+            -400.0,
+            -120.35218495358873
+          ],
+          "level_dB_band": [
+            0.0,
+            -1.4283426864736615e-07
+          ]
+        },
+        {
+          "frequencies": [
+            7191,
+            16000
+          ],
+          "ref_band_pct": [
+            0.01908871604425273,
+            0.016848720096416504
+          ],
+          "residual_band_pct": [
+            0.0,
+            40.56241680085166
+          ],
+          "error_dBr_band": [
+            -400.0,
+            -110.37098659019637
+          ],
+          "level_dB_band": [
+            0.0,
+            1.3301062757278284e-07
+          ]
+        },
+        {
+          "frequencies": [
+            16000,
+            22051
+          ],
+          "ref_band_pct": [
+            0.0001593572339532511,
+            0.00010062433530879718
+          ],
+          "residual_band_pct": [
+            0.0,
+            19.832267074985495
+          ],
+          "error_dBr_band": [
+            -400.0,
+            -91.23986229114392
+          ],
+          "level_dB_band": [
+            0.0,
+            6.107110411654629e-07
+          ]
+        }
+      ],
+      "whole_mix_bands": [
+        {
+          "frequencies": [
+            20,
+            500
+          ],
+          "ref_band_pct": [
+            77.22226038183881,
+            79.99952702807921
+          ],
+          "residual_band_pct": [
+            1.4076322247307593,
+            0.7017055742346581
+          ],
+          "error_dBr_band": [
+            -117.98295732814664,
+            -115.24105330009638
+          ],
+          "level_dB_band": [
+            -2.4020811062874036e-07,
+            -3.833488196136943e-07
+          ]
+        },
+        {
+          "frequencies": [
+            500,
+            2000
+          ],
+          "ref_band_pct": [
+            21.08955398920946,
+            18.572255466091384
+          ],
+          "residual_band_pct": [
+            16.720405145861577,
+            9.132337085379948
+          ],
+          "error_dBr_band": [
+            -101.5986302231311,
+            -97.75455552574329
+          ],
+          "level_dB_band": [
+            -5.649570284898335e-07,
+            7.915044227322936e-08
+          ]
+        },
+        {
+          "frequencies": [
+            2000,
+            5000
+          ],
+          "ref_band_pct": [
+            1.438150440926605,
+            1.197271294923531
+          ],
+          "residual_band_pct": [
+            28.930683538788443,
+            17.538663135061782
+          ],
+          "error_dBr_band": [
+            -87.55488047592586,
+            -83.01368920702474
+          ],
+          "level_dB_band": [
+            3.0773686544898412e-06,
+            1.8091278804255827e-06
+          ]
+        },
+        {
+          "frequencies": [
+            5000,
+            5512.5
+          ],
+          "ref_band_pct": [
+            0.099440748494633,
+            0.028329364572050732
+          ],
+          "residual_band_pct": [
+            4.319607226155351,
+            2.8863397618066644
+          ],
+          "error_dBr_band": [
+            -84.21162549153763,
+            -74.59062218357784
+          ],
+          "level_dB_band": [
+            -2.4563597676043763e-05,
+            3.866838324877763e-05
+          ]
+        },
+        {
+          "frequencies": [
+            5512.5,
+            7191
+          ],
+          "ref_band_pct": [
+            0.07109376603461479,
+            0.08361653724847355
+          ],
+          "residual_band_pct": [
+            12.201075645635868,
+            9.067908990838731
+          ],
+          "error_dBr_band": [
+            -78.24475824479802,
+            -74.31957862884519
+          ],
+          "level_dB_band": [
+            -1.9107072719108504e-05,
+            -1.8832901624823977e-05
+          ]
+        },
+        {
+          "frequencies": [
+            7191,
+            16000
+          ],
+          "ref_band_pct": [
+            0.03473441554181098,
+            0.02975134404903488
+          ],
+          "residual_band_pct": [
+            30.887058944680895,
+            40.49001228752394
+          ],
+          "error_dBr_band": [
+            -71.10025862301767,
+            -63.33331518811123
+          ],
+          "level_dB_band": [
+            -1.2917836283434221e-05,
+            3.83921941033778e-05
+          ]
+        },
+        {
+          "frequencies": [
+            16000,
+            22051
+          ],
+          "ref_band_pct": [
+            0.00020068215767431603,
+            0.00012273124424062488
+          ],
+          "residual_band_pct": [
+            5.526389098008431,
+            20.18074775984802
+          ],
+          "error_dBr_band": [
+            -56.19109726212439,
+            -42.511907200645155
+          ],
+          "level_dB_band": [
+            -1.6476579008427246e-06,
+            -0.00047289219295963475
+          ]
+        }
+      ]
+    }
+  },
+  "impulse": [
+    {
+      "shape": 112,
+      "onset": 512,
+      "branch": 0,
+      "wanted_echo_center": 59312,
+      "original_peak_sample": 59312,
+      "candidate_peak_sample": 59313,
+      "original_energy_centroid": 59312.0,
+      "candidate_energy_centroid": 59312.61967074524,
+      "unshifted_correlation": 0.5624276494796617,
+      "diagnostic_correlation_peak_lag": 1,
+      "residual_db_unshifted": -1.6261393742800188
+    },
+    {
+      "shape": 112,
+      "onset": 513,
+      "branch": 0,
+      "wanted_echo_center": 59313,
+      "original_peak_sample": 59313,
+      "candidate_peak_sample": 59313,
+      "original_energy_centroid": 59313.0,
+      "candidate_energy_centroid": 59312.621874656936,
+      "unshifted_correlation": 0.6013337363951912,
+      "diagnostic_correlation_peak_lag": 0,
+      "residual_db_unshifted": -1.8804465841878892
+    },
+    {
+      "shape": 112,
+      "onset": 514,
+      "branch": 0,
+      "wanted_echo_center": 59314,
+      "original_peak_sample": 59314,
+      "candidate_peak_sample": 59313,
+      "original_energy_centroid": 59314.0,
+      "candidate_energy_centroid": 59313.48507579657,
+      "unshifted_correlation": 0.47263194884306753,
+      "diagnostic_correlation_peak_lag": -1,
+      "residual_db_unshifted": -1.0669924671997928
+    },
+    {
+      "shape": 112,
+      "onset": 515,
+      "branch": 0,
+      "wanted_echo_center": 59315,
+      "original_peak_sample": 59315,
+      "candidate_peak_sample": 59316,
+      "original_energy_centroid": 59315.0,
+      "candidate_energy_centroid": 59315.68241422703,
+      "unshifted_correlation": 0.5500587150344239,
+      "diagnostic_correlation_peak_lag": 1,
+      "residual_db_unshifted": -1.5473419553159293
+    },
+    {
+      "shape": 4096,
+      "onset": 512,
+      "branch": 0,
+      "wanted_echo_center": 59312,
+      "original_peak_sample": 59312,
+      "candidate_peak_sample": 59312,
+      "original_energy_centroid": 59312.0,
+      "candidate_energy_centroid": 59312.0,
+      "unshifted_correlation": 1.0,
+      "diagnostic_correlation_peak_lag": 0,
+      "residual_db_unshifted": -400.0
+    },
+    {
+      "shape": 4096,
+      "onset": 513,
+      "branch": 0,
+      "wanted_echo_center": 59313,
+      "original_peak_sample": 59313,
+      "candidate_peak_sample": 59313,
+      "original_energy_centroid": 59313.0,
+      "candidate_energy_centroid": 59313.0,
+      "unshifted_correlation": 1.0,
+      "diagnostic_correlation_peak_lag": 0,
+      "residual_db_unshifted": -400.0
+    },
+    {
+      "shape": 4096,
+      "onset": 514,
+      "branch": 0,
+      "wanted_echo_center": 59314,
+      "original_peak_sample": 59314,
+      "candidate_peak_sample": 59314,
+      "original_energy_centroid": 59314.0,
+      "candidate_energy_centroid": 59314.0,
+      "unshifted_correlation": 1.0,
+      "diagnostic_correlation_peak_lag": 0,
+      "residual_db_unshifted": -400.0
+    },
+    {
+      "shape": 4096,
+      "onset": 515,
+      "branch": 0,
+      "wanted_echo_center": 59315,
+      "original_peak_sample": 59315,
+      "candidate_peak_sample": 59315,
+      "original_energy_centroid": 59315.0,
+      "candidate_energy_centroid": 59315.0,
+      "unshifted_correlation": 1.0,
+      "diagnostic_correlation_peak_lag": 0,
+      "residual_db_unshifted": -400.0
+    },
+    {
+      "shape": 64,
+      "onset": 512,
+      "branch": 0,
+      "wanted_echo_center": 59312,
+      "original_peak_sample": 59312,
+      "candidate_peak_sample": 59314,
+      "original_energy_centroid": 59312.0,
+      "candidate_energy_centroid": 59313.50000000665,
+      "unshifted_correlation": 0.39778344615790845,
+      "diagnostic_correlation_peak_lag": 2,
+      "residual_db_unshifted": -0.7393890443728584
+    },
+    {
+      "shape": 64,
+      "onset": 513,
+      "branch": 0,
+      "wanted_echo_center": 59313,
+      "original_peak_sample": 59313,
+      "candidate_peak_sample": 59314,
+      "original_energy_centroid": 59313.0,
+      "candidate_energy_centroid": 59313.50000000665,
+      "unshifted_correlation": 0.5257417335407548,
+      "diagnostic_correlation_peak_lag": 1,
+      "residual_db_unshifted": -1.3599426459067536
+    },
+    {
+      "shape": 64,
+      "onset": 514,
+      "branch": 0,
+      "wanted_echo_center": 59314,
+      "original_peak_sample": 59314,
+      "candidate_peak_sample": 59314,
+      "original_energy_centroid": 59314.0,
+      "candidate_energy_centroid": 59313.50000000665,
+      "unshifted_correlation": 0.5257417733956008,
+      "diagnostic_correlation_peak_lag": 0,
+      "residual_db_unshifted": -1.3599428536797493
+    },
+    {
+      "shape": 64,
+      "onset": 515,
+      "branch": 0,
+      "wanted_echo_center": 59315,
+      "original_peak_sample": 59315,
+      "candidate_peak_sample": 59314,
+      "original_energy_centroid": 59315.0,
+      "candidate_energy_centroid": 59313.50000000665,
+      "unshifted_correlation": 0.39778344615790845,
+      "diagnostic_correlation_peak_lag": -1,
+      "residual_db_unshifted": -0.7393890443728584
+    },
+    {
+      "shape": 112,
+      "onset": 512,
+      "branch": 0,
+      "wanted_echo_center": 118113,
+      "original_peak_sample": 118113,
+      "candidate_peak_sample": 118113,
+      "original_energy_centroid": 118113.0,
+      "candidate_energy_centroid": 118113.48146872365,
+      "unshifted_correlation": 0.5639742362382351,
+      "diagnostic_correlation_peak_lag": 0,
+      "residual_db_unshifted": -1.5419167064627661
+    },
+    {
+      "shape": 112,
+      "onset": 513,
+      "branch": 0,
+      "wanted_echo_center": 118114,
+      "original_peak_sample": 118114,
+      "candidate_peak_sample": 118113,
+      "original_energy_centroid": 118114.0,
+      "candidate_energy_centroid": 118113.48507966932,
+      "unshifted_correlation": 0.5139758531739355,
+      "diagnostic_correlation_peak_lag": -1,
+      "residual_db_unshifted": -1.2869665442953724
+    },
+    {
+      "shape": 112,
+      "onset": 514,
+      "branch": 0,
+      "wanted_echo_center": 118115,
+      "original_peak_sample": 118115,
+      "candidate_peak_sample": 118114,
+      "original_energy_centroid": 118115.0,
+      "candidate_energy_centroid": 118114.53708660054,
+      "unshifted_correlation": 0.4470181129081034,
+      "diagnostic_correlation_peak_lag": -1,
+      "residual_db_unshifted": -0.9333735190987058
+    },
+    {
+      "shape": 112,
+      "onset": 515,
+      "branch": 0,
+      "wanted_echo_center": 118116,
+      "original_peak_sample": 118116,
+      "candidate_peak_sample": 118116,
+      "original_energy_centroid": 118116.0,
+      "candidate_energy_centroid": 118116.53898683186,
+      "unshifted_correlation": 0.5562825479113115,
+      "diagnostic_correlation_peak_lag": 0,
+      "residual_db_unshifted": -1.4982120688351184
+    },
+    {
+      "shape": 4096,
+      "onset": 512,
+      "branch": 0,
+      "wanted_echo_center": 118113,
+      "original_peak_sample": 118113,
+      "candidate_peak_sample": 118113,
+      "original_energy_centroid": 118113.0,
+      "candidate_energy_centroid": 118113.0,
+      "unshifted_correlation": 1.0,
+      "diagnostic_correlation_peak_lag": 0,
+      "residual_db_unshifted": -400.0
+    },
+    {
+      "shape": 4096,
+      "onset": 513,
+      "branch": 0,
+      "wanted_echo_center": 118114,
+      "original_peak_sample": 118114,
+      "candidate_peak_sample": 118114,
+      "original_energy_centroid": 118114.0,
+      "candidate_energy_centroid": 118114.0,
+      "unshifted_correlation": 1.0,
+      "diagnostic_correlation_peak_lag": 0,
+      "residual_db_unshifted": -400.0
+    },
+    {
+      "shape": 4096,
+      "onset": 514,
+      "branch": 0,
+      "wanted_echo_center": 118115,
+      "original_peak_sample": 118115,
+      "candidate_peak_sample": 118115,
+      "original_energy_centroid": 118115.0,
+      "candidate_energy_centroid": 118115.0,
+      "unshifted_correlation": 1.0,
+      "diagnostic_correlation_peak_lag": 0,
+      "residual_db_unshifted": -400.0
+    },
+    {
+      "shape": 4096,
+      "onset": 515,
+      "branch": 0,
+      "wanted_echo_center": 118116,
+      "original_peak_sample": 118116,
+      "candidate_peak_sample": 118116,
+      "original_energy_centroid": 118116.0,
+      "candidate_energy_centroid": 118116.0,
+      "unshifted_correlation": 1.0,
+      "diagnostic_correlation_peak_lag": 0,
+      "residual_db_unshifted": -400.0
+    },
+    {
+      "shape": 64,
+      "onset": 512,
+      "branch": 0,
+      "wanted_echo_center": 118113,
+      "original_peak_sample": 118113,
+      "candidate_peak_sample": 118114,
+      "original_energy_centroid": 118113.0,
+      "candidate_energy_centroid": 118114.24967457015,
+      "unshifted_correlation": 0.4480902412295381,
+      "diagnostic_correlation_peak_lag": 1,
+      "residual_db_unshifted": -0.9446596162565155
+    },
+    {
+      "shape": 64,
+      "onset": 513,
+      "branch": 0,
+      "wanted_echo_center": 118114,
+      "original_peak_sample": 118114,
+      "candidate_peak_sample": 118114,
+      "original_energy_centroid": 118114.0,
+      "candidate_energy_centroid": 118114.24967457015,
+      "unshifted_correlation": 0.4826182092094872,
+      "diagnostic_correlation_peak_lag": 0,
+      "residual_db_unshifted": -1.0868632620309264
+    },
+    {
+      "shape": 64,
+      "onset": 514,
+      "branch": 0,
+      "wanted_echo_center": 118115,
+      "original_peak_sample": 118115,
+      "candidate_peak_sample": 118114,
+      "original_energy_centroid": 118115.0,
+      "candidate_energy_centroid": 118114.24967457015,
+      "unshifted_correlation": 0.43073257079530664,
+      "diagnostic_correlation_peak_lag": -1,
+      "residual_db_unshifted": -0.8748930466853405
+    },
+    {
+      "shape": 64,
+      "onset": 515,
+      "branch": 0,
+      "wanted_echo_center": 118116,
+      "original_peak_sample": 118116,
+      "candidate_peak_sample": 118114,
+      "original_energy_centroid": 118116.0,
+      "candidate_energy_centroid": 118114.24967457015,
+      "unshifted_correlation": 0.349617256378055,
+      "diagnostic_correlation_peak_lag": -2,
+      "residual_db_unshifted": -0.5629435461969965
+    },
+    {
+      "shape": 112,
+      "onset": 512,
+      "branch": 1,
+      "wanted_echo_center": 29912,
+      "original_peak_sample": 29912,
+      "candidate_peak_sample": 29913,
+      "original_energy_centroid": 29912.0,
+      "candidate_energy_centroid": 29912.616561847863,
+      "unshifted_correlation": 0.5629874248822828,
+      "diagnostic_correlation_peak_lag": 1,
+      "residual_db_unshifted": -1.6296503404830092
+    },
+    {
+      "shape": 112,
+      "onset": 513,
+      "branch": 1,
+      "wanted_echo_center": 29913,
+      "original_peak_sample": 29913,
+      "candidate_peak_sample": 29913,
+      "original_energy_centroid": 29913.0,
+      "candidate_energy_centroid": 29912.618765582607,
+      "unshifted_correlation": 0.6009003373910675,
+      "diagnostic_correlation_peak_lag": 0,
+      "residual_db_unshifted": -1.8775096165785015
+    },
+    {
+      "shape": 112,
+      "onset": 514,
+      "branch": 1,
+      "wanted_echo_center": 29914,
+      "original_peak_sample": 29914,
+      "candidate_peak_sample": 29913,
+      "original_energy_centroid": 29914.0,
+      "candidate_energy_centroid": 29913.48209082832,
+      "unshifted_correlation": 0.47241216198952507,
+      "diagnostic_correlation_peak_lag": -1,
+      "residual_db_unshifted": -1.0660155634750075
+    },
+    {
+      "shape": 112,
+      "onset": 515,
+      "branch": 1,
+      "wanted_echo_center": 29915,
+      "original_peak_sample": 29915,
+      "candidate_peak_sample": 29916,
+      "original_energy_centroid": 29915.0,
+      "candidate_energy_centroid": 29915.679360575978,
+      "unshifted_correlation": 0.5506425589407584,
+      "diagnostic_correlation_peak_lag": 1,
+      "residual_db_unshifted": -1.5509169586339322
+    },
+    {
+      "shape": 4096,
+      "onset": 512,
+      "branch": 1,
+      "wanted_echo_center": 29912,
+      "original_peak_sample": 29912,
+      "candidate_peak_sample": 29912,
+      "original_energy_centroid": 29912.0,
+      "candidate_energy_centroid": 29912.0,
+      "unshifted_correlation": 1.0,
+      "diagnostic_correlation_peak_lag": 0,
+      "residual_db_unshifted": -400.0
+    },
+    {
+      "shape": 4096,
+      "onset": 513,
+      "branch": 1,
+      "wanted_echo_center": 29913,
+      "original_peak_sample": 29913,
+      "candidate_peak_sample": 29913,
+      "original_energy_centroid": 29913.0,
+      "candidate_energy_centroid": 29913.0,
+      "unshifted_correlation": 1.0,
+      "diagnostic_correlation_peak_lag": 0,
+      "residual_db_unshifted": -400.0
+    },
+    {
+      "shape": 4096,
+      "onset": 514,
+      "branch": 1,
+      "wanted_echo_center": 29914,
+      "original_peak_sample": 29914,
+      "candidate_peak_sample": 29914,
+      "original_energy_centroid": 29914.0,
+      "candidate_energy_centroid": 29914.0,
+      "unshifted_correlation": 1.0,
+      "diagnostic_correlation_peak_lag": 0,
+      "residual_db_unshifted": -400.0
+    },
+    {
+      "shape": 4096,
+      "onset": 515,
+      "branch": 1,
+      "wanted_echo_center": 29915,
+      "original_peak_sample": 29915,
+      "candidate_peak_sample": 29915,
+      "original_energy_centroid": 29915.0,
+      "candidate_energy_centroid": 29915.0,
+      "unshifted_correlation": 1.0,
+      "diagnostic_correlation_peak_lag": 0,
+      "residual_db_unshifted": -400.0
+    },
+    {
+      "shape": 64,
+      "onset": 512,
+      "branch": 1,
+      "wanted_echo_center": 29912,
+      "original_peak_sample": 29912,
+      "candidate_peak_sample": 29913,
+      "original_energy_centroid": 29912.0,
+      "candidate_energy_centroid": 29913.49999998929,
+      "unshifted_correlation": 0.39778343651617604,
+      "diagnostic_correlation_peak_lag": 1,
+      "residual_db_unshifted": -0.7393889988826269
+    },
+    {
+      "shape": 64,
+      "onset": 513,
+      "branch": 1,
+      "wanted_echo_center": 29913,
+      "original_peak_sample": 29913,
+      "candidate_peak_sample": 29913,
+      "original_energy_centroid": 29913.0,
+      "candidate_energy_centroid": 29913.49999998929,
+      "unshifted_correlation": 0.5257417832179531,
+      "diagnostic_correlation_peak_lag": 0,
+      "residual_db_unshifted": -1.3599429095710214
+    },
+    {
+      "shape": 64,
+      "onset": 514,
+      "branch": 1,
+      "wanted_echo_center": 29914,
+      "original_peak_sample": 29914,
+      "candidate_peak_sample": 29913,
+      "original_energy_centroid": 29914.0,
+      "candidate_energy_centroid": 29913.49999998929,
+      "unshifted_correlation": 0.5257417349845319,
+      "diagnostic_correlation_peak_lag": -1,
+      "residual_db_unshifted": -1.3599426581184728
+    },
+    {
+      "shape": 64,
+      "onset": 515,
+      "branch": 1,
+      "wanted_echo_center": 29915,
+      "original_peak_sample": 29915,
+      "candidate_peak_sample": 29913,
+      "original_energy_centroid": 29915.0,
+      "candidate_energy_centroid": 29913.49999998929,
+      "unshifted_correlation": 0.39778343651617604,
+      "diagnostic_correlation_peak_lag": -2,
+      "residual_db_unshifted": -0.7393889988826263
+    },
+    {
+      "shape": 112,
+      "onset": 512,
+      "branch": 1,
+      "wanted_echo_center": 59313,
+      "original_peak_sample": 59313,
+      "candidate_peak_sample": 59313,
+      "original_energy_centroid": 59313.0,
+      "candidate_energy_centroid": 59313.44692292795,
+      "unshifted_correlation": 0.554639824470048,
+      "diagnostic_correlation_peak_lag": 0,
+      "residual_db_unshifted": -1.4872972349450064
+    },
+    {
+      "shape": 112,
+      "onset": 513,
+      "branch": 1,
+      "wanted_echo_center": 59314,
+      "original_peak_sample": 59314,
+      "candidate_peak_sample": 59313,
+      "original_energy_centroid": 59314.0,
+      "candidate_energy_centroid": 59313.45055769634,
+      "unshifted_correlation": 0.4906658696718414,
+      "diagnostic_correlation_peak_lag": -1,
+      "residual_db_unshifted": -1.1697310940709233
+    },
+    {
+      "shape": 112,
+      "onset": 514,
+      "branch": 1,
+      "wanted_echo_center": 59315,
+      "original_peak_sample": 59315,
+      "candidate_peak_sample": 59314,
+      "original_energy_centroid": 59315.0,
+      "candidate_energy_centroid": 59314.527815142246,
+      "unshifted_correlation": 0.4472166922665565,
+      "diagnostic_correlation_peak_lag": -1,
+      "residual_db_unshifted": -0.9333393531415767
+    },
+    {
+      "shape": 112,
+      "onset": 515,
+      "branch": 1,
+      "wanted_echo_center": 59316,
+      "original_peak_sample": 59316,
+      "candidate_peak_sample": 59316,
+      "original_energy_centroid": 59316.0,
+      "candidate_energy_centroid": 59316.49700969996,
+      "unshifted_correlation": 0.5555025190338484,
+      "diagnostic_correlation_peak_lag": 0,
+      "residual_db_unshifted": -1.4903700039933288
+    },
+    {
+      "shape": 4096,
+      "onset": 512,
+      "branch": 1,
+      "wanted_echo_center": 59313,
+      "original_peak_sample": 59313,
+      "candidate_peak_sample": 59313,
+      "original_energy_centroid": 59313.0,
+      "candidate_energy_centroid": 59313.0,
+      "unshifted_correlation": 1.0,
+      "diagnostic_correlation_peak_lag": 0,
+      "residual_db_unshifted": -400.0
+    },
+    {
+      "shape": 4096,
+      "onset": 513,
+      "branch": 1,
+      "wanted_echo_center": 59314,
+      "original_peak_sample": 59314,
+      "candidate_peak_sample": 59314,
+      "original_energy_centroid": 59314.0,
+      "candidate_energy_centroid": 59314.0,
+      "unshifted_correlation": 1.0,
+      "diagnostic_correlation_peak_lag": 0,
+      "residual_db_unshifted": -400.0
+    },
+    {
+      "shape": 4096,
+      "onset": 514,
+      "branch": 1,
+      "wanted_echo_center": 59315,
+      "original_peak_sample": 59315,
+      "candidate_peak_sample": 59315,
+      "original_energy_centroid": 59315.0,
+      "candidate_energy_centroid": 59315.0,
+      "unshifted_correlation": 1.0,
+      "diagnostic_correlation_peak_lag": 0,
+      "residual_db_unshifted": -400.0
+    },
+    {
+      "shape": 4096,
+      "onset": 515,
+      "branch": 1,
+      "wanted_echo_center": 59316,
+      "original_peak_sample": 59316,
+      "candidate_peak_sample": 59316,
+      "original_energy_centroid": 59316.0,
+      "candidate_energy_centroid": 59316.0,
+      "unshifted_correlation": 1.0,
+      "diagnostic_correlation_peak_lag": 0,
+      "residual_db_unshifted": -400.0
+    },
+    {
+      "shape": 64,
+      "onset": 512,
+      "branch": 1,
+      "wanted_echo_center": 59313,
+      "original_peak_sample": 59313,
+      "candidate_peak_sample": 59314,
+      "original_energy_centroid": 59313.0,
+      "candidate_energy_centroid": 59314.2496745116,
+      "unshifted_correlation": 0.44809024312128154,
+      "diagnostic_correlation_peak_lag": 1,
+      "residual_db_unshifted": -0.9446596150518318
+    },
+    {
+      "shape": 64,
+      "onset": 513,
+      "branch": 1,
+      "wanted_echo_center": 59314,
+      "original_peak_sample": 59314,
+      "candidate_peak_sample": 59314,
+      "original_energy_centroid": 59314.0,
+      "candidate_energy_centroid": 59314.2496745116,
+      "unshifted_correlation": 0.48261819554917657,
+      "diagnostic_correlation_peak_lag": 0,
+      "residual_db_unshifted": -1.0868631913278972
+    },
+    {
+      "shape": 64,
+      "onset": 514,
+      "branch": 1,
+      "wanted_echo_center": 59315,
+      "original_peak_sample": 59315,
+      "candidate_peak_sample": 59314,
+      "original_energy_centroid": 59315.0,
+      "candidate_energy_centroid": 59314.2496745116,
+      "unshifted_correlation": 0.4307325551723031,
+      "diagnostic_correlation_peak_lag": -1,
+      "residual_db_unshifted": -0.8748929777454982
+    },
+    {
+      "shape": 64,
+      "onset": 515,
+      "branch": 1,
+      "wanted_echo_center": 59316,
+      "original_peak_sample": 59316,
+      "candidate_peak_sample": 59314,
+      "original_energy_centroid": 59316.0,
+      "candidate_energy_centroid": 59314.2496745116,
+      "unshifted_correlation": 0.3496172669040162,
+      "diagnostic_correlation_peak_lag": -2,
+      "residual_db_unshifted": -0.562943588122501
+    },
+    {
+      "shape": 112,
+      "onset": 512,
+      "branch": 1,
+      "wanted_echo_center": 88712,
+      "original_peak_sample": 88712,
+      "candidate_peak_sample": 88713,
+      "original_energy_centroid": 88712.06261511608,
+      "candidate_energy_centroid": 88712.89666230312,
+      "unshifted_correlation": 0.5444694286925295,
+      "diagnostic_correlation_peak_lag": 1,
+      "residual_db_unshifted": -1.4960131708610809
+    },
+    {
+      "shape": 112,
+      "onset": 513,
+      "branch": 1,
+      "wanted_echo_center": 88713,
+      "original_peak_sample": 88713,
+      "candidate_peak_sample": 88713,
+      "original_energy_centroid": 88713.06261511608,
+      "candidate_energy_centroid": 88712.90198677033,
+      "unshifted_correlation": 0.6098365293970552,
+      "diagnostic_correlation_peak_lag": 0,
+      "residual_db_unshifted": -1.8944858837269254
+    },
+    {
+      "shape": 112,
+      "onset": 514,
+      "branch": 1,
+      "wanted_echo_center": 88714,
+      "original_peak_sample": 88714,
+      "candidate_peak_sample": 88713,
+      "original_energy_centroid": 88714.06261511608,
+      "candidate_energy_centroid": 88713.8554436436,
+      "unshifted_correlation": 0.5201965650284122,
+      "diagnostic_correlation_peak_lag": -1,
+      "residual_db_unshifted": -1.303528932303416
+    },
+    {
+      "shape": 112,
+      "onset": 515,
+      "branch": 1,
+      "wanted_echo_center": 88715,
+      "original_peak_sample": 88715,
+      "candidate_peak_sample": 88716,
+      "original_energy_centroid": 88715.06261511608,
+      "candidate_energy_centroid": 88715.94837082988,
+      "unshifted_correlation": 0.5388587152708396,
+      "diagnostic_correlation_peak_lag": 1,
+      "residual_db_unshifted": -1.4619047130773788
+    },
+    {
+      "shape": 4096,
+      "onset": 512,
+      "branch": 1,
+      "wanted_echo_center": 88712,
+      "original_peak_sample": 88712,
+      "candidate_peak_sample": 88712,
+      "original_energy_centroid": 88712.06261511608,
+      "candidate_energy_centroid": 88712.06261511608,
+      "unshifted_correlation": 0.9999999999999998,
+      "diagnostic_correlation_peak_lag": 0,
+      "residual_db_unshifted": -400.0
+    },
+    {
+      "shape": 4096,
+      "onset": 513,
+      "branch": 1,
+      "wanted_echo_center": 88713,
+      "original_peak_sample": 88713,
+      "candidate_peak_sample": 88713,
+      "original_energy_centroid": 88713.06261511608,
+      "candidate_energy_centroid": 88713.06261511608,
+      "unshifted_correlation": 0.9999999999999998,
+      "diagnostic_correlation_peak_lag": 0,
+      "residual_db_unshifted": -400.0
+    },
+    {
+      "shape": 4096,
+      "onset": 514,
+      "branch": 1,
+      "wanted_echo_center": 88714,
+      "original_peak_sample": 88714,
+      "candidate_peak_sample": 88714,
+      "original_energy_centroid": 88714.06261511608,
+      "candidate_energy_centroid": 88714.06261511608,
+      "unshifted_correlation": 0.9999999999999998,
+      "diagnostic_correlation_peak_lag": 0,
+      "residual_db_unshifted": -400.0
+    },
+    {
+      "shape": 4096,
+      "onset": 515,
+      "branch": 1,
+      "wanted_echo_center": 88715,
+      "original_peak_sample": 88715,
+      "candidate_peak_sample": 88715,
+      "original_energy_centroid": 88715.06261511608,
+      "candidate_energy_centroid": 88715.06261511608,
+      "unshifted_correlation": 0.9999999999999998,
+      "diagnostic_correlation_peak_lag": 0,
+      "residual_db_unshifted": -400.0
+    },
+    {
+      "shape": 64,
+      "onset": 512,
+      "branch": 1,
+      "wanted_echo_center": 88712,
+      "original_peak_sample": 88712,
+      "candidate_peak_sample": 88714,
+      "original_energy_centroid": 88712.06261511608,
+      "candidate_energy_centroid": 88713.6595278978,
+      "unshifted_correlation": 0.46509624311540115,
+      "diagnostic_correlation_peak_lag": 1,
+      "residual_db_unshifted": -1.0515216129428253
+    },
+    {
+      "shape": 64,
+      "onset": 513,
+      "branch": 1,
+      "wanted_echo_center": 88713,
+      "original_peak_sample": 88713,
+      "candidate_peak_sample": 88714,
+      "original_energy_centroid": 88713.06261511608,
+      "candidate_energy_centroid": 88713.6595278978,
+      "unshifted_correlation": 0.5496710667705316,
+      "diagnostic_correlation_peak_lag": 0,
+      "residual_db_unshifted": -1.473189246792407
+    },
+    {
+      "shape": 64,
+      "onset": 514,
+      "branch": 1,
+      "wanted_echo_center": 88714,
+      "original_peak_sample": 88714,
+      "candidate_peak_sample": 88714,
+      "original_energy_centroid": 88714.06261511608,
+      "candidate_energy_centroid": 88713.6595278978,
+      "unshifted_correlation": 0.5372110004498483,
+      "diagnostic_correlation_peak_lag": -1,
+      "residual_db_unshifted": -1.408435964409953
+    },
+    {
+      "shape": 64,
+      "onset": 515,
+      "branch": 1,
+      "wanted_echo_center": 88715,
+      "original_peak_sample": 88715,
+      "candidate_peak_sample": 88714,
+      "original_energy_centroid": 88715.06261511608,
+      "candidate_energy_centroid": 88713.6595278978,
+      "unshifted_correlation": 0.4302266794564242,
+      "diagnostic_correlation_peak_lag": -2,
+      "residual_db_unshifted": -0.8889264033850928
+    }
+  ]
+}

@@ -1,0 +1,52 @@
+--- a/firmware/src/app/s1c_part.h
++++ b/firmware/src/app/s1c_part.h
+@@ -20,7 +20,7 @@
+ 
+ typedef struct {
+     s1c e;
+-    uint16_t wbuf[S1C_WAP_WORDS];
++    uint16_t wbuf[2205]; /* source 50 ms at the S1 part's 44.1 kHz */
+     uint8_t *arena;            /* S1C_ARENA_BYTES, or NULL: no delay/reverb */
+     uint16_t program;          /* pack program, or S1_PART_INIT */
+     float detm;                /* program DETM: pitch bend scales it */
+--- a/firmware/src/dsp/s1c/s1c.c
++++ b/firmware/src/dsp/s1c/s1c.c
+@@ -1086,7 +1086,8 @@
+ {
+     s1u_rvb_attach(&s->rv, rvb);
+     s->wid.buf = wbuf; s->pool = pool; s->pool_bytes = pool_bytes & ~3;
+-    memset(wbuf, 0, S1C_WAP_WORDS * 2);
++    memset(wbuf, 0, 2205u * sizeof *wbuf);
++    s->wpos=0;
+     s->ddec = 0;
+ }
+ #else
+@@ -1489,20 +1490,14 @@
+         L *= 2.0f * P(MVOL); R *= 2.0f * P(MVOL);
+ #endif
+         L = comp(s->cmp[0][0], L, &cm) * P(CMG); R = comp(s->cmp[0][1], R, &cm) * P(CMG);
+-        /* widen: the right channel through three allpasses, crossfaded */
+-#if WAP_L0
+-        R = s1u_widen_run(&s->wid, R, P(WIDEN));
+-#else
+-        {
+-#if defined S1C_WIDEN_FLOAT
+-            float wd = s->wbuf[s->wpos]; s->wbuf[s->wpos] = R;
+-#else
+-            float wd = h16_get(s->wbuf[s->wpos]); s->wbuf[s->wpos] = h16_put(R);
+-#endif
+-            if (++s->wpos >= s->wlen) s->wpos = 0;
+-            R += P(WIDEN) * (wd - R);
+-        }
+-#endif
++        /* Source WIDEN: one postmaster right delay, unconditionally clocked. */
++        uint16_t *history=s->wid.buf;
++        const unsigned pos=(unsigned)s->wpos;
++        const float delayed=h16_get(history[pos]);
++        history[pos]=h16_put(R);
++        s->wpos=(int32_t)(pos+1u==2205u?0u:pos+1u);
++        const float widen=P(WIDEN);
++        R=widen*delayed+(1.f-widen)*R;
+         outl[f] = L; outr[f] = R;
+     }
+ }

@@ -1,0 +1,201 @@
+{
+  "scope": "single scale-order A/B through actual Apple HP+Crusher and verified static dry suffix; partial upstream source equivalence; no fit or normalize",
+  "windows": {
+    "attack": {
+      "frames": [
+        16384,
+        18432
+      ],
+      "before_vs_original": {
+        "level_db": -12.522984438619325,
+        "null_dbr": -1.8836987481902978,
+        "spectral_db": 8.278320858843424,
+        "correlation": 0.8622338742793308
+      },
+      "candidate_vs_original": {
+        "level_db": -12.518659850222434,
+        "null_dbr": -1.884098258039261,
+        "spectral_db": 8.277413279696713,
+        "correlation": 0.8620484087906344
+      },
+      "candidate_vs_before": {
+        "level_db": 0.004324588396892573,
+        "null_dbr": -45.647762380777614,
+        "spectral_db": 0.005100144348989445,
+        "correlation": 0.9999865102028973
+      }
+    },
+    "held": {
+      "frames": [
+        24576,
+        37634
+      ],
+      "before_vs_original": {
+        "level_db": -12.101834893919154,
+        "null_dbr": -2.335965337698322,
+        "spectral_db": 11.984753961671046,
+        "correlation": 0.9619842394630782
+      },
+      "candidate_vs_original": {
+        "level_db": -12.10190668544225,
+        "null_dbr": -2.335943538553834,
+        "spectral_db": 11.984818153340314,
+        "correlation": 0.9619842349267934
+      },
+      "candidate_vs_before": {
+        "level_db": -7.179152309592124e-05,
+        "null_dbr": -101.57810100969971,
+        "spectral_db": 9.125682857208144e-05,
+        "correlation": 0.9999999999993906
+      }
+    },
+    "first_release": {
+      "frames": [
+        38434,
+        49459
+      ],
+      "before_vs_original": {
+        "level_db": -11.992293499197256,
+        "null_dbr": -2.4564161736175545,
+        "spectral_db": 11.304603364201938,
+        "correlation": 0.9848285466436258
+      },
+      "candidate_vs_original": {
+        "level_db": -11.992966169156995,
+        "null_dbr": -2.456197827253347,
+        "spectral_db": 11.30525454853091,
+        "correlation": 0.9848285482101763
+      },
+      "candidate_vs_before": {
+        "level_db": -0.0006726699597396603,
+        "null_dbr": -82.19786870764543,
+        "spectral_db": 0.0006821948677780746,
+        "correlation": 0.9999999999842757
+      }
+    },
+    "pending": {
+      "frames": [
+        49459,
+        49875
+      ],
+      "before_vs_original": {
+        "level_db": -7.814273457736181,
+        "null_dbr": -1.4130816184673447,
+        "spectral_db": 5.210940124124645,
+        "correlation": 0.5448052810257268
+      },
+      "candidate_vs_original": {
+        "level_db": -7.880189376412029,
+        "null_dbr": -1.4194505393369798,
+        "spectral_db": 5.228054862565094,
+        "correlation": 0.5471800488279354
+      },
+      "candidate_vs_before": {
+        "level_db": -0.06591591867584701,
+        "null_dbr": -41.328128447515944,
+        "spectral_db": 0.097037591341516,
+        "correlation": 0.9999916887116265
+      }
+    },
+    "after_handoff": {
+      "frames": [
+        49875,
+        53971
+      ],
+      "before_vs_original": {
+        "level_db": -11.845022956901815,
+        "null_dbr": -1.3663712060643594,
+        "spectral_db": 14.102970491184005,
+        "correlation": 0.6556642216467559
+      },
+      "candidate_vs_original": {
+        "level_db": -11.84333925744223,
+        "null_dbr": -1.3665326595442664,
+        "spectral_db": 14.090641713474021,
+        "correlation": 0.6556397642313502
+      },
+      "candidate_vs_before": {
+        "level_db": 0.0016836994595859317,
+        "null_dbr": -51.824843566029784,
+        "spectral_db": 0.03785774788439088,
+        "correlation": 0.9999967348003139
+      }
+    },
+    "chord": {
+      "frames": [
+        53971,
+        81434
+      ],
+      "before_vs_original": {
+        "level_db": -12.297105384616565,
+        "null_dbr": -0.2789848480963265,
+        "spectral_db": 50.98777702144268,
+        "correlation": 0.24952932507644576
+      },
+      "candidate_vs_original": {
+        "level_db": -12.297177475126194,
+        "null_dbr": -0.2789848526068766,
+        "spectral_db": 50.98772899326579,
+        "correlation": 0.24952938342509565
+      },
+      "candidate_vs_before": {
+        "level_db": -7.209050962820931e-05,
+        "null_dbr": -99.9224529373881,
+        "spectral_db": 7.486946631662479e-05,
+        "correlation": 0.9999999999835402
+      }
+    },
+    "final_release": {
+      "frames": [
+        82534,
+        115302
+      ],
+      "before_vs_original": {
+        "level_db": -12.199237752500194,
+        "null_dbr": -0.6862279306565645,
+        "spectral_db": 10.903792807163857,
+        "correlation": 0.42043075376965416
+      },
+      "candidate_vs_original": {
+        "level_db": -12.199910314801182,
+        "null_dbr": -0.6861941219644528,
+        "spectral_db": 10.904281899660283,
+        "correlation": 0.4204307617245305
+      },
+      "candidate_vs_before": {
+        "level_db": -0.0006725623009879971,
+        "null_dbr": -82.21966289040407,
+        "spectral_db": 0.0006851262570962293,
+        "correlation": 0.9999999999984033
+      }
+    },
+    "late_tail": {
+      "frames": [
+        115302,
+        148684
+      ],
+      "before_vs_original": {
+        "level_db": -12.15252895726261,
+        "null_dbr": -0.8139368386576974,
+        "spectral_db": 9.281477658333674,
+        "correlation": 0.46961951415274833
+      },
+      "candidate_vs_original": {
+        "level_db": -12.153259490421334,
+        "null_dbr": -0.8138882892296626,
+        "spectral_db": 9.282058603077925,
+        "correlation": 0.469619477193675
+      },
+      "candidate_vs_before": {
+        "level_db": -0.0007305331587197264,
+        "null_dbr": -81.48939280335269,
+        "spectral_db": 0.0007394904455313696,
+        "correlation": 0.999999999988202
+      }
+    }
+  },
+  "output_digests": {
+    "before": "1bcba699bf4a2ea5cada40a9d9a83353211b475b16588d0926068b254af65643",
+    "candidate": "88fb260e39535236e786add3a4a948aa6e67ba13b545b45a6975df5f42165257"
+  }
+}
