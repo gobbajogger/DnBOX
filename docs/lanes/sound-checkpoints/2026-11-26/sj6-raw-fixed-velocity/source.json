@@ -1,0 +1,71 @@
+{
+  "current_executable": "6d163d79202e866d2fda96e36f752bd386641b5ae2d0b1f829a254d26b652850",
+  "default_conductor_taper": 1.0,
+  "nominal_to_effective": [
+    {
+      "input": 1,
+      "actual_output": 0
+    },
+    {
+      "input": 31,
+      "actual_output": 31
+    },
+    {
+      "input": 55,
+      "actual_output": 55
+    },
+    {
+      "input": 80,
+      "actual_output": 79
+    },
+    {
+      "input": 86,
+      "actual_output": 85
+    },
+    {
+      "input": 87,
+      "actual_output": 86
+    },
+    {
+      "input": 88,
+      "actual_output": 88
+    },
+    {
+      "input": 96,
+      "actual_output": 95
+    },
+    {
+      "input": 100,
+      "actual_output": 99
+    },
+    {
+      "input": 127,
+      "actual_output": 127
+    }
+  ],
+  "physical_raw_ranged_keys": [
+    36,
+    48,
+    52,
+    55
+  ],
+  "source": {
+    "prefilter_attack": {
+      "velocity_86_vs_87_db": 0.0,
+      "signed_after_exact_velocity_ratio_dbr": -38.79036535233714
+    },
+    "prefilter_hold": {
+      "velocity_86_vs_87_db": 0.0,
+      "signed_after_exact_velocity_ratio_dbr": -38.79036501671355
+    },
+    "post_voice_hold": {
+      "velocity_86_vs_87_db": -0.10041594660333358,
+      "signed_after_exact_velocity_ratio_dbr": -144.87591441342033
+    },
+    "post_voice_release": {
+      "velocity_86_vs_87_db": -0.10041600709346801,
+      "signed_after_exact_velocity_ratio_dbr": -144.3909077577919
+    }
+  },
+  "scope": "True executable .2683a4 constructor default and .2f8b68 note taper, real generated current saw owner physical setting projection, not full saved native input/event conductor"
+}

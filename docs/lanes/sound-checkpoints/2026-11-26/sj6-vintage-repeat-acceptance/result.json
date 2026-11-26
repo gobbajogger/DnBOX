@@ -1,0 +1,171 @@
+{
+  "native_repeats": {
+    "Solidify": {
+      "authored_repeat_bit_identical": false,
+      "windows": {
+        "first_0_16": {
+          "authored_dbfs": -23.840445743101096,
+          "repeat_dbfs": -22.95429703150209,
+          "authored_repeat_error_dbfs": -29.704626431129387,
+          "authored_repeat_dbr": -5.864180688028295,
+          "dry_single_dbfs": -27.30834066054369,
+          "range_saved_compact_against_both_dbfs": [
+            -23.661424309933068,
+            -22.819357239363434
+          ]
+        },
+        "first_16_50": {
+          "authored_dbfs": -61.04476803331452,
+          "repeat_dbfs": -54.83953654405144,
+          "authored_repeat_error_dbfs": -60.5336276386359,
+          "authored_repeat_dbr": 0.5111403946786224,
+          "dry_single_dbfs": -57.572141471929854,
+          "range_saved_compact_against_both_dbfs": [
+            -61.044768033314526,
+            -54.83953654405144
+          ]
+        },
+        "last_0_16": {
+          "authored_dbfs": -25.165290082110477,
+          "repeat_dbfs": -26.488035356165742,
+          "authored_repeat_error_dbfs": -27.263047746051182,
+          "authored_repeat_dbr": -2.0977576639407056,
+          "dry_single_dbfs": -28.343774830786387,
+          "range_saved_compact_against_both_dbfs": [
+            -25.321893850385635,
+            -26.77999073976555
+          ]
+        },
+        "last_16_50": {
+          "authored_dbfs": -77.95609988867983,
+          "repeat_dbfs": -71.95131380379969,
+          "authored_repeat_error_dbfs": -68.49139853172824,
+          "authored_repeat_dbr": 9.4647013569516,
+          "dry_single_dbfs": -62.14569325686104,
+          "range_saved_compact_against_both_dbfs": [
+            -77.95609988867983,
+            -71.95131380379969
+          ]
+        },
+        "last_50_100": {
+          "authored_dbfs": -85.03444429683073,
+          "repeat_dbfs": -84.00209344618298,
+          "authored_repeat_error_dbfs": -78.54258688793956,
+          "authored_repeat_dbr": 6.4918574088911685,
+          "dry_single_dbfs": -76.98306401294712,
+          "range_saved_compact_against_both_dbfs": [
+            -85.03444429683073,
+            -84.00209344618298
+          ]
+        }
+      }
+    },
+    "Raw neutral": {
+      "authored_repeat_bit_identical": true,
+      "windows": {
+        "first_0_16": {
+          "authored_dbfs": -23.663383084816083,
+          "repeat_dbfs": -23.663383084816083,
+          "authored_repeat_error_dbfs": null,
+          "authored_repeat_dbr": null,
+          "dry_single_dbfs": -31.112858181652534,
+          "range_saved_compact_against_both_dbfs": [
+            -23.969898454874482,
+            -23.969898454874482
+          ]
+        },
+        "first_16_50": {
+          "authored_dbfs": -49.38179145121001,
+          "repeat_dbfs": -49.38179145121001,
+          "authored_repeat_error_dbfs": null,
+          "authored_repeat_dbr": null,
+          "dry_single_dbfs": -58.159584524854125,
+          "range_saved_compact_against_both_dbfs": [
+            -49.447978588361764,
+            -49.447978588361764
+          ]
+        },
+        "last_0_16": {
+          "authored_dbfs": -17.947070503222267,
+          "repeat_dbfs": -17.947070503222267,
+          "authored_repeat_error_dbfs": null,
+          "authored_repeat_dbr": null,
+          "dry_single_dbfs": -24.049788336619958,
+          "range_saved_compact_against_both_dbfs": [
+            -17.97864632533444,
+            -17.97864632533444
+          ]
+        },
+        "last_16_50": {
+          "authored_dbfs": -61.56304630235017,
+          "repeat_dbfs": -61.56304630235017,
+          "authored_repeat_error_dbfs": null,
+          "authored_repeat_dbr": null,
+          "dry_single_dbfs": -70.96799288099993,
+          "range_saved_compact_against_both_dbfs": [
+            -61.560861118740476,
+            -61.560861118740476
+          ]
+        },
+        "last_50_100": {
+          "authored_dbfs": -82.9352157968475,
+          "repeat_dbfs": -82.9352157968475,
+          "authored_repeat_error_dbfs": null,
+          "authored_repeat_dbr": null,
+          "dry_single_dbfs": -83.51879931153228,
+          "range_saved_compact_against_both_dbfs": [
+            -82.9352157968475,
+            -82.9352157968475
+          ]
+        }
+      }
+    }
+  },
+  "dry_seed_summary": {
+    "first": {
+      "native_dry_draws": 1,
+      "num_host_seeds": 4,
+      "change_dbr_per_seed": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "median_change_dbr": 0.0,
+      "improved_seed_count": 0
+    },
+    "last": {
+      "native_dry_draws": 1,
+      "num_host_seeds": 4,
+      "change_dbr_per_seed": [
+        -2.6042298751221606,
+        4.826324846957192,
+        3.6210198210629074,
+        0.47045047476495183
+      ],
+      "median_change_dbr": 2.0457351479139296,
+      "improved_seed_count": 1
+    }
+  },
+  "authored_one_seed_against_repeat_bounds": {
+    "retain": {
+      "against_authored_a_dbfs": -27.376441060868878,
+      "against_authored_b_bounds_dbfs": [
+        -64.54215390031433,
+        -21.295862269976777
+      ]
+    },
+    "redraw": {
+      "against_authored_a_dbfs": -27.198380409522557,
+      "against_authored_b_bounds_dbfs": [
+        -70.65867721767945,
+        -21.20698833768349
+      ]
+    }
+  },
+  "existing_exact_retained_vs_both_0_16ms": {
+    "2-authored_vs_authored": -27.38259660363712,
+    "2-authored_vs_authored-repeat": -25.42203317247608
+  },
+  "scope": "No host rerender, no new native captures, no inferred matching random state; bounds only if candidate PCM missing"
+}

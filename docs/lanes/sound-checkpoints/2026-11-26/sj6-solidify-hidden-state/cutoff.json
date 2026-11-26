@@ -1,0 +1,32 @@
+{
+  "source": "6d163d79202e866d2fda96e36f752bd386641b5ae2d0b1f829a254d26b652850",
+  "cases": {
+    "solidify_exact_empty_note_list": {
+      "armed": false,
+      "depth": 0,
+      "physical_delay": 0.0,
+      "base": 1.0,
+      "cutoff_panel": 1,
+      "destination_enum": 7,
+      "physical_sends": []
+    },
+    "long_delay_positive_guard": {
+      "armed": true,
+      "depth": 0,
+      "physical_delay": 0.8,
+      "base": 0.4000000059604645,
+      "cutoff_panel": 1,
+      "destination_enum": 7,
+      "physical_sends": []
+    },
+    "other_key_held": {
+      "armed": false,
+      "depth": 0,
+      "physical_delay": 0.8,
+      "base": 0.4000000059604645,
+      "cutoff_panel": 1,
+      "destination_enum": 7,
+      "physical_sends": []
+    }
+  }
+}

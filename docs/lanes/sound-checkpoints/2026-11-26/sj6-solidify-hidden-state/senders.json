@@ -1,0 +1,304 @@
+{
+  "raw_summary": {
+    "57": 0.0,
+    "72": 0.5,
+    "73": 0.0,
+    "74": 0.5,
+    "75": 0.5,
+    "89": 0.0,
+    "105": 0.0,
+    "106": 0.7449958324432373,
+    "136": 0.0,
+    "137": 0.0,
+    "206": 0.6000000238418579
+  },
+  "rows": [
+    {
+      "id": 72,
+      "val": 0.5,
+      "target": "0x1000f4c44",
+      "writes": [
+        [
+          "setPitchBend:",
+          "OSC1",
+          0.0
+        ]
+      ]
+    },
+    {
+      "id": 73,
+      "val": 0.0,
+      "target": "0x1000f4c58",
+      "writes": [
+        [
+          "setPitchBend:",
+          "Sampler2",
+          -12.0
+        ],
+        [
+          "setPitchBend:",
+          "OSC2",
+          -12.0
+        ]
+      ]
+    },
+    {
+      "id": 74,
+      "val": 0.5,
+      "target": "0x1000f4ba4",
+      "writes": [
+        [
+          "setPitchBend:",
+          "Sub",
+          0.0
+        ],
+        [
+          "setPitchBend:",
+          "OSC1",
+          0.0
+        ]
+      ]
+    },
+    {
+      "id": 75,
+      "val": 0.5,
+      "target": "0x1000f4bc0",
+      "writes": [
+        [
+          "setPitchBend:",
+          "Sampler2",
+          -12.0
+        ],
+        [
+          "setPitchBend:",
+          "OSC2",
+          -12.0
+        ]
+      ]
+    },
+    {
+      "id": 57,
+      "val": 0.0,
+      "target": "0x1000f48bc",
+      "writes": [
+        [
+          "setPitchADSRSemitones:",
+          "OSC1",
+          0.0
+        ],
+        [
+          "setPitchADSRSemitones:",
+          "OSC2",
+          0.0
+        ],
+        [
+          "setPitchADSRSemitones:",
+          "Sub",
+          0.0
+        ],
+        [
+          "setPitchADSRSemitones:",
+          "Noise",
+          0.0
+        ],
+        [
+          "setPitchADSRSemitones:",
+          "Sampler2",
+          0.0
+        ]
+      ]
+    }
+  ],
+  "vibrato_gate_sweep": [
+    {
+      "id": "effective-zero-vib-depth-0.0",
+      "val": 0.0,
+      "target": "0x1000ee200",
+      "writes": [
+        [
+          "setVibratoFrequency:",
+          "Sub",
+          0.0
+        ],
+        [
+          "setVibratoFrequency:",
+          "Sampler2",
+          0.0
+        ],
+        [
+          "setVibratoFrequency:",
+          "OSC1",
+          0.0
+        ],
+        [
+          "setVibratoFrequency:",
+          "OSC2",
+          0.0
+        ]
+      ]
+    },
+    {
+      "id": "positive-vib-depth-holdout-0.0",
+      "val": 0.5,
+      "target": "0x1000ee200",
+      "writes": [
+        [
+          "setVibratoFrequency:",
+          "Sub",
+          0.0
+        ],
+        [
+          "setVibratoFrequency:",
+          "Sampler2",
+          0.0
+        ],
+        [
+          "setVibratoFrequency:",
+          "OSC1",
+          0.0
+        ],
+        [
+          "setVibratoFrequency:",
+          "OSC2",
+          0.0
+        ]
+      ]
+    },
+    {
+      "id": "effective-zero-vib-depth-0.01",
+      "val": 0.0,
+      "target": "0x1000ee200",
+      "writes": [
+        [
+          "setVibratoFrequency:",
+          "Sub",
+          0.0
+        ],
+        [
+          "setVibratoFrequency:",
+          "Sampler2",
+          0.0
+        ],
+        [
+          "setVibratoFrequency:",
+          "OSC1",
+          0.0
+        ],
+        [
+          "setVibratoFrequency:",
+          "OSC2",
+          0.0
+        ]
+      ]
+    },
+    {
+      "id": "positive-vib-depth-holdout-0.01",
+      "val": 0.5,
+      "target": "0x1000ee200",
+      "writes": [
+        [
+          "setVibratoFrequency:",
+          "Sub",
+          0.0
+        ],
+        [
+          "setVibratoFrequency:",
+          "Sampler2",
+          0.0
+        ],
+        [
+          "setVibratoFrequency:",
+          "OSC1",
+          0.0
+        ],
+        [
+          "setVibratoFrequency:",
+          "OSC2",
+          0.0
+        ]
+      ]
+    },
+    {
+      "id": "effective-zero-vib-depth-1.0",
+      "val": 0.0,
+      "target": "0x1000ee200",
+      "writes": [
+        [
+          "setVibratoDepth:",
+          "Sub",
+          0.0
+        ],
+        [
+          "setVibratoDepth:",
+          "Sampler2",
+          0.0
+        ],
+        [
+          "setVibratoDepth:",
+          "Noise",
+          0.0
+        ],
+        [
+          "setVibratoDepth:",
+          "OSC1",
+          0.0
+        ],
+        [
+          "setVibratoDepth:",
+          "OSC2",
+          0.0
+        ]
+      ]
+    },
+    {
+      "id": "positive-vib-depth-holdout-1.0",
+      "val": 0.5,
+      "target": "0x1000ee200",
+      "writes": [
+        [
+          "setVibratoDepth:",
+          "Sub",
+          1.4691303968429565
+        ],
+        [
+          "setVibratoDepth:",
+          "Sampler2",
+          1.4691303968429565
+        ],
+        [
+          "setVibratoDepth:",
+          "Noise",
+          1.4691303968429565
+        ],
+        [
+          "setVibratoDepth:",
+          "OSC1",
+          1.4691303968429565
+        ],
+        [
+          "setVibratoDepth:",
+          "OSC2",
+          1.4691303968429565
+        ]
+      ]
+    }
+  ],
+  "fader_writes": [
+    [
+      "OSC1",
+      0,
+      0.8080000281333923
+    ],
+    [
+      "OSC2",
+      0,
+      0.36819931864738464
+    ]
+  ],
+  "a_reference_converted": [
+    440.0,
+    400.0,
+    500.0
+  ],
+  "source": "6d163d79202e866d2fda96e36f752bd386641b5ae2d0b1f829a254d26b652850"
+}

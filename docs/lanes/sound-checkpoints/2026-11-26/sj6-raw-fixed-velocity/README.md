@@ -1,0 +1,8 @@
+# Deterministic Raw J106: exact current velocity ingress
+From lane scratch:
+    OPENBLAS_NUM_THREADS=1 PYTHONPATH=/tmp/sj6-owner-packages:ab-effects-readonly/sj6-fullbench/bench python3 sj6-raw-fixed-ingress/source.py
+    bash sj6-raw-fixed-ingress/run.sh
+
+Current original constructor .2683a4 emits taper exponent 1. Float32 division by 127 prior to binary64 taper and truncation at .2f8b68–8bdc converts the fixed nominal velocity 87 to 86 on default; this accounts for previously directly observed older physical 86 under the current binary. Current .2b9ef0 adds no random or cross-key attenuation below 60, including all four authenticated Raw ranged pitches. This test executes the default sender and taper with controlled metadata; it does not reconstruct saved AU conductor/preferences outside this source scope. Direct current single-voice signed physical .808 generated saw and OTA probe changes only velocity, yielding no measured pre-OTA input difference and exact postvoice 86/87 level and signed proportionality. The order for this OTA mode is not the same assumption as the Normal reference taps.
+
+The actual compact host uses the matching documented Raw readback and same signed schedules, default-off one bridge converts fixed nominal only for confirmed low-key/range path, leaves master, waveform, envelope and effects identical. Authored native has exact bitwise repeat (single dry capture). Exact negative confirmation: near .1004 dB level difference, not the missing large sound fidelity; unsupported/dynamic path bytes unchanged. No product write, device operations, or exported original PCM.

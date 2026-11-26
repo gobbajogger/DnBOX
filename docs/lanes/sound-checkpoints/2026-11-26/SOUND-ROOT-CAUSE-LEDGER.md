@@ -459,6 +459,36 @@ signed owner counters on a clearly non-timing witness.
   during startup silence; never alias these histories on Mono alone.
   [Source-state lower bound](s1-delay-state-minimality/README.md).
 
+- **Raw fixed velocity is a real small projection mismatch.** Current
+  original source maps nominal 87 to physical 86 with binary32 division
+  followed by Double scale and integer truncation. OTA filter input is
+  unchanged; output scales by 86/87 (~−0.10 dB). The signed whole
+  difference scarcely changes, and active other routes stay exact.
+  [Source and same-cue A/B](sj6-raw-fixed-velocity/README.md).
+- **No hidden ramp for the saved Solidify case.** Captured original
+  gain/tuning and preroll converge without a difference in per-layer
+  sample output, and authored no-depth dynamic cutoff does not arm
+  the restore path. No stale bookkeeping word copied.
+  [Source probe](sj6-solidify-hidden-state/README.md).
+- **#109 call and carrier are separate from an audio pass.** The
+  default-off host draft uses an owner-row byte which old validation
+  required zero, rather than interpreting opaque old MASTER data.
+  Old firmware rejects newly authored nonzero values; the stock UI and
+  Remote do not yet expose this route, and physical receive semantics
+  must not be passed to the unrelated legacy crusher step.
+  [Private descriptor and wire witness](sj6-109-typed/README.md).
+- **No timing shortcut via span merge.** Identical external event
+  schedule over 256 frames still changes PCM for 10 of 11 actual
+  voices if two original 128-frame spans are merged. Kick audio is
+  equal but its retained state changes. Fixed-memory traffic lacks
+  causal evidence for a material saving in the peak block.
+  [Span gate](strict-span-merge-guard/README.md) and
+  [traffic audit](strict-voice-fixed-traffic/README.md).
+- **MIX/WAVE strip is local progress only.** Seventy-two pixel/tiles/
+  DMA host pairs demonstrate one exact guarded path (and zero stable
+  sends). All full-canvas fallbacks must retire before counting SRAM.
+  [Scoped test](mix-wave-exact-strip/README.md).
+
 ## Release boundary
 
 These are lab diagnostics. A host proof or a leaf emulator measurement

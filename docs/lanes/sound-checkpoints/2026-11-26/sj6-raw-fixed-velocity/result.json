@@ -1,0 +1,80 @@
+{
+  "dry": {
+    "ref_pcm": "905e705042416acd2a5404594706608c6bd0a35b0783013ef4bbf977fe170002",
+    "source_osc1_public": 1.0,
+    "source_osc2_public": 0.0,
+    "physical_taper_scope": "Default 1 taper, no key\u226560 after real Range transposition",
+    "fixture_dry_dynamic_unchanged": true,
+    "windows": {
+      "attack": {
+        "after_vs_before_level_db": -0.10041597994678247,
+        "before_signed_dbr": 0.3618658929608066,
+        "after_signed_dbr": 0.3477324935282663
+      },
+      "held": {
+        "after_vs_before_level_db": -0.10041598189710074,
+        "before_signed_dbr": 0.42434336739867773,
+        "after_signed_dbr": 0.40980161002731635
+      },
+      "release": {
+        "after_vs_before_level_db": -0.10041604574105711,
+        "before_signed_dbr": -6.489421228388296,
+        "after_signed_dbr": -6.458064258312126
+      },
+      "chord": {
+        "after_vs_before_level_db": -0.10041598577793479,
+        "before_signed_dbr": -1.9156304764072862,
+        "after_signed_dbr": -1.89857761911684
+      },
+      "final_tail": {
+        "after_vs_before_level_db": -0.10041585114884162,
+        "before_signed_dbr": -2.8510841517476897,
+        "after_signed_dbr": -2.8148005562020995
+      },
+      "whole": {
+        "after_vs_before_level_db": -0.1004159875570252,
+        "before_signed_dbr": -1.4444180203684045,
+        "after_signed_dbr": -1.4351946668980506
+      }
+    }
+  },
+  "authored": {
+    "ref_pcm": "9cc279dc61f6a504e1c234cd90db37f7c16c0cc9377a33e1165e6a75f7cf7b21",
+    "source_osc1_public": 1.0,
+    "source_osc2_public": 0.0,
+    "physical_taper_scope": "Default 1 taper, no key\u226560 after real Range transposition",
+    "fixture_dry_dynamic_unchanged": true,
+    "windows": {
+      "attack": {
+        "after_vs_before_level_db": -0.10047719602637739,
+        "before_signed_dbr": 1.2336920212033922,
+        "after_signed_dbr": 1.2087835029429328
+      },
+      "held": {
+        "after_vs_before_level_db": -0.1004414288885118,
+        "before_signed_dbr": 1.3549939946374763,
+        "after_signed_dbr": 1.3295045916070394
+      },
+      "release": {
+        "after_vs_before_level_db": -0.10038817163919794,
+        "before_signed_dbr": -1.1009334708126732,
+        "after_signed_dbr": -1.1278060187074899
+      },
+      "chord": {
+        "after_vs_before_level_db": -0.10044546520494323,
+        "before_signed_dbr": 1.0333913232620437,
+        "after_signed_dbr": 1.0146909065480498
+      },
+      "final_tail": {
+        "after_vs_before_level_db": -0.10054732207277062,
+        "before_signed_dbr": -0.03478461315486895,
+        "after_signed_dbr": -0.03872205471702829
+      },
+      "whole": {
+        "after_vs_before_level_db": -0.10044615994558088,
+        "before_signed_dbr": 1.0611328344622977,
+        "after_signed_dbr": 1.0411286241825926
+      }
+    }
+  }
+}

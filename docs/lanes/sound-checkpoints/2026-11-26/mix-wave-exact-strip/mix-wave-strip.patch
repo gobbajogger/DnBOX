@@ -1,0 +1,57 @@
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -9624,6 +9624,41 @@
+     }
+ }
+ 
++#if X0X_UI_HOME_STRIP_SPIKE && !X0X_UI_CLIP_ONLY_PROBE && X0X_UI_MIX_WAVE_STRIP
++/* Only the lower WAVE panel crosses the 80-row DMA boundary. Use the stock
++ * WAVE rasterizer once for band zero; do not repeat its 100-ms scope latch. */
++typedef struct {
++    char gr[24], load[24];
++    uint16_t gray, white, amb, face, edge;
++    uint8_t busy, guard;
++} mix_wave_view;
++static void paint_mix_wave_strip(int band, const void *arg)
++{
++    mix_wave_view *v=(mix_wave_view *)arg;
++    if (!band) {
++        draw_mix(0);
++        v->gray=C_GRAY; v->white=C_WHITE; v->amb=C_AMB; v->face=SOUND_FACE; v->edge=SOUND_EDGE;
++        if(engine_gr_db()>0.5f)put_s(put_i(put_s(v->gr,"-"),(int)(engine_gr_db()+0.5f))," dB");
++        else put_s(v->gr,"0 dB");
++        put_s(put_i(put_s(v->load,"AUDIO LOAD "),(int)plat_cpu_pct()),"%");
++        v->busy=plat_cpu_pct()>85u;
++        v->guard=engine_guard_active()!=0;
++        return;
++    }
++    surface_panel(3,3,114,34,0,v->face,v->edge,0);
++    cv_text(9,6,&FONT_T,"WET GR",v->gray);
++    cv_text(9,20,&FONT_S,v->gr,v->white);
++    surface_panel(3,42,234,24,0,v->face,v->edge,0);
++    cv_text(9,49,&FONT_XS,v->load,v->busy?v->amb:v->gray);
++    if(v->guard)text_r(229,49,&FONT_XS,"GUARD",v->amb);
++}
++static UI_DRAW void commit_mix_wave_strips(void)
++{
++    mix_wave_view v;
++    commit_main_strips(C_BLACK,paint_mix_wave_strip,&v);
++}
++#endif
++
+ #if X0X_UI_PERF
+ /* PERF: the live window, or the test's progress and table */
+ static char *put_pct10(char *q, int v)                /* 123 -> "12.3%" */
+@@ -10140,6 +10175,12 @@
+        ) {
+         if (ui.view == V_HOME && !ui.home_live && commit_home_strips()) return;
+         if (ui.view == V_SONG && commit_song_strips()) return;
++#if X0X_UI_MIX_WAVE_STRIP
++        if (ui.view == V_MIX && ui.page[V_MIX][0] > MIX_FIRST_KIT_PAGE + NKIT) {
++            commit_mix_wave_strips();
++            return;
++        }
++#endif
+     }
+ #endif
+     cv_begin(240, 2 * BAND_H, C_BLACK);           /* both bands, then one transfer: no tear between them */

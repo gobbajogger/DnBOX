@@ -1,0 +1,282 @@
+{
+  "0": {
+    "reached_steady": {
+      "first": {
+        "rows": 1281,
+        "keys": [
+          36
+        ],
+        "request": [
+          65.40638732910156
+        ],
+        "inc_hz": [
+          65.40638882433996
+        ],
+        "stages": [
+          5
+        ],
+        "fader_words": [
+          "17d94e3f17d94e3f17d94e3f17d94e3f"
+        ],
+        "bend_words": [
+          "00000000000000000000000000000000"
+        ]
+      },
+      "chord": {
+        "rows": 1932,
+        "keys": [
+          55
+        ],
+        "request": [
+          195.9977264404297
+        ],
+        "inc_hz": [
+          195.99772528745234
+        ],
+        "stages": [
+          5
+        ],
+        "fader_words": [
+          "17d94e3f17d94e3f17d94e3f17d94e3f"
+        ],
+        "bend_words": [
+          "00000000000000000000000000000000"
+        ]
+      },
+      "release": {
+        "rows": 35,
+        "keys": [
+          55
+        ],
+        "request": [
+          195.9977264404297
+        ],
+        "inc_hz": [
+          195.99772528745234
+        ],
+        "stages": [
+          7
+        ],
+        "fader_words": [
+          "17d94e3f17d94e3f17d94e3f17d94e3f"
+        ],
+        "bend_words": [
+          "00000000000000000000000000000000"
+        ]
+      }
+    },
+    "live_state": {
+      "first": {
+        "rows": 1281,
+        "keys": [
+          36
+        ],
+        "request": [
+          65.40638732910156
+        ],
+        "inc_hz": [
+          65.40638882433996
+        ],
+        "stages": [
+          5
+        ],
+        "fader_words": [
+          "17d94e3f17d94e3f17d94e3f17d94e3f"
+        ],
+        "bend_words": [
+          "00000000000000000000000000000000"
+        ]
+      },
+      "chord": {
+        "rows": 1932,
+        "keys": [
+          55
+        ],
+        "request": [
+          195.9977264404297
+        ],
+        "inc_hz": [
+          195.99772528745234
+        ],
+        "stages": [
+          5
+        ],
+        "fader_words": [
+          "17d94e3f17d94e3f17d94e3f17d94e3f"
+        ],
+        "bend_words": [
+          "00000000000000000000000000000000"
+        ]
+      },
+      "release": {
+        "rows": 35,
+        "keys": [
+          55
+        ],
+        "request": [
+          195.9977264404297
+        ],
+        "inc_hz": [
+          195.99772528745234
+        ],
+        "stages": [
+          7
+        ],
+        "fader_words": [
+          "17d94e3f17d94e3f17d94e3f17d94e3f"
+        ],
+        "bend_words": [
+          "00000000000000000000000000000000"
+        ]
+      }
+    },
+    "difference": {
+      "same": true,
+      "first": null,
+      "last": null,
+      "max_abs": 0.0
+    },
+    "same_recv_PCM_SHA": "aa7edd4ac23b4fc9095cd89d75ee4f0981954d35a5ff17eadc1cac56b7a7711d",
+    "scope": "Receiver static current control words with captured fader/transpose sends; no authentic Vintage RNG, full current control callback or Apple effects."
+  },
+  "1": {
+    "reached_steady": {
+      "first": {
+        "rows": 1281,
+        "keys": [
+          36
+        ],
+        "request": [
+          65.40638732910156
+        ],
+        "inc_hz": [
+          32.70319441216998
+        ],
+        "stages": [
+          5
+        ],
+        "fader_words": [
+          "9f84bc3e9f84bc3e9f84bc3e9f84bc3e"
+        ],
+        "bend_words": [
+          "000040c1000040c1000040c1000040c1"
+        ]
+      },
+      "chord": {
+        "rows": 1932,
+        "keys": [
+          55
+        ],
+        "request": [
+          195.9977264404297
+        ],
+        "inc_hz": [
+          97.99886264372617
+        ],
+        "stages": [
+          5
+        ],
+        "fader_words": [
+          "9f84bc3e9f84bc3e9f84bc3e9f84bc3e"
+        ],
+        "bend_words": [
+          "000040c1000040c1000040c1000040c1"
+        ]
+      },
+      "release": {
+        "rows": 35,
+        "keys": [
+          55
+        ],
+        "request": [
+          195.9977264404297
+        ],
+        "inc_hz": [
+          97.99886264372617
+        ],
+        "stages": [
+          7
+        ],
+        "fader_words": [
+          "9f84bc3e9f84bc3e9f84bc3e9f84bc3e"
+        ],
+        "bend_words": [
+          "000040c1000040c1000040c1000040c1"
+        ]
+      }
+    },
+    "live_state": {
+      "first": {
+        "rows": 1281,
+        "keys": [
+          36
+        ],
+        "request": [
+          65.40638732910156
+        ],
+        "inc_hz": [
+          32.70319441216998
+        ],
+        "stages": [
+          5
+        ],
+        "fader_words": [
+          "9f84bc3e9f84bc3e9f84bc3e17d94e3f"
+        ],
+        "bend_words": [
+          "000040c1000040c1000040c100000000"
+        ]
+      },
+      "chord": {
+        "rows": 1932,
+        "keys": [
+          55
+        ],
+        "request": [
+          195.9977264404297
+        ],
+        "inc_hz": [
+          97.99886264372617
+        ],
+        "stages": [
+          5
+        ],
+        "fader_words": [
+          "9f84bc3e9f84bc3e9f84bc3e17d94e3f"
+        ],
+        "bend_words": [
+          "000040c1000040c1000040c100000000"
+        ]
+      },
+      "release": {
+        "rows": 35,
+        "keys": [
+          55
+        ],
+        "request": [
+          195.9977264404297
+        ],
+        "inc_hz": [
+          97.99886264372617
+        ],
+        "stages": [
+          7
+        ],
+        "fader_words": [
+          "9f84bc3e9f84bc3e9f84bc3e17d94e3f"
+        ],
+        "bend_words": [
+          "000040c1000040c1000040c100000000"
+        ]
+      }
+    },
+    "difference": {
+      "same": true,
+      "first": null,
+      "last": null,
+      "max_abs": 0.0
+    },
+    "same_recv_PCM_SHA": "7d5e470723ff8e8fcfc539c9d663f7500378acdc35c845a7b70b5a9504d48a00",
+    "scope": "Receiver static current control words with captured fader/transpose sends; no authentic Vintage RNG, full current control callback or Apple effects."
+  }
+}

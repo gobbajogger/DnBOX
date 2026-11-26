@@ -1,0 +1,128 @@
+--- a/firmware/src/app/sj6_137_host_witness.h
++++ b/firmware/src/app/sj6_137_host_witness.h
+@@ -357,6 +357,9 @@
+ #endif
+ #if X0X_SJ6_NATIVE_ROOM
+ enum { SJ6_CRUSH_ROW=3, SJ6_CRUSH_BYTE=24, SJ6_CRUSH_ID=107, SJ6_CRUSH_AMOUNT_ID=108 };
++#if defined(X0X_HOST) && defined(SJ6_RATE_CARRIER_WITNESS)
++enum { SJ6_CRUSH_RATE_FIELD=31, SJ6_CRUSH_RATE_ID=109 };
++#endif
+ _Static_assert(SJ6_CRUSH_ROW+NBASS<=NVOICES_MAX && SJ6_CRUSH_BYTE+2u<=NPARAMS_MAX,
+                "SuperJ6 Crush uses the designated owner bytes");
+ static inline const uint8_t *sj6_crush_code(const sound_t *s,unsigned owner)
+@@ -713,6 +716,9 @@
+ #ifdef X0X_SJ6_MOD_TYPED_PROBE
+     [SJ6_MOD_BYTE]=SJ6_MOD_LAST,
+ #endif
++#if defined(X0X_HOST) && defined(SJ6_RATE_CARRIER_WITNESS)
++    [SJ6_CRUSH_RATE_FIELD]=128,
++#endif
+ #if X0X_S1_FEEDBACK_PROBE
+     [S1_FB_BYTE]=S1_FB_LAST,
+ #endif
+@@ -787,6 +793,9 @@
+ #if X0X_SJ6_VCF_PORT
+     OWNER_BIT(SJ6_KEY_TRACK_BYTE)|OWNER_BIT(SJ6_ENV_STRENGTH_BYTE)|OWNER_BIT(SJ6_VCF_BYTE)|
+ #endif
++#if defined(X0X_HOST) && defined(SJ6_RATE_CARRIER_WITNESS)
++    OWNER_BIT(SJ6_CRUSH_RATE_FIELD)|
++#endif
+ #if X0X_SJ6_NATIVE_UNISON
+     ((OWNER_BIT(4)-1u)<<SJ6_UNISON_BYTE)|
+ #endif
+--- a/firmware/src/app/original_presets.inc
++++ b/firmware/src/app/original_presets.inc
+@@ -1008,6 +1008,13 @@
+ }
+ X0X_COLD int sj6_crush_get(unsigned owner,unsigned k)
+ {
++#if defined(X0X_HOST) && defined(SJ6_RATE_CARRIER_WITNESS)
++    if(k==2u){
++        if(!original_typed_sj6_live(mot_base_snd,owner))return -1;
++        unsigned code=read137(mot_base_snd,owner)[SJ6_CRUSH_RATE_FIELD];
++        return code>128u?-1:code?(int)code-1:0; /* unassigned display, no applied receipt */
++    }
++#endif
+     if(k>1u || !original_typed_sj6_live(mot_base_snd,owner))
+         return -1;
+     unsigned b=sj6_crush_code(mot_base_snd,owner)[k];
+@@ -1015,6 +1022,12 @@
+ }
+ static __attribute__((noinline)) void sj6_crush_choose_store(unsigned owner, unsigned k, unsigned pos)
+ {
++#if defined(X0X_HOST) && defined(SJ6_RATE_CARRIER_WITNESS)
++    if(k==2u){
++        slot137((sound_t *)mot_base_snd,owner)[SJ6_CRUSH_RATE_FIELD]=(uint8_t)(pos+1u);
++        return; /* storage witness, never touches original_crush or graph */
++    }
++#endif
+     sj6_crush_write((sound_t*)mot_base_snd,owner)[k]=(uint8_t)pos;
+     sj6_crush_apply(mot_base_snd,owner);
+ }
+@@ -3192,6 +3205,9 @@
+ #if X0X_SJ6_NATIVE_ROOM
+         memset(sj6_room_write(sound,v),0,SJ6_ROOM_COUNT);
+         memset(sj6_crush_write(sound,v),0,2u);
++#if defined(X0X_HOST) && defined(SJ6_RATE_CARRIER_WITNESS)
++        slot137(sound,v)[SJ6_CRUSH_RATE_FIELD]=0;
++#endif
+ #endif
+ #endif
+ #if X0X_SJ6_PITCH_ENV_NATIVE
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -1289,8 +1289,13 @@
+ #endif
+ #if X0X_SJ6_NATIVE_ROOM
+     case R_SJ6CRUSH:{
++#if defined(X0X_HOST) && defined(SJ6_RATE_CARRIER_WITNESS)
++        static const x0x_param_t p[3]={{"CRUSH",1,0,ONOFF_N},{"AMOUNT",127,0,0},{"BIT RATE",127,0,0}};
++        return r.c<3u ? &p[r.c] : 0;
++#else
+         static const x0x_param_t p[2]={{"CRUSH",1,0,ONOFF_N},{"AMOUNT",127,0,0}};
+         return r.c<2u ? &p[r.c] : 0;
++#endif
+     }
+ #endif
+ #if X0X_SJ6_OTA_NATIVE
+@@ -3628,8 +3633,12 @@
+                 OWNER_PAGE(PT_PITCH_MOD,J(R_SJ6PITCH,4),0,0,0);
+ #endif
+ #if X0X_SJ6_NATIVE_ROOM
++#if defined(X0X_HOST) && defined(SJ6_RATE_CARRIER_WITNESS)
++                OWNER_PAGE(PT_EFFECT,J(R_SJ6CRUSH,0),J(R_SJ6CRUSH,1),J(R_SJ6CRUSH,2),0);
++#else
+                 OWNER_PAGE(PT_EFFECT,J(R_SJ6CRUSH,0),J(R_SJ6CRUSH,1),0,0);
+ #endif
++#endif
+ #if X0X_SJ6_OTA_NATIVE
+                 OWNER_PAGE(PT_FILTER_MODE,J(R_SJ6OTA,0),0,0,0);
+ #endif
+@@ -4683,6 +4692,15 @@
+                 undo_peek(&undo,entry,crush_off,crush,sizeof crush);
+                 if(crush[0]>1u || crush[1]>127u){undo_field_invalid("CRUSH");return;}
+                 if(memcmp(crush,sj6_crush_code(&proj.sound,v),sizeof crush))undo_room|=1u<<v;
++#if defined(X0X_HOST) && defined(SJ6_RATE_CARRIER_WITNESS)
++                const uint32_t ro=__builtin_offsetof(sound_t,v)+
++                    ((T_303*NVOICES_MAX+8u+2u*v)*NPARAMS_MAX+SJ6_CRUSH_RATE_FIELD);
++                uint8_t rate;
++                undo_peek(&undo,entry,ro,&rate,1u);
++                if(rate>128u){undo_field_invalid("BIT RATE");return;}
++                /* Actual byte restore occurs in the existing Undo copy.
++                 * No live effect means no stock room/Crusher callback. */
++#endif
+ #endif
+ #if X0X_SJ6_OTA_NATIVE
+                 const uint32_t ota_off=__builtin_offsetof(sound_t,v)+
+--- a/firmware/src/app/remote_sj6_panel.inc
++++ b/firmware/src/app/remote_sj6_panel.inc
+@@ -134,6 +134,9 @@
+         {23, R_SJ6ROOM, SJ6_ROOM_DEPTH},
+         {107, R_SJ6CRUSH, 0},
+         {108, R_SJ6CRUSH, 1},
++#if defined(X0X_HOST) && defined(SJ6_RATE_CARRIER_WITNESS)
++        {109, R_SJ6CRUSH, 2},
++#endif
+ #endif
+ #if defined(DNBOX_137_HOST_WITNESS) && DNBOX_TYPED_CONTROLS_NATIVE_TEST && X0X_SJ6_OTA_NATIVE
+         {209, R_SJ6OTA, 0},
