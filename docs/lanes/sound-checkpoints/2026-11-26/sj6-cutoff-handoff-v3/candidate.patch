@@ -1,0 +1,320 @@
+--- a/firmware/src/dsp/juno6.h
++++ b/firmware/src/dsp/juno6.h
+@@ -155,6 +155,10 @@
+  float lfo1_pwm_base, lfo1_cut_current, lfo1_cut_target;
+  int32_t lfo1_cut_until;
+  uint8_t lfo1_cut_active, lfo1_cut_force;
++#if X0X_SJ6_NOTE_CUTOFF_LATCH
++ float note_cut_current, note_cut_target;
++ uint8_t note_cut_latched;
++#endif
+  uint32_t lfo1_pwm_until_tick;
+ #if (defined(X0X_HOST) && defined(X0X_SJ6_ALT3_WITNESS)) || X0X_SJ6_ALT3_NATIVE
+  struct {
+@@ -289,6 +293,10 @@
+  * Amount and base are authored normalized Float; No save or UI transport. */
+ int juno6_configure_lfo1_pwm(juno6_t *,unsigned selector,unsigned enabled,float base,float amount);
+ /* Bounded source ID181=1 (normal ID7 cutoff), Loop/Triangle only. */
++#if X0X_SJ6_NOTE_CUTOFF_LATCH
++int juno6_cutoff_note_qualifies(const juno6_t *);
++void juno6_cutoff_first_note(juno6_t *);
++#endif
+ int juno6_configure_lfo1_cutoff(juno6_t *,float authored_base,float live_current,float amount);
+ float juno6_mod_cutoff_hz(unsigned value);
+ #if X0X_SJ6_OTA_NATIVE
+--- a/firmware/src/dsp/juno6_factory.inc
++++ b/firmware/src/dsp/juno6_factory.inc
+@@ -591,6 +591,9 @@
+ }
+ #endif
+ 
++#if X0X_SJ6_NOTE_CUTOFF_LATCH
++#include "juno6_note_cutoff.h"
++#endif
+ int juno6_configure_lfo1_cutoff(juno6_t *s,float base,float current,float amount)
+ {
+     if(!s||!s->typed||!(base>=0.f&&base<=1.f&&current>=0.f&&current<=1.f&&amount>=0.f&&amount<=1.f))
+@@ -924,6 +927,9 @@
+         s->wheel_lfo1_amount=0;
+         s->lfo1_pwm_until_tick=0;
+         s->lfo1_cut_active=s->lfo1_cut_force=0;
++#if X0X_SJ6_NOTE_CUTOFF_LATCH
++        s->note_cut_latched=0;
++#endif
+         s->lfo1_cut_until=(int32_t)s->sample_rate;
+         s->lfo2_hold_sample = s->lfo2_hold_elapsed = 0.f;
+         s->lfo2_pwm_until_tick = 0;
+@@ -1102,6 +1108,10 @@
+   return 1;
+  }
+  if(!(x>=0&&x<=1))return 0;
++#if X0X_SJ6_NOTE_CUTOFF_LATCH
++ if(id==JUNO6_APP_PARAM_BASE+180u)
++     return s->typed && dnbx_store_raw(&s->core,180u,x)==DNBX_RAW_STORED_ONLY;
++#endif
+  if(id>=JUNO6_APP_PARAM_BASE){
+   if(!juno6_can_edit_amp2(s) || !set_amp2(&s->core,id-JUNO6_APP_PARAM_BASE,x))return 0;
+   /* AMP2 explicitly selects the two-layer engine. Only a waveform snapshot
+@@ -1113,6 +1123,14 @@
+  /* Existing AMP automation must not overwrite the separate FILTER values. */
+  #define JUNO6_LEGACY_ADSR(field, value) (p.amp.field = (value))
+  if(id>=18)return 0;
++#if X0X_SJ6_NOTE_CUTOFF_LATCH
++ if(id==2 && s->typed && s->note_cut_latched) {
++  s->note_cut_target=sj6_note_cut_rebase(s->note_cut_target,s->macro[2],x);
++  s->macro[2]=x;
++  (void)dnbx_store_raw(&s->core,7u,x);
++  return 1;
++ }
++#endif
+  s->macro[id]=x;
+ #if defined(X0X_SJ6_BEND_TYPED_PROBE) && X0X_SJ6_BEND_TYPED_PROBE
+  if(id==16 && s->pb_typed) return sj6_pb_refresh(s);
+@@ -1440,6 +1458,10 @@
+     if(s->lfo1_aux_route==route && s->lfo1_aux_base==base)return;
+     s->lfo1_aux_route=(uint8_t)route;
+     s->lfo1_aux_base=(uint8_t)base;
++#if X0X_SJ6_NOTE_CUTOFF_LATCH
++    /* The existing project edit supersedes an imported live exact AU word. */
++    s->core.raw_present[180u/32u]&=~(UINT32_C(1)<<(180u%32u));
++#endif
+     s->lfo1_aux_until=0u;
+ #if X0X_SJ6_NATIVE_DELAY
+     juno6_delay_native_route_refresh(s,s->lfo_tempo);
+@@ -1807,13 +1829,28 @@
+         } else s->lfo1_cut_current=next;
+     }
+ }
+-static int sj6_render_lfo1_cutoff(juno6_t *s,float *left,float *right,unsigned frames)
++static int sj6_render_lfo1_cutoff(juno6_t *s,float *left,float *right,unsigned frames,unsigned run_lfo)
+ {
+     uint64_t phase=s->lfo_phase_q40[0];
+     while(frames) {
+         if(s->lfo1_cut_until<=0) {
+ #if X0X_SJ6_LFO1_WAVE_NATIVE
+             if(s->lfo1_wave==SJ6_LFO_HELD)sj6_held1_80hz(s);
++#endif
++#if X0X_SJ6_NOTE_CUTOFF_LATCH
++            if(s->note_cut_latched) {
++                if(run_lfo && sj6_effective_lfo_amount(s,0u)>.01f) {
++                    /* The active LFO may subsequently replace the note target. */
++                    s->lfo1_cut_active=1;
++                    s->lfo1_cut_current=s->note_cut_current;
++                    s->note_cut_latched=0;
++                } else {
++                    s->mod_wheel_cutoff_hz=sj6_cutoff_hz(s,sj6_note_cut_tick(s));
++                }
++            }
++            if(!s->note_cut_latched && run_lfo)
++#else
++            (void)run_lfo;
+ #endif
+             sj6_cutoff_tick(s,
+ #if X0X_SJ6_LFO_TRIGGER_NATIVE
+@@ -1895,7 +1932,26 @@
+         (void)dnbx_pwm_from_unit(raw, &layer->pulse_width);
+         unsigned count = until_tick / tick_hz;
+         if (count > frames) count = frames;
++#if X0X_SJ6_NOTE_CUTOFF_LATCH
++        /* A distinct oscillator's PWM and the physical filter share a render.
++         * Merge their existing frame boundaries instead of dropping either. */
++        const unsigned note_cut=s->note_cut_latched && s->mod_destination!=5u;
++        if(note_cut) {
++            if(s->lfo1_cut_until<=0) {
++                s->mod_wheel_cutoff_hz=sj6_cutoff_hz(s,sj6_note_cut_tick(s));
++                s->lfo1_cut_until+=(int32_t)s->sample_rate;
++            }
++            const unsigned next=((unsigned)s->lfo1_cut_until+79u)/80u;
++            if(next<count)count=next;
++            if(s->mod_wheel_cutoff_hz)
++                for(unsigned l=0;l<DNBX_LAYERS;l++)
++                    s->core.layer[l].params.cutoff_hz=s->mod_wheel_cutoff_hz;
++        }
++#endif
+         result = render_typed_span(s, left, right, count);
++#if X0X_SJ6_NOTE_CUTOFF_LATCH
++        if(note_cut && result==DNBX_OK)s->lfo1_cut_until-=(int32_t)(80u*count);
++#endif
+         if (result != DNBX_OK) break;
+         until_tick -= count * tick_hz;
+ #if X0X_SJ6_AUX_LFO_NATIVE
+@@ -1959,7 +2015,12 @@
+  const unsigned legacy_lfo1=1u,routed_cut=0u;
+ #endif
+  const unsigned cut_route=lfo1_route && (routed_cut || (legacy_lfo1 && s->lfo1_pwm_route==3));
+- if (wheel_cutoff||cut_route) for(unsigned l=0;l<2;++l) {
++#if X0X_SJ6_NOTE_CUTOFF_LATCH
++ const unsigned note_cut=s->note_cut_latched && s->mod_destination!=5u;
++#else
++ const unsigned note_cut=0;
++#endif
++ if (wheel_cutoff||cut_route||note_cut) for(unsigned l=0;l<2;++l) {
+   base[l]=s->core.layer[l].params.cutoff_hz;
+   if(wheel_cutoff)s->core.layer[l].params.cutoff_hz=wheel_cutoff;
+  }
+@@ -1984,8 +2045,8 @@
+      frames && frames<=DNBX_MAX_FRAMES && left && right && left!=right)
+    rendered=render_lfo_pwm(s,0u,first,left,right,frames);
+   else {
+-   rendered=cut_route && frames<=DNBX_MAX_FRAMES && left && right && left!=right ?
+-      sj6_render_lfo1_cutoff(s,left,right,frames):render_typed_span(s,left,right,frames);
++   rendered=(cut_route||note_cut) && frames<=DNBX_MAX_FRAMES && left && right && left!=right ?
++      sj6_render_lfo1_cutoff(s,left,right,frames,cut_route):render_typed_span(s,left,right,frames);
+    if(rendered==DNBX_OK) s->lfo1_pwm_until_tick=0;
+   }
+   if (rendered==DNBX_OK) {
+@@ -1997,7 +2058,7 @@
+    else s->lfo2_pwm_until_tick = 0;
+   }
+  }
+- if (wheel_cutoff||cut_route) for(unsigned l=0;l<2;++l) s->core.layer[l].params.cutoff_hz=base[l];
++ if (wheel_cutoff||cut_route||note_cut) for(unsigned l=0;l<2;++l) s->core.layer[l].params.cutoff_hz=base[l];
+  if (rendered!=DNBX_OK)return 0;
+  /* Keep all three audio-clock phases independent of receiver and span. */
+  for (unsigned i = 0, running = s->lfo_running; running; ++i, running >>= 1)
+--- a/firmware/src/app/original_runtime.h
++++ b/firmware/src/app/original_runtime.h
+@@ -81,6 +81,9 @@
+     uint8_t stale_ttl[ORIGINAL_INPUT_KEYS][128]; /* 256-frame ticks since a canceled pitch is retriggered */
+     uint32_t stale_pending[ORIGINAL_INPUT_KEYS][4]; /* first ambiguous off, one bit per pitch */
+     uint16_t stale_tick_frames, stale_timers;
++#if X0X_SJ6_NOTE_CUTOFF_LATCH
++    uint16_t occupied_keys; /* number of nonzero source/key owners, not note-ons */
++#endif
+     uint8_t kind;
+     int8_t status;
+ } original_runtime_part;
+--- a/firmware/src/app/original_runtime.c
++++ b/firmware/src/app/original_runtime.c
+@@ -916,8 +916,12 @@
+ static void sj6_lfo_note_set_changed(original_runtime_part *p)
+ {
+     if(p->kind!=ORIGINAL_SOUND_JUNO || !juno6_lfo_snapback_active(&p->dsp.juno.synth))return;
++#if X0X_SJ6_NOTE_CUTOFF_LATCH
++    if(p->occupied_keys)return;
++#else
+     for(unsigned s=0;s<ORIGINAL_INPUT_COUNT;s++)
+         for(unsigned key=0;key<128u;key++)if(p->keys[s][key])return;
++#endif
+     juno6_lfo_trigger(&p->dsp.juno.synth,SJ6_LFO_EVENT_EMPTY);
+ }
+ #endif
+@@ -979,6 +983,9 @@
+                 p->stale_pending[source][lane] &= ~mask;
+                 if (p->keys[source][key]) {
+                     --p->keys[source][key];
++#if X0X_SJ6_NOTE_CUTOFF_LATCH
++                    if(!p->keys[source][key])--p->occupied_keys;
++#endif
+                     if (live_off(p, source, key) != ORIGINAL_RUNTIME_OK) return p->status;
+                 }
+             }
+@@ -1042,6 +1049,14 @@
+             p->stale_ttl[source][key] = ORIGINAL_STALE_GRACE_TICKS;
+             ++p->stale_timers;
+         }
++#if X0X_SJ6_NOTE_CUTOFF_LATCH
++        if (!*held) {
++            if(!p->occupied_keys && p->kind==ORIGINAL_SOUND_JUNO &&
++                juno6_cutoff_note_qualifies(&p->dsp.juno.synth))
++                juno6_cutoff_first_note(&p->dsp.juno.synth);
++            ++p->occupied_keys;
++        }
++#endif
+         ++*held;
+ #if X0X_SJ6_VELOCITY_SETTINGS
+         if (code>=3u && code<6u) velocity=87u;  /* Build 9 input listener, never Note Off */
+@@ -1084,6 +1099,9 @@
+     }
+     if (!*held) return ORIGINAL_RUNTIME_OK;
+     --*held;
++#if X0X_SJ6_NOTE_CUTOFF_LATCH
++    if(!*held)--p->occupied_keys;
++#endif
+     if (source < ORIGINAL_INPUT_KEYS)
+         p->stale_pending[source][key >> 5] &= ~(UINT32_C(1) << (key & 31u));
+     return live_off(p, source, key);
+@@ -1132,6 +1150,9 @@
+     }
+     for (unsigned key = 0; key < 128; ++key) if (p->keys[source][key]) {
+         p->keys[source][key] = 0;
++#if X0X_SJ6_NOTE_CUTOFF_LATCH
++        --p->occupied_keys;
++#endif
+         if (live_off(p, source, key) != ORIGINAL_RUNTIME_OK) return p->status;
+     }
+     return ORIGINAL_RUNTIME_OK;
+@@ -1153,6 +1174,9 @@
+             p->stale_pending[source][key >> 5] &= ~(UINT32_C(1) << (key & 31u));
+         }
+         p->keys[source][key] = 0;
++#if X0X_SJ6_NOTE_CUTOFF_LATCH
++        --p->occupied_keys;
++#endif
+         if (live_off(p, source, key) != ORIGINAL_RUNTIME_OK) return p->status;
+     }
+     return ORIGINAL_RUNTIME_OK;
+@@ -1183,6 +1207,9 @@
+         ok = original_chicago_backend_all_off(&p->dsp.chicago) == ORIGINAL_CHICAGO_BACKEND_OK;
+     }
+     memset(p->keys, 0, sizeof p->keys);
++#if X0X_SJ6_NOTE_CUTOFF_LATCH
++    p->occupied_keys=0;
++#endif
+     memset(p->stale, 0, sizeof p->stale);
+     memset(p->stale_ttl, 0, sizeof p->stale_ttl);
+     memset(p->stale_pending, 0, sizeof p->stale_pending);
+--- /dev/null
++++ b/firmware/src/dsp/juno6_note_cutoff.h
+@@ -0,0 +1,51 @@
++/* Included by the typed SJ6 provider, opt-in pending live LFO arbitration proof.
++ * Uses its existing 80 Hz frame clock, not the host application's wall timer. */
++#if X0X_SJ6_AUX_LFO_NATIVE
++#include "juno6_aux_catalog.h"
++#endif
++#define SJ6_NOTE_CUT_EPS 0x1.0624dep-11f
++static float sj6_note_cut_rebase(float target,float old,float next)
++{
++    return fm_clampf((target-old)+next,0.f,1.f);
++}
++int juno6_cutoff_note_qualifies(const juno6_t *s)
++{
++#if X0X_SJ6_LFO1_DELAY_PORT
++    if(!s->typed || juno6_lfo1_delay_seconds(s->lfo1_delay_raw)<.01f)return 0;
++#if X0X_SJ6_AUX_LFO_NATIVE
++    if(s->lfo1_aux_route)return sj6_aux_destination_id(s->lfo1_aux_route)==7;
++#endif
++    return s->lfo1_pwm_route==3u;
++#else
++    (void)s;
++    return 0;
++#endif
++}
++void juno6_cutoff_first_note(juno6_t *s)
++{
++    float target=s->lfo1_pwm_base;
++#if X0X_SJ6_AUX_LFO_NATIVE
++    if(s->lfo1_aux_route)target=s->lfo1_aux_base*(1.f/127.f);
++#endif
++    float exact;
++    if(dnbx_read_raw(&s->core,180u,&exact)==DNBX_OK)target=exact;
++    if(!s->note_cut_latched) {
++        if(fm_fabsf(target-s->macro[2])<=SJ6_NOTE_CUT_EPS)return;
++        s->note_cut_current=s->macro[2];
++    }
++    s->note_cut_target=target;
++    s->note_cut_latched=1;
++}
++static float sj6_note_cut_tick(juno6_t *s)
++{
++    const float target=s->note_cut_target;
++    const float curr=s->note_cut_current;
++    const float value=fm_clampf(curr+(target-curr)*0x1.217c58p-1f,0.f,1.f);
++    s->note_cut_current=value;
++    if(fm_fabsf(value-target)<=SJ6_NOTE_CUT_EPS) {
++        s->note_cut_current=target;
++        if(fm_fabsf(s->macro[2]-target)<=SJ6_NOTE_CUT_EPS)
++            s->note_cut_latched=0;
++    }
++    return value;
++}

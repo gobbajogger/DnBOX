@@ -1,0 +1,33 @@
+{
+  "cases": [
+    {
+      "case": "held",
+      "lead": 0,
+      "commit": 33491,
+      "compared_amp_words": 66,
+      "independent_sample_reset_exact": true
+    },
+    {
+      "case": "middle_release",
+      "lead": 11025,
+      "commit": 33491,
+      "compared_amp_words": 66,
+      "independent_sample_reset_exact": true
+    },
+    {
+      "case": "long_release",
+      "lead": 22050,
+      "commit": 33491,
+      "compared_amp_words": 66,
+      "independent_sample_reset_exact": true
+    },
+    {
+      "case": "staggered",
+      "lead": 11025,
+      "commit": 33667,
+      "compared_amp_words": 66,
+      "independent_sample_reset_exact": true
+    }
+  ],
+  "scope": "Actual current independent Main and Sub receivers under same projected AMP slots10\u201315 and co-timed receipt events; not proof of firmware compact envelope or current app ingress."
+}

@@ -1,0 +1,47 @@
+--- a/firmware/src/dsp/juno6_delay_native.inc
++++ b/firmware/src/dsp/juno6_delay_native.inc
+@@ -61,6 +61,7 @@
+     }
+     return native_delay_frames(s,lo,bpm,s->delay24.sync);
+ }
++#endif
+ 
+ /* In-place coarsening aligned on the newest complete old cell. Write
+  * indices trail the already-read source indices, including across wrap. */
+@@ -91,6 +92,7 @@
+     /* The existing partial bin stays pending; phase < old <= wanted,
+        and both channels already hold the exact uncommitted time sum. */
+ }
++#if X0X_SJ6_AUX_LFO_NATIVE
+ void juno6_delay_native_route_refresh(juno6_t *s,float bpm)
+ {
+     if(!s->delay24.tap || !s->delay24.stride || !(bpm>0.f))return;
+@@ -129,12 +131,22 @@
+         stride=1u;
+         while (window>(float)((SJ6_NATIVE_DELAY_CAP-2u)*stride)) stride<<=1;
+         if (stride!=s->delay24.stride) {
+-            s->delay24.stride=(uint16_t)stride;
+-            s->delay24.filled=s->delay24.phase=s->delay24.pos=0;
+-            s->delay24.sum[0]=s->delay24.sum[1]=0.f;
+-            s->delay24.inv_stride=1.f/(float)stride;
+-            s->delay24.current=s->delay24.target=frames*s->delay24.inv_stride;
+-            s->delay24.ramp[0]=0;
++            const unsigned prior=s->delay24.stride;
++            if (prior && stride>prior && stride/prior<=s->delay24.filled &&
++                s->delay24.current*(float)prior>=(float)stride) {
++                /* Preserve representable prior history and the partial bin
++                 * on a warm manual/tempo expansion, just like routed time. */
++                native_delay_route_coarsen(s,stride);
++            } else {
++                /* A smaller stride cannot reconstruct old bins; colder
++                 * expansions without one group or a usable tap still reset. */
++                s->delay24.stride=(uint16_t)stride;
++                s->delay24.filled=s->delay24.phase=s->delay24.pos=0;
++                s->delay24.sum[0]=s->delay24.sum[1]=0.f;
++                s->delay24.inv_stride=1.f/(float)stride;
++                s->delay24.current=s->delay24.target=frames*s->delay24.inv_stride;
++                s->delay24.ramp[0]=0;
++            }
+         }
+     }
+     native_delay_ramp(s->delay24.current,frames*s->delay24.inv_stride,&s->delay24.target,

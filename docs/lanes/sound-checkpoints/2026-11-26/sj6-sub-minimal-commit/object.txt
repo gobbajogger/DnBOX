@@ -1,0 +1,10 @@
+     2: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND __adddf3
+     3: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND __divdf3
+     4: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND __floatunsidf
+     5: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND __gtdf2
+     6: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND __ltdf2
+     7: 000000bc     8 FUNC    GLOBAL DEFAULT    2 sj6_stage1_cancel
+     8: 00000000   140 FUNC    GLOBAL DEFAULT    2 sj6_stage1_offer
+     9: 0000008c    48 FUNC    GLOBAL DEFAULT    2 sj6_stage1_prep
+  [ 2] .text             PROGBITS        00000000 000034 0000c4 00  AX  0   0  2
+  [ 3] .rela.text        RELA            00000000 000198 000054 0c      4   2  4
