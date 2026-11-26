@@ -1,0 +1,316 @@
+{
+  "attack": [
+    [
+      {
+        "reference": {
+          "level_db": -5.941754395003805,
+          "signed_dbr": -6.093793805284617,
+          "spectrum_db": 7.128381175937653
+        },
+        "envelope_rms_error_128frame_dB": 5.952527268163585
+      },
+      {
+        "reference": {
+          "level_db": -5.941754602032723,
+          "signed_dbr": -6.093793597633507,
+          "spectrum_db": 7.128380874068177
+        },
+        "envelope_rms_error_128frame_dB": 5.952527697236384
+      }
+    ],
+    [
+      {
+        "reference": {
+          "level_db": -5.946519166132424,
+          "signed_dbr": -6.089444122421294,
+          "spectrum_db": 7.132382970778003
+        },
+        "envelope_rms_error_128frame_dB": 5.960960439072476
+      },
+      {
+        "reference": {
+          "level_db": -5.94651937316134,
+          "signed_dbr": -6.0894439142050185,
+          "spectrum_db": 7.132382658346787
+        },
+        "envelope_rms_error_128frame_dB": 5.960960869116016
+      }
+    ]
+  ],
+  "single_hold": [
+    [
+      {
+        "reference": {
+          "level_db": -5.920704594056636,
+          "signed_dbr": -5.739442600827475,
+          "spectrum_db": 6.657271002618734
+        },
+        "envelope_rms_error_128frame_dB": 6.141453230277958
+      },
+      {
+        "reference": {
+          "level_db": -5.920705062094212,
+          "signed_dbr": -5.7394422095107425,
+          "spectrum_db": 6.657270389311011
+        },
+        "envelope_rms_error_128frame_dB": 6.141453658758656
+      }
+    ],
+    [
+      {
+        "reference": {
+          "level_db": -5.920704439078669,
+          "signed_dbr": -5.7394427572287405,
+          "spectrum_db": 6.657268169507848
+        },
+        "envelope_rms_error_128frame_dB": 6.141453805003509
+      },
+      {
+        "reference": {
+          "level_db": -5.920704907116246,
+          "signed_dbr": -5.739442365912199,
+          "spectrum_db": 6.6572675561988905
+        },
+        "envelope_rms_error_128frame_dB": 6.141454233484113
+      }
+    ]
+  ],
+  "single_release": [
+    [
+      {
+        "reference": {
+          "level_db": -5.212059423460895,
+          "signed_dbr": -6.039383440810797,
+          "spectrum_db": 5.752218230646946
+        },
+        "envelope_rms_error_128frame_dB": 3.7278314805948853
+      },
+      {
+        "reference": {
+          "level_db": -5.212058751655303,
+          "signed_dbr": -6.0393840241780445,
+          "spectrum_db": 5.752209410046745
+        },
+        "envelope_rms_error_128frame_dB": 3.72783363035783
+      }
+    ],
+    [
+      {
+        "reference": {
+          "level_db": -5.264502932814869,
+          "signed_dbr": -6.040232848768453,
+          "spectrum_db": 6.309655751206017
+        },
+        "envelope_rms_error_128frame_dB": 3.627105178929587
+      },
+      {
+        "reference": {
+          "level_db": -5.264502261009278,
+          "signed_dbr": -6.0402334302514396,
+          "spectrum_db": 6.309652026709711
+        },
+        "envelope_rms_error_128frame_dB": 3.6271075296794253
+      }
+    ]
+  ],
+  "chord_attack": [
+    [
+      {
+        "reference": {
+          "level_db": -5.955026426441866,
+          "signed_dbr": -5.989284522389432,
+          "spectrum_db": 6.640102419708482
+        },
+        "envelope_rms_error_128frame_dB": 5.957940916226423
+      },
+      {
+        "reference": {
+          "level_db": -5.955026796273717,
+          "signed_dbr": -5.989284161453293,
+          "spectrum_db": 6.640105162928496
+        },
+        "envelope_rms_error_128frame_dB": 5.9579412221300245
+      }
+    ],
+    [
+      {
+        "reference": {
+          "level_db": -5.958563635452352,
+          "signed_dbr": -5.986162734697526,
+          "spectrum_db": 6.616306150070616
+        },
+        "envelope_rms_error_128frame_dB": 5.971459745104737
+      },
+      {
+        "reference": {
+          "level_db": -5.958564005284202,
+          "signed_dbr": -5.986162373905087,
+          "spectrum_db": 6.616308864752644
+        },
+        "envelope_rms_error_128frame_dB": 5.971460051159461
+      }
+    ]
+  ],
+  "chord_hold": [
+    [
+      {
+        "reference": {
+          "level_db": -6.133209269787571,
+          "signed_dbr": 0.8377149359803349,
+          "spectrum_db": 6.495500676996786
+        },
+        "envelope_rms_error_128frame_dB": 7.414926963109046
+      },
+      {
+        "reference": {
+          "level_db": -6.133209670668212,
+          "signed_dbr": 0.8377148618716885,
+          "spectrum_db": 6.495501147759589
+        },
+        "envelope_rms_error_128frame_dB": 7.414927285953363
+      }
+    ],
+    [
+      {
+        "reference": {
+          "level_db": -6.133210000726246,
+          "signed_dbr": 0.8377147882288718,
+          "spectrum_db": 6.495506139528786
+        },
+        "envelope_rms_error_128frame_dB": 7.414927903834702
+      },
+      {
+        "reference": {
+          "level_db": -6.1332104016068865,
+          "signed_dbr": 0.8377147141204293,
+          "spectrum_db": 6.495506610281488
+        },
+        "envelope_rms_error_128frame_dB": 7.414928226679096
+      }
+    ]
+  ],
+  "early_tail": [
+    [
+      {
+        "reference": {
+          "level_db": -3.914258243882753,
+          "signed_dbr": 3.9277620919951257,
+          "spectrum_db": 6.5947683787244555
+        },
+        "envelope_rms_error_128frame_dB": 8.29319663560481
+      },
+      {
+        "reference": {
+          "level_db": -3.9142603834463188,
+          "signed_dbr": 3.9277612016270265,
+          "spectrum_db": 6.594778943085438
+        },
+        "envelope_rms_error_128frame_dB": 8.293195865531683
+      }
+    ],
+    [
+      {
+        "reference": {
+          "level_db": -4.188616750606615,
+          "signed_dbr": 3.8315685646981477,
+          "spectrum_db": 6.315627754779461
+        },
+        "envelope_rms_error_128frame_dB": 9.225506287470237
+      },
+      {
+        "reference": {
+          "level_db": -4.18861889017018,
+          "signed_dbr": 3.8315676972332997,
+          "spectrum_db": 6.315638803356834
+        },
+        "envelope_rms_error_128frame_dB": 9.225505375260406
+      }
+    ]
+  ],
+  "late_tail": [
+    [
+      {
+        "reference": {
+          "level_db": -14.552428963612352,
+          "signed_dbr": -1.2914469697763153,
+          "spectrum_db": 12.17713802755067
+        },
+        "envelope_rms_error_128frame_dB": null
+      },
+      {
+        "reference": {
+          "level_db": -14.552433244747494,
+          "signed_dbr": -1.2914444827861224,
+          "spectrum_db": 12.177135415596661
+        },
+        "envelope_rms_error_128frame_dB": null
+      }
+    ],
+    [
+      {
+        "reference": {
+          "level_db": -14.935689363554943,
+          "signed_dbr": -1.177565869559211,
+          "spectrum_db": 12.491010285536158
+        },
+        "envelope_rms_error_128frame_dB": null
+      },
+      {
+        "reference": {
+          "level_db": -14.935693644690085,
+          "signed_dbr": -1.177563479183511,
+          "spectrum_db": 12.491007857864384
+        },
+        "envelope_rms_error_128frame_dB": null
+      }
+    ]
+  ],
+  "whole": [
+    [
+      {
+        "reference": {
+          "level_db": -6.045890770422769,
+          "signed_dbr": -0.9747168165903287,
+          "spectrum_db": 6.625259723012314
+        },
+        "envelope_rms_error_128frame_dB": 6.755237972980619
+      },
+      {
+        "reference": {
+          "level_db": -6.045891180219423,
+          "signed_dbr": -0.9747168303410367,
+          "spectrum_db": 6.62525960552701
+        },
+        "envelope_rms_error_128frame_dB": 6.75523830791538
+      }
+    ],
+    [
+      {
+        "reference": {
+          "level_db": -6.046796246034518,
+          "signed_dbr": -0.9750132008769717,
+          "spectrum_db": 6.694100102100924
+        },
+        "envelope_rms_error_128frame_dB": 6.760446182045943
+      },
+      {
+        "reference": {
+          "level_db": -6.046796655831171,
+          "signed_dbr": -0.9750132146076025,
+          "spectrum_db": 6.694099960286823
+        },
+        "envelope_rms_error_128frame_dB": 6.760446521901181
+      }
+    ]
+  ],
+  "typed_pcm_hashes": {
+    "0-0-dry.final": "eac703ef6a28059695957bf791cb3517b776489f86738d98a004a6fb4cc320ee",
+    "0-1-authored.final": "9fcefb04a1054306c40c6e6d7727d2c679393a2c6f77e4353c1244e33196a3cb",
+    "0-1-dry.final": "a7da5dc2025efd6a6a566d48b58eceadbc5cce760604e840b64a601071f65d04",
+    "0-2-dry.final": "94d3be11ca63ad663a142686a3f8ee5426ad7cd2df86add8ec547c176ef881d6",
+    "1-0-dry.final": "eac703ef6a28059695957bf791cb3517b776489f86738d98a004a6fb4cc320ee",
+    "1-1-authored.final": "9fcefb04a1054306c40c6e6d7727d2c679393a2c6f77e4353c1244e33196a3cb",
+    "1-1-dry.final": "b108a2280603aee487c62b61f0937ddd7b85733571f85d04f506e22ad85e2125",
+    "1-2-dry.final": "94d3be11ca63ad663a142686a3f8ee5426ad7cd2df86add8ec547c176ef881d6"
+  }
+}

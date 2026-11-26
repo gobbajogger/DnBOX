@@ -1,0 +1,9 @@
+# Solidify typed Sine signed source phase / clock isolation
+Use `bash sj6-solidify-sine-phase/run.sh > sj6-solidify-sine-phase/result.json` and independently:
+```sh
+cc -std=c99 -O2 -ffp-contract=off -Isj6-wave-carrier sj6-solidify-sine-phase/stage.c -lm -o /tmp/sj6-solidify-source-phase
+/tmp/sj6-solidify-source-phase
+```
+Needs existing exact Range-corrected compact donor and approved private installed-current-AU three-preset archive. Separate stock and center branches, driver reads original exact authorized signed cue. No copy of original samples, per-preset gain, output fit or time shifting. At layer render seam only true generated Sine switches from sin phase to the source-proven cosine origin. Variant 1 uses unchanged compact phase/advance. Variant 2 uses actual source-derived successive quarter-steps and two halfband stages on the nonproprietary cosine. Per-owner Sine state starts/retains at unchanged true compact poly/mono allocations. This is an isolated host witness, not production footprint or source-bank reconstruction. It does not transplant original loaded harmonics.
+
+Independent shaped-free neutral source verification uses absolute H1 cosine-projection phase from current authenticated pre-Normal stage against H1 of locally generated test, same first frame and 44.1k sample rate (columns pitch, old sinusoid, quarter-origin at compact clock, quarter-clock halfband). Independent source anchors + nearest 110–3520 Hz show up to .063 degrees fund phase error at 4× across pitch; higher harmonic shape and actual loaded-bank render not asserted. Pure phase of two app-authored generated Sines addresses large signed onset/dry held regressions in Solidify without any canonical gain changes. However late dry release regresses, reference Vintage is separately nondeterministic, and authored/dry success is not full. Brainwave and Raw, and all existing baseline signed bytes, unchanged. No target build or production changes.

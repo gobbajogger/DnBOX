@@ -1,0 +1,39 @@
+--- donor/suffix-driver.c
++++ witness/driver.c
+@@ -45,6 +45,7 @@
+ void sj6_validated_dry_post(float*l,float*r,unsigned n){
+  if(suffix_scope){suffix_post+=n;sj6_post_dry(&routed_suffix,l,r,n);}
+ }
++#include "host-amp.inc"
+ static void select_suffix(void) {
+  /* Exact prior dry guard, except a read-back latent amount paired with live
+   * disabled Crusher and zero rate. Exclude non-centered-Sine comparison
+@@ -125,16 +126,18 @@
+   assert(argc==5);stems=fopen(argv[4],"wb");assert(stems);pre=fopen(argv[3],"wb");assert(pre);FILE *in=fopen(argv[1],"r"),*out=fopen(argv[2],"wb");assert(in&&out);
+   unsigned n;float bpm;assert(fscanf(in,"%f%u",&bpm,&n)==2&&n<256);
+   for(unsigned i=0,id;i<n;i++){float x;assert(fscanf(in,"%u%f",&id,&x)==2&&id<256&&!present[id]&&isfinite(x));word[id]=x;present[id]=1;}
+-  prepare(bpm); select_suffix();
++  prepare(bpm); select_suffix(); amp_open();
+   assert(fscanf(in,"%u",&n)==1&&n<4096);
+   unsigned total=0;
+   float l[128],r[128],st[256];
+   for(unsigned i=0;i<n;i++){
+     unsigned frames,ev,key,v;
+     assert(fscanf(in,"%u%u",&frames,&ev)==2&&frames&&frames<=128&&ev<5);
+-    while(ev--){assert(fscanf(in,"%u%u",&key,&v)==2);assert(original_runtime_key(&part,ORIGINAL_INPUT_USB,key,(v&&bid(205))?87u:v)==ORIGINAL_RUNTIME_OK);}
++    while(ev--){assert(fscanf(in,"%u%u",&key,&v)==2);unsigned old=part.dsp.juno.synth.core.voice[0].gate;assert(original_runtime_key(&part,ORIGINAL_INPUT_USB,key,(v&&bid(205))?87u:v)==ORIGINAL_RUNTIME_OK);amp_edge(old);}
+     memset(carrier_tap,0,sizeof carrier_tap);memset(raw_tap,0,sizeof raw_tap);
++    amp_span(frames);
+     assert(original_runtime_render(&part,&work,l,r,frames)==ORIGINAL_RUNTIME_OK);
++    amp_checked(frames);
+     for(unsigned j=0;j<frames;j++){assert(isfinite(l[j])&&isfinite(r[j]));st[2*j]=l[j];st[2*j+1]=r[j];}
+     for(unsigned j=0;j<frames;j++){const float z[]={raw_tap[0][j],raw_tap[1][j],carrier_tap[0][j],carrier_tap[1][j]};assert(fwrite(z,sizeof z,1,stems)==1);}
+     assert(fwrite(st,2*sizeof(float),frames,out)==frames);total+=frames;
+@@ -144,6 +147,7 @@
+     above_unity[0],above_unity[1],above_ring[0],above_ring[1]);
+   fprintf(stderr,"sum_samples=%u classic_frames=%u classic_clips=%u classic_peak=%a\n",sum_samples,classic_frames,classic_clips,classic_peak);
+   fprintf(stderr,"suffix_scope=%u pre=%u post=%u\n",suffix_scope,suffix_pre,suffix_post);
++  fprintf(stderr,"amp_admit=%d ons=%u offs=%u words=%u\n",amp_scope,amp_on_count,amp_off_count,amp_words);
+   assert(!fclose(pre));assert(!fclose(stems));assert(total==148684); fclose(in);assert(!fclose(out));
+ }
+ /* The fixture has one SJ6 owner. A misroute aborts instead of returning silence. */

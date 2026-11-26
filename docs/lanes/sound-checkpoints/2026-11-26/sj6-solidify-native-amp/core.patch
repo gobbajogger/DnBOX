@@ -1,0 +1,31 @@
+--- donor/compose.c
++++ witness/typed-core.c
+@@ -960,6 +960,11 @@
+     if (!left || !right || left==right) return DNBX_E_ARGUMENT;
+     COUNT(w,frames,n);
+     const float osc_gain[]={gain1,gain2};
++    extern int sj6_amp_diagnostic_begin(const dnbx_part*,unsigned);
++    extern float sj6_amp_diagnostic_value(unsigned,unsigned);
++    extern int sj6_amp_diagnostic_live(unsigned);
++    int host_amp=sj6_amp_diagnostic_begin(s,n);
++
+ #if X0X_SJ6_NOISE_SUB_NATIVE
+     float sj6_steps[DNBX_VOICES];
+     const uint8_t *sj6_harmonics[DNBX_VOICES];
+@@ -1045,7 +1050,7 @@
+         for (unsigned i=0;i<DNBX_VOICES;i++) {
+             dnbx_voice *v=&s->voice[i];
+             COUNT(w,voice_slots,1);
+-            if (!voice_active(v)) continue;
++            if (!voice_active(v) && !(host_amp && !i && sj6_amp_diagnostic_live(k))) continue;
+             COUNT(w,active_voice_samples,1);
+             float velocity=v->velocity;
+             if (s->velocity_mode==DNBX_VELOCITY_SQUARED) velocity*=velocity;
+@@ -1073,6 +1078,7 @@
+                 if(pitch_ratio!=1.f)lv->increment=fm_minf(lv->increment*pitch_ratio,.45f);
+ #endif
+                 float amp=envelope_sample(&lv->amp,&p->amp,s->sample_rate,w);
++                if(host_amp && !i)amp=sj6_amp_diagnostic_value(l,k);
+                 float env=envelope_sample(&lv->filter,fp[l],s->sample_rate,w);
+                 if (fvel != 0.f) env *= filter_note[i];
+ #if defined(X0X_HOST) && SJ6_WAVE_PROBE
