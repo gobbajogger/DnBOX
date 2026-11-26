@@ -1,0 +1,70 @@
+--- a/exact-delay.c
++++ b/exact-delay.c
+@@ -12,6 +12,7 @@
+ dnbox_s1_exact_delay *dnbox_s1_delay_new(unsigned rate) {
+     dnbox_s1_exact_delay *p=calloc(1,sizeof *p);
+     if(!p)return 0;
++    if(!rate){free(p);return 0;}
+     sp_create(&p->sp); p->sp->sr=rate; p->sp->nchan=2;
+     for(unsigned i=0;i<4;i++){
+         sp_vdelay_create(&p->line[i]); sp_vdelay_init(p->sp,p->line[i],10.f);
+@@ -31,14 +32,53 @@
+ void dnbox_s1_delay_reset(dnbox_s1_exact_delay *p) {
+     for(unsigned i=0;i<4;i++)sp_vdelay_reset(p->sp,p->line[i]);
+ }
++/* The original four lines always advance together and have the same
++ * size, with exactly two independent delay ages. Reuse only their control
++ * geometry; preserve each feedback write and the signed right crossfeed. */
++typedef struct { int a,b,c,d; float w,x,y,z,f; } tap_geom;
++static __attribute__((noinline)) void geometry(tap_geom *gp,float t,int sr,int at,int n)
++{
++    tap_geom g;
++    /* The integer rate is exactly binary32; binary64 represents the full
++       product of the two binary32 operands before the original narrowing. */
++    float f=t*(-(float)sr);
++    int i=(int)f;
++    f-=(float)i;
++    i+=at;
++    if(i<0 || f<0.f){
++        f++;i--;
++        while(i<0)i+=n;
++    }else while(i>=n)i-=n;
++    int c=i==n-1?0:i+1;
++    g.a=i==0?n-1:i-1;g.b=i;g.c=c;g.d=c==n-1?0:c+1;
++    float w,x,y,z;
++    z=f*f;z--;z*=0.1666666667;
++    y=f;y++;w=(y*=0.5);w--;
++    x=3.0*z;y-=x;w-=z;x-=f;
++    g.w=w;g.x=x;g.y=y;g.z=z;g.f=f;
++    *gp=g;
++}
++static __attribute__((noinline)) float lane(sp_vdelay *p,const tap_geom *gp,int at,float in,float fb)
++{
++    const tap_geom g=*gp;
++    float *buf=p->buf.ptr;
++    buf[at]=in+p->prev*fb;
++    float a=buf[g.a],b=buf[g.b],c=buf[g.c],d=buf[g.d];
++    const float o=(g.w*a+g.x*b+g.y*c+g.z*d)*g.f+b;
++    p->prev=o;
++    return o;
++}
+ void dnbox_s1_delay_tap(dnbox_s1_exact_delay *p,float t,float fb,float l,float r,float *left,float *right) {
+-    for(unsigned i=0;i<4;i++){p->line[i]->del=i<2?t*2.f:t;p->line[i]->feedback=fb;}
+-    float o=0, fill=0;
+-    sp_vdelay_compute(p->sp,p->line[0],&l,left);
+-    sp_vdelay_compute(p->sp,p->line[1],&r,&o);
+-    sp_vdelay_compute(p->sp,p->line[2],&r,&fill);
+-    sp_vdelay_compute(p->sp,p->line[3],&o,right);
++    const int at=p->line[0]->left;
++    const int n=(uint32_t)(p->line[0]->maxdel*p->sp->sr);
++    tap_geom twice,once; geometry(&twice,t*2.f,p->sp->sr,at,n);
++    geometry(&once,t,p->sp->sr,at,n);
++    *left=lane(p->line[0],&twice,at,l,fb);
++    const float o=lane(p->line[1],&twice,at,r,fb);
++    const float fill=lane(p->line[2],&once,at,r,fb);
++    *right=lane(p->line[3],&once,at,o,fb);
+     *right+=fill;
++    p->line[0]->left=at+1==n?0:at+1;
+ }
+ void dnbox_s1_delay_insert(dnbox_s1_exact_delay *p,float t,float fb,float ft,float cutoff,float ratio,
+      float mix,float enable,float l,float r,float *left,float *right) {

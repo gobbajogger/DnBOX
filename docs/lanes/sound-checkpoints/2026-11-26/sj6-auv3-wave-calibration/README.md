@@ -13,3 +13,9 @@ Git keeps the 42 genuine installed-AU reference renders and all calibration mani
 68b221f4d70746d3f500170f190c7e8ad5adfc9c0ada6e56c178e0ec3e61de57  pulse-reference.tgz
 ef6482370cb7e0f9529cec6b87795ef9bd8be9762c2cc87213a47cd8bc94e60f  saw-reference.tgz
 5384ea63f680587b5ff6d4e50d1b5b4fde8b28b4289d1260f7e319af22a82334  tri-reference.tgz
+
+Additional full AU compressor-off harmonic fingerprints from A4 held frames
+25000 through 54999 (origin frame 16384): relative to h1, measured h2/h3
+are Sine -30.65/-29.85 dB, Triangle -22.31/-19.12, Saw -6.00/-9.52 and
+Pulse -106.96/-9.52. Agreement of common gain intervals is not a null test
+or evidence that Sine/Triangle partials already match isolated source.
