@@ -1,0 +1,316 @@
+{
+  "bin_sha": "6d163d79202e866d2fda96e36f752bd386641b5ae2d0b1f829a254d26b652850",
+  "bank_sha": "86544b4049376ab7838cc1bf30df4f0701826b3960a930ecd78bcbea7112acc6",
+  "cases": {
+    "0-dry": {
+      "unchanged_byte_identical": true,
+      "sha": "7147ed28f377a6d455c456ae594806ae1c9c1a4a0e636077e8c5b345d09d894a"
+    },
+    "1-dry": {
+      "reference_pcm": "76bdf841f398a11c4846a538a6863cc8e1c538600b1da843725830dba364bf21",
+      "compact_arms_sha": [
+        "7e0d850c87d6df8ee3e4e4c269ecab511629bee460e0bbad8243bbb5747d09c7",
+        "21eb6dc4c1aea7e6dd99fc21050e2c7215cdb421b9869a98deddd22fbeee73f0"
+      ],
+      "windows": {
+        "one_attack": {
+          "analytic_real_route": {
+            "delta_db": -6.415975017612448,
+            "signed_dbr": -2.078319099908886
+          },
+          "original_bank_real_route": {
+            "delta_db": -4.583723874741902,
+            "signed_dbr": -2.186192684864003
+          },
+          "analytic_fixed_suffix_sensitivity": {
+            "delta_db": -7.7670422331203,
+            "signed_dbr": -4.551037180819998
+          },
+          "original_bank_fixed_suffix_sensitivity": {
+            "delta_db": -5.933280019801458,
+            "signed_dbr": -6.094127523196048
+          }
+        },
+        "one_hold": {
+          "analytic_real_route": {
+            "delta_db": -6.405647788687708,
+            "signed_dbr": -1.422293558727683
+          },
+          "original_bank_real_route": {
+            "delta_db": -4.557692868604589,
+            "signed_dbr": -1.3568183987797608
+          },
+          "analytic_fixed_suffix_sensitivity": {
+            "delta_db": -7.753554864927792,
+            "signed_dbr": -4.381174135334203
+          },
+          "original_bank_fixed_suffix_sensitivity": {
+            "delta_db": -5.903700654443825,
+            "signed_dbr": -5.773216639197566
+          }
+        },
+        "one_release": {
+          "analytic_real_route": {
+            "delta_db": -11.087249961750702,
+            "signed_dbr": 0.9866934190168606
+          },
+          "original_bank_real_route": {
+            "delta_db": -8.93370029646687,
+            "signed_dbr": 1.327279051332582
+          },
+          "analytic_fixed_suffix_sensitivity": {
+            "delta_db": -7.106232353723437,
+            "signed_dbr": -4.62770645852704
+          },
+          "original_bank_fixed_suffix_sensitivity": {
+            "delta_db": -5.189043057546147,
+            "signed_dbr": -6.059285519109071
+          }
+        },
+        "one_modal_late": {
+          "analytic_real_route": {
+            "delta_db": null,
+            "signed_dbr": -1.9286549331065743e-15
+          },
+          "original_bank_real_route": {
+            "delta_db": null,
+            "signed_dbr": -1.9286549331065743e-15
+          },
+          "analytic_fixed_suffix_sensitivity": {
+            "delta_db": -5.204780425093249,
+            "signed_dbr": -6.917770481058824
+          },
+          "original_bank_fixed_suffix_sensitivity": {
+            "delta_db": -3.2542561183500514,
+            "signed_dbr": -10.093661537794548
+          }
+        },
+        "chord_hold": {
+          "analytic_real_route": {
+            "delta_db": -7.710155693066571,
+            "signed_dbr": 0.09114516928247206
+          },
+          "original_bank_real_route": {
+            "delta_db": -5.941866000745348,
+            "signed_dbr": 0.2991404882400514
+          },
+          "analytic_fixed_suffix_sensitivity": {
+            "delta_db": -7.8749632722508505,
+            "signed_dbr": 0.4532513517770697
+          },
+          "original_bank_fixed_suffix_sensitivity": {
+            "delta_db": -6.1075952698347376,
+            "signed_dbr": 0.7059871784489334
+          }
+        },
+        "final_early": {
+          "analytic_real_route": {
+            "delta_db": -6.3054572014151695,
+            "signed_dbr": 3.314846204280333
+          },
+          "original_bank_real_route": {
+            "delta_db": -4.440027746543549,
+            "signed_dbr": 3.9637808831145804
+          },
+          "analytic_fixed_suffix_sensitivity": {
+            "delta_db": -5.746875391676057,
+            "signed_dbr": 3.278852301114867
+          },
+          "original_bank_fixed_suffix_sensitivity": {
+            "delta_db": -3.887771780590383,
+            "signed_dbr": 3.9385089990045925
+          }
+        },
+        "final_modal_late": {
+          "analytic_real_route": {
+            "delta_db": null,
+            "signed_dbr": -2.892982399659862e-15
+          },
+          "original_bank_real_route": {
+            "delta_db": null,
+            "signed_dbr": -2.892982399659862e-15
+          },
+          "analytic_fixed_suffix_sensitivity": {
+            "delta_db": -19.1404512922649,
+            "signed_dbr": -0.8127131786972609
+          },
+          "original_bank_fixed_suffix_sensitivity": {
+            "delta_db": -17.28026195755274,
+            "signed_dbr": -1.0138619558940494
+          }
+        },
+        "whole": {
+          "analytic_real_route": {
+            "delta_db": -7.226430857482153,
+            "signed_dbr": -0.6370471886777731
+          },
+          "original_bank_real_route": {
+            "delta_db": -5.423347291630456,
+            "signed_dbr": -0.5185639584027777
+          },
+          "analytic_fixed_suffix_sensitivity": {
+            "delta_db": -7.823118602843638,
+            "signed_dbr": -0.9592353230641935
+          },
+          "original_bank_fixed_suffix_sensitivity": {
+            "delta_db": -6.024417342094165,
+            "signed_dbr": -0.9732406489445699
+          }
+        }
+      },
+      "fixed_nonadmitting_modal": {
+        "one": {
+          "native": {
+            "coords": [
+              -0.0017722021519965912,
+              -0.0017718158651455567,
+              0.0030523023896878738,
+              -0.0005356603292199708
+            ],
+            "disjoint_tail_residual_dbr": -94.36985100957705
+          },
+          "analytic_fixed_suffix_sensitivity": {
+            "coords": [
+              -0.0010126259661691786,
+              -0.0009366766215309025,
+              0.0017018983988802518,
+              -0.00029603662636325213
+            ],
+            "disjoint_tail_residual_dbr": -197.07433600034744
+          },
+          "original_bank_fixed_suffix_sensitivity": {
+            "coords": [
+              -0.001269922880007734,
+              -0.0011697739379689927,
+              0.0021294368216227427,
+              -0.00037070194730902997
+            ],
+            "disjoint_tail_residual_dbr": -196.62113164840608
+          }
+        },
+        "last": {
+          "native": {
+            "coords": [
+              -0.001336750249628532,
+              -0.00030647014778541556,
+              0.0007386400259274707,
+              -0.00029122547566771674
+            ],
+            "disjoint_tail_residual_dbr": -92.79232787712476
+          },
+          "analytic_fixed_suffix_sensitivity": {
+            "coords": [
+              -0.00013136281599638086,
+              -0.0001081762917147484,
+              0.00025554239140230037,
+              -3.6344602679340925e-05
+            ],
+            "disjoint_tail_residual_dbr": -196.79760490496523
+          },
+          "original_bank_fixed_suffix_sensitivity": {
+            "coords": [
+              -0.0001629093535572371,
+              -0.00013373761569189678,
+              0.00031577992768916954,
+              -4.502925173477227e-05
+            ],
+            "disjoint_tail_residual_dbr": -196.1000498091315
+          }
+        }
+      }
+    },
+    "1-authored": {
+      "reference_pcm": "2ce5be3f5af9890d974c8b53d3bd35949d378a9a8789a7b2262dad0e668f36c5",
+      "compact_arms_sha": [
+        "c086d638e22bd29306ab46c079dc4dd78c4ed08f12d1e5fdf4e62fd2cf75267b",
+        "2a7b282a5990aaccd69f91c7198defb6130db6ce6831469dee6019b6ab162601"
+      ],
+      "windows": {
+        "one_attack": {
+          "analytic_real_route": {
+            "delta_db": -7.653089697491984,
+            "signed_dbr": -1.2124966975845646
+          },
+          "original_bank_real_route": {
+            "delta_db": -5.820827945666887,
+            "signed_dbr": -1.2075170551326788
+          }
+        },
+        "one_hold": {
+          "analytic_real_route": {
+            "delta_db": -7.613503426745037,
+            "signed_dbr": -0.047087777502309525
+          },
+          "original_bank_real_route": {
+            "delta_db": -5.765555159478267,
+            "signed_dbr": 0.20813478511950284
+          }
+        },
+        "one_release": {
+          "analytic_real_route": {
+            "delta_db": -12.26175938878127,
+            "signed_dbr": 1.4301273392200358
+          },
+          "original_bank_real_route": {
+            "delta_db": -10.108254201929352,
+            "signed_dbr": 1.825382791695855
+          }
+        },
+        "one_modal_late": {
+          "analytic_real_route": {
+            "delta_db": null,
+            "signed_dbr": 1.928654933106574e-15
+          },
+          "original_bank_real_route": {
+            "delta_db": null,
+            "signed_dbr": 1.928654933106574e-15
+          }
+        },
+        "chord_hold": {
+          "analytic_real_route": {
+            "delta_db": -9.264310566652233,
+            "signed_dbr": -2.9871398906968736
+          },
+          "original_bank_real_route": {
+            "delta_db": -7.4960233918347114,
+            "signed_dbr": -3.7223535172409044
+          }
+        },
+        "final_early": {
+          "analytic_real_route": {
+            "delta_db": -7.205152410771122,
+            "signed_dbr": -2.217306640612367
+          },
+          "original_bank_real_route": {
+            "delta_db": -5.339842180082685,
+            "signed_dbr": -2.476924995795342
+          }
+        },
+        "final_modal_late": {
+          "analytic_real_route": {
+            "delta_db": null,
+            "signed_dbr": 0.0
+          },
+          "original_bank_real_route": {
+            "delta_db": null,
+            "signed_dbr": 0.0
+          }
+        },
+        "whole": {
+          "analytic_real_route": {
+            "delta_db": -8.68136462992676,
+            "signed_dbr": -1.9425037047650204
+          },
+          "original_bank_real_route": {
+            "delta_db": -6.878282916300824,
+            "signed_dbr": -2.2168431128154213
+          }
+        }
+      }
+    },
+    "2-dry": {
+      "unchanged_byte_identical": true,
+      "sha": "589d276d4c1e2555531ea736cecab7e848913068cf205d11453e76005376b155"
+    }
+  }
+}

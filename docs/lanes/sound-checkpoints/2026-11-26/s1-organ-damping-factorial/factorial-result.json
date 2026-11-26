@@ -1,0 +1,277 @@
+{
+  "fixture": 113,
+  "scope": "host only direct room-return columns 4/5; matched input, unchanged candidate controls",
+  "hashes": {
+    "original-wet": "09d3fcf1ed1c92bc441b3c1c37dcda796c99ec3b6b08b6e8769205cd1e079716",
+    "compact-matched": "694c6c84cfbb3c881fd606efa05b88e000fc6cdff382ab3bc8e286cd19e0916a",
+    "compact-corrected": "56c08bbf01824b0768bfa3c3a150af8e525e476b0312d007bd23981fdbb22783",
+    "authored-original-pole": "2ffb968a5221f4767e3de4ff2ae16f35b6893845496067785a8427c2cb4f2ed9",
+    "authored-corrected-pole": "ea6f77808a40cdedc81dcfa56f2a30d5ba2ce56b62035ec98ef99309354218a7"
+  },
+  "matched_source_send_all_frames": 264728,
+  "compact_feedback_mix_exact": true,
+  "compiled_baseline": {
+    "whole_dB": [
+      -0.268,
+      -0.087
+    ],
+    "note_body_dB": -0.257,
+    "release_1p5s_dB": -0.445,
+    "last_1s_dB": 0.8,
+    "spectral_distance_db": [
+      5.999,
+      6.219
+    ],
+    "raw_residual_dB_rel_reference": 1.906,
+    "windows": {
+      "onset_100ms": {
+        "level_db": [
+          7.927300481039461,
+          7.949686375260436
+        ],
+        "raw_residual_db": [
+          3.800919870381643,
+          3.717599614708393
+        ]
+      },
+      "held": {
+        "level_db": [
+          -0.261848338215582,
+          -0.0391908114354925
+        ],
+        "raw_residual_db": [
+          2.195171426653867,
+          1.443757171963898
+        ]
+      },
+      "release_100ms": {
+        "level_db": [
+          -0.6188909428137013,
+          -1.2872344165907446
+        ],
+        "raw_residual_db": [
+          -0.010357843501772391,
+          1.3333235766071354
+        ]
+      },
+      "release": {
+        "level_db": [
+          -0.33283033461207084,
+          -0.5422050320991327
+        ],
+        "raw_residual_db": [
+          2.2039123475279947,
+          2.90887659865777
+        ]
+      },
+      "last_second": {
+        "level_db": [
+          0.35488360133910074,
+          1.2145710276826096
+        ],
+        "raw_residual_db": [
+          3.158042770433524,
+          4.218739545952067
+        ]
+      }
+    }
+  },
+  "corrected_damping_only": {
+    "whole_dB": [
+      0.589,
+      0.613
+    ],
+    "note_body_dB": 0.384,
+    "release_1p5s_dB": 1.62,
+    "last_1s_dB": 4.357,
+    "spectral_distance_db": [
+      6.348,
+      6.646
+    ],
+    "raw_residual_dB_rel_reference": 2.212,
+    "windows": {
+      "onset_100ms": {
+        "level_db": [
+          7.96087287782555,
+          7.978402209911298
+        ],
+        "raw_residual_db": [
+          3.8663191010383735,
+          3.7716257955167727
+        ]
+      },
+      "held": {
+        "level_db": [
+          0.43402838560998114,
+          0.5161703391734513
+        ],
+        "raw_residual_db": [
+          2.4152218151988007,
+          1.6910107658828875
+        ]
+      },
+      "release_100ms": {
+        "level_db": [
+          1.3677941954032755,
+          -0.0008365012362428126
+        ],
+        "raw_residual_db": [
+          0.7823746196707231,
+          0.921855401780981
+        ]
+      },
+      "release": {
+        "level_db": [
+          1.8784522182593375,
+          1.3886084599565016
+        ],
+        "raw_residual_db": [
+          3.2130194248984036,
+          3.6207263865436277
+        ]
+      },
+      "last_second": {
+        "level_db": [
+          3.9983070998456967,
+          4.697047033587893
+        ],
+        "raw_residual_db": [
+          5.5262153684290585,
+          6.504494794592507
+        ]
+      }
+    }
+  },
+  "authored_feedback_original_pole": {
+    "whole_dB": [
+      -1.574,
+      -1.497
+    ],
+    "note_body_dB": -1.501,
+    "release_1p5s_dB": -3.158,
+    "last_1s_dB": -6.013,
+    "spectral_distance_db": [
+      6.218,
+      6.444
+    ],
+    "raw_residual_dB_rel_reference": 1.224,
+    "windows": {
+      "onset_100ms": {
+        "level_db": [
+          7.376036150929995,
+          7.372916034900712
+        ],
+        "raw_residual_db": [
+          2.907771517404909,
+          2.76268635698294
+        ]
+      },
+      "held": {
+        "level_db": [
+          -1.4596796423301905,
+          -1.328299297320628
+        ],
+        "raw_residual_db": [
+          1.6176908878866492,
+          0.7973682845076797
+        ]
+      },
+      "release_100ms": {
+        "level_db": [
+          -1.8991917112422854,
+          -3.5176895017661347
+        ],
+        "raw_residual_db": [
+          -0.6303388224985764,
+          0.43778867525262166
+        ]
+      },
+      "release": {
+        "level_db": [
+          -2.901016001396555,
+          -3.388801848290679
+        ],
+        "raw_residual_db": [
+          0.8988855672078808,
+          1.6391957317360335
+        ]
+      },
+      "last_second": {
+        "level_db": [
+          -6.806180311196473,
+          -5.325237466531533
+        ],
+        "raw_residual_db": [
+          0.6317128790752912,
+          1.622232492617708
+        ]
+      }
+    }
+  },
+  "authored_feedback_corrected_pole": {
+    "whole_dB": [
+      -0.924,
+      -0.988
+    ],
+    "note_body_dB": -1.006,
+    "release_1p5s_dB": -1.462,
+    "last_1s_dB": -2.531,
+    "spectral_distance_db": [
+      6.036,
+      6.291
+    ],
+    "raw_residual_dB_rel_reference": 1.372,
+    "windows": {
+      "onset_100ms": {
+        "level_db": [
+          7.421475859088707,
+          7.383957969035723
+        ],
+        "raw_residual_db": [
+          2.997667980314386,
+          2.7887901670229027
+        ]
+      },
+      "held": {
+        "level_db": [
+          -0.9031953825937928,
+          -0.9094509981656502
+        ],
+        "raw_residual_db": [
+          1.7530142848866406,
+          0.9026609450813252
+        ]
+      },
+      "release_100ms": {
+        "level_db": [
+          -0.30675151006122275,
+          -2.3098111505704293
+        ],
+        "raw_residual_db": [
+          -0.15454136058369217,
+          -0.10039535849170911
+        ]
+      },
+      "release": {
+        "level_db": [
+          -1.1335716540535798,
+          -1.7622402610442025
+        ],
+        "raw_residual_db": [
+          1.3980530553347068,
+          1.9380638190073738
+        ]
+      },
+      "last_second": {
+        "level_db": [
+          -3.1762277155553713,
+          -1.9549489435334046
+        ],
+        "raw_residual_db": [
+          1.7352536917339956,
+          2.730197077647085
+        ]
+      }
+    }
+  }
+}
