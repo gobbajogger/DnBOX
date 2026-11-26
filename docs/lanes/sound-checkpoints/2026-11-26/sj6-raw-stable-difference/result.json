@@ -1,0 +1,261 @@
+{
+  "scope": "original dry fixed linear suffix conjecture must first pass matched compact check; no phase/gain fit",
+  "columns": [
+    "signed_dbr",
+    "level_db"
+  ],
+  "results": {
+    "1": {
+      "hold": {
+        "validate_same_input_compact": [
+          -80.5527876466735,
+          9.942698218420215e-07
+        ],
+        "compact_vs_implied_original": [
+          -0.0071557814475083845,
+          -45.36390219552299
+        ]
+      },
+      "early_release": {
+        "validate_same_input_compact": [
+          -77.78390376616404,
+          -0.00010445738316566382
+        ],
+        "compact_vs_implied_original": [
+          -0.008769135266521129,
+          -38.44566671061991
+        ]
+      },
+      "late_release": {
+        "validate_same_input_compact": [
+          -42.9567278793773,
+          0.0024158182844963494
+        ],
+        "compact_vs_implied_original": [
+          0.8204829851357399,
+          -10.54417618696454
+        ]
+      },
+      "whole": {
+        "validate_same_input_compact": [
+          -79.96591370410418,
+          -4.414408189164552e-06
+        ],
+        "compact_vs_implied_original": [
+          -0.007297530707622408,
+          -45.27002230024431
+        ]
+      }
+    },
+    "4": {
+      "hold": {
+        "validate_same_input_compact": [
+          -113.79127732064434,
+          -1.5247795579710191e-06
+        ],
+        "compact_vs_implied_original": [
+          -0.18522896709265613,
+          -19.997171653434435
+        ]
+      },
+      "early_release": {
+        "validate_same_input_compact": [
+          -104.91280501714088,
+          4.426995036623424e-06
+        ],
+        "compact_vs_implied_original": [
+          -0.21782674890547488,
+          -18.823434617217373
+        ]
+      },
+      "late_release": {
+        "validate_same_input_compact": [
+          -52.11924886055452,
+          -0.001804479050213232
+        ],
+        "compact_vs_implied_original": [
+          0.8070018151867668,
+          -10.73004311004313
+        ]
+      },
+      "whole": {
+        "validate_same_input_compact": [
+          -113.2256737548468,
+          -1.5093484980537271e-06
+        ],
+        "compact_vs_implied_original": [
+          -0.18925960065881917,
+          -20.000116929311666
+        ]
+      }
+    },
+    "16": {
+      "hold": {
+        "validate_same_input_compact": [
+          -125.74917524268983,
+          2.635180906286337e-07
+        ],
+        "compact_vs_implied_original": [
+          -1.9384123579723165,
+          -11.329423905999539
+        ]
+      },
+      "early_release": {
+        "validate_same_input_compact": [
+          -114.85292952144664,
+          -2.0808403646684922e-07
+        ],
+        "compact_vs_implied_original": [
+          -2.214721017815896,
+          -10.1610009581554
+        ]
+      },
+      "late_release": {
+        "validate_same_input_compact": [
+          -63.981267606491386,
+          0.0010823652921608889
+        ],
+        "compact_vs_implied_original": [
+          0.662664507386318,
+          -10.382377539924239
+        ]
+      },
+      "whole": {
+        "validate_same_input_compact": [
+          -124.21337117352388,
+          6.821900834122656e-07
+        ],
+        "compact_vs_implied_original": [
+          -1.942582135076643,
+          -11.324699941167111
+        ]
+      }
+    },
+    "32": {
+      "hold": {
+        "validate_same_input_compact": [
+          -126.47984572497452,
+          -4.4665203795460855e-08
+        ],
+        "compact_vs_implied_original": [
+          -2.559346269391553,
+          -10.482274779019376
+        ]
+      },
+      "early_release": {
+        "validate_same_input_compact": [
+          -113.52282287491172,
+          -1.2945333110825354e-05
+        ],
+        "compact_vs_implied_original": [
+          -2.836087168658543,
+          -9.01895413742608
+        ]
+      },
+      "late_release": {
+        "validate_same_input_compact": [
+          -68.8083183294624,
+          -0.00012486973455258832
+        ],
+        "compact_vs_implied_original": [
+          -1.2467848196936464,
+          -10.929160466434713
+        ]
+      },
+      "whole": {
+        "validate_same_input_compact": [
+          -125.3519961255583,
+          1.845896349907357e-10
+        ],
+        "compact_vs_implied_original": [
+          -2.563791382769065,
+          -10.47080786259221
+        ]
+      }
+    },
+    "64": {
+      "hold": {
+        "validate_same_input_compact": [
+          -123.97721992279473,
+          -8.028476273140999e-07
+        ],
+        "compact_vs_implied_original": [
+          -2.740095706372987,
+          -10.23652707756749
+        ]
+      },
+      "early_release": {
+        "validate_same_input_compact": [
+          -117.69597062291103,
+          8.261897607022033e-07
+        ],
+        "compact_vs_implied_original": [
+          -3.0381399209074207,
+          -7.260854635084042
+        ]
+      },
+      "late_release": {
+        "validate_same_input_compact": [
+          -80.93615090213407,
+          -3.2202542873485356e-05
+        ],
+        "compact_vs_implied_original": [
+          0.822511453262923,
+          -17.05322888784146
+        ]
+      },
+      "whole": {
+        "validate_same_input_compact": [
+          -125.2260972406022,
+          3.958872494046249e-07
+        ],
+        "compact_vs_implied_original": [
+          -2.8165844963082725,
+          -10.031523714264113
+        ]
+      }
+    },
+    "128": {
+      "hold": {
+        "validate_same_input_compact": [
+          -116.398956909932,
+          -2.5162662952425803e-06
+        ],
+        "compact_vs_implied_original": [
+          -2.4070117174038343,
+          -10.483737869174885
+        ]
+      },
+      "early_release": {
+        "validate_same_input_compact": [
+          -114.62414968615195,
+          4.745795303032224e-06
+        ],
+        "compact_vs_implied_original": [
+          -1.6247425737724663,
+          -10.73128669245625
+        ]
+      },
+      "late_release": {
+        "validate_same_input_compact": [
+          -118.88131385079951,
+          -4.133442556872248e-06
+        ],
+        "compact_vs_implied_original": [
+          -5.140478165662145,
+          -6.163276329529408
+        ]
+      },
+      "whole": {
+        "validate_same_input_compact": [
+          -118.94844284587272,
+          -5.255779886957571e-07
+        ],
+        "compact_vs_implied_original": [
+          -2.675272774171915,
+          -9.741165644321669
+        ]
+      }
+    }
+  }
+}
