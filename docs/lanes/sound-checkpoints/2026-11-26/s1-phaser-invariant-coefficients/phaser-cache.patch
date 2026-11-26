@@ -1,0 +1,90 @@
+--- a/AudioKit/Core/Soundpipe/modules/phaser.c
++++ b/AudioKit/Core/Soundpipe/modules/phaser.c
+@@ -24,6 +24,10 @@
+ }
+ 
+ typedef struct {
++#if DNBOX_PH_COEF
++ unsigned tags[3], valid;
++ float gain, pole, rsin, rcos;
++#endif
+ 
+ 	float fRec4[3];
+ 	float fRec3[3];
+@@ -200,6 +204,9 @@
+ }
+ 
+ void initphaser(phaser* dsp, int samplingFreq) {
++#if DNBOX_PH_COEF
++ dsp->valid=0;
++#endif
+ 	instanceInitphaser(dsp, samplingFreq);
+ }
+ 
+@@ -216,15 +223,45 @@
+ 	interface->addHorizontalSlider(interface->uiInterface, "lfobpm", &dsp->fHslider6, 30.f, 24.f, 360.f, 1.f);
+ }
+ 
++#if DNBOX_PH_COEF
++static unsigned ph_word(float f){unsigned u; __builtin_memcpy(&u,&f,4); return u;}
++static void ph_slow(phaser*dsp){
++    const float gain=(float)dsp->fHslider0,width=(float)dsp->fHslider2,bpm=(float)dsp->fHslider6;
++    const unsigned g=ph_word(gain),w=ph_word(width),b=ph_word(bpm);
++    if(!dsp->valid||g!=dsp->tags[0]){
++        dsp->gain=pow(10.f,.05f*gain);
++        dsp->tags[0]=g;
++    }
++    if(!dsp->valid||w!=dsp->tags[1]){
++        dsp->pole=exp(dsp->fConst1*(0.f-(3.14159f*width)));
++        dsp->tags[1]=w;
++    }
++    if(!dsp->valid||b!=dsp->tags[2]){
++        const float angle=dsp->fConst2*bpm;
++        dsp->rsin=sin(angle);dsp->rcos=cos(angle);
++        dsp->tags[2]=b;
++    }
++    dsp->valid=1;
++}
++#endif
+ void computephaser(phaser* dsp, int count, FAUSTFLOAT** inputs, FAUSTFLOAT** outputs) {
+ 	FAUSTFLOAT* input0 = inputs[0];
+ 	FAUSTFLOAT* input1 = inputs[1];
+ 	FAUSTFLOAT* output0 = outputs[0];
+ 	FAUSTFLOAT* output1 = outputs[1];
+-	float fSlow0 = pow(10.f, (0.05f * (float)dsp->fHslider0));
++#if DNBOX_PH_COEF
++    ph_slow(dsp);
++    float fSlow0=dsp->gain;
++#else
++    float fSlow0 = pow(10.f, (0.05f * (float)dsp->fHslider0));
++#endif
+ 	float fSlow1 = (0.5f * ((int)(float)dsp->fCheckbox0?2.f:(float)dsp->fHslider1));
+ 	float fSlow2 = (1.f - fSlow1);
+-	float fSlow3 = exp((dsp->fConst1 * (0.f - (3.14159f * (float)dsp->fHslider2))));
++#if DNBOX_PH_COEF
++    float fSlow3=dsp->pole;
++#else
++    float fSlow3 = exp((dsp->fConst1 * (0.f - (3.14159f * (float)dsp->fHslider2))));
++#endif
+ 	float fSlow4 = faustpower2_f(fSlow3);
+ 	float fSlow5 = (0.f - (2.f * fSlow3));
+ 	float fSlow6 = (float)dsp->fHslider3;
+@@ -233,8 +270,16 @@
+ 	float fSlow9 = (6.28319f * fSlow8);
+ 	float fSlow10 = (0.5f * ((6.28319f * max(fSlow8, (float)dsp->fHslider5)) - fSlow9));
+ 	float fSlow11 = (dsp->fConst2 * (float)dsp->fHslider6);
+-	float fSlow12 = sin(fSlow11);
+-	float fSlow13 = cos(fSlow11);
++#if DNBOX_PH_COEF
++    float fSlow12=dsp->rsin;
++#else
++    float fSlow12 = sin(fSlow11);
++#endif
++#if DNBOX_PH_COEF
++    float fSlow13=dsp->rcos;
++#else
++    float fSlow13 = cos(fSlow11);
++#endif
+ 	float fSlow14 = (0.f - fSlow12);
+ 	float fSlow15 = (float)dsp->fHslider7;
+ 	float fSlow16 = (dsp->fConst1 * faustpower2_f(fSlow6));
