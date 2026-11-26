@@ -115,6 +115,19 @@ changing the rounding rule.
   around −56…−57 dBr and degraded the quiet cue.
   [Native memcpy rejection](sj6-classic-e4m11-native-rejection/sj6-e4m11-native/README.md),
   [host bfloat rejection](sj6-classic-bfloat-rejected/README.md).
+- **Sub-specific dry mismatch:** Compact ignored typed Range before its
+  Sub zone and pitch. The source-backed host repair moves Brainwave Low
+  from 66 to the original 33 Hz and materially improves dry levels in
+  Brainwave and Raw; isolated Main and no-Sub Solidify are unchanged.
+  The corrected Sub still has −25.8 dB fundamental error, different odd
+  harmonics and onset-dependent phase. The initial 128 frames correlate
+  almost perfectly with the original, then the mismatch changes sign:
+  a constant phase offset or time shift is not the answer. Exact fader
+  mapping only buys .031 dB; measured compact filter H1 loss is ~2.25 dB,
+  not enough to explain the remainder. Resetting on the authentic
+  pending commit frame without fixing the carrier/state worsened
+  signed chord and release; do not adopt it alone.
+  [Exact source and signed scorer](sj6-sub-range-and-signed-shape/README.md).
 - **Unresolved:** source owner of the gain between the calibrated Crusher
   and Apple's compressor input; which missing or misrouted per-program
   states dominate different dry patches; delay-bandwidth correction that

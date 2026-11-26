@@ -1,0 +1,322 @@
+{
+  "held": {
+    "windows": [
+      24576,
+      37634
+    ],
+    "native_fanin": {
+      "level_db": -0.00023710085147212413,
+      "signed_dbr": -65.38910404606548
+    },
+    "compact_fanin": {
+      "level_db": -2.170334092719535e-07,
+      "signed_dbr": -134.4462460445182
+    },
+    "arms": {
+      "all": {
+        "compact_vs_native": {
+          "level_db": -33.116837139124165,
+          "signed_dbr": -0.011456678139729164
+        },
+        "native_repeat": {
+          "level_db": 0.00019919111853031868,
+          "signed_dbr": -51.28444584261521
+        },
+        "compact_vs_all": 0.0,
+        "native_vs_all": 0.0
+      },
+      "osc1-only": {
+        "compact_vs_native": {
+          "level_db": -33.17770308478402,
+          "signed_dbr": -0.120957599311979
+        },
+        "native_repeat": {
+          "level_db": -3.450812468357762e-06,
+          "signed_dbr": -68.95717377982221
+        },
+        "compact_vs_all": -5.909906404830707,
+        "native_vs_all": -5.849040459170848
+      },
+      "osc2-only": {
+        "compact_vs_native": {
+          "level_db": -31.291709787988115,
+          "signed_dbr": -0.08631404197074276
+        },
+        "native_repeat": {
+          "level_db": -1.667320045579822e-07,
+          "signed_dbr": -123.0786030501747
+        },
+        "compact_vs_all": -5.602246730510512,
+        "native_vs_all": -7.427374081646557
+      },
+      "sub-only": {
+        "compact_vs_native": {
+          "level_db": -26.313076486953072,
+          "signed_dbr": 0.3444027337214634
+        },
+        "native_repeat": {
+          "level_db": 0.0001806110231282598,
+          "signed_dbr": -50.07454588537219
+        },
+        "compact_vs_all": 0.7347357477879786,
+        "native_vs_all": -6.06902490438311
+      }
+    }
+  },
+  "pending": {
+    "windows": [
+      49459,
+      49875
+    ],
+    "native_fanin": {
+      "level_db": -0.0009901078825590441,
+      "signed_dbr": -56.94893704635103
+    },
+    "compact_fanin": {
+      "level_db": 5.447809007428615e-07,
+      "signed_dbr": -139.30995064147362
+    },
+    "arms": {
+      "all": {
+        "compact_vs_native": {
+          "level_db": -20.84065581031123,
+          "signed_dbr": -0.38760557346465163
+        },
+        "native_repeat": {
+          "level_db": 0.002979002394120054,
+          "signed_dbr": -67.104997504075
+        },
+        "compact_vs_all": 0.0,
+        "native_vs_all": 0.0
+      },
+      "osc1-only": {
+        "compact_vs_native": {
+          "level_db": -24.342629571094122,
+          "signed_dbr": -0.27101612210393444
+        },
+        "native_repeat": {
+          "level_db": -0.0008896141940144856,
+          "signed_dbr": -68.02496544739827
+        },
+        "compact_vs_all": -7.618366680106332,
+        "native_vs_all": -4.116392919323443
+      },
+      "osc2-only": {
+        "compact_vs_native": {
+          "level_db": -14.9830563475014,
+          "signed_dbr": -0.6501085910996306
+        },
+        "native_repeat": {
+          "level_db": -3.4212132331692973e-06,
+          "signed_dbr": -122.98680218087527
+        },
+        "compact_vs_all": -6.110496126774846,
+        "native_vs_all": -11.968095589584678
+      },
+      "sub-only": {
+        "compact_vs_native": {
+          "level_db": -22.970826985812963,
+          "signed_dbr": 0.01865378480087783
+        },
+        "native_repeat": {
+          "level_db": 0.004433334681529164,
+          "signed_dbr": -45.87990825734856
+        },
+        "compact_vs_all": -3.9785433399809023,
+        "native_vs_all": -1.8483721644791724
+      }
+    }
+  },
+  "commit": {
+    "windows": [
+      49875,
+      50003
+    ],
+    "native_fanin": {
+      "level_db": 0.0007150264019224209,
+      "signed_dbr": -72.10881250660418
+    },
+    "compact_fanin": {
+      "level_db": -3.6281254654674407e-07,
+      "signed_dbr": -141.86521364057813
+    },
+    "arms": {
+      "all": {
+        "compact_vs_native": {
+          "level_db": -28.95291231093308,
+          "signed_dbr": -0.2828891634816199
+        },
+        "native_repeat": {
+          "level_db": -0.0008396483183993691,
+          "signed_dbr": -76.21995990842893
+        },
+        "compact_vs_all": 0.0,
+        "native_vs_all": 0.0
+      },
+      "osc1-only": {
+        "compact_vs_native": {
+          "level_db": -34.20296874282097,
+          "signed_dbr": 0.06935424874068534
+        },
+        "native_repeat": {
+          "level_db": 5.038591716736884e-05,
+          "signed_dbr": -96.98937944158683
+        },
+        "compact_vs_all": -12.277169936629777,
+        "native_vs_all": -7.0271135047418865
+      },
+      "osc2-only": {
+        "compact_vs_native": {
+          "level_db": -29.62377636605815,
+          "signed_dbr": -0.20680195977264867
+        },
+        "native_repeat": {
+          "level_db": 9.242962227957771e-07,
+          "signed_dbr": -138.04900609245985
+        },
+        "compact_vs_all": -5.060525543289799,
+        "native_vs_all": -4.38966148816473
+      },
+      "sub-only": {
+        "compact_vs_native": {
+          "level_db": -12.146221842561161,
+          "signed_dbr": 0.846543219790607
+        },
+        "native_repeat": {
+          "level_db": -0.008284828776451883,
+          "signed_dbr": -42.43337116363215
+        },
+        "compact_vs_all": -3.6429559317290314,
+        "native_vs_all": -20.44964640010095
+      }
+    }
+  },
+  "chord": {
+    "windows": [
+      53971,
+      81434
+    ],
+    "native_fanin": {
+      "level_db": 3.1603352926914886e-06,
+      "signed_dbr": -62.80807485013882
+    },
+    "compact_fanin": {
+      "level_db": -1.6637426077081992e-08,
+      "signed_dbr": -140.7905059131046
+    },
+    "arms": {
+      "all": {
+        "compact_vs_native": {
+          "level_db": -31.698547762452055,
+          "signed_dbr": -0.0618878793861183
+        },
+        "native_repeat": {
+          "level_db": -0.000595845377192818,
+          "signed_dbr": -50.752162483266105
+        },
+        "compact_vs_all": 0.0,
+        "native_vs_all": 0.0
+      },
+      "osc1-only": {
+        "compact_vs_native": {
+          "level_db": -34.97787606714053,
+          "signed_dbr": 0.019354459842145767
+        },
+        "native_repeat": {
+          "level_db": -5.580853191860128e-07,
+          "signed_dbr": -50.58766634721511
+        },
+        "compact_vs_all": -9.21620167654438,
+        "native_vs_all": -5.936873371855907
+      },
+      "osc2-only": {
+        "compact_vs_native": {
+          "level_db": -33.396873709720715,
+          "signed_dbr": -0.048297425860288484
+        },
+        "native_repeat": {
+          "level_db": 4.042910834132688e-06,
+          "signed_dbr": -67.092112900444
+        },
+        "compact_vs_all": -8.420433252994858,
+        "native_vs_all": -6.722107305726198
+      },
+      "sub-only": {
+        "compact_vs_native": {
+          "level_db": -27.922322732324307,
+          "signed_dbr": -0.1376673864968712
+        },
+        "native_repeat": {
+          "level_db": 9.494661167043561e-06,
+          "signed_dbr": -51.87061981628702
+        },
+        "compact_vs_all": -5.18487555073575,
+        "native_vs_all": -8.961100580863498
+      }
+    }
+  },
+  "release": {
+    "windows": [
+      82534,
+      115302
+    ],
+    "native_fanin": {
+      "level_db": -0.0010756800791776086,
+      "signed_dbr": -49.71803070968305
+    },
+    "compact_fanin": {
+      "level_db": -5.460667267864967e-08,
+      "signed_dbr": -141.50526158991437
+    },
+    "arms": {
+      "all": {
+        "compact_vs_native": {
+          "level_db": -30.896591310516563,
+          "signed_dbr": -0.06827348611169706
+        },
+        "native_repeat": {
+          "level_db": 0.0009672453220354074,
+          "signed_dbr": -38.602986881303934
+        },
+        "compact_vs_all": 0.0,
+        "native_vs_all": 0.0
+      },
+      "osc1-only": {
+        "compact_vs_native": {
+          "level_db": -33.73792718357394,
+          "signed_dbr": 0.0881868887460108
+        },
+        "native_repeat": {
+          "level_db": -7.410033793814825e-06,
+          "signed_dbr": -48.39669606118481
+        },
+        "compact_vs_all": -9.071517986531148,
+        "native_vs_all": -6.230182113473777
+      },
+      "osc2-only": {
+        "compact_vs_native": {
+          "level_db": -32.67286480783985,
+          "signed_dbr": -0.0307346206385432
+        },
+        "native_repeat": {
+          "level_db": 2.7956728203613877e-06,
+          "signed_dbr": -62.860429592773784
+        },
+        "compact_vs_all": -8.41489423932639,
+        "native_vs_all": -6.638620742003106
+      },
+      "sub-only": {
+        "compact_vs_native": {
+          "level_db": -27.72306137237356,
+          "signed_dbr": -0.34288487185399097
+        },
+        "native_repeat": {
+          "level_db": -6.495093951082069e-06,
+          "signed_dbr": -51.516359475480186
+        },
+        "compact_vs_all": -5.312766261374492,
+        "native_vs_all": -8.486296199517493
+      }
+    }
+  }
+}
