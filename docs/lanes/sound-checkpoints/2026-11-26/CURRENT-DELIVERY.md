@@ -6,6 +6,23 @@ isolated kernel timing, or partial link into a release claim.
 
 ## Latest measured results
 
+- **Raw active-voice root localization.** The
+  [same-input native and compact taps](sj6-raw-voice-stage/README.md)
+  isolate two distinct discrepancies. Sub held fundamental is
+  already −9.52 dB/−115.29° before OTA, and ends +0.32 dB/−133.00°
+  after voice processing. Main held is −1.85 dB/+0.13° pre-OTA,
+  with relative H2–H8 within .001 dB, but +0.19 dB/−10.24° after it.
+  Held individual post-voice RMS differs only +0.06/+0.21 dB.
+  Not a master-volume fix. Native Sub cursor/onset and Main voice
+  processing need separate source-faithful fixes; terminal parity is open.
+- **Whole guarded 909 trial failed.** The new
+  [paired replay](drum909-warm-replay/README.md) saved 112 B in
+  each native link but did not qualify: 14,278 µs/79 late Elite and
+  14,374/66 Pro (frozen old 14,269/63 and 14,322/61). Output first
+  differs at frame 65,600 on both. Without producer phase proof,
+  these outcomes are not attributable; park the patch. The additive
+  exact Q15 scale leaf was too small to change the gate conclusion.
+
 - **Synth One filter-envelope sharing, guarded.** The
   [paired native link and signed-PCM matrix](s1-shared-fenv/README.md)
   recover 48 B APP (+300/+308 B vs +252/+260 B) on this fitted donor.

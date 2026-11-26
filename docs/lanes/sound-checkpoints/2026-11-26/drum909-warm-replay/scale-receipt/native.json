@@ -1,0 +1,73 @@
+{
+  "armed_code_and_table_size_B": [
+    6656,
+    6648
+  ],
+  "N_samples_at_most_per_case": 8192,
+  "results": [
+    {
+      "mode": "native rate",
+      "base_ticks": 91677,
+      "new_ticks": 91698,
+      "saved_pct": -0.022906508720835106,
+      "phase": 2564255456,
+      "pcm_words_fnv32": 174889925
+    },
+    {
+      "mode": "+0.375",
+      "base_ticks": 142246,
+      "new_ticks": 139651,
+      "saved_pct": 1.8243043741124532,
+      "phase": 1324812544,
+      "pcm_words_fnv32": 3709785733
+    },
+    {
+      "mode": "+0.875",
+      "base_ticks": 162292,
+      "new_ticks": 159947,
+      "saved_pct": 1.4449264289059227,
+      "phase": 3200433312,
+      "pcm_words_fnv32": 4273998725
+    },
+    {
+      "mode": "sub-native",
+      "base_ticks": 107914,
+      "new_ticks": 105833,
+      "saved_pct": 1.9283874196119133,
+      "phase": 266083520,
+      "pcm_words_fnv32": 1333894661
+    },
+    {
+      "mode": "double integer",
+      "base_ticks": 164018,
+      "new_ticks": 161746,
+      "saved_pct": 1.385213817995586,
+      "phase": 2038459392,
+      "pcm_words_fnv32": 487513669
+    },
+    {
+      "mode": "early terminal",
+      "base_ticks": 83782,
+      "new_ticks": 83601,
+      "saved_pct": 0.21603685755890287,
+      "phase": 4094491648,
+      "pcm_words_fnv32": 831615429
+    },
+    {
+      "mode": "+1.25",
+      "base_ticks": 174248,
+      "new_ticks": 172104,
+      "saved_pct": 1.2304301914512648,
+      "phase": 1156205568,
+      "pcm_words_fnv32": 4225857733
+    },
+    {
+      "mode": "partial mute",
+      "base_ticks": 44359,
+      "new_ticks": 44359,
+      "saved_pct": 0.0,
+      "phase": 2616839296,
+      "pcm_words_fnv32": 2840003589
+    }
+  ]
+}

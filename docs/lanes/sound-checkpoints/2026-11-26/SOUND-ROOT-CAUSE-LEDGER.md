@@ -544,3 +544,13 @@ guarded provider/installer arrangement is still required.
 Keep arp and all agreed controls, never use PSRAM, and enforce the protected
 pool/headroom. No release until the combined target gate passes. Add a row
 and its evidence here whenever a hypothesis is rejected or corrected.
+
+### Current Raw active-voice localization
+The [native/compact stage witness](sj6-raw-voice-stage/README.md)
+separates Main from Sub. Main's carrier shape is near exact pre-OTA
+while the signed phase changes between pre-OTA and voice output.
+The Sub carrier is already out of phase pre-OTA and phase carries
+through the post-voice reference. Individual post-voice magnitudes
+are close. These observations do not identify how the installed
+terminal path creates its remaining amplitude gap and do not
+establish all-preset parity.

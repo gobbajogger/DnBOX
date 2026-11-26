@@ -1,0 +1,61 @@
+{
+  "records_identical": true,
+  "original_tape_bytes_identical": true,
+  "scope": "diagnostic; external bytes identical, actual producer admission unproven; mixed workloads, PCM or elapsed differences cannot be causally attributed",
+  "results": [
+    {
+      "model": "elite",
+      "old_us": 14269,
+      "new_us": 14278,
+      "old_late": 63,
+      "new_late": 79,
+      "old_xruns": 63,
+      "new_xruns": 79,
+      "old_halves": 560,
+      "new_halves": 544,
+      "same_byte_exact_pcm": false,
+      "old_first_valid_owner_ms": 2998,
+      "new_first_valid_owner_ms": 3042,
+      "pre_tape_healthy_count": 0,
+      "legacy_timeline_old": [
+        73728,
+        1066398905,
+        0,
+        307902
+      ],
+      "legacy_timeline_new": [
+        73728,
+        1052236440,
+        0,
+        118316
+      ]
+    },
+    {
+      "model": "pro",
+      "old_us": 14322,
+      "new_us": 14374,
+      "old_late": 61,
+      "new_late": 66,
+      "old_xruns": 61,
+      "new_xruns": 66,
+      "old_halves": 562,
+      "new_halves": 557,
+      "same_byte_exact_pcm": false,
+      "old_first_valid_owner_ms": 3008,
+      "new_first_valid_owner_ms": 3032,
+      "pre_tape_healthy_count": 0,
+      "legacy_timeline_old": [
+        73728,
+        1066398905,
+        0,
+        307902
+      ],
+      "legacy_timeline_new": [
+        73728,
+        3165941994,
+        0,
+        46870
+      ]
+    }
+  ]
+}
