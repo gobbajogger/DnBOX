@@ -23,3 +23,16 @@ one owner, but those gaps are noncontiguous. A real layout needs
 explicit disjoint state fields and allocator/lifecycle proof. No pool,
 flash, active motion guarantees, target time, original-cue sound
 result, or product enablement follows from this guest host test.
+
+The follow-up run-layout.sh implements a split layout without traversing
+the boundaries of its arrays. A has six 28 B AP+condition records, three
+4-word pole arrays and the last voice's pole zero. B has two 4-word pole
+arrays. C holds only the last voice's three remaining pole words. The
+last four-word recurrence uses a local array, with explicit copyback.
+Layout sizes are exactly 220/32/12 B by C static assertion. In 180,000
+host transactions across two independent owners, all outputs and active
+state words match the contiguous 44 B packed baseline. 86,865 frozen
+valid arms and 5,951 out-of-range owner/voice arms preserve data and return
+signed negative zero. This verifies the layout logic only, not that the
+actual native linked offsets, all owners, controls, extra coefficient
+descriptors or real target timing qualify. No pitch state borrowing.
