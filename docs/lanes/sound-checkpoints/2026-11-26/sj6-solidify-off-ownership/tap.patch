@@ -1,0 +1,10 @@
+--- donor/chord-driver.c
++++ witness/typed.c
+@@ -124,6 +124,7 @@
+ static void chord_trace(char *tag,unsigned at,unsigned key,unsigned value) {
+  const dnbx_voice *d=&part.dsp.juno.synth.core.voice[0];
+  fprintf(stderr,"%s %u %u %u %u %u",tag,at,key,value,d->note,d->gate);
++ fprintf(stderr," vel=%a",d->velocity);
+  for(unsigned i=0;i<2;i++){
+     const dnbx_layer_voice *l=d->layer+i;
+     fprintf(stderr," %a %a %u %a",l->increment*44100.f,l->phase,l->amp.stage,l->amp.level);

@@ -1,0 +1,73 @@
+{
+  "authored": {
+    "event_velocity": [
+      0.6850393414497375,
+      0.6850393414497375,
+      0.6850393414497375
+    ],
+    "row_count": 3,
+    "state": [
+      "post 82534 60 0 67 1 vel=0x1.5ebd7ap-1 0x1.888d94p+7 0x1.ab1a92p-3 4 0x1p+0 0x1.87b3b4p+6 0x1.c82a48p-2 4 0x1p+0",
+      "post 82534 64 0 67 1 vel=0x1.5ebd7ap-1 0x1.888d94p+7 0x1.ab1a92p-3 4 0x1p+0 0x1.87b3b4p+6 0x1.c82a48p-2 4 0x1p+0",
+      "post 82534 67 0 67 0 vel=0x1.5ebd7ap-1 0x1.888d94p+7 0x1.ab1a92p-3 6 0x1p+0 0x1.87b3b4p+6 0x1.c82a48p-2 6 0x1p+0"
+    ],
+    "rms": 0.02025556068889824,
+    "whole_sha256": "a7da5dc2025efd6a6a566d48b58eceadbc5cce760604e840b64a601071f65d04"
+  },
+  "swap": {
+    "event_velocity": [
+      0.6850393414497375,
+      0.6850393414497375,
+      0.6850393414497375
+    ],
+    "row_count": 3,
+    "state": [
+      "post 82534 64 0 67 1 vel=0x1.5ebd7ap-1 0x1.888d94p+7 0x1.ab1a92p-3 4 0x1p+0 0x1.87b3b4p+6 0x1.c82a48p-2 4 0x1p+0",
+      "post 82534 60 0 67 1 vel=0x1.5ebd7ap-1 0x1.888d94p+7 0x1.ab1a92p-3 4 0x1p+0 0x1.87b3b4p+6 0x1.c82a48p-2 4 0x1p+0",
+      "post 82534 67 0 67 0 vel=0x1.5ebd7ap-1 0x1.888d94p+7 0x1.ab1a92p-3 6 0x1p+0 0x1.87b3b4p+6 0x1.c82a48p-2 6 0x1p+0"
+    ],
+    "rms": 0.02025556068889824,
+    "whole_sha256": "a7da5dc2025efd6a6a566d48b58eceadbc5cce760604e840b64a601071f65d04"
+  },
+  "owner_first": {
+    "event_velocity": [
+      0.6850393414497375,
+      0.6850393414497375,
+      0.6850393414497375
+    ],
+    "row_count": 3,
+    "state": [
+      "post 82534 67 0 60 1 vel=0x1.5ebd7ap-1 0x1.05ff6cp+7 0x1.ab1a92p-3 4 0x1p+0 0x1.056dfep+6 0x1.c82a48p-2 4 0x1p+0",
+      "post 82534 64 0 60 1 vel=0x1.5ebd7ap-1 0x1.05ff6cp+7 0x1.ab1a92p-3 4 0x1p+0 0x1.056dfep+6 0x1.c82a48p-2 4 0x1p+0",
+      "post 82534 60 0 60 0 vel=0x1.5ebd7ap-1 0x1.05ff6cp+7 0x1.ab1a92p-3 6 0x1p+0 0x1.056dfep+6 0x1.c82a48p-2 6 0x1p+0"
+    ],
+    "rms": 0.019128269802364116,
+    "whole_sha256": "cad010928ae7d9f658d8abcd014cdf34be89798cbaae6e5992d24d91a0f07f62"
+  },
+  "only_owner": {
+    "event_velocity": [
+      0.6850393414497375
+    ],
+    "row_count": 1,
+    "state": [
+      "post 82534 67 0 60 1 vel=0x1.5ebd7ap-1 0x1.05ff6cp+7 0x1.ab1a92p-3 4 0x1p+0 0x1.056dfep+6 0x1.c82a48p-2 4 0x1p+0"
+    ],
+    "rms": 0.06761378249305727,
+    "whole_sha256": "6bcb9e25861e240f404bb7f449a28b42b8d96946222ab31f24b8c85afb571ac8"
+  },
+  "nonfixed": {
+    "event_velocity": [
+      0.7559055089950562,
+      0.7559055089950562,
+      0.7559055089950562
+    ],
+    "row_count": 3,
+    "state": [
+      "post 82534 60 0 67 1 vel=0x1.83060cp-1 0x1.888d94p+7 0x1.ab1a92p-3 4 0x1p+0 0x1.87b3b4p+6 0x1.c82a48p-2 4 0x1p+0",
+      "post 82534 64 0 67 1 vel=0x1.83060cp-1 0x1.888d94p+7 0x1.ab1a92p-3 4 0x1p+0 0x1.87b3b4p+6 0x1.c82a48p-2 4 0x1p+0",
+      "post 82534 67 0 67 0 vel=0x1.83060cp-1 0x1.888d94p+7 0x1.ab1a92p-3 6 0x1p+0 0x1.87b3b4p+6 0x1.c82a48p-2 6 0x1p+0"
+    ],
+    "rms": 0.022350973147470813,
+    "whole_sha256": "9b960ada09ac2ec45bd67d7bb131c2036a4b8081474989df0475830870503fb1"
+  }
+}

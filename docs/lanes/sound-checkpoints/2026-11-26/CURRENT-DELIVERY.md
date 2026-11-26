@@ -6,6 +6,13 @@ isolated kernel timing, or partial link into a release claim.
 
 ## Latest measured results
 
+- **Raw J106 chorus, same input:** the [original J60V2 leaf replay](sj6-j60-same-input-cause/README.md)
+  on the identical compact pre-chorus signal closes the wet center chord
+  gap from 3.67 dB to 0.15 dB, and the tail gap from 6.20 dB to 1.08 dB.
+  Some held side metrics worsen. This is direct evidence to prioritize
+  J60V2, not a gain/width tweak or a whole-engine pass. The affordable
+  44.1 kHz implementation and strict timing are still open.
+
 - SuperJ6: the [Sine phase witness](sj6-solidify-sine-phase/README.md)
   improves Solidify's signed opening and hold without gain changes.
   Centered dry first attack +2.887 → −2.116 dBr, hold +3.039 → −1.442.

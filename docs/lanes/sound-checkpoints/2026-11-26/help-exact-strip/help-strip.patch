@@ -1,0 +1,90 @@
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -10037,6 +10037,64 @@
+     }
+ }
+ 
++#if X0X_UI_HOME_STRIP_SPIKE && !X0X_UI_CLIP_ONLY_PROBE && X0X_UI_HELP_STRIP
++static UI_DRAW void draw_help_card(int band,const char *const *l,int n,
++                                  const char *title,uint16_t c,uint16_t black,uint16_t white)
++{
++    if (band == 0) {
++        box(6, 4, 228, 24, c);
++        text_c(120, vc(&FONT_B, 4, 24), &FONT_B, title, black);
++    }
++    for (int k = 0; k < n; k++) {
++        int32_t y = 34 + k * 18 - band * BAND_H;
++        if (y > -18 && y < BAND_H)
++            text_c(120, y, &FONT_XS, l[k], white);
++    }
++}
++
++static UI_DRAW void draw_help(int band)
++{
++    const char *l[HELP_LINES];
++    int n = help_lines(ui.help - 1, l);
++    draw_help_card(band,l,n,btn_label(ui.help-1),part_col(),C_BLACK,C_WHITE);
++}
++
++/* A help label can be backed by SAVE's static mutable formatting scratch.
++ * Copy actual strings before the first returning LCD input callback. */
++typedef struct {
++    char lines[HELP_LINES][48], title[20];
++    uint16_t accent, black, white;
++    uint8_t n;
++} main_help_snapshot;
++static int copy_main_help(char *dst,unsigned cap,const char *src)
++{
++    for (unsigned i=0;i<cap;i++) {
++        if (!(dst[i]=src[i])) return 1;
++    }
++    return 0;
++}
++static void paint_help_strip(int band,const void *view)
++{
++    const main_help_snapshot *s=view;
++    const char *lines[HELP_LINES];
++    for(unsigned i=0;i<s->n;i++) lines[i]=s->lines[i];
++    draw_help_card(band,lines,s->n,s->title,s->accent,s->black,s->white);
++}
++static UI_DRAW int commit_help_strips(void)
++{
++    main_help_snapshot v;
++    const char *lines[HELP_LINES];
++    unsigned i=ui.help;
++    if(!i || i>NB) return 0;
++    unsigned n=(unsigned)help_lines(i-1,lines);
++    if(n>HELP_LINES || !copy_main_help(v.title,sizeof v.title,btn_label(i-1)))return 0;
++    for(unsigned j=0;j<n;j++)
++        if(!copy_main_help(v.lines[j],sizeof v.lines[j],lines[j]))return 0;
++    v.n=(uint8_t)n;v.accent=part_col();v.black=C_BLACK;v.white=C_WHITE;
++    commit_main_strips(v.black,paint_help_strip,&v);
++    return 1;
++}
++#else
+ static UI_DRAW void draw_help(int band)
+ {
+     const char *l[HELP_LINES];
+@@ -10053,6 +10111,8 @@
+     }
+ }
+ 
++#endif
++
+ #ifdef X0X_HOST
+ /* every card, on every kind of screen, fits the screen: 1 = yes (prints the first that does not) */
+ static int help_fits(void)
+@@ -10168,6 +10228,13 @@
+     }
+ #endif
+ #if X0X_UI_HOME_STRIP_SPIKE && !X0X_UI_CLIP_ONLY_PROBE
++#if X0X_UI_HELP_STRIP
++    if (
++#if defined(X0X_HOST)
++        !home_strip_fixture_use_full &&
++#endif
++        ui.help && commit_help_strips()) return;
++#endif
+     if (!readout && !ui.help && ui.overlay == O_NONE
+ #if defined(X0X_HOST)
+         && !home_strip_fixture_use_full

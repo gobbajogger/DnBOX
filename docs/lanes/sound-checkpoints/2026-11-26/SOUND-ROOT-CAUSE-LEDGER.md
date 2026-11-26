@@ -501,6 +501,24 @@ order remain verified independently.
   sends). All full-canvas fallbacks must retire before counting SRAM.
   [Scoped test](mix-wave-exact-strip/README.md).
 
+- **Raw J106 wet center causal link.** Same compact pre-J60 words,
+  pinned true original J60 leaf, same callback/mode, unchanged master.
+  Stopped and baseline joins are signed exact. The original leaf brings
+  chord wet center +3.082 dB vs native +2.932 and tail +4.153 vs +5.230,
+  from compact −0.736 and −0.973 respectively. Held side/mid regresses
+  from an already matching ratio. Do not infer separate wet audio from
+  a terminal subtraction or apply stereo-width tuning.
+  [Same-input replay](sj6-j60-same-input-cause/README.md).
+- **Strict runner source still incomplete.** Exact commit/tree
+  metadata recovered, but 80 pinned relevant blobs are absent, and the
+  documented repository returned no commit at that reference. A newer
+  runner needs independently labelled evidence; it is not qualification.
+  [Object audit](strict-source-object-audit/README.md).
+- **Help strip remains guarded.** 1,260 host pairs preserved exact
+  pixels and ordered DMA, including stable zero transfers. The full
+  canvas is still needed by other paths; no native qualification or
+  global memory saving. [Proof](help-exact-strip/README.md).
+
 ## Release boundary
 
 These are lab diagnostics. A host proof or a leaf emulator measurement
