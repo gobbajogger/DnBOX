@@ -81,3 +81,9 @@ The separate small SuperJ6 addendum adds the independently qualified pre-note la
 | `DnBOX-S1-Native-Morph-Worker-Proof.source-only.tgz` (v5) | 116,200 | `2fe0fb5e9a0844dd48f980e0571c99f26a37526e84942040ebacd1943a25ab7e` | Download version 5, verify SHA-256 and extract. [Same exact timing and flash contents](lanes/sound-checkpoints/2026-11-26/s1-morph-native-proof/). |
 | SuperJ6 cutoff and HP native source receipt | 18,196 | `c87b4ae3bab4b334fa5fd5f0ceaabfd2512ed3b721739be32f4b00a38dda0868` | Verify SHA-256, extract and use the [cutoff native](lanes/sound-checkpoints/2026-11-26/sj6-cutoff-handoff-v3/native/) and [HP/Crusher native](lanes/sound-checkpoints/2026-11-26/sj6-hp-crusher-native/) run scripts on the pinned lab donor. No linked image is included. |
 | `DnBOX-S1-Native-Morph-Worker-Proof.source-only.tgz` (v6) | 144,329 | `940e39cdb51ac722d318087eda882842ff9493a2d2e25f74231c42167ab01ef0` | Download version 6, verify SHA-256 and extract. Includes the guarded 909 transaction, matched Elite repeats, and native decoder comparisons. [Git source and measurements](lanes/sound-checkpoints/2026-11-26/s1-morph-native-proof/). |
+
+## Direct SuperJ6 Jupiter Sine level calibration — 2026-11-26
+
+| Library name | Size (bytes) | SHA256 | Recovery |
+| --- | ---: | --- | --- |
+| `SJ6-Direct-AUv3-Jupiter-Sine-Gain.tgz` | 5,822,562 | `b0580a3f13c9070cb34f589015d345c022d32e2557e3af541bb60a5526289cb0` | Download by name, verify SHA-256 and run `python3 score_gain.py .`. [The seven native references and source in Git](lanes/sound-checkpoints/2026-11-26/sj6-auv3-jupiter-gain/). |

@@ -14,7 +14,7 @@ python3 submit.py test-01 master
 python3 submit.py test-02 dynamic --step 24576:1 --step 61440:0.3345831036567688
 ```
 
-Profiles: `master`, `fanin`, `static`, `physical` and `dynamic`.
+Profiles: `master`, `fanin`, `static`, `physical` `dynamic` and `jupiter-gain`.
 The dynamic profile can take up to eight timestamped #7 writes while
 the cue is held; the last must restore the authored value. Recipes
 are data only: no shell commands, custom plug-in paths, executable code
@@ -28,3 +28,7 @@ Verified on the Mac: launched once, completed the four master captures,
 then queued a separate job and completed its four dynamic-cutoff captures
 in the same process. An invalid profile was rejected without running.
 No app binary is stored in Git.
+
+Version 2 adds a fixed `jupiter-gain` calibration profile without changing
+the app ID. It runs seven neutralized factory Jupiter Sine direct AUv3
+references, without editing a user preset or touching an output device.

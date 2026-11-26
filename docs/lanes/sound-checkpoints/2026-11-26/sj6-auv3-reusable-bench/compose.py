@@ -7,6 +7,7 @@ p = argparse.ArgumentParser()
 for profile in PROFILES:
     p.add_argument(f"--{profile}", type=Path, required=True)
 p.add_argument("--host", type=Path, required=True)
+p.add_argument("--gain", type=Path, required=True)
 args=p.parse_args()
 prelude = None
 modules=[]
@@ -37,4 +38,5 @@ for profile in PROFILES:
     modules.append(f"func capture_{profile}("+body)
 print(prelude)
 print("\n".join(modules))
+print(args.gain.read_text())
 print(args.host.read_text())

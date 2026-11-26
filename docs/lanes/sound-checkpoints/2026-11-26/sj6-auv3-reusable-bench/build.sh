@@ -16,7 +16,7 @@ cp "$base/sj6-direct-auv3-master/s4-inputs.json" "$new/Contents/Resources/s4-inp
 python3 "$here/compose.py" --master "$base/sj6-direct-auv3-master/main.swift" \
  --fanin "$base/sj6-direct-auv3-fanin/main.swift" --static "$base/sj6-direct-auv3-osc2-static/main.swift" \
  --physical "$base/sj6-direct-auv3-physical-cutoff/main.swift" --dynamic "$base/sj6-direct-auv3-dynamic-cutoff/main.swift" \
- --host "$here/queue.swift" > "$stage/main.swift"
+ --gain "$base/sj6-auv3-jupiter-gain/capture_gain.swift" --host "$here/queue.swift" > "$stage/main.swift"
 swiftc "$stage/main.swift" -O -o "$new/Contents/MacOS/Capture"
 codesign --force --sign - "$new"
 mv -n "$new" "$app"

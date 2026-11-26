@@ -20,7 +20,10 @@ let profiles: [String:BenchProfile] = [
     "fanin": BenchProfile(run:capture_fanin,sequence:["all","osc1-only","osc2-only","sub-only","all-repeat","osc1-only-repeat","osc2-only-repeat","sub-only-repeat"].map{($0,"authored")}),
     "static": BenchProfile(run:capture_static,sequence:["osc2-only","osc2-only-repeat"].map{($0,"authored")}),
     "physical": BenchProfile(run:capture_physical,sequence:physicalSequence),
-    "dynamic": BenchProfile(run:capture_dynamic,sequence:physicalSequence)
+    "dynamic": BenchProfile(run:capture_dynamic,sequence:physicalSequence),
+    "jupiter-gain": BenchProfile(run:capture_gain,sequence:[
+        ("osc1-only","authored"),("osc1-only","half"),("osc2-only","authored"),("osc2-only","half"),
+        ("osc1-only-repeat","authored"),("osc2-only-repeat","authored"),("both-muted","authored")])
 ]
 
 final class Bench: NSObject, NSApplicationDelegate, NSWindowDelegate {
