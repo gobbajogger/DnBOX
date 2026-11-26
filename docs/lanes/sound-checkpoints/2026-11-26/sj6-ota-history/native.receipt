@@ -1,0 +1,32 @@
+
+/workspace/scratch/3a7051e761a0/sj6-ota-history/tmp.fpQ9UJ/q.o:	file format ELF32-pi32v2
+
+Sections:
+Idx Name          Size      Address          Type
+  0               00000000 0000000000000000 
+  1 .strtab       00000094 0000000000000000 
+  2 .text         00000000 0000000000000000 TEXT DATA 
+  3 .text.clock_2x 000000f2 0000000000000000 TEXT DATA 
+  4 .rela.text.clock_2x 00000048 0000000000000000 
+  5 .text.physical_replay 00000154 0000000000000000 TEXT DATA 
+  6 .rela.text.physical_replay 00000084 0000000000000000 
+  7 .symtab       00000070 0000000000000000 
+         U fmaf
+         U memset
+         U tanhf
+
+/workspace/scratch/3a7051e761a0/sj6-ota-history/tmp.fpQ9UJ/q.o:	file format ELF32-pi32v2
+
+Sections:
+Idx Name          Size      Address          Type
+  0               00000000 0000000000000000 
+  1 .strtab       0000009c 0000000000000000 
+  2 .text         00000000 0000000000000000 TEXT DATA 
+  3 .text.clock_2x 000000ee 0000000000000000 TEXT DATA 
+  4 .rela.text.clock_2x 00000048 0000000000000000 
+  5 .text.physical_replay 0000013e 0000000000000000 TEXT DATA 
+  6 .rela.text.physical_replay 00000084 0000000000000000 
+  7 .symtab       00000070 0000000000000000 
+         U fmaf
+         U memset
+         U tanhf

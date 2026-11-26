@@ -33,6 +33,12 @@ isolated kernel timing, or partial link into a release claim.
   and 532→516 Pro (16 B less each in the same staging). No new OTA
   history active or reason to deploy the empty gaps. A minimized
   Main-only history is still theoretical, not all source owners.
+  The [reduced isolated Main leaf](sj6-ota-history/README.md)
+  now genuinely uses 64 B instead of 84. Aliased histories are
+  consistent by recurrence, not approximate coefficients: both
+  real cutoff tapes (123,515 frames each) and 104,640 synthetic
+  lifecycle cases are word-exact. Isolated PI32 text 582→556 B
+  still needs fmaf/tanhf; no admitted native owner combination.
 
 - **SuperJ6 Main physical OTA is now independently reconstructed.**
   The [same-input leaf and full typed Raw controls](sj6-raw-main-ota/README.md)
