@@ -176,9 +176,9 @@ changing the rounding rule.
   sessions still needed a no-soft-double finite range reducer. The new
   192-bit Payne–Hanek guarded Float32 route preserved finite range
   and signed-tiny behavior; six million tested words max cosine error
-  1.07e−7, and native signed-product error ≤5.96e−8. Actual strict Elite
-  firmware linked without soft-double calls but **still exceeded APP
-  by 2,112 B** (2,116 B with the packer marker), up 2,552 B over the
+  1.07e−7, and native signed-product error ≤5.96e−8. The strict Elite
+  link map showed no soft-double calls, but the link **failed with APP
+  overflow of 2,112 B** (2,116 B with the packer marker), up 2,552 B over the
   matched stock donor, unchanged pool. This is a ∼10 KiB reduction
   against the double variant, not a firmware fit. Next isolate the
   structural wrapper/library contributions in the new map.
