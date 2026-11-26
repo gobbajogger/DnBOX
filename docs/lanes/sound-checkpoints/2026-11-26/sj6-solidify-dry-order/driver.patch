@@ -1,0 +1,42 @@
+--- old/driver.c
++++ proof/driver.c
+@@ -38,9 +38,30 @@
+ #include "suffix.h"
+ static sj6_scoped_dry_suffix routed_suffix;
+ static unsigned suffix_scope, suffix_pre, suffix_post;
++static unsigned hp_frames,crusher_frames;
++void sj6_ordered_hp(float*l,float*r,unsigned n){
++ if(!ORIGINAL_DRY_ORDER || !suffix_scope)return;
++ assert(hp_frames==crusher_frames && hp_frames==suffix_post);
++ hp_frames+=n;
++ for(unsigned i=0;i<n;i++){
++  l[i]=sj6_hp10_44100(&routed_suffix.pre[0],l[i]);
++  r[i]=sj6_hp10_44100(&routed_suffix.pre[1],r[i]);
++ }
++}
++void sj6_ordered_crusher(float*l,float*r,unsigned n){
++ if(!ORIGINAL_DRY_ORDER || !suffix_scope)return;
++ assert(hp_frames==crusher_frames+n);
++ crusher_frames+=n;
++ for(unsigned i=0;i<n;i++){
++  l[i]=sj6_zero_crusher_44100(&routed_suffix.pre[0],l[i]);
++  r[i]=sj6_zero_crusher_44100(&routed_suffix.pre[1],r[i]);
++ }
++}
+ int sj6_validated_dry_pre(float*l,float*r,unsigned n){
+  if(!suffix_scope)return 0;
+- suffix_pre+=n; sj6_pre_dry(&routed_suffix,l,r,n);return 1;
++ suffix_pre+=n;
++ if(!ORIGINAL_DRY_ORDER)sj6_pre_dry(&routed_suffix,l,r,n);
++ return 1; /* admitted physical Crusher already ran in ordered path */
+ }
+ void sj6_validated_dry_post(float*l,float*r,unsigned n){
+  if(suffix_scope){suffix_post+=n;sj6_post_dry(&routed_suffix,l,r,n);}
+@@ -144,6 +165,7 @@
+     above_unity[0],above_unity[1],above_ring[0],above_ring[1]);
+   fprintf(stderr,"sum_samples=%u classic_frames=%u classic_clips=%u classic_peak=%a\n",sum_samples,classic_frames,classic_clips,classic_peak);
+   fprintf(stderr,"suffix_scope=%u pre=%u post=%u\n",suffix_scope,suffix_pre,suffix_post);
++  fprintf(stderr,"before_trem_HPF=%u post_trem_Crusher=%u post_master_DC=%u\n",hp_frames,crusher_frames,suffix_post);
+   assert(!fclose(pre));assert(!fclose(stems));assert(total==148684); fclose(in);assert(!fclose(out));
+ }
+ /* The fixture has one SJ6 owner. A misroute aborts instead of returning silence. */

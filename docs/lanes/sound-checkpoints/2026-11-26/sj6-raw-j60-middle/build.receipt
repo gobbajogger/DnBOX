@@ -1,0 +1,43 @@
+/tmp/sj6-cross-range.c: OK
+c175a5d50a161fcc0d4eb7dade04b6c6205d2243bd241a768ff93902e0d63def  firmware/src/app/original_runtime.c
+69d1fb6f971427aecda1f06d1ff7770aa1d77c299ad335d748392a391075fe98  firmware/src/dsp/juno6.c
+18615ef0dba599add05597eb843d428a4a67c286cfde71f55d037e4c4263f57c  firmware/src/dsp/juno6_factory.inc
+d58f87a1f598fb894a184ccd57f543a1ec451ee13aea020b6eec9e92ca0da625  firmware/src/dsp/dnbx_core.c
+In file included from /workspace/scratch/3a7051e761a0/sj6-hp-exact-exp-fit/kept-elite-1/firmware/src/dsp/juno6.c:204:
+/workspace/scratch/3a7051e761a0/sj6-hp-exact-exp-fit/kept-elite-1/firmware/src/dsp/juno6_factory.inc:291:1: warning: ‘minsize’ attribute directive ignored [-Wattributes]
+  291 | {
+      | ^
+/workspace/scratch/3a7051e761a0/sj6-hp-exact-exp-fit/kept-elite-1/firmware/src/dsp/juno6_factory.inc:323:1: warning: ‘minsize’ attribute directive ignored [-Wattributes]
+  323 | {
+      | ^
+/workspace/scratch/3a7051e761a0/sj6-hp-exact-exp-fit/kept-elite-1/firmware/src/dsp/juno6_factory.inc:334:1: warning: ‘minsize’ attribute directive ignored [-Wattributes]
+  334 | {
+      | ^
+/workspace/scratch/3a7051e761a0/sj6-hp-exact-exp-fit/kept-elite-1/firmware/src/dsp/juno6_factory.inc:401:1: warning: ‘minsize’ attribute directive ignored [-Wattributes]
+  401 | {
+      | ^
+/workspace/scratch/3a7051e761a0/sj6-hp-exact-exp-fit/kept-elite-1/firmware/src/dsp/juno6_factory.inc:418:1: warning: ‘minsize’ attribute directive ignored [-Wattributes]
+  418 | {
+      | ^
+/workspace/scratch/3a7051e761a0/sj6-hp-exact-exp-fit/kept-elite-1/firmware/src/dsp/juno6_factory.inc:437:1: warning: ‘minsize’ attribute directive ignored [-Wattributes]
+  437 | {
+      | ^
+/workspace/scratch/3a7051e761a0/sj6-hp-exact-exp-fit/kept-elite-1/firmware/src/dsp/juno6_factory.inc:979:1: warning: ‘minsize’ attribute directive ignored [-Wattributes]
+  979 | {
+      | ^
+/workspace/scratch/3a7051e761a0/sj6-hp-exact-exp-fit/kept-elite-1/firmware/src/dsp/juno6_factory.inc:986:1: warning: ‘minsize’ attribute directive ignored [-Wattributes]
+  986 | {
+      | ^
+/workspace/scratch/3a7051e761a0/sj6-hp-exact-exp-fit/kept-elite-1/firmware/src/dsp/juno6_factory.inc:1048:1: warning: ‘minsize’ attribute directive ignored [-Wattributes]
+ 1048 | {
+      | ^
+In file included from /workspace/scratch/3a7051e761a0/sj6-hp-exact-exp-fit/kept-elite-1/firmware/src/dsp/juno6_factory.inc:1381:
+/workspace/scratch/3a7051e761a0/sj6-hp-exact-exp-fit/kept-elite-1/firmware/src/dsp/juno6_aux_core.inc:56:1: warning: ‘minsize’ attribute directive ignored [-Wattributes]
+   56 | {
+      | ^
+/workspace/scratch/3a7051e761a0/sj6-hp-exact-exp-fit/kept-elite-1/firmware/src/dsp/juno6_aux_core.inc:140:1: warning: ‘minsize’ attribute directive ignored [-Wattributes]
+  140 | {
+      | ^
+/workspace/scratch/3a7051e761a0/sj6-hp-exact-exp-fit/kept-elite-1/firmware/src/dsp/juno6_aux_core.inc:152:1: warning: ‘minsize’ attribute directive ignored [-Wattributes]
+  152 | {
+      | ^

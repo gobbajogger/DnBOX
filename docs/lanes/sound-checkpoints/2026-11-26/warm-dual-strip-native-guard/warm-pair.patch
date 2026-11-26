@@ -1,0 +1,175 @@
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -9410,6 +9410,75 @@
+     }
+ }
+ 
++#if DNBOX_WARM_STRIP_PAIR_LAB
++#if X0X_HOST
++static uint8_t home_strip_fixture_use_full;
++#endif
++enum { HOME_STRIP_SPLIT = 80 };
++_Static_assert(HOME_STRIP_SPLIT % X0X_LCD_TILE_H == 0 &&
++               HOME_STRIP_SPLIT <= KNOB_H &&
++               MAIN_ROWS-HOME_STRIP_SPLIT <= KNOB_H, "Home physical strips");
++typedef void (*main_strip_painter)(int band, const void *view);
++static UI_DRAW void commit_main_strips(uint16_t bg, main_strip_painter paint, const void *view)
++{
++    /* Arm this single logical region once. A returning input callback can
++     * invalidate the whole frame by clearing blit_hash/cv_tile_valid while
++     * DMA is in progress. Never rearm it on strip two. */
++    const int force = !blit_hash[1] || !cv_tile_valid[1];
++    blit_hash[1] = 1u;
++    cv_tile_valid[1] = 1u;
++    for (int top = 0; top < MAIN_ROWS; top += HOME_STRIP_SPLIT) {
++        int size = MAIN_ROWS-top > HOME_STRIP_SPLIT ? HOME_STRIP_SPLIT : MAIN_ROWS-top;
++        cv_begin(240, (unsigned)size, bg);
++        for (int b = 0; b < 2; ++b) {
++            int a = b * BAND_H - top;
++            cv_oy = a;
++            cv_y0 = a > 0 ? a : 0;
++            cv_y1 = a+BAND_H < size ? a+BAND_H : size;
++            if (cv_y0 < cv_y1) paint(b, view);
++        }
++        const cv_lcd_pos_t pos = {0, MAIN_Y + (unsigned)top};
++        x0x_lcd_tile_commit(cv_px, (unsigned)size,
++            main_tileh + ((unsigned)top / X0X_LCD_TILE_H) * X0X_LCD_TILE_COLS,
++            force, cv_lcd_emit, (void *)&pos);
++    }
++}
++#endif
++#if DNBOX_WARM_STRIP_PAIR_LAB
++/* Only the lower WAVE panel crosses the 80-row DMA boundary. Use the stock
++ * WAVE rasterizer once for band zero; do not repeat its 100-ms scope latch. */
++typedef struct {
++    char gr[24], load[24];
++    uint16_t gray, white, amb, face, edge;
++    uint8_t busy, guard;
++} mix_wave_view;
++static void paint_mix_wave_strip(int band, const void *arg)
++{
++    mix_wave_view *v=(mix_wave_view *)arg;
++    if (!band) {
++        draw_mix(0);
++        v->gray=C_GRAY; v->white=C_WHITE; v->amb=C_AMB; v->face=SOUND_FACE; v->edge=SOUND_EDGE;
++        if(engine_gr_db()>0.5f)put_s(put_i(put_s(v->gr,"-"),(int)(engine_gr_db()+0.5f))," dB");
++        else put_s(v->gr,"0 dB");
++        put_s(put_i(put_s(v->load,"AUDIO LOAD "),(int)plat_cpu_pct()),"%");
++        v->busy=plat_cpu_pct()>85u;
++        v->guard=engine_guard_active()!=0;
++        return;
++    }
++    surface_panel(3,3,114,34,0,v->face,v->edge,0);
++    cv_text(9,6,&FONT_T,"WET GR",v->gray);
++    cv_text(9,20,&FONT_S,v->gr,v->white);
++    surface_panel(3,42,234,24,0,v->face,v->edge,0);
++    cv_text(9,49,&FONT_XS,v->load,v->busy?v->amb:v->gray);
++    if(v->guard)text_r(229,49,&FONT_XS,"GUARD",v->amb);
++}
++static UI_DRAW void commit_mix_wave_strips(void)
++{
++    mix_wave_view v;
++    commit_main_strips(C_BLACK,paint_mix_wave_strip,&v);
++}
++#endif
++
+ #if X0X_UI_PERF
+ /* PERF: the live window, or the test's progress and table */
+ static char *put_pct10(char *q, int v)                /* 123 -> "12.3%" */
+@@ -9788,6 +9857,64 @@
+     }
+ }
+ 
++#if DNBOX_WARM_STRIP_PAIR_LAB
++static UI_DRAW void draw_help_card(int band,const char *const *l,int n,
++                                  const char *title,uint16_t c,uint16_t black,uint16_t white)
++{
++    if (band == 0) {
++        box(6, 4, 228, 24, c);
++        text_c(120, vc(&FONT_B, 4, 24), &FONT_B, title, black);
++    }
++    for (int k = 0; k < n; k++) {
++        int32_t y = 34 + k * 18 - band * BAND_H;
++        if (y > -18 && y < BAND_H)
++            text_c(120, y, &FONT_XS, l[k], white);
++    }
++}
++
++static UI_DRAW void draw_help(int band)
++{
++    const char *l[HELP_LINES];
++    int n = help_lines(ui.help - 1, l);
++    draw_help_card(band,l,n,btn_label(ui.help-1),part_col(),C_BLACK,C_WHITE);
++}
++
++/* A help label can be backed by SAVE's static mutable formatting scratch.
++ * Copy actual strings before the first returning LCD input callback. */
++typedef struct {
++    char lines[HELP_LINES][48], title[20];
++    uint16_t accent, black, white;
++    uint8_t n;
++} main_help_snapshot;
++static int copy_main_help(char *dst,unsigned cap,const char *src)
++{
++    for (unsigned i=0;i<cap;i++) {
++        if (!(dst[i]=src[i])) return 1;
++    }
++    return 0;
++}
++static void paint_help_strip(int band,const void *view)
++{
++    const main_help_snapshot *s=view;
++    const char *lines[HELP_LINES];
++    for(unsigned i=0;i<s->n;i++) lines[i]=s->lines[i];
++    draw_help_card(band,lines,s->n,s->title,s->accent,s->black,s->white);
++}
++static UI_DRAW int commit_help_strips(void)
++{
++    main_help_snapshot v;
++    const char *lines[HELP_LINES];
++    unsigned i=ui.help;
++    if(!i || i>NB) return 0;
++    unsigned n=(unsigned)help_lines(i-1,lines);
++    if(n>HELP_LINES || !copy_main_help(v.title,sizeof v.title,btn_label(i-1)))return 0;
++    for(unsigned j=0;j<n;j++)
++        if(!copy_main_help(v.lines[j],sizeof v.lines[j],lines[j]))return 0;
++    v.n=(uint8_t)n;v.accent=part_col();v.black=C_BLACK;v.white=C_WHITE;
++    commit_main_strips(v.black,paint_help_strip,&v);
++    return 1;
++}
++#else
+ static UI_DRAW void draw_help(int band)
+ {
+     const char *l[HELP_LINES];
+@@ -9804,6 +9931,8 @@
+     }
+ }
+ 
++#endif
++
+ #ifdef X0X_HOST
+ /* every card, on every kind of screen, fits the screen: 1 = yes (prints the first that does not) */
+ static int help_fits(void)
+@@ -9908,6 +10037,22 @@
+             smk_clip_lcd_force();   /* a menu (for example GLO) is on the screen: draw the grid again after it */
+     }
+ #endif
++#if DNBOX_WARM_STRIP_PAIR_LAB
++    if (
++#if X0X_HOST
++        !home_strip_fixture_use_full &&
++#endif
++        ui.help && commit_help_strips()) return;
++    if (
++#if X0X_HOST
++        !home_strip_fixture_use_full &&
++#endif
++        !readout && !ui.help && ui.overlay == O_NONE &&
++        ui.view == V_MIX && ui.page[V_MIX][0] > MIX_FIRST_KIT_PAGE + NKIT) {
++        commit_mix_wave_strips();
++        return;
++    }
++#endif
+     cv_begin(240, 2 * BAND_H, C_BLACK);           /* both bands, then one transfer: no tear between them */
+     for (band = 0; band < 2; band++) {
+         cv_band(band * BAND_H, BAND_H);

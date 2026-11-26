@@ -1,0 +1,23 @@
+--- old/runtime.c
++++ proof/runtime.c
+@@ -1516,6 +1516,11 @@
+         sj6_exact_hp(leaf,left,right,frames);
+     }
+ #endif
++#if X0X_SJ6_EXACT_ZERO_LEAF
++#error This isolated proof rejects duplication with the compact owner.
++#endif
++    extern void sj6_ordered_hp(float*,float*,unsigned);
++    sj6_ordered_hp(left,right,frames);
+ #if (defined(X0X_HOST) && defined(X0X_SJ6_ALT3_WITNESS)) || X0X_SJ6_ALT3_NATIVE
+ #if X0X_SJ6_AUX_LFO_NATIVE
+             if(mod && (mod[3]>=0.f || mod[4]>=0.f))
+@@ -1524,6 +1529,8 @@
+ #endif
+             juno6_alt3_process(&p->dsp.juno.synth,left,right,frames); /* after HPF, before downstream FX */
+ #endif
++    extern void sj6_ordered_crusher(float*,float*,unsigned);
++    sj6_ordered_crusher(left,right,frames);
+ #if X0X_SJ6_EXACT_ZERO_LEAF
+             if(leaf)sj6_exact_zero_crusher(leaf,left,right,frames);
+ #endif

@@ -1,0 +1,642 @@
+{
+  "pins": {
+    "dry": [
+      "905e705042416acd2a5404594706608c6bd0a35b0783013ef4bbf977fe170002",
+      "65e66b2587d5a90bf07cffed896843804a7e483281aa6779b9cab8e935f89b87"
+    ],
+    "authored": [
+      "9cc279dc61f6a504e1c234cd90db37f7c16c0cc9377a33e1165e6a75f7cf7b21",
+      "2b2c6dcdac9dbbb41c84cedb18da1635a01ca1603f34c1839937a4b91b5db229"
+    ],
+    "authored-repeat": [
+      "9cc279dc61f6a504e1c234cd90db37f7c16c0cc9377a33e1165e6a75f7cf7b21"
+    ]
+  },
+  "scope": "Raw current captured version with physical public Chorus-I switch as sole change, repeated authored tight baseline. Compact exact previous Range-only. Orthogonal stereo split never changes waveform, delta contains conditioned switching / private topology and is not asserted to be a pure return.",
+  "measured": {
+    "attack": {
+      "dry": {
+        "relative_to_own_dry_mid_db": {
+          "native": [
+            0.0,
+            -140.8620640287229
+          ],
+          "compact": [
+            0.0,
+            null
+          ]
+        },
+        "side_to_mid_dB": {
+          "native": -140.8620640287229,
+          "compact": null
+        },
+        "compact_to_native_level_db": [
+          -28.102556426436486,
+          null
+        ],
+        "compact_signed_error_dbr": [
+          -0.04270903793822335,
+          0.0
+        ],
+        "rms_dbfs": {
+          "native": [
+            -18.784673320102875,
+            -159.64673734882578
+          ],
+          "compact": [
+            -46.887229746539354,
+            null
+          ]
+        }
+      },
+      "authored": {
+        "relative_to_own_dry_mid_db": {
+          "native": [
+            4.2265564052295375,
+            -11.245555101976144
+          ],
+          "compact": [
+            6.037940130043252,
+            -12.57550710779541
+          ]
+        },
+        "side_to_mid_dB": {
+          "native": -15.472111507205678,
+          "compact": -18.61344723783866
+        },
+        "compact_to_native_level_db": [
+          -26.29117270162277,
+          -29.43250843225575
+        ],
+        "compact_signed_error_dbr": [
+          0.007133826045595316,
+          0.0041328961795698655
+        ],
+        "rms_dbfs": {
+          "native": [
+            -14.558116914873338,
+            -30.030228422079016
+          ],
+          "compact": [
+            -40.84928961649611,
+            -59.462736854334764
+          ]
+        }
+      },
+      "delta": {
+        "relative_to_own_dry_mid_db": {
+          "native": [
+            2.775029428516664,
+            -11.245555271920749
+          ],
+          "compact": [
+            1.120611282523351,
+            -12.57550710779541
+          ]
+        },
+        "side_to_mid_dB": {
+          "native": -14.020584700437412,
+          "compact": -13.696118390318759
+        },
+        "compact_to_native_level_db": [
+          -29.756974572429797,
+          -29.432508262311142
+        ],
+        "compact_signed_error_dbr": [
+          -0.05230558387368612,
+          0.004132903776767786
+        ],
+        "rms_dbfs": {
+          "native": [
+            -16.00964389158621,
+            -30.030228592023622
+          ],
+          "compact": [
+            -45.766618464016005,
+            -59.462736854334764
+          ]
+        }
+      }
+    },
+    "first_hold": {
+      "dry": {
+        "relative_to_own_dry_mid_db": {
+          "native": [
+            0.0,
+            -140.30759928833433
+          ],
+          "compact": [
+            0.0,
+            null
+          ]
+        },
+        "side_to_mid_dB": {
+          "native": -140.30759928833433,
+          "compact": null
+        },
+        "compact_to_native_level_db": [
+          -28.148266565715083,
+          null
+        ],
+        "compact_signed_error_dbr": [
+          -0.03617598036729572,
+          0.0
+        ],
+        "rms_dbfs": {
+          "native": [
+            -18.452551734680476,
+            -158.7601510230148
+          ],
+          "compact": [
+            -46.60081830039556,
+            null
+          ]
+        }
+      },
+      "authored": {
+        "relative_to_own_dry_mid_db": {
+          "native": [
+            3.971390463351793,
+            -6.836805517594511
+          ],
+          "compact": [
+            5.92651931671413,
+            -8.458775823472205
+          ]
+        },
+        "side_to_mid_dB": {
+          "native": -10.808195980946302,
+          "compact": -14.385295140186333
+        },
+        "compact_to_native_level_db": [
+          -26.193137712352744,
+          -29.770236871592775
+        ],
+        "compact_signed_error_dbr": [
+          0.030945210496583518,
+          -0.0955403576600649
+        ],
+        "rms_dbfs": {
+          "native": [
+            -14.481161271328684,
+            -25.289357252274986
+          ],
+          "compact": [
+            -40.67429898368143,
+            -55.05959412386776
+          ]
+        }
+      },
+      "delta": {
+        "relative_to_own_dry_mid_db": {
+          "native": [
+            2.467845840933884,
+            -6.836805405738114
+          ],
+          "compact": [
+            0.846321363219547,
+            -8.458775823472205
+          ]
+        },
+        "side_to_mid_dB": {
+          "native": -9.304651246671998,
+          "compact": -9.30509718669175
+        },
+        "compact_to_native_level_db": [
+          -29.769791043429418,
+          -29.77023698344917
+        ],
+        "compact_signed_error_dbr": [
+          -0.0363459000373863,
+          -0.09554036029718925
+        ],
+        "rms_dbfs": {
+          "native": [
+            -15.984705893746593,
+            -25.28935714041859
+          ],
+          "compact": [
+            -45.754496937176015,
+            -55.05959412386776
+          ]
+        }
+      }
+    },
+    "release": {
+      "dry": {
+        "relative_to_own_dry_mid_db": {
+          "native": [
+            0.0,
+            -127.78459733750886
+          ],
+          "compact": [
+            0.0,
+            null
+          ]
+        },
+        "side_to_mid_dB": {
+          "native": -127.78459733750886,
+          "compact": null
+        },
+        "compact_to_native_level_db": [
+          -23.511827605189698,
+          null
+        ],
+        "compact_signed_error_dbr": [
+          -0.5238661180589967,
+          0.0
+        ],
+        "rms_dbfs": {
+          "native": [
+            -43.028858177324956,
+            -170.8134555148338
+          ],
+          "compact": [
+            -66.54068578251466,
+            null
+          ]
+        }
+      },
+      "authored": {
+        "relative_to_own_dry_mid_db": {
+          "native": [
+            6.999336021994412,
+            -2.565172331348154
+          ],
+          "compact": [
+            7.150905972138615,
+            -4.61372181004921
+          ]
+        },
+        "side_to_mid_dB": {
+          "native": -9.564508353342566,
+          "compact": -11.764627782187825
+        },
+        "compact_to_native_level_db": [
+          -23.360257655045494,
+          -25.56037708389075
+        ],
+        "compact_signed_error_dbr": [
+          -0.32640683790324304,
+          -0.11690519334495644
+        ],
+        "rms_dbfs": {
+          "native": [
+            -36.02952215533055,
+            -45.59403050867311
+          ],
+          "compact": [
+            -59.389779810376034,
+            -71.15440759256386
+          ]
+        }
+      },
+      "delta": {
+        "relative_to_own_dry_mid_db": {
+          "native": [
+            4.150151988511779,
+            -2.5651726305790925
+          ],
+          "compact": [
+            2.754873455613163,
+            -4.61372181004921
+          ]
+        },
+        "side_to_mid_dB": {
+          "native": -6.715324619090871,
+          "compact": -7.368595265662373
+        },
+        "compact_to_native_level_db": [
+          -24.90710613808831,
+          -25.56037678465981
+        ],
+        "compact_signed_error_dbr": [
+          -0.14756268545689308,
+          -0.11690529317321127
+        ],
+        "rms_dbfs": {
+          "native": [
+            -38.878706188813176,
+            -45.59403080790405
+          ],
+          "compact": [
+            -63.785812326901485,
+            -71.15440759256386
+          ]
+        }
+      }
+    },
+    "chord_hold": {
+      "dry": {
+        "relative_to_own_dry_mid_db": {
+          "native": [
+            0.0,
+            -140.1746994742577
+          ],
+          "compact": [
+            0.0,
+            null
+          ]
+        },
+        "side_to_mid_dB": {
+          "native": -140.1746994742577,
+          "compact": null
+        },
+        "compact_to_native_level_db": [
+          -30.183273050025004,
+          null
+        ],
+        "compact_signed_error_dbr": [
+          -0.17849827436700352,
+          0.0
+        ],
+        "rms_dbfs": {
+          "native": [
+            -13.441132865883418,
+            -153.61583234014108
+          ],
+          "compact": [
+            -43.624405915908426,
+            null
+          ]
+        }
+      },
+      "authored": {
+        "relative_to_own_dry_mid_db": {
+          "native": [
+            0.9802787029840876,
+            -4.365909996292022
+          ],
+          "compact": [
+            3.08248112184043,
+            -4.035069810318088
+          ]
+        },
+        "side_to_mid_dB": {
+          "native": -5.34618869927611,
+          "compact": -7.117550932158519
+        },
+        "compact_to_native_level_db": [
+          -28.08107063116866,
+          -29.852432864051067
+        ],
+        "compact_signed_error_dbr": [
+          0.046155727794453046,
+          -0.033936049314717165
+        ],
+        "rms_dbfs": {
+          "native": [
+            -12.46085416289933,
+            -17.80704286217544
+          ],
+          "compact": [
+            -40.541924794067995,
+            -47.6594757262265
+          ]
+        }
+      },
+      "delta": {
+        "relative_to_own_dry_mid_db": {
+          "native": [
+            2.932046209848029,
+            -4.365909991583127
+          ],
+          "compact": [
+            -0.7357161026565728,
+            -4.035069810318088
+          ]
+        },
+        "side_to_mid_dB": {
+          "native": -7.297956201431157,
+          "compact": -3.2993537076615143
+        },
+        "compact_to_native_level_db": [
+          -33.85103536252961,
+          -29.852432868759962
+        ],
+        "compact_signed_error_dbr": [
+          0.037082098428108896,
+          -0.033936050928379445
+        ],
+        "rms_dbfs": {
+          "native": [
+            -10.509086656035386,
+            -17.807042857466545
+          ],
+          "compact": [
+            -44.360122018564994,
+            -47.6594757262265
+          ]
+        }
+      }
+    },
+    "final_tail": {
+      "dry": {
+        "relative_to_own_dry_mid_db": {
+          "native": [
+            0.0,
+            -142.5745313222042
+          ],
+          "compact": [
+            0.0,
+            null
+          ]
+        },
+        "side_to_mid_dB": {
+          "native": -142.5745313222042,
+          "compact": null
+        },
+        "compact_to_native_level_db": [
+          -31.41543948216611,
+          null
+        ],
+        "compact_signed_error_dbr": [
+          -0.21386466527910944,
+          0.0
+        ],
+        "rms_dbfs": {
+          "native": [
+            -38.995623606205015,
+            -181.57015492840918
+          ],
+          "compact": [
+            -70.41106308837112,
+            null
+          ]
+        }
+      },
+      "authored": {
+        "relative_to_own_dry_mid_db": {
+          "native": [
+            3.221881424076145,
+            2.959392530125685
+          ],
+          "compact": [
+            2.736792437848549,
+            1.8209640475866096
+          ]
+        },
+        "side_to_mid_dB": {
+          "native": -0.2624888939504591,
+          "compact": -0.9158283902619391
+        },
+        "compact_to_native_level_db": [
+          -31.90052846839371,
+          -32.55386796470519
+        ],
+        "compact_signed_error_dbr": [
+          -0.016378543517303376,
+          -0.04777187420953323
+        ],
+        "rms_dbfs": {
+          "native": [
+            -35.77374218212887,
+            -36.036231076079325
+          ],
+          "compact": [
+            -67.67427065052257,
+            -68.59009904078451
+          ]
+        }
+      },
+      "delta": {
+        "relative_to_own_dry_mid_db": {
+          "native": [
+            5.230224090446574,
+            2.95939250821818
+          ],
+          "compact": [
+            -0.9729925368477348,
+            1.8209640475866096
+          ]
+        },
+        "side_to_mid_dB": {
+          "native": -2.2708315822283955,
+          "compact": 2.7939565844343446
+        },
+        "compact_to_native_level_db": [
+          -37.61865610946042,
+          -32.55386794279768
+        ],
+        "compact_signed_error_dbr": [
+          0.00630773518240813,
+          -0.04777187472611786
+        ],
+        "rms_dbfs": {
+          "native": [
+            -33.76539951575844,
+            -36.036231097986835
+          ],
+          "compact": [
+            -71.38405562521885,
+            -68.59009904078451
+          ]
+        }
+      }
+    },
+    "whole": {
+      "dry": {
+        "relative_to_own_dry_mid_db": {
+          "native": [
+            0.0,
+            -140.48742656881254
+          ],
+          "compact": [
+            0.0,
+            null
+          ]
+        },
+        "side_to_mid_dB": {
+          "native": -140.48742656881254,
+          "compact": null
+        },
+        "compact_to_native_level_db": [
+          -29.763676149954122,
+          null
+        ],
+        "compact_signed_error_dbr": [
+          -0.15559612747484391,
+          0.0
+        ],
+        "rms_dbfs": {
+          "native": [
+            -18.62438496934405,
+            -159.1118115381566
+          ],
+          "compact": [
+            -48.38806111929817,
+            null
+          ]
+        }
+      },
+      "authored": {
+        "relative_to_own_dry_mid_db": {
+          "native": [
+            1.7599003096385333,
+            -4.431102982963049
+          ],
+          "compact": [
+            4.009361785927325,
+            -4.444484754857346
+          ]
+        },
+        "side_to_mid_dB": {
+          "native": -6.191003292601582,
+          "compact": -8.45384654078467
+        },
+        "compact_to_native_level_db": [
+          -27.514214673665332,
+          -29.77705792184842
+        ],
+        "compact_signed_error_dbr": [
+          0.038238188733720764,
+          -0.048267049997821734
+        ],
+        "rms_dbfs": {
+          "native": [
+            -16.864484659705514,
+            -23.055487952307097
+          ],
+          "compact": [
+            -44.37869933337084,
+            -52.832545874155514
+          ]
+        }
+      },
+      "delta": {
+        "relative_to_own_dry_mid_db": {
+          "native": [
+            2.9505977603020925,
+            -4.431102985322548
+          ],
+          "compact": [
+            -0.37883217800178,
+            -4.444484754857346
+          ]
+        },
+        "side_to_mid_dB": {
+          "native": -7.381700745624641,
+          "compact": -4.065652576855566
+        },
+        "compact_to_native_level_db": [
+          -33.093106088258,
+          -29.77705791948892
+        ],
+        "compact_signed_error_dbr": [
+          0.027144923845521463,
+          -0.048267051403430634
+        ],
+        "rms_dbfs": {
+          "native": [
+            -15.673787209041954,
+            -23.055487954666596
+          ],
+          "compact": [
+            -48.76689329729995,
+            -52.832545874155514
+          ]
+        }
+      }
+    }
+  }
+}

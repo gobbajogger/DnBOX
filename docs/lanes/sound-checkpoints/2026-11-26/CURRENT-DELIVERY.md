@@ -11,7 +11,10 @@ isolated kernel timing, or partial link into a release claim.
   gap from 3.67 dB to 0.15 dB, and the tail gap from 6.20 dB to 1.08 dB.
   Some held side metrics worsen. This is direct evidence to prioritize
   J60V2, not a gain/width tweak or a whole-engine pass. The affordable
-  44.1 kHz implementation and strict timing are still open.
+  44.1 kHz implementation and strict timing are still open. The original
+  direct bridge alone overshoots chord/tail; the [same-input 96 kHz
+  middle](sj6-raw-j60-middle/README.md) also differs, so do not adopt
+  a [43-tap direct-only substitute](sj6-j60-direct-sparse/README.md).
 
 - SuperJ6: the [Sine phase witness](sj6-solidify-sine-phase/README.md)
   improves Solidify's signed opening and hold without gain changes.

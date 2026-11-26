@@ -1,0 +1,74 @@
+guard=0 model=elite
+guarded elite XIP 552420 free 252 pool usable 564 read-only FDATA 61432 diagnostic slot3 span 32764 slot3 free 4 read-only FITTAB 4072 header 443952440200000001000000d8ef00007def59ef4364f3ff96d8325deb5ef771 ELF 39986b42b39fe3e300cdf8a7fb60996ef475580118c664f7efac4961d9d82918
+.text           0x0000000002000120    0x85e3c
+.c1_text        0x0000000001c00ebc      0x260 load address 0x0000000002086a18
+.data           0x0000000001c08000      0x288 load address 0x0000000002086c78
+.bss            0x0000000001c08290    0x17cd4
+.pool           0x0000000001c20000    0x51dcc
+.xpool          0x0000000001c75200     0x2400
+ .text.draw_main
+                0x000000000204f214      0x794 /tmp/lto-llvm-e7d90d.o
+guard=0 model=pro
+guarded pro XIP 552412 free 260 pool usable 564 read-only FDATA 61432 diagnostic slot3 span 32764 slot3 free 4 read-only FITTAB 4072 header 443952440200000002000000d8ef00007def59ef66141c5a5fff8313de14cb71 ELF df5831a1a84f8b52198f9af9112ac44a97c12759743d710d4f2b35d215db4570
+.text           0x0000000002000120    0x85e34
+.c1_text        0x0000000001c00ebc      0x260 load address 0x0000000002086a10
+.data           0x0000000001c08000      0x288 load address 0x0000000002086c70
+.bss            0x0000000001c08290    0x17cd4
+.pool           0x0000000001c20000    0x51dcc
+.xpool          0x0000000001c75200     0x2400
+ .text.draw_main
+                0x000000000204f214      0x794 /tmp/lto-llvm-2a87c8.o
+guard=1 model=elite
+/workspace/scratch/3a7051e761a0/prereqs/jieli-linux-toolchains-20260730.1/pi32v2/bin/ld: region `XIP' overflowed by 768 bytes
+.text           0x0000000002000120    0x8623c
+.c1_text        0x0000000001c00ebc      0x260 load address 0x0000000002086e18
+.data           0x0000000001c08000      0x288 load address 0x0000000002087078
+.bss            0x0000000001c08290    0x17cd4
+.pool           0x0000000001c20000    0x51dcc
+.xpool          0x0000000001c75200     0x2400
+ .text.paint_mix_wave_strip
+                0x000000000200bca4      0x14e /tmp/lto-llvm-3dff78.o
+--
+ .text.draw_help_card
+                0x000000000200be40       0x78 /tmp/lto-llvm-3dff78.o
+ .text.paint_help_strip
+                0x000000000200beb8       0x36 /tmp/lto-llvm-3dff78.o
+--
+ .text.copy_main_help
+                0x00000000020448c6       0x1c /tmp/lto-llvm-3dff78.o
+ .text.commit_main_strips
+                0x00000000020448e2       0xc0 /tmp/lto-llvm-3dff78.o
+ .text.commit_help_strips
+                0x00000000020449a2       0xa8 /tmp/lto-llvm-3dff78.o
+ .text.commit_mix_wave_strips
+                0x0000000002044a4a       0x28 /tmp/lto-llvm-3dff78.o
+--
+ .text.draw_main
+                0x000000000204f5c6      0x7de /tmp/lto-llvm-3dff78.o
+guard=1 model=pro
+/workspace/scratch/3a7051e761a0/prereqs/jieli-linux-toolchains-20260730.1/pi32v2/bin/ld: region `XIP' overflowed by 760 bytes
+.text           0x0000000002000120    0x86234
+.c1_text        0x0000000001c00ebc      0x260 load address 0x0000000002086e10
+.data           0x0000000001c08000      0x288 load address 0x0000000002087070
+.bss            0x0000000001c08290    0x17cd4
+.pool           0x0000000001c20000    0x51dcc
+.xpool          0x0000000001c75200     0x2400
+ .text.paint_mix_wave_strip
+                0x000000000200bca4      0x14e /tmp/lto-llvm-54e033.o
+--
+ .text.draw_help_card
+                0x000000000200be40       0x78 /tmp/lto-llvm-54e033.o
+ .text.paint_help_strip
+                0x000000000200beb8       0x36 /tmp/lto-llvm-54e033.o
+--
+ .text.copy_main_help
+                0x00000000020448c6       0x1c /tmp/lto-llvm-54e033.o
+ .text.commit_main_strips
+                0x00000000020448e2       0xc0 /tmp/lto-llvm-54e033.o
+ .text.commit_help_strips
+                0x00000000020449a2       0xa8 /tmp/lto-llvm-54e033.o
+ .text.commit_mix_wave_strips
+                0x0000000002044a4a       0x28 /tmp/lto-llvm-54e033.o
+--
+ .text.draw_main
+                0x000000000204f5c6      0x7de /tmp/lto-llvm-54e033.o

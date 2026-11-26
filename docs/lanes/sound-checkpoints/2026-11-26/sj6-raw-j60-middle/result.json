@@ -1,0 +1,296 @@
+{
+  "sha_oracle": "a5243e50bda6bd44f463c6e63ea3137802142f55f3c1ea25a5a6e046acba81a1",
+  "pre_j60_sha": "a36817e8b5ca4b8176fb3903fa68356431a38658d4b1faa627c0500fc41e6e45",
+  "route": "actual compact pre-J60 frames and equal partition, authentic older app effect with its own 96k bridge, stopped equals input; newer installed-AU terminal context only because same native pre-J60 input not exposed",
+  "windows": {
+    "attack": {
+      "native_terminal_context_side_mid": -14.02058470043741,
+      "native_terminal_context_relative_to_own_dry_mid": [
+        2.775029428516664,
+        -11.245555271920749
+      ],
+      "same_input_compact_vs_orig_j60_signed_dbr": [
+        -1.687345670751736,
+        4.047724263242957
+      ],
+      "same_input": {
+        "same_input_orig_j60": {
+          "delta_side_to_mid_db": -15.931419496429552,
+          "delta_relative_to_own_dry_mid_db": [
+            1.4514625779512336,
+            -14.479956918478319
+          ]
+        },
+        "same_input_typed_j60": {
+          "delta_side_to_mid_db": -13.69611839031876,
+          "delta_relative_to_own_dry_mid_db": [
+            1.120611282523351,
+            -12.575507107795412
+          ]
+        },
+        "original_direct_only_typed_middle_sensitivity": {
+          "delta_side_to_mid_db": -14.784956188526412,
+          "delta_relative_to_own_dry_mid_db": [
+            2.209449037290574,
+            -12.575507151235838
+          ]
+        }
+      }
+    },
+    "held": {
+      "native_terminal_context_side_mid": -9.304651246671991,
+      "native_terminal_context_relative_to_own_dry_mid": [
+        2.4678458409338826,
+        -6.836805405738108
+      ],
+      "same_input_compact_vs_orig_j60_signed_dbr": [
+        -1.837611552167206,
+        1.7140042114833467
+      ],
+      "same_input": {
+        "same_input_orig_j60": {
+          "delta_side_to_mid_db": -10.621225863381163,
+          "delta_relative_to_own_dry_mid_db": [
+            1.2406812175826347,
+            -9.38054464579853
+          ]
+        },
+        "same_input_typed_j60": {
+          "delta_side_to_mid_db": -9.305097186691754,
+          "delta_relative_to_own_dry_mid_db": [
+            0.8463213632195434,
+            -8.45877582347221
+          ]
+        },
+        "original_direct_only_typed_middle_sensitivity": {
+          "delta_side_to_mid_db": -10.477911796916931,
+          "delta_relative_to_own_dry_mid_db": [
+            2.0191359877433306,
+            -8.4587758091736
+          ]
+        }
+      }
+    },
+    "release": {
+      "native_terminal_context_side_mid": -6.715324619090872,
+      "native_terminal_context_relative_to_own_dry_mid": [
+        4.15015198851178,
+        -2.5651726305790925
+      ],
+      "same_input_compact_vs_orig_j60_signed_dbr": [
+        -7.373393725839451,
+        -4.104929146038178
+      ],
+      "same_input": {
+        "same_input_orig_j60": {
+          "delta_side_to_mid_db": -9.15382641918399,
+          "delta_relative_to_own_dry_mid_db": [
+            3.7278502691550885,
+            -5.425976150028901
+          ]
+        },
+        "same_input_typed_j60": {
+          "delta_side_to_mid_db": -7.368595265662372,
+          "delta_relative_to_own_dry_mid_db": [
+            2.7548734556131604,
+            -4.613721810049211
+          ]
+        },
+        "original_direct_only_typed_middle_sensitivity": {
+          "delta_side_to_mid_db": -8.568302334925672,
+          "delta_relative_to_own_dry_mid_db": [
+            3.954580507800724,
+            -4.613721827124948
+          ]
+        }
+      }
+    },
+    "chord": {
+      "native_terminal_context_side_mid": -7.297956201431154,
+      "native_terminal_context_relative_to_own_dry_mid": [
+        2.9320462098480276,
+        -4.365909991583126
+      ],
+      "same_input_compact_vs_orig_j60_signed_dbr": [
+        0.09271432788226155,
+        3.4447033258635336
+      ],
+      "same_input": {
+        "same_input_orig_j60": {
+          "delta_side_to_mid_db": -8.282463938444804,
+          "delta_relative_to_own_dry_mid_db": [
+            3.0819601877195133,
+            -5.200503750725291
+          ]
+        },
+        "same_input_typed_j60": {
+          "delta_side_to_mid_db": -3.299353707661507,
+          "delta_relative_to_own_dry_mid_db": [
+            -0.7357161026565813,
+            -4.035069810318088
+          ]
+        },
+        "original_direct_only_typed_middle_sensitivity": {
+          "delta_side_to_mid_db": -8.519155250735015,
+          "delta_relative_to_own_dry_mid_db": [
+            4.484085443408697,
+            -4.035069807326318
+          ]
+        }
+      }
+    },
+    "tail": {
+      "native_terminal_context_side_mid": -2.2708315822283978,
+      "native_terminal_context_relative_to_own_dry_mid": [
+        5.230224090446577,
+        2.959392508218179
+      ],
+      "same_input_compact_vs_orig_j60_signed_dbr": [
+        1.1088296485841183,
+        3.2699978433493335
+      ],
+      "same_input": {
+        "same_input_orig_j60": {
+          "delta_side_to_mid_db": -2.354346291340354,
+          "delta_relative_to_own_dry_mid_db": [
+            4.152826443694362,
+            1.7984801523540073
+          ]
+        },
+        "same_input_typed_j60": {
+          "delta_side_to_mid_db": 2.793956584434346,
+          "delta_relative_to_own_dry_mid_db": [
+            -0.9729925368477359,
+            1.8209640475866096
+          ]
+        },
+        "original_direct_only_typed_middle_sensitivity": {
+          "delta_side_to_mid_db": -4.646859364535808,
+          "delta_relative_to_own_dry_mid_db": [
+            6.467823405065824,
+            1.8209640405300167
+          ]
+        }
+      }
+    },
+    "full": {
+      "native_terminal_context_side_mid": -7.381700745624639,
+      "native_terminal_context_relative_to_own_dry_mid": [
+        2.9505977603020916,
+        -4.431102985322546
+      ],
+      "same_input_compact_vs_orig_j60_signed_dbr": [
+        -0.06569051081881913,
+        3.0101809176318097
+      ],
+      "same_input": {
+        "same_input_orig_j60": {
+          "delta_side_to_mid_db": -8.30632992039496,
+          "delta_relative_to_own_dry_mid_db": [
+            2.7167119881140565,
+            -5.5896179322809045
+          ]
+        },
+        "same_input_typed_j60": {
+          "delta_side_to_mid_db": -4.065652576855562,
+          "delta_relative_to_own_dry_mid_db": [
+            -0.37883217800179103,
+            -4.444484754857353
+          ]
+        },
+        "original_direct_only_typed_middle_sensitivity": {
+          "delta_side_to_mid_db": -8.340819474320655,
+          "delta_relative_to_own_dry_mid_db": [
+            3.8963347228628042,
+            -4.444484751457851
+          ]
+        }
+      }
+    }
+  },
+  "middle": [
+    {
+      "source": "held",
+      "entered": [
+        45266,
+        83666
+      ],
+      "signed_dbr": -23.418796859777974,
+      "delta_level_db": -0.007091704906030714
+    },
+    {
+      "source": "chord",
+      "entered": [
+        117266,
+        179666
+      ],
+      "signed_dbr": -17.145717576285712,
+      "delta_level_db": 0.022824977789717066
+    },
+    {
+      "source": "tail",
+      "entered": [
+        179666,
+        227666
+      ],
+      "signed_dbr": -14.409208604646086,
+      "delta_level_db": -0.09082401793621171
+    }
+  ],
+  "inside_count": 323664,
+  "source_impulse_model": {
+    "linear_half_input_word_exact": true,
+    "coefficients_not_exported": true,
+    "fixed_support_9tap": [
+      43,
+      52
+    ],
+    "blind_impulse_phase_dbr": {
+      "121": -111.01628307006368,
+      "89": -115.95008813186399,
+      "35": -113.82578091861163,
+      "30": -109.51127390139888,
+      "31": -110.52963119439798,
+      "73": -121.09179525994028,
+      "50": -117.3737643166354,
+      "26": -120.95110047219579,
+      "67": -110.98635719717448
+    },
+    "measured": {
+      "source_one_phase_full": {
+        "held": {
+          "direct_vs_actual_signed_dbr": -127.70613046690359,
+          "hybrid_delta_mid_db": 2.0191381115962366,
+          "hybrid_delta_side_mid_db": -10.477913932927967
+        },
+        "chord": {
+          "direct_vs_actual_signed_dbr": -127.74750073904312,
+          "hybrid_delta_mid_db": 4.484086079488094,
+          "hybrid_delta_side_mid_db": -8.519155883809532
+        },
+        "tail": {
+          "direct_vs_actual_signed_dbr": -128.10574427268384,
+          "hybrid_delta_mid_db": 6.4678239114023075,
+          "hybrid_delta_side_mid_db": -4.646859875258794
+        }
+      },
+      "source_one_phase_9tap": {
+        "held": {
+          "direct_vs_actual_signed_dbr": -33.70654215922413,
+          "hybrid_delta_mid_db": 1.8940196683498387,
+          "hybrid_delta_side_mid_db": -10.352795511082903
+        },
+        "chord": {
+          "direct_vs_actual_signed_dbr": -33.59980373375625,
+          "hybrid_delta_mid_db": 4.421786557209796,
+          "hybrid_delta_side_mid_db": -8.456856362278792
+        },
+        "tail": {
+          "direct_vs_actual_signed_dbr": -33.19355215535856,
+          "hybrid_delta_mid_db": 6.384899706210204,
+          "hybrid_delta_side_mid_db": -4.563935662825486
+        }
+      }
+    }
+  }
+}
