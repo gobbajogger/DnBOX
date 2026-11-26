@@ -1,0 +1,5 @@
+# A/B storage selector diagnostic
+Use exact guarded strip donor with grouped cold APP patch and install ticket codec applied.
+Verify firmware/src/storage.c SHA-256 `3a5a8da7e1960a00ff0be3952a306c7947ea963fffbd9efffe24372582541093`, copy to local baseline, then apply `patch --fuzz=0 -p1 < ab-select.patch`, final SHA-256 `9e20d413cd7b15cd3f497652b4d6e4636558472c7f53c7c795851f80ce0e8b87`.
+Run `python3 verify-ab-select.py baseline-storage.c firmware/src/storage.c` and registered tests/host/run_project_stage.sh, run_project_save_preflight.sh, run_project_stream_copy.sh.
+Use already established ui-cold-help run.sh and exact paired flags for native linker. Baseline overflow 100/92 B reduced to 52/44 B. No fit, no native timing, no qualified stack result. Maps identify 248-B st_choose text, not frame size; failed links emitted no usable ELF. At C-object level writer's adapter now holds an extra st_hdr_t while shared selector still has two headers; real maximum native stack not bounded by this and needs actual linked-frame and high-water checks before adoption.
