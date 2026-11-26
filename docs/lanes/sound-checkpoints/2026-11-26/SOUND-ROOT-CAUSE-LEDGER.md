@@ -408,6 +408,15 @@ signed owner counters on a clearly non-timing witness.
   and PCM, but saved only about 5 µs per measured 256-frame half, for
   126 extra bytes. Not adopted against the much larger system miss.
 
+- **Sine phase is causal for the early attack, not sufficient.** A
+  quarter-cycle authentic origin alone improves Solidify centered dry
+  attack from +2.887 to −2.116 dBr, and hold from +3.039 to −1.442.
+  The late dry tail gets worse (+0.344 → +3.331). Independent pure Sine
+  4× phase with original halfband remained within 0.063° across six
+  pitches, but it did not reconstruct the complete loaded modes.
+  Raw and Brainwave were signed exact untouched. [Source and
+  measurements](sj6-solidify-sine-phase/README.md).
+
 ## Release boundary
 
 These are lab diagnostics. A host proof or a leaf emulator measurement

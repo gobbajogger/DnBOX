@@ -4,6 +4,33 @@ No full release pass. Continue SuperJ6 sound matching, exact Synth One optimizat
 and whole-firmware capacity work independently. Do not turn a source experiment,
 isolated kernel timing, or partial link into a release claim.
 
+## Latest measured results
+
+- SuperJ6: the [Sine phase witness](sj6-solidify-sine-phase/README.md)
+  improves Solidify's signed opening and hold without gain changes.
+  Centered dry first attack +2.887 → −2.116 dBr, hold +3.039 → −1.442.
+  The late dry tail regressed +0.344 → +3.331 dBr, so do not enable this
+  as a full fix. Closed hypotheses:
+  [Sine gain alone](sj6-sine-gain-rejection/README.md),
+  [amp envelope alone](sj6-solidify-native-amp/README.md) and
+  [slow chord glide](sj6-solidify-chord-ownership/CHORD.md).
+- SuperJ6 J60V2: [generated clock, filter grid and 48 kHz leaf](sj6-j60v2-clock/README.md)
+  plus true host effects comparisons. The exact current instrument stages
+  use a 96 kHz middle kernel; 48 kHz specialization is a host candidate,
+  not a replacement for a bounded 44.1 kHz path. No native timing claim.
+- Combined warm diagnostic fits Elite +252 / Pro +260 B app, with +564 B
+  pool surplus above raw reserve, but measured 11,976 µs/1 late and
+  14,509 µs/70 late in the unchanged external stress tape. The image has
+  legacy diagnostic drum injections beyond that tape and cannot qualify.
+  Pro's measured Core 0 wait for Synth One at the A-before-B barrier was
+  only 8.625 µs. Do not claim release, and do not repeat the same probe.
+- Synth One: typed per-owner RAM union is being validated separately for
+  a larger delay history; these bytes are not available to all engines
+  at once and the exact effect does not yet fit. Preserve arpeggiator,
+  controls, reserve and protected partitions.
+
+## Earlier checkpoints
+
 | Lane | Verified result | Open gate |
 | --- | --- | --- |
 | SuperJ6 whole signal | 42 genuine Mac AUv3 waveform/level captures plus a calibrated Saw range extension. All four waveforms support a common ~7 dB difference before compressor versus scoped reconstruction; post-compressor estimate agrees with original master. | Identify the upstream gain owner and prove same-note and polyphonic levels across original and compact full processing. No fitted master boost. |
