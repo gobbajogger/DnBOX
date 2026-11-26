@@ -26,3 +26,20 @@ the scope of this header, not general arbitrary-ratio DSP. Rebuild with:
 
 No rate-change policy, filter/amplitude/sound result, target-cycle result,
 or production route is implied by the clock test.
+
+`python3 coefficients.py` regenerates phase knots and measures the worst
+absolute-sum error of a coefficient row against the generated 257-phase
+reference. This bound measures the coefficient approximation, not the final
+chorus audio. Signed native-host oracle experiments independently measured
+8-interval Float32 cubic interpolation at 44.1 kHz: −75.83 dBr impulse,
+−91.82 dBr broad stereo burst and −123.10 dBr tail. A smaller 48-tap prune
+with the original window intact gave −55.96/−71.00/−63.79 dBr on that
+fixture. Quantized 16-interval alternatives and a factored 48 kHz bridge
+are candidates, not validated firmware.
+
+For rational coordinate `q+p`, converter delay subtracts 32 before
+the signed tap index: `x[q-32+j]`, `j=-31..32`. Up can read after host
+`q+1` has already been written, so exact write-before-step storage needs
+65 upstream and 64 downstream historical frames/channel. Pruning to
+`j=-23..24` still needs 57 upstream and 56 downstream because the center
+does not move. The C test proves these maximum ages for both tested rates.

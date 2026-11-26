@@ -25,10 +25,30 @@ static void check(unsigned num, unsigned den)
         sj6_phase_next(&c);
     }
 }
+static void check_history(unsigned num, unsigned den, unsigned lead)
+{
+    unsigned max_full = 0, max_prune = 0;
+    for (unsigned k = 512; k < 8192; ++k) {
+        unsigned coord = k*num;
+        unsigned q = coord/den;
+        /* Before stepping Up, host frame ceil(coord/den) is available.
+         * Down steps only after the current 96k floor frame is published. */
+        unsigned newest = q + (lead && coord%den != 0);
+        unsigned full = newest - (q-63) + 1;
+        unsigned prune = newest - (q-55) + 1;
+        if (full > max_full) max_full = full;
+        if (prune > max_prune) max_prune = prune;
+    }
+    assert(max_full == 64 + lead);
+    assert(max_prune == 56 + lead);
+}
+
 int main(void)
 {
     check(147,320); check(320,147); /* 44.1 ↔ 96 kHz */
     check(1,2); check(2,1);        /* 48 ↔ 96 kHz */
     check(1,1);                    /* 96 kHz identity */
-    puts("PASS: 7,505,000 exact cursor/phase steps, including rollover");
+    check_history(147,320,1); check_history(320,147,0);
+    check_history(1,2,1); check_history(2,1,0);
+    puts("PASS: 7,505,000 exact cursor/phase steps, including rollover; ring-age bounds exact");
 }
