@@ -19,3 +19,12 @@ Additional full AU compressor-off harmonic fingerprints from A4 held frames
 are Sine -30.65/-29.85 dB, Triangle -22.31/-19.12, Saw -6.00/-9.52 and
 Pulse -106.96/-9.52. Agreement of common gain intervals is not a null test
 or evidence that Sine/Triangle partials already match isolated source.
+
+`shape_drive.py native ../sj6-auv3-compressor-inlet/native` rechecks the
+same-clock compressor-off levels and h2–h6 from the four oscillator sweeps.
+The full-to-half fader changes true level by about 5.81–6.23 dB, while the
+relative Sine/Triangle h2 and h3 remain the same on every fader, including
+midpoint repeats. This is inconsistent with simple drive-dependent
+quadratic/cubic coloration after that fader, not proof of the source node.
+Do not remove the Sine/Triangle harmonics when a full-pipeline reference
+contains them or use amplitude fitting as a sound fix.
