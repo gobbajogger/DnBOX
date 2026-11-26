@@ -1,0 +1,56 @@
+[
+  {
+    "compared": [
+      "exact-A",
+      "exact-A-repeat"
+    ],
+    "eligible_for_comparison": false,
+    "failures": [
+      "exact-A: fewer than four exact pre-scene settled owner replies",
+      "exact-A: no effective producer frame for first scene event",
+      "exact-A: first late half\u2014not reported by runner",
+      "exact-A-repeat: fewer than four exact pre-scene settled owner replies",
+      "exact-A-repeat: no effective producer frame for first scene event",
+      "exact-A-repeat: first late half\u2014not reported by runner",
+      "complete renderer-consumed event-frame receipt missing"
+    ],
+    "same_pcm": true,
+    "same_first_dac_nonzero_frame": true
+  },
+  {
+    "compared": [
+      "table-share",
+      "tom-body"
+    ],
+    "eligible_for_comparison": false,
+    "failures": [
+      "table-share: fewer than four exact pre-scene settled owner replies",
+      "table-share: no effective producer frame for first scene event",
+      "table-share: first late half\u2014not reported by runner",
+      "tom-body: fewer than four exact pre-scene settled owner replies",
+      "tom-body: no effective producer frame for first scene event",
+      "tom-body: first late half\u2014not reported by runner",
+      "complete renderer-consumed event-frame receipt missing"
+    ],
+    "same_pcm": false,
+    "same_first_dac_nonzero_frame": false
+  },
+  {
+    "compared": [
+      "table-share",
+      "tom-body"
+    ],
+    "eligible_for_comparison": false,
+    "failures": [
+      "table-share: fewer than four exact pre-scene settled owner replies",
+      "table-share: no effective producer frame for first scene event",
+      "table-share: first late half\u2014not reported by runner",
+      "tom-body: fewer than four exact pre-scene settled owner replies",
+      "tom-body: no effective producer frame for first scene event",
+      "tom-body: first late half\u2014not reported by runner",
+      "complete renderer-consumed event-frame receipt missing"
+    ],
+    "same_pcm": false,
+    "same_first_dac_nonzero_frame": false
+  }
+]

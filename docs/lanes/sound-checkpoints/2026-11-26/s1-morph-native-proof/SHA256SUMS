@@ -52,6 +52,12 @@ d73fc9d961edc85cfb39fd470e2553243a19fb1ffedf460301ffbd14d666cbd0  ./fetch/replay
 8d83de13cc6f017768f6dc2cc819c906c734bd57a61d04fd92c1b65e01031948  ./fetch/run-verified.sh
 e9f9b0dc8ab7e2994129a8c5a94266aca5c34059c305b2ca788235f7b0a20a0c  ./fetch/run.sh
 42683c623d40e8a8434dfb179e7ebac0cf21e3758ca3d5725c5d94378da454b6  ./fetch/sampler-ab.patch
+d4b89b65a8449cd816601d2c65769b723b7e624f336a8b6a9bd1e6a3457ce99c  ./harness-admission/README.md
+6e283356612e85463250b76d0dc62580b29e463664ef36aed9d85472dfdb8bf2  ./harness-admission/audit.py
+5d053f23c503f381bbbf3f173ce064fc2ef96300d0428a6e15e5e059e101f843  ./harness-admission/compare.json
+bf7a1bde03c78e85c26f04d2a7ae5b6aeaa15a84b8dee36d8ce9cbf740d17a73  ./harness-admission/compare.py
+9c06afa35afc13b8ab902903b0c4f7935aea9b8d3bccf13a0fbd0e6d3b473050  ./harness-admission/results.jsonl
+bf6b76b146ebcff600c2914ac5710b51976ee90167bb5283c4ff2224a07389a6  ./harness-admission/test_compare.py
 c574284cd48fb7aa564eaf5c74f4565048b2f237f514fbd39ebe76d32db7a0c6  ./kr/exact-morph.h
 6415a4f91d018af74dc7120a4f711a6d4a4ae3b6279203b3a5f5886bd0ff61bf  ./kr/link-guarded-exact.py
 dda85a7d29857b0fd13c45b09fc0a5598238edea2456a1833bd87aea7fdc4c6f  ./kr/morph-native.inc
