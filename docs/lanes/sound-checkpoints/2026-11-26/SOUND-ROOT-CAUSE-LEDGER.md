@@ -384,6 +384,30 @@ signed owner counters on a clearly non-timing witness.
   improved first-release signed error from +0.086 to −0.389 dBr; the
   production typed projection still conflates connected dry with bypass.
 
+- **Sine gain alone rejected.** The original Sine per-layer factor
+  1.237790942 made Solidify +1.853 dB louder but made centered dry
+  signed whole residual +0.864 → +1.233 dBr. The modified compact output
+  nulled against the previous compact output times that factor at
+  −139 to −140 dBr. Raw and Brainwave remained byte-exact, so this
+  does not repair shape or phase. No gain change adopted.
+- **Amp envelope alone rejected as the remaining Solidify cause.**
+  The original prep implementation matched 15,306 original stage and
+  amplitude words, but replacing it on a reusable typed cold Main route
+  barely moved Solidify signed whole error: −0.9747 → −0.9750 dBr.
+  The phase-insensitive final early-release error moved 8.293 →
+  9.226 dB and the whole spectral error 6.625 → 6.694 dB. Untouched
+  controls/other route cases stayed exact. Do not infer that original
+  note scheduling/smoothing was implemented everywhere.
+- **Synth One delay split-band rejection.** With an optimistic 2,152 B
+  pool and four bits per band coefficient with zero bookkeeping,
+  Pad and Hall signed dated tap residuals remained roughly
+  −23 and −16 to −19 dBFS. A short treble buffer cannot supply
+  Pad's ~216 and ~432 ms history. This rejects the tested allocation,
+  not every possible compact representation.
+- **Pro serial mixer rejection.** Fusion preserved the exact raw scope
+  and PCM, but saved only about 5 µs per measured 256-frame half, for
+  126 extra bytes. Not adopted against the much larger system miss.
+
 ## Release boundary
 
 These are lab diagnostics. A host proof or a leaf emulator measurement
