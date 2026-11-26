@@ -1,0 +1,104 @@
+juno6_set:
+ 200758c:    7f 04             	[--sp] = {rets, r15-r4}
+ 200758e:    c2 84             	sp += -240
+ 2007590:    24 16             	r4 = r2
+ 2007592:    16 16             	r6 = r1
+ 2007594:    05 16             	r5 = r0
+ 2007596:    47 20             	r7 = 0
+ 2007598:    00 ff 00 50 a4 01 	if (r5 == 0) goto 840 <.GJTIE263_1_1_+0xCC : 20078e6 >
+ 200759e:    08 e1 00 51       	r8 = r5 + 256
+ 20075a2:    0a e1 d4 5c       	r10 = r5 + 3284
+ 20075a6:    40 20             	r0 = 0
+ 20075a8:    a6 f8 18 00       	if (r6 != 256) goto 48 <juno6_set+0x50 : 20075dc >
+ 20075ac:    4b ff              <unknown instruction>
+juno6_cutoff_note_qualifies:
+ 206234e:    75 04             	[--sp] = {rets, r5, r4}
+ 2062350:    05 16             	r5 = r0
+ 2062352:    40 e0 dc 0c       	r0 = 3292 <firmware/src/dsp/master.c+0xCDC : cdc >
+ 2062356:    d8 ee 50 00       	r0 = b[r5+r0] (u)
+ 206235a:    44 20             	r4 = 0
+ 206235c:    00 5e             	if (r0 == 0) goto 60 <juno6_cutoff_note_qualifies+0x4C : 206239a >
+ 206235e:    40 e0 60 0e       	r0 = 3680 <firmware/src/dsp/master.c+0xE60 : e60 >
+ 2062362:    d8 ee 50 00       	r0 = b[r5+r0] (u)
+ 2062366:    bd ea 80 1a       	call -379648 <juno6_lfo1_delay_seconds : 200586a >
+ 206236a:    c1 ff 0a d7 23 3c 	r1 = 1008981770 <cold_fittab_end+0x3A142722 : 3c23d70a >
+ 2062370:    81 e9              <unknown instruction>
+ 2062372:    13 08             	r3 = [r1++=r8] 
+juno6_cutoff_first_note:
+ 206239e:    76 04             	[--sp] = {rets, r6-r4}
+ 20623a0:    e2 9f             	sp += -4
+ 20623a2:    04 16             	r4 = r0
+ 20623a4:    40 e0 68 0d       	r0 = 3432 <firmware/src/dsp/master.c+0xD68 : d68 >
+ 20623a8:    d8 ee 40 00       	r0 = b[r4+r0] (u)
+ 20623ac:    05 e1 64 4e       	r5 = r4 + 3684
+ 20623b0:    00 4c             	if (r0 == 0) goto 24 <juno6_cutoff_first_note+0x2C : 20623ca >
+ 20623b2:    40 e0 69 0d       	r0 = 3433 <firmware/src/dsp/master.c+0xD68 : d68 >
+ 20623b6:    d8 ee 40 00       	r0 = b[r4+r0] (u)
+ 20623ba:    3f e5              <unknown instruction>
+ 20623bc:    9f 00             	callns r15
+ 20623be:    c1 ff 04 02 01 3c 	r1 = 1006699012 <cold_fittab_end+0x39F1521C : 3c010204 >
+render_typed_span:
+ 2064818:    7f 04             	[--sp] = {rets, r15-r4}
+ 206481a:    82 83             	sp += -500
+ 206481c:    0f 16             	r15 = r0
+ 206481e:    40 e0 68 0d       	r0 = 3432 <firmware/src/dsp/master.c+0xD68 : d68 >
+ 2064822:    d8 ee f0 00       	r0 = b[r15+r0] (u)
+ 2064826:    d0 ec fc 5d       	r5 = [r15+220]
+ 206482a:    36 d6             	r6 = r3  #
+ 206482c:    81 2d             		 [sp+52] = r1
+ 206482e:    27 16             	r7 = r2
+ 2064830:    bc ea ef eb       	call -403490 <sj6_aux_destination_id.1175 : 2002012 >
+ 2064834:    04 16             	r4 = r0
+ 2064836:    40 20             	r0 = 0
+render_lfo_pwm:
+ 2064e8e:    7f 04             	[--sp] = {rets, r15-r4}
+ 2064e90:    e2 90             	sp += -64
+ 2064e92:    24 a2             	r4 = r2 << 2
+ 2064e94:    04 d8             	r4 += r0  #
+ 2064e96:    80 25             		 [sp+20] = r0
+ 2064e98:    06 e1 40 4a       	r6 = r4 + 2624
+ 2064e9c:    04 e1 a0 0d       	r4 = r0 + 3488
+ 2064ea0:    00 e1 c4 40       	r0 = r4 + 196
+ 2064ea4:    37 16             	r7 = r3
+ 2064ea6:    19 16             	r9 = r1
+ 2064ea8:    81 41             	if (r1 != 0) goto 2 <render_lfo_pwm+0x1E : 2064eac >
+ 2064eaa:    06 16             	r6 = r0
+sj6_render_with_lfo:
+ 2065156:    7f 04             	[--sp] = {rets, r15-r4}
+ 2065158:    e2 8d             	sp += -76
+ 206515a:    3d 16             	r13 = r3
+ 206515c:    1f 16             	r15 = r1
+ 206515e:    03 16             	r3 = r0
+ 2065160:    00 e1 1c 3d       	r0 = r3 + 3356
+ 2065164:    2e d6             	r14 = r2  #
+ 2065166:    80 22             		 [sp+8] = r0
+ 2065168:    08 e1 a0 3d       	r8 = r3 + 3488
+ 206516c:    d0 ec 8c 53       	r5 = [r8+60]
+ 2065170:    07 e1 d4 3c       	r7 = r3 + 3284
+ 2065174:    c4 14             	r12 = 0
+juno6_render_stereo:
+ 2065860:    7a 04             	[--sp] = {rets, r10-r4}
+ 2065862:    05 16             	r5 = r0
+ 2065864:    40 e0 dc 0c       	r0 = 3292 <firmware/src/dsp/master.c+0xCDC : cdc >
+ 2065868:    d8 ee 50 00       	r0 = b[r5+r0] (u)
+ 206586c:    39 16             	r9 = r3
+ 206586e:    26 16             	r6 = r2
+ 2065870:    17 16             	r7 = r1
+ 2065872:    10 5d             	if (r0 == 0) goto 122 <juno6_render_stereo+0x8E : 20658ee >
+ 2065874:    48 e0 01 00       	r8 = 1 <firmware/src/dsp/master.c : 0 >
+ 2065878:    41 21             	r1 = 1
+ 206587a:    07 41             	if (r7 == 0) goto 2 <juno6_render_stereo+0x1E : 206587e >
+ 206587c:    41 20             	r1 = 0
+runtime_key_configured:
+ 207bd34:    7a 04             	[--sp] = {rets, r10-r4}
+ 207bd36:    37 16             	r7 = r3
+ 207bd38:    29 16             	r9 = r2
+ 207bd3a:    16 16             	r6 = r1
+ 207bd3c:    05 16             	r5 = r0
+ 207bd3e:    40 20             	r0 = 0
+ 207bd40:    05 f8 a8 00       	if (r5 == 0) goto 336 <runtime_key_configured+0x160 : 207be94 >
+ 207bd44:    06 fc a6 08       	if (r6 > 4) goto 332 <runtime_key_configured+0x160 : 207be94 >
+ 207bd48:    90 e1 70 12       	r1 = r7 | r2
+ 207bd4c:    01 fc a2 fe       	if (r1 > 127) goto 324 <runtime_key_configured+0x160 : 207be94 >
+ 207bd50:    40 e0 b8 2f       	r0 = 12216 <firmware/src/dsp/master.c+0x2FB8 : 2fb8 >
+ 207bd54:    54 1c             	r4 = r5 + r0

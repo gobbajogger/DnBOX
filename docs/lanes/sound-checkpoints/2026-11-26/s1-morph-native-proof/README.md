@@ -136,3 +136,51 @@ Both terminal snapshots satisfy the fast-route guard, 4 settled owner readbacks 
 319,488 PCM frames each. Zero skipped cycles, virtual erases or writes. The exact
 mix pass improves vs cold-reader-only test but not the original baseline on every
 metric (Elite +6 late, Pro -13). Release target is still unfulfilled; keep diagnostic.
+
+## 909 native instruction-fetch A/B and release capacity ledger
+On same loaded playback and scheduler/observer source, linked the exact same
+730-byte d9_render_smp leaf into either APP XIP or the existing boot-copied RAM
+code region. Only absolute data load relocations differ in the function (14 byte
+positions across seven sites). One identical volatile absolute-call mechanism in
+both modes is needed by the native far-call range; this is a controlled diagnostic
+pair, not timings of unchanged production baseline. FDATA payload (including
+sample streams and LUT), morph, font payload, FITTAB payload are bit-identical;
+some other relocated metadata bytes naturally reference different APP addresses
+and all original build-specific guards remain checked. No guard window, pool
+reserve, FLASH location, or executable lifetime enlarged.
+
+RAM mode consumes 728 B net more RAMTEXT because of final alignment, leaving 1,036
+B of already designated RAM code (BLE unaffected). Both physical builds +404/+416
+B XIP in the flash diagnostic and +412/+424 B in RAM, with +448 B above required pool
+reserve (instrumented). Real host state regression: 41,600 complete 909 state and
+four-bus PCM comparisons byte-identical.
+
+360 MHz loaded diagnostic timing (same synthetic S1/ARP/Chicago, same 922 actions,
+same confirmed active plans):
+- Elite XIP 12,965us / 54 late; RAM 12,881us / 61.
+- Pro XIP 13,275us / 64 late; RAM 13,321us / 59.
+Each zero skipped cycles and emulator NOR byte-for-byte unchanged; 319,488 PCM
+frames, 4 readbacks. All fail. Those peaks have different within-scene phases,
+with all-matching worker 0x04 and three stretches but 909 cost still roughly
+6.1–6.3ms. Do not interpret the mixed gains as calibrated hardware flash contention
+or treat the emulation's per-core cache model as a hardware bus proof. A hardware
+contention diagnosis would require matched workload snapshots and real bus counters.
+This run does bound practical value of the tested fetch-placement choice and does
+not support further flash relocation as a deadline fix. Reasonable next redesign:
+transactional dry 909 voice prediction/commit in the proved bounded-220-frame
+physical workspace lifetime once actual APP code is reclaimed. Independent untraced
+noinline-only links instead spent 28 B, so do not reuse the smaller traced link as a
+production free-space claim. Preserve ordered mix and rollback, not unlimited spin.
+
+The production companion and wet-memory inventory uses retained uninstrumented
+native maps: no currently approved immutable region for the 20,372 B morph asset;
+only 48 B behind current other companion payloads. Proposed slot1 tail would shrink
+80KiB to60KiB, even though all stock five samples remained in an offline trial; do not
+assume the writable tail empty or reuse it. Exact source 44.1k Float32 RevSC needs
+98,760 mutable bytes per owner before owner state. At a representative 0.2162s, the
+four original delay rings alone require 228,832 B even bounded to current delay,
+or 672,824 B combined with RevSC and Widen for two simultaneous owners. At 2.4s
+the same two-owner sum is 5,295,480 B before additional control state and padding.
+Current 564 B above protected 8192 B pool or hypothetical replacement total
+9,068 B (both 4,252 B wet arenas plus usable slack; required width and reserve held)
+does not fit. No mutable flash state, protected region storage or on-device actions.

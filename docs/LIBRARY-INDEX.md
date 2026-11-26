@@ -73,3 +73,10 @@ The separate small SuperJ6 addendum adds the independently qualified pre-note la
 | Library name | Size (bytes) | SHA256 | Recovery |
 | --- | ---: | --- | --- |
 | `SJ6-Portable-HP-Zero-Crusher-References.tgz` | 11,703,710 | `444407d73a7dad329d7b3818ebc2445664b98d2a294cb97db40ab85d80bc895a` | Download by name, verify SHA-256, extract and run `bash verify.sh` (C compiler and NumPy). The same references and compact source are in the [Git bench](lanes/sound-checkpoints/2026-11-26/sj6-portable-hp-zero-crusher/). |
+
+## Native sound target measurements — 2026-11-26
+
+| Library name | Size (bytes) | SHA256 | Recovery |
+| --- | ---: | --- | --- |
+| `DnBOX-S1-Native-Morph-Worker-Proof.source-only.tgz` (v5) | 116,200 | `2fe0fb5e9a0844dd48f980e0571c99f26a37526e84942040ebacd1943a25ab7e` | Download version 5, verify SHA-256 and extract. [Same exact timing and flash contents](lanes/sound-checkpoints/2026-11-26/s1-morph-native-proof/). |
+| SuperJ6 cutoff and HP native source receipt | 18,196 | `c87b4ae3bab4b334fa5fd5f0ceaabfd2512ed3b721739be32f4b00a38dda0868` | Verify SHA-256, extract and use the [cutoff native](lanes/sound-checkpoints/2026-11-26/sj6-cutoff-handoff-v3/native/) and [HP/Crusher native](lanes/sound-checkpoints/2026-11-26/sj6-hp-crusher-native/) run scripts on the pinned lab donor. No linked image is included. |

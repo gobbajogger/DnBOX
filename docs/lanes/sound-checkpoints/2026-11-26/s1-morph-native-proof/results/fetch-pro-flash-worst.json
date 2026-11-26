@@ -1,0 +1,44 @@
+{
+  "scope": "Instrumentation build, record worst half only. Timer includes IRQs. Recorded job span excludes 808 body split outside run_job, other orchestration, bus FX/master, PCM conversion and interrupt activity. Both core sums overlap; do not add.",
+  "elf_sha256": "342867cbf537c0201d5ac52e1669c81ba2e69852fd637c0d0cb90fb76893abec",
+  "half": 380,
+  "us": 13275,
+  "latched_ms": 5413,
+  "raw_late_total": 64,
+  "plan_masks": [
+    "0x4"
+  ],
+  "stretches": 3,
+  "job_labels": [
+    "909",
+    "808",
+    "A-Synth-One",
+    "B-Chicago",
+    "BREAK"
+  ],
+  "execution_us_by_core": [
+    [
+      6308.208333333333,
+      408.5833333333333,
+      0.0,
+      3454.375,
+      312.25
+    ],
+    [
+      0.0,
+      0.0,
+      8400.708333333334,
+      0.0,
+      0.0
+    ]
+  ],
+  "execution_us_total_per_core": [
+    10483.416666666666,
+    8400.708333333334
+  ],
+  "ordered_mix_wait_us_core0_1": [
+    6.291666666666667,
+    4.291666666666667
+  ],
+  "approx_events_in_same_wall_window": []
+}

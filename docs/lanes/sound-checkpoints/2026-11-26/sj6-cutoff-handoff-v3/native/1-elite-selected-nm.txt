@@ -1,0 +1,31 @@
+01c20000 B _pool_start
+01c3bed8 00005f80 b original_bass
+01c71de4 B _pool_end
+01c75200 B _xpool_start
+01c77600 B _xpool_end
+02002e08 0000015c t juno6_set_aux_lfo
+020064ce 00000026 t juno6_set_filter_velocity
+02006548 00000042 t juno6_set_vcf_lfo1_amount
+0200758c 000003e8 T juno6_set
+02007c68 00000080 t juno6_set_panel_lfo
+0200806e 0000002a T juno6_set_lfo2_pwm
+0200855a 00000096 t juno6_set_vibrato_words
+02008632 00000030 t juno6_set_a_reference
+02008662 0000001a T juno6_set_lfo2_shape
+0200882a 00000044 t juno6_set_layer_semi
+0200886e 00000044 t juno6_set_layer_fine
+02009056 000000cc t juno6_set_lfo_words
+0200db4c 0000006a t juno6_set_bend_ranges
+0200dbda 00000048 t juno6_set_mod_destination
+0200ef4a 00000044 T juno6_set_sj6_hpf
+02011012 0000011a t juno6_set_mod_wheel
+0206234e 00000050 T juno6_cutoff_note_qualifies
+0206239e 00000064 T juno6_cutoff_first_note
+02062684 000000a0 T juno6_set_lfo_tempo
+020641dc 00000176 t render_typed_span_raw
+02064818 00000676 t render_typed_span
+02064e8e 000002c8 t render_lfo_pwm
+02065156 0000070a t sj6_render_with_lfo
+02065860 000000a0 T juno6_render_stereo
+0207bd34 000001b8 t runtime_key_configured
+02085412 00000005 t render_typed_span.empty

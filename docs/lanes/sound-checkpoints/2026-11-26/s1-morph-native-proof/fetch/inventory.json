@@ -1,0 +1,103 @@
+{
+  "models": [
+    {
+      "model": "elite",
+      "elf": "6408fdefd90c6049fe50b60080d25505b7be729b6ccf6f6c694e4221aff4356a",
+      "app_used": 552392,
+      "app_free": 280,
+      "pool_total_free": 8756,
+      "protected_pool_reserve": 8192,
+      "usable_extra_pool": 564,
+      "ramtext_tail": 1764,
+      "xpool_used": 9216,
+      "ordinary_data_bss_ram_unallocated": 172,
+      "existing_companions": {
+        "lab_fdata": 61432,
+        "lab_slot3": 32764,
+        "lab_fittab": 4072,
+        "xdata": 8180,
+        "lab_morph": 20372
+      }
+    },
+    {
+      "model": "pro",
+      "elf": "b9a8451759164fc430cbd2eb860754547a8f58de7fe0db8c3cbfc59755313a71",
+      "app_used": 552380,
+      "app_free": 292,
+      "pool_total_free": 8756,
+      "protected_pool_reserve": 8192,
+      "usable_extra_pool": 564,
+      "ramtext_tail": 1764,
+      "xpool_used": 9216,
+      "ordinary_data_bss_ram_unallocated": 172,
+      "existing_companions": {
+        "lab_fdata": 61432,
+        "lab_slot3": 32764,
+        "lab_fittab": 4072,
+        "xdata": 8180,
+        "lab_morph": 20372
+      }
+    }
+  ],
+  "existing_companion_capacity": {
+    "FDATA": {
+      "used": 61432,
+      "capacity": 61440,
+      "spare": 8
+    },
+    "diagnostic SLOT3": {
+      "used": 32764,
+      "capacity": 32768,
+      "spare": 4
+    },
+    "FITTAB": {
+      "used": 4072,
+      "capacity": 4096,
+      "spare": 24
+    },
+    "XDATA": {
+      "used": 8180,
+      "capacity": 8192,
+      "spare": 12
+    }
+  },
+  "retained_diagnostic_unique_spare_sum": 48,
+  "current_no_audited_production_immutable_region": true,
+  "tail_diagnostic": {
+    "start_hex": "0xD1000",
+    "end_hex": "0xD6000",
+    "capacity": 20480,
+    "raw_codec_plus_table": 20372,
+    "proposed_additional_manifest": 32,
+    "spare_if_versioned": 76,
+    "original_slot1_upload_capacity": 81920,
+    "slot1_capacity_after_repartition": 61440,
+    "stock_five_breaks_remain_in_offline_test": true,
+    "unsafe_under_current_writable_range": true
+  },
+  "native_compact_fx_borrowed_arena_per_owner": 4252,
+  "native_half_precision_widen_built_into_its_backend_per_owner": 4410,
+  "two_owner_hypothetical_available_if_compact_replaced": 9068,
+  "original_vdelay_allocated_history": 7056016,
+  "original_revsc_one_owner_history": 98760,
+  "original_widen_one_50ms_float32_history": 8820,
+  "lower_bounds_before_alignment_state": [
+    {
+      "seconds": 0.2162,
+      "four_float32_delay_line_history_lower_bound": 228832,
+      "with_one_float32_revsc_history": 327592,
+      "with_two_independent_owners": 655184,
+      "with_one_float32_revsc_and_widen": 336412,
+      "with_two_owners_plus_widen": 672824
+    },
+    {
+      "seconds": 2.4,
+      "four_float32_delay_line_history_lower_bound": 2540160,
+      "with_one_float32_revsc_history": 2638920,
+      "with_two_independent_owners": 5277840,
+      "with_one_float32_revsc_and_widen": 2647740,
+      "with_two_owners_plus_widen": 5295480
+    }
+  ],
+  "scope": "Runtime delay/reverb histories are mutable each sample; read-only storage cannot satisfy these bounds. No flash/PSRAM writes or capacity shrinking."
+}

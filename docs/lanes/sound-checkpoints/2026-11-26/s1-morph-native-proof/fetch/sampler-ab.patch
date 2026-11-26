@@ -1,0 +1,84 @@
+--- a/firmware/src/dsp/drum909.c
++++ b/firmware/src/dsp/drum909.c
+@@ -1042,13 +1042,20 @@
+ }
+ #endif
+ /* Hats, ride, crash (render_sampler) */
+-static void d9_render_smp(d9_smp_t *s, const d9_bus_t *bus, int n)
++/* Same absolute-call indirection in both XIP and RAM arms; relative PI32
++ * long call cannot cross the XIP/RAM distance. */
++static void (* const volatile fetch_anchor)(d9_env_t *)=d9_env_anchor;
++static int32_t (* const volatile fetch_decode)(d9_smp_t *,const uint8_t *)=d9_smp_decode;
++static void (* const volatile fetch_emit)(const d9_bus_t *,int)=d9_emit_block;
++static float (* const volatile fetch_shape)(const d9_shape_t *,float,float *)=d9_shape_other;
++static float (* const volatile fetch_tick)(d9_env_t *)=d9_env_tick;
++__attribute__((noinline,section(".fetch_test"))) static void d9_render_smp(d9_smp_t *s, const d9_bus_t *bus, int n)
+ {
+     if (!s->playing)
+         return;
+     const int m = n < s->mute ? n : s->mute;
+     s->mute -= m;
+-    d9_env_anchor(&s->out);
++    fetch_anchor(&s->out);
+     const int drive = s->drive > 0.25f;
+     const float pre = 1.0f + s->drive * 0.5f;
+     const uint8_t *adpcm = s->adpcm;
+@@ -1061,12 +1068,12 @@
+         s->pos < len && (unsigned)m < len - s->pos &&
+         (s->dk == s->pos || s->dk == s->pos + 1u)) {
+         if (s->dk == s->pos)
+-            s->h1 = d9_smp_decode(s, adpcm);
++            s->h1 = fetch_decode(s, adpcm);
+         for (int i = 0; i < m; ++i) {
+             s->h0 = s->h1;
+-            s->h1 = d9_smp_decode(s, adpcm);
++            s->h1 = fetch_decode(s, adpcm);
+             const float v = (float)s->h0 * (1.0f / 32768.0f);
+-            bus->y[i] = v * d9_env_tick(&s->out);
++            bus->y[i] = v * fetch_tick(&s->out);
+         }
+         s->pos += (unsigned)m;
+     } else {
+@@ -1076,7 +1083,7 @@
+                 const uint32_t need = s->pos + 2 < len ? s->pos + 2 : len;
+                 while (s->dk < need) {
+                     s->h0 = s->h1;
+-                    s->h1 = d9_smp_decode(s, adpcm);
++                    s->h1 = fetch_decode(s, adpcm);
+                 }
+                 const int last = s->pos + 1 >= len;
+                 const float a = (float)(last ? s->h1 : s->h0) * (1.0f / 32768.0f);
+@@ -1087,7 +1094,7 @@
+                 s->pos += s->inc + (f2 < s->frac);
+                 s->frac = f2;
+             }
+-            bus->y[i] = v * d9_env_tick(&s->out);
++            bus->y[i] = v * fetch_tick(&s->out);
+         }
+     }
+     /* Drive reads this voice's decoded output in the original sample order.
+@@ -1099,12 +1106,13 @@
+                 bus->y[i] = d9_tanh_inline(k * (bus->y[i] * pre)) * g;
+         } else {
+             for (int i = 0; i < m; ++i)
+-                bus->y[i] = d9_shape_other(&s->shape, bus->y[i] * pre, s->crush_st);
++                bus->y[i] = fetch_shape(&s->shape, bus->y[i] * pre, s->crush_st);
+         }
+     }
+-    d9_emit_block(bus, m);
++    fetch_emit(bus, m);
+ }
+ 
++static void (* const volatile fetch_enter)(d9_smp_t *,const d9_bus_t *,int)=d9_render_smp;
+ static float *d9_dry_r;         /* the render in progress: its right side (0: mono) */
+ static float d9_pl0[DR_NUM], d9_pr0[DR_NUM];   /* each voice's pan where this block starts */
+ static inline __attribute__((always_inline)) void d9_bus_inline(d9_bus_t *b, drum909_t *d, int voice, float *dry, float *rev, float *dly,
+@@ -1192,7 +1200,7 @@
+         d9_smp_t *s = &d->smp[order[k] - DR_CH];
+         if (s->mute > 0) {
+             d9_bus(&bus, d, order[k], dry, rev, dly, audible_tracks);
+-            d9_render_smp(s, &bus, n);
++            fetch_enter(s, &bus, n);
+         }
+     }
+ }

@@ -1,0 +1,8 @@
+s1-native-xip-fetch/elite-anchor-only-failed.log:firmware/src/dsp/drum909.c:(.fetch_test+0x90): relocation truncated to fit: R_PI32V2_LONG_JUMP_23M2 against `d9_smp_decode'
+s1-native-xip-fetch/elite-before-entry-failed.log:firmware/src/dsp/drum909.c:(.text.d9_render+0x16e0): relocation truncated to fit: R_PI32V2_LONG_JUMP_23M2 against `d9_render_smp'
+s1-native-xip-fetch/elite-before-tick-failed.log:firmware/src/dsp/drum909.c:(.fetch_test+0x122): relocation truncated to fit: R_PI32V2_LONG_JUMP_23M2 against `d9_env_tick'
+s1-native-xip-fetch/elite-direct-call-failed.log:firmware/src/dsp/drum909.c:(.fetch_test+0x2e): relocation truncated to fit: R_PI32V2_LONG_JUMP_23M2 against `d9_env_anchor'
+s1-native-xip-fetch/pro-anchor-only-failed.log:firmware/src/dsp/drum909.c:(.fetch_test+0x90): relocation truncated to fit: R_PI32V2_LONG_JUMP_23M2 against `d9_smp_decode'
+s1-native-xip-fetch/pro-before-entry-failed.log:firmware/src/dsp/drum909.c:(.text.d9_render+0x16e0): relocation truncated to fit: R_PI32V2_LONG_JUMP_23M2 against `d9_render_smp'
+s1-native-xip-fetch/pro-before-tick-failed.log:firmware/src/dsp/drum909.c:(.fetch_test+0x122): relocation truncated to fit: R_PI32V2_LONG_JUMP_23M2 against `d9_env_tick'
+s1-native-xip-fetch/pro-direct-call-failed.log:firmware/src/dsp/drum909.c:(.fetch_test+0x2e): relocation truncated to fit: R_PI32V2_LONG_JUMP_23M2 against `d9_env_anchor'
