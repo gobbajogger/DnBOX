@@ -1,0 +1,36 @@
+{
+  "source_sha": "6d163d79202e866d2fda96e36f752bd386641b5ae2d0b1f829a254d26b652850",
+  "host_size": 32,
+  "cases": [
+    {
+      "case": "held",
+      "compared_prep_words": 2068,
+      "first_anchor": "0x1.a199f653eae89p-1",
+      "commit": 33491
+    },
+    {
+      "case": "midrelease",
+      "compared_prep_words": 2069,
+      "first_anchor": "0x1.d72b4cc3abf42p-2",
+      "commit": 33491
+    },
+    {
+      "case": "released",
+      "compared_prep_words": 2069,
+      "first_anchor": "0x1.03e4925c826c8p-2",
+      "commit": 33491
+    },
+    {
+      "case": "staggered",
+      "compared_prep_words": 2069,
+      "first_anchor": "0x1.d72b4cc3abf42p-2",
+      "commit": 33667
+    },
+    {
+      "case": "duration",
+      "compared_prep_words": 2069,
+      "first_anchor": "0x1.4fe4d6b6ffa74p-2",
+      "commit": 33507
+    }
+  ]
+}

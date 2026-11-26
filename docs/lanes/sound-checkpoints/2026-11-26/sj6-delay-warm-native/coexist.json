@@ -1,0 +1,35 @@
+{
+  "geometry": {
+    "old_stride": 16,
+    "new_stride": 32,
+    "cursor": 1023,
+    "filled": 1024,
+    "pending_producer_cell": 1023,
+    "phase": 0
+  },
+  "live_read": {
+    "cells": [
+      1021,
+      1020
+    ],
+    "before": [
+      615.9375,
+      6320.8125
+    ],
+    "after_newest_two_staged": [
+      -126.4375,
+      6153.0625
+    ]
+  },
+  "oldest_group": {
+    "zero_based_index": 511,
+    "before": [
+      -12610,
+      -2377
+    ],
+    "after_ingress_overwrite": [
+      -24165,
+      7752
+    ]
+  }
+}
