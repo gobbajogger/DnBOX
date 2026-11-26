@@ -1,0 +1,45 @@
+{
+  "scope": "actual PI32v2 object and strict raw emulator, one core, no audio/scheduler/USB, relative timings only",
+  "lookups_per_arm": 16384,
+  "rows": [
+    {
+      "frequency_hz": 440,
+      "direct_ticks": 813585,
+      "compact_ticks": 1775885,
+      "direct_paired_image_ticks": 816375,
+      "paired_ticks": 1614422,
+      "compact_over_direct": 2.1827897515318004,
+      "paired_over_direct": 1.9775495329964783,
+      "paired_over_simple": 0.9090802613907996,
+      "phase": 15809263,
+      "direct_sample_sum": 4094.274658203125,
+      "compact_sample_sum": 4094.26904296875
+    },
+    {
+      "frequency_hz": 880,
+      "direct_ticks": 796175,
+      "compact_ticks": 1609522,
+      "direct_paired_image_ticks": 800435,
+      "paired_ticks": 1444773,
+      "compact_over_direct": 2.021568122586115,
+      "paired_over_direct": 1.804984789520698,
+      "paired_over_simple": 0.8976410387680317,
+      "phase": 6879983,
+      "direct_sample_sum": 4094.635498046875,
+      "compact_sample_sum": 4094.640380859375
+    },
+    {
+      "frequency_hz": 12000,
+      "direct_ticks": 424638,
+      "compact_ticks": 1439078,
+      "direct_paired_image_ticks": 429648,
+      "paired_ticks": 1283798,
+      "compact_over_direct": 3.3889524724588944,
+      "paired_over_direct": 2.98802275350985,
+      "paired_over_simple": 0.8920975791444244,
+      "phase": 11827951,
+      "direct_sample_sum": 4096.3447265625,
+      "compact_sample_sum": 4096.33935546875
+    }
+  ]
+}

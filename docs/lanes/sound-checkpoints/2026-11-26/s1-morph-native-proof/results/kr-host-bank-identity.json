@@ -1,0 +1,13 @@
+{
+  "cases": 906,
+  "changed": {
+    "trial_sha256": 0,
+    "ref_sha256": 0,
+    "same_note_events": 0,
+    "authored_tuning": 0,
+    "metrics": 0
+  },
+  "bank_result_sha256": "50fef1f8c94e3c05b19b76d4c07091081614076b198e6e76674f01ebb76a0192",
+  "baseline_sha256": "a084f5ed40a84707147591590b4efe1a8f2edf3cef6ab3d1b33f4d55b7906b19",
+  "scope": "same host graph, exact fast provider vs established tight provider. Does not validate target timing or independently emitted events."
+}

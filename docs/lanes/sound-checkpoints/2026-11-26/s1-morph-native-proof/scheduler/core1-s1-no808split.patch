@@ -1,0 +1,16 @@
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -3459,7 +3459,12 @@
+     m = plan_pick(n);
+     eng_c1_mask = (uint8_t)m;
+     /* 808 stays on core 0 and core 1 has other work: move the BD+SD prefix */
+-    eng_808_split = (uint8_t)(!(m & (1u << JB_808)) && m && drum808_active(&d808));
++    /* Diagnostic: don't put the 808 body's serialized prefix in front of an
++     * already-admitted expensive S1 worker. All mix orders remain unchanged. */
++    const unsigned worker_s1 =
++        ((m & (1u << JB_A)) && original_bass[0].kind == ORIGINAL_SOUND_SYNTHONE) ||
++        ((m & (1u << JB_B)) && original_bass[1].kind == ORIGINAL_SOUND_SYNTHONE);
++    eng_808_split = (uint8_t)(!worker_s1 && !(m & (1u << JB_808)) && m && drum808_active(&d808));
+     eng_808_body = (uint8_t)!eng_808_split;
+     eng_sync();
+     if (m && !plat_cpu2_run(core2_jobs, 0u)) {

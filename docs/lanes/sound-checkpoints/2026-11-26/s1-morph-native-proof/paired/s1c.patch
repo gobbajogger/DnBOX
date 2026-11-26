@@ -1,0 +1,41 @@
+--- a/firmware/src/dsp/s1c/s1c.c
++++ b/firmware/src/dsp/s1c/s1c.c
+@@ -330,30 +330,15 @@
+ /* ---- oscillators ---- */
+ #endif
+ 
+-static float blep(float t, float dt)
++#define DNBX_MORPH_TARGET_FRAGMENT 1
++#define DNBX_MORPH_PAIR 1
++#include "morph-native.inc"
++static float morph(uint32_t *ph, float dt, uint32_t unused, float pos, int bl)
+ {
+-    if (t < dt) { t /= dt; return t + t - t * t - 1.0f; }
+-    if (t > 1.0f - dt) { t = (t - 1.0f) / dt; return t * t + t + t + 1.0f; }
+-    return 0.0f;
+-}
+-/* the four morph shapes: triangle, square, 1/8 pulse, saw; polyBLEP when band-limiting is on */
+-static float shape(int k, float t, float dt, int bl)
+-{
+-    if (k == 0) return t < 0.5f ? 4.0f * t - 1.0f : 3.0f - 4.0f * t;
+-    if (k == 3) return 2.0f * t - 1.0f - (bl ? blep(t, dt) : 0.0f);
+-    float w = k == 1 ? 0.5f : 0.125f, y = t < w ? -1.0f : 1.0f;
+-    if (bl) { float u = t + 1.0f - w; if (u >= 1.0f) u -= 1.0f; y += blep(u, dt) - blep(t, dt); }
+-    return y;
+-}
+-static float morph(uint32_t *ph, float dt, uint32_t increment, float pos, int bl)
+-{
+-    float t = (float)*ph * (1.0f / Q32);
+-    if (pos > 1.0f) pos -= (int)pos;
+-    float f = pos * 3.0f; int k = (int)f; if (k > 2) k = 2;
+-    f -= k;
+-    float y = shape(k, t, dt, bl);
+-    if (f > 0.0f) y += f * (shape(k + 1, t, dt, bl) - y);
+-    *ph += increment;
++    (void)unused;
++    uint32_t p = *ph >> 8;
++    float y = exact_morph_sample(&p, dt * 44100.f, pos, bl);
++    *ph = p << 8;
+     return y;
+ }
+ #if X0X_SYNTHONE_PATCH

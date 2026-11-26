@@ -1,0 +1,84 @@
+--- a/firmware/src/dsp/s1c/s1c.c
++++ b/firmware/src/dsp/s1c/s1c.c
+@@ -330,37 +330,23 @@
+ /* ---- oscillators ---- */
+ #endif
+ 
+-static float blep(float t, float dt)
+-{
+-    if (t < dt) { t /= dt; return t + t - t * t - 1.0f; }
+-    if (t > 1.0f - dt) { t = (t - 1.0f) / dt; return t * t + t + t + 1.0f; }
+-    return 0.0f;
+-}
+-/* the four morph shapes: triangle, square, 1/8 pulse, saw; polyBLEP when band-limiting is on */
+-static float shape(int k, float t, float dt, int bl)
+-{
+-    if (k == 0) return t < 0.5f ? 4.0f * t - 1.0f : 3.0f - 4.0f * t;
+-    if (k == 3) return 2.0f * t - 1.0f - (bl ? blep(t, dt) : 0.0f);
+-    float w = k == 1 ? 0.5f : 0.125f, y = t < w ? -1.0f : 1.0f;
+-    if (bl) { float u = t + 1.0f - w; if (u >= 1.0f) u -= 1.0f; y += blep(u, dt) - blep(t, dt); }
+-    return y;
+-}
+-static float morph(uint32_t *ph, float dt, uint32_t increment, float pos, int bl)
+-{
+-    float t = (float)*ph * (1.0f / Q32);
+-    if (pos > 1.0f) pos -= (int)pos;
+-    float f = pos * 3.0f; int k = (int)f; if (k > 2) k = 2;
+-    f -= k;
+-    float y = shape(k, t, dt, bl);
+-    if (f > 0.0f) y += f * (shape(k + 1, t, dt, bl) - y);
+-    *ph += increment;
++#define DNBX_MORPH_TARGET_FRAGMENT 1
++#define DNBX_MORPH_PAIR 1
++#include "morph-native.inc"
++static float morph_held(uint32_t *ph, uint32_t prepared, float pos, int bl)
++{
++    uint32_t p = *ph >> 8;
++    float y = tick_morph(&p, prepared, pos, bl);
++    *ph = p << 8;
+     return y;
+ }
++static float morph(uint32_t *ph, float hz, float pos, int bl)
++{ return morph_held(ph, prep_morph(hz),pos,bl); }
+ #if X0X_SYNTHONE_PATCH
+ /* Panel preview uses the same continuous morph with the note-dependent
+  * antialiasing disabled. It does not advance any playing oscillator. */
+ float s1c_morph_preview(float position, uint32_t phase)
+-{ return morph(&phase, 0.f, 0, position, 0); }
++{ return morph(&phase, 0.f, position, 0); }
+ #endif
+ static float sine_q(uint32_t ph) { return sinf((float)ph * (TWO_PI / Q32)); }
+ 
+@@ -450,9 +436,8 @@
+     float cut = P(CUT) * lfo10(s, P(LCUT)), em = P(FENV) * lfo10(s, P(LFENV));
+     cut = clampf(cut - cut * em * (1.0f - v->fenv), 64.0f, 22050.0f);
+     int bl = P(BLE) > 0.0f;
+-    float dt1 = f1 / s->sr, dt2 = f2 / s->sr;
+-    float o1 = morph(&v->ph[0], dt1, ph_inc(dt1), P(I1), bl) * v->vamp * P(VOL1);
+-    float o2 = morph(&v->ph[1], dt2, ph_inc(dt2), P(I2), bl) * v->vamp * P(VOL2);
++    float o1 = morph(&v->ph[0], f1, P(I1), bl) * v->vamp * P(VOL1);
++    float o2 = morph(&v->ph[1], f2, P(I2), bl) * v->vamp * P(VOL2);
+     float y = (1.0f - bal) * o1 + bal * o2;
+     float sub = sine_q(v->ph[2]);
+     v->ph[2] += ph_inc(fs / s->sr);
+@@ -501,8 +486,7 @@
+         /* The frequencies and the sample rate cannot change until the next
+          * control tick. Save the original rounded divisions and phase words
+          * in the existing cache, not additional voice state. */
+-        v->kd1 = f1 / s->sr; v->kd2 = f2 / s->sr;
+-        v->ki1 = ph_inc(v->kd1); v->ki2 = ph_inc(v->kd2);
++        v->ki1 = prep_morph(f1); v->ki2 = prep_morph(f2);
+         v->kis = ph_inc(fs / s->sr); v->kif = ph_inc(v->kff / s->sr);
+         v->kidx = clampf(P(FMA) * lfo10(s, P(LFM)), 0.0f, 15.0f);
+         v->kbal = clampf(P(BAL) + lfo01(s, P(LMIX)), 0.0f, 1.0f);
+@@ -532,8 +516,8 @@
+         }
+     }
+     int bl = P(BLE) > 0.0f;
+-    float o1 = morph(&v->ph[0], v->kd1, v->ki1, P(I1), bl) * v->vamp * P(VOL1);
+-    float o2 = morph(&v->ph[1], v->kd2, v->ki2, P(I2), bl) * v->vamp * P(VOL2);
++    float o1 = morph_held(&v->ph[0], v->ki1, P(I1), bl) * v->vamp * P(VOL1);
++    float o2 = morph_held(&v->ph[1], v->ki2, P(I2), bl) * v->vamp * P(VOL2);
+     float y = (1.0f - v->kbal) * o1 + v->kbal * o2;
+     float sub = sine_t(v->ph[2]);
+     v->ph[2] += v->kis;

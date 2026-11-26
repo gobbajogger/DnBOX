@@ -1,0 +1,13 @@
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -3361,8 +3361,8 @@
+ static uint32_t c1_allowed(void)
+ {
+     uint32_t m = (1u << JB_909) | (1u << JB_808) | (1u << JB_BRK);
+-    if (original_bass[0].kind == ORIGINAL_SOUND_MIAMI) m |= 1u << JB_A;
+-    if (original_bass[1].kind == ORIGINAL_SOUND_MIAMI) m |= 1u << JB_B;
++    if (original_bass[0].kind == ORIGINAL_SOUND_MIAMI || original_bass[0].kind == ORIGINAL_SOUND_SYNTHONE) m |= 1u << JB_A;
++    if (original_bass[1].kind == ORIGINAL_SOUND_MIAMI || original_bass[1].kind == ORIGINAL_SOUND_SYNTHONE) m |= 1u << JB_B;
+     return m;
+ }
+ /* before a stretch of n frames: the split to use (sticky; idle jobs stay on core 0) */
