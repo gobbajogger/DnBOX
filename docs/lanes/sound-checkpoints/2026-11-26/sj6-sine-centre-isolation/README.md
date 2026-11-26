@@ -1,0 +1,7 @@
+# SuperJ6 center-source isolation
+
+Host-only, default-off hypothesis probe. It compares the actual typed compact renderer's single centered Sine with its own pre-mix output. It does not run or alter later FX, AutoPan, the real device, or the authored program. It inserts no fitted compensation. The guarded branch intentionally reproduces stereo duplication of the admitted source instead of running the old two-stage mixer reduction. There is no application/UI face to arm it.
+
+Run `bash run.sh <path to exact source donor root>` with C99 compiler and libm; default donor relative to this directory is `../sj6-hp-connected-zero/host-donor`. Preimages are checked before zero-fuzz application. The runner builds default-off and host-opt-in, then exercises both paths using real note/control ingress.
+
+Both OSCs reach +21.583624662 dB within guarded dry scope. Across 256 one-voice note/leg cases at velocity127, maximum peak .403999567. Six actual distinct note identities preserve old code bit-for-bit; forcing their oscillator clocks coherent hypothetically clips at 2.423625946 when globally multiplied by 12. Natural six-note poly likewise can clip if lifted globally (2.042029858). Continuous held A4 across 1→3→6→3→1 actual voices exhibits +21.58/0/0/0/+21.58 dB compared with default, so the apparent solo improvement fails gain continuity for adoption. Existing alternate/pan/muted/filter state paths remain unchanged in covered fixtures. This is not a native mix law, level-matched terminal A/B, all-preset result, timing check, or proposed release setting.

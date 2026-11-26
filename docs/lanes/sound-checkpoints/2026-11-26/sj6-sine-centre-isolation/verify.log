@@ -1,0 +1,30 @@
+firmware/src/dsp/dnbx_core.h: OK
+firmware/src/dsp/dnbx_core.c: OK
+/tmp/tmp.SFoJf2KO62/firmware/src/dsp/dnbx_core.c:590:1: warning: ‘minsize’ attribute directive ignored [-Wattributes]
+  590 | {
+      | ^
+OSC1 centre isolated | level delta 0.000000000 dB | peak 0.023022791
+OSC2 centre isolated | level delta 0.000000000 dB | peak 0.023022791
+six distinct notes natural | fallback peak 0.170169160 | hypothetical x12 2.042029858
+six distinct notes coherent | fallback peak 0.201968834 | hypothetical x12 2.423625946
+all 256 one-Sine 127-velocity fixtures single-path peak 0.033666633; no clipping
+continuously held key69, total=1 | delta=0.00000000 dB | release settle blocks=0
+continuously held key69, total=3 | delta=0.00000000 dB | release settle blocks=0
+continuously held key69, total=6 | delta=0.00000000 dB | release settle blocks=0
+continuously held key69, total=3 | delta=0.00000000 dB | release settle blocks=104
+continuously held key69, total=1 | delta=0.00000000 dB | release settle blocks=104
+centre, both OSCs, release, muted, panned/nonzero/alternate refusals, six voice, clip checks PASS
+/tmp/tmp.SFoJf2KO62/firmware/src/dsp/dnbx_core.c:590:1: warning: ‘minsize’ attribute directive ignored [-Wattributes]
+  590 | {
+      | ^
+OSC1 centre isolated | level delta 21.583624662 dB | peak 0.276273489
+OSC2 centre isolated | level delta 21.583624662 dB | peak 0.276273489
+six distinct notes natural | fallback peak 0.170169160 | hypothetical x12 2.042029858
+six distinct notes coherent | fallback peak 0.201968834 | hypothetical x12 2.423625946
+all 256 one-Sine 127-velocity fixtures single-path peak 0.403999567; no clipping
+continuously held key69, total=1 | delta=21.58362468 dB | release settle blocks=0
+continuously held key69, total=3 | delta=0.00000000 dB | release settle blocks=0
+continuously held key69, total=6 | delta=0.00000000 dB | release settle blocks=0
+continuously held key69, total=3 | delta=0.00000000 dB | release settle blocks=104
+continuously held key69, total=1 | delta=21.58362469 dB | release settle blocks=104
+centre, both OSCs, release, muted, panned/nonzero/alternate refusals, six voice, clip checks PASS
