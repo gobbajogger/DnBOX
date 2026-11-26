@@ -1,0 +1,35 @@
+--- a/experiments/original_synth/chicago_mp4.c
++++ b/experiments/original_synth/chicago_mp4.c
+@@ -52,6 +52,14 @@
+  n.history[0]=z1;n.history[1]=z2;n.history[2]=z3;n.history[3]=z4;n.history[4]=tmp;*s=n;*out=z4;return 1;
+ }
+ 
++/* IEEE binary32: abs(Inf/NaN) alone reaches 0x7f800000. The following
++ * unsigned addition sets bit31 exactly for that subset. Test five values
++ * with one final branch, preserving the full state-commit guard. */
++static inline uint32_t ck_bad32(float v)
++{
++ return (original_math_bits(v) & 0x7fffffffu)+0x00800000u;
++}
++
+ /* One Chicago voice sample: oscillators (sync 1), noise, MP4 filter and
+  * stereo gain. The same float operations in the same order as
+  * original_voice_gain_oscillator + the noise step + original_chicago_mp4_sample
+@@ -101,7 +109,7 @@
+  if(!original_binary32_isfinite(d))return 0;
+  float u=original_binary32_abs(d)>=1?0:1-original_binary32_abs(d);float u2=u*u,u4=u2*u2,u5=u*u4;float v5=1-u5;float nonlinear=d>=0?v5:-v5;
+  float v=input-R*nonlinear,z1=v+A*(H[0]-v),z2=z1+A*(H[1]-z1),z3=z2+A*(H[2]-z2),z4=z3+A*(H[3]-z3);
+- if(!original_binary32_isfinite(z1)||!original_binary32_isfinite(z2)||!original_binary32_isfinite(z3)||!original_binary32_isfinite(z4)||!original_binary32_isfinite(tmp))return 0;
++ if((ck_bad32(z1)|ck_bad32(z2)|ck_bad32(z3)|ck_bad32(z4)|ck_bad32(tmp))>>31)return 0;
+  *ra=a2;*re=e2;*rr=r2;H[0]=z1;H[1]=z2;H[2]=z3;H[3]=z4;H[4]=tmp;
+  float l=ck_xadvance(&st[0]),r=ck_xadvance(&st[1]);
+  *lo=original_math_bits(z4*l);*ro=original_math_bits(z4*r);return 1;
+@@ -132,7 +140,7 @@
+  if(!original_binary32_isfinite(d))return 0;
+  float u=original_binary32_abs(d)>=1?0:1-original_binary32_abs(d);float u2=u*u,u4=u2*u2,u5=u*u4;float v5=1-u5;float nonlinear=d>=0?v5:-v5;
+  float v=input-R*nonlinear,z1=v+A*(H[0]-v),z2=z1+A*(H[1]-z1),z3=z2+A*(H[2]-z2),z4=z3+A*(H[3]-z3);
+- if(!original_binary32_isfinite(z1)||!original_binary32_isfinite(z2)||!original_binary32_isfinite(z3)||!original_binary32_isfinite(z4)||!original_binary32_isfinite(tmp))return 0;
++ if((ck_bad32(z1)|ck_bad32(z2)|ck_bad32(z3)|ck_bad32(z4)|ck_bad32(tmp))>>31)return 0;
+  H[0]=z1;H[1]=z2;H[2]=z3;H[3]=z4;H[4]=tmp;
+  *lo=original_math_bits(z4*sl);*ro=original_math_bits(z4*sr);return 1;
+ }
