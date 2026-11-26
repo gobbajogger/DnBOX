@@ -57,7 +57,11 @@ isolated kernel timing, or partial link into a release claim.
   the same single patch recovers 48 B in each paired native link
   (+584/+596 to +632/+644); both entire 906-program signed host
   logs are byte-identical, including 14 legacy and 8 wet rollback
-  witnesses. Keep these receipts separate from target timing.
+  witnesses. In [isolated qualified PI32 cycles](s1-fenv-native-speed/scope.txt)
+  the renders are exact and finite for all 24 tested cases. Four
+  active notes save 24–38 µs / 64 frames on routed cases, but a
+  single note costs 13–16 µs more. Keep the guard off pending a
+  selective variant and actual heavy playback qualification.
 - **What remains in SuperJ6 Raw.** In the reconstructed pre-chorus
   path with the genuine current J60 leaf, the [relative chorus level
   is within 0.17 dB](sj6-postvoice-split/README.md). The absolute dry
