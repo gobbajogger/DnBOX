@@ -1,0 +1,3807 @@
+{
+  "active" : [
+    {
+      "address" : "0",
+      "identifier" : "neonvolumeControl",
+      "value" : 0.31501427292823792
+    },
+    {
+      "address" : "7",
+      "identifier" : "neoncutoffLayer1",
+      "value" : 0.3345831036567688
+    },
+    {
+      "address" : "8",
+      "identifier" : "neonresonanceLayer1",
+      "value" : 0.41413787007331848
+    },
+    {
+      "address" : "11",
+      "identifier" : "neonverbEnable",
+      "value" : 0
+    },
+    {
+      "address" : "13",
+      "identifier" : "neonverbSize",
+      "value" : 0.44478034973144531
+    },
+    {
+      "address" : "14",
+      "identifier" : "neonverbLoCut",
+      "value" : 0.42146396636962891
+    },
+    {
+      "address" : "15",
+      "identifier" : "neonverbMix",
+      "value" : 0.15406031906604767
+    },
+    {
+      "address" : "24",
+      "identifier" : "neondelayEnable",
+      "value" : 0
+    },
+    {
+      "address" : "25",
+      "identifier" : "neondelayTime",
+      "value" : 0.30000001192092896
+    },
+    {
+      "address" : "26",
+      "identifier" : "neondelayFeedback",
+      "value" : 0.5
+    },
+    {
+      "address" : "27",
+      "identifier" : "neondelayMix",
+      "value" : 0.40000000596046448
+    },
+    {
+      "address" : "86",
+      "identifier" : "neonoscRange",
+      "value" : 0
+    },
+    {
+      "address" : "12",
+      "identifier" : "neonverbTypeII",
+      "value" : 0
+    },
+    {
+      "address" : "118",
+      "identifier" : "neonisTempoSyncd",
+      "value" : 0
+    },
+    {
+      "address" : "22",
+      "identifier" : "neonautopanRate",
+      "value" : 0
+    },
+    {
+      "address" : "23",
+      "identifier" : "neonautopanDepth",
+      "value" : 0
+    },
+    {
+      "address" : "17",
+      "identifier" : "neoncompressorAmount",
+      "value" : 0
+    },
+    {
+      "address" : "16",
+      "identifier" : "neonstereoWiden",
+      "value" : 0
+    },
+    {
+      "address" : "32",
+      "identifier" : "neonmonoEnable",
+      "value" : 1
+    },
+    {
+      "address" : "33",
+      "identifier" : "neonlegatoEnable",
+      "value" : 0
+    },
+    {
+      "address" : "35",
+      "identifier" : "neonglideTime",
+      "value" : 0.48234140872955322
+    },
+    {
+      "address" : "1",
+      "identifier" : "neonpulseVolume",
+      "value" : 1
+    },
+    {
+      "address" : "3",
+      "identifier" : "neonsawVolume",
+      "value" : 1
+    },
+    {
+      "address" : "201",
+      "identifier" : "neonnoiseVolume",
+      "value" : 0
+    },
+    {
+      "address" : "202",
+      "identifier" : "neonsubVolume",
+      "value" : 0.72697329521179199
+    },
+    {
+      "address" : "28",
+      "identifier" : "neonhighPassCutoff",
+      "value" : 0
+    },
+    {
+      "address" : "63",
+      "identifier" : "neonarpEnable",
+      "value" : 0
+    },
+    {
+      "address" : "64",
+      "identifier" : "neonarpType",
+      "value" : 0
+    },
+    {
+      "address" : "65",
+      "identifier" : "neonarpOctave",
+      "value" : 0
+    },
+    {
+      "address" : "66",
+      "identifier" : "neonarpInterval",
+      "value" : 1
+    },
+    {
+      "address" : "142",
+      "identifier" : "neonseqEnable",
+      "value" : 0
+    },
+    {
+      "address" : "144",
+      "identifier" : "neonseqGate",
+      "value" : 0.43761894106864929
+    },
+    {
+      "address" : "143",
+      "identifier" : "neonseqDivision",
+      "value" : 0.32773110270500183
+    },
+    {
+      "address" : "145",
+      "identifier" : "neonseqTotalSteps",
+      "value" : 0.46666666865348816
+    },
+    {
+      "address" : "36",
+      "identifier" : "neonattack",
+      "value" : 0.069132737815380096
+    },
+    {
+      "address" : "37",
+      "identifier" : "neondecay",
+      "value" : 0.92179125547409058
+    },
+    {
+      "address" : "38",
+      "identifier" : "neonsustain",
+      "value" : 0.054274644702672958
+    },
+    {
+      "address" : "39",
+      "identifier" : "neonrelease",
+      "value" : 0.4693225622177124
+    },
+    {
+      "address" : "115",
+      "identifier" : "neonadsrLinkEnable",
+      "value" : 1
+    },
+    {
+      "address" : "116",
+      "identifier" : "neonadsrFilterLinkEnable",
+      "value" : 0
+    },
+    {
+      "address" : "119",
+      "identifier" : "neonattack2",
+      "value" : 0.069132737815380096
+    },
+    {
+      "address" : "120",
+      "identifier" : "neondecay2",
+      "value" : 0.92179125547409058
+    },
+    {
+      "address" : "121",
+      "identifier" : "neonsustain2",
+      "value" : 0.054274644702672958
+    },
+    {
+      "address" : "122",
+      "identifier" : "neonrelease2",
+      "value" : 0.4693225622177124
+    },
+    {
+      "address" : "40",
+      "identifier" : "neonchorusIEnable",
+      "value" : 0
+    },
+    {
+      "address" : "41",
+      "identifier" : "neonchorusIIEnable",
+      "value" : 0
+    },
+    {
+      "address" : "42",
+      "identifier" : "neonchorusRate",
+      "value" : 0.40400001406669617
+    },
+    {
+      "address" : "43",
+      "identifier" : "neonchorusDepth",
+      "value" : 0.20200000703334808
+    },
+    {
+      "address" : "44",
+      "identifier" : "neonchorusMix",
+      "value" : 0.50499999523162842
+    },
+    {
+      "address" : "208",
+      "identifier" : "neonchorusVersion",
+      "value" : 1
+    },
+    {
+      "address" : "59",
+      "identifier" : "neonunison",
+      "value" : 1
+    },
+    {
+      "address" : "60",
+      "identifier" : "neonunisonDetune",
+      "value" : 0.40000000596046448
+    },
+    {
+      "address" : "61",
+      "identifier" : "neonunisonStereo",
+      "value" : 0
+    },
+    {
+      "address" : "62",
+      "identifier" : "neonunisonType",
+      "value" : 0
+    },
+    {
+      "address" : "57",
+      "identifier" : "neonfmModCents",
+      "value" : 0
+    },
+    {
+      "address" : "129",
+      "identifier" : "neonfilterCutoff",
+      "value" : 0.40000000596046448
+    },
+    {
+      "address" : "130",
+      "identifier" : "neonfilterRez",
+      "value" : 0.41413787007331848
+    },
+    {
+      "address" : "131",
+      "identifier" : "neonfilterTracking",
+      "value" : 0.53133594989776611
+    },
+    {
+      "address" : "132",
+      "identifier" : "neonfilterAttack",
+      "value" : 0.51685017347335815
+    },
+    {
+      "address" : "133",
+      "identifier" : "neonfilterDecay",
+      "value" : 0.47146177291870117
+    },
+    {
+      "address" : "134",
+      "identifier" : "neonfilterSustain",
+      "value" : 0.088760174810886383
+    },
+    {
+      "address" : "135",
+      "identifier" : "neonfilterRelease",
+      "value" : 0.60479044914245605
+    },
+    {
+      "address" : "136",
+      "identifier" : "neonfilterStrength",
+      "value" : 0.4559931755065918
+    },
+    {
+      "address" : "137",
+      "identifier" : "neonfilterVelocity",
+      "value" : 0.90648221969604492
+    },
+    {
+      "address" : "138",
+      "identifier" : "neonpitchAttack",
+      "value" : 0.5
+    },
+    {
+      "address" : "139",
+      "identifier" : "neonpitchDecay",
+      "value" : 0.5
+    },
+    {
+      "address" : "140",
+      "identifier" : "neonpitchSustain",
+      "value" : 0
+    },
+    {
+      "address" : "141",
+      "identifier" : "neonpitchRelease",
+      "value" : 0.5
+    },
+    {
+      "address" : "72",
+      "identifier" : "neonlayer1Semi",
+      "value" : 0.5
+    },
+    {
+      "address" : "73",
+      "identifier" : "neonlayer2Semi",
+      "value" : 0
+    },
+    {
+      "address" : "74",
+      "identifier" : "neonlayer1Detune",
+      "value" : 0.5
+    },
+    {
+      "address" : "75",
+      "identifier" : "neonlayer2Detune",
+      "value" : 0.5
+    },
+    {
+      "address" : "206",
+      "identifier" : "neonaTuning",
+      "value" : 0.60000002384185791
+    },
+    {
+      "address" : "212",
+      "identifier" : "neonkeyLockEnable",
+      "value" : 0
+    },
+    {
+      "address" : "213",
+      "identifier" : "neonkeyLockRoot",
+      "value" : 0
+    },
+    {
+      "address" : "214",
+      "identifier" : "neonkeyLockScale",
+      "value" : 0
+    },
+    {
+      "address" : "82",
+      "identifier" : "neonlayer1Waveform",
+      "value" : 0.66666668653488159
+    },
+    {
+      "address" : "83",
+      "identifier" : "neonlayer2Waveform",
+      "value" : 0.66666668653488159
+    },
+    {
+      "address" : "104",
+      "identifier" : "neontremoloRate",
+      "value" : 0.5
+    },
+    {
+      "address" : "103",
+      "identifier" : "neontremoloDepth",
+      "value" : 0
+    },
+    {
+      "address" : "105",
+      "identifier" : "neonvibratoSemitones",
+      "value" : 0.48688513040542603
+    },
+    {
+      "address" : "106",
+      "identifier" : "neonvibratoRate",
+      "value" : 0.069233313202857971
+    },
+    {
+      "address" : "107",
+      "identifier" : "neoncrushEnable",
+      "value" : 0
+    },
+    {
+      "address" : "108",
+      "identifier" : "neoncrushAmount",
+      "value" : 0.11941517889499664
+    },
+    {
+      "address" : "109",
+      "identifier" : "neoncrushBitRate",
+      "value" : 0
+    },
+    {
+      "address" : "5",
+      "identifier" : "neonlayer1Sound",
+      "value" : 0
+    },
+    {
+      "address" : "6",
+      "identifier" : "neonlayer2Sound",
+      "value" : 0
+    },
+    {
+      "address" : "203",
+      "identifier" : "neonpad1Destination",
+      "value" : 3
+    },
+    {
+      "address" : "204",
+      "identifier" : "neonpad2Destination",
+      "value" : 6
+    },
+    {
+      "address" : "147",
+      "identifier" : "neonseqStep1Offset",
+      "value" : 0.5
+    },
+    {
+      "address" : "148",
+      "identifier" : "neonseqStep2Offset",
+      "value" : 0.5
+    },
+    {
+      "address" : "149",
+      "identifier" : "neonseqStep3Offset",
+      "value" : 0.5
+    },
+    {
+      "address" : "150",
+      "identifier" : "neonseqStep4Offset",
+      "value" : 0.5
+    },
+    {
+      "address" : "151",
+      "identifier" : "neonseqStep5Offset",
+      "value" : 0.5
+    },
+    {
+      "address" : "152",
+      "identifier" : "neonseqStep6Offset",
+      "value" : 0.5
+    },
+    {
+      "address" : "153",
+      "identifier" : "neonseqStep7Offset",
+      "value" : 0.5
+    },
+    {
+      "address" : "154",
+      "identifier" : "neonseqStep8Offset",
+      "value" : 0.5
+    },
+    {
+      "address" : "155",
+      "identifier" : "neonseqStep9Offset",
+      "value" : 0.5
+    },
+    {
+      "address" : "156",
+      "identifier" : "neonseqStep10Offset",
+      "value" : 0.5
+    },
+    {
+      "address" : "157",
+      "identifier" : "neonseqStep11Offset",
+      "value" : 0.5
+    },
+    {
+      "address" : "158",
+      "identifier" : "neonseqStep12Offset",
+      "value" : 0.5
+    },
+    {
+      "address" : "159",
+      "identifier" : "neonseqStep13Offset",
+      "value" : 0.5
+    },
+    {
+      "address" : "160",
+      "identifier" : "neonseqStep14Offset",
+      "value" : 0.5
+    },
+    {
+      "address" : "161",
+      "identifier" : "neonseqStep15Offset",
+      "value" : 0.5
+    },
+    {
+      "address" : "162",
+      "identifier" : "neonseqStep16Offset",
+      "value" : 0.5
+    },
+    {
+      "address" : "163",
+      "identifier" : "neonseqStep1Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "164",
+      "identifier" : "neonseqStep2Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "165",
+      "identifier" : "neonseqStep3Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "166",
+      "identifier" : "neonseqStep4Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "167",
+      "identifier" : "neonseqStep5Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "168",
+      "identifier" : "neonseqStep6Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "169",
+      "identifier" : "neonseqStep7Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "170",
+      "identifier" : "neonseqStep8Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "171",
+      "identifier" : "neonseqStep9Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "172",
+      "identifier" : "neonseqStep10Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "173",
+      "identifier" : "neonseqStep11Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "174",
+      "identifier" : "neonseqStep12Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "175",
+      "identifier" : "neonseqStep13Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "176",
+      "identifier" : "neonseqStep14Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "177",
+      "identifier" : "neonseqStep15Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "178",
+      "identifier" : "neonseqStep16Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "179",
+      "identifier" : "neonmodwheelDestination",
+      "value" : 0
+    },
+    {
+      "address" : "181",
+      "identifier" : "neonlfo1Dest1Param",
+      "value" : 1
+    },
+    {
+      "address" : "180",
+      "identifier" : "neonlfo1Dest1BaseValue",
+      "value" : 0.3345831036567688
+    },
+    {
+      "address" : "183",
+      "identifier" : "neonlfo1Dest2Param",
+      "value" : 0
+    },
+    {
+      "address" : "182",
+      "identifier" : "neonlfo1Dest2BaseValue",
+      "value" : 0
+    },
+    {
+      "address" : "88",
+      "identifier" : "neonlfo1Rate",
+      "value" : 0.079609759151935577
+    },
+    {
+      "address" : "89",
+      "identifier" : "neonlfo1Amount",
+      "value" : 0.09651908278465271
+    },
+    {
+      "address" : "91",
+      "identifier" : "neonlfo1DelayTime",
+      "value" : 0.35310420393943787
+    },
+    {
+      "address" : "93",
+      "identifier" : "neonlfo3DelayTime",
+      "value" : 0
+    },
+    {
+      "address" : "94",
+      "identifier" : "neonlfo1Waveform",
+      "value" : 0
+    },
+    {
+      "address" : "185",
+      "identifier" : "neonlfo2Dest1Param",
+      "value" : 38
+    },
+    {
+      "address" : "184",
+      "identifier" : "neonlfo2Dest1BaseValue",
+      "value" : 0.41413787007331848
+    },
+    {
+      "address" : "187",
+      "identifier" : "neonlfo2Dest2Param",
+      "value" : 0
+    },
+    {
+      "address" : "186",
+      "identifier" : "neonlfo2Dest2BaseValue",
+      "value" : 0
+    },
+    {
+      "address" : "96",
+      "identifier" : "neonlfo2Rate",
+      "value" : 0.26926818490028381
+    },
+    {
+      "address" : "97",
+      "identifier" : "neonlfo2Amount",
+      "value" : 0.31970754265785217
+    },
+    {
+      "address" : "98",
+      "identifier" : "neonlfo2Waveform",
+      "value" : 0.5
+    },
+    {
+      "address" : "189",
+      "identifier" : "neonlfo3Dest1Param",
+      "value" : 15
+    },
+    {
+      "address" : "188",
+      "identifier" : "neonlfo3Dest1BaseValue",
+      "value" : 0.4559931755065918
+    },
+    {
+      "address" : "191",
+      "identifier" : "neonlfo3Dest2Param",
+      "value" : 0
+    },
+    {
+      "address" : "190",
+      "identifier" : "neonlfo3Dest2BaseValue",
+      "value" : 0
+    },
+    {
+      "address" : "100",
+      "identifier" : "neonlfo3Rate",
+      "value" : 0.24111917614936829
+    },
+    {
+      "address" : "101",
+      "identifier" : "neonlfo3Amount",
+      "value" : 0.97877013683319092
+    },
+    {
+      "address" : "102",
+      "identifier" : "neonlfo3Waveform",
+      "value" : 0.25
+    },
+    {
+      "address" : "192",
+      "identifier" : "neonlfo1Mode",
+      "value" : 0
+    },
+    {
+      "address" : "193",
+      "identifier" : "neonlfo2Mode",
+      "value" : 1
+    },
+    {
+      "address" : "194",
+      "identifier" : "neonlfo3Mode",
+      "value" : 1
+    },
+    {
+      "address" : "123",
+      "identifier" : "neonvintageMode",
+      "value" : 0.053853664547204971
+    },
+    {
+      "address" : "124",
+      "identifier" : "neonglobalBend",
+      "value" : 0.5
+    },
+    {
+      "address" : "125",
+      "identifier" : "neonlayer1Bend",
+      "value" : 0.5
+    },
+    {
+      "address" : "126",
+      "identifier" : "neonlayer2Bend",
+      "value" : 0.5
+    },
+    {
+      "address" : "198",
+      "identifier" : "neonlfoSnapbackEnable",
+      "value" : 0
+    },
+    {
+      "address" : "199",
+      "identifier" : "neonlfo2SnapbackEnable",
+      "value" : 0
+    },
+    {
+      "address" : "200",
+      "identifier" : "neonlfo3SnapbackEnable",
+      "value" : 0
+    },
+    {
+      "address" : "195",
+      "identifier" : "neonlfo1HzEnable",
+      "value" : 1
+    },
+    {
+      "address" : "196",
+      "identifier" : "neonlfo2HzEnable",
+      "value" : 0
+    },
+    {
+      "address" : "197",
+      "identifier" : "neonlfo3HzEnable",
+      "value" : 1
+    },
+    {
+      "address" : "87",
+      "identifier" : "neonlfo1Enable",
+      "value" : 1
+    },
+    {
+      "address" : "95",
+      "identifier" : "neonlfo2Enable",
+      "value" : 1
+    },
+    {
+      "address" : "99",
+      "identifier" : "neonlfo3Enable",
+      "value" : 1
+    },
+    {
+      "address" : "205",
+      "identifier" : "neonfixedVelocityEnable",
+      "value" : 1
+    },
+    {
+      "address" : "209",
+      "identifier" : "neonfilterType",
+      "value" : 0
+    },
+    {
+      "address" : "78",
+      "identifier" : "neonlayer1PWM",
+      "value" : 0
+    },
+    {
+      "address" : "79",
+      "identifier" : "neonlayer2PWM",
+      "value" : 0
+    },
+    {
+      "address" : "210",
+      "identifier" : "neonlayer1PWMEnable",
+      "value" : 0
+    },
+    {
+      "address" : "211",
+      "identifier" : "neonlayer2PWMEnable",
+      "value" : 0
+    },
+    {
+      "address" : "215",
+      "identifier" : "neonj60v2Rate",
+      "value" : 0.5
+    },
+    {
+      "address" : "216",
+      "identifier" : "neonj60v2Depth",
+      "value" : 0.5
+    },
+    {
+      "address" : "217",
+      "identifier" : "neonj60v2Mix",
+      "value" : 1
+    }
+  ],
+  "after" : [
+    {
+      "address" : "0",
+      "identifier" : "neonvolumeControl",
+      "value" : 0.31501427292823792
+    },
+    {
+      "address" : "7",
+      "identifier" : "neoncutoffLayer1",
+      "value" : 0.3345831036567688
+    },
+    {
+      "address" : "8",
+      "identifier" : "neonresonanceLayer1",
+      "value" : 0.41413787007331848
+    },
+    {
+      "address" : "11",
+      "identifier" : "neonverbEnable",
+      "value" : 0
+    },
+    {
+      "address" : "13",
+      "identifier" : "neonverbSize",
+      "value" : 0.44478034973144531
+    },
+    {
+      "address" : "14",
+      "identifier" : "neonverbLoCut",
+      "value" : 0.42146396636962891
+    },
+    {
+      "address" : "15",
+      "identifier" : "neonverbMix",
+      "value" : 0.15406031906604767
+    },
+    {
+      "address" : "24",
+      "identifier" : "neondelayEnable",
+      "value" : 0
+    },
+    {
+      "address" : "25",
+      "identifier" : "neondelayTime",
+      "value" : 0.30000001192092896
+    },
+    {
+      "address" : "26",
+      "identifier" : "neondelayFeedback",
+      "value" : 0.5
+    },
+    {
+      "address" : "27",
+      "identifier" : "neondelayMix",
+      "value" : 0.40000000596046448
+    },
+    {
+      "address" : "86",
+      "identifier" : "neonoscRange",
+      "value" : 0
+    },
+    {
+      "address" : "12",
+      "identifier" : "neonverbTypeII",
+      "value" : 0
+    },
+    {
+      "address" : "118",
+      "identifier" : "neonisTempoSyncd",
+      "value" : 0
+    },
+    {
+      "address" : "22",
+      "identifier" : "neonautopanRate",
+      "value" : 0
+    },
+    {
+      "address" : "23",
+      "identifier" : "neonautopanDepth",
+      "value" : 0
+    },
+    {
+      "address" : "17",
+      "identifier" : "neoncompressorAmount",
+      "value" : 0
+    },
+    {
+      "address" : "16",
+      "identifier" : "neonstereoWiden",
+      "value" : 0
+    },
+    {
+      "address" : "32",
+      "identifier" : "neonmonoEnable",
+      "value" : 1
+    },
+    {
+      "address" : "33",
+      "identifier" : "neonlegatoEnable",
+      "value" : 0
+    },
+    {
+      "address" : "35",
+      "identifier" : "neonglideTime",
+      "value" : 0.48234140872955322
+    },
+    {
+      "address" : "1",
+      "identifier" : "neonpulseVolume",
+      "value" : 1
+    },
+    {
+      "address" : "3",
+      "identifier" : "neonsawVolume",
+      "value" : 1
+    },
+    {
+      "address" : "201",
+      "identifier" : "neonnoiseVolume",
+      "value" : 0
+    },
+    {
+      "address" : "202",
+      "identifier" : "neonsubVolume",
+      "value" : 0.72697329521179199
+    },
+    {
+      "address" : "28",
+      "identifier" : "neonhighPassCutoff",
+      "value" : 0
+    },
+    {
+      "address" : "63",
+      "identifier" : "neonarpEnable",
+      "value" : 0
+    },
+    {
+      "address" : "64",
+      "identifier" : "neonarpType",
+      "value" : 0
+    },
+    {
+      "address" : "65",
+      "identifier" : "neonarpOctave",
+      "value" : 0
+    },
+    {
+      "address" : "66",
+      "identifier" : "neonarpInterval",
+      "value" : 1
+    },
+    {
+      "address" : "142",
+      "identifier" : "neonseqEnable",
+      "value" : 0
+    },
+    {
+      "address" : "144",
+      "identifier" : "neonseqGate",
+      "value" : 0.43761894106864929
+    },
+    {
+      "address" : "143",
+      "identifier" : "neonseqDivision",
+      "value" : 0.32773110270500183
+    },
+    {
+      "address" : "145",
+      "identifier" : "neonseqTotalSteps",
+      "value" : 0.46666666865348816
+    },
+    {
+      "address" : "36",
+      "identifier" : "neonattack",
+      "value" : 0.069132737815380096
+    },
+    {
+      "address" : "37",
+      "identifier" : "neondecay",
+      "value" : 0.92179125547409058
+    },
+    {
+      "address" : "38",
+      "identifier" : "neonsustain",
+      "value" : 0.054274644702672958
+    },
+    {
+      "address" : "39",
+      "identifier" : "neonrelease",
+      "value" : 0.4693225622177124
+    },
+    {
+      "address" : "115",
+      "identifier" : "neonadsrLinkEnable",
+      "value" : 1
+    },
+    {
+      "address" : "116",
+      "identifier" : "neonadsrFilterLinkEnable",
+      "value" : 0
+    },
+    {
+      "address" : "119",
+      "identifier" : "neonattack2",
+      "value" : 0.069132737815380096
+    },
+    {
+      "address" : "120",
+      "identifier" : "neondecay2",
+      "value" : 0.92179125547409058
+    },
+    {
+      "address" : "121",
+      "identifier" : "neonsustain2",
+      "value" : 0.054274644702672958
+    },
+    {
+      "address" : "122",
+      "identifier" : "neonrelease2",
+      "value" : 0.4693225622177124
+    },
+    {
+      "address" : "40",
+      "identifier" : "neonchorusIEnable",
+      "value" : 0
+    },
+    {
+      "address" : "41",
+      "identifier" : "neonchorusIIEnable",
+      "value" : 0
+    },
+    {
+      "address" : "42",
+      "identifier" : "neonchorusRate",
+      "value" : 0.40400001406669617
+    },
+    {
+      "address" : "43",
+      "identifier" : "neonchorusDepth",
+      "value" : 0.20200000703334808
+    },
+    {
+      "address" : "44",
+      "identifier" : "neonchorusMix",
+      "value" : 0.50499999523162842
+    },
+    {
+      "address" : "208",
+      "identifier" : "neonchorusVersion",
+      "value" : 1
+    },
+    {
+      "address" : "59",
+      "identifier" : "neonunison",
+      "value" : 1
+    },
+    {
+      "address" : "60",
+      "identifier" : "neonunisonDetune",
+      "value" : 0.40000000596046448
+    },
+    {
+      "address" : "61",
+      "identifier" : "neonunisonStereo",
+      "value" : 0
+    },
+    {
+      "address" : "62",
+      "identifier" : "neonunisonType",
+      "value" : 0
+    },
+    {
+      "address" : "57",
+      "identifier" : "neonfmModCents",
+      "value" : 0
+    },
+    {
+      "address" : "129",
+      "identifier" : "neonfilterCutoff",
+      "value" : 0.40000000596046448
+    },
+    {
+      "address" : "130",
+      "identifier" : "neonfilterRez",
+      "value" : 0.41413787007331848
+    },
+    {
+      "address" : "131",
+      "identifier" : "neonfilterTracking",
+      "value" : 0.53133594989776611
+    },
+    {
+      "address" : "132",
+      "identifier" : "neonfilterAttack",
+      "value" : 0.51685017347335815
+    },
+    {
+      "address" : "133",
+      "identifier" : "neonfilterDecay",
+      "value" : 0.47146177291870117
+    },
+    {
+      "address" : "134",
+      "identifier" : "neonfilterSustain",
+      "value" : 0.088760174810886383
+    },
+    {
+      "address" : "135",
+      "identifier" : "neonfilterRelease",
+      "value" : 0.60479044914245605
+    },
+    {
+      "address" : "136",
+      "identifier" : "neonfilterStrength",
+      "value" : 0.4559931755065918
+    },
+    {
+      "address" : "137",
+      "identifier" : "neonfilterVelocity",
+      "value" : 0.90648221969604492
+    },
+    {
+      "address" : "138",
+      "identifier" : "neonpitchAttack",
+      "value" : 0.5
+    },
+    {
+      "address" : "139",
+      "identifier" : "neonpitchDecay",
+      "value" : 0.5
+    },
+    {
+      "address" : "140",
+      "identifier" : "neonpitchSustain",
+      "value" : 0
+    },
+    {
+      "address" : "141",
+      "identifier" : "neonpitchRelease",
+      "value" : 0.5
+    },
+    {
+      "address" : "72",
+      "identifier" : "neonlayer1Semi",
+      "value" : 0.5
+    },
+    {
+      "address" : "73",
+      "identifier" : "neonlayer2Semi",
+      "value" : 0
+    },
+    {
+      "address" : "74",
+      "identifier" : "neonlayer1Detune",
+      "value" : 0.5
+    },
+    {
+      "address" : "75",
+      "identifier" : "neonlayer2Detune",
+      "value" : 0.5
+    },
+    {
+      "address" : "206",
+      "identifier" : "neonaTuning",
+      "value" : 0.60000002384185791
+    },
+    {
+      "address" : "212",
+      "identifier" : "neonkeyLockEnable",
+      "value" : 0
+    },
+    {
+      "address" : "213",
+      "identifier" : "neonkeyLockRoot",
+      "value" : 0
+    },
+    {
+      "address" : "214",
+      "identifier" : "neonkeyLockScale",
+      "value" : 0
+    },
+    {
+      "address" : "82",
+      "identifier" : "neonlayer1Waveform",
+      "value" : 0.66666668653488159
+    },
+    {
+      "address" : "83",
+      "identifier" : "neonlayer2Waveform",
+      "value" : 0.66666668653488159
+    },
+    {
+      "address" : "104",
+      "identifier" : "neontremoloRate",
+      "value" : 0.5
+    },
+    {
+      "address" : "103",
+      "identifier" : "neontremoloDepth",
+      "value" : 0
+    },
+    {
+      "address" : "105",
+      "identifier" : "neonvibratoSemitones",
+      "value" : 0.48688513040542603
+    },
+    {
+      "address" : "106",
+      "identifier" : "neonvibratoRate",
+      "value" : 0.069233313202857971
+    },
+    {
+      "address" : "107",
+      "identifier" : "neoncrushEnable",
+      "value" : 0
+    },
+    {
+      "address" : "108",
+      "identifier" : "neoncrushAmount",
+      "value" : 0.11941517889499664
+    },
+    {
+      "address" : "109",
+      "identifier" : "neoncrushBitRate",
+      "value" : 0
+    },
+    {
+      "address" : "5",
+      "identifier" : "neonlayer1Sound",
+      "value" : 0
+    },
+    {
+      "address" : "6",
+      "identifier" : "neonlayer2Sound",
+      "value" : 0
+    },
+    {
+      "address" : "203",
+      "identifier" : "neonpad1Destination",
+      "value" : 3
+    },
+    {
+      "address" : "204",
+      "identifier" : "neonpad2Destination",
+      "value" : 6
+    },
+    {
+      "address" : "147",
+      "identifier" : "neonseqStep1Offset",
+      "value" : 0.5
+    },
+    {
+      "address" : "148",
+      "identifier" : "neonseqStep2Offset",
+      "value" : 0.5
+    },
+    {
+      "address" : "149",
+      "identifier" : "neonseqStep3Offset",
+      "value" : 0.5
+    },
+    {
+      "address" : "150",
+      "identifier" : "neonseqStep4Offset",
+      "value" : 0.5
+    },
+    {
+      "address" : "151",
+      "identifier" : "neonseqStep5Offset",
+      "value" : 0.5
+    },
+    {
+      "address" : "152",
+      "identifier" : "neonseqStep6Offset",
+      "value" : 0.5
+    },
+    {
+      "address" : "153",
+      "identifier" : "neonseqStep7Offset",
+      "value" : 0.5
+    },
+    {
+      "address" : "154",
+      "identifier" : "neonseqStep8Offset",
+      "value" : 0.5
+    },
+    {
+      "address" : "155",
+      "identifier" : "neonseqStep9Offset",
+      "value" : 0.5
+    },
+    {
+      "address" : "156",
+      "identifier" : "neonseqStep10Offset",
+      "value" : 0.5
+    },
+    {
+      "address" : "157",
+      "identifier" : "neonseqStep11Offset",
+      "value" : 0.5
+    },
+    {
+      "address" : "158",
+      "identifier" : "neonseqStep12Offset",
+      "value" : 0.5
+    },
+    {
+      "address" : "159",
+      "identifier" : "neonseqStep13Offset",
+      "value" : 0.5
+    },
+    {
+      "address" : "160",
+      "identifier" : "neonseqStep14Offset",
+      "value" : 0.5
+    },
+    {
+      "address" : "161",
+      "identifier" : "neonseqStep15Offset",
+      "value" : 0.5
+    },
+    {
+      "address" : "162",
+      "identifier" : "neonseqStep16Offset",
+      "value" : 0.5
+    },
+    {
+      "address" : "163",
+      "identifier" : "neonseqStep1Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "164",
+      "identifier" : "neonseqStep2Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "165",
+      "identifier" : "neonseqStep3Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "166",
+      "identifier" : "neonseqStep4Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "167",
+      "identifier" : "neonseqStep5Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "168",
+      "identifier" : "neonseqStep6Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "169",
+      "identifier" : "neonseqStep7Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "170",
+      "identifier" : "neonseqStep8Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "171",
+      "identifier" : "neonseqStep9Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "172",
+      "identifier" : "neonseqStep10Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "173",
+      "identifier" : "neonseqStep11Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "174",
+      "identifier" : "neonseqStep12Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "175",
+      "identifier" : "neonseqStep13Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "176",
+      "identifier" : "neonseqStep14Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "177",
+      "identifier" : "neonseqStep15Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "178",
+      "identifier" : "neonseqStep16Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "179",
+      "identifier" : "neonmodwheelDestination",
+      "value" : 0
+    },
+    {
+      "address" : "181",
+      "identifier" : "neonlfo1Dest1Param",
+      "value" : 1
+    },
+    {
+      "address" : "180",
+      "identifier" : "neonlfo1Dest1BaseValue",
+      "value" : 0.3345831036567688
+    },
+    {
+      "address" : "183",
+      "identifier" : "neonlfo1Dest2Param",
+      "value" : 0
+    },
+    {
+      "address" : "182",
+      "identifier" : "neonlfo1Dest2BaseValue",
+      "value" : 0
+    },
+    {
+      "address" : "88",
+      "identifier" : "neonlfo1Rate",
+      "value" : 0.079609759151935577
+    },
+    {
+      "address" : "89",
+      "identifier" : "neonlfo1Amount",
+      "value" : 0.09651908278465271
+    },
+    {
+      "address" : "91",
+      "identifier" : "neonlfo1DelayTime",
+      "value" : 0.35310420393943787
+    },
+    {
+      "address" : "93",
+      "identifier" : "neonlfo3DelayTime",
+      "value" : 0
+    },
+    {
+      "address" : "94",
+      "identifier" : "neonlfo1Waveform",
+      "value" : 0
+    },
+    {
+      "address" : "185",
+      "identifier" : "neonlfo2Dest1Param",
+      "value" : 38
+    },
+    {
+      "address" : "184",
+      "identifier" : "neonlfo2Dest1BaseValue",
+      "value" : 0.41413787007331848
+    },
+    {
+      "address" : "187",
+      "identifier" : "neonlfo2Dest2Param",
+      "value" : 0
+    },
+    {
+      "address" : "186",
+      "identifier" : "neonlfo2Dest2BaseValue",
+      "value" : 0
+    },
+    {
+      "address" : "96",
+      "identifier" : "neonlfo2Rate",
+      "value" : 0.26926818490028381
+    },
+    {
+      "address" : "97",
+      "identifier" : "neonlfo2Amount",
+      "value" : 0.31970754265785217
+    },
+    {
+      "address" : "98",
+      "identifier" : "neonlfo2Waveform",
+      "value" : 0.5
+    },
+    {
+      "address" : "189",
+      "identifier" : "neonlfo3Dest1Param",
+      "value" : 15
+    },
+    {
+      "address" : "188",
+      "identifier" : "neonlfo3Dest1BaseValue",
+      "value" : 0.4559931755065918
+    },
+    {
+      "address" : "191",
+      "identifier" : "neonlfo3Dest2Param",
+      "value" : 0
+    },
+    {
+      "address" : "190",
+      "identifier" : "neonlfo3Dest2BaseValue",
+      "value" : 0
+    },
+    {
+      "address" : "100",
+      "identifier" : "neonlfo3Rate",
+      "value" : 0.24111917614936829
+    },
+    {
+      "address" : "101",
+      "identifier" : "neonlfo3Amount",
+      "value" : 0.97877013683319092
+    },
+    {
+      "address" : "102",
+      "identifier" : "neonlfo3Waveform",
+      "value" : 0.25
+    },
+    {
+      "address" : "192",
+      "identifier" : "neonlfo1Mode",
+      "value" : 0
+    },
+    {
+      "address" : "193",
+      "identifier" : "neonlfo2Mode",
+      "value" : 1
+    },
+    {
+      "address" : "194",
+      "identifier" : "neonlfo3Mode",
+      "value" : 1
+    },
+    {
+      "address" : "123",
+      "identifier" : "neonvintageMode",
+      "value" : 0.053853664547204971
+    },
+    {
+      "address" : "124",
+      "identifier" : "neonglobalBend",
+      "value" : 0.5
+    },
+    {
+      "address" : "125",
+      "identifier" : "neonlayer1Bend",
+      "value" : 0.5
+    },
+    {
+      "address" : "126",
+      "identifier" : "neonlayer2Bend",
+      "value" : 0.5
+    },
+    {
+      "address" : "198",
+      "identifier" : "neonlfoSnapbackEnable",
+      "value" : 0
+    },
+    {
+      "address" : "199",
+      "identifier" : "neonlfo2SnapbackEnable",
+      "value" : 0
+    },
+    {
+      "address" : "200",
+      "identifier" : "neonlfo3SnapbackEnable",
+      "value" : 0
+    },
+    {
+      "address" : "195",
+      "identifier" : "neonlfo1HzEnable",
+      "value" : 1
+    },
+    {
+      "address" : "196",
+      "identifier" : "neonlfo2HzEnable",
+      "value" : 0
+    },
+    {
+      "address" : "197",
+      "identifier" : "neonlfo3HzEnable",
+      "value" : 1
+    },
+    {
+      "address" : "87",
+      "identifier" : "neonlfo1Enable",
+      "value" : 1
+    },
+    {
+      "address" : "95",
+      "identifier" : "neonlfo2Enable",
+      "value" : 1
+    },
+    {
+      "address" : "99",
+      "identifier" : "neonlfo3Enable",
+      "value" : 1
+    },
+    {
+      "address" : "205",
+      "identifier" : "neonfixedVelocityEnable",
+      "value" : 1
+    },
+    {
+      "address" : "209",
+      "identifier" : "neonfilterType",
+      "value" : 0
+    },
+    {
+      "address" : "78",
+      "identifier" : "neonlayer1PWM",
+      "value" : 0
+    },
+    {
+      "address" : "79",
+      "identifier" : "neonlayer2PWM",
+      "value" : 0
+    },
+    {
+      "address" : "210",
+      "identifier" : "neonlayer1PWMEnable",
+      "value" : 0
+    },
+    {
+      "address" : "211",
+      "identifier" : "neonlayer2PWMEnable",
+      "value" : 0
+    },
+    {
+      "address" : "215",
+      "identifier" : "neonj60v2Rate",
+      "value" : 0.5
+    },
+    {
+      "address" : "216",
+      "identifier" : "neonj60v2Depth",
+      "value" : 0.5
+    },
+    {
+      "address" : "217",
+      "identifier" : "neonj60v2Mix",
+      "value" : 1
+    }
+  ],
+  "authored" : [
+    {
+      "address" : "0",
+      "identifier" : "neonvolumeControl",
+      "value" : 0.31501427292823792
+    },
+    {
+      "address" : "7",
+      "identifier" : "neoncutoffLayer1",
+      "value" : 0.3345831036567688
+    },
+    {
+      "address" : "8",
+      "identifier" : "neonresonanceLayer1",
+      "value" : 0.41413787007331848
+    },
+    {
+      "address" : "11",
+      "identifier" : "neonverbEnable",
+      "value" : 1
+    },
+    {
+      "address" : "13",
+      "identifier" : "neonverbSize",
+      "value" : 0.44478034973144531
+    },
+    {
+      "address" : "14",
+      "identifier" : "neonverbLoCut",
+      "value" : 0.42146396636962891
+    },
+    {
+      "address" : "15",
+      "identifier" : "neonverbMix",
+      "value" : 0.15406031906604767
+    },
+    {
+      "address" : "24",
+      "identifier" : "neondelayEnable",
+      "value" : 0
+    },
+    {
+      "address" : "25",
+      "identifier" : "neondelayTime",
+      "value" : 0.30000001192092896
+    },
+    {
+      "address" : "26",
+      "identifier" : "neondelayFeedback",
+      "value" : 0.5
+    },
+    {
+      "address" : "27",
+      "identifier" : "neondelayMix",
+      "value" : 0.40000000596046448
+    },
+    {
+      "address" : "86",
+      "identifier" : "neonoscRange",
+      "value" : 0
+    },
+    {
+      "address" : "12",
+      "identifier" : "neonverbTypeII",
+      "value" : 0
+    },
+    {
+      "address" : "118",
+      "identifier" : "neonisTempoSyncd",
+      "value" : 0
+    },
+    {
+      "address" : "22",
+      "identifier" : "neonautopanRate",
+      "value" : 0
+    },
+    {
+      "address" : "23",
+      "identifier" : "neonautopanDepth",
+      "value" : 0
+    },
+    {
+      "address" : "17",
+      "identifier" : "neoncompressorAmount",
+      "value" : 0
+    },
+    {
+      "address" : "16",
+      "identifier" : "neonstereoWiden",
+      "value" : 0
+    },
+    {
+      "address" : "32",
+      "identifier" : "neonmonoEnable",
+      "value" : 1
+    },
+    {
+      "address" : "33",
+      "identifier" : "neonlegatoEnable",
+      "value" : 0
+    },
+    {
+      "address" : "35",
+      "identifier" : "neonglideTime",
+      "value" : 0.48234140872955322
+    },
+    {
+      "address" : "1",
+      "identifier" : "neonpulseVolume",
+      "value" : 1
+    },
+    {
+      "address" : "3",
+      "identifier" : "neonsawVolume",
+      "value" : 1
+    },
+    {
+      "address" : "201",
+      "identifier" : "neonnoiseVolume",
+      "value" : 0
+    },
+    {
+      "address" : "202",
+      "identifier" : "neonsubVolume",
+      "value" : 0.72697329521179199
+    },
+    {
+      "address" : "28",
+      "identifier" : "neonhighPassCutoff",
+      "value" : 0
+    },
+    {
+      "address" : "63",
+      "identifier" : "neonarpEnable",
+      "value" : 0
+    },
+    {
+      "address" : "64",
+      "identifier" : "neonarpType",
+      "value" : 0
+    },
+    {
+      "address" : "65",
+      "identifier" : "neonarpOctave",
+      "value" : 0
+    },
+    {
+      "address" : "66",
+      "identifier" : "neonarpInterval",
+      "value" : 1
+    },
+    {
+      "address" : "142",
+      "identifier" : "neonseqEnable",
+      "value" : 0
+    },
+    {
+      "address" : "144",
+      "identifier" : "neonseqGate",
+      "value" : 0.43761894106864929
+    },
+    {
+      "address" : "143",
+      "identifier" : "neonseqDivision",
+      "value" : 0.32773110270500183
+    },
+    {
+      "address" : "145",
+      "identifier" : "neonseqTotalSteps",
+      "value" : 0.46666666865348816
+    },
+    {
+      "address" : "36",
+      "identifier" : "neonattack",
+      "value" : 0.069132737815380096
+    },
+    {
+      "address" : "37",
+      "identifier" : "neondecay",
+      "value" : 0.92179125547409058
+    },
+    {
+      "address" : "38",
+      "identifier" : "neonsustain",
+      "value" : 0.054274644702672958
+    },
+    {
+      "address" : "39",
+      "identifier" : "neonrelease",
+      "value" : 0.4693225622177124
+    },
+    {
+      "address" : "115",
+      "identifier" : "neonadsrLinkEnable",
+      "value" : 1
+    },
+    {
+      "address" : "116",
+      "identifier" : "neonadsrFilterLinkEnable",
+      "value" : 0
+    },
+    {
+      "address" : "119",
+      "identifier" : "neonattack2",
+      "value" : 0.069132737815380096
+    },
+    {
+      "address" : "120",
+      "identifier" : "neondecay2",
+      "value" : 0.92179125547409058
+    },
+    {
+      "address" : "121",
+      "identifier" : "neonsustain2",
+      "value" : 0.054274644702672958
+    },
+    {
+      "address" : "122",
+      "identifier" : "neonrelease2",
+      "value" : 0.4693225622177124
+    },
+    {
+      "address" : "40",
+      "identifier" : "neonchorusIEnable",
+      "value" : 0
+    },
+    {
+      "address" : "41",
+      "identifier" : "neonchorusIIEnable",
+      "value" : 0
+    },
+    {
+      "address" : "42",
+      "identifier" : "neonchorusRate",
+      "value" : 0.40400001406669617
+    },
+    {
+      "address" : "43",
+      "identifier" : "neonchorusDepth",
+      "value" : 0.20200000703334808
+    },
+    {
+      "address" : "44",
+      "identifier" : "neonchorusMix",
+      "value" : 0.50499999523162842
+    },
+    {
+      "address" : "208",
+      "identifier" : "neonchorusVersion",
+      "value" : 1
+    },
+    {
+      "address" : "59",
+      "identifier" : "neonunison",
+      "value" : 1
+    },
+    {
+      "address" : "60",
+      "identifier" : "neonunisonDetune",
+      "value" : 0.40000000596046448
+    },
+    {
+      "address" : "61",
+      "identifier" : "neonunisonStereo",
+      "value" : 0
+    },
+    {
+      "address" : "62",
+      "identifier" : "neonunisonType",
+      "value" : 0
+    },
+    {
+      "address" : "57",
+      "identifier" : "neonfmModCents",
+      "value" : 0
+    },
+    {
+      "address" : "129",
+      "identifier" : "neonfilterCutoff",
+      "value" : 0.40000000596046448
+    },
+    {
+      "address" : "130",
+      "identifier" : "neonfilterRez",
+      "value" : 0.41413787007331848
+    },
+    {
+      "address" : "131",
+      "identifier" : "neonfilterTracking",
+      "value" : 0.53133594989776611
+    },
+    {
+      "address" : "132",
+      "identifier" : "neonfilterAttack",
+      "value" : 0.51685017347335815
+    },
+    {
+      "address" : "133",
+      "identifier" : "neonfilterDecay",
+      "value" : 0.47146177291870117
+    },
+    {
+      "address" : "134",
+      "identifier" : "neonfilterSustain",
+      "value" : 0.088760174810886383
+    },
+    {
+      "address" : "135",
+      "identifier" : "neonfilterRelease",
+      "value" : 0.60479044914245605
+    },
+    {
+      "address" : "136",
+      "identifier" : "neonfilterStrength",
+      "value" : 0.4559931755065918
+    },
+    {
+      "address" : "137",
+      "identifier" : "neonfilterVelocity",
+      "value" : 0.90648221969604492
+    },
+    {
+      "address" : "138",
+      "identifier" : "neonpitchAttack",
+      "value" : 0.5
+    },
+    {
+      "address" : "139",
+      "identifier" : "neonpitchDecay",
+      "value" : 0.5
+    },
+    {
+      "address" : "140",
+      "identifier" : "neonpitchSustain",
+      "value" : 0
+    },
+    {
+      "address" : "141",
+      "identifier" : "neonpitchRelease",
+      "value" : 0.5
+    },
+    {
+      "address" : "72",
+      "identifier" : "neonlayer1Semi",
+      "value" : 0.5
+    },
+    {
+      "address" : "73",
+      "identifier" : "neonlayer2Semi",
+      "value" : 0
+    },
+    {
+      "address" : "74",
+      "identifier" : "neonlayer1Detune",
+      "value" : 0.5
+    },
+    {
+      "address" : "75",
+      "identifier" : "neonlayer2Detune",
+      "value" : 0.5
+    },
+    {
+      "address" : "206",
+      "identifier" : "neonaTuning",
+      "value" : 0.60000002384185791
+    },
+    {
+      "address" : "212",
+      "identifier" : "neonkeyLockEnable",
+      "value" : 0
+    },
+    {
+      "address" : "213",
+      "identifier" : "neonkeyLockRoot",
+      "value" : 0
+    },
+    {
+      "address" : "214",
+      "identifier" : "neonkeyLockScale",
+      "value" : 0
+    },
+    {
+      "address" : "82",
+      "identifier" : "neonlayer1Waveform",
+      "value" : 0.66666668653488159
+    },
+    {
+      "address" : "83",
+      "identifier" : "neonlayer2Waveform",
+      "value" : 0.66666668653488159
+    },
+    {
+      "address" : "104",
+      "identifier" : "neontremoloRate",
+      "value" : 0.5
+    },
+    {
+      "address" : "103",
+      "identifier" : "neontremoloDepth",
+      "value" : 0
+    },
+    {
+      "address" : "105",
+      "identifier" : "neonvibratoSemitones",
+      "value" : 0.48688513040542603
+    },
+    {
+      "address" : "106",
+      "identifier" : "neonvibratoRate",
+      "value" : 0.069233313202857971
+    },
+    {
+      "address" : "107",
+      "identifier" : "neoncrushEnable",
+      "value" : 0
+    },
+    {
+      "address" : "108",
+      "identifier" : "neoncrushAmount",
+      "value" : 0.11941517889499664
+    },
+    {
+      "address" : "109",
+      "identifier" : "neoncrushBitRate",
+      "value" : 0
+    },
+    {
+      "address" : "5",
+      "identifier" : "neonlayer1Sound",
+      "value" : 0
+    },
+    {
+      "address" : "6",
+      "identifier" : "neonlayer2Sound",
+      "value" : 0
+    },
+    {
+      "address" : "203",
+      "identifier" : "neonpad1Destination",
+      "value" : 3
+    },
+    {
+      "address" : "204",
+      "identifier" : "neonpad2Destination",
+      "value" : 6
+    },
+    {
+      "address" : "147",
+      "identifier" : "neonseqStep1Offset",
+      "value" : 0.5
+    },
+    {
+      "address" : "148",
+      "identifier" : "neonseqStep2Offset",
+      "value" : 0.5
+    },
+    {
+      "address" : "149",
+      "identifier" : "neonseqStep3Offset",
+      "value" : 0.5
+    },
+    {
+      "address" : "150",
+      "identifier" : "neonseqStep4Offset",
+      "value" : 0.5
+    },
+    {
+      "address" : "151",
+      "identifier" : "neonseqStep5Offset",
+      "value" : 0.5
+    },
+    {
+      "address" : "152",
+      "identifier" : "neonseqStep6Offset",
+      "value" : 0.5
+    },
+    {
+      "address" : "153",
+      "identifier" : "neonseqStep7Offset",
+      "value" : 0.5
+    },
+    {
+      "address" : "154",
+      "identifier" : "neonseqStep8Offset",
+      "value" : 0.5
+    },
+    {
+      "address" : "155",
+      "identifier" : "neonseqStep9Offset",
+      "value" : 0.5
+    },
+    {
+      "address" : "156",
+      "identifier" : "neonseqStep10Offset",
+      "value" : 0.5
+    },
+    {
+      "address" : "157",
+      "identifier" : "neonseqStep11Offset",
+      "value" : 0.5
+    },
+    {
+      "address" : "158",
+      "identifier" : "neonseqStep12Offset",
+      "value" : 0.5
+    },
+    {
+      "address" : "159",
+      "identifier" : "neonseqStep13Offset",
+      "value" : 0.5
+    },
+    {
+      "address" : "160",
+      "identifier" : "neonseqStep14Offset",
+      "value" : 0.5
+    },
+    {
+      "address" : "161",
+      "identifier" : "neonseqStep15Offset",
+      "value" : 0.5
+    },
+    {
+      "address" : "162",
+      "identifier" : "neonseqStep16Offset",
+      "value" : 0.5
+    },
+    {
+      "address" : "163",
+      "identifier" : "neonseqStep1Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "164",
+      "identifier" : "neonseqStep2Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "165",
+      "identifier" : "neonseqStep3Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "166",
+      "identifier" : "neonseqStep4Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "167",
+      "identifier" : "neonseqStep5Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "168",
+      "identifier" : "neonseqStep6Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "169",
+      "identifier" : "neonseqStep7Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "170",
+      "identifier" : "neonseqStep8Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "171",
+      "identifier" : "neonseqStep9Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "172",
+      "identifier" : "neonseqStep10Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "173",
+      "identifier" : "neonseqStep11Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "174",
+      "identifier" : "neonseqStep12Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "175",
+      "identifier" : "neonseqStep13Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "176",
+      "identifier" : "neonseqStep14Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "177",
+      "identifier" : "neonseqStep15Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "178",
+      "identifier" : "neonseqStep16Toggle",
+      "value" : 1
+    },
+    {
+      "address" : "179",
+      "identifier" : "neonmodwheelDestination",
+      "value" : 0
+    },
+    {
+      "address" : "181",
+      "identifier" : "neonlfo1Dest1Param",
+      "value" : 1
+    },
+    {
+      "address" : "180",
+      "identifier" : "neonlfo1Dest1BaseValue",
+      "value" : 0.3345831036567688
+    },
+    {
+      "address" : "183",
+      "identifier" : "neonlfo1Dest2Param",
+      "value" : 0
+    },
+    {
+      "address" : "182",
+      "identifier" : "neonlfo1Dest2BaseValue",
+      "value" : 0
+    },
+    {
+      "address" : "88",
+      "identifier" : "neonlfo1Rate",
+      "value" : 0.079609759151935577
+    },
+    {
+      "address" : "89",
+      "identifier" : "neonlfo1Amount",
+      "value" : 0.09651908278465271
+    },
+    {
+      "address" : "91",
+      "identifier" : "neonlfo1DelayTime",
+      "value" : 0.35310420393943787
+    },
+    {
+      "address" : "93",
+      "identifier" : "neonlfo3DelayTime",
+      "value" : 0
+    },
+    {
+      "address" : "94",
+      "identifier" : "neonlfo1Waveform",
+      "value" : 0
+    },
+    {
+      "address" : "185",
+      "identifier" : "neonlfo2Dest1Param",
+      "value" : 38
+    },
+    {
+      "address" : "184",
+      "identifier" : "neonlfo2Dest1BaseValue",
+      "value" : 0.41413787007331848
+    },
+    {
+      "address" : "187",
+      "identifier" : "neonlfo2Dest2Param",
+      "value" : 0
+    },
+    {
+      "address" : "186",
+      "identifier" : "neonlfo2Dest2BaseValue",
+      "value" : 0
+    },
+    {
+      "address" : "96",
+      "identifier" : "neonlfo2Rate",
+      "value" : 0.26926818490028381
+    },
+    {
+      "address" : "97",
+      "identifier" : "neonlfo2Amount",
+      "value" : 0.31970754265785217
+    },
+    {
+      "address" : "98",
+      "identifier" : "neonlfo2Waveform",
+      "value" : 0.5
+    },
+    {
+      "address" : "189",
+      "identifier" : "neonlfo3Dest1Param",
+      "value" : 15
+    },
+    {
+      "address" : "188",
+      "identifier" : "neonlfo3Dest1BaseValue",
+      "value" : 0.4559931755065918
+    },
+    {
+      "address" : "191",
+      "identifier" : "neonlfo3Dest2Param",
+      "value" : 0
+    },
+    {
+      "address" : "190",
+      "identifier" : "neonlfo3Dest2BaseValue",
+      "value" : 0
+    },
+    {
+      "address" : "100",
+      "identifier" : "neonlfo3Rate",
+      "value" : 0.24111917614936829
+    },
+    {
+      "address" : "101",
+      "identifier" : "neonlfo3Amount",
+      "value" : 0.97877013683319092
+    },
+    {
+      "address" : "102",
+      "identifier" : "neonlfo3Waveform",
+      "value" : 0.25
+    },
+    {
+      "address" : "192",
+      "identifier" : "neonlfo1Mode",
+      "value" : 0
+    },
+    {
+      "address" : "193",
+      "identifier" : "neonlfo2Mode",
+      "value" : 1
+    },
+    {
+      "address" : "194",
+      "identifier" : "neonlfo3Mode",
+      "value" : 1
+    },
+    {
+      "address" : "123",
+      "identifier" : "neonvintageMode",
+      "value" : 0.053853664547204971
+    },
+    {
+      "address" : "124",
+      "identifier" : "neonglobalBend",
+      "value" : 0.5
+    },
+    {
+      "address" : "125",
+      "identifier" : "neonlayer1Bend",
+      "value" : 0.5
+    },
+    {
+      "address" : "126",
+      "identifier" : "neonlayer2Bend",
+      "value" : 0.5
+    },
+    {
+      "address" : "198",
+      "identifier" : "neonlfoSnapbackEnable",
+      "value" : 0
+    },
+    {
+      "address" : "199",
+      "identifier" : "neonlfo2SnapbackEnable",
+      "value" : 0
+    },
+    {
+      "address" : "200",
+      "identifier" : "neonlfo3SnapbackEnable",
+      "value" : 0
+    },
+    {
+      "address" : "195",
+      "identifier" : "neonlfo1HzEnable",
+      "value" : 1
+    },
+    {
+      "address" : "196",
+      "identifier" : "neonlfo2HzEnable",
+      "value" : 0
+    },
+    {
+      "address" : "197",
+      "identifier" : "neonlfo3HzEnable",
+      "value" : 1
+    },
+    {
+      "address" : "87",
+      "identifier" : "neonlfo1Enable",
+      "value" : 1
+    },
+    {
+      "address" : "95",
+      "identifier" : "neonlfo2Enable",
+      "value" : 1
+    },
+    {
+      "address" : "99",
+      "identifier" : "neonlfo3Enable",
+      "value" : 1
+    },
+    {
+      "address" : "205",
+      "identifier" : "neonfixedVelocityEnable",
+      "value" : 1
+    },
+    {
+      "address" : "209",
+      "identifier" : "neonfilterType",
+      "value" : 0
+    },
+    {
+      "address" : "78",
+      "identifier" : "neonlayer1PWM",
+      "value" : 0
+    },
+    {
+      "address" : "79",
+      "identifier" : "neonlayer2PWM",
+      "value" : 0
+    },
+    {
+      "address" : "210",
+      "identifier" : "neonlayer1PWMEnable",
+      "value" : 0
+    },
+    {
+      "address" : "211",
+      "identifier" : "neonlayer2PWMEnable",
+      "value" : 0
+    },
+    {
+      "address" : "215",
+      "identifier" : "neonj60v2Rate",
+      "value" : 0.5
+    },
+    {
+      "address" : "216",
+      "identifier" : "neonj60v2Depth",
+      "value" : 0.5
+    },
+    {
+      "address" : "217",
+      "identifier" : "neonj60v2Mix",
+      "value" : 1
+    }
+  ],
+  "authored_overlap" : 148,
+  "authored_readback_mismatch" : [
+    "neonfilterRez",
+    "neonlfo2Dest1BaseValue"
+  ],
+  "bank_file_sha256" : "76b095bdaf8859b04d8086abf54f7819489745b16e63b95001549a8fbba7724e",
+  "blocks" : [
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    34,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    17,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    51,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    102
+  ],
+  "component" : "aumu\/j6ct\/AuPr",
+  "component_version" : 67072,
+  "cue_sha256" : "17b7b5389af054fd713c31acadbf170955c4146628872c9482ed23ce07f33943",
+  "dry_control_identifiers" : [
+    "neonverbEnable",
+    "neonstereoWiden",
+    "neoncompressorAmount",
+    "neonautopanRate",
+    "neonautopanDepth",
+    "neondelayEnable",
+    "neonchorusIEnable",
+    "neonchorusIIEnable",
+    "neoncrushEnable"
+  ],
+  "frames" : 148684,
+  "mode" : "dry",
+  "pcm_sha256" : "9737b24fa3523102dafe67716e0a3dcc73cc22647d13be869d0fb006690c7ac2",
+  "rate" : 44100,
+  "schedule" : [
+    {
+      "action" : "on",
+      "frame" : 16384,
+      "note" : 48,
+      "velocity" : 100
+    },
+    {
+      "action" : "off",
+      "frame" : 38434,
+      "note" : 48,
+      "velocity" : 0
+    },
+    {
+      "action" : "on",
+      "frame" : 49459,
+      "note" : 60,
+      "velocity" : 96
+    },
+    {
+      "action" : "on",
+      "frame" : 49459,
+      "note" : 64,
+      "velocity" : 80
+    },
+    {
+      "action" : "on",
+      "frame" : 49459,
+      "note" : 67,
+      "velocity" : 88
+    },
+    {
+      "action" : "off",
+      "frame" : 82534,
+      "note" : 60,
+      "velocity" : 0
+    },
+    {
+      "action" : "off",
+      "frame" : 82534,
+      "note" : 64,
+      "velocity" : 0
+    },
+    {
+      "action" : "off",
+      "frame" : 82534,
+      "note" : 67,
+      "velocity" : 0
+    }
+  ],
+  "wanted" : {
+    "bank" : "DMT CYMATICS",
+    "bank_uuid" : "E5694AB9-BE2B-4256-BC65-EDC580C16C84",
+    "position" : 0,
+    "program" : "BRAINWAVE MONO BASS",
+    "program_uid" : "1E5E5DDF-B5C6-4503-BDBC-CAE9CD1D0A94",
+    "record_sha256" : "77237f3947f9a37df74e7e4a0f8e9512ff460fb67937945a88f7b84d947577e6"
+  },
+  "warm_frames" : 16384
+}

@@ -1,0 +1,80 @@
+{
+  "BRAINWAVE MONO BASS": {
+    "note": {
+      "wet_rms_dBFS": -21.195767685195012,
+      "dry_rms_dBFS": -21.144501163457406,
+      "wet_minus_dry_dB": -0.05126652173760604,
+      "authored_repeat_rms_delta_dB": 0.00041861125378872543
+    },
+    "chord": {
+      "wet_rms_dBFS": -19.97803491123396,
+      "dry_rms_dBFS": -20.019010666207055,
+      "wet_minus_dry_dB": 0.04097575497309691,
+      "authored_repeat_rms_delta_dB": -0.0008929445290668525
+    },
+    "early_tail": {
+      "wet_rms_dBFS": -25.698025564151337,
+      "dry_rms_dBFS": -25.737972481798774,
+      "wet_minus_dry_dB": 0.03994691764743763,
+      "authored_repeat_rms_delta_dB": -0.002811392776045807
+    },
+    "late_tail": {
+      "wet_rms_dBFS": -39.48036620370249,
+      "dry_rms_dBFS": -39.5170634962185,
+      "wet_minus_dry_dB": 0.03669729251600984,
+      "authored_repeat_rms_delta_dB": -0.003874423678652761
+    }
+  },
+  "BASS: Solidify": {
+    "note": {
+      "wet_rms_dBFS": -15.469029479082915,
+      "dry_rms_dBFS": -18.958996527428226,
+      "wet_minus_dry_dB": 3.489967048345312,
+      "authored_repeat_rms_delta_dB": 0.019490613608073915
+    },
+    "chord": {
+      "wet_rms_dBFS": -13.904020194645545,
+      "dry_rms_dBFS": -17.728039329224956,
+      "wet_minus_dry_dB": 3.8240191345794106,
+      "authored_repeat_rms_delta_dB": 0.14427025088913048
+    },
+    "early_tail": {
+      "wet_rms_dBFS": -40.11126611624178,
+      "dry_rms_dBFS": -43.28577956276453,
+      "wet_minus_dry_dB": 3.1745134465227522,
+      "authored_repeat_rms_delta_dB": -1.3225214823551994
+    },
+    "late_tail": {
+      "wet_rms_dBFS": -221.0230429877238,
+      "dry_rms_dBFS": -213.29033368150732,
+      "wet_minus_dry_dB": -7.732709306216492,
+      "authored_repeat_rms_delta_dB": 0.6614418896803613
+    }
+  },
+  "Raw J106 101": {
+    "note": {
+      "wet_rms_dBFS": -14.048254785724366,
+      "dry_rms_dBFS": -18.464012893678284,
+      "wet_minus_dry_dB": 4.415758107953918,
+      "authored_repeat_rms_delta_dB": 0.0
+    },
+    "chord": {
+      "wet_rms_dBFS": -11.433927633482385,
+      "dry_rms_dBFS": -13.465214926251178,
+      "wet_minus_dry_dB": 2.031287292768793,
+      "authored_repeat_rms_delta_dB": 0.0
+    },
+    "early_tail": {
+      "wet_rms_dBFS": -32.89270386075566,
+      "dry_rms_dBFS": -38.99562360620499,
+      "wet_minus_dry_dB": 6.102919745449327,
+      "authored_repeat_rms_delta_dB": 0.0
+    },
+    "late_tail": {
+      "wet_rms_dBFS": -216.2185938692798,
+      "dry_rms_dBFS": -217.20160634027224,
+      "wet_minus_dry_dB": 0.9830124709924348,
+      "authored_repeat_rms_delta_dB": 0.0
+    }
+  }
+}
