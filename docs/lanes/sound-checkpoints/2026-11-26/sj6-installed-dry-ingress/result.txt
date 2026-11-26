@@ -1,0 +1,5 @@
+sender_sha256=f0639b038b3dd82d9bd28c2e3848b59f4711cd1c47a63b7f1cb322be85bb43bd
+capture_sha256_pcm=76bdf841f398a11c4846a538a6863cc8e1c538600b1da843725830dba364bf21
+before_explicit_dry={107: 1, 108: 0.03187546133995056, 109: 0}; at_render={107: 0, 108: 0.03187546133995056, 109: 0}; after_render={107: 0, 108: 0.03187546133995056, 109: 0}
+explicit host dry order=[11, 16, 17, 22, 23, 24, 40, 41, 107]; last writer sends 107=0
+No host #108/#109 write follows; no proof of hidden AU activity.
