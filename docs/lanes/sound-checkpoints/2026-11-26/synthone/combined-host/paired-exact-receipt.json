@@ -1,0 +1,22 @@
+{
+  "cases": 906,
+  "same_reference_pcm": 906,
+  "same_candidate_pcm": 906,
+  "scope": "fixed-note-tape host audio, not native timing or fit",
+  "old_full_receipt_sha256": "a084f5ed40a84707147591590b4efe1a8f2edf3cef6ab3d1b33f4d55b7906b19",
+  "new_full_receipt_sha256": "d12973cfecde739ecbe9b01096026dae4a2c2c8757b50ef02a5bf55a21a994ba",
+  "old_inputs": {
+    "recovered-sound/s1-room-parity/unified-releasephase/original": "2b6a520a454df06f7e6d331d8049537e92a609a35a8d14baa16c0447dbcd935f",
+    "s1-morph-compact/private/shared-tight/build/candidate": "fb391d7f59eca8aedc35fc6e260aebacdf6496cbe85a68abe1b254f11028bba0",
+    "s1-fx-parity/reference-build/factory-inputs/public-morphs.f32": "0d35b5422cb5d3e0e349a66c9e0a50f2980b6287e68f8d94f55640d3f8168bd5",
+    "recovered-sound/s1-room-parity/aligned-commands.bin": "622050ebc18a4dc98461d68f0f56b76924868b64c98bb370153c98cf3e577b41",
+    "recovered-sound/s1-bank-replay/original-private/pack.private": "d5e003e878ab46d6051d6cff16be557fbdfde7fccaa9255e4217bb5ffb51fa43"
+  },
+  "new_inputs": {
+    "recovered-sound/s1-room-parity/unified-releasephase/original": "2b6a520a454df06f7e6d331d8049537e92a609a35a8d14baa16c0447dbcd935f",
+    "s1-morph-compact/private/paired-combined/candidate": "6c7b6f6302e65ddc2d910c471402723ee23abe795430b33d24d3924f1e639f8f",
+    "s1-fx-parity/reference-build/factory-inputs/public-morphs.f32": "0d35b5422cb5d3e0e349a66c9e0a50f2980b6287e68f8d94f55640d3f8168bd5",
+    "recovered-sound/s1-room-parity/aligned-commands.bin": "622050ebc18a4dc98461d68f0f56b76924868b64c98bb370153c98cf3e577b41",
+    "recovered-sound/s1-bank-replay/original-private/pack.private": "d5e003e878ab46d6051d6cff16be557fbdfde7fccaa9255e4217bb5ffb51fa43"
+  }
+}
