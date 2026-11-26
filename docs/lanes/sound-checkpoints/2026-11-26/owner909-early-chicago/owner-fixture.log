@@ -1,0 +1,9 @@
+firmware/src/app/engine.c: OK
+firmware/src/dsp/drum909.c: OK
+firmware/src/dsp/drum808.c: OK
+firmware/src/dsp/x0x_param.c: OK
+build/smk37-elite/gen/x0x_drum_samples.h: OK
+build/smk37-elite/gen/x0x_drum_tables.h: OK
+experiments/original_synth/chicago_mp4.c: OK
+Active owner spans 909=192 808=192 Chicago A=192 Chicago B=192; both mixed sends present=192
+192 spans, 20904 frames, 6810624 exact compared state/bus bytes; 124 actual overlapping host renderer intervals (max 53892 ns; not target timing)

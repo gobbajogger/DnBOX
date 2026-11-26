@@ -70,7 +70,12 @@ isolated kernel timing, or partial link into a release claim.
   C0, preserving sum order. The guarded engine TU compiles (+346 B
   named text, +20 B BSS); twelve extracted C cases reject unsafe
   takeover and nine abstract orders preserve barriers. No paired
-  link, target PCM, or timing yet. Never combine the two memory
+  link, target PCM, or timing yet. Separate
+  [active host DSP proof](owner909-early-chicago/owner-fixture.log)
+  compares 6.81 MB of exact outputs/states over 192 active
+  spans, with actual host overlap on 124; it does not cover
+  the linked product scheduler, S1 owner, or final master.
+  Never combine the two memory
   estimates within the same 52 B of available reserve headroom.
 
 - **Synth One filter-envelope sharing, guarded.** The
