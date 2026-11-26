@@ -37,6 +37,17 @@ isolated kernel timing, or partial link into a release claim.
   extra zero frames at onset, not proof of exactly two DMA
   misses or an external tape issue. The mixed/ALNK boundary
   remains unattributed.
+  A [bounded one-shot recorder](909-first-cue-recorder/README.md)
+  would add 48 B and bind a first-cue producer to its rendered
+  ALNK half. It cannot attest DAC consumption by itself. The native
+  attempt did not link (compiler output I/O), so size is estimated.
+  A separate [whole-owner overlap](owner909-early-chicago/README.md)
+  runs 909 on C1 after the existing 808 prefix and advances bass on
+  C0, preserving sum order. The guarded engine TU compiles (+346 B
+  named text, +20 B BSS); twelve extracted C cases reject unsafe
+  takeover and nine abstract orders preserve barriers. No paired
+  link, target PCM, or timing yet. Never combine the two memory
+  estimates within the same 52 B of available reserve headroom.
 
 - **Synth One filter-envelope sharing, guarded.** The
   [paired native link and signed-PCM matrix](s1-shared-fenv/README.md)

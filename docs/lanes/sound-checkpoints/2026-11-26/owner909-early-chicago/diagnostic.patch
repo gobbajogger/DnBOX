@@ -1,0 +1,208 @@
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -3005,6 +3005,13 @@
+ static uint8_t eng_plan;                               /* the plan in force (the same bits) */
+ static uint32_t eng_job_cost[JB_N];                    /* ticks per 256 frames when active */
+ static uint32_t eng_job_arg;                           /* this stretch's n, 808 mask and window offset */
++#if X0X_DIAG_OWNER909_EARLY_CHICAGO
++/* Only C0 writes and reads these; never a second copy of live DSP state. */
++static uint32_t early_bass_ticks[NBASS];
++static uint8_t early_bass_ready;
++static volatile uint32_t early_909_claim __attribute__((aligned(4)));
++static volatile uint32_t early_909_partial_fault __attribute__((aligned(4)));
++#endif
+ static uint8_t eng_job_solo;
+ static uint8_t eng_c1_waited;                          /* core 0 has called plat_cpu2_wait this stretch */
+ static uint8_t eng_brk_mark;                           /* brk_midi_count before core 1 could add any */
+@@ -3030,6 +3037,19 @@
+ /* both cores see each other's writes (fm1: csync; one core: the call is the barrier) */
+ __attribute__((weak)) void plat_cpu2_sync(void) {}
+ #define eng_sync() plat_cpu2_sync()
++#if X0X_DIAG_OWNER909_EARLY_CHICAGO
++static void early_909_check_halted(void)
++{
++    eng_sync();
++    if (eng_c1_mask == (1u << JB_909) &&
++        ((early_909_claim == 1 && !eng_808_body) ||
++         (early_909_claim == 2 && eng_stage < 1))) {
++        early_909_partial_fault=early_909_claim;
++        eng_sync();
++        __builtin_trap(); /* never reach local replay with partially written state */
++    }
++}
++#endif
+ 
+ static void job_cost(int j, uint32_t ticks, uint32_t n)
+ {
+@@ -3124,6 +3144,9 @@
+                 eng_c1_waited = 1;
+                 (void)plat_cpu2_wait();
+             }
++#if X0X_DIAG_OWNER909_EARLY_CHICAGO
++            early_909_check_halted();
++#endif
+             if (!eng_808_body)
+                 d808_body_run();
+             return eng_808_body ? 0 : 1;
+@@ -3131,6 +3154,50 @@
+     }
+ }
+ 
++#if X0X_DIAG_OWNER909_EARLY_CHICAGO
++/* Whole-owner A/B preparation only; no writes to shared dry/send sum.
++ * Bass B retains right-left lane order and no shared Chicago memo crosses cores. */
++static void bass_prepare_job(int bv, int core, uint32_t n)
++{
++    int p=PART_303A+bv;
++    float *bb[NBASS];
++    uint32_t i;
++    bb[bv]=eng_bass_buf[2*bv];bb[1-bv]=eng_bass_buf[2*bv+1];
++        PROF_T(pb);
++        (void)original_runtime_prepare(&original_bass[bv], seq_tempo(&seq));
++        bass_adapt_pre(bv, (unsigned)n);
++        int status = original_runtime_render(&original_bass[bv], bv ? &original_workspace_b : &original_workspace,
++                                             bb[bv], bb[1-bv], n);
++        bass_adapt_post(bv, bb[bv], bb[1-bv], (unsigned)n);
++        if (!core)
++            PROF_ADD(2 + bv, pb);
++        bass_render_ok[bv] = (uint8_t)(status == ORIGINAL_RUNTIME_OK);   /* recorder: core 0, after */
++        if (status == ORIGINAL_RUNTIME_OK) {
++            /* One coherent request decision per sub-block. Once note ownership is
++             * gone, fade residual insert output over 512 samples. Cancellation or
++             * a fresh owner ramps back smoothly; DSP histories keep advancing. */
++            int fade = engine_bass_preset_pending(bv) == 2 && !original_runtime_owned(&original_bass[bv]);
++            bass_303_accent_makeup(bb[bv], bb[1-bv], (unsigned)n, &bass_accent_mk[bv], bass_accent_mk_to[bv]);
++            if (fade || original_switch_gain[bv] != 512u) {
++                for (i = 0; i < n; ++i) {
++                    if (fade) { if (original_switch_gain[bv]) --original_switch_gain[bv]; }
++                    else if (original_switch_gain[bv] < 512u) ++original_switch_gain[bv];
++                    float gain = (float)original_switch_gain[bv] * (1.0f/512.0f);
++                    bb[bv][i] *= gain; bb[1-bv][i] *= gain;
++                }
++            }
++            /* Only the trailing quiet frames survive the last audible sample. */
++            uint32_t last = n;
++            while (last && !(fm_fabsf(bb[bv][last - 1]) > 1.0f/65536.0f ||
++                             fm_fabsf(bb[1-bv][last - 1]) > 1.0f/65536.0f))
++                --last;
++            uint32_t quiet = last ? n - last : original_quiet_samples[bv] + n;
++            bass_quiet_next[bv] = quiet < 512u ? quiet : 512u;
++            bfx_shape(p, bb[bv], bb[1-bv], 0, 0, 2, (int)n);
++        }
++}
++
++#endif
+ /* one job, render and mix; core 1: not timed by the cycle counter (core 0's) */
+ static int run_job(int j, int core)
+ {
+@@ -3212,6 +3279,14 @@
+         float *bl = eng_bass_buf[2 * bv], *br = eng_bass_buf[2 * bv + 1];
+         float *bb[NBASS];
+         bb[bv] = bl; bb[1 - bv] = br;                     /* bass B renders right-left, as always */
++#if X0X_DIAG_OWNER909_EARLY_CHICAGO
++        /* Only C0 can have prepared these inputs at the admitted call site. */
++        if (!core && early_bass_ready)
++            tk -= early_bass_ticks[bv];
++        else
++            bass_prepare_job(bv,core,n);
++        int status = bass_render_ok[bv];
++#else
+         PROF_T(pb);
+         (void)original_runtime_prepare(&original_bass[bv], seq_tempo(&seq));
+         bass_adapt_pre(bv, (unsigned)n);
+@@ -3244,11 +3319,16 @@
+             bass_quiet_next[bv] = quiet < 512u ? quiet : 512u;
+             bfx_shape(p, bb[bv], bb[1-bv], 0, 0, 2, (int)n);
+         }
++#endif
+         w0 = plat_ticks24();
+         if (stage_wait((uint32_t)(2 + bv), core))         /* A mixes after the 808, B after A */
+             return 0;
+         wt = plat_ticks24() - w0;
++#if X0X_DIAG_OWNER909_EARLY_CHICAGO
++        if (status) {
++#else
+         if (status == ORIGINAL_RUNTIME_OK) {
++#endif
+             /* A part that was silent when Solo excluded it must not leak a new
+              * note through the 10 ms mix glide-out: start its glides at zero.
+              * (The quiet count from before this stretch, as the one-core order read it.) */
+@@ -3300,8 +3380,15 @@
+     /* Real platform: the worker keeps this frame until all its bass jobs
+      * finish after stage 1. Existing takeover cannot enter before stage 1.
+      * Host runs core1 synchronously, so it leaves this opt-in unadvertised. */
+-    if (eng_808_split && !eng_808_body)
++    if (eng_808_split && !eng_808_body) {
++#if X0X_DIAG_OWNER909_EARLY_CHICAGO
++        if (eng_c1_mask==(1u<<JB_909)) {
++            early_909_claim=1;
++            eng_sync(); /* claim visible before any prefix state write */
++        }
++#endif
+         d808_body_run();
++    }
+     for (j = eng_c1_next; j < JB_N; j++) {
+         if (!(eng_c1_mask & (1u << j)))
+             continue;
+@@ -3313,6 +3400,12 @@
+         if (eng_stage < (j == JB_808 ? 1u : j == JB_A ? 2u : j == JB_B ? 3u : 0u))
+             return;
+ #endif
++#if X0X_DIAG_OWNER909_EARLY_CHICAGO
++        if (j==JB_909 && eng_c1_mask==(1u<<JB_909)) {
++            early_909_claim=2;
++            eng_sync(); /* claim visible before any kit or accumulation write */
++        }
++#endif
+         if (!run_job(j, 1))
+             return;
+         eng_c1_next = (uint8_t)(j + 1);
+@@ -3333,6 +3426,13 @@
+         (void)plat_cpu2_wait();
+     }
+     eng_sync();
++#if X0X_DIAG_OWNER909_EARLY_CHICAGO
++    early_909_check_halted();
++    /* A halt can retire the job after stage 1 published but before next
++     * advanced. A published 909 must never execute again either. */
++    if (eng_c1_mask==(1u<<JB_909) && eng_stage>=1)
++        eng_c1_next=JB_N;
++#endif
+     for (j = eng_c1_next; j < JB_N && eng_stage < s; j++) {
+         if (!(eng_c1_mask & (1u << j)))
+             continue;
+@@ -3466,6 +3566,13 @@
+     bass_render_ok[0] = bass_render_ok[1] = 0;
+     original_rec_cancel_cut();                        /* both basses' recorder state: here, before the jobs */
+     m = plan_pick(n);
++#if X0X_DIAG_OWNER909_EARLY_CHICAGO
++    early_bass_ready=0;
++    early_909_claim=0; /* C1 has joined the previous stretch */
++    if (drum909_active(&d909) &&
++        original_bass[1].kind == ORIGINAL_SOUND_CHICAGO)
++        m=1u << JB_909;   /* complete kit, not an individual sampler */
++#endif
+     eng_c1_mask = (uint8_t)m;
+     /* 808 stays on core 0 and core 1 has other work: move the BD+SD prefix */
+     eng_808_split = (uint8_t)(!(m & (1u << JB_808)) && m && drum808_active(&d808));
+@@ -3476,6 +3583,20 @@
+         eng_808_split = 0;
+         eng_808_body = 1;
+     }
++#if X0X_DIAG_OWNER909_EARLY_CHICAGO
++    /* After actual worker admission only. No other C1 bass/BREAK publisher.
++     * Prefix uses 808 buses; A/B workspaces are released before C0 enters
++     * the 808 job and any borrowed metal window. Commit ordering unchanged. */
++    if (eng_c1_mask == (1u << JB_909) &&
++        original_bass[1].kind == ORIGINAL_SOUND_CHICAGO) {
++        for (int bv=0;bv<NBASS;bv++) {
++            uint32_t tick=plat_ticks24();
++            bass_prepare_job(bv,0,n);
++            early_bass_ticks[bv]=plat_ticks24()-tick;
++        }
++        early_bass_ready=1;
++    }
++#endif
+ #if X0X_DEBUG
+     eng_dbg_nsub++;
+     uint32_t w0 = plat_ticks24();

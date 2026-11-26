@@ -1,0 +1,100 @@
+--- a/firmware/src/app/main_fm1.c
++++ b/firmware/src/app/main_fm1.c
+@@ -26,6 +26,14 @@
+     uint32_t crash_seen;                            /* the crash count already reported at a boot */
+ } x0x_dbg __attribute__((section(".noinit")));
+ static uint8_t safe_mode;
++#if DNBOX_LAB_FIRST_CUE
++#if !X0X_COLD_COMPANION_LAB
++#error first-cue recorder is diagnostic only
++#endif
++/* 12 words: stage, actual sub-render start/range, 909 bus samples,
++ * callback ordinal, ALNK flags, total elapsed us, four final DMA words. */
++volatile uint32_t lab_first_cue[12] X0X_POOL __attribute__((aligned(4)));
++#endif
+ #if X0X_DEBUG
+ /* development: the slowest block since boot, taken apart (read over USB: tools/fm1_debug.py) */
+ extern volatile uint32_t eng_dbg_wait, eng_dbg_nsub;
+@@ -51,6 +59,12 @@
+             engine_render(o + 2u * k, REND_FRAMES);
+ #if FELUCCA_UAC
+             uac_tap(o + 2u * k, REND_FRAMES);       /* the USB audio input: the same master output */
++#endif
++#if DNBOX_LAB_FIRST_CUE
++            if (lab_first_cue[0]==1 && lab_first_cue[1]==65536u) {
++                lab_first_cue[2]|=k<<16;
++                lab_first_cue[0]=2;       /* pin subcall within half, before further rendering */
++            }
+ #endif
+             engine_volume(o + 2u * k, REND_FRAMES);     /* USB AUDIO FULL: the MASTER knob after the tap */
+ #if FELUCCA_UAC
+@@ -102,7 +116,27 @@
+         uint32_t half = fm1_audio_free_half();
+         render_block(&abuf[half * HALF_WORDS]);
+         fm1_audio_ack_half();
++#if DNBOX_LAB_FIRST_CUE
++        const uint32_t exit_half=fm1_audio_free_half();  /* the original test read */
++        if (lab_first_cue[0]==2) {
++            const uint32_t off=lab_first_cue[2]>>16;
++            if (off < HALF_FRAMES && HALF_FRAMES-off>8u) {
++                const int32_t *first=abuf+half*HALF_WORDS+off*2u;
++                lab_first_cue[5]=x0x_dbg.halves-1u;
++                lab_first_cue[6]=(uint32_t)p | (half<<8) | (exit_half<<9) |
++                    ((exit_half!=half)<<10);
++                lab_first_cue[7]=x0x_dbg.last_us;
++                lab_first_cue[8]=(uint32_t)first[0];
++                lab_first_cue[9]=(uint32_t)first[1];
++                lab_first_cue[10]=(uint32_t)first[16];
++                lab_first_cue[11]=(uint32_t)first[17];
++                lab_first_cue[0]=3;        /* complete, publish last */
++            } else lab_first_cue[0]=0xffffffffu;
++        }
++        if (exit_half != half) {
++#else
+         if (fm1_audio_free_half() != half) {
++#endif
+ #if X0X_DEBUG
+             x0x_worst.late_in++;
+ #endif
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -3012,6 +3012,9 @@
+  * metals' voices on core 0 in parallel, mid lanes and metal mix after the body
+  * is visible. No added audio latency; the sums are the same bits. */
+ extern volatile uint32_t d9_test_timeline[4];
++#if DNBOX_LAB_FIRST_CUE
++extern volatile uint32_t lab_first_cue[12];
++#endif
+ static uint8_t eng_808_split;
+ static volatile uint8_t eng_808_body;                  /* 1: BD+SD is in left808/right808 */
+ static float eng_vol;                                  /* this callback's master volume (render_sub may master) */
+@@ -3151,6 +3154,14 @@
+         } else {
+             drum909_render_st_cleared(&d909,dry_l,dry_r,rev,dly,(int)n,
+                         smc_audible_drums(solo,PART_909));
++#if DNBOX_LAB_FIRST_CUE
++            if (lab_first_cue[0]==1 && d8_frame==65536u) {
++                uint32_t u;
++                __builtin_memcpy(&u,&dry_l[0],4); lab_first_cue[3]=u;
++                if (n>8u) { __builtin_memcpy(&u,&dry_l[8],4); lab_first_cue[4]=u; }
++                lab_first_cue[2]|=0x200u | (n>8u ? 0x400u : 0u);
++            }
++#endif
+             if (d8_frame==73728u) {
+                 { uint32_t bits; __builtin_memcpy(&bits,&dry_l[8],4); d9_test_timeline[1]=bits; }
+                 { uint32_t bits; __builtin_memcpy(&bits,&rev[8],4); d9_test_timeline[2]=bits; }
+@@ -3676,6 +3687,14 @@
+             motion_tick(&mot, n);
+         PROF_ADD(7, pt);
+     }
++#if DNBOX_LAB_FIRST_CUE
++    if (d8_frame==65536u && lab_first_cue[0]==0) {
++        lab_first_cue[1]=d8_frame;
++        /* n is 256 maximum; low 9 bits hold n, flags start at bit 9. */
++        lab_first_cue[2]=n;
++        lab_first_cue[0]=1;
++    }
++#endif
+     d9_test_keys();
+     while (done < n) {
+         uint32_t k = seq_until_event(&seq, n - done);
