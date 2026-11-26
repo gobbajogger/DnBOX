@@ -38,7 +38,11 @@ isolated kernel timing, or partial link into a release claim.
   consistent by recurrence, not approximate coefficients: both
   real cutoff tapes (123,515 frames each) and 104,640 synthetic
   lifecycle cases are word-exact. Isolated PI32 text 582→556 B
-  still needs fmaf/tanhf; no admitted native owner combination.
+  originally needed fmaf/tanhf. The [tested exact shared FMA](sj6-ota-shared-fma/SHARED.md)
+  eliminates fmaf without altering Chicago, and all original-cue
+  and stress output words still match. The 622 B native object
+  and at least 688 B of absent tanhf/expm1f code exceed APP
+  before extra dependencies. No native clock or OTA admission.
 
 - **SuperJ6 Main physical OTA is now independently reconstructed.**
   The [same-input leaf and full typed Raw controls](sj6-raw-main-ota/README.md)

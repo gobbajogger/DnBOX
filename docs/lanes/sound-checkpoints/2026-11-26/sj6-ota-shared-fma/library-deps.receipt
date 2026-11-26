@@ -1,0 +1,14 @@
+0ffdc7faf4f8ecace4e119accce10ecb64dac16122d2586d323c388da305bd7c  sj6-j60-right-native/out/warm-elite/1/never-install.elf
+02000d34 00000070 T memset
+0205dbe0 0000034c t original_fma_compact_bits
+0205df2c 000003be t original_fma_finite_bits_reference
+ddbcae26a746c6ee2f4ccae382ceb4762d06f42d3544875862dcb75f94c3ea51  sj6-j60-right-native/out/warm-pro/1/never-install.elf
+02000d34 00000070 T memset
+0205dbe0 0000034c t original_fma_compact_bits
+0205df2c 000003be t original_fma_finite_bits_reference
+/workspace/scratch/3a7051e761a0/prereqs/jieli-linux-toolchains-20260730.1/pi32v2/lib/r3/libm.a:lib_a-sf_expm1.o:00000000 0000021e T expm1f
+/workspace/scratch/3a7051e761a0/prereqs/jieli-linux-toolchains-20260730.1/pi32v2/lib/r3/libm.a:lib_a-sf_tanh.o:         U expm1f
+/workspace/scratch/3a7051e761a0/prereqs/jieli-linux-toolchains-20260730.1/pi32v2/lib/r3/libm.a:lib_a-sf_tanh.o:         U fabsf
+/workspace/scratch/3a7051e761a0/prereqs/jieli-linux-toolchains-20260730.1/pi32v2/lib/r3/libm.a:lib_a-sf_tanh.o:00000000 00000092 T tanhf
+0fb9151ce826fe1941b2634fe4ee56d57da1745333b69786b371bde18568c791  /tmp/phaser-warm-own.Y0XNbQ/tree/experiments/original_synth/fused_reference.c
+44f4617f419846ebc5c4ab3ec008876b6e9e2f9ab238c223e7941bb083e8eeb0  /tmp/phaser-warm-own.Y0XNbQ/tree/experiments/original_synth/fused_reference.h
