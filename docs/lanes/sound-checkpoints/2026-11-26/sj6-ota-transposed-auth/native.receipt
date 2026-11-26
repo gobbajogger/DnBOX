@@ -1,0 +1,23 @@
+packed
+00000000 00000030 t paired_fma
+00000000 000000ee t clock_2x
+00000000 00000106 T physical_tick
+         U fm_tanhf
+         U original_fma_compact_bits
+         U original_fma_finite_bits_reference
+fused
+00000000 00000024 T admit
+00000000 00000030 t paired_fma
+00000000 000000ee t clock_2x
+00000000 00000150 t physical_tick
+         U fm_tanhf
+         U original_fma_compact_bits
+         U original_fma_finite_bits_reference
+separate
+00000000 00000024 T admit
+00000000 00000030 t paired_fma
+00000000 000000ee t clock_2x
+00000000 0000012c t physical_tick
+         U fm_tanhf
+         U original_fma_compact_bits
+         U original_fma_finite_bits_reference

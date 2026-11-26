@@ -1,0 +1,15 @@
+--- a/firmware/src/dsp/juno6.h
++++ b/firmware/src/dsp/juno6.h
+@@ -80,7 +80,11 @@
+ #error stock Juno layout may be reclaimed only when factory INIT owns all voices
+ #endif
+ #if DNBX_SJ6_RECLAIM_STOCK_LAYOUT
+- float typed_filter_gap_a[55];
++ /* Reserved only: no DSP reader/writer until owner admission is qualified. */
++ struct {
++    struct {float up[2][2], down[2][2], condition;} voice[JUNO6_VOICES];
++    float spare;
++ } typed_filter_gap_a;
+  float sample_rate;
+  float typed_filter_gap_b[8];
+  uint8_t retired_stock_flags[2];

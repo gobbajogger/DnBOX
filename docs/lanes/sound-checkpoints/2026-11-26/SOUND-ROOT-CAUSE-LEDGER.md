@@ -632,3 +632,19 @@ only the selector byte; the live resolver maps Filter to #7/#8, not
 the separate legacy #129/#130. Ten destination pairs verified. Do not
 insert an automatic note-time or preset-load modulation from the
 selector value. This does not close the gesture dynamics.
+
+### Smaller fixed all-pass state on two authentic Main leaf cues
+The [52-byte transposed leaf proof](sj6-ota-transposed-auth/README.md)
+includes both original authored cutoff profiles (123,515 frames each).
+The separate-multiply version differs from the exact 64-byte model by
+at most −138.10 dBr in any measured signed window; original-reference
+full ratios are −139.44 and −127.25 dBr. The PI32 622-byte split object
+is 18 B smaller and adds eight ordinary multiplies per active output
+frame versus the prior 640-byte exact split. Native cycles are not
+measured. This is not bit-exact, a full signal match, or admission.
+
+The dormant typed storage uses 216 B contiguous reserved padding for
+six voices, with separately owned poles and no pool credit. Both
+target layouts retain all verified offsets. Control clock, live
+route/feedback guards, and actual CPU/flash fit remain open. No product
+enablement.

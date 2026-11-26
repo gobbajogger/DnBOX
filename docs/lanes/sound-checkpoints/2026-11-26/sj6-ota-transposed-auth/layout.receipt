@@ -1,0 +1,40 @@
+elite 0
+00004b53 00003931 R full_size
+00000000 00000165 R juno_core_off
+00000165 00000109 R juno_knobs_off
+0000026e 00000103 R juno_pb_off
+00008484 00003fb5 R owner_size
+00002ca2 00001eb1 R s1_history_off
+00000371 00002931 R unison_hist_off
+elite 1
+00004b53 00003931 R full_size
+0000c439 000000dd R gap_a
+0000c516 00000021 R gap_b
+0000c537 0000000d R gap_c
+00000000 00000165 R juno_core_off
+00000165 00000109 R juno_knobs_off
+0000026e 00000103 R juno_pb_off
+00008484 00003fb5 R owner_size
+00002ca2 00001eb1 R s1_history_off
+00000371 00002931 R unison_hist_off
+pro 0
+00004b53 00003931 R full_size
+00000000 00000165 R juno_core_off
+00000165 00000109 R juno_knobs_off
+0000026e 00000103 R juno_pb_off
+00008484 00003fb5 R owner_size
+00002ca2 00001eb1 R s1_history_off
+00000371 00002931 R unison_hist_off
+pro 1
+00004b53 00003931 R full_size
+0000c439 000000dd R gap_a
+0000c516 00000021 R gap_b
+0000c537 0000000d R gap_c
+00000000 00000165 R juno_core_off
+00000165 00000109 R juno_knobs_off
+0000026e 00000103 R juno_pb_off
+00008484 00003fb5 R owner_size
+00002ca2 00001eb1 R s1_history_off
+00000371 00002931 R unison_hist_off
+317e9a1fef94c40810802df7b31ff4e521bf0e39e4b19786176732c17b38e640  /workspace/scratch/3a7051e761a0/sj6-stock-layout/scratch.lvzk/pre-before
+firmware/src/dsp/juno6.h:80:2: error: #error stock Juno layout may be reclaimed only when factory INIT owns all voices

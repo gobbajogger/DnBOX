@@ -1,0 +1,65 @@
+packed
+	r0 = r1 - r11 (f)
+	call paired_fma
+	r0 = r7 - r1 (f)
+	call paired_fma
+	r0 = r9 - r11 (f)  #
+	call paired_fma
+	r0 = r7 - r1 (f)
+	call paired_fma
+	r0 = r0 - r7 (f)
+	call paired_fma
+	r0 = r6 - r1 (f)
+	call paired_fma
+	r0 = r9 - r6 (f)  #
+	call paired_fma
+	r0 = r5 - r1 (f)
+	call paired_fma
+	r1 = r1 * r2 (f)
+	r1 = r1 * r2 (f)
+fused
+	call paired_fma
+	call paired_fma
+	call paired_fma
+	call paired_fma
+	call paired_fma
+	call paired_fma
+	call paired_fma
+	call paired_fma
+	call paired_fma
+	call paired_fma
+	call paired_fma
+	call paired_fma
+	call paired_fma
+	call paired_fma
+	call paired_fma
+	call paired_fma
+	r1 = r1 * r2 (f)
+	r1 = r1 * r2 (f)
+separate
+	call paired_fma
+	r0 = r6 * r5 (f)
+	r0 = r12 - r0 (f)
+	call paired_fma
+	r0 = r10 * r0 (f)
+	r0 = r5 - r0 (f)
+	call paired_fma
+	r0 = r6 * r5 (f)
+	r0 = r12 - r0 (f)
+	call paired_fma
+	r0 = r10 * r6 (f)
+	r0 = r5 - r0 (f)
+	call paired_fma
+	r0 = r6 * r5 (f)
+	r0 = r7 - r0 (f)
+	call paired_fma
+	r0 = r8 * r0 (f)
+	r0 = r5 - r0 (f)
+	call paired_fma
+	r0 = r7 * r6 (f)
+	r0 = r9 - r0 (f)
+	call paired_fma
+	r1 = r5 * r0 (f)
+	r1 = r6 - r1 (f)
+	r0 = r0 * r2 (f)
+	r0 = r0 * r2 (f)
