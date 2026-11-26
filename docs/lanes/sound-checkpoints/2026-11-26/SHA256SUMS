@@ -56,9 +56,12 @@ b99bd18b45102191790b06e4d5e202dc7cdf1d2b74254070ff8c85261129b428  ./replay-recov
 31b08131f07713a7b440febc7328be528147f93cfc15f762f6fb7042434b199d  ./superj6/filter_panel.h
 ab696b3232bca7c35e45f2e43feff25e1e59387cf9f96e8e22710e00824cbdae  ./superj6/filter_receiver_probe.c
 11ef507231b3e8698da328873103250f28fb2acdbb2d912611a744033ec8825f  ./superj6/main-generated-source-order.patch
+81bd975dab2d35770b2611c2424f9d690f33322deec1a9b84524f755fc3b992f  ./superj6/master-boundary/CURRENT-MASTER.md
 c981feed1269ce59034ec2e30387f558e59ac8d632915854a21cc158941e2f05  ./superj6/master-boundary/MAC-CAPTURE-ATTEMPT.md
 779b4a2cf9c962003998d071403620a041f0d916f6730ac288ba102f9fc04249  ./superj6/master-boundary/README.md
+a15f014561465291e537b5f7871c02e0043ae1555aeaae81960d7ead27735990  ./superj6/master-boundary/check-current-master.py
 16b39b5b4d09ca4caf8546a91bc6e7e14654308e5ed31d0e84ffda82dd36f216  ./superj6/master-boundary/check.py
+dccb08dcad57b78370f32f147e2539898f2c7e14cf9e33b62bbe1854ec0af1f5  ./superj6/master-boundary/current-master-result.json
 90ec40e60ee8daee867fcd7d885ab0d6fd310394ccc67950a68fcf8e081b8532  ./superj6/master-boundary/old-premaster/README.md
 8609de4aa9210722135622f4fc592e2dad9f52c654b4de5c472fa04242e8134f  ./superj6/master-boundary/old-premaster/probe.py
 6fd0b252a42c635afbe35dd14e75481571594314bd1c2971943950a2b37c7868  ./superj6/master-boundary/old-premaster/result.json
@@ -74,6 +77,9 @@ ab9968277301006181f5a75008e126afafdf3b732745acae43c11f816b517729  ./superj6/nati
 6df42a7a046f764acf501a564433f8b18af87e55fd586cfd1f384c0da2b4538d  ./superj6/normal_coeff_test.c
 abfc8788813dd1cea5f08f4f1c23b756589c72113c3f471085f8ff8a54323bdc  ./superj6/normal_cutoff.h
 61eed7a411e5db2dc8aa6bdd87daec1de2ffea5935ac6cfe6fc1c2f1e2f327ed  ./superj6/normal_receiver.h
+9e29a96eb2b0534ad3c04202045b7e7808bf0bea3df43a23f941ffa503c6b209  ./superj6/old-convergence/README.md
+06e73858795952ce075fa243960064b6dbbdbf317c0c07abf0dbcec18afaa5d5  ./superj6/old-convergence/probe.py
+077c49f09cf130c5561d251173677131ebd8a36cf42182d842edbb9837de7c75  ./superj6/old-convergence/result.json
 9f8a4dd1edc154b76a7dd1010cc62b0c895d2a354a75c1c88a76b02f67998a0f  ./superj6/score_native_suffix.py
 4b80c9efa5d116ab71e63ba0597235e10ca9a4ea442a2c46a86c0306a08f0b42  ./superj6/sj6_main_4x.h
 a102bc1c865c23f0bfebfce2a3f07054cce6bca9918b82071135731f5b4e3485  ./superj6/source_callback_clock.h

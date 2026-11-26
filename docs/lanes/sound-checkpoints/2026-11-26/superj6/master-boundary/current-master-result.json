@@ -1,0 +1,15 @@
+{
+  "scope": "current Mac ARM64 static master path, no AU runtime or hidden PCM tap",
+  "sha256": "1d6edf2bf5dd30906b148e10f50e2470a9f55d13d7f64ab3515e3c2294f1c257",
+  "master_slot": 200,
+  "master_sender": "0x1000ee4b4",
+  "scale": 0.404,
+  "exponent": 1,
+  "mixer_setter": "0x10047b638",
+  "selectors": [
+    "setVolume:",
+    "setOutputVolume:"
+  ],
+  "brainwave_raw": 0.3150142729282379,
+  "brainwave_output_volume": 0.12726576626300812
+}
