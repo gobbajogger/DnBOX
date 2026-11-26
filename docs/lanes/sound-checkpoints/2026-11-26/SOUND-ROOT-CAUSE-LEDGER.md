@@ -53,6 +53,15 @@ changing the rounding rule.
   The remaining waveform candidate must avoid running this 4×
   float loop, even though this was a useful diagnostic.
   [Donor A/B](sj6-halfband-packed-donor/README.md).
+  **Less expensive phase prototype:** Fold64/Q8 keeps the source phase
+  clock, uses generated prefiltered bands, and avoids live 4× filter
+  histories. Blind median phase error ~.03° Sine/.02° Triangle, with
+  better H2–18 agreement and exact Saw/PWM guards. A paired fully typed
+  dry sequential stress test changed Sine 12.67→12.78 ms and Triangle
+  15.87→12.87 ms (fixed cues); candidate worst 12.91 ms, plus 1,156 B
+  application flash and no extra pool. This is useful but does **not**
+  fit our combined build or clear its timing. [Leaf](sj6-fold64-q8-leaf/FOLD-RESULT.md),
+  [paired dry evidence](sj6-fold64-q8-full-dry/FOLD-RESULT.md).
   [Independent authentic holds](https://github.com/gobbajogger/DnBOX/commit/17ec80e3).
 - **Upstream dry differences vary by patch.** The AU references for
   Brainwave, Solidify and Raw J106 have matched cue/UID, fresh instances
@@ -74,6 +83,7 @@ changing the rounding rule.
   [AMP-order receipts](sj6-amp-before-filter/sj6-cross-preset/AMP-INGRESS.md).
   Replacing the immutable open Normal filter for qualified Solidify was
   also under .002 dB in whole-level change, so it is not the large loss.
+  [Static Normal scope](sj6-static-normal-rejected/sj6-cross-preset/NORMAL-STATIC.md).
 - **The compact dry mixer explains only part of the loss.** At unchanged
   Master and typed settings, removing only the fixed six-voice divisor
   recovers ~15.6 dB. Restoring unity duplication only for centered layers
@@ -91,7 +101,9 @@ changing the rounding rule.
   Native disassembly identified an out-of-line memcpy on each tap;
   an ABI-proven no-copy bit carrier may be worth one independent test.
   Straight bfloat16 is ruled out separately: the same-size store was
-  around −56…−57 dBr and degraded the quiet cue. [Host bfloat rejection](sj6-classic-bfloat-rejected/README.md).
+  around −56…−57 dBr and degraded the quiet cue.
+  [Native memcpy rejection](sj6-classic-e4m11-native-rejection/sj6-e4m11-native/README.md),
+  [host bfloat rejection](sj6-classic-bfloat-rejected/README.md).
 - **Unresolved:** source owner of the gain between the calibrated Crusher
   and Apple's compressor input; which missing or misrouted per-program
   states dominate different dry patches; delay-bandwidth correction that
@@ -146,6 +158,11 @@ changing the rounding rule.
   **12,224 B** although backend union/pool was unchanged. The isolated
   code-size result cannot predict that linked soft-double/libm cost.
   The current compiled variant is rejected for normal firmware admission.
+  A legal stationary Rate reaches an out-of-guard notch angle after
+  119.575 seconds, from drift in the source rotor. The combined 906
+  capture length alone cannot justify removing that guard. Private
+  Level is fixed 0 dB and can use exactly 1; preserving longer valid
+  sessions still needs a no-soft-double finite range reducer.
 
 ## Release boundary
 
