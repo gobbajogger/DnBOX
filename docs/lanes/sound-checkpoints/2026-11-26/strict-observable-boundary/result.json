@@ -1,0 +1,69 @@
+{
+  "eligible": false,
+  "runner": "fdd1504d8801a69a95c24226357f4b202bbaa345565c80a1bbf861f69a287017",
+  "existing_observer_embedded_fields": {
+    "dma": [
+      "seq",
+      "scheduled_cycle",
+      "observed_cycle",
+      "deadline_cycle",
+      "address",
+      "words"
+    ],
+    "irq_enter": [
+      "seq",
+      "cycle",
+      "depth",
+      "snapshot"
+    ],
+    "store": [
+      "seq",
+      "name",
+      "offset",
+      "width",
+      "value"
+    ],
+    "half": [
+      "seq",
+      "entry_cycle",
+      "completion_cycle",
+      "completion_uncertainty_cycles",
+      "dma_seq_at_completion",
+      "last_us_writes",
+      "last_us",
+      "peak_delta",
+      "invalid"
+    ]
+  },
+  "exact_old_refusals": {
+    "no-skip": "cannot read work/felucca_xip.bin: DnBOX observer requires FM1_STRICT=1 --mhz360 --shot --fwsc, normal dual-core scheduling, and no timing/fault overrides",
+    "protected": "cannot read work/felucca_xip.bin: DnBOX flash fixture has wrong size or changes protected package bytes below0x9D000"
+  },
+  "current_warm_capture": [
+    {
+      "model": "elite",
+      "preflight_owner_count": 0,
+      "first_healthy_reply_ms": 2998,
+      "frames": 319488
+    },
+    {
+      "model": "pro",
+      "preflight_owner_count": 0,
+      "first_healthy_reply_ms": 3008,
+      "frames": 319488
+    }
+  ],
+  "observation_only": [
+    "DMA transfer cycle/address/word count in supported observer mode",
+    "ALNK callback completion/snapshot in supported observer mode",
+    "USB bus time and bytes",
+    "final RAM",
+    "DAC PCM relative index"
+  ],
+  "no_anchor": [
+    "protected warm candidate is not admitted to passive observer",
+    "USB IN/OUT is not typed application acknowledgement by producer frame",
+    "observer schema lacks scripted event publication/application identity and PCM read frame link"
+  ],
+  "undocumented_audio_trace": "binary contains FM1_AUDIO_TRACE; no verified current emitted schema for applied events or DAC capture-frame ownership"
+}
