@@ -1,0 +1,2649 @@
+--- a/firmware/src/dsp/dnbx_core.c
++++ b/firmware/src/dsp/dnbx_core.c
+@@ -8,6 +8,7 @@
+  * endpoint, with retention chosen to reach that endpoint in a stated duration.
+  * See evidence/envelope_fit.json and README.md for observations and limits. */
+ #include "dnbx_core.h"
++#include <math.h>
+ #include "fastmath.h"
+ #include <string.h>
+ 
+@@ -45,12 +46,12 @@
+ {
+     /* Reuse identical physical ranges without changing their binary32 bounds.
+      * Field order remains guarded by the offset assertion below. */
+-    static const float bounds[11][2]={
++    static const float bounds[12][2]={
+         {0,16},{0,1},{.03f,.5f},{0,4},{0,.5f},
+-        {20,20000},{-20000,20000},{0,.47f},{-48,48},{-1,1},{0,24}
++        {20,20000},{-20000,20000},{0,.47f},{-48,48},{-1,1},{0,24},{0,24.2f}
+     };
+     static const uint8_t field_range[23]={
+-        0,0,10,1,0,10,0,0,0,1,0,0,1,2,3,4,5,1,6,0,7,8,9
++        0,0,10,1,0,10,0,0,10,1,0,11,1,2,3,4,5,1,6,0,7,8,9
+     };
+     _Static_assert(offsetof(dnbx_layer_params,oscillator_mode)==23*sizeof(float),
+                    "parameter fields must match typed bounds table");
+@@ -58,10 +59,19 @@
+     if (p->oscillator_mode == DNBX_OSC_SUPERJ6 &&
+         (!superj6_amp_range || (p->waveform != 0 && p->waveform != 1.f / 3.f &&
+          p->waveform != 2.f / 3.f && p->waveform != 1))) return 0;
+-    if (!superj6_amp_range && (p->amp.decay_s > 16 || p->amp.release_s > 16)) return 0;
++    if (!superj6_amp_range && (p->amp.decay_s > 16 || p->amp.release_s > 16 ||
++                               p->filter.decay_s > 16 || p->filter.release_s > 16)) return 0;
+     for (unsigned i=0;i<23;i++) {
+         float value;
+         memcpy(&value,(const unsigned char *)p+i*sizeof(float),sizeof value);
++#if X0X_SJ6_OTA_NATIVE
++        /* Build9 OTA's normalized cutoff spans ~3..30000 Hz; leave
++         * every legacy engine/output parameter range unchanged. */
++        if(superj6_amp_range && field_range[i]==5u){
++            if(!range(value,3.f,30001.f))return 0;
++            continue;
++        }
++#endif
+         const float *limit=bounds[field_range[i]];
+         if (!range(value,limit[0],limit[1])) return 0;
+     }
+@@ -77,6 +87,107 @@
+     return fm_clampf(440.0f * fm_exp2f(((float)note-69.0f+tune)/12.0f)/sr,
+                      .000001f,.45f);
+ }
++
++/* Base tune validation stays independent of a live common Build9 bend. */
++static float pitch_increment(const dnbx_part *s, unsigned note, float tune)
++{
++#if defined(X0X_SJ6_BEND_TYPED_PROBE) && X0X_SJ6_BEND_TYPED_PROBE
++    tune += s->superj6_bend_semitones;
++#endif
++    return increment(note,tune,s->sample_rate);
++}
++#if X0X_SJ6_SCALE_NATIVE
++#include "s1c/s1c_scales.h"
++void dnbx_set_sj6_scale(dnbx_part *s,unsigned index,unsigned npo,
++                         const uint8_t *head,const uint8_t *tail)
++{
++    if(!valid(s)||!s->superj6_amp_range||index>S1C_SCALE_MAX)return;
++    s->sj6_scale_index=(uint8_t)index;
++    s->sj6_scale_npo=(uint8_t)npo;
++    s->sj6_scale_head=head;
++    s->sj6_scale_tail=tail;
++}
++static void sj6_scale_attack(const dnbx_part *s,dnbx_voice *v)
++{
++    /* Use the current tuning only at the new key onset. A later wheel or
++     * layer tune edit transposes this base frequency, not another scale. */
++    v->sj6_scale_hz=s->sj6_scale_index ?
++        s1c_shared_scale_hz(s->sj6_scale_index,v->note,440.f,s->sj6_scale_npo,
++                           s->sj6_scale_head,320u,s->sj6_scale_tail) : 0.f;
++}
++#endif
++#if X0X_SJ6_VINTAGE_NATIVE
++/* Build9 Vintage knob ID123: fresh symmetric offsets on oscillator note
++ * attack. A change arms subsequent attacks; it doesn't retune held audio. */
++float dnbx_sj6_vintage_cents(unsigned position)
++{ return 5.f*fm_powf((float)position*(1.f/127.f),2.02f); }
++
++void dnbx_set_sj6_vintage(dnbx_part *s,unsigned owner,unsigned position)
++{
++    if(!valid(s)||!s->superj6_amp_range||position>127u)return;
++    s->sj6_vintage_limit=(uint16_t)(256.f*dnbx_sj6_vintage_cents(position)+.5f);
++    if(!s->sj6_vintage_random)
++        s->sj6_vintage_random=owner ? UINT32_C(0x6c8e9cf5) : UINT32_C(0x71da45b3);
++}
++
++static void sj6_vintage_attack(dnbx_part *s,dnbx_voice *v,unsigned l)
++{
++    if(!s->sj6_vintage_limit){v->sj6_vintage_q8[l]=0;return;}
++    uint32_t x=s->sj6_vintage_random;
++    x^=x<<13;x^=x>>17;x^=x<<5;s->sj6_vintage_random=x;
++    /* Two independent draws for two triggered oscillator layers.
++     * Quantization is under 0.004 cents. Never touch noise RNG or bend. */
++    const int32_t u=(int32_t)(x>>16)-32768;
++    v->sj6_vintage_q8[l]=(int16_t)((u*(int32_t)s->sj6_vintage_limit)/32768);
++}
++
++#endif
++#if X0X_SJ6_VINTAGE_NATIVE || X0X_SJ6_SCALE_NATIVE
++static float voice_pitch_increment(const dnbx_part *s,const dnbx_voice *v,unsigned l,float tune)
++{
++#if X0X_SJ6_VINTAGE_NATIVE
++    if(v->sj6_vintage_q8[l])
++        tune+=(float)v->sj6_vintage_q8[l]*(1.f/25600.f);
++#else
++    (void)l;
++#endif
++#if X0X_SJ6_SCALE_NATIVE
++    if(v->sj6_scale_hz){
++#if X0X_SJ6_BEND_TYPED_PROBE
++        tune+=s->superj6_bend_semitones;
++#endif
++        return fm_clampf(v->sj6_scale_hz*fm_exp2f(tune/12.f)/s->sample_rate,.000001f,.45f);
++    }
++#endif
++    return pitch_increment(s,v->note,tune);
++}
++#else
++#define voice_pitch_increment(s,v,l,tune) pitch_increment(s,(v)->note,tune)
++#endif
++#if X0X_SJ6_AUX_LFO_NATIVE
++void dnbx_sj6_transient_bend(dnbx_part *s,unsigned l,float semitones)
++{
++    if(semitones==0.f)return;
++    const float tune=s->layer[l].params.tune_semitones+semitones;
++    for(unsigned i=0;i<DNBX_VOICES;i++)
++        if(voice_active(&s->voice[i]))
++            s->voice[i].layer[l].increment=voice_pitch_increment(s,&s->voice[i],l,tune);
++}
++#endif
++#if defined(X0X_SJ6_BEND_TYPED_PROBE) && X0X_SJ6_BEND_TYPED_PROBE
++int dnbx_set_superj6_bend(dnbx_part *s, float semitones)
++{
++    if (!valid(s) || !s->superj6_amp_range || !range(semitones,-48.f,48.f))
++        return DNBX_E_RANGE;
++    if (s->superj6_bend_semitones==semitones) return DNBX_OK;
++    s->superj6_bend_semitones=semitones;
++    for (unsigned i=0; i<DNBX_VOICES; ++i)
++        if (voice_active(&s->voice[i]))
++            for (unsigned l=0; l<DNBX_LAYERS; ++l)
++                s->voice[i].layer[l].increment=voice_pitch_increment(s,&s->voice[i],l,s->layer[l].params.tune_semitones);
++    return DNBX_OK;
++}
++#endif
+ 
+ /* DnBOX's existing polynomial BLEP primitive. */
+ static float blep(float t, float dt, dnbx_work *w)
+@@ -301,6 +412,106 @@
+     if (status == DNBX_OK) s->superj6_amp_range = 1;
+     return status;
+ }
++static float filter_sustain(const dnbx_part *s,unsigned l)
++{
++    const dnbx_layer_params *p=&s->layer[l].params;
++#if X0X_SJ6_OTA_NATIVE
++    if(s->sj6_ota)return s->sj6_ota_sustain[l];
++#endif
++    return s->filter_link ? p->amp.sustain : p->filter.sustain;
++}
++
++/* Prepare outside the sample loop. Link the four ADSR settings only;
++ * keep the filter's own hold policy and independent per-voice history. */
++static const dnbx_envelope_params *filter_params(const dnbx_part *s,unsigned layer,
++                                                dnbx_envelope_params *tmp)
++{
++    const dnbx_layer_params *p=&s->layer[layer].params;
++    if (!s->filter_link
++#if X0X_SJ6_OTA_NATIVE
++        && !s->sj6_ota
++#endif
++       ) return &p->filter;
++    *tmp=p->filter;
++    if(s->filter_link) {
++        tmp->attack_s=p->amp.attack_s; tmp->decay_s=p->amp.decay_s;
++        tmp->release_s=p->amp.release_s;
++    }
++    tmp->sustain=filter_sustain(s,layer);
++    return tmp;
++}
++#if X0X_SJ6_OTA_NATIVE
++int dnbx_set_sj6_ota(dnbx_part *s,unsigned value)
++{
++    if(!valid(s)||!s->superj6_amp_range||value>1u)return 0;
++    if(s->sj6_ota==value)return 1;
++    s->sj6_ota=(uint8_t)value;
++    /* Original selects a different filter history. Rearm the target without
++     * resetting oscillator phase, ADSR gate or the other bass owner. */
++    for(unsigned v=0;v<DNBX_VOICES;++v)
++        for(unsigned l=0;l<DNBX_LAYERS;++l){
++            dnbx_layer_voice *p=&s->voice[v].layer[l];
++            p->filter_first=p->filter_second=p->ota_tail[0]=p->ota_tail[1]=0.f;
++        }
++    return 1;
++}
++void dnbx_set_sj6_ota_filter_sustain(dnbx_part *s,unsigned l,float v)
++{
++    s->sj6_ota_sustain[l]=v;
++    const float target=filter_sustain(s,l);
++    for(unsigned i=0;i<DNBX_VOICES;++i) {
++        dnbx_envelope_state *e=&s->voice[i].layer[l].filter;
++        if(e->stage==DNBX_ENV_SUSTAIN)e->level=e->curve=target;
++    }
++}
++static inline float sj6_ota_stage(float input,float *state,float g)
++{
++    float v=g*fm_tanhf(input-*state);
++    float y=*state+v;
++    *state=y+v;
++    return y;
++}
++static __attribute__((noinline)) float sj6_ota_filter(dnbx_layer_voice *v,float x,
++                                                       float rad,float resonance)
++{
++    /* Original OTA mode is a nonlinear, resonance-fed four-stage ladder,
++     * not the normal two-stage recurrence or the independent ID28 HPF.
++     * Compact discrete-time approximation: reused cutoff/envelope path,
++     * bounded resonance, and a single update per stage at board rate. */
++    float g=.5f*rad/(1.f+.5f*rad);
++    float input=x-(3.85f*fm_clampf(resonance,0.f,1.f))*v->ota_tail[1];
++    float y=sj6_ota_stage(input,&v->filter_first,g);
++    y=sj6_ota_stage(y,&v->filter_second,g);
++    y=sj6_ota_stage(y,&v->ota_tail[0],g);
++    return sj6_ota_stage(y,&v->ota_tail[1],g);
++}
++#endif
++int dnbx_set_filter_link(dnbx_part *s,unsigned enabled)
++{
++    if (!valid(s)) return DNBX_E_UNINITIALIZED;
++    if (enabled>1u) return DNBX_E_RANGE;
++    if (!s->superj6_amp_range || dnbx_active_voices(s)) return DNBX_E_UNSUPPORTED;
++    s->filter_link=(uint8_t)enabled;
++    return DNBX_OK;
++}
++#if X0X_SUPERJ6_BUILTIN_INIT
++void dnbx_apply_panel_envelopes(dnbx_part *s, unsigned layer, const dnbx_envelope_params *amp,
++                                const dnbx_envelope_params *filter, unsigned linked)
++{
++    dnbx_layer_params *p = &s->layer[layer].params;
++    p->amp = *amp;
++    p->filter = *filter;
++    s->filter_link = (uint8_t)linked;
++    /* The core latches timed segment coefficients at entry. Only a voice
++     * already in sustain follows a new sustain or link target immediately. */
++    for (unsigned i = 0; i < DNBX_VOICES; ++i) {
++        dnbx_layer_voice *v = &s->voice[i].layer[layer];
++        if (v->amp.stage == DNBX_ENV_SUSTAIN) v->amp.level = v->amp.curve = amp->sustain;
++        if (v->filter.stage == DNBX_ENV_SUSTAIN)
++            v->filter.level = v->filter.curve = filter_sustain(s,layer);
++    }
++}
++#endif
+ int dnbx_set_layer(dnbx_part *s,unsigned layer,const dnbx_layer_params *p)
+ {
+     if (!valid(s)) return DNBX_E_UNINITIALIZED;
+@@ -309,10 +520,10 @@
+     s->layer[layer].params=*p;
+     for (unsigned i=0;i<DNBX_VOICES;i++) {
+         dnbx_layer_voice *v=&s->voice[i].layer[layer];
+-        v->increment=increment(s->voice[i].note,p->tune_semitones,s->sample_rate);
++        v->increment=voice_pitch_increment(s,&s->voice[i],layer,p->tune_semitones);
+         /* A running timed segment retains its cached endpoint/rate. */
+         if (v->amp.stage==DNBX_ENV_SUSTAIN) v->amp.level=v->amp.curve=p->amp.sustain;
+-        if (v->filter.stage==DNBX_ENV_SUSTAIN) v->filter.level=v->filter.curve=p->filter.sustain;
++        if (v->filter.stage==DNBX_ENV_SUSTAIN) v->filter.level=v->filter.curve=filter_sustain(s,layer);
+     }
+     return DNBX_OK;
+ }
+@@ -322,12 +533,100 @@
+     if (l>=DNBX_LAYERS || !p) return DNBX_E_ARGUMENT;
+     *p=s->layer[l].params; return DNBX_OK;
+ }
++#if X0X_SJ6_PITCH_ENV_NATIVE
++#if X0X_SJ6_AUX_LFO_NATIVE
++/* The receiver's envelope must run when a routed depth crosses zero so
++ * an LFO never invents a new trigger at each 80 Hz parameter write. */
++void dnbx_route_sj6_pitch_env(dnbx_part *s,unsigned routed)
++{
++    if(!valid(s)||!s->superj6_amp_range)return;
++    if(routed && !s->sj6_pitch_routed && !s->sj6_pitch_depth)
++        for(unsigned i=0;i<DNBX_VOICES;i++) {
++            dnbx_voice *v=&s->voice[i];
++            memset(&v->sj6_pitch,0,sizeof v->sj6_pitch);
++            if(v->gate || v->pedal_held)envelope_on(&v->sj6_pitch,&s->sj6_pitch_param,s->sample_rate);
++        }
++    s->sj6_pitch_routed=(uint8_t)!!routed;
++}
++#endif
++int dnbx_set_sj6_pitch_env(dnbx_part *s,const uint8_t code[5])
++{
++    if(!valid(s)||!s->superj6_amp_range)return 0;
++    for(unsigned k=0;k<4u;k++)if(code[k]>127u)return 0;
++    if(code[4]>60u)return 0;
++    /* Build 9's actual setters: attack, decay and release use x^3.33;
++     * sustain x^2.5; rounded 0..60 semitones comes from parameter 57. */
++    const float a=code[0] ? (float)(code[0]-(code[0]<=64u))/127.f : .5f;
++    const float d=code[1] ? (float)(code[1]-(code[1]<=64u))/127.f : .5f;
++    const float u=(float)code[2]/127.f;
++    const float r=code[3] ? (float)(code[3]-(code[3]<=64u))/127.f : .5f;
++    s->sj6_pitch_param=(dnbx_envelope_params){
++        .attack_s=16.f*fm_powf(a,3.33f),.decay_s=24.f*fm_powf(d,3.33f),
++        .sustain=fm_powf(u,2.5f),.release_s=24.f*fm_powf(r,3.33f)
++    };
++    /* Enabling depth on an already-held note starts a genuine pitch envelope.
++     * Zero depth performs no extra work in the audio hot path. */
++    if(code[4] && !s->sj6_pitch_depth
++#if X0X_SJ6_AUX_LFO_NATIVE
++       && !s->sj6_pitch_routed
++#endif
++      )
++        for(unsigned i=0;i<DNBX_VOICES;i++) {
++            dnbx_voice *v=&s->voice[i];
++            memset(&v->sj6_pitch,0,sizeof v->sj6_pitch);
++            if(v->gate || v->pedal_held)envelope_on(&v->sj6_pitch,&s->sj6_pitch_param,s->sample_rate);
++        }
++    s->sj6_pitch_depth=code[4];
++    return 1;
++}
++#endif
++/* Mono and poly use the same actual attack, including original routed
++ * oscillator masks, envelope retrigger, Vintage, and scale capture. */
++static __attribute__((noinline,minsize)) void note_attack(dnbx_part *s,dnbx_voice *v,unsigned velocity
++#if X0X_SJ6_SEQ_DEST_NATIVE
++    ,unsigned layers
++#endif
++    )
++{
++#if X0X_SJ6_SCALE_NATIVE
++    sj6_scale_attack(s,v);
++#endif
++    v->velocity=(float)velocity/127.0f;
++#if X0X_SJ6_PITCH_ENV_NATIVE
++    if(s->sj6_pitch_depth
++#if X0X_SJ6_AUX_LFO_NATIVE
++       || s->sj6_pitch_routed
++#endif
++      )envelope_on(&v->sj6_pitch,&s->sj6_pitch_param,s->sample_rate);
++#endif
++    for (unsigned l=0;l<DNBX_LAYERS;l++) {
++#if X0X_SJ6_SEQ_DEST_NATIVE
++        if (!(layers&(1u<<l))) continue;
++#endif
++        const dnbx_layer_params *p=&s->layer[l].params;
++#if X0X_SJ6_VINTAGE_NATIVE
++        sj6_vintage_attack(s,v,l);
++#endif
++        v->layer[l].increment=voice_pitch_increment(s,v,l,p->tune_semitones);
++        envelope_on(&v->layer[l].amp,&p->amp,s->sample_rate);
++        dnbx_envelope_params linked;
++        envelope_on(&v->layer[l].filter,filter_params(s,l,&linked),s->sample_rate);
++    }
++}
++#if X0X_SJ6_RANDOM5_6_NATIVE
++static __attribute__((noinline)) int note_on(dnbx_part *s,unsigned note,unsigned velocity,unsigned zero_on)
++#else
+ int dnbx_note_on(dnbx_part *s,unsigned note,unsigned velocity)
++#endif
+ {
+     unsigned chosen=0; int found=0, retrigger=0;
+     if (!valid(s)) return DNBX_E_UNINITIALIZED;
+     if (note>127 || velocity>127) return DNBX_E_RANGE;
+-    if (!velocity) { dnbx_note_off(s,note); return DNBX_NOTE_OFF_ONLY; }
++    if (!velocity
++#if X0X_SJ6_RANDOM5_6_NATIVE
++        && !zero_on
++#endif
++       ) { dnbx_note_off(s,note); return DNBX_NOTE_OFF_ONLY; }
+     /* DnBOX allocator policy: same held note, silent slot, first released
+      * slot, then oldest held slot. Bounded ranks avoid timestamp rollover. */
+     for (unsigned i=0;i<DNBX_VOICES;i++) {
+@@ -344,6 +643,9 @@
+     if (!found) for (unsigned i=1;i<DNBX_VOICES;i++)
+         if (s->voice[i].age_rank>s->voice[chosen].age_rank) chosen=i;
+     dnbx_voice *v=&s->voice[chosen];
++#if X0X_SJ6_MONO32_PROBE
++    if(!chosen){s->sj6_glide_offset=0.f;s->sj6_glide_ratio=1.f;s->sj6_glide_clock=0;}
++#endif
+     uint8_t next_rank[DNBX_VOICES]={0};
+     /* Retirement can leave gaps, so compact the surviving order rather than
+      * incrementing stale ranks. At most 36 comparisons per note-on, outside
+@@ -358,21 +660,112 @@
+     for (unsigned i=0;i<DNBX_VOICES;i++) s->voice[i].age_rank=next_rank[i];
+     if (!retrigger) memset(v,0,sizeof *v);
+     v->note=(uint8_t)note; v->gate=1; v->age_rank=0; v->pedal_held=0;
+-    v->velocity=(float)velocity/127.0f;
+-    for (unsigned l=0;l<DNBX_LAYERS;l++) {
+-        const dnbx_layer_params *p=&s->layer[l].params;
+-        v->layer[l].increment=increment(note,p->tune_semitones,s->sample_rate);
+-        envelope_on(&v->layer[l].amp,&p->amp,s->sample_rate);
+-        envelope_on(&v->layer[l].filter,&p->filter,s->sample_rate);
+-    }
++#if X0X_SJ6_SEQ_DEST_NATIVE
++    v->layer[0].amp.reserved=zero_on>1u ? (uint8_t)(4u | (zero_on>>1)) : 0u;
++#endif
++    note_attack(s,v,velocity
++#if X0X_SJ6_SEQ_DEST_NATIVE
++        ,zero_on>1u ? zero_on>>1 : 3u
++#endif
++        );
+     return (int)chosen;
+ }
++#if X0X_SJ6_RANDOM5_6_NATIVE
++int dnbx_note_on(dnbx_part *s,unsigned note,unsigned velocity)
++{ return note_on(s,note,velocity,0); }
++int dnbx_superj6_velocity_zero_on(dnbx_part *s,unsigned note)
++{ return note_on(s,note,0,1); }
++#if X0X_SJ6_SEQ_DEST_NATIVE
++int dnbx_superj6_routed_on(dnbx_part *s,unsigned note,unsigned vel,unsigned layers)
++{ return layers>=1u && layers<=3u ? note_on(s,note,vel,(layers<<1)|1u) : DNBX_E_RANGE; }
++#endif
++#endif
++#if defined(X0X_SJ6_MONO32_PROBE) && X0X_SJ6_MONO32_PROBE
++int dnbx_superj6_legato_voice(dnbx_part *s,unsigned note)
++{
++    if(!valid(s)||note>127u||!s->voice[0].gate)return -1;
++    dnbx_voice *v=&s->voice[0];
++    v->note=(uint8_t)note;
++#if X0X_SJ6_SCALE_NATIVE
++    sj6_scale_attack(s,v);
++#endif
++    for(unsigned l=0;l<DNBX_LAYERS;l++)
++        v->layer[l].increment=voice_pitch_increment(s,v,l,s->layer[l].params.tune_semitones);
++    return 0;
++}
++#if X0X_SJ6_SEQ_DEST_NATIVE
++static __attribute__((noinline)) int mono_routed_on(dnbx_part *s,unsigned note,unsigned vel,unsigned layers)
++#else
++int dnbx_superj6_mono_voice(dnbx_part *s,unsigned note,unsigned vel)
++#endif
++{
++    if(!valid(s)||note>127u||vel>127u
++#if !X0X_SJ6_RANDOM5_6_NATIVE
++       || !vel
++#endif
++       )return -1;
++    dnbx_voice *v=&s->voice[0];
++    if(!voice_active(v))memset(v,0,sizeof *v);
++    v->note=(uint8_t)note;v->gate=1;v->pedal_held=0;v->age_rank=0;
++#if X0X_SJ6_SEQ_DEST_NATIVE
++    v->layer[0].amp.reserved=(uint8_t)(layers&4u ? layers : 0u);
++#endif
++    note_attack(s,v,vel
++#if X0X_SJ6_SEQ_DEST_NATIVE
++        ,layers
++#endif
++        );
++    return 0;
++}
++#if X0X_SJ6_SEQ_DEST_NATIVE
++int dnbx_superj6_mono_voice(dnbx_part *s,unsigned note,unsigned vel)
++{ return mono_routed_on(s,note,vel,3); }
++int dnbx_superj6_mono_routed_on(dnbx_part *s,unsigned note,unsigned vel,unsigned layers)
++{ return layers>=1u && layers<=3u ? mono_routed_on(s,note,vel,layers|4u) : -1; }
++#endif
++#endif
++static void release_layers(dnbx_part *s,dnbx_voice *v,unsigned mask)
++{
++    for (unsigned l=0;l<DNBX_LAYERS;l++) if (mask&(1u<<l)) {
++        envelope_off(&v->layer[l].amp,&s->layer[l].params.amp,s->sample_rate);
++        dnbx_envelope_params linked;
++        envelope_off(&v->layer[l].filter,filter_params(s,l,&linked),s->sample_rate);
++    }
++}
++#if X0X_SJ6_SEQ_DEST_NATIVE
++void dnbx_superj6_release_routes(dnbx_part *s,unsigned disabled)
++{
++    if (!valid(s) || !s->superj6_amp_range) return;
++    for (unsigned i=0;i<DNBX_VOICES;i++) {
++        dnbx_voice *v=&s->voice[i];
++        uint8_t *route=&v->layer[0].amp.reserved;
++        unsigned off=*route&disabled&3u;
++        if (off) {
++            *route&=(uint8_t)~off;
++            release_layers(s,v,off);
++        }
++    }
++}
++#endif
+ static void release_voice(dnbx_part *s,dnbx_voice *v)
+ {
+-    for (unsigned l=0;l<DNBX_LAYERS;l++) {
+-        envelope_off(&v->layer[l].amp,&s->layer[l].params.amp,s->sample_rate);
+-        envelope_off(&v->layer[l].filter,&s->layer[l].params.filter,s->sample_rate);
+-    }
++#if X0X_SJ6_PITCH_ENV_NATIVE
++    if(s->sj6_pitch_depth
++#if X0X_SJ6_AUX_LFO_NATIVE
++       || s->sj6_pitch_routed
++#endif
++      )envelope_off(&v->sj6_pitch,&s->sj6_pitch_param,s->sample_rate);
++#endif
++#if X0X_SJ6_SEQ_DEST_NATIVE
++    if (v->layer[0].amp.reserved&4u) {
++        /* A destination edit already released the disabled lanes.
++         * Later Note Off must not move their release anchor. */
++        release_layers(s,v,v->layer[0].amp.reserved&3u);
++        v->layer[0].amp.reserved=0;
++        return;
++    }
++#endif
++    release_layers(s,v,3u);
+ }
+ int dnbx_note_off(dnbx_part *s,unsigned note)
+ {
+@@ -431,7 +824,59 @@
+     out->note=v->note; out->gate=v->gate; out->age_rank=v->age_rank;
+     out->active=(uint8_t)(voice_active(v)!=0); return DNBX_OK;
+ }
+-int dnbx_render(dnbx_part *s,float *left,float *right,unsigned n,dnbx_work *w)
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST && X0X_SJ6_VELOCITY_PORT
++#include "sj6_velocity_fma.h"
++#endif
++#if X0X_SJ6_NOISE_SUB_NATIVE
++/* IDs 201/202 have independent source gains; their Build9 graph setters
++ * read a common normalized input but use different gain laws. */
++void dnbx_set_sj6_sources(dnbx_part *s,unsigned owner,const uint8_t code[2])
++{
++    if (!s->superj6_amp_range || code[0]>127u || code[1]>127u) return;
++    if (code[0]!=s->sj6_noise_code) {
++        float x=(float)code[0]/127.f;
++        s->sj6_noise_code=code[0];
++        s->sj6_noise_gain=.707f*x*x*fm_sqrtf(x);
++    }
++    if (code[1]!=s->sj6_sub_code) {
++        s->sj6_sub_code=code[1];
++        s->sj6_sub_gain=(.808f/127.f)*(float)code[1];
++    }
++    if (!s->sj6_noise_random)
++        s->sj6_noise_random=owner ? UINT32_C(0xd1b54a35) : UINT32_C(0x9e3779b9);
++}
++
++/* Phase-coherent tonal approximation of the source's octave-down Juno Sub,
++ * with the original MySub.sfz key boundaries. Four measured spectral levels
++ * per zone, quantized to 1/128; no original sample words are included here. */
++static const uint8_t sj6_sub_harmonic[12][4]={
++    {92,22,10,6},{94,19,11,5},{88,17,10,5},{66,13,7,4},
++    {65,12,7,4},{56,14,8,5},{62,16,9,7},{49,14,7,4},
++    {53,16,9,6},{52,12,3,1},{32,3,1,1},{35,2,0,0}
++};
++static unsigned sj6_sub_zone(unsigned note)
++{ return note<34u ? 0u : note>=94u ? 11u : (note-34u)/6u+1u; }
++static inline float sj6_synthesize_sub(float phase,float step,const uint8_t *h)
++{
++    float fundamental=fm_sin_turns(phase), sq=fundamental*fundamental;
++    float out=h[0];
++    if(step<.15f) {
++        out+=h[1]*(3.f-4.f*sq);
++        if(step<.09f) {
++            out+=h[2]*(5.f+sq*(-20.f+16.f*sq));
++            if(step<(.45f/7.f))out+=h[3]*(7.f+sq*(-56.f+sq*(112.f-64.f*sq)));
++        }
++    }
++    return (fundamental*(1.f/128.f))*out;
++}
++static inline float sj6_noise_next(uint32_t *state)
++{
++    uint32_t x=*state;
++    x^=x<<13; x^=x>>17; x^=x<<5; *state=x;
++    return (float)((int32_t)(x>>8)-8388608)*(1.f/8388608.f);
++}
++#endif
++static int render_with_osc_gains(dnbx_part *s,float *left,float *right,unsigned n,dnbx_work *w,float gain1,float gain2,float fvel,float source_bend)
+ {
+     if (!valid(s)) return DNBX_E_UNINITIALIZED;
+ #if !DNBX_DIAGNOSTIC_COUNTERS
+@@ -441,7 +886,72 @@
+     if (!n) return DNBX_OK;
+     if (!left || !right || left==right) return DNBX_E_ARGUMENT;
+     COUNT(w,frames,n);
++    const float osc_gain[]={gain1,gain2};
++#if X0X_SJ6_NOISE_SUB_NATIVE
++    float sj6_steps[DNBX_VOICES];
++    const uint8_t *sj6_harmonics[DNBX_VOICES];
++    uint32_t sj6_noise=s->sj6_noise_random;
++    if(s->sj6_sub_gain)
++        for(unsigned i=0;i<DNBX_VOICES;++i) {
++            unsigned note=s->voice[i].note;
++            sj6_steps[i]=.5f*pitch_increment(s,note,0.f)*source_bend;
++            sj6_harmonics[i]=sj6_sub_harmonic[sj6_sub_zone(note)];
++        }
++#else
++    (void)source_bend;
++#endif
++    float filter_note[DNBX_VOICES];
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST && !X0X_SJ6_VELOCITY_PORT
++    /* The admission profile rejects nonzero b2 and the host-only velocity
++       flag. Do not approximate a different sounding filter in the trial. */
++    if(fvel != 0.f) return DNBX_E_UNSUPPORTED;
++#else
++    if (fvel != 0.f) {
++        float inverse = 1.f - fvel;
++        for (unsigned i = 0; i < DNBX_VOICES; ++i)
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST && X0X_SJ6_VELOCITY_PORT
++            filter_note[i] = sj6_velocity_fma(fvel,s->voice[i].velocity,inverse);
++#else
++            filter_note[i] = fmaf(fvel,s->voice[i].velocity,inverse);
++#endif
++    }
++#endif
++#if X0X_SJ6_VCF_PORT
++    float track=0.f,strength=0.f,keyboard_ratio[DNBX_VOICES];
++    const int authored_track=dnbx_read_raw(s,131u,&track)==DNBX_OK && track>0.f;
++    const int authored_strength=dnbx_read_raw(s,136u,&strength)==DNBX_OK;
++    /* Physical controls and LFOs share the original normalized parameter
++     * words. The normal filter scales tracking/strength, OTA bypasses the
++     * conductor's extra taper (Build9 setters 0x1000eddf4/0x1000edf88). */
++#if X0X_SJ6_OTA_NATIVE
++    if(!s->sj6_ota)
++#endif
++    {
++        track*=.25f;
++        if(authored_strength)strength=fm_powf(strength,3.03f);
++    }
++    if(authored_track)
++        for(unsigned i=0;i<DNBX_VOICES;i++)
++            keyboard_ratio[i]=fm_exp2f(track*((float)s->voice[i].note-60.f)/12.f);
++#endif
++    dnbx_envelope_params linked[DNBX_LAYERS];
++    const dnbx_envelope_params *fp[DNBX_LAYERS];
++    for (unsigned l=0;l<DNBX_LAYERS;l++) fp[l]=filter_params(s,l,&linked[l]);
+     for (unsigned k=0;k<n;k++) {
++#if X0X_SJ6_MONO32_PROBE
++        if(s->sj6_glide_offset!=0.f&&s->sj6_glide_secs>0.f){
++            if(!s->sj6_glide_clock) {
++                const float step=16.f/s->sample_rate*12.f/s->sj6_glide_secs;
++                const float prev=s->sj6_glide_offset;
++                float next=prev>0.f?prev-step:prev+step;
++                if((next>0.f)!=(prev>0.f))next=0.f;
++                s->sj6_glide_offset=next;
++                s->sj6_glide_ratio=next?fm_exp2f(next/12.f):1.f;
++                s->sj6_glide_clock=16;
++            }
++            --s->sj6_glide_clock;
++        }
++#endif
+         float mix[2]={0,0},width[2];
+         for (unsigned l=0;l<DNBX_LAYERS;l++) {
+             dnbx_layer *ls=&s->layer[l];
+@@ -458,23 +968,75 @@
+             COUNT(w,active_voice_samples,1);
+             float velocity=v->velocity;
+             if (s->velocity_mode==DNBX_VELOCITY_SQUARED) velocity*=velocity;
++#if X0X_SJ6_PITCH_ENV_NATIVE
++            float pitch_ratio=1.f;
++            if(s->sj6_pitch_depth
++#if X0X_SJ6_AUX_LFO_NATIVE
++       || s->sj6_pitch_routed
++#endif
++      ) {
++                float env=envelope_sample(&v->sj6_pitch,&s->sj6_pitch_param,s->sample_rate,w);
++                pitch_ratio=fm_exp2f(env*(float)s->sj6_pitch_depth*(1.f/12.f));
++            }
++#endif
+             for (unsigned l=0;l<DNBX_LAYERS;l++) {
+                 dnbx_layer_voice *lv=&v->layer[l];
+                 const dnbx_layer_params *p=&s->layer[l].params;
++#if X0X_SJ6_MONO32_PROBE || X0X_SJ6_PITCH_ENV_NATIVE
++                const float nominal=lv->increment;
++#endif
++#if X0X_SJ6_MONO32_PROBE
++                if(!i&&s->sj6_glide_offset!=0.f)lv->increment*=s->sj6_glide_ratio;
++#endif
++#if X0X_SJ6_PITCH_ENV_NATIVE
++                if(pitch_ratio!=1.f)lv->increment=fm_minf(lv->increment*pitch_ratio,.45f);
++#endif
+                 float amp=envelope_sample(&lv->amp,&p->amp,s->sample_rate,w);
+-                float env=envelope_sample(&lv->filter,&p->filter,s->sample_rate,w);
++                float env=envelope_sample(&lv->filter,fp[l],s->sample_rate,w);
++                if (fvel != 0.f) env *= filter_note[i];
+                 float x = p->oscillator_mode == DNBX_OSC_SUPERJ6
+                     ? factory_oscillator(lv, p->waveform, width[l], w)
+                     : oscillator(lv->phase,lv->increment,p->waveform,width[l],p->oscillator_mode,w);
++                if (osc_gain[l]!=1.f) x*=osc_gain[l];
+                 x+=(lv->subphase<.5f?1.0f:-1.0f)*p->sub_gain;
++#if X0X_SJ6_NOISE_SUB_NATIVE
++                if(!l) {
++                    if(s->sj6_noise_gain) x+=s->sj6_noise_gain*sj6_noise_next(&sj6_noise);
++                    if(s->sj6_sub_gain) {
++                        float step=sj6_steps[i];
++#if X0X_SJ6_PITCH_ENV_NATIVE
++                        step*=pitch_ratio;
++#endif
++                        x+=s->sj6_sub_gain*sj6_synthesize_sub(v->sj6_sub_phase,step,sj6_harmonics[i]);
++                        v->sj6_sub_phase+=step;
++                        if(v->sj6_sub_phase>=1.f) v->sj6_sub_phase-=1.f;
++                    }
++                }
++#endif
+                 /* Existing DnBOX two-pole recurrence, with explicit saturation
+                  * guards to make a finite bound part of this candidate ABI. */
++#if X0X_SJ6_VCF_PORT
++                const float base=authored_track?p->cutoff_hz*keyboard_ratio[i]:p->cutoff_hz;
++                /* Compact filter's calibrated maximum is 7 kHz of envelope excursion. */
++                const float amount=authored_strength?7000.f*strength:p->filter_env_hz;
++                float a=fm_clampf(FM_TWO_PI*(base+env*amount)/s->sample_rate,.001f,.75f);
++#else
+                 float a=fm_clampf(FM_TWO_PI*(p->cutoff_hz+env*p->filter_env_hz)/s->sample_rate,.001f,.75f);
++#endif
++#if X0X_SJ6_OTA_NATIVE
++                if(s->sj6_ota)mix[l]+=velocity*amp*sj6_ota_filter(lv,x,a,p->resonance);
++                else
++#endif
++                {
+                 lv->filter_first=fm_clampf(lv->filter_first+a*(x-lv->filter_first-p->resonance*.8f*lv->filter_second),-4,4);
+                 lv->filter_second=fm_clampf(lv->filter_second+a*(lv->filter_first-lv->filter_second),-4,4);
+                 mix[l]+=velocity*amp*lv->filter_second;
++                }
+                 lv->phase+=lv->increment; if (lv->phase>=1) lv->phase-=1;
+                 lv->subphase+=lv->increment*.5f; if (lv->subphase>=1) lv->subphase-=1;
++#if X0X_SJ6_MONO32_PROBE || X0X_SJ6_PITCH_ENV_NATIVE
++                lv->increment=nominal;
++#endif
+                 COUNT(w,layer_samples,1);
+             }
+         }
+@@ -485,8 +1047,54 @@
+             left[k]+=x*(.5f-.5f*p->pan); right[k]+=x*(.5f+.5f*p->pan);
+         }
+     }
++#if X0X_SJ6_NOISE_SUB_NATIVE
++    s->sj6_noise_random=sj6_noise;
++#endif
+     return DNBX_OK;
+ }
++int dnbx_render(dnbx_part *s,float *left,float *right,unsigned n,dnbx_work *w)
++{
++    return render_with_osc_gains(s,left,right,n,w,1.f,1.f,0.f,1.f);
++}
++int dnbx_render_superj6_osc2(dnbx_part *s,float *left,float *right,unsigned n,float gain)
++{
++    if (!valid(s)) return DNBX_E_UNINITIALIZED;
++    if (!s->superj6_amp_range) return DNBX_E_UNSUPPORTED;
++    if (!(gain >= 0.f && gain <= .808f)) return DNBX_E_RANGE;
++    return render_with_osc_gains(s,left,right,n,0,1.f,gain,0.f,1.f);
++}
++#if X0X_SUPERJ6_BUILTIN_INIT
++int dnbx_render_pitch_osc_levels_velocity(dnbx_part *s, float *left, float *right, unsigned n, float ratio, float gain1,float gain2,float fvel)
++{
++    if (!valid(s)) return DNBX_E_UNINITIALIZED;
++    if (!(ratio >= .5f && ratio <= 2.f)) return DNBX_E_RANGE;
++    if (!(gain1 >= 0.f && (gain1 <= .808f || gain1 == 1.f)) ||
++        !(gain2 >= 0.f && (gain2 <= .808f || gain2 == 1.f))) return DNBX_E_RANGE;
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST && X0X_SJ6_VELOCITY_PORT
++    if (fvel!=0.f && !(fvel>=.008f && fvel<=1.1f)) return DNBX_E_RANGE;
++#endif
++    if (ratio == 1.f) return render_with_osc_gains(s,left,right,n,0,gain1,gain2,fvel,ratio);
++    float nominal[DNBX_VOICES][DNBX_LAYERS];
++    for (unsigned i = 0; i < DNBX_VOICES; ++i)
++        for (unsigned l = 0; l < DNBX_LAYERS; ++l) {
++            float *step = &s->voice[i].layer[l].increment;
++            nominal[i][l] = *step;
++            *step = fm_minf(*step * ratio, .45f);
++        }
++    int result = render_with_osc_gains(s,left,right,n,0,gain1,gain2,fvel,ratio);
++    for (unsigned i = 0; i < DNBX_VOICES; ++i)
++        for (unsigned l = 0; l < DNBX_LAYERS; ++l)
++            s->voice[i].layer[l].increment = nominal[i][l];
++    return result;
++}
++int dnbx_render_pitch_osc_levels(dnbx_part *s,float *l,float *r,unsigned n,float ratio,float g1,float g2)
++{ return dnbx_render_pitch_osc_levels_velocity(s,l,r,n,ratio,g1,g2,0.f); }
++int dnbx_render_pitch_osc2(dnbx_part *s,float *l,float *r,unsigned n,float ratio,float gain)
++{ return dnbx_render_pitch_osc_levels(s,l,r,n,ratio,1.f,gain); }
++int dnbx_render_pitch(dnbx_part *s, float *l, float *r, unsigned n, float ratio)
++{ return dnbx_render_pitch_osc2(s,l,r,n,ratio,1.f); }
++#endif
++
+ int dnbx_store_raw(dnbx_part *s,unsigned id,float raw)
+ {
+     if (!valid(s)) return DNBX_E_UNINITIALIZED;
+--- a/firmware/src/dsp/dnbx_core.h
++++ b/firmware/src/dsp/dnbx_core.h
+@@ -1,6 +1,10 @@
+ /* SPDX-License-Identifier: GPL-3.0-only */
+ #ifndef DNBX_CORE_H
+ #define DNBX_CORE_H
++#if defined(X0X_SJ6_BEND_TYPED_PROBE) && X0X_SJ6_BEND_TYPED_PROBE && \
++    ((!defined(X0X_HOST) && !DNBOX_TYPED_CONTROLS_NATIVE_TEST) || !defined(X0X_S1_BEND_RANGE_PROBE) || (defined(X0X_HOST) && !defined(DNBOX_137_HOST_WITNESS) && !DNBOX_TYPED_CONTROLS_NATIVE_TEST))
++#error "SuperJ6 typed bend requires the guarded typed carrier"
++#endif
+ #include <stddef.h>
+ #include <stdint.h>
+ #ifdef __cplusplus
+@@ -67,20 +71,40 @@
+ } dnbx_layer_params;
+ 
+ /* Public layout supports static allocation; fields below are implementation
+- * state and must not be modified by a caller. No pointers or global state. */
++ * state and must not be modified by a caller. No mutable global state.
++ * The guarded device tuning path borrows only resident, read-only ratio bytes
++ * that the project owner holds stable for the instrument's lifetime. */
+ typedef struct {
+     float level, curve, delta, asymptote, step_rate, endpoint, correction;
+     uint32_t remaining;
+-    uint8_t stage, tick_left, timed_stage, reserved;
++    uint8_t stage, tick_left, timed_stage;
++    /* Amp envelope [layer 0] reserves this byte for compact SuperJ6
++     * sequencer ownership and its sounding routed layer mask. */
++    uint8_t reserved;
+ } dnbx_envelope_state;
+ typedef struct {
+     float phase, increment, subphase, filter_first, filter_second;
++#if X0X_SJ6_OTA_NATIVE
++    float ota_tail[2];
++#endif
+     float oscillator_history[4];
+     dnbx_envelope_state amp, filter;
+ } dnbx_layer_voice;
+ typedef struct {
+     dnbx_layer_voice layer[DNBX_LAYERS];
++#if X0X_SJ6_PITCH_ENV_NATIVE
++    dnbx_envelope_state sj6_pitch;
++#endif
+     float velocity;
++#if X0X_SJ6_NOISE_SUB_NATIVE
++    float sj6_sub_phase;
++#endif
++#if X0X_SJ6_VINTAGE_NATIVE
++    int16_t sj6_vintage_q8[DNBX_LAYERS]; /* signed cents × 256 for sounding note */
++#endif
++#if X0X_SJ6_SCALE_NATIVE
++    float sj6_scale_hz;          /* note-on tuning; held bend never reselects tuning */
++#endif
+     uint8_t note, gate, age_rank, pedal_held;
+ } dnbx_voice;
+ typedef struct {
+@@ -90,11 +114,42 @@
+ typedef struct {
+     uint32_t magic;
+     float sample_rate;
++#if X0X_SJ6_VINTAGE_NATIVE
++    uint32_t sj6_vintage_random;
++    uint16_t sj6_vintage_limit;
++#endif
++#if X0X_SJ6_SCALE_NATIVE
++    const uint8_t *sj6_scale_head,*sj6_scale_tail;  /* resident project arena */
++    uint8_t sj6_scale_index,sj6_scale_npo;
++#endif
+     dnbx_layer layer[DNBX_LAYERS];
+     dnbx_voice voice[DNBX_VOICES];
+     float raw[DNBX_RAW_CONTROLS];
+     uint32_t raw_present[(DNBX_RAW_CONTROLS + 31u) / 32u];
+-    uint8_t damper, velocity_mode, superj6_amp_range, reserved;
++#if defined(X0X_SJ6_BEND_TYPED_PROBE) && X0X_SJ6_BEND_TYPED_PROBE
++    float superj6_bend_semitones;
++#endif
++#if X0X_SJ6_MONO32_PROBE
++    float sj6_glide_secs,sj6_glide_offset,sj6_glide_ratio;
++    uint8_t sj6_glide_clock;
++#endif
++#if X0X_SJ6_PITCH_ENV_NATIVE
++    dnbx_envelope_params sj6_pitch_param;
++    uint8_t sj6_pitch_depth;
++#if X0X_SJ6_AUX_LFO_NATIVE
++    uint8_t sj6_pitch_routed;
++#endif
++#endif
++#if X0X_SJ6_NOISE_SUB_NATIVE
++    float sj6_noise_gain,sj6_sub_gain;
++    uint32_t sj6_noise_random;
++    uint8_t sj6_noise_code,sj6_sub_code;
++#endif
++#if X0X_SJ6_OTA_NATIVE
++    float sj6_ota_sustain[DNBX_LAYERS];
++    uint8_t sj6_ota;
++#endif
++    uint8_t damper, velocity_mode, superj6_amp_range, filter_link;
+ } dnbx_part;
+ 
+ /* Optional caller-owned render-only semantic counters. They count dnbx_render
+@@ -124,17 +179,63 @@
+ void dnbx_default_layer_params(dnbx_layer_params *);
+ int dnbx_init(dnbx_part *, float sample_rate);
+ int dnbx_init_superj6(dnbx_part *, float sample_rate); /* 8000 .. 192000 inclusive. */
++/* Typed SuperJ6 only: binary pre-note switch, no overwrite of independent settings. */
++int dnbx_set_filter_link(dnbx_part *, unsigned);
++#if X0X_SJ6_OTA_NATIVE
++int dnbx_set_sj6_ota(dnbx_part *,unsigned);
++void dnbx_set_sj6_ota_filter_sustain(dnbx_part *,unsigned,float);
++#endif
++/* Prevalidated physical panel settings, applied at the audio boundary. */
++void dnbx_apply_panel_envelopes(dnbx_part *, unsigned layer, const dnbx_envelope_params *amp,
++                                const dnbx_envelope_params *filter, unsigned linked);
+ int dnbx_set_layer(dnbx_part *, unsigned layer, const dnbx_layer_params *);
+ int dnbx_get_layer(const dnbx_part *, unsigned layer, dnbx_layer_params *);
++#if X0X_SJ6_AUX_LFO_NATIVE
++void dnbx_sj6_transient_bend(dnbx_part *,unsigned layer,float semitones);
++#endif
+ /* Positive velocity returns chosen voice index 0..5. Velocity 0 performs
+  * note-off and returns DNBX_NOTE_OFF_ONLY. MIDI values outside 0..127 fail. */
++#if defined(X0X_SJ6_MONO32_PROBE) && X0X_SJ6_MONO32_PROBE
++int dnbx_superj6_mono_voice(dnbx_part*,unsigned,unsigned);
++int dnbx_superj6_legato_voice(dnbx_part*,unsigned);
++#endif
++#if X0X_SJ6_PITCH_ENV_NATIVE
++int dnbx_set_sj6_pitch_env(dnbx_part *,const uint8_t code[5]);
++#if X0X_SJ6_AUX_LFO_NATIVE
++void dnbx_route_sj6_pitch_env(dnbx_part *,unsigned);
++#endif
++#endif
++#if X0X_SJ6_NOISE_SUB_NATIVE
++void dnbx_set_sj6_sources(dnbx_part *,unsigned owner,const uint8_t code[2]);
++#endif
++#if X0X_SJ6_VINTAGE_NATIVE
++float dnbx_sj6_vintage_cents(unsigned position);
++void dnbx_set_sj6_vintage(dnbx_part *,unsigned owner,unsigned position);
++#endif
++#if X0X_SJ6_SCALE_NATIVE
++void dnbx_set_sj6_scale(dnbx_part *,unsigned index,unsigned npo,
++                        const uint8_t *head,const uint8_t *tail);
++#endif
+ int dnbx_note_on(dnbx_part *, unsigned note, unsigned velocity);
++#if X0X_SJ6_RANDOM5_6_NATIVE
++int dnbx_superj6_velocity_zero_on(dnbx_part *,unsigned note);
++#if X0X_SJ6_SEQ_DEST_NATIVE
++int dnbx_superj6_routed_on(dnbx_part*,unsigned note,unsigned vel,unsigned layers);
++void dnbx_superj6_release_routes(dnbx_part *,unsigned disabled);
++#if X0X_SJ6_MONO32_PROBE
++int dnbx_superj6_mono_routed_on(dnbx_part*,unsigned note,unsigned vel,unsigned layers);
++#endif
++#endif
++#endif
+ int dnbx_note_off(dnbx_part *, unsigned note);
+ int dnbx_set_sustain(dnbx_part *, unsigned down); /* Strict boolean 0 or 1. */
+ /* Applies to new and existing notes, from the stored linear velocity. */
+ int dnbx_set_velocity_mode(dnbx_part *, unsigned mode);
+ int dnbx_all_off(dnbx_part *);
+ int dnbx_active_voices(const dnbx_part *);
++#if defined(X0X_SJ6_BEND_TYPED_PROBE) && X0X_SJ6_BEND_TYPED_PROBE
++int dnbx_set_superj6_bend(dnbx_part *, float semitones);
++#endif
+ int dnbx_read_voice(const dnbx_part *, unsigned voice, dnbx_voice_snapshot *);
+ /* Overwrites separate L/R arrays of at least frames floats. Arrays must be
+  * disjoint from each other, part, and work. 0..1024 frames per call; a zero
+@@ -146,12 +247,27 @@
+  * No allocations, locks, variable-bound retry, or I/O. */
+ int dnbx_render(dnbx_part *, float *left, float *right, unsigned frames,
+                 dnbx_work *work);
++/* Typed SuperJ6 audio owner: Scale only oscillator 2, leaving its sub and
++ * composite gain intact. Physical original ID3 domain [0,.808].
++ * No state/layout change; caller owns the immutable gain for this block. */
++int dnbx_render_superj6_osc2(dnbx_part *, float *left, float *right,
++                            unsigned frames, float oscillator_2_gain);
++#if X0X_SUPERJ6_BUILTIN_INIT
++int dnbx_render_pitch_osc2(dnbx_part *, float *, float *, unsigned, float, float);
++int dnbx_render_pitch_osc_levels(dnbx_part *, float *, float *, unsigned, float, float, float);
++int dnbx_render_pitch_osc_levels_velocity(dnbx_part *, float *, float *, unsigned, float, float, float, float);
++#endif
++
+ 
+ /* Lossless finite raw admission, deliberately separate from physical DSP.
+  * NONE of the 218 app control IDs is automatically applied to the DSP.
+  * Gain laws and selector dictionaries are not inferred. 207 is reserved;
+  * 212..214 are externally owned key-lock metadata. All retain exact float
+  * bits and return a status showing that no DSP behavior was applied. */
++#if X0X_SUPERJ6_BUILTIN_INIT
++/* Render one span with a transient oscillator-rate ratio. Nominal tuning is retained. */
++int dnbx_render_pitch(dnbx_part *, float *, float *, unsigned, float ratio);
++#endif
+ int dnbx_store_raw(dnbx_part *, unsigned app_id, float raw);
+ int dnbx_read_raw(const dnbx_part *, unsigned app_id, float *raw);
+ /* Independently documented scalar laws, not a preset/application binding. */
+--- a/firmware/src/dsp/drum808.c
++++ b/firmware/src/dsp/drum808.c
+@@ -1620,29 +1620,39 @@
+ static const d8_spec_t k_spec_bd_x2[] = {{0.0f, 6.0f, 0, 42}, {0.0f, 1.0f, 0, 24}};
+ static const d8_spec_t k_spec_sd_x2[] = {{0.0f, 1.0f, 0, 89}, {0.0f, 1.0f, 0, 64}};
+ static const d8_spec_t k_spec_ma_x2[] = {{0.0f, 1.0f, 0, 32}, NON};
+-static const d8_spec_t k_spec_head[D8S_NUM][D8_SPEC_HEAD] = {
+-    [D8S_BD] = {LVL, TU12, {0.1f, 8.0f, 1, 87}},
+-    [D8S_SD] = {LVL, TU12, {0.1f, 8.0f, 1, 108}},
+-    [D8S_LT] = {LVL, TU2,  {0.06f, 2.0f, 1, 68}},
+-    [D8S_MT] = {LVL, TU2,  {0.06f, 2.0f, 1, 56}},
+-    [D8S_HT] = {LVL, TU2,  {0.06f, 2.0f, 1, 53}},
+-    [D8S_LC] = {LVL, TU2,  {0.06f, 2.0f, 1, 58}},
+-    [D8S_MC] = {LVL, TU2,  {0.06f, 2.0f, 1, 36}},
+-    [D8S_HC] = {LVL, TU2,  {0.06f, 2.0f, 1, 34}},
+-    [D8S_RS] = {LVL, TU12, {0.005f, 0.2f, 1, 40}},
+-    [D8S_CL] = {LVL, TU12, {0.0f, 1.0f, 0, 64}},
+-    [D8S_MA] = {LVL, TU12, {0.01f, 0.3f, 1, 51}},
+-    [D8S_CP] = {LVL, TU12, {0.35f, 2.8f, 1, 64}},
+-    [D8S_CB] = {LVL, TUM,  {0.1f, 2.0f, 1, 62}},
+-    [D8S_CH] = {LVL, TUM,  {0.03f, 0.5f, 1, 47}},
+-    [D8S_OH] = {LVL, TUM,  {0.08f, 1.5f, 1, 74}},
+-    [D8S_CY] = {LVL, TUM,  {0.4f, 6.0f, 1, 70}},
++static const d8_spec_t k_spec_level = LVL;
++static const d8_spec_t k_spec_tune[] = {TU12, TU2, TUM};
++static const uint8_t k_tune_kind[D8S_NUM] = {
++    [D8S_LT]=1, [D8S_MT]=1, [D8S_HT]=1, [D8S_LC]=1, [D8S_MC]=1, [D8S_HC]=1,
++    [D8S_CB]=2, [D8S_CH]=2, [D8S_OH]=2, [D8S_CY]=2,
+ };
++static const d8_spec_t k_spec_decay[D8S_NUM] = {
++    [D8S_BD] = {0.1f, 8.0f, 1, 87},
++    [D8S_SD] = {0.1f, 8.0f, 1, 108},
++    [D8S_LT] = {0.06f, 2.0f, 1, 68},
++    [D8S_MT] = {0.06f, 2.0f, 1, 56},
++    [D8S_HT] = {0.06f, 2.0f, 1, 53},
++    [D8S_LC] = {0.06f, 2.0f, 1, 58},
++    [D8S_MC] = {0.06f, 2.0f, 1, 36},
++    [D8S_HC] = {0.06f, 2.0f, 1, 34},
++    [D8S_RS] = {0.005f, 0.2f, 1, 40},
++    [D8S_CL] = {0.0f, 1.0f, 0, 64},
++    [D8S_MA] = {0.01f, 0.3f, 1, 51},
++    [D8S_CP] = {0.35f, 2.8f, 1, 64},
++    [D8S_CB] = {0.1f, 2.0f, 1, 62},
++    [D8S_CH] = {0.03f, 0.5f, 1, 47},
++    [D8S_OH] = {0.08f, 1.5f, 1, 74},
++    [D8S_CY] = {0.4f, 6.0f, 1, 70},
++};
++_Static_assert(D8S_LT==D8S_SD+1 && D8S_HC==D8S_LT+5 && D8S_CY==D8S_CB+3 &&
++               D8S_CY+1==D8S_NUM,"808 shared tune range layout");
+ static const d8_spec_t *d8_kspec(int s, int slot)
+ {
+     int fx;
+-    if (slot < D8_SPEC_HEAD)
+-        return &k_spec_head[s][slot];
++    if (slot == 0) return &k_spec_level;
++    if (slot == 1)
++        return &k_spec_tune[k_tune_kind[s]];
++    if (slot == 2) return &k_spec_decay[s];
+     fx = slot - D8_SPEC_HEAD;
+     if (s == D8S_BD) {
+         if (fx < 2)
+--- a/firmware/src/dsp/drum909.c
++++ b/firmware/src/dsp/drum909.c
+@@ -30,8 +30,28 @@
+ 
+ /* 9W9's back-to-back diode rounding at the two fixed drives the circuits use */
+ /* inline with their tanh: they run per sample in the voice loops (no call) */
+-D9_INLINE float d9_diode16(float x) { return d9_tanh_inline(1.6f * x) * D9_INV_TANH_1_6; }
+-D9_INLINE float d9_diode20(float x) { return d9_tanh_inline(2.0f * x) * D9_INV_TANH_2_0; }
++/* These two callers take only d9_tri: its rounded integer fold gives [-1,1].
++ * Both fixed drives therefore stay inside the real interpolation table. */
++_Static_assert(2 * ((int)X0X_TANH_SCALE + 1) <= X0X_TANH_N, "fixed triangle drives must fit the tanh table");
++D9_INLINE float d9_triangle_diode(float x, float drive, float gain)
++{
++    const float u = drive * x;
++    const float t = d9_tanh_table(fm_fabsf(u) * X0X_TANH_SCALE);
++    return (u < 0.0f ? -t : t) * gain;
++}
++D9_INLINE float d9_diode16(float x) { return d9_triangle_diode(x, 1.6f, D9_INV_TANH_1_6); }
++/* A fold is nonnegative and at most 2^31-1. Scaling the triangle
++ * subtraction by 256 is exact throughout binary32's normal range.
++ * This is the fixed 2x diode lookup coordinate, before sign/magnitude. */
++D9_INLINE float d9_triangle20(uint32_t phase)
++{
++    if (X0X_TANH_SCALE != 128.0f)
++        return d9_triangle_diode(d9_tri(phase), 2.0f, D9_INV_TANH_2_0);
++    const uint32_t folded = phase ^ (uint32_t)((int32_t)phase >> 31);
++    const float coordinate = (float)(int32_t)folded * 0x1p-22f - 256.0f;
++    const float result = d9_tanh_table(fm_fabsf(coordinate));
++    return (coordinate < 0.0f ? -result : result) * D9_INV_TANH_2_0;
++}
+ /* d9_shape with the diode (every voice's default type) inline, tanh included */
+ D9_INLINE float d9_shape_v(const d9_shape_t *s, float x, float *st)
+ {
+@@ -680,6 +700,9 @@
+         s->pos = 0;
+         s->frac = 0;
+         s->dk = 0;                                 /* decode again from the start */
++#if X0X_909_HUFF_DIAG
++        s->huff_bit = 0;
++#endif
+         s->pred = s->idx = 0;
+         s->h0 = s->h1 = 0;
+         s->playing = 1;
+@@ -806,8 +829,8 @@
+ 
+         v->ph += d9_inc(f);
+         v->ph2 += d9_inc(f * ratio);
+-        float o = d9_diode20(d9_tri(v->ph));
+-        o += d9_diode20(d9_tri(v->ph2)) * mix2;
++        float o = d9_triangle20(v->ph);
++        o += d9_triangle20(v->ph2) * mix2;
+         o *= inv_mix;
+         float y = d9_shape_v(&v->shape, o, v->crush_st) * amp;
+ 
+@@ -832,6 +855,20 @@
+ /* Toms (er99_tom909_render): three VCOs on their own envelopes + stick noise.
+  * The two upper partials and the stick are attack features (110 / 70 / 8 ms);
+  * once their envelopes have run out (-100 dB) they are skipped. */
++/* During a tom note only its own ticks advance these envelope countdowns.
++ * Measure each boundary from the beginning of the block. The last ramp
++ * tick still installs v1 exactly and cur retains the value it returned. */
++D9_INLINE float d9_tom_value(d9_env_t *e, int ticks, int frame)
++{
++    const float value = e->v;
++    e->cur = value;
++    if (frame < ticks) e->v = frame + 1 == ticks ? e->v1 : value * e->r;
++    return value;
++}
++D9_INLINE int d9_tom_left(int ticks, int frames)
++{
++    return ticks > frames ? ticks - frames : 0;
++}
+ static void d9_render_tom(d9_tom_t *t, const d9_bt_t *p, const float *nz, const d9_bus_t *bus, int n)
+ {
+     const int m = n < t->mute ? n : t->mute;
+@@ -841,32 +878,66 @@
+     d9_env_anchor(&t->env[1]);
+     d9_env_anchor(&t->env[2]);
+     d9_env_anchor(&t->noise_env);
++    const int pitch_ticks = t->pitch.left;
++    const int body_ticks = t->env[0].left;
++    const int partial1_ticks = t->env[1].left;
++    const int partial2_ticks = t->env[2].left;
++    const int stick_ticks = t->noise_env.left;
++    /* At least one checked tick follows the interior prefix for every
++     * participating envelope. It records cur, which no voice reads inside
++     * this render. The prefix needs only the original five multiplications. */
++    int interior = m;
++    if (pitch_ticks < interior) interior = pitch_ticks;
++    if (body_ticks < interior) interior = body_ticks;
++    if (partial1_ticks < interior) interior = partial1_ticks;
++    if (partial2_ticks < interior) interior = partial2_ticks;
++    if (stick_ticks < interior) interior = stick_ticks;
++    --interior;
+     const float stick_g = t->noise_level * 1.5f;
+     if (t->stick_warm) {
+         d9_warm(&t->noise_bp, nz);
+         t->stick_warm = 0;
+     }
+     for (int i = 0; i < m; ++i) {
+-        const float f = d9_env_tick(&t->pitch);
++        float f, body, part1 = 0.0f, part2 = 0.0f, stick_amp = 0.0f;
++        const int one = i < partial1_ticks, two = i < partial2_ticks, stick_on = i < stick_ticks;
++        if (i < interior) {
++            f = t->pitch.v; t->pitch.v *= t->pitch.r;
++            body = t->env[0].v; t->env[0].v *= t->env[0].r;
++            part1 = t->env[1].v; t->env[1].v *= t->env[1].r;
++            part2 = t->env[2].v; t->env[2].v *= t->env[2].r;
++            stick_amp = t->noise_env.v; t->noise_env.v *= t->noise_env.r;
++        } else {
++            f = d9_tom_value(&t->pitch, pitch_ticks, i);
++            body = d9_tom_value(&t->env[0], body_ticks, i);
++            if (one) part1 = d9_tom_value(&t->env[1], partial1_ticks, i);
++            if (two) part2 = d9_tom_value(&t->env[2], partial2_ticks, i);
++            if (stick_on) stick_amp = d9_tom_value(&t->noise_env, stick_ticks, i);
++        }
+         float o = 0.0f;
+         t->ph[0] += d9_inc(f);
+-        o += d9_diode20(d9_tri(t->ph[0])) * d9_env_tick(&t->env[0]);
+-        if (t->env[1].left) {
++        o += d9_triangle20(t->ph[0]) * body;
++        if (one) {
+             t->ph[1] += d9_inc(f * 1.50f);
+-            o += d9_diode20(d9_tri(t->ph[1])) * d9_env_tick(&t->env[1]);
+-        }
+-        if (t->env[2].left) {
++            o += d9_triangle20(t->ph[1]) * part1;
++        }
++        if (two) {
+             t->ph[2] += d9_inc(f * 2.75f);
+-            o += d9_diode20(d9_tri(t->ph[2])) * d9_env_tick(&t->env[2]);
++            o += d9_triangle20(t->ph[2]) * part2;
+         }
+         o *= 0.55f;
+         float stick = 0.0f;
+-        if (t->noise_env.left)
+-            stick = d9_biquad_tick(&t->noise_bp, nz[i]) * d9_env_tick(&t->noise_env) * stick_g;
++        if (stick_on)
++            stick = d9_biquad_tick(&t->noise_bp, nz[i]) * stick_amp * stick_g;
+         float y = d9_shape_v(&p->shape, o + stick, t->crush_st);
+         y = d9_biquad_tick(&t->dc_block, y);
+         bus->y[i] = y * t->out_gain;
+     }
++    t->pitch.left = d9_tom_left(pitch_ticks, m);
++    t->env[0].left = d9_tom_left(body_ticks, m);
++    t->env[1].left = d9_tom_left(partial1_ticks, m);
++    t->env[2].left = d9_tom_left(partial2_ticks, m);
++    t->noise_env.left = d9_tom_left(stick_ticks, m);
+     d9_emit_block(bus, m);
+     if (!t->noise_env.left)
+         t->stick_stale = 1;
+@@ -950,6 +1021,26 @@
+     d9_emit_block(bus, m);
+ }
+ 
++#if X0X_909_HUFF_DIAG
++#if !X0X_COLD_COMPANION_LAB
++#error "Huffman 909 diagnostic requires the verified read-only companion"
++#endif
++static inline int32_t d9_smp_decode(d9_smp_t *s, const uint8_t *stream)
++{
++    const uint32_t cursor = s->huff_bit;
++    const uint8_t *p = stream + (cursor >> 3);
++    const unsigned bits = p[0] | ((unsigned)p[1] << 8);
++    const unsigned e = x0x_smp_huff_lut[(bits >> (cursor & 7u)) & 63u];
++    s->huff_bit = cursor + (e >> 4);
++    ++s->dk;
++    return ima_decode_code(e & 15u, &s->pred, &s->idx);
++}
++#else
++static inline int32_t d9_smp_decode(d9_smp_t *s, const uint8_t *stream)
++{
++    return ima_decode(stream, s->dk++, &s->pred, &s->idx);
++}
++#endif
+ /* Hats, ride, crash (render_sampler) */
+ static void d9_render_smp(d9_smp_t *s, const d9_bus_t *bus, int n)
+ {
+@@ -962,51 +1053,61 @@
+     const float pre = 1.0f + s->drive * 0.5f;
+     const uint8_t *adpcm = s->adpcm;
+     const uint32_t len = s->len;
+-    /* Decode forward to sample pos+1 (to the last sample at the end): the same
+-     * values as a fully decoded buffer. pos only goes up, so each sample is
+-     * decoded once (up to 4 a sample at pitch x4). Drive and the shape type
+-     * are constant for the block: one loop each, no per-sample branch. */
+-#define D9_SMP_CORE \
+-        float v = 0.0f; \
+-        if (s->pos < len) { \
+-            const uint32_t need = s->pos + 2 < len ? s->pos + 2 : len; \
+-            while (s->dk < need) { \
+-                s->h0 = s->h1; \
+-                s->h1 = ima_decode(adpcm, s->dk++, &s->pred, &s->idx); \
+-            } \
+-            const int last = s->pos + 1 >= len; \
+-            const float a = (float)(last ? s->h1 : s->h0) * (1.0f / 32768.0f); \
+-            const float b = last ? 0.0f : (float)s->h1 * (1.0f / 32768.0f); \
+-            const float fr = (float)s->frac * (1.0f / 4294967296.0f); \
+-            v = a + (b - a) * fr; \
+-            const uint32_t f2 = s->frac + s->incf; \
+-            s->pos += s->inc + (f2 < s->frac); \
+-            s->frac = f2; \
+-        } \
+-        v *= d9_env_tick(&s->out);
+-    if (!drive) {
+-        for (int i = 0; i < m; ++i) { D9_SMP_CORE; bus->y[i] = v; }
+-    } else if (s->shape.type == 0) {
+-        const float k = s->shape.k, g = s->shape.g;
++    /* At the native sample rate, interpolation at fraction zero yields the
++     * exact integer sample. Keep the decoder's ordinary one-sample lookahead,
++     * including the priming nibble on a new hit. Endpoints, non-integral rates
++     * and an unaligned decoder take the general path. */
++    if (m > 0 && s->inc == 1u && !(s->incf | s->frac) &&
++        s->pos < len && (unsigned)m < len - s->pos &&
++        (s->dk == s->pos || s->dk == s->pos + 1u)) {
++        if (s->dk == s->pos)
++            s->h1 = d9_smp_decode(s, adpcm);
+         for (int i = 0; i < m; ++i) {
+-            D9_SMP_CORE;
+-            v = d9_tanh_inline(k * (v * pre)) * g;
+-            bus->y[i] = v;
+-        }
++            s->h0 = s->h1;
++            s->h1 = d9_smp_decode(s, adpcm);
++            const float v = (float)s->h0 * (1.0f / 32768.0f);
++            bus->y[i] = v * d9_env_tick(&s->out);
++        }
++        s->pos += (unsigned)m;
+     } else {
+         for (int i = 0; i < m; ++i) {
+-            D9_SMP_CORE;
+-            v = d9_shape_other(&s->shape, v * pre, s->crush_st);
+-            bus->y[i] = v;
+-        }
+-    }
+-#undef D9_SMP_CORE
++            float v = 0.0f;
++            if (s->pos < len) {
++                const uint32_t need = s->pos + 2 < len ? s->pos + 2 : len;
++                while (s->dk < need) {
++                    s->h0 = s->h1;
++                    s->h1 = d9_smp_decode(s, adpcm);
++                }
++                const int last = s->pos + 1 >= len;
++                const float a = (float)(last ? s->h1 : s->h0) * (1.0f / 32768.0f);
++                const float b = last ? 0.0f : (float)s->h1 * (1.0f / 32768.0f);
++                const float fr = (float)s->frac * (1.0f / 4294967296.0f);
++                v = a + (b - a) * fr;
++                const uint32_t f2 = s->frac + s->incf;
++                s->pos += s->inc + (f2 < s->frac);
++                s->frac = f2;
++            }
++            bus->y[i] = v * d9_env_tick(&s->out);
++        }
++    }
++    /* Drive reads this voice's decoded output in the original sample order.
++     * Its crush history is disjoint from the decoder and its output envelope. */
++    if (drive) {
++        if (s->shape.type == 0) {
++            const float k = s->shape.k, g = s->shape.g;
++            for (int i = 0; i < m; ++i)
++                bus->y[i] = d9_tanh_inline(k * (bus->y[i] * pre)) * g;
++        } else {
++            for (int i = 0; i < m; ++i)
++                bus->y[i] = d9_shape_other(&s->shape, bus->y[i] * pre, s->crush_st);
++        }
++    }
+     d9_emit_block(bus, m);
+ }
+ 
+ static float *d9_dry_r;         /* the render in progress: its right side (0: mono) */
+ static float d9_pl0[DR_NUM], d9_pr0[DR_NUM];   /* each voice's pan where this block starts */
+-__attribute__((noinline)) static void d9_bus(d9_bus_t *b, drum909_t *d, int voice, float *dry, float *rev, float *dly,
++static inline __attribute__((always_inline)) void d9_bus_inline(d9_bus_t *b, drum909_t *d, int voice, float *dry, float *rev, float *dly,
+                           uint16_t audible_tracks)
+ {
+     b->dry = audible_tracks & (1u << voice) ? dry : 0;
+@@ -1025,12 +1126,18 @@
+     b->dly = b->sdly != 0.0f ? dly : 0;
+ }
+ 
++__attribute__((noinline)) static void d9_bus(d9_bus_t *b, drum909_t *d, int voice, float *dry,
++                                               float *rev, float *dly, uint16_t audible_tracks)
++{
++    d9_bus_inline(b, d, voice, dry, rev, dly, audible_tracks);
++}
++
+ /* Identical noise/history transition for an active or silent span. */
+ static float *d9_noise_span(drum909_t *d, int n)
+ {
+     /* the shared noise, written on after the previous block so nz[-DR_NZ_HIST
+      * .. -1] is the noise before this block; the tail is moved to the front
+-     * only when the buffer runs out (every other 256-frame block) */
++     * only when room is needed for the next block; the forward copy is safe because its source starts at or after its destination. */
+     if (d->nz_pos + n > DR_NZ_BUF) {
+         for (int i = 0; i < DR_NZ_HIST; ++i)
+             d->nz_buf[i] = d->nz_buf[d->nz_pos - DR_NZ_HIST + i];
+@@ -1060,7 +1167,7 @@
+ 
+     /* 9W9's summing order: BD SD LT MT HT RS CP OH RD CR CH */
+     if (d->bt[DR_BD].mute > 0) {
+-        d9_bus(&bus, d, DR_BD, dry, rev, dly, audible_tracks);
++        d9_bus_inline(&bus, d, DR_BD, dry, rev, dly, audible_tracks);
+         d9_render_bd(&d->bt[DR_BD], nz, &bus, n);
+     }
+     if (d->bt[DR_SD].mute > 0) {
+@@ -1096,18 +1203,44 @@
+     d9_render(d, dry, rev, dly, n, 0x7FFu);
+ }
+ 
+-void drum909_render_st_masked(drum909_t *d, float *dry_l, float *dry_r, float *rev, float *dly,
+-                             int n, uint16_t audible_tracks)
+-{
+-    d9_dry_r = dry_r;
+-    for (int v = 0; v < DR_NUM; ++v) {             /* every voice's pan glides, sounding or not */
++/* All callers share pan, noise and serial voice state. The engine's 909 job
++ * owns two cleared dry buffers. If every pan stays at unity, the two buses
++ * get the same sequence of binary32 additions, and the mono render computes
++ * that sequence once. Other callers may already have unequal bus contents. */
++static void d9_render_st_masked(drum909_t *d, float *dry_l, float *dry_r, float *rev, float *dly,
++                                int n, uint16_t audible_tracks, int cleared)
++{
++    int duplicate = cleared;
++    if (n > 256) n = 256;
++    for (int v = 0; v < DR_NUM; ++v) {
+         d9_pl0[v] = d->pan_lc[v];
+         d9_pr0[v] = d->pan_rc[v];
+-        d->pan_dl[v] = x0x_glide_block(&d->pan_lc[v], d->pan_l[v], n > 256 ? 256 : n);
+-        d->pan_dr[v] = x0x_glide_block(&d->pan_rc[v], d->pan_r[v], n > 256 ? 256 : n);
+-    }
++        if (d9_pl0[v] == 1.0f && d9_pr0[v] == 1.0f &&
++            d->pan_l[v] == 1.0f && d->pan_r[v] == 1.0f) {
++            d->pan_dl[v] = d->pan_dr[v] = 0.0f;
++        } else {
++            duplicate = 0;
++            d->pan_dl[v] = x0x_glide_block(&d->pan_lc[v], d->pan_l[v], n);
++            d->pan_dr[v] = x0x_glide_block(&d->pan_rc[v], d->pan_r[v], n);
++        }
++    }
++    d9_dry_r = duplicate ? 0 : dry_r;
+     d9_render(d, dry_l, rev, dly, n, audible_tracks);
++    if (duplicate && n > 0)
++        __builtin_memcpy(dry_r, dry_l, (unsigned)n * sizeof *dry_l);
+     d9_dry_r = 0;
++}
++
++void drum909_render_st_cleared(drum909_t *d, float *dry_l, float *dry_r, float *rev, float *dly,
++                               int n, uint16_t audible_tracks)
++{
++    d9_render_st_masked(d, dry_l, dry_r, rev, dly, n, audible_tracks, 1);
++}
++
++void drum909_render_st_masked(drum909_t *d, float *dry_l, float *dry_r, float *rev, float *dly,
++                              int n, uint16_t audible_tracks)
++{
++    d9_render_st_masked(d, dry_l, dry_r, rev, dly, n, audible_tracks, 0);
+ }
+ 
+ void drum909_render_st(drum909_t *d, float *dry_l, float *dry_r, float *rev, float *dly, int n)
+--- a/firmware/src/dsp/drum909.h
++++ b/firmware/src/dsp/drum909.h
+@@ -23,7 +23,7 @@
+ 
+ #define DR_MAX_PARAMS 11         /* most params any voice (or the kit) has (X0X: + PAN, the SD's DECAY, the BD's sends) */
+ #define DR_NZ_HIST 256           /* noise history kept across blocks (filter warm-up) */
+-#define DR_NZ_BUF (DR_NZ_HIST + 2 * 256)
++#define DR_NZ_BUF (DR_NZ_HIST + 256)
+ 
+ /* BD and SD: 9W9's er99_bt_t */
+ typedef struct {
+@@ -82,6 +82,9 @@
+     const uint8_t *adpcm;         /* IMA ADPCM, 44.1 kHz (ima_adpcm.h) */
+     uint32_t len;                 /* samples */
+     uint32_t dk;                  /* samples decoded so far; h0, h1 = samples dk - 2, dk - 1 */
++#if X0X_909_HUFF_DIAG
++    uint32_t huff_bit;            /* next exact sequential IMA nibble's bit cursor */
++#endif
+     int32_t pred, idx;            /* decoder state after dk samples */
+     int32_t h0, h1;
+     uint32_t pos, frac;           /* 32.32 read position */
+@@ -121,6 +124,9 @@
+ /* Only selected tracks reach dry/send buses; every voice still advances normally. */
+ void drum909_render_st_masked(drum909_t *d, float *dry_l, float *dry_r, float *rev, float *dly,
+                              int n, uint16_t audible_tracks);
++/* Distinct cleared dry buffers, as in the 909 engine job. */
++void drum909_render_st_cleared(drum909_t *d, float *dry_l, float *dry_r, float *rev, float *dly,
++                             int n, uint16_t audible_tracks);
+ void drum909_pan_settle(drum909_t *d);   /* every pan to its target at once (the kit is silent: no zipper) */
+ int drum909_nparams(int voice);
+ const x0x_param_t *drum909_param(int voice, int i);
+--- a/firmware/src/dsp/drum909_dsp.h
++++ b/firmware/src/dsp/drum909_dsp.h
+@@ -235,19 +235,41 @@
+ 
+ /* The body, always inlined: drum909.c's per-sample voice loops call it with no call
+  * overhead. d9_tanh below is the same body for every other caller. */
++D9_INLINE float d9_tanh_table(float a)
++{
++    const int32_t i = (int32_t)a;
++    const float fr = a - (float)i;
++#if X0X_TANH_SPLIT_LAB
++#if !X0X_COLD_COMPANION_LAB
++#error split tanh is restricted to the guarded read-only companion lab
++#endif
++    float t0, t1;
++    const unsigned n = (unsigned)i;
++    if (n < X0X_TANH_LAB_SPLIT - 1u) {
++        t0 = x0x_tanh_lab_head[n];
++        t1 = x0x_tanh_lab_head[n + 1u];
++    } else {
++        union { uint32_t u; float f; } tail;
++        tail.u = 0x3f7f0000u | x0x_tanh_lab_tail[n + 1u - X0X_TANH_LAB_SPLIT];
++        t1 = tail.f;
++        if (n == X0X_TANH_LAB_SPLIT - 1u) {
++            t0 = x0x_tanh_lab_head[n];
++        } else {
++            tail.u = 0x3f7f0000u | x0x_tanh_lab_tail[n - X0X_TANH_LAB_SPLIT];
++            t0 = tail.f;
++        }
++    }
++#else
++    const float t0 = x0x_tanh_raw[(unsigned)i];
++    const float t1 = x0x_tanh_raw[(unsigned)i + 1u];
++#endif
++    return t0 + (t1 - t0) * fr;
++}
++
+ D9_INLINE float d9_tanh_inline(float u)
+ {
+     const float a = fm_fabsf(u) * X0X_TANH_SCALE;
+-    float t;
+-    if (a >= (float)X0X_TANH_N) {
+-        t = 1.0f;
+-    } else {
+-        const int32_t i = (int32_t)a;
+-        const float fr = a - (float)i;
+-        const float t0 = x0x_tanh_raw[(unsigned)i];      /* 0e88652c0: one exact const float table */
+-        const float t1 = x0x_tanh_raw[(unsigned)i + 1u];
+-        t = t0 + (t1 - t0) * fr;
+-    }
++    const float t = a >= (float)X0X_TANH_N ? 1.0f : d9_tanh_table(a);
+     return u < 0.0f ? -t : t;
+ }
+ 
+--- a/firmware/src/dsp/fxbus.c
++++ b/firmware/src/dsp/fxbus.c
+@@ -165,12 +165,12 @@
+ }
+ 
+ /* Boot only (engine_init). fxbus_process and the reverb/delay ticks stay -O2. */
+-X0X_COLD void fxbus_init(fxbus_t *f, int16_t *dly_buf, int dly_len)
++X0X_COLD void fxbus_init(fxbus_t *f, fx_dly_word_t *dly_buf, int dly_len)
+ {
+     uint8_t *p = (uint8_t *)f;
+     for (unsigned i = 0; i < sizeof(*f); ++i)
+         p[i] = 0;
+-    for (int i = 0; i < dly_len; ++i)
++    for (unsigned i = 0; i < (unsigned)FX_DLY_WORDS(dly_len); ++i)
+         dly_buf[i] = 0;
+     f->dbuf = dly_buf;
+     f->dlen = dly_len;
+@@ -302,7 +302,40 @@
+ /* the line at d samples behind w, interpolated (X0X: the ping-pong tap).
+  * Outlined once: fx_delay calls this many times (mono + stereo / PING taps);
+  * one body beats N inlined copies on pi32 (-O2). */
+-__attribute__((noinline)) static float dl_tap(const int16_t *buf, int32_t len, float flen, int32_t w, float d)
++#if X0X_MIX_DELAY_PACK14
++/* Signed monotone compander: original Q11 precision through approximately
++ * ±3 full scale; headroom bins use 4 or 16 Q11 counts. No tap, rate or
++ * effect control changes, but hot signals must be compared before shipping. */
++static inline int32_t dl_get(const fx_dly_word_t *buf,unsigned i)
++{
++    unsigned bit=i*14u;
++    const uint8_t *p=buf+(bit>>3u);
++    unsigned code=((unsigned)p[0]|((unsigned)p[1]<<8u)|((unsigned)p[2]<<16u))>>(bit&7u);
++    unsigned mag=code&8191u;
++    if(mag>=6656u)mag=mag==8191u?32767u:8192u+(mag-6656u)*16u+7u;
++    else if(mag>=6144u)mag=6144u+(mag-6144u)*4u+1u;
++    return code&8192u ? -(int32_t)mag : (int32_t)mag;
++}
++static inline int32_t dl_write(fx_dly_word_t *buf,unsigned i,float v)
++{
++    int32_t sample=(int32_t)(v*2048.f);
++    if(sample>32767)sample=32767;
++    if(sample< -32767)sample=-32767;
++    unsigned mag=sample<0 ? (unsigned)-sample : (unsigned)sample;
++    if(mag>=8192u)mag=6656u+((mag-8192u)>>4u);
++    else if(mag>=6144u)mag=6144u+((mag-6144u)>>2u);
++    unsigned bit=i*14u,shift=bit&7u;
++    uint8_t *p=buf+(bit>>3u);
++    unsigned v24=(unsigned)p[0]|((unsigned)p[1]<<8u)|((unsigned)p[2]<<16u);
++    v24=(v24&~(16383u<<shift))|((mag|((sample<0)?8192u:0u))<<shift);
++    p[0]=(uint8_t)v24;p[1]=(uint8_t)(v24>>8u);p[2]=(uint8_t)(v24>>16u);
++    return sample;
++}
++#else
++static inline int32_t dl_get(const fx_dly_word_t *buf,unsigned i){return buf[i];}
++static inline int32_t dl_write(fx_dly_word_t *buf,unsigned i,float v){return sat12_store(&buf[i],v);}
++#endif
++__attribute__((noinline)) static float dl_tap(const fx_dly_word_t *buf, int32_t len, float flen, int32_t w, float d)
+ {
+     float rp = (float)w - d;
+     while (rp < 0.0f) rp += flen;
+@@ -310,7 +343,7 @@
+     const float fr = rp - (float)i0;
+     if (i0 >= len) i0 -= len;
+     const int32_t i1 = i0 + 1 >= len ? 0 : i0 + 1;
+-    const float b0 = (float)buf[i0] * (1.0f / 2048.0f), b1 = (float)buf[i1] * (1.0f / 2048.0f);
++    const float b0 = (float)dl_get(buf,(unsigned)i0) * (1.0f / 2048.0f), b1 = (float)dl_get(buf,(unsigned)i1) * (1.0f / 2048.0f);
+     return b0 + (b1 - b0) * fr;
+ }
+ 
+@@ -349,7 +382,7 @@
+             return;
+         }
+     }
+-    int16_t *buf = f->dbuf;
++    fx_dly_word_t *buf = f->dbuf;
+     const float flen = (float)len;
+     const int ping = out_r && f->dl_ping && 2.0f * fm_maxf(f->dcur, target) + 4.0f < flen;
+     const float lvl = f->muted & 2u ? 0.0f : f->dl_level;
+@@ -403,7 +436,7 @@
+             s -= hp;
+             write = s;
+         }
+-        int32_t k = sat12_store(&buf[w], x + write);       /* 12-bit, toward zero */
++        int32_t k = dl_write(buf,(unsigned)w,x+write);    /* Q11, toward zero */
+         if (++w >= len) w = 0;
+         out[i] += y * lvl;
+         if (out_r)
+--- a/firmware/src/dsp/fxbus.h
++++ b/firmware/src/dsp/fxbus.h
+@@ -34,6 +34,16 @@
+        FX_DL_TIME, FX_DL_FDBK, FX_DL_TONE, FX_DL_LEVEL,
+        FX_DL_HPF, FX_DL_TYPE, FX_DL_WEAR, FX_DL_PING, FX_NPARAMS };
+ 
++#if X0X_MIX_DELAY_PACK14
++/* Link-only memory candidate. Every cell remains addressable at the old
++ * duration. One extra byte makes the unaligned 24-bit read safe at wrap. */
++typedef uint8_t fx_dly_word_t;
++#define FX_DLY_WORDS(samples) (((samples)*14u+7u)/8u+1u)
++#else
++typedef int16_t fx_dly_word_t;
++#define FX_DLY_WORDS(samples) (samples)
++#endif
++
+ struct fxbus {
+     /* reverb */
+     float rv_decay, rv_damp, rv_level;
+@@ -52,7 +62,7 @@
+     float dl_time_ms, dl_fdbk, dl_tc, dl_level, bpm, wear;
+     int32_t dl_div, dl_type;
+     d9_biquad_t dl_hp;
+-    int16_t *dbuf;
++    fx_dly_word_t *dbuf;
+     int32_t dlen, w, dl_quiet;
+     float dcur, lp, tape_hp;
+     uint32_t wow_ph, flut_ph;
+@@ -67,7 +77,7 @@
+ };
+ typedef struct fxbus fxbus_t;
+ 
+-void fxbus_init(fxbus_t *f, int16_t *dly_buf, int dly_len);
++void fxbus_init(fxbus_t *f, fx_dly_word_t *dly_buf, int dly_len);
+ void fxbus_set_bpm(fxbus_t *f, float bpm);
+ void fxbus_process(fxbus_t *f, const float *dry, const float *rev, const float *dly, float *out, int n);
+ /* X0X stereo: dry in L / R, the sends mono; with everything centred and no reverb, out_l and out_r
+--- a/firmware/src/dsp/ima_adpcm.h
++++ b/firmware/src/dsp/ima_adpcm.h
+@@ -32,9 +32,8 @@
+     0,0,0,0,0,0,0,0, 0,0,1,1,0,0,1,1,
+     0,1,0,1,0,1,0,1, 0,1,1,2,0,1,1,2
+ };
+-static inline int32_t ima_decode(const uint8_t *d, uint32_t i, int32_t *pred, int32_t *idx)
++static inline int32_t ima_decode_code(uint32_t code, int32_t *pred, int32_t *idx)
+ {
+-    uint32_t byte = d[i >> 1], code = (i & 1u) ? (byte >> 4) : (byte & 15u);
+     uint32_t mag = code & 7u;
+     int32_t step = IMA_STEP_T[*idx];
+     int32_t delta = ((step * (int32_t)(2u * mag + 1u)) >> 3) - IMA_ROUND_CORR[((step & 7) << 3) | mag];
+@@ -44,3 +43,8 @@
+     *idx = x < 0 ? 0 : x > 88 ? 88 : x;
+     return *pred;
+ }
++static inline int32_t ima_decode(const uint8_t *d, uint32_t i, int32_t *pred, int32_t *idx)
++{
++    uint32_t byte = d[i >> 1], code = (i & 1u) ? (byte >> 4) : (byte & 15u);
++    return ima_decode_code(code, pred, idx);
++}
+--- a/firmware/src/dsp/juno6.c
++++ b/firmware/src/dsp/juno6.c
+@@ -1,6 +1,14 @@
+ /* SPDX-License-Identifier: GPL-3.0-only */
+ #include "juno6.h"
+ #include "juno6_controls.h"
++#include "juno6_aux_catalog.h"
++const uint8_t sj6_aux_destination_ids[SJ6_AUX_ORIGINAL_LAST+1u]={
++        0,78,79,129,1,3,57,
++        207,7,36,66,65,23,22,108,37,26,27,25,132,133,135,136,134,131,35,124,207,
++        125,74,72,1,126,75,73,3,89,88,97,96,101,100,0,201,39,8,143,144,202,38,
++        103,104,60,61,14,15,13,145,147,148,149,150,151,152,153,154,155,156,
++        157,158,159,160,161,162,207,17,78,79
++    };
+ #include <math.h>
+ #include "fastmath.h"
+ #include <string.h>
+@@ -99,8 +107,24 @@
+ }
+ void juno6_chorus_init(juno6_chorus_t*c,float sr){memset(c,0,sizeof *c);c->sample_rate=sr>8000?sr:44100;c->rate_hz=.8f;c->depth_ms=3.4f;c->mix=.22f;}
+ void juno6_chorus_set(juno6_chorus_t*c,float r,float d,float m){c->rate_hz=clampf(r,.1f,5);c->depth_ms=clampf(d,1.7f,5.4f);c->mix=clampf(m,0,.5f);}
++static inline float chorus_read(const juno6_chorus_t *c, unsigned write, float delay)
++{
++ unsigned whole = (unsigned)delay;
++ unsigned a = (write + JUNO6_CHORUS_SAMPLES - whole) & (JUNO6_CHORUS_SAMPLES - 1);
++ unsigned b = (a + JUNO6_CHORUS_SAMPLES - 1) & (JUNO6_CHORUS_SAMPLES - 1);
++ float frac = delay - whole;
++ return ((float)c->delay[a] * (1 - frac) + (float)c->delay[b] * frac) / 32768.0f;
++}
++
+ void juno6_chorus_process(juno6_chorus_t *c, float *l, float *r, unsigned n)
+ {
++#if X0X_SUPERJ6_FACTORY
++ if (c->factory_mode == JUNO6_CHORUS_OFF) return;
++#endif
++#if X0X_SUPERJ6_BUILTIN_INIT
++ unsigned mode = c->factory_mode;
++ if (mode != JUNO6_CHORUS_LEGACY && c->mix == 0.f) return;
++#endif
+  const float sr = c->sample_rate;
+  const float min_delay = sr * .0017f, max_delay = fm_minf(255, sr * .0054f);
+  const float depth = c->depth_ms * .001f - .0017f;
+@@ -111,10 +135,20 @@
+  for (unsigned i = 0; i < n; ++i) {
+   float in = (l[i] + r[i]) * .5f;
+   float angle = (float)phase / 4294967296.0f * TWO_PI;
+-  float d = clampf(sr * (.0017f + depth * (.5f + .5f * fm_sinf(angle))), min_delay, max_delay);
+-  unsigned whole = (unsigned)d, a = (write + 256 - whole) & 255, b = (a + 255) & 255;
+-  float frac = d - whole;
+-  float delayed = ((float)c->delay[a] * (1 - frac) + (float)c->delay[b] * frac) / 32768.0f;
++  float sweep = .5f * fm_sinf(angle);
++#if X0X_SUPERJ6_BUILTIN_INIT
++  /* Both compact taps share one history and oscillator. The opposed sweep
++   * gives the two switches distinct preview paths within that history. */
++  if (mode == JUNO6_CHORUS_II) sweep = -sweep;
++#endif
++  float d = clampf(sr * (.0017f + depth * (.5f + sweep)), min_delay, max_delay);
++  float delayed = chorus_read(c, write, d);
++#if X0X_SUPERJ6_BUILTIN_INIT
++  if (mode == JUNO6_CHORUS_BOTH) {
++   d = clampf(sr * (.0017f + depth * (.5f - sweep)), min_delay, max_delay);
++   delayed = .5f * (delayed + chorus_read(c, write, d));
++  }
++#endif
+   float wet = delayed * mix;
+   c->delay[write] = (int16_t)clampf(in * 32767, -32768, 32767);
+   write = (write + 1) & 255;
+@@ -169,3 +203,7 @@
+ #if X0X_SUPERJ6_FACTORY
+ #include "juno6_factory.inc"
+ #endif
++
++#include "juno6_j60_native.inc"
++
++#include "juno6_classic_native.inc"
+--- a/firmware/src/dsp/juno6.h
++++ b/firmware/src/dsp/juno6.h
+@@ -12,6 +12,54 @@
+ #define JUNO6_APP_PARAM_BASE 256u
+ /* Qualified raw master-volume domain includes the authored over-unity stops. */
+ #define JUNO6_FACTORY_MASTER_MAX 1.32f
++#if X0X_SUPERJ6_BUILTIN_INIT
++/* Authored build-9 IDs: 82, 83, 86, 210, 78, 211, 79. */
++enum { SJ6_WAVE1, SJ6_WAVE2, SJ6_RANGE, SJ6_PWM1_ON, SJ6_PWM1, SJ6_PWM2_ON, SJ6_PWM2, SJ6_OSC_KNOBS,
++       SJ6_AMP_ATTACK = SJ6_OSC_KNOBS, SJ6_AMP_DECAY, SJ6_AMP_SUSTAIN, SJ6_AMP_RELEASE,
++       SJ6_FILTER_ATTACK, SJ6_FILTER_DECAY, SJ6_FILTER_SUSTAIN, SJ6_FILTER_RELEASE,
++       SJ6_FILTER_LINK, SJ6_MASTER_LEVEL, SJ6_LFO1_RATE, SJ6_LFO2_RATE, SJ6_LFO3_RATE,
++       SJ6_LFO2_PWM_DEPTH, SJ6_LFO2_PWM_ROUTE, SJ6_LFO1_MODE, SJ6_LFO2_MODE, SJ6_LFO3_MODE,
++       SJ6_CHORUS_I, SJ6_CHORUS_II, SJ6_CHORUS_RATE, SJ6_CHORUS_MIX,
++       SJ6_VIBRATO_DEPTH, SJ6_VIBRATO_RATE, SJ6_A_REFERENCE, SJ6_LFO2_SHAPE,
++       SJ6_LAYER1_SEMI, SJ6_LAYER2_SEMI, SJ6_LAYER1_FINE, SJ6_LAYER2_FINE, SJ6_OSC2_LEVEL, SJ6_OSC1_LEVEL, SJ6_FILTER_VELOCITY,
++#if X0X_SJ6_VCF_PORT
++       SJ6_VCF_LFO1_AMOUNT,
++#endif
++       SJ6_KNOBS, SJ6_LFO2_PWM_BASE = SJ6_KNOBS };
++enum { SJ6_LAYER1_SEMI_ID = 72, SJ6_LAYER2_SEMI_ID = 73, SJ6_SEMI_CENTER = 12, SJ6_SEMI_MAX = 24 };
++enum { SJ6_LAYER1_FINE_ID = 74, SJ6_FINE_CENTER = 50, SJ6_FINE_MAX = 100 };
++enum { SJ6_A_REFERENCE_ID = 206, SJ6_A_REFERENCE_STEPS = 100, SJ6_A_REFERENCE_DEFAULT = 60 };
++enum { SJ6_LFO_COUNT = 3, SJ6_LFO_WORD_COUNT = 6, SJ6_LFO_DIVISIONS = 18 };
++#if X0X_SJ6_NATIVE_UNISON
++enum { SJ6_UNISON_HISTORY=1024 };
++typedef struct {
++    int16_t (*history)[SJ6_UNISON_HISTORY];
++    float head[5],step[5],pan[5],wet,dry,trim;
++    uint16_t pos,filled;
++    uint8_t code[4],taps;
++} juno6_unison_t;
++#endif
++typedef struct {
++    float word[SJ6_LFO_WORD_COUNT]; /* Rates, then Hz mode words, in index order. */
++    uint8_t present;
++} juno6_lfo_words;
++typedef struct {
++    float rate, mode, hz;
++    uint64_t phase;
++    uint8_t present; /* Bit 0 = rate, bit 1 = mode. */
++    uint8_t division; /* Build-9 index, valid with both words and mode zero. */
++} juno6_lfo_view;
++enum { SJ6_ADSR_STAGES = 4, SJ6_EXTRA_COUNT = SJ6_LFO2_PWM_DEPTH - SJ6_OSC_KNOBS };
++enum { SJ6_LFO2_PWM_DEPTH_MASK = 127, SJ6_LFO2_PWM_ROUTE_SHIFT = 7,
++       SJ6_LFO2_PWM_ROUTE_MASK = 3u << SJ6_LFO2_PWM_ROUTE_SHIFT,
++       SJ6_LFO2_PWM_SHAPE_SHIFT = 9 };
++/* Build-9 normalized wave choices; internal sine is not selector ID98. */
++enum { SJ6_LFO_TRI, SJ6_LFO_UP, SJ6_LFO_DOWN, SJ6_LFO_SQUARE, SJ6_LFO_HELD,
++       SJ6_LFO2_SHAPE_MAX = SJ6_LFO_HELD, SJ6_LFO2_SHAPE_MASK = 7 };
++enum { SJ6_WAVE_STOPS = 3, SJ6_RANGE_STOPS = 2, SJ6_PWM_STEPS = 127, SJ6_MASTER_INIT = 128 };
++#endif
++static inline int juno6_factory_range_valid(float raw)
++{ return raw == 0.f || raw == .5f || raw == 1.f; }
+ #endif
+ #define JUNO6_VOICES 6u
+ #define JUNO6_CHORUS_BYTES 512u
+@@ -32,28 +80,169 @@
+  uint32_t age;
+  float sample_rate,attack,decay,sustain,release,cutoff,resonance,pulse_width,sub_level;
+  uint8_t waveform, damper;
++#if defined(X0X_SJ6_BEND_TYPED_PROBE) && X0X_SJ6_BEND_TYPED_PROBE
++ uint8_t pb_typed, pb_down, pb_up;
++#endif
+  float macro[18], bend, hpf, hp_state, hp_input, lfo_phase;
+ #if X0X_SUPERJ6_FACTORY
+  dnbx_part core;
+  /* An idle typed wave or AMP2 edit selects the app renderer until cold adoption. */
+- uint8_t typed;
++ uint8_t typed, amp1_independent; /* qualified by committed factory source, never inferred from raw words */
+  /* Main writes under the audio-source mask. The block boundary commits each
+   * field once. Cold selection clears staged edits with the whole synth. */
+- float pending_field[5]; /* slots 0..3 AMP2, slot 4 output attenuation */
++ float pending_field[7]; /* AMP2 0..3, master 4, independent AMP1 attack 5, oscillator range 6 */
+  float master_gain;
+  juno6_oscillator_edit pending_wave[2];
+- uint8_t pending_field_mask, pending_wave_mask;
++ uint8_t pending_field_mask, pending_wave_mask, pending_filter_link, osc2_level_code;
+  float typed_hp_state[2], typed_hp_input[2];
++#if X0X_SUPERJ6_BUILTIN_INIT
++ uint64_t lfo_phase_q40[SJ6_LFO_COUNT];
++ uint64_t lfo_step_q40[SJ6_LFO_COUNT];
++#if X0X_SJ6_AUX_LFO_NATIVE
++ struct sj6_aux_fx_schedule *aux_fx_schedule;
++ uint32_t lfo1_aux_until;
++ float lfo1_aux_delta;
++ uint8_t lfo1_aux_route,lfo1_aux_base;
++ uint32_t aux_lfo3_age,aux_delay_frames,aux_lfo_until[2],aux_lfo3_entropy;
++ float aux_lfo_delta[2];
++ float aux_servo[6];
++ uint8_t aux_servo_mask;
++ uint16_t aux_lfo_cursor;
++#if X0X_SJ6_LFO_TRIGGER_NATIVE
++ uint8_t aux_lfo[18],trigger_active,trigger_done;
++#else
++ uint8_t aux_lfo[13];
++#endif
++ uint8_t aux_lfo3_held_turn;
++#endif
++ float lfo_tempo;
++ uint16_t lfo2_pwm;
++ uint8_t lfo_running, lfo_sync, lfo2_pwm_index, vibrato_left;
++ uint32_t lfo2_pwm_until_tick, vibrato_phase, vibrato_step;
++ float vibrato_depth, vibrato_ratio, mod_wheel_cutoff_hz;
++#if X0X_SJ6_OTA_NATIVE
++ float sj6_live_raw_cutoff;
++#endif
++ uint64_t lfo2_entropy_state;
++#if X0X_SJ6_LFO1_WAVE_NATIVE
++ uint64_t lfo1_entropy_state;
++ float lfo1_hold_elapsed, lfo1_hold_period, lfo1_hold_sample;
++ uint8_t lfo1_wave;
++#endif
++ float lfo2_hold_elapsed, lfo2_hold_period, lfo2_hold_sample;
++#if defined(X0X_HOST) && defined(X0X_SJ6_DELAY_WITNESS)
++ struct {
++    float *left,*right;
++    float dry,from,target,feedback;
++    unsigned tap, pos, elapsed, tick, capacity;
++    float delay,delay_from,delay_target,fb_from,fb_target,bpm;
++    unsigned time_raw,fb_raw,sync,clock_refused,delay_elapsed,fb_elapsed;
++    unsigned enabled,mix,pending;
++ } delay24;
++#elif X0X_SJ6_NATIVE_DELAY
++ struct {
++    int16_t *tap;
++    float current,target,fb,fb_target,wet,wet_target,inv_stride,sum[2],step[3];
++    uint16_t ramp[3];
++    uint16_t stride,phase,pos,filled;
++    uint8_t tick,mix,clock_refused,sync,enabled;
++ } delay24;
++#endif
++#if X0X_SJ6_LFO1_DELAY_PORT
++ uint32_t lfo1_delay_age, lfo1_delay_frames;
++ uint8_t lfo1_delay_raw, lfo1_delay_started;
++#endif
++ float lfo1_pwm_base, lfo1_cut_current, lfo1_cut_target;
++ int32_t lfo1_cut_until;
++ uint8_t lfo1_cut_active, lfo1_cut_force;
++ uint32_t lfo1_pwm_until_tick;
++#if (defined(X0X_HOST) && defined(X0X_SJ6_ALT3_WITNESS)) || X0X_SJ6_ALT3_NATIVE
++ struct {
++    float rate,depth,from_rate,from_depth,to_rate,to_depth;
++    uint32_t phase,increment,elapsed,depth_elapsed,duration;
++    uint8_t tick, armed, dirty, tempo_sync, last_wheel_code, panel_rate,panel_depth;
++ } alt3;
++#endif
++ uint8_t osc1_level_code, mod_destination, mod_wheel_lfo1, mod_wheel_lfo2;
++ uint8_t lfo1_pwm_route, lfo1_pwm_index, wheel_lfo1_amount; /* 0 untouched, 1..128 physical CC1 */
++#if X0X_SJ6_LFO1_WAVE_NATIVE
++ uint8_t lfo1_disabled,lfo1_snapback; /* fields 87/198 independent of phase, Hz and waveform */
++#endif
++ uint8_t filter_velocity_position;
++ float filter_velocity_scale;
++#endif
++#endif
++#if defined(X0X_SJ6_MONO32_PROBE) && X0X_SJ6_MONO32_PROBE
++ uint32_t mono32_keys[4];
++ uint8_t mono32_on,legato33_on,glide35_detent;
++#endif
++#if X0X_SJ6_NATIVE_UNISON
++    juno6_unison_t unison;
+ #endif
+ } juno6_t;
++#if X0X_SJ6_NATIVE_UNISON
++void juno6_unison_config(juno6_t *, const uint8_t [4], int16_t [2][SJ6_UNISON_HISTORY]);
++void juno6_unison_process(juno6_t *,float *,float *,unsigned);
++void juno6_unison_process_mod(juno6_t *,float *,float *,unsigned,float,float);
++#endif
++#if X0X_SUPERJ6_FACTORY
++enum { JUNO6_CHORUS_LEGACY, JUNO6_CHORUS_OFF, JUNO6_CHORUS_I, JUNO6_CHORUS_II, JUNO6_CHORUS_BOTH };
++#endif
++#if X0X_SJ6_NATIVE_J60
++typedef struct {
++    float phase,center,bridge,rate,depth,mix,target[3],prev[2];
++    float lp[2][2][2],hp_x[2],hp_y[2],post0[2],post1[2],wet[2];
++    uint16_t write,filled;
++    uint8_t selected,reset;
++} sj6_j60_t;
++#endif
++#if X0X_SJ6_NATIVE_CLASSIC
++enum { SJ6_CLASSIC_NATIVE_RING=1058 };
++typedef struct {
++    float phase,current[3],target[3],step[3];
++    uint16_t pos,filled,left[3];
++    uint8_t code[3],typed,mode,quantum;
++} sj6_classic_native_t;
++#endif
+ typedef struct {
+  int16_t delay[JUNO6_CHORUS_SAMPLES];
+  uint16_t write;
++#if X0X_SUPERJ6_FACTORY
++ /* Fits the existing alignment gap; pending is audio-boundary owned. */
++ uint8_t factory_mode, factory_pending;
++#endif
+  uint32_t phase;
+  float sample_rate,depth_ms,rate_hz,mix;
++#if X0X_SJ6_NATIVE_CLASSIC
++ int16_t mode_history[2][SJ6_CLASSIC_NATIVE_RING];
++#elif X0X_SJ6_NATIVE_J60
++ int16_t mode_history[2][1024];
++#endif
++#if X0X_SJ6_NATIVE_J60
++ sj6_j60_t j60;
++#endif
++#if X0X_SJ6_NATIVE_CLASSIC
++ sj6_classic_native_t classic_native;
++#endif
+ } juno6_chorus_t;
++#if X0X_SJ6_NATIVE_CLASSIC
++void juno6_classic_native_config(juno6_chorus_t *,const uint8_t [3]);
++void juno6_classic_native_process(juno6_chorus_t *,float *,float *,unsigned);
++#endif
++#if X0X_SJ6_NATIVE_J60
++void juno6_j60_config(juno6_chorus_t *,const uint8_t [4]);
++void juno6_j60_process(juno6_chorus_t *,float *,float *,unsigned);
++#endif
+ void juno6_init(juno6_t*,float);
++#if defined(X0X_SJ6_MONO32_PROBE) && X0X_SJ6_MONO32_PROBE
++int juno6_mono32_set(juno6_t*,unsigned);
++int juno6_legato33_set(juno6_t*,unsigned);
++int juno6_glide35_set(juno6_t*,unsigned);
++#endif
+ int juno6_note_on(juno6_t*,uint8_t,uint8_t);
++#if X0X_SJ6_RANDOM5_6_NATIVE
++int juno6_arp_zero_on(juno6_t*,uint8_t);
++#endif
+ void juno6_note_off(juno6_t*,uint8_t);
+ void juno6_all_off(juno6_t*);
+ void juno6_render(juno6_t*,float*,unsigned);
+@@ -62,6 +251,10 @@
+ void juno6_chorus_process(juno6_chorus_t*,float*,float*,unsigned);
+ /* Slot adapter: normalized patch macros; final two are performance-only. */
+ int juno6_set(juno6_t*, unsigned, float);
++#if X0X_SUPERJ6_BUILTIN_INIT
++float juno6_sj6_hpf_hz(float unit);
++void juno6_set_sj6_hpf(juno6_t *, float unit);
++#endif
+ int juno6_active(const juno6_t*);
+ 
+ /* Caller-owned output must be disjoint from synth. Serialized observation;
+@@ -73,6 +266,140 @@
+ #if X0X_SUPERJ6_FACTORY
+ int juno6_render_stereo(juno6_t *, float *, float *, unsigned);
+ int juno6_can_edit_amp2(const juno6_t *);
++#if X0X_SUPERJ6_BUILTIN_INIT
++unsigned juno6_knob_position(const juno6_t *s, unsigned slot);
++void juno6_apply_knobs(juno6_t *s, unsigned mask, const uint8_t positions[SJ6_OSC_KNOBS]);
++void juno6_apply_panel_envelopes(juno6_t *, unsigned mask, const uint8_t positions[SJ6_EXTRA_COUNT], int reset);
++void juno6_apply_panel_master(juno6_t *, unsigned position);
++/* Transient Build-9 default MOD destination, LFO1 RATE. Audio owner only. */
++#if defined(X0X_SJ6_BEND_TYPED_PROBE) && X0X_SJ6_BEND_TYPED_PROBE
++int juno6_set_bend_ranges(juno6_t *, unsigned down, unsigned up);
++#endif
++int juno6_set_mod_wheel(juno6_t *, unsigned value);
++/* ID179 original editor index; only source-qualified receivers are enabled. */
++int juno6_set_mod_destination(juno6_t *, unsigned selected);
++#if (defined(X0X_HOST) && defined(X0X_SJ6_ALT3_WITNESS)) || X0X_SJ6_ALT3_NATIVE
++int juno6_arm_alt3_running(juno6_t *,unsigned verified_ramp_frames,int tempo_sync);
++int juno6_arm_alt3_free(juno6_t *,unsigned verified_ramp_frames,int tempo_sync);
++int juno6_alt3_set_panel(juno6_t *,unsigned,unsigned,unsigned);
++float juno6_alt3_panel_hz(unsigned rate,unsigned sync,float bpm);
++void juno6_alt3_process(juno6_t *,float *,float *,unsigned);
++#endif
++/* Qualified original continuous Triangle LFO1 route only (selector 69/70).
++ * Amount and base are authored normalized Float; No save or UI transport. */
++int juno6_configure_lfo1_pwm(juno6_t *,unsigned selector,unsigned enabled,float base,float amount);
++/* Bounded source ID181=1 (normal ID7 cutoff), Loop/Triangle only. */
++int juno6_configure_lfo1_cutoff(juno6_t *,float authored_base,float live_current,float amount);
++float juno6_mod_cutoff_hz(unsigned value);
++#if X0X_SJ6_OTA_NATIVE
++void juno6_sj6_set_ota(juno6_t *,unsigned mode);
++float juno6_sj6_panel_cutoff_hz(float normalized,unsigned mode);
++#endif
++#if (defined(X0X_HOST) && defined(X0X_SJ6_DELAY_WITNESS)) || X0X_SJ6_NATIVE_DELAY
++enum { SJ6_DELAY24=90, SJ6_DELAY27=91, SJ6_DELAY25=92, SJ6_DELAY26=93, SJ6_DELAYSYNC=94 };
++#if X0X_SJ6_NATIVE_DELAY
++enum { SJ6_NATIVE_DELAY_CAP=1024 };
++void juno6_delay_native_arm(juno6_t *,int16_t *);
++void juno6_delay_native_config(juno6_t *,const uint8_t [4],float);
++#if X0X_SJ6_AUX_LFO_NATIVE
++void juno6_delay_native_route_refresh(juno6_t *,float);
++#endif
++#else
++int juno6_delay24_arm(juno6_t *,float *,float *,unsigned,float,unsigned);
++int juno6_delay24_set(juno6_t *,unsigned,unsigned);
++int juno6_delay25_profile(juno6_t *,unsigned,float,unsigned);
++int juno6_delay25_clock(juno6_t *,float,unsigned);
++unsigned juno6_delay_position(const juno6_t *,unsigned);
++#endif
++int juno6_delay25_can(const juno6_t *,unsigned,float,unsigned);
++void juno6_delay24_process(juno6_t *,float *,float *,unsigned);
++#endif
++#if X0X_SJ6_LFO1_WAVE_NATIVE
++enum { SJ6_LFO1_WAVE=96, SJ6_LFO1_ENABLE=118, SJ6_LFO1_SNAPBACK=119,
++        SJ6_LFO1_WAVE_ID=94, SJ6_LFO1_ENABLE_ID=87, SJ6_LFO1_SNAPBACK_ID=198,
++        SJ6_LFO1_WAVE_MAX=SJ6_LFO_HELD };
++void juno6_lfo1_controls(juno6_t *,unsigned waveshape,unsigned disabled,unsigned snapback);
++#endif
++#if X0X_SJ6_LFO1_DELAY_PORT
++enum { SJ6_LFO1_DELAY=95, SJ6_LFO1_DELAY_ID=91 };
++float juno6_lfo1_delay_seconds(unsigned position);
++void juno6_lfo1_delay_set(juno6_t *,unsigned position);
++#endif
++#if X0X_SJ6_AUX_LFO_NATIVE
++void juno6_set_aux_lfo(juno6_t *,const uint8_t *);
++void juno6_set_aux_lfo1(juno6_t *,unsigned route,unsigned base);
++static inline unsigned juno6_aux_fx_route(const juno6_t *s,unsigned slot)
++{ return slot?s->aux_lfo[4u+slot]:s->lfo1_aux_route; }
++float juno6_aux_delay_seconds(unsigned);
++#if X0X_SJ6_LFO_TRIGGER_NATIVE
++enum { SJ6_LFO_EVENT_KEY,SJ6_LFO_EVENT_ARP,SJ6_LFO_EVENT_EMPTY };
++void juno6_lfo_trigger(juno6_t *,unsigned);
++int juno6_lfo_snapback_active(const juno6_t *);
++#endif
++float juno6_aux_capture_base(const juno6_t *,unsigned);
++#if X0X_SJ6_AUX_SEQ_NATIVE
++unsigned juno6_aux_seq_values(const juno6_t *,uint8_t ids[5],float values[5]);
++#endif
++#endif
++#if X0X_SJ6_NOISE_SUB_NATIVE
++enum { SJ6_NOISE_LEVEL=98, SJ6_SUB_LEVEL=99 };
++#endif
++#if X0X_SJ6_SEQ_SETTINGS_NATIVE
++enum { SJ6_SEQ_START_SNAP=114, SJ6_SEQ_LOCK=115
++#if X0X_SJ6_SEQ_DEST_NATIVE
++       , SJ6_SEQ_DEST=116
++#endif
++};
++#if X0X_SJ6_SEQ_DEST_NATIVE
++#if !X0X_SJ6_SEQ_SETTINGS_NATIVE || !X0X_SJ6_RANDOM5_6_NATIVE
++#error SuperJ6 Destination needs native SEQ settings and explicit ARP note-on
++#endif
++#define SJ6_SEQ_SETTING_SLOT(k) ((k) >= SJ6_SEQ_START_SNAP && (k) <= SJ6_SEQ_DEST)
++int juno6_arp_routed_on(juno6_t*,uint8_t,uint8_t,unsigned layers);
++void juno6_arp_release_routes(juno6_t*,unsigned disabled);
++#else
++#define SJ6_SEQ_SETTING_SLOT(k) ((k)==SJ6_SEQ_START_SNAP || (k)==SJ6_SEQ_LOCK)
++#endif
++#endif
++void juno6_set_lfo_words(juno6_t *, const juno6_lfo_words *, int reset_phase);
++void juno6_set_panel_lfo(juno6_t *, unsigned lfo, int position, unsigned hz_mode);
++void juno6_set_lfo_tempo(juno6_t *, float bpm);
++static inline void juno6_set_panel_lfo_rate(juno6_t *s, unsigned lfo, unsigned position)
++{ juno6_set_panel_lfo(s, lfo, (int)position, 1); }
++void juno6_read_lfo(const juno6_t *, unsigned lfo, juno6_lfo_view *);
++void juno6_set_lfo2_pwm(juno6_t *, uint16_t setting);
++void juno6_set_lfo2_shape(juno6_t *, unsigned shape);
++void juno6_set_vibrato(juno6_t *, float depth_unit, float rate_unit, int reset);
++/* Binary32 unit interval, including an authored negative zero. */
++static inline int juno6_unit_word_valid(uint32_t bits)
++{ return bits <= UINT32_C(0x3f800000) || bits == UINT32_C(0x80000000); }
++int juno6_set_filter_velocity(juno6_t *, unsigned position);
++#if X0X_SJ6_VCF_PORT
++int juno6_set_vcf_lfo1_amount(juno6_t *, unsigned position);
++#endif
++void juno6_set_vibrato_words(juno6_t *, const float values[2], unsigned present, int reset);
++unsigned juno6_layer_fine(const juno6_t *, unsigned layer);
++void juno6_set_layer_fine(juno6_t *, unsigned layer, unsigned position);
++unsigned juno6_layer_semi(const juno6_t *, unsigned layer);
++void juno6_set_layer_semi(juno6_t *, unsigned layer, unsigned position);
++static inline unsigned juno6_layer1_semi(const juno6_t *s) { return juno6_layer_semi(s, 0); }
++static inline void juno6_set_layer1_semi(juno6_t *s, unsigned position)
++{ juno6_set_layer_semi(s, 0, position); }
++void juno6_set_a_reference(juno6_t *, float normalized, unsigned present);
++float juno6_a_reference_unit(unsigned position);
++static inline float juno6_a_reference_hz(float normalized)
++{ return 200.f + 400.f * normalized; }
++int juno6_read_panel_envelope(const juno6_t *, unsigned filter, juno6_envelope_snapshot *, unsigned *linked);
++#if X0X_SJ6_OTA_NATIVE
++/* Refresh OTA sustain after a real cutoff gesture (0..1), or use the current
++ * raw cutoff (-1) after ENV amount, Link, Sustain or filter-model edits. */
++void juno6_refresh_ota_sustain(juno6_t *,float raw_cutoff);
++#endif
++#endif
+ void juno6_apply_pre_note_wave(juno6_t *, unsigned, const juno6_oscillator_edit *);
+ void juno6_apply_factory_waves(juno6_t *, const juno6_oscillator_edit waves[2]);
+-#endif
++/* Audio boundary, idle, with already-qualified independent envelopes. */
++/* Prevalidated idle only, negative internal sentinel means absent. */
++void juno6_apply_pre_note_range(juno6_t*,float);
++int juno6_apply_independent_amp1_attack(juno6_t *, float);
++#endif
+--- /dev/null
++++ b/firmware/src/dsp/juno6_aux_catalog.h
+@@ -0,0 +1,16 @@
++/* SPDX-License-Identifier: GPL-3.0-only */
++#pragma once
++#include <stdint.h>
++/* Build9 KoFMInstrument.lfoDestinations contains exactly 71 UInt8 entries.
++ * Legacy carrier 1..6 remains decodable; newly authored selectors use
++ * original index + 7, including indices whose receiver is not yet admitted. */
++enum { SJ6_AUX_ORIGINAL_FIRST=7, SJ6_AUX_ORIGINAL_COUNT=71, SJ6_AUX_ORIGINAL_LAST=77 };
++#if X0X_SJ6_AUX_SEQ_NATIVE
++static inline int sj6_aux_seq_id(unsigned id)
++{ return id==65u || id==66u || (id>=143u && id<=145u) || (id>=147u && id<=162u); }
++#endif
++extern const uint8_t sj6_aux_destination_ids[SJ6_AUX_ORIGINAL_LAST+1u];
++static inline int sj6_aux_destination_id(unsigned route)
++{
++    return route && route<sizeof sj6_aux_destination_ids && sj6_aux_destination_ids[route]!=207u ? sj6_aux_destination_ids[route] : -1;
++}
+--- /dev/null
++++ b/firmware/src/dsp/juno6_aux_core.inc
+@@ -0,0 +1,170 @@
++/* Read/write only established native receivers selected by the original
++ * auxiliary LFO destination table. All settings below are span-local. */
++static int juno6_aux_core_supported(unsigned id)
++{
++    return id==7u || id==8u || (id>=36u&&id<=39u) || (id>=72u&&id<=75u) ||
++           (id>=124u&&id<=126u) || (id>=131u&&id<=136u)
++#if X0X_SJ6_NOISE_SUB_NATIVE
++           || id==201u || id==202u
++#endif
++           ;
++}
++__attribute__((noinline)) static float sj6_aux_infer_cutoff(float hz)
++{
++    float a=0.f,b=1.f;
++    for(unsigned n=0;n<12u;n++){
++        const float x=(a+b)*.5f;
++        if(sj6_normal_cutoff_hz(x)<hz)a=x;else b=x;
++    }
++    return (a+b)*.5f;
++}
++static float juno6_aux_core_base(const juno6_t *s,unsigned id)
++{
++    const dnbx_layer_params *p=&s->core.layer[0].params;
++    float raw;
++    if(!juno6_aux_core_supported(id))return -1.f;
++#if X0X_SJ6_NOISE_SUB_NATIVE
++    if(id==201u)return s->core.sj6_noise_code*(1.f/127.f);
++    if(id==202u)return s->core.sj6_sub_code*(1.f/127.f);
++#endif
++    if(dnbx_read_raw(&s->core,id,&raw)==DNBX_OK)return fm_clampf(raw,0.f,1.f);
++    if(id==7u)return sj6_aux_infer_cutoff(p->cutoff_hz);
++    if(id==8u)return p->resonance;
++    if((id>=72u && id<=75u)||(id>=124u && id<=126u))return .5f;
++    if(id==131u)return 0.f;
++    if(id==136u)return fm_clampf(p->filter_env_hz*(1.f/7000.f),0.f,1.f);
++    const unsigned filter=id>=132u, stage=id-(filter?132u:36u);
++    const dnbx_envelope_params *e=filter?&p->filter:&p->amp;
++    if(!filter || stage!=3u)return sj6_stage_raw(e,stage,filter);
++    return fm_clampf(fm_powf(fm_maxf((e->release_s-.2f)-.002f,0.f)/
++                     23.998f,1.f/3.35f),0.f,1.f);
++}
++typedef struct {
++    dnbx_layer_params layer[2];
++    float tune[2][DNBX_VOICES];
++    float track,strength,offset[4],bend[3];
++#if X0X_SJ6_NOISE_SUB_NATIVE
++    float noise,sub;
++#endif
++#if X0X_SJ6_OTA_NATIVE
++    float ota_raw_cutoff,ota_sustain[2];
++#endif
++    uint32_t present;
++    unsigned active;
++} sj6_aux_core_saved;
++__attribute__((noinline,minsize)) static void juno6_aux_core_apply(juno6_t *s,sj6_aux_core_saved *save,unsigned id,float raw)
++{
++    dnbx_part *p=&s->core;
++    if(!save->active){
++        for(unsigned l=0;l<2u;l++){
++            save->layer[l]=p->layer[l].params;
++            for(unsigned i=0;i<DNBX_VOICES;i++)save->tune[l][i]=p->voice[i].layer[l].increment;
++        }
++        save->track=p->raw[131];save->strength=p->raw[136];
++        save->present=p->raw_present[4];
++#if X0X_SJ6_NOISE_SUB_NATIVE
++        save->noise=p->sj6_noise_gain;save->sub=p->sj6_sub_gain;
++#endif
++        save->active=1u;
++    }
++#if X0X_SJ6_OTA_NATIVE
++    /* Only real cutoff or sustained-envelope receivers alter this derived
++     * target. Save the authored/smoothed state once per audio span, so
++     * two destinations can combine without committing either one. */
++    if(p->sj6_ota && (id==7u || id==136u ||
++       id==(p->filter_link?38u:134u))){
++        if(!(save->active&512u)){
++            save->ota_raw_cutoff=s->sj6_live_raw_cutoff;
++            for(unsigned l=0;l<2u;l++)save->ota_sustain[l]=p->sj6_ota_sustain[l];
++            save->active|=512u;
++        }
++        if(id==7u)s->sj6_live_raw_cutoff=raw;
++    }
++#endif
++    if(id>=124u && id<=126u){
++        /* AU's independent global/layer trim, not the keyboard wheel. */
++        const unsigned k=id-124u;
++        save->bend[k]=(raw-.5f)*24.f;
++        save->active|=1u<<(6u+k);
++    } else if(id==7u){
++        const float hz=sj6_cutoff_hz(s,raw);
++        for(unsigned l=0;l<2u;l++)p->layer[l].params.cutoff_hz=hz;
++    } else if(id==8u){
++        for(unsigned l=0;l<2u;l++)p->layer[l].params.resonance=raw;
++    } else if(id==131u || id==136u){
++        p->raw[id]=raw;p->raw_present[id/32u]|=1u<<(id%32u);
++#if X0X_SJ6_NOISE_SUB_NATIVE
++    } else if(id==201u){
++        /* Original independent Noise gain: .707u^2.5. */
++        p->sj6_noise_gain=.707f*raw*raw*fm_sqrtf(raw);
++    } else if(id==202u){
++        /* Original separate octave-down Sub fader: .808u. */
++        p->sj6_sub_gain=.808f*raw;
++#endif
++    } else if(id>=72u && id<=75u){
++        const unsigned l=id&1u,semi=id<74u;
++        const float authored=semi?(float)juno6_layer_semi(s,l):(float)juno6_layer_fine(s,l);
++        const float scale=semi?24.f:100.f;
++        const float d=(float)(unsigned)(raw*scale+.5f)-authored;
++        dnbx_layer_params q=p->layer[l].params;
++        /* Repeated same-class writes replace that class in destination
++         * order; an independent semitone and fine choice can coexist. */
++        unsigned bit=1u<<(2u+l+(semi?0u:2u));
++        if(save->active&bit){
++            /* Reset that class only; use the current span's raw offset. */
++            const unsigned idx=(semi?0u:2u)+l;
++            const float prior=save->offset[idx];
++            q.tune_semitones+= (d-prior)*(semi?1.f:.01f);
++        }else q.tune_semitones+=d*(semi?1.f:.01f);
++        save->offset[(semi?0u:2u)+l]=d;save->active|=bit;
++        (void)dnbx_set_layer(p,l,&q);
++    } else {
++        const unsigned filter=id>=132u,stage=id-(filter?132u:36u);
++        /* Same normalized ADSR transfer as direct original panels,
++         * including Build9 filter release's fixed 200 ms extension. */
++        const float physical=amp_stage_from_unit(stage,raw)+(filter && stage==3u?.2f:0.f);
++        for(unsigned l=0;l<2u;l++){
++            dnbx_envelope_params amp=p->layer[l].params.amp,eg=p->layer[l].params.filter;
++            dnbx_envelope_params *e=filter?&eg:&amp;
++            switch(stage){
++            case 0:e->attack_s=physical;break;
++            case 1:e->decay_s=physical;break;
++            case 2:e->sustain=physical;break;
++            default:e->release_s=physical;break;
++            }
++            dnbx_apply_panel_envelopes(p,l,&amp,&eg,p->filter_link);
++        }
++    }
++}
++__attribute__((noinline,minsize)) static void juno6_aux_core_bends(juno6_t *s,const sj6_aux_core_saved *save)
++{
++#if X0X_SJ6_OTA_NATIVE
++    if(save->active&512u)juno6_refresh_ota_sustain(s,-1.f);
++#endif
++    if(!(save->active&0x1c0u))return;
++    const float common=(save->active&64u)?save->bend[0]:0.f;
++    for(unsigned l=0;l<DNBX_LAYERS;l++){
++        const float local=(save->active&(128u<<l))?save->bend[l+1u]:0.f;
++        dnbx_sj6_transient_bend(&s->core,l,common+local);
++    }
++}
++__attribute__((noinline,minsize)) static void juno6_aux_core_restore(juno6_t *s,const sj6_aux_core_saved *save)
++{
++    dnbx_part *p=&s->core;
++    if(!save->active)return;
++    p->raw[131]=save->track;p->raw[136]=save->strength;p->raw_present[4]=save->present;
++#if X0X_SJ6_OTA_NATIVE
++    if(save->active&512u){
++        s->sj6_live_raw_cutoff=save->ota_raw_cutoff;
++        for(unsigned l=0;l<2u;l++)p->sj6_ota_sustain[l]=save->ota_sustain[l];
++    }
++#endif
++#if X0X_SJ6_NOISE_SUB_NATIVE
++    p->sj6_noise_gain=save->noise;p->sj6_sub_gain=save->sub;
++#endif
++    for(unsigned l=0;l<2u;l++){
++        p->layer[l].params=save->layer[l];
++        dnbx_apply_panel_envelopes(p,l,&save->layer[l].amp,&save->layer[l].filter,p->filter_link);
++        for(unsigned i=0;i<DNBX_VOICES;i++)p->voice[i].layer[l].increment=save->tune[l][i];
++    }
++}
+--- /dev/null
++++ b/firmware/src/dsp/juno6_aux_fx.h
+@@ -0,0 +1,32 @@
++/* SPDX-License-Identifier: GPL-3.0-only */
++#pragma once
++#include <stdint.h>
++/* One audio block is <=256 frames. 44.1k/80 gives at most one boundary
++ * per active oscillator inside a block, plus LFO3's separate delay start.
++ * Keep one closed initial interval and bounded additional boundaries. */
++enum { SJ6_AUX_FX_EVENTS=5, SJ6_AUX_FX_ROUTES=5 };
++typedef struct { uint8_t at, code[SJ6_AUX_FX_ROUTES]; } sj6_aux_fx_event;
++typedef struct sj6_aux_fx_schedule { uint8_t count; sj6_aux_fx_event event[SJ6_AUX_FX_EVENTS]; } sj6_aux_fx_schedule;
++
++static inline int sj6_aux_fx_supported(int id)
++{
++    switch(id){
++    case 0:return 1;
++#if X0X_SJ6_NATIVE_LIMITER
++    case 17:return 1;
++#endif
++#if (defined(X0X_HOST) && defined(X0X_SJ6_ALT3_WITNESS)) || X0X_SJ6_ALT3_NATIVE
++    case 103:case 104:return 1;
++#endif
++#if X0X_SJ6_NATIVE_UNISON
++    case 60:case 61:return 1;
++#endif
++#if X0X_SJ6_NATIVE_ROOM
++    case 13:case 14:case 15:case 22:case 23:case 108:return 1;
++#endif
++#if X0X_SJ6_NATIVE_DELAY
++    case 25:case 26:case 27:return 1;
++#endif
++    default:return 0;
++    }
++}
+--- /dev/null
++++ b/firmware/src/dsp/juno6_aux_servo.inc
+@@ -0,0 +1,42 @@
++/* Real target IDs in the original Hack chooser. Use separate audio-effective
++ * values so an LFO never writes project bytes, pots or authored readback. */
++static int sj6_aux_servo_slot(unsigned id)
++{
++    switch(id){
++    case 88:return 0;case 96:return 1;case 100:return 2;
++    case 89:return 3;case 97:return 4;case 101:return 5;
++    default:return -1;
++    }
++}
++static float sj6_aux_servo_base(const juno6_t *s,unsigned id)
++{
++    int k=sj6_aux_servo_slot(id);
++    float value=0.f;
++    if(k<0)return -1.f;
++    if(dnbx_read_raw(&s->core,id,&value)==DNBX_OK)return fm_clampf(value,0.f,1.f);
++    if(k==4)return (s->lfo2_pwm&SJ6_LFO2_PWM_DEPTH_MASK)*(1.f/127.f);
++    if(k==5)return s->aux_lfo[2]*(1.f/127.f);
++    return value;
++}
++static void sj6_aux_servo_commit(juno6_t *s,unsigned mask,const float target[6],unsigned cursor,unsigned phase3)
++{
++    const unsigned old=s->aux_servo_mask;
++    if(!(old|mask))return;
++    s->aux_servo_mask=(uint8_t)mask;
++    for(unsigned i=0;i<6u;i++){
++        unsigned bit=1u<<i;
++        if(!(old&bit) && !(mask&bit))continue;
++        if((old&bit) && (mask&bit) && s->aux_servo[i]==target[i])continue;
++        if(mask&bit)s->aux_servo[i]=target[i];
++        if(i>=3u)continue; /* amounts have no phase accumulator */
++        /* Anchor the old phase at the actual write point before changing the
++         * step. This preserves a continuous integral over multiple spans. */
++        const uint64_t step=s->lfo_step_q40[i];
++        prepare_lfo_step(s,i);
++        unsigned passed=i==2u?phase3:cursor;
++#if X0X_SJ6_LFO1_DELAY_PORT
++        if(!i && sj6_lfo1_waiting(s))passed=0;
++#endif
++        s->lfo_phase_q40[i]+=(step-s->lfo_step_q40[i])*passed;
++    }
++}
+--- /dev/null
++++ b/firmware/src/dsp/juno6_classic_native.inc
+@@ -0,0 +1,79 @@
++/* SPDX-License-Identifier: GPL-3.0-only */
++/* Build 9 classic TempoChorus role: true stereo, 3.518..24 ms
++ * quadrature modulation, retained stopped state and active 1.707 booster. */
++#if X0X_SJ6_NATIVE_CLASSIC
++void juno6_classic_native_config(juno6_chorus_t *c,const uint8_t b[3])
++{
++    sj6_classic_native_t *s=&c->classic_native;
++    unsigned m=c->factory_mode;
++    s->typed=1;
++    if(m<JUNO6_CHORUS_I || m>JUNO6_CHORUS_BOTH)return; /* OFF: freeze, do not reapply targets. */
++    if(s->mode==m && !memcmp(s->code,b,3))return;
++    static const float mode_rate[]={.513f,.863f,1.726f};
++    float target[3]={
++        b[0]?16.f*fm_powf((float)(b[0]-1u)/127.f,3.33f):mode_rate[m-JUNO6_CHORUS_I],
++        b[1]?.97f*((float)(b[1]-1u)/127.f):(.97f*.97f*.202f),
++        b[2]?((float)(b[2]-1u)/127.f):(m==JUNO6_CHORUS_BOTH?.555f:.505f)
++    };
++    memcpy(s->code,b,3);
++    for(unsigned i=0;i<3;++i){
++        if(!s->mode)s->current[i]=target[i];
++        if(s->target[i]!=target[i]){
++            s->target[i]=target[i];
++            s->step[i]=(target[i]-s->current[i])*(1.f/1250.f);
++            s->left[i]=1250u;
++        }
++    }
++    s->mode=(uint8_t)m;
++}
++static inline float classic_native_tap(const juno6_chorus_t *c,const sj6_classic_native_t *s,unsigned ch,float lag)
++{
++    const unsigned n=(unsigned)lag;
++    if(n>s->filled)return 0.f;
++    int index=(int)s->pos-(int)n;
++    if(index<0)index+=SJ6_CLASSIC_NATIVE_RING;
++    const float a=c->mode_history[ch][index], b=n==s->filled?0.f:
++        c->mode_history[ch][index?index-1:SJ6_CLASSIC_NATIVE_RING-1];
++    return (a+(b-a)*(lag-(float)n))*(1.f/4096.f);
++}
++static inline float classic_native_lfo(float p)
++{
++    if(p>=1.f)p-=1.f;
++    float x=p*256.f;
++    unsigned i=(unsigned)x;
++    float a=fm_sinf((float)i*(TWO_PI/256.f));
++    float b=fm_sinf((float)((i+1u)&255u)*(TWO_PI/256.f));
++    return a+(b-a)*(x-(float)i);
++}
++void juno6_classic_native_process(juno6_chorus_t *c,float *l,float *r,unsigned frames)
++{
++    sj6_classic_native_t *s=&c->classic_native;
++    unsigned m=c->factory_mode;
++    if(m<JUNO6_CHORUS_I || m>JUNO6_CHORUS_BOTH)return;
++    const float ms=c->sample_rate*.001f, inv_sr=1.f/c->sample_rate;
++    for(unsigned i=0;i<frames;++i){
++        if(!s->quantum){
++            for(unsigned k=0;k<3u;++k)if(s->left[k])
++                s->current[k]=--s->left[k]?s->current[k]+s->step[k]:s->target[k];
++            s->quantum=8;
++        }
++        --s->quantum;
++        const float phase=s->phase, mix=s->current[2];
++        const float amp=(24.f-3.518f)*.5f*s->current[1], center=(24.f+3.518f)*.5f;
++        const float a=classic_native_tap(c,s,0,(center+amp*classic_native_lfo(phase))*ms);
++        const float b=classic_native_tap(c,s,1,(center+amp*classic_native_lfo(phase+.25f))*ms);
++        const float x=l[i], y=r[i];
++        /* Corrected source uses feedback *= 1 + .05*sin(...). At the
++         * typed Init native carrier raw feedback is exactly zero; the
++         * original shadow mode-offset assignments are not injected. */
++        c->mode_history[0][s->pos]=(int16_t)(fm_clampf(x,-7.999f,7.999f)*4096.f);
++        c->mode_history[1][s->pos]=(int16_t)(fm_clampf(y,-7.999f,7.999f)*4096.f);
++        if(++s->pos>=SJ6_CLASSIC_NATIVE_RING)s->pos=0;
++        if(s->filled<SJ6_CLASSIC_NATIVE_RING-1u)++s->filled;
++        s->phase+=s->current[0]*inv_sr;
++        if(s->phase>=1.f)s->phase-=1.f;
++        l[i]=1.707f*(x+(a-x)*mix);
++        r[i]=1.707f*(y+(b-y)*mix);
++    }
++}
++#endif
+--- /dev/null
++++ b/firmware/src/dsp/juno6_delay_native.inc
+@@ -0,0 +1,215 @@
++/* SPDX-License-Identifier: GPL-3.0-only */
++/* Compact stereo SuperJ6 Delay 24–27 + Sync 118. The caller loans an
++ * engine-exclusive, owner-local ring. At long taps the history is sampled
++ * more slowly; neither the time law nor its UI/persisted detents change. */
++#if X0X_SJ6_NATIVE_DELAY
++enum { SJ6_NATIVE_DELAY_MAX_STRIDE = 8192 };
++
++static float native_delay_frames(const juno6_t *s,unsigned raw,float bpm,unsigned sync)
++{
++    static const uint16_t grid128[18]={
++        0,3,4,6,8,12,16,24,32,48,64,96,128,256,384,512,768,1024
++    }; /* fractions of a whole note /128, same original 18 detents */
++    if (raw>127u || sync>1u || !(bpm>0.f) || bpm>10000.f) return 0.f;
++    unsigned i=sync?(raw*17u+63u)/127u:0u;
++    float sec=i ? (float)grid128[i]*(1.875f/bpm) : (1.5f/127.f)*(float)raw;
++    float frames=sec*s->sample_rate;
++    if (!(frames<=(SJ6_NATIVE_DELAY_CAP-2u)*SJ6_NATIVE_DELAY_MAX_STRIDE)) return 0.f;
++    return frames<1.f ? 1.f : frames;
++}
++
++void juno6_delay_native_arm(juno6_t *s,int16_t *history)
++{
++    if (s->typed && !s->delay24.tap) s->delay24.tap=history;
++}
++
++int juno6_delay25_can(const juno6_t *s,unsigned raw,float bpm,unsigned sync)
++{
++    return s->delay24.tap && native_delay_frames(s,raw,bpm,sync)>0.f;
++}
++
++/* Match the existing original control ramp cadence: 10,000 frames,
++ * update every eight rendered frames. No per-sample division. */
++static void native_delay_ramp(float current,float next,float *target,float *step,uint16_t *ramp)
++{
++    if (*target==next) return;
++    *target=next;
++    *step=(next-current)*(1.f/1250.f);
++    *ramp=1250u;
++}
++static void native_delay_advance(float *current,float target,float step,uint16_t *ramp)
++{
++    if (*ramp) *current=--*ramp ? *current+step : target;
++}
++
++#if X0X_SJ6_AUX_LFO_NATIVE
++/* When any of the original LFO selectors targets Delay Time, provision the
++ * whole reachable compact span once. A control tick then selects a tap
++ * without clearing or changing sample rate mid-tail. */
++static float native_delay_route_window(const juno6_t *s,float bpm)
++{
++    int owned=0;
++    for(unsigned k=0;k<SJ6_AUX_FX_ROUTES;k++)
++        if(sj6_aux_destination_id(juno6_aux_fx_route(s,k))==25){owned=1;break;}
++    if(!owned)return 0.f;
++    float max=native_delay_frames(s,127u,bpm,s->delay24.sync);
++    if(max>0.f)return max;
++    unsigned lo=0,hi=127u;
++    while(hi-lo>1u){
++        const unsigned mid=(lo+hi)>>1;
++        if(native_delay_frames(s,mid,bpm,s->delay24.sync)>0.f)lo=mid;else hi=mid;
++    }
++    return native_delay_frames(s,lo,bpm,s->delay24.sync);
++}
++
++/* In-place coarsening aligned on the newest complete old cell. Write
++ * indices trail the already-read source indices, including across wrap. */
++static void native_delay_route_coarsen(juno6_t *s,unsigned wanted)
++{
++    const unsigned old=s->delay24.stride;
++    const unsigned ratio=wanted/old;
++    const unsigned filled=s->delay24.filled/ratio;
++    const unsigned pos=s->delay24.pos;
++    enum { MASK=SJ6_NATIVE_DELAY_CAP-1u };
++    for(unsigned i=0;i<filled;i++){
++        int32_t l=0,r=0;
++        for(unsigned j=0;j<ratio;j++){
++            unsigned from=((pos-1u-i*ratio-j)&MASK)*2u;
++            l+=s->delay24.tap[from];r+=s->delay24.tap[from+1u];
++        }
++        const unsigned to=((pos-1u-i)&MASK)*2u;
++        s->delay24.tap[to]=(int16_t)(l/(int32_t)ratio);
++        s->delay24.tap[to+1u]=(int16_t)(r/(int32_t)ratio);
++    }
++    s->delay24.filled=(uint16_t)filled;
++    s->delay24.stride=(uint16_t)wanted;
++    s->delay24.inv_stride=1.f/(float)wanted;
++    const float convert=(float)old*s->delay24.inv_stride;
++    s->delay24.current*=convert;
++    s->delay24.target*=convert;
++    s->delay24.step[0]*=convert;
++    /* The existing partial bin stays pending; phase < old <= wanted,
++       and both channels already hold the exact uncommitted time sum. */
++}
++void juno6_delay_native_route_refresh(juno6_t *s,float bpm)
++{
++    if(!s->delay24.tap || !s->delay24.stride || !(bpm>0.f))return;
++    const float window=native_delay_route_window(s,bpm);
++    unsigned stride=s->delay24.stride;
++    while(window>(float)((SJ6_NATIVE_DELAY_CAP-2u)*stride))stride<<=1;
++    if(stride!=s->delay24.stride)native_delay_route_coarsen(s,stride);
++}
++#endif
++
++void juno6_delay_native_config(juno6_t *s,const uint8_t b[4],float bpm)
++{
++    if (!s->delay24.tap) return;
++    float frames=native_delay_frames(s,b[1],bpm,!!(b[0]&2u));
++    s->delay24.clock_refused=!(frames>0.f);
++    s->delay24.sync=(uint8_t)!!(b[0]&2u);
++    s->delay24.enabled=b[0]&1u;
++    if (!(frames>0.f)) return;
++    /* Power of two bins permit stable repeats, and hysteresis minimizes the
++     * only non-transplantable edit: switching the history sample rate. */
++    unsigned stride=s->delay24.stride;
++    float window=frames;
++#if X0X_SJ6_AUX_LFO_NATIVE
++    const float route=native_delay_route_window(s,bpm);
++    if(route>window)window=route;
++    /* Never shrink/reset a warm, routed history on unrelated amount edits. */
++    if (route>0.f && stride && window>(float)((SJ6_NATIVE_DELAY_CAP-2u)*stride)){
++        while(window>(float)((SJ6_NATIVE_DELAY_CAP-2u)*stride))stride<<=1;
++        native_delay_route_coarsen(s,stride);
++    }
++#else
++    const float route=0.f;
++#endif
++    if (!stride || window>(float)((SJ6_NATIVE_DELAY_CAP-2u)*stride) ||
++        (route==0.f && stride>1u && frames<(float)((SJ6_NATIVE_DELAY_CAP/4u)*stride))) {
++        stride=1u;
++        while (window>(float)((SJ6_NATIVE_DELAY_CAP-2u)*stride)) stride<<=1;
++        if (stride!=s->delay24.stride) {
++            s->delay24.stride=(uint16_t)stride;
++            s->delay24.filled=s->delay24.phase=s->delay24.pos=0;
++            s->delay24.sum[0]=s->delay24.sum[1]=0.f;
++            s->delay24.inv_stride=1.f/(float)stride;
++            s->delay24.current=s->delay24.target=frames*s->delay24.inv_stride;
++            s->delay24.ramp[0]=0;
++        }
++    }
++    native_delay_ramp(s->delay24.current,frames*s->delay24.inv_stride,&s->delay24.target,
++                      &s->delay24.step[0],&s->delay24.ramp[0]);
++    native_delay_ramp(s->delay24.fb,(.99f/127.f)*b[2],&s->delay24.fb_target,
++                      &s->delay24.step[1],&s->delay24.ramp[1]);
++    unsigned mix=(b[0]&1u)?b[3]:0u;
++    if (mix!=s->delay24.mix) {
++        s->delay24.mix=(uint8_t)mix;
++        native_delay_ramp(s->delay24.wet,mix ? .9f*fm_powf((float)mix/127.f,1.1f) : 0.f,
++                          &s->delay24.wet_target,&s->delay24.step[2],&s->delay24.ramp[2]);
++    }
++}
++
++float juno6_aux_delay_frames(const juno6_t *s,unsigned raw)
++{
++    float v=native_delay_frames(s,raw,s->lfo_tempo,s->delay24.sync);
++    if(v>0.f && s->delay24.stride && v<=(SJ6_NATIVE_DELAY_CAP-2u)*s->delay24.stride)
++        return v*s->delay24.inv_stride;
++    return 0.f; /* No wrap into stale/unaligned history at this stride. */
++}
++static int16_t native_delay_encode(float x)
++{
++    return x>=1.f?32767:x<=-1.f?-32767:(int16_t)(x*32767.f);
++}
++
++void juno6_delay24_process(juno6_t *s,float *left,float *right,unsigned n)
++{
++    if (!s->delay24.stride || !s->delay24.tap) return;
++    enum { MASK=SJ6_NATIVE_DELAY_CAP-1u };
++    if (n && s->delay24.stride==1u && s->delay24.current==1.f && s->delay24.target==1.f &&
++        s->delay24.fb==0.f && s->delay24.fb_target==0.f && s->delay24.wet==0.f && s->delay24.wet_target==0.f) {
++        /* Default, dry 1-sample path: only the previous input can be used. */
++        unsigned pos=s->delay24.pos;
++        s->delay24.tap[2u*pos]=native_delay_encode(left[n-1u]);
++        s->delay24.tap[2u*pos+1u]=native_delay_encode(right[n-1u]);
++        s->delay24.pos=(uint16_t)((pos+1u)&MASK);
++        s->delay24.filled=1;
++        return;
++    }
++    for (unsigned i=0;i<n;++i) {
++        if (!(s->delay24.tick++ & 7u)) {
++            native_delay_advance(&s->delay24.current,s->delay24.target,s->delay24.step[0],&s->delay24.ramp[0]);
++            native_delay_advance(&s->delay24.fb,s->delay24.fb_target,s->delay24.step[1],&s->delay24.ramp[1]);
++            native_delay_advance(&s->delay24.wet,s->delay24.wet_target,s->delay24.step[2],&s->delay24.ramp[2]);
++        }
++        float age=s->delay24.current+1.f-((float)s->delay24.phase+1.f)*s->delay24.inv_stride;
++        if (age<1.f) age=1.f;
++        unsigned whole=(unsigned)age, pos=s->delay24.pos;
++        unsigned a=((pos-whole)&MASK)*2u, b=((pos-whole-1u)&MASK)*2u;
++        float delay[2]={0.f,0.f};
++        if (whole<=s->delay24.filled) {
++            float frac=age-(float)whole;
++            const int16_t *history=s->delay24.tap;
++            for (unsigned c=0;c<2;++c) {
++                float x=history[a+c], y=whole<s->delay24.filled ? history[b+c] : 0.f;
++                delay[c]=(x+(y-x)*frac)*(1.f/32767.f);
++            }
++        }
++        s->delay24.sum[0]+=left[i]+s->delay24.fb*delay[0];
++        s->delay24.sum[1]+=right[i]+s->delay24.fb*delay[1];
++        if (++s->delay24.phase==s->delay24.stride) {
++            for (unsigned c=0;c<2;++c) {
++                s->delay24.tap[2u*pos+c]=native_delay_encode(s->delay24.sum[c]*s->delay24.inv_stride);
++                s->delay24.sum[c]=0.f;
++            }
++            s->delay24.phase=0;
++            s->delay24.pos=(uint16_t)((pos+1u)&MASK);
++            if (s->delay24.filled<SJ6_NATIVE_DELAY_CAP) ++s->delay24.filled;
++        }
++        if (!s->delay24.clock_refused && s->delay24.wet!=0.f) {
++            float dry=1.f-s->delay24.wet;
++            left[i]=dry*left[i]+s->delay24.wet*delay[0];
++            right[i]=dry*right[i]+s->delay24.wet*delay[1];
++        }
++    }
++}
++#endif

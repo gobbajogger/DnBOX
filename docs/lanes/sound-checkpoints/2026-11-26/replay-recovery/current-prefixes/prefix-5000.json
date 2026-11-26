@@ -1,0 +1,82 @@
+{
+  "scope": "Copy-to-copy exact sealed replay; planner fields describe only capture endpoint.",
+  "elf_sha256": "d6c0611a98d75755f2e57b2562fef99f4d4ae671652debcbc3c84469dd2b16b0",
+  "shared_virtual_nor_sha256": "d9953d21980f6ae7dc26296c8b513618f11389db87beb54430ff7c2d3377ff31",
+  "shared_scene_sha256": "d08718b1521119b252b5cca0c5e1db6981ea25a5a0b31b6ead60dceccb3f6271",
+  "pcm_frames_full_and_terminal_half_trimmed": [
+    186880,
+    186368
+  ],
+  "pcm_equal_full_prefix": true,
+  "pcm_equal_before_terminal_half": true,
+  "usb_equal_entire_observed_prefix": true,
+  "short_last_midi_ms": 4946,
+  "full_endpoint": {
+    "half_count": 584,
+    "worst_us": 15558,
+    "in_audio": true,
+    "late": 39,
+    "last_us": 8129,
+    "planner_endpoint": {
+      "eng_plan": [
+        19
+      ],
+      "eng_c1_mask": [
+        19
+      ],
+      "eng_c1_next": [
+        0
+      ],
+      "eng_job_arg": [
+        1048064
+      ],
+      "eng_job_cost": [
+        61315,
+        11965,
+        78521,
+        39650,
+        3734
+      ],
+      "eng_808_split": [
+        0
+      ],
+      "eng_stage": [
+        0
+      ]
+    }
+  },
+  "short_endpoint": {
+    "half_count": 361,
+    "worst_us": 15559,
+    "in_audio": true,
+    "late": 3,
+    "last_us": 12219,
+    "planner_endpoint": {
+      "eng_plan": [
+        19
+      ],
+      "eng_c1_mask": [
+        19
+      ],
+      "eng_c1_next": [
+        0
+      ],
+      "eng_job_arg": [
+        1048064
+      ],
+      "eng_job_cost": [
+        66333,
+        12138,
+        80952,
+        47693,
+        3646
+      ],
+      "eng_808_split": [
+        0
+      ],
+      "eng_stage": [
+        0
+      ]
+    }
+  }
+}

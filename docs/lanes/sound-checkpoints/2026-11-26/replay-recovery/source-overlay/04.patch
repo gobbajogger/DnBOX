@@ -1,0 +1,3949 @@
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -439,13 +439,230 @@
+        R_SLEN, R_STALLS, R_HDR, R_TAPE, R_MIDICH, R_OUTLOUD, R_SREP, R_BATT, R_USBFULL, R_FREEPLAY,
+        R_BT, R_BTSTAT, R_BTNAME, R_CKCH, R_CLKSRC, R_SMC_ROLE, R_SMC_MAP, R_BENGINE, R_BPRESET, R_BSTATUS, R_SECTION, R_PARTON, R_FINETUNE, R_QUEUEMUTE, R_BRKRATE, R_BPATSND, R_NOTELOCK };   /* R_TAPE: FX's one-knob TAPE (DIGI .. worn tape) */          /* R_HDR: a list's section header (a = its group), never selected */
+ #if X0X_SYNTHONE_PATCH
+-enum { R_S1PATCH = R_NOTELOCK + 1 };
++enum { R_S1PATCH = R_NOTELOCK + 1, R_S1LINK = R_NOTELOCK + 4 };
++extern int s1_patch_slot(unsigned factory_id);
+ #endif
+ #if X0X_ARP_HOOKS
+ enum { R_ARP = R_NOTELOCK + 2 };          /* a: ARP_F_* field, b: bass voice */
+-static const x0x_param_t *arp_desc(unsigned field);
++static const x0x_param_t *arp_desc(unsigned owner, unsigned field);
+ static int arp_get(unsigned voice, unsigned field);
+ static void arp_set(unsigned voice, unsigned field, int v);
++#endif
++#if X0X_S1_KEYBOARD_HOLD && DNBOX_TYPED_CONTROLS_NATIVE_TEST
++enum { R_S1WHITEKEYS = R_NOTELOCK + 63, R_S1MIDIVEL, R_S1MICROKEYS };
++#endif
++#if X0X_S1_KEYBOARD_HOLD && X0X_S1_SCALE_NATIVE
++#include "sj6_137_host_witness.h"
++extern unsigned s1c_scale_npo(unsigned);
++#endif
++#if X0X_SJ6_OTA_NATIVE
++#include "../dsp/juno6.h"
++extern int sj6_ota_get(unsigned);
++#endif
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++#include "sj6_137_host_witness.h"
++extern int s1_typed_tuple_editable(void);
++#endif
++#if X0X_S1_SCALE_NATIVE && DNBOX_TYPED_CONTROLS_NATIVE_TEST
++enum { R_S1SCALE=R_NOTELOCK+58 };
++extern int s1_typed_scale_choose(unsigned,unsigned,int);
++extern const char *s1c_scale_name(unsigned);
++#endif
++#if X0X_SJ6_VINTAGE_NATIVE && X0X_SJ6_ALT3_NATIVE && DNBOX_TYPED_CONTROLS_NATIVE_TEST
++enum { R_SJ6LIMITER=R_NOTELOCK+54 };
++extern int sj6_native_limiter_get(unsigned,unsigned);
++extern int sj6_native_limiter_choose(unsigned,unsigned,unsigned);
++extern int engine_superj6_knob_position(unsigned,unsigned);
++extern int engine_superj6_knob_turn(unsigned,unsigned,int,int);
++extern float dnbx_sj6_vintage_cents(unsigned);
++#endif
++#if X0X_SJ6_VELOCITY_SETTINGS && DNBOX_TYPED_CONTROLS_NATIVE_TEST
++enum { R_SJ6INPUTVEL=R_NOTELOCK+70 };
++extern int sj6_input_velocity_choose(unsigned,unsigned,unsigned);
++#endif
++#if X0X_SJ6_BEND_TYPED_PROBE && DNBOX_TYPED_CONTROLS_NATIVE_TEST
++enum { R_SJ6PB=R_NOTELOCK+6 };
++extern int sj6_typed_pb_edit(unsigned,unsigned,unsigned);
++#endif
++#if X0X_SJ6_MOD_TYPED_PROBE && DNBOX_TYPED_CONTROLS_NATIVE_TEST
++enum { R_SJ6MOD=R_NOTELOCK+7 };
++extern int sj6_typed_mod_choose(unsigned,unsigned);
++#endif
++#if X0X_SJ6_MONO32_PROBE && DNBOX_TYPED_CONTROLS_NATIVE_TEST
++enum { R_SJ6MONO32=R_NOTELOCK+15 };
++extern int engine_sj6_mono32_get(unsigned,unsigned);
++extern int engine_sj6_mono32_edit(unsigned,unsigned,unsigned);
++#endif
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++enum { R_S1PHASER=R_NOTELOCK+32, R_S1CWG=R_NOTELOCK+31, R_S1CMP=R_NOTELOCK+46 };
++extern int s1_phaser_get(unsigned,unsigned);
++extern int s1_phaser_choose(unsigned,unsigned,unsigned);
++extern int s1_cmp_position(unsigned,unsigned);
++extern int s1_cmp_choose(unsigned,unsigned,unsigned);
++extern float s1_cmp_physical(unsigned,unsigned);
++extern int s1_typed_cwg_position(unsigned);
++extern int s1_typed_cwg_choose(unsigned,unsigned);
++#if X0X_S1_AUTOPAN_PROBE
++enum { R_S1PAN=R_NOTELOCK+12 };
++extern int s1_typed_pan_read(unsigned,unsigned*,unsigned*,int*,float*);
++extern int s1_typed_pan_choose(unsigned,int,unsigned);
++static unsigned s1_pan_pos(unsigned v,unsigned *max){
++    unsigned p=0; int sync; float hz;
++    if(!s1_typed_pan_read(v,&p,max,&sync,&hz))*max=0;
++    return p;
++}
++#endif
++#endif
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++extern int s1_typed_feedback_choose(unsigned v,unsigned pos);
++extern int s1_delay_res_get(unsigned owner);
++extern int s1_delay_res_choose(unsigned owner,unsigned code);
++extern int s1_env_lfo_get(unsigned owner);
++extern int s1_env_lfo_choose(unsigned owner,unsigned code);
++extern int s1_typed_dict_position(unsigned owner);
++extern int s1_typed_dict_choose(unsigned owner,unsigned pos);
++extern int s1_typed_crush_choose(unsigned owner,unsigned choice);
++extern int s1_aa_get(unsigned owner);
++extern int s1_aa_choose(unsigned owner,unsigned value);
++extern int s1_typed_a4_choose(unsigned owner,unsigned hz);
++extern int s1_typed_rvfb_choose(unsigned owner,unsigned pos);
++extern int s1_typed_trans_choose(unsigned owner,int st);
++extern int s1_half_choose(unsigned owner,unsigned position);
++extern int engine_s1_key_hold(int voice);
++extern int engine_s1_key_set_hold(int voice,int on);
++extern int s1_typed_scale_choose(unsigned owner,unsigned code,int reset);
++extern int s1_typed_mod_choose(unsigned owner,unsigned route);
++#if X0X_S1_FEEDBACK_PROBE
++enum { R_S1DLFB=R_NOTELOCK+13 };
++#endif
++#if 1
++enum { R_S1DLYRES=R_NOTELOCK+45 };
++#endif
++#if 1
++enum { R_S1ENVLFO=R_NOTELOCK+33 };
++#endif
++#if X0X_S1_DELAY_TRACK_TEST
++enum { R_S1DICT=R_NOTELOCK+20 };
++#endif
++#if X0X_S1_CRUSH_LFO_PROBE
++enum { R_S1CRUSH=R_NOTELOCK+11 };
++#endif
++#if 1
++enum { R_S1AA=R_NOTELOCK+35 };
++#endif
++#if 1
++enum { R_S1A4=R_NOTELOCK+8 };
++#endif
++#if 1
++enum { R_S1RVFB=R_NOTELOCK+9 };
++#endif
++#if 1
++enum { R_S1TRANS=R_NOTELOCK+10 };
++#endif
++#if X0X_S1_HALFTIME
++enum { R_S1HALF=R_NOTELOCK+59 };
++#endif
++#if X0X_S1_KEYBOARD_HOLD
++enum { R_S1KEY_HOLD=R_NOTELOCK+56 };
++#endif
++#if X0X_S1_KEYBOARD_HOLD && X0X_S1_SCALE_NATIVE
++enum { R_S1A4RESET=R_NOTELOCK+57 };
++#endif
++#if 1
++enum { R_S1MODWHEEL=R_NOTELOCK+5 };
++#endif
++#if X0X_S1_DELAY_TIME_NATIVE
++enum { R_S1DLYTIME=R_NOTELOCK+34 };
++extern int s1_delay_time_read(unsigned,unsigned*,unsigned*,float*);
++extern int s1_delay_time_choose(unsigned,unsigned);
++#endif
++#endif
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++#if X0X_SJ6_AUX_LFO_NATIVE
++#include "../dsp/juno6_aux_catalog.h"
++static const char *const sj6_aux_route_labels[]={
++    "OFF","CUTOFF","AMP ATTACK","ARP INTERVAL","ARP OCTAVE","PAN DEPTH","PAN RATE",
++    "CRUSH","AMP DECAY","DELAY FB","DELAY MIX","DELAY TIME","FILTER ATK","FILTER DEC",
++    "FILTER REL","ENV AMOUNT","FILTER SUS","KEY TRACK","GLIDE","GLOBAL BEND",
++    "OSC 1 BEND","OSC 1 FINE","OSC 1 SEMI","OSC 1 LEVEL","OSC 2 BEND","OSC 2 FINE",
++    "OSC 2 SEMI","OSC 2 LEVEL","LFO 1 AMOUNT","LFO 1 RATE","LFO 2 AMOUNT","LFO 2 RATE",
++    "LFO 3 AMOUNT","LFO 3 RATE","MASTER LEVEL","NOISE","AMP RELEASE","RESONANCE",
++    "SEQ DIVISION","SEQ GATE","SUB","AMP SUSTAIN","TREM DEPTH","TREM RATE",
++    "UNISON DETUNE","UNISON STEREO","ROOM LOW CUT","ROOM MIX","ROOM SIZE","SEQ LENGTH",
++    "SEQ STEP 1","SEQ STEP 2","SEQ STEP 3","SEQ STEP 4","SEQ STEP 5","SEQ STEP 6",
++    "SEQ STEP 7","SEQ STEP 8","SEQ STEP 9","SEQ STEP 10","SEQ STEP 11","SEQ STEP 12",
++    "SEQ STEP 13","SEQ STEP 14","SEQ STEP 15","SEQ STEP 16","COMP AMOUNT","PWM 1","PWM 2"
++};
++_Static_assert(sizeof sj6_aux_route_labels / sizeof *sj6_aux_route_labels == SJ6_AUX_ORIGINAL_COUNT - 2u,
++               "Three original OFF rows project to one detent");
++static unsigned sj6_aux_route_detent(unsigned code)
++{
++    int id=sj6_aux_destination_id(code);
++    if(id<0)return 0;
++    unsigned shown=0;
++    for(unsigned j=SJ6_AUX_ORIGINAL_FIRST;j<=SJ6_AUX_ORIGINAL_LAST;++j){
++        int other=sj6_aux_destination_id(j);
++        if(other<0)continue;
++        ++shown;
++        if(id==other)return shown;
++    }
++    return 0;
++}
++static int sj6_aux_route_wire(unsigned detent)
++{
++    if(!detent)return 0;
++    for(unsigned j=SJ6_AUX_ORIGINAL_FIRST;j<=SJ6_AUX_ORIGINAL_LAST;++j)
++        if(sj6_aux_destination_id(j)>=0 && !--detent)return (int)j;
++    return -1;
++}
++static int sj6_aux_field_route(unsigned slot){return slot==14u || (slot>=5u && slot<9u);}
++#endif
++#if X0X_SJ6_NATIVE_ROOM
++enum { R_SJ6ROOM=R_NOTELOCK+49 };
++extern int sj6_native_room_get(unsigned owner,unsigned slot);
++extern int sj6_native_room_choose(unsigned owner,unsigned slot,unsigned value);
++#endif
++#if X0X_SJ6_NATIVE_ROOM
++enum { R_SJ6CRUSH=R_NOTELOCK+53 };
++extern int sj6_crush_get(unsigned owner,unsigned k);
++extern int sj6_crush_choose(unsigned owner,unsigned k,unsigned pos);
++#endif
++#if X0X_SJ6_OTA_NATIVE
++enum { R_SJ6OTA=R_NOTELOCK+51 };
++extern int sj6_ota_get(unsigned owner);
++extern int sj6_ota_choose(unsigned owner,unsigned value);
++#endif
++#if X0X_SJ6_NATIVE_UNISON
++enum { R_SJ6UNISON=R_NOTELOCK+36 };
++extern int engine_sj6_unison_get(unsigned v,unsigned slot);
++extern int engine_sj6_unison_edit(unsigned v,unsigned slot,unsigned value);
++#endif
++#if X0X_SJ6_NATIVE_J60
++enum { R_SJ6J60=R_NOTELOCK+37 };
++extern int engine_sj6_j60_get(unsigned v,unsigned k);
++extern int engine_sj6_j60_edit(unsigned v,unsigned k,unsigned p);
++#endif
++#if X0X_SJ6_PITCH_ENV_NATIVE
++enum { R_SJ6PITCH=R_NOTELOCK+47 };
++extern int sj6_pitch_get(unsigned owner,unsigned k);
++extern int sj6_pitch_choose(unsigned owner,unsigned k,unsigned pos);
++#endif
++#if X0X_SJ6_VCF_PORT
++enum { R_SJ6FILTER_EXTRA=R_NOTELOCK+48 };
++extern int sj6_filter_control_get(unsigned owner,unsigned k);
++extern int sj6_filter_control_choose(unsigned owner,unsigned k,unsigned pos);
++#endif
++#if X0X_SJ6_AUX_LFO_NATIVE
++enum { R_SJ6AUX=R_NOTELOCK+50 };
++extern int sj6_aux_get(unsigned v,unsigned k);
++extern int sj6_aux_choose(unsigned v,unsigned k,unsigned pos);
++#endif
++#endif
++#if X0X_SUPERJ6_BUILTIN_INIT
++#include "../dsp/juno6.h"
++enum { R_SJ6KNOB=R_NOTELOCK+3 };
++extern int engine_superj6_knob_position(unsigned,unsigned);
++extern int engine_superj6_knob_turn(unsigned,unsigned,int,int);
+ #endif
+ typedef struct { uint8_t kind, a, b, c; } pref_t;
+ #define PR(k, a, b, c) ((pref_t){(k), (a), (b), (c)})
+@@ -464,6 +681,7 @@
+ static const s1_patch_snapshot *s1_draw_patch;
+ static int s1_read(pref_t r, s1_patch_value *value)
+ {
++    if(r.kind==R_S1LINK)return engine_s1_patch_read(r.b,S1_LINK_ID,value);
+     const s1_patch_descriptor *d = s1_patch_at(r.c);
+     return d && engine_s1_patch_read(r.b, d->factory_id, value);
+ }
+@@ -473,9 +691,10 @@
+     if (!s1_read(r, &owner)) return;
+     if (relative) value += owner.position;
+     if (value < 0) value = 0;
+-    if (value > S1_PATCH_STEPS) value = S1_PATCH_STEPS;
++    if (value > owner.max_position) value = owner.max_position;
+     const s1_patch_descriptor *d = s1_patch_at(r.c);
+-    int status = engine_s1_patch_set(r.b, owner.revision, d->factory_id, (unsigned)value);
++    if(r.kind!=R_S1LINK && !d)return;
++    int status = engine_s1_patch_set(r.b, owner.revision, r.kind==R_S1LINK?S1_LINK_ID:d->factory_id, (unsigned)value);
+     if (status == S1_EDIT_QUEUED) mark_dirty();
+     else say(status == S1_EDIT_BUSY ? (owner.note_locked ? "NOTE LOCK" : "EDIT BUSY - RETRY") :
+              "PATCH CHANGED", 0);
+@@ -569,8 +788,222 @@
+     {"LENGTH", NSONG, 0, 0},
+ };
+ 
+-static int pref_read_only(pref_t r)
+-{
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++/* Keep a single original live getter shared by presentation and edit admission.
++ * A missing lookup entry remains a legacy/unsupported kind. */
++typedef int (*typed_read_fn)(unsigned,unsigned);
++static typed_read_fn const typed_readers[]={
++#if X0X_SJ6_VINTAGE_NATIVE && X0X_SJ6_ALT3_NATIVE
++    [0]=sj6_native_limiter_get,
++#endif
++#if X0X_SJ6_MONO32_PROBE
++    [1]=engine_sj6_mono32_get,
++#endif
++#if 1
++    [2]=s1_phaser_get,
++#endif
++#if 1
++    [3]=s1_cmp_position,
++#endif
++#if 1
++    [4]=0,
++#endif
++#if X0X_SJ6_NATIVE_ROOM
++    [5]=sj6_native_room_get,
++#endif
++#if X0X_SJ6_NATIVE_ROOM
++    [6]=sj6_crush_get,
++#endif
++#if X0X_SJ6_OTA_NATIVE
++    [7]=0,
++#endif
++#if X0X_SJ6_NATIVE_UNISON
++    [8]=engine_sj6_unison_get,
++#endif
++#if X0X_SJ6_NATIVE_J60
++    [9]=engine_sj6_j60_get,
++#endif
++#if X0X_SJ6_PITCH_ENV_NATIVE
++    [10]=sj6_pitch_get,
++#endif
++#if X0X_SJ6_VCF_PORT
++    [11]=sj6_filter_control_get,
++#endif
++#if X0X_SJ6_AUX_LFO_NATIVE
++    [12]=sj6_aux_get,
++#endif
++};
++static __attribute__((noinline)) int typed_read_eval(unsigned code,pref_t r)
++{
++    unsigned slot=(code&127u)-1u;
++    if(slot==4u)return s1_typed_cwg_position(r.b);
++#if X0X_SJ6_OTA_NATIVE
++    if(slot==7u)return sj6_ota_get(r.b);
++#endif
++    return typed_readers[slot](r.b,r.c);
++}
++static const uint8_t typed_read_codes[]={
++#if X0X_SJ6_VINTAGE_NATIVE && X0X_SJ6_ALT3_NATIVE
++    [R_SJ6LIMITER-R_NOTELOCK]=1u,
++#endif
++#if X0X_SJ6_MONO32_PROBE
++    [R_SJ6MONO32-R_NOTELOCK]=2u,
++#endif
++#if 1
++    [R_S1PHASER-R_NOTELOCK]=3u,
++#endif
++#if 1
++    [R_S1CMP-R_NOTELOCK]=4u,
++#endif
++#if 1
++    [R_S1CWG-R_NOTELOCK]=5u,
++#endif
++#if X0X_SJ6_NATIVE_ROOM
++    [R_SJ6ROOM-R_NOTELOCK]=134u,
++#endif
++#if X0X_SJ6_NATIVE_ROOM
++    [R_SJ6CRUSH-R_NOTELOCK]=135u,
++#endif
++#if X0X_SJ6_OTA_NATIVE
++    [R_SJ6OTA-R_NOTELOCK]=136u,
++#endif
++#if X0X_SJ6_NATIVE_UNISON
++    [R_SJ6UNISON-R_NOTELOCK]=137u,
++#endif
++#if X0X_SJ6_NATIVE_J60
++    [R_SJ6J60-R_NOTELOCK]=138u,
++#endif
++#if X0X_SJ6_PITCH_ENV_NATIVE
++    [R_SJ6PITCH-R_NOTELOCK]=139u,
++#endif
++#if X0X_SJ6_VCF_PORT
++    [R_SJ6FILTER_EXTRA-R_NOTELOCK]=140u,
++#endif
++#if X0X_SJ6_AUX_LFO_NATIVE
++    [R_SJ6AUX-R_NOTELOCK]=141u,
++#endif
++};
++static __attribute__((noinline)) unsigned typed_read_find(unsigned kind)
++{
++    unsigned i=kind-R_NOTELOCK;
++    return i<sizeof typed_read_codes?typed_read_codes[i]:0;
++}
++#endif
++__attribute__((noinline)) static int pref_read_only(pref_t r)
++{
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++    unsigned code=typed_read_find(r.kind);
++    if(code)return ((code&128u) && r.b>=NBASS) || typed_read_eval(code,r)<0 || !s1_typed_tuple_editable();
++#endif
++#if X0X_S1_SCALE_NATIVE && DNBOX_TYPED_CONTROLS_NATIVE_TEST
++    if(r.kind==R_S1SCALE){
++        if(r.b>=NBASS || !s1_typed_tuple_editable())return 1;
++#if X0X_SJ6_SCALE_NATIVE
++        if(live137(&proj.sound,r.b) && engine_bass_bank(r.b)==ORIGINAL_SOUND_JUNO)return 0;
++#endif
++        return !live_s1_mod(&proj.sound,r.b);
++    }
++#endif
++#if X0X_SJ6_VINTAGE_NATIVE && X0X_SJ6_ALT3_NATIVE && DNBOX_TYPED_CONTROLS_NATIVE_TEST
++#endif
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++    switch(r.kind){
++#if X0X_SJ6_BEND_TYPED_PROBE
++    case R_SJ6PB:
++#endif
++#if X0X_SJ6_MOD_TYPED_PROBE
++    case R_SJ6MOD:
++#endif
++#if X0X_SJ6_VELOCITY_SETTINGS
++    case R_SJ6INPUTVEL:
++#endif
++#if X0X_SJ6_BEND_TYPED_PROBE || X0X_SJ6_MOD_TYPED_PROBE || X0X_SJ6_VELOCITY_SETTINGS
++        return r.b>=NBASS || engine_bass_bank(r.b)!=ORIGINAL_SOUND_JUNO ||
++               !live137(&proj.sound,r.b) || !s1_typed_tuple_editable();
++#endif
++#if X0X_SJ6_MONO32_PROBE
++#endif
++    default:break;
++    }
++#endif
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++#if X0X_S1_AUTOPAN_PROBE
++    if(r.kind==R_S1PAN)return r.b>=NBASS || !live_s1_mod(&proj.sound,r.b) || !s1_typed_tuple_editable();
++#endif
++#endif
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++#if X0X_S1_FEEDBACK_PROBE
++    if(r.kind==R_S1DLFB)return r.b>=NBASS || !live_s1_mod(&proj.sound,r.b) || !s1_typed_tuple_editable();
++#endif
++#if 1
++    if(r.kind==R_S1DLYRES)return r.b>=NBASS || !live_s1_mod(&proj.sound,r.b) || !s1_typed_tuple_editable();
++#endif
++#if 1
++    if(r.kind==R_S1ENVLFO)return r.b>=NBASS || !live_s1_mod(&proj.sound,r.b) || !s1_typed_tuple_editable();
++#endif
++#if X0X_S1_DELAY_TRACK_TEST
++    if(r.kind==R_S1DICT)return r.b>=NBASS || !live_s1_mod(&proj.sound,r.b) || !s1_typed_tuple_editable();
++#endif
++#if X0X_S1_CRUSH_LFO_PROBE
++    if(r.kind==R_S1CRUSH)return r.b>=NBASS || !live_s1_mod(&proj.sound,r.b) || !s1_typed_tuple_editable();
++#endif
++#if 1
++    if(r.kind==R_S1AA)return r.b>=NBASS || !live_s1_mod(&proj.sound,r.b) || !s1_typed_tuple_editable();
++#endif
++#if 1
++    if(r.kind==R_S1A4)return r.b>=NBASS || !live_s1_mod(&proj.sound,r.b) || !s1_typed_tuple_editable();
++#endif
++#if 1
++    if(r.kind==R_S1RVFB)return r.b>=NBASS || !live_s1_mod(&proj.sound,r.b) || !s1_typed_tuple_editable();
++#endif
++#if 1
++    if(r.kind==R_S1TRANS)return r.b>=NBASS || !live_s1_mod(&proj.sound,r.b) || !s1_typed_tuple_editable();
++#endif
++#if X0X_S1_HALFTIME
++    if(r.kind==R_S1HALF)return r.b>=NBASS || !live_s1_mod(&proj.sound,r.b) || !s1_typed_tuple_editable();
++#endif
++#if X0X_S1_KEYBOARD_HOLD
++    if(r.kind==R_S1KEY_HOLD)return r.b>=NBASS || !live_s1_mod(&proj.sound,r.b) || !s1_typed_tuple_editable();
++#endif
++#if X0X_S1_KEYBOARD_HOLD && X0X_S1_SCALE_NATIVE
++    if(r.kind==R_S1A4RESET)return r.b>=NBASS || !live_s1_mod(&proj.sound,r.b) || !s1_typed_tuple_editable();
++#endif
++#if 1
++    if(r.kind==R_S1MODWHEEL)return r.b>=NBASS || !live_s1_mod(&proj.sound,r.b) || !s1_typed_tuple_editable();
++#endif
++#if X0X_S1_DELAY_TIME_NATIVE
++    if(r.kind==R_S1DLYTIME){unsigned p,max;float sec;
++        return r.b>=NBASS || !s1_typed_tuple_editable() || s1_delay_time_read(r.b,&p,&max,&sec)==-2;}
++#endif
++#endif
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++#if X0X_SJ6_NATIVE_ROOM
++#endif
++#if X0X_SJ6_NATIVE_ROOM
++#endif
++#if X0X_SJ6_OTA_NATIVE
++#endif
++#if X0X_SJ6_NATIVE_UNISON
++#endif
++#if X0X_SJ6_NATIVE_J60
++#endif
++#if X0X_SJ6_PITCH_ENV_NATIVE
++#endif
++#if X0X_SJ6_VCF_PORT
++#endif
++#if X0X_SJ6_AUX_LFO_NATIVE
++#endif
++#endif
++#if X0X_SUPERJ6_BUILTIN_INIT
++    if(r.kind==R_SJ6KNOB){
++        if(r.b>=NBASS || engine_bass_bank(r.b)!=ORIGINAL_SOUND_JUNO ||
++           engine_superj6_knob_position(r.b,r.c)<0)return 1;
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++        if(r.c>=SJ6_KNOBS && (!live137(&proj.sound,r.b) || !s1_typed_tuple_editable()))return 1;
++#endif
++        return 0;
++    }
++#endif
+     if (r.kind == R_BSTATUS) return 1;
+     /* A bank with a single preset (Synth One INIT) has nothing to choose. */
+     if (r.kind == R_BPRESET && original_sound_factories((unsigned)engine_bass_requested_bank(r.b)) <= 1u) return 1;
+@@ -598,18 +1031,119 @@
+     }
+ }
+ 
+-static const x0x_param_t *pref_desc(pref_t r)
+-{
++#if X0X_SUPERJ6_BUILTIN_INIT
++static const x0x_param_t *sj6_knob_desc(unsigned slot)
++{
++#if X0X_SJ6_ALT3_NATIVE
++    if(slot==SJ6_TREM_DEPTH || slot==SJ6_TREM_RATE) {
++        static const x0x_param_t trem[]={{"DEPTH",127,0,0},{"RATE",127,64,0}};
++        return &trem[slot-SJ6_TREM_DEPTH];
++    }
++#endif
++#if X0X_SJ6_SEQ_SETTINGS_NATIVE
++    if(SJ6_SEQ_SETTING_SLOT(slot)) {
++        static const char *const states[]={"OFF","ON"};
++#if X0X_SJ6_SEQ_DEST_NATIVE
++        static const char *const seq_dest[]={"BOTH","OSC 1","OSC 2"};
++#endif
++        static const x0x_param_t seqcfg[]={{"START SNAP",1,0,states},{"LOCK",1,0,states}
++#if X0X_SJ6_SEQ_DEST_NATIVE
++            , {"DEST",2,0,seq_dest}
++#endif
++        };
++        return &seqcfg[slot-SJ6_SEQ_START_SNAP];
++    }
++#endif
++#if X0X_SJ6_NOISE_SUB_NATIVE
++    if(slot==SJ6_NOISE_LEVEL || slot==SJ6_SUB_LEVEL) {
++        static const x0x_param_t sources[2]={{"NOISE",127,0,0},{"SUB",127,0,0}};
++        return &sources[slot-SJ6_NOISE_LEVEL];
++    }
++#endif
++#if X0X_SJ6_LFO1_WAVE_NATIVE
++    if(slot==SJ6_LFO1_ENABLE || slot==SJ6_LFO1_SNAPBACK){
++        static const char *const onoff[]={"OFF","ON"};
++        static const x0x_param_t toggle[]={{"LFO1 ON",1,1,onoff},{"SNAP 1",1,0,onoff}};
++        return &toggle[slot-SJ6_LFO1_ENABLE];
++    }
++    if(slot==SJ6_LFO1_WAVE){
++        static const char *const names[]={"TRI","RAMP UP","RAMP DOWN","SQUARE","S&H"};
++        static const x0x_param_t wave={"LFO1 WAVE",SJ6_LFO1_WAVE_MAX,0,names};return &wave;
++    }
++#endif
++#if X0X_SJ6_LFO1_DELAY_PORT
++    if(slot==SJ6_LFO1_DELAY) {
++        static const x0x_param_t delay={"LFO1 DELAY",SJ6_LFO1_DELAY_MAX,0,0};
++        return &delay;
++    }
++#endif
++#if (defined(X0X_HOST) && defined(X0X_SJ6_DELAY_WITNESS)) || X0X_SJ6_NATIVE_DELAY
++    static const char *const clocks[]={"FREE","SYNC"};
++    static const x0x_param_t clock={"CLOCK",1,0,clocks};
++    if(slot==SJ6_DELAYSYNC)return &clock;
++    static const x0x_param_t delay[4]={{"ENABLE",1,0,0},{"MIX",127,0,0},{"TIME",127,0,0},{"FEEDBACK",127,0,0}};
++    if(slot>=SJ6_DELAY24&&slot<=SJ6_DELAY27)return &delay[slot-SJ6_DELAY24];
++#endif
++    static const char *const wave[] = {"SINE", "TRI", "SAW", "SQ"};
++    static const char *const range[] = {"16FT", "8FT", "4FT"};
++    static const char *const enable[] = {"OFF", "ON"};
++    static const char *const pwm_route[]={"OFF","PWM 1","PWM 2"};
++    static const char *const clock_mode[]={"FREE","SYNC"};
++    static const char *const lfo_wave[]={"TRI","RAMP UP","RAMP DOWN","SQUARE","S&H"};
++    static const x0x_param_t knobs[SJ6_KNOBS+1] = {
++        {"WAVE 1", SJ6_WAVE_STOPS, 2, wave}, {"WAVE 2", SJ6_WAVE_STOPS, 2, wave},
++        {"RANGE", SJ6_RANGE_STOPS, 1, range},
++        {"PWM 1 ON", 1, 0, enable}, {"PWM 1", SJ6_PWM_STEPS, 0, 0},
++        {"PWM 2 ON", 1, 0, enable}, {"PWM 2", SJ6_PWM_STEPS, 0, 0},
++        {"ATTACK", 127, 0, 0}, {"DECAY", 127, 0, 0},
++        {"SUSTAIN", 127, 0, 0}, {"RELEASE", 127, 0, 0},
++        {"ATTACK", 127, 0, 0}, {"DECAY", 127, 0, 0},
++        {"SUSTAIN", 127, 0, 0}, {"RELEASE", 127, 0, 0},
++        {"LINK", 1, 0, enable},
++
++        [SJ6_MASTER_LEVEL]={"LEVEL",127,127,0},
++        [SJ6_LFO1_RATE]={"LFO1 RATE",127,64,0}, [SJ6_LFO2_RATE]={"LFO2 RATE",127,64,0},
++        [SJ6_LFO3_RATE]={"LFO3 RATE",127,64,0}, [SJ6_LFO2_PWM_DEPTH]={"PWM DEPTH",SJ6_PWM_STEPS,0,0},
++        [SJ6_LFO2_PWM_ROUTE]={"PWM ROUTE",2,0,pwm_route},
++        [SJ6_LFO1_MODE]={"LFO1 MODE",1,0,clock_mode}, [SJ6_LFO2_MODE]={"LFO2 MODE",1,0,clock_mode},
++        [SJ6_LFO3_MODE]={"LFO3 MODE",1,0,clock_mode},
++        [SJ6_CHORUS_I]={"CHORUS I",1,0,enable}, [SJ6_CHORUS_II]={"CHORUS II",1,0,enable},
++        [SJ6_CHORUS_RATE]={"CHORUS RATE",127,64,0}, [SJ6_CHORUS_MIX]={"CHORUS MIX",127,0,0},
++        [SJ6_VIBRATO_DEPTH]={"VIBRATO",127,0,0}, [SJ6_VIBRATO_RATE]={"VIBRATE RATE",127,0,0},
++        [SJ6_A_REFERENCE]={"A REF",SJ6_A_REFERENCE_STEPS,SJ6_A_REFERENCE_DEFAULT,0},
++        [SJ6_LFO2_SHAPE]={"LFO2 WAVE",4,0,lfo_wave},
++        [SJ6_LAYER1_SEMI]={"LAYER 1 SEMI", SJ6_SEMI_MAX, SJ6_SEMI_CENTER, 0},
++        [SJ6_LAYER2_SEMI]={"LAYER 2 SEMI", SJ6_SEMI_MAX, SJ6_SEMI_CENTER, 0},
++        [SJ6_LAYER1_FINE]={"LAYER 1 FINE", SJ6_FINE_MAX, SJ6_FINE_CENTER, 0},
++        [SJ6_LAYER2_FINE]={"LAYER 2 FINE", SJ6_FINE_MAX, SJ6_FINE_CENTER, 0},
++        [SJ6_OSC2_LEVEL]={"OSC 2 LVL",127,127,0}, [SJ6_OSC1_LEVEL]={"OSC 1 LVL",127,127,0},
++        [SJ6_FILTER_VELOCITY]={"VELOCITY",127,0,0},
++#if X0X_SJ6_VCF_PORT
++        [SJ6_VCF_LFO1_AMOUNT]={"LFO1 AMOUNT",127,0,0},
++#endif
++        [SJ6_LFO2_PWM_BASE]={"PWM BASE",SJ6_PWM_STEPS,0,0},
++    };
++    return slot<sizeof knobs/sizeof *knobs && knobs[slot].name ? &knobs[slot]:0;
++}
++#endif
++__attribute__((noinline)) static const x0x_param_t *pref_desc(pref_t r)
++{
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++    static const char *const s1_env_lfo_names[]={"OFF","LFO 1","LFO 2","BOTH"};
++    static const char *const s1_mod_wheel_names[]={"CUTOFF","LFO1 RATE","LFO2 RATE"};
++#endif
+     switch (r.kind) {
+ #if X0X_ARP_HOOKS
+-    case R_ARP: return arp_desc(r.a);
++    case R_ARP: return arp_desc(r.b, r.a);
+ #endif
+ #if X0X_SYNTHONE_PATCH
++    case R_S1LINK:{static const x0x_param_t p={"LINK",1,0,ONOFF_N};return r.c?0:&p;}
+     case R_S1PATCH: {
+         const s1_patch_descriptor *d = s1_patch_at(r.c);
+         static x0x_param_t pot = {0, S1_PATCH_STEPS, 0, 0};
+         if (!d) return 0;
+         pot.name = d->label;
++        pot.max = (uint8_t)s1_patch_steps(r.c);
+         return &pot;
+     }
+ #endif
+@@ -624,6 +1158,197 @@
+     case R_BPATSND:
+         PATSND_P.max = (uint8_t)original_sound_factories((unsigned)engine_bass_requested_bank(r.b));
+         return &PATSND_P;
++#if X0X_S1_KEYBOARD_HOLD && DNBOX_TYPED_CONTROLS_NATIVE_TEST
++    case R_S1WHITEKEYS: { static const x0x_param_t p = {"WHITE KEYS",1,0,ONOFF_N}; return &p; }
++    case R_S1MIDIVEL: { static const x0x_param_t p = {"MIDI VELOCITY",1,0,ONOFF_N}; return &p; }
++#if X0X_S1_SCALE_NATIVE
++    case R_S1MICROKEYS: { static const x0x_param_t p = {"TUNING KEYS",1,0,ONOFF_N}; return &p; }
++#endif
++#endif
++#if X0X_S1_SCALE_NATIVE && DNBOX_TYPED_CONTROLS_NATIVE_TEST
++    case R_S1SCALE: {static const x0x_param_t p={"SCALE",S1C_SCALE_MAX,0,0};return &p;}
++#endif
++#if X0X_SJ6_VINTAGE_NATIVE && X0X_SJ6_ALT3_NATIVE && DNBOX_TYPED_CONTROLS_NATIVE_TEST
++    case R_SJ6LIMITER: {
++        static const x0x_param_t p[SJ6_LIM_COUNT]={{"THRESHOLD",127,57,0},{"HEADROOM",127,0,0},
++            {"ATTACK",127,0,0},{"GAIN",127,64,0}};
++        if(r.c<SJ6_LIM_COUNT)return &p[r.c];
++        static const x0x_param_t rage={"RAGE AMOUNT",127,0,0}, vintage={"VINTAGE",127,0,0};
++        return r.c==SJ6_VINTAGE_SLOT?&vintage:r.c==SJ6_RAGE_SLOT?&rage:0;
++    }
++#endif
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++#if X0X_SJ6_BEND_TYPED_PROBE
++    case R_SJ6PB: {
++        static const x0x_param_t p[]={{"PB DOWN",48,0,0},{"PB UP",48,0,0}};
++        return r.c<2?p+r.c:0;
++    }
++#endif
++#if X0X_SJ6_MOD_TYPED_PROBE
++    case R_SJ6MOD: {
++        static const char *const names[]={"LFO Rate","LFO>DCO","LFO>Cutoff","Tremolo","LFO2 Rate","CUTOFF"};
++        static const x0x_param_t p={"MOD WHEEL DESTINATION",5,0,names};
++        return r.c==0?&p:0;
++    }
++#endif
++#if X0X_SJ6_MONO32_PROBE
++    case R_SJ6MONO32: {
++        static const x0x_param_t p[]={{"MONO",1,0,ONOFF_N},{"LEGATO",1,0,ONOFF_N},{"GLIDE TIME",127,0,0}};
++        return r.c<3?p+r.c:0;
++    }
++#endif
++#if X0X_SJ6_VELOCITY_SETTINGS
++    case R_SJ6INPUTVEL: {
++        static const char *const curves[]={"SOFT","MEDIUM","HARD"};
++        static const x0x_param_t p[]={{"FIXED VELOCITY",1,0,ONOFF_N},{"MIDI VEL CURVE",2,1,curves}};
++        return r.c<2?p+r.c:0;
++    }
++#endif
++#endif
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++    case R_S1PHASER:{
++        static const x0x_param_t p[4]={{"MIX",127,0,0},{"RATE",127,5,0},
++            {"FEEDBACK",127,0,0},{"WIDTH",127,99,0}};
++        return r.c<S1_PHASE_COUNT?&p[r.c]:0;
++    }
++    case R_S1CMP:{
++        static const x0x_param_t p[]={{"RATIO",127,0,0},{"THRESHOLD",127,0,0},{"ATTACK",127,0,0},
++            {"RELEASE",127,0,0},{"MASTER",127,0,0},{"RV INPUT",127,0,0}};
++        return r.c<S1_CMP_COUNT ? &p[r.c<12u?r.c/3u:r.c-8u]:0;
++    }
++    case R_S1CWG:{static const x0x_param_t p={"WET MAKEUP",S1_CWG_MAX,S1_CWG_INIT,0};return r.c?0:&p;}
++#if X0X_S1_AUTOPAN_PROBE
++    case R_S1PAN:{
++        static const x0x_param_t amount={"AMOUNT",127,0,0};
++        static x0x_param_t rate={"RATE",127,0,0};
++        if(r.b>=NBASS || r.c>=2 || !live_s1_mod(&proj.sound,r.b))return 0;
++        if(!r.c)return &amount;
++        unsigned max; (void)s1_pan_pos(r.b,&max); rate.max=(uint8_t)max;
++        return &rate;
++    }
++#endif
++#endif
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++#if X0X_S1_FEEDBACK_PROBE
++    case R_S1DLFB:{static const x0x_param_t p={"FEEDBACK",127,14,0};return r.c?0:&p;}
++#endif
++#if 1
++    case R_S1DLYRES:{static const x0x_param_t p={"INPUT RES",S1_DELAY_RES_MAX,0,0};return r.c?0:&p;}
++#endif
++#if 1
++    case R_S1ENVLFO:{static const x0x_param_t p={"ENV LFO",S1_ENV_LFO_MAX,0,s1_env_lfo_names};return r.c?0:&p;}
++#endif
++#if X0X_S1_DELAY_TRACK_TEST
++    case R_S1DICT:{static const x0x_param_t p={"IN CUTOFF",S1_DICT_MAX,S1_DICT_INIT,0};return r.c?0:&p;}
++#endif
++#if X0X_S1_CRUSH_LFO_PROBE
++    case R_S1CRUSH:{static const x0x_param_t p={"CRUSH LFO",S1_CRUSH_LAST,0,s1_env_lfo_names};return r.c?0:&p;}
++#endif
++#if 1
++    case R_S1AA:{static const x0x_param_t p={"ANTI-ALIAS",1,0,ONOFF_N};return r.c?0:&p;}
++#endif
++#if 1
++    case R_S1A4:{static const x0x_param_t p={"A REF",60,30,0};return r.c?0:&p;}
++#endif
++#if 1
++    case R_S1RVFB:{static const x0x_param_t p={"RV SIZE",128,64,0};return r.c?0:&p;}
++#endif
++#if 1
++    case R_S1TRANS:{static const x0x_param_t p={"TRANSPOSE",48,24,0};return r.c?0:&p;}
++#endif
++#if X0X_S1_HALFTIME
++    case R_S1HALF:{static const x0x_param_t p={"SMOOTH TIME",127,S1_HALF_DEFAULT,0};return r.c?0:&p;}
++#endif
++#if X0X_S1_KEYBOARD_HOLD
++    case R_S1KEY_HOLD:{static const x0x_param_t p={"KEY HOLD",1,0,ONOFF_N};return r.c?0:&p;}
++#endif
++#if X0X_S1_KEYBOARD_HOLD && X0X_S1_SCALE_NATIVE
++    case R_S1A4RESET:{static const x0x_param_t p={"RESET TUNING",1,0,0};return r.c?0:&p;}
++#endif
++#if 1
++    case R_S1MODWHEEL:{static const x0x_param_t p={"MOD WHEEL",2,0,s1_mod_wheel_names};return r.c?0:&p;}
++#endif
++#if X0X_S1_DELAY_TIME_NATIVE
++    case R_S1DLYTIME:{
++        static x0x_param_t d={"TIME",127,0,0};
++        unsigned p,max;float sec;
++        if(r.c || r.b>=NBASS || s1_delay_time_read(r.b,&p,&max,&sec)==-2)return 0;
++        d.max=(uint8_t)max;return &d;
++    }
++#endif
++#endif
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++#if X0X_SJ6_NATIVE_ROOM
++    case R_SJ6ROOM: {
++        static const x0x_param_t pot[SJ6_ROOM_COUNT]={
++            {"REVERB",1,0,0},{"ROOM TYPE",1,0,0},{"SIZE",127,0,0},{"LOW CUT",127,0,0},
++            {"MIX",127,0,0},{"WIDEN",1,0,0},{"PAN RATE",127,0,0},{"PAN DEPTH",127,0,0}
++        };
++        return r.c<SJ6_ROOM_COUNT?&pot[r.c]:NULL;
++    }
++#endif
++#if X0X_SJ6_NATIVE_ROOM
++    case R_SJ6CRUSH:{
++        static const x0x_param_t p[2]={{"CRUSH",1,0,ONOFF_N},{"AMOUNT",127,0,0}};
++        return r.c<2u ? &p[r.c] : 0;
++    }
++#endif
++#if X0X_SJ6_OTA_NATIVE
++    case R_SJ6OTA:{static const x0x_param_t p={"FILTER TYPE",1,0,0};return r.c?0:&p;}
++#endif
++#if X0X_SJ6_NATIVE_UNISON
++    case R_SJ6UNISON: {
++        static const x0x_param_t p[]={{"ENABLE",1,0,ONOFF_N},{"DETUNE",127,27,0},
++                                    {"STEREO",127,0,0},{"TYPE",5,0,0}};
++        return r.c<4u ? p+r.c : 0;
++    }
++#endif
++#if X0X_SJ6_NATIVE_J60
++    case R_SJ6J60: {
++        static const char *const models[]={"LEGACY","J60 V2"};
++        static const x0x_param_t p[]={{"VERSION",1,0,models},{"RATE",127,64,0},
++                                    {"DEPTH",127,64,0},{"MIX",127,127,0}};
++        return r.c<4u ? p+r.c : 0;
++    }
++#endif
++#if X0X_SJ6_PITCH_ENV_NATIVE
++    case R_SJ6PITCH: {
++        static const x0x_param_t d[5]={{"ATTACK",127,64,0},{"DECAY",127,64,0},
++           {"SUSTAIN",127,0,0},{"RELEASE",127,64,0},{"SEMITONES",60,0,0}};
++        return r.c<SJ6_PITCH_COUNT ? &d[r.c] : NULL;
++    }
++#endif
++#if X0X_SJ6_VCF_PORT
++    case R_SJ6FILTER_EXTRA:{
++        static const x0x_param_t p[2]={{"KEY TRACK",127,0,0},{"ENV AMOUNT",127,0,0}};
++        return r.c<2u ? &p[r.c] : 0;
++    }
++#endif
++#if X0X_SJ6_AUX_LFO_NATIVE
++    case R_SJ6AUX: {
++        static const char *const wave[]={"TRI","UP","DOWN","SQUARE","S&H"};
++
++        static const x0x_param_t d[9]={{"LFO 2 ON",1,0,ONOFF_N},{"LFO 3 ON",1,0,ONOFF_N},
++            {"LFO 3 AMOUNT",127,0,0},{"LFO 3 WAVE",4,0,wave},{"LFO 3 DELAY",127,0,0},
++            {"LFO 2 DEST A",sizeof sj6_aux_route_labels/sizeof *sj6_aux_route_labels-1u,0,sj6_aux_route_labels},{"LFO 2 DEST B",sizeof sj6_aux_route_labels/sizeof *sj6_aux_route_labels-1u,0,sj6_aux_route_labels},
++            {"LFO 3 DEST A",sizeof sj6_aux_route_labels/sizeof *sj6_aux_route_labels-1u,0,sj6_aux_route_labels},{"LFO 3 DEST B",sizeof sj6_aux_route_labels/sizeof *sj6_aux_route_labels-1u,0,sj6_aux_route_labels}};
++#if X0X_SJ6_LFO_TRIGGER_NATIVE
++        static const char *const mode[]={"LOOP","RETRIG","ARP SHOT","ONE SHOT"};
++        static const x0x_param_t trigger[5]={{"LFO 1",3,0,mode},{"LFO 2",3,0,mode},{"LFO 3",3,0,mode},
++            {"LFO 2 SNAP",1,0,ONOFF_N},{"LFO 3 SNAP",1,0,ONOFF_N}};
++        if(r.c>=9u && r.c<14u)return &trigger[r.c-9u];
++#endif
++        if(r.c==14u) {
++            static const x0x_param_t first={"LFO 1 DEST",sizeof sj6_aux_route_labels/sizeof *sj6_aux_route_labels-1u,0,sj6_aux_route_labels};
++            return &first;
++        }
++        return r.c<9u?&d[r.c]:NULL;
++    }
++#endif
++#endif
++#if X0X_SUPERJ6_BUILTIN_INIT
++    case R_SJ6KNOB:return sj6_knob_desc(r.c);
++#endif
+     case R_NOTELOCK: return &NOTELOCK_P;
+     case R_ENG: return engine_param(r.a, r.b, r.c);
+     case R_GEN: return &GEN_P[r.c % NGEN];
+@@ -714,16 +1439,28 @@
+     if (r.kind == R_BRKSLOT && ui.brk_choice_on && r.a == ui.brk_choice_bank &&
+         seq.ppat[PART_BRK] == ui.brk_choice_pat) return ui.brk_choice_slot;
+     pattern_t *p = pref_pattern(r);
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++    unsigned code=typed_read_find(r.kind);
++    if(code){
++        int x=typed_read_eval(code,r);
++        if(x<0)return r.kind==R_S1PHASER?(int)s1_phase_init(r.c):0;
++#if X0X_SJ6_AUX_LFO_NATIVE
++        if(r.kind==R_SJ6AUX && sj6_aux_field_route(r.c))return (int)sj6_aux_route_detent((unsigned)x);
++#endif
++        return x;
++    }
++#endif
+     switch (r.kind) {
+ #if X0X_ARP_HOOKS
+     case R_ARP: return arp_get(r.b, r.a);
+ #endif
+ #if X0X_SYNTHONE_PATCH
++    case R_S1LINK:{s1_patch_value x;return s1_read(r,&x)?x.position:0;}
+     case R_S1PATCH: {
+         const s1_patch_descriptor *d = s1_patch_at(r.c);
+         if (d && s1_draw_patch && bidx() == r.b)
+-            return (int)((s1_draw_patch->physical[r.c] - d->minimum) *
+-                         (S1_PATCH_STEPS / (d->maximum - d->minimum)) + .5f);
++            return (int)((s1_draw_patch->physical[r.c] - s1_patch_min(d)) *
++                         (S1_PATCH_STEPS / (s1_patch_max(d) - s1_patch_min(d))) + .5f);
+         s1_patch_value value;
+         return s1_read(r, &value) ? value.position : 0;
+     }
+@@ -779,6 +1516,115 @@
+         unsigned bank, value;
+         return bass_pattern_preset_decode(ps, &bank, &value) ? (int)value : 0;
+     }
++#if X0X_S1_KEYBOARD_HOLD && DNBOX_TYPED_CONTROLS_NATIVE_TEST
++    case R_S1WHITEKEYS: return !!(proj.set.bt & PROJ_S1_WHITE_KEYS);
++    case R_S1MIDIVEL: return !!(proj.set.bt & PROJ_S1_MIDI_VELOCITY);
++#if X0X_S1_SCALE_NATIVE
++    case R_S1MICROKEYS: return !!(proj.set.ck_x1 & PROJ_S1_MICRO_KEYS);
++#endif
++#endif
++#if X0X_S1_SCALE_NATIVE && DNBOX_TYPED_CONTROLS_NATIVE_TEST
++    case R_S1SCALE:return proj.sound.v[T_MST][S1_SCALE_ROW+r.b][S1_SCALE_BYTE];
++#endif
++#if X0X_SJ6_VINTAGE_NATIVE && X0X_SJ6_ALT3_NATIVE && DNBOX_TYPED_CONTROLS_NATIVE_TEST
++#endif
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++#if X0X_SJ6_BEND_TYPED_PROBE
++    case R_SJ6PB: {
++        if(r.b>=NBASS || r.c>=2 || !live137(&proj.sound,r.b))return 0;
++        unsigned m=sj6_pb_decode(read137(&proj.sound,r.b)[SJ6_PB_DN_BYTE+r.c]);
++        return r.c?(int)m:(int)(SJ6_PB_LIMIT-m);
++    }
++#endif
++#if X0X_SJ6_MOD_TYPED_PROBE
++    case R_SJ6MOD:return r.b<NBASS && live137(&proj.sound,r.b)?read137(&proj.sound,r.b)[SJ6_MOD_BYTE]:0;
++#endif
++#if X0X_SJ6_MONO32_PROBE
++#endif
++#if X0X_SJ6_VELOCITY_SETTINGS
++    case R_SJ6INPUTVEL:{
++        if(r.b>=NBASS || !live137(&proj.sound,r.b))return 0;
++        unsigned code=sj6_input_vel(&proj.sound,r.b), curve=code%3u;
++        return r.c?(int)(curve<2u?1u-curve:2u):(int)(code/3u);
++    }
++#endif
++#endif
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++#if X0X_S1_AUTOPAN_PROBE
++    case R_S1PAN:{
++        unsigned max;
++        return r.b>=NBASS||!live_s1_mod(&proj.sound,r.b)?0:r.c?(int)s1_pan_pos(r.b,&max):read137(&proj.sound,r.b)[S1_PAN_AMOUNT_BYTE];
++    }
++#endif
++#endif
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++#if X0X_S1_FEEDBACK_PROBE
++    case R_S1DLFB:return r.b<NBASS && live_s1_mod(&proj.sound,r.b)?(read137(&proj.sound,r.b)[S1_FB_BYTE]?(int)read137(&proj.sound,r.b)[S1_FB_BYTE]-1:14):0;
++#endif
++#if 1
++    case R_S1DLYRES:return r.b<NBASS && live_s1_mod(&proj.sound,r.b)?(s1_delay_res_get(r.b)):0;
++#endif
++#if 1
++    case R_S1ENVLFO:return r.b<NBASS && live_s1_mod(&proj.sound,r.b)?(s1_env_lfo_get(r.b)):0;
++#endif
++#if X0X_S1_DELAY_TRACK_TEST
++    case R_S1DICT:return r.b<NBASS && live_s1_mod(&proj.sound,r.b)?(s1_typed_dict_position(r.b)):0;
++#endif
++#if X0X_S1_CRUSH_LFO_PROBE
++    case R_S1CRUSH:return r.b<NBASS && live_s1_mod(&proj.sound,r.b)?(read137(&proj.sound,r.b)[S1_CRUSH_BYTE]):0;
++#endif
++#if 1
++    case R_S1AA:return r.b<NBASS && live_s1_mod(&proj.sound,r.b)?(s1_aa_get(r.b)):0;
++#endif
++#if 1
++    case R_S1A4:return r.b<NBASS && live_s1_mod(&proj.sound,r.b)?((int)s1_a4_hz(read137(&proj.sound,r.b)[S1_A4_BYTE])-410):0;
++#endif
++#if 1
++    case R_S1RVFB:return r.b<NBASS && live_s1_mod(&proj.sound,r.b)?((int)s1_rvfb_pos(read137(&proj.sound,r.b)[S1_RVFB_BYTE])):0;
++#endif
++#if 1
++    case R_S1TRANS:return r.b<NBASS && live_s1_mod(&proj.sound,r.b)?(s1_trans_st(read137(&proj.sound,r.b)[S1_TRANS_BYTE])+24):0;
++#endif
++#if X0X_S1_HALFTIME
++    case R_S1HALF:return r.b<NBASS && live_s1_mod(&proj.sound,r.b)?(s1_half_code(&proj.sound,r.b)?(int)s1_half_code(&proj.sound,r.b)-1:S1_HALF_DEFAULT):0;
++#endif
++#if X0X_S1_KEYBOARD_HOLD
++    case R_S1KEY_HOLD:return r.b<NBASS && live_s1_mod(&proj.sound,r.b)?(engine_s1_key_hold(r.b)):0;
++#endif
++#if X0X_S1_KEYBOARD_HOLD && X0X_S1_SCALE_NATIVE
++    case R_S1A4RESET:return r.b<NBASS && live_s1_mod(&proj.sound,r.b)?(0):0;
++#endif
++#if 1
++    case R_S1MODWHEEL:return r.b<NBASS && live_s1_mod(&proj.sound,r.b)?(read137(&proj.sound,r.b)[3]):0;
++#endif
++#if X0X_S1_DELAY_TIME_NATIVE
++    case R_S1DLYTIME:{
++        unsigned p,max;float sec;
++        return r.b>=NBASS || s1_delay_time_read(r.b,&p,&max,&sec)==-2?0:(int)p;
++    }
++#endif
++#endif
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++#if X0X_SJ6_NATIVE_ROOM
++#endif
++#if X0X_SJ6_NATIVE_ROOM
++#endif
++#if X0X_SJ6_OTA_NATIVE
++#endif
++#if X0X_SJ6_NATIVE_UNISON
++#endif
++#if X0X_SJ6_NATIVE_J60
++#endif
++#if X0X_SJ6_PITCH_ENV_NATIVE
++#endif
++#if X0X_SJ6_VCF_PORT
++#endif
++#if X0X_SJ6_AUX_LFO_NATIVE
++#endif
++#endif
++#if X0X_SUPERJ6_BUILTIN_INIT
++    case R_SJ6KNOB:{int p=engine_superj6_knob_position(r.b,r.c);return p<0?0:p;}
++#endif
+     case R_NOTELOCK: return engine_note_lock_capture_on();
+     case R_OUTLOUD: return proj.set.out_loud;
+     case R_USBFULL: return proj.set.usb_full;
+@@ -814,19 +1660,311 @@
+     engine_set(target,voice,parameter,proj.sound.v[target][voice][parameter]);
+ }
+ 
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++/* Two receiver ABI groups use their original function types. Only the few
++ * nonstandard remaps need entry thunks. IDs remain the same public prefs. */
++static int typed_set_r_s1a4(pref_t r,int v){return (s1_typed_a4_choose(r.b,(unsigned)v+410u));}
++static int typed_set_r_s1trans(pref_t r,int v){return (s1_typed_trans_choose(r.b,v-24));}
++#if X0X_S1_KEYBOARD_HOLD
++static int typed_set_r_s1key_hold(pref_t r,int v){return (engine_s1_key_set_hold(r.b,v));}
++#endif
++#if X0X_S1_KEYBOARD_HOLD && X0X_S1_SCALE_NATIVE
++static int typed_set_r_s1a4reset(pref_t r,int v){return (v==1 && s1_typed_scale_choose(r.b,0,1));}
++#endif
++#if X0X_SJ6_AUX_LFO_NATIVE
++static int typed_set_r_sj6aux(pref_t r,int v){return sj6_aux_choose(r.b,r.c,(unsigned)(sj6_aux_field_route(r.c)?sj6_aux_route_wire((unsigned)v):v));}
++#endif
++#if X0X_S1_AUTOPAN_PROBE
++static int typed_set_r_s1pan(pref_t r,int v){return s1_typed_pan_choose(r.b,r.c,(unsigned)v);}
++#endif
++typedef int (*typed_edit1_fn)(unsigned,unsigned);
++typedef int (*typed_edit2_fn)(unsigned,unsigned,unsigned);
++typedef int (*typed_custom_fn)(pref_t,int);
++enum {
++    TYPED_0_BASE=0,
++#if X0X_S1_FEEDBACK_PROBE
++    TYPED_R_S1DLFB,
++#endif
++    TYPED_R_S1DLYRES,
++    TYPED_R_S1ENVLFO,
++#if X0X_S1_DELAY_TRACK_TEST
++    TYPED_R_S1DICT,
++#endif
++#if X0X_S1_CRUSH_LFO_PROBE
++    TYPED_R_S1CRUSH,
++#endif
++    TYPED_R_S1AA,
++    TYPED_R_S1RVFB,
++#if X0X_S1_HALFTIME
++    TYPED_R_S1HALF,
++#endif
++    TYPED_R_S1MODWHEEL,
++#if X0X_SJ6_OTA_NATIVE
++    TYPED_R_SJ6OTA,
++#endif
++#if X0X_SJ6_MOD_TYPED_PROBE
++    TYPED_R_SJ6MOD,
++#endif
++    TYPED_R_S1CWG,
++    TYPED_0_END,
++    TYPED_1_BASE=TYPED_0_END,
++#if X0X_SJ6_NATIVE_ROOM
++    TYPED_R_SJ6ROOM,
++#endif
++#if X0X_SJ6_NATIVE_ROOM
++    TYPED_R_SJ6CRUSH,
++#endif
++#if X0X_SJ6_NATIVE_UNISON
++    TYPED_R_SJ6UNISON,
++#endif
++#if X0X_SJ6_NATIVE_J60
++    TYPED_R_SJ6J60,
++#endif
++#if X0X_SJ6_PITCH_ENV_NATIVE
++    TYPED_R_SJ6PITCH,
++#endif
++#if X0X_SJ6_VCF_PORT
++    TYPED_R_SJ6FILTER_EXTRA,
++#endif
++#if X0X_SJ6_BEND_TYPED_PROBE
++    TYPED_R_SJ6PB,
++#endif
++#if X0X_SJ6_MONO32_PROBE
++    TYPED_R_SJ6MONO32,
++#endif
++#if X0X_SJ6_VELOCITY_SETTINGS
++    TYPED_R_SJ6INPUTVEL,
++#endif
++    TYPED_R_S1PHASER,
++    TYPED_R_S1CMP,
++    TYPED_1_END,
++    TYPED_2_BASE=TYPED_1_END,
++    TYPED_R_S1A4,
++    TYPED_R_S1TRANS,
++#if X0X_S1_KEYBOARD_HOLD
++    TYPED_R_S1KEY_HOLD,
++#endif
++#if X0X_S1_KEYBOARD_HOLD && X0X_S1_SCALE_NATIVE
++    TYPED_R_S1A4RESET,
++#endif
++#if X0X_SJ6_AUX_LFO_NATIVE
++    TYPED_R_SJ6AUX,
++#endif
++#if X0X_S1_AUTOPAN_PROBE
++    TYPED_R_S1PAN,
++#endif
++    TYPED_2_END,
++};
++static const uint8_t typed_kind[]={
++#if X0X_S1_FEEDBACK_PROBE
++    [TYPED_R_S1DLFB]=R_S1DLFB,
++#endif
++    [TYPED_R_S1DLYRES]=R_S1DLYRES,
++    [TYPED_R_S1ENVLFO]=R_S1ENVLFO,
++#if X0X_S1_DELAY_TRACK_TEST
++    [TYPED_R_S1DICT]=R_S1DICT,
++#endif
++#if X0X_S1_CRUSH_LFO_PROBE
++    [TYPED_R_S1CRUSH]=R_S1CRUSH,
++#endif
++    [TYPED_R_S1AA]=R_S1AA,
++    [TYPED_R_S1RVFB]=R_S1RVFB,
++#if X0X_S1_HALFTIME
++    [TYPED_R_S1HALF]=R_S1HALF,
++#endif
++    [TYPED_R_S1MODWHEEL]=R_S1MODWHEEL,
++#if X0X_SJ6_OTA_NATIVE
++    [TYPED_R_SJ6OTA]=R_SJ6OTA,
++#endif
++#if X0X_SJ6_MOD_TYPED_PROBE
++    [TYPED_R_SJ6MOD]=R_SJ6MOD,
++#endif
++    [TYPED_R_S1CWG]=R_S1CWG,
++#if X0X_SJ6_NATIVE_ROOM
++    [TYPED_R_SJ6ROOM]=R_SJ6ROOM,
++#endif
++#if X0X_SJ6_NATIVE_ROOM
++    [TYPED_R_SJ6CRUSH]=R_SJ6CRUSH,
++#endif
++#if X0X_SJ6_NATIVE_UNISON
++    [TYPED_R_SJ6UNISON]=R_SJ6UNISON,
++#endif
++#if X0X_SJ6_NATIVE_J60
++    [TYPED_R_SJ6J60]=R_SJ6J60,
++#endif
++#if X0X_SJ6_PITCH_ENV_NATIVE
++    [TYPED_R_SJ6PITCH]=R_SJ6PITCH,
++#endif
++#if X0X_SJ6_VCF_PORT
++    [TYPED_R_SJ6FILTER_EXTRA]=R_SJ6FILTER_EXTRA,
++#endif
++#if X0X_SJ6_BEND_TYPED_PROBE
++    [TYPED_R_SJ6PB]=R_SJ6PB,
++#endif
++#if X0X_SJ6_MONO32_PROBE
++    [TYPED_R_SJ6MONO32]=R_SJ6MONO32,
++#endif
++#if X0X_SJ6_VELOCITY_SETTINGS
++    [TYPED_R_SJ6INPUTVEL]=R_SJ6INPUTVEL,
++#endif
++    [TYPED_R_S1PHASER]=R_S1PHASER,
++    [TYPED_R_S1CMP]=R_S1CMP,
++    [TYPED_R_S1A4]=R_S1A4,
++    [TYPED_R_S1TRANS]=R_S1TRANS,
++#if X0X_S1_KEYBOARD_HOLD
++    [TYPED_R_S1KEY_HOLD]=R_S1KEY_HOLD,
++#endif
++#if X0X_S1_KEYBOARD_HOLD && X0X_S1_SCALE_NATIVE
++    [TYPED_R_S1A4RESET]=R_S1A4RESET,
++#endif
++#if X0X_SJ6_AUX_LFO_NATIVE
++    [TYPED_R_SJ6AUX]=R_SJ6AUX,
++#endif
++#if X0X_S1_AUTOPAN_PROBE
++    [TYPED_R_S1PAN]=R_S1PAN,
++#endif
++};
++static typed_edit1_fn const typed_0[]={
++#if X0X_S1_FEEDBACK_PROBE
++    [TYPED_R_S1DLFB-TYPED_0_BASE-1]=s1_typed_feedback_choose,
++#endif
++    [TYPED_R_S1DLYRES-TYPED_0_BASE-1]=s1_delay_res_choose,
++    [TYPED_R_S1ENVLFO-TYPED_0_BASE-1]=s1_env_lfo_choose,
++#if X0X_S1_DELAY_TRACK_TEST
++    [TYPED_R_S1DICT-TYPED_0_BASE-1]=s1_typed_dict_choose,
++#endif
++#if X0X_S1_CRUSH_LFO_PROBE
++    [TYPED_R_S1CRUSH-TYPED_0_BASE-1]=s1_typed_crush_choose,
++#endif
++    [TYPED_R_S1AA-TYPED_0_BASE-1]=s1_aa_choose,
++    [TYPED_R_S1RVFB-TYPED_0_BASE-1]=s1_typed_rvfb_choose,
++#if X0X_S1_HALFTIME
++    [TYPED_R_S1HALF-TYPED_0_BASE-1]=s1_half_choose,
++#endif
++    [TYPED_R_S1MODWHEEL-TYPED_0_BASE-1]=s1_typed_mod_choose,
++#if X0X_SJ6_OTA_NATIVE
++    [TYPED_R_SJ6OTA-TYPED_0_BASE-1]=sj6_ota_choose,
++#endif
++#if X0X_SJ6_MOD_TYPED_PROBE
++    [TYPED_R_SJ6MOD-TYPED_0_BASE-1]=sj6_typed_mod_choose,
++#endif
++    [TYPED_R_S1CWG-TYPED_0_BASE-1]=s1_typed_cwg_choose,
++};
++static typed_edit2_fn const typed_1[]={
++#if X0X_SJ6_NATIVE_ROOM
++    [TYPED_R_SJ6ROOM-TYPED_1_BASE-1]=sj6_native_room_choose,
++#endif
++#if X0X_SJ6_NATIVE_ROOM
++    [TYPED_R_SJ6CRUSH-TYPED_1_BASE-1]=sj6_crush_choose,
++#endif
++#if X0X_SJ6_NATIVE_UNISON
++    [TYPED_R_SJ6UNISON-TYPED_1_BASE-1]=engine_sj6_unison_edit,
++#endif
++#if X0X_SJ6_NATIVE_J60
++    [TYPED_R_SJ6J60-TYPED_1_BASE-1]=engine_sj6_j60_edit,
++#endif
++#if X0X_SJ6_PITCH_ENV_NATIVE
++    [TYPED_R_SJ6PITCH-TYPED_1_BASE-1]=sj6_pitch_choose,
++#endif
++#if X0X_SJ6_VCF_PORT
++    [TYPED_R_SJ6FILTER_EXTRA-TYPED_1_BASE-1]=sj6_filter_control_choose,
++#endif
++#if X0X_SJ6_BEND_TYPED_PROBE
++    [TYPED_R_SJ6PB-TYPED_1_BASE-1]=sj6_typed_pb_edit,
++#endif
++#if X0X_SJ6_MONO32_PROBE
++    [TYPED_R_SJ6MONO32-TYPED_1_BASE-1]=engine_sj6_mono32_edit,
++#endif
++#if X0X_SJ6_VELOCITY_SETTINGS
++    [TYPED_R_SJ6INPUTVEL-TYPED_1_BASE-1]=sj6_input_velocity_choose,
++#endif
++    [TYPED_R_S1PHASER-TYPED_1_BASE-1]=s1_phaser_choose,
++    [TYPED_R_S1CMP-TYPED_1_BASE-1]=s1_cmp_choose,
++};
++static typed_custom_fn const typed_2[]={
++    [TYPED_R_S1A4-TYPED_2_BASE-1]=typed_set_r_s1a4,
++    [TYPED_R_S1TRANS-TYPED_2_BASE-1]=typed_set_r_s1trans,
++#if X0X_S1_KEYBOARD_HOLD
++    [TYPED_R_S1KEY_HOLD-TYPED_2_BASE-1]=typed_set_r_s1key_hold,
++#endif
++#if X0X_S1_KEYBOARD_HOLD && X0X_S1_SCALE_NATIVE
++    [TYPED_R_S1A4RESET-TYPED_2_BASE-1]=typed_set_r_s1a4reset,
++#endif
++#if X0X_SJ6_AUX_LFO_NATIVE
++    [TYPED_R_SJ6AUX-TYPED_2_BASE-1]=typed_set_r_sj6aux,
++#endif
++#if X0X_S1_AUTOPAN_PROBE
++    [TYPED_R_S1PAN-TYPED_2_BASE-1]=typed_set_r_s1pan,
++#endif
++};
++static __attribute__((noinline)) int pref_set_typed_value(pref_t r,int v)
++{
++    if(r.kind<=R_NOTELOCK)return 0;
++    unsigned i=1;
++    for(;i<sizeof typed_kind;i++)if(typed_kind[i]==r.kind)break;
++    if(i==sizeof typed_kind)return 0;
++    const x0x_param_t *d=pref_desc(r);
++    if(d && (unsigned)v<=d->max && !pref_read_only(r)){
++        int changed;
++        if(i<TYPED_0_END)changed=typed_0[i-TYPED_0_BASE-1](r.b,(unsigned)v);
++        else if(i<TYPED_1_END)changed=typed_1[i-TYPED_1_BASE-1](r.b,r.c,(unsigned)v);
++        else changed=typed_2[i-TYPED_2_BASE-1](r,v);
++        if(changed)mark_dirty();
++    }
++    return 1;
++}
++#endif
+ X0X_COLD static void pref_set_impl(pref_t r, int v, int from_keyboard)
+ {
+ #if X0X_ARP_HOOKS
+     if (r.kind == R_ARP) { arp_set(r.b, r.a, v); return; }
+ #endif
+ #if X0X_SYNTHONE_PATCH
+-    if (r.kind == R_S1PATCH) { s1_edit(r, v, 0); return; }
++    if (r.kind == R_S1PATCH || r.kind == R_S1LINK) { s1_edit(r, v, 0); return; }
+ #endif
+ #if X0X_BASS_PRESET_PREVIEW
+     /* Freeze the active bank before reading its descriptor. The audio boundary
+      * may otherwise replace Chicago with Miami between clamp and store. */
+     int bass_edit = r.kind == R_ENG && r.a == T_303;
+     if (bass_edit) engine_bass_edit_hold(1);
++#endif
++#if X0X_S1_SCALE_NATIVE && DNBOX_TYPED_CONTROLS_NATIVE_TEST
++    if(r.kind==R_S1SCALE){
++        if((unsigned)v<=S1C_SCALE_MAX && !pref_read_only(r) &&
++           s1_typed_scale_choose(r.b,(unsigned)v,0))mark_dirty();
++        return;
++    }
++#endif
++#if X0X_SJ6_VINTAGE_NATIVE && X0X_SJ6_ALT3_NATIVE && DNBOX_TYPED_CONTROLS_NATIVE_TEST
++    if(r.kind==R_SJ6LIMITER){
++        if((unsigned)v<=127u && !pref_read_only(r) &&
++           sj6_native_limiter_choose(r.b,r.c,(unsigned)v))mark_dirty();
++        return;
++    }
++#endif
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++    if(pref_set_typed_value(r,v))return;
++#endif
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++#if X0X_S1_DELAY_TIME_NATIVE
++    if(r.kind==R_S1DLYTIME){
++        if(v>=0 && !pref_read_only(r)){
++            int rc=s1_delay_time_choose(r.b,(unsigned)v);
++            if(rc>0)mark_dirty();else if(rc<0)say("DELAY TIME LIMIT",0);
++        }
++        return;
++    }
++#endif
++#endif
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++#endif
++#if X0X_SUPERJ6_BUILTIN_INIT
++    if(r.kind==R_SJ6KNOB){
++        const x0x_param_t *d=pref_desc(r);
++        if(d && (unsigned)v<=d->max && !pref_read_only(r) &&
++           engine_superj6_knob_turn(r.b,r.c,v,0))mark_dirty();
++        return;
++    }
+ #endif
+     pattern_t *p = pref_pattern(r);
+     const x0x_param_t *d = pref_desc(r);
+@@ -944,6 +2082,16 @@
+             (uint8_t)bass_pattern_preset_encode(bank, (unsigned)v);
+         break;
+     }
++#if X0X_S1_KEYBOARD_HOLD && DNBOX_TYPED_CONTROLS_NATIVE_TEST
++    case R_S1WHITEKEYS:
++        proj.set.bt = (uint8_t)((proj.set.bt & ~PROJ_S1_WHITE_KEYS) | (v ? PROJ_S1_WHITE_KEYS : 0u)); break;
++    case R_S1MIDIVEL:
++        proj.set.bt = (uint8_t)((proj.set.bt & ~PROJ_S1_MIDI_VELOCITY) | (v ? PROJ_S1_MIDI_VELOCITY : 0u)); break;
++#if X0X_S1_SCALE_NATIVE
++    case R_S1MICROKEYS:
++        proj.set.ck_x1 = (uint8_t)((proj.set.ck_x1 & ~PROJ_S1_MICRO_KEYS) | (v ? PROJ_S1_MICRO_KEYS : 0u)); break;
++#endif
++#endif
+     case R_NOTELOCK: engine_note_lock_capture(v); break;
+     case R_OUTLOUD: proj.set.out_loud = (uint8_t)v; engine_out_loud(v); break;
+     case R_USBFULL: proj.set.usb_full = (uint8_t)v; engine_usb_full(v); break;
+@@ -1274,7 +2422,20 @@
+         float hz;                                     /* CUTOFF: the engine's base corner (Synths 91f6e4e9), else % */
+         if (engine_param_si(T_303, r.b, (int)id, value, &hz) == X0X_U_HZ) { unit_value(X0X_U_HZ, hz, num, unit); return 1; }
+     }
+-    if (kind == ORIGINAL_SOUND_JUNO) { juno_value_text(id, value, num, unit); return 1; }
++    if (kind == ORIGINAL_SOUND_JUNO) {
++#if X0X_SJ6_OTA_NATIVE
++        if(id==2u){
++            int mode=sj6_ota_get(r.b);
++            float x;
++            if(mode>=0 && original_sound_control_value(kind,id,(unsigned)value,&x)){
++                unit_value(X0X_U_HZ,juno6_sj6_panel_cutoff_hz(x,(unsigned)mode),num,unit);
++                return 1;
++            }
++        }
++#endif
++        juno_value_text(id, value, num, unit);
++        return 1;
++    }
+     if (kind == ORIGINAL_SOUND_SYNTHONE) { put_i(num,(value*100+63)/127); put_s(unit,"%"); return 1; }
+     if (ui_original_states(kind,id) || (kind == ORIGINAL_SOUND_CHICAGO && (id == 0 || id == 4)) ||
+         (kind == ORIGINAL_SOUND_MIAMI && id == 7)) {
+@@ -1360,12 +2521,66 @@
+ /* the value, as a number and a unit ("-6" "dB"); a switch gives its name and no unit */
+ X0X_COLD static void pref_value_of(pref_t r, int v, char *num, char *unit)
+ {
++#if X0X_S1_SCALE_NATIVE && DNBOX_TYPED_CONTROLS_NATIVE_TEST
++    if(r.kind==R_S1SCALE){
++        unit[0]=0;
++#if X0X_S1_USER_SCALE
++        if(v==S1C_SCALE_USER){
++            const uint8_t *n=proj.sound.v[T_MST][S1_SCALE_ROW+r.b]+S1_USER_ID;
++            for(unsigned i=0;i<S1C_USER_NAME;i++){num[i]=(char)n[i];if(!n[i])break;}
++            num[S1C_USER_NAME]=0;
++            if(!num[0])put_s(num,"USER");
++            return;
++        }
++#endif
++        put_s(num,s1c_scale_name((unsigned)v));return;
++    }
++#endif
++#if X0X_SJ6_VINTAGE_NATIVE && X0X_SJ6_ALT3_NATIVE && DNBOX_TYPED_CONTROLS_NATIVE_TEST
++    if(r.kind==R_SJ6LIMITER && r.c==SJ6_VINTAGE_SLOT){
++        *num=*unit=0;
++        put_d1(num,dnbx_sj6_vintage_cents((unsigned)v),1);put_s(unit,"cent");return;
++    }
++#endif
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++#if X0X_SJ6_NATIVE_ROOM
++    extern float sj6_room_locut(unsigned);
++    extern float sj6_room_rate_clocked(unsigned,float,int);
++    *num=*unit=0;
++    if(r.kind==R_SJ6ROOM && r.c<SJ6_ROOM_COUNT){
++        if(r.c==SJ6_ROOM_TYPE)put_s(num,v?"II":"I");
++        else if(sj6_room_max(r.c)==1u)put_s(num,v?"ON":"OFF");
++        else if(r.c==SJ6_ROOM_LOCUT){put_i(num,(int)(sj6_room_locut((unsigned)v)+.5f));put_s(unit,"Hz");}
++        else if(r.c==SJ6_ROOM_RATE){
++            int sync=0;
++#if X0X_SJ6_NATIVE_DELAY
++            sync=engine_superj6_knob_position(r.b,SJ6_DELAYSYNC)>0;
++#endif
++            put_d1(num,sj6_room_rate_clocked((unsigned)v,seq_tempo(&seq),sync),0);
++            put_s(unit,"Hz");
++        }
++        else {put_i(num,(100*v+63)/127);put_s(unit,"%");}
++        return;
++    }
++#endif
++#if X0X_SJ6_OTA_NATIVE
++    if(r.kind==R_SJ6OTA){*num=*unit=0;put_s(num,v?"JUNO OTA":"NORMAL");return;}
++#endif
++#endif
+     const x0x_param_t *d = pref_desc(r);
+     *num = *unit = 0;
+     if (!d || r.kind == R_ACT)
+         return;
+ #if X0X_ARP_HOOKS
++#if X0X_S1_FENCED_CLOCK
++    if (r.kind == R_ARP && r.a == ARP_F_SOURCE_RATE) {
++        put_i(num,v+1);put_s(unit,"BPM");return;
++    }
++#endif
+     if (r.kind == R_ARP && r.a == ARP_F_GATE) {
++#if (X0X_SJ6_ZERO_GATE_PROBE || X0X_SJ6_NATIVE_ZERO_GATE) && DNBOX_TYPED_CONTROLS_NATIVE_TEST
++        if(live137(&proj.sound,r.b)){put_i(num,v);put_s(unit,"%");return;}
++#endif
+         put_i(num, v + 1); put_s(unit, "%"); return;
+     }
+ #endif
+@@ -1543,19 +2758,223 @@
+ }
+ 
+ /* ===================================================================== pages === */
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++#define MAXPAGES 36 /* 33 current J6 pages plus source-join slots. Fit not assessed here. */
++#elif X0X_SUPERJ6_BUILTIN_INIT
++#define MAXPAGES 24
++#else
+ #define MAXPAGES 14
++#endif
+ /* page groups: whose values a page holds (the SEL list's headers, the header's colour) */
+ enum { GR_NONE, GR_TRACK, GR_TMIX, GR_KIT, GR_PAT, GR_SOUND, GR_MORE,
+        GR_MIDI, GR_AUDIO, GR_KEYS, GR_PROJECT, GR_SYSTEM, GR_BT };   /* (the last six: GLO's sections) */
+ #define MAXMORE 14
+ typedef struct {
+     pref_t r[MAXPAGES][4];
+-    char title[MAXPAGES][12];
++    uint8_t title[MAXPAGES];
+     uint8_t group[MAXPAGES];
+     int n;
+     pref_t more[MAXMORE];              /* the screen's other knobs: only in SEL's list, under MORE */
+     int nmore;
+ } pages_t;
++typedef enum {
++    PT_EMPTY,
++    PT_AMP_ENVELOP,
++    PT_PERFORM,
++    PT_SEQUENCE,
++    PT_PRESET,
++    PT_KEYS,
++    PT_ARP_SEQ,
++    PT_GROOVE,
++    PT_RETRIG,
++    PT_KIT,
++    PT_ARPEGGIATOR,
++    PT_FX_MOTION,
++    PT_WHEELS,
++    PT_VOICE,
++    PT_PHASER,
++    PT_MASTER_CMP,
++    PT_RV_INPUT_CM,
++    PT_WET_CMP,
++    PT_CMP_GAIN,
++    PT_AUTO_PAN,
++    PT_FILTER_LINK,
++    PT_REVERB,
++    PT_STEREO_FX,
++    PT_ARP_PARAMS,
++    PT_DELAY,
++    PT_TUNING,
++    PT_FILTER_MOD,
++    PT_CRUSH_MOD,
++    PT_KEY_HOLD,
++    PT_UNISON,
++    PT_CHORUS_J60,
++    PT_PITCH_ADSR,
++    PT_PITCH_MOD,
++    PT_EFFECT,
++    PT_FILTER_MODE,
++    PT_LFO_SETUP,
++    PT_LFO_ROUTING,
++    PT_LFO_CONTROL,
++    PT_LFO_TRIGGER,
++    PT_LIMITER,
++    PT_SOUND,
++    PT_LOOPS,
++    PT_GENERATE,
++    PT_SCALE,
++    PT_PARTS,
++    PT_MASTER,
++    PT_WAVE,
++    PT_PERF,
++    PT_BAR,
++    PT_808_MIX,
++    PT_909_MIX,
++    PT_OSCILLATOR,
++    PT_PULSE_WIDTH,
++    PT_FILTER,
++    PT_FILTER_ADSR,
++    PT_AMP_ADSR,
++    PT_OSC_MIX,
++    PT_OUTPUT,
++    PT_LFO_RATE,
++    PT_LFO_MODE,
++    PT_LFO2_PWM,
++    PT_LFO,
++    PT_CHORUS,
++    PT_DELAY_CLOCK,
++    PT_VIBRATO,
++    PT_BD,
++    PT_SD,
++    PT_LT,
++    PT_MT,
++    PT_HT,
++    PT_RS,
++    PT_CP,
++    PT_CH,
++    PT_OH,
++    PT_CR,
++    PT_RD,
++    PT_CB,
++    PT_CY,
++    PT_ENVELOPE,
++    PT_LFO_CHORUS,
++    PT_FILTER_1,
++    PT_FILTER_2,
++    PT_AMPLIFIER,
++    PT_CARRIER,
++    PT_XMOD,
++    PT_WOBBLE,
++    PT_COUNT
++} page_title_id_t;
++static const char *const page_titles[PT_COUNT]={
++    [PT_EMPTY]="",
++    [PT_AMP_ENVELOP]="AMP ENVELOP",
++    [PT_PERFORM]="PERFORM",
++    [PT_SEQUENCE]="SEQUENCE",
++    [PT_PRESET]="PRESET",
++    [PT_KEYS]="KEYS",
++    [PT_ARP_SEQ]="ARP SEQ",
++    [PT_GROOVE]="GROOVE",
++    [PT_RETRIG]="RETRIG",
++    [PT_KIT]="KIT",
++    [PT_ARPEGGIATOR]="ARPEGGIATOR",
++    [PT_FX_MOTION]="FX MOTION",
++    [PT_WHEELS]="WHEELS",
++    [PT_VOICE]="VOICE",
++    [PT_PHASER]="PHASER",
++    [PT_MASTER_CMP]="MASTER CMP",
++    [PT_RV_INPUT_CM]="RV INPUT CM",
++    [PT_WET_CMP]="WET CMP",
++    [PT_CMP_GAIN]="CMP GAIN",
++    [PT_AUTO_PAN]="AUTO PAN",
++    [PT_FILTER_LINK]="FILTER LINK",
++    [PT_REVERB]="REVERB",
++    [PT_STEREO_FX]="STEREO FX",
++    [PT_ARP_PARAMS]="ARP PARAMS",
++    [PT_DELAY]="DELAY",
++    [PT_TUNING]="TUNING",
++    [PT_FILTER_MOD]="FILTER MOD",
++    [PT_CRUSH_MOD]="CRUSH MOD",
++    [PT_KEY_HOLD]="KEY HOLD",
++    [PT_UNISON]="UNISON",
++    [PT_CHORUS_J60]="CHORUS J60",
++    [PT_PITCH_ADSR]="PITCH ADSR",
++    [PT_PITCH_MOD]="PITCH MOD",
++    [PT_EFFECT]="EFFECT",
++    [PT_FILTER_MODE]="FILTER MODE",
++    [PT_LFO_SETUP]="LFO SETUP",
++    [PT_LFO_ROUTING]="LFO ROUTING",
++    [PT_LFO_CONTROL]="LFO CONTROL",
++    [PT_LFO_TRIGGER]="LFO TRIGGER",
++    [PT_LIMITER]="LIMITER",
++    [PT_SOUND]="SOUND",
++    [PT_LOOPS]="LOOPS",
++    [PT_GENERATE]="GENERATE",
++    [PT_SCALE]="SCALE",
++    [PT_PARTS]="PARTS",
++    [PT_MASTER]="MASTER",
++    [PT_WAVE]="WAVE",
++    [PT_PERF]="PERF",
++    [PT_BAR]="BAR",
++    [PT_808_MIX]="808 MIX",
++    [PT_909_MIX]="909 MIX",
++    [PT_OSCILLATOR]="OSCILLATOR",
++    [PT_PULSE_WIDTH]="PULSE WIDTH",
++    [PT_FILTER]="FILTER",
++    [PT_FILTER_ADSR]="FILTER ADSR",
++    [PT_AMP_ADSR]="AMP ADSR",
++    [PT_OSC_MIX]="OSC MIX",
++    [PT_OUTPUT]="OUTPUT",
++    [PT_LFO_RATE]="LFO RATE",
++    [PT_LFO_MODE]="LFO MODE",
++    [PT_LFO2_PWM]="LFO2 PWM",
++    [PT_LFO]="LFO",
++    [PT_CHORUS]="CHORUS",
++    [PT_DELAY_CLOCK]="DELAY CLOCK",
++    [PT_VIBRATO]="VIBRATO",
++    [PT_BD]="BD",
++    [PT_SD]="SD",
++    [PT_LT]="LT",
++    [PT_MT]="MT",
++    [PT_HT]="HT",
++    [PT_RS]="RS",
++    [PT_CP]="CP",
++    [PT_CH]="CH",
++    [PT_OH]="OH",
++    [PT_CR]="CR",
++    [PT_RD]="RD",
++    [PT_CB]="CB",
++    [PT_CY]="CY",
++    [PT_ENVELOPE]="ENVELOPE",
++    [PT_LFO_CHORUS]="LFO/CHORUS",
++    [PT_FILTER_1]="FILTER 1",
++    [PT_FILTER_2]="FILTER 2",
++    [PT_AMPLIFIER]="AMPLIFIER",
++    [PT_CARRIER]="CARRIER",
++    [PT_XMOD]="XMOD",
++    [PT_WOBBLE]="WOBBLE",
++};
++_Static_assert(PT_COUNT<=256,"page title IDs fit");
++static const char *page_title(const pages_t *p,int n)
++{ return page_titles[p->title[n]]; }
++static page_title_id_t drum_page_title(int t,int v)
++{
++    static const uint8_t n909[]={PT_BD,PT_SD,PT_LT,PT_MT,PT_HT,PT_RS,PT_CP,PT_CH,PT_OH,PT_CR,PT_RD,PT_KIT};
++    _Static_assert(sizeof n909==DR_NUM+1,"drum title coverage");
++    static const uint8_t n808[]={PT_BD,PT_SD,PT_LT,PT_MT,PT_HT,PT_RS,PT_CP,PT_CB,PT_CY,PT_OH,PT_CH,PT_KIT};
++    _Static_assert(sizeof n808==D8_NUM+1,"drum title coverage");
++    if(t==T_909 && (unsigned)v<sizeof n909)return n909[v];
++    if(t==T_808 && (unsigned)v<sizeof n808)return n808[v];
++    return PT_EMPTY;
++}
++static const uint8_t title_juno[]={PT_OSCILLATOR,PT_FILTER,PT_ENVELOPE,PT_LFO_CHORUS};
++#if X0X_SYNTHONE_PATCH
++static const uint8_t title_synthone[]={PT_OSCILLATOR,PT_FILTER,PT_FILTER_ADSR,PT_AMP_ADSR,PT_EFFECT};
++#else
++static const uint8_t title_synthone[]={PT_EFFECT};
++#endif
++static const uint8_t title_chicago[]={PT_OSCILLATOR,PT_FILTER_1,PT_FILTER_2,PT_ENVELOPE,PT_AMPLIFIER,PT_ARPEGGIATOR,PT_EFFECT};
++static const uint8_t title_miami[]={PT_CARRIER,PT_XMOD,PT_FILTER,PT_WOBBLE,PT_OUTPUT};
+ static pages_t pg X0X_POOL;
+ typedef struct { pref_t r[4]; char title[12]; int page, n; } page_query_t;
+ /* The descriptor emitter has one explicit output contract. Query mode records
+@@ -1573,44 +2992,30 @@
+         pages->more[pages->nmore++] = r;
+ }
+ 
+-static void title(pages_t *pages, int i, const char *s)
+-{
+-    int k = 0;
+-    while (s[k] && k < 11) {
+-        pages->title[i][k] = s[k];
+-        k++;
+-    }
+-    pages->title[i][k] = 0;
+-}
+-
+-static void add_page(page_emitter_t *emit, const char *t,
++__attribute__((noinline)) static void add_page(page_emitter_t *emit, page_title_id_t title,
+                      pref_t a, pref_t b, pref_t c, pref_t d)
+ {
+-    page_query_t *query = emit->query;
+-    pages_t *pages = emit->pages;
+-    if (query) {
+-        if (query->n == query->page) {
+-            query->r[0] = a;
+-            query->r[1] = b;
+-            query->r[2] = c;
+-            query->r[3] = d;
+-            unsigned i = 0;
+-            for (; t[i] && i < 11; i++)
+-                query->title[i] = t[i];
+-            query->title[i] = 0;
+-        }
+-        query->n++;
+-        return;
+-    }
+-    if (pages->n >= MAXPAGES)
+-        return;
+-    pages->r[pages->n][0] = a;
+-    pages->r[pages->n][1] = b;
+-    pages->r[pages->n][2] = c;
+-    pages->r[pages->n][3] = d;
+-    title(pages, pages->n, t);
+-    pages->group[pages->n] = emit->group;
+-    pages->n++;
++    page_query_t *q=emit->query;
++    pages_t *pages=emit->pages;
++    pref_t *refs;
++    if(q){
++        if(q->n++!=q->page)return;
++        refs=q->r;
++        const char *t=page_titles[title];
++        unsigned i=0;
++        for(;t[i] && i<11;i++)q->title[i]=t[i];
++        q->title[i]=0;
++    }else{
++        if(pages->n>=MAXPAGES)return;
++        unsigned i=(unsigned)pages->n++;
++        refs=pages->r[i];
++        pages->title[i]=(uint8_t)title;
++        pages->group[i]=emit->group;
++    }
++    refs[0]=a;
++    refs[1]=b;
++    refs[2]=c;
++    refs[3]=d;
+ }
+ 
+ static int name_is(const x0x_param_t *d, const char *n)
+@@ -1655,7 +3060,7 @@
+     ((r.b==DR_BD && r.c==2) || (r.b==DR_SD && r.c==3)); }
+ X0X_COLD static void add_track_pages(page_emitter_t *emit, int t, int v)
+ {
+-    const char *nm = engine_voice_name(t, v);
++    page_title_id_t nm=drum_page_title(t,v);
+     pref_t snd[NPARAMS_MAX];
+     int rank[NPARAMS_MAX];
+     int n = 0, i, j;
+@@ -1684,7 +3089,7 @@
+     emit->group = GR_TRACK;
+     for (i = 0; i < n; i += 4)
+         add_page(emit, nm, snd[i], i + 1 < n ? snd[i + 1] : NONE, i + 2 < n ? snd[i + 2] : NONE, i + 3 < n ? snd[i + 3] : NONE);
+-    if(amp.kind!=R_NONE)add_page(emit,"AMP ENVELOPE",amp,NONE,NONE,NONE);
++    if(amp.kind!=R_NONE)add_page(emit,PT_AMP_ENVELOP,amp,NONE,NONE,NONE);
+ }
+ 
+ /* where a screen's page is kept: per part on the part's screens (and TB-3PO), else one per screen */
+@@ -1708,7 +3113,49 @@
+ static int8_t arp_held = -1;                 /* the ARP SEQ pad held (0..15), or -1 */
+ static uint8_t arp_edited;
+ static uint32_t arp_t0;
+-static const x0x_param_t *arp_desc(unsigned field) { return field < ARP_NF ? &ARP_P[field] : 0; }
++static const x0x_param_t *arp_desc(unsigned owner, unsigned field)
++{
++#if X0X_S1_FENCED_CLOCK
++    static const char *const stops[]={"1/64 T","1/64","1/32 T","1/32","1/16 T","1/16","1/8 T","1/8",
++        "1/4 T","1/4","1/2 T","1/2","1 BAR T","1 BAR","2 BARS","3 BARS","4 BARS","6 BARS","8 BARS"};
++    static const x0x_param_t rate={"ARP RATE",199,119,0};
++    static const x0x_param_t factor={"CLOCK FACTOR",18,9,stops};
++    if (field==ARP_F_SOURCE_RATE||field==ARP_F_SOURCE_FACTOR)
++        return engine_bass_bank(owner) != ORIGINAL_SOUND_SYNTHONE ? 0 :
++            field==ARP_F_SOURCE_RATE ? &rate : &factor;
++#endif
++#if X0X_SJ6_ARP_ADAPTER_NATIVE && X0X_SUPERJ6_BUILTIN_INIT && DNBOX_TYPED_CONTROLS_NATIVE_TEST
++    if(owner<NBASS && live137(&proj.sound,owner) && engine_bass_bank(owner)==ORIGINAL_SOUND_JUNO){
++        static const char *const types[]={"UP","DOWN","UP+DN","UP+DN X2","RANDOM","RANDOM2","RANDOM3"};
++        static const x0x_param_t mode={"MODE",6,0,types}, speed={"SPEED",12,SJ6_RATE_DEFAULT,0},
++                                     seq_enable={"SEQ ON",1,0,ONOFF_N};
++        if(field==ARP_F_MODE)return &mode;
++        if(field==ARP_F_SPEED)return &speed;
++        if(field==ARP_F_SEQ_ENABLE)return &seq_enable;
++    }
++#endif
++#if X0X_SJ6_ARP_ADAPTER_NATIVE && X0X_SUPERJ6_BUILTIN_INIT
++    if(engine_bass_bank(owner)==ORIGINAL_SOUND_SYNTHONE) {
++        static const x0x_param_t s1_direction={"DIRECTION",ARP_UPDN,0,ARP_MODE_N};
++        static const x0x_param_t seq_enable={"SEQ ON",1,0,ONOFF_N};
++        if(field==ARP_F_MODE)return &s1_direction;
++        if(field==ARP_F_SEQ_ENABLE)return &seq_enable;
++    }
++#endif
++#if X0X_SUPERJ6_BUILTIN_INIT
++    if(owner<NBASS && engine_bass_bank(owner)==ORIGINAL_SOUND_JUNO){
++        static const char *const beats[]={"SPEED","1/16","3/32","1/8","3/16","1/4","3/8","1/2",
++            "3/4","1","1.5","2","3","4","8","12","16","24","32"};
++        static const x0x_param_t division={"BEATS",ARP_SAGA_DIVISIONS,0,beats};
++        if(field==ARP_F_DIVISION)return &division;
++#if (X0X_SJ6_ZERO_GATE_PROBE || X0X_SJ6_NATIVE_ZERO_GATE) && DNBOX_TYPED_CONTROLS_NATIVE_TEST
++        static const x0x_param_t gate={"GATE",100,50,0};
++        if(field==ARP_F_GATE && live137(&proj.sound,owner))return &gate;
++#endif
++    }
++#endif
++    return field<sizeof(ARP_P)/sizeof(ARP_P[0]) && ARP_P[field].name ? &ARP_P[field] : 0;
++}
+ /* The voice's engine has the arp (SuperJ6 or Synth One, hooks answering). */
+ static int arp_engine(int b)
+ {
+@@ -1718,24 +3165,68 @@
+ }
+ static int arp_get(unsigned voice, unsigned field)
+ {
++#if X0X_S1_FENCED_CLOCK
++    if(field==ARP_F_SOURCE_RATE || field==ARP_F_SOURCE_FACTOR){
++        int value=engine_arp_source_get(voice,field);
++        return value<0?0:field==ARP_F_SOURCE_RATE?value-1:18-value;
++    }
++#endif
+     engine_arp_settings s;
+     if (!engine_arp_settings_read(voice, &s)) return 0;
+     switch (field) {
+     case ARP_F_ON: return s.on;
+-    case ARP_F_MODE: return s.mode;
++    case ARP_F_MODE:
++#if X0X_SJ6_ARP_ADAPTER_NATIVE && X0X_SUPERJ6_BUILTIN_INIT && DNBOX_TYPED_CONTROLS_NATIVE_TEST
++        if(live137(&proj.sound,voice) && engine_bass_bank(voice)==ORIGINAL_SOUND_JUNO)
++            return s.mode>ARP_SEQ?s.mode-1u:s.mode<ARP_SEQ?s.mode:0;
++#endif
++        return s.mode;
++#if X0X_SJ6_ARP_ADAPTER_NATIVE && X0X_SUPERJ6_BUILTIN_INIT
++    case ARP_F_SEQ_ENABLE: return s.seq_on;
++#endif
+     case ARP_F_RANGE: return s.range ? s.range - 1 : 0;
+     case ARP_F_SPEED: return s.speed;
+     case ARP_F_LENGTH: return s.length ? s.length - 1 : 0;
+     case ARP_F_INTERVAL: return s.interval;
+-    case ARP_F_GATE: return s.gate ? s.gate - 1 : 0;
++    case ARP_F_GATE:
++#if (X0X_SJ6_ZERO_GATE_PROBE || X0X_SJ6_NATIVE_ZERO_GATE) && DNBOX_TYPED_CONTROLS_NATIVE_TEST
++        if(live137(&proj.sound,voice))return s.gate;
++#endif
++        return s.gate?s.gate-1:0;
++#if X0X_SUPERJ6_BUILTIN_INIT
++    case ARP_F_DIVISION:
++#if X0X_SJ6_ARP_ADAPTER_NATIVE
++        return s.division>=SJ6_RATE_FIRST?0:s.division;
++#else
++        return s.division;
++#endif
++#endif
+     }
+     return 0;
+ }
+ static void arp_set(unsigned voice, unsigned field, int v)
+ {
++    const x0x_param_t *d=arp_desc(voice,field);
++    if(!d || (unsigned)v>d->max)return;
++#if X0X_S1_FENCED_CLOCK
++    if(field==ARP_F_SOURCE_RATE || field==ARP_F_SOURCE_FACTOR){
++        if(engine_arp_source_set(voice,field,field==ARP_F_SOURCE_RATE?v+1:18-v))mark_dirty();
++        else say("ARP NOT CHANGED",0);
++        return;
++    }
++#endif
++#if X0X_SJ6_ARP_ADAPTER_NATIVE && X0X_SUPERJ6_BUILTIN_INIT && DNBOX_TYPED_CONTROLS_NATIVE_TEST
++    if(field==ARP_F_MODE && live137(&proj.sound,voice) &&
++       engine_bass_bank(voice)==ORIGINAL_SOUND_JUNO && v>=ARP_SEQ)++v;
++#endif
+     engine_arp_settings s;
+     if (!engine_arp_settings_read(voice, &s)) return;
+-    if (field == ARP_F_RANGE || field == ARP_F_LENGTH || field == ARP_F_GATE) v++;
++    int typed_gate=0;
++#if (X0X_SJ6_ZERO_GATE_PROBE || X0X_SJ6_NATIVE_ZERO_GATE) && DNBOX_TYPED_CONTROLS_NATIVE_TEST
++    typed_gate=field==ARP_F_GATE && live137(&proj.sound,voice);
++    if(typed_gate && !s1_typed_tuple_editable())return;
++#endif
++    if(field==ARP_F_RANGE || field==ARP_F_LENGTH || (field==ARP_F_GATE && !typed_gate))v++;
+     if (engine_arp_set(voice, s.revision, field, v) == S1_EDIT_REJECTED) say("ARP NOT CHANGED", 0);
+ }
+ /* SEQ page 4: SEQUENCE, PRESET, KEYS, ARP SEQ. */
+@@ -1790,7 +3281,7 @@
+ /* Immutable page descriptions avoid rebuilding four constant preference records at
+  * every call site. The only patched byte is the current part/voice/channel;
+  * NONE retains its all-zero record. This runs only during UI page construction. */
+-X0X_COLD __attribute__((noinline)) static void add_page_refs(page_emitter_t *emit, const char *t, const pref_t *refs, int axis, uint8_t value)
++X0X_COLD __attribute__((noinline)) static void add_page_refs(page_emitter_t *emit, page_title_id_t t, const pref_t *refs, int axis, uint8_t value)
+ {
+     pref_t row[4];
+     for (int i = 0; i < 4; i++) {
+@@ -1815,6 +3306,30 @@
+ }
+ 
+ /* Pure navigation inputs: emit existing descriptors without keyboard clamping. */
++/* Owner-page rows share one decoder. Packing is only a source descriptor:
++ * exact kind/a/b/c values and order stay identical at add_page. */
++#define QR(k,c) ((uint16_t)((k)*256u+(c)))
++typedef struct { uint8_t title; uint16_t ref[4]; } owner_page_row;
++static __attribute__((noinline)) void add_owner_pages(page_emitter_t *emit,
++        const owner_page_row *rows,unsigned n,uint8_t b)
++{
++    for(unsigned i=0;i<n;i++){
++        pref_t ref[4];
++        for(unsigned j=0;j<4;j++){
++            uint16_t word=rows[i].ref[j];
++            uint8_t kind=(uint8_t)(word>>8), c=(uint8_t)word;
++            ref[j]=word?PR(kind,T_303,b,c):NONE;
++#if X0X_ARP_HOOKS
++            if(kind==R_ARP)ref[j]=PR(R_ARP,c,b,0);
++#endif
++        }
++        add_page(emit,rows[i].title,ref[0],ref[1],ref[2],ref[3]);
++    }
++}
++#define OWNER_PAGE(name, ...) do { \
++    static const owner_page_row row={name,{__VA_ARGS__}}; \
++    add_owner_pages(emit,&row,1,b); \
++} while(0)
+ static void describe_pages(pages_t *out, page_query_t *query, int view, int p, int mixsel, const uint8_t *selection)
+ {
+     page_emitter_t output = {out, query, GR_NONE};
+@@ -1827,36 +3342,60 @@
+     case V_HOME:                                       /* the pattern: how the parts run through it */
+     case V_GLO:
+         do { static const pref_t refs[4] = {PR(R_TEMPO, 0, 0, 0), PR(R_SWING, 0, 0, 0), PR(R_ENG, T_MST, 0, MST_DJF), PR(R_ENG, T_MST, 0, MST_PUMP)};
+-            add_page_refs(emit, "PERFORM", refs, 0, 0); } while (0);
++            add_page_refs(emit, PT_PERFORM, refs, 0, 0); } while (0);
+         break;
+     case V_SEQ:                                        /* the part's steps: how its pattern runs */
+         emit->group = GR_PAT;
+         if (part_is_drum(p))
+             do { static const pref_t refs[4] = {PR(R_DLEN, 0, 0, 0), PR(R_DRATE, 0, 0, 0), NONE, NONE};
+-            add_page_refs(emit, "SEQUENCE", refs, 1, p); } while (0);   /* (the swing: HOME's, all parts') */
++            add_page_refs(emit, PT_SEQUENCE, refs, 1, p); } while (0);   /* (the swing: HOME's, all parts') */
+         else if (part_is_303(p)) {
+             int b = p - PART_303A;
+             do { static const pref_t refs[4] = {PR(R_BLEN, 0, 0, 0), PR(R_BRATE, 0, 0, 0), PR(R_BDIR, 0, 0, 0), PR(R_BTRANS, 0, 0, 0)};
+-            add_page_refs(emit, "SEQUENCE", refs, 1, b); } while (0);
+-            add_page(emit, "PRESET", PR(R_BPATSND, 0, b, 0), NONE, NONE, NONE);   /* 0.0.25: this pattern's bass preset */
++            add_page_refs(emit, PT_SEQUENCE, refs, 1, b); } while (0);
++            add_page(emit, PT_PRESET, PR(R_BPATSND, 0, b, 0), NONE, NONE, NONE);   /* 0.0.25: this pattern's bass preset */
+             emit->group = GR_NONE;                          /* (not the pattern's: no P1 in its name) */
++#if X0X_S1_KEYBOARD_HOLD && DNBOX_TYPED_CONTROLS_NATIVE_TEST
++            if(engine_bass_bank(b)==ORIGINAL_SOUND_SYNTHONE)
++                add_page(emit, PT_KEYS, PR(R_FREEPLAY,b,0,0), PR(R_S1WHITEKEYS,0,0,0), PR(R_S1MIDIVEL,0,0,0),
++#if X0X_S1_SCALE_NATIVE
++                         PR(R_S1MICROKEYS,0,0,0));
++#else
++                         NONE);
++#endif
++            else
++#endif
++#if X0X_S1_SCALE_NATIVE && X0X_SJ6_SCALE_NATIVE && DNBOX_TYPED_CONTROLS_NATIVE_TEST
++            if(live137(&proj.sound,(unsigned)b) && engine_bass_bank(b)==ORIGINAL_SOUND_JUNO)
++                add_page(emit,PT_KEYS,PR(R_FREEPLAY,b,0,0),PR(R_S1SCALE,T_303,b,0),NONE,NONE);
++            else
++#endif
+             do { static const pref_t refs[4] = {PR(R_FREEPLAY, 0, 0, 0), NONE, NONE, NONE};
+-            add_page_refs(emit, "KEYS", refs, 1, b); } while (0);
++            add_page_refs(emit, PT_KEYS, refs, 1, b); } while (0);
+ #if X0X_ARP_HOOKS
+             if (arp_engine(b)) {                       /* 4: the 16 arp steps on the pads; K7/K8 stay empty */
+                 emit->group = GR_PAT;
+-                add_page(emit, "ARP SEQ", PR(R_ARP, ARP_F_LENGTH, b, 0), PR(R_ARP, ARP_F_INTERVAL, b, 0), PR(R_ARP, ARP_F_GATE, b, 0), NONE);
++                pref_t seq_enable=NONE;
++#if X0X_SUPERJ6_BUILTIN_INIT
++                if(engine_bass_bank(b)==ORIGINAL_SOUND_JUNO)
++                    seq_enable=PR(R_ARP,ARP_F_DIVISION,b,0);
++#endif
++#if X0X_SJ6_ARP_ADAPTER_NATIVE
++                if(engine_bass_bank(b)==ORIGINAL_SOUND_SYNTHONE)
++                    seq_enable=PR(R_ARP,ARP_F_SEQ_ENABLE,b,0);
++#endif
++                add_page(emit, PT_ARP_SEQ, PR(R_ARP, ARP_F_LENGTH, b, 0), PR(R_ARP, ARP_F_INTERVAL, b, 0), PR(R_ARP, ARP_F_GATE, b, 0), seq_enable);
+                 emit->group = GR_NONE;
+             }
+ #endif
+         }
+         else {
+             do { static const pref_t refs[4] = {PR(R_BRKRATE, 0, 0, 0), NONE, NONE, NONE};
+-            add_page_refs(emit, "SEQUENCE", refs, 0, 0); } while (0);
++            add_page_refs(emit, PT_SEQUENCE, refs, 0, 0); } while (0);
+             do { static const pref_t refs[4] = {PR(R_BRKSET, 0, 0, BRK_COMPLEX), PR(R_BRKSET, 0, 0, BRK_ANCHOR), PR(R_BRKSET, 0, 0, BRK_ROLL), PR(R_BRKSET, 0, 0, BRK_FILL)};
+-            add_page_refs(emit, "GROOVE", refs, 0, 0); } while (0);
++            add_page_refs(emit, PT_GROOVE, refs, 0, 0); } while (0);
+             do { static const pref_t refs[4] = {PR(R_BRKSET, 0, 0, BRK_R2), PR(R_BRKSET, 0, 0, BRK_R3), PR(R_BRKSET, 0, 0, BRK_R4), PR(R_BRKSET, 0, 0, BRK_R8)};
+-            add_page_refs(emit, "RETRIG", refs, 0, 0); } while (0);
++            add_page_refs(emit, PT_RETRIG, refs, 0, 0); } while (0);
+             do { static const pref_t refs[] = {PR(R_BRKSET, 0, 0, BRK_PHRASE), PR(R_BRKSET, 0, 0, BRK_ALEN), PR(R_BRKSET, 0, 0, BRK_BLEN)};
+                 more_refs(emit, refs, 3, 0, 0); } while (0);
+         }
+@@ -1868,20 +3407,71 @@
+             emit->group = GR_KIT;
+             if (p == PART_909)                         /* (the kit's gain: the mixer's level does it) */
+                 do { static const pref_t refs[4] = {PR(R_ENG, T_909, NDRUM, 1), NONE, NONE, NONE};
+-            add_page_refs(emit, "KIT", refs, 0, 0); } while (0);
++            add_page_refs(emit, PT_KIT, refs, 0, 0); } while (0);
+             else
+                 do { static const pref_t refs[4] = {PR(R_ENG, T_808, NDRUM, 1), NONE, NONE, NONE};
+-            add_page_refs(emit, "KIT", refs, 0, 0); } while (0);
++            add_page_refs(emit, PT_KIT, refs, 0, 0); } while (0);
+         } else if (part_is_303(p)) {
+             int b = p - PART_303A;
+             emit->group = GR_SOUND;
+             int kind = engine_bass_bank(b), chicago = kind == ORIGINAL_SOUND_CHICAGO;
+             const int8_t (*rows)[4] = kind == ORIGINAL_SOUND_JUNO ? ui_original_juno_rows : kind == ORIGINAL_SOUND_SYNTHONE ? ui_original_synthone_rows :
+                 chicago ? ui_original_chicago_rows : ui_original_miami_rows;
+-            const char *const *titles = kind == ORIGINAL_SOUND_JUNO ? ui_original_juno_titles : kind == ORIGINAL_SOUND_SYNTHONE ? ui_original_synthone_titles :
+-                chicago ? ui_original_chicago_titles : ui_original_miami_titles;
++            const uint8_t *titles = kind == ORIGINAL_SOUND_JUNO ? title_juno : kind == ORIGINAL_SOUND_SYNTHONE ? title_synthone :
++                chicago ? title_chicago : title_miami;
+             int count = kind == ORIGINAL_SOUND_JUNO ? UI_ORIGINAL_JUNO_PAGES : kind == ORIGINAL_SOUND_SYNTHONE ? UI_ORIGINAL_SYNTHONE_PAGES :
+                 chicago ? UI_ORIGINAL_CHICAGO_PAGES : UI_ORIGINAL_MIAMI_PAGES;
++#if X0X_SUPERJ6_BUILTIN_INIT
++            if(kind==ORIGINAL_SOUND_JUNO){
++#define K(k) QR(R_SJ6KNOB,k)
++#define E(k) QR(R_ENG,k)
++                static const owner_page_row rows[]={
++                {PT_OSCILLATOR,{K(SJ6_WAVE1),K(SJ6_WAVE2),K(SJ6_RANGE),K(SJ6_A_REFERENCE)}},
++                {PT_PULSE_WIDTH,{K(SJ6_PWM1_ON),K(SJ6_PWM1),K(SJ6_PWM2_ON),K(SJ6_PWM2)}},
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST && X0X_SJ6_VCF_PORT
++                {PT_FILTER,{E(2),E(3),QR(R_SJ6FILTER_EXTRA,1),K(SJ6_FILTER_LINK)}},
++                {PT_FILTER_MOD,{
++#if X0X_SJ6_VELOCITY_PORT
++                         K(SJ6_FILTER_VELOCITY),
++#else
++                         0,
++#endif
++                         K(SJ6_VCF_LFO1_AMOUNT),QR(R_SJ6FILTER_EXTRA,0),0}},
++#else
++                {PT_FILTER,{E(2),E(3),E(4),K(SJ6_FILTER_LINK)}},
++#endif
++                {PT_FILTER_ADSR,{K(SJ6_FILTER_ATTACK),K(SJ6_FILTER_DECAY),K(SJ6_FILTER_SUSTAIN),K(SJ6_FILTER_RELEASE)}},
++                {PT_AMP_ADSR,{K(SJ6_AMP_ATTACK),K(SJ6_AMP_DECAY),K(SJ6_AMP_SUSTAIN),K(SJ6_AMP_RELEASE)}},
++#if X0X_SJ6_NOISE_SUB_NATIVE
++                {PT_OSC_MIX,{K(SJ6_NOISE_LEVEL),K(SJ6_SUB_LEVEL),0,0}},
++#endif
++                {PT_OUTPUT,{E(9),K(SJ6_MASTER_LEVEL),K(SJ6_OSC1_LEVEL),K(SJ6_OSC2_LEVEL)}},
++                {PT_LFO_RATE,{K(SJ6_LFO1_RATE),K(SJ6_LFO2_RATE),K(SJ6_LFO3_RATE),K(SJ6_LFO2_SHAPE)}},
++                {PT_LFO_MODE,{K(SJ6_LFO1_MODE),K(SJ6_LFO2_MODE),K(SJ6_LFO3_MODE),
++#if X0X_SJ6_LFO1_DELAY_PORT
++                         K(SJ6_LFO1_DELAY)}},
++#else
++                         NONE);
++#endif
++                {PT_LFO2_PWM,{K(SJ6_LFO2_RATE),K(SJ6_LFO2_PWM_DEPTH),K(SJ6_LFO2_PWM_ROUTE),K(SJ6_LFO2_PWM_BASE)}},
++#if X0X_SJ6_LFO1_WAVE_NATIVE
++                {PT_LFO,{K(SJ6_LFO1_ENABLE),K(SJ6_LFO1_SNAPBACK),K(SJ6_LFO1_WAVE),0}},
++#else
++                {PT_LFO,{E(10),E(11),0,0}},
++#endif
++                {PT_CHORUS,{K(SJ6_CHORUS_I),K(SJ6_CHORUS_II),K(SJ6_CHORUS_RATE),K(SJ6_CHORUS_MIX)}},
++#if X0X_SJ6_NATIVE_DELAY
++                {PT_DELAY,{K(SJ6_DELAY24),K(SJ6_DELAY25),K(SJ6_DELAY26),K(SJ6_DELAY27)}},
++                {PT_DELAY_CLOCK,{K(SJ6_DELAYSYNC),0,0,0}},
++#endif
++                {PT_VIBRATO,{K(SJ6_VIBRATO_DEPTH),K(SJ6_VIBRATO_RATE),0,0}},
++                {PT_TUNING,{K(SJ6_LAYER1_SEMI),K(SJ6_LAYER2_SEMI),K(SJ6_LAYER1_FINE),K(SJ6_LAYER2_FINE)}},
++                };
++                add_owner_pages(emit,rows,sizeof rows/sizeof *rows,b);
++#undef E
++#undef K
++            } else
++#endif
+             for (int row = 0; row < count; row++) {
+                 pref_t refs[4];
+                 for (int col = 0; col < 4; col++) refs[col] = rows[row][col] < 0 ? NONE : PR(R_ENG,T_303,b,rows[row][col]);
+@@ -1895,21 +3485,179 @@
+ #if X0X_ARP_HOOKS
+                 /* ARPEGGIATOR before EFFECT (Chicago order); SJ6 has no EFFECT group. */
+                 if (kind == ORIGINAL_SOUND_SYNTHONE && row == count - 1 && arp_engine(b))
+-                    add_page(emit, "ARPEGGIATOR", PR(R_ARP, ARP_F_ON, b, 0), PR(R_ARP, ARP_F_RANGE, b, 0),
++                    add_page(emit, PT_ARPEGGIATOR, PR(R_ARP, ARP_F_ON, b, 0), PR(R_ARP, ARP_F_RANGE, b, 0),
+                              PR(R_ARP, ARP_F_MODE, b, 0), PR(R_ARP, ARP_F_SPEED, b, 0));
+ #endif
+                 add_page_refs(emit, titles[row],refs,0,0);
+             }
+ #if X0X_ARP_HOOKS
+             if (kind == ORIGINAL_SOUND_JUNO && arp_engine(b))
+-                add_page(emit, "ARPEGGIATOR", PR(R_ARP, ARP_F_ON, b, 0), PR(R_ARP, ARP_F_RANGE, b, 0),
++                add_page(emit, PT_ARPEGGIATOR, PR(R_ARP, ARP_F_ON, b, 0), PR(R_ARP, ARP_F_RANGE, b, 0),
+                          PR(R_ARP, ARP_F_MODE, b, 0), PR(R_ARP, ARP_F_SPEED, b, 0));
+ #endif
+-            add_page(emit, "SOUND",PR(R_BENGINE,0,b,0),PR(R_BPRESET,0,b,0),PR(R_BSTATUS,0,b,0),NONE);
++#if X0X_SJ6_VINTAGE_NATIVE && X0X_SJ6_ALT3_NATIVE && DNBOX_TYPED_CONTROLS_NATIVE_TEST
++            if(kind==ORIGINAL_SOUND_JUNO && engine_superj6_knob_position(b,SJ6_TREM_DEPTH)>=0)
++                OWNER_PAGE(PT_FX_MOTION,QR(R_SJ6KNOB,SJ6_TREM_DEPTH),
++                         QR(R_SJ6KNOB,SJ6_TREM_RATE),QR(R_SJ6LIMITER,SJ6_RAGE_SLOT),
++                         QR(R_SJ6LIMITER,SJ6_VINTAGE_SLOT));
++#endif
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++            if(kind==ORIGINAL_SOUND_JUNO && live137(&proj.sound,b)){
++#if X0X_SJ6_BEND_TYPED_PROBE
++                OWNER_PAGE(PT_WHEELS,QR(R_SJ6PB,0),QR(R_SJ6PB,1),
++#if X0X_SJ6_MOD_TYPED_PROBE
++                         QR(R_SJ6MOD,0),
++#else
++                         0,
++#endif
++#if X0X_SJ6_VELOCITY_SETTINGS
++                         QR(R_SJ6INPUTVEL,0));
++#else
++                         NONE);
++#endif
++#endif
++#if X0X_SJ6_MONO32_PROBE
++                if(engine_sj6_mono32_get(b,0)>=0)
++                    OWNER_PAGE(PT_VOICE,QR(R_SJ6MONO32,0),QR(R_SJ6MONO32,1),
++                             QR(R_SJ6MONO32,2),
++#if X0X_SJ6_VELOCITY_SETTINGS
++                             QR(R_SJ6INPUTVEL,1));
++#else
++                             NONE);
++#endif
++#endif
++            }
++#endif
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++            if(kind==ORIGINAL_SOUND_SYNTHONE && live_s1_mod(&proj.sound,b)){
++                OWNER_PAGE(PT_PHASER,QR(R_S1PHASER,0),QR(R_S1PHASER,1),
++                         QR(R_S1PHASER,2),QR(R_S1PHASER,3));
++                OWNER_PAGE(PT_MASTER_CMP,QR(R_S1CMP,0),QR(R_S1CMP,3),
++                         QR(R_S1CMP,6),QR(R_S1CMP,9));
++                OWNER_PAGE(PT_RV_INPUT_CM,QR(R_S1CMP,1),QR(R_S1CMP,4),
++                         QR(R_S1CMP,7),QR(R_S1CMP,10));
++                OWNER_PAGE(PT_WET_CMP,QR(R_S1CMP,2),QR(R_S1CMP,5),
++                         QR(R_S1CMP,8),QR(R_S1CMP,11));
++                OWNER_PAGE(PT_CMP_GAIN,QR(R_S1CMP,12),QR(R_S1CMP,13),
++                         QR(R_S1CWG,0),0);
++#if X0X_S1_AUTOPAN_PROBE
++                OWNER_PAGE(PT_AUTO_PAN,QR(R_S1PAN,0),QR(R_S1PAN,1),0,0);
++#endif
++            }
++#endif
++#if X0X_SYNTHONE_PATCH
++            if(kind==ORIGINAL_SOUND_SYNTHONE)
++                OWNER_PAGE(PT_FILTER_LINK,QR(R_S1LINK,0),0,0,0);
++#endif
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++#if X0X_SJ6_NATIVE_ROOM
++            if(kind==ORIGINAL_SOUND_JUNO && sj6_native_room_get(b,SJ6_ROOM_ENABLE)>=0){
++                OWNER_PAGE(PT_REVERB,QR(R_SJ6ROOM,SJ6_ROOM_ENABLE),
++                         QR(R_SJ6ROOM,SJ6_ROOM_SIZE),QR(R_SJ6ROOM,SJ6_ROOM_LOCUT),
++                         QR(R_SJ6ROOM,SJ6_ROOM_MIX));
++                OWNER_PAGE(PT_STEREO_FX,QR(R_SJ6ROOM,SJ6_ROOM_TYPE),
++                         QR(R_SJ6ROOM,SJ6_ROOM_WIDEN),QR(R_SJ6ROOM,SJ6_ROOM_RATE),
++                         QR(R_SJ6ROOM,SJ6_ROOM_DEPTH));
++            }
++#endif
++#endif
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++            if(kind==ORIGINAL_SOUND_SYNTHONE && live_s1_mod(&proj.sound,b)){
++#if X0X_S1_FENCED_CLOCK && X0X_ARP_HOOKS
++                OWNER_PAGE(PT_ARP_PARAMS,QR(R_ARP,ARP_F_SOURCE_RATE),QR(R_ARP,ARP_F_SOURCE_FACTOR),0,0);
++#endif
++                OWNER_PAGE(PT_DELAY,
++#if X0X_S1_FEEDBACK_PROBE
++                    QR(R_S1DLFB,0),
++#else
++                    0,
++#endif
++#if X0X_S1_DELAY_TRACK_TEST
++                    QR(R_S1DICT,0),
++#else
++                    0,
++#endif
++#if X0X_S1_DELAY_TIME_NATIVE
++                    QR(R_S1DLYTIME,0),
++#else
++                    0,
++#endif
++                    QR(R_S1DLYRES,0));
++                OWNER_PAGE(PT_TUNING,QR(R_S1A4,0),QR(R_S1TRANS,0),
++                    QR(R_S1AA,0),
++#if X0X_S1_KEYBOARD_HOLD && X0X_S1_SCALE_NATIVE
++                    QR(R_S1A4RESET,0));
++#else
++                    NONE);
++#endif
++                OWNER_PAGE(PT_REVERB,QR(R_S1RVFB,0),0,0,0);
++                OWNER_PAGE(PT_FILTER_MOD,QR(R_S1ENVLFO,0),0,0,0);
++                OWNER_PAGE(PT_WHEELS,QR(R_S1MODWHEEL,0),0,0,0);
++#if X0X_S1_CRUSH_LFO_PROBE
++                OWNER_PAGE(PT_CRUSH_MOD,QR(R_S1CRUSH,0),0,0,0);
++#endif
++#if X0X_S1_KEYBOARD_HOLD
++                OWNER_PAGE(PT_KEY_HOLD,QR(R_S1KEY_HOLD,0),
++#if X0X_S1_SCALE_NATIVE
++                    QR(R_S1SCALE,0),
++#else
++                    0,
++#endif
++#if X0X_S1_HALFTIME
++                    QR(R_S1HALF,0),
++#else
++                    0,
++#endif
++                    0);
++#endif
++            }
++#endif
++#if X0X_SUPERJ6_BUILTIN_INIT && DNBOX_TYPED_CONTROLS_NATIVE_TEST
++            if(kind==ORIGINAL_SOUND_JUNO && live137(&proj.sound,b)){
++#define J(k,c) QR(k,c)
++#if X0X_SJ6_NATIVE_UNISON
++                if(engine_sj6_unison_get(b,0)>=0)
++                    OWNER_PAGE(PT_UNISON,J(R_SJ6UNISON,0),J(R_SJ6UNISON,1),J(R_SJ6UNISON,2),J(R_SJ6UNISON,3));
++#endif
++#if X0X_SJ6_NATIVE_J60
++                if(engine_sj6_j60_get(b,0)>=0)
++                    OWNER_PAGE(PT_CHORUS_J60,J(R_SJ6J60,0),J(R_SJ6J60,1),J(R_SJ6J60,2),J(R_SJ6J60,3));
++#endif
++#if X0X_SJ6_PITCH_ENV_NATIVE
++                OWNER_PAGE(PT_PITCH_ADSR,J(R_SJ6PITCH,0),J(R_SJ6PITCH,1),J(R_SJ6PITCH,2),J(R_SJ6PITCH,3));
++                OWNER_PAGE(PT_PITCH_MOD,J(R_SJ6PITCH,4),0,0,0);
++#endif
++#if X0X_SJ6_NATIVE_ROOM
++                OWNER_PAGE(PT_EFFECT,J(R_SJ6CRUSH,0),J(R_SJ6CRUSH,1),0,0);
++#endif
++#if X0X_SJ6_OTA_NATIVE
++                OWNER_PAGE(PT_FILTER_MODE,J(R_SJ6OTA,0),0,0,0);
++#endif
++#if X0X_SJ6_AUX_LFO_NATIVE
++                OWNER_PAGE(PT_LFO_SETUP,J(R_SJ6AUX,0),J(R_SJ6AUX,1),J(R_SJ6AUX,2),J(R_SJ6AUX,3));
++                OWNER_PAGE(PT_LFO_ROUTING,J(R_SJ6AUX,5),J(R_SJ6AUX,6),J(R_SJ6AUX,7),J(R_SJ6AUX,8));
++                OWNER_PAGE(PT_LFO_CONTROL,J(R_SJ6AUX,14),J(R_SJ6AUX,4),
++#if X0X_SJ6_LFO_TRIGGER_NATIVE
++                         J(R_SJ6AUX,12),J(R_SJ6AUX,13));
++                OWNER_PAGE(PT_LFO_TRIGGER,J(R_SJ6AUX,9),J(R_SJ6AUX,10),J(R_SJ6AUX,11),0);
++#else
++                         NONE,NONE);
++#endif
++#endif
++#undef J
++            }
++#endif
++#if X0X_SJ6_VINTAGE_NATIVE && X0X_SJ6_ALT3_NATIVE && DNBOX_TYPED_CONTROLS_NATIVE_TEST
++            if(kind==ORIGINAL_SOUND_JUNO && sj6_native_limiter_get(b,SJ6_LIM_THRESH)>=0)
++                OWNER_PAGE(PT_LIMITER,QR(R_SJ6LIMITER,SJ6_LIM_THRESH),
++                         QR(R_SJ6LIMITER,SJ6_LIM_HEADROOM),QR(R_SJ6LIMITER,SJ6_LIM_ATTACK),
++                         QR(R_SJ6LIMITER,SJ6_LIM_GAIN));
++#endif
++            add_page(emit, PT_SOUND,PR(R_BENGINE,0,b,0),PR(R_BPRESET,0,b,0),PR(R_BSTATUS,0,b,0),NONE);
+         } else {
+             emit->group = GR_PAT;                           /* (its groove and retrigs: SEQ) */
+             do { static const pref_t refs[4] = {PR(R_BRKSLOT, 0, 0, 0), PR(R_BRKSLOT, 1, 0, 0), PR(R_BRKSET, 0, 0, BRK_BCHANCE), PR(R_ENG, T_BRK, 0, 1)};
+-            add_page_refs(emit, "LOOPS", refs, 0, 0); } while (0);
++            add_page_refs(emit, PT_LOOPS, refs, 0, 0); } while (0);
+             more(emit, PR(R_ENG, T_BRK, 0, 0));
+             more(emit, PR(R_BRKSLICE, 0, 0, 0));
+             more(emit, PR(R_BRKSLICE, 1, 0, 0));
+@@ -1919,52 +3667,52 @@
+         int b = p - PART_303A;
+         emit->group = GR_PAT;
+         do { static const pref_t refs[4] = {PR(R_GEN, 0, 0, G_DENS), PR(R_GEN, 0, 0, G_ACC), PR(R_GEN, 0, 0, G_SLIDE), PR(R_GEN, 0, 0, G_OCTS)};
+-            add_page_refs(emit, "GENERATE", refs, 1, b); } while (0);
++            add_page_refs(emit, PT_GENERATE, refs, 1, b); } while (0);
+         do { static const pref_t refs[4] = {PR(R_GEN, 0, 0, G_ROOT), PR(R_GEN, 0, 0, G_SCALE), PR(R_GEN, 0, 0, G_BASE), PR(R_GEN, 0, 0, G_MUT)};
+-            add_page_refs(emit, "SCALE", refs, 1, b); } while (0);
++            add_page_refs(emit, PT_SCALE, refs, 1, b); } while (0);
+         break;
+     }
+     case V_FX:                                         /* (each part's sends: MIX's PARTS) */
+         do { static const pref_t refs[4] = {PR(R_ENG, T_FX, 0, FX_RV_DECAY), PR(R_ENG, T_FX, 0, FX_RV_TONE), PR(R_ENG, T_FX, 0, FX_RV_HPF), PR(R_ENG, T_FX, 0, FX_RV_LEVEL)};
+-            add_page_refs(emit, "REVERB", refs, 0, 0); } while (0);
++            add_page_refs(emit, PT_REVERB, refs, 0, 0); } while (0);
+         do { static const pref_t refs[4] = {PR(R_ENG, T_FX, 0, FX_DL_TIME), PR(R_ENG, T_FX, 0, FX_DL_FDBK), PR(R_ENG, T_FX, 0, FX_DL_TONE), PR(R_TAPE, 0, 0, 0)};
+-            add_page_refs(emit, "DELAY", refs, 0, 0); } while (0);
++            add_page_refs(emit, PT_DELAY, refs, 0, 0); } while (0);
+             do { static const pref_t refs[] = {PR(R_ENG, T_FX, 0, FX_RV_HPF), PR(R_ENG, T_FX, 0, FX_RV_LEVEL), PR(R_ENG, T_FX, 0, FX_DL_HPF), PR(R_ENG, T_FX, 0, FX_DL_LEVEL), PR(R_ENG, T_FX, 0, FX_DL_PING)};
+                 more_refs(emit, refs, 5, 0, 0); } while (0);
+         break;
+     case V_MIX:                                        /* a channel picked with a black key, its four knobs */
+         do { static const pref_t refs[4] = {PR(R_ENG, T_MIX, 0, MX_LEVEL), PR(R_ENG, T_MIX, 0, MX_PAN), PR(R_ENG, T_MIX, 0, MX_REV), PR(R_ENG, T_MIX, 0, MX_DLY)};
+-            add_page_refs(emit, "PARTS", refs, 2, mixsel); } while (0);
++            add_page_refs(emit, PT_PARTS, refs, 2, mixsel); } while (0);
+         for (p = 0; p < NKIT; p++) {                    /* each drum machine's tracks: LEVEL, PAN, REV, DLY */
+             int t = p ? T_808 : T_909, v = selection[p];
+-            add_page(emit, p ? "808 MIX" : "909 MIX", find_ref(t, v, "Level"), find_ref(t, v, "Pan"), find_ref(t, v, "Rev"),
++            add_page(emit, p ? PT_808_MIX : PT_909_MIX, find_ref(t, v, "Level"), find_ref(t, v, "Pan"), find_ref(t, v, "Rev"),
+                      find_ref(t, v, "Dly"));
+         }
+         do { static const pref_t refs[4] = {PR(R_ENG, T_FX, 0, FX_DRIVE), PR(R_ENG, T_MST, 0, MST_COMP1), PR(R_ENG, T_MST, 0, MST_PUMP), PR(R_ENG, T_MST, 0, MST_DJF)};
+-            add_page_refs(emit, "MASTER", refs, 0, 0); } while (0);
++            add_page_refs(emit, PT_MASTER, refs, 0, 0); } while (0);
+             do { static const pref_t refs[] = {PR(R_ENG, T_MST, 0, MST_THRESH), PR(R_ENG, T_MST, 0, MST_RATIO), PR(R_ENG, T_MST, 0, MST_ATTACK), PR(R_ENG, T_MST, 0, MST_RELEASE), PR(R_ENG, T_MST, 0, MST_MAKEUP), PR(R_ENG, T_MST, 0, MST_MIX), PR(R_ENG, T_MST, 0, MST_PUMPSRC), PR(R_ENG, T_MST, 0, MST_RESO), PR(R_ENG, T_MST, 0, MST_LIMIT), PR(R_ENG, T_FX, 0, FX_DIST), PR(R_ENG, T_FX, 0, FX_COMP), PR(R_ENG, T_FX, 0, FX_VOLUME)};
+                 more_refs(emit, refs, 12, 0, 0); } while (0);
+         /* sibling of MASTER: same knobs, post-master eng_scope wave (Baud Girl ≤10 Hz redraw) */
+         do { static const pref_t refs[4] = {PR(R_ENG, T_FX, 0, FX_DRIVE), PR(R_ENG, T_MST, 0, MST_COMP1), PR(R_ENG, T_MST, 0, MST_PUMP), PR(R_ENG, T_MST, 0, MST_DJF)};
+-            add_page_refs(emit, "WAVE", refs, 0, 0); } while (0);
++            add_page_refs(emit, PT_WAVE, refs, 0, 0); } while (0);
+         break;
+ #if X0X_UI_PERF
+     case V_PERF:
+         do { static const pref_t refs[4] = {PR(R_STALLS, 0, 0, 0), NONE, NONE, NONE};
+-            add_page_refs(emit, "PERF", refs, 0, 0); } while (0);
++            add_page_refs(emit, PT_PERF, refs, 0, 0); } while (0);
+         break;
+ #endif
+     case V_SONG:
+         do { static const pref_t refs[4] = {PR(R_SBAR, 0, 0, 0), PR(R_SPAT, PART_909, 0, 0), PR(R_SPAT, PART_808, 0, 0), PR(R_SPAT, PART_BRK, 0, 0)};
+-            add_page_refs(emit, "BAR", refs, 0, 0); } while (0);
++            add_page_refs(emit, PT_BAR, refs, 0, 0); } while (0);
+         do { static const pref_t refs[4] = {PR(R_SBAR, 0, 0, 0), PR(R_SPAT, PART_303B, 0, 0), PR(R_SPAT, PART_303A, 0, 0), PR(R_SREP, 0, 0, 0)};
+-            add_page_refs(emit, "BAR", refs, 0, 0); } while (0);
++            add_page_refs(emit, PT_BAR, refs, 0, 0); } while (0);
+         break;
+     default: break;
+     }
+     if ((query ? query->n : out->n) == 0)
+         do { static const pref_t refs[4] = {NONE, NONE, NONE, NONE};
+-            add_page_refs(emit, "", refs, 0, 0); } while (0);
++            add_page_refs(emit, PT_EMPTY, refs, 0, 0); } while (0);
+ }
+ 
+ static void build_pages(void)
+@@ -2033,7 +3781,11 @@
+ /* ===================================================================== lists === */
+ /* A list is rows of refs. SEL on a page opens the list of every page's knobs (the deep view);
+  * GLOBAL is a list of its own. SELECT moves, ALGORITHM changes, SEL runs an action. */
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++#define LIST_MAX (MAXPAGES*4+MAXMORE+4)
++#else
+ #define LIST_MAX 64
++#endif
+ static pref_t list_rows[LIST_MAX] X0X_POOL;
+ static char list_title[16];
+ 
+@@ -2436,6 +4188,28 @@
+ #define UNDO_OFF __builtin_offsetof(project_t, sound)
+ #define UNDO_BYTES (sizeof(project_t) - UNDO_OFF)
+ static undo_t undo X0X_POOL;
++#if X0X_S1_USER_SCALE
++/* Same byte comparison as peeking all chunks, but only inspect stored
++ * differences. Runs can include unchanged gap bytes; compare those too. */
++static __attribute__((noinline)) int s1_undo_range_diff(const undo_t *u,int entry,
++    unsigned start,unsigned end)
++{
++    const uint8_t *e=u->pool+u->at[entry];
++    unsigned runs=ud_get16(e);
++    for(e+=8;runs;--runs){
++        unsigned off=ud_get16(e),n=ud_get16(e+2);
++        if(off>=end)break;
++        e+=4;
++        if(off+n>start){
++            unsigned first=off>start?off:start;
++            unsigned last=off+n<end?off+n:end;
++            if(memcmp(e+first-off,u->region+first,last-first))return 1;
++        }
++        e+=(n+1u)&~1u;
++    }
++    return 0;
++}
++#endif
+ /* Project transfers temporarily borrow the undo baseline. The history stays in undo.pool;
+  * abort copies the live project back, and successful replacement starts a new history. */
+ #define undo_shadow ((uint8_t *)&project_stage + UNDO_OFF)
+@@ -2475,33 +4249,50 @@
+ }
+ 
+ /* a run of the project changed under the engine: the sound's pots go to the engine again */
+-static void undo_changed(uint32_t off, uint32_t len)
+-{
+-    const uint32_t s0 = __builtin_offsetof(project_t, sound), s1 = s0 + sizeof(proj.sound.v);
+-    const uint32_t l0 = __builtin_offsetof(project_t, arr) + __builtin_offsetof(arrange_t, lane);
+-    uint32_t a = off + UNDO_OFF, k;
+-    for (k = a; k < a + len; k++) {
+-        if (k >= s0 && k < s1) {
+-            uint32_t x = k - s0, t = x / (NVOICES_MAX * NPARAMS_MAX), v = (x / NPARAMS_MAX) % NVOICES_MAX,
+-                     i = x % NPARAMS_MAX;
++__attribute__((noinline)) static void undo_changed(uint32_t off, uint32_t len)
++{
++    const uint32_t s0=__builtin_offsetof(project_t,sound),s1=s0+sizeof(proj.sound.v);
++    const uint32_t l0=__builtin_offsetof(project_t,arr)+__builtin_offsetof(arrange_t,lane);
++    uint32_t first=off+UNDO_OFF,last=first+len;
++    /* The changed bytes are the undo engine's validated ranges. Read no
++     * additional data, and queue common controls in their original order. */
++    _Static_assert(__builtin_offsetof(project_t,sound)+sizeof(proj.sound.v)
++        <=__builtin_offsetof(project_t,arr)+__builtin_offsetof(arrange_t,lane),"sound before motion");
++    if(len && last>l0)undo_lanes=1;
++    if(first<s0)first=s0;
++    if(last>s1)last=s1;
++    for(uint32_t k=first;k<last;){
++        const unsigned x=k-s0, row=x/NPARAMS_MAX;
++        const int t=(int)(row/NVOICES_MAX),v=(int)(row%NVOICES_MAX);
++        const uint32_t next=s0+(row+1u)*NPARAMS_MAX;
+ #if X0X_ARP_HOOKS
+-            /* The arp block (sound.v[T_303][2 + voice]): the engine re-reads it. */
+-            if (t == T_303 && v >= 2 && v < 2 + NBASS) {
+-                (void)engine_arp_reload(v - 2);
+-                k = s0 + (t * NVOICES_MAX + v + 1) * NPARAMS_MAX - 1;   /* once per block */
+-                continue;
+-            }
++        /* One reload for every touched ARP row, even a partial range. */
++        if(t==T_303 && v>=2 && v<2+NBASS){
++            (void)engine_arp_reload((unsigned)(v-2));
++            k=next;continue;
++        }
+ #endif
+ #if X0X_BASS_TAGGED_SOUND
+-            if((t==T_303 && (undo_bass_mask&(1u<<v))) ||
+-               (t==T_MIX && v>=PART_303A && v<=PART_303B && (undo_bass_mask&(1u<<(v-PART_303A)))))continue;
+-#endif
+-            if ((int)v < engine_nvoices((int)t) && (int)i < engine_nparams((int)t, (int)v))
+-                ui_restore_base((int)t, (int)v, (int)i);
+-        } else if (k >= l0) {
+-            undo_lanes = 1;
+-        }
+-    }
++        if((t==T_303 && (undo_bass_mask&(1u<<v))) ||
++           (t==T_MIX && v>=PART_303A && v<=PART_303B && (undo_bass_mask&(1u<<(v-PART_303A))))){
++            k=next;continue;
++        }
++#endif
++        if(v<engine_nvoices(t)){
++            unsigned stop=(unsigned)engine_nparams(t,v);
++            const unsigned avail=last+NPARAMS_MAX-next;
++            if(stop>avail)stop=avail;
++            for(unsigned i=x%NPARAMS_MAX;i<stop;i++)ui_restore_base(t,v,(int)i);
++        }
++        k=next;
++    }
++}
++
++static __attribute__((noinline)) int undo_part_at(unsigned x)
++{
++    return (int)(x < __builtin_offsetof(pattern_t, bass) ? x / sizeof(dpart_t)
++               : x < __builtin_offsetof(pattern_t, brk) ? NKIT + (x - __builtin_offsetof(pattern_t, bass)) / sizeof(bpart_t)
++               : PART_BRK);
+ }
+ 
+ /* what an undo step touched, in words: "909 P3", "SOUND", "SONG", "MOTION" */
+@@ -2514,12 +4305,7 @@
+         put_s(t, "SOUND");
+     } else if (a >= p0 && b < a0 && (a - p0) / sizeof(pattern_t) == (b - p0) / sizeof(pattern_t)) {
+         uint32_t pi = (a - p0) / sizeof(pattern_t), x = (a - p0) % sizeof(pattern_t), y = (b - p0) % sizeof(pattern_t);
+-        int pa = (int)(x < __builtin_offsetof(pattern_t, bass) ? x / sizeof(dpart_t)
+-                       : x < __builtin_offsetof(pattern_t, brk) ? NKIT + (x - __builtin_offsetof(pattern_t, bass)) / sizeof(bpart_t)
+-                       : PART_BRK);
+-        int pb = (int)(y < __builtin_offsetof(pattern_t, bass) ? y / sizeof(dpart_t)
+-                       : y < __builtin_offsetof(pattern_t, brk) ? NKIT + (y - __builtin_offsetof(pattern_t, bass)) / sizeof(bpart_t)
+-                       : PART_BRK);
++        int pa=undo_part_at(x),pb=undo_part_at(y);
+         char *q = put_s(t, pa == pb ? part_name(pa) : "PATTERN");
+         put_i(put_s(q, " P"), (int)pi + 1);
+     } else if (a >= p0 && b < a0) {
+@@ -2544,6 +4330,89 @@
+     for (int b = 0; b < NBASS; b++) seq_rec_cancel(&seq, b);
+     engine_project_hold(0);
+ }
++extern void engine_sj6_voice_undo(unsigned mask);
++extern int engine_sj6_voice_undo_ready(unsigned mask);
++extern void s1_aa_undo(unsigned mask);
++extern int s1_aa_undo_ready(unsigned mask);
++extern void s1_cmp_undo(unsigned mask);
++extern int s1_cmp_undo_ready(unsigned mask);
++extern void s1_delay_time_undo(unsigned mask);
++extern int s1_delay_time_undo_ready(unsigned mask,const uint8_t before[NBASS]);
++extern void s1_phaser_undo(unsigned mask);
++extern int s1_phaser_undo_ready(unsigned mask);
++extern void s1_typed_a4_undo(unsigned mask);
++extern void s1_typed_crush_undo(unsigned mask);
++extern void s1_typed_cwg_undo(unsigned mask);
++extern int s1_typed_cwg_undo_ready(unsigned mask);
++extern void s1_typed_dict_undo(unsigned mask);
++extern int s1_typed_dict_undo_ready(unsigned mask);
++extern void s1_typed_feedback_undo(unsigned mask);
++extern void s1_typed_pan_undo(unsigned mask);
++extern void s1_typed_rvfb_undo(unsigned mask);
++extern void s1_typed_trans_undo(unsigned mask);
++extern void sj6_aux_undo(unsigned mask);
++extern int sj6_aux_undo_ready(unsigned mask);
++extern void sj6_classic_i_undo(unsigned mask);
++extern void sj6_native_limiter_undo(unsigned mask);
++extern int sj6_native_limiter_undo_ready(unsigned mask);
++extern void sj6_native_room_undo(unsigned mask);
++extern int sj6_native_room_undo_ready(unsigned mask);
++extern void sj6_ota_undo(unsigned mask);
++extern int sj6_ota_undo_ready(unsigned mask);
++extern void sj6_pitch_undo(unsigned mask);
++extern int sj6_pitch_undo_ready(unsigned mask);
++extern void sj6_typed_mod_undo(unsigned mask);
++#if X0X_BASS_TAGGED_SOUND && defined(DNBOX_137_HOST_WITNESS)
++__attribute__((noinline)) X0X_COLD static int undo_bounded_field(
++    int entry,uint32_t offset,unsigned limit,unsigned old,unsigned owner_bit,
++    unsigned *changed,const char *message)
++{
++    uint8_t value;
++    undo_peek(&undo,entry,offset,&value,1u);
++    if(value>limit) {
++        say(message,0);engine_bass_edit_hold(0);return 0;
++    }
++    if(value!=old)*changed|=owner_bit;
++    return 1;
++}
++#endif
++#if X0X_BASS_TAGGED_SOUND && defined(DNBOX_137_HOST_WITNESS)
++static __attribute__((noinline)) int ui_undo_check(unsigned changed,
++        int (*ready)(unsigned),const char *message)
++{
++    if(!changed || ready(changed & ~undo_bass_mask))return 1;
++    engine_project_hold(0);
++    engine_bass_edit_hold(0);
++    say(message,0);
++    return 0;
++}
++static __attribute__((noinline)) void ui_undo_apply(unsigned changed,void (*apply)(unsigned))
++{
++    if(changed)apply(changed & ~undo_bass_mask);
++}
++#endif
++#if X0X_BASS_TAGGED_SOUND && defined(DNBOX_137_HOST_WITNESS)
++static __attribute__((noinline)) void ui_undo_invalid(const char *message)
++{
++    say(message,0);
++    engine_bass_edit_hold(0);
++}
++static __attribute__((noinline)) int ui_undo_span(int entry,unsigned offset,
++    const uint8_t *old,unsigned len,unsigned max,unsigned (*bound)(unsigned),
++    unsigned mask,unsigned *changed,const char *message)
++{
++    uint8_t bytes[NPARAMS_MAX];
++    undo_peek(&undo,entry,offset,bytes,len);
++    for(unsigned k=0;k<len;k++) if(bytes[k]>(bound?bound(k):max)){
++        ui_undo_invalid(message);return 0;
++    }
++    if(memcmp(bytes,old,len))*changed|=mask;
++    return 1;
++}
++#if X0X_SJ6_AUX_LFO_NATIVE
++_Static_assert(NPARAMS_MAX>=SJ6_AUX_BYTES,"Undo helper row size");
++#endif
++#endif
+ static void do_undo(int redo)
+ {
+     record_finish();
+@@ -2559,6 +4428,111 @@
+ #endif
+     undo_commit_stable();                       /* what was just done is a step too */
+ #if X0X_BASS_TAGGED_SOUND
++#ifdef DNBOX_137_HOST_WITNESS
++    unsigned typed_hold_changes=0,undo_sj6_input_vel=0;
++#if defined(DNBOX_137_HOST_WITNESS) && defined(X0X_SJ6_MOD_TYPED_PROBE)
++    unsigned undo_sj6_mod=0;
++#endif
++#if !defined(X0X_SJ6_MOD_TYPED_PROBE)
++    const unsigned undo_sj6_mod=0;
++#endif
++#if X0X_S1_FENCED_CLOCK
++    extern void s1_typed_clock_undo(unsigned);
++    unsigned undo_clock=0;
++#else
++    const unsigned undo_clock=0;
++#endif
++#if X0X_SJ6_ZERO_GATE_PROBE || X0X_SJ6_NATIVE_ZERO_GATE || X0X_SJ6_NATIVE_RANDOM2
++    extern void engine_sj6_zero_undo(unsigned);
++    unsigned undo_zero=0;
++#else
++    const unsigned undo_zero=0;
++#endif
++#if X0X_S1_DELAY_TRACK_TEST
++    unsigned undo_dict=0;
++#else
++    const unsigned undo_dict=0;
++#endif
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++    unsigned undo_cwg=0, undo_aa=0, undo_cmp=0;
++#if X0X_SJ6_NATIVE_LIMITER
++    unsigned undo_limiter=0;
++#else
++    const unsigned undo_limiter=0;
++#endif
++#if X0X_SJ6_OTA_NATIVE
++    unsigned undo_ota=0;
++#else
++    const unsigned undo_ota=0;
++#endif
++#if X0X_SJ6_NATIVE_ROOM
++    unsigned undo_room=0;
++#else
++    const unsigned undo_room=0;
++#endif
++#else
++    const unsigned undo_cwg=0, undo_aa=0, undo_cmp=0;
++    const unsigned undo_limiter=0;
++    const unsigned undo_ota=0;
++    const unsigned undo_room=0;
++#endif
++#if X0X_SJ6_VCF_PORT
++    extern int sj6_vcf_undo_ready(unsigned);
++    extern void sj6_vcf_undo(unsigned);
++    unsigned undo_vcf=0;
++#else
++    const unsigned undo_vcf=0;
++#endif
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++    unsigned undo_phaser=0;
++#endif
++#if !DNBOX_TYPED_CONTROLS_NATIVE_TEST
++    const unsigned undo_phaser=0;
++#endif
++#if X0X_S1_DELAY_TIME_NATIVE
++    unsigned undo_dlytime=0;uint8_t undo_dlycode[NBASS]={0};
++#endif
++#if !X0X_S1_DELAY_TIME_NATIVE
++    const unsigned undo_dlytime=0;
++#endif
++#if X0X_SJ6_NATIVE_UNISON
++    unsigned undo_sj6_unison=0;
++#else
++    const unsigned undo_sj6_unison=0;
++#endif
++#if X0X_SJ6_PITCH_ENV_NATIVE
++    unsigned undo_pitch=0;
++#endif
++#if !X0X_SJ6_PITCH_ENV_NATIVE
++    const unsigned undo_pitch=0;
++#endif
++#if X0X_SJ6_NATIVE_J60
++    unsigned undo_j60=0;
++#else
++    const unsigned undo_j60=0;
++#endif
++#if X0X_SJ6_AUX_LFO_NATIVE
++    unsigned undo_aux=0;
++#endif
++#if !X0X_SJ6_AUX_LFO_NATIVE
++    const unsigned undo_aux=0;
++#endif
++    unsigned undo_velocity137=0,undo_s1_mod=0,undo_a4=0,undo_rvfb=0,undo_trans=0,undo_crush=0,undo_delay=0,undo_pan=0,undo_feedback=0,undo_chorus_i=0,undo_sj6_voice=0;
++#if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
++    extern int s1_typed_pb_undo_ready(unsigned);
++    extern void s1_typed_pb_undo(unsigned);
++    unsigned undo_pb=0;
++#if defined(X0X_SJ6_BEND_TYPED_PROBE) && X0X_SJ6_BEND_TYPED_PROBE
++    extern void sj6_typed_pb_undo(unsigned);
++    unsigned undo_sj6_pb=0;
++#endif
++#if !(defined(X0X_SJ6_BEND_TYPED_PROBE) && X0X_SJ6_BEND_TYPED_PROBE)
++    const unsigned undo_sj6_pb=0;
++#endif
++#else
++    const unsigned undo_pb=0,undo_sj6_pb=0;
++#endif
++#endif
+     undo_wait=0;undo_bass_mask=0;
+     int entry=redo?undo.cur:undo.cur-1;
+     if(entry>=0 && entry<undo.n) {
+@@ -2568,9 +4542,363 @@
+             uint32_t tag=__builtin_offsetof(sound_t,bass)+v*sizeof(bass_sound_tag_t);
+             undo_peek(&undo,entry,cell,target.cell[v],NPARAMS_MAX);
+             undo_peek(&undo,entry,tag,target.tag[v].bytes,BASS_SOUND_TAG_BYTES);
++#if X0X_SUPERJ6_BUILTIN_INIT
++            uint32_t ext = cell + ORIGINAL_SJ6_EXTRA_ROW * NPARAMS_MAX;
++            undo_peek(&undo, entry, ext, target.sj6_extra[v], ORIGINAL_SJ6_EXT_USED);
++            if (((original_sound_edit_mask(target.cell[v]) |
++                  original_sound_edit_mask(proj.sound.v[T_303][v])) & ORIGINAL_SJ6_EXT_BITS) &&
++                memcmp(target.sj6_extra[v], proj.sound.v[T_303][ORIGINAL_SJ6_EXTRA_ROW + v],
++                       ORIGINAL_SJ6_EXT_USED)) undo_bass_mask |= 1u << v;
++#endif
++#if X0X_S1_EXTRA || X0X_SUPERJ6_BUILTIN_INIT
++            undo_peek(&undo, entry, cell + BASS_SHARED_EXTRA_ROW * NPARAMS_MAX,
++                      target.shared_extra[v], BASS_SHARED_EXTRA_BYTES);
++            const uint8_t *shared = proj.sound.v[T_303][BASS_SHARED_EXTRA_ROW + v];
++            int pending = original_sound_bass_shared_size(target.cell[v], target.shared_extra[v]);
++            int applied = original_sound_bass_shared_size(proj.sound.v[T_303][v], shared);
++            if (pending < 0 || applied < 0 ||
++                memcmp(target.shared_extra[v], shared, (unsigned)(pending > applied ? pending : applied)))
++                undo_bass_mask |= 1u << v;
++#endif
++#ifdef DNBOX_137_HOST_WITNESS
++            if (proj.set.snd_rev==REV137) {
++                const int undo_j6_init=target.cell[v][29]==ORIGINAL_SOUND_JUNO &&
++                    !original_sound_sj6_factory(target.cell[v]);
++                const int undo_s1_init=s1_typed_init_cell(target.cell[v]);
++                (void)undo_j6_init;(void)undo_s1_init;
++                uint8_t p;
++#if X0X_SJ6_NATIVE_J60
++                uint8_t j60[4];
++                const uint32_t j60_off=__builtin_offsetof(sound_t,v)+
++                    ((T_MST*NVOICES_MAX+SJ6_J60_ROW+v)*NPARAMS_MAX+SJ6_J60_OFFSET);
++#if X0X_SJ6_NATIVE_CLASSIC
++                uint8_t classic[3];
++                const uint32_t classic_off=__builtin_offsetof(sound_t,v)+
++                    ((T_MST*NVOICES_MAX+SJ6_CLASSIC_ROW+v)*NPARAMS_MAX+SJ6_CLASSIC_OFFSET);
++                undo_peek(&undo,entry,classic_off,classic,sizeof classic);
++                if(!sj6_classic_native_valid(classic) ||
++                   ((classic[0]|classic[1]|classic[2]) &&
++                    !undo_j6_init)){
++                    ui_undo_invalid("UNDO LEGACY CHORUS INVALID");return;
++                }
++                if(memcmp(classic,sj6_classic_native_code(&proj.sound,v),sizeof classic))undo_j60|=1u<<v;
++#endif
++                undo_peek(&undo,entry,j60_off,j60,sizeof j60);
++                if(!sj6_j60_valid(j60) ||
++                   ((j60[0]|j60[1]|j60[2]|j60[3]) &&
++                    !undo_j6_init)){
++                    ui_undo_invalid("UNDO CHORUS INVALID");return;
++                }
++                if(memcmp(j60,sj6_j60_code(&proj.sound,v),sizeof j60))undo_j60|=1u<<v;
++#endif
++                uint32_t off=cell+(8u+v)*NPARAMS_MAX+2u;
++#if X0X_SJ6_AUX_LFO_NATIVE
++                uint8_t lfo1_route[4];
++                uint32_t lfo1_off=__builtin_offsetof(sound_t,v)+
++                    ((T_MST*NVOICES_MAX+SJ6_AUX_LFO1_ROW+v)*NPARAMS_MAX+SJ6_AUX_LFO1_OFF);
++                undo_peek(&undo,entry,lfo1_off,lfo1_route,sizeof lfo1_route);
++                if(!sj6_aux_lfo1_valid(lfo1_route) ||
++                   ((lfo1_route[0]|lfo1_route[2]) &&
++                    !undo_j6_init)){
++                    ui_undo_invalid("UNDO LFO1 ROUTE INVALID");return;
++                }
++                if(memcmp(lfo1_route,sj6_aux_lfo1_read(&proj.sound,v),sizeof lfo1_route))undo_aux|=1u<<v;
++                uint8_t aux[SJ6_AUX_BYTES];
++                uint32_t aux_off=__builtin_offsetof(sound_t,v)+((T_MST*NVOICES_MAX+SJ6_AUX_ROW+v)*NPARAMS_MAX);
++                undo_peek(&undo,entry,aux_off,aux,sizeof aux);
++                for(unsigned k=0;k<SJ6_AUX_BYTES;k++)
++                    if(!sj6_aux_valid(k,aux[k])){ui_undo_invalid("UNDO LFO INVALID");return;}
++                if(memcmp(aux,sj6_aux_read(&proj.sound,v),sizeof aux))undo_aux|=1u<<v;
++#if X0X_SJ6_LFO_TRIGGER_NATIVE
++                uint8_t snaps[2];
++                undo_peek(&undo,entry,aux_off+30u,snaps,sizeof snaps);
++                if(snaps[0]>1u||snaps[1]>1u){ui_undo_invalid("UNDO SNAP INVALID");return;}
++                if(memcmp(snaps,sj6_aux_read(&proj.sound,v)+30u,sizeof snaps))undo_aux|=1u<<v;
++#endif
++#endif
++#if X0X_SJ6_PITCH_ENV_NATIVE
++                uint32_t pitch_off=__builtin_offsetof(sound_t,v)+
++                    ((T_MST*NVOICES_MAX+SJ6_PITCH_ROW+v)*NPARAMS_MAX+SJ6_PITCH_OFFSET);
++                if(!ui_undo_span(entry,pitch_off,sj6_pitch_read(&proj.sound,v),SJ6_PITCH_COUNT,0,sj6_pitch_max,1u<<v,&undo_pitch,"UNDO PITCH INVALID"))return;
++#endif
++#if X0X_SJ6_NATIVE_UNISON
++                uint8_t uni[4];
++                const uint32_t unison_off=__builtin_offsetof(sound_t,v)+
++                    ((T_303*NVOICES_MAX+8u+2u*v)*NPARAMS_MAX+SJ6_UNISON_BYTE);
++                undo_peek(&undo,entry,unison_off,uni,sizeof uni);
++                if(uni[0]>1u || uni[1]>128u || uni[2]>127u || uni[3]>5u ||
++                   ((uni[0]|uni[1]|uni[2]|uni[3]) &&
++                    !undo_j6_init)){
++                    ui_undo_invalid("UNDO UNISON INVALID");return;
++                }
++                if(memcmp(uni,sj6_unison_code(&proj.sound,v),sizeof uni))undo_sj6_unison|=1u<<v;
++#endif
++#if X0X_S1_DELAY_TIME_NATIVE
++                undo_peek(&undo,entry,__builtin_offsetof(sound_t,v)+(T_303*NVOICES_MAX+8u+2u*v)*NPARAMS_MAX+S1_DELAY_TIME_BYTE,&undo_dlycode[v],1u);
++                if(undo_dlycode[v]>S1_DELAY_TIME_MAX){ui_undo_invalid("UNDO DELAY INVALID");return;}
++                if(undo_dlycode[v]!=*s1_delay_time_code(&proj.sound,v))undo_dlytime|=1u<<v;
++#endif
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++                const uint32_t typed_off=__builtin_offsetof(sound_t,v)+
++                        (T_303*NVOICES_MAX+8u+2u*v)*NPARAMS_MAX;
++                if(!undo_bounded_field(entry,typed_off+S1_DELAY_RES_BYTE,S1_DELAY_RES_MAX,*s1_delay_res_read(&proj.sound,v),1u<<v,&undo_phaser,"UNDO DELAY RES INVALID"))return;
++                if(!undo_bounded_field(entry,typed_off+S1_ENV_LFO_BYTE,S1_ENV_LFO_MAX,*s1_env_lfo_read(&proj.sound,v),1u<<v,&undo_phaser,"UNDO ENV LFO INVALID"))return;
++                if(!ui_undo_span(entry,typed_off+S1_PHASE_BYTE,s1_phase_read(&proj.sound,v),S1_PHASE_COUNT,S1_PHASE_MAX,0,1u<<v,&undo_phaser,"UNDO PHASER INVALID"))return;
++#endif
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++#if X0X_SJ6_NOISE_SUB_NATIVE
++                const uint32_t sources_off=__builtin_offsetof(sound_t,v)+
++                    ((T_MST*NVOICES_MAX+SJ6_SOURCES_ROW+v)*NPARAMS_MAX+SJ6_SOURCES_OFFSET);
++                if(!ui_undo_span(entry,sources_off,sj6_sources_read(&proj.sound,v),SJ6_SOURCES_COUNT,127u,0,1u<<v,&undo_delay,"UNDO OSC SOURCE INVALID"))return;
++#endif
++#if X0X_SJ6_SEQ_SETTINGS_NATIVE
++                const uint32_t seqcfg_off=__builtin_offsetof(sound_t,v)+
++                    ((T_MST*NVOICES_MAX+SJ6_SEQ_SETTINGS_ROW+v)*NPARAMS_MAX+SJ6_SEQ_SETTINGS_OFFSET);
++                if(!ui_undo_span(entry,seqcfg_off,sj6_seq_settings_read(&proj.sound,v),SJ6_SEQ_SETTINGS_COUNT,1u,0,1u<<v,&undo_delay,"UNDO SEQ SETUP INVALID"))return;
++#if X0X_SJ6_SEQ_DEST_NATIVE
++                const uint32_t dest_off=__builtin_offsetof(sound_t,v)+
++                    ((T_MST*NVOICES_MAX+SJ6_DEST_ROW+v)*NPARAMS_MAX+SJ6_DEST_BYTE);
++                if(!undo_bounded_field(entry,dest_off,2u,sj6_dest_read(&proj.sound,v),
++                    1u<<v,&undo_delay,"UNDO SEQ DEST INVALID"))return;
++#endif
++#endif
++#if X0X_SJ6_NATIVE_ROOM
++                const uint32_t room_off=__builtin_offsetof(sound_t,v)+
++                    ((T_MST*NVOICES_MAX+SJ6_ROOM_ROW+v)*NPARAMS_MAX+SJ6_ROOM_BYTE);
++                if(!ui_undo_span(entry,room_off,sj6_room_read(&proj.sound,v),SJ6_ROOM_COUNT,0,sj6_room_max,1u<<v,&undo_room,"UNDO FX INVALID"))return;
++                uint8_t crush[2];
++                const uint32_t crush_off=__builtin_offsetof(sound_t,v)+
++                    ((T_MST*NVOICES_MAX+SJ6_CRUSH_ROW+v)*NPARAMS_MAX+SJ6_CRUSH_BYTE);
++                undo_peek(&undo,entry,crush_off,crush,sizeof crush);
++                if(crush[0]>1u || crush[1]>127u){ui_undo_invalid("UNDO CRUSH INVALID");return;}
++                if(memcmp(crush,sj6_crush_code(&proj.sound,v),sizeof crush))undo_room|=1u<<v;
++#endif
++#if X0X_SJ6_OTA_NATIVE
++                const uint32_t ota_off=__builtin_offsetof(sound_t,v)+
++                    ((T_MST*NVOICES_MAX+SJ6_OTA_ROW+v)*NPARAMS_MAX+SJ6_OTA_BYTE);
++                if(!undo_bounded_field(entry,ota_off,1u,sj6_ota_read(&proj.sound,v),
++                    1u<<v,&undo_ota,"UNDO FILTER INVALID"))return;
++#endif
++#if X0X_SJ6_NATIVE_LIMITER
++                const uint32_t lim_off=__builtin_offsetof(sound_t,v)+
++                    ((T_MST*NVOICES_MAX+SJ6_LIM_ROW+v)*NPARAMS_MAX+SJ6_LIM_BYTE);
++                if(!ui_undo_span(entry,lim_off,sj6_limiter_read(&proj.sound,v),SJ6_LIM_COUNT,128u,0,1u<<v,&undo_limiter,"UNDO LIMITER INVALID"))return;
++#if X0X_SJ6_VINTAGE_NATIVE
++                if(!undo_bounded_field(entry,lim_off+SJ6_VINTAGE_BYTE-SJ6_LIM_BYTE,127u,
++                    sj6_vintage_read(&proj.sound,v),1u<<v,&undo_limiter,"UNDO VINTAGE INVALID"))return;
++#endif
++#if X0X_SJ6_VELOCITY_SETTINGS
++                if(!undo_bounded_field(entry,lim_off+SJ6_INPUT_VEL_BYTE-SJ6_LIM_BYTE,SJ6_INPUT_VEL_MAX,
++                    sj6_input_vel(&proj.sound,v),1u<<v,&undo_sj6_input_vel,"UNDO VELOCITY INVALID"))return;
++#endif
++                if(!undo_bounded_field(entry,lim_off+SJ6_RAGE_BYTE-SJ6_LIM_BYTE,128u,sj6_rage_read(&proj.sound,v),
++                    1u<<v,&undo_limiter,"UNDO LIMITER INVALID"))return;
++#endif
++                const uint32_t cmp_off=__builtin_offsetof(sound_t,v)+
++                    ((T_MST*NVOICES_MAX+S1_CMP_ROW+v)*NPARAMS_MAX);
++                if(!ui_undo_span(entry,cmp_off,s1_cmp_read(&proj.sound,v),S1_CMP_COUNT,127u,0,1u<<v,&undo_cmp,"UNDO COMP INVALID"))return;
++                const uint32_t aa_off=__builtin_offsetof(sound_t,v)+
++                    ((T_303*NVOICES_MAX+8u+2u*v)*NPARAMS_MAX+S1_AA_BYTE);
++                if(!undo_bounded_field(entry,aa_off,1u,s1_aa_read(&proj.sound,v),1u<<v,&undo_aa,"UNDO ANTI-ALIAS INVALID"))return;
++                if(!undo_bounded_field(entry,off-2u+S1_CWG_BYTE,S1_CWG_MAX,s1_cwg_read(&proj.sound,v),1u<<v,&undo_cwg,"UNDO WET MAKEUP INVALID"))return;
++#endif
++#if X0X_SJ6_LFO1_WAVE_NATIVE
++                const uint32_t wave_off=__builtin_offsetof(sound_t,v)+
++                    ((T_MST*NVOICES_MAX+SJ6_LFO1_WAVE_ROW+v)*NPARAMS_MAX+SJ6_LFO1_WAVE_OFFSET);
++                undo_peek(&undo,entry,wave_off,&p,1u);
++                if(p>SJ6_LFO1_WAVE_MAX || (p && !undo_j6_init)){
++                    ui_undo_invalid("UNDO LFO WAVE INVALID");return;
++                }
++                if(p!=sj6_lfo1_wave_read(&proj.sound,v))undo_delay|=1u<<v;
++#if X0X_SJ6_ALT3_NATIVE
++                uint8_t trem[2];
++                const uint32_t trem_off=__builtin_offsetof(sound_t,v)+
++                    ((T_MST*NVOICES_MAX+SJ6_TREM_ROW+v)*NPARAMS_MAX+SJ6_TREM_OFFSET);
++                undo_peek(&undo,entry,trem_off,trem,sizeof trem);
++                if(trem[0]>127u || trem[1]>128u || ((trem[0]|trem[1]) &&
++                   !undo_j6_init)){
++                    ui_undo_invalid("UNDO TREMOLO INVALID");return;
++                }
++                if(memcmp(trem,sj6_trem_read(&proj.sound,v),sizeof trem))undo_delay|=1u<<v;
++#endif
++                for(unsigned k=0;k<2u;++k) {
++                    undo_peek(&undo,entry,wave_off+1u+k,&p,1u);
++                    if(p>1u || (p && !undo_j6_init)) {
++                        ui_undo_invalid("UNDO LFO SWITCH INVALID");return;
++                    }
++                    if(p!=sj6_lfo1_option(&proj.sound,v,k))undo_delay|=1u<<v;
++                }
++#endif
++#if X0X_SJ6_LFO1_DELAY_PORT
++                if(!undo_bounded_field(entry,off-2u+SJ6_LFO1_DELAY_BYTE,SJ6_LFO1_DELAY_MAX,sj6_lfo1_delay_read(&proj.sound,v),1u<<v,&undo_delay,"UNDO LFO DELAY INVALID"))return;
++#endif
++#if X0X_S1_DELAY_TRACK_TEST
++#if X0X_SJ6_VCF_PORT
++                const uint32_t vcf_off=__builtin_offsetof(sound_t,v)+
++                    ((T_303*NVOICES_MAX+8u+2u*v)*NPARAMS_MAX+SJ6_VCF_BYTE);
++                if(!undo_bounded_field(entry,vcf_off,127u,*sj6_vcf_code(&proj.sound,v),1u<<v,&undo_vcf,"UNDO LFO1 INVALID"))return;
++                const uint32_t filter_off=vcf_off-SJ6_VCF_BYTE;
++                for(unsigned k=0;k<2u;++k) {
++                    undo_peek(&undo,entry,filter_off+(k?SJ6_ENV_STRENGTH_BYTE:SJ6_KEY_TRACK_BYTE),&p,1u);
++                    if(p>(k?128u:127u)){ui_undo_invalid("UNDO FILTER INVALID");return;}
++                    if(p!=*sj6_filter_code(&proj.sound,v,k))undo_vcf|=1u<<v;
++                }
++#endif
++                const uint32_t dict_off=off-2u+S1_DICT_BYTE;
++                if(!undo_bounded_field(entry,dict_off,S1_DICT_MAX,s1_dict_read(&proj.sound,v),1u<<v,&undo_dict,"UNDO IN CUTOFF INVALID"))return;
++#endif
++#if X0X_SJ6_CLASSIC_I_PROBE
++                uint8_t ci[SJ6_CLASSIC_I_COUNT];
++                undo_peek(&undo,entry,off+SJ6_CLASSIC_I_BYTE-2u,ci,sizeof ci);
++                if(memcmp(ci,read137(&proj.sound,v)+SJ6_CLASSIC_I_BYTE,sizeof ci)) {
++                  if(!sj6_classic_i_bytes_valid(ci)){ui_undo_invalid("UNDO CHORUS INVALID");return;}
++                  undo_chorus_i|=1u<<v;
++                }
++#endif
++                undo_peek(&undo,entry,off,&p,1u);
++                if (p!=read137(&proj.sound,v)[2] && p<=127) undo_velocity137|=1u<<v;
++                undo_peek(&undo,entry,off+1u,&p,1u);
++                if (p!=read137(&proj.sound,v)[3] && p<=2) undo_s1_mod|=1u<<v;
++#if X0X_S1_FENCED_CLOCK
++                uint8_t clock_value[S1_ARP_CLOCK_BYTES];
++                undo_peek(&undo,entry,off-2u+S1_ARP_CLOCK_BYTE,clock_value,sizeof clock_value);
++                if(memcmp(clock_value,read137(&proj.sound,v)+S1_ARP_CLOCK_BYTE,sizeof clock_value)) {
++                    if(!s1_clock_valid(clock_value)){
++                        ui_undo_invalid("UNDO CLOCK INVALID");return;
++                    }
++                    undo_clock|=1u<<v;
++                }
++#endif
++#if (defined(X0X_SJ6_ZERO_GATE_PROBE) && X0X_SJ6_ZERO_GATE_PROBE) || X0X_SJ6_NATIVE_ZERO_GATE
++                if(!undo_bounded_field(entry,off+SJ6_ARP_ZERO_BYTE-2u,1u,read137(&proj.sound,v)[SJ6_ARP_ZERO_BYTE],1u<<v,&undo_zero,"UNDO GATE INVALID"))return;
++#endif
++#if (defined(X0X_HOST) && defined(X0X_SJ6_DELAY_WITNESS)) || X0X_SJ6_NATIVE_DELAY
++                uint8_t dl[SJ6_DELAY_COUNT];
++                undo_peek(&undo,entry,off+SJ6_DELAY_BYTE-2u,dl,sizeof dl);
++                if(memcmp(dl,read137(&proj.sound,v)+SJ6_DELAY_BYTE,sizeof dl)){
++                    if(!sj6_delay_bytes_valid(dl)||!s1_typed_tuple_editable()){
++                        ui_undo_invalid("UNDO DELAY UNAVAILABLE");return;
++                    }
++                    undo_delay|=1u<<v;
++                }
++#endif
++#if defined(X0X_S1_AUTOPAN_PROBE) && X0X_S1_AUTOPAN_PROBE
++                uint8_t pan[1u+S1_PAN_RATE_BYTES];
++                undo_peek(&undo,entry,off+(S1_PAN_AMOUNT_BYTE-2u),pan,sizeof pan);
++                if(pan[0]>127u || !s1_pan_rate_valid(s1_pan_rate_word_bytes(pan+1u))){ui_undo_invalid("UNDO PAN INVALID");return;}
++                if(memcmp(pan,read137(&proj.sound,v)+S1_PAN_AMOUNT_BYTE,sizeof pan))undo_pan|=1u<<v;
++#endif
++#if X0X_SJ6_RANDOM2_PROBE || X0X_SJ6_NATIVE_RANDOM2
++                undo_peek(&undo,entry,off+SJ6_ARP_RANDOM_BYTE-2u,&p,1u);
++                if(p!=read137(&proj.sound,v)[SJ6_ARP_RANDOM_BYTE]){
++                    if(p!=0u && p!=2u){ui_undo_invalid("UNDO MODE INVALID");return;}
++                    undo_zero|=1u<<v;
++                }
++#endif
++#if X0X_SJ6_MONO32_PROBE
++                uint8_t voice_settings[2];
++                undo_peek(&undo,entry,off+SJ6_VOICE_BYTE-2u,voice_settings,sizeof voice_settings);
++                if(!sj6_voice_valid(v,voice_settings[0],voice_settings[1])){
++                    ui_undo_invalid("UNDO VOICE INVALID");return;
++                }
++                const uint8_t *cur_voice=sj6_voice_read(&proj.sound,v);
++                if(memcmp(voice_settings,cur_voice,sizeof voice_settings)){
++                    undo_sj6_voice|=1u<<v;
++                }
++#endif
++                if(!undo_bounded_field(entry,off+S1_TRANS_BYTE-2u,S1_TRANS_LAST,read137(&proj.sound,v)[S1_TRANS_BYTE],1u<<v,&undo_trans,"UNDO TRANSPOSE INVALID"))return;
++#if defined(X0X_S1_CRUSH_LFO_PROBE) && X0X_S1_CRUSH_LFO_PROBE
++                if(!undo_bounded_field(entry,off+S1_CRUSH_BYTE-2u,S1_CRUSH_LAST,read137(&proj.sound,v)[S1_CRUSH_BYTE],1u<<v,&undo_crush,"UNDO CRUSH INVALID"))return;
++#endif
++#if defined(X0X_S1_FEEDBACK_PROBE) && X0X_S1_FEEDBACK_PROBE
++                if(!undo_bounded_field(entry,off+(S1_FB_BYTE-2u),S1_FB_LAST,read137(&proj.sound,v)[S1_FB_BYTE],1u<<v,&undo_feedback,"UNDO FEEDBACK INVALID"))return;
++#endif
++                if(!undo_bounded_field(entry,off+(S1_A4_BYTE-2u),S1_A4_MAX,read137(&proj.sound,v)[S1_A4_BYTE],1u<<v,&undo_a4,"UNDO A REF INVALID"))return;
++#if X0X_S1_HALFTIME
++                const uint32_t half_off=__builtin_offsetof(sound_t,v)+
++                    ((T_MST*NVOICES_MAX+S1_HALF_ROW+v)*NPARAMS_MAX+S1_HALF_BYTE);
++                undo_peek(&undo,entry,half_off,&p,1u);
++                if(p>128u || (p && !undo_s1_init)){
++                    ui_undo_invalid("UNDO SMOOTH INVALID");return;
++                }
++                if(p!=s1_half_code(&proj.sound,v))undo_a4|=1u<<v;
++#endif
++#if X0X_S1_SCALE_NATIVE
++                const uint32_t scale_off=__builtin_offsetof(sound_t,v)+
++                    ((T_MST*NVOICES_MAX+S1_SCALE_ROW+v)*NPARAMS_MAX+S1_SCALE_BYTE);
++                undo_peek(&undo,entry,scale_off,&p,1u);
++                if(p>S1C_SCALE_MAX || (p && !undo_s1_init
++#if X0X_SJ6_SCALE_NATIVE
++                   && !undo_j6_init
++#endif
++                   )){
++                    ui_undo_invalid("UNDO SCALE INVALID");return;
++                }
++                if(p!=proj.sound.v[T_MST][S1_SCALE_ROW+v][S1_SCALE_BYTE])undo_a4|=1u<<v;
++#if X0X_S1_USER_SCALE
++                uint8_t target_user_count=0;
++                const uint32_t base=__builtin_offsetof(sound_t,v);
++                undo_peek(&undo,entry,scale_off+S1_USER_COUNT-S1_SCALE_BYTE,&target_user_count,1u);
++                if(target_user_count>S1C_USER_NOTES || (p==S1C_SCALE_USER && !target_user_count)){
++                    ui_undo_invalid("UNDO USER SCALE INVALID");return;
++                }
++                const unsigned m=(unsigned)(scale_off+S1_USER_COUNT-S1_SCALE_BYTE);
++                const unsigned h=base+(s1_user_head_target(v)*NVOICES_MAX+S1_USER_ROW)*NPARAMS_MAX;
++                const unsigned t=base+(T_MIX*NVOICES_MAX+s1_user_tail_row(v))*NPARAMS_MAX;
++                if(s1_undo_range_diff(&undo,entry,m,m+S1C_USER_NAME+1u) ||
++                   s1_undo_range_diff(&undo,entry,h,h+S1_USER_HEAD) ||
++                   s1_undo_range_diff(&undo,entry,t,t+S1_USER_TAIL))undo_a4|=1u<<v;
++#endif
++#endif
++                if(!undo_bounded_field(entry,off+(S1_RVFB_BYTE-2u),S1_RVFB_LAST,read137(&proj.sound,v)[S1_RVFB_BYTE],1u<<v,&undo_rvfb,"UNDO RV SIZE INVALID"))return;
++#if defined(DNBOX_137_HOST_WITNESS) && defined(X0X_SJ6_MOD_TYPED_PROBE)
++                undo_peek(&undo,entry,off+SJ6_MOD_BYTE-2u,&p,1u);
++                if(p!=read137(&proj.sound,v)[SJ6_MOD_BYTE]){
++                    if(p>SJ6_MOD_LAST){ui_undo_invalid("UNDO MOD INVALID");return;}
++                    undo_sj6_mod|=1u<<v;
++                }
++#endif
++
++#if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
++                uint8_t pb[2];
++                undo_peek(&undo,entry,off+2u,pb,sizeof pb);
++                const uint8_t *row=read137(&proj.sound,v);
++                if (pb[0]!=row[S1_PB_DN_BYTE] || pb[1]!=row[S1_PB_UP_BYTE]) {
++                    if (pb[0]>S1_PB_LAST || pb[1]>S1_PB_LAST) {
++                        ui_undo_invalid("UNDO RANGE INVALID");return;
++                    }
++                    undo_pb|=1u<<v;
++                }
++#if defined(X0X_SJ6_BEND_TYPED_PROBE) && X0X_SJ6_BEND_TYPED_PROBE
++                undo_peek(&undo,entry,off+SJ6_PB_DN_BYTE-2u,pb,sizeof pb);
++                if (pb[0]!=row[SJ6_PB_DN_BYTE] || pb[1]!=row[SJ6_PB_UP_BYTE]) {
++                    if (pb[0]>SJ6_PB_LIMIT || pb[1]>SJ6_PB_LIMIT) {
++                        ui_undo_invalid("UNDO RANGE INVALID");return;
++                    }
++                    undo_sj6_pb|=1u<<v;
++                }
++#endif
++#endif
++            }
++#endif
+             if(memcmp(target.cell[v],proj.sound.v[T_303][v],NPARAMS_MAX) ||
+                memcmp(&target.tag[v],&proj.sound.bass[v],sizeof target.tag[v]))undo_bass_mask|=1u<<v;
+         }
++#ifdef DNBOX_137_HOST_WITNESS
++        extern int engine_bass_wheel_active(void);
++        const unsigned typed_only_changes=undo_s1_mod | undo_a4 | undo_rvfb | undo_trans | undo_crush | undo_delay | undo_pan | undo_feedback | undo_aux | undo_pitch | undo_dlytime | undo_phaser | undo_limiter | undo_ota | undo_room | undo_cmp | undo_aa | undo_cwg | undo_dict | undo_vcf | undo_chorus_i | undo_sj6_unison | undo_j60 | undo_sj6_voice | undo_clock | undo_zero | undo_sj6_input_vel;
++        typed_hold_changes=typed_only_changes|undo_velocity137|undo_pb|undo_sj6_pb|undo_sj6_mod;
++        if(typed_only_changes && !s1_typed_tuple_editable()) {
++            ui_undo_invalid("PROJECT READ ONLY");return;
++        }
++        /* No live per-group publication API exists for these three historical
++         * sidecars. Use the existing held base restore on the affected
++         * owners, including its active-note/lock/input admission. */
++        undo_bass_mask |= undo_delay | undo_sj6_unison | undo_j60;
++        if(undo_s1_mod && engine_bass_wheel_active()) {
++            ui_undo_invalid("UNDO WAIT WHEEL");return;
++        }
++#endif
+         if(undo_bass_mask) {
+             engine_project_hold(1);
+             int ready=engine_bass_base_ready(undo_bass_mask,&target);
+@@ -2588,10 +4916,63 @@
+         }
+     }
+ #endif
++#ifdef DNBOX_137_HOST_WITNESS
++    if ((typed_hold_changes) && !undo_bass_mask) engine_project_hold(1);
++#if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
++    /* Recheck while audio is held: a note-lock must not acquire the owner
++     * between validating history and publishing the typed scalar pair. */
++    if ((undo_pb || undo_sj6_pb || undo_sj6_mod) && !s1_typed_pb_undo_ready(undo_pb|undo_sj6_pb|undo_sj6_mod)) {
++        engine_project_hold(0);
++        engine_bass_edit_hold(0);
++        say("UNDO WAIT RANGE",0);
++        return;
++    }
++#endif
++#endif
++#if X0X_SJ6_MONO32_PROBE
++    if(!ui_undo_check(undo_sj6_voice,engine_sj6_voice_undo_ready,"UNDO WAIT VOICE"))return;
++#endif
++#if defined(DNBOX_137_HOST_WITNESS) && X0X_S1_DELAY_TRACK_TEST
++#if X0X_SJ6_VCF_PORT
++    if(!ui_undo_check(undo_vcf,sj6_vcf_undo_ready,"UNDO WAIT LFO1"))return;
++#endif
++    if(!ui_undo_check(undo_dict,s1_typed_dict_undo_ready,"UNDO WAIT IN CUTOFF"))return;
++#endif
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++#if X0X_SJ6_NATIVE_ROOM
++    if(!ui_undo_check(undo_room,sj6_native_room_undo_ready,"UNDO WAIT FX"))return;
++#endif
++#if X0X_SJ6_OTA_NATIVE
++    if(!ui_undo_check(undo_ota,sj6_ota_undo_ready,"UNDO WAIT FILTER"))return;
++#endif
++#if X0X_SJ6_NATIVE_LIMITER
++    if(!ui_undo_check(undo_limiter,sj6_native_limiter_undo_ready,"UNDO WAIT LIMITER"))return;
++#endif
++    if(!ui_undo_check(undo_cmp,s1_cmp_undo_ready,"UNDO WAIT COMP"))return;
++    if(!ui_undo_check(undo_aa,s1_aa_undo_ready,"UNDO WAIT ANTI-ALIAS"))return;
++    if(!ui_undo_check(undo_cwg,s1_typed_cwg_undo_ready,"UNDO WAIT WET MAKEUP"))return;
++#endif
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++    if(!ui_undo_check(undo_phaser,s1_phaser_undo_ready,"UNDO WAIT PHASER"))return;
++#endif
++#if X0X_S1_DELAY_TIME_NATIVE
++    if(undo_dlytime && !s1_delay_time_undo_ready(undo_dlytime & ~undo_bass_mask,undo_dlycode)) {
++        engine_project_hold(0);engine_bass_edit_hold(0);say("UNDO WAIT DELAY",0);return;
++    }
++#endif
++#if X0X_SJ6_PITCH_ENV_NATIVE
++    if(!ui_undo_check(undo_pitch,sj6_pitch_undo_ready,"UNDO WAIT PITCH"))return;
++#endif
++#if X0X_SJ6_AUX_LFO_NATIVE
++    if(!ui_undo_check(undo_aux,sj6_aux_undo_ready,"UNDO WAIT LFO"))return;
++#endif
+     undo_lanes = 0;
+     if (!(redo ? undo_redo : undo_undo)(&undo, undo_changed, &lo, &hi)) {
+ #if X0X_BASS_TAGGED_SOUND
+         if(undo_bass_mask)engine_project_hold(0);
++#ifdef DNBOX_137_HOST_WITNESS
++        else if(typed_hold_changes)engine_project_hold(0);
++#endif
+ #endif
+ #if X0X_BASS_PRESET_PREVIEW
+         engine_bass_edit_hold(0);
+@@ -2600,7 +4981,79 @@
+         return;
+     }
+ #if X0X_BASS_TAGGED_SOUND
+-    if(undo_bass_mask) {engine_bass_base_restore(undo_bass_mask);engine_project_hold(0);}
++    if(undo_bass_mask) engine_bass_base_restore(undo_bass_mask);
++#ifdef DNBOX_137_HOST_WITNESS
++    extern void sj6_137_undo_apply(unsigned);
++    ui_undo_apply(undo_velocity137,sj6_137_undo_apply);
++#if defined(DNBOX_137_HOST_WITNESS) && defined(X0X_SJ6_MOD_TYPED_PROBE)
++    ui_undo_apply(undo_sj6_mod,sj6_typed_mod_undo);
++#endif
++    extern void s1_typed_mod_undo(unsigned);
++    ui_undo_apply(undo_s1_mod,s1_typed_mod_undo);
++    ui_undo_apply(undo_a4,s1_typed_a4_undo);
++    ui_undo_apply(undo_rvfb,s1_typed_rvfb_undo);
++    ui_undo_apply(undo_trans,s1_typed_trans_undo);
++#if X0X_SJ6_MONO32_PROBE
++    ui_undo_apply(undo_sj6_voice,engine_sj6_voice_undo);
++#endif
++#if X0X_SJ6_CLASSIC_I_PROBE
++    ui_undo_apply(undo_chorus_i,sj6_classic_i_undo);
++#endif
++#if defined(X0X_S1_FEEDBACK_PROBE) && X0X_S1_FEEDBACK_PROBE
++    ui_undo_apply(undo_feedback,s1_typed_feedback_undo);
++#endif
++#if X0X_S1_DELAY_TRACK_TEST
++    ui_undo_apply(undo_dict,s1_typed_dict_undo);
++#if X0X_SJ6_VCF_PORT
++    ui_undo_apply(undo_vcf,sj6_vcf_undo);
++#endif
++#endif
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++#if X0X_SJ6_NATIVE_ROOM
++    ui_undo_apply(undo_room,sj6_native_room_undo);
++#endif
++#if X0X_SJ6_OTA_NATIVE
++    ui_undo_apply(undo_ota,sj6_ota_undo);
++#endif
++#if X0X_SJ6_NATIVE_LIMITER
++    ui_undo_apply(undo_limiter,sj6_native_limiter_undo);
++#endif
++    ui_undo_apply(undo_cmp,s1_cmp_undo);
++    ui_undo_apply(undo_aa,s1_aa_undo);
++    ui_undo_apply(undo_cwg,s1_typed_cwg_undo);
++#endif
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++    ui_undo_apply(undo_phaser,s1_phaser_undo);
++#endif
++#if X0X_S1_DELAY_TIME_NATIVE
++    ui_undo_apply(undo_dlytime,s1_delay_time_undo);
++#endif
++#if X0X_SJ6_PITCH_ENV_NATIVE
++    ui_undo_apply(undo_pitch,sj6_pitch_undo);
++#endif
++#if X0X_SJ6_AUX_LFO_NATIVE
++    ui_undo_apply(undo_aux,sj6_aux_undo);
++#endif
++    ui_undo_apply(undo_crush,s1_typed_crush_undo);
++#if defined(X0X_S1_AUTOPAN_PROBE) && X0X_S1_AUTOPAN_PROBE
++    ui_undo_apply(undo_pan,s1_typed_pan_undo);
++#endif
++#if X0X_S1_FENCED_CLOCK
++    ui_undo_apply(undo_clock,s1_typed_clock_undo);
++#endif
++#if X0X_SJ6_ZERO_GATE_PROBE || X0X_SJ6_NATIVE_ZERO_GATE || X0X_SJ6_NATIVE_RANDOM2
++    ui_undo_apply(undo_zero,engine_sj6_zero_undo);
++#endif
++#if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
++    ui_undo_apply(undo_pb,s1_typed_pb_undo);
++#if defined(X0X_SJ6_BEND_TYPED_PROBE) && X0X_SJ6_BEND_TYPED_PROBE
++    ui_undo_apply(undo_sj6_pb,sj6_typed_pb_undo);
++#endif
++#endif
++    if(undo_bass_mask || typed_hold_changes) engine_project_hold(0);
++#else
++    if(undo_bass_mask) engine_project_hold(0);
++#endif
+ #endif
+ #if X0X_BASS_PRESET_PREVIEW
+     engine_bass_edit_hold(0);
+@@ -3556,7 +6009,8 @@
+ static void turn_ref(pref_t r, int e, int knob)
+ {
+ #if X0X_SYNTHONE_PATCH
+-    if (r.kind == R_S1PATCH) { s1_edit(r, accel(knob, e, S1_PATCH_STEPS), 1); return; }
++    if (r.kind == R_S1LINK) { s1_edit(r, (e>0)-(e<0), 1); return; }
++    if (r.kind == R_S1PATCH) { s1_edit(r, accel(knob, e, s1_patch_steps(r.c)), 1); return; }
+ #endif
+     if (r.kind == R_BRKSLOT && !r.b) { (void)brk_choice_turn(r, e); return; }
+     brk_choice_cancel();
+@@ -4524,6 +6978,17 @@
+ static uint8_t ui_step_lane;
+ static int step_lane_turn(int e);
+ 
++X0X_COLD static void ui_record_arm(int on)
++{
++    record_finish();
++    bass_step_cancel();                            /* key-up will now take the keyboard path */
++    memset(bass_rec_step, 0, sizeof bass_rec_step);
++    ui.rec = (uint8_t)on;
++    if (ui.rec && is_303())
++        ui.wpos[bidx()] = 0;
++    say(ui.rec ? "RECORD ON: KEYS + KNOBS" : "RECORD OFF", 0);
++}
++
+ X0X_COLD static void button_tap(int b)
+ {
+     if (ui.brk_choice_on) {
+@@ -4581,13 +7046,7 @@
+             ask(ACT_CLEAR_PART, ui.part, t, target);
+             break;
+         }
+-        record_finish();
+-        bass_step_cancel();                            /* key-up will now take the keyboard path */
+-        memset(bass_rec_step, 0, sizeof bass_rec_step);
+-        ui.rec = !ui.rec;
+-        if (ui.rec && is_303())
+-            ui.wpos[bidx()] = 0;
+-        say(ui.rec ? "RECORD ON: KEYS + KNOBS" : "RECORD OFF", 0);
++        ui_record_arm(!ui.rec);
+         break;
+     case B_HOME:                                      /* the pattern; again: the song (a list: back) */
+         if(ui.view==V_GLO && ui.overlay==O_LIST && ui.glo_section>=0) {global_back();break;}
+@@ -4834,7 +7293,9 @@
+ 
+ /* 37 physical identities, not indices into the legacy 27-key tables. */
+ typedef struct {
+-    uint8_t pitch[37],velocity[37],accent[37],down[37],order[37],n;
++    /* MIDI payloads are seven-bit. The free high pitch bit records an
++     * accepted press; high velocity bit stores the original accent. */
++    uint8_t pitch[37],velocity[37],order[37],n;
+     uint64_t suppressed;
+ } ui_live_keys_t;
+ static ui_live_keys_t live_keys[NBASS] X0X_POOL;
+@@ -4873,9 +7334,9 @@
+ static int live_send(int b,unsigned physical,int on,int slide)
+ {
+     ui_live_keys_t *k=&live_keys[b];
+-    if(engine_live_key(b,live_generation,(int)live_token(physical),k->pitch[physical],
+-        on?k->velocity[physical]:0,k->accent[physical],slide)) {
+-        if(on){live_intent|=(uint8_t)(1u<<b);live_intent_generation[b]=live_generation;k->down[physical]=2;}
++    if(engine_live_key(b,live_generation,(int)live_token(physical),k->pitch[physical]&127u,
++        on?(k->velocity[physical]&127u):0,k->velocity[physical]>>7,slide)) {
++        if(on){live_intent|=(uint8_t)(1u<<b);live_intent_generation[b]=live_generation;k->pitch[physical]|=128u;}
+         return 1;
+     }
+     ui_live_cancel_voice(b);return 0;
+@@ -4889,22 +7350,47 @@
+     int b=live_owner;ui_live_keys_t *k=&live_keys[b];
+     int owns=(live_intent&(1u<<b)) && live_intent_generation[b]==live_generation;
+     if(velocity) {
+-        if(k->down[physical] || (k->suppressed&bit))return;
++        if((k->pitch[physical]&128u) || (k->suppressed&bit))return;
+         if(k->n>=UI_BASS_HELD_MAX){k->suppressed|=bit;return;}
+-        k->pitch[physical]=(uint8_t)pitch;k->velocity[physical]=(uint8_t)velocity;
+-        k->accent[physical]=(uint8_t)!!(ui.btn&(1u<<B_ENV));k->down[physical]=1;
++#if X0X_S1_KEYBOARD_HOLD
++        if((proj.set.bt & PROJ_S1_WHITE_KEYS) && engine_bass_bank(b)==ORIGINAL_SOUND_SYNTHONE) {
++            static const uint8_t degree[12]={0,0,1,1,2,3,3,4,4,5,5,6};
++            pitch=25+7*(pitch/12)+degree[pitch%12];
++        }
++#if X0X_S1_SCALE_NATIVE
++        if((proj.set.ck_x1 & PROJ_S1_MICRO_KEYS) && engine_bass_bank(b)==ORIGINAL_SOUND_SYNTHONE) {
++            const uint8_t *scale=proj.sound.v[T_MST][S1_SCALE_ROW+b];
++            unsigned code=scale[S1_SCALE_BYTE];
++            int npo=(int)s1c_scale_npo(code);
++#if X0X_S1_USER_SCALE
++            if(code==S1C_SCALE_USER && scale[S1_USER_COUNT] &&
++               scale[S1_USER_COUNT]<=S1C_USER_NOTES) npo=scale[S1_USER_COUNT];
++#endif
++            int base=41+ui.oct*npo;
++            if(base<0)base=0;
++            pitch=base+(int)physical;
++            if(pitch>127)return;
++        }
++#endif
++#endif
++        /* A press is published synchronously from this foreground call;
++         * success sets its high bit, failure cancels the owner and clears
++         * its inventory. No persistent in-between DOWN state exists. */
++        const uint8_t p7=(uint8_t)pitch, v7=(uint8_t)velocity;
++        k->pitch[physical]=p7;
++        k->velocity[physical]=(uint8_t)(v7|((!!(ui.btn&(1u<<B_ENV)))<<7));
+         unsigned old=k->n;k->order[k->n++]=(uint8_t)physical;
+         (void)old;
++        if((p7|v7)&128u){ui_live_cancel_voice(b);return;}
+         if (!live_send(b, physical, 1, 0)) return;
+     } else {
+-        if(!k->down[physical])return;
++        if(!(k->pitch[physical]&128u))return;
+         unsigned i=0;while(i<k->n && k->order[i]!=physical)i++;
+-        int latest=i+1==k->n,active=k->down[physical]==2;k->down[physical]=0;
++        k->pitch[physical]&=127u;
+         if(i<k->n){for(unsigned j=i+1;j<k->n;j++)k->order[j-1]=k->order[j];k->n--;}
+-        (void)latest;
+-        if (owns && active && !live_send(b, physical, 0, 0)) return;
+-    }
+-    if(k->n){unsigned last=k->order[k->n-1];kbd_held_note[b]=k->pitch[last];kbd_held_key[b]=(uint8_t)live_token(last);}
++        if (owns && !live_send(b, physical, 0, 0)) return;
++    }
++    if(k->n){unsigned last=k->order[k->n-1];kbd_held_note[b]=k->pitch[last]&127u;kbd_held_key[b]=(uint8_t)live_token(last);}
+     else kbd_held_note[b]=kbd_held_key[b]=0;
+     bass_rec_step[b]=0;
+ }
+@@ -4916,8 +7402,8 @@
+         int last=k->n?k->order[k->n-1]:-1;
+         /* Remove missing older keys first: fallback must never transiently
+          * resurrect another key already released in this same snapshot. */
+-        for(unsigned p=0;p<37;p++)if((int)p!=last && k->down[p] && !(physical&((uint64_t)1u<<p)))live_edge(p,0,0);
+-        if(last>=0 && k->down[last] && !(physical&((uint64_t)1u<<last)))live_edge((unsigned)last,0,0);
++        for(unsigned p=0;p<37;p++)if((int)p!=last && (k->pitch[p]&128u) && !(physical&((uint64_t)1u<<p)))live_edge(p,0,0);
++        if(last>=0 && (k->pitch[last]&128u) && !(physical&((uint64_t)1u<<last)))live_edge((unsigned)last,0,0);
+     }
+ }
+ /* Entry precedes controls; exit cuts off old publication on any context edit.
+@@ -4947,7 +7433,7 @@
+         plat_outer_keys(live_outer,&physical,&overflow,live_epoch,owner>=0,ui.oct,1);
+         live_octave=ui.oct;
+         if(owner>=0) {
+-            for(unsigned p=0;p<37;p++)if(!live_keys[owner].down[p] && (physical&((uint64_t)1u<<p)))
++            for(unsigned p=0;p<37;p++)if(!(live_keys[owner].pitch[p]&128u) && (physical&((uint64_t)1u<<p)))
+                 live_keys[owner].suppressed|=(uint64_t)1u<<p;
+         }
+         live_reconcile(physical);return;
+@@ -4975,7 +7461,7 @@
+     live_boundary(0);
+     /* A legacy pad/key press accepted before Free Play still owns its original
+      * release. It was never admitted into the new physical-key registry. */
+-    if(!down)for(int b=0;b<NBASS;b++)if(!live_keys[b].down[p] && !live_keys[b].n) {
++    if(!down)for(int b=0;b<NBASS;b++)if(!(live_keys[b].pitch[p]&128u) && !live_keys[b].n) {
+         int legacy=kbd_held_key[b]==key+1;
+         for(unsigned i=0;i<kbd_arp_n[b];i++)legacy|=kbd_arp_key[b][i]==key+1;
+         if(legacy){live_keys[b].suppressed&=~bit;return 0;}
+@@ -5937,7 +8423,7 @@
+             }
+         }
+         int mix_kit=drum_mix_page();
+-        if(mix_kit>=0)name=pg.title[cur_page()];
++        if(mix_kit>=0)name=page_title(&pg,cur_page());
+         if(clip_mode)name="LP";
+         if(pickup)name=ui.msg;
+         sound_slab(0,0,240,HDR_H,0);
+@@ -6131,8 +8617,14 @@
+     int len = bp->len < NSTEPS ? bp->len : NSTEPS;
+     int ph = seq.playing ? eng_step[TRK_BASS0 + b] : -1, lo = 127, hi = 0;
+ #if X0X_ARP_HOOKS
+-    if (arp)                                       /* only the step that really sounded (row 60 rule) */
+-        ph = as.on && engine_arp_view((unsigned)b, &arp_ph, &age) && age < 250u ? (int)arp_ph : -1;
++    if (arp) {                                     /* only the step that really sounded (row 60 rule) */
++#if X0X_SJ6_ARP_ADAPTER_NATIVE && X0X_SUPERJ6_BUILTIN_INIT
++        int sounding=as.on || (as.seq_on && engine_bass_bank(b)!=ORIGINAL_SOUND_SYNTHONE);
++#else
++        int sounding=as.on;
++#endif
++        ph = sounding && engine_arp_view((unsigned)b, &arp_ph, &age) && age < 250u ? (int)arp_ph : -1;
++    }
+ #endif
+     uint16_t col = part_col();
+     uint32_t lmarks = gen || arp ? 0 : lock_marks(-1, -1, ui.spage * 16);
+@@ -6296,7 +8788,7 @@
+ /* Control rows share the existing main/knob strips; no framebuffer or UI state is added. */
+ static UI_DRAW const char *matrix_group(int page)
+ {
+-    const char *t = pg.title[page];
++    const char *t = page_title(&pg,page);
+     if (!strcmp_s(t,"FX")) {
+         int ty=matrix_value(pg.r[page][0]);
+         return ty==CHI_FX_OFF?"FX / OFF":ty==CHI_FX_COMP?"FX / MASTER":"FX / INSERT";
+@@ -7605,8 +10097,8 @@
+     int page = cur_page(), i = ui.touched;
+     if (ui.view != V_PART || !is_303() || i < 0 || i > 3 ||
+         (int32_t)(ui.touch_until - plat_ms()) <= 0 ||
+-        (strcmp_s(pg.title[page], "AMP ADSR") &&
+-         strcmp_s(pg.title[page], "FILTER ADSR"))) return 0;
++        (strcmp_s(page_title(&pg,page), "AMP ADSR") &&
++         strcmp_s(page_title(&pg,page), "FILTER ADSR"))) return 0;
+     r = pg.r[page][i];
+     return matrix_touch_matches(r, i);
+ }
+@@ -8520,66 +11012,45 @@
+ 
+ /* Qualitative effect identities in the existing 26x19 box. The short name
+  * beside each picture remains authoritative; these are not measured DSP plots. */
++/* Compact fixed icons: three-byte op stores four 5-bit coordinates and
++ * the line/rectangle bit. Geometry, colour and invocation order originate
++ * in the original static FX renderer. Dynamic and native input paths are unchanged. */
+ static UI_DRAW void orig_fx_glyph(int type,int gx,int gy,uint16_t col)
+ {
+-    int right=gx+OG_W-1,bot=gy+OG_H,mid=gy+OG_H/2;
+-    switch(type) {
+-    case 0: /* bypass */
+-        cv_line(gx,mid,right,mid,col);cv_line(gx+10,gy+2,gx+15,bot-2,col);break;
+-    case 1: case 7: { /* chorus pair / ensemble trio */
+-        int n=type==7?3:2;
+-        for(int row=0;row<n;row++) {
+-            int y=gy+(n==3?3+row*5:5+row*7),py=y;
+-            for(int k=1;k<=4;k++) {
+-                int x=gx+k*6,yy=y+(k&1?2:-2);
+-                cv_line(gx+(k-1)*6,py,x,yy,col);py=yy;
+-            }
+-        }
+-        break;
+-    }
+-    case 2: /* phaser notches */
+-        cv_line(gx,gy+5,gx+3,gy+5,col);
+-        for(int i=0;i<2;i++) {
+-            int x=gx+3+i*10;
+-            cv_line(x,gy+5,x+4,bot-2,col);cv_line(x+4,bot-2,x+8,gy+5,col);
+-            cv_line(x+8,gy+5,i?right:x+10,gy+5,col);
+-        }
+-        break;
+-    case 3: /* ring modulation: alternating lobes under an amplitude envelope */
+-        for(int i=0;i<6;i++) {
+-            int x=gx+i*4,h=i<3?2+i*2:12-i*2;
+-            cv_line(x,mid,x+2,mid+(i&1?h:-h),col);
+-            cv_line(x+2,mid+(i&1?h:-h),x+4,mid,col);
+-        }
+-        break;
+-    case 4: /* compressor knee */
+-        cv_line(gx,bot,gx+11,gy+7,col);cv_line(gx+11,gy+7,right,gy+3,col);break;
+-    case 5: /* decimator steps */
+-        for(int i=0;i<4;i++) {
+-            int x=gx+i*6,y=gy+15-i*4;
+-            cv_line(x,y,x+6,y,col);if(i<3)cv_line(x+6,y,x+6,y-4,col);
+-        }
+-        break;
+-    case 6: /* EQ peak */
+-        cv_line(gx,mid,gx+6,mid,col);cv_line(gx+6,mid,gx+12,gy+2,col);
+-        cv_line(gx+12,gy+2,gx+18,mid,col);cv_line(gx+18,mid,right,mid,col);break;
+-    case 8: /* short delay taps */
+-        for(int i=0;i<3;i++)cv_rect(gx+i*9,bot-12+i*4,2,12-i*4,col);
+-        cv_line(gx,bot,right,bot,col);break;
+-    case 9: /* BPM delay: clock plus taps */
+-        cv_line(gx,gy+3,gx+8,gy+3,col);cv_line(gx+8,gy+3,gx+8,gy+11,col);
+-        cv_line(gx+8,gy+11,gx,gy+11,col);cv_line(gx,gy+11,gx,gy+3,col);
+-        cv_line(gx+4,gy+5,gx+4,gy+7,col);cv_line(gx+4,gy+7,gx+6,gy+7,col);
+-        for(int i=0;i<3;i++)cv_rect(gx+12+i*6,bot-12+i*4,1,12-i*4,col);
+-        cv_line(gx,bot,right,bot,col);break;
+-    case 10: /* hall: room walls and diffuse reflections */
+-        cv_line(gx,bot,gx,gy+2,col);cv_line(gx,gy+2,right,gy+2,col);cv_line(right,gy+2,right,bot,col);
+-        for(int i=0;i<5;i++)cv_rect(gx+3+i*4,gy+5+i,1,10-i*2,col);
+-        break;
+-    case 11: /* reverb cut off at a gate */
+-        for(int i=0;i<4;i++)cv_rect(gx+i*5,gy+3+i*2,2,12-i*2,col);
+-        cv_rect(gx+20,gy+1,2,17,col);cv_line(gx+22,bot,right,bot,col);break;
+-    default: break;
++    static const uint8_t at[]={
++        0,2,10,17,29,31,38,42,54,58,68,76,
++        82,
++    };
++    static const uint8_t commands[]={
++        32,229,4,74,60,8,160,152,3,230,176,1,
++        108,200,3,242,224,1,128,25,7,198,49,5,
++        76,73,7,210,97,5,160,140,2,163,28,8,
++        7,174,2,171,180,2,173,68,8,17,214,2,
++        181,228,2,32,137,3,226,144,4,36,153,6,
++        166,161,4,40,169,1,106,176,4,44,185,7,
++        238,193,4,48,201,2,178,208,4,52,217,5,
++        118,225,4,64,174,3,235,228,1,224,153,7,
++        230,153,5,102,177,5,108,177,3,236,200,3,
++        242,200,1,114,224,1,32,153,4,38,49,1,
++        76,200,4,50,229,4,96,152,2,166,176,0,
++        44,200,2,178,224,0,0,25,5,70,49,3,
++        204,72,5,82,97,3,160,153,7,230,177,5,
++        108,201,7,242,225,5,192,8,22,73,9,20,
++        210,9,18,64,102,9,96,160,1,104,160,5,
++        104,129,5,96,129,1,164,144,3,228,152,3,
++        204,4,22,82,5,20,216,5,18,64,102,9,
++        64,2,1,64,100,1,89,100,9,163,4,21,
++        199,4,20,235,4,19,15,5,18,51,5,17,
++        96,8,22,165,8,21,234,8,20,47,9,19,
++        52,136,24,86,102,9,
++    };
++    if((unsigned)type>=sizeof at-1u)return;
++    for(unsigned j=at[type];j<at[type+1];j++){
++        const uint8_t *p=commands+3u*j;
++        unsigned w=(unsigned)p[0]|((unsigned)p[1]<<8)|((unsigned)p[2]<<16);
++        int x=(int)(w&31u),y=(int)((w>>5)&31u),a=(int)((w>>10)&31u),b=(int)((w>>15)&31u);
++        if(w&(1u<<20))cv_rect(gx+x,gy+y,a,b,col);
++        else cv_line(gx+x,gy+y,gx+a,gy+b,col);
+     }
+ }
+ static UI_DRAW void og_wave_width(int gx,int gy,int width,float (*f)(float,float),float q,uint16_t col)
+@@ -9196,7 +11667,7 @@
+ static UI_DRAW void knob_tag(char *t)
+ {
+     int g = pg.group[cur_page()], dm = drum_mix_page();
+-    const char *ti = pg.title[cur_page()];
++    const char *ti = page_title(&pg,cur_page());
+     if (lock_step() >= 0) {
+         put_i(put_s(put_s(t, is_drum() ? engine_voice_name(ui.part == PART_909 ? T_909 : T_808, ui.sel[ui.part])
+                                         : part_name(ui.part)), " P-LOCK STEP "), lock_step() + 1);
+@@ -9224,9 +11695,9 @@
+         put_s(t, ti);
+     {   /* a section over several pages (same name): which of them, "BD (1/2)" */
+         int p = cur_page(), a = p, b = p;
+-        while (a > 0 && !strcmp_s(pg.title[a - 1], ti))
++        while (a > 0 && !strcmp_s(page_title(&pg,a - 1), ti))
+             a--;
+-        while (b + 1 < pg.n && !strcmp_s(pg.title[b + 1], ti))
++        while (b + 1 < pg.n && !strcmp_s(page_title(&pg,b + 1), ti))
+             b++;
+         if (b > a) {
+             char *q = t;
+@@ -9877,4 +12348,22 @@
+ int ui_dirty(void) { return ui.dirty != 0; }
+ void ui_say(const char *a, const char *b) { say(a, b); }
+ 
+-
++#if X0X_REMOTE_DNR3
++/* DNR3 Remote (REMOTE-FW-PROTOCOL 4.1): the panel's own read and write of a pref_t value, so a Remote
++ * write takes the same path (undo, traces, bass edit hold, S1 patch). remote_dnr3.c checks the address
++ * and the kinds it may set first. The value is clamped to the descriptor; -1: no such value. */
++int ui_remote_pref(const uint8_t *e, int set, int v, const x0x_param_t **dp)   /* e: kind, a, b, c */
++{
++    pref_t r;
++    const x0x_param_t *d = *dp = pref_desc((memcpy(&r, e, 4), r));
++    if (!d || (set && pref_read_only(r)))
++        return -1;
++    if (set)
++        pref_set_impl(r, v, 0);                    /* clamps to the descriptor */
++    return pref_get(r);
++}
++#endif
++
++#if X0X_REMOTE_DNR3 && X0X_REMOTE_TYPED_SYNTH
++#include "remote_synth_panel.inc"
++#endif
+--- a/firmware/src/app/ui_break_layout_main.h
++++ b/firmware/src/app/ui_break_layout_main.h
+@@ -81,7 +81,7 @@
+     /* Same physical panel crosses the strip boundary; no buffer repartition. */
+     night_panel(3,146-off,234,64,0);
+     /* Keep Q descenders above the main/knob strip boundary at y158. */
+-    cv_text(10,vc(&FONT_T,147-off,10),&FONT_T,pg.title[cur_page()],col);
++    cv_text(10,vc(&FONT_T,147-off,10),&FONT_T,page_title(&pg,cur_page()),col);
+     if(pg.n>1){q=put_i(t,cur_page()+1);put_i(put_s(q," / "),pg.n);text_r(230,vc(&FONT_T,147-off,10),&FONT_T,t,C_GRAY);}
+ }
+ static void break_layout_footer(void)
+--- /dev/null
++++ b/firmware/src/app/ui_link_coverage.inc
+@@ -0,0 +1,16 @@
++static const uint8_t ui_link_coverage[2][5][10] = {
++    {
++        {16, 0, 0, 0, 0, 0, 0, 0, 16, 0},
++        {14, 2, 0, 0, 0, 0, 0, 2, 14, 0},
++        {8, 11, 0, 0, 0, 0, 0, 11, 8, 0},
++        {1, 13, 11, 2, 0, 2, 11, 13, 1, 0},
++        {0, 1, 8, 14, 16, 14, 8, 1, 0, 0},
++    },
++    {
++        {0, 0, 16, 0, 0, 0, 0, 0, 0, 16},
++        {0, 0, 14, 2, 0, 0, 0, 0, 0, 14},
++        {0, 0, 8, 11, 0, 0, 0, 0, 0, 12},
++        {0, 0, 1, 13, 11, 2, 0, 2, 11, 13},
++        {0, 0, 0, 1, 8, 14, 16, 14, 8, 1},
++    },
++};
+--- /dev/null
++++ b/firmware/src/app/ui_smc_arc8.h
+@@ -0,0 +1,132 @@
++/* SPDX-License-Identifier: GPL-3.0-only */
++/* Generated by tests/host/gen_arc8_table.c with the original float arithmetic. */
++/* --smc-packed: (screen position delta << 3) | coverage index, then threshold. */
++static const uint8_t smc_arc_alpha[] = {2,4,6,7,8,11,14,16};
++static const uint8_t smc_arc_pixels[][2] = {
++    {0x31,0x39},
++    {0x0b,0x3d},
++    {0x0c,0x00},
++    {0x0b,0xc3},
++    {0x09,0xc7},
++    {0xd3,0x32},
++    {0x0e,0x35},
++    {0x0f,0x38},
++    {0x0f,0x3c},
++    {0x0f,0x00},
++    {0x0f,0xc4},
++    {0x0f,0xc8},
++    {0x0e,0xcb},
++    {0x0b,0xce},
++    {0xbd,0x2d},
++    {0x0f,0x30},
++    {0x0f,0x34},
++    {0x0f,0x37},
++    {0x0f,0x3c},
++    {0x0f,0x00},
++    {0x0f,0xc4},
++    {0x0f,0xc9},
++    {0x0f,0xcc},
++    {0x0f,0xd0},
++    {0x0d,0xd3},
++    {0xad,0x28},
++    {0x0f,0x2b},
++    {0x0f,0x2e},
++    {0x0f,0x31},
++    {0x0f,0x36},
++    {0x0f,0x3b},
++    {0x0e,0x00},
++    {0x0f,0xc5},
++    {0x0f,0xca},
++    {0x0f,0xcf},
++    {0x0f,0xd2},
++    {0x0f,0xd5},
++    {0x0d,0xd8},
++    {0x9b,0x24},
++    {0x0f,0x26},
++    {0x0f,0x28},
++    {0x0f,0x2b},
++    {0x0e,0x2f},
++    {0x0a,0x34},
++    {0x22,0xcc},
++    {0x0e,0xd1},
++    {0x0f,0xd5},
++    {0x0f,0xd8},
++    {0x0f,0xda},
++    {0x0b,0xdc},
++    {0x96,0x21},
++    {0x0f,0x22},
++    {0x0f,0x24},
++    {0x0e,0x27},
++    {0x08,0x2b},
++    {0x30,0xd5},
++    {0x0e,0xd9},
++    {0x0f,0xdc},
++    {0x0f,0xde},
++    {0x0e,0xdf},
++    {0x89,0x1c},
++    {0x0f,0x1d},
++    {0x0f,0x1e},
++    {0x0f,0x20},
++    {0x0a,0x22},
++    {0x42,0xde},
++    {0x0f,0xe0},
++    {0x0f,0xe2},
++    {0x0f,0xe3},
++    {0x09,0xe4},
++    {0x83,0x19},
++    {0x0f,0x19},
++    {0x0f,0x1a},
++    {0x0f,0x1b},
++    {0x57,0xe5},
++    {0x0f,0xe6},
++    {0x0f,0xe7},
++    {0x0b,0xe7},
++    {0x84,0x16},
++    {0x0f,0x16},
++    {0x0f,0x16},
++    {0x0e,0x16},
++    {0x56,0xea},
++    {0x0f,0xea},
++    {0x0f,0xea},
++    {0x0c,0xea},
++    {0x83,0x12},
++    {0x0f,0x12},
++    {0x0f,0x11},
++    {0x0f,0x10},
++    {0x57,0xf0},
++    {0x0f,0xef},
++    {0x0f,0xee},
++    {0x0b,0xee},
++    {0x81,0x0f},
++    {0x0f,0x0e},
++    {0x0f,0x0d},
++    {0x0f,0x0b},
++    {0x0a,0x09},
++    {0x42,0xf7},
++    {0x0f,0xf5},
++    {0x0f,0xf3},
++    {0x0f,0xf2},
++    {0x09,0xf1},
++    {0x8e,0x0b},
++    {0x0f,0x09},
++    {0x0f,0x07},
++    {0x0e,0x04},
++    {0x08,0x01},
++    {0x30,0xff},
++    {0x0e,0xfc},
++    {0x0f,0xf9},
++    {0x0f,0xf7},
++    {0x0e,0xf5},
++    {0x93,0x08},
++    {0x0f,0x06},
++    {0x0f,0x03},
++    {0x0f,0x01},
++    {0x47,0xff},
++    {0x0f,0xfd},
++    {0x0f,0xfa},
++    {0x0b,0xf8},
++    {0x9d,0x03},
++    {0x0f,0x01},
++    {0x57,0xff},
++    {0x0d,0xfd},
++};
+--- a/firmware/src/app/undo.c
++++ b/firmware/src/app/undo.c
+@@ -227,7 +227,7 @@
+ }
+ 
+ /* Read the bytes an entry would restore without changing history or its baseline. */
+-static inline void undo_peek(const undo_t *u,int k,uint32_t off,uint8_t *out,uint32_t len)
++static __attribute__((noinline)) void undo_peek(const undo_t *u,int k,uint32_t off,uint8_t *out,uint32_t len)
+ {
+     for(uint32_t i=0;i<len;i++)out[i]=u->region[off+i];
+     const uint8_t *e=u->pool+u->at[k];unsigned runs=ud_get16(e);e+=8;
+--- a/firmware/src/app/x0x.h
++++ b/firmware/src/app/x0x.h
+@@ -57,7 +57,22 @@
+ #define PROJ_BT_CLK_IN 8u
+ #define PROJ_BT_SMC_CENTRAL 16u  /* connect to an SMC-Mixer instead of advertising at next boot */
+ #define PROJ_BT_SMC_USER 32u     /* SMC's editable User preset, rather than factory DAW mode */
++#if X0X_S1_KEYBOARD_HOLD
++/* Device-only Synth One key mapping (the original stores it in app settings),
++ * carried in the local settings object without growing the project layout. */
++#define PROJ_S1_WHITE_KEYS 64u
++#define PROJ_S1_MIDI_VELOCITY 128u
++#else
++#define PROJ_S1_WHITE_KEYS 0u
++#define PROJ_S1_MIDI_VELOCITY 0u
++#endif
++#if X0X_S1_KEYBOARD_HOLD && X0X_S1_SCALE_NATIVE
++#define PROJ_S1_MICRO_KEYS 64u         /* otherwise free ck_x1 bit 6 */
++#else
++#define PROJ_S1_MICRO_KEYS 0u
++#endif
+ #define PROJ_DEVICE_BT (1u | PROJ_BT_SMC_CENTRAL | PROJ_BT_SMC_USER)
++#define PROJ_DEVICE_PREFS (PROJ_DEVICE_BT | PROJ_S1_WHITE_KEYS | PROJ_S1_MIDI_VELOCITY)
+ #define PROJ_CLK_SRC(bt) ((uint8_t)((bt) >> 1 & 3u))
+ #define PROJ_A74_CLK_OFF 38u
+ /* M7a: all-ON retains the exact legacy settings/file bytes. Nonzero OFF
+@@ -102,7 +117,7 @@
+     uint8_t ck_ord, ck_rate, ck_oct;     /* clip mode ARP: order, rate, octaves - 1 (0-3) */
+     uint8_t ck_gate;                     /* clip mode ARP: gate / 10 % - 1 (0-9) */
+     uint8_t ck_inv;                      /* clip mode CHORD: inversion 0-3 */
+-    uint8_t ck_x1;                       /* clip mode ARP: bits 0-2 SWING (50 + 3 x %), bits 3-5 HUMAN (0 = off) */
++    uint8_t ck_x1;                       /* clip mode ARP: bits 0-2 SWING (50 + 3 x %), bits 3-5 HUMAN, bit 6 Synth One degree keyboard */
+     uint8_t ck_x2;                       /* clip mode: bits 0-3 ARP RHYTHM (CK_RHY_T), bits 4-6 CHORD STRUM (x 10 ms) */
+ } settings_t;
+ 
+--- a/firmware/src/ble/ble_midi_host.c
++++ b/firmware/src/ble/ble_midi_host.c
+@@ -413,6 +413,9 @@
+ /* ---- events ---- */
+ static void link_reset(bleh_t *h)
+ {
++#ifdef BLEH_LINK_RESET
++    BLEH_LINK_RESET();
++#endif
+     h->cccd[0] = h->cccd[1] = 0;
+     h->att_rsp_len = 0;
+     /* A new accepted BLE link starts a fresh MIDI epoch, even when the old
+@@ -544,6 +547,9 @@
+     /* Check the advertised length before dereferencing the caller's tail. */
+     if (!m || len < 2u || len - 2u > BLEH_SYSEX_MAX ||
+         m[0] != 0xF0u || m[len - 1u] != 0xF7u) return -1;
++#if X0X_REMOTE_BLE
++    if (!h->sx) return -1;
++#endif
+     for (i = 1; i + 1 < len; i++) if (m[i] & 0x80u) return -1;
+     if (h->sx_on) return -2;
+     for (i = 0; i + 2 < len; i++) h->sx[i] = m[i + 1];
+--- a/firmware/src/ble/ble_midi_host.h
++++ b/firmware/src/ble/ble_midi_host.h
+@@ -25,7 +25,11 @@
+ #define BLEH_NAME_MAX 20u
+ #define BLEH_MIDIQ 32u
+ #define BLEH_INQ 64u                         /* attempt 32: MIDI in (iPhone colour bursts); a power of 2 */
++#if X0X_REMOTE_BLE
++#define BLEH_SYSEX_MAX 254u
++#else
+ #define BLEH_SYSEX_MAX 64u               /* the longest SysEx bleh_sysex_send takes */
++#endif
+ 
+ enum { BLEH_H4_CMD = 1, BLEH_H4_ACL = 2, BLEH_H4_EVT = 4 };
+ enum { BLEH_IDLE = 0, BLEH_STARTING, BLEH_ADVERTISING, BLEH_CONNECTED, BLEH_ERROR };
+@@ -63,7 +67,11 @@
+     uint8_t q_r, q_w;
+     bleh_msg_t in_q[BLEH_INQ];
+     uint8_t in_r, in_w, in_running, in_sysex;
++#if X0X_REMOTE_BLE
++    uint8_t *sx;                        /* device supplies a main-RAM 254-byte buffer */
++#else
+     uint8_t sx[BLEH_SYSEX_MAX];          /* outgoing SysEx: data bytes between F0 and F7 */
++#endif
+     uint8_t sx_len, sx_pos, sx_on;
+     uint16_t sx_ts;
+     uint32_t drops_in, sysex_in, smp_rejects;
+--- a/firmware/src/ble.c
++++ b/firmware/src/ble.c
+@@ -13,7 +13,12 @@
+  * before. Service: the TIMER5 interrupt, next to usb_poll (2 kHz, never inside the render). */
+ #include "fm1_ble.h"
+ #include "fm1_supply.h"
++#if X0X_REMOTE_BLE
++static void ble_dnr3_reset(void);
++#define BLEH_LINK_RESET() ble_dnr3_reset()
++#endif
+ #include "ble/ble_midi_host.c"
++#undef BLEH_LINK_RESET
+ #include "ble/ble_midi_central.c"
+ #include "ble/ble_glue.h"
+ 
+@@ -112,7 +117,44 @@
+ extern void smk_apc_ble_link(uint8_t connected, uint8_t notifying);
+ extern uint8_t smk_apc_ble_event(uint32_t pkt, uint8_t notifying);
+ #include "app/smk_inlog_profile.h"
++#if X0X_REMOTE_BLE
++static uint8_t ble_sx[254], ble_dnr3_tx[BLEH_SYSEX_MAX];
++static uint8_t ble_sx_n, ble_sx_over, ble_sx_reply, ble_sx_ch;
++static volatile uint8_t ble_dnr3_n;                 /* ISR publishes complete frames, editor owns until cleared */
++static volatile uint32_t ble_dnr3_wire = 1;
++static uint32_t ble_dnr3_rx_wire;
++static void ble_dnr3_reset(void)
++{
++    ble_dnr3_wire += 2u;                         /* odd generation never aliases USB (0) */
++    ble_sx_n = ble_sx_over = ble_sx_reply = 0;
++    /* A queued frame is immutable until the editor releases it. Old-wire
++     * input and output are ignored, even if the controller reuses a handle. */
++}
++static int ble_dnr3_live(uint32_t wire)
++{
++    return wire == ble_dnr3_wire && ble_up && ble_want &&
++           !ble_central_role && !smc_ble_role_get() && bleh_notifying(&ble_r.host.h);
++}
++static void ble_dnr3_out(uint32_t wire, const uint8_t *p, uint32_t n)
++{
++    uint32_t f = irq_save();                       /* TIMER5 owns bleh state and its union otherwise */
++    if (ble_dnr3_live(wire))
++        (void)bleh_sysex_send(&ble_r.host.h, p, n, (uint16_t)fm1_ms);
++    irq_restore(f);
++}
++static void ble_dnr3_service(void)
++{
++    uint32_t n = ble_dnr3_n;
++    if (!n) return;
++    RING_PUBLISH();
++    uint32_t wire = ble_dnr3_rx_wire;
++    if (ble_dnr3_live(wire)) (void)remote_dnr3_frame_on(ble_sx, n, wire);
++    RING_PUBLISH();
++    ble_dnr3_n = 0;
++}
++#else
+ static uint8_t ble_sx[16], ble_sx_n, ble_sx_over, ble_sx_reply, ble_sx_ch;
++#endif
+ static void ble_sysex_in(const uint8_t *p, uint32_t n, int end, void *ctx)
+ {
+     (void)ctx;
+@@ -120,6 +162,12 @@
+         ble_sx_n = ble_sx_over = ble_sx_reply = 0;
+         return;                                 /* discard the old device link during a role change */
+     }
++#if X0X_REMOTE_BLE
++    if (ble_dnr3_n) {                              /* never overwrite bytes owned by the editor */
++        ble_sx_over = !end;
++        return;
++    }
++#endif
+     if (!end) {
+         while (n--) {
+             if (ble_sx_n < sizeof ble_sx) ble_sx[ble_sx_n++] = *p++;
+@@ -127,6 +175,16 @@
+         }
+         return;
+     }
++#if X0X_REMOTE_BLE
++    if (end > 0 && !ble_sx_over && ble_sx_n >= 4u &&
++        ble_sx[0] == 0x7Du && ble_sx[1] == 0x44u && ble_sx[2] == 0x4Eu) {
++        ble_dnr3_rx_wire = ble_dnr3_wire;
++        RING_PUBLISH();
++        ble_dnr3_n = ble_sx_n;
++        ble_sx_n = 0;
++        return;
++    }
++#endif
+     if (end > 0 && !ble_sx_over && ble_sx_n == 4u && ble_sx[0] == 0x7Eu && ble_sx[2] == 0x06u &&
+         ble_sx[3] == 0x01u && (ble_sx[1] <= 0x0Fu || ble_sx[1] == 0x7Fu)) {
+         ble_sx_ch = ble_sx[1];                    /* Universal Device Inquiry */
+@@ -270,6 +328,9 @@
+     } else {
+         blec_pair_bind(0, 0);
+         bleh_init(&ble_r.host.h, ble_send, 0, ble_r.nm, addr);
++#if X0X_REMOTE_BLE
++        ble_r.host.h.sx = ble_dnr3_tx;
++#endif
+         bleh_set_sysex(&ble_r.host.h, ble_sysex_in);
+     }
+     fm1_ble_sync();
+--- /dev/null
++++ b/firmware/src/dsp/classic_i/classic.c
+@@ -0,0 +1,45 @@
++/* Host-only translation of active classic musical Mode I inner render.
++ * Caller supplies real AU-retained scalars at the existing block boundary. */
++#include "classic.h"
++#include <math.h>
++
++static float wrap(float p,float n) {
++    while(p<0.f)p+=n;
++    while(p>=n)p-=n;
++    return p;
++}
++static float sine(unsigned i) {
++    return (float)sin(((double)i/256.+(double)i/256.)*3.141592653589793);
++}
++static float lfo(float phase) {
++    float pos=wrap(phase,1.f)*256.f;
++    unsigned i=(unsigned)pos;
++    float frac=pos-(float)i;
++    float end=sine((i+1u)&255u)*frac;
++    return (float)fma(1.-(double)frac,sine(i),(double)end);
++}
++static float stereo_delay(classic_i *s,unsigned channel,float x,float ms,float fb)
++{
++    const float n=CLASSIC_I_DELAY_FRAMES;
++    float delay=(float)(44100.*(double)ms/1000.);
++    float off=wrap((float)s->write[channel]-delay,n);
++    unsigned j=(unsigned)off, k=(j+1u)%CLASSIC_I_DELAY_FRAMES;
++    float x0=s->ring[channel][j], x1=s->ring[channel][k], f=off-(float)j;
++    float y=fmaf(1.f-f,x0,f*x1);
++    s->ring[channel][s->write[channel]]=fmaf(fb,y,x);
++    s->write[channel]=(s->write[channel]+1u)%CLASSIC_I_DELAY_FRAMES;
++    return y;
++}
++void classic_i_frame(classic_i *s,float l,float r,float depth,
++    float phase_increment,const float feedback[2],float mix,float out[2])
++{
++    const float amp=(24.f-3.518f)*.5f, center=(24.f+3.518f)*.5f;
++    float m0=lfo(s->phase), m1=lfo(s->phase+.25f);
++    float mst[2]={fmaf(amp*depth,m0,center),
++                  fmaf(amp*depth,m1,center)};
++    float phase=s->phase+phase_increment;
++    s->phase=phase<1.f ? phase : phase-1.f;
++    float yl=stereo_delay(s,0,l,mst[0],feedback[0]),yr=stereo_delay(s,1,r,mst[1],feedback[1]);
++    out[0]=fmaf(1.f-mix,l,mix*yl);
++    out[1]=fmaf(1.f-mix,r,mix*yr);
++}
+--- /dev/null
++++ b/firmware/src/dsp/classic_i/classic.h
+@@ -0,0 +1,9 @@
++#pragma once
++enum { CLASSIC_I_DELAY_FRAMES=1058 };
++typedef struct {
++    float ring[2][CLASSIC_I_DELAY_FRAMES];
++    unsigned write[2];
++    float phase;
++} classic_i;
++void classic_i_frame(classic_i *,float l,float r,float depth,
++    float phase_increment,const float feedback[2],float mix,float out[2]);
+--- /dev/null
++++ b/firmware/src/dsp/classic_i/wrapper.c
+@@ -0,0 +1,78 @@
++/* Classic Build9 scoped host wrapper: real legacy musical modes I and II only. */
++#include "wrapper.h"
++#include <math.h>
++#include <string.h>
++
++#define WRAPPER_PI2 6.283185307179586
++#define WRAPPER_RATE 44100.
++static float ramper(classic_ramper *r,uint64_t at)
++{
++    if(r->pending!=r->target){
++        r->target=r->pending;r->start=at;r->initial=r->current;
++    }
++    if(r->current==r->target)return r->current;
++    uint64_t dt=at-r->start;
++    if(dt>=r->duration){r->current=r->target;r->start=0;}
++    else if(at>=r->start)r->current=fmaf(r->target-r->initial,(float)dt/(float)r->duration,r->initial);
++    return r->current;
++}
++void classic_wrapper_prepare(classic_mode_i *s,const float incoming[4],unsigned retained_ramp_frames)
++{
++    memset(s,0,sizeof *s);
++    for(unsigned i=0;i<4;++i){
++        classic_ramper *r=s->p+i;
++        r->pending=r->target=r->current=r->initial=incoming[i];
++        r->duration=retained_ramp_frames;
++    }
++}
++void classic_wrapper_start(classic_mode_i *s,int started)
++{
++    /* Actual start/stop virtuals only store DSP byte +41. */
++    s->started=!!started;
++}
++int classic_wrapper_command(classic_mode_i *s,unsigned id,float u)
++{
++    if(!(u>=0.f&&u<=1.f))return 0;
++    switch(id){
++      case 42:s->p[0].pending=(float)(16.*pow((double)u,3.33));return 1;
++      case 43:s->p[1].pending=(float)(.97*(double)u);return 1;
++      case 44:s->p[3].pending=u;return 1;
++      default:return 0;
++    }
++}
++void classic_wrapper_process(classic_mode_i *s,uint64_t at,float *l,float *r,size_t n)
++{
++    if(!s->started)return; /* Original disabled branch copies dry unchanged. */
++    for(size_t off=0;off<n;off+=8){
++        const uint64_t t=at+off;
++        const float rate=ramper(s->p,t),depth=ramper(s->p+1,t);
++        const float feedback=ramper(s->p+2,t),mix=ramper(s->p+3,t);
++        const float increment=(float)((double)rate/WRAPPER_RATE);
++        const double omega=(double)rate*WRAPPER_PI2;
++        const float a=sinf((float)(omega*(double)t/WRAPPER_RATE));
++        const float b=sinf((float)(omega*(double)((float)t+.2f)/WRAPPER_RATE));
++        /* Earlier mode offsets are overwritten in both delay slots before render. */
++        const float fb[]={feedback*fmaf(a,.05f,1.f),
++                          feedback*fmaf(b,.05f,1.f)};
++        size_t end=off+8<n ? off+8 : n;
++        for(size_t i=off;i<end;++i) {
++            float y[2];classic_i_frame(&s->core,l[i],r[i],depth,increment,fb,mix,y);
++            /* Legacy app booster after active TempoChorus; OFF is unity. */
++            l[i]=y[0]*(float)1.707;r[i]=y[1]*(float)1.707;
++        }
++    }
++}
++int classic_wrapper_enter(classic_mode_i *s,unsigned mode)
++{
++    static const double rate[]={.513,.863,1.726};
++    if(mode>3)return 0;
++    classic_wrapper_start(s,mode!=0);
++    if(!mode)return 1; /* Original OFF skips the three reapplications. */
++    const float u=(float)pow(rate[mode-1]/16.,1./3.33);
++    s->mode_ii=mode;
++    (void)classic_wrapper_command(s,42,u);
++    (void)classic_wrapper_command(s,43,(float)(.97*.202));
++    (void)classic_wrapper_command(s,44,mode==3 ? .555f : .505f);
++    return 1;
++}
++void classic_wrapper_enter_mode_ii(classic_mode_i *s){(void)classic_wrapper_enter(s,2);}
+--- /dev/null
++++ b/firmware/src/dsp/classic_i/wrapper.h
+@@ -0,0 +1,22 @@
++#pragma once
++#include "classic.h"
++#include <stddef.h>
++#include <stdint.h>
++
++typedef struct {
++    float pending,target,current,initial;
++    uint64_t start;
++    unsigned duration;
++} classic_ramper;
++typedef struct {
++    classic_i core;
++    classic_ramper p[4]; /* public AU frequency, depth, feedback, dryWetMix */
++    unsigned started, mode_ii;
++} classic_mode_i;
++void classic_wrapper_prepare(classic_mode_i *,const float incoming[4],unsigned retained_ramp_frames);
++void classic_wrapper_start(classic_mode_i *,int);
++int classic_wrapper_command(classic_mode_i *,unsigned id,float unit);
++void classic_wrapper_process(classic_mode_i *,uint64_t absolute_frame,float *,float *,size_t);
++/* Separate source-verified legacy musical mode 2; never the private alternate AU renderer. */
++void classic_wrapper_enter_mode_ii(classic_mode_i *);
++int classic_wrapper_enter(classic_mode_i *,unsigned musical_mode);

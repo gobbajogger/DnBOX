@@ -1,0 +1,105 @@
+{
+  "source_hashes": {
+    "SJ6-Brainwave-Warm-Main-Sub.native.private.tgz": "9db19abc7c56183e745e1f3de150559b319dabda4817ebd30af9a9db356c4b53",
+    "SJ6-Brainwave-Warm-Main-Sub-Crusher-native.private.tgz": "0ce56bbedd2b7627edec53809a6887f53ef98a02529854829c730d58b5ecd8cc",
+    "SJ6-Brainwave-OTA-order-native-Chain.private.tgz": "7457978e9374d93763144e467579981dd9269a487fbb151b47a6e3c2c4d5f136",
+    "SJ6-Brainwave-Main-Scale-Order-Apple-Prefix.private.tgz": "8ea0d69cee28242fa01b4f2500e55c3d4fb280c6d99e31dde73a09b5b71e3a8e",
+    "settled_suffix.so": "4d1d9eb81432a082398acced46fbab1a89fe767b6d1fdc0c57bd0a1750b16c38"
+  },
+  "main": {
+    "source_digest": "07b39e292e2c5b54e2f356e853deaaef554739de031fef3a494c5ab34d0d74d9",
+    "native_reference_digest": "0f6eca02f22df3fb8c916edab12c195b9e0ec9f5e4d36d8e51c08fa2dee198f4",
+    "external_leaf_receipt": "real Apple HP10 and AUDistortion",
+    "end_boundary": "source-backed guarded host suffix; not the loaded instrument",
+    "windows": {
+      "attack": {
+        "terminal_level_db": -12.518659850222434,
+        "terminal_null_dbr": -1.884098258039261,
+        "native_leaf_hpf_db": 0.10914301949264155,
+        "native_leaf_crusher_db": -1.2125459770410436,
+        "source_suffix_db": -22.387021227541055,
+        "signed_corr": 0.8620484087906344
+      },
+      "held": {
+        "terminal_level_db": -12.101906685442254,
+        "terminal_null_dbr": -2.3359435385538356,
+        "native_leaf_hpf_db": 0.13679251324336614,
+        "native_leaf_crusher_db": -1.0707998589253693,
+        "source_suffix_db": -22.370880619167444,
+        "signed_corr": 0.9619842349267949
+      },
+      "pending": {
+        "terminal_level_db": -7.880189376412029,
+        "terminal_null_dbr": -1.4194505393369798,
+        "native_leaf_hpf_db": 0.16081449296533587,
+        "native_leaf_crusher_db": -0.5848386792595537,
+        "source_suffix_db": -22.288652655549456,
+        "signed_corr": 0.5471800488279351
+      },
+      "chord": {
+        "terminal_level_db": -12.29717747512619,
+        "terminal_null_dbr": -0.2789848526068736,
+        "native_leaf_hpf_db": 0.013326626756910563,
+        "native_leaf_crusher_db": -0.15994263752358684,
+        "source_suffix_db": -22.33158620023669,
+        "signed_corr": 0.2495293834250962
+      },
+      "release": {
+        "terminal_level_db": -12.199910314801183,
+        "terminal_null_dbr": -0.6861941219644507,
+        "native_leaf_hpf_db": 0.015031950014306465,
+        "native_leaf_crusher_db": -0.1455234891450684,
+        "source_suffix_db": -22.329913501275893,
+        "signed_corr": 0.42043076172453175
+      }
+    }
+  },
+  "sub": {
+    "source_digest": "a48fe22c7f561104ae241843614a3d6cf7b96cc534d04deef68e9273ca3d79bc",
+    "native_reference_digest": "9bf15bea79395fb043145eb41b0a245549c1aef43384aa6657b4a3ea2adcfaa3",
+    "external_leaf_receipt": "host HP then real Apple AUDistortion",
+    "end_boundary": "source-backed guarded host suffix; not the loaded instrument",
+    "windows": {
+      "attack": {
+        "terminal_level_db": -11.944614103388156,
+        "terminal_null_dbr": -2.502784001291446,
+        "native_leaf_hpf_db": null,
+        "native_leaf_crusher_db": -3.079163915621548,
+        "source_suffix_db": -22.61549747029139,
+        "signed_corr": 0.9927483782075892
+      },
+      "held": {
+        "terminal_level_db": -12.327525727625826,
+        "terminal_null_dbr": -2.324552834273641,
+        "native_leaf_hpf_db": null,
+        "native_leaf_crusher_db": -2.918157919295546,
+        "source_suffix_db": -22.476084246617745,
+        "signed_corr": 0.9776799330739596
+      },
+      "pending": {
+        "terminal_level_db": -12.215219413280376,
+        "terminal_null_dbr": -2.163645585615965,
+        "native_leaf_hpf_db": null,
+        "native_leaf_crusher_db": 1.1341880033661338,
+        "source_suffix_db": -21.801602347245726,
+        "signed_corr": 0.923151946314067
+      },
+      "chord": {
+        "terminal_level_db": -12.517040281790639,
+        "terminal_null_dbr": -1.7714626967204472,
+        "native_leaf_hpf_db": null,
+        "native_leaf_crusher_db": -0.7342000437213504,
+        "source_suffix_db": -22.353536867675544,
+        "signed_corr": 0.8259612349280324
+      },
+      "release": {
+        "terminal_level_db": -12.487531840240498,
+        "terminal_null_dbr": -1.7365202424585136,
+        "native_leaf_hpf_db": null,
+        "native_leaf_crusher_db": -0.4452996717972615,
+        "source_suffix_db": -22.34300108875809,
+        "signed_corr": 0.8126525808757125
+      }
+    }
+  }
+}

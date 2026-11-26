@@ -61,3 +61,6 @@ and measured results. The supplied original AU binary is not committed.
 
 ### Timing attribution and isolated exact-kernel trials
 The sampled Elite replay is not observationally neutral. Matched strict replays of two independently tested numerical simplifications also lowered peak but increased underruns. Do not carry either into a release by looking at maximum block time alone. The ordered Core 1 join model and host test are recorded as a design lead only; it is not connected to firmware and does not prove hardware drain acknowledgment.
+
+### Sound-first host parity
+User directed complete sound matching before fitting. The current host Synth One candidate runs original unrestricted delay, room and widening from actual DnBOX voices; the named Pad and Organ are materially closer, not declared all-bank parity. SuperJ6 Main/Sub output evidence points to shared routing or gain, not a Main-only fix. The recovery folder preserves prior timing work without resuming timing or fit.

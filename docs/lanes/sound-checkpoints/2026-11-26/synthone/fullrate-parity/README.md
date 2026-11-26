@@ -1,0 +1,6 @@
+# Unconstrained Synth One host parity candidate
+The actual DnBOX host voice and parameter ingress now feed the four original float histories, tracking low-pass, stereo high-pass, RevSC, independent original compressors, original post-master width delay, in production source order. No previously captured wet signal is injected. This scope is host sound; fit and hardware are deferred. The program import and source maps are separate from preset-specific corrections; none were applied.
+
+Run from the workspace containing the exact restored source dependencies: `bash build.sh NEW_OUTPUT_DIRECTORY`. Each named test arm uses the same actually driven voice. `bank-compare.py` cold-starts both renderers for each selected matching ordinal and uses exact MIDI and finite stereo Float32 output without gain fitting, EQ, realignment, or resampling.
+
+Independently measured against original source: 062 Pad right tail level −6.54 to −0.05 dB, final right waveform residual −26.17 dBr and left −18.10 dBr; 113 Organ late output +0.008/+0.007 dB and residual −42.54/−42.51 dBr. This is a much closer result, not a bank-wide parity claim. Full separate comparison uses the exact 906 recovered authored preset command pack and does not change project-wide tuning.

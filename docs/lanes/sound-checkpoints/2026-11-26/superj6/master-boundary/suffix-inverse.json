@@ -1,0 +1,103 @@
+{
+  "source_hashes": {
+    "SJ6-Brainwave-Warm-Main-Sub.native.private.tgz": "9db19abc7c56183e745e1f3de150559b319dabda4817ebd30af9a9db356c4b53",
+    "SJ6-Brainwave-Warm-Main-Sub-Crusher-native.private.tgz": "0ce56bbedd2b7627edec53809a6887f53ef98a02529854829c730d58b5ecd8cc",
+    "SJ6-Brainwave-OTA-order-native-Chain.private.tgz": "7457978e9374d93763144e467579981dd9269a487fbb151b47a6e3c2c4d5f136",
+    "SJ6-Brainwave-Main-Scale-Order-Apple-Prefix.private.tgz": "8ea0d69cee28242fa01b4f2500e55c3d4fb280c6d99e31dde73a09b5b71e3a8e",
+    "settled_suffix.so": "4d1d9eb81432a082398acced46fbab1a89fe767b6d1fdc0c57bd0a1750b16c38"
+  },
+  "main": {
+    "source_digest": "07b39e292e2c5b54e2f356e853deaaef554739de031fef3a494c5ab34d0d74d9",
+    "native_reference_digest": "0f6eca02f22df3fb8c916edab12c195b9e0ec9f5e4d36d8e51c08fa2dee198f4",
+    "master_raw": 0.3150142729282379,
+    "assumed_linear_leaf_gains": [
+      0.0764919138606103,
+      0.07649191720417825
+    ],
+    "strict_scope": "conditional inverse, not an original native internal sample",
+    "windows": {
+      "attack": {
+        "inverse_round_trip_dbr": -129.93772163951647,
+        "inferred_original_at_postcrusher_rms": 0.7917531675530357,
+        "verified_candidate_postcrusher_rms": 0.18747524348039388,
+        "inferred_boundary_level_db": -12.512917664329677,
+        "inferred_boundary_null_dbr": -1.8911539960991415
+      },
+      "held": {
+        "inverse_round_trip_dbr": -105.49135225437232,
+        "inferred_original_at_postcrusher_rms": 0.7262777640600919,
+        "verified_candidate_postcrusher_rms": 0.18035717903634427,
+        "inferred_boundary_level_db": -12.099386279574997,
+        "inferred_boundary_null_dbr": -2.33817990707977
+      },
+      "pending": {
+        "inverse_round_trip_dbr": -88.55275628335038,
+        "inferred_original_at_postcrusher_rms": 0.11208154983885417,
+        "verified_candidate_postcrusher_rms": 0.045120280896041504,
+        "inferred_boundary_level_db": -7.90324665931493,
+        "inferred_boundary_null_dbr": -1.371075461068274
+      },
+      "chord": {
+        "inverse_round_trip_dbr": -108.67634343368064,
+        "inferred_original_at_postcrusher_rms": 0.8345540867919784,
+        "verified_candidate_postcrusher_rms": 0.20253965393755483,
+        "inferred_boundary_level_db": -12.298888492170173,
+        "inferred_boundary_null_dbr": -0.27994797142187944
+      },
+      "release": {
+        "inverse_round_trip_dbr": -113.92073583130299,
+        "inferred_original_at_postcrusher_rms": 0.3758711097411316,
+        "verified_candidate_postcrusher_rms": 0.09226540597013169,
+        "inferred_boundary_level_db": -12.200000984035555,
+        "inferred_boundary_null_dbr": -0.6877449883839238
+      }
+    }
+  },
+  "sub": {
+    "source_digest": "a48fe22c7f561104ae241843614a3d6cf7b96cc534d04deef68e9273ca3d79bc",
+    "native_reference_digest": "9bf15bea79395fb043145eb41b0a245549c1aef43384aa6657b4a3ea2adcfaa3",
+    "master_raw": 0.3150142729282379,
+    "assumed_linear_leaf_gains": [
+      0.0764919138606103,
+      0.07649191720417825
+    ],
+    "strict_scope": "conditional inverse, not an original native internal sample",
+    "windows": {
+      "attack": {
+        "inverse_round_trip_dbr": -121.67547531048434,
+        "inferred_original_at_postcrusher_rms": 0.4518760190755391,
+        "verified_candidate_postcrusher_rms": 0.11400751875792502,
+        "inferred_boundary_level_db": -11.961716004153022,
+        "inferred_boundary_null_dbr": -2.4986013830801466
+      },
+      "held": {
+        "inverse_round_trip_dbr": -111.81936318397504,
+        "inferred_original_at_postcrusher_rms": 0.44038942999803976,
+        "verified_candidate_postcrusher_rms": 0.10654060488493301,
+        "inferred_boundary_level_db": -12.326434570905928,
+        "inferred_boundary_null_dbr": -2.327449166612933
+      },
+      "pending": {
+        "inverse_round_trip_dbr": -97.54762770148116,
+        "inferred_original_at_postcrusher_rms": 0.1908222654326959,
+        "verified_candidate_postcrusher_rms": 0.047116633326033615,
+        "inferred_boundary_level_db": -12.149095933513909,
+        "inferred_boundary_null_dbr": -2.1451089462356485
+      },
+      "chord": {
+        "inverse_round_trip_dbr": -101.48289196675556,
+        "inferred_original_at_postcrusher_rms": 0.35006675787560737,
+        "verified_candidate_postcrusher_rms": 0.08285514458351596,
+        "inferred_boundary_level_db": -12.516627857695022,
+        "inferred_boundary_null_dbr": -1.7740029447927026
+      },
+      "release": {
+        "inverse_round_trip_dbr": -93.52755103209992,
+        "inferred_original_at_postcrusher_rms": 0.17048488067155435,
+        "verified_candidate_postcrusher_rms": 0.040485769677897715,
+        "inferred_boundary_level_db": -12.487669396989032,
+        "inferred_boundary_null_dbr": -1.7380724891907047
+      }
+    }
+  }
+}

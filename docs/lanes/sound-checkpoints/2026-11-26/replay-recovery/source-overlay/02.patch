@@ -1,0 +1,3118 @@
+--- a/firmware/src/app/original_runtime.c
++++ b/firmware/src/app/original_runtime.c
+@@ -6,12 +6,39 @@
+ #include "chicago_fx2_compact.h"
+ #endif
+ #include <string.h>
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++/* Keep one exact cold verifier in the existing non-LTO runtime object. */
++#define CANONICAL137_IMPL
++#include "sj6_137_host_witness.h"
++#undef CANONICAL137_IMPL
++#endif
++#include "../dsp/sj6_native_limiter.inc"
++#include "../dsp/sj6_native_room.inc"
++#if X0X_SJ6_CLASSIC_I_PROBE
++#include "../dsp/classic_i/classic.c"
++#include "../dsp/classic_i/wrapper.c"
++#endif
+ 
+ static int runtime_result(original_runtime_part *p, int ok)
+ {
+     if (!ok) p->status = ORIGINAL_RUNTIME_FAULT;
+     return p->status;
+ }
++
++#if X0X_SUPERJ6_BUILTIN_INIT
++X0X_COLD void original_runtime_sj6_chorus(original_runtime_part *part, const uint8_t *cell)
++{
++    part->dsp.juno.chorus.factory_mode = (uint8_t)original_sound_sj6_chorus(cell);
++    if (!part->dsp.juno.chorus.factory_mode) return;
++    /* These are the existing compact RATE/MIX controls. Loaded patches and
++     * first switch edits start from the visible positions in the sound cell. */
++    for (unsigned id = 13; id <= 14; ++id) {
++        float value;
++        if (original_sound_control_value(ORIGINAL_SOUND_JUNO, id, original_sound_panel_position(cell,id), &value))
++            (void)original_runtime_param(part, id, value);
++    }
++}
++#endif
+ 
+ X0X_COLD int original_runtime_init(original_runtime_part *p, const uint8_t cell[32], float bpm,
+     original_chicago_tuning *tuning, const original_chicago_fx2_cold_owner *fx)
+@@ -20,7 +47,11 @@
+     (void)original_sound_adopt_legacy_cell((uint8_t *)cell);
+     if (!original_sound_valid(cell)) return ORIGINAL_RUNTIME_INVALID;
+     unsigned kind = cell[29];
+-    unsigned factory = (unsigned)original_sound_factory_source(kind, cell[30]);
++    unsigned ordinal = kind == ORIGINAL_SOUND_SYNTHONE ? 0u : cell[30];
++#if X0X_SUPERJ6_BUILTIN_INIT
++    if (kind == ORIGINAL_SOUND_JUNO) ordinal=original_sound_sj6_factory(cell);
++#endif
++    unsigned factory = (unsigned)original_sound_factory_source(kind, ordinal);
+     /* The old active union is intentionally retired at this explicit cold
+      * boundary. A caller must inspect the returned admission result. */
+     memset(p, 0, sizeof *p);
+@@ -29,6 +60,11 @@
+     if (kind == ORIGINAL_SOUND_JUNO) {
+         juno6_init(&p->dsp.juno.synth,44100);
+         juno6_chorus_init(&p->dsp.juno.chorus,44100);
++#if X0X_SUPERJ6_BUILTIN_INIT
++        p->dsp.juno.chorus.mix = 0;
++        p->dsp.juno.synth.osc2_level_code = (uint8_t)original_sound_sj6_osc2_code(cell);
++        p->dsp.juno.synth.osc1_level_code = (uint8_t)original_sound_sj6_osc1_code(cell);
++#endif
+         rc=ORIGINAL_RUNTIME_OK;
+     } else if (kind == ORIGINAL_SOUND_SYNTHONE) {
+         s1_part_init(&p->dsp.synthone);
+@@ -44,7 +80,12 @@
+         }
+ #endif
+ #if X0X_SYNTHONE_PATCH
+-        if (original_sound_edit_mask(cell) & S1_PATCH_MASK) s1_part_apply_cell(&p->dsp.synthone, cell);
++        if ((original_sound_edit_mask(cell) & (S1_PATCH_MASK | S1_LINK_MASK | S1_BASE_EDIT_MASK | S1_ROUTE_MASK | S1_MOD_EXT_MARK))
++#if X0X_S1_EXTRA
++            || s1_coarse_code(cell,0) || s1_coarse_code(cell,1) || s1_detune_code(cell) || s1_voice_code(cell)
++#endif
++            )
++            s1_part_apply_cell(&p->dsp.synthone, cell);
+ #endif
+         rc = ORIGINAL_RUNTIME_OK;
+     } else if (kind == ORIGINAL_SOUND_MIAMI)
+@@ -53,6 +94,21 @@
+         rc = original_chicago_backend_init_compact(&p->dsp.chicago, factory, bpm, 0, tuning, fx);
+     p->status = (int8_t)rc;
+     if (rc != ORIGINAL_RUNTIME_OK) return rc;
++#if X0X_SUPERJ6_BUILTIN_INIT
++    /* Legacy macro edits belong to the earlier renderer. Explicit build-9
++     * panel edits are reapplied with the selected sound. */
++    if (kind == ORIGINAL_SOUND_JUNO) {
++        uint8_t positions[SJ6_OSC_KNOBS];
++        unsigned mask = original_sound_sj6_knobs(cell, positions);
++        if (mask) juno6_apply_knobs(&p->dsp.juno.synth, mask, positions);
++        juno6_set_lfo2_pwm(&p->dsp.juno.synth, original_sound_sj6_lfo2_pwm(cell));
++        juno6_set_lfo2_shape(&p->dsp.juno.synth, original_sound_sj6_shape(cell));
++        original_runtime_sj6_chorus(p, cell);
++        if (original_sound_sj6_hpf_authored(cell))
++            juno6_set_sj6_hpf(&p->dsp.juno.synth, ((cell[ORIGINAL_SJ6_HPF_PANEL] & 127u) * (1.f/127.f)));
++        return original_runtime_prepare(p, bpm);
++    }
++#endif
+     if (kind == ORIGINAL_SOUND_JUNO) {
+         for(unsigned i=0;i<ORIGINAL_JUNO_NPARAMS-2u;i++){
+             float value;
+@@ -83,11 +139,12 @@
+     if (!p || p->status != ORIGINAL_RUNTIME_OK) return p ? p->status : 0;
+     int ok;
+     if (p->kind == ORIGINAL_SOUND_JUNO || p->kind == ORIGINAL_SOUND_SYNTHONE) {
++#if X0X_SUPERJ6_BUILTIN_INIT
++        if (p->kind == ORIGINAL_SOUND_JUNO) juno6_set_lfo_tempo(&p->dsp.juno.synth, bpm);
++#endif
+ #if X0X_ARP_ENGINE
+-        p->arp.bpm = bpm;   /* only the arp clock follows tempo: idempotent */
++        p->arp.bpm = bpm;
+         arp_params(p);      /* engine_arp.h; defined with the arp below */
+-#else
+-        (void)bpm;          /* no tempo-dependent parameters: idempotent */
+ #endif
+         ok = 1;
+     } else if (p->kind == ORIGINAL_SOUND_MIAMI) {
+@@ -118,7 +175,14 @@
+ }
+ #if X0X_S1C
+ _Static_assert(sizeof(original_chicago_fx2_compact) >= S1C_ARENA_BYTES, "Synth One effects fit the Chicago FX2 arena");
++#if X0X_S1_USER_SCALE && X0X_SUPERJ6_FACTORY
++/* In the combined profile SJ6 already owns the union's largest arm.
++ * A Synth One User tuning Table uses that arm's existing spare bytes. */
++_Static_assert(sizeof(s1_dry_part) <= sizeof(((original_runtime_backend *)0)->juno),
++               "Synth One tuning must remain within the combined backend union");
++#else
+ _Static_assert(sizeof(s1_dry_part) <= sizeof(original_miami_backend), "Synth One part does not grow the backend union");
++#endif
+ 
+ int original_runtime_s1_program(original_runtime_part *p, unsigned program)
+ {
+@@ -150,7 +214,7 @@
+         original_chicago_backend_set(&p->dsp.chicago, parameter, value) == ORIGINAL_CHICAGO_BACKEND_OK);
+ }
+ 
+-static int runtime_note(original_runtime_part *p, unsigned key, unsigned velocity)
++static int runtime_note_backend(original_runtime_part *p, unsigned key, unsigned velocity)
+ {
+     if(p->kind==ORIGINAL_SOUND_JUNO){
+         if(velocity) return runtime_result(p,juno6_note_on(&p->dsp.juno.synth,(uint8_t)key,(uint8_t)velocity));
+@@ -165,6 +229,15 @@
+         original_chicago_backend_note(&p->dsp.chicago, key, velocity) == ORIGINAL_CHICAGO_BACKEND_OK);
+ }
+ 
++extern void engine_remote_bass_voice(const original_runtime_part *, unsigned, unsigned) __attribute__((weak));
++static int runtime_note(original_runtime_part *p, unsigned key, unsigned velocity)
++{
++    int result = runtime_note_backend(p, key, velocity);
++    if (result == ORIGINAL_RUNTIME_OK && engine_remote_bass_voice)
++        engine_remote_bass_voice(p, key, velocity);
++    return result;
++}
++
+ static int key_held(const original_runtime_part *p, unsigned key)
+ {
+     for (unsigned s = 0; s < ORIGINAL_INPUT_COUNT; ++s) if (p->keys[s][key]) return 1;
+@@ -186,6 +259,14 @@
+     if (!b || b[0] != 'A' || b[1] != 1u) return 0;
+     c->on = b[2] & 1u;
+     c->mode = (uint8_t)(b[2] >> 1 & 3u);
++#if X0X_SUPERJ6_BUILTIN_INIT
++    if (c->mode == ARP_UPDN && (b[2] & 0x40u)) c->mode = ARP_UPDN_REPEAT;
++    const unsigned division = (b[2] & 0x20u) >> 1 | b[7] >> 4;
++    if (division <= SJ6_RATE_MAX) c->division = division;
++#if X0X_SJ6_ARP_ADAPTER_NATIVE
++    c->seq_on=(b[2]>>7)&1u;
++#endif
++#endif
+     c->range = (uint8_t)((b[2] >> 3 & 3u) + 1u);
+     c->speed = arp_clamp(b[3] & 15u, 0, ARP_NSPEED - 1u);
+     c->length = (uint8_t)((b[3] >> 4) + 1u);
+@@ -207,12 +288,29 @@
+ {
+     memset(b, 0, ARP_BLOCK_BYTES);
+     b[0] = 'A'; b[1] = 1u;
+-    b[2] = (uint8_t)((c->on & 1u) | (arp_clamp(c->mode, 0, ARP_NMODES - 1u) << 1) | ((arp_clamp(c->range, 1, 4) - 1u) << 3));
++    unsigned mode = arp_clamp(c->mode, 0, ARP_NMODES - 1u), flags = 0;
++#if (defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE) || X0X_SJ6_NATIVE_RANDOM2
++    if(sj6_random_encode(mode)) mode=ARP_UP;
++#endif
++#if X0X_SUPERJ6_BUILTIN_INIT
++    const unsigned division = c->division <= SJ6_RATE_MAX ? c->division : 0;
++    /* Reserved v1 header bits hold the extended mode and division. Older
++     * readers still see UPDN and the legacy SPEED fallback. */
++    flags = (division & 16u) << 1;
++#if X0X_SJ6_ARP_ADAPTER_NATIVE
++    flags |= (c->seq_on&1u)<<7;
++#endif
++    if (mode == ARP_UPDN_REPEAT) { mode = ARP_UPDN; flags |= 0x40u; }
++#endif
++    b[2] = (uint8_t)((c->on & 1u) | (mode << 1) | ((arp_clamp(c->range, 1, 4) - 1u) << 3) | flags);
+     b[3] = (uint8_t)(arp_clamp(c->speed, 0, ARP_NSPEED - 1u) | ((arp_clamp(c->length, 1, 16) - 1u) << 4));
+     b[4] = arp_clamp(c->interval, 0, 12);
+     b[5] = arp_clamp(c->gate, 1, 100);
+     b[6] = c->src_type;
+     b[7] = c->amp2_mask & 15u;
++#if X0X_SUPERJ6_BUILTIN_INIT
++    b[7] |= (uint8_t)(division << 4);
++#endif
+     for (unsigned i = 0; i < 4; ++i) { b[8 + 2 * i] = (uint8_t)c->amp2[i]; b[9 + 2 * i] = (uint8_t)(c->amp2[i] >> 8); }
+     for (unsigned i = 0; i < ARP_STEPS; ++i) {
+         int o = c->offset[i] < -24 ? -24 : c->offset[i] > 24 ? 24 : c->offset[i];
+@@ -230,8 +328,10 @@
+  * AMP2. arpEnable / seqEnable are exclusive in the app; SEQ wins if both. */
+ int engine_arp_from_sj6(engine_arp_cfg *c, unsigned id, float v)
+ {
+-    /* 12 seqDivision stops (provisional names 1/1 .. 1/64) -> CHI_ARP_SPD_*. */
++#if !X0X_SUPERJ6_BUILTIN_INIT
++    /* Older profile's provisional mapping kept for replay compatibility. */
+     static const uint8_t div[12] = {0, 0, 2, 3, 5, 6, 7, 8, 9, 9, 9, 9};
++#endif
+     if (!c || !(v == v)) return 0;
+     if (id >= 147 && id <= 162) { c->offset[id - 147] = (int8_t)arp_round((v - .5f) * 48.f, -24, 24); return 1; }
+     if (id >= 163 && id <= 178) {
+@@ -247,23 +347,45 @@
+     }
+     switch (id) {
+     case 63:
++#if X0X_SJ6_ARP_ADAPTER_NATIVE
++        c->on=v>=.5f;
++        if(c->on)c->seq_on=0;
++#else
+         if (c->mode != ARP_SEQ || !c->on) c->on = v >= .5f;
++#endif
+         return 1;
+     case 64: {
+         int t = arp_round(v * 6.f, 0, 6);
+         c->src_type = (uint8_t)t;
++#if X0X_SJ6_ARP_ADAPTER_NATIVE && X0X_SJ6_RANDOM5_6_NATIVE
++        c->mode=(uint8_t)(t<ARP_SEQ?t:t+1);
++#else
+         if (c->mode != ARP_SEQ) c->mode = (uint8_t)(t <= ARP_UPDN ? t : ARP_UP);
++#endif
+         return 1;
+     }
+     case 65: c->range = (uint8_t)arp_round(v * 3.f + 1.f, 1, 4); return 1;
+     case 66: c->interval = (uint8_t)arp_round(v * 12.f, 0, 12); return 1;
+     case 142:
++#if X0X_SJ6_ARP_ADAPTER_NATIVE
++        c->seq_on=v>=.5f;
++        if(c->seq_on)c->on=0;
++#else
+         if (v >= .5f) { c->on = 1; c->mode = ARP_SEQ; }
+         else if (c->mode == ARP_SEQ) c->mode = (uint8_t)(c->src_type <= ARP_UPDN ? c->src_type : ARP_UP);
++#endif
+         return 1;
+     case 143: {
++#if X0X_SUPERJ6_BUILTIN_INIT
++        /* Stored division, distinct from the app's normalized rate-knob law. */
++        float index = (1.f - v) * 17.f;
++        if (!(index > -.5f && index < 17.5f)) return 0;
++        unsigned whole = index > 0.f ? (unsigned)index : 0u;
++        c->division = (uint8_t)(1u + whole + (index - whole >= .5f));
++#else
+         int k = (int)(v * 12.f);
+         c->speed = div[k < 0 ? 0 : k > 11 ? 11 : k];
++#endif
+         return 1;
+     }
+     case 144: c->gate = (uint8_t)arp_round(v * 100.f, 1, 100); return 1;
+@@ -289,16 +411,24 @@
+     switch (id) {
+     case 60: {
+         static const uint8_t dir[3] = {ARP_UP, ARP_UPDN, ARP_DOWN};
+-        if (c->mode != ARP_SEQ) c->mode = dir[arp_round(v, 0, 2)];
+-        c->src_type = dir[arp_round(v, 0, 2)];       /* remembered for SEQ off */
++        c->src_type = dir[arp_round(v, 0, 2)];
++#if X0X_SJ6_ARP_ADAPTER_NATIVE
++        c->mode = c->src_type;
++#else
++        if (c->mode != ARP_SEQ) c->mode = c->src_type;
++#endif
+         return 1;
+     }
+     case 61: c->interval = (uint8_t)arp_round(v, 0, 12); return 1;
+     case 62: c->on = v >= .5f; return 1;
+     case 63: c->range = (uint8_t)arp_round(v + 1.f, 1, 4); return 1;
+     case 65:
++#if X0X_SJ6_ARP_ADAPTER_NATIVE
++        c->seq_on = v >= .5f; /* original ARP ON is the separate master */
++#else
+         if (v >= .5f) c->mode = ARP_SEQ;
+         else if (c->mode == ARP_SEQ) c->mode = c->src_type <= ARP_UPDN ? c->src_type : ARP_UP;
++#endif
+         return 1;
+     case 66: c->length = (uint8_t)arp_round(v, 1, 16); return 1;
+     case 64: case 147: return 1;
+@@ -308,11 +438,19 @@
+ 
+ /* ---- Shared Synth One / SuperJ6 arp + ARP SEQ: the original AudioKit Synth
+  * One S1Sequencer (dsp/synthone/sequencer, MIT), one copy for both owners; the
+- * SuperJ6 app ("Synth One J6") runs the same sequencer. Live sources feed
+- * heldNoteNumbersAE (newest first, as the source); SEQUENCE playback bypasses it. */
++ * compact SuperJ6 uses this scheduler with its qualified Saga division and
++ * note rules. Live sources feed the held pool; main SEQUENCE playback bypasses it. */
+ #include "../dsp/synthone/sequencer/S1Sequencer.c"
++#if X0X_SJ6_ARP_ADAPTER_NATIVE
++static inline int sj6_arp_owner(const original_runtime_part *p)
++{ return p->kind == ORIGINAL_SOUND_JUNO && p->dsp.juno.synth.typed; }
++#endif
+ static int arp_engaged(const original_runtime_part *p)
+ {
++#if X0X_SJ6_ARP_ADAPTER_NATIVE
++    if (sj6_arp_owner(p))
++        return p->arp.cfg.on || p->arp.cfg.seq_on;
++#endif
+     return p->arp.cfg.on && (p->kind == ORIGINAL_SOUND_JUNO || p->kind == ORIGINAL_SOUND_SYNTHONE);
+ }
+ static int live_source(unsigned source) { return source != ORIGINAL_INPUT_SEQUENCE; }
+@@ -321,7 +459,50 @@
+     for (unsigned s = 0; s < ORIGINAL_INPUT_COUNT; ++s) if (live_source(s) && p->keys[s][key]) return 1;
+     return 0;
+ }
+-static void arp_key_on(void *ctx, int note, int velocity) { (void)runtime_note(ctx, (unsigned)note, (unsigned)velocity); }
++static void arp_key_on(void *ctx, int note, int velocity)
++{
++#if X0X_SJ6_LFO_TRIGGER_NATIVE
++    original_runtime_part *p=ctx;
++    if(p->kind==ORIGINAL_SOUND_JUNO && velocity)
++        juno6_lfo_trigger(&p->dsp.juno.synth,SJ6_LFO_EVENT_ARP);
++#endif
++#if X0X_SJ6_RANDOM5_6_NATIVE
++    original_runtime_part *zero_owner=ctx;
++#if X0X_SJ6_SEQ_DEST_NATIVE
++    unsigned layers=zero_owner->arp.prm.saga_layers;
++    if (zero_owner->kind==ORIGINAL_SOUND_JUNO && zero_owner->dsp.juno.synth.typed) {
++        /* BOTH also carries scheduler ownership; ordinary live/transport
++         * notes do not acquire that ownership. */
++        if (!layers) layers=3u;
++#if X0X_SJ6_LFO_TRIGGER_NATIVE
++        if (!velocity)
++            juno6_lfo_trigger(&zero_owner->dsp.juno.synth,SJ6_LFO_EVENT_ARP);
++#endif
++        int ok=runtime_result(zero_owner,juno6_arp_routed_on(&zero_owner->dsp.juno.synth,
++                                   (uint8_t)note,(uint8_t)velocity,layers));
++        if (ok==ORIGINAL_RUNTIME_OK && velocity && engine_remote_bass_voice)
++            engine_remote_bass_voice(zero_owner,(unsigned)note,(unsigned)velocity);
++        return;
++    }
++#endif
++    /* Scheduler ON is distinct from a velocity-zero MIDI packet. */
++    if (!velocity && zero_owner->kind==ORIGINAL_SOUND_JUNO && zero_owner->dsp.juno.synth.typed) {
++#if X0X_SJ6_LFO_TRIGGER_NATIVE
++        juno6_lfo_trigger(&zero_owner->dsp.juno.synth,SJ6_LFO_EVENT_ARP);
++#endif
++        (void)runtime_result(zero_owner,juno6_arp_zero_on(&zero_owner->dsp.juno.synth,(uint8_t)note));
++        return;
++    }
++#endif
++#if X0X_S1_KEYBOARD_HOLD
++    original_runtime_part *s1=ctx;
++    if (!velocity && s1->kind==ORIGINAL_SOUND_SYNTHONE) {
++        s1_part_key_on(&s1->dsp.synthone,(unsigned)note,0);
++        return;
++    }
++#endif
++    (void)runtime_note(ctx, (unsigned)note, (unsigned)velocity);
++}
+ static void arp_key_off(void *ctx, int note)
+ {
+     original_runtime_part *p = ctx;
+@@ -341,7 +522,75 @@
+     a->nheld = (uint8_t)n;
+ }
+ /* engine_arp_cfg -> the S1Parameter values the sequencer reads. */
++#if X0X_SUPERJ6_BUILTIN_INIT
++/* Build-9 Saga periods in units of 1/32 beat, indexed by stored division. */
++static uint32_t saga_step(uint32_t beat, unsigned division)
++{
++#if X0X_SJ6_ARP_ADAPTER_NATIVE
++    if(division>=SJ6_RATE_FIRST)
++        return (uint32_t)(((uint64_t)beat*(division-SJ6_RATE_FIRST+5u))/17u);
++#endif
++    static const uint16_t units[ARP_SAGA_DIVISIONS] = {
++        2, 3, 4, 6, 8, 12, 16, 24, 32, 48, 64, 96, 128, 256, 384, 512, 768, 1024
++    };
++    uint64_t ticks = ((uint64_t)beat * units[division - 1u]) >> 5;
++    return ticks > UINT32_MAX - S1_SAMPLE_TICKS ? UINT32_MAX - S1_SAMPLE_TICKS : (uint32_t)ticks;
++}
++#endif
+ static const uint8_t arp_ticks[ARP_NSPEED] = {48, 36, 32, 24, 18, 16, 12, 8, 6, 3};   /* 24 PPQN */
++#if X0X_SJ6_AUX_SEQ_NATIVE
++#if !X0X_SJ6_AUX_LFO_NATIVE || !X0X_SUPERJ6_BUILTIN_INIT
++#error SuperJ6 sequencer LFO targets require the native aux engine and Saga scheduler
++#endif
++float sj6_aux_arp_base(const original_runtime_part *p,unsigned id)
++{
++    const engine_arp_cfg *c=&p->arp.cfg;
++    switch(id) {
++        case 65: return (c->range?c->range-1u:0u)*(1.f/3.f);
++        case 66: return c->interval*(1.f/12.f);
++        case 143: {
++            unsigned beats=c->division ? saga_step(544u,c->division) :
++                544u*arp_ticks[c->speed<ARP_NSPEED?c->speed:ARP_SPEED_1_16]/24u;
++            const float knob=((float)beats*(1.f/544.f)-.3f)*(1.f/.7f);
++            return knob<0.f?0.f:knob>1.f?1.f:knob;
++        }
++        case 144:return c->gate*.01f;
++        case 145:return (c->length?c->length-1u:15u)*(1.f/15.f);
++        default:return id>=147u && id<=162u ?
++            (24.f+c->offset[id-147u])*(1.f/48.f) : 0.f;
++    }
++}
++/* Build9 Seq Division maps the normalized input to round((.3+.7*u)*17)/17.
++ * Time is represented in the existing Q8 sample scheduler domain. */
++static uint32_t sj6_aux_divtime(uint32_t beat,unsigned fine)
++{ return (uint32_t)(((uint64_t)beat*fine)/17u); }
++static unsigned sj6_aux_arp_apply(S1SequencerParams *q,const uint8_t ids[5],
++                                 const float raw[5],unsigned n)
++{
++    unsigned fine=0;
++    for(unsigned i=0;i<n;i++) {
++        const float v=raw[i];
++        switch(ids[i]) {
++            case 65:q->arpOctave=(uint8_t)(v*3.f+.5f);break;
++            case 66:q->arpInterval=(uint8_t)(v*12.f+.5f);break;
++            case 143:fine=(unsigned)((.3f+.7f*v)*17.f+.5f);break;
++            case 144:q->seqGate=(uint8_t)(v*100.f+.5f);break;
++            case 145:q->arpTotalSteps=(uint8_t)(v*15.f+1.5f);break;
++            default:q->sequencerPattern[ids[i]-147u]=(int8_t)((int)(v*48.f+.5f)-24);break;
++        }
++    }
++    return fine;
++}
++#endif
++#if X0X_SJ6_ARP_ADAPTER_NATIVE
++unsigned engine_sj6_rate_detent(const engine_arp_cfg *c)
++{
++    if(c->division>=SJ6_RATE_FIRST)return c->division-SJ6_RATE_FIRST;
++    const unsigned p=c->division?saga_step(544u,c->division):544u*arp_ticks[c->speed<ARP_NSPEED?c->speed:ARP_SPEED_1_16]/24u;
++    unsigned n=(p+16u)>>5;
++    return n<5u?0u:n>17u?12u:n-5u;
++}
++#endif
+ uint32_t engine_arp_step_frames(float bpm, unsigned speed)
+ {
+     const uint8_t *ticks = arp_ticks;
+@@ -356,6 +605,13 @@
+     S1SequencerParams *q = &p->arp.prm;
+     q->arpIsOn = c->on;
+     q->arpIsSequencer = c->mode == ARP_SEQ;
++#if X0X_SJ6_ARP_ADAPTER_NATIVE
++    if(p->kind==ORIGINAL_SOUND_JUNO && p->dsp.juno.synth.typed) {
++        q->arpIsSequencer=c->seq_on || q->arpIsSequencer;
++        q->arpIsOn=c->on || c->seq_on;
++    } else if(p->kind==ORIGINAL_SOUND_SYNTHONE)
++        q->arpIsSequencer=c->seq_on || q->arpIsSequencer;
++#endif
+     q->arpDirection = dir[c->mode < 3 ? c->mode : 0];
+     q->arpOctave = (uint8_t)(c->range ? c->range - 1 : 0);
+     q->arpInterval = c->interval;
+@@ -363,24 +619,177 @@
+     __builtin_memcpy(q->sequencerPattern, c->offset, sizeof q->sequencerPattern);
+     q->sequencerOctBoost = c->oct_mask;
+     q->sequencerNoteOn = c->on_mask;
+-    /* arpRate = project tempo; arpSeqTempoMultiplier = SPEED (exact frames). */
+     q->arpBeatsPerSample = S1_SAMPLE_TICKS;
+     q->seqGate = c->gate ? c->gate : 100;
+-    S1Sequencer_setStep(q, S1_SAMPLE_TICKS * engine_arp_step_frames(p->arp.bpm, c->speed));
++#if defined(X0X_SJ6_ZERO_GATE_PROBE) && X0X_SJ6_ZERO_GATE_PROBE
++#if !defined(X0X_HOST) || !defined(DNBOX_137_HOST_WITNESS)
++#error "Saga zero Gate is a composed host witness only"
++#endif
++    if (p->kind==ORIGINAL_SOUND_JUNO) q->seqGate=c->gate;
++#elif X0X_SJ6_NATIVE_ZERO_GATE
++    if (p->kind==ORIGINAL_SOUND_JUNO && p->dsp.juno.synth.typed) q->seqGate=c->gate;
++#endif
++#if X0X_SUPERJ6_BUILTIN_INIT
++    q->saga_notes = p->kind == ORIGINAL_SOUND_JUNO;
++    q->saga_timing = q->saga_notes && c->division && c->division <= SJ6_RATE_MAX;
++#if (defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE) || X0X_SJ6_NATIVE_RANDOM2
++    if (q->saga_notes && sj6_random_encode(c->mode))
++        q->arpDirection=ArpeggiatorMode_SagaRandom+c->mode-ARP_SAGA_RANDOM2;
++#endif
++    if (c->mode == ARP_UPDN_REPEAT)
++        q->arpDirection = q->saga_notes ? ArpeggiatorMode_UpDownRepeat : ArpeggiatorMode_UpDown;
++    if (q->saga_timing) {
++        float bpm = p->arp.bpm;
++        bpm = !(bpm >= 20.f) ? (bpm > 0.f ? 20.f : 120.f) : bpm > 275.f ? 275.f : bpm;
++        unsigned beat = (unsigned)((44100.f * 60.f * S1_SAMPLE_TICKS) / bpm + .5f);
++        S1Sequencer_setStep(q, saga_step(beat, c->division));
++    } else
++#endif
++        S1Sequencer_setStep(q, S1_SAMPLE_TICKS * engine_arp_step_frames(p->arp.bpm, c->speed));
+     q->patternRange = p->kind == ORIGINAL_SOUND_SYNTHONE ? 12 : 24;
++#if X0X_S1_SCALE_NATIVE && X0X_S1C
++    const s1c *s=&p->dsp.synthone.e;
++    q->npo=p->kind!=ORIGINAL_SOUND_SYNTHONE ? 0u :
++#if X0X_S1_USER_SCALE
++        s->tuning_index==S1C_SCALE_USER ? s->user_npo :
++#endif
++        (uint8_t)s1c_scale_npo(s->tuning_index);
++#endif
+     q->clocked = 0;
+ }
++#if X0X_S1_FENCED_CLOCK
++#if X0X_S1_CLOCK_NATIVE
++#include "s1_clock_bits.h"
++static uint32_t source_factor_bits(unsigned i)
++{
++    /* Exact binary32 values of original units[i] / 192.f. */
++    static const uint32_t f[] = {
++        0x41000000,0x40c00000,0x40800000,0x40400000,0x40000000,
++        0x3f800000,0x3f2aaaab,0x3f000000,0x3eaaaaab,0x3e800000,
++        0x3e2aaaab,0x3e000000,0x3daaaaab,0x3d800000,0x3d2aaaab,
++        0x3d000000,0x3caaaaab,0x3c800000,0x3c2aaaab
++    };
++    return f[i];
++}
++static uint32_t source_clock_rearm(original_runtime_arp *a, uint32_t *visible)
++{
++    uint32_t f = source_factor_bits(a->source_stop);
++    uint32_t k = s1_clock_step(a->source_phase, f, visible);
++    a->source_boundary = s1_clock_boundary(k + 1u, f);
++    return k;
++}
++#endif
++int original_runtime_s1_clock(original_runtime_part *p, float bpm, unsigned factor)
++{
++#if !X0X_S1_CLOCK_NATIVE
++    static const uint16_t units[]={1536,1152,768,576,384,192,128,96,64,48,32,24,16,12,8,6,4,3,2};
++#endif
++    if (!p || p->kind!=ORIGINAL_SOUND_SYNTHONE || p->status!=ORIGINAL_RUNTIME_OK ||
++        !(bpm>=1.f && bpm<=200.f) || factor>=19u) return 0;
++    original_runtime_arp *a=&p->arp;
++#if X0X_S1_CLOCK_NATIVE
++    /* The typed native editor/storage supports the complete original 1..200
++     * integer panel, not the separate fractional Ableton Link input. */
++    unsigned ibpm = (unsigned)bpm;
++    if ((float)ibpm != bpm) return 0;
++    if (!a->source_set) a->source_wait=!!a->nheld;
++    a->source_set=1; a->source_bpm=(uint8_t)ibpm; a->source_stop=(uint8_t)factor;
++    a->source_delta=s1_clock_delta_bits(bpm/60.f);
++    (void)source_clock_rearm(a, 0);
++#else
++    if (!a->source_set) a->source_wait=!!a->nheld;
++    a->source_set=1; a->source_bpm=bpm; a->source_stop=(uint8_t)factor;
++    a->source_delta=(bpm/60.f)/44100.;
++    a->source_factor=units[factor]/192.f;
++#endif
++    return 1;
++}
++static S1ClockPulse source_clock_sample(original_runtime_arp *a)
++{
++    const int prev=a->seq.previousHeldNoteNumbersAECount, first=!prev&&a->nheld, on=a->prm.arpIsOn==1;
++    S1ClockPulse p={on&&(first||(prev&&!a->nheld)),0,0};
++    if (p.reset) {
++        a->source_phase=0;
++#if X0X_S1_CLOCK_NATIVE
++        a->source_boundary=0; /* next sample initializes exact boundary */
++#endif
++    }
++    if (on || (a->seq.sequencerLastNotesCount && !p.reset)) {
++#if X0X_S1_CLOCK_NATIVE
++        if (!a->source_boundary) (void)source_clock_rearm(a, 0);
++        a->source_phase = s1_clock_add(a->source_phase, a->source_delta);
++        const int crossed = a->source_phase >= a->source_boundary;
++        p.trigger = first || crossed;
++        if (p.trigger && on && a->nheld) {
++            uint32_t k;
++            (void)source_clock_rearm(a, &k);
++            if (k >= S1_CINTMAX) p.trigger=0;
++            else p.index=(int)k;
++        } else if (crossed) {
++            (void)source_clock_rearm(a, 0);
++        }
++#else
++        const double r0=__builtin_fmod(a->source_phase,a->source_factor);
++        a->source_phase+=a->source_delta;
++        const double r1=__builtin_fmod(a->source_phase,a->source_factor);
++        p.trigger=first||r1<r0;
++        if (p.trigger && on && a->nheld) {
++            const double i=a->source_phase/a->source_factor;
++            if (i>=2147483648.) p.trigger=0;
++            else p.index=(int)i;
++        }
++#endif
++    }
++    return p;
++}
++#endif
++#if X0X_SJ6_SEQ_DEST_NATIVE
++void original_runtime_sj6_destination(original_runtime_part *p,unsigned destination)
++{
++    unsigned prior=p->arp.prm.saga_layers;
++    if (prior==destination || destination>2u) return;
++    p->arp.prm.saga_layers=(uint8_t)destination;
++    if (p->status==ORIGINAL_RUNTIME_OK && p->kind==ORIGINAL_SOUND_JUNO && p->dsp.juno.synth.typed) {
++        unsigned oldmask=prior ? prior : 3u, newmask=destination ? destination : 3u;
++        if (oldmask&~newmask)
++            juno6_arp_release_routes(&p->dsp.juno.synth,oldmask&~newmask);
++    }
++}
++#endif
+ void original_runtime_arp_clock(original_runtime_part *p, uint64_t pos_q8, uint32_t beat_q8, int start)
+ {
+     if (!p) return;
++#if X0X_SJ6_SEQ_SETTINGS_NATIVE
++    if (p->arp.prm.saga_snap_native && !beat_q8 && p->arp.prm.clocked) {
++        /* External sync dropped. An onset still waiting enters free time;
++         * do not retrigger a phrase that already got its first boundary. */
++        arp_params(p);
++        if (p->arp.seq.saga_wait_first) p->arp.seq.previousHeldNoteNumbersAECount=0;
++        p->arp.seq.saga_wait_first=0;
++        p->arp.clk_force=0;
++    }
++#endif
+     p->arp.clk_pos = pos_q8; p->arp.clk_beat = beat_q8;
+     if (start) p->arp.clk_force = (uint8_t)arp_engaged(p);
+ }
+ /* Lock the sequencer to the transport: grid = beat * SPEED ticks / 24. */
+-static void arp_follow_clock(original_runtime_arp *a)
++static void arp_follow_clock(original_runtime_arp *a
++#if X0X_SJ6_AUX_SEQ_NATIVE
++    ,unsigned aux_div
++#endif
++)
+ {
+     const unsigned sp = a->cfg.speed < ARP_NSPEED ? a->cfg.speed : ARP_SPEED_1_16;
+-    uint32_t len = (uint32_t)((uint64_t)a->clk_beat * arp_ticks[sp] / 24u);
++    uint32_t len;
++#if X0X_SJ6_AUX_SEQ_NATIVE
++    if(aux_div)len=sj6_aux_divtime(a->clk_beat,aux_div);
++    else
++#endif
++#if X0X_SUPERJ6_BUILTIN_INIT
++    if (a->prm.saga_timing) len = saga_step(a->clk_beat, a->cfg.division);
++    else
++#endif
++        len = (uint32_t)((uint64_t)a->clk_beat * arp_ticks[sp] / 24u);
+     if (len < 2u * S1_SAMPLE_TICKS) len = 2u * S1_SAMPLE_TICKS;
+     a->prm.arpBeatsPerSample = S1_SAMPLE_TICKS;
+     if (len != a->prm.arpSeqTempoMultiplier || !a->prm.clocked) S1Sequencer_setStep(&a->prm, len);
+@@ -396,16 +805,91 @@
+     S1Sequencer_clock(&a->seq, &a->prm, step, phase, a->clk_force);
+     a->clk_force = 0;
+ }
++#if defined(X0X_SJ6_GATE_DEADLINE_PROBE) && X0X_SJ6_GATE_DEADLINE_PROBE
++int original_runtime_sj6_gate_edit(original_runtime_part *p,unsigned percent)
++{
++    if (!p || p->status!=ORIGINAL_RUNTIME_OK || p->kind!=ORIGINAL_SOUND_JUNO || percent>100u)
++        return 0;
++    p->arp.cfg.gate=(uint8_t)percent;
++    S1Sequencer_liveGate(&p->arp.seq,&p->arp.prm,percent);
++    return 1;
++}
++#endif
++#if X0X_SJ6_NATIVE_POSITIVE_GATE
++int original_runtime_sj6_live_gate(original_runtime_part *p,unsigned gate)
++{
++    if(!p || p->status!=ORIGINAL_RUNTIME_OK || p->kind!=ORIGINAL_SOUND_JUNO ||
++       !p->dsp.juno.synth.typed || gate>100u
++#if !X0X_SJ6_NATIVE_ZERO_GATE
++       || gate<1u
++#endif
++       ) return 0;
++    p->arp.cfg.gate=(uint8_t)gate;
++    S1Sequencer_liveGate(&p->arp.seq,&p->arp.prm,gate);
++    return 1;
++}
++#endif
+ int original_runtime_arp_config(original_runtime_part *p, const engine_arp_cfg *c)
+ {
+     if (!p || !c) return 0;
+     int ok = p->status == ORIGINAL_RUNTIME_OK, was = ok && arp_engaged(p);
+     original_runtime_arp *a = &p->arp;
++#if X0X_SJ6_ARP_ADAPTER_NATIVE
++    int seq_changed=0;
++    if(was && p->kind==ORIGINAL_SOUND_JUNO && p->dsp.juno.synth.typed) {
++        seq_changed=a->cfg.seq_on!=c->seq_on;
++        if (a->cfg.on == c->on && !seq_changed &&
++            (a->cfg.mode == ARP_SEQ) == (c->mode == ARP_SEQ)) {
++            /* Build9 writes Type/Octave/Interval, Division, Length and
++             * pattern cells into the running Saga. Only changing the active
++             * owner resets the phrase; editing these cannot turn notes off. */
++#if X0X_SJ6_GATE_DEADLINE_PROBE || X0X_SJ6_NATIVE_POSITIVE_GATE
++            /* The active Note Off has its own old deadline even when the
++             * knob edit changes only Division or aggregates several fields. */
++            if (c->division != a->cfg.division || c->speed != a->cfg.speed ||
++                c->gate != a->cfg.gate)
++                latchGateDeadline(&a->seq, &a->prm);
++#endif
++            a->cfg = *c;
++            arp_params(p);
++            return 1;
++        }
++    }
++#endif
+     if (was) S1Sequencer_reset(&a->seq, 0, p, arp_key_off);
+     a->cfg = *c;
+     if (!ok) return 0;
+     arp_params(p);
+     int now = arp_engaged(p);
++#if X0X_SJ6_ARP_ADAPTER_NATIVE
++    if(now && was && seq_changed) {
++        S1Sequencer_init(&a->seq);  /* new mode starts without losing held keys */
++        a->fired=0;
++    }
++    if (now != was && sj6_arp_owner(p)) {
++        /* The physical held list belongs to the key input, not the active
++         * mode. Keep each note's velocity and playing order on both switches. */
++        if (now) {
++            for (unsigned key=0; key<128; ++key)
++                if (live_held(p,key) && !p->keys[ORIGINAL_INPUT_SEQUENCE][key])
++                    (void)runtime_note(p,key,0);
++        } else {
++            /* Any held key outside the bounded cache still receives its
++             * fallback attack. Replay cached keys oldest-first for Mono. */
++            for (unsigned key=0; key<128; ++key) {
++                if (!live_held(p,key)) continue;
++                unsigned i=0;
++                while(i<a->nheld && a->held[i].noteNumber!=key) ++i;
++                if (i==a->nheld) (void)runtime_note(p,key,a->vel ? a->vel : 100u);
++            }
++            for (unsigned i=a->nheld; i; --i)
++                (void)runtime_note(p,a->held[i-1].noteNumber,a->held[i-1].velocity);
++        }
++        S1Sequencer_init(&a->seq);
++        a->fired=0;
++        return 1;
++    }
++#endif
+     if (now && !was) a->nheld = 0;
+     if (now != was) {                  /* direct live notes <-> the arp */
+         for (unsigned key = 0; key < 128; ++key)
+@@ -428,18 +912,40 @@
+     *frames = p->arp.age;
+     return 1;
+ }
++#if X0X_SJ6_LFO_TRIGGER_NATIVE
++static void sj6_lfo_note_set_changed(original_runtime_part *p)
++{
++    if(p->kind!=ORIGINAL_SOUND_JUNO || !juno6_lfo_snapback_active(&p->dsp.juno.synth))return;
++    for(unsigned s=0;s<ORIGINAL_INPUT_COUNT;s++)
++        for(unsigned key=0;key<128u;key++)if(p->keys[s][key])return;
++    juno6_lfo_trigger(&p->dsp.juno.synth,SJ6_LFO_EVENT_EMPTY);
++}
++#endif
+ /* A live or sequenced key's count already went down: the arp, or the voice. */
+ static int live_off(original_runtime_part *p, unsigned source, unsigned key)
+ {
+-    if (live_source(source) && arp_engaged(p)) {
+-        if (!live_held(p, key)) arp_hold(p, key, 0);
+-        return ORIGINAL_RUNTIME_OK;
++#if X0X_SJ6_LFO_TRIGGER_NATIVE && X0X_ARP_ENGINE
++    sj6_lfo_note_set_changed(p);
++#endif
++    if (live_source(source)) {
++        int engaged=arp_engaged(p);
++        if (engaged
++#if X0X_SJ6_ARP_ADAPTER_NATIVE
++            || sj6_arp_owner(p)
++#endif
++           ) {
++            if (!live_held(p,key)) arp_hold(p,key,0);
++            if (engaged) return ORIGINAL_RUNTIME_OK;
++        }
+     }
+     return key_held(p, key) ? ORIGINAL_RUNTIME_OK : runtime_note(p, key, 0);
+ }
+ #else
+ static int live_off(original_runtime_part *p, unsigned source, unsigned key)
+ {
++#if X0X_SJ6_LFO_TRIGGER_NATIVE && X0X_ARP_ENGINE
++    sj6_lfo_note_set_changed(p);
++#endif
+     (void)source;
+     return key_held(p, key) ? ORIGINAL_RUNTIME_OK : runtime_note(p, key, 0);
+ }
+@@ -481,7 +987,48 @@
+     return ORIGINAL_RUNTIME_OK;
+ }
+ 
++#if X0X_SJ6_VELOCITY_SETTINGS
++/* Original MIDI transform: Float32 raw/127, then binary64 pow with
++ * 1/taper and truncate after multiplication by 127. Exact discrete map
++ * for Medium (1), Soft (.4), and Hard (4), including Float32 truncation. */
++static const uint8_t sj6_midi_velocity[3][128]={
++    {
++        0,0,1,2,3,4,5,6,7,9,9,11,11,13,13,15,
++        15,16,18,19,19,20,22,23,23,24,26,27,27,28,30,31,
++        31,32,33,34,36,37,38,39,39,40,41,42,44,45,46,47,
++        47,48,49,50,52,53,54,55,55,56,57,58,60,61,62,63,
++        63,64,65,66,67,68,69,70,72,73,74,75,76,77,78,79,
++        79,80,81,82,83,84,85,86,88,89,90,91,92,93,94,95,
++        95,96,97,98,99,100,101,102,104,105,106,107,108,109,110,111,
++        111,112,113,114,115,116,117,118,120,121,122,123,124,125,126,127,
++    },
++    {
++        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
++        0,0,0,1,1,1,1,1,1,2,2,2,2,3,3,3,
++        4,4,4,5,5,5,6,6,7,7,7,8,8,9,10,10,
++        11,11,12,12,13,14,14,15,16,17,17,18,19,20,21,22,
++        22,23,24,25,26,27,28,29,30,31,32,34,35,36,37,38,
++        39,41,42,43,45,46,47,49,50,52,53,55,56,58,59,61,
++        63,64,66,68,69,71,73,75,77,78,80,82,84,86,88,90,
++        92,94,96,99,101,103,105,107,110,112,114,117,119,122,124,127,
++    },
++    {
++        0,37,44,49,53,56,59,61,63,65,67,68,70,71,73,74,
++        75,76,77,78,80,80,81,82,83,84,85,86,87,87,88,89,
++        89,90,91,92,92,93,93,94,95,95,96,96,97,97,98,99,
++        99,100,100,101,101,102,102,103,103,103,104,104,105,105,106,106,
++        107,107,107,108,108,109,109,109,110,110,110,111,111,112,112,112,
++        113,113,113,114,114,114,115,115,115,116,116,116,117,117,117,118,
++        118,118,119,119,119,119,120,120,120,121,121,121,121,122,122,122,
++        123,123,123,123,124,124,124,124,125,125,125,125,126,126,126,127,
++    },
++};
++static int runtime_key_configured(original_runtime_part *p,unsigned source,unsigned key,unsigned velocity,unsigned code)
++#endif
++
++#if !X0X_SJ6_VELOCITY_SETTINGS
+ int original_runtime_key(original_runtime_part *p, unsigned source, unsigned key, unsigned velocity)
++#endif
+ {
+     if (!p || source >= ORIGINAL_INPUT_COUNT || key > 127 || velocity > 127) return 0;
+     if (p->status != ORIGINAL_RUNTIME_OK) return p->status;
+@@ -496,11 +1043,36 @@
+             ++p->stale_timers;
+         }
+         ++*held;
++#if X0X_SJ6_VELOCITY_SETTINGS
++        if (code>=3u && code<6u) velocity=87u;  /* Build 9 input listener, never Note Off */
++#endif
++#if X0X_SJ6_LFO_TRIGGER_NATIVE
++        if(p->kind==ORIGINAL_SOUND_JUNO)
++            juno6_lfo_trigger(&p->dsp.juno.synth,SJ6_LFO_EVENT_KEY);
++#endif
+ #if X0X_ARP_ENGINE
+-        if (live_source(source) && arp_engaged(p)) {
+-            p->arp.vel = (uint8_t)velocity;
+-            arp_hold(p, key, velocity ? velocity : 1u);
+-            return ORIGINAL_RUNTIME_OK;
++        if (live_source(source)) {
++            int engaged=arp_engaged(p);
++            if (engaged
++#if X0X_SJ6_ARP_ADAPTER_NATIVE
++                || sj6_arp_owner(p)
++#endif
++               ) {
++                p->arp.vel = (uint8_t)velocity;
++                arp_hold(p,key,velocity);
++                if (engaged) return ORIGINAL_RUNTIME_OK;
++            }
++        }
++#endif
++#if X0X_SJ6_VELOCITY_SETTINGS
++        /* The original only applies MIDI taper to direct external events.
++         * Its arp captures the authored velocity before this mapping. */
++        const unsigned curve=code%3u;
++        if(code<6u && source<ORIGINAL_INPUT_KEYS){
++            velocity=sj6_midi_velocity[curve][velocity];
++            /* A positive MIDI input can map to zero, while still meaning
++             * an attack and possessing a matching later Note Off. */
++            if(!velocity)return runtime_result(p,juno6_arp_zero_on(&p->dsp.juno.synth,(uint8_t)key));
+         }
+ #endif
+         return runtime_note(p, key, velocity);
+@@ -516,6 +1088,36 @@
+         p->stale_pending[source][key >> 5] &= ~(UINT32_C(1) << (key & 31u));
+     return live_off(p, source, key);
+ }
++
++#if X0X_SJ6_VELOCITY_SETTINGS
++int original_runtime_key(original_runtime_part *p,unsigned source,unsigned key,unsigned velocity)
++{ return runtime_key_configured(p,source,key,velocity,6u); }
++int original_runtime_sj6_key(original_runtime_part *p,unsigned source,unsigned key,unsigned velocity,unsigned code)
++{
++    if(source>=ORIGINAL_INPUT_SEQUENCE || !p || p->kind!=ORIGINAL_SOUND_JUNO || code>5u)code=6u;
++    return runtime_key_configured(p,source,key,velocity,code);
++}
++#endif
++
++#if X0X_S1_KEYBOARD_HOLD
++/* Manager's direct pressAdded, not another external MIDI Note On packet.
++ * Its release velocity may be zero; that is an actual silent press. The
++ * physical MIDI admission already owns the key, so reordering is not a
++ * fresh token and must not grow any input source's held counter. */
++void original_runtime_s1_repress(original_runtime_part *p,unsigned key,unsigned velocity)
++{
++    if(p->kind!=ORIGINAL_SOUND_SYNTHONE || p->status!=ORIGINAL_RUNTIME_OK)return;
++#if X0X_ARP_ENGINE
++    if(arp_engaged(p)){
++        arp_hold(p,key,1u);
++        p->arp.vel=p->arp.held[0].velocity=(uint8_t)velocity;
++        return;
++    }
++#endif
++    s1_part_key_on(&p->dsp.synthone,key,velocity);
++    if(velocity && engine_remote_bass_voice)engine_remote_bass_voice(p,key,velocity);
++}
++#endif
+ 
+ int original_runtime_release_source(original_runtime_part *p, unsigned source)
+ {
+@@ -564,6 +1166,13 @@
+         juno6_all_off(&p->dsp.juno.synth);
+         memset(p->dsp.juno.chorus.delay,0,sizeof p->dsp.juno.chorus.delay);
+         p->dsp.juno.chorus.write=0;ok=1;
++#if X0X_SJ6_NATIVE_LIMITER
++        p->dsp.juno.limiter.gain=1.f;
++#endif
++#if X0X_SJ6_NATIVE_ROOM
++        sj6_room_reset(&p->dsp.juno.room);
++        sj6_fatten_reset(&p->dsp.juno.room);
++#endif
+     } else if (p->kind == ORIGINAL_SOUND_SYNTHONE) {
+         s1_part_all_off(&p->dsp.synthone);
+         ok = 1;
+@@ -698,17 +1307,75 @@
+          * block is split where it turns notes on or off. */
+         original_runtime_arp *a = &p->arp;
+         unsigned done = 0;
+-        if (a->clk_beat) arp_follow_clock(a);
++        const S1SequencerParams *active=&a->prm;
++#if X0X_SJ6_AUX_SEQ_NATIVE
++        S1SequencerParams mod;
++        uint8_t ids[5];
++        float values[5];
++        unsigned n=p->kind==ORIGINAL_SOUND_JUNO && p->dsp.juno.synth.typed ?
++            juno6_aux_seq_values(&p->dsp.juno.synth,ids,values) : 0u;
++        unsigned aux_div=0;
++        if(n) {
++            mod=a->prm;
++            aux_div=sj6_aux_arp_apply(&mod,ids,values,n);
++            active=&mod;
++        }
++#endif
++        if (a->clk_beat) arp_follow_clock(a
++#if X0X_SJ6_AUX_SEQ_NATIVE
++            ,aux_div
++#endif
++        );
++#if X0X_SJ6_AUX_SEQ_NATIVE
++        if(n) {
++            uint32_t period=a->prm.arpSeqTempoMultiplier;
++            mod.clocked=a->prm.clocked;
++            if(!a->clk_beat && aux_div) {
++                float bpm=a->bpm;
++                bpm=!(bpm>=20.f)?(bpm>0.f?20.f:120.f):bpm>275.f?275.f:bpm;
++                unsigned beat=(unsigned)((44100.f*60.f*S1_SAMPLE_TICKS)/bpm+.5f);
++                period=sj6_aux_divtime(beat,aux_div);
++            }
++            /* Cache the new duration for future attacks, not an existing latch. */
++            S1Sequencer_setStep(&mod,period);
++        }
++#endif
++#if X0X_S1_FENCED_CLOCK
++        const int source_available=a->source_set && p->kind==ORIGINAL_SOUND_SYNTHONE &&
++            !a->clk_beat && a->prm.seqGate==100;
++        if (!source_available) a->source_wait=!!a->source_set;
++        else if (a->source_wait && !a->nheld) {
++            a->source_wait=0; a->source_phase=0; a->prm.clocked=0;
++#if X0X_S1_CLOCK_NATIVE
++            a->source_boundary=0;
++#endif
++        }
++#endif
+         for (unsigned i = 0; i < frames; ++i) {
+-            if (S1Sequencer_willFire(&a->seq, &a->prm, a->nheld)) {
++#if X0X_S1_FENCED_CLOCK
++            if (source_available && !a->source_wait) {
++                const S1ClockPulse pulse=source_clock_sample(a);
++                if ((pulse.reset||pulse.trigger) && i>done) {
++                    if (render_backend(p,w,left+done,right+done,i-done)!=ORIGINAL_RUNTIME_OK)
++                        return p->status;
++                    done=i;
++                }
++                S1Sequencer_processOriginal(&a->seq,&a->prm,a->held,a->nheld,p,arp_key_on,arp_key_off,&pulse);
++                if (p->status!=ORIGINAL_RUNTIME_OK) return p->status;
++                if (pulse.trigger&&a->seq.gateOpen) { a->fired=1; a->age=0; }
++                a->age+=a->age<UINT32_MAX;
++                continue;
++            }
++#endif
++            if (S1Sequencer_willFire(&a->seq, active, a->nheld)) {
+                 if (i > done && render_backend(p, w, left + done, right + done, i - done) != ORIGINAL_RUNTIME_OK)
+                     return p->status;
+                 done = i;
+                 int before = a->seq.mStepCounter, first = !a->seq.previousHeldNoteNumbersAECount && a->nheld;
+-                S1Sequencer_process(&a->seq, &a->prm, a->held, a->nheld, p, arp_key_on, arp_key_off);
++                S1Sequencer_process(&a->seq, active, a->held, a->nheld, p, arp_key_on, arp_key_off);
+                 if (p->status != ORIGINAL_RUNTIME_OK) return p->status;
+                 if (a->seq.gateOpen && (first || a->seq.mStepCounter != before)) { a->fired = 1; a->age = 0; }
+-            } else S1Sequencer_process(&a->seq, &a->prm, a->held, a->nheld, p, arp_key_on, arp_key_off);
++            } else S1Sequencer_process(&a->seq, active, a->held, a->nheld, p, arp_key_on, arp_key_off);
+             a->age += a->age < UINT32_MAX;
+         }
+         return frames > done ? render_backend(p, w, left + done, right + done, frames - done) : p->status;
+@@ -717,21 +1384,222 @@
+     return render_backend(p, w, left, right, frames);
+ }
+ 
+-static int render_backend(original_runtime_part *p, original_runtime_workspace *w,
+-    float *left, float *right, unsigned frames)
+-{
+-    int ok;
+-    if(p->kind==ORIGINAL_SOUND_JUNO){
++#if X0X_SJ6_NATIVE_ROOM
++/* Build9 uses an independent AKDecimator with 30 percent wet and 1.3 gain.
++ * This compact receiver preserves the decimation control direction, rate law,
++ * wet path and warm timing without claiming the Apple AU's DSP bit identity. */
++static void sj6_crush_process(original_runtime_part *p,float *left,float *right,unsigned frames)
++{
++    if(!p->dsp.juno.crush.active)return;
++    const float step=p->dsp.juno.crush.step;
++    float phase=p->dsp.juno.crush.phase;
++    float l=p->dsp.juno.crush.hold[0],r=p->dsp.juno.crush.hold[1];
++    for(unsigned i=0;i<frames;++i){
++        phase+=step;
++        if(phase>=1.f){phase-=1.f;l=left[i];r=right[i];}
++        left[i]=1.3f*(.7f*left[i]+.3f*l);
++        right[i]=1.3f*(.7f*right[i]+.3f*r);
++    }
++    p->dsp.juno.crush.phase=phase;
++    p->dsp.juno.crush.hold[0]=l;
++    p->dsp.juno.crush.hold[1]=r;
++}
++#endif
++
+ #if X0X_SUPERJ6_FACTORY
+-        ok=juno6_render_stereo(&p->dsp.juno.synth,left,right,frames);
+-        if(ok){
+-            juno6_chorus_process(&p->dsp.juno.chorus,left,right,frames);
++#if X0X_SJ6_AUX_LFO_NATIVE
++#include "../dsp/juno6_aux_catalog.h"
++#include "../dsp/juno6_aux_fx.h"
++float juno6_aux_master_gain(float);
++#if (defined(X0X_HOST) && defined(X0X_SJ6_ALT3_WITNESS)) || X0X_SJ6_ALT3_NATIVE
++void juno6_alt3_process_mod(juno6_t *,float *,float *,unsigned,float,float);
++#endif
++#if X0X_SJ6_NATIVE_DELAY
++float juno6_aux_delay_frames(const juno6_t *,unsigned);
++#endif
++#endif
++static void sj6_run_effects(original_runtime_part *p,float *left,float *right,unsigned frames
++#if X0X_SJ6_AUX_LFO_NATIVE
++                            ,const float *mod
++#endif
++                            )
++{
++#if (defined(X0X_HOST) && defined(X0X_SJ6_ALT3_WITNESS)) || X0X_SJ6_ALT3_NATIVE
++#if X0X_SJ6_AUX_LFO_NATIVE
++            if(mod && (mod[3]>=0.f || mod[4]>=0.f))
++                juno6_alt3_process_mod(&p->dsp.juno.synth,left,right,frames,mod[3],mod[4]);
++            else
++#endif
++            juno6_alt3_process(&p->dsp.juno.synth,left,right,frames); /* after HPF, before downstream FX */
++#endif
++#if X0X_SJ6_NATIVE_J60
++            if(p->dsp.juno.chorus.j60.selected)
++                juno6_j60_process(&p->dsp.juno.chorus,left,right,frames);
++            else
++#endif
++#if X0X_SJ6_NATIVE_CLASSIC
++            if(p->dsp.juno.chorus.classic_native.typed)
++                juno6_classic_native_process(&p->dsp.juno.chorus,left,right,frames);
++            else
++#endif
++#if X0X_SJ6_CLASSIC_I_PROBE
++            if(p->classic_i_authored && p->dsp.juno.chorus.factory_mode>=JUNO6_CHORUS_OFF) {
++                classic_wrapper_process(&p->classic_i_effect,p->classic_i_sample,left,right,frames);
++            } else
++#endif
++                juno6_chorus_process(&p->dsp.juno.chorus,left,right,frames);
++#if X0X_SJ6_CLASSIC_I_PROBE
++            p->classic_i_sample+=frames;
++#endif
++#if (defined(X0X_HOST) && defined(X0X_SJ6_DELAY_WITNESS)) || X0X_SJ6_NATIVE_DELAY
++            juno6_delay24_process(&p->dsp.juno.synth,left,right,frames);
++#endif
++#if X0X_SJ6_NATIVE_UNISON
++            #if X0X_SJ6_AUX_LFO_NATIVE
++            if(mod && (mod[1]>=0.f || mod[2]>=0.f))
++                juno6_unison_process_mod(&p->dsp.juno.synth,left,right,frames,mod[1],mod[2]);
++            else
++#endif
++            juno6_unison_process(&p->dsp.juno.synth,left,right,frames);
++#endif
++#if X0X_SJ6_NATIVE_ROOM
++            sj6_crush_process(p,left,right,frames);
++            sj6_room_process(&p->dsp.juno.room,left,right,frames);
++#endif
++#if X0X_SJ6_NATIVE_LIMITER
++            sj6_limiter_process(&p->dsp.juno.limiter,left,right,frames);
++#endif
+             /* The original master attenuator follows the instrument effects. */
+-            float gain=p->dsp.juno.synth.master_gain;
++#if X0X_SJ6_AUX_LFO_NATIVE
++            const float gain=mod && mod[0]>=0.f?mod[0]:p->dsp.juno.synth.master_gain;
++#else
++            const float gain=p->dsp.juno.synth.master_gain;
++#endif
+             if(gain!=1.f) for(unsigned i=0;i<frames;++i){
+                 left[i]*=gain;
+                 right[i]*=gain;
+             }
++}
++#if X0X_SJ6_AUX_LFO_NATIVE
++/* A temporary receiver write is scoped to the actual audio it modulates.
++ * Do not use UI setters here: they could reset history or mutate project
++ * state. Audio filter/tape/feedback histories continue across every span. */
++static void sj6_run_modulated_effects(original_runtime_part *p,float *left,float *right,unsigned frames,
++                                      const uint8_t code[SJ6_AUX_FX_ROUTES])
++{
++    juno6_t *s=&p->dsp.juno.synth;
++    float mod[5]={-1.f,-1.f,-1.f,-1.f,-1.f};
++#if X0X_SJ6_NATIVE_LIMITER
++    sj6_limiter_t *lim=&p->dsp.juno.limiter;
++    const sj6_limiter_t limiter_before=*lim;
++    unsigned limited=0;
++#endif
++#if X0X_SJ6_NATIVE_ROOM
++    sj6_room_t *room=&p->dsp.juno.room;
++    const float fb=room->fb,hp=room->hp_coeff,mix=room->mix,rate=room->rate,depth=room->depth,
++                crush=p->dsp.juno.crush.step;
++#endif
++#if X0X_SJ6_NATIVE_DELAY
++    float delay_saved[3]={s->delay24.current,s->delay24.fb,s->delay24.wet};
++    uint16_t delay_ramp[3]={s->delay24.ramp[0],s->delay24.ramp[1],s->delay24.ramp[2]};
++    unsigned delay_mask=0;
++    const uint8_t saved_refused=s->delay24.clock_refused;
++#endif
++    for(unsigned i=0;i<SJ6_AUX_FX_ROUTES;i++)if(code[i]){
++        const int id=sj6_aux_destination_id(juno6_aux_fx_route(s,i));
++        unsigned raw=code[i]-1u;
++        const float u=(float)raw*(1.f/127.f);
++        switch(id){
++        case 0:mod[0]=juno6_aux_master_gain(u);break;
++#if X0X_SJ6_NATIVE_LIMITER
++        case 17:sj6_rage_apply(lim,u);limited=1u;break;
++#endif
++#if (defined(X0X_HOST) && defined(X0X_SJ6_ALT3_WITNESS)) || X0X_SJ6_ALT3_NATIVE
++        case 103:mod[3]=u;break;
++        case 104:mod[4]=u;break;
++#endif
++#if X0X_SJ6_NATIVE_UNISON
++        case 60:mod[1]=u;break;
++        case 61:mod[2]=u;break;
++#endif
++#if X0X_SJ6_NATIVE_ROOM
++        case 13:room->fb=.4f+.6f*u;break;
++        case 14:room->hp_coeff=1.f-fm_expf(-6.2831853f*sj6_room_locut(raw)*
++                                       (SJ6_ROOM_STRIDE/44100.f));break;
++        case 15:room->mix=u;break;
++        case 22:room->rate=sj6_room_rate_clocked(raw,room->clock_bpm,room->clock_sync)*
++                           (1.f/44100.f);break;
++        case 23:room->depth=u;break;
++        case 108:p->dsp.juno.crush.step=1.f/(1.f+31.f*fm_powf(u,1.23f));break;
++#endif
++#if X0X_SJ6_NATIVE_DELAY
++        case 25:{
++            float t=juno6_aux_delay_frames(s,raw);
++            if(t>0.f){s->delay24.current=t;s->delay24.clock_refused=0;delay_mask|=1u;}
++            break;
++        }
++        case 26:s->delay24.fb=.99f*u;delay_mask|=2u;break;
++        case 27:if(s->delay24.enabled){s->delay24.wet=.9f*fm_powf(u,1.1f);delay_mask|=4u;}break;
++#endif
++        default:break;
++        }
++    }
++#if X0X_SJ6_NATIVE_DELAY
++    for(unsigned k=0;k<3u;k++)if(delay_mask&(1u<<k))s->delay24.ramp[k]=0;
++#endif
++    sj6_run_effects(p,left,right,frames,mod);
++#if X0X_SJ6_NATIVE_LIMITER
++    if(limited){
++        const float live_gain=lim->gain;
++        *lim=limiter_before;
++        lim->gain=live_gain;
++    }
++#endif
++#if X0X_SJ6_NATIVE_DELAY
++    if(delay_mask&1u){s->delay24.current=delay_saved[0];s->delay24.clock_refused=saved_refused;}
++    if(delay_mask&2u)s->delay24.fb=delay_saved[1];
++    if(delay_mask&4u)s->delay24.wet=delay_saved[2];
++    for(unsigned k=0;k<3u;k++)if(delay_mask&(1u<<k))s->delay24.ramp[k]=delay_ramp[k];
++#endif
++#if X0X_SJ6_NATIVE_ROOM
++    room->fb=fb;room->hp_coeff=hp;room->mix=mix;room->rate=rate;room->depth=depth;
++    p->dsp.juno.crush.step=crush;
++#endif
++}
++#endif
++#endif
++
++static int render_backend(original_runtime_part *p, original_runtime_workspace *w,
++    float *left, float *right, unsigned frames)
++{
++    int ok;
++    if(p->kind==ORIGINAL_SOUND_JUNO){
++#if X0X_SUPERJ6_FACTORY
++#if X0X_SJ6_AUX_LFO_NATIVE
++        juno6_t *s=&p->dsp.juno.synth;
++        sj6_aux_fx_schedule sched;
++        sched.count=0;
++        for(unsigned i=0;i<SJ6_AUX_FX_ROUTES;i++)if(sj6_aux_fx_supported(sj6_aux_destination_id(juno6_aux_fx_route(s,i)))){
++            s->aux_fx_schedule=&sched;
++            break;
++        }
++        ok=juno6_render_stereo(s,left,right,frames);
++        s->aux_fx_schedule=0;
++        if(ok){
++            if(!sched.count)sj6_run_effects(p,left,right,frames,0);
++            else {
++                if(sched.event[0].at)sj6_run_effects(p,left,right,sched.event[0].at,0);
++                for(unsigned i=0;i<sched.count;i++){
++                    unsigned at=sched.event[i].at;
++                    unsigned to=i+1u<sched.count?sched.event[i+1u].at:frames;
++                    if(to>at)sj6_run_modulated_effects(p,left+at,right+at,to-at,sched.event[i].code);
++                }
++            }
++#else
++        ok=juno6_render_stereo(&p->dsp.juno.synth,left,right,frames);
++        if(ok){
++            sj6_run_effects(p,left,right,frames);
++#endif
+         }
+ #else
+         juno6_render(&p->dsp.juno.synth,left,frames);
+--- a/firmware/src/app/original_runtime.h
++++ b/firmware/src/app/original_runtime.h
+@@ -9,7 +9,15 @@
+ #include "../dsp/original_chicago_backend.h"
+ #include "../dsp/original_miami_backend.h"
+ #include "../dsp/juno6.h"
++#include "../dsp/sj6_native_limiter.h"
++#include "../dsp/sj6_native_room.h"
+ #include "engine_arp.h"
++#if X0X_SJ6_CLASSIC_I_PROBE
++#ifndef X0X_HOST
++#error scoped classic I host only
++#endif
++#include "../dsp/classic_i/wrapper.h"
++#endif
+ 
+ enum { ORIGINAL_INPUT_USB, ORIGINAL_INPUT_BLE, ORIGINAL_INPUT_TRS,
+        ORIGINAL_INPUT_KEYS, ORIGINAL_INPUT_SEQUENCE, ORIGINAL_INPUT_COUNT };
+@@ -18,7 +26,17 @@
+ typedef union {
+     original_chicago_backend chicago;
+     original_miami_backend miami;
+-    struct { juno6_t synth; juno6_chorus_t chorus; } juno;
++    struct {
++        juno6_t synth;
++        juno6_chorus_t chorus;
++#if X0X_SJ6_NATIVE_LIMITER
++        sj6_limiter_t limiter;
++#endif
++#if X0X_SJ6_NATIVE_ROOM
++        sj6_room_t room;
++        struct {float step,phase,hold[2];uint8_t active;} crush;
++#endif
++    } juno;
+     s1_dry_part synthone;
+ } original_runtime_backend;
+ /* Shared live arp / ARP SEQ for SYNTHONE and JUNO owners (engine_arp.h). Live
+@@ -31,6 +49,17 @@
+     S1Sequencer seq;
+     NoteNumber held[S1_SEQ_MAX_HELD];   /* heldNoteNumbersAE, newest first */
+     float bpm;
++#if X0X_S1_FENCED_CLOCK
++#if X0X_S1_CLOCK_NATIVE
++    uint64_t source_phase, source_delta, source_boundary;
++    uint8_t source_stop, source_set, source_wait, source_bpm;
++#else
++    double source_phase, source_delta;
++    float source_factor, source_bpm;
++    uint8_t source_stop;
++    uint8_t source_set, source_wait;
++#endif
++#endif
+     uint32_t age;                       /* frames since the last real note-on (H3) */
+     uint64_t clk_pos;                   /* transport position, Q8 samples (clk_beat != 0) */
+     uint32_t clk_beat;                  /* Q8 samples per beat; 0 = transport stopped */
+@@ -39,6 +68,11 @@
+ #endif
+ typedef struct {
+     original_runtime_backend dsp;
++#if X0X_SJ6_CLASSIC_I_PROBE
++    classic_mode_i classic_i_effect;
++    uint64_t classic_i_sample;
++    uint8_t classic_i_authored;
++#endif
+ #if X0X_ARP_ENGINE
+     original_runtime_arp arp;
+ #endif
+@@ -65,9 +99,31 @@
+  * externally owned Chicago resources must be retired before overwriting it. */
+ int original_runtime_retire(original_runtime_part *);
+ int original_runtime_prepare(original_runtime_part *, float bpm);
++#if X0X_SJ6_NATIVE_LIMITER
++void original_runtime_sj6_limiter(original_runtime_part *,const uint8_t b[SJ6_LIM_COUNT]);
++void original_runtime_sj6_rage(original_runtime_part *,unsigned);
++unsigned sj6_limiter_position(unsigned,unsigned);
++float sj6_limiter_value(unsigned,unsigned);
++#endif
++#if X0X_SJ6_NATIVE_ROOM
++void original_runtime_sj6_room(original_runtime_part *,const uint8_t word[SJ6_ROOM_COUNT]);
++float sj6_room_rate(unsigned);
++float sj6_room_rate_clocked(unsigned,float,int);
++void original_runtime_sj6_room_clock(original_runtime_part *,float,int);
++float sj6_room_locut(unsigned);
++#endif
+ int original_runtime_param(original_runtime_part *, unsigned parameter, float value);
++#if X0X_SUPERJ6_BUILTIN_INIT
++void original_runtime_sj6_chorus(original_runtime_part *, const uint8_t *cell);
++#endif
+ int original_runtime_key(original_runtime_part *, unsigned source, unsigned key, unsigned velocity);
++#if X0X_SJ6_VELOCITY_SETTINGS
++int original_runtime_sj6_key(original_runtime_part *,unsigned source,unsigned key,unsigned velocity,unsigned code);
++#endif
+ int original_runtime_release_source(original_runtime_part *, unsigned source);
++#if X0X_S1_KEYBOARD_HOLD
++void original_runtime_s1_repress(original_runtime_part *, unsigned key, unsigned velocity);
++#endif
+ int original_runtime_cut_source(original_runtime_part *p, unsigned source);
+ int original_runtime_all_off(original_runtime_part *);
+ #if X0X_S1C
+@@ -76,6 +132,10 @@
+ #endif
+ /* Source/voice ownership excludes residual insert output; selector fades that output separately. */
+ int original_runtime_owned(const original_runtime_part *);
++#if X0X_SJ6_AUX_SEQ_NATIVE
++#include "../dsp/juno6_aux_catalog.h"
++float sj6_aux_arp_base(const original_runtime_part *,unsigned);
++#endif
+ int original_runtime_active(const original_runtime_part *);
+ /* Chicago only: live filter EG level and env depth for the ENV glyph. */
+ int original_runtime_filter_view(const original_runtime_part *, float *eg, float *depth);
+@@ -92,11 +152,24 @@
+ int original_runtime_env_view(const original_runtime_part *, float adsr[4], float *level, int *state);
+ #if X0X_ARP_ENGINE
+ /* Apply an arp block (on/off transitions hand held keys over). 1 = applied. */
++#if defined(X0X_SJ6_GATE_DEADLINE_PROBE) && X0X_SJ6_GATE_DEADLINE_PROBE
++int original_runtime_sj6_gate_edit(original_runtime_part *, unsigned percent);
++#endif
++#if X0X_SJ6_NATIVE_POSITIVE_GATE
++int original_runtime_sj6_live_gate(original_runtime_part *,unsigned);
++#endif
+ int original_runtime_arp_config(original_runtime_part *, const engine_arp_cfg *);
+ /* Display only: 1 while running, the step that last sounded, frames since. */
+ /* Per block, before render: the DnBOX transport clock (seq_t metronome).
+  * beat_q8 = 0: stopped, the arp free-runs from the key press (Synth One). */
+ void original_runtime_arp_clock(original_runtime_part *, uint64_t pos_q8, uint32_t beat_q8, int start);
++#if X0X_SJ6_SEQ_DEST_NATIVE
++void original_runtime_sj6_destination(original_runtime_part *,unsigned destination);
++#endif
++#if X0X_S1_FENCED_CLOCK
++int original_runtime_s1_clock(original_runtime_part *, float, unsigned);
++int engine_host_s1_clock(unsigned, float, unsigned);
++#endif
+ int original_runtime_arp_view(const original_runtime_part *, unsigned *step, uint32_t *frames);
+ #endif
+ int original_runtime_render(original_runtime_part *, original_runtime_workspace *,
+--- a/firmware/src/app/original_sound.c
++++ b/firmware/src/app/original_sound.c
+@@ -42,6 +42,7 @@
+  {"Width",127,0,0},{"ChoRate",127,0,0},{"Chorus",127,0,0},{"Level",127,0,0},
+  {"PBend",127,0,0},{"Damper",127,0,0}
+ };
++#if !X0X_SYNTH_CONTROLS_INIT_ONLY
+ static const uint8_t original_sound_juno_factories[4][16] = {
+  {42,28,70,18,45,8,40,92,40,0,15,8,64,25,45,100},
+  {90,18,42,24,35,65,55,95,75,0,12,15,55,40,55,100},
+@@ -49,6 +50,7 @@
+  {70,10,105,12,20,0,20,110,15,12,25,5,80,60,50,96}
+ };
+ static const char *const original_sound_juno_names[4] = {"SUPERJ6 POLY", "SUPERJ6 PAD", "SUPERJ6 PLUCK", "SUPERJ6 BRASS"};
++#endif
+ static const x0x_param_t original_sound_synthone_params[ORIGINAL_SYNTHONE_NPARAMS] = {
+     {"PBend",127,64,0},{"Damper",127,0,0},{"Crush",127,0,0}
+ };
+@@ -90,7 +92,11 @@
+ #define S1_FACTORIES (1u + ORIGINAL_SYNTHONE_PROGRAMS)
+ static unsigned s1_cell_program(const uint8_t *cell)
+ {
+-    return cell[21] ? (unsigned)(cell[21] & 0x3fu) << 7 | (cell[7] & 127u) : 0u;
++    unsigned high = cell[21];
++#if X0X_S1_EXTRA
++    high &= S1_PROGRAM_BYTE_MASK;
++#endif
++    return high ? (high & 0x3fu) << 7 | (cell[7] & 127u) : 0u;
+ }
+ unsigned original_sound_s1_program(const uint8_t cell[ORIGINAL_SOUND_BYTES])
+ {
+@@ -155,9 +161,11 @@
+     if (source < 0) return 0;
+     return kind == ORIGINAL_SOUND_CHICAGO ? original_chicago_program_name((unsigned)source) :
+     kind == ORIGINAL_SOUND_MIAMI ? original_miami_program_name((unsigned)source) :
++#if !X0X_SYNTH_CONTROLS_INIT_ONLY
+     kind == ORIGINAL_SOUND_JUNO ? original_sound_juno_names[factory] :
+ #if X0X_S1C
+     factory ? s1_part_program_name(factory - 1u) :
++#endif
+ #endif
+     original_sound_synthone_names[0];
+ }
+@@ -198,20 +206,470 @@
+     if (!original_sound_is_legacy_slot2_cell(cell)) return 0;
+     return original_sound_init(cell, ORIGINAL_SOUND_SYNTHONE, ORIGINAL_SYNTHONE_INIT_FACTORY);
+ }
++#if X0X_SUPERJ6_BUILTIN_INIT
++static int sj6_marker_shape(unsigned hi) { return hi==0u || (hi>=8u && hi<=11u); }
++static int sj6_marker_canonical(unsigned b)
++{ return sj6_marker_shape(b>>4) && (b&7u)<=4u; }
++static unsigned sj6_invalid_before(unsigned b)
++{
++    unsigned hi=b>>4, lo=b&15u;
++    unsigned rows=(hi>0u)+(hi>8u ? (hi>12u ? 4u : hi-8u) : 0u);
++    unsigned valid=0;
++    if(sj6_marker_shape(hi)) {
++        valid=lo<5u?lo:5u;
++        if(lo>8u) valid+=lo-8u<5u?lo-8u:5u;
++    }
++    return b-10u*rows-valid;
++}
++static unsigned sj6_marker_from_invalid(unsigned n)
++{
++    for(unsigned hi=0;hi<16u;++hi) {
++        unsigned valid=sj6_marker_shape(hi), width=valid?6u:16u;
++        if(n<width) return hi*16u+(valid ? n+5u+(n>=3u?5u:0u) : n);
++        n-=width;
++    }
++    return 256u;
++}
++unsigned original_sound_sj6_marker(const uint8_t *cell)
++{
++    unsigned b=cell[31];
++    if(sj6_marker_canonical(b)) return b;
++    unsigned n=sj6_invalid_before(b);
++    if(n>=200u) return 256u;
++    n%=50u;
++    unsigned hi=n/10u,lo=n%10u;
++    return (hi?hi+7u:0u)*16u+lo+(lo>=5u?3u:0u);
++}
++unsigned original_sound_sj6_osc1_code(const uint8_t *cell)
++{
++    unsigned b=cell[31];
++    if(cell[29]!=ORIGINAL_SOUND_JUNO || sj6_marker_canonical(b)) return 0;
++    unsigned n=sj6_invalid_before(b);
++    if(n>=200u) return 0;
++    unsigned occupied=(cell[25] & (ORIGINAL_SJ6_LFO2_PWM_BIT>>24))!=0;
++    unsigned low=(cell[13]>>7)|((cell[14]>>7)<<1)|((cell[18]>>7)<<2)|((cell[19]>>7)<<3)
++        |((occupied!=(cell[21]!=0u))<<4);
++    return 1u+(n/50u)*32u+low;
++}
++static void sj6_store_marker(uint8_t *cell,unsigned b,unsigned position)
++{
++    unsigned hi=b>>4,lo=b&15u;
++    unsigned n=(hi?hi-7u:0u)*10u+lo-(lo>=8u?3u:0u);
++    cell[31]=(uint8_t)sj6_marker_from_invalid((position>>5)*50u+n);
++}
++void original_sound_sj6_marker_store(uint8_t *cell,unsigned b)
++{
++    unsigned code=original_sound_sj6_osc1_code(cell);
++    if(!code)cell[31]=(uint8_t)b;
++    else sj6_store_marker(cell,b,code-1u);
++}
++void original_sound_sj6_osc1_store(uint8_t *cell,unsigned pos)
++{
++    unsigned b=original_sound_sj6_marker(cell);
++    if(pos>127u || b>255u || cell[29]!=ORIGINAL_SOUND_JUNO)return;
++    static const uint8_t plane[]={13,14,18,19};
++    for(unsigned i=0;i<4u;++i) cell[plane[i]]=(cell[plane[i]]&127u)|(((pos>>i)&1u)<<7);
++    unsigned bit=ORIGINAL_SJ6_LFO2_PWM_BIT>>24;
++    unsigned owner=(cell[21]!=0u)^((pos>>4)&1u);
++    cell[25]=(cell[25]&~bit)|(owner?bit:0u);
++    sj6_store_marker(cell,b,pos);
++}
++unsigned original_sound_sj6_max(unsigned slot)
++{
++    static const uint8_t max[SJ6_OSC_KNOBS] = {3, 3, 2, 1, 127, 1, 127};
++    if (slot < SJ6_OSC_KNOBS) return max[slot];
++    if (slot == SJ6_MASTER_LEVEL) return SJ6_MASTER_INIT;
++    if (slot == SJ6_A_REFERENCE) return SJ6_A_REFERENCE_STEPS;
++    if (slot == SJ6_LFO2_SHAPE) return SJ6_LFO2_SHAPE_MAX;
++    if (slot == SJ6_LAYER1_SEMI || slot == SJ6_LAYER2_SEMI) return SJ6_SEMI_MAX;
++    if (slot == SJ6_LAYER1_FINE || slot == SJ6_LAYER2_FINE) return SJ6_FINE_MAX;
++    if (slot == SJ6_LFO2_PWM_ROUTE) return DNBX_LAYERS;
++    if (slot == SJ6_FILTER_LINK || (slot >= SJ6_LFO1_MODE && slot <= SJ6_CHORUS_II)) return 1u;
++    return slot <= SJ6_LFO2_PWM_BASE ? 127u : 0;
++}
++
++void original_sound_sj6_chorus_store(uint8_t *cell, unsigned mode)
++{
++    const unsigned shift = ORIGINAL_SJ6_CHORUS_SHIFT - 24u;
++    cell[25] = (uint8_t)((cell[25] & ((1u << shift) - 1u)) | (mode << shift));
++}
++
++void original_sound_sj6_lfo2_pwm_store(uint8_t *cell, uint16_t setting)
++{
++    uint32_t flags = original_sound_edit_mask(cell) &
++                     ~(ORIGINAL_SJ6_LFO2_PWM_BIT | ORIGINAL_SJ6_LFO2_PWM2_BIT);
++    unsigned code=original_sound_sj6_osc1_code(cell);
++    cell[ORIGINAL_SJ6_LFO2_PWM_BYTE] = (uint8_t)setting;
++    if (((uint8_t)setting!=0u)^((code && ((code-1u)&16u))!=0))
++        flags |= ORIGINAL_SJ6_LFO2_PWM_BIT;
++    if (setting >> 8) flags |= ORIGINAL_SJ6_LFO2_PWM2_BIT;
++    original_sound_put_mask(cell, flags);
++}
++
++/* Two seven-bit detents in the otherwise forbidden MSBs of Juno panel
++ * bytes 0..12 and 15. No FX bytes, shape tag or shared/extra row used.
++ * Zero is the exact old neutral representation, 101..127 are invalid. */
++static unsigned sj6_fine_byte(unsigned layer, unsigned bit)
++{
++    unsigned i = layer * 7u + bit;
++    return i == 13u ? 15u : i;
++}
++unsigned original_sound_sj6_fine_code(const uint8_t *cell, unsigned layer)
++{
++    unsigned code = 0;
++    for (unsigned i = 0; i < 7u; ++i) code |= (unsigned)(cell[sj6_fine_byte(layer, i)] >> 7) << i;
++    return code;
++}
++unsigned original_sound_sj6_fine(const uint8_t *cell, unsigned layer)
++{
++    unsigned code = original_sound_sj6_fine_code(cell, layer);
++    return code ? code - (code <= SJ6_FINE_CENTER) : SJ6_FINE_CENTER;
++}
++void original_sound_sj6_fine_store(uint8_t *cell, unsigned layer, unsigned pos)
++{
++    unsigned code = pos == SJ6_FINE_CENTER ? 0u : pos + (pos < SJ6_FINE_CENTER);
++    for (unsigned i = 0; i < 7u; ++i) {
++        uint8_t *byte = cell + sj6_fine_byte(layer, i);
++        *byte = (*byte & 127u) | (((code >> i) & 1u) << 7);
++    }
++}
++
++/* Rows 4 and 5 belong to the two candidate owner extensions. A base-cell
++ * marker distinguishes a real extension from unused rows of older projects. */
++unsigned original_sound_sj6_extra_mask(const uint8_t *extra)
++{
++    return extra[0] | (unsigned)extra[1] << 8;
++}
++
++/* Five spare bits beside seven-bit ADSR values. Code zero is the old
++ * extension; 1..12 are positions 0..11 and 13..24 remain unchanged. */
++enum { SJ6_SEMI_PLANE_BITS = 5, SJ6_FILTER_LINK_INDEX = SJ6_FILTER_LINK - SJ6_OSC_KNOBS };
++static unsigned sj6_layer2_code(const uint8_t *extra) { return extra[2 + SJ6_FILTER_LINK_INDEX] >> 1; }
++static unsigned sj6_semi_code(const uint8_t *extra)
++{
++    unsigned code = 0;
++    for (unsigned i = 0; i < SJ6_SEMI_PLANE_BITS; ++i)
++        code |= (unsigned)(extra[2 + i] >> 7) << i;
++    return code;
++}
++unsigned original_sound_sj6_layer_semi(const uint8_t *extra, unsigned layer)
++{
++    const unsigned code = layer ? sj6_layer2_code(extra) : sj6_semi_code(extra);
++    return !code ? SJ6_SEMI_CENTER : code - (code <= SJ6_SEMI_CENTER);
++}
++
++int original_sound_sj6_extra_valid(const uint8_t *extra)
++{
++    unsigned mask = original_sound_sj6_extra_mask(extra);
++    const unsigned code = sj6_semi_code(extra);
++    const unsigned layer2 = sj6_layer2_code(extra);
++    if (code > SJ6_SEMI_MAX || layer2 > SJ6_SEMI_MAX || !(mask | code | layer2)) return 0;
++    for (unsigned i = 0; i < SJ6_EXTRA_COUNT; ++i) {
++        unsigned value = extra[2 + i];
++        if (i < SJ6_SEMI_PLANE_BITS ||
++            (i >= ORIGINAL_SJ6_RATE_INDEX && (mask & (1u << (i + SJ6_LFO_COUNT)))))
++            value &= 127u;
++        else if (i == SJ6_FILTER_LINK_INDEX) value &= 1u;
++        if (mask & (1u << i)) {
++            if (value > original_sound_sj6_max(SJ6_OSC_KNOBS + i)) return 0;
++        } else if (i < ORIGINAL_SJ6_RATE_INDEX && value) return 0;
++    }
++    return 1;
++}
++
++int original_sound_sj6_semi_ready(const uint8_t *cell, const uint8_t *extra)
++{
++    if (!original_sound_sj6_marker_valid(cell)) return 0;
++    if (original_sound_edit_mask(cell) & ORIGINAL_SJ6_EXTRA_BIT)
++        return original_sound_sj6_extra_valid(extra);
++    for (unsigned i = 0; i < ORIGINAL_SJ6_EXTRA_SIZE; ++i)
++        if (extra[i]) return 0;
++    return 1;
++}
++void original_sound_sj6_semi_store(uint8_t *cell, uint8_t *extra, unsigned layer, unsigned position)
++{
++    const unsigned code = position == SJ6_SEMI_CENTER ? 0u :
++                          position + (position < SJ6_SEMI_CENTER);
++    if (layer) {
++        uint8_t *link = extra + 2 + SJ6_FILTER_LINK_INDEX;
++        *link = (*link & 1u) | (code << 1);
++    } else for (unsigned i = 0; i < SJ6_SEMI_PLANE_BITS; ++i)
++        extra[2 + i] = (extra[2 + i] & 127u) | (((code >> i) & 1u) << 7);
++    const uint32_t flags = original_sound_edit_mask(cell) & ~ORIGINAL_SJ6_EXTRA_BIT;
++    original_sound_put_mask(cell, flags | ((sj6_semi_code(extra) || sj6_layer2_code(extra) || original_sound_sj6_extra_mask(extra)) ?
++                            ORIGINAL_SJ6_EXTRA_BIT : 0u));
++}
++
++void original_sound_sj6_extra_store(uint8_t *cell, uint8_t *extra, unsigned mask,
++                                  const uint8_t *positions, unsigned modes, unsigned hz_modes)
++{
++    uint32_t flags = original_sound_edit_mask(cell);
++    if (!(flags & ORIGINAL_SJ6_EXTRA_BIT)) memset(extra, 0, ORIGINAL_SJ6_EXTRA_SIZE);
++    for (unsigned i = 0; i < SJ6_EXTRA_COUNT; ++i)
++        if (mask & (1u << i)) {
++            unsigned keep = i < SJ6_SEMI_PLANE_BITS ? 128u : i == SJ6_FILTER_LINK_INDEX ? 62u : 0u;
++            extra[2 + i] = positions[i] | (extra[2 + i] & keep);
++        }
++    /* Mode presence uses the three remaining mask bits. High rate-byte
++     * bits then encode per-clock Hz (1) or sync (0) without moving raw words. */
++    for (unsigned i = 0; i < SJ6_LFO_COUNT; ++i) if (modes & (1u << i)) {
++        uint8_t *rate = extra + 2 + ORIGINAL_SJ6_RATE_INDEX + i;
++        *rate = (*rate & 127u) | (((hz_modes >> i) & 1u) << 7);
++    }
++    mask |= original_sound_sj6_extra_mask(extra) | (modes << ORIGINAL_SJ6_MODE_INDEX);
++    extra[0] = (uint8_t)mask;
++    extra[1] = (uint8_t)(mask >> 8);
++    original_sound_put_mask(cell, flags | ORIGINAL_SJ6_EXTRA_BIT);
++}
++
++/* Rates occupy three exact little-endian binary32 words. Each accepted Hz
++ * mode is encoded as absent, +0, -0, or +1, preserving all authored bits. */
++int original_sound_sj6_lfo_words(const uint8_t *extra, juno6_lfo_words *out)
++{
++    *out = (juno6_lfo_words){0};
++    const uint8_t *p = extra + ORIGINAL_SJ6_EXTRA_SIZE;
++    unsigned tags = p[12] | (unsigned)p[13] << 8;
++    if (!tags || tags >> 9) return 0;
++    for (unsigned i = 0; i < SJ6_LFO_COUNT; ++i) {
++        uint32_t bits = 0;
++        for (unsigned b = 0; b < 4; ++b) bits |= (uint32_t)p[4 * i + b] << (8 * b);
++        if (tags & (1u << i)) {
++            memcpy(&out->word[i], &bits, sizeof bits);
++            if (!(out->word[i] >= 0.f && out->word[i] <= 1.f)) return 0;
++            out->present |= 1u << i;
++        } else if (bits) return 0;
++        unsigned mode = (tags >> (3u + 2u * i)) & 3u;
++        if (mode) {
++            const uint32_t exact[] = {0, 0, UINT32_C(0x80000000), UINT32_C(0x3f800000)};
++            memcpy(&out->word[SJ6_LFO_COUNT + i], &exact[mode], sizeof bits);
++            out->present |= 1u << (SJ6_LFO_COUNT + i);
++        }
++    }
++    return 1;
++}
++
++void original_sound_sj6_lfo_store(uint8_t *cell, uint8_t *extra, const juno6_lfo_words *words)
++{
++    uint32_t flags = original_sound_edit_mask(cell);
++    /* A cold authored selection supersedes the previous rate and mode overrides. */
++    if (flags & ORIGINAL_SJ6_EXTRA_BIT) {
++        const unsigned first_rate = SJ6_LFO1_RATE - SJ6_OSC_KNOBS;
++        unsigned mask = original_sound_sj6_extra_mask(extra) & ((1u << first_rate) - 1u);
++        memset(extra + 2 + first_rate, 0, SJ6_LFO_COUNT);
++        extra[0] = (uint8_t)mask;
++        extra[1] = (uint8_t)(mask >> 8);
++        if (!(mask | sj6_semi_code(extra) | sj6_layer2_code(extra))) flags &= ~ORIGINAL_SJ6_EXTRA_BIT;
++    }
++    if (words->present || (flags & ORIGINAL_SJ6_AUTHORED_LFO_BIT)) {
++        uint8_t *p = extra + ORIGINAL_SJ6_EXTRA_SIZE;
++        unsigned tags = words->present & 7u;
++        for (unsigned i = 0; i < SJ6_LFO_COUNT; ++i) {
++            uint32_t bits = 0;
++            if (words->present & (1u << i)) memcpy(&bits, &words->word[i], sizeof bits);
++            for (unsigned b = 0; b < 4; ++b) p[4 * i + b] = (uint8_t)(bits >> (8 * b));
++            if (words->present & (1u << (SJ6_LFO_COUNT + i))) {
++                memcpy(&bits, &words->word[SJ6_LFO_COUNT + i], sizeof bits);
++                unsigned mode = bits == UINT32_C(0x3f800000) ? 3u : bits == UINT32_C(0x80000000) ? 2u : 1u;
++                tags |= mode << (3u + 2u * i);
++            }
++        }
++        p[12] = (uint8_t)tags;
++        p[13] = (uint8_t)(tags >> 8);
++        flags &= ~ORIGINAL_SJ6_AUTHORED_LFO_BIT;
++        if (tags) flags |= ORIGINAL_SJ6_AUTHORED_LFO_BIT;
++    }
++    original_sound_put_mask(cell, flags);
++}
++
++static uint32_t sj6_read_word(const uint8_t *wire)
++{
++    uint32_t word = 0;
++    for (unsigned b = 0; b < 4; ++b) word |= (uint32_t)wire[b] << (8u * b);
++    return word;
++}
++
++static void sj6_write_word(uint8_t *wire, uint32_t word)
++{
++    for (unsigned b = 0; b < 4; ++b) wire[b] = (uint8_t)(word >> (8u * b));
++}
++
++int original_sound_sj6_vibrato_words(const uint8_t *cell, const uint8_t *wire, float values[2])
++{
++    unsigned present = original_sound_sj6_vibrato_mask(cell);
++    if (!present) return 0;
++    for (unsigned i = 0; i < 2; ++i) {
++        uint32_t word = sj6_read_word(wire + 4u * i);
++        if (present & (1u << i) ? !juno6_unit_word_valid(word) : word != 0) return -1;
++        memcpy(&values[i], &word, sizeof word);
++    }
++    return (int)present;
++}
++
++int original_sound_sj6_vibrato_available(const uint8_t *cell, const uint8_t *wire)
++{
++    if (!original_sound_sj6_marker_valid(cell)) return 0;
++    if (original_sound_sj6_vibrato_mask(cell)) {
++        float values[2];
++        return original_sound_sj6_vibrato_words(cell, wire, values) > 0;
++    }
++    for (unsigned i = 0; i < ORIGINAL_SJ6_VIBRATO_WIRE_BYTES; ++i)
++        if (wire[i]) return 0;
++    return 1;
++}
++
++void original_sound_sj6_vibrato_store(uint8_t *cell, uint8_t *wire, const float values[2], unsigned present)
++{
++    original_sound_sj6_marker_store(cell,(original_sound_sj6_marker(cell) & ~7u) | (present ? present + 1u : 0u));
++    for (unsigned i = 0; i < 2; ++i) {
++        uint32_t word = 0;
++        if (present & (1u << i)) memcpy(&word, &values[i], sizeof word);
++        sj6_write_word(wire + 4u * i, word);
++    }
++}
++
++int original_sound_sj6_a_reference_word(const uint8_t *cell, const uint8_t *wire, float *value)
++{
++    if (!original_sound_sj6_has_a_reference(cell)) return 0;
++    uint32_t word = sj6_read_word(wire + ORIGINAL_SJ6_VIBRATO_WIRE_BYTES);
++    if (!juno6_unit_word_valid(word)) return -1;
++    memcpy(value, &word, sizeof word);
++    return 1;
++}
++
++void original_sound_sj6_a_reference_store(uint8_t *cell, uint8_t *wire, float value, unsigned present)
++{
++    uint32_t word = 0;
++    if (present) memcpy(&word, &value, sizeof word);
++    sj6_write_word(wire + ORIGINAL_SJ6_VIBRATO_WIRE_BYTES, word);
++    original_sound_sj6_marker_store(cell,(original_sound_sj6_marker(cell) & ~ORIGINAL_SJ6_A_REFERENCE_MARK) | (present ? ORIGINAL_SJ6_A_REFERENCE_MARK : 0u));
++}
++
++int original_sound_sj6_a_reference_available(const uint8_t *cell, const uint8_t *wire)
++{
++    if (!original_sound_sj6_vibrato_available(cell, wire)) return 0;
++    float value;
++    int has_word = original_sound_sj6_a_reference_word(cell, wire, &value);
++    return has_word ? has_word > 0 : !sj6_read_word(wire + ORIGINAL_SJ6_VIBRATO_WIRE_BYTES);
++}
++
++int original_sound_sj6_ext_valid(const uint8_t *cell, const uint8_t *extra)
++{
++    uint32_t flags = original_sound_edit_mask(cell);
++    juno6_lfo_words words;
++    const uint8_t *vibrato = extra + ORIGINAL_SJ6_VIBRATO_OFFSET;
++    return (original_sound_sj6_vibrato_marker(cell) != 1u || ((vibrato[0] | vibrato[1]) <= 127u)) &&
++           (!(flags & ORIGINAL_SJ6_EXTRA_BIT) || original_sound_sj6_extra_valid(extra)) &&
++           (!(flags & ORIGINAL_SJ6_AUTHORED_LFO_BIT) || original_sound_sj6_lfo_words(extra, &words));
++}
++
++/* Keep legacy macro bytes and preset identity. Bytes 18/19 store PWM amounts.
++ * Byte 20 packs the two waveforms, range, then the two enable switches. */
++unsigned original_sound_sj6_knobs(const uint8_t cell[ORIGINAL_SOUND_BYTES],
++                                uint8_t positions[SJ6_OSC_KNOBS])
++{
++    unsigned mixed = cell[20];
++    positions[SJ6_WAVE1] = mixed & 3u;
++    positions[SJ6_WAVE2] = (mixed >> 2) & 3u;
++    positions[SJ6_RANGE] = (mixed >> 4) & 3u;
++    positions[SJ6_PWM1_ON] = (mixed >> 6) & 1u;
++    positions[SJ6_PWM1] = cell[18] & 127u;
++    positions[SJ6_PWM2_ON] = mixed >> 7;
++    positions[SJ6_PWM2] = cell[19] & 127u;
++    return (original_sound_edit_mask(cell) >> ORIGINAL_SJ6_EDIT_SHIFT) & ORIGINAL_SJ6_EDIT_MASK;
++}
++
++void original_sound_sj6_store(uint8_t cell[ORIGINAL_SOUND_BYTES], unsigned mask,
++                             const uint8_t positions[SJ6_OSC_KNOBS])
++{
++    uint8_t saved[SJ6_OSC_KNOBS];
++    (void)original_sound_sj6_knobs(cell, saved);
++    for (unsigned i = 0; i < SJ6_OSC_KNOBS; ++i)
++        if (mask & (1u << i)) saved[i] = positions[i];
++    cell[18] = saved[SJ6_PWM1] | (cell[18] & 128u);
++    cell[19] = saved[SJ6_PWM2] | (cell[19] & 128u);
++    cell[20] = (uint8_t)(saved[SJ6_WAVE1] | saved[SJ6_WAVE2] << 2 |
++                        saved[SJ6_RANGE] << 4 | saved[SJ6_PWM1_ON] << 6 |
++                        saved[SJ6_PWM2_ON] << 7);
++    original_sound_put_mask(cell, original_sound_edit_mask(cell) | (mask << ORIGINAL_SJ6_EDIT_SHIFT));
++}
++#endif
++
+ int original_sound_valid(const uint8_t cell[ORIGINAL_SOUND_BYTES])
+ {
+     if (!cell || cell[26] != 'O' || cell[27] != 'S' || cell[28] != ORIGINAL_SOUND_SCHEMA) return 0;
+     int crush_edit = cell[29] == ORIGINAL_SOUND_SYNTHONE &&
+         (original_sound_edit_mask(cell) & (1u << ORIGINAL_SYNTHONE_CRUSH));
+-    if (cell[31] != crush_edit ||
+-        (cell[29] == ORIGINAL_SOUND_SYNTHONE && !crush_edit && cell[ORIGINAL_SYNTHONE_CRUSH])) return 0;
++    int marker = cell[31];
++#if X0X_S1_EXTRA
++    if (cell[29] == ORIGINAL_SOUND_SYNTHONE) {
++        if (s1_detune_code(cell) > S1_DETUNE_STEPS+1u) return 0;
++        marker &= 1u;
++    }
++#endif
++    if (marker != crush_edit
++#if X0X_SUPERJ6_BUILTIN_INIT
++        && !original_sound_sj6_marker_valid(cell)
++#endif
++       ) return 0;
++    if (cell[29] == ORIGINAL_SOUND_SYNTHONE && !crush_edit && original_sound_panel_position(cell,ORIGINAL_SYNTHONE_CRUSH)) return 0;
+     unsigned count = original_sound_count(cell[29]);
+-    if (!count || cell[30] >= original_sound_factories(cell[29])) return 0;
++    if (!count) return 0;
++#if X0X_S1_EXTRA
++    if (cell[29] == ORIGINAL_SOUND_SYNTHONE) {
++        /* [30] was zero on every valid current S1 cell; the marker also
++         * excludes historical slot-2 migration before either reader writes. */
++        unsigned code = cell[S1_MOD_EXT_BYTE];
++        unsigned marked = (original_sound_edit_mask(cell) & S1_MOD_EXT_MARK) != 0;
++        unsigned detune_route = s1_detune_route_code(cell);
++        unsigned pitch_route = s1_pitch_route_code(cell);
++        unsigned tremolo_route = s1_tremolo_route_code(cell);
++        if (marked != !!(code || detune_route || pitch_route || tremolo_route) || code >= S1_MOD_EXT_CODES ||
++            detune_route > 4u || pitch_route > 4u || tremolo_route > 4u) return 0;
++    } else
++#endif
++    if (
++#if X0X_SUPERJ6_BUILTIN_INIT
++        !original_sound_sj6_osc2_code(cell) &&
++#endif
++        cell[30] >= original_sound_factories(cell[29])) return 0;
++#if X0X_SUPERJ6_BUILTIN_INIT
++    uint32_t sj6_flags = original_sound_edit_mask(cell);
++    if (cell[29] == ORIGINAL_SOUND_JUNO) {
++        for (unsigned l = 0; l < 2; ++l)
++            if (original_sound_sj6_fine_code(cell, l) > SJ6_FINE_MAX) return 0;
++        if (cell[17] > 127u ||
++            (original_sound_sj6_hpf_authored(cell) && !(sj6_flags & (1u << ORIGINAL_SJ6_HPF_PANEL)))) return 0;
++        if (!original_sound_sj6_osc1_code(cell) &&
++            ((cell[13]|cell[14]|cell[18]|cell[19])&128u)) return 0;
++    }
++    if (cell[29] == ORIGINAL_SOUND_JUNO && ((sj6_flags >> ORIGINAL_SJ6_EDIT_SHIFT) || original_sound_sj6_osc1_code(cell))) {
++        uint8_t positions[SJ6_OSC_KNOBS];
++        unsigned mask = original_sound_sj6_knobs(cell, positions);
++        if ((!original_sound_sj6_osc1_code(cell) &&
++             !!cell[ORIGINAL_SJ6_LFO2_PWM_BYTE] != !!(sj6_flags & ORIGINAL_SJ6_LFO2_PWM_BIT)) ||
++            original_sound_sj6_lfo2_pwm(cell) >> SJ6_LFO2_PWM_ROUTE_SHIFT > DNBX_LAYERS ||
++            original_sound_sj6_chorus(cell) > JUNO6_CHORUS_BOTH) return 0;
++        for (unsigned i = 0; i < SJ6_OSC_KNOBS; ++i)
++            if (positions[i] > (mask & (1u << i) ? original_sound_sj6_max(i) : 0)) return 0;
++        for (unsigned i = 0; i < count; ++i)
++            if (original_sound_panel_position(cell, i) > original_sound_param(ORIGINAL_SOUND_JUNO, i)->max) return 0;
++        return 1;
++    }
++#endif
+ #if X0X_S1C
+     /* Synth One program bytes [7] and [21]: checked here, then masked for the zero checks. */
+     uint8_t s1c_copy[ORIGINAL_SOUND_BYTES];
+     if (cell[29] == ORIGINAL_SOUND_SYNTHONE) {
+-        if (cell[30] || (cell[21] && ((cell[21] & 0xc0u) != 0x40u || cell[7] > 127u)) || (!cell[21] && cell[7]) ||
++        unsigned program_high = cell[21];
++#if X0X_S1_EXTRA
++        program_high &= S1_PROGRAM_BYTE_MASK;
++        _Static_assert(ORIGINAL_SYNTHONE_PROGRAMS < 1024u, "legacy preset high bits fit");
++#endif
++        if (
++#if !X0X_S1_EXTRA
++            cell[30] ||
++#endif
++            (program_high && ((program_high & 0xc0u) != 0x40u || cell[7] > 127u)) || (!program_high && cell[7]) ||
+             s1_cell_program(cell) > ORIGINAL_SYNTHONE_PROGRAMS) return 0;
+         for (unsigned i = 0; i < ORIGINAL_SOUND_BYTES; ++i) s1c_copy[i] = cell[i];
+         s1c_copy[7] = s1c_copy[21] = 0;
+@@ -220,18 +678,49 @@
+ #endif
+ #if X0X_SYNTHONE_PATCH
+     uint32_t mask = original_sound_edit_mask(cell);
+-    if (cell[29] == ORIGINAL_SOUND_SYNTHONE && (mask & S1_PATCH_MASK)) {
+-        if (mask & ~(S1_PATCH_MASK | 7u)) return 0;
++    uint32_t editor = S1_PATCH_MASK | S1_LINK_MASK | S1_EXTRA_MARK;
++#if X0X_S1_EXTRA
++    editor |= S1_BASE_EDIT_MASK | S1_ROUTE_MASK | S1_MOD_EXT_MARK;
++#endif
++    if (cell[29] == ORIGINAL_SOUND_SYNTHONE && ((mask & editor)
++#if X0X_S1_EXTRA
++        || s1_coarse_code(cell,0) || s1_coarse_code(cell,1) || s1_voice_code(cell) || (cell[S1_VOICE_MARK_BYTE] & 128u)
++#endif
++        )) {
++        if (mask & ~(editor | 7u)) return 0;
++#if X0X_S1_EXTRA
++        uint8_t codes[S1_ROUTE_COUNT];
++        if (!s1_route_decode(mask >> S1_ROUTE_SHIFT, codes)) return 0;
++#endif
++#if X0X_S1_EXTRA
++        if ((cell[S1_LINK_BYTE] & 1u) != ((mask & S1_LINK_MASK) != 0) ||
++            s1_voice_code(cell) >= S1_VOICE_CODES ||
++            !!s1_voice_code(cell) != !!(cell[S1_VOICE_MARK_BYTE] & 128u)) return 0;
++#else
++        if (cell[S1_LINK_BYTE] != ((mask & S1_LINK_MASK) != 0)) return 0;
++#endif
+         for (unsigned i = 0; i < 22; ++i) {
+-            if (cell[i] > 127u || (i >= 2 && !(mask & (UINT32_C(1) << i)) && cell[i])) return 0;
++            unsigned v = cell[i];
++#if X0X_S1_EXTRA
++            if (i < ORIGINAL_SYNTHONE_NPARAMS) v &= 127u;
++            if (i == S1_LINK_BYTE) v &= 1u;
++            if (i-S1_BASE_EDIT_BYTE < S1_BASE_EDIT_COUNT) v &= 127u;
++            if (i-S1_PATCH_FIRST_BYTE < 2u*S1_COARSE_BITS || i == S1_VOICE_MARK_BYTE) v &= 127u;
++#endif
++            if (v > 127u || (i >= 2 && i != S1_LINK_BYTE && !(mask & (UINT32_C(1) << i)) && v)) return 0;
+         }
++#if X0X_S1_EXTRA
++        if (s1_coarse_code(cell,0) > S1_COARSE_STEPS+1u ||
++            s1_coarse_code(cell,1) > S1_COARSE_STEPS+1u) return 0;
++#endif
+         return 1;
+     }
+     if (mask >> count) return 0;
+ #else
+     if (original_sound_edit_mask(cell) >> count) return 0;
+ #endif
+-    for (unsigned i = 0; i < count; ++i) if (cell[i] > original_sound_param(cell[29], i)->max) return 0;
++    for (unsigned i = 0; i < count; ++i)
++        if (original_sound_panel_position(cell, i) > original_sound_param(cell[29], i)->max) return 0;
+     for (unsigned i = count; i < 22; ++i) if (cell[i]) return 0;
+     return 1;
+ }
+@@ -254,7 +743,9 @@
+         if (!original_miami_program_init(&p, (unsigned)source)) return 0;
+         for (unsigned i = 0; i < 18; ++i) next[i] = original_sound_display_byte(kind, i, p.macro[i]);
+     } else if (kind == ORIGINAL_SOUND_JUNO) {
++#if !X0X_SYNTH_CONTROLS_INIT_ONLY
+         memcpy(next, original_sound_juno_factories[factory], 16u);
++#endif
+     } else if (kind == ORIGINAL_SOUND_SYNTHONE) {
+         /* Init cell: performance defaults only. Full 150-parameter packing is not admitted. */
+         next[0] = 64;
+@@ -273,20 +764,402 @@
+         original_sound_is_performance(cell[29], parameter) ||
+         value > original_sound_param(cell[29], parameter)->max) return 0;
+     uint32_t mask = original_sound_edit_mask(cell) | (UINT32_C(1) << parameter);
++#if X0X_SUPERJ6_BUILTIN_INIT
++    if (cell[29] == ORIGINAL_SOUND_JUNO) value |= cell[parameter] & 128u;
++#endif
++#if X0X_S1_EXTRA
++    if (cell[29] == ORIGINAL_SOUND_SYNTHONE) value |= cell[parameter] & 128u;
++#endif
+     cell[parameter] = (uint8_t)value;
+-    if (cell[29] == ORIGINAL_SOUND_SYNTHONE && parameter == ORIGINAL_SYNTHONE_CRUSH) cell[31] = 1;
++    if (cell[29] == ORIGINAL_SOUND_SYNTHONE && parameter == ORIGINAL_SYNTHONE_CRUSH) cell[31] |= 1u;
+     original_sound_put_mask(cell, mask);
+     return 1;
+ }
++#if X0X_S1_EXTRA
++enum { S1_LFO_GROUP_STATES = S1_LFO_RATE_CODES * S1_LFO_RATE_CODES * 75u };
++_Static_assert(S1_EXTRA_COUNT == 11 && S1_LFO_GROUP_STATES <= 31u * 65535u,
++               "LFO group shares only the five spare header bits and two suffix bytes");
++
++static unsigned s1_lfo_ordinal(const uint8_t *state)
++{
++    return state[0] + S1_LFO_RATE_CODES *
++           (state[1] + S1_LFO_RATE_CODES * (state[2] + 5u * (state[3] + 5u * state[4])));
++}
++
++static void s1_lfo_digits(unsigned ordinal, uint8_t *state)
++{
++    state[0] = (uint8_t)(ordinal % S1_LFO_RATE_CODES); ordinal /= S1_LFO_RATE_CODES;
++    state[1] = (uint8_t)(ordinal % S1_LFO_RATE_CODES); ordinal /= S1_LFO_RATE_CODES;
++    state[2] = (uint8_t)(ordinal % 5u); ordinal /= 5u;
++    state[3] = (uint8_t)(ordinal % 5u);
++    state[4] = (uint8_t)(ordinal / 5u);
++}
++
++static void s1_extra_lfo_write(uint8_t *data, const uint8_t state[S1_LFO_COUNT])
++{
++    unsigned ordinal = s1_lfo_ordinal(state);
++    unsigned high = (ordinal - 1u) / 65535u + 1u;
++    unsigned suffix = ordinal - (high - 1u) * 65535u;
++    data[1] = (uint8_t)((data[1] & 7u) | (high << 3));
++    data[S1_FILTER_EXTRA_BYTES] = (uint8_t)suffix;
++    data[S1_FILTER_EXTRA_BYTES+1] = (uint8_t)(suffix >> 8);
++}
++
++/* A zero legacy header was invalid for every marked Synth One record. The
++ * wet format uses it without borrowing any more of the 15-byte lock tail. */
++enum { S1_MIX_RADIX = 129, S1_MIX_PAIR = S1_MIX_RADIX * S1_MIX_RADIX,
++       S1_EXTENDED_FX = 0xf8u, S1_REVERB_LFO_HEADER = 0xd8u,
++       S1_REVERB_LFO_STRIDE = 5u * 3u * S1_MIX_RADIX };
++_Static_assert(S1_LFO_GROUP_STATES <= ((S1_REVERB_LFO_HEADER >> 3)-1u)*65535u+1u &&
++               4u*S1_REVERB_LFO_STRIDE <= (S1_EXTENDED_FX-S1_REVERB_LFO_HEADER)*256u,
++               "reverb LFO escape fits wholly in invalid prior LFO headers");
++static inline int s1_reverb_lfo_header(const uint8_t *data)
++{ return data[1] >= S1_REVERB_LFO_HEADER && data[1] < S1_EXTENDED_FX; }
++/* With high=31, even the shortest nonzero legacy LFO suffix is invalid.
++ * Byte zero holds the optional HP stop. Low header bits hold Widen's
++ * ternary digit (unset/off/on); 3–7 stay invalid. Existing HP wire is exact. */
++_Static_assert(S1_LFO_GROUP_STATES < 30u * 65535u + 1u, "reverb HP marker must fail legacy decoding");
++#define S1_DIGIT(slot) ((slot) - S1_EXTRA_FIRST)
++static const uint8_t s1_packed_pairs[][2] = {
++    {S1_DIGIT(S1_OSC1_MORPH), S1_DIGIT(S1_OSC2_MORPH)},
++    {S1_DIGIT(S1_OSC2_LEVEL), S1_DIGIT(S1_SUB_LEVEL)},
++    {S1_DIGIT(S1_FM_LEVEL), S1_DIGIT(S1_FM_INDEX)},
++    {S1_DIGIT(S1_NOISE_LEVEL), S1_DIGIT(S1_ADSR_TRACK)},
++};
++static const uint8_t s1_packed_selectors[] = {
++    S1_DIGIT(S1_SUB_OCTAVE), S1_DIGIT(S1_SUB_WAVE), S1_DIGIT(S1_FILTER_TYPE)
++};
++#undef S1_DIGIT
++_Static_assert(16u + 4u * 15u + 3u * 2u + 21u + 15u + 2u == 8u * S1_EXTRA_BYTES,
++               "last two packed bits hold the ternary mono legato digit");
++
++static unsigned s1_take_bits(const uint8_t *data, unsigned *at, unsigned width)
++{
++    unsigned shift = *at & 7u;
++    const uint8_t *start = data + *at / 8u;
++    *at += width;
++    uint32_t word = 0;
++    for (unsigned i = 0; i < (shift + width + 7u) / 8u; ++i)
++        word |= (uint32_t)start[i] << (i * 8u);
++    return (word >> shift) & ((UINT32_C(1) << width) - 1u);
++}
++
++static void s1_put_bits(uint8_t *data, unsigned *at, unsigned width, unsigned value)
++{
++    unsigned shift = *at & 7u;
++    uint8_t *start = data + *at / 8u;
++    *at += width;
++    uint32_t word = (uint32_t)value << shift;
++    for (unsigned i = 0; i < (shift + width + 7u) / 8u; ++i)
++        start[i] |= (uint8_t)(word >> (i * 8u));
++}
++
++static int s1_read_packed(const uint8_t *data, s1_extra_state *state)
++{
++    const unsigned extended = (data[1] & S1_EXTENDED_FX) == S1_EXTENDED_FX;
++    unsigned reverb_hp = extended ? data[0] : 0u;
++    unsigned widen = extended ? data[1] & 7u : 0u;
++    const unsigned legato = data[S1_EXTRA_BYTES-1] >> 6;
++    /* Once HP or Widen exceeded its old domain, no earlier reader could
++     * accept the header. Use only those states for the independent route. */
++    if (s1_reverb_lfo_header(data)) {
++        unsigned word = 256u*(data[1]-S1_REVERB_LFO_HEADER) + data[0];
++        if (word >= 4u*S1_REVERB_LFO_STRIDE) return 0;
++        reverb_hp = word % S1_MIX_RADIX; word /= S1_MIX_RADIX;
++        widen = word % 3u; word /= 3u;
++        state->cutoff_lfo = (uint8_t)(word % 5u);
++        state->reverb_mix_lfo = (uint8_t)(1u+word/5u);
++    } else if (widen >= 3u || reverb_hp >= S1_MIX_RADIX) {
++        unsigned word = widen >= 3u ? 256u * (widen - 3u) + reverb_hp :
++                        1280u + 127u * widen + reverb_hp - S1_MIX_RADIX;
++        if (word >= 4u * 3u * S1_MIX_RADIX) return 0;
++        reverb_hp = word % S1_MIX_RADIX; word /= S1_MIX_RADIX;
++        widen = word % 3u; state->cutoff_lfo = (uint8_t)(1u + word / 3u);
++    } else if (extended && !(reverb_hp || widen)) return 0;
++    if (legato > 2u) return 0;
++    unsigned at = 16;
++    for (unsigned i = 0; i < sizeof s1_packed_pairs / sizeof s1_packed_pairs[0]; ++i) {
++        unsigned pair = s1_take_bits(data, &at, 15);
++        if (pair >= S1_MIX_PAIR) return 0;
++        state->panel[s1_packed_pairs[i][0]] = (uint8_t)(pair / S1_MIX_RADIX);
++        state->panel[s1_packed_pairs[i][1]] = (uint8_t)(pair % S1_MIX_RADIX);
++    }
++    for (unsigned i = 0; i < sizeof s1_packed_selectors; ++i) {
++        unsigned slot = s1_packed_selectors[i];
++        unsigned digit = s1_take_bits(data, &at, 2);
++        if (digit > s1_patch_steps(S1_EXTRA_FIRST + slot) + 1u) return 0;
++        state->panel[slot] = (uint8_t)digit;
++    }
++    unsigned ordinal = s1_take_bits(data, &at, 21);
++    unsigned wet = s1_take_bits(data, &at, 15);
++    if (ordinal >= S1_LFO_GROUP_STATES || (!wet && !reverb_hp && !widen && !legato && !state->cutoff_lfo && !state->reverb_mix_lfo) || wet >= S1_MIX_PAIR) return 0;
++    s1_lfo_digits(ordinal, state->lfo);
++    state->wet[0] = (uint8_t)(wet / S1_MIX_RADIX);
++    state->wet[1] = (uint8_t)(wet % S1_MIX_RADIX);
++    state->wet[S1_REVERB_HP - S1_WET_FIRST] = (uint8_t)reverb_hp;
++    state->wet[S1_WIDEN - S1_WET_FIRST] = (uint8_t)widen;
++    state->wet[S1_MONO_LEGATO - S1_WET_FIRST] = (uint8_t)legato;
++    return 1;
++}
++
++static void s1_write_packed(uint8_t *dest, const s1_extra_state *state)
++{
++    uint8_t data[S1_EXTRA_BYTES] = {0};
++    const uint8_t reverb_hp = state->wet[S1_REVERB_HP - S1_WET_FIRST];
++    const uint8_t widen = state->wet[S1_WIDEN - S1_WET_FIRST];
++    if (state->reverb_mix_lfo) {
++        unsigned word = ((5u*(state->reverb_mix_lfo-1u) + state->cutoff_lfo)*3u + widen)*S1_MIX_RADIX + reverb_hp;
++        data[0] = (uint8_t)word;
++        data[1] = (uint8_t)(S1_REVERB_LFO_HEADER + word/256u);
++    } else if (state->cutoff_lfo) {
++        unsigned word = ((state->cutoff_lfo - 1u) * 3u + widen) * S1_MIX_RADIX + reverb_hp;
++        if (word < 1280u) {
++            data[0] = (uint8_t)word;
++            data[1] = (uint8_t)(S1_EXTENDED_FX | (3u + word / 256u));
++        } else {
++            word -= 1280u;
++            data[0] = (uint8_t)(S1_MIX_RADIX + word % 127u);
++            data[1] = (uint8_t)(S1_EXTENDED_FX | word / 127u);
++        }
++    } else if (reverb_hp || widen) { data[0] = reverb_hp; data[1] = (uint8_t)(S1_EXTENDED_FX | widen); }
++    unsigned at = 16;
++    for (unsigned i = 0; i < sizeof s1_packed_pairs / sizeof s1_packed_pairs[0]; ++i)
++        s1_put_bits(data, &at, 15, S1_MIX_RADIX * state->panel[s1_packed_pairs[i][0]] +
++                    state->panel[s1_packed_pairs[i][1]]);
++    for (unsigned i = 0; i < sizeof s1_packed_selectors; ++i)
++        s1_put_bits(data, &at, 2, state->panel[s1_packed_selectors[i]]);
++    s1_put_bits(data, &at, 21, s1_lfo_ordinal(state->lfo));
++    s1_put_bits(data, &at, 15, S1_MIX_RADIX * state->wet[0] + state->wet[1]);
++    s1_put_bits(data, &at, 2, state->wet[S1_MONO_LEGATO - S1_WET_FIRST]);
++    memcpy(dest, data, sizeof data);
++}
++
++static int s1_read_legacy(const uint8_t *data, s1_extra_state *state)
++{
++    unsigned mask = s1_extra_bits(data);
++    unsigned size = s1_extra_size(data);
++    if (size == S1_EXTRA_BYTES) {
++        unsigned suffix = data[S1_FILTER_EXTRA_BYTES] |
++                          ((unsigned)data[S1_FILTER_EXTRA_BYTES+1] << 8);
++        unsigned ordinal = ((data[1] >> 3) - 1u) * 65535u + suffix;
++        if (!suffix || ordinal >= S1_LFO_GROUP_STATES) return 0;
++        s1_lfo_digits(ordinal, state->lfo);
++    } else if (!mask) return 0;
++    unsigned count = size == S1_OSC_EXTRA_BYTES ? S1_OSC_EXTRA_BYTES - 2u : S1_EXTRA_COUNT;
++    for (unsigned i = 0; i < count; ++i) {
++        unsigned value = data[2+i];
++        if (mask & (1u << i)) {
++            if (value > s1_patch_steps(S1_EXTRA_FIRST+i)) return 0;
++            state->panel[i] = (uint8_t)(value + 1u);
++        } else if (value) return 0;
++    }
++    return 1;
++}
++
++int s1_extra_read(const uint8_t *data, s1_extra_state *state)
++{
++    s1_extra_state next = {0};
++    if (data && !((s1_extra_packed(data) || s1_reverb_lfo_header(data) || (data[1] & S1_EXTENDED_FX) == S1_EXTENDED_FX) ?
++                     s1_read_packed(data, &next) : s1_read_legacy(data, &next)))
++        return 0;
++    *state = next;
++    return 1;
++}
++
++int original_sound_s1_extra_valid(const uint8_t *cell, const uint8_t *extra)
++{
++    s1_extra_state state;
++    return !original_sound_s1_has_extra(cell) || s1_extra_read(extra, &state);
++}
++
++static int s1_extra_edit_read(const uint8_t *cell, const uint8_t *extra, unsigned slot, s1_extra_state *state)
++{
++    if (cell[29] != ORIGINAL_SOUND_SYNTHONE) return 0;
++    const uint8_t *owned = original_sound_s1_has_extra(cell) ? extra : NULL;
++    if (!s1_extra_read(owned, state)) return 0;
++    /* A longer record can claim a gap only if every newly owned byte is free. */
++    unsigned needed = slot < S1_FILTER_TYPE ? S1_OSC_EXTRA_BYTES :
++                      slot < S1_LFO_FIRST ? S1_FILTER_EXTRA_BYTES : S1_EXTRA_BYTES;
++    for (unsigned i = owned ? s1_extra_size(owned) : 0; i < needed; ++i)
++        if (extra[i]) return 0;
++    return 1;
++}
++
++int original_sound_s1_extra_available(const uint8_t *cell, const uint8_t *extra, unsigned slot)
++{
++    s1_extra_state state;
++    return s1_extra_edit_read(cell, extra, slot, &state);
++}
++
++int original_sound_s1_extra_set(uint8_t *cell, uint8_t *extra, unsigned slot, unsigned position)
++{
++    s1_extra_state state;
++    if (slot < S1_EXTRA_FIRST || (slot >= S1_WET_FIRST + S1_WET_COUNT && slot != S1_CUTOFF_LFO && slot != S1_REVERB_MIX_LFO) || slot == S1_LFO_SYNC ||
++        !original_sound_valid(cell) || !s1_extra_edit_read(cell, extra, slot, &state)) return 0;
++    if (slot == S1_REVERB_MIX_LFO) {
++        if (!position || position > 4u) return 0;
++        state.reverb_mix_lfo = (uint8_t)position;
++    } else if (slot == S1_CUTOFF_LFO) {
++        if (!position || position > 4u) return 0;
++        state.cutoff_lfo = (uint8_t)position;
++    } else if (slot >= S1_WET_FIRST) {
++        if (!position || position > s1_patch_steps(slot) + 1u) return 0;
++        state.wet[slot-S1_WET_FIRST] = (uint8_t)position;
++    } else if (slot >= S1_LFO_FIRST) {
++        unsigned limit = s1_lfo_rate_slot(slot) ? S1_LFO_RATE_CODES : 5u;
++        if (!position || position >= limit) return 0;
++        state.lfo[slot-S1_LFO_FIRST] = (uint8_t)position;
++    } else {
++        if (position > s1_patch_steps(slot)) return 0;
++        state.panel[slot-S1_EXTRA_FIRST] = (uint8_t)(position + 1u);
++    }
++    if (state.wet[0] || state.wet[1] || state.wet[2] || state.wet[3] || state.wet[4] || state.cutoff_lfo || state.reverb_mix_lfo) s1_write_packed(extra, &state);
++    else if (slot >= S1_LFO_FIRST) s1_extra_lfo_write(extra, state.lfo);
++    else {
++        unsigned i = slot - S1_EXTRA_FIRST;
++        extra[2+i] = (uint8_t)position;
++        extra[i >> 3] |= (uint8_t)(1u << (i & 7u));
++    }
++    original_sound_put_mask(cell, original_sound_edit_mask(cell) | S1_EXTRA_MARK);
++    return 1;
++}
++
++/* OFF retains the last snapped rates. Preserve each authored rate as its
++ * division before disabling the shared sync flag, at the audio boundary. */
++int original_sound_s1_sync_set(uint8_t *cell, uint8_t *extra, unsigned code, const uint8_t divisions[2])
++{
++    s1_extra_state state;
++    if (!code || code > 2u || !original_sound_valid(cell) ||
++        !s1_extra_edit_read(cell, extra, S1_LFO_SYNC, &state)) return 0;
++    if (code == 1u) {
++        for (unsigned i = 0; i < 2; ++i)
++            if (state.lfo[i]) state.lfo[i] = (uint8_t)(S1_LFO_CODE_SYNC + divisions[i]);
++    }
++    state.lfo[S1_LFO_SYNC - S1_LFO_FIRST] = (uint8_t)code;
++    if (state.wet[0] || state.wet[1] || state.wet[2] || state.wet[3] || state.wet[4] || state.cutoff_lfo || state.reverb_mix_lfo) s1_write_packed(extra, &state);
++    else s1_extra_lfo_write(extra, state.lfo);
++    original_sound_put_mask(cell, original_sound_edit_mask(cell) | S1_EXTRA_MARK);
++    return 1;
++}
++#endif
+ #if X0X_SYNTHONE_PATCH
+ int original_sound_s1_set(uint8_t cell[ORIGINAL_SOUND_BYTES], unsigned slot, unsigned position)
+ {
+-    if (slot >= S1_PATCH_COUNT || position > S1_PATCH_STEPS ||
++    if ((slot > S1_PATCH_COUNT
++#if X0X_S1_EXTRA
++        && !s1_base_edit_slot(slot)
++#endif
++        ) || position > S1_PATCH_STEPS ||
+         !original_sound_valid(cell) || cell[29] != ORIGINAL_SOUND_SYNTHONE) return 0;
++#if X0X_S1_EXTRA
++    if (slot - S1_VOICE_MODE < 2u) {
++        if (position > s1_patch_steps(slot)) return 0;
++        unsigned code = s1_voice_code(cell);
++        code = slot == S1_VOICE_MODE ? code % S1_GLIDE_RADIX + (position+1u)*S1_GLIDE_RADIX :
++                                      code - code % S1_GLIDE_RADIX + position+1u;
++        cell[S1_LINK_BYTE] = (uint8_t)((cell[S1_LINK_BYTE] & 1u) | (code << 1));
++        cell[S1_VOICE_MARK_BYTE] |= 128u;
++        return 1;
++    }
++    if (slot == S1_OSC2_DETUNE) {
++        if (position > S1_DETUNE_STEPS) return 0;
++        cell[31] = (uint8_t)((cell[31] & 1u) | ((position+1u) << 1));
++        return 1;
++    }
++    if (s1_coarse_slot(slot)) {
++        if (position > S1_COARSE_STEPS) return 0;
++        unsigned offset = S1_PATCH_FIRST_BYTE + (slot-S1_COARSE_FIRST)*S1_COARSE_BITS;
++        for (unsigned i=0;i<S1_COARSE_BITS;++i) {
++            unsigned hi = ((position+1u) >> i) & 1u;
++            cell[offset+i] = (uint8_t)((cell[offset+i] & 127u) | (hi << 7));
++        }
++        return 1;
++    }
++    if (slot == S1_TREMOLO_LFO) {
++        if (position > 3u) return 0;
++        for (unsigned i=0;i<ORIGINAL_SYNTHONE_NPARAMS;++i)
++            cell[i] = (uint8_t)((cell[i] & 127u) | ((((position+1u) >> i) & 1u) << 7));
++        original_sound_put_mask(cell, original_sound_edit_mask(cell) | S1_MOD_EXT_MARK);
++        return 1;
++    }
++    if (slot == S1_PITCH_LFO) {
++        if (position > 3u) return 0;
++        cell[21] = (uint8_t)((cell[21] & S1_PROGRAM_BYTE_MASK) | ((position+1u) << 3));
++        original_sound_put_mask(cell, original_sound_edit_mask(cell) | S1_MOD_EXT_MARK);
++        return 1;
++    }
++    if (slot == S1_DETUNE_LFO) {
++        if (position > 3u) return 0;
++        for (unsigned i=0;i<S1_BASE_EDIT_COUNT;++i) {
++            uint8_t *p = cell+S1_BASE_EDIT_BYTE+i;
++            *p = (uint8_t)((*p & 127u) | (((position+1u) >> i & 1u) << 7));
++        }
++        original_sound_put_mask(cell, original_sound_edit_mask(cell) | S1_MOD_EXT_MARK);
++        return 1;
++    }
++    if (s1_fx_gate_slot(slot)) {
++        if (position > 1u) return 0;
++        unsigned code = cell[S1_MOD_EXT_BYTE];
++        unsigned divisor = S1_ROUTE_EXT_CODES * (slot == S1_DELAY_ON ? 1u : S1_FX_GATE_RADIX);
++        unsigned prior = code / divisor % S1_FX_GATE_RADIX;
++        cell[S1_MOD_EXT_BYTE] = (uint8_t)(code - prior*divisor + (position+1u)*divisor);
++        original_sound_put_mask(cell, original_sound_edit_mask(cell) | S1_MOD_EXT_MARK);
++        return 1;
++    }
++    if (s1_mod_ext_slot(slot)) {
++        if (position > 3u) return 0;
++        unsigned code = cell[S1_MOD_EXT_BYTE], divisor = s1_mod_ext_divisor(slot);
++        unsigned prior = code / divisor % S1_MOD_RADIX;
++        cell[S1_MOD_EXT_BYTE] = (uint8_t)(code - prior * divisor + (position + 1u) * divisor);
++        original_sound_put_mask(cell, original_sound_edit_mask(cell) | S1_MOD_EXT_MARK);
++        return 1;
++    }
++    if (s1_base_route_slot(slot)) {
++        if (position > 3u) return 0;
++        const uint32_t mask = original_sound_edit_mask(cell);
++        uint8_t codes[S1_ROUTE_COUNT];
++        if (!s1_route_decode(mask >> S1_ROUTE_SHIFT, codes)) return 0;
++        codes[slot-S1_ROUTE_FIRST] = (uint8_t)(position+1u);
++        original_sound_put_mask(cell, (mask & ~S1_ROUTE_MASK) |
++                                ((uint32_t)s1_route_encode(codes) << S1_ROUTE_SHIFT));
++        return 1;
++    }
++    if (s1_base_edit_slot(slot)) {
++        const unsigned byte = S1_BASE_EDIT_BYTE + slot - S1_BASE_EDIT_FIRST;
++        cell[byte] = (uint8_t)((cell[byte] & 128u) | position);
++        original_sound_put_mask(cell, original_sound_edit_mask(cell) | (UINT32_C(1) << byte));
++        return 1;
++    }
++#endif
++    if (slot == S1_PATCH_COUNT) {
++        if (position > 1) return 0;
++        cell[S1_LINK_BYTE] = (uint8_t)((cell[S1_LINK_BYTE] & 254u) | position);
++        uint32_t mask = original_sound_edit_mask(cell);
++        original_sound_put_mask(cell, position ? mask | S1_LINK_MASK : mask & ~S1_LINK_MASK);
++        return 1;
++    }
+     unsigned byte = S1_PATCH_FIRST_BYTE + slot;
+-    cell[byte] = (uint8_t)position;
++    cell[byte] = (uint8_t)((cell[byte] & 128u) | position);
+     original_sound_put_mask(cell, original_sound_edit_mask(cell) | (UINT32_C(1) << byte));
+     return 1;
++}
++#endif
++
++#if X0X_S1_EXTRA || X0X_SUPERJ6_BUILTIN_INIT
++int original_sound_bass_shared_size(const uint8_t *cell, const uint8_t *extra)
++{
++#if X0X_S1_EXTRA
++    if (original_sound_s1_has_extra(cell))
++        return original_sound_s1_extra_valid(cell, extra) ? (int)s1_extra_size(extra) : -1;
++#endif
++#if X0X_SUPERJ6_BUILTIN_INIT
++    if (cell[29] == ORIGINAL_SOUND_JUNO && !original_sound_sj6_marker_valid(cell)) return -1;
++    if (original_sound_sj6_has_a_reference(cell))
++        return original_sound_sj6_a_reference_available(cell, extra) ? (int)ORIGINAL_SJ6_TUNING_WIRE_BYTES : -1;
++    if (original_sound_sj6_vibrato_mask(cell))
++        return original_sound_sj6_vibrato_available(cell, extra) ? (int)ORIGINAL_SJ6_VIBRATO_WIRE_BYTES : -1;
++#endif
++    return 0;
+ }
+ #endif
+ 
+@@ -327,12 +1200,22 @@
+     }
+     float result;
+     if (original_sound_edit_mask(cell) & (UINT32_C(1) << parameter)) {
+-        if (!original_sound_control_value(cell[29], parameter, cell[parameter], &result)) return 0;
++        if (!original_sound_control_value(cell[29], parameter, original_sound_panel_position(cell, parameter), &result)) return 0;
+     }
+     else if (cell[29] == ORIGINAL_SOUND_SYNTHONE)
+         result = 0.f;
+     else if (cell[29] == ORIGINAL_SOUND_JUNO)
+-        result = unit_control(original_sound_juno_factories[cell[30]][parameter]);
++#if X0X_SYNTH_CONTROLS_INIT_ONLY
++        result = unit_control(cell[parameter] & 127u);
++#else
++        result = unit_control(original_sound_juno_factories[
++#if X0X_SUPERJ6_BUILTIN_INIT
++            original_sound_sj6_factory(cell)
++#else
++            cell[30]
++#endif
++        ][parameter]);
++#endif
+     else if (cell[29] == ORIGINAL_SOUND_CHICAGO) {
+         original_chicago_program p;
+         if (!original_chicago_program_init(&p, (unsigned)original_sound_factory_source(cell[29], cell[30]))) return 0;
+--- a/firmware/src/app/original_sound.h
++++ b/firmware/src/app/original_sound.h
+@@ -6,6 +6,10 @@
+ #include "../dsp/x0x_param.h"
+ 
+ #define ORIGINAL_SOUND_BYTES 32u
++#if (X0X_S1C && X0X_SYNTHONE_PATCH) || X0X_SUPERJ6_BUILTIN_INIT
++/* Only the active bank's valid marker owns bytes. Unmarked data stays opaque. */
++int original_sound_bass_shared_size(const uint8_t *cell, const uint8_t *extra);
++#endif
+ #define ORIGINAL_SOUND_CHICAGO 0u
+ #define ORIGINAL_SOUND_MIAMI 1u
+ #define ORIGINAL_SOUND_SYNTHONE 2u
+@@ -43,8 +47,10 @@
+ 
+ /* New firmware patch representation, not a legacy bank decoder:
+  * [0..21] macro display bytes; [22..25] LE edit mask; [26..27] 'OS'; [28] version;
+- * [29] engine kind; [30] selected factory index; [31] zero, or one for a
+- * Synth One cell with an edited crush rate, distinguishing historical cells.
++ * [29] engine kind; [30] selected factory index; [31] normally zero. Synth
++ * One uses 1 for crush. SuperJ6 uses 1 for old knob bytes and 2..4 for exact
++ * vibrato records with depth, rate or both present, respectively. Bit 3
++ * independently marks an A-reference word in the same qualified record.
+  * Chicago indexes all 81 programs (the 55 compact ones first, then the 26
+  * restored-insert ones) and FxType stores a twelve-choice index.
+  * Kind 2 is Synth One. New writes use persistent id OS11. Historical id
+@@ -79,12 +85,32 @@
+  * rewritten, 0 if the cell is already a current Synth One or other kind. */
+ int original_sound_adopt_legacy_cell(uint8_t cell[ORIGINAL_SOUND_BYTES]);
+ unsigned original_sound_count(unsigned kind);
++/* Keep legacy ordinal validation separate from choices offered in this build. */
+ unsigned original_sound_factories(unsigned kind);
++static inline unsigned original_sound_available_factories(unsigned kind)
++{
++#if X0X_SYNTH_CONTROLS_INIT_ONLY
++    if (kind == ORIGINAL_SOUND_JUNO || kind == ORIGINAL_SOUND_SYNTHONE) return 1;
++#endif
++    return original_sound_factories(kind);
++}
+ /* Returns the immutable original program index, or -1 on invalid input. */
+ int original_sound_factory_source(unsigned kind, unsigned factory);
+ /* Convert a firmware control to its actual original macro. FxType is discrete;
+  * Chicago ENV4 and Miami TUNE7 have exact midpoint64; all others use q/127.
+  * Failed conversion does not change *value. */
++/* The Juno cell retains its original seven-bit panel under the typed plane.
++ * Full-cell serialization intentionally does not strip the plane. */
++static inline unsigned original_sound_panel_position(const uint8_t *cell, unsigned id)
++{
++#if X0X_SUPERJ6_BUILTIN_INIT
++    if (id < ORIGINAL_JUNO_NPARAMS && cell[29] == ORIGINAL_SOUND_JUNO) return cell[id] & 127u;
++#endif
++#if X0X_S1C && X0X_SYNTHONE_PATCH
++    if (id < ORIGINAL_SYNTHONE_NPARAMS && cell[29] == ORIGINAL_SOUND_SYNTHONE) return cell[id] & 127u;
++#endif
++    return cell[id];
++}
+ int original_sound_control_value(unsigned kind, unsigned parameter, unsigned control, float *value);
+ static inline unsigned original_sound_bend_id(unsigned kind)
+ { return kind == ORIGINAL_SOUND_SYNTHONE ? 0u : original_sound_count(kind) - 2u; }
+@@ -95,10 +121,145 @@
+ int original_sound_valid(const uint8_t cell[ORIGINAL_SOUND_BYTES]);
+ int original_sound_init(uint8_t cell[ORIGINAL_SOUND_BYTES], unsigned kind, unsigned factory);
+ int original_sound_set(uint8_t cell[ORIGINAL_SOUND_BYTES], unsigned parameter, unsigned value);
++#if X0X_SUPERJ6_BUILTIN_INIT
++/* Explicit HPF law selected only by an intentional panel edit. Archived
++ * unmarked cells retain their compact interpretation and cold behavior. */
++enum { ORIGINAL_SJ6_HPF_PANEL = 9, ORIGINAL_SJ6_HPF_LAW_BYTE = 16 };
++static inline unsigned original_sound_sj6_hpf_authored(const uint8_t *cell)
++{ return cell[29] == ORIGINAL_SOUND_JUNO && (cell[ORIGINAL_SJ6_HPF_LAW_BYTE] & 128u); }
++#endif
+ #if X0X_SYNTHONE_PATCH
++#include "s1_patch.h"
++#if X0X_S1_EXTRA
++int original_sound_s1_extra_valid(const uint8_t *cell, const uint8_t *extra);
++int original_sound_s1_extra_available(const uint8_t *cell, const uint8_t *extra, unsigned slot);
++int original_sound_s1_extra_set(uint8_t *cell, uint8_t *extra, unsigned slot, unsigned position);
++int original_sound_s1_sync_set(uint8_t *cell, uint8_t *extra, unsigned code, const uint8_t divisions[2]);
++#endif
+ int original_sound_s1_set(uint8_t cell[ORIGINAL_SOUND_BYTES], unsigned slot, unsigned position);
+ #endif
++#if X0X_SUPERJ6_BUILTIN_INIT
++#include "../dsp/juno6.h"
++/* Init-only typed oscillator-2 level. Unmarked legacy factory ordinals
++ * are unchanged, while older readers reject the marked form before writes. */
++static inline unsigned original_sound_sj6_osc2_code(const uint8_t *cell)
++{ return cell[29] == ORIGINAL_SOUND_JUNO && (cell[30] & 128u) ? (cell[30] & 127u)+1u : 0u; }
++static inline unsigned original_sound_sj6_factory(const uint8_t *cell)
++{ return original_sound_sj6_osc2_code(cell) ? 0u : cell[30]; }
++#define ORIGINAL_SJ6_EDIT_SHIFT 18u
++#define ORIGINAL_SJ6_EDIT_MASK ((1u << SJ6_OSC_KNOBS) - 1u)
++#define ORIGINAL_SJ6_EXTRA_BIT (1u << (ORIGINAL_SJ6_EDIT_SHIFT + SJ6_OSC_KNOBS))
++#define ORIGINAL_SJ6_AUTHORED_LFO_BIT (ORIGINAL_SJ6_EXTRA_BIT << 1)
++#define ORIGINAL_SJ6_LFO2_PWM_BIT (ORIGINAL_SJ6_AUTHORED_LFO_BIT << 1)
++#define ORIGINAL_SJ6_LFO2_PWM_BYTE 21u
++#define ORIGINAL_SJ6_LFO2_PWM2_BIT (ORIGINAL_SJ6_LFO2_PWM_BIT << 1)
++#define ORIGINAL_SJ6_CHORUS_SHIFT 29u
++/* The upper three edit bits encode a mode, including explicit OFF. */
++static inline unsigned original_sound_sj6_chorus(const uint8_t *cell)
++{ return cell[25] >> (ORIGINAL_SJ6_CHORUS_SHIFT - 24); }
++void original_sound_sj6_chorus_store(uint8_t *cell, unsigned mode);
++static inline unsigned original_sound_sj6_lfo2_pwm(const uint8_t *cell)
++{
++    /* Keep the earlier OFF/PWM1 byte intact. PWM2 occupies the next edit bit. */
++    return cell[ORIGINAL_SJ6_LFO2_PWM_BYTE] |
++           ((cell[25] & (ORIGINAL_SJ6_LFO2_PWM2_BIT >> 24)) ? (2u << SJ6_LFO2_PWM_ROUTE_SHIFT) : 0u);
++}
++#define ORIGINAL_SJ6_EXT_BITS (ORIGINAL_SJ6_EXTRA_BIT | ORIGINAL_SJ6_AUTHORED_LFO_BIT)
++#define ORIGINAL_SJ6_EXTRA_ROW 4u
++#define ORIGINAL_SJ6_EXTRA_SIZE (2u + SJ6_EXTRA_COUNT)
++#define ORIGINAL_SJ6_RATE_INDEX (SJ6_LFO1_RATE - SJ6_OSC_KNOBS)
++#define ORIGINAL_SJ6_MODE_INDEX SJ6_EXTRA_COUNT
++#define ORIGINAL_SJ6_LFO_AUTHORED_SIZE 14u
++#define ORIGINAL_SJ6_VIBRATO_OFFSET (ORIGINAL_SJ6_EXTRA_SIZE + ORIGINAL_SJ6_LFO_AUTHORED_SIZE)
++#define ORIGINAL_SJ6_EXT_USED (ORIGINAL_SJ6_VIBRATO_OFFSET + 2u)
++/* Rows 6 and 7 carry one bank-qualified extension per bass part. */
++#define ORIGINAL_SJ6_VIBRATO_ROW (ORIGINAL_SJ6_EXTRA_ROW + 2u)
++#define ORIGINAL_SJ6_VIBRATO_WIRE_BYTES 8u
++#define ORIGINAL_SJ6_A_REFERENCE_MARK 8u
++#define ORIGINAL_SJ6_TUNING_WIRE_BYTES 12u
++/* The base cell owns the shape. Low-nibble marks keep their old shared-row
++ * meanings. Only a tagged nondefault shape can use the upper nibble. */
++#define ORIGINAL_SJ6_LFO2_SHAPE_MARK 128u
++#define ORIGINAL_SJ6_LFO2_SHAPE_SHIFT 4u
++/* Dense level plane preserves every canonical old shape/tuning marker.
++ * 50 semantic states times four groups of 32 = 128 optional positions.
++ * In an extended marker the redundant PWM occupancy flag is XOR digit bit 4. */
++unsigned original_sound_sj6_marker(const uint8_t *cell);
++unsigned original_sound_sj6_osc1_code(const uint8_t *cell);
++void original_sound_sj6_marker_store(uint8_t *cell,unsigned canonical);
++void original_sound_sj6_osc1_store(uint8_t *cell,unsigned position);
++static inline unsigned original_sound_sj6_shape(const uint8_t *cell)
++{
++    unsigned high = original_sound_sj6_marker(cell) >> ORIGINAL_SJ6_LFO2_SHAPE_SHIFT;
++    return high == 8u ? SJ6_LFO_HELD : high >= 9u && high <= 11u ? high - 8u : SJ6_LFO_TRI;
++}
++static inline void original_sound_sj6_shape_store(uint8_t *cell, unsigned shape)
++{
++    if (shape <= SJ6_LFO2_SHAPE_MAX)
++        original_sound_sj6_marker_store(cell,(original_sound_sj6_marker(cell) & 15u) |
++                    (shape ? ORIGINAL_SJ6_LFO2_SHAPE_MARK | ((shape & 3u) << ORIGINAL_SJ6_LFO2_SHAPE_SHIFT) : 0u));
++}
++/* The same kind-discriminated byte marks Synth One crush edits. */
++static inline unsigned original_sound_sj6_vibrato_marker(const uint8_t *cell)
++{ return original_sound_sj6_marker(cell) & 7u; }
++static inline int original_sound_sj6_marker_valid(const uint8_t *cell)
++{
++    return cell[29] == ORIGINAL_SOUND_JUNO && original_sound_sj6_marker(cell)<=255u;
++}
++static inline int original_sound_sj6_vibrato(const uint8_t *cell)
++{ return original_sound_sj6_marker_valid(cell) && original_sound_sj6_vibrato_marker(cell) != 0; }
++static inline unsigned original_sound_sj6_vibrato_mask(const uint8_t *cell)
++{
++    unsigned marker = original_sound_sj6_vibrato_marker(cell);
++    return original_sound_sj6_vibrato(cell) && marker > 1u ? marker - 1u : 0u;
++}
++static inline int original_sound_sj6_has_a_reference(const uint8_t *cell)
++{ return original_sound_sj6_marker_valid(cell) && (original_sound_sj6_marker(cell) & ORIGINAL_SJ6_A_REFERENCE_MARK); }
++int original_sound_sj6_a_reference_word(const uint8_t *cell, const uint8_t *wire, float *value);
++void original_sound_sj6_a_reference_store(uint8_t *cell, uint8_t *wire, float value, unsigned present);
++int original_sound_sj6_a_reference_available(const uint8_t *cell, const uint8_t *wire);
++/* Exact little-endian binary32 words. Zero means no exact record, -1 means malformed. */
++int original_sound_sj6_vibrato_words(const uint8_t *cell, const uint8_t *wire, float values[2]);
++void original_sound_sj6_vibrato_store(uint8_t *cell, uint8_t *wire, const float values[2], unsigned present);
++int original_sound_sj6_vibrato_available(const uint8_t *cell, const uint8_t *wire);
++int original_sound_sj6_lfo_words(const uint8_t *extra, juno6_lfo_words *);
++void original_sound_sj6_lfo_store(uint8_t *cell, uint8_t *extra, const juno6_lfo_words *);
++int original_sound_sj6_ext_valid(const uint8_t *cell, const uint8_t *extra);
++unsigned original_sound_sj6_extra_mask(const uint8_t *extra);
++unsigned original_sound_sj6_fine_code(const uint8_t *cell, unsigned layer);
++unsigned original_sound_sj6_fine(const uint8_t *cell, unsigned layer);
++void original_sound_sj6_fine_store(uint8_t *cell, unsigned layer, unsigned pos);
++unsigned original_sound_sj6_layer_semi(const uint8_t *extra, unsigned layer);
++static inline unsigned original_sound_sj6_semi(const uint8_t *extra)
++{ return original_sound_sj6_layer_semi(extra, 0); }
++int original_sound_sj6_semi_ready(const uint8_t *cell, const uint8_t *extra);
++void original_sound_sj6_semi_store(uint8_t *cell, uint8_t *extra, unsigned layer, unsigned position);
++int original_sound_sj6_extra_valid(const uint8_t *extra);
++void original_sound_sj6_extra_store(uint8_t *cell, uint8_t *extra, unsigned mask,
++                                  const uint8_t *positions, unsigned modes, unsigned hz_modes);
++unsigned original_sound_sj6_max(unsigned slot);
++void original_sound_sj6_lfo2_pwm_store(uint8_t *cell, uint16_t setting);
++unsigned original_sound_sj6_knobs(const uint8_t cell[ORIGINAL_SOUND_BYTES],
++                                uint8_t positions[SJ6_OSC_KNOBS]);
++void original_sound_sj6_store(uint8_t cell[ORIGINAL_SOUND_BYTES], unsigned mask,
++                             const uint8_t positions[SJ6_OSC_KNOBS]);
++#endif
+ uint32_t original_sound_edit_mask(const uint8_t cell[ORIGINAL_SOUND_BYTES]);
++#if X0X_S1_EXTRA
++/* Edit bits are scoped to the cell's engine. SuperJ6 bit 22 is PWM1. */
++static inline int original_sound_s1_has_extra(const uint8_t *cell)
++{
++    return cell[29] == ORIGINAL_SOUND_SYNTHONE && (original_sound_edit_mask(cell) & S1_EXTRA_MARK);
++}
++#endif
++static inline int original_sound_is_edited(const uint8_t *cell)
++{
++#if X0X_SUPERJ6_BUILTIN_INIT
++    if (original_sound_sj6_marker_valid(cell) &&
++        (cell[31] || original_sound_sj6_osc2_code(cell) || original_sound_sj6_fine_code(cell, 0) || original_sound_sj6_fine_code(cell, 1))) return 1;
++#endif
++    return original_sound_edit_mask(cell) != 0;
++}
+ int original_sound_restore_miami(original_miami_program *, const uint8_t cell[ORIGINAL_SOUND_BYTES]);
+ int original_sound_restore_chicago(original_chicago_program *, const uint8_t cell[ORIGINAL_SOUND_BYTES]);
+ int original_sound_value(const uint8_t cell[ORIGINAL_SOUND_BYTES], unsigned parameter, float *value);
+--- a/firmware/src/app/project.c
++++ b/firmware/src/app/project.c
+@@ -21,16 +21,29 @@
+ 
+ project_t proj;
+ /* Reuses the UI undo shadow while an exclusive project operation is active. */
++#ifdef DNBOX_137_HOST_WITNESS
++#include "sj6_137_host_witness.h"
++#ifdef X0X_HOST
++#include <string.h>
++#endif
++#endif
+ project_t project_stage X0X_POOL;
+ 
+ #define PROJ_STREAM 13u                 /* compact Chicago schema2; current raw patterns/arrangement */
+ #define PROJ_STREAM_14 14u              /* 13 + per-pattern bass presets (pattern_t.rsv[0..1]) and note locks */
+ #define PROJ_STREAM_CHORD 15u /* same byte layout, sparse held-key chord metadata */
++#ifdef DNBOX_137_HOST_WITNESS
++static int stream_known(uint32_t format) { return format == PROJ_STREAM || format == PROJ_STREAM_14 || format == PROJ_STREAM_CHORD || format == STREAM137; }
++#else
+ static int stream_known(uint32_t format) { return format == PROJ_STREAM || format == PROJ_STREAM_14 || format == PROJ_STREAM_CHORD; }
++#endif
+ /* Revision 14 only when the project uses what 13 cannot hold, so a project without
+  * pattern presets or note locks stays byte-identical and loads on 0.0.24.x. */
+ static uint32_t stream_format_of(const project_t *pr)
+ {
++#ifdef DNBOX_137_HOST_WITNESS
++    if(pr->set.snd_rev==REV137)return STREAM137;
++#endif
+     for(int k=0;k<NLANE;k++)
+         if(pr->arr.lane[k].used && pr->arr.lane[k].t==HELD_CHORD_TARGET)return PROJ_STREAM_CHORD;
+     for (int p = 0; p < NPAT; p++)
+@@ -61,6 +74,11 @@
+ /* 1: unsupported, 2: damaged. Both retain flash until validated staged adoption. */
+ static uint8_t project_incompatible;
+ static uint8_t stream_previous; /* per-object older-copy selection during recovery */
++#ifdef DNBOX_137_HOST_WITNESS
++enum { TUPLE_SET_PREVIOUS = 1u << NSTREAM, TUPLE_SOUND_PREVIOUS = 2u << NSTREAM };
++static uint8_t tuple_recovered; /* previous A/B tuple is playable but permanently read-only until latest coheres */
++int s1_typed_tuple_editable(void) {return !tuple_recovered && !project_incompatible;}
++#endif
+ static uint8_t device_bt_pending;       /* independent of UI dirty/autosave and project reset/load */
+ static uint8_t settings_read_failed;    /* defaults must not replace unread stored settings */
+ static uint8_t settings_load_failed;    /* a Bluetooth retry alone cannot adopt fallback defaults */
+@@ -87,7 +105,7 @@
+     s->keysound = 0;
+     s->autosave_off = 0;
+     s->clk_out = 1;
+-    s->bt = (uint8_t)((device_bt & PROJ_DEVICE_BT) | PROJ_BT_CLK_IN);   /* CLOCK SOURCE AUTO */
++    s->bt = (uint8_t)((device_bt & PROJ_DEVICE_PREFS) | PROJ_BT_CLK_IN);   /* CLOCK SOURCE AUTO */
+     s->notes_out = 0;
+     s->bpm_x10 = 1250;
+     s->accent_q7 = 88;
+@@ -102,9 +120,11 @@
+ static void project_defaults_for(project_t *pr, uint8_t device_bt)
+ {
+     int i;
++    const uint8_t micro_keys=proj.set.ck_x1 & PROJ_S1_MICRO_KEYS;
+     __builtin_memset(pr, 0, sizeof *pr);
+     *part_off_of(pr) = 0;
+     project_settings_defaults(&pr->set, device_bt);
++    pr->set.ck_x1 |= micro_keys;
+     engine_sound_defaults(&pr->sound);
+     arrange_defaults(pr);
+     /* the 303 lines start empty, like the drums: OCT+ on TB-3PO (or keyboard mode) writes one */
+@@ -127,12 +147,36 @@
+  * objects that changed: an autosave usually erases one or two sectors, not six */
+ static uint64_t stored_hash[OBJ_NOBJ];
+ static uint8_t stored_known[OBJ_NOBJ];
++#ifdef DNBOX_137_HOST_WITNESS
++__attribute__((noinline)) static uint64_t hash_append(uint64_t h,const uint8_t *p,uint32_t n)
++#else
+ __attribute__((noinline)) static uint64_t hash_of(const uint8_t *p, uint32_t n)        /* FNV-1a, 64-bit */
+-{
++#endif
++{
++#ifdef DNBOX_137_HOST_WITNESS
++    while (n--) h = (h ^ *p++) * UINT64_C(1099511628211);
++#else
+     uint64_t h = UINT64_C(14695981039346656037);
+     while (n--)
+         h = (h ^ *p++) * UINT64_C(1099511628211);
++#endif
+     return h;
++#ifdef DNBOX_137_HOST_WITNESS
++}
++static uint64_t hash_of(const uint8_t *p,uint32_t n)
++{ return hash_append(UINT64_C(14695981039346656037),p,n); }
++static uint64_t tuple_hash(const project_t *pr,uint8_t part_off)
++{
++    settings_t set;
++    memcpy(&set,&pr->set,sizeof set);
++    /* The independently persisted device Bluetooth bit is not project data. */
++    set.bt &= ~1u;
++    uint8_t domain[2]={STREAM137,part_off};
++    uint64_t h=hash_of(domain,sizeof domain);
++    h=hash_append(h,(const uint8_t *)&set,sizeof set);
++    h=hash_append(h,(const uint8_t *)&pr->sound,sizeof pr->sound);
++    return hash_append(h,(const uint8_t *)pr+RAW_OFF,RAW_LEN);
++#endif
+ }
+ 
+ __attribute__((noinline)) static uint32_t get32(const uint8_t *p)
+@@ -166,7 +210,11 @@
+  * invalidate cached equality and block saves until a later read resolves it. */
+ static int read_settings_payload(void)
+ {
++#ifdef DNBOX_137_HOST_WITNESS
++    int n = plat_store_load(OBJ_SET | (stream_previous & TUPLE_SET_PREVIOUS ? PLAT_STORE_PREVIOUS : 0), io_buf, sizeof io_buf);
++#else
+     int n = plat_store_load(OBJ_SET, io_buf, sizeof io_buf);
++#endif
+     settings_read_failed = (uint8_t)(n < -1);
+     if (n < 0) stored_known[OBJ_SET] = 0;
+     return n;
+@@ -178,7 +226,11 @@
+     int n = read_settings_payload();
+     if (n < 0) return n;
+     if (!PROJ_SET_LEN_OK((uint32_t)n) || get32(io_buf) != PROJ_FORMAT ||
++#ifdef DNBOX_137_HOST_WITNESS
++        !valid_rev137(io_buf[4u + __builtin_offsetof(settings_t, snd_rev)])) return -9;
++#else
+         io_buf[4u + __builtin_offsetof(settings_t, snd_rev)] != PROJ_SND_REV) return -9;
++#endif
+     if ((uint32_t)n == 4u + sizeof *dst)
+         __builtin_memset(io_buf + 4u + sizeof *dst, 0, PROJ_SET_TAIL);
+     else if (PROJ_SET_TAIL_BAD(io_buf + 4u + sizeof *dst)) return -9;
+@@ -192,7 +244,11 @@
+ {
+     if (len + 4u > sizeof io_buf)
+         return -1;
++#ifdef DNBOX_137_HOST_WITNESS
++    put32(io_buf, obj==OBJ_SOUND && proj.set.snd_rev==REV137 ? SOUND137 : PROJ_FORMAT);
++#else
+     put32(io_buf, PROJ_FORMAT);
++#endif
+     __builtin_memcpy(io_buf + 4u, src, len);
+     return save_buf(obj, len + 4u);
+ }
+@@ -226,9 +282,16 @@
+ int project_device_bt_pending(void) { return device_bt_pending; }
+ int project_device_bt_save(void)
+ {
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++    return -9; /* no project-flash writes in this test profile */
++#endif
+     int n, rc;
+     if (!device_bt_pending) return 0;
++#ifdef DNBOX_137_HOST_WITNESS
++    if (project_incompatible || tuple_recovered) return -9;
++#else
+     if (project_incompatible) return -9;
++#endif
+     n = read_settings_payload();
+     if (n < -1) return n;                /* pending stays set: UI retries after I/O recovers */
+     if (n == -1) {
+@@ -239,7 +302,11 @@
+         /* Do not normalize or migrate a payload as a side effect of a toggle:
+          * only the exact layout load_settings accepts is patched. */
+         if (!PROJ_SET_LEN_OK((uint32_t)n) || get32(io_buf) != PROJ_FORMAT ||
++#ifdef DNBOX_137_HOST_WITNESS
++            !valid_rev137(io_buf[4u + __builtin_offsetof(settings_t, snd_rev)]) ||
++#else
+             io_buf[4u + __builtin_offsetof(settings_t, snd_rev)] != PROJ_SND_REV ||
++#endif
+             ((uint32_t)n > 4u + sizeof(settings_t) && PROJ_SET_TAIL_BAD(io_buf + 4u + sizeof(settings_t))))
+             return -9;
+         io_buf[4u + __builtin_offsetof(settings_t, bt)] =
+@@ -259,13 +326,29 @@
+ #define SOUND_CELL_V8 28u
+ #define SOUND_BYTES_V8 (NTARGETS * NVOICES_MAX * SOUND_CELL_V8)
+ 
++#ifdef DNBOX_137_HOST_WITNESS
++static int load_sound(sound_t *dst, unsigned revision)
++#else
+ static int load_sound(sound_t *dst)
+-{
++#endif
++{
++#ifdef DNBOX_137_HOST_WITNESS
++    int n = plat_store_load(OBJ_SOUND | (stream_previous & TUPLE_SOUND_PREVIOUS ? PLAT_STORE_PREVIOUS : 0), io_buf, sizeof io_buf);
++#else
+     int n = plat_store_load(OBJ_SOUND, io_buf, sizeof io_buf);
++#endif
+     if (n < 0) return n;
++#ifdef DNBOX_137_HOST_WITNESS
++    if ((uint32_t)n != sizeof *dst + 4u || get32(io_buf) != (revision==REV137 ? SOUND137 : PROJ_FORMAT)) return -9;
++#else
+     if ((uint32_t)n != sizeof *dst + 4u || get32(io_buf) != PROJ_FORMAT) return -9;
++#endif
+     __builtin_memcpy(dst, io_buf + 4u, sizeof *dst);
++#ifdef DNBOX_137_HOST_WITNESS
++    if ((revision==REV137 && !canonical137(dst)) || engine_bass_sound_validate(dst)) return -9;
++#else
+     if (engine_bass_sound_validate(dst)) return -9;
++#endif
+     stored_known[OBJ_SOUND] = 1;
+     stored_hash[OBJ_SOUND] = hash_of(io_buf, (uint32_t)n);
+     return 0;
+@@ -337,8 +420,19 @@
+     lz_sink_t sink = {st_put, &o};
+     o.fill = STREAM_HDR;
+     put32(io_buf, o.format);
++#ifdef DNBOX_137_HOST_WITNESS
++    if (o.format==STREAM137) {
++        uint64_t h=tuple_hash(&proj,part_off_live);
++        put32(io_buf+4,(uint32_t)h);
++        put32(io_buf+8,(uint32_t)(h>>32));
++    } else {
++        put32(io_buf+4,RAW_LEN);
++        put32(io_buf+8,crc);
++    }
++#else
+     put32(io_buf + 4, RAW_LEN);
+     put32(io_buf + 8, crc);
++#endif
+     put32(io_buf + 12, packed_len);
+     if (lz_compress(raw, RAW_LEN, &sink) || o.err || st_flush(&o))
+         return -3;
+@@ -415,7 +509,11 @@
+         const lane_t *l=&arr->lane[k];
+         if(!l->used)continue;
+         if(l->t==HELD_CHORD_TARGET) {
++#ifdef DNBOX_137_HOST_WITNESS
++            if((format!=PROJ_STREAM_CHORD && format!=STREAM137) || !held_chord_lane_valid(l))return 0;
++#else
+             if(format!=PROJ_STREAM_CHORD || !held_chord_lane_valid(l))return 0;
++#endif
+             for(int j=0;j<k;j++)if(arr->lane[j].used && arr->lane[j].t==l->t &&
+                 arr->lane[j].pat==l->pat && arr->lane[j].part==l->part &&
+                 arr->lane[j].v==l->v && arr->lane[j].i==l->i)return 0;
+@@ -424,7 +522,15 @@
+         if(l->t==0xfdu) {
+ #if X0X_BASS_NOTE_SOUND
+             /* A lock on a step that is no longer a note is kept and never plays. */
++#ifdef DNBOX_137_HOST_WITNESS
++            if((format!=PROJ_STREAM_14 && format!=PROJ_STREAM_CHORD && format!=STREAM137) ||
++               ((l->i==NOTE137 || l->i==NOTE_S1_MOD) && format!=STREAM137) ||
++               (format==STREAM137 && s1_typed_init_cell(l->val) && l->i!=NOTE_S1_MOD) ||
++               (format==STREAM137 && l->val[29]==ORIGINAL_SOUND_JUNO && !original_sound_sj6_factory(l->val) && l->i!=NOTE137) ||
++               engine_bass_note_validate(l))return 0;
++#else
+             if((format!=PROJ_STREAM_14 && format!=PROJ_STREAM_CHORD) || engine_bass_note_validate(l))return 0;
++#endif
+             for(int j=0;j<k;j++)if(arr->lane[j].used && arr->lane[j].t==l->t &&
+                 arr->lane[j].pat==l->pat && arr->lane[j].part==l->part && arr->lane[j].v==l->v)return 0;
+ #else
+@@ -452,9 +558,16 @@
+     uint8_t *raw = (uint8_t *)pr + RAW_OFF;
+     uint32_t crc = get32(io_buf + 8), plen = get32(io_buf + 12);
+     uint32_t raw_len = RAW_LEN;
++#ifdef DNBOX_137_HOST_WITNESS
++    uint64_t binding=(uint64_t)get32(io_buf+4)|((uint64_t)crc<<32);
++#endif
+     st_in_t s = {0, n, STREAM_HDR, plen, format, 0};
+     lz_src_t src = {st_get, &s};
++#ifdef DNBOX_137_HOST_WITNESS
++    if (n < (int)STREAM_HDR || (format!=STREAM137 && get32(io_buf + 4) != raw_len) || plen > STREAM_CAP)
++#else
+     if (n < (int)STREAM_HDR || get32(io_buf + 4) != raw_len || plen > STREAM_CAP)
++#endif
+         return -1;
+     stored_known[STREAM_OBJ[0]] = 1;
+     stored_hash[STREAM_OBJ[0]] = hash_of(io_buf, (uint32_t)n);
+@@ -464,9 +577,19 @@
+      * and allow the boot-default autosave path to overwrite it. */
+     if (s.unsupported)
+         return -9;
++#ifdef DNBOX_137_HOST_WITNESS
++    if (decode_rc || s.left || (format!=STREAM137 && crc32_of(raw,raw_len)!=crc))
++#else
+     if (decode_rc || s.left || crc32_of(raw, raw_len) != crc)
++#endif
+         return -1;
++#ifdef DNBOX_137_HOST_WITNESS
++    if (format==STREAM137 && tuple_hash(pr,*part_off_of(pr))!=binding)
++        return -10; /* valid-sized inputs but not necessarily one project generation */
++    if ((format==STREAM137)!=(pr->set.snd_rev==REV137) || !stream_layout_ok(pr, format))
++#else
+     if (!stream_layout_ok(pr, format))
++#endif
+         return -9;
+     stream_13_upgrade(pr, format);
+ #if !X0X_ORIGINAL_SYNTH
+@@ -486,6 +609,29 @@
+         pattern_init(&pr->pat[i], 0x3B0u + (uint32_t)i * 977u, 0x5A1u + (uint32_t)i * 613u);
+ }
+ 
++#ifdef DNBOX_137_HOST_WITNESS
++
++/* Host witness. Search only A/B candidates in the same recognized typed
++ * wire. The streams that matter are those actually consumed by LZ. */
++static int read_typed_tuple(project_t *pr,unsigned mask,uint8_t independent_bt)
++{
++    settings_t set;
++    stream_previous=(uint8_t)mask;
++    int rc=load_settings(&set);
++    if (rc || set.snd_rev!=REV137) return -9;
++    uint8_t part_off=io_buf[4u+sizeof set];
++    pr->set=set;
++    *part_off_of(pr)=part_off;
++    rc=load_sound(&pr->sound,REV137);
++    if (rc) return -9;
++    int n=load_stream_object(0);
++    if (n<(int)STREAM_HDR || get32(io_buf)!=STREAM137) return -9;
++    rc=load_stream(pr,n,STREAM137);
++    if (rc) return rc;
++    pr->set.bt=(uint8_t)((pr->set.bt&~1u)|(independent_bt&1u));
++    return project_validate_for(pr);
++}
++#endif
+ 
+ /* Objects are read into the candidate project; the original profile admits only
+  * a completely validated candidate and leaves safe defaults on every failure. */
+@@ -509,7 +655,11 @@
+     if (rc == -9) goto unsupported;
+     if (!rc) {
+         if (set.magic != PROJ_MAGIC || set.format != PROJ_FORMAT ||
++#ifdef DNBOX_137_HOST_WITNESS
++            !valid_rev137(set.snd_rev) || set.stereo != PROJ_STEREO) goto unsupported;
++#else
+             set.snd_rev != PROJ_SND_REV || set.stereo != PROJ_STEREO) goto unsupported;
++#endif
+         pr->set = set;
+         *part_off_of(pr) = part_off;
+         device_bt = set.bt;                       /* retain saved Bluetooth role on partial-load fallback */
+@@ -522,10 +672,38 @@
+             device_bt = (uint8_t)(1u | PROJ_BT_SMC_CENTRAL);
+ #endif
+     }
++#ifdef DNBOX_137_HOST_WITNESS
++    if (settings_present && pr->set.snd_rev==REV137) {
++        rc=read_typed_tuple(pr,0,device_bt);
++        stream_previous=0;
++        if (!rc) {
++            if (pr==&proj) tuple_recovered=0;
++            return 0;
++        }
++        /* Unsupported/newer envelopes are not rollback candidates. An
++         * exact-schema hash mismatch may have a coherent A/B before-image. */
++        if (rc!=-10 && rc!=-1) goto unsupported;
++        for(unsigned mask=1;mask<(4u<<NSTREAM);++mask) {
++            if (!read_typed_tuple(pr,mask,device_bt)) {
++                stream_previous=0;
++                memset(stored_known,0,sizeof stored_known);
++                tuple_recovered=1;
++                return 0;
++            }
++        }
++        goto unsupported;
++    }
++    rc = load_sound(&pr->sound,pr->set.snd_rev);
++#else
+     rc = load_sound(&pr->sound);
++#endif
+     present |= rc != -1;
+     transient |= rc == -2 || rc == -8;
++#ifdef DNBOX_137_HOST_WITNESS
++    if (rc == -9 || (pr->set.snd_rev==REV137 && rc==-1)) goto unsupported;
++#else
+     if (rc == -9) goto unsupported;
++#endif
+     if (rc) bad = 1;
+     stream_previous = 0;
+     int n = load_stream_object(0);
+@@ -534,7 +712,11 @@
+     if (n >= 0 && (n < 4 || !stream_known(get32(io_buf)))) goto unsupported;
+     if (n >= 4) {
+         rc = load_stream(pr, n, get32(io_buf));
++#ifdef DNBOX_137_HOST_WITNESS
++        if (rc == -9 || (pr->set.snd_rev==REV137 && rc)) goto unsupported;
++#else
+         if (rc == -9) goto unsupported;
++#endif
+         /* At most 16 A/B combinations, no second stream buffer. A cut can
+          * leave only some newest objects changed (unchanged objects are not
+          * written), so taking all older copies is not sufficient. */
+@@ -554,6 +736,9 @@
+             bad = 1;
+         }
+     } else {
++#ifdef DNBOX_137_HOST_WITNESS
++        if(pr->set.snd_rev==REV137 && n==-1)goto unsupported;
++#endif
+         bad = 1;
+         /* PAT0 may itself be missing while later committed segments remain. */
+         for (int k = 1; k < NSTREAM; ++k)
+@@ -610,29 +795,39 @@
+     if(bass_status)return bass_status;
+ #endif
+     if (s->magic != PROJ_MAGIC || s->format != PROJ_FORMAT || s->stereo != PROJ_STEREO ||
++#ifdef DNBOX_137_HOST_WITNESS
++        !valid_rev137(s->snd_rev) || (s->snd_rev==REV137 && !canonical137(&p->sound)) || s->palette > 5 || s->keyled > 2 || s->clk_out > 1 ||
++#else
+         s->snd_rev != PROJ_SND_REV || s->palette > 5 || s->keyled > 2 || s->clk_out > 1 ||
++#endif
+         s->notes_out > 1 || s->bpm_x10 < 200 || s->bpm_x10 > 2750 || s->accent_q7 > 127 ||
+         s->keysound > 1 || s->autosave_off > 1 || s->out_loud > 1 || s->usb_full > 1 ||
+-        (s->bt & 0xC0u) || !(s->bt & PROJ_BT_CLK_IN) || PROJ_CLK_SRC(s->bt) > SEQ_CLK_EXT ||
++        (s->bt & (0xC0u & ~PROJ_DEVICE_PREFS)) || !(s->bt & PROJ_BT_CLK_IN) || PROJ_CLK_SRC(s->bt) > SEQ_CLK_EXT ||
+         s->ck_ch < 2)
+         return -1;
+-    for (i = 0; i < 12; i++)
+-        if ((&s->ck_ch)[i] > CK_MAX[i])
+-            return -1;
++    for (i = 0; i < 12; i++) {
++        unsigned value=(&s->ck_ch)[i];
++        if(i==10) value&=~PROJ_S1_MICRO_KEYS;
++        if(value > CK_MAX[i]) return -1;
++    }
+     for (i = 0; i < NPARTS; i++)
+         if (s->midi_ch[i] > 17)
+             return -1;
+     if (p->sound.v[T_FX][1][0] > 127)       /* UI's derived TAPE control */
+         return -1;
+-    for (t = 0; t < NTARGETS; t++)
+-        for (v = 0; v < engine_nvoices(t); v++)
+-            for (i = 0; i < engine_nparams(t, v); i++)
+-                if (
++    for (t = 0; t < NTARGETS; t++) {
+ #if X0X_BASS_TAGGED_SOUND
+-                    t!=T_303 &&
+-#endif
+-                    p->sound.v[t][v][i] > engine_param(t, v, i)->max)
++        if(t==T_303)continue; /* already checked by engine_bass_sound_validate */
++#endif
++        const int voices=engine_nvoices(t);
++        for (v = 0; v < voices; v++) {
++            const int n=engine_nparams(t,v);
++            const uint8_t *value=p->sound.v[t][v];
++            for (i = 0; i < n; i++)
++                if (value[i] > engine_param(t, v, i)->max)
+                     return -1;
++        }
++    }
+     for (k = 0; k < NPAT; k++) {
+         const pattern_t *pat = &p->pat[k];
+         if (pat->swing > 100)
+@@ -682,17 +877,30 @@
+             return -1;
+ #if X0X_BASS_NOTE_SOUND
+         if(l->t==BASS_NOTE_TARGET) {
++#ifdef DNBOX_137_HOST_WITNESS
++            if(((l->i==NOTE137 || l->i==NOTE_S1_MOD) && s->snd_rev!=REV137) ||
++               (s->snd_rev==REV137 && s1_typed_init_cell(l->val) && l->i!=NOTE_S1_MOD) ||
++               (s->snd_rev==REV137 && l->val[29]==ORIGINAL_SOUND_JUNO && !original_sound_sj6_factory(l->val) && l->i!=NOTE137) ||
++               engine_bass_note_validate(l))return -1;
++#else
+             if(engine_bass_note_validate(l))return -1;
+-            for(int j=0;j<k;j++)if(p->arr.lane[j].used && p->arr.lane[j].t==l->t &&
+-                p->arr.lane[j].pat==l->pat && p->arr.lane[j].part==l->part && p->arr.lane[j].v==l->v)return -1;
+-            continue;
+-        }
++#endif
++        } else
+ #endif
+         if(l->t==HELD_CHORD_TARGET) {
+             if(!held_chord_lane_valid(l))return -1;
+-            for(int j=0;j<k;j++)if(p->arr.lane[j].used && p->arr.lane[j].t==l->t &&
+-                p->arr.lane[j].pat==l->pat && p->arr.lane[j].part==l->part &&
+-                p->arr.lane[j].v==l->v && p->arr.lane[j].i==l->i)return -1;
++        }
++        if(l->t==HELD_CHORD_TARGET
++#if X0X_BASS_NOTE_SOUND
++           || l->t==BASS_NOTE_TARGET
++#endif
++        ) {
++            /* NOTE intentionally ignores its tagged index for ownership;
++             * held chord addresses include the index. Same duplicate rules. */
++            for(const lane_t *prior=p->arr.lane;prior<l;++prior)
++                if(prior->used && prior->t==l->t && prior->pat==l->pat &&
++                   prior->part==l->part && prior->v==l->v &&
++                   (l->t!=HELD_CHORD_TARGET || prior->i==l->i)) return -1;
+             continue;
+         }
+         if (l->t == T_PROB) {
+@@ -749,7 +957,9 @@
+ {
+     /* Device roles belong to this keyboard; loading music must not change its
+      * Bluetooth connection or opt-in control surface mode. */
+-    project_stage.set.bt = (uint8_t)((project_stage.set.bt & ~PROJ_DEVICE_BT) | (proj.set.bt & PROJ_DEVICE_BT));
++    project_stage.set.bt = (uint8_t)((project_stage.set.bt & ~PROJ_DEVICE_PREFS) | (proj.set.bt & PROJ_DEVICE_PREFS));
++    project_stage.set.ck_x1=(uint8_t)((project_stage.set.ck_x1 & ~PROJ_S1_MICRO_KEYS) |
++                                      (proj.set.ck_x1 & PROJ_S1_MICRO_KEYS));
+     __builtin_memcpy(&proj, &project_stage, sizeof proj);
+     part_off_live = part_off_staged;
+     project_incompatible = 0; /* explicitly validated import/reset is the recovery boundary */
+@@ -789,7 +999,11 @@
+     put32(h + 12, crc32_of((const uint8_t *)&project_stage, sizeof project_stage));
+     put32(h + 16, project_rates_format(&project_stage));
+     put32(h + 20, stream_format_of(&project_stage));
++#ifdef DNBOX_137_HOST_WITNESS
++    put32(h + 24, project_stage.set.snd_rev);
++#else
+     put32(h + 24, PROJ_SND_REV);
++#endif
+     put32(h + 28, PROJ_FILE_OFF_WORD(part_off_staged & PROJ_PART_OFF_ALL));
+ }
+ 
+@@ -799,7 +1013,12 @@
+     if (get32(h) != 0x50583058u || get32(h + 4) != 1 || get32(h + 8) != sizeof project_stage ||
+         !PROJ_FORMAT_OK(get32(h + 16)) ||
+         !stream_known(get32(h + 20)) ||
++#ifdef DNBOX_137_HOST_WITNESS
++        !valid_rev137(get32(h + 24)) || get32(h + 24)!=project_stage.set.snd_rev ||
++        ((get32(h+20)==STREAM137)!=(project_stage.set.snd_rev==REV137)) || !PROJ_FILE_OFF_OK(get32(h + 28)))
++#else
+         get32(h + 24) != PROJ_SND_REV || !PROJ_FILE_OFF_OK(get32(h + 28)))
++#endif
+         return -1;
+     if (get32(h + 12) != crc32_of((const uint8_t *)&project_stage, sizeof project_stage))
+         return -4;
+@@ -852,16 +1071,27 @@
+ /* 0 = saved and verified; -7 = the patterns, song and motion do not fit (nothing was written) */
+ int project_save(void)
+ {
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++    return -9; /* portable/flash admission is read-only on disk */
++#endif
+ #if X0X_BASS_TAGGED_SOUND
+ #if X0X_SYNTHONE_PATCH
+     if(engine_s1_patch_pending())return -8;
++#endif
++#if X0X_SUPERJ6_BUILTIN_INIT
++    if(engine_superj6_knob_pending() || engine_superj6_factory_pending())return -8;
+ #endif
+     if(engine_bass_sound_validate(&proj.sound))return -9;
+     for(int v=0;v<NBASS;v++)if(engine_bass_preset_pending(v))return -8;
+ #elif X0X_BASS_PRESET_PREVIEW
+     if(engine_bass_preview_changed()) return -9; /* no untagged preview writes */
+ #endif
++#ifdef DNBOX_137_HOST_WITNESS
++    if (project_incompatible || tuple_recovered || !valid_rev137(proj.set.snd_rev) ||
++        (proj.set.snd_rev==REV137 && !canonical137(&proj.sound)) || !stream_layout_ok(&proj, stream_format_of(&proj)))
++#else
+     if (project_incompatible || !stream_layout_ok(&proj, stream_format_of(&proj)))
++#endif
+         return -9; /* not one settings/sound/pattern object may be rewritten */
+     if (settings_read_failed || settings_load_failed) return -8; /* retry load before saving fallback defaults */
+ #ifndef X0X_HOST

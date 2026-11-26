@@ -1,0 +1,3612 @@
+--- /dev/null
++++ b/firmware/src/app/remote_dnr3.c
+@@ -0,0 +1,946 @@
++/* SPDX-License-Identifier: GPL-3.0-only */
++/* DNR3: the DnBOX Remote's SysEx protocol (Web Remote spec REMOTE-FW-PROTOCOL.md v3.0, sections 3-5).
++ * Part of the UI's translation unit: x0x.c includes it after editor.c, host/x0x_host.c after ui.c, so
++ * it uses the panel's own (static) pattern, lane and pref code. It runs in the main loop only
++ * (ed_service, the UI's context): pattern writes are single bytes / aligned words, as the panel's.
++ *
++ *   F0 7D 44 4E 03  op  seq u14  len u14  payload[len]  crc u32  F7
++ *
++ * Numbers are 7-bit groups, low first; crc = CRC-32 of op .. payload end. A reply is op | 0x40 with
++ * "status u7, rev u28, fields" (fields only for OK); a notification is op 0x7F, seq 0, "rev u28, kind u7,
++ * fields". Lean on purpose (XIP and RAM budgets): one frame buffer (the editor's on the device), static
++ * tables, a 4-entry PARAM queue and fingerprints instead of copies of the sequencer state. */
++#include "remote_dnr3.h"
++#if X0X_REMOTE_TYPED_SYNTH && !X0X_SYNTHONE_PATCH
++#error Remote typed exercise requires owner generation and original panel descriptors
++#endif
++#if X0X_REMOTE_TYPED_SYNTH && X0X_SYNTHONE_PATCH
++#include "s1c_part.h"
++#endif
++#include "../crc32_nibble.h"
++/* Native nightly builds supply the validated full source SHA as 20 bytes;
++ * the editor/About screen still uses its separate short display identity. */
++#ifndef X0X_DNR3_GIT_SHA_BYTES
++#define X0X_DNR3_GIT_SHA_BYTES {0}
++#endif
++
++#ifndef REMOTE_DNR3_BUSY
++#define REMOTE_DNR3_BUSY() 0
++#endif
++#ifdef REMOTE_DNR3_OUTBUF
++#define RD_OUT REMOTE_DNR3_OUTBUF
++#define RD_N ed_n
++#define rd_b ed_b
++#define rd_u ed_u
++#define rd_g ed_g
++#define rd_str ed_str
++#define rd_put7 ed_put7
++#else
++static uint8_t rd_outbuf[256];
++#define RD_OUT rd_outbuf
++static uint32_t rd_n;
++#define RD_N rd_n
++#endif
++enum { RD_HELLO = 0, RD_OPEN = 1, RD_KEEP = 6, RD_CLOSE = 7, RD_WATCH = 8, RD_DESCRIBE = 0x10, RD_PGET, RD_PSET,
++       RD_SGET = 0x20, RD_SSET, RD_PART, RD_DUMP, RD_CUE, RD_TRANSPORT = 0x26, RD_TEMPO, RD_MUTE, RD_RECORD, RD_MGET, RD_MSET, RD_STATE = 0x30 };
++enum { RS_OK, RS_QUEUED, RS_BAD, RS_BUSY, RS_STALE, RS_CONFLICT, RS_UNSUPPORTED, RS_FULL, RS_DENIED };
++enum { RN_PARAM, RN_STEP, RN_CUE, RN_TRANSPORT, RN_MUTE, RN_VOICE, RN_POSITION, RN_PATTERN, RN_N };
++#define RD_WBIT(k) ((k) == RN_PATTERN ? 4u : 1u << (k))   /* the WATCH bit of a NOTIFY kind */
++#if X0X_REMOTE_TYPED_SYNTH && defined(__clang__)
++#define RD_SIZE __attribute__((minsize))
++#else
++#define RD_SIZE
++#endif
++#if X0X_REMOTE_TYPED_SYNTH
++#define RD_CAPS 0x1FFFu      /* negotiated original-ID synth descriptors */
++enum { RD_SYNTH_LO=112, RD_SYNTH_HI=113, RD_SYNTH_UNIT_WRITABLE=0x60 };
++RD_SIZE static int rd_typed(unsigned kind){return kind==RD_SYNTH_LO || kind==RD_SYNTH_HI;}
++#else
++#define RD_CAPS 0xFFFu       /* PARAM..VOICE (0..8), guarded bass PARAM_SET (9), Record (10), MIAMI carrier motion (11) */
++#define rd_typed(kind) 0
++#endif
++#define RD_WATCHABLE 0x7Fu
++#define RD_LEASE_MS 2000u
++#define RD_GAP_MS 20u        /* >= 20 ms between notifications: <= 50 frames/s (HELLO watch_max_hz) */
++#define RD_HEAD 15u          /* F0 7D 44 4E 03 op seq2 len2 status rev4 */
++#define RD_ANY 127u          /* a wildcard address in a NOTIFY: the Remote re-reads */
++#define RD_MAXOUT 254u       /* + crc and F7 stay inside 256 */
++
++static struct {
++    uint32_t rev, epoch, client, deadline, last_tx, ccrc, fp[4], par[4], step;   /* par: PARAM changes waiting, kind|a|b|c */
++    volatile uint32_t voice;
++    uint32_t voice_seen;
++    uint16_t cseq;
++#if X0X_REMOTE_TYPED_SYNTH
++    uint32_t synth_generation;
++    uint16_t synth_key;
++#endif
++    uint8_t active, watch, dirty, pend, cop, clen, np;
++    volatile uint8_t voice_arm;
++    uint8_t voice_generation;
++    /* Frames cached only for writes. The widest response is CUE: 15-byte
++     * header + 2 address + 2*NTRACKS + 6 CRC/end = 33 bytes (step max 32). */
++    uint8_t pos[NTRACKS], cache[36];
++} rd;
++_Static_assert(RD_HEAD + 2 + 2 * NTRACKS + 6 <= sizeof rd.cache, "CUE write cache");
++/* Bounded latest-event pulse: one aligned publication from the audio owners,
++ * never a SysEx or wait on that side. A WATCH generation rejects any late
++ * store from an expired/replaced subscription. Packed as generation:7,
++ * stamp:8, velocity:7, note:7, part:3; bursts may overwrite earlier pulses.
++ * The client times out pulses in addition to handling bass releases. */
++
++RD_SIZE __attribute__((noinline)) void remote_dnr3_voice(unsigned part, unsigned note, unsigned vel)
++{
++    uint32_t a = rd.voice_arm;
++    if (a)
++        rd.voice = a << 25 | ((rd.voice + (1u << 17)) & (255u << 17)) |
++                   vel << 10 | note << 3 | part;
++}
++#if X0X_REMOTE_BLE
++/* 0 = USB. A nonzero BLE token is only valid for one connection epoch. */
++static uint32_t rd_wire, rd_lease_wire;
++RD_SIZE static void rd_out(const uint8_t *p, uint32_t n)
++{
++    if (rd_wire) ble_dnr3_out(rd_wire, p, n);
++    else remote_dnr3_out(p, n);
++}
++#else
++#define rd_out remote_dnr3_out
++#endif
++
++/* ---- what changed ----------------------------------------------------------------------------- */
++__attribute__((noinline)) void remote_touch(int kind, uint32_t at)
++{
++    int i = 0;
++    rd.dirty = 1;
++    if (kind == REMOTE_TOUCH_ALL) {                       /* a project load, an undo: every value */
++        rd.np = 0;
++        remote_touch(RN_PARAM, 0x7F7F7F7Fu);
++        kind = RN_STEP, at = 0x7F7F7Fu;
++    }
++    if (kind == RN_PARAM) {
++        while (i < rd.np && rd.par[i] != at)
++            i++;
++        if (i == rd.np) {                                 /* full: one wildcard for all of them */
++            if (i == 4)
++                rd.np = 0, at = 0x7F7F7F7Fu;
++            rd.par[rd.np++] = at;
++        }
++    } else if (kind == RN_STEP) {
++        if (rd.pend & 1u << RN_STEP)                      /* two different steps: RD_ANY = re-read */
++            for (; i < 24; i += 8)
++                if ((rd.step ^ at) >> i & 255u)
++                    at |= RD_ANY << i;
++        rd.step = at;
++    }
++    rd.pend |= (uint8_t)(1u << kind);
++}
++RD_SIZE static int rd_playing(void) { return !seq.req_stop && (seq.playing || seq.req_start || seq.req_cont); }
++RD_SIZE __attribute__((noinline)) static uint32_t rd_bpm10(void) { return (uint32_t)(seq.bpm * 10.0f + 0.5f); }
++RD_SIZE static int rd_clip(void)
++{
++#if BOARD_SMK37
++    extern uint8_t smk_clip_mode_on(void);
++    return smk_clip_mode_on() != 0;
++#else
++    return 0;
++#endif
++}
++/* Sequencer state that changes outside the UI (the audio ISR: the bar's cue launch, transport edges,
++ * MIDI Start/Stop and Program Change, queued mutes; also HOME pads and SMC): a CRC fingerprint per
++ * NOTIFY kind, checked every main-loop pass. Then one rev step for everything that changed. */
++RD_SIZE __attribute__((noinline)) static void rd_sync(void)
++{
++    static const uint8_t kind[4] = {RN_CUE, RN_PATTERN, RN_TRANSPORT, RN_MUTE};
++    uint32_t v[5];
++    int k;
++    v[0] = (uint32_t)rd_playing() | (uint32_t)seq.clk_src << 1, v[1] = rd_bpm10();
++    v[2] = seq.mute, v[3] = seq.vmute, v[4] = seq.mute_q ^ seq.vmute_q * 3u ^ (uint32_t)seq.part_off << 25;
++    {
++        uint32_t f[4] = {x0x_crc32((const uint8_t *)seq.pcue, NTRACKS), x0x_crc32((const uint8_t *)seq.ppat, NTRACKS),
++                         x0x_crc32(v, 8), x0x_crc32(v + 2, 12)};
++        for (k = 0; k < 4; k++)
++            if (f[k] != rd.fp[k])
++                rd.fp[k] = f[k], remote_touch(kind[k], 0);
++    }
++    if (rd.dirty)
++        rd.dirty = 0, rd.rev = (rd.rev + 1u) & 0x0FFFFFFFu;
++}
++RD_SIZE __attribute__((noinline)) static void rd_lease(uint32_t now)
++{
++    if (rd.active && ((int32_t)(now - rd.deadline) >= 0
++#if X0X_REMOTE_BLE
++                      || (rd_lease_wire && !ble_dnr3_live(rd_lease_wire))
++#endif
++                     ))
++        rd.active = rd.voice_arm = 0;                     /* lease ran out: read only */
++    rd_sync();
++}
++
++/* ---- frames out ------------------------------------------------------------------------------- */
++#ifndef REMOTE_DNR3_OUTBUF
++RD_SIZE static void rd_b(uint32_t v)
++{
++    if (RD_N < RD_MAXOUT - 5u)
++        RD_OUT[RD_N++] = (uint8_t)(v & 127u);
++}
++RD_SIZE static void rd_u(uint32_t v, int k)
++{
++    for (; k > 0; k--, v >>= 7)
++        rd_b(v);
++}
++#endif
++/* the header (status < 0: a notification of kind -1 - status) and the crc; then out */
++RD_SIZE __attribute__((noinline)) static void rd_send(int op, uint32_t sq, int status)
++{
++    static const uint8_t h[5] = {0xF0, 0x7D, 0x44, 0x4E, 0x03};
++    uint32_t n = RD_N;
++    memcpy(RD_OUT, h, 5);
++    RD_N = 5;
++    rd_b((uint32_t)op);
++    rd_u(sq, 2);
++    rd_u(n - 10u, 2);
++    if (status < 0)
++        rd_u(rd.rev, 4), rd_b((uint32_t)(-1 - status));
++    else
++        rd_b((uint32_t)status), rd_u(rd.rev, 4);
++    RD_N = n;
++    rd_u(x0x_crc32(RD_OUT + 5, n - 5u), 5);
++    RD_OUT[RD_N++] = 0xF7;
++    rd_out(RD_OUT, RD_N);
++}
++#ifndef REMOTE_DNR3_OUTBUF
++/* ed_put7: per 7 bytes one byte of their high bits, then the 7 low parts */
++RD_SIZE static void rd_put7(const uint8_t *s, uint32_t n)
++{
++    while (n) {
++        uint32_t k = n < 7u ? n : 7u, j, hi = 0;
++        for (j = 0; j < k; j++)
++            hi |= (uint32_t)(s[j] >> 7) << j;
++        rd_b(hi);
++        for (j = 0; j < k; j++)
++            rd_b(s[j]);
++        s += k;
++        n -= k;
++    }
++}
++RD_SIZE static void rd_str(const char *s, int max)
++{
++    for (int k = 0; s && s[k] && k < max; k++)
++        rd_b((uint8_t)s[k]);
++    rd_b(0);
++}
++#endif
++RD_SIZE static uint32_t rd_pcrc(int pat) { return x0x_crc32(&proj.pat[pat], sizeof(pattern_t)) & 0x3FFFu; }
++RD_SIZE __attribute__((noinline)) static void rd_bytes(const volatile uint8_t *s, int n, int none)
++{
++    while (n-- > 0) {
++        uint32_t b = *s++;                         /* one snapshot of each ISR-owned byte */
++        rd_b(b < (uint32_t)none ? b : 127u);
++    }
++}
++RD_SIZE __attribute__((noinline)) static void rd_cues(void) { rd_bytes(seq.ppat, NTRACKS, 128); rd_bytes(seq.pcue, NTRACKS, NPAT); }
++RD_SIZE __attribute__((noinline)) static void rd_mutes(void) { rd_u(seq.mute, 5); rd_u(seq.vmute, 5); }
++
++/* ---- the panel's values (pref_t), checked before ui.c indexes a table with them ----------------
++ * 0: no such value, 1: the Remote may set it, 2: readable only (settings that write flash, change
++ * radios or run the device; 4.1) */
++RD_SIZE __attribute__((noinline)) static int rd_pref_ok(unsigned kind, unsigned a, unsigned b, unsigned c)
++{
++    enum { G = 1, PA, FP, BB, SW, KP, BP, GN, BS, SL, BR, SP, SR, EN, RO = 0x80 };
++    static const uint8_t LIM[EN][3] = {    /* the highest a, b, c of each kind of address (255: any) */
++        {0}, {0, 0, 0}, {NPARTS - 1, 255, 255}, {NBASS - 1, 255, 255}, {255, NBASS - 1, 255},
++        {0, NPAT, 255}, {NKIT - 1, NPAT, 255}, {NBASS - 1, NPAT, 255}, {NBASS - 1, NPAT, NGEN - 1},
++        {255, NPAT, BRK_NSET - 1}, {1, NPAT, 255}, {255, NPAT, 255}, {NPARTS - 1, NSONG, 255}, {255, NSONG, 255}};
++    static const uint8_t KIND[R_NOTELOCK + 1] = {
++        [R_ENG] = EN, [R_SWING] = SW, [R_DLEN] = KP, [R_DRATE] = KP, [R_BLEN] = BP, [R_BRATE] = BP, [R_BDIR] = BP,
++        [R_BTRANS] = BP, [R_GEN] = GN, [R_BRKSET] = BS, [R_BRKSLICE] = SL, [R_BRKSLOT] = SL, [R_BRKRATE] = BR,
++        [R_SPAT] = SP, [R_SREP] = SR, [R_PARTON] = PA, [R_MIDICH] = PA | RO, [R_FREEPLAY] = FP, [R_BENGINE] = BB,
++        [R_BPRESET] = BB, [R_BPATSND] = BB, [R_BSTATUS] = BB | RO, [R_TEMPO] = G, [R_ACCENT] = G, [R_CLKOUT] = G,
++        [R_NOTEOUT] = G, [R_PALETTE] = G, [R_KEYLED] = G, [R_KEYSOUND] = G, [R_SBAR] = G, [R_SLEN] = G, [R_TAPE] = G,
++        [R_OUTLOUD] = G, [R_CKCH] = G, [R_FINETUNE] = G, [R_QUEUEMUTE] = G, [R_NOTELOCK] = G,
++        [R_AUTOSAVE] = G | RO, [R_STALLS] = G | RO, [R_BATT] = G | RO, [R_USBFULL] = G | RO, [R_BT] = G | RO,
++        [R_BTSTAT] = G | RO, [R_BTNAME] = G | RO, [R_CLKSRC] = G | RO, [R_SMC_ROLE] = G | RO, [R_SMC_MAP] = G | RO};
++    unsigned k = kind <= R_NOTELOCK ? KIND[kind] : 0u, l = k & 15u;
++    if (l == EN)
++        return a < NTARGETS && (int)b < engine_nvoices((int)a) && (int)c < engine_nparams((int)a, (int)b);
++    if (!l || a > LIM[l][0] || b > LIM[l][1] || c > LIM[l][2])
++        return 0;
++    return k & RO ? 2 : 1;
++}
++/* ui.c; e: kind, a, b, c. -1: no such value (or set and read only); *d: its descriptor */
++int ui_remote_pref(const uint8_t *e, int set, int v, const x0x_param_t **d);
++#if X0X_REMOTE_TYPED_SYNTH
++int ui_remote_synth(unsigned bank, unsigned voice, unsigned id, int set, int value,
++                    const x0x_param_t **dp, int *queued);
++#endif
++RD_SIZE __attribute__((noinline)) static int rd_pget(const uint8_t *e, const x0x_param_t **d)
++{
++    *d = 0;
++    return rd_pref_ok(e[0], e[1], e[2], e[3]) ? ui_remote_pref(e, 0, 0, d) : -1;
++}
++
++/* ---- step records (4.2), the same bytes in and out --------------------------------------------
++ *   909/808: track (11 = accent row), on, vel (the T_VEL lane: get 0 = none; set 0 = none, 127 = keep)
++ *   303:     note, gate, accent, slide, velocity, end
++ *   BREAK:   on, slice (0 = the generator, 1..32; steps 0..15 only)
++ * the record length, -1 for a bad address */
++RD_SIZE __attribute__((noinline)) static int rd_step_get(int part, int pat, int step, int track, uint8_t *rec)
++{
++    const pattern_t *p = &proj.pat[pat & (NPAT - 1)];
++    if ((unsigned)part >= NPARTS || (unsigned)pat >= NPAT || (unsigned)step >= NSTEPS)
++        return -1;
++    if (part < NKIT) {
++        int lane = motion_find(proj.arr.lane, pat, part, T_VEL, part << 4 | track, 0), v;
++        if ((unsigned)track > NDRUM)
++            return -1;
++        rec[0] = (uint8_t)track;
++        rec[1] = (uint8_t)sm_get(track == NDRUM ? p->drum[part].accent : p->drum[part].hit[track], step);
++        v = track < NDRUM && lane >= 0 ? proj.arr.lane[lane].val[step] : MOT_NONE;
++        rec[2] = (uint8_t)(v == MOT_NONE ? 0 : v);
++        return 3;
++    }
++    if (part == PART_BRK) {
++        if (step >= 32)
++            return -1;
++        rec[0] = (uint8_t)(p->brk.steps >> step & 1u);
++        rec[1] = step < 16 ? p->brk.slice[step] : 0;
++        return 2;
++    }
++    {
++        const bstep_t *s = &p->bass[part - NKIT].step[step];
++        rec[0] = s->note & 127u;
++        rec[1] = (uint8_t)bstep_gate(s);
++        rec[2] = !!(s->flags & BS_ACCENT);
++        rec[3] = !!(s->flags & BS_SLIDE);
++        rec[4] = s->velocity & 127u;
++        rec[5] = (uint8_t)(s->flags >> BS_END_SHIFT);
++        return 6;
++    }
++}
++/* 0 written, RS_BAD a bad record, RS_FULL no room for a velocity lane or the note's sound */
++RD_SIZE __attribute__((noinline)) static int rd_step_set(int part, int pat, int step, const uint8_t *rec)
++{
++    pattern_t *p = &proj.pat[pat & (NPAT - 1)];
++    uint8_t now[6];
++    if (rd_step_get(part, pat, step, rec[0], now) < 0)
++        return RS_BAD;
++    if (part < NKIT) {                                    /* as the SEQ pads and drum_vel_*_step */
++        int t = rec[0], voice = part << 4 | t, lane = motion_find(proj.arr.lane, pat, part, T_VEL, voice, 0);
++        uint32_t *w = (t == NDRUM ? p->drum[part].accent : p->drum[part].hit[t]) + (step >> 5), m = 1u << (step & 31);
++        if (rec[1] > 1u)
++            return RS_BAD;
++        if (t < NDRUM && rec[1] && rec[2] && rec[2] < 127u) {
++            if (lane < 0 && (lane = motion_alloc(proj.arr.lane, pat, part, T_VEL, voice, 0)) < 0)
++                return RS_FULL;
++            proj.arr.lane[lane].val[step] = rec[2];
++        } else if (t < NDRUM && lane >= 0 && (!rec[1] || !rec[2])) {
++            proj.arr.lane[lane].val[step] = MOT_NONE;
++            engine_motion_clear_empty(lane);
++        }
++        *w = rec[1] ? *w | m : *w & ~m;
++    } else if (part == PART_BRK) {
++        if (rec[0] > 1u || rec[1] > 32u || (step >= 16 && rec[1]))
++            return RS_BAD;
++        if (step < 16)
++            p->brk.slice[step] = rec[1];
++        p->brk.steps = rec[0] ? p->brk.steps | 1u << step : p->brk.steps & ~(1u << step);
++    } else {                                              /* as bass_write */
++        int b = part - NKIT;
++        bstep_t *s = &p->bass[b].step[step];
++        if (rec[1] > G_TIE || (rec[2] | rec[3]) > 1u || rec[5] > 15u)
++            return RS_BAD;
++#if X0X_BASS_NOTE_SOUND
++        if (rec[1] == G_NOTE && now[1] != G_NOTE && engine_bass_note_capture(proj.arr.lane, pat, b, step, &proj.sound) < 0)
++            return RS_FULL;
++        if (rec[1] != G_NOTE)
++            bass_note_clear(proj.arr.lane, pat, b, step);
++#endif
++        if (now[0] != rec[0] || now[1] != rec[1])
++            (void)held_chord_set(proj.arr.lane, pat, b, step, 0, 0);   /* a chord follows its own key gestures */
++        s->velocity = rec[4];
++        s->note = rec[0];
++        s->flags = (uint8_t)(rec[1] | (rec[2] ? BS_ACCENT : 0u) | (rec[3] ? BS_SLIDE : 0u) | rec[5] << BS_END_SHIFT);
++    }
++    ui.dirty = 1;                                         /* SAVE has work to do; the change is the Remote's */
++    remote_touch(RN_STEP, (uint32_t)part | (uint32_t)pat << 8 | (uint32_t)step << 16);
++    return 0;
++}
++RD_SIZE __attribute__((noinline)) static int rd_step(int part, int pat, int step, int track)
++{
++    uint8_t r[6];
++    int n = rd_step_get(part, pat, step, track, r);
++    rd_b((uint32_t)part); rd_b((uint32_t)pat); rd_b((uint32_t)step);
++    for (int i = 0; i < n; i++)
++        rd_b(r[i]);
++    return n;
++}
++
++/* ---- notifications (only to the lease holder, for its WATCH bits) ------------------------------ */
++RD_SIZE __attribute__((noinline)) void remote_dnr3_tick(uint32_t now)
++{
++    const x0x_param_t *d;
++    int k, v;
++    rd_lease(now);
++    if (!rd.active) {
++        rd.pend = rd.np = 0;
++        return;
++    }
++    for (k = 0; k < NTRACKS; k++) {                       /* POSITION: not a state change, no rev */
++        uint8_t p = seq.playing ? seq.t[k].pos & 127u : 127u;
++        if (p != rd.pos[k])
++            rd.pos[k] = p, rd.pend |= 1u << RN_POSITION;
++    }
++    if (now - rd.last_tx < RD_GAP_MS)
++        return;
++    uint32_t voice = rd.voice;
++    rd.pend &= (uint8_t)~(1u << RN_VOICE);
++    if (rd.voice_arm && (voice >> 25) == rd.voice_arm && voice != rd.voice_seen) {
++        rd.pend |= 1u << RN_VOICE;
++    }
++    for (k = 0; k < RN_N; k++) {
++        if (!(rd.pend >> k & 1u))
++            continue;
++        rd.pend &= (uint8_t)~(1u << k);
++        if (!(rd.watch & RD_WBIT(k))) {
++            if (!k)
++                rd.np = 0;
++            continue;
++        }
++        RD_N = RD_HEAD;
++        if (k == RN_PARAM) {
++            const uint8_t *e = (const uint8_t *)rd.par;   /* little-endian: kind, a, b, c */
++            v = rd_pget(e, &d);
++            rd_bytes(e, 4, 128);
++            rd_u(v < 0 ? 0x3FFFu : (uint32_t)v, 2);
++            rd.par[0] = rd.par[1], rd.par[1] = rd.par[2], rd.par[2] = rd.par[3];
++            if (--rd.np)
++                rd.pend |= 1u << RN_PARAM;
++        } else if (k == RN_STEP) {
++            rd_bytes((const uint8_t *)&rd.step, 3, 128);
++            v = rd.step >> 8 & 255u;
++            rd_u(v < NPAT ? rd_pcrc(v) : 0x3FFFu, 2);
++        } else if (k == RN_TRANSPORT) {
++            rd_b((uint32_t)rd_playing()); rd_u(rd_bpm10(), 2); rd_b(seq.clk_src);
++        } else if (k == RN_MUTE) {
++            rd_mutes(); rd_b(seq.part_off);
++        } else if (k == RN_VOICE) {
++            rd_b(voice & 7u);
++            rd_u(voice >> 3, 2);
++            rd.voice_seen = voice;
++        } else if (k == RN_POSITION)
++            rd_bytes(rd.pos, NTRACKS, 128);
++        else
++            rd_cues();                                    /* CUE, PATTERN */
++#if X0X_REMOTE_BLE
++        rd_wire = rd_lease_wire;
++#endif
++        rd_send(0x7F, 0, -1 - k);
++        rd.last_tx = now;
++        return;
++    }
++}
++
++/* ---- requests --------------------------------------------------------------------------------- */
++#ifndef REMOTE_DNR3_OUTBUF
++RD_SIZE __attribute__((noinline)) static uint32_t rd_g(const uint8_t *a, int k)
++{
++    uint32_t v = 0;
++    while (k--)
++        v = v << 7 | a[k];
++    return v;
++}
++#endif
++/* 1 + the payload bytes a request needs (0: no such op); 0x40: a lease op (epoch first), 0x80: a write */
++#define RL 0x40u
++#define RW 0xC0u
++static const uint8_t RD_OPS[RD_STATE + 1] = {
++    [RD_HELLO] = 2, [RD_OPEN] = 5, [RD_KEEP] = RL | 5, [RD_CLOSE] = RL | 5, [RD_WATCH] = RL | 9,
++    [RD_DESCRIBE] = 5, [RD_PGET] = 2, [RD_PSET] = RW | 13, [RD_SGET] = 4, [RD_SSET] = RW | 10, [RD_PART] = RW | 10,
++    [RD_DUMP] = 5, [RD_CUE] = RW | 7, [RD_TRANSPORT] = RW | 6, [RD_TEMPO] = RW | 7, [RD_MUTE] = RW | 8, [RD_RECORD] = RW | 6, [RD_MGET] = 3, [RD_MSET] = RW | 12, [RD_STATE] = 1};
++
++/* Caller holds the bass edit boundary: queued/persisted and active identity
++ * must all agree without adopting a legacy cell or changing the base sound. */
++RD_SIZE __attribute__((noinline)) static int rd_bass_guard(int voice, int bank)
++{
++    if (engine_bass_preset_pending(voice))
++        return RS_BUSY;
++    if (engine_bass_bank(voice) != bank)
++        return RS_CONFLICT;
++    const uint8_t *cell = proj.sound.v[T_303][voice];
++    return cell[29] == bank && original_sound_valid(cell) ? RS_OK : RS_BUSY;
++}
++
++enum { RD_MPOINTS = 16, RD_MIAMI_CARRIER = 0 };
++RD_SIZE __attribute__((noinline)) static int rd_motion_busy(void)
++{
++    return ui.rec || seq.playing || seq.req_start || seq.req_stop || seq.req_cont;
++}
++/* These operations name only the verified MIAMI carrier, not Chicago Wave
++ * or the cross modulator. Stop transport/REC before edit; motion's retained
++ * audio-side record/ramp requests must never race a DNR3 transaction. */
++RD_SIZE __attribute__((noinline)) static int rd_motion(const uint8_t *a, uint32_t n, int write)
++{
++    int voice = a[0], pat = a[1], part = PART_303A + voice, status, lane, step, value, before;
++    const uint8_t *points;
++    if (n != (write ? 7u : 2u) || voice >= NBASS || pat >= NPAT)
++        return RS_BAD;
++    if (!write && rd_motion_busy())
++        return RS_BUSY;
++    if (write && (rd_clip() || ui.overlay == O_ASK || perf_testing()))
++        return RS_DENIED;
++    engine_bass_edit_hold(1);
++    status = rd_bass_guard(voice, ORIGINAL_SOUND_MIAMI);
++    if (status) goto done;
++    if (!write && seq.ppat[part] != pat) { status = RS_CONFLICT; goto done; }
++    lane = motion_find(proj.arr.lane, pat, part, T_303, voice, RD_MIAMI_CARRIER);
++    points = lane >= 0 ? proj.arr.lane[lane].val : 0;
++    status = RS_OK;
++    if (!write) {
++        for (step = 0; step < RD_MPOINTS; ++step)
++            rd_u(points ? points[step] : MOT_NONE, 2);
++        goto done;
++    }
++    step = a[2];
++    value = (int)rd_g(a + 5, 2);
++    status = RS_BAD;
++    int expect = (int)rd_g(a + 3, 2);
++    if (step >= RD_MPOINTS || (value > 127 && value != MOT_NONE) ||
++        (expect > 127 && expect != MOT_NONE)) goto done;
++    /* Even stopped, an independent Program Change can adopt a cue in the
++     * audio IRQ. Revalidate that boundary and the actual point at commit.
++     * Never packetize, checksum, sweep caches, or send while IRQ is held. */
++    uint32_t irq = plat_cq_lock();
++    status = RS_BUSY;
++    if (rd_motion_busy()) goto unlock;
++    status = RS_CONFLICT;
++    if (seq.ppat[part] != pat || seq.pcue[part] < NPAT) goto unlock;
++    before = points ? points[step] : MOT_NONE;
++    if (expect != before) goto unlock;
++    if (before != value) {
++        if (lane < 0 && (lane = motion_alloc(proj.arr.lane, pat, part, T_303, voice, RD_MIAMI_CARRIER)) < 0) {
++            status = RS_FULL;
++            goto unlock;
++        }
++        proj.arr.lane[lane].val[step] = (uint8_t)value;
++        ui.dirty = 1;                 /* native quiet-window history snapshots saved project lanes */
++        rd.dirty = 1;                 /* revision; polling clients re-read the lane */
++    }
++    status = RS_OK;
++unlock:
++    plat_cq_unlock(irq);
++    if (!status) {
++        if (before != value && value == MOT_NONE) engine_motion_clear_empty(lane);
++        rd_u((uint32_t)value, 2);
++    }
++done:
++    engine_bass_edit_hold(0);
++    return status;
++}
++
++#if X0X_REMOTE_TYPED_SYNTH
++/* Keep semantic original IDs separate from legacy saved-cell slot indices.
++ * A typed read is absent if the player has not selected that actual engine. */
++RD_SIZE static int rd_synth_target(const uint8_t *e)
++{
++    return e[1] >= ORIGINAL_SOUND_SYNTHONE && e[1] <= ORIGINAL_SOUND_JUNO && e[2] < NBASS;
++}
++RD_SIZE static unsigned rd_synth_id(const uint8_t *e)
++{ return (unsigned)e[3]+(e[0]==RD_SYNTH_HI?128u:0u); }
++static unsigned rd_synth_key(const uint8_t *e)
++{ return 1u + rd_synth_id(e) + (((e[1]&1u)*2u+e[2])*256u); }
++
++RD_SIZE static int rd_synth_read(const uint8_t *e,const x0x_param_t **d)
++{
++    if (!rd_synth_target(e) || rd_bass_guard(e[2],e[1])) return -1;
++    int queued;
++    return ui_remote_synth(e[1],e[2],rd_synth_id(e),0,0,d,&queued);
++}
++RD_SIZE static int rd_synth_write(const uint8_t *q)
++{
++    int old,status,value;
++    const x0x_param_t *d;
++    if(!rd_synth_target(q)||q[8]!=q[1]||rd_g(q+4,2)==0x3fffu)return RS_BAD;
++    engine_bass_edit_hold(1);
++    status=rd_bass_guard(q[2],q[1]);
++    if(status)goto done;
++    if(rd.synth_key!=rd_synth_key(q)||rd.synth_generation!=engine_remote_synth_generation(q[2])){
++        status=RS_CONFLICT;goto done;
++    }
++    old=rd_synth_read(q,&d);
++    if(old<0){status=RS_UNSUPPORTED;goto done;}
++    if(rd_g(q+4,2)!=(uint32_t)old){status=RS_CONFLICT;goto done;}
++    value=(int)rd_g(q+6,2);
++    if(value>(int)d->max){status=RS_BAD;goto done;}
++    int queued;
++    if (ui_remote_synth(q[1], q[2], rd_synth_id(q), 1, value, &d, &queued) != value) {
++        status=RS_CONFLICT;
++        goto done;
++    }
++    status=queued ? RS_QUEUED : RS_OK;
++    rd.dirty=1;
++    rd.synth_key=0;
++    rd_bytes(q,4,128);rd_u((uint32_t)value,2);
++done:
++    engine_bass_edit_hold(0);
++    return status;
++}
++#else
++#define rd_synth_read(e,d) (-1)
++#define RD_SYNTH_UNIT_WRITABLE 0
++#endif
++
++RD_SIZE static int rd_pset(const uint8_t *q)
++{
++    const x0x_param_t *d;
++    int v;
++    if ((v = rd_pget(q, &d)) < 0)
++        return RS_BAD;
++    if (rd_pref_ok(q[0], q[1], q[2], q[3]) > 1)
++        return RS_UNSUPPORTED;
++    if (rd_g(q + 4, 2) != 0x3FFFu && rd_g(q + 4, 2) != (uint32_t)v)
++        return RS_CONFLICT;
++    if ((v = ui_remote_pref(q, 1, (int)rd_g(q + 6, 2), &d)) < 0)
++        return RS_UNSUPPORTED;                        /* read only here (a performance value, BSTATUS) */
++    rd_bytes(q, 4, 128);
++    rd_u((uint32_t)v, 2);
++    return 0;
++}
++
++RD_SIZE __attribute__((noinline)) static int rd_op(uint32_t op, const uint8_t *a, uint32_t len)
++{
++    const uint8_t *q = a + 4;                             /* a write's fields, after its epoch */
++    const x0x_param_t *d;
++    int k, v;
++    switch (op) {
++    case RD_HELLO: {
++        static const uint8_t t[8] = {RD_CAPS & 127u, RD_CAPS >> 7, 0, 0, NPAT, NSTEPS, NDRUM, NKIT};
++        static const uint8_t sha[20] = X0X_DNR3_GIT_SHA_BYTES;
++        if (a[0] != 3u)
++            return RS_UNSUPPORTED;
++        rd_b(3);
++        rd_b(0);
++        rd_put7(sha, 20);
++#if defined(X0X_HOST)
++        rd_b(3);
++#elif defined(SMK_MODEL)
++        rd_b(SMK_MODEL[7] == 'E' ? 1u : 2u);
++#else
++        rd_b(0);
++#endif
++        rd_bytes(t, 8, 128);                              /* caps u28, NPAT, NSTEPS, drum tracks, drum machines */
++        rd_b((uint32_t)rd_clip()); rd_b(seq.clk_src); rd_b(1000u / RD_GAP_MS);
++        return 0;
++    }
++    case RD_OPEN:
++        if (rd.active && (rd_g(a, 4) != rd.client
++#if X0X_REMOTE_BLE
++                          || rd_wire != rd_lease_wire
++#endif
++                         ))         /* another client's lease is live */
++            return RS_BUSY;
++        rd.client = rd_g(a, 4);
++        rd.epoch = (rd.epoch + 1u + (plat_ms() << 3)) & 0x0FFFFFFFu;
++        rd.epoch += !rd.epoch;
++        rd.active = 1;
++#if X0X_REMOTE_BLE
++        rd_lease_wire = rd_wire;
++#endif
++        rd.watch = rd.clen = rd.voice_arm = 0;
++#if X0X_REMOTE_TYPED_SYNTH
++        rd.synth_key=0;
++#endif
++        rd.deadline = plat_ms() + RD_LEASE_MS;
++        rd_u(rd.epoch, 4);
++        rd_u(RD_LEASE_MS, 2);
++        return 0;
++    case RD_CLOSE:
++        rd.active = rd.voice_arm = 0;
++        /* fall through */
++    case RD_KEEP:
++        return 0;
++    case RD_WATCH:
++        rd.watch = (uint8_t)(rd_g(q, 4) & RD_WATCHABLE);
++        if (rd.watch & (1u << RN_VOICE)) {
++            if (!rd.voice_arm) {
++                if (!(++rd.voice_generation & 127u)) rd.voice_generation = 1;
++                rd.voice_seen = rd.voice;
++                rd.voice_arm = rd.voice_generation;
++            }
++        } else rd.voice_arm = 0;
++        rd_u(rd.watch, 4);
++        return 0;
++    case RD_DESCRIBE: {
++        if ((rd_typed(a[0]) ? rd_synth_read(a,&d) : rd_pget(a,&d)) < 0)
++            return RS_UNSUPPORTED;
++        rd_str(d->name, 6);
++        rd_u(d->max, 2);
++        rd_u(d->def, 2);
++        rd_b(rd_typed(a[0]) ? RD_SYNTH_UNIT_WRITABLE : 0); /* typed/writable flags */
++        v = d->names && d->max < 32u ? d->max + 1 : 0;    /* more switch names than fit: numbers */
++        rd_b((uint32_t)v);
++        for (k = 0; k < v; k++)
++            rd_str(d->names[k], 5);
++        return 0;
++    }
++    case RD_PGET:
++        if (!a[0] || a[0] > 16u || len < 1u + 4u * a[0])
++            return RS_BAD;
++        rd_b(a[0]);
++        for (k = 0; k < a[0]; k++) {
++            const uint8_t *e = a + 1 + 4 * k;
++#if X0X_REMOTE_TYPED_SYNTH
++            if(rd_typed(e[0])){
++                int observe=a[0]==1 && rd_synth_target(e) && rd.active;
++                uint32_t generation=observe?engine_remote_synth_generation(e[2]):0;
++                v=rd_synth_read(e,&d);
++                if(observe){
++                    rd.synth_key=v>=0 && generation==engine_remote_synth_generation(e[2])?
++                        (uint16_t)rd_synth_key(e):0;
++                    rd.synth_generation=generation;
++                }
++            }else
++#endif
++            v=rd_pget(e,&d);
++            rd_bytes(e, 4, 128);
++            rd_u(v < 0 ? 0x3FFFu : (uint32_t)v, 2);       /* 0x3FFF, max 0: not a value here */
++            rd_u(v < 0 ? 0u : d->max, 2);
++        }
++        return 0;
++    case RD_PSET:
++#if X0X_REMOTE_TYPED_SYNTH
++        if(rd_typed(q[0]))return len==13u?rd_synth_write(q):RS_BAD;
++#endif
++        if (len == 12u)                                  /* legacy parameter writes */
++            return rd_pset(q);
++        if (len != 13u || q[0] != R_ENG || q[1] != T_303 || q[2] >= NBASS || q[8] > ORIGINAL_SOUND_JUNO)
++            return RS_BAD;
++        /* Match the active engine, not R_BENGINE's requested bank. Keep the
++         * descriptor, compare-and-set and readback on that same audio owner.
++         * A queued preset (even in the same bank) may replace the whole cell. */
++        engine_bass_edit_hold(1);
++        v = rd_bass_guard(q[2], q[8]);
++        if (!v) v = rd_pset(q);
++        engine_bass_edit_hold(0);
++        return v;
++    case RD_SGET:                                         /* a 4th byte: the drum track (default 0) */
++        return rd_step(a[0], a[1], a[2], len > 3u ? a[3] : 0) < 0 ? RS_BAD : 0;
++    case RD_SSET: {
++        int part = q[0], need = part < NKIT ? 3 : part == PART_BRK ? 2 : 6;
++        if (len < 9u + (uint32_t)need || (unsigned)q[1] >= NPAT)
++            return RS_BAD;
++        if (rd_g(q + 3, 2) != 0x3FFFu && rd_g(q + 3, 2) != rd_pcrc(q[1]))
++            return RS_CONFLICT;
++        if ((k = rd_step_set(part, q[1], q[2], q + 5)) != 0)
++            return k;
++        rd_step(part, q[1], q[2], q[5]);
++        rd_u(rd_pcrc(q[1]), 2);
++        return 0;
++    }
++    case RD_PART: {
++        /* field: 0 len 1..64, 1 rate RATE_*, 2 dir (303), 3 transpose (303), 4 swing (909) */
++        static const uint8_t KIND[3][5] = {{R_DLEN, R_DRATE, 0, 0, R_SWING}, {R_BLEN, R_BRATE, R_BDIR, R_BTRANS, 0},
++                                           {0, R_BRKRATE, 0, 0, 0}};
++        uint8_t e[4];
++        int part = q[0], f = q[2], kind;
++        if ((unsigned)part >= NTRACKS || (unsigned)q[1] >= NPAT || f > 4)
++            return RS_BAD;
++        kind = KIND[part < NKIT ? 0 : part == PART_BRK ? 2 : 1][f];
++        if (!kind || (kind == R_SWING && part))
++            return RS_UNSUPPORTED;
++        e[0] = (uint8_t)kind, e[1] = (uint8_t)(kind == R_SWING || kind == R_BRKRATE ? 0 : part < NKIT ? part : part - NKIT);
++        e[2] = (uint8_t)(q[1] + 1), e[3] = 0;
++        v = (int)rd_g(q + 3, 2) - !f;                     /* len: the pref counts from 0 */
++        _Static_assert(RATE_16 == 0 && RATE_4 == RATE_8 + 1, "R_BRKRATE: 0 16th, 1 8th, 2 4th");
++        if (kind == R_BRKRATE)
++            v = !v ? 0 : v == RATE_8 || v == RATE_4 ? v - (RATE_8 - 1) : -1;
++        if (rd_pget(e, &d) < 0 || v < 0 || v > d->max)
++            return RS_BAD;
++        v = ui_remote_pref(e, 1, v, &d) + !f;
++        if (kind == R_BRKRATE && v)
++            v += RATE_8 - 1;
++        rd_bytes(q, 3, 128);
++        rd_u((uint32_t)v, 2);
++        return 0;
++    }
++    case RD_DUMP: {
++        uint32_t off = rd_g(a + 1, 2), c = a[3];
++        if (a[0] >= NPAT || c > 112u || off > sizeof(pattern_t))
++            return RS_BAD;
++        if (c > sizeof(pattern_t) - off)
++            c = sizeof(pattern_t) - off;
++        rd_b(a[0]);
++        rd_u(off, 2);
++        rd_u(sizeof(pattern_t), 2);
++        rd_b(c);
++        rd_put7((const uint8_t *)&proj.pat[a[0]] + off, c);
++        rd_u(rd_pcrc(a[0]), 2);
++        return 0;
++    }
++    case RD_CUE:
++        if ((q[0] >= NTRACKS && q[0] != 127u) || (q[1] >= NPAT && q[1] != 127u))
++            return RS_BAD;
++        if (q[1] < NPAT)
++            seq_chain(&seq, 0, 0);                        /* as the PRESET encoder: a cue ends a chain */
++        for (k = 0; k < NTRACKS; k++)
++            if (q[0] == 127u || q[0] == k)
++                seq.pcue[k] = q[1] < NPAT ? q[1] : 0xFFu;
++        rd_bytes(q, 2, 128);
++        rd_cues();
++        return 0;
++    case RD_TRANSPORT:                                    /* the PLAY key's requests, plus CONTINUE */
++        if (q[0] > 2u)
++            return RS_BAD;
++        if (seq.clk_src == SEQ_CLK_EXT && seq.ext)        /* an external clock runs it: FA/FB/FC */
++            return RS_DENIED;
++        if (!q[0]) {
++            if (rd_playing())
++                seq_stop(&seq);
++        } else if (!rd_playing()) {
++            memset(bass_rec_step, 0, sizeof bass_rec_step);
++            if (q[0] == 1) {
++                seq.song_start = ui.song_sel < song()->len ? ui.song_sel : 0;
++                seq_start(&seq);
++            } else
++                seq_continue(&seq);
++        }
++        rd_b((uint32_t)rd_playing());
++        return 0;
++    case RD_RECORD:
++        if (len != 5u || q[0] > 2u)
++            return RS_BAD;
++        if (q[0] != 2u && q[0] != ui.rec) {
++            if (rd_clip() || (seq.clk_src == SEQ_CLK_EXT && seq.ext) ||
++                ui.overlay == O_ASK || ui.brk_choice_on || perf_testing())
++                return RS_DENIED;
++            ui_record_arm(q[0]);
++        }
++        rd_b(ui.rec);
++        return 0;
++    case RD_MGET: return rd_motion(a, len, 0);
++    case RD_MSET: return rd_motion(q, len - 4u, 1);
++    case RD_TEMPO:
++        v = (int)rd_g(q, 2);
++        if (v < 200 || v > 3000)
++            return RS_BAD;
++        seq.bpm = (float)v / 10.0f;
++        ui.dirty = 1;
++        rd_u(rd_bpm10(), 2);
++        return 0;
++    case RD_MUTE: {
++        /* bit: MUTE_* (0 .. MUTE_BRK: the drum voices, the 303s, BREAK); queued: the next 909 bar */
++        uint32_t m = 1u << (q[0] & 31u), want = q[1] ? m : 0u;
++        if (q[1] > 1u || q[2] > 1u || q[0] > MUTE_BRK)
++            return RS_BAD;
++        seq.mute_q &= ~m;                                 /* mute_q: bits that flip at the bar */
++        if (!q[2])
++            seq.mute = (seq.mute & ~m) | want;
++        else if ((seq.mute & m) != want)
++            seq.mute_q |= m;
++        rd_mutes();
++        return 0;
++    }
++    default:                                              /* RD_STATE */
++        rd_b((uint32_t)rd_playing()); rd_b(seq.clk_src); rd_b((uint32_t)rd_clip()); rd_b(seq.send_notes);
++        rd_u(rd_bpm10(), 2);
++        rd_cues();
++        rd_mutes();
++        rd_b(seq.part_off); rd_b(seq.song_on); rd_u(seq.song_pos, 2);
++        rd_bytes(seq.ch, NTRACKS, 16);
++        for (k = 0; k < NTRACKS; k++)
++            rd_b(seq.playing ? seq.t[k].pos : 127u);
++        for (k = 0; k < NPAT; k++)
++            rd_u(rd_pcrc(k), 2);
++        return 0;
++    }
++}
++
++/* p: the frame without F0/F7. 0: a DNR frame (answered or dropped), -1: not one (the editor's, OTA) */
++#if X0X_REMOTE_BLE
++RD_SIZE __attribute__((noinline)) int remote_dnr3_frame_on(const uint8_t *p, uint32_t n, uint32_t wire)
++#else
++RD_SIZE __attribute__((noinline)) int remote_dnr3_frame(const uint8_t *p, uint32_t n)
++#endif
++{
++    uint32_t i = 0, op, sq, len = 0, crc = 0, f = 0;
++    int st;
++    if (n < 4u || p[0] != 0x7Du || p[1] != 0x44u || p[2] != 0x4Eu)
++        return -1;
++    if (n < 7u || p[4] > 0x3Fu || p[5] > 0x7Fu || p[6] > 0x7Fu)
++        return 0;                                         /* no readable op/seq (or a reply/notify echo): dropped */
++#if X0X_REMOTE_BLE
++    rd_wire = wire;
++#endif
++    op = p[4];
++    sq = rd_g(p + 5, 2);
++    st = p[3] == 2u ? RS_UNSUPPORTED : RS_BAD;            /* DNR2: the old page fails clearly; other majors: header */
++    if (p[3] != 3u)
++        goto reply;
++    while (i < n && p[i] < 0x80u)
++        i++;
++    if (i < n || n < 14u || n > 254u)
++        goto reply;                                       /* range, length */
++    len = rd_g(p + 7, 2);
++    crc = x0x_crc32(p + 4, n - 9u);
++    if (len != n - 14u || crc != rd_g(p + n - 5u, 5))
++        goto reply;                                       /* length, crc */
++    f = RD_OPS[op <= RD_STATE ? op : 2u];                 /* (op 2: none) */
++    st = RS_UNSUPPORTED;
++    if (!f)
++        goto reply;
++    st = RS_BAD;
++    if (len + 1u < (f & 63u))
++        goto reply;
++    /* Polling Record is read-only: it must not replace a cached arm/off,
++     * or an exact retransmission could undo a later physical gesture. */
++    if (op == RD_RECORD && p[13] == 2u)
++        f &= ~0x80u;
++    if (f & 0x80u && rd.clen && rd.cop == op && rd.cseq == sq && rd.ccrc == crc
++#if X0X_REMOTE_BLE
++        && rd_wire == rd_lease_wire
++#endif
++       ) {
++        rd_out(rd.cache, rd.clen);               /* an exact retry: the same reply, no second write */
++        return 0;
++    }
++    rd_lease(plat_ms());                                  /* panel edits first: rev and expect are current */
++    st = RS_BUSY;
++    if ((f & 0x80u || op == RD_OPEN) && REMOTE_DNR3_BUSY())
++        goto reply;
++    if (f & 0x40u) {
++#if X0X_REMOTE_BLE
++        if (rd_wire != rd_lease_wire) goto denied;
++#endif
++        st = !rd.active ? RS_DENIED : rd_g(p + 9, 4) != rd.epoch ? RS_STALE : RS_OK;
++        if (st)
++            goto reply;
++        rd.deadline = plat_ms() + RD_LEASE_MS;            /* any write or KEEPALIVE renews */
++    }
++    RD_N = RD_HEAD;
++    st = rd_op(op, p + 9, len);
++    rd_sync();
++reply:
++    if (st && st!=RS_QUEUED)
++        RD_N = RD_HEAD;
++    rd_send((int)(op | 0x40u), sq, st);
++    if ((st==RS_OK || st==RS_QUEUED) && f & 0x80u && RD_N <= sizeof rd.cache) {
++        memcpy(rd.cache, RD_OUT, RD_N);
++        rd.clen = (uint8_t)RD_N;
++        rd.cop = (uint8_t)op;
++        rd.cseq = (uint16_t)sq;
++        rd.ccrc = crc;
++    }
++    return 0;
++#if X0X_REMOTE_BLE
++denied:
++    st = RS_DENIED;
++    goto reply;
++#endif
++}
++
++#if X0X_REMOTE_BLE
++RD_SIZE int remote_dnr3_frame(const uint8_t *p, uint32_t n)
++{
++    return remote_dnr3_frame_on(p, n, 0);
++}
++#endif
+--- /dev/null
++++ b/firmware/src/app/remote_dnr3.h
+@@ -0,0 +1,21 @@
++/* SPDX-License-Identifier: GPL-3.0-only */
++/* DNR3 Remote protocol (REMOTE-FW-PROTOCOL v3.0): the firmware's entry points. The platform (usb.c on
++ * the device, the host harness or the web emulator) supplies remote_dnr3_out(). */
++#pragma once
++#include <stdint.h>
++
++/* 1: the firmware answers DNR3. host/x0x_host.c and x0x.c turn it on before ui.c; other units that
++ * pull ui.c or editor.c alone (host fixtures) keep it off and need no remote_dnr3.c. */
++#ifndef X0X_REMOTE_DNR3
++#define X0X_REMOTE_DNR3 0
++#endif
++
++int remote_dnr3_frame(const uint8_t *p, uint32_t n);    /* p: a SysEx frame without F0/F7. 0 handled, -1 not DNR */
++int remote_dnr3_frame_on(const uint8_t *p, uint32_t n, uint32_t wire); /* nonzero: BLE link epoch */
++void remote_dnr3_tick(uint32_t now_ms);                 /* main loop: lease, revision, notifications */
++void remote_dnr3_out(const uint8_t *frame, uint32_t n); /* platform: send one frame F0 .. F7, n <= 256 */
++/* firmware: a state change (main loop only). kind = NOTIFY kind, at = its address, one byte each from
++ * bit 0 (0 PARAM: kind,a,b,c, a pref_t; 1 STEP: part,pat,step; 127 = any); REMOTE_TOUCH_ALL: everything,
++ * the Remote re-reads. Rev bumps once per main-loop pass however many sites touch. */
++void remote_touch(int kind, uint32_t at);
++#define REMOTE_TOUCH_ALL 127
+--- /dev/null
++++ b/firmware/src/app/remote_s1_panel.inc
+@@ -0,0 +1,103 @@
++/* SPDX-License-Identifier: GPL-3.0-only
++ * Included at the DNR3 adapter in ui.c, not as a standalone translation unit.
++ * Stable original Synth One IDs are distinct from local preferences/storage.
++ */
++static int rd_panel_s1_ref(unsigned voice, unsigned id, pref_t *out)
++{
++    unsigned kind = R_S1PATCH, a = T_303, c = 0;
++    if (voice >= NBASS || engine_bass_bank(voice) != ORIGINAL_SOUND_SYNTHONE)
++        return 0;
++#if X0X_ARP_HOOKS
++    static const uint8_t arp_fields[] = {
++        ARP_F_MODE, ARP_F_INTERVAL, ARP_F_ON, ARP_F_RANGE,
++        ARP_F_SOURCE_RATE, ARP_F_SEQ_ENABLE, ARP_F_LENGTH
++    };
++    if (id >= 60u && id <= 66u) {
++        kind = R_ARP; a = arp_fields[id - 60u]; goto done;
++    }
++#endif
++    if (id >= 116u && id <= 119u) {
++        kind = R_S1PHASER; c = id - 116u; goto done;
++    }
++    if (id >= 122u && id <= 135u) {
++        kind = R_S1CMP; c = id - 122u; goto done;
++    }
++    static const rd_panel_row fixed[] = {
++        {34, R_ENG, ORIGINAL_SYNTHONE_CRUSH},
++        {35, R_S1PAN, 0},
++        {36, R_S1PAN, 1},
++        {38, R_S1RVFB, 0},
++        {42, R_S1DLFB, 0},
++        {43, R_S1DLYTIME, 0},
++        {56, R_S1ENVLFO, 0},
++        {58, R_S1CRUSH, 0},
++        {136, R_S1CWG, 0},
++        {137, R_S1DICT, 0},
++        {138, R_S1DLYRES, 0},
++        {143, R_S1A4, 0},
++        {144, R_S1HALF, 0},
++        {146, R_S1AA, 0},
++        {148, R_S1TRANS, 0},
++        {240, R_S1KEY_HOLD, 0},
++        {241, R_S1WHITEKEYS, 0},
++        {242, R_S1MIDIVEL, 0},
++        {243, R_S1MICROKEYS, 0},
++        {244, R_S1SCALE, 0},
++        {245, R_S1A4RESET, 0},
++        {246, R_S1MODWHEEL, 0},
++        {255, R_S1LINK, 0},
++    };
++#if X0X_ARP_HOOKS
++    if (id == 147u) { kind = R_ARP; a = ARP_F_SOURCE_FACTOR; goto done; }
++#endif
++    if (rd_panel_position(fixed, sizeof(fixed)/sizeof(fixed[0]), voice, id, out))
++        return 1;
++    /* Keep the dynamic stock owner slot resolver and reserved holes. */
++    if (id > 149 || (id >= 67 && id <= 114) ||
++        id == 18 || id == 31 || id == 33 || id == 140 || id == 145)
++        return 0;
++    int slot = s1_patch_slot(id);
++    if (slot < 0) return 0;
++    c = (unsigned)slot;
++done:
++    *out = (pref_t){(uint8_t)kind, (uint8_t)a, (uint8_t)voice, (uint8_t)c};
++    return 1;
++}
++
++static int rd_panel_s1_extra(unsigned voice, unsigned id, int set, int v,
++                             const x0x_param_t **dp, int *queued)
++{
++#if X0X_ARP_HOOKS
++    if (voice >= NBASS || engine_bass_bank(voice) != ORIGINAL_SOUND_SYNTHONE)
++        return -1;
++    if (id < 67u || id > 114u)
++        return -1;
++    static const x0x_param_t step_pitch = {"PITCH", 24, 12, 0};
++    static const x0x_param_t step_oct = {"OCTAVE", 1, 0, 0};
++    static const x0x_param_t step_gate = {"ENABLED", 1, 1, 0};
++    unsigned field, step;
++    engine_arp_steps s;
++    if (!engine_arp_steps_read(voice, &s)) return -1;
++    if (id < 83u) {
++        field = ARP_S_OFFSET; step = id - 67u; *dp = &step_pitch;
++    } else if (id < 99u) {
++        field = ARP_S_OCT; step = id - 83u; *dp = &step_oct;
++    } else {
++        field = ARP_S_ON; step = id - 99u; *dp = &step_gate;
++    }
++    int old = field == ARP_S_OFFSET ? (int)s.offset[step] + 12 :
++              (int)(((field == ARP_S_OCT ? s.oct_mask : s.on_mask) >> step) & 1u);
++    if (old < 0 || old > (*dp)->max) return -1;
++    if (!set || v == old) return old;
++    if (v < 0 || v > (*dp)->max) return -1;
++    int q = engine_arp_step_set(voice, s.revision, step, field,
++                                field == ARP_S_OFFSET ? v - 12 : v);
++    if (q != S1_EDIT_QUEUED) return -1;
++    *queued = 1;
++    mark_dirty();
++    return v;
++#else
++    (void)voice; (void)id; (void)set; (void)v; (void)dp; (void)queued;
++    return -1;
++#endif
++}
+--- /dev/null
++++ b/firmware/src/app/remote_sj6_panel.inc
+@@ -0,0 +1,266 @@
++/* SPDX-License-Identifier: GPL-3.0-only */
++/* Included by ui.c after pref_t, actual panel routes and the original engine
++ * hooks. Wire ID is original SuperJ6 Build-9 control ID; return native UI
++ * detents, never a guessed use of the ID as a project-cell offset. */
++static int rd_panel_sj6_ref(unsigned voice, unsigned id, pref_t *out)
++{
++#if X0X_SUPERJ6_BUILTIN_INIT
++    if (!out || voice>=NBASS || engine_bass_bank(voice)!=ORIGINAL_SOUND_JUNO) return 0;
++    static const rd_panel_row fixed[] = {
++        {7, R_ENG, 2},         /* actual original panel cutoff, not layer2 */
++        {8, R_ENG, 3},         /* actual panel resonance */
++        {28, R_ENG, 9},        /* instrument HPF; not Room Low Cut */
++        {36, R_SJ6KNOB, SJ6_AMP_ATTACK},
++        {37, R_SJ6KNOB, SJ6_AMP_DECAY},
++        {38, R_SJ6KNOB, SJ6_AMP_SUSTAIN},
++        {39, R_SJ6KNOB, SJ6_AMP_RELEASE},
++        {78, R_SJ6KNOB, SJ6_PWM1},
++        {79, R_SJ6KNOB, SJ6_PWM2},
++        {82, R_SJ6KNOB, SJ6_WAVE1},
++        {83, R_SJ6KNOB, SJ6_WAVE2},
++        {86, R_SJ6KNOB, SJ6_RANGE},
++        {116, R_SJ6KNOB, SJ6_FILTER_LINK}, /* the sole public LINK: amp into filter */
++        {132, R_SJ6KNOB, SJ6_FILTER_ATTACK},
++        {133, R_SJ6KNOB, SJ6_FILTER_DECAY},
++        {134, R_SJ6KNOB, SJ6_FILTER_SUSTAIN},
++        {135, R_SJ6KNOB, SJ6_FILTER_RELEASE},
++        {210, R_SJ6KNOB, SJ6_PWM1_ON},
++        {211, R_SJ6KNOB, SJ6_PWM2_ON},
++#if X0X_SJ6_SEQ_DEST_NATIVE
++        {146, R_SJ6KNOB, SJ6_SEQ_DEST},
++#endif
++#if X0X_SJ6_NATIVE_DELAY
++        {24, R_SJ6KNOB, SJ6_DELAY24},
++        {25, R_SJ6KNOB, SJ6_DELAY25},
++        {26, R_SJ6KNOB, SJ6_DELAY26},
++        {27, R_SJ6KNOB, SJ6_DELAY27},
++        {118, R_SJ6KNOB, SJ6_DELAYSYNC},
++#endif
++#if X0X_SJ6_LFO1_WAVE_NATIVE
++        {0, R_SJ6KNOB, SJ6_MASTER_LEVEL},
++        {1, R_SJ6KNOB, SJ6_OSC1_LEVEL},
++        {3, R_SJ6KNOB, SJ6_OSC2_LEVEL},
++        {40, R_SJ6KNOB, SJ6_CHORUS_I},
++        {41, R_SJ6KNOB, SJ6_CHORUS_II},
++        {72, R_SJ6KNOB, SJ6_LAYER1_SEMI},
++        {73, R_SJ6KNOB, SJ6_LAYER2_SEMI},
++        {74, R_SJ6KNOB, SJ6_LAYER1_FINE},
++        {75, R_SJ6KNOB, SJ6_LAYER2_FINE},
++        {87, R_SJ6KNOB, SJ6_LFO1_ENABLE},
++        {88, R_SJ6KNOB, SJ6_LFO1_RATE},
++        {94, R_SJ6KNOB, SJ6_LFO1_WAVE},
++        {96, R_SJ6KNOB, SJ6_LFO2_RATE},
++        {97, R_SJ6KNOB, SJ6_LFO2_PWM_DEPTH}, /* source-bound original LFO2 Amount detent */
++        {98, R_SJ6KNOB, SJ6_LFO2_SHAPE},
++        {100, R_SJ6KNOB, SJ6_LFO3_RATE},
++        {105, R_SJ6KNOB, SJ6_VIBRATO_DEPTH},
++        {106, R_SJ6KNOB, SJ6_VIBRATO_RATE},
++        {195, R_SJ6KNOB, SJ6_LFO1_MODE},
++        {196, R_SJ6KNOB, SJ6_LFO2_MODE},
++        {197, R_SJ6KNOB, SJ6_LFO3_MODE},
++        {198, R_SJ6KNOB, SJ6_LFO1_SNAPBACK},
++        {206, R_SJ6KNOB, SJ6_A_REFERENCE},
++#endif
++#if defined(DNBOX_137_HOST_WITNESS) && X0X_S1_DELAY_TRACK_TEST && X0X_SJ6_AUX_LFO_NATIVE
++        {95, R_SJ6AUX, 0},
++        {99, R_SJ6AUX, 1},
++        {101, R_SJ6AUX, 2},
++        {102, R_SJ6AUX, 3},
++        {93, R_SJ6AUX, 4},
++        {185, R_SJ6AUX, 5},
++        {187, R_SJ6AUX, 6},
++        {189, R_SJ6AUX, 7},
++        {191, R_SJ6AUX, 8},
++        {181, R_SJ6AUX, 14},
++#if X0X_SJ6_LFO_TRIGGER_NATIVE
++        {192, R_SJ6AUX, 9},
++        {193, R_SJ6AUX, 10},
++        {194, R_SJ6AUX, 11},
++        {199, R_SJ6AUX, 12},
++        {200, R_SJ6AUX, 13},
++#endif
++#endif
++#if X0X_SJ6_LFO1_DELAY_PORT
++        {91, R_SJ6KNOB, SJ6_LFO1_DELAY},
++#endif
++#if X0X_SJ6_NOISE_SUB_NATIVE
++        {201, R_SJ6KNOB, SJ6_NOISE_LEVEL},
++        {202, R_SJ6KNOB, SJ6_SUB_LEVEL},
++#endif
++#if X0X_SJ6_ALT3_NATIVE
++        {103, R_SJ6KNOB, SJ6_TREM_DEPTH},
++        {104, R_SJ6KNOB, SJ6_TREM_RATE},
++#endif
++#if X0X_SJ6_VCF_PORT
++        {89, R_SJ6KNOB, SJ6_VCF_LFO1_AMOUNT},
++        {131, R_SJ6FILTER_EXTRA, 0},
++        {136, R_SJ6FILTER_EXTRA, 1},
++#endif
++#if X0X_SJ6_VELOCITY_PORT
++        {137, R_SJ6KNOB, SJ6_FILTER_VELOCITY},
++#endif
++#if X0X_SJ6_NATIVE_UNISON
++        {59, R_SJ6UNISON, 0},
++        {62, R_SJ6UNISON, 1},
++        {60, R_SJ6UNISON, 2},
++        {61, R_SJ6UNISON, 3},
++#endif
++#if X0X_SJ6_MONO32_PROBE
++        {32, R_SJ6MONO32, 0},
++        {33, R_SJ6MONO32, 1},
++        {35, R_SJ6MONO32, 2},
++#endif
++#if defined(DNBOX_137_HOST_WITNESS) && X0X_SJ6_MOD_TYPED_PROBE
++        {179, R_SJ6MOD, 0},
++#if X0X_SJ6_VELOCITY_SETTINGS
++        {205, R_SJ6INPUTVEL, 0},
++#endif
++#endif
++#if defined(DNBOX_137_HOST_WITNESS) && X0X_S1_DELAY_TRACK_TEST && X0X_SJ6_PITCH_ENV_NATIVE
++        {138, R_SJ6PITCH, 0},
++        {139, R_SJ6PITCH, 1},
++        {140, R_SJ6PITCH, 2},
++        {141, R_SJ6PITCH, 3},
++        {57, R_SJ6PITCH, 4},
++#endif
++#if defined(DNBOX_137_HOST_WITNESS) && DNBOX_TYPED_CONTROLS_NATIVE_TEST && X0X_SJ6_NATIVE_ROOM
++        {11, R_SJ6ROOM, SJ6_ROOM_ENABLE},
++        {12, R_SJ6ROOM, SJ6_ROOM_TYPE},
++        {13, R_SJ6ROOM, SJ6_ROOM_SIZE},
++        {14, R_SJ6ROOM, SJ6_ROOM_LOCUT},
++        {15, R_SJ6ROOM, SJ6_ROOM_MIX},
++        {16, R_SJ6ROOM, SJ6_ROOM_WIDEN},
++        {22, R_SJ6ROOM, SJ6_ROOM_RATE},
++        {23, R_SJ6ROOM, SJ6_ROOM_DEPTH},
++        {107, R_SJ6CRUSH, 0},
++        {108, R_SJ6CRUSH, 1},
++#endif
++#if defined(DNBOX_137_HOST_WITNESS) && DNBOX_TYPED_CONTROLS_NATIVE_TEST && X0X_SJ6_OTA_NATIVE
++        {209, R_SJ6OTA, 0},
++#endif
++#if X0X_SJ6_NATIVE_J60
++        {208, R_SJ6J60, 0},
++#endif
++#if defined(DNBOX_137_HOST_WITNESS) && DNBOX_TYPED_CONTROLS_NATIVE_TEST && X0X_SJ6_NATIVE_LIMITER
++        {18, R_SJ6LIMITER, SJ6_LIM_THRESH},
++        {19, R_SJ6LIMITER, SJ6_LIM_HEADROOM},
++        {20, R_SJ6LIMITER, SJ6_LIM_ATTACK},
++        {21, R_SJ6LIMITER, SJ6_LIM_GAIN},
++#if X0X_SJ6_ALT3_NATIVE
++        {17, R_SJ6LIMITER, SJ6_RAGE_SLOT},
++#endif
++#if X0X_SJ6_VINTAGE_NATIVE
++        {123, R_SJ6LIMITER, SJ6_VINTAGE_SLOT},
++#endif
++#endif
++    };
++    switch (id) {
++    /* Bank-3 Remote extension IDs: actual standalone settings, not AU
++     * automation IDs, and not alternate names for existing AU controls. */
++#if X0X_SJ6_SEQ_SETTINGS_NATIVE
++    case 240: /* SEQ START SNAP */
++    case 241: /* SEQ LOCK */
++        if (!live137(&proj.sound,voice)) return 0;
++        *out=PR(R_SJ6KNOB,T_303,voice,id==240u?SJ6_SEQ_START_SNAP:SJ6_SEQ_LOCK);
++        return 1;
++#endif
++#if defined(DNBOX_137_HOST_WITNESS) && DNBOX_TYPED_CONTROLS_NATIVE_TEST &&  X0X_S1_KEYBOARD_HOLD && X0X_S1_SCALE_NATIVE && X0X_SJ6_SCALE_NATIVE
++    case 242: /* SELECT KEY SCALE; shares actual typed scale receiver, not factory A4 */
++        if (!live137(&proj.sound,voice) ||
++            original_sound_sj6_factory(proj.sound.v[T_303][voice])) return 0;
++        *out=PR(R_S1SCALE,T_303,voice,0);
++        return 1;
++#endif
++#if defined(DNBOX_137_HOST_WITNESS) && X0X_SJ6_MOD_TYPED_PROBE && X0X_SJ6_VELOCITY_SETTINGS
++    case 243: /* standalone MIDI velocity curve; 205 remains separate FIXED */
++        if (!live137(&proj.sound,voice)) return 0;
++        *out=PR(R_SJ6INPUTVEL,T_303,voice,1);
++        return 1;
++#endif
++/* The composed source uses the later extended slot enum, not the old
++ * 16-knob envelope-only replacement. Do not compile a shadow slot list. */
++#if X0X_SJ6_NATIVE_J60
++    case 215: case 216: case 217:
++        /* Same physical knobs, different actual original receivers. */
++        if (engine_sj6_j60_get(voice,0)!=1) return 0;
++        *out=PR(R_SJ6J60,T_303,voice,id-214u); return 1;
++#if X0X_SJ6_NATIVE_CLASSIC
++    case 42: case 43: case 44:
++        if (engine_sj6_j60_get(voice,0)!=0) return 0;
++        *out=PR(R_SJ6J60,T_303,voice,id-41u); return 1;
++#endif
++#endif
++    default: break;
++    }
++    return rd_panel_position(fixed, sizeof(fixed)/sizeof(fixed[0]), voice, id, out);
++#else
++    (void)voice; (void)id; (void)out;
++#endif
++    return 0;
++}
++
++static int rd_panel_sj6_extra(unsigned voice,unsigned id,int set,int v,
++                              const x0x_param_t **dp,int *queued)
++{
++    if (queued) *queued=0;
++#if X0X_SUPERJ6_BUILTIN_INIT && X0X_SJ6_ARP_ADAPTER_NATIVE && X0X_ARP_ENGINE
++    static const x0x_param_t step_pitch={"STEP PITCH",48,24,NULL};
++    static const x0x_param_t step_on={"STEP ON",1,1,ONOFF_N};
++    engine_arp_steps state;
++    const int enable=id>=163u;
++    unsigned index,field;
++    int old;
++    if (!dp || voice>=NBASS || engine_bass_bank(voice)!=ORIGINAL_SOUND_JUNO ||
++        !live137(&proj.sound,voice)) return -1;
++    switch(id) {
++    case 63: field=ARP_F_ON;break;
++    case 64: field=ARP_F_MODE;break;
++    case 65: field=ARP_F_RANGE;break;
++    case 66: field=ARP_F_INTERVAL;break;
++    case 142: field=ARP_F_SEQ_ENABLE;break;
++    case 143: field=ARP_F_SPEED;break; /* same original 13 stops as physical ARP SPEED */
++    case 144: field=ARP_F_GATE;break;
++    case 145: field=ARP_F_LENGTH;break;
++    default: field=ARP_NF;break;
++    }
++    if (field!=ARP_NF) {
++        engine_arp_settings settings;
++        int physical;
++        *dp=arp_desc(field,voice);
++        if (!*dp || !engine_arp_settings_read(voice,&settings)) return -1;
++        old=arp_get(voice,field);
++        if (!set || old==v) return old;
++        if (!queued || v<0 || (unsigned)v>(*dp)->max) return -1;
++        physical=v;
++        if (field==ARP_F_RANGE || field==ARP_F_LENGTH) ++physical;
++        else if (field==ARP_F_MODE && v>=ARP_SEQ) ++physical;
++        else if (field==ARP_F_GATE) {
++#if X0X_SJ6_NATIVE_ZERO_GATE || X0X_SJ6_ZERO_GATE_PROBE
++            if (!s1_typed_tuple_editable()) return -1;
++#else
++            ++physical;
++#endif
++        }
++        if (engine_arp_set(voice,settings.revision,field,physical)!=S1_EDIT_QUEUED)
++            return -1;
++        mark_dirty();
++        *queued=1;
++        return v;
++    }
++    if (id<147u || id>178u || !engine_arp_steps_read(voice,&state)) return -1;
++    index=id-(enable?163u:147u);
++    field=enable?ARP_S_ON:ARP_S_OFFSET;
++    *dp=enable?&step_on:&step_pitch;
++    old=enable?((state.on_mask>>index)&1u):state.offset[index]+24;
++    if (!set || old==v) return old;
++    if (!queued || v<0 || (unsigned)v>(*dp)->max) return -1;
++    if (engine_arp_step_set(voice,state.revision,index,field,enable?v:v-24)!=S1_EDIT_QUEUED)
++        return -1;
++    mark_dirty();
++    *queued=1;
++    return v;
++#else
++    (void)voice; (void)id; (void)set; (void)v; (void)dp;
++    return -1;
++#endif
++}
+--- /dev/null
++++ b/firmware/src/app/remote_synth_panel.inc
+@@ -0,0 +1,98 @@
++/* SPDX-License-Identifier: GPL-3.0-only
++ * Included after the panel preference functions under X0X_REMOTE_TYPED_SYNTH.
++ * The device's own panel is the authority on bounds, owner and persistence.
++ */
++typedef struct { uint8_t id, kind, c; } rd_panel_row;
++_Static_assert(sizeof(rd_panel_row)==3, "typed Remote sparse row");
++__attribute__((noinline)) static int rd_panel_position(const rd_panel_row *rows,
++        unsigned count, unsigned voice, unsigned id, pref_t *out)
++{
++    for (; count; --count, ++rows) {
++        if (rows->id == id) {
++            *out = PR(rows->kind, T_303, voice, rows->c);
++            return 1;
++        }
++    }
++    return 0;
++}
++#include "remote_s1_panel.inc"
++#include "remote_sj6_panel.inc"
++
++int ui_remote_synth(unsigned bank, unsigned voice, unsigned id, int set, int value,
++                    const x0x_param_t **dp, int *queued)
++{
++    pref_t r;
++    if (!dp || !queued || voice >= NBASS ||
++        engine_bass_bank(voice) != (int)bank || engine_bass_preset_pending(voice))
++        return -1;
++    *dp = 0;
++    *queued = 0;
++    switch (bank) {
++    case ORIGINAL_SOUND_SYNTHONE:
++        if (!rd_panel_s1_ref(voice, id, &r))
++            return rd_panel_s1_extra(voice, id, set, value, dp, queued);
++        break;
++    case ORIGINAL_SOUND_JUNO:
++        if (!rd_panel_sj6_ref(voice, id, &r))
++            return rd_panel_sj6_extra(voice, id, set, value, dp, queued);
++        break;
++    default:
++        return -1;
++    }
++
++    /* S1 patch state is published only at the audio boundary. Reuse the real
++     * renderer's revisioned receiver rather than guessing an async success
++     * based on (or before) a panel redraw. */
++    if (bank == ORIGINAL_SOUND_SYNTHONE &&
++        (r.kind == R_S1PATCH || r.kind == R_S1LINK)) {
++        s1_patch_value s;
++        const x0x_param_t *d = pref_desc(r);
++        if (!d || !engine_s1_patch_read(voice, id, &s) || s.position > d->max)
++            return -1;
++        *dp = d;
++        if (!set || s.position == value) return s.position;
++        if (value < 0 || value > d->max || pref_read_only(r)) return -1;
++        if (engine_s1_patch_set(voice, s.revision, id, (unsigned)value) != S1_EDIT_QUEUED)
++            return -1;
++        *queued = 1;
++        mark_dirty();
++        return value;
++    }
++
++    const x0x_param_t *d = pref_desc(r);
++    if (!d) return -1;
++    const int max = d->max, old = pref_get(r);
++    if (old < 0 || old > max) return -1;
++    *dp = d;
++    if (!set) return old;
++    if (value < 0 || value > max || pref_read_only(r)) return -1;
++
++    if (bank == ORIGINAL_SOUND_SYNTHONE && id == 245u) {
++        if (value != 1) return -1;
++        pref_t a4, scale;
++        if (!rd_panel_s1_ref(voice, 143, &a4) || !rd_panel_s1_ref(voice, 244, &scale))
++            return -1;
++        const x0x_param_t *a4d = pref_desc(a4), *scaled = pref_desc(scale);
++        if (!a4d || !scaled) return -1;
++        const int a4init = a4d->def, scaleinit = scaled->def;
++        pref_set_impl(r, 1, 0);
++        if (pref_get(a4) != a4init || pref_get(scale) != scaleinit) return -1;
++        return 1; /* action ack; a new GET still correctly returns 0 */
++    }
++    if (old == value) return old;
++#if X0X_ARP_HOOKS
++    if (bank == ORIGINAL_SOUND_SYNTHONE && r.kind == R_ARP &&
++        r.a != ARP_F_SOURCE_RATE && r.a != ARP_F_SOURCE_FACTOR) {
++        engine_arp_settings s;
++        if (!engine_arp_settings_read(voice, &s)) return -1;
++        int actual = value + (r.a == ARP_F_RANGE || r.a == ARP_F_LENGTH);
++        if (engine_arp_set(voice, s.revision, r.a, actual) != S1_EDIT_QUEUED)
++            return -1;
++        *queued = 1;
++        mark_dirty();
++        return value;
++    }
++#endif
++    pref_set_impl(r, value, 0);
++    return pref_get(r) == value ? value : -1;
++}
+--- /dev/null
++++ b/firmware/src/app/s1_clock_bits.h
+@@ -0,0 +1,127 @@
++/* SPDX-License-Identifier: GPL-3.0-only */
++#ifndef DNBOX_S1_CLOCK_BITS_H
++#define DNBOX_S1_CLOCK_BITS_H
++
++#include <stdint.h>
++#define S1_CF (UINT64_C(1) << 52)
++#define S1_CF_MASK (S1_CF - 1)
++#define S1_CSTOP UINT64_MAX
++#define S1_CINTMAX ((uint32_t)INT32_MAX + 1u)
++
++static inline unsigned s1_clock_nbits(uint64_t x)
++{
++    uint32_t hi = (uint32_t)(x >> 32);
++    return hi ? 64u - (unsigned)__builtin_clz(hi)
++              : 32u - (unsigned)__builtin_clz((uint32_t)x);
++}
++
++static inline uint32_t s1_clock_fbits(float f)
++{
++    union { float f; uint32_t u; } v;
++    v.f = f;
++    return v.u;
++}
++
++static inline uint32_t s1_clock_fsig(uint32_t w)
++{
++    return (w & 0x7fffffu) | 0x800000u;
++}
++
++/* Original: float32(bpm/60) widened exactly, then divided by exact 44100.0.
++ * Generate the binary64 significand directly. This executes only on edit/adopt,
++ * not per audio sample; remainder stays below 88200. */
++static uint64_t s1_clock_delta_bits(float beats_per_second)
++{
++    uint32_t raw = s1_clock_fbits(beats_per_second), rest = s1_clock_fsig(raw);
++    uint32_t init = rest / 44100u;
++    rest -= init * 44100u;
++    unsigned width = 32u - (unsigned)__builtin_clz(init);
++    uint64_t q = init;
++    for (unsigned i = width; i < 53u; ++i) {
++        rest <<= 1;
++        q <<= 1;
++        if (rest >= 44100u) { rest -= 44100u; ++q; }
++    }
++    uint32_t half = rest << 1;
++    if (half > 44100u || (half == 44100u && (q & 1u))) ++q;
++    return ((uint64_t)((raw >> 23) + width + 871u) << 52) + q;
++}
++
++/* Add two positive, normal binary64 encodings with one nearest-even rounding.
++ * The native clock domain contains only zero and such normals. No floating64
++ * arithmetic, divide, or modulo executes in the per-sample path. */
++static inline uint64_t s1_clock_add(uint64_t a, uint64_t b)
++{
++    if (!a) return b;
++    if (b > a) { uint64_t x = a; a = b; b = x; }
++    unsigned e = (unsigned)(a >> 52), d = e - (unsigned)(b >> 52);
++    if (d > 53u) return a;
++    uint64_t m = (a & S1_CF_MASK) | S1_CF;
++    uint64_t n = (b & S1_CF_MASK) | S1_CF;
++    uint64_t t = n >> d;
++    uint64_t r = n - (t << d);
++    m += t;
++    if (m >> 53) {
++        int odd = (int)(m & 1u);
++        m >>= 1;
++        if (odd && (r || (m & 1u))) ++m;
++        ++e;
++    } else if (d) {
++        uint64_t h = UINT64_C(1) << (d - 1u);
++        if (r > h || (r == h && (m & 1u))) ++m;
++    }
++    return ((uint64_t)(e - 1u) << 52) + m;
++}
++
++static inline uint32_t s1_clock_step(uint64_t phase, uint32_t factor, uint32_t *rounded)
++{
++    /* floor(phase / factor), saturated at the original signed index guard.
++     * Native float32 factor is exactly widened by aligning its significand. */
++    unsigned pe = (unsigned)(phase >> 52);
++    unsigned fe = (factor >> 23) + 896u;
++    if (!phase || pe < fe) { if (rounded) *rounded = 0; return 0; }
++    unsigned d = pe - fe;
++    if (d > 31u) { if (rounded) *rounded = S1_CINTMAX; return S1_CINTMAX; }
++    uint64_t f = (uint64_t)s1_clock_fsig(factor) << 29;
++    uint64_t rem = (phase & S1_CF_MASK) | S1_CF;
++    uint32_t q = 0;
++    do {
++        q <<= 1;
++        if (rem >= f) { rem -= f; ++q; }
++        if (!d) break;
++        --d;
++        rem <<= 1;
++    } while (1);
++    /* Match double division followed by integer truncation when its nearest
++     * rounding carries a nonintegral quotient exactly onto the next integer.
++     * All q up to the cap are exactly representable in binary64. */
++    if (q >= S1_CINTMAX) q = S1_CINTMAX;
++    if (rounded) {
++        *rounded = q;
++        if (rem && q < S1_CINTMAX) {
++            uint32_t next = q + 1u;
++            unsigned l = 31u - (unsigned)__builtin_clz(next);
++            unsigned power = (next & (next - 1u)) == 0;
++            unsigned k = 53u - l + power;
++            if (f - rem <= (f >> k)) *rounded = next;
++        }
++    }
++    return q;
++}
++
++static inline uint64_t s1_clock_boundary(uint32_t step, uint32_t factor)
++{
++    if (!step || step > S1_CINTMAX) return S1_CSTOP;
++    /* Smallest representable phase at or above the exact next product.
++     * An inexact nearest-even product below the boundary would fire early. */
++    uint64_t m = (uint64_t)s1_clock_fsig(factor) * step;
++    unsigned bits = s1_clock_nbits(m);
++    if (bits > 53u) {
++        unsigned d = bits - 53u;
++        m = (m + ((UINT64_C(1) << d) - 1u)) >> d;
++    } else {
++        m <<= 53u - bits;
++    }
++    return ((uint64_t)((factor >> 23) + bits + 871u) << 52) + m;
++}
++#endif
+--- /dev/null
++++ b/firmware/src/app/s1_native_phaser.h
+@@ -0,0 +1,57 @@
++/* SPDX-License-Identifier: GPL-3.0-only */
++#pragma once
++enum { S1_PHASE_BYTE=48, S1_PHASE_MAX=127, S1_PHASE_COUNT=4, S1_PHASE_FIRST=116 };
++_Static_assert(S1_PHASE_BYTE>=NPARAMS_MAX && S1_PHASE_BYTE+S1_PHASE_COUNT<=2u*NPARAMS_MAX,
++               "Synth One Phaser belongs in the second typed owner row");
++enum { S1_ENV_LFO_BYTE=52, S1_ENV_LFO_MAX=3, S1_ENV_LFO_PARAM=56 };
++_Static_assert(S1_ENV_LFO_BYTE==S1_PHASE_BYTE+S1_PHASE_COUNT &&
++               S1_ENV_LFO_BYTE<2u*NPARAMS_MAX, "Envelope LFO has a distinct owner byte");
++static inline const uint8_t *s1_env_lfo_read(const sound_t *s,unsigned owner)
++{
++    return &s->v[T_303][8u+2u*owner+S1_ENV_LFO_BYTE/NPARAMS_MAX][S1_ENV_LFO_BYTE%NPARAMS_MAX];
++}
++static inline uint8_t *s1_env_lfo_write(sound_t *s,unsigned owner)
++{
++    return &s->v[T_303][8u+2u*owner+S1_ENV_LFO_BYTE/NPARAMS_MAX][S1_ENV_LFO_BYTE%NPARAMS_MAX];
++}
++enum { S1_DELAY_RES_BYTE=62, S1_DELAY_RES_MAX=127, S1_DELAY_RES_PARAM=138 };
++_Static_assert(S1_DELAY_RES_BYTE<2u*NPARAMS_MAX, "Delay input resonance owner byte");
++static inline const uint8_t *s1_delay_res_read(const sound_t *s,unsigned owner)
++{
++    return &s->v[T_303][8u+2u*owner+S1_DELAY_RES_BYTE/NPARAMS_MAX][S1_DELAY_RES_BYTE%NPARAMS_MAX];
++}
++static inline uint8_t *s1_delay_res_write(sound_t *s,unsigned owner)
++{
++    return &s->v[T_303][8u+2u*owner+S1_DELAY_RES_BYTE/NPARAMS_MAX][S1_DELAY_RES_BYTE%NPARAMS_MAX];
++}
++static inline unsigned s1_phase_init(unsigned k)
++{
++    static const uint8_t p[S1_PHASE_COUNT]={0,5,0,99};
++    return p[k];
++}
++static inline unsigned s1_phase_encode(unsigned k,unsigned pos)
++{
++    const unsigned init=s1_phase_init(k);
++    return pos==init ? 0u : pos+(pos<init);
++}
++static inline unsigned s1_phase_position(unsigned k,unsigned code)
++{
++    const unsigned init=s1_phase_init(k);
++    return code ? code-(code<=init) : init;
++}
++static inline uint8_t *s1_phase_write(sound_t *s,unsigned owner)
++{
++    return &s->v[T_303][8u+2u*owner+S1_PHASE_BYTE/NPARAMS_MAX][S1_PHASE_BYTE%NPARAMS_MAX];
++}
++static inline const uint8_t *s1_phase_read(const sound_t *s,unsigned owner)
++{
++    return &s->v[T_303][8u+2u*owner+S1_PHASE_BYTE/NPARAMS_MAX][S1_PHASE_BYTE%NPARAMS_MAX];
++}
++static inline float s1_phase_value(unsigned k,unsigned code)
++{
++    /* Original kernel units: wet ratio, cycles/min, feedback fraction, sweep width Hz. */
++    static const float lo[S1_PHASE_COUNT]={0.f,1.f,0.f,100.f};
++    static const float span[S1_PHASE_COUNT]={1.f/127.f,299.f/127.f,.8f/127.f,900.f/127.f};
++    static const float defaults[S1_PHASE_COUNT]={0.f,12.f,0.f,800.f};
++    return code ? lo[k]+span[k]*(float)s1_phase_position(k,code) : defaults[k];
++}
+--- a/firmware/src/app/s1_patch.h
++++ b/firmware/src/app/s1_patch.h
+@@ -10,12 +10,148 @@
+  * Storage slots are in descriptor order and must never be reordered. Existing
+  * OS11 INIT and historical eight-control cells use no bits in this range. */
+ enum { S1_PATCH_FIRST_BYTE = 8, S1_PATCH_COUNT = 13, S1_PATCH_STEPS = 127 };
++/* Panel link is a project option outside the upstream factory ID space. */
++enum { S1_LINK_BYTE = 6, S1_LINK_ID = 255, S1_FILTER_FIRST = 5, S1_AMP_FIRST = 9 };
++#define S1_LINK_MASK (UINT32_C(1) << 21)
++#define X0X_S1_EXTRA (X0X_S1C && X0X_SYNTHONE_PATCH)
++#if X0X_S1_EXTRA
++/* Existing project sound rows 0/1 own the base cells, 2/3 ARP, 4/5 SJ6. */
++enum {
++    S1_EXTRA_ROW = 6, S1_EXTRA_FIRST = S1_PATCH_COUNT + 1,
++    S1_OSC1_MORPH = S1_EXTRA_FIRST, S1_OSC2_MORPH, S1_OSC2_LEVEL,
++    S1_SUB_LEVEL, S1_SUB_OCTAVE, S1_SUB_WAVE, S1_FM_LEVEL, S1_FM_INDEX, S1_NOISE_LEVEL,
++    S1_FILTER_TYPE, S1_ADSR_TRACK,
++    S1_OSC_EXTRA_BYTES = 2 + S1_FILTER_TYPE - S1_EXTRA_FIRST,
++    S1_LFO1_RATE = S1_ADSR_TRACK + 1, S1_LFO2_RATE, S1_LFO1_SHAPE, S1_LFO2_SHAPE,
++    S1_LFO_SYNC, S1_DELAY_MIX, S1_REVERB_MIX, S1_REVERB_HP, S1_WIDEN, S1_MONO_LEGATO,
++    S1_WET_FIRST = S1_DELAY_MIX, S1_WET_COUNT = 5,
++    S1_LFO_FIRST = S1_LFO1_RATE, S1_LFO_COUNT = 5,
++    S1_EXTRA_COUNT = S1_ADSR_TRACK + 1 - S1_EXTRA_FIRST,
++    S1_FILTER_EXTRA_BYTES = 2 + S1_EXTRA_COUNT,
++    S1_EXTRA_BYTES = S1_FILTER_EXTRA_BYTES + 2,
++    S1_LFO_DIVISIONS = 19, S1_LFO_CODE_SYNC = 129,
++    S1_LFO_RATE_CODES = S1_LFO_CODE_SYNC + S1_LFO_DIVISIONS,
++    S1_PART_LEVEL = 40, S1_LFO1_DEPTH, S1_LFO2_DEPTH, S1_CUTOFF_LFO, S1_NOISE_LFO, S1_OSC_MIX_LFO, S1_RESONANCE_LFO, S1_FM_LFO, S1_AMP_DECAY_LFO, S1_OSC1_SEMI, S1_OSC2_SEMI, S1_OSC2_DETUNE, S1_VOICE_MODE, S1_MONO_GLIDE, S1_DELAY_ON, S1_REVERB_ON, S1_DETUNE_LFO, S1_PITCH_LFO, S1_TREMOLO_LFO, S1_REVERB_MIX_LFO = S1_TREMOLO_LFO+3,
++    S1_BASE_EDIT_FIRST = S1_PART_LEVEL, S1_BASE_EDIT_COUNT = 3, S1_BASE_EDIT_BYTE = 3
++};
++#if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
++enum { S1_BEND_LO = S1_TREMOLO_LFO+1, S1_BEND_HI };
++static inline int s1_bend_slot(unsigned slot) { return slot-S1_BEND_LO < 2u; }
++#endif
++/* Formerly invalid q7 top bits. Code zero keeps the exact program;
++ * codes 1..37 are the original integer stops -12..+24. */
++enum { S1_COARSE_FIRST = S1_OSC1_SEMI, S1_COARSE_STEPS = 36, S1_COARSE_BITS = 6 };
++static inline int s1_coarse_slot(unsigned slot) { return slot-S1_COARSE_FIRST < 2u; }
++static inline unsigned s1_coarse_code(const uint8_t cell[32], unsigned osc)
++{
++    unsigned code = 0;
++    for (unsigned i=0;i<S1_COARSE_BITS;++i)
++        code |= (unsigned)(cell[S1_PATCH_FIRST_BYTE + osc*S1_COARSE_BITS + i] >> 7) << i;
++    return code;
++}
++/* Sound byte 31 bit 0 keeps the existing crush marker. Its previously
++ * invalid high bits hold absent or one of the 81 manual -4..+4 detents. */
++enum { S1_DETUNE_STEPS = 80 };
++static inline unsigned s1_detune_code(const uint8_t cell[32]) { return cell[31] >> 1; }
++/* The prior typed link domain was exactly 0/1. Preserve bit 0 and
++ * allocate the old-invalid high bits to independent 3 x 42 digits. */
++enum { S1_VOICE_MARK_BYTE = 20, S1_GLIDE_STEPS = 40, S1_GLIDE_RADIX = S1_GLIDE_STEPS+2, S1_VOICE_CODES = 3*S1_GLIDE_RADIX };
++static inline unsigned s1_voice_code(const uint8_t cell[32]) { return cell[S1_LINK_BYTE] >> 1; }
++#define S1_MOD_EXT_MARK (UINT32_C(1) << 23)
++/* Radix five stores independent absent/explicit OFF/LFO1/LFO2/BOTH digits.
++ * FM-only codes 0..4 are identical to the preceding typed binding. */
++enum { S1_MOD_EXT_BYTE = 30, S1_MOD_EXT_FIRST = S1_FM_LFO, S1_MOD_EXT_COUNT = 2,
++       S1_MOD_RADIX = 5, S1_ROUTE_EXT_CODES = S1_MOD_RADIX * S1_MOD_RADIX,
++       S1_FX_GATE_RADIX = 3, S1_MOD_EXT_CODES = S1_ROUTE_EXT_CODES * 9 };
++/* Typed q7 MSBs of three owned base editor bytes; absent/explicit 0..3.
++ * S1_MOD_EXT_MARK must also be present, preventing legacy slot-2 adoption. */
++static inline unsigned s1_detune_route_code(const uint8_t cell[32])
++{
++    const uint8_t *p = cell+S1_BASE_EDIT_BYTE;
++    return (p[0] >> 7) | ((p[1] >> 7) << 1) | ((p[2] >> 7) << 2);
++}
++/* Only formerly invalid bits 3..5 of the historic high ordinal byte.
++ * Bit7 is independently reserved and not claimed by this route. */
++enum { S1_PROGRAM_BYTE_MASK = 0xc7 };
++static inline unsigned s1_pitch_route_code(const uint8_t cell[32])
++{ return (cell[21] & 0x38u) >> 3; }
++/* Formerly invalid high bits [0..2], with typed mod witness. Lower
++ * legacy performance/crush words are unchanged. */
++static inline unsigned s1_tremolo_route_code(const uint8_t cell[32])
++{ return (cell[0] >> 7) | ((cell[1] >> 7) << 1) | ((cell[2] >> 7) << 2); }
++static inline int s1_fx_gate_slot(unsigned slot) { return slot-S1_DELAY_ON < 2u; }
++static inline int s1_mod_ext_slot(unsigned slot) { return slot - S1_MOD_EXT_FIRST < S1_MOD_EXT_COUNT; }
++static inline unsigned s1_mod_ext_divisor(unsigned slot) { return slot == S1_FM_LFO ? 1u : S1_MOD_RADIX; }
++#define S1_EXTRA_MARK (UINT32_C(1) << 22)
++#define S1_BASE_EDIT_MASK (((UINT32_C(1) << S1_BASE_EDIT_COUNT) - 1u) << S1_BASE_EDIT_BYTE)
++/* Synth One route group: legacy Noise/Osc lanes keep their exact bytes.
++ * Formerly-invalid bit-7 range encodes an explicit third route as a radix-5 ordinal. */
++enum { S1_ROUTE_FIRST = S1_NOISE_LFO, S1_ROUTE_COUNT = 3, S1_ROUTE_SHIFT = 24 };
++#define S1_ROUTE_MASK (UINT32_C(255) << S1_ROUTE_SHIFT)
++static inline int s1_route_decode(unsigned word, uint8_t code[S1_ROUTE_COUNT])
++{
++    if (!(word & 128u)) {
++        code[0] = (uint8_t)(word & 7u); code[1] = (uint8_t)((word >> 3) & 7u); code[2] = 0;
++        return word < 64u && code[0] <= 4u && code[1] <= 4u;
++    }
++    word -= 128u;
++    if (word >= 100u) return 0;
++    code[2] = (uint8_t)(1u + word / 25u);
++    word %= 25u;
++    code[0] = (uint8_t)(word / 5u); code[1] = (uint8_t)(word % 5u);
++    return 1;
++}
++static inline unsigned s1_route_encode(const uint8_t code[S1_ROUTE_COUNT])
++{
++    return code[2] ? 128u + (code[2]-1u)*25u + code[0]*5u + code[1] :
++           code[0] | (unsigned)code[1] << 3;
++}
++static inline int s1_base_route_slot(unsigned slot)
++{ return slot - S1_ROUTE_FIRST < S1_ROUTE_COUNT; }
++static inline int s1_base_edit_slot(unsigned slot)
++{ return slot == S1_TREMOLO_LFO || slot == S1_PITCH_LFO || slot == S1_DETUNE_LFO || s1_fx_gate_slot(slot) || slot - S1_VOICE_MODE < 2u || slot == S1_OSC2_DETUNE || s1_coarse_slot(slot) || s1_mod_ext_slot(slot) || s1_base_route_slot(slot) || slot - S1_BASE_EDIT_FIRST < S1_BASE_EDIT_COUNT; }
++float s1c_morph_preview(float position, uint32_t phase);
++static inline unsigned s1_extra_bits(const uint8_t *data)
++{ return (unsigned)data[0] | (((unsigned)data[1] & 7u) << 8); }
++/* Used only for a validated Synth One owner, never to claim opaque rows. */
++static inline int s1_extra_packed(const uint8_t *data)
++{ return !(data[0] | data[1]); }
++static inline unsigned s1_extra_size(const uint8_t *data)
++{
++    if (data[1] >> 3 || s1_extra_packed(data)) return S1_EXTRA_BYTES;
++    return s1_extra_bits(data) >> (S1_FILTER_TYPE - S1_EXTRA_FIRST) ?
++           S1_FILTER_EXTRA_BYTES : S1_OSC_EXTRA_BYTES;
++}
++static inline int s1_lfo_rate_slot(unsigned slot)
++{ return slot - S1_LFO_FIRST < 2u; }
++/* Zero means unset in each phase. Panel and wet digits hold position + 1.
++ * LFO rate digits keep their existing absolute/free-or-division code. */
++typedef struct {
++    uint8_t panel[S1_EXTRA_COUNT], lfo[S1_LFO_COUNT], wet[S1_WET_COUNT], cutoff_lfo, reverb_mix_lfo;
++} s1_extra_state;
++int s1_extra_read(const uint8_t *data, s1_extra_state *state);
++#else
++#define S1_EXTRA_MARK 0u
++#define S1_BASE_EDIT_MASK 0u
++#define S1_ROUTE_MASK 0u
++#define S1_MOD_EXT_MARK 0u
++#endif
++#if X0X_S1_EXTRA
++unsigned s1_patch_steps(unsigned slot);
++#else
++static inline unsigned s1_patch_steps(unsigned slot)
++{ return slot == S1_PATCH_COUNT ? 1u : S1_PATCH_STEPS; }
++#endif
+ #define S1_PATCH_MASK (((UINT32_C(1) << S1_PATCH_COUNT) - 1) << S1_PATCH_FIRST_BYTE)
+ 
+ typedef struct {
+     const char *label;
++#if X0X_S1_EXTRA
++    uint8_t factory_id, unit, domain, steps;
++#else
+     float minimum, maximum;
+     uint8_t factory_id, unit;
++#endif
+ } s1_patch_descriptor;
+ 
+ typedef struct {
+@@ -24,6 +160,7 @@
+     float physical; /* applied DSP target; the exact INIT value before an edit */
+     uint8_t position;      /* nearest editable position */
+     uint8_t note_locked;   /* temporary sequencer patch owns the heard value */
++    uint8_t max_position;  /* original division stops while a rate is synced */
+ } s1_patch_value;
+ 
+ /* Whole audible patch from a single render boundary. Values are in the same
+@@ -32,10 +169,30 @@
+     uint32_t revision;
+     unsigned preset;
+     uint8_t note_locked;
++    uint8_t filter_link;
+     float physical[S1_PATCH_COUNT];
+ } s1_patch_snapshot;
+ 
+ const s1_patch_descriptor *s1_patch_at(unsigned index);
++#if X0X_S1_EXTRA
++const float *s1_patch_bounds(const s1_patch_descriptor *d);
++#endif
++static inline float s1_patch_min(const s1_patch_descriptor *d)
++{
++#if X0X_S1_EXTRA
++    return s1_patch_bounds(d)[0];
++#else
++    return d->minimum;
++#endif
++}
++static inline float s1_patch_max(const s1_patch_descriptor *d)
++{
++#if X0X_S1_EXTRA
++    return s1_patch_bounds(d)[1];
++#else
++    return d->maximum;
++#endif
++}
+ float s1_patch_physical(const s1_patch_descriptor *, unsigned position);
+ /* Value for the firmware's unit_value formatter. Uses real seconds and Hz. */
+ static inline float s1_patch_display(const s1_patch_descriptor *d, float physical)
+--- a/firmware/src/app/s1c_part.c
++++ b/firmware/src/app/s1c_part.c
+@@ -1,5 +1,6 @@
+ /* SPDX-License-Identifier: GPL-3.0-only */
+ #include "s1c_part.h"
++#include "../x0x_cold.h"
+ #include "../dsp/s1c/s1c_front.h"
+ #include "../dsp/s1pack/s1pack.h"
+ #include "../dsp/fastmath.h"
+@@ -8,14 +9,17 @@
+ #include "original_sound.h"
+ #endif
+ #include <stddef.h>
++#include <math.h>
+ #include <string.h>
+ 
+ #define S1C_SR 44100.0f
+ /* Synth One factory parameter ids (s1c uses the same numbering). */
+-enum { P_MONO = 20, P_DETM = 31, P_BCSR = 34 };
+-
++enum { P_CUT = 16, P_MONO = 20, P_GLIDE = 21, P_DET2 = 30, P_DETM = 31, P_BCSR = 34, P_PAN_RATE = 36, P_DELAY_TIME = 43, P_CUTOFF_LFO = 48, P_RESONANCE_LFO = 49, P_OSC_MIX_LFO = 50, P_REVERB_MIX_LFO = 51, P_AMP_DECAY_LFO = 52, P_NOISE_LFO = 53, P_FM_LFO = 54, P_DETUNE_LFO = 55, P_PITCH_LFO = 57, P_TREMOLO_LFO = 59, P_TEMPO_SYNC = 139 };
++
++#if !X0X_SYNTH_CONTROLS_INIT_ONLY
+ static const uint8_t *s1_part_pack;
+ static uint16_t s1_part_pack_count;
++#endif
+ 
+ _Static_assert(S1C_RVB_BYTES % 4u == 0u && S1C_RVB_BYTES + 1024u <= S1C_ARENA_BYTES,
+                "reverb lines leave at least 1 KiB of delay pool in the Chicago FX2 arena");
+@@ -27,7 +31,9 @@
+     e->rv.fit[0] = 0.5f; e->rv.fit[1] = 1.5f; e->rv.fit[2] = 1.0f; e->dfmt = 0;
+ }
+ 
++#if !X0X_SYNTH_CONTROLS_INIT_ONLY
+ static void emit(void *context, unsigned id, float physical) { (void)s1c_front_set((s1c *)context, id, physical); }
++#endif
+ 
+ static void load_init(s1c *e)
+ {
+@@ -35,6 +41,11 @@
+     for (unsigned i = 0; i < 150u; ++i) (void)s1c_front_set(e, i, s1c_front_init(i));
+ }
+ 
++#if X0X_SYNTH_CONTROLS_INIT_ONLY
++unsigned s1_part_set_pack(const uint8_t *p, uint32_t bytes) { (void)p; (void)bytes; return 0; }
++unsigned s1_part_programs(void) { return 0; }
++const char *s1_part_program_name(unsigned program) { (void)program; return "INIT"; }
++#else
+ unsigned s1_part_set_pack(const uint8_t *p, uint32_t bytes)
+ {
+     s1_part_pack = NULL;
+@@ -61,6 +72,7 @@
+     name[i] = 0;
+     return name;
+ }
++#endif
+ 
+ int s1_part_program(s1_dry_part *part, unsigned program)
+ {
+@@ -68,15 +80,55 @@
+     int ok = 1;
+     if (program != S1_PART_INIT && program >= s1_part_programs()) { program = S1_PART_INIT; ok = 0; }
+     load_init(e);
++#if !X0X_SYNTH_CONTROLS_INIT_ONLY
+     if (program != S1_PART_INIT) {
+         char name[S1PACK_NAME_MAX];
+         if (s1pack_read(s1_part_pack, program, name, emit, e) < 0) { load_init(e); program = S1_PART_INIT; ok = 0; }
+     }
++#endif
++#if X0X_S1_EXTRA
++    part->extra_live_mask = 0;
++    part->lfo_live_mask = 0;
++    part->clock_factory_pan = e->t[P_PAN_RATE];
++    part->clock_factory_delay = e->t[P_DELAY_TIME];
++    part->reverb_lfo_factory = e->t[P_REVERB_MIX_LFO];
++    part->cutoff_lfo_factory = e->t[P_CUTOFF_LFO];
++    part->fx_gate_factory[0] = e->t[S1C_P_DLON];
++    part->fx_gate_factory[1] = e->t[S1C_P_RVON];
++    part->tremolo_lfo_factory = e->t[P_TREMOLO_LFO];
++    part->pitch_lfo_factory = e->t[P_PITCH_LFO];
++    part->detune_lfo_factory = e->t[P_DETUNE_LFO];
++    part->detune_factory = e->t[P_DET2];
++    part->voice_factory[0] = e->t[P_MONO];
++    part->voice_factory[1] = e->t[P_GLIDE];
++    for (unsigned i=0;i<2;++i) part->coarse_factory[i] = e->t[3u+i];
++    for (unsigned i = 0; i < S1_MOD_EXT_COUNT; ++i)
++        part->mod_ext_factory[i] = e->t[s1_patch_at(S1_MOD_EXT_FIRST+i)->factory_id];
++    for (unsigned i = 0; i < S1_ROUTE_COUNT; ++i)
++        part->route_factory[i] = e->t[s1_patch_at(S1_ROUTE_FIRST+i)->factory_id];
++    for (unsigned i = 0; i < S1_BASE_EDIT_COUNT; ++i)
++        part->base_factory[i] = e->t[s1_patch_at(S1_BASE_EDIT_FIRST+i)->factory_id];
++    for (unsigned i = 0; i < S1_EXTRA_COUNT; ++i)
++        part->extra_factory[i] = e->t[s1_patch_at(S1_EXTRA_FIRST+i)->factory_id];
++    for (unsigned i = 0; i < S1_LFO_COUNT; ++i)
++        part->lfo_factory[i] = e->t[s1_patch_at(S1_LFO_FIRST+i)->factory_id];
++    for (unsigned i = 0; i < S1_WET_COUNT; ++i)
++        part->wet_factory[i] = e->t[s1_patch_at(S1_WET_FIRST+i)->factory_id];
++#endif
+     fit_apply(e);
+     /* The engine clears its voices when mono changes; a program load is not a change. */
+     e->mono_prev = (uint8_t)e->t[P_MONO];
+     part->program = (uint16_t)program;
++#if X0X_SYNTHONE_PATCH
++    part->filter_link = 0;
++#endif
+     part->detm = e->t[P_DETM];
++#if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
++    part->bend_typed = 0;
++    part->bend_min = -2.f;
++    part->bend_max = 2.f;
++    part->bend_raw = 8192;
++#endif
+     part->held = 0;
+     if (part->arena)
+         s1c_attach(e, part->arena, part->wbuf, part->arena + S1C_RVB_BYTES, (int)(S1C_ARENA_BYTES - S1C_RVB_BYTES));
+@@ -102,11 +154,146 @@
+     part->held = 0;
+     part->damper = 0;
+     part->e.t[P_DETM] = part->detm;
++#if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
++    part->bend_raw = 8192;
++#endif
+ }
+ 
+ #if X0X_SYNTHONE_PATCH
+ /* Linear 7-bit edits across the original physical domains. The INIT preset
+  * retains its exact unquantized values. Storage order must never change. */
++#if X0X_S1_EXTRA
++/* Slot-indexed descriptors preserve the original stored order. Only repeated
++ * physical domains share an index; begin/end float literals are unchanged. */
++#define S1_CATALOG_ROWS(D) \
++    D(0,"OSC BALANCE",2,X0X_U_PCT,0,127) \
++    D(1,"OSC 1 LEVEL",5,X0X_U_PCT,0,127) \
++    D(2,"CUTOFF",16,X0X_U_HZ,1,127) \
++    D(3,"RESONANCE",17,X0X_U_PCT,2,127) \
++    D(4,"FILTER ENV",19,X0X_U_PCT,3,127) \
++    D(5,"FILTER ATTACK",22,X0X_U_S,4,127) \
++    D(6,"FILTER DECAY",23,X0X_U_S,5,127) \
++    D(7,"FILTER SUSTAIN",24,X0X_U_PCT,0,127) \
++    D(8,"FILTER RELEASE",25,X0X_U_S,6,127) \
++    D(9,"AMP ATTACK",26,X0X_U_S,4,127) \
++    D(10,"AMP DECAY",27,X0X_U_S,5,127) \
++    D(11,"AMP SUSTAIN",28,X0X_U_PCT,0,127) \
++    D(12,"AMP RELEASE",29,X0X_U_S,7,127) \
++    D(S1_EXTRA_FIRST,"OSC 1 MORPH",0,X0X_U_PCT,0,127) \
++    D(S1_EXTRA_FIRST+1,"OSC 2 MORPH",1,X0X_U_PCT,0,127) \
++    D(S1_EXTRA_FIRST+2,"OSC 2 LEVEL",6,X0X_U_PCT,0,127) \
++    D(S1_EXTRA_FIRST+3,"SUB LEVEL",7,X0X_U_PCT,0,127) \
++    D(S1_EXTRA_FIRST+4,"SUB OCTAVE",8,X0X_U_NONE,0,1) \
++    D(S1_EXTRA_FIRST+5,"SUB WAVE",9,X0X_U_NONE,0,1) \
++    D(S1_EXTRA_FIRST+6,"FM LEVEL",10,X0X_U_PCT,0,127) \
++    D(S1_EXTRA_FIRST+7,"FM INDEX",11,X0X_U_NONE,8,127) \
++    D(S1_EXTRA_FIRST+8,"NOISE LEVEL",12,X0X_U_PCT,9,127) \
++    D(S1_EXTRA_FIRST+9,"FILTER TYPE",115,X0X_U_NONE,6,2) \
++    D(S1_EXTRA_FIRST+10,"ADSR PITCH TRACK",149,X0X_U_PCT,0,127) \
++    D(S1_EXTRA_FIRST+11,"LFO 1 RATE",15,X0X_U_HZ,10,127) \
++    D(S1_EXTRA_FIRST+12,"LFO 2 RATE",47,X0X_U_HZ,10,127) \
++    D(S1_EXTRA_FIRST+13,"LFO 1 SHAPE",13,X0X_U_NONE,11,3) \
++    D(S1_EXTRA_FIRST+14,"LFO 2 SHAPE",45,X0X_U_NONE,11,3) \
++    D(S1_EXTRA_FIRST+15,"SYNC TO ARP",P_TEMPO_SYNC,X0X_U_NONE,0,1) \
++    D(S1_EXTRA_FIRST+16,"DELAY MIX",S1C_P_DLMIX,X0X_U_PCT,0,127) \
++    D(S1_EXTRA_FIRST+17,"REVERB MIX",S1C_P_RVMIX,X0X_U_PCT,0,127) \
++    D(S1_EXTRA_FIRST+18,"REVERB HP",S1C_P_RVHP,X0X_U_HZ,12,127) \
++    D(S1_EXTRA_FIRST+19,"WIDEN",S1C_P_WIDEN,X0X_U_NONE,0,1) \
++    D(S1_EXTRA_FIRST+20,"MONO LEGATO",120,X0X_U_NONE,0,1) \
++    D(S1_PART_LEVEL,"PART LEVEL",S1C_P_MVOL,X0X_U_PCT,6,127) \
++    D(S1_LFO1_DEPTH,"LFO 1 DEPTH",14,X0X_U_PCT,0,127) \
++    D(S1_LFO2_DEPTH,"LFO 2 DEPTH",46,X0X_U_PCT,0,127) \
++    D(S1_NOISE_LFO,"NOISE LFO",P_NOISE_LFO,X0X_U_NONE,11,3) \
++    D(S1_OSC_MIX_LFO,"OSC MIX LFO",P_OSC_MIX_LFO,X0X_U_NONE,11,3) \
++    D(S1_RESONANCE_LFO,"RES LFO",P_RESONANCE_LFO,X0X_U_NONE,11,3) \
++    D(S1_FM_LFO,"FM LFO",P_FM_LFO,X0X_U_NONE,11,3) \
++    D(S1_AMP_DECAY_LFO,"AMP DEC LFO",P_AMP_DECAY_LFO,X0X_U_NONE,11,3) \
++    D(S1_OSC1_SEMI,"OSC 1 SEMI",3,X0X_U_ST,13,S1_COARSE_STEPS) \
++    D(S1_OSC2_SEMI,"OSC 2 SEMI",4,X0X_U_ST,13,S1_COARSE_STEPS) \
++    D(S1_VOICE_MODE,"VOICE MODE",P_MONO,X0X_U_NONE,0,1) \
++    D(S1_MONO_GLIDE,"MONO GLIDE",P_GLIDE,X0X_U_S,14,S1_GLIDE_STEPS) \
++    D(S1_OSC2_DETUNE,"OSC 2 DETUNE",P_DET2,X0X_U_NONE,15,S1_DETUNE_STEPS) \
++    D(S1_DELAY_ON,"DELAY",S1C_P_DLON,X0X_U_NONE,0,1) \
++    D(S1_REVERB_ON,"REVERB",S1C_P_RVON,X0X_U_NONE,0,1) \
++    D(S1_DETUNE_LFO,"DETUNE LFO",P_DETUNE_LFO,X0X_U_NONE,11,3) \
++    D(S1_PITCH_LFO,"PITCH LFO",P_PITCH_LFO,X0X_U_NONE,11,3) \
++    D(S1_TREMOLO_LFO,"TREMOLO LFO",P_TREMOLO_LFO,X0X_U_NONE,11,3) \
++    D(S1_REVERB_MIX_LFO,"REVERB MIX LFO",P_REVERB_MIX_LFO,X0X_U_NONE,11,3) \
++    D(S1_CUTOFF_LFO,"CUTOFF LFO",P_CUTOFF_LFO,X0X_U_NONE,11,3) \
++    S1_CATALOG_BEND_ROWS(D)
++#if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
++#define S1_CATALOG_BEND_ROWS(D) \
++    D(S1_BEND_LO,"PB DOWN",141,X0X_U_ST,16,24) \
++    D(S1_BEND_HI,"PB UP",142,X0X_U_ST,17,24)
++#else
++#define S1_CATALOG_BEND_ROWS(D)
++#endif
++static const s1_patch_descriptor patch_parameters[S1_REVERB_MIX_LFO+1] = {
++#define S1_D(slot,label,id,unit,range,steps) [slot]={label,id,unit,range,steps},
++    S1_CATALOG_ROWS(S1_D)
++#undef S1_D
++};
++static const uint8_t patch_slot_code[150] = {
++#define S1_R(slot,label,id,unit,range,steps) [id]=(slot)+1u,
++    S1_CATALOG_ROWS(S1_R)
++#undef S1_R
++};
++/* Duplicate ID or persisted slot is a compile error, independent of any
++ * initializer override warnings. These schema guards emit no runtime code. */
++static inline void s1_catalog_schema_unique(unsigned id,unsigned slot)
++{
++    switch(id) {
++#define S1_ID(slot,label,id,unit,range,steps) case id: break;
++    S1_CATALOG_ROWS(S1_ID)
++#undef S1_ID
++    }
++    switch(slot) {
++#define S1_SLOT(slot,label,id,unit,range,steps) case slot: break;
++    S1_CATALOG_ROWS(S1_SLOT)
++#undef S1_SLOT
++    }
++}
++_Static_assert(S1_LFO_FIRST==S1_EXTRA_FIRST+11 && S1_WET_FIRST==S1_EXTRA_FIRST+16 &&
++               S1_MONO_LEGATO==S1_EXTRA_FIRST+20, "legacy S1 descriptor order");
++#undef S1_CATALOG_ROWS
++#undef S1_CATALOG_BEND_ROWS
++static const float patch_domain[][2] = {
++    {0, 1},
++    {64, 22050},
++    {0, .98f},
++    {0, 1.2f},
++    {.0005f, 2},
++    {.005f, 2},
++    {0, 2},
++    {.004f, 2},
++    {0, 15},
++    {0, .25f},
++    {0x1.111112p-11f, 80},
++    {0, 3},
++    {80, 900},
++    {-12, 24},
++    {0, .2f},
++    {-4, 4},
++    {-24.f, 0.f},
++    {0.f, 24.f},
++};
++_Static_assert(sizeof(void*)!=4u || sizeof(s1_patch_descriptor)==8u, "native compact S1 descriptor");
++const float *s1_patch_bounds(const s1_patch_descriptor *d) { return patch_domain[d->domain]; }
++X0X_COLD __attribute__((noinline)) unsigned s1_patch_steps(unsigned slot)
++{
++    if (slot == S1_PATCH_COUNT) return 1u;
++    if (slot >= sizeof patch_parameters / sizeof patch_parameters[0]) return S1_PATCH_STEPS;
++    unsigned steps=patch_parameters[slot].steps;
++    return steps ? steps : S1_PATCH_STEPS;
++}
++const s1_patch_descriptor *s1_patch_at(unsigned slot)
++{
++    return slot < sizeof patch_parameters / sizeof patch_parameters[0] &&
++           patch_parameters[slot].label ? patch_parameters+slot : NULL;
++}
++int s1_patch_slot(unsigned id)
++{ return id < sizeof patch_slot_code ? (int)patch_slot_code[id]-1 : -1; }
++#else
+ static const s1_patch_descriptor patch_parameters[S1_PATCH_COUNT] = {
+     {"OSC BALANCE", 0, 1, 2, X0X_U_PCT},
+     {"OSC 1 LEVEL", 0, 1, 5, X0X_U_PCT},
+@@ -122,36 +309,235 @@
+     {"AMP SUSTAIN", 0, 1, 28, X0X_U_PCT},
+     {"AMP RELEASE", .004f, 2, 29, X0X_U_S},
+ };
+-
+ const s1_patch_descriptor *s1_patch_at(unsigned slot)
+-{ return slot < S1_PATCH_COUNT ? &patch_parameters[slot] : NULL; }
+-
++{ return slot < S1_PATCH_COUNT ? patch_parameters+slot : NULL; }
+ int s1_patch_slot(unsigned id)
+ {
+-    for (unsigned i = 0; i < S1_PATCH_COUNT; ++i)
+-        if (patch_parameters[i].factory_id == id) return (int)i;
++    for (unsigned i=0;i<S1_PATCH_COUNT;++i)
++        if(patch_parameters[i].factory_id==id) return (int)i;
+     return -1;
+ }
++#endif
+ 
+ float s1_patch_physical(const s1_patch_descriptor *d, unsigned position)
+ {
+-    if (position >= S1_PATCH_STEPS) return d->maximum;
+-    return d->minimum + (d->maximum - d->minimum) * ((float)position / S1_PATCH_STEPS);
++#if X0X_S1_EXTRA
++    const float *bounds=s1_patch_bounds(d);
++    const float lo=bounds[0], hi=bounds[1];
++#else
++    const float lo=d->minimum, hi=d->maximum;
++#endif
++    if (position >= S1_PATCH_STEPS) return hi;
++    return lo + (hi - lo) * ((float)position / S1_PATCH_STEPS);
+ }
+ 
+ float s1_part_patch_value(const s1_dry_part *part, unsigned slot)
+ {
+-    return slot < S1_PATCH_COUNT ? part->e.t[patch_parameters[slot].factory_id] : 0.0f;
+-}
++#if X0X_S1_EXTRA && defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
++    if (s1_bend_slot(slot)) return slot == S1_BEND_LO ? part->bend_min : part->bend_max;
++#endif
++    if (slot == S1_PATCH_COUNT) return part->filter_link;
++    if (part->filter_link && slot >= S1_FILTER_FIRST && slot < S1_AMP_FIRST)
++        return part->filter_unlinked[slot - S1_FILTER_FIRST];
++    const s1_patch_descriptor *d = s1_patch_at(slot);
++    return d ? part->e.t[d->factory_id] : 0.0f;
++}
++
++#if X0X_S1_EXTRA
++/* Called only at the existing patch/lock audio boundary. Restore immutable
++ * program words directly before applying an authored clock as one tuple. */
++static void s1_part_clock(s1_dry_part *part, unsigned code)
++{
++    s1c *e = &part->e;
++#if defined(X0X_S1_AUTOPAN_PROBE) && X0X_S1_AUTOPAN_PROBE
++    const float pan_hz=e->t[P_PAN_RATE];
++#endif
++    s1c_set(e, P_TEMPO_SYNC, part->lfo_factory[S1_LFO_SYNC - S1_LFO_FIRST]);
++    s1c_set(e, patch_parameters[S1_LFO1_RATE].factory_id, part->lfo_factory[0]);
++    s1c_set(e, patch_parameters[S1_LFO2_RATE].factory_id, part->lfo_factory[1]);
++#if defined(X0X_S1_AUTOPAN_PROBE) && X0X_S1_AUTOPAN_PROBE
++    if(!e->pan_authored)
++#endif
++    s1c_set(e, P_PAN_RATE, part->clock_factory_pan);
++    s1c_set(e, P_DELAY_TIME, part->clock_factory_delay);
++    if (code) {
++        (void)s1c_front_set(e, P_TEMPO_SYNC, 1.f);
++        if (code == 1u) (void)s1c_front_set(e, P_TEMPO_SYNC, 0.f);
++    }
++#if defined(X0X_S1_AUTOPAN_PROBE) && X0X_S1_AUTOPAN_PROBE
++    if(e->pan_authored)(void)s1c_front_set(e,P_PAN_RATE,pan_hz);
++#endif
++}
++
++void s1_part_apply_extra(s1_dry_part *part, const uint8_t *extra)
++{
++    s1_extra_state state;
++    if (!s1_extra_read(extra, &state)) return;
++    s1c_set(&part->e, P_REVERB_MIX_LFO, state.reverb_mix_lfo ? (float)(state.reverb_mix_lfo - 1u) : part->reverb_lfo_factory);
++    s1c_set(&part->e, P_CUTOFF_LFO, state.cutoff_lfo ? (float)(state.cutoff_lfo - 1u) : part->cutoff_lfo_factory);
++    unsigned next = 0;
++    for (unsigned i = 0; i < S1_EXTRA_COUNT; ++i) {
++        unsigned digit = state.panel[i], bit = 1u << i;
++        if (!(digit || (part->extra_live_mask & bit))) continue;
++        const s1_patch_descriptor *d = &patch_parameters[S1_EXTRA_FIRST+i];
++        float value = part->extra_factory[i];
++        if (digit) {
++            next |= bit;
++            unsigned position = digit - 1u;
++            value = s1_patch_steps(S1_EXTRA_FIRST+i) < S1_PATCH_STEPS ? (float)position :
++                    s1_patch_physical(d, position);
++        }
++#if S1C_KR > 1
++        /* A held mode switch needs the new coefficients on its first sample. */
++        if (i == S1_FILTER_TYPE - S1_EXTRA_FIRST && value != part->e.t[d->factory_id])
++            for (unsigned v = 0; v < S1C_VOICES; ++v) part->e.v[v].kc = 0;
++#endif
++        (void)s1c_front_set(&part->e, d->factory_id, value);
++    }
++    for (unsigned i = 0; i < S1_WET_COUNT; ++i) {
++        unsigned digit = state.wet[i], bit = 1u << (S1_EXTRA_COUNT+i);
++        if (!(digit || (part->extra_live_mask & bit))) continue;
++        const s1_patch_descriptor *d = &patch_parameters[S1_WET_FIRST + i];
++        float value = part->wet_factory[i];
++        if (digit) value = s1_patch_steps(S1_WET_FIRST+i) == 1u ?
++                           (float)(digit-1u) : s1_patch_physical(d, digit-1u);
++        s1c_set(&part->e, d->factory_id, value);
++        if (digit) next |= bit;
++    }
++    part->extra_live_mask = (uint16_t)next;
++    const uint8_t *values = state.lfo;
++    if (!(part->lfo_live_mask | values[0] | values[1] | values[2] | values[3] | values[4])) return;
++    const unsigned clock_index = S1_LFO_SYNC - S1_LFO_FIRST;
++    const unsigned clock_bit = 1u << clock_index;
++    const unsigned clock = values[clock_index];
++    int clock_dirty = clock || (part->lfo_live_mask & clock_bit);
++    if (clock_dirty) s1_part_clock(part, clock);
++    unsigned live = clock ? clock_bit : 0;
++    for (unsigned i = 0; i < clock_index; ++i) {
++        unsigned id = patch_parameters[S1_LFO_FIRST + i].factory_id;
++        if (values[i]) {
++            if (i < 2) s1c_front_lfo_apply(&part->e, id, values[i]);
++            else s1c_set(&part->e, id, (float)(values[i] - 1u));
++            live |= 1u << i;
++        } else if ((!clock_dirty || i >= 2) && (part->lfo_live_mask & (1u << i))) {
++            /* Program targets are already in applied units. Do not re-quantize. */
++            s1c_set(&part->e, id, part->lfo_factory[i]);
++        }
++    }
++    part->lfo_live_mask = (uint8_t)live;
++}
++#endif
+ 
+ void s1_part_apply_cell(s1_dry_part *part, const uint8_t cell[32])
+ {
+     uint32_t mask = original_sound_edit_mask(cell);
++#if X0X_S1_EXTRA
++    for (unsigned i=0;i<2;++i) {
++        unsigned code = s1_coarse_code(cell,i);
++        s1c_set(&part->e, 3u+i, code ? (float)((int)code-13) : part->coarse_factory[i]);
++    }
++    unsigned voice = s1_voice_code(cell);
++    unsigned mono = voice / S1_GLIDE_RADIX, glide = voice % S1_GLIDE_RADIX;
++    s1c_set(&part->e, P_MONO, mono ? (float)(mono-1u) : part->voice_factory[0]);
++    s1c_set(&part->e, P_GLIDE, glide ? (float)(glide-1u) / 200.f : part->voice_factory[1]);
++    unsigned detune_code = s1_detune_code(cell);
++    s1c_set(&part->e, P_DET2, detune_code ? (float)((int)detune_code-41) / 10.f : part->detune_factory);
++    unsigned mod_code = mask & S1_MOD_EXT_MARK ? cell[S1_MOD_EXT_BYTE] : 0u;
++    for (unsigned i = 0; i < S1_MOD_EXT_COUNT; ++i) {
++        unsigned digit = mod_code % S1_MOD_RADIX;
++        s1c_set(&part->e, patch_parameters[S1_MOD_EXT_FIRST+i].factory_id,
++                digit ? (float)(digit - 1u) : part->mod_ext_factory[i]);
++        mod_code /= S1_MOD_RADIX;
++    }
++    unsigned delay = mod_code % S1_FX_GATE_RADIX, reverb = mod_code / S1_FX_GATE_RADIX;
++    s1c_set_delay_gate(&part->e, delay ? (float)(delay-1u) : part->fx_gate_factory[0], delay != 0);
++    s1c_set(&part->e, S1C_P_RVON, reverb ? (float)(reverb-1u) : part->fx_gate_factory[1]);
++    unsigned detune_route = s1_detune_route_code(cell);
++    s1c_set(&part->e, P_DETUNE_LFO, detune_route ? (float)(detune_route-1u) : part->detune_lfo_factory);
++    unsigned pitch_route = s1_pitch_route_code(cell);
++    s1c_set(&part->e, P_PITCH_LFO, pitch_route ? (float)(pitch_route-1u) : part->pitch_lfo_factory);
++    unsigned tremolo_route = s1_tremolo_route_code(cell);
++    s1c_set(&part->e, P_TREMOLO_LFO, tremolo_route ? (float)(tremolo_route-1u) : part->tremolo_lfo_factory);
++    uint8_t codes[S1_ROUTE_COUNT];
++    if (s1_route_decode(mask >> S1_ROUTE_SHIFT, codes))
++        for (unsigned i = 0; i < S1_ROUTE_COUNT; ++i)
++            s1c_set(&part->e, patch_parameters[S1_ROUTE_FIRST+i].factory_id,
++                    codes[i] ? (float)(codes[i]-1u) : part->route_factory[i]);
++    for (unsigned i = 0; i < S1_BASE_EDIT_COUNT; ++i) {
++        const s1_patch_descriptor *d = &patch_parameters[S1_BASE_EDIT_FIRST+i];
++        const unsigned byte = S1_BASE_EDIT_BYTE + i;
++        s1c_set(&part->e, d->factory_id, mask & (UINT32_C(1) << byte) ?
++                s1_patch_physical(d, cell[byte] & 127u) : part->base_factory[i]);
++    }
++#endif
++    if (part->filter_link)
++        for (unsigned i = 0; i < 4; ++i)
++            part->e.t[patch_parameters[S1_FILTER_FIRST + i].factory_id] = part->filter_unlinked[i];
+     for (unsigned i = 0; i < S1_PATCH_COUNT; ++i) {
+         unsigned byte = S1_PATCH_FIRST_BYTE + i;
+         if (mask & (UINT32_C(1) << byte))
+-            (void)s1c_front_set(&part->e, patch_parameters[i].factory_id, s1_patch_physical(&patch_parameters[i], cell[byte]));
+-    }
++            (void)s1c_front_set(&part->e, patch_parameters[i].factory_id, s1_patch_physical(&patch_parameters[i], cell[byte] & 127u));
++    }
++    part->filter_link = (mask & S1_LINK_MASK) != 0;
++    if (part->filter_link)
++        for (unsigned i = 0; i < 4; ++i) {
++            unsigned filter_id = patch_parameters[S1_FILTER_FIRST + i].factory_id;
++            unsigned amp_id = patch_parameters[S1_AMP_FIRST + i].factory_id;
++            part->filter_unlinked[i] = part->e.t[filter_id];
++            part->e.t[filter_id] = part->e.t[amp_id];
++        }
++}
++#endif
++
++/* AudioKit Manager routes normalized CC1 to the inverted logarithmic
++ * 120..7600 scale, times 3. Front end clamps cutoff to 64..22050 Hz. */
++#if X0X_SYNTHONE_PATCH && defined(X0X_S1_MOD_RATE_PROBE) && X0X_S1_MOD_RATE_PROBE
++int s1_part_mod_route(s1_dry_part *part, unsigned route)
++{
++    if (route > 2u) return 0;
++    part->mod_wheel_route = (uint8_t)route;
++    return 1;
++}
++#endif
++void s1_part_mod_wheel(s1_dry_part *part, unsigned cc1)
++{
++    if (cc1 > 127u) cc1 = 127u;
++#if X0X_SYNTHONE_PATCH && defined(X0X_S1_MOD_RATE_PROBE) && X0X_S1_MOD_RATE_PROBE
++    if (part->mod_wheel_route) {
++        s1c_front_mod_rate(&part->e, part->mod_wheel_route == 1u ? 15u : 47u, cc1);
++        return;
++    }
++#endif
++    /* Fixed logarithmic CC1 curve: factor[i] is (7600/120)^(2^i/127).
++     * Seven factors cover the complete 7-bit input without a vendor libm
++     * dependency or a 128-entry table. Input and endpoints are unchanged. */
++    static const float factor[7] = {
++        0x1.08800e0000000p+0f, 0x1.11485e0000000p+0f, 0x1.23bb6e0000000p+0f,
++        0x1.4c73a60000000p+0f, 0x1.afbc2a0000000p+0f, 0x1.6c0d900000000p+1f,
++        0x1.02db480000000p+3f
++    };
++    float cutoff = 360.f;
++    for (unsigned bits = 127u - cc1, i = 0; bits; bits >>= 1, ++i)
++        if (bits & 1u) cutoff *= factor[i];
++    (void)s1c_front_set(&part->e, P_CUT, cutoff);
++}
++#if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
++/* Original signed bounds act only on the transient MIDI wheel word. */
++static void s1_bend_refresh(s1_dry_part *part)
++{
++    const unsigned raw = part->bend_raw;
++    float st = raw < 8192 ? part->bend_min * ((float)(8191u - raw) / 8191.f)
++                          : part->bend_max * ((float)(raw - 8192u) / 8192.f);
++    part->e.t[P_DETM] = st == 0.f ? part->detm : part->detm * fm_exp2f(st / 12.f);
++}
++int s1_part_bend_ranges(s1_dry_part *part, float min_st, float max_st)
++{
++    if (!part || !(min_st >= -24.f && min_st <= 0.f && max_st >= 0.f && max_st <= 24.f)) return 0;
++    part->bend_typed = 1;
++    part->bend_min = min_st;
++    part->bend_max = max_st;
++    s1_bend_refresh(part);
++    return 1;
+ }
+ #endif
+ 
+@@ -164,6 +550,16 @@
+         return 1;
+     }
+     if (id == 0) {
++#if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
++        /* Invert the existing normalized ingress exactly for all 14-bit MIDI
++         * words. The physical wheel/motion use this same receiver with q7. */
++        if (part->bend_typed) {
++            part->bend_raw = (uint16_t)(value < .5f ? value * 16384.f + .5f :
++                (value - .5f) * 16382.f + 8192.5f);
++            s1_bend_refresh(part);
++            return 1;
++        }
++#endif
+         /* +-2 semitones on the program's frequency multiplier (smoothed by the engine). */
+         part->e.t[P_DETM] = part->detm * fm_exp2f((value - 0.5f) * (4.0f / 12.0f));
+         return 1;
+@@ -177,13 +573,21 @@
+     return 1;
+ }
+ 
++#if !X0X_S1_KEYBOARD_HOLD
++static
++#endif
++void s1_part_key_on(s1_dry_part *part,unsigned key,unsigned velocity)
++{
++    for (unsigned i=0;i<S1C_VOICES;++i)
++        if(part->e.v[i].root==(int)key)part->held&=(uint8_t)~(1u<<i);
++    s1c_start(&part->e,(int)key,(int)velocity);
++}
++
+ int s1_part_note(s1_dry_part *part, unsigned key, unsigned velocity)
+ {
+     if (key > 127 || velocity > 127) return 0;
+     if (velocity) {
+-        for (unsigned i = 0; i < S1C_VOICES; ++i)
+-            if (part->e.v[i].root == (int)key) part->held &= (uint8_t)~(1u << i);
+-        s1c_start(&part->e, (int)key, (int)velocity);
++        s1_part_key_on(part,key,velocity);
+         return 1;
+     }
+     if (part->damper) {
+--- a/firmware/src/app/s1c_part.h
++++ b/firmware/src/app/s1c_part.h
+@@ -8,6 +8,10 @@
+ #pragma once
+ #include "../dsp/s1c/s1c_config.h"
+ #include "../dsp/s1c/s1c.h"
++#include "typed_controls_trial.h"
++#if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE && !defined(X0X_HOST) && !DNBOX_TYPED_CONTROLS_NATIVE_TEST
++#error "Volatile Synth One WHEELS range experiment is host-only"
++#endif
+ #if X0X_SYNTHONE_PATCH
+ #include "s1_patch.h"
+ #endif
+@@ -16,10 +20,30 @@
+ 
+ typedef struct {
+     s1c e;
+-    uint16_t wbuf[S1C_WAP_WORDS];
++    uint16_t wbuf[2205]; /* source 50 ms at the S1 part's 44.1 kHz */
+     uint8_t *arena;            /* S1C_ARENA_BYTES, or NULL: no delay/reverb */
+     uint16_t program;          /* pack program, or S1_PART_INIT */
+     float detm;                /* program DETM: pitch bend scales it */
++#if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
++    float bend_min, bend_max;
++    uint16_t bend_raw;
++    uint8_t bend_typed;
++#endif
++#if X0X_SYNTHONE_PATCH
++#if X0X_S1_EXTRA
++    float extra_factory[S1_EXTRA_COUNT]; /* exact pack values for note-lock transitions */
++    float lfo_factory[S1_LFO_COUNT], wet_factory[S1_WET_COUNT];
++    float mod_ext_factory[S1_MOD_EXT_COUNT], coarse_factory[2], detune_factory, voice_factory[2], fx_gate_factory[2], detune_lfo_factory, pitch_lfo_factory, tremolo_lfo_factory;
++    float clock_factory_pan, clock_factory_delay, reverb_lfo_factory, cutoff_lfo_factory, route_factory[S1_ROUTE_COUNT], base_factory[S1_BASE_EDIT_COUNT];
++    uint16_t extra_live_mask;
++    uint8_t lfo_live_mask;
++#endif
++    float filter_unlinked[4];
++    uint8_t filter_link;
++#if defined(X0X_S1_MOD_RATE_PROBE) && X0X_S1_MOD_RATE_PROBE
++    uint8_t mod_wheel_route;
++#endif
++#endif
+     uint8_t damper, held;      /* held: voices kept sounding by the damper */
+ } s1_dry_part;
+ 
+@@ -41,10 +65,25 @@
+ #if X0X_SYNTHONE_PATCH
+ int s1_patch_slot(unsigned factory_id);
+ float s1_part_patch_value(const s1_dry_part *, unsigned slot);
+-void s1_part_apply_cell(s1_dry_part *, const uint8_t cell[32]);
++void s1_part_apply_cell(s1_dry_part *part, const uint8_t cell[32]);
++#if X0X_S1_EXTRA
++void s1_part_apply_extra(s1_dry_part *, const uint8_t *extra);
++#endif
+ #endif
+ int s1_part_param(s1_dry_part *part, unsigned id, float value);
++/* Original Init route (cutoff). Performance-only, no Sound or REC lane. */
++#if X0X_SYNTHONE_PATCH && defined(X0X_S1_MOD_RATE_PROBE) && X0X_S1_MOD_RATE_PROBE
++/* Diagnostic only: select without dispatching a gesture. No product writer. */
++int s1_part_mod_route(s1_dry_part *, unsigned route);
++#endif
++void s1_part_mod_wheel(s1_dry_part *part, unsigned cc1);
+ int s1_part_note(s1_dry_part *part, unsigned key, unsigned velocity);
++#if X0X_S1_KEYBOARD_HOLD
++void s1_part_key_on(s1_dry_part *, unsigned key, unsigned velocity);
++#endif
++#if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
++int s1_part_bend_ranges(s1_dry_part *, float min_st, float max_st);
++#endif
+ int s1_part_active(const s1_dry_part *part);
+ /* UI observation: loudest voice's amp envelope, filter envelope, stage (0 attack,
+  * 1 decay/sustain, 3 release) and gate. 0 when silent. */
+--- /dev/null
++++ b/firmware/src/app/sj6_137_host_witness.h
+@@ -0,0 +1,985 @@
++/* Existing host witness and the explicit read-only native trial. */
++#include "typed_controls_trial.h"
++#if (!defined(X0X_HOST) && !DNBOX_TYPED_CONTROLS_NATIVE_TEST) || !defined(DNBOX_137_HOST_WITNESS)
++#error Typed controls require the host witness or explicit native admission trial
++#endif
++#pragma once
++#include "x0x.h"
++enum { REV137=0x70u, SOUND137=0x584a3656u, STREAM137=16u, NOTE137=2u, NOTE_S1_MOD=3u };
++static inline uint8_t *slot137(sound_t *s,unsigned v) {return s->v[T_303][8+2*v];}
++static inline const uint8_t *read137(const sound_t *s,unsigned v) {return s->v[T_303][8+2*v];}
++#if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
++enum { S1_PB_DN_BYTE=4, S1_PB_UP_BYTE=5, S1_PB_LAST=24, S1_PB_INIT_POS=12 };
++static inline unsigned s1_pb_encode(unsigned pos) {
++ return pos==S1_PB_INIT_POS ? 0u : pos+(pos<S1_PB_INIT_POS);
++}
++static inline unsigned s1_pb_decode(unsigned code) {
++ return code ? code-(code<=S1_PB_INIT_POS) : S1_PB_INIT_POS;
++}
++#endif
++#if defined(X0X_SJ6_BEND_TYPED_PROBE) && X0X_SJ6_BEND_TYPED_PROBE
++enum { SJ6_PB_DN_BYTE=10, SJ6_PB_UP_BYTE=11, SJ6_PB_LIMIT=48 };
++static inline unsigned sj6_pb_encode(unsigned magnitude) { return magnitude==2u ? 0u : magnitude+(magnitude<2u); }
++static inline unsigned sj6_pb_decode(unsigned code) { return code ? code-(code<=2u) : 2u; }
++#endif
++#if defined(X0X_SJ6_MOD_TYPED_PROBE)
++enum { SJ6_MOD_BYTE=14, SJ6_MOD_LAST=5 };
++#endif
++enum { S1_A4_BYTE=6, S1_A4_MAX=60, S1_A4_PARAM=143 };
++static inline unsigned s1_a4_hz(unsigned code) {return code ? 409+code+(code>=31) : 440;}
++static inline unsigned s1_a4_code(unsigned hz) {return hz==440 ? 0 : hz-409-(hz>440);}
++enum {S1_RVFB_BYTE=12, S1_RVFB_LAST=128, S1_RVFB_INIT=64};
++static inline unsigned s1_rvfb_pos(unsigned code){return code?code-(code<=S1_RVFB_INIT):S1_RVFB_INIT;}
++static inline unsigned s1_rvfb_code(unsigned pos){return pos==S1_RVFB_INIT?0u:pos+(pos<S1_RVFB_INIT);}
++enum {S1_CRUSH_BYTE=20,S1_CRUSH_LAST=3,S1_CRUSH_PARAM=58};
++enum {S1_TRANS_BYTE=15,S1_TRANS_LAST=48,S1_TRANS_PARAM=148};
++static inline int s1_trans_st(unsigned code){return code?(int)code-25+(code>=25):0;}
++static inline unsigned s1_trans_code(int st){return st?(unsigned)(st+25-(st>0)):0u;}
++#if X0X_S1_FENCED_CLOCK
++enum { S1_ARP_CLOCK_BYTE=7, S1_ARP_CLOCK_BYTES=3 };
++enum {S1_ARP_CLOCK_RATE_AUTHORED=0x80u};
++static inline unsigned s1_clock_bpm(const uint8_t *p){return p[0];}
++static inline int s1_clock_rate_authored(const uint8_t *p){return p[1]==S1_ARP_CLOCK_RATE_AUTHORED;}
++static inline int s1_clock_valid(const uint8_t *p){
++ unsigned bpm=s1_clock_bpm(p);
++ if(p[1] && !s1_clock_rate_authored(p))return 0;
++ return (bpm>=1&&bpm<=200&&p[2]>=1&&p[2]<=19) || (!bpm&&!p[1]&&!p[2]);
++}
++#endif
++#if (defined(X0X_SJ6_ZERO_GATE_PROBE) && X0X_SJ6_ZERO_GATE_PROBE) || X0X_SJ6_NATIVE_ZERO_GATE
++enum { SJ6_ARP_ZERO_BYTE=13 };
++#endif
++#if (defined(X0X_HOST) && defined(X0X_SJ6_DELAY_WITNESS)) || X0X_SJ6_NATIVE_DELAY
++enum { SJ6_DELAY_BYTE=16, SJ6_DELAY_COUNT=4, SJ6_DELAY_ENABLE_BIT=1, SJ6_DELAY_SYNC_BIT=2 };
++_Static_assert(SJ6_DELAY_BYTE+SJ6_DELAY_COUNT<=NPARAMS_MAX,"single owner row");
++static inline int sj6_delay_bytes_valid(const uint8_t *b) {
++ return b[0]<=3u && b[1]<=127u && b[2]<=127u && b[3]<=127u;
++}
++#endif
++#if X0X_SJ6_LFO1_DELAY_PORT
++enum { SJ6_LFO1_DELAY_BYTE=60, SJ6_LFO1_DELAY_MAX=127 };
++_Static_assert(SJ6_LFO1_DELAY_BYTE>=NPARAMS_MAX && SJ6_LFO1_DELAY_BYTE<2u*NPARAMS_MAX,
++               "Juno LFO delay is an independent second-row byte");
++static inline uint8_t sj6_lfo1_delay_read(const sound_t *sound,unsigned v)
++{
++    return sound->v[T_303][8u+2u*v+SJ6_LFO1_DELAY_BYTE/NPARAMS_MAX][SJ6_LFO1_DELAY_BYTE%NPARAMS_MAX];
++}
++static inline void sj6_lfo1_delay_write(sound_t *sound,unsigned v,uint8_t value)
++{
++    sound->v[T_303][8u+2u*v+SJ6_LFO1_DELAY_BYTE/NPARAMS_MAX][SJ6_LFO1_DELAY_BYTE%NPARAMS_MAX]=value;
++}
++#endif
++enum {S1_PAN_AMOUNT_BYTE=21,S1_PAN_RATE_BYTE=22,S1_PAN_RATE_BYTES=4};
++static inline uint32_t s1_pan_rate_word_bytes(const uint8_t *b){
++ return (uint32_t)b[0]|(uint32_t)b[1]<<8|(uint32_t)b[2]<<16|(uint32_t)b[3]<<24;
++}
++static inline uint32_t s1_pan_rate_word(const uint8_t *r){return s1_pan_rate_word_bytes(r+S1_PAN_RATE_BYTE);}
++static inline float s1_pan_rate_hz(uint32_t bits){
++ float hz;__builtin_memcpy(&hz,&bits,sizeof hz);return hz;
++}
++static inline void s1_pan_rate_put(uint8_t *r,float hz){
++ uint32_t w;__builtin_memcpy(&w,&hz,sizeof w);
++ for(unsigned i=0;i<S1_PAN_RATE_BYTES;i++)r[S1_PAN_RATE_BYTE+i]=(uint8_t)(w>>(8u*i));
++}
++static inline int s1_pan_rate_valid(uint32_t w){
++ const float hz=s1_pan_rate_hz(w);
++ return w==0 || (hz>=1.f/1920.f && hz<=10.f);
++}
++enum {S1_FB_BYTE=30,S1_FB_LAST=128};
++#if X0X_SJ6_CLASSIC_I_PROBE
++enum { SJ6_CLASSIC_I_BYTE=27, SJ6_CLASSIC_I_COUNT=3, SJ6_CLASSIC_I_DEFAULT=129 };
++static inline int sj6_classic_i_bytes_valid(const uint8_t *b) {
++ return b[0]<=SJ6_CLASSIC_I_DEFAULT && b[1]<=SJ6_CLASSIC_I_DEFAULT && b[2]<=SJ6_CLASSIC_I_DEFAULT;
++}
++#endif
++#if (defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE) || X0X_SJ6_NATIVE_RANDOM2
++enum { SJ6_ARP_RANDOM_BYTE=26 };
++#endif
++#if X0X_SJ6_MONO32_PROBE
++enum {SJ6_VOICE_BYTE=36,SJ6_GLIDE_BYTE=37};
++static inline uint8_t *sj6_voice_payload(sound_t *s,unsigned v){
++ return s->v[T_303][9u+2u*v]+(SJ6_VOICE_BYTE-32u);
++}
++static inline const uint8_t *sj6_voice_read(const sound_t *s,unsigned v){
++ return s->v[T_303][9u+2u*v]+(SJ6_VOICE_BYTE-32u);
++}
++static inline uint8_t sj6_voice_tag(unsigned v,unsigned flags,unsigned glide){
++ return (uint8_t)((flags||glide)?0x80u+(v<<2)+flags:0u);
++}
++static inline int sj6_voice_valid(unsigned v,unsigned code,unsigned glide){
++ return glide<=127u && code==sj6_voice_tag(v,code&3u,glide);
++}
++#endif
++#if X0X_S1_DELAY_TRACK_TEST
++enum { S1_DICT_BYTE=39, S1_DICT_MAX=50, S1_DICT_INIT=25, S1_DICT_PARAM=137 };
++_Static_assert(S1_DICT_BYTE>=NPARAMS_MAX && S1_DICT_BYTE<2u*NPARAMS_MAX,"S1 Delay tracking belongs in second owner row");
++static inline unsigned s1_dict_encode(unsigned pos)
++{ return pos==S1_DICT_INIT ? 0u : pos+(pos<S1_DICT_INIT); }
++static inline unsigned s1_dict_decode(unsigned code)
++{ return code ? code-(code<=S1_DICT_INIT) : S1_DICT_INIT; }
++static inline unsigned s1_dict_read(const sound_t *s,unsigned owner)
++{ return s->v[T_303][8+2u*owner+S1_DICT_BYTE/NPARAMS_MAX][S1_DICT_BYTE%NPARAMS_MAX]; }
++static inline void s1_dict_store(sound_t *s,unsigned owner,unsigned code)
++{ s->v[T_303][8+2u*owner+S1_DICT_BYTE/NPARAMS_MAX][S1_DICT_BYTE%NPARAMS_MAX]=(uint8_t)code; }
++#endif
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++enum { S1_CWG_BYTE=46, S1_CWG_MAX=127, S1_CWG_INIT=50, S1_CWG_PARAM=136 };
++_Static_assert(S1_CWG_BYTE>=NPARAMS_MAX && S1_CWG_BYTE<2u*NPARAMS_MAX,"S1 Wet Makeup belongs in second owner row");
++static inline unsigned s1_cwg_encode(unsigned pos)
++{ return pos==S1_CWG_INIT ? 0u : pos+(pos<S1_CWG_INIT); }
++static inline unsigned s1_cwg_decode(unsigned code)
++{ return code ? code-(code<=S1_CWG_INIT) : S1_CWG_INIT; }
++static inline unsigned s1_cwg_read(const sound_t *s,unsigned owner)
++{ return s->v[T_303][8+2u*owner+S1_CWG_BYTE/NPARAMS_MAX][S1_CWG_BYTE%NPARAMS_MAX]; }
++static inline void s1_cwg_store(sound_t *s,unsigned owner,unsigned code)
++{ s->v[T_303][8+2u*owner+S1_CWG_BYTE/NPARAMS_MAX][S1_CWG_BYTE%NPARAMS_MAX]=(uint8_t)code; }
++#endif
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++#include "s1_native_phaser.h"
++#endif
++#if X0X_S1_DELAY_TIME_NATIVE
++enum { S1_DELAY_TIME_BYTE=45, S1_DELAY_TIME_MAX=143 };
++_Static_assert(S1_DELAY_TIME_BYTE>=NPARAMS_MAX && S1_DELAY_TIME_BYTE<2u*NPARAMS_MAX,
++               "S1 delay time belongs in the second typed owner row");
++static inline uint8_t *s1_delay_time_slot(sound_t *s,unsigned v)
++{ return &s->v[T_303][8+2u*v+S1_DELAY_TIME_BYTE/NPARAMS_MAX][S1_DELAY_TIME_BYTE%NPARAMS_MAX]; }
++static inline const uint8_t *s1_delay_time_code(const sound_t *s,unsigned v)
++{ return &s->v[T_303][8+2u*v+S1_DELAY_TIME_BYTE/NPARAMS_MAX][S1_DELAY_TIME_BYTE%NPARAMS_MAX]; }
++#endif
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++/* Original oscBandlimitEnable (146), shared by the two morph oscillators.
++ * b57 is an owner-local binary value, with zero equal to original Init. */
++enum { S1_AA_BYTE=57, S1_AA_PARAM=146 };
++_Static_assert(S1_AA_BYTE>=NPARAMS_MAX && S1_AA_BYTE<2u*NPARAMS_MAX,
++               "Synth One anti-alias belongs in its second owner row");
++static inline unsigned s1_aa_read(const sound_t *s,unsigned owner)
++{ return s->v[T_303][8u+2u*owner+S1_AA_BYTE/NPARAMS_MAX][S1_AA_BYTE%NPARAMS_MAX]; }
++static inline void s1_aa_store(sound_t *s,unsigned owner,unsigned value)
++{ s->v[T_303][8u+2u*owner+S1_AA_BYTE/NPARAMS_MAX][S1_AA_BYTE%NPARAMS_MAX]=(uint8_t)value; }
++#endif
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++/* T_MST's actual DSP consumes only voice 0 (engine_nvoices). The untouched
++ * project rows 1 and 2 carry the two Synth One compressor edit payloads;
++ * no serialized size, map, revision, master bus pot or peer changes. */
++#if X0X_S1_SCALE_NATIVE
++#include "../dsp/s1c/s1c_scales.h"
++enum { S1_SCALE_ROW=5,S1_SCALE_BYTE=11 };
++_Static_assert(S1_SCALE_ROW+NBASS<=NVOICES_MAX && S1_SCALE_BYTE<NPARAMS_MAX,"Synth One scale carrier");
++#if X0X_S1_USER_SCALE
++/* T_FX owner 0, T_BRK owner 1: rows 2..11; neither engine reads them.
++ * Four more rows at T_MIX 6..9, after the SMC CUT sidecar row 5.
++ * Alias region is inside serialized Sound, never a writable flash map. */
++enum { S1_USER_ROW=2,S1_USER_HEAD=(NVOICES_MAX-S1_USER_ROW)*NPARAMS_MAX,
++       S1_USER_MIX=6,S1_USER_TAIL=S1C_USER_BYTES-S1_USER_HEAD,
++       S1_USER_COUNT=13,S1_USER_ID=14 };
++_Static_assert(NVOICES_MAX==12 && NPARAMS_MAX==32 && NPARTS==5 &&
++    S1_USER_HEAD==320 && S1_USER_TAIL==64 && S1_USER_MIX+2*NBASS<=NVOICES_MAX &&
++    S1_USER_ID+S1C_USER_NAME<=NPARAMS_MAX,"User tuning uses exact unused Sound rows");
++static inline unsigned s1_user_head_target(unsigned v){return v?T_BRK:T_FX;}
++static inline unsigned s1_user_tail_row(unsigned v){return S1_USER_MIX+2u*v;}
++static inline unsigned s1_user_npo(const sound_t*s,unsigned v){return s->v[T_MST][S1_SCALE_ROW+v][S1_USER_COUNT];}
++static int s1_user_valid(const sound_t *s,unsigned v)
++{
++    const uint8_t *m=s->v[T_MST][S1_SCALE_ROW+v];
++    const uint8_t *head=(const uint8_t *)&s->v[s1_user_head_target(v)]+S1_USER_ROW*NPARAMS_MAX;
++    const uint8_t *tail=(const uint8_t *)&s->v[T_MIX]+s1_user_tail_row(v)*NPARAMS_MAX;
++    unsigned count=m[S1_USER_COUNT];
++    if(count>S1C_USER_NOTES || (m[S1_SCALE_BYTE]==S1C_SCALE_USER && !count))return 0;
++    for(unsigned i=0;i<S1C_USER_NAME;i++){
++        unsigned c=m[S1_USER_ID+i];
++        if(c && (c<32u || c>126u))return 0;
++    }
++    unsigned prev=0,code=0;
++    for(unsigned i=0;i<3u*count;i++){
++        unsigned c=i<S1_USER_HEAD?head[i]:tail[i-S1_USER_HEAD];
++        code|=c<<(8u*(i%3u));
++        if(i%3u==2u){if(code>=0x800000u || (i>2u && code<prev))return 0;prev=code;code=0;}
++    }
++    return 1;
++}
++#endif
++#endif
++#if X0X_S1_HALFTIME
++enum { S1_HALF_ROW=5,S1_HALF_BYTE=12,S1_HALF_PARAM=144,S1_HALF_DEFAULT=13 };
++static inline unsigned s1_half_code(const sound_t *s,unsigned v)
++{ return s->v[T_MST][S1_HALF_ROW+v][S1_HALF_BYTE]; }
++#endif
++enum { S1_CMP_ROW=1, S1_CMP_FIRST=122, S1_CMP_COUNT=14 };
++_Static_assert(S1_CMP_ROW+NBASS<=NVOICES_MAX && S1_CMP_COUNT<=NPARAMS_MAX,
++               "Synth One compressor rows fit the existing sound extent");
++static inline const uint8_t *s1_cmp_read(const sound_t *s,unsigned owner)
++{ return s->v[T_MST][S1_CMP_ROW+owner]; }
++static inline uint8_t *s1_cmp_write(sound_t *s,unsigned owner)
++{ return s->v[T_MST][S1_CMP_ROW+owner]; }
++static inline unsigned s1_cmp_init(unsigned k)
++{
++    static const uint8_t pos[S1_CMP_COUNT]={127,80,80,108,109,110,25,25,25,38,57,38,54,50};
++    return pos[k];
++}
++static inline unsigned s1_cmp_decode(unsigned k,unsigned code)
++{
++    unsigned init=s1_cmp_init(k);
++    return code ? code-(code<=init) : init;
++}
++static inline unsigned s1_cmp_encode(unsigned k,unsigned pos)
++{
++    unsigned init=s1_cmp_init(k);
++    return pos==init ? 0u : pos+(pos<init);
++}
++#endif
++#if X0X_SJ6_PITCH_ENV_NATIVE
++enum { SJ6_PITCH_ROW=1, SJ6_PITCH_OFFSET=16, SJ6_PITCH_COUNT=5 };
++_Static_assert(SJ6_PITCH_ROW+NBASS<=NVOICES_MAX && SJ6_PITCH_OFFSET+SJ6_PITCH_COUNT<=NPARAMS_MAX,
++               "Pitch ADSR is isolated in the existing typed extension rows");
++#if X0X_S1_COMP_NATIVE
++_Static_assert(SJ6_PITCH_OFFSET>=S1_CMP_COUNT,"Pitch extension must not overlap S1 compressors");
++#endif
++static inline uint8_t *sj6_pitch_write(sound_t *s,unsigned v)
++{ return &s->v[T_MST][SJ6_PITCH_ROW+v][SJ6_PITCH_OFFSET]; }
++static inline const uint8_t *sj6_pitch_read(const sound_t *s,unsigned v)
++{ return &s->v[T_MST][SJ6_PITCH_ROW+v][SJ6_PITCH_OFFSET]; }
++static inline int sj6_pitch_init(const sound_t *s,unsigned v)
++{ return s->v[T_303][v][29]==ORIGINAL_SOUND_JUNO && !original_sound_sj6_factory(s->v[T_303][v]); }
++static inline unsigned sj6_pitch_max(unsigned k) { return k==4u ? 60u : 127u; }
++static inline unsigned sj6_pitch_default(unsigned k) { return k==2u || k==4u ? 0u : 64u; }
++static inline unsigned sj6_pitch_encode(unsigned k,unsigned pos) {
++    unsigned d=sj6_pitch_default(k); return pos==d ? 0u : pos+(pos<d);
++}
++static inline unsigned sj6_pitch_decode(unsigned k,unsigned code) {
++    unsigned d=sj6_pitch_default(k); return code ? code-(code<=d) : d;
++}
++#endif
++#if X0X_SJ6_AUX_LFO_NATIVE
++enum { SJ6_AUX_ROW=3,SJ6_AUX_BYTES=
++#if X0X_SJ6_LFO_TRIGGER_NATIVE
++    16
++#else
++    13
++#endif
++};
++
++_Static_assert(SJ6_AUX_ROW+NBASS<=NVOICES_MAX && SJ6_AUX_BYTES<=NPARAMS_MAX,"Aux LFO rows");
++static inline const uint8_t *sj6_aux_read(const sound_t *s,unsigned v)
++{ return &s->v[T_MST][SJ6_AUX_ROW+v][0]; }
++static inline uint8_t *sj6_aux_write(sound_t *s,unsigned v)
++{ return &s->v[T_MST][SJ6_AUX_ROW+v][0]; }
++static inline int sj6_aux_init(const sound_t *s,unsigned v)
++{ return s->v[T_303][v][29]==ORIGINAL_SOUND_JUNO && !original_sound_sj6_factory(s->v[T_303][v]); }
++#include "../dsp/juno6_aux_catalog.h"
++int juno6_aux_destination_supported(unsigned);
++enum { SJ6_AUX_LFO1_ROW=5,SJ6_AUX_LFO1_OFF=20,SJ6_AUX_LFO1_NONE=7 };
++static inline const uint8_t *sj6_aux_lfo1_read(const sound_t *s,unsigned v)
++{ return &s->v[T_MST][SJ6_AUX_LFO1_ROW+v][SJ6_AUX_LFO1_OFF]; }
++static inline int sj6_aux_lfo1_valid(const uint8_t *p)
++{ return !p[1] && !p[3] && p[2]<=127u && (p[0] || !p[2]) &&
++         (p[0]==SJ6_AUX_LFO1_NONE || juno6_aux_destination_supported(p[0])); }
++static inline unsigned sj6_aux_max(unsigned k) {
++ return k<2u?1u:k==3u?4u:k>=5u&&k<9u?SJ6_AUX_ORIGINAL_LAST:127u;
++}
++static inline int sj6_aux_valid(unsigned k,unsigned value)
++{
++#if X0X_SJ6_LFO_TRIGGER_NATIVE
++ if(k>=13u)return value<=(k<16u?3u:1u);
++#endif
++ if(k>=5u && k<9u)return juno6_aux_destination_supported(value);
++ return value<=(k<2u?2u:sj6_aux_max(k));
++}
++#endif
++static inline int s1_typed_init_cell(const uint8_t *b);
++#if X0X_SJ6_VCF_PORT
++enum { SJ6_VCF_BYTE=47 };
++_Static_assert(SJ6_VCF_BYTE>=NPARAMS_MAX && SJ6_VCF_BYTE<2u*NPARAMS_MAX,
++               "VCF amount belongs in the existing second owner row");
++static inline const uint8_t *sj6_vcf_code(const sound_t *s,unsigned v)
++{
++    return &s->v[T_303][8+2u*v+SJ6_VCF_BYTE/NPARAMS_MAX][SJ6_VCF_BYTE%NPARAMS_MAX];
++}
++static inline int sj6_vcf_init(const sound_t *s,unsigned v)
++{
++    return s->v[T_303][v][29]==ORIGINAL_SOUND_JUNO &&
++           !original_sound_sj6_factory(s->v[T_303][v]);
++}
++#endif
++#if X0X_SJ6_NATIVE_UNISON
++enum { SJ6_UNISON_BYTE=53, SJ6_UNISON_COUNT=4 };
++_Static_assert(SJ6_UNISON_BYTE>=NPARAMS_MAX && SJ6_UNISON_BYTE+4u<=2u*NPARAMS_MAX,
++               "Unison fits the existing second owner row");
++static inline const uint8_t *sj6_unison_code(const sound_t *s,unsigned v)
++{
++ return &s->v[T_303][8u+2u*v+SJ6_UNISON_BYTE/NPARAMS_MAX][SJ6_UNISON_BYTE%NPARAMS_MAX];
++}
++static inline uint8_t *sj6_unison_payload(sound_t *s,unsigned v)
++{
++ return &s->v[T_303][8u+2u*v+SJ6_UNISON_BYTE/NPARAMS_MAX][SJ6_UNISON_BYTE%NPARAMS_MAX];
++}
++static inline int sj6_unison_owner(const sound_t *s,unsigned v)
++{
++ return s && s->v[T_303][v][29]==ORIGINAL_SOUND_JUNO &&
++        !original_sound_sj6_factory(s->v[T_303][v]);
++}
++#endif
++#if X0X_SJ6_VCF_PORT
++enum { SJ6_KEY_TRACK_BYTE=61, SJ6_ENV_STRENGTH_BYTE=63 };
++static inline const uint8_t *sj6_filter_code(const sound_t *s,unsigned owner,unsigned k)
++{
++    unsigned i=k?SJ6_ENV_STRENGTH_BYTE:SJ6_KEY_TRACK_BYTE;
++    return &s->v[T_303][8u+2u*owner+i/NPARAMS_MAX][i%NPARAMS_MAX];
++}
++#endif
++#if X0X_SJ6_NATIVE_ROOM
++#include "../dsp/sj6_native_room.h"
++enum { SJ6_ROOM_ROW=1, SJ6_ROOM_BYTE=21 };
++_Static_assert(SJ6_ROOM_ROW+NBASS<=NVOICES_MAX && SJ6_ROOM_BYTE+SJ6_ROOM_COUNT<=NPARAMS_MAX,
++               "SuperJ6 room fits reserved owner row offsets 21 through 28");
++static inline const uint8_t *sj6_room_read(const sound_t *s,unsigned owner)
++{ return s->v[T_MST][SJ6_ROOM_ROW+owner]+SJ6_ROOM_BYTE; }
++static inline uint8_t *sj6_room_write(sound_t *s,unsigned owner)
++{ return s->v[T_MST][SJ6_ROOM_ROW+owner]+SJ6_ROOM_BYTE; }
++static inline unsigned sj6_room_max(unsigned slot)
++{ return slot==SJ6_ROOM_ENABLE || slot==SJ6_ROOM_TYPE || slot==SJ6_ROOM_WIDEN ? 1u : 127u; }
++#endif
++#if X0X_SJ6_NATIVE_J60
++enum { SJ6_J60_ROW=3,SJ6_J60_OFFSET=16,SJ6_J60_COUNT=4 };
++enum { SJ6_J60_VERSION_ID=208, SJ6_J60_RATE_ID=215, SJ6_J60_DEPTH_ID=216, SJ6_J60_MIX_ID=217 };
++_Static_assert(SJ6_J60_ROW+NBASS <= NVOICES_MAX && SJ6_J60_OFFSET+SJ6_J60_COUNT <= NPARAMS_MAX,
++               "J60 project fields fit their disjoint typed master row");
++static inline const uint8_t *sj6_j60_code(const sound_t *s,unsigned v)
++{ return &s->v[T_MST][SJ6_J60_ROW+v][SJ6_J60_OFFSET]; }
++static inline uint8_t *sj6_j60_payload(sound_t *s,unsigned v)
++{ return &s->v[T_MST][SJ6_J60_ROW+v][SJ6_J60_OFFSET]; }
++static inline int sj6_j60_owner(const sound_t *s,unsigned v)
++{
++ return s && s->v[T_303][v][29]==ORIGINAL_SOUND_JUNO &&
++        !original_sound_sj6_factory(s->v[T_303][v]);
++}
++static inline int sj6_j60_valid(const uint8_t *b)
++{ return b[0]<=1u&&b[1]<=128u&&b[2]<=128u&&b[3]<=128u; }
++#endif
++#if X0X_SJ6_NATIVE_ROOM
++enum { SJ6_CRUSH_ROW=3, SJ6_CRUSH_BYTE=24, SJ6_CRUSH_ID=107, SJ6_CRUSH_AMOUNT_ID=108 };
++_Static_assert(SJ6_CRUSH_ROW+NBASS<=NVOICES_MAX && SJ6_CRUSH_BYTE+2u<=NPARAMS_MAX,
++               "SuperJ6 Crush uses the designated owner bytes");
++static inline const uint8_t *sj6_crush_code(const sound_t *s,unsigned owner)
++{ return &s->v[T_MST][SJ6_CRUSH_ROW+owner][SJ6_CRUSH_BYTE]; }
++static inline uint8_t *sj6_crush_write(sound_t *s,unsigned owner)
++{ return &s->v[T_MST][SJ6_CRUSH_ROW+owner][SJ6_CRUSH_BYTE]; }
++#endif
++#if X0X_SJ6_NOISE_SUB_NATIVE
++enum { SJ6_SOURCES_ROW=1, SJ6_SOURCES_OFFSET=29, SJ6_SOURCES_COUNT=2 };
++_Static_assert(SJ6_SOURCES_ROW+NBASS<=NVOICES_MAX && SJ6_SOURCES_OFFSET+SJ6_SOURCES_COUNT<=NPARAMS_MAX,
++               "Juno independent source levels fit the typed owner row");
++static inline const uint8_t *sj6_sources_read(const sound_t *s,unsigned owner)
++{ return s->v[T_MST][SJ6_SOURCES_ROW+owner]+SJ6_SOURCES_OFFSET; }
++static inline uint8_t *sj6_sources_write(sound_t *s,unsigned owner)
++{ return s->v[T_MST][SJ6_SOURCES_ROW+owner]+SJ6_SOURCES_OFFSET; }
++#endif
++#if X0X_SJ6_OTA_NATIVE
++enum { SJ6_OTA_ROW=3, SJ6_OTA_BYTE=21 };
++_Static_assert(SJ6_OTA_ROW+NBASS<=NVOICES_MAX && SJ6_OTA_BYTE<NPARAMS_MAX,
++               "SuperJ6 OTA occupies reserved owner row offset 21");
++static inline unsigned sj6_ota_read(const sound_t *s,unsigned owner)
++{ return s->v[T_MST][SJ6_OTA_ROW+owner][SJ6_OTA_BYTE]; }
++static inline void sj6_ota_write(sound_t *s,unsigned owner,unsigned value)
++{ s->v[T_MST][SJ6_OTA_ROW+owner][SJ6_OTA_BYTE]=(uint8_t)value; }
++#endif
++#if X0X_SJ6_NATIVE_LIMITER
++#include "../dsp/sj6_native_limiter.h"
++enum { SJ6_LIM_ROW=5, SJ6_LIM_BYTE=0, SJ6_RAGE_BYTE=26,
++       SJ6_RAGE_SLOT=SJ6_LIM_COUNT };
++#if X0X_SJ6_VINTAGE_NATIVE
++enum { SJ6_VINTAGE_BYTE=27, SJ6_VINTAGE_SLOT=SJ6_RAGE_SLOT+1 };
++#define SJ6_FX_MOTION_LAST SJ6_VINTAGE_SLOT
++static inline unsigned sj6_vintage_read(const sound_t *s,unsigned owner)
++{ return s->v[T_MST][SJ6_LIM_ROW+owner][SJ6_VINTAGE_BYTE]; }
++static inline void sj6_vintage_write(sound_t *s,unsigned owner,unsigned code)
++{ s->v[T_MST][SJ6_LIM_ROW+owner][SJ6_VINTAGE_BYTE]=(uint8_t)code; }
++#else
++#define SJ6_FX_MOTION_LAST SJ6_RAGE_SLOT
++#endif
++/* 0 preserves an untouched carrier; 1..128 encode an authored value. */
++static inline unsigned sj6_rage_read(const sound_t *s,unsigned owner)
++{ return s->v[T_MST][SJ6_LIM_ROW+owner][SJ6_RAGE_BYTE]; }
++static inline void sj6_rage_write(sound_t *s,unsigned owner,unsigned code)
++{ s->v[T_MST][SJ6_LIM_ROW+owner][SJ6_RAGE_BYTE]=(uint8_t)code; }
++_Static_assert(SJ6_LIM_ROW+NBASS<=NVOICES_MAX && SJ6_LIM_BYTE+SJ6_LIM_COUNT<=NPARAMS_MAX,
++               "The two SuperJ6 limiter payloads occupy unused master owner rows");
++static inline const uint8_t *sj6_limiter_read(const sound_t *s,unsigned owner)
++{ return s->v[T_MST][SJ6_LIM_ROW+owner]+SJ6_LIM_BYTE; }
++static inline uint8_t *sj6_limiter_write(sound_t *s,unsigned owner)
++{ return s->v[T_MST][SJ6_LIM_ROW+owner]+SJ6_LIM_BYTE; }
++#endif
++#if X0X_SJ6_NATIVE_CLASSIC
++#if !X0X_SJ6_NATIVE_J60
++#error "Native Classic Chorus requires the shared Chorus Version page"
++#endif
++enum { SJ6_CLASSIC_ROW=5, SJ6_CLASSIC_OFFSET=4,SJ6_CLASSIC_COUNT=3 };
++enum { SJ6_CLASSIC_RATE_ID=42,SJ6_CLASSIC_DEPTH_ID=43,SJ6_CLASSIC_MIX_ID=44 };
++_Static_assert(SJ6_CLASSIC_ROW+NBASS<=NVOICES_MAX && SJ6_CLASSIC_OFFSET+3u<=NPARAMS_MAX,
++               "Classic Chorus payload is independent of all J60 and limiter bytes");
++static inline const uint8_t *sj6_classic_native_code(const sound_t *s,unsigned v)
++{ return &s->v[T_MST][SJ6_CLASSIC_ROW+v][SJ6_CLASSIC_OFFSET]; }
++static inline uint8_t *sj6_classic_native_payload(sound_t *s,unsigned v)
++{ return &s->v[T_MST][SJ6_CLASSIC_ROW+v][SJ6_CLASSIC_OFFSET]; }
++static inline int sj6_classic_native_valid(const uint8_t *p)
++{ return p[0]<=128u && p[1]<=128u && p[2]<=128u; }
++#endif
++#if X0X_SJ6_SEQ_SETTINGS_NATIVE
++enum { SJ6_SEQ_SETTINGS_ROW=3, SJ6_SEQ_SETTINGS_OFFSET=28, SJ6_SEQ_SETTINGS_COUNT=2  };
++_Static_assert(SJ6_SEQ_SETTINGS_ROW+NBASS<=NVOICES_MAX &&
++               SJ6_SEQ_SETTINGS_OFFSET+SJ6_SEQ_SETTINGS_COUNT<=NPARAMS_MAX,
++               "independent typed settings rows");
++static inline int sj6_seq_settings_valid(const uint8_t *p)
++{
++    return p[0]<=1u && p[1]<=1u;
++}
++#if X0X_SJ6_SEQ_DEST_NATIVE
++enum { SJ6_DEST_ROW=5,SJ6_DEST_BYTE=28 };
++_Static_assert(SJ6_DEST_ROW+NBASS<=NVOICES_MAX && SJ6_DEST_BYTE<NPARAMS_MAX,
++               "Separate route bytes do not conflict with Snapback");
++static inline unsigned sj6_dest_read(const sound_t *s,unsigned v)
++{ return s->v[T_MST][SJ6_DEST_ROW+v][SJ6_DEST_BYTE]; }
++static inline uint8_t *sj6_dest_write(sound_t *s,unsigned v)
++{ return &s->v[T_MST][SJ6_DEST_ROW+v][SJ6_DEST_BYTE]; }
++#endif
++static inline const uint8_t *sj6_seq_settings_read(const sound_t *s,unsigned v)
++{ return s->v[T_MST][SJ6_SEQ_SETTINGS_ROW+v]+SJ6_SEQ_SETTINGS_OFFSET; }
++static inline uint8_t *sj6_seq_settings_write(sound_t *s,unsigned v)
++{ return s->v[T_MST][SJ6_SEQ_SETTINGS_ROW+v]+SJ6_SEQ_SETTINGS_OFFSET; }
++#endif
++#if X0X_SJ6_LFO1_WAVE_NATIVE
++enum { SJ6_LFO1_WAVE_ROW=5, SJ6_LFO1_WAVE_OFFSET=7 };
++static inline unsigned sj6_lfo1_wave_read(const sound_t *s,unsigned owner)
++{ return s->v[T_MST][SJ6_LFO1_WAVE_ROW+owner][SJ6_LFO1_WAVE_OFFSET]; }
++static inline void sj6_lfo1_wave_write(sound_t *s,unsigned owner,unsigned code)
++{ s->v[T_MST][SJ6_LFO1_WAVE_ROW+owner][SJ6_LFO1_WAVE_OFFSET]=(uint8_t)code; }
++static inline unsigned sj6_lfo1_option(const sound_t *s,unsigned owner,unsigned k)
++{ return s->v[T_MST][SJ6_LFO1_WAVE_ROW+owner][SJ6_LFO1_WAVE_OFFSET+1u+k]; }
++static inline void sj6_lfo1_option_store(sound_t *s,unsigned owner,unsigned k,unsigned p)
++{ s->v[T_MST][SJ6_LFO1_WAVE_ROW+owner][SJ6_LFO1_WAVE_OFFSET+1u+k]=(uint8_t)p; }
++static inline int sj6_lfo1_wave_allowed(const uint8_t *owner)
++{ return owner[29]==ORIGINAL_SOUND_JUNO && !original_sound_sj6_factory(owner); }
++#endif
++#if X0X_SJ6_ALT3_NATIVE
++enum { SJ6_TREM_ROW=5, SJ6_TREM_OFFSET=24, SJ6_TREM_DEPTH=120, SJ6_TREM_RATE=121,
++       SJ6_TREM_DEPTH_ID=103, SJ6_TREM_RATE_ID=104 };
++_Static_assert(SJ6_TREM_ROW+NBASS<=NVOICES_MAX && SJ6_TREM_OFFSET+2u<=NPARAMS_MAX,
++               "SuperJ6 Tremolo is an independent owner effect");
++static inline const uint8_t *sj6_trem_read(const sound_t *s,unsigned v)
++{ return &s->v[T_MST][SJ6_TREM_ROW+v][SJ6_TREM_OFFSET]; }
++static inline uint8_t *sj6_trem_write(sound_t *s,unsigned v)
++{ return &s->v[T_MST][SJ6_TREM_ROW+v][SJ6_TREM_OFFSET]; }
++static inline unsigned sj6_trem_position(const uint8_t *p,unsigned k)
++{ return k ? p[1] ? p[1]-1u : 64u : p[0]; }
++#endif
++#if X0X_SJ6_VELOCITY_SETTINGS
++/* Zero encodes original Init (linear input, Fixed off). */
++enum { SJ6_INPUT_VEL_ROW=5, SJ6_INPUT_VEL_BYTE=29, SJ6_INPUT_VEL_MAX=5 };
++static inline unsigned sj6_input_vel(const sound_t *s,unsigned v)
++{ return s->v[T_MST][SJ6_INPUT_VEL_ROW+v][SJ6_INPUT_VEL_BYTE]; }
++static inline void sj6_input_vel_write(sound_t *s,unsigned v,unsigned code)
++{ s->v[T_MST][SJ6_INPUT_VEL_ROW+v][SJ6_INPUT_VEL_BYTE]=(uint8_t)code; }
++#endif
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST && !defined(CANONICAL137_IMPL)
++int canonical137(const sound_t *s);
++#else
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++int canonical137(const sound_t *s) {
++#else
++static inline int canonical137(const sound_t *s) {
++#endif
++ for (unsigned v=0;v<2;++v) {
++  const uint8_t *cell=s->v[T_303][v];
++  const int j6_init=cell[29]==ORIGINAL_SOUND_JUNO && !original_sound_sj6_factory(cell);
++  const int s1_init=s1_typed_init_cell(cell);
++  (void)j6_init;(void)s1_init;
++
++  const uint8_t *b=read137(s,v);
++#if X0X_SJ6_VELOCITY_SETTINGS
++#if !DNBOX_TYPED_CONTROLS_NATIVE_TEST
++  const unsigned input_vel=sj6_input_vel(s,v);
++  if(input_vel>SJ6_INPUT_VEL_MAX || (input_vel && !j6_init))return 0;
++#endif
++#endif
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++  /* Fixed J6-only T_MST fields. A zero entry skips a field owned by S1,
++   * a reserved byte, or a dynamic validator below. */
++  static const uint8_t j6_master[3][32]={
++   {
++#if X0X_SJ6_PITCH_ENV_NATIVE
++    [SJ6_PITCH_OFFSET ... SJ6_PITCH_OFFSET+3]=127,[SJ6_PITCH_OFFSET+4]=60,
++#endif
++#if X0X_SJ6_NATIVE_ROOM
++    [SJ6_ROOM_BYTE+SJ6_ROOM_ENABLE]=1,[SJ6_ROOM_BYTE+SJ6_ROOM_TYPE]=1,
++    [SJ6_ROOM_BYTE+SJ6_ROOM_SIZE]=127,[SJ6_ROOM_BYTE+SJ6_ROOM_LOCUT]=127,
++    [SJ6_ROOM_BYTE+SJ6_ROOM_MIX]=127,[SJ6_ROOM_BYTE+SJ6_ROOM_WIDEN]=1,
++    [SJ6_ROOM_BYTE+SJ6_ROOM_RATE]=127,[SJ6_ROOM_BYTE+SJ6_ROOM_DEPTH]=127,
++#endif
++#if X0X_SJ6_NOISE_SUB_NATIVE
++    [SJ6_SOURCES_OFFSET]=127,[SJ6_SOURCES_OFFSET+1]=127,
++#endif
++   },{
++#if X0X_SJ6_NATIVE_J60
++    [SJ6_J60_OFFSET]=1,[SJ6_J60_OFFSET+1 ... SJ6_J60_OFFSET+3]=128,
++#endif
++#if X0X_SJ6_OTA_NATIVE
++    [SJ6_OTA_BYTE]=1,
++#endif
++#if X0X_SJ6_NATIVE_ROOM
++    [SJ6_CRUSH_BYTE]=1,[SJ6_CRUSH_BYTE+1]=127,
++#endif
++#if X0X_SJ6_SEQ_SETTINGS_NATIVE
++    [SJ6_SEQ_SETTINGS_OFFSET]=1,[SJ6_SEQ_SETTINGS_OFFSET+1]=1,
++#endif
++   },{
++#if X0X_SJ6_NATIVE_LIMITER
++    [SJ6_LIM_BYTE ... SJ6_LIM_BYTE+SJ6_LIM_COUNT-1]=128,[SJ6_RAGE_BYTE]=128,
++#if X0X_SJ6_VINTAGE_NATIVE
++    [SJ6_VINTAGE_BYTE]=127,
++#endif
++#endif
++#if X0X_SJ6_NATIVE_CLASSIC
++    [SJ6_CLASSIC_OFFSET ... SJ6_CLASSIC_OFFSET+SJ6_CLASSIC_COUNT-1]=128,
++#endif
++#if X0X_SJ6_LFO1_WAVE_NATIVE
++    [SJ6_LFO1_WAVE_OFFSET]=SJ6_LFO1_WAVE_MAX,
++    [SJ6_LFO1_WAVE_OFFSET+1]=1,[SJ6_LFO1_WAVE_OFFSET+2]=1,
++#endif
++#if X0X_SJ6_ALT3_NATIVE
++    [SJ6_TREM_OFFSET]=127,[SJ6_TREM_OFFSET+1]=128,
++#endif
++#if X0X_SJ6_SEQ_SETTINGS_NATIVE && X0X_SJ6_SEQ_DEST_NATIVE
++    [SJ6_DEST_BYTE]=2,
++#endif
++#if X0X_SJ6_VELOCITY_SETTINGS
++    [SJ6_INPUT_VEL_BYTE]=SJ6_INPUT_VEL_MAX,
++#endif
++   }
++  };
++  for(unsigned row=0;row<3u;row++){
++    const uint8_t *x=s->v[T_MST][1u+v+2u*row], *bound=j6_master[row];
++    for(unsigned k=0;k<32u;k++)
++      if(bound[k] && (x[k]>bound[k] || (x[k] && !j6_init)))return 0;
++  }
++#if X0X_SJ6_AUX_LFO_NATIVE
++  const uint8_t *r1=sj6_aux_lfo1_read(s,v);
++  if(!sj6_aux_lfo1_valid(r1) || ((r1[0]|r1[2])&&!j6_init))return 0;
++  const uint8_t *aux=sj6_aux_read(s,v);
++  for(unsigned k=0;k<SJ6_AUX_BYTES;k++)
++    if(!sj6_aux_valid(k,aux[k]) || (aux[k] && !j6_init))return 0;
++#if X0X_SJ6_LFO_TRIGGER_NATIVE
++  if(aux[30]>1u || aux[31]>1u || ((aux[30]||aux[31]) && !j6_init))return 0;
++#endif
++#endif
++#else
++#if X0X_SJ6_NATIVE_J60
++  const uint8_t *j60=sj6_j60_code(s,v);
++  if(!sj6_j60_valid(j60) ||
++     ((j60[0]|j60[1]|j60[2]|j60[3])&&!j6_init))return 0;
++#endif
++#if X0X_SJ6_NATIVE_CLASSIC
++  const uint8_t *classic=sj6_classic_native_code(s,v);
++  if(!sj6_classic_native_valid(classic) ||
++     ((classic[0]|classic[1]|classic[2])&&!j6_init))return 0;
++#endif
++#if X0X_SJ6_LFO1_WAVE_NATIVE
++  unsigned wave=sj6_lfo1_wave_read(s,v);
++  const unsigned mute=sj6_lfo1_option(s,v,0),snap=sj6_lfo1_option(s,v,1);
++  if(wave>SJ6_LFO1_WAVE_MAX || mute>1u || snap>1u ||
++     ((wave|mute|snap) && !j6_init))return 0;
++#endif
++#if X0X_SJ6_ALT3_NATIVE
++  const uint8_t *trem=sj6_trem_read(s,v);
++  if(trem[0]>127u || trem[1]>128u || ((trem[0]|trem[1]) &&
++     !j6_init))
++      return 0;
++#endif
++#if X0X_SJ6_SEQ_SETTINGS_NATIVE
++  const uint8_t *seqcfg=sj6_seq_settings_read(s,v);
++  if(!sj6_seq_settings_valid(seqcfg) ||
++     ((seqcfg[0]|seqcfg[1]) && !j6_init)) return 0;
++#if X0X_SJ6_SEQ_DEST_NATIVE
++  unsigned dest=sj6_dest_read(s,v);
++  if(dest>2u || (dest && !j6_init))return 0;
++#endif
++#endif
++#if X0X_SJ6_NATIVE_LIMITER
++  const unsigned rage=sj6_rage_read(s,v);
++  if(rage>128u || (rage && !j6_init))return 0;
++#if X0X_SJ6_VINTAGE_NATIVE
++  const unsigned vintage=sj6_vintage_read(s,v);
++  if(vintage>127u || (vintage && !j6_init))return 0;
++#endif
++  for(unsigned k=0;k<SJ6_LIM_COUNT;++k){
++    unsigned c=sj6_limiter_read(s,v)[k];
++    if(c>128u || (c && !j6_init))return 0;
++  }
++#endif
++#if X0X_SJ6_OTA_NATIVE
++  unsigned ota=sj6_ota_read(s,v);
++  if(ota>1u || (ota && !j6_init))return 0;
++#endif
++#if X0X_SJ6_NOISE_SUB_NATIVE
++  const uint8_t *sources=sj6_sources_read(s,v);
++  if(sources[0]>127u || sources[1]>127u ||
++     ((sources[0]|sources[1]) && !j6_init)) return 0;
++#endif
++#if X0X_SJ6_AUX_LFO_NATIVE
++  const uint8_t *r1=sj6_aux_lfo1_read(s,v);
++  if(!sj6_aux_lfo1_valid(r1) || ((r1[0]|r1[2])&&!j6_init))return 0;
++  const uint8_t *aux=sj6_aux_read(s,v);
++  for(unsigned k=0;k<SJ6_AUX_BYTES;k++)
++    if(!sj6_aux_valid(k,aux[k]) || (aux[k] && !j6_init))return 0;
++#if X0X_SJ6_LFO_TRIGGER_NATIVE
++  if(aux[30]>1u || aux[31]>1u || ((aux[30]||aux[31]) && !j6_init))return 0;
++#endif
++#endif
++#if X0X_SJ6_NATIVE_ROOM
++  const uint8_t *crush=sj6_crush_code(s,v);
++  if(crush[0]>1u || crush[1]>127u ||
++     ((crush[0]|crush[1]) && !j6_init))return 0;
++  for(unsigned k=0;k<SJ6_ROOM_COUNT;++k){
++    unsigned code=sj6_room_read(s,v)[k];
++    if(code>sj6_room_max(k) || (code && !j6_init))return 0;
++  }
++#endif
++#if X0X_SJ6_PITCH_ENV_NATIVE
++  const uint8_t *pitch=sj6_pitch_read(s,v);
++  for(unsigned k=0;k<SJ6_PITCH_COUNT;k++)
++    if(pitch[k]>sj6_pitch_max(k) || (pitch[k] && !j6_init))return 0;
++#endif
++#endif
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++#if X0X_S1_SCALE_NATIVE
++  unsigned tuning=s->v[T_MST][S1_SCALE_ROW+v][S1_SCALE_BYTE];
++  if(tuning>S1C_SCALE_MAX || (tuning && !s1_init
++#if X0X_SJ6_SCALE_NATIVE
++       && !j6_init
++#endif
++       ))return 0;
++#if X0X_S1_USER_SCALE
++  if(!s1_user_valid(s,v))return 0;
++#endif
++#endif
++#if X0X_S1_HALFTIME
++  unsigned half=s1_half_code(s,v);
++  if(half>128u || (half && !s1_init))return 0;
++#endif
++  for(unsigned k=0;k<S1_CMP_COUNT;k++){
++   unsigned value=s1_cmp_read(s,v)[k];
++   if(value>127u || (value && !s1_init))return 0;
++  }
++#endif
++#if X0X_SJ6_MONO32_PROBE
++  const uint8_t *voice=sj6_voice_read(s,v);
++  if(!sj6_voice_valid(v,voice[0],voice[1]))return 0;
++#endif
++#if X0X_S1_FENCED_CLOCK
++  if(!s1_clock_valid(b+S1_ARP_CLOCK_BYTE)) return 0;
++#if X0X_S1_CLOCK_NATIVE
++  if(b[S1_ARP_CLOCK_BYTE+2u] &&
++     !s1_init) return 0;
++#endif
++#endif
++#if (defined(X0X_HOST) && defined(X0X_SJ6_DELAY_WITNESS)) || X0X_SJ6_NATIVE_DELAY
++  if(!sj6_delay_bytes_valid(b+SJ6_DELAY_BYTE))return 0;
++#if X0X_SJ6_NATIVE_DELAY
++  if ((b[16] | b[17] | b[18] | b[19]) &&
++      !j6_init) return 0;
++#endif
++#endif
++  if (b[0]!=137 || b[1]!=v || b[2]>127 || b[3]>2) return 0;
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++#if X0X_SJ6_VELOCITY_PORT
++  if(b[2] && !j6_init)return 0;
++#else
++  if (b[2]) return 0; /* SuperJ6 Filter Velocity receiver not in this slice */
++#endif
++#endif
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++  /* Exact wire bounds. A zero bound keeps every reserved byte zero. The
++   * unrestricted groups were already validated independently above. */
++  static const uint8_t maxbyte[64] = {
++#if X0X_S1_BEND_RANGE_PROBE
++    [S1_PB_DN_BYTE]=S1_PB_LAST,[S1_PB_UP_BYTE]=S1_PB_LAST,
++#endif
++    [S1_A4_BYTE]=S1_A4_MAX,[S1_RVFB_BYTE]=S1_RVFB_LAST,
++    [S1_TRANS_BYTE]=S1_TRANS_LAST,
++#if X0X_S1_FENCED_CLOCK
++    [S1_ARP_CLOCK_BYTE ... S1_ARP_CLOCK_BYTE+S1_ARP_CLOCK_BYTES-1]=255,
++#endif
++#if X0X_SJ6_BEND_TYPED_PROBE
++    [SJ6_PB_DN_BYTE]=SJ6_PB_LIMIT,[SJ6_PB_UP_BYTE]=SJ6_PB_LIMIT,
++#endif
++#ifdef X0X_SJ6_MOD_TYPED_PROBE
++    [SJ6_MOD_BYTE]=SJ6_MOD_LAST,
++#endif
++#if X0X_S1_FEEDBACK_PROBE
++    [S1_FB_BYTE]=S1_FB_LAST,
++#endif
++#if X0X_SJ6_LFO1_DELAY_PORT
++    [SJ6_LFO1_DELAY_BYTE]=SJ6_LFO1_DELAY_MAX,
++#endif
++#if X0X_SJ6_NATIVE_ZERO_GATE
++    [SJ6_ARP_ZERO_BYTE]=1,
++#endif
++#if X0X_S1_CRUSH_LFO_PROBE
++    [S1_CRUSH_BYTE]=S1_CRUSH_LAST,
++#endif
++#if X0X_SJ6_NATIVE_DELAY
++    [SJ6_DELAY_BYTE ... SJ6_DELAY_BYTE+SJ6_DELAY_COUNT-1]=255,
++#endif
++#if X0X_S1_AUTOPAN_PROBE
++    [S1_PAN_AMOUNT_BYTE]=127,
++    [S1_PAN_RATE_BYTE ... S1_PAN_RATE_BYTE+S1_PAN_RATE_BYTES-1]=255,
++#endif
++#if X0X_SJ6_NATIVE_RANDOM2
++#if X0X_SJ6_RANDOM5_6_NATIVE
++    [SJ6_ARP_RANDOM_BYTE]=4,
++#else
++    [SJ6_ARP_RANDOM_BYTE]=2,
++#endif
++#endif
++#if X0X_SJ6_MONO32_PROBE
++    [SJ6_VOICE_BYTE]=255,[SJ6_GLIDE_BYTE]=255,
++#endif
++#if X0X_S1_DELAY_TRACK_TEST
++    [S1_DICT_BYTE]=S1_DICT_MAX,
++#endif
++#if X0X_SJ6_VCF_PORT
++    [SJ6_KEY_TRACK_BYTE]=127,[SJ6_ENV_STRENGTH_BYTE]=128,[SJ6_VCF_BYTE]=127,
++#endif
++    [S1_AA_BYTE]=1,[S1_CWG_BYTE]=S1_CWG_MAX,
++    [S1_DELAY_RES_BYTE]=S1_DELAY_RES_MAX,[S1_ENV_LFO_BYTE]=S1_ENV_LFO_MAX,
++    [S1_PHASE_BYTE ... S1_PHASE_BYTE+S1_PHASE_COUNT-1]=S1_PHASE_MAX,
++#if X0X_S1_DELAY_TIME_NATIVE
++    [S1_DELAY_TIME_BYTE]=S1_DELAY_TIME_MAX,
++#endif
++#if X0X_SJ6_NATIVE_UNISON
++    [SJ6_UNISON_BYTE]=1,[SJ6_UNISON_BYTE+1]=128,[SJ6_UNISON_BYTE+2]=127,[SJ6_UNISON_BYTE+3]=5,
++#endif
++  };
++#define OWNER_BIT(i) (UINT64_C(1)<<(i))
++  const uint64_t s1_only =
++#if X0X_S1_FEEDBACK_PROBE
++    OWNER_BIT(S1_FB_BYTE)|
++#endif
++#if X0X_S1_CRUSH_LFO_PROBE
++    OWNER_BIT(S1_CRUSH_BYTE)|
++#endif
++#if X0X_S1_DELAY_TRACK_TEST
++    OWNER_BIT(S1_DICT_BYTE)|
++#endif
++#if X0X_S1_DELAY_TIME_NATIVE
++    OWNER_BIT(S1_DELAY_TIME_BYTE)|
++#endif
++    OWNER_BIT(S1_AA_BYTE)|OWNER_BIT(S1_CWG_BYTE)|OWNER_BIT(S1_DELAY_RES_BYTE)|
++    OWNER_BIT(S1_ENV_LFO_BYTE)|((OWNER_BIT(S1_PHASE_COUNT)-1u)<<S1_PHASE_BYTE);
++  const uint64_t j6_only =
++#if X0X_SJ6_LFO1_DELAY_PORT
++    OWNER_BIT(SJ6_LFO1_DELAY_BYTE)|
++#endif
++#if X0X_SJ6_NATIVE_ZERO_GATE
++    OWNER_BIT(SJ6_ARP_ZERO_BYTE)|
++#endif
++#if X0X_SJ6_NATIVE_RANDOM2
++    OWNER_BIT(SJ6_ARP_RANDOM_BYTE)|
++#endif
++#if X0X_SJ6_VCF_PORT
++    OWNER_BIT(SJ6_KEY_TRACK_BYTE)|OWNER_BIT(SJ6_ENV_STRENGTH_BYTE)|OWNER_BIT(SJ6_VCF_BYTE)|
++#endif
++#if X0X_SJ6_NATIVE_UNISON
++    ((OWNER_BIT(4)-1u)<<SJ6_UNISON_BYTE)|
++#endif
++    0u;
++#undef OWNER_BIT
++  /* The same exact bounds and ownership sets, scanned a real storage row
++   * at a time. No 64-bit per-byte shift/accumulation is needed on PI32. */
++  const uint64_t forbidden=(s1_init?0u:s1_only)|(j6_init?0u:j6_only);
++  for(unsigned row=0;row<2;row++){
++   const uint8_t *x=s->v[T_303][8u+2u*v+row], *limits=maxbyte+32u*row;
++   unsigned bits=row?(uint32_t)(forbidden>>32):(uint32_t)forbidden;
++   unsigned off=row?0u:4u;
++   bits>>=off;
++   for(unsigned i=off;i<32;i++,bits>>=1){
++    unsigned value=x[i];
++    if(value>limits[i] || (value && (bits&1u)))return 0;
++   }
++  }
++#if X0X_SJ6_NATIVE_RANDOM2
++  if(b[SJ6_ARP_RANDOM_BYTE]==1u)return 0;
++#endif
++#if X0X_S1_AUTOPAN_PROBE
++  if(!s1_pan_rate_valid(s1_pan_rate_word(b)))return 0;
++#endif
++#else
++#if defined(X0X_S1_BEND_RANGE_PROBE) && X0X_S1_BEND_RANGE_PROBE
++  if (b[S1_PB_DN_BYTE]>S1_PB_LAST || b[S1_PB_UP_BYTE]>S1_PB_LAST) return 0;
++  for(unsigned i=6;i<64;i++)
++#else
++  for(unsigned i=4;i<64;i++)
++#endif
++  {
++   const uint8_t x=s->v[T_303][8+2*v+i/32][i%32];
++#if defined(X0X_SJ6_BEND_TYPED_PROBE) && X0X_SJ6_BEND_TYPED_PROBE
++   if (i==SJ6_PB_DN_BYTE || i==SJ6_PB_UP_BYTE) {
++     if (x>SJ6_PB_LIMIT) return 0;
++     continue;
++   }
++#endif
++#if defined(X0X_SJ6_MOD_TYPED_PROBE)
++   if(i==SJ6_MOD_BYTE) {if(x>SJ6_MOD_LAST)return 0;continue;}
++#endif
++#if defined(X0X_S1_FEEDBACK_PROBE) && X0X_S1_FEEDBACK_PROBE
++   if(i==S1_FB_BYTE) {
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++    if(x && !s1_init)return 0;
++#endif
++    if(x>S1_FB_LAST)return 0;
++    continue;
++   }
++#endif
++#if X0X_SJ6_LFO1_DELAY_PORT
++   if(i==SJ6_LFO1_DELAY_BYTE) {
++     if(x>SJ6_LFO1_DELAY_MAX || (x && !j6_init)) return 0;
++     continue;
++   }
++#endif
++   if(i==S1_A4_BYTE) {if(x>S1_A4_MAX)return 0;continue;}
++   if(i==S1_RVFB_BYTE) {if(x>S1_RVFB_LAST)return 0;continue;}
++#if X0X_S1_FENCED_CLOCK
++   if(i>=S1_ARP_CLOCK_BYTE&&i<S1_ARP_CLOCK_BYTE+S1_ARP_CLOCK_BYTES)continue;
++#endif
++#if (defined(X0X_SJ6_ZERO_GATE_PROBE) && X0X_SJ6_ZERO_GATE_PROBE) || X0X_SJ6_NATIVE_ZERO_GATE
++   if(i==SJ6_ARP_ZERO_BYTE){
++    if(x>1u)return 0;
++#if X0X_SJ6_NATIVE_ZERO_GATE
++    if(x && !j6_init)return 0;
++#endif
++    continue;
++   }
++#endif
++   if(i==S1_TRANS_BYTE){if(x>S1_TRANS_LAST)return 0;continue;}
++#if defined(X0X_S1_CRUSH_LFO_PROBE) && X0X_S1_CRUSH_LFO_PROBE
++   if(i==S1_CRUSH_BYTE){
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++     if(x && !s1_init)return 0;
++#endif
++     if(x>S1_CRUSH_LAST)return 0;
++     continue;
++   }
++#endif
++#if (defined(X0X_HOST) && defined(X0X_SJ6_DELAY_WITNESS)) || X0X_SJ6_NATIVE_DELAY
++   if(i>=SJ6_DELAY_BYTE && i<SJ6_DELAY_BYTE+SJ6_DELAY_COUNT)continue;
++#endif
++#if defined(X0X_S1_AUTOPAN_PROBE) && X0X_S1_AUTOPAN_PROBE
++   if(i==S1_PAN_AMOUNT_BYTE){if(x>127)return 0;continue;}
++   if(i>=S1_PAN_RATE_BYTE && i<S1_PAN_RATE_BYTE+S1_PAN_RATE_BYTES) {
++      if(i==S1_PAN_RATE_BYTE&&!s1_pan_rate_valid(s1_pan_rate_word(b)))return 0;
++      continue;
++   }
++#endif
++#if X0X_SJ6_CLASSIC_I_PROBE
++   if(i>=SJ6_CLASSIC_I_BYTE && i<SJ6_CLASSIC_I_BYTE+SJ6_CLASSIC_I_COUNT) {
++     if(x>SJ6_CLASSIC_I_DEFAULT)return 0;
++     continue;
++   }
++#endif
++#if (defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE) || X0X_SJ6_NATIVE_RANDOM2
++   if(i==SJ6_ARP_RANDOM_BYTE){
++#if X0X_SJ6_RANDOM5_6_NATIVE
++     if(x==1u || x>4u)return 0;
++#else
++     if(x!=0u && x!=2u)return 0;
++#endif
++#if X0X_SJ6_NATIVE_RANDOM2
++     if(x && !j6_init)return 0;
++#endif
++     continue;
++   }
++#endif
++#if X0X_SJ6_MONO32_PROBE
++   if(i==SJ6_VOICE_BYTE||i==SJ6_GLIDE_BYTE)continue;
++#endif
++#if X0X_S1_DELAY_TRACK_TEST
++   if(i==S1_DICT_BYTE){
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++    if(x && !s1_init)return 0;
++#endif
++    if(x>S1_DICT_MAX)return 0;
++    continue;
++   }
++#endif
++#if X0X_SJ6_VCF_PORT
++   if(i==SJ6_KEY_TRACK_BYTE || i==SJ6_ENV_STRENGTH_BYTE) {
++     const unsigned limit=i==SJ6_KEY_TRACK_BYTE?127u:128u;
++     if(x>limit || (x && !j6_init))return 0;
++     continue;
++   }
++   if(i==SJ6_VCF_BYTE) {
++     if(x>127u || (x && !j6_init))return 0;
++     continue;
++   }
++#endif
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++   if(i==S1_AA_BYTE){
++     if(x>1u || (x && !s1_init))return 0;
++     continue;
++   }
++   if(i==S1_CWG_BYTE){
++     if(x>S1_CWG_MAX || (x && !s1_init))return 0;
++     continue;
++   }
++#endif
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++   if(i==S1_DELAY_RES_BYTE){
++     if(x>S1_DELAY_RES_MAX || (x && !s1_init))return 0;
++     continue;
++   }
++   if(i==S1_ENV_LFO_BYTE){
++     if(x>S1_ENV_LFO_MAX || (x && !s1_init))return 0;
++     continue;
++   }
++   if(i>=S1_PHASE_BYTE && i<S1_PHASE_BYTE+S1_PHASE_COUNT){
++     if(x>S1_PHASE_MAX || (x && !s1_init))return 0;
++     continue;
++   }
++#endif
++#if X0X_S1_DELAY_TIME_NATIVE
++   if(i==S1_DELAY_TIME_BYTE) {
++     if(x>S1_DELAY_TIME_MAX || (x && !s1_init))return 0;
++     continue;
++   }
++#endif
++#if X0X_SJ6_NATIVE_UNISON
++   if(i>=SJ6_UNISON_BYTE && i<SJ6_UNISON_BYTE+4u){
++     static const uint8_t bound[]={1,128,127,5};
++     if(x>bound[i-SJ6_UNISON_BYTE] || (x&&!j6_init))return 0;
++     continue;
++   }
++#endif
++   if (x) return 0;
++  }
++#endif
++ }
++ return 1;
++}
++#endif
++/* Whole-carrier canonical admission occurs at stage validation. Audio only
++   does a constant-size candidate check at the existing owner boundary. */
++static inline int live137(const sound_t *s,unsigned v) {
++ if(s!=&proj.sound || proj.set.snd_rev!=REV137 || v>=NBASS) return 0;
++ const uint8_t *r=read137(s,v);
++ return r[0]==137u && r[1]==v && r[2]<=127u &&
++        s->v[T_303][v][29]==ORIGINAL_SOUND_JUNO &&
++        !original_sound_sj6_factory(s->v[T_303][v]);
++}
++static inline int valid_rev137(unsigned r) {return r==PROJ_SND_REV || r==REV137;}
++
++static inline int s1_typed_init_cell(const uint8_t *b){
++ return b[29]==ORIGINAL_SOUND_SYNTHONE && !original_sound_s1_program(b);
++}
++static inline int live_s1_mod(const sound_t *s,unsigned v) {
++ if(s!=&proj.sound || proj.set.snd_rev!=REV137 || v>=NBASS)return 0;
++ const uint8_t *r=read137(s,v);
++ return r[0]==137u && r[1]==v && r[3]<=2 && s1_typed_init_cell(s->v[T_303][v]);
++}
+--- a/firmware/src/app/superj6_factory.h
++++ b/firmware/src/app/superj6_factory.h
+@@ -7,25 +7,114 @@
+  * Presence distinguishes authored +0/-0 from an absent PWM word. */
+ enum {
+     SJ6_ROW_AMP2 = 0, SJ6_ROW_MASTER = 4, SJ6_ROW_WAVE = 5,
+-    SJ6_ROW_AMOUNT = 7, SJ6_ROW_ENABLE = 9, SJ6_ROW_COUNT = 11
++    SJ6_ROW_AMOUNT = 7, SJ6_ROW_ENABLE = 9, SJ6_ROW_RANGE = 11, SJ6_ROW_FILTER_LINK = 12,
++#if X0X_SUPERJ6_BUILTIN_INIT
++    SJ6_ROW_LFO_RATE = 13, SJ6_ROW_LFO_HZ = 16, SJ6_ROW_VIBRATO = 19, SJ6_ROW_A_REFERENCE = 21, SJ6_ROW_COUNT = 22
++#else
++    SJ6_ROW_COUNT = 13
++#endif
+ };
+ typedef struct {
+     float value[SJ6_ROW_COUNT];
++#if X0X_SUPERJ6_BUILTIN_INIT
++    uint32_t present;
++#else
+     uint16_t present;
++#endif
++    uint8_t chorus_flags;
++#if X0X_SUPERJ6_BUILTIN_INIT
++    uint8_t saga_invalid;
++    uint16_t saga_seen, saga_on;
++    uint8_t semi_authored[2]; /* 0 absent, 1–25 exact physical step + 1, 255 invalid. */
++    uint8_t lfo2_authored; /* 0 absent; 1–5 validated selector+1; 255 invalid */
++#endif
+ } sj6_factory_row;
++
++#if X0X_SUPERJ6_BUILTIN_INIT
++static inline unsigned sj6_factory_semi_word(uint32_t bits)
++{
++    if (bits == UINT32_C(0x80000000)) bits = 0; /* -0 */
++    if (bits > UINT32_C(0x3f800000)) return 255u;
++    /* All u < 1/64 round to -12. Every Float32 from 1/64 to 1 is
++     * represented exactly at Q29. Compute 24u at Q26, no FP64 needed.
++     * For u below 1/2 an exact tie rounds towards the lower integer. */
++    unsigned exponent = bits >> 23;
++    if (exponent < 121u) return 1u;
++    uint32_t scaled = ((UINT32_C(0x00800000) | (bits & UINT32_C(0x007fffff))) <<
++                       (exponent - 121u)) * 3u;
++    return 1u + ((scaled + (1u << 25) - (bits < UINT32_C(0x3f000000))) >> 26);
++}
++#endif
+ 
+ static inline void sj6_factory_add_word(sj6_factory_row *row, unsigned id, uint32_t bits)
+ {
+     unsigned slot;
++#if X0X_SUPERJ6_BUILTIN_INIT
++    if (id == 72u || id == 73u) {
++        uint8_t *value = row->semi_authored + (id - 72u);
++        if (!*value) *value = (uint8_t)sj6_factory_semi_word(bits);
++        return;
++    }
++    if (id == 98u) {
++        if (!row->lfo2_authored) {
++            /* On [0,1], Build-9 widens Float32, multiplies by 4 exactly,
++             * and truncates. Ordering IEEE-754 positive words is equivalent. */
++            if (bits == UINT32_C(0x80000000)) bits = 0; /* -0 */
++            row->lfo2_authored = bits > UINT32_C(0x3f800000) ? 255u :
++                bits == UINT32_C(0x3f800000) ? 5u :
++                bits >= UINT32_C(0x3f400000) ? 4u :
++                bits >= UINT32_C(0x3f000000) ? 3u :
++                bits >= UINT32_C(0x3e800000) ? 2u : 1u;
++        }
++        return;
++    }
++    /* Only the literal binary step toggles are qualified. Do not feed the
++     * normalized offset/count/gate fields through the provisional mapper. */
++    if (id >= 163 && id <= 178) {
++        uint16_t bit = (uint16_t)(1u << (id - 163));
++        if (!(row->saga_seen & bit)) {
++            row->saga_seen |= bit;
++            if (bits == UINT32_C(0x3f800000)) row->saga_on |= bit;
++            else if (bits & UINT32_C(0x7fffffff)) row->saga_invalid = 1;
++        }
++        return;
++    }
++#endif
++    if (id == 40 || id == 41) {
++        unsigned mb = 1u << (id - 40), pb = mb << 2;
++        if (!(row->chorus_flags & pb)) {
++            row->chorus_flags |= (uint8_t)pb;
++            if (bits == UINT32_C(0x3f800000)) row->chorus_flags |= (uint8_t)mb;
++            else if (bits != 0) row->chorus_flags |= 16u;
++        }
++        return;
++    }
+     if (id == 0) slot = SJ6_ROW_MASTER;
+     else if (id >= 119 && id <= 122) slot = SJ6_ROW_AMP2 + id - 119;
+     else if (id == 82 || id == 83) slot = SJ6_ROW_WAVE + id - 82;
+     else if (id == 78 || id == 79) slot = SJ6_ROW_AMOUNT + id - 78;
+     else if (id == 210 || id == 211) slot = SJ6_ROW_ENABLE + id - 210;
++    else if (id == 86) slot = SJ6_ROW_RANGE;
++    else if (id == 116) slot = SJ6_ROW_FILTER_LINK;
++#if X0X_SUPERJ6_BUILTIN_INIT
++    else if (id == 88 || id == 96 || id == 100) slot = SJ6_ROW_LFO_RATE + (id == 88 ? 0u : id == 96 ? 1u : 2u);
++    else if (id >= 195 && id <= 197) slot = SJ6_ROW_LFO_HZ + id - 195;
++    else if (id == 105 || id == 106) slot = SJ6_ROW_VIBRATO + id - 105;
++    else if (id == 206) slot = SJ6_ROW_A_REFERENCE;
++#endif
+     else return;
+     unsigned bit = 1u << slot;
+     if (!(row->present & bit)) {
+         __builtin_memcpy(&row->value[slot], &bits, sizeof bits);
+-        row->present |= (uint16_t)bit;
++        row->present |= bit;
+     }
+ }
++
++/* Zero means an older record without the switches, then OFF/I/II/I+II. */
++static inline int sj6_factory_chorus_mode(const sj6_factory_row *row)
++{
++    unsigned mask = row->chorus_flags;
++    if (!mask) return 0;
++    if ((mask & ~3u) != 12u) return -1;
++    return 1 + (mask & 3u);
++}
+--- /dev/null
++++ b/firmware/src/app/typed_controls_trial.h
+@@ -0,0 +1,50 @@
++/* SPDX-License-Identifier: GPL-3.0-only */
++#pragma once
++/* Firmware-emulator trial only. Do not activate device persistence, migration
++ * or bench-only DSP. All translation units must use the same support flags. */
++#ifndef DNBOX_TYPED_CONTROLS_NATIVE_TEST
++#define DNBOX_TYPED_CONTROLS_NATIVE_TEST 0
++#endif
++#if X0X_SJ6_LFO1_DELAY_PORT && !DNBOX_TYPED_CONTROLS_NATIVE_TEST
++#error Native SuperJ6 ID91 requires the typed trial
++#endif
++#if X0X_SJ6_NOISE_SUB_NATIVE
++#if !DNBOX_TYPED_CONTROLS_NATIVE_TEST
++#error Native SuperJ6 source levels require the read-only typed carrier
++#endif
++#endif
++#if X0X_SJ6_SEQ_SETTINGS_NATIVE && !DNBOX_TYPED_CONTROLS_NATIVE_TEST
++#error Native SuperJ6 sequencer settings require the typed carrier
++#endif
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST != 0 && DNBOX_TYPED_CONTROLS_NATIVE_TEST != 1
++#error DNBOX_TYPED_CONTROLS_NATIVE_TEST must be 0 or 1
++#endif
++#if X0X_SJ6_NATIVE_DELAY && (!DNBOX_TYPED_CONTROLS_NATIVE_TEST || X0X_SJ6_DELAY_WITNESS)
++#error Native SuperJ6 Delay requires the read-only typed carrier and excludes the host float witness
++#endif
++#if X0X_SJ6_NATIVE_ZERO_GATE && (!DNBOX_TYPED_CONTROLS_NATIVE_TEST || !X0X_SJ6_NATIVE_POSITIVE_GATE)
++#error "Native SuperJ6 zero Gate requires the typed native positive Gate carrier"
++#endif
++#if X0X_SJ6_NATIVE_POSITIVE_GATE && (!DNBOX_TYPED_CONTROLS_NATIVE_TEST || X0X_SJ6_ZERO_GATE_PROBE || X0X_SJ6_GATE_DEADLINE_PROBE)
++#error Positive Gate is a disjoint native trial, with zero and host Gate flags off
++#endif
++#if X0X_S1_CLOCK_NATIVE && (!DNBOX_TYPED_CONTROLS_NATIVE_TEST || !X0X_S1_FENCED_CLOCK)
++#error Native clock requires the explicit typed trial and b7-9 feature flags
++#endif
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++#if !X0X_SYNTHONE_PATCH || !X0X_S1C || !X0X_SUPERJ6_BUILTIN_INIT || \
++    !X0X_S1_BEND_RANGE_PROBE || !X0X_S1_MOD_RATE_PROBE
++#error Native trial needs Synth One MOD and PB receivers and both engine profiles
++#endif
++#if X0X_SJ6_DELAY_WITNESS || (X0X_SJ6_FILTER_VEL_PROBE && !X0X_SJ6_VELOCITY_PORT) || X0X_SJ6_ALT3_WITNESS || \
++    X0X_SJ6_ZERO_GATE_PROBE || X0X_SJ6_GATE_DEADLINE_PROBE || X0X_SJ6_RANDOM2_PROBE || \
++    (defined(X0X_SJ6_MOD_TYPED_PROBE) && !X0X_SJ6_ALT3_NATIVE) || X0X_SJ6_CLASSIC_I_PROBE || \
++    (X0X_S1_FENCED_CLOCK && !X0X_S1_CLOCK_NATIVE)
++#error Bench-only or separate typed DSP is outside this read-only admission trial
++#endif
++#ifndef DNBOX_137_HOST_WITNESS
++#define DNBOX_137_HOST_WITNESS 1 /* retain exact existing host feature conditionals */
++#endif
++#elif !defined(X0X_HOST) && defined(DNBOX_137_HOST_WITNESS)
++#error The typed bench carrier is not enabled in stock firmware
++#endif

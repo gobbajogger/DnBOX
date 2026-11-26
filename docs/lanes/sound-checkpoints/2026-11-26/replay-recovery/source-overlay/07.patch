@@ -1,0 +1,1522 @@
+--- /dev/null
++++ b/firmware/src/dsp/sj6_native_room.inc
+@@ -0,0 +1,148 @@
++/* SPDX-License-Identifier: GPL-3.0-only */
++/* Independent compact stereo inserts. No shared sends, cross-owner state,
++ * malloc, floating-point delay storage, or overlap with the Delay arena. */
++#if X0X_SJ6_NATIVE_ROOM
++#include "../dsp/fastmath.h"
++float sj6_room_rate(unsigned word)
++{
++    float u=(float)word*(1.f/127.f);
++    /* Original free rate, authenticated Build9 conductor ID22. */
++    return 16.f*fm_powf(u,3.33f);
++}
++float sj6_room_rate_clocked(unsigned word,float bpm,int sync)
++{
++    if(!sync)return sj6_room_rate(word);
++    static const float grid[18]={64,48,32,24,16,12,8,6,4,3,2,1.5f,1,.5f,.3333f,.25f,.1667f,.125f};
++    const unsigned index=(17u*(127u-word)+63u)/127u;
++    return bpm>0.f ? (bpm*(1.f/240.f))*grid[index] : 0.f;
++}
++void original_runtime_sj6_room_clock(original_runtime_part *p,float bpm,int sync)
++{
++    if(!p || p->kind!=ORIGINAL_SOUND_JUNO || p->status!=ORIGINAL_RUNTIME_OK)return;
++    sj6_room_t *s=&p->dsp.juno.room;
++    if(s->clock_bpm==bpm && s->clock_sync==(unsigned)!!sync)return;
++    s->clock_bpm=bpm;s->clock_sync=(uint8_t)!!sync;
++    s->rate=sj6_room_rate_clocked(s->rate_code,bpm,sync)*(1.f/44100.f);
++}
++float sj6_room_locut(unsigned word)
++{
++    /* Independent wet HPF ID14, not the similarly scaled instrument HPF. */
++    return 800.f*fm_powf((float)word*(1.f/127.f),2.42f);
++}
++static void sj6_room_reset(sj6_room_t *s)
++{
++    memset(s->ring,0,sizeof s->ring);
++    memset(s->pos,0,sizeof s->pos);
++    memset(s->lo,0,sizeof s->lo);
++    memset(s->acc,0,sizeof s->acc);
++    memset(s->wet,0,sizeof s->wet);
++    memset(s->last,0,sizeof s->last);
++    s->tick=0;
++}
++static void sj6_fatten_reset(sj6_room_t *s)
++{
++    memset(s->wide,0,sizeof s->wide);
++    s->wide_pos=0;
++    s->fat_lp[0]=s->fat_lp[1]=0.f;
++}
++void original_runtime_sj6_room(original_runtime_part *p,const uint8_t word[SJ6_ROOM_COUNT])
++{
++    if(!p||p->kind!=ORIGINAL_SOUND_JUNO||p->status!=ORIGINAL_RUNTIME_OK)return;
++    sj6_room_t *s=&p->dsp.juno.room;
++    if(s->enable!=word[SJ6_ROOM_ENABLE]||s->type!=word[SJ6_ROOM_TYPE])sj6_room_reset(s);
++    if(s->widen!=word[SJ6_ROOM_WIDEN]){
++        sj6_fatten_reset(s);
++    }
++    s->armed=1;
++    s->enable=word[SJ6_ROOM_ENABLE];s->type=word[SJ6_ROOM_TYPE];
++    s->widen=word[SJ6_ROOM_WIDEN];
++    s->mix=(float)word[SJ6_ROOM_MIX]*(1.f/127.f);
++    s->fb=.4f+(.6f/127.f)*(float)word[SJ6_ROOM_SIZE];
++    s->hp_coeff=1.f-fm_expf(-6.2831853f*sj6_room_locut(word[SJ6_ROOM_LOCUT])*
++                              (SJ6_ROOM_STRIDE/44100.f));
++    s->rate_code=word[SJ6_ROOM_RATE];
++    s->rate=sj6_room_rate_clocked(s->rate_code,s->clock_bpm,s->clock_sync)*(1.f/44100.f);
++    s->depth=(float)word[SJ6_ROOM_DEPTH]*(1.f/127.f);
++}
++static int16_t sj6_room_pcm(float x)
++{
++    if(x>1.f)x=1.f;
++    if(x< -1.f)x=-1.f;
++    return (int16_t)(32767.f*x);
++}
++static void sj6_room_tick(sj6_room_t *s)
++{
++    /* Two compact room responses: paired asymmetric combs and a four-line
++     * diffusing network. Neither stores or invokes the app's original IR. */
++    static const uint8_t len[2][4]={{47,59,73,89},{SJ6_ROOM_L0,SJ6_ROOM_L1,SJ6_ROOM_L2,SJ6_ROOM_L3}};
++    static const uint16_t base[4]={0,SJ6_ROOM_L0,SJ6_ROOM_L0+SJ6_ROOM_L1,
++        SJ6_ROOM_L0+SJ6_ROOM_L1+SJ6_ROOM_L2};
++    const uint8_t *length=len[s->type];
++    float x[4],in[2],feedback[4];
++    for(unsigned c=0;c<2;++c){
++        float y=s->acc[c]*(1.f/SJ6_ROOM_STRIDE);
++        s->acc[c]=0.f;
++        s->lo[c]+=s->hp_coeff*(y-s->lo[c]);
++        in[c]=y-s->lo[c];
++        s->last[c]=s->wet[c];
++    }
++    for(unsigned i=0;i<4;++i)x[i]=(1.f/32767.f)*s->ring[base[i]+s->pos[i]];
++    if(s->type){
++        feedback[0]=.5f*(x[0]+x[1]+x[2]+x[3]);
++        feedback[1]=.5f*(x[0]-x[1]+x[2]-x[3]);
++        feedback[2]=.5f*(x[0]+x[1]-x[2]-x[3]);
++        feedback[3]=.5f*(x[0]-x[1]-x[2]+x[3]);
++        s->wet[0]=.55f*(x[0]+x[3]);
++        s->wet[1]=.55f*(x[1]-x[2]);
++    }else{
++        feedback[0]=x[0];feedback[1]=x[1];feedback[2]=x[2];feedback[3]=x[3];
++        s->wet[0]=.55f*(x[0]+x[2]);
++        s->wet[1]=.55f*(x[1]+x[3]);
++    }
++    for(unsigned i=0;i<4;++i){
++        s->ring[base[i]+s->pos[i]]=sj6_room_pcm(.42f*in[i&1u]+s->fb*feedback[i]);
++        if(++s->pos[i]>=length[i])s->pos[i]=0;
++    }
++}
++/* Build9 Fatten stereo topology. The output of the delayed left leg and
++ * the dry right leg are both discarded by the hard panners. Only right
++ * history is needed. The compact 15 kHz feedback LP is Butterworth;
++ * AudioUnit private internals are not assumed sample-identical. */
++static float sj6_fatten_tick(sj6_room_t *s,float right)
++{
++    const unsigned at=s->wide_pos;
++    const float delayed=(4.f/32767.f)*(float)s->wide[at];
++    const float x=right+.5f*delayed;
++    const float y=0.481161993f*x+s->fat_lp[0];
++    s->fat_lp[0]=0.962323986f*x-0.672069140f*y+s->fat_lp[1];
++    s->fat_lp[1]=0.481161993f*x-0.252578833f*y;
++    s->wide[at]=sj6_room_pcm(.25f*y);
++    s->wide_pos=at+1u==SJ6_ROOM_WIDE?0u:(uint16_t)(at+1u);
++    return delayed;
++}
++static void sj6_room_process(sj6_room_t *s,float *left,float *right,unsigned frames)
++{
++    if(!s->armed||(!s->enable&&!s->widen&&s->depth==0.f))return;
++    for(unsigned i=0;i<frames;++i){
++        float l=left[i],r=right[i];
++        if(s->enable){
++            s->acc[0]+=l;s->acc[1]+=r;
++            if(++s->tick==SJ6_ROOM_STRIDE){s->tick=0;sj6_room_tick(s);}
++            if(s->mix>0.f){
++                float t=(float)s->tick*(1.f/SJ6_ROOM_STRIDE);
++                l+=(s->last[0]+t*(s->wet[0]-s->last[0])-l)*s->mix;
++                r+=(s->last[1]+t*(s->wet[1]-s->last[1])-r)*s->mix;
++            }
++        }
++        if(s->widen)r=sj6_fatten_tick(s,r);
++        if(s->depth>0.f){
++            float pan=fm_sinf(6.2831853f*s->pan_phase)*s->depth;
++            /* Center exactly unity, continuously shift opposing stereo gains. */
++            l*=1.f-pan;r*=1.f+pan;
++            s->pan_phase+=s->rate;
++            if(s->pan_phase>=1.f)s->pan_phase-=1.f;
++        }
++        left[i]=l;right[i]=r;
++    }
++}
++#endif
+--- /dev/null
++++ b/firmware/src/dsp/sj6_velocity_fma.h
+@@ -0,0 +1,36 @@
++/* SPDX-License-Identifier: GPL-3.0-only */
++#pragma once
++#include <stdint.h>
++/* Target-specific exact original fmaf for the verified SMK domains:
++ * factor = one of 128 original rounded (Double(u) * 1.1) detents,
++ * velocity = Float32(note_velocity / 127), offset = Float32(1-factor).
++ * Every nonzero operand has a binary32 exponent >= -10, and each nonzero
++ * product operand exponent >= -7. The FP product plus offset therefore
++ * fits an exact signed Q62 before one nearest-even Float32 rounding.
++ */
++static inline float sj6_velocity_fma(float factor,float velocity,float offset)
++{
++    union { float f; uint32_t u; } a={.f=factor}, v={.f=velocity}, b={.f=offset}, out;
++    uint32_t av=a.u&0x7fffffff, vv=v.u&0x7fffffff,bv=b.u&0x7fffffff;
++    if(!av || !vv) return offset;
++    const unsigned ae=av>>23,ve=vv>>23,be=bv>>23;
++    if(ae<120u||ae>127u||ve<120u||ve>127u||(bv&&be<117u))return offset;
++    uint64_t qprod=(uint64_t)((av&0x7fffffu)|0x800000u)*((vv&0x7fffffu)|0x800000u);
++    qprod<<=ae+ve-238u;
++    uint64_t qoffset=bv?(uint64_t)((bv&0x7fffffu)|0x800000u)<<(be-88u):0;
++    int64_t q=(int64_t)qprod+((b.u>>31)?-(int64_t)qoffset:(int64_t)qoffset);
++    if(!q)return 0.f;
++    const uint64_t p=q<0?(uint64_t)-q:(uint64_t)q;
++    uint32_t hi=(uint32_t)(p>>32);
++    unsigned h=hi?63u-(unsigned)__builtin_clz(hi):31u-(unsigned)__builtin_clz((uint32_t)p);
++    uint64_t f;
++    if(h<=23) f=p<<(23u-h);
++    else{
++        unsigned r=h-23u;
++        f=p>>r;
++        uint64_t rem=p-(f<<r),half=UINT64_C(1)<<(r-1u);
++        f+=rem>half||(rem==half&&(f&1u));
++    }
++    out.u=(q<0?0x80000000u:0u)+((h+64u)<<23)+(uint32_t)f;
++    return out.f;
++}
+--- /dev/null
++++ b/firmware/src/dsp/sj6_velocity_scale.inc
+@@ -0,0 +1,35 @@
++/* Original Build9 velocity law, generated by generate-velocity.c. */
++static const float sj6_velocity_scale[128]={
++ 0x0p+0f, 0x1.1bd13cp-7f, 0x1.1bd13cp-6f, 0x1.a9b9dap-6f,
++ 0x1.1bd13cp-5f, 0x1.62c58cp-5f, 0x1.a9b9dap-5f, 0x1.f0ae2ap-5f,
++ 0x1.1bd13cp-4f, 0x1.3f4b64p-4f, 0x1.62c58cp-4f, 0x1.863fb4p-4f,
++ 0x1.a9b9dap-4f, 0x1.cd3402p-4f, 0x1.f0ae2ap-4f, 0x1.0a1428p-3f,
++ 0x1.1bd13cp-3f, 0x1.2d8e5p-3f, 0x1.3f4b64p-3f, 0x1.510878p-3f,
++ 0x1.62c58cp-3f, 0x1.74829ep-3f, 0x1.863fb4p-3f, 0x1.97fcc6p-3f,
++ 0x1.a9b9dap-3f, 0x1.bb76eep-3f, 0x1.cd3402p-3f, 0x1.def116p-3f,
++ 0x1.f0ae2ap-3f, 0x1.01359ep-2f, 0x1.0a1428p-2f, 0x1.12f2b2p-2f,
++ 0x1.1bd13cp-2f, 0x1.24afc6p-2f, 0x1.2d8e5p-2f, 0x1.366cd8p-2f,
++ 0x1.3f4b64p-2f, 0x1.4829eep-2f, 0x1.510878p-2f, 0x1.59e702p-2f,
++ 0x1.62c58cp-2f, 0x1.6ba414p-2f, 0x1.74829ep-2f, 0x1.7d6128p-2f,
++ 0x1.863fb4p-2f, 0x1.8f1e3ep-2f, 0x1.97fcc6p-2f, 0x1.a0db5p-2f,
++ 0x1.a9b9dap-2f, 0x1.b29864p-2f, 0x1.bb76eep-2f, 0x1.c45576p-2f,
++ 0x1.cd3402p-2f, 0x1.d6128cp-2f, 0x1.def116p-2f, 0x1.e7cfap-2f,
++ 0x1.f0ae2ap-2f, 0x1.f98cb2p-2f, 0x1.01359ep-1f, 0x1.05a4e2p-1f,
++ 0x1.0a1428p-1f, 0x1.0e836ep-1f, 0x1.12f2b2p-1f, 0x1.1761f8p-1f,
++ 0x1.1bd13cp-1f, 0x1.20408p-1f, 0x1.24afc6p-1f, 0x1.291f0ap-1f,
++ 0x1.2d8e5p-1f, 0x1.31fd94p-1f, 0x1.366cd8p-1f, 0x1.3adc1ep-1f,
++ 0x1.3f4b64p-1f, 0x1.43baaap-1f, 0x1.4829eep-1f, 0x1.4c9934p-1f,
++ 0x1.510878p-1f, 0x1.5577bcp-1f, 0x1.59e702p-1f, 0x1.5e5646p-1f,
++ 0x1.62c58cp-1f, 0x1.6734dp-1f, 0x1.6ba414p-1f, 0x1.70135ap-1f,
++ 0x1.74829ep-1f, 0x1.78f1e4p-1f, 0x1.7d6128p-1f, 0x1.81d06cp-1f,
++ 0x1.863fb4p-1f, 0x1.8aaef8p-1f, 0x1.8f1e3ep-1f, 0x1.938d82p-1f,
++ 0x1.97fcc6p-1f, 0x1.9c6c0cp-1f, 0x1.a0db5p-1f, 0x1.a54a96p-1f,
++ 0x1.a9b9dap-1f, 0x1.ae291ep-1f, 0x1.b29864p-1f, 0x1.b707a8p-1f,
++ 0x1.bb76eep-1f, 0x1.bfe632p-1f, 0x1.c45576p-1f, 0x1.c8c4bcp-1f,
++ 0x1.cd3402p-1f, 0x1.d1a348p-1f, 0x1.d6128cp-1f, 0x1.da81d2p-1f,
++ 0x1.def116p-1f, 0x1.e3605ap-1f, 0x1.e7cfap-1f, 0x1.ec3ee4p-1f,
++ 0x1.f0ae2ap-1f, 0x1.f51d6ep-1f, 0x1.f98cb2p-1f, 0x1.fdfbf8p-1f,
++ 0x1.01359ep+0f, 0x1.036d4p+0f, 0x1.05a4e2p+0f, 0x1.07dc86p+0f,
++ 0x1.0a1428p+0f, 0x1.0c4bccp+0f, 0x1.0e836ep+0f, 0x1.10bb1p+0f,
++ 0x1.12f2b2p+0f, 0x1.152a54p+0f, 0x1.1761f8p+0f, 0x1.19999ap+0f,
++};
+--- a/firmware/src/dsp/synthone/sequencer/S1Sequencer.c
++++ b/firmware/src/dsp/synthone/sequencer/S1Sequencer.c
+@@ -30,8 +30,25 @@
+     s->mBeatTime = 0;
+     s->mStepCounter = 0;
+     s->lastPosition = -1;
++#if X0X_SJ6_SEQ_SETTINGS_NATIVE
++    s->saga_wait_first=0;
++#endif
+     s->gateOpen = 0;
++#if defined(X0X_SJ6_GATE_DEADLINE_PROBE) && X0X_SJ6_GATE_DEADLINE_PROBE
++    s->editGateLatched = 0;
++#elif X0X_SJ6_NATIVE_POSITIVE_GATE
++    s->liveGateTicks=0;
++#if X0X_SJ6_NATIVE_ZERO_GATE
++    s->liveGateLatched=0;
++#endif
++#endif
++#if (defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE) || X0X_SJ6_NATIVE_RANDOM2
++    s->saga_random_state=0;
++#endif
+     s->sequencerLastNotesCount = 0;
++#if X0X_SUPERJ6_BUILTIN_INIT
++    s->saga_index = 0;
++#endif
+ }
+ 
+ static void turnOffLastNotes(S1Sequencer *s, void *ctx, KeyOffCallback off)
+@@ -39,6 +56,14 @@
+     for (unsigned i = 0; i < s->sequencerLastNotesCount; ++i) off(ctx, s->sequencerLastNotes[i]);
+     s->sequencerLastNotesCount = 0;
+     s->gateOpen = 0;
++#if defined(X0X_SJ6_GATE_DEADLINE_PROBE) && X0X_SJ6_GATE_DEADLINE_PROBE
++    s->editGateLatched = 0;
++#elif X0X_SJ6_NATIVE_POSITIVE_GATE
++    s->liveGateTicks=0;
++#if X0X_SJ6_NATIVE_ZERO_GATE
++    s->liveGateLatched=0;
++#endif
++#endif
+ }
+ 
+ void S1Sequencer_reset(S1Sequencer *s, int resetNotes, void *ctx, KeyOffCallback off)
+@@ -63,13 +88,115 @@
+     NoteNumber r = { (uint8_t)(nn < 0 || nn >= S1_NUM_MIDI_NOTES ? 255 : nn), note.velocity };
+     return r;
+ }
++#if X0X_SUPERJ6_BUILTIN_INIT
++static unsigned saga_clip(int note)
++{ return note < 0 ? 0u : note >= S1_NUM_MIDI_NOTES ? S1_NUM_MIDI_NOTES - 1u : (unsigned)note; }
++
++#if (defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE) || X0X_SJ6_NATIVE_RANDOM2
++/* Fresh uniform Fisher–Yates followed by reading ONE element has this
++ * marginal distribution. Do not retain a shuffled bag across steps. */
++static unsigned saga_random_index(uint32_t *state,uint32_t seed,unsigned count)
++{
++    const uint32_t limit=UINT32_MAX-UINT32_MAX%count;
++    uint32_t x=*state ? *state : seed ? seed : UINT32_C(0x9e3779b9);
++    do { x^=x<<13; x^=x>>17; x^=x<<5; } while(x>limit);
++    *state=x;
++    return (x-1u)%count;
++}
++#endif
++/* The original sorts the pitches across all tiers before choosing a note.
++ * Sort only on an event, with bounded scratch and no second clock/state machine. */
++static NoteNumber saga_note(const NoteNumber *held, int count, int octaves,
++                           int interval, int mode, int index
++#if (defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE) || X0X_SJ6_NATIVE_RANDOM2
++                           , S1Sequencer *sequencer,uint32_t seed
++#endif
++)
++{
++    NoteNumber notes[S1_SEQ_MAX_HELD * 4];
++    int size = 0;
++    for (int h = 0; h < count; ++h) for (int oct = 0; oct < octaves; ++oct) {
++        unsigned pitch = held[h].noteNumber + oct * interval;
++        int slot = size++;
++        while (slot > 0 && notes[slot - 1].noteNumber > pitch) {
++            notes[slot] = notes[slot - 1];
++            --slot;
++        }
++        notes[slot] = (NoteNumber){(uint8_t)pitch, held[h].velocity};
++    }
++#if (defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE) || X0X_SJ6_NATIVE_RANDOM2
++    if (mode==ArpeggiatorMode_SagaRandom
++#if X0X_SJ6_RANDOM5_6_NATIVE
++        || mode==ArpeggiatorMode_SagaRandom5 || mode==ArpeggiatorMode_SagaRandom6
++#endif
++       )
++        index=(int)saga_random_index(&sequencer->saga_random_state,seed,(unsigned)size);
++    else
++#endif
++    if (mode == ArpeggiatorMode_Down) index = size - 1 - index;
++    else {
++        if (mode == ArpeggiatorMode_UpDownRepeat) index /= 2;
++        if (index >= size) index = 2 * size - 2 - index;
++    }
++    NoteNumber note = notes[index];
++    note.noteNumber = (uint8_t)saga_clip(note.noteNumber);
++    return note;
++}
++#endif
++
+ static int sequenceSize(const S1SequencerParams *p, int heldNotesCount)
+ {
+     if (p->arpIsSequencer) return p->arpTotalSteps > 16 ? 16 : p->arpTotalSteps;
+     const int m = heldNotesCount * (p->arpOctave + 1);
++#if X0X_SUPERJ6_BUILTIN_INIT
++    if (p->arpDirection == ArpeggiatorMode_UpDownRepeat) return (m > 1 ? 2 * m - 2 : m) * 2;
++#endif
+     return p->arpDirection == ArpeggiatorMode_UpDown && m > 1 ? 2 * m - 2 : m;
+ }
+-static uint32_t gateLength(const S1SequencerParams *p) { return p->gateTicks; }
++static uint32_t gateLength(const S1Sequencer *s,const S1SequencerParams *p)
++{
++#if defined(X0X_SJ6_GATE_DEADLINE_PROBE) && X0X_SJ6_GATE_DEADLINE_PROBE
++    if (s->editGateLatched) return s->editGateTicks;
++#elif X0X_SJ6_NATIVE_POSITIVE_GATE
++    #if X0X_SJ6_NATIVE_ZERO_GATE
++    if (s->liveGateLatched) return s->liveGateTicks;
++#else
++    if (s->liveGateTicks) return s->liveGateTicks;
++#endif
++#endif
++    (void)s;
++    return p->gateTicks;
++}
++#if X0X_SJ6_GATE_DEADLINE_PROBE || X0X_SJ6_NATIVE_POSITIVE_GATE
++static void latchGateDeadline(S1Sequencer *s, const S1SequencerParams *p)
++{
++#if defined(X0X_SJ6_GATE_DEADLINE_PROBE) && X0X_SJ6_GATE_DEADLINE_PROBE
++    if (s->gateOpen && s->sequencerLastNotesCount && !s->editGateLatched) {
++        s->editGateTicks=p->gateTicks;
++        s->editGateLatched=1;
++    }
++#else
++#if X0X_SJ6_NATIVE_ZERO_GATE
++    if (s->gateOpen && s->sequencerLastNotesCount && !s->liveGateLatched) {
++        s->liveGateTicks=p->gateTicks;
++        s->liveGateLatched=1;
++    }
++#else
++    /* Positive legacy Gate has a nonzero threshold at the shortest legal step. */
++    if (s->gateOpen && s->sequencerLastNotesCount && !s->liveGateTicks)
++        s->liveGateTicks=p->gateTicks;
++#endif
++#endif
++}
++
++void S1Sequencer_liveGate(S1Sequencer *s,S1SequencerParams *p,unsigned percent)
++{
++    if (p->seqGate == percent) return;
++    latchGateDeadline(s,p);
++    p->seqGate=(uint8_t)percent;
++    S1Sequencer_setStep(p,p->arpSeqTempoMultiplier);
++}
++#endif
+ void S1Sequencer_setStep(S1SequencerParams *p, uint32_t ticks)
+ {
+     p->arpSeqTempoMultiplier = ticks;
+@@ -85,19 +212,35 @@
+     if (!(arpSeqIsOn || s->sequencerLastNotesCount)) return 0;
+     const uint32_t next = s->mBeatTime + p->arpBeatsPerSample;
+     if (next >= p->arpSeqTempoMultiplier) return 1;                 /* r1 < r0 */
+-    return s->gateOpen && s->sequencerLastNotesCount && next >= gateLength(p);
+-}
+-
+-void S1Sequencer_process(S1Sequencer *s, const S1SequencerParams *p, const NoteNumber *held, int heldNoteNumbersAECount,
+-                         void *ctx, KeyOnCallback on, KeyOffCallback off)
++    return s->gateOpen && s->sequencerLastNotesCount && next >= gateLength(s,p);
++}
++
++#if X0X_S1_FENCED_CLOCK
++void S1Sequencer_processOriginal(S1Sequencer *s,
++#else
++void S1Sequencer_process(S1Sequencer *s,
++#endif
++ const S1SequencerParams *p, const NoteNumber *held, int heldNoteNumbersAECount,
++                         void *ctx, KeyOnCallback on, KeyOffCallback off
++#if X0X_S1_FENCED_CLOCK
++                         , const S1ClockPulse *pulse
++#endif
++                         )
+ {
+     /// MARK: ARPEGGIATOR + SEQUENCER BEGIN
+     const int arpSeqIsOn = p->arpIsOn == 1;
+     const int firstTimeAnyKeysHeld = s->previousHeldNoteNumbersAECount == 0 && heldNoteNumbersAECount > 0;
+     const int firstTimeNoKeysHeld = heldNoteNumbersAECount == 0 && s->previousHeldNoteNumbersAECount > 0;
+ 
++#if X0X_SJ6_SEQ_SETTINGS_NATIVE
++    if (p->saga_snap_native && (firstTimeAnyKeysHeld || firstTimeNoKeysHeld))
++        s->saga_wait_first=(uint8_t)(firstTimeAnyKeysHeld && p->clocked);
++#endif
+     // reset arp/seq when user goes from 0 to N, or N to 0 held keys
+     if (arpSeqIsOn && (firstTimeNoKeysHeld || firstTimeAnyKeysHeld)) {
++#if X0X_SUPERJ6_BUILTIN_INIT
++        s->saga_index = 0;
++#endif
+         if (!p->clocked) {               // DnBOX: a running transport keeps its grid
+             s->mBeatTime = 0u - p->arpBeatsPerSample; // reset internal beattime (0 after this sample's add)
+             s->mStepCounter = 0;
+@@ -111,18 +254,43 @@
+         // Compare previous beatTime to current to see if we crossed a beat boundary
+         uint32_t newBeatTime = s->mBeatTime + p->arpBeatsPerSample;
+         int crossed = 0;
++#if X0X_S1_FENCED_CLOCK
++        if (pulse) {
++            crossed = pulse->trigger;
++            if (crossed) s->mStepCounter = pulse->index;
++        } else
++#endif
+         if (newBeatTime >= p->arpSeqTempoMultiplier) {
+             newBeatTime -= p->arpSeqTempoMultiplier;
+             if (newBeatTime >= p->arpSeqTempoMultiplier) newBeatTime = 0;   /* multiplier shrank */
+             ++s->mStepCounter;
+             crossed = 1;
+         }
++#if X0X_S1_FENCED_CLOCK
++        if (!pulse)
++#endif
+         s->mBeatTime = newBeatTime;
+         // SuperJ6 seqGate: the step's notes end early
+-        if (!crossed && s->gateOpen && s->mBeatTime >= gateLength(p)) turnOffLastNotes(s, ctx, off);
++        if (!crossed && s->gateOpen && s->mBeatTime >= gateLength(s,p)) turnOffLastNotes(s, ctx, off);
+ 
+         // If keys are now held, or if beat boundary was crossed
+-        if (firstTimeAnyKeysHeld || crossed) {
++        if (crossed || (
++#if X0X_S1_FENCED_CLOCK
++                        !pulse &&
++#endif
++                        firstTimeAnyKeysHeld
++#if X0X_SUPERJ6_BUILTIN_INIT
++#if X0X_SJ6_SEQ_SETTINGS_NATIVE
++                        && !((p->saga_snap_native || p->saga_timing) && p->clocked)
++#else
++                        && !(p->saga_timing && p->clocked)
++#endif
++#endif
++                       )) {
++#if X0X_SJ6_SEQ_SETTINGS_NATIVE
++            const unsigned first_snap=s->saga_wait_first;
++            s->saga_wait_first=0;
++#endif
+             // Turn off previous beat's notes even if arp is off
+             turnOffLastNotes(s, ctx, off);
+             // ARP/SEQ is ON, held notes
+@@ -130,10 +298,32 @@
+                 const int size = sequenceSize(p, heldNoteNumbersAECount);
+                 // At least one key is held down, and a non-empty sequence has been created
+                 if (size > 0) {
++#if X0X_S1_SCALE_NATIVE
++                    const int npo=p->npo?p->npo:12;
++                    const float npof=(float)npo/12.f;
++#else
++                    const int npo=12;
++#endif
+                     // DnBOX: SEQ follows the transport grid; ARP order starts on the press
++#if X0X_SJ6_SEQ_SETTINGS_NATIVE
++                    if (first_snap || firstTimeAnyKeysHeld || s->mStepCounter < s->mStepBase)
++                        s->mStepBase=s->mStepCounter;
++                    int seqNotePosition = (p->arpIsSequencer == 1 && !p->saga_snap_native ?
++                                           s->mStepCounter : s->mStepCounter-s->mStepBase) % size;
++#else
+                     if (firstTimeAnyKeysHeld || s->mStepCounter < s->mStepBase) s->mStepBase = s->mStepCounter;
+-                    const int seqNotePosition = (p->arpIsSequencer == 1 ? s->mStepCounter
+-                                                 : s->mStepCounter - s->mStepBase) % size;
++                    int seqNotePosition = (p->arpIsSequencer == 1 ? s->mStepCounter
++                                           : s->mStepCounter - s->mStepBase) % size;
++#endif
++#if X0X_S1_FENCED_CLOCK
++                    if (pulse) seqNotePosition = pulse->index % size;
++#endif
++#if X0X_SUPERJ6_BUILTIN_INIT
++                    if (p->saga_notes && !p->arpIsSequencer) {
++                        seqNotePosition = s->saga_index % size;
++                        if (++s->saga_index >= size) s->saga_index = 0;
++                    }
++#endif
+                     if (p->arpIsSequencer == 1) {
+                         // SEQUENCER
+                         const int i = seqNotePosition;
+@@ -141,10 +331,16 @@
+                         const int octBoost = p->sequencerOctBoost >> i & 1;
+                         int nn = p->sequencerPattern[i];
+                         nn = nn < -p->patternRange ? -p->patternRange : nn > p->patternRange ? p->patternRange : nn;
+-                        const int nnob = (nn < 0) ? (nn - octBoost * 12) : (nn + octBoost * 12);
++#if X0X_S1_SCALE_NATIVE
++                        nn=(int)((float)nn*npof); /* original truncates each transposed step */
++#endif
++                        const int nnob = (nn < 0) ? (nn - octBoost * npo) : (nn + octBoost * npo);
+                         if (onOff == 1) {
+                             for (int h = 0; h < heldNoteNumbersAECount; ++h) {
+-                                const int note = held[h].noteNumber + nnob;
++                                int note = held[h].noteNumber + nnob;
++#if X0X_SUPERJ6_BUILTIN_INIT
++                                if (p->saga_notes) note = (int)saga_clip(note);
++#endif
+                                 if (note >= 0 && note < S1_NUM_MIDI_NOTES &&
+                                     s->sequencerLastNotesCount < S1_SEQ_MAX_HELD) {
+                                     on(ctx, note, held[h].velocity);
+@@ -154,9 +350,35 @@
+                         }
+                     } else {
+                         // ARPEGGIATOR
+-                        const NoteNumber snn = arpNote(held, heldNoteNumbersAECount, p->arpOctave + 1,
+-                                                       p->arpInterval, p->arpDirection, seqNotePosition);
++                        NoteNumber snn;
++#if X0X_SUPERJ6_BUILTIN_INIT
++                        if (p->saga_notes) snn = saga_note(held, heldNoteNumbersAECount, p->arpOctave + 1,
++                                                         p->arpInterval, p->arpDirection, seqNotePosition
++#if (defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE) || X0X_SJ6_NATIVE_RANDOM2
++                                                         , s,p->saga_random_seed
++#endif
++                                                         );
++                        else
++#endif
++                            snn = arpNote(held, heldNoteNumbersAECount, p->arpOctave + 1,
++#if X0X_S1_SCALE_NATIVE
++                                          (int)((float)p->arpInterval*npof),
++#else
++                                          p->arpInterval,
++#endif
++                                          p->arpDirection, seqNotePosition);
+                         if (snn.noteNumber < S1_NUM_MIDI_NOTES) {
++#if X0X_SJ6_RANDOM5_6_NATIVE
++                            if (p->saga_notes && p->arpDirection>=ArpeggiatorMode_SagaRandom5) {
++                                /* Build9 updates currentStepIndex and wraps by
++                                 * seq length before Conductor sees the note-on. */
++                                unsigned step=(s->mStepCounter-s->mStepBase+1u)%(p->arpTotalSteps ? p->arpTotalSteps : 16u);
++                                if (p->arpDirection==ArpeggiatorMode_SagaRandom6 ?
++                                    !(step&3u) : step>1u &&
++                                    saga_random_index(&s->saga_random_state,p->saga_random_seed,100u)<50u)
++                                    snn.velocity=0;
++                            }
++#endif
+                             on(ctx, snn.noteNumber, snn.velocity);
+                             s->sequencerLastNotes[s->sequencerLastNotesCount++] = snn.noteNumber;
+                         }
+@@ -171,6 +393,13 @@
+     /// MARK: ARPEGGIATOR + SEQUENCER END
+ }
+ 
++#if X0X_S1_FENCED_CLOCK
++void S1Sequencer_process(S1Sequencer *s, const S1SequencerParams *p, const NoteNumber *held, int count,
++                         void *ctx, KeyOnCallback on, KeyOffCallback off)
++{
++    S1Sequencer_processOriginal(s,p,held,count,ctx,on,off,0);
++}
++#endif
+ int S1Sequencer_getArpBeatCount(const S1Sequencer *s) { return s->mStepCounter; }
+ 
+ // DnBOX: lock to the transport. The free-running clock above advances at the
+@@ -180,6 +409,9 @@
+ {
+     const uint32_t len = p->arpSeqTempoMultiplier;
+     if (force) {
++#if X0X_SUPERJ6_BUILTIN_INIT
++        s->saga_index = 0;
++#endif
+         s->mStepCounter = step; s->mBeatTime = phase; s->mStepBase = step + 1;
+     } else if (step == s->mStepCounter) {
+         s->mBeatTime = phase;
+--- a/firmware/src/dsp/synthone/sequencer/S1Sequencer.h
++++ b/firmware/src/dsp/synthone/sequencer/S1Sequencer.h
+@@ -8,13 +8,28 @@
+ //
+ //  C port of DSP/Sequencer/S1Sequencer.hpp + S1SeqNoteNumber.hpp + S1ArpModes.hpp
+ //  (pinned source 56079bbd). Same structure and names; compact where the chip
+-//  needs it (see S1Sequencer.c for every change). Used by BOTH the Synth One and
+-//  the SuperJ6 owner (the SuperJ6 app is "Synth One J6", same sequencer); the
+-//  SuperJ6-only differences are the two delta fields in S1SequencerParams.
++//  needs it (see S1Sequencer.c for changes). Both owners share this scheduler.
++//  The compact SuperJ6 owner uses its Saga pitch law and division grid.
+ //
+ #pragma once
+ #include <stdint.h>
++#if defined(X0X_SJ6_GATE_DEADLINE_PROBE) && X0X_SJ6_GATE_DEADLINE_PROBE
++#if !defined(X0X_HOST) || !defined(X0X_SJ6_ZERO_GATE_PROBE)
++#error "Saga deadline proof is host-only and requires the typed zero-Gate witness"
++#endif
++#endif
++#if X0X_S1_FENCED_CLOCK && !defined(X0X_HOST) && !X0X_S1_CLOCK_NATIVE
++#error "Original clock prototype without the explicit native receiver"
++#endif
+ 
++#if defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE
++#if !defined(X0X_HOST) || !defined(DNBOX_137_HOST_WITNESS) || !X0X_SJ6_ZERO_GATE_PROBE
++#error "Build9 RANDOM2 proof is a composed host witness only"
++#endif
++#endif
++#if X0X_SJ6_NATIVE_RANDOM2 && (!DNBOX_TYPED_CONTROLS_NATIVE_TEST || !X0X_SJ6_NATIVE_POSITIVE_GATE || X0X_SJ6_RANDOM2_PROBE || !X0X_SUPERJ6_BUILTIN_INIT)
++#error Native RANDOM2 needs the read-only both-engine positive-Gate trial
++#endif
+ #define S1_NUM_MIDI_NOTES 128
+ #define S1_SEQ_MAX_HELD 8          /* DnBOX: held keys tracked (source: 128) */
+ #define S1_SEQ_STEPS 16
+@@ -24,7 +39,14 @@
+ typedef struct { uint8_t noteNumber, velocity; } NoteNumber;     /* heldNoteNumbersAE entry */
+ 
+ /* S1ArpModes.hpp */
+-enum ArpeggiatorMode { ArpeggiatorMode_Up = 0, ArpeggiatorMode_UpDown = 1, ArpeggiatorMode_Down = 2 };
++enum ArpeggiatorMode { ArpeggiatorMode_Up = 0, ArpeggiatorMode_UpDown = 1, ArpeggiatorMode_Down = 2, ArpeggiatorMode_UpDownRepeat = 3
++#if (defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE) || X0X_SJ6_NATIVE_RANDOM2
++    , ArpeggiatorMode_SagaRandom=4
++#if X0X_SJ6_RANDOM5_6_NATIVE
++    , ArpeggiatorMode_SagaRandom5=5, ArpeggiatorMode_SagaRandom6=6
++#endif
++#endif
++};
+ 
+ /* The S1Parameter values S1Sequencer::process reads (S1Parameter.h ids). */
+ typedef struct {
+@@ -32,8 +54,6 @@
+     uint8_t arpIsSequencer;             /* 65 */
+     uint8_t arpDirection;               /* 60  ArpeggiatorMode */
+     uint8_t arpOctave;                  /* 63  0..3 */
+-    uint8_t arpInterval;                /* 61  0..12 */
+-    uint8_t arpTotalSteps;              /* 66  1..16 */
+     int8_t sequencerPattern[S1_SEQ_STEPS];  /* 67..82 */
+     uint16_t sequencerOctBoost;         /* 83..98, bit per step */
+     uint16_t sequencerNoteOn;           /* 99..114, bit per step */
+@@ -43,10 +63,27 @@
+     uint32_t arpBeatsPerSample;
+     uint32_t arpSeqTempoMultiplier;
+     /* SuperJ6 deltas (Synth One: 100, 12) */
++    uint32_t gateTicks;                 /* seqGate % of arpSeqTempoMultiplier (UINT32_MAX = 100 %) */
++#if X0X_SUPERJ6_BUILTIN_INIT
++#if (defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE) || X0X_SJ6_NATIVE_RANDOM2
++    uint32_t saga_random_seed;
++#endif
++    uint8_t saga_notes, saga_timing;    /* SuperJ6 pitch law and optional original grid */
++#endif
++    uint8_t arpInterval;                /* 61  0..12 */
++    uint8_t arpTotalSteps;              /* 66  1..16 */
+     uint8_t seqGate;                    /* % of a step a note sounds (SJ6 seqGate) */
+     uint8_t patternRange;               /* |sequencerPattern| limit: S1 12, SJ6 24 */
+-    uint32_t gateTicks;                 /* seqGate % of arpSeqTempoMultiplier (UINT32_MAX = 100 %) */
+     uint8_t clocked;                    /* DnBOX: transport clock owns mStepCounter / mBeatTime */
++#if X0X_SJ6_SEQ_SETTINGS_NATIVE
++    #if X0X_SJ6_SEQ_DEST_NATIVE
++    uint8_t saga_layers;              /* scheduler only; 0 default/BOTH */
++#endif
++    uint8_t saga_snap_native;          /* external-only Juno start snap contract */
++#endif
++#if X0X_S1_SCALE_NATIVE
++    uint8_t npo; /* 0 legacy/12ET, positive S1 notes per octave */
++#endif
+ } S1SequencerParams;
+ 
+ typedef void (*KeyOnCallback)(void *ctx, int note, int velocity);
+@@ -58,9 +95,27 @@
+     int mStepCounter;
+     int lastPosition;                   /* DnBOX H3: sequence position that last sounded */
+     int mStepBase;                      /* DnBOX: ARP order restarts here (press / transport start) */
++#if defined(X0X_SJ6_GATE_DEADLINE_PROBE) && X0X_SJ6_GATE_DEADLINE_PROBE
++    uint32_t editGateTicks;           /* already dispatched step's original deadline */
++    uint8_t editGateLatched;
++#elif X0X_SJ6_NATIVE_POSITIVE_GATE
++    uint32_t liveGateTicks;            /* prior active Saga deadline */
++#if X0X_SJ6_NATIVE_ZERO_GATE
++    uint8_t liveGateLatched;          /* zero is itself a deadline */
++#endif
++#endif
++#if X0X_SJ6_SEQ_SETTINGS_NATIVE
++    uint8_t saga_wait_first;           /* no note dispatched before the first grid boundary */
++#endif
+     uint8_t gateOpen;
+     uint8_t sequencerLastNotesCount;
+     uint8_t sequencerLastNotes[S1_SEQ_MAX_HELD];
++#if X0X_SUPERJ6_BUILTIN_INIT
++#if (defined(X0X_SJ6_RANDOM2_PROBE) && X0X_SJ6_RANDOM2_PROBE) || X0X_SJ6_NATIVE_RANDOM2
++    uint32_t saga_random_state;
++#endif
++    uint8_t saga_index;
++#endif
+ } S1Sequencer;
+ 
+ void S1Sequencer_init(S1Sequencer *);
+@@ -71,8 +126,16 @@
+ /* One sample of S1Sequencer::process. held = heldNoteNumbersAE (newest first). */
+ void S1Sequencer_process(S1Sequencer *, const S1SequencerParams *, const NoteNumber *held, int heldCount,
+                          void *ctx, KeyOnCallback on, KeyOffCallback off);
++#if X0X_S1_FENCED_CLOCK
++typedef struct { int reset, trigger, index; } S1ClockPulse;
++void S1Sequencer_processOriginal(S1Sequencer *, const S1SequencerParams *,
++    const NoteNumber *, int, void *, KeyOnCallback, KeyOffCallback, const S1ClockPulse *);
++#endif
+ int S1Sequencer_getArpBeatCount(const S1Sequencer *);
+ /* Set the step length (and its gate) in ticks. */
++#if X0X_SJ6_GATE_DEADLINE_PROBE || X0X_SJ6_NATIVE_POSITIVE_GATE
++void S1Sequencer_liveGate(S1Sequencer *,S1SequencerParams *,unsigned percent);
++#endif
+ void S1Sequencer_setStep(S1SequencerParams *, uint32_t ticks);
+ /* DnBOX: follow the transport. step/phase = clock position before this sample's
+  * increment (step -1 just before the first step); force = transport (re)start. */
+--- a/firmware/src/gfx.c
++++ b/firmware/src/gfx.c
+@@ -87,6 +87,11 @@
+ #define CV_MAX (240u * CV_ROWS)
+ _Static_assert(CV_ROWS >= 82u, "screen strip shorter than the knob row");
+ static uint16_t cv_px[CV_MAX] __attribute__((section(".pool")));
++#if X0X_LCD_CANVAS_FILL_SCRATCH
++_Static_assert(CV_MAX >= 240u, "LCD fill needs one full row");
++static uint16_t *lcd_fill_scratch(void) { return cv_px; }
++#undef lcd_fillbuf
++#endif
+ static uint32_t cv_w, cv_h;
+ static int32_t cv_oy;            /* y offset for graph drawing */
+ static int32_t cv_y0, cv_y1;     /* X0X: the rows drawing may touch (cv_band) */
+--- a/firmware/src/lcd.c
++++ b/firmware/src/lcd.c
+@@ -80,7 +80,12 @@
+     lcd_cmd(0x2C);
+ }
+ 
+-#if BOARD_SMK37
++#if X0X_LCD_CANVAS_FILL_SCRATCH
++/* Full-screen fill calls retire the previous canvas; the next drawing
++ * route calls cv_begin before blitting. Wait on any read before reuse. */
++static uint16_t *lcd_fill_scratch(void);
++#define lcd_fillbuf (lcd_fill_scratch())
++#elif BOARD_SMK37
+ static uint16_t lcd_fillbuf[240] SMK_BIG;
+ #else
+ static uint16_t lcd_fillbuf[240];
+@@ -188,7 +193,7 @@
+  * padled_flush() only sends when a colour changed. */
+ #define PADLED_N 16u
+ #define PADLED_LATCH 250u
+-static uint8_t padled_buf[PADLED_LATCH + PADLED_N * 24u] SMK_BIG;   /* (zeroed at boot: the latch stays 0) */
++static uint8_t padled_buf[PADLED_LATCH + PADLED_N * 24u];   /* (zeroed at boot: the latch stays 0) */
+ static uint32_t padled_rgb[PADLED_N];
+ static uint8_t padled_dirty = 1;
+ /* hardware pad (0..7 top row, 8..15 bottom row, left to right; smk_input.h SMK_PAD_OF_WHITE) -> position in
+--- a/firmware/src/usb.c
++++ b/firmware/src/usb.c
+@@ -362,7 +362,7 @@
+  * full SXQ/MQ, but a refused Device Inquiry / intro must retry once space frees. */
+ static uint8_t usb_sx_reply, usb_sx_ch;
+ 
+-static void usb_sx_answer(void)
++__attribute__((noinline)) static void usb_sx_answer(void)
+ {
+     uint8_t m[35];
+     uint32_t i, n;
+@@ -504,7 +504,7 @@
+ static const uint8_t STR2[] = {18, 3, 'X', 0, '0', 0, 'X', 0, ' ', 0, 'F', 0, 'M', 0, '-', 0, '1', 0};   /* legacy */
+ #endif
+ 
+-static int get_desc(uint32_t wvalue, const uint8_t **d, uint16_t *l)
++__attribute__((noinline)) static int get_desc(uint32_t wvalue, const uint8_t **d, uint16_t *l)
+ {
+     switch (wvalue >> 8) {
+     case 1:
+@@ -578,7 +578,7 @@
+     sie_wr(S_TXCSR2, 0x40);                             /* ISO */
+ }
+ 
+-static void uac_stream(uint32_t alt)                    /* SET_INTERFACE, configuration, bus reset */
++__attribute__((noinline)) static void uac_stream(uint32_t alt)                    /* SET_INTERFACE, configuration, bus reset */
+ {
+     uac.go = 0;                                         /* the next render primes the ring again */
+     uac.flowing = 0;                                    /* ... once the host has taken a packet */
+@@ -597,7 +597,7 @@
+ #endif
+ 
+ #if FELUCCA_UAC
+-static void uac_out_stream(uint32_t alt)                /* SET_INTERFACE (IF3), configuration, bus reset */
++__attribute__((noinline)) static void uac_out_stream(uint32_t alt)                /* SET_INTERFACE (IF3), configuration, bus reset */
+ {
+     uo.go = 0;
+     RING_PUBLISH();
+@@ -617,7 +617,7 @@
+ }
+ #endif
+ 
+-static void ep1_config(void)
++__attribute__((noinline)) static void ep1_config(void)
+ {
+     fm1_usb_ep_txbuf(1, ep1tx);
+     fm1_usb_ep_rxbuf(1, ep1rx);
+@@ -692,7 +692,7 @@
+     e0_chunk();
+ }
+ 
+-static void ep0_service(void)
++__attribute__((noinline)) static void ep0_service(void)
+ {
+     static const uint8_t zero2[2];
+     uint32_t csr, i;
+@@ -1036,7 +1036,7 @@
+ static uint8_t usb_link_st;
+ #endif
+ 
+-static void ep1_rx(void)
++__attribute__((noinline)) static void ep1_rx(void)
+ {
+     uint32_t csr, n, i;
+     sie_wr(S_INDEX, 1);
+@@ -1103,6 +1103,15 @@
+     sx_busy = 0;
+     return 0;
+ }
++/* DNR3 Remote replies and notifications (app/remote_dnr3.h): never wait for the host; a frame that does
++ * not fit the ring now is dropped (the Remote retries, or re-reads on the revision gap). */
++#if X0X_REMOTE_DNR3
++void remote_dnr3_out(const uint8_t *frame, uint32_t n)
++{
++    if (!sx_busy && SXQ - (so_w - so_r) >= (n + 2u) / 3u)
++        (void)ota_wire_send(frame, n);
++}
++#endif
+ static int ota_frame_get(const uint8_t **p, uint32_t *n)
+ {
+     if (!sx_ready)
+@@ -1128,7 +1137,7 @@
+     ep1tx[n + 3] = (uint8_t)(pkt >> 24);
+ }
+ 
+-static void ep1_tx(void)
++__attribute__((noinline)) static void ep1_tx(void)
+ {
+     uint32_t csr, n = 0;
+     /* Retry a sticky APC SysEx reply after TX drain frees ring space (ISR-safe). */
+--- a/firmware/src/x0x.c
++++ b/firmware/src/x0x.c
+@@ -5,6 +5,10 @@
+  * units compiled at -O2 by tools/build.py; this one is -Os. Order matters. */
+ #include <stdint.h>
+ #include "fm1_time.h"
++#ifndef X0X_REMOTE_DNR3
++#define X0X_REMOTE_DNR3 1                   /* the DNR3 Remote protocol (app/remote_dnr3.c) */
++#endif
++#include "app/remote_dnr3.h"         /* X0X_REMOTE_DNR3 */
+ #include "fm1_sys.h"
+ #include "fm1_irq.h"
+ #include "fm1_guard.h"
+@@ -32,6 +36,9 @@
+ 
+ #include "libc.c"
+ #include "app/lcd_trace.h"        /* opt-in hardware timing; off in production */
++#if BOARD_SMK37 && !defined(X0X_HOST)
++#define X0X_LCD_CANVAS_FILL_SCRATCH 1
++#endif
+ #include "lcd.c"
+ #include "gfx.c"
+ 
+@@ -188,6 +195,12 @@
+ #ifndef X0X_BLE
+ #define X0X_BLE BOARD_SMK37          /* Bluetooth MIDI through a separate controller image (src/ble.c) */
+ #endif
++#ifndef X0X_REMOTE_BLE
++#define X0X_REMOTE_BLE 0  /* USB DNR3 must not implicitly enable unqualified BLE Remote. */
++#endif
++#if X0X_REMOTE_BLE && (!X0X_BLE || !X0X_REMOTE_DNR3)
++#error "DNR3 over BLE requires both transports"
++#endif
+ #if X0X_BLE
+ #include "ble.c"
+ #endif
+@@ -211,4 +224,9 @@
+ #include "app/smc_mixer.c"
+ #endif
+ #include "app/editor.c"
++#if X0X_REMOTE_DNR3
++#define REMOTE_DNR3_BUSY() (ED_MAINTENANCE_HELD() || ed_project.mode || ui_project_busy())
++#define REMOTE_DNR3_OUTBUF ed_out           /* the editor's reply buffer: both build and send in ed_service */
++#include "app/remote_dnr3.c"          /* DNR3 Remote protocol (ed_service dispatches it) */
++#endif
+ #include "app/main_fm1.c"
+--- a/tools/build.py
++++ b/tools/build.py
+@@ -138,6 +138,19 @@
+ ]
+ 
+ # Native and host front ends import this same source composition.
++def synth_controls_init_only():
++    # The combined development controls profile is bank-free by default.
++    # Explicit 0 is only for reproducing earlier banked build receipts.
++    dual_controls = (BOARD == "smk37" and MODEL in ("elite", "pro") and
++                     S1C == "1" and SUPERJ6_FACTORY == "1" and
++                     os.environ.get("X0X_SUPERJ6_BUILTIN_INIT") == "1" and
++                     synthone_patch_setting() == "1")
++    value = os.environ.get("X0X_SYNTH_CONTROLS_INIT_ONLY", "1" if dual_controls else "0")
++    if value not in ("0", "1"):
++        raise SystemExit("X0X_SYNTH_CONTROLS_INIT_ONLY: 0 or 1")
++    return value == "1"
++
++
+ SUPERJ6_FACTORY = os.environ.get("X0X_SUPERJ6_FACTORY", "0")
+ if SUPERJ6_FACTORY not in ("0", "1"):
+     raise SystemExit("X0X_SUPERJ6_FACTORY: 0 or 1")
+@@ -220,6 +233,7 @@
+ MODEL = "pro"                       # current USB app name variant, set by --model
+ VERSION = None                      # numeric X.Y.Z passed to the firmware as X0X_VERSION
+ GIT_SHA = None                      # short source revision, diagnostics only
++GIT_SHA_BYTES = None                # complete DNR3 source identity
+ RELEASE_LABEL = None                # display only, e.g. 0.1.3_openbeta; not part of the package identity
+ 
+ 
+@@ -472,8 +486,19 @@
+     flags = [*flags, "-DX0X_SYNTHONE_PATCH=" + synthone_patch]
+     if SUPERJ6_FACTORY == "1":
+         flags = [*flags, "-DX0X_SUPERJ6_FACTORY=1"]
++    sj6_builtin_init = os.environ.get("X0X_SUPERJ6_BUILTIN_INIT", "0")
++    if sj6_builtin_init not in ("0", "1") or sj6_builtin_init == "1" and SUPERJ6_FACTORY != "1":
++        raise SystemExit("X0X_SUPERJ6_BUILTIN_INIT requires X0X_SUPERJ6_FACTORY=1")
++    if sj6_builtin_init == "1":
++        flags = [*flags, "-DX0X_SUPERJ6_BUILTIN_INIT=1"]
+     if S1C == "1":
+         flags = [*flags, "-DX0X_S1C=1"]
++    init_only = synth_controls_init_only()
++    if init_only:
++        if not (BOARD == "smk37" and MODEL in ("elite", "pro") and
++                S1C == "1" and synthone_patch == "1" and sj6_builtin_init == "1"):
++            raise SystemExit("Init-only controls require SMK Elite/Pro, compact Synth One editor and built-in SuperJ6 Init")
++        flags = [*flags, "-DX0X_SYNTH_CONTROLS_INIT_ONLY=1"]
+     chance_probe = os.environ.get("X0X_GFINAL_CHANCE_PROBE", "1")
+     if chance_probe not in ("0", "1"):
+         raise SystemExit("X0X_GFINAL_CHANCE_PROBE: 0 or 1")
+@@ -500,6 +525,8 @@
+         original_flags = [*flags, *ORIGINAL_SYNTH_FLAGS]
+         original_o2 = [*o2, *ORIGINAL_SYNTH_FLAGS]
+         for u in (*ORIGINAL_SYNTH_UNITS, *ORIGINAL_SYNTH_BACKENDS):
++            if init_only and Path(u).stem == "s1pack":
++                continue
+             o = OUT / "original" / (Path(u).stem + ".o")
+             uf = original_o2 if Path(u).stem in ORIGINAL_SYNTH_O2_UNITS else original_flags
+             if Path(u).stem in ORIGINAL_SYNTH_OZ_UNITS:
+@@ -534,7 +561,7 @@
+     flags = [*CFLAGS, *FPU, *BOARD_DEFS[BOARD], "-Ifirmware/hal", "-Ifirmware/src",
+              f"-I{GEN.relative_to(SRC)}"]
+     factory_roots = []
+-    if SUPERJ6_FACTORY == "1":
++    if SUPERJ6_FACTORY == "1" and not synth_controls_init_only():
+         names = ["engine_superj6_factory_load"]
+         if synthone_patch_setting() != "1":
+             names.extend(("engine_superj6_edit", "engine_superj6_pre_note_wave"))
+@@ -556,7 +583,7 @@
+         flags.append(usb_name)  # app only: loader, VID/PID and package identity unchanged
+     if VERSION and os.environ.get("X0X_DEBUG") == "1":
+         raise SystemExit("X0X_DEBUG=1 (register peek / poke over USB) is for development builds only")
+-    for flag in ("X0X_CDC", "X0X_DEBUG", "X0X_DEV_WOBBLE", "X0X_WOBBLE", "X0X_LCD_TRACE"):
++    for flag in ("X0X_CDC", "X0X_DEBUG", "X0X_DEV_WOBBLE", "X0X_WOBBLE", "X0X_LCD_TRACE", "X0X_REMOTE_DNR3", "X0X_REMOTE_TYPED_SYNTH"):
+         v = os.environ.get(flag)    # unset: the default in firmware headers / below
+         if v in ("0", "1"):
+             flags.append(f"-D{flag}={v}")
+@@ -594,7 +621,7 @@
+             if not re.fullmatch(r"[0-8]", baud):
+                 raise SystemExit("X0X_SMK_LCD_BAUD: 0..8 (SPI clock = 60 MHz / (n + 1))")
+             flags.append(f"-DLCD_BAUD={baud}u")
+-    flags += version_defines(VERSION, RELEASE_LABEL, GIT_SHA)
++    flags += version_defines(VERSION, RELEASE_LABEL, GIT_SHA, GIT_SHA_BYTES)
+     units, objs = app_compile_commands(flags, original_synth, wobble)
+     for directory in {o.parent for o in objs}:
+         directory.mkdir(parents=True, exist_ok=True)
+@@ -776,7 +803,7 @@
+     """the FL_FDATA region the loader writes (the payload, then 0xFF to FL_FDATA_SIZE). SMK only; None
+     when the flash map has no FDATA or there is no payload."""
+     lo, hi = fdata_region()
+-    if BOARD != "smk37" or lo == hi:
++    if BOARD != "smk37" or lo == hi or synth_controls_init_only():
+         return None
+     raw = fdata_payload()
+     if raw is None:
+@@ -937,10 +964,10 @@
+     version = canonical_version(text)
+     if not isinstance(git_sha, str) or not re.fullmatch(r"[0-9a-f]{40}", git_sha):
+         raise ValueError("Git SHA must be 40 lowercase hexadecimal characters")
+-    return {"version_macro": version, "git_sha": git_sha[:8]}
+-
+-
+-def version_defines(version, release_label, git_sha):
++    return {"version_macro": version, "git_sha": git_sha[:8], "git_sha_bytes": bytes.fromhex(git_sha)}
++
++
++def version_defines(version, release_label, git_sha, sha_bytes=None):
+     """Application-only defines shared by UI, editor and USB display text."""
+     flags = []
+     if version:
+@@ -949,11 +976,14 @@
+         flags.append(f'-DX0X_RELEASE_LABEL="{release_label}"')
+     if git_sha:
+         flags.append(f'-DX0X_GIT_SHA="{git_sha}"')
++    if sha_bytes is not None:
++        assert isinstance(sha_bytes, bytes) and len(sha_bytes) == 20
++        flags.append("-DX0X_DNR3_GIT_SHA_BYTES={" + ",".join(str(byte) for byte in sha_bytes) + "}")
+     return flags
+ 
+ 
+ def main():
+-    global PRODUCT, VERSION, GIT_SHA, RELEASE_LABEL, BOARD, MODEL, APP_SLOT, APP_CODE_MAX, OUT, GEN, LDR
++    global PRODUCT, VERSION, GIT_SHA, GIT_SHA_BYTES, RELEASE_LABEL, BOARD, MODEL, APP_SLOT, APP_CODE_MAX, OUT, GEN, LDR
+     ap = argparse.ArgumentParser()
+     versions = ap.add_mutually_exclusive_group()
+     versions.add_argument("--release", metavar="X.Y[.Z]", help="release build: numeric package identity and version string")
+@@ -1015,13 +1045,14 @@
+     # image from that directory, even if a host test is generating it concurrently.
+     GEN = OUT / ("native-gen" if BOARD == "fm1" else "gen")
+     name = f"{stem}.fwsc"
+-    VERSION = GIT_SHA = None
++    VERSION = GIT_SHA = GIT_SHA_BYTES = None
+     RELEASE_LABEL = None
+     if nightly:
+         if BOARD != "smk37" or MODEL not in ("elite", "pro"):
+             ap.error("--nightly-version supports SMK-37 Elite/Pro only")
+         VERSION = nightly["version_macro"]
+         GIT_SHA = nightly["git_sha"]
++        GIT_SHA_BYTES = nightly["git_sha_bytes"]
+     if a.release:
+         # identity FM-1_9 + major, minor, patch as two digits each (0.10 -> FM-1_9001000). FM-1 is the
+         # model the update tools match on; the number is ours (X0X 0.3..0.9 were FM-1_9XY, one digit
+@@ -1074,6 +1105,7 @@
+         print(f"FDATA: {used} B of {len(fdata)} (flash {fdata_region()[0]:#x}), {len(fdata) - used} B spare")
+         (OUT / "fdata.img").write_bytes(fdata)
+     elif fm1pkg_make.FDATA_SIZE and BOARD == "smk37":
++        (OUT / "fdata.img").unlink(missing_ok=True)  # never leave a stale package input
+         print(f"FDATA: {fm1pkg_make.FDATA_SIZE} B region, no payload in this tree (no fdata.bin entry)")
+     if errors:
+         raise SystemExit("build: checks failed")
+--- a/tools/gen_drum_samples.py
++++ b/tools/gen_drum_samples.py
+@@ -23,6 +23,7 @@
+ The tables header is written next to the samples header.
+ """
+ import hashlib
++import heapq
+ import json
+ import math
+ import struct
+@@ -108,6 +109,20 @@
+         lines.append("    " + ", ".join(fmt(v) for v in vals[i:i + per]) + ",")
+     lines.append("};")
+     return "\n".join(lines)
++
++
++def tanh_split_decl(tab):
++    split=400
++    bits=[bits32(x) for x in tab]
++    assert len(bits)==1026 and all(b&0xffff0000==0x3f7f0000 for b in bits[split:])
++    head=b"".join(struct.pack("<I",b) for b in bits[:split])
++    tail=b"".join(struct.pack("<H",b&0xffff) for b in bits[split:])
++    assert hashlib.sha256(head).hexdigest()=="9cce98ce40e37b6b28e389229844eca61b153116956a1d9afc350f5c5c4defea"
++    assert hashlib.sha256(tail).hexdigest()=="6f4f3d420d74dc070615a53c0aeca829dbe778619041ac122f9b12872a5f9a27"
++    assert head+b"".join(struct.pack("<I",0x3f7f0000|(b&0xffff)) for b in bits[split:])==b"".join(struct.pack("<I",b) for b in bits)
++    return "\n".join(["#define X0X_TANH_LAB_SPLIT 400",
++        arr("float","x0x_tanh_lab_head",tab[:split],cfloat,per=6,shared=True),
++        arr("uint16_t","x0x_tanh_lab_tail",[b&0xffff for b in bits[split:]],lambda b:f"0x{b:04x}u",per=10,shared=True)])
+ 
+ 
+ def pot_exp(lo, hi, pot):
+@@ -236,6 +251,57 @@
+     Path(target.name).replace(path)
+ 
+ 
++def huffman_cymbals(samples):
++    """Deterministic shared 6-bit-prefix coding of the exact IMA nibbles."""
++    nibbles = [[(data[i >> 1] >> (4 * (i & 1))) & 15 for i in range(n)]
++               for _, n, data in samples]
++    counts = [0] * 16
++    for voice in nibbles:
++        for x in voice:
++            counts[x] += 1
++    heap = [(n, (x,)) for x, n in enumerate(counts)]
++    heapq.heapify(heap)
++    lens = [0] * 16
++    while len(heap) > 1:
++        a, kids_a = heapq.heappop(heap)
++        b, kids_b = heapq.heappop(heap)
++        kids = kids_a + kids_b
++        for x in kids:
++            lens[x] += 1
++        heapq.heappush(heap, (a + b, kids))
++    assert max(lens) == 6
++    lookup = [0] * 64
++    codes = [0] * 16
++    code = previous = 0
++    for x in sorted(range(16), key=lambda x: (lens[x], x)):
++        n = lens[x]
++        code <<= n - previous
++        bit_order = sum(((code >> k) & 1) << (n - 1 - k) for k in range(n))
++        codes[x] = bit_order
++        for entry in range(bit_order, 64, 1 << n):
++            assert lookup[entry] == 0
++            lookup[entry] = (n << 4) | x
++        code += 1
++        previous = n
++    assert all(lookup)
++    output = []
++    for (name, _, _), voice in zip(samples, nibbles):
++        raw = bytearray()
++        word = bits = 0
++        for x in voice:
++            word |= codes[x] << bits
++            bits += lens[x]
++            if bits >= 8:
++                raw.append(word & 255)
++                word >>= 8
++                bits -= 8
++        if bits:
++            raw.append(word)
++        raw.append(0)  # final fixed 2-byte lookahead may reach this guard byte
++        output.append((name, raw))
++    return lookup, output
++
++
+ def main():
+     out_s = Path(sys.argv[1]) if len(sys.argv) > 1 else SRC / "build" / "gen" / "x0x_drum_samples.h"
+     out_t = out_s.parent / "x0x_drum_tables.h"
+@@ -249,6 +315,7 @@
+     total = nbytes = 0
+     encoded_dir = ASSETS / "encoded"
+     manifest = json.loads((encoded_dir / "manifest.json").read_text())
++    streams, plain = [], []
+     for name, fn in SAMPLES:
+         wav = ASSETS / fn
+         pcm, bits = read_wav(wav)
+@@ -262,8 +329,12 @@
+         nbytes += len(data)
+         hdr.append(f"/* {fn}: {len(pcm)} frames, source {bits}-bit, {len(data)} B of ADPCM */")
+         hdr.append(f"#define {name.upper()}_LEN {len(pcm)}u")
+-        hdr.append(arr("uint8_t", name, list(data), per=24))
+-        hdr.append("")
++        streams.append((name, len(pcm), data))
++        plain.append(arr("uint8_t", name, list(data), per=24))
++    lut, packed = huffman_cymbals(streams)
++    hdr += ["", "#if X0X_909_HUFF_DIAG", arr("uint8_t", "x0x_smp_huff_lut", lut, per=16)]
++    hdr += [arr("uint8_t", name, list(data), per=24) for name,data in packed]
++    hdr += ["#else", *plain, "#endif", ""]
+     write_header(out_s, "\n".join(hdr))
+ 
+     tab = [f32(math.tanh(TANH_MAX * i / TANH_N)) for i in range(TANH_N + 2)]
+@@ -295,6 +366,7 @@
+           " * Retain the packed representation above for the old decoder oracle.",
+           " * cfloat emits a decimal literal that round-trips to the same binary32. */",
+           arr("float", "x0x_tanh_raw", tab, cfloat, per=6, shared=True),
++          "#if X0X_TANH_SPLIT_LAB", tanh_split_decl(tab), "#endif",
+           "/* Exact binary32 table entry i (0 .. X0X_TANH_N+1). Hot-path inline. */",
+           "static inline float x0x_tanh_value(unsigned i)",
+           "{",
+--- a/experiments/original_synth/chicago_drive.c
++++ b/experiments/original_synth/chicago_drive.c
+@@ -1,6 +1,11 @@
+ /* SPDX-License-Identifier: GPL-3.0-only */
+ #include "chicago_drive.h"
+ #include "chicago_drive_private.h"
++#ifdef DNBOX_CHICAGO_DRIVE_COMPACT
++#define drive_word(i) ((i)==127u?32767:(int32_t)((i)*258u))
++#else
++#define drive_word(i) (original_drive_table[(i)])
++#endif
+ #include <limits.h>
+ #include <string.h>
+ static int32_t si(uint32_t u){return u<=INT32_MAX?(int32_t)u:(int32_t)((int64_t)u-4294967296LL);}
+@@ -16,7 +21,7 @@
+ void original_chicago_drive_reset(original_chicago_drive *s){if(!s)return;s->drive=shl(s->target_drive,15);s->gain=shl(s->target_gain,15);s->threshold=0;memset(s->previous_driven,0,sizeof s->previous_driven);memset(s->previous_nonlinear,0,sizeof s->previous_nonlinear);}
+ int original_chicago_drive_set(original_chicago_drive *s,unsigned parameter,unsigned value){
+  if(!s||value>127||(parameter!=2&&parameter!=3))return 0;
+- if(parameter==2){s->edit1=(uint8_t)value;s->target_drive=original_drive_table[value];}
++ if(parameter==2){s->edit1=(uint8_t)value;s->target_drive=drive_word(value);}
+  else{s->edit2=(uint8_t)value;s->target_gain=1279+asr(mul(original_drive_gain_table[value],31489),15);}
+  return 1;
+ }
+--- /dev/null
++++ b/experiments/original_synth/chicago_mod_speed_compact_generated.h
+@@ -0,0 +1,4 @@
++/* Local verified generated data; never commit. */
++static const uint8_t mod_speed_lo[78]={0,0,1,0,6,0,13,0,25,0,68,0,103,0,151,0,39,1,140,1,10,2,164,2,59,4,65,5,115,6,215,7,72,11,95,13,191,15,107,18,198,24,130,28,166,32,58,37,205,47,221,53,124,60,179,67,12,84,64,93,48,103,230,113,206,137,19,151,73,165,122,180,176,196,93,232,236,251};
++static const uint8_t mod_speed_mid[153]={176,16,1,11,62,1,188,86,1,215,112,1,124,169,1,36,200,1,107,232,1,98,10,2,153,83,2,246,122,2,63,164,2,131,207,2,61,44,3,212,93,3,167,145,3,71,0,4,55,59,4,169,120,4,174,184,4,190,64,5,238,136,5,251,211,5,254,114,6,26,199,6,99,30,7,236,120,7,18,56,8,217,156,8,52,5,9,250,224,9,146,84,10,20,204,10,52,199,11,255,74,12,16,211,12,99,240,13,212,133,14,104,98,16,1,11,17,100,35,19,184,224,19,184,57,22,243,230,23,4,172,25,203,137,27,40,129,29,1,147,31,65,192,33,212,9,36,173,112,38,194,245,40};
++static const uint8_t mod_speed_tail[5]={128,253,255,255,15};
+--- a/experiments/original_synth/chicago_modulation.c
++++ b/experiments/original_synth/chicago_modulation.c
+@@ -5,6 +5,33 @@
+ #define ORIGINAL_MODULATION_COEFFICIENTS "modulation_private.h"
+ #endif
+ #include ORIGINAL_MODULATION_COEFFICIENTS
++#ifdef DNBOX_CHICAGO_MOD_SPEED_COMPACT
++#include "chicago_mod_speed_compact_generated.h"
++static __attribute__((noinline)) int32_t palette_mod_speed(unsigned v)
++{
++ if(v<39u){const uint8_t *p=mod_speed_lo+2u*v;return p[0]|((uint32_t)p[1]<<8);}
++ if(v<90u){const uint8_t *p=mod_speed_mid+3u*(v-39u);return p[0]|((uint32_t)p[1]<<8)|((uint32_t)p[2]<<16);}
++ unsigned i=v-90u, t=(i*(i-1u))>>1;
++ return 2705732u+42756u*t+64134u*i+((86u*t+156u*i)>>8)-((mod_speed_tail[i>>3]>>(i&7u))&1u);
++}
++#else
++#define palette_mod_speed(v) (mod_speed[(v)])
++#endif
++#ifdef DNBOX_CHICAGO_MOD_PALETTE
++static inline int32_t palette_mod_feedback(unsigned v) { return v<=32u ? 0 : (int32_t)(((v-32u)*699339u)>>11); }
++#else
++#define palette_mod_feedback(v) (mod_feedback[(v)])
++#endif
++#ifdef DNBOX_CHICAGO_MOD_PALETTE
++static inline int32_t palette_mod_wet(unsigned v) { return v>=32u ? 32767 : (int32_t)(v<<10); }
++#else
++#define palette_mod_wet(v) (mod_wet[(v)])
++#endif
++#ifdef DNBOX_CHICAGO_MOD_PALETTE
++static inline int32_t palette_mod_linear(unsigned v) { return v==127u ? 32767 : (int32_t)(v*258u); }
++#else
++#define palette_mod_linear(v) (mod_linear[(v)])
++#endif
+ #include <string.h>
+ #include <limits.h>
+ #include <assert.h>
+@@ -35,13 +62,13 @@
+  memset(s,0,sizeof *s);
+  s->edit1=s->edit2=64;
+  s->dirty=1;
+- s->pending_frequency=asr(mod_linear[64]*3,3);s->pending_wet=mod_linear[64];
++ s->pending_frequency=asr(palette_mod_linear(64)*3,3);s->pending_wet=palette_mod_linear(64);
+ }
+ void original_chicago_ring_reset(original_chicago_ring *s){if(s){s->frequency_acc=shl(s->frequency,15);s->wet_acc=shl(s->wet,15);s->phase=0;}}
+ int original_chicago_ring_set(original_chicago_ring *s,unsigned p,unsigned v){
+  if(!s||v>127||(p!=2&&p!=3))return 0;
+  if(p==2)s->edit1=(uint8_t)v;else s->edit2=(uint8_t)v;
+- s->pending_frequency=asr(mod_linear[s->edit1]*3,3);s->pending_wet=mod_linear[s->edit2];s->dirty=1;return 1;
++ s->pending_frequency=asr(palette_mod_linear(s->edit1)*3,3);s->pending_wet=palette_mod_linear(s->edit2);s->dirty=1;return 1;
+ }
+ int original_chicago_ring_process(original_chicago_ring *s,int16_t *l,int16_t *r,uint32_t n){
+  if(!s||(n&&(!l||!r||l==r)))return 0;
+@@ -80,7 +107,7 @@
+  if(!s||v>127||(p!=2&&p!=3))return 0;
+  if(p==2)s->edit1=(uint8_t)v;
+  else s->edit2=(uint8_t)v;
+- s->pending_speed=mod_speed[s->edit1];s->pending_feedback=mod_feedback[s->edit2];s->pending_wet=mod_wet[s->edit2];s->dirty=1;return 1;
++ s->pending_speed=palette_mod_speed(s->edit1);s->pending_feedback=palette_mod_feedback(s->edit2);s->pending_wet=palette_mod_wet(s->edit2);s->dirty=1;return 1;
+ }
+ static int32_t feedback_twice(int32_t y){int32_t a=sub(shl(y,1),shl(y,15));for(unsigned j=0;j<2;j++)a=sub(shl(asr(a,15),1),si((uint32_t)a&0xffff8000u));return asr(a,15);}
+ int original_chicago_chorus_process(original_chicago_chorus *s,int16_t *l,int16_t *r,uint32_t n){
+@@ -109,9 +136,9 @@
+  memset(s,0,sizeof *s);
+  s->edit1=30;
+  s->edit2=63;
+- s->speed=mod_speed[30];
+- s->modulation=asr(mul(mod_linear[63],16102),15);
+- int32_t x=asr(sub(shl(mod_linear[120],15),mod_linear[120]),15);s->depth=(int32_t)((uint32_t)mul(x,x)>>15);s->feedback=asr(mul(mod_ph_feedback[40],32440),15);s->wet=mod_linear[64];
++ s->speed=palette_mod_speed(30);
++ s->modulation=asr(mul(palette_mod_linear(63),16102),15);
++ int32_t x=asr(sub(shl(palette_mod_linear(120),15),palette_mod_linear(120)),15);s->depth=(int32_t)((uint32_t)mul(x,x)>>15);s->feedback=asr(mul(mod_ph_feedback[40],32440),15);s->wet=palette_mod_linear(64);
+ }
+ void original_chicago_phaser_reset(original_chicago_phaser *s){
+  if(!s)return;
+@@ -124,7 +151,7 @@
+ }
+ int original_chicago_phaser_set(original_chicago_phaser *s,unsigned p,unsigned v){
+  if(!s||v>127||(p!=2&&p!=3))return 0;
+- if(p==2){s->edit1=(uint8_t)v;s->speed=mod_speed[v];}else{s->edit2=(uint8_t)v;s->modulation=asr(mul(mod_linear[v],16102),15);}
++ if(p==2){s->edit1=(uint8_t)v;s->speed=palette_mod_speed(v);}else{s->edit2=(uint8_t)v;s->modulation=asr(mul(palette_mod_linear(v),16102),15);}
+  return 1;
+ }
+ int original_chicago_phaser_process(original_chicago_phaser *s,int16_t *l,int16_t *r,uint32_t n){
+--- a/experiments/original_synth/chicago_packed.c
++++ b/experiments/original_synth/chicago_packed.c
+@@ -1,6 +1,40 @@
+ /* SPDX-License-Identifier: GPL-3.0-only */
+ #include "chicago_packed.h"
+-#ifdef X0X_CHICAGO_COMPACT_HEADERS
++#if defined(X0X_CHICAGO_FAST32) && X0X_CHICAGO_FAST32
++#include "p_a.h"
++#include "p_e.h"
++static uint16_t u16(const uint8_t *p){return (uint16_t)p[0]|(uint16_t)((uint16_t)p[1]<<8);}
++static uint32_t u32(const uint8_t *p){return (uint32_t)u16(p)|((uint32_t)u16(p+2)<<16);}
++static __attribute__((noinline)) uint32_t chicago_fast32_lookup(const unsigned char *t,unsigned idx){
++    unsigned i=idx&127,ns=u16(t+2);
++    const uint8_t *p=t+4+2*ns+u16(t+4+(idx>>7)*2);
++    unsigned degree=p[0]>>5,width=p[0]&31,q=p[9];
++    uint32_t base=u32(p+1),lo=u32(p+5);
++    p+=10;
++    int32_t coefficients[4];
++    for(unsigned j=0;j<=degree;j++){
++        uint32_t z=0;
++        unsigned b,count=0;
++        do{b=*p++;z|=(b&127u)<<count;count+=7;}while(b&128u);
++        coefficients[j]=(int32_t)((z>>1)^(0u-(z&1u)));
++    }
++    int32_t v=coefficients[degree];
++    for(unsigned j=degree;j>0;j--)v=coefficients[j-1]+((v*(int32_t)i)>>7);
++    if(q)v=(v+(int32_t)(1u<<(q-1)))>>q;
++    unsigned bit=i*width,shift=bit&7,rem=width;
++    uint32_t z=0;
++    p+=bit>>3;
++    if(rem){
++        unsigned take=8-shift;
++        if(take>rem)take=rem;
++        z=(unsigned)(*p++>>shift)&((1u<<take)-1u);
++        rem-=take;
++        while(rem){unsigned n=rem<8?rem:8;z|=((uint32_t)*p++&((1u<<n)-1u))<<take;take+=n;rem-=n;}
++    }
++    return base+lo+(uint32_t)v+z;
++}
++
++#elif defined(X0X_CHICAGO_COMPACT_HEADERS)
+ #include "chicago_compact_private.h"
+ static int chicago_compact_decode(const uint8_t *p,size_t bytes,uint32_t entries,uint32_t entry,uint32_t prefix,uint32_t *out){
+  if(bytes<7)return 0;
+@@ -58,7 +92,10 @@
+  uint32_t ab,eb,i0=last_index;
+  ab=last_a;eb=last_e;
+  if(i0!=index||last_index!=i0){
+-#ifdef X0X_CHICAGO_COMPACT_HEADERS
++#if defined(X0X_CHICAGO_FAST32) && X0X_CHICAGO_FAST32
++  if(index>16384u)return 0;
++  ab=chicago_fast32_lookup(p_a,index);eb=chicago_fast32_lookup(p_e,index);
++#elif defined(X0X_CHICAGO_COMPACT_HEADERS)
+   if(!chicago_compact_lookup(&original_chicago_packed_a,index,original_chicago_packed_a_prefix,&ab)||!chicago_compact_lookup(&original_chicago_packed_e,index,original_chicago_packed_e_prefix,&eb))return 0;
+ #else
+   if(!original_lossless_second16_lookup(&original_chicago_packed_a,index,&ab)||!original_lossless_second16_lookup(&original_chicago_packed_e,index,&eb))return 0;
+--- /dev/null
++++ b/experiments/original_synth/miami_cap_compact_generated.h
+@@ -0,0 +1,2 @@
++/* Local generated exact cap; do not commit. */
++const float original_miami_cap_compact[22]={0x1.29375a0000000p+0f,0x1.291f940000000p+0f,0x1.28d83e0000000p+0f,0x1.28615c0000000p+0f,0x1.27baea0000000p+0f,0x1.26e4ec0000000p+0f,0x1.25df5e0000000p+0f,0x1.24aa440000000p+0f,0x1.23459a0000000p+0f,0x1.21b1640000000p+0f,0x1.1fed9e0000000p+0f,0x1.1dfa4c0000000p+0f,0x1.1bd76a0000000p+0f,0x1.1984fa0000000p+0f,0x1.1702fe0000000p+0f,0x1.1451720000000p+0f,0x1.11705a0000000p+0f,0x1.0e5fb20000000p+0f,0x1.0b1f7c0000000p+0f,0x1.07afba0000000p+0f,0x1.0410680000000p+0f,0x1.00418a0000000p+0f};
+--- a/experiments/original_synth/miami_ms20.c
++++ b/experiments/original_synth/miami_ms20.c
+@@ -20,6 +20,19 @@
+ static float fl(uint32_t u){return original_math_float(u);}
+ static float clamp(float x,float lo,float hi){return x<lo?lo:x>hi?hi:x;}
+ static float lookup(const float *t,float q){if(q<=fl(0x3727c5ac))return t[0];if(q>=128)return t[128];unsigned j=(unsigned)q;return interpolate(t[j+1]-t[j],q-(float)j,t[j]);}
++#ifdef DNBOX_MIAMI_STOCK_CAP_COMPACT
++static float lookup_cap(const float *t,float q)
++{
++ if(!original_miami_cap_is_compact(t))return lookup(t,q);
++ if(q<=88.f)return t[0];
++ if(q>=109.f)return t[21];
++ unsigned j=(unsigned)q;
++ float a=t[j-88u],b=t[j-87u];
++ return interpolate(b-a,q-(float)j,a);
++}
++#else
++#define lookup_cap lookup
++#endif
+ static void stage(original_ramp *r,float target,float reciprocal){r->target=target;r->delta=(target-r->current)*reciprocal;}
+ static float advance(const original_ramp *r){float q=r->current+r->delta;if(r->delta>0){if(q>=r->target)q=r->target;}else if(r->delta<0){if(q<=r->target)q=r->target;}else q=r->target;return q;}
+ int original_miami_nonlinear(float x,float *out){
+@@ -51,11 +64,11 @@
+  float cutoff,float resonance,float depth,float env,float md,float mc,float mr,float noise,float mn,uint32_t duration){
+  if(!s||!t||!t->a||!t->b||!t->r||!t->cap||!duration||duration>2147482880u)return 0;
+  float controls[]={cutoff,resonance,depth,env,md,mc,mr,noise,mn};for(unsigned i=0;i<9;i++)if(!original_binary32_isfinite(controls[i]))return 0;
+- for(unsigned i=0;i<129;i++)if(!original_binary32_isfinite(t->a[i])||!original_binary32_isfinite(t->b[i])||!original_binary32_isfinite(t->r[i])||!original_binary32_isfinite(t->cap[i]))return 0;
++ for(unsigned i=0;i<129;i++)if(!original_binary32_isfinite(t->a[i])||!original_binary32_isfinite(t->b[i])||!original_binary32_isfinite(t->r[i])||!original_binary32_isfinite(original_miami_cap_at(t->cap,i)))return 0;
+  float r=resonance+mr;if(!original_binary32_isfinite(r)||r<0||r>1)return 0;
+  float d=clamp(depth+md,-1,1),z=ref_fma(env,d,cutoff),q=ref_fma(mc,128,z*128.0f);
+  if(!original_binary32_isfinite(q))return 0;
+- float a=lookup(t->a,q),b=lookup(t->b,q),cap=lookup(t->cap,q),R;
++ float a=lookup(t->a,q),b=lookup(t->b,q),cap=lookup_cap(t->cap,q),R;
+  if(r==1)R=t->r[128];else{float rq=r*128.0f;unsigned j=(unsigned)rq;R=interpolate(t->r[j+1]-t->r[j],rq-(float)j,t->r[j]);}
+  float target=R<=fl(0x3727c5ac)?fl(0x3727c5ac):(R<cap?R:cap);
+  float ng=clamp(noise+mn,0,1);ng=ng*ng+fl(0x3727c5ac);float reciprocal=1.0f/(float)duration;
+--- a/experiments/original_synth/miami_ms20.h
++++ b/experiments/original_synth/miami_ms20.h
+@@ -12,6 +12,19 @@
+ /* Authentic sample-rate-specific A/B/R and correctedcap arrays must each have
+  *129finite entries. This unit does NOT invent platform libm table bits. */
+ typedef struct {const float *a,*b,*r,*cap;} original_ms20_tables;
++
++/* The sole native stock marker has a certified flat prefix/suffix. All caller
++ * supplied cap pointers retain the original 129-element layout contract. */
++#ifdef DNBOX_MIAMI_STOCK_CAP_COMPACT
++extern const float original_miami_cap_compact[22];
++static inline int original_miami_cap_is_compact(const float *p)
++{ return p==original_miami_cap_compact; }
++static inline float original_miami_cap_at(const float *p,unsigned i)
++{ return p[original_miami_cap_is_compact(p) ? (i<=88u ? 0u : i>=109u ? 21u : i-88u) : i]; }
++#else
++#define original_miami_cap_at(p,i) ((p)[(i)])
++#endif
++
+ int original_miami_ms20_init(original_miami_ms20 *s,unsigned voice_index,float a0,float b0,float cap0);
+ /* Full note reset preserves noise history/gain; next prepare is mandatory. */
+ int original_miami_ms20_note_reset(original_miami_ms20 *s,float a0);
+--- a/experiments/original_synth/miami_selected_voice.c
++++ b/experiments/original_synth/miami_selected_voice.c
+@@ -26,7 +26,7 @@
+ }
+ static int tables_valid(const original_ms20_tables *in,const int32_t pitch[128]){
+  if(!in||!in->a||!in->b||!in->r||!in->cap||!pitch)return 0;
+- for(unsigned i=0;i<129;i++)if(!original_binary32_isfinite(in->a[i])||!original_binary32_isfinite(in->b[i])||!original_binary32_isfinite(in->r[i])||!original_binary32_isfinite(in->cap[i]))return 0;
++ for(unsigned i=0;i<129;i++)if(!original_binary32_isfinite(in->a[i])||!original_binary32_isfinite(in->b[i])||!original_binary32_isfinite(in->r[i])||!original_binary32_isfinite(original_miami_cap_at(in->cap,i)))return 0;
+  for(unsigned i=0;i<128;i++)if(pitch[i]<=0||(i&&pitch[i]<=pitch[i-1]))return 0;
+  return 1;
+ }
+@@ -36,7 +36,14 @@
+ }
+ int original_miami_voice_tables_init(original_miami_voice_tables *out,original_miami_voice_table_storage *storage,const original_ms20_tables *in,const int32_t pitch[128]){
+  if(!out||!storage||!tables_valid(in,pitch))return 0;
+- memcpy(storage->a,in->a,sizeof storage->a);memcpy(storage->b,in->b,sizeof storage->b);memcpy(storage->r,in->r,sizeof storage->r);memcpy(storage->cap,in->cap,sizeof storage->cap);memcpy(storage->pitch,pitch,sizeof storage->pitch);
++ memcpy(storage->a,in->a,sizeof storage->a);memcpy(storage->b,in->b,sizeof storage->b);memcpy(storage->r,in->r,sizeof storage->r);
++#ifdef DNBOX_MIAMI_STOCK_CAP_COMPACT
++ if(original_miami_cap_is_compact(in->cap)){
++  for(unsigned i=0;i<129;i++)storage->cap[i]=original_miami_cap_at(in->cap,i);
++ }else
++#endif
++ memcpy(storage->cap,in->cap,sizeof storage->cap);
++ memcpy(storage->pitch,pitch,sizeof storage->pitch);
+  original_miami_voice_tables t;memset(&t,0,sizeof t);t.filter=(original_ms20_tables){storage->a,storage->b,storage->r,storage->cap};t.pitch=storage->pitch;t.ready=TABLE_READY;*out=t;return 1;
+ }
+ static int program_valid(const original_miami_program *p){
+@@ -131,6 +138,19 @@
+ }
+ #ifndef MIAMI_VOICE_CHECKED_TABLE_PREP
+ static float lookup(const float t[129],float q){if(q<=fl(0x3727c5ac))return t[0];if(q>=128)return t[128];unsigned j=(unsigned)q;return table_fma(t[j+1]-t[j],q-(float)j,t[j]);}
++#ifdef DNBOX_MIAMI_STOCK_CAP_COMPACT
++static float lookup_cap(const float *t,float q)
++{
++ if(!original_miami_cap_is_compact(t))return lookup(t,q);
++ if(q<=88.f)return t[0];
++ if(q>=109.f)return t[21];
++ unsigned j=(unsigned)q;
++ float a=t[j-88u],b=t[j-87u];
++ return table_fma(b-a,q-(float)j,a);
++}
++#else
++#define lookup_cap lookup
++#endif
+ static void stage(original_ramp *r,float target,float reciprocal){r->target=target;r->delta=(target-r->current)*reciprocal;}
+ #endif
+ /* Identical selected MS20 preparation arithmetic to the checked dependency.
+@@ -142,7 +162,7 @@
+  (void)original_miami_ms20_prepare(s,&tables,c->cutoff,c->resonance,c->env_depth,env,0,mc,0,c->noise,0,D);
+ #else
+  float d=clamp(c->env_depth+0.0f,-1,1),z=ref_fma(env,d,c->cutoff),q=ref_fma(mc,128,z*128.0f);
+- float a=lookup(t->filter.a,q),b=lookup(t->filter.b,q),cap=lookup(t->filter.cap,q),r=c->resonance+0.0f,R;
++ float a=lookup(t->filter.a,q),b=lookup(t->filter.b,q),cap=lookup_cap(t->filter.cap,q),r=c->resonance+0.0f,R;
+  if(r==1)R=t->filter.r[128];else {float rq=r*128.0f;unsigned j=(unsigned)rq;R=table_fma(t->filter.r[j+1]-t->filter.r[j],rq-(float)j,t->filter.r[j]);}
+  float target=R<=fl(0x3727c5ac)?fl(0x3727c5ac):(R<cap?R:cap);
+  float ng=clamp(c->noise+0.0f,0,1);ng=ng*ng+fl(0x3727c5ac);float reciprocal=1.0f/(float)D;
+@@ -152,7 +172,7 @@
+ int original_miami_selected_voice_init(original_miami_selected_voice *s,const original_miami_voice_tables *t,unsigned index,unsigned last){
+  if(!s||!t||t->ready!=TABLE_READY||index>=128||last>127)return 0;
+  original_miami_selected_voice n;memset(&n,0,sizeof n);
+- if(!original_miami_pitch_init(&n.pitch,last)||!original_miami_ms20_init(&n.filter,index,t->filter.a[0],t->filter.b[0],t->filter.cap[0]))return 0;
++ if(!original_miami_pitch_init(&n.pitch,last)||!original_miami_ms20_init(&n.filter,index,t->filter.a[0],t->filter.b[0],original_miami_cap_at(t->filter.cap,0u)))return 0;
+  /* Native B0738 reset, B0990..B09C0: both MG phases -1, cached outputs/
+   * hold zero, S&H LFSR seed6d70 and pending-wrap flag1. Full-note inputs
+   * still replace these with the owner-resolved ordered-head MG snapshot. */
+--- a/experiments/wobble/miami_decimator_adapter.c
++++ b/experiments/wobble/miami_decimator_adapter.c
+@@ -1,6 +1,22 @@
+ /* SPDX-License-Identifier: GPL-3.0-only */
+ #include "miami_decimator_adapter.h"
++#ifdef DNBOX_MIAMI_DECIMATOR_COMPACT
++#include "miami_decimator_compact_generated.h"
++static inline int16_t wet_word(unsigned i)
++{ return (int16_t)(i==127u ? 32767u : i*258u); }
++static uint16_t frequency_word(unsigned i)
++{
++    if(i>=123u)return frequency_tail[i-123u];
++    /* i<=122, so the exact unsigned predictor cannot overflow.
++     * For i==0 unsigned multiply by zero also leaves the predictor zero. */
++    unsigned q=(i*(2351u*i-39u))>>11;
++    return (uint16_t)(1486u+q+((frequency_corrections[i>>3]>>(i&7u))&1u));
++}
++#else
+ #include "miami_decimator_tables_private.h"
++#define wet_word(i) (miami_decimator_wet[(i)])
++#define frequency_word(i) (miami_decimator_frequency[(i)])
++#endif
+ int miami_decimator_adapter_init(miami_decimator_adapter_t *s)
+ {
+     if (!s) return 0;
+@@ -11,8 +27,8 @@
+     (void)miami_decimator_seed(&next.kernel,0,0,0,0);
+     next.frequency_integer = 64;
+     next.wet_integer = 127;
+-    next.wet_gain = miami_decimator_wet[127];
+-    (void)miami_decimator_stage_step(&next.kernel,miami_decimator_frequency[63]);
++    next.wet_gain = wet_word(127u);
++    (void)miami_decimator_stage_step(&next.kernel,frequency_word(63u));
+     *s = next;
+     return 1;
+ }
+@@ -29,11 +45,11 @@
+     uint8_t p = (uint8_t)((uint32_t)value & UINT32_C(127));
+     if (parameter == 2) {
+         s->wet_integer = p;
+-        s->wet_gain = miami_decimator_wet[p];
++        s->wet_gain = wet_word(p);
+     } else {
+         if (parameter == 1) s->frequency_integer = p;
+         else s->bit_integer = p;
+-        (void)miami_decimator_stage_step(&s->kernel,miami_decimator_frequency[127-s->frequency_integer]);
++        (void)miami_decimator_stage_step(&s->kernel,frequency_word(127u-s->frequency_integer));
+     }
+     return 1;
+ }
+--- /dev/null
++++ b/experiments/wobble/miami_decimator_compact_generated.h
+@@ -0,0 +1,3 @@
++/* Local verified generated data; never commit. */
++static const uint8_t frequency_corrections[16]={0,0,176,227,107,187,239,127,255,255,255,255,255,255,255,7};
++static const uint16_t frequency_tail[5]={23000,30000,39000,50000,65535};
