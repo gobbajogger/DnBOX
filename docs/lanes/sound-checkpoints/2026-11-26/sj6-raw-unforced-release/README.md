@@ -49,3 +49,18 @@ actual Main/Sub signal ownership and inheritance of filter state.
 python3 held-sub-and-main.py ../sj6-native-factory-cross/program-2-dry compact-generated
 shasum -a 256 -c decomposition/SHA256SUMS  # run from decomposition/ for relative rows
 ```
+
+The 16–50 ms interval also solves for the weights of the *fixed physical
+poles*, with no phase alignment, gain correction or pole tuning. Held-out
+50–200 ms errors are −94 dBr original and −99 dBr compact, validating the
+same physical decay law on unseen audio. At +16 ms, the tested left-channel
+HP cosine/sine mode contributions have weights about
+[−.000873, −.002365] original vs [+.004430, +.002029] compact.
+The .995 and .999 residue weights also reverse sign. Therefore the
+problem is where the input leaves the filter state, not choosing a different
+HP cutoff or muting the ring. The original author's sampler/time trajectory
+must be addressed before interpreting a tail gain map.
+
+```sh
+python3 decay-mode-weights.py ../sj6-native-factory-cross/program-2-dry compact-generated
+```
