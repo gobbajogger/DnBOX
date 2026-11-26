@@ -83,6 +83,15 @@ changing the rounding rule.
   [Exact typed diagnostic](sj6-typed-mixer-diagnostic/sj6-mixer-diagnostic/README.md).
   No tested dry cue clips, but this is not proof of full FX or dynamic
   control headroom. Do not call the mixer experiment a sound fix.
+- **Short Classic ring headroom, not long delay.** E4M11 removed clipping
+  with eight true compact typed source stress tapes, −80.86…−81.37 dBr
+  vs float, unchanged 512-byte ring. Guarded Elite and Pro linked and
+  agreed, but this implementation adds 176 application bytes and
+  1,089–1,155 µs per 256-frame two-owner block. **Reject it as written**.
+  Native disassembly identified an out-of-line memcpy on each tap;
+  an ABI-proven no-copy bit carrier may be worth one independent test.
+  Straight bfloat16 is ruled out separately: the same-size store was
+  around −56…−57 dBr and degraded the quiet cue. [Host bfloat rejection](sj6-classic-bfloat-rejected/README.md).
 - **Unresolved:** source owner of the gain between the calibrated Crusher
   and Apple's compressor input; which missing or misrouted per-program
   states dominate different dry patches; delay-bandwidth correction that
@@ -133,6 +142,10 @@ changing the rounding rule.
   [Combined proof](s1-phaser-combined-guarded/README.md).
   Do not
   bypass that restriction or misreport the isolated fixture as target fit.
+  An actual guarded Elite insertion exceeded application flash by
+  **12,224 B** although backend union/pool was unchanged. The isolated
+  code-size result cannot predict that linked soft-double/libm cost.
+  The current compiled variant is rejected for normal firmware admission.
 
 ## Release boundary
 
