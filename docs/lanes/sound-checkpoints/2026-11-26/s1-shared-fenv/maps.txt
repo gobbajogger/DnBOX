@@ -1,0 +1,20 @@
+ .text.voice_run_kr
+                0x00000000020704ba      0x7f8 /tmp/lto-llvm-2f73c2.o
+--
+ .text.s1_part_render
+                0x000000000207131a     0x153e /tmp/lto-llvm-2f73c2.o
+ .text.voice_run_kr
+                0x00000000020704ba      0x7f8 /tmp/lto-llvm-78f779.o
+--
+ .text.s1_part_render
+                0x000000000207131a     0x153e /tmp/lto-llvm-78f779.o
+ .text.voice_run_kr
+                0x00000000020704ba      0x792 /dev/shm/s1-fenv.f4wZ6yJy/temp/lto-llvm-b9f8d2.o
+--
+ .text.s1_part_render
+                0x00000000020712b4     0x1578 /dev/shm/s1-fenv.f4wZ6yJy/temp/lto-llvm-b9f8d2.o
+ .text.voice_run_kr
+                0x00000000020704ba      0x792 /dev/shm/s1-fenv.f4wZ6yJy/temp/lto-llvm-122e1c.o
+--
+ .text.s1_part_render
+                0x00000000020712b4     0x1578 /dev/shm/s1-fenv.f4wZ6yJy/temp/lto-llvm-122e1c.o

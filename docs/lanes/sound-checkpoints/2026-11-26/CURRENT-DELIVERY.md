@@ -6,6 +6,19 @@ isolated kernel timing, or partial link into a release claim.
 
 ## Latest measured results
 
+- **Synth One filter-envelope sharing, guarded.** The
+  [paired native link and signed-PCM matrix](s1-shared-fenv/README.md)
+  recover 48 B APP (+300/+308 B vs +252/+260 B) on this fitted donor.
+  The protected pool is unchanged and all 24 focused host PCM cases
+  are exact. No native timing proof or combined production claim.
+- **What remains in SuperJ6 Raw.** In the reconstructed pre-chorus
+  path with the genuine current J60 leaf, the [relative chorus level
+  is within 0.17 dB](sj6-postvoice-split/README.md). The absolute dry
+  waveform and level still differ. Inserting the original Unison-off
+  and settled AutoPan does not close the gap: together they make the
+  absolute output 4.59 dB lower and leave waveform correlation
+  effectively unchanged. Continue through the active voice path.
+
 - **New guarded 909 state promotion, not yet full-scene.** The
   [plain-decoder and Huffman traces](drum909-state-promotion/README.md)
   match complete owner state and four buses on 112,000 host spans.
