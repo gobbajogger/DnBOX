@@ -356,6 +356,34 @@ the worst half. Only test admission after contemporaneous active
 signed owner counters on a clearly non-timing witness.
 [Exact idle-Sub proof](s1-silent-sub-scoped/README.md).
 
+## Further root-cause narrowing
+
+- **SuperJ6 J60V2, not Classic.** On the Raw J106 authored case, Chorus I
+  activates the original 96 kHz J60V2 path. The compact chorus adds wet
+  audio immediately rather than reproducing the two converters' signed
+  response. Generated converters with the independently clocked original
+  middle kernel reached −145.71 dBr or better on eight host fixtures;
+  +47/+48 frame impulse peak timing was exact at 44.1/48 kHz. Mix 0 and
+  stopped were signed exact bypass. Not a target fit. [Exact cheap
+  clock proof](sj6-j60v2-clock/README.md).
+- **Solidify voice.** The real co-timed chord captures rule out slow
+  held-note glide as the cause: the final note is already present in the
+  earliest stable slice. Keep current ownership; trace envelope kinetics
+  and per-layer amplitude independently. Do not revisit master volume.
+- **Pro timing.** A second lean probe at ordinal 484 measured 14,305 µs
+  and 62 dropouts. Core 0 waited 8.625 µs at the instrumented A-before-B
+  dependency despite 6,457.875 µs elapsed on the Core 1 pre-stage path.
+  That specific barrier cannot explain the 3,496 µs budget miss. Do not
+  add measurements across differently instrumented runs. The guarded
+  images have synthetic legacy drum hits in addition to the external
+  tape, so this is stress evidence, not release admission.
+- **High-pass behavior.** Seven saved zero-resonance fixed-cutoff captures
+  matched two-state TPT to −143.68 dBr or better. This does not prove
+  continuity at a parameter change: valid filters with different retained
+  state diverge during a warm switch. The warm lab's strict dry suffix
+  improved first-release signed error from +0.086 to −0.389 dBr; the
+  production typed projection still conflates connected dry with bypass.
+
 ## Release boundary
 
 These are lab diagnostics. A host proof or a leaf emulator measurement
