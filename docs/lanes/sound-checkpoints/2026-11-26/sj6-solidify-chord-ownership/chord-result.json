@@ -1,0 +1,185 @@
+{
+  "receiver_no_glide": {
+    "49459": {
+      "received_key": 55,
+      "requested_freq": 195.9977264404297,
+      "instant_hz": 0.0,
+      "phase": 0.0,
+      "amp_stage": 2
+    },
+    "49475": {
+      "received_key": 55,
+      "requested_freq": 195.9977264404297,
+      "instant_hz": 195.99772528745234,
+      "phase": 0.07111026346683502,
+      "amp_stage": 2
+    },
+    "49587": {
+      "received_key": 55,
+      "requested_freq": 195.9977264404297,
+      "instant_hz": 195.99772528745234,
+      "phase": 0.5688807368278503,
+      "amp_stage": 2
+    },
+    "49715": {
+      "received_key": 55,
+      "requested_freq": 195.9977264404297,
+      "instant_hz": 195.99772528745234,
+      "phase": 0.13775992393493652,
+      "amp_stage": 4
+    },
+    "49843": {
+      "received_key": 55,
+      "requested_freq": 195.9977264404297,
+      "instant_hz": 195.99772528745234,
+      "phase": 0.7066396474838257,
+      "amp_stage": 4
+    },
+    "49971": {
+      "received_key": 55,
+      "requested_freq": 195.9977264404297,
+      "instant_hz": 195.99772528745234,
+      "phase": 0.2755204141139984,
+      "amp_stage": 4
+    },
+    "50227": {
+      "received_key": 55,
+      "requested_freq": 195.9977264404297,
+      "instant_hz": 195.99772528745234,
+      "phase": 0.41327938437461853,
+      "amp_stage": 4
+    }
+  },
+  "receiver_glide_on_nonfactory_control": {
+    "49459": {
+      "received_key": 55,
+      "requested_freq": 195.9977264404297,
+      "instant_hz": 0.0,
+      "phase": 0.0,
+      "amp_stage": 2
+    },
+    "49475": {
+      "received_key": 55,
+      "requested_freq": 195.9977264404297,
+      "instant_hz": 130.94924739561975,
+      "phase": 0.04750991612672806,
+      "amp_stage": 2
+    },
+    "49587": {
+      "received_key": 55,
+      "requested_freq": 195.9977264404297,
+      "instant_hz": 131.90858114976436,
+      "phase": 0.38146910071372986,
+      "amp_stage": 2
+    },
+    "49715": {
+      "received_key": 55,
+      "requested_freq": 195.9977264404297,
+      "instant_hz": 133.01356409210712,
+      "phase": 0.7661355137825012,
+      "amp_stage": 4
+    },
+    "49843": {
+      "received_key": 55,
+      "requested_freq": 195.9977264404297,
+      "instant_hz": 134.12781888619065,
+      "phase": 0.15402308106422424,
+      "amp_stage": 4
+    },
+    "49971": {
+      "received_key": 55,
+      "requested_freq": 195.9977264404297,
+      "instant_hz": 135.25140713900328,
+      "phase": 0.5451610088348389,
+      "amp_stage": 4
+    },
+    "50227": {
+      "received_key": 55,
+      "requested_freq": 195.9977264404297,
+      "instant_hz": 137.52688178792596,
+      "phase": 0.33728837966918945,
+      "amp_stage": 4
+    }
+  },
+  "real_warm": {
+    "dry": {
+      "pcm_sha": "76bdf841f398a11c4846a538a6863cc8e1c538600b1da843725830dba364bf21",
+      "dominant_ridges_hz": {
+        "49459": [
+          98.07701110839844,
+          195.6493377685547
+        ],
+        "50227": [
+          97.90878295898438,
+          195.6493377685547
+        ],
+        "51459": [
+          98.2452392578125,
+          195.6493377685547
+        ],
+        "53459": [
+          97.90878295898438,
+          195.6493377685547
+        ],
+        "55459": [
+          98.2452392578125,
+          195.6493377685547
+        ]
+      },
+      "prechord_rms": 8.804854587651789e-07
+    },
+    "authored": {
+      "pcm_sha": "2ce5be3f5af9890d974c8b53d3bd35949d378a9a8789a7b2262dad0e668f36c5",
+      "dominant_ridges_hz": {
+        "49459": [
+          97.74055480957031,
+          195.9857940673828
+        ],
+        "50227": [
+          97.74055480957031,
+          195.9857940673828
+        ],
+        "51459": [
+          97.90878295898438,
+          195.9857940673828
+        ],
+        "53459": [
+          97.74055480957031,
+          195.9857940673828
+        ],
+        "55459": [
+          97.90878295898438,
+          195.9857940673828
+        ]
+      },
+      "prechord_rms": 4.053938482684316e-07
+    },
+    "authored-repeat": {
+      "pcm_sha": "fc105e5b8f0c73d1f362474852fe90cf7d3b22ea09315246c40f8f4ea68ce43e",
+      "dominant_ridges_hz": {
+        "49459": [
+          98.07701110839844,
+          195.9857940673828
+        ],
+        "50227": [
+          98.07701110839844,
+          195.9857940673828
+        ],
+        "51459": [
+          98.2452392578125,
+          195.9857940673828
+        ],
+        "53459": [
+          98.07701110839844,
+          195.9857940673828
+        ],
+        "55459": [
+          98.2452392578125,
+          195.9857940673828
+        ]
+      },
+      "prechord_rms": 8.409843985646148e-07
+    }
+  },
+  "scope": "First 2048 frames prove no long receiver-slew transplant; no direct installed per-lane output. Delay shorter than first analysis window not excluded. No correction to note ownership."
+}
