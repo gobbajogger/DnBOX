@@ -17,7 +17,13 @@ No patch is enabled merely by adding these files to the sound branch.
   overflowed by 228/216 B. The independently compiled in-engine half-history
   replay preserves all 264,600 left samples and the entire room trace; the
   right last-second residual is −42.5144 dBr against the original. Both-board
-  native timing and audio qualification are still outstanding.
+  native timing remains red in an exact matched heavy replay.
+  Elite: 15,840 → 15,558 µs and 105 → 39 underruns; Pro: 15,801 →
+  15,793 µs and 108 → 53 underruns. There were no skipped cycles, no
+  NOR writes and no XRUNs on separate cold boots. Both fail the strict
+  10,809 µs, zero-XRUN deadline. Scope: isolated diagnostic, not release.
+  The same right-history layout with BF16 also links at 72/84 B XIP.
+  Its wider exponent avoids the proven low-tail half-format floor.
 - A general rate-then-bit-depth selector reduces Mushroom's right
   spectral error from 4.14 to 2.65 dB (bar: 3 dB) without preset edits.
   Hall Drone is cadence-limited and Deeper Space Pad precision-limited.
