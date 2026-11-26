@@ -52,3 +52,18 @@ python3 score.py native/bare ../sj6-crusher-gain-probe/native/installed \
   ../sj6-crusher-control-matrix/native/installed native/live
 shasum -a 256 -c SHA256SUMS
 ```
+
+## Cross-check against independently signed Crusher-off dry output
+
+`python3 reconcile-dry.py ../sj6-auv3-compressor-inlet/native` reuses the
+three matching fader/identity cases from the earlier independent capture.
+It compares their output fundamental to our calibrated input equivalent,
+with compressor, delay, reverb, AutoPan, widen and both choruses disabled.
+The observed net transfer is approximately 0.427–0.450, close to the
+authored raw master .44618. This is an end-to-end sanity check on the
+inferred Crusher-input scale, **not** a decomposition of the intervening
+owners. The old analytic stem RMS .19569 is not the latest authenticated
+populated waveform; do not derive precise oscillator amplitude parity
+from its numerical proximity. The genuine later pre-Normal sine
+fundamental was about .3422; its comparison requires the downstream
+owner and envelope convention rather than an assumed unity route.

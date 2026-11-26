@@ -1,0 +1,23 @@
+{
+  "f250": {
+    "output_h1_peak": 0.0305413719779236,
+    "crusher_equivalent_h1_peak": 0.06783892646160537,
+    "apparent_dry_transfer": 0.45020423480918476,
+    "public_master_raw": 0.44618064165115356,
+    "difference_from_raw_master_dB": 0.07797704257989534
+  },
+  "f500": {
+    "output_h1_peak": 0.06037248016566117,
+    "crusher_equivalent_h1_peak": 0.1395050821932726,
+    "apparent_dry_transfer": 0.43276186943512324,
+    "public_master_raw": 0.44618064165115356,
+    "difference_from_raw_master_dB": -0.2652347105796813
+  },
+  "f1000": {
+    "output_h1_peak": 0.11790390515820337,
+    "crusher_equivalent_h1_peak": 0.27617338299740535,
+    "apparent_dry_transfer": 0.42691987141755466,
+    "public_master_raw": 0.44618064165115356,
+    "difference_from_raw_master_dB": -0.38328707518875105
+  }
+}
