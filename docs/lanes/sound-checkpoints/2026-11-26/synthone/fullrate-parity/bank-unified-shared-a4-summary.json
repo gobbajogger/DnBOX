@@ -1,0 +1,37 @@
+{
+  "scope": "Whole stereo cold-start six-note host renders, in matching command ordinal. Optional authenticated authored tuning and note tape; no project change, hardware, or fit.",
+  "mode": "wet",
+  "same_note_tape": true,
+  "tuning_rows": 16,
+  "count": 906,
+  "source_bank_rows": 906,
+  "identity_sha256": "583a2477205ccf04b363c344bc9300897200c9e78f0bf634b9233622b0f83780",
+  "inputs": {
+    "recovered-sound/s1-room-parity/unified2/original": "2b6a520a454df06f7e6d331d8049537e92a609a35a8d14baa16c0447dbcd935f",
+    "recovered-sound/s1-room-parity/unified2/candidate": "191d4affe04d0e5b931cedfaf32b655fc93a0c057b81470aa884d926ba8316b1",
+    "s1-fx-parity/reference-build/factory-inputs/public-morphs.f32": "0d35b5422cb5d3e0e349a66c9e0a50f2980b6287e68f8d94f55640d3f8168bd5",
+    "recovered-sound/s1-room-parity/aligned-commands.bin": "622050ebc18a4dc98461d68f0f56b76924868b64c98bb370153c98cf3e577b41",
+    "recovered-sound/s1-bank-replay/original-private/pack.private": "d5e003e878ab46d6051d6cff16be557fbdfde7fccaa9255e4217bb5ffb51fa43"
+  },
+  "explicit_project_A4_holdouts": [
+    42,
+    180,
+    335,
+    347,
+    362,
+    782,
+    848
+  ],
+  "comparison_mode": "906 aligned held-out replacements; same binaries and data. Seven A4 differences isolated and rerendered with explicit shared A4 on both arms.",
+  "counts": {
+    "level_1db": 906,
+    "waveform20": 906,
+    "waveform40": 875,
+    "waveform60": 606,
+    "whole_peak_error": [
+      -22.1910793063126,
+      0.020464422555184634
+    ],
+    "exact_pcm": 2
+  }
+}
