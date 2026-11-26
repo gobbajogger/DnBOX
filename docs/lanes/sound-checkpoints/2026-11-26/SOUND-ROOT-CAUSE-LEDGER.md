@@ -19,6 +19,16 @@ Do not fit individual presets, a master gain, or an arbitrary time shift.
 | Applying a stock unity voice sum through existing Q15 histories without checking headroom | The compact source divides the layer voice sum by six and multiplies each centered leg by .5. The original single-voice scope supports raw summing, but the host bypass of both reductions can overflow the short Classic history before the master. The history alternatives already tried were too slow on PI32. This is a real compact difference, not proof that it explains every patch. [Fixed history rejection](sj6-classic-fixed-native/README.md), [same-byte alternative, host only](sj6-classic-e4m11-headroom/README.md). |
 | Turning up the long-delay wet output to recover treble | The sampled history aliases the carrier at long settings; boosting output cannot reconstruct it. At the ~496 ms cue, a prototype preserving more history bandwidth made the first actual 3 kHz carrier −.71 dB vs the original, but BFP4 round-to-nearest froze sustained tails at max feedback for all 201 measured repeats. The fixed stride also only covers ~.505 s, not the 1.5 s free or 16 s synced endpoint (120 BPM). **Reject the prototype as a replacement.** |
 
+**Long-delay rejection follow-up:** a deterministic error state per
+channel (not per cell) does not repair the 4-bit block format. At .99
+feedback over 201 echoes, `u=x+e`, nearest `q` using the block step, then
+`e=clip(u−q, −step/2, +step/2)` removed exact DC lock but musical periods
+still locked. The one-sided 3 kHz RMS stayed .6201 versus .000047 in the
+floating reference, and stereo/fuller chord tests also failed to decay.
+Do not reopen simple rounding, truncation or one serial error state as a
+release fix. The model's fixed ~.505 s coverage independently fails the
+full delay range.
+
 ## SuperJ6: confirmed mechanisms and active tests
 
 - **Oscillator:** source Sine/Triangle factory bank interpolation, signed
@@ -32,7 +42,9 @@ Do not fit individual presets, a master gain, or an arbitrary time shift.
   The packed-float implementation is **rejected on target**: the same
   24-layer-voice simulator leaf took 18,131.54 µs vs 4,019.5 µs for
   stock 2×, before lookup, envelope, filters or arp. It exceeds the whole
-  budget. The remaining waveform candidate must avoid running this 4×
+  budget. The 4× Q14 integer variant also measured 17.21 ms in the
+  comparable leaf, so switching arithmetic alone did not save this loop.
+  The remaining waveform candidate must avoid running this 4×
   float loop, even though this was a useful diagnostic.
   [Donor A/B](sj6-halfband-packed-donor/README.md).
   [Independent authentic holds](https://github.com/gobbajogger/DnBOX/commit/17ec80e3).
@@ -49,7 +61,10 @@ Do not fit individual presets, a master gain, or an arbitrary time shift.
   from the sample-history and oscillator corrections.
   [Original captures](sj6-native-factory-cross/README.md),
   [compact projection](sj6-compact-factory-cross/sj6-cross-preset/README.md),
-  [per-control tests](sj6-factory-control-primitives/sj6-cross-preset/PRIMITIVES.md).
+  [per-control tests](sj6-factory-control-primitives/sj6-cross-preset/PRIMITIVES.md). A separate
+  source-backed AMP-before-IIR diagnostic shifted held level at most .004
+  dB, so it does not explain a broad settled-level deficit. It matters on
+  transitions (Raw dry tail about +.40 dB on that probe).
 - **The compact dry mixer explains only part of the loss.** At unchanged
   Master and typed settings, removing only the fixed six-voice divisor
   recovers ~15.6 dB. Restoring unity duplication only for centered layers
@@ -98,7 +113,15 @@ Do not fit individual presets, a master gain, or an arbitrary time shift.
   and live-edit proofs; do not treat the earlier 906 run as proving the
   latest combined candidate. [Exact initial baseline](s1-phaser-invariant-coefficients/README.md),
   [bounded cosine](s1-bounded-phaser-cos/README.md),
-  [signed tiny rounding](s1-phaser-tiny-rne/README.md).
+  [signed tiny rounding](s1-phaser-tiny-rne/README.md). The newer combined native
+  leaf measures ~2.12 ms/512 frames under every-frame in-range Width/Rate
+  changes, vs 77.5–78.1 ms all-libm, with zero Width/Rate fallbacks on 906
+  connected host replays. All note tapes matched, 445 PCM rows bit-identical,
+  worst whole error −75.88 dBFS RMS. Release admission is an independent
+  problem: 108 B compact owner vs 224 B matched owner in the checked
+  layouts, and shipping verification disallows soft-double routines
+  still invoked by guarded exact fallback and Level preparation. Do not
+  bypass that restriction or misreport the isolated fixture as target fit.
 
 ## Release boundary
 
