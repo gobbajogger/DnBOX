@@ -1,0 +1,22 @@
+{
+  "scope": "Whole stereo cold-start six-note host renders, in matching command ordinal. No tuning-selection changes, no hardware or fit.",
+  "mode": "wet",
+  "count": 906,
+  "source_bank_rows": 906,
+  "identity_sha256": "583a2477205ccf04b363c344bc9300897200c9e78f0bf634b9233622b0f83780",
+  "inputs": {
+    "s1-fx-parity/known-stock-validation/original": "8a97efc15f2adfc9ed02611f986f4f5c661f2c2b4fb112799737490ba6bc1403",
+    "recovered-sound/s1-room-parity/build5/room-delay-master": "637d38723de96f3fe3ea352d97658e42e71a9a3b0d1926d3cf544d0b9aec992a",
+    "s1-fx-parity/reference-build/factory-inputs/public-morphs.f32": "0d35b5422cb5d3e0e349a66c9e0a50f2980b6287e68f8d94f55640d3f8168bd5",
+    "recovered-sound/s1-room-parity/aligned-commands.bin": "622050ebc18a4dc98461d68f0f56b76924868b64c98bb370153c98cf3e577b41",
+    "recovered-sound/s1-bank-replay/original-private/pack.private": "d5e003e878ab46d6051d6cff16be557fbdfde7fccaa9255e4217bb5ffb51fa43"
+  },
+  "confirmed_rendered": 906,
+  "confirmed_errors": 0,
+  "order_permuted": 143,
+  "bank_rows_sha256": "b2230f4ddb43d05e05e37944fa0ff49b7477f349a8112fc6d9115224ee9b49e5",
+  "whole_levels_both_within_1db": 558,
+  "whole_waveform_residual_both_le_minus_20dbr": 307,
+  "whole_waveform_residual_both_le_minus_40dbr": 25,
+  "does_not_establish_full_parity": true
+}

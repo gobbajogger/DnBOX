@@ -1,0 +1,75 @@
+{
+  "scope": "Whole stereo cold-start six-note host renders, in matching command ordinal. Optional authenticated authored tuning and note tape; no project change, hardware, or fit.",
+  "mode": "wet",
+  "same_note_tape": true,
+  "tuning_rows": 16,
+  "count": 906,
+  "source_bank_rows": 906,
+  "identity_sha256": "583a2477205ccf04b363c344bc9300897200c9e78f0bf634b9233622b0f83780",
+  "inputs": {
+    "recovered-sound/s1-room-parity/unified/original": "2b6a520a454df06f7e6d331d8049537e92a609a35a8d14baa16c0447dbcd935f",
+    "recovered-sound/s1-room-parity/unified/candidate": "12c2557ae7df4c7a86c472f68f18393e3e0e8520d85a635e5f93cb2ba17b03fc",
+    "s1-fx-parity/reference-build/factory-inputs/public-morphs.f32": "0d35b5422cb5d3e0e349a66c9e0a50f2980b6287e68f8d94f55640d3f8168bd5",
+    "recovered-sound/s1-room-parity/aligned-commands.bin": "622050ebc18a4dc98461d68f0f56b76924868b64c98bb370153c98cf3e577b41",
+    "recovered-sound/s1-bank-replay/original-private/pack.private": "d5e003e878ab46d6051d6cff16be557fbdfde7fccaa9255e4217bb5ffb51fa43"
+  },
+  "replay_rows": 906,
+  "replay_scene_errors": 0,
+  "active_tape_rows": 393,
+  "replayed_authored_tunings": 16,
+  "count_levels_both_1db": 900,
+  "count_null_both_minus20": 558,
+  "count_null_both_minus40": 160,
+  "exact_same_pcm": 0,
+  "complete_run_sha256": "72c630bf2a3d440268669a5e73c551a63cd69a5a2934b1d2a834a982e9858759",
+  "level_fails": [
+    {
+      "id": 11,
+      "label": "11: ARP - Purple Nights arena 4252",
+      "level_db": [
+        1.1567648670573214,
+        0.9108323331266748
+      ]
+    },
+    {
+      "id": 180,
+      "label": "180: BB Synth Won Sign-off arena 4252",
+      "level_db": [
+        -0.8618483786692223,
+        -1.1557774477785479
+      ]
+    },
+    {
+      "id": 217,
+      "label": "217: LEAD - Get Zipped arena 4252",
+      "level_db": [
+        1.061373359569131,
+        1.1083817223957593
+      ]
+    },
+    {
+      "id": 220,
+      "label": "220: ARP - Purple Nights arena 4252",
+      "level_db": [
+        1.1567648670573214,
+        0.9108323331266748
+      ]
+    },
+    {
+      "id": 335,
+      "label": "335: JEC Soft iVCS3 arena 4252",
+      "level_db": [
+        -0.5386286462697505,
+        1.1010424109870451
+      ]
+    },
+    {
+      "id": 347,
+      "label": "347: JEC Rainbow Dome Synthi arena 4252",
+      "level_db": [
+        1.6217311775670187,
+        3.3447274782627483
+      ]
+    }
+  ]
+}

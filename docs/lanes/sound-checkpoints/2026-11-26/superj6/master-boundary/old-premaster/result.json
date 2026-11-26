@@ -1,0 +1,145 @@
+{
+  "binary_sha256": "a5243e50bda6bd44f463c6e63ea3137802142f55f3c1ea25a5a6e046acba81a1",
+  "input_pcm_sha256": "3763ab5fde1bd272f4ef34ccf7dc14b35e621121821be8b7fadac3bb6ca7c091",
+  "scope": "old ARM64 DSP creation/set/process; known input at actual Booster kernel; no simulated Apple mixers, no attribution to current AU",
+  "arms": {
+    "master_old_default": {
+      "expected_same_input_gain": [
+        0.95,
+        0.95
+      ],
+      "actual_gain_at_unity_sample": [
+        0.949999988079071,
+        0.949999988079071
+      ],
+      "samples": 514,
+      "signed_peak": [
+        1.7766319513320923,
+        1.8049999475479126
+      ],
+      "output_sha256": "8358bd04b50ae55f144d17ce6532971901f519ff799cc587f657aed3597701b0",
+      "bit_exact_steady": true,
+      "live_ramp_probe": null
+    },
+    "unity": {
+      "expected_same_input_gain": [
+        1,
+        1
+      ],
+      "actual_gain_at_unity_sample": [
+        1.0,
+        1.0
+      ],
+      "samples": 514,
+      "signed_peak": [
+        1.8701388835906982,
+        1.899999976158142
+      ],
+      "output_sha256": "3763ab5fde1bd272f4ef34ccf7dc14b35e621121821be8b7fadac3bb6ca7c091",
+      "bit_exact_steady": true,
+      "live_ramp_probe": null
+    },
+    "muted": {
+      "expected_same_input_gain": [
+        0,
+        0
+      ],
+      "actual_gain_at_unity_sample": [
+        0.0,
+        0.0
+      ],
+      "samples": 514,
+      "signed_peak": [
+        0.0,
+        -0.0
+      ],
+      "output_sha256": "78f0f923bfe08fbbb1d68021307b40ab2c78a8074ddc3a2d23505888fff27c13",
+      "bit_exact_steady": true,
+      "live_ramp_probe": null
+    },
+    "crusher_active_setting": {
+      "expected_same_input_gain": [
+        1.3,
+        1.3
+      ],
+      "actual_gain_at_unity_sample": [
+        1.2999999523162842,
+        1.2999999523162842
+      ],
+      "samples": 514,
+      "signed_peak": [
+        2.431180477142334,
+        2.4699997901916504
+      ],
+      "output_sha256": "7fcbef6af2081e40e25aff4d3811184087b6d1ae02579cde5067264cc0c1e060",
+      "bit_exact_steady": true,
+      "live_ramp_probe": null
+    },
+    "classic_active_setting": {
+      "expected_same_input_gain": [
+        1.707,
+        1.707
+      ],
+      "actual_gain_at_unity_sample": [
+        1.7070000171661377,
+        1.7070000171661377
+      ],
+      "samples": 514,
+      "signed_peak": [
+        3.1923270225524902,
+        3.243299961090088
+      ],
+      "output_sha256": "68b9b6d44b1ebe5f01330e4b525efa153384a48d5494e83421169a7326493d3e",
+      "bit_exact_steady": true,
+      "live_ramp_probe": null
+    },
+    "stopped_asymmetric_guard": {
+      "expected_same_input_gain": [
+        1.0,
+        1.0
+      ],
+      "actual_gain_at_unity_sample": [
+        1.0,
+        1.0
+      ],
+      "samples": 514,
+      "signed_peak": [
+        1.8701388835906982,
+        1.899999976158142
+      ],
+      "output_sha256": "3763ab5fde1bd272f4ef34ccf7dc14b35e621121821be8b7fadac3bb6ca7c091",
+      "bit_exact_steady": true,
+      "live_ramp_probe": null
+    },
+    "asymmetric_live": {
+      "expected_same_input_gain": [
+        0.95,
+        1.3
+      ],
+      "actual_gain_at_unity_sample": [
+        1.0,
+        1.0
+      ],
+      "samples": 514,
+      "signed_peak": [
+        1.7766319513320923,
+        2.464090585708618
+      ],
+      "output_sha256": "423caabe3cc268e9dfe8e3b223d8a8b038e131d4405f68fb0d7b9be6512ef259",
+      "bit_exact_steady": false,
+      "live_ramp_probe": [
+        1.0,
+        1.0,
+        0.990909122946874,
+        0.9909091278148482,
+        0.9818182046215103,
+        0.9727272510883467,
+        0.9636363312925037,
+        0.9499999593724836,
+        0.9499999794778817,
+        0.9499999943521964,
+        0.95
+      ]
+    }
+  }
+}

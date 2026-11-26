@@ -1,0 +1,670 @@
+{
+  "status": "authored-loader host comparison only",
+  "original_rows": 906,
+  "custom_rows": 16,
+  "rows": [
+    {
+      "id": 0,
+      "name": "Synthwave 1974",
+      "no_tuning_bit_identical": true,
+      "original_sha": "b482c5d3444b676f6a86e9081708bf9355166044db1e0640db3cf9423dc79621",
+      "compact_sha": "95d0dbe986faca83e7935f783b58863f991e20f12aad5fcfe6d2a06d4e44c5f0"
+    },
+    {
+      "id": 9,
+      "name": "JEC Digiharp",
+      "baseline": {
+        "whole_db": [
+          -41.85573883835268,
+          -39.495402296651974
+        ],
+        "tail_db": [
+          -36.35085036324163,
+          -37.31948316274925
+        ]
+      },
+      "authored": {
+        "whole_db": [
+          -39.84082811692244,
+          -38.22198890576793
+        ],
+        "tail_db": [
+          -29.672202877519478,
+          -34.46099055602678
+        ]
+      },
+      "reference_changed": true,
+      "compact_changed": true,
+      "tuning": " 5 Harmonic Series: Pentad",
+      "npo": 5,
+      "table_sha256": "eddd039eaf1aa0696e6735ee297c599b97f91fc2465729e89821434d03915992",
+      "source_bank": "BankA.json",
+      "note_hz": [
+        52.32511306012,
+        130.8127826503,
+        261.6255653006,
+        470.92601754108,
+        732.5515828416799,
+        1465.1031656833597
+      ]
+    },
+    {
+      "id": 24,
+      "name": "Frost Plucks",
+      "baseline": {
+        "whole_db": [
+          -35.00420057184073,
+          -30.652867118168544
+        ],
+        "tail_db": [
+          -31.1951429446665,
+          -30.253743030167
+        ]
+      },
+      "authored": {
+        "whole_db": [
+          -32.32133680015175,
+          -25.50478980009754
+        ],
+        "tail_db": [
+          -22.754365487246503,
+          -22.58888989898384
+        ]
+      },
+      "reference_changed": true,
+      "compact_changed": true,
+      "tuning": " 3 Harmonic+Subharmonic Series: Triad",
+      "npo": 5,
+      "table_sha256": "ddd8a1318a0a52cd6209b6497002e72c9d5727f2396727579e08695914590ab5",
+      "source_bank": "BankA.json",
+      "note_hz": [
+        49.0547934938625,
+        130.8127826503,
+        261.6255653006,
+        436.04260883433335,
+        697.6681741349332,
+        1395.3363482698664
+      ]
+    },
+    {
+      "id": 62,
+      "name": "Irresistible Forces Pad",
+      "no_tuning_bit_identical": true,
+      "original_sha": "513256ed0b89958c0accd522461ba25c808f75451b12cafcc9fb898ffa76a881",
+      "compact_sha": "9a2930c2495e712239d39e6991b13d84d9e4c8811b8f47a8ee0ce8372555f392"
+    },
+    {
+      "id": 64,
+      "name": "Harmonic Harp Pluck",
+      "baseline": {
+        "whole_db": [
+          1.8944633289400699,
+          1.4170804112889481
+        ],
+        "tail_db": [
+          1.0369630893558193,
+          0.9272586345195759
+        ]
+      },
+      "authored": {
+        "whole_db": [
+          2.5803999356254192,
+          1.6286015988838032
+        ],
+        "tail_db": [
+          0.9708449476993924,
+          2.3102092541732087
+        ]
+      },
+      "reference_changed": true,
+      "compact_changed": true,
+      "tuning": " 7 Wilson North Indian:Bhairavi",
+      "npo": 7,
+      "table_sha256": "5f796f4f8ba824a01e7a9440df605f341159fff15b4e332e05c40159101ca9f9",
+      "source_bank": "BankA.json",
+      "note_hz": [
+        77.60621626958715,
+        155.2124325391743,
+        261.6255653006,
+        392.4383479509,
+        523.2511306012,
+        827.7996402089296
+      ]
+    },
+    {
+      "id": 113,
+      "name": "Dark Theater Organ",
+      "no_tuning_bit_identical": true,
+      "original_sha": "45338ec7ae208d8bcd615ec33fa1771eebbcbdc00ecc412f19c6a7b80589276b",
+      "compact_sha": "480b88082f020a59acad2ffae2cc8fb9ad1b3129ccb72126eec38ac6416e7156"
+    },
+    {
+      "id": 147,
+      "name": "BB Dream With Me Arp",
+      "baseline": {
+        "whole_db": [
+          1.8439461434627178,
+          0.9179508210520111
+        ],
+        "tail_db": [
+          0.11520627450876456,
+          0.33998941647680103
+        ]
+      },
+      "authored": {
+        "whole_db": [
+          1.9581846104938383,
+          1.754910389171036
+        ],
+        "tail_db": [
+          1.4371830274684305,
+          2.1849015925231745
+        ]
+      },
+      "reference_changed": true,
+      "compact_changed": true,
+      "tuning": " 6 Wilson Hexany(3, 5, 15, 27)",
+      "npo": 6,
+      "table_sha256": "17a30f1811a6dba1e571a3c9fec0549109e2ec886983a0516172a3710aa417ef",
+      "source_bank": "Brice Beasley.json",
+      "note_hz": [
+        68.98330335074414,
+        153.2962296683203,
+        275.93321340297655,
+        413.8998201044648,
+        613.1849186732812,
+        1103.7328536119062
+      ]
+    },
+    {
+      "id": 151,
+      "name": "BB Kubrick Hall Drone",
+      "no_tuning_bit_identical": true,
+      "original_sha": "18e7a69a84651f8697ffa675ac2f78c076a6ad168ec2271386d24d599cc636a5",
+      "compact_sha": "d547f637465efb7611fbd7f8e297f47e22bbc131c7f02abb4e38c6a8dedbbcbd"
+    },
+    {
+      "id": 163,
+      "name": "BB Hobbs Vox Pad",
+      "baseline": {
+        "whole_db": [
+          -34.68598814316884,
+          -34.7604480075918
+        ],
+        "tail_db": [
+          -27.33305763789497,
+          -36.286229248167686
+        ]
+      },
+      "authored": {
+        "whole_db": [
+          -34.79148225048172,
+          -34.807196982511385
+        ],
+        "tail_db": [
+          -27.419396026703073,
+          -36.29645132167496
+        ]
+      },
+      "reference_changed": true,
+      "compact_changed": true,
+      "tuning": "12 Hobbs Recurrence Relation",
+      "npo": 12,
+      "table_sha256": "daccaf67f6fa903b99f94d9f04c87aaae063bfaae270b269ff4aa51d8e180068",
+      "source_bank": "Brice Beasley.json",
+      "note_hz": [
+        130.8127826503,
+        196.21917397545,
+        261.6255653006,
+        308.63640906555156,
+        392.4383479509,
+        523.2511306012
+      ]
+    },
+    {
+      "id": 178,
+      "name": "BB Eazy-East Lead",
+      "baseline": {
+        "whole_db": [
+          -3.2440545178337254,
+          -3.30157473778537
+        ],
+        "tail_db": [
+          -1.9519000274906344,
+          -2.411147253970805
+        ]
+      },
+      "authored": {
+        "whole_db": [
+          -1.38915372647487,
+          -1.581250249204372
+        ],
+        "tail_db": [
+          1.364045648854664,
+          0.2572310409883013
+        ]
+      },
+      "reference_changed": true,
+      "compact_changed": true,
+      "tuning": " 7 Wilson Highland Bagpipes",
+      "npo": 7,
+      "table_sha256": "b4fa3eef9412a431424ea201ab583af63b45a3e141e74f8b507dbce00b785533",
+      "source_bank": "Brice Beasley.json",
+      "note_hz": [
+        79.71403942752656,
+        159.42807885505312,
+        261.6255653006,
+        392.4383479509,
+        523.2511306012,
+        850.28308722695
+      ]
+    },
+    {
+      "id": 366,
+      "name": "Deeper Space Pad",
+      "no_tuning_bit_identical": true,
+      "original_sha": "d904aadd85c6e844acd2447c945eb93bc98c4e3978b96fe6107dd83c048a4623",
+      "compact_sha": "c2e70c02386b47004251c62df767a14c1bca1acf3b863fddf9185c1bc39a0371"
+    },
+    {
+      "id": 412,
+      "name": "Hexadekany Arp",
+      "baseline": {
+        "whole_db": [
+          0.8477406607063203,
+          1.1033068290859678
+        ],
+        "tail_db": [
+          1.3961446135358422,
+          1.3302479795106326
+        ]
+      },
+      "authored": {
+        "whole_db": [
+          0.5434158014073415,
+          1.41337952205704
+        ],
+        "tail_db": [
+          0.18178775168329955,
+          0.27160934247563734
+        ]
+      },
+      "reference_changed": true,
+      "compact_changed": true,
+      "tuning": " 6 Wilson Hexany(1, 3, 5, 7)",
+      "npo": 6,
+      "table_sha256": "d94d9083b701c392c5bbb0e048be01ec9e3f966230ddcf2e3f3b631d381ee1ba",
+      "source_bank": "Red Sky Lullaby.json",
+      "note_hz": [
+        71.5382405118828,
+        163.515978312875,
+        286.1529620475312,
+        457.84473927604995,
+        654.0639132515,
+        1144.6118481901249
+      ]
+    },
+    {
+      "id": 414,
+      "name": "Analog Bubblearp",
+      "baseline": {
+        "whole_db": [
+          0.6090386486456772,
+          0.26017339531891326
+        ],
+        "tail_db": [
+          -0.958970898883323,
+          -1.9621378724531646
+        ]
+      },
+      "authored": {
+        "whole_db": [
+          0.43320899281150455,
+          0.1982814204538088
+        ],
+        "tail_db": [
+          -1.19385470991008,
+          -2.728367059109849
+        ]
+      },
+      "reference_changed": true,
+      "compact_changed": true,
+      "tuning": " 7 Wilson MOS G:0.2641",
+      "npo": 7,
+      "table_sha256": "9ebcd846c1a9b15cadced63d3b0f811588bfcb7415ab203e5fd99f6ca1bcf7ff",
+      "source_bank": "Red Sky Lullaby.json",
+      "note_hz": [
+        78.54566306448562,
+        157.09132612897125,
+        261.6255653006,
+        377.297757069037,
+        523.2511306012,
+        784.6795075714408
+      ]
+    },
+    {
+      "id": 422,
+      "name": "Modal Trance Arp",
+      "baseline": {
+        "whole_db": [
+          1.2921841455345637,
+          0.4819204669446631
+        ],
+        "tail_db": [
+          -0.16164302460300553,
+          0.10650088448579062
+        ]
+      },
+      "authored": {
+        "whole_db": [
+          0.568799179938289,
+          0.49997686040380485
+        ],
+        "tail_db": [
+          -0.10064599761715949,
+          1.1313759314609098
+        ]
+      },
+      "reference_changed": true,
+      "compact_changed": true,
+      "tuning": " 7 Wilson North Indian:Madhubanti",
+      "npo": 7,
+      "table_sha256": "fb8b1c60b7dc152e74a560735ea13012933d843d497d6695927111eede83a338",
+      "source_bank": "Red Sky Lullaby.json",
+      "note_hz": [
+        77.60621626958715,
+        155.2124325391743,
+        261.6255653006,
+        392.4383479509,
+        523.2511306012,
+        872.0852176686668
+      ]
+    },
+    {
+      "id": 426,
+      "name": "Hick Up Arp",
+      "baseline": {
+        "whole_db": [
+          2.8030730678093,
+          2.9222691900300024
+        ],
+        "tail_db": [
+          3.7802511298374224,
+          1.856168864076404
+        ]
+      },
+      "authored": {
+        "whole_db": [
+          3.3057325736518672,
+          3.367293120823147
+        ],
+        "tail_db": [
+          3.56031071583147,
+          2.589131548681901
+        ]
+      },
+      "reference_changed": true,
+      "compact_changed": true,
+      "tuning": " 5 Grady: S Pentatonic 11-limit Scale 2",
+      "npo": 5,
+      "table_sha256": "23c1eb93b66af5eebbec3a604e349736f7b2781f069c948be2d7b291be2e6e34",
+      "source_bank": "Red Sky Lullaby.json",
+      "note_hz": [
+        49.0547934938625,
+        130.8127826503,
+        261.6255653006,
+        457.84473927604995,
+        719.4703045766499,
+        1438.9406091532999
+      ]
+    },
+    {
+      "id": 429,
+      "name": "Oddscale Riser",
+      "baseline": {
+        "whole_db": [
+          0.6770033124144886,
+          0.7432835026377911
+        ],
+        "tail_db": [
+          0.24131532406148887,
+          0.48092667903256586
+        ]
+      },
+      "authored": {
+        "whole_db": [
+          0.7099646272094194,
+          0.8691286055893627
+        ],
+        "tail_db": [
+          0.43271493493665314,
+          0.7267018274941026
+        ]
+      },
+      "reference_changed": true,
+      "compact_changed": true,
+      "tuning": "19 Grady: A-Narushima 19-tone 7-limit",
+      "npo": 19,
+      "table_sha256": "c6465ec55bc171b2e7938364930b8fcc1211fa3733e5351eb25d1ba091c49b9f",
+      "source_bank": "Red Sky Lullaby.json",
+      "note_hz": [
+        171.69177722851873,
+        218.0213044171667,
+        261.6255653006,
+        305.2298261840334,
+        343.38355445703746,
+        406.97310157871124
+      ]
+    },
+    {
+      "id": 487,
+      "name": "Soi ARP 22",
+      "baseline": {
+        "whole_db": [
+          1.256734560263981,
+          1.2688768721463892
+        ],
+        "tail_db": [
+          -0.22330856955226322,
+          -1.7384690697380403
+        ]
+      },
+      "authored": {
+        "whole_db": [
+          0.6964273145053652,
+          0.6550810823640697
+        ],
+        "tail_db": [
+          -2.293477378354727,
+          -7.288934062703559
+        ]
+      },
+      "reference_changed": true,
+      "compact_changed": true,
+      "tuning": "Harmonic+Subharmonic Series: Dyad",
+      "npo": 3,
+      "table_sha256": "d17f4b1511acbae658eba3f66428c1faa3e9943f27d97f9cd0133e904ae5da7e",
+      "source_bank": "Sound of Izrael 2.json",
+      "note_hz": [
+        16.3515978312875,
+        87.20852176686665,
+        261.6255653006,
+        697.6681741349332,
+        1395.3363482698664,
+        4186.0090448096
+      ]
+    },
+    {
+      "id": 742,
+      "name": "WSW - Arp - Siren Song",
+      "baseline": {
+        "whole_db": [
+          0.8630046174683553,
+          0.22581057267247867
+        ],
+        "tail_db": [
+          0.05722673497762097,
+          -0.3060556210524468
+        ]
+      },
+      "authored": {
+        "whole_db": [
+          0.4353270722945046,
+          1.1020949909451374
+        ],
+        "tail_db": [
+          0.02590449000405564,
+          0.32967458204239997
+        ]
+      },
+      "reference_changed": true,
+      "compact_changed": true,
+      "tuning": " 6 Wilson Hexany(3, 5, 15, 27)",
+      "npo": 6,
+      "table_sha256": "17a30f1811a6dba1e571a3c9fec0549109e2ec886983a0516172a3710aa417ef",
+      "source_bank": "Wabi Sabi Waves.json",
+      "note_hz": [
+        68.98330335074414,
+        153.2962296683203,
+        275.93321340297655,
+        413.8998201044648,
+        613.1849186732812,
+        1103.7328536119062
+      ]
+    },
+    {
+      "id": 752,
+      "name": "WSW - Arp - Squirp",
+      "baseline": {
+        "whole_db": [
+          0.8285799033443496,
+          0.8179633273968219
+        ],
+        "tail_db": [
+          -0.0024844618717625748,
+          0.002934215825665505
+        ]
+      },
+      "authored": {
+        "whole_db": [
+          1.4125550429489995,
+          1.3082019363761304
+        ],
+        "tail_db": [
+          0.011202595772921091,
+          0.16110159019036066
+        ]
+      },
+      "reference_changed": true,
+      "compact_changed": true,
+      "tuning": " 6 Wilson Hexany(3, 5, 15, 27)",
+      "npo": 6,
+      "table_sha256": "17a30f1811a6dba1e571a3c9fec0549109e2ec886983a0516172a3710aa417ef",
+      "source_bank": "Wabi Sabi Waves.json",
+      "note_hz": [
+        68.98330335074414,
+        153.2962296683203,
+        275.93321340297655,
+        413.8998201044648,
+        613.1849186732812,
+        1103.7328536119062
+      ]
+    },
+    {
+      "id": 801,
+      "name": "WSW - Keys - Breathe 4",
+      "no_tuning_bit_identical": true,
+      "original_sha": "718f7a126397af0a2e8b96da48a9fbf31e24cb18e3289b486e105b8b43690486",
+      "compact_sha": "b9a01dc5a10441a3b0ef74ac3e78f61042ffa488739c24d655213ef03b29fab5"
+    },
+    {
+      "id": 802,
+      "name": "WSW - Keys - Broke Stringthing",
+      "baseline": {
+        "whole_db": [
+          -2.9324537997663187,
+          -3.14231607909196
+        ],
+        "tail_db": [
+          -11.616125761957022,
+          -10.113978538190267
+        ]
+      },
+      "authored": {
+        "whole_db": [
+          -25.839780619072812,
+          -26.462805211073412
+        ],
+        "tail_db": [
+          -31.109983526720093,
+          -29.02922001493601
+        ]
+      },
+      "reference_changed": true,
+      "compact_changed": true,
+      "tuning": "Tetrany (Major):(A,B,C,D)=(3,5,7,9)",
+      "npo": 4,
+      "table_sha256": "c3dfc8cdaca99a1ca459d9c7930bd6a503e2ec15aca053fb775d165a92d29079",
+      "source_bank": "Wabi Sabi Waves.json",
+      "note_hz": [
+        36.791095120396875,
+        114.46118481901249,
+        294.328760963175,
+        588.65752192635,
+        915.6894785520999,
+        2354.6300877054
+      ],
+      "first_note_dry_peak_hz": [
+        59.72099304199219,
+        59.38453674316406,
+        18.000411987304688,
+        18.000411987304688
+      ]
+    },
+    {
+      "id": 803,
+      "name": "WSW - Keys - Cold Ones",
+      "no_tuning_bit_identical": true,
+      "original_sha": "1af154adc180d5b1f78743da5dda36b0f93d698375dec75655b4eca1a4108a47",
+      "compact_sha": "3a1c2081abd65d2413bddad04e23580b62f1c727c4ca067554282c27deacdb46"
+    },
+    {
+      "id": 900,
+      "name": "WSW - Sequence - Ellipsis",
+      "baseline": {
+        "whole_db": [
+          0.17729425661184742,
+          -0.16926070661409515
+        ],
+        "tail_db": [
+          -0.11131943117940865,
+          -0.2528997307212292
+        ]
+      },
+      "authored": {
+        "whole_db": [
+          0.136112372193172,
+          -0.21399855693429473
+        ],
+        "tail_db": [
+          -0.07728919155632075,
+          -0.20640452276339238
+        ]
+      },
+      "reference_changed": true,
+      "compact_changed": true,
+      "tuning": " 3 Harmonic+Subharmonic Series: Triad",
+      "npo": 5,
+      "table_sha256": "ddd8a1318a0a52cd6209b6497002e72c9d5727f2396727579e08695914590ab5",
+      "source_bank": "Wabi Sabi Waves.json",
+      "note_hz": [
+        49.0547934938625,
+        130.8127826503,
+        261.6255653006,
+        436.04260883433335,
+        697.6681741349332,
+        1395.3363482698664
+      ]
+    }
+  ]
+}
