@@ -1,0 +1,69 @@
+--- a/main.swift
++++ b/main.swift
+@@ -1478,7 +1478,7 @@
+ 
+ }
+ func capture_factory(_ arm:String,_ mode:String,_ av:AVAudioUnit,_ root:URL,_ plan:[CutoffStep]?) throws {
+-    guard let ix=Int(arm), (0..<4).contains(ix), ["authored","dry","authored-repeat"].contains(mode) else { throw Failed.usage }
++    guard let ix=Int(arm), (0..<4).contains(ix), ["main-only","main-only-repeat"].contains(mode) else { throw Failed.usage }
+     let bytes=try Data(contentsOf:Bundle.main.url(forResource:"s4-inputs",withExtension:"json")!)
+     try require(digest(bytes)=="17b7b5389af054fd713c31acadbf170955c4146628872c9482ed23ce07f33943","wrong cue digest")
+     let cfg=try JSONSerialization.jsonObject(with:bytes) as! [String:Any]
+@@ -1524,9 +1524,9 @@
+     let overlap=Set(pm.keys).intersection(saved.keys)
+     let mismatch=overlap.sorted().filter{abs(pm[$0]!-saved[$0]!)>1e-6}
+     try require(overlap.count>100 && mismatch.count<20,"too many authored differences: \(overlap.count) / \(mismatch)")
+-    let ids:[AUParameterAddress]=[11,16,17,22,23,24,40,41,107]
++    let ids:[AUParameterAddress]=[11,16,17,22,23,24,40,41,107,202]
+     var edits:[String]=[]
+-    if mode=="dry" {
++    if mode.hasPrefix("main-only") {
+         for id in ids {
+             guard let p=au.parameterTree?.allParameters.first(where:{$0.address==id}) else {throw Failed.check("missing dry effect address \(id)")}
+             edits.append(p.identifier)
+@@ -1538,6 +1538,10 @@
+         _=wait(0.35,{false})
+     }
+     let before=params(), bm=mapped(before)
++    let actual=Dictionary(uniqueKeysWithValues:before.map { ($0["address"] as! String, $0["value"] as! Double) })
++    for (k,v) in ["1":1.0,"3":0.0,"7":1.0,"8":0.0,"130":0.0,"131":0.0,"136":0.0,"201":0.0,"202":0.0,"209":1.0] {
++        try require(actual[k]==v,"Main-only frozen external admission failed at \(k)")
++    }
+     try require(Set(pm.keys.filter{pm[$0] != bm[$0]}).isSubset(of:Set(edits)),"non-effect control unexpectedly changed")
+     guard let midi=au.scheduleMIDIEventBlock else {throw Failed.check("MIDI scheduler absent")}
+     var output:[[Float]]=[[],[]], blocks:[Int]=[], next=0, retries=0
+@@ -1569,14 +1573,14 @@
+     try FileManager.default.createDirectory(at:item,withIntermediateDirectories:false)
+     try npy(pcm,frames:frames).write(to:item.appendingPathComponent("output.npy"),options:.atomic)
+     let meta:[String:Any]=["component":"aumu/j6ct/AuPr","component_version":au.componentVersion,"wanted":wanted,"mode":mode,
+-        "bank_file_sha256":digest(try Data(contentsOf:file)),"cue_sha256":digest(bytes),"rate":Int(rate),"frames":frames,"warm_frames":warm,
++        "diagnostic_only":true,"installed_au_sha256":"1d6edf2bf5dd30906b148e10f50e2470a9f55d13d7f64ab3515e3c2294f1c257","bank_file_sha256":digest(try Data(contentsOf:file)),"cue_sha256":digest(bytes),"rate":Int(rate),"frames":frames,"warm_frames":warm,
+         "schedule":schedule,"blocks":blocks,"pcm_sha256":digest(pcm),"authored_overlap":overlap.count,"authored_readback_mismatch":mismatch,
+         "authored":pre,"active":before,"after":after,"dry_control_identifiers":edits]
+     try JSONSerialization.data(withJSONObject:meta,options:[.prettyPrinted,.sortedKeys]).write(to:item.appendingPathComponent("capture.json"),options:.atomic)
+ }
+ 
+ let profiles: [String:BenchProfile] = [
+-   "factory-cross":BenchProfile(run:capture_factory,sequence:(0..<4).flatMap { i in ["authored","dry","authored-repeat"].map { (String(i),$0) } }),
++   "factory-cross":BenchProfile(run:capture_factory,sequence:[("2","main-only"),("2","main-only-repeat")]),
+     "detector-cross":BenchProfile(run:capture_gain,sequence:[
+         ("detector-cross-cold-off","authored"),("detector-cross-cold-on","authored"),
+         ("detector-cross-zero-off","authored"),("detector-cross-zero-on","authored"),
+@@ -1640,7 +1644,8 @@
+         quit.frame=NSRect(x:505,y:14,width:110,height:30)
+         window.contentView?.addSubview(quit)
+         window.center()
+-        window.makeKeyAndOrderFront(nil)
++        window.orderOut(nil)
++        DispatchQueue.main.asyncAfter(deadline:.now()+60) { [weak self] in self?.app.terminate(nil) }
+         publish("Ready. Waiting for a validated local test request.")
+         let t=Timer(timeInterval:0.75,repeats:true){[weak self] _ in self?.poll()}
+         timer=t
+@@ -1727,6 +1732,7 @@
+         currentDir=nil
+         job=nil
+         pending=false
++        app.terminate(nil)
+     }
+     func next(_ j:BenchJob,_ prof:BenchProfile,_ i:Int,_ dir:URL,_ optionIndex:Int=0) {
+         guard i<prof.sequence.count else {

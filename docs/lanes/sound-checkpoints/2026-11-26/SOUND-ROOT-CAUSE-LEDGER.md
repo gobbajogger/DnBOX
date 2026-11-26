@@ -727,3 +727,20 @@ cannot qualify a native OTA route. No switch to the separate arithmetic
 outside that scoped filter can be inferred. Keep product fallback
 untouched; capture a real eligible case or explicitly use narrower
 diagnostics while the native guards are implemented.
+
+The [three-byte histories](sj6-ota-packed-history-q24/README.md) retain
+the full exponent and nearest/even rounded significand; the four poles,
+conditioner, and arithmetic are unchanged. Both physical source
+profiles give a worst translated same-input Q24 difference of
+−104.98 dBr, and the appended finite tail reaches at worst −100.23.
+A two-owner host test preserves all states and signed words across
+220/32/12 B disjoint slots. The [bare native Q24 factoring](sj6-ota-bare-q24/README.md)
+preserves the packed checksum; shared non-inlined four-use kernel
+is 36 B smaller than the unpacked comparator plus the same clock,
+and costs 0.693 µs more per synthetic frame. Native APP, real routing,
+combined workload and controls are not qualified.
+
+The [new pure Main capture attempt](sj6-ota-direct-main-preflight/README.md)
+compiled but never entered the offline app, so no new Mac dependency
+or original PCM claim. Continue with intact signed stored evidence
+and controlled Main + preserved-stock-Sub diagnostics.
