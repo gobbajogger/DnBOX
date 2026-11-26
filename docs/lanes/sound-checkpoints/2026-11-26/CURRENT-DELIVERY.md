@@ -6,14 +6,18 @@ isolated kernel timing, or partial link into a release claim.
 
 ## Latest measured results
 
-- **Potential SuperJ6 RAM recovery, not yet linked.** The
-  [guarded stock-only layout](sj6-stock-layout/README.md) removes
-  268 B per runtime owner only when a legacy route cannot be
-  entered. Default stock preprocessed source stays identical and
-  guarded Raw dry/wet match 148,684 signed host frames. The target
-  type layout is measured; 536 B across both owners is an estimate
-  until paired links confirm the pool. It is not room for the full
-  original filter or qualification of target playback.
+- **SuperJ6 internal history storage, not pool recovery.** The
+  [offset-preserving gap proof](sj6-stock-gap/GAPS.md) reserves
+  264 aligned bytes per exclusive typed/Juno owner without moving
+  either protected lease offset. Raw authored/dry signed audio and
+  the full ARP/physical-control witness are unchanged. The simple
+  shrink alone did not change the native union size because S1
+  also owns its full extent. The
+  [exact thin OFF/ON paired links](sj6-stock-gap-native/native-gaps-paired.json)
+  retain 52 B spendable above reserve, with APP 520→504 Elite
+  and 532→516 Pro (16 B less each in the same staging). No new OTA
+  history active or reason to deploy the empty gaps. A minimized
+  Main-only history is still theoretical, not all source owners.
 
 - **SuperJ6 Main physical OTA is now independently reconstructed.**
   The [same-input leaf and full typed Raw controls](sj6-raw-main-ota/README.md)

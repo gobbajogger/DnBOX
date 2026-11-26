@@ -1,0 +1,154 @@
+{
+  "elite": {
+    "paired": {
+      "off": {
+        "used": 552152,
+        "free": 520,
+        "pool_over_8192": 564,
+        "effective_unreserved_pool": 52,
+        "sha": "aa2cacb33abf17bf35b287db214f82185f0bbc8a226f2daad63fb814ce66ac69",
+        "extent": [
+          61432,
+          32764,
+          4,
+          4072
+        ],
+        "symbols": {
+          "_pool_start": [
+            "01c20000",
+            0
+          ],
+          "_pool_end": [
+            "01c71dcc",
+            0
+          ],
+          "_xpool_start": [
+            "01c75200",
+            0
+          ],
+          "_xpool_end": [
+            "01c77600",
+            0
+          ],
+          "original_bass": [
+            "01c3bed8",
+            32616
+          ]
+        }
+      },
+      "on": {
+        "used": 552168,
+        "free": 504,
+        "pool_over_8192": 564,
+        "effective_unreserved_pool": 52,
+        "sha": "efa6fc2bbe8e457a21513f9c4b04b766e87923377ccce25dcf6aed63987abc26",
+        "extent": [
+          61432,
+          32764,
+          4,
+          4072
+        ],
+        "symbols": {
+          "_pool_start": [
+            "01c20000",
+            0
+          ],
+          "_pool_end": [
+            "01c71dcc",
+            0
+          ],
+          "_xpool_start": [
+            "01c75200",
+            0
+          ],
+          "_xpool_end": [
+            "01c77600",
+            0
+          ],
+          "original_bass": [
+            "01c3bed8",
+            32616
+          ]
+        }
+      }
+    },
+    "same_path_layout_app_delta": 16,
+    "staging_offset_vs_pinned_prior": 64
+  },
+  "pro": {
+    "paired": {
+      "off": {
+        "used": 552140,
+        "free": 532,
+        "pool_over_8192": 564,
+        "effective_unreserved_pool": 52,
+        "sha": "34537d270385218c6eddc08ccf1d752a558a69c39385db7746c3867c594beb86",
+        "extent": [
+          61432,
+          32764,
+          4,
+          4072
+        ],
+        "symbols": {
+          "_pool_start": [
+            "01c20000",
+            0
+          ],
+          "_pool_end": [
+            "01c71dcc",
+            0
+          ],
+          "_xpool_start": [
+            "01c75200",
+            0
+          ],
+          "_xpool_end": [
+            "01c77600",
+            0
+          ],
+          "original_bass": [
+            "01c3bed8",
+            32616
+          ]
+        }
+      },
+      "on": {
+        "used": 552156,
+        "free": 516,
+        "pool_over_8192": 564,
+        "effective_unreserved_pool": 52,
+        "sha": "b97a21d2a53194610ccf30e1fd6ee945cbf4293145cecfac91722002abfaac8f",
+        "extent": [
+          61432,
+          32764,
+          4,
+          4072
+        ],
+        "symbols": {
+          "_pool_start": [
+            "01c20000",
+            0
+          ],
+          "_pool_end": [
+            "01c71dcc",
+            0
+          ],
+          "_xpool_start": [
+            "01c75200",
+            0
+          ],
+          "_xpool_end": [
+            "01c77600",
+            0
+          ],
+          "original_bass": [
+            "01c3bed8",
+            32616
+          ]
+        }
+      }
+    },
+    "same_path_layout_app_delta": 16,
+    "staging_offset_vs_pinned_prior": 64
+  }
+}
