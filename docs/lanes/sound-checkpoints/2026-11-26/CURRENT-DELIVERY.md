@@ -124,7 +124,13 @@ isolated kernel timing, or partial link into a release claim.
   records 14,288 µs/86 late OFF and 14,736 µs/64 ON with no
   NOR writes, skipped cycles, or partial owner trap. Changed
   first healthy read time and PCM prevent causal comparison.
-  Neither arm passes, no Pro timing, hold. Separate
+  Neither arm passes, no Pro timing, hold. A new
+  [four terminal sampler split](owner909-terminal-group/README.md)
+  preserves complete 909 owner and four-bus words across 256
+  active host spans, including not-ready and stale tokens.
+  Its 4,660 B private workspace fits the native 5,120 B A area
+  only with a proven active-A barrier. No integrated ownership or
+  timing claim. Separate
   [active host DSP proof](owner909-early-chicago/owner-fixture.log)
   compares 6.81 MB of exact outputs/states over 192 active
   spans, with actual host overlap on 124; it does not cover
