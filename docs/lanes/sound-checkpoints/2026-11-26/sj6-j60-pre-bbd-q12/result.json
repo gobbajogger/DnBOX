@@ -1,0 +1,97 @@
+{
+  "input_sha": "59235e639119826ee40414cb4bc46c6ea1e0d2d0159ae148e93992118c11cc45",
+  "original_post_HP_sha": "fcd0544003a243a78115f161f7fac5ac779302e968817382f5951f9a365073cd",
+  "original_wet_pcm_sha": "78e7715422eb77c61946992e8c12ed3993b870f6d0f4905fca5f2a90f62094f1",
+  "original_96k_frames": 323664,
+  "effect": "corrected post in all four; compact trajectory unchanged; 0 compact HP+Q12, 1 orig HP+Q12, 2 compact HP+F32 ring, 3 orig HP+F32 ring",
+  "windows": {
+    "0": {
+      "attack": {
+        "wet_signed_dbr": -23.084587613629644,
+        "pre_quant_HP_signed_dbr": -105.48790238721423
+      },
+      "held": {
+        "wet_signed_dbr": -19.96921797554792,
+        "pre_quant_HP_signed_dbr": -105.48027915014636
+      },
+      "release": {
+        "wet_signed_dbr": -24.74340392943503,
+        "pre_quant_HP_signed_dbr": -102.95542206697183
+      },
+      "chord": {
+        "wet_signed_dbr": -18.675270972094847,
+        "pre_quant_HP_signed_dbr": -112.63867686890941
+      },
+      "tail": {
+        "wet_signed_dbr": -20.78847720813988,
+        "pre_quant_HP_signed_dbr": -112.947689429783
+      }
+    },
+    "1": {
+      "attack": {
+        "wet_signed_dbr": -23.08449578522248,
+        "pre_quant_HP_signed_dbr": -105.48790238721423
+      },
+      "held": {
+        "wet_signed_dbr": -19.969289141531796,
+        "pre_quant_HP_signed_dbr": -105.48027915014636
+      },
+      "release": {
+        "wet_signed_dbr": -24.74340392943503,
+        "pre_quant_HP_signed_dbr": -102.95542206697183
+      },
+      "chord": {
+        "wet_signed_dbr": -18.675297517405824,
+        "pre_quant_HP_signed_dbr": -112.63867686890941
+      },
+      "tail": {
+        "wet_signed_dbr": -20.78847720813988,
+        "pre_quant_HP_signed_dbr": -112.947689429783
+      }
+    },
+    "2": {
+      "attack": {
+        "wet_signed_dbr": -23.15708023008891,
+        "pre_quant_HP_signed_dbr": -105.48790238721423
+      },
+      "held": {
+        "wet_signed_dbr": -19.99702953213092,
+        "pre_quant_HP_signed_dbr": -105.48027915014636
+      },
+      "release": {
+        "wet_signed_dbr": -26.432395066691047,
+        "pre_quant_HP_signed_dbr": -102.95542206697183
+      },
+      "chord": {
+        "wet_signed_dbr": -18.668469291111652,
+        "pre_quant_HP_signed_dbr": -112.63867686890941
+      },
+      "tail": {
+        "wet_signed_dbr": -20.967654155303013,
+        "pre_quant_HP_signed_dbr": -112.947689429783
+      }
+    },
+    "3": {
+      "attack": {
+        "wet_signed_dbr": -23.157179749838257,
+        "pre_quant_HP_signed_dbr": -105.48790238721423
+      },
+      "held": {
+        "wet_signed_dbr": -19.997098001961252,
+        "pre_quant_HP_signed_dbr": -105.48027915014636
+      },
+      "release": {
+        "wet_signed_dbr": -26.43275852926176,
+        "pre_quant_HP_signed_dbr": -102.95542206697183
+      },
+      "chord": {
+        "wet_signed_dbr": -18.668514253664366,
+        "pre_quant_HP_signed_dbr": -112.63867686890941
+      },
+      "tail": {
+        "wet_signed_dbr": -20.96769676725222,
+        "pre_quant_HP_signed_dbr": -112.947689429783
+      }
+    }
+  }
+}
