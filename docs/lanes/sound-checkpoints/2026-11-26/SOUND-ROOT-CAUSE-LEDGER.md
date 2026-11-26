@@ -7,6 +7,11 @@ Do not fit individual presets, a master gain, or an arbitrary time shift.
 
 ## SuperJ6: ruled out or insufficient
 
+The [actual accepted-note sender](sj6-raw-current-note-fanout/README.md)
+calls each eligible owner once for each tested event (all sixteen owner
+sets at four Raw keys). Do not fit level by duplicating notes. This
+does not identify a later installed mixer or FX level discrepancy.
+
 Raw's actual current [OSC2 and noise](sj6-raw-osc2-noise/README.md)
 are silent in reached original outputs with positive controls; the
 [compressor send is truly muted](sj6-raw-comp-muted/README.md), even
