@@ -7,13 +7,13 @@ isolated kernel timing, or partial link into a release claim.
 ## Latest measured results
 
 - **Original Raw post-voice owners, guarded host only.** The actual
-  current OTA cutoff setter produces physical 30,000.0078125 Hz for
+  [current OTA cutoff setter](sj6-warm-post-voice-sum/README.md) produces physical 30,000.0078125 Hz for
   this cue. Separately captured Main and Sub state and program
   chronology were joined at the app's proven unity mixer before the
   compact instrument HP. Dry solo summation matches the joined result
   below −143 dBr. Original post-voice substitution improves held and
   complete comparisons, but worsens the first signed release. A
-  separately guarded HP10/zero-Crusher before J60 and final DC after
+  [separately guarded HP10/zero-Crusher](sj6-warm-post-voice-physical-chain/README.md) before J60 and final DC after
   the unchanged master recovers that first release (authored +1.090
   → −6.048 dBr, dry +0.827 → −5.272), but worsens authored chord,
   final release and whole. No adoption. Source-only archive receipts:
@@ -22,7 +22,7 @@ isolated kernel timing, or partial link into a release claim.
   Do not infer the complete installed graph or export original audio.
 
 - **SuperJ6 distinct factory controls.** #203/#204 select independent
-  performance XY destinations, not sequencer pads. Original setter
+  [performance XY destinations](sj6-factory-xy-pad-owners/README.md), not sequencer pads. Original setter
   dispatch and Pad Lock restore keep the two fields separate; every
   one of the 640 original presets stores distinct values. Existing AU
   setter/loaded-state proof does not verify XY movement or enable a
@@ -34,6 +34,12 @@ isolated kernel timing, or partial link into a release claim.
   nodes plus a separate compensation mixer. Complete public #130
   dispatch is not yet proven. Keep all fields separate and refuse
   unsupported factory restores.
+- **Downloadable Synth One tuning is not carried yet.** The [906-preset
+  metadata audit](s1-download-tuning-metadata/proof.txt) finds 16
+  real custom tunings, 672 explicit equal temperament and 218 absent.
+  Removing tuning leaves every DNL2 bank byte-identical. The existing
+  owner-local oscillator can reproduce the known custom scale, but
+  standard and absent metadata must never silently retune the project.
 
 - **Downloadable preset transaction on host:** the [actual immutable
   DNL2 reader](dnl2-immutable-staging/README.md) validates all 1,546

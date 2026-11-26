@@ -1,0 +1,314 @@
+{
+  "source_binary": "6d163d79202e866d2fda96e36f752bd386641b5ae2d0b1f829a254d26b652850",
+  "source_asset_hashes": {
+    "data": "ec994e3fabf42b2761d7ca3799f87dacb4ac12670e2909451ff14f78b9a5f740",
+    "map": "3668ef83c102b4952a19bc6fd5adc585eb69d0eff4dd4743be9488b0771fc75d"
+  },
+  "source_roles": {
+    "Main": {
+      "output_sha": "553a9361684c79521026ac1f471a4c5d6dfca0fdfc6679edb8853d05a2a1074d",
+      "receiver_controls": {
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "7": 0,
+        "8": 0,
+        "9": 0,
+        "10": 0.0020000000949949026,
+        "11": 0,
+        "12": 0.0020047882571816444,
+        "13": 1.0,
+        "14": 0,
+        "15": 0.012719512917101383,
+        "20": 1,
+        "25": 0,
+        "28": 0,
+        "29": 0,
+        "32": 1,
+        "37": 440,
+        "38": 1,
+        "39": 0,
+        "40": 0,
+        "42": 0,
+        "43": 0,
+        "44": 0,
+        "51": 1,
+        "0": 0.8080000281333923,
+        "36": 30000.0078125,
+        "41": 1
+      },
+      "events": {
+        "36": [
+          16384,
+          38993,
+          38992,
+          38434,
+          22610
+        ],
+        "48": [
+          49459,
+          83093,
+          83092,
+          82534,
+          33635
+        ],
+        "52": [
+          49459,
+          83093,
+          83092,
+          82534,
+          33635
+        ],
+        "55": [
+          49459,
+          83093,
+          83092,
+          82534,
+          33635
+        ]
+      },
+      "events_columns": [
+        "first frame",
+        "last owner frame",
+        "last nonzero AMP",
+        "first release",
+        "active counted"
+      ]
+    },
+    "Sub": {
+      "output_sha": "9ab95b764bc75ab233f74283faef1ccd6f24c7bfaae1cefcf4684b846884d4b7",
+      "receiver_controls": {
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "7": 0,
+        "8": 0,
+        "9": 0,
+        "10": 0.0020000000949949026,
+        "11": 0,
+        "12": 0.0020047882571816444,
+        "13": 1.0,
+        "14": 0,
+        "15": 0.012719512917101383,
+        "20": 1,
+        "25": 0,
+        "28": 0,
+        "29": 0,
+        "32": 1,
+        "37": 440,
+        "38": 1,
+        "39": 0,
+        "40": 0,
+        "42": 0,
+        "43": 0,
+        "44": 0,
+        "51": 1,
+        "0": 0.3396509885787964,
+        "36": 30000.0078125,
+        "41": 0
+      },
+      "events": {
+        "36": [
+          16384,
+          38993,
+          38992,
+          38434,
+          22610
+        ],
+        "48": [
+          49459,
+          83093,
+          83092,
+          82534,
+          33635
+        ],
+        "52": [
+          49459,
+          83093,
+          83092,
+          82534,
+          33635
+        ],
+        "55": [
+          49459,
+          83093,
+          83092,
+          82534,
+          33635
+        ]
+      },
+      "events_columns": [
+        "first frame",
+        "last owner frame",
+        "last nonzero AMP",
+        "first release",
+        "active counted"
+      ]
+    }
+  },
+  "input_control_words": 170,
+  "source_predry_HP_scope": "before actual compact HP; Raw compact cached HP 0 does not assert original Apple floor/state",
+  "source_reference_tape_hashes": {
+    "dry": "905e705042416acd2a5404594706608c6bd0a35b0783013ef4bbf977fe170002",
+    "authored": "9cc279dc61f6a504e1c234cd90db37f7c16c0cc9377a33e1165e6a75f7cf7b21",
+    "authored-repeat": "9cc279dc61f6a504e1c234cd90db37f7c16c0cc9377a33e1165e6a75f7cf7b21"
+  },
+  "unchanged_prior_compact_dry_authored": true,
+  "original_assets_and_tape_in_ram_only": true,
+  "tested_modes": [
+    "exact Compact original runtime same source with independent per-sampler post-OTA stereo child sum",
+    "no original full app suffix assertion"
+  ],
+  "windows": {
+    "attack": {
+      "authored": [
+        {
+          "signed_dbr": 1.2384052170777835,
+          "level_db": -4.76116365099797
+        },
+        {
+          "signed_dbr": -1.7402947064008856,
+          "level_db": -5.075212513006408
+        }
+      ],
+      "dry": [
+        {
+          "signed_dbr": 0.3618655401482813,
+          "level_db": -6.518931594458824
+        },
+        {
+          "signed_dbr": -1.7199257713243499,
+          "level_db": -6.738252684939949
+        }
+      ],
+      "authored_minus_dry_0_signed_dbr": 0.015476632241584918,
+      "authored_minus_dry_1_signed_dbr": -1.3174894570137916,
+      "separate_process_sum_vs_joined_compact_dry_dbr": -146.79858843597498
+    },
+    "held": {
+      "authored": [
+        {
+          "signed_dbr": 1.3551018016978833,
+          "level_db": -4.795871817195353
+        },
+        {
+          "signed_dbr": -1.6709044144310279,
+          "level_db": -5.00636610111246
+        }
+      ],
+      "dry": [
+        {
+          "signed_dbr": 0.4243431552518341,
+          "level_db": -6.5646417204057155
+        },
+        {
+          "signed_dbr": -1.7337106644101352,
+          "level_db": -6.741141176886267
+        }
+      ],
+      "authored_minus_dry_0_signed_dbr": 0.09975851549299541,
+      "authored_minus_dry_1_signed_dbr": -1.2645494491537936,
+      "separate_process_sum_vs_joined_compact_dry_dbr": -146.84002839137773
+    },
+    "first-release": {
+      "authored": [
+        {
+          "signed_dbr": -1.1907483157150307,
+          "level_db": -1.8810539110836777
+        },
+        {
+          "signed_dbr": 1.0898336247931113,
+          "level_db": -9.495700497454722
+        }
+      ],
+      "dry": [
+        {
+          "signed_dbr": -6.489421512189604,
+          "level_db": -1.9282027288613506
+        },
+        {
+          "signed_dbr": 0.8265103678843466,
+          "level_db": -13.160888373162365
+        }
+      ],
+      "authored_minus_dry_0_signed_dbr": 0.054112462766418214,
+      "authored_minus_dry_1_signed_dbr": 0.2854824321536584,
+      "separate_process_sum_vs_joined_compact_dry_dbr": -142.9922917133442
+    },
+    "chord": {
+      "authored": [
+        {
+          "signed_dbr": 0.963007740405068,
+          "level_db": -6.863531612965453
+        },
+        {
+          "signed_dbr": -0.4619164090382521,
+          "level_db": -6.866177808802617
+        }
+      ],
+      "dry": [
+        {
+          "signed_dbr": -1.915630181949279,
+          "level_db": -8.599647913038192
+        },
+        {
+          "signed_dbr": -3.341205519726853,
+          "level_db": -8.499875051842073
+        }
+      ],
+      "authored_minus_dry_0_signed_dbr": 0.5371697507996993,
+      "authored_minus_dry_1_signed_dbr": -0.1529246782100919,
+      "separate_process_sum_vs_joined_compact_dry_dbr": -146.97715238968374
+    },
+    "final-release": {
+      "authored": [
+        {
+          "signed_dbr": -0.09840219670851424,
+          "level_db": -10.564947596303881
+        },
+        {
+          "signed_dbr": 0.2013460908187809,
+          "level_db": -9.174818009846303
+        }
+      ],
+      "dry": [
+        {
+          "signed_dbr": -2.8510862026005994,
+          "level_db": -9.831814408354806
+        },
+        {
+          "signed_dbr": -2.806478155467042,
+          "level_db": -10.387385421962858
+        }
+      ],
+      "authored_minus_dry_0_signed_dbr": -0.026702101466723995,
+      "authored_minus_dry_1_signed_dbr": 0.20718652798284912,
+      "separate_process_sum_vs_joined_compact_dry_dbr": -145.6471377688315
+    },
+    "full": {
+      "authored": [
+        {
+          "signed_dbr": 1.010231726176478,
+          "level_db": -6.28813322999696
+        },
+        {
+          "signed_dbr": -0.7207444229147654,
+          "level_db": -6.3716596982523015
+        }
+      ],
+      "dry": [
+        {
+          "signed_dbr": -1.4444188461197285,
+          "level_db": -8.180051650765494
+        },
+        {
+          "signed_dbr": -3.012880228928565,
+          "level_db": -8.161077410427085
+        }
+      ],
+      "authored_minus_dry_0_signed_dbr": 0.46559370639146996,
+      "authored_minus_dry_1_signed_dbr": -0.273090785598675,
+      "separate_process_sum_vs_joined_compact_dry_dbr": -146.9425839304896
+    }
+  }
+}
