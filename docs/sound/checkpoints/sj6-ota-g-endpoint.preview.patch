@@ -1,0 +1,19 @@
+--- /dev/null
++++ b/firmware/src/dsp/sj6_ota_g_endpoint.preview.h
+@@ -0,0 +1,16 @@
++#ifndef SJ6_OTA_G_ENDPOINT_H
++#define SJ6_OTA_G_ENDPOINT_H
++#include <math.h>
++/* Original source-order endpoint. Finite cutoff, positive supported Fs;
++ * -ffp-contract=off. A numerically small-angle approximation is NOT bit exact. */
++static inline float sj6_ota_g_endpoint(float hz,float fs)
++{
++ const float maximum=fminf(fs*.9f,30000.f);
++ if(maximum<hz)hz=maximum;
++ hz=fmaxf(hz,3.f);
++ const float rounded_log=log2f(hz);
++ const float restored_hz=exp2f(rounded_log);
++ const float angle=(restored_hz*0x1.921fb6p+1f)/(fs+fs);
++ return tanf(angle);
++}
++#endif
