@@ -1,0 +1,256 @@
+--- a/firmware/src/dsp/s1c/s1c.c
++++ b/firmware/src/dsp/s1c/s1c.c
+@@ -486,6 +486,173 @@
+ volatile uint8_t lab_s1_voice_seen;
+ volatile uint32_t lab_morph_share[2];
+ volatile uint32_t lab_pitch_cache[2];
++#if DNBOX_S1_NEUTRAL_KR_LAB
++#if !S1C_CSM
++#error neutral KR scoped to compact parameter map
++#endif
++typedef struct {
++ const float *c,*t;
++ const s1u_lfo *lfo;
++ float sr,monos;
++ volatile uint32_t *pitch,*morph;
++ volatile uint8_t *seen;
++} s1_kr_read;
++static float kr_lfo01(const s1_kr_read *s,float sel)
++{
++ int k=(int)sel;
++ return k==1?s->lfo[0].o01:k==2?s->lfo[1].o01:k==3?.5f*(s->lfo[0].o01+s->lfo[1].o01):0.f;
++}
++static float kr_lfo10(const s1_kr_read *s,float sel)
++{
++ int k=(int)sel;
++ return k==1?s->lfo[0].o10:k==2?s->lfo[1].o10:k==3?.5f*(s->lfo[0].o10+s->lfo[1].o10):1.f;
++}
++static __attribute__((noinline)) float voice_run_neutral(const s1_kr_read *s,s1c_voice *v,uint32_t draw
++#if DNBOX_S1_FIXED_PITCH_LAB
++ ,unsigned refresh_pitch
++#endif
++)
++{
++    int mono = P(MONO) > 0.0f, ft = (int)P(FTYPE);
++    v->amp = env_step(&v->ea, v->gate, P(AA), clampf(P(AD) * kr_lfo10(s, P(LDEC)), 0.005f, 2.0f), P(AS), P(AR), s->sr);
++    v->fenv = env_step(&v->ef, v->gate, P(FA), P(FD), P(FS), P(FR), s->sr);
++    if (--v->kc <= 0) {
++        v->kc = S1C_KR;
++#if DNBOX_S1_FIXED_PITCH_LAB
++        if(s->pitch){++s->pitch[0];if(!refresh_pitch)++s->pitch[1];}
++        if(refresh_pitch){
++#endif
++        float base = mono ? s->monos : v->freq, half = 0.5f * s->sr;
++        float plfo = 1.0f + kr_lfo01(s, P(LPITCH)) * 0.0594630944f, k = P(DETM) * plfo;
++        const float f1 = clampf(base * exp2f((int)P(SEMI1) / 12.0f) * k, 0.0f, half);
++        float det = P(DET2) * (v->freq / 261.6255653f);
++        if ((int)P(LDET)) det *= kr_lfo01(s, P(LDET));
++        const float f2 = clampf(base * exp2f((int)P(SEMI2) / 12.0f) * k + det, 0.0f, half);
++        const float fs = clampf(base * k / (2.0f * (1.0f + P(SUBOCT))), 0.0f, half);
++        v->kff = clampf(base * k, 0.0f, half);
++        /* The frequencies and the sample rate cannot change until the next
++         * control tick. Save the original rounded divisions and phase words
++         * in the existing cache, not additional voice state. */
++        v->kd1 = f1 / s->sr; v->kd2 = f2 / s->sr;
++        v->ki1 = ph_inc(v->kd1); v->ki2 = ph_inc(v->kd2);
++        v->kis = ph_inc(fs / s->sr); v->kif = ph_inc(v->kff / s->sr);
++#if DNBOX_S1_FIXED_PITCH_LAB
++        float pitch = log2f(f1 > 0.0f ? f1 : 261.0f), kt = 1.0f - clampf((pitch - 6.0f) / 5.0f, 0.0f, 1.0f);
++        float kf = 1.0f - P(KTRK);
++        v->kkey = (1.0f - kf) * kt * kt + kf;
++        }
++#endif
++        v->kidx = clampf(P(FMA) * kr_lfo10(s, P(LFM)), 0.0f, 15.0f);
++        v->kbal = clampf(P(BAL) + kr_lfo01(s, P(LMIX)), 0.0f, 1.0f);
++        const float kres = clampf(P(RES) * kr_lfo10(s, P(LRES)), 0.0f, 0.98f);
++#if !DNBOX_S1_FIXED_PITCH_LAB
++        float pitch = log2f(f1 > 0.0f ? f1 : 261.0f), kt = 1.0f - clampf((pitch - 6.0f) / 5.0f, 0.0f, 1.0f);
++        float kf = 1.0f - P(KTRK);
++        v->kkey = (1.0f - kf) * kt * kt + kf;
++#endif
++        const float kcut = P(CUT) * kr_lfo10(s, P(LCUT)), kem = P(FENV) * kr_lfo10(s, P(LFENV));
++        float cut = clampf(kcut - kcut * kem * (1.0f - v->fenv), 64.0f, 22050.0f);
++        if (ft == 0) {
++            float x = cut * (2.0f / s->sr); if (x > 1.0f) x = 1.0f;
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++            v->ka1 = kres; /* unused by LP; retain original KR resonance */
++#endif
++            v->kA = ladder_a(x);
++            v->kfb = kres * (3.98720139f + x * (3.68178143f - x * 3.93633599f));
++        } else if (ft == 1) {
++            float bw = 0.0625f * s->sr * (exp2f(clampf(1.0f - kres, 0.0f, 1.0f)) - 1.0f);
++            float cc = 1.0f / tanf(3.14159265f * bw / s->sr), d = 2.0f * cosf(TWO_PI * cut / s->sr), a1 = 1.0f / (1.0f + cc);
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++            v->kA = cc; /* unused by BP; retain original KR bandwidth */
++#endif
++            v->ka1 = a1; v->ka4 = -cc * d * a1; v->ka5 = (cc - 1.0f) * a1;
++        } else {
++            float cc = tanf(3.14159265f * cut / s->sr), a1 = 1.0f / (1.0f + 1.41421356f * cc + cc * cc);
++            v->ka1 = a1; v->ka4 = 2.0f * (cc * cc - 1.0f) * a1; v->ka5 = (1.0f - 1.41421356f * cc + cc * cc) * a1;
++        }
++    }
++    int bl = P(BLE) > 0.0f;
++    const uint32_t old_ph=v->ph[0];
++    const float pos1=P(I1), pos2=P(I2);
++    const float wave1=morph(&v->ph[0],v->kd1,v->ki1,pos1,bl);
++    float wave2;
++    if(s->morph)++s->morph[0];
++    if(old_ph==v->ph[1] && v->ki1==v->ki2 &&
++       ((s1c_fb){.f=v->kd1}).u==((s1c_fb){.f=v->kd2}).u &&
++       ((s1c_fb){.f=pos1}).u==((s1c_fb){.f=pos2}).u){
++        wave2=wave1; v->ph[1]+=v->ki2; if(s->morph)++s->morph[1];
++    }else wave2=morph(&v->ph[1],v->kd2,v->ki2,pos2,bl);
++    float o1=wave1*v->vamp*P(VOL1),o2=wave2*v->vamp*P(VOL2);
++    float y = (1.0f - v->kbal) * o1 + v->kbal * o2;
++    if(s->seen)*s->seen=1; /* latch real use of voice kernel */
++    float sub = sine_t(v->ph[2]);
++    v->ph[2] += v->kis;
++    y += P(SUBSQ) != 0.0f ? (sub > 0.0f ? P(SUBV) : -P(SUBV)) : sub * v->vamp * P(SUBV) * 3.0f;
++    if (P(FMV) != 0.0f) {
++        float mod = sine_t(v->mph) * v->kff * v->kidx;
++        v->mph += v->kif;
++        y += sine_t(v->cph) * v->vamp * P(FMV);
++        v->cph += ph_inc((v->kff + mod) / s->sr);
++    }
++    if (P(NOISEV) != 0.0f) {
++        y += ((float)(int32_t)draw * (1.0f / 2147483648.0f)) * v->vamp * P(NOISEV) * kr_lfo10(s, P(LNOISE));
++    }
++    y *= v->amp * v->kkey;
++    float fo;
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++    const float route=P(LFENV);
++    if(P(FENV)>0.f && ((route==1.f && P(L1A)>0.f) ||
++                      (route==2.f && P(L2A)>0.f) ||
++                      (route==3.f && (P(L1A)>0.f || P(L2A)>0.f)))) {
++        const float base=P(CUT)*kr_lfo10(s,P(LCUT)), amount=P(FENV)*kr_lfo10(s,route);
++        const float hz=clampf(base-base*amount*(1.f-v->fenv),64.f,22050.f);
++        if(ft==0){
++            float x=hz*(2.f/s->sr);if(x>1.f)x=1.f;
++            const float a=ladder_a(x),fb=v->ka1*(3.98720139f+x*(3.68178143f-x*3.93633599f));
++            fo=ladder(v->lp,y,a,fb);
++        } else if(ft==2){
++            const float cc=tanf(3.14159265f*hz/s->sr),a1=1.0f/(1.0f+1.41421356f*cc+cc*cc);
++            const float a4=2.0f*(cc*cc-1.0f)*a1,a5=(1.0f-1.41421356f*cc+cc*cc)*a1;
++            fo=hp2(v->bq,y,a1,a4,a5);
++        } else {
++            const float d=2.f*cosf(TWO_PI*hz/s->sr);
++            const float a4=-v->kA*d*v->ka1;
++            float t=y-a4*v->bq[0]-v->ka5*v->bq[1];
++            fo=t*v->ka1-v->ka1*v->bq[1];
++            v->bq[1]=v->bq[0];v->bq[0]=t;
++        }
++    } else
++#endif
++    if (ft == 0) fo = ladder(v->lp, y, v->kA, v->kfb);
++    else if (ft == 2) fo = hp2(v->bq, y, v->ka1, v->ka4, v->ka5);
++    else {
++        float t = y - v->ka4 * v->bq[0] - v->ka5 * v->bq[1];
++        fo = t * v->ka1 - v->ka1 * v->bq[1];
++        v->bq[1] = v->bq[0]; v->bq[0] = t;
++    }
++    return y + P(FMIX) * (fo - y);
++}
++static inline s1_kr_read s1_kr_from_owner(const s1c *s)
++{
++ return (s1_kr_read){.c=s->c,.t=s->t,.lfo=s->lfo,.sr=s->sr,.monos=s->monos,.pitch=lab_pitch_cache,.morph=lab_morph_share,.seen=&lab_s1_voice_seen};
++}
++static float voice_run_kr(s1c *s, s1c_voice *v
++#if DNBOX_S1_FIXED_PITCH_LAB
++    ,unsigned refresh_pitch
++#endif
++)
++{
++ /* One rounding-identical draw per actual active voice. No later DSP operation
++  * can observe this owner cursor before the next voice is called. */
++ if(P(NOISEV)!=0.f)s->rnd=s->rnd*1664525u+1013904223u;
++ s1_kr_read ctx=s1_kr_from_owner(s);
++ return voice_run_neutral(&ctx,v,s->rnd
++#if DNBOX_S1_FIXED_PITCH_LAB
++ ,refresh_pitch
++#endif
++);
++}
++#else
+ static float voice_run_kr(s1c *s, s1c_voice *v
+ #if DNBOX_S1_FIXED_PITCH_LAB
+     ,unsigned refresh_pitch
+@@ -612,6 +779,7 @@
+     }
+     return y + P(FMIX) * (fo - y);
+ }
++#endif
+ #define voice_run voice_run_kr
+ #endif
+ /* ---- FX ---- */
+@@ -1485,6 +1653,27 @@
+     }
+     wet_phase=2;plat_cpu2_sync();
+ }
++#if DNBOX_S1_LATE_RENDER_TILE_LAB
++#if !DNBOX_S1_NEUTRAL_KR_LAB
++#error requires neutral KR
++#endif
++#define S1_HAS_FIXED_PITCH_WITNESS 1
++#define DNBOX_S1_PRIVATE_TILE_LAB 1
++#include "private-tile.inc"
++typedef struct {
++ s1_private_packet packet;
++ s1_voice_view suffix, fallback;
++ float terms[16][3], prefix[16];
++ unsigned seq;
++} s1_late_staging;
++/* Ownership and ACK are strictly dispatcher-provided. Hooks may decline to
++ * acquire if the previously offered private packet is still outstanding.
++ * After offer, ACK is sampled once after home suffix; never waits in audio. */
++extern s1_late_staging *s1_lab_late_acquire(s1c *);
++extern void s1_lab_late_offer(s1_late_staging *,unsigned);
++extern unsigned s1_lab_late_ack(s1_late_staging *,unsigned);
++extern void s1_lab_late_retire(s1_late_staging *,unsigned,int);
++#endif
+ __attribute__((minsize)) void s1c_render(s1c *s, float *outl, float *outr, unsigned n)
+ {
+     unsigned f, i;
+@@ -1567,6 +1756,29 @@
+         }
+         if(concurrent){while(wet_ready[qi])plat_cpu2_sync();plat_cpu2_sync();}
+         const unsigned last=first+16<n?first+16:n;
++#if DNBOX_S1_LATE_RENDER_TILE_LAB
++        s1_late_staging *split=0;
++        unsigned mask=0;
++        if(first && !concurrent && !seq && P(MONO)==0.f && s->mono_prev==0){
++            for(unsigned v=0;v<S1C_VOICES;v++)if(s->v[v].root!=-1 && s->v[v].stage)mask|=1u<<v;
++            if((mask&7u)&&(mask&56u))split=s1_lab_late_acquire(s);
++        }
++        if(split){
++            const s1_voice_port_view plan={port_target,port_id,port_n};
++            unsigned id=++split->seq;if(!id)id=++split->seq;
++            s1_voice_capture(&split->suffix,s);
++            split->fallback=split->suffix;
++            if(s1_private_offer(&split->packet,s,&plan,last-first,mask,id)){
++                s1_lab_late_offer(split,id);
++                s1_voice_tile(&split->suffix,s->v,mask,last-first,3,1,&split->terms[0][0],&plan);
++                const unsigned ack=s1_lab_late_ack(split,id);
++                const int took=s1_private_accept_or_local(&split->packet,s->v,&split->fallback,&plan,last-first,mask,id,ack,split->prefix);
++                s->rnd=split->suffix.rnd;
++                s1_lab_late_retire(split,id,took);
++            } else split=0;
++        }
++#endif
++
+         for(f=first;f<last;f++){
+ #if S1C_FAST
+         int cu = (f & 3) == 0;
+@@ -1609,6 +1821,13 @@
+ #else
+ #define S1_VOICE_PITCH
+ #endif
++#if DNBOX_S1_LATE_RENDER_TILE_LAB
++        if(split){
++            const unsigned t=f-first;
++            y=split->prefix[t];
++            for(unsigned v=3;v<S1C_VOICES;v++)if(mask&(1u<<v))y+=split->terms[t][v-3u];
++        } else
++#endif
+         if (P(MONO) > 0.0f) { if (s->v[0].root != -1 && s->v[0].stage) y = voice_run(s, &s->v[0] S1_VOICE_PITCH); }
+         else for (i = 0; i < S1C_VOICES; i++) if (s->v[i].root != -1 && s->v[i].stage) y += voice_run(s, &s->v[i] S1_VOICE_PITCH);
+ 
