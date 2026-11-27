@@ -1,0 +1,164 @@
+[
+  {
+    "mode": 1,
+    "full_residual_dBr": -74.22928619384766,
+    "events": [
+      {
+        "ch": 0,
+        "start": 0,
+        "ref_lag": 611,
+        "got_lag": 611,
+        "level_error_dB": 0.0,
+        "error_dBr": -385.2598571777344
+      },
+      {
+        "ch": 0,
+        "start": 1777,
+        "ref_lag": 622,
+        "got_lag": 622,
+        "level_error_dB": -0.0023435140028595924,
+        "error_dBr": -71.07357788085938
+      },
+      {
+        "ch": 0,
+        "start": 3554,
+        "ref_lag": 633,
+        "got_lag": 633,
+        "level_error_dB": -0.004948217421770096,
+        "error_dBr": -64.71945190429688
+      },
+      {
+        "ch": 1,
+        "start": 0,
+        "ref_lag": 692,
+        "got_lag": 692,
+        "level_error_dB": -0.0005379270878620446,
+        "error_dBr": -74.28450012207031
+      },
+      {
+        "ch": 1,
+        "start": 1777,
+        "ref_lag": 691,
+        "got_lag": 691,
+        "level_error_dB": -0.0025817323476076126,
+        "error_dBr": -70.14556121826172
+      },
+      {
+        "ch": 1,
+        "start": 3554,
+        "ref_lag": 689,
+        "got_lag": 689,
+        "level_error_dB": -0.00518132746219635,
+        "error_dBr": -64.3121337890625
+      }
+    ]
+  },
+  {
+    "mode": 2,
+    "full_residual_dBr": -73.92118835449219,
+    "events": [
+      {
+        "ch": 0,
+        "start": 0,
+        "ref_lag": 613,
+        "got_lag": 613,
+        "level_error_dB": 0.000201908202143386,
+        "error_dBr": -82.3847885131836
+      },
+      {
+        "ch": 0,
+        "start": 1777,
+        "ref_lag": 632,
+        "got_lag": 632,
+        "level_error_dB": -0.0015098009025678039,
+        "error_dBr": -75.16229248046875
+      },
+      {
+        "ch": 0,
+        "start": 3554,
+        "ref_lag": 649,
+        "got_lag": 649,
+        "level_error_dB": -0.00628324318677187,
+        "error_dBr": -62.72526550292969
+      },
+      {
+        "ch": 1,
+        "start": 0,
+        "ref_lag": 692,
+        "got_lag": 692,
+        "level_error_dB": 0.0,
+        "error_dBr": -385.72271728515625
+      },
+      {
+        "ch": 1,
+        "start": 1777,
+        "ref_lag": 689,
+        "got_lag": 689,
+        "level_error_dB": -0.0014792501460760832,
+        "error_dBr": -75.2148208618164
+      },
+      {
+        "ch": 1,
+        "start": 3554,
+        "ref_lag": 681,
+        "got_lag": 681,
+        "level_error_dB": -0.005199976731091738,
+        "error_dBr": -64.45773315429688
+      }
+    ]
+  },
+  {
+    "mode": 3,
+    "full_residual_dBr": -72.93211364746094,
+    "events": [
+      {
+        "ch": 0,
+        "start": 0,
+        "ref_lag": 620,
+        "got_lag": 620,
+        "level_error_dB": 0.00028991798171773553,
+        "error_dBr": -75.73751831054688
+      },
+      {
+        "ch": 0,
+        "start": 1777,
+        "ref_lag": 655,
+        "got_lag": 655,
+        "level_error_dB": -0.002120319753885269,
+        "error_dBr": -72.2464828491211
+      },
+      {
+        "ch": 0,
+        "start": 3554,
+        "ref_lag": 681,
+        "got_lag": 681,
+        "level_error_dB": -0.005307209212332964,
+        "error_dBr": -64.22639465332031
+      },
+      {
+        "ch": 1,
+        "start": 0,
+        "ref_lag": 691,
+        "got_lag": 691,
+        "level_error_dB": -0.0006285340059548616,
+        "error_dBr": -81.53458404541016
+      },
+      {
+        "ch": 1,
+        "start": 1777,
+        "ref_lag": 677,
+        "got_lag": 677,
+        "level_error_dB": -0.002716380637139082,
+        "error_dBr": -69.97483825683594
+      },
+      {
+        "ch": 1,
+        "start": 3554,
+        "ref_lag": 651,
+        "got_lag": 651,
+        "level_error_dB": -0.004869997967034578,
+        "error_dBr": -64.86105346679688
+      }
+    ]
+  }
+]

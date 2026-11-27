@@ -1,0 +1,85 @@
+--- a/firmware/src/dsp/sj6_native_limiter.inc
++++ b/firmware/src/dsp/sj6_native_limiter.inc
+@@ -56,12 +56,9 @@
+     if(p && p->kind==ORIGINAL_SOUND_JUNO && p->status==ORIGINAL_RUNTIME_OK && position<=127u)
+         sj6_rage_apply(&p->dsp.juno.limiter,(float)position*(1.f/127.f));
+ }
+-static void sj6_limiter_process(sj6_limiter_t *s,float *l,float *r,unsigned frames)
++static inline float sj6_limiter_sample(sj6_limiter_t *s,float *l,float *r,float gain)
+ {
+-    if(!s->armed)return;
+-    float gain=s->gain;
+-    for(unsigned i=0;i<frames;++i){
+-        const float peak=fm_maxf(fm_fabsf(l[i]),fm_fabsf(r[i]));
++        const float peak=fm_maxf(fm_fabsf(*l),fm_fabsf(*r));
+         float target=1.f;
+         if(peak>s->threshold){
+             const float over=peak-s->threshold;
+@@ -72,8 +69,14 @@
+          * Original Bonus Release label invokes ATTACK, not this recovery. */
+         gain+=(target-gain)*(target<gain?s->attack:.0004534119f);
+         const float applied=s->output_gain*gain;
+-        l[i]*=applied;r[i]*=applied;
+-    }
++        *l*=applied;*r*=applied;
++        return gain;
++}
++static void sj6_limiter_process(sj6_limiter_t *s,float *l,float *r,unsigned frames)
++{
++    if(!s->armed)return;
++    float gain=s->gain;
++    for(unsigned i=0;i<frames;++i)gain=sj6_limiter_sample(s,l+i,r+i,gain);
+     s->gain=gain;
+ }
+ #endif
+--- a/firmware/src/dsp/sj6_native_room.inc
++++ b/firmware/src/dsp/sj6_native_room.inc
+@@ -124,13 +124,22 @@
+     s->wide_pos=at+1u==SJ6_ROOM_WIDE?0u:(uint16_t)(at+1u);
+     return delayed;
+ }
+-static void sj6_room_process(sj6_room_t *s,float *left,float *right,unsigned frames)
++static void sj6_room_process(sj6_room_t *s,float *left,float *right,unsigned frames
++#if X0X_SJ6_NATIVE_LIMITER
++                             ,sj6_limiter_t *dry_limit
++#endif
++                             )
+ {
+     if(!s->armed||(!s->enable&&s->armed!=2&&!s->widen&&s->depth==0.f))return;
+     for(unsigned i=0;i<frames;++i){
+         float l=left[i],r=right[i];
+         if(s->enable||s->armed==2){
+             if(s->enable){s->acc[0]+=l;s->acc[1]+=r;}
++#if X0X_SJ6_NATIVE_LIMITER
++            /* The room feed is from post-delay before the dry compressor.
++             * This opt-in is admitted only for the existing additive return. */
++            if(dry_limit)dry_limit->gain=sj6_limiter_sample(dry_limit,&l,&r,dry_limit->gain);
++#endif
+             if(++s->tick==SJ6_ROOM_STRIDE){s->tick=0;sj6_room_tick(s);}
+             if(s->mix>0.f){
+                 float t=(float)s->tick*(1.f/SJ6_ROOM_STRIDE);
+--- a/firmware/src/app/original_runtime.c
++++ b/firmware/src/app/original_runtime.c
+@@ -1477,9 +1477,21 @@
+ #endif
+ #if X0X_SJ6_NATIVE_ROOM
+             sj6_crush_process(p,left,right,frames);
++#if X0X_SJ6_NATIVE_LIMITER
++            sj6_room_t *room=&p->dsp.juno.room;
++            sj6_limiter_t *lim=&p->dsp.juno.limiter;
++#if DNBOX_SJ6_DRY_RAGE_PARALLEL
++            const int dry_split=lim->armed && room->armed && room->type==1 &&
++              (room->enable || room->armed==2) && !room->widen && room->depth==0.f;
++#else
++            const int dry_split=0;
++#endif
++            sj6_room_process(room,left,right,frames,dry_split?lim:0);
++            if(!dry_split)sj6_limiter_process(lim,left,right,frames);
++#else
+             sj6_room_process(&p->dsp.juno.room,left,right,frames);
+ #endif
+-#if X0X_SJ6_NATIVE_LIMITER
++#elif X0X_SJ6_NATIVE_LIMITER
+             sj6_limiter_process(&p->dsp.juno.limiter,left,right,frames);
+ #endif
+             /* The original master attenuator follows the instrument effects. */

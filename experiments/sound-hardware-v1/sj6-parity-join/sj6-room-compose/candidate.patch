@@ -1,0 +1,44 @@
+--- a/firmware/src/app/original_runtime.c
++++ b/firmware/src/app/original_runtime.c
+@@ -14,6 +14,9 @@
+ #endif
+ #include "../dsp/sj6_native_limiter.inc"
+ #include "../dsp/sj6_native_room.inc"
++#if defined(X0X_HOST) && defined(DNBOX_ROOM_COMPOSE_LAB)
++#include "room.h"
++#endif
+ #if X0X_SJ6_CLASSIC_I_PROBE
+ #include "../dsp/classic_i/classic.c"
+ #include "../dsp/classic_i/wrapper.c"
+@@ -1476,8 +1479,18 @@
+ #endif
+ #endif
+ #if X0X_SJ6_NATIVE_ROOM
++#if defined(X0X_HOST) && defined(DNBOX_ROOM_COMPOSE_LAB)
++            if(p->lab_room_block){
++                /* Input: explicit separate dry-Rage and post wet HP witness.
++                 * Not a mapping from compact normalized fields or a product fallback. */
++                compose_room_tick(p->lab_room,p->lab_room_block,left,right,frames);
++            } else {
++#endif
+             sj6_crush_process(p,left,right,frames);
+             sj6_room_process(&p->dsp.juno.room,left,right,frames);
++#if defined(X0X_HOST) && defined(DNBOX_ROOM_COMPOSE_LAB)
++            }
++#endif
+ #endif
+ #if X0X_SJ6_NATIVE_LIMITER
+             sj6_limiter_process(&p->dsp.juno.limiter,left,right,frames);
+--- a/firmware/src/app/original_runtime.h
++++ b/firmware/src/app/original_runtime.h
+@@ -68,6 +68,10 @@
+ #endif
+ typedef struct {
+     original_runtime_backend dsp;
++#if defined(X0X_HOST) && defined(DNBOX_ROOM_COMPOSE_LAB)
++    struct RoomOwner *lab_room;
++    const struct RoomBlock *lab_room_block;
++#endif
+ #if X0X_SJ6_CLASSIC_I_PROBE
+     classic_mode_i classic_i_effect;
+     uint64_t classic_i_sample;

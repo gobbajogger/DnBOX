@@ -1,0 +1,128 @@
+{
+  "binary": "ipa",
+  "reference": "a5243e50bda6bd44f463c6e63ea3137802142f55f3c1ea25a5a6e046acba81a1",
+  "rows": [
+    {
+      "stages": 0,
+      "delay_frames": 11025,
+      "words": 300000,
+      "peak_error": 0.0,
+      "different_words": 0,
+      "partition_peak_error": 0.0,
+      "reference_wiring_exact": true,
+      "partition_exact": true,
+      "tail_rms": 1.8216880036222622e-44,
+      "sha": "9a61f189ee75c9372c6ecdc1fcac583e3a5586a9d1710bb97735069f0fc95d9f"
+    },
+    {
+      "stages": 1,
+      "delay_frames": 11025,
+      "words": 300000,
+      "peak_error": 0.0,
+      "different_words": 0,
+      "partition_peak_error": 0.0,
+      "reference_wiring_exact": true,
+      "partition_exact": true,
+      "tail_rms": 1.8216880036222622e-44,
+      "sha": "0a135df55de22fb647d6a71dd7f6ec7140eabfdb98e94311c4833bf696328a5c"
+    },
+    {
+      "stages": 2,
+      "delay_frames": 11025,
+      "words": 300000,
+      "peak_error": 0.0,
+      "different_words": 0,
+      "partition_peak_error": 0.0,
+      "reference_wiring_exact": true,
+      "partition_exact": true,
+      "tail_rms": 1.6815581571897805e-44,
+      "sha": "4e48fa02ac659bf291174cba11683293242628df55e8cc1dd90bd7dcd19f7ffb"
+    },
+    {
+      "stages": 4,
+      "delay_frames": 11025.375,
+      "words": 300000,
+      "peak_error": 0.0,
+      "different_words": 0,
+      "partition_peak_error": 0.0,
+      "reference_wiring_exact": true,
+      "partition_exact": true,
+      "tail_rms": 0.01860157925638044,
+      "sha": "6059c1079a509a7cb5c0960c8b451bf784e489fa048c3bedf78a2cf2c02fd113"
+    },
+    {
+      "stages": 7,
+      "delay_frames": 11025.375,
+      "words": 300000,
+      "peak_error": 0.0,
+      "different_words": 0,
+      "partition_peak_error": 0.0,
+      "reference_wiring_exact": true,
+      "partition_exact": true,
+      "tail_rms": 0.015648985257960105,
+      "sha": "f6e3cb9caf55d19b77d538df214cf448cb28dbc140de798c61734c7a47981447"
+    },
+    {
+      "stages": 7,
+      "delay_frames": 44100,
+      "words": 300000,
+      "peak_error": 0.0,
+      "different_words": 0,
+      "partition_peak_error": 0.0,
+      "reference_wiring_exact": true,
+      "partition_exact": true,
+      "tail_rms": 0.036254500416666995,
+      "sha": "9781e38de46165b87c9cee4a79237c0d8543793348e6bf12864bf1ba78d29738"
+    },
+    {
+      "stages": 7,
+      "delay_frames": 132300,
+      "words": 300000,
+      "peak_error": 0.0,
+      "different_words": 0,
+      "partition_peak_error": 0.0,
+      "reference_wiring_exact": true,
+      "partition_exact": true,
+      "tail_rms": 0.026648984989810533,
+      "sha": "5aa7cb82a0f3ca76b90ec45b0902aabcdc23f0537e1125959c2006432dc634f4"
+    },
+    {
+      "stages": 15,
+      "delay_frames": 11025.375,
+      "words": 300000,
+      "peak_error": 0.0,
+      "different_words": 0,
+      "partition_peak_error": 0.0,
+      "reference_wiring_exact": true,
+      "partition_exact": true,
+      "tail_rms": 0.015762924436939732,
+      "sha": "8b7a9cbbd5024b807092feceb0bd2afa0eb4cc9cc72e88f55a00569e260959e2"
+    },
+    {
+      "stages": 31,
+      "delay_frames": 11025.375,
+      "words": 300000,
+      "peak_error": 0.0,
+      "different_words": 0,
+      "partition_peak_error": 0.0,
+      "reference_wiring_exact": true,
+      "partition_exact": true,
+      "tail_rms": 0.01522127773027073,
+      "sha": "3ad324779292e70b57a4e385388d0c6a906b296de02d9af8cd7fd42899039984"
+    },
+    {
+      "stages": 31,
+      "delay_frames": 132300,
+      "words": 300000,
+      "peak_error": 0.0,
+      "different_words": 0,
+      "partition_peak_error": 0.0,
+      "reference_wiring_exact": true,
+      "partition_exact": true,
+      "tail_rms": 0.018774007344315415,
+      "sha": "c994f9b371ca66a5038d9fc8c049ca899996fca6393f734e5a7daedbcbb1be45"
+    }
+  ],
+  "scope": "Real original independent oscillator receiver inputs into composed host graph. Matched against explicit same-kernel graph, not installed final output. Noise active original-receiver positive control. Does not cover full preset imports, Apple HP, nonlinear Rage or precise Apple Room front-end. Type II return+dry compressor split are wired with an explicitly separate wet fixture.",
+  "keeper": "No audio emitted"
+}

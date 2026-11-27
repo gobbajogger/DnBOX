@@ -1,0 +1,70 @@
+{
+  "scope": "Actual independent ipa ABI receivers; exact verified private Sub pack/SFZ, pinned previously reached controls projected to receivers. Authored Noise muted. Positive direct physical fader .25; emulator random shim, do not claim installed exact random PCM or host production port. External original source owners; actual guarded compact render_backend, regular dry/chorus off, trim sourced, master unity. No sample outputs saved.",
+  "original": "a5243e50bda6bd44f463c6e63ea3137802142f55f3c1ea25a5a6e046acba81a1",
+  "controls": "c5cffc17f3e0d5a61ad53727c8c55243fef348151dc8d9263b7e8cb5ee30fad4",
+  "signed_checks": 362904,
+  "authored": {
+    "oscSampler1": {
+      "signed_sha": "ed8e877583efe7b2912723aa573263649a3fe62bd6e9f41a83ceafe8fdd11e37",
+      "rms": 0.10646202014017239,
+      "peak": 0.357558012008667,
+      "words": 60484
+    },
+    "oscSampler2": {
+      "signed_sha": "b188bf03710c6a5a38ff56d82682b8e49dd47168c7d80d62324cd6abe7faab5e",
+      "rms": 0.10043420149679191,
+      "peak": 0.37268632650375366,
+      "words": 60484
+    },
+    "sampler1": {
+      "signed_sha": "7bc1db36513e38c5061eeb91f8a202e430d125e52cda0676dffc79f2156c1981",
+      "rms": 0.19313098672373477,
+      "peak": 0.30130141973495483,
+      "words": 60484
+    },
+    "noiseOsc": {
+      "signed_sha": "e34ff16508a2a14ad18ae6b0995b0315afc622f30414fb721a8760ddbf5455ed",
+      "rms": 0.0,
+      "peak": 0.0,
+      "words": 60484
+    },
+    "mix": {
+      "signed_sha": "ad585e2747b987bc4b4d34e4d5391f9e7ef70efa4890a1a75c2837d7b5ccf3b7",
+      "rms": 0.24401347363606612,
+      "peak": 0.532252311706543,
+      "words": 60484
+    }
+  },
+  "positive_noise": {
+    "oscSampler1": {
+      "signed_sha": "ed8e877583efe7b2912723aa573263649a3fe62bd6e9f41a83ceafe8fdd11e37",
+      "rms": 0.10646202014017239,
+      "peak": 0.357558012008667,
+      "words": 60484
+    },
+    "oscSampler2": {
+      "signed_sha": "b188bf03710c6a5a38ff56d82682b8e49dd47168c7d80d62324cd6abe7faab5e",
+      "rms": 0.10043420149679191,
+      "peak": 0.37268632650375366,
+      "words": 60484
+    },
+    "sampler1": {
+      "signed_sha": "7bc1db36513e38c5061eeb91f8a202e430d125e52cda0676dffc79f2156c1981",
+      "rms": 0.19313098672373477,
+      "peak": 0.30130141973495483,
+      "words": 60484
+    },
+    "noiseOsc": {
+      "signed_sha": "ff08a6fce61d52a91525bd05e97561269376f50eefe840214d11ec3465f2492b",
+      "rms": 0.029591957374594833,
+      "peak": 0.1186128631234169,
+      "words": 60484
+    },
+    "mix": {
+      "signed_sha": "275cc73e1ad07340b4370729fa940568a774c05f753c2345deeade18ad5c5b12",
+      "rms": 0.2449498968218335,
+      "peak": 0.5572230219841003,
+      "words": 60484
+    }
+  }
+}
