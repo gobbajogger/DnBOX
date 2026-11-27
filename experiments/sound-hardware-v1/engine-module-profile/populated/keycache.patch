@@ -1,0 +1,79 @@
+--- a/firmware/src/dsp/s1c/s1c.c
++++ b/firmware/src/dsp/s1c/s1c.c
+@@ -498,10 +498,28 @@
+         v->kc = S1C_KR;
+         float base = mono ? s->monos : v->freq, half = 0.5f * s->sr;
+         float plfo = 1.0f + lfo01(s, P(LPITCH)) * 0.0594630944f, k = P(DETM) * plfo;
++#if DNBOX_S1_KEY_CACHE
++        const int semi1 = (int)P(SEMI1), semi2 = (int)P(SEMI2);
++        if(!s->cached_semi_valid || semi1 != s->cached_semi[0]) {
++            s->cached_semi[0] = semi1;
++            s->cached_semi_ratio[0] = exp2f(semi1 / 12.0f);
++        }
++        if(!s->cached_semi_valid || semi2 != s->cached_semi[1]) {
++            s->cached_semi[1] = semi2;
++            s->cached_semi_ratio[1] = exp2f(semi2 / 12.0f);
++        }
++        s->cached_semi_valid = 1;
++        const float f1 = clampf(base * s->cached_semi_ratio[0] * k, 0.0f, half);
++#else
+         const float f1 = clampf(base * exp2f((int)P(SEMI1) / 12.0f) * k, 0.0f, half);
++#endif
+         float det = P(DET2) * (v->freq / 261.6255653f);
+         if ((int)P(LDET)) det *= lfo01(s, P(LDET));
++#if DNBOX_S1_KEY_CACHE
++        const float f2 = clampf(base * s->cached_semi_ratio[1] * k + det, 0.0f, half);
++#else
+         const float f2 = clampf(base * exp2f((int)P(SEMI2) / 12.0f) * k + det, 0.0f, half);
++#endif
+         const float fs = clampf(base * k / (2.0f * (1.0f + P(SUBOCT))), 0.0f, half);
+         v->kff = clampf(base * k, 0.0f, half);
+         /* The frequencies and the sample rate cannot change until the next
+@@ -513,9 +531,22 @@
+         v->kidx = clampf(P(FMA) * lfo10(s, P(LFM)), 0.0f, 15.0f);
+         v->kbal = clampf(P(BAL) + lfo01(s, P(LMIX)), 0.0f, 1.0f);
+         const float kres = clampf(P(RES) * lfo10(s, P(LRES)), 0.0f, 0.98f);
++#if DNBOX_S1_KEY_CACHE
++        /* Both cached values key the identical original expression.
++         * Cached fields are cleared by s1c_init; a new voice can reuse the
++         * prior result only when both effective inputs still match. */
++        const float track_hz = f1 > 0.0f ? f1 : 261.0f, track_amount = P(KTRK);
++        if(!v->cached_track_valid || track_hz != v->cached_track_pitch || track_amount != v->cached_track_amount) {
++            v->cached_track_pitch = track_hz;
++            v->cached_track_amount = track_amount;
++            v->cached_track_valid = 1;
++#endif
+         float pitch = log2f(f1 > 0.0f ? f1 : 261.0f), kt = 1.0f - clampf((pitch - 6.0f) / 5.0f, 0.0f, 1.0f);
+         float kf = 1.0f - P(KTRK);
+         v->kkey = (1.0f - kf) * kt * kt + kf;
++#if DNBOX_S1_KEY_CACHE
++        }
++#endif
+         const float kcut = P(CUT) * lfo10(s, P(LCUT)), kem = P(FENV) * lfo10(s, P(LFENV));
+         float cut = clampf(kcut - kcut * kem * (1.0f - v->fenv), 64.0f, 22050.0f);
+         if (ft == 0) {
+--- a/firmware/src/dsp/s1c/s1c.h
++++ b/firmware/src/dsp/s1c/s1c.h
+@@ -115,6 +115,10 @@
+     float kd1, kd2, kff, kidx, kbal, kkey, kA, kfb, ka1, ka4, ka5;
+     uint32_t ki1, ki2, kis, kif;         /* binary32-rounded phase increments */
+ #endif
++#if DNBOX_S1_KEY_CACHE
++    float cached_track_pitch, cached_track_amount;
++    uint8_t cached_track_valid;
++#endif
+ } s1c_voice;
+ #ifndef S1C_EXT
+ #define S1C_EXT 0             /* 1: device memory model - caller-owned buffers, exact-size delay lines */
+@@ -224,6 +228,11 @@
+     S1C_SAMPLE rv[S1C_RV_TOTAL];
+ #endif
+ #endif
++#if DNBOX_S1_KEY_CACHE
++    float cached_semi_ratio[2];
++    int cached_semi[2];
++    uint8_t cached_semi_valid;
++#endif
+ } s1c;
+ /* Public parameter ids (S1 parameter order) for the effects and master: set with s1c_set in
+  * physical units. Bit-crush, auto-pan, widen, phaser, delay and reverb are all reachable here. */

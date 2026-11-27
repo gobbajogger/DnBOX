@@ -1,0 +1,60 @@
+--- a/firmware/src/dsp/s1c/s1c.c
++++ b/firmware/src/dsp/s1c/s1c.c
+@@ -181,7 +181,22 @@
+ /* ---- envelope: one-pole ADSR, attack aims at 1 with tau*0.6 and turns to decay at 0.99 ---- */
+ enum { E_CLEAR = S1U_E_CLEAR, E_ATK = S1U_E_ATK, E_DEC = S1U_E_DEC, E_REL = S1U_E_REL };
+ static float pole(float t, float sr) { return t <= 0.0f ? 0.0f : expf(-1.0f / (t * sr)); }
++#if DNBOX_S1_HOT_INLINE
++static inline __attribute__((always_inline)) float s1u_env_step_hot(s1u_env *e, float gate, float atk, float dec, float sus, float rel, float sr)
++{
++    if (e->prev < gate && e->mode != S1U_E_DEC) { e->mode = S1U_E_ATK; e->a = pole(atk * 0.6f, sr); }
++    else if (e->prev > gate) { e->mode = S1U_E_REL; e->a = pole(rel, sr); }
++    e->prev = gate;
++    if (e->mode == S1U_E_CLEAR) return 0.0f;
++    float x = e->mode == S1U_E_ATK ? gate : gate * sus;
++    e->y = (1.0f - e->a) * x + e->a * e->y;
++    if (e->mode == S1U_E_ATK && e->y > 0.99f) { e->mode = S1U_E_DEC; e->a = pole(dec, sr); }
++    return e->y;
++}
++#define env_step s1u_env_step_hot
++#else
+ #define env_step s1u_env_step
++#endif
+ static void voice_release(s1c *s, s1c_voice *v, int step)
+ {
+     v->stage = 2; v->gate = 0.0f;
+@@ -393,9 +408,34 @@
+ }
+ #endif
+ 
++#if DNBOX_S1_HOT_INLINE
++static inline __attribute__((always_inline)) float s1u_ladder_hot(float *h, float in, float A, float fb)
++{
++    float o = 0.0f;
++    for (int k = 0; k < 2; k++) {
++        float tmp = h[3], v = in - fb * 0.5f * (h[3] + h[4]);
++        float z1 = v + A * (h[0] - v), z2 = z1 + A * (h[1] - z1), z3 = z2 + A * (h[2] - z2), z4 = z3 + A * (h[3] - z3);
++        h[0] = z1; h[1] = z2; h[2] = z3; h[3] = z4; h[4] = tmp;
++        o += z4;
++    }
++    return 0.5f * o;
++}
++#define ladder s1u_ladder_hot
++#else
+ #define ladder s1u_ladder
++#endif
+ #define ladder_a s1u_ladder_a
++#if DNBOX_S1_HOT_INLINE
++static inline __attribute__((always_inline)) float s1u_hp2_hot(float *z, float x, float a1, float a4, float a5)
++{
++    float t = x - a4 * z[0] - a5 * z[1], o = (t - 2.0f * z[0] + z[1]) * a1;
++    z[1] = z[0]; z[0] = t;
++    return o;
++}
++#define hp2 s1u_hp2_hot
++#else
+ #define hp2 s1u_hp2
++#endif
+ static float moog(float *h, float in, float cut, float res, float sr)
+ {
+     /* four one-pole stages with resonance feedback, run twice per sample (2x oversampled) */
