@@ -334,9 +334,14 @@ int original_sound_value(const uint8_t cell[ORIGINAL_SOUND_BYTES], unsigned para
     else if (cell[29] == ORIGINAL_SOUND_JUNO)
         result = unit_control(original_sound_juno_factories[cell[30]][parameter]);
     else if (cell[29] == ORIGINAL_SOUND_CHICAGO) {
+        unsigned source = (unsigned)original_sound_factory_source(cell[29], cell[30]);
+#if X0X_CHI_FACTORY_COL
+        if (!original_chicago_factory_value(source, parameter, &result)) return 0;
+#else
         original_chicago_program p;
-        if (!original_chicago_program_init(&p, (unsigned)original_sound_factory_source(cell[29], cell[30]))) return 0;
+        if (!original_chicago_program_init(&p, source)) return 0;
         result = p.macro[parameter];
+#endif
     } else {
         original_miami_program p;
         if (!original_miami_program_init(&p, cell[30])) return 0;

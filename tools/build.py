@@ -327,8 +327,20 @@ def miami_n513_boot():
     return flag
 
 
+def chicago_factory_col():
+    flag = os.environ.get("X0X_CHI_FACTORY_COL", "0")
+    if flag not in ("0", "1") or (flag == "1" and (BOARD != "smk37" or VERSION)):
+        raise SystemExit("X0X_CHI_FACTORY_COL: SMK diagnostic only (0 or 1)")
+    return flag
+
+
 def _generate_locked():
     """Body of generate(), called with GEN/.generate.lock held."""
+    if chicago_factory_col() == "1":
+        import gen_chicago_factory_col
+        gen_chicago_factory_col.generate(SRC / "experiments/original_synth/chicago_program_private.h",
+                                        GEN / "original_chicago_factory_col.inc")
+
     if miami_n513_boot() == "1":
         import gen_miami_n513
         gen_miami_n513.generate(SRC / "experiments/original_synth/miami_n513_private.h",
@@ -569,6 +581,8 @@ def build_app():
         raise SystemExit("X0X_D9_TANH_BOOT: SMK diagnostic only (0 or 1)")
     if tanh_boot == "1":
         flags.append("-DX0X_D9_TANH_BOOT=1")
+    if chicago_factory_col() == "1":
+        flags.append("-DX0X_CHI_FACTORY_COL=1")
     # Diagnostic builds must opt in explicitly; never alter release defaults.
     diagnostic_guard = os.environ.get("X0X_DIAG_DISABLE_LOAD_GUARD", "0")
     if diagnostic_guard not in ("0", "1"):

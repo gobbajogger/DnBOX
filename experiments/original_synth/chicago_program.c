@@ -45,12 +45,53 @@ int original_chicago_program_set(original_chicago_program *p,unsigned parameter,
   p->target[i]=mapped(value,&original_chicago_mappings[i]);
  p->macro[parameter]=value;p->revision++;return 1;
 }
+#if X0X_CHI_FACTORY_COL && defined(ORIGINAL_PROGRAM_VALUES_CHICAGO) && !defined(ORIGINAL_CHICAGO_EXPANDED_FACTORY)
+#define CHICAGO_FACTORY_COL_ACTIVE 1
+#include "original_chicago_factory_col.inc"
+#include "binary32_math.h"
+
+static unsigned chi_col_bits(const uint8_t *p, unsigned bit, unsigned width)
+{
+ unsigned at=bit>>3;
+ return ((((unsigned)p[at+1]<<8)|p[at])>>(bit&7u))&((1u<<width)-1u);
+}
+__attribute__((noinline)) static float chi_col_factory(unsigned factory, unsigned parameter)
+{
+ unsigned d=chi_factory_cols[parameter], w=d>>12;
+ const uint8_t *p=chi_factory_codes+(d&4095u);
+ unsigned rank;
+ if(w==9) rank=chi_col_bits(p,factory*9u,9);
+ else {
+  unsigned at=w?chi_col_bits(p+1u+2u*p[0],factory*w,w):0;
+  p+=1u+2u*at;
+  rank=((unsigned)p[1]<<8)|p[0];
+ }
+ if(rank<128u) return (float)rank/127.0f;
+ rank-=128u;
+ if(rank<CHICAGO_GRID1000_N) {
+  unsigned bit=rank*10u, shift=bit&31u;
+  const uint32_t *q=chi_factory_grid+(bit>>5);
+  uint32_t z=q[0]>>shift;
+  if(shift>22u) z|=q[1]<<(32u-shift);
+  return (float)(z&1023u)/1000.0f;
+ }
+ return original_math_float(chi_factory_raw[rank-CHICAGO_GRID1000_N]);
+}
+int original_chicago_factory_value(unsigned factory, unsigned parameter, float *out)
+{
+ if(!out||factory>=81||parameter>=22)return 0;
+ *out=chi_col_factory(factory,parameter);
+ return 1;
+}
+#endif
 int original_chicago_program_init(original_chicago_program *p,unsigned factory){
  if(!p||factory>=81)return 0;
  original_chicago_program next;memset(&next,0,sizeof next);
  for(unsigned i=0;i<22;i++){
 #ifdef ORIGINAL_CHICAGO_EXPANDED_FACTORY
   float x=original_chicago_factory_macro[factory][i];
+#elif CHICAGO_FACTORY_COL_ACTIVE
+  float x=chi_col_factory(factory,i);
 #else
   unsigned bit=(factory*22+i)*9,byte=bit>>3;
   unsigned code=((unsigned)original_chicago_factory_codes[byte]|((unsigned)original_chicago_factory_codes[byte+1]<<8))>>(bit&7);

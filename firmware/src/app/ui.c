@@ -8865,6 +8865,13 @@ static UI_DRAW void cv_draw_pair(uint16_t bg,const void *scene,
         cv_commit_main_band(page);
     }
 }
+static UI_DRAW const cv_readout_scene *cv_pair_readout(cv_readout_scene *note,
+                                                         int eligible)
+{
+    if (!eligible || (ui.brk_choice_on && engine_brk_preview_active()))
+        return NULL;
+    return cv_capture_readout(note) ? note : NULL;
+}
 #endif
 
 static UI_DRAW void draw_main(void)
@@ -8925,18 +8932,14 @@ static UI_DRAW void draw_main(void)
         cv_drum_scene s;
         cv_readout_scene note;
         cv_capture_drum(&s);
-        int has_note=readout && !envelope &&
-            !(ui.brk_choice_on && engine_brk_preview_active()) && cv_capture_readout(&note);
-        cv_draw_pair(s.bg,&s,cv_paint_drum,has_note?&note:NULL);
+        cv_draw_pair(s.bg,&s,cv_paint_drum,cv_pair_readout(&note,readout && !envelope));
         return;
     }
     if (ui.view == V_MIX && ui.overlay == O_NONE && !ui.help) {
         cv_mix_scene s;
         cv_readout_scene note;
         cv_capture_mix(&s);
-        int has_note=readout && !envelope &&
-            !(ui.brk_choice_on && engine_brk_preview_active()) && cv_capture_readout(&note);
-        cv_draw_pair(s.bg,&s,cv_paint_mix,has_note?&note:NULL);
+        cv_draw_pair(s.bg,&s,cv_paint_mix,cv_pair_readout(&note,readout && !envelope));
         return;
     }
     cv_modal_scene modal;
@@ -8961,10 +8964,7 @@ static UI_DRAW void draw_main(void)
         cv_song_scene sg;
         cv_readout_scene note;
         cv_capture_song(&sg);
-        int has_note=readout && !envelope &&
-            !(ui.brk_choice_on && engine_brk_preview_active()) &&
-            cv_capture_readout(&note);
-        cv_draw_pair(sg.bg,&sg,cv_paint_song,has_note?&note:NULL);
+        cv_draw_pair(sg.bg,&sg,cv_paint_song,cv_pair_readout(&note,readout && !envelope));
         return;
     }
     if (!modal.route && ui.overlay==O_NONE && ui.view==V_PART && is_drum()) { (void)draw_drum_frame();return; }
@@ -8972,10 +8972,7 @@ static UI_DRAW void draw_main(void)
         cv_home_scene home;
         cv_readout_scene note;
         cv_capture_home(&home);
-        int has_note=readout && !envelope &&
-            !(ui.brk_choice_on && engine_brk_preview_active()) &&
-            cv_capture_readout(&note);
-        cv_draw_pair(home.bg,&home,cv_paint_home,has_note?&note:NULL);
+        cv_draw_pair(home.bg,&home,cv_paint_home,cv_pair_readout(&note,readout && !envelope));
         return;
     }
     if (!modal.route && ui.part==PART_BRK && ui.view!=V_FX && ui.view!=V_HOME &&
@@ -8987,9 +8984,7 @@ static UI_DRAW void draw_main(void)
         cv_break_scene brk;
         cv_readout_scene note;
         cv_capture_break(&brk);
-        int has_note=readout && !envelope && ui.view!=V_PART && ui.view!=V_SEQ &&
-            !(ui.brk_choice_on && engine_brk_preview_active()) && cv_capture_readout(&note);
-        cv_draw_pair(brk.bg,&brk,cv_paint_break,has_note?&note:NULL);
+        cv_draw_pair(brk.bg,&brk,cv_paint_break,cv_pair_readout(&note,readout && !envelope && ui.view!=V_PART && ui.view!=V_SEQ));
         return;
     }
     if (!modal.route && ui.overlay==O_NONE && is_303() &&
@@ -8997,19 +8992,14 @@ static UI_DRAW void draw_main(void)
         cv_303_scene roll;
         cv_readout_scene note;
         cv_capture_303(&roll,ui.view==V_GEN);
-        int has_note=readout && !envelope &&
-            !(ui.brk_choice_on && engine_brk_preview_active()) && cv_capture_readout(&note);
-        cv_draw_pair(roll.bg,&roll,cv_paint_303,has_note?&note:NULL);
+        cv_draw_pair(roll.bg,&roll,cv_paint_303,cv_pair_readout(&note,readout && !envelope));
         return;
     }
     if (!modal.route && ui.view == V_FX) {
         cv_fx_scene fx;
         cv_readout_scene note;
         cv_capture_fx(&fx);
-        int has_note=readout && !envelope &&
-            !(ui.brk_choice_on && engine_brk_preview_active()) &&
-            cv_capture_readout(&note);
-        cv_draw_pair(fx.bg,&fx,cv_paint_fx,has_note?&note:NULL);
+        cv_draw_pair(fx.bg,&fx,cv_paint_fx,cv_pair_readout(&note,readout && !envelope));
         return;
     }
 #else

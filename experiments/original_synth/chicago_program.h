@@ -19,6 +19,9 @@ typedef struct {
  * Render/held-note users retain an immutable copy. No heap or global scratch.
  * Public edits accept finite normalized[0,1] without a UI-byte round trip. */
 int original_chicago_program_init(original_chicago_program *p,unsigned factory);
+#if X0X_CHI_FACTORY_COL
+int original_chicago_factory_value(unsigned factory,unsigned parameter,float *out);
+#endif
 int original_chicago_program_set(original_chicago_program *p,unsigned parameter,float normalized);
 /* Core0..108 and FX1/FX2 109..116 only. The original five mapped IDs above120
  * are no-ops in this CMP4 route and deliberately have no invented state. */
