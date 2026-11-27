@@ -13,6 +13,9 @@ enum {
     MST_NPARAMS
 };
 enum { PUMP_909, PUMP_808, PUMP_BOTH };
+#if X0X_UI_SMALL_CANVAS
+extern const float x0x_master_ratios[10];
+#endif
 
 typedef struct {
     uint8_t pot[MST_NPARAMS];

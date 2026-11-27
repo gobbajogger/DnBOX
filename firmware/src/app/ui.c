@@ -9837,7 +9837,11 @@ static UI_DRAW int semantic_amount_glyph(pref_t r,int val,int cx,uint16_t col)
 {
  const x0x_param_t *d=pref_desc(r);int q=d&&d->max?(val*127+d->max/2)/d->max:0,left=cx-18;
  if(r.kind==R_ENG && r.a==T_MST && r.c==MST_COMP1) {
+#if X0X_UI_SMALL_CANVAS
+  const float *ratios=x0x_master_ratios;
+#else
   static const float ratios[]={1,1.5f,2,3,4,6,8,12,20,1e6f};
+#endif
   int py=48, ratio=engine_master_get(MST_RATIO), mix=engine_master_get(MST_MIX);
   float t=-48.0f+48.0f*engine_master_get(MST_THRESH)/127.0f, slope=1.0f-1.0f/ratios[(unsigned)ratio<10u?ratio:0];
   cv_line(left,48,cx+18,28,C_LINE);

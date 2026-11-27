@@ -19,7 +19,12 @@
 #define FS 44100.0f
 
 static const char *const RATIO_N[] = {"1:1", "1.5:1", "2:1", "3:1", "4:1", "6:1", "8:1", "12:1", "20:1", "INF"};
-static const float RATIO_V[] = {1.0f, 1.5f, 2.0f, 3.0f, 4.0f, 6.0f, 8.0f, 12.0f, 20.0f, 1e6f};
+#if X0X_UI_SMALL_CANVAS
+#define RATIO_V x0x_master_ratios
+#else
+static
+#endif
+const float RATIO_V[] = {1.0f, 1.5f, 2.0f, 3.0f, 4.0f, 6.0f, 8.0f, 12.0f, 20.0f, 1e6f};
 static const char *const SRC_N[] = {"909", "808", "BOTH"};
 static const char *const MODE_N[] = {"OFF", "LP", "BP", "HP"};
 static const char *const ONOFF_N[] = {"OFF", "ON"};

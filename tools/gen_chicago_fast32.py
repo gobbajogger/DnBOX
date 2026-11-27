@@ -51,7 +51,7 @@ def gram_inverse(n, degree):
                 a[j]=[x-scale*y for x,y in zip(a[j],a[k])]
     return [row[m:] for row in a]
 
-def encoded_segment(words,nmax):
+def encoded_segment(words,nmax,fold_lo=False):
     n=len(words)
     shift=nmax.bit_length()-1
     assert nmax==1<<shift
@@ -95,17 +95,22 @@ def encoded_segment(words,nmax):
             while z>=128:
                 coeff+=bytes([(z&127)|128]);z>>=7
             coeff+=bytes([z])
-        record=struct.pack('<BIi',(degree<<5)|width,base2,lo)+coeff+bits.to_bytes((n*width+7)//8,'little')
+        header=(struct.pack('<BI',(degree<<5)|width,(base2+lo)&U32) if fold_lo
+                else struct.pack('<BIi',(degree<<5)|width,base2,lo))
+        record=header+coeff+bits.to_bytes((n*width+7)//8,'little')
         if best is None or len(record)<len(best):
             best=record
     assert best is not None
     return best
 
-def one(data,start,i,seg):
-    h,base,lo=struct.unpack_from('<BIi',data,start)
+def one(data,start,i,seg,fold_lo=False):
+    if fold_lo:
+        h,base=struct.unpack_from('<BI',data,start);lo=0
+    else:
+        h,base,lo=struct.unpack_from('<BIi',data,start)
     degree=h>>5
     w=h&31
-    p=start+9
+    p=start+(5 if fold_lo else 9)
     q=data[p] if FAST else Q
     p+=int(FAST)
     poly=[]
@@ -127,26 +132,26 @@ def one(data,start,i,seg):
     else:val=0
     return (base+(((v+(1<<(q-1)))>>q) if q else v)+lo+val)&U32
 
-def trial(words,step):
+def trial(words,step,fold_lo=False):
     payload=[];offs=[];prev=0
     for i in range(0,len(words),step):
-        b=encoded_segment(words[i:i+step],step)
+        b=encoded_segment(words[i:i+step],step,fold_lo)
         offs.append(prev)
         payload.append(b);prev+=len(b)
     table=struct.pack('<HH',step,len(offs))+struct.pack('<%dH'%len(offs),*offs)+b''.join(payload)
     bs,ns=struct.unpack_from('<HH',table)
     for i,word in enumerate(words):
         start=4+2*ns+struct.unpack_from('<H',table,4+2*(i//bs))[0]
-        assert one(table,start,i%bs,bs)==word,(step,i)
+        assert one(table,start,i%bs,bs,fold_lo)==word,(step,i)
     return table,max(map(len,payload)),max(b[0]>>5 for b in payload)
 
-def generate(source, dest):
+def generate(source, dest, fold_lo=False):
     text=Path(source).read_text()
     out=Path(dest)
     out.mkdir(parents=True,exist_ok=True)
     for name in ('a','e'):
         _,_,words=input_words(text,name)
-        data,_,_=trial(words,128)
+        data,_,_=trial(words,128,fold_lo)
         (out/f'p_{name}.h').write_text('static const unsigned char p_'+name+'[]={\n'+
             ''.join(','.join(str(x) for x in data[i:i+32])+',\n' for i in range(0,len(data),32))+'};\n')
         print(f'Chicago FAST32 {name}: {len(words)} bit-exact coefficients in {len(data)} B')
