@@ -34,3 +34,20 @@ Three first edges reached at `0x1002b89b8`, `0x1002b8a04`, and `0x1002b8a8c`. Ni
 4. Verify matched note owners, matched sampler inputs, separate branch histories and callback-local control timing first. Then compare whole unnormalized signed output with original held/release cue, and measure the exact same enabled graph on Elite and Pro. The external app mixer values not observed by these tests stay unresolved, not substituted with fitted trim.
 
 Earlier causal checkpoints: [Normal filter and AMP](checkpoints/2026-11-27-sj6-normal-first-divergence.md), [vibrato pause experiment](checkpoints/2026-11-27-sj6-vibrato-arm-no-adoption.md). Full parity and zero dropout are not claimed.
+
+
+## Authenticated control routing
+
+The compiled app runs LFO1, LFO2, then LFO3. For routed effects it clamps the normalized value and passes it through the same original public parameter dispatch as a direct edit. This does not mean the user can select every internal writer: the original public MOD picker is a serialized 71-row table, and selected rows are converted back to indices in that table.
+
+| Original public effect destination | Zero-based picker row | Parameter ID |
+|---|---:|---:|
+| AutoPan depth / rate | 5 / 6 | 23 / 22 |
+| Delay feedback / mix / time | 9 / 10 / 11 | 26 / 27 / 25 |
+| Unison detune / stereo | 45 / 46 | 60 / 61 |
+
+Delay enable, Unison enable/type, Classic Chorus and J60 are absent from this pinned constructor's public picker, even though several of their controls exist in the internal writer lookup. The Version path replaces matching existing chorus rows if present; it does not insert absent rows. J60 starts only when the combined Chorus mode is nonzero and the internal Version byte is 1. Crusher mix callback is #110; it should not be conflated with #109 Bit Rate.
+
+The wet input high-pass and Room feedback use the reached original parameter transforms: normalized Room Size becomes `0.4+0.6*u` and Low Cut becomes `800*u^2.42`. Type II stops the wet limiter; a diagnostic fork has passed an 8192-frame chronological stimulus through the authenticated Apple high-pass leaf, an older reached Costello Room implementation, and independent dry/stopped-Rage and wet paths. This proves the branch construction and tests that candidate, not that the installed current active Room and Rage match. No whole-engine parity is inferred.
+
+See [reached filter-envelope behavior](superj6-source-envelope-coefficients.md) for the source-backed envelope, recurrence, and clock.
