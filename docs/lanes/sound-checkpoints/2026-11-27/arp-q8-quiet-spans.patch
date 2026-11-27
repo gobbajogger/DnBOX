@@ -1,0 +1,42 @@
+--- a/firmware/src/dsp/synthone/sequencer/S1Sequencer.c
++++ b/firmware/src/dsp/synthone/sequencer/S1Sequencer.c
+@@ -167,6 +167,24 @@
+     (void)s;
+     return p->gateTicks;
+ }
++/* Exact Q8 no-edge admission: retain the original reaction at every boundary. */
++static unsigned s1_skip_quiet(S1Sequencer *s,const S1SequencerParams *p,int held,unsigned n)
++{
++    if(!n || n>256u || p->arpBeatsPerSample!=S1_SAMPLE_TICKS ||
++       s->previousHeldNoteNumbersAECount!=held) return 0;
++    if(p->arpIsOn!=1 && !s->sequencerLastNotesCount) return n;
++    uint32_t limit=p->arpSeqTempoMultiplier, beat=s->mBeatTime;
++    if(s->gateOpen){
++        uint32_t g=gateLength(s,p);
++        if(g<limit)limit=g;
++    }
++    if(beat>=limit)return 0;
++    const uint32_t span=(limit-1u-beat)>>8;
++    if(n>span)n=span;
++    s->mBeatTime=beat+(n<<8);
++    return n;
++}
++
+ #if X0X_SJ6_GATE_DEADLINE_PROBE || X0X_SJ6_NATIVE_POSITIVE_GATE
+ static void latchGateDeadline(S1Sequencer *s, const S1SequencerParams *p)
+ {
+--- a/firmware/src/app/original_runtime.c
++++ b/firmware/src/app/original_runtime.c
+@@ -1367,6 +1367,12 @@
+                 continue;
+             }
+ #endif
++            const unsigned quiet=s1_skip_quiet(&a->seq,active,a->nheld,frames-i);
++            if(quiet){
++                a->age=quiet<=UINT32_MAX-a->age?a->age+quiet:UINT32_MAX;
++                i+=quiet-1u;
++                continue;
++            }
+             if (S1Sequencer_willFire(&a->seq, active, a->nheld)) {
+                 if (i > done && render_backend(p, w, left + done, right + done, i - done) != ORIGINAL_RUNTIME_OK)
+                     return p->status;
