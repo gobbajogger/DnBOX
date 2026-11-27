@@ -83,11 +83,23 @@ static inline uint32_t font_bitmap_width(const felucca_font_t *f, uint32_t gi)
  * (20+138+82 = 240). The tallest is the main area. The strip used to be 144
  * rows; the extra 6 moved into the knob row and were still reserved here
  * (240 * 6 * 2 = 2880 bytes of the pool). */
+#ifndef X0X_UI_SMALL_CANVAS
+#define X0X_UI_SMALL_CANVAS 0
+#endif
+#if X0X_UI_SMALL_CANVAS
+#define CV_ROWS 82u
+#else
 #define CV_ROWS 138u
+#endif
 #define CV_MAX (240u * CV_ROWS)
 _Static_assert(CV_ROWS >= 82u, "screen strip shorter than the knob row");
 static uint16_t cv_px[CV_MAX] __attribute__((section(".pool")));
 static uint32_t cv_w, cv_h;
+#if X0X_UI_SMALL_CANVAS
+static uint32_t cv_row_base;
+#else
+#define cv_row_base 0u
+#endif
 static int32_t cv_oy;            /* y offset for graph drawing */
 static int32_t cv_y0, cv_y1;     /* X0X: the rows drawing may touch (cv_band) */
 
@@ -140,6 +152,9 @@ static void cv_begin(uint32_t w, uint32_t h, uint16_t bg)
     if (w * h > CV_MAX)
         h = CV_MAX / w;
     lcd_sync();                     /* the last blit may still read cv_px */
+#if X0X_UI_SMALL_CANVAS
+    cv_row_base = 0;
+#endif
     cv_w = w;
     cv_h = h;
     cv_oy = cv_y0 = 0;
@@ -162,7 +177,24 @@ static void cv_band(int32_t y0, int32_t h)
 {
     cv_oy = cv_y0 = y0;
     cv_y1 = y0 + h;
+#if X0X_UI_SMALL_CANVAS
+    if (cv_y0 < (int32_t)cv_row_base) cv_y0 = (int32_t)cv_row_base;
+    if (cv_y1 > (int32_t)(cv_row_base + cv_h)) cv_y1 = (int32_t)(cv_row_base + cv_h);
+#endif
 }
+
+#if X0X_UI_SMALL_CANVAS
+/* Raster in logical coordinates, backed by just one contiguous window. */
+static void cv_window(uint32_t w, uint32_t logical_h, uint32_t y0, uint32_t rows, uint16_t bg)
+{
+    if (y0 > logical_h) y0 = logical_h;
+    if (rows > logical_h - y0) rows = logical_h - y0;
+    cv_begin(w, rows, bg);
+    cv_row_base = y0;
+    cv_y0 = (int32_t)y0;
+    cv_y1 = (int32_t)(y0 + cv_h);
+}
+#endif
 
 static void cv_blit(uint32_t x, uint32_t y) { lcd_blit(x, y, cv_w, cv_h, cv_px); }
 
@@ -177,7 +209,7 @@ static inline void cv_pset(int32_t x, int32_t y, uint16_t c)
 {
     y += cv_oy;
     if ((uint32_t)x < cv_w && y >= cv_y0 && y < cv_y1)
-        cv_px[(uint32_t)y * cv_w + (uint32_t)x] = swap16(c);
+        cv_px[((uint32_t)y - cv_row_base) * cv_w + (uint32_t)x] = swap16(c);
 }
 
 static void cv_rect(int32_t x, int32_t y, int32_t w, int32_t h, uint16_t c)
@@ -195,7 +227,7 @@ static void cv_rect(int32_t x, int32_t y, int32_t w, int32_t h, uint16_t c)
         y1 = cv_y1;
     for (; y < y1; y++)
         for (i = x; i < x1; i++)
-            cv_px[(uint32_t)y * cv_w + (uint32_t)i] = sc;
+            cv_px[((uint32_t)y - cv_row_base) * cv_w + (uint32_t)i] = sc;
 }
 
 #if defined(__clang__) && !defined(X0X_HOST)
@@ -208,7 +240,7 @@ static void px_blend(int32_t x, int32_t y, uint16_t c, uint32_t a)
     y += cv_oy;
     if ((uint32_t)x >= cv_w || y < cv_y0 || y >= cv_y1 || !a)
         return;
-    q = &cv_px[(uint32_t)y * cv_w + (uint32_t)x];
+    q = &cv_px[((uint32_t)y - cv_row_base) * cv_w + (uint32_t)x];
     if (a >= 16u) {
         *q = swap16(c);
         return;
@@ -380,13 +412,13 @@ static int32_t cv_text_clip(int32_t x, int32_t y, const felucca_font_t *f, const
                 if (!a || px < clip_left || px >= clip_right || (uint32_t)px >= cv_w || py < cv_y0 || py >= cv_y1)
                     continue;
                 if (a == 15u) {
-                    cv_px[(uint32_t)py * cv_w + (uint32_t)px] = sc;
+                    cv_px[((uint32_t)py - cv_row_base) * cv_w + (uint32_t)px] = sc;
                 } else {
-                    uint32_t bg = swap16(cv_px[(uint32_t)py * cv_w + (uint32_t)px]);
+                    uint32_t bg = swap16(cv_px[((uint32_t)py - cv_row_base) * cv_w + (uint32_t)px]);
                     uint32_t br = bg >> 11, bgg = (bg >> 5) & 63u, bb = bg & 31u;
                     uint32_t nr = cv_div15(r * a + br * (15u - a)), ng = cv_div15(g * a + bgg * (15u - a)),
                              nb = cv_div15(b * a + bb * (15u - a));
-                    cv_px[(uint32_t)py * cv_w + (uint32_t)px] = swap16((nr << 11) | (ng << 5) | nb);
+                    cv_px[((uint32_t)py - cv_row_base) * cv_w + (uint32_t)px] = swap16((nr << 11) | (ng << 5) | nb);
                 }
             }
         x += font_advance(f,gi);
@@ -429,6 +461,15 @@ static void draw_boot_screen(const uint8_t *pay)
     int custom = pay && pay[0] == BOOT_KIND_CUSTOM;
     int picture = custom && (pay[1] & BOOT_F_PIC);
     boot_lines(pay,title,subtitle);
+#if X0X_UI_SMALL_CANVAS
+    for (int band=0; band<3; ++band) {
+        cv_begin(240,80,C_BLACK);
+        if (picture) for (unsigned y=band?(unsigned)band*80u-20u:0u; y<BOOT_PIC_H && y+20u<(unsigned)(band+1)*80u; ++y)
+            for (unsigned x=0; x<BOOT_PIC_W; ++x)
+                if (boot_pix(pay+BOOT_PAY_FIXED,x,y)) cv_pset((int)x,(int)y+20-band*80,C_HI);
+        cv_blit(0,(uint32_t)band*80u);
+    }
+#else
     for (int band=0; band<2; ++band) {
         cv_begin(240,120,C_BLACK);
         if (picture) for (unsigned y=0; y<BOOT_PIC_H; ++y)
@@ -436,6 +477,7 @@ static void draw_boot_screen(const uint8_t *pay)
                 if (boot_pix(pay+BOOT_PAY_FIXED,x,y)) cv_pset((int)x,(int)y+20-band*120,C_HI);
         cv_blit(0,(uint32_t)band*120u);
     }
+#endif
     /* B supports lowercase; M deliberately contains capitals/numbers only. */
     draw_text_box(0,picture?137:96,240,&FONT_B,title,C_HI,1);
     draw_text_box(0,picture?164:134,240,&FONT_S,subtitle,C_GRAY,1);

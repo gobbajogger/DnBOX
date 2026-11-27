@@ -630,6 +630,115 @@ uint8_t smk_clip_wait(void)
 {
     return (uint8_t)(!apc_link_host && !ck_page_on());
 }
+#if X0X_UI_SMALL_CANVAS
+/* Main-area global logical coordinates; physical store holds one 69-row band. */
+void cv_window(uint32_t w, uint32_t logical_h, uint32_t y0, uint32_t rows, uint16_t bg);
+void cv_commit_main_band(unsigned band);
+#define SMK_CLIP_BAND_ROWS 69u
+typedef struct {
+    uint32_t keys[2];
+    uint8_t pg, value[9];
+    uint16_t black;
+} ck_page_scene;
+static void ck_page_snapshot(ck_page_scene *scene);
+static void ck_page_draw(const ck_page_scene *scene, unsigned band);
+typedef struct {
+    uint8_t cols, rows, origin_col, origin_row, view, has_clips;
+    uint16_t white, black, dim;
+    uint8_t velocity[SMK_APC40_CLIP_COUNT];
+    uint8_t queued[SMK_APC40_CLIP_COUNT / 8];
+    uint8_t view_bits[SMK_APC40_CLIP_COUNT / 8];
+} smk_clip_lcd_scene;
+static void smk_clip_grid_band(const smk_clip_lcd_scene *s, const smk_apc40_lcd_map_t *m, unsigned band)
+{
+    int32_t p = m->pitch, gap = p >= 24 ? 3 : 2;
+    int32_t y0 = (int32_t)(band * SMK_CLIP_BAND_ROWS);
+    for (uint8_t row = 0; row < m->nrows; ++row) {
+        /* Absolute logical y, including cards that cross the physical seam. */
+        int32_t y = m->y0 + (int32_t)smk_apc40_lcd_screen_row(m, (uint8_t)(m->row0 + row)) * p;
+        if (y + p <= y0 || y >= y0 + (int32_t)SMK_CLIP_BAND_ROWS)
+            continue;
+        for (uint8_t col = 0; col < m->ncols; ++col) {
+            int32_t x = m->x0 + (int32_t)col * p, q = p / 4;
+            unsigned n = (m->row0 + row) * SMK_APC40_SOURCE_COLS + m->col0 + col;
+            unsigned bit = 1u << (n & 7u);
+            uint8_t v = s->velocity[n];
+            if (s->view_bits[n >> 3] & bit) cv_rect(x, y, p, p, s->white);
+            cv_rect(x + gap, y + gap, p - 2 * gap, p - 2 * gap, s->black);
+            if (v)
+                cv_rect(x + gap + 1, y + gap + 1, p - 2 * gap - 2, p - 2 * gap - 2, smk_clip_lcd565(v));
+            else
+                cv_rect(x + p / 2 - 2, y + p / 2 - 2, 4, 4, s->dim);
+            if (s->queued[n >> 3] & bit)
+                cv_rect(x + p / 2 - q / 2, y + p / 2 - q / 2, q, q, s->white);
+        }
+    }
+}
+uint8_t smk_clip_lcd_draw(uint32_t w, uint32_t h)
+{
+    static uint32_t last_ms, last_sig;
+    uint32_t now = fm1_ms;
+    if (h != 2u * SMK_CLIP_BAND_ROWS)
+        return 0u;
+    if (ck_page_on()) {
+        if (now - last_ms < SMK_CLIP_LCD_MIN_MS)
+            return 0u;
+        ck_page_scene scene;
+        ck_page_snapshot(&scene);
+        last_ms = now;
+        was_on = 0u;
+        for (unsigned band = 0; band < 2u; ++band) {
+            cv_window(w, h, band * SMK_CLIP_BAND_ROWS, SMK_CLIP_BAND_ROWS, scene.black);
+            ck_page_draw(&scene, band);
+            cv_commit_main_band(band);
+        }
+        return 1u;
+    }
+    if (was_on && now - last_ms < SMK_CLIP_LCD_MIN_MS)
+        return 0u;
+    smk_clip_lcd_scene scene = {.white=C_WHITE,.black=C_BLACK,.dim=C_DIM};
+    /* Capture all IRQ/BLE-mutated fields at once, restoring IRQ before any
+     * signature, layout, rendering, DMA, or existing LCD input service. */
+    uint32_t irq = irq_save();
+    scene.cols = apc_cols;
+    scene.rows = apc_rows;
+    scene.origin_col = apc_origin_col;
+    scene.origin_row = apc_origin_row;
+    scene.view = apc_view;
+    scene.has_clips = apc_view_has_clips;
+    for (unsigned n = 0; n < SMK_APC40_CLIP_COUNT; ++n) {
+        scene.velocity[n] = apc_led_velocity[n];
+        scene.queued[n >> 3] |= (uint8_t)((!!(apc_cell_flags[n] & SMK_APC40_CELL_QUEUED)) << (n & 7u));
+    }
+    irq_restore(irq);
+    for (uint8_t pad = 0; pad < SMK_APC40_PAD_COUNT; ++pad) {
+        uint8_t n = smk_apc40_note_for_pad_view(scene.cols, scene.rows, scene.origin_col,
+                                               scene.origin_row, scene.view, pad);
+        if (n < SMK_APC40_CLIP_COUNT)
+            scene.view_bits[n >> 3] |= (uint8_t)(1u << (n & 7u));
+    }
+    uint32_t sig = 2166136261u;
+    for (unsigned n = 0; n < SMK_APC40_CLIP_COUNT; ++n) {
+        sig = (sig ^ scene.velocity[n]) * 16777619u;
+        sig = (sig ^ ((scene.queued[n >> 3] >> (n & 7u) & 1u) ? SMK_APC40_CELL_QUEUED : 0u)) * 16777619u;
+    }
+    for (unsigned n = 0; n < SMK_APC40_CLIP_COUNT; ++n)
+        sig = (sig ^ (scene.view_bits[n >> 3] >> (n & 7u) & 1u)) * 16777619u;
+    sig = (sig ^ ((uint32_t)scene.cols | (uint32_t)scene.rows << 8 | (uint32_t)scene.origin_col << 16 |
+                  (uint32_t)scene.origin_row << 24)) * 16777619u;
+    sig = (sig ^ scene.has_clips) * 16777619u;
+    if (was_on && sig == last_sig && now - last_ms < 1000u)
+        return 0u;
+    was_on = 1u;
+    last_sig = sig;
+    last_ms = now;
+    const smk_apc40_lcd_map_t m = smk_apc40_lcd_map(scene.cols, scene.rows, scene.origin_col, scene.origin_row,
+                                                    scene.has_clips, (uint16_t)w, (uint16_t)h);
+    for (unsigned band = 0; band < 2u; ++band) {
+        cv_window(w, h, band * SMK_CLIP_BAND_ROWS, SMK_CLIP_BAND_ROWS, scene.black);
+        smk_clip_grid_band(&scene, &m, band);
+        cv_commit_main_band(band);
+#else
 static void ck_page_draw(void);
 uint8_t smk_clip_lcd_draw(uint32_t w, uint32_t h)
 {
@@ -695,6 +804,7 @@ uint8_t smk_clip_lcd_draw(uint32_t w, uint32_t h)
                 if (apc_cell_flags[n] & SMK_APC40_CELL_QUEUED)
                     cv_rect(x + p / 2 - q / 2, y + p / 2 - q / 2, q, q, C_WHITE);
             }
+#endif
     }
     return 1u;
 }
@@ -1780,7 +1890,7 @@ CK_FN static int32_t ck_key_x(uint32_t k, int32_t x0, int32_t ww)
     return x0 + (int32_t)(k / 12u * 7u + CK_WI[k % 12u]) * ww + (int32_t)CK_BLK(k) * (ww - ww * 3 / 10);
 }
 /* a keyboard of n keys from key 0 (C), the white keys ww wide and h high, key k in col[k] */
-CK_FN static void ck_kbd(int32_t x0, int32_t y, int32_t ww, int32_t h, uint32_t n, const uint16_t *col)
+CK_FN static void ck_kbd(int32_t x0, int32_t y, int32_t ww, int32_t h, uint32_t n, const uint16_t *col, uint16_t black)
 {
     uint32_t k, pass;
     for (pass = 0; pass < 2u; pass++)
@@ -1789,7 +1899,7 @@ CK_FN static void ck_kbd(int32_t x0, int32_t y, int32_t ww, int32_t h, uint32_t 
             if (CK_BLK(k) != pass)
                 continue;
             if (pass) {
-                cv_rect(x - 1, y, bw + 2, h * 3 / 5 + 1, C_BLACK);
+                cv_rect(x - 1, y, bw + 2, h * 3 / 5 + 1, black);
                 cv_rect(x, y, bw, h * 3 / 5, col[k]);
             } else {
                 cv_rect(x, y, ww - 1, h, col[k]);
@@ -1850,7 +1960,7 @@ uint8_t smk_ck_panel(uint32_t *last, uint32_t force)
     for (i = 0; i < 12u; i++)                               /* one octave: the scale, the notes that sound */
         col[i] = snd >> i & 1u ? C_AMB : ck_in(m, i) ? (CK_BLK(i) ? RGB(140, 140, 140) : RGB(220, 220, 220))
                                                     : (CK_BLK(i) ? RGB(30, 30, 30) : RGB(70, 70, 70));
-    ck_kbd(4, 23, 15, 36, 12u, col);
+    ck_kbd(4, 23, 15, 36, 12u, col, C_BLACK);
     cv_rect(ck_key_x(sp->ck_root, 4, 15) + 2, 23 + (CK_BLK(sp->ck_root) ? 15 : 31), 5, 3, CK_MODE_C[0]);
     q = put_s(put_s(put_s(t, ck_nm(CK_ROOT_N, sp->ck_root)), " "), ck_nm(CK_SCALE_N, sp->ck_scale));
     if (sp->ck_snap)
@@ -1883,6 +1993,42 @@ uint8_t smk_ck_panel(uint32_t *last, uint32_t force)
     return 1u;
 }
 /* The stage settings and a plain keybed. The keybed plays MIDI; its colours do not encode field values. */
+#if X0X_UI_SMALL_CANVAS
+static void ck_page_snapshot(ck_page_scene *scene)
+{
+    /* Only main-loop service mutates these fields. No such service runs
+     * here; all nine field values and the keybed are frozen before SPI. */
+    scene->pg = ck.pg;
+    scene->black = C_BLACK;
+    scene->keys[0] = ck.keys[0];
+    scene->keys[1] = ck.keys[1];
+    unsigned pg = (scene->pg & 3u) - 1u, count = pg == 2u ? 9u : 4u;
+    for (unsigned n = 0; n < count; ++n)
+        scene->value[n] = (uint8_t)ck_get(CK_PAGE_FIELDS[pg][n]);
+}
+static void ck_page_draw(const ck_page_scene *scene, unsigned band)
+{
+    uint32_t pg = (scene->pg & 3u) - 1u;
+    uint16_t c = CK_MODE_C[pg];
+    if (band == 0u) {
+        char t[12];
+        uint32_t count = pg == 2u ? 9u : 4u;
+        for (uint32_t n = 0; n < count; ++n) {
+            uint32_t f = CK_PAGE_FIELDS[pg][n];
+            int32_t fx = 4 + (int32_t)(n / 5u) * 120, fy = 2 + (int32_t)(n % 5u) * 12;
+            const char *nm = ck_nm(CK_FLD_N, f);
+            if (f == (uint32_t)scene->pg >> 4)
+                rbox(fx - 2, fy, 116, 12, 3, dim(c, 4));
+            cv_text(fx, vc(&FONT_T, fy, 12), &FONT_T, nm, C_GRAY);
+            cv_text(fx + 44, vc(&FONT_XS, fy, 12), &FONT_XS, ck_val_txt(f, scene->value[n], t), C_WHITE);
+        }
+    } else {
+        uint16_t col[CK_NKEY];
+        for (uint32_t k = 0; k < CK_NKEY; ++k)
+            col[k] = CK_BIT(scene->keys, k) ? c : CK_BLK(k) ? RGB(25, 25, 25) : RGB(60, 60, 60);
+        ck_kbd(10, 76, 10, 46, CK_NKEY, col, scene->black);
+    }
+#else
 static void ck_page_draw(void)
 {
     CK_BASE;
@@ -1901,7 +2047,8 @@ static void ck_page_draw(void)
     }
     for (k = 0; k < CK_NKEY; k++)
         col[k] = CK_BIT(cp->keys, k) ? c : CK_BLK(k) ? RGB(25, 25, 25) : RGB(60, 60, 60);
-    ck_kbd(10, 76, 10, 46, CK_NKEY, col);
+    ck_kbd(10, 76, 10, 46, CK_NKEY, col, C_BLACK);
+#endif
 }
 /* every main loop pass (also between frames, for the arp timing) */
 CK_FN void smk_ck_poll(void)

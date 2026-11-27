@@ -1068,6 +1068,187 @@ static int smc_button_symbol(int note, const char *s)
 
 /* The encoder and fader use the same bounded native value rendering. Keeping
  * one outline avoids duplicating formatting and width trimming in every grid. */
+
+#if X0X_UI_SMALL_CANVAS
+typedef struct {
+    float v;
+    uint16_t c, fill;
+    uint8_t x,y,a,b,kind,bipolar,text,font;
+} smc_grid_op;
+typedef struct { unsigned n, nt; uint16_t black; uint8_t bad; } smc_grid_scene;
+enum { SMC_GRID_OPS=217, SMC_GRID_TEXTS=64, SMC_GRID_RASTER=240*BAND_H };
+_Static_assert(sizeof(smc_grid_op)==16, "SMC opcode ABI");
+_Static_assert(2u*SMC_GRID_RASTER+SMC_GRID_OPS*sizeof(smc_grid_op)+32u*SMC_GRID_TEXTS<=sizeof cv_px,"SMC tape in canvas tail");
+static unsigned char *smc_grid_storage(void)
+{
+    return (unsigned char *)(cv_px+SMC_GRID_RASTER);
+}
+static char *smc_grid_string(unsigned id)
+{
+    return (char *)smc_grid_storage()+SMC_GRID_OPS*sizeof(smc_grid_op)+32u*id;
+}
+static void smc_grid_add(smc_grid_scene *s, const smc_grid_op *op)
+{
+    if (s->bad || s->n == SMC_GRID_OPS) { s->bad=1; return; }
+    memcpy(smc_grid_storage()+s->n++*sizeof(*op),op,sizeof(*op));
+}
+static void smc_grid_rect(smc_grid_scene *s,int x,int y,int w,int h,uint16_t c)
+{
+    const smc_grid_op op={.kind=0,.x=x,.y=y,.a=w,.b=h,.c=c};
+    smc_grid_add(s,&op);
+}
+static void smc_grid_arc(smc_grid_scene *s,int x,int y,int r,float v,uint16_t track,uint16_t fill,int bipolar)
+{
+    const smc_grid_op op={.kind=1,.x=x,.y=y,.a=r,.v=v,.c=track,.fill=fill,.bipolar=bipolar};
+    smc_grid_add(s,&op);
+}
+static void smc_grid_icon(smc_grid_scene *s,int x,int y,int symbol,int scale,uint16_t color)
+{
+    const smc_grid_op op={.kind=2,.x=x,.y=y,.a=symbol,.b=scale,.c=color};
+    smc_grid_add(s,&op);
+}
+static void smc_grid_text(smc_grid_scene *s,int x,int y,const felucca_font_t *f,const char *str,uint16_t c)
+{
+    if (s->bad || s->nt == SMC_GRID_TEXTS) { s->bad=1; return; }
+    unsigned n=0;
+    while(n<31u&&str[n]) ++n;
+    if(str[n]) { s->bad=1; return; }
+    memcpy(smc_grid_string(s->nt),str,n+1u);
+    const smc_grid_op op={.kind=3,.x=x,.y=y,.font=f==&FONT_XS,.c=c,.text=s->nt++};
+    smc_grid_add(s,&op);
+}
+static UI_DRAW void smc_ui_strip_value(smc_grid_scene *scene, pref_t r, int x, int y, uint16_t color)
+{
+    char value[32], unit[12];
+    if (r.kind == R_NONE) put_s(value, "--");
+    else pref_value_of(r, pref_get(r), value, unit);
+    char *end = value; while (*end) end++;
+    while (tw(&FONT_T, value) > 27 && end > value) *--end = 0;
+    smc_grid_text(scene, x, y, &FONT_T, value, color);
+}
+
+/* Eight physical strips, left to right: encoder above, fader left of M/S/R.
+ * Keep this geometry even when a target is inactive; position is the user's map. */
+static UI_DRAW void smc_ui_grid(smc_grid_scene *scene)
+{
+    static const uint8_t NOTES[4] = {16, 8, 0, 24};
+    /* Strips 0..4 = part_s (PART_N / BRK); 5..7 = send/master FX. */
+    static const char *const MAIN_FX[3] = {"RVB", "DLY", "FLT"};
+    int kit = smc_drum_mix();
+    int view = smc.locked ? smc.lock_view : smc.view;
+    /* Selection follows SMC, independently of the touched control.
+     * A locked bank can differ: no lane is selected if it is outside this bank.
+     * LOCK in the header describes captured targets, never the title highlight. */
+    int selected = kit >= 0 ? smc.sel[kit] - smc_drum_track(kit, 0) :
+        view == V_FX ? 5 + smc_page_now() :
+        view == V_MIX ? (smc_page_now() == 3 ? 7 : part_position(smc.mixsel)) : part_position(smc.locked ? smc.lock_part : smc.part);
+    for (int n = 0; n < 8; n++) {
+        pref_t f = smc_target(n), k = smc_knob_target(n);
+        char name[24];
+        int x = n * 30, active = smc_ui.kind < 2 && n == smc_ui.strip;
+        uint16_t fc = active && smc_ui.kind == 0 ? C_HI : C_GRAY;
+        uint16_t kc = active && smc_ui.kind == 1 ? C_HI : C_GRAY;
+        if (n) smc_grid_rect(scene, x, 0, 1, 138, C_LINE);
+        if (kit >= 0) {
+            int track = smc_drum_track(kit, n);
+            if (track < 0) put_s(name, "--");
+            else if ((smc.locked ? smc.lock_view : smc.view) == V_SEQ)
+                put_s(name, engine_voice_name(kit ? T_808 : T_909, track));
+            else put_i(name, track + 1);
+        } else put_s(name, n < NPARTS ? part_s(part_at(n)) : MAIN_FX[n - NPARTS]);
+        int page_knobs = kit < 0 && view != V_HOME && !(view == V_MIX && smc_page_now() == 0);
+        if (n == selected) smc_grid_rect(scene, x + 1, 0, 28, 13, UI_N_SELECT);
+        smc_grid_text(scene, x + 15, 1, &FONT_T, name,
+               n == selected ? SOUND_INK : page_knobs ? C_DIM : C_WHITE);
+        const felucca_font_t *label_font = &FONT_T;
+        if (k.kind == R_NONE) put_s(name, "--");
+        else {
+            const char *label = pref_name(k);
+            if (k.kind == R_ENG && k.a == T_MIX && k.c == MX_PAN) label = "PAN";
+            if (k.kind == R_ENG && k.a == T_MIX && k.c == MX_CUT) label = "CUT";
+            if (k.kind == R_ENG && k.a == T_FX && k.c == FX_RV_DECAY) label = "DECAY";
+            if (k.kind == R_ENG && k.a == T_FX && k.c == FX_DL_FDBK) label = "FDBK";
+            if (k.kind == R_ENG && k.a == T_MST && k.c == MST_RESO) label = "RESO";
+            if (k.kind == R_BLEN || k.kind == R_DLEN) label = "LEN";
+            if (k.kind == R_BDIR) label = "DIR";
+            if (k.kind == R_BTRANS) label = "TRNS";
+            if (k.kind == R_FREEPLAY) label = "FREE";
+            if (k.kind == R_BPATSND) label = "SOUND";
+            smc_ui_text(name, label);
+            if (tw(label_font, caps_of(name)) > 27) label_font = &FONT_XS;
+        }
+        smc_grid_text(scene, x + 15, 14, label_font, caps_of(name), k.kind == R_NONE ? C_DIM : kc);
+        /* Same authoritative value/arc renderer as the keyboard knob strip. */
+        if (k.kind != R_NONE) {
+            int bipolar = k.kind == R_BTRANS || is_pan(k) ||
+                (k.kind == R_ENG && k.a == T_MST && k.c == MST_DJF);
+            if (bipolar) smc_grid_rect(scene, x + 14, 25, 2, 3, C_WHITE);
+            smc_grid_arc(scene, x + 15, 36, 8, (float)smc_scaled(k) / 127.0f, C_LINE, kc, bipolar);
+        } else smc_grid_text(scene, x + 15, 30, &FONT_T, "--", C_DIM);
+        smc_ui_strip_value(scene, k, x + 15, 46, k.kind == R_NONE ? C_DIM : kc);
+        smc_grid_rect(scene, x + 3, 64, 2, 51, f.kind == R_NONE ? C_LINE : C_DIM);
+        if (f.kind != R_NONE) {
+            int target = 111 - smc_scaled(f) * 45 / 127;
+            /* Source #688: color the fader's destination travel, without
+             * replacing its physical pickup marker or newer UI materials. */
+            uint16_t travel = kit >= 0 ? PART_COL[kit] :
+                n < NPARTS ? PART_COL[part_at(n)] : C_AMB;
+            smc_grid_rect(scene, x + 3, target, 2, 115 - target, travel);
+            smc_grid_rect(scene, x + 1, target, 6, 4, fc);
+            /* A fine white marker is physical position until pickup is acquired. */
+            if (!(smc.picked & (1u << n)) && seq.metro_view <= 16u)
+                smc_grid_rect(scene, x + 1, 111 - smc.last[n] * 45 / 127, 6, 1, C_WHITE);
+        }
+        int fx_view = kit < 0 && smc.view == V_FX && ui.overlay == O_NONE;
+        for (unsigned row = 0; row < (fx_view ? 4u : 3u); row++) {
+            int y = 62 + row * 12;
+            uint8_t note = (uint8_t)(NOTES[row] + n);
+            int fx_held = fx_view && smc.fx_strip.key_bus[note] < SMCFX_N;
+            uint16_t c = fx_held ? C_HI : fx_view ? C_GRAY :
+                smc_led(note) ? C_HI : f.kind == R_NONE ? C_DIM : C_GRAY;
+            const char *caption = smc_button_caption(note);
+            if (caption[0] == 'X' || caption[0] == '-') c = C_DIM;
+            smc_grid_rect(scene, x + 8, y, 22, 11, C_LINE);
+            int symbol=smc_button_symbol(note,caption);
+            if (symbol) {
+                smc_grid_icon(scene, x+14,y+1,symbol,1,c);
+                if (symbol==UI_G_RECORD || symbol==UI_G_MUTE || symbol==UI_G_SOLO) {
+                    smc_grid_rect(scene, x+26,y+4,3,3,c);
+                    if (!smc_led(note)) smc_grid_rect(scene, x+27,y+5,1,1,C_BLACK);
+                }
+            } else {
+                const felucca_font_t *font = tw(&FONT_T, caption) <= 20 ? &FONT_T : &FONT_XS;
+                const capm_t *cap = caps(font);
+                int text_y = y + 1 + (9 - (cap->bot - cap->top + 1)) / 2 - cap->top;
+                smc_grid_text(scene, x + 18, text_y, font, caption, c);
+            }
+        }
+        smc_ui_strip_value(scene, f, x + 15, 122, fc);
+    }
+}
+
+static void smc_ui_grid_striped(void)
+{
+    smc_grid_scene scene={.black=C_BLACK};
+    lcd_sync();
+    smc_ui_grid(&scene);
+    if(scene.bad) return;
+    for(unsigned band=0;band<2u;++band) {
+        cv_window(240, MAIN_ROWS, band*BAND_H, BAND_H, scene.black);
+        for(unsigned i=0;i<scene.n;++i) {
+            smc_grid_op op;
+            memcpy(&op,smc_grid_storage()+i*sizeof(op),sizeof(op));
+            switch(op.kind) {
+            case 0: cv_rect(op.x,op.y,op.a,op.b,op.c); break;
+            case 1: if (!band) arc(op.x,op.y,op.a,op.v,op.c,op.fill,op.bipolar); break;
+            case 2: ui_pictogram(op.x,op.y,op.a,op.b,op.c); break;
+            case 3: text_c(op.x,op.y,op.font?&FONT_XS:&FONT_T,smc_grid_string(op.text),op.c); break;
+            }
+        }
+        cv_commit_main_band(band);
+    }
+}
+#else
 static UI_DRAW void smc_ui_strip_value(pref_t r, int x, int y, uint16_t color)
 {
     char value[32], unit[12];
@@ -1177,6 +1358,8 @@ static UI_DRAW void smc_ui_grid(void)
         smc_ui_strip_value(f, x + 15, 122, fc);
     }
 }
+
+#endif
 
 /* Prefer the displayed physical key; after its release, show another held key. */
 static int smc_fx_header_note(void)
@@ -1300,10 +1483,14 @@ static void smc_ui_draw_peer(void)
     }
     dv_header_battery(219,5);
     cv_commit_header();
+#if X0X_UI_SMALL_CANVAS
+    smc_ui_grid_striped();
+#else
     cv_begin(240, 2 * BAND_H, C_BLACK);
     cv_band(0, 2 * BAND_H);
     smc_ui_grid();
     cv_commit_rect(1, 0, MAIN_Y);
+#endif
     cv_begin(240, KNOB_H, C_BLACK);
     cv_rect(0, 0, 240, 1, C_LINE);
     if (smc_ui.kind == 2) {

@@ -5419,7 +5419,7 @@ static void input(void)
 /* gfx.c sizes the one screen strip (CV_ROWS) to this main area. The unity
  * build sees that macro; a host file that compiles ui.c alone does not. */
 #ifdef CV_ROWS
-_Static_assert(2u * BAND_H <= CV_ROWS, "main area taller than the screen strip");
+_Static_assert((X0X_UI_SMALL_CANVAS ? 1u : 2u) * BAND_H <= CV_ROWS, "main area taller than the screen strip");
 _Static_assert(KNOB_H <= CV_ROWS, "knob row taller than the screen strip");
 _Static_assert(HDR_H <= CV_ROWS, "header taller than the screen strip");
 _Static_assert(HDR_H + 2u * BAND_H + KNOB_H == 240u, "the three strips must tile the 240-row panel");
@@ -5511,7 +5511,13 @@ static void cv_commit(int region, uint32_t x, uint32_t y)
 #define MAIN_ROWS (2 * BAND_H)
 #define KNOB_ROWS KNOB_H
 #define LCD_TILE_ROWS(n) (((n) + X0X_LCD_TILE_H - 1u) / X0X_LCD_TILE_H)
-static uint32_t main_tileh[LCD_TILE_ROWS(MAIN_ROWS) * X0X_LCD_TILE_COLS];
+static uint32_t main_tileh[
+#if X0X_UI_SMALL_CANVAS
+    (2u * LCD_TILE_ROWS(BAND_H))
+#else
+    LCD_TILE_ROWS(MAIN_ROWS)
+#endif
+    * X0X_LCD_TILE_COLS];
 static uint32_t knob_tileh[LCD_TILE_ROWS(KNOB_ROWS) * X0X_LCD_TILE_COLS];
 static uint32_t header_tileh[LCD_TILE_ROWS(HDR_H) * X0X_LCD_TILE_COLS];
 static uint32_t header_full_hash, popup_knob_full_hash;
@@ -5524,10 +5530,30 @@ static void cv_commit_rows(int region, uint32_t x, uint32_t y,
     cv_tile_valid[region] = 1u;
     x0x_lcd_tile_commit(cv_px, rows, hashes, force, cv_lcd_emit, &pos);
 }
+#if !X0X_UI_SMALL_CANVAS
 static void cv_commit_rect(int region, uint32_t x, uint32_t y)
 {
     cv_commit_rows(region, x, y, MAIN_ROWS, main_tileh);
 }
+#endif
+#if X0X_UI_SMALL_CANVAS
+/* Separate hash rows per band. All other main owners in this build use the
+ * same partition; whole-main invalidations still force both bands. */
+static void cv_commit_main_band(unsigned band)
+{
+    static uint8_t force;
+    const cv_lcd_pos_t pos = {0, MAIN_Y + band * BAND_H};
+    if (!band) force = !blit_hash[1] || !cv_tile_valid[1];
+    x0x_lcd_tile_commit(cv_px, BAND_H,
+        main_tileh + band * LCD_TILE_ROWS(BAND_H) * X0X_LCD_TILE_COLS,
+        force, cv_lcd_emit, (void *)&pos);
+    if (band) {
+        blit_hash[1] = 1u;
+        cv_tile_valid[1] = 1u;
+    }
+}
+#endif
+
 static void cv_commit_knobs(int region)
 {
     cv_commit_rows(region, 0, KNOB_Y, KNOB_ROWS, knob_tileh);
@@ -7532,28 +7558,47 @@ static UI_DRAW void draw_main(void)
         if (smk_clip_mode_on() && ui.overlay == O_NONE && !ui.help && smk_clip_wait()) {
             if (!clip_wait_on) {                  /* CLP-80: no Loopy host: the waiting screen, not the grid */
                 clip_wait_on = 1u;
+#if X0X_UI_SMALL_CANVAS
+                for (unsigned page = 0; page < 2u; ++page) {
+                    cv_window(240, 2 * BAND_H, page * BAND_H, BAND_H, C_BLACK);
+#else
                 cv_begin(240, 2 * BAND_H, C_BLACK);
                 cv_band(0, 2 * BAND_H);
+#endif
                 text_c(120, 34, &FONT_B, "WAITING FOR", C_WHITE);
                 text_c(120, 56, &FONT_B, "LOOPY PRO", C_WHITE);
                 text_c(120, 86, &FONT_XS, "USB OR BLUETOOTH", C_GRAY);
+#if X0X_UI_SMALL_CANVAS
+                    cv_commit_main_band(page);
+                }
+#else
                 cv_commit_rect(1, 0, MAIN_Y);
+#endif
             }
             smk_clip_lcd_force();                 /* the grid draws at once when a host comes */
             return;
         }
         clip_wait_on = 0u;
         if (smk_clip_mode_on() && ui.overlay == O_NONE && !ui.help) {
+#if X0X_UI_SMALL_CANVAS
+            smk_clip_lcd_draw(240u, 2u * BAND_H);
+#else
             if (smk_clip_lcd_draw(240u, 2u * BAND_H))
                 cv_commit_rect(1, 0, MAIN_Y);
+#endif
             return;
         }
         if (smk_clip_mode_on())
             smk_clip_lcd_force();   /* a menu (for example GLO) is on the screen: draw the grid again after it */
     }
 #endif
+#if !X0X_UI_SMALL_CANVAS
     cv_begin(240, 2 * BAND_H, C_BLACK);           /* both bands, then one transfer: no tear between them */
+#endif
     for (band = 0; band < 2; band++) {
+#if X0X_UI_SMALL_CANVAS
+        cv_window(240, MAIN_ROWS, (uint32_t)band * BAND_H, BAND_H, C_BLACK);
+#endif
         cv_band(band * BAND_H, BAND_H);
         if (ui.help)
             draw_help(band);
@@ -7588,9 +7633,14 @@ static UI_DRAW void draw_main(void)
             !(ui.brk_choice_on && engine_brk_preview_active()) &&
             !(ui.view == V_PART && (is_drum() || is_303())))
             draw_readout();
+#if X0X_UI_SMALL_CANVAS
+        cv_commit_main_band((unsigned)band);
+#endif
     }
+#if !X0X_UI_SMALL_CANVAS
     cv_band(0, 2 * BAND_H);
     cv_commit_rect(1, 0, MAIN_Y);
+#endif
 }
 
 /* -------------------------------------------------------------- knob strip --- */
