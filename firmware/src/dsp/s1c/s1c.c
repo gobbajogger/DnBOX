@@ -565,9 +565,22 @@ static float dl_tick_c(s1c_dline *d, float in, float del, float fb, float c)
 static float xl_read(const s1c_dline *d, float del)
 {
     float pos = (float)d->w - del;
-    while (pos < 0.0f) pos += (float)d->len;
+    const int len = d->len;
+    if (pos < 0.0f) {
+        pos += (float)len;
+        /* When Delay is off, its history may be only 16 frames long.
+         * Keep its original tap and feedback state without an unbounded
+         * per-sample wrap loop. Delays are limited to 5 s at 44.1 kHz;
+         * subtracting whole ring lengths from the negative magnitude
+         * adds exact integers and preserves the same binary32 fraction. */
+        if (pos < -(float)len) {
+            const int whole = (int)-pos;
+            pos += (float)(len == 16 ? whole & ~15 : (whole / len) * len);
+        }
+        if (pos < 0.0f) pos += (float)len;
+    }
     int i = (int)pos; float f = pos - (float)i;
-    int j = i + 1 == d->len ? 0 : i + 1;
+    int j = i + 1 == len ? 0 : i + 1;
     const uint16_t *b = (const uint16_t *)d->buf;
     return h16_get(b[i]) * (1.0f - f) + h16_get(b[j]) * f;
 }
@@ -847,11 +860,37 @@ void s1c_render(s1c *s, float *outl, float *outr, unsigned n)
 #endif
 #endif
     (void)cr; (void)cw;
+    const float l1step = P(L1R) / s->sr, l2step = P(L2R) / s->sr;
+    s1c_fb last_rvhp = {.u = UINT32_MAX};
+#if S1C_FAST && S1C_CSM && S1C_NO_SEQ
+    /* Controls are block-owned in this build. If one exact smoothing step is
+     * a binary32 fixed point, every remaining step would return those bits.
+     * Moving only the unsettled controls keeps sample order, rounding and
+     * smoothing time unchanged, including at preset and automation edges. */
+    uint8_t moving[sizeof s1c_smid];
+    float input[sizeof s1c_smid];
+    unsigned nmoving = 0;
+    for (i = 0; i < sizeof s1c_smid; ++i) {
+        const float x = c1 * s->t[s1c_smid[i]];
+        const s1c_fb old = {.f = s->c[i]}, next = {.f = x + c2 * old.f};
+        if (old.u != next.u) {
+            moving[nmoving] = (uint8_t)i;
+            input[nmoving++] = x;
+        }
+    }
+#endif
     for (f = 0; f < n; f++) {
 #if S1C_FAST
         int cu = (f & 3) == 0;
 #if S1C_CSM
+#if S1C_NO_SEQ
+        for (i = 0; i < nmoving; ++i) {
+            const unsigned k = moving[i];
+            s->c[k] = input[i] + c2 * s->c[k];
+        }
+#else
         for (i = 0; i < (int)sizeof s1c_smid; i++) s->c[i] = c1 * s->t[s1c_smid[i]] + c2 * s->c[i];
+#endif
 #else
         for (i = 0; i < s1c_nsm; i++) { unsigned q = s1c_sm[i]; s->c[q] = c1 * s->t[q] + c2 * s->c[q]; }
 #endif
@@ -876,8 +915,8 @@ void s1c_render(s1c *s, float *outl, float *outr, unsigned n)
         /* LFOs */
         float x;
         float lc2 = s->lfo_c2;
-        s1u_lfo_tick(&s->lfo[0], P(L1R), (int)P(L1I), P(L1A), lc2, s->sr);
-        s1u_lfo_tick(&s->lfo[1], P(L2R), (int)P(L2I), P(L2A), lc2, s->sr);
+        s1u_lfo_tick(&s->lfo[0], l1step, (int)P(L1I), P(L1A), lc2);
+        s1u_lfo_tick(&s->lfo[1], l2step, (int)P(L2I), P(L2A), lc2);
 #if !S1C_NO_SEQ
         sequencer(s);
 #endif
@@ -1082,8 +1121,10 @@ void s1c_render(s1c *s, float *outl, float *outr, unsigned n)
         float mL = (1.0f - dm) * L + dm * oL, mR = (1.0f - dm) * R + dm * oRR;
         /* reverb: high-pass, pre-gain, input compressor, network, wet compressor */
 #if S1C_FAST
-        if ((f & 7) == 0) {
-            float cc = tanf(3.14159265f * P(RVHP) / s->sr), a1 = 1.0f / (1.0f + 1.41421356f * cc + cc * cc);
+        const s1c_fb rvhp = {.f = P(RVHP)};
+        if ((f & 7) == 0 && (f == 0 || rvhp.u != last_rvhp.u)) {
+            last_rvhp = rvhp;
+            float cc = tanf(3.14159265f * rvhp.f / s->sr), a1 = 1.0f / (1.0f + 1.41421356f * cc + cc * cc);
             s->hpk[0] = a1; s->hpk[1] = 2.0f * (cc * cc - 1.0f) * a1; s->hpk[2] = (1.0f - 1.41421356f * cc + cc * cc) * a1;
         }
         float hl, hr;

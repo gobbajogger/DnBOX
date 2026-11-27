@@ -121,6 +121,9 @@ void drum909_render_st(drum909_t *d, float *dry_l, float *dry_r, float *rev, flo
 /* Only selected tracks reach dry/send buses; every voice still advances normally. */
 void drum909_render_st_masked(drum909_t *d, float *dry_l, float *dry_r, float *rev, float *dly,
                              int n, uint16_t audible_tracks);
+/* Distinct cleared dry buffers, as in the 909 engine job. */
+void drum909_render_st_cleared(drum909_t *d, float *dry_l, float *dry_r, float *rev, float *dly,
+                             int n, uint16_t audible_tracks);
 void drum909_pan_settle(drum909_t *d);   /* every pan to its target at once (the kit is silent: no zipper) */
 int drum909_nparams(int voice);
 const x0x_param_t *drum909_param(int voice, int i);

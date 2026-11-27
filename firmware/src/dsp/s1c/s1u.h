@@ -14,7 +14,7 @@ float s1u_env_step(s1u_env *e, float gate, float atk, float dec, float sus, floa
 /* ---- LFO: sine / square / saw up / saw down, smoothed, unipolar outputs ----
  * o01 = 0..amount (adds), o10 = 1-amount..1 (scales). */
 typedef struct { float ph, sm, o01, o10; } s1u_lfo;
-void s1u_lfo_tick(s1u_lfo *l, float rate_hz, int shape, float amount, float smooth_c2, float sr);
+void s1u_lfo_tick(s1u_lfo *l, float step, int shape, float amount, float smooth_c2);
 
 /* ---- table sine: ph is a 32-bit phase (one turn = 2^32) ---- */
 float s1u_sin(uint32_t ph);

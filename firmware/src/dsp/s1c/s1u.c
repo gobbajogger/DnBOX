@@ -70,9 +70,9 @@ float s1u_sin(uint32_t ph)
 }
 
 /* ---- LFO ---- */
-void s1u_lfo_tick(s1u_lfo *l, float rate_hz, int shape, float amount, float c2, float sr)
+void s1u_lfo_tick(s1u_lfo *l, float step, int shape, float amount, float c2)
 {
-    l->ph += rate_hz / sr; if (l->ph >= 1.0f) l->ph -= 1.0f;
+    l->ph += step; if (l->ph >= 1.0f) l->ph -= 1.0f;
     float ph = l->ph;
     float x = shape == 0 ? s1u_sin((uint32_t)(ph * 4294967296.0f)) :
               shape == 1 ? (ph > 0.5f ? 1.0f : -1.0f) : shape == 2 ? (ph - 0.5f) * 2.0f : (0.5f - ph) * 2.0f;
@@ -166,6 +166,11 @@ float s1u_crush_run(s1u_crush *c, float y)
 /* ---- auto-pan ---- */
 void s1u_autopan(float *ph, float y, float rate, float amount, float sr, float *l, float *r)
 {
+    if (amount == 0.0f) {
+        *ph += rate / sr; if (*ph >= 1.0f) *ph -= 1.0f;
+        *l = *r = y * sin_q[32];
+        return;
+    }
     float pan = s1u_sin((uint32_t)(*ph * 4294967296.0f)) * amount;
     *ph += rate / sr; if (*ph >= 1.0f) *ph -= 1.0f;
     uint32_t pa = (uint32_t)((1.0f + pan) * 0.125f * 4294967296.0f);   /* angle / 2pi */

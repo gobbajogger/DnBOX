@@ -2320,6 +2320,7 @@ __attribute__((noinline)) static void scale_glide(float *buf, glide_t *g, uint32
     uint32_t i;
     float c = g->cur, t = g->tgt;
     if (c == t) {
+        if (c == 1.0f) return;
         for (i = 0; i < n; i++)
             buf[i] *= c;
         return;
@@ -2580,7 +2581,7 @@ static int run_job(int j, int core)
             drum909_advance_noise(&d909, (int)n);       /* retain the exact restart noise/history */
             drum909_pan_settle(&d909);                    /* silent: pans move at once, no glide */
         } else {
-            drum909_render_st_masked(&d909, dry_l, dry_r, rev, dly, (int)n, smc_audible_drums(solo, PART_909));
+            drum909_render_st_cleared(&d909, dry_l, dry_r, rev, dly, (int)n, smc_audible_drums(solo, PART_909));
             mix_targets(PART_909, mix_level[PART_909], solo_parts);
             bfx_shape(PART_909, dry_l, dry_r, rev, dly, 4, (int)n);
             for (i = 0; i < n; i++)                       /* kit send: filtered sides, still centred */
@@ -2813,14 +2814,19 @@ static uint32_t plan_cost(uint32_t m, const uint32_t *c)
     k = (int)(m >> 4 & 1u); t[k] += c[JB_BRK];          /* mixed by core 0 after both */
     return t[0] > t[1] ? t[0] : t[1];
 }
-/* jobs core 1 may take: a Chicago part stays on core 0. Its note start (voice resume, the
- * full note mask) goes about 3 KB deep, more than core 1's 2,816-byte stack (fm1-emu stack
- * mark: 2,988 B with Chicago there; static path 2,384 B plus indirect calls). */
+/* The 4352-byte Core1 user stack reserves a conservative 256-byte
+ * bottom guard. The controller has its own separate exception stack.
+ * A single Chicago may use either core, but both must stay serial on
+ * core 0 when present: the immutable lookup's write-back cache is
+ * shared and cannot have two simultaneous writers. */
 static uint32_t c1_allowed(void)
 {
-    uint32_t m = (1u << JB_909) | (1u << JB_808) | (1u << JB_BRK);
-    if (original_bass[0].kind == ORIGINAL_SOUND_MIAMI) m |= 1u << JB_A;
-    if (original_bass[1].kind == ORIGINAL_SOUND_MIAMI) m |= 1u << JB_B;
+    const unsigned a=original_bass[0].kind,b=original_bass[1].kind;
+    uint32_t m=(1u<<JB_909)|(1u<<JB_808)|(1u<<JB_BRK);
+    if (a==ORIGINAL_SOUND_MIAMI ||
+        (a==ORIGINAL_SOUND_CHICAGO && b!=ORIGINAL_SOUND_CHICAGO)) m|=1u<<JB_A;
+    if (b==ORIGINAL_SOUND_MIAMI ||
+        (b==ORIGINAL_SOUND_CHICAGO && a!=ORIGINAL_SOUND_CHICAGO)) m|=1u<<JB_B;
     return m;
 }
 /* before a stretch of n frames: the split to use (sticky; idle jobs stay on core 0) */
@@ -2842,20 +2848,21 @@ static uint32_t plan_pick(uint32_t n)
     if (!breaks_silent(&brk)) act |= 1u << JB_BRK;
     for (j = 0; j < JB_N; j++)                         /* a short stretch still pays a call's set-up */
         c[j] = (act >> j & 1u) ? eng_job_cost[j] * nn / 256u : 0u;
-    best &= act & ok;
+    uint32_t allowed = act & ok;
+    best &= allowed;
     bc = plan_cost(best, c);
     cost = bc;
-    for (m = 0; m < (1u << JB_N); m++) {
-        uint32_t k;
-        if (m & ~(act & ok))
-            continue;
-        k = plan_cost(m, c);
+    /* Visit allowed masks in their original ascending order, preserving ties. */
+    m = 0;
+    do {
+        uint32_t k = plan_cost(m, c);
         if (k < bc) { bc = k; best = m; }
-    }
+        m = (m - allowed) & allowed;
+    } while (m);
 
-    if (bc * 8u < cost * 7u || (eng_plan & ~(act & ok)))   /* 1/8 better, or a job of it went idle */
+    if (bc * 8u < cost * 7u || (eng_plan & ~allowed))
         eng_plan = (uint8_t)best;
-    return eng_plan & act & ok;
+    return eng_plan & allowed;
 }
 
 /* post-mix tail on both cores. L and R cannot be split: the reverb's four combs
