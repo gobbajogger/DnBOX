@@ -6917,6 +6917,7 @@ static UI_DRAW void draw_song(int band)
 }
 
 /* Continuous send track with an explicit setting thumb, including zero/max. */
+#if X0X_UI_SMALL_CANVAS
 static UI_DRAW void night_send(int x,int y,int w,int value,uint16_t col,uint16_t side,uint16_t bg)
 {
     int at=x+value*(w-3)/127;
@@ -6924,6 +6925,16 @@ static UI_DRAW void night_send(int x,int y,int w,int value,uint16_t col,uint16_t
     if(value)cv_rect(x,y+3,at-x+2,1,blend(bg,col,8));
     cv_rect(at,y,3,7,col);
 }
+#else
+static UI_DRAW void night_send(int x,int y,int w,int value,uint16_t col)
+{
+    int at=x+value*(w-3)/127;
+    cv_rect(x,y+2,w,3,UI_N_SIDE);
+    if(value)cv_rect(x,y+3,at-x+2,1,dim(col,8));
+    cv_rect(at,y,3,7,col);
+}
+
+#endif
 
 #if X0X_UI_SMALL_CANVAS
 typedef struct {
@@ -6987,8 +6998,8 @@ static UI_DRAW void draw_fx(int band)
         const char *name=part_display(p);
         if(tw(&FONT_T,name)>49)name=part_s(p);
         cv_text(7,y+2,&FONT_T,name,PART_COL[p]);
-        night_send(60,y+3,76,proj.sound.v[T_MIX][p][1],PART_COL[p],UI_N_SIDE,C_BLACK);
-        night_send(154,y+3,76,proj.sound.v[T_MIX][p][2],PART_COL[p],UI_N_SIDE,C_BLACK);
+        night_send(60,y+3,76,proj.sound.v[T_MIX][p][1],PART_COL[p]);
+        night_send(154,y+3,76,proj.sound.v[T_MIX][p][2],PART_COL[p]);
     }
     int delay = cur_page() == 1;
     night_panel(3,92-off,234,20,0);
