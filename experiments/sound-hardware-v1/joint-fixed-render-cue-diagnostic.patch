@@ -1,0 +1,55 @@
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -3024,6 +3024,9 @@
+  * either core may write (core 0's stacks are closed to core 1's writes, fm1_guard.h) */
+ static float eng_bass_buf[2 * NBASS][256] X0X_XPOOL;
+ static original_runtime_workspace original_workspace_b X0X_XPOOL;
++#if DNBOX_LAB_JOINT_FIXED_RENDER_CUE
++volatile uint32_t lab_joint_fixed_audible_spans;
++#endif
+ static uint32_t bass_quiet_next[NBASS];               /* the quiet count after this stretch's render */
+ static uint8_t bass_render_ok[NBASS];
+ static volatile uint32_t eng_stage;                    /* mixes done this stretch: 1 909, 2 808, 3 basses */
+@@ -3524,6 +3527,12 @@
+ #if X0X_DEBUG
+     eng_dbg_wait += plat_ticks24() - w0;              /* now: core 0's whole job span */
+ #endif
++#if DNBOX_LAB_JOINT_FIXED_RENDER_CUE
++    if(bass_render_ok[0] && bass_render_ok[1] &&
++       original_bass[0].kind==ORIGINAL_SOUND_SYNTHONE &&
++       original_bass[1].kind==ORIGINAL_SOUND_JUNO &&
++       bass_quiet_next[0]<n && bass_quiet_next[1]<n) ++lab_joint_fixed_audible_spans;
++#endif
+     brk_midi_drain();
+     for (j = 0; j < NBASS; j++)                       /* the recorder (shared with the sequencer): core 0 */
+         if (bass_render_ok[j]) original_rec_recover_off(j);
+@@ -3636,6 +3645,10 @@
+ }
+ #endif
+ 
++#if DNBOX_LAB_JOINT_FIXED_RENDER_CUE
++volatile uint8_t lab_joint_fixed_cue_seeded;
++#endif
++
+ void engine_render(int32_t *out_lr, uint32_t n)
+ {
+     static float out_l[256], out_r[256];
+@@ -3666,6 +3679,18 @@
+     apply_superj6_edits();
+ #endif
+     arp_boundary();
++#if DNBOX_LAB_JOINT_FIXED_RENDER_CUE
++    /* Deterministic workload diagnostic only. No MIDI transport claim.
++     * A and B use the same actual voice runtime and patch as a MIDI note. */
++    if(!lab_joint_fixed_cue_seeded &&
++       original_bass[0].kind==ORIGINAL_SOUND_SYNTHONE &&
++       original_bass[1].kind==ORIGINAL_SOUND_JUNO &&
++       original_bass[0].status==1 && original_bass[1].status==1) {
++        midi_bass_note(0,0,0x90,54,100);
++        midi_bass_note(1,0,0x90,57,100);
++        lab_joint_fixed_cue_seeded=(original_bass[0].keys[0][54]&&original_bass[1].keys[0][57])?1:2;
++    }
++#endif
+     if ((mot_was_on && !mot_on) || mot_release_req) {   /* motion off, or its lanes replaced: knobs back */
+         mot_release_req = 0;
+         motion_release(&mot);
