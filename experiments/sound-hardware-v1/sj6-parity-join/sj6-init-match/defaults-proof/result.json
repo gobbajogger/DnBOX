@@ -1,0 +1,54 @@
+{
+  "compact_defaults": [
+    "defaults 0 amp 0.008 0.28 0.72 0.24 layer gain 1 wave 0.666667 cutoff 4000 resonance 0.12 env 4000",
+    "defaults 1 amp 0.008 0.28 0.72 0.24 layer gain 1 wave 0.666667 cutoff 4000 resonance 0.12 env 4000"
+  ],
+  "native_control_readbacks": {
+    "neonpulseVolume": 1,
+    "neonsawVolume": 0,
+    "neonsustain": 1,
+    "neonsustain2": 1
+  },
+  "cases": {
+    "0": {
+      "held_relative_level_db": [
+        -13.071449975117373,
+        -13.072035563604052
+      ],
+      "held_signed_residual_dbr": [
+        -2.020534937000243,
+        -2.0200828548751266
+      ]
+    },
+    "1": {
+      "held_relative_level_db": [
+        -10.222323875473256,
+        -10.222909463959935
+      ],
+      "held_signed_residual_dbr": [
+        -2.9232264805755337,
+        -2.9224845595918767
+      ]
+    },
+    "2": {
+      "held_relative_level_db": [
+        -19.092049888396996,
+        -19.09263547688368
+      ],
+      "held_signed_residual_dbr": [
+        -0.9600692776583277,
+        -0.9598832020130892
+      ]
+    },
+    "3": {
+      "held_relative_level_db": [
+        -16.24292378875288,
+        -16.243509377239562
+      ],
+      "held_signed_residual_dbr": [
+        -1.3589817144507845,
+        -1.3587039198330442
+      ]
+    }
+  }
+}
