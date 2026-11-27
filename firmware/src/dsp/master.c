@@ -19,7 +19,12 @@
 #define FS 44100.0f
 
 static const char *const RATIO_N[] = {"1:1", "1.5:1", "2:1", "3:1", "4:1", "6:1", "8:1", "12:1", "20:1", "INF"};
-static const float RATIO_V[] = {1.0f, 1.5f, 2.0f, 3.0f, 4.0f, 6.0f, 8.0f, 12.0f, 20.0f, 1e6f};
+#if X0X_UI_SMALL_CANVAS
+#define RATIO_V x0x_master_ratios
+#else
+static
+#endif
+const float RATIO_V[] = {1.0f, 1.5f, 2.0f, 3.0f, 4.0f, 6.0f, 8.0f, 12.0f, 20.0f, 1e6f};
 static const char *const SRC_N[] = {"909", "808", "BOTH"};
 static const char *const MODE_N[] = {"OFF", "LP", "BP", "HP"};
 static const char *const ONOFF_N[] = {"OFF", "ON"};
@@ -362,11 +367,10 @@ static int master_settled_zero(master_t *m, const float *l, const float *r, int 
     return 1;
 }
 
-void master_process_st(master_t *m, float *xl, float *xr, int n, float volume)
+float master_process_st_continue(master_t *m, float *xl, float *xr, int n, float volume, float grmax)
 {
-    if (master_settled_zero(m, xl, xr, n, volume)) return;
     int i, mode = m->pot[MST_MODE], comp_on = m->comp_on, limit = m->pot[MST_LIMIT];
-    float k = m->k, grmax = 0.0f, vc = m->vol_cur < 0.0f ? volume : m->vol_cur;
+    float k = m->k, vc = m->vol_cur < 0.0f ? volume : m->vol_cur;
     float det_in = 0.0f, att_in = 0.0f, rel_in = 0.0f, pump_in = 0.0f;
     if (comp_on) {
         det_in = 1.0f - m->a_det;
@@ -422,7 +426,14 @@ void master_process_st(master_t *m, float *xl, float *xr, int n, float volume)
         xr[i] = sr;
     }
     m->vol_cur = vc;
-    m->gr_view = grmax > m->gr_view ? grmax : m->gr_view * 0.93f;   /* the meter: peak, falling */
+    return grmax;
+}
+
+void master_process_st(master_t *m, float *xl, float *xr, int n, float volume)
+{
+    if (master_settled_zero(m, xl, xr, n, volume)) return;
+    float grmax=master_process_st_continue(m,xl,xr,n,volume,0.0f);
+    m->gr_view=grmax>m->gr_view?grmax:m->gr_view*0.93f;
 }
 
 /* UI text only (master_format). Audio paths never call this — build for size. */

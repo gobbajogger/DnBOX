@@ -67,7 +67,8 @@ typedef struct {
 
 void motion_init(motion_t *m, lane_t *lanes);
 void motion_step(motion_t *m, int part, int pat, int step, int next, int pass);   /* ISR */
-void motion_tick(motion_t *m, uint32_t n);                                       /* ISR */
+void motion_step_empty(motion_t *m,int part,int step);
+int motion_tick(motion_t *m, uint32_t n);                                       /* ISR */
 void motion_bank_retag(lane_t *lanes, int target, int voice, unsigned old_bank, unsigned new_bank);
 void motion_bank_change(motion_t *m, int target, int voice, unsigned old_bank, unsigned new_bank); /* audio boundary */
 void motion_bank_step(motion_t *m, int target, int voice, int part, int pat, int step, int next);

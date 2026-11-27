@@ -1415,12 +1415,17 @@ static void brk_midi_drain(void)
         (void)plat_midi_pulse(brk_midi_events[i].channel, brk_midi_events[i].note, 100);
     brk_midi_count = 0;
 }
+/* Audio-context hint only. New normal/parked motion lanes are created on
+ * the foreground; in-span note/chord saves create only passive records. */
+static uint8_t mot_empty_in_render;
 static void s_step(void *x, int t, int p)
 {
     (void)x;
     eng_step[t] = (uint8_t)p;
-    if (mot_on)
-        motion_step(&mot, t, seq.ppat[t], p, seq_next_step(&seq, t, p), seq_part_len(&seq, t));
+    if (mot_on) {
+        if (mot_empty_in_render) motion_step_empty(&mot,t,p);
+        else motion_step(&mot,t,seq.ppat[t],p,seq_next_step(&seq,t,p),seq_part_len(&seq,t));
+    }
 }
 
 /* --------------------------------------------------------------- motion --- */
@@ -2432,6 +2437,9 @@ static float eng_bass_buf[2 * NBASS][256] X0X_XPOOL;
 static original_runtime_workspace original_workspace_b X0X_XPOOL;
 static uint32_t bass_quiet_next[NBASS];               /* the quiet count after this stretch's render */
 static uint8_t bass_render_ok[NBASS];
+#if DNBOX_LAB_D9_SUFFIX
+static uint8_t d9_trial_armed;
+#endif
 static uint8_t full808_a_ready;
 static int full808_a_status;
 static uint32_t full808_a_ticks;
@@ -2455,6 +2463,8 @@ static volatile uint8_t eng_808_body;                  /* 1: BD+SD is in left808
 static float eng_vol;                                  /* this callback's master volume (render_sub may master) */
 static uint8_t eng_master_done;                        /* 1: this stretch ran the master */
 static uint8_t eng_do_master;                          /* pipeline this stretch */
+static unsigned eng_master_raw_prefix;           /* candidate final suffix; still unmastered */
+static float eng_master_resume_gr;
 static uint32_t eng_mastered;                          /* contiguous prefix already mastered */
 static volatile uint32_t eng_fx_done;                  /* frames of FX visible to core 0 (tail pipeline) */
 static float *eng_fx_ol, *eng_fx_or;
@@ -2607,6 +2617,11 @@ static int run_job(int j, int core)
              * off the published plan even when a failed core is taken over. */
             float *mono = ((eng_c1_mask >> JB_808 ^ eng_c1_mask >> JB_A) & 1u)
                 ? original_workspace_b.mix.kit909_mono : original_workspace.mix.kit909_mono;
+#if DNBOX_LAB_D9_SUFFIX
+            if(core && d9_trial_armed)
+                drum909_trial_serial(&d909,dry_l,dry_r,rev,dly,(int)n,smc_audible_drums(solo,PART_909));
+            else
+#endif
             drum909_render_st_cleared(&d909, dry_l, dry_r, rev, dly, (int)n, smc_audible_drums(solo, PART_909));
             mix_targets(PART_909, mix_level[PART_909], solo_parts);
             bfx_shape(PART_909, dry_l, dry_r, rev, dly, 4, (int)n);
@@ -2919,6 +2934,19 @@ static void core2_fx(uint32_t arg)
         eng_sync();
     }
 }
+static void master_st_tail(float *l,float *r,unsigned n)
+{
+    if (eng_master_raw_prefix)
+        eng_master_resume_gr=master_process_st_continue(&mst,l,r,(int)n,eng_vol,eng_master_resume_gr);
+    else master_process_st(&mst,l,r,(int)n,eng_vol);
+}
+static void resume_master_meter(void)
+{
+    if (!eng_master_raw_prefix) return;
+    float g=eng_master_resume_gr;
+    mst.gr_view=g>mst.gr_view?g:mst.gr_view*.93f;
+    eng_master_raw_prefix=0;
+}
 static void tape_after_fx(void)
 {
     if (fx.dl_type != 1 || fx.dl_level <= 0.0f || (fx.muted & 2u))
@@ -2957,6 +2985,10 @@ __attribute__((noinline)) static void render_sub(float *out_l, float *out_r, uin
     /* 808 stays on core 0 and core 1 has other work: move the BD+SD prefix */
     eng_808_split = (uint8_t)(!full808 && !(m & (1u << JB_808)) && m && drum808_active(&d808));
     eng_808_body = (uint8_t)!eng_808_split;
+#if DNBOX_LAB_D9_SUFFIX
+    d9_trial_armed=(uint8_t)(full808 && n>=128 && drum909_active(&d909));
+    if(d9_trial_armed) drum909_trial_snapshot(&d909);
+#endif
     eng_sync();
     if (m && !plat_cpu2_run(core2_jobs, 0u)) {
         eng_c1_mask = 0;                              /* one core: all of it here */
@@ -2969,6 +3001,9 @@ __attribute__((noinline)) static void render_sub(float *out_l, float *out_r, uin
 #endif
     full808_a_ready = 0;
     if (full808 && eng_c1_mask == ((1u<<JB_909)|(1u<<JB_B))) {
+#if DNBOX_LAB_D9_SUFFIX
+        if(d9_trial_armed) drum909_trial_helper((int)n);
+#endif
         uint32_t at = plat_ticks24();
         full808_a_status = bass_render_dsp(0,n,eng_bass_buf[0],eng_bass_buf[1]);
         full808_a_ticks = plat_ticks24()-at;
@@ -3007,6 +3042,16 @@ __attribute__((noinline)) static void render_sub(float *out_l, float *out_r, uin
     }
     bfx_send_shape(0, rev, (int)n);
     bfx_send_shape(1, dly, (int)n);
+    if (eng_master_raw_prefix) {
+        if (bfx_flt_hold || busfx_settling(&bfx_flt_st)) {
+            eng_master_raw_prefix=0;
+            eng_do_master=0; /* original deferred operation incl filter stays untouched */
+        } else {
+            unsigned prefix=eng_master_raw_prefix;
+            eng_master_resume_gr=master_process_st_continue(&mst,out_l-prefix,out_r-prefix,
+                                                             (int)prefix,eng_vol,0.f);
+        }
+    }
     if (eng_do_master && n >= ENG_TAIL_CS) {
         uint32_t done = 0, waited = 0, first = 1;
         PROF_T(pf);
@@ -3022,7 +3067,7 @@ __attribute__((noinline)) static void render_sub(float *out_l, float *out_r, uin
             bfx_flt_shape(out_l + done, out_r + done, (int)m);
             {
                 PROF_T(pt);
-                master_process_st(&mst, out_l + done, out_r + done, (int)m, eng_vol);
+                master_st_tail(out_l+done,out_r+done,m);
                 PROF_ADD(6, pt);
             }
             done += m;
@@ -3041,9 +3086,10 @@ __attribute__((noinline)) static void render_sub(float *out_l, float *out_r, uin
             bfx_flt_shape(out_l, out_r, (int)n);
             {
                 PROF_T(pt);
-                master_process_st(&mst, out_l, out_r, (int)n, eng_vol);
+                master_st_tail(out_l,out_r,n);
                 PROF_ADD(6, pt);
             }
+            resume_master_meter();
             eng_master_done = 1;
             return;
         }
@@ -3072,7 +3118,7 @@ __attribute__((noinline)) static void render_sub(float *out_l, float *out_r, uin
             bfx_flt_shape(out_l + done, out_r + done, (int)(ready - done));
             {
                 PROF_T(pt);
-                master_process_st(&mst, out_l + done, out_r + done, (int)(ready - done), eng_vol);
+                master_st_tail(out_l+done,out_r+done,ready-done);
                 PROF_ADD(6, pt);
             }
             done = ready;
@@ -3081,6 +3127,7 @@ __attribute__((noinline)) static void render_sub(float *out_l, float *out_r, uin
             (void)plat_cpu2_wait();
 #endif
         tape_after_fx();
+        resume_master_meter();
         eng_master_done = 1;
     } else {
         PROF_T(pf);
@@ -3107,6 +3154,7 @@ __attribute__((noinline, minsize)) void engine_diag_half(uint32_t half, uint32_t
 
 void engine_render(int32_t *out_lr, uint32_t n)
 {
+    mot_empty_in_render = 0;
     static float out_l[256], out_r[256];
     uint32_t done = 0, i;
     float vol = usb_full ? 1.0f : (float)plat_master() / 4096.0f;   /* (FULL: engine_volume) */
@@ -3117,6 +3165,7 @@ void engine_render(int32_t *out_lr, uint32_t n)
     eng_vol = vol;
     eng_master_done = 0;
     eng_mastered = 0;
+    eng_master_raw_prefix = 0;
     if (project_hold) {
         tape_signal_seen = 0;
         for (i = 0; i < n * 2u; i++)
@@ -3154,7 +3203,7 @@ void engine_render(int32_t *out_lr, uint32_t n)
         seq_advance(&seq, 0, &SINK);
         brk_midi_drain();
         if (mot_on && seq.playing && !seq_clock_waiting(&seq))
-            motion_tick(&mot, n);
+            mot_empty_in_render = (uint8_t)!motion_tick(&mot, n);
         PROF_ADD(7, pt);
     }
     while (done < n) {
@@ -3166,6 +3215,16 @@ void engine_render(int32_t *out_lr, uint32_t n)
         /* any stretch of ENG_TAIL_CS or more: pipeline. Mastered frames
          * must be a prefix (the master's state is in sample order). */
         eng_do_master = (k >= ENG_TAIL_CS && done == eng_mastered);
+        /* seq_advance at the final boundary may otherwise change pump/kompressor
+         * before the formerly deferred master call. Prove it has no such event. */
+        if (done>eng_mastered && k>=ENG_TAIL_CS && done+k==n &&
+            seq_until_event(&seq,k+1u)==k+1u &&
+            !seq.req_start && !seq.req_stop && !seq.req_cont && !seq.ext_pending &&
+            seq.clk_src==seq.clk_cur && (!seq.ext || seq.ext_since+k<=FS/2u) &&
+            (!mot_playing || seq.playing)) {
+            eng_master_raw_prefix=done-eng_mastered;
+            eng_do_master=1;
+        }
         render_sub(out_l + done, out_r + done, k, 0);
         d8_frame+=k;
         if (eng_do_master && eng_master_done)
@@ -3179,6 +3238,7 @@ void engine_render(int32_t *out_lr, uint32_t n)
         }
         done += k;
     }
+    mot_empty_in_render = 0;
     if (mot_playing && !seq.playing) {                   /* stopped: every knob back to its own value */
         motion_release(&mot);
 #if X0X_BASS_NOTE_SOUND

@@ -2451,6 +2451,12 @@ static void fm1_main(void)
     if (flash_ok)
         (void)s1_part_set_pack(fm1_xip_ptr(FL_FDATA_LO), FL_FDATA_SIZE);
 #endif
+#if X0X_MIAMI_N513_BOOT
+    {   /* Boot only, before first setup/audio. Project actions don't rewrite the table. */
+        extern void original_miami_table_boot(void);
+        original_miami_table_boot();
+    }
+#endif
     engine_init(proj.pat, &proj.arr.song, proj.arr.lane, &proj.sound);
     if (project_load() != 0)
         project_defaults();                         /* nothing saved yet (or another format) */

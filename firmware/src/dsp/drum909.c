@@ -9,7 +9,10 @@
 #include "drum909.h"
 #include "x0x_drum_samples.h"
 #include "ima_adpcm.h"
-#include "../x0x_cold.h"          /* X0X_COLD: init/set/get are boot/UI/MIDI — not d9_render */
+#include "../x0x_cold.h"
+#if DNBOX_LAB_D9_SUFFIX
+#include "../app/plat.h"
+#endif          /* X0X_COLD: init/set/get are boot/UI/MIDI — not d9_render */
 
 #define D9_VCA_VT 0.0002f
 #define D9_VCA_NORM (1.0f / (1.0f - D9_VCA_VT))
@@ -752,6 +755,9 @@ typedef struct {
     float *dry_r, pl, pr;     /* X0X stereo: dry_r 0 = mono (dry gets y as 9W9's) */
     float dpl, dpr;           /* the pans' glide per sample this block (0 settled) */
     float *y;                 /* the voice's samples this block, mixed after its loop (d9_emit_block) */
+#if DNBOX_LAB_D9_SUFFIX
+    int *private_n;
+#endif
 } d9_bus_t;
 
 /* a voice's block into the buses, after its sample loop: per sample the same products and
@@ -759,6 +765,9 @@ typedef struct {
  * in the same order), the bus tests once a block instead of per sample */
 __attribute__((noinline)) static void d9_emit_block(const d9_bus_t *b, int m)
 {
+#if DNBOX_LAB_D9_SUFFIX
+    if (b->private_n) { *b->private_n = m; return; }
+#endif
     const float *y = b->y;
     float *dry = b->dry;
     if (!dry) return;                 /* runtime solo suppresses the voice, including an already-playing tail */
@@ -1119,11 +1128,60 @@ void drum909_advance_noise(drum909_t *d, int n)
     if (n > 0) (void)d9_noise_span(d, n);
 }
 
-static void d9_render(drum909_t *d, float *dry, float *rev, float *dly, int n, uint16_t audible_tracks)
+#if DNBOX_LAB_D9_SUFFIX
+typedef struct {
+    d9_smp_t smp[4];
+    float stem[4][256];
+    int ns[4];
+    volatile uint32_t ready;
+} d9_ticket;
+static d9_ticket d9_pkt X0X_POOL;
+static volatile uint32_t d9_trial_adopted,d9_trial_fallback;
+static const uint8_t d9_cymbals[4]={DR_OH,DR_RD,DR_CR,DR_CH};
+
+/* Cymbals use immutable encoded samples, not the shared kit noise.
+ * Rim and clap stay on the owning core in the exact old summing order. */
+__attribute__((noinline)) static void d9_sample_suffix(drum909_t*d,d9_ticket*p,
+                                 float*dry,float*rev,float*dly,int n,uint16_t mask,float*y)
+{
+    d9_bus_t bus;
+    d9_smp_t *smp=p?p->smp:d->smp;
+    for(int k=0;k<4;k++){
+        int v=d9_cymbals[k];
+        d9_smp_t *s=&smp[v-DR_CH];
+        if(s->mute<=0) continue;
+        if(p) { bus.y=p->stem[k]; bus.private_n=&p->ns[k]; }
+        else { bus.y=y; bus.private_n=0; d9_bus(&bus,d,v,dry,rev,dly,mask); }
+        d9_render_smp(s,&bus,n);
+    }
+}
+void drum909_trial_snapshot(const drum909_t*d)
+{
+    for(int i=0;i<4;i++) d9_pkt.smp[i]=d->smp[i];
+    d9_pkt.ready=0;
+    plat_cpu2_sync();
+}
+void drum909_trial_helper(int n)
+{
+    if(n<128 || n>256) return;
+    for(int i=0;i<4;i++) d9_pkt.ns[i]=0;
+    d9_sample_suffix(0,&d9_pkt,0,0,0,n,0,0);
+    plat_cpu2_sync();
+    d9_pkt.ready=1;
+}
+#endif
+static void d9_render(drum909_t *d, float *dry, float *rev, float *dly, int n, uint16_t audible_tracks
+#if DNBOX_LAB_D9_SUFFIX
+                       , int try_helper
+#endif
+                       )
 {
     d9_bus_t bus;
     float y[256];
     bus.y = y;
+#if DNBOX_LAB_D9_SUFFIX
+    bus.private_n=0;
+#endif
     if (n > 256)
         n = 256;
     float *const nz = d9_noise_span(d, n);
@@ -1150,6 +1208,22 @@ static void d9_render(drum909_t *d, float *dry, float *rev, float *dly, int n, u
         d9_bus(&bus, d, DR_CP, dry, rev, dly, audible_tracks);
         d9_render_clap(&d->clap, nz, &bus, n);
     }
+#if DNBOX_LAB_D9_SUFFIX
+    if (try_helper && d9_pkt.ready) {
+        ++d9_trial_adopted;
+        plat_cpu2_sync();
+        for(int j=0;j<4;j++) d->smp[j]=d9_pkt.smp[j];
+        bus.private_n=0;
+        for(int j=0;j<4;j++) if(d9_pkt.ns[j]) {
+            bus.y=d9_pkt.stem[j];
+            d9_bus(&bus,d,d9_cymbals[j],dry,rev,dly,audible_tracks);
+            d9_emit_block(&bus,d9_pkt.ns[j]);
+        }
+    } else {
+        if(try_helper) ++d9_trial_fallback;
+        d9_sample_suffix(d,0,dry,rev,dly,n,audible_tracks,y);
+    }
+#else
     static const uint8_t order[4] = { DR_OH, DR_RD, DR_CR, DR_CH };
     for (int k = 0; k < 4; ++k) {
         d9_smp_t *s = &d->smp[order[k] - DR_CH];
@@ -1158,12 +1232,17 @@ static void d9_render(drum909_t *d, float *dry, float *rev, float *dly, int n, u
             d9_render_smp(s, &bus, n);
         }
     }
+#endif
 }
 
 void drum909_render(drum909_t *d, float *dry, float *rev, float *dly, int n)
 {
     d9_dry_r = 0;
-    d9_render(d, dry, rev, dly, n, 0x7FFu);
+    d9_render(d, dry, rev, dly, n, 0x7FFu
+#if DNBOX_LAB_D9_SUFFIX
+       ,0
+#endif
+       );
 }
 
 /* All callers share pan, noise and serial voice state. The engine's 909 job
@@ -1171,7 +1250,11 @@ void drum909_render(drum909_t *d, float *dry, float *rev, float *dly, int n)
  * get the same sequence of binary32 additions, and the mono render computes
  * that sequence once. Other callers may already have unequal bus contents. */
 static void d9_render_st_masked(drum909_t *d, float *dry_l, float *dry_r, float *rev, float *dly,
-                                int n, uint16_t audible_tracks, int cleared)
+                                int n, uint16_t audible_tracks, int cleared
+#if DNBOX_LAB_D9_SUFFIX
+                                ,int try_helper
+#endif
+                                )
 {
     int duplicate = cleared;
     if (n > 256) n = 256;
@@ -1188,7 +1271,11 @@ static void d9_render_st_masked(drum909_t *d, float *dry_l, float *dry_r, float 
         }
     }
     d9_dry_r = duplicate ? 0 : dry_r;
-    d9_render(d, dry_l, rev, dly, n, audible_tracks);
+    d9_render(d, dry_l, rev, dly, n, audible_tracks
+#if DNBOX_LAB_D9_SUFFIX
+       ,try_helper
+#endif
+       );
     if (duplicate && n > 0)
         __builtin_memcpy(dry_r, dry_l, (unsigned)n * sizeof *dry_l);
     d9_dry_r = 0;
@@ -1197,13 +1284,27 @@ static void d9_render_st_masked(drum909_t *d, float *dry_l, float *dry_r, float 
 void drum909_render_st_cleared(drum909_t *d, float *dry_l, float *dry_r, float *rev, float *dly,
                                int n, uint16_t audible_tracks)
 {
-    d9_render_st_masked(d, dry_l, dry_r, rev, dly, n, audible_tracks, 1);
+    d9_render_st_masked(d, dry_l, dry_r, rev, dly, n, audible_tracks, 1
+#if DNBOX_LAB_D9_SUFFIX
+       ,0
+#endif
+       );
 }
 
+#if DNBOX_LAB_D9_SUFFIX
+void drum909_trial_serial(drum909_t*d,float*l,float*r,float*rev,float*dly,int n,uint16_t aud)
+{
+    d9_render_st_masked(d,l,r,rev,dly,n,aud,1,1);
+}
+#endif
 void drum909_render_st_masked(drum909_t *d, float *dry_l, float *dry_r, float *rev, float *dly,
                               int n, uint16_t audible_tracks)
 {
-    d9_render_st_masked(d, dry_l, dry_r, rev, dly, n, audible_tracks, 0);
+    d9_render_st_masked(d, dry_l, dry_r, rev, dly, n, audible_tracks, 0
+#if DNBOX_LAB_D9_SUFFIX
+       ,0
+#endif
+       );
 }
 
 void drum909_render_st(drum909_t *d, float *dry_l, float *dry_r, float *rev, float *dly, int n)

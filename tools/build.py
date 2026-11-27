@@ -320,8 +320,20 @@ def chicago_fold_residual_min():
     return flag
 
 
+def miami_n513_boot():
+    flag = os.environ.get("X0X_MIAMI_N513_BOOT", "0")
+    if flag not in ("0", "1") or (flag == "1" and (BOARD != "smk37" or VERSION)):
+        raise SystemExit("X0X_MIAMI_N513_BOOT: SMK diagnostic only (0 or 1)")
+    return flag
+
+
 def _generate_locked():
     """Body of generate(), called with GEN/.generate.lock held."""
+    if miami_n513_boot() == "1":
+        import gen_miami_n513
+        gen_miami_n513.generate(SRC / "experiments/original_synth/miami_n513_private.h",
+                                GEN / "original_miami_n513_boot.inc")
+
     if BOARD == "smk37" and MODEL in ("elite", "pro"):
         import gen_chicago_fast32
         gen_chicago_fast32.generate(SRC / "experiments/original_synth/chicago_packed_private.h", GEN,
@@ -550,6 +562,8 @@ def build_app():
             names.extend(("engine_superj6_edit", "engine_superj6_pre_note_wave"))
         for name in names:
             factory_roots.extend(("-u", name))
+    if miami_n513_boot() == "1":
+        flags.append("-DX0X_MIAMI_N513_BOOT=1")
     tanh_boot = os.environ.get("X0X_D9_TANH_BOOT", "0")
     if tanh_boot not in ("0", "1") or (tanh_boot == "1" and (BOARD != "smk37" or VERSION)):
         raise SystemExit("X0X_D9_TANH_BOOT: SMK diagnostic only (0 or 1)")
@@ -571,7 +585,7 @@ def build_app():
         flags.append(usb_name)  # app only: loader, VID/PID and package identity unchanged
     if VERSION and os.environ.get("X0X_DEBUG") == "1":
         raise SystemExit("X0X_DEBUG=1 (register peek / poke over USB) is for development builds only")
-    for flag in ("X0X_CDC", "X0X_DEBUG", "X0X_DEV_WOBBLE", "X0X_WOBBLE", "X0X_LCD_TRACE", "X0X_UI_SMALL_CANVAS"):
+    for flag in ("X0X_CDC", "X0X_DEBUG", "X0X_DEV_WOBBLE", "X0X_WOBBLE", "X0X_LCD_TRACE", "X0X_UI_SMALL_CANVAS", "DNBOX_LAB_D9_SUFFIX", "DNBOX_LAB_ARP_EVENTLESS"):
         v = os.environ.get(flag)    # unset: the default in firmware headers / below
         if v in ("0", "1"):
             flags.append(f"-D{flag}={v}")

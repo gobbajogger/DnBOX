@@ -1,7 +1,42 @@
 /* SPDX-License-Identifier: GPL-3.0-only */
 #include "miami_ms20.h"
 #include "binary32_classify.h"
+#if X0X_MIAMI_N513_BOOT
+#include "original_miami_n513_boot.inc"
+/* Written once on Core 0 before engine/IRQ bring-up; both existing hot
+ * consumers still use ordinary indexed loads of the reconstructed words. */
+static uint32_t original_miami_n513_bits[513] __attribute__((section(".pool"), aligned(4)));
+__attribute__((noinline, cold)) void original_miami_table_boot(void)
+{
+ const uint8_t *p = miami_n513_packed;
+ uint32_t word = 0, stride = 0, bend = 0;
+ unsigned i = 0;
+ while (i < 513u) {
+  const unsigned width = *p++;
+  unsigned used = 0;
+  for (unsigned j = 0; j < 8u && i < 513u; ++j) {
+   unsigned shift = 0;
+   uint32_t code = 0;
+   while (shift < width) {
+    unsigned n = 8u - used;
+    if (n > width - shift) n = width - shift;
+    code |= ((uint32_t)(*p >> used) & ((1u << n) - 1u)) << shift;
+    shift += n;
+    used += n;
+    if (used == 8u) { ++p; used = 0; }
+   }
+   bend += (code >> 1) ^ (0u - (code & 1u));
+   stride += bend;
+   word += stride;
+   original_miami_n513_bits[i++] = word;
+  }
+  p += used != 0u;
+ }
+}
+#else
 #include "miami_n513_private.h"
+#define MIAMI_N513_TAIL original_miami_n513_bits[512]
+#endif
 #include <math.h>
 #include "binary32_math.h"
 #include "miami_pow2_fma.h"
@@ -26,7 +61,7 @@ int original_miami_nonlinear(float x,float *out){
  if(!out||!original_binary32_isfinite(x))return 0;
  float u=512.0f*original_binary32_abs(x),result;
  if(u<512){unsigned j=(unsigned)u;float a=fl(original_miami_n513_bits[j]),b=fl(original_miami_n513_bits[j+1]);float g=interpolate(b-a,u-(float)j,a);result=x*g;}
- else result=clamp(x,-1,1)*fl(original_miami_n513_bits[512]);
+ else result=clamp(x,-1,1)*fl(MIAMI_N513_TAIL);
  *out=result;return 1;
 }
 int original_miami_mg_shape(unsigned ordinal,float phase,float *b,float *u){
@@ -183,7 +218,7 @@ int original_miami_voice_render_add(original_miami_ms20 *f,original_voice_gain *
   float a=x+g*(h0-x);float b=a+g*(h1-a);
   float in=h2+b,u=512.0f*original_binary32_abs(in),nl;
   if(u<512){unsigned k=(unsigned)u;float ta=fl(original_miami_n513_bits[k]),tb=fl(original_miami_n513_bits[k+1]);float gg=interpolate(tb-ta,u-(float)k,ta);nl=in*gg;}
-  else nl=clamp(in,-1,1)*fl(original_miami_n513_bits[512]);
+  else nl=clamp(in,-1,1)*fl(MIAMI_N513_TAIL);
   float feedback=r*nl,difference=feedback-h4;
   float d=difference+fb*(h3+difference);float cc=d+fb*(h2-d);
   h0=a;h1=b;h2=cc;h3=d;h4=feedback;

@@ -686,6 +686,30 @@ int original_runtime_active(const original_runtime_part *p)
 }
 
 static int render_backend(original_runtime_part *, original_runtime_workspace *, float *, float *, unsigned);
+#if DNBOX_LAB_ARP_EVENTLESS
+/* These parameters and held notes are span-owned. No sample may fire or
+ * execute an early-gate write; unsigned wrap is deliberately a miss. */
+static int arp_eventless_advance(S1Sequencer *s, const S1SequencerParams *p, int held, uint32_t *age, unsigned n)
+{
+    if (!n) return 1;
+    const int on = p->arpIsOn == 1;
+    const int prev = s->previousHeldNoteNumbersAECount;
+    if ((prev == 0 && held > 0) || 
+        (held == 0 && prev > 0)) return 0;
+    if (on || s->sequencerLastNotesCount) {
+        if (n > 256 || p->arpBeatsPerSample != S1_SAMPLE_TICKS) return 0;
+        const uint32_t add = n * S1_SAMPLE_TICKS;
+        const uint32_t end = s->mBeatTime + add;
+        if (end < s->mBeatTime || end >= p->arpSeqTempoMultiplier ||
+            (s->gateOpen && end >= p->gateTicks)) return 0;
+        s->mBeatTime = end;
+    }
+    s->previousHeldNoteNumbersAECount = held;
+    *age = UINT32_MAX - *age < n ? UINT32_MAX : *age + n;
+    return 1;
+}
+#endif
+
 int original_runtime_render(original_runtime_part *p, original_runtime_workspace *w,
     float *left, float *right, unsigned frames)
 {
@@ -699,6 +723,10 @@ int original_runtime_render(original_runtime_part *p, original_runtime_workspace
         original_runtime_arp *a = &p->arp;
         unsigned done = 0;
         if (a->clk_beat) arp_follow_clock(a);
+#if DNBOX_LAB_ARP_EVENTLESS
+        if (frames && arp_eventless_advance(&a->seq, &a->prm, a->nheld, &a->age, frames))
+            return render_backend(p, w, left, right, frames);
+#endif
         for (unsigned i = 0; i < frames; ++i) {
             if (S1Sequencer_willFire(&a->seq, &a->prm, a->nheld)) {
                 if (i > done && render_backend(p, w, left + done, right + done, i - done) != ORIGINAL_RUNTIME_OK)
