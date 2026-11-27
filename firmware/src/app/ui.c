@@ -7610,6 +7610,21 @@ static UI_DRAW void draw_footer(void)
     segs(4, vc(&FONT_T, FOOT_Y, 9), &FONT_T, col, FOOT_GAP, a, b, c, 0);
 }
 
+#if X0X_UI_SMALL_CANVAS && BOARD_SMK37
+static UI_DRAW void draw_clip_wait_small(void)
+{
+    /* The first transfer services input and can change the palette. */
+    const uint16_t bg = C_BLACK, fg = C_WHITE, muted = C_GRAY;
+    for (unsigned page = 0; page < 2u; ++page) {
+        cv_window(240, MAIN_ROWS, page * BAND_H, BAND_H, bg);
+        text_c(120, 34, &FONT_B, "WAITING FOR", fg);
+        text_c(120, 56, &FONT_B, "LOOPY PRO", fg);
+        text_c(120, 86, &FONT_XS, "USB OR BLUETOOTH", muted);
+        cv_commit_main_band(page);
+    }
+}
+#endif
+
 static UI_DRAW void draw_main(void)
 {
     int band, readout = ui.touched >= 0 && (int32_t)(ui.touch_until - plat_ms()) > 0 &&
@@ -7633,19 +7648,13 @@ static UI_DRAW void draw_main(void)
             if (!clip_wait_on) {                  /* CLP-80: no Loopy host: the waiting screen, not the grid */
                 clip_wait_on = 1u;
 #if X0X_UI_SMALL_CANVAS
-                for (unsigned page = 0; page < 2u; ++page) {
-                    cv_window(240, 2 * BAND_H, page * BAND_H, BAND_H, C_BLACK);
+                draw_clip_wait_small();
 #else
                 cv_begin(240, 2 * BAND_H, C_BLACK);
                 cv_band(0, 2 * BAND_H);
-#endif
                 text_c(120, 34, &FONT_B, "WAITING FOR", C_WHITE);
                 text_c(120, 56, &FONT_B, "LOOPY PRO", C_WHITE);
                 text_c(120, 86, &FONT_XS, "USB OR BLUETOOTH", C_GRAY);
-#if X0X_UI_SMALL_CANVAS
-                    cv_commit_main_band(page);
-                }
-#else
                 cv_commit_rect(1, 0, MAIN_Y);
 #endif
             }
