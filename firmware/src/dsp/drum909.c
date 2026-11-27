@@ -369,6 +369,20 @@ static void d9_apply(drum909_t *d, int voice, int field, float v)
         return;
     }
     if (voice <= DR_HT) {
+        if (voice >= DR_LT) {
+            d9_tom_panel_t *p = &d->tom_panel[voice - DR_LT];
+            switch (field) {
+            case F_TUNE: p->tune = v; break;
+            case F_ATTACK: p->attack = v; break;
+            case F_DECAY: p->decay = v; break;
+            case F_LEVEL: p->level = v; break;
+            case F_DRIVE: p->drive = v; break;
+            case F_DIST: p->dist_type = (int32_t)v; break;
+            default: break;
+            }
+            d9_shape_prep(&p->shape, p->drive, p->dist_type);
+            return;
+        }
         d9_bt_t *b = &d->bt[voice];
         switch (field) {
         case F_TUNE: b->tune = v; break;
@@ -510,7 +524,7 @@ X0X_COLD void drum909_init(drum909_t *d)
     d->noise = 0xC0FFEEu;
     d->nz_pos = DR_NZ_HIST;
 
-    for (int i = 0; i < 5; ++i) {
+    for (int i = 0; i < 2; ++i) {
         d9_bt_t *b = &d->bt[i];
         b->drive = 2.0f; b->level = 0.8f; b->click_tone = 3000.0f;
         switch (i) {
@@ -527,22 +541,19 @@ X0X_COLD void drum909_init(drum909_t *d)
             b->snappy = 0.5f; b->noise_decay = 1200.0f; b->noise_hp = 1000.0f;
             b->drive = 1.8f; b->level = 0.62f;
             break;
-        case 2:
-            b->tune = 68.0f; b->sweep_depth = 1.12f; b->sweep_time = 200.0f;
-            b->decay = 1700.0f; b->attack = 0.18f; b->level = 0.55f;
-            break;
-        case 3:
-            b->tune = 102.0f; b->sweep_depth = 1.12f; b->sweep_time = 180.0f;
-            b->decay = 1050.0f; b->attack = 0.18f; b->level = 0.55f;
-            break;
-        default:
-            b->tune = 132.0f; b->sweep_depth = 1.12f; b->sweep_time = 160.0f;
-            b->decay = 1100.0f; b->attack = 0.18f; b->level = 0.55f;
-            break;
+
         }
         d9_bt_init(b);
     }
+    static const float tom_tune[] = {68.0f, 102.0f, 132.0f};
+    static const float tom_sweep[] = {200.0f, 180.0f, 160.0f};
+    static const float tom_decay[] = {1700.0f, 1050.0f, 1100.0f};
     for (int i = 0; i < 3; ++i) {
+        d9_tom_panel_t *p = &d->tom_panel[i];
+        p->tune = tom_tune[i]; p->sweep_depth = 1.12f; p->sweep_time = tom_sweep[i];
+        p->decay = tom_decay[i]; p->attack = 0.18f; p->level = 0.55f;
+        p->drive = 2.0f;
+        d9_shape_prep(&p->shape, p->drive, p->dist_type);
         d9_tom_t *t = &d->tom[i];
         for (int j = 0; j < 3; ++j)
             d9_env_set(&t->env[j], 0.0f);
@@ -641,7 +652,7 @@ static void d9_bt_trigger(d9_bt_t *v, int bd, float accent)
     v->mute = d9_ceil((longest + 20.0f) * D9_MS);
 }
 
-__attribute__((noinline)) static void d9_tom_trigger(d9_tom_t *t, const d9_bt_t *p, float accent)
+__attribute__((noinline)) static void d9_tom_trigger(d9_tom_t *t, const d9_tom_panel_t *p, float accent)
 {
     if (t->stick_stale && t->mute > 0)
         t->stick_warm = 1;
@@ -697,7 +708,7 @@ void drum909_trigger(drum909_t *d, int voice, float vel)
         break;
     }
     case DR_LT: case DR_MT: case DR_HT:
-        d9_tom_trigger(&d->tom[voice - DR_LT], &d->bt[voice], vgain);
+        d9_tom_trigger(&d->tom[voice - DR_LT], &d->tom_panel[voice - DR_LT], vgain);
         break;
     case DR_RS: {
         d9_rim_t *r = &d->rim;
@@ -901,7 +912,7 @@ static void d9_render_sd(d9_bt_t *v, const float *nz, const d9_bus_t *bus, int n
 /* Toms (er99_tom909_render): three VCOs on their own envelopes + stick noise.
  * The two upper partials and the stick are attack features (110 / 70 / 8 ms);
  * once their envelopes have run out (-100 dB) they are skipped. */
-static void d9_render_tom(d9_tom_t *t, const d9_bt_t *p, const float *nz, const d9_bus_t *bus, int n)
+static void d9_render_tom(d9_tom_t *t, const d9_tom_panel_t *p, const float *nz, const d9_bus_t *bus, int n)
 {
     const int m = n < t->mute ? n : t->mute;
     t->mute -= m;
@@ -1198,7 +1209,7 @@ static void d9_render(drum909_t *d, float *dry, float *rev, float *dly, int n, u
     for (int t = 0; t < 3; ++t)
         if (d->tom[t].mute > 0) {
             d9_bus(&bus, d, DR_LT + t, dry, rev, dly, audible_tracks);
-            d9_render_tom(&d->tom[t], &d->bt[DR_LT + t], nz, &bus, n);
+            d9_render_tom(&d->tom[t], &d->tom_panel[t], nz, &bus, n);
         }
     if (d->rim.mute > 0) {
         d9_bus(&bus, d, DR_RS, dry, rev, dly, audible_tracks);

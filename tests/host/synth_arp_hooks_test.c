@@ -83,6 +83,14 @@ static void expect_order(unsigned v, const int *keys, unsigned nkeys, const int 
     render(512);
 }
 
+static void usb_key(unsigned v, unsigned key, unsigned velocity)
+{
+    unsigned ch = seq.ch[TRK_BASS0 + v];
+    CHECK(ch < 16);
+    host_midi_put((velocity ? 9u : 8u) | ((velocity ? 0x90u : 0x80u) | ch) << 8 |
+            key << 16 | velocity << 24);
+}
+
 static void s1_arp(void)
 {
     const unsigned v = 0;
@@ -91,9 +99,22 @@ static void s1_arp(void)
     CHECK(!s.on && s.mode == ARP_UP && s.range == 1 && s.speed == ARP_SPEED_1_16 && s.length == 16 &&
           s.interval == 12 && s.gate == 100 && !s.note_locked);
     engine_arp_steps st; CHECK(engine_arp_steps_read(v, &st) && st.on_mask == 0xFFFF && !st.oct_mask);
-    /* OFF: held keys play directly. */
-    unsigned from = nev;
+    /* Real REC-equivalent local holds wait for the last physical key-up. */
     engine_bass_on(v, 48, 0, 0); engine_bass_on(v, 52, 0, 0); block();
+    uint32_t applied = settings(v).revision;
+    unsigned held_mark = nev;
+    set(v, ARP_F_ON, 1);
+    CHECK(nev == held_mark && settings(v).revision == applied);
+    engine_bass_off_note(v, 52); block();
+    CHECK(nev == held_mark + 1 && ev[held_mark].key == 52 && !ev[held_mark].vel);
+    CHECK(settings(v).revision == applied);
+    engine_bass_off_note(v, 48); block();
+    CHECK(nev == held_mark + 2 && ev[held_mark + 1].key == 48 && !ev[held_mark + 1].vel);
+    CHECK(settings(v).revision == applied + 1 && settings(v).on);
+    set(v, ARP_F_ON, 0);
+    /* OFF: held USB MIDI keys play directly. */
+    unsigned from = nev;
+    usb_key(v, 48, 100); usb_key(v, 52, 100); block();
     int got[64]; unsigned n = ons(from, got, NULL, 64);
     CHECK(n == 2 && got[0] == 48 && got[1] == 52);
     /* ON while held: direct notes end, the arp takes over from step 0. */
@@ -129,7 +150,7 @@ static void s1_arp(void)
     n = ons(from, got, NULL, 64);
     CHECK(n == 2 && got[0] == 48 && got[1] == 52);
     CHECK(!engine_arp_view(v, &step, &age));
-    engine_bass_off(v); render(512);
+    usb_key(v, 48, 0); usb_key(v, 52, 0); render(512);
     /* Modes, range and interval. */
     set(v, ARP_F_ON, 1);
     CHECK(!engine_arp_view(v, &step, &age));            /* on, but no keys held */
@@ -493,8 +514,7 @@ static void clock_sync(void)
         CHECK(!ck_bad && ck_ons >= steps + 16 && ck_ons <= steps + 17);
         printf("synth-arp: clock %.1f BPM %llu steps on the transport grid, last 16+ frame-exact (max err %lld frame)\n", bpms[b], (unsigned long long)steps + 16, (long long)ck_maxerr);
         /* stop: the arp free-runs; start again: step 1 lands on the start frame */
-        seq_stop(&seq); render(4096 + 777);       /* Stop releases notes (firmware policy) */
-        engine_bass_on(v, 48, 0, 0); render(777);  /* stopped: free-running Synth One arp */
+        seq_stop(&seq); render(4096 + 777 + 777); /* The held local key can free-run after Stop. */
     }
     /* Tempo change mid-run: the next steps follow the new grid, nothing doubles or drops. */
     ck_ons = ck_bad = 0; ck_maxerr = 0; on_hook = ck_on;
@@ -516,11 +536,12 @@ static void clock_sync(void)
     CHECK(lo >= (int64_t)(newlen / 256u) && hi <= (int64_t)(newlen / 256u) + 1);
     printf("synth-arp: tempo 120 -> 150 mid-run: steps %lld..%lld frames (grid %.2f), no double/drop\n", (long long)lo, (long long)hi, newlen / 256.0);
     seq_stop(&seq); render(4096);
-    engine_bass_on(v, 48, 0, 0); render(500);
+    engine_bass_off(v); render(500);             /* Genuine release before the mode edit. */
     /* SEQ follows the bar: start restarts at step 1 of the pattern. */
     set(v, ARP_F_MODE, ARP_SEQ); set(v, ARP_F_LENGTH, 4);
     for (unsigned i = 0; i < 4; ++i) { step_set(v, i, ARP_S_ON, 1); step_set(v, i, ARP_S_OCT, 0); step_set(v, i, ARP_S_OFFSET, (int)i); }
     block();
+    engine_bass_on(v, 48, 0, 0); render(300);
     for (unsigned r = 0; r < 2; ++r) {
         nev = 0;
         ck_start_transport(120.f);
@@ -534,7 +555,7 @@ static void clock_sync(void)
             CHECK(t[i] + 1 >= want && t[i] <= want + 1);
         }
         seq_stop(&seq); render(3000 + r * 1234);
-        engine_bass_on(v, 48, 0, 0); render(300);
+        render(300); /* Keep the same genuine key hold through Stop and restart. */
     }
     puts("synth-arp: SEQ pattern restarts on the bar at transport start (x2), steps on the grid PASS");
     engine_bass_off(v); render(4096);

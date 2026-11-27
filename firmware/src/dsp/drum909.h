@@ -43,7 +43,15 @@ typedef struct {
     float crush_st[2];
 } d9_bt_t;
 
-/* LT/MT/HT: 9W9's er99_tom_t (three VCOs); reads the panel from a d9_bt_t */
+/* LT/MT/HT own the real tom runtime below, not BD/SD oscillators,
+ * detector filters or envelopes. Keep only the fields the panel feeds. */
+typedef struct {
+    float tune, sweep_depth, sweep_time, decay, attack, level, drive;
+    int32_t dist_type;
+    d9_shape_t shape;
+} d9_tom_panel_t;
+
+/* LT/MT/HT: 9W9's er99_tom_t (three VCOs), with independent panel values. */
 typedef struct {
     uint32_t ph[3];
     d9_env_t env[3], pitch, noise_env;
@@ -93,7 +101,8 @@ typedef struct {
 } d9_smp_t;
 
 struct drum909 {
-    d9_bt_t bt[5];                /* BD SD LT MT HT panels; BD and SD voices */
+    d9_bt_t bt[2];                /* BD and SD panels + voices */
+    d9_tom_panel_t tom_panel[3];   /* LT, MT, HT panel values */
     d9_tom_t tom[3];              /* LT MT HT voices */
     d9_rim_t rim;
     d9_clap_t clap;

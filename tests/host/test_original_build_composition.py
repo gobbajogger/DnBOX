@@ -112,7 +112,8 @@ class OriginalBuildCompositionTests(unittest.TestCase):
                                       ("smk37", "pro", True),
                                       ("smk37", "mke", False),
                                       ("fm1", "pro", False)):
-            with mock.patch.object(build, "BOARD", board), mock.patch.object(build, "MODEL", model):
+            with mock.patch.object(build, "BOARD", board), mock.patch.object(build, "MODEL", model), \
+                 mock.patch.dict(os.environ, {"X0X_CHICAGO_FOLD_RESIDUAL_MIN": "0"}):
                 _, _, sources = compile_plan({"X0X_ORIGINAL_SYNTH": "1"})
             for path, command in sources.items():
                 with self.subTest(board=board, model=model, source=path):
@@ -120,10 +121,26 @@ class OriginalBuildCompositionTests(unittest.TestCase):
                     native_only = Path(path).suffix == ".S" or Path(path).stem in {"chicago_dynamics", "chicago_modulation", "original_runtime"} or path in {"firmware/src/dsp/drum909.c", "firmware/src/dsp/master.c", "firmware/src/dsp/fxbus.c", "firmware/src/app/gfinal/ui_chance_exact.c"}
                     self.assertEqual("-flto" in command, compact and not native_only)
                     expected = compact and Path(path).stem == "chicago_packed"
-                    self.assertEqual("-DX0X_CHICAGO_COMPACT_HEADERS=1" in command, expected)
+                    self.assertEqual("-DX0X_CHICAGO_FAST32=1" in command, expected)
+                    folds = [flag for flag in command if str(flag).startswith("-DX0X_CHICAGO_FOLD_RESIDUAL_MIN=")]
+                    self.assertEqual(folds, ["-DX0X_CHICAGO_FOLD_RESIDUAL_MIN=0"] if expected else [])
+                    self.assertNotIn("-DX0X_CHICAGO_COMPACT_HEADERS=1", command)
                     if "-O2" in command:
                         self.assertIn("-ffp-contract=off", command)
                         self.assertNotIn("-ffast-math", command)
+
+    def test_chicago_fold_follows_small_canvas_or_explicit_override(self):
+        for small, override, expected in (("0", None, "0"), ("1", None, "1"),
+                                          ("1", "0", "0"), ("0", "1", "1")):
+            env = {"X0X_UI_SMALL_CANVAS": small}
+            if override is not None:
+                env["X0X_CHICAGO_FOLD_RESIDUAL_MIN"] = override
+            with self.subTest(small=small, override=override), \
+                 mock.patch.dict(os.environ, env, clear=True), \
+                 mock.patch.object(build, "BOARD", "smk37"), mock.patch.object(build, "MODEL", "pro"):
+                _, _, sources = compile_plan({"X0X_ORIGINAL_SYNTH": "1"})
+                self.assertIn(f"-DX0X_CHICAGO_FOLD_RESIDUAL_MIN={expected}",
+                              sources["experiments/original_synth/chicago_packed.c"])
 
     def assert_chance_plan(self, model, setting=None):
         env = dict(os.environ)
