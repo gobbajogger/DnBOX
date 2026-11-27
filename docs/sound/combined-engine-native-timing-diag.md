@@ -25,3 +25,10 @@ In the dry INIT scope legacy chorus computes a delay tap with wet mix zero. Simp
 
 - The [909 unity cursor candidate](../../experiments/sound-hardware-v1/909-unity-cursor-local-diagnostic.patch) holds serial samples, Huffman cursor and envelope state in locals until the end of a native-rate span. Existing non-unity and final-sample admission remain. Hosted sanitizers and a strict PI32 differential agreed on four sampler voices: 159,744 stereo frames per target run and matching decoder, envelope, scratch and four bus arrays. Isolated timed slices improved 7.54–7.58% across CH/OH/CR/RD, roughly 5.4 µs per 128 frames per voice. Measured +46 B in the unlinked target object; a combined footprint is not claimed. No adoption just to post a percentage.
 - Hoisting invariant SuperJ6 pan, gain and LFO step arithmetic reproduced 1,048,896 stereo host frames and complete state; 49,152 native stereo frames and state also matched. It costs 48 B APP in both diagnostic links and saves only about 10.6 µs per 128 isolated stereo samples for six voices. This is too small a trade while executable headroom is limited; leave it out of the current candidate.
+
+
+### Combined dry chorus + 909 cursor check
+
+I combined just these two separately exact component changes on the current source-order donor, with Plan 4 and all original owner/memory guards. Actual native paired link: 228 B Elite / 240 B Pro free APP (64 B combined versus donor 292/304); pool unchanged at 908 B after 8 KiB reserve, or 396 B after the final 512 B floor. Same project bytes, five exact settled owner responses on both, no skipped cycles, no virtual NOR modification, stable Core 1 stack paint and no bad mailbox.
+
+Elite reported 13,228 µs / 67 XRUNs and Pro 20,417 µs / 185. Elite's terminal voice state had no evidence of triggered SuperJ6 slots; Pro retained a gated SuperJ6 note. The valid owner responses alone are **not** proof of equal active-note work. Do not compare these peak/XRUN numbers as an improvement in the joint workload. The real integrated candidate remains unqualified pending a replay with measured per-render joint activity. No shipping changes.
