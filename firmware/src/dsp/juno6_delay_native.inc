@@ -8,11 +8,13 @@ enum { SJ6_NATIVE_DELAY_MAX_STRIDE = 8192 };
 static float native_delay_frames(const juno6_t *s,unsigned raw,float bpm,unsigned sync)
 {
     static const uint16_t grid128[18]={
-        0,3,4,6,8,12,16,24,32,48,64,96,128,256,384,512,768,1024
+        2,3,4,6,8,12,16,24,32,48,64,96,128,256,384,512,768,1024
     }; /* fractions of a whole note /128, same original 18 detents */
     if (raw>127u || sync>1u || !(bpm>0.f) || bpm>10000.f) return 0.f;
     unsigned i=sync?(raw*17u+63u)/127u:0u;
-    float sec=i ? (float)grid128[i]*(1.875f/bpm) : (1.5f/127.f)*(float)raw;
+    float sec=sync ? (float)grid128[i]*(1.875f/bpm) : (1.5f/127.f)*(float)raw;
+    /* The original clamps before ramping; the raw detent stays unchanged. */
+    if (sec>3.f) sec=3.f;
     float frames=sec*s->sample_rate;
     if (!(frames<=(SJ6_NATIVE_DELAY_CAP-2u)*SJ6_NATIVE_DELAY_MAX_STRIDE)) return 0.f;
     return frames<1.f ? 1.f : frames;
