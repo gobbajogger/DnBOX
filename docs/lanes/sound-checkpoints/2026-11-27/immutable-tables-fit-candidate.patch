@@ -1,0 +1,149 @@
+--- a/firmware/src/dsp/s1c/s1c_front.c
++++ b/firmware/src/dsp/s1c/s1c_front.c
+@@ -14,9 +14,27 @@
+ #include <math.h>
+ #endif
+ #endif
+-static float dict_f(uint8_t i) { union { uint32_t u; float f; } v; v.u = s1c_dict[i]; return v.f; }
+-#define MINV(id) dict_f(s1c_imin[id])
+-#define MAXV(id) dict_f(s1c_imax[id])
++/* Exact parameter words: only zero mantissa tails and repeated ranges are omitted. */
++__attribute__((noinline)) static float dict_f(uint8_t i)
++{
++    union { uint32_t u; float f; } v;
++    if (i < 14) v.u=(uint32_t)s1c_dict_high[i]<<16;
++    else if(i < 39) v.u=s1c_dict_full[i-14];
++    else if(i < 66) v.u=(uint32_t)s1c_dict_high[i-25]<<16;
++    else v.u=s1c_dict_full[i-41];
++    return v.f;
++}
++__attribute__((noinline)) static unsigned range_code(unsigned id)
++{
++    if(id<48)return s1c_range_codes[id];
++    if(id<60)return 0x290du;
++    if(id<67)return s1c_range_codes[id-12];
++    if(id<83)return 0x2e02u;
++    if(id<115)return 0x240du;
++    return s1c_range_codes[id-60];
++}
++#define MINV(id) dict_f((uint8_t)range_code(id))
++#define MAXV(id) dict_f((uint8_t)(range_code(id)>>8))
+ float s1c_front_init(unsigned id) { return id < 150 ? dict_f(s1c_iinit[id]) : 0.f; }
+ 
+ enum { F_L1R = 15, F_PANF = 36, F_DLT = 43, F_L2R = 47, F_ARPRATE = 64, F_TSYNC = 139, F_PB = 140,
+--- a/firmware/src/dsp/s1c/s1c_tables.inc
++++ b/firmware/src/dsp/s1c/s1c_tables.inc
+@@ -1,7 +1,7 @@
+ /* SPDX-License-Identifier: GPL-3.0-only */
+ /* Synth One parameter ranges and INIT values (the original kernel's minimums/maximums and its
+  * default parameter set), as indices into one dictionary of the 70 distinct binary32 values. */
+-static const uint32_t s1c_dict[70] = {0xc2700000,0xc1c00000,0xc1400000,0xc1300000,0xc1100000,0xc1080000,0xc1000000,0xc0e00000,0xc0a00000,0xc0800000,0xc0400000,0xc0000000,0xbf800000,0x00000000,0x358637bd,0x39be37c6,0x3a03126f,0x3a088889,0x3a83126f,0x3b83126f,0x3ba3d70a,0x3c23d70a,0x3c2aaaab,0x3d4ccccd,0x3dcccccd,0x3e000000,0x3e19999a,0x3e4ccccd,0x3e666666,0x3e800000,0x3f000000,0x3f400000,0x3f4ccccd,0x3f666666,0x3f7ae148,0x3f7d70a4,0x3f800000,0x3f99999a,0x3ff0a3d7,0x40000000,0x40200000,0x40400000,0x40800000,0x40c00000,0x41000000,0x41200000,0x41400000,0x41500000,0x41700000,0x41800000,0x41a00000,0x41c00000,0x42800000,0x42a00000,0x42c80000,0x43480000,0x43960000,0x43cd0000,0x43dc0000,0x43eb0000,0x442f0000,0x44480000,0x44610000,0x447a0000,0x45000000,0x46000000,0x467ffc00,0x469c4000,0x46ac4400,0x473b8000};
+-static const uint8_t s1c_imin[150] = {13,13,13,2,2,13,13,13,13,13,13,13,13,13,13,17,52,13,13,13,13,13,16,20,13,13,16,20,13,19,9,36,13,36,64,13,17,13,13,53,13,13,13,15,13,13,13,17,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,36,13,36,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,36,13,54,13,13,36,36,36,0,0,0,13,13,13,13,13,13,30,30,30,30,13,13,13,1,13,57,14,12,13,22,1,13};
+-static const uint8_t s1c_imax[150] = {36,36,36,51,51,36,36,36,36,36,36,48,29,41,36,53,68,34,36,37,36,27,39,39,36,39,39,39,36,39,42,39,39,51,69,36,45,36,36,62,36,36,33,40,36,41,36,53,41,41,41,41,41,41,41,41,41,41,41,41,39,46,36,41,55,36,49,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,39,36,56,32,63,36,36,50,50,50,13,13,13,21,21,21,30,30,30,42,42,42,36,34,36,66,13,51,59,35,46,36,44,51,36};
+-static const uint8_t s1c_iinit[150] = {36,36,30,13,13,32,32,13,13,13,13,13,13,13,13,29,67,24,36,13,13,13,23,23,36,30,23,20,32,23,13,36,30,51,69,13,29,36,30,60,13,13,24,29,25,13,13,29,13,13,13,13,13,13,13,13,13,13,13,13,13,46,36,41,55,13,49,13,12,39,10,42,8,43,7,44,4,45,3,46,13,36,11,13,36,13,36,13,36,13,36,13,36,13,36,13,36,13,36,13,36,36,13,36,36,13,36,36,13,36,36,13,36,36,13,13,13,46,13,61,13,13,50,47,47,4,5,6,18,18,18,26,28,26,39,38,38,31,13,36,65,2,46,58,24,12,13,22,13,13};
++static const uint16_t s1c_dict_high[41] = {0xc270,0xc1c0,0xc140,0xc130,0xc110,0xc108,0xc100,0xc0e0,0xc0a0,0xc080,0xc040,0xc000,0xbf80,0x0,0x4000,0x4020,0x4040,0x4080,0x40c0,0x4100,0x4120,0x4140,0x4150,0x4170,0x4180,0x41a0,0x41c0,0x4280,0x42a0,0x42c8,0x4348,0x4396,0x43cd,0x43dc,0x43eb,0x442f,0x4448,0x4461,0x447a,0x4500,0x4600};
++static const uint32_t s1c_dict_full[29] = {0x358637bd,0x39be37c6,0x3a03126f,0x3a088889,0x3a83126f,0x3b83126f,0x3ba3d70a,0x3c23d70a,0x3c2aaaab,0x3d4ccccd,0x3dcccccd,0x3e000000,0x3e19999a,0x3e4ccccd,0x3e666666,0x3e800000,0x3f000000,0x3f400000,0x3f4ccccd,0x3f666666,0x3f7ae148,0x3f7d70a4,0x3f800000,0x3f99999a,0x3ff0a3d7,0x467ffc00,0x469c4000,0x46ac4400,0x473b8000};
++static const uint16_t s1c_range_codes[90] = {0x240d,0x240d,0x240d,0x3302,0x3302,0x240d,0x240d,0x240d,0x240d,0x240d,0x240d,0x300d,0x1d0d,0x290d,0x240d,0x3511,0x4434,0x220d,0x240d,0x250d,0x240d,0x1b0d,0x2710,0x2714,0x240d,0x270d,0x2710,0x2714,0x240d,0x2713,0x2a09,0x2724,0x270d,0x3324,0x4540,0x240d,0x2d11,0x240d,0x240d,0x3e35,0x240d,0x240d,0x210d,0x280f,0x240d,0x290d,0x240d,0x3511,0x270d,0x2e0d,0x240d,0x290d,0x3724,0x240d,0x3124,0x270d,0x240d,0x3824,0x200d,0x3f36,0x240d,0x240d,0x3224,0x3224,0x3224,0xd00,0xd00,0xd00,0x150d,0x150d,0x150d,0x1e0d,0x1e0d,0x1e0d,0x2a1e,0x2a1e,0x2a1e,0x241e,0x220d,0x240d,0x420d,0xd01,0x330d,0x3b39,0x230e,0x2e0c,0x240d,0x2c16,0x3301,0x240d};
++static const uint8_t s1c_iinit[150] = {0x24,0x24,0x1e,0xd,0xd,0x20,0x20,0xd,0xd,0xd,0xd,0xd,0xd,0xd,0xd,0x1d,0x43,0x18,0x24,0xd,0xd,0xd,0x17,0x17,0x24,0x1e,0x17,0x14,0x20,0x17,0xd,0x24,0x1e,0x33,0x45,0xd,0x1d,0x24,0x1e,0x3c,0xd,0xd,0x18,0x1d,0x19,0xd,0xd,0x1d,0xd,0xd,0xd,0xd,0xd,0xd,0xd,0xd,0xd,0xd,0xd,0xd,0xd,0x2e,0x24,0x29,0x37,0xd,0x31,0xd,0xc,0x27,0xa,0x2a,0x8,0x2b,0x7,0x2c,0x4,0x2d,0x3,0x2e,0xd,0x24,0xb,0xd,0x24,0xd,0x24,0xd,0x24,0xd,0x24,0xd,0x24,0xd,0x24,0xd,0x24,0xd,0x24,0xd,0x24,0x24,0xd,0x24,0x24,0xd,0x24,0x24,0xd,0x24,0x24,0xd,0x24,0x24,0xd,0xd,0xd,0x2e,0xd,0x3d,0xd,0xd,0x32,0x2f,0x2f,0x4,0x5,0x6,0x12,0x12,0x12,0x1a,0x1c,0x1a,0x27,0x26,0x26,0x1f,0xd,0x24,0x41,0x2,0x2e,0x3a,0x18,0xc,0xd,0x16,0xd,0xd};
+--- a/firmware/src/dsp/ima_adpcm.h
++++ b/firmware/src/dsp/ima_adpcm.h
+@@ -26,12 +26,19 @@
+ #endif
+ 
+ /* decode nibble i of d; updates the decoder state and returns the new sample */
+-static const uint8_t IMA_ROUND_CORR[64] = {
++#if !DNBOX_SHARE_CONST_GRIDS || defined(X0X_IMA_TABLES_DEFINE)
++#if !DNBOX_SHARE_CONST_GRIDS
++static
++#endif
++const uint8_t IMA_ROUND_CORR[64] = {
+     0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,
+     0,0,0,0,0,0,0,0, 0,1,0,1,0,1,0,1,
+     0,0,0,0,0,0,0,0, 0,0,1,1,0,0,1,1,
+     0,1,0,1,0,1,0,1, 0,1,1,2,0,1,1,2
+ };
++#else
++extern const uint8_t IMA_ROUND_CORR[64];
++#endif
+ static inline int32_t ima_decode_code(uint32_t code, int32_t *pred, int32_t *idx)
+ {
+     uint32_t mag = code & 7u;
+--- a/firmware/src/dsp/sj6_native_room.inc
++++ b/firmware/src/dsp/sj6_native_room.inc
+@@ -12,7 +12,12 @@
+ float sj6_room_rate_clocked(unsigned word,float bpm,int sync)
+ {
+     if(!sync)return sj6_room_rate(word);
++#if DNBOX_SHARE_CONST_GRIDS
++    extern const float dnbox_sj6_clock_grid[18];
++    const float *grid=dnbox_sj6_clock_grid;
++#else
+     static const float grid[18]={64,48,32,24,16,12,8,6,4,3,2,1.5f,1,.5f,.3333f,.25f,.1667f,.125f};
++#endif
+     const unsigned index=(17u*(127u-word)+63u)/127u;
+     return bpm>0.f ? (bpm*(1.f/240.f))*grid[index] : 0.f;
+ }
+--- a/firmware/src/dsp/juno6_factory.inc
++++ b/firmware/src/dsp/juno6_factory.inc
+@@ -643,9 +643,14 @@
+     return (float)(((double)tempo/60.0*grid[index])*.25);
+ #else
+     /* Native PI32v2 has no floating-point widening runtime. */
++#if DNBOX_SHARE_CONST_GRIDS
++    extern const float dnbox_sj6_clock_grid[18];
++    const float *grid=dnbox_sj6_clock_grid;
++#else
+     static const float grid[18]={
+         64,48,32,24,16,12,8,6,4,3,2,1.5f,1,.5f,.3333f,.25f,.1667f,.125f
+     };
++#endif
+     const unsigned index=(unsigned)((1.f-normalized)*17.f+.5f);
+     return (tempo*(1.f/240.f))*grid[index];
+ #endif
+--- a/firmware/src/dsp/juno6.c
++++ b/firmware/src/dsp/juno6.c
+@@ -1,5 +1,11 @@
+ /* SPDX-License-Identifier: GPL-3.0-only */
+ #include "juno6.h"
++#if DNBOX_SHARE_CONST_GRIDS
++const float dnbox_sj6_clock_grid[18]={
++    64,48,32,24,16,12,8,6,4,3,2,1.5f,1,.5f,.3333f,.25f,.1667f,.125f
++};
++#endif
++
+ #include "juno6_controls.h"
+ #include "juno6_aux_catalog.h"
+ const uint8_t sj6_aux_destination_ids[SJ6_AUX_ORIGINAL_LAST+1u]={
+--- a/firmware/src/dsp/fxbus.c
++++ b/firmware/src/dsp/fxbus.c
+@@ -10,7 +10,12 @@
+ #define FX_RV_QUIET (1356 + 8192)          /* combs silent this long: the allpass tail is < -140 dB */
+ 
+ /* 1/32 1/16T 1/16 1/8T 1/16. 1/8 1/4T 1/8. 1/4 1/2T 1/4. 1/2 1/2. (in beats) */
++#if DNBOX_SHARE_CONST_GRIDS
++const float dnbox_fx_beats[13] = {
++#define fx_beats dnbox_fx_beats
++#else
+ static const float fx_beats[13] = {
++#endif
+     0.125f, 1.0f / 6.0f, 0.25f, 1.0f / 3.0f, 0.375f, 0.5f, 2.0f / 3.0f,
+     0.75f, 1.0f, 4.0f / 3.0f, 1.5f, 2.0f, 3.0f
+ };
+--- a/firmware/src/app/chicago_bpmdly.h
++++ b/firmware/src/app/chicago_bpmdly.h
+@@ -45,10 +45,15 @@
+ /* Same beat grid as fxbus DlTime 0..12. */
+ static inline float chi_bpmdly_beats(uint8_t div)
+ {
++#if DNBOX_SHARE_CONST_GRIDS
++    extern const float dnbox_fx_beats[13];
++    const float *beats=dnbox_fx_beats;
++#else
+     static const float beats[13] = {
+         0.125f, 1.0f / 6.0f, 0.25f, 1.0f / 3.0f, 0.375f, 0.5f, 2.0f / 3.0f,
+         0.75f,  1.0f,        4.0f / 3.0f, 1.5f,  2.0f,  3.0f
+     };
++#endif
+     if (div > 12)
+         div = 12;
+     return beats[div];
