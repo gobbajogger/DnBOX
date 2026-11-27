@@ -74,8 +74,8 @@ static void prepare_bank(bank_t *k, const uint8_t *d, uint32_t n)
     k->ck_shift=(uint8_t)sh;
     for(uint32_t i=0;i<n;i++) {
         if(!(i & ((1u<<sh)-1u))) {
-            k->ck[i>>sh].pred=(int16_t)pred;
-            k->ck[i>>sh].idx=(uint8_t)idx;
+            k->ck_pred[i>>sh]=(int16_t)pred;
+            k->ck_idx[i>>sh]=(uint8_t)idx;
         }
         ima_decode(d,i,&pred,&idx); /* setup costs are not render-time costs */
     }
@@ -94,7 +94,7 @@ static void bank_seek(const bank_t *k, voice_t *v, uint32_t p, int32_t *pred, in
     (void)v;
 #endif
     uint32_t c=p>>k->ck_shift, i=c<<k->ck_shift;
-    *pred=k->ck[c].pred; *idx=k->ck[c].idx;
+    *pred=k->ck_pred[c]; *idx=k->ck_idx[c];
 #if BRK_SEEK_CACHE
     if(p >= BRK_PROFILE_RCH && p-BRK_PROFILE_RCH >= i) {
         uint32_t target=p-BRK_PROFILE_RCH;

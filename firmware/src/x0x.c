@@ -136,7 +136,15 @@ static uint16_t x0x_main_scratch[2048] __attribute__((aligned(4)));
 #define OTA_DEC_OFF 0xD00u
 #define LZ_SCRATCH x0x_main_scratch
 #define PERF_SCRATCH x0x_main_scratch
+#if DNBOX_EDITOR_REPLY_ALIAS
+/* Editor owns this tail through synchronous USB-MIDI enqueue; OTA does
+ * not run inside editor dispatch, and PERF ends below OTA_DEC_OFF. */
+#define ED_OUT_SCRATCH (OTA_SCRATCH + OTA_DEC_OFF)
+#define ED_SMP_SCRATCH (ED_OUT_SCRATCH + 220u)
+_Static_assert(OTA_DEC_OFF + 732u <= sizeof x0x_main_scratch, "editor reply tail");
+#else
 #define ED_SMP_SCRATCH (OTA_SCRATCH + OTA_DEC_OFF)   /* 512 B; call-scoped like ota_dec */
+#endif
 #define OTA_PARM_OFF 0xF80u
 #define OTA_PARM_N 112u
 _Static_assert(OTA_DEC_OFF + 640u <= OTA_PARM_OFF, "update parm overlaps the decoded frame");

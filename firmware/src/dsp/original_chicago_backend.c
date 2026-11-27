@@ -556,13 +556,13 @@ int original_chicago_backend_render(original_chicago_backend *s,
 int original_chicago_backend_cutoff_hz(float macro, float *hz)
 {
     original_chicago_program p;
-    float c, a, e;
+    float c, a;
     memset(&p, 0, sizeof p);
     if (!hz || !original_chicago_program_set(&p, 2u, macro) || !original_chicago_program_native(&p, 24u, &c))
         return 0;
     float q = c * 16384.0f;
     q = q < 0.0f ? 0.0f : q > 16384.0f ? 16384.0f : q;
-    if (!original_chicago_packed_lookup(0, (uint32_t)q, &a, &e) || !(a >= 0.0f && a <= 1.0f)) return 0;
+    if (!original_chicago_packed_cutoff_a((uint32_t)q, &a) || !(a >= 0.0f && a <= 1.0f)) return 0;
     float f = a > 0.0f ? -fm_logf(a) * (44100.0f / FM_TWO_PI) : 22050.0f;
     *hz = f > 22050.0f ? 22050.0f : f < 0.0f ? 0.0f : f;
     return 1;

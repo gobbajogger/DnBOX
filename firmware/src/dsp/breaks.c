@@ -300,12 +300,12 @@ X0X_COLD static void bank_fill(brk_bank_t *k, const brk_loop_t *loop)
         k->start[s] = (n >> 5) * s + ((n & 31u) * s >> 5);  /* n * s / 32 without overflow */
     for (i = 0, s = 0; i < n; i++) {                       /* one pass: record states, decode on */
         if (!(i & ((1u << sh) - 1u))) {
-            k->ck[i >> sh].pred = (int16_t)pred;
-            k->ck[i >> sh].idx = (uint8_t)idx;
+            k->ck_pred[i >> sh] = (int16_t)pred;
+            k->ck_idx[i >> sh] = (uint8_t)idx;
         }
         while (s < 32 && k->start[s] == i) {
-            k->at_start[s].pred = (int16_t)pred;
-            k->at_start[s].idx = (uint8_t)idx;
+            k->at_start_pred[s] = (int16_t)pred;
+            k->at_start_idx[s] = (uint8_t)idx;
             s++;
         }
         ima_decode(k->adpcm, i, &pred, &idx);
@@ -324,8 +324,8 @@ X0X_COLD static void pend_store(breaks_t *b, int which, const brk_loop_t *loop)
 static void bank_seek(const brk_bank_t *k, uint32_t p, int32_t *pred, int32_t *idx)
 {
     uint32_t c = p >> k->ck_shift, i = c << k->ck_shift;
-    *pred = k->ck[c].pred;
-    *idx = k->ck[c].idx;
+    *pred = k->ck_pred[c];
+    *idx = k->ck_idx[c];
     while (i < p)
         ima_decode(k->adpcm, i++, pred, idx);
 }
@@ -499,8 +499,8 @@ static void bank_seek_reverse(brk_voice_t *v, const brk_bank_t *k, uint32_t p, i
     }
     c = p >> k->ck_shift;
     i = c << k->ck_shift;
-    *pred = k->ck[c].pred;
-    *idx = k->ck[c].idx;
+    *pred = k->ck_pred[c];
+    *idx = k->ck_idx[c];
     /* rev_fetch passes a BRK_RCH-aligned base. If it is also an exact
      * checkpoint, no decoding or adjacent-state lookup is necessary. */
     if (i == p) {
@@ -610,7 +610,7 @@ __attribute__((noinline)) static int slice_start(breaks_t *b, int bk, int sl, fl
     sl %= k->slices;
     unsigned boundary = (unsigned)sl * (32u / k->slices);
     return voice_start_on(b, k, bk, sl, k->start[boundary], b->perf.reverse, 1,
-                   k->at_start[boundary].pred, k->at_start[boundary].idx, hit_gain);
+                   k->at_start_pred[boundary], k->at_start_idx[boundary], hit_gain);
 }
 
 /* ---- the generator ---------------------------------------------------------------------- */

@@ -1,6 +1,40 @@
 /* SPDX-License-Identifier: GPL-3.0-only */
 #include "chicago_packed.h"
-#ifdef X0X_CHICAGO_COMPACT_HEADERS
+#if defined(X0X_CHICAGO_FAST32) && X0X_CHICAGO_FAST32
+#include "p_a.h"
+#include "p_e.h"
+static uint16_t u16(const uint8_t *p){return (uint16_t)p[0]|(uint16_t)((uint16_t)p[1]<<8);}
+static uint32_t u32(const uint8_t *p){return (uint32_t)u16(p)|((uint32_t)u16(p+2)<<16);}
+static __attribute__((noinline)) uint32_t chicago_fast32_lookup(const unsigned char *t,unsigned idx){
+    unsigned i=idx&127,ns=u16(t+2);
+    const uint8_t *p=t+4+2*ns+u16(t+4+(idx>>7)*2);
+    unsigned degree=p[0]>>5,width=p[0]&31,q=p[9];
+    uint32_t base=u32(p+1),lo=u32(p+5);
+    p+=10;
+    int32_t coefficients[4];
+    for(unsigned j=0;j<=degree;j++){
+        uint32_t z=0;
+        unsigned b,count=0;
+        do{b=*p++;z|=(b&127u)<<count;count+=7;}while(b&128u);
+        coefficients[j]=(int32_t)((z>>1)^(0u-(z&1u)));
+    }
+    int32_t v=coefficients[degree];
+    for(unsigned j=degree;j>0;j--)v=coefficients[j-1]+((v*(int32_t)i)>>7);
+    if(q)v=(v+(int32_t)(1u<<(q-1)))>>q;
+    unsigned bit=i*width,shift=bit&7,rem=width;
+    uint32_t z=0;
+    p+=bit>>3;
+    if(rem){
+        unsigned take=8-shift;
+        if(take>rem)take=rem;
+        z=(unsigned)(*p++>>shift)&((1u<<take)-1u);
+        rem-=take;
+        while(rem){unsigned n=rem<8?rem:8;z|=((uint32_t)*p++&((1u<<n)-1u))<<take;take+=n;rem-=n;}
+    }
+    return base+lo+(uint32_t)v+z;
+}
+
+#elif defined(X0X_CHICAGO_COMPACT_HEADERS)
 #include "chicago_compact_private.h"
 static int chicago_compact_decode(const uint8_t *p,size_t bytes,uint32_t entries,uint32_t entry,uint32_t prefix,uint32_t *out){
  if(bytes<7)return 0;
@@ -48,6 +82,21 @@ static int chicago_compact_lookup(const original_lossless_table16 *t,uint32_t in
 #endif
 #include <string.h>
 #include <stdint.h>
+/* The display-only lookup may run on Core 0 while the Chicago audio owner
+ * renders on Core 1. Read the immutable A coefficient without the pair cache. */
+int original_chicago_packed_cutoff_a(uint32_t index,float *a){
+ if(!a)return 0;
+ uint32_t ab;
+#if defined(X0X_CHICAGO_FAST32) && X0X_CHICAGO_FAST32
+ if(index>16384u)return 0;
+ ab=chicago_fast32_lookup(p_a,index);
+#elif defined(X0X_CHICAGO_COMPACT_HEADERS)
+ if(!chicago_compact_lookup(&original_chicago_packed_a,index,original_chicago_packed_a_prefix,&ab))return 0;
+#else
+ if(!original_lossless_second16_lookup(&original_chicago_packed_a,index,&ab))return 0;
+#endif
+ memcpy(a,&ab,4);return 1;
+}
 int original_chicago_packed_lookup(const void *context,uint32_t index,float *a,float *e){
  if(context||!a||!e||a==e)return 0;
  /* The tables are constant: repeat the last decoded pair for the same index. Two
@@ -58,7 +107,10 @@ int original_chicago_packed_lookup(const void *context,uint32_t index,float *a,f
  uint32_t ab,eb,i0=last_index;
  ab=last_a;eb=last_e;
  if(i0!=index||last_index!=i0){
-#ifdef X0X_CHICAGO_COMPACT_HEADERS
+#if defined(X0X_CHICAGO_FAST32) && X0X_CHICAGO_FAST32
+  if(index>16384u)return 0;
+  ab=chicago_fast32_lookup(p_a,index);eb=chicago_fast32_lookup(p_e,index);
+#elif defined(X0X_CHICAGO_COMPACT_HEADERS)
   if(!chicago_compact_lookup(&original_chicago_packed_a,index,original_chicago_packed_a_prefix,&ab)||!chicago_compact_lookup(&original_chicago_packed_e,index,original_chicago_packed_e_prefix,&eb))return 0;
 #else
   if(!original_lossless_second16_lookup(&original_chicago_packed_a,index,&ab)||!original_lossless_second16_lookup(&original_chicago_packed_e,index,&eb))return 0;

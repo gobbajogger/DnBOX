@@ -125,7 +125,12 @@ static int smk__division_poll(unsigned owner)
 #ifndef SMK_BIG
 #define SMK_BIG                   /* (a section for big buffers, e.g. a zero-initialised RAM pool: x0x.c) */
 #endif
+#if DNBOX_LAB_RAM_SPARE
+static uint16_t smk_trim_pad[SMK_NPAD][5] __attribute__((section(".ram_spare")));
+static uint16_t smk_trim_key[FM1_NKEY][5] __attribute__((section(".ram_spare")));
+#else
 static uint16_t smk_trim_pad[SMK_NPAD][5] SMK_BIG, smk_trim_key[FM1_NKEY][5] SMK_BIG;
+#endif
 
 /* ------------------------------------------------------------------ state --- */
 static volatile struct {

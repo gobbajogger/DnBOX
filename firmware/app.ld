@@ -41,6 +41,11 @@ SECTIONS
     .c1_text : { _c1_start = .; KEEP(*(.c1_text*)) . = ALIGN(4); _c1_end = .; } > RAMTEXT AT > XIP
     _c1_load = LOADADDR(.c1_text);
     _rt_end = _c1_end;                  /* the guard's RAM code window covers both */
+    .ram_spare (NOLOAD) : {
+      . = ALIGN(4); _ram_spare_start = .; *(.ram_spare*) . = ALIGN(4); _ram_spare_end = .;
+    } > RAMTEXT
+    ASSERT(_ram_spare_start >= _c1_end && _ram_spare_end <= ORIGIN(RAMTEXT) + LENGTH(RAMTEXT),
+           "RAM spare data must stay outside code and Bluetooth regions")
     .data : { . = ALIGN(4); _data_start = .; KEEP(*(.bss.fm1_c1_mb)) *(.data*) *(.sdata*) . = ALIGN(4); _data_end = .; } > RAM AT > XIP
     _data_load = LOADADDR(.data);
     .c1stack (NOLOAD) : { *(.bss.c1stack) } > C1STK

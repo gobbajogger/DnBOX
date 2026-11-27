@@ -80,11 +80,11 @@ static void lcd_window(uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1)
     lcd_cmd(0x2C);
 }
 
-#if BOARD_SMK37
-static uint16_t lcd_fillbuf[240] SMK_BIG;
-#else
-static uint16_t lcd_fillbuf[240];
-#endif
+/* Fill and dirty tiles use the same single SPI DMA. Both writers call
+ * lcd_sync before touching this memory. Neither retains its data afterward. */
+#include "app/lcd_tiles.h"
+static uint16_t lcd_txbuf[X0X_LCD_MAX_DMA_BYTES / 2u];
+_Static_assert(sizeof lcd_txbuf >= 240u * sizeof(uint16_t), "LCD fill scanline must fit");
 
 static void lcd_fill(uint32_t x, uint32_t y, uint32_t w, uint32_t h, uint16_t c)
 {
@@ -98,12 +98,12 @@ static void lcd_fill(uint32_t x, uint32_t y, uint32_t w, uint32_t h, uint16_t c)
     lcd_sync();
     k = 240u / w * w;                       /* whole rows per transfer (narrow fills: one DMA) */
     for (i = 0; i < k; i++)
-        lcd_fillbuf[i] = (uint16_t)sw;
+        lcd_txbuf[i] = (uint16_t)sw;
     lcd_window(x, y, x + w - 1u, y + h - 1u);
     for (n = w * h; n; n -= k) {
         if (k > n)
             k = n;
-        lcd_data(lcd_fillbuf, k * 2u);
+        lcd_data(lcd_txbuf, k * 2u);
     }
 }
 

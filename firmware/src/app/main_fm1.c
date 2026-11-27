@@ -4,6 +4,9 @@
 /* X0X on the FM-1: boot (WDT first, boot-loop guard, guards), LCD, input (TIMER5 10 kHz),
  * audio (ALNK0), USB; then the main loop: UI at ~60 frames/s, input polled in between. */
 extern uint32_t _data_start[], _data_end[], _data_load[], _bss_start[], _bss_end[];
+#if DNBOX_LAB_RAM_SPARE
+extern uint32_t _ram_spare_start[], _ram_spare_end[];
+#endif
 extern uint32_t _xpool_start[], _xpool_end[];
 extern uint32_t _pool_start[], _pool_end[], _rt_start[], _rt_end[], _rt_load[], _c1_start[], _c1_end[], _c1_load[];
 
@@ -2508,6 +2511,10 @@ void fm1_cstart(void)
     irq_stack_mark();                               /* before any interrupt: PERF's IRQ STACK */
     for (d = _bss_start; d < _bss_end; d++)
         *d = 0;
+#if DNBOX_LAB_RAM_SPARE
+    for (d = _ram_spare_start; d < _ram_spare_end; d++)
+        *d = 0;
+#endif
     for (d = _pool_start; d < _pool_end; d++)
         *d = 0;
     for (d = _xpool_start; d < _xpool_end; d++)

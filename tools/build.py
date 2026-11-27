@@ -314,9 +314,8 @@ def generate():
 def _generate_locked():
     """Body of generate(), called with GEN/.generate.lock held."""
     if BOARD == "smk37" and MODEL in ("elite", "pro"):
-        import gen_chicago_compact
-        gen_chicago_compact.generate(SRC / "experiments/original_synth/chicago_packed_private.h",
-                                     GEN / "chicago_compact_private.h")
+        import gen_chicago_fast32
+        gen_chicago_fast32.generate(SRC / "experiments/original_synth/chicago_packed_private.h", GEN)
     if gen_cache.restore(GEN):
         print("generate: cached font, drums, and break bank")
         write_fittab_id()
@@ -509,7 +508,7 @@ def app_compile_commands(flags, original_synth, wobble):
             if S1C == "1" and Path(u).stem in S1C_OZ_UNITS:
                 uf = ["-Oz" if flag == "-Os" else flag for flag in uf]
             if BOARD == "smk37" and MODEL in ("elite", "pro") and Path(u).stem == "chicago_packed":
-                uf = [*uf, "-DX0X_CHICAGO_COMPACT_HEADERS=1"]
+                uf = [*uf, "-DX0X_CHICAGO_FAST32=1"]
             if SUPERJ6_FACTORY == "1" and synthone_patch == "1":
                 uf = ["-Oz" if flag == "-Os" else flag for flag in uf]
             if SUPERJ6_FACTORY == "1" and Path(u).stem in {"dnbx_core", "juno6"}:
@@ -579,6 +578,7 @@ def build_app():
         flags.append(f"-DX0X_WOBBLE={wobble}")
     if not any(f.startswith("-DX0X_DEV_WOBBLE=") for f in flags):
         flags.append(f"-DX0X_DEV_WOBBLE={'1' if original_synth else wobble}")
+    flags += ["-DDNBOX_LAB_RAM_SPARE=1", "-DDNBOX_EDITOR_REPLY_ALIAS=1"]
     flags += clang_std_inc()
     flags.append(f'-DFELUCCA_ID="{PRODUCT}"')
     if BOARD == "smk37":            # SMK store owner (storage.c st_owner_check): X0X's own family, untagged data cleared

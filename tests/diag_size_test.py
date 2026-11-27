@@ -35,7 +35,7 @@ guard = struct_words(glue, "ble_guard_t")
 case = re.search(r"case ED_DIAG: \{(.*?)break;", editor, re.S).group(1)
 size = int(re.search(r"uint32_t w\[(\d+)\]", case).group(1))
 boot = len(re.findall(r"w\[nw\+\+\] = bootguard", case))
-out = int(re.search(r"static uint8_t ed_out\[(\d+)\];", editor).group(1))
+out = int(re.search(r"(?m)^#define ED_OUT_MAX (\d+)u\b", editor).group(1))
 
 body = re.search(r"static uint32_t ble_diag\(uint32_t \*w, uint32_t max\)\n\{(.*?)\n\}", ble, re.S).group(1)
 live, k, writes = 0, None, 0

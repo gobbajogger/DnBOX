@@ -52,16 +52,25 @@ static void smk_inlog_reply(uint32_t arg);   /* main_fm1.c */
 static uint32_t ed_reboot_at;                /* fm1_ms + 1 when a restart was asked for (0: none) */
 #define ED_READ_MAX 224u                     /* X0X: SMP_READ's bytes a frame (the break page draws the slots) */
 
-static uint8_t ed_out[732];                  /* ED_INLOG with 64 entries: 732 B (tests/diag_size_test.py) */
+#define ED_OUT_MAX 732u                     /* full existing diagnostic reply capacity */
+#ifdef ED_OUT_SCRATCH
+#define ed_out (*(uint8_t (*)[ED_OUT_MAX])(void *)ED_OUT_SCRATCH)
+#else
+static uint8_t ed_out[ED_OUT_MAX];
+#endif
 static uint32_t ed_n;
 
-static void ed_begin(uint32_t cmd)
+static void ed_header(uint32_t cmd)
 {
     ed_out[0] = 0xF0;
     ed_out[1] = ED_HDR0;
     ed_out[2] = ED_HDR1;
     ed_out[3] = ED_HDR2;
     ed_out[4] = (uint8_t)cmd;
+}
+static void ed_begin(uint32_t cmd)
+{
+    ed_header(cmd);
     ed_n = 5;
 }
 static void ed_b(uint32_t v)
@@ -76,8 +85,15 @@ static void ed_str(const char *s, uint32_t max)
         ed_b((uint8_t)s[i] & 0x7Fu);
     ed_b(0);
 }
-static int ed_send(void)
+static int ed_send(uint32_t cmd)
 {
+#ifdef ED_OUT_SCRATCH
+    /* SAVE/LOAD/VALIDATE borrow the full LZ table; the reply body is
+     * constructed after them. Rebuild only the previously written prefix. */
+    ed_header(cmd);
+#else
+    (void)cmd;
+#endif
     ed_out[ed_n++] = 0xF7;
     return ota_wire_send(ed_out, ed_n);
 }
@@ -151,6 +167,14 @@ static int ed_read_area(const uint8_t *base, uint32_t size, const uint8_t *a)
 #define ED_SMP_BUF_SIZE 512u
 #ifdef ED_SMP_SCRATCH
 _Static_assert(ED_SMP_BUF_SIZE <= 640u, "ed_smp_buf fits the ota_dec region");
+#ifdef ED_OUT_SCRATCH
+_Static_assert(220u + ED_SMP_BUF_SIZE <= ED_OUT_MAX, "editor staging fits the shared tail");
+/* The sole response reading the staging payload is project READ.
+ * ed_put7 copies forward by seven INPUT bytes, then emits eight. Output
+ * starts at byte 10 and expands by at most 32 for this read maximum.
+ * It therefore never overwrites unread bytes at offset 220. */
+_Static_assert(10u + (ED_READ_MAX + 6u) / 7u < 220u, "editor project pack cannot clobber unread bytes");
+#endif
 #define ed_smp_buf ED_SMP_SCRATCH
 #else
 static uint8_t ed_smp_buf[ED_SMP_BUF_SIZE] __attribute__((aligned(4)));
@@ -873,7 +897,7 @@ static void ed_handle(const uint8_t *f, uint32_t n)
     }
     case ED_INSTALL: {
         int start = ed_install_handle(a, na);
-        int sent = ed_send();
+        int sent = ed_send(cmd);
         if (na && a[0] == 3u)
             ed_install_pending = sent == 0 && start ? 1u : 2u;
         /* Even a refused/uncertain COMMIT cannot inherit a legacy IRQ request
@@ -882,6 +906,9 @@ static void ed_handle(const uint8_t *f, uint32_t n)
     }
     case ED_PROJECT:
         ed_project_handle(a, na);
+#ifdef ED_OUT_SCRATCH
+        if (na) ed_out[5] = (uint8_t)(a[0] & 0x7Fu);
+#endif
         break;
     case ED_INFO:
         ed_str("X0X " X0X_VERSION, 24);
@@ -1139,7 +1166,7 @@ static void ed_handle(const uint8_t *f, uint32_t n)
     default:
         return;                                       /* not ours: no reply */
     }
-    ed_send();
+    ed_send(cmd);
 }
 
 /* Return 1 only when this check left a non-editor frame pending for OTA. */

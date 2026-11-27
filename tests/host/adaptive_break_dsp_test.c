@@ -23,7 +23,7 @@ int main(void)
         CHECK(k->valid && k->slices==counts[ni]);
         int32_t pred=0,idx=0;
         for(unsigned pos=0, s=0;pos<l.nsamples;pos++) {
-            if(s<32 && pos==k->start[s]) { CHECK(k->at_start[s].pred==pred);CHECK(k->at_start[s].idx==idx);s++; }
+            if(s<32 && pos==k->start[s]) { CHECK(k->at_start_pred[s]==pred);CHECK(k->at_start_idx[s]==idx);s++; }
             ima_decode(data,pos,&pred,&idx);
         }
         for(unsigned sl=0;sl<counts[ni];sl++) {

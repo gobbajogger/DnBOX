@@ -2305,10 +2305,10 @@ volatile uint32_t eng_dbg_wait, eng_dbg_nsub;  /* 24 MHz ticks waiting for core 
 #endif
 
 /* the mix of one stretch between two events: dry left and right, the reverb and delay sends;
- * t0..tr the 808's scratch, kbuf the break's, mono the 909's kit send */
-static float dry_l[256], dry_r[256], rev[256], dly[256], t1[256], t2[256], kbuf[256], mono[256];
+ * t0..tr the 808's scratch, kbuf the break's */
+static float dry_l[256], dry_r[256], rev[256], dly[256], t1[256], t2[256], kbuf[256];
 /* The 808's L/R scratch is the stretch's own out_l/out_r window (saves 2 KiB).
- * Lifetime: core 2 writes it while core 1 only touches dry_l..mono; core 1
+ * Lifetime: core 2 writes it while core 1 only touches dry_l..kbuf; core 1
  * reads it after plat_cpu2_wait and before the 303s overwrite that window;
  * fxbus_process_st then writes the final mix there. A failed core 2 is held. */
 static float *t0, *tr;
@@ -2581,6 +2581,14 @@ static int run_job(int j, int core)
             drum909_advance_noise(&d909, (int)n);       /* retain the exact restart noise/history */
             drum909_pan_settle(&d909);                    /* silent: pans move at once, no glide */
         } else {
+            /* 808 cannot publish mix stage 2 while this 909 job is still using
+             * scratch (before stage 1). If A shares the 808 core, A cannot
+             * start until stage 2; otherwise B cannot start before stage 2
+             * (B follows either 808 or A waiting for stage 2 on that core).
+             * 808's split-metal render uses only the first four lanes. Key
+             * off the published plan even when a failed core is taken over. */
+            float *mono = ((eng_c1_mask >> JB_808 ^ eng_c1_mask >> JB_A) & 1u)
+                ? original_workspace_b.mix.kit909_mono : original_workspace.mix.kit909_mono;
             drum909_render_st_cleared(&d909, dry_l, dry_r, rev, dly, (int)n, smc_audible_drums(solo, PART_909));
             mix_targets(PART_909, mix_level[PART_909], solo_parts);
             bfx_shape(PART_909, dry_l, dry_r, rev, dly, 4, (int)n);
@@ -2606,7 +2614,7 @@ static int run_job(int j, int core)
                  * The selected workspace is therefore free until the metal mix
                  * finishes, even when both bass jobs are on core 1. */
                 float (*raw)[256] = (eng_c1_mask & (1u << JB_A))
-                    ? original_workspace_b.metal : original_workspace.metal;
+                    ? original_workspace_b.mix.metal : original_workspace.mix.metal;
                 uint16_t aud = (uint16_t)(arg >> 9 & 0x7FFu);
                 drum808_metal_prepare(&d808, raw, (int)n, aud);
                 if (body_wait(core))

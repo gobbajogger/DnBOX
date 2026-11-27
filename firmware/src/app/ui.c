@@ -455,8 +455,8 @@ typedef struct { uint8_t kind, a, b, c; } pref_t;
 #define NONE PR(R_NONE, 0, 0, 0)
 
 static const char *const GLOBAL_SECTIONS[6] = {"MIDI + CLOCK", "BLUETOOTH", "AUDIO", "KEYS + SCREEN", "PROJECT", "SYSTEM"};
-static ui_original_control_cache original_controls X0X_POOL;
-static ui_original_wave_cache original_wave X0X_POOL;   /* engine waveform cue (ca8299b6 / 9e237cce) */
+static ui_original_control_cache original_controls;
+static ui_original_wave_cache original_wave;   /* engine waveform cue (ca8299b6 / 9e237cce) */
 static uint8_t original_page_bank, original_list_bank;
 static int original_display_value(pref_t r);
 static const ui_original_control_view *original_text_view(pref_t r, int value);
@@ -1559,7 +1559,11 @@ typedef struct {
     pref_t more[MAXMORE];              /* the screen's other knobs: only in SEL's list, under MORE */
     int nmore;
 } pages_t;
+#if DNBOX_LAB_RAM_SPARE
+static pages_t pg __attribute__((section(".ram_spare")));
+#else
 static pages_t pg X0X_POOL;
+#endif
 typedef struct { pref_t r[4]; char title[12]; int page, n; } page_query_t;
 /* The descriptor emitter has one explicit output contract. Query mode records
  * one requested page plus the count, without a second persistent page table. */
@@ -2037,7 +2041,7 @@ static int track_page(void)
 /* A list is rows of refs. SEL on a page opens the list of every page's knobs (the deep view);
  * GLOBAL is a list of its own. SELECT moves, ALGORITHM changes, SEL runs an action. */
 #define LIST_MAX 64
-static pref_t list_rows[LIST_MAX] X0X_POOL;
+static pref_t list_rows[LIST_MAX];
 static char list_title[16];
 
 static void list_add(pref_t r)
@@ -5425,7 +5429,11 @@ _Static_assert(HDR_H + 2u * BAND_H + KNOB_H == 240u, "the three strips must tile
 /* Dirty-tile DMA uses a dedicated, bounded .bss buffer. Full-row DMA
  * reads the untouched canvas until lcd_sync. Pool capacity is unchanged (0.0.24.1 has only 136 bytes above its pool gate).
  * 48 x 16 x RGB565 = 1536 bytes, 1.024 ms at the SMK-37's 12 MHz SPI. */
+#ifdef X0X_HOST
 static uint16_t cv_lcd_txbuf[X0X_LCD_MAX_DMA_BYTES / 2u];
+#else
+#define cv_lcd_txbuf lcd_txbuf
+#endif
 static uint32_t blit_hash[4];
 static uint8_t part_header_snapshot_valid;
 static uint8_t cv_tile_valid[4];

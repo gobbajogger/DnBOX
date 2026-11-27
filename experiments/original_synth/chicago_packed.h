@@ -4,5 +4,6 @@
 #include <stdint.h>
 /* Exact immutable 44100-derived A/E table provider for MP4 prepare_reader.
  * Context must be NULL. Private coefficient payload, not approved for public use. */
+int original_chicago_packed_cutoff_a(uint32_t index,float *a);
 int original_chicago_packed_lookup(const void *context,uint32_t index,float *a,float *e);
 #endif

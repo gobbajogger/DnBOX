@@ -23,7 +23,7 @@
 
 #define BRK_GRAIN_HOP 3969u            /* 90 ms grains; half-rate source progression */
 #define BRK_FS 44100                  /* output sample rate */
-#define BRK_NCK 480                   /* ADPCM checkpoints per loop (4 bytes each); bounded reverse-state reuse */
+#define BRK_NCK 480                   /* ADPCM checkpoints per loop; bounded reverse-state reuse */
 #define BRK_RCH 512                   /* reverse playback decodes this many samples at a time */
 #ifndef BRK_FADE
 #define BRK_FADE 88                   /* crossfade / gate ramp: 2 ms at 44.1 kHz */
@@ -40,18 +40,17 @@ typedef struct {
 /* indices of breaks_param() past the per-pattern settings */
 enum { BRK_LEVEL = BRK_NSET, BRK_PITCH, BRK_REV, BRK_DLY, BRK_NPARAM };
 
-typedef struct {
-    int16_t pred;                     /* IMA state BEFORE decoding the nibble at that index */
-    uint8_t idx, rsv;
-} brk_ima_t;
-
 typedef struct brk_bank {
     const uint8_t *adpcm;
     uint32_t n;                       /* samples */
     float sp16;                       /* source samples per 16th note: n / (bars * 16) */
     uint32_t start[33];                /* exact max-32 boundaries, start[32] = n */
-    brk_ima_t at_start[32];            /* exact decoder state at each max-32 boundary */
-    brk_ima_t ck[BRK_NCK];            /* decoder state every 1 << ck_shift samples */
+    /* Parallel lanes preserve exact signed predictor and IMA index without
+     * an aligned struct's unused byte per state, or unaligned 16-bit loads. */
+    int16_t at_start_pred[32];         /* exact state at each max-32 boundary */
+    int16_t ck_pred[BRK_NCK];          /* exact state every 1 << ck_shift samples */
+    uint8_t at_start_idx[32];
+    uint8_t ck_idx[BRK_NCK];
     uint8_t ck_shift;
     volatile uint8_t valid;           /* 0 while this snapshot is being built; published only when 1 */
     uint8_t gen;                      /* bumped on every load of this snapshot */

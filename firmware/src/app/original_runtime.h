@@ -51,7 +51,8 @@ typedef struct {
     int8_t status;
 } original_runtime_part;
 typedef union {
-    float metal[4][256]; /* split 808 render, before the owning bass uses this space */
+    /* Disjoint storage: split 808 metal prefix and concurrent 909 kit send. */
+    struct { float metal[4][256], kit909_mono[256]; } mix;
     struct { uint32_t left[256], right[256]; int16_t converted[2][256], scratch[4][256]; } chicago;
     struct { uint32_t left[256], right[256]; int32_t dry[2][256]; int16_t scratch[2][256]; } miami;
 } original_runtime_workspace;
