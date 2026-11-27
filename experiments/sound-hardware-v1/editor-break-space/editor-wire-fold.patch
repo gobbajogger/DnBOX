@@ -1,0 +1,171 @@
+--- a/firmware/src/app/editor.c
++++ b/firmware/src/app/editor.c
+@@ -69,13 +69,13 @@
+     if (ed_n < sizeof ed_out - 1u)
+         ed_out[ed_n++] = (uint8_t)(v & 0x7Fu);
+ }
+-#if X0X_REMOTE_DNR3
+ /* Fixed-width little-endian 7-bit fields in editor and Remote frames. */
+ static __attribute__((noinline)) void ed_u(uint32_t v, int n)
+ {
+     for (; n > 0; n--, v >>= 7)
+         ed_b(v);
+ }
++#if X0X_REMOTE_DNR3
+ static __attribute__((noinline)) uint32_t ed_g(const uint8_t *a, int n)
+ {
+     uint32_t v = 0;
+@@ -153,9 +153,7 @@
+         return 0;
+     if (count > size - off)
+         count = size - off;
+-    ed_b(off);
+-    ed_b(off >> 7);
+-    ed_b(off >> 14);
++    ed_u(off, 3);
+     ed_put7(base + off, count);
+     return 1;
+ }
+@@ -233,7 +231,6 @@
+ {
+     return (uint32_t)a[0] | (uint32_t)a[1] << 7 | (uint32_t)a[2] << 14;
+ }
+-static void ed_w21(uint32_t v) { ed_b(v); ed_b(v >> 7); ed_b(v >> 14); }
+ static uint8_t *ed_project_byte(uint32_t off)
+ {
+     return off < PROJECT_FILE_HDR ? &ed_project.header[off] : (uint8_t *)&project_stage + off - PROJECT_FILE_HDR;
+@@ -274,7 +271,7 @@
+     switch (op) {
+     case 64:                                        /* QUERY / keepalive */
+         if (na) { rc = 1; break; }
+-        ed_b(0); ed_b(X0X_BASS_TAGGED_SOUND?2:1); ed_w21(PROJECT_FILE_SIZE); ed_b(ed_project.recovery ? 3 : ed_project.mode);
++        ed_b(0); ed_b(X0X_BASS_TAGGED_SOUND?2:1); ed_u(PROJECT_FILE_SIZE, 3); ed_b(ed_project.recovery ? 3 : ed_project.mode);
+         return;
+     case 65:                                        /* EXPORT BEGIN */
+     case 67:                                        /* IMPORT BEGIN */
+@@ -298,7 +295,7 @@
+         if (op == 65) {
+             project_capture_stage();
+             project_file_header(ed_project.header);
+-            ed_b(0); ed_w21(PROJECT_FILE_SIZE);
++            ed_b(0); ed_u(PROJECT_FILE_SIZE, 3);
+             return;
+         }
+         break;
+@@ -311,7 +308,7 @@
+         }
+         for (i = 0; i < n; i++)
+             ed_smp_buf[i] = *ed_project_byte(off + i);
+-        ed_b(0); ed_w21(off); ed_put7(ed_smp_buf, n);
++        ed_b(0); ed_u(off, 3); ed_put7(ed_smp_buf, n);
+         return;
+     case 68:                                        /* sequential WRITE, exact retries are idempotent */
+         if (ed_project.mode != 2) { rc = 2; break; }
+@@ -332,7 +329,7 @@
+                 *ed_project_byte(off + i) = ed_smp_buf[i];
+             ed_project.next += n;
+         }
+-        ed_b(0); ed_w21(ed_project.next);
++        ed_b(0); ed_u(ed_project.next, 3);
+         return;
+     case 69:                                        /* COMMIT, deliberately never saved implicitly */
+     case 74:                                        /* VALIDATE before any sample write */
+@@ -742,9 +739,7 @@
+         if (n > len - off)
+             n = len - off;
+         ed_b(0);
+-        ed_b(off);
+-        ed_b(off >> 7);
+-        ed_b(off >> 14);
++        ed_u(off, 3);
+         ed_put7(sec + BOOT_PAY_OFF + off, n);
+         return;
+     }
+@@ -786,9 +781,7 @@
+             off = (uint32_t)a[0] | (uint32_t)a[1] << 7 | (uint32_t)a[2] << 14;
+         n = na >= 3u ? ed_unpack_exact(a + 3, na - 3u, ed_smp_buf, 256u) : 0u;
+         rc = boot_write(&bst, off, n ? ed_smp_buf : 0, n, fm1_ms);
+-        ed_b(off);
+-        ed_b(off >> 7);
+-        ed_b(off >> 14);
++        ed_u(off, 3);
+         boot_finish(rc);
+         return;
+     }
+@@ -929,8 +922,7 @@
+         uint32_t k;
+         ed_b(gfx_xdata_ok);
+         for (k = 0; k < XDATA_HDR; k++) {
+-            ed_b(h[k]);
+-            ed_b(h[k] >> 7);
++            ed_u(h[k], 2);
+         }
+         break;
+     }
+@@ -944,8 +936,7 @@
+         uint32_t k;
+         ed_b(blob ? 1 : 0);
+         for (k = 0; k < FITTAB_HDR; k++) {
+-            ed_b(h[k]);
+-            ed_b(h[k] >> 7);
++            ed_u(h[k], 2);
+         }
+         break;
+     }
+@@ -963,8 +954,7 @@
+ #endif
+         for (k = 0; k < FL_FDATA_HDR; k++) {
+             uint32_t v = FL_FDATA_SIZE ? h[k] : 0xFFu;
+-            ed_b(v);
+-            ed_b(v >> 7);
++            ed_u(v, 2);
+         }
+         break;
+     }
+@@ -981,11 +971,7 @@
+ #endif
+         ed_b(nw);
+         for (k = 0; k < nw; k++) {
+-            ed_b(w[k]);
+-            ed_b(w[k] >> 7);
+-            ed_b(w[k] >> 14);
+-            ed_b(w[k] >> 21);
+-            ed_b(w[k] >> 28);
++            ed_u(w[k], 5);
+         }
+         break;
+     }
+@@ -1035,9 +1021,7 @@
+             }
+         }
+         ed_b(a[0]);
+-        ed_b(off);
+-        ed_b(off >> 7);
+-        ed_b(off >> 14);
++        ed_u(off, 3);
+         ed_b(rc);
+         break;
+     }
+@@ -1104,8 +1088,7 @@
+             v[1] = SMP_USER_SIZE(i) / 0x1000u;
+             v[2] = usr_nz[i] ? (h->data_len + 1023u) / 1024u : 0u;
+             for (j = 0; j < 3u; j++) {
+-                ed_b(v[j]);
+-                ed_b(v[j] >> 7);
++                ed_u(v[j], 2);
+             }
+         }
+         break;
+@@ -1130,11 +1113,7 @@
+             ed_b(words);
+             for (k = 0; k < words; k++) {
+                 uint32_t v = k < nt ? t[k] : op == 3u ? fm1_t5w.hits : g[k - nt];
+-                ed_b(v);
+-                ed_b(v >> 7);
+-                ed_b(v >> 14);
+-                ed_b(v >> 21);
+-                ed_b(v >> 28);
++                ed_u(v, 5);
+             }
+             break;
+         }

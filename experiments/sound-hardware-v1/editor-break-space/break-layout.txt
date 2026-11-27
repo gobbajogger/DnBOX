@@ -1,0 +1,11 @@
+     2: 00000004  6772 OBJECT  GLOBAL DEFAULT  COM engine_brk
+     3: 00000004  4392 OBJECT  GLOBAL DEFAULT  COM replacement_banks
+    64: 00000000  4392 OBJECT  LOCAL  DEFAULT   91 brk_side
+    65: 00000000    16 FUNC    LOCAL  DEFAULT    9 brk_side_slot_c
+     2: 00000004  5748 OBJECT  GLOBAL DEFAULT  COM engine_brk
+     3: 00000004  3368 OBJECT  GLOBAL DEFAULT  COM replacement_banks
+    64: 00000000  3368 OBJECT  LOCAL  DEFAULT   91 brk_side
+    65: 00000000    16 FUNC    LOCAL  DEFAULT    9 brk_side_slot_c
+   text	   data	    bss	    dec	    hex	filename
+   9190	   4392	      0	  13582	   350e	base-breaks.o
+   9278	   3368	      0	  12646	   3166	new-breaks.o
