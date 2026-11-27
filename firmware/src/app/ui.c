@@ -6325,6 +6325,221 @@ static int held_note_of(const bpart_t *bp, int s)
 }
 
 /* GEN uses the same pitch and step positions as the notes drawn above it. */
+
+#if X0X_UI_SMALL_CANVAS
+typedef struct { uint8_t mark,flags,note,next; } cv_303_cell;
+typedef struct {
+    cv_303_cell cell[16];
+    int16_t lo,hi;
+    int8_t active;
+    uint8_t root,gen,badge,changed;
+    uint16_t bg,white,line,gray,guide,col,pulse,quiet;
+    char text[40],seed[16];
+} cv_303_scene;
+static UI_DRAW void cv_capture_303(cv_303_scene *z, int gen)
+{
+    int b = bidx(), c;       /* o: drawn in the screen's rows, minus the band's */
+    const bpart_t *bp = &cur_pat()->bass[b];
+    int held = ui.held_step, arp = 0;
+#if X0X_ARP_HOOKS
+    static bpart_t arp_bp;                         /* ARP SEQ: the same roll, drawn from the engine's arp steps */
+    engine_arp_settings as;
+    engine_arp_steps ast;
+    unsigned arp_ph = 0;
+    uint32_t age = 0;
+    if (!gen && arp_seq_page() && engine_arp_settings_read((unsigned)b, &as) && engine_arp_steps_read((unsigned)b, &ast)) {
+        memset(&arp_bp, 0, sizeof arp_bp);
+        arp_bp.len = as.length ? as.length : 16;
+        arp_bp.gen.root = UI_ARP_ROOT % 12;            /* offsets from the held root (C3 when none is held) */
+        arp_bp.gen.base_oct = (uint8_t)(UI_ARP_ROOT / 12 - 1);
+        for (c = 0; c < ARP_STEPS; c++) {
+            arp_bp.step[c].note = (uint8_t)(UI_ARP_ROOT + ast.offset[c] + ((ast.oct_mask >> c) & 1u) * 12);
+            arp_bp.step[c].flags = (ast.on_mask >> c) & 1u ? G_NOTE : G_REST;
+        }
+        bp = &arp_bp;
+        held = arp_held;
+        arp = 1;
+    }
+#endif
+    int len = bp->len < NSTEPS ? bp->len : NSTEPS;
+    int ph = seq.playing ? eng_step[TRK_BASS0 + b] : -1, lo = 127, hi = 0;
+#if X0X_ARP_HOOKS
+    if (arp)                                       /* only the step that really sounded (row 60 rule) */
+        ph = as.on && engine_arp_view((unsigned)b, &arp_ph, &age) && age < 250u ? (int)arp_ph : -1;
+#endif
+    uint16_t col = part_col();
+    uint32_t lmarks = gen || arp ? 0 : lock_marks(-1, -1, ui.spage * 16);
+    char *q = z->text;
+    for (c = 0; c < len; c++) {
+        if (bstep_gate(&bp->step[c]) == G_NOTE) {
+            int pitch = bp->step[c].note;
+            if (pitch < lo)
+                lo = pitch;
+            if (pitch > hi)
+                hi = pitch;
+        }
+    }
+    if (lo > hi)
+        lo = hi = 12 * (bp->gen.base_oct + 1) + bp->gen.root;
+    lo -= 2;
+    hi += 2;
+    if (hi - lo < 14)
+        hi = lo + 14;
+
+    z->lo=lo; z->hi=hi; z->root=bp->gen.root;
+    z->active=gen && ph<len ? ph-step_of(0) : -1;
+    if(gen) ph=-1;
+    z->gen=gen; z->badge=0; z->changed=0;
+    z->bg=C_BLACK; z->white=C_WHITE; z->line=C_LINE; z->gray=C_GRAY;
+    z->guide=C_DIM; z->col=col; z->pulse=dim(col,2); z->quiet=dim(col,9);
+    for (c=0;c<16;++c) {
+        int s=step_of(c);
+        cv_303_cell *v=&z->cell[c];
+        v->mark=s>=len ? 1 : (s==ph ? 2 : 0);
+        if(s>=len) continue;
+        int start=note_start_of(bp,s);
+        if(start<0) continue;
+        const bstep_t *st=&bp->step[s], *next=&bp->step[s+1==len ? 0 : s+1];
+        v->flags=st->flags;
+        v->mark|=4 | (s==held ? 8 : 0) | ((lmarks>>c&1u) ? 16 : 0)
+                     | (bstep_gate(next)==G_TIE ? 32 : 0)
+                     | (bstep_gate(next)==G_NOTE ? 64 : 0);
+        v->note=bp->step[start].note;
+        v->next=next->note;
+    }
+#if X0X_ARP_HOOKS
+    if (arp) {                                     /* ARP SEQ: the held step, else the arp's state */
+        if (held >= 0) {
+            int off = bp->step[held].note - UI_ARP_ROOT;
+            q = put_s(q, "ARP STEP ");
+            q = put_i(q, held + 1);
+            q = put_s(q, off < 0 ? "  -" : "  +");
+            q = put_i(q, off < 0 ? -off : off);
+            put_s(q, "st");
+        } else {
+            q = put_s(q, "ARP ");
+            q = put_s(q, ARP_MODE_N[as.mode % ARP_NMODES]);
+            put_s(q, as.on ? "" : " OFF");
+        }
+        z->badge = 1;
+    } else
+#endif
+    if (ui.held_step >= 0 || ui.rec) {   /* the step held (or being written) */
+        int s = ui.held_step >= 0 ? ui.held_step : ui.wpos[b];
+        const bstep_t *st = &bp->step[s];
+        q = put_s(q, ui.held_step >= 0 ? "STEP " : "WRITE ");
+        q = put_i(q, s + 1);
+        q = put_s(q, "  ");
+        q = put_note(q, held_note_of(bp, s) + bp->transpose - 24);
+        if (bstep_gate(st) == G_TIE)
+            q = put_s(q, " TIE");
+        if (st->flags & BS_ACCENT)
+            q = put_s(q, " ACC");
+        if (st->flags & BS_SLIDE)
+            q = put_s(q, " SLIDE");
+        put_i(put_s(q, " V"), bstep_velocity(st));
+        z->badge = 1;
+    } else {                                           /* else the line's scale and seed */
+
+        q = put_s(q, ROOT_N[bp->gen.root % 12]);
+        q = put_s(q, " ");
+        put_s(q, TB3PO_SCALE_NAMES[bp->gen.scale % TB3PO_NSCALES]);
+        put_hex(put_s(z->seed, "SEED "), bp->gen.seed & 0xFFFFu, 4);
+        z->changed = gen && ui.gen_stale[b];
+    }
+}
+
+static UI_DRAW void draw_303_gen_roll(const cv_303_scene *z, int o)
+{
+    int active=z->active,lo=z->lo,hi=z->hi;
+    if ((unsigned)active < 16)
+        cv_rect(col_x(active), ROLL_TOP - 4 - o, 12, ROLL_BOT - ROLL_TOP + 10, z->pulse);
+    for (int c = 0; c <= 16; ++c)
+        cv_rect(col_x(c) - 1, ROLL_TOP - 4 - o, 1, ROLL_BOT + 6,
+                (c & 3) ? z->line : z->guide);
+    int prev_y = ROLL_BOT + 1;
+    cv_rect(5, ROLL_TOP - o, 18, ROLL_BOT + 1 - ROLL_TOP, z->line);
+    /* Give adjacent pitch guides a background row for the time rail and
+     * cursor to remain visible. Keys and notes keep their original positions. */
+    int pitch_guides=hi-lo<=(ROLL_BOT-ROLL_TOP)/2;
+    int n = lo;
+    do {
+        int y = note_y(n, lo, hi);
+        int h = prev_y - y;
+        prev_y = y;
+        unsigned pitch = (unsigned)(n + 12) % 12;
+        int inset = (0x54au & (1u << pitch)) ? 12 : 0;
+        cv_rect(5 + inset, y - o, 18 - inset, h - (h > 1), z->gray);
+        if(pitch_guides) cv_rect(GX, y + 2 - o, 211, 1, pitch ? z->line : z->guide);
+    } while (n++ < hi);
+}
+
+
+static UI_DRAW void draw_303_scene(int band,const cv_303_scene *z)
+{
+    int o=band*BAND_H,lo=z->lo,hi=z->hi,gen=z->gen;
+    uint16_t col=z->col;
+    if(gen) draw_303_gen_roll(z,o);
+    else {
+        int n=lo+(int)((unsigned)(12*11+z->root-lo)%12u);
+        for(;n<=hi;n+=12) {
+            char t[12];
+            int y=note_y(n,lo,hi)-o;
+            put_note(t,n);
+            cv_rect(GX,y+2,213,1,z->line);
+            cv_text(1,y-4,&FONT_XS,t,z->guide);
+        }
+    }
+    int x=GX;
+    for(int c=0;c<16;++c,x+=13+!(c&3)) {
+        const cv_303_cell *v=&z->cell[c];
+        unsigned m=v->mark;
+        if(m&1) {
+            cv_rect(x+5,ROLL_BOT+4-o,2,2,z->line);
+            continue;
+        }
+        if(m&2) cv_rect(x,ROLL_TOP-4-o,12,ROLL_BOT-ROLL_TOP+10,z->pulse);
+        if(!(m&4)) continue;
+        int y=note_y(v->note,lo,hi)-o;
+        uint16_t fc=m&8 ? z->white : v->flags&BS_ACCENT ? col : z->quiet;
+        int end=v->flags>>BS_END_SHIFT;
+        int width=end ? end-end/5 : 12;
+        box(x,y,width,5,fc);
+        if((m&8) && (v->flags&BS_ACCENT)) {
+            int inset=width>2;
+            cv_rect(x+inset,y+1,width-2*inset,3,col);
+        }
+        if(m&16) cv_rect(x+5,y-3,2,2,z->white);
+        if((v->flags&BS_GATE_MASK)==G_TIE) {
+            if(c>0) {
+                int lead=7+!(c&3);
+                cv_rect(x-lead,y,lead+(width<6 ? width : 6),5,fc);
+            } else {
+                cv_rect(GX-4,y+1+gen,4,gen ? 1 : 3,fc);
+                if(!gen) cv_rect(GX-7,y+2,3,1,fc);
+            }
+        }
+        if(c==15 && (m&32)) {
+            cv_rect(237,y+1,2,3,fc);
+            cv_rect(239,y+2,1,1,fc);
+        }
+        if(v->flags&BS_SLIDE) {
+            int ny=gen && !(m&64) ? y : note_y(v->next,lo,hi)-o;
+            if(c<15) cv_line(x+11,y+2,x+14,ny+2,z->white);
+            else cv_line(x+12,y+2,x+14,y+2+((ny>y)-(ny<y))*2,z->white);
+        }
+    }
+    if(z->badge) cv_text(4,vc(&FONT_B,122,16)-o,&FONT_B,z->text,z->white);
+    else segs(4,vc(&FONT_S,122,16)-o,&FONT_S,z->gray,10,z->text,z->seed,z->changed ? "CHANGED" : 0,0);
+}
+
+static UI_DRAW void draw_303(int band,int gen)
+{
+    cv_303_scene roll;
+    cv_capture_303(&roll,gen);
+    draw_303_scene(band,&roll);
+}
+#else
 static UI_DRAW void draw_gen_roll(int active, int lo, int hi, int o)
 {
     if ((unsigned)active < 16)
@@ -6501,6 +6716,8 @@ static UI_DRAW void draw_303(int band, int gen)
              gen && ui.gen_stale[b] ? "CHANGED" : 0, 0);
     }
 }
+
+#endif
 
 static int strcmp_s(const char *a, const char *b);
 static UI_DRAW void draw_param_widget(pref_t r, int x, int y, int width, int touched, uint16_t col, int height, int night);
@@ -6705,10 +6922,12 @@ static UI_DRAW void draw_part_sound(int band)
 }
 
 #include "ui_break_layout_main.h"
+#if !X0X_UI_SMALL_CANVAS
 static UI_DRAW void draw_break(int band)
 {
     break_layout_main(band);
 }
+#endif
 
 /* Stored forward note-origin semantics, shared with the piano roll. Resolve
  * a possible wrapped hold once, then propagate gates across this 16-step row. */
@@ -8461,6 +8680,32 @@ static UI_DRAW void draw_clip_wait_small(void)
 }
 #endif
 
+#if X0X_UI_SMALL_CANVAS
+/* The scene is immutable while LCD DMA services local and MIDI input. */
+#define CV_PAINTER(name) \
+    static void cv_paint_##name(int band,const void *scene) \
+    { draw_##name##_scene(band,(const cv_##name##_scene *)scene); }
+CV_PAINTER(drum)
+CV_PAINTER(mix)
+CV_PAINTER(song)
+CV_PAINTER(home)
+CV_PAINTER(break)
+CV_PAINTER(303)
+CV_PAINTER(fx)
+#undef CV_PAINTER
+static UI_DRAW void cv_draw_pair(uint16_t bg,const void *scene,
+                                  void (*paint)(int,const void *),const cv_readout_scene *note)
+{
+    for(unsigned page=0;page<2u;++page) {
+        cv_window(240,MAIN_ROWS,page*BAND_H,BAND_H,bg);
+        cv_band((int)page*BAND_H,BAND_H);
+        paint((int)page,scene);
+        if(page && note) draw_readout_scene(note);
+        cv_commit_main_band(page);
+    }
+}
+#endif
+
 static UI_DRAW void draw_main(void)
 {
 #if X0X_UI_SMALL_CANVAS
@@ -8521,13 +8766,7 @@ static UI_DRAW void draw_main(void)
         cv_capture_drum(&s);
         int has_note=readout && !envelope &&
             !(ui.brk_choice_on && engine_brk_preview_active()) && cv_capture_readout(&note);
-        for (unsigned page=0; page<2; ++page) {
-            cv_window(240, MAIN_ROWS, page * BAND_H, BAND_H, s.bg);
-            cv_band((int)page * BAND_H, BAND_H);
-            draw_drum_scene((int)page,&s);
-            if (page && has_note) draw_readout_scene(&note);
-            cv_commit_main_band(page);
-        }
+        cv_draw_pair(s.bg,&s,cv_paint_drum,has_note?&note:NULL);
         return;
     }
     if (ui.view == V_MIX && ui.overlay == O_NONE && !ui.help) {
@@ -8536,13 +8775,7 @@ static UI_DRAW void draw_main(void)
         cv_capture_mix(&s);
         int has_note=readout && !envelope &&
             !(ui.brk_choice_on && engine_brk_preview_active()) && cv_capture_readout(&note);
-        for (unsigned page=0;page<2;++page) {
-            cv_window(240,MAIN_ROWS,page*BAND_H,BAND_H,s.bg);
-            cv_band((int)page*BAND_H,BAND_H);
-            draw_mix_scene((int)page,&s);
-            if (page && has_note) draw_readout_scene(&note);
-            cv_commit_main_band(page);
-        }
+        cv_draw_pair(s.bg,&s,cv_paint_mix,has_note?&note:NULL);
         return;
     }
     cv_modal_scene modal;
@@ -8558,13 +8791,7 @@ static UI_DRAW void draw_main(void)
         int has_note=readout && !envelope &&
             !(ui.brk_choice_on && engine_brk_preview_active()) &&
             cv_capture_readout(&note);
-        for (unsigned page=0;page<2;page++) {
-            cv_window(240,MAIN_ROWS,page*BAND_H,BAND_H,sg.bg);
-            cv_band(page*BAND_H,BAND_H);
-            draw_song_scene(page,&sg);
-            if (page && has_note) draw_readout_scene(&note);
-            cv_commit_main_band(page);
-        }
+        cv_draw_pair(sg.bg,&sg,cv_paint_song,has_note?&note:NULL);
         return;
     }
     if (!modal.route && ui.view == V_HOME && ui.overlay == O_NONE) {
@@ -8574,13 +8801,31 @@ static UI_DRAW void draw_main(void)
         int has_note=readout && !envelope &&
             !(ui.brk_choice_on && engine_brk_preview_active()) &&
             cv_capture_readout(&note);
-        for(unsigned page=0;page<2;page++) {
-            cv_window(240,MAIN_ROWS,page*BAND_H,BAND_H,home.bg);
-            cv_band(page*BAND_H,BAND_H);
-            draw_home_scene(page,&home);
-            if(page&&has_note)draw_readout_scene(&note);
-            cv_commit_main_band(page);
-        }
+        cv_draw_pair(home.bg,&home,cv_paint_home,has_note?&note:NULL);
+        return;
+    }
+    if (!modal.route && ui.part==PART_BRK && ui.view!=V_FX && ui.view!=V_HOME &&
+        ui.view!=V_SONG && ui.view!=V_MIX
+#if X0X_UI_PERF
+        && ui.view!=V_PERF
+#endif
+        ) {
+        cv_break_scene brk;
+        cv_readout_scene note;
+        cv_capture_break(&brk);
+        int has_note=readout && !envelope && ui.view!=V_PART && ui.view!=V_SEQ &&
+            !(ui.brk_choice_on && engine_brk_preview_active()) && cv_capture_readout(&note);
+        cv_draw_pair(brk.bg,&brk,cv_paint_break,has_note?&note:NULL);
+        return;
+    }
+    if (!modal.route && ui.overlay==O_NONE && is_303() &&
+        (ui.view==V_SEQ || ui.view==V_GEN)) {
+        cv_303_scene roll;
+        cv_readout_scene note;
+        cv_capture_303(&roll,ui.view==V_GEN);
+        int has_note=readout && !envelope &&
+            !(ui.brk_choice_on && engine_brk_preview_active()) && cv_capture_readout(&note);
+        cv_draw_pair(roll.bg,&roll,cv_paint_303,has_note?&note:NULL);
         return;
     }
     if (!modal.route && ui.view == V_FX) {
@@ -8590,13 +8835,7 @@ static UI_DRAW void draw_main(void)
         int has_note=readout && !envelope &&
             !(ui.brk_choice_on && engine_brk_preview_active()) &&
             cv_capture_readout(&note);
-        for (unsigned page=0;page<2;page++) {
-            cv_window(240,MAIN_ROWS,page*BAND_H,BAND_H,fx.bg);
-            cv_band(page*BAND_H,BAND_H);
-            draw_fx_scene(page,&fx);
-            if (page && has_note) draw_readout_scene(&note);
-            cv_commit_main_band(page);
-        }
+        cv_draw_pair(fx.bg,&fx,cv_paint_fx,has_note?&note:NULL);
         return;
     }
 #else
@@ -8648,8 +8887,10 @@ static UI_DRAW void draw_main(void)
             draw_drum(band);
         else if (is_303())
             draw_303(band, ui.view == V_GEN);
+#if !X0X_UI_SMALL_CANVAS
         else
             draw_break(band);
+#endif
         if (band == 1 && readout && !envelope &&
             !(ui.part==PART_BRK && (ui.view==V_PART || ui.view==V_SEQ)) &&
             !(ui.brk_choice_on && engine_brk_preview_active()) &&
