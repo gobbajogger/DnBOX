@@ -1,16 +1,21 @@
-# Scheduler headroom lab: full 808 and early Synth One A
+# Scheduler headroom lab
 
-This branch is a test checkpoint, not an installer release. Build both models with `X0X_UI_SMALL_CANVAS=1 X0X_CHICAGO_FOLD_RESIDUAL_MIN=1 MODEL=elite|pro bash build.sh` and the native JieLi SDK and tools.
+This is a development checkpoint, not an installer release. Build with `X0X_UI_SMALL_CANVAS=1 X0X_CHICAGO_FOLD_RESIDUAL_MIN=1 MODEL=elite|pro bash build.sh` using the native SDK. It contains the previous exact-mask 909/Chicago worker and whole-808/early-Synth-One main-core split.
 
-The realized second-core plan at every original measured Elite miss put the 909, 808 and Chicago B on Core 1. When the scheduler selects that exact plan and the applied A/B owners are ready Synth One and Chicago, retain the 909 and Chicago on Core 1, put full 808 on Core 0, and render Synth One A before the ordered mix wait. The original ordered mix and ownership are retained. Do not confuse the actual ready owner with whether the voice is currently active; tails and upcoming arp events matter.
+At a provably eventless final long span, resume the FX/master pipeline after a short raw first span. Use one logical master call and one GR meter commit. Keep the old deferred path on control/clock boundaries or while the global filter is active/settling. The full host sequencer test with compressor, pump and limiter admitted 128 safe and rejected 128 eventful boundaries; all 529,152 tested PCM, peak, sequence and GR bytes were identical. The master math also passed 32,768 signed block tests and 128 explicitly settled-zero cases.
 
-| Model | Worst audio block | Late / XRUN | Half callbacks | App flash free |
-| --- | ---: | ---: | ---: | ---: |
-| Elite | 11,412 µs | 0 / 0 | 619 | 2,524 B |
-| Pro | 11,412 µs | 0 / 0 | 619 | 2,536 B |
+Motion can skip a second lane scan when it has no relevant current lane. The callback-scoped empty path cannot skip if an active **or parked** lane exists, since a gated sound change can reactivate a parked lane. Passive note/chord storage does not affect the decision. Four existing suites and 16,384 complete passive/empty state comparisons passed; all four parked banks stay on the normal path.
 
-Exact uninstrumented 922-event strict 360 MHz replay; the same Synth One preset 518 on A, Chicago on B, arp on, delay mix ~0.3625 at 2/3 s and Room at 0.5 were checked at boot and the end. No skipped cycles and no simulated NOR changes in the loaded runs. Same-replay host A/B with 309 actually remapped spans matched 495,120 output and observed state bytes. Both native models still miss the 10,809 µs target by 603 µs; this is not a release pass or an all-scenario guarantee. After the fixed pool reserve, 31,496 B remains in both builds.
+| MIDI offset | Elite worst block | Pro worst block | Late / XRUN (both) |
+| ---: | ---: | ---: | ---: |
+| 0 ms | 11,181 µs | 11,169 µs | 0 / 0 |
+| 2 ms | 11,012 µs | 11,133 µs | 0 / 0 |
+| 5 ms | 10,908 µs | 11,315 µs | 0 / 0 |
 
-Expected package SHA-256:
-- Elite: 2c397dd77a48ef01148e435b82553779136d669c23470e98dc80c5ae831fa49a
-- Pro: b758fe6cb7f0b153acd3a0114f80c104790ce2c74257ecb16f96f871e420844a
+Strict 360 MHz, same 922-event tape, no skipped cycles, unchanged loaded NOR. Both sides confirm Synth One preset 518 with ARP, delay and Room on and Chicago B. Measured worst 11,315 µs still exceeds 10,809 by 506 µs. These are three tested offsets, not a release guarantee. Elite/Pro app flash free 1,948/1,960 B; shared pool 31,496 B after reserve on both.
+
+Package digests:
+```
+72a18eea701d4ed659dbff7db0d452281870c2a3a0f3ed75aabf2e7276d1ed4d  x0x-smk37-elite.fwsc
+b5f96fd2506143aecfe6316e36c03b7b31e24b490b9e73d8afefa6d18f9903de  x0x-smk37.fwsc
+```

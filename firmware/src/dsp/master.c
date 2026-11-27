@@ -367,11 +367,10 @@ static int master_settled_zero(master_t *m, const float *l, const float *r, int 
     return 1;
 }
 
-void master_process_st(master_t *m, float *xl, float *xr, int n, float volume)
+float master_process_st_continue(master_t *m, float *xl, float *xr, int n, float volume, float grmax)
 {
-    if (master_settled_zero(m, xl, xr, n, volume)) return;
     int i, mode = m->pot[MST_MODE], comp_on = m->comp_on, limit = m->pot[MST_LIMIT];
-    float k = m->k, grmax = 0.0f, vc = m->vol_cur < 0.0f ? volume : m->vol_cur;
+    float k = m->k, vc = m->vol_cur < 0.0f ? volume : m->vol_cur;
     float det_in = 0.0f, att_in = 0.0f, rel_in = 0.0f, pump_in = 0.0f;
     if (comp_on) {
         det_in = 1.0f - m->a_det;
@@ -427,7 +426,14 @@ void master_process_st(master_t *m, float *xl, float *xr, int n, float volume)
         xr[i] = sr;
     }
     m->vol_cur = vc;
-    m->gr_view = grmax > m->gr_view ? grmax : m->gr_view * 0.93f;   /* the meter: peak, falling */
+    return grmax;
+}
+
+void master_process_st(master_t *m, float *xl, float *xr, int n, float volume)
+{
+    if (master_settled_zero(m, xl, xr, n, volume)) return;
+    float grmax=master_process_st_continue(m,xl,xr,n,volume,0.0f);
+    m->gr_view=grmax>m->gr_view?grmax:m->gr_view*0.93f;
 }
 
 /* UI text only (master_format). Audio paths never call this — build for size. */

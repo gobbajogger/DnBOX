@@ -39,20 +39,31 @@ __attribute__((noinline)) static void to_base(motion_t *m, const lane_t *l, lane
     r->ramp = 0;
 }
 
-void motion_step(motion_t *m, int part, int pat, int step, int next, int pass)
+static inline int motion_step_metric(motion_t *m,int part,int step)
 {
-    int k, phase;
     if (part < 0 || part >= MOT_PARTS || step < 0 || step >= NSTEPS)
-        return;
+        return 0;
     if (m->age[part])
         m->len[part][m->last[part] & 1u] = m->age[part];
     m->age[part] = 0;
     m->last[part] = (uint8_t)step;
+    return 1;
+}
+
+void motion_step_empty(motion_t *m,int part,int step)
+{
+    (void)motion_step_metric(m,part,step);
+}
+
+void motion_step(motion_t *m, int part, int pat, int step, int next, int pass)
+{
+    int k, phase, have_current = 0;
+    if (!motion_step_metric(m,part,step)) return;
     if (next < 0 || next >= NSTEPS)
         next = 0;
     /* Restore departing patterns first; a later slot must never overwrite
      * the active pattern for the same parameter with the base value. */
-    for (phase = 0; phase < 2; phase++) for (k = 0; k < NLANE; k++) {
+    for (phase = 0; phase < 2 && (!phase || have_current); phase++) for (k = 0; k < NLANE; k++) {
         lane_t *l = &m->lane[k];
         lane_rt_t *r = &m->rt[k];
         int v, nv;
@@ -76,8 +87,12 @@ void motion_step(motion_t *m, int part, int pat, int step, int next, int pass)
             r->hold_left = 0;
             continue;
         }
-        if (!phase)
+        if (!phase) {
+            /* If no non-passive lane belongs to this pattern, all
+             * restoration is already complete, with no second pass. */
+            have_current = 1;
             continue;
+        }
         if (r->hold_req) {
             r->hold_req = 0;
             r->hold_left = (uint8_t)pass;
@@ -122,16 +137,20 @@ void motion_step(motion_t *m, int part, int pat, int step, int next, int pass)
     }
 }
 
-void motion_tick(motion_t *m, uint32_t n)
+int motion_tick(motion_t *m, uint32_t n)
 {
-    int k, p;
+    int k, p, could_play_later = 0;
     for (p = 0; p < MOT_PARTS; p++)
         m->age[p] += n;
     for (k = 0; k < NLANE; k++) {
         const lane_t *l = &m->lane[k];
         lane_rt_t *r = &m->rt[k];
         uint32_t L, a;
-        if (!r->ramp || !l->used || passive(l->t) || r->gen != l->gen || l->part >= MOT_PARTS)
+        if (!l->used) continue;
+        /* A parked lane can reactivate on gated sound adoption before the
+         * next audio span. Note and held-chord entries are always passive. */
+        if (l->t != 0xfdu && l->t != 0xfcu) could_play_later = 1;
+        if (!r->ramp || passive(l->t) || r->gen != l->gen || l->part >= MOT_PARTS)
             continue;
         L = m->len[l->part][r->part_parity];
         if (!L)
@@ -141,6 +160,7 @@ void motion_tick(motion_t *m, uint32_t n)
             a = L;
         put(m, l, r, (int)r->from + ((int)r->to - (int)r->from) * (int)a / (int)L);
     }
+    return could_play_later;
 }
 
 /* Pure project-data rewrite; also used by the UI undo transaction with audio held. */
