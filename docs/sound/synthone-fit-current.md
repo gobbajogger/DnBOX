@@ -6,7 +6,7 @@ Exact native compact diagnostic (same S1C effect allocation on both boards): Eli
 
 ## Exact delay horizon change (host)
 
-The source host initialized all four variable delay buffers for 10 seconds even though the admitted physical control is bounded to 2.5 seconds. The reached output branches read `2t, 2t, t, t`. New physical backing retains the original 10-second **logical** cursor and interpolation, with (5s+8) slots worth of frames for each long branch and (2.5s+8) for each short branch. Fails closed outside the tested physical range. This is a history capacity change, not a changed time control.
+The source host initialized all four variable delay buffers for 10 seconds even though the admitted physical control is bounded to 2.5 seconds. The reached output branches read `2t, 2t, t, t`. New physical backing retains the original 10-second **logical** cursor and interpolation, with a five-second bound for each long branch and a 2.5-second bound for each short branch, plus small interpolation and ring guards. Fails closed outside the tested physical range. This is a history capacity change, not a changed time control.
 
 - Whole accepted comparison: 3,684,000 frames across 44.1/48 kHz, no changed Float32 samples, including active feedback, filter/mix, retime, resets and resolved source tempo-sync changes.
 - 44.1 kHz delay history shrank from 7,056,016 B to 2,646,136 B per owner. Combined with uncompressed room (98,760 B) and Float32 stereo widen (8,820 B), histories still total 2,753,716 B per owner. These are implementation sizes, not information-theoretic lower bounds. No native fit/timing.
