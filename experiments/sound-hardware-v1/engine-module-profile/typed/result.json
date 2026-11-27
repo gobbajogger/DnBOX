@@ -1,0 +1,84 @@
+{
+  "elite": {
+    "allocated_sections": {
+      "text": 474284,
+      "pool": 317528,
+      "bss": 96912,
+      "lab_slot3": 31672,
+      "lab_fittab": 3688,
+      "lab_fdata": 59944,
+      "ram_text": 2748,
+      "c1_text": 608,
+      "data": 648
+    },
+    "xip_used": 478292,
+    "xip_free": 74380,
+    "pool_beyond_floor_and_margin": 17832,
+    "module_audit": {
+      "profile": "synth-one",
+      "evidence": {
+        "synth-one": {
+          "selected": true,
+          "objects": [
+            "s1c",
+            "s1c_front",
+            "s1c_part",
+            "s1u"
+          ],
+          "renderers": [
+            "voice_run_kr"
+          ]
+        },
+        "superj6": {
+          "selected": false,
+          "objects": [],
+          "renderers": []
+        }
+      },
+      "legacy_providers_out_of_scope": true,
+      "elf_sha256": "f89241830b7c751eda2a3ac4264f08405f4c0c315ba9467b2eaa79b78e0f6eab",
+      "link_map_sha256": "b60dfb47f4e9948cd44885a63279626023ad5169583ebeb7d888075be384cca1"
+    }
+  },
+  "pro": {
+    "allocated_sections": {
+      "text": 474276,
+      "pool": 317528,
+      "bss": 96912,
+      "lab_slot3": 31672,
+      "lab_fittab": 3688,
+      "lab_fdata": 59944,
+      "ram_text": 2748,
+      "c1_text": 608,
+      "data": 648
+    },
+    "xip_used": 478284,
+    "xip_free": 74388,
+    "pool_beyond_floor_and_margin": 17832,
+    "module_audit": {
+      "profile": "synth-one",
+      "evidence": {
+        "synth-one": {
+          "selected": true,
+          "objects": [
+            "s1c",
+            "s1c_front",
+            "s1c_part",
+            "s1u"
+          ],
+          "renderers": [
+            "voice_run_kr"
+          ]
+        },
+        "superj6": {
+          "selected": false,
+          "objects": [],
+          "renderers": []
+        }
+      },
+      "legacy_providers_out_of_scope": true,
+      "elf_sha256": "a6b35896744650792921c7bd01eb9373c4b3272f1785682dc94d8f7133994d43",
+      "link_map_sha256": "6bfe508dd689e1fb06954c24f9b7e573e17d85274b39b92c59cc3b6e0e93ff03"
+    }
+  }
+}

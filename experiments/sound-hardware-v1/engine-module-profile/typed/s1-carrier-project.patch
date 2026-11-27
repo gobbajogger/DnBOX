@@ -1,0 +1,22 @@
+--- a/firmware/src/app/project.c
++++ b/firmware/src/app/project.c
+@@ -526,7 +526,9 @@
+             if((format!=PROJ_STREAM_14 && format!=PROJ_STREAM_CHORD && format!=STREAM137) ||
+                ((l->i==NOTE137 || l->i==NOTE_S1_MOD) && format!=STREAM137) ||
+                (format==STREAM137 && s1_typed_init_cell(l->val) && l->i!=NOTE_S1_MOD) ||
++#if X0X_SUPERJ6_BUILTIN_INIT
+                (format==STREAM137 && l->val[29]==ORIGINAL_SOUND_JUNO && !original_sound_sj6_factory(l->val) && l->i!=NOTE137) ||
++#endif
+                engine_bass_note_validate(l))return 0;
+ #else
+             if((format!=PROJ_STREAM_14 && format!=PROJ_STREAM_CHORD) || engine_bass_note_validate(l))return 0;
+@@ -880,7 +882,9 @@
+ #ifdef DNBOX_137_HOST_WITNESS
+             if(((l->i==NOTE137 || l->i==NOTE_S1_MOD) && s->snd_rev!=REV137) ||
+                (s->snd_rev==REV137 && s1_typed_init_cell(l->val) && l->i!=NOTE_S1_MOD) ||
++#if X0X_SUPERJ6_BUILTIN_INIT
+                (s->snd_rev==REV137 && l->val[29]==ORIGINAL_SOUND_JUNO && !original_sound_sj6_factory(l->val) && l->i!=NOTE137) ||
++#endif
+                engine_bass_note_validate(l))return -1;
+ #else
+             if(engine_bass_note_validate(l))return -1;

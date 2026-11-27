@@ -1,0 +1,88 @@
+--- a/run.sh
++++ b/run.sh
+@@ -3,7 +3,7 @@
+ D="$(cd "$(dirname "$0")";pwd)"; R="$(cd "$D/..";pwd)"
+ export JIELI_TOOLCHAIN="$R/prereqs/jieli-linux-toolchains-20260730.1" AC79_SDK="$R/prereqs/sdk"
+ export PYTHONPATH="$D/tree" DNBOX_CONTROL_FLAGS="$D/compose-flags.txt" D9_LAB_OUT="$D/tree/joint-diagnostic-later"
+-export X0X_SUPERJ6_FACTORY=1 X0X_SUPERJ6_BUILTIN_INIT=1 X0X_S1C=1 X0X_SYNTH_CONTROLS_INIT_ONLY=1 X0X_SYNTHONE_PATCH=1 X0X_ARP_HOOKS=1 X0X_REMOTE_DNR3=1 X0X_REMOTE_TYPED_SYNTH=1
++export X0X_SUPERJ6_FACTORY=0 X0X_SUPERJ6_BUILTIN_INIT=0 X0X_S1C=1 X0X_SYNTH_CONTROLS_INIT_ONLY=1 X0X_SYNTHONE_PATCH=1 X0X_ARP_HOOKS=1 X0X_REMOTE_DNR3=1 X0X_REMOTE_TYPED_SYNTH=0
+ export D9_LAB_XDATA_TAIL=1 D9_LAB_SLOT3_METADATA=1 DNBOX_TANH_SPLIT_LAB=1 DNBOX_TANH_REFILL_LAB=1 D9_LAB_S1_FDATA=1 DNBOX_CHICAGO_MOD_PALETTE=1 DNBOX_MIAMI_STOCK_CAP_COMPACT=1 D9_LAB_SPARE_TABLES=1 DNBOX_MIAMI_DECIMATOR_COMPACT=1 DNBOX_CHICAGO_DRIVE_COMPACT=1 DNBOX_CHICAGO_MOD_SPEED_COMPACT=1
+ cd "$D/tree"
+ python3 "$D/link-guarded-exact.py" --board smk37 --model elite --sdk "$AC79_SDK" > "$D/elite.log" 2>&1 & a=$!
+--- a/link-guarded-exact.py
++++ b/link-guarded-exact.py
+@@ -31,6 +31,7 @@
+                '.rodata.s1_pan_detent_hz':0x200,
+                '.rodata.s1_pan_boundary_hz':0x1fc,
+                '.rodata.sj6_velocity_scale':0x200}
++    relocated.pop('.rodata.sj6_velocity_scale')
+     split = os.environ.get('DNBOX_TANH_SPLIT_LAB') == '1'
+     if split:
+         relocated.pop('.rodata.x0x_tanh_raw')
+@@ -84,6 +85,7 @@
+         '.rodata.compact_miami_factory_codes': (480,'6393cd72abdd5e07b0dff12191907d89857e00db50fecb981ac62c1081e99f67'),
+         '.rodata.compact_miami_names': (339,'43d7f6dad8ad1bd8b14630dc857dc6bd1ff1ccf3047ac9f23d271917a9cfaf80'),
+     }
++    exact_fittab.pop('.rodata.sj6_midi_velocity') # absent with the disabled module
+     if os.environ.get('D9_LAB_SPARE_TABLES')=='1':
+         exact_fittab['.rodata.compact_chicago_base_codes']=(117, '92d8f98eb9012d87537b0e2b645e377221b869f884314dfeb52593ebd3fddb9f')
+     tables+=''.join(' *('+n+')' for n in dict.fromkeys((*relocated,*extra_fdata)))
+@@ -123,6 +125,8 @@
+         '.rodata.rd_panel_sj6_ref.fixed':312,
+         '.rodata.page_titles':344,
+     } if os.environ.get("D9_LAB_SLOT3_METADATA")=="1" else {}
++    for absent in ('.rodata.sj6_knob_desc.knobs','.rodata.sj6_aux_route_labels','.rodata.rd_panel_sj6_ref.fixed'):
++        slot3_metadata.pop(absent)
+     if os.environ.get('D9_LAB_SPARE_TABLES')=='1':
+         assert slot3_metadata
+         slot3_metadata['.rodata.d9_cp_p']=96
+@@ -257,6 +261,8 @@
+         addr,count=(int(x,16) for x in re.search(r'^ '+re.escape(n)+r'\s+(0x[0-9a-f]+)\s+(0x[0-9a-f]+)',mt,re.M).groups())
+         assert count==size and 0x020A9000+lo<=addr<=0x020A9000+hi-count,(n,addr,count)
+     xcrc=zlib.crc32(a[5][lo:hi])
++    print('Linked typed single-engine ELF; no packaging attempted.',flush=True)
++    raise Stop
+     p,p2,p3=(a[-2][32:],a[-1][32:],a[4][32:])
+     assert cold909_end+sum(relocated.values())<=len(a[-2])<=61440
+     assert 32+sum(pair.values())<=len(a[-1])<=32768
+@@ -329,11 +335,11 @@
+     print('guarded',b.MODEL,'XIP',used,'free',0x86ee0-used,'pool usable',0x54000-pool-8192,'read-only FDATA',len(z[-2]),'diagnostic slot3 span',len(z[-1]),'slot3 free',32768-len(z[-1]),'read-only FITTAB',len(z[4]),'header',h.hex(),'ELF',hashlib.sha256(elf.read_bytes()).hexdigest(),flush=True)
+     raise Stop
+ b.CFLAGS += ['-DX0X_COLD_COMPANION_LAB=1','-DX0X_COLD_SLOT3_LAB=1','-DX0X_COLD_FITTAB_LAB=1','-DX0X_909_HUFF_DIAG=1']
+-b.CFLAGS.extend(["-DX0X_S1_FEEDBACK_PROBE=1","-DX0X_S1_DELAY_TRACK_TEST=1","-DX0X_SJ6_FILTER_VEL_PROBE=1","-DX0X_SJ6_VELOCITY_PORT=1","-DX0X_SJ6_NATIVE_RANDOM2=1"])
+-b.CFLAGS.append("-DX0X_SJ6_NATIVE_POSITIVE_GATE=1")
+-b.CFLAGS += ["-DDNBOX_TYPED_CONTROLS_NATIVE_TEST=1","-DX0X_S1_MOD_RATE_PROBE=1","-DX0X_S1_BEND_RANGE_PROBE=1","-DX0X_S1_AUTOPAN_PROBE=1","-DX0X_S1_AUTOPAN_PORT=1","-DX0X_SJ6_MONO32_PROBE=1"]
+-b.CFLAGS.extend(["-DX0X_S1_FEEDBACK_PROBE=1","-DX0X_S1_DELAY_TRACK_TEST=1","-DX0X_SJ6_FILTER_VEL_PROBE=1","-DX0X_SJ6_VELOCITY_PORT=1","-DX0X_SJ6_NATIVE_RANDOM2=1"])
+-b.CFLAGS.append("-DX0X_SJ6_NATIVE_POSITIVE_GATE=1")
++
++
++
++
++
+ b.ORIGINAL_SYNTH_OZ_UNITS |= {'chicago_selector','chicago_arp_control','chicago_note_context','miami_geometry','miami_fx_conversion'}
+ b.CFLAGS.extend(Path(os.environ['DNBOX_CONTROL_FLAGS']).read_text().split())
+ if os.environ.get("DNBOX_CHICAGO_MOD_SPEED_COMPACT") == "1": b.CFLAGS.append("-DDNBOX_CHICAGO_MOD_SPEED_COMPACT=1")
+--- a/tree/firmware/src/app/original_runtime.c
++++ b/tree/firmware/src/app/original_runtime.c
+@@ -181,7 +181,7 @@
+ _Static_assert(sizeof(s1_dry_part) <= sizeof(((original_runtime_backend *)0)->juno),
+                "Synth One tuning must remain within the combined backend union");
+ #else
+-_Static_assert(sizeof(s1_dry_part) <= sizeof(original_miami_backend), "Synth One part does not grow the backend union");
++_Static_assert(sizeof(s1_dry_part) <= sizeof(original_runtime_backend), "Synth One arm fits diagnostic union");
+ #endif
+ 
+ int original_runtime_s1_program(original_runtime_part *p, unsigned program)
+--- a/tree/tools/build.py
++++ b/tree/tools/build.py
+@@ -496,8 +496,8 @@
+     init_only = synth_controls_init_only()
+     if init_only:
+         if not (BOARD == "smk37" and MODEL in ("elite", "pro") and
+-                S1C == "1" and synthone_patch == "1" and sj6_builtin_init == "1"):
+-            raise SystemExit("Init-only controls require SMK Elite/Pro, compact Synth One editor and built-in SuperJ6 Init")
++                S1C == "1" and synthone_patch == "1"):
++            raise SystemExit("Init-only controls require SMK Elite/Pro, compact Synth One editor")
+         flags = [*flags, "-DX0X_SYNTH_CONTROLS_INIT_ONLY=1"]
+     chance_probe = os.environ.get("X0X_GFINAL_CHANCE_PROBE", "1")
+     if chance_probe not in ("0", "1"):

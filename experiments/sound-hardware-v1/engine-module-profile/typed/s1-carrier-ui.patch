@@ -1,0 +1,26 @@
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -4565,8 +4565,12 @@
+ #endif
+ #ifdef DNBOX_137_HOST_WITNESS
+             if (proj.set.snd_rev==REV137) {
++#if X0X_SUPERJ6_BUILTIN_INIT
+                 const int undo_j6_init=target.cell[v][29]==ORIGINAL_SOUND_JUNO &&
+                     !original_sound_sj6_factory(target.cell[v]);
++#else
++                const int undo_j6_init=0;
++#endif
+                 const int undo_s1_init=s1_typed_init_cell(target.cell[v]);
+                 (void)undo_j6_init;(void)undo_s1_init;
+                 uint8_t p;
+@@ -4986,8 +4990,10 @@
+ #if X0X_BASS_TAGGED_SOUND
+     if(undo_bass_mask) engine_bass_base_restore(undo_bass_mask);
+ #ifdef DNBOX_137_HOST_WITNESS
++#if X0X_SUPERJ6_BUILTIN_INIT
+     extern void sj6_137_undo_apply(unsigned);
+     ui_undo_apply(undo_velocity137,sj6_137_undo_apply);
++#endif
+ #if defined(DNBOX_137_HOST_WITNESS) && defined(X0X_SJ6_MOD_TYPED_PROBE)
+     ui_undo_apply(undo_sj6_mod,sj6_typed_mod_undo);
+ #endif

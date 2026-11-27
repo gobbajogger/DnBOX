@@ -1,0 +1,84 @@
+{
+  "elite": {
+    "allocated_sections": {
+      "text": 474380,
+      "pool": 326344,
+      "bss": 96912,
+      "lab_slot3": 31672,
+      "lab_fittab": 3688,
+      "lab_fdata": 59944,
+      "ram_text": 2748,
+      "c1_text": 608,
+      "data": 648
+    },
+    "xip_used": 478388,
+    "xip_free": 74284,
+    "pool_beyond_floor_and_margin": 9016,
+    "module_audit": {
+      "profile": "synth-one",
+      "evidence": {
+        "synth-one": {
+          "selected": true,
+          "objects": [
+            "s1c",
+            "s1c_front",
+            "s1c_part",
+            "s1u"
+          ],
+          "renderers": [
+            "voice_run_kr"
+          ]
+        },
+        "superj6": {
+          "selected": false,
+          "objects": [],
+          "renderers": []
+        }
+      },
+      "legacy_providers_out_of_scope": true,
+      "elf_sha256": "0456284122ac74feac377774d92291b37698e19dd4a68f2b872f0cb7024521cc",
+      "link_map_sha256": "de88b289b91716ed4ce15e54a044ccb839b3b87eed3f64c02a58b0466c24b755"
+    }
+  },
+  "pro": {
+    "allocated_sections": {
+      "text": 474372,
+      "pool": 326344,
+      "bss": 96912,
+      "lab_slot3": 31672,
+      "lab_fittab": 3688,
+      "lab_fdata": 59944,
+      "ram_text": 2748,
+      "c1_text": 608,
+      "data": 648
+    },
+    "xip_used": 478380,
+    "xip_free": 74292,
+    "pool_beyond_floor_and_margin": 9016,
+    "module_audit": {
+      "profile": "synth-one",
+      "evidence": {
+        "synth-one": {
+          "selected": true,
+          "objects": [
+            "s1c",
+            "s1c_front",
+            "s1c_part",
+            "s1u"
+          ],
+          "renderers": [
+            "voice_run_kr"
+          ]
+        },
+        "superj6": {
+          "selected": false,
+          "objects": [],
+          "renderers": []
+        }
+      },
+      "legacy_providers_out_of_scope": true,
+      "elf_sha256": "b0e4b9e1b595d974ad866e8c55f8a51b752aaaa9ffffdfa75ef9d74bc92bc90b",
+      "link_map_sha256": "d3ab58825680a2f532ea17f3238d0eab0d6b85251896ff7d70dd63e9f39ac1bf"
+    }
+  }
+}
