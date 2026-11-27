@@ -1,0 +1,111 @@
+--- a/firmware/src/dsp/s1c/s1c.c
++++ b/firmware/src/dsp/s1c/s1c.c
+@@ -486,7 +486,56 @@
+ #if DNBOX_S1_VOICE_TRACE
+ volatile uint32_t lab_s1_voice_entries;
+ #endif
+-static float voice_run_kr(s1c *s, s1c_voice *v)
++static __attribute__((noinline)) void voice_kr_refresh(s1c *s, s1c_voice *v, int mono, int ft)
++{
++    v->kc = S1C_KR;
++    float base = mono ? s->monos : v->freq, half = 0.5f * s->sr;
++    float plfo = 1.0f + lfo01(s, P(LPITCH)) * 0.0594630944f, k = P(DETM) * plfo;
++    const float f1 = clampf(base * exp2f((int)P(SEMI1) / 12.0f) * k, 0.0f, half);
++    float det = P(DET2) * (v->freq / 261.6255653f);
++    if ((int)P(LDET)) det *= lfo01(s, P(LDET));
++    const float f2 = clampf(base * exp2f((int)P(SEMI2) / 12.0f) * k + det, 0.0f, half);
++    const float fs = clampf(base * k / (2.0f * (1.0f + P(SUBOCT))), 0.0f, half);
++    v->kff = clampf(base * k, 0.0f, half);
++    /* The frequencies and the sample rate cannot change until the next
++     * control tick. Save the original rounded divisions and phase words
++     * in the existing cache, not additional voice state. */
++    v->kd1 = f1 / s->sr; v->kd2 = f2 / s->sr;
++    v->ki1 = ph_inc(v->kd1); v->ki2 = ph_inc(v->kd2);
++    v->kis = ph_inc(fs / s->sr); v->kif = ph_inc(v->kff / s->sr);
++    v->kidx = clampf(P(FMA) * lfo10(s, P(LFM)), 0.0f, 15.0f);
++    v->kbal = clampf(P(BAL) + lfo01(s, P(LMIX)), 0.0f, 1.0f);
++    const float kres = clampf(P(RES) * lfo10(s, P(LRES)), 0.0f, 0.98f);
++    float pitch = log2f(f1 > 0.0f ? f1 : 261.0f), kt = 1.0f - clampf((pitch - 6.0f) / 5.0f, 0.0f, 1.0f);
++    float kf = 1.0f - P(KTRK);
++    v->kkey = (1.0f - kf) * kt * kt + kf;
++    const float kcut = P(CUT) * lfo10(s, P(LCUT)), kem = P(FENV) * lfo10(s, P(LFENV));
++    float cut = clampf(kcut - kcut * kem * (1.0f - v->fenv), 64.0f, 22050.0f);
++    if (ft == 0) {
++        float x = cut * (2.0f / s->sr); if (x > 1.0f) x = 1.0f;
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++        v->ka1 = kres; /* unused by LP; retain original KR resonance */
++#endif
++        v->kA = ladder_a(x);
++        v->kfb = kres * (3.98720139f + x * (3.68178143f - x * 3.93633599f));
++    } else if (ft == 1) {
++        float bw = 0.0625f * s->sr * (exp2f(clampf(1.0f - kres, 0.0f, 1.0f)) - 1.0f);
++        float cc = 1.0f / tanf(3.14159265f * bw / s->sr), d = 2.0f * cosf(TWO_PI * cut / s->sr), a1 = 1.0f / (1.0f + cc);
++#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
++        v->kA = cc; /* unused by BP; retain original KR bandwidth */
++#endif
++        v->ka1 = a1; v->ka4 = -cc * d * a1; v->ka5 = (cc - 1.0f) * a1;
++    } else {
++        float cc = tanf(3.14159265f * cut / s->sr), a1 = 1.0f / (1.0f + 1.41421356f * cc + cc * cc);
++        v->ka1 = a1; v->ka4 = 2.0f * (cc * cc - 1.0f) * a1; v->ka5 = (1.0f - 1.41421356f * cc + cc * cc) * a1;
++    }
++}
++#if DNBOX_S1_VOICE_SRAM
++#define S1_VOICE __attribute__((section(".ram_text.s1_voice"),noinline,used))
++#else
++#define S1_VOICE
++#endif
++static S1_VOICE float voice_run_kr(s1c *s, s1c_voice *v)
+ {
+ #if DNBOX_S1_VOICE_TRACE
+     ++lab_s1_voice_entries;
+@@ -494,49 +543,7 @@
+     int mono = P(MONO) > 0.0f, ft = (int)P(FTYPE);
+     v->amp = env_step(&v->ea, v->gate, P(AA), clampf(P(AD) * lfo10(s, P(LDEC)), 0.005f, 2.0f), P(AS), P(AR), s->sr);
+     v->fenv = env_step(&v->ef, v->gate, P(FA), P(FD), P(FS), P(FR), s->sr);
+-    if (--v->kc <= 0) {
+-        v->kc = S1C_KR;
+-        float base = mono ? s->monos : v->freq, half = 0.5f * s->sr;
+-        float plfo = 1.0f + lfo01(s, P(LPITCH)) * 0.0594630944f, k = P(DETM) * plfo;
+-        const float f1 = clampf(base * exp2f((int)P(SEMI1) / 12.0f) * k, 0.0f, half);
+-        float det = P(DET2) * (v->freq / 261.6255653f);
+-        if ((int)P(LDET)) det *= lfo01(s, P(LDET));
+-        const float f2 = clampf(base * exp2f((int)P(SEMI2) / 12.0f) * k + det, 0.0f, half);
+-        const float fs = clampf(base * k / (2.0f * (1.0f + P(SUBOCT))), 0.0f, half);
+-        v->kff = clampf(base * k, 0.0f, half);
+-        /* The frequencies and the sample rate cannot change until the next
+-         * control tick. Save the original rounded divisions and phase words
+-         * in the existing cache, not additional voice state. */
+-        v->kd1 = f1 / s->sr; v->kd2 = f2 / s->sr;
+-        v->ki1 = ph_inc(v->kd1); v->ki2 = ph_inc(v->kd2);
+-        v->kis = ph_inc(fs / s->sr); v->kif = ph_inc(v->kff / s->sr);
+-        v->kidx = clampf(P(FMA) * lfo10(s, P(LFM)), 0.0f, 15.0f);
+-        v->kbal = clampf(P(BAL) + lfo01(s, P(LMIX)), 0.0f, 1.0f);
+-        const float kres = clampf(P(RES) * lfo10(s, P(LRES)), 0.0f, 0.98f);
+-        float pitch = log2f(f1 > 0.0f ? f1 : 261.0f), kt = 1.0f - clampf((pitch - 6.0f) / 5.0f, 0.0f, 1.0f);
+-        float kf = 1.0f - P(KTRK);
+-        v->kkey = (1.0f - kf) * kt * kt + kf;
+-        const float kcut = P(CUT) * lfo10(s, P(LCUT)), kem = P(FENV) * lfo10(s, P(LFENV));
+-        float cut = clampf(kcut - kcut * kem * (1.0f - v->fenv), 64.0f, 22050.0f);
+-        if (ft == 0) {
+-            float x = cut * (2.0f / s->sr); if (x > 1.0f) x = 1.0f;
+-#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
+-            v->ka1 = kres; /* unused by LP; retain original KR resonance */
+-#endif
+-            v->kA = ladder_a(x);
+-            v->kfb = kres * (3.98720139f + x * (3.68178143f - x * 3.93633599f));
+-        } else if (ft == 1) {
+-            float bw = 0.0625f * s->sr * (exp2f(clampf(1.0f - kres, 0.0f, 1.0f)) - 1.0f);
+-            float cc = 1.0f / tanf(3.14159265f * bw / s->sr), d = 2.0f * cosf(TWO_PI * cut / s->sr), a1 = 1.0f / (1.0f + cc);
+-#if DNBOX_TYPED_CONTROLS_NATIVE_TEST
+-            v->kA = cc; /* unused by BP; retain original KR bandwidth */
+-#endif
+-            v->ka1 = a1; v->ka4 = -cc * d * a1; v->ka5 = (cc - 1.0f) * a1;
+-        } else {
+-            float cc = tanf(3.14159265f * cut / s->sr), a1 = 1.0f / (1.0f + 1.41421356f * cc + cc * cc);
+-            v->ka1 = a1; v->ka4 = 2.0f * (cc * cc - 1.0f) * a1; v->ka5 = (1.0f - 1.41421356f * cc + cc * cc) * a1;
+-        }
+-    }
++    if (--v->kc <= 0) voice_kr_refresh(s,v,mono,ft);
+     int bl = P(BLE) > 0.0f;
+     float o1 = morph(&v->ph[0], v->kd1, v->ki1, P(I1), bl) * v->vamp * P(VOL1);
+     float o2 = morph(&v->ph[1], v->kd2, v->ki2, P(I2), bl) * v->vamp * P(VOL2);

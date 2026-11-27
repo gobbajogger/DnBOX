@@ -1,0 +1,213 @@
+--- a/firmware/src/dsp/s1c/s1c.c
++++ b/firmware/src/dsp/s1c/s1c.c
+@@ -486,73 +486,107 @@
+ #if DNBOX_S1_VOICE_TRACE
+ volatile uint32_t lab_s1_voice_entries;
+ #endif
+-static float voice_run_kr(s1c *s, s1c_voice *v)
++static __attribute__((noinline)) void voice_kr_refresh(s1c *s, s1c_voice *v, int mono, int ft)
+ {
+-#if DNBOX_S1_VOICE_TRACE
+-    ++lab_s1_voice_entries;
+-#endif
+-    int mono = P(MONO) > 0.0f, ft = (int)P(FTYPE);
+-    v->amp = env_step(&v->ea, v->gate, P(AA), clampf(P(AD) * lfo10(s, P(LDEC)), 0.005f, 2.0f), P(AS), P(AR), s->sr);
+-    v->fenv = env_step(&v->ef, v->gate, P(FA), P(FD), P(FS), P(FR), s->sr);
+-    if (--v->kc <= 0) {
+-        v->kc = S1C_KR;
+-        float base = mono ? s->monos : v->freq, half = 0.5f * s->sr;
+-        float plfo = 1.0f + lfo01(s, P(LPITCH)) * 0.0594630944f, k = P(DETM) * plfo;
+-        const float f1 = clampf(base * exp2f((int)P(SEMI1) / 12.0f) * k, 0.0f, half);
+-        float det = P(DET2) * (v->freq / 261.6255653f);
+-        if ((int)P(LDET)) det *= lfo01(s, P(LDET));
+-        const float f2 = clampf(base * exp2f((int)P(SEMI2) / 12.0f) * k + det, 0.0f, half);
+-        const float fs = clampf(base * k / (2.0f * (1.0f + P(SUBOCT))), 0.0f, half);
+-        v->kff = clampf(base * k, 0.0f, half);
+-        /* The frequencies and the sample rate cannot change until the next
+-         * control tick. Save the original rounded divisions and phase words
+-         * in the existing cache, not additional voice state. */
+-        v->kd1 = f1 / s->sr; v->kd2 = f2 / s->sr;
+-        v->ki1 = ph_inc(v->kd1); v->ki2 = ph_inc(v->kd2);
+-        v->kis = ph_inc(fs / s->sr); v->kif = ph_inc(v->kff / s->sr);
+-        v->kidx = clampf(P(FMA) * lfo10(s, P(LFM)), 0.0f, 15.0f);
+-        v->kbal = clampf(P(BAL) + lfo01(s, P(LMIX)), 0.0f, 1.0f);
+-        const float kres = clampf(P(RES) * lfo10(s, P(LRES)), 0.0f, 0.98f);
+-        float pitch = log2f(f1 > 0.0f ? f1 : 261.0f), kt = 1.0f - clampf((pitch - 6.0f) / 5.0f, 0.0f, 1.0f);
+-        float kf = 1.0f - P(KTRK);
+-        v->kkey = (1.0f - kf) * kt * kt + kf;
+-        const float kcut = P(CUT) * lfo10(s, P(LCUT)), kem = P(FENV) * lfo10(s, P(LFENV));
+-        float cut = clampf(kcut - kcut * kem * (1.0f - v->fenv), 64.0f, 22050.0f);
+-        if (ft == 0) {
+-            float x = cut * (2.0f / s->sr); if (x > 1.0f) x = 1.0f;
++    v->kc = S1C_KR;
++    float base = mono ? s->monos : v->freq, half = 0.5f * s->sr;
++    float plfo = 1.0f + lfo01(s, P(LPITCH)) * 0.0594630944f, k = P(DETM) * plfo;
++    const float f1 = clampf(base * exp2f((int)P(SEMI1) / 12.0f) * k, 0.0f, half);
++    float det = P(DET2) * (v->freq / 261.6255653f);
++    if ((int)P(LDET)) det *= lfo01(s, P(LDET));
++    const float f2 = clampf(base * exp2f((int)P(SEMI2) / 12.0f) * k + det, 0.0f, half);
++    const float fs = clampf(base * k / (2.0f * (1.0f + P(SUBOCT))), 0.0f, half);
++    v->kff = clampf(base * k, 0.0f, half);
++    /* The frequencies and the sample rate cannot change until the next
++     * control tick. Save the original rounded divisions and phase words
++     * in the existing cache, not additional voice state. */
++    v->kd1 = f1 / s->sr; v->kd2 = f2 / s->sr;
++    v->ki1 = ph_inc(v->kd1); v->ki2 = ph_inc(v->kd2);
++    v->kis = ph_inc(fs / s->sr); v->kif = ph_inc(v->kff / s->sr);
++    v->kidx = clampf(P(FMA) * lfo10(s, P(LFM)), 0.0f, 15.0f);
++    v->kbal = clampf(P(BAL) + lfo01(s, P(LMIX)), 0.0f, 1.0f);
++    const float kres = clampf(P(RES) * lfo10(s, P(LRES)), 0.0f, 0.98f);
++    float pitch = log2f(f1 > 0.0f ? f1 : 261.0f), kt = 1.0f - clampf((pitch - 6.0f) / 5.0f, 0.0f, 1.0f);
++    float kf = 1.0f - P(KTRK);
++    v->kkey = (1.0f - kf) * kt * kt + kf;
++    const float kcut = P(CUT) * lfo10(s, P(LCUT)), kem = P(FENV) * lfo10(s, P(LFENV));
++    float cut = clampf(kcut - kcut * kem * (1.0f - v->fenv), 64.0f, 22050.0f);
++    if (ft == 0) {
++        float x = cut * (2.0f / s->sr); if (x > 1.0f) x = 1.0f;
+ #if DNBOX_TYPED_CONTROLS_NATIVE_TEST
+-            v->ka1 = kres; /* unused by LP; retain original KR resonance */
++        v->ka1 = kres; /* unused by LP; retain original KR resonance */
+ #endif
+-            v->kA = ladder_a(x);
+-            v->kfb = kres * (3.98720139f + x * (3.68178143f - x * 3.93633599f));
+-        } else if (ft == 1) {
+-            float bw = 0.0625f * s->sr * (exp2f(clampf(1.0f - kres, 0.0f, 1.0f)) - 1.0f);
+-            float cc = 1.0f / tanf(3.14159265f * bw / s->sr), d = 2.0f * cosf(TWO_PI * cut / s->sr), a1 = 1.0f / (1.0f + cc);
++        v->kA = ladder_a(x);
++        v->kfb = kres * (3.98720139f + x * (3.68178143f - x * 3.93633599f));
++    } else if (ft == 1) {
++        float bw = 0.0625f * s->sr * (exp2f(clampf(1.0f - kres, 0.0f, 1.0f)) - 1.0f);
++        float cc = 1.0f / tanf(3.14159265f * bw / s->sr), d = 2.0f * cosf(TWO_PI * cut / s->sr), a1 = 1.0f / (1.0f + cc);
+ #if DNBOX_TYPED_CONTROLS_NATIVE_TEST
+-            v->kA = cc; /* unused by BP; retain original KR bandwidth */
++        v->kA = cc; /* unused by BP; retain original KR bandwidth */
+ #endif
+-            v->ka1 = a1; v->ka4 = -cc * d * a1; v->ka5 = (cc - 1.0f) * a1;
+-        } else {
+-            float cc = tanf(3.14159265f * cut / s->sr), a1 = 1.0f / (1.0f + 1.41421356f * cc + cc * cc);
+-            v->ka1 = a1; v->ka4 = 2.0f * (cc * cc - 1.0f) * a1; v->ka5 = (1.0f - 1.41421356f * cc + cc * cc) * a1;
+-        }
++        v->ka1 = a1; v->ka4 = -cc * d * a1; v->ka5 = (cc - 1.0f) * a1;
++    } else {
++        float cc = tanf(3.14159265f * cut / s->sr), a1 = 1.0f / (1.0f + 1.41421356f * cc + cc * cc);
++        v->ka1 = a1; v->ka4 = 2.0f * (cc * cc - 1.0f) * a1; v->ka5 = (1.0f - 1.41421356f * cc + cc * cc) * a1;
+     }
++}
++#if DNBOX_S1_VOICE_SRAM
++#define S1_VOICE __attribute__((section(".ram_text.s1_voice"),noinline,used))
++#else
++#define S1_VOICE
++#endif
++#if DNBOX_S1_VOICE_FAR
++static __typeof__(&lfo10) const volatile s1_far_lfo10=&lfo10;
++static __typeof__(&clampf) const volatile s1_far_clampf=&clampf;
++static __typeof__(&env_step) const volatile s1_far_env_step=&env_step;
++static __typeof__(&voice_kr_refresh) const volatile s1_far_voice_kr_refresh=&voice_kr_refresh;
++static __typeof__(&morph) const volatile s1_far_morph=&morph;
++static __typeof__(&sine_t) const volatile s1_far_sine_t=&sine_t;
++static __typeof__(&ph_inc) const volatile s1_far_ph_inc=&ph_inc;
++static __typeof__(&ladder_a) const volatile s1_far_ladder_a=&ladder_a;
++static __typeof__(&ladder) const volatile s1_far_ladder=&ladder;
++static __typeof__(&tanf) const volatile s1_far_tanf=&tanf;
++static __typeof__(&hp2) const volatile s1_far_hp2=&hp2;
++static __typeof__(&cosf) const volatile s1_far_cosf=&cosf;
++#else
++#define s1_far_lfo10 lfo10
++#define s1_far_clampf clampf
++#define s1_far_env_step env_step
++#define s1_far_voice_kr_refresh voice_kr_refresh
++#define s1_far_morph morph
++#define s1_far_sine_t sine_t
++#define s1_far_ph_inc ph_inc
++#define s1_far_ladder_a ladder_a
++#define s1_far_ladder ladder
++#define s1_far_tanf tanf
++#define s1_far_hp2 hp2
++#define s1_far_cosf cosf
++#endif
++static S1_VOICE float voice_run_kr(s1c *s, s1c_voice *v)
++{
++#if DNBOX_S1_VOICE_TRACE
++    ++lab_s1_voice_entries;
++#endif
++    int mono = P(MONO) > 0.0f, ft = (int)P(FTYPE);
++    v->amp = s1_far_env_step(&v->ea, v->gate, P(AA), s1_far_clampf(P(AD) * s1_far_lfo10(s, P(LDEC)), 0.005f, 2.0f), P(AS), P(AR), s->sr);
++    v->fenv = s1_far_env_step(&v->ef, v->gate, P(FA), P(FD), P(FS), P(FR), s->sr);
++    if (--v->kc <= 0) s1_far_voice_kr_refresh(s,v,mono,ft);
+     int bl = P(BLE) > 0.0f;
+-    float o1 = morph(&v->ph[0], v->kd1, v->ki1, P(I1), bl) * v->vamp * P(VOL1);
+-    float o2 = morph(&v->ph[1], v->kd2, v->ki2, P(I2), bl) * v->vamp * P(VOL2);
++    float o1 = s1_far_morph(&v->ph[0], v->kd1, v->ki1, P(I1), bl) * v->vamp * P(VOL1);
++    float o2 = s1_far_morph(&v->ph[1], v->kd2, v->ki2, P(I2), bl) * v->vamp * P(VOL2);
+     float y = (1.0f - v->kbal) * o1 + v->kbal * o2;
+-    float sub = sine_t(v->ph[2]);
++    float sub = s1_far_sine_t(v->ph[2]);
+     v->ph[2] += v->kis;
+     y += P(SUBSQ) != 0.0f ? (sub > 0.0f ? P(SUBV) : -P(SUBV)) : sub * v->vamp * P(SUBV) * 3.0f;
+     if (P(FMV) != 0.0f) {
+-        float mod = sine_t(v->mph) * v->kff * v->kidx;
++        float mod = s1_far_sine_t(v->mph) * v->kff * v->kidx;
+         v->mph += v->kif;
+-        y += sine_t(v->cph) * v->vamp * P(FMV);
+-        v->cph += ph_inc((v->kff + mod) / s->sr);
++        y += s1_far_sine_t(v->cph) * v->vamp * P(FMV);
++        v->cph += s1_far_ph_inc((v->kff + mod) / s->sr);
+     }
+     if (P(NOISEV) != 0.0f) {
+         s->rnd = s->rnd * 1664525u + 1013904223u;
+-        y += ((float)(int32_t)s->rnd * (1.0f / 2147483648.0f)) * v->vamp * P(NOISEV) * lfo10(s, P(LNOISE));
++        y += ((float)(int32_t)s->rnd * (1.0f / 2147483648.0f)) * v->vamp * P(NOISEV) * s1_far_lfo10(s, P(LNOISE));
+     }
+     y *= v->amp * v->kkey;
+     float fo;
+@@ -561,18 +595,18 @@
+     if(P(FENV)>0.f && ((route==1.f && P(L1A)>0.f) ||
+                       (route==2.f && P(L2A)>0.f) ||
+                       (route==3.f && (P(L1A)>0.f || P(L2A)>0.f)))) {
+-        const float base=P(CUT)*lfo10(s,P(LCUT)), amount=P(FENV)*lfo10(s,route);
+-        const float hz=clampf(base-base*amount*(1.f-v->fenv),64.f,22050.f);
++        const float base=P(CUT)*s1_far_lfo10(s,P(LCUT)), amount=P(FENV)*s1_far_lfo10(s,route);
++        const float hz=s1_far_clampf(base-base*amount*(1.f-v->fenv),64.f,22050.f);
+         if(ft==0){
+             float x=hz*(2.f/s->sr);if(x>1.f)x=1.f;
+-            const float a=ladder_a(x),fb=v->ka1*(3.98720139f+x*(3.68178143f-x*3.93633599f));
+-            fo=ladder(v->lp,y,a,fb);
++            const float a=s1_far_ladder_a(x),fb=v->ka1*(3.98720139f+x*(3.68178143f-x*3.93633599f));
++            fo=s1_far_ladder(v->lp,y,a,fb);
+         } else if(ft==2){
+-            const float cc=tanf(3.14159265f*hz/s->sr),a1=1.0f/(1.0f+1.41421356f*cc+cc*cc);
++            const float cc=s1_far_tanf(3.14159265f*hz/s->sr),a1=1.0f/(1.0f+1.41421356f*cc+cc*cc);
+             const float a4=2.0f*(cc*cc-1.0f)*a1,a5=(1.0f-1.41421356f*cc+cc*cc)*a1;
+-            fo=hp2(v->bq,y,a1,a4,a5);
++            fo=s1_far_hp2(v->bq,y,a1,a4,a5);
+         } else {
+-            const float d=2.f*cosf(TWO_PI*hz/s->sr);
++            const float d=2.f*s1_far_cosf(TWO_PI*hz/s->sr);
+             const float a4=-v->kA*d*v->ka1;
+             float t=y-a4*v->bq[0]-v->ka5*v->bq[1];
+             fo=t*v->ka1-v->ka1*v->bq[1];
+@@ -580,8 +614,8 @@
+         }
+     } else
+ #endif
+-    if (ft == 0) fo = ladder(v->lp, y, v->kA, v->kfb);
+-    else if (ft == 2) fo = hp2(v->bq, y, v->ka1, v->ka4, v->ka5);
++    if (ft == 0) fo = s1_far_ladder(v->lp, y, v->kA, v->kfb);
++    else if (ft == 2) fo = s1_far_hp2(v->bq, y, v->ka1, v->ka4, v->ka5);
+     else {
+         float t = y - v->ka4 * v->bq[0] - v->ka5 * v->bq[1];
+         fo = t * v->ka1 - v->ka1 * v->bq[1];
+@@ -589,8 +623,13 @@
+     }
+     return y + P(FMIX) * (fo - y);
+ }
++#if DNBOX_S1_VOICE_FAR
++static __typeof__(&voice_run_kr) const volatile s1_voice_far=&voice_run_kr;
++#define voice_run s1_voice_far
++#else
+ #define voice_run voice_run_kr
+ #endif
++#endif
+ /* ---- FX ---- */
+ typedef s1u_cc s1c_cc;
+ #define comp_coef s1u_comp_coef

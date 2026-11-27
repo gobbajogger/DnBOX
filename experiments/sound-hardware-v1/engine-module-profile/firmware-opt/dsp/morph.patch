@@ -1,0 +1,93 @@
+--- a/firmware/src/dsp/s1c/s1c.c
++++ b/firmware/src/dsp/s1c/s1c.c
+@@ -345,6 +345,29 @@
+     if (bl) { float u = t + 1.0f - w; if (u >= 1.0f) u -= 1.0f; y += blep(u, dt) - blep(t, dt); }
+     return y;
+ }
++#if DNBOX_S1_MORPH_SHARE
++typedef struct { int k; float f; } s1c_morph_blend;
++static inline s1c_morph_blend morph_decode(float pos)
++{
++    if (pos > 1.0f) pos -= (int)pos;
++    float f = pos * 3.0f; int k = (int)f; if (k > 2) k = 2;
++    f -= k;
++    return (s1c_morph_blend){k,f};
++}
++static inline float morph_cell(uint32_t *ph, float dt, uint32_t increment, s1c_morph_blend m, int bl)
++{
++    float t = (float)*ph * (1.0f / Q32);
++    int k = m.k; float f = m.f;
++    float y = shape(k, t, dt, bl);
++    if (f > 0.0f) y += f * (shape(k + 1, t, dt, bl) - y);
++    *ph += increment;
++    return y;
++}
++static float morph(uint32_t *ph,float dt,uint32_t increment,float pos,int bl)
++{
++    return morph_cell(ph,dt,increment,morph_decode(pos),bl);
++}
++#else
+ static float morph(uint32_t *ph, float dt, uint32_t increment, float pos, int bl)
+ {
+     float t = (float)*ph * (1.0f / Q32);
+@@ -356,6 +379,7 @@
+     *ph += increment;
+     return y;
+ }
++#endif
+ #if X0X_SYNTHONE_PATCH
+ /* Panel preview uses the same continuous morph with the note-dependent
+  * antialiasing disabled. It does not advance any playing oscillator. */
+@@ -486,7 +510,11 @@
+ #if DNBOX_S1_VOICE_TRACE
+ volatile uint32_t lab_s1_voice_entries;
+ #endif
++#if DNBOX_S1_MORPH_SHARE
++static float voice_run_kr(s1c *s, s1c_voice *v, const s1c_morph_blend blend[2])
++#else
+ static float voice_run_kr(s1c *s, s1c_voice *v)
++#endif
+ {
+ #if DNBOX_S1_VOICE_TRACE
+     ++lab_s1_voice_entries;
+@@ -569,8 +597,13 @@
+         }
+     }
+     int bl = P(BLE) > 0.0f;
++#if DNBOX_S1_MORPH_SHARE
++    float o1 = morph_cell(&v->ph[0],v->kd1,v->ki1,blend[0],bl) * v->vamp * P(VOL1);
++    float o2 = morph_cell(&v->ph[1],v->kd2,v->ki2,blend[1],bl) * v->vamp * P(VOL2);
++#else
+     float o1 = morph(&v->ph[0], v->kd1, v->ki1, P(I1), bl) * v->vamp * P(VOL1);
+     float o2 = morph(&v->ph[1], v->kd2, v->ki2, P(I2), bl) * v->vamp * P(VOL2);
++#endif
+     float y = (1.0f - v->kbal) * o1 + v->kbal * o2;
+     float sub = sine_t(v->ph[2]);
+     v->ph[2] += v->kis;
+@@ -1220,8 +1253,26 @@
+         sequencer(s);
+ #endif
+         float y = 0.0f;
++#if DNBOX_S1_MORPH_SHARE && S1C_KR > 1
++        if (P(MONO) > 0.0f) {
++            if (s->v[0].root != -1 && s->v[0].stage) {
++                const s1c_morph_blend blend[2] = {morph_decode(P(I1)),morph_decode(P(I2))};
++                y = voice_run_kr(s,&s->v[0],blend);
++            }
++        } else {
++            i = 0;
++            while (i < S1C_VOICES && (s->v[i].root == -1 || !s->v[i].stage)) ++i;
++            if (i < S1C_VOICES) {
++                const s1c_morph_blend blend[2] = {morph_decode(P(I1)),morph_decode(P(I2))};
++                y += voice_run_kr(s,&s->v[i++],blend);
++                for (; i < S1C_VOICES; ++i)
++                    if (s->v[i].root != -1 && s->v[i].stage) y += voice_run_kr(s,&s->v[i],blend);
++            }
++        }
++#else
+         if (P(MONO) > 0.0f) { if (s->v[0].root != -1 && s->v[0].stage) y = voice_run(s, &s->v[0]); }
+         else for (i = 0; i < S1C_VOICES; i++) if (s->v[i].root != -1 && s->v[i].stage) y += voice_run(s, &s->v[i]);
++#endif
+ 
+         /* bitcrush (sample-and-hold), tremolo */
+ #if defined(X0X_S1_CRUSH_LFO_PROBE) && X0X_S1_CRUSH_LFO_PROBE

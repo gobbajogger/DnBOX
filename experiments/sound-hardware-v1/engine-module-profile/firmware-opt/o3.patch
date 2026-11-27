@@ -1,0 +1,12 @@
+--- a/tools/build.py
++++ b/tools/build.py
+@@ -542,6 +542,9 @@
+             if SUPERJ6_FACTORY == "1" and Path(u).stem in {"dnbx_core", "juno6"}:
+                 uf = ["-Oz" if flag == "-Os" else flag for flag in uf]
+                 uf = [*uf, "-DDNBX_DIAGNOSTIC_COUNTERS=0"]
++            if Path(u).stem in {"s1c","s1u"} and os.environ.get("DNBOX_S1_HOT_O3")=="1":
++                assert "-O2" in uf and "-fno-fast-math" in uf and "-ffp-contract=off" in uf
++                uf = ["-O3" if f == "-O2" else f for f in uf]
+             units.append(("cc", *uf, "-c", Path(u), "-o", o))
+             objs.append(o)
+     if chance_probe == "1":
