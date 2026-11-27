@@ -1,0 +1,90 @@
+--- a/firmware/src/dsp/s1c/s1c.c
++++ b/firmware/src/dsp/s1c/s1c.c
+@@ -483,6 +483,12 @@
+ #if S1C_KR > 1
+ /* Cheap voice: pitch, LFO, key-tracking and filter coefficients at control rate (every S1C_KR
+  * samples), sines from a 256-point table, the filter envelope still per sample in the cutoff. */
++#if DNBOX_S1_EXACT_SEMI_LAB
++#include "semi.h"
++#define S1_NOTE_RATIO(a) semitone_ratio(a)
++#else
++#define S1_NOTE_RATIO(a) exp2f((a)/12.0f)
++#endif
+ static float voice_run_kr(s1c *s, s1c_voice *v)
+ {
+     int mono = P(MONO) > 0.0f, ft = (int)P(FTYPE);
+@@ -492,10 +498,10 @@
+         v->kc = S1C_KR;
+         float base = mono ? s->monos : v->freq, half = 0.5f * s->sr;
+         float plfo = 1.0f + lfo01(s, P(LPITCH)) * 0.0594630944f, k = P(DETM) * plfo;
+-        const float f1 = clampf(base * exp2f((int)P(SEMI1) / 12.0f) * k, 0.0f, half);
++        const float f1 = clampf(base * S1_NOTE_RATIO((int)P(SEMI1)) * k, 0.0f, half);
+         float det = P(DET2) * (v->freq / 261.6255653f);
+         if ((int)P(LDET)) det *= lfo01(s, P(LDET));
+-        const float f2 = clampf(base * exp2f((int)P(SEMI2) / 12.0f) * k + det, 0.0f, half);
++        const float f2 = clampf(base * S1_NOTE_RATIO((int)P(SEMI2)) * k + det, 0.0f, half);
+         const float fs = clampf(base * k / (2.0f * (1.0f + P(SUBOCT))), 0.0f, half);
+         v->kff = clampf(base * k, 0.0f, half);
+         /* The frequencies and the sample rate cannot change until the next
+--- /dev/null
++++ b/firmware/src/dsp/s1c/semi.h
+@@ -0,0 +1,7 @@
++static const float s1_semi_exact_table[49]={
++#include "semi.inc"
++};
++static inline float semitone_ratio(int x){
++ unsigned u=(unsigned)x+24u;
++ return u<49u?s1_semi_exact_table[u]:fm_exp2f((float)x/12.f);
++}
+--- /dev/null
++++ b/firmware/src/dsp/s1c/semi.inc
+@@ -0,0 +1,49 @@
++0x1p-2f,
++0x1.0f38fap-2f,
++0x1.1f59acp-2f,
++0x1.306fep-2f,
++0x1.428a3p-2f,
++0x1.55b81p-2f,
++0x1.6a09e8p-2f,
++0x1.7f911p-2f,
++0x1.965feap-2f,
++0x1.ae89fap-2f,
++0x1.c823e2p-2f,
++0x1.e3437ep-2f,
++0x1p-1f,
++0x1.0f38f8p-1f,
++0x1.1f59acp-1f,
++0x1.306fep-1f,
++0x1.428a3p-1f,
++0x1.55b81p-1f,
++0x1.6a09e8p-1f,
++0x1.7f910ep-1f,
++0x1.965feap-1f,
++0x1.ae89fap-1f,
++0x1.c823ep-1f,
++0x1.e3437ep-1f,
++0x1p+0f,
++0x1.0f38fap+0f,
++0x1.1f59acp+0f,
++0x1.306fep+0f,
++0x1.428a3p+0f,
++0x1.55b81p+0f,
++0x1.6a09e8p+0f,
++0x1.7f910ep+0f,
++0x1.965fecp+0f,
++0x1.ae89fap+0f,
++0x1.c823ep+0f,
++0x1.e3438p+0f,
++0x1p+1f,
++0x1.0f38fap+1f,
++0x1.1f59acp+1f,
++0x1.306fep+1f,
++0x1.428a3p+1f,
++0x1.55b81p+1f,
++0x1.6a09e8p+1f,
++0x1.7f911p+1f,
++0x1.965feap+1f,
++0x1.ae89fap+1f,
++0x1.c823e2p+1f,
++0x1.e3437ep+1f,
++0x1p+2f,
