@@ -6,6 +6,9 @@
 #include "chicago_fx2_compact.h"
 #endif
 #include <string.h>
+#if X0X_SJ6_NATIVE_DELAY && X0X_SUPERJ6_FACTORY
+#include "lab_delay.inc"
+#endif
 
 static int runtime_result(original_runtime_part *p, int ok)
 {
@@ -89,6 +92,9 @@ int original_runtime_prepare(original_runtime_part *p, float bpm)
 #else
         (void)bpm;          /* no tempo-dependent parameters: idempotent */
 #endif
+#if X0X_SJ6_NATIVE_DELAY && X0X_SUPERJ6_FACTORY
+        original_runtime_delay_drain(p,bpm);
+#endif
         ok = 1;
     } else if (p->kind == ORIGINAL_SOUND_MIAMI) {
         ok = original_miami_backend_set_tempo(&p->dsp.miami, bpm) &&
@@ -111,6 +117,12 @@ int original_runtime_retire(original_runtime_part *p)
     if (p->kind == ORIGINAL_SOUND_SYNTHONE && p->dsp.synthone.arena) {
         (void)original_chicago_fx2_compact_init((original_chicago_fx2_compact *)(void *)p->dsp.synthone.arena);
         p->dsp.synthone.arena = NULL;
+    }
+#endif
+#if X0X_SJ6_NATIVE_DELAY && X0X_SUPERJ6_FACTORY
+    if (p->kind==ORIGINAL_SOUND_JUNO) {
+        memset(&p->dsp.juno.lab_delay,0,sizeof p->dsp.juno.lab_delay);
+        memset(&p->dsp.juno.synth.delay24,0,sizeof p->dsp.juno.synth.delay24);
     }
 #endif
     p->status = ORIGINAL_RUNTIME_INVALID;
@@ -754,6 +766,9 @@ static int render_backend(original_runtime_part *p, original_runtime_workspace *
         ok=juno6_render_stereo(&p->dsp.juno.synth,left,right,frames);
         if(ok){
             juno6_chorus_process(&p->dsp.juno.chorus,left,right,frames);
+#if X0X_SJ6_NATIVE_DELAY && X0X_SUPERJ6_FACTORY
+            juno6_delay24_process(&p->dsp.juno.synth,left,right,frames);
+#endif
             /* The original master attenuator follows the instrument effects. */
             float gain=p->dsp.juno.synth.master_gain;
             if(gain!=1.f) for(unsigned i=0;i<frames;++i){

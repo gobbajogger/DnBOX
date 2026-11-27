@@ -584,6 +584,16 @@ def build_app():
     flags = [*CFLAGS, *FPU, *BOARD_DEFS[BOARD], "-Ifirmware/hal", "-Ifirmware/src",
              f"-I{GEN.relative_to(SRC)}"]
     factory_roots = []
+    native_sj6_rx = os.environ.get("X0X_SJ6_NATIVE_DELAY", "0")
+    if native_sj6_rx not in ("0", "1") or (native_sj6_rx == "1" and
+            (BOARD != "smk37" or VERSION or SUPERJ6_FACTORY != "1")):
+        raise SystemExit("X0X_SJ6_NATIVE_DELAY: unversioned SMK factory diagnostic only")
+    if native_sj6_rx == "1":
+        flags.append("-DX0X_SJ6_NATIVE_DELAY=1")
+        # No front-end caller yet: retain both boundaries in sizing builds.
+        factory_roots.extend(("-u", "original_runtime_delay_bind",
+                              "-u", "original_runtime_delay_publish",
+                              "-u", "original_runtime_delay_result"))
     if SUPERJ6_FACTORY == "1":
         names = ["engine_superj6_factory_load"]
         if synthone_patch_setting() != "1":

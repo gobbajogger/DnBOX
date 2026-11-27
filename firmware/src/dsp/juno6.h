@@ -44,6 +44,16 @@ typedef struct {
  juno6_oscillator_edit pending_wave[2];
  uint8_t pending_field_mask, pending_wave_mask;
  float typed_hp_state[2], typed_hp_input[2];
+#if X0X_SJ6_NATIVE_DELAY
+ float lfo_tempo; /* unused AUX accessor; AUX production is not enabled */
+ struct {
+    int16_t *tap;
+    float current,target,fb,fb_target,wet,wet_target,inv_stride,sum[2],step[3];
+    uint16_t ramp[3];
+    uint16_t stride,phase,pos,filled;
+    uint8_t tick,mix,clock_refused,sync,enabled;
+ } delay24;
+#endif
 #endif
 } juno6_t;
 typedef struct {

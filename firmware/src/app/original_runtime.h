@@ -18,7 +18,19 @@ enum { ORIGINAL_RUNTIME_OK = 1, ORIGINAL_RUNTIME_INVALID = 0,
 typedef union {
     original_chicago_backend chicago;
     original_miami_backend miami;
-    struct { juno6_t synth; juno6_chorus_t chorus; } juno;
+    struct {
+        juno6_t synth;
+        juno6_chorus_t chorus;
+#if X0X_SJ6_NATIVE_DELAY && X0X_SUPERJ6_FACTORY
+    /* RAM-only: publisher is serialized by the caller's audio-source mask. */
+    struct {
+        uint32_t epoch;
+        int16_t *arena;
+        float last_bpm;
+        uint8_t pending[4], applied[4], ready, present, result;
+    } lab_delay;
+#endif
+    } juno;
     s1_dry_part synthone;
 } original_runtime_backend;
 /* Shared live arp / ARP SEQ for SYNTHONE and JUNO owners (engine_arp.h). Live
@@ -65,6 +77,11 @@ int original_runtime_init(original_runtime_part *, const uint8_t cell[32], float
 /* Call on an initialized or zero-initialized part before cold replacement;
  * externally owned Chicago resources must be retired before overwriting it. */
 int original_runtime_retire(original_runtime_part *);
+#if X0X_SJ6_NATIVE_DELAY && X0X_SUPERJ6_FACTORY
+int original_runtime_delay_bind(original_runtime_part *, int16_t *, uint32_t);
+int original_runtime_delay_publish(original_runtime_part *, uint32_t, unsigned, const uint8_t *, unsigned);
+int original_runtime_delay_result(const original_runtime_part *);
+#endif
 int original_runtime_prepare(original_runtime_part *, float bpm);
 int original_runtime_param(original_runtime_part *, unsigned parameter, float value);
 int original_runtime_key(original_runtime_part *, unsigned source, unsigned key, unsigned velocity);
