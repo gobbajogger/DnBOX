@@ -1537,7 +1537,7 @@ X0X_COLD void engine_motion_clear(int k)
      * removed ramp after the restoration or interleave DSP program writes. */
     if (k < 0 || k >= NLANE || !mot.lane) return;
     lane_t *lane = &mot.lane[k];
-    int restore = lane->used && lane->t != 0xfdu && lane->t != HELD_CHORD_TARGET;
+    int restore = lane->used && lane->t != 0xfdu && lane->t != HELD_CHORD_TARGET && !motion_parked_bass(lane->t);
     int t = lane->t, v = lane->v, i = lane->i;
     if (original_motion_performance(t, v, i)) restore = 0;
     /* BREAK velocity is a sequencer byte, so remove it and restore its owner

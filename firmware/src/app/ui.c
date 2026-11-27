@@ -848,7 +848,7 @@ X0X_COLD static void pref_set_impl(pref_t r, int v, int from_keyboard)
         int preset = r.kind == R_BENGINE ? 0 : v;
         int rc = engine_bass_select_preset(r.b,bank,preset,&proj.sound);
         if (rc) {
-            say(rc == -2 ? "ENGINE UNAVAILABLE" : rc == -4 ? "BASS MOTION IN USE" :
+            say(rc == -2 ? "ENGINE UNAVAILABLE" :
                 rc == -5 ? "UNSUPPORTED SOUND" : "INVALID PRESET",0);
             return;
         }
@@ -2216,6 +2216,7 @@ static int pattern_used(const pattern_t *pt)
 static void clear_lanes(int pat, int part)
 {
     int k;
+    engine_bass_edit_hold(1);
     for (k = 0; k < NLANE; k++) {
         lane_t *l = &proj.arr.lane[k];
         if (l->used && l->pat == pat && l->part == part) {
@@ -2224,10 +2225,12 @@ static void clear_lanes(int pat, int part)
                 ui_restore_base(l->t,l->v,l->i);
         }
     }
+    engine_bass_edit_hold(0);
 }
 
+
 /* part `part` of pattern src onto pattern dst, its lanes too; 0 = done, -1 = lanes did not fit */
-static int copy_part(int dst, int src, int part)
+static int copy_part_owned(int dst, int src, int part)
 {
     pattern_t *d = &proj.pat[dst];
     const pattern_t *a = &proj.pat[src];
@@ -2265,6 +2268,14 @@ static int copy_part(int dst, int src, int part)
     }
     return rc;
 }
+static int copy_part(int dst, int src, int part)
+{
+    engine_bass_edit_hold(1);
+    int rc=copy_part_owned(dst, src, part);
+    engine_bass_edit_hold(0);
+    return rc;
+}
+
 
 static void clear_part(pattern_t *p, int part)
 {
@@ -2579,7 +2590,7 @@ static void do_undo(int redo)
                 if(ready>0) {
                     undo_wait=(uint8_t)(redo?2:1);undo_wait_cur=undo.cur;undo_wait_used=undo.used;
                     undo_wait_serial=engine_bass_choice_serial();say("UNDO WAIT NOTE / INPUT",0);
-                } else say(ready==-4?"UNDO SOUND LOCKS":"UNDO ENGINE UNAVAILABLE",0);
+                } else say("UNDO ENGINE UNAVAILABLE",0);
 #if X0X_BASS_PRESET_PREVIEW
                 engine_bass_edit_hold(0);
 #endif
@@ -2658,7 +2669,7 @@ X0X_COLD int ui_project_save(void)
     save_wait = 0;
     rc = project_save();
     if (project_storage_unsupported() != 2)
-        say(rc == -9 ? "NEWER DATA: NOT SAVED" : rc == -7 ? "MEMORY FULL: NOT SAVED" : rc ? "SAVE FAILED" : "SAVED", 0);
+        say(rc == -9 ? (project_storage_unsupported()==3 ? "RECOVERED: EXPORT ONLY" : "NEWER DATA: NOT SAVED") : rc == -7 ? "MEMORY FULL: NOT SAVED" : rc ? "SAVE FAILED" : "SAVED", 0);
     ui.save_failed = rc != 0;
     if (!rc)
         ui.dirty = 0;
@@ -2959,9 +2970,9 @@ X0X_COLD static void reset_sound(int part)
         int ready = engine_bass_base_ready(mask, &next);
         if (ready) {
             engine_project_hold(0);
-            ui.overlay = O_ASK; /* retry after notes/input or sound locks are released */
+            ui.overlay = O_ASK; /* retry after notes/input are released */
             say(ready > 0 ? "UNDO WAIT NOTE / INPUT" :
-                ready == -4 ? "UNDO SOUND LOCKS" : "UNDO ENGINE UNAVAILABLE", 0);
+                "UNDO ENGINE UNAVAILABLE", 0);
             engine_bass_edit_hold(0);
             return;
         }
@@ -2969,6 +2980,11 @@ X0X_COLD static void reset_sound(int part)
 #endif
     /* Keep preceding mixer/part edits out of the reset's undo entry. */
     undo_commit_stable();
+#if X0X_BASS_TAGGED_SOUND
+    int old_bank=mask ? engine_bass_bank(voice) : -1;
+    int new_bank=mask ? engine_bass_sound_bank(&factory,voice) : -1;
+    if (mask) motion_bank_retag(proj.arr.lane,T_303,voice,old_bank,new_bank);
+#endif
     int result = sound_reset_part(&proj.sound, &factory, part, &mute_proxy, &undo);
     if (result == SOUND_RESET_OK) {
 #if X0X_BASS_TAGGED_SOUND
@@ -2983,7 +2999,13 @@ X0X_COLD static void reset_sound(int part)
         say("RESET SOUND ", part_name(part));
     } else say(result == SOUND_RESET_NO_SAVED ? "NO SAVED SOUND" : "UNDO UNAVAILABLE", 0);
 #if X0X_BASS_TAGGED_SOUND
-    if (mask) engine_project_hold(0);
+    if (mask) {
+        if (result != SOUND_RESET_OK) {
+            motion_bank_retag(proj.arr.lane,T_303,voice,new_bank,old_bank);
+            memcpy(project_stage.arr.lane,proj.arr.lane,sizeof proj.arr.lane);
+        }
+        engine_project_hold(0);
+    }
 #endif
     engine_bass_edit_hold(0);
 }
@@ -3543,7 +3565,7 @@ static uint32_t lock_marks(int t, int v, int base)
     int k, c;
     for (k = 0; k < NLANE; k++) {
         const lane_t *l = &proj.arr.lane[k];
-        if (!l->used || l->part != ui.part || l->pat != seq.ppat[ui.part] || (t >= 0 && l->t != t) ||
+        if (!l->used || motion_parked_bass(l->t) || l->part != ui.part || l->pat != seq.ppat[ui.part] || (t >= 0 && l->t != t) ||
             (v >= 0 && l->v != v))
             continue;
         for (c = 0; c < 16; c++)
@@ -6533,7 +6555,7 @@ static UI_DRAW void draw_part_sound(int band)
             int edited=engine_bass_preset_edited(b);
             const char *status=pending?"WAIT":preset<0?"USER":edited?"EDITED":"ACTIVE";
             const char *reason=pending==2?"WAIT FOR NOTES/TAIL":pending==3?"RETURN WHEELS":
-                pending==4?"BASS MOTION IN USE":pending==5?"WAIT FOR INPUT":
+                pending==5?"WAIT FOR INPUT":
                 pending==6?"WAIT FOR UPDATE":"WAIT FOR AUDIO";
             int iw=pending?9:edited?8:10, vy=y+(night?(pending?31:36):(pending?24:29));
 #if X0X_BASS_TAGGED_SOUND
@@ -9703,7 +9725,7 @@ X0X_COLD void ui_init(void)
     undo_start();                                   /* the project as loaded is where undo stops */
     if (project_storage_unsupported()) {
         ui.save_failed = 1;
-        if (project_storage_unsupported() != 2) say("NEWER DATA: LOAD BLOCKED", 0);
+        if (project_storage_unsupported() != 2) say(project_storage_unsupported()==3 ? "RECOVERED: EXPORT ONLY" : "NEWER DATA: LOAD BLOCKED", 0);
     }
 }
 
@@ -9884,7 +9906,7 @@ static void autosave(void)
         break;
     case -9:
         ui.save_failed = 1;
-        say("NEWER DATA: NOT SAVED", 0);
+        say(project_storage_unsupported()==3 ? "RECOVERED: EXPORT ONLY" : "NEWER DATA: NOT SAVED", 0);
         break;
     case -7:
         ui.save_failed = 1;

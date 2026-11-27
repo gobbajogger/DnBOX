@@ -26,11 +26,18 @@ project_t project_stage X0X_POOL;
 #define PROJ_STREAM 13u                 /* compact Chicago schema2; current raw patterns/arrangement */
 #define PROJ_STREAM_14 14u              /* 13 + per-pattern bass presets (pattern_t.rsv[0..1]) and note locks */
 #define PROJ_STREAM_CHORD 15u /* same byte layout, sparse held-key chord metadata */
-static int stream_known(uint32_t format) { return format == PROJ_STREAM || format == PROJ_STREAM_14 || format == PROJ_STREAM_CHORD; }
+#define PROJ_STREAM_BASS_MOTION 16u /* parked bass automation is tagged by engine */
+static int stream_known(uint32_t format)
+{
+    return format >= PROJ_STREAM && format <=
+        (X0X_BASS_TAGGED_SOUND?PROJ_STREAM_BASS_MOTION:PROJ_STREAM_CHORD);
+}
 /* Revision 14 only when the project uses what 13 cannot hold, so a project without
  * pattern presets or note locks stays byte-identical and loads on 0.0.24.x. */
 static uint32_t stream_format_of(const project_t *pr)
 {
+    for(int k=0;k<NLANE;k++)
+        if(pr->arr.lane[k].used && motion_parked_bass(pr->arr.lane[k].t))return PROJ_STREAM_BASS_MOTION;
     for(int k=0;k<NLANE;k++)
         if(pr->arr.lane[k].used && pr->arr.lane[k].t==HELD_CHORD_TARGET)return PROJ_STREAM_CHORD;
     for (int p = 0; p < NPAT; p++)
@@ -52,14 +59,24 @@ static const uint8_t STREAM_OBJ[] = {OBJ_PAT0, OBJ_PAT1, OBJ_SONG, OBJ_MOTION};
 #define STREAM_HDR 16u                  /* in the first object: format, raw length, raw CRC, packed length */
 #define STREAM_CAP (NSTREAM * (PLAT_STORE_MAX - 4u) - (STREAM_HDR - 4u))
 #define RAW_OFF __builtin_offsetof(project_t, pat)
+#define TUPLE_OFF __builtin_offsetof(project_t, sound)
+#define TUPLE_LEN (sizeof(project_t) - TUPLE_OFF)
 #define RAW_LEN (sizeof(project_t) - RAW_OFF)   /* the patterns and the arrangement, contiguous */
-typedef char raw_fits[(RAW_LEN < 0xFFFFu) ? 1 : -1];
+typedef char raw_fits[(RAW_LEN < 0xFFFFu && TUPLE_LEN < 0xFFFFu) ? 1 : -1];
+_Static_assert(TUPLE_OFF + sizeof(sound_t) == RAW_OFF, "tuple sound and patterns contiguous");
+static uint32_t stream_offset(uint32_t format)
+{return format==PROJ_STREAM_BASS_MOTION?TUPLE_OFF:RAW_OFF;}
+static uint32_t stream_raw_len(uint32_t format)
+{return format==PROJ_STREAM_BASS_MOTION?TUPLE_LEN:RAW_LEN;}
 typedef char raw_contiguous[(__builtin_offsetof(project_t, arr) == RAW_OFF + sizeof proj.pat) ? 1 : -1];
 
 static void arrange_defaults(project_t *pr);
 static int project_validate_for(const project_t *pr);
-/* 1: unsupported, 2: damaged. Both retain flash until validated staged adoption. */
+/* 1: unsupported, 2: damaged, 3: recovered complete read-only tuple.
+ * Retain on-flash data until explicit validated import/reset. */
 static uint8_t project_incompatible;
+static uint8_t stream_tuple_authority; /* once observed/published 16, never rewrite legacy sound */
+static uint8_t stream_read_recovered, stream_stage_recovered;
 static uint8_t stream_previous; /* per-object older-copy selection during recovery */
 static uint8_t device_bt_pending;       /* independent of UI dirty/autosave and project reset/load */
 static uint8_t settings_read_failed;    /* defaults must not replace unread stored settings */
@@ -318,29 +335,33 @@ static int st_put(void *ctx, const uint8_t *p, uint32_t n)
 }
 
 /* Check capacity before any project object is changed, including settings and sound. */
-static int measure_project(const project_t *pr, uint32_t *length)
+static int measure_for_format(const project_t *pr, uint32_t *length, uint32_t format)
 {
-    const uint8_t *raw = (const uint8_t *)pr + RAW_OFF;
-    st_out_t o = {1, 0, 0, 0, 0, PROJ_STREAM};
+    const uint8_t *raw = (const uint8_t *)pr + stream_offset(format);
+    st_out_t o = {1, 0, 0, 0, 0, format};
     lz_sink_t sink = {st_put, &o};
-    if (lz_compress(raw, RAW_LEN, &sink))
+    if (lz_compress(raw, stream_raw_len(format), &sink))
         return -7;
     *length = o.total;
     return 0;
 }
 
-static int save_stream(void)
+static int measure_project(const project_t *pr, uint32_t *length)
+{return measure_for_format(pr,length,stream_format_of(pr));}
+
+static int save_stream(uint32_t format)
 {
-    const uint8_t *raw = (const uint8_t *)&proj + RAW_OFF;
-    uint32_t crc = crc32_of(raw, RAW_LEN);
-    st_out_t o = {0, 0, 0, 0, 0, stream_format_of(&proj)};
+    const uint8_t *raw = (const uint8_t *)&proj + stream_offset(format);
+    const uint32_t len=stream_raw_len(format);
+    uint32_t crc = crc32_of(raw, len);
+    st_out_t o = {0, 0, 0, 0, 0, format};
     lz_sink_t sink = {st_put, &o};
     o.fill = STREAM_HDR;
     put32(io_buf, o.format);
-    put32(io_buf + 4, RAW_LEN);
+    put32(io_buf + 4, len);
     put32(io_buf + 8, crc);
     put32(io_buf + 12, packed_len);
-    if (lz_compress(raw, RAW_LEN, &sink) || o.err || st_flush(&o))
+    if (lz_compress(raw, len, &sink) || o.err || st_flush(&o))
         return -3;
     while (o.k < NSTREAM)                             /* the objects past the stream: empty */
         if (st_flush(&o))
@@ -415,16 +436,17 @@ static int stream_parts_ok(const pattern_t *pat,const arrange_t *arr,uint32_t fo
         const lane_t *l=&arr->lane[k];
         if(!l->used)continue;
         if(l->t==HELD_CHORD_TARGET) {
-            if(format!=PROJ_STREAM_CHORD || !held_chord_lane_valid(l))return 0;
+            if(format<PROJ_STREAM_CHORD || !held_chord_lane_valid(l))return 0;
             for(int j=0;j<k;j++)if(arr->lane[j].used && arr->lane[j].t==l->t &&
                 arr->lane[j].pat==l->pat && arr->lane[j].part==l->part &&
                 arr->lane[j].v==l->v && arr->lane[j].i==l->i)return 0;
         }
+        if(motion_parked_bass(l->t) && format!=PROJ_STREAM_BASS_MOTION)return 0;
         if(l->t==0xfeu)return 0; /* frozen historical contract remains unsupported */
         if(l->t==0xfdu) {
 #if X0X_BASS_NOTE_SOUND
             /* A lock on a step that is no longer a note is kept and never plays. */
-            if((format!=PROJ_STREAM_14 && format!=PROJ_STREAM_CHORD) || engine_bass_note_validate(l))return 0;
+            if(format<PROJ_STREAM_14 || engine_bass_note_validate(l))return 0;
             for(int j=0;j<k;j++)if(arr->lane[j].used && arr->lane[j].t==l->t &&
                 arr->lane[j].pat==l->pat && arr->lane[j].part==l->part && arr->lane[j].v==l->v)return 0;
 #else
@@ -449,9 +471,9 @@ static void migrate_break_counts(project_t *pr, uint32_t format)
 
 static int load_stream(project_t *pr, int n, uint32_t format)
 {
-    uint8_t *raw = (uint8_t *)pr + RAW_OFF;
+    uint8_t *raw = (uint8_t *)pr + stream_offset(format);
     uint32_t crc = get32(io_buf + 8), plen = get32(io_buf + 12);
-    uint32_t raw_len = RAW_LEN;
+    uint32_t raw_len = stream_raw_len(format);
     st_in_t s = {0, n, STREAM_HDR, plen, format, 0};
     lz_src_t src = {st_get, &s};
     if (n < (int)STREAM_HDR || get32(io_buf + 4) != raw_len || plen > STREAM_CAP)
@@ -472,13 +494,27 @@ static int load_stream(project_t *pr, int n, uint32_t format)
 #if !X0X_ORIGINAL_SYNTH
     migrate_break_counts(pr, format);
 #endif
-    if (format != stream_format_of(pr))
+    if (format != PROJ_STREAM_BASS_MOTION && format != stream_format_of(pr))
         for (int k = 0; k < NSTREAM; k++) stored_known[STREAM_OBJ[k]] = 0;
     packed_len = plen;
     return 0;
 }
 
 
+/* Validation binds the correct sound to each attempted candidate. The
+ * independent legacy sound is never consulted for a stream16 candidate. */
+static int read_stream_candidate(project_t *pr,int n,uint32_t format,int validate)
+{
+    if(format!=PROJ_STREAM_BASS_MOTION){
+        int rc=load_sound(&pr->sound);
+        if(rc)return rc;
+        n=load_stream_object(0); /* OBJ_SOUND used the single shared io_buf */
+        if(n<4)return n<0?n:-1;
+        if(get32(io_buf)!=format)return -9;
+    }
+    const int rc=load_stream(pr,n,format);
+    return rc||!validate?rc:project_validate_for(pr);
+}
 static void patterns_defaults(project_t *pr)
 {
     int i;
@@ -492,6 +528,7 @@ static void patterns_defaults(project_t *pr)
 static int read_project(project_t *pr)
 {
     uint8_t device_bt = proj.set.bt;
+    stream_read_recovered=0;
     project_defaults_for(pr, device_bt);
     packed_len = 0;
     settings_t set = pr->set;
@@ -522,31 +559,34 @@ static int read_project(project_t *pr)
             device_bt = (uint8_t)(1u | PROJ_BT_SMC_CENTRAL);
 #endif
     }
-    rc = load_sound(&pr->sound);
-    present |= rc != -1;
-    transient |= rc == -2 || rc == -8;
-    if (rc == -9) goto unsupported;
-    if (rc) bad = 1;
     stream_previous = 0;
     int n = load_stream_object(0);
     present |= n != -1;
     transient |= n == -2 || n == -8;
     if (n >= 0 && (n < 4 || !stream_known(get32(io_buf)))) goto unsupported;
     if (n >= 4) {
-        rc = load_stream(pr, n, get32(io_buf));
-        if (rc == -9) goto unsupported;
-        /* At most 16 A/B combinations, no second stream buffer. A cut can
-         * leave only some newest objects changed (unchanged objects are not
-         * written), so taking all older copies is not sufficient. */
+        const uint32_t newest=get32(io_buf);
+        if(newest==PROJ_STREAM_BASS_MOTION)stream_tuple_authority=1;
+        rc=read_stream_candidate(pr,n,newest,newest==PROJ_STREAM_BASS_MOTION);
+        if (rc == -9) goto unsupported; /* unknown latest feature or sound */
+        present |= rc != -1;
+        transient |= rc == -2 || rc == -8;
+        int saw_tuple=newest==PROJ_STREAM_BASS_MOTION;
+        /* At most 16 original combinations. A prior valid tuple is a
+         * recovery source, never permission to rewrite a newer/torn head. */
         for (unsigned mask = 1; rc && mask < (1u << NSTREAM); ++mask) {
             stream_previous = (uint8_t)mask;
             n = load_stream_object(0);
             if (n < (int)STREAM_HDR || !stream_known(get32(io_buf))) continue;
-            rc = load_stream(pr, n, get32(io_buf));
-            if (!rc) rc = project_validate_for(pr);
+            const uint32_t format=get32(io_buf);
+            if(format==PROJ_STREAM_BASS_MOTION)saw_tuple=stream_tuple_authority=1;
+            rc=read_stream_candidate(pr,n,format,1);
+            transient |= rc == -2 || rc == -8;
         }
-        if (!rc && stream_previous)
+        if (!rc && stream_previous) {
+            stream_read_recovered=(uint8_t)saw_tuple;
             for (int k = 0; k < NSTREAM; ++k) stored_known[STREAM_OBJ[k]] = 0;
+        }
         stream_previous = 0;
         if (rc) {
             patterns_defaults(pr);
@@ -555,6 +595,10 @@ static int read_project(project_t *pr)
         }
     } else {
         bad = 1;
+        rc=load_sound(&pr->sound);
+        present |= rc != -1;
+        transient |= rc == -2 || rc == -8;
+        if(rc==-9)goto unsupported;
         /* PAT0 may itself be missing while later committed segments remain. */
         for (int k = 1; k < NSTREAM; ++k)
         {
@@ -585,7 +629,7 @@ int project_load(void)
 {
     project_incompatible = 0;
     int rc = read_project(&proj);
-    if (!rc) settings_load_failed = 0;
+    if (!rc) { settings_load_failed = 0; if(stream_read_recovered)project_incompatible=3; }
     if (rc == -9
 #if X0X_BASS_TAGGED_SOUND
         || (!rc && engine_bass_sound_validate(&proj.sound))
@@ -594,7 +638,7 @@ int project_load(void)
     return rc;
 }
 int project_storage_unsupported(void) { return project_incompatible; }
-void project_reset_stage(void) { project_defaults_for(&project_stage, proj.set.bt); }
+void project_reset_stage(void) { stream_stage_recovered=0; project_defaults_for(&project_stage, proj.set.bt); }
 
 /* Validate indices before the UI, sequencer or DSP can see an imported project.
  * Unused sound cells and motion lanes are opaque, just as they are in storage.
@@ -695,6 +739,21 @@ static int project_validate_for(const project_t *p)
                 p->arr.lane[j].v==l->v && p->arr.lane[j].i==l->i)return -1;
             continue;
         }
+#if X0X_BASS_TAGGED_SOUND
+        if (motion_parked_bass(l->t)) {
+            int kind = l->t - MOT_PARK_BASS;
+            if (l->v >= NBASS || l->part != PART_303A + l->v ||
+                kind == engine_bass_sound_bank(&p->sound,l->v)) return -1;
+            const x0x_param_t *desc = engine_bass_bank_param(kind,l->i);
+            if (!desc) return -1;
+            for (int j=0;j<k;j++) {
+                const lane_t *other=&p->arr.lane[j];
+                if (other->used && other->t==l->t && other->pat==l->pat &&
+                    other->part==l->part && other->v==l->v && other->i==l->i) return -1;
+            }
+            max = desc->max;
+        } else
+#endif
         if (l->t == T_PROB) {
             if ((l->v >> 4) != l->part || (l->v & 15) >= (l->part < NKIT ? NDRUM : 1) || l->i)
                 return -1;
@@ -739,6 +798,7 @@ int project_load_stage(void)
 {
     uint32_t live_length = packed_len;
     int rc = read_project(&project_stage);
+    stream_stage_recovered=(uint8_t)(!rc && stream_read_recovered);
     if (rc == -9) project_incompatible = 1;
     packed_len = live_length;
     rc=rc?rc:project_validate_stage();
@@ -752,7 +812,11 @@ void project_commit_stage(void)
     project_stage.set.bt = (uint8_t)((project_stage.set.bt & ~PROJ_DEVICE_BT) | (proj.set.bt & PROJ_DEVICE_BT));
     __builtin_memcpy(&proj, &project_stage, sizeof proj);
     part_off_live = part_off_staged;
-    project_incompatible = 0; /* explicitly validated import/reset is the recovery boundary */
+    /* Ordinary import/reset cannot turn a half-committed storage chain into
+     * a safe write base. Until an explicit transactional repair exists,
+     * keep a tuple-recovery fence even after an in-memory adoption. */
+    project_incompatible = (stream_stage_recovered || project_incompatible==3)?3:0;
+    stream_stage_recovered=0;
     settings_load_failed = 0;
     settings_read_failed = 0;
     (void)measure_project(&proj, &packed_len);
@@ -796,6 +860,7 @@ void project_file_header(uint8_t *h)
 
 int project_file_validate(const uint8_t *h)
 {
+    stream_stage_recovered=0; /* explicit validated import only, not loaded fallback */
     if (get32(h) != 0x50583058u || get32(h + 4) != 1 || get32(h + 8) != sizeof project_stage ||
         !PROJ_FORMAT_OK(get32(h + 16)) ||
         !stream_known(get32(h + 20)) ||
@@ -845,6 +910,7 @@ static void capture_settings(settings_t *set, uint8_t *part_off)
 
 void project_capture_stage(void)
 {
+    stream_stage_recovered=0;
     __builtin_memcpy(&project_stage, &proj, sizeof proj);
     capture_settings(&project_stage.set, &part_off_staged);
 }
@@ -861,7 +927,8 @@ int project_save(void)
 #elif X0X_BASS_PRESET_PREVIEW
     if(engine_bass_preview_changed()) return -9; /* no untagged preview writes */
 #endif
-    if (project_incompatible || !stream_layout_ok(&proj, stream_format_of(&proj)))
+    const uint32_t format=stream_tuple_authority?PROJ_STREAM_BASS_MOTION:stream_format_of(&proj);
+    if (project_incompatible || !stream_layout_ok(&proj, format))
         return -9; /* not one settings/sound/pattern object may be rewritten */
     if (settings_read_failed || settings_load_failed) return -8; /* retry load before saving fallback defaults */
 #ifndef X0X_HOST
@@ -870,12 +937,16 @@ int project_save(void)
         return -8;
 #endif
     capture_settings(&proj.set, &part_off_live);
-    if (measure_project(&proj, &packed_len))
+    if (measure_for_format(&proj, &packed_len, format))
         return -7;
     if (save_settings(&proj.set, part_off_live))
         return -1;
-    if (save_obj(OBJ_SOUND, &proj.sound, sizeof proj.sound))
+    if(format==PROJ_STREAM_BASS_MOTION)
+        stream_tuple_authority=1; /* sticky even if interrupted or retagged */
+    else if(save_obj(OBJ_SOUND,&proj.sound,sizeof proj.sound))
         return -2;
-    return save_stream();
+    const int rc=save_stream(format);
+    if(rc && format==PROJ_STREAM_BASS_MOTION)project_incompatible=3;
+    return rc;
 }
 

@@ -14,6 +14,8 @@ static unsigned checks, failures, erases, programs, saves;
 static const char *test_name;
 static int settings_read_failure = -1; /* byte address; -2 fails every settings read */
 static int cut_before_object = -1;
+static int tuple_fault_op=-1, tuple_fault_partial;
+static unsigned tuple_ops;
 
 static void expect(int ok, const char *what, int line)
 {
@@ -47,6 +49,10 @@ static int st_read(uint32_t off, void *dst, uint32_t n)
 static int st_erase(uint32_t off)
 {
     REQUIRE(!(off & 4095u) && project_range(off, 4096u));
+    if((int)tuple_ops++==tuple_fault_op) {
+        if(tuple_fault_partial) memset(nor+off,0xFF,2048u);
+        return -1;
+    }
     erases++;
     memset(nor + off, 0xFF, 4096u);
     return 0;
@@ -56,6 +62,10 @@ static int st_prog(uint32_t off, const void *src, uint32_t n)
     const uint8_t *p = src;
     uint32_t i;
     REQUIRE((off & 255u) + n <= 256u && project_range(off, n));
+    if((int)tuple_ops++==tuple_fault_op) {
+        if(tuple_fault_partial) for(i=0;i<n/2u;i++)nor[off+i]&=p[i];
+        return -1;
+    }
     programs++;
     for (i = 0; i < n; i++)
         nor[off + i] &= p[i];
@@ -176,6 +186,8 @@ static void fixture(const char *name)
     memcpy(protected_flash, nor, sizeof nor);
     erases = programs = saves = 0;
     cut_before_object = -1;
+    tuple_fault_op=-1; tuple_fault_partial=0; tuple_ops=0;
+    stream_tuple_authority=stream_read_recovered=stream_stage_recovered=0;
     memset(stored_known, 0, sizeof stored_known);
     memset(stored_hash, 0, sizeof stored_hash);
     project_incompatible = 0; /* a new simulated boot, not an accepted old project */
@@ -849,6 +861,161 @@ static void test_rates_format(void)
     CHECK(get32(h + 16) == PROJ_FORMAT);
 }
 
+#if X0X_BASS_TAGGED_SOUND
+static uint8_t tuple_saved_nor[sizeof nor], tuple_sound_slots[2*ST_SECTOR];
+static project_t tuple_old, tuple_new;
+static void tuple_boot(void)
+{
+    stream_tuple_authority=stream_read_recovered=stream_stage_recovered=0;
+    settings_read_failed=settings_load_failed=0;
+    memset(stored_known,0,sizeof stored_known);
+    memset(stored_hash,0,sizeof stored_hash);
+}
+static void tuple_park(void)
+{
+    int bank=engine_bass_sound_bank(&proj.sound,0)==0?1:0;
+    const x0x_param_t *d=engine_bass_bank_param(bank,0);
+    REQUIRE(d);
+    lane_t *l=&proj.arr.lane[0];
+    memset(l,0,sizeof *l);
+    l->used=1;l->t=MOT_PARK_BASS+bank;l->part=PART_303A;l->v=0;l->i=0;
+    for(unsigned i=0;i<NSTEPS;i++)l->val[i]=MOT_NONE;
+    l->val[0]=(uint8_t)(d->max/2u);
+}
+static void tuple_fixture(unsigned prior_tuple)
+{
+    fixture("stream16 sound/automation tuple, old/new coherent after each cut");
+    for(unsigned k=0;k<NPAT;k++) {
+        for(unsigned b=0;b<NKIT;b++)
+            for(unsigned v=0;v<NDRUM;v++)
+                for(unsigned i=0;i<NSW;i++)proj.pat[k].drum[b].hit[v][i]=next_random();
+        for(unsigned b=0;b<NBASS;b++)
+            for(unsigned i=0;i<NSTEPS;i++)
+                proj.pat[k].bass[b].step[i]=(bstep_t){next_random()%128u,G_NOTE,next_random()%128u};
+        REQUIRE(measure_project(&proj,&packed_len)==0);
+        if(packed_len>10500)break;
+    }
+    REQUIRE(project_save()==0);
+    memcpy(tuple_sound_slots,nor+st_sector(OBJ_SOUND,0),sizeof tuple_sound_slots);
+    if(prior_tuple) {
+        tuple_park();
+        proj.sound.v[T_FX][1][0]=13;
+        REQUIRE(project_save()==0);
+        proj.pat[0].bass[0].step[0].note=75;
+        proj.pat[10].bass[0].step[0]=(bstep_t){67,G_NOTE,79};
+        proj.sound.v[T_FX][1][0]=39;
+        REQUIRE(project_save()==0);
+    }
+    memcpy(&tuple_old,&proj,sizeof proj);
+    memcpy(tuple_saved_nor,nor,sizeof nor);
+    tuple_park();
+    proj.arr.lane[0].val[1]=proj.arr.lane[0].val[0];
+    proj.pat[0].bass[0].step[0].note=85;
+    proj.pat[5].bass[0].step[0]=(bstep_t){68,G_NOTE,80};
+    proj.pat[13].bass[0].step[0]=(bstep_t){69,G_NOTE,81};
+    proj.sound.v[T_FX][1][0]=57;
+    memcpy(&tuple_new,&proj,sizeof proj);
+}
+static void test_tuple_cut(void)
+{
+    unsigned cuts=0,recovered=0;
+    for(unsigned prior=0;prior<2;prior++) {
+        tuple_fixture(prior);
+        REQUIRE(project_validate_for(&proj)==0);
+        uint32_t legacy_size=0,tuple_size=0;
+        REQUIRE(measure_for_format(&proj,&legacy_size,PROJ_STREAM)==0);
+        REQUIRE(measure_for_format(&proj,&tuple_size,PROJ_STREAM_BASS_MOTION)==0);
+        printf("tuple sizes old16=%u raw_legacy=%u raw_tuple=%u packed_legacy=%u packed_tuple=%u cap=%u\n",
+               prior,(unsigned)RAW_LEN,(unsigned)TUPLE_LEN,legacy_size,tuple_size,(unsigned)STREAM_CAP);
+        for(unsigned partial=0;partial<2;partial++) {
+            for(unsigned fail=0;;fail++){
+                memcpy(nor,tuple_saved_nor,sizeof nor);
+                tuple_boot();
+                REQUIRE(project_load()==0);
+                memcpy(&proj,&tuple_new,sizeof proj);
+                tuple_ops=0; tuple_fault_op=(int)fail;tuple_fault_partial=(int)partial;
+                int rc=project_save();
+                tuple_fault_op=-1;
+                REQUIRE(!memcmp(tuple_sound_slots,nor+st_sector(OBJ_SOUND,0),sizeof tuple_sound_slots));
+                if(!rc)break;
+                ++cuts;
+                CHECK(rc==-3 && project_storage_unsupported()==3);
+                snapshot(); CHECK(project_save()==-9); check_no_writes();
+                tuple_boot();
+                snapshot(); REQUIRE(project_load()==0);
+                const int old=!memcmp(&proj,&tuple_old,sizeof proj),new=!memcmp(&proj,&tuple_new,sizeof proj);
+                REQUIRE(old || new);
+                if (project_storage_unsupported()==3) {
+                    ++recovered;
+                    CHECK(old || new); /* newest head may authenticate from an older continuation */
+                    uint8_t h[32];
+                    project_capture_stage(); project_file_header(h);
+                    CHECK(project_file_validate(h)==0);
+                    CHECK(!memcmp(&project_stage,&proj,sizeof proj));
+                    CHECK(project_load_stage()==0);
+                    project_commit_stage();
+                    CHECK(project_storage_unsupported()==3);
+                    CHECK(project_save()==-9);
+                    project_device_bt_set(!(proj.set.bt&1u));
+                    CHECK(project_device_bt_save()==-9);
+                    project_reset_stage();
+                    REQUIRE(project_validate_stage()==0);
+                    project_commit_stage();
+                    CHECK(project_storage_unsupported()==3 && project_save()==-9);
+                }
+                check_no_writes();
+            }
+        }
+        tuple_boot();REQUIRE(project_load()==0);
+        REQUIRE(!memcmp(&proj,&tuple_new,sizeof proj));
+        /* Independent legacy OBJ_SOUND damage cannot poison a good 16. */
+        memset(nor+st_sector(OBJ_SOUND,0),0,2u*ST_SECTOR);
+        tuple_boot();REQUIRE(project_load()==0);
+        REQUIRE(!memcmp(&proj,&tuple_new,sizeof proj));
+        /* Future writes remain tuple format even after last parked lane removed. */
+        proj.arr.lane[0].used=0;
+        REQUIRE(project_save()==0);
+        REQUIRE(st_load(OBJ_PAT0,io_buf,sizeof io_buf)>16 && get32(io_buf)==PROJ_STREAM_BASS_MOTION);
+        CHECK(!project_storage_unsupported());
+    }
+    /* A tuple may fit the audio/project RAM and old compressed limit but not
+     * the new image. Reject transparently before changing a single byte. */
+    tuple_fixture(0);
+    int found_capacity=0;
+    for(unsigned i=0;i<NPAT*NBASS*NSTEPS;i++){
+        bstep_t *st=&proj.pat[i/(NBASS*NSTEPS)].bass[(i/NSTEPS)%NBASS].step[i%NSTEPS];
+        *st=(bstep_t){next_random()%128u,G_NOTE,next_random()%128u};
+        if(i%19u)continue;
+        uint32_t packed=0;
+        if(measure_for_format(&proj,&packed,PROJ_STREAM_BASS_MOTION)!=-7)continue;
+        if(measure_for_format(&proj,&packed,PROJ_STREAM))break;
+        found_capacity=1;
+        snapshot();
+        CHECK(project_save()==-7);
+        check_no_writes();
+        tuple_boot();REQUIRE(project_load()==0);
+        REQUIRE(!memcmp(&proj,&tuple_old,sizeof proj));
+        printf("capacity seam legacy fits %u, tuple over cap untouched\n",packed);
+        break;
+    }
+    REQUIRE(found_capacity);
+    /* A future-format head is not an interrupted v16 and must not be
+     * adopted/re-written even with a complete known alternate. */
+    tuple_fixture(0);
+    REQUIRE(project_save()==0);
+    int n=st_load(OBJ_PAT0,io_buf,sizeof io_buf);
+    REQUIRE(n>16 && get32(io_buf)==PROJ_STREAM_BASS_MOTION);
+    put32(io_buf,PROJ_STREAM_BASS_MOTION+1);
+    REQUIRE(st_save(OBJ_PAT0,io_buf,(unsigned)n)==0);
+    tuple_boot();snapshot();
+    CHECK(project_load()==-9 && project_storage_unsupported()==1);
+    CHECK(project_save()==-9);
+    check_no_writes();
+    REQUIRE(cuts && recovered);
+    printf("tuple power cuts=%u, fenced/exportable recoveries=%u\n",cuts,recovered);
+}
+#endif
+
 int main(void)
 {
     test_defaults();
@@ -864,6 +1031,9 @@ int main(void)
     test_settings_survive_sound_read_failure();
     test_interobject_power_cut();
     test_damaged_single_object();
+#if X0X_BASS_TAGGED_SOUND
+    test_tuple_cut();
+#endif
     printf("project staging: %u checks, %u failures; real storage, defaults and sample metadata\n", checks, failures);
     return failures ? 1 : 0;
 }

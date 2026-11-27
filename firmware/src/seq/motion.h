@@ -26,6 +26,13 @@
 #define MOT_NONE 0xFFu
 #define MOT_PARTS 5
 #define MOT_GAP 4                     /* steps: a longer pause ends a recording gesture */
+/* Per-engine dormant bass automation. Keep the original lane and values while
+ * a different synth owns the slot; only active T_303 lanes enter playback. */
+#define MOT_PARK_BASS 0xe0u
+#define MOT_PARK_BANKS 4u
+static inline int motion_parked_bass(unsigned target)
+{ return target - MOT_PARK_BASS < MOT_PARK_BANKS; }
+
 
 typedef struct {
     uint8_t used, gen;
@@ -61,6 +68,9 @@ typedef struct {
 void motion_init(motion_t *m, lane_t *lanes);
 void motion_step(motion_t *m, int part, int pat, int step, int next, int pass);   /* ISR */
 void motion_tick(motion_t *m, uint32_t n);                                       /* ISR */
+void motion_bank_retag(lane_t *lanes, int target, int voice, unsigned old_bank, unsigned new_bank);
+void motion_bank_change(motion_t *m, int target, int voice, unsigned old_bank, unsigned new_bank); /* audio boundary */
+void motion_bank_step(motion_t *m, int target, int voice, int part, int pat, int step, int next);
 void motion_release(motion_t *m);                                                /* ISR */
 int motion_value(const motion_t *m, int k);      /* what lane k is applying now, -1 = nothing */
 

@@ -27,15 +27,16 @@ int main(void)
     select_sound(ORIGINAL_SOUND_CHICAGO,1);
     CHECK(proj.arr.lane[empty].used);
     select_sound(ORIGINAL_SOUND_MIAMI,0); /* off-pattern empty slot must not veto */
-    CHECK(!proj.arr.lane[empty].used);
+    CHECK(proj.arr.lane[empty].used && proj.arr.lane[empty].t==MOT_PARK_BASS+ORIGINAL_SOUND_CHICAGO);
     select_sound(ORIGINAL_SOUND_CHICAGO,1);
     int same=motion_alloc(proj.arr.lane,31,PART_303A,T_303,0,2);
     CHECK(same>=0);
     proj.arr.lane[same].val[21]=47;
     select_sound(ORIGINAL_SOUND_CHICAGO,2);
     CHECK(proj.arr.lane[same].used && proj.arr.lane[same].val[21]==47);
-    CHECK(engine_bass_select_preset(0,ORIGINAL_SOUND_MIAMI,0,&proj.sound)==-4);
-    CHECK(proj.arr.lane[same].used && proj.arr.lane[same].val[21]==47);
+    select_sound(ORIGINAL_SOUND_MIAMI,0);
+    CHECK(proj.arr.lane[same].used && proj.arr.lane[same].t==MOT_PARK_BASS+ORIGINAL_SOUND_CHICAGO);
+    CHECK(proj.arr.lane[same].val[21]==47);
     select_sound(ORIGINAL_SOUND_CHICAGO,2);
     ui.part=PART_303A;
     ui.view=V_PART;
@@ -60,6 +61,6 @@ int main(void)
     for(int i=0;i<4096 && engine_bass_preset_pending(0);++i)tick();
     CHECK(engine_bass_preset_index(0)==3);
     puts("PASS physical Pattern role never changes sound on ENGINE/PRESET row; K6 still changes presets");
-    puts("PASS empty off-pattern lanes never veto; existing automation survives presets; incompatible switch preserves it");
+    puts("PASS empty off-pattern lanes never veto; existing automation survives presets; another engine parks it");
     return 0;
 }

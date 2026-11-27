@@ -22,6 +22,9 @@ __attribute__((noinline)) static void put(motion_t *m, const lane_t *l, lane_rt_
     }
 }
 
+static inline int passive(unsigned t)
+{ return t==0xfdu || t==0xfcu || motion_parked_bass(t); }
+
 static void restore_base(motion_t *m, const lane_t *l)
 {
     if (m->restore) m->restore(m->ctx, l->t, l->v, l->i);
@@ -53,7 +56,7 @@ void motion_step(motion_t *m, int part, int pat, int step, int next, int pass)
         lane_t *l = &m->lane[k];
         lane_rt_t *r = &m->rt[k];
         int v, nv;
-        if (!l->used || (l->t==0xfdu || l->t==0xfcu) || l->part != part)
+        if (!l->used || passive(l->t) || l->part != part)
             continue;
         if (r->gen != l->gen) {                        /* a reused slot: a fresh runtime */
             r->gen = l->gen;
@@ -128,7 +131,7 @@ void motion_tick(motion_t *m, uint32_t n)
         const lane_t *l = &m->lane[k];
         lane_rt_t *r = &m->rt[k];
         uint32_t L, a;
-        if (!r->ramp || !l->used || (l->t==0xfdu || l->t==0xfcu) || r->gen != l->gen || l->part >= MOT_PARTS)
+        if (!r->ramp || !l->used || passive(l->t) || r->gen != l->gen || l->part >= MOT_PARTS)
             continue;
         L = m->len[l->part][r->part_parity];
         if (!L)
@@ -140,12 +143,56 @@ void motion_tick(motion_t *m, uint32_t n)
     }
 }
 
+/* Pure project-data rewrite; also used by the UI undo transaction with audio held. */
+X0X_COLD __attribute__((noinline)) void motion_bank_retag(lane_t *lanes, int target, int voice, unsigned old_bank, unsigned new_bank)
+{
+    if (!lanes || old_bank==new_bank || old_bank>=MOT_PARK_BANKS || new_bank>=MOT_PARK_BANKS) return;
+    for (int k=0;k<NLANE;k++) {
+        lane_t *l=&lanes[k];
+        if(!l->used || l->v!=voice) continue;
+        if(l->t==target) l->t=(uint8_t)(MOT_PARK_BASS+old_bank);
+        else if(l->t==MOT_PARK_BASS+new_bank) l->t=(uint8_t)target;
+    }
+}
+/* No cross-bank "restore": the runtime at this boundary has just been rebuilt. */
+X0X_COLD void motion_bank_change(motion_t *m, int target, int voice, unsigned old_bank, unsigned new_bank)
+{
+    if (!m->lane) return;
+    motion_bank_retag(m->lane,target,voice,old_bank,new_bank);
+    for (int k=0;k<NLANE;k++) {
+        const lane_t *l=&m->lane[k];
+        if (l->used && l->v==voice && (l->t==target || motion_parked_bass(l->t))) {
+            lane_rt_t *r=&m->rt[k];
+            r->gen=l->gen;r->applied=MOT_NONE;r->rec_last=MOT_NONE;
+            r->ramp=0;r->rec_req=0;r->hold_req=0;r->hold_left=0;
+        }
+    }
+}
+
+/* A gated preset might adopt at note-on after the sequencer called
+ * motion_step. Refresh just the new owner's synth locks, not the other
+ * controls or timing counters that already processed this step. */
+X0X_COLD void motion_bank_step(motion_t *m, int target, int voice, int part, int pat, int step, int next)
+{
+    if (!m->lane || (unsigned)step>=NSTEPS || (unsigned)next>=NSTEPS) return;
+    for (int k=0;k<NLANE;k++) {
+        const lane_t *l=&m->lane[k];
+        if(!l->used || l->t!=target || l->v!=voice || l->part!=part || l->pat!=pat)continue;
+        lane_rt_t *r=&m->rt[k];
+        if(l->val[step]==MOT_NONE)continue; /* replacement already has the exact base */
+        put(m,l,r,l->val[step]);
+        r->from=l->val[step];r->to=l->val[next];
+        r->ramp=(uint8_t)(r->to!=MOT_NONE && r->from!=r->to);
+        r->part_parity=(uint8_t)(step&1);
+    }
+}
+
 void motion_release(motion_t *m)
 {
     int k, p;
     for (k = 0; k < NLANE; k++) {
         lane_rt_t *r = &m->rt[k];
-        if (m->lane[k].used && m->lane[k].t!=0xfdu && m->lane[k].t!=0xfcu && r->gen == m->lane[k].gen)
+        if (m->lane[k].used && !passive(m->lane[k].t) && r->gen == m->lane[k].gen)
             to_base(m, &m->lane[k], r);
         r->rec_last = MOT_NONE;
         r->hold_left = 0;
@@ -198,7 +245,7 @@ X0X_COLD int motion_alloc(lane_t *L, int pat, int part, int t, int v, int i)
 X0X_COLD void motion_clear(motion_t *m, int k)
 {
     if (k >= 0 && k < NLANE) {
-        if (m->lane[k].used && m->lane[k].t!=0xfdu && m->lane[k].t!=0xfcu && m->apply && m->base) {
+        if (m->lane[k].used && !passive(m->lane[k].t) && m->apply && m->base) {
             /* Restore the target before freeing the slot. T_VEL caches the last
              * applied strike in seq.drum_vel; skipping this leaves that override
              * sticky after the lane is gone (and after Stop), so later hits keep

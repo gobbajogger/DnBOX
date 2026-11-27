@@ -38,18 +38,18 @@ export async function sha256(b) {
 export function parseProject(b, expectedLength = null) {
   b = bytes(b);
   const offChk=m=>(m&1?0x17:0)^(m&2?0x2E:0)^(m&4?0x5C:0)^(m&8?0xB8:0)^(m&16?0x67:0);
-  const offWordOk=(w,p,s)=>w===0 || ((p===13 || p===14 || p===15) && s===13 && (w&0xFFFF0000)>>>0===0x4F460000 && (w&0xFF)>=1 && (w&0xFF)<=31 && (w>>>8&0xFF)===offChk(w&0xFF));
+  const offWordOk=(w,p,s)=>w===0 || ([13,14,15,16].includes(p) && s===13 && (w&0xFFFF0000)>>>0===0x4F460000 && (w&0xFF)>=1 && (w&0xFF)<=31 && (w>>>8&0xFF)===offChk(w&0xFF));
   if (b.length < PROJECT_HEADER || b.length > 0x1FFFFF) throw fail("Invalid project file size.");
   const v = view(b);
   if (v.getUint32(0, true) !== 0x50583058) throw fail("The project header is missing.");
   const projectVersion=v.getUint32(16,true), patternVersion=v.getUint32(20,true), soundRevision=v.getUint32(24,true);
   // Format 2 protects RATE_8/RATE_4 from older firmware. Its layout is unchanged,
   // but it is valid only with the current revision-13 stream family.
-  const currentSchema=[13,14,15].includes(patternVersion) && soundRevision===13;
+  const currentSchema=[13,14,15,16].includes(patternVersion) && soundRevision===13;
   const knownFormat=projectVersion===1 || (projectVersion===2 && currentSchema);
   const knownSchema=(patternVersion===3 && (soundRevision===4 || soundRevision===10)) ||
     ([6,8].includes(patternVersion) && (soundRevision===10 || soundRevision===11)) ||
-    ([7,9].includes(patternVersion) && soundRevision===11) || ((patternVersion===13 || patternVersion===14 || patternVersion===15) && soundRevision===13);
+    ([7,9].includes(patternVersion) && soundRevision===11) || ([13,14,15,16].includes(patternVersion) && soundRevision===13);
   if(v.getUint32(4,true)!==1 || !knownFormat || !knownSchema || !offWordOk(v.getUint32(28,true),patternVersion,soundRevision))
     throw fail("This project uses an incompatible file, project, pattern or sound version.","version");
   if((soundRevision===13 || [6,7,8,9].includes(patternVersion) && soundRevision===11) && b.length!==36452)
@@ -65,10 +65,10 @@ export function parseProject(b, expectedLength = null) {
 // imports, including rollback/recovery, accept only the current persistent schema.
 function requireCurrentProject(project, expectedLength = null) {
   const meta = parseProject(project);
-  // Streams 14/15 add preset/held-chord metadata in existing fields; same 36,452-byte layout.
+  // Streams 14–16 add metadata, including engine-aware automation; same file layout.
   // Preserve opaque bytes. Firmware VALIDATE checks semantics before any sample mutation.
-  if ((meta.patternVersion !== 13 && meta.patternVersion !== 14 && meta.patternVersion !== 15) || meta.soundRevision !== 13)
-    throw fail("Only revision 13 projects can be loaded. Older projects remain available for inspection and backup.", "version");
+  if (![13,14,15,16].includes(meta.patternVersion) || meta.soundRevision !== 13)
+    throw fail("Only the current project formats can be loaded. Older projects remain available for inspection and backup.", "version");
   if (expectedLength !== null) parseProject(project, expectedLength);
   return meta;
 }
@@ -367,7 +367,7 @@ export class ProjectDevice {
     if(confirmed!==true || this.projectProtocol!==2 || !Array.isArray(engines) || engines.length!==2 ||
        !integer(engines[0],0,1) || !integer(engines[1],0,1) || engines[0]===1 && engines[1]===1)
       throw fail("Explicit valid engine choices for both bass slots are required.","identity");
-    throw fail("Only revision 13 projects can be loaded. Legacy bass adoption is unavailable.", "version");
+    throw fail("Only the current project formats can be loaded. Legacy bass adoption is unavailable.", "version");
   }
   async commit() { await this.command(PROJECT_OP.COMMIT, PROJECT_CONFIRM); this.active = false; this.mode = 0; }
   async save() { await this.command(PROJECT_OP.SAVE, [], { timeout: Math.max(10000, this.timeout) }); }
