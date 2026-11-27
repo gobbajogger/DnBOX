@@ -1,0 +1,76 @@
+--- a/firmware/src/dsp/dnbx_core.c
++++ b/firmware/src/dsp/dnbx_core.c
+@@ -928,6 +928,28 @@
+     {65,12,7,4},{56,14,8,5},{62,16,9,7},{49,14,7,4},
+     {53,16,9,6},{52,12,3,1},{32,3,1,1},{35,2,0,0}
+ };
++#if X0X_SJ6_SUB_TUNE_PROFILE
++static inline int32_t sj6_sub_tune_mc(const dnbx_sj6_sub_tune_profile *p,unsigned k)
++{
++    const uint8_t *b=p->milli_cents[k];
++    uint32_t v=(uint32_t)b[0]|((uint32_t)b[1]<<8)|((uint32_t)b[2]<<16);
++    return v<0x800000u?(int32_t)v:-(int32_t)(0x1000000u-v);
++}
++int dnbx_sj6_bind_sub_tune_profile(dnbx_part *s,const dnbx_sj6_sub_tune_profile *p,size_t n)
++{
++    if(!valid(s)||!s->superj6_amp_range||dnbx_active_voices(s))return 0;
++    if(!p) {
++        if(n)return 0;
++        s->sj6_sub_tune_profile=0;return 1;
++    }
++    if(n!=sizeof(*p)||p->version!=1||p->units!=1||p->reserved[0]||p->reserved[1])return 0;
++    for(unsigned k=0;k<128;k++){
++        int32_t v=sj6_sub_tune_mc(p,k);
++        if(v< -100000 || v>100000)return 0;
++    }
++    s->sj6_sub_tune_profile=p;return 1;
++}
++#endif
+ static unsigned sj6_sub_zone(unsigned note)
+ { return note<34u ? 0u : note>=94u ? 11u : (note-34u)/6u+1u; }
+ static inline float sj6_synthesize_sub(float phase,float step,const uint8_t *h)
+@@ -975,7 +997,12 @@
+             unsigned note=s->voice[i].note;
+             const unsigned ranged=(unsigned)((int)note+shift);
+             if(ranged<=127u)note=ranged;
+-            sj6_steps[i]=.5f*pitch_increment(s,note,0.f)*source_bend;
++            float source_offset=0.f;
++#if X0X_SJ6_SUB_TUNE_PROFILE
++            if(s->sj6_sub_tune_profile)
++                source_offset=(float)sj6_sub_tune_mc(s->sj6_sub_tune_profile,note)*.00001f;
++#endif
++            sj6_steps[i]=.5f*pitch_increment(s,note,source_offset)*source_bend;
+             sj6_harmonics[i]=sj6_sub_harmonic[sj6_sub_zone(note)];
+         }
+     }
+--- a/firmware/src/dsp/dnbx_core.h
++++ b/firmware/src/dsp/dnbx_core.h
+@@ -142,6 +142,10 @@
+ #endif
+ #if X0X_SJ6_NOISE_SUB_NATIVE
+     float sj6_noise_gain,sj6_sub_gain;
++#if X0X_SJ6_SUB_TUNE_PROFILE
++    const struct dnbx_sj6_sub_tune_profile *sj6_sub_tune_profile;
++#endif
++
+     uint32_t sj6_noise_random;
+     uint8_t sj6_noise_code,sj6_sub_code;
+ #endif
+@@ -207,6 +211,17 @@
+ #endif
+ #if X0X_SJ6_NOISE_SUB_NATIVE
+ void dnbx_set_sj6_sources(dnbx_part *,unsigned owner,const uint8_t code[2]);
++#if X0X_SJ6_SUB_TUNE_PROFILE
++/* Caller owns already-authorized, immutable RAM or memory-mapped storage
++ * for this part's lifetime. This leaf validates format, not provenance.
++ * Packed signed 24-bit little-endian milli-cents indexed by physical key.
++ * NULL/0 detaches; only a silent typed SJ6 owner can rebind. */
++typedef struct dnbx_sj6_sub_tune_profile {
++    uint8_t version, units, reserved[2], milli_cents[128][3];
++} dnbx_sj6_sub_tune_profile;
++int dnbx_sj6_bind_sub_tune_profile(dnbx_part *,const dnbx_sj6_sub_tune_profile *,size_t);
++#endif
++
+ #endif
+ #if X0X_SJ6_VINTAGE_NATIVE
+ float dnbx_sj6_vintage_cents(unsigned position);
