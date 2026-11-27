@@ -2432,6 +2432,12 @@ static float eng_bass_buf[2 * NBASS][256] X0X_XPOOL;
 static original_runtime_workspace original_workspace_b X0X_XPOOL;
 static uint32_t bass_quiet_next[NBASS];               /* the quiet count after this stretch's render */
 static uint8_t bass_render_ok[NBASS];
+static uint8_t full808_a_ready;
+static int full808_a_status;
+static uint32_t full808_a_ticks;
+#if X0X_HOST
+unsigned host_full808_a_count;
+#endif
 static volatile uint32_t eng_stage;                    /* mixes done this stretch: 1 909, 2 808, 3 basses */
 static volatile uint8_t eng_c1_next;                   /* core 1: the next of its jobs to start */
 static uint8_t eng_c1_mask;                            /* jobs on core 1 this stretch (bit per JB_*) */
@@ -2563,6 +2569,18 @@ static int body_wait(int core)
     }
 }
 
+/* S1-A uses its owner arena and L/R only; never the scratch workspace
+ * containing C1's 909 mono. Keep adaptation on C0 and ordered mix later. */
+static int bass_render_dsp(int bv, unsigned n, float *l, float *r)
+{
+    (void)original_runtime_prepare(&original_bass[bv], seq_tempo(&seq));
+    bass_adapt_pre(bv, (unsigned)n);
+    int status = original_runtime_render(&original_bass[bv], bv ? &original_workspace_b : &original_workspace,
+                         l, r, n);
+    bass_adapt_post(bv, l, r, (unsigned)n);
+    return status;
+}
+
 /* one job, render and mix; core 1: not timed by the cycle counter (core 0's) */
 static int run_job(int j, int core)
 {
@@ -2648,11 +2666,12 @@ static int run_job(int j, int core)
         float *bb[NBASS];
         bb[bv] = bl; bb[1 - bv] = br;                     /* bass B renders right-left, as always */
         PROF_T(pb);
-        (void)original_runtime_prepare(&original_bass[bv], seq_tempo(&seq));
-        bass_adapt_pre(bv, (unsigned)n);
-        int status = original_runtime_render(&original_bass[bv], bv ? &original_workspace_b : &original_workspace,
-                                             bb[bv], bb[1-bv], n);
-        bass_adapt_post(bv, bb[bv], bb[1-bv], (unsigned)n);
+        int status;
+        if (!core && bv == 0 && full808_a_ready) {
+            full808_a_ready = 0;
+            status = full808_a_status;
+            tk -= full808_a_ticks;
+        } else status = bass_render_dsp(bv, n, bb[bv], bb[1-bv]);
         if (!core)
             PROF_ADD(2 + bv, pb);
         bass_render_ok[bv] = (uint8_t)(status == ORIGINAL_RUNTIME_OK);   /* recorder: core 0, after */
@@ -2929,9 +2948,14 @@ __attribute__((noinline)) static void render_sub(float *out_l, float *out_r, uin
     bass_render_ok[0] = bass_render_ok[1] = 0;
     original_rec_cancel_cut();                        /* both basses' recorder state: here, before the jobs */
     m = plan_pick(n);
+    const int full808 = m == ((1u<<JB_909)|(1u<<JB_808)|(1u<<JB_B)) &&
+        original_bass[0].kind == ORIGINAL_SOUND_SYNTHONE &&
+        original_bass[1].kind == ORIGINAL_SOUND_CHICAGO &&
+        original_bass[0].status == ORIGINAL_RUNTIME_OK && original_bass[1].status == ORIGINAL_RUNTIME_OK;
+    if (full808) m &= ~(1u<<JB_808);
     eng_c1_mask = (uint8_t)m;
     /* 808 stays on core 0 and core 1 has other work: move the BD+SD prefix */
-    eng_808_split = (uint8_t)(!(m & (1u << JB_808)) && m && drum808_active(&d808));
+    eng_808_split = (uint8_t)(!full808 && !(m & (1u << JB_808)) && m && drum808_active(&d808));
     eng_808_body = (uint8_t)!eng_808_split;
     eng_sync();
     if (m && !plat_cpu2_run(core2_jobs, 0u)) {
@@ -2943,6 +2967,16 @@ __attribute__((noinline)) static void render_sub(float *out_l, float *out_r, uin
     eng_dbg_nsub++;
     uint32_t w0 = plat_ticks24();
 #endif
+    full808_a_ready = 0;
+    if (full808 && eng_c1_mask == ((1u<<JB_909)|(1u<<JB_B))) {
+        uint32_t at = plat_ticks24();
+        full808_a_status = bass_render_dsp(0,n,eng_bass_buf[0],eng_bass_buf[1]);
+        full808_a_ticks = plat_ticks24()-at;
+        full808_a_ready = 1;
+#if X0X_HOST
+        ++host_full808_a_count;
+#endif
+    }
     for (j = 0; j < JB_N; j++)
         if (!(eng_c1_mask & (1u << j)))
             (void)run_job(j, 0);
