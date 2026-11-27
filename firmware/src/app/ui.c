@@ -467,13 +467,27 @@ static void build_pages(void);
 static const s1_patch_snapshot *s1_draw_patch;
 #if X0X_UI_SMALL_CANVAS
 /* Painter-only, never installed across cv_commit_* / foreground service. */
-typedef struct { s1_matrix_telemetry value; unsigned voice; int ready; } cv_s1_telemetry;
+typedef struct {
+    s1_matrix_telemetry value;
+    unsigned voice;
+    int ready;
+    uint16_t palette[5], on, tie;
+    uint8_t light, base, enabled, head, held;
+    uint8_t page,first,n;
+    int8_t touched;
+    pref_t row[4][4];
+    char title[4][12];
+    char preset[FACTORY_NAME_MAX];
+    struct cv_s1_cell {
+        char label[24],num[16],unit[8];
+        int16_t raw;
+        uint8_t valid,max,mark;
+    } cell[4][4];
+    float rate_hz;
+    uint8_t cells_ready,rate_valid;
+} cv_s1_telemetry;
 static const cv_s1_telemetry *s1_draw_frame;
-static void cv_capture_s1_telemetry(cv_s1_telemetry *s,unsigned voice)
-{
-    s->voice=voice;
-    s->ready=engine_s1_matrix_snapshot(voice,&s->value);
-}
+static void cv_capture_s1_telemetry(cv_s1_telemetry *s,unsigned voice);
 static int s1_draw_frozen(unsigned voice)
 { return s1_draw_frame && s1_draw_frame->voice==voice; }
 #endif
@@ -736,7 +750,11 @@ static UI_DRAW int pref_get(pref_t r)
 #if X0X_SYNTHONE_PATCH
     case R_S1PATCH: {
         const s1_patch_descriptor *d = s1_patch_at(r.c);
-        if (d && s1_draw_patch && bidx() == r.b)
+        if (d && s1_draw_patch && (bidx() == r.b
+#if X0X_UI_SMALL_CANVAS
+            || s1_draw_frozen(r.b)
+#endif
+            ))
             return (int)((s1_draw_patch->physical[r.c] - d->minimum) *
                          (S1_PATCH_STEPS / (d->maximum - d->minimum)) + .5f);
 #if X0X_UI_SMALL_CANVAS
@@ -1391,7 +1409,11 @@ X0X_COLD static void pref_value_of(pref_t r, int v, char *num, char *unit)
     if (r.kind == R_S1PATCH) {
         const s1_patch_descriptor *patch = s1_patch_at(r.c);
         float physical;
-        if (s1_draw_patch && bidx() == r.b)
+        if (s1_draw_patch && (bidx() == r.b
+#if X0X_UI_SMALL_CANVAS
+            || s1_draw_frozen(r.b)
+#endif
+            ))
             physical = s1_draw_patch->physical[r.c];
         else {
             s1_patch_value owner;
@@ -6774,12 +6796,37 @@ static UI_DRAW int matrix_touch_matches(pref_t r, int i)
            ui.touch_b == r.b && ui.touch_c == r.c;
 }
 
+/* Only the matrix painter reads these aliases. A foreground edit during
+ * DMA sees entirely normal UI globals after this frame context is removed. */
+#if X0X_SYNTHONE_PATCH && X0X_UI_SMALL_CANVAS
+#define SM_F (s1_draw_frame!=0)
+#define SM_REF(p) (SM_F?s1_draw_frame->row[(p)-s1_draw_frame->first]:pg.r[p])
+#define SM_TITLE(p) (SM_F?s1_draw_frame->title[(p)-s1_draw_frame->first]:pg.title[p])
+#define SM_N (SM_F?s1_draw_frame->n:pg.n)
+#define SM_PAGE (SM_F?s1_draw_frame->page:cur_page())
+#define SM_VOICE (SM_F?(int)s1_draw_frame->voice:bidx())
+#define SM_BANK (SM_F?ORIGINAL_SOUND_SYNTHONE:engine_bass_sound_bank(&proj.sound,bidx()))
+#define SM_PART (SM_F||(ui.view==V_PART&&is_303()))
+#define SM_TOUCH (SM_F?s1_draw_frame->touched:matrix_live_touch())
+#define SM_DB(r) (s1_draw_frozen((r).b)?ORIGINAL_SOUND_SYNTHONE:engine_bass_sound_bank(&proj.sound,(r).b))
+#else
+#define SM_F 0
+#define SM_REF(p) pg.r[p]
+#define SM_TITLE(p) pg.title[p]
+#define SM_N pg.n
+#define SM_PAGE cur_page()
+#define SM_VOICE bidx()
+#define SM_BANK engine_bass_sound_bank(&proj.sound,bidx())
+#define SM_PART (ui.view==V_PART&&is_303())
+#define SM_TOUCH matrix_live_touch()
+#define SM_DB(r) engine_bass_sound_bank(&proj.sound,(r).b)
+#endif
 /* Control rows share the existing main/knob strips; no framebuffer or UI state is added. */
 static UI_DRAW const char *matrix_group(int page)
 {
-    const char *t = pg.title[page];
+    const char *t = SM_TITLE(page);
     if (!strcmp_s(t,"FX")) {
-        int ty=matrix_value(pg.r[page][0]);
+        int ty=matrix_value(SM_REF(page)[0]);
         return ty==CHI_FX_OFF?"FX / OFF":ty==CHI_FX_COMP?"FX / MASTER":"FX / INSERT";
     }
     if (!strcmp_s(t,"AMP ADSR")) return "AMP ENVELOPE";
@@ -6802,18 +6849,74 @@ static int draw_drum_frame(void);
 #endif
 /* Same sixteen physical white-key positions as the selected part, not a
  * second sequencer or an invented animation. All four sound banks stay above. */
+#if X0X_SYNTHONE_PATCH && X0X_UI_SMALL_CANVAS
+static UI_DRAW const char *matrix_name(pref_t r);
+#if X0X_BASS_PRESET_PREVIEW
+static const char *matrix_preset_name(int voice);
+#endif
+static void cv_capture_s1_cells(cv_s1_telemetry *s);
+static void cv_capture_s1_telemetry(cv_s1_telemetry *s,unsigned voice)
+{
+    s->voice=voice;
+    s->ready=engine_s1_matrix_snapshot(voice,&s->value);
+    memcpy(s->palette,pal,sizeof s->palette);
+    s->light=ui_theme_light;
+    s->page=cur_page();s->n=pg.n;s->first=(s->page/4)*4;
+    if(s->n>=4 && s->first+4>s->n)s->first=s->n-4;
+    s->touched=ui.touched>=0 && ui.touched<4 &&
+        (int32_t)(ui.touch_until-plat_ms())>0 ? ui.touched : -1;
+    for(unsigned p=s->first;p<s->n&&p<s->first+4u;p++){
+        memcpy(s->row[p-s->first],pg.r[p],sizeof s->row[0]);
+        memcpy(s->title[p-s->first],pg.title[p],sizeof s->title[0]);
+    }
+    const bpart_t *bp=&cur_pat()->bass[voice];
+    const int base=step_of(0),head=seq.playing?eng_step[TRK_BASS0+voice]:-1;
+    s->base=base;
+    s->enabled=bp->len>base ? (bp->len-base>16?16:bp->len-base) : 0;
+    s->head=head>=base&&head<base+s->enabled?head-base:255;
+    s->held=ui.held_step>=base&&ui.held_step<base+s->enabled?ui.held_step-base:255;
+    s->on=s->tie=0;
+    for(unsigned c=0;c<s->enabled;c++){
+        const int gate=bstep_gate(&bp->step[base+c]);
+        if(gate!=G_REST)s->on|=1u<<c;
+        if(gate==G_TIE)s->tie|=1u<<c;
+    }
+    cv_capture_s1_cells(s);
+}
+#endif
 static UI_DRAW void sound_step_footer(void)
 {
-    const bpart_t *bp=&cur_pat()->bass[bidx()];
-    int ph=seq.playing?eng_step[TRK_BASS0+bidx()]:-1;
-    for(int c=0;c<16;c++) {
-        int step=step_of(c),x=8+c*14,enabled=step<bp->len;
-        int gate=enabled?bstep_gate(&bp->step[step]):G_REST;
+    const bpart_t *bp;
+    int ph,held,base,len;
+    uint16_t col;
+#if X0X_SYNTHONE_PATCH && X0X_UI_SMALL_CANVAS
+    const cv_s1_telemetry *scene=s1_draw_frame;
+    if(scene) {
+        bp=0;base=scene->base;len=base+scene->enabled;
+        ph=base+scene->head;held=base+scene->held;
+        col=PART_COL[PART_303A+scene->voice];
+    }else
+#endif
+    {
+        bp=&cur_pat()->bass[bidx()];base=step_of(0);len=bp->len;
+        ph=seq.playing?eng_step[TRK_BASS0+bidx()]:-1;
+        held=ui.held_step;col=part_col();
+    }
+    for(int c=0;c<16;c++){
+        int step=base+c,x=8+c*14,enabled=step<len;
+        int gate=G_REST;
+        if(enabled){
+#if X0X_SYNTHONE_PATCH && X0X_UI_SMALL_CANVAS
+            if(scene)gate=(scene->on>>c)&1u?((scene->tie>>c)&1u?G_TIE:G_NOTE):G_REST;
+            else
+#endif
+            gate=bstep_gate(&bp->step[step]);
+        }
         char number[8];put_i(number,step+1);
         text_c(x+6,224-KNOB_Y,&FONT_T,number,enabled?SOUND_GRAY:SOUND_DIM);
         cv_rect(x,237-KNOB_Y,12,2,enabled?SOUND_LINE:SOUND_SIDE);
-        if(gate!=G_REST)cv_rect(x,237-KNOB_Y,12,gate==G_TIE?1:2,part_col());
-        if(enabled && step==ui.held_step)cv_rect(x,236-KNOB_Y,12,1,SOUND_INK);
+        if(gate!=G_REST)cv_rect(x,237-KNOB_Y,12,gate==G_TIE?1:2,col);
+        if(enabled && step==held)cv_rect(x,236-KNOB_Y,12,1,SOUND_INK);
         if(enabled && step==ph)cv_rect(x,239-KNOB_Y,12,1,SOUND_INK);
     }
 }
@@ -6858,34 +6961,34 @@ static UI_DRAW void draw_part_sound(int band)
 #if X0X_SYNTHONE_PATCH
     s1_patch_snapshot patch;
 #if X0X_UI_SMALL_CANVAS
-    if(s1_draw_frozen((unsigned)bidx()))
+    if(s1_draw_frozen((unsigned)SM_VOICE))
         s1_draw_patch=s1_draw_frame->ready?&s1_draw_frame->value.patch:0;
     else
 #endif
-    if (engine_bass_bank(bidx()) == ORIGINAL_SOUND_SYNTHONE &&
-        engine_s1_patch_snapshot(bidx(), &patch)) s1_draw_patch = &patch;
+    if (engine_bass_bank(SM_VOICE) == ORIGINAL_SOUND_SYNTHONE &&
+        engine_s1_patch_snapshot(SM_VOICE, &patch)) s1_draw_patch = &patch;
 #endif
 #if !X0X_SYNTHONE_PATCH
     if (pg.r[cur_page()][0].kind == R_BENGINE &&
-        engine_bass_bank(bidx()) == ORIGINAL_SOUND_SYNTHONE) {
+        engine_bass_bank(SM_VOICE) == ORIGINAL_SOUND_SYNTHONE) {
         draw_init_selector(band);
         return;
     }
 #endif
-    int page=cur_page(), first=page/4*4, row, k, off=band*BAND_H;
+    int page=SM_PAGE, first=page/4*4, row, k, off=band*BAND_H;
     int three=matrix_three_rows(), night=three || X0X_ORIGINAL_SYNTH;
     int rows=three?3:4, height=three?66:49, step=three?67:50;
     /* A partial final bank shares preceding rows with the previous view.
      * Keep the selected page and its physical encoder bindings unchanged. */
-    int tail = pg.n >= rows && first + rows > pg.n;
-    if (tail) first = pg.n - rows;
-    uint16_t col=matrix_col();
+    int tail = SM_N >= rows && first + rows > SM_N;
+    if (tail) first = SM_N - rows;
+    uint16_t col=SM_F?(ui_theme_light?RGB(40,104,30):RGB(164,235,141)):matrix_col();
     if(night) cv_rect(0,0,240,band==2?KNOB_H:BAND_H,SOUND_BASE);
     for (row=0;row<rows;row++) {
         int p=first+row, y=4+row*step-off, active=p==page;
         uint16_t label=night?(active?SOUND_INK:SOUND_GRAY):(active?C_BLACK:C_GRAY);
         char t[32];
-        if (p>=pg.n || y+height<=0 || y>=(band==2?KNOB_H:BAND_H)) continue;
+        if (p>=SM_N || y+height<=0 || y>=(band==2?KNOB_H:BAND_H)) continue;
         if (night) sound_slab(3,y,234,height,active);
         else surface_panel(3,y,234,height,active,active?col:SOUND_FACE,
                            active?blend(col,C_WHITE,5):SOUND_EDGE,active?dim(col,8):SOUND_SIDE);
@@ -6899,21 +7002,21 @@ static UI_DRAW void draw_part_sound(int band)
         /* Original page descriptors keep all their mapped knobs on the left.
          * Spread those same controls across the panel without moving a binding. */
         int columns = 4;
-        if (X0X_ORIGINAL_SYNTH && pg.r[p][3].kind == R_NONE)
-            columns = pg.r[p][1].kind == R_NONE ? 1 : pg.r[p][2].kind == R_NONE ? 2 : 3;
+        if (X0X_ORIGINAL_SYNTH && SM_REF(p)[3].kind == R_NONE)
+            columns = SM_REF(p)[1].kind == R_NONE ? 1 : SM_REF(p)[2].kind == R_NONE ? 2 : 3;
         int cell_width = columns == 4 ? 59 : columns == 3 ? 78 : columns == 2 ? 118 : 232;
         for (k=0;k<columns;k++) {
             int x=4+k*cell_width;
-            if (k && (pg.r[p][k].kind!=R_NONE
+            if (k && (SM_REF(p)[k].kind!=R_NONE
 #if X0X_BASS_PRESET_PREVIEW
-                || (k==2 && pg.r[p][0].kind==R_BENGINE)
+                || (k==2 && SM_REF(p)[0].kind==R_BENGINE)
 #endif
                 )) cv_rect(x,y+14,1,night?height-18:32,night?(active?SOUND_SELECT_SIDE:SOUND_LINE):(active?dim(col,3):C_LINE));
-            draw_param_widget(pg.r[p][k],x,y,cell_width,active,col,height,night);
+            draw_param_widget(SM_REF(p)[k],x,y,cell_width,active,col,height,night);
         }
 #if X0X_BASS_PRESET_PREVIEW
-        if (!X0X_ORIGINAL_SYNTH && pg.r[p][0].kind==R_BENGINE) {
-            int b=bidx(), pending=engine_bass_preset_pending(b), preset=engine_bass_preset_index(b);
+        if (!X0X_ORIGINAL_SYNTH && SM_REF(p)[0].kind==R_BENGINE) {
+            int b=SM_VOICE, pending=engine_bass_preset_pending(b), preset=engine_bass_preset_index(b);
             int edited=engine_bass_preset_edited(b);
             const char *status=pending?"WAIT":preset<0?"USER":edited?"EDITED":"ACTIVE";
             const char *reason=pending==2?"WAIT FOR NOTES/TAIL":pending==3?"RETURN WHEELS":
@@ -8736,9 +8839,19 @@ CV_PAINTER(fx)
  * must always address the real owner, never the display snapshot. */
 static void cv_paint_s1_matrix(int band,const void *scene)
 {
-    s1_draw_frame=scene;
+    const cv_s1_telemetry *ctx=scene;
+    uint16_t saved[5];
+    const uint8_t light=ui_theme_light;
+    /* Only the synchronous painter sees this palette; restore it before
+     * any LCD commit, foreground service, or input callback. */
+    memcpy(saved,pal,sizeof saved);
+    memcpy(pal,ctx->palette,sizeof saved);
+    ui_theme_light=ctx->light;
+    s1_draw_frame=ctx;
     draw_part_sound(band);
     s1_draw_frame=0;
+    ui_theme_light=light;
+    memcpy(pal,saved,sizeof saved);
 }
 #endif
 static UI_DRAW void cv_draw_pair(uint16_t bg,const void *scene,
@@ -9070,8 +9183,23 @@ static UI_DRAW void draw_wave_glyph(int cx, int y, int shape, int mix, uint16_t 
     }
 }
 
+#if X0X_SYNTHONE_PATCH && X0X_UI_SMALL_CANVAS
+static const struct cv_s1_cell *s1_matrix_cell(pref_t r)
+{
+    const cv_s1_telemetry *s=s1_draw_frame;
+    if(s && s->cells_ready)
+        for(unsigned n=0;n<4 && n+s->first<s->n;n++)for(unsigned k=0;k<4;k++)
+            if(!memcmp(&r,&s->row[n][k],sizeof r))
+                return &s->cell[n][k];
+    return 0;
+}
+#endif
 static UI_DRAW const char *matrix_name(pref_t r)
 {
+#if X0X_SYNTHONE_PATCH && X0X_UI_SMALL_CANVAS
+    const struct cv_s1_cell *cell=s1_matrix_cell(r);
+    if(cell)return cell->label;
+#endif
     if (r.kind==R_ENG && r.a==T_303) return ui_original_name((unsigned)engine_bass_sound_bank(&proj.sound,r.b),r.c);
     if (r.kind==R_ENG && r.a==T_303) {
         switch(r.c) {
@@ -9111,6 +9239,10 @@ static UI_DRAW const char *matrix_name(pref_t r)
 
 static int matrix_value(pref_t r)
 {
+#if X0X_SYNTHONE_PATCH && X0X_UI_SMALL_CANVAS
+    const struct cv_s1_cell *cell=s1_matrix_cell(r);
+    if(cell)return cell->raw;
+#endif
     int val = pref_get(r);
     if (lock_step() >= 0) {
         int lv = lock_of(r, lock_step());
@@ -9122,6 +9254,42 @@ static int matrix_value(pref_t r)
     return val;
 }
 
+#if X0X_SYNTHONE_PATCH && X0X_UI_SMALL_CANVAS
+static void cv_capture_s1_cells(cv_s1_telemetry *s)
+{
+    const int ls=lock_step();
+    s->cells_ready=0;s->rate_valid=0;
+    s1_draw_frame=s;
+    s1_draw_patch=s->ready?&s->value.patch:0;
+#if X0X_BASS_PRESET_PREVIEW
+    put_s(s->preset,preset_shown(matrix_preset_name(s->voice)));
+#endif
+    for(unsigned n=0;n<4 && n+s->first<s->n;n++)for(unsigned k=0;k<4;k++){
+        struct cv_s1_cell *c=&s->cell[n][k];
+        pref_t r=s->row[n][k];
+        const x0x_param_t *d=pref_desc(r);
+        c->valid=d!=0;c->max=d?d->max:0;
+        c->raw=d?matrix_value(r):0;
+        c->label[0]=c->num[0]=c->unit[0]=0;c->mark=0;
+        if(!d)continue;
+        put_s(c->label,matrix_name(r));
+        pref_value_of(r,c->raw,c->num,c->unit);
+        c->mark=lock_of(r,ls)>=0?1:ls<0&&has_motion(r)?2:0;
+        if(r.kind==R_ENG && r.a==T_303 && r.c==ORIGINAL_SYNTHONE_CRUSH)
+            s->rate_valid=engine_param_si(T_303,r.b,r.c,c->raw,&s->rate_hz)==X0X_U_HZ;
+    }
+    s1_draw_frame=0;s1_draw_patch=0;
+    s->cells_ready=1;
+}
+static void matrix_format(pref_t r,int raw,char *num,char *unit)
+{
+    const struct cv_s1_cell *c=s1_matrix_cell(r);
+    if(c && raw==c->raw){ put_s(num,c->num);put_s(unit,c->unit);return; }
+    pref_value_of(r,raw,num,unit);
+}
+#else
+#define matrix_format pref_value_of
+#endif
 static UI_DRAW int adsr_touch_active(void)
 {
     pref_t r;
@@ -9229,7 +9397,13 @@ static UI_DRAW void preset_text(preset_text_t *out,const char *name,int tall)
 
 static UI_DRAW void draw_preset_name(int voice,int cx,int y,int height,uint16_t ink)
 {
-    preset_text_t text;preset_text(&text,preset_shown(matrix_preset_name(voice)),height>49);
+    const char *name;
+#if X0X_SYNTHONE_PATCH && X0X_UI_SMALL_CANVAS
+    if(s1_draw_frozen((unsigned)voice)) name=s1_draw_frame->preset;
+    else
+#endif
+    name=preset_shown(matrix_preset_name(voice));
+    preset_text_t text;preset_text(&text,name,height>49);
     int top=height>49?(text.lines==2?28:35):(text.lines==2?21:26);
     for(int i=0;i<text.lines;i++) text_c(cx,y+top+i*text.font->h,text.font,text.line[i],ink);
 }
@@ -9293,7 +9467,13 @@ static int matrix_voice_view(unsigned v,float *amp,float *mod,unsigned *stage,un
 #endif
 static UI_DRAW void draw_param_widget(pref_t r, int x, int y, int width, int active, uint16_t col, int height, int night)
 {
+#if X0X_SYNTHONE_PATCH && X0X_UI_SMALL_CANVAS
+    const struct cv_s1_cell *cell=s1_matrix_cell(r);
+    const x0x_param_t cap={.max=cell?cell->max:0};
+    const x0x_param_t *d=cell?(cell->valid?&cap:0):pref_desc(r);
+#else
     const x0x_param_t *d=pref_desc(r);
+#endif
     char num[16],unit[8],value[24];
     int cx=x+width/2,val,shape=0,mix=0,lv,discrete=0,glyph=GL_NONE,unused=0,orig_glyph=0;
     const felucca_font_t *font;
@@ -9301,10 +9481,10 @@ static UI_DRAW void draw_param_widget(pref_t r, int x, int y, int width, int act
     int value_y=height>49?35:26, bar_y=height-4;
     if(!d) return;
     int rate_row = width == 232 && r.kind == R_ENG && r.a == T_303 &&
-        r.c == ORIGINAL_SYNTHONE_CRUSH && engine_bass_sound_bank(&proj.sound,r.b) == ORIGINAL_SOUND_SYNTHONE;
+        r.c == ORIGINAL_SYNTHONE_CRUSH && SM_DB(r) == ORIGINAL_SOUND_SYNTHONE;
     val=matrix_value(r);
     if(r.kind==R_ENG && r.a==T_303 &&
-       engine_bass_sound_bank(&proj.sound,r.b)==ORIGINAL_SOUND_CHICAGO) {
+       SM_DB(r)==ORIGINAL_SOUND_CHICAGO) {
         /* Original Chicago slots: 13 ON, 14 MODE, 16 SPEED; readout text stays original. */
         if(r.c>=13 && r.c<=16) {
             const ui_original_control_view *o=original_text_view(PR(R_ENG,T_303,r.b,13),matrix_value(PR(R_ENG,T_303,r.b,13)));
@@ -9364,7 +9544,7 @@ static UI_DRAW void draw_param_widget(pref_t r, int x, int y, int width, int act
                              i<ceiling ? ink : SOUND_DIM;
             cv_rect(cx-3*pitch+pitch*i,y+31-2*i,pitch-2,2,color);
         }
-        pref_value_of(r, val, num, unit);
+        matrix_format(r, val, num, unit);
         strip_value(cx, y+35, num, unit, ink,0);
         return;
     }
@@ -9377,21 +9557,21 @@ static UI_DRAW void draw_param_widget(pref_t r, int x, int y, int width, int act
         hz = fm_minf(22050.f, fm_maxf(64.f, hz));
         int knee = (int)((hz-64.f) * (127.f / (22050.f-64.f)) + .5f);
         filter_glyph(cx, y+21, 1, knee, (int)(params[3]*(127.f/.98f)+.5f), ink);
-        pref_value_of(r, val, num, unit);
+        matrix_format(r, val, num, unit);
         strip_value(cx, y+36, num, unit, ink,0);
         return;
     }
 #endif
-    if(r.kind==R_ENG && val>=0 && val<=d->max) shape=wave_shape(r,val,&mix);
+    if(!SM_F && r.kind==R_ENG && val>=0 && val<=d->max) shape=wave_shape(r,val,&mix);
     if(!shape && !unused && val>=0 && orig_strip_slot(r)) {
         /* Drum parts draw their own rows in draw_drum_voice. */
-        pref_value_of(r,val,num,unit);
+        matrix_format(r,val,num,unit);
         if (rate_row) {
             s1_rate_glyph(r,val,x+34,y+23,108,ink);
             strip_value(x+width-29,y+34,num,unit,ink,0);
         } else {
             orig_strip_glyph(r,val,x+3,y+22,ink);
-            if (engine_bass_sound_bank(&proj.sound, r.b) == ORIGINAL_SOUND_JUNO)
+            if (SM_DB(r) == ORIGINAL_SOUND_JUNO)
                 strip_value_fit(x, y+28, num, unit, ink);
             else {
                 int inset=14;
@@ -9405,15 +9585,15 @@ static UI_DRAW void draw_param_widget(pref_t r, int x, int y, int width, int act
         }
     } else
     if(shape) {
-        int slot=original_wave_slot((unsigned)engine_bass_sound_bank(&proj.sound,r.b),r.c);
+        int slot=original_wave_slot((unsigned)SM_DB(r),r.c);
         const ui_original_wave_cache *wave=slot>=0?original_wave_view(r,val):0;
         uint16_t face=night?(active?SOUND_SELECT:SOUND_FACE):(active?col:SOUND_FACE);
         if(wave) draw_original_wave(cx-10,y+25,wave,slot,ink,face);
         else draw_wave_glyph(cx-10,y+((shape==2 || shape==3)?25:28),shape,mix,ink,face);
-        pref_value_of(r,val,num,unit);           /* original readout text */
+        matrix_format(r,val,num,unit);           /* original readout text */
         strip_value(cx+17,y+28,num,unit,ink,0);
     } else {
-        pref_value_of(r,val,num,unit);
+        matrix_format(r,val,num,unit);
         if(unused) {put_s(num,"--");unit[0]=0;}
         else if(orig_glyph) {}
         else if(glyph==GL_POWER || glyph==GL_PEDAL) put_s(num,val>=(glyph==GL_PEDAL?64:1)?"ON":"OFF");
@@ -9431,8 +9611,14 @@ static UI_DRAW void draw_param_widget(pref_t r, int x, int y, int width, int act
             if(val>0 && d->max) cv_rect(x+8,y+bar_y,1+(width-18)*(val>d->max?d->max:val)/d->max,1,ink);
         }
     }
-    lv=lock_of(r,lock_step());
-    if(lv>=0 || (lock_step()<0 && has_motion(r)))
+#if X0X_SYNTHONE_PATCH && X0X_UI_SMALL_CANVAS
+    if(cell){lv=cell->mark==1?0:-1; if(!cell->mark)return;}
+    else
+#endif
+    {
+        lv=lock_of(r,lock_step());
+        if(lv<0 && !(lock_step()<0 && has_motion(r)))return;
+    }
         cv_rect(x+53,y+24,2,2,night?SOUND_INK:(active?C_BLACK:lv>=0?C_AMB:C_HI));
 }
 
@@ -9445,18 +9631,18 @@ static UI_DRAW void draw_param_widget(pref_t r, int x, int y, int width, int act
 static unsigned adsr_stage_slots(int p,int slot[4])
 {
     if(slot)for(int i=0;i<4;i++)slot[i]=-1;
-    if(ui.view!=V_PART || !is_303() || p<0 || p>=pg.n)return 0;
-    int bank=engine_bass_sound_bank(&proj.sound,bidx());
+    if(!SM_PART || p<0 || p>=SM_N)return 0;
+    int bank=SM_BANK;
     int first=bank==ORIGINAL_SOUND_CHICAGO?7:bank==ORIGINAL_SOUND_JUNO?5:-1,kind=R_ENG;
 #if X0X_SYNTHONE_PATCH
     /* Synth One FILTER ADSR slots 5..8 and AMP ADSR slots 9..12. */
-    if(bank==ORIGINAL_SOUND_SYNTHONE){kind=R_S1PATCH;first=pg.r[p][0].c<9?5:9;}
+    if(bank==ORIGINAL_SOUND_SYNTHONE){kind=R_S1PATCH;first=SM_REF(p)[0].c<9?5:9;}
 #endif
     if(first<0)return 0;
     unsigned present=0;
     for(int k=0;k<4;k++) {
-        pref_t r=pg.r[p][k];if(r.kind==R_NONE)continue;
-        if(r.kind!=kind || r.a!=T_303 || r.b!=bidx() || r.c<first || r.c>first+3)return 0;
+        pref_t r=SM_REF(p)[k];if(r.kind==R_NONE)continue;
+        if(r.kind!=kind || r.a!=T_303 || r.b!=SM_VOICE || r.c<first || r.c>first+3)return 0;
         unsigned stage=(unsigned)(r.c-first);
         if(present&(1u<<stage))return 0;
         present|=1u<<stage;if(slot)slot[stage]=k;
@@ -9478,15 +9664,15 @@ static UI_DRAW void adsr_values(ui_adsr_t *e,int p)
     *e=(ui_adsr_t){0};e->present=adsr_stage_slots(p,e->slot);
     if(!e->present)return;
     /* Only the two admitted original owners below can enable a graph. */
-    if(engine_bass_sound_bank(&proj.sound,bidx())==ORIGINAL_SOUND_JUNO) {
+    if(SM_BANK==ORIGINAL_SOUND_JUNO) {
         juno6_envelope_snapshot v;
-        if(!engine_juno_envelope_view(bidx(),&v)){e->enabled=0;return;}
+        if(!engine_juno_envelope_view(SM_VOICE,&v)){e->enabled=0;return;}
         e->attack=v.adsr[0];e->decay=v.adsr[1];e->sustain=v.adsr[2];e->release=v.adsr[3];
         e->live_level=v.level;e->live_stage=v.stage;e->live_gate=v.gate;e->live_active=v.active;
         e->enabled=3; /* compact Juno linear A/D, geometric R */
         return;
     }
-    if(engine_bass_sound_bank(&proj.sound,bidx())==ORIGINAL_SOUND_CHICAGO) {
+    if(SM_BANK==ORIGINAL_SOUND_CHICAGO) {
         /* Original Chicago ENVELOPE slots 7..10 (A, D, S, R): stage-normalised
          * compiled native controls include each macro's scaling; D/R are RC. */
         /* Time constants of original_vca_tick (control_math.c), seconds:
@@ -9494,7 +9680,7 @@ static UI_DRAW void adsr_values(ui_adsr_t *e,int p)
         /* Native VCA EG controls exactly as the engine compiles them (macro
          * scaling included); q127 if the runtime view is unavailable. */
         float native[4]={0,0,0,0};unsigned gate=0;
-        int nv=engine_bass_adsr_view(bidx(),native,&gate);
+        int nv=engine_bass_adsr_view(SM_VOICE,native,&gate);
         if(!nv){e->enabled=0;return;}
         e->sustain=native[2];e->gate=(int)gate;
         for(i=0;i<3;i++) {
@@ -9505,16 +9691,16 @@ static UI_DRAW void adsr_values(ui_adsr_t *e,int p)
         return;
     }
 #if X0X_SYNTHONE_PATCH
-    if(engine_bass_sound_bank(&proj.sound,bidx())==ORIGINAL_SOUND_SYNTHONE) {
+    if(SM_BANK==ORIGINAL_SOUND_SYNTHONE) {
         /* Applied physical seconds/level of this ADSR; the live gauge reads
          * the loudest started voice's own amp or filter envelope. */
         s1_patch_snapshot v;float lv=0;unsigned st=0,held=0;
         int first=-1;
-        for(i=0;i<4;i++)if(e->slot[i]>=0){first=pg.r[p][e->slot[i]].c-i;break;}
+        for(i=0;i<4;i++)if(e->slot[i]>=0){first=SM_REF(p)[e->slot[i]].c-i;break;}
         const s1_patch_snapshot *p=&v;
         if(first<0){e->enabled=0;return;}
 #if X0X_UI_SMALL_CANVAS
-        if(s1_draw_frozen((unsigned)bidx())){
+        if(s1_draw_frozen((unsigned)SM_VOICE)){
             if(!s1_draw_frame->ready){e->enabled=0;return;}
             const s1_matrix_telemetry *m=&s1_draw_frame->value;
             unsigned f=first==5;
@@ -9523,8 +9709,8 @@ static UI_DRAW void adsr_values(ui_adsr_t *e,int p)
         }else
 #endif
         {
-            if(!engine_s1_patch_snapshot(bidx(),&v)){e->enabled=0;return;}
-            e->live_active=engine_s1_envelope_view(bidx(),first==5,&lv,&st,&held)&&st;
+            if(!engine_s1_patch_snapshot(SM_VOICE,&v)){e->enabled=0;return;}
+            e->live_active=engine_s1_envelope_view(SM_VOICE,first==5,&lv,&st,&held)&&st;
         }
         e->attack=p->physical[first];e->decay=p->physical[first+1];
         e->sustain=p->physical[first+2];e->release=fm_maxf(p->physical[first+3],1e-4f);
@@ -9546,8 +9732,8 @@ static UI_DRAW void adsr_values(ui_adsr_t *e,int p)
  * Synth One FILTER/AMP ADSR rows (slots 5..8, 9..12) use the same graph.
  * Miami has no A/D/S/R row. */
 static UI_DRAW int adsr_row(int p)
-{ return adsr_stage_slots(p,0)!=0 || (p>=0 && p<pg.n && drum_amp_ref(pg.r[p][0]) &&
-    pg.r[p][1].kind==R_NONE && pg.r[p][2].kind==R_NONE && pg.r[p][3].kind==R_NONE); }
+{ return adsr_stage_slots(p,0)!=0 || (p>=0 && p<SM_N && drum_amp_ref(SM_REF(p)[0]) &&
+    SM_REF(p)[1].kind==R_NONE && SM_REF(p)[2].kind==R_NONE && SM_REF(p)[3].kind==R_NONE); }
 /* Level of one original stage at time t (s): attack toward 1.3 clipped at 1,
  * decay toward sustain, release toward zero (original_vca_tick). */
 static UI_DRAW float adsr_original_level(const ui_adsr_t *e,int stage,float t)
@@ -9766,17 +9952,21 @@ static UI_DRAW void draw_drum_amp_inline(int p,int active,int y,int h,int level_
 #endif
     );
 }
+static int matrix_live_touch(void)
+{
+    return ui.touched>=0 && ui.touched<4 &&
+        (int32_t)(ui.touch_until-plat_ms())>0 ? ui.touched : -1;
+}
 static UI_DRAW void draw_adsr_inline(int p,int active,int y,int h,int off)
 {
 #if !X0X_UI_SMALL_CANVAS || defined(DV_TEST_STOCK)
-    if(drum_amp_ref(pg.r[p][0])){draw_drum_amp_inline(p,active,y-off,h,0);return;}
+    if(drum_amp_ref(SM_REF(p)[0])){draw_drum_amp_inline(p,active,y-off,h,0);return;}
 #endif
     static const char *const names[4]={"ATTACK","DECAY","SUSTAIN","RELEASE"};
     ui_adsr_t e;
-    int k,touched=active && ui.touched>=0 && ui.touched<4 &&
-        (int32_t)(ui.touch_until-plat_ms())>0?ui.touched:-1,edited=-1;
+    int k,touched=active?SM_TOUCH:-1,edited=-1;
     int x0=13,y0=y+h-5,top=y+22,xs[5];
-    uint16_t col=active?matrix_col():SOUND_WHITE,hi=SOUND_INK;   /* inactive: the inactive-row ink */
+    uint16_t col=active?(SM_F?(ui_theme_light?RGB(40,104,30):RGB(164,235,141)):matrix_col()):SOUND_WHITE,hi=SOUND_INK;   /* inactive: the inactive-row ink */
     float dur[3];
     adsr_values(&e,p);
     if(!e.enabled)return;
@@ -9785,7 +9975,7 @@ static UI_DRAW void draw_adsr_inline(int p,int active,int y,int h,int off)
     int ys=y0-(int)(e.sustain*(y0-top)+0.5f);
     if(edited>=0) { /* the selected or turned stage and its live value */
         char num[16],unit[8],t[32];
-        pref_value_of(pg.r[p][e.slot[edited]],matrix_value(pg.r[p][e.slot[edited]]),num,unit);
+        matrix_format(SM_REF(p)[e.slot[edited]],matrix_value(SM_REF(p)[e.slot[edited]]),num,unit);
         put_s(put_s(put_s(put_s(t,names[edited])," "),num),unit);
         text_r(232,y-off,&FONT_T,t,hi);
     }
@@ -9813,8 +10003,8 @@ static UI_DRAW void draw_adsr_inline(int p,int active,int y,int h,int off)
         char label[20];
         if (e.enabled >= 3) {
             char num[16], unit[8];
-            pref_t r = pg.r[p][e.slot[k]];
-            pref_value_of(r, matrix_value(r), num, unit);
+            pref_t r = SM_REF(p)[e.slot[k]];
+            matrix_format(r, matrix_value(r), num, unit);
             char *end = label;
             *end++ = "ADSR"[k]; *end++ = ' ';
             put_s(end, active ? "" : num);
@@ -9823,7 +10013,7 @@ static UI_DRAW void draw_adsr_inline(int p,int active,int y,int h,int off)
             strip_value(31+e.slot[k]*59,y+(active?9:8)-off,active ? num : label,unit,edited==k?hi:SOUND_GRAY,active ? label : 0);
             continue;
         }
-        physical_stage_label(label,e.slot[k],"ADSR"[k],matrix_value(pg.r[p][e.slot[k]]));
+        physical_stage_label(label,e.slot[k],"ADSR"[k],matrix_value(SM_REF(p)[e.slot[k]]));
         text_c(31+e.slot[k]*59,y+8-off,&FONT_T,label,edited==k?hi:SOUND_GRAY);
     }
     {   /* Native state1 contains both decay and sustain. Classify within 1% of S.
@@ -9831,7 +10021,7 @@ static UI_DRAW void draw_adsr_inline(int p,int active,int y,int h,int off)
         float level=0,mod=0; unsigned state=6,held=0;
         int observed;
         if(e.enabled>=3) {level=e.live_level;held=e.live_gate;state=!e.live_active?6:e.live_stage==1?0:e.live_stage==4?3:1;observed=1;}
-        else observed=engine_bass_voice_view(bidx(),&level,&mod,&state,&held);
+        else observed=engine_bass_voice_view(SM_VOICE,&level,&mod,&state,&held);
         if(observed && state!=6) {
             if(level<0)level=0; if(level>1)level=1;
             int stage=e.enabled>=3?(e.live_stage==1?0:e.live_stage==2?1:e.live_stage==3?2:3):
@@ -9860,7 +10050,7 @@ static UI_DRAW void draw_adsr_inline(int p,int active,int y,int h,int off)
         float adsr[4],lv=0; int st=6,px=-1;
         int observed;
         if(e.enabled>=3){lv=e.live_level;st=!e.live_active?6:e.live_stage==1?0:e.live_stage==4?3:1;observed=1;}
-        else observed=engine_bass_env_view(bidx(),adsr,&lv,&st);
+        else observed=engine_bass_env_view(SM_VOICE,adsr,&lv,&st);
         if(observed && st!=6) {
             if(lv<0)lv=0; if(lv>1)lv=1;
             if(e.enabled>=3) {
@@ -10132,7 +10322,7 @@ static UI_DRAW int control_glyph(pref_t r,int val,int cx,uint16_t col)
 static UI_DRAW int orig_strip_slot(pref_t r)
 {
     if(r.kind!=R_ENG || r.a!=T_303) return 0;
-    int b=engine_bass_sound_bank(&proj.sound,r.b);
+    int b=SM_DB(r);
     if(b==ORIGINAL_SOUND_SYNTHONE) return r.c == ORIGINAL_SYNTHONE_CRUSH;
     if(b==ORIGINAL_SOUND_JUNO) return r.c < 16 && (r.c < 5 || r.c > 8);
     if(b==ORIGINAL_SOUND_CHICAGO) return r.c>=1 && (r.c<=6 || r.c==11 || r.c==12 || r.c==15 || r.c==17);
@@ -10233,7 +10423,15 @@ static float og_rate_hold(float t,float ticks)
 static UI_DRAW void s1_rate_glyph(pref_t r,int val,int x,int y,int width,uint16_t ink)
 {
     float hz;
-    if (engine_param_si(T_303,r.b,r.c,val,&hz) == X0X_U_HZ)
+    int valid;
+#if X0X_SYNTHONE_PATCH && X0X_UI_SMALL_CANVAS
+    if(s1_draw_frozen(r.b)) {
+        valid=s1_draw_frame->rate_valid;
+        hz=valid?s1_draw_frame->rate_hz:0;
+    }else
+#endif
+    valid=engine_param_si(T_303,r.b,r.c,val,&hz)==X0X_U_HZ;
+    if (valid)
         og_wave_width(x,y,width,og_rate_hold,hz*.002f,ink); /* two milliseconds */
 }
 static float og_crush(float t,float q){int n=12-(int)(q*10+.5f);float v=og_sin((float)((int)(t*(26-q*20))) /(26-q*20),1.5f);
@@ -10360,7 +10558,7 @@ static UI_DRAW void orig_strip_glyph(pref_t r,int val,int gx,int gy,uint16_t col
 {
     const x0x_param_t *d=pref_desc(r);
     float q=d && d->max?(float)val/(float)d->max:0;
-    int bank=engine_bass_sound_bank(&proj.sound,r.b), c=r.c;
+    int bank=SM_DB(r), c=r.c;
     if (bank == ORIGINAL_SOUND_SYNTHONE && c == ORIGINAL_SYNTHONE_CRUSH) {
         s1_rate_glyph(r,val,gx,gy,OG_W,col);
         return;

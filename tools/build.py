@@ -550,6 +550,11 @@ def build_app():
             names.extend(("engine_superj6_edit", "engine_superj6_pre_note_wave"))
         for name in names:
             factory_roots.extend(("-u", name))
+    tanh_boot = os.environ.get("X0X_D9_TANH_BOOT", "0")
+    if tanh_boot not in ("0", "1") or (tanh_boot == "1" and (BOARD != "smk37" or VERSION)):
+        raise SystemExit("X0X_D9_TANH_BOOT: SMK diagnostic only (0 or 1)")
+    if tanh_boot == "1":
+        flags.append("-DX0X_D9_TANH_BOOT=1")
     # Diagnostic builds must opt in explicitly; never alter release defaults.
     diagnostic_guard = os.environ.get("X0X_DIAG_DISABLE_LOAD_GUARD", "0")
     if diagnostic_guard not in ("0", "1"):

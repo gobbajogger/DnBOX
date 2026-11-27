@@ -451,9 +451,54 @@ X0X_COLD static void d9_bt_init(d9_bt_t *v)
     d9_shape_prep(&v->shape, v->drive, v->dist_type);
 }
 
+#if X0X_D9_TANH_BOOT
+/* .pool is zeroed at reset. The only writer is the first engine_init on
+ * CPU0 before audio DMA/IRQ start; project reinitialization never rewrites
+ * the published table. Every hot lookup still reads a flat float array. */
+float x0x_tanh_raw[X0X_TANH_N + 2] __attribute__((section(".pool"), aligned(4)));
+X0X_COLD static void d9_tanh_boot(void)
+{
+    static uint8_t ready;
+    if (ready)
+        return;
+    const uint8_t *p = x0x_tanh_second_bytes;
+    uint32_t word = 0, stride = 0;
+    unsigned i = 0;
+    while (i < X0X_TANH_N + 2u) {
+        const unsigned width = *p++;
+        unsigned used = 0;
+        for (unsigned j = 0; j < 16u && i < X0X_TANH_N + 2u; ++j) {
+            unsigned shift = 0;
+            uint32_t code = 0;
+            while (shift < width) {
+                unsigned n = 8u - used;
+                if (n > width - shift)
+                    n = width - shift;
+                code |= ((uint32_t)(*p >> used) & ((1u << n) - 1u)) << shift;
+                shift += n;
+                used += n;
+                if (used == 8u) {
+                    ++p;
+                    used = 0;
+                }
+            }
+            stride += (code >> 1) ^ (0u - (code & 1u));
+            word += stride;
+            union { uint32_t u; float f; } bits = { .u = word };
+            x0x_tanh_raw[i++] = bits.f;
+        }
+        p += used != 0u;
+    }
+    ready = 1;
+}
+#endif
+
 /* Boot only (engine_init). d9_render and drum909_trigger stay -O2. */
 X0X_COLD void drum909_init(drum909_t *d)
 {
+#if X0X_D9_TANH_BOOT
+    d9_tanh_boot();
+#endif
     uint8_t *p = (uint8_t *)d;
     for (unsigned i = 0; i < sizeof(*d); ++i)
         p[i] = 0;
