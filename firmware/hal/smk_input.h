@@ -331,6 +331,16 @@ static void smk__extq(uint32_t k, uint32_t vel)
     smk_extq_w = (uint8_t)((w + 1u) % SMK_EXTQ);
 }
 
+#if X0X_D9_EARLY_HIT && !defined(X0X_HOST)
+#include "smk_d9_early_route.h"
+static d9_lease smk_d9_route;
+static d9_admit smk_d9_staged;
+static uint32_t smk_d9_staged_tick;
+static void smk_d9_publish_scan(void);
+static volatile uint32_t smk_d9_buttons, smk_d9_receipt;
+static void smk_d9_postscan(uint64_t before);
+#endif
+
 static void smk__key_event(uint32_t k, uint32_t vel)     /* vel 0 = release */
 {
     if (vel)
@@ -347,6 +357,10 @@ static void smk__key_event(uint32_t k, uint32_t vel)     /* vel 0 = release */
     }
     const uint64_t bit=(uint64_t)1u<<k;
     if (!vel && (fm1_in.keys&bit)) smk_extq_released|=bit;
+#if X0X_D9_EARLY_HIT && !defined(X0X_HOST)
+    if (!vel && k>=SMK_KEY_F3 && k<SMK_KEY_F3+27u)
+        smk_d9_receipt &= ~(1u<<(k-SMK_KEY_F3));
+#endif
     if (smk_ext_enabled && (smk_ext_enabled!=PLAT_PHYS_RELEASE || !vel))
         smk__extq(k,vel);
     if(vel) fm1_in.keys|=bit;
@@ -407,6 +421,9 @@ static void smk__buttons(void)
             continue;
         *c = 0;
         fm1_in.buttons ^= bit;
+#if X0X_D9_EARLY_HIT && !defined(X0X_HOST)
+        smk_d9_buttons=d9_epoch_next(smk_d9_buttons);
+#endif
         if (!on)
             fm1_in.pressed |= bit;
         else
@@ -459,9 +476,16 @@ static void smk__leds(void)                        /* the next frame shows the o
 static void fm1__frame(void)
 {
     uint32_t now = fm1_ticks();
+#if X0X_D9_EARLY_HIT && !defined(X0X_HOST)
+    int leased=smk_d9_route.live_id!=0;
+    uint64_t before=leased?fm1_in.keys:0;
+#endif
     smk__keys(now);
     smk__buttons();
     smk__encoders();
+#if X0X_D9_EARLY_HIT && !defined(X0X_HOST)
+    if (leased) smk_d9_postscan(before);
+#endif
     smk__leds();
     fm1_in.frames++;
 }

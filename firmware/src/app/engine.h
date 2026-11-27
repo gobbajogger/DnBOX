@@ -315,6 +315,9 @@ void engine_bass_on_velocity(int part, int note, int accent, int slide, int velo
 void engine_bass_record(int part, int note, int velocity, int flags); /* accepted live REC press, audio-owned */
 void engine_bass_off(int part);
 void engine_request_notes_off(void); /* all sounding notes off; transport keeps running */
+#if X0X_D9_EARLY_HIT
+int engine_early_drum_put(unsigned voice, unsigned velocity);
+#endif
 int engine_bass_off_note_try(int part,int note); /* false means retry this real key-up */
 void engine_bass_off_note(int part, int note); /* Chicago arp: release one held pitch; 0 note = all */
 void engine_brk_bend(int value); /* transient -8192..8191, +/-12 semitones */

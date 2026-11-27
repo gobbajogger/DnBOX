@@ -1052,6 +1052,25 @@ static uint32_t diag_consume, diag_command, diag_offset;
 uint32_t engine_diag_render_offset;
 #endif
 
+#if X0X_D9_EARLY_HIT
+#include "early_drum_mailbox.h"
+static early_drum_mailbox early_drum;
+_Static_assert((unsigned)DR_NUM == EARLY_DRUM_VOICES, "909 mailbox voice range");
+volatile uint32_t early_drum_admitted, early_drum_consumed; /* native diagnostic receipt */
+volatile uint32_t early_drum_audio_trace[8][2]; /* (voice and velocity, 24 MHz tick) */
+
+/* End-of-scan only; the scanner has certified a single ordinary 909 contact. */
+int engine_early_drum_put(unsigned voice, unsigned velocity)
+{
+    if (SEQ_PART_OFF(&seq, TRK_DRUM) || plat_midi_pending())
+        return 0;
+    if (!early_drum_publish(&early_drum, voice, velocity, project_hold, cq_r != cq_w))
+        return 0;
+    ++early_drum_admitted;
+    return 1;
+}
+#endif
+
 void engine_drum(int kit, int voice, float vel)
 {
     if ((unsigned)kit < NKIT && SEQ_PART_OFF(&seq, kit)) return;
@@ -1093,6 +1112,13 @@ X0X_COLD void engine_request_notes_off(void)
     __builtin_memset(cq_panic_fresh, 0, sizeof cq_panic_fresh);
     cq_panic_active = 1;
     notes_off_requested_cutoff = cq_w;
+#if X0X_D9_EARLY_HIT
+    /* Cut the scanner producer and audio consumer together. A physical token
+     * already accepted must still not be replayed by the foreground. */
+    uint32_t scan_flags = plat_early_drum_lock();
+    early_drum_cancel(&early_drum);
+    plat_early_drum_unlock(scan_flags);
+#endif
     notes_off_midi_epoch = plat_midi_cut();
     notes_off_midi_valid = 1;
     /* Retire capabilities now, not on the later audio consume: a fresh key
@@ -1648,6 +1674,9 @@ __attribute__((weak)) void smk_ck_midi_stop(void) {}
 
 X0X_COLD int engine_physical_keys_pending(unsigned mask)
 {
+#if X0X_D9_EARLY_HIT
+    if (early_drum_pending(&early_drum)) return 1;
+#endif
     if(live_key_r!=live_key_w || (live_key_cancel&mask) || cq_r!=cq_w)return 1;
     for(int v=0;v<NBASS;v++)if((mask&(1u<<v)) &&
         (live_key_owner[v].gate || (bass_held_src[v]==3 && bass_held_count[v])))return 1;
@@ -1655,6 +1684,11 @@ X0X_COLD int engine_physical_keys_pending(unsigned mask)
 }
 X0X_COLD int engine_project_notes(void)
 {
+#if X0X_D9_EARLY_HIT
+    /* project_acquire publishes project_hold before checking outstanding
+     * work; its store prevents subsequent interrupt-side admission. */
+    if (early_drum_pending(&early_drum)) return 1;
+#endif
     uint32_t r = cq_r;
     int k;
     /* A physical strike is already accepted before the audio owner drains its
@@ -2095,6 +2129,20 @@ static void drain(void)
             break;
         }
     }
+#if X0X_D9_EARLY_HIT
+    /* This strike was accepted before any subsequently published CQ or MIDI
+     * command. Panic retires older strikes before this boundary. */
+    uint32_t early = early_drum_take(&early_drum);
+    if (early) {
+        unsigned j=early_drum_consumed++;
+        if (j<8u) {
+            early_drum_audio_trace[j][0]=early;
+            early_drum_audio_trace[j][1]=plat_ticks24();
+        }
+        unsigned v = (unsigned)((float)early_drum_vel(early) / 127.0f * 4095.0f);
+        s_drum(0, TRK_DRUM, (int)early_drum_voice(early), (float)v / 4095.0f);
+    }
+#endif
     unsigned budget = 128; /* bound parameter floods to this audio boundary */
     while (r != cq_w && budget--) {
         if (cq_hole_on && r == cq_hole_at) {   /* already copied toward the head */

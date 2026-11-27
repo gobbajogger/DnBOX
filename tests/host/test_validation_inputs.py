@@ -179,6 +179,7 @@ class PackageBytes(unittest.TestCase):
             'X0X_HOST_DEFS': '-DX0X_UI_SMALL_CANVAS=1',
             'X0X_CHI_FACTORY_COL': '1',
             'X0X_D9_ENTROPY': '1',
+            'X0X_D9_EARLY_HIT': '1',
         }
         # The test changes only caller configuration, not the installed wheels.
         with patch.object(identity.importlib.metadata, 'distribution',

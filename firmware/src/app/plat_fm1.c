@@ -16,6 +16,11 @@ void plat_cq_unlock(uint32_t state)
     fm1_irq_mask_restore(FM1_IRQ_ALNK0, state);
 }
 
+#if X0X_D9_EARLY_HIT
+uint32_t plat_early_drum_lock(void) { return irq_save(); }
+void plat_early_drum_unlock(uint32_t flags) { irq_restore(flags); }
+#endif
+
 uint32_t plat_ms(void) { return fm1_ms; }
 
 uint32_t plat_buttons(void)

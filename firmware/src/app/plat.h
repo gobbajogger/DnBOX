@@ -85,6 +85,10 @@ void plat_play_red(int red);           /* PLAY lights green; red (its other LED)
 uint32_t plat_midi_mark(void);        /* accepted input producer watermark, non-consuming */
 int plat_midi_passed(uint32_t mark);  /* consumer reached/passed mark; <2^31 outstanding */
 int plat_midi_pending(void);          /* non-consuming shared USB/BLE/TRS input ring query */
+#if X0X_D9_EARLY_HIT
+uint32_t plat_early_drum_lock(void);
+void plat_early_drum_unlock(uint32_t flags);
+#endif
 int plat_midi_in(uint32_t *pkt);       /* 1 = got one (called from the audio ISR) */
 /* CPU0 main/TIMER5 request boundary, captured inside this call. Only the newest
  * cut is valid: a later cut makes all still-queued packets old, including those

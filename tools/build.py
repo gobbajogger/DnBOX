@@ -592,6 +592,11 @@ def build_app():
             factory_roots.extend(("-u", name))
     if drum_entropy_setting() == "1":
         flags.append("-DX0X_D9_ENTROPY=1")
+    early_drum = os.environ.get("X0X_D9_EARLY_HIT", "0")
+    if early_drum not in ("0", "1") or (early_drum == "1" and (BOARD != "smk37" or VERSION)):
+        raise SystemExit("X0X_D9_EARLY_HIT: SMK diagnostic only (0 or 1)")
+    if early_drum == "1":
+        flags.append("-DX0X_D9_EARLY_HIT=1")
     if miami_n513_boot() == "1":
         flags.append("-DX0X_MIAMI_N513_BOOT=1")
     tanh_boot = os.environ.get("X0X_D9_TANH_BOOT", "0")

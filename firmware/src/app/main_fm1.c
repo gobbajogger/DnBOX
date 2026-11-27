@@ -149,6 +149,9 @@ void fm1_timer5_irq(void)
     x0x_dbg.timer_irqs++;
     if (x0x_dbg.in_audio)
         x0x_dbg.nested++;
+#if BOARD_SMK37 && X0X_D9_EARLY_HIT
+    smk_d9_staged.lease_id=0;
+#endif
     fm1_input_tick();
 #if X0X_LCD_TRACE && BOARD_SMK37
     lcd_trace_input_tick(fm1_in.keys, fm1_in.notes, mi_w);
@@ -181,6 +184,9 @@ void fm1_timer5_irq(void)
         fm1_t5w_check(3u, fm1_ms);
 #endif
     }
+#if BOARD_SMK37 && X0X_D9_EARLY_HIT
+    if (smk_d9_staged.lease_id) smk_d9_publish_scan();
+#endif
     if (++sub == 10u)
         sub = 0;
     {

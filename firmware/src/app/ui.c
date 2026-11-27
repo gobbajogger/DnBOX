@@ -5166,9 +5166,23 @@ static int live_central_event(int key,int down)
 }
 
 
+#if BOARD_SMK37 && X0X_D9_EARLY_HIT && !defined(X0X_HOST)
+static uint32_t smk_d9_fg_epoch=UINT32_MAX;
+extern uint8_t smk_clip_mode_on(void);
+extern volatile uint32_t early_drum_admitted;
+volatile uint32_t early_drum_scan_trace[8][2]; /* (physical key, 24 MHz tick), first eight */
+#endif
+
 X0X_COLD static void input_body(void)
 {
+#if BOARD_SMK37 && X0X_D9_EARLY_HIT && !defined(X0X_HOST)
+    /* Snapshot key level and its admission together with scanner release. */
+    uint32_t scan_flags=plat_early_drum_lock();
+    uint32_t btn=plat_buttons(), keys=plat_keys(), early=smk_d9_receipt&fm1_in.knotes, ch, i;
+    plat_early_drum_unlock(scan_flags);
+#else
     uint32_t btn = plat_buttons(), keys = plat_keys(), ch, i;
+#endif
 #if UI_ALL_KEY_REC
     const uint32_t pads=plat_record_pad_keys(), pad_edges=pads^rec_pad_prev;
     rec_pad_prev=pads;
@@ -5295,8 +5309,25 @@ X0X_COLD static void input_body(void)
     } else
 #endif
     {
-        for (i = 0; i < NKEYS; i++)
-            if (ch & (1u << i)) key_event((int)i, (keys >> i) & 1u,0);
+        for (i = 0; i < NKEYS; i++) {
+            if (!(ch & (1u << i))) continue;
+#if BOARD_SMK37 && X0X_D9_EARLY_HIT && !defined(X0X_HOST)
+            if (early & keys & (1u << i)) {
+                /* A physical press at a stable 909 route already owns its
+                 * audio action. Do not reinterpret it if the view changed. */
+                int voice=KEY_BLACK[i];
+                if (voice>=0 && ui.part==PART_909 && (ui.view==V_PART || ui.view==V_SEQ) &&
+                    ui.overlay==O_NONE && !ui.rec && !ui.help && !ui.btn
+                    && !smc_ui_active() && !smk_clip_mode_on()) {
+                    if (ui.sel[PART_909]!=voice) drum_step_cancel();
+                    ui.sel[PART_909]=(uint8_t)voice;
+                    build_pages();
+                }
+                continue;
+            }
+#endif
+            key_event((int)i, (keys >> i) & 1u,0);
+        }
     }
     build_pages();
     if (!seq.playing)                                  /* PLAY plays what is on screen: the song on SONG, */
@@ -5444,10 +5475,17 @@ X0X_COLD static void input_body(void)
 
 static void input(void)
 {
+#if BOARD_SMK37 && X0X_D9_EARLY_HIT && !defined(X0X_HOST)
+    const uint32_t before=smk_d9_buttons;
+#endif
     live_boundary(1);
     input_body();
     seq.rec_ext_mask = ui.rec && !project_busy && ui.overlay != O_ASK ? (uint8_t)((1u << NBASS) - 1u) : 0;
     live_boundary(0);
+#if BOARD_SMK37 && X0X_D9_EARLY_HIT && !defined(X0X_HOST)
+    if (before==smk_d9_buttons && !ui.btn && !fm1_in.buttons)
+        smk_d9_fg_epoch=before;
+#endif
 }
 
 /* ================================================================== drawing === */
@@ -5509,6 +5547,59 @@ static void cv_lcd_maybe_input(void)
         cv_lcd_input();
     }
 }
+#if BOARD_SMK37 && X0X_D9_EARLY_HIT && !defined(X0X_HOST)
+static unsigned smk_d9_fg_playing;
+static int smk_d9_seq_stale(void)
+{
+    /* AUTO is also internal until an external owner or a pending tick
+     * exists. Do not arm across a requested clock or transport change. */
+    return seq.clk_src!=seq.clk_cur || seq.clk_cur>SEQ_CLK_INT ||
+           seq.ext || seq.ext_pending || seq.clk_lock ||
+           seq.req_start || seq.req_cont || seq.req_stop || SEQ_PART_OFF(&seq,TRK_DRUM);
+}
+static void smk_d9_open_lcd_lease(void)
+{
+    extern uint8_t smk_clip_mode_on(void);
+    smk_d9_fg_playing=seq.playing;
+    int safe=lcd_busy && !project_busy && !perf_testing() && !smc_ui_active() &&
+             !smk_clip_mode_on() && !smk_pad_piano && ui.part==PART_909 &&
+             (ui.view==V_PART || ui.view==V_SEQ) && ui.overlay==O_NONE &&
+             !ui.help && !ui.rec && !ui.btn && !ui.keys && ui.hold_step<0 &&
+             !smk_d9_seq_stale() && (proj.set.keysound || !smk_d9_fg_playing);
+    d9_lease_open(&smk_d9_route,safe,smk_d9_fg_epoch,smk_d9_buttons);
+}
+static void smk_d9_postscan(uint64_t before)
+{
+    uint64_t after=fm1_in.keys;
+    uint32_t low=after;
+    if (before || !low || (low&(low-1)) || after!=(uint64_t)low) return;
+    unsigned k=__builtin_ctz(low);
+    if (k<SMK_KEY_F3 || k>=SMK_KEY_F3+NKEYS) return;
+    d9_postscan s={.button_epoch=smk_d9_buttons,.down_before=before,
+                   .down_after=after,.pad_notes=fm1_in.pnotes,.button_now=fm1_in.buttons};
+    for (unsigned i=0;i<FM1_NBTN;++i) s.debounce|=fm1_in.cnt[i];
+    for (unsigned i=0;i<FM1_NENC;++i) s.encoder_pending|=fm1_in.enc_steps[i]!=0;
+    s.other_pending=seq.playing!=smk_d9_fg_playing || smk_d9_seq_stale();
+    if (d9_scan_admit(&smk_d9_route,&s,k,fm1_in.key_vel[k],BLACK_KEY,&smk_d9_staged))
+        smk_d9_staged_tick=fm1_ticks();
+}
+/* Later in this TIMER5 interrupt: an arriving USB/TRS/BLE packet is
+ * visible to the normal-order veto before we accept the physical strike. */
+static void smk_d9_publish_scan(void)
+{
+    d9_admit e=smk_d9_staged;
+    if (!e.lease_id || e.lease_id!=smk_d9_route.live_id || smk_d9_seq_stale())
+        return;
+    unsigned before=early_drum_admitted;
+    if (engine_early_drum_put(e.voice,e.velocity)) {
+        smk_d9_receipt |= 1u<<(e.physical-SMK_KEY_F3);
+        if (before<8u) {
+            early_drum_scan_trace[before][0]=e.physical | ((uint32_t)e.velocity<<8);
+            early_drum_scan_trace[before][1]=smk_d9_staged_tick;
+        }
+    }
+}
+#endif
 typedef struct { uint32_t x, y; } cv_lcd_pos_t;
 static void cv_lcd_emit(void *context, const uint16_t *px, uint32_t stride,
                          uint32_t x, uint32_t y, uint32_t w, uint32_t h)
@@ -5516,9 +5607,15 @@ static void cv_lcd_emit(void *context, const uint16_t *px, uint32_t stride,
     const cv_lcd_pos_t *pos = (const cv_lcd_pos_t *)context;
     /* The previous DMA can still read cv_lcd_txbuf: never overwrite it early.
      * This wait is bounded by the previous <=1536-byte pixel transfer. */
+#if BOARD_SMK37 && X0X_D9_EARLY_HIT && !defined(X0X_HOST)
+    smk_d9_open_lcd_lease();
+#endif
     lcd_sync();
     x0x_lcd_tile_pack(cv_lcd_txbuf, px, stride, x, y, w, h);
     lcd_blit(pos->x + x, pos->y + y, w, h, cv_lcd_txbuf);
+#if BOARD_SMK37 && X0X_D9_EARLY_HIT && !defined(X0X_HOST)
+    d9_lease_close(&smk_d9_route);
+#endif
     cv_lcd_maybe_input();
 }
 /* A whole-strip repaint already has contiguous full-width rows in cv_px.
@@ -5530,7 +5627,13 @@ static void cv_lcd_full(uint32_t x, uint32_t y)
     const uint32_t rows_per_dma = X0X_LCD_MAX_DMA_BYTES / (2u * cv_w);
     for (uint32_t row = 0; row < cv_h; row += rows_per_dma) {
         const uint32_t h = cv_h - row < rows_per_dma ? cv_h - row : rows_per_dma;
+#if BOARD_SMK37 && X0X_D9_EARLY_HIT && !defined(X0X_HOST)
+        smk_d9_open_lcd_lease();
+#endif
         lcd_blit(x, y + row, cv_w, h, cv_px + row * cv_w);
+#if BOARD_SMK37 && X0X_D9_EARLY_HIT && !defined(X0X_HOST)
+        d9_lease_close(&smk_d9_route);
+#endif
         cv_lcd_maybe_input();
     }
 }
