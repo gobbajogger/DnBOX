@@ -1,0 +1,114 @@
+--- a/firmware/src/dsp/s1c/s1c.c
++++ b/firmware/src/dsp/s1c/s1c.c
+@@ -484,13 +484,23 @@
+ /* Cheap voice: pitch, LFO, key-tracking and filter coefficients at control rate (every S1C_KR
+  * samples), sines from a 256-point table, the filter envelope still per sample in the cutoff. */
+ volatile uint8_t lab_s1_voice_seen;
+-static float voice_run_kr(s1c *s, s1c_voice *v)
++volatile uint32_t lab_morph_share[2];
++volatile uint32_t lab_pitch_cache[2];
++static float voice_run_kr(s1c *s, s1c_voice *v
++#if DNBOX_S1_FIXED_PITCH_LAB
++    ,unsigned refresh_pitch
++#endif
++)
+ {
+     int mono = P(MONO) > 0.0f, ft = (int)P(FTYPE);
+     v->amp = env_step(&v->ea, v->gate, P(AA), clampf(P(AD) * lfo10(s, P(LDEC)), 0.005f, 2.0f), P(AS), P(AR), s->sr);
+     v->fenv = env_step(&v->ef, v->gate, P(FA), P(FD), P(FS), P(FR), s->sr);
+     if (--v->kc <= 0) {
+         v->kc = S1C_KR;
++#if DNBOX_S1_FIXED_PITCH_LAB
++        ++lab_pitch_cache[0]; if(!refresh_pitch)++lab_pitch_cache[1];
++        if(refresh_pitch){
++#endif
+         float base = mono ? s->monos : v->freq, half = 0.5f * s->sr;
+         float plfo = 1.0f + lfo01(s, P(LPITCH)) * 0.0594630944f, k = P(DETM) * plfo;
+         const float f1 = clampf(base * exp2f((int)P(SEMI1) / 12.0f) * k, 0.0f, half);
+@@ -505,12 +515,20 @@
+         v->kd1 = f1 / s->sr; v->kd2 = f2 / s->sr;
+         v->ki1 = ph_inc(v->kd1); v->ki2 = ph_inc(v->kd2);
+         v->kis = ph_inc(fs / s->sr); v->kif = ph_inc(v->kff / s->sr);
++#if DNBOX_S1_FIXED_PITCH_LAB
++        float pitch = log2f(f1 > 0.0f ? f1 : 261.0f), kt = 1.0f - clampf((pitch - 6.0f) / 5.0f, 0.0f, 1.0f);
++        float kf = 1.0f - P(KTRK);
++        v->kkey = (1.0f - kf) * kt * kt + kf;
++        }
++#endif
+         v->kidx = clampf(P(FMA) * lfo10(s, P(LFM)), 0.0f, 15.0f);
+         v->kbal = clampf(P(BAL) + lfo01(s, P(LMIX)), 0.0f, 1.0f);
+         const float kres = clampf(P(RES) * lfo10(s, P(LRES)), 0.0f, 0.98f);
++#if !DNBOX_S1_FIXED_PITCH_LAB
+         float pitch = log2f(f1 > 0.0f ? f1 : 261.0f), kt = 1.0f - clampf((pitch - 6.0f) / 5.0f, 0.0f, 1.0f);
+         float kf = 1.0f - P(KTRK);
+         v->kkey = (1.0f - kf) * kt * kt + kf;
++#endif
+         const float kcut = P(CUT) * lfo10(s, P(LCUT)), kem = P(FENV) * lfo10(s, P(LFENV));
+         float cut = clampf(kcut - kcut * kem * (1.0f - v->fenv), 64.0f, 22050.0f);
+         if (ft == 0) {
+@@ -533,8 +551,17 @@
+         }
+     }
+     int bl = P(BLE) > 0.0f;
+-    float o1 = morph(&v->ph[0], v->kd1, v->ki1, P(I1), bl) * v->vamp * P(VOL1);
+-    float o2 = morph(&v->ph[1], v->kd2, v->ki2, P(I2), bl) * v->vamp * P(VOL2);
++    const uint32_t old_ph=v->ph[0];
++    const float pos1=P(I1), pos2=P(I2);
++    const float wave1=morph(&v->ph[0],v->kd1,v->ki1,pos1,bl);
++    float wave2;
++    ++lab_morph_share[0];
++    if(old_ph==v->ph[1] && v->ki1==v->ki2 &&
++       ((s1c_fb){.f=v->kd1}).u==((s1c_fb){.f=v->kd2}).u &&
++       ((s1c_fb){.f=pos1}).u==((s1c_fb){.f=pos2}).u){
++        wave2=wave1; v->ph[1]+=v->ki2; ++lab_morph_share[1];
++    }else wave2=morph(&v->ph[1],v->kd2,v->ki2,pos2,bl);
++    float o1=wave1*v->vamp*P(VOL1),o2=wave2*v->vamp*P(VOL2);
+     float y = (1.0f - v->kbal) * o1 + v->kbal * o2;
+     lab_s1_voice_seen=1; /* latch real use of voice kernel */
+     float sub = sine_t(v->ph[2]);
+@@ -1461,6 +1488,12 @@
+ __attribute__((minsize)) void s1c_render(s1c *s, float *outl, float *outr, unsigned n)
+ {
+     unsigned f, i;
++#if DNBOX_S1_FIXED_PITCH_LAB
++#if S1C_KR<=1 || !S1C_FAST || !S1C_CSM || !S1C_NO_SEQ
++#error exact fixed poly pitch lab needs guarded native span and external sequencer
++#endif
++    unsigned fixed_pitch=P(MONO)<=0.f && P(LPITCH)==0.f && P(LDET)==0.f;
++#endif
+ #if X0X_S1_DELAY_HISTORY_NATIVE
+     /* Existing boot/inactive paths may render before FX is attached. The
+      * real fixed-arena device binds before audio; keep a dry fallback. */
+@@ -1502,6 +1535,10 @@
+         const float t=c1*s->t[s1c_smid[i]];
+         const s1c_fb cur={.f=s->c[i]},next={.f=t+c2*cur.f};
+         if(next.u!=cur.u){
++#if DNBOX_S1_FIXED_PITCH_LAB
++            const unsigned id=s1c_smid[i];
++            if(id==DETM || id==DET2 || id==KTRK)fixed_pitch=0;
++#endif
+             if(wet_owns(i)){h->port_target[wn]=t;h->port_id[wn++]=(uint8_t)i;}
+             else {port_target[port_n]=t;port_id[port_n++]=(uint8_t)i;}
+         }
+@@ -1563,9 +1600,19 @@
+         sequencer(s);
+ #endif
+         float y = 0.0f;
+-        if (P(MONO) > 0.0f) { if (s->v[0].root != -1 && s->v[0].stage) y = voice_run(s, &s->v[0]); }
+-        else for (i = 0; i < S1C_VOICES; i++) if (s->v[i].root != -1 && s->v[i].stage) y += voice_run(s, &s->v[i]);
++#if DNBOX_S1_FIXED_PITCH_LAB
++        /* Every admitted poly voice is already present and rendered at every
++         * frame in the first KR period. Starting kc is <=S1C_KR: first real
++         * tick refreshes before any reuse. Arp/note ingress splits this span. */
++        const unsigned refresh_pitch=!fixed_pitch || f<S1C_KR;
++#define S1_VOICE_PITCH ,refresh_pitch
++#else
++#define S1_VOICE_PITCH
++#endif
++        if (P(MONO) > 0.0f) { if (s->v[0].root != -1 && s->v[0].stage) y = voice_run(s, &s->v[0] S1_VOICE_PITCH); }
++        else for (i = 0; i < S1C_VOICES; i++) if (s->v[i].root != -1 && s->v[i].stage) y += voice_run(s, &s->v[i] S1_VOICE_PITCH);
+ 
++#undef S1_VOICE_PITCH
+         /* bitcrush (sample-and-hold), tremolo */
+ #if defined(X0X_S1_CRUSH_LFO_PROBE) && X0X_S1_CRUSH_LFO_PROBE
+         float crush_route = P(LBC);
