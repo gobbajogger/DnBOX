@@ -320,10 +320,15 @@ static void sj6_arp(void)
 
     /* Reference: every private-bank preset's arp/seq fields through the decoder,
      * and the SEQ order of every seqEnable preset played on the SJ6 owner. */
-    const char *dir = "/workspace/sj6-private/presets_txt";
+    const char *reference = getenv("SJ6_PRESETS_TXT");
+    const char *dir = reference ? reference : "/workspace/sj6-private/presets_txt";
     DIR *d = opendir(dir);
     fine = 0;
-    if (!d) { puts("synth-arp: SJ6 reference SKIP (private bank absent)"); return; }
+    if (!d) {
+        CHECK(!reference);  /* a requested reference must not silently skip */
+        puts("synth-arp: SJ6 reference SKIP (private bank absent)");
+        return;
+    }
     unsigned presets = 0, seqs = 0, arps = 0, notes = 0, amp2 = 0;
     struct dirent *e;
     static sj6_text t;
