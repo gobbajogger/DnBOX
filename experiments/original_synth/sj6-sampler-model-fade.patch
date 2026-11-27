@@ -1,0 +1,131 @@
+--- a/firmware/src/dsp/juno6.h
++++ b/firmware/src/dsp/juno6.h
+@@ -122,6 +122,10 @@
+  float vibrato_depth, vibrato_ratio, mod_wheel_cutoff_hz;
+ #if X0X_SJ6_OTA_NATIVE
+  float sj6_live_raw_cutoff;
++#if DNBOX_SJ6_MODE_FADE_LAB
++ float sj6_mode_gain,sj6_mode_step;
++ uint8_t sj6_mode_armed,sj6_mode_requested;
++#endif
+ #endif
+  uint64_t lfo2_entropy_state;
+ #if X0X_SJ6_LFO1_WAVE_NATIVE
+@@ -293,6 +297,10 @@
+ float juno6_mod_cutoff_hz(unsigned value);
+ #if X0X_SJ6_OTA_NATIVE
+ void juno6_sj6_set_ota(juno6_t *,unsigned mode);
++#if DNBOX_SJ6_MODE_FADE_LAB
++int juno6_sj6_mode_fade_arm(juno6_t *);
++unsigned juno6_sj6_mode_fade_requested(const juno6_t *);
++#endif
+ float juno6_sj6_panel_cutoff_hz(float normalized,unsigned mode);
+ #endif
+ #if (defined(X0X_HOST) && defined(X0X_SJ6_DELAY_WITNESS)) || X0X_SJ6_NATIVE_DELAY
+--- a/firmware/src/dsp/juno6_factory.inc
++++ b/firmware/src/dsp/juno6_factory.inc
+@@ -580,7 +580,55 @@
+ #define sj6_cutoff_hz(s,raw) sj6_normal_cutoff_hz(raw)
+ #endif
+ #if X0X_SJ6_OTA_NATIVE
++#if DNBOX_SJ6_MODE_FADE_LAB
++#if !X0X_SUPERJ6_BUILTIN_INIT || !X0X_SJ6_LFO1_DELAY_PORT
++#error Mode fade witness requires the pinned typed renderer
++#endif
++/* No global ramp state or cross-owner sharing. Do not arm an unproved
++ * modulation or split FX receiver; keep the old steady path untouched. */
++static int sj6_mode_fade_neutral(const juno6_t *s)
++{
++    return s->typed && !s->lfo_running && !s->lfo1_pwm_route &&
++           !s->mod_wheel_cutoff_hz && !s->lfo1_cut_active && !s->lfo1_cut_force && !s->lfo2_pwm &&
++           !s->vibrato_step && !s->vibrato_phase && !s->vibrato_left &&
++           (s->lfo1_delay_started || !s->lfo1_delay_frames)
++#if X0X_SJ6_AUX_LFO_NATIVE
++           && !s->aux_fx_schedule && !s->aux_servo_mask && !s->lfo1_aux_route &&
++           !s->lfo_step_q40[1] && !s->lfo_step_q40[2]
++#endif
++           ;
++}
++int juno6_sj6_mode_fade_arm(juno6_t *s)
++{
++    if(!s || !sj6_mode_fade_neutral(s))return 0;
++    if(!s->sj6_mode_armed) {
++        s->sj6_mode_requested=s->core.sj6_ota;
++        s->sj6_mode_gain=1.f;
++        s->sj6_mode_step=1.f/fm_maxf(1.f,s->sample_rate*.005f);
++        s->sj6_mode_armed=1;
++    }
++    return 1;
++}
++unsigned juno6_sj6_mode_fade_requested(const juno6_t *s)
++{
++    return s->sj6_mode_armed ? s->sj6_mode_requested : s->core.sj6_ota;
++}
++static void sj6_mode_fade_samples(juno6_t *s,float *l,float *r,unsigned n)
++{
++    if(!s->sj6_mode_armed)return;
++    float gain=s->sj6_mode_gain;
++    const int pending=s->sj6_mode_requested!=s->core.sj6_ota;
++    if(!pending && gain==1.f)return;
++    for(unsigned i=0;i<n;i++){
++        gain=pending ? fm_maxf(0.f,gain-s->sj6_mode_step) : fm_minf(1.f,gain+s->sj6_mode_step);
++        l[i]*=gain;r[i]*=gain;
++    }
++    s->sj6_mode_gain=gain;
++}
++static void sj6_apply_ota_active(juno6_t *s,unsigned mode)
++#else
+ void juno6_sj6_set_ota(juno6_t *s,unsigned mode)
++#endif
+ {
+     if(mode==s->core.sj6_ota || !dnbx_set_sj6_ota(&s->core,mode))return;
+     /* Original model selection re-evaluates the real knob/current target. */
+@@ -589,6 +637,16 @@
+     if(s->lfo1_cut_active)s->mod_wheel_cutoff_hz=sj6_cutoff_hz(s,s->lfo1_cut_current);
+     juno6_refresh_ota_sustain(s,-1.f);
+ }
++#if DNBOX_SJ6_MODE_FADE_LAB
++void juno6_sj6_set_ota(juno6_t *s,unsigned mode)
++{
++    if(s->sj6_mode_armed) {
++        if(mode<=1u && sj6_mode_fade_neutral(s))s->sj6_mode_requested=(uint8_t)mode;
++        return;
++    }
++    sj6_apply_ota_active(s,mode);
++}
++#endif
+ #endif
+ 
+ int juno6_configure_lfo1_cutoff(juno6_t *s,float base,float current,float amount)
+@@ -2025,6 +2083,10 @@
+ #else
+  if (dnbx_render(&s->core,left,right,frames,0)!=DNBX_OK)return 0;
+ #endif
++#if DNBOX_SJ6_MODE_FADE_LAB && X0X_SJ6_OTA_NATIVE
++ /* Sampler-bus gain: after dry voice sum, before typed HPF and downstream FX. */
++ sj6_mode_fade_samples(s,left,right,frames);
++#endif
+  float hp_hz = s->hpf > 0.f ? 15+2000*s->hpf*s->hpf : 0.f;
+ #if X0X_SUPERJ6_BUILTIN_INIT
+  if (s->hpf < -1.f) hp_hz=-s->hpf-1.f;
+@@ -2239,6 +2301,20 @@
+ #if X0X_SJ6_LFO1_DELAY_PORT
+ int juno6_render_stereo(juno6_t *s,float *left,float *right,unsigned frames)
+ {
++#if DNBOX_SJ6_MODE_FADE_LAB && X0X_SJ6_OTA_NATIVE
++    if (s->sj6_mode_armed && (s->sj6_mode_gain!=1.f || s->sj6_mode_requested!=s->core.sj6_ota)) {
++        if(!frames || frames>DNBX_MAX_FRAMES || !left || !right || left==right || !sj6_mode_fade_neutral(s))
++            return 0; /* diagnostic: never silently broaden a partial transition */
++        /* Origin is this receiver callback, including its last partial tile. */
++        for(unsigned i=0;i<frames;i+=16u) {
++            const unsigned n=frames-i<16u ? frames-i : 16u;
++            if(s->sj6_mode_gain==0.f && s->sj6_mode_requested!=s->core.sj6_ota)
++                 sj6_apply_ota_active(s,s->sj6_mode_requested); /* existing compact target rearm, not new OTA DSP */
++            if(!sj6_render_with_lfo(s,left+i,right+i,n))return 0;
++        }
++        return 1;
++    }
++#endif
+     if (s->typed && !s->lfo1_delay_started && frames && frames<=DNBX_MAX_FRAMES &&
+         left && right && left!=right) {
+         if (s->lfo1_delay_age>=s->lfo1_delay_frames) s->lfo1_delay_started=1;
