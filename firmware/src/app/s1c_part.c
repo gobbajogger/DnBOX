@@ -67,6 +67,9 @@ int s1_part_program(s1_dry_part *part, unsigned program)
     s1c *e = &part->e;
     int ok = 1;
     if (program != S1_PART_INIT && program >= s1_part_programs()) { program = S1_PART_INIT; ok = 0; }
+#if X0X_S1_EXTRA_FX_LEASE
+    const unsigned history_bytes = part->arena ? (unsigned)e->pool_bytes : 0u;
+#endif
     load_init(e);
     if (program != S1_PART_INIT) {
         char name[S1PACK_NAME_MAX];
@@ -79,7 +82,11 @@ int s1_part_program(s1_dry_part *part, unsigned program)
     part->detm = e->t[P_DETM];
     part->held = 0;
     if (part->arena)
+#if X0X_S1_EXTRA_FX_LEASE
+        s1c_attach(e, part->arena, part->wbuf, part->arena + S1C_RVB_BYTES, (int)history_bytes);
+#else
         s1c_attach(e, part->arena, part->wbuf, part->arena + S1C_RVB_BYTES, (int)(S1C_ARENA_BYTES - S1C_RVB_BYTES));
+#endif
     return ok;
 }
 
@@ -88,6 +95,15 @@ void s1_part_init(s1_dry_part *part)
     memset(part, 0, sizeof *part);
     (void)s1_part_program(part, S1_PART_INIT);
 }
+
+#if X0X_S1_EXTRA_FX_LEASE
+void s1_part_bind_sized(s1_dry_part *part, void *arena, unsigned bytes)
+{
+    if (!arena || bytes != S1C_ARENA_BYTES+2016u || ((uintptr_t)arena & 3u)) return;
+    part->arena = (uint8_t *)arena;
+    s1c_attach(&part->e, arena, part->wbuf, part->arena + S1C_RVB_BYTES, (int)(bytes-S1C_RVB_BYTES));
+}
+#endif
 
 void s1_part_bind(s1_dry_part *part, void *arena)
 {

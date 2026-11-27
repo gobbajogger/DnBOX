@@ -72,7 +72,19 @@ unsigned engine_original_tail_state(int v)
 #endif
 static original_runtime_workspace original_workspace POOL;
 static original_chicago_tuning original_tuning POOL;
+#if X0X_S1C && X0X_S1_EXTRA_FX_LEASE
+typedef union {
+    original_chicago_fx2_compact chicago;
+    uint32_t arena[(S1C_ARENA_BYTES+2016u)/4u];
+} original_fx_extended_slot;
+_Static_assert(sizeof(original_fx_extended_slot)==6268u, "exact S1 slot lease");
+_Static_assert(NBASS==2, "4032-byte two-slot lease");
+static original_fx_extended_slot original_fx[NBASS] POOL;
+#define CHICAGO_FX_SLOT(v) (&original_fx[v].chicago)
+#else
 static original_chicago_fx2_compact original_fx[NBASS] POOL;
+#define CHICAGO_FX_SLOT(v) (&original_fx[v])
+#endif
 static original_chicago_fx2_cold_owner original_fx_owner[NBASS];
 static uint8_t original_fx_ready;
 static uint8_t original_key_pitch[NBASS][38]; /* token -> pitch+1; zero is released */
@@ -3585,8 +3597,8 @@ X0X_COLD void engine_init(pattern_t *patterns, song_t *song, lane_t *lanes, cons
     if (!original_tuning.ready) (void)original_chicago_tuning_bind(&original_tuning, 0, 0, NULL, 0x6d70);
     if (!original_fx_ready) {
         for (p = 0; p < NBASS; ++p) {
-            (void)original_chicago_fx2_compact_init(&original_fx[p]);
-            original_fx_owner[p] = original_chicago_fx2_compact_owner(&original_fx[p]);
+            (void)original_chicago_fx2_compact_init(CHICAGO_FX_SLOT(p));
+            original_fx_owner[p] = original_chicago_fx2_compact_owner(CHICAGO_FX_SLOT(p));
         }
         original_fx_ready = 1;
     }

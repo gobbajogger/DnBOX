@@ -60,6 +60,10 @@ typedef union {
 /* Cold/adoption operations use the explicit seven-type Chicago selection
  * policy. Its owner remains caller-owned at a stable address. Missing resources
  * remain a visible refusal. No old engine or bank is involved. */
+#if X0X_S1C && X0X_S1_EXTRA_FX_LEASE
+int original_runtime_init_sized(original_runtime_part *, const uint8_t cell[32], float bpm,
+    original_chicago_tuning *, const original_chicago_fx2_cold_owner *, void *arena, unsigned bytes);
+#endif
 int original_runtime_init(original_runtime_part *, const uint8_t cell[32], float bpm,
     original_chicago_tuning *, const original_chicago_fx2_cold_owner *);
 /* Call on an initialized or zero-initialized part before cold replacement;

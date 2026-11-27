@@ -579,6 +579,8 @@ def build_app():
     if not any(f.startswith("-DX0X_DEV_WOBBLE=") for f in flags):
         flags.append(f"-DX0X_DEV_WOBBLE={'1' if original_synth else wobble}")
     flags += ["-DDNBOX_LAB_RAM_SPARE=1", "-DDNBOX_EDITOR_REPLY_ALIAS=1"]
+    if os.environ.get("X0X_S1_EXTRA_FX_LEASE") == "1":
+        flags += ["-DX0X_S1_EXTRA_FX_LEASE=1"]
     flags += clang_std_inc()
     flags.append(f'-DFELUCCA_ID="{PRODUCT}"')
     if BOARD == "smk37":            # SMK store owner (storage.c st_owner_check): X0X's own family, untagged data cleared

@@ -32,6 +32,9 @@ static inline float s1_part_crush_hz(float amount) { return 48000.f - 45952.f * 
 unsigned s1_part_set_pack(const uint8_t *, uint32_t);
 
 void s1_part_init(s1_dry_part *part);                    /* INIT program, no effects arena */
+#if X0X_S1_EXTRA_FX_LEASE
+void s1_part_bind_sized(s1_dry_part *part, void *arena, unsigned bytes);
+#endif
 void s1_part_bind(s1_dry_part *part, void *arena);       /* lend S1C_ARENA_BYTES (or NULL) */
 int s1_part_program(s1_dry_part *part, unsigned program); /* pack program or S1_PART_INIT; 1 = loaded */
 unsigned s1_part_programs(void);                         /* programs in the mapped pack, 0 if none */

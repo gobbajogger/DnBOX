@@ -13,8 +13,13 @@ static int runtime_result(original_runtime_part *p, int ok)
     return p->status;
 }
 
+#if X0X_S1C && X0X_S1_EXTRA_FX_LEASE
+X0X_COLD int original_runtime_init_sized(original_runtime_part *p, const uint8_t cell[32], float bpm,
+    original_chicago_tuning *tuning, const original_chicago_fx2_cold_owner *fx, void *arena, unsigned bytes)
+#else
 X0X_COLD int original_runtime_init(original_runtime_part *p, const uint8_t cell[32], float bpm,
     original_chicago_tuning *tuning, const original_chicago_fx2_cold_owner *fx)
+#endif
 {
     if (!p || !cell) return ORIGINAL_RUNTIME_INVALID;
     (void)original_sound_adopt_legacy_cell((uint8_t *)cell);
@@ -36,7 +41,14 @@ X0X_COLD int original_runtime_init(original_runtime_part *p, const uint8_t cell[
         /* The part's Chicago FX2 object is idle while it plays Synth One: its
          * reverb lines and delay pool live there (retire re-initialises it). */
         if (!fx || !fx->context) return p->status = ORIGINAL_RUNTIME_NEEDS_FX;
-        s1_part_bind(&p->dsp.synthone, fx->context);
+#if X0X_S1_EXTRA_FX_LEASE
+        if (arena) {
+            if (arena != fx->context || bytes != S1C_ARENA_BYTES+2016u ||
+                ((uintptr_t)arena & 3u)) return p->status = ORIGINAL_RUNTIME_NEEDS_FX;
+            s1_part_bind_sized(&p->dsp.synthone, arena, bytes);
+        } else
+#endif
+            s1_part_bind(&p->dsp.synthone, fx->context);
         {
             unsigned program = original_sound_s1_program(cell);
             /* A missing pack or program plays INIT: still a valid, selectable sound. */
@@ -78,6 +90,14 @@ X0X_COLD int original_runtime_init(original_runtime_part *p, const uint8_t cell[
 #if X0X_ARP_ENGINE
 static void arp_params(original_runtime_part *p);
 #endif
+#if X0X_S1C && X0X_S1_EXTRA_FX_LEASE
+X0X_COLD int original_runtime_init(original_runtime_part *p, const uint8_t cell[32], float bpm,
+    original_chicago_tuning *tuning, const original_chicago_fx2_cold_owner *fx)
+{
+    return original_runtime_init_sized(p, cell, bpm, tuning, fx, NULL, 0);
+}
+#endif
+
 int original_runtime_prepare(original_runtime_part *p, float bpm)
 {
     if (!p || p->status != ORIGINAL_RUNTIME_OK) return p ? p->status : 0;

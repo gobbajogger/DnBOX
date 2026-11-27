@@ -1,3 +1,11 @@
+#if X0X_S1C && X0X_S1_EXTRA_FX_LEASE
+#define S1_FX_INIT_FOR_SLOT(v, cell, bpm, tuning, fx)                               \
+    original_runtime_init_sized(&original_bass[v], cell, bpm, tuning, fx,           \
+                                (void *)&original_fx[v], sizeof original_fx[v])
+#else
+#define S1_FX_INIT_FOR_SLOT(v, cell, bpm, tuning, fx)                               \
+    original_runtime_init(&original_bass[v], cell, bpm, tuning, fx)
+#endif
 /* SPDX-License-Identifier: GPL-3.0-only */
 /* Textually included by engine.c: replacement-only patch publication. */
 static int16_t bass_named_preset[NBASS] = {-1, -1};
@@ -366,7 +374,7 @@ X0X_COLD static int bass_restore_part(const sound_t *sound, int v)
 {
     if (engine_bass_sound_bank(sound, v) < 0) return 0;
     if (original_runtime_retire(&original_bass[v]) != ORIGINAL_RUNTIME_OK) return 0;
-    int rc = original_runtime_init(&original_bass[v], sound->v[T_303][v], seq_tempo(&seq),
+    int rc = S1_FX_INIT_FOR_SLOT(v, sound->v[T_303][v], seq_tempo(&seq),
         &original_tuning, &original_fx_owner[v]);
     original_switch_gain[v] = 512u; original_quiet_samples[v] = 0;
 #if X0X_SYNTHONE_PATCH
@@ -495,7 +503,7 @@ static void bass_preset_boundary_voice(int v)
             bass_applied[v] = token;
             return;
         }
-        int rc = original_runtime_init(&original_bass[v], next, seq_tempo(&seq),
+        int rc = S1_FX_INIT_FOR_SLOT(v, next, seq_tempo(&seq),
             &original_tuning, &original_fx_owner[v]);
         if (rc != ORIGINAL_RUNTIME_OK) {
             /* A failed adoption remains visible and needs a fresh explicit
