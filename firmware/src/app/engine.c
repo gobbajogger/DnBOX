@@ -414,9 +414,7 @@ int engine_live_key(int voice,uint32_t generation,int token,int pitch,int veloci
     uint32_t flags=plat_cq_lock();
     if(live_key_owner[voice].blocked){plat_cq_unlock(flags);return 0;}
     unsigned w=live_key_w,next=(w+1u)%LIVE_KEY_Q;
-    if(next==live_key_r) {
-        live_key_cancel|=(uint8_t)(1u<<voice);plat_cq_unlock(flags);return 0;
-    }
+    if(next==live_key_r) {plat_cq_unlock(flags);return 0;}
     live_key_q[w].generation=generation;
     live_key_q[w].word=(uint32_t)voice|((uint32_t)token<<1)|((uint32_t)pitch<<7)|
         ((uint32_t)velocity<<14)|((uint32_t)!!accent<<21)|((uint32_t)!!slide<<22);
@@ -676,7 +674,7 @@ static int cq_replace(uint32_t i, uint32_t w, uint32_t word)
     }
 }
 
-__attribute__((noinline)) static void cq_put(uint32_t type, uint32_t a, uint32_t b, uint32_t c)
+__attribute__((noinline)) static int cq_put(uint32_t type, uint32_t a, uint32_t b, uint32_t c)
 {
     uint32_t w = cq_w;
     uint32_t word = (type << 28) | ((a & 0xFFu) << 20) | ((b & 0xFFu) << 12) | (c & 0xFFFu);
@@ -688,29 +686,30 @@ retry:
          * press is rare but must not displace an already-queued release. */
         uint32_t i, keep = (type == C_BON) || (type == C_BOFF) || (type == C_BRK) || (type == C_DRUM) || (type == C_REC) || (type == C_BASE) || (type == C_MOD);
         if (!keep)
-            return;
+            return 0;
         uint32_t r = cq_r;
         for (i = r; i != w; i++) {
             uint32_t t = cq[i % CQ] >> 28;
             if (t < C_DRUM || t == C_DRUM) {
-                if (cq_replace(i, w, word)) return;
+                if (cq_replace(i, w, word)) return 1;
                 goto retry;
             }
         }
         for (i = cq_r; i != w; i++) {
             uint32_t tw = cq[i % CQ], t = tw >> 28, bb = (tw >> 12) & 0xFFu;
             if (t != C_BOFF && !(t == C_BRK && bb == 0u)) {
-                if (cq_replace(i, w, word)) return;
+                if (cq_replace(i, w, word)) return 1;
                 goto retry;
             }
         }
         if (cq_r != r) goto retry; /* consumer freed room during the scan */
-        return;
+        return 0;
     }
     cq[w % CQ] = word;
     cq_mark_fresh(w);
     __asm__ volatile("" ::: "memory");
     cq_w = w + 1;
+    return 1;
 }
 
 /* ------------------------------------------------------------ params --- */
@@ -1111,13 +1110,12 @@ X0X_COLD void engine_request_notes_off(void)
     notes_off_req = 1;
     plat_cq_unlock(flags);
 }
-void engine_bass_off_note(int part, int note)
+int engine_bass_off_note_try(int part,int note)
 {
-    if (note <= 0)
-        engine_bass_off(part);
-    else
-        cq_put(C_BOFF, (uint32_t)part, (uint32_t)(note & 127), 1u);
+    return cq_put(C_BOFF,(uint32_t)part,(uint32_t)(note>0?note&127:0),note>0);
 }
+void engine_bass_off_note(int part,int note)
+{ (void)engine_bass_off_note_try(part,note); }
 void engine_brk_live(int key, int down) { if (down && SEQ_PART_OFF(&seq, TRK_BRK)) return; cq_put(C_BRK, (uint32_t)key, (uint32_t)(down != 0), 0); }
 
 /* Opt-in bounded trace: ordinary RAM, never the audio pool. No raw struct
@@ -1624,23 +1622,12 @@ static void s_transport(void *ctx, int running)
 {
     (void)ctx;
     if (running) return;
-    /* Explicit firmware Stop policy: release existing notes, including pedal
-     * holds, through the original all-off lifecycle. New input after this
-     * event is accepted immediately; idle clocks and effect tails still run. */
-    for (int v = 0; v < NBASS; ++v) {
-        (void)original_runtime_all_off(&original_bass[v]);
-        /* Stop retires sounding keys, not the Free Play UI context. Its
-         * already accepted FIFO follows this transport boundary; changing
-         * generation here would discard the first new press after Stop.
-         * Modal/cancel boundaries still revoke generation separately. */
-        live_key_owner[v].gate = live_key_owner[v].token = 0;
-        live_key_owner[v].pitch = live_key_owner[v].arp = 0;
-        __builtin_memset(original_key_pitch[v], 0, sizeof original_key_pitch[v]);
-        original_seq_note[v] = -1;
-        bass_held[v] = bass_held_count[v] = 0;
-
+    /* Transport belongs only to the sequencer. Independent physical,
+     * external and pedal owners keep their gates and actual release edges. */
+    for(int v=0;v<NBASS;v++){
+        (void)original_runtime_release_source(&original_bass[v],ORIGINAL_INPUT_SEQUENCE);
+        original_seq_note[v]=-1;
     }
-    src_held[0] = src_held[1] = src_held[2] = 0;
 }
 #if BOARD_SMK37
 #include "app/smk_apc40.h"
@@ -1654,6 +1641,13 @@ void smk_ck_midi_stop(void);
 __attribute__((weak)) void smk_ck_midi_stop(void) {}
 #endif
 
+X0X_COLD int engine_physical_keys_pending(unsigned mask)
+{
+    if(live_key_r!=live_key_w || (live_key_cancel&mask) || cq_r!=cq_w)return 1;
+    for(int v=0;v<NBASS;v++)if((mask&(1u<<v)) &&
+        (live_key_owner[v].gate || (bass_held_src[v]==3 && bass_held_count[v])))return 1;
+    return 0;
+}
 X0X_COLD int engine_project_notes(void)
 {
     uint32_t r = cq_r;

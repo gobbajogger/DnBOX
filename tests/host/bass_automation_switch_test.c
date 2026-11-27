@@ -7,11 +7,11 @@ extern void engine_live_key_motion_step(int voice, int step);
 extern void engine_live_key_pattern_note(int voice, int note);
 /* This fixture exercises logical pattern and sound edits, not physical input. */
 uint64_t plat_physical_keys(void) { return (uint64_t)plat_keys()<<5; }
-int plat_outer_keys(plat_outer_event_t *events, uint64_t *keys, int *overflow,
+int plat_outer_keys(plat_outer_event_t *events, uint64_t *keys, uint64_t *released, int *overflow,
                     uint32_t epoch, int enabled, int octave, int publish)
 {
     (void)events;(void)epoch;(void)enabled;(void)octave;(void)publish;
-    *keys=plat_physical_keys();*overflow=0;return 0;
+    *keys=plat_physical_keys();*released=0;*overflow=0;return 0;
 }
 
 

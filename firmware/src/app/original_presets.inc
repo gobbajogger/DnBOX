@@ -413,7 +413,8 @@ int engine_bass_preset_pending(int v)
     if (!(request.token & 0x80000000u) || request.token == bass_applied[v]) return 0;
     if (!plat_midi_passed(request.midi) || (int32_t)(cq_r - request.cq) < 0) return 5;
     if (bass_wheel_mask & (1u << v)) return 3;
-    if (original_runtime_owned(&original_bass[v]) || original_quiet_samples[v] < 512u) return 2;
+    if (live_key_owner[v].gate || (bass_held_src[v]==3 && bass_held_count[v]) || original_runtime_owned(&original_bass[v]) || original_quiet_samples[v] < 512u)
+        return 2;
     return 1;
 }
 X0X_COLD int engine_bass_requested_bank(int v)
@@ -440,7 +441,8 @@ X0X_COLD int engine_bass_base_ready(unsigned mask, const bass_base_state_t *targ
         if (!engine_bass_bank_available(v, bank)) return -2;
         /* Typed history restore retains its existing admission contract. Only
          * factory requests own the measured fade/quiescence transition. */
-        if ((bass_wheel_mask & (1u << v)) || original_runtime_active(&original_bass[v])) return 2;
+        if ((bass_wheel_mask & (1u << v)) || live_key_owner[v].gate ||
+            original_runtime_active(&original_bass[v])) return 2;
     }
     return cq_r != cq_w || live_key_r != live_key_w || live_key_cancel ||
         !plat_midi_passed(plat_midi_mark()) ? 2 : 0;

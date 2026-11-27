@@ -72,6 +72,9 @@ static void arp_boundary(void)
 {
     for (unsigned v = 0; v < NBASS; ++v) {
         if (!arp_pending_flag[v]) continue;
+        /* Applying a new mode calls Sequencer_reset. Do not repurpose the
+         * held physical chord before its genuine release. */
+        if(live_key_owner[v].gate || (bass_held_src[v]==3 && bass_held_count[v]))continue;
         arp_pending_flag[v] = 0;
         if (!arp_kind_ok(v)) continue;
         engine_arp_cfg c = arp_pending[v];

@@ -160,6 +160,7 @@ static volatile struct {
 
 /* key events beyond the FM-1's 27 (keybed keys 0..4 and 32..36): key << 8 | velocity (0 = release) */
 #define SMK_EXTQ 32u
+static volatile uint64_t smk_extq_released; /* real key-up survives FIFO cutoff */
 static volatile uint32_t smk_extq[SMK_EXTQ][2]; /* generation, physical/velocity/pitch */
 static volatile uint8_t smk_extq_w, smk_extq_r, smk_extq_overflow, smk_ext_enabled;
 static volatile uint32_t smk_ext_epoch;
@@ -338,15 +339,13 @@ static void smk__key_event(uint32_t k, uint32_t vel)     /* vel 0 = release */
             fm1_in.knotes &= ~bit;
         }
         fm1_in.notes = fm1_in.knotes | fm1_in.pnotes;
-        if (smk_ext_enabled == PLAT_PHYS_REC || (smk_ext_enabled == PLAT_PHYS_RELEASE && !vel))
-            smk__extq(k, vel);
-    } else {
-        smk__extq(k, vel);
     }
-    if (vel)
-        fm1_in.keys |= (uint64_t)1u << k;
-    else
-        fm1_in.keys &= ~((uint64_t)1u << k);
+    const uint64_t bit=(uint64_t)1u<<k;
+    if (!vel && (fm1_in.keys&bit)) smk_extq_released|=bit;
+    if (smk_ext_enabled && (smk_ext_enabled!=PLAT_PHYS_RELEASE || !vel))
+        smk__extq(k,vel);
+    if(vel) fm1_in.keys|=bit;
+    else fm1_in.keys&=~bit;
 }
 
 #if X0X_DIAG_STATE_TRACE

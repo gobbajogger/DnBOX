@@ -15,6 +15,17 @@
 #else
 #define ref_fma fmaf
 #endif
+/* Exact arithmetic for all 128 production coordinates. Test/host builds can
+ * still inject independent measured coefficient tables. */
+static inline int32_t mod_linear_at(unsigned p)
+{
+#ifdef __PI32V2__
+    return p==127u ? 32767 : (int32_t)(258u*p);
+#else
+    return mod_linear[p];
+#endif
+}
+
 static int32_t si(uint32_t u){return u<=INT32_MAX?(int32_t)u:(int32_t)((int64_t)u-4294967296LL);}
 static int32_t add(int32_t a,int32_t b){return si((uint32_t)a+(uint32_t)b);}
 static int32_t sub(int32_t a,int32_t b){return si((uint32_t)a-(uint32_t)b);}
@@ -35,13 +46,13 @@ void original_chicago_ring_init(original_chicago_ring *s){
  memset(s,0,sizeof *s);
  s->edit1=s->edit2=64;
  s->dirty=1;
- s->pending_frequency=asr(mod_linear[64]*3,3);s->pending_wet=mod_linear[64];
+ s->pending_frequency=asr(mod_linear_at(64)*3,3);s->pending_wet=mod_linear_at(64);
 }
 void original_chicago_ring_reset(original_chicago_ring *s){if(s){s->frequency_acc=shl(s->frequency,15);s->wet_acc=shl(s->wet,15);s->phase=0;}}
 int original_chicago_ring_set(original_chicago_ring *s,unsigned p,unsigned v){
  if(!s||v>127||(p!=2&&p!=3))return 0;
  if(p==2)s->edit1=(uint8_t)v;else s->edit2=(uint8_t)v;
- s->pending_frequency=asr(mod_linear[s->edit1]*3,3);s->pending_wet=mod_linear[s->edit2];s->dirty=1;return 1;
+ s->pending_frequency=asr(mod_linear_at(s->edit1)*3,3);s->pending_wet=mod_linear_at(s->edit2);s->dirty=1;return 1;
 }
 int original_chicago_ring_process(original_chicago_ring *s,int16_t *l,int16_t *r,uint32_t n){
  if(!s||(n&&(!l||!r||l==r)))return 0;
@@ -110,8 +121,8 @@ void original_chicago_phaser_init(original_chicago_phaser *s){
  s->edit1=30;
  s->edit2=63;
  s->speed=mod_speed[30];
- s->modulation=asr(mul(mod_linear[63],16102),15);
- int32_t x=asr(sub(shl(mod_linear[120],15),mod_linear[120]),15);s->depth=(int32_t)((uint32_t)mul(x,x)>>15);s->feedback=asr(mul(mod_ph_feedback[40],32440),15);s->wet=mod_linear[64];
+ s->modulation=asr(mul(mod_linear_at(63),16102),15);
+ int32_t x=asr(sub(shl(mod_linear_at(120),15),mod_linear_at(120)),15);s->depth=(int32_t)((uint32_t)mul(x,x)>>15);s->feedback=asr(mul(mod_ph_feedback[40],32440),15);s->wet=mod_linear_at(64);
 }
 void original_chicago_phaser_reset(original_chicago_phaser *s){
  if(!s)return;
@@ -124,7 +135,7 @@ void original_chicago_phaser_reset(original_chicago_phaser *s){
 }
 int original_chicago_phaser_set(original_chicago_phaser *s,unsigned p,unsigned v){
  if(!s||v>127||(p!=2&&p!=3))return 0;
- if(p==2){s->edit1=(uint8_t)v;s->speed=mod_speed[v];}else{s->edit2=(uint8_t)v;s->modulation=asr(mul(mod_linear[v],16102),15);}
+ if(p==2){s->edit1=(uint8_t)v;s->speed=mod_speed[v];}else{s->edit2=(uint8_t)v;s->modulation=asr(mul(mod_linear_at(v),16102),15);}
  return 1;
 }
 int original_chicago_phaser_process(original_chicago_phaser *s,int16_t *l,int16_t *r,uint32_t n){

@@ -24,9 +24,7 @@ static void fresh_keys(int bank)
     T(engine_bass_bank(0)==bank);
     ui.part=PART_303A;set_view(V_PART);build_pages();ui.oct=0;
     audio_block();ui.freeplay[0]=1;scan();scan();T(live_owner==0);
-    /* Only the admitted voice acknowledges its cancellation here. An inactive
-     * voice can retain its wait bit after audio has already released its keys. */
-    T(!(live_wait&1u));
+
 }
 static void set_oct(int o){ui.oct=(int8_t)o;scan();}
 static void every_key(int bank,const char *ctx)
@@ -96,8 +94,7 @@ static void first_render_edges(int bank)
         }
     }
 }
-/* Every owner-loss path must release the old engine key before its physical
- * key-up. A generation change without release used to abandon this key. */
+/* Admission contexts must not impersonate a true physical release. */
 static void owner_switches(int bank)
 {
     for (int path=0;path<20;path++) {
@@ -120,15 +117,15 @@ static void owner_switches(int bank)
         case 12: test_smcui=1;break;
         case 13: held_btn=1u<<B_HOME;break;
         case 14: held_btn=1u<<B_SAVE;break;
-        case 15: engine_live_key_force_serial(0,generation+1,context);break;
-        case 16: engine_live_key_force_serial(0,generation+1,context+1);break;
+        case 15: engine_request_notes_off();break; /* explicit Panic exception */
+        case 16: smk_clip_enter_cleanup();test_clip_mode=1;break;
         case 17: project_busy=1;break;
         case 18: perf.test=0;perf.phase=1;break;
         case 19: set_view(V_SEQ);ui.freeplay[0]=0;break;
         }
         scan();
         if(path==0) { T(ui.part==PART_303B);T(live_owner==1); }
-        int retained=(path>=2 && path<=7) || path==13 || path==14 || path==19;
+        int retained=path!=15;
         T(!!engine_live_key_probe(0,2)==retained);
         T(!!(engine_bass_keys_held()&1)==retained);
         edge(17,0);T(!engine_live_key_probe(0,2));
@@ -145,25 +142,51 @@ static void owner_switches(int bank)
     edge(17,0);T(engine_bass_keys_held()&1); /* foreign MIDI source stays held */
     midi3(0x80|ch,65,0);audio_block();T(!(engine_bass_keys_held()&1));
 }
-/* Cancellation acknowledgement belongs to each voice. Exercise the inactive
- * wait bit that a global !live_wait assertion incorrectly rejected, and prove
- * both the active voice and the cancelled voice accept fresh physical edges. */
-static void cancelled_voice_reentry(int bank)
+static void selected_and_transport(int bank)
 {
-    fresh_keys(bank);enc_acc[EN_ALGO]=-1;scan();T(live_owner==1);
-    edge(20,100);T(engine_live_key_probe(1,2));
+    fresh_keys(bank);
+    edge(17,100); T(engine_live_key_probe(0,2));
     uint32_t before,after,context;int arp;
-    engine_live_key_state(1,&before,&arp,&context);
-    enc_acc[EN_ALGO]=1;scan();T(live_owner==0);
-    engine_live_key_state(1,&after,&arp,&context);
-    T(after!=before);T(!engine_live_key_probe(1,2));
-    T(!(engine_bass_keys_held()&2));T(live_wait&2u);
-    /* Selecting A must not need a visit to B to acknowledge B's cancellation. */
-    fresh_keys(bank);T(live_wait&2u);
-    edge(17,100);T(engine_live_key_probe(0,2));edge(17,0);
-    enc_acc[EN_ALGO]=-1;scan();T(live_owner==1);T(!(live_wait&2u));
-    edge(20,100);T(engine_live_key_probe(1,2));
-    edge(20,0);T(!engine_live_key_probe(1,2));
+    engine_live_key_state(0,&before,&arp,&context);
+    enc_acc[EN_ALGO]=-1;scan();T(live_owner==1);
+    edge(19,100);T(engine_live_key_probe(0,2)&&engine_live_key_probe(1,2));
+    btn(B_PLAY,1);btn(B_PLAY,0);scan();T(seq.playing);
+    btn(B_PLAY,1);btn(B_PLAY,0);scan();T(!seq.playing);
+    T(engine_live_key_probe(0,2)&&engine_live_key_probe(1,2));
+    T(engine_live_key_probe(0,1)==53 && engine_live_key_probe(1,1)==55);
+    T(!engine_bass_select_preset(0,bank==0?1:0,0,&proj.sound));
+    tick(250);T(engine_bass_bank(0)==bank && engine_bass_preset_pending(0)==2);
+    edge(17,0);T(!engine_live_key_probe(0,2)&&engine_live_key_probe(1,2));
+    engine_live_key_state(0,&after,&arp,&context);T(before==after);
+    for(unsigned i=0;i<2200 && engine_bass_preset_pending(0);i++)audio_block();
+    if(engine_bass_bank(0)!=(bank==0?1:0))fprintf(stderr,"preset wait bank-old=%d actual=%d pending=%d gate=%u held=%u\n",bank,engine_bass_bank(0),engine_bass_preset_pending(0),engine_live_key_probe(0,2),engine_bass_keys_held());
+    T(engine_bass_bank(0)==(bank==0?1:0));
+    edge(19,0);T(!engine_live_key_probe(1,2));
+    /* HAL overflow and resync must remember real key-up even if the same
+       physical index is already back down before this input scan. */
+    fresh_keys(bank);edge(17,100);
+    for(unsigned i=0;i<40;i++)physical(0,(i&1)?0:96);
+    physical(17,0);physical(17,96);scan();
+    T(!engine_live_key_probe(0,2));
+    edge(17,0);edge(17,96);T(engine_live_key_probe(0,2));
+    /* The audio-side FIFO can be full even after the HAL reported release.
+       Retain the press-time off request and retry instead of cancelling A. */
+    engine_live_key_state(0,&before,&arp,&context);
+    unsigned pushed=0;
+    while(engine_live_key(0,before,1,122,0,0,0))++pushed;
+    T(pushed==31);
+    physical(17,0);ui_input_only();
+    T((live_keys[0].down[17]&4) && engine_live_key_probe(0,2));
+    audio_block();ui_input_only();audio_block();
+    T(!engine_live_key_probe(0,2) && !live_keys[0].down[17]);
+    engine_live_key_state(0,&after,&arp,&context);T(before==after);
+    edge(17,100);T(engine_live_key_probe(0,2));
+    /* User project reset stays pending; genuine release drains first. */
+    const unsigned rev=project_revision;
+    T(ui_project_reset()==UI_PROJECT_BUSY && !project_reset_wait);
+    run_action(ACT_RESET,0);T(project_reset_wait);
+    scan();T(project_revision==rev&&engine_live_key_probe(0,2));
+    edge(17,0);ui_frame();T(!project_reset_wait&&project_revision!=rev);
 }
 static void page_hold_release(int bank)
 {
@@ -203,9 +226,13 @@ int main(int argc,char **argv)
         settings_do_not_swallow(bank);
         first_render_edges(bank);
         owner_switches(bank); page_hold_release(bank);
-        cancelled_voice_reentry(bank);
+        selected_and_transport(bank);
     }
+#if defined(X0X_S1C) && X0X_S1C && defined(X0X_SUPERJ6_FACTORY) && X0X_SUPERJ6_FACTORY
+    selected_and_transport(ORIGINAL_SOUND_SYNTHONE);
+    selected_and_transport(ORIGINAL_SOUND_JUNO);
+#endif
     T(!irq_depth);
-    printf("PASS %u checks: 37 keys x 6 octaves x {Chicago, Miami} x {EDIT, SEQ, list, HELP}, edge keys x50; on/off in first render\n",checks);
+    printf("PASS %u checks: 37 keys x 6 octaves x {Chicago, Miami} x {EDIT, SEQ, list, HELP}, edge keys x50; first-render edges, modal/part/transport retention, preset deferral, overflow and project reset\n",checks);
     return 0;
 }

@@ -49,13 +49,13 @@ int main(void)
     physical(15,90);scan();T(kbd_held_key[0]==rec_key_token(15));
     physical(15,0);scan();T(kbd_held_key[0]==11 && (engine_bass_keys_held()&1));
     pad(10,0);scan();T(!(engine_bass_keys_held()&1));
-    /* Held pitch survives octave change, then owner cutover releases A. */
+    /* Held pitch survives octave change, then owner cutover leaves A until its real release. */
     physical(36,96);scan();T(kbd_held_note[0]==72 && live_keys[0].n==1);
     ui.oct=1;scan();T(kbd_held_note[0]==72);
     physical(36,0);scan();T(!(engine_bass_keys_held()&1));
     ui.oct=0;scan();
     physical(0,96);scan();T(kbd_held_note[0]==36);
-    ui.part=PART_303B;scan();T(live_owner==1 && !(engine_bass_keys_held()&1));
+    ui.part=PART_303B;scan();T(live_owner==1 && (engine_bass_keys_held()&1));
     physical(36,96);scan();T(kbd_held_note[1]==72 && (engine_bass_keys_held()&2));
     physical(0,0);scan();T(engine_bass_keys_held()&2);
     physical(36,0);scan();T(!(engine_bass_keys_held()&2));
@@ -82,6 +82,23 @@ int main(void)
     set_view(V_SEQ);scan();
     at_step(TRK_BASS0,10,10);pad(10,1);scan();T(bst(10)->note==51);
     pad(10,0);scan();T(!(engine_bass_keys_held()&1));
+    /* REC, Stop and REC-off must not end an already admitted real key. */
+    at_step(TRK_BASS0,11,10);
+    physical(36,91);scan();
+    T(live_keys[0].n==1 && (engine_bass_keys_held()&1));
+    btn(B_PLAY,1);btn(B_PLAY,0);scan();T(!seq.playing);
+    T(live_keys[0].n==1 && (engine_bass_keys_held()&1));
+    btn(B_REC,1);btn(B_REC,0);scan();T(!ui.rec);
+    T(live_keys[0].n==1 && (engine_bass_keys_held()&1));
+    physical(36,0);scan();T(!live_keys[0].n && !(engine_bass_keys_held()&1));
+    prep();physical(36,93);scan();
+    T(live_keys[0].n==1 && (engine_bass_keys_held()&1));
+    unsigned filled=0;
+    while(engine_bass_off_note_try(1,121)) {++filled;T(filled<4096);}
+    physical(36,0);ui_input_only();
+    T((live_keys[0].down[36]&4) && (engine_bass_keys_held()&1));
+    for(unsigned i=0;i<20 && (live_keys[0].n || (engine_bass_keys_held()&1));i++)scan();
+    T(!live_keys[0].n && !(engine_bass_keys_held()&1));
     T(!irq_depth);
     printf("PASS %u checks: physical 37-key stopped + playing REC, exact 36–72 mapping, mixed FIFO ordering, alias/release/ownership\n",checks);
     return 0;

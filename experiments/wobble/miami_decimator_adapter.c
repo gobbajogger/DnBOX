@@ -11,7 +11,7 @@ int miami_decimator_adapter_init(miami_decimator_adapter_t *s)
     (void)miami_decimator_seed(&next.kernel,0,0,0,0);
     next.frequency_integer = 64;
     next.wet_integer = 127;
-    next.wet_gain = miami_decimator_wet[127];
+    next.wet_gain = 32767;
     (void)miami_decimator_stage_step(&next.kernel,miami_decimator_frequency[63]);
     *s = next;
     return 1;
@@ -29,7 +29,7 @@ int miami_decimator_adapter_set(miami_decimator_adapter_t *s, unsigned parameter
     uint8_t p = (uint8_t)((uint32_t)value & UINT32_C(127));
     if (parameter == 2) {
         s->wet_integer = p;
-        s->wet_gain = miami_decimator_wet[p];
+        s->wet_gain = p==127u ? 32767 : (int32_t)(258u*p);
     } else {
         if (parameter == 1) s->frequency_integer = p;
         else s->bit_integer = p;

@@ -64,12 +64,12 @@ uint32_t plat_record_pad_keys(void); /* pad aliases only, not physical keybed */
 #define PLAT_OUTER_PITCH(word) ((uint32_t)(word) >> 14)
 #if defined(X0X_HOST) && !defined(X0X_LIVE_KEY_TEST)
 static inline uint64_t plat_physical_keys(void) { return (uint64_t)plat_keys()<<5; }
-static inline int plat_outer_keys(plat_outer_event_t *events,uint64_t *keys,int *overflow,
+static inline int plat_outer_keys(plat_outer_event_t *events,uint64_t *keys,uint64_t *released,int *overflow,
                                   uint32_t epoch,int enabled,int octave,int publish)
-{ (void)events;(void)epoch;(void)enabled;(void)octave;(void)publish;*keys=plat_physical_keys();*overflow=0;return 0; }
+{ (void)events;(void)epoch;(void)enabled;(void)octave;(void)publish;*keys=plat_physical_keys();*released=0;*overflow=0;return 0; }
 #else
 uint64_t plat_physical_keys(void);
-int plat_outer_keys(plat_outer_event_t *events,uint64_t *keys,int *overflow,
+int plat_outer_keys(plat_outer_event_t *events,uint64_t *keys,uint64_t *released,int *overflow,
                     uint32_t epoch,int enabled,int octave,int publish);
 #endif
 uint8_t plat_key_velocity(int key);    /* last strike, 1..127; 100 without velocity sensing */

@@ -43,15 +43,17 @@ static inline int16_t chi_bpmdly_q15(float x)
 }
 
 /* Same beat grid as fxbus DlTime 0..12. */
+#include "../dsp/fx_beat_table.h"
 static inline float chi_bpmdly_beats(uint8_t div)
 {
-    static const float beats[13] = {
-        0.125f, 1.0f / 6.0f, 0.25f, 1.0f / 3.0f, 0.375f, 0.5f, 2.0f / 3.0f,
-        0.75f,  1.0f,        4.0f / 3.0f, 1.5f,  2.0f,  3.0f
-    };
     if (div > 12)
         div = 12;
+#ifdef __PI32V2__
+    return x0x_fx_beats[div];
+#else
+    static const float beats[13] = X0X_FX_BEATS_VALUES;
     return beats[div];
+#endif
 }
 
 static inline void chi_bpmdly_set_bpm(chi_bpmdly_t *d, uint8_t e1, uint8_t e2, float sr, float bpm)

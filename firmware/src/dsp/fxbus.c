@@ -2,6 +2,7 @@
 /* Send reverb, synced delay and master stage: a port of 9W9's er99_verb_tick,
  * er99_dly_tick, master distortion and master_glue (GPL-3.0). See fxbus.h. */
 #include "fxbus.h"
+#include "fx_beat_table.h"
 #include "../x0x_cold.h"          /* X0X_COLD: fxbus_init is boot only, not the send/render */
 
 static const int32_t fx_cl[4] = { 1116, 1188, 1277, 1356 };
@@ -10,10 +11,7 @@ static const int32_t fx_alr[2] = { 579, 457 };
 #define FX_RV_QUIET (1356 + 8192)          /* combs silent this long: the allpass tail is < -140 dB */
 
 /* 1/32 1/16T 1/16 1/8T 1/16. 1/8 1/4T 1/8. 1/4 1/2T 1/4. 1/2 1/2. (in beats) */
-static const float fx_beats[13] = {
-    0.125f, 1.0f / 6.0f, 0.25f, 1.0f / 3.0f, 0.375f, 0.5f, 2.0f / 3.0f,
-    0.75f, 1.0f, 4.0f / 3.0f, 1.5f, 2.0f, 3.0f
-};
+const float x0x_fx_beats[13] = X0X_FX_BEATS_VALUES;
 
 /* ---- parameters ---- */
 enum { CV_LIN, CV_EXP, CV_SW };
@@ -89,7 +87,7 @@ __attribute__((noinline)) static void fx_retime(fxbus_t *f)
     if (i < 0) i = 0;
     if (i > 12) i = 12;
     const float bpm = f->bpm >= 20.0f ? f->bpm : 120.0f;
-    float ms = fx_beats[i] * 60000.0f / bpm;
+    float ms = x0x_fx_beats[i] * 60000.0f / bpm;
     const float max_ms = (float)(f->dlen - 256) / D9_SR * 1000.0f;
     while (ms > max_ms)                 /* longer than the line (1/2. under 90 BPM): half of it, */
         ms *= 0.5f;                     /* which is still on the beat; cutting it short is not */

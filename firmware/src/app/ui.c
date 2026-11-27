@@ -212,7 +212,7 @@ typedef struct {
     uint8_t step_edited;
     uint8_t paste_src[NPARTS];        /* source slots chosen with a paste target; stable through confirmation */
     uint8_t brk_choice_on, brk_choice_bank, brk_choice_slot, brk_choice_pat;
-    uint8_t step_preview;              /* the held step is sounding (only while stopped) */
+    uint8_t step_preview, step_preview_note;              /* the held step is sounding (only while stopped) */
     uint8_t step_created;              /* the press turned the held step on (its release keeps it) */
     int8_t brk_held;                   /* BREAK: the white key (16th) held, -1 none */
     int8_t hold_step;                  /* a drum machine: the step (white key) held, -1 none */
@@ -282,7 +282,10 @@ static void mark_dirty(void) { ui.dirty = 1; }
 static uint8_t save_wait;
 static void live_boundary(int entry);
 static void keyboard_panic_reset(uint32_t btn);
-static uint8_t project_busy, project_revision;
+static uint8_t project_busy, project_revision, project_reset_wait;
+static int8_t sound_reset_wait=-1;
+static int ui_physical_notes_pending(unsigned mask);
+static int ui_physical_owner_held(int b);
 static uint32_t song_structure_revision; /* runtime identity epoch for frozen song-bar controls */
 int ui_project_busy(void) { return project_busy != 0; }
 X0X_COLD static void project_input_sync(void)
@@ -971,7 +974,7 @@ X0X_COLD static void pref_set_impl(pref_t r, int v, int from_keyboard)
         if (v && ui.part == PART_303A + r.a)
             bass_step_cancel();                       /* the held step must not become a held keyboard note */
         ui.freeplay[r.a] = (uint8_t)v;
-        if (!v && (kbd_held_note[r.a] || kbd_arp_n[r.a])) { /* a key still down: let it go */
+        if (!v && !ui_physical_owner_held(r.a) && (kbd_held_note[r.a] || kbd_arp_n[r.a])) { /* legacy preview only */
             engine_bass_off(r.a);
             kbd_held_note[r.a] = 0;
             kbd_held_key[r.a] = 0;
@@ -2546,13 +2549,17 @@ static void undo_name(uint32_t lo, uint32_t hi, char *t)
 
 /* Finish an audio-owned recorder before history or bulk pattern edits. Hold is
  * brief, covers state finalization only, and never reinitializes a voice. */
-static void record_finish(void)
+static void record_finish_held(void)
 {
-    seq.rec_mask = seq.rec_ext_mask = 0;
-    engine_project_hold(1);
+    seq.rec_mask=seq.rec_ext_mask=0;
     seq.rec_epoch++;
     seq.rec_ev_gen++;
-    for (int b = 0; b < NBASS; b++) seq_rec_cancel(&seq, b);
+    for(int b=0;b<NBASS;b++)seq_rec_cancel(&seq,b);
+}
+static void record_finish(void)
+{
+    engine_project_hold(1);
+    record_finish_held();
     engine_project_hold(0);
 }
 static void do_undo(int redo)
@@ -2952,13 +2959,17 @@ X0X_COLD static void reset_sound(int part)
     int target, voice, nvoice, tag;
     uint8_t mute_proxy = (uint8_t)seq.mute; /* data helper only checks this pointer for null */
     if (project_busy || sound_reset_span(part, &target, &voice, &nvoice, &tag)) return;
+    if(tag>=0 && ui_physical_notes_pending(1u<<tag)){
+        sound_reset_wait=(int8_t)part;
+        say("RELEASE KEYS TO RESET",0);
+        return;
+    }
     engine_bass_edit_hold(1);
     if (!saved_sound_present(part)) {
         say("NO SAVED SOUND", 0);
         engine_bass_edit_hold(0);
         return;
     }
-    record_finish(); /* finalize audio-owned recording before the undo snapshot */
     engine_sound_defaults(&factory);
 #if X0X_BASS_TAGGED_SOUND
     unsigned mask = tag >= 0 ? 1u << tag : 0;
@@ -2970,14 +2981,15 @@ X0X_COLD static void reset_sound(int part)
         int ready = engine_bass_base_ready(mask, &next);
         if (ready) {
             engine_project_hold(0);
-            ui.overlay = O_ASK; /* retry after notes/input are released */
-            say(ready > 0 ? "UNDO WAIT NOTE / INPUT" :
-                "UNDO ENGINE UNAVAILABLE", 0);
+            if(ready>0)sound_reset_wait=(int8_t)part;
+            say(ready > 0 ? "RESET WAIT NOTE / INPUT" : "RESET ENGINE UNAVAILABLE", 0);
             engine_bass_edit_hold(0);
             return;
         }
-    }
+        record_finish_held();
+    }else
 #endif
+    record_finish();
     /* Keep preceding mixer/part edits out of the reset's undo entry. */
     undo_commit_stable();
 #if X0X_BASS_TAGGED_SOUND
@@ -3111,7 +3123,10 @@ X0X_COLD static void run_action(int act, int arg)
         say("SONG CLEARED", 0);
         break;
     case ACT_RESET:
-        (void)ui_project_reset();
+        if(!project_busy && ui_physical_notes_pending((1u<<NBASS)-1u)){
+            project_reset_wait=1;
+            say("RELEASE KEYS TO RESET",0);
+        }else (void)ui_project_reset();
         break;
 #if X0X_UI_PERF
     case ACT_PERF:
@@ -3476,7 +3491,7 @@ static void bass_step_cancel(void)
     if (ui.held_step < 0)
         return;
     if (ui.step_preview)
-        engine_bass_off(ui.held_step_part - PART_303A);
+        engine_bass_off_note(ui.held_step_part - PART_303A,ui.step_preview_note);
     if (ui.step_edited && lock_step() >= 0)
         lock_release();
     ui.step_preview = 0;
@@ -3920,10 +3935,12 @@ static void bass_step_key(int white, int down)
             bp->step[s].flags = G_NOTE;
             mark_dirty();
         }
-        ui.step_preview = key_sounds();               /* as the drum keys */
-        if (ui.step_preview)
-            engine_bass_on_velocity(b, bp->step[s].note + bp->transpose - 24,
-                                    (bp->step[s].flags & BS_ACCENT) != 0, 0, bstep_velocity(&bp->step[s]));
+        const int n=bp->step[s].note+bp->transpose-24;
+        ui.step_preview=key_sounds() && n>0 && n<=127;
+        if(ui.step_preview){
+            ui.step_preview_note=(uint8_t)n;
+            engine_bass_on_velocity(b,n,(bp->step[s].flags&BS_ACCENT)!=0,0,bstep_velocity(&bp->step[s]));
+        }
     } else if (ui.held_step == s && ui.held_step_part == ui.part &&
                ui.held_step_pat == seq.ppat[ui.part]) {
         if (!ui.step_created && !ui.step_edited && plat_ms() - ui.step_t0 < STEP_TAP_MS) {   /* a tap takes it off */
@@ -3992,8 +4009,13 @@ static void held_note_by(int by)
     ui.step_edited = 1;
     mark_dirty();
     if (key_sounds()) {                                /* as the drum keys: playing, the line is heard */
-        engine_bass_on_velocity(bidx(), st->note + bp->transpose - 24, 0, 1, bstep_velocity(st));
-        ui.step_preview = 1;
+        const int b=bidx(), n=st->note+bp->transpose-24;
+        if(ui.step_preview)engine_bass_off_note(b,ui.step_preview_note);
+        ui.step_preview=n>0 && n<=127;
+        if(ui.step_preview){
+            engine_bass_on_velocity(b,n,0,1,bstep_velocity(st));
+            ui.step_preview_note=(uint8_t)n;
+        }
     }
 }
 
@@ -4078,7 +4100,7 @@ void smk_clip_enter_cleanup(void)
     ui.hold_step = -1;
     break_step_cancel();
     for (int b = 0; b < NBASS; b++)                   /* a 303 key note that still sounds: let it go */
-        if (kbd_held_note[b] || kbd_arp_n[b]) {
+        if (!ui_physical_owner_held(b) && (kbd_held_note[b] || kbd_arp_n[b])) {
             engine_bass_off(b);
             kbd_held_note[b] = 0;
             kbd_held_key[b] = 0;
@@ -4151,7 +4173,7 @@ static int globe_paste_part(int src, int dst)
     return 1;
 }
 
-static int bass_key_release(int b,unsigned token)
+static int bass_key_release(int b,unsigned token,int sent)
 {
     uint32_t i, j, hit = 0;
     int note = -1;
@@ -4167,10 +4189,11 @@ static int bass_key_release(int b,unsigned token)
             break;
         }
     if (kbd_held_key[b] == token || hit) {
-        if ((X0X_ORIGINAL_SYNTH || chi_arp_on_part(b)) && note >= 0)
-            engine_bass_off_note(b, note);
-        else
-            engine_bass_off(b);
+        if(!sent){
+            if((X0X_ORIGINAL_SYNTH || chi_arp_on_part(b)) && note>=0)
+                engine_bass_off_note(b,note);
+            else engine_bass_off(b);
+        }
         if (!kbd_arp_n[b]) {
             kbd_held_note[b] = 0;
             kbd_held_key[b] = 0;
@@ -4213,7 +4236,7 @@ static UI_DRAW void key_event(int k, int down, int pad_only)
     if (!pad_only && live_central_event(k,down)) return;
     if (!down) {
         for (int b = 0; b < NBASS; b++)
-            if (bass_key_release(b, (unsigned)k + 1u)) return;
+            if (bass_key_release(b, (unsigned)k + 1u,0)) return;
     }
 #if BOARD_SMK37
     extern uint8_t smk_clip_mode_on(void);
@@ -4865,26 +4888,19 @@ static void division_pad_input(void)
 
 /* 37 physical identities, not indices into the legacy 27-key tables. */
 typedef struct {
-    uint8_t pitch[37],velocity[37],accent[37],down[37],order[37],n;
+    uint8_t pitch[37],accent[37],down[37],order[37],n;
     uint64_t suppressed;
 } ui_live_keys_t;
 static ui_live_keys_t live_keys[NBASS] X0X_POOL;
 static plat_outer_event_t live_outer[32] X0X_POOL;
-static uint32_t live_epoch=1,live_generation,live_context,live_wait_generation[NBASS],live_intent_generation[NBASS];
+static uint32_t live_epoch=1,live_generation,live_context,live_intent_generation[NBASS];
 static int8_t live_owner=-1,live_octave,live_arp;
-static uint8_t live_wait,live_intent,live_release_only;
+static uint8_t live_release_only;
 #if BOARD_SMK37 && (!defined(X0X_HOST) || defined(X0X_REC_KEY_TEST))
 #define UI_ALL_KEY_REC 1
 static uint8_t live_rec;
 static uint32_t live_rec_scope;
 static uint32_t rec_pad_prev;
-static int record_key_owner(void)
-{
-    extern uint8_t smk_clip_mode_on(void);
-    return ui.rec && !project_busy && !perf_testing() && ui.view==V_SEQ && is_303() &&
-           ui.overlay!=O_ASK && !(ui.btn&((1u<<B_HOME)|(1u<<B_SAVE))) &&
-           !smk_clip_mode_on() && !smc_ui_active() ? bidx() : -1;
-}
 static unsigned rec_key_token(unsigned physical) { return physical+38u; }
 #else
 #define UI_ALL_KEY_REC 0
@@ -4892,14 +4908,15 @@ static unsigned rec_key_token(unsigned physical) { return physical+38u; }
 #endif
 static unsigned live_token(unsigned physical)
 { return physical>=5 && physical<32?physical-4:physical<5?physical+28:physical+1; }
-int ui_live_key_owner(void)
+/* Test common UI context exactly once regardless of input admission mode.
+ * Settings/HELP remain playable; prompts, transfers and mode overlays do
+ * not admit new strikes, while the press-time release ledger stays live. */
+static int __attribute__((noinline)) physical_page_owner(void)
 {
 #if BOARD_SMK37 || defined(X0X_HOST)
-    /* Synth pages keep the keybed: a settings list or HELP on top of SEQ/EDIT
-     * does not take the piano keys. Only a question (O_ASK) waits for an answer. */
-    if(project_busy || perf_testing() || ui.rec || ui.overlay==O_ASK ||
-       (ui.btn&((1u<<B_HOME)|(1u<<B_SAVE))) || (ui.view!=V_SEQ && ui.view!=V_PART) ||
-       !is_303() || (!ui.freeplay[bidx()] && ui.view!=V_PART))return 0; /* EDIT plays (kbd_on): all 37 keys */
+    if(project_busy || perf_testing() || ui.overlay==O_ASK ||
+       (ui.btn&((1u<<B_HOME)|(1u<<B_SAVE))) ||
+       (ui.view!=V_SEQ && ui.view!=V_PART) || !is_303())return 0;
 #if BOARD_SMK37
     extern uint8_t smk_clip_mode_on(void);
     if(smk_clip_mode_on() || smc_ui_active())return 0;
@@ -4909,174 +4926,169 @@ int ui_live_key_owner(void)
     return 0;
 #endif
 }
-static int live_can_keep_release(int b)
+int ui_live_key_owner(void)
 {
-    if(b<0 || !live_keys[b].n || !is_303() || bidx()!=b ||
-       project_busy || perf_testing() || ui.overlay==O_ASK)
-        return 0;
-#if BOARD_SMK37
-    extern uint8_t smk_clip_mode_on(void);
-    if(smk_clip_mode_on() || smc_ui_active())return 0;
-#endif
-    return 1;
+    if(ui.rec)return 0;
+    int owner=physical_page_owner();
+    return owner && (ui.view==V_PART || ui.freeplay[owner-1])?owner:0;
 }
-static void ui_live_cancel_voice(int b)
-{
-    if((unsigned)b>=NBASS || (!live_keys[b].n && !(live_intent&(1u<<b))))return;
 #if UI_ALL_KEY_REC
-    if(live_rec && b==live_owner) {
-        ui_live_keys_t *k=&live_keys[b];
-        for(unsigned p=0;p<37;p++)
-            if(k->down[p]) (void)bass_key_release(b,rec_key_token(p));
-        memset(k,0,sizeof *k);
-        k->suppressed=plat_physical_keys();
-        return;
-    }
+static int record_key_owner(void)
+{ return ui.rec && ui.view==V_SEQ ? physical_page_owner()-1 : -1; }
 #endif
-    int arp;engine_live_key_state(b,&live_wait_generation[b],&arp,0);
-    engine_live_key_cancel(b);live_wait|=(uint8_t)(1u<<b);live_intent&=(uint8_t)~(1u<<b);
-    uint64_t held=plat_physical_keys();
-    memset(&live_keys[b],0,sizeof live_keys[b]);live_keys[b].suppressed=held;
-    kbd_held_note[b]=kbd_held_key[b]=kbd_arp_n[b]=bass_rec_step[b]=0;
+/* Press-time ledger is per audio part, independent of the UI admission
+ * owner. 2 = direct physical note, 3 = REC physical preview/monitor. */
+static int live_physical_owner(unsigned p)
+{
+    for(int b=0;b<NBASS;b++) if(live_keys[b].down[p])return b;
+    return -1;
 }
-static int live_send(int b,unsigned physical,int on,int slide)
+static void live_forget(int b,unsigned p)
 {
     ui_live_keys_t *k=&live_keys[b];
-    if(engine_live_key(b,live_generation,(int)live_token(physical),k->pitch[physical],
-        on?k->velocity[physical]:0,k->accent[physical],slide)) {
-        if(on){live_intent|=(uint8_t)(1u<<b);live_intent_generation[b]=live_generation;k->down[physical]=2;}
-        return 1;
+    unsigned i=0;
+    while(i<k->n && k->order[i]!=p)i++;
+    if(i<k->n){for(unsigned j=i+1;j<k->n;j++)k->order[j-1]=k->order[j];--k->n;}
+    k->down[p]=0;
+    unsigned pitch=0,key=0;
+    if(k->n){
+        const unsigned last=k->order[k->n-1];
+        pitch=k->pitch[last];
+#if UI_ALL_KEY_REC
+        key=(k->down[last]&3)==3?rec_key_token(last):live_token(last);
+#else
+        key=live_token(last);
+#endif
+    }else if(kbd_arp_n[b]){
+        unsigned i=kbd_arp_n[b]-1;
+        pitch=kbd_arp_note[b][i];key=kbd_arp_key[b][i];
     }
-    ui_live_cancel_voice(b);return 0;
+    kbd_held_note[b]=(uint8_t)pitch;kbd_held_key[b]=(uint8_t)key;
+    bass_rec_step[b]=0;
+}
+static void live_release(int b,unsigned p)
+{
+    ui_live_keys_t *k=&live_keys[b];
+    unsigned kind=k->down[p]&3;
+    k->down[p]|=4u; /* a known real key-up remains pending across a re-press */
+#if UI_ALL_KEY_REC
+    if(kind==3){
+        if(!engine_bass_off_note_try(b,k->pitch[p]))return;
+        (void)bass_key_release(b,rec_key_token(p),1);
+    }
+    else
+#endif
+    if(kind==2 &&
+        !engine_live_key(b,live_intent_generation[b],(int)live_token(p),k->pitch[p],0,k->accent[p],0))
+        return; /* FIFO full: retry physical release on next reconciliation */
+    live_forget(b,p);
 }
 static void live_edge(unsigned physical,int velocity,int pitch)
 {
-    if(physical>=37 || (velocity && live_release_only))return;
-    uint64_t bit=(uint64_t)1u<<physical;
-    if(!velocity)for(int b=0;b<NBASS;b++)live_keys[b].suppressed&=~bit;
-    if(live_owner<0 || (live_wait&(1u<<live_owner)))return;
-    int b=live_owner;ui_live_keys_t *k=&live_keys[b];
-#if UI_ALL_KEY_REC
-    if(live_rec) {
-        if(velocity) {
-            if(k->down[physical] || (k->suppressed&bit))return;
-            k->down[physical]=1;
-            ++k->n;
-            bass_key_press(b,rec_key_token(physical),pitch,1,BASS_VELOCITY_DEFAULT);
-        } else if(k->down[physical]) {
-            k->down[physical]=0;
-            --k->n;
-            (void)bass_key_release(b,rec_key_token(physical));
-        }
+    if(physical>=37)return;
+    const uint64_t bit=UINT64_C(1)<<physical;
+    int b=live_physical_owner(physical);
+    if(!velocity){
+        for(int i=0;i<NBASS;i++) live_keys[i].suppressed&=~bit;
+        if(b>=0)live_release(b,physical);
         return;
     }
+    if(b>=0 || live_owner<0 || live_release_only)return;
+    b=live_owner;
+    ui_live_keys_t *k=&live_keys[b];
+    if(k->suppressed&bit)return;
+    if(k->n>=UI_BASS_HELD_MAX){k->suppressed|=bit;return;}
+    const int accent=!!(ui.btn&(1u<<B_ENV));
+    if(!live_rec && !engine_live_key(b,live_generation,(int)live_token(physical),pitch,velocity,accent,0)){
+        k->suppressed|=bit;
+        return; /* a rejected new press never cancels older accepted keys */
+    }
+    k->pitch[physical]=(uint8_t)pitch;k->down[physical]=2u+live_rec;
+    k->order[k->n++]=(uint8_t)physical;
+    live_intent_generation[b]=live_generation;
+#if UI_ALL_KEY_REC
+    if(live_rec)bass_key_press(b,rec_key_token(physical),pitch,1,BASS_VELOCITY_DEFAULT);
+    else
 #endif
-    int owns=(live_intent&(1u<<b)) && live_intent_generation[b]==live_generation;
-    if(velocity) {
-        if(k->down[physical] || (k->suppressed&bit))return;
-        if(k->n>=UI_BASS_HELD_MAX){k->suppressed|=bit;return;}
-        k->pitch[physical]=(uint8_t)pitch;k->velocity[physical]=(uint8_t)velocity;
-        k->accent[physical]=(uint8_t)!!(ui.btn&(1u<<B_ENV));k->down[physical]=1;
-        unsigned old=k->n;k->order[k->n++]=(uint8_t)physical;
-        (void)old;
-        if (!live_send(b, physical, 1, 0)) return;
-    } else {
-        if(!k->down[physical])return;
-        unsigned i=0;while(i<k->n && k->order[i]!=physical)i++;
-        int latest=i+1==k->n,active=k->down[physical]==2;k->down[physical]=0;
-        if(i<k->n){for(unsigned j=i+1;j<k->n;j++)k->order[j-1]=k->order[j];k->n--;}
-        (void)latest;
-        if (owns && active && !live_send(b, physical, 0, 0)) return;
+    {
+        k->accent[physical]=(uint8_t)accent;
+        kbd_held_note[b]=(uint8_t)pitch;kbd_held_key[b]=(uint8_t)live_token(physical);
+        bass_rec_step[b]=0;
     }
-    if(k->n){unsigned last=k->order[k->n-1];kbd_held_note[b]=k->pitch[last];kbd_held_key[b]=(uint8_t)live_token(last);}
-    else {
-        kbd_held_note[b]=kbd_held_key[b]=0;
-        if(live_release_only)live_intent&=(uint8_t)~(1u<<b);
-    }
-    bass_rec_step[b]=0;
 }
-static void live_reconcile(uint64_t physical)
+static void live_reconcile(uint64_t physical,uint64_t released)
 {
-    for(int b=0;b<NBASS;b++)live_keys[b].suppressed&=physical;
-    if(live_owner>=0) {
-        ui_live_keys_t *k=&live_keys[live_owner];
-        int last=k->n && !live_rec?k->order[k->n-1]:-1;
-        /* Remove missing older keys first: fallback must never transiently
-         * resurrect another key already released in this same snapshot. */
-        for(unsigned p=0;p<37;p++)if((int)p!=last && k->down[p] && !(physical&((uint64_t)1u<<p)))live_edge(p,0,0);
-        if(last>=0 && k->down[last] && !(physical&((uint64_t)1u<<last)))live_edge((unsigned)last,0,0);
+    for(int b=0;b<NBASS;b++) {
+        ui_live_keys_t *k=&live_keys[b];
+        k->suppressed&=physical;
+        if(!k->n)continue;
+        uint32_t generation;
+        int arp;
+        engine_live_key_state(b,&generation,&arp,0);
+        /* Explicit Panic or a true destructive owner reset invalidated the
+         * capability. Never send the stale token to the replacement. */
+        if(arp<0 || generation!=live_intent_generation[b]){
+            memset(k,0,sizeof *k);k->suppressed=physical;
+                kbd_held_note[b]=kbd_held_key[b]=kbd_arp_n[b]=bass_rec_step[b]=0;
+            continue;
+        }
+        for(unsigned p=0;p<37;p++)
+            if(k->down[p] && ((k->down[p]&4) || ((~physical|released)&(UINT64_C(1)<<p))))live_release(b,p);
     }
 }
-/* Entry precedes controls; exit cuts off old publication on any context edit.
- * Every input-only and early-return path passes through this wrapper boundary. */
+static int ui_physical_owner_held(int b){return (unsigned)b<NBASS && live_keys[b].n;}
+static int ui_physical_notes_pending(unsigned mask)
+{
+    for(unsigned b=0;b<NBASS;b++)if((mask&(1u<<b)) && live_keys[b].n)return 1;
+    return engine_physical_keys_pending(mask);
+}
+/* Changing the admission epoch discards old NOTE ONs only. The HAL
+ * physical snapshot always reconciles real NOTE OFFs for every part. */
 static void live_boundary(int entry)
 {
-    int owner=ui_live_key_owner()-1,arp=0,record=0;uint32_t generation=0,context=0;
+    int owner=ui_live_key_owner()-1,arp=0,record=0;
+    uint32_t generation=0,context=0;
 #if UI_ALL_KEY_REC
     const int rec_owner=record_key_owner();
-    if(rec_owner>=0) { owner=rec_owner;record=1; }
+    if(rec_owner>=0){owner=rec_owner;record=1;}
 #endif
-    int release_only=0;
-    /* UI navigation can remove new-key admission without changing the
-     * selected bass or the engine owner of an already-admitted key.
-     * REC-on/off remains a true change, but SEQ->EDIT in REC does not. */
-    if(owner<0 && (!!ui.rec==!!live_rec) && live_can_keep_release(live_owner)) {
-        owner=live_owner;
-        record=live_rec;
-        release_only=1;
-    }
-    if(owner>=0) {
+    if(owner>=0){
         engine_live_key_state(owner,&generation,&arp,&context);
-        if(arp<0)owner=-1; /* exhausted capability serial: no admission until cold boot */
-        if(owner>=0 && (live_wait&(1u<<owner)) && generation!=live_wait_generation[owner])live_wait&=(uint8_t)~(1u<<owner);
+        if(arp<0)owner=-1;
     }
-    if(owner<0)record=release_only=0;
-    int changed=owner!=live_owner || record!=live_rec || (owner>=0 && (context!=live_context || arp!=live_arp));
-    const int mode=owner<0?PLAT_PHYS_OFF:release_only?PLAT_PHYS_RELEASE:record?PLAT_PHYS_REC:PLAT_PHYS_OUTER;
+    if(owner<0)record=0;
+    const int release_only=owner<0 && (live_keys[0].n || live_keys[1].n);
+    const int mode=owner<0?(release_only?PLAT_PHYS_RELEASE:PLAT_PHYS_OFF):record?PLAT_PHYS_REC:PLAT_PHYS_OUTER;
+    int changed=owner!=live_owner || record!=live_rec || context!=live_context ||
+        generation!=live_generation || arp!=live_arp || ui.oct!=live_octave ||
+        release_only!=live_release_only;
 #if UI_ALL_KEY_REC
     const uint32_t rec_scope=record?((uint32_t)seq.rec_epoch<<9)|((uint32_t)seq.ppat[ui.part]<<1)|!!seq.playing:0;
-    if(record && rec_scope!=live_rec_scope)changed=1;
-    live_rec_scope=rec_scope;
+    if(rec_scope!=live_rec_scope)changed=1;
+    live_rec_scope=rec_scope;live_rec=(uint8_t)record;
 #endif
-    int admission_changed=release_only!=live_release_only;
-    int gate_changed=owner>=0 && generation!=live_generation;
-    int pitch_changed=ui.oct!=live_octave,overflow=0,n;
-    uint64_t physical;
-    if(changed) {
-        /* Revoke the old physical keys before discarding their inventory.
-         * A changed serial is not proof that their Note Off was consumed. */
-        if(live_owner>=0) ui_live_cancel_voice(live_owner);
-        live_owner=(int8_t)owner;live_context=context;live_arp=(int8_t)arp;
-#if UI_ALL_KEY_REC
-        live_rec=(uint8_t)record;
-#endif
-    }
-    if(gate_changed && owner>=0 && !changed) ui_live_cancel_voice(owner);
-    live_generation=generation;
-    live_release_only=(uint8_t)release_only;
-    if(changed || pitch_changed || gate_changed || admission_changed) {
-        live_epoch++;if(!live_epoch)live_epoch=1;
-        plat_outer_keys(live_outer,&physical,&overflow,live_epoch,mode,ui.oct,1);
-        live_octave=ui.oct;
-        if(owner>=0) {
-            for(unsigned p=0;p<37;p++)if(!live_keys[owner].down[p] && (physical&((uint64_t)1u<<p)))
-                live_keys[owner].suppressed|=(uint64_t)1u<<p;
+    live_owner=(int8_t)owner;live_context=context;live_generation=generation;
+    live_arp=(int8_t)arp;live_release_only=(uint8_t)release_only;live_octave=ui.oct;
+    int overflow=0,n;
+    uint64_t physical,released;
+    uint64_t discarded_releases=0;
+    if(!changed){
+        if(entry!=(record?2:1))return;
+        n=plat_outer_keys(live_outer,&physical,&released,&overflow,live_epoch,mode,ui.oct,0);
+        if(!overflow){
+            for(int i=0;i<n;i++)if(live_outer[i].generation==live_epoch){
+                unsigned w=live_outer[i].word;
+                live_edge(w&127u,(int)((w>>7)&127u),(int)((w>>14)&127u));
+            }
+            live_reconcile(physical,0);
+            return;
         }
-        live_reconcile(physical);return;
+        discarded_releases=released;
     }
-    if(entry != (record&&!release_only?2:1))return;
-    n=plat_outer_keys(live_outer,&physical,&overflow,live_epoch,mode,ui.oct,0);
-    if(overflow) {
-        if(owner>=0)ui_live_cancel_voice(owner);
-        live_epoch++;if(!live_epoch)live_epoch=1;
-        plat_outer_keys(live_outer,&physical,&overflow,live_epoch,mode,ui.oct,1);
-        if(record && owner>=0) live_keys[owner].suppressed|=physical;
-        return;
-    }
-    for(int i=0;i<n;i++)if(owner>=0 && live_outer[i].generation==live_epoch) {
-        unsigned w=live_outer[i].word;live_edge(w&127u,(int)((w>>7)&127u),(int)((w>>14)&127u));
-    }
-    live_reconcile(physical);
+    if(!++live_epoch)live_epoch=1;
+    plat_outer_keys(live_outer,&physical,&released,&overflow,live_epoch,mode,ui.oct,1);
+    if(owner>=0)live_keys[owner].suppressed|=physical;
+    live_reconcile(physical,released|discarded_releases);
 }
 /* Only physical keybed edges enter this route; legacy pad-note aliases retain
  * their existing path. Outer tokens never enter KEY_BLACK or central bitmaps. */
@@ -5086,15 +5098,13 @@ static int live_central_event(int key,int down)
     uint64_t physical=plat_physical_keys();
     if(down && !(physical&bit))return 0;
     live_boundary(0);
-    if(live_release_only) {
-        /* Unrelated keydowns are now the displayed page's own gestures.
-         * A legacy pad alias cannot release a still-physical held key. */
-        if(!down && !(physical&bit) && live_owner>=0 && live_keys[live_owner].down[p]) {
-            live_edge(p,0,0);
-            return 1;
-        }
-        return 0;
+    /* A pad alias must not release a still-physically held synth note. */
+    int held=live_physical_owner(p);
+    if(held>=0){
+        if(!down && !(physical&bit))live_edge(p,0,0);
+        return 1;
     }
+    if(live_release_only)return 0;
     if(live_rec)return 1;
     /* A legacy pad/key press accepted before Free Play still owns its original
      * release. It was never admitted into the new physical-key registry. */
@@ -9745,7 +9755,8 @@ X0X_COLD static int project_acquire(int reset)
     }
 #endif
     engine_project_hold(1);
-    if (!reset && (seq.playing || seq.req_start || seq.req_cont || seq.req_stop || engine_project_notes())) {
+    if ((reset && ui_physical_notes_pending((1u<<NBASS)-1u)) ||
+        (!reset && (seq.playing || seq.req_start || seq.req_cont || seq.req_stop || engine_project_notes()))) {
         engine_project_hold(0);
         return UI_PROJECT_BUSY;
     }
@@ -9769,6 +9780,8 @@ X0X_COLD void ui_project_end(int apply)
             smc_project_reset();
         }
 #endif
+        project_reset_wait=0;
+        sound_reset_wait=-1;
         project_commit_stage();
         engine_init(proj.pat, &proj.arr.song, proj.arr.lane, &proj.sound);
         seq.bpm = (float)proj.set.bpm_x10 / 10.0f;
@@ -9812,11 +9825,15 @@ X0X_COLD int ui_project_load(void)
 
 X0X_COLD int ui_project_reset(void)
 {
+    /* Local confirmed reset may wait in ui_frame. A direct editor request
+     * remains BUSY until it can actually return a completed transaction. */
     int rc = project_acquire(1);
     if (rc) {
         say("PROJECT BUSY", 0);
         return rc;
     }
+    project_reset_wait=0;
+    sound_reset_wait=-1;
     project_reset_stage();
     ui_project_end(1);
     say("PROJECT RESET: SAMPLES KEPT", 0);
@@ -9925,6 +9942,12 @@ UI_DRAW void ui_frame(void)
     if (ui.brk_choice_on && (!engine_brk_preview_active() || project_busy || seq.ppat[PART_BRK] != ui.brk_choice_pat ||
         plat_keys() || (plat_buttons() & ~((1u << B_SEL) | (1u << B_HOME))))) brk_choice_cancel();
     input();
+    if(!project_busy && project_reset_wait && !ui_physical_notes_pending((1u<<NBASS)-1u))
+        (void)ui_project_reset();
+    if(!project_busy && sound_reset_wait>=PART_303A &&
+       !ui_physical_notes_pending(1u<<(sound_reset_wait-PART_303A))){
+        const int part=sound_reset_wait;sound_reset_wait=-1;reset_sound(part);
+    }
     division_pad_input();
     ext_rec_drain();
     if (project_busy) {

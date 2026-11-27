@@ -12,7 +12,7 @@ def fn(t,start):
 s+='''\n#define SMK_KEY_F3 5u
 #define SMK_EXTQ 32u
 static struct { uint32_t notes,knotes,pnotes,notes_pressed; uint8_t key_vel[37]; uint64_t keys; } fm1_in;
-'''+h[h.index('static volatile uint32_t smk_extq'):h.index('\nstatic uint8_t fm1_led')]
+'''+h[h.index('static volatile uint64_t smk_extq_released'):h.index('\nstatic uint8_t fm1_led')]
 s+='\n'+fn(h,'static void smk__extq(')+'\n'+fn(h,'static void smk__key_event(')
 s+='''\nstatic unsigned irq_depth;
 static uint32_t irq_save(void){return irq_depth++;}

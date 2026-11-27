@@ -259,6 +259,7 @@ void engine_render(int32_t *out_lr, uint32_t n);   /* ISR: n stereo frames, 24-b
  * Releasing an aborted transaction preserves the sequencer and queued parameter commands. */
 void engine_project_hold(int hold);
 void engine_project_release(void);              /* end a transaction; discard MIDI received while held */
+int engine_physical_keys_pending(unsigned mask);
 int engine_project_notes(void);                 /* held or queued notes: cannot begin a transfer */
 void engine_project_flush(void);                /* held only: end old output notes and transport */
 
@@ -303,6 +304,7 @@ void engine_bass_on_velocity(int part, int note, int accent, int slide, int velo
 void engine_bass_record(int part, int note, int velocity, int flags); /* accepted live REC press, audio-owned */
 void engine_bass_off(int part);
 void engine_request_notes_off(void); /* all sounding notes off; transport keeps running */
+int engine_bass_off_note_try(int part,int note); /* false means retry this real key-up */
 void engine_bass_off_note(int part, int note); /* Chicago arp: release one held pitch; 0 note = all */
 void engine_brk_bend(int value); /* transient -8192..8191, +/-12 semitones */
 #ifdef X0X_HOST

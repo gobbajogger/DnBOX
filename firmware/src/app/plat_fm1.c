@@ -75,13 +75,14 @@ uint64_t plat_physical_keys(void)
     return (uint64_t)plat_keys()<<5;
 #endif
 }
-int plat_outer_keys(plat_outer_event_t *events, uint64_t *keys, int *overflow,
+int plat_outer_keys(plat_outer_event_t *events, uint64_t *keys, uint64_t *released, int *overflow,
                     uint32_t epoch, int enabled, int octave, int publish)
 {
     int n = 0;
 #if BOARD_SMK37
     uint32_t flags = irq_save();
     *keys = fm1_in.keys;
+    *released=smk_extq_released;smk_extq_released=0;
     *overflow = smk_extq_overflow;
     if (publish || *overflow)
         smk_extq_r = smk_extq_w;
@@ -104,6 +105,7 @@ int plat_outer_keys(plat_outer_event_t *events, uint64_t *keys, int *overflow,
     (void)octave;
     (void)publish;
     *keys = plat_physical_keys();
+    *released=0;
     *overflow = 0;
 #endif
     return n;
