@@ -1,0 +1,18 @@
+--- a/firmware/src/dsp/dnbx_core.c
++++ b/firmware/src/dsp/dnbx_core.c
+@@ -1028,6 +1028,15 @@
+                 else
+ #endif
+                 {
++#if DNBOX_LAB_SJ6_NORMAL_PREAMP
++                /* Diagnostic source-order arm: earlier evaluated AMP only.
++                 * Keep the same oscillator, velocity, Normal coefficients,
++                 * filter-state lifetime, and output fader for signed A/B. */
++                if(s->superj6_amp_range && p->oscillator_mode==DNBX_OSC_SUPERJ6) {
++                    x*=amp;
++                    amp=1.f;
++                }
++#endif
+                 lv->filter_first=fm_clampf(lv->filter_first+a*(x-lv->filter_first-p->resonance*.8f*lv->filter_second),-4,4);
+                 lv->filter_second=fm_clampf(lv->filter_second+a*(lv->filter_first-lv->filter_second),-4,4);
+                 mix[l]+=velocity*amp*lv->filter_second;
