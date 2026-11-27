@@ -1,0 +1,15 @@
+--- dnbx_core.c
++++ dnbx_core.c
+@@ -1,3 +1,4 @@
++extern void dnbox_j6_mix_tap(float,float);
+ /* SPDX-License-Identifier: GPL-3.0-only */
+ /* Clean analytic candidate using permitted DnBOX juno6.c oscillator, two-pole
+  * filter, and allocator primitives plus permitted DnBOX fastmath.h. No original
+@@ -1040,6 +1041,7 @@
+                 COUNT(w,layer_samples,1);
+             }
+         }
++        if(s->superj6_amp_range)dnbox_j6_mix_tap(mix[0],mix[1]);
+         left[k]=0; right[k]=0;
+         for (unsigned l=0;l<DNBX_LAYERS;l++) {
+             const dnbx_layer_params *p=&s->layer[l].params;

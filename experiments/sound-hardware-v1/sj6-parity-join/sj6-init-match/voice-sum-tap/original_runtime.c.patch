@@ -1,0 +1,15 @@
+--- original_runtime.c
++++ original_runtime.c
+@@ -1,3 +1,4 @@
++extern void dnbox_j6_tap(const float *,const float *,unsigned);
+ /* SPDX-License-Identifier: GPL-3.0-only */
+ #include "original_runtime.h"
+ #include "../dsp/juno6_controls.h"
+@@ -1602,6 +1603,7 @@
+         ok=juno6_render_stereo(s,left,right,frames);
+ #endif
+         s->aux_fx_schedule=0;
++        if(ok)dnbox_j6_tap(left,right,frames);
+         if(ok){
+             if(!sched.count)sj6_run_effects(p,left,right,frames,0);
+             else {

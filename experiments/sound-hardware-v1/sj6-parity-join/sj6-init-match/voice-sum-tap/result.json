@@ -1,0 +1,125 @@
+{
+  "native_terminal_sha": "e3884e0b9ba777d056d91d3a05e85f03cda1d3aef497b3a98854570649542453",
+  "cases": {
+    "0": {
+      "tap_sha": "4a145b50937b4d66df5b2fba0720066335bff37b571d679d36455770c905c743",
+      "terminal_sha": "cf7c501f68080cd53f2003be476006f75c9ea1e85087765009c148cb4153b954",
+      "windows": {
+        "attack": {
+          "terminal_gain_vs_pre_pan_db": [
+            -21.58362467927653,
+            -21.58362467927653
+          ],
+          "terminal_level_vs_native_db": [
+            11.190665481655964,
+            3.764109162555418
+          ],
+          "no_div6_arithmetic_level_vs_native_db": [
+            26.75369024765287,
+            19.327133928552325
+          ],
+          "no_div6_arithmetic_signed_error_dbr": [
+            26.482996535468125,
+            18.501678328280637
+          ]
+        },
+        "held": {
+          "terminal_gain_vs_pre_pan_db": [
+            -21.583624666122287,
+            -21.583624666122287
+          ],
+          "terminal_level_vs_native_db": [
+            -13.071449975117373,
+            -13.072035563604052
+          ],
+          "no_div6_arithmetic_level_vs_native_db": [
+            2.491574777725289,
+            2.4909891892386096
+          ],
+          "no_div6_arithmetic_signed_error_dbr": [
+            -6.074550906152276,
+            -6.071160598574917
+          ]
+        },
+        "initial_release": {
+          "terminal_gain_vs_pre_pan_db": [
+            -21.583624675686718,
+            -21.583624675686718
+          ],
+          "terminal_level_vs_native_db": [
+            2.590075457647893,
+            2.5682989757271613
+          ],
+          "no_div6_arithmetic_level_vs_native_db": [
+            18.153100220054984,
+            18.131323738134252
+          ],
+          "no_div6_arithmetic_signed_error_dbr": [
+            17.80007417561684,
+            17.77749177543931
+          ]
+        }
+      }
+    },
+    "3": {
+      "tap_sha": "9d9f07e4d4729f39adb89e613fd318dc47909fe4a086f46f2b7fa09141eac54c",
+      "terminal_sha": "fa3e2a8c2a81448f6d1de1547fbc9c9584313787873a5fb2750529a2d426c50d",
+      "windows": {
+        "attack": {
+          "terminal_gain_vs_pre_pan_db": [
+            -21.58362467147086,
+            -21.58362467147086
+          ],
+          "terminal_level_vs_native_db": [
+            5.696827134156712,
+            -1.7297291849438325
+          ],
+          "no_div6_arithmetic_level_vs_native_db": [
+            21.25985189234795,
+            13.833295573247405
+          ],
+          "no_div6_arithmetic_signed_error_dbr": [
+            20.745648206070598,
+            12.222653605805377
+          ]
+        },
+        "held": {
+          "terminal_gain_vs_pre_pan_db": [
+            -21.583624671595814,
+            -21.583624671595814
+          ],
+          "terminal_level_vs_native_db": [
+            -16.24292378875288,
+            -16.243509377239562
+          ],
+          "no_div6_arithmetic_level_vs_native_db": [
+            -0.6798990304366879,
+            -0.6804846189233682
+          ],
+          "no_div6_arithmetic_signed_error_dbr": [
+            -9.981131864004047,
+            -9.973156829395151
+          ]
+        },
+        "initial_release": {
+          "terminal_gain_vs_pre_pan_db": [
+            -21.58362468090745,
+            -21.58362468090745
+          ],
+          "terminal_level_vs_native_db": [
+            -0.8431353426778456,
+            -0.8649118245985772
+          ],
+          "no_div6_arithmetic_level_vs_native_db": [
+            14.719889424949983,
+            14.698112943029251
+          ],
+          "no_div6_arithmetic_signed_error_dbr": [
+            14.221240404053733,
+            14.19837320449255
+          ]
+        }
+      }
+    }
+  }
+}
