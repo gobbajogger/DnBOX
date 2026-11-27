@@ -1,0 +1,83 @@
+{
+  "scope": "native PI32 allocation-only model matching latest measured paired guarded maps; no kernel linked",
+  "models": {
+    "elite": {
+      "elf_sha256": "98d9ea2f91fdfaa52c5795c88bf5fabd16272d428874e57723b45dd5492096b5",
+      "xip_free": 336,
+      "pool_beyond_gate": 3968,
+      "bss_free": 512,
+      "sections": {
+        "bss": [
+          29393552,
+          97136
+        ],
+        "data": [
+          29392896,
+          648
+        ],
+        "pool": [
+          29491200,
+          331392
+        ],
+        "xpool": [
+          29839872,
+          9216
+        ]
+      }
+    },
+    "pro": {
+      "elf_sha256": "850e77813ccacd936a585f6731fe54a068ca26786ab2c5deaf06a020783b20b2",
+      "xip_free": 348,
+      "pool_beyond_gate": 3968,
+      "bss_free": 512,
+      "sections": {
+        "bss": [
+          29393552,
+          97136
+        ],
+        "data": [
+          29392896,
+          648
+        ],
+        "pool": [
+          29491200,
+          331392
+        ],
+        "xpool": [
+          29839872,
+          9216
+        ]
+      }
+    }
+  },
+  "cases": {
+    "edge": {
+      "native_rc": 0,
+      "extra": 3968,
+      "region_over": 0,
+      "guard_over": 0,
+      "linker": ""
+    },
+    "one_word_over": {
+      "native_rc": 1,
+      "extra": 3972,
+      "region_over": 0,
+      "guard_over": 4,
+      "linker": "<workspace>/prereqs/jieli-linux-toolchains-20260730.1/pi32v2/bin/ld: floor plus reserve guard"
+    },
+    "minimum_25bit_one": {
+      "native_rc": 1,
+      "extra": 2067290,
+      "region_over": 2054620,
+      "guard_over": 2063324,
+      "linker": "<workspace>/prereqs/jieli-linux-toolchains-20260730.1/pi32v2/bin/ld: minimum_25bit_one.elf section `.pool' will not fit in region `POOL'\n<workspace>/prereqs/jieli-linux-toolchains-20260730.1/pi32v2/bin/ld: floor plus reserve guard"
+    },
+    "minimum_25bit_two": {
+      "native_rc": 1,
+      "extra": 4134580,
+      "region_over": 4121908,
+      "guard_over": 4130612,
+      "linker": "<workspace>/prereqs/jieli-linux-toolchains-20260730.1/pi32v2/bin/ld: minimum_25bit_two.elf section `.pool' will not fit in region `POOL'\n<workspace>/prereqs/jieli-linux-toolchains-20260730.1/pi32v2/bin/ld: floor plus reserve guard"
+    }
+  }
+}

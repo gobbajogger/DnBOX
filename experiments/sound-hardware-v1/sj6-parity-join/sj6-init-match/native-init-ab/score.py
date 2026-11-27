@@ -56,7 +56,17 @@ for m,ref in ((0,nr[False]),(3,nr[True]),(6,nr[True])):
 assert b[3]['repeat_exact'] and not b[6]['repeat_exact']
 original_taper = level(nr[False][112][:,q],nr[False][32][:,q])
 assert np.max(np.abs(np.array(original_taper)-b[0]['velocity_high_over_low_db'])) < 1e-5
-print(json.dumps(dict(native_binary_sha=binary,native_init_uid=uid,native_fixed_hash=h(r),
+def harmonics(sound):
+    x = sound[0,q].astype("float64")
+    spec = abs(np.fft.rfft(x*np.hanning(len(x)),2**17))
+    f = np.fft.rfftfreq(2**17,1/44100)
+    band = np.flatnonzero((f>90)&(f<170))
+    k = band[np.argmax(spec[band])]
+    f0 = f[k]
+    return dict(raw_peak_hz=f0, relative_h2_through_h9_db=[
+        float(20*np.log10(np.max(spec[np.abs(f-f0*n)<3])/spec[k])) for n in range(2,10)])
+print(json.dumps(dict(held_spectrum=dict(compact_fixed=harmonics(compact(3,32)), native=harmonics(r)),
+                      native_binary_sha=binary,native_init_uid=uid,native_fixed_hash=h(r),
                       rate=44100, frames=132300, note=48, note_on=0, note_off=22050,
                       original_variable_velocity_high_over_low_db=original_taper,
                       steady_window=[q.start,q.stop],compact=b),indent=2))

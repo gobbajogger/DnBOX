@@ -1,0 +1,132 @@
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -713,6 +713,7 @@
+ static const char *const BRK_RATE_N[] = {"1/16", "1/8", "1/4"};   /* M13: BREAK groups 16ths; stored as RATE_16/8/4 */
+ static const char *const DIR_N[] = {"FWD", "REV", "PING", "RND"};
+ static const char *const ONOFF_N[] = {"OFF", "ON"};
++static const char *const FREE_SYNC_N[] = {"FREE", "SYNC"};
+ #define ROOT_N NOTE_N                       /* same twelve names as put_note */
+ static const char *const THEME_N[] = {"GREEN", "AMBER", "CYAN", "RED", "MONO", "LIGHT"};
+ enum { G_DENS, G_ACC, G_SLIDE, G_OCTS, G_ROOT, G_SCALE, G_BASE, G_MUT, NGEN };
+@@ -1043,11 +1044,10 @@
+ #endif
+ #if X0X_SJ6_SEQ_SETTINGS_NATIVE
+     if(SJ6_SEQ_SETTING_SLOT(slot)) {
+-        static const char *const states[]={"OFF","ON"};
+ #if X0X_SJ6_SEQ_DEST_NATIVE
+         static const char *const seq_dest[]={"BOTH","OSC 1","OSC 2"};
+ #endif
+-        static const x0x_param_t seqcfg[]={{"START SNAP",1,0,states},{"LOCK",1,0,states}
++        static const x0x_param_t seqcfg[]={{"START SNAP",1,0,ONOFF_N},{"LOCK",1,0,ONOFF_N}
+ #if X0X_SJ6_SEQ_DEST_NATIVE
+             , {"DEST",2,0,seq_dest}
+ #endif
+@@ -1063,8 +1063,7 @@
+ #endif
+ #if X0X_SJ6_LFO1_WAVE_NATIVE
+     if(slot==SJ6_LFO1_ENABLE || slot==SJ6_LFO1_SNAPBACK){
+-        static const char *const onoff[]={"OFF","ON"};
+-        static const x0x_param_t toggle[]={{"LFO1 ON",1,1,onoff},{"SNAP 1",1,0,onoff}};
++        static const x0x_param_t toggle[]={{"LFO1 ON",1,1,ONOFF_N},{"SNAP 1",1,0,ONOFF_N}};
+         return &toggle[slot-SJ6_LFO1_ENABLE];
+     }
+     if(slot==SJ6_LFO1_WAVE){
+@@ -1078,35 +1077,32 @@
+     }
+ #endif
+ #if (defined(X0X_HOST) && defined(X0X_SJ6_DELAY_WITNESS)) || X0X_SJ6_NATIVE_DELAY
+-    static const char *const clocks[]={"FREE","SYNC"};
+-    static const x0x_param_t clock={"CLOCK",1,0,clocks};
++    static const x0x_param_t clock={"CLOCK",1,0,FREE_SYNC_N};
+     if(slot==SJ6_DELAYSYNC)return &clock;
+     static const x0x_param_t delay[4]={{"ENABLE",1,0,0},{"MIX",127,0,0},{"TIME",127,0,0},{"FEEDBACK",127,0,0}};
+     if(slot>=SJ6_DELAY24&&slot<=SJ6_DELAY27)return &delay[slot-SJ6_DELAY24];
+ #endif
+     static const char *const wave[] = {"SINE", "TRI", "SAW", "SQ"};
+     static const char *const range[] = {"16FT", "8FT", "4FT"};
+-    static const char *const enable[] = {"OFF", "ON"};
+     static const char *const pwm_route[]={"OFF","PWM 1","PWM 2"};
+-    static const char *const clock_mode[]={"FREE","SYNC"};
+     static const x0x_param_t knobs[SJ6_KNOBS+1] = {
+         {"WAVE 1", SJ6_WAVE_STOPS, 2, wave}, {"WAVE 2", SJ6_WAVE_STOPS, 2, wave},
+         {"RANGE", SJ6_RANGE_STOPS, 1, range},
+-        {"PWM 1 ON", 1, 0, enable}, {"PWM 1", SJ6_PWM_STEPS, 0, 0},
+-        {"PWM 2 ON", 1, 0, enable}, {"PWM 2", SJ6_PWM_STEPS, 0, 0},
++        {"PWM 1 ON", 1, 0,ONOFF_N}, {"PWM 1", SJ6_PWM_STEPS, 0, 0},
++        {"PWM 2 ON", 1, 0,ONOFF_N}, {"PWM 2", SJ6_PWM_STEPS, 0, 0},
+         {"ATTACK", 127, 0, 0}, {"DECAY", 127, 0, 0},
+         {"SUSTAIN", 127, 0, 0}, {"RELEASE", 127, 0, 0},
+         {"ATTACK", 127, 0, 0}, {"DECAY", 127, 0, 0},
+         {"SUSTAIN", 127, 0, 0}, {"RELEASE", 127, 0, 0},
+-        {"LINK", 1, 0, enable},
++        {"LINK", 1, 0,ONOFF_N},
+ 
+         [SJ6_MASTER_LEVEL]={"LEVEL",127,127,0},
+         [SJ6_LFO1_RATE]={"LFO1 RATE",127,64,0}, [SJ6_LFO2_RATE]={"LFO2 RATE",127,64,0},
+         [SJ6_LFO3_RATE]={"LFO3 RATE",127,64,0}, [SJ6_LFO2_PWM_DEPTH]={"PWM DEPTH",SJ6_PWM_STEPS,0,0},
+         [SJ6_LFO2_PWM_ROUTE]={"PWM ROUTE",2,0,pwm_route},
+-        [SJ6_LFO1_MODE]={"LFO1 MODE",1,0,clock_mode}, [SJ6_LFO2_MODE]={"LFO2 MODE",1,0,clock_mode},
+-        [SJ6_LFO3_MODE]={"LFO3 MODE",1,0,clock_mode},
+-        [SJ6_CHORUS_I]={"CHORUS I",1,0,enable}, [SJ6_CHORUS_II]={"CHORUS II",1,0,enable},
++        [SJ6_LFO1_MODE]={"LFO1 MODE",1,0,FREE_SYNC_N}, [SJ6_LFO2_MODE]={"LFO2 MODE",1,0,FREE_SYNC_N},
++        [SJ6_LFO3_MODE]={"LFO3 MODE",1,0,FREE_SYNC_N},
++        [SJ6_CHORUS_I]={"CHORUS I",1,0,ONOFF_N}, [SJ6_CHORUS_II]={"CHORUS II",1,0,ONOFF_N},
+         [SJ6_CHORUS_RATE]={"CHORUS RATE",127,64,0}, [SJ6_CHORUS_MIX]={"CHORUS MIX",127,0,0},
+         [SJ6_VIBRATO_DEPTH]={"VIBRATO",127,0,0}, [SJ6_VIBRATO_RATE]={"VIBRATE RATE",127,0,0},
+         [SJ6_A_REFERENCE]={"A REF",SJ6_A_REFERENCE_STEPS,SJ6_A_REFERENCE_DEFAULT,0},
+@@ -3118,6 +3114,9 @@
+ static uint32_t arp_t0;
+ static const x0x_param_t *arp_desc(unsigned owner, unsigned field)
+ {
++#if X0X_SJ6_ARP_ADAPTER_NATIVE && X0X_SUPERJ6_BUILTIN_INIT
++    static const x0x_param_t seq_enable={"SEQ ON",1,0,ONOFF_N};
++#endif
+ #if X0X_S1_FENCED_CLOCK
+     static const char *const stops[]={"1/64 T","1/64","1/32 T","1/32","1/16 T","1/16","1/8 T","1/8",
+         "1/4 T","1/4","1/2 T","1/2","1 BAR T","1 BAR","2 BARS","3 BARS","4 BARS","6 BARS","8 BARS"};
+@@ -3130,8 +3129,7 @@
+ #if X0X_SJ6_ARP_ADAPTER_NATIVE && X0X_SUPERJ6_BUILTIN_INIT && DNBOX_TYPED_CONTROLS_NATIVE_TEST
+     if(owner<NBASS && live137(&proj.sound,owner) && engine_bass_bank(owner)==ORIGINAL_SOUND_JUNO){
+         static const char *const types[]={"UP","DOWN","UP+DN","UP+DN X2","RANDOM","RANDOM2","RANDOM3"};
+-        static const x0x_param_t mode={"MODE",6,0,types}, speed={"SPEED",12,SJ6_RATE_DEFAULT,0},
+-                                     seq_enable={"SEQ ON",1,0,ONOFF_N};
++        static const x0x_param_t mode={"MODE",6,0,types}, speed={"SPEED",12,SJ6_RATE_DEFAULT,0};
+         if(field==ARP_F_MODE)return &mode;
+         if(field==ARP_F_SPEED)return &speed;
+         if(field==ARP_F_SEQ_ENABLE)return &seq_enable;
+@@ -3140,7 +3138,6 @@
+ #if X0X_SJ6_ARP_ADAPTER_NATIVE && X0X_SUPERJ6_BUILTIN_INIT
+     if(engine_bass_bank(owner)==ORIGINAL_SOUND_SYNTHONE) {
+         static const x0x_param_t s1_direction={"DIRECTION",ARP_UPDN,0,ARP_MODE_N};
+-        static const x0x_param_t seq_enable={"SEQ ON",1,0,ONOFF_N};
+         if(field==ARP_F_MODE)return &s1_direction;
+         if(field==ARP_F_SEQ_ENABLE)return &seq_enable;
+     }
+@@ -3683,7 +3680,8 @@
+             do { static const pref_t refs[] = {PR(R_ENG, T_FX, 0, FX_RV_HPF), PR(R_ENG, T_FX, 0, FX_RV_LEVEL), PR(R_ENG, T_FX, 0, FX_DL_HPF), PR(R_ENG, T_FX, 0, FX_DL_LEVEL), PR(R_ENG, T_FX, 0, FX_DL_PING)};
+                 more_refs(emit, refs, 5, 0, 0); } while (0);
+         break;
+-    case V_MIX:                                        /* a channel picked with a black key, its four knobs */
++    case V_MIX: {                                      /* a channel picked with a black key, its four knobs */
++        static const pref_t master_refs[4] = {PR(R_ENG, T_FX, 0, FX_DRIVE), PR(R_ENG, T_MST, 0, MST_COMP1), PR(R_ENG, T_MST, 0, MST_PUMP), PR(R_ENG, T_MST, 0, MST_DJF)};
+         do { static const pref_t refs[4] = {PR(R_ENG, T_MIX, 0, MX_LEVEL), PR(R_ENG, T_MIX, 0, MX_PAN), PR(R_ENG, T_MIX, 0, MX_REV), PR(R_ENG, T_MIX, 0, MX_DLY)};
+             add_page_refs(emit, PT_PARTS, refs, 2, mixsel); } while (0);
+         for (p = 0; p < NKIT; p++) {                    /* each drum machine's tracks: LEVEL, PAN, REV, DLY */
+@@ -3691,14 +3689,13 @@
+             add_page(emit, p ? PT_808_MIX : PT_909_MIX, find_ref(t, v, "Level"), find_ref(t, v, "Pan"), find_ref(t, v, "Rev"),
+                      find_ref(t, v, "Dly"));
+         }
+-        do { static const pref_t refs[4] = {PR(R_ENG, T_FX, 0, FX_DRIVE), PR(R_ENG, T_MST, 0, MST_COMP1), PR(R_ENG, T_MST, 0, MST_PUMP), PR(R_ENG, T_MST, 0, MST_DJF)};
+-            add_page_refs(emit, PT_MASTER, refs, 0, 0); } while (0);
++        add_page_refs(emit, PT_MASTER, master_refs, 0, 0);
+             do { static const pref_t refs[] = {PR(R_ENG, T_MST, 0, MST_THRESH), PR(R_ENG, T_MST, 0, MST_RATIO), PR(R_ENG, T_MST, 0, MST_ATTACK), PR(R_ENG, T_MST, 0, MST_RELEASE), PR(R_ENG, T_MST, 0, MST_MAKEUP), PR(R_ENG, T_MST, 0, MST_MIX), PR(R_ENG, T_MST, 0, MST_PUMPSRC), PR(R_ENG, T_MST, 0, MST_RESO), PR(R_ENG, T_MST, 0, MST_LIMIT), PR(R_ENG, T_FX, 0, FX_DIST), PR(R_ENG, T_FX, 0, FX_COMP), PR(R_ENG, T_FX, 0, FX_VOLUME)};
+                 more_refs(emit, refs, 12, 0, 0); } while (0);
+         /* sibling of MASTER: same knobs, post-master eng_scope wave (Baud Girl ≤10 Hz redraw) */
+-        do { static const pref_t refs[4] = {PR(R_ENG, T_FX, 0, FX_DRIVE), PR(R_ENG, T_MST, 0, MST_COMP1), PR(R_ENG, T_MST, 0, MST_PUMP), PR(R_ENG, T_MST, 0, MST_DJF)};
+-            add_page_refs(emit, PT_WAVE, refs, 0, 0); } while (0);
++        add_page_refs(emit, PT_WAVE, master_refs, 0, 0);
+         break;
++    }
+ #if X0X_UI_PERF
+     case V_PERF:
+         do { static const pref_t refs[4] = {PR(R_STALLS, 0, 0, 0), NONE, NONE, NONE};
