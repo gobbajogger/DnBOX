@@ -21,6 +21,100 @@ static void break_layout_fit_name(char *out, unsigned cap, const char *prefix,
     }
     out[0]=0;
 }
+#if X0X_UI_SMALL_CANVAS
+typedef struct {
+    uint8_t outline[232], outline_ok, preview_on, active, choosing, audition, count_target;
+    char name[2][40], preview[40], title[sizeof pg.title[0]];
+    uint16_t bg,col,gray,white,line,hi,face,edge,selection_fill;
+    int page,count,slice,bank,edit_count,requested_count,control_page,control_pages;
+} cv_break_scene;
+
+static void cv_capture_break(cv_break_scene *s)
+{
+    const brkpart_t *bp=&cur_pat()->brk;
+    const char *const *names=engine_brk_slot_names();
+    int ns=engine_brk_nslots(),div,running;
+    int count=engine_brk_count(0);
+    engine_brk_state(&s->slice,&s->bank,&div,&running);
+    s->audition=engine_brk_held()!=0;
+    s->active=running||s->audition;
+    s->choosing=ui.brk_choice_on&&engine_brk_preview_active()&&ui.brk_choice_pat==seq.ppat[PART_BRK];
+    s->count=count<1?1:count;
+    s->page=ui.brk_page*8<s->count?ui.brk_page:(s->count-1)/8;
+    s->count_target=ui.brk_count_target;
+    s->edit_count=(int)brk_slice_count(bp,s->count_target);
+    s->requested_count=(int)brk_slice_count(bp,0);
+    if(!ui.outline_ok||ui.outline_slot!=bp->slot_a||
+       ui.outline_revision!=engine_brk_outline_revision(0)){
+        ui.outline_ok=(uint8_t)engine_brk_outline_snapshot(0,ui.outline,232,&ui.outline_revision);
+        ui.outline_slot=bp->slot_a;
+    }
+    s->outline_ok=ui.outline_ok;
+    if(s->outline_ok)memcpy(s->outline,ui.outline,sizeof s->outline);
+    for(int b=0;b<2;b++){
+        const char *name=ns?names[(b?bp->slot_b:bp->slot_a)%ns]:"none";
+        break_layout_fit_name(s->name[b],sizeof s->name[b],b?"B ":"A ",name,106);
+    }
+    s->preview_on=s->choosing&&ui.brk_choice_slot<ns;
+    if(s->preview_on)
+        break_layout_fit_name(s->preview,sizeof s->preview,ui.brk_choice_bank?"PREVIEW B ":"PREVIEW A ",
+                              names[ui.brk_choice_slot],220);
+    s->control_page=cur_page();
+    s->control_pages=pg.n;
+    memcpy(s->title,pg.title[s->control_page],sizeof s->title);
+    s->bg=C_BLACK; s->col=part_col(); s->gray=C_GRAY; s->white=C_WHITE;
+    s->line=C_LINE; s->hi=C_HI; s->face=SOUND_FACE; s->edge=SOUND_EDGE;
+    s->selection_fill=dim(s->col,5);
+}
+static void draw_break_scene(int band,const cv_break_scene *s)
+{
+    int off=MAIN_Y+band*BAND_H;
+    int page=s->page,count=s->count,slice=s->slice,bank=s->bank;
+    int active=s->active,audition=s->audition,choosing=s->choosing;
+    uint16_t col=s->col;
+    char t[40],*q;
+    surface_panel(3,24-off,234,118,0,s->face,s->edge,0);
+    /* Eight real A-owned slices. Labels have a separate ink band below80. */
+    for(int c=0;c<8;c++){
+        int local=page*8+c,x=9+c*222/8,w=(c+1)*222/8-c*222/8;
+        if(active&&bank==0&&slice==local)cv_rect(x,32-off,w-1,45,s->selection_fill);
+        if(local<count)put_i(t,local+1);else put_s(t,"-");
+        text_c(x+w/2,vc(&FONT_T,83-off,10),&FONT_T,t,active&&bank==0&&slice==local?s->white:s->gray);
+        if(c)cv_rect(x,32-off,1,45,s->line);
+    }
+    cv_rect(9,54-off,222,1,s->line);
+    for(int x=0;x<222&&s->outline_ok;x++){
+        int local=page*8+x*8/222;
+        int source_x=(page*8*232+x*8*232/222)/count;
+        int h=local<count&&source_x<232?s->outline[source_x]*21/255:0;
+        if(h)cv_rect(9+x,54-off-h,1,2*h+1,active&&bank==0&&slice==local?s->white:col);
+    }
+    for(int b=0;b<2;b++){
+        text_c(b?177:63,vc(&FONT_T,99-off,11),&FONT_T,s->name[b],active&&!choosing&&bank==b?s->white:s->hi);
+        if(active&&!choosing&&bank==b)cv_rect(b?124:10,111-off,106,1,col);
+    }
+    if(s->preview_on){
+        cv_text(10,vc(&FONT_T,114-off,10),&FONT_T,s->preview,s->white);
+        cv_text(10,vc(&FONT_T,126-off,10),&FONT_T,"SEL CHOOSE",s->white);
+        text_r(230,vc(&FONT_T,126-off,10),&FONT_T,"HOME CANCEL",s->white);
+    }else{
+        q=put_i(put_s(t,"A "),page*8+1);q=put_i(put_s(q,"-"),count<8?count:page*8+8);put_i(put_s(q," / "),count);
+        cv_text(10,vc(&FONT_T,114-off,10),&FONT_T,t,s->gray);
+        q=put_s(t,s->count_target?"EDIT B ":"EDIT A ");put_i(q,s->edit_count);
+        text_r(230,vc(&FONT_T,114-off,10),&FONT_T,t,s->gray);
+        t[0]=0;
+        if(count!=s->requested_count)put_s(t,"PENDING");
+        else if(active){q=put_s(t,audition?"LIVE A ":bank?"PLAY B ":"PLAY A ");put_i(q,slice+1);}
+        cv_text(10,vc(&FONT_T,126-off,10),&FONT_T,t,s->hi);
+        text_r(230,vc(&FONT_T,126-off,10),&FONT_T,"MORE",s->hi);
+    }
+    /* Same physical panel crosses the strip boundary; no buffer repartition. */
+    surface_panel(3,146-off,234,64,0,s->face,s->edge,0);
+    /* Keep Q descenders above the main/knob strip boundary at y158. */
+    cv_text(10,vc(&FONT_T,147-off,10),&FONT_T,s->title,col);
+    if(s->control_pages>1){q=put_i(t,s->control_page+1);put_i(put_s(q," / "),s->control_pages);text_r(230,vc(&FONT_T,147-off,10),&FONT_T,t,s->gray);}
+}
+#else
 static void break_layout_main(int band)
 {
     const brkpart_t *bp=&cur_pat()->brk;
@@ -84,6 +178,7 @@ static void break_layout_main(int band)
     cv_text(10,vc(&FONT_T,147-off,10),&FONT_T,pg.title[cur_page()],col);
     if(pg.n>1){q=put_i(t,cur_page()+1);put_i(put_s(q," / "),pg.n);text_r(230,vc(&FONT_T,147-off,10),&FONT_T,t,C_GRAY);}
 }
+#endif
 static void break_layout_footer(void)
 {
     const brkpart_t *bp=&cur_pat()->brk;
