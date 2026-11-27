@@ -1,0 +1,71 @@
+{
+  "native_binary_sha": "1d6edf2bf5dd30906b148e10f50e2470a9f55d13d7f64ab3515e3c2294f1c257",
+  "native_init_uid": "8733EFD7-4000-4C31-BC52-5AD9E4B707E1",
+  "native_fixed_hash": "e3884e0b9ba777d056d91d3a05e85f03cda1d3aef497b3a98854570649542453",
+  "rate": 44100,
+  "frames": 132300,
+  "note": 48,
+  "note_on": 0,
+  "note_off": 22050,
+  "original_variable_velocity_high_over_low_db": [
+    11.07922507413176,
+    11.079225121035837
+  ],
+  "steady_window": [
+    11025,
+    22050
+  ],
+  "compact": {
+    "0": {
+      "velocity_high_over_low_db": [
+        11.079225700069195,
+        11.079225700069195
+      ],
+      "repeat_exact": false,
+      "steady_level_relative_to_corresponding_reference_db": [
+        -13.071450576717794,
+        -13.072036125701647
+      ],
+      "steady_residual_dbr": [
+        -2.0205347427499687,
+        -2.020082701670594
+      ],
+      "compact_hash32": "27d9e37463d6374c79fbf027b5e43527999d645cb1d5641585acfde78c222198",
+      "compact_hash112": "304d085a97fe594f35f0471457b597ed2deb0a268d450aaca8f31fb9e3d576f8"
+    },
+    "3": {
+      "velocity_high_over_low_db": [
+        0.0,
+        0.0
+      ],
+      "repeat_exact": true,
+      "steady_level_relative_to_corresponding_reference_db": [
+        -13.071449975117373,
+        -13.072035563604052
+      ],
+      "steady_residual_dbr": [
+        -2.020534937000243,
+        -2.0200828548751266
+      ],
+      "compact_hash32": "cf7c501f68080cd53f2003be476006f75c9ea1e85087765009c148cb4153b954",
+      "compact_hash112": "cf7c501f68080cd53f2003be476006f75c9ea1e85087765009c148cb4153b954"
+    },
+    "6": {
+      "velocity_high_over_low_db": [
+        10.881360775988611,
+        10.881360775988611
+      ],
+      "repeat_exact": false,
+      "steady_level_relative_to_corresponding_reference_db": [
+        -21.658418971970825,
+        -21.659004560457507
+      ],
+      "steady_residual_dbr": [
+        -0.705526334665968,
+        -0.7053941293092201
+      ],
+      "compact_hash32": "5afd6d36296a2a5f01748778240877e1f948e6d43a21d07d48013ea859a06d35",
+      "compact_hash112": "2c62c87023ab3d1cd35b0ecf1bc8a14484ca8ad6ef291049e6bd131109e87e55"
+    }
+  }
+}
