@@ -1,0 +1,30 @@
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -2999,6 +2999,7 @@
+ static original_runtime_workspace original_workspace_b X0X_XPOOL;
+ #if DNBOX_LAB_JOINT_FIXED_RENDER_CUE
+ volatile uint32_t lab_joint_fixed_audible_spans;
++volatile uint32_t lab_joint_audible_a, lab_joint_audible_b;
+ #endif
+ static uint32_t bass_quiet_next[NBASS];               /* the quiet count after this stretch's render */
+ static uint8_t bass_render_ok[NBASS];
+@@ -3493,6 +3494,8 @@
+     eng_dbg_wait += plat_ticks24() - w0;              /* now: core 0's whole job span */
+ #endif
+ #if DNBOX_LAB_JOINT_FIXED_RENDER_CUE
++    if(bass_render_ok[0] && original_bass[0].kind==ORIGINAL_SOUND_SYNTHONE && bass_quiet_next[0]<n) ++lab_joint_audible_a;
++    if(bass_render_ok[1] && original_bass[1].kind==ORIGINAL_SOUND_JUNO && bass_quiet_next[1]<n) ++lab_joint_audible_b;
+     if(bass_render_ok[0] && bass_render_ok[1] &&
+        original_bass[0].kind==ORIGINAL_SOUND_SYNTHONE &&
+        original_bass[1].kind==ORIGINAL_SOUND_JUNO &&
+@@ -3647,7 +3650,9 @@
+ #if DNBOX_LAB_JOINT_FIXED_RENDER_CUE
+     /* Deterministic workload diagnostic only. No MIDI transport claim.
+      * A and B use the same actual voice runtime and patch as a MIDI note. */
+-    if(!lab_joint_fixed_cue_seeded &&
++    static uint32_t lab_joint_rendered_frames;
++    if(lab_joint_rendered_frames<112640u)lab_joint_rendered_frames+=n;
++    if(lab_joint_rendered_frames>=112640u && !lab_joint_fixed_cue_seeded &&
+        original_bass[0].kind==ORIGINAL_SOUND_SYNTHONE &&
+        original_bass[1].kind==ORIGINAL_SOUND_JUNO &&
+        original_bass[0].status==1 && original_bass[1].status==1) {
