@@ -1,0 +1,107 @@
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -3157,6 +3157,9 @@
+ }
+ 
+ /* one job, render and mix; core 1: not timed by the cycle counter (core 0's) */
++#if DNBOX_S1_STAGE_TRACE
++extern volatile uint32_t s1_stage_now[17];
++#endif
+ static int run_job(int j, int core)
+ {
+     uint32_t arg = eng_job_arg, n = arg & 0xFFu ? arg & 0xFFu : 256u, i;
+@@ -3306,6 +3309,11 @@
+         if (!core)
+             PROF_ADD(PR_BRK, pk);
+     }
++#if DNBOX_S1_STAGE_TRACE
++    uint32_t elapsed = plat_ticks24() - tk;
++    s1_stage_now[core * 5 + j] += elapsed - wt;
++    s1_stage_now[14 + core] += wt;
++#endif
+     if (active)
+         job_cost(j, plat_ticks24() - tk - wt, n);
+     return 1;
+@@ -3487,6 +3495,10 @@
+     /* 808 stays on core 0 and core 1 has other work: move the BD+SD prefix */
+     eng_808_split = (uint8_t)(!(m & (1u << JB_808)) && m && drum808_active(&d808));
+     eng_808_body = (uint8_t)!eng_808_split;
++#if DNBOX_S1_STAGE_TRACE
++    uint32_t jobs_start = plat_ticks24();
++    s1_stage_now[16] |= 1u << m;
++#endif
+     eng_sync();
+     if (m && !plat_cpu2_run(core2_jobs, 0u)) {
+         eng_c1_mask = 0;                              /* one core: all of it here */
+@@ -3510,6 +3522,10 @@
+         c1_take_over(JB_N + 1u);                      /* failed, or the host: the rest here */
+         PROF_ADD(PR_808, pt);                         /* core 0's wait for core 1 (as before) */
+     }
++#if DNBOX_S1_STAGE_TRACE
++    s1_stage_now[10] += plat_ticks24() - jobs_start;
++    uint32_t post_start = plat_ticks24();
++#endif
+ #if X0X_DEBUG
+     eng_dbg_wait += plat_ticks24() - w0;              /* now: core 0's whole job span */
+ #endif
+@@ -3535,6 +3551,9 @@
+     }
+     bfx_send_shape(0, rev, (int)n);
+     bfx_send_shape(1, dly, (int)n);
++#if DNBOX_S1_STAGE_TRACE
++    s1_stage_now[11] += plat_ticks24() - post_start;
++#endif
+     if (eng_do_master && n >= ENG_TAIL_CS) {
+         uint32_t done = 0, waited = 0, first = 1;
+         PROF_T(pf);
+@@ -3715,7 +3734,14 @@
+         /* any stretch of ENG_TAIL_CS or more: pipeline. Mastered frames
+          * must be a prefix (the master's state is in sample order). */
+         eng_do_master = (k >= ENG_TAIL_CS && done == eng_mastered);
++#if DNBOX_S1_STAGE_TRACE
++        uint32_t sub_start = plat_ticks24();
++#endif
+         render_sub(out_l + done, out_r + done, k, 0);
++#if DNBOX_S1_STAGE_TRACE
++        s1_stage_now[12] += plat_ticks24() - sub_start;
++        ++s1_stage_now[13];
++#endif
+         d8_frame+=k;
+         if (eng_do_master && eng_master_done)
+             eng_mastered = done + k;
+--- a/firmware/src/app/main_fm1.c
++++ b/firmware/src/app/main_fm1.c
+@@ -30,6 +30,10 @@
+ } x0x_dbg __attribute__((section(".noinit")));
+ volatile uint32_t lab_bass_half[2] __attribute__((section(".lab_bass")));
+ volatile uint32_t lab_half_attribution[3] __attribute__((section(".lab_bass"))); /* half number and C0 A/B cycles at the worst half */
++#if DNBOX_S1_STAGE_TRACE
++volatile uint32_t s1_stage_now[17];
++volatile uint32_t s1_stage_worst[20];
++#endif
+ static uint8_t safe_mode;
+ #if X0X_DEBUG
+ /* development: the slowest block since boot, taken apart (read over USB: tools/fm1_debug.py) */
+@@ -44,6 +48,9 @@
+ {
+     uint32_t t0 = fm1_ticks(), us, budget = HALF_FRAMES * 1000000u / FS;
+     x0x_dbg.in_audio = 1;
++#if DNBOX_S1_STAGE_TRACE
++    for (unsigned i = 0; i < 17; ++i) s1_stage_now[i] = 0;
++#endif
+ #if FELUCCA_UAC
+     uac_render_start();
+ #endif
+@@ -96,6 +103,12 @@
+     x0x_dbg.last_us = us;
+     if (us > x0x_dbg.max_us) {
+         x0x_dbg.max_us = us;
++#if DNBOX_S1_STAGE_TRACE
++        for (unsigned i = 0; i < 17; ++i) s1_stage_worst[i] = s1_stage_now[i];
++        s1_stage_worst[17] = us;
++        s1_stage_worst[18] = x0x_dbg.halves;
++        s1_stage_worst[19] = x0x_dbg.late;
++#endif
+         lab_half_attribution[0] = x0x_dbg.halves;
+         lab_half_attribution[1] = lab_bass_half[0];
+         lab_half_attribution[2] = lab_bass_half[1];

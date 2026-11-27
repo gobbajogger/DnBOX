@@ -1,0 +1,47 @@
+--- a/firmware/src/dsp/drum909.c
++++ b/firmware/src/dsp/drum909.c
+@@ -898,7 +898,16 @@
+         d9_warm(&t->noise_bp, nz);
+         t->stick_warm = 0;
+     }
+-    for (int i = 0; i < m; ++i) {
++#if DNBOX_S1_TOM_TAIL
++    /* Split off the section where no attack partial or stick is still
++     * active. The body recurrence and binary32 expression are unchanged. */
++    int attack = partial1_ticks > partial2_ticks ? partial1_ticks : partial2_ticks;
++    if (stick_ticks > attack) attack = stick_ticks;
++    if (attack > m) attack = m;
++#else
++    const int attack = m;
++#endif
++    for (int i = 0; i < attack; ++i) {
+         float f, body, part1 = 0.0f, part2 = 0.0f, stick_amp = 0.0f;
+         const int one = i < partial1_ticks, two = i < partial2_ticks, stick_on = i < stick_ticks;
+         if (i < interior) {
+@@ -933,6 +942,26 @@
+         y = d9_biquad_tick(&t->dc_block, y);
+         bus->y[i] = y * t->out_gain;
+     }
++#if DNBOX_S1_TOM_TAIL
++    uint32_t phase = t->ph[0];
++    float pitch = t->pitch.v, body = t->env[0].v;
++    const float pt_end = t->pitch.v1, a_end = t->env[0].v1;
++    const float pt_rate = t->pitch.r, a_rate = t->env[0].r, gain = t->out_gain;
++    for (int i = attack; i < m; ++i) {
++        phase += d9_inc(pitch);
++        float o = 0.0f;
++        o += d9_triangle20(phase) * body;
++        o *= 0.55f;
++        float y = d9_shape_v(&p->shape, o + 0.0f, t->crush_st);
++        y = d9_biquad_tick(&t->dc_block, y);
++        bus->y[i] = y * gain;
++        t->pitch.cur = pitch;
++        t->env[0].cur = body;
++        if (i < pitch_ticks) pitch = i + 1 == pitch_ticks ? pt_end : pitch * pt_rate;
++        if (i < body_ticks) body = i + 1 == body_ticks ? a_end : body * a_rate;
++    }
++    t->ph[0] = phase; t->pitch.v = pitch; t->env[0].v = body;
++#endif
+     t->pitch.left = d9_tom_left(pitch_ticks, m);
+     t->env[0].left = d9_tom_left(body_ticks, m);
+     t->env[1].left = d9_tom_left(partial1_ticks, m);

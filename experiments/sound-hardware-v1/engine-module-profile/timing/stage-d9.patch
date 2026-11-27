@@ -1,0 +1,88 @@
+--- a/firmware/src/app/main_fm1.c
++++ b/firmware/src/app/main_fm1.c
+@@ -33,6 +33,7 @@
+ #if DNBOX_S1_STAGE_TRACE
+ volatile uint32_t s1_stage_now[17];
+ volatile uint32_t s1_stage_worst[20];
++volatile uint32_t s1_d9_now[10], s1_d9_worst[10];
+ #endif
+ static uint8_t safe_mode;
+ #if X0X_DEBUG
+@@ -50,6 +51,7 @@
+     x0x_dbg.in_audio = 1;
+ #if DNBOX_S1_STAGE_TRACE
+     for (unsigned i = 0; i < 17; ++i) s1_stage_now[i] = 0;
++    for (unsigned i = 0; i < 10; ++i) s1_d9_now[i] = 0;
+ #endif
+ #if FELUCCA_UAC
+     uac_render_start();
+@@ -105,6 +107,7 @@
+         x0x_dbg.max_us = us;
+ #if DNBOX_S1_STAGE_TRACE
+         for (unsigned i = 0; i < 17; ++i) s1_stage_worst[i] = s1_stage_now[i];
++        for (unsigned i = 0; i < 10; ++i) s1_d9_worst[i] = s1_d9_now[i];
+         s1_stage_worst[17] = us;
+         s1_stage_worst[18] = x0x_dbg.halves;
+         s1_stage_worst[19] = x0x_dbg.late;
+--- a/firmware/src/dsp/drum909.c
++++ b/firmware/src/dsp/drum909.c
+@@ -1178,6 +1178,15 @@
+     if (n > 0) (void)d9_noise_span(d, n);
+ }
+ 
++#if DNBOX_S1_STAGE_TRACE
++extern uint32_t plat_ticks24(void);
++extern volatile uint32_t s1_d9_now[10];
++#define D9_TRACE_START(x) uint32_t x = plat_ticks24()
++#define D9_TRACE_END(x,i) (s1_d9_now[(i)] += plat_ticks24() - (x))
++#else
++#define D9_TRACE_START(x) ((void)0)
++#define D9_TRACE_END(x,i) ((void)0)
++#endif
+ static void d9_render(drum909_t *d, float *dry, float *rev, float *dly, int n, uint16_t audible_tracks)
+ {
+     d9_bus_t bus;
+@@ -1185,36 +1194,36 @@
+     bus.y = y;
+     if (n > 256)
+         n = 256;
+-    float *const nz = d9_noise_span(d, n);
++    D9_TRACE_START(t0); float *const nz = d9_noise_span(d, n); D9_TRACE_END(t0, 0);
+ 
+     /* 9W9's summing order: BD SD LT MT HT RS CP OH RD CR CH */
+     if (d->bt[DR_BD].mute > 0) {
+         d9_bus_inline(&bus, d, DR_BD, dry, rev, dly, audible_tracks);
+-        d9_render_bd(&d->bt[DR_BD], nz, &bus, n);
++        D9_TRACE_START(t1); d9_render_bd(&d->bt[DR_BD], nz, &bus, n); D9_TRACE_END(t1, 1);
+     }
+     if (d->bt[DR_SD].mute > 0) {
+         d9_bus(&bus, d, DR_SD, dry, rev, dly, audible_tracks);
+-        d9_render_sd(&d->bt[DR_SD], nz, &bus, n);
++        D9_TRACE_START(t2); d9_render_sd(&d->bt[DR_SD], nz, &bus, n); D9_TRACE_END(t2, 2);
+     }
+     for (int t = 0; t < 3; ++t)
+         if (d->tom[t].mute > 0) {
+             d9_bus(&bus, d, DR_LT + t, dry, rev, dly, audible_tracks);
+-            d9_render_tom(&d->tom[t], &d->bt[DR_LT + t], nz, &bus, n);
++            D9_TRACE_START(t3); d9_render_tom(&d->tom[t], &d->bt[DR_LT + t], nz, &bus, n); D9_TRACE_END(t3, 3);
+         }
+     if (d->rim.mute > 0) {
+         d9_bus(&bus, d, DR_RS, dry, rev, dly, audible_tracks);
+-        d9_render_rim(&d->rim, nz, &bus, n);
++        D9_TRACE_START(t4); d9_render_rim(&d->rim, nz, &bus, n); D9_TRACE_END(t4, 4);
+     }
+     if (d->clap.mute > 0) {
+         d9_bus(&bus, d, DR_CP, dry, rev, dly, audible_tracks);
+-        d9_render_clap(&d->clap, nz, &bus, n);
++        D9_TRACE_START(t5); d9_render_clap(&d->clap, nz, &bus, n); D9_TRACE_END(t5, 5);
+     }
+     static const uint8_t order[4] = { DR_OH, DR_RD, DR_CR, DR_CH };
+     for (int k = 0; k < 4; ++k) {
+         d9_smp_t *s = &d->smp[order[k] - DR_CH];
+         if (s->mute > 0) {
+             d9_bus(&bus, d, order[k], dry, rev, dly, audible_tracks);
+-            d9_render_smp(s, &bus, n);
++            D9_TRACE_START(t6); d9_render_smp(s, &bus, n); D9_TRACE_END(t6, 6+k);
+         }
+     }
+ }

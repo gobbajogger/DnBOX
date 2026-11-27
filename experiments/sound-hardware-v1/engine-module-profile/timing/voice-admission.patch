@@ -1,0 +1,17 @@
+--- a/firmware/src/dsp/s1c/s1c.c
++++ b/firmware/src/dsp/s1c/s1c.c
+@@ -483,8 +483,14 @@
+ #if S1C_KR > 1
+ /* Cheap voice: pitch, LFO, key-tracking and filter coefficients at control rate (every S1C_KR
+  * samples), sines from a 256-point table, the filter envelope still per sample in the cutoff. */
++#if DNBOX_S1_VOICE_TRACE
++volatile uint32_t lab_s1_voice_entries;
++#endif
+ static float voice_run_kr(s1c *s, s1c_voice *v)
+ {
++#if DNBOX_S1_VOICE_TRACE
++    ++lab_s1_voice_entries;
++#endif
+     int mono = P(MONO) > 0.0f, ft = (int)P(FTYPE);
+     v->amp = env_step(&v->ea, v->gate, P(AA), clampf(P(AD) * lfo10(s, P(LDEC)), 0.005f, 2.0f), P(AS), P(AR), s->sr);
+     v->fenv = env_step(&v->ef, v->gate, P(FA), P(FD), P(FS), P(FR), s->sr);

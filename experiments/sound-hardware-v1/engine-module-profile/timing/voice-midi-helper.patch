@@ -1,0 +1,15 @@
+--- a/guarded_replay.py
++++ b/guarded_replay.py
+@@ -135,9 +135,11 @@
+  pcm=d/'stereo.s16le';ram=d/'ram.bin';duration=2000 if offset<0 else 8000
+  env={k:v for k,v in os.environ.items() if not k.startswith('FM1_')}
+  env.update(FM1_STRICT='1',FM1_NO_SKIP='1',FM1_BENCH_KEYS='@'+str(keys),FM1_DNBOX_PCM=str(pcm),FM1_DUMPRAM=str(ram))
++ if offset>=0:
++  env.update(FM1_USB_SEND='2250:913064;2300:913764;2450:913c64;6610:813000;6640:813700;6680:813c00',FM1_USB_TRACE='1')
+  (d/'work').mkdir()
+  with (d/'run.log').open('w') as f:
+-  subprocess.run([str(emu),'--fwsc',str(pkg),'--mhz','360','--shot',str(duration),'--flash',str(flash)],env=env,cwd=d,stdout=f,stderr=subprocess.STDOUT,check=True,timeout=900)
++  subprocess.run([str(emu),'--fwsc',str(pkg),'--mhz','360','--usb','--shot',str(duration),'--flash',str(flash)],env=env,cwd=d,stdout=f,stderr=subprocess.STDOUT,check=True,timeout=900)
+  log=(d/'run.log').read_text()
+  ensure(f'panel.ppm at {duration} ms' in log and 'SMK-37 pads' in log and 'skipped 0 cycles' in log,'wrong scene execution')
+  final=regular(flash)

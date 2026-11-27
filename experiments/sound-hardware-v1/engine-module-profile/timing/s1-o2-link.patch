@@ -1,0 +1,10 @@
+--- a/link-sealed-s1.py
++++ b/link-sealed-s1.py
+@@ -361,6 +361,7 @@
+ if os.environ.get('DNBOX_TANH_SPLIT_LAB') == '1':
+     b.CFLAGS.append('-DX0X_TANH_SPLIT_LAB=1')
+ b.CFLAGS += ["-DX0X_COLD_XDATA_TAIL_LAB=1"]
++b.ORIGINAL_SYNTH_O2_UNITS.update({'s1c','s1u'})
+ b.generate=lambda:None
+ b.build_loader=lambda:None
+ b.tc=seal
