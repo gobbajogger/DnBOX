@@ -171,6 +171,22 @@ class PackageBytes(unittest.TestCase):
         with patch.object(identity.importlib.metadata, 'distribution', side_effect=distribution):
             return identity.runtime({}, {'X0X_VALIDATION_PYTHON_PACKAGES': 'fixture'})
 
+    def test_part_sound_profile_flag_changes_runtime_identity(self):
+        flags = {
+            'X0X_UI_SMALL_CANVAS': '1', 'X0X_CHICAGO_FOLD_RESIDUAL_MIN': '1',
+            'DNBOX_LAB_D9_SUFFIX': '1', 'X0X_D9_TANH_BOOT': '1',
+            'DNBOX_LAB_ARP_EVENTLESS': '1', 'X0X_MIAMI_N513_BOOT': '1',
+            'X0X_HOST_DEFS': '-DX0X_UI_SMALL_CANVAS=1',
+        }
+        # The test changes only caller configuration, not the installed wheels.
+        with patch.object(identity.importlib.metadata, 'distribution',
+                          side_effect=importlib.metadata.PackageNotFoundError):
+            expected = identity.runtime({}, {})['environment']
+            self.assertEqual(identity.runtime({}, flags)['environment'], flags)
+            for key, value in flags.items():
+                with self.subTest(flag=key):
+                    self.assertNotEqual(identity.runtime({}, {key: value})['environment'], expected)
+
     def test_distro_source_binary_and_added_file_mutations(self):
         self.assertIsNone(self.dist.files)
         baseline = self.runtime()
