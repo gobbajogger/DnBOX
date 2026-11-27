@@ -804,7 +804,7 @@ test("format 2 rejects historical layouts and offline editing", async () => {
 // The registered project-rates-companion test generates these with production C,
 // rather than merely patching version words in a synthetic JavaScript buffer.
 if (process.env.PROJECT_RATE_FIXTURES) {
-  for (const stream of [13,14,15]) for (const rate of [4,5]) for (const part of [0,1,2]) {
+  for (const stream of [13,14,15,16]) for (const rate of [4,5]) for (const part of [0,1,2]) {
     test(`firmware export stream ${stream} rate ${rate} part ${part} transfers byte-exactly`, async () => {
       const raw=new Uint8Array(readFileSync(`${process.env.PROJECT_RATE_FIXTURES}/s${stream}-r${rate}-p${part}.bin`));
       const meta=parseProject(raw);assert.equal(meta.projectVersion,2);assert.equal(meta.patternVersion,stream);

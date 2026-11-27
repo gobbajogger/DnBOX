@@ -4,11 +4,19 @@
 #include "smc_ui_test.c"
 int main(void){
  const char *dir=getenv("PROJECT_RATE_FIXTURES");CHECK(dir!=NULL);
- for(int stream=13;stream<=15;stream++)for(int rate=RATE_8;rate<=RATE_4;rate++)for(int part=0;part<3;part++){
+ for(int stream=13;stream<=16;stream++)for(int rate=RATE_8;rate<=RATE_4;rate++)for(int part=0;part<3;part++){
   setup(V_PART,PART_303A);proj.set.bt|=PROJ_BT_CLK_IN;
   memset(proj.arr.lane,0,sizeof proj.arr.lane);
   for(int p=0;p<NPAT;p++)proj.pat[p].rsv[0]=proj.pat[p].rsv[1]=0;
   if(stream==14)proj.pat[0].rsv[0]=1; /* Chicago preset 1, not a forged stream header. */
+  if(stream==16){
+   const int active=engine_bass_sound_bank(&proj.sound,0);
+   const int parked=active==ORIGINAL_SOUND_MIAMI?ORIGINAL_SOUND_CHICAGO:ORIGINAL_SOUND_MIAMI;
+   const x0x_param_t *param=engine_bass_bank_param(parked,2);
+   CHECK(param!=NULL && param->max>=1);
+   int l=motion_alloc(proj.arr.lane,0,PART_303A,MOT_PARK_BASS+parked,0,2);
+   CHECK(l>=0);proj.arr.lane[l].val[0]=1;
+  }
   if(stream==15){uint8_t notes[]={60,64,67};proj.pat[0].bass[0].step[0]=(bstep_t){60,G_NOTE,100};CHECK(held_chord_set(proj.arr.lane,0,0,0,notes,3));}
   /* Matching format-1 peer fixture: do not mislabel extended rates as old data. */
   if(rate==RATE_8 && part==0){
