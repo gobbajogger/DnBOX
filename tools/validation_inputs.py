@@ -199,6 +199,7 @@ def runtime(config, env=None):
         'CC', 'CXX', 'CFLAGS', 'CXXFLAGS', 'CPPFLAGS', 'LDFLAGS', 'CPATH', 'LIBRARY_PATH',
         'X0X_VERSION', 'X0X_BASS_PRESET_PREVIEW', 'X0X_BASS_TAGGED_SOUND',
         'X0X_BASS_NOTE_SOUND',
+        'X0X_SUPERJ6_FACTORY', 'X0X_SYNTHONE_PATCH', 'X0X_S1C', 'X0X_S1C_OZ',
         # These independently affect the actual Part Sound firmware or its UI gate.
         'X0X_UI_SMALL_CANVAS', 'X0X_CHICAGO_FOLD_RESIDUAL_MIN', 'DNBOX_LAB_D9_SUFFIX',
         'X0X_D9_TANH_BOOT', 'DNBOX_LAB_ARP_EVENTLESS', 'X0X_MIAMI_N513_BOOT', 'X0X_HOST_DEFS',

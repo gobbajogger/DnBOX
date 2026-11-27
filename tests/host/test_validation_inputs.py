@@ -187,6 +187,19 @@ class PackageBytes(unittest.TestCase):
                 with self.subTest(flag=key):
                     self.assertNotEqual(identity.runtime({}, {key: value})['environment'], expected)
 
+    def test_synth_build_flags_change_runtime_identity(self):
+        options = {'X0X_SUPERJ6_FACTORY': ('0', '1'),
+                   'X0X_SYNTHONE_PATCH': ('0', '1'), 'X0X_S1C': ('0', '1'),
+                   'X0X_S1C_OZ': ('s1c s1u s1c_front', 's1c s1u')}
+        with patch.object(identity.importlib.metadata, 'distribution',
+                          side_effect=importlib.metadata.PackageNotFoundError):
+            for key, values in options.items():
+                with self.subTest(flag=key):
+                    configs = ({}, {key: values[0]}, {key: values[1]})
+                    runs = [identity.runtime({}, env) for env in configs]
+                    self.assertEqual([run['environment'] for run in runs], list(configs))
+                    self.assertEqual(len({identity.digest(identity.encoded(run)) for run in runs}), 3)
+
     def test_distro_source_binary_and_added_file_mutations(self):
         self.assertIsNone(self.dist.files)
         baseline = self.runtime()
