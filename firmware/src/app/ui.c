@@ -6788,6 +6788,154 @@ static void lane(int y, int p, uint32_t bits, int ph, int len, int base)
     }
 }
 
+#if X0X_UI_SMALL_CANVAS
+#define HOME_X0 45
+typedef struct {
+    uint16_t bg, gray, white, face, edge, side, amb, dim;
+    const uint16_t *part_colors; /* immutable light/dark table, chosen before DMA */
+    uint8_t live;
+    union {
+        struct {
+            const char *status, *name[NPARTS]; /* literals only */
+            uint16_t chain;
+            uint8_t c0, current[NPARTS];
+            int8_t cue[NPARTS];
+            uint8_t glyph[NPARTS][16][4];
+        } pattern;
+        struct {
+            char name[NPARTS][24];
+            uint16_t bits[NPARTS];
+            uint8_t length[NPARTS], base[NPARTS], mute;
+            int8_t head[NPARTS];
+        } steps;
+    } p;
+} cv_home_scene;
+
+static void cv_capture_home(cv_home_scene *s)
+{
+    s->bg=C_BLACK;s->gray=SOUND_GRAY;s->white=SOUND_WHITE;
+    s->face=SOUND_FACE;s->edge=SOUND_EDGE;s->side=SOUND_SIDE;s->amb=C_AMB;s->dim=SOUND_DIM;
+    s->part_colors=PART_COL;s->live=(uint8_t)!!ui.home_live;
+    if (s->live) {
+        s->p.steps.mute=0;
+        for (int p=0;p<NPARTS;++p) {
+            const int tr=p<NKIT?TRK_DRUM+p:p==PART_BRK?TRK_BRK:TRK_BASS0+p-PART_303A;
+            const pattern_t *pt=pat_of(p);
+            const int len=p<NKIT?pt->drum[p].len:p==PART_BRK?16:pt->bass[p-PART_303A].len;
+            const int ph=seq.playing?eng_step[tr]:-1;
+            int base=ph>=0?ph/16*16:0;
+            if (base>=len) base=0;
+            uint32_t bits=0;
+            if (p<NKIT)for(int c=0;c<16&&base+c<len;c++)for(int v=0;v<NDRUM;v++)
+                if(sm_get(pt->drum[p].hit[v],base+c))bits|=1u<<c;
+            if (p==PART_BRK)bits=pt->brk.steps;
+            if (part_is_303(p))bits=bass_content_bits16(&pt->bass[p-PART_303A],base);
+            s->p.steps.bits[p]=(uint16_t)bits;
+            s->p.steps.length[p]=(uint8_t)len;
+            s->p.steps.base[p]=(uint8_t)base;
+            s->p.steps.head[p]=(int8_t)(ph-base);
+            s->p.steps.mute|=(uint8_t)(part_muted(p)<<p);
+            if (part_is_303(p)) {
+                const int voice=p-PART_303A,bank=engine_bass_bank(voice);
+                const char *engine=bank==ORIGINAL_SOUND_JUNO?"SUPERJ6":
+                    bank==ORIGINAL_SOUND_SYNTHONE?"SYNTH ONE":bank==ORIGINAL_SOUND_MIAMI?"MIAMI":
+                    bank==ORIGINAL_SOUND_CHICAGO?"CHICAGO":"CHOOSE ENGINE";
+                put_s(put_s(s->p.steps.name[p],engine),voice?" B":" A");
+            } else put_s(s->p.steps.name[p],part_display(p));
+        }
+        return;
+    }
+    const int c0=ui.pbank*16,saved=save_state();
+    s->p.pattern.c0=(uint8_t)c0;
+    s->p.pattern.status=saved==SAVE_SAVED?"SAVED":header_save_label(saved);
+    const int a=seq.chain_a,b=seq.chain_b;
+    s->p.pattern.chain=0;
+    for (int c=0;c<16;++c) {
+        const int pat=c0+c;
+        if (a!=b && pat>=(a<b?a:b) && pat<=(a<b?b:a))s->p.pattern.chain|=(uint16_t)(1u<<c);
+    }
+    for (int p=0;p<NPARTS;++p) {
+        const char *name=part_display(p);
+        s->p.pattern.name[p]=tw(&FONT_T,name)>HOME_X0-11?part_s(p):name;
+        s->p.pattern.current[p]=seq.ppat[p];
+        s->p.pattern.cue[p]=(int8_t)(ui.frame&16u?seq_cue_of(&seq,p):-1);
+        for (int c=0;c<16;++c) {
+            const int pat=c0+c;
+            uint8_t v[8]={0};
+            if (part_used(&proj.pat[pat],p))
+                home_pattern_strength8(&proj.pat[pat],proj.arr.lane,pat,p,proj.set.accent_q7,T_VEL,v);
+            for (int j=0;j<4;++j) {
+                const int current=s->p.pattern.current[p]==pat;
+                unsigned a=home_glyph_brightness(v[2*j],current),b=home_glyph_brightness(v[2*j+1],current);
+                /* Actual brightness range 0 or 2..16. The spare code 1 is 16. */
+                s->p.pattern.glyph[p][c][j]=(uint8_t)((a==16?1:a)|((b==16?1:b)<<4));
+            }
+        }
+    }
+}
+static UI_DRAW void draw_home_scene(int band,const cv_home_scene *s)
+{
+    const int off=band*BAND_H;
+    char text[24];
+    if (s->live) {
+        cv_text(8,3-off,&FONT_T,"LIVE STEPS",s->gray);
+        for (int pos=0;pos<NPARTS;++pos) {
+            int p=part_at(pos),y=18+pos*24-off;
+            if (y+22<=0||y>=BAND_H)continue;
+            int len=s->p.steps.length[p],base=s->p.steps.base[p];
+            uint16_t col=(s->p.steps.mute>>p&1u)?s->dim:s->part_colors[p];
+            char *q=put_i(text,base+1);
+            q=put_i(put_s(q,"-"),base+16<len?base+16:len);put_i(put_s(q," / "),len);
+            surface_panel(3,y,234,22,0,s->face,s->edge,s->side);
+            cv_text(8,y+1,&FONT_T,s->p.steps.name[p],col);
+            cv_text(8,y+11,&FONT_T,text,s->gray);
+            for(int c=0;c<16;++c) {
+                int x=85+c*9,on=(s->p.steps.bits[p]>>c)&1u;
+                cv_rect(x,y+5,7,10,base+c<len?s->edge:s->side);
+                if(base+c<len&&on)cv_rect(x+1,y+6,5,8,col);
+                if(c==s->p.steps.head[p])cv_rect(x,y+17,7,2,s->white);
+            }
+        }
+        return;
+    }
+    const int c0=s->p.pattern.c0;
+    put_i(put_s(put_i(put_s(text,"PATTERNS "),c0+1),"-"),c0+16);
+    cv_text(8,6-off,&FONT_T,text,s->gray);
+    int sw=tw(&FONT_T,s->p.pattern.status)+10;
+    rbox(237-sw,3-off,sw,14,7,s->face);
+    text_r(232,6-off,&FONT_T,s->p.pattern.status,s->gray);
+    rbox(3,20-off,234,112,UI_PANEL_RADIUS,s->face);
+    for(int c=0;c<16;++c) {
+        char n[4];put_i(n,c0+c+1);
+        text_c(HOME_X0+5+c*12,24-off,&FONT_T,n,s->gray);
+    }
+    for (int pos=0;pos<NPARTS;++pos) {
+        int p=part_at(pos),y=38+pos*18-off;
+        if(y+18<=0||y>=BAND_H)continue;
+        const uint16_t col=s->part_colors[p];
+        cv_text(9,y+1,&FONT_T,s->p.pattern.name[p],col);
+        for(int c=0;c<16;++c) {
+            int pat=c0+c,x=HOME_X0+c*12;
+            const int current=s->p.pattern.current[p]==pat;
+            rbox(x,y,10,12,2,s->side);
+            if(current)rframe(x,y,10,12,2,col);
+            if(!current && s->p.pattern.cue[p]==pat)rframe(x,y,10,12,2,s->white);
+            for(int j=0;j<8;++j) {
+                unsigned q=(s->p.pattern.glyph[p][c][j/2]>>(4*(j&1)))&15u;
+                if(q)cv_rect(x+1+j,y+4,1,3,blend(s->bg,col,q==1?16:q));
+            }
+            if(s->p.pattern.chain>>c&1u)cv_rect(x,y+14,10,1,s->amb);
+        }
+    }
+}
+static UI_DRAW void draw_home(int band)
+{
+    /* HOME entered mid-frame from an unqualified route keeps legacy behavior. */
+    cv_home_scene s;
+    cv_capture_home(&s);
+    draw_home_scene(band,&s);
+}
+#else
 /* R22 HOME: pattern numbers name columns, parts name rows. Assignment and
  * stored note/velocity content remain separate; drawing never edits a pattern. */
 static UI_DRAW void draw_home_live(int band)
@@ -6873,7 +7021,77 @@ static UI_DRAW void draw_home(int band)
     }
 }
 
+#endif
+
 /* SONG: a table of bars, twelve rows across the two bands (the first is the heading) */
+#if X0X_UI_SMALL_CANVAS
+enum { SONG_PAINT_ROWS=12 };
+typedef struct {
+    const char *name[NPARTS]; /* immutable part label literals */
+    uint16_t ink[NPARTS], bg, gray, white, dim, face, edge, select, select_edge;
+    int top, len, selected, play;
+    uint16_t play_color;
+    struct { uint8_t pat[NPARTS], mute, rep; } bar[SONG_PAINT_ROWS];
+} cv_song_scene;
+static void cv_capture_song(cv_song_scene *s)
+{
+    const song_t *sg=song();
+    s->selected=ui.song_sel;
+    s->top=s->selected>5 ? s->selected-5 : 0;
+    s->len=sg->len;
+    s->play=seq.song_on && seq.playing ? seq.song_pos : -1;
+    s->play_color=seq.song_rec ? RGB(255,80,70) : C_WHITE;
+    s->bg=C_BLACK; s->gray=C_GRAY; s->white=C_WHITE; s->dim=C_DIM;
+    s->face=SOUND_FACE; s->edge=SOUND_EDGE;
+    s->select=SOUND_SELECT; s->select_edge=SOUND_SELECT_EDGE;
+    for (int pos=0;pos<NPARTS;pos++) {
+        int p=part_at(pos);
+        s->ink[pos]=PART_COL[p];
+        s->name[pos]=part_fit(p,&FONT_XS,35);
+    }
+    for (int row=1;row<SONG_PAINT_ROWS;row++) {
+        int k=s->top+row-1;
+        if (k>=s->len || k>=NSONG) break;
+        for (int pos=0;pos<NPARTS;pos++)
+            s->bar[row].pat[pos]=sg->bar[k].pat[part_at(pos)];
+        s->bar[row].mute=sg->bar[k].mute;
+        s->bar[row].rep=SONG_REP(&sg->bar[k]);
+    }
+}
+static UI_DRAW void draw_song_scene(int band,const cv_song_scene *s)
+{
+    for (int r=0;r<6;r++) {
+        int row=band*6+r,y=r*11,k=s->top+row-1;
+        char t[8];
+        if (!row) {
+            cv_text(4,vc(&FONT_XS,y,11),&FONT_XS,"BAR",s->gray);
+            for(int pos=0;pos<NPARTS;pos++)
+                text_c(58+pos*36,vc(&FONT_XS,y,11),&FONT_XS,s->name[pos],s->ink[pos]);
+            continue;
+        }
+        if (k>s->len || k>=NSONG) break;
+        int sel=k==s->selected;
+        surface_panel(0,y,236,11,sel,sel?s->select:s->face,sel?s->select_edge:s->edge,0);
+        put_i(t,k+1);
+        cv_text(4,vc(&FONT_XS,y,11),&FONT_XS,t,sel?s->white:s->gray);
+        if (k==s->play)
+            play_icon(26,y+1,s->play_color);
+        if (k==s->len) {
+            cv_text(50,vc(&FONT_XS,y,11),&FONT_XS,k?"END":"EMPTY",sel?s->white:s->dim);
+            continue;
+        }
+        for (int pos=0;pos<NPARTS;pos++) {
+            int muted=s->bar[row].mute>>part_at(pos)&1u;
+            t[0]='P'; put_i(t+1,s->bar[row].pat[pos]+1);
+            text_c(58+pos*36,vc(&FONT_XS,y,11),&FONT_XS,muted?"-":t,muted?s->dim:s->ink[pos]);
+        }
+        if (s->bar[row].rep>1) {
+            t[0]='x'; put_i(t+1,s->bar[row].rep);
+            text_r(238,vc(&FONT_XS,y,11),&FONT_XS,t,s->white);
+        }
+    }
+}
+#else
 static UI_DRAW void draw_song(int band)
 {
     const song_t *sg = song();
@@ -6915,6 +7133,7 @@ static UI_DRAW void draw_song(int band)
         }
     }
 }
+#endif
 
 /* Continuous send track with an explicit setting thumb, including zero/max. */
 #if X0X_UI_SMALL_CANVAS
@@ -8332,6 +8551,38 @@ static UI_DRAW void draw_main(void)
         draw_list_once();
         return;
     }
+    if (!modal.route && ui.view == V_SONG) {
+        cv_song_scene sg;
+        cv_readout_scene note;
+        cv_capture_song(&sg);
+        int has_note=readout && !envelope &&
+            !(ui.brk_choice_on && engine_brk_preview_active()) &&
+            cv_capture_readout(&note);
+        for (unsigned page=0;page<2;page++) {
+            cv_window(240,MAIN_ROWS,page*BAND_H,BAND_H,sg.bg);
+            cv_band(page*BAND_H,BAND_H);
+            draw_song_scene(page,&sg);
+            if (page && has_note) draw_readout_scene(&note);
+            cv_commit_main_band(page);
+        }
+        return;
+    }
+    if (!modal.route && ui.view == V_HOME && ui.overlay == O_NONE) {
+        cv_home_scene home;
+        cv_readout_scene note;
+        cv_capture_home(&home);
+        int has_note=readout && !envelope &&
+            !(ui.brk_choice_on && engine_brk_preview_active()) &&
+            cv_capture_readout(&note);
+        for(unsigned page=0;page<2;page++) {
+            cv_window(240,MAIN_ROWS,page*BAND_H,BAND_H,home.bg);
+            cv_band(page*BAND_H,BAND_H);
+            draw_home_scene(page,&home);
+            if(page&&has_note)draw_readout_scene(&note);
+            cv_commit_main_band(page);
+        }
+        return;
+    }
     if (!modal.route && ui.view == V_FX) {
         cv_fx_scene fx;
         cv_readout_scene note;
@@ -8381,8 +8632,10 @@ static UI_DRAW void draw_main(void)
 #endif
         else if (ui.view == V_MIX)
             draw_mix(band);
+#if !X0X_UI_SMALL_CANVAS
         else if (ui.view == V_SONG)
             draw_song(band);
+#endif
 #if X0X_UI_PERF
         else if (ui.view == V_PERF)
             draw_perf(band);
