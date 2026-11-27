@@ -10,11 +10,18 @@ static unsigned geo_enabled,geo_findings,geo_ntile,geo_nframe;
  * Owner masks are translated by actual blits then checked against final pixels. */
 static uint32_t pixel_tile_owner[CV_MAX],pixel_frame_owner[240*240];
 static uint16_t pixel_tile_color[CV_MAX],pixel_frame_color[240*240];
+static int geo_row_base(void) {
+#if X0X_UI_SMALL_CANVAS
+ return (int)cv_row_base;
+#else
+ return 0;
+#endif
+}
 static void pixel_snapshot(uint16_t *before) {if(geo_enabled)memcpy(before,cv_px,cv_w*cv_h*sizeof *before);}
 static void pixel_finish(const uint16_t *before,uint32_t owner) {
  if(!geo_enabled)return;
- for(int y=cv_y0;y<cv_y1;y++)for(unsigned x=0;x<cv_w;x++)if(before[y*cv_w+x]!=cv_px[y*cv_w+x]){
-  pixel_tile_owner[y*cv_w+x]=owner;pixel_tile_color[y*cv_w+x]=cv_px[y*cv_w+x];
+ for(int y=cv_y0;y<cv_y1;y++)for(unsigned x=0;x<cv_w;x++)if(before[(y-geo_row_base())*cv_w+x]!=cv_px[(y-geo_row_base())*cv_w+x]){
+  pixel_tile_owner[(y-geo_row_base())*cv_w+x]=owner;pixel_tile_color[(y-geo_row_base())*cv_w+x]=cv_px[(y-geo_row_base())*cv_w+x];
  }
 }
 
@@ -26,7 +33,15 @@ static void geo_blit(int x,int y) {
  }
  for(unsigned i=0;i<geo_ntile;i++) {
   if(geo_nframe>=1024){fprintf(stderr,"geometry label overflow\n");exit(1);}
-  geo_frame[geo_nframe]=geo_tile[i];geo_frame[geo_nframe].x+=x;geo_frame[geo_nframe].y+=y;geo_nframe++;
+  geo_label e=geo_tile[i];e.x+=x;e.y+=y;
+#if X0X_UI_SMALL_CANVAS
+  /* A real glyph may cross two strips. Keep one final-frame obligation. */
+  unsigned j=0;for(;j<geo_nframe;j++)if(e.x==geo_frame[j].x&&e.y==geo_frame[j].y&&
+    e.f==geo_frame[j].f&&e.col==geo_frame[j].col&&e.value==geo_frame[j].value&&
+    e.ref==geo_frame[j].ref&&!strcmp(e.text,geo_frame[j].text))break;
+  if(j<geo_nframe)continue;
+#endif
+  geo_frame[geo_nframe++]=e;
  }
 }
 

@@ -657,7 +657,12 @@ static void check_drum_titles(int kit, int bank, int names)
         text_c(n * 30 + 15, 1, &FONT_T, label, selected ? SOUND_INK : C_WHITE);
         CHECK(tw(&FONT_T, label) <= 27);
     }
+#if X0X_UI_SMALL_CANVAS
+    /* Independent 13-row oracle is physically backed by exactly 13 rows. */
+    cv_commit_rows(1,0,MAIN_Y,cv_h,main_tileh);
+#else
     cv_commit_rect(1, 0, MAIN_Y);
+#endif
     CHECK(!memcmp(active_fb + MAIN_Y * 240, fb + MAIN_Y * 240, 13 * 240 * sizeof *fb));
     memcpy(fb, active_fb, sizeof fb);
     blit_hash[1] = old_hash;

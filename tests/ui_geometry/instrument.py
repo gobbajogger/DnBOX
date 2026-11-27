@@ -20,19 +20,28 @@ def instrument(root):
     a='    return x;\n}\n\nstatic int32_t cv_text('
     s=once(s,a,'''    if(geo_enabled) {
      if(geo_ntile>=256 || strlen(geo_text)>=128){fprintf(stderr,"geometry text overflow\\n");exit(1);}
-     geo_label *e=&geo_tile[geo_ntile++];e->f=f;e->x=geo_x;e->y=geo_y;e->col=c;strcpy(e->text,geo_text);e->value=geo_value_fn&&!(geo_skip_a&&!strcmp(geo_text,geo_skip_a))&&!(geo_skip_b&&!strcmp(geo_text,geo_skip_b))?geo_value_fn:0;e->ref=e->value?geo_value_ref:0;
+     geo_label *e=&geo_tile[geo_ntile++];e->f=f;e->x=geo_x;e->y=geo_y-geo_row_base();e->col=c;strcpy(e->text,geo_text);e->value=geo_value_fn&&!(geo_skip_a&&!strcmp(geo_text,geo_skip_a))&&!(geo_skip_b&&!strcmp(geo_text,geo_skip_b))?geo_value_fn:0;e->ref=e->value?geo_value_ref:0;
     }
 '''+a);p.write_text(s)
     p=root/'firmware/src/app/ui.c';s=p.read_text()
     s=once(s,'static void cv_lcd_full(uint32_t x, uint32_t y)\n{','static void cv_lcd_full(uint32_t x, uint32_t y)\n{\n    geo_blit(x,y);')
     s=once(s,'    cv_lcd_pos_t pos = {x, y};','    geo_blit(x,y);\n    cv_lcd_pos_t pos = {x, y};')
+    if 'static void cv_commit_main_band(' in s:
+        v='    cv_lcd_pos_t pos = {0, MAIN_Y + band * BAND_H};'
+        s=once(s,v,v+'\n    geo_blit((int)pos.x,(int)pos.y);')
+        v='        paint(2,scene);'
+        s=once(s,v,v+'\n        geo_blit((int)pos.x,(int)pos.y);')
     # Current parameter names are rendered once in their semantic face ink.
     p.write_text(s)
 
     p=root/'firmware/src/app/ui_drum_voice.inc';s=p.read_text()
-    a='static UI_DRAW void dv_glyph(pref_t r, float ev, float ox, float oy, float sx, float sy, uint16_t col)\n{'
+    scene='static UI_DRAW void dv_glyph_scene(' in s
+    glyph='dv_glyph_scene' if scene else 'dv_glyph'
+    glyph_sig='static UI_DRAW void '+glyph+'(pref_t r, float ev, float ox, float oy, float sx, float sy, uint16_t col'+(' DV_ARG' if scene else '')+')'
+    value_args=' DV_FORWARD' if scene else ''
+    a=glyph_sig+'\n{'
     s=once(s,a,a+'\n    if(getenv("PRESENCE_MUTATE_GLYPH"))return;\n    if(geo_enabled){if(presence_nglyph>=256)exit(2);unsigned *q=presence_glyph[presence_nglyph++];q[0]=r.kind;q[1]=r.a;q[2]=r.b;q[3]=r.c;}\n')
-    a='static UI_DRAW void dv_value_text(pref_t r, int ev_i, int cx, int y, uint16_t col, int large)\n{'
+    a='static UI_DRAW void dv_value_text(pref_t r, int ev_i, int cx, int y, uint16_t col, int large'+(' DV_ARG' if scene else '')+')\n{'
     s=once(s,a,a+'\n    if(getenv("PRESENCE_MUTATE_VALUE"))return;');p.write_text(s)
 
     p=root/'firmware/src/app/ui.c';s=p.read_text()
@@ -89,9 +98,9 @@ def instrument(root):
       uint32_t ao=1u+((uint32_t)a.kind<<24)+((uint32_t)a.a<<16)+((uint32_t)a.b<<8)+a.c;
       uint32_t dd=1u+((uint32_t)d.kind<<24)+((uint32_t)d.a<<16)+((uint32_t)d.b<<8)+d.c;
       int split=14+(int)(214.f*v->rise_end/window);
-      for(int yy=cv_y0;yy<cv_y1;yy++)for(unsigned xx=0;xx<cv_w;xx++)if(stage_before[yy*cv_w+xx]!=cv_px[yy*cv_w+xx]){
-        pixel_tile_owner[yy*cv_w+xx]=stage==1||(stage==0&&(int)xx<=split)?ao:dd;
-        pixel_tile_color[yy*cv_w+xx]=cv_px[yy*cv_w+xx];
+      for(int yy=cv_y0;yy<cv_y1;yy++)for(unsigned xx=0;xx<cv_w;xx++)if(stage_before[(yy-geo_row_base())*cv_w+xx]!=cv_px[(yy-geo_row_base())*cv_w+xx]){
+        pixel_tile_owner[(yy-geo_row_base())*cv_w+xx]=stage==1||(stage==0&&(int)xx<=split)?ao:dd;
+        pixel_tile_color[(yy-geo_row_base())*cv_w+xx]=cv_px[(yy-geo_row_base())*cv_w+xx];
       }
       for(int k=0;k<2;k++)if(stage==0 || stage==k+1){
         pref_t r=k?d:a;if(presence_nglyph>=256)exit(2);unsigned *q=presence_glyph[presence_nglyph++];q[0]=r.kind;q[1]=r.a;q[2]=r.b;q[3]=r.c;
@@ -104,9 +113,10 @@ def instrument(root):
     helper=root/'tests/ui_defects/first_slice/instrument.py'
     spec=importlib.util.spec_from_file_location('first_slice_wrappers',helper);module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
     p=root/'firmware/src/app/ui_drum_voice.inc';s=p.read_text()
-    sig='static UI_DRAW void dv_glyph(pref_t r, float ev, float ox, float oy, float sx, float sy, uint16_t col)'
+    sig=glyph_sig
     wrapper=sig+'\n{\n    uint16_t before[CV_MAX];pixel_snapshot(before);\n    first_original_dv_glyph(r,ev,ox+(getenv("PIXEL_MUTATE_SHIFT")?80:0),oy,sx,sy,col);\n    uint32_t owner=1u+((uint32_t)r.kind<<24)+((uint32_t)r.a<<16)+((uint32_t)r.b<<8)+r.c;\n    if(geo_enabled&&getenv("PIXEL_MUTATE_BLANK"))memcpy(cv_px,before,cv_w*cv_h*sizeof *before);\n    pixel_finish(before,owner);\n    if(geo_enabled&&getenv("PIXEL_MUTATE_OVERPAINT"))memcpy(cv_px,before,cv_w*cv_h*sizeof *before);\n}\n'
-    s=module.wrap(s,sig,'dv_glyph',wrapper);p.write_text(s)
+    wrapper=wrapper.replace('first_original_dv_glyph(', 'first_original_'+glyph+'(').replace('oy,sx,sy,col);','oy,sx,sy,col'+value_args+');')
+    s=module.wrap(s,sig,glyph,wrapper);p.write_text(s)
 
     # L11 pan: every pan the walk formats (is_pan or any control named Pan)
     # must read L50..L1, C, R1..R50 with no unit. PAN_MUTATE emits raw numbers.
@@ -145,6 +155,12 @@ def instrument(root):
 }
 """
     s=module.wrap(s,sig,'pref_value_of',wrapper)
+    # Fast S1 cached formatting does not call pref_value_of while painting.
+    # Tag its actual typed ref too, or the prior capture's last cell steals
+    # ownership of every subsequent cached readout on the audited frame.
+    fast='static void matrix_format(pref_t r,int raw,char *num,char *unit)\n{'
+    if fast in s:
+        s=once(s,fast,fast+'\n    geo_last_ref=1u+(((unsigned)r.kind<<24)|((unsigned)r.a<<16)|((unsigned)r.b<<8)|r.c);')
     p.write_text(s)
 
     # #62 type scale: tag the text a value formatter draws (not its unit or caption).
@@ -153,7 +169,7 @@ def instrument(root):
         ('firmware/src/app/ui.c','static void cell_value(int cx, int y, const char *num, const char *unit, uint16_t c)','cx,y,num,unit,c',1,'unit,0'),
         ('firmware/src/app/ui.c','static UI_DRAW void strip_value(int cx, int y, char *num, const char *unit, uint16_t ink, const char *caption)','cx,y,num,unit,ink,caption',2,'unit,caption'),
         ('firmware/src/app/ui.c','static UI_DRAW void strip_value_fit(int x, int y, char *num, const char *unit, uint16_t ink)','x,y,num,unit,ink',3,'unit,0'),
-        ('firmware/src/app/ui_drum_voice.inc','static UI_DRAW void dv_value_text(pref_t r, int ev_i, int cx, int y, uint16_t col, int large)','r,ev_i,cx,y,col,large',4,'0,0')):
+        ('firmware/src/app/ui_drum_voice.inc','static UI_DRAW void dv_value_text(pref_t r, int ev_i, int cx, int y, uint16_t col, int large'+(' DV_ARG' if scene else '')+')','r,ev_i,cx,y,col,large'+value_args,4,'0,0')):
         p=root/path;s=p.read_text();name=sig.split('(')[0].split()[-1]
         a,b=skips.split(',')
         ref='1u+(((unsigned)r.kind<<24)|((unsigned)r.a<<16)|((unsigned)r.b<<8)|r.c)' if fn==4 else 'geo_last_ref'
@@ -190,4 +206,8 @@ def instrument(root):
     first_original_draw_303(band,gen);
 }
 """
+    if 'static UI_DRAW void draw_303_scene(int band,const cv_303_scene *z)' in s:
+        dsig='static UI_DRAW void draw_303_scene(int band,const cv_303_scene *z)'
+        w=wrapper.replace(sig,dsig).replace('!gen','!z->gen').replace('first_original_draw_303(band,gen);','first_original_draw_303_scene(band,z);')
+        s=module.wrap(s,dsig,'draw_303_scene',w)
     s=module.wrap(s,sig,'draw_303',wrapper);p.write_text(s)

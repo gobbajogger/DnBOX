@@ -280,7 +280,12 @@ int main(int argc, char **argv)
     engine_bass_on_velocity(0, 72, 0, 0, 100); block(256);
     CHECK(engine_original_keys(0, 0));
     seq_stop(&seq); block(256);
-    CHECK(!seq.playing && !engine_original_keys(0, 0) && !engine_original_keys(0, 1));
+    /* Stop releases the sequence owner, not a manually held note or pedal. */
+    CHECK(!seq.playing && engine_original_keys(0, 0) == 1);
+    CHECK(engine_original_value_bits(0, 17) == float_bits(1.0f));
+    engine_bass_off_note(0,72); block(256);
+    CHECK(engine_original_keys(0, 0) == 0);
+    midi(0, 0xb2, 64, 0); block(256);
     /* A note following Stop in the same drain belongs to stopped free play;
      * a late block-end transport callback must never erase that newer note. */
     seq_start(&seq); block(256); seq_stop(&seq);
@@ -295,26 +300,27 @@ int main(int argc, char **argv)
     engine_bass_off_note(0, 77); block(256);
     CHECK(engine_original_keys(0, 0) == 0);
 
-    /* Physical input accepted after Stop shares the same ordering guarantee.
-     * Retire old sounding owners without revoking these queued new presses. */
+    /* Physical input retains pre-Stop owners and admits the next new press.
+     * Each press keeps its actual release edge and cannot release its peer. */
     seq_start(&seq); block(256);
     engine_live_key_state(0, &generation, &arp, &context);
     CHECK(engine_live_key(0, generation, 1, 60, 100, 0, 0)); block(256);
-    seq_stop(&seq);
-    CHECK(engine_live_key(0, generation, 2, 64, 100, 0, 0)); block(256);
+    seq_stop(&seq); block(256);
     CHECK(!seq.playing && engine_original_keys(0, 0) == 1);
+    CHECK(engine_live_key(0, generation, 2, 64, 100, 0, 0)); block(256);
+    CHECK(engine_original_keys(0, 0) == 2);
     CHECK(engine_live_key(0, generation, 1, 60, 0, 0, 0)); block(256);
     CHECK(engine_original_keys(0, 0) == 1); /* old release cannot kill the new key */
     CHECK(engine_live_key(0, generation, 2, 64, 0, 0, 0)); block(256);
     CHECK(engine_original_keys(0, 0) == 0);
 
-    /* MIDI Stop at the ring tail must precede physical FIFO consumption. */
+    /* MIDI Stop at the ring tail must not consume either physical token. */
     seq.clk_src = SEQ_CLK_AUTO; seq.clk_lock = 0;
     seq_start(&seq); block(256);
     CHECK(engine_live_key(0, generation, 3, 67, 100, 0, 0)); block(256);
     midi(0, 0xfc, 0, 0);
     CHECK(engine_live_key(0, generation, 4, 72, 100, 0, 0)); block(256);
-    CHECK(!seq.playing && engine_original_keys(0, 0) == 1);
+    CHECK(!seq.playing && engine_original_keys(0, 0) == 2);
     CHECK(engine_live_key(0, generation, 3, 67, 0, 0, 0)); block(256);
     CHECK(engine_original_keys(0, 0) == 1);
     CHECK(engine_live_key(0, generation, 4, 72, 0, 0, 0)); block(256);

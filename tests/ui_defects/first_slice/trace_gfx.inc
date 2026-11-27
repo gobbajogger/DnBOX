@@ -11,7 +11,11 @@ static void first_snapshot(uint16_t *before) { if(first_enabled)memcpy(before,cv
 static void first_finish(const uint16_t *before,const char *kind,float ox,float oy,const char *text) {
     if(!first_enabled)return;
     int x0=240,y0=240,x1=-1,y1=-1,n=0;
-    for(int y=cv_y0;y<cv_y1;y++)for(unsigned x=0;x<cv_w;x++)if(before[y*cv_w+x]!=cv_px[y*cv_w+x]){
+    int row_base=0;
+#if X0X_UI_SMALL_CANVAS
+    row_base=(int)cv_row_base;
+#endif
+    for(int y=cv_y0;y<cv_y1;y++)for(unsigned x=0;x<cv_w;x++)if(before[(y-row_base)*cv_w+x]!=cv_px[(y-row_base)*cv_w+x]){
         int sy=y+first_offset;if(sy<0||sy>=240)continue;
         first_mask[sy*240+x]=1;n++;if((int)x<x0)x0=(int)x;if((int)x>x1)x1=(int)x;if(sy<y0)y0=sy;if(sy>y1)y1=sy;
     }
@@ -32,7 +36,8 @@ static void first_panel(const char *id,int x,int y,int w,int h) {
 typedef struct {char text[96];const felucca_font_t *font;int x,y,row,control;uint16_t color;} first_label_t;
 static first_label_t first_labels[512];static unsigned first_nlabels;
 static void first_record_label(int x,int y,const felucca_font_t *f,const char *s,uint16_t col) {
-    if(!first_enabled||first_value||first_nlabels>=512)return;
+    if(!first_enabled||first_value)return;
+    if(first_nlabels>=512){fprintf(stderr,"first slice label overflow\n");exit(2);}
     first_label_t *e=&first_labels[first_nlabels++];snprintf(e->text,sizeof e->text,"%s",s);
     e->font=f;e->x=x;e->y=y+cv_oy+first_offset;e->row=first_row;e->control=first_control;e->color=col;
 }
