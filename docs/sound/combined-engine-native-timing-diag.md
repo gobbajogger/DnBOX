@@ -32,3 +32,21 @@ In the dry INIT scope legacy chorus computes a delay tap with wet mix zero. Simp
 I combined just these two separately exact component changes on the current source-order donor, with Plan 4 and all original owner/memory guards. Actual native paired link: 228 B Elite / 240 B Pro free APP (64 B combined versus donor 292/304); pool unchanged at 908 B after 8 KiB reserve, or 396 B after the final 512 B floor. Same project bytes, five exact settled owner responses on both, no skipped cycles, no virtual NOR modification, stable Core 1 stack paint and no bad mailbox.
 
 Elite reported 13,228 µs / 67 XRUNs and Pro 20,417 µs / 185. Elite's terminal voice state had no evidence of triggered SuperJ6 slots; Pro retained a gated SuperJ6 note. The valid owner responses alone are **not** proof of equal active-note work. Do not compare these peak/XRUN numbers as an improvement in the joint workload. The real integrated candidate remains unqualified pending a replay with measured per-render joint activity. No shipping changes.
+
+
+### Recovered app flash and independently verified joint activity
+
+Sharing byte-identical cold compressor ratios and SuperJ6 labels recovered 60 B APP on both links (228→288 Elite; 240→300 Pro), with every value and the RAM/companion geometry unchanged. [Exact source change](../../experiments/sound-hardware-v1/cold-linked-duplicates-diagnostic.patch).
+
+The historical USB owner checks were not enough. An independent early DIN variant retained the same project bytes and three correct owner responses at 4.6 seconds, but neither board retained any SuperJ6 voice or Synth One root at that held checkpoint, so that input path did not qualify a joint speed test.
+
+A separate guarded [engine-entry cue and activity observer](../../experiments/sound-hardware-v1/joint-fixed-render-cue-diagnostic.patch) prepares the same project and calls the actual note helper when both typed owners are ready. Both acknowledged the seeded notes. The observer counts successful render spans in which **both** separate pre-mix signals exceed the existing audibility threshold somewhere in the span. This is not claimed same-sample overlap, MIDI ingress qualification, or a transparent timing probe.
+
+| Strict instrumented seeded run | Elite | Pro |
+|---|---:|---:|
+| Joint-audible render spans | 312 | 354 |
+| Worst time | 20,233 µs | 20,359 µs |
+| XRUNs | 205 | 209 |
+| Skipped cycles / bad mailboxes | 0 / 0 | 0 / 0 |
+
+All five settled owner responses and immutable disposable virtual NOR checks passed on both runs. Budget is 10,809 µs with zero XRUNs. These are first demonstrably jointly audible measurements for this cue, not a release pass or a controlled speed delta versus previous differently activated runs. The cue/observer compile in diagnostic only.
