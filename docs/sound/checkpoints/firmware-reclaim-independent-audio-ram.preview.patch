@@ -1,0 +1,82 @@
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -2872,10 +2872,10 @@
+ #endif
+ 
+ /* the mix of one stretch between two events: dry left and right, the reverb and delay sends;
+- * t0..tr the 808's scratch, kbuf the break's, mono the 909's kit send */
+-static float dry_l[256], dry_r[256], rev[256], dly[256], t1[256], t2[256], kbuf[256], mono[256];
++ * t0..tr the 808's scratch, kbuf the break's */
++static float dry_l[256], dry_r[256], rev[256], dly[256], t1[256], t2[256], kbuf[256];
+ /* The 808's L/R scratch is the stretch's own out_l/out_r window (saves 2 KiB).
+- * Lifetime: core 2 writes it while core 1 only touches dry_l..mono; core 1
++ * Lifetime: core 2 writes it while core 1 only touches the independent dry/send scratch; core 1
+  * reads it after plat_cpu2_wait and before the 303s overwrite that window;
+  * fxbus_process_st then writes the final mix there. A failed core 2 is held. */
+ static float *t0, *tr;
+@@ -2973,6 +2973,33 @@
+     add_glide(rev, m, &mix_glide[b][GL_REV], n);
+     add_glide(dly, m, &mix_glide[b][GL_DLY], n);
+     meter(b, m, mix_level[b], n);
++}
++
++/* Same filtered, unpanned sides for centered kit sends and peak. */
++static void centered_909(float *rout,float *dout,const float *l,const float *r,
++                         glide_t *rg,glide_t *dg,float level,float *peak,uint32_t n)
++{
++    float rc=rg->cur,rt=rg->tgt,dc=dg->cur,dt=dg->tgt, pk=*peak;
++    const int rm=rc!=rt,dm=dc!=dt,ro=rm||rc!=0.f,dp=dm||dc!=0.f;
++    if(!ro&&!dp){
++        for(uint32_t i=0;i<n;i++){
++            float m=(l[i]+r[i])*0.5f;
++            float a=fm_fabsf(m)*level;if(a>pk)pk=a;
++        }
++        *peak=pk;
++        return;
++    }
++    for(uint32_t i=0;i<n;i++){
++        float m=(l[i]+r[i])*0.5f;
++        if(rm)rc+=(rt-rc)*GLIDE_A;
++        if(dm)dc+=(dt-dc)*GLIDE_A;
++        if(ro)rout[i]+=m*rc;
++        if(dp)dout[i]+=m*dc;
++        float a=fm_fabsf(m)*level;if(a>pk)pk=a;
++    }
++    if(rm)rg->cur=fm_fabsf(rt-rc)<1e-5f?rt:rc;
++    if(dm)dg->cur=fm_fabsf(dt-dc)<1e-5f?dt:dc;
++    *peak=pk;
+ }
+ 
+ /* ---- the two cores' jobs, balanced per stretch ----
+@@ -3155,13 +3182,12 @@
+             drum909_render_st_cleared(&d909, dry_l, dry_r, rev, dly, (int)n, smc_audible_drums(solo, PART_909));
+             mix_targets(PART_909, mix_level[PART_909], solo_parts);
+             bfx_shape(PART_909, dry_l, dry_r, rev, dly, 4, (int)n);
+-            for (i = 0; i < n; i++)                       /* kit send: filtered sides, still centred */
+-                mono[i] = (dry_l[i] + dry_r[i]) * 0.5f;
+-            scale_glide(dry_l, &mix_glide[PART_909][GL_L], n);   /* then the part's PAN over the kit */
+-            scale_glide(dry_r, &mix_glide[PART_909][GL_R], n);
+             scale_glide(rev, &mix_glide[PART_909][GL_VREV], n);
+             scale_glide(dly, &mix_glide[PART_909][GL_VDLY], n);
+-            kit_sends(PART_909, mono, n);
++            centered_909(rev, dly, dry_l, dry_r, &mix_glide[PART_909][GL_REV],
++                         &mix_glide[PART_909][GL_DLY], mix_level[PART_909], &part_peak[PART_909], n);
++            scale_glide(dry_l, &mix_glide[PART_909][GL_L], n);
++            scale_glide(dry_r, &mix_glide[PART_909][GL_R], n);
+         }
+         if (!core)
+             PROF_ADD(PR_909, p9);
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -3786,7 +3786,11 @@
+ #else
+ #define LIST_MAX 64
+ #endif
++#if defined(__clang__) && !defined(X0X_HOST)
++static pref_t list_rows[LIST_MAX] __attribute__((section(".sbss.ui_relocated"),aligned(4)));
++#else
+ static pref_t list_rows[LIST_MAX] X0X_POOL;
++#endif
+ static char list_title[16];
+ 
+ static void list_add(pref_t r)
