@@ -90,6 +90,9 @@ typedef struct {
     const uint8_t *adpcm;         /* IMA ADPCM, 44.1 kHz (ima_adpcm.h) */
     uint32_t len;                 /* samples */
     uint32_t dk;                  /* samples decoded so far; h0, h1 = samples dk - 2, dk - 1 */
+#if X0X_D9_ENTROPY
+    uint32_t entropy_cursor;      /* packed bit position and previous two nibbles */
+#endif
     int32_t pred, idx;            /* decoder state after dk samples */
     int32_t h0, h1;
     uint32_t pos, frac;           /* 32.32 read position */

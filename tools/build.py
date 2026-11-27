@@ -334,6 +334,20 @@ def chicago_factory_col():
     return flag
 
 
+def drum_entropy_setting():
+    flag = os.environ.get("X0X_D9_ENTROPY", "0")
+    if flag not in ("0", "1") or (flag == "1" and (BOARD != "smk37" or VERSION)):
+        raise SystemExit("X0X_D9_ENTROPY: SMK diagnostic only (0 or 1)")
+    return flag
+
+
+def write_drum_entropy():
+    if drum_entropy_setting() == "1":
+        subprocess.run([sys.executable, str(SRC / "tools" / "gen_drum_entropy.py"),
+                        str(GEN / "x0x_drum_samples.h"), str(GEN / "x0x_drum_entropy.h")],
+                       check=True)
+
+
 def _generate_locked():
     """Body of generate(), called with GEN/.generate.lock held."""
     if chicago_factory_col() == "1":
@@ -352,6 +366,7 @@ def _generate_locked():
                                     fold_lo=chicago_fold_residual_min() == "1")
     if gen_cache.restore(GEN):
         print("generate: cached font, drums, and break bank")
+        write_drum_entropy()
         write_fittab_id()
         return
     tools = SRC / "tools"
@@ -384,6 +399,7 @@ def _generate_locked():
         break_pack.write_empty_header(GEN / "x0x_break_bank.h")
         print("break bank: none (factory loops are an optional install)")
     gen_cache.store(GEN)
+    write_drum_entropy()
     write_fittab_id()
 
 
@@ -574,6 +590,8 @@ def build_app():
             names.extend(("engine_superj6_edit", "engine_superj6_pre_note_wave"))
         for name in names:
             factory_roots.extend(("-u", name))
+    if drum_entropy_setting() == "1":
+        flags.append("-DX0X_D9_ENTROPY=1")
     if miami_n513_boot() == "1":
         flags.append("-DX0X_MIAMI_N513_BOOT=1")
     tanh_boot = os.environ.get("X0X_D9_TANH_BOOT", "0")

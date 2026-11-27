@@ -7,7 +7,11 @@
 #define X0X_DRUM_TABLES_DEFINE              /* the shared lookup tables live here (x0x_drum_tables.h) */
 #define X0X_IMA_TABLES_DEFINE               /* one IMA step/index table for breaks + 909 + engine */
 #include "drum909.h"
+#if X0X_D9_ENTROPY
+#include "x0x_drum_entropy.h"
+#else
 #include "x0x_drum_samples.h"
+#endif
 #include "ima_adpcm.h"
 #include "../x0x_cold.h"
 #if DNBOX_LAB_D9_SUFFIX
@@ -748,6 +752,9 @@ void drum909_trigger(drum909_t *d, int voice, float vel)
         s->pos = 0;
         s->frac = 0;
         s->dk = 0;                                 /* decode again from the start */
+#if X0X_D9_ENTROPY
+        s->entropy_cursor = 0;
+#endif
         s->pred = s->idx = 0;
         s->h0 = s->h1 = 0;
         s->playing = 1;
@@ -1030,6 +1037,17 @@ __attribute__((noinline)) static void d9_render_clap(d9_clap_t *v, const float *
     d9_emit_block(bus, m);
 }
 
+/* Recover the same ordered IMA nibble before doing the unchanged predictor update. */
+D9_INLINE int32_t d9_decode_smp(d9_smp_t *s, const uint8_t *src)
+{
+#if X0X_D9_ENTROPY
+    ++s->dk;
+    return ima_decode_code(d9_entropy_code(src, &s->entropy_cursor), &s->pred, &s->idx);
+#else
+    return ima_decode(src, s->dk++, &s->pred, &s->idx);
+#endif
+}
+
 /* Hats, ride, crash (render_sampler) */
 static void d9_render_smp(d9_smp_t *s, const d9_bus_t *bus, int n)
 {
@@ -1050,10 +1068,10 @@ static void d9_render_smp(d9_smp_t *s, const d9_bus_t *bus, int n)
         s->pos < len && (unsigned)m < len - s->pos &&
         (s->dk == s->pos || s->dk == s->pos + 1u)) {
         if (s->dk == s->pos)
-            s->h1 = ima_decode(adpcm, s->dk++, &s->pred, &s->idx);
+            s->h1 = d9_decode_smp(s, adpcm);
         for (int i = 0; i < m; ++i) {
             s->h0 = s->h1;
-            s->h1 = ima_decode(adpcm, s->dk++, &s->pred, &s->idx);
+            s->h1 = d9_decode_smp(s, adpcm);
             const float v = (float)s->h0 * (1.0f / 32768.0f);
             bus->y[i] = v * d9_env_tick(&s->out);
         }
@@ -1065,7 +1083,7 @@ static void d9_render_smp(d9_smp_t *s, const d9_bus_t *bus, int n)
                 const uint32_t need = s->pos + 2 < len ? s->pos + 2 : len;
                 while (s->dk < need) {
                     s->h0 = s->h1;
-                    s->h1 = ima_decode(adpcm, s->dk++, &s->pred, &s->idx);
+                    s->h1 = d9_decode_smp(s, adpcm);
                 }
                 const int last = s->pos + 1 >= len;
                 const float a = (float)(last ? s->h1 : s->h0) * (1.0f / 32768.0f);
