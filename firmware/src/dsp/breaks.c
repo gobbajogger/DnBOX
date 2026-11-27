@@ -281,10 +281,31 @@ X0X_COLD static int pick_slot(const breaks_t *b, int which)
     }
     return -1;
 }
+/* Equal-grid boundary without overflow, including the exclusive end at 32. */
+static inline uint32_t bank_boundary(uint32_t n, unsigned step32)
+{
+    return (n >> 5) * step32 + (((n & 31u) * step32) >> 5);
+}
+
+/* Valid banks have >=64 samples, so slice starts are strictly monotonic.
+ * Find the greatest start <= lo (previous linear scan's exact policy). */
+__attribute__((noinline)) static unsigned bank_slice_for_lo(const brk_bank_t *k, uint32_t lo)
+{
+    unsigned low = 0, high = k->slices, unit = 32u / high;
+    while (high - low > 1u) {
+        unsigned mid = (low + high) >> 1;
+        if (bank_boundary(k->n, mid * unit) <= lo)
+            low = mid;
+        else
+            high = mid;
+    }
+    return low;
+}
+
 /* Main-loop bank decode — not breaks_render (X0X_COLD) */
 X0X_COLD static void bank_fill(brk_bank_t *k, const brk_loop_t *loop)
 {
-    uint32_t n, i, s, sh;
+    uint32_t n, i, s, sh, next = 0;
     int32_t pred = 0, idx = 0;
     n = loop->nsamples;
     k->valid = 0;
@@ -296,17 +317,15 @@ X0X_COLD static void bank_fill(brk_bank_t *k, const brk_loop_t *loop)
     k->n = n;
     k->sp16 = (float)n / ((float)loop->bars * 16.0f);
     k->slices = (uint8_t)loop_count(loop);
-    for (s = 0; s <= 32; s++)
-        k->start[s] = (n >> 5) * s + ((n & 31u) * s >> 5);  /* n * s / 32 without overflow */
     for (i = 0, s = 0; i < n; i++) {                       /* one pass: record states, decode on */
         if (!(i & ((1u << sh) - 1u))) {
             k->ck_pred[i >> sh] = (int16_t)pred;
             k->ck_idx[i >> sh] = (uint8_t)idx;
         }
-        while (s < 32 && k->start[s] == i) {
+        while (s < 32 && next == i) {
             k->at_start_pred[s] = (int16_t)pred;
             k->at_start_idx[s] = (uint8_t)idx;
-            s++;
+            next = bank_boundary(n, ++s);
         }
         ima_decode(k->adpcm, i, &pred, &idx);
     }
@@ -567,8 +586,9 @@ static int voice_start_on(breaks_t *b, const brk_bank_t *k, int bk, int sl, uint
     v->snap = k;
     v->rev = (uint8_t)rev;
     v->seek_pos = UINT32_MAX;       /* never reuse state from a prior voice */
-    v->lo = k->start[sl * (32 / k->slices)];
-    v->hi = k->start[(sl + 1) * (32 / k->slices)];
+    unsigned unit = 32u / k->slices;
+    v->lo = bank_boundary(k->n, (unsigned)sl * unit);
+    v->hi = bank_boundary(k->n, ((unsigned)sl + 1u) * unit);
     v->frac = 0.0f;
     v->g = 0.0f;
     v->hit_gain = hit_gain;
@@ -609,7 +629,7 @@ __attribute__((noinline)) static int slice_start(breaks_t *b, int bk, int sl, fl
         return 0;
     sl %= k->slices;
     unsigned boundary = (unsigned)sl * (32u / k->slices);
-    return voice_start_on(b, k, bk, sl, k->start[boundary], b->perf.reverse, 1,
+    return voice_start_on(b, k, bk, sl, bank_boundary(k->n, boundary), b->perf.reverse, 1,
                    k->at_start_pred[boundary], k->at_start_idx[boundary], hit_gain);
 }
 
@@ -946,10 +966,8 @@ void breaks_render(breaks_t *b, float *out, int n)
         brk_voice_t *v = &b->v[b->cur];
         const brk_bank_t *k = v->snap;
         if (v->on && k && v->rev != b->perf.reverse && v->dg >= 0.0f) {
-            int bk = v->bank, sl = 0;
+            int bk = v->bank, sl = (int)bank_slice_for_lo(k, v->lo);
             uint32_t p = v->rev ? v->pos : (v->pos ? v->pos - 1u : 0u);
-            while (sl + 1 < k->slices && k->start[(sl + 1) * (32 / k->slices)] <= v->lo)
-                sl++;
             voice_start_on(b, k, bk, sl, p, b->perf.reverse, 0, 0, 0, v->hit_gain);
             inc[b->cur] = brk_inc(b, b->v[b->cur].snap ? b->v[b->cur].snap : k);
         }
@@ -991,8 +1009,7 @@ void breaks_render(breaks_t *b, float *out, int n)
                 uint32_t advance = (uint32_t)b->grain_distance % span;
                 uint32_t off = b->grain_anchor - v->lo;
                 uint32_t pos = v->lo + (v->rev ? (off + span - advance) % span : (off + advance) % span);
-                int sl = 0;
-                while (sl + 1 < k->slices && k->start[(sl + 1) * (32 / k->slices)] <= v->lo) sl++;
+                int sl = (int)bank_slice_for_lo(k, v->lo);
                 if (voice_start_on(b, k, v->bank, sl, pos, v->rev, 0, 0, 0, v->hit_gain))
                     inc[b->cur] = brk_inc(b, k);
             }

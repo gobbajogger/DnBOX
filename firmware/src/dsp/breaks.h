@@ -44,7 +44,6 @@ typedef struct brk_bank {
     const uint8_t *adpcm;
     uint32_t n;                       /* samples */
     float sp16;                       /* source samples per 16th note: n / (bars * 16) */
-    uint32_t start[33];                /* exact max-32 boundaries, start[32] = n */
     /* Parallel lanes preserve exact signed predictor and IMA index without
      * an aligned struct's unused byte per state, or unaligned 16-bit loads. */
     int16_t at_start_pred[32];         /* exact state at each max-32 boundary */

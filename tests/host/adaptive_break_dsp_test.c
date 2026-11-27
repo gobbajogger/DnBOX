@@ -23,14 +23,14 @@ int main(void)
         CHECK(k->valid && k->slices==counts[ni]);
         int32_t pred=0,idx=0;
         for(unsigned pos=0, s=0;pos<l.nsamples;pos++) {
-            if(s<32 && pos==k->start[s]) { CHECK(k->at_start_pred[s]==pred);CHECK(k->at_start_idx[s]==idx);s++; }
+            if(s<32 && pos==bank_boundary(k->n, s)) { CHECK(k->at_start_pred[s]==pred);CHECK(k->at_start_idx[s]==idx);s++; }
             ima_decode(data,pos,&pred,&idx);
         }
         for(unsigned sl=0;sl<counts[ni];sl++) {
             unsigned bi=sl*(32/counts[ni]);
-            CHECK(k->start[bi]==(uint64_t)l.nsamples*sl/counts[ni]);
+            CHECK(bank_boundary(k->n, bi)==(uint64_t)l.nsamples*sl/counts[ni]);
             breaks_slice_on(&b,(int)sl);render(&b,2);
-            CHECK(b.v[b.cur].lo==k->start[bi]);CHECK(b.v[b.cur].hi==k->start[bi+32/counts[ni]]);
+            CHECK(b.v[b.cur].lo==bank_boundary(k->n, bi));CHECK(b.v[b.cur].hi==bank_boundary(k->n, bi+32/counts[ni]));
             breaks_slice_hold(&b,(int)sl,0);render(&b,2);
         }
         events=0;breaks_set(&b,BRK_COMPLEX,0);breaks_set(&b,BRK_ALEN,2);
