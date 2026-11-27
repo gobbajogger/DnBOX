@@ -1,0 +1,75 @@
+--- a/firmware/src/dsp/drum909.c
++++ b/firmware/src/dsp/drum909.c
+@@ -328,7 +328,11 @@
+ #define D9_BD_PITCH_POT0 45
+ static float d9_bd_base(float pm)
+ {
++#if DNBOX_SHARE_EXP_DFMAP
++    const float unity = 0x1.00e0bep+0f;
++#else
+     const float unity = x0x_pot_exp_value(X0X_EXP_BD_PITCH, D9_BD_PITCH_POT0);
++#endif
+     if (!(pm > 0.0f) || (pm >= 1.0f && pm <= unity)) return D9_BD_BASE_HZ;
+     return D9_BD_BASE_HZ * (pm / unity);
+ }
+--- a/tools/gen_drum_samples.py
++++ b/tools/gen_drum_samples.py
+@@ -165,7 +165,7 @@
+             packed = corrections[row * 64 + pot // 2]
+             delta = minimum + ((packed >> ((pot & 1) * 4)) & 15)
+             assert (_exp_predictor_word(row, pot) + delta) & 0xffffffff == word
+-    lines = ["#ifdef X0X_DRUM_TABLES_DEFINE",
++    lines = ["#if defined(X0X_DRUM_TABLES_DEFINE) && !DNBOX_SHARE_EXP_DFMAP",
+              "static const uint32_t x0x_exp_predictor_args[X0X_EXP_COUNT][2] = {"]
+     lines += [f"    {{0x{a:08x}u, 0x{b:08x}u}}," for a, b in _EXP_PREDICTOR_BITS]
+     lines += ["};", arr("int8_t", "x0x_exp_correction_min", minima),
+--- a/experiments/original_synth/sj6_lab_dfmap.c
++++ b/experiments/original_synth/sj6_lab_dfmap.c
+@@ -89,3 +89,47 @@
+ 
+ float compact_g_export(float hz,float fs){return bounded_g(hz,fs);}
+ float compact_k_export(float r,float hz,float fs){return bounded_k(r,hz,fs);}
++
++
++#if DNBOX_SHARE_EXP_DFMAP
++/* Generated from the finite EXP_RANGES/pot domain. Laboratory only:
++ * not accepted for the dynamic ISR path until measured there. */
++static const struct {float base; F logratio;} pool_exp_rows[19]={
++ {0x1.9000000000000p+6f,{0x1.549a780000000p+2f,0x1.2f346e0000000p-24f}},
++ {0x1.b851ec0000000p-2f,{0x1.b9a1dc0000000p+1f,0x1.25d3740000000p-24f}},
++ {0x1.b333340000000p-1f,{0x1.e8e3020000000p+1f,-0x1.02ed460000000p-24f}},
++ {0x1.0400000000000p+7f,{0x1.4caffc0000000p+0f,0x1.d2620e0000000p-26f}},
++ {0x1.2c00000000000p+8f,{0x1.de54e40000000p+1f,-0x1.9e82cc0000000p-24f}},
++ {0x1.9000000000000p+5f,{0x1.b22ca60000000p-1f,-0x1.7d892c0000000p-26f}},
++ {0x1.4000000000000p+6f,{0x1.416e7a0000000p+2f,-0x1.2f47a60000000p-23f}},
++ {0x1.4000000000000p+6f,{0x1.49a7840000000p-1f,0x1.79a3720000000p-26f}},
++ {0x1.1800000000000p+6f,{0x1.3e56180000000p+2f,0x1.f670240000000p-25f}},
++ {0x1.b800000000000p+6f,{0x1.418d4e0000000p-1f,-0x1.9e7fd20000000p-27f}},
++ {0x1.e000000000000p+5f,{0x1.43c4ea0000000p+2f,-0x1.8fe3fc0000000p-25f}},
++ {0x1.2c00000000000p+7f,{0x1.0000000000000p+0f,0x0.0p+0f}},
++ {0x1.4500000000000p+9f,{0x1.1b5ecc0000000p+0f,0x1.69ab920000000p-25f}},
++ {0x1.e000000000000p+6f,{0x1.8789d40000000p+1f,-0x1.8fe3fc0000000p-25f}},
++ {0x1.4000000000000p+4f,{0x1.7a0a7e0000000p+2f,0x1.b498220000000p-23f}},
++ {0x1.e000000000000p+3f,{0x1.149a780000000p+2f,0x1.2f346e0000000p-24f}},
++ {0x1.9000000000000p+6f,{0x1.3a0a7e0000000p+2f,0x1.b498220000000p-23f}},
++ {0x1.0000000000000p-2f,{0x1.0000000000000p+2f,0x0.0p+0f}},
++ {0x1.e000000000000p+4f,{0x1.2f2a720000000p+2f,-0x1.9e82cc0000000p-24f}},
++};
++static const F pool_exp_anchor[8]={
++ {0x1.0000000000000p+0f,0x0.0p+0f},
++ {0x1.172b840000000p+0f,-0x1.c157420000000p-27f},
++ {0x1.306fe00000000p+0f,0x1.4636e20000000p-25f},
++ {0x1.4bfdae0000000p+0f,-0x1.593abc0000000p-25f},
++ {0x1.6a09e60000000p+0f,0x1.9fcef40000000p-26f},
++ {0x1.8ace540000000p+0f,0x1.15506e0000000p-27f},
++ {0x1.ae89fa0000000p+0f,-0x1.a94b140000000p-26f},
++ {0x1.d5818e0000000p+0f,-0x1.822dbc0000000p-27f},
++};
++float x0x_pot_exp_value(unsigned row,unsigned pot){
++ const F x=mul(f((float)pot/127.f),pool_exp_rows[row].logratio);
++ const unsigned q=(unsigned)(x.h*8.f+.5f);
++ const F r=mul(add(x,f(-(float)q*.125f)),(F){0x1.62e430p-1f,-0x1.05c611p-29f});
++ const float p=rd(mul(pool_exp_anchor[q&7u],eval(r,ex,6)))*((U){.u=((q>>3)+127u)<<23}).f;
++ return pool_exp_rows[row].base*p;
++}
++#endif
