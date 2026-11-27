@@ -1,0 +1,720 @@
+--- a/firmware/src/dsp/s1c/s1c.c
++++ b/firmware/src/dsp/s1c/s1c.c
+@@ -483,7 +483,7 @@
+ #if S1C_KR > 1
+ /* Cheap voice: pitch, LFO, key-tracking and filter coefficients at control rate (every S1C_KR
+  * samples), sines from a 256-point table, the filter envelope still per sample in the cutoff. */
+-volatile uint32_t lab_sub_skip[2];
++volatile uint8_t lab_s1_voice_seen;
+ static float voice_run_kr(s1c *s, s1c_voice *v)
+ {
+     int mono = P(MONO) > 0.0f, ft = (int)P(FTYPE);
+@@ -536,16 +536,10 @@
+     float o1 = morph(&v->ph[0], v->kd1, v->ki1, P(I1), bl) * v->vamp * P(VOL1);
+     float o2 = morph(&v->ph[1], v->kd2, v->ki2, P(I2), bl) * v->vamp * P(VOL2);
+     float y = (1.0f - v->kbal) * o1 + v->kbal * o2;
+-    const float sublev=P(SUBV);
+-    const uint32_t subphase=v->ph[2];
+-    v->ph[2]+=v->kis; /* keep phase warm at zero effective sub */
+-    const s1c_fb voicesum={.f=y},subword={.f=sublev};
+-    const unsigned mag=voicesum.u&0x7fffffffu;
+-    ++lab_sub_skip[0];
+-    if((subword.u&0x7fffffffu)!=0u || mag-0x00800000u>=0x7f000000u){
+-        const float sub=sine_t(subphase);
+-        y+=P(SUBSQ)!=0.0f ? (sub>0.0f?sublev:-sublev) : sub*v->vamp*sublev*3.0f;
+-    } else ++lab_sub_skip[1];
++    lab_s1_voice_seen=1; /* latch real use of voice kernel */
++    float sub = sine_t(v->ph[2]);
++    v->ph[2] += v->kis;
++    y += P(SUBSQ) != 0.0f ? (sub > 0.0f ? P(SUBV) : -P(SUBV)) : sub * v->vamp * P(SUBV) * 3.0f;
+     if (P(FMV) != 0.0f) {
+         float mod = sine_t(v->mph) * v->kff * v->kidx;
+         v->mph += v->kif;
+@@ -1103,141 +1097,65 @@
+ #define ENV_GET(q, i) s->env[q][i]
+ #endif
+ 
+-#include "revsc-proto.inc"
+-void s1c_render(s1c *s, float *outl, float *outr, unsigned n)
+-{
+-    unsigned f, i;
+-#if X0X_S1_DELAY_HISTORY_NATIVE
+-    /* Existing boot/inactive paths may render before FX is attached. The
+-     * real fixed-arena device binds before audio; keep a dry fallback. */
+-    if(s->pool && s->pool_bytes>=60){
+-        if(!s->ddec){
+-            uint32_t mix;
+-            __builtin_memcpy(&mix, &s->t[RVMIX], sizeof mix);
+-            /* attach cleared the whole shared room arena. Adopt only on
+-             * first partition of the immutable authored program, not on
+-             * live mix/enable/delay edits. Floats here use canonical [0,1]. */
+-            if(mix && mix<=0x3f800000u && s->rv.fb==-1.f && s->t[DLON]==0.f && s->t[RVON]!=0.f)
+-                s->rv.fb=-2.f;
+-            dly_partition(s);
+-        }else dly_regrid(s);
+-    }
+-#endif
+-#if !S1C_BUSFX && S1C_RVB && S1C_RVB_DEC > 1
+-    const int room8=s->rv.fb==-2.f;
+-    const unsigned rvdec=room8?7u:S1C_RVB_DEC;
+-    const float rvi=room8?(1.f/7.f):(1.f/S1C_RVB_DEC);
+-#endif
+-    int mono = s->t[MONO] > 0.0f;
+-    if (mono) { if (s->v[0].stage == 2 && s->v[0].amp < 0.01f) voice_clear(&s->v[0]); }
+-    else for (i = 0; i < S1C_VOICES; i++) if (s->v[i].stage == 2 && s->v[i].amp < 0.01f) voice_clear(&s->v[i]);
+-    float c2 = s->port_c2, c1 = 1.0f - c2;
+-    param_dirty(s);
+-    s1c_cc cm, cr, cw;   /* compressor parameters are not smoothed: coefficients once per block */
+-    comp_coef(&cm, P(CMR), P(CMT), P(CMA), P(CMREL), s->sr);
+-#if !S1C_BUSFX
+-#if !S1C_NO_RVCOMP
+-    comp_coef(&cr, P(CRR), P(CRT), P(CRA), P(CRREL), s->sr);
+-    comp_coef(&cw, P(CWR), P(CWT), P(CWA), P(CWREL), s->sr);
+-#endif
+-#endif
+-    (void)cr; (void)cw;
+-#if S1C_FAST && S1C_CSM && S1C_NO_SEQ
+-    /* Shared arp/lock ingress still runs outside this render span. A lane
+-     * whose rounded recurrence already equals its current word remains
+-     * fixed through this span, including sign bit on zero. */
+-    float port_target[sizeof s1c_smid];
+-    uint8_t port_id[sizeof s1c_smid];
+-    unsigned port_n=0;
+-    for(i=0;i<sizeof s1c_smid;i++){
+-        const float t=c1*s->t[s1c_smid[i]];
+-        const s1c_fb cur={.f=s->c[i]}, next={.f=t+c2*cur.f};
+-        if(next.u!=cur.u){
+-            port_target[port_n]=t;
+-            port_id[port_n++]=(uint8_t)i;
+-        }
+-    }
++#include "revsc-thread.inc"
++#include "../../app/plat.h"
++#ifndef DNBOX_NATIVE_WET_TILE_WITNESS
++#error Disposable-emulator witness must be explicitly enabled
++#endif
++/* Only the caller on Core 0 and its single delegated consumer are admitted.
++ * Payload and immutable header may be read from Core 0 stack, but all
++ * consumer acknowledgments are outside that protected stack. */
++static volatile uint32_t wet_ready[2];
++volatile uint32_t lab_wet_native[6]; /* grants, local spans, helper tiles, fault, local tiles, offers */
++static s1c *volatile wet_exact_owner;
++static volatile uint32_t wet_seq,wet_offer,wet_request,wet_start;
++static volatile uint8_t wet_phase; /* 0 offer, 1 grant, 2 done; one writer per phase */
++void s1_diagnostic_tile_owner(s1c *s) { wet_exact_owner=s; }
++
++#if !X0X_S1_DELAY_HISTORY_NATIVE || !S1C_NO_SEQ || !S1C_FAST || !S1C_CSM || !S1C_RVB || S1C_NO_RVCOMP || S1C_BUSFX || S1C_HFR
++#error Requires pinned guarded native Synth One owner config
+ #endif
+-    for (f = 0; f < n; f++) {
+-#if S1C_FAST
+-        int cu = (f & 3) == 0;
+-#if S1C_CSM
+-#if S1C_NO_SEQ
++static inline unsigned wet_owns(unsigned i){return (i<32u ? (0xa2000000u>>i) : (0x41fu>>(i-32u)))&1u;}
++typedef struct {float l,r,verb_scale;} s1_tile_sample;
++typedef struct {
++ s1_tile_sample samples[16];
++ float cut[2];
++} s1_wet_slot;
++typedef struct {
++ s1c *engine;
++ float *outl,*outr;
++ unsigned n,port_n,rvdec;
++ int room8;
++ float c2,rvi,sr,ftype,dict,crg,cmg,cwg,rvfb;
++ s1c_cc cm,cr,cw;
++ float port_target[9];
++ uint8_t port_id[9];
++} s1_wet_header;
++unsigned s1_thread_runs,s1_inline_runs,s1_outstanding, s1_header_size=sizeof(s1_wet_header),s1_slot_size=sizeof(s1_wet_slot);
++typedef struct {s1_wet_header header;s1_wet_slot slots[2];} s1_wet_job;
++static const s1_wet_job *volatile wet_current;
++_Static_assert(sizeof(s1_tile_sample)==12,"packed sample");
++static __attribute__((noinline,minsize)) void consume_tile(const s1_wet_header *h,const s1_wet_slot *slot,unsigned first){
++    s1c *s=h->engine;
++    float *outl=h->outl,*outr=h->outr;
++    const unsigned last=first+16u<h->n?first+16u:h->n;
++    const unsigned port_n=h->port_n,rvdec=h->rvdec;
++    const int room8=h->room8;
++    const float *port_target=h->port_target;
++    const uint8_t *port_id=h->port_id;
++    const float c2=h->c2,rvi=h->rvi;
++    const s1c_cc cm=h->cm,cr=h->cr,cw=h->cw;
++    unsigned f,i;
++        for(f=first;f<last;f++){
++        const unsigned t=f-first;
+         for(i=0;i<port_n;i++){
+             const unsigned id=port_id[i];
+             s->c[id]=port_target[i]+c2*s->c[id];
+         }
+-#else
+-        for (i = 0; i < (int)sizeof s1c_smid; i++) s->c[i] = c1 * s->t[s1c_smid[i]] + c2 * s->c[i];
+-#endif
+-#else
+-        for (i = 0; i < s1c_nsm; i++) { unsigned q = s1c_sm[i]; s->c[q] = c1 * s->t[q] + c2 * s->c[q]; }
+-#endif
+-#else
+-        for (i = 0; i < 150; i++) if (smoothed(i)) s->c[i] = c1 * s->t[i] + c2 * s->c[i];
+-#endif
+-        float gh = P(GLIDE);
+-        if (gh != s->glide_h) { s->glide_h = gh; s->glide_c2 = gh > 0.0f ? powf(0.5f, 1.0f / (s->sr * gh)) : 0.0f; }
+-        s->monos = (1.0f - s->glide_c2) * s->monof + s->glide_c2 * s->monos;
+-        if (P(MONO) != (float)s->mono_prev) {
+-            voice_mode_reset(s, (uint8_t)P(MONO));
+-        }
+-        /* LFOs */
+-        float x;
+-        float lc2 = s->lfo_c2;
+-        s1u_lfo_tick(&s->lfo[0], P(L1R), (int)P(L1I), P(L1A), lc2, s->sr);
+-        s1u_lfo_tick(&s->lfo[1], P(L2R), (int)P(L2I), P(L2A), lc2, s->sr);
+-#if !S1C_NO_SEQ
+-        sequencer(s);
+-#endif
+-        float y = 0.0f;
+-        if (P(MONO) > 0.0f) { if (s->v[0].root != -1 && s->v[0].stage) y = voice_run(s, &s->v[0]); }
+-        else for (i = 0; i < S1C_VOICES; i++) if (s->v[i].root != -1 && s->v[i].stage) y += voice_run(s, &s->v[i]);
+-
+-        /* bitcrush (sample-and-hold), tremolo */
+-#if defined(X0X_S1_CRUSH_LFO_PROBE) && X0X_S1_CRUSH_LFO_PROBE
+-        float crush_route = P(LBC);
+-        if (crush_route==1.f || crush_route==2.f || crush_route==3.f) {
+-            /* The original clock is consumed only on capture. Evaluate the
+-             * effective per-sample rate at that same sample, not at a prior
+-             * control tick. Keep the original binary32 add/subtract order. */
+-            s1u_crush *cr = &s->crush;
+-            if (cr->idx <= cr->n) {
+-#ifdef X0X_HOST
+-                float bsr = (float)log2(P(BCSR)) + 4.0f*lfo01(s,crush_route);
+-                s1u_crush_clock(cr,clampf((float)exp2(bsr),2048.0f,48000.0f),s->sr);
+-#else
+-                float bsr = log2f(P(BCSR)) + 4.0f*lfo01(s,crush_route);
+-                s1u_crush_clock(cr,clampf(exp2f(bsr),2048.0f,48000.0f),s->sr);
+-#endif
+-                cr->v = y;
+-                cr->idx += cr->inc;
+-                cr->idx -= cr->n;
+-                cr->n = 0.f;
+-            } else y = cr->v;
+-            cr->n += 1.f;
+-        } else
+-#endif
+-        {
+-#if S1C_FAST
+-        if ((f & 7) == 0)
+-#endif
+-        {
+-            float bsr = log2f(P(BCSR)) + 4.0f * lfo01(s, P(LBC));
+-            s1u_crush_clock(&s->crush, clampf(exp2f(bsr), 2048.0f, 48000.0f), s->sr);
+-        }
+-        y = s1u_crush_run(&s->crush, y);
+-        }
+-        y *= lfo10(s, P(LTREM));
+-        /* autopan, equal power */
+-        float L, R;
+-#if defined(X0X_S1_AUTOPAN_PROBE) && X0X_S1_AUTOPAN_PROBE
+-        if(s->pan_authored) s1u_autopan_authored(&s->pan_ph, y, P(PANF), P(PANA), s->sr, &L, &R);
+-        else
+-#endif
+-        s1u_autopan(&s->pan_ph, y, P(PANF), P(PANA), s->sr, &L, &R);
+-        /* phaser */
+-        s1u_phaser_run(&s->ph, &L, &R, P(PHMIX), P(PHRATE), P(PHW), P(PHFB), s->sr);
++        float L=slot->samples[t].l,R=slot->samples[t].r;
++        const int cu=(f&3u)==0;
++#define S1_WET(k,v) (v)
++#define S1_WET2(k,v) (v)
+ #if !S1C_BUSFX
+         /* ping-pong delay with tracking low-pass on its input */
+ #if X0X_S1_DELAY_HISTORY_NATIVE
+@@ -1245,12 +1163,12 @@
+         if(s->ddec>0) {
+ #endif
+         float dL = L, dR = R;
+-        if (P(FTYPE) == 0.0f) {
++        if (h->ftype == 0.0f) {
+ #if S1C_FAST
+             if ((f & 7) == 0) {
+-                float pv = clampf(log2f(P(CUT)), 10.0f, 14.4284f);
+-                float pc = 1.0f + (pv - 10.0f) * (1.0f / 4.4284f) * (P(DICT) - 1.0f);
+-                float x = clampf(P(CUT) * pc, 64.0f, 22050.0f) * (2.0f / s->sr);
++                float pv = clampf(log2f(S1_WET(CUT,slot->cut[t>>3])), 10.0f, 14.4284f);
++                float pc = 1.0f + (pv - 10.0f) * (1.0f / 4.4284f) * (h->dict - 1.0f);
++                float x = clampf(S1_WET(CUT,slot->cut[t>>3]) * pc, 64.0f, 22050.0f) * (2.0f / h->sr);
+                 x = x > 1.0f ? 1.0f : x;
+                 s->dl_fc = ladder_a(x);     /* the ladder coefficient, not Hz */
+             }
+@@ -1260,11 +1178,11 @@
+             dL = ladder(s->dlp[0], L, s->dl_fc, 0.0f);
+             dR = ladder(s->dlp[1], R, s->dl_fc, 0.0f);
+ #else
+-            float pv = clampf(log2f(P(CUT)), 10.0f, 14.4284f);
+-            float pc = 1.0f + (pv - 10.0f) * (1.0f / 4.4284f) * (P(DICT) - 1.0f);
+-            float fc = clampf(P(CUT) * pc, 64.0f, 22050.0f);
+-            dL = moog(s->dlp[0], L, fc, 0.0f, s->sr);
+-            dR = moog(s->dlp[1], R, fc, 0.0f, s->sr);
++            float pv = clampf(log2f(S1_WET(CUT,slot->cut[t>>3])), 10.0f, 14.4284f);
++            float pc = 1.0f + (pv - 10.0f) * (1.0f / 4.4284f) * (h->dict - 1.0f);
++            float fc = clampf(S1_WET(CUT,slot->cut[t>>3]) * pc, 64.0f, 22050.0f);
++            dL = moog(s->dlp[0], L, fc, 0.0f, h->sr);
++            dR = moog(s->dlp[1], R, fc, 0.0f, h->sr);
+ #endif
+         }
+ #ifdef S1C_OPT_A
+@@ -1283,12 +1201,12 @@
+             #ifdef S1C_ADPCM
+             #if S1C_DLMONO     /* no autopan and no phaser: L and R delay inputs are identical, line B == line A */
+             s->dmono = s->t[PANA] == 0.0f && s->t[PHMIX] == 0.0f;
+-            float need = (s->dmono ? 3.0f : (float)S1C_DLN) * s->t[DLT] * s->sr * s->t[DLON] * s1c_dlbytes[s1c_dlfmt];
++            float need = (s->dmono ? 3.0f : (float)S1C_DLN) * s->t[DLT] * h->sr * s->t[DLON] * s1c_dlbytes[s1c_dlfmt];
+ #else
+-            float need = S1C_DLN * s->t[DLT] * s->sr * s->t[DLON] * s1c_dlbytes[s1c_dlfmt];
++            float need = S1C_DLN * s->t[DLT] * h->sr * s->t[DLON] * s1c_dlbytes[s1c_dlfmt];
+ #endif
+ #else
+-            float need = 6.0f * s->t[DLT] * s->sr * s->t[DLON] * S1C_DLB;
++            float need = 6.0f * s->t[DLT] * h->sr * s->t[DLON] * S1C_DLB;
+ #endif
+             int want = (int)(need / cap) + 1; if (want > 256) want = 256;
+             s->ddec = want;
+@@ -1305,7 +1223,7 @@
+ #define S1C_DL_WET 1.0f
+ #endif
+         /* compact lines lose level per repeat (decimation, interpolation): feedback and wet trim, by ear */
+-        float T = P(DLT) * s->sr / (float)dd, fbk = P(DLFB) * (1.0f + S1C_DL_FBK * (float)(dd > 1)), oL, oRR;
++        float T = P(DLT) * h->sr / (float)dd, fbk = P(DLFB) * (1.0f + S1C_DL_FBK * (float)(dd > 1)), oL, oRR;
+         if (fbk > S1C_DL_FBMAX) fbk = S1C_DL_FBMAX;
+ #if defined(X0X_S1_FEEDBACK_PROBE) && X0X_S1_FEEDBACK_PROBE
+         if(s->delay_feedback_direct)fbk=P(DLFB);
+@@ -1313,12 +1231,12 @@
+         if (dd > 1) {
+         /* lines run at sr / S1C_DLY_DEC: box-filtered input, linearly interpolated output */
+ #if S1C_DLAA
+-        if (s->aa_dd != dd) { s->aa_dd = dd; bq_lp(&s->aa, S1C_DLAA * 0.01f * s->sr / (float)dd, s->sr); }
++        if (s->aa_dd != dd) { s->aa_dd = dd; bq_lp(&s->aa, S1C_DLAA * 0.01f * h->sr / (float)dd, h->sr); }
+         dL = bq_run(&s->aa, s->zaa[0], dL); dR = bq_run(&s->aa, s->zaa[1], dR);
+ #endif
+         s->da[0] += dL; s->da[1] += dR;
+ #if S1C_HFR
+-        if (s->dd_set != dd) { s->dd_set = dd; bq_hp(&s->hd, S1C_HFR_FC * s->sr / (float)dd, s->sr); s->hd_norm = bq_norm(s, &s->hd);
++        if (s->dd_set != dd) { s->dd_set = dd; bq_hp(&s->hd, S1C_HFR_FC * h->sr / (float)dd, h->sr); s->hd_norm = bq_norm(s, &s->hd);
+ #if S1C_EXT
+                                s->e_eb = S1C_EXT_EB;
+ #else
+@@ -1430,7 +1348,7 @@
+         oRR = dl_tick(&s->dl[3], oR, T, fbk) + oF;
+ #endif
+         }
+-        float dm = P(DLMIX) * P(DLON);
++        float dm = P(DLMIX)*P(DLON);
+         if (dd > 1) { oL *= S1C_DL_WET; oRR *= S1C_DL_WET; }
+ #if X0X_S1_DELAY_HISTORY_NATIVE
+         mL=(1.f-dm)*L+dm*oL; mR=(1.f-dm)*R+dm*oRR;
+@@ -1441,16 +1359,16 @@
+         /* reverb: high-pass, pre-gain, input compressor, network, wet compressor */
+ #if S1C_FAST
+         if ((f & 7) == 0) {
+-            float cc = tanf(3.14159265f * P(RVHP) / s->sr), a1 = 1.0f / (1.0f + 1.41421356f * cc + cc * cc);
++            float cc = tanf(3.14159265f * P(RVHP) / h->sr), a1 = 1.0f / (1.0f + 1.41421356f * cc + cc * cc);
+             s->hpk[0] = a1; s->hpk[1] = 2.0f * (cc * cc - 1.0f) * a1; s->hpk[2] = (1.0f - 1.41421356f * cc + cc * cc) * a1;
+         }
+         float hl, hr;
+         hl = hp2(s->hp_y[0], mL, s->hpk[0] * 2.0f, s->hpk[1], s->hpk[2]); hr = hp2(s->hp_y[1], mR, s->hpk[0] * 2.0f, s->hpk[1], s->hpk[2]);
+ #else
+-        float hl = buthp(s->hp_y[0], mL, P(RVHP), s->sr) * 2.0f, hr = buthp(s->hp_y[1], mR, P(RVHP), s->sr) * 2.0f;
++        float hl = buthp(s->hp_y[0], mL, P(RVHP), h->sr) * 2.0f, hr = buthp(s->hp_y[1], mR, P(RVHP), h->sr) * 2.0f;
+ #endif
+ #if !S1C_NO_RVCOMP
+-        hl = comp(s->cmp[1][0], hl, &cr) * P(CRG); hr = comp(s->cmp[1][1], hr, &cr) * P(CRG);
++        hl = comp(s->cmp[1][0], hl, &cr) * h->crg; hr = comp(s->cmp[1][1], hr, &cr) * h->crg;
+ #endif
+         float wl, wr;
+ #if S1C_RVB
+@@ -1459,8 +1377,8 @@
+         if (++s->rk>=rvdec) {
+             s->rk=0;s->r0[0]=s->r1[0];s->r0[1]=s->r1[1];
+             float l=s->ra[0]*rvi,r=s->ra[1]*rvi;
+-            if(room8)rv8(s,l,r,&s->r1[0],&s->r1[1]);
+-            else rvb_compact(s,l,r,&s->r1[0],&s->r1[1]);
++            if(room8)rv8(s,l,r,&s->r1[0],&s->r1[1],h->rvfb);
++            else s1u_rvb_run(&s->rv,h->rvfb,l,r,&s->r1[0],&s->r1[1],h->sr/(float)S1C_RVB_DEC);
+             s->ra[0]=s->ra[1]=0.f;
+         }
+         float u=(float)s->rk*rvi;
+@@ -1473,10 +1391,10 @@
+         reverb(s, hl, hr, &wl, &wr);
+ #endif
+ #if S1C_HFR && S1C_RVB_DEC > 1 && S1C_HFR_RV
+-        if (s->rvb_fbt != s->t[RVFB] || s->hr_norm == 0.0f) {
+-            float fb = s->t[RVFB]; s->rvb_fbt = fb;
+-            s->rt_a = fb > 0.0f ? powf(fb, 2.0f / (FITV(s)[1] * 0.068390f * s->sr)) : 0.0f;
+-            bq_hp(&s->hr, S1C_HFR_FC * s->sr / (float)S1C_RVB_DEC, s->sr); s->hr_norm = bq_norm(s, &s->hr);
++        if (s->rvb_fbt != h->rvfb || s->hr_norm == 0.0f) {
++            float fb = h->rvfb; s->rvb_fbt = fb;
++            s->rt_a = fb > 0.0f ? powf(fb, 2.0f / (FITV(s)[1] * 0.068390f * h->sr)) : 0.0f;
++            bq_hp(&s->hr, S1C_HFR_FC * h->sr / (float)S1C_RVB_DEC, h->sr); s->hr_norm = bq_norm(s, &s->hr);
+         }
+         { float a = s->rt_a, b = 1.0f - a;
+           float xl = bq_run(&s->hr, s->zra[0], hl), xr = bq_run(&s->hr, s->zra[1], hr);
+@@ -1486,18 +1404,18 @@
+           wl += g * bq_run(&s->hr, s->zrs[0], hfr_noise(s)); wr += g * bq_run(&s->hr, s->zrs[1], hfr_noise(s)); }
+ #endif
+ #if !S1C_NO_RVCOMP
+-        wl = comp(s->cmp[2][0], wl, &cw) * P(CWG); wr = comp(s->cmp[2][1], wr, &cw) * P(CWG);
++        wl = comp(s->cmp[2][0], wl, &cw) * h->cwg; wr = comp(s->cmp[2][1], wr, &cw) * h->cwg;
+ #endif
+-        float rm = P(RVMIX) * P(RVON) * lfo10(s, P(LRVMIX));
++        float rm = P(RVMIX)*P(RVON)*S1_WET2(lfo10(s,P(LRVMIX)),slot->samples[t].verb_scale);
+         L = ((1.0f - rm) * mL + rm * wl) * 2.0f * P(MVOL);
+         R = ((1.0f - rm) * mR + rm * wr) * 2.0f * P(MVOL);
+ #else
+         /* device: delay and reverb are the shared bus; the part glue reads these send levels */
+-        s->send_dly = P(DLMIX) * P(DLON);
+-        s->send_rev = P(RVMIX) * P(RVON) * lfo10(s, P(LRVMIX));
++        s->send_dly = P(DLMIX)*P(DLON);
++        s->send_rev = P(RVMIX)*P(RVON)*S1_WET2(lfo10(s,P(LRVMIX)),slot->samples[t].verb_scale);
+         L *= 2.0f * P(MVOL); R *= 2.0f * P(MVOL);
+ #endif
+-        L = comp(s->cmp[0][0], L, &cm) * P(CMG); R = comp(s->cmp[0][1], R, &cm) * P(CMG);
++        L = comp(s->cmp[0][0], L, &cm) * h->cmg; R = comp(s->cmp[0][1], R, &cm) * h->cmg;
+         /* Source WIDEN: one postmaster right delay, unconditionally clocked. */
+         uint16_t *history=s->wid.buf;
+         const unsigned pos=(unsigned)s->wpos;
+@@ -1508,4 +1426,205 @@
+         R=widen*delayed+(1.f-widen)*R;
+         outl[f] = L; outr[f] = R;
+     }
++#undef S1_WET
++#undef S1_WET2
++}
++/* Core 0 only, from the existing ordered-mix wait. The producer owns all
++ * wet history until it acknowledges this same offer between whole tiles. */
++__attribute__((noinline,minsize)) void s1_diagnostic_try_wet(void)
++{
++    const uint32_t seq=wet_offer;
++    if(!seq || wet_request==seq)return;
++    wet_request=seq;
++    while(wet_offer==seq && !wet_phase && plat_cpu2_busy()>0)
++        plat_cpu2_sync();
++    if(wet_offer!=seq || wet_phase!=1)return;
++    plat_cpu2_sync();
++    const s1_wet_job *j=wet_current;
++    const unsigned n=j->header.n;
++    for(unsigned f=wet_start;f<n;f+=16u){
++        const unsigned q=(f>>4)&1u;
++        while(!wet_ready[q]){
++            if(plat_cpu2_busy()<=0){++lab_wet_native[3];return;}
++            plat_cpu2_sync();
++        }
++        plat_cpu2_sync();
++        consume_tile(&j->header,&j->slots[q],f);
++        ++lab_wet_native[2];
++        plat_cpu2_sync();
++        wet_ready[q]=0;
++        plat_cpu2_sync();
++    }
++    wet_phase=2;plat_cpu2_sync();
++}
++__attribute__((minsize)) void s1c_render(s1c *s, float *outl, float *outr, unsigned n)
++{
++    unsigned f, i;
++#if X0X_S1_DELAY_HISTORY_NATIVE
++    /* Existing boot/inactive paths may render before FX is attached. The
++     * real fixed-arena device binds before audio; keep a dry fallback. */
++    if(s->pool && s->pool_bytes>=60){
++        if(!s->ddec){
++            uint32_t mix;
++            __builtin_memcpy(&mix, &s->t[RVMIX], sizeof mix);
++            /* attach cleared the whole shared room arena. Adopt only on
++             * first partition of the immutable authored program, not on
++             * live mix/enable/delay edits. Floats here use canonical [0,1]. */
++            if(mix && mix<=0x3f800000u && s->rv.fb==-1.f && s->t[DLON]==0.f && s->t[RVON]!=0.f)
++                s->rv.fb=-2.f;
++            dly_partition(s);
++        }else dly_regrid(s);
++    }
++#endif
++#if !S1C_BUSFX && S1C_RVB && S1C_RVB_DEC > 1
++    const int room8=s->rv.fb==-2.f;
++    const unsigned rvdec=room8?7u:S1C_RVB_DEC;
++    const float rvi=room8?(1.f/7.f):(1.f/S1C_RVB_DEC);
++#endif
++    int mono = s->t[MONO] > 0.0f;
++    if (mono) { if (s->v[0].stage == 2 && s->v[0].amp < 0.01f) voice_clear(&s->v[0]); }
++    else for (i = 0; i < S1C_VOICES; i++) if (s->v[i].stage == 2 && s->v[i].amp < 0.01f) voice_clear(&s->v[i]);
++    float c2 = s->port_c2, c1 = 1.0f - c2;
++    param_dirty(s);
++    s1_wet_job j;
++    s1_wet_header *h=&j.header;
++    h->engine=s;h->outl=outl;h->outr=outr;h->n=n;h->rvdec=rvdec;h->room8=room8;
++    h->c2=c2;h->rvi=rvi;h->sr=s->sr;h->ftype=P(FTYPE);h->dict=P(DICT);
++    h->crg=P(CRG);h->cmg=P(CMG);h->cwg=P(CWG);h->rvfb=s->t[RVFB];
++    comp_coef(&h->cm,P(CMR),P(CMT),P(CMA),P(CMREL),s->sr);
++    comp_coef(&h->cr,P(CRR),P(CRT),P(CRA),P(CRREL),s->sr);
++    comp_coef(&h->cw,P(CWR),P(CWT),P(CWA),P(CWREL),s->sr);
++    float port_target[sizeof s1c_smid-9];
++    uint8_t port_id[sizeof s1c_smid-9];
++    unsigned port_n=0,wn=0;
++    for(i=0;i<sizeof s1c_smid;i++){
++        const float t=c1*s->t[s1c_smid[i]];
++        const s1c_fb cur={.f=s->c[i]},next={.f=t+c2*cur.f};
++        if(next.u!=cur.u){
++            if(wet_owns(i)){h->port_target[wn]=t;h->port_id[wn++]=(uint8_t)i;}
++            else {port_target[port_n]=t;port_id[port_n++]=(uint8_t)i;}
++        }
++    }
++    h->port_n=wn;
++    uint32_t seq=0;
++    if(wet_exact_owner==s && n>=32u){
++        wet_ready[0]=wet_ready[1]=0;
++        wet_current=&j;
++        wet_phase=0;
++        seq=++wet_seq;
++        if(!seq)seq=++wet_seq;
++        plat_cpu2_sync();
++        wet_offer=seq;
++        plat_cpu2_sync();
++    }
++    int concurrent=0;
++    for(unsigned first=0;first<n;first+=16u){
++        s1_wet_slot *slot=&j.slots[(first>>4)&1u];
++        const unsigned qi=(first>>4)&1u;
++        if(!concurrent && seq && first && wet_request==seq){
++            wet_start=first;
++            plat_cpu2_sync();
++            wet_phase=1;plat_cpu2_sync();
++            concurrent=1;++lab_wet_native[0];
++        }
++        if(concurrent){while(wet_ready[qi])plat_cpu2_sync();plat_cpu2_sync();}
++        const unsigned last=first+16<n?first+16:n;
++        for(f=first;f<last;f++){
++#if S1C_FAST
++        int cu = (f & 3) == 0;
++#if S1C_CSM
++#if S1C_NO_SEQ
++        for(i=0;i<port_n;i++){
++            const unsigned id=port_id[i];
++            s->c[id]=port_target[i]+c2*s->c[id];
++        }
++#else
++        for (i = 0; i < (int)sizeof s1c_smid; i++) s->c[i] = c1 * s->t[s1c_smid[i]] + c2 * s->c[i];
++#endif
++#else
++        for (i = 0; i < s1c_nsm; i++) { unsigned q = s1c_sm[i]; s->c[q] = c1 * s->t[q] + c2 * s->c[q]; }
++#endif
++#else
++        for (i = 0; i < 150; i++) if (smoothed(i)) s->c[i] = c1 * s->t[i] + c2 * s->c[i];
++#endif
++        float gh = P(GLIDE);
++        if (gh != s->glide_h) { s->glide_h = gh; s->glide_c2 = gh > 0.0f ? powf(0.5f, 1.0f / (s->sr * gh)) : 0.0f; }
++        s->monos = (1.0f - s->glide_c2) * s->monof + s->glide_c2 * s->monos;
++        if (P(MONO) != (float)s->mono_prev) {
++            voice_mode_reset(s, (uint8_t)P(MONO));
++        }
++        /* LFOs */
++        float x;
++        float lc2 = s->lfo_c2;
++        s1u_lfo_tick(&s->lfo[0], P(L1R), (int)P(L1I), P(L1A), lc2, s->sr);
++        s1u_lfo_tick(&s->lfo[1], P(L2R), (int)P(L2I), P(L2A), lc2, s->sr);
++#if !S1C_NO_SEQ
++        sequencer(s);
++#endif
++        float y = 0.0f;
++        if (P(MONO) > 0.0f) { if (s->v[0].root != -1 && s->v[0].stage) y = voice_run(s, &s->v[0]); }
++        else for (i = 0; i < S1C_VOICES; i++) if (s->v[i].root != -1 && s->v[i].stage) y += voice_run(s, &s->v[i]);
++
++        /* bitcrush (sample-and-hold), tremolo */
++#if defined(X0X_S1_CRUSH_LFO_PROBE) && X0X_S1_CRUSH_LFO_PROBE
++        float crush_route = P(LBC);
++        if (crush_route==1.f || crush_route==2.f || crush_route==3.f) {
++            /* The original clock is consumed only on capture. Evaluate the
++             * effective per-sample rate at that same sample, not at a prior
++             * control tick. Keep the original binary32 add/subtract order. */
++            s1u_crush *cr = &s->crush;
++            if (cr->idx <= cr->n) {
++#ifdef X0X_HOST
++                float bsr = (float)log2(P(BCSR)) + 4.0f*lfo01(s,crush_route);
++                s1u_crush_clock(cr,clampf((float)exp2(bsr),2048.0f,48000.0f),s->sr);
++#else
++                float bsr = log2f(P(BCSR)) + 4.0f*lfo01(s,crush_route);
++                s1u_crush_clock(cr,clampf(exp2f(bsr),2048.0f,48000.0f),s->sr);
++#endif
++                cr->v = y;
++                cr->idx += cr->inc;
++                cr->idx -= cr->n;
++                cr->n = 0.f;
++            } else y = cr->v;
++            cr->n += 1.f;
++        } else
++#endif
++        {
++#if S1C_FAST
++        if ((f & 7) == 0)
++#endif
++        {
++            float bsr = log2f(P(BCSR)) + 4.0f * lfo01(s, P(LBC));
++            s1u_crush_clock(&s->crush, clampf(exp2f(bsr), 2048.0f, 48000.0f), s->sr);
++        }
++        y = s1u_crush_run(&s->crush, y);
++        }
++        y *= lfo10(s, P(LTREM));
++        /* autopan, equal power */
++        float L, R;
++#if defined(X0X_S1_AUTOPAN_PROBE) && X0X_S1_AUTOPAN_PROBE
++        if(s->pan_authored) s1u_autopan_authored(&s->pan_ph, y, P(PANF), P(PANA), s->sr, &L, &R);
++        else
++#endif
++        s1u_autopan(&s->pan_ph, y, P(PANF), P(PANA), s->sr, &L, &R);
++        /* phaser */
++        s1u_phaser_run(&s->ph, &L, &R, P(PHMIX), P(PHRATE), P(PHW), P(PHFB), s->sr);
++        const unsigned t=f-first;
++        slot->samples[t].l=L;slot->samples[t].r=R;
++        slot->samples[t].verb_scale=lfo10(s,P(LRVMIX));
++        if(!(f&7u))slot->cut[t>>3]=P(CUT);
++        }
++
++        if(concurrent){
++            plat_cpu2_sync();
++            wet_ready[qi]=1;
++            plat_cpu2_sync();
++        } else consume_tile(h,slot,first);
++    }
++    if(concurrent)while(wet_phase!=2)plat_cpu2_sync();
++    if(seq){
++        plat_cpu2_sync(); wet_offer=0;
++        plat_cpu2_sync(); wet_current=0;
++    }
+ }
++
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -3075,6 +3075,10 @@
+         eng_sync();
+         if (eng_stage >= s)
+             return 0;
++        if(s==3u && eng_c1_mask==(1u<<JB_A) && original_bass[1].kind==ORIGINAL_SOUND_CHICAGO){
++            extern void s1_diagnostic_try_wet(void);
++            s1_diagnostic_try_wet();
++        }
+         if (plat_cpu2_busy() <= 0 || plat_ticks24() - t0 > 24000u * 24u) {
+             c1_take_over(s);                             /* failed, or the host: run its jobs here */
+             return eng_stage >= s ? 0 : 1;
+@@ -4048,6 +4052,10 @@
+ 
+ X0X_COLD void engine_init(pattern_t *patterns, song_t *song, lane_t *lanes, const sound_t *base)
+ {
++    /* Diagnostic A render owner address is fixed even when its union changes.
++     * A caller on Core 0 self-consumes unless an actual helper requests a tile. */
++    extern void s1_diagnostic_tile_owner(s1c *);
++    s1_diagnostic_tile_owner(&original_bass[0].dsp.synthone.e);
+ #if X0X_BASS_PRESET_PREVIEW
+     bass_named_preset[0]=bass_named_preset[1]=-1;
+     bass_preview_dirty=bass_wheel_mask=0;
+--- a/firmware/src/dsp/master.c
++++ b/firmware/src/dsp/master.c
+@@ -374,6 +374,7 @@
+         rel_in = 1.0f - m->a_rel;
+         pump_in = 1.0f - m->a_pump;
+     }
++    float env=m->env, inv_env=m->inv_env, gain=m->gain; int hold=m->hold,pos=m->la_pos;
+     for (i = 0; i < n; i++) {
+         float s = xl[i], sr = xr[i];
+         if (comp_on) {
+@@ -406,14 +407,27 @@
+              * MST_LA samples it takes to come out, and is held for them. (It used to halve the
+              * distance every sample: a step in the waveform, a click on every limited kick.) */
+             float a = fm_maxf(fm_fabsf(s), fm_fabsf(sr)), d, dr;
+-            limit_env(m, a);
+-            d = m->la[m->la_pos];
+-            dr = m->la_r[m->la_pos];
+-            m->la[m->la_pos] = s;
+-            m->la_r[m->la_pos] = sr;
+-            m->la_pos = (m->la_pos + 1) & (MST_LA - 1);   /* MST_LA: a power of two */
+-            s = soft_ceiling(d * m->gain);
+-            sr = soft_ceiling(dr * m->gain);
++            if (a >= env) {
++                env = a;
++                hold = MST_LA;
++                inv_env = a > 0.8f ? 1.0f / a : 0.0f;
++            } else if (hold) {
++                hold--;
++            } else {
++                env *= 0.99985f;
++                inv_env *= 1.0001500225f;                 /* 1 / 0.99985 */
++            }
++            {
++                float want = env > 0.8f ? 0.8f * inv_env : 1.0f;
++                gain += (want - gain) * (want < gain ? (5.0f / MST_LA) : 0.002f);
++            }
++            d = m->la[pos];
++            dr = m->la_r[pos];
++            m->la[pos] = s;
++            m->la_r[pos] = sr;
++            pos = (pos + 1) & (MST_LA - 1);   /* MST_LA: a power of two */
++            s = soft_ceiling(d * gain);
++            sr = soft_ceiling(dr * gain);
+         } else {
+             s = clamp_pm1(s);
+             sr = clamp_pm1(sr);
+@@ -421,6 +435,7 @@
+         xl[i] = s;
+         xr[i] = sr;
+     }
++    if(limit && n>0){m->env=env;m->inv_env=inv_env;m->gain=gain;m->hold=hold;m->la_pos=pos;}
+     m->vol_cur = vc;
+     m->gr_view = grmax > m->gr_view ? grmax : m->gr_view * 0.93f;   /* the meter: peak, falling */
+ }
+--- /dev/null
++++ b/firmware/src/dsp/s1c/revsc-thread.inc
+@@ -0,0 +1,52 @@
++/* Host-only experiment; room and delay now have independent histories.
++ * Step table is the existing DnBOX IMA codec table, GPL-3.0-only. */
++/* Existing target table and exact rounding primitive; stand-alone host
++ * component can instantiate a private table from the same canonical header. */
++#include "../ima_adpcm.h"
++typedef struct {
++  float y[8], interp[2][4];
++  uint16_t w[8];
++  int16_t pred[2][8];
++  uint8_t si[2][8], samples[1724];
++} rv8_owner;
++_Static_assert(sizeof(rv8_owner)<=S1C_RVB_BYTES,"independent reverb region");
++static const uint16_t rv8_lengths[8]={354,396,460,508,558,590,306,276};
++static __attribute__((noinline)) void rv8_step(unsigned c,int16_t *pred,uint8_t *index)
++{
++    int32_t p=*pred,i=*index;
++    (void)ima_decode_code(c,&p,&i);
++    *pred=(int16_t)p;*index=(uint8_t)i;
++}
++static unsigned rv8_encode(float x,int16_t *pred,uint8_t *ix){
++ x*=4096.f; int target=(int)(x< -32768.f?-32768.f:x>32767.f?32767.f:x);
++ int diff=target-*pred,k=IMA_STEP_T[*ix]; unsigned c=0;
++ if(diff<0){c=8;diff=-diff;}
++ if(diff>=k){c|=4;diff-=k;} if(diff>=k>>1){c|=2;diff-=k>>1;} if(diff>=k>>2)c|=1;
++ rv8_step(c,pred,ix); return c;
++}
++static void rv8(s1c *s,float il,float ir,float *ol,float *orr,float fb){
++ rv8_owner *q=(void *)s->rv.m; float pressure=0,l=0,r=0;
++ for(unsigned i=0;i<8;++i)pressure+=q->y[i];
++ pressure*=.25f;
++ const float taper=fb<.5f?fb*2.f:1.f, gain=fb+.29f*(1.f-fb)*taper;
++ unsigned at=0;
++ for(unsigned i=0;i<8;++i){
++  unsigned w=q->w[i], shift=(w&1u)*4u; uint8_t *n=&q->samples[at+(w>>1)];
++  rv8_step((*n>>shift)&15u,&q->pred[0][i],&q->si[0][i]);
++  float x=q->pred[0][i]*(1.f/4096.f);
++  unsigned code=rv8_encode(pressure+((i&1)?ir:il)-q->y[i],&q->pred[1][i],&q->si[1][i]);
++  *n=(uint8_t)((*n&~(15u<<shift))|(code<<shift));
++  x*=gain; x+=.171572875f*(q->y[i]-x); q->y[i]=x; if(i&1)r+=x;else l+=x;
++  q->w[i]=(uint16_t)(w+1u==rv8_lengths[i]?0:w+1u);at+=rv8_lengths[i]>>1;
++ }
++ *ol=.35f*l;*orr=.35f*r;
++}
++
++/* Four cheap one-poles suppress reconstructed multirate images, not dry. */
++static float rv8_antimage(s1c *s, unsigned channel,float input)
++{
++    rv8_owner *q=(void *)s->rv.m;
++    float *z=q->interp[channel];
++    for(unsigned i=0;i<4;++i){z[i]+=.38f*(input-z[i]);input=z[i];}
++    return input;
++}
