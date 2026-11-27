@@ -33,9 +33,10 @@ for _ in range(16):
 shot('tap REC','tapkey 7')
 (tmp / 'routes.txt').write_text('\n'.join(commands) + '\n')
 PY
+# Neither route should render a wall-clock audio-load number into the oracle.
 mkdir "$tmp/original" "$tmp/compacted"
-X0X_HOST_LOAD=0 "$tmp/base" "$tmp/routes.txt" "$tmp/original" >/dev/null
-X0X_HOST_LOAD=0 "$tmp/trial" "$tmp/routes.txt" "$tmp/compacted" >/dev/null
+X0X_HOST_LOAD=0 X0X_HOST_DISPLAY_LOAD=0 "$tmp/base" "$tmp/routes.txt" "$tmp/original" >/dev/null
+X0X_HOST_LOAD=0 X0X_HOST_DISPLAY_LOAD=0 "$tmp/trial" "$tmp/routes.txt" "$tmp/compacted" >/dev/null
 python3 - "$tmp" <<'PY'
 import hashlib
 from pathlib import Path

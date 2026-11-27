@@ -6917,14 +6917,65 @@ static UI_DRAW void draw_song(int band)
 }
 
 /* Continuous send track with an explicit setting thumb, including zero/max. */
-static UI_DRAW void night_send(int x,int y,int w,int value,uint16_t col)
+static UI_DRAW void night_send(int x,int y,int w,int value,uint16_t col,uint16_t side,uint16_t bg)
 {
     int at=x+value*(w-3)/127;
-    cv_rect(x,y+2,w,3,UI_N_SIDE);
-    if(value)cv_rect(x,y+3,at-x+2,1,dim(col,8));
+    cv_rect(x,y+2,w,3,side);
+    if(value)cv_rect(x,y+3,at-x+2,1,blend(bg,col,8));
     cv_rect(at,y,3,7,col);
 }
 
+#if X0X_UI_SMALL_CANVAS
+typedef struct {
+    const char *name[NPARTS]; /* part_display/part_s return immutable literals */
+    uint16_t ink[NPARTS], bg, side, gray, hi, white, panel, edge;
+    uint8_t send[NPARTS][2], delay;
+    char delay_line[40], value[40];
+} cv_fx_scene;
+static void cv_capture_fx(cv_fx_scene *s)
+{
+    char a[16],u[8],*q;
+    s->bg=C_BLACK; s->side=UI_N_SIDE; s->gray=C_GRAY;
+    s->hi=C_HI; s->white=C_WHITE; s->panel=SOUND_FACE; s->edge=SOUND_EDGE;
+    for (int pos=0;pos<NPARTS;pos++) {
+        int p=part_at(pos);
+        const char *name=part_display(p);
+        s->name[pos]=tw(&FONT_T,name)>49 ? part_s(p) : name;
+        s->ink[pos]=PART_COL[p];
+        s->send[pos][0]=proj.sound.v[T_MIX][p][1];
+        s->send[pos][1]=proj.sound.v[T_MIX][p][2];
+    }
+    s->delay=cur_page()==1;
+    q=put_s(s->delay_line,"DELAY ");
+    if (!s->delay) {
+        pref_value(PR(R_ENG,T_FX,0,FX_DL_TIME),a,u);
+        q=put_s(put_s(q,a),"  ");
+    }
+    pref_value(PR(R_ENG,T_FX,0,FX_DL_TYPE),a,u);
+    put_s(q,a);
+    pref_value(PR(R_ENG,T_FX,0,s->delay ? FX_RV_DECAY : FX_DL_FDBK),a,u);
+    put_s(put_s(s->value,a),u);
+}
+static UI_DRAW void draw_fx_scene(int band,const cv_fx_scene *s)
+{
+    int off=band*BAND_H;
+    text_c(98,1-off,&FONT_T,"REVERB",s->gray);
+    text_c(192,1-off,&FONT_T,"DELAY",s->gray);
+    for (int pos=0;pos<NPARTS;pos++) {
+        int y=14+pos*15-off;
+        surface_panel(3,y,234,13,0,s->panel,s->edge,0);
+        cv_text(7,y+2,&FONT_T,s->name[pos],s->ink[pos]);
+        night_send(60,y+3,76,s->send[pos][0],s->ink[pos],s->side,s->bg);
+        night_send(154,y+3,76,s->send[pos][1],s->ink[pos],s->side,s->bg);
+    }
+    surface_panel(3,92-off,234,20,0,s->panel,s->edge,0);
+    cv_text(9,96-off,&FONT_S,s->delay_line,s->hi);
+    int x=s->delay ? 123 : 3;
+    surface_panel(x,116-off,114,20,0,s->panel,s->edge,0);
+    cv_text(x+6,121-off,&FONT_T,s->delay ? "RV DECAY" : "FEEDBACK",s->gray);
+    text_r(x+108,121-off,&FONT_T,s->value,s->white);
+}
+#else
 static UI_DRAW void draw_fx(int band)
 {
     int off=band*BAND_H;
@@ -6936,8 +6987,8 @@ static UI_DRAW void draw_fx(int band)
         const char *name=part_display(p);
         if(tw(&FONT_T,name)>49)name=part_s(p);
         cv_text(7,y+2,&FONT_T,name,PART_COL[p]);
-        night_send(60,y+3,76,proj.sound.v[T_MIX][p][1],PART_COL[p]);
-        night_send(154,y+3,76,proj.sound.v[T_MIX][p][2],PART_COL[p]);
+        night_send(60,y+3,76,proj.sound.v[T_MIX][p][1],PART_COL[p],UI_N_SIDE,C_BLACK);
+        night_send(154,y+3,76,proj.sound.v[T_MIX][p][2],PART_COL[p],UI_N_SIDE,C_BLACK);
     }
     int delay = cur_page() == 1;
     night_panel(3,92-off,234,20,0);
@@ -6955,9 +7006,11 @@ static UI_DRAW void draw_fx(int band)
     put_s(put_s(t,a),u);
     text_r(x+108,121-off,&FONT_T,t,C_WHITE);
 }
+#endif
 
 /* MIX, a drum machine's page: its eleven tracks' levels (and pans), the selected one lit */
 static UI_DRAW void dv_body_pictogram(int t,int v,int x,int y,float scale,float env,uint16_t col);
+#if !X0X_UI_SMALL_CANVAS
 static UI_DRAW void draw_drum_mix(int band, int k)
 {
     int t = k ? T_808 : T_909, o = band * BAND_H, selected=ui.sel[k];
@@ -6996,6 +7049,7 @@ static UI_DRAW void draw_drum_mix(int band, int k)
     }
 }
 
+#endif
 /* WAVE page: mid-line plot of eng_scope (post-master L+R). Latch ≤10 Hz; skip if shape/write
  * index unchanged so SPI stays calm (Baud Girl FM-1+VA scope policy). No second audio tap. */
 static UI_DRAW void draw_master_wave(void)
@@ -7047,6 +7101,199 @@ static UI_DRAW void draw_master_wave(void)
     }
 }
 
+#if X0X_UI_SMALL_CANVAS
+enum { CV_MIX_PARTS, CV_MIX_909, CV_MIX_808, CV_MIX_MASTER, CV_MIX_WAVE };
+typedef struct {
+    uint16_t bg, white, gray, dim, line, face, edge, side, hi, amber, part;
+    uint8_t route;
+    const uint16_t *part_colors; /* selected static theme table */
+    union {
+        struct {
+            const char *save;
+            uint16_t pending, mute;
+            uint8_t selection, level[NDRUM], pan[NDRUM], hit[NDRUM];
+        } kit;
+        struct {
+            const char *names[NPARTS];
+            float gr;
+            unsigned cpu;
+            uint8_t selection, muted, level[NPARTS], peak[NPARTS], guard, pump_hi;
+            char pump[24];
+        } main;
+    } body;
+} cv_mix_scene;
+
+static void cv_capture_mix(cv_mix_scene *s)
+{
+    s->bg=C_BLACK; s->white=C_WHITE; s->gray=C_GRAY; s->dim=C_DIM;
+    s->line=C_LINE; s->face=SOUND_FACE; s->edge=SOUND_EDGE; s->side=SOUND_SIDE;
+    s->hi=C_HI; s->amber=C_AMB; s->part=part_col();
+    s->part_colors=PART_COL;
+    const int kit=drum_mix_page(), page=ui.page[V_MIX][0];
+    if (kit>=0) {
+        s->route=(uint8_t)(CV_MIX_909+kit);
+        s->body.kit.selection=ui.sel[kit];
+        const int saved=save_state();
+        /* These labels (including SAVE_QUEUED variants) are all literals. */
+        s->body.kit.save=saved==SAVE_SAVED?"SAVED":header_save_label(saved);
+        s->body.kit.pending=(uint16_t)(seq.vmute_q>>(kit*NDRUM));
+        s->body.kit.mute=0;
+        for (unsigned v=0;v<NDRUM;++v) {
+            const int t=kit?T_808:T_909;
+            const int muted=part_muted(kit)||track_muted(kit,v);
+            uint32_t age; float env=0;
+            int level=pref_get(find_ref(t,v,"Level")), pan=pref_get(find_ref(t,v,"Pan"));
+            int live=engine_drum_view(kit,v,&age,&env);
+            if (muted) s->body.kit.mute|=(uint16_t)(1u<<v);
+            s->body.kit.level[v]=(uint8_t)level;
+            s->body.kit.pan[v]=(uint8_t)pan;
+            s->body.kit.hit[v]=(uint8_t)(live&&!muted?(int)((float)(level*64/127)*env+.5f):0);
+        }
+        return;
+    }
+    s->route=page==MIX_FIRST_KIT_PAGE+NKIT?CV_MIX_MASTER:page>MIX_FIRST_KIT_PAGE+NKIT?CV_MIX_WAVE:CV_MIX_PARTS;
+    s->body.main.gr=engine_gr_db(); s->body.main.cpu=plat_cpu_pct();
+    s->body.main.guard=(uint8_t)!!engine_guard_active();
+    if (s->route==CV_MIX_PARTS) {
+        /* part_display/part_s resolve to immutable literals even if engines change. */
+        mix_strip_names(s->body.main.names);
+        s->body.main.selection=(uint8_t)(cur_page()==0?ui.mixsel:255u);
+        s->body.main.muted=0;
+        for (unsigned p=0;p<NPARTS;++p) {
+            s->body.main.level[p]=proj.sound.v[T_MIX][p][0];
+            s->body.main.peak[p]=(uint8_t)(eng_peak[p]*64/32768);
+            if (part_muted(p)) s->body.main.muted|=(uint8_t)(1u<<p);
+        }
+        char a[12], u[8];
+        pref_value(PR(R_ENG,T_MST,0,MST_PUMP),a,u);
+        put_s(put_s(put_s(s->body.main.pump,"PUMP "),a),u);
+        s->body.main.pump_hi=(uint8_t)!!proj.sound.v[T_MST][0][MST_PUMP];
+    }
+}
+
+static void cv_mix_panel(const cv_mix_scene *s,int x,int y,int w,int h)
+{
+    surface_panel(x,y,w,h,0,s->face,s->edge,s->side);
+}
+
+static UI_DRAW void draw_mix_scene(int band,const cv_mix_scene *s)
+{
+    if (s->route==CV_MIX_909 || s->route==CV_MIX_808) {
+        int k=s->route-CV_MIX_909,t=k?T_808:T_909,o=band*BAND_H;
+        const uint16_t col=s->part_colors[k];
+        if (!band) text_r(232,6,&FONT_T,s->body.kit.save,s->gray);
+        rbox(4,21-o,232,126,UI_PANEL_RADIUS,s->face);
+        for (int v=0;v<NDRUM;++v) {
+            int x=8+v*21,sel=v==s->body.kit.selection,muted=s->body.kit.mute>>v&1u;
+            int f=s->body.kit.level[v]*64/127,pan=s->body.kit.pan[v],hit=s->body.kit.hit[v];
+            uint16_t ink=sel?col:muted?s->dim:s->gray;
+            if (sel)rbox(x-3,24-o,19,106,2,s->edge);
+            if (!band)dv_body_pictogram(t,v,x-26,16,.26f,0,ink);
+            if (muted)cv_line(x,37-o,x+15,26-o,s->gray);
+            if (s->body.kit.pending>>v&1u)text_r(x+17,96-o,&FONT_T,"0",DRUM_MIX_ACCENT);
+            cv_rect(x+7,43-o,1,64,s->line);
+            if (hit)cv_rect(x+7,107-hit-o,1,hit,col);
+            cv_rect(x+2,107-f-o,11,1,sel?s->white:s->gray);
+            cv_rect(x+1,122-o,13,1,s->line);
+            cv_rect(x+1+pan*12/127,120-o,2,5,ink);
+        }
+        return;
+    }
+    const int master=s->route==CV_MIX_MASTER,wave=s->route==CV_MIX_WAVE;
+    int p;
+    /* MASTER and WAVE latches execute only once in the frame, prior to any DMA. */
+    /* MASTER peak history: fixed 98 columns. A scrolling ring rewrote every column each
+     * frame, so cv_commit_rect sent nearly the whole main band (~18 ms SPI) — panel tear
+     * ("broken" hist) and knob-strip lag (draw_knobs waits on that blit). Write-head
+     * overwrite + wall-clock sample keeps geometry stable and dirties ~one column. */
+    if (band == 0 && master) {
+        enum { HIST_N = 98, HIST_MS = 20 };             /* ~2 s window; never shrink width */
+        static uint8_t hist[HIST_N];
+        static uint32_t hw, hist_ms;                    /* hw was uint8_t: ring broke every 256 */
+        static uint16_t peak_hold;
+        int x, pk = 0;
+        uint32_t now = plat_ms();
+        for (p = 0; p < NPARTS; p++)
+            pk = eng_peak[p] > pk ? eng_peak[p] : pk;
+        if ((uint16_t)pk > peak_hold)
+            peak_hold = (uint16_t)pk;
+        if (!hist_ms || (int32_t)(now - hist_ms) >= HIST_MS) {
+            hist[hw % (uint32_t)HIST_N] = (uint8_t)(peak_hold * 62 / 32768);
+            hw++;
+            peak_hold = 0;
+            hist_ms = now;                             /* one column per paint when overdue */
+        }
+        for (x = 0; x < HIST_N; x++) {
+            int h = hist[x];
+            cv_rect(4 + x * 2, 66 - h, 2, h + 1, s->part);
+        }
+    }
+    if (!band && wave) draw_master_wave();
+    if (!band && !master && !wave) {
+        for (int pos=0;pos<NPARTS;++pos) {
+            p=part_at(pos);
+            int x=6+pos*38,lvl=s->body.main.level[p],pk=s->body.main.peak[p];
+            int selected=p==s->body.main.selection;
+            surface_panel(x-2,0,30,BAND_H,selected,selected?blend(s->bg,s->part_colors[p],3):s->face,
+                          selected?s->part_colors[p]:s->edge,s->side);
+            rbox(x+10,4,6,64,3,s->line);
+            if (pk>1)rbox(x+10,68-pk,6,pk,3,(s->body.main.muted>>p&1u)?s->dim:s->part_colors[p]);
+            rbox(x+4,67-lvl*64/127,18,3,1,s->white);
+        }
+    }
+    const float gr_db=s->body.main.gr;
+    const unsigned cpu=s->body.main.cpu;
+    if (!band) {
+        int gr=(int)(gr_db*64.f/24.f);
+        gr=gr>64?64:gr;
+        cv_mix_panel(s,205,1,32,66);
+        rbox(208,5,7,61,3,s->line);
+        if (gr>1)rbox(208,5,7,gr>61?61:gr,3,RGB(255,80,60));
+        cv_text(218,4,&FONT_T,"GR",s->gray);
+        return;
+    }
+    char t[24];
+    if (wave) {
+        cv_mix_panel(s,3,3,114,34);
+        cv_text(9,6,&FONT_T,"WET GR",s->gray);
+        if (gr_db>.5f)put_s(put_i(put_s(t,"-"),(int)(gr_db+.5f))," dB");
+        else put_s(t,"0 dB");
+        cv_text(9,20,&FONT_S,t,s->white);
+        cv_mix_panel(s,3,42,234,24);
+        put_s(put_i(put_s(t,"AUDIO LOAD "),(int)cpu),"%");
+        cv_text(9,49,&FONT_XS,t,cpu>85u?s->amber:s->gray);
+        if (s->body.main.guard)text_r(229,49,&FONT_XS,"GUARD",s->amber);
+        return;
+    }
+    if (!master) {
+        for (int pos=0;pos<NPARTS;++pos) {
+            p=part_at(pos);
+            text_c(6+pos*38+13,0,&FONT_XS,s->body.main.names[pos],
+                   (s->body.main.muted>>p&1u)?s->line:s->part_colors[p]);
+        }
+    }
+    cv_mix_panel(s,0,14,118,31);
+    cv_mix_panel(s,0,46,240,22);
+    if ((int)(gr_db+.5f))put_s(put_i(put_s(t,"WET GR -"),(int)(gr_db+.5f)),"dB");
+    else put_s(t,"WET GR 0dB");
+    cv_text(4,20,&FONT_B,t,gr_db>.5f?RGB(255,110,90):s->gray);
+    if (!master) {
+        cv_mix_panel(s,120,14,120,31);
+        cv_text(124,20,&FONT_B,s->body.main.pump,s->body.main.pump_hi?s->hi:s->gray);
+    }
+    put_s(put_i(t,(int)cpu),"%");
+    cv_text(4,50,&FONT_XS,"AUDIO LOAD",s->dim);
+    cv_text(70,50,&FONT_XS,t,cpu>85u?RGB(255,60,60):s->gray);
+    if (s->body.main.guard)cv_text(100,50,&FONT_XS,"GUARD",s->amber);
+}
+static UI_DRAW void draw_mix(int band)
+{
+    /* A MIX entered during a not-yet-qualified route retains old behavior. */
+    cv_mix_scene s;
+    cv_capture_mix(&s);
+    draw_mix_scene(band,&s);
+}
+#else
 static UI_DRAW void draw_mix(int band)
 {
     int p, dm = drum_mix_page();
@@ -7152,6 +7399,7 @@ static UI_DRAW void draw_mix(int band)
             cv_text(100, 50, &FONT_XS, "GUARD", C_AMB);
     }
 }
+#endif
 
 #if X0X_UI_PERF
 /* PERF: the live window, or the test's progress and table */
@@ -8052,10 +8300,41 @@ static UI_DRAW void draw_main(void)
         }
         return;
     }
+    if (ui.view == V_MIX && ui.overlay == O_NONE && !ui.help) {
+        cv_mix_scene s;
+        cv_readout_scene note;
+        cv_capture_mix(&s);
+        int has_note=readout && !envelope &&
+            !(ui.brk_choice_on && engine_brk_preview_active()) && cv_capture_readout(&note);
+        for (unsigned page=0;page<2;++page) {
+            cv_window(240,MAIN_ROWS,page*BAND_H,BAND_H,s.bg);
+            cv_band((int)page*BAND_H,BAND_H);
+            draw_mix_scene((int)page,&s);
+            if (page && has_note) draw_readout_scene(&note);
+            cv_commit_main_band(page);
+        }
+        return;
+    }
     cv_modal_scene modal;
     cv_capture_modal(&modal);
     if (!modal.route && ui.overlay == O_LIST) {
         draw_list_once();
+        return;
+    }
+    if (!modal.route && ui.view == V_FX) {
+        cv_fx_scene fx;
+        cv_readout_scene note;
+        cv_capture_fx(&fx);
+        int has_note=readout && !envelope &&
+            !(ui.brk_choice_on && engine_brk_preview_active()) &&
+            cv_capture_readout(&note);
+        for (unsigned page=0;page<2;page++) {
+            cv_window(240,MAIN_ROWS,page*BAND_H,BAND_H,fx.bg);
+            cv_band(page*BAND_H,BAND_H);
+            draw_fx_scene(page,&fx);
+            if (page && has_note) draw_readout_scene(&note);
+            cv_commit_main_band(page);
+        }
         return;
     }
 #else
@@ -8085,8 +8364,10 @@ static UI_DRAW void draw_main(void)
 #endif
         if (ui.view == V_HOME)
             draw_home(band);
+#if !X0X_UI_SMALL_CANVAS
         else if (ui.view == V_FX)
             draw_fx(band);
+#endif
         else if (ui.view == V_MIX)
             draw_mix(band);
         else if (ui.view == V_SONG)

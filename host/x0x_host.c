@@ -276,6 +276,7 @@ const uint8_t *plat_slot(int k, int z, uint32_t *ns, uint32_t *rate, char name[9
 }
 
 static uint32_t cpu_pct, cpu_peak;
+static int display_load = -1;                  /* optional fixed UI diagnostic for pixel A/B */
 static int load_force = -1;                      /* script "load N": the guard sees N%, -1 measured */
 /* the second core, simulated: a job runs at once, in order (the split path, the same sums) */
 static int cpu2_on, cpu2_fail_once;
@@ -306,7 +307,7 @@ void plat_ble_peers(plat_ble_peers_t *out) { memset(out, 0, sizeof *out); out->s
 #endif
 const char *plat_ble_name(void) { return ""; }
 void plat_ble_set(int on) { ble_on = on; }
-uint32_t plat_cpu_pct(void) { return cpu_pct; }
+uint32_t plat_cpu_pct(void) { return display_load >= 0 ? (uint32_t)display_load : cpu_pct; }
 uint32_t plat_xruns(void) { return 0; }
 /* performance: no CPU counter here: the "cycles" are nanoseconds (plat_cycles_hz) */
 static uint64_t host_ns(void)
@@ -326,7 +327,7 @@ uint32_t plat_cpu_peak_pct(void)
 {
     uint32_t p = cpu_peak;
     cpu_peak = 0;
-    return p;
+    return display_load >= 0 ? (uint32_t)display_load : p;
 }
 int plat_stalls(uint32_t s[3]) { (void)s; return -1; }
 void plat_stalls_enable(int on) { (void)on; }
@@ -969,6 +970,8 @@ int main(int argc, char **argv)
         perror(argv[1]);
         return 2;
     }
+    if (getenv("X0X_HOST_DISPLAY_LOAD"))
+        display_load = atoi(getenv("X0X_HOST_DISPLAY_LOAD"));
     if (getenv("X0X_HOST_LOAD"))                 /* the tests: the host time is not the FM-1 load (a busy host turns on the guard) */
         load_force = atoi(getenv("X0X_HOST_LOAD"));
     snprintf(out, sizeof out, "%s/midi_out.txt", dir);
