@@ -1,0 +1,146 @@
+{
+  "scope": "Authentic original-source graph on both sides; candidate changes only fed delay engine, not restored compact voices or device",
+  "cases": [
+    {
+      "stock_row": 62,
+      "name": "Irresistible Forces Pad",
+      "arms": {
+        "original": {
+          "hash": "513256ed0b89958c0accd522461ba25c808f75451b12cafcc9fb898ffa76a881",
+          "receipt": [
+            "original 62 wet 264600 frames, delay on 0.99981 mix 0.768108, reverb on 0.99981 mix 0.147469"
+          ],
+          "metrics": {
+            "whole_dB": [
+              0.0,
+              0.0
+            ],
+            "note_body_dB": 0.0,
+            "release_1p5s_dB": 0.0,
+            "last_1s_dB": 0.0,
+            "spectral_distance_db": [
+              0.0,
+              0.0
+            ],
+            "raw_residual_dB_rel_reference": -308.364
+          }
+        },
+        "shape1024": {
+          "hash": "ade911edb44f897ac700467637f0d13f2db018443510a2b6eb27962f840f34e2",
+          "receipt": [
+            "original 62 wet 264600 frames, delay on 0.99981 mix 0.768108, reverb on 0.99981 mix 0.147469",
+            "scope portable original-source delay isolated policy mode=ADPCM bits=4 stride=2 cadence=22050.000000 shape=1024 cold_target=0.21621621 max_owned_t=0.22902495 bytes=13668 taps_out=0 invalid=0 rejected=0 accepted=264598"
+          ],
+          "metrics": {
+            "whole_dB": [
+              -0.104,
+              -0.062
+            ],
+            "note_body_dB": -0.091,
+            "release_1p5s_dB": -0.056,
+            "last_1s_dB": -0.058,
+            "spectral_distance_db": [
+              6.346,
+              3.837
+            ],
+            "raw_residual_dB_rel_reference": -21.331
+          }
+        }
+      }
+    },
+    {
+      "stock_row": 151,
+      "name": "BB Kubrick Hall Drone",
+      "arms": {
+        "original": {
+          "hash": "18e7a69a84651f8697ffa675ac2f78c076a6ad168ec2271386d24d599cc636a5",
+          "receipt": [
+            "original 151 wet 264600 frames, delay on 0.99981 mix 0.83485, reverb on 0.99981 mix 0.799962"
+          ],
+          "metrics": {
+            "whole_dB": [
+              0.0,
+              0.0
+            ],
+            "note_body_dB": 0.0,
+            "release_1p5s_dB": 0.0,
+            "last_1s_dB": 0.0,
+            "spectral_distance_db": [
+              0.0,
+              0.0
+            ],
+            "raw_residual_dB_rel_reference": -296.565
+          }
+        },
+        "shape1024": {
+          "hash": "414d2ba406d751959c7c8522021dadb943a284543cd2aea48d64db1ca3e1c8b9",
+          "receipt": [
+            "original 151 wet 264600 frames, delay on 0.99981 mix 0.83485, reverb on 0.99981 mix 0.799962",
+            "scope portable original-source delay isolated policy mode=ADPCM bits=4 stride=6 cadence=7350.000000 shape=1024 cold_target=0.66666669 max_owned_t=0.68707484 bytes=13668 taps_out=0 invalid=0 rejected=0 accepted=264598"
+          ],
+          "metrics": {
+            "whole_dB": [
+              -0.107,
+              -0.146
+            ],
+            "note_body_dB": -0.126,
+            "release_1p5s_dB": -0.134,
+            "last_1s_dB": -0.159,
+            "spectral_distance_db": [
+              9.574,
+              10.085
+            ],
+            "raw_residual_dB_rel_reference": -18.023
+          }
+        }
+      }
+    },
+    {
+      "stock_row": 366,
+      "name": "Deeper Space Pad",
+      "arms": {
+        "original": {
+          "hash": "d904aadd85c6e844acd2447c945eb93bc98c4e3978b96fe6107dd83c048a4623",
+          "receipt": [
+            "original 366 wet 264600 frames, delay on 0.99981 mix 0.777209, reverb on 0.99981 mix 0.99981"
+          ],
+          "metrics": {
+            "whole_dB": [
+              0.0,
+              0.0
+            ],
+            "note_body_dB": 0.0,
+            "release_1p5s_dB": 0.0,
+            "last_1s_dB": 0.0,
+            "spectral_distance_db": [
+              0.0,
+              0.0
+            ],
+            "raw_residual_dB_rel_reference": -302.243
+          }
+        },
+        "shape1024": {
+          "hash": "33c89a0890fd74bd53f0da97843d2ecc9c26c05513ffd68eb005fa5ee1f509f6",
+          "receipt": [
+            "original 366 wet 264600 frames, delay on 0.99981 mix 0.777209, reverb on 0.99981 mix 0.99981",
+            "scope portable original-source delay isolated policy mode=ADPCM bits=4 stride=2 cadence=22050.000000 shape=1024 cold_target=0.1875 max_owned_t=0.22902495 bytes=13668 taps_out=0 invalid=0 rejected=0 accepted=264598"
+          ],
+          "metrics": {
+            "whole_dB": [
+              -0.016,
+              -0.018
+            ],
+            "note_body_dB": -0.037,
+            "release_1p5s_dB": -0.012,
+            "last_1s_dB": -0.012,
+            "spectral_distance_db": [
+              11.217,
+              13.797
+            ],
+            "raw_residual_dB_rel_reference": -32.601
+          }
+        }
+      }
+    }
+  ]
+}
