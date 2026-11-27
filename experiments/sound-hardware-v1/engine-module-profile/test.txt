@@ -1,0 +1,73 @@
+{
+  "profile": "dual",
+  "evidence": {
+    "synth-one": {
+      "selected": true,
+      "objects": [
+        "s1c",
+        "s1c_front",
+        "s1c_part",
+        "s1u"
+      ],
+      "renderers": [
+        "voice_run_kr"
+      ]
+    },
+    "superj6": {
+      "selected": true,
+      "objects": [
+        "dnbx_core"
+      ],
+      "renderers": [
+        "dnbx_render_pitch_osc_levels_velocity",
+        "render_with_osc_gains"
+      ]
+    }
+  },
+  "legacy_providers_out_of_scope": true,
+  "elf_sha256": "afd72b2dd91400b5a8e8aa76c4e65e3538280d3166458791b0c31631138000c1",
+  "link_map_sha256": "cd5e5eb6a44257baa82f340bbe79734e2c07ff27d5b3197d82dbd563bd6a12fd"
+}
+usage: engine_profile.py [-h] [--elf ELF] [--link-map LINK_MAP] [--nm NM]
+                         {dual,synth-one,superj6}
+engine_profile.py: error: superj6: disabled module still present, objects ['dnbx_core'], renderer symbols ['dnbx_render_pitch_osc_levels_velocity', 'render_with_osc_gains']
+usage: engine_profile.py [-h] [--elf ELF] [--link-map LINK_MAP] [--nm NM]
+                         {dual,synth-one,superj6}
+engine_profile.py: error: synth-one: disabled module still present, objects ['s1c', 's1c_front', 's1c_part', 's1u'], renderer symbols ['voice_run_kr']
+{
+  "profile": "dual",
+  "evidence": {
+    "synth-one": {
+      "selected": true,
+      "objects": [
+        "s1c",
+        "s1c_front",
+        "s1c_part",
+        "s1u"
+      ],
+      "renderers": [
+        "voice_run_kr"
+      ]
+    },
+    "superj6": {
+      "selected": true,
+      "objects": [
+        "dnbx_core"
+      ],
+      "renderers": [
+        "dnbx_render_pitch_osc_levels_velocity",
+        "render_with_osc_gains"
+      ]
+    }
+  },
+  "legacy_providers_out_of_scope": true,
+  "elf_sha256": "9f6641eadc32e585253ba3d85bb517387a94ab537492af508eabcecd0ff04c09",
+  "link_map_sha256": "79b78728330db31e070fad6919f1707ab4dc95d3a8d2c6ba33fd1783256347e3"
+}
+usage: engine_profile.py [-h] [--elf ELF] [--link-map LINK_MAP] [--nm NM]
+                         {dual,synth-one,superj6}
+engine_profile.py: error: superj6: disabled module still present, objects ['dnbx_core'], renderer symbols ['dnbx_render_pitch_osc_levels_velocity', 'render_with_osc_gains']
+usage: engine_profile.py [-h] [--elf ELF] [--link-map LINK_MAP] [--nm NM]
+                         {dual,synth-one,superj6}
+engine_profile.py: error: synth-one: disabled module still present, objects ['s1c', 's1c_front', 's1c_part', 's1u'], renderer symbols ['voice_run_kr']
+Three selections, two fail-closed conflict guards, unchanged unprofiled default

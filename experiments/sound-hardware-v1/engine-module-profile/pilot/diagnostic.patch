@@ -1,0 +1,82 @@
+--- a/run.sh
++++ b/run.sh
+@@ -3,7 +3,7 @@
+ D="$(cd "$(dirname "$0")";pwd)"; R="$(cd "$D/..";pwd)"
+ export JIELI_TOOLCHAIN="$R/prereqs/jieli-linux-toolchains-20260730.1" AC79_SDK="$R/prereqs/sdk"
+ export PYTHONPATH="$D/tree" DNBOX_CONTROL_FLAGS="$D/compose-flags.txt" D9_LAB_OUT="$D/tree/joint-diagnostic-later"
+-export X0X_SUPERJ6_FACTORY=1 X0X_SUPERJ6_BUILTIN_INIT=1 X0X_S1C=1 X0X_SYNTH_CONTROLS_INIT_ONLY=1 X0X_SYNTHONE_PATCH=1 X0X_ARP_HOOKS=1 X0X_REMOTE_DNR3=1 X0X_REMOTE_TYPED_SYNTH=1
++export X0X_SUPERJ6_FACTORY=0 X0X_SUPERJ6_BUILTIN_INIT=0 X0X_S1C=1 X0X_SYNTH_CONTROLS_INIT_ONLY=1 X0X_SYNTHONE_PATCH=1 X0X_ARP_HOOKS=1 X0X_REMOTE_DNR3=1 X0X_REMOTE_TYPED_SYNTH=0
+ export D9_LAB_XDATA_TAIL=1 D9_LAB_SLOT3_METADATA=1 DNBOX_TANH_SPLIT_LAB=1 DNBOX_TANH_REFILL_LAB=1 D9_LAB_S1_FDATA=1 DNBOX_CHICAGO_MOD_PALETTE=1 DNBOX_MIAMI_STOCK_CAP_COMPACT=1 D9_LAB_SPARE_TABLES=1 DNBOX_MIAMI_DECIMATOR_COMPACT=1 DNBOX_CHICAGO_DRIVE_COMPACT=1 DNBOX_CHICAGO_MOD_SPEED_COMPACT=1
+ cd "$D/tree"
+ python3 "$D/link-guarded-exact.py" --board smk37 --model elite --sdk "$AC79_SDK" > "$D/elite.log" 2>&1 & a=$!
+--- a/compose-flags.txt
++++ b/compose-flags.txt
+@@ -1,5 +1 @@
+- -DX0X_SJ6_NATIVE_ZERO_GATE=1 -DX0X_S1_FENCED_CLOCK=1 -DX0X_S1_CLOCK_NATIVE=1 -DX0X_SJ6_VCF_PORT=1 -DX0X_S1_CRUSH_LFO_PROBE=1
+- -DX0X_S1_DELAY_TIME_NATIVE=1 -DX0X_SJ6_NATIVE_DELAY=1 -DX0X_SJ6_LFO1_DELAY_PORT=1 -DX0X_SJ6_NATIVE_UNISON=1 -DX0X_SJ6_PITCH_ENV_NATIVE=1 -DX0X_SJ6_BEND_TYPED_PROBE=1 -DX0X_SJ6_MOD_TYPED_PROBE=1 -DX0X_SJ6_ALT3_NATIVE=1 -DX0X_SJ6_NATIVE_ROOM=1 -DX0X_SJ6_NATIVE_J60=1 -DX0X_SJ6_AUX_LFO_NATIVE=1 -DX0X_SJ6_NOISE_SUB_NATIVE=1 -DX0X_SJ6_OTA_NATIVE=1 -DX0X_SJ6_NATIVE_LIMITER=1 -DX0X_SJ6_NATIVE_CLASSIC=1 -DX0X_SJ6_SEQ_SETTINGS_NATIVE=1 -DX0X_SJ6_LFO1_WAVE_NATIVE=1 -DX0X_SJ6_LFO_TRIGGER_NATIVE=1 -DX0X_S1_KEYBOARD_HOLD=1 -DX0X_SJ6_RANDOM5_6_NATIVE=1 -DX0X_MIX_DELAY_PACK14=1 -DX0X_S1_SCALE_NATIVE=1 -DX0X_SJ6_SEQ_DEST_NATIVE=1 -DX0X_S1_USER_SCALE=1 -DX0X_S1_HALFTIME=1 -DX0X_SJ6_AUX_SEQ_NATIVE=1 -DX0X_SJ6_ARP_ADAPTER_NATIVE=1 -DX0X_S1_DELAY_HISTORY_NATIVE=1
+--DDNBOX_TYPED_CONTROLS_NATIVE_TEST=1 -DX0X_S1_MOD_RATE_PROBE=1 -DX0X_S1_BEND_RANGE_PROBE=1 -DX0X_S1_AUTOPAN_PROBE=1 -DX0X_S1_AUTOPAN_PORT=1 -DX0X_SJ6_MONO32_PROBE=1 -DX0X_S1_FEEDBACK_PROBE=1 -DX0X_S1_DELAY_TRACK_TEST=1 -DX0X_SJ6_FILTER_VEL_PROBE=1 -DX0X_SJ6_VELOCITY_PORT=1 -DX0X_SJ6_NATIVE_RANDOM2=1 -DX0X_SJ6_NATIVE_POSITIVE_GATE=1 -DX0X_SJ6_VINTAGE_NATIVE=1 -DX0X_SJ6_SCALE_NATIVE=1 -DX0X_SJ6_VELOCITY_SETTINGS=1 -DX0X_S1_WET_GAIN_TEST=1 -DX0X_S1_PHASER_NATIVE_TEST=1 -DX0X_SUPERJ6_BUILTIN_INIT=1
+- -DX0X_CORE_PLAN=4 -DDNBOX_SJ6_SOURCE_UNISON_ORDER=1 -DDNBOX_SJ6_MODE_FADE_LAB=1 -DDNBOX_LAB_JOINT_FIXED_RENDER_CUE=1
+- -DDNBOX_LAB_RAM_SPARE=1
++-DX0X_MIX_DELAY_PACK14=1 -DX0X_CORE_PLAN=4
+--- a/link-guarded-exact.py
++++ b/link-guarded-exact.py
+@@ -31,6 +31,7 @@
+                '.rodata.s1_pan_detent_hz':0x200,
+                '.rodata.s1_pan_boundary_hz':0x1fc,
+                '.rodata.sj6_velocity_scale':0x200}
++    relocated.pop('.rodata.sj6_velocity_scale')
+     split = os.environ.get('DNBOX_TANH_SPLIT_LAB') == '1'
+     if split:
+         relocated.pop('.rodata.x0x_tanh_raw')
+@@ -329,11 +330,11 @@
+     print('guarded',b.MODEL,'XIP',used,'free',0x86ee0-used,'pool usable',0x54000-pool-8192,'read-only FDATA',len(z[-2]),'diagnostic slot3 span',len(z[-1]),'slot3 free',32768-len(z[-1]),'read-only FITTAB',len(z[4]),'header',h.hex(),'ELF',hashlib.sha256(elf.read_bytes()).hexdigest(),flush=True)
+     raise Stop
+ b.CFLAGS += ['-DX0X_COLD_COMPANION_LAB=1','-DX0X_COLD_SLOT3_LAB=1','-DX0X_COLD_FITTAB_LAB=1','-DX0X_909_HUFF_DIAG=1']
+-b.CFLAGS.extend(["-DX0X_S1_FEEDBACK_PROBE=1","-DX0X_S1_DELAY_TRACK_TEST=1","-DX0X_SJ6_FILTER_VEL_PROBE=1","-DX0X_SJ6_VELOCITY_PORT=1","-DX0X_SJ6_NATIVE_RANDOM2=1"])
+-b.CFLAGS.append("-DX0X_SJ6_NATIVE_POSITIVE_GATE=1")
+-b.CFLAGS += ["-DDNBOX_TYPED_CONTROLS_NATIVE_TEST=1","-DX0X_S1_MOD_RATE_PROBE=1","-DX0X_S1_BEND_RANGE_PROBE=1","-DX0X_S1_AUTOPAN_PROBE=1","-DX0X_S1_AUTOPAN_PORT=1","-DX0X_SJ6_MONO32_PROBE=1"]
+-b.CFLAGS.extend(["-DX0X_S1_FEEDBACK_PROBE=1","-DX0X_S1_DELAY_TRACK_TEST=1","-DX0X_SJ6_FILTER_VEL_PROBE=1","-DX0X_SJ6_VELOCITY_PORT=1","-DX0X_SJ6_NATIVE_RANDOM2=1"])
+-b.CFLAGS.append("-DX0X_SJ6_NATIVE_POSITIVE_GATE=1")
++
++
++
++
++
+ b.ORIGINAL_SYNTH_OZ_UNITS |= {'chicago_selector','chicago_arp_control','chicago_note_context','miami_geometry','miami_fx_conversion'}
+ b.CFLAGS.extend(Path(os.environ['DNBOX_CONTROL_FLAGS']).read_text().split())
+ if os.environ.get("DNBOX_CHICAGO_MOD_SPEED_COMPACT") == "1": b.CFLAGS.append("-DDNBOX_CHICAGO_MOD_SPEED_COMPACT=1")
+--- a/tree/tools/build.py
++++ b/tree/tools/build.py
+@@ -496,8 +496,8 @@
+     init_only = synth_controls_init_only()
+     if init_only:
+         if not (BOARD == "smk37" and MODEL in ("elite", "pro") and
+-                S1C == "1" and synthone_patch == "1" and sj6_builtin_init == "1"):
+-            raise SystemExit("Init-only controls require SMK Elite/Pro, compact Synth One editor and built-in SuperJ6 Init")
++                S1C == "1" and synthone_patch == "1"):
++            raise SystemExit("Init-only controls require SMK Elite/Pro, compact Synth One editor")
+         flags = [*flags, "-DX0X_SYNTH_CONTROLS_INIT_ONLY=1"]
+     chance_probe = os.environ.get("X0X_GFINAL_CHANCE_PROBE", "1")
+     if chance_probe not in ("0", "1"):
+--- a/tree/firmware/src/app/typed_controls_trial.h
++++ b/tree/firmware/src/app/typed_controls_trial.h
+@@ -32,7 +32,7 @@
+ #error Native clock requires the explicit typed trial and b7-9 feature flags
+ #endif
+ #if DNBOX_TYPED_CONTROLS_NATIVE_TEST
+-#if !X0X_SYNTHONE_PATCH || !X0X_S1C || !X0X_SUPERJ6_BUILTIN_INIT || \
++#if !X0X_SYNTHONE_PATCH || !X0X_S1C || \
+     !X0X_S1_BEND_RANGE_PROBE || !X0X_S1_MOD_RATE_PROBE
+ #error Native trial needs Synth One MOD and PB receivers and both engine profiles
+ #endif
+--- a/tree/firmware/src/app/original_runtime.c
++++ b/tree/firmware/src/app/original_runtime.c
+@@ -181,7 +181,7 @@
+ _Static_assert(sizeof(s1_dry_part) <= sizeof(((original_runtime_backend *)0)->juno),
+                "Synth One tuning must remain within the combined backend union");
+ #else
+-_Static_assert(sizeof(s1_dry_part) <= sizeof(original_miami_backend), "Synth One part does not grow the backend union");
++_Static_assert(sizeof(s1_dry_part) <= sizeof(original_runtime_backend), "Synth One arm fits diagnostic union");
+ #endif
+ 
+ int original_runtime_s1_program(original_runtime_part *p, unsigned program)

@@ -1,0 +1,84 @@
+{
+  "elite": {
+    "xip_used": 456648,
+    "xip_free": 96024,
+    "pool_total": 344064,
+    "pool_allocated": 317496,
+    "pool_beyond_8192_floor_and_512_margin": 17864,
+    "sections": {
+      "lab_fdata": 58924,
+      "lab_fittab": 3688,
+      "lab_slot3": 31200,
+      "text": 452664,
+      "ram_text": 2748,
+      "c1_text": 608,
+      "data": 624
+    },
+    "audit": {
+      "profile": "synth-one",
+      "evidence": {
+        "synth-one": {
+          "selected": true,
+          "objects": [
+            "s1c",
+            "s1c_front",
+            "s1c_part",
+            "s1u"
+          ],
+          "renderers": [
+            "voice_run_kr"
+          ]
+        },
+        "superj6": {
+          "selected": false,
+          "objects": [],
+          "renderers": []
+        }
+      },
+      "legacy_providers_out_of_scope": true,
+      "elf_sha256": "538c3b606964e88742afe297d9495c036c0578f19ba00f3212e7e52ea6bdabf9",
+      "link_map_sha256": "4f5779b80d0c9160eb20246680707369a2fc30db73514eba2670d3cc20373402"
+    }
+  },
+  "pro": {
+    "xip_used": 456636,
+    "xip_free": 96036,
+    "pool_total": 344064,
+    "pool_allocated": 317496,
+    "pool_beyond_8192_floor_and_512_margin": 17864,
+    "sections": {
+      "lab_fdata": 58924,
+      "lab_fittab": 3688,
+      "lab_slot3": 31200,
+      "text": 452652,
+      "ram_text": 2748,
+      "c1_text": 608,
+      "data": 624
+    },
+    "audit": {
+      "profile": "synth-one",
+      "evidence": {
+        "synth-one": {
+          "selected": true,
+          "objects": [
+            "s1c",
+            "s1c_front",
+            "s1c_part",
+            "s1u"
+          ],
+          "renderers": [
+            "voice_run_kr"
+          ]
+        },
+        "superj6": {
+          "selected": false,
+          "objects": [],
+          "renderers": []
+        }
+      },
+      "legacy_providers_out_of_scope": true,
+      "elf_sha256": "33f7375ca5a62592ebb798beca0859ed41dd60f6df4804e7ca290849101a11d4",
+      "link_map_sha256": "7c9a4aeae234d1634654b1dece850b77d09339bbee1980ccf81b5e525e34ac51"
+    }
+  }
+}

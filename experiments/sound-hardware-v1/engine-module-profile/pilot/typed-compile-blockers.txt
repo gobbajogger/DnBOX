@@ -1,0 +1,4 @@
+firmware/src/app/original_presets.inc:2735:49: error: no member named 'filter_velocity_position' in 'juno6_t'
+firmware/src/app/original_presets.inc:2996:5: error: use of undeclared identifier 'tone_clock_active'
+firmware/src/app/original_presets.inc:3268:9: error: use of undeclared identifier 'tone_clock_active'
+firmware/src/app/original_runtime.c:184:1: error: static_assert failed "Synth One part does not grow the backend union"

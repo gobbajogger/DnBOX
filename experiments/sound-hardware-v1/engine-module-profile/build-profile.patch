@@ -1,0 +1,92 @@
+--- a/tools/build.py
++++ b/tools/build.py
+@@ -41,6 +41,12 @@
+ GEN = OUT / "gen"
+ LDR = OUT / "loader"
+ sys.path.insert(0, str(SRC / "tools"))
++if "DNBOX_ENGINE_PROFILE" in os.environ:
++    from engine_profile import apply_environment
++    try:
++        apply_environment(os.environ)
++    except ValueError as exc:
++        raise SystemExit(str(exc)) from exc
+ import fm1pkg_make  # noqa: E402
+ import gen_cache  # noqa: E402
+ import lz4blk  # noqa: E402
+--- /dev/null
++++ b/tools/engine_profile.py
+@@ -0,0 +1,74 @@
++#!/usr/bin/env python3
++"""Emit built-in engine selections or audit unsplit native link evidence."""
++import argparse
++import hashlib
++import json
++import re
++from pathlib import Path
++from subprocess import check_output
++
++PROFILES={"dual":(True,True),"synth-one":(True,False),"superj6":(False,True)}
++SINGLE_MODULE_OBJECTS={
++    "synth-one":("s1c","s1u","s1c_front","s1c_part","s1pack"),
++    "superj6":("dnbx_core",),
++}
++CORE_SYMBOL={
++    "synth-one":r"(?:s1c_render|voice_run_kr)",
++    "superj6":r"(?:dnbx_render(?:_[A-Za-z0-9_]+)?|render_with_osc_gains)",
++}
++# The guard flags aren't sufficient evidence. The linker audit below fails
++# closed if build.py still compiles the old unselected ownership paths.
++def plan(profile):
++    s1,sj6=PROFILES[profile]
++    flag=lambda v:"1" if v else "0"
++    return dict(X0X_S1C=flag(s1), X0X_SYNTHONE_PATCH=flag(s1),
++                X0X_SUPERJ6_FACTORY=flag(sj6), X0X_SUPERJ6_BUILTIN_INIT=flag(sj6),
++                X0X_ARP_HOOKS="1")
++
++def apply_environment(environ):
++    profile=environ.get("DNBOX_ENGINE_PROFILE")
++    if profile is None:return
++    if profile not in PROFILES:raise ValueError("DNBOX_ENGINE_PROFILE: dual, synth-one, or superj6")
++    overlay=plan(profile)
++    for key,value in overlay.items():
++        if key in environ and environ[key]!=value:
++            raise ValueError(f"{profile} conflicts with explicit {key}={environ[key]}; expected {value}")
++    environ.update(overlay)
++
++def audit(profile, elf, link_map, nm="nm"):
++    if not elf.is_file() or not link_map.is_file():
++        raise ValueError("exact unstripped ELF and its matching link map required")
++    sym=check_output([nm,"--defined-only",str(elf)],text=True,stderr=-1)
++    if not re.search(r"(?m)^[0-9a-f]+\s+[Tt]\s+_start$",sym):
++        raise ValueError("missing native _start, stripped or wrong ELF")
++    ledger=link_map.read_text()
++    if not ("Linker script and memory map" in ledger and "LOAD " in ledger):
++        raise ValueError("not a full native link map")
++    expected=dict(zip(SINGLE_MODULE_OBJECTS,PROFILES[profile]))
++    evidence={}
++    for engine, units in SINGLE_MODULE_OBJECTS.items():
++        obj=sorted(set(re.findall(r"(?m)^LOAD [^\n]*?[/\\]("+'|'.join(units)+r")\.o(?:\s|$)",ledger)))
++        syms=sorted(set(re.findall(r"(?m)^[0-9a-f]+\s+[Tt]\s+("+CORE_SYMBOL[engine]+r")(?:\.\S+)?$",sym)))
++        if expected[engine] and (not obj or not syms):
++            raise ValueError(f"{engine}: selected module lacks ELF renderer or matching compile-unit evidence")
++        if not expected[engine] and (obj or syms):
++            raise ValueError(f"{engine}: disabled module still present, objects {obj}, renderer symbols {syms}")
++        evidence[engine]=dict(selected=expected[engine],objects=obj,renderers=syms)
++    return dict(profile=profile, evidence=evidence, legacy_providers_out_of_scope=True,
++                elf_sha256=hashlib.sha256(elf.read_bytes()).hexdigest(),
++                link_map_sha256=hashlib.sha256(link_map.read_bytes()).hexdigest())
++
++def cli():
++    p=argparse.ArgumentParser(description=__doc__)
++    p.add_argument("profile",choices=PROFILES)
++    p.add_argument("--elf",type=Path)
++    p.add_argument("--link-map",type=Path)
++    p.add_argument("--nm",default="nm")
++    a=p.parse_args()
++    if bool(a.elf)!=bool(a.link_map):p.error("paired ELF and link map required")
++    try:
++        out=audit(a.profile,a.elf,a.link_map,a.nm) if a.elf else dict(profile=a.profile,environment=plan(a.profile),status="compact module selection only; legacy providers remain supported; audit native output")
++    except (ValueError,OSError) as exc:
++        p.error(str(exc))
++    print(json.dumps(out,indent=2))
++if __name__=="__main__": cli()
