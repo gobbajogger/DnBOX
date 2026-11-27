@@ -1,0 +1,52 @@
+--- a/stream_probe.c
++++ b/stream_probe.c
+@@ -93,11 +93,15 @@
+         s->dec[c].idx=p[c*3+2];
+     }
+ }
+-static void wet_at(Host *h,int base,int frac,float *l,float *r){
++static void wet_at(Host *h,int base,const float *weights,float *l,float *r){
+     Stream *s=&h->s;
+     int last=base+TAPS/2, work=0;
+-    if(last>=s->write){*l=*r=0;return;}
+-    if(base<s->read-TAPS+TAPS/2){  /* time tweak backwards: rebuild from a restart */
++    if(last>=s->write || last<0){*l=*r=0;return;}
++    /* Requested samples start at base−TAPS/2+1 and cached samples start
++     * at read−TAPS. Equality means the entire window is already cached;
++     * do not restart and decode the same block for a repeated phase. */
++    const int first_needed=base-TAPS/2+1;
++    if((first_needed>0?first_needed:0)<s->read-TAPS){
+         s->cache_pos=0;
+         for(int i=0;i<TAPS;i++)s->cached[i][0]=s->cached[i][1]=0;
+         if(base>=TAPS/2-1) seek(s,(base-(TAPS/2-1))/N*N);
+@@ -119,9 +123,11 @@
+     if(work>s->worst)s->worst=work;
+     float a=0,b=0;
+     const int start=base-TAPS/2+1;
+-    for(int j=0;j<TAPS;j++)if(start+j>=0){
+-        const int k=(s->cache_pos+j+TAPS-s->read+(last+1))%TAPS;
+-        const float w=has_short(s)?short_interp[frac][j]:long_interp[frac][j];
++    unsigned j=start<0?(unsigned)-start:0u;
++    unsigned cursor=(unsigned)(s->cache_pos+TAPS-s->read+(last+1))&7u;
++    for(;j<TAPS;j++){
++        const unsigned k=(cursor+j)&7u;
++        const float w=weights[j];
+         a+=w*s->cached[k][0];b+=w*s->cached[k][1];
+     }
+     *l=a*(1.f/32768.f);*r=b*(1.f/32768.f);
+@@ -140,13 +146,14 @@
+     const unsigned partial=short_rate?0u:3u;
+     int32_t (*next)[2]=short_rate?s->history.short_profile.next:s->history.long_profile.next;
+     const int16_t *coeff=short_rate?rec_short:rec_long;
++    const float (*weights)[TAPS]=short_rate?short_interp:long_interp;
+     for(size_t i=0;i<n;i++){
+         const unsigned phase=s->phase;
+         unsigned frac=phase+partial;
+         int base=s->framecell-s->del_cells+shift;
+         if(frac>=stride){frac-=stride;++base;}
+         float dl=0,dr=0;
+-        if(base>=-TAPS)wet_at(h,base,frac,&dl,&dr);
++        if(base>=-TAPS)wet_at(h,base,weights[frac],&dl,&dr);
+         const float dry=s->dry,wet=1.f-dry;
+         const float in_l=l[i],in_r=r[i];
+         ol[i]=dry*in_l+wet*dl;orr[i]=dry*in_r+wet*dr;
