@@ -1,0 +1,96 @@
+{
+  "input_signed_sha": "86dc34c0bad5b706617939c6d34e8b907cd40c71f0ec10618919c3b3fd48357b",
+  "feedback_matched_physical": 0.7779527902603149,
+  "frames": 24576,
+  "i": {
+    "stock_raw": {
+      "first_nonzero": 384,
+      "peak": 0.0072176274843513966,
+      "signed_sha": "85ab6d33c43c02f5b3b00a81b05c83e66841b131a74a32c620264f275ea4a7a0",
+      "rms_by_window": [
+        [
+          0.0005784352702754239,
+          6.723068965461948e-05,
+          0.0
+        ],
+        [
+          0.00029200060875978514,
+          4.34400800456938e-05,
+          3.510545976053983e-07
+        ]
+      ],
+      "energy_8k_fraction": 0.002263097558170557,
+      "energy_above_half_rate_nyquist": 0.0008435441995970905
+    },
+    "original_raw": {
+      "first_nonzero": 1981,
+      "peak": 0.02852749638259411,
+      "signed_sha": "740b42c7c79f0b863ac4b60bbcc273dd8db26dfcd7df1a353d480908746f8633",
+      "rms_by_window": [
+        [
+          0.0010769090200959857,
+          0.0005253327127763263,
+          0.00016666493094632986
+        ],
+        [
+          0.000473733439376529,
+          0.00043769026098443607,
+          0.00016775481445635435
+        ]
+      ],
+      "energy_8k_fraction": 0.1343739926815033,
+      "energy_above_half_rate_nyquist": 0.07931868731975555
+    },
+    "reconstruction_dBr": 0.6917681536460036
+  },
+  "ii": {
+    "stock_raw": {
+      "first_nonzero": 496,
+      "peak": 0.0072176274843513966,
+      "signed_sha": "c03fe7d3a4635714c79bdf925fc2fcf30325b8352a9b8a6b02b8ca73d73a0331",
+      "rms_by_window": [
+        [
+          0.00044787480630002627,
+          7.103457491060385e-05,
+          0.0
+        ],
+        [
+          0.0004418138376914768,
+          6.780332054385333e-05,
+          0.0
+        ]
+      ],
+      "energy_8k_fraction": 0.002407601336017251,
+      "energy_above_half_rate_nyquist": 0.0008813832537271082
+    },
+    "original_raw": {
+      "first_nonzero": 1981,
+      "peak": 0.05548693612217903,
+      "signed_sha": "2a569841e6038411d589ecfd80e67f11c8715a61082f476e730fb8633d80c175",
+      "rms_by_window": [
+        [
+          0.00167806405818982,
+          0.0008863057744647378,
+          0.00029817391149300287
+        ],
+        [
+          0.000725762608843478,
+          0.0007455732349505054,
+          0.00029852862990920195
+        ]
+      ],
+      "energy_8k_fraction": 0.35215166211128235,
+      "energy_above_half_rate_nyquist": 0.21964725852012634
+    },
+    "reconstruction_dBr": 0.24972747802500705
+  },
+  "original_damping_alone_residual_dBr": -3.500987685917069,
+  "gate_close": {
+    "frame": 6144,
+    "actual_compact_before_exact": true,
+    "actual_stock_wet_tail_stays_open_rms": 1.654348315050548e-05,
+    "actual_stock_wet_tail_closed_rms": 0.0,
+    "original_continued_Costello_with_zero_send_rms": 0.0004975373353661485,
+    "scope": "Original send gate is static verified as upstream; the exact detached active Costello here never stops and input is already zero."
+  }
+}

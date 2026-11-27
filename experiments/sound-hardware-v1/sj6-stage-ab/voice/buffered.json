@@ -1,0 +1,40 @@
+{
+  "scope": "Real current outer BufferedAudioUnit closure then AKAudioUnitBase processEvents closure and virtual sampler; constructed closure storage, public AudioBufferList ABI; no Apple mixer, imported Mixer frames, or full preset scene claim.",
+  "source": "6d163d79202e866d2fda96e36f752bd386641b5ae2d0b1f829a254d26b652850",
+  "cases": [
+    {
+      "role": "oscSampler1",
+      "key": 36,
+      "samples_per_channel": 4200,
+      "process_calls": 80,
+      "n_set": [
+        7,
+        17,
+        23,
+        31,
+        63,
+        128
+      ],
+      "peak": 0.355755090713501,
+      "sha": "898934cae818e2decb09d0c49734c5e0e29232c8608220e4b8fa710946bc4502",
+      "audiobuffer_mismatches": 0
+    },
+    {
+      "role": "oscSampler2",
+      "key": 36,
+      "samples_per_channel": 4200,
+      "process_calls": 80,
+      "n_set": [
+        7,
+        17,
+        23,
+        31,
+        63,
+        128
+      ],
+      "peak": 0.3724251687526703,
+      "sha": "5725c4774970393acdefa8c5e02be049b85a0cbf8e143c8343311df7aa6ff91f",
+      "audiobuffer_mismatches": 0
+    }
+  ]
+}

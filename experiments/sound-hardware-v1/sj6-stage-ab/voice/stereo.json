@@ -1,0 +1,96 @@
+{
+  "main": {
+    "pcm_sha": "0f6eca02f22df3fb8c916edab12c195b9e0ec9f5e4d36d8e51c08fa2dee198f4",
+    "windows": {
+      "attack": {
+        "native_side_vs_mid_dB": -141.44339674417898,
+        "recon_side_vs_mid_dB": -142.3781326047655,
+        "mid_level_dB": -12.518659850222429,
+        "mid_residual_dBr": -1.8840982580392895,
+        "side_residual_vs_native_total_dBr": -143.7512105659712
+      },
+      "held": {
+        "native_side_vs_mid_dB": -140.15326338990386,
+        "recon_side_vs_mid_dB": -144.12358607490845,
+        "mid_level_dB": -12.101906685442227,
+        "mid_residual_dBr": -2.335943538553867,
+        "side_residual_vs_native_total_dBr": -143.20868911841856
+      },
+      "release": {
+        "native_side_vs_mid_dB": -138.7534713885239,
+        "recon_side_vs_mid_dB": -141.269475570306,
+        "mid_level_dB": -12.022927213095775,
+        "mid_residual_dBr": -2.420373483792076,
+        "side_residual_vs_native_total_dBr": -140.66370845573624
+      },
+      "pending": {
+        "native_side_vs_mid_dB": -137.16307803445636,
+        "recon_side_vs_mid_dB": -136.69694569685814,
+        "mid_level_dB": -7.880189376412038,
+        "mid_residual_dBr": -1.4194505393371255,
+        "side_residual_vs_native_total_dBr": -137.21034344132883
+      },
+      "chord": {
+        "native_side_vs_mid_dB": -143.06727692768945,
+        "recon_side_vs_mid_dB": -139.2798023746316,
+        "mid_level_dB": -12.297177475126222,
+        "mid_residual_dBr": -0.2789848526068816,
+        "side_residual_vs_native_total_dBr": -145.34306524314096
+      },
+      "final": {
+        "native_side_vs_mid_dB": -139.66342764740506,
+        "recon_side_vs_mid_dB": -138.9975131436202,
+        "mid_level_dB": -11.883427156077655,
+        "mid_residual_dBr": -0.5816607226421128,
+        "side_residual_vs_native_total_dBr": -141.9210511531913
+      }
+    }
+  },
+  "sub": {
+    "pcm_sha": "9bf15bea79395fb043145eb41b0a245549c1aef43384aa6657b4a3ea2adcfaa3",
+    "windows": {
+      "attack": {
+        "native_side_vs_mid_dB": -137.45161121713343,
+        "recon_side_vs_mid_dB": -142.88647090621785,
+        "mid_level_dB": -11.944614103388101,
+        "mid_residual_dBr": -2.50278400129154,
+        "side_residual_vs_native_total_dBr": -139.59656209703434
+      },
+      "held": {
+        "native_side_vs_mid_dB": -136.411741925801,
+        "recon_side_vs_mid_dB": -138.0634314664278,
+        "mid_level_dB": -12.327525727625792,
+        "mid_residual_dBr": -2.3245528342737227,
+        "side_residual_vs_native_total_dBr": -139.15504378533043
+      },
+      "release": {
+        "native_side_vs_mid_dB": -142.17274803620828,
+        "recon_side_vs_mid_dB": -140.69812292111138,
+        "mid_level_dB": -11.989113584416257,
+        "mid_residual_dBr": -2.3596256185260565,
+        "side_residual_vs_native_total_dBr": -145.0397226176145
+      },
+      "pending": {
+        "native_side_vs_mid_dB": -136.20670413058656,
+        "recon_side_vs_mid_dB": -136.2248201959511,
+        "mid_level_dB": -12.215219413280373,
+        "mid_residual_dBr": -2.163645585616116,
+        "side_residual_vs_native_total_dBr": -137.4513133826801
+      },
+      "chord": {
+        "native_side_vs_mid_dB": -140.7693912306897,
+        "recon_side_vs_mid_dB": -138.39918678103425,
+        "mid_level_dB": -12.517040281790665,
+        "mid_residual_dBr": -1.7714626967204756,
+        "side_residual_vs_native_total_dBr": -143.36762995021087
+      },
+      "final": {
+        "native_side_vs_mid_dB": -145.17295709504572,
+        "recon_side_vs_mid_dB": -142.25679367947416,
+        "mid_level_dB": -12.630571014540315,
+        "mid_residual_dBr": -1.772212161259146,
+        "side_residual_vs_native_total_dBr": -148.70833819205782
+      }
+    }
+  }
+}

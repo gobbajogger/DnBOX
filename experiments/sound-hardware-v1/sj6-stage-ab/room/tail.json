@@ -1,0 +1,2 @@
+{"frames": 24576, "close": 6144, "steady_active_exact": true, "cold_off_exact": true, "tail_continues_exactly_for_this_zero_send_test": true, "state_bytes_delta": 0, "scope": "host ablation only, no original tone parity or target timing"}
+{"frames": 24576, "close": [6143, 14211], "reopen": [9971, 16607], "candidate_exact": true, "fresh_owner_restart_exact": true, "nonzero_tails_on_both_closed_intervals": true, "exact_signed_sha": "21ab53f822206ec30ca574febb321223fe015d644d7594336d6df027b5cba8f4", "scope": "same full-wet gated inlet; no held dry output equivalence asserted"}

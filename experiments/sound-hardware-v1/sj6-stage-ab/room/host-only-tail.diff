@@ -1,0 +1,40 @@
+--- incumbent/sj6_native_room.inc
++++ diagnostic/tail.inc
+@@ -2,7 +2,7 @@
+ /* Independent compact stereo inserts. No shared sends, cross-owner state,
+  * malloc, floating-point delay storage, or overlap with the Delay arena. */
+ #if X0X_SJ6_NATIVE_ROOM
+-#include "../dsp/fastmath.h"
++#include "dsp/fastmath.h"
+ float sj6_room_rate(unsigned word)
+ {
+     float u=(float)word*(1.f/127.f);
+@@ -49,11 +49,11 @@
+ {
+     if(!p||p->kind!=ORIGINAL_SOUND_JUNO||p->status!=ORIGINAL_RUNTIME_OK)return;
+     sj6_room_t *s=&p->dsp.juno.room;
+-    if(s->enable!=word[SJ6_ROOM_ENABLE]||s->type!=word[SJ6_ROOM_TYPE])sj6_room_reset(s);
++    if(s->type!=word[SJ6_ROOM_TYPE])sj6_room_reset(s);
+     if(s->widen!=word[SJ6_ROOM_WIDEN]){
+         sj6_fatten_reset(s);
+     }
+-    s->armed=1;
++    s->armed=(uint8_t)(s->armed==2 || word[SJ6_ROOM_ENABLE] ? 2 : 1);
+     s->enable=word[SJ6_ROOM_ENABLE];s->type=word[SJ6_ROOM_TYPE];
+     s->widen=word[SJ6_ROOM_WIDEN];
+     s->mix=(float)word[SJ6_ROOM_MIX]*(1.f/127.f);
+@@ -122,11 +122,11 @@
+ }
+ static void sj6_room_process(sj6_room_t *s,float *left,float *right,unsigned frames)
+ {
+-    if(!s->armed||(!s->enable&&!s->widen&&s->depth==0.f))return;
++    if(!s->armed||(s->armed!=2&&!s->widen&&s->depth==0.f))return;
+     for(unsigned i=0;i<frames;++i){
+         float l=left[i],r=right[i];
+-        if(s->enable){
+-            s->acc[0]+=l;s->acc[1]+=r;
++        if(s->armed==2){
++            if(s->enable){s->acc[0]+=l;s->acc[1]+=r;}
+             if(++s->tick==SJ6_ROOM_STRIDE){s->tick=0;sj6_room_tick(s);}
+             if(s->mix>0.f){
+                 float t=(float)s->tick*(1.f/SJ6_ROOM_STRIDE);

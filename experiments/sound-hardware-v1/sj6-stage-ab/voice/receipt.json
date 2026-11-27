@@ -1,0 +1,477 @@
+{
+  "after-halfband.private.f32": {
+    "sha": "03300983aa637f8fb64ad924ab04489c8e93a21a8b72ed2517bab90abace7a97",
+    "windows": {
+      "attack": {
+        "peak_in": [
+          0.5060973167419434,
+          0.5273870229721069,
+          1.0331329107284546
+        ],
+        "peak_out": 0.9262211322784424,
+        "distinct_roles": true,
+        "nonzero_pair": 2047,
+        "receiver_ratio_min_max": [
+          0.8937387563466354,
+          0.8970696171375674
+        ],
+        "polarity_loss": 0
+      },
+      "held": {
+        "peak_in": [
+          0.483856201171875,
+          0.48985913395881653,
+          0.9703946709632874
+        ],
+        "peak_out": 0.8815498948097229,
+        "distinct_roles": true,
+        "nonzero_pair": 13057,
+        "receiver_ratio_min_max": [
+          0.9068469516088542,
+          0.9263872314877744
+        ],
+        "polarity_loss": 0
+      },
+      "release": {
+        "peak_in": [
+          0.40842974185943604,
+          0.10957606136798859,
+          0.40473878383636475
+        ],
+        "peak_out": 0.37554237246513367,
+        "distinct_roles": true,
+        "nonzero_pair": 512,
+        "receiver_ratio_min_max": [
+          0.927372465977236,
+          0.9278636525151673
+        ],
+        "polarity_loss": 0
+      },
+      "handoff": {
+        "peak_in": [
+          0.11789177358150482,
+          0.046429675072431564,
+          0.11000289767980576
+        ],
+        "peak_out": 0.10368002206087112,
+        "distinct_roles": true,
+        "nonzero_pair": 416,
+        "receiver_ratio_min_max": [
+          0.9425208039836526,
+          0.9429749739697437
+        ],
+        "polarity_loss": 0
+      },
+      "chord": {
+        "peak_in": [
+          0.3612474203109741,
+          0.38801413774490356,
+          0.7479559183120728
+        ],
+        "peak_out": 0.7096364498138428,
+        "distinct_roles": true,
+        "nonzero_pair": 27463,
+        "receiver_ratio_min_max": [
+          0.948329515747212,
+          0.9790944407802056
+        ],
+        "polarity_loss": 0
+      },
+      "final": {
+        "peak_in": [
+          0.26471376419067383,
+          0.2647864818572998,
+          0.5247700214385986
+        ],
+        "peak_out": 0.5144736170768738,
+        "distinct_roles": true,
+        "nonzero_pair": 512,
+        "receiver_ratio_min_max": [
+          0.9800604672813049,
+          0.9803792143404206
+        ],
+        "polarity_loss": 0
+      }
+    }
+  },
+  "source-order.private.f32": {
+    "sha": "0cd1196eb9f333b04925b0cf38d6bcd7616a7cf6c75f7389deb1617b7ed03afc",
+    "windows": {
+      "attack": {
+        "peak_in": [
+          0.5061012506484985,
+          0.527391254901886,
+          1.033140778541565
+        ],
+        "peak_out": 0.9262281656265259,
+        "distinct_roles": true,
+        "nonzero_pair": 2047,
+        "receiver_ratio_min_max": [
+          0.8937387532089212,
+          0.8970696227927296
+        ],
+        "polarity_loss": 0
+      },
+      "held": {
+        "peak_in": [
+          0.4838600754737854,
+          0.48986318707466125,
+          0.9704030156135559
+        ],
+        "peak_out": 0.8815574645996094,
+        "distinct_roles": true,
+        "nonzero_pair": 13057,
+        "receiver_ratio_min_max": [
+          0.9068469535320193,
+          0.9263872382676134
+        ],
+        "polarity_loss": 0
+      },
+      "release": {
+        "peak_in": [
+          0.4084615707397461,
+          0.10958465188741684,
+          0.4047703146934509
+        ],
+        "peak_out": 0.3755716383457184,
+        "distinct_roles": true,
+        "nonzero_pair": 512,
+        "receiver_ratio_min_max": [
+          0.9273724729584868,
+          0.9278636446675075
+        ],
+        "polarity_loss": 0
+      },
+      "handoff": {
+        "peak_in": [
+          0.11823084205389023,
+          0.04705208167433739,
+          0.11028553545475006
+        ],
+        "peak_out": 0.10394641757011414,
+        "distinct_roles": true,
+        "nonzero_pair": 416,
+        "receiver_ratio_min_max": [
+          0.9425208064394834,
+          0.9429749770121454
+        ],
+        "polarity_loss": 0
+      },
+      "chord": {
+        "peak_in": [
+          0.3612501919269562,
+          0.3880174458026886,
+          0.7479619979858398
+        ],
+        "peak_out": 0.709642231464386,
+        "distinct_roles": true,
+        "nonzero_pair": 27463,
+        "receiver_ratio_min_max": [
+          0.9483295203553838,
+          0.9790944419657497
+        ],
+        "polarity_loss": 0
+      },
+      "final": {
+        "peak_in": [
+          0.2647342085838318,
+          0.26480695605278015,
+          0.5248105525970459
+        ],
+        "peak_out": 0.5145133137702942,
+        "distinct_roles": true,
+        "nonzero_pair": 512,
+        "receiver_ratio_min_max": [
+          0.980060467751766,
+          0.9803792209770338
+        ],
+        "polarity_loss": 0
+      }
+    }
+  },
+  "three-main-taps.private.f32": {
+    "sha": "0cd1196eb9f333b04925b0cf38d6bcd7616a7cf6c75f7389deb1617b7ed03afc",
+    "windows": {
+      "attack": {
+        "peak_in": [
+          0.5061012506484985,
+          0.527391254901886,
+          1.033140778541565
+        ],
+        "peak_out": 0.9262281656265259,
+        "distinct_roles": true,
+        "nonzero_pair": 2047,
+        "receiver_ratio_min_max": [
+          0.8937387532089212,
+          0.8970696227927296
+        ],
+        "polarity_loss": 0
+      },
+      "held": {
+        "peak_in": [
+          0.4838600754737854,
+          0.48986318707466125,
+          0.9704030156135559
+        ],
+        "peak_out": 0.8815574645996094,
+        "distinct_roles": true,
+        "nonzero_pair": 13057,
+        "receiver_ratio_min_max": [
+          0.9068469535320193,
+          0.9263872382676134
+        ],
+        "polarity_loss": 0
+      },
+      "release": {
+        "peak_in": [
+          0.4084615707397461,
+          0.10958465188741684,
+          0.4047703146934509
+        ],
+        "peak_out": 0.3755716383457184,
+        "distinct_roles": true,
+        "nonzero_pair": 512,
+        "receiver_ratio_min_max": [
+          0.9273724729584868,
+          0.9278636446675075
+        ],
+        "polarity_loss": 0
+      },
+      "handoff": {
+        "peak_in": [
+          0.11823084205389023,
+          0.04705208167433739,
+          0.11028553545475006
+        ],
+        "peak_out": 0.10394641757011414,
+        "distinct_roles": true,
+        "nonzero_pair": 416,
+        "receiver_ratio_min_max": [
+          0.9425208064394834,
+          0.9429749770121454
+        ],
+        "polarity_loss": 0
+      },
+      "chord": {
+        "peak_in": [
+          0.3612501919269562,
+          0.3880174458026886,
+          0.7479619979858398
+        ],
+        "peak_out": 0.709642231464386,
+        "distinct_roles": true,
+        "nonzero_pair": 27463,
+        "receiver_ratio_min_max": [
+          0.9483295203553838,
+          0.9790944419657497
+        ],
+        "polarity_loss": 0
+      },
+      "final": {
+        "peak_in": [
+          0.2647342085838318,
+          0.26480695605278015,
+          0.5248105525970459
+        ],
+        "peak_out": 0.5145133137702942,
+        "distinct_roles": true,
+        "nonzero_pair": 512,
+        "receiver_ratio_min_max": [
+          0.980060467751766,
+          0.9803792209770338
+        ],
+        "polarity_loss": 0
+      }
+    }
+  },
+  "saw-before-ablation.private.f32": {
+    "sha": "0cd1196eb9f333b04925b0cf38d6bcd7616a7cf6c75f7389deb1617b7ed03afc",
+    "windows": {
+      "attack": {
+        "peak_in": [
+          0.5061012506484985,
+          0.527391254901886,
+          1.033140778541565
+        ],
+        "peak_out": 0.9262281656265259,
+        "distinct_roles": true,
+        "nonzero_pair": 2047,
+        "receiver_ratio_min_max": [
+          0.8937387532089212,
+          0.8970696227927296
+        ],
+        "polarity_loss": 0
+      },
+      "held": {
+        "peak_in": [
+          0.4838600754737854,
+          0.48986318707466125,
+          0.9704030156135559
+        ],
+        "peak_out": 0.8815574645996094,
+        "distinct_roles": true,
+        "nonzero_pair": 13057,
+        "receiver_ratio_min_max": [
+          0.9068469535320193,
+          0.9263872382676134
+        ],
+        "polarity_loss": 0
+      },
+      "release": {
+        "peak_in": [
+          0.4084615707397461,
+          0.10958465188741684,
+          0.4047703146934509
+        ],
+        "peak_out": 0.3755716383457184,
+        "distinct_roles": true,
+        "nonzero_pair": 512,
+        "receiver_ratio_min_max": [
+          0.9273724729584868,
+          0.9278636446675075
+        ],
+        "polarity_loss": 0
+      },
+      "handoff": {
+        "peak_in": [
+          0.11823084205389023,
+          0.04705208167433739,
+          0.11028553545475006
+        ],
+        "peak_out": 0.10394641757011414,
+        "distinct_roles": true,
+        "nonzero_pair": 416,
+        "receiver_ratio_min_max": [
+          0.9425208064394834,
+          0.9429749770121454
+        ],
+        "polarity_loss": 0
+      },
+      "chord": {
+        "peak_in": [
+          0.3612501919269562,
+          0.3880174458026886,
+          0.7479619979858398
+        ],
+        "peak_out": 0.709642231464386,
+        "distinct_roles": true,
+        "nonzero_pair": 27463,
+        "receiver_ratio_min_max": [
+          0.9483295203553838,
+          0.9790944419657497
+        ],
+        "polarity_loss": 0
+      },
+      "final": {
+        "peak_in": [
+          0.2647342085838318,
+          0.26480695605278015,
+          0.5248105525970459
+        ],
+        "peak_out": 0.5145133137702942,
+        "distinct_roles": true,
+        "nonzero_pair": 512,
+        "receiver_ratio_min_max": [
+          0.980060467751766,
+          0.9803792209770338
+        ],
+        "polarity_loss": 0
+      }
+    }
+  },
+  "saw-after-auth.private.f32": {
+    "sha": "0c8a3900405610432e8786d77011ae89f48c7c4a8b95bf89729c03e7a9f81756",
+    "windows": {
+      "attack": {
+        "peak_in": [
+          0.5060970783233643,
+          0.527387261390686,
+          1.0331331491470337
+        ],
+        "peak_out": 0.9262213706970215,
+        "distinct_roles": true,
+        "nonzero_pair": 2047,
+        "receiver_ratio_min_max": [
+          0.8937387587100345,
+          0.8970696208216049
+        ],
+        "polarity_loss": 0
+      },
+      "held": {
+        "peak_in": [
+          0.4838562309741974,
+          0.48985913395881653,
+          0.970395028591156
+        ],
+        "peak_out": 0.8815502524375916,
+        "distinct_roles": true,
+        "nonzero_pair": 13057,
+        "receiver_ratio_min_max": [
+          0.906846951871274,
+          0.9263872416970509
+        ],
+        "polarity_loss": 0
+      },
+      "release": {
+        "peak_in": [
+          0.4084298014640808,
+          0.10957614332437515,
+          0.4047388434410095
+        ],
+        "peak_out": 0.37554243206977844,
+        "distinct_roles": true,
+        "nonzero_pair": 512,
+        "receiver_ratio_min_max": [
+          0.9273724746043768,
+          0.9278636506080353
+        ],
+        "polarity_loss": 0
+      },
+      "handoff": {
+        "peak_in": [
+          0.11789177358150482,
+          0.046429675072431564,
+          0.11000289767980576
+        ],
+        "peak_out": 0.10368002206087112,
+        "distinct_roles": true,
+        "nonzero_pair": 416,
+        "receiver_ratio_min_max": [
+          0.9425208039836526,
+          0.9429749793181138
+        ],
+        "polarity_loss": 0
+      },
+      "chord": {
+        "peak_in": [
+          0.3612472712993622,
+          0.3880142867565155,
+          0.7479559183120728
+        ],
+        "peak_out": 0.7096364498138428,
+        "distinct_roles": true,
+        "nonzero_pair": 27463,
+        "receiver_ratio_min_max": [
+          0.9483295170099223,
+          0.9790944407802056
+        ],
+        "polarity_loss": 0
+      },
+      "final": {
+        "peak_in": [
+          0.26471376419067383,
+          0.2647865116596222,
+          0.5247700214385986
+        ],
+        "peak_out": 0.5144736170768738,
+        "distinct_roles": true,
+        "nonzero_pair": 512,
+        "receiver_ratio_min_max": [
+          0.9800604672813049,
+          0.980379216153252
+        ],
+        "polarity_loss": 0
+      }
+    }
+  }
+}

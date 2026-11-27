@@ -1,0 +1,1 @@
+cc -shared -fPIC -std=c11 -O2 -ffp-contract=off -DX0X_HOST=1 -DX0X_SUPERJ6_FACTORY=1 -DX0X_SUPERJ6_BUILTIN_INIT=1 -DX0X_SJ6_NATIVE_ROOM=1 -I"$DONOR/firmware/src" -I"$DONOR/experiments/original_synth" "$BRIDGE" -lm -o "$OUT"
