@@ -1,0 +1,39 @@
+--- a/link-guarded-exact.py
++++ b/link-guarded-exact.py
+@@ -31,7 +31,6 @@
+                '.rodata.s1_pan_detent_hz':0x200,
+                '.rodata.s1_pan_boundary_hz':0x1fc,
+                '.rodata.sj6_velocity_scale':0x200}
+-    relocated.pop('.rodata.sj6_velocity_scale')
+     split = os.environ.get('DNBOX_TANH_SPLIT_LAB') == '1'
+     if split:
+         relocated.pop('.rodata.x0x_tanh_raw')
+@@ -62,6 +61,10 @@
+         '.rodata.original_chicago_eq_sin': (512, '9656f4300eb60486c3542b370804dfe85fd7bc749f386db50c1afed5d86b8ff9'),
+         '.rodata.original_chicago_eq_cos': (512, '09e31976123fe609ffc6da59f59318694d8bafeb66c1d4e05fe78f4be173675c'),
+     })
++    # Synth One-only uses breaks.c's formula selector, not the SJ6 packed table.
++    assert os.environ.get('X0X_SUPERJ6_FACTORY') == '0'
++    extra_fdata.pop('.rodata.brk_retrigger_groups')
++    relocated.pop('.rodata.sj6_velocity_scale', None)
+     s1_fdata={
+         '.rodata.patch_domain': (144,'1850293ba738017d5c152031d40c0f33ce3f2204b47c7784e56d42eb75100da1'),
+         '.rodata.patch_slot_code': (150,'2ee5a02b37043b1bbffa6f6cef1e81efc7960620ef0e9297a8a63affe4aa7e42'),
+@@ -261,8 +264,15 @@
+         addr,count=(int(x,16) for x in re.search(r'^ '+re.escape(n)+r'\s+(0x[0-9a-f]+)\s+(0x[0-9a-f]+)',mt,re.M).groups())
+         assert count==size and 0x020A9000+lo<=addr<=0x020A9000+hi-count,(n,addr,count)
+     xcrc=zlib.crc32(a[5][lo:hi])
+-    print('Linked typed single-engine ELF; no packaging attempted.',flush=True)
+-    raise Stop
++    # Verify BREAK's alternate compiled data stayed in app XIP with exact ticks.
++    n = '.rodata.brk_retrigger_probability.ticks'
++    entries = re.findall(r'^ '+re.escape(n)+r'\s+(0x[0-9a-f]+)\s+(0x[0-9a-f]+)', mt, re.M)
++    assert len(entries) == 1, entries
++    addr, size = map(lambda value: int(value, 16), entries[0])
++    off = addr - b.APP_XIP
++    assert size == 6 and 0 <= off <= len(a[0])-size
++    assert a[0][off:off+size] == bytes((3,6,12,24,48,96))
++    assert not re.search(r'^ \.rodata\.brk_retrigger_groups\s+0x', mt, re.M)
+     p,p2,p3=(a[-2][32:],a[-1][32:],a[4][32:])
+     assert cold909_end+sum(relocated.values())<=len(a[-2])<=61440
+     assert 32+sum(pair.values())<=len(a[-1])<=32768

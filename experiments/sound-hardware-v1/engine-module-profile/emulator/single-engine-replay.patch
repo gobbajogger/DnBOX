@@ -1,0 +1,11 @@
+--- a/guarded_replay.py
++++ b/guarded_replay.py
+@@ -52,7 +52,7 @@
+   img.extend(b'\xff'*(off-len(img)));img.extend(r)
+   if n!='data':ram.append((v-ELF_RAM,r))
+  img.extend(b'\xff'*(-len(img)%4));img.extend(b'\x00\xff\xff\xff')
+- ensure(500000<len(img)<=MAX,'app overlap with BLE')
++ ensure(0<len(img)<=MAX,'app overlap with BLE')
+  return bytes(img),ram
+ def loader(module,base,img):
+  enc,crc=module.enc,module.crc16

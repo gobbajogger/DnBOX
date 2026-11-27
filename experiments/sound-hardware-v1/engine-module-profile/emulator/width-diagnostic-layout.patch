@@ -1,0 +1,81 @@
+--- a/firmware/src/dsp/s1c/s1c.h
++++ b/firmware/src/dsp/s1c/s1c.h
+@@ -260,6 +260,14 @@
+ #define S1C_RVB_BYTES (2 * S1C_RVB_WORDS)
+ #endif
+ /* after s1c_init: reverb lines, widen allpasses, and the pool the delay lines and HF rings are carved from */
+-void s1c_attach(s1c *s, void *rvb, uint16_t *wbuf, uint8_t *pool, int pool_bytes);
+-#endif
+-#endif
++#if defined(DNBOX_S1_EXACT_WIDTH_LAB) && DNBOX_S1_EXACT_WIDTH_LAB
++#if X0X_SUPERJ6_FACTORY
++#error Exact width allocation must not enter a dual-Synth profile
++#endif
++typedef float s1_width_sample;
++#else
++typedef uint16_t s1_width_sample;
++#endif
++void s1c_attach(s1c *s, void *rvb, s1_width_sample *wbuf, uint8_t *pool, int pool_bytes);
++#endif
++#endif
+--- a/firmware/src/app/s1c_part.h
++++ b/firmware/src/app/s1c_part.h
+@@ -20,7 +20,7 @@
+ 
+ typedef struct {
+     s1c e;
+-    uint16_t wbuf[2205]; /* source 50 ms at the S1 part's 44.1 kHz */
++    s1_width_sample wbuf[2205]; /* source 50 ms at the S1 part's 44.1 kHz */
+     uint8_t *arena;            /* S1C_ARENA_BYTES, or NULL: no delay/reverb */
+     uint16_t program;          /* pack program, or S1_PART_INIT */
+     float detm;                /* program DETM: pitch bend scales it */
+--- a/firmware/src/dsp/s1c/s1c.c
++++ b/firmware/src/dsp/s1c/s1c.c
+@@ -1082,10 +1082,10 @@
+ #endif
+ }
+ #endif
+-void s1c_attach(s1c *s, void *rvb, uint16_t *wbuf, uint8_t *pool, int pool_bytes)
++void s1c_attach(s1c *s, void *rvb, s1_width_sample *wbuf, uint8_t *pool, int pool_bytes)
+ {
+     s1u_rvb_attach(&s->rv, rvb);
+-    s->wid.buf = wbuf; s->pool = pool; s->pool_bytes = pool_bytes & ~3;
++    s->wid.buf = (uint16_t *)(void *)wbuf; s->pool = pool; s->pool_bytes = pool_bytes & ~3;
+     memset(wbuf, 0, 2205u * sizeof *wbuf);
+     s->wpos=0;
+     s->ddec = 0;
+@@ -1491,10 +1491,15 @@
+ #endif
+         L = comp(s->cmp[0][0], L, &cm) * P(CMG); R = comp(s->cmp[0][1], R, &cm) * P(CMG);
+         /* Source WIDEN: one postmaster right delay, unconditionally clocked. */
+-        uint16_t *history=s->wid.buf;
++        s1_width_sample *history=(s1_width_sample *)(void *)s->wid.buf;
+         const unsigned pos=(unsigned)s->wpos;
++#if defined(DNBOX_S1_EXACT_WIDTH_LAB) && DNBOX_S1_EXACT_WIDTH_LAB
++        const float delayed=history[pos];
++        history[pos]=delayed*0.f+R; /* source feedback-zero addition preserves signed-zero chronology */
++#else
+         const float delayed=h16_get(history[pos]);
+         history[pos]=h16_put(R);
++#endif
+         s->wpos=(int32_t)(pos+1u==2205u?0u:pos+1u);
+         const float widen=P(WIDEN);
+         R=widen*delayed+(1.f-widen)*R;
+--- a/firmware/src/app/original_runtime.c
++++ b/firmware/src/app/original_runtime.c
+@@ -181,7 +181,15 @@
+ _Static_assert(sizeof(s1_dry_part) <= sizeof(((original_runtime_backend *)0)->juno),
+                "Synth One tuning must remain within the combined backend union");
+ #else
++#if defined(DNBOX_S1_EXACT_WIDTH_LAB) && DNBOX_S1_EXACT_WIDTH_LAB
++/* Existing owners retain independent histories. The pilot link must verify
++ * the physical pool and 8704-byte reserve; no union-overrun allowance. */
++_Static_assert(sizeof(((s1_dry_part *)0)->wbuf)==8820u, "exact 50 ms SRAM");
++_Static_assert(sizeof(original_runtime_backend) == sizeof(s1_dry_part),
++               "exact width uses the Synth One arm; paired native pool and reserve must be audited");
++#else
+ _Static_assert(sizeof(s1_dry_part) <= sizeof(original_miami_backend), "Synth One part does not grow the backend union");
++#endif
+ #endif
+ 
+ int original_runtime_s1_program(original_runtime_part *p, unsigned program)
