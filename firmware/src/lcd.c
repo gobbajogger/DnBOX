@@ -21,7 +21,13 @@
 #endif
 #endif
 
-static uint8_t lcd_small[64];
+enum { LCD_WINDOW_STAGE_BYTES = 8u, LCD_CMD_STAGE_BYTES = 16u };
+static uint8_t lcd_small[LCD_CMD_STAGE_BYTES] __attribute__((aligned(16)));
+_Static_assert(LCD_WINDOW_STAGE_BYTES <= sizeof lcd_small, "CASET and RASET staging overlap");
+/* Derive the actual byte count, rejecting oversized payloads at compile time. */
+#define LCD_SEQ_DATA(cmd, ...) \
+    (cmd), (sizeof((const uint8_t[]){__VA_ARGS__}) + \
+    0u * sizeof(char[sizeof((const uint8_t[]){__VA_ARGS__}) <= LCD_CMD_STAGE_BYTES ? 1 : -1])), __VA_ARGS__
 static uint8_t lcd_busy;           /* a lcd_data DMA may still run; CS is low */
 
 static void lcd_spin(uint32_t n)
@@ -124,21 +130,21 @@ static void lcd_blit(uint32_t x, uint32_t y, uint32_t w, uint32_t h, const uint1
  * lcd_init sends DISPON after the clear. Same format as below. */
 static const uint8_t LCD_SEQ[] = {
     0x01, 0,                     /* SWRESET */
-    0x00, 1, 150,
+    LCD_SEQ_DATA(0x00, 150),
     0x11, 0,                     /* SLPOUT */
-    0x00, 1, 120,
-    0x36, 1, 0x00,               /* MADCTL: top-left origin, RGB order */
-    0x3A, 1, 0x55,               /* COLMOD: RGB565 */
-    0xB2, 5, 0x0C, 0x0C, 0x00, 0x33, 0x33,
-    0xB7, 1, 0x35,
-    0xBB, 1, 0x32,
-    0xC2, 1, 0x01,
-    0xC3, 1, 0x15,
-    0xC4, 1, 0x20,
-    0xC6, 1, 0x0F,
-    0xD0, 2, 0xA4, 0xA1,
-    0xE0, 14, 0xD0, 0x08, 0x0E, 0x09, 0x09, 0x05, 0x31, 0x33, 0x48, 0x17, 0x14, 0x15, 0x31, 0x34,
-    0xE1, 14, 0xD0, 0x08, 0x0E, 0x09, 0x09, 0x05, 0x31, 0x33, 0x48, 0x17, 0x14, 0x15, 0x31, 0x34,
+    LCD_SEQ_DATA(0x00, 120),
+    LCD_SEQ_DATA(0x36, 0x00),               /* MADCTL: top-left origin, RGB order */
+    LCD_SEQ_DATA(0x3A, 0x55),               /* COLMOD: RGB565 */
+    LCD_SEQ_DATA(0xB2, 0x0C, 0x0C, 0x00, 0x33, 0x33),
+    LCD_SEQ_DATA(0xB7, 0x35),
+    LCD_SEQ_DATA(0xBB, 0x32),
+    LCD_SEQ_DATA(0xC2, 0x01),
+    LCD_SEQ_DATA(0xC3, 0x15),
+    LCD_SEQ_DATA(0xC4, 0x20),
+    LCD_SEQ_DATA(0xC6, 0x0F),
+    LCD_SEQ_DATA(0xD0, 0xA4, 0xA1),
+    LCD_SEQ_DATA(0xE0, 0xD0, 0x08, 0x0E, 0x09, 0x09, 0x05, 0x31, 0x33, 0x48, 0x17, 0x14, 0x15, 0x31, 0x34),
+    LCD_SEQ_DATA(0xE1, 0xD0, 0x08, 0x0E, 0x09, 0x09, 0x05, 0x31, 0x33, 0x48, 0x17, 0x14, 0x15, 0x31, 0x34),
     0x21, 0,                     /* INVON: IPS panel */
     0x13, 0,                     /* NORON */
 };
@@ -148,15 +154,16 @@ static const uint8_t LCD_SEQ[] = {
  * cmd 0x00 = wait (data byte: ~ms). */
 static const uint8_t LCD_SEQ[] = {
     0x01, 0,                     /* SWRESET */
-    0x00, 1, 150,
+    LCD_SEQ_DATA(0x00, 150),
     0x11, 0,                     /* SLPOUT */
-    0x00, 1, 120,
-    0x3A, 1, 0x55,               /* COLMOD: RGB565 */
-    0x36, 1, 0x00,               /* MADCTL: top-left origin, RGB order */
+    LCD_SEQ_DATA(0x00, 120),
+    LCD_SEQ_DATA(0x3A, 0x55),               /* COLMOD: RGB565 */
+    LCD_SEQ_DATA(0x36, 0x00),               /* MADCTL: top-left origin, RGB order */
     0x21, 0,                     /* INVON: IPS panel */
     0x13, 0,                     /* NORON */
 };
 #endif
+#undef LCD_SEQ_DATA
 
 static void lcd_init(void)
 {
