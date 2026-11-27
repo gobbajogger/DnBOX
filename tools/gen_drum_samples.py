@@ -110,6 +110,40 @@ def arr(ctype, name, vals, fmt=str, per=12, shared=False):
     return "\n".join(lines)
 
 
+def pack_tanh_second_difference(table):
+    """A width byte then a group of up to 16 LSB-first ZigZag residuals."""
+    words = [struct.unpack("<I", struct.pack("<f", f))[0] for f in table]
+    values, prev, stride = [], 0, 0
+    for word in words:
+        nxt = word - prev
+        residual = nxt - stride
+        values.append(residual * 2 if residual >= 0 else -residual * 2 - 1)
+        prev, stride = word, nxt
+    data = bytearray()
+    for start in range(0, len(values), 16):
+        part = values[start:start + 16]
+        width = max(part).bit_length()
+        assert width <= 32
+        payload = sum(value << (width * i) for i, value in enumerate(part))
+        data.append(width)
+        data.extend(payload.to_bytes((len(part) * width + 7) // 8, "little"))
+    # Check the exact packed representation, including all group boundaries.
+    prev, stride, offset = 0, 0, 0
+    for start in range(0, len(words), 16):
+        size = min(16, len(words) - start)
+        width = data[offset]
+        n = (width * size + 7) // 8
+        payload = int.from_bytes(data[offset + 1:offset + 1 + n], "little")
+        offset += 1 + n
+        for i in range(size):
+            u = (payload >> (width * i)) & ((1 << width) - 1)
+            stride += (u >> 1) ^ -(u & 1)
+            prev += stride
+            assert prev == words[start + i]
+    assert offset == len(data)
+    return data
+
+
 def pot_exp(lo, hi, pot):
     """er99_pot_to_value for an EXP pot, in float as 9W9 evaluates it"""
     ratio = f32(f32(hi) / f32(lo))
@@ -294,7 +328,14 @@ def main():
           "/* Direct tanh reads: flash/rodata only, one copy (shared), no RAM.",
           " * Retain the packed representation above for the old decoder oracle.",
           " * cfloat emits a decimal literal that round-trips to the same binary32. */",
+          "#if X0X_D9_TANH_BOOT",
+          "extern float x0x_tanh_raw[X0X_TANH_N + 2];",
+          "#ifdef X0X_DRUM_TABLES_DEFINE",
+          arr("uint8_t", "x0x_tanh_second_bytes", pack_tanh_second_difference(tab), per=16),
+          "#endif",
+          "#else",
           arr("float", "x0x_tanh_raw", tab, cfloat, per=6, shared=True),
+          "#endif",
           "/* Exact binary32 table entry i (0 .. X0X_TANH_N+1). Hot-path inline. */",
           "static inline float x0x_tanh_value(unsigned i)",
           "{",

@@ -124,6 +124,11 @@ void drum909_render_st_masked(drum909_t *d, float *dry_l, float *dry_r, float *r
 /* Distinct cleared dry buffers, as in the 909 engine job. */
 void drum909_render_st_cleared(drum909_t *d, float *dry_l, float *dry_r, float *rev, float *dly,
                              int n, uint16_t audible_tracks);
+#if DNBOX_LAB_D9_SUFFIX
+void drum909_trial_snapshot(const drum909_t *);
+void drum909_trial_helper(int n);
+void drum909_trial_serial(drum909_t*,float*,float*,float*,float*,int,uint16_t);
+#endif
 void drum909_pan_settle(drum909_t *d);   /* every pan to its target at once (the kit is silent: no zipper) */
 int drum909_nparams(int voice);
 const x0x_param_t *drum909_param(int voice, int i);

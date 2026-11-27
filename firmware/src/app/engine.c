@@ -2437,6 +2437,9 @@ static float eng_bass_buf[2 * NBASS][256] X0X_XPOOL;
 static original_runtime_workspace original_workspace_b X0X_XPOOL;
 static uint32_t bass_quiet_next[NBASS];               /* the quiet count after this stretch's render */
 static uint8_t bass_render_ok[NBASS];
+#if DNBOX_LAB_D9_SUFFIX
+static uint8_t d9_trial_armed;
+#endif
 static uint8_t full808_a_ready;
 static int full808_a_status;
 static uint32_t full808_a_ticks;
@@ -2614,6 +2617,11 @@ static int run_job(int j, int core)
              * off the published plan even when a failed core is taken over. */
             float *mono = ((eng_c1_mask >> JB_808 ^ eng_c1_mask >> JB_A) & 1u)
                 ? original_workspace_b.mix.kit909_mono : original_workspace.mix.kit909_mono;
+#if DNBOX_LAB_D9_SUFFIX
+            if(core && d9_trial_armed)
+                drum909_trial_serial(&d909,dry_l,dry_r,rev,dly,(int)n,smc_audible_drums(solo,PART_909));
+            else
+#endif
             drum909_render_st_cleared(&d909, dry_l, dry_r, rev, dly, (int)n, smc_audible_drums(solo, PART_909));
             mix_targets(PART_909, mix_level[PART_909], solo_parts);
             bfx_shape(PART_909, dry_l, dry_r, rev, dly, 4, (int)n);
@@ -2977,6 +2985,10 @@ __attribute__((noinline)) static void render_sub(float *out_l, float *out_r, uin
     /* 808 stays on core 0 and core 1 has other work: move the BD+SD prefix */
     eng_808_split = (uint8_t)(!full808 && !(m & (1u << JB_808)) && m && drum808_active(&d808));
     eng_808_body = (uint8_t)!eng_808_split;
+#if DNBOX_LAB_D9_SUFFIX
+    d9_trial_armed=(uint8_t)(full808 && n>=128 && drum909_active(&d909));
+    if(d9_trial_armed) drum909_trial_snapshot(&d909);
+#endif
     eng_sync();
     if (m && !plat_cpu2_run(core2_jobs, 0u)) {
         eng_c1_mask = 0;                              /* one core: all of it here */
@@ -2989,6 +3001,9 @@ __attribute__((noinline)) static void render_sub(float *out_l, float *out_r, uin
 #endif
     full808_a_ready = 0;
     if (full808 && eng_c1_mask == ((1u<<JB_909)|(1u<<JB_B))) {
+#if DNBOX_LAB_D9_SUFFIX
+        if(d9_trial_armed) drum909_trial_helper((int)n);
+#endif
         uint32_t at = plat_ticks24();
         full808_a_status = bass_render_dsp(0,n,eng_bass_buf[0],eng_bass_buf[1]);
         full808_a_ticks = plat_ticks24()-at;
