@@ -31,6 +31,17 @@
 enum { S1_EDIT_REJECTED, S1_EDIT_QUEUED, S1_EDIT_BUSY };
 int engine_s1_patch_pending(void);
 int engine_s1_patch_snapshot(unsigned voice, s1_patch_snapshot *out);
+#if X0X_UI_SMALL_CANVAS
+/* Same owner and interrupt boundary for all Sound-matrix observations. */
+typedef struct s1_matrix_telemetry {
+    s1_patch_snapshot patch;
+    struct { float level; unsigned stage,held;int ok; } eg[2];
+    float voice_amp,voice_mod;
+    unsigned voice_stage,voice_held;
+    int voice_ok;
+} s1_matrix_telemetry;
+int engine_s1_matrix_snapshot(unsigned voice, s1_matrix_telemetry *out);
+#endif
 int engine_s1_patch_read(unsigned voice, unsigned factory_id, s1_patch_value *out);
 int engine_s1_patch_set(unsigned voice, uint32_t revision, unsigned factory_id, unsigned position);
 /* Loudest started voice's amplitude (filter=0) or filter (filter=1) envelope:

@@ -50,5 +50,10 @@ int s1_part_active(const s1_dry_part *part);
  * 1 decay/sustain, 3 release) and gate. 0 when silent. */
 /* Loudest started voice's amp (filter=0) or filter envelope: level, stage 0 idle 1 attack 2 decay 3 release. */
 int s1_part_env_view(const s1_dry_part *part, unsigned filter, float *level, unsigned *stage, unsigned *key_down);
+#if X0X_SYNTHONE_PATCH && X0X_UI_SMALL_CANVAS
+struct s1_matrix_telemetry;
+/* Caller owns the same interrupt mask as the patch revision capture. */
+void s1_part_matrix_view(const s1_dry_part *part,struct s1_matrix_telemetry *out);
+#endif
 int s1_part_voice_view(const s1_dry_part *part, float *level, float *modulation, unsigned *state, unsigned *key_down);
 void s1_part_render(s1_dry_part *part, float *left, float *right, unsigned frames);

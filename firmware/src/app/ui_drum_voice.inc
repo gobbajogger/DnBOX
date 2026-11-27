@@ -194,12 +194,70 @@ static void dv_header_battery(int x, int y)
     }
 }
 
-static UI_DRAW void dv_body_pictogram(int t, int v, int x, int y, float scale, float env, uint16_t col)
+
+#if X0X_UI_SMALL_CANVAS
+#define DV_ROWS 3u
+typedef struct {
+    dv_ink ink;
+    pref_t r[DV_ROWS][4];
+    float eased[DV_ROWS][4];
+    uint8_t value[DV_ROWS][4];
+    uint8_t group[DV_ROWS],amp_row[DV_ROWS];
+    uint8_t n,page,voice,kit,key_sound,pitch_valid;
+    uint8_t live[2];
+    uint32_t age[2];
+    float env[2],back[2],pitch_ms,pitch_hz;
+    uint8_t kick[3];
+    uint8_t graph,attack_owner,decay_owner;
+    uint8_t variant_decay_slot;
+    char variant_decay_value[24];
+    uint16_t first,hit,play;
+    drum_curve_t b;
+    union { drum_curve_t a; dv_amp_scene amp; } special;
+} dv_scene;
+#define DV_ARG ,const dv_scene *z
+#define DV_FORWARD ,z
+#define DV_NULL ,0
+#define DV(v,default_value) (z ? (v) : (default_value))
+#else
+#define DV_ARG
+#define DV_FORWARD
+#define DV_NULL
+#define DV(v,default_value) (default_value)
+#endif
+
+static int dv_pitch(float *elapsed,float *hz DV_ARG)
+{
+#if X0X_UI_SMALL_CANVAS
+    if(z){*elapsed=z->pitch_ms;*hz=z->pitch_hz;return z->pitch_valid;}
+#endif
+    return engine_bd909_pitch_view(elapsed,hz);
+}
+#if X0X_UI_SMALL_CANVAS && !defined(DV_TEST_STOCK)
+#undef DV
+#define DV(v,default_value) (v)
+#endif
+static UI_DRAW void dv_amp_paint(int p,int active,int y,int h,int mode DV_ARG)
+{
+#if X0X_UI_SMALL_CANVAS
+#if defined(DV_TEST_STOCK)
+    if(z)
+#endif
+    {dv_drum_amp_inline(z->r[p][0],active,y,h,mode,&z->special.amp,&z->ink);return;}
+#endif
+    if(mode==0)draw_adsr_inline(p,active,y,h,0);
+    else draw_drum_amp_inline(p,active,y,h,mode);
+}
+#if X0X_UI_SMALL_CANVAS && !defined(DV_TEST_STOCK)
+#undef DV
+#define DV(v,default_value) (z ? (v) : (default_value))
+#endif
+static UI_DRAW void dv_body_scene(int t, int v, int x, int y, float scale, float env, uint16_t col DV_ARG)
 {
     if (v < 0 || v >= NDRUM) return;
     const dv_body_t *body=&DV_BODY[t==T_808][v];
     float s=3.0f * scale * (1.0f + 0.06f * env);
-    uint16_t ink=env > 0.02f ? blend(col, C_WHITE, (int)(env * 6.0f + 0.5f)) : col;
+    uint16_t ink=env > 0.02f ? blend(col, DV(z->ink.C[0],C_WHITE), (int)(env * 6.0f + 0.5f)) : col;
     for (int p=0; p<body->npoly; p++){
         unsigned path=dv_path(body->first + p), offset=path&2047u, n=path>>11;
         if(n>64)n=64;
@@ -253,13 +311,13 @@ static UI_DRAW float dv_sweep_level(float hz)
 
 /* Common control-to-physical-value boundary for the kick glyph and KIT plot.
  * An eased input is only substituted for the currently drawn glyph control. */
-static UI_DRAW void dv_kick_pitch_controls(float *out,int edit,int value)
+static UI_DRAW void dv_kick_pitch_controls(float *out,int edit,int value DV_ARG)
 {
     static const uint8_t pots[3]={0,4,5};
     for(int i=0;i<3;i++){
         int pot=pots[i];
         pref_t r=PR(R_ENG,T_909,DR_BD,pot);
-        out[i]=dg_si(r,pot,pot==edit?value:matrix_value(r));
+        out[i]=dg_si(r,pot,pot==edit?value:DV(z->kick[i],matrix_value(r)));
     }
     out[1]*=.01f;
 }
@@ -268,15 +326,20 @@ static UI_DRAW void dv_kick_pitch_controls(float *out,int edit,int value)
 #define DV_ACTIVE_SINGLE_SCALE 1.8f
 
 /* Live AA glyph in an R22 slot. Box origin is the path origin (unit 0..32, 0..17). */
-static UI_DRAW void dv_glyph(pref_t r, float ev, float ox, float oy, float sx, float sy, uint16_t col)
+static UI_DRAW void dv_glyph_scene(pref_t r, float ev, float ox, float oy, float sx, float sy, uint16_t col DV_ARG)
 {
-    int role = drum_strip_role(r);
+    int role = DV(drum_strip_role_at(r,V_PART),drum_strip_role(r));
     int val = (int)(ev + (ev >= 0 ? 0.5f : -0.5f));
     const x0x_param_t *d = pref_desc(r);
     float q = d && d->max ? ev / (float)d->max : 0;
     float e = 0;
     uint32_t age = 0xffffffffu;
-    int live = drum_live(r, &age, &e);
+    int live;
+#if X0X_UI_SMALL_CANVAS
+    if(z) { unsigned i=r.b==NDRUM;age=z->age[i];e=z->env[i];live=z->live[i]; }
+    else
+#endif
+    live=drum_live(r,&age,&e);
     int i, n;
     float xy[80];
     if (q < 0) q = 0;
@@ -304,7 +367,7 @@ static UI_DRAW void dv_glyph(pref_t r, float ev, float ox, float oy, float sx, f
              * linear DSP click gain. Its three-millisecond time is fixed. */
             int x = (int)ox, y = (int)oy + 19;
             int h = (int)(18.f*q+.5f);
-            uint16_t ink = live && age < 30u ? C_WHITE : col;
+            uint16_t ink = live && age < 30u ? DV(z->ink.C[0],C_WHITE) : col;
             cv_rect(x+7,y,35,1,col);
             if (h) cv_rect(x+2,y-h+1,2,h,ink);
             return;
@@ -317,7 +380,7 @@ static UI_DRAW void dv_glyph(pref_t r, float ev, float ox, float oy, float sx, f
         xy[2*n]=ox+sx;xy[2*n+1]=oy+12.f*sy;n++;
         xy[2*n]=ox+end*sx;xy[2*n+1]=oy;n++;
         xy[2*n]=ox+31.f*sx;xy[2*n+1]=oy;n++;
-        cv_poly_aa(xy, n, live && age < 30u ? C_WHITE : col);
+        cv_poly_aa(xy, n, live && age < 30u ? DV(z->ink.C[0],C_WHITE) : col);
         return;
     }
     if (role == DG_DECAY || role == DG_NTAIL) {
@@ -347,9 +410,9 @@ static UI_DRAW void dv_glyph(pref_t r, float ev, float ox, float oy, float sx, f
             }
             xy[2*n] = ox + px * sx; xy[2*n+1] = oy + py * sy; n++;
         }
-        float back=dg_live_back(r,live);
-        uint16_t idle_col=!live && back<1.f?blend(C_LINE,col,(int)(16.f*back)):col;
-        cv_poly_aa(xy, n, live?C_LINE:idle_col);
+        float back=DV(z->back[r.b==NDRUM],dg_live_back(r,live));
+        uint16_t idle_col=!live && back<1.f?blend(DV(z->ink.C[9],C_LINE),col,(int)(16.f*back)):col;
+        cv_poly_aa(xy, n, live?DV(z->ink.C[9],C_LINE):idle_col);
         if(live) {
             /* Same -60dB envelope/remaining-tail law as dg_tail, in the R22
              * viewbox. The approved idle curve stays as a dim ghost. */
@@ -370,7 +433,7 @@ static UI_DRAW void dv_glyph(pref_t r, float ev, float ox, float oy, float sx, f
                     float py=oy+12.f*(1.f-(float)height/(OG_H-2))*sy;
                     xy[2*n]=px;xy[2*n+1]=py;n++;
                     if(i==0 || (noisy && i%5==0))
-                        cv_line_aa(px,py,px,oy+12.f*sy,i?col:C_WHITE);
+                        cv_line_aa(px,py,px,oy+12.f*sy,i?col:DV(z->ink.C[0],C_WHITE));
                 }
             }
             if(n>1)cv_poly_aa(xy,n,col);
@@ -379,7 +442,7 @@ static UI_DRAW void dv_glyph(pref_t r, float ev, float ox, float oy, float sx, f
     }
     if (role == DG_BDSWEEP) { /* Tune and Depth preview the kick pitch drop. */
         float controls[3];
-        dv_kick_pitch_controls(controls,r.c,val);
+        dv_kick_pitch_controls(controls,r.c,val DV_FORWARD);
         float tau=controls[0],m=controls[1],pm=controls[2];
         if (r.c == 0) {
             /* Centre the 0.0.26 26x19 raster in the Tune slot. Compact
@@ -395,16 +458,16 @@ static UI_DRAW void dv_glyph(pref_t r, float ev, float ox, float oy, float sx, f
             /* The hit timestamp uses bit zero as its nonzero sentinel.
              * On an even trigger tick its stored time is 1 ms in the future. */
             if (live && age == UINT32_MAX) age = 0;
-            float back = dg_live_back(r, live);
-            if (!live && back < 1.f) col = blend(C_LINE, col, (int)(16.f * back));
-            cv_rect(left, bottom, width, 1, C_LINE);
+            float back = DV(z->back[r.b==NDRUM],dg_live_back(r,live));
+            if (!live && back < 1.f) col = blend(DV(z->ink.C[9],C_LINE), col, (int)(16.f * back));
+            cv_rect(left, bottom, width, 1, DV(z->ink.C[9],C_LINE));
             int previous = bottom;
             for (i = 0; i < width; i++) {
                 float t = i * 100.f / (width - 1);
                 float level = dv_sweep_level(engine_bd909_hz(tau, m, pm, t));
                 int y = bottom - 1 - (int)(level * (height - 3) + .5f);
                 if (i) cv_line(left + i - 1, previous, left + i, y,
-                               live && t < (float)age ? C_LINE : col);
+                               live && t < (float)age ? DV(z->ink.C[9],C_LINE) : col);
                 previous = y;
             }
 
@@ -422,12 +485,12 @@ static UI_DRAW void dv_glyph(pref_t r, float ev, float ox, float oy, float sx, f
             /* X follows hit age. Y follows the oscillator that is sounding,
              * even when the player edits the next kick before it retriggers. */
             float elapsed, hz;
-            if (live && age < 100u && engine_bd909_pitch_view(&elapsed, &hz)) {
+            if (live && age < 100u && dv_pitch(&elapsed,&hz DV_FORWARD)) {
                 int x = (int)(age * (width - 1) / 100.f + .5f);
                 if (x < 1) x = 1;
                 if (x > width - 2) x = width - 2;
                 int y = bottom - 1 - (int)(dv_sweep_level(hz) * (height - 3) + .5f);
-                ui_curve_cursor(left+x,y,C_WHITE);
+                ui_curve_cursor(left+x,y,DV(z->ink.C[0],C_WHITE));
             }
             return;
         }
@@ -444,11 +507,11 @@ static UI_DRAW void dv_glyph(pref_t r, float ev, float ox, float oy, float sx, f
         /* The sounding kick latches its own sweep; a next-note control edit
          * must not move this marker onto the newly requested preview. */
         float ms,hz;
-        if(engine_bd909_pitch_view(&ms,&hz) && ms>=0 && ms<=100) {
+        if(dv_pitch(&ms,&hz DV_FORWARD) && ms>=0 && ms<=100) {
             float level=dv_sweep_level(hz);
             int mx=(int)(ox+31.f*ms/100.f*sx+.5f);
             int my=(int)(oy+12.f*(1.f-level)*sy+.5f);
-            ui_curve_cursor(mx,my,C_WHITE);
+            ui_curve_cursor(mx,my,DV(z->ink.C[0],C_WHITE));
         }
         return;
     }
@@ -472,10 +535,10 @@ static UI_DRAW void dv_glyph(pref_t r, float ev, float ox, float oy, float sx, f
     if (role == DG_ACCENT) {
         /* The focused standard KIT slot uses the shared strike peaks. */
         if (sx == DV_ACTIVE_SINGLE_SCALE && sy == DV_ACTIVE_SINGLE_SCALE &&
-            pg.n && pg.group[cur_page()] == GR_KIT &&
-            ((r.a == T_808 && ui.sel[PART_808] != D8_CP && name_is(d,"Accent")) ||
-             (r.a == T_909 && ui.sel[PART_909] == DR_BD && r.b == NDRUM && r.c == 1))) {
-            dg_accent((int)ox+4,(int)oy,43,22,q,live,e,col);
+            DV(z->n,pg.n) && DV(z->group[z->page],pg.group[cur_page()]) == GR_KIT &&
+            ((r.a == T_808 && DV(z->voice,ui.sel[PART_808]) != D8_CP && name_is(d,"Accent")) ||
+             (r.a == T_909 && DV(z->voice,ui.sel[PART_909]) == DR_BD && r.b == NDRUM && r.c == 1))) {
+            dg_accent((int)ox+4,(int)oy,43,22,q,live,e,col,DV(z->ink.C[9],C_LINE),DV(z->ink.C[0],C_WHITE));
             return;
         }
         /* four ticks, height follows accent */
@@ -526,10 +589,23 @@ static UI_DRAW void dv_glyph(pref_t r, float ev, float ox, float oy, float sx, f
     cv_poly_aa(xy, n, col);
 }
 
-static UI_DRAW void dv_value_text(pref_t r, int ev_i, int cx, int y, uint16_t col, int large)
+#if X0X_UI_SMALL_CANVAS && !defined(DV_TEST_STOCK)
+#undef DV
+#define DV(v,default_value) (v)
+#endif
+static UI_DRAW void dv_value_text(pref_t r, int ev_i, int cx, int y, uint16_t col, int large DV_ARG)
 {
     char t[24];
     const felucca_font_t *f = large ? &FONT_S : &FONT_T;
+#if X0X_UI_SMALL_CANVAS
+    if(
+#if defined(DV_TEST_STOCK)
+       z &&
+#endif
+       z->variant_decay_slot==r.c && r.b==z->voice) {
+        text_c(cx,y,f,z->variant_decay_value,col);return;
+    }
+#endif
     dv_readout(t,r,ev_i);
     text_c(cx, y, f, t, col);
 }
@@ -568,13 +644,13 @@ static UI_DRAW int dv_kick_pitch_y(float hz,int top,int bottom)
     return bottom-(int)((bottom-top)*octaves*.2f+.5f);
 }
 
-static UI_DRAW void dv_curve_row(drum_curve_t *v,int kick,int top,int bottom,uint16_t col)
+static UI_DRAW void dv_curve_row(drum_curve_t *v,int kick,int top,int bottom,uint16_t col DV_ARG)
 {
     if(bottom<cv_y0 || top>=cv_y1 || top>=bottom)return;
     float controls[3],elapsed=v->elapsed,level=v->level;
     if(kick) {
-        dv_kick_pitch_controls(controls,-1,0);
-        if(!engine_bd909_pitch_view(&elapsed,&level))elapsed=-1;
+        dv_kick_pitch_controls(controls,-1,0 DV_FORWARD);
+        if(!dv_pitch(&elapsed,&level DV_FORWARD))elapsed=-1;
     }
     int left=13,width=214;
     /* The admitted 909 KIT graph has only 29 px; preserve the axes of the
@@ -586,16 +662,16 @@ static UI_DRAW void dv_curve_row(drum_curve_t *v,int kick,int top,int bottom,uin
         int end=bottom,mid;
         char time[16];
         left=33;width=194;bottom-=FONT_T.h+2;mid=(top+bottom)/2;
-        cv_line(left,mid,left+width,mid,SOUND_LINE);
-        cv_line(left+width/2,top,left+width/2,bottom,SOUND_LINE);
-        text_r(29,top-2,&FONT_T,"100%",SOUND_GRAY);
-        text_r(29,mid-3,&FONT_T,"50%",SOUND_GRAY);
-        text_r(29,bottom-4,&FONT_T,"0%",SOUND_GRAY);
-        cv_text(left,end-FONT_T.h,&FONT_T,"0",SOUND_GRAY);
+        cv_line(left,mid,left+width,mid,DV(z->ink.C[4],SOUND_LINE));
+        cv_line(left+width/2,top,left+width/2,bottom,DV(z->ink.C[4],SOUND_LINE));
+        text_r(29,top-2,&FONT_T,"100%",DV(z->ink.C[5],SOUND_GRAY));
+        text_r(29,mid-3,&FONT_T,"50%",DV(z->ink.C[5],SOUND_GRAY));
+        text_r(29,bottom-4,&FONT_T,"0%",DV(z->ink.C[5],SOUND_GRAY));
+        cv_text(left,end-FONT_T.h,&FONT_T,"0",DV(z->ink.C[5],SOUND_GRAY));
         put_i(time,(int)(v->window*.5f+.5f));
-        text_c(left+width/2,end-FONT_T.h,&FONT_T,time,SOUND_GRAY);
+        text_c(left+width/2,end-FONT_T.h,&FONT_T,time,DV(z->ink.C[5],SOUND_GRAY));
         put_s(put_i(time,(int)(v->window+.5f)),"ms");
-        text_r(left+width,end-FONT_T.h,&FONT_T,time,SOUND_GRAY);
+        text_r(left+width,end-FONT_T.h,&FONT_T,time,DV(z->ink.C[5],SOUND_GRAY));
     }
     float points[72];
     float onset[3]={v->delay,v->delay+v->rise_end,v->delay+v->rise_end+v->hold};
@@ -614,13 +690,13 @@ static UI_DRAW void dv_curve_row(drum_curve_t *v,int kick,int top,int bottom,uin
         int x=left+(int)((float)width*elapsed/v->window+.5f);
         int y=kick?dv_kick_pitch_y(level,top,bottom):
             bottom-(int)((bottom-top)*fm_clampf(level,0,1)+.5f);
-        ui_curve_cursor(x,y,SOUND_INK);
+        ui_curve_cursor(x,y,DV(z->ink.C[6],SOUND_INK));
     }
 }
 
 /* A bounded stage curve is a target-law preview. The separate right-hand
  * level tick is actual owner state, not reconstructed horizontal progress. */
-static UI_DRAW void dv_bound_stage(drum_curve_t *v,int stage,int top,int off,uint16_t col)
+static UI_DRAW void dv_bound_stage(drum_curve_t *v,int stage,int top,int off,uint16_t col DV_ARG)
 {
     if(!v || !(v->peak>=0 && v->peak<1.e30f) ||
        !(v->rise_tau>0 && v->rise_tau<1.e30f) ||
@@ -641,36 +717,34 @@ static UI_DRAW void dv_bound_stage(drum_curve_t *v,int stage,int top,int off,uin
     }
     cv_poly_aa(points,used,col);
     char label[16];put_s(put_i(label,(int)window),"ms");
-    cv_text(13,bottom-off,&FONT_T,"0",SOUND_GRAY);
-    text_r(227,bottom-off,&FONT_T,label,SOUND_GRAY);
+    cv_text(13,bottom-off,&FONT_T,"0",DV(z->ink.C[5],SOUND_GRAY));
+    text_r(227,bottom-off,&FONT_T,label,DV(z->ink.C[5],SOUND_GRAY));
     if(v->elapsed>=0 && v->level>=0 && v->level<1.e30f) {
         int y=bottom-off-(int)(height*fm_clampf(v->level,0,1)+.5f);
-        cv_rect(230,y,3,1,SOUND_INK);
+        cv_rect(230,y,3,1,DV(z->ink.C[6],SOUND_INK));
     }
 }
 /* Shared identity and white-key window. Preserve selected-owner bounds and
  * the legacy generic window fallback; neither changes sequencer state. */
-static UI_DRAW void dv_voice_steps(int t,int v,int identity_y,int step_y,int strict)
+static UI_DRAW void dv_voice_steps(int t,int v,int identity_y,int step_y,int strict DV_ARG)
 {
-    uint16_t col=part_col();
-    const dpart_t *dp=&cur_pat()->drum[ui.part];
-    int len=dp->len,shown_len=len;
-    unsigned first=(unsigned)ui.spage*16u;
-    if(!strict){if(first>=NSTEPS)first=0;if(shown_len<1)shown_len=16;}
+    uint16_t col=DV(z->ink.col,part_col());
+    const dpart_t *dp=DV(0,&cur_pat()->drum[ui.part]);
+    int len=dp?dp->len:0;
+    unsigned first=DV(z->first,(unsigned)ui.spage*16u);
+    if(!strict && first>=NSTEPS)first=0;
     char label[32];
     put_i(put_s(put_s(label,dv_voice_name(t,v)),t==T_808?" 808/":" 909/"),v+1);
     cv_text(11,identity_y,&FONT_T,label,col);
     /* no "P# / length" here: the header carries P#, the step ruler shows the window, and
      * LENGTH is its own control (FINAL-REFERENCES: "1-16 / 17" restates LENGTH) */
-    (void)shown_len;
     for(int s=0;s<16;s++) {
         int absolute=(int)first+s,sx=9+s*14;
         int valid=absolute<NSTEPS && absolute<len;
-        int hit=valid && sm_get(dp->hit[v],absolute);
-        int live=seq.playing && eng_step[TRK_DRUM+ui.part]%(len?len:16)==absolute;
-        if(strict&&!valid)live=0;
-        cv_rect(sx,step_y,11,4,live?C_WHITE:hit?col:SOUND_LINE);
-        put_i(label,absolute+1);text_c(sx+5,step_y+6,&FONT_T,label,SOUND_GRAY);
+        int hit=DV((z->hit>>s)&1u,valid && sm_get(dp->hit[v],absolute));
+        int live=DV((z->play>>s)&1u,seq.playing && (!strict||valid) && eng_step[TRK_DRUM+ui.part]%(len?len:16)==absolute);
+        cv_rect(sx,step_y,11,4,live?DV(z->ink.C[0],C_WHITE):hit?col:DV(z->ink.C[4],SOUND_LINE));
+        put_i(label,absolute+1);text_c(sx+5,step_y+6,&FONT_T,label,DV(z->ink.C[5],SOUND_GRAY));
     }
 }
 
@@ -683,53 +757,70 @@ static UI_DRAW void dv_stage_value(char *out,char stage,int lettered,int have,fl
     if(have)put_s(put_d1(q,ms,0),"ms");else put_s(put_i(q,(raw*100+63)/127),"%");
 }
 
-static UI_DRAW void dv_cp_stage_page(int band)
+static UI_DRAW void dv_cp_stage_page(int band DV_ARG)
 {
-    int off=HDR_H+band*BAND_H,page=cur_page();
-    uint16_t col=part_col(),ink=page==0?SOUND_INK:SOUND_GRAY;
+    int off=HDR_H+band*BAND_H,page=DV(z->page,cur_page());
+    uint16_t col=DV(z->ink.col,part_col()),ink=page==0?DV(z->ink.C[6],SOUND_INK):DV(z->ink.C[5],SOUND_GRAY);
     drum_curve_t attack={.elapsed=-1},decay={.elapsed=-1};
-    int choice=matrix_value(pg.r[0][2]);
-    int attack_owner=engine_drum808_param_curve_preview(D8_CP,3,choice,matrix_value(pg.r[0][1]),&attack);
-    int decay_owner=engine_drum808_param_curve_preview(D8_CP,2,choice,matrix_value(pg.r[0][3]),&decay);
+    int raw_a=DV(z->value[0][1],matrix_value(pg.r[0][1]));
+    int raw_b=DV(z->value[0][3],matrix_value(pg.r[0][3]));
+    int choice=DV(z->value[0][2],matrix_value(pg.r[0][2]));
+    int attack_owner;
+    int decay_owner;
+#if X0X_UI_SMALL_CANVAS
+#if defined(DV_TEST_STOCK)
+    if(z)
+#endif
+    {attack=z->special.a;decay=z->b;attack_owner=z->attack_owner;decay_owner=z->decay_owner;}
+#if defined(DV_TEST_STOCK)
+    else
+#endif
+#endif
+#if !X0X_UI_SMALL_CANVAS || defined(DV_TEST_STOCK)
+    {
+    attack_owner=engine_drum808_param_curve_preview(D8_CP,3,choice,raw_a,&attack);
+    decay_owner=engine_drum808_param_curve_preview(D8_CP,2,choice,raw_b,&decay);
+    }
+#endif
     int selected=decay_owner==D8S_MA+1;
-    rbox(3,24-off,234,213,UI_PANEL_RADIUS,SOUND_FACE);
+    rbox(3,24-off,234,213,UI_PANEL_RADIUS,DV(z->ink.C[2],SOUND_FACE));
     cv_text(11,28-off,&FONT_T,page==0?"SOUND":"KIT",ink);
-    if(!key_sounds())cv_text(91,28-off,&FONT_T,"KEY SOUND OFF",SOUND_GRAY);
-    char label[32];put_i(put_s(put_i(label,page+1),"/"),pg.n);
-    text_r(232,28-off,&FONT_T,label,SOUND_GRAY);
+    if(!DV(z->key_sound,key_sounds()))cv_text(91,28-off,&FONT_T,"KEY SOUND OFF",DV(z->ink.C[5],SOUND_GRAY));
+    char label[32];put_i(put_s(put_i(label,page+1),"/"),DV(z->n,pg.n));
+    text_r(232,28-off,&FONT_T,label,DV(z->ink.C[5],SOUND_GRAY));
     const int slots[2]={0,2};
     for(int i=0;i<2;i++) {
-        pref_t r=pg.r[0][slots[i]];int center=i?155:83,value=matrix_value(r);
-        text_c(center,40-off,&FONT_T,i?"TYPE":"TUNE",SOUND_GRAY);   /* the bank title above is SOUND */
-        dv_glyph(r,ui_ease_float(r,value),center-22,53-off,1.375f,1.f,col);
-        dv_value_text(r,value,center,72-off,SOUND_WHITE,1);
+        pref_t r=DV(z->r[0][slots[i]],pg.r[0][slots[i]]);int center=i?155:83,value=DV(z->value[0][slots[i]],matrix_value(r));
+        text_c(center,40-off,&FONT_T,i?"TYPE":"TUNE",DV(z->ink.C[5],SOUND_GRAY));   /* the bank title above is SOUND */
+        dv_glyph_scene(r,DV(z->eased[0][slots[i]],ui_ease_float(r,value)),center-22,53-off,1.375f,1.f,col DV_FORWARD);
+        dv_value_text(r,value,center,72-off,DV(z->ink.C[3],SOUND_WHITE),1 DV_FORWARD);
     }
-    cv_text(13,88-off,&FONT_T,selected?"MARACAS AD":"MARACAS ATTACK",SOUND_GRAY);
+    cv_text(13,88-off,&FONT_T,selected?"MARACAS AD":"MARACAS ATTACK",DV(z->ink.C[5],SOUND_GRAY));
     int have_a=attack_owner==D8S_MA+1;
-    dv_stage_value(label,'A',selected,have_a,attack.rise_end,matrix_value(pg.r[0][1]));
+    dv_stage_value(label,'A',selected,have_a,attack.rise_end,raw_a);
     if(selected)cv_text(13,100-off,&FONT_T,label,ink);
     else text_r(227,88-off,&FONT_T,label,ink);
     if(selected) {
         /* Both editable stages belong to MA: one AD graph, never two owners. */
-        dv_stage_value(label,'D',1,decay_owner==D8S_MA+1,decay.fall*4.60517f,matrix_value(pg.r[0][3]));
+        dv_stage_value(label,'D',1,decay_owner==D8S_MA+1,decay.fall*4.60517f,raw_b);
         text_r(227,100-off,&FONT_T,label,ink);
         if(have_a) {
             decay.rise_tau=attack.rise_tau;decay.rise_end=attack.rise_end;
             if(attack.elapsed>=0){decay.elapsed=attack.elapsed;decay.level=attack.level;}
         }
-        dv_bound_stage(&decay,0,116,off,col);
+        dv_bound_stage(&decay,0,116,off,col DV_FORWARD);
     } else {
-        if(have_a)dv_bound_stage(&attack,1,100,off,col);
-        text_c(120,132-off,&FONT_T,"CLAP DECAY",SOUND_GRAY);
-        dv_stage_value(label,'D',0,decay_owner==D8S_CP+1,decay.fall*4.60517f,matrix_value(pg.r[0][3]));
+        if(have_a)dv_bound_stage(&attack,1,100,off,col DV_FORWARD);
+        text_c(120,132-off,&FONT_T,"CLAP DECAY",DV(z->ink.C[5],SOUND_GRAY));
+        dv_stage_value(label,'D',0,decay_owner==D8S_CP+1,decay.fall*4.60517f,raw_b);
         text_r(227,132-off,&FONT_T,label,ink);
-        if(decay_owner==D8S_CP+1)dv_bound_stage(&decay,2,144,off,col);
+        if(decay_owner==D8S_CP+1)dv_bound_stage(&decay,2,144,off,col DV_FORWARD);
     }
-    pref_t kit=pg.r[1][0];int kv=matrix_value(kit);
-    cv_text(11,180-off,&FONT_T,"KIT ACCENT",page==1?SOUND_INK:SOUND_GRAY);
-    dv_glyph(kit,ui_ease_float(kit,kv),105,179-off,.7f,.7f,col);
-    dv_value_text(kit,kv,214,180-off,SOUND_WHITE,0);
-    dv_voice_steps(T_808,D8_CP,200-off,212-off,1);
+    pref_t kit=DV(z->r[1][0],pg.r[1][0]);int kv=DV(z->value[1][0],matrix_value(kit));
+    cv_text(11,180-off,&FONT_T,"KIT ACCENT",page==1?DV(z->ink.C[6],SOUND_INK):DV(z->ink.C[5],SOUND_GRAY));
+    dv_glyph_scene(kit,DV(z->eased[1][0],ui_ease_float(kit,kv)),105,179-off,.7f,.7f,col DV_FORWARD);
+    dv_value_text(kit,kv,214,180-off,DV(z->ink.C[3],SOUND_WHITE),0 DV_FORWARD);
+    dv_voice_steps(T_808,D8_CP,200-off,212-off,1 DV_FORWARD);
 }
 
 static UI_DRAW void dv_upper_caption(char *caption,const x0x_param_t *d,int max)
@@ -743,13 +834,13 @@ static UI_DRAW void dv_upper_caption(char *caption,const x0x_param_t *d,int max)
     caption[j]=0;
 }
 
-static UI_DRAW void dv_control_caption(pref_t r,int cx,int y)
+static UI_DRAW void dv_control_caption(pref_t r,int cx,int y DV_ARG)
 {
     char caption[16];   /* the presentation name (TYPE, Depth), not the raw DSP id */
     const char *n=pref_name(r);int j=0;
     for(;j<14 && n && n[j];j++)caption[j]=n[j]>='a' && n[j]<='z'?n[j]-32:n[j];
     caption[j]=0;
-    text_c(cx,y,&FONT_T,caption,SOUND_GRAY);
+    text_c(cx,y,&FONT_T,caption,DV(z->ink.C[5],SOUND_GRAY));
 }
 
 /* Existing placements in a standard drum bank, indexed by selection and
@@ -768,38 +859,38 @@ static const dv_bank_slot_t dv_bank_slots[2][2] = {
 };
 
 /* The AMP bank's slot zero is K5 on SMK (K1 on the generic host). */
-static UI_DRAW __attribute__((noinline)) void dv_kick_decay_caption(int page,int x,int y,uint16_t col)
+static UI_DRAW __attribute__((noinline)) void dv_kick_decay_caption(int page,int x,int y,uint16_t col DV_ARG)
 {
     char caption[32];
     char *value=put_s(caption,"DECAY ")   /* no K-number prefix: "K5DECAY" read as one cryptic word */;
-    pref_t r=pg.r[page][0];
-    dv_readout(value,r,matrix_value(r));
+    pref_t r=DV(z->r[page][0],pg.r[page][0]);
+    dv_readout(value,r,DV(z->value[page][0],matrix_value(r)));
     text_r(x,y,&FONT_T,caption,col);
 }
 
-static UI_DRAW void dv_bank_focus(int y,int height)
+static UI_DRAW void dv_bank_focus(int y,int height DV_ARG)
 {
-    rbox(6,y,228,height,UI_PANEL_RADIUS,ui_theme_light?SOUND_SELECT:RGB(36,48,54));
+    rbox(6,y,228,height,UI_PANEL_RADIUS,DV(z->ink.focus,(ui_theme_light?SOUND_SELECT:RGB(36,48,54))));
 }
 
-static UI_DRAW void draw_drum_voice(int band)
+static UI_DRAW void dv_draw(int band DV_ARG)
 {
     int off = band * BAND_H, bh = dv_band_h(band);
-    int t = ui.part == PART_808 ? T_808 : T_909;
-    int v = ui.sel[ui.part];
-    int page = cur_page();
+    int t = DV(z->kit,ui.part==PART_808) ? T_808 : T_909;
+    int v = DV(z->voice,ui.sel[ui.part]);
+    int page = DV(z->page,cur_page());
     int bd_amp = -1;
-    int kick_kit = t == T_909 && v == DR_BD && pg.group[page] == GR_KIT;
-    int n = pg.n;
+    int kick_kit = t == T_909 && v == DR_BD && DV(z->group[page],pg.group[page]) == GR_KIT;
+    int n = DV(z->n,pg.n);
     int p, y, active;
-    uint16_t col = part_col();
-    uint16_t ink = col, gray = SOUND_GRAY;
+    uint16_t col = DV(z->ink.col,part_col());
+    uint16_t ink = col, gray = DV(z->ink.C[5],SOUND_GRAY);
     uint32_t age = 0;
     float env = 0;
     int live;
     int body_y, yb;
-    cv_rect(0, 0, 240, bh, SOUND_BASE);
-    if(t==T_808 && v==D8_CP){dv_cp_stage_page(band);return;}
+    cv_rect(0, 0, 240, bh, DV(z->ink.C[1],SOUND_BASE));
+    if(t==T_808 && v==D8_CP){dv_cp_stage_page(band DV_FORWARD);return;}
 
     /* body surface + banks: R22 y=24 (screen) => main y=4, height grows with bank count. */
     yb = DV_MAIN(24);
@@ -812,30 +903,30 @@ static UI_DRAW void draw_drum_voice(int band)
         uint8_t bank_cells[MAXPAGES];
         int ah;
         for (p = 0; p < n; p++) {
-            if(t==T_909 && v==DR_BD && drum_amp_ref(pg.r[p][0])) {
+            if(t==T_909 && v==DR_BD && drum_amp_ref(DV(z->r[p][0],pg.r[p][0]))) {
                 bd_amp=p;
                 if(p==page || kick_kit) used+=32; /* K5 focus summary, not a second graph */
                 continue;
             }
             int cells = 0;
-            for(int k=0;k<4;k++)if(pg.r[p][k].kind!=R_NONE)cells++;
+            for(int k=0;k<4;k++)if(DV(z->r[p][k],pg.r[p][k]).kind!=R_NONE)cells++;
             bank_cells[p]=(uint8_t)cells;
             ah = (p == page) ? (cells==1?56:72) : (cells>1?42:32);
             used += ah;
         }
         body_h = used + 4;
         if (by + body_h > 0 && by < bh)
-            rbox(3, by, 234, body_h, UI_PANEL_RADIUS, SOUND_FACE);
+            rbox(3, by, 234, body_h, UI_PANEL_RADIUS, DV(z->ink.C[2],SOUND_FACE));
         /* banks */
         y = yb + 2;
         for (p = 0; p < n; p++) {
             if(p==bd_amp) {
                 if(p==page || kick_kit) {
                     if(p==page)
-                        dv_bank_focus(y-off,32);
+                        dv_bank_focus(y-off,32 DV_FORWARD);
                     cv_text(11,y+5-off,&FONT_T,"AMP",gray);
-                    dv_kick_decay_caption(bd_amp,232,y+5-off,p==page?SOUND_INK:gray);
-                    if(kick_kit)draw_drum_amp_inline(bd_amp,0,y-off,32,-1);
+                    dv_kick_decay_caption(bd_amp,232,y+5-off,p==page?DV(z->ink.C[6],SOUND_INK):gray DV_FORWARD);
+                    if(kick_kit)dv_amp_paint(bd_amp,0,y-off,32,-1 DV_FORWARD);
                     y+=32;
                 }
                 continue;
@@ -847,11 +938,11 @@ static UI_DRAW void draw_drum_voice(int band)
             if (active) {
                 int ay = y - off;
                 if (ay + ah > 0 && ay < bh)
-                    dv_bank_focus(ay,ah);
+                    dv_bank_focus(ay,ah DV_FORWARD);
             }
-            if(adsr_row(p)) {
+            if(DV(z->amp_row[p],adsr_row(p))) {
                 cv_text(11,y-off,&FONT_T,"AMP",gray);
-                draw_adsr_inline(p,active,y,ah,off);y+=ah;continue;
+                dv_amp_paint(p,active,y-off,ah,0 DV_FORWARD);y+=ah;continue;
             }
             /* labels */
             {
@@ -859,20 +950,20 @@ static UI_DRAW void draw_drum_voice(int band)
                 char pgind[8], a[16], b[16];
                 const x0x_param_t *pd0;
                 b[0] = 0;
-                if (pg.r[p][0].kind == R_ENG && pg.r[p][0].b == NDRUM) {
+                if (DV(z->r[p][0],pg.r[p][0]).kind == R_ENG && DV(z->r[p][0],pg.r[p][0]).b == NDRUM) {
                     put_s(a,"KIT");
-                    put_s(b,kick_kit?"VELOCITY DEPTH":pref_name(pg.r[p][0]));
+                    put_s(b,kick_kit?"VELOCITY DEPTH":pref_name(DV(z->r[p][0],pg.r[p][0])));
                 } else {
                     put_s(a, "SOUND");
-                    pd0 = pref_desc(pg.r[p][0]);
+                    pd0 = pref_desc(DV(z->r[p][0],pg.r[p][0]));
                     /* Multi-control rows already label each cell; a second
                      * first-control summary would overprint that caption. */
                     if (cells==1) dv_upper_caption(b,pd0,12);
                 }
                 if (ly + 12 > 0 && ly < bh) {
                     cv_text(11, ly, &FONT_T, a, gray);
-                    if(p==0 && !key_sounds())cv_text(91,ly,&FONT_T,"KEY SOUND OFF",gray);
-                    put_i(put_s(put_i(pgind,p+1),"/"),pg.n);
+                    if(p==0 && !DV(z->key_sound,key_sounds()))cv_text(91,ly,&FONT_T,"KEY SOUND OFF",gray);
+                    put_i(put_s(put_i(pgind,p+1),"/"),DV(z->n,pg.n));
                     text_r(232, ly, &FONT_T, pgind, gray);
                 }
                 /* The second line may enter this strip after the first line
@@ -882,12 +973,12 @@ static UI_DRAW void draw_drum_voice(int band)
             }
             /* glyphs + values */
             for (k = 0; k < 4; k++) {
-                pref_t r = pg.r[p][k];
+                pref_t r = DV(z->r[p][k],pg.r[p][k]);
                 int ev_i, vx, gy, gx;
                 float ev;
                 if (r.kind == R_NONE) continue;
-                ev_i = matrix_value(r);
-                ev = ui_ease_float(r,ev_i);
+                ev_i = DV(z->value[p][k],matrix_value(r));
+                ev = DV(z->eased[p][k],ui_ease_float(r,ev_i));
                 /* Only the pictogram eases; numeric state is committed now. */
                 int multi = cells > 1;
                 const dv_bank_slot_t *slot = &dv_bank_slots[active][multi];
@@ -896,17 +987,17 @@ static UI_DRAW void draw_drum_voice(int band)
                     int center = 6 + (228*(2*k+1))/(2*cells);
                     gx = center - 22;
                     vx = active ? center : gx + 40;
-                    dv_control_caption(r, center, row_y + 14);
+                    dv_control_caption(r, center, row_y + 14 DV_FORWARD);
                 } else {
                     gx = active ? 92 : 98;
                     vx = 214;
                 }
                 gy = row_y + slot->glyph_y;
                 if (gy < bh && (slot->visible_height == 0 || gy + slot->visible_height > 0))
-                    dv_glyph(r, ev, (float)gx, (float)gy, slot->sx, slot->sy, active ? ink : gray);
+                    dv_glyph_scene(r,ev,(float)gx,(float)gy,slot->sx,slot->sy,active?ink:gray DV_FORWARD);
                 int vy = row_y + slot->value_y;
                 if (!active || !multi || (vy < bh && vy + 16 > 0))
-                    dv_value_text(r,ev_i,vx,vy,SOUND_WHITE,active || !multi);
+                    dv_value_text(r,ev_i,vx,vy,DV(z->ink.C[3],SOUND_WHITE),active || !multi DV_FORWARD);
             }
             y += ah;
         }
@@ -914,14 +1005,25 @@ static UI_DRAW void draw_drum_voice(int band)
     }
 
     /* lower panel: body pictogram, voice name, P1/16, 16-step strip */
-    live = engine_drum_view(ui.part, v, &age, &env);
+    #if X0X_UI_SMALL_CANVAS
+#if defined(DV_TEST_STOCK)
+    if(z)
+#endif
+    {live=z->live[0];env=z->env[0];}
+#if defined(DV_TEST_STOCK)
+    else
+#endif
+#endif
+#if !X0X_UI_SMALL_CANVAS || defined(DV_TEST_STOCK)
+    live=engine_drum_view(ui.part,v,&age,&env);
+#endif
     if (!live) env = 0;
     {
         int py = body_y - off;
         int ph = 237 - HDR_H - body_y; /* to screen y=237 */
         if (ph < 40) ph = 40;
         if (py + ph > 0 && py < bh) {
-            rbox(3, py, 234, ph, UI_PANEL_RADIUS, SOUND_FACE);
+            rbox(3, py, 234, ph, UI_PANEL_RADIUS, DV(z->ink.C[2],SOUND_FACE));
             /* Real voice identity and actual16 steps share the remaining
              * context surface. Rows reflow; no activity or data is invented. */
             /* One continuous16-step window, matching the white-key input.
@@ -933,31 +1035,142 @@ static UI_DRAW void draw_drum_voice(int band)
                 memset(&curve,0,sizeof curve);
                 curve.window=160;
                 graph=1;
-            } else graph=t==T_808?engine_drum808_curve(v,&curve):dv_909_curve(v,&curve);
+            }
+#if X0X_UI_SMALL_CANVAS
+#if defined(DV_TEST_STOCK)
+            else if(z)
+#else
+            else
+#endif
+            {curve=z->b;graph=z->graph;}
+#endif
+#if !X0X_UI_SMALL_CANVAS || defined(DV_TEST_STOCK)
+            else graph=t==T_808?engine_drum808_curve(v,&curve):dv_909_curve(v,&curve);
+#endif
             if(bd_amp>=0 && !kick_kit) {
-                dv_body_pictogram(t,v,31,body_y-9-off,.32f,env,col);
-                draw_drum_amp_inline(bd_amp,bd_amp==page,py,step_top-body_y,1);
-                if(bd_amp!=page)dv_kick_decay_caption(bd_amp,139,body_y+3-off,gray);
+                dv_body_scene(t,v,31,body_y-9-off,.32f,env,col DV_FORWARD);
+                dv_amp_paint(bd_amp,bd_amp==page,py,step_top-body_y,1 DV_FORWARD);
+                if(bd_amp!=page)dv_kick_decay_caption(bd_amp,139,body_y+3-off,gray DV_FORWARD);
             } else if(graph) {
                 /* Keep the existing physical knobs, voice and all 16 steps.
                  * The editable envelope uses the full width between them. */
-                dv_body_pictogram(t,v,79,body_y-9-off,.32f,env,col);
+                dv_body_scene(t,v,79,body_y-9-off,.32f,env,col DV_FORWARD);
                 const char *role=kick_kit?"PITCH ENV":"AMP ENV";
                 if((t==T_909 && v==DR_SD) || (t==T_808 && v==D8_SD))role="NOISE ENV";
                 else if((t==T_909 && v==DR_CP) || (t==T_808 && v==D8_CP && curve.delay>0))role="TAIL ENV";
                 else if(t==T_808 && v==D8_CB)role="BODY ENV";
                 else if(t==T_808 && v==D8_CY)role="SUSTAIN";
                 cv_text(133,body_y+3-off,&FONT_T,role,gray);
-                dv_curve_row(&curve,kick_kit,body_y+17-off,step_top-4-off,col);
+                dv_curve_row(&curve,kick_kit,body_y+17-off,step_top-4-off,col DV_FORWARD);
             } else if(ph>44) {
                 /* Reserve 28 px for the identity and step lane; keep the
                  * larger icon and its live pulse in the remaining body. */
                 float scale=fm_minf(3.f,(float)(ph-28)/44.f);
-                dv_body_pictogram(t,v,89,py+(ph-11)/2-16,scale,env,col);
+                dv_body_scene(t,v,89,py+(ph-11)/2-16,scale,env,col DV_FORWARD);
             }
-            dv_voice_steps(t,v,body_y+3-off,step_top-off,0);
+            dv_voice_steps(t,v,body_y+3-off,step_top-off,0 DV_FORWARD);
         }
     }
 }
 
 
+
+static UI_DRAW void dv_body_pictogram(int t,int v,int x,int y,float scale,float env,uint16_t col)
+{ dv_body_scene(t,v,x,y,scale,env,col DV_NULL); }
+#if !X0X_UI_SMALL_CANVAS || defined(DV_TEST_STOCK)
+static UI_DRAW void draw_drum_voice(int band){dv_draw(band DV_NULL);}
+#endif
+static UI_DRAW void dv_glyph(pref_t r,float ev,float ox,float oy,float sx,float sy,uint16_t col)
+{ dv_glyph_scene(r,ev,ox,oy,sx,sy,col DV_NULL); }
+
+#if X0X_UI_SMALL_CANVAS
+static int dv_capture(dv_scene *z)
+{
+    unsigned kit=ui.part==PART_808,v=ui.sel[ui.part],n=pg.n,page=cur_page();
+    if(n>DV_ROWS || !n || page>=n || v>=NDRUM)return 0;
+    int t=kit?T_808:T_909,clap=kit&&v==D8_CP;
+    if(clap && n<2)return 0;
+    for(unsigned p=0;p<n;p++)for(unsigned k=0;k<4;k++){
+        pref_t r=pg.r[p][k];
+        if(r.kind!=R_NONE && (r.kind!=R_ENG || r.a!=t || (r.b!=v && r.b!=NDRUM)))return 0;
+    }
+    z->kit=kit;z->voice=v;z->n=n;z->page=page;z->key_sound=key_sounds();
+    z->ink=(dv_ink){{C_WHITE,SOUND_BASE,SOUND_FACE,SOUND_WHITE,SOUND_LINE,SOUND_GRAY,SOUND_INK,SOUND_DIM,SOUND_SELECT_SIDE,C_LINE},
+        part_col(),ui_theme_light?SOUND_SELECT:RGB(36,48,54),C_BLACK};
+    z->special.amp.valid=0;z->variant_decay_slot=255;
+    for(unsigned p=0;p<n;p++){
+        z->group[p]=pg.group[p];z->amp_row[p]=adsr_row(p);
+        for(unsigned k=0;k<4;k++){
+            pref_t r=pg.r[p][k];z->r[p][k]=r;
+            if(r.kind==R_NONE)continue;
+            int raw=matrix_value(r);
+            z->value[p][k]=(uint8_t)raw;
+            if(kit && r.b==v && (v==D8_CB||v==D8_CY||v==D8_OH||v==D8_CH) &&
+                name_is(pref_desc(r),"Decay")){
+                if(z->variant_decay_slot!=255)return 0;
+                z->variant_decay_slot=r.c;
+                dv_readout(z->variant_decay_value,r,raw);
+            }
+            /* The old clap painter advances only TUNE/TYPE/KIT ease. */
+            if(!z->amp_row[p] && (!clap || (p==0&&(k==0||k==2)) || (p==1&&k==0)))
+                z->eased[p][k]=ui_ease_float(r,raw);
+        }
+        if(z->amp_row[p])dv_capture_amp(&z->special.amp,z->r[p][0],z->value[p][0]);
+    }
+    if(!kit && v==DR_BD){
+        z->kick[0]=(uint8_t)matrix_value(PR(R_ENG,T_909,DR_BD,0));
+        z->kick[1]=(uint8_t)matrix_value(PR(R_ENG,T_909,DR_BD,4));
+        z->kick[2]=(uint8_t)matrix_value(PR(R_ENG,T_909,DR_BD,5));
+        z->pitch_ms=z->pitch_hz=0;
+        z->pitch_valid=engine_bd909_pitch_view(&z->pitch_ms,&z->pitch_hz);
+    }
+    for(unsigned i=0;i<2;i++)
+        z->live[i]=drum_live(PR(R_ENG,t,i?NDRUM:v,0),&z->age[i],&z->env[i]);
+    z->back[0]=z->back[1]=1.f;
+    unsigned back_seen=0;
+    if(!clap)for(unsigned p=0;p<n;p++)for(unsigned k=0;k<4;k++) {
+        pref_t r=z->r[p][k];
+        int role=drum_strip_role_at(r,V_PART),i=r.b==NDRUM;
+        if((role==DG_DECAY || role==DG_NTAIL || (role==DG_BDSWEEP && r.c==0)) && !(back_seen&(1u<<i))) {
+            z->back[i]=dg_live_back(r,z->live[i]);back_seen|=1u<<i;
+        }
+    }
+    if(clap){
+        int choice=z->value[0][2];
+        z->special.a=(drum_curve_t){.elapsed=-1};z->b=(drum_curve_t){.elapsed=-1};
+        z->attack_owner=engine_drum808_param_curve_preview(D8_CP,3,choice,z->value[0][1],&z->special.a);
+        z->decay_owner=engine_drum808_param_curve_preview(D8_CP,2,choice,z->value[0][3],&z->b);
+    } else {
+        z->b=(drum_curve_t){0};
+        z->graph=kit?engine_drum808_curve(v,&z->b):dv_909_curve(v,&z->b);
+    }
+    const dpart_t *dp=&cur_pat()->drum[ui.part];
+    unsigned first=(unsigned)ui.spage*16u;
+    if(!clap && first>=NSTEPS)first=0;
+    int len=dp->len,play=seq.playing ? eng_step[TRK_DRUM+ui.part]%(len?len:16) : -1;
+    z->first=(uint16_t)first;z->hit=z->play=0;
+    for(unsigned i=0;i<16;i++){
+        unsigned x=first+i;
+        int valid=x<NSTEPS&&x<(unsigned)len;
+        if(valid&&sm_get(dp->hit[v],x))z->hit|=(uint16_t)(1u<<i);
+        if((!clap||valid)&&(int)x==play)z->play|=(uint16_t)(1u<<i);
+    }
+    return 1;
+}
+
+static void dv_paint_frame(int band,const void *scene)
+{ dv_draw(band,(const dv_scene *)scene); }
+static UI_DRAW int draw_drum_frame(void)
+{
+    dv_scene z;
+    if(!dv_capture(&z))return 0;
+    int force=cv_claim_scene_footer();
+    cv_draw_pair(z.ink.bg,&z,dv_paint_frame,0);
+    cv_draw_scene_footer(z.ink.bg,&z,dv_paint_frame,force);
+    return 1;
+}
+#endif
+#undef DV
+#undef DV_ARG
+#undef DV_FORWARD
+#undef DV_NULL

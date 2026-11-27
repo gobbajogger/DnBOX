@@ -8,9 +8,17 @@ static uint32_t u32(const uint8_t *p){return (uint32_t)u16(p)|((uint32_t)u16(p+2
 static __attribute__((noinline)) uint32_t chicago_fast32_lookup(const unsigned char *t,unsigned idx){
     unsigned i=idx&127,ns=u16(t+2);
     const uint8_t *p=t+4+2*ns+u16(t+4+(idx>>7)*2);
+#if X0X_CHICAGO_FOLD_RESIDUAL_MIN
+    /* Fold the lossless residual minimum into the unsigned base offline.
+     * Base + lo was already reduced modulo 2^32 by the old decoder. */
+    unsigned degree=p[0]>>5,width=p[0]&31,q=p[5];
+    uint32_t base=u32(p+1);
+    p+=6;
+#else
     unsigned degree=p[0]>>5,width=p[0]&31,q=p[9];
     uint32_t base=u32(p+1),lo=u32(p+5);
     p+=10;
+#endif
     int32_t coefficients[4];
     for(unsigned j=0;j<=degree;j++){
         uint32_t z=0;
@@ -31,7 +39,11 @@ static __attribute__((noinline)) uint32_t chicago_fast32_lookup(const unsigned c
         rem-=take;
         while(rem){unsigned n=rem<8?rem:8;z|=((uint32_t)*p++&((1u<<n)-1u))<<take;take+=n;rem-=n;}
     }
+#if X0X_CHICAGO_FOLD_RESIDUAL_MIN
+    return base+(uint32_t)v+z;
+#else
     return base+lo+(uint32_t)v+z;
+#endif
 }
 
 #elif defined(X0X_CHICAGO_COMPACT_HEADERS)

@@ -57,10 +57,8 @@ static void bass_publish_request(int voice, uint32_t token)
     ++bass_publish_seq[voice];
 }
 #if X0X_SYNTHONE_PATCH
-X0X_COLD int engine_s1_patch_snapshot(unsigned voice, s1_patch_snapshot *out)
+static int s1_snapshot_locked(unsigned voice, s1_patch_snapshot *out)
 {
-    if (voice >= NBASS || !out) return 0;
-    uint32_t lock = plat_cq_lock();
     const original_runtime_part *owner = &original_bass[voice];
     int ready = owner->kind == ORIGINAL_SOUND_SYNTHONE && owner->status == ORIGINAL_RUNTIME_OK;
     if (ready) {
@@ -70,14 +68,19 @@ X0X_COLD int engine_s1_patch_snapshot(unsigned voice, s1_patch_snapshot *out)
         for (unsigned i = 0; i < S1_PATCH_COUNT; ++i)
             out->physical[i] = s1_part_patch_value(&owner->dsp.synthone, i);
     }
+    return ready;
+}
+X0X_COLD int engine_s1_patch_snapshot(unsigned voice, s1_patch_snapshot *out)
+{
+    if (voice >= NBASS || !out) return 0;
+    uint32_t lock=plat_cq_lock();
+    int ready=s1_snapshot_locked(voice,out);
     plat_cq_unlock(lock);
     return ready;
 }
 
-int engine_s1_envelope_view(unsigned voice, unsigned filter, float *level, unsigned *stage, unsigned *key_down)
+static int s1_envelope_locked(unsigned voice, unsigned filter, float *level, unsigned *stage, unsigned *key_down)
 {
-    if (voice >= NBASS || !level || !stage || !key_down) return 0;
-    uint32_t lock = plat_cq_lock();
     const original_runtime_part *owner = &original_bass[voice];
     int selected = -1;
 #if X0X_S1C
@@ -97,9 +100,41 @@ int engine_s1_envelope_view(unsigned voice, unsigned filter, float *level, unsig
         }
     }
 #endif
-    plat_cq_unlock(lock);
     return selected >= 0;
 }
+
+int engine_s1_envelope_view(unsigned voice, unsigned filter, float *level, unsigned *stage, unsigned *key_down)
+{
+    if (voice >= NBASS || !level || !stage || !key_down) return 0;
+    uint32_t lock=plat_cq_lock();
+    int ok=s1_envelope_locked(voice,filter,level,stage,key_down);
+    plat_cq_unlock(lock);
+    return ok;
+}
+
+#if X0X_UI_SMALL_CANVAS
+X0X_COLD int engine_s1_matrix_snapshot(unsigned voice,s1_matrix_telemetry *out)
+{
+    if (voice>=NBASS || !out) return 0;
+    out->eg[0].level=out->eg[1].level=0;
+    out->eg[0].stage=out->eg[1].stage=0;
+    out->eg[0].held=out->eg[1].held=0;
+    uint32_t lock=plat_cq_lock();
+    int ready=s1_snapshot_locked(voice,&out->patch);
+    if (ready) {
+#if X0X_S1C
+        s1_part_matrix_view(&original_bass[voice].dsp.synthone,out);
+#else
+        for(unsigned f=0;f<2;f++)
+            out->eg[f].ok=s1_envelope_locked(voice,f,&out->eg[f].level,&out->eg[f].stage,&out->eg[f].held);
+        out->voice_ok=original_runtime_voice_view(&original_bass[voice],&out->voice_amp,&out->voice_mod,
+                                                  &out->voice_stage,&out->voice_held);
+#endif
+    }
+    plat_cq_unlock(lock);
+    return ready;
+}
+#endif
 
 int engine_s1_patch_read(unsigned voice, unsigned factory_id, s1_patch_value *out)
 {

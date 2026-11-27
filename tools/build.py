@@ -311,11 +311,21 @@ def generate():
         fcntl.flock(_gen_lock.fileno(), fcntl.LOCK_UN)
         _gen_lock.close()
 
+def chicago_fold_residual_min():
+    # Keep the reference package unchanged unless the size trial is selected.
+    flag = os.environ.get("X0X_CHICAGO_FOLD_RESIDUAL_MIN",
+                          os.environ.get("X0X_UI_SMALL_CANVAS", "0"))
+    if flag not in ("0", "1"):
+        raise SystemExit("X0X_CHICAGO_FOLD_RESIDUAL_MIN: 0 or 1")
+    return flag
+
+
 def _generate_locked():
     """Body of generate(), called with GEN/.generate.lock held."""
     if BOARD == "smk37" and MODEL in ("elite", "pro"):
         import gen_chicago_fast32
-        gen_chicago_fast32.generate(SRC / "experiments/original_synth/chicago_packed_private.h", GEN)
+        gen_chicago_fast32.generate(SRC / "experiments/original_synth/chicago_packed_private.h", GEN,
+                                    fold_lo=chicago_fold_residual_min() == "1")
     if gen_cache.restore(GEN):
         print("generate: cached font, drums, and break bank")
         write_fittab_id()
@@ -508,7 +518,8 @@ def app_compile_commands(flags, original_synth, wobble):
             if S1C == "1" and Path(u).stem in S1C_OZ_UNITS:
                 uf = ["-Oz" if flag == "-Os" else flag for flag in uf]
             if BOARD == "smk37" and MODEL in ("elite", "pro") and Path(u).stem == "chicago_packed":
-                uf = [*uf, "-DX0X_CHICAGO_FAST32=1"]
+                uf = [*uf, "-DX0X_CHICAGO_FAST32=1",
+                      "-DX0X_CHICAGO_FOLD_RESIDUAL_MIN=" + chicago_fold_residual_min()]
             if SUPERJ6_FACTORY == "1" and synthone_patch == "1":
                 uf = ["-Oz" if flag == "-Os" else flag for flag in uf]
             if SUPERJ6_FACTORY == "1" and Path(u).stem in {"dnbx_core", "juno6"}:

@@ -1,5 +1,8 @@
 /* SPDX-License-Identifier: GPL-3.0-only */
 #include "s1c_part.h"
+#if X0X_SYNTHONE_PATCH && X0X_UI_SMALL_CANVAS
+#include "engine.h"
+#endif
 #include "../dsp/s1c/s1c_front.h"
 #include "../dsp/s1pack/s1pack.h"
 #include "../dsp/fastmath.h"
@@ -234,6 +237,27 @@ int s1_part_env_view(const s1_dry_part *part, unsigned filter, float *level, uns
     *stage = e->mode;            /* E_CLEAR 0, E_ATK 1, E_DEC 2, E_REL 3 */
     return 1;
 }
+
+#if X0X_SYNTHONE_PATCH && X0X_UI_SMALL_CANVAS
+void s1_part_matrix_view(const s1_dry_part *part,s1_matrix_telemetry *out)
+{
+    unsigned held=0;
+    const int sel=loudest(part,&held);
+    const s1c_voice *v=sel>=0?&part->e.v[sel]:0;
+    /* Legacy runtime wrapper returns a valid idle tuple for a ready owner. */
+    out->voice_ok=1;
+    out->voice_amp=v?v->amp:0;
+    out->voice_mod=v?v->fenv:0;
+    out->voice_stage=v?(v->stage==2?3u:v->ea.mode==1?0u:1u):6u;
+    out->voice_held=held;
+    out->eg[0].ok=out->eg[1].ok=v!=0;
+    if(v) {
+        out->eg[0].level=v->ea.y;out->eg[1].level=v->ef.y;
+        out->eg[0].stage=v->ea.mode;out->eg[1].stage=v->ef.mode;
+        out->eg[0].held=out->eg[1].held=held;
+    }
+}
+#endif
 
 void s1_part_render(s1_dry_part *part, float *left, float *right, unsigned frames)
 {
