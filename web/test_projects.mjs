@@ -586,7 +586,7 @@ test("historical firmware exports remain exact read-only snapshots but cannot pr
     for (const portable of [false, true]) {
       const saved = await bundle(raw, snapshot(), portable);
       assert.deepEqual((await readProjectFile(saved)).project, raw);
-      await assert.rejects(prepareProjectImport(device, saved), e => e.code === "version" && /revision 13/.test(e.message));
+      await assert.rejects(prepareProjectImport(device, saved), e => e.code === "version" && /current project formats/.test(e.message));
     }
     assertNoImportMutations(keyboard);
     assert.deepEqual(keyboard.project, raw); assert.deepEqual(keyboard.images, snapshot().images);
@@ -604,7 +604,7 @@ test("current import refuses a historical live snapshot before any mutation whil
   assert.equal(parseProject((await readProjectFile(incoming)).project).soundRevision, 13);
   const at = keyboard.calls.length, exports = keyboard.projectCalls(OP.EXPORT).length;
   await assert.rejects(prepareProjectImport(device, incoming),
-    e => e.code === "version" && /revision 13/.test(e.message));
+    e => e.code === "version" && /current project formats/.test(e.message));
   assert.equal(keyboard.projectCalls(OP.EXPORT).length, exports + 1,
     "a valid current input reaches the live snapshot guard after read-only export");
   assertNoImportMutations(keyboard, at);
@@ -624,7 +624,7 @@ test("current import rejects a historical replacement recovery backup before sta
     "only the backup changed; the intended import remains current");
   const at = keyboard.calls.length, exports = keyboard.projectCalls(OP.EXPORT).length;
   await assert.rejects(applyProjectImport(device, prepared, { confirmed: true, backupSaved: true }),
-    e => e.code === "version" && /revision 13/.test(e.message));
+    e => e.code === "version" && /current project formats/.test(e.message));
   assertNoImportMutations(keyboard, at);
   assert.equal(keyboard.projectCalls(OP.EXPORT).length, exports,
     "the invalid rollback source is rejected before the fresh snapshot and staging");
@@ -638,8 +638,8 @@ test("direct stage and preparation reject same-length old headers and protocol2 
     const raw = legacyProject(pattern, sound), { keyboard, device } = await connected();
     assert.equal(raw.length, keyboard.project.length);
     assert.equal(parseProject(raw).patternVersion, pattern, "historical inspection remains available");
-    await assert.rejects(device.stage(raw), e => e.code === "version" && /revision 13/.test(e.message));
-    await assert.rejects(prepareProjectImport(device, await bundle(raw)), e => e.code === "version" && /revision 13/.test(e.message));
+    await assert.rejects(device.stage(raw), e => e.code === "version" && /current project formats/.test(e.message));
+    await assert.rejects(prepareProjectImport(device, await bundle(raw)), e => e.code === "version" && /current project formats/.test(e.message));
     assertNoImportMutations(keyboard);
     assert.deepEqual(keyboard.project, rawProject()); assert.deepEqual(keyboard.images, snapshot().images);
   }
@@ -649,7 +649,7 @@ test("direct stage and preparation reject same-length old headers and protocol2 
   } });
   for (const pattern of [3, 6]) {
     const raw = legacyProject(pattern, 10, 36428);
-    await assert.rejects(device.stage(raw), e => e.code === "version" && /revision 13/.test(e.message));
+    await assert.rejects(device.stage(raw), e => e.code === "version" && /current project formats/.test(e.message));
     assertNoImportMutations(keyboard);
   }
 });
@@ -659,7 +659,7 @@ test("retained-recovery preparation refuses legacy bundles without releasing its
   keyboard.mode = 3; await device.query({ acceptModeChange: true });
   const at = keyboard.calls.length;
   await assert.rejects(prepareProjectImport(device, await bundle(legacyProject())),
-    e => e.code === "version" && /revision 13/.test(e.message));
+    e => e.code === "version" && /current project formats/.test(e.message));
   assertNoImportMutations(keyboard, at);
   assert.equal(keyboard.mode, 3); assert.equal(device.mode, 3);
 });
@@ -673,7 +673,7 @@ test("normal and retained-recovery APIs recheck tampered prepared bytes before a
     const prepared = await prepareProjectImport(device, valid), at = keyboard.calls.length;
     prepared.file.bytes = old; // Valid outer/component CRCs; revision policy must be checked again.
     await assert.rejects(applyProjectImport(device, prepared, { confirmed: true, backupSaved: true }),
-      e => e.code === "version" && /revision 13/.test(e.message));
+      e => e.code === "version" && /current project formats/.test(e.message));
     assertNoImportMutations(keyboard, at);
     assert.deepEqual(keyboard.project, rawProject()); assert.deepEqual(keyboard.images, snapshot().images);
     assert.equal(keyboard.mode, recovery ? 3 : 0, "rejection preserves an existing recovery hold");
@@ -751,14 +751,14 @@ test("stream 15 on old firmware fails validation before sample mutation or commi
   assert.equal(keyboard.sampleWrites().length, 0);
   assert.equal(keyboard.projectCalls(OP.COMMIT).length, 0);
   assert.deepEqual(keyboard.project, rawProject());
-  for (const version of [16, 999]) {
+  for (const version of [17, 999]) {
     new DataView(chord.buffer).setUint32(20, version, true);
     assert.throws(() => parseProject(chord), /incompatible/);
   }
 });
 
 
-for (const stream of [13, 14, 15]) {
+for (const stream of [13, 14, 15, 16]) {
   test(`format 2 stream ${stream} preserves backup/restore bytes and downgrade safety`, async () => {
     const raw = rawProject(7), v = new DataView(raw.buffer);
     v.setUint32(16, 2, true); v.setUint32(20, stream, true);
@@ -791,7 +791,7 @@ for (const stream of [13, 14, 15]) {
 }
 test("format 2 rejects historical layouts and offline editing", async () => {
   const {openProject} = await import('./offline-sequencer/project-adapter.js');
-  for (const [stream,sound] of [[3,4],[3,10],[6,11],[8,11],[9,11],[16,13],[13,14]]) {
+  for (const [stream,sound] of [[3,4],[3,10],[6,11],[8,11],[9,11],[17,13],[13,14]]) {
     const raw = rawProject(), v = new DataView(raw.buffer);
     v.setUint32(16,2,true);v.setUint32(20,stream,true);v.setUint32(24,sound,true);
     assert.throws(() => parseProject(raw), /incompatible/);
