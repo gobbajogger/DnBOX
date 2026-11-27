@@ -1890,7 +1890,11 @@ CK_FN static int32_t ck_key_x(uint32_t k, int32_t x0, int32_t ww)
     return x0 + (int32_t)(k / 12u * 7u + CK_WI[k % 12u]) * ww + (int32_t)CK_BLK(k) * (ww - ww * 3 / 10);
 }
 /* a keyboard of n keys from key 0 (C), the white keys ww wide and h high, key k in col[k] */
+#if X0X_UI_SMALL_CANVAS
 CK_FN static void ck_kbd(int32_t x0, int32_t y, int32_t ww, int32_t h, uint32_t n, const uint16_t *col, uint16_t black)
+#else
+CK_FN static void ck_kbd(int32_t x0, int32_t y, int32_t ww, int32_t h, uint32_t n, const uint16_t *col)
+#endif
 {
     uint32_t k, pass;
     for (pass = 0; pass < 2u; pass++)
@@ -1899,7 +1903,11 @@ CK_FN static void ck_kbd(int32_t x0, int32_t y, int32_t ww, int32_t h, uint32_t 
             if (CK_BLK(k) != pass)
                 continue;
             if (pass) {
+#if X0X_UI_SMALL_CANVAS
                 cv_rect(x - 1, y, bw + 2, h * 3 / 5 + 1, black);
+#else
+                cv_rect(x - 1, y, bw + 2, h * 3 / 5 + 1, C_BLACK);
+#endif
                 cv_rect(x, y, bw, h * 3 / 5, col[k]);
             } else {
                 cv_rect(x, y, ww - 1, h, col[k]);
@@ -1960,7 +1968,11 @@ uint8_t smk_ck_panel(uint32_t *last, uint32_t force)
     for (i = 0; i < 12u; i++)                               /* one octave: the scale, the notes that sound */
         col[i] = snd >> i & 1u ? C_AMB : ck_in(m, i) ? (CK_BLK(i) ? RGB(140, 140, 140) : RGB(220, 220, 220))
                                                     : (CK_BLK(i) ? RGB(30, 30, 30) : RGB(70, 70, 70));
+#if X0X_UI_SMALL_CANVAS
     ck_kbd(4, 23, 15, 36, 12u, col, C_BLACK);
+#else
+    ck_kbd(4, 23, 15, 36, 12u, col);
+#endif
     cv_rect(ck_key_x(sp->ck_root, 4, 15) + 2, 23 + (CK_BLK(sp->ck_root) ? 15 : 31), 5, 3, CK_MODE_C[0]);
     q = put_s(put_s(put_s(t, ck_nm(CK_ROOT_N, sp->ck_root)), " "), ck_nm(CK_SCALE_N, sp->ck_scale));
     if (sp->ck_snap)
@@ -2047,7 +2059,7 @@ static void ck_page_draw(void)
     }
     for (k = 0; k < CK_NKEY; k++)
         col[k] = CK_BIT(cp->keys, k) ? c : CK_BLK(k) ? RGB(25, 25, 25) : RGB(60, 60, 60);
-    ck_kbd(10, 76, 10, 46, CK_NKEY, col, C_BLACK);
+    ck_kbd(10, 76, 10, 46, CK_NKEY, col);
 #endif
 }
 /* every main loop pass (also between frames, for the arp timing) */

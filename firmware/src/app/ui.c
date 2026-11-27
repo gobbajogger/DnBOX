@@ -5542,15 +5542,16 @@ static void cv_commit_rect(int region, uint32_t x, uint32_t y)
 static void cv_commit_main_band(unsigned band)
 {
     static uint8_t force;
-    const cv_lcd_pos_t pos = {0, MAIN_Y + band * BAND_H};
-    if (!band) force = !blit_hash[1] || !cv_tile_valid[1];
-    x0x_lcd_tile_commit(cv_px, BAND_H,
-        main_tileh + band * LCD_TILE_ROWS(BAND_H) * X0X_LCD_TILE_COLS,
-        force, cv_lcd_emit, (void *)&pos);
-    if (band) {
+    cv_lcd_pos_t pos = {0, MAIN_Y + band * BAND_H};
+    if (!band) {
+        force = !blit_hash[1] || !cv_tile_valid[1];
+        /* Preserve any invalidation issued by live input during either send. */
         blit_hash[1] = 1u;
         cv_tile_valid[1] = 1u;
     }
+    x0x_lcd_tile_commit(cv_px, BAND_H,
+        main_tileh + band * LCD_TILE_ROWS(BAND_H) * X0X_LCD_TILE_COLS,
+        force, cv_lcd_emit, &pos);
 }
 #endif
 
@@ -7439,6 +7440,77 @@ static UI_DRAW void draw_list(int band)
     }
 }
 
+#if X0X_UI_SMALL_CANVAS
+/* Resolve and own just the mutable strings; all other help lines are literals. */
+typedef struct {
+    uint16_t bg, white, gray, part;
+    int8_t route, n;
+    union {
+        struct {
+            const char *title, *lines[HELP_LINES];
+            char copy_part[40], clear_part[32], status[40];
+        } help;
+        char ask[2][sizeof ui.ask_q[0]];
+    } text;
+} cv_modal_scene;
+static void cv_capture_modal(cv_modal_scene *s)
+{
+    s->route = ui.help ? 1 : ui.overlay == O_ASK ? 2 : 0;
+    if (!s->route) return;
+    s->bg = C_BLACK; s->white = C_WHITE; s->gray = C_GRAY;
+    if (s->route == 2) {
+        memcpy(s->text.ask, ui.ask_q, sizeof s->text.ask);
+        return;
+    }
+    int button = ui.help - 1;
+    s->part = part_col();
+    s->text.help.title = btn_label(button);
+    s->n = help_lines(button, s->text.help.lines);
+    if (button == B_SAVE) {
+        /* help_lines supplies these three specific static arrays in SAVE. */
+        memcpy(s->text.help.copy_part, s->text.help.lines[1], sizeof s->text.help.copy_part);
+        memcpy(s->text.help.clear_part, s->text.help.lines[3], sizeof s->text.help.clear_part);
+        memcpy(s->text.help.status, s->text.help.lines[5], sizeof s->text.help.status);
+        s->text.help.lines[1] = s->text.help.copy_part;
+        s->text.help.lines[3] = s->text.help.clear_part;
+        s->text.help.lines[5] = s->text.help.status;
+    }
+}
+static UI_DRAW void draw_ask(int band, const cv_modal_scene *s)
+{
+    uint16_t red = RGB(255, 80, 60);
+    if (band == 0) {
+        frame(6, 10, 228, 62, red);
+        cv_rect(7, 71, 226, 1, s->bg);
+        text_c(120, 24, &FONT_B, s->text.ask[0], s->white);
+        text_c(120, 46, &FONT_S, s->text.ask[1], s->gray);
+    } else {
+        cv_rect(6, 0, 1, 44, red);
+        cv_rect(233, 0, 1, 44, red);
+        cv_rect(7, 44, 226, 1, red);
+        box(22, 10, 92, 24, red);
+        text_c(68, vc(&FONT_B, 10, 24), &FONT_B, UI_CAP_SEL " YES", s->bg);
+        frame(126, 10, 92, 24, s->gray);
+        text_c(172, vc(&FONT_B, 10, 24), &FONT_B, UI_CAP_HOME " NO", s->gray);
+    }
+}
+
+static UI_DRAW void draw_help(int band, const cv_modal_scene *s)
+{
+    int n = s->n, k;
+    uint16_t c = s->part;
+    if (band == 0) {
+        box(6, 4, 228, 24, c);
+        text_c(120, vc(&FONT_B, 4, 24), &FONT_B, s->text.help.title, s->bg);
+    }
+    for (k = 0; k < n; k++) {                            /* evenly spaced; a line across the bands in both */
+        int32_t y = 34 + k * 18 - band * BAND_H;
+        if (y > -18 && y < BAND_H)
+            text_c(120, y, &FONT_XS, s->text.help.lines[k], s->white);
+    }
+}
+
+#else
 static UI_DRAW void draw_ask(int band)
 {
     uint16_t red = RGB(255, 80, 60);
@@ -7473,6 +7545,8 @@ static UI_DRAW void draw_help(int band)
             text_c(120, y, &FONT_XS, l[k], C_WHITE);
     }
 }
+
+#endif
 
 #ifdef X0X_HOST
 /* every card, on every kind of screen, fits the screen: 1 = yes (prints the first that does not) */
@@ -7592,19 +7666,33 @@ static UI_DRAW void draw_main(void)
             smk_clip_lcd_force();   /* a menu (for example GLO) is on the screen: draw the grid again after it */
     }
 #endif
-#if !X0X_UI_SMALL_CANVAS
+#if X0X_UI_SMALL_CANVAS
+    cv_modal_scene modal;
+    cv_capture_modal(&modal);
+#else
     cv_begin(240, 2 * BAND_H, C_BLACK);           /* both bands, then one transfer: no tear between them */
 #endif
     for (band = 0; band < 2; band++) {
 #if X0X_UI_SMALL_CANVAS
-        cv_window(240, MAIN_ROWS, (uint32_t)band * BAND_H, BAND_H, C_BLACK);
+        cv_window(240, MAIN_ROWS, (uint32_t)band * BAND_H, BAND_H,
+                  modal.route ? modal.bg : C_BLACK);
 #endif
         cv_band(band * BAND_H, BAND_H);
+#if X0X_UI_SMALL_CANVAS
+        if (modal.route) {
+            if (modal.route == 1) draw_help(band, &modal);
+            else draw_ask(band, &modal);
+            cv_commit_main_band((unsigned)band);
+            continue;
+        }
+        if (ui.overlay == O_LIST)
+#else
         if (ui.help)
             draw_help(band);
         else if (ui.overlay == O_ASK)
             draw_ask(band);
         else if (ui.overlay == O_LIST)
+#endif
             draw_list(band);
         else if (ui.view == V_HOME)
             draw_home(band);
