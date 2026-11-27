@@ -1,0 +1,41 @@
+--- a/firmware/src/dsp/drum909.c
++++ b/firmware/src/dsp/drum909.c
+@@ -1090,12 +1090,34 @@
+         (s->dk == s->pos || s->dk == s->pos + 1u)) {
+         if (s->dk == s->pos)
+             s->h1 = d9_smp_decode(s, adpcm);
++        float av=s->out.v, ac=s->out.cur;
++        const float ar=s->out.r, end=s->out.v1;
++        int remaining=s->out.left;
++        int32_t h0=s->h0,h1=s->h1;
++#if X0X_909_HUFF_DIAG
++        int32_t pred=s->pred,idx=s->idx;
++        uint32_t cursor=s->huff_bit;
++#endif
+         for (int i = 0; i < m; ++i) {
+-            s->h0 = s->h1;
+-            s->h1 = d9_smp_decode(s, adpcm);
+-            const float v = (float)s->h0 * (1.0f / 32768.0f);
+-            bus->y[i] = v * d9_env_tick(&s->out);
++            h0=h1;
++#if X0X_909_HUFF_DIAG
++            const uint8_t *p=adpcm+(cursor>>3);
++            const unsigned e=x0x_smp_huff_lut[((p[0]|((unsigned)p[1]<<8))>>(cursor&7u))&63u];
++            cursor+=e>>4;
++            h1=ima_decode_code(e&15u,&pred,&idx);
++#else
++            h1=d9_smp_decode(s,adpcm);
++#endif
++            const float v=(float)h0*(1.0f/32768.0f);
++            ac=av;
++            if(remaining)av=--remaining?av*ar:end;
++            bus->y[i]=v*ac;
+         }
++        s->h0=h0; s->h1=h1;
++#if X0X_909_HUFF_DIAG
++        s->pred=pred; s->idx=idx; s->huff_bit=cursor; s->dk+=(unsigned)m;
++#endif
++        s->out.v=av; s->out.cur=ac; s->out.left=remaining;
+         s->pos += (unsigned)m;
+     } else {
+         for (int i = 0; i < m; ++i) {
