@@ -1602,66 +1602,62 @@ D8_TICK float shape(float x, const d8_shp_t *p, int type, float *st)
 /* ======================================================================= */
 
 /* 8W8's pot table (sc808_params.h), per sound and slot: min, max, EXP?, default */
-typedef struct { float min, max; uint8_t exp, def; } d8_spec_t;
-#define TU12 {-12.0f, 12.0f, 0, 64}
-#define TU2 {-2.0f, 2.0f, 0, 64}
-#define TUM {0.5f, 2.0f, 1, 64}
-#define LVL {0.0f, 2.0f, 0, 64}
-#define DRV {0.0f, 10.0f, 0, 0}
-#define DST {0.0f, 6.0f, 0, 0}
-#define SND {0.0f, 1.0f, 0, 0}
-#define NON {0.0f, 1.0f, 0, 0}
-/* Level/tune/decay stay per sound. Thirteen voices share one drive..x2 block
- * (DRV,DST,SND,SND,NON,NON). Kick, snare, and maracas keep private FX columns. */
-#define D8_SPEC_HEAD 3
-static const d8_spec_t k_spec_fx6[] = {DRV, DST, SND, SND, NON, NON};
-/* BD/SD/MA private FX: share the fx6 prefix, keep only the differing tail cells.
- * BD: DRV,DST then NON,NON from fx6[4..], then private x2. SD/MA: DRV..SND from fx6[0..3]. */
-static const d8_spec_t k_spec_bd_x2[] = {{0.0f, 6.0f, 0, 42}, {0.0f, 1.0f, 0, 24}};
-static const d8_spec_t k_spec_sd_x2[] = {{0.0f, 1.0f, 0, 89}, {0.0f, 1.0f, 0, 64}};
-static const d8_spec_t k_spec_ma_x2[] = {{0.0f, 1.0f, 0, 32}, NON};
-static const d8_spec_t k_spec_head[D8S_NUM][D8_SPEC_HEAD] = {
-    [D8S_BD] = {LVL, TU12, {0.1f, 8.0f, 1, 87}},
-    [D8S_SD] = {LVL, TU12, {0.1f, 8.0f, 1, 108}},
-    [D8S_LT] = {LVL, TU2,  {0.06f, 2.0f, 1, 68}},
-    [D8S_MT] = {LVL, TU2,  {0.06f, 2.0f, 1, 56}},
-    [D8S_HT] = {LVL, TU2,  {0.06f, 2.0f, 1, 53}},
-    [D8S_LC] = {LVL, TU2,  {0.06f, 2.0f, 1, 58}},
-    [D8S_MC] = {LVL, TU2,  {0.06f, 2.0f, 1, 36}},
-    [D8S_HC] = {LVL, TU2,  {0.06f, 2.0f, 1, 34}},
-    [D8S_RS] = {LVL, TU12, {0.005f, 0.2f, 1, 40}},
-    [D8S_CL] = {LVL, TU12, {0.0f, 1.0f, 0, 64}},
-    [D8S_MA] = {LVL, TU12, {0.01f, 0.3f, 1, 51}},
-    [D8S_CP] = {LVL, TU12, {0.35f, 2.8f, 1, 64}},
-    [D8S_CB] = {LVL, TUM,  {0.1f, 2.0f, 1, 62}},
-    [D8S_CH] = {LVL, TUM,  {0.03f, 0.5f, 1, 47}},
-    [D8S_OH] = {LVL, TUM,  {0.08f, 1.5f, 1, 74}},
-    [D8S_CY] = {LVL, TUM,  {0.4f, 6.0f, 1, 70}},
+/* Cold pot metadata: exact original float endpoints shared across voices.
+ * The default is still the physical 7-bit detent, not a replacement value. */
+typedef struct { float min, max; } d8_range_t;
+typedef struct { uint8_t range, def; } d8_spec_t;
+enum {
+    D8R_LEVEL, D8R_TUNE12, D8R_TUNE2, D8R_TUNEM, D8R_DRIVE, D8R_DIST, D8R_UNIT,
+    D8R_BDSD, D8R_TOM, D8R_RIM, D8R_MARACAS, D8R_CLAP, D8R_BELL, D8R_CH, D8R_OH, D8R_CY,
+    D8R_EXP = D8R_BDSD
 };
-static const d8_spec_t *d8_kspec(int s, int slot)
+static const d8_range_t d8_ranges[] = {
+    {0.0f, 2.0f}, {-12.0f, 12.0f}, {-2.0f, 2.0f}, {0.5f, 2.0f},
+    {0.0f, 10.0f}, {0.0f, 6.0f}, {0.0f, 1.0f},
+    {0.1f, 8.0f}, {0.06f, 2.0f}, {0.005f, 0.2f}, {0.01f, 0.3f},
+    {0.35f, 2.8f}, {0.1f, 2.0f}, {0.03f, 0.5f}, {0.08f, 1.5f}, {0.4f, 6.0f},
+};
+#define R(range, def) {D8R_##range, def}
+#define HEAD(tune, decay, def) {D8R_##tune, R(decay, def)}
+static const struct { uint8_t tune; d8_spec_t decay; } d8_heads[D8S_NUM] = {
+    [D8S_BD] = HEAD(TUNE12, BDSD, 87),
+    [D8S_SD] = HEAD(TUNE12, BDSD, 108),
+    [D8S_LT] = HEAD(TUNE2, TOM, 68),
+    [D8S_MT] = HEAD(TUNE2, TOM, 56),
+    [D8S_HT] = HEAD(TUNE2, TOM, 53),
+    [D8S_LC] = HEAD(TUNE2, TOM, 58),
+    [D8S_MC] = HEAD(TUNE2, TOM, 36),
+    [D8S_HC] = HEAD(TUNE2, TOM, 34),
+    [D8S_RS] = HEAD(TUNE12, RIM, 40),
+    [D8S_CL] = HEAD(TUNE12, UNIT, 64),
+    [D8S_MA] = HEAD(TUNE12, MARACAS, 51),
+    [D8S_CP] = HEAD(TUNE12, CLAP, 64),
+    [D8S_CB] = HEAD(TUNEM, BELL, 62),
+    [D8S_CH] = HEAD(TUNEM, CH, 47),
+    [D8S_OH] = HEAD(TUNEM, OH, 74),
+    [D8S_CY] = HEAD(TUNEM, CY, 70),
+};
+#undef HEAD
+#undef R
+
+static d8_spec_t d8_pot_spec(int s, int slot)
 {
-    int fx;
-    if (slot < D8_SPEC_HEAD)
-        return &k_spec_head[s][slot];
-    fx = slot - D8_SPEC_HEAD;
-    if (s == D8S_BD) {
-        if (fx < 2)
-            return &k_spec_fx6[fx];       /* DRV, DST */
-        if (fx < 4)
-            return &k_spec_fx6[fx + 2];   /* NON, NON at fx6[4..] */
-        return &k_spec_bd_x2[fx - 4];
+    if (slot == D8P_LEVEL) return (d8_spec_t){D8R_LEVEL, 64};
+    if (slot == D8P_TUNE) return (d8_spec_t){d8_heads[s].tune, 64};
+    if (slot == D8P_DECAY) return d8_heads[s].decay;
+    if (slot == D8P_DRIVE) return (d8_spec_t){D8R_DRIVE, 0};
+    if (slot == D8P_DIST) return (d8_spec_t){D8R_DIST, 0};
+    if (slot >= D8P_X1) {
+        if (s == D8S_BD) return slot == D8P_X1 ? (d8_spec_t){D8R_DIST,42} : (d8_spec_t){D8R_UNIT,24};
+        if (s == D8S_SD) return (d8_spec_t){D8R_UNIT, slot == D8P_X1 ? 89 : 64};
+        if (s == D8S_MA && slot == D8P_X1) return (d8_spec_t){D8R_UNIT,32};
     }
-    if (s == D8S_SD) {
-        if (fx < 4)
-            return &k_spec_fx6[fx];       /* DRV, DST, SND, SND */
-        return &k_spec_sd_x2[fx - 4];
-    }
-    if (s == D8S_MA) {
-        if (fx < 4)
-            return &k_spec_fx6[fx];
-        return &k_spec_ma_x2[fx - 4];
-    }
-    return &k_spec_fx6[fx];
+    return (d8_spec_t){D8R_UNIT,0};
+}
+
+static int d8_range_exponential(unsigned range)
+{
+    return range == D8R_TUNEM || range >= D8R_EXP;
 }
 
 /* the lanes 8W8 balanced the kit with, applied before the drive stage */
@@ -1677,9 +1673,10 @@ static const float k_base_note[D8S_NUM] = {
 
 static float pot_value(int s, int slot, int pot)
 {
-    const d8_spec_t *p = d8_kspec(s, slot);
+    unsigned range = d8_pot_spec(s, slot).range;
+    const d8_range_t *p = &d8_ranges[range];
     float t = (float)pot / 127.0f;
-    if (p->exp && p->min > 0.0f)
+    if (d8_range_exponential(range) && p->min > 0.0f)
         return p->min * d8_pow(p->max / p->min, t);
     return p->min + (p->max - p->min) * t;
 }
@@ -2044,7 +2041,7 @@ X0X_COLD int drum808_param_si(int track, int i, int pot, float *val)
     *val = v;
     switch (m.slot) {
     case D8P_LEVEL: return X0X_U_GAIN;
-    case D8P_TUNE: return d8_kspec(s, m.slot)->exp ? X0X_U_RATIO : X0X_U_ST;
+    case D8P_TUNE: return d8_range_exponential(d8_heads[s].tune) ? X0X_U_RATIO : X0X_U_ST;
     case D8P_REV: case D8P_DLY: *val = v * 100.0f; return X0X_U_PCT;
     case D8P_DECAY:
         if(track==D8_LT||track==D8_MT||track==D8_HT)return X0X_U_S;
@@ -2130,7 +2127,7 @@ void drum808_init(drum808_t *d)
     }
     for (s = 0; s < D8S_NUM; s++)
         for (k = 0; k < D8P_NUM; k++)
-            set_pot(d, s, k, d8_kspec(s, k)->def);
+            set_pot(d, s, k, d8_pot_spec(s, k).def);
     for (s = 0; s < D8_NUM; s++) {
         d->tpan[s] = 64;                          /* centre */
         d->pan_l[s] = d->pan_r[s] = d->pan_lc[s] = d->pan_rc[s] = 1.0f;
