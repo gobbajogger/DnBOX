@@ -338,6 +338,8 @@ static void smk__key_event(uint32_t k, uint32_t vel)     /* vel 0 = release */
             fm1_in.knotes &= ~bit;
         }
         fm1_in.notes = fm1_in.knotes | fm1_in.pnotes;
+        if (smk_ext_enabled == PLAT_PHYS_REC || (smk_ext_enabled == PLAT_PHYS_RELEASE && !vel))
+            smk__extq(k, vel);
     } else {
         smk__extq(k, vel);
     }

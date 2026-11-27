@@ -163,7 +163,7 @@ static void check_panel_route(int owner)
     CHECK(pref_desc(pg.r[cur_page()][1])->max == 3);
     for (int preset = 0; preset < 4; ++preset) {
         if (preset) {
-            panel_turn(EN_PRESET, 1);
+            panel_turn(EN_K2, 1);
             settle_selector(owner);
         }
         CHECK(engine_bass_preset_index(owner) == preset);

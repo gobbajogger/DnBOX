@@ -140,11 +140,41 @@ int engine_s1_patch_set(unsigned voice, uint32_t revision, unsigned factory_id, 
 }
 #endif
 
-static int bass_has_locks(int voice)
+/* Same-engine presets keep the same parameter map. Different engines
+ * cannot safely reuse authored knob indices; empty allocation slots are
+ * not automation and never block either request. */
+static int bass_motion_nonempty(const lane_t *l, int k)
 {
-    if (mot.lane) for (int k = 0; k < NLANE; ++k)
-        if (mot.lane[k].used && mot.lane[k].t == T_303 && mot.lane[k].v == voice) return 1;
+    if (mot.rt[k].rec_req) return 1;
+    for (int step=0;step<NSTEPS;step++) if(l->val[step]!=MOT_NONE) return 1;
     return 0;
+}
+static int bass_motion_switch_blocked(int voice, int bank)
+{
+    if (bank == original_bass[voice].kind || !mot.lane) return 0;
+    for (int k=0;k<NLANE;k++) {
+        const lane_t *l=&mot.lane[k];
+        if (!l->used || l->t!=T_303 || l->v!=voice) continue;
+        if (bass_motion_nonempty(l,k)) return 1;
+    }
+    return 0;
+}
+/* An audio-boundary replacement asks the next step to apply automation
+ * anew. Only a successful cross-engine switch retires empty old slots. */
+static void bass_motion_after_switch(int voice, unsigned old_bank)
+{
+    if (!mot.lane) return;
+    for (int k=0;k<NLANE;k++) {
+        lane_t *l=&mot.lane[k];
+        if (!l->used || l->t!=T_303 || l->v!=voice) continue;
+        if (old_bank!=original_bass[voice].kind && !bass_motion_nonempty(l,k)) {
+            /* Checked again at admission in this same audio boundary. */
+            l->used=0;
+            mot.rt[k].rec_req=mot.rt[k].hold_req=0;
+        }
+        mot.rt[k].applied=MOT_NONE;
+        mot.rt[k].ramp=0;
+    }
 }
 static void bass_tag_set(sound_t *sound, int voice, int bank, int preset, int edited)
 {
@@ -411,7 +441,7 @@ int engine_bass_preset_pending(int v)
     if (!bass_request_snapshot(v, &request)) return 6;
     if (!(request.token & 0x80000000u) || request.token == bass_applied[v]) return 0;
     if (!plat_midi_passed(request.midi) || (int32_t)(cq_r - request.cq) < 0) return 5;
-    if (bass_has_locks(v)) return 4;
+    if (bass_motion_switch_blocked(v, (int)((request.token >> BASS_REQ_PRESET_BITS) & 3u))) return 4;
     if (bass_wheel_mask & (1u << v)) return 3;
     if (original_runtime_owned(&original_bass[v]) || original_quiet_samples[v] < 512u) return 2;
     return 1;
@@ -438,7 +468,7 @@ X0X_COLD int engine_bass_base_ready(unsigned mask, const bass_base_state_t *targ
         memcpy(cell, target->cell[v], sizeof cell);
         if (bass_tagged_cell_validate(cell, &tag, &bank)) return -5;
         if (!engine_bass_bank_available(v, bank)) return -2;
-        if (bass_has_locks(v)) return -4;
+        if (bass_motion_switch_blocked(v, bank)) return -4;
         /* Typed history restore retains its existing admission contract. Only
          * factory requests own the measured fade/quiescence transition. */
         if ((bass_wheel_mask & (1u << v)) || original_runtime_active(&original_bass[v])) return 2;
@@ -451,7 +481,9 @@ X0X_COLD void engine_bass_base_restore(unsigned mask)
     for (int v = 0; v < NBASS; ++v) if (mask & (1u << v)) {
         engine_bass_cancel_preset(v);
         live_key_context_retire(v, 0);
-        (void)bass_restore_part(mot_base_snd, v);
+        unsigned old_bank=original_bass[v].kind;
+        if (bass_restore_part(mot_base_snd, v)==ORIGINAL_RUNTIME_OK)
+            bass_motion_after_switch(v, old_bank);
         for (int i = 0; i < MX_NPARAMS; ++i) apply_base(T_MIX, PART_303A + v, i);
     }
 }
@@ -460,7 +492,7 @@ X0X_COLD int engine_bass_select_preset_at(int v, int bank, int preset, sound_t *
     if ((unsigned)v >= NBASS || !sound || sound != mot_base_snd ||
         (unsigned)preset >= original_sound_factories((unsigned)bank)) return -1;
     if (!engine_bass_bank_available(v, bank)) return -2;
-    if (bass_has_locks(v)) return -4;
+    if (bass_motion_switch_blocked(v, bank)) return -4;
     bass_gate_pat[v] = (uint8_t)((unsigned)pat < NPAT ? pat : 0xFF);
     __asm__ volatile("" ::: "memory");
     uint32_t token = 0x80000000u | ((++bass_request_serial & BASS_REQ_SERIAL_MASK) << BASS_REQ_SERIAL_SHIFT) |
@@ -488,6 +520,7 @@ static void bass_preset_boundary_voice(int v)
         int bank = (int)((token >> BASS_REQ_PRESET_BITS) & 3u), preset = (int)(token & BASS_REQ_PRESET_MASK);
         uint8_t next[32];
         if (!engine_bass_bank_available(v, bank) || !original_sound_init(next, bank, preset)) return;
+        unsigned old_bank=original_bass[v].kind;
         live_key_context_retire(v, 1);
         if (original_runtime_retire(&original_bass[v]) != ORIGINAL_RUNTIME_OK) {
             bass_applied[v] = token;
@@ -501,6 +534,10 @@ static void bass_preset_boundary_voice(int v)
             bass_applied[v] = token;
             return;
         }
+        bass_motion_after_switch(v, old_bank);
+#if X0X_BASS_NOTE_SOUND
+        note_lock_applied[v]=0;
+#endif
         original_switch_gain[v] = 512u; original_quiet_samples[v] = 0;
         sound_t *sound = (sound_t *)mot_base_snd;
         __builtin_memcpy(sound->v[T_303][v], next, sizeof next);

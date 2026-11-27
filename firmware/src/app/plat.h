@@ -50,9 +50,13 @@ static inline int plat_division_pad(unsigned owner) { (void)owner; return -1; }
 #else
 int plat_division_pad(unsigned owner);
 #endif
-/* Outer physical events retain their publication epoch and strike pitch.
+/* Outer (or all physical REC) events retain their publication epoch and strike pitch.
  * Snapshot/cutoff includes the complete physical bitmap under an IRQ guard. */
 typedef struct { uint32_t generation, word; } plat_outer_event_t;
+enum { PLAT_PHYS_OFF, PLAT_PHYS_OUTER, PLAT_PHYS_REC, PLAT_PHYS_RELEASE };
+#if BOARD_SMK37 && (!defined(X0X_HOST) || defined(X0X_REC_KEY_TEST))
+uint32_t plat_record_pad_keys(void); /* pad aliases only, not physical keybed */
+#endif
 #define PLAT_OUTER_PACK(key, vel, pitch) \
     ((uint32_t)(key) | ((uint32_t)(vel) << 7) | ((uint32_t)(pitch) << 14))
 #define PLAT_OUTER_KEY(word) ((uint32_t)(word) & 127u)

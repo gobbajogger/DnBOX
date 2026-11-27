@@ -40,9 +40,9 @@ static void physical_browse(int voice)
     CHECK(engine_bass_preset_index(voice)==0);audio_block();CHECK(engine_bass_preset_index(voice)==6);
     for(int i=5;i>=0;i--){now_ms++;enc_acc[EN_K2]=-1;ui_input_only();CHECK(engine_bass_requested_preset(voice)==i);}
     audio_block();CHECK(engine_bass_preset_index(voice)==0);
-    for(int i=1;i<=4;i++){now_ms++;enc_acc[EN_PRESET]=1;ui_input_only();CHECK(engine_bass_requested_preset(voice)==i);}
+    for(int i=1;i<=4;i++){now_ms++;enc_acc[EN_K2]=1;ui_input_only();CHECK(engine_bass_requested_preset(voice)==i);}
     audio_block();CHECK(engine_bass_preset_index(voice)==4);
-    for(int i=3;i>=0;i--){now_ms++;enc_acc[EN_PRESET]=-1;ui_input_only();CHECK(engine_bass_requested_preset(voice)==i);}
+    for(int i=3;i>=0;i--){now_ms++;enc_acc[EN_K2]=-1;ui_input_only();CHECK(engine_bass_requested_preset(voice)==i);}
     audio_block();CHECK(engine_bass_preset_index(voice)==0);
 }
 static void edited_pixels(int voice)
@@ -124,7 +124,8 @@ int main(int argc,char **argv)
     audio_block();CHECK(engine_bass_preset_pending(0)==3);CHECK(engine_bass_preset_index(0)==0);
     engine_bass_cancel_preset(0);audio_block();CHECK(!engine_bass_preset_pending(0));CHECK(engine_bass_preset_index(0)==0);engine_bass_wheel_owners(0);
     proj.arr.lane[0].used=1;proj.arr.lane[0].t=T_303;proj.arr.lane[0].v=0;
-    CHECK(engine_bass_select_preset(0,0,1,&proj.sound)==-4);CHECK(!engine_bass_preset_pending(0));proj.arr.lane[0].used=0;
+    CHECK(engine_bass_select_preset(0,0,1,&proj.sound)==0); CHECK(engine_bass_preset_pending(0));
+    engine_bass_cancel_preset(0); audio_block(); CHECK(!engine_bass_preset_pending(0)); proj.arr.lane[0].used=0;
 #if X0X_DEV_WOBBLE
     ui.part=PART_303B;ui.view=V_PART;build_pages();*page_of(V_PART)=(uint8_t)sound_page();
     pref_set(PR(R_BENGINE,0,1,0),1);CHECK(engine_bass_requested_bank(1)==1);CHECK(engine_bass_bank(1)==0);

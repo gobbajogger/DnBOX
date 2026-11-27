@@ -128,8 +128,9 @@ static void owner_switches(int bank)
         }
         scan();
         if(path==0) { T(ui.part==PART_303B);T(live_owner==1); }
-        T(!engine_live_key_probe(0,2));
-        T(!(engine_bass_keys_held()&1));
+        int retained=(path>=2 && path<=7) || path==13 || path==14 || path==19;
+        T(!!engine_live_key_probe(0,2)==retained);
+        T(!!(engine_bass_keys_held()&1)==retained);
         edge(17,0);T(!engine_live_key_probe(0,2));
         test_clip_mode=test_padcal=test_smcui=0;held_btn=0;
         project_busy=0;perf.test=-1;perf.phase=0;
@@ -164,6 +165,35 @@ static void cancelled_voice_reentry(int bank)
     edge(20,100);T(engine_live_key_probe(1,2));
     edge(20,0);T(!engine_live_key_probe(1,2));
 }
+static void page_hold_release(int bank)
+{
+    static const unsigned keys[]={0,17,36};
+    for(unsigned i=0;i<3;++i){
+        fresh_keys(bank);
+        ui.freeplay[0]=0;scan();edge(keys[i],100);
+        const unsigned pitch=36+keys[i];
+        uint32_t gen,now,ctx;int arp;
+        engine_live_key_state(0,&gen,&arp,&ctx);
+        T(engine_live_key_probe(0,1)==pitch);
+        /* Real UI view action refuses new musical onsets in this context. */
+        btn(B_SEQ,1);btn(B_SEQ,0);scan();
+        T(ui.view==V_SEQ && live_release_only && engine_live_key_probe(0,2));
+        T(engine_live_key_probe(0,1)==pitch);
+        /* An outer press must not replace our earlier voice on the step page. */
+        const unsigned other=keys[i]==0?36:0;
+        edge(other,100); T(engine_live_key_probe(0,1)==pitch);
+        edge(other,0); T(engine_live_key_probe(0,1)==pitch);
+        ui.oct=1;scan();
+        T(engine_live_key_probe(0,1)==pitch);
+        /* A release followed by a fresh press within the same scan must
+         * release the old voice, but cannot admit the new press on SEQ. */
+        physical(keys[i],0);physical(keys[i],100);scan();
+        T(!engine_live_key_probe(0,2));
+        edge(keys[i],0);T(!engine_live_key_probe(0,2));
+        engine_live_key_state(0,&now,&arp,&ctx);
+        T(now==gen); /* normal one release, not a cancel/re-generation */
+    }
+}
 int main(int argc,char **argv)
 {
     (void)argc;(void)argv;boot();tick(300);
@@ -172,7 +202,7 @@ int main(int argc,char **argv)
         edge_keys_intermittent(bank);
         settings_do_not_swallow(bank);
         first_render_edges(bank);
-        owner_switches(bank);
+        owner_switches(bank); page_hold_release(bank);
         cancelled_voice_reentry(bank);
     }
     T(!irq_depth);

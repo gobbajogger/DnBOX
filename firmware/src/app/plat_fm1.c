@@ -61,6 +61,12 @@ int plat_division_pad(unsigned owner)
 }
 #endif
 
+#if BOARD_SMK37
+uint32_t plat_record_pad_keys(void)
+{
+    return fm1_in.pnotes & ((1u << NKEYS) - 1u);
+}
+#endif
 uint64_t plat_physical_keys(void)
 {
 #if BOARD_SMK37
@@ -87,7 +93,7 @@ int plat_outer_keys(plat_outer_event_t *events, uint64_t *keys, int *overflow,
     smk_extq_overflow = 0;
     if (publish) {
         smk_ext_epoch = epoch;
-        smk_ext_enabled = (uint8_t)!!enabled;
+        smk_ext_enabled = (uint8_t)enabled;
         smk_ext_oct = (int8_t)octave;
     }
     irq_restore(flags);

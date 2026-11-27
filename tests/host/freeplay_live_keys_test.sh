@@ -7,9 +7,9 @@ cd "$(dirname "$0")/../.."
 . tests/host/original_build.sh
 OUT=${X0X_LIVE_TEST_OUT:-build/host/freeplay-live-keys}
 mkdir -p "$OUT"; OUT=$(cd "$OUT" && pwd)
-sh host/build_host.sh --generate-only >"$OUT/assets.log" 2>&1
+if [ "${DNBOX_TEST_PREGENERATED:-0}" != 1 ]; then sh host/build_host.sh --generate-only >"$OUT/assets.log" 2>&1; fi
 X0X_LIVE_TEST_OUT="$OUT" python3 tests/host/freeplay_live_keys_fixture.py
-${CC:-cc} ${SAN_FLAGS:-} -O1 -g -std=c99 -w -DX0X_HOST -DX0X_LIVE_KEY_TEST=1 -DBOARD_SMK37=1 \
+${CC:-cc} ${SAN_FLAGS:-} -O1 -g -std=c99 -w ${X0X_LIVE_EXTRA_FLAGS:-} -DX0X_HOST -DX0X_LIVE_KEY_TEST=1 -DBOARD_SMK37=1 \
     -Ifirmware/src -Ifirmware/src/dsp -Ibuild/gen $ORIGINAL_FLAGS \
     "$OUT/probe.c" $ORIGINAL_SOURCES -lm -o "$OUT/test"
 "$OUT/test" "$OUT"

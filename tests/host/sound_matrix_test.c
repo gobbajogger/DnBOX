@@ -103,7 +103,7 @@ static void mapping(int voice,int bank)
     button_tap(B_EDIT);CHECK(cur_page()==1);select_row(-1);CHECK(cur_page()==0);
     CHECK(!memcmp(&before,&proj.sound,sizeof before));
     *page_of(V_PART)=sound_page();engine_bass_wheel_owners(1u<<voice);
-    int n=engine_bass_requested_preset(voice);now_ms+=1000;enc_acc[EN_PRESET]=1;ui_input_only();
+    int n=engine_bass_requested_preset(voice);now_ms+=1000;enc_acc[EN_K2]=1;ui_input_only();
     CHECK(engine_bass_requested_preset(voice)==n+1);CHECK(engine_bass_preset_pending(voice));
     knob(2,1);knob(3,-1);CHECK(engine_bass_preset_pending(voice));
     patch();CHECK(!engine_bass_preset_pending(voice));engine_bass_wheel_owners(0);

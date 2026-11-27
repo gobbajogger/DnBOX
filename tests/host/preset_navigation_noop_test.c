@@ -41,8 +41,8 @@ int main(void)
     boot();run_ms(50);engine_guard_enable(0);
     for(int v=0;v<2;v++)for(int bank=0;bank<=ORIGINAL_SOUND_JUNO;bank++)for(int last=0;last<2;last++) {
         int target=last?(int)original_sound_factories(bank)-1:0,d=last?1:-1;
-        for(int role=0;role<2;role++) {
-            int encoder=role?EN_K2:EN_PRESET;
+        {
+            int encoder=EN_K2; /* SOUND K6 only; K4 belongs to patterns. */
             selected(v,bank,target);sound_t before=proj.sound;
             for(int i=0;i<3;i++)audio();
             CHECK(!memcmp(&before,&proj.sound,sizeof before));
