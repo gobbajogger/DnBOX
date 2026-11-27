@@ -24,3 +24,8 @@ Note-off uses the live double-precision current value, not the rounded start val
 - Receipt SHA-256: direct setup matrix `8270ee48b9e9be0030cef2b78dde9152f89f17dbcef66a9b81599777b11d6365`; persistent reached descriptors `1c47048c872c9bc0de1bc3651fb0331b288d316c67448d89c8ee379787ccd6d9`.
 
 Fix the stage coefficients, update boundary, and position in the cutoff signal path as shared engine behavior, then compare signed renders with the existing untuned presets. Do not fit gain per preset or deduce the original filter timing from final RMS.
+
+### Clock holdouts
+
+- Re-initializing the original receiver at 48 kHz changed the physical cadence record from 2756.25 to 3000 ticks/second. Ten authored/override stage widths and 3,105 recurrence updates matched exactly. Receipt `615df713e8d86dc5ed0cc4f218b37ab0076eee3083d8efa59e07d014480f5bb0`.
+- At 44.1 kHz, regrouping unchanged events into 17/31/63/128/251-frame host callbacks matched 3,193 original recurrence updates. The tick boundary is callback-local, not a global sample counter and not an internal compact render-subspan boundary. During the authored attack, reached intervals were 1, 5, 10, 11, 15 and 16 frames. Receipt `7eae0c62cd91d6b85d3afad6522d0a014d813d21c38d9e62a440c904e0430539`.
