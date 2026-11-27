@@ -22,7 +22,7 @@ First remaining reached cutoff divergence on physical key 60: onset 268.27768 ve
 
 ## Non-Vintage receiver trace
 
-On the original #32 off path, the reached base is constructed with a binary32 FMA at `0x3b56f4`; its centered pitch denominator/reference constants are exact binary32 ±261.6260070800781. The reached last stage is another binary32 FMA followed by a binary32 multiply at `0x3b5c78`–`0x3b5c80`:
+On the original #32 off path, the reached base is constructed with a binary32 FMA at `0x3b56f4`; its pitch-centering and reference constants are exact binary32 ±261.6260070800781. The reached last stage is another binary32 FMA followed by a binary32 multiply at `0x3b5c78`–`0x3b5c80`:
 
 ```
 base = fma(tracking_operand, centered_pitch_operand, reference)
