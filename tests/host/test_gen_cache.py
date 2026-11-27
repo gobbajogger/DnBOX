@@ -14,6 +14,9 @@ os.environ["X0X_GEN_CACHE"] = tempfile.mkdtemp(prefix="x0x-gen-cache-")
 os.environ.pop("X0X_BREAK_BANK", None)
 os.environ.pop("X0X_FONTSET", None)
 os.environ.pop("X0X_FONT_DIRS", None)
+# This fixture drives build.generate() for its default FM-1 board directly.
+# Do not inherit a model-specific Elite/Pro lab option into that board.
+os.environ.pop("X0X_MIAMI_N513_BOOT", None)
 
 import build  # noqa: E402
 import gen_cache  # noqa: E402

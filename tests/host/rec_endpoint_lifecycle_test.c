@@ -354,6 +354,9 @@ static void test_timestamped_live_duration(void)
     input(); capture_frames(1);
     CHECK(!seq.rec_bass[0].active && bstep_gate(&bp->step[0]) == G_REST,
           "bulk edit invalidates pending keyboard recording epoch before re-arm");
+    /* The admitted physical press survives recording cancellation. */
+    engine_bass_off_note(0, 48); capture_frames(1);
+    CHECK(!(engine_bass_keys_held() & 1), "physical release retires the manual note");
     ui.rec = 0;
 
     /* Context cancel, then the pattern itself reopens the DSP gate. That gate is

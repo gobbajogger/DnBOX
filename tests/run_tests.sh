@@ -111,6 +111,7 @@ test_class() {
     composed-features|composed-panic-cutover|panic-clear|panic-order|panic-mutants|live-key-epoch|midi-epoch-step|composed-ui-identity|synthone-slot|juno-slot-integration|held-chord-integration|poly-chord-integration|project-rates-companion|composed-smc-panic) TEST_CLASS=G ;;
     s1c-slot|s1c-programs|s1c-fx-controls|synth-arp-hooks) TEST_CLASS=G ;;
     ui-synthone-patch|ui-synthone-frames) TEST_CLASS=G ;;   # SMK host fixtures regenerate build/gen
+    smc-reachability) TEST_CLASS=S ;; # generate-only writes shared headers; no overlap with readers
     rec-live-smk) TEST_CLASS=S ;;   # these read build/gen from host-build (phase 1)
     save-note-quiet|original-release-integration|original-release-ui|freeplay-rate-pads|freeplay-live-keys|rec-37-physical-keys|synth-bus-mute|storage-warning|freeplay-latency|pads-in-settings|boot-screen|ui-theme) TEST_CLASS=G ;;
     rec-held-duration|rec-endpoint-lifecycle|rec-endpoint-storage|rec-nonforward-guard|pattern-preset-notelock) TEST_CLASS=G ;;
@@ -147,7 +148,7 @@ run_one() {             # key name command...: the result goes to $RES/key (and 
     echo "$(( $(date +%s) - t0 )) s $n" > "$RES/$k.time"
 }
 GLOCK="${X0X_GATE_LOCK:-/workspace/x0x37-refs/gate.lock}"
-install_path() { test_class "$1"; case "$TEST_CLASS" in W) return 0 ;; S) case "$1" in rec-live-smk) return 1 ;; *) return 0 ;; esac ;; *) return 1 ;; esac; }
+install_path() { test_class "$1"; case "$TEST_CLASS" in W) return 0 ;; S) case "$1" in rec-live-smk|smc-reachability) return 1 ;; *) return 0 ;; esac ;; *) return 1 ;; esac; }
 lk() {                  # name command...: start the command. An install-path test holds the shared gate lock while it runs
     n_="$1"; shift
     if install_path "$n_" && [ "${X0X_GATE_HOLDS_LOCK:-0}" != 1 ] && [ -w "$GLOCK" ] && command -v flock >/dev/null 2>&1; then

@@ -80,7 +80,7 @@ int main(void) {
  fresh("snapshot target is not reinterpreted as endpoint-only motion");REQUIRE(project_save()==0);
  proj.arr.lane[0].used=1;proj.arr.lane[0].t=0xFE;
  CHECK(project_save()==-9); /* reject even before settings/sound writes */
- REQUIRE(measure_project(&proj,&packed_len)==0);REQUIRE(save_stream()==0); /* synthesize unsupported CRC-valid input */
+ REQUIRE(measure_project(&proj,&packed_len)==0);REQUIRE(save_stream(PROJ_STREAM)==0); /* synthesize unsupported CRC-valid input */
  rejected_preserves_storage();
  printf("rec_endpoint_storage: %u checks %u failures; no unsupported rewrite\n",checks,failures);
  return failures!=0;

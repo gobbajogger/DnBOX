@@ -36,11 +36,11 @@ static void order_navigation(void)
     setup(V_SEQ,PART_303A);
     bstep_t *a_step=&proj.pat[0].bass[0].step[0], *b_step=&proj.pat[0].bass[1].step[0];
     a_step->flags=G_NOTE;a_step->note=48;b_step->flags=G_NOTE;b_step->note=55;
-    key_event(WHITE_KEY[0],1);CHECK(ui.held_step==0);
+    key_event(WHITE_KEY[0], 1, 0);CHECK(ui.held_step==0);
     enc_acc[EN_ALGO]=-1;ui_input_only();CHECK(ui.part==PART_303A && ui.held_step==0); /* held-step velocity, not navigation */
     /* #789: SMC SELECT moves only the SMC context; the keyboard held step stays its own. */
     smc_button_apply(27,0);CHECK(smc.part==PART_303B && ui.part==PART_303A && ui.held_step==0);
-    key_event(WHITE_KEY[0],0);CHECK(a_step->flags==G_NOTE && b_step->flags==G_NOTE && b_step->note==55);
+    key_event(WHITE_KEY[0], 0, 0);CHECK(a_step->flags==G_NOTE && b_step->flags==G_NOTE && b_step->note==55);
     /* Both synth engine choices may change; a physical lane must not move. */
     for (int a=0;a<2;a++) for(int b=0;b<2;b++) {
         engine_bass_select_preset(0,a,0,&proj.sound); engine_bass_select_preset(1,b,0,&proj.sound);
@@ -51,22 +51,22 @@ static void panel_maps(void)
 {
     for (int pos=0;pos<NPARTS;pos++) {
         int p=expected[pos]; setup(V_HOME,PART_909);
-        key_event(BLACK_KEY[pos],1);key_event(BLACK_KEY[pos],0);
+        key_event(BLACK_KEY[pos], 1, 0);key_event(BLACK_KEY[pos], 0, 0);
         CHECK(seq.mute==MUTE_MASK[p]);leds();
         CHECK((dim_keys & (1u<<BLACK_KEY[pos])) && !(lit_keys & (1u<<BLACK_KEY[pos])));
         for(int other=0;other<NPARTS;other++) if(other!=pos)CHECK(lit_keys & (1u<<BLACK_KEY[other]));
         setup(V_MIX,PART_909);*page_of(V_MIX)=0;build_pages();
-        key_event(BLACK_KEY[pos],1);key_event(BLACK_KEY[pos],0);
+        key_event(BLACK_KEY[pos], 1, 0);key_event(BLACK_KEY[pos], 0, 0);
         CHECK(ui.mixsel==p && pg.r[0][0].b==p);leds();
         CHECK(lit_keys & (1u<<BLACK_KEY[pos]));
-        ui.btn=1u<<B_HOME;key_event(BLACK_KEY[pos],1);key_event(BLACK_KEY[pos],0);ui.btn=0;
+        ui.btn=1u<<B_HOME;key_event(BLACK_KEY[pos], 1, 0);key_event(BLACK_KEY[pos], 0, 0);ui.btn=0;
         CHECK(seq.mute==MUTE_MASK[p]);
         setup(V_SONG,PART_909);song_fill(0);
-        key_event(BLACK_KEY[pos],1);key_event(BLACK_KEY[pos],0);
+        key_event(BLACK_KEY[pos], 1, 0);key_event(BLACK_KEY[pos], 0, 0);
         CHECK(song()->bar[0].mute==(1u<<p));leds();CHECK(dim_keys & (1u<<BLACK_KEY[pos]));
     }
     setup(V_HOME,PART_909);
-    for(int pos=NPARTS;pos<11;pos++) {key_event(BLACK_KEY[pos],1);key_event(BLACK_KEY[pos],0);CHECK(!seq.mute);}
+    for(int pos=NPARTS;pos<11;pos++) {key_event(BLACK_KEY[pos], 1, 0);key_event(BLACK_KEY[pos], 0, 0);CHECK(!seq.mute);}
     setup(V_SONG,PART_909);
     CHECK(pg.r[0][1].a==PART_909 && pg.r[0][2].a==PART_808 && pg.r[0][3].a==PART_BRK);
     CHECK(pg.r[1][1].a==PART_303B && pg.r[1][2].a==PART_303A);

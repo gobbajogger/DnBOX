@@ -18,7 +18,7 @@ test('legacy adoption requires two explicit dense identities, never an omitted e
   for (const engines of [[0,0], [0,1], [1,0]]) {
     // Intentional policy change: even formerly valid identities cannot migrate legacy data.
     await assert.rejects(device.adoptLegacyBass(engines, { confirmed: true }),
-      e => e.code === 'version' && /revision 13/.test(e.message));
+      e => e.code === 'version' && /current project formats/.test(e.message));
     assert.deepEqual(calls, [], 'explicit identities cannot bypass revision-13-only imports');
   }
   assert.equal(calls.length, 0);

@@ -97,8 +97,8 @@ static void composed_geometry(void) {
     reset(); count_set(32,0); count_set(4,1); ui.msg_until=0;
     ui_frame(); unsigned first=main_pixels(); ui.brk_page=3;ui_frame();CHECK(main_pixels()!=first);
     first=main_pixels();ui.brk_count_target=1;ui_frame();CHECK(main_pixels()!=first);
-    first=main_pixels();key_event(black(2),1);audio();ui_frame();CHECK(main_pixels()!=first);
-    key_event(black(2),0);audio();ui_frame();CHECK(main_pixels()==first);
+    first=main_pixels();key_event(black(2), 1, 0);audio();ui_frame();CHECK(main_pixels()!=first);
+    key_event(black(2), 0, 0);audio();ui_frame();CHECK(main_pixels()==first);
     for(int n=1;n<=32;n++){char t[4];put_i(t,n);CHECK(tw(&FONT_XS,t)<=12);}
     CHECK(8+tw(&FONT_XS,"A KEYS 25-32/32 PENDING")<144);
     CHECK(144+tw(&FONT_XS,"EDIT B 32")<=232);
@@ -129,14 +129,14 @@ int main(void)
         count_set(n,0);note(0,0,1);note(1,0,1);min_q[mi_w++%MQ]=PLAT_MIDI_LINK_END(0);audio();CHECK(engine_brk_held()!=0);
         min_q[mi_w++%MQ]=PLAT_MIDI_LINK_END(1);audio();CHECK(engine_brk_held()==0);
     }
-    count_set(32,0);page(2);CHECK(ui.brk_page==1);key_event(black(0),1);audio();CHECK(engine_brk_held()==(1u<<8));page(2);CHECK(ui.brk_page==1);
-    ui.overlay=O_LIST;key_event(black(0),0);audio();CHECK(engine_brk_held()==0);ui.overlay=O_NONE;page(2);CHECK(ui.brk_page==2);
-    key_event(black(7),1);audio();CHECK(engine_brk_held()==(1u<<23));ui.part=PART_303A;key_event(black(7),0);audio();CHECK(engine_brk_held()==0);ui.part=PART_BRK;
-    count_set(4,0);key_event(black(4),1);audio();CHECK(engine_brk_held()==0);key_event(black(4),0);
-    for(int i=8;i<11;i++){key_event(black(i),1);audio();CHECK(engine_project_notes());key_event(black(i),0);audio();}
+    count_set(32,0);page(2);CHECK(ui.brk_page==1);key_event(black(0), 1, 0);audio();CHECK(engine_brk_held()==(1u<<8));page(2);CHECK(ui.brk_page==1);
+    ui.overlay=O_LIST;key_event(black(0), 0, 0);audio();CHECK(engine_brk_held()==0);ui.overlay=O_NONE;page(2);CHECK(ui.brk_page==2);
+    key_event(black(7), 1, 0);audio();CHECK(engine_brk_held()==(1u<<23));ui.part=PART_303A;key_event(black(7), 0, 0);audio();CHECK(engine_brk_held()==0);ui.part=PART_BRK;
+    count_set(4,0);key_event(black(4), 1, 0);audio();CHECK(engine_brk_held()==0);key_event(black(4), 0, 0);
+    for(int i=8;i<11;i++){key_event(black(i), 1, 0);audio();CHECK(engine_project_notes());key_event(black(i), 0, 0);audio();}
     // A pin survives reduction and is resolved for display/playback, not rewritten.
-    count_set(32,0);ui.brk_page=3;key_event(0,1);key_event(black(7),1);CHECK(proj.pat[seq.ppat[TRK_BRK]].brk.slice[0]==32);
-    count_set(4,0);CHECK(engine_brk_count(0)==32);key_event(black(7),0);key_event(0,0);audio();native_break_service();CHECK(engine_brk_count(0)==4);CHECK(proj.pat[seq.ppat[TRK_BRK]].brk.slice[0]==32);
+    count_set(32,0);ui.brk_page=3;key_event(0, 1, 0);key_event(black(7), 1, 0);CHECK(proj.pat[seq.ppat[TRK_BRK]].brk.slice[0]==32);
+    count_set(4,0);CHECK(engine_brk_count(0)==32);key_event(black(7), 0, 0);key_event(0, 0, 0);audio();native_break_service();CHECK(engine_brk_count(0)==4);CHECK(proj.pat[seq.ppat[TRK_BRK]].brk.slice[0]==32);
     // White outer C/D counts selected loop only. E is not in this input bitmap.
     ui.brk_count_target=1;count_set(8,1);page(8);CHECK(brk_slice_count(&proj.pat[0].brk,1)==16);CHECK(engine_brk_count(0)==4);page(4);CHECK(brk_slice_count(&proj.pat[0].brk,1)==8);
     // Held-at-entry, modal, busy, clip eligibility do not replay a press later.
@@ -150,11 +150,11 @@ int main(void)
     for(unsigned ci=0;ci<4;ci++){count_set(counts[ci],0);for(unsigned pg=0;pg<(counts[ci]+7)/8;pg++){ui.brk_page=pg;ui.msg_until=0;ui_frame();char path[128];snprintf(path,sizeof path,"build/host/adaptive-A%u-page%u.png",counts[ci],pg+1);png_write(path);}}
     count_set(8,0);count_set(32,1);ui.brk_count_target=1;ui.brk_page=0;ui.msg_until=0;ui_frame();png_write("build/host/adaptive-A8-B32-editB.png");
     count_set(32,0);count_set(4,1);ui.brk_count_target=1;ui.brk_page=3;ui.msg_until=0;ui_frame();png_write("build/host/adaptive-A32-B4-editB.png");
-    key_event(black(2),1);audio();int sl,bk,dv,running;engine_brk_state(&sl,&bk,&dv,&running);CHECK(!running&&sl==26&&bk==0);ui.msg_until=0;ui_frame();png_write("build/host/adaptive-stopped-live-A27.png");key_event(black(2),0);audio();CHECK(!engine_brk_held());
+    key_event(black(2), 1, 0);audio();int sl,bk,dv,running;engine_brk_state(&sl,&bk,&dv,&running);CHECK(!running&&sl==26&&bk==0);ui.msg_until=0;ui_frame();png_write("build/host/adaptive-stopped-live-A27.png");key_event(black(2), 0, 0);audio();CHECK(!engine_brk_held());
     unsigned plain=output_run(0,0,0),remote=output_run(0,1,0),stutter=output_run(1,1,0);CHECK(plain==remote&&plain==stutter);CHECK(plain==output_run(0,1,1));unsigned fallback=output_run(0,2,0);CHECK(fallback>0&&fallback<=plain);
     // AS-001 native caller: no unrelated edit/pattern change after release.
-    reset();count_set(32,0);key_event(black(0),1);audio();page(4);CHECK(engine_brk_count(0)==32);
-    key_event(black(0),0);audio();project_busy=1;
+    reset();count_set(32,0);key_event(black(0), 1, 0);audio();page(4);CHECK(engine_brk_count(0)==32);
+    key_event(black(0), 0, 0);audio();project_busy=1;
     for(int i=0;i<10;i++){native_break_service();audio();}CHECK(engine_brk_count(0)==32);
     project_busy=0;for(int i=0;i<100;i++){ui_input_only();ui_frame();audio();native_break_service();}
     CHECK(engine_brk_count(0)==16);CHECK(!engine_brk_held());

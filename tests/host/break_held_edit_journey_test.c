@@ -43,7 +43,7 @@ int main(void){for(int route=0;route<5;route++){
  setup(V_SEQ,PART_BRK);proj.pat[0].brk.steps=proj.pat[1].brk.steps=1u<<10;
  held_keys=1u<<WHITE_KEY[10];++now_ms;input();
  seq_cue_part(&seq,PART_BRK,1);for(int n=0;n<16 && seq.ppat[PART_BRK]!=1;n++)audio_block();CHECK(seq.ppat[PART_BRK]==1);
- key_event(WHITE_KEY[10],0);CHECK(ui.brk_held<0);
+ key_event(WHITE_KEY[10], 0, 0);CHECK(ui.brk_held<0);
  CHECK(proj.pat[0].brk.steps==(1u<<10));CHECK(proj.pat[1].brk.steps==(1u<<10));held_keys=0;
  /* A queued playing cue adopts a different pattern while the physical key stays down. */
  setup(V_SEQ,PART_BRK);proj.pat[0].brk.steps=proj.pat[1].brk.steps=1u<<10;
@@ -83,6 +83,6 @@ int main(void){for(int route=0;route<5;route++){
  seq_cue_part(&seq,PART_BRK,1);for(int n=0;n<16&&seq.ppat[PART_BRK]!=1;n++)audio_block();CHECK(seq.ppat[PART_BRK]==1);
  static lane_t before_lanes[NLANE];memcpy(before_lanes,proj.arr.lane,sizeof before_lanes);
  prob_turn(-1);CHECK(!memcmp(before_lanes,proj.arr.lane,sizeof before_lanes));
- key_event(WHITE_KEY[10],0);CHECK(proj.pat[0].brk.steps==(1u<<10));CHECK(proj.pat[1].brk.steps==(1u<<10));held_keys=0;
+ key_event(WHITE_KEY[10], 0, 0);CHECK(proj.pat[0].brk.steps==(1u<<10));CHECK(proj.pat[1].brk.steps==(1u<<10));held_keys=0;
  puts("BREAK SEQ hold EDIT lock release/navigation journey PASS");return 0;
 }

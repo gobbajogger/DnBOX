@@ -122,7 +122,7 @@ static void content_matrix(void)
         if (p != PART_BRK) check("later-only-noncurrent", 4, p, 0, 0x04);
     }
     /* Exercise the production HOME white-key handler, not a separate selection implementation. */
-    key_event(WHITE_KEY[1], 1); key_event(WHITE_KEY[1], 0);
+    key_event(WHITE_KEY[1], 1, 0); key_event(WHITE_KEY[1], 0, 0);
     run_ms(20); /* the audio/main handoff applies a stopped-transport cue */
     for (p = 0; p < NPARTS; ++p) assert(seq.ppat[p] == 1);
     render("matrix-current-sparse");
@@ -130,17 +130,17 @@ static void content_matrix(void)
         check("sparse-current", 1, p, 0x8043, 0x89);
         check("empty-no-longer-current", 0, p, 0, 0);
     }
-    key_event(WHITE_KEY[4], 1); key_event(WHITE_KEY[4], 0);
+    key_event(WHITE_KEY[4], 1, 0); key_event(WHITE_KEY[4], 0, 0);
     run_ms(20);
     render("matrix-current-later-only");
     for (p = 0; p < NPARTS; ++p)
         check("later-only-current", 4, p, 0, p == PART_BRK ? 0 : 0x04);
-    key_event(WHITE_KEY[2], 1); key_event(WHITE_KEY[2], 0);
+    key_event(WHITE_KEY[2], 1, 0); key_event(WHITE_KEY[2], 0, 0);
     run_ms(20);
     render("matrix-current-dense");
     for (p = 0; p < NPARTS; ++p) check("dense-current", 2, p, 0xffff, 0xff);
     seq.playing = 1;
-    key_event(WHITE_KEY[1], 1); key_event(WHITE_KEY[1], 0);
+    key_event(WHITE_KEY[1], 1, 0); key_event(WHITE_KEY[1], 0, 0);
     assert(seq_cue_of(&seq, PART_909) == 1 && seq.ppat[PART_909] == 2);
     ui.frame = 16;
     render("matrix-cue-highlight");
@@ -171,13 +171,13 @@ static void tie_matrix(void)
         check("valid-note-and-hold-noncurrent", 3, PART_303A+b, 0x38, 6);
         check("valid-wrap-hold-noncurrent", 4, PART_303A+b, 3, 0x81);
     }
-    key_event(WHITE_KEY[1], 1); key_event(WHITE_KEY[1], 0);
+    key_event(WHITE_KEY[1], 1, 0); key_event(WHITE_KEY[1], 0, 0);
     run_ms(20);
     for (b = 0; b < NBASS; ++b) assert(seq.ppat[PART_303A+b] == 1);
     render("ties-current-all-tie");
     for (b = 0; b < NBASS; ++b) check("all-tie-silent-current", 1, PART_303A+b, 0, 0);
     for (int pat = 3; pat <= 4; ++pat) {
-        key_event(WHITE_KEY[pat], 1); key_event(WHITE_KEY[pat], 0); run_ms(20);
+        key_event(WHITE_KEY[pat], 1, 0); key_event(WHITE_KEY[pat], 0, 0); run_ms(20);
         render(pat == 3 ? "ties-current-valid-hold" : "ties-current-wrap-hold");
         for (b = 0; b < NBASS; ++b)
             check(pat == 3 ? "valid-note-and-hold-current" : "valid-wrap-hold-current",
@@ -218,7 +218,7 @@ static void velocity_brightness(void)
     render("velocity-current-strong");
     check_velocity_glyph(0, 15);
     check_velocity_glyph(1, 2);
-    key_event(WHITE_KEY[1], 1); key_event(WHITE_KEY[1], 0); run_ms(20);
+    key_event(WHITE_KEY[1], 1, 0); key_event(WHITE_KEY[1], 0, 0); run_ms(20);
     assert(seq.ppat[PART_909] == 1);
     render("velocity-current-quiet");
     check_velocity_glyph(0, 8);
