@@ -115,29 +115,29 @@ static void mute_regression(int mode, int bank, int strip)
     message(0x80, 16 + strip, 0);           /* release: a repeat NoteOn is not a toggle (d06b6c96) */
     assert(seq.vmute == expected);
     assert(seq.mute == 0);
-    assert(smc.lit[16 + strip] == (track < NDRUM));
+    assert((smc.feedback[16 + strip] == 2) == (track < NDRUM));
     for (int i = 0; i < 3; i++)
         assert(pref_get(PR(R_ENG, T_FX, 0, i == 0 ? FX_RV_LEVEL : i == 1 ? FX_DL_LEVEL : FX_VOLUME)) == before_fx[i]);
     assert(ui.sel[kit] == bank * 8 + 2 && ui.part == 3);
     message(0x90, 16 + strip, 127);
-    assert(seq.vmute == 0 && seq.mute == 0 && smc.lit[16 + strip] == 0);
+    assert(seq.vmute == 0 && seq.mute == 0 && (smc.feedback[16 + strip] == 2) == 0);
     if (track < NDRUM) {
         mute_track(kit, track);
         smc_frame();
-        assert(seq.vmute == expected && smc.lit[16 + strip] == 1);
+        assert(seq.vmute == expected && (smc.feedback[16 + strip] == 2) == 1);
         mute_track(kit, track);
         smc_frame();
-        assert(smc.lit[16 + strip] == 0);
+        assert((smc.feedback[16 + strip] == 2) == 0);
         smc.sel[kit] = bank * 8 + (strip + 1) % (bank ? 3 : 8);
         message(0x90, 24 + strip, 127);
         assert(smc.sel[kit] == track && smc.view == V_MIX);
         assert(ui.sel[kit] == bank * 8 + 2 && ui.part == 3);
-        assert(smc.lit[24 + strip] == 1);
+        assert((smc.feedback[24 + strip] == 2) == 1);
     } else {
         assert(smc_target(strip).kind == R_NONE);
         assert(smc_knob_target(strip).kind == R_NONE);
         message(0x90, 24 + strip, 127);
-        assert(ui.sel[kit] == bank * 8 + 2 && smc.lit[24 + strip] == 0);
+        assert(ui.sel[kit] == bank * 8 + 2 && (smc.feedback[24 + strip] == 2) == 0);
     }
     printf("PASS: %s bank %d M%d action, light and SELECT\n", mode == 1 ? "909" : "808", bank + 1, strip + 1);
 }
@@ -152,14 +152,14 @@ static void main_regression(void)
         assert(strip < NPARTS || before > 0);
         message(0x90, 16 + strip, 127);
         message(0x80, 16 + strip, 0);       /* release: a repeat NoteOn is not a toggle (d06b6c96) */
-        assert(seq.vmute == 0 && smc.lit[16 + strip] == 1);
+        assert(seq.vmute == 0 && (smc.feedback[16 + strip] == 2) == 1);
         if (strip < NPARTS) {
             static const int expected_part[5] = {PART_909, PART_808, PART_BRK, PART_303B, PART_303A};
             assert(seq.mute == MUTE_MASK[expected_part[strip]]);
         }
         else assert(seq.mute == 0 && pref_get(fx) == 0);
         message(0x90, 16 + strip, 127);
-        assert(seq.vmute == 0 && seq.mute == 0 && smc.lit[16 + strip] == 0);
+        assert(seq.vmute == 0 && seq.mute == 0 && (smc.feedback[16 + strip] == 2) == 0);
         if (strip >= NPARTS) assert(pref_get(fx) == before);
     }
 }
@@ -184,28 +184,28 @@ static void priority_regression(void)
         seq.vmute = 0xFFFFFFFFu;
         seq.mute = 0xFFFFFFFFu;
         smc_frame();
-        for (int strip = 0; strip < 8; strip++) assert(smc.lit[16 + strip] == 1);
+        for (int strip = 0; strip < 8; strip++) assert((smc.feedback[16 + strip] == 2) == 1);
         message(0x90, 0x2F, 127);
         assert(smc.sel[kit] == 0); /* a pending BANK chord cannot navigate */
         message(0x80, 0x2F, 0);    /* an uncombined BANK tap commits on release */
         assert(smc.sel[kit] == 8);
         for (int strip = 0; strip < 8; strip++) {
-            assert(smc.lit[16 + strip] == (strip < 3));
-            assert(smc.lit[24 + strip] == (strip == 0));
+            assert((smc.feedback[16 + strip] == 2) == (strip < 3));
+            assert((smc.feedback[24 + strip] == 2) == (strip == 0));
         }
         message(0x90, 0x2E, 127);
         assert(smc.sel[kit] == 8);
         message(0x80, 0x2E, 0);
-        for (int strip = 0; strip < 8; strip++) assert(smc.lit[16 + strip] == 1);
+        for (int strip = 0; strip < 8; strip++) assert((smc.feedback[16 + strip] == 2) == 1);
         /* The owner-selected drum R/S layout follows the same visible bank. */
         setup(kit + 1, 1);
         message(0x90, 1, 127);
         assert(smc.part == kit && smc.sel[kit] == 9 && ui.rec);
         assert(ui.part == PART_909 && ui.sel[kit] == 0);
         message(0x90, 9, 127);
-        assert(smc_project_active() && smc.lit[9] == 1);
+        assert(smc_project_active() && (smc.feedback[9] == 2) == 1);
         message(0x80, 9, 0);
-        assert(!smc_project_active() && smc.lit[9] == 0);
+        assert(!smc_project_active() && (smc.feedback[9] == 2) == 0);
     }
 }
 

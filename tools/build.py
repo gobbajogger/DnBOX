@@ -593,7 +593,9 @@ def build_app():
         # No front-end caller yet: retain both boundaries in sizing builds.
         factory_roots.extend(("-u", "original_runtime_delay_bind",
                               "-u", "original_runtime_delay_publish",
-                              "-u", "original_runtime_delay_result"))
+                              "-u", "original_runtime_delay_result",
+                              "-u", "engine_lab_delay_epoch",
+                              "-u", "engine_lab_delay_publish"))
     if SUPERJ6_FACTORY == "1":
         names = ["engine_superj6_factory_load"]
         if synthone_patch_setting() != "1":

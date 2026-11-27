@@ -2033,6 +2033,9 @@ int engine_midi_held(void)   /* host test: bit k the 303 k gate, bit 8 + s the b
 }
 #endif
 
+#if X0X_SJ6_NATIVE_DELAY && X0X_SUPERJ6_FACTORY
+#include "lab_delay_engine.inc"
+#endif
 #include "original_presets.inc"
 #include "engine_arp.inc"
 
@@ -3179,6 +3182,9 @@ void engine_render(int32_t *out_lr, uint32_t n)
     original_prepare_all(); /* precedes every serial frame-zero edit and key */
 #if X0X_SUPERJ6_FACTORY
     apply_superj6_edits();
+#if X0X_SJ6_NATIVE_DELAY
+    lab_delay_bind_current();
+#endif
 #endif
     arp_boundary();
     if ((mot_was_on && !mot_on) || mot_release_req) {   /* motion off, or its lanes replaced: knobs back */

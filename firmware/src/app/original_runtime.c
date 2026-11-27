@@ -576,6 +576,13 @@ int original_runtime_all_off(original_runtime_part *p)
         juno6_all_off(&p->dsp.juno.synth);
         memset(p->dsp.juno.chorus.delay,0,sizeof p->dsp.juno.chorus.delay);
         p->dsp.juno.chorus.write=0;ok=1;
+#if X0X_SJ6_NATIVE_DELAY && X0X_SUPERJ6_FACTORY
+        /* Panic/all-off invalidates history without discarding knob settings
+         * or visiting old ring cells. Unfilled history reads zero. */
+        juno6_t *s=&p->dsp.juno.synth;
+        s->delay24.filled=s->delay24.phase=s->delay24.pos=0;
+        s->delay24.sum[0]=s->delay24.sum[1]=0.f;
+#endif
     } else if (p->kind == ORIGINAL_SOUND_SYNTHONE) {
         s1_part_all_off(&p->dsp.synthone);
         ok = 1;

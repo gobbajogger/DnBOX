@@ -168,12 +168,12 @@ static void feedback_epochs(void)
 {
     for(unsigned p=0;p<2;p++) {
         prepare(0); smc_slot=(uint8_t)p;
-        memset(smc.known,0,sizeof smc.known); smc.pending=0xFF;
-        reject_tx=1; smc_frame_peer(); CHECK(!smc.known[0]); CHECK(smc.pending==0xFF);
+        memset(smc.feedback,0,sizeof smc.feedback); smc.pending=0xFF;
+        reject_tx=1; smc_frame_peer(); CHECK(!smc.feedback[0]); CHECK(smc.pending==0xFF);
         reject_tx=0; inject_peer=p; inject_feedback=1; smc_frame_peer();
-        CHECK(!inject_feedback); CHECK(!smc.known[0]); CHECK(smc.pending==0xFF);
-        smc_poll(); smc_frame_peer(); CHECK(smc.known[0]); CHECK(!smc.pending);
-        memset(smc.known,1,sizeof smc.known); smc.pending=1;
+        CHECK(!inject_feedback); CHECK(!smc.feedback[0]); CHECK(smc.pending==0xFF);
+        smc_poll(); smc_frame_peer(); CHECK(smc.feedback[0]); CHECK(!smc.pending);
+        memset(smc.feedback,1,sizeof smc.feedback); smc.pending=1;
         inject_feedback=1; smc_frame_peer(); CHECK(smc.pending==1);
         smc_poll(); smc_frame_peer(); CHECK(!smc.pending);
         smc_slot=0;

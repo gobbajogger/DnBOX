@@ -400,7 +400,11 @@ void engine_bass_sound_refresh(sound_t *sound, int v)
 X0X_COLD static int bass_restore_part(const sound_t *sound, int v)
 {
     if (engine_bass_sound_bank(sound, v) < 0) return 0;
+#if X0X_SJ6_NATIVE_DELAY && X0X_SUPERJ6_FACTORY
+    if (lab_delay_owner_retire(v) != ORIGINAL_RUNTIME_OK) return 0;
+#else
     if (original_runtime_retire(&original_bass[v]) != ORIGINAL_RUNTIME_OK) return 0;
+#endif
     int rc = original_runtime_init(&original_bass[v], sound->v[T_303][v], seq_tempo(&seq),
         &original_tuning, &original_fx_owner[v]);
     original_switch_gain[v] = 512u; original_quiet_samples[v] = 0;
@@ -526,7 +530,11 @@ static void bass_preset_boundary_voice(int v)
         if (!engine_bass_bank_available(v, bank) || !original_sound_init(next, bank, preset)) return;
         unsigned old_bank=original_bass[v].kind;
         live_key_context_retire(v, 1);
+#if X0X_SJ6_NATIVE_DELAY && X0X_SUPERJ6_FACTORY
+        if (lab_delay_owner_retire(v) != ORIGINAL_RUNTIME_OK) {
+#else
         if (original_runtime_retire(&original_bass[v]) != ORIGINAL_RUNTIME_OK) {
+#endif
             bass_applied[v] = token;
             return;
         }
