@@ -1,0 +1,25 @@
+--- a/firmware/src/dsp/dnbx_core.c
++++ b/firmware/src/dsp/dnbx_core.c
+@@ -1028,9 +1028,22 @@
+                 else
+ #endif
+                 {
++#if defined(X0X_HOST) && DNBOX_INIT_NORMAL_LAB
++                extern int dnbox_init_normal_lab;
++                extern float dnbox_init_normal_sample(float x,float *,float *,float *,float *);
++                if(dnbox_init_normal_lab && p->oscillator_mode==DNBX_OSC_SUPERJ6) {
++                    /* History is mutually exclusive with OTA. A fresh
++                       voice clears all four words in the existing loader. */
++                    mix[l]+=dnbox_init_normal_sample(x*(velocity*amp),&lv->filter_first,
++                               &lv->filter_second,&lv->ota_tail[0],&lv->ota_tail[1]);
++                } else {
++#endif
+                 lv->filter_first=fm_clampf(lv->filter_first+a*(x-lv->filter_first-p->resonance*.8f*lv->filter_second),-4,4);
+                 lv->filter_second=fm_clampf(lv->filter_second+a*(lv->filter_first-lv->filter_second),-4,4);
+                 mix[l]+=velocity*amp*lv->filter_second;
++#if defined(X0X_HOST) && DNBOX_INIT_NORMAL_LAB
++                }
++#endif
+                 }
+                 lv->phase+=lv->increment; if (lv->phase>=1) lv->phase-=1;
+                 lv->subphase+=lv->increment*.5f; if (lv->subphase>=1) lv->subphase-=1;

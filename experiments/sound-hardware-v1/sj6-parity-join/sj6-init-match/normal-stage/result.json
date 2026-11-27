@@ -1,0 +1,59 @@
+{
+  "scope": "Actual old ARM64 IIR instructions on matching signed dry Init-like saw input. Portable reference with original coefficient words; compact same-input two-pole, no gain fitting. This compares IIR stage only; original oscillator and AU presets not rendered.",
+  "cases": [
+    {
+      "coeff_hex": [
+        "0x1.a47d12f06ce80p-5",
+        "0x1.a47d12f06ce80p-4",
+        "0x1.a47d12f06ce80p-5",
+        "-0x1.1800eb0838ae4p+0",
+        "0x1.32423599192d0p-2"
+      ],
+      "cutoff_hz": 4000.0,
+      "original_damping": 1.0,
+      "saw_hz": 130.81278265,
+      "compared_words": 2048,
+      "compact_rms_residual_dbr": -19.459027383238844,
+      "corrected_bit_equal": true,
+      "original_signed_sha": "c32f218555bcfd977fe100a21b19f1fcb03e7fb119815ff744e004cb0412e29d"
+    },
+    {
+      "coeff_hex": [
+        "0x1.b7ea6e1cfd9c0p-8",
+        "0x1.b7ea6e1cfd9c0p-7",
+        "0x1.b7ea6e1cfd9c0p-8",
+        "-0x1.d08b0852bb7e8p+0",
+        "0x1.aed564165ee9ep-1"
+      ],
+      "cutoff_hz": 1200.0,
+      "original_damping": 0.7,
+      "saw_hz": 261.6255653,
+      "compared_words": 2048,
+      "compact_rms_residual_dbr": -11.568776249476265,
+      "corrected_bit_equal": true,
+      "original_signed_sha": "947f0a9054ff0664ec62669dd6df86f86c36ed8e3f0f71ac151374b91fb853a2"
+    },
+    {
+      "coeff_hex": [
+        "0x1.db657ee44c800p-12",
+        "0x1.db657ee44c800p-11",
+        "0x1.db657ee44c800p-12",
+        "-0x1.fbaf178bc0d88p+0",
+        "0x1.f84be1d6f3d75p-1"
+      ],
+      "cutoff_hz": 300.0,
+      "original_damping": 0.4043673574924469,
+      "saw_hz": 65.406391325,
+      "compared_words": 2048,
+      "compact_rms_residual_dbr": -4.855702626916151,
+      "corrected_bit_equal": true,
+      "original_signed_sha": "21e7b0030463864e370938418a1bdc9d1c8207225bdd5abfc41a93c7f530c59c"
+    },
+    {
+      "runtime_first_note": true,
+      "sample_words": 1024,
+      "sample_prefix_sha": "633e3a82dbff1b2188da264ee85eeb99f1abcba44e74f3771c35be40bed20223",
+      "corrected_bit_equal": true
+    }
+  ]
+}
