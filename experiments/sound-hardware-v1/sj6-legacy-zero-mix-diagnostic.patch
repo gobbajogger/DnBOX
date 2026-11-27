@@ -1,0 +1,21 @@
+--- a/firmware/src/dsp/juno6.c
++++ b/firmware/src/dsp/juno6.c
+@@ -140,6 +140,8 @@
+  unsigned write = c->write;
+  for (unsigned i = 0; i < n; ++i) {
+   float in = (l[i] + r[i]) * .5f;
++  float wet=0.f;
++  if (mix!=0.f || !(l[i]>0.f || l[i]<0.f) || !(r[i]>0.f || r[i]<0.f)) {
+   float angle = (float)phase / 4294967296.0f * TWO_PI;
+   float sweep = .5f * fm_sinf(angle);
+ #if X0X_SUPERJ6_BUILTIN_INIT
+@@ -155,7 +157,8 @@
+    delayed = .5f * (delayed + chorus_read(c, write, d));
+   }
+ #endif
+-  float wet = delayed * mix;
++   wet = delayed * mix;
++  }
+   c->delay[write] = (int16_t)clampf(in * 32767, -32768, 32767);
+   write = (write + 1) & 255;
+   l[i] = l[i] * dry + wet;
