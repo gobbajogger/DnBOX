@@ -6192,6 +6192,77 @@ static int step_of(int col) { return ui.spage * 16 + col; }
 static int32_t col_x(int c) { return GX + c * 13 + (c >> 2); }   /* a pixel between beats */
 
 #define DROW 11                                    /* drum rows: 12 of them over both bands, a gap under */
+#if X0X_UI_SMALL_CANVAS
+/* Only visible 16-step rows and resolved foreground cues survive the SPI
+ * input yield. Do not retain a project pointer across that yield. */
+typedef struct {
+    uint16_t hit[NDRUM+1], locks, mute, fired;
+    uint16_t bg, white, gray, dim, line, col;
+    uint8_t kit, sel, visible;
+    int8_t head;
+} cv_drum_scene;
+
+static void cv_capture_drum(cv_drum_scene *s)
+{
+    const unsigned k = (unsigned)ui.part, base = ui.spage * 16u;
+    const dpart_t *d = &cur_pat()->drum[k];
+    const int len = d->len, sel = ui.sel[k];
+    const int ph = seq.playing ? eng_step[TRK_DRUM + k] : -1;
+    const unsigned window = (uint32_t)(15000.0f / (seq.bpm >= 20.0f ? seq.bpm : 120.0f)) + 20u;
+    int remain = len - (int)base;
+    s->kit = (uint8_t)k; s->sel = (uint8_t)sel;
+    s->visible = (uint8_t)(remain < 0 ? 0 : remain > 16 ? 16 : remain);
+    s->head = (int8_t)(ph >= (int)base && ph < (int)base + 16 ? ph - (int)base : -1);
+    s->bg = C_BLACK; s->white = C_WHITE; s->gray = C_GRAY;
+    s->dim = C_DIM; s->line = C_LINE; s->col = part_col();
+    s->mute = (uint16_t)((seq.mute | seq.vmute) >> (k * NDRUM));
+    s->locks = (uint16_t)(lock_marks(k == PART_909 ? T_909 : T_808, sel, (int)base) |
+                          lock_marks(T_PROB, k << 4 | sel, (int)base));
+    s->fired = 0u;
+    for (unsigned v = 0; v <= NDRUM; ++v) {
+        const uint32_t *bits = v < NDRUM ? d->hit[v] : d->accent;
+        /* spage is integer groups of 16, so a whole row is one aligned read. */
+        s->hit[v] = base < NSTEPS ? (uint16_t)(bits[base >> 5] >> (base & 31u)) : 0u;
+        if (v < NDRUM && s->head >= 0 && s->head < s->visible &&
+            (s->hit[v] >> s->head & 1u) && engine_drum_fired(k, v, ph, window))
+            s->fired |= (uint16_t)(1u << v);
+    }
+}
+
+static UI_DRAW void draw_drum_scene(int band,const cv_drum_scene *s)
+{
+    const uint16_t on_dim = blend(s->bg,s->col,8);
+    for (int v=0; v<=NDRUM; ++v) {
+        int y=v*DROW+1-band*BAND_H, sel=v<NDRUM && v==s->sel;
+        if (y < -DROW || y >= BAND_H) continue;
+        const char *nm = v<NDRUM ? engine_voice_name(s->kit==PART_909 ? T_909 : T_808,v) : "AC";
+        int muted = v<NDRUM && (s->mute>>v&1u);
+        if (sel)
+            surface_panel(0,y-1,24,DROW,1,s->col,s->col,blend(s->bg,s->col,5));
+        cv_text(5,vc(&FONT_XS,y-1,DROW-1),&FONT_XS,nm,sel?s->bg:muted?s->line:v<NDRUM?s->gray:s->white);
+        for (int c=0; c<16; ++c) {
+            int x=col_x(c), hit=s->hit[v]>>c&1u;
+            if (c>=s->visible) { cv_rect(x+5,y+3,2,2,s->line); continue; }
+            if (v==NDRUM) {
+                if (hit) box(x+2,y+1,8,6,s->white);
+                else rbox(x+2,y+3,8,2,1,s->line);
+                continue;
+            }
+            box(x,y,12,DROW-2,hit?(muted?s->dim:sel?s->col:on_dim):(c==s->head?s->dim:s->line));
+            if (hit && c==s->head && (s->fired>>v&1u))
+                box(x+2,y+2,8,DROW-6,s->white);
+            if (hit && sel && (s->locks>>c&1u))
+                cv_rect(x+8,y+1,3,3,s->bg);
+        }
+    }
+}
+static UI_DRAW void draw_drum(int band)
+{
+    cv_drum_scene s;
+    cv_capture_drum(&s);
+    draw_drum_scene(band,&s);
+}
+#else
 static UI_DRAW void draw_drum(int band)
 {
     int k = ui.part, v, c, len = cur_pat()->drum[k].len;
@@ -6231,6 +6302,7 @@ static UI_DRAW void draw_drum(int band)
         }
     }
 }
+#endif
 
 #define ROLL_TOP 4                                 /* the 303's line: from here (both bands) ... */
 #define ROLL_BOT 117                               /* use the space above the step's line */
@@ -7220,6 +7292,92 @@ static UI_DRAW void draw_perf(int band)
 #endif
 
 /* the readout: the knob being turned, large, across the bottom band */
+#if X0X_UI_SMALL_CANVAS
+typedef struct {
+    /* 23-char caps_of + up to 6-char pattern/voice prefix + NUL. */
+    char nm[32], num[36], unit[8];
+    uint16_t bg, col, gray, white;
+    uint8_t shrink;
+} cv_readout_scene;
+static int cv_capture_readout(cv_readout_scene *s)
+{
+    char *num=s->num,*unit=s->unit;
+    pref_t r;
+    const char *nm;
+    char *t=s->nm;
+    if (ui.touched == 4) {
+        r = PR(R_TEMPO, 0, 0, 0);
+        nm = "TEMPO";
+    } else {
+        r = pg.r[cur_page()][ui.touched];
+        /* A bound strip already shows the active label, glyph and value. */
+#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+        /* Compare kind, target and parameter; ignore the bound MIX part. */
+        uint32_t key;
+        __builtin_memcpy(&key, &r, sizeof key);
+        key &= 0xff00ffffu;
+        if (key == (R_ENG | (T_FX << 8) | (FX_DL_FDBK << 24)) ||
+            key == (R_ENG | (T_MIX << 8) | (MX_LEVEL << 24))) return 0;
+#else
+        if (r.kind == R_ENG && ((r.a == T_FX && r.c == FX_DL_FDBK) ||
+                                (r.a == T_MIX && r.c == MX_LEVEL))) return 0;
+#endif
+        nm = caps_of(pref_name(r));
+        if (track_page()) {                              /* a track's own: "BD  Tune" */
+            put_s(put_s(put_s(t, engine_voice_name(ui.part == PART_909 ? T_909 : T_808, ui.sel[ui.part])), "  "), nm);
+            nm = t;
+        } else if (in_pattern(r)) {                      /* the pattern's: "P3  LENGTH" (it changes with it) */
+            int pp = r.kind == R_DLEN || r.kind == R_DRATE ? r.a : r.kind >= R_BLEN && r.kind <= R_BTRANS ? NKIT + r.a
+                     : r.kind == R_SWING ? PART_909 : part_view() ? ui.part : PART_909;
+            put_s(put_s(put_i(put_s(t, "P"), seq.ppat[pp] + 1), "  "), nm);
+            nm = t;
+        }
+    }
+    pref_value(r, num, unit);
+    if (r.kind == R_BPRESET) {
+        const char *name = original_sound_name((unsigned)engine_bass_requested_bank(r.b),
+                                               (unsigned)engine_bass_requested_preset(r.b));
+        put_s(num,caps_of(name ? name : "USER"));
+        put_i(put_s(t,"PRESET "),engine_bass_requested_preset(r.b)+1); nm=t;
+    }
+    if (nm!=s->nm) put_s(s->nm,nm);
+    s->bg=C_BLACK; s->col=part_col(); s->gray=C_GRAY; s->white=C_WHITE;
+    s->shrink=(r.kind==R_ENG && r.a==T_303) || r.kind==R_BENGINE || r.kind==R_BPRESET || r.kind==R_BSTATUS;
+    return 1;
+}
+static UI_DRAW void draw_readout_scene(const cv_readout_scene *s)
+{
+    const char *nm=s->nm,*num=s->num,*unit=s->unit;
+    int32_t w,x;
+    {   /* one row: the name on the left, the value (+ unit) on the right, both on the box's middle */
+        const int32_t bx = 8, by = 14, bw = 224, bh = 50;
+        const felucca_font_t *vf = &FONT_M;           /* (the 31 px face for numbers was dropped: 7.6 KB of flash) */
+        int32_t ly, uw = unit[0] ? tw(&FONT_S, unit) + 3 : 0;
+        if (s->shrink) {
+            int room = bw-24-tw(&FONT_B,nm)-10-uw;
+            if (tw(vf,num) > room) {
+                if (tw(&FONT_B,num) <= room) vf=&FONT_B;
+                else if (tw(&FONT_XS,num) <= room) vf=&FONT_XS;
+                else vf=&FONT_T;
+            }
+        }
+        ly = vc(vf, by, bh);
+        box(bx, by, bw, bh, s->bg);
+        frame(bx, by, bw, bh, s->col);
+        cv_text(bx + 12, vc(&FONT_B, by, bh), &FONT_B, nm, s->gray);
+        w = tw(vf, num);
+        x = bx + bw - 12 - uw - w;
+        cv_text(x, ly, vf, num, s->white);
+        if (unit[0])
+            cv_text(bx + bw - 12 - uw + 3, base_y(vf, ly, &FONT_S), &FONT_S, unit, s->gray);
+    }
+}
+static UI_DRAW void draw_readout(void)
+{
+    cv_readout_scene s;
+    if (cv_capture_readout(&s)) draw_readout_scene(&s);
+}
+#else
 static UI_DRAW void draw_readout(void)
 {
     char num[36], unit[8];
@@ -7285,6 +7443,7 @@ static UI_DRAW void draw_readout(void)
             cv_text(bx + bw - 12 - uw + 3, base_y(vf, ly, &FONT_S), &FONT_S, unit, C_GRAY);
     }
 }
+#endif
 
 static const char *action_key_cue(void)
 {
@@ -7347,6 +7506,204 @@ static int peer_offset(const char *text,const plat_ble_peers_t *peers,int travel
 }
 
 /* Lists share the body with the lower controls, except for full PART editors. */
+#if X0X_UI_SMALL_CANVAS
+enum { LIST_OP_MAX=166, LIST_TEXT_MAX=54, LIST_TEXT_BYTES=44, LIST_RASTER=240*BAND_H };
+enum { LO_RECT, LO_BOX, LO_LINE, LO_PANEL, LO_ICON, LO_TOGGLE, LO_TEXT, LO_CLIP };
+typedef struct { int16_t x,y,a,b; uint16_t ink,edge; uint8_t kind,z,font,text; } cv_list_op;
+/* At most nine visible rows plus a row crossing each logical seam.
+ * Eleven row fragments × nine ops/three texts plus three scrollbars
+ * fit the fixed backing area, even when the part list owns the footer. */
+typedef struct { unsigned n,cut[2],nt; uint16_t bg; uint8_t failed; } cv_list_scene;
+static uint8_t cv_list_owns_knob_frame;
+_Static_assert(sizeof(cv_list_op)*LIST_OP_MAX+LIST_TEXT_BYTES*LIST_TEXT_MAX+2u*LIST_RASTER<=240u*82u*2u,
+               "LIST scene exceeds bounded canvas");
+_Static_assert(PEER_TEXT_CAP<=LIST_TEXT_BYTES, "LIST peer text exceeds tape");
+static unsigned char *list_tape(void) { return (unsigned char *)(cv_px+LIST_RASTER); }
+static char *list_tape_text(unsigned id) { return (char *)list_tape()+sizeof(cv_list_op)*LIST_OP_MAX+LIST_TEXT_BYTES*id; }
+static void list_op(cv_list_scene *s, cv_list_op op)
+{
+    if(s->failed || s->n==LIST_OP_MAX){s->failed=1;return;}
+    memcpy(list_tape()+sizeof op*s->n++,&op,sizeof op);
+}
+static void list_text(cv_list_scene *s, int x,int y,const felucca_font_t *f,const char *t,uint16_t ink,
+                      int lo,int hi,int clip)
+{
+    cv_list_op op={.kind=clip?LO_CLIP:LO_TEXT,.x=x,.y=y,.a=lo,.b=hi,.ink=ink,
+                   .font=f==&FONT_T?0:f==&FONT_XS?1:f==&FONT_S?2:3};
+    if(s->failed || s->nt==LIST_TEXT_MAX){s->failed=1;return;}
+    unsigned n=0;while(n<LIST_TEXT_BYTES-1&&t[n])++n;
+    if(t[n]){s->failed=1;return;}
+    op.text=s->nt++;memcpy(list_tape_text(op.text),t,n+1);
+    list_op(s,op);
+}
+#define LR(x0,y0,w,h,c) list_op(s,(cv_list_op){.kind=LO_RECT,.x=(x0),.y=(y0),.a=(w),.b=(h),.ink=(c)})
+#define LB(x0,y0,w,h,r,c) list_op(s,(cv_list_op){.kind=LO_BOX,.x=(x0),.y=(y0),.a=(w),.b=(h),.z=(r),.ink=(c)})
+#define LL(x0,y0,x1,y1,c) list_op(s,(cv_list_op){.kind=LO_LINE,.x=(x0),.y=(y0),.a=(x1),.b=(y1),.ink=(c)})
+#define LP(x0,y0,w,h,act,face,ed,side) list_op(s,(cv_list_op){.kind=LO_PANEL,.x=(x0),.y=(y0),.a=(w),.b=(h),.z=(act),.ink=(face),.edge=(ed)})
+#define LI(x0,y0,g,scale,c) list_op(s,(cv_list_op){.kind=LO_ICON,.x=(x0),.y=(y0),.a=(g),.b=(scale),.ink=(c)})
+#define LT(x0,y0,on,c) list_op(s,(cv_list_op){.kind=LO_TOGGLE,.x=(x0),.y=(y0),.z=(on),.ink=(c)})
+#define LTX(x0,y0,f,t,c) list_text(s,x0,y0,f,t,c,0,0,0)
+static void list_text_r(cv_list_scene*s,int x,int y,const felucca_font_t*f,const char*t,uint16_t ink)
+{ list_text(s,x-tw(f,t),y,f,t,ink,0,0,0); }
+#define LTR(x0,y0,f,t,c) list_text_r(s,x0,y0,f,t,c)
+#define LTC(x0,y0,f,t,c,lo,hi) list_text(s,x0,y0,f,t,c,lo,hi,1)
+static UI_DRAW void capture_list_band(cv_list_scene *s,int band)
+{
+    int visible = visible_list_rows();
+    int pitch = ui.list_n && ui.list_n < visible ? visible * 23 / ui.list_n : 23;
+    int extra = visible == 6 ? (pitch - 23) / 2 : 0;
+    for (int i = 0; i < visible; i++) {
+        int y = i * pitch + (pitch - 23 - extra) / 2 - band * BAND_H;
+        if (y + 23 + extra <= 0 || y >= BAND_H) continue;
+        int row = ui.list_top + i, sel = row == ui.list_sel;
+        pref_t r;
+        char num[36], unit[8];
+        const x0x_param_t *d;
+        if (row >= ui.list_n)
+            break;
+        r = list_rows[row];
+        if (r.kind == R_HDR) {                         /* a section: whose values follow */
+            char t[28];
+            hdr_name(r.a, t);
+            LTX(8, vc(&FONT_XS, y + 4, 16), &FONT_XS, t, C_AMB);
+            LR(8, y + 19, 220, 1, C_LINE);
+            continue;
+        }
+        d = pref_desc(r);
+        int has_bar = d && !d->names && d->max >= 24;
+        int inset = has_bar ? 0 : 3;
+        LP(3,y+1,229,21+extra,sel,sel?dim(part_col(),6):SOUND_FACE,
+                      sel?part_col():SOUND_EDGE,SOUND_SIDE);
+        list_naming = 1;
+        const char *row_name = caps_of(pref_name(r));
+        list_naming = 0;
+        LTX(8, vc(sel ? &FONT_B : &FONT_S, y + 1 - inset, 18), sel ? &FONT_B : &FONT_S, row_name, sel ? C_WHITE : C_GRAY);
+        y += extra;
+        if (r.kind == R_SECTION) {                     /* a GLOBAL category: its chevron */
+            LL(221,y+8,225,y+11,sel?C_AMB:C_DIM);LL(225,y+11,221,y+14,sel?C_AMB:C_DIM);
+        }
+        if (r.kind == R_ACT || r.kind == R_SECTION) {   /* actual SCALE action; category keeps its chevron */
+            uint16_t ac = sel ? C_WHITE : C_DIM;
+            if (r.kind == R_ACT && r.a == ACT_ABOUT) {
+                int32_t lx, lw;
+                if (release_label_box(X0X_RELEASE_LABEL, sel, &lx, &lw))
+                    list_op(s,(cv_list_op){.kind=LO_TEXT,.x=lx,.y=vc(&FONT_XS,y+1+inset,18),.font=1,.text=255,.ink=sel?C_WHITE:C_HI});
+            }
+            /* the SCALE cue on the selected row only: six identical cues were filler (calm lists) */
+            if (sel) LTR(r.kind==R_SECTION?213:226,vc(&FONT_XS,y+1+inset,18),&FONT_XS,action_key_cue(),ac);
+            continue;
+        }
+        if(r.kind==R_BTNAME) {                       /* connected peers: one line, scrolls when long */
+            plat_ble_peers_t peers;char shown[PEER_TEXT_CAP];const felucca_font_t *nf=sel?&FONT_B:&FONT_S;
+            plat_ble_peers(&peers);peer_join(shown,&peers);
+            int left=8+tw(nf,"NAME")+8, width=226-left, travel=tw(nf,shown)-width;
+            int offset=peer_offset(shown,&peers,travel,plat_ms());
+            LTC(left-(travel<0?travel:offset),vc(nf,y+1+inset,18),nf,shown,sel?C_WHITE:C_HI,left,226);continue;
+        }
+        if (r.kind == R_PARTON) {                      /* part stripe and switch; value text shares the descriptor */
+            int on = pref_get(r);
+            uint16_t ink = PART_COL[r.a % NPARTS];
+            LR(3, y + 1, 2, 21, ink);
+            if (on) LI(168, y + 6, UI_G_CHECK, 1, ink);
+            LT(190, y + 6, on, on ? ink : C_GRAY);
+        }
+        pref_value(r, num, unit);
+        if (visible == 9 && r.kind == R_ENG && d && d->names) put_s(num, caps_of(num));
+        if (r.kind == R_BPRESET) {
+            const char *name = original_sound_name((unsigned)engine_bass_requested_bank(r.b),
+                                                   (unsigned)engine_bass_requested_preset(r.b));
+            put_s(num,caps_of(name ? name : "USER"));
+        }
+        {
+            const felucca_font_t *nf = sel ? &FONT_B : &FONT_S;
+            if ((r.kind == R_ENG && r.a == T_303) || r.kind == R_BENGINE || r.kind == R_BPRESET || r.kind == R_BSTATUS) {
+                int room = 226-8-tw(sel ? &FONT_B : &FONT_S,caps_of(pref_name(r)))-8-
+                           (unit[0] ? tw(&FONT_XS,unit)+2 : 0);
+                if (tw(nf,num) > room) nf = tw(&FONT_XS,num) <= room ? &FONT_XS : &FONT_T;
+            }
+            int32_t ny = vc(nf, y + 1 + inset, 18), ux = (r.kind==R_PARTON?158:226) - tw(&FONT_XS, unit);
+            LTX(ux, base_y(nf, ny, &FONT_XS), &FONT_XS, unit, sel ? C_WHITE : C_GRAY);
+            LTR(unit[0] ? ux - 2 : ux, ny, nf, num, sel ? C_WHITE : C_HI);
+        }
+        if (has_bar) {
+            int v = pref_get(r);
+            LB(108, y + 18, 70, 3, 1, C_LINE);
+            if (v)
+                LB(108, y + 18, 3 + v * 67 / d->max, 3, 1, sel ? part_col() : C_DIM);
+        }
+    }
+    if (ui.list_n > visible) {
+        int height = visible * 23;
+        int h = height * visible / ui.list_n, y = height * ui.list_top / ui.list_n - band * BAND_H;
+        LB(235, 0, 3, BAND_H, 1, C_LINE);
+        LB(235, y, 3, h, 1, C_HI);
+    }
+}
+#undef LR
+#undef LB
+#undef LL
+#undef LP
+#undef LI
+#undef LT
+#undef LTX
+#undef LTR
+#undef LTC
+static void draw_list_scene(const cv_list_scene *s,unsigned band)
+{
+    const felucca_font_t *const fonts[]={&FONT_T,&FONT_XS,&FONT_S,&FONT_B};
+    const unsigned end=band<2u?s->cut[band]:s->n;
+    for(unsigned i=band?s->cut[band-1u]:0;i<end;i++){
+        cv_list_op q;memcpy(&q,list_tape()+i*sizeof q,sizeof q);
+        switch(q.kind){
+        case LO_RECT: cv_rect(q.x,q.y,q.a,q.b,q.ink);break;
+        case LO_BOX: rbox(q.x,q.y,q.a,q.b,q.z,q.ink);break;
+        case LO_LINE: cv_line(q.x,q.y,q.a,q.b,q.ink);break;
+        case LO_PANEL: surface_panel(q.x,q.y,q.a,q.b,q.z,q.ink,q.edge,0);break;
+        case LO_ICON: ui_pictogram(q.x,q.y,q.a,q.b,q.ink);break;
+        case LO_TOGGLE: ui_state_toggle(q.x,q.y,q.z,q.ink);break;
+        case LO_TEXT: cv_text(q.x,q.y,fonts[q.font],q.text==255?X0X_RELEASE_LABEL:list_tape_text(q.text),q.ink);break;
+        case LO_CLIP: cv_text_clip(q.x,q.y,fonts[q.font],list_tape_text(q.text),q.ink,q.a,q.b);break;
+        }
+    }
+}
+static UI_DRAW void draw_list_once(void)
+{
+    cv_list_scene s={.bg=C_BLACK};
+    const int owns_footer=visible_list_rows()==9; /* LIST precludes the clip key footer. */
+    lcd_sync();
+    capture_list_band(&s,0); s.cut[0]=s.n;
+    capture_list_band(&s,1); s.cut[1]=s.n;
+    if (owns_footer) capture_list_band(&s,2);
+    if(s.failed)return;
+
+    int force=0;
+    if (owns_footer) {
+        cv_list_owns_knob_frame=1;
+        blit_hash[2]=0;
+        force=!blit_hash[3] || !cv_tile_valid[3];
+        blit_hash[3]=1; cv_tile_valid[3]=1;
+    }
+    for(unsigned band=0;band<2;band++){
+        cv_window(240,MAIN_ROWS,band*BAND_H,BAND_H,s.bg);
+        cv_band(band*BAND_H,BAND_H);
+        draw_list_scene(&s,band);
+        cv_commit_main_band(band);
+    }
+    /* Keep the command tape above the 69 physical rows. An aligned
+     * split of the 82-row strip preserves its old tile boundaries. */
+    if (owns_footer) {
+        enum { LIST_KNOB_SPLIT=4u*X0X_LCD_TILE_H };
+        for (unsigned row=0;row<KNOB_ROWS;row+=LIST_KNOB_SPLIT) {
+            cv_lcd_pos_t pos={0, KNOB_Y+row};
+            cv_window(240,KNOB_ROWS,row,LIST_KNOB_SPLIT,s.bg);
+            draw_list_scene(&s,2);
+            x0x_lcd_tile_commit(cv_px,cv_h,
+                knob_tileh + row/X0X_LCD_TILE_H*X0X_LCD_TILE_COLS,
+                force,cv_lcd_emit,&pos);
+        }
+    }
+}
+#else
 static UI_DRAW void draw_list(int band)
 {
     int visible = visible_list_rows();
@@ -7439,6 +7796,7 @@ static UI_DRAW void draw_list(int band)
         rbox(235, y, 3, h, 1, C_HI);
     }
 }
+#endif
 
 #if X0X_UI_SMALL_CANVAS
 /* Resolve and own just the mutable strings; all other help lines are literals. */
@@ -7627,6 +7985,9 @@ static UI_DRAW void draw_clip_wait_small(void)
 
 static UI_DRAW void draw_main(void)
 {
+#if X0X_UI_SMALL_CANVAS
+    cv_list_owns_knob_frame=0;
+#endif
     int band, readout = ui.touched >= 0 && (int32_t)(ui.touch_until - plat_ms()) > 0 &&
                         ui.overlay == O_NONE && !ui.help &&
                         (ui.touched >= 4 || pg.n <= 0 || pg.r[cur_page()][ui.touched].kind != R_NONE);   /* never an empty readout */
@@ -7676,8 +8037,27 @@ static UI_DRAW void draw_main(void)
     }
 #endif
 #if X0X_UI_SMALL_CANVAS
+    if (ui.view == V_SEQ && is_drum() && ui.overlay == O_NONE && !ui.help) {
+        cv_drum_scene s;
+        cv_readout_scene note;
+        cv_capture_drum(&s);
+        int has_note=readout && !envelope &&
+            !(ui.brk_choice_on && engine_brk_preview_active()) && cv_capture_readout(&note);
+        for (unsigned page=0; page<2; ++page) {
+            cv_window(240, MAIN_ROWS, page * BAND_H, BAND_H, s.bg);
+            cv_band((int)page * BAND_H, BAND_H);
+            draw_drum_scene((int)page,&s);
+            if (page && has_note) draw_readout_scene(&note);
+            cv_commit_main_band(page);
+        }
+        return;
+    }
     cv_modal_scene modal;
     cv_capture_modal(&modal);
+    if (!modal.route && ui.overlay == O_LIST) {
+        draw_list_once();
+        return;
+    }
 #else
     cv_begin(240, 2 * BAND_H, C_BLACK);           /* both bands, then one transfer: no tear between them */
 #endif
@@ -7694,16 +8074,16 @@ static UI_DRAW void draw_main(void)
             cv_commit_main_band((unsigned)band);
             continue;
         }
-        if (ui.overlay == O_LIST)
 #else
         if (ui.help)
             draw_help(band);
         else if (ui.overlay == O_ASK)
             draw_ask(band);
         else if (ui.overlay == O_LIST)
-#endif
             draw_list(band);
-        else if (ui.view == V_HOME)
+        else
+#endif
+        if (ui.view == V_HOME)
             draw_home(band);
         else if (ui.view == V_FX)
             draw_fx(band);
@@ -9536,6 +9916,9 @@ static UI_DRAW void knob_tag(char *t)
 static UI_DRAW void draw_knobs(void)
 {
     static uint32_t last_sig;
+#if X0X_UI_SMALL_CANVAS
+    if (cv_list_owns_knob_frame) { last_sig=0; return; }
+#endif
     int i, pgi = cur_page();
     uint32_t sig;
 #if BOARD_SMK37
@@ -9552,12 +9935,20 @@ static UI_DRAW void draw_knobs(void)
     }
 #endif
     if (ui.view == V_PART && (is_drum() || is_303())) {
+#if X0X_UI_SMALL_CANVAS
+        /* LIST opened after the main upload started. Retain the footer
+         * until draw_main captures all three parts together next frame. */
+        if (ui.overlay == O_LIST && !ui.help) { last_sig=0; return; }
+#endif
         /* Continuation of the same 4x4 matrix, not a duplicate knob row. */
         cv_begin(240, KNOB_H, C_BLACK);
         if (ui.overlay==O_NONE && !ui.help) {
             if (is_drum()) draw_drum_voice(2);
             else draw_part_sound(2);
-        } else if (ui.overlay == O_LIST && !ui.help) draw_list(2);
+        }
+#if !X0X_UI_SMALL_CANVAS
+        else if (ui.overlay == O_LIST && !ui.help) draw_list(2);
+#endif
         cv_commit_knobs(3);
         last_sig = 0;
         return;
