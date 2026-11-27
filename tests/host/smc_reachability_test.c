@@ -309,41 +309,41 @@ static void record_lamp_follows_part(void) {
     assert(led_vel[0] == 127);
     assert(led_vel[4] == 0);
     ui.part = PART_303A;                /* keyboard selection cannot retarget SMC */
-    for (int i = 0; i < 128; i++) smc.known[i] = 0;
+    memset(smc.feedback, 0, sizeof smc.feedback);
     smc_frame();
     assert(led_vel[0] == 127 && led_vel[4] == 0);
     smc_select_part(PART_303A);
-    for (int i = 0; i < 128; i++) smc.known[i] = 0;
+    memset(smc.feedback, 0, sizeof smc.feedback);
     smc_frame();
     assert(led_vel[0] == 0);
     assert(led_vel[4] == 127);
     ui.rec = 0;
-    for (int i = 0; i < 128; i++) smc.known[i] = 0;
+    memset(smc.feedback, 0, sizeof smc.feedback);
     smc_frame();
     assert(led_vel[4] == 0);
 }
 /* Nav lamps on strips 6–8 must follow their own shortcut, not one shared page formula. */
 static void nav_strip_lamps(void) {
     memset(led_vel, 0, sizeof led_vel);
-    for (int i = 0; i < 128; i++) smc.known[i] = 0;
+    memset(smc.feedback, 0, sizeof smc.feedback);
     smc_view(V_FX, 0);
     smc_frame();
     assert(led_vel[29] == 127);        /* SELECT 6 = reverb */
     assert(led_vel[30] == 0);          /* SELECT 7 stays dark on reverb */
     assert(led_vel[13] == 0);          /* S6 is MIX, not FX */
     smc_view(V_FX, 1);
-    for (int i = 0; i < 128; i++) smc.known[i] = 0;
+    memset(smc.feedback, 0, sizeof smc.feedback);
     smc_frame();
     assert(led_vel[29] == 0);
     assert(led_vel[30] == 127);
     smc_view(V_MIX, 3);
-    for (int i = 0; i < 128; i++) smc.known[i] = 0;
+    memset(smc.feedback, 0, sizeof smc.feedback);
     smc_frame();
     assert(led_vel[31] == 127);        /* SELECT 8 = master MIX page */
     assert(led_vel[7] == 0);           /* R8 only on HOME */
     assert(led_vel[13] == 127);        /* S6 on any MIX page */
     smc_view(V_HOME, 0);
-    for (int i = 0; i < 128; i++) smc.known[i] = 0;
+    memset(smc.feedback, 0, sizeof smc.feedback);
     smc_frame();
     assert(led_vel[7] == 127);
     assert(led_vel[31] == 0);

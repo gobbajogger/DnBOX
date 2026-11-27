@@ -44,19 +44,19 @@ static void feedback_retry(void)
 {
     setup(V_SEQ, PART_808); smc_frame();
     seq.ext_now = smc.beat_at + smc.beat_period / 2u; smc_frame();
-    CHECK(smc.known[0x5D] && !smc.lit[0x5D]);
+    CHECK(smc.feedback[36] && !(smc.feedback[36] == 2));
     unsigned before = accepted;
     fail_note = 0x5D; failure_enabled = 1; seq.ext_now = smc.beat_at + smc.beat_period; smc_frame();
-    CHECK(accepted == before && !smc.lit[0x5D]);
-    smc_frame(); CHECK(accepted == before && !smc.lit[0x5D]);
+    CHECK(accepted == before && !(smc.feedback[36] == 2));
+    smc_frame(); CHECK(accepted == before && !(smc.feedback[36] == 2));
     failure_enabled = 0; smc_frame();
-    CHECK(accepted == before + 1 && smc.lit[0x5D]);
+    CHECK(accepted == before + 1 && (smc.feedback[36] == 2));
     CHECK(last_ok[0] == 0x90 && last_ok[1] == 0x5D && last_ok[2] == 127);
     send_note(0, 0x5D, 0x90, 127); send_note(0, 0x5D, 0x90, 0);
-    CHECK(smc.locked); seq.ext_now += smc.beat_period / 2u; smc_frame(); CHECK(smc.lit[0x5D]);
+    CHECK(smc.locked); seq.ext_now += smc.beat_period / 2u; smc_frame(); CHECK((smc.feedback[36] == 2));
     send_note(0, 0x5D, 0x90, 127); CHECK(smc.locked);
     now_ms += 900; smc_poll(); send_note(0, 0x5D, 0x90, 0);
-    CHECK(!smc.locked); smc_frame(); CHECK(!smc.lit[0x5D]);
+    CHECK(!smc.locked); smc_frame(); CHECK(!(smc.feedback[36] == 2));
     puts("PASS independent LED backpressure: rejected write retries; cache tracks accepted bytes; lock/unlock phases");
 }
 static void independent_release_loss(void)

@@ -110,14 +110,14 @@ static void independent_lifecycle(void)
 }
 static void independent_feedback(void)
 {
-    pair_setup(); peer_lock(0); memset(smc_states[0].known,0,sizeof smc_states[0].known); smc_frame();
+    pair_setup(); peer_lock(0); memset(smc_states[0].feedback,0,sizeof smc_states[0].feedback); smc_frame();
     CHECK(note_writes(0,0x5D,127)); CHECK(out_n[0] && out_n[1]);
     /* Blocked peer zero's TX must not starve peer one or advance its own cache. */
-    memset(smc_states[0].known,0,sizeof smc_states[0].known);
-    memset(smc_states[1].known,0,sizeof smc_states[1].known);
+    memset(smc_states[0].feedback,0,sizeof smc_states[0].feedback);
+    memset(smc_states[1].feedback,0,sizeof smc_states[1].feedback);
     memset(out_n,0,sizeof out_n); reject_peer=0; smc_frame();
-    CHECK(out_n[0]==0 && out_n[1]>0); CHECK(!smc_states[0].known[0]);
-    reject_peer=2; smc_frame(); CHECK(out_n[0]>0 && smc_states[0].known[0]);
+    CHECK(out_n[0]==0 && out_n[1]>0); CHECK(!smc_states[0].feedback[0]);
+    reject_peer=2; smc_frame(); CHECK(out_n[0]>0 && smc_states[0].feedback[0]);
     /* Hosted channel sixteen is deliberately attached to peer zero, not the
      * peer left selected by an interrupt or the last physical control. */
     proj.set.bt|=PROJ_BT_SMC_USER;

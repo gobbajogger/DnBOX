@@ -148,17 +148,17 @@ int main(int argc, char **argv)
         return check_input(up);
     }
     ble_central_link_notify_slot(0, 1); smc_poll();
-    smc.picked = 0x55; smc.seen = 0xAA; smc.known[5] = 1;
+    smc.picked = 0x55; smc.seen = 0xAA; smc.feedback[5] = 1;
     if (mode == 2) {
         /* Unchanged connection must not reset pickup or republish notices. */
         unsigned before = notices;
         for (unsigned i = 0; i < 32; i++) smc_poll();
         if (notices != before || smc.picked != 0x55 || smc.seen != 0xAA ||
-            !smc.known[5]) return 4;
+            !smc.feedback[5]) return 4;
     } else if (mode == 3) {
         /* Coalesced down/up remains a new link even if the final state is up. */
         ble_central_link_notify_slot(0, 0); ble_central_link_notify_slot(0, 1); smc_poll();
-        if (smc.picked || smc.seen || smc.known[5]) return 5;
+        if (smc.picked || smc.seen || smc.feedback[5]) return 5;
     } else if (mode == 4) {
         /* A project lock/reset must leave a newer link publication available. */
         locked = 1;

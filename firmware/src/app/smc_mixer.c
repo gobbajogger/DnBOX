@@ -217,7 +217,7 @@ typedef struct {
     uint8_t input_seen;                /* physical history survives target/pickup refresh */
     uint8_t solo_target[8];            /* physical S key: 1..5 parts, then 909/808 tracks; 0 released */
     uint16_t drum_solo[NKIT];
-    uint8_t lit[128], known[128];
+    uint8_t feedback[43];          /* 0 unknown, 1 sent off, 2 sent on; see smc_frame_peer */
     uint8_t fx_restore[3];
     uint32_t knob_t;                   /* acceleration of the knob now turning, not a panel encoder */
     uint8_t knob_run, knob_i, play_down, select_down, knob_bank;
@@ -2805,7 +2805,7 @@ static void smc_poll_peer(void)
         smc.picked = smc.seen = smc.input_seen = 0;
         smc.knob_i = 0;
         smc.pending = 0xFFu;
-        for (int i = 0; i < 128; i++) smc.known[i] = 0;
+        memset(smc.feedback, 0, sizeof smc.feedback);
         smc_solo_clear();              /* also covers a down/up pair coalesced before this poll */
         smc_panic_reset();
         if (!smc.up) {
@@ -2824,7 +2824,7 @@ static void smc_poll_peer(void)
         smc_fx_clear();
         smc_solo_clear();
         smc.pending = 0xFFu;
-        memset(smc.known, 0, sizeof smc.known);
+        memset(smc.feedback, 0, sizeof smc.feedback);
     }
     /* Confirmation parks pickup and solos. Help does not. */
     if (!allow || ui.overlay == O_ASK) {
@@ -3007,17 +3007,16 @@ static void smc_frame_peer(void)
     if (ui_project_busy() || !smc.up || !(link & 1u) || link != smc_link_seen ||
         !(proj.set.bt & PROJ_BT_SMC_CENTRAL)) return;
     for (i = 0; i < 8; i++) smc_notice(i);
-    for (i = 0; i < 43; i++) {
+    for (i = 0; i < (int)sizeof smc.feedback; i++) {
         n = i < 32 ? i : global[i - 32];
         want = smc_led(n);
-        if (smc.known[n] && smc.lit[n] == want) continue;
+        if (smc.feedback[i] == want + 1) continue;
         msg[0] = 0x90;
         msg[1] = (uint8_t)n;
         msg[2] = (uint8_t)(want ? 127 : 0);
         if (smc_link_published != link || !plat_ble_smc_send_slot(smc_slot, msg, 3)) return;
         if (smc_link_published != link) return;
-        smc.known[n] = 1;
-        smc.lit[n] = (uint8_t)want;
+        smc.feedback[i] = (uint8_t)(want + 1);
     }
     for (i = 0; i < 8; i++)
         if (smc.pending & (1u << i)) {

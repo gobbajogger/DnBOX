@@ -46,7 +46,7 @@ typedef struct { int kind,a,b,c; } pref_t;
 #define PR(k,a,b,c) ((pref_t){k,a,b,c})
 seq_t seq;
 static struct { int rec,part,view,overlay,help,sel[NKIT]; } ui;
-static struct { uint8_t up,rec_part,solo,known[128],lit[128],pending,value[8],locked,lock_kit,lock_bank,lock_part,lock_view,lock_page,lock_pages,lock_page_kit[1],fx_down; uint16_t drum_solo[NKIT]; uint32_t beat_at,beat_period; float beat_internal; uint8_t beat_external; uint8_t view,part,mixsel,sel[NKIT],song_sel; } smc_states[2];
+static struct { uint8_t up,rec_part,solo,feedback[43],pending,value[8],locked,lock_kit,lock_bank,lock_part,lock_view,lock_page,lock_pages,lock_page_kit[1],fx_down; uint16_t drum_solo[NKIT]; uint32_t beat_at,beat_period; float beat_internal; uint8_t beat_external; uint8_t view,part,mixsel,sel[NKIT],song_sel; } smc_states[2];
 #define SMC_PEERS 2u
 static uint8_t smc_slot;
 static uint32_t smc_link_published=1, smc_link_seen=1;

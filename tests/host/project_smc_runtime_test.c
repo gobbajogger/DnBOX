@@ -79,7 +79,7 @@ int main(void)
     assert(ui_project_begin() == UI_PROJECT_BUSY && smc.solo == 1);
     smc.picked = smc.seen = 0xFF;
     smc.fx_restore[0] = 89;
-    memset(smc.known, 1, sizeof smc.known);
+    memset(smc.feedback, 1, sizeof smc.feedback);
     seq.mute = 0x123;
     ui.rec = 1;
     ask(ACT_RESET, 0, "RESET PROJECT?", "SAMPLES ARE KEPT");
@@ -90,7 +90,7 @@ int main(void)
     assert(!seq.playing && !seq.req_start && !ui.rec && !seq.mute);
     assert(!smc.solo && !smc.picked && !smc.seen && !smc.fx_restore[0]);
     assert(smc.up && smc.fresh && smc.pending == 0xFF);
-    for (int i = 0; i < 128; i++) assert(!smc.known[i]);
+    for (unsigned i = 0; i < sizeof smc.feedback; i++) assert(!smc.feedback[i]);
     assert((proj.set.bt & (PROJ_BT_SMC_CENTRAL | PROJ_BT_SMC_USER)) ==
            (PROJ_BT_SMC_CENTRAL | PROJ_BT_SMC_USER));
     render();
