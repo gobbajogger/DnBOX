@@ -1,0 +1,51 @@
+--- a/firmware/src/dsp/drum909.c
++++ b/firmware/src/dsp/drum909.c
+@@ -9,6 +9,7 @@
+ #include "drum909.h"
+ #include "x0x_drum_samples.h"
+ #include "ima_adpcm.h"
++#include "../app/plat.h"
+ #include "../x0x_cold.h"          /* X0X_COLD: init/set/get are boot/UI/MIDI — not d9_render */
+ 
+ #define D9_VCA_VT 0.0002f
+@@ -466,8 +467,31 @@
+ }
+ 
+ /* Boot only (engine_init). d9_render and drum909_trigger stay -O2. */
++/* Runtime exact IMA transitions: no flash table, retained pool allocation. */
++static int32_t d9_ima_transition[89][16] X0X_POOL;
++static inline int32_t d9_ima_decode(const uint8_t *d, uint32_t i, int32_t *pred, int32_t *idx)
++{
++    uint32_t byte = d[i >> 1], code = (i & 1u) ? (byte >> 4) : (byte & 15u);
++    const int32_t z = d9_ima_transition[*idx][code];
++    int32_t p = *pred + (z >> 7);
++    *pred = p < -32768 ? -32768 : p > 32767 ? 32767 : p;
++    *idx = z & 127;
++    return *pred;
++}
++
+ X0X_COLD void drum909_init(drum909_t *d)
+ {
++    for (int ix=0; ix<89; ++ix)
++        for (int code=0; code<16; ++code) {
++            const int m=code&7, step=IMA_STEP_T[ix];
++            const int delta=((step>>3) + ((m&1)?(step>>2):0) +
++                             ((m&2)?(step>>1):0) + ((m&4)?step:0));
++            int next=ix+IMA_IDX_T[m];
++            if (next<0) next=0;
++            if (next>88) next=88;
++            d9_ima_transition[ix][code]=((code&8)?-delta:delta)*128+next;
++        }
++
+     uint8_t *p = (uint8_t *)d;
+     for (unsigned i = 0; i < sizeof(*d); ++i)
+         p[i] = 0;
+@@ -995,7 +1019,7 @@
+             const uint32_t need = s->pos + 2 < len ? s->pos + 2 : len; \
+             while (s->dk < need) { \
+                 s->h0 = s->h1; \
+-                s->h1 = ima_decode(adpcm, s->dk++, &s->pred, &s->idx); \
++                s->h1 = d9_ima_decode(adpcm, s->dk++, &s->pred, &s->idx); \
+             } \
+             const int last = s->pos + 1 >= len; \
+             const float a = (float)(last ? s->h1 : s->h0) * (1.0f / 32768.0f); \

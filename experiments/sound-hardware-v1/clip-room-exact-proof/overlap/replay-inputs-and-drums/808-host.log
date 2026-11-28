@@ -1,0 +1,4 @@
+firmware/src/dsp/drum808.c:962:1: warning: ‘minsize’ attribute directive ignored [-Wattributes]
+  962 | {
+      | ^
+8205582 randomized 808 frames / 64000 spans: all four output buses and kit state bit-exact

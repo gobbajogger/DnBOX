@@ -1,0 +1,67 @@
+--- a/firmware/src/dsp/drum808.c
++++ b/firmware/src/dsp/drum808.c
+@@ -985,16 +985,22 @@
+     return 1;
+ }
+ 
++extern volatile uint32_t lazy_span, schmitt_now[4][3];
+ __attribute__((noinline)) static void bank_block(d8_bank_t *b, float *bus, float *pair, int m, int cb_on)
+ {
+     uint32_t dt[6];
+     int i, n;
++    unsigned tries=0, accepted=0;
+     for (i = 0; i < 6; i++)
+         dt[i] = bank_dt1(b, i);
+     for (n = 0; n < m; n++) {
+-        if (!(n&3) && n+4<=m && bank_quiet_four(b,dt,bus+n,cb_on?pair+n:pair,cb_on)) {
+-            n+=3;
+-            continue;
++        if (!(n&3) && n+4<=m) {
++            ++tries;
++            if(bank_quiet_four(b,dt,bus+n,cb_on?pair+n:pair,cb_on)) {
++                ++accepted;
++                n+=3;
++                continue;
++            }
+         }
+         float sum = 0.0f;
+         if (D8_UNLIKELY(--b->drift_cnt <= 0)) {
+@@ -1026,6 +1032,12 @@
+         if (cb_on)
+             pair[n] = ((b->ph[4] < BANK_DUTY ? 2.5f : -2.5f) + (b->ph[5] < BANK_DUTY ? 2.5f : -2.5f)) * 0.5f;
+     }
++    if(lazy_span<4) {
++        schmitt_now[lazy_span][0]+=tries;
++        schmitt_now[lazy_span][1]+=accepted;
++        schmitt_now[lazy_span][2]+=(unsigned)m;
++    }
++
+ }
+ 
+ /* ---- metal envelope ---- */
+--- a/firmware/src/app/main_fm1.c
++++ b/firmware/src/app/main_fm1.c
+@@ -27,6 +27,7 @@
+ } x0x_dbg __attribute__((section(".noinit")));
+ volatile uint32_t lazy_now[4][16], lazy_worst[4][16], lazy_last[4][16];
+ volatile uint32_t lazy_span=4, lazy_worst_us, lazy_last_us, lazy_worst_half;
++volatile uint32_t schmitt_now[4][3], schmitt_worst[4][3];
+ static uint8_t safe_mode;
+ #if X0X_DEBUG
+ /* development: the slowest block since boot, taken apart (read over USB: tools/fm1_debug.py) */
+@@ -42,6 +43,7 @@
+     uint32_t t0 = fm1_ticks(), us, budget = HALF_FRAMES * 1000000u / FS;
+     x0x_dbg.in_audio = 1;
+     lazy_span=0;
++    for(unsigned t=0;t<4;t++) for(unsigned i=0;i<3;i++) schmitt_now[t][i]=0;
+     for(unsigned t=0;t<4;t++) for(unsigned i=0;i<16;i++) lazy_now[t][i]=0;
+ #if FELUCCA_UAC
+     uac_render_start();
+@@ -97,6 +99,7 @@
+     for(unsigned t=0;t<4;t++) for(unsigned i=0;i<16;i++) lazy_last[t][i]=lazy_now[t][i];
+     if(us>lazy_worst_us) {
+         lazy_worst_us=us; lazy_worst_half=x0x_dbg.halves;
++        for(unsigned t=0;t<4;t++) for(unsigned i=0;i<3;i++) schmitt_worst[t][i]=schmitt_now[t][i];
+         for(unsigned t=0;t<4;t++) for(unsigned i=0;i<16;i++) lazy_worst[t][i]=lazy_now[t][i];
+     }
+     if (us > x0x_dbg.max_us) x0x_dbg.max_us = us;
