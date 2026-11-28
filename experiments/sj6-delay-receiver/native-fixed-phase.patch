@@ -1,0 +1,70 @@
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -1846,6 +1846,7 @@
+ #include "../dsp/s1c/s1c_front.h"
+ extern volatile unsigned int lab_delay_probe, lab_s1_probe;
+ volatile uint32_t bench_fixed[10];
++uint32_t bench_generated_frame(void) { return d8_frame; }
+ enum { FIX_CONFIG=65536u,FIX_ON=98304u,FIX_OFF=163840u,FIX_VOICES=4 };
+ static uint32_t fix_sample,fix_active;
+ __attribute__((noinline)) static void midi_in(uint32_t pkt)
+--- a/firmware/src/app/main_fm1.c
++++ b/firmware/src/app/main_fm1.c
+@@ -39,6 +39,13 @@
+ } x0x_worst;
+ #endif                           /* two failed boots: no audio, USB on (safe_main) */
+ 
++/* Disposable fixed-workload timing observer; store only after render + DMA ack. */
++extern uint32_t bench_generated_frame(void);
++struct fixed_phase { uint32_t count, peak_ticks; };
++volatile struct fixed_phase bench_phase[3];
++volatile uint8_t bench_half_flags[1024];
++volatile uint32_t bench_phase_rejected;
++static uint32_t bench_elapsed_ticks;
+ static void render_block(int32_t *o)                /* ALNK0: one half, measured */
+ {
+     uint32_t t0 = fm1_ticks(), us, budget = HALF_FRAMES * 1000000u / FS;
+@@ -65,7 +72,8 @@
+ #if X0X_DIAG_STATE_TRACE
+     engine_diag_half(x0x_dbg.halves, x0x_dbg.late);
+ #endif
+-    us = (fm1_ticks() - t0) / FM1_TICKS_PER_US;
++    bench_elapsed_ticks = fm1_ticks() - t0;
++    us = bench_elapsed_ticks / FM1_TICKS_PER_US;
+ #if X0X_LCD_TRACE
+     lcd_trace_record(LCD_T_AUDIO, us);
+ #endif
+@@ -104,15 +112,32 @@
+     fm1_audio_ack_aux(p);
+     if (p & FM1_AUDIO_HALF) {
+         uint32_t half = fm1_audio_free_half();
++        const uint32_t start = bench_generated_frame();
+         render_block(&abuf[half * HALF_WORDS]);
+         fm1_audio_ack_half();
+-        if (fm1_audio_free_half() != half) {
++        const unsigned flip = fm1_audio_free_half() != half;
++        if (flip) {
+ #if X0X_DEBUG
+             x0x_worst.late_in++;
+ #endif
+             x0x_dbg.late++;                         /* the DMA moved on while we rendered */
+             audio_xruns++;
+         }
++        const uint32_t idx = start / HALF_FRAMES;
++        if (start % HALF_FRAMES || idx >= sizeof bench_half_flags ||
++                bench_generated_frame() - start != HALF_FRAMES || bench_half_flags[idx]) {
++            ++bench_phase_rejected;
++        } else {
++            const unsigned phase = start < 98304u ? 0u : start < 163840u ? 1u : 2u;
++            volatile struct fixed_phase *out = &bench_phase[phase];
++            const uint32_t ticks = bench_elapsed_ticks;
++            const uint32_t physical_ticks =
++                (uint64_t)HALF_FRAMES * FM1_TICKS_PER_US * 1000000u / FS;
++            bench_half_flags[idx] = 8u | (flip << 2) |
++                ((ticks > physical_ticks) << 1) | (ticks > 10809u * FM1_TICKS_PER_US);
++            ++out->count;
++            if (ticks > out->peak_ticks) out->peak_ticks = ticks;
++        }
+     }
+ }
+ extern void isr_alnk0(void);

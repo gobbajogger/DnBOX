@@ -40,3 +40,34 @@ controlled workload timing, not final original-app sound parity.
 The initial Elite run matched all ten events and the expected activation /
 release counts. It did not pass performance: maximum 21,156 microseconds
 and 147 XRUNs over the overall 8-second test.
+
+## Optional observers: use separate worktrees
+
+After applying the workload patch, apply exactly one observer patch
+and rebuild both comparison arms with it:
+
+- `native-fixed-phase.patch` reports per-phase peak time and the generated
+  half indices that exceeded either the 10,809 us project target or the
+  physical 512-frame budget. It tracks the DMA index change independently.
+  The observed render time is taken at the existing timing boundary;
+  bookkeeping runs after DMA acknowledgment and the index comparison.
+  An alternating DMA index is not a count of every missed boundary.
+- `native-fixed-digest.patch` fingerprints the 32-bit output words in each
+  of 128 held halves and the first 32 release halves, before the DMA half
+  is acknowledged. Use the fingerprints to locate a change in rendered
+  output even when the post-DMA capture is affected by lost halves.
+  Hashing can affect timing, so this arm must not be used to assess speed.
+
+Record the exact ELF for each arm. The standard workload acceptance checks
+still apply. From the source root compare the two results directories:
+
+```sh
+python3 experiments/sj6-delay-receiver/native-fixed-observer.py timing "$BASE" "$CANDIDATE"
+# or, for two separately built correctness arms
+python3 experiments/sj6-delay-receiver/native-fixed-observer.py pcm "$BASE" "$CANDIDATE"
+```
+
+The held phase covers generated samples [98,304, 163,840). During release,
+physical keys are no longer down, but envelope and FX tails may still cost
+time. An over-budget render does not by itself tell you how many DMA
+boundaries passed. Keep the 922-event physical-input acceptance separate.

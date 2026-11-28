@@ -1,0 +1,52 @@
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -1846,6 +1846,7 @@
+ #include "../dsp/s1c/s1c_front.h"
+ extern volatile unsigned int lab_delay_probe, lab_s1_probe;
+ volatile uint32_t bench_fixed[10];
++uint32_t bench_generated_frame(void) { return d8_frame; }
+ enum { FIX_CONFIG=65536u,FIX_ON=98304u,FIX_OFF=163840u,FIX_VOICES=4 };
+ static uint32_t fix_sample,fix_active;
+ __attribute__((noinline)) static void midi_in(uint32_t pkt)
+--- a/firmware/src/app/main_fm1.c
++++ b/firmware/src/app/main_fm1.c
+@@ -98,13 +98,39 @@
+     x0x_dbg.in_audio = 0;
+ }
+ 
++/* Correctness-only observation of the generated buffer, not a timing build. */
++extern uint32_t bench_generated_frame(void);
++volatile uint32_t bench_pcm_sig[160];
++volatile uint32_t bench_pcm_count, bench_pcm_rejected;
++
++__attribute__((noinline,minsize)) static void bench_pcm_capture(uint32_t start, const int32_t *words)
++{
++    enum { SIG_ON = 98304u, SIG_END = 180224u };
++    if (start < SIG_ON || start >= SIG_END) return;
++    const unsigned idx=(start-SIG_ON)/HALF_FRAMES;
++    if (start % HALF_FRAMES || bench_generated_frame()-start != HALF_FRAMES ||
++            idx != bench_pcm_count || idx >= sizeof bench_pcm_sig / sizeof *bench_pcm_sig) {
++        ++bench_pcm_rejected;
++        return;
++    }
++    uint32_t a=2166136261u;
++    for (unsigned i=0;i<HALF_WORDS;++i) {
++        const uint32_t w=(uint32_t)words[i];
++        a=(a ^ w)*16777619u;
++    }
++    bench_pcm_sig[idx]=a;
++    ++bench_pcm_count;
++}
++
+ void fm1_alnk0_irq(void)                            /* via isr_alnk0 (hal/fm1_isr.S) */
+ {
+     uint8_t p = fm1_audio_pending();
+     fm1_audio_ack_aux(p);
+     if (p & FM1_AUDIO_HALF) {
+         uint32_t half = fm1_audio_free_half();
++        const uint32_t start=bench_generated_frame();
+         render_block(&abuf[half * HALF_WORDS]);
++        bench_pcm_capture(start, &abuf[half * HALF_WORDS]);
+         fm1_audio_ack_half();
+         if (fm1_audio_free_half() != half) {
+ #if X0X_DEBUG
