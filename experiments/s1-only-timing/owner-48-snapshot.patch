@@ -1,0 +1,745 @@
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -468,9 +468,7 @@
+ #if X0X_UI_SMALL_CANVAS
+ /* Painter-only, never installed across cv_commit_* / foreground service. */
+ typedef struct {
+-    s1_matrix_telemetry value;
+     unsigned voice;
+-    int ready;
+     uint16_t palette[5], on, tie;
+     uint8_t light, base, enabled, head, held;
+     uint8_t page,first,n;
+@@ -478,6 +476,11 @@
+     pref_t row[4][4];
+     char title[4][12];
+     char preset[FACTORY_NAME_MAX];
++} cv_matrix_layout;
++typedef struct {
++    cv_matrix_layout layout;
++    s1_matrix_telemetry value;
++    int ready;
+     struct cv_s1_cell {
+         char label[24],num[16],unit[8];
+         int16_t raw;
+@@ -486,10 +489,27 @@
+     float rate_hz;
+     uint8_t cells_ready,rate_valid;
+ } cv_s1_telemetry;
++#ifdef DNBOX_LAB_LEGACY_SEMANTIC_RENDER
++typedef struct {
++    cv_matrix_layout layout;
++    uint8_t sound[32], preview[22];
++    unsigned preview_mask, marks, gate, stage, held;
++    uint8_t showing_lock;
++    int8_t bank, pending, status, edited, requested, adsr_ok, voice_ok, env_ok, filter_ok, motion_ok;
++    int env_stage, active, index, selected;
++    float adsr[4], env[4], level, amp, mod, feg, depth, phase, bipolar, current, target, cutoff, glide;
++    int cutoff_unit;
++} cv_legacy_render;
++static const cv_legacy_render *legacy_scene;
++#define LEG(v) (legacy_scene!=NULL)
++#else
++#define LEG(v) 0
++#endif
+ static const cv_s1_telemetry *s1_draw_frame;
++static const cv_matrix_layout *matrix_draw_layout;
+ static void cv_capture_s1_telemetry(cv_s1_telemetry *s,unsigned voice);
+ static int s1_draw_frozen(unsigned voice)
+-{ return s1_draw_frame && s1_draw_frame->voice==voice; }
++{ return s1_draw_frame && s1_draw_frame->layout.voice==voice; }
+ #endif
+ static int s1_read(pref_t r, s1_patch_value *value)
+ {
+@@ -627,6 +647,77 @@
+     }
+ }
+ 
++#ifdef DNBOX_LAB_LEGACY_SEMANTIC_RENDER
++static int legacy_voice_view(unsigned v,float * amp,float * mod,unsigned * stage,unsigned * held)
++{
++    if (LEG(v)) { const cv_legacy_render *l=legacy_scene;*amp=l->amp;*mod=l->mod;*stage=l->stage;*held=l->held; return l->voice_ok; }
++    return engine_bass_voice_view(v,amp,mod,stage,held);
++}
++#else
++#define legacy_voice_view engine_bass_voice_view
++#endif
++#ifdef DNBOX_LAB_LEGACY_SEMANTIC_RENDER
++static int legacy_adsr_view(unsigned v,float * z,unsigned * gate)
++{
++    if (LEG(v)) { const cv_legacy_render *l=legacy_scene;memcpy(z,l->adsr,sizeof l->adsr);*gate=l->gate; return l->adsr_ok; }
++    return engine_bass_adsr_view(v,z,gate);
++}
++#else
++#define legacy_adsr_view engine_bass_adsr_view
++#endif
++#ifdef DNBOX_LAB_LEGACY_SEMANTIC_RENDER
++static int legacy_env_view(unsigned v,float * z,float * level,int * state)
++{
++    if (LEG(v)) { const cv_legacy_render *l=legacy_scene;memcpy(z,l->env,sizeof l->env);*level=l->level;*state=l->env_stage; return l->env_ok; }
++    return engine_bass_env_view(v,z,level,state);
++}
++#else
++#define legacy_env_view engine_bass_env_view
++#endif
++#ifdef DNBOX_LAB_LEGACY_SEMANTIC_RENDER
++static int legacy_filter_view(unsigned v,float * feg,float * depth)
++{
++    if (LEG(v)) { const cv_legacy_render *l=legacy_scene;*feg=l->feg;*depth=l->depth; return l->filter_ok; }
++    return engine_bass_filter_view(v,feg,depth);
++}
++#else
++#define legacy_filter_view engine_bass_filter_view
++#endif
++#ifdef DNBOX_LAB_LEGACY_SEMANTIC_RENDER
++static int legacy_motion_view(unsigned v,float * phase,float * mg,float * cur,float * target,int * active)
++{
++    if (LEG(v)) { const cv_legacy_render *l=legacy_scene;*phase=l->phase;*mg=l->bipolar;*cur=l->current;*target=l->target;*active=l->active; return l->motion_ok; }
++    return engine_bass_motion_view(v,phase,mg,cur,target,active);
++}
++#else
++#define legacy_motion_view engine_bass_motion_view
++#endif
++#ifdef DNBOX_LAB_LEGACY_SEMANTIC_RENDER
++static __attribute__((noinline,minsize)) int LEG_DB(unsigned v)
++{ return LEG(v)?legacy_scene->bank:engine_bass_sound_bank(&proj.sound,v); }
++#define LEG_GET(field, fn, v) (LEG(v)?legacy_scene->field:fn(v))
++#else
++#define LEG_DB(v) engine_bass_sound_bank(&proj.sound,v)
++#define LEG_GET(field, fn, v) fn(v)
++#endif
++typedef struct { float from,to; uint8_t seen; } matrix_glide_history;
++static float matrix_glide_advance(matrix_glide_history *h,int known,float current,float target)
++{
++    float f=1.f;
++    if(known) {
++        if(!h->seen || target!=h->to) {
++            h->from=h->seen?current:target;
++            h->to=target;
++            h->seen=1;
++        }
++        if(h->to!=h->from)f=(current-h->from)/(h->to-h->from);
++    }
++    if(f<0.f)f=0.f;
++    if(f>1.f)f=1.f;
++    return f;
++}
++static matrix_glide_history matrix_glide[NBASS];
++
+ static const x0x_param_t *pref_desc(pref_t r)
+ {
+     switch (r.kind) {
+@@ -645,16 +736,20 @@
+     case R_BENGINE: return &BENGINE_P;
+     case R_BPRESET:
+         {
+-            unsigned max = original_sound_factories((unsigned)engine_bass_requested_bank(r.b));
++            unsigned max = original_sound_factories((unsigned)LEG_GET(requested,engine_bass_requested_bank,r.b));
+             BPRESET_P.max = max > 256u ? 255u : (uint8_t)(max ? max - 1u : 0u);
+         }
+         return &BPRESET_P;
+     case R_BSTATUS: return &BSTATUS_P;
+     case R_BPATSND:
+-        PATSND_P.max = (uint8_t)original_sound_factories((unsigned)engine_bass_requested_bank(r.b));
++        PATSND_P.max = (uint8_t)original_sound_factories((unsigned)LEG_GET(requested,engine_bass_requested_bank,r.b));
+         return &PATSND_P;
+     case R_NOTELOCK: return &NOTELOCK_P;
+-    case R_ENG: return engine_param(r.a, r.b, r.c);
++    case R_ENG:
++#ifdef DNBOX_LAB_LEGACY_SEMANTIC_RENDER
++        if(r.a==T_303 && r.c<22 && LEG(r.b))return original_sound_param(legacy_scene->bank,r.c);
++#endif
++        return engine_param(r.a, r.b, r.c);
+     case R_GEN: return &GEN_P[r.c % NGEN];
+     case R_BRKSET: return breaks_param(r.c);
+     case R_SWING: return &SEQ_P[SQ_SWING];
+@@ -764,9 +859,9 @@
+         return s1_read(r, &value) ? value.position : 0;
+     }
+ #endif
+-    case R_BENGINE: return engine_bass_requested_bank(r.b);
+-    case R_BPRESET: return engine_bass_requested_preset(r.b);
+-    case R_BSTATUS: return engine_bass_preset_pending(r.b) * 4 + engine_bass_status(r.b);
++    case R_BENGINE: return LEG_GET(requested,engine_bass_requested_bank,r.b);
++    case R_BPRESET: return LEG_GET(selected,engine_bass_requested_preset,r.b);
++    case R_BSTATUS: return LEG_GET(pending,engine_bass_preset_pending,r.b) * 4 + LEG_GET(status,engine_bass_status,r.b);
+     case R_ENG: return proj.sound.v[r.a][r.b][r.c];
+     case R_SWING: return p->swing;
+     case R_DLEN: return p->drum[r.a].len - 1;
+@@ -1251,7 +1346,7 @@
+ static const char *original_status_name(int voice)
+ {
+     static const char *const pending[] = {"READY","WAIT","HELD","WHEEL","LOCKS","INPUT","WAIT"};
+-    int status = engine_bass_status(voice), wait = engine_bass_preset_pending(voice);
++    int status = LEG_GET(status,engine_bass_status,voice), wait = LEG_GET(pending,engine_bass_preset_pending,voice);
+     if (status != 1) return status == -1 ? "FX WAIT" : "DSP ERR";
+     return wait > 0 && wait < 7 ? pending[wait] : "READY";
+ }
+@@ -1287,13 +1382,13 @@
+         if (value < 0) put_s(num,"USER");
+         else {
+             char *end = put_i(num,value+1);
+-            if (!engine_bass_preset_pending(r.b) && engine_bass_preset_edited(r.b)) put_s(end,"*");
++            if (!LEG_GET(pending,engine_bass_preset_pending,r.b) && LEG_GET(edited,engine_bass_preset_edited,r.b)) put_s(end,"*");
+         }
+         return 1;
+     }
+     if (r.kind == R_BSTATUS) { put_s(num,original_status_name(r.b)); return 1; }
+     if (r.kind != R_ENG || r.a != T_303) return 0;
+-    int bank = engine_bass_sound_bank(&proj.sound,r.b);
++    int bank = LEG_DB(r.b);
+     unsigned kind = (unsigned)bank, id = r.c;
+     const ui_original_control_view *v = 0;
+     /* a corrupt patch has no bank: never index a name table through a null view */
+@@ -1308,7 +1403,13 @@
+     }
+     if ((kind == ORIGINAL_SOUND_CHICAGO && id == 2) || (kind == ORIGINAL_SOUND_MIAMI && id == 9)) {
+         float hz;                                     /* CUTOFF: the engine's base corner (Synths 91f6e4e9), else % */
+-        if (engine_param_si(T_303, r.b, (int)id, value, &hz) == X0X_U_HZ) { unit_value(X0X_U_HZ, hz, num, unit); return 1; }
++        int u;
++#ifdef DNBOX_LAB_LEGACY_SEMANTIC_RENDER
++        if(LEG(r.b)){hz=legacy_scene->cutoff;u=legacy_scene->cutoff_unit;}
++        else
++#endif
++        u=engine_param_si(T_303,r.b,(int)id,value,&hz);
++        if (u == X0X_U_HZ) { unit_value(X0X_U_HZ, hz, num, unit); return 1; }
+     }
+     if (kind == ORIGINAL_SOUND_JUNO) { juno_value_text(id, value, num, unit); return 1; }
+     if (kind == ORIGINAL_SOUND_SYNTHONE) { put_i(num,(value*100+63)/127); put_s(unit,"%"); return 1; }
+@@ -3405,38 +3506,57 @@
+     else preview = motion_now(r);
+     return preview >= 0 ? preview : value;
+ }
+-static const ui_original_control_view *original_text_view(pref_t r, int value)
+-{
+-    const uint8_t *cell = proj.sound.v[T_303][r.b];
+-    unsigned kind = (unsigned)engine_bass_sound_bank(&proj.sound,r.b);
+-    uint32_t relevant = kind == ORIGINAL_SOUND_CHICAGO ? UI_ORIGINAL_CHICAGO_TEXT_MASK :
+-        kind == ORIGINAL_SOUND_MIAMI ? UI_ORIGINAL_MIAMI_TEXT_MASK : 0u;
+-    uint8_t preview[22] = {0}; uint32_t mask = 0;
+-    for (unsigned id = 0; id < original_sound_count(kind); id++) if (relevant & (1u<<id)) {
+-        pref_t ref = PR(R_ENG,T_303,r.b,id);
+-        int q = lock_step() >= 0 ? lock_of(ref,lock_step()) : motion_now(ref);
+-        if (q >= 0) { preview[id] = (uint8_t)q; mask |= 1u<<id; }
+-    }
+-    if ((relevant & (1u<<r.c)) && value != cell[r.c]) { preview[r.c]=(uint8_t)value; mask |= 1u<<r.c; }
+-    return ui_original_controls_update(&original_controls,r.b,cell,preview,mask) ? &original_controls.view : 0;
+-}
+-
+-/* The engine waveform of an oscillator control, with the same lock/motion
+- * preview as the text readout. 0 when the slot has no waveform. */
+-static const ui_original_wave_cache *original_wave_view(pref_t r, int value)
+-{
+-    const uint8_t *cell = proj.sound.v[T_303][r.b];
+-    unsigned kind = (unsigned)engine_bass_sound_bank(&proj.sound,r.b);
+-    if (kind == ORIGINAL_SOUND_JUNO || kind == ORIGINAL_SOUND_SYNTHONE) return 0; /* Synth One has no Miami oscillator UI */
+-    uint32_t relevant = kind == ORIGINAL_SOUND_CHICAGO ? UI_ORIGINAL_CHICAGO_WAVE_MASK : UI_ORIGINAL_MIAMI_WAVE_MASK;
+-    uint8_t preview[22] = {0}; uint32_t mask = 0;
+-    for (unsigned id = 0; id < original_sound_count(kind); id++) if (relevant & (1u<<id)) {
+-        pref_t ref = PR(R_ENG,T_303,r.b,id);
+-        int q = lock_step() >= 0 ? lock_of(ref,lock_step()) : motion_now(ref);
+-        if (q >= 0) { preview[id] = (uint8_t)q; mask |= 1u<<id; }
+-    }
+-    if ((relevant & (1u<<r.c)) && value != cell[r.c]) { preview[r.c]=(uint8_t)value; mask |= 1u<<r.c; }
+-    return ui_original_wave_update(&original_wave,r.b,cell,preview,mask) ? &original_wave : 0;
++/* A single frozen/live projection for both text and waveform consumers. */
++static __attribute__((noinline,minsize)) uint32_t original_project_cell(
++    pref_t r,int value,int wave,const uint8_t **cell,uint8_t preview[22])
++{
++    unsigned kind=(unsigned)LEG_DB(r.b);
++    uint32_t relevant;
++    *cell=proj.sound.v[T_303][r.b];
++#ifdef DNBOX_LAB_LEGACY_SEMANTIC_RENDER
++    if(LEG(r.b))*cell=legacy_scene->sound;
++#endif
++    if(kind==ORIGINAL_SOUND_CHICAGO)
++        relevant=wave?UI_ORIGINAL_CHICAGO_WAVE_MASK:UI_ORIGINAL_CHICAGO_TEXT_MASK;
++    else if(kind==ORIGINAL_SOUND_MIAMI)
++        relevant=wave?UI_ORIGINAL_MIAMI_WAVE_MASK:UI_ORIGINAL_MIAMI_TEXT_MASK;
++    else relevant=wave?UI_ORIGINAL_MIAMI_WAVE_MASK:0u;
++    uint32_t mask=0;
++#ifdef DNBOX_LAB_LEGACY_SEMANTIC_RENDER
++    if(LEG(r.b)) {
++        mask=legacy_scene->preview_mask&relevant;
++        for(unsigned id=0;id<22u;++id)if(mask&(1u<<id))preview[id]=legacy_scene->preview[id];
++    } else
++#endif
++    {
++        const int ls=lock_step();
++        for(unsigned id=0;id<original_sound_count(kind);id++)if(relevant&(1u<<id)){
++            const pref_t ref=PR(R_ENG,T_303,r.b,id);
++            int q=ls>=0?lock_of(ref,ls):motion_now(ref);
++            if(q>=0){preview[id]=(uint8_t)q;mask|=1u<<id;}
++        }
++    }
++    if((relevant&(1u<<r.c)) && value!=(*cell)[r.c]){
++        preview[r.c]=(uint8_t)value;
++        mask|=1u<<r.c;
++    }
++    return mask;
++}
++static const ui_original_control_view *original_text_view(pref_t r,int value)
++{
++    const uint8_t *cell;
++    uint8_t preview[22]={0};
++    const uint32_t mask=original_project_cell(r,value,0,&cell,preview);
++    return ui_original_controls_update(&original_controls,r.b,cell,preview,mask)?&original_controls.view:0;
++}
++static const ui_original_wave_cache *original_wave_view(pref_t r,int value)
++{
++    const unsigned kind=LEG_DB(r.b);
++    if(kind==ORIGINAL_SOUND_JUNO || kind==ORIGINAL_SOUND_SYNTHONE)return 0;
++    const uint8_t *cell;
++    uint8_t preview[22]={0};
++    const uint32_t mask=original_project_cell(r,value,1,&cell,preview);
++    return ui_original_wave_update(&original_wave,r.b,cell,preview,mask)?&original_wave:0;
+ }
+ 
+ static void lock_turn(pref_t r, int e, int role)
+@@ -6806,27 +6926,30 @@
+ /* Only the matrix painter reads these aliases. A foreground edit during
+  * DMA sees entirely normal UI globals after this frame context is removed. */
+ #if X0X_SYNTHONE_PATCH && X0X_UI_SMALL_CANVAS
+-#define SM_F (s1_draw_frame!=0)
+-#define SM_REF(p) (SM_F?s1_draw_frame->row[(p)-s1_draw_frame->first]:pg.r[p])
+-#define SM_TITLE(p) (SM_F?s1_draw_frame->title[(p)-s1_draw_frame->first]:pg.title[p])
+-#define SM_N (SM_F?s1_draw_frame->n:pg.n)
+-#define SM_PAGE (SM_F?s1_draw_frame->page:cur_page())
+-#define SM_VOICE (SM_F?(int)s1_draw_frame->voice:bidx())
+-#define SM_BANK (SM_F?ORIGINAL_SOUND_SYNTHONE:engine_bass_sound_bank(&proj.sound,bidx()))
++#define SM_LAYOUT matrix_draw_layout
++#define SM_S1 (s1_draw_frame!=NULL)
++#define SM_F (SM_LAYOUT!=NULL)
++#define SM_REF(p) (SM_F?SM_LAYOUT->row[(p)-SM_LAYOUT->first]:pg.r[p])
++#define SM_TITLE(p) (SM_F?SM_LAYOUT->title[(p)-SM_LAYOUT->first]:pg.title[p])
++#define SM_N (SM_F?SM_LAYOUT->n:pg.n)
++#define SM_PAGE (SM_F?SM_LAYOUT->page:cur_page())
++#define SM_VOICE (SM_F?(int)SM_LAYOUT->voice:bidx())
++#define SM_BANK (s1_draw_frame?ORIGINAL_SOUND_SYNTHONE:LEG_DB(SM_VOICE))
+ #define SM_PART (SM_F||(ui.view==V_PART&&is_303()))
+-#define SM_TOUCH (SM_F?s1_draw_frame->touched:matrix_live_touch())
+-#define SM_DB(r) (s1_draw_frozen((r).b)?ORIGINAL_SOUND_SYNTHONE:engine_bass_sound_bank(&proj.sound,(r).b))
++#define SM_TOUCH (SM_F?SM_LAYOUT->touched:matrix_live_touch())
++#define SM_DB(r) (s1_draw_frozen((r).b)?ORIGINAL_SOUND_SYNTHONE:LEG_DB((r).b))
+ #else
++#define SM_S1 0
+ #define SM_F 0
+ #define SM_REF(p) pg.r[p]
+ #define SM_TITLE(p) pg.title[p]
+ #define SM_N pg.n
+ #define SM_PAGE cur_page()
+ #define SM_VOICE bidx()
+-#define SM_BANK engine_bass_sound_bank(&proj.sound,bidx())
++#define SM_BANK LEG_DB(bidx())
+ #define SM_PART (ui.view==V_PART&&is_303())
+ #define SM_TOUCH matrix_live_touch()
+-#define SM_DB(r) engine_bass_sound_bank(&proj.sound,(r).b)
++#define SM_DB(r) LEG_DB((r).b)
+ #endif
+ /* Control rows share the existing main/knob strips; no framebuffer or UI state is added. */
+ static UI_DRAW const char *matrix_group(int page)
+@@ -6862,10 +6985,9 @@
+ static const char *matrix_preset_name(int voice);
+ #endif
+ static void cv_capture_s1_cells(cv_s1_telemetry *s);
+-static void cv_capture_s1_telemetry(cv_s1_telemetry *s,unsigned voice)
++static void cv_capture_matrix_layout(cv_matrix_layout *s,unsigned voice)
+ {
+     s->voice=voice;
+-    s->ready=engine_s1_matrix_snapshot(voice,&s->value);
+     memcpy(s->palette,pal,sizeof s->palette);
+     s->light=ui_theme_light;
+     s->page=cur_page();s->n=pg.n;s->first=(s->page/4)*4;
+@@ -6888,6 +7010,11 @@
+         if(gate!=G_REST)s->on|=1u<<c;
+         if(gate==G_TIE)s->tie|=1u<<c;
+     }
++}
++static void cv_capture_s1_telemetry(cv_s1_telemetry *s,unsigned voice)
++{
++    s->ready=engine_s1_matrix_snapshot(voice,&s->value);
++    cv_capture_matrix_layout(&s->layout,voice);
+     cv_capture_s1_cells(s);
+ }
+ #endif
+@@ -6920,7 +7047,7 @@
+ {
+     sound_step_scene_t v={0};
+ #if X0X_SYNTHONE_PATCH && X0X_UI_SMALL_CANVAS
+-    const cv_s1_telemetry *scene=s1_draw_frame;
++    const cv_matrix_layout *scene=SM_LAYOUT;
+     if(scene) {
+         v.base=scene->base;v.enabled=scene->enabled;
+         v.ph=scene->base+scene->head;v.held=scene->base+scene->held;
+@@ -6989,12 +7116,12 @@
+         s1_draw_patch=s1_draw_frame->ready?&s1_draw_frame->value.patch:0;
+     else
+ #endif
+-    if (engine_bass_bank(SM_VOICE) == ORIGINAL_SOUND_SYNTHONE &&
++    if (LEG_GET(bank,engine_bass_bank,SM_VOICE) == ORIGINAL_SOUND_SYNTHONE &&
+         engine_s1_patch_snapshot(SM_VOICE, &patch)) s1_draw_patch = &patch;
+ #endif
+ #if !X0X_SYNTHONE_PATCH
+     if (pg.r[cur_page()][0].kind == R_BENGINE &&
+-        engine_bass_bank(SM_VOICE) == ORIGINAL_SOUND_SYNTHONE) {
++        LEG_GET(bank,engine_bass_bank,SM_VOICE) == ORIGINAL_SOUND_SYNTHONE) {
+         draw_init_selector(band);
+         return;
+     }
+@@ -7007,7 +7134,13 @@
+     int tail = SM_N >= rows && first + rows > SM_N;
+     if (tail) first = SM_N - rows;
+     uint16_t col=SM_F?(ui_theme_light?RGB(40,104,30):RGB(164,235,141)):matrix_col();
+-    if(night) cv_rect(0,0,240,band==2?KNOB_H:BAND_H,SOUND_BASE);
++    if(night) {
++        int h=band==2?KNOB_H:BAND_H;
++#ifdef DNBOX_LAB_LEGACY_SEMANTIC_RENDER
++        if(band==2 && legacy_scene)h=69; /* old matrix raster ends before step tail */
++#endif
++        cv_rect(0,0,240,h,SOUND_BASE);
++    }
+     for (row=0;row<rows;row++) {
+         int p=first+row, y=4+row*step-off, active=p==page;
+         uint16_t label=night?(active?SOUND_INK:SOUND_GRAY):(active?C_BLACK:C_GRAY);
+@@ -7040,15 +7173,15 @@
+         }
+ #if X0X_BASS_PRESET_PREVIEW
+         if (!X0X_ORIGINAL_SYNTH && SM_REF(p)[0].kind==R_BENGINE) {
+-            int b=SM_VOICE, pending=engine_bass_preset_pending(b), preset=engine_bass_preset_index(b);
+-            int edited=engine_bass_preset_edited(b);
++            int b=SM_VOICE, pending=LEG_GET(pending,engine_bass_preset_pending,b), preset=LEG_GET(index,engine_bass_preset_index,b);
++            int edited=LEG_GET(edited,engine_bass_preset_edited,b);
+             const char *status=pending?"WAIT":preset<0?"USER":edited?"EDITED":"ACTIVE";
+             const char *reason=pending==2?"WAIT FOR NOTES/TAIL":pending==3?"RETURN WHEELS":
+                 pending==5?"WAIT FOR INPUT":
+                 pending==6?"WAIT FOR UPDATE":"WAIT FOR AUDIO";
+             int iw=pending?9:edited?8:10, vy=y+(night?(pending?31:36):(pending?24:29));
+ #if X0X_BASS_TAGGED_SOUND
+-            if (engine_bass_sound_bank(&proj.sound,b)<0) {status="UNKNOWN";iw=0;}
++            if (LEG_DB(b)<0) {status="UNKNOWN";iw=0;}
+ #endif
+             /* K7/K8 stay unmapped. Their shared right half is a status display,
+              * with a compact group measured from the actual text advance and
+@@ -8876,21 +9009,75 @@
+ #if X0X_SYNTHONE_PATCH
+ /* Scope frozen telemetry to synchronous painting; input serviced during DMA
+  * must always address the real owner, never the display snapshot. */
+-static void cv_paint_s1_matrix(int band,const void *scene)
++static __attribute__((noinline,minsize)) void cv_paint_locked_matrix(
++    int band,const cv_matrix_layout *layout)
+ {
+-    const cv_s1_telemetry *ctx=scene;
+     uint16_t saved[5];
+     const uint8_t light=ui_theme_light;
+-    /* Only the synchronous painter sees this palette; restore it before
+-     * any LCD commit, foreground service, or input callback. */
+-    memcpy(saved,pal,sizeof saved);
+-    memcpy(pal,ctx->palette,sizeof saved);
+-    ui_theme_light=ctx->light;
+-    s1_draw_frame=ctx;
++    memcpy(saved,pal,sizeof saved);memcpy(pal,layout->palette,sizeof saved);
++    ui_theme_light=layout->light;
++    matrix_draw_layout=layout;
+     draw_part_sound(band);
++    matrix_draw_layout=NULL;
++    ui_theme_light=light;memcpy(pal,saved,sizeof saved);
++}
++static void cv_paint_s1_matrix(int band,const void *scene)
++{
++    const cv_s1_telemetry *ctx=scene;
++    s1_draw_frame=ctx;
++    cv_paint_locked_matrix(band,&ctx->layout);
+     s1_draw_frame=0;
+-    ui_theme_light=light;
+-    memcpy(pal,saved,sizeof saved);
++}
++#endif
++#ifdef DNBOX_LAB_LEGACY_SEMANTIC_RENDER
++static int cv_capture_legacy_render(cv_legacy_render *l,unsigned v)
++{
++    const int bank=engine_bass_bank(v);
++    if(bank!=ORIGINAL_SOUND_CHICAGO && bank!=ORIGINAL_SOUND_MIAMI)return 0;
++    if(engine_bass_sound_bank(&proj.sound,v)!=bank)return 0;
++    l->bank=bank;
++    cv_capture_matrix_layout(&l->layout,v);
++    memcpy(l->sound,proj.sound.v[T_303][v],sizeof l->sound);
++    const unsigned count=original_sound_count(bank);
++    const int ls=lock_step();
++    l->preview_mask=l->marks=0;
++    l->showing_lock=ls>=0;
++    for(unsigned id=0;id<count;id++) {
++        const pref_t r=PR(R_ENG,T_303,v,id);
++        const int q=ls>=0?lock_of(r,ls):motion_now(r);
++        if(ls>=0?q>=0:has_motion(r))l->marks|=1u<<id;
++        if(q>=0){l->preview[id]=(uint8_t)q;l->preview_mask|=1u<<id;}
++    }
++    l->voice_ok=engine_bass_voice_view(v,&l->amp,&l->mod,&l->stage,&l->held);
++    l->adsr_ok=engine_bass_adsr_view(v,l->adsr,&l->gate);
++    l->env_ok=engine_bass_env_view(v,l->env,&l->level,&l->env_stage);
++    l->filter_ok=engine_bass_filter_view(v,&l->feg,&l->depth);
++    l->motion_ok=engine_bass_motion_view(v,&l->phase,&l->bipolar,&l->current,&l->target,&l->active);
++    l->glide=1.f;
++    const unsigned glide_id=bank==ORIGINAL_SOUND_CHICAGO?1:4;
++    for(unsigned y=0;y<4u && y+l->layout.first<l->layout.n;++y)
++        for(unsigned x=0;x<4u;++x){
++            const pref_t r=l->layout.row[y][x];
++            if(r.kind!=R_NONE && (r.a==T_303 || r.kind==R_BENGINE || r.kind==R_BPRESET || r.kind==R_BSTATUS) && r.b!=v)return 0;
++            if(r.kind==R_ENG && r.a==T_303 && r.c==glide_id)
++                l->glide=matrix_glide_advance(&matrix_glide[v],l->motion_ok,l->current,l->target);
++        }
++    l->pending=engine_bass_preset_pending(v);l->edited=engine_bass_preset_edited(v);
++    l->index=engine_bass_preset_index(v);l->status=engine_bass_status(v);
++    l->requested=engine_bass_requested_bank(v);l->selected=engine_bass_requested_preset(v);
++    const unsigned id=bank==ORIGINAL_SOUND_CHICAGO?2:9;
++    l->cutoff_unit=engine_param_si(T_303,v,id,(l->preview_mask&(1u<<id))?l->preview[id]:l->sound[id],&l->cutoff);
++#if X0X_BASS_PRESET_PREVIEW
++    put_s(l->layout.preset,preset_shown(matrix_preset_name(v)));
++#endif
++    return bank==engine_bass_bank(v) && !memcmp(l->sound,proj.sound.v[T_303][v],sizeof l->sound);
++}
++static void cv_paint_legacy_matrix(int band,const void *scene)
++{
++    const cv_legacy_render *l=scene;
++    legacy_scene=l;
++    cv_paint_locked_matrix(band,&l->layout);
++    legacy_scene=NULL;
+ }
+ #endif
+ static UI_DRAW void cv_draw_pair(uint16_t bg,const void *scene,
+@@ -9013,6 +9200,24 @@
+         return;
+     }
+ #endif
++#ifdef DNBOX_LAB_LEGACY_SEMANTIC_RENDER
++    if (!modal.route && ui.overlay == O_NONE && ui.view == V_PART && is_303()) {
++        cv_legacy_render l={0};
++        if(cv_capture_legacy_render(&l,(unsigned)bidx())){
++            const uint16_t bg=C_BLACK;
++            const int force=cv_claim_scene_footer();
++            cv_draw_pair(bg,&l,cv_paint_legacy_matrix,NULL);
++            cv_draw_scene_footer(bg,&l,cv_paint_legacy_matrix,force,3u*X0X_LCD_TILE_H);
++            return;
++        }
++#if CV_ROWS < 69u
++        /* Mid-capture publication or unsupported bank. Neither band has
++         * been committed; keep the previous complete frame for this tick. */
++        cv_scene_owns_knob_frame=1;
++        return;
++#endif
++    }
++#endif
+     if (!modal.route && ui.view == V_SONG) {
+         cv_song_scene sg;
+         cv_readout_scene note;
+@@ -9159,7 +9364,7 @@
+     if (r.kind != R_ENG || r.a != T_303) return 0;
+     /* Original control slots (ui_original_controls.h), never legacy IDs:
+      * Chicago 0 WAVE; Miami 0/6 WAVE (TRI/SAW/SQR/PUL), 11 wobble SHAPE. */
+-    unsigned kind = (unsigned)engine_bass_sound_bank(&proj.sound,r.b);
++    unsigned kind = (unsigned)LEG_DB(r.b);
+     if (kind == ORIGINAL_SOUND_CHICAGO) {
+         if (r.c == 0) { *mix = v; return 1; }
+         return 0;
+@@ -9247,8 +9452,8 @@
+ {
+     const cv_s1_telemetry *s=s1_draw_frame;
+     if(s && s->cells_ready)
+-        for(unsigned n=0;n<4 && n+s->first<s->n;n++)for(unsigned k=0;k<4;k++)
+-            if(!memcmp(&r,&s->row[n][k],sizeof r))
++        for(unsigned n=0;n<4 && n+s->layout.first<s->layout.n;n++)for(unsigned k=0;k<4;k++)
++            if(!memcmp(&r,&s->layout.row[n][k],sizeof r))
+                 return &s->cell[n][k];
+     return 0;
+ }
+@@ -9259,7 +9464,7 @@
+     const struct cv_s1_cell *cell=s1_matrix_cell(r);
+     if(cell)return cell->label;
+ #endif
+-    if (r.kind==R_ENG && r.a==T_303) return ui_original_name((unsigned)engine_bass_sound_bank(&proj.sound,r.b),r.c);
++    if (r.kind==R_ENG && r.a==T_303) return ui_original_name((unsigned)LEG_DB(r.b),r.c);
+     if (r.kind==R_ENG && r.a==T_303) {
+         switch(r.c) {
+         case BASS303_FATTACK: return "ATTACK";
+@@ -9302,6 +9507,9 @@
+     const struct cv_s1_cell *cell=s1_matrix_cell(r);
+     if(cell)return cell->raw;
+ #endif
++#ifdef DNBOX_LAB_LEGACY_SEMANTIC_RENDER
++    if(r.a==T_303 && r.kind==R_ENG && r.c<22 && LEG(r.b))return (legacy_scene->preview_mask&(1u<<r.c))?legacy_scene->preview[r.c]:legacy_scene->sound[r.c];
++#endif
+     int val = pref_get(r);
+     if (lock_step() >= 0) {
+         int lv = lock_of(r, lock_step());
+@@ -9318,14 +9526,14 @@
+ {
+     const int ls=lock_step();
+     s->cells_ready=0;s->rate_valid=0;
+-    s1_draw_frame=s;
++    s1_draw_frame=s;matrix_draw_layout=&s->layout;
+     s1_draw_patch=s->ready?&s->value.patch:0;
+ #if X0X_BASS_PRESET_PREVIEW
+-    put_s(s->preset,preset_shown(matrix_preset_name(s->voice)));
++    put_s(s->layout.preset,preset_shown(matrix_preset_name(s->layout.voice)));
+ #endif
+-    for(unsigned n=0;n<4 && n+s->first<s->n;n++)for(unsigned k=0;k<4;k++){
++    for(unsigned n=0;n<4 && n+s->layout.first<s->layout.n;n++)for(unsigned k=0;k<4;k++){
+         struct cv_s1_cell *c=&s->cell[n][k];
+-        pref_t r=s->row[n][k];
++        pref_t r=s->layout.row[n][k];
+         const x0x_param_t *d=pref_desc(r);
+         c->valid=d!=0;c->max=d?d->max:0;
+         c->raw=d?matrix_value(r):0;
+@@ -9337,7 +9545,7 @@
+         if(r.kind==R_ENG && r.a==T_303 && r.c==ORIGINAL_SYNTHONE_CRUSH)
+             s->rate_valid=engine_param_si(T_303,r.b,r.c,c->raw,&s->rate_hz)==X0X_U_HZ;
+     }
+-    s1_draw_frame=0;s1_draw_patch=0;
++    s1_draw_frame=0;matrix_draw_layout=0;s1_draw_patch=0;
+     s->cells_ready=1;
+ }
+ static void matrix_format(pref_t r,int raw,char *num,char *unit)
+@@ -9458,7 +9666,11 @@
+ {
+     const char *name;
+ #if X0X_SYNTHONE_PATCH && X0X_UI_SMALL_CANVAS
+-    if(s1_draw_frozen((unsigned)voice)) name=s1_draw_frame->preset;
++    if(s1_draw_frozen((unsigned)voice)) name=s1_draw_frame->layout.preset;
++    else
++#endif
++#ifdef DNBOX_LAB_LEGACY_SEMANTIC_RENDER
++    if(LEG(voice))name=legacy_scene->layout.preset;
+     else
+ #endif
+     name=preset_shown(matrix_preset_name(voice));
+@@ -9521,7 +9733,7 @@
+         return 1;
+     }
+ #endif
+-    return engine_bass_voice_view(v,amp,mod,stage,held);
++    return legacy_voice_view(v,amp,mod,stage,held);
+ }
+ #endif
+ static UI_DRAW void draw_param_widget(pref_t r, int x, int y, int width, int active, uint16_t col, int height, int night)
+@@ -9621,7 +9833,7 @@
+         return;
+     }
+ #endif
+-    if(!SM_F && r.kind==R_ENG && val>=0 && val<=d->max) shape=wave_shape(r,val,&mix);
++    if(!SM_S1 && r.kind==R_ENG && val>=0 && val<=d->max) shape=wave_shape(r,val,&mix);
+     if(!shape && !unused && val>=0 && orig_strip_slot(r)) {
+         /* Drum parts draw their own rows in draw_drum_voice. */
+         matrix_format(r,val,num,unit);
+@@ -9674,6 +9886,12 @@
+     if(cell){lv=cell->mark==1?0:-1; if(!cell->mark)return;}
+     else
+ #endif
++#ifdef DNBOX_LAB_LEGACY_SEMANTIC_RENDER
++    if (r.kind==R_ENG && r.a==T_303 && r.c<22 && LEG(r.b)) {
++        if (!(legacy_scene->marks&(1u<<r.c)))return;
++        lv=legacy_scene->showing_lock?0:-1;
++    } else
++#endif
+     {
+         lv=lock_of(r,lock_step());
+         if(lv<0 && !(lock_step()<0 && has_motion(r)))return;
+@@ -9739,7 +9957,7 @@
+         /* Native VCA EG controls exactly as the engine compiles them (macro
+          * scaling included); q127 if the runtime view is unavailable. */
+         float native[4]={0,0,0,0};unsigned gate=0;
+-        int nv=engine_bass_adsr_view(SM_VOICE,native,&gate);
++        int nv=legacy_adsr_view(SM_VOICE,native,&gate);
+         if(!nv){e->enabled=0;return;}
+         e->sustain=native[2];e->gate=(int)gate;
+         for(i=0;i<3;i++) {
+@@ -10080,7 +10298,7 @@
+         float level=0,mod=0; unsigned state=6,held=0;
+         int observed;
+         if(e.enabled>=3) {level=e.live_level;held=e.live_gate;state=!e.live_active?6:e.live_stage==1?0:e.live_stage==4?3:1;observed=1;}
+-        else observed=engine_bass_voice_view(SM_VOICE,&level,&mod,&state,&held);
++        else observed=legacy_voice_view(SM_VOICE,&level,&mod,&state,&held);
+         if(observed && state!=6) {
+             if(level<0)level=0; if(level>1)level=1;
+             int stage=e.enabled>=3?(e.live_stage==1?0:e.live_stage==2?1:e.live_stage==3?2:3):
+@@ -10109,7 +10327,7 @@
+         float adsr[4],lv=0; int st=6,px=-1;
+         int observed;
+         if(e.enabled>=3){lv=e.live_level;st=!e.live_active?6:e.live_stage==1?0:e.live_stage==4?3:1;observed=1;}
+-        else observed=engine_bass_env_view(SM_VOICE,adsr,&lv,&st);
++        else observed=legacy_env_view(SM_VOICE,adsr,&lv,&st);
+         if(observed && st!=6) {
+             if(lv<0)lv=0; if(lv>1)lv=1;
+             if(e.enabled>=3) {
+@@ -10591,7 +10809,7 @@
+ {
+     int bot = gy + OG_H, right = gx + OG_W - 1, mid = gy + OG_H / 2;
+     float amp, mod; unsigned state, held;
+-    int sounding = engine_bass_voice_view(r.b, &amp, &mod, &state, &held) && state != 6;
++    int sounding = legacy_voice_view(r.b, &amp, &mod, &state, &held) && state != 6;
+     if (!sounding) amp = 0.f;
+     if (r.c == 0 || r.c == 12) {
+         /* A single unfiltered DCO cycle at its configured base duty. */
+@@ -10647,23 +10865,6 @@
+ }
+ /* A matrix snapshot can advance this once, then paint all LCD windows with
+  * the same fraction. Keep separate history for each synth part. */
+-typedef struct { float from,to; uint8_t seen; } matrix_glide_history;
+-static float matrix_glide_advance(matrix_glide_history *h,int known,float current,float target)
+-{
+-    float f=1.f;
+-    if(known) {
+-        if(!h->seen || target!=h->to) {
+-            h->from=h->seen?current:target;
+-            h->to=target;
+-            h->seen=1;
+-        }
+-        if(h->to!=h->from)f=(current-h->from)/(h->to-h->from);
+-    }
+-    if(f<0.f)f=0.f;
+-    if(f>1.f)f=1.f;
+-    return f;
+-}
+-static matrix_glide_history matrix_glide[NBASS];
+ 
+ static UI_DRAW void orig_strip_glyph(pref_t r,int val,int gx,int gy,uint16_t col)
+ {
+@@ -10680,7 +10881,7 @@
+     int top=gy+3,bot=gy+OG_H,mid=gy+OG_H/2,right=gx+OG_W-1;
+     if(q<0)q=0; if(q>1)q=1;
+     float amp=0,mod=0; unsigned state=6,held=0;
+-    int sounding=engine_bass_voice_view(r.b,&amp,&mod,&state,&held) && state!=6;
++    int sounding=legacy_voice_view(r.b,&amp,&mod,&state,&held) && state!=6;
+     if(amp<0)amp=0; if(amp>1)amp=1;
+     if(c==(chi?2:9) || (chi && c==3)) {          /* CUTOFF / PEAK: lowpass response */
+         float cq=q,pq=0;
+@@ -10695,7 +10896,7 @@
+         pref_t cr=PR(R_ENG,T_303,r.b,2),pr=PR(R_ENG,T_303,r.b,3);
+         const x0x_param_t *dc=pref_desc(cr),*dp=pref_desc(pr);
+         float cq=dc&&dc->max?(float)matrix_value(cr)/dc->max:0,pq=dp&&dp->max?(float)matrix_value(pr)/dp->max:0;
+-        float depth=2*q-1,eg=0,dd; if(engine_bass_filter_view(r.b,&eg,&dd)) depth=dd;
++        float depth=2*q-1,eg=0,dd; if(legacy_filter_view(r.b,&eg,&dd)) depth=dd;
+         if(eg<0)eg=0; if(eg>1)eg=1; if(pq<0)pq=0; if(pq>1)pq=1;
+         int pivot=env_knee_x(gx,cq+eg*depth),tgt=env_knee_x(gx,cq+depth),pass=top+3;
+         int peak=pass-1-(int)(pq*5+.5f);         /* fixed by PEAK: 1..6 px above the passband */
+@@ -10712,8 +10913,12 @@
+          * note (current -> target from the engine); the travelled part is lit. */
+         int w=1+(int)(q*18+.5f),x0=gx+(OG_W-1-w)/2,b=r.b<NBASS?r.b:0,on=0;
+         float ph,bi,cu=0,tg=0;
+-        const int known=engine_bass_motion_view(b,&ph,&bi,&cu,&tg,&on);
++        const int known=legacy_motion_view(b,&ph,&bi,&cu,&tg,&on);
++        #ifdef DNBOX_LAB_LEGACY_SEMANTIC_RENDER
++        const float f=LEG(b)?legacy_scene->glide:matrix_glide_advance(&matrix_glide[b],known,cu,tg);
++#else
+         const float f=matrix_glide_advance(&matrix_glide[b],known,cu,tg);
++#endif
+         int dx=x0+(int)(f*w+.5f),dy=bot-1-(int)(f*(bot-1-top)+.5f);
+         if(f>=1) { cv_line(gx,bot-1,x0,bot-1,col);cv_line(x0,bot-1,x0+w,top,col);cv_line(x0+w,top,right,top,col); }
+         else {
+@@ -10754,7 +10959,7 @@
+             unsigned shape=o?o->shape[2]:0;
+             float phase=-1,mg=0,cu,tg,b,u;
+             int on=0,py=mid;
+-            if(!engine_bass_motion_view(r.b,&phase,&mg,&cu,&tg,&on) || !on || !(phase>=-1 && phase<=1)) phase=-1;
++            if(!legacy_motion_view(r.b,&phase,&mg,&cu,&tg,&on) || !on || !(phase>=-1 && phase<=1)) phase=-1;
+             for(int i=0;i<OG_W;i++) {
+                 float t=phase+2.0f*i/(OG_W-1);
+                 if(t>1) t-=2;
