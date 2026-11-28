@@ -84,8 +84,16 @@ assert "midi_send_note(0x61u" not in main and "midi_send_note(0x60u" not in main
 assert "midi_send_note(0x5Eu" not in main and "midi_send_note(0x5Fu" not in main
 assert "smk_apc_view_move" not in main and "fader_nav" not in main
 assert "smk_apc40_note_for_pad_view(apc_cols, apc_rows, apc_origin_col," in main
-assert "oct_pressed & (1u << panel.btn[B_OCTDN])" in main and "oct_pressed & (1u << panel.btn[B_OCTUP])" in main
-print("PASS < > local only (no Loopy moves), OCT-/OCT+ move clamped local views; KNOB BANK tap and FADER BANK are no-ops in clip mode")
+ck_poll = main.split("CK_FN void smk_ck_poll(void)")[1].split("/* every frame")[0]
+ck_controls = main.split("CK_FN static void ck_controls(void)")[1].split("/* All 37 raw")[0]
+ck_press = main.split("CK_FN static void ck_press(")[1].split("CK_FN static void ck_release(")[0]
+assert "ck_oct.oct = ck_oct_edge(ck_oct.oct, oct_previous, oct_now);" in ck_poll
+assert ck_poll.index("ck_oct.oct = ck_oct_edge") < ck_poll.index("ck_press(k, fm1_in.key_vel[k])")
+assert "ck_oct.key_oct[k] = ck_oct.oct;" in ck_press and "ck_oct_notes(out, n, ck_oct.key_oct[k])" in main
+assert "own && !ck_page_on()" in ck_controls and "apc_view = smk_apc40_view_after_move" in ck_controls
+assert "smk_free_arrows(press >> 5 & 3u)" in ck_controls
+assert "oct_pressed &" not in main
+print("PASS OCT-/OCT+ own Clip pitch, held keys keep their register, and idle grid arrows move the clamped local view (no Loopy moves)")
 
 # Clip mode entry latches the layout from stored feedback, so the pads light at once.
 assert "smk_apc_clip_entered();" in main

@@ -14,12 +14,12 @@ import subprocess
 import tempfile
 
 FUNCTIONS = ('ck_send', 'ck_q_run', 'ck_arp_stop_note', 'ck_on', 'ck_clip_on',
-             'ck_clip_off', 'ck_key_send', 'ck_voice', 'ck_all_off', 'smk_project_reset')
+             'ck_clip_off', 'ck_key_send', 'ck_voice', 'ck_all_off', 'ck_oct_buttons', 'smk_project_reset')
 
 
 def source_window(src, name):
     pat = (r'\b(?:CK_FN\s+)?(?:__attribute__\(\(minsize\)\)\s+)?'
-           r'(?:static\s+)?void\s+' + re.escape(name) + r'\s*\([^;]*?\)\s*\{')
+           r'(?:static\s+)?(?:void|uint8_t)\s+' + re.escape(name) + r'\s*\([^;]*?\)\s*\{')
     m = re.search(pat, src)
     if not m:
         raise ValueError(f'{name}: missing production C function')
@@ -47,6 +47,8 @@ PRELUDE = r'''
 #define CK_BASE ck_t *cp = &ck
 #define SMK_APC40_PAD_COUNT 2u
 #define SMK_BTN_KNOB_BANK 5u
+enum {B_OCTDN, B_OCTUP};
+static const struct {uint8_t btn[2];} panel={.btn={11,12}};
 typedef struct {
     uint8_t on, ch, arp_note, vel, nk, btn_prev;
     uint16_t last_ms;
@@ -56,6 +58,7 @@ typedef struct { uint8_t ck_x1; } settings_t;
 typedef struct { settings_t set; } project_t;
 typedef struct { uint32_t keys[2], pnotes, buttons; } fm1_input_t;
 static ck_t ck;
+static struct { int8_t oct, key_oct[CK_NKEY]; uint8_t oct_prev; } ck_oct;
 static project_t proj;
 static fm1_input_t fm1_in;
 static uint32_t fm1_ms;
@@ -161,6 +164,13 @@ int main(void) {
     human_delay = 0; press(0); release(0);
     CHECK(on[60] == 1 && off[60] == 1 && on[64] == 1 && off[64] == 1,
           "first note after reset can sound and release normally");
+
+    start(); fm1_in.buttons=1u<<panel.btn[B_OCTUP];
+    smk_project_reset();
+    CHECK(ck_oct.oct_prev==2u, "held mapped OCT+ is not a new press after project reset");
+    fm1_in.buttons=1u<<panel.btn[B_OCTDN];
+    smk_project_reset();
+    CHECK(ck_oct.oct_prev==1u, "held mapped OCT- is also armed only after release");
 
     printf("clip_key_project_reset: %d observations, %d failures\n", checks, failures);
     return failures ? 1 : 0;

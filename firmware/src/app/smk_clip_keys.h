@@ -28,6 +28,30 @@
 enum { CK_M_SCALE = 1u, CK_M_CHORD = 2u, CK_M_ARP = 4u };
 enum { CK_ORD_UP, CK_ORD_DOWN, CK_ORD_UPDN, CK_ORD_DNUP, CK_ORD_PLAYED, CK_ORD_RANDOM };
 
+/* Clip keybed pitch, independent of the number of octaves in the arp cycle.
+ * Raw edge bits: 1 = down, 2 = up. The paired firmware-update chord is neutral. */
+CK_FN static int8_t ck_oct_edge(int8_t oct, uint8_t previous, uint8_t down)
+{
+    const unsigned press = down & ~previous;
+    if (down == 1u && press && oct > -2) return oct - 1;
+    if (down == 2u && press && oct < 3) return oct + 1;
+    return oct;
+}
+
+CK_FN static uint32_t ck_oct_notes(uint8_t *notes, uint32_t n, int8_t oct)
+{
+    if (!oct) return n;
+    const int shift = 12 * oct;
+    uint32_t i, kept = 0;
+    for (i=0; i<n; ++i) {
+        const int pitch = notes[i] + shift;
+        if ((unsigned)pitch < 128u)
+            notes[kept++] = (uint8_t)pitch;
+    }
+    return kept;
+}
+
+
 /* 12-bit pitch masks, bit 0 = the root */
 static const uint16_t CK_SCALE_MASK[CK_NSCALE] = {0xAB5, 0x5AD, 0x6AD, 0x5AB, 0xAD5, 0x6B5, 0x56B, 0x9AD,
                                                   0xAAD, 0x295, 0x4A9, 0xFFF, 0x4E9, 0x29D, 0x9B5, 0x5B3,

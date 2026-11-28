@@ -27,6 +27,7 @@ typedef struct {
     uint32_t snd[2], keys[2], acc;
     uint8_t ch, on, vel, fl, nk, korder[37], step, tick;
 } ck_t;
+static struct {int8_t oct,key_oct[37];} ck_oct;
 typedef struct { uint8_t ck_x2, ck_rate; } settings_t;
 typedef struct { settings_t set; } project_t;
 static ck_t ck;

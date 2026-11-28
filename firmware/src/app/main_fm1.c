@@ -1103,6 +1103,14 @@ static void smk_wheels(void)
  *   In clip mode < and > never move the Loopy viewport: Loopy does not report clips outside its 8x5 APC box,
  *   so a legal move cannot be known, and moves to empty areas broke the pad map.
  * - HOME held (SELECT is the tempo): nothing. */
+/* Hardware calibration can assign an arrow to a different panel role. */
+__attribute__((noinline,minsize)) static uint32_t smk_free_arrows(uint32_t raw)
+{
+    for (uint32_t i=0; i<NB; ++i)
+        if (panel.btn[i] == SMK_BTN_LEFT || panel.btn[i] == SMK_BTN_RIGHT)
+            raw &= ~(1u << (panel.btn[i] - SMK_BTN_LEFT));
+    return raw;
+}
 static void smk_arrows(void)
 {
     static arw_t arw;
@@ -1113,9 +1121,7 @@ static void smk_arrows(void)
         (void)arw_frame(&arw, now, ARW_NONE, fm1_ms);
         return;
     }
-    for (i = 0; i < NB; i++)
-        if (panel.btn[i] == SMK_BTN_LEFT || panel.btn[i] == SMK_BTN_RIGHT)
-            now &= ~(1u << (panel.btn[i] - SMK_BTN_LEFT));
+    now = smk_free_arrows(now);
     route = arw_route((uint32_t)ui_menu_open(), clip_grid_mode, (plat_buttons() >> B_HOME) & 1u);
     i = arw_menu_id(ui.view, (uint32_t)cur_page());
     if (clip_grid_mode && route == ARW_MENU && i != menu_id)
@@ -1154,6 +1160,17 @@ typedef struct {
     uint8_t korder[8];                /* the keys of the arp, in press order (more keys: not in the arp) */
 } ck_t;
 static ck_t ck SMK_BIG;
+/* Clip octave state is control-only; don't spend audio-pool RAM on it. */
+static struct {
+    int8_t oct, key_oct[CK_NKEY];      /* each sounding key retains its press-time register */
+    uint8_t oct_prev;
+} ck_oct;
+static uint8_t ck_oct_buttons(uint32_t raw)
+{
+    return (uint8_t)(((raw >> panel.btn[B_OCTDN]) & 1u) |
+                     ((raw >> panel.btn[B_OCTUP]) & 1u) << 1);
+}
+
 void smk_ck_midi_stop(void) { ck.off_req = 1; }
 /* a base register for ck (short code: no full address for each field) */
 #include "fm1_opt.h"
@@ -1197,13 +1214,13 @@ CK_FN static uint32_t ck_key_notes(uint32_t k, uint8_t *out)
 {
     CK_BASE;
     CK_SET;
-    uint32_t c = cp->on & CK_M_CHORD;
+    uint32_t n, c = cp->on & CK_M_CHORD;
     if (!(cp->on & (CK_M_SCALE | CK_M_CHORD))) {
         out[0] = (uint8_t)(CK_BASE_NOTE + k);
-        return 1u;
-    }
-    return ck_notes(CK_BASE_NOTE + k, ck_mask(sp->ck_scale, sp->ck_root), cp->on & CK_M_SCALE ? sp->ck_snap + 1u : 0u,
+        n = 1u;
+    } else n = ck_notes(CK_BASE_NOTE + k, ck_mask(sp->ck_scale, sp->ck_root), cp->on & CK_M_SCALE ? sp->ck_snap + 1u : 0u,
                     c ? (int32_t)sp->ck_chord : -1, c ? sp->ck_inv : 0u, out);
+    return ck_oct_notes(out, n, ck_oct.key_oct[k]);
 }
 CK_FN static void ck_arp_stop_note(void)
 {
@@ -1305,6 +1322,8 @@ CK_FN void smk_project_reset(void)
     ck_qn = 0;
     ck_all_off();
     memset(&ck, 0, sizeof ck);
+    memset(&ck_oct, 0, sizeof ck_oct);
+    ck_oct.oct_prev = ck_oct_buttons(fm1_in.buttons);
     ck.keys[0] = ((const volatile uint32_t *)&fm1_in.keys)[0];
     ck.keys[1] = ((const volatile uint32_t *)&fm1_in.keys)[1] & 0x1Fu;
     ck.btn_prev = 0x7Fu;
@@ -1361,6 +1380,7 @@ CK_FN static void ck_press(uint32_t k, uint32_t vel)
 {
     CK_SET;
     CK_BASE;
+    ck_oct.key_oct[k] = ck_oct.oct;
     cp->vel = (uint8_t)(vel ? vel : 1u);
     if (!(cp->on & CK_M_ARP)) {
         if ((sp->ck_x2 >> 4) && (cp->on & CK_M_CHORD)) {     /* STRUM: the last strum ends at once */
@@ -1639,6 +1659,13 @@ CK_FN static void ck_controls(void)
         ui_say("LATCH", cp->fl & CK_F_LATCH ? " ON" : " OFF");
     }
     cp->pg = (uint8_t)ck_page_press(cp->pg, press, cur);
+    /* On the clip grid alone, the otherwise idle arrows move the local view.
+     * A stage or menu still has its existing arrow owner; never send Loopy navigation. */
+    if (own && !ck_page_on() && (cur & 0x60u) != 0x60u && (press & 0x60u)) {
+        const uint32_t move = smk_free_arrows(press >> 5 & 3u);
+        if (move)
+            apc_view = smk_apc40_view_after_move(apc_cols, apc_rows, apc_view, move == 1u ? -1 : 1);
+    }
     f = cp->pg >> 4;
     st = ck_rpt(own && ck_page_on() ? cur >> 5 & 3u : 0u, press >> 5 & 3u, fm1_ms, &ck_rpt_st);
     if (st) {                                               /* < >: the last field one step down / up */
@@ -1908,6 +1935,10 @@ CK_FN void smk_ck_poll(void)
     uint32_t now = fm1_ms, k, on = clip_grid_mode, ble = plat_ble_state() == PLAT_BLE_CONNECTED ? CK_F_BLE : 0u;
     uint32_t dt = (uint16_t)(now - cp->last_ms);
     cp->last_ms = (uint16_t)now;
+    const uint8_t oct_now = ck_oct_buttons(fm1_in.buttons);
+    const uint8_t oct_previous = ck_oct.oct_prev;
+    ck_oct.oct_prev = oct_now;            /* track edges through mode changes and busy frames */
+
     if (ui_project_busy()) {
         cp->keys[0] = ((const volatile uint32_t *)&fm1_in.keys)[0];
         cp->keys[1] = ((const volatile uint32_t *)&fm1_in.keys)[1] & 0x1Fu;
@@ -1940,6 +1971,7 @@ CK_FN void smk_ck_poll(void)
             ck_all_off();                                   /* (on the old channel) */
             cp->ch = (uint8_t)(sp->ck_ch - 1u);
         }
+        ck_oct.oct = ck_oct_edge(ck_oct.oct, oct_previous, oct_now);
         ck_controls();
     }
     for (k = 0; k < CK_NKEY; k++) {                         /* (out of clip mode: keys held at entry do not play) */
@@ -2021,23 +2053,6 @@ CK_FN static void smk_frame(void)
     (void)smk_clip_map_refresh();
     smk_faders();
     smk_wheels();
-    /* Local clip view navigation. */
-    {
-        /* OCT- / OCT+ move the local view down / up by one 8x2 view. The move stays
-         * in the latched clip footprint. plat_buttons hides these buttons from the
-         * X0X UI in clip mode, so they have no other effect. */
-        {
-            static uint32_t oct_prev;
-            uint32_t oct_now = fm1_in.buttons &
-                               ((1u << panel.btn[B_OCTDN]) | (1u << panel.btn[B_OCTUP]));
-            uint32_t oct_pressed = oct_now & ~oct_prev;
-            oct_prev = oct_now;
-            if (clip_grid_mode && (oct_pressed & (1u << panel.btn[B_OCTDN])))
-                apc_view = smk_apc40_view_after_move(apc_cols, apc_rows, apc_view, -1);
-            if (clip_grid_mode && (oct_pressed & (1u << panel.btn[B_OCTUP])))
-                apc_view = smk_apc40_view_after_move(apc_cols, apc_rows, apc_view, 1);
-        }
-    }
     if (clip_grid_mode) {
         smk_pad_piano = 0;   /* force direct white map, ignore piano layout */
         /* simple pad press: send note on rising edge, note-off on falling */

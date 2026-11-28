@@ -16,7 +16,7 @@ import tempfile
 
 
 def function(src, name):
-    match = re.search(r'\b(?:static\s+)?void\s+' + re.escape(name) + r'\s*\([^;]*?\)\s*\{', src)
+    match = re.search(r'\b(?:static\s+)?(?:void|uint32_t)\s+' + re.escape(name) + r'\s*\([^;]*?\)\s*\{', src)
     if match is None:
         raise RuntimeError(f'{name}: source window missing')
     p, level = match.start(), 0
@@ -41,6 +41,13 @@ def main():
     if mark is None:
         raise RuntimeError('ck_press direct note-on call missing')
     press_status = mark.group(1)
+    header = Path(args.source).with_name('smk_clip_keys.h').read_text(encoding='utf-8')
+    transpose = function(header, 'ck_oct_notes')
+    if 'ck_oct.key_oct[k] = ck_oct.oct;' not in press[:mark.start()]:
+        raise RuntimeError('key octave must be captured before the actual NoteOn route')
+    if 'return ck_oct_notes(out, n, ck_oct.key_oct[k]);' not in function(src, 'ck_key_notes'):
+        raise RuntimeError('key-note mapping must use the captured octave')
+
     send_src = function(src, 'ck_key_send')
     voice_src = function(src, 'ck_voice')
     live = 'static uint32_t ck_clip_live[4];' in src
@@ -57,6 +64,7 @@ def main():
 #define CK_BIT(map, k) (((map)[(k) >> 5] >> ((k) & 31u)) & 1u)
 typedef struct { uint32_t snd[2]; uint8_t ch, on, nk; } ck_state_t;
 static ck_state_t ck;
+static struct { int8_t oct, key_oct[CK_NKEY]; } ck_oct;
 #define CK_BASE ck_state_t *cp = &ck
 static int on[128], off[128], balance[128], errors, checks;
 static void ck_on(uint32_t n) {
@@ -72,17 +80,20 @@ static void ck_send(uint32_t status, uint32_t n, uint32_t v) {
 /* C/C# snap together to C in MAJOR NEAR; second pair shares two tones
  * between two chords. The upstream scale math is separately tested by
  * smk_clip_keys_test.c; this mock intentionally isolates note ownership. */
+OCTAVE_HELPER
 static uint32_t ck_key_notes(uint32_t k, uint8_t *out) {
-    if (k <= 1u) { out[0] = 60; return 1; }
-    if (k == 2u) { out[0] = 60; out[1] = 64; out[2] = 67; return 3; }
-    if (k == 3u) { out[0] = 64; out[1] = 67; return 2; }
-    out[0] = (uint8_t)(48 + k); return 1;
+    uint32_t n = 1;
+    if (k <= 1u) { out[0] = 60; }
+    else if (k == 2u) { out[0] = 60; out[1] = 64; out[2] = 67; n=3; }
+    else if (k == 3u) { out[0] = 64; out[1] = 67; n=2; }
+    else out[0] = (uint8_t)(48 + k);
+    return ck_oct_notes(out, n, ck_oct.key_oct[k]);
 }
 #define CHECK(test, name) do { checks++; if (!(test)) { \
   fprintf(stderr, "FAIL %s line %d\n", name, __LINE__); errors++; } } while(0)
-static void reset(void) { memset(&ck, 0, sizeof ck); memset(on, 0, sizeof on); \
+static void reset(void) { memset(&ck, 0, sizeof ck); memset(&ck_oct,0,sizeof ck_oct); memset(on, 0, sizeof on); \
  memset(off, 0, sizeof off); memset(balance, 0, sizeof balance); errors = checks = 0; }
-static void press(uint32_t k) { ck.snd[k >> 5] |= 1u << (k & 31u); ck_key_send(k, PRESS_STATUS); }
+static void press(uint32_t k) { ck_oct.key_oct[k]=ck_oct.oct; ck.snd[k >> 5] |= 1u << (k & 31u); ck_key_send(k, PRESS_STATUS); }
 static void release(uint32_t k) { ck.snd[k >> 5] &= ~(1u << (k & 31u)); ck_key_send(k, 0x81u); }
 static int suite(void) {
     int failures = 0;
@@ -123,12 +134,31 @@ static int suite(void) {
     press(0); press(1); ck_voice(0x80u);
     CHECK(off[60] == 1 && balance[60] == 0, "bulk all-off does not duplicate NoteOff");
     failures += errors;
-    printf("clip_key_overlap_test: %d failures (12 critical observations)\n", failures);
+    reset();
+    press(4);
+    ck_oct.oct=1;
+    CHECK(balance[52]==1 && off[52]==0 && on[64]==0, "octave press does not revoice a held note");
+    press(5);
+    CHECK(on[65]==1 && on[53]==0, "new key uses the new octave");
+    release(4); release(5);
+    CHECK(off[52]==1 && off[65]==1 && balance[52]==0 && balance[65]==0,
+          "physical releases match their original pitches");
+    failures += errors;
+    reset();
+    ck_oct.oct=1; press(4); ck_oct.oct=0; press(16);
+    CHECK(on[64]==1 && balance[64]==1, "mixed octaves can share one sounding MIDI pitch");
+    release(4);
+    CHECK(off[64]==0 && balance[64]==1, "first mixed-octave release leaves the other owner");
+    release(16);
+    CHECK(off[64]==1 && balance[64]==0, "last mixed-octave release closes the gate");
+    failures += errors;
+    printf("clip_key_overlap_test: %d failures (18 critical observations)\n", failures);
     return failures ? 1 : 0;
 }
 int main(void) { return suite(); }
 '''
     body = host.replace('#define CK_FN', '#define CK_FN\n#define PRESS_STATUS ' + press_status)
+    body = body.replace('OCTAVE_HELPER', transpose)
     if live:
         body = body.replace('static ck_state_t ck;', 'static ck_state_t ck;\nstatic uint32_t ck_clip_live[4];')
         body = body.replace('memset(&ck, 0, sizeof ck);',

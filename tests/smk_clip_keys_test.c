@@ -259,8 +259,23 @@ static void test_human(void)
     }
 }
 
+static void test_clip_octave(void)
+{
+    uint8_t o[CK_MAXN]={0,12,60,108,120,127};
+    assert(ck_oct_edge(0,0,2)==1);       /* OCT+ new press */
+    assert(ck_oct_edge(0,0,1)==-1);      /* OCT- new press */
+    assert(ck_oct_edge(1,2,2)==1);       /* a hold cannot repeat */
+    assert(ck_oct_edge(1,0,3)==1);       /* updater chord, not a pitch move */
+    assert(ck_oct_edge(1,1,3)==1);       /* adding the second updater button */
+    assert(ck_oct_edge(3,0,2)==3 && ck_oct_edge(-2,0,1)==-2);
+    assert(ck_oct_notes(o,6,1)==4 && o[0]==12 && o[1]==24 && o[2]==72 && o[3]==120);
+    o[0]=1; o[1]=12; o[2]=24; o[3]=127;
+    assert(ck_oct_notes(o,4,-2)==2 && o[0]==0 && o[1]==103);
+}
+
 int main(void)
 {
+    test_clip_octave();
     test_scale_masks();
     test_snap();
     test_chords();

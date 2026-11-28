@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 """One owner for each press of "<" and ">" in clip mode (BEHAVIOR.md CLP-27, CLP-76, GEN-56).
 A menu list open: only smk_arrows acts (ui_menu_open), and the clip keys (ck_controls) mask the arrows.
-No menu: smk_arrows does nothing in clip mode, and the clip keys page step stays as it is.
+No menu: smk_arrows does nothing in clip mode. The clip keys handle a stage field when a stage is open; on the plain grid they move the local viewport.
 The test reads the source, because the clip keys code needs the device build. It also checks that the
 two hold repeats use the same times."""
 import re
@@ -43,8 +43,14 @@ if "ck_rpt(" in ck:                      # e7989ac: the hold repeat reads the he
     assert re.match(r"(own|smk_ck_knobs_owned\(\)) &&", arg), "ck_rpt must get 0 with a menu open"
 else:                                    # before e7989ac: a press steps the page
     assert "press & 0x60u" in ck
-# no other read of the held arrows (cur bits 5-6) in ck_controls
-held = [m.start() for m in re.finditer(r"cur >> 5|cur & 0x60", ck)]
+# The grid has the arrows only with no settings page/menu and avoids
+# stealing controls remapped in HARDWARE CALIBRATION.
+grid = ck.split("/* On the clip grid alone", 1)[1].split("f = cp->pg >> 4;", 1)[0]
+assert "own && !ck_page_on()" in grid
+assert "smk_free_arrows(press >> 5 & 3u)" in grid and "smk_apc40_view_after_move" in grid
+assert "now = smk_free_arrows(now);" in sa
+# All remaining held-arrow reads are the existing masked stage repeat.
+held = [m.start() for m in re.finditer(r"cur >> 5|cur & 0x60", ck.replace(grid, ""))]
 assert len(held) <= ("ck_rpt(" in ck), "an unmasked read of the held < >"
 # the same feel: the same hold repeat times
 assert define(arw, "ARW_FIRST_MS") == 400 and define(arw, "ARW_NEXT_MS") == 80
