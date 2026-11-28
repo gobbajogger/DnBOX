@@ -1,0 +1,149 @@
+--- a/firmware/src/dsp/s1c/s1c.c
++++ b/firmware/src/dsp/s1c/s1c.c
+@@ -393,55 +393,77 @@
+ #if S1C_KR > 1
+ /* Cheap voice: pitch, LFO, key-tracking and filter coefficients at control rate (every S1C_KR
+  * samples), sines from a 256-point table, the filter envelope still per sample in the cutoff. */
+-static float voice_run_kr(s1c *s, s1c_voice *v, const s1c_morph *m, float adec, const float *semi)
++volatile uint32_t bench_pitch_reused, bench_filter_reused;
++static float voice_run_kr(s1c *s, s1c_voice *v, const s1c_morph *m, float adec, const float *semi, uint32_t *seen,uint32_t *fseen)
+ {
+     int mono = P(MONO) > 0.0f, ft = (int)P(FTYPE);
+     v->amp = env_step(&v->ea, v->gate, P(AA), adec, P(AS), P(AR), s->sr);
+     v->fenv = env_step(&v->ef, v->gate, P(FA), P(FD), P(FS), P(FR), s->sr);
+     if (--v->kc <= 0) {
+         v->kc = S1C_KR;
+-        float base = mono ? s->monos : v->freq, half = 0.5f * s->sr;
+-        float plfo = 1.0f + lfo01(s, P(LPITCH)) * 0.0594630944f, k = P(DETM) * plfo;
+-        float f1 = clampf(base * (semi ? semi[0] : exp2f((int)P(SEMI1) / 12.0f)) * k, 0.0f, half);
+-        float det = P(DET2) * (v->freq / 261.6255653f);
+-        if ((int)P(LDET)) det *= lfo01(s, P(LDET));
+-        float f2 = clampf(base * (semi ? semi[1] : exp2f((int)P(SEMI2) / 12.0f)) * k + det, 0.0f, half);
+-        float fs = clampf(base * k / (2.0f * (1.0f + P(SUBOCT))), 0.0f, half);
+-        v->kff = clampf(base * k, 0.0f, half);
+-        v->kdt1 = f1 / s->sr;
+-        v->kdt2 = f2 / s->sr;
+-        v->kstep[0] = ph_inc(v->kdt1);
+-        v->kstep[1] = ph_inc(v->kdt2);
+-        v->kstep[2] = ph_inc(fs / s->sr);
+-        v->kstep[3] = ph_inc(v->kff / s->sr);
++        const uint32_t bit=1u<<(unsigned)(v-s->v);
++        if(!seen || !(*seen & bit)) {
++            float base = mono ? s->monos : v->freq, half = 0.5f * s->sr;
++            float plfo = 1.0f + lfo01(s, P(LPITCH)) * 0.0594630944f, k = P(DETM) * plfo;
++            float f1 = clampf(base * (semi ? semi[0] : exp2f((int)P(SEMI1) / 12.0f)) * k, 0.0f, half);
++            float det = P(DET2) * (v->freq / 261.6255653f);
++            if ((int)P(LDET)) det *= lfo01(s, P(LDET));
++            float f2 = clampf(base * (semi ? semi[1] : exp2f((int)P(SEMI2) / 12.0f)) * k + det, 0.0f, half);
++            float fs = clampf(base * k / (2.0f * (1.0f + P(SUBOCT))), 0.0f, half);
++            v->kff = clampf(base * k, 0.0f, half);
++            v->kdt1 = f1 / s->sr;
++            v->kdt2 = f2 / s->sr;
++            v->kstep[0] = ph_inc(v->kdt1);
++            v->kstep[1] = ph_inc(v->kdt2);
++            v->kstep[2] = ph_inc(fs / s->sr);
++            v->kstep[3] = ph_inc(v->kff / s->sr);
++            float pitch = log2f(f1 > 0.0f ? f1 : 261.0f), kt = 1.0f - clampf((pitch - 6.0f) / 5.0f, 0.0f, 1.0f);
++            float kf = 1.0f - P(KTRK);
++            v->kkey = (1.0f - kf) * kt * kt + kf;
++            if(seen) *seen|=bit;
++        } else ++bench_pitch_reused;
+         v->kidx = clampf(P(FMA) * lfo10(s, P(LFM)), 0.0f, 15.0f);
+         v->kbal = clampf(P(BAL) + lfo01(s, P(LMIX)), 0.0f, 1.0f);
+-        v->kres = clampf(P(RES) * lfo10(s, P(LRES)), 0.0f, 0.98f);
+-        float pitch = log2f(f1 > 0.0f ? f1 : 261.0f), kt = 1.0f - clampf((pitch - 6.0f) / 5.0f, 0.0f, 1.0f);
+-        float kf = 1.0f - P(KTRK);
+-        v->kkey = (1.0f - kf) * kt * kt + kf;
+-        v->kcut = P(CUT) * lfo10(s, P(LCUT)); v->kem = P(FENV) * lfo10(s, P(LFENV));
+-        float cut = clampf(v->kcut - v->kcut * v->kem * (1.0f - v->fenv), 64.0f, 22050.0f);
+-        if (ft == 0) {
+-            float x = cut * (2.0f / s->sr); if (x > 1.0f) x = 1.0f;
+-            v->kA = ladder_a(x);
+-            v->kfb = v->kres * (3.98720139f + x * (3.68178143f - x * 3.93633599f));
+-        } else if (ft == 1) {
+-            float bw = 0.0625f * s->sr * (exp2f(clampf(1.0f - v->kres, 0.0f, 1.0f)) - 1.0f);
+-            float cc = 1.0f / tanf(3.14159265f * bw / s->sr), d = 2.0f * cosf(TWO_PI * cut / s->sr), a1 = 1.0f / (1.0f + cc);
+-            v->ka1 = a1; v->ka4 = -cc * d * a1; v->ka5 = (cc - 1.0f) * a1;
+-        } else {
+-            float cc = tanf(3.14159265f * cut / s->sr), a1 = 1.0f / (1.0f + 1.41421356f * cc + cc * cc);
+-            v->ka1 = a1; v->ka4 = 2.0f * (cc * cc - 1.0f) * a1; v->ka5 = (1.0f - 1.41421356f * cc + cc * cc) * a1;
+-        }
++        if(!fseen || !(*fseen & bit)) {
++            v->kres = clampf(P(RES) * lfo10(s, P(LRES)), 0.0f, 0.98f);
++            v->kcut = P(CUT) * lfo10(s, P(LCUT)); v->kem = P(FENV) * lfo10(s, P(LFENV));
++            float cut = clampf(v->kcut - v->kcut * v->kem * (1.0f - v->fenv), 64.0f, 22050.0f);
++            if (ft == 0) {
++                float x = cut * (2.0f / s->sr); if (x > 1.0f) x = 1.0f;
++                v->kA = ladder_a(x);
++                v->kfb = v->kres * (3.98720139f + x * (3.68178143f - x * 3.93633599f));
++            } else if (ft == 1) {
++                float bw = 0.0625f * s->sr * (exp2f(clampf(1.0f - v->kres, 0.0f, 1.0f)) - 1.0f);
++                float cc = 1.0f / tanf(3.14159265f * bw / s->sr), d = 2.0f * cosf(TWO_PI * cut / s->sr), a1 = 1.0f / (1.0f + cc);
++                v->ka1 = a1; v->ka4 = -cc * d * a1; v->ka5 = (cc - 1.0f) * a1;
++            } else {
++                float cc = tanf(3.14159265f * cut / s->sr), a1 = 1.0f / (1.0f + 1.41421356f * cc + cc * cc);
++                v->ka1 = a1; v->ka4 = 2.0f * (cc * cc - 1.0f) * a1; v->ka5 = (1.0f - 1.41421356f * cc + cc * cc) * a1;
++            }
++            if(fseen) *fseen|=bit;
++        } else ++bench_filter_reused;
+     }
+     int bl = P(BLE) > 0.0f;
+     float o1 = morph_step(&v->ph[0], v->kdt1, m[0].k, m[0].frac, bl, v->kstep[0]) * v->vamp * P(VOL1);
+     float o2 = morph_step(&v->ph[1], v->kdt2, m[1].k, m[1].frac, bl, v->kstep[1]) * v->vamp * P(VOL2);
+     float y = (1.0f - v->kbal) * o1 + v->kbal * o2;
+-    float sub = sine_t(v->ph[2]);
+-    v->ph[2] += v->kstep[2];
+-    y += P(SUBSQ) != 0.0f ? (sub > 0.0f ? P(SUBV) : -P(SUBV)) : sub * v->vamp * P(SUBV) * 3.0f;
++    const s1c_fb sub_gain={.f=P(SUBV)};
++    const uint32_t sub_phase=v->ph[2];
++    v->ph[2]+=v->kstep[2];
++    if(!sub_gain.u) {
++        /* The quarter-wave sine has a negative sign on the second
++         * half, including -0 at the half-turn. Preserve the original
++         * signed-zero contribution and always advance its phase. */
++        const uint32_t sign=P(SUBSQ)!=0.f ?
++            ((sub_phase-1u<0x7fffffffu)?0u:0x80000000u) :
++            (sub_phase&0x80000000u);
++        const s1c_fb zero={.u=sign};
++        y+=zero.f;
++    } else {
++        float sub=sine_t(sub_phase);
++        y += P(SUBSQ) != 0.0f ? (sub>0.f?sub_gain.f:-sub_gain.f)
++                              : sub*v->vamp*sub_gain.f*3.f;
++    }
+     if (P(FMV) != 0.0f) {
+         float mod = sine_t(v->mph) * v->kff * v->kidx;
+         v->mph += v->kstep[3];
+@@ -463,7 +485,7 @@
+     }
+     return y + P(FMIX) * (fo - y);
+ }
+-#define voice_run(s,v) voice_run_kr(s,v,morphs,adec,semis)
++#define voice_run(s,v) voice_run_kr(s,v,morphs,adec,semis,pitch_seen,filter_seen)
+ #endif
+ /* ---- FX ---- */
+ typedef s1u_cc s1c_cc;
+@@ -903,6 +925,23 @@
+     const float *semis = NULL;
+ #endif
+ #endif
++#if S1C_KR > 1
++    uint32_t pitch_mask=0, *pitch_seen=NULL, filter_mask=0, *filter_seen=NULL;
++#if S1C_FAST && S1C_CSM && S1C_NO_SEQ
++    int stable_pitch=P(MONO)==0.f && s->mono_prev==0 &&
++                     P(LPITCH)==0.f && P(LDET)==0.f;
++    int stable_filter=P(FENV)==0.f && P(LCUT)==0.f && P(LRES)==0.f && P(LFENV)==0.f;
++    for(i=0;(stable_pitch||stable_filter) && i<nmoving;++i) {
++        const unsigned k=s1c_smid[moving[i]];
++        if(k==SEMI1 || k==SEMI2 || k==DETM || k==DET2 || k==SUBOCT || k==KTRK ||
++           k==LPITCH || k==LDET || k==MONO) stable_pitch=0;
++        if(k==FENV || k==LCUT || k==LRES || k==LFENV || k==CUT || k==RES || k==FTYPE ||
++           k==MONO) stable_filter=0;
++    }
++    if(stable_pitch) pitch_seen=&pitch_mask;
++    if(stable_filter) filter_seen=&filter_mask;
++#endif
++#endif
+     for (f = 0; f < n; f++) {
+ #if S1C_FAST
+         int cu = (f & 3) == 0;

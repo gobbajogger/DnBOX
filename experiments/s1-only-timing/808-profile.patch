@@ -1,0 +1,46 @@
+--- a/firmware/src/dsp/drum808.c
++++ b/firmware/src/dsp/drum808.c
+@@ -2455,11 +2455,15 @@
+     }
+ }
+ 
++#include "../app/plat.h"
++extern volatile uint32_t bench_loaded_on;
++volatile uint32_t d8_load_profile[L_NUM+1][3]; /* actual frames, oscillator ticks, mix and meter ticks */
+ static void d8_render(drum808_t *d, float *dry, float *rev, float *dly, int n, uint16_t audible_tracks,
+                       uint32_t lanes)
+ {
+     float buf[CHUNK], bus[CHUNK], pair[CHUNK];
+     int off, l, i;
++    const int profile=bench_loaded_on!=0;
+     for (off = 0; off < n; off += CHUNK) {
+         int m = n - off < CHUNK ? n - off : CHUNK;
+         int cb_on = (lanes & (1u << L_CB)) && lane_on(d, L_CB);
+@@ -2468,7 +2472,9 @@
+         /* the shared bank runs only while a metal voice of this call sounds */
+         if ((lanes & D8_LANES_METAL) &&
+             (cb_on || lane_on(d, L_CH) || lane_on(d, L_OH) || lane_on(d, L_CY))) {
++            uint32_t t=profile?plat_ticks24():0;
+             bank_block(&d->bank, bus, pair, m, cb_on);
++            if(profile) { d8_load_profile[L_NUM][0]+=m; d8_load_profile[L_NUM][1]+=plat_ticks24()-t; }
+         }
+         for (l = 0; l < L_NUM; l++) {
+             if (!(lanes & (1u << l)))
+@@ -2487,7 +2493,9 @@
+                     }
+                 }
+             }
++            uint32_t t=profile?plat_ticks24():0;
+             got = voice_run(d, l, buf, mm, bus, pair);
++            if(profile) { d8_load_profile[l][0]+=got; uint32_t x=plat_ticks24(); d8_load_profile[l][1]+=x-t; t=x; }
+             {
+                 float *dr = d8_dry_r;                     /* the chunk's slice of the right side */
+                 d8_dry_r = dr ? dr + off : 0;
+@@ -2495,6 +2503,7 @@
+                 d8_dry_r = dr;
+             }
+             lane_meter(ln, buf, got);
++            if(profile) d8_load_profile[l][2]+=plat_ticks24()-t;
+         }
+     }
+ }
