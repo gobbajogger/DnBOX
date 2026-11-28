@@ -1,0 +1,46 @@
+--- a/firmware/src/gfx.c
++++ b/firmware/src/gfx.c
+@@ -87,12 +87,18 @@
+ #define X0X_UI_SMALL_CANVAS 0
+ #endif
+ #if X0X_UI_SMALL_CANVAS
++#ifdef DNBOX_LCD_FAIL_FAST
++#define CV_ROWS 48u
++#else
+ #define CV_ROWS 69u
++#endif
+ #else
+ #define CV_ROWS 138u
+ #endif
+ #define CV_MAX (240u * CV_ROWS)
++#ifndef DNBOX_LCD_FAIL_FAST
+ _Static_assert(CV_ROWS >= 69u, "screen strip shorter than the main band");
++#endif
+ static uint16_t cv_px[CV_MAX] __attribute__((section(".pool")));
+ static uint32_t cv_w, cv_h;
+ #if X0X_UI_SMALL_CANVAS
+@@ -152,6 +158,12 @@
+     uint32_t fill = swap16(bg);
+     if (w * h > CV_MAX) {
+         ++bench_display_oversize;
++#ifdef DNBOX_LCD_FAIL_FAST
++        fprintf(stderr, "LCD_CAPACITY requested %u x %u backing %u rows\n",
++                (unsigned)w,(unsigned)h,(unsigned)CV_ROWS);
++        fflush(stderr);
++        abort();
++#endif
+         h = CV_MAX / w;
+     }
+     lcd_sync();                     /* the last blit may still read cv_px */
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -5459,7 +5459,9 @@
+ /* gfx.c sizes the one screen strip (CV_ROWS) to this main area. The unity
+  * build sees that macro; a host file that compiles ui.c alone does not. */
+ #ifdef CV_ROWS
++#ifndef DNBOX_LCD_FAIL_FAST
+ _Static_assert((X0X_UI_SMALL_CANVAS ? 1u : 2u) * BAND_H <= CV_ROWS, "main area taller than the screen strip");
++#endif
+ #if !X0X_UI_SMALL_CANVAS
+ _Static_assert(KNOB_H <= CV_ROWS, "knob row taller than the screen strip");
+ #endif

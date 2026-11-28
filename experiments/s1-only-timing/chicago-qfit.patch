@@ -1,0 +1,104 @@
+--- a/tools/gen_chicago_fast32.py
++++ b/tools/gen_chicago_fast32.py
+@@ -56,51 +56,62 @@
+     shift=nmax.bit_length()-1
+     assert nmax==1<<shift
+     base=words[0]
+-    best=None
++    stock=None
++    shorter=[]
+     rhs=[sum(i**j*(w-base) for i,w in enumerate(words)) for j in range(min(n,4))]
+     for degree in range(min(n,4)):
+         co=[sum(v*x for v,x in zip(row,rhs))*nmax**i for i,row in enumerate(gram_inverse(n,degree))]
+         bound=sum(map(abs,co))
+         q=next((q for q in range(18,-1,-1) if (bound*(1<<q)+degree+1)*nmax<=(1<<31)-1),0)
+-        poly=tuple(round(c*(1<<q)) for c in co)
+-        vals=[]
+-        admissible=True
+-        for i,word in enumerate(words):
+-            v=poly[-1]
+-            for a in reversed(poly[:-1]):
+-                lim=(1<<31) if FAST else (1<<63)
+-                if not -lim<=v*i<lim:
+-                    admissible=False
+-                    break
+-                v=a+((v*i)>>shift)
+-                if FAST and not -(1<<31)<=v+(1<<(max(q,1)-1))<(1<<31):
+-                    admissible=False;break
+-            if not admissible:break
+-            vals.append(word-(base+(((v+(1<<(q-1)))>>q) if q else v)))
+-        if not admissible:continue
+-        lo=min(vals); hi=max(vals)
+-        width=(hi-lo).bit_length()
+-        if width>31 or not -(1<<31)<=lo<(1<<31):continue
+-        bits=0
+-        for i,d in enumerate(vals):bits|=(d-lo)<<(i*width)
+-        # i32 coefficients when possible; exact escape i64 otherwise. Constant
+-        # term is folded into the base except for the fractional component.
+-        c=poly[0]>>q
+-        base2=base+c
+-        poly=(poly[0]-(c<<q),*poly[1:])
+-        if not 0<=base2<=U32:continue
+-        coeff=bytes([q]) if FAST else b''
+-        for p in poly:
+-            z=(p<<1) if p>=0 else ((-p<<1)-1)
+-            while z>=128:
+-                coeff+=bytes([(z&127)|128]);z>>=7
+-            coeff+=bytes([z])
+-        header=(struct.pack('<BI',(degree<<5)|width,(base2+lo)&U32) if fold_lo
+-                else struct.pack('<BIi',(degree<<5)|width,base2,lo))
+-        record=header+coeff+bits.to_bytes((n*width+7)//8,'little')
+-        if best is None or len(record)<len(best):
++        max_q=q
++        for q in range(max_q,-1,-1):
++            poly=tuple(round(c*(1<<q)) for c in co)
++            vals=[]
++            admissible=True
++            for i,word in enumerate(words):
++                v=poly[-1]
++                for a in reversed(poly[:-1]):
++                    lim=(1<<31) if FAST else (1<<63)
++                    if not -lim<=v*i<lim:
++                        admissible=False
++                        break
++                    v=a+((v*i)>>shift)
++                    if FAST and not -(1<<31)<=v+(1<<(max(q,1)-1))<(1<<31):
++                        admissible=False;break
++                if not admissible:break
++                vals.append(word-(base+(((v+(1<<(q-1)))>>q) if q else v)))
++            if not admissible:continue
++            lo=min(vals); hi=max(vals)
++            width=(hi-lo).bit_length()
++            if width>31 or not -(1<<31)<=lo<(1<<31):continue
++            bits=0
++            for i,d in enumerate(vals):bits|=(d-lo)<<(i*width)
++            # i32 coefficients when possible; exact escape i64 otherwise. Constant
++            # term is folded into the base except for the fractional component.
++            c=poly[0]>>q
++            base2=base+c
++            poly=(poly[0]-(c<<q),*poly[1:])
++            if not 0<=base2<=U32:continue
++            coeff=bytes([q]) if FAST else b''
++            for p in poly:
++                z=(p<<1) if p>=0 else ((-p<<1)-1)
++                while z>=128:
++                    coeff+=bytes([(z&127)|128]);z>>=7
++                coeff+=bytes([z])
++            header=(struct.pack('<BI',(degree<<5)|width,(base2+lo)&U32) if fold_lo
++                    else struct.pack('<BIi',(degree<<5)|width,base2,lo))
++            record=header+coeff+bits.to_bytes((n*width+7)//8,'little')
++            cost=(degree,len(coeff)-int(FAST),bool(q),width)
++            if q==max_q and (stock is None or len(record)<len(stock[0])):
++                stock=(record,cost)
++            shorter.append((record,cost))
++    assert stock is not None
++    best, stock_cost=stock
++    for record,cost in shorter:
++        # Keep the existing decoder and reject codewords that add any
++        # polynomial, coefficient, rounding, or residual read work.
++        if len(record)<len(best) and all(new<=old for new,old in zip(cost,stock_cost)):
+             best=record
+-    assert best is not None
+     return best
+ 
+ def one(data,start,i,seg,fold_lo=False):
