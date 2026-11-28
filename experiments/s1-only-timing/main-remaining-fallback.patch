@@ -1,0 +1,78 @@
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -8906,6 +8906,8 @@
+         cv_commit_main_window(page,row,rows);
+     }
+ }
++static void cv_paint_blank(int band,const void *scene)
++{ (void)band; (void)scene; }
+ static void cv_paint_modal(int band,const void *scene)
+ {
+     const cv_modal_scene *modal=scene;
+@@ -8975,7 +8977,7 @@
+     }
+ #endif
+ #if X0X_UI_SMALL_CANVAS
+-    if (ui.view == V_SEQ && is_drum() && ui.overlay == O_NONE && !ui.help) {
++    if (is_drum() && (ui.view==V_SEQ || ui.view==V_GEN) && ui.overlay==O_NONE && !ui.help) {
+         cv_drum_scene s;
+         cv_readout_scene note;
+         cv_capture_drum(&s);
+@@ -9053,6 +9055,26 @@
+         cv_draw_pair(fx.bg,&fx,cv_paint_fx,cv_pair_readout(&note,readout && !envelope));
+         return;
+     }
++    /* Remaining drawer needs the legacy bass graph, or the opt-in PERF
++     * debug view. Everything else uses the same immutable fallback scene
++     * as its old direct wrapper; capture only before the first LCD service. */
++    if (!(ui.view==V_PART && is_303()) &&
++        !(X0X_UI_PERF && ui.view==V_PERF)) {
++        cv_readout_scene note;
++        const int eligible=readout && !envelope;
++        if (is_drum()) {
++            cv_drum_scene drum;
++            cv_capture_drum(&drum);
++            cv_draw_pair(drum.bg,&drum,cv_paint_drum,cv_pair_readout(&note,eligible));
++        } else if (is_303()) {
++            cv_303_scene roll;
++            cv_capture_303(&roll,ui.view==V_GEN);
++            cv_draw_pair(roll.bg,&roll,cv_paint_303,cv_pair_readout(&note,eligible));
++        } else {
++            cv_draw_pair(C_BLACK,NULL,cv_paint_blank,cv_pair_readout(&note,eligible));
++        }
++        return;
++    }
+ #else
+     cv_begin(240, 2 * BAND_H, C_BLACK);           /* both bands, then one transfer: no tear between them */
+ #endif
+@@ -9061,7 +9083,13 @@
+         cv_window(240, MAIN_ROWS, (uint32_t)band * BAND_H, BAND_H, C_BLACK);
+ #endif
+         cv_band(band * BAND_H, BAND_H);
+-#if !X0X_UI_SMALL_CANVAS
++#if X0X_UI_SMALL_CANVAS
++#if X0X_UI_PERF
++        if (ui.view==V_PERF) draw_perf(band);
++        else
++#endif
++        draw_part_sound(band);
++#else
+         if (ui.help)
+             draw_help(band);
+         else if (ui.overlay == O_ASK)
+@@ -9069,7 +9097,6 @@
+         else if (ui.overlay == O_LIST)
+             draw_list(band);
+         else
+-#endif
+         if (ui.view == V_HOME)
+             draw_home(band);
+ #if !X0X_UI_SMALL_CANVAS
+@@ -9096,7 +9123,6 @@
+             draw_drum(band);
+         else if (is_303())
+             draw_303(band, ui.view == V_GEN);
+-#if !X0X_UI_SMALL_CANVAS
+         else
+             draw_break(band);
+ #endif

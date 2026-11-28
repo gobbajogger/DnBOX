@@ -52,7 +52,7 @@
     float input=-48.0f+48.0f*i/36.0f;
     int y=48-(int)((comp_glyph_output(input-t,slope,mix,input)+48)*20/48+0.5f);
 -   cv_line(left+i-1,py,left+i,y,col);py=y;
-+   if(y+cv_oy>=cv_y0||py+cv_oy>=cv_y0)cv_line(left+i-1,py,left+i,y,col);
++   cv_line(left+i-1,py,left+i,y,col);
 +   py=y;
 +  }
 +}

@@ -1,0 +1,238 @@
+--- a/firmware/src/app/editor.c
++++ b/firmware/src/app/editor.c
+@@ -49,6 +49,12 @@
+ /* ED_BT_TEST (SMK-37 with Bluetooth, for tools/ble_autotest.py): op 0 = query, 1 = clear the start
+  * block (as BLUETOOTH OFF), 2 = restart the unit (a chip reset, as fm1_reboot; never the update
+  * loader). Reply: op, BLUETOOTH setting, guard blocked, plat_ble_state(). */
++/* Request smaller code only for control-plane handlers, not audio/DSP. */
++#if defined(__clang__)
++#define ED_COLD __attribute__((minsize, noinline))
++#else
++#define ED_COLD
++#endif
+ static uint32_t ed_reboot_at;                /* fm1_ms + 1 when a restart was asked for (0: none) */
+ #define ED_READ_MAX 224u                     /* X0X: SMP_READ's bytes a frame (the break page draws the slots) */
+ 
+@@ -73,6 +79,7 @@
+     ed_header(cmd);
+     ed_n = 5;
+ }
++ED_COLD
+ static void ed_b(uint32_t v)
+ {
+     if (ed_n < sizeof ed_out - 1u)
+@@ -156,7 +163,7 @@
+     }
+ }
+ /* Offset is 21 bits; count is in byte pairs. Invalid offsets send no reply. */
+-static int ed_read_area(const uint8_t *base, uint32_t size, const uint8_t *a)
++static int ED_COLD ed_read_area(const uint8_t *base, uint32_t size, const uint8_t *a)
+ {
+     uint32_t off = (uint32_t)a[0] | (uint32_t)a[1] << 7 | (uint32_t)a[2] << 14;
+     uint32_t count = a[3] > ED_READ_MAX / 2u ? ED_READ_MAX : a[3] * 2u;
+@@ -278,7 +285,7 @@
+ {
+     return rc == 0 ? 0u : rc == UI_PROJECT_BUSY ? 2u : rc == -4 ? 4u : rc == -7 ? 6u : rc == -10 ? 9u : 5u;
+ }
+-static void ed_project_handle(const uint8_t *a, uint32_t na)
++static void ED_COLD ed_project_handle(const uint8_t *a, uint32_t na)
+ {
+     uint32_t op, rc = 0, off = 0, n = 0, i;
+     if (!na)
+@@ -428,7 +435,7 @@
+ }
+ #if SMP_SEC0_BACKUP
+ /* Erase 4 KiB at dst and program from src through ed_smp_buf (backup and restore). */
+-static int ed_smp_copy_4k(uint32_t dst, const uint8_t *src)
++static int ED_COLD ed_smp_copy_4k(uint32_t dst, const uint8_t *src)
+ {
+     uint32_t i;
+     if (ed_silence_erase4k(dst, 0))
+@@ -510,7 +517,7 @@
+     smp_write_next[k] = SMP_USER_DATA;
+     return 0;
+ }
+-static int ed_smp_erase(uint32_t k, uint32_t all)
++static int ED_COLD ed_smp_erase(uint32_t k, uint32_t all)
+ {
+     uint32_t i;
+     int rc = 0;
+@@ -565,7 +572,7 @@
+     ed_smp_clear_backup(k);                           /* sec0-only shadow would lie after this */
+     return 0;
+ }
+-static int ed_smp_end(uint32_t k, const uint8_t *a, uint32_t na)
++static int ED_COLD ed_smp_end(uint32_t k, const uint8_t *a, uint32_t na)
+ {
+     const smp_user_hdr_t *h = smp_hdr(ed_smp_buf);
+     uint32_t n = ed_unpack_exact(a, na, ed_smp_buf, ED_SMP_BUF_SIZE);
+@@ -631,7 +638,7 @@
+     for (k = 0; k < 5u; k++)
+         ed_b(v >> (7u * k));
+ }
+-static int ed_debug(uint32_t cmd, const uint8_t *a, uint32_t na)
++static int ED_COLD ed_debug(uint32_t cmd, const uint8_t *a, uint32_t na)
+ {
+     uint32_t addr, i;
+ #if X0X_DEBUG > 1                                     /* the clock work's timing loop: level 2 (room) */
+@@ -718,7 +725,7 @@
+         store_stage_unlock();
+     ed_b((uint32_t)rc);
+ }
+-static void ed_boot(uint32_t cmd, const uint8_t *a, uint32_t na)
++static void ED_COLD ed_boot(uint32_t cmd, const uint8_t *a, uint32_t na)
+ {
+     int rc;
+     if (cmd == ED_BOOT_INFO) {
+@@ -830,7 +837,7 @@
+  * rc: 0 ok, 1 format, 2 busy, 3 stale/consumed, 4 changed, 5 exhausted.
+  * Return true only for a consumed, valid COMMIT; caller must also enqueue its
+  * entire ACK successfully before publishing the main-loop request. */
+-static int ed_install_handle(const uint8_t *a, uint32_t na)
++static int ED_COLD ed_install_handle(const uint8_t *a, uint32_t na)
+ {
+     uint32_t op = na ? a[0] : 0, k, ticket = 0, rc = 0, any = 0;
+     int same, start = 0;
+@@ -873,7 +880,7 @@
+     return start;
+ }
+ 
+-static void ed_handle(const uint8_t *f, uint32_t n)
++static void ED_COLD ed_handle(const uint8_t *f, uint32_t n)
+ {
+     uint32_t cmd = f[3], i;
+     const uint8_t *a = f + 4;
+@@ -1159,6 +1166,7 @@
+ }
+ 
+ /* Return 1 only when this check left a non-editor frame pending for OTA. */
++#undef ED_COLD
+ static int ed_service(void)
+ {
+     const uint8_t *p;
+@@ -1202,3 +1210,4 @@
+     }
+     return 0;
+ }
++
+--- a/firmware/src/app/project.c
++++ b/firmware/src/app/project.c
+@@ -1,3 +1,8 @@
++#if defined(__clang__)
++#define PROJECT_COLD __attribute__((minsize, noinline))
++#else
++#define PROJECT_COLD
++#endif
+ /* SPDX-License-Identifier: GPL-3.0-only */
+ /* X0X project: the settings, the sound, the 32 patterns, the song and the motion lanes.
+  *
+@@ -190,6 +195,7 @@
+ }
+ 
+ /* Exact size only; an older settings object is unsupported (-9). */
++PROJECT_COLD
+ static int load_settings(settings_t *dst)
+ {
+     int n = read_settings_payload();
+@@ -241,6 +247,7 @@
+     }
+ }
+ int project_device_bt_pending(void) { return device_bt_pending; }
++PROJECT_COLD
+ int project_device_bt_save(void)
+ {
+     int n, rc;
+@@ -349,6 +356,7 @@
+ static int measure_project(const project_t *pr, uint32_t *length)
+ {return measure_for_format(pr,length,stream_format_of(pr));}
+ 
++PROJECT_COLD
+ static int save_stream(uint32_t format)
+ {
+     const uint8_t *raw = (const uint8_t *)&proj + stream_offset(format);
+@@ -377,6 +385,7 @@
+     uint8_t unsupported; /* a consumed segment must retain its format classification */
+ } st_in_t;
+ 
++PROJECT_COLD
+ static int load_stream_object(int k)
+ {
+     return plat_store_load(STREAM_OBJ[k] |
+@@ -469,6 +478,7 @@
+ #endif
+ 
+ 
++PROJECT_COLD
+ static int load_stream(project_t *pr, int n, uint32_t format)
+ {
+     uint8_t *raw = (uint8_t *)pr + stream_offset(format);
+@@ -503,6 +513,7 @@
+ 
+ /* Validation binds the correct sound to each attempted candidate. The
+  * independent legacy sound is never consulted for a stream16 candidate. */
++PROJECT_COLD
+ static int read_stream_candidate(project_t *pr,int n,uint32_t format,int validate)
+ {
+     if(format!=PROJ_STREAM_BASS_MOTION){
+@@ -525,6 +536,7 @@
+ 
+ /* Objects are read into the candidate project; the original profile admits only
+  * a completely validated candidate and leaves safe defaults on every failure. */
++PROJECT_COLD
+ static int read_project(project_t *pr)
+ {
+     uint8_t device_bt = proj.set.bt;
+@@ -625,6 +637,7 @@
+ }
+ 
+ void project_defaults(void) { project_defaults_for(&proj, proj.set.bt); }
++PROJECT_COLD
+ int project_load(void)
+ {
+     project_incompatible = 0;
+@@ -644,6 +657,7 @@
+  * Unused sound cells and motion lanes are opaque, just as they are in storage.
+  * Break slot indices are resolved against the companion's complete sample manifest:
+  * a slot may not exist here yet, because sample restoration follows this check. */
++PROJECT_COLD
+ static int project_validate_for(const project_t *p)
+ {
+     const settings_t *s = &p->set;
+@@ -794,6 +808,7 @@
+ int project_validate_stage(void) { return project_validate_for(&project_stage); }
+ 
+ 
++PROJECT_COLD
+ int project_load_stage(void)
+ {
+     uint32_t live_length = packed_len;
+@@ -805,6 +820,7 @@
+     return rc;
+ }
+ 
++PROJECT_COLD
+ void project_commit_stage(void)
+ {
+     /* Device roles belong to this keyboard; loading music must not change its
+@@ -858,6 +874,7 @@
+ }
+ 
+ 
++PROJECT_COLD
+ int project_file_validate(const uint8_t *h)
+ {
+     stream_stage_recovered=0; /* explicit validated import only, not loaded fallback */
+@@ -916,6 +933,7 @@
+ }
+ 
+ /* 0 = saved and verified; -7 = the patterns, song and motion do not fit (nothing was written) */
++PROJECT_COLD
+ int project_save(void)
+ {
+ #if X0X_BASS_TAGGED_SOUND
+@@ -950,3 +968,5 @@
+     return rc;
+ }
+ 
++
++#undef PROJECT_COLD

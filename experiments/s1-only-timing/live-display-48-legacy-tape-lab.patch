@@ -1,0 +1,183 @@
+--- a/firmware/src/gfx.c
++++ b/firmware/src/gfx.c
+@@ -102,6 +102,23 @@
+ #endif
+ static int32_t cv_oy;            /* y offset for graph drawing */
+ static int32_t cv_y0, cv_y1;     /* X0X: the rows drawing may touch (cv_band) */
++/* Diagnostic, scoped to an immutable legacy matrix frame. */
++enum { LEGACY_RASTER_ROWS=32u, LG_POINT,LG_RECT,LG_BLEND,LG_LINE,LG_TEXT,LG_DISC,LG_ROUND };
++typedef struct { int16_t x,y,a,b;uint16_t color;uint8_t kind,z; } lg_op;
++typedef struct { unsigned used,end[3],failed; } lg_scene;
++static lg_scene *lg_record;
++static unsigned char *lg_data(void)
++{ return (unsigned char *)(cv_px+240u*LEGACY_RASTER_ROWS); }
++static void lg_push(lg_op op,const void *ext,unsigned n)
++{
++    lg_scene *s=lg_record;
++    const unsigned bytes=sizeof cv_px-240u*LEGACY_RASTER_ROWS*sizeof(*cv_px);
++    if(s->failed || s->used+sizeof op+n>bytes){s->failed=1;return;}
++    unsigned char *p=lg_data()+s->used;memcpy(p,&op,sizeof op);
++    if(n) memcpy(p+sizeof op,ext,n);
++    s->used+=sizeof op+n;
++}
++static const felucca_font_t *const lg_font[]={&FONT_T,&FONT_XS,&FONT_S,&FONT_B,&FONT_M,&FONT_L};
+ 
+ #define RGB(r, g, b) ((uint16_t)((((r) >> 3) << 11) | (((g) >> 2) << 5) | ((b) >> 3)))
+ #include "ui_theme.h"
+@@ -210,6 +227,8 @@
+ 
+ static inline void cv_pset(int32_t x, int32_t y, uint16_t c)
+ {
++    if(lg_record){lg_push((lg_op){.kind=LG_POINT,.x=x,.y=y+cv_oy,.color=c},0,0);return;}
++
+     y += cv_oy;
+     if ((uint32_t)x < cv_w && y >= cv_y0 && y < cv_y1)
+         cv_px[((uint32_t)y - cv_row_base) * cv_w + (uint32_t)x] = swap16(c);
+@@ -217,6 +236,8 @@
+ 
+ static void cv_rect(int32_t x, int32_t y, int32_t w, int32_t h, uint16_t c)
+ {
++    if(lg_record){lg_push((lg_op){.kind=LG_RECT,.x=x,.y=y+cv_oy,.a=w,.b=h,.color=c},0,0);return;}
++
+     int32_t x1 = x + w, y1 = y + h + cv_oy, i;
+     uint16_t sc = swap16(c);
+     y += cv_oy;                             /* clipped once, then filled row by row */
+@@ -238,6 +259,8 @@
+ #endif
+ static void px_blend(int32_t x, int32_t y, uint16_t c, uint32_t a)
+ {
++    if(lg_record){lg_push((lg_op){.kind=LG_BLEND,.x=x,.y=y+cv_oy,.z=a,.color=c},0,0);return;}
++
+     uint16_t *q;
+     uint32_t bg;
+     y += cv_oy;
+@@ -263,6 +286,8 @@
+ #endif
+ static void cv_line(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint16_t c)
+ {
++    if(lg_record){lg_push((lg_op){.kind=LG_LINE,.x=x0,.y=y0+cv_oy,.a=x1,.b=y1+cv_oy,.color=c},0,0);return;}
++
+     int dx = x1 - x0, dy = y1 - y0;
+     if (!dx || !dy) {
+         cv_rect(dx < 0 ? x1 : x0, dy < 0 ? y1 : y0,
+@@ -328,6 +353,24 @@
+  * anti-aliased face on a coloured box gets no dark fringe); returns the end x */
+ static int32_t cv_text_clip(int32_t x, int32_t y, const felucca_font_t *f, const char *s, uint16_t c, int32_t clip_left, int32_t clip_right)
+ {
++    if(lg_record) {
++        unsigned i=0,n=1;
++        while(i<sizeof lg_font/sizeof *lg_font && lg_font[i]!=f)++i;
++        if(i==sizeof lg_font/sizeof *lg_font) lg_record->failed=1;
++        else {
++            uint8_t text[96];
++            while(s[n-1]&&n<sizeof text)++n;
++            if(n>=sizeof text || s[n-1]) lg_record->failed=1;
++            else{
++                text[0]=(uint8_t)n;memcpy(text+1,s,n);
++                lg_push((lg_op){.kind=LG_TEXT,.x=x,.y=y+cv_oy,.a=clip_left,.b=clip_right,.z=i,.color=c},text,n+1);
++            }
++        }
++        f=font_live(f);
++        for(;*s;++s)x+=font_advance(f,glyph(f,(uint8_t)*s));
++        return x;
++    }
++
+     uint32_t r = c >> 11, g = (c >> 5) & 63u, b = c & 31u;
+     uint16_t sc = swap16(c);
+     f = font_live(f);
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -5794,6 +5794,11 @@
+  * The outline still paints its top, bottom and side pixels in that order. */
+ static UI_DRAW void rounded_box(int x,int y,int w,int h,int r,uint16_t c,int border)
+ {
++    if(lg_record){
++        const uint8_t radius=(uint8_t)r;
++        lg_push((lg_op){.kind=LG_ROUND,.x=x,.y=y+cv_oy,.a=w,.b=h,.z=border,.color=c},&radius,1);return;
++    }
++
+     if(!border && (w<=0 || h<=0))return;
+     if(r>w/2)r=w/2;
+     if(r>h/2)r=h/2;
+@@ -5829,6 +5834,11 @@
+ /* an anti-aliased disc of radius r (float) at (cx, cy) */
+ static void disc(float cx, float cy, float r, uint16_t c)
+ {
++    if(lg_record){
++        const float xy[3]={cx,cy+(float)cv_oy,r};
++        lg_push((lg_op){.kind=LG_DISC,.color=c},xy,sizeof xy);return;
++    }
++
+     int32_t x0 = (int32_t)fm_floorf(cx - r - 1.0f), x1 = (int32_t)(cx + r + 1.0f);
+     int32_t y0 = (int32_t)fm_floorf(cy - r - 1.0f), y1 = (int32_t)(cy + r + 1.0f), x, y;
+     for (y = y0; y <= y1; y++)
+@@ -8881,6 +8891,58 @@
+     memcpy(pal,saved,sizeof saved);
+ }
+ #endif
++static UI_DRAW void replay_lg(int band,const void *snapshot)
++{
++    const lg_scene *s=snapshot;
++    for(unsigned i=band?s->end[band-1]:0;i<s->end[band];){
++        lg_op op;
++        const unsigned char *d=lg_data()+i;
++        memcpy(&op,d,sizeof op);i+=sizeof op;d+=sizeof op;
++        switch(op.kind){
++        case LG_POINT:cv_pset(op.x,op.y,op.color);break;
++        case LG_RECT:cv_rect(op.x,op.y,op.a,op.b,op.color);break;
++        case LG_BLEND:px_blend(op.x,op.y,op.color,op.z);break;
++        case LG_LINE:cv_line(op.x,op.y,op.a,op.b,op.color);break;
++        case LG_TEXT: {
++            const char *t=(const char *)d+1;
++            cv_text_clip(op.x,op.y,lg_font[op.z],t,op.color,op.a,op.b);
++            i+=(unsigned)*d+1;
++        } break;
++        case LG_ROUND:rounded_box(op.x,op.y,op.a,op.b,*d,op.color,op.z);i++;break;
++        case LG_DISC: {
++            float xy[3];memcpy(xy,d,sizeof xy);
++            disc(xy[0],xy[1],xy[2],op.color);i+=sizeof xy;
++        } break;
++        }
++    }
++}
++/* Capture all three logical bands before the first input opportunity. The
++ * protected tape occupies the tail of the same buffer, beyond a 32-row raster. */
++static UI_DRAW int draw_legacy_matrix_frame(void)
++{
++    lg_scene shot={0};
++    const uint16_t bg=C_BLACK;
++    lcd_sync();
++    lg_record=&shot;
++    for(unsigned band=0;band<3u;++band){
++        cv_w=240;
++        cv_h=cv_y1=band==2u?KNOB_H:BAND_H;
++        cv_row_base=cv_y0=cv_oy=0;
++        draw_part_sound((int)band);
++        shot.end[band]=shot.used;
++    }
++    lg_record=0;
++    if(shot.failed)return 0;
++    int force=cv_claim_scene_footer();
++    for(unsigned band=0;band<2u;++band)for(unsigned first=0;first<BAND_H;first+=LEGACY_RASTER_ROWS){
++        unsigned rows=BAND_H-first;if(rows>LEGACY_RASTER_ROWS)rows=LEGACY_RASTER_ROWS;
++        cv_window(240,BAND_H,first,rows,bg);
++        replay_lg((int)band,&shot);
++        cv_commit_main_window(band,first,rows);
++    }
++    cv_draw_scene_footer(bg,&shot,replay_lg,force,LEGACY_RASTER_ROWS);
++    return 1;
++}
+ static UI_DRAW void cv_draw_pair(uint16_t bg,const void *scene,
+                                   void (*paint)(int,const void *),const cv_readout_scene *note)
+ {
+@@ -8987,6 +9049,10 @@
+         return;
+     }
+ #endif
++    if(!modal.route && ui.overlay==O_NONE && ui.view==V_PART && is_303()) {
++        if(draw_legacy_matrix_frame())return;
++        /* Diagnostic at 69 rows only: keep ordinary native fallback on overflow. */
++    }
+     if (!modal.route && ui.view == V_SONG) {
+         cv_song_scene sg;
+         cv_readout_scene note;
