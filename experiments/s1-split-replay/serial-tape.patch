@@ -1,0 +1,188 @@
+--- a/s1c.c
++++ b/s1c.c
+@@ -879,7 +879,17 @@
+         }
+     }
+ #endif
+-    for (f = 0; f < n; f++) {
++    /* Host proof only. Replay small serial tiles to validate the stage cut. */
++#if !defined(X0X_HOST) || !S1C_CSM || !S1C_NO_SEQ || !S1C_FAST || !S1C_EXT || S1C_HFR || S1C_BUSFX
++#error "Split proof only covers the active compact FX profile"
++#endif
++    enum { TILE=32 };
++    struct frame { float input, c_BCSR, c_CUT, c_DLFB, c_DLMIX, c_DLON, c_DLT, c_MVOL, c_PANA, c_PANF, c_PHFB, c_PHMIX, c_PHRATE, c_PHW, c_RVHP, c_RVMIX, c_RVON, c_WIDEN, lfo01_LBC, lfo10_LTREM, lfo10_LRVMIX; unsigned reset_delay; } tape[TILE];
++    _Static_assert(sizeof tape[0] == 88, "exact frame payload");
++    for (unsigned block=0;block<n;block+=TILE) {
++        const unsigned end=n-block<TILE?n:block+TILE;
++        for (f=block; f<end; ++f) {
++            unsigned reset_delay=0;
+ #if S1C_FAST
+         int cu = (f & 3) == 0;
+ #if S1C_CSM
+@@ -906,7 +916,7 @@
+             s->nlast = 0; s->prev_held = 0;
+ #if !S1C_BUSFX
+ #if S1C_EXT
+-            s->ddec = 0;     /* re-partition (clears the lines) */
++            reset_delay = 1;  /* replay the same reset before this FX frame */
+ #else
+             for (i = 0; i < 4; i++) { memset(s->dl[i].buf, 0, sizeof s->dbuf[0]); s->dl[i].prev = 0.0f; }
+ #endif
+@@ -924,37 +934,66 @@
+         if (P(MONO) > 0.0f) { if (s->v[0].root != -1 && s->v[0].stage) y = voice_run(s, &s->v[0]); }
+         else for (i = 0; i < S1C_VOICES; i++) if (s->v[i].root != -1 && s->v[i].stage) y += voice_run(s, &s->v[i]);
+ 
++        struct frame *row=&tape[f-block];
++        row->input=y;
++        row->c_BCSR=P(BCSR);
++        row->c_CUT=P(CUT);
++        row->c_DLFB=P(DLFB);
++        row->c_DLMIX=P(DLMIX);
++        row->c_DLON=P(DLON);
++        row->c_DLT=P(DLT);
++        row->c_MVOL=P(MVOL);
++        row->c_PANA=P(PANA);
++        row->c_PANF=P(PANF);
++        row->c_PHFB=P(PHFB);
++        row->c_PHMIX=P(PHMIX);
++        row->c_PHRATE=P(PHRATE);
++        row->c_PHW=P(PHW);
++        row->c_RVHP=P(RVHP);
++        row->c_RVMIX=P(RVMIX);
++        row->c_RVON=P(RVON);
++        row->c_WIDEN=P(WIDEN);
++        row->lfo01_LBC=lfo01(s, P(LBC));
++        row->lfo10_LTREM=lfo10(s, P(LTREM));
++        row->lfo10_LRVMIX=lfo10(s, P(LRVMIX));
++        row->reset_delay=reset_delay;
++        }
++        for (f=block; f<end; ++f) {
++        const struct frame *row=&tape[f-block];
++        float y=row->input;
++        const int cu=(f & 3)==0;
++        if (row->reset_delay) s->ddec=0;
+         /* bitcrush (sample-and-hold), tremolo */
+ #if S1C_FAST
+         if ((f & 7) == 0)
+ #endif
+         {
+-            float bsr = log2f(P(BCSR)) + 4.0f * lfo01(s, P(LBC));
++            float bsr = log2f(row->c_BCSR) + 4.0f * row->lfo01_LBC;
+             s1u_crush_clock(&s->crush, clampf(exp2f(bsr), 2048.0f, 48000.0f), s->sr);
+         }
+         y = s1u_crush_run(&s->crush, y);
+-        y *= lfo10(s, P(LTREM));
++        y *= row->lfo10_LTREM;
+         /* autopan, equal power */
+         float L, R;
+-        s1u_autopan(&s->pan_ph, y, P(PANF), P(PANA), s->sr, &L, &R);
++        s1u_autopan(&s->pan_ph, y, row->c_PANF, row->c_PANA, s->sr, &L, &R);
+         /* phaser */
+-        s1u_phaser_run(&s->ph, &L, &R, P(PHMIX), P(PHRATE), P(PHW), P(PHFB), s->sr);
++        s1u_phaser_run(&s->ph, &L, &R, row->c_PHMIX, row->c_PHRATE, row->c_PHW, row->c_PHFB, s->sr);
+ #if !S1C_BUSFX
+         /* ping-pong delay with tracking low-pass on its input */
+         float dL = L, dR = R;
+-        if (P(FTYPE) == 0.0f) {
++        if (s->t[FTYPE] == 0.0f) {
+ #if S1C_FAST
+             if ((f & 7) == 0) {
+-                float pv = clampf(log2f(P(CUT)), 10.0f, 14.4284f);
+-                float pc = 1.0f + (pv - 10.0f) * (1.0f / 4.4284f) * (P(DICT) - 1.0f);
+-                float x = clampf(P(CUT) * pc, 64.0f, 22050.0f) * (2.0f / s->sr);
++                float pv = clampf(log2f(row->c_CUT), 10.0f, 14.4284f);
++                float pc = 1.0f + (pv - 10.0f) * (1.0f / 4.4284f) * (s->t[DICT] - 1.0f);
++                float x = clampf(row->c_CUT * pc, 64.0f, 22050.0f) * (2.0f / s->sr);
+                 s->dl_fc = ladder_a(x > 1.0f ? 1.0f : x);     /* the ladder coefficient, not Hz */
+             }
+             dL = ladder(s->dlp[0], L, s->dl_fc, 0.0f); dR = ladder(s->dlp[1], R, s->dl_fc, 0.0f);
+ #else
+-            float pv = clampf(log2f(P(CUT)), 10.0f, 14.4284f);
+-            float pc = 1.0f + (pv - 10.0f) * (1.0f / 4.4284f) * (P(DICT) - 1.0f);
+-            float fc = clampf(P(CUT) * pc, 64.0f, 22050.0f);
++            float pv = clampf(log2f(row->c_CUT), 10.0f, 14.4284f);
++            float pc = 1.0f + (pv - 10.0f) * (1.0f / 4.4284f) * (s->t[DICT] - 1.0f);
++            float fc = clampf(row->c_CUT * pc, 64.0f, 22050.0f);
+             dL = moog(s->dlp[0], L, fc, 0.0f, s->sr); dR = moog(s->dlp[1], R, fc, 0.0f, s->sr);
+ #endif
+         }
+@@ -994,7 +1033,7 @@
+ #define S1C_DL_WET 1.0f
+ #endif
+         /* compact lines lose level per repeat (decimation, interpolation): feedback and wet trim, by ear */
+-        float T = P(DLT) * s->sr / (float)dd, fbk = P(DLFB) * (1.0f + S1C_DL_FBK * (float)(dd > 1)), oL, oRR;
++        float T = row->c_DLT * s->sr / (float)dd, fbk = row->c_DLFB * (1.0f + S1C_DL_FBK * (float)(dd > 1)), oL, oRR;
+         if (fbk > S1C_DL_FBMAX) fbk = S1C_DL_FBMAX;
+         if (dd > 1) {
+         /* lines run at sr / S1C_DLY_DEC: box-filtered input, linearly interpolated output */
+@@ -1116,12 +1155,12 @@
+         oRR = dl_tick(&s->dl[3], oR, T, fbk) + oF;
+ #endif
+         }
+-        float dm = P(DLMIX) * P(DLON);
++        float dm = row->c_DLMIX * row->c_DLON;
+         if (dd > 1) { oL *= S1C_DL_WET; oRR *= S1C_DL_WET; }
+         float mL = (1.0f - dm) * L + dm * oL, mR = (1.0f - dm) * R + dm * oRR;
+         /* reverb: high-pass, pre-gain, input compressor, network, wet compressor */
+ #if S1C_FAST
+-        const s1c_fb rvhp = {.f = P(RVHP)};
++        const s1c_fb rvhp = {.f = row->c_RVHP};
+         if ((f & 7) == 0 && (f == 0 || rvhp.u != last_rvhp.u)) {
+             last_rvhp = rvhp;
+             float cc = tanf(3.14159265f * rvhp.f / s->sr), a1 = 1.0f / (1.0f + 1.41421356f * cc + cc * cc);
+@@ -1130,10 +1169,10 @@
+         float hl, hr;
+         hl = hp2(s->hp_y[0], mL, s->hpk[0] * 2.0f, s->hpk[1], s->hpk[2]); hr = hp2(s->hp_y[1], mR, s->hpk[0] * 2.0f, s->hpk[1], s->hpk[2]);
+ #else
+-        float hl = buthp(s->hp_y[0], mL, P(RVHP), s->sr) * 2.0f, hr = buthp(s->hp_y[1], mR, P(RVHP), s->sr) * 2.0f;
++        float hl = buthp(s->hp_y[0], mL, row->c_RVHP, s->sr) * 2.0f, hr = buthp(s->hp_y[1], mR, row->c_RVHP, s->sr) * 2.0f;
+ #endif
+ #if !S1C_NO_RVCOMP
+-        hl = comp(s->cmp[1][0], hl, &cr) * P(CRG); hr = comp(s->cmp[1][1], hr, &cr) * P(CRG);
++        hl = comp(s->cmp[1][0], hl, &cr) * s->t[CRG]; hr = comp(s->cmp[1][1], hr, &cr) * s->t[CRG];
+ #endif
+         float wl, wr;
+ #if S1C_RVB
+@@ -1166,21 +1205,21 @@
+           wl += g * bq_run(&s->hr, s->zrs[0], hfr_noise(s)); wr += g * bq_run(&s->hr, s->zrs[1], hfr_noise(s)); }
+ #endif
+ #if !S1C_NO_RVCOMP
+-        wl = comp(s->cmp[2][0], wl, &cw) * P(CWG); wr = comp(s->cmp[2][1], wr, &cw) * P(CWG);
++        wl = comp(s->cmp[2][0], wl, &cw) * s->t[CWG]; wr = comp(s->cmp[2][1], wr, &cw) * s->t[CWG];
+ #endif
+-        float rm = P(RVMIX) * P(RVON) * lfo10(s, P(LRVMIX));
+-        L = ((1.0f - rm) * mL + rm * wl) * 2.0f * P(MVOL);
+-        R = ((1.0f - rm) * mR + rm * wr) * 2.0f * P(MVOL);
++        float rm = row->c_RVMIX * row->c_RVON * row->lfo10_LRVMIX;
++        L = ((1.0f - rm) * mL + rm * wl) * 2.0f * row->c_MVOL;
++        R = ((1.0f - rm) * mR + rm * wr) * 2.0f * row->c_MVOL;
+ #else
+         /* device: delay and reverb are the shared bus; the part glue reads these send levels */
+-        s->send_dly = P(DLMIX) * P(DLON);
+-        s->send_rev = P(RVMIX) * P(RVON) * lfo10(s, P(LRVMIX));
+-        L *= 2.0f * P(MVOL); R *= 2.0f * P(MVOL);
++        s->send_dly = row->c_DLMIX * row->c_DLON;
++        s->send_rev = row->c_RVMIX * row->c_RVON * row->lfo10_LRVMIX;
++        L *= 2.0f * row->c_MVOL; R *= 2.0f * row->c_MVOL;
+ #endif
+-        L = comp(s->cmp[0][0], L, &cm) * P(CMG); R = comp(s->cmp[0][1], R, &cm) * P(CMG);
++        L = comp(s->cmp[0][0], L, &cm) * s->t[CMG]; R = comp(s->cmp[0][1], R, &cm) * s->t[CMG];
+         /* widen: the right channel through three allpasses, crossfaded */
+ #if WAP_L0
+-        R = s1u_widen_run(&s->wid, R, P(WIDEN));
++        R = s1u_widen_run(&s->wid, R, row->c_WIDEN);
+ #else
+         {
+ #if defined S1C_WIDEN_FLOAT
+@@ -1189,9 +1228,10 @@
+             float wd = h16_get(s->wbuf[s->wpos]); s->wbuf[s->wpos] = h16_put(R);
+ #endif
+             if (++s->wpos >= s->wlen) s->wpos = 0;
+-            R += P(WIDEN) * (wd - R);
++            R += row->c_WIDEN * (wd - R);
+         }
+ #endif
+         outl[f] = L; outr[f] = R;
+     }
++    }
+ }
