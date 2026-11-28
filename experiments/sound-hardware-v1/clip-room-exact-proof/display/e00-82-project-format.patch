@@ -1,0 +1,49 @@
+--- a/firmware/src/app/project.c
++++ b/firmware/src/app/project.c
+@@ -38,12 +38,16 @@
+  * pattern presets or note locks stays byte-identical and loads on 0.0.24.x. */
+ static uint32_t stream_format_of(const project_t *pr)
+ {
+-    for(int k=0;k<NLANE;k++)
+-        if(pr->arr.lane[k].used && pr->arr.lane[k].t==HELD_CHORD_TARGET)return PROJ_STREAM_CHORD;
++    int note_lock = 0;
++    for (int k = 0; k < NLANE; k++) {
++        const lane_t *l = &pr->arr.lane[k];
++        if (!l->used) continue;
++        if (l->t == HELD_CHORD_TARGET) return PROJ_STREAM_CHORD;
++        note_lock |= l->t == 0xfdu;
++    }
++    if (note_lock) return PROJ_STREAM_14;
+     for (int p = 0; p < NPAT; p++)
+         if (pr->pat[p].rsv[0] | pr->pat[p].rsv[1]) return PROJ_STREAM_14;
+-    for (int k = 0; k < NLANE; k++)
+-        if (pr->arr.lane[k].used && pr->arr.lane[k].t == 0xfdu) return PROJ_STREAM_14;
+     return PROJ_STREAM;
+ }
+ /* Revision 13 never stored these bytes: they load as 0 (no pattern preset). */
+@@ -821,18 +825,18 @@
+ PROJECT_COLD
+ int project_file_validate(const uint8_t *h)
+ {
++    const uint32_t format = get32(h + 20), part_off = get32(h + 28);
+     if (get32(h) != 0x50583058u || get32(h + 4) != 1 || get32(h + 8) != sizeof project_stage ||
+-        !PROJ_FORMAT_OK(get32(h + 16)) ||
+-        !stream_known(get32(h + 20)) ||
+-        get32(h + 24) != PROJ_SND_REV || !PROJ_FILE_OFF_OK(get32(h + 28)))
++        !PROJ_FORMAT_OK(get32(h + 16)) || !stream_known(format) ||
++        get32(h + 24) != PROJ_SND_REV || !PROJ_FILE_OFF_OK(part_off))
+         return -1;
+     if (get32(h + 12) != crc32_of((const uint8_t *)&project_stage, sizeof project_stage))
+         return -4;
+-    if(!stream_layout_ok(&project_stage,get32(h+20)))return -9;
+-    stream_13_upgrade(&project_stage, get32(h+20));
+-    part_off_staged = (uint8_t)(get32(h + 28) & PROJ_PART_OFF_ALL);
++    if(!stream_layout_ok(&project_stage,format))return -9;
++    stream_13_upgrade(&project_stage, format);
++    part_off_staged = (uint8_t)(part_off & PROJ_PART_OFF_ALL);
+ #if !X0X_ORIGINAL_SYNTH
+-    migrate_break_counts(&project_stage, get32(h+20));
++    migrate_break_counts(&project_stage, format);
+ #endif
+     return project_validate_stage();
+ }

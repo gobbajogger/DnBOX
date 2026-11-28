@@ -13,7 +13,7 @@ static _Alignas(16) unsigned char arena[S1C_ARENA_BYTES],pre[S1C_ARENA_BYTES],po
 static float out[4][256];
 
 void candidate_s1c_split_enable(void *,unsigned);
-static _Alignas(16) unsigned char worker[5120];
+static _Alignas(16) unsigned char worker[6144];
 static jmp_buf abort_now;
 static int running, bad, ticks, syncs;
 static unsigned accepted, faulted;

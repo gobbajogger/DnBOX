@@ -1,0 +1,93 @@
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -7463,6 +7463,55 @@
+     segs(4, vc(&FONT_T, FOOT_Y, 9), &FONT_T, col, FOOT_GAP, a, b, c, 0);
+ }
+ 
++#if X0X_UI_SMALL_CANVAS
++/* A full 69-row raster occupies the head of cv_px. Its unused last 13
++ * rows carry one lossless pixel transcript until both writes are finished. */
++#define CV_STAGE_PIXELS (240u * BAND_H)
++#define CV_STAGE_BYTES (2u * (CV_MAX - CV_STAGE_PIXELS))
++#define CV_STAGE_PACKED ((uint8_t *)(cv_px + CV_STAGE_PIXELS))
++#ifdef X0X_HOST
++static uint32_t cv_stage_peak, cv_stage_reject;
++#endif
++typedef struct { uint8_t *p; unsigned n; } cv_stage_io;
++static int cv_stage_write(void *op,const uint8_t *p,uint32_t n)
++{
++    cv_stage_io *o=op;
++    if(n>o->n)return -1;
++    memcpy(o->p,p,n);o->p+=n;o->n-=n;
++    return 0;
++}
++static int cv_stage_read(void *op)
++{
++    cv_stage_io *o=op;
++    if(!o->n)return -1;
++    --o->n;return *o->p++;
++}
++static UI_DRAW unsigned cv_stage_pack(void)
++{
++    /* Main-loop only, before any renderer input callback. LZ's dictionary
++     * may not be touched during the PERF test's persistent scratch lease. */
++    if(perf_testing())return 0;
++    cv_stage_io io={CV_STAGE_PACKED,CV_STAGE_BYTES};
++    lz_sink_t sink={cv_stage_write,&io};
++    if(lz_compress((const uint8_t *)cv_px,2*CV_STAGE_PIXELS,&sink))return 0;
++    const unsigned len=CV_STAGE_BYTES-io.n;
++#ifdef X0X_HOST
++    if(len>cv_stage_peak)cv_stage_peak=len;
++#endif
++    return len;
++}
++static UI_DRAW int cv_stage_unpack(unsigned len)
++{
++    lcd_sync();
++    cv_stage_io io={CV_STAGE_PACKED,len};
++    lz_src_t src={cv_stage_read,&io};
++    if(lz_decompress(&src,(uint8_t *)cv_px,2*CV_STAGE_PIXELS))return 0;
++    cv_row_base=BAND_H;
++    cv_band(BAND_H,BAND_H);
++    return 1;
++}
++#endif
++
+ static UI_DRAW void draw_main(void)
+ {
+     int band, readout = ui.touched >= 0 && (int32_t)(ui.touch_until - plat_ms()) > 0 &&
+@@ -7525,7 +7574,15 @@
+ #else
+     cv_begin(240, 2 * BAND_H, C_BLACK);           /* both bands, then one transfer: no tear between them */
+ #endif
++#if X0X_UI_SMALL_CANVAS
++    unsigned staged_len=0;
++    /* Nonmodal renderer has no input callback. Paint the later physical
++     * band first and save its pixels BEFORE either band can fire input. */
++    for (int pass=0;pass<2;++pass) {
++        band=modal.route ? pass : 1-pass;
++#else
+     for (band = 0; band < 2; band++) {
++#endif
+ #if X0X_UI_SMALL_CANVAS
+         cv_window(240, MAIN_ROWS, (uint32_t)band * BAND_H, BAND_H,
+                   modal.route ? modal.bg : C_BLACK);
+@@ -7575,7 +7632,17 @@
+             !(ui.view == V_PART && (is_drum() || is_303())))
+             draw_readout();
+ #if X0X_UI_SMALL_CANVAS
+-        cv_commit_main_band((unsigned)band);
++        if (band==1) {
++            if (!(staged_len=cv_stage_pack())) {
++#ifdef X0X_HOST
++                ++cv_stage_reject;
++#endif
++                return;
++            }
++        } else {
++            cv_commit_main_band(0);
++            if(cv_stage_unpack(staged_len))cv_commit_main_band(1);
++        }
+ #endif
+     }
+ #if !X0X_UI_SMALL_CANVAS

@@ -1,0 +1,853 @@
+--- a/firmware/src/gfx.c
++++ b/firmware/src/gfx.c
+@@ -83,11 +83,23 @@
+  * (20+138+82 = 240). The tallest is the main area. The strip used to be 144
+  * rows; the extra 6 moved into the knob row and were still reserved here
+  * (240 * 6 * 2 = 2880 bytes of the pool). */
++#ifndef X0X_UI_SMALL_CANVAS
++#define X0X_UI_SMALL_CANVAS 0
++#endif
++#if X0X_UI_SMALL_CANVAS
++#define CV_ROWS 82u
++#else
+ #define CV_ROWS 138u
++#endif
+ #define CV_MAX (240u * CV_ROWS)
+ _Static_assert(CV_ROWS >= 82u, "screen strip shorter than the knob row");
+ static uint16_t cv_px[CV_MAX] __attribute__((section(".pool")));
+ static uint32_t cv_w, cv_h;
++#if X0X_UI_SMALL_CANVAS
++static uint32_t cv_row_base;
++#else
++#define cv_row_base 0u
++#endif
+ static int32_t cv_oy;            /* y offset for graph drawing */
+ static int32_t cv_y0, cv_y1;     /* X0X: the rows drawing may touch (cv_band) */
+ 
+@@ -140,6 +152,9 @@
+     if (w * h > CV_MAX)
+         h = CV_MAX / w;
+     lcd_sync();                     /* the last blit may still read cv_px */
++#if X0X_UI_SMALL_CANVAS
++    cv_row_base = 0;
++#endif
+     cv_w = w;
+     cv_h = h;
+     cv_oy = cv_y0 = 0;
+@@ -162,8 +177,25 @@
+ {
+     cv_oy = cv_y0 = y0;
+     cv_y1 = y0 + h;
++#if X0X_UI_SMALL_CANVAS
++    if (cv_y0 < (int32_t)cv_row_base) cv_y0 = (int32_t)cv_row_base;
++    if (cv_y1 > (int32_t)(cv_row_base + cv_h)) cv_y1 = (int32_t)(cv_row_base + cv_h);
++#endif
+ }
+ 
++#if X0X_UI_SMALL_CANVAS
++/* Raster in logical coordinates, backed by just one contiguous window. */
++static void cv_window(uint32_t w, uint32_t logical_h, uint32_t y0, uint32_t rows, uint16_t bg)
++{
++    if (y0 > logical_h) y0 = logical_h;
++    if (rows > logical_h - y0) rows = logical_h - y0;
++    cv_begin(w, rows, bg);
++    cv_row_base = y0;
++    cv_y0 = (int32_t)y0;
++    cv_y1 = (int32_t)(y0 + cv_h);
++}
++#endif
++
+ static void cv_blit(uint32_t x, uint32_t y) { lcd_blit(x, y, cv_w, cv_h, cv_px); }
+ 
+ /* canvas rows r0 .. cv_h-1 only, to screen row y + r0 */
+@@ -177,7 +209,7 @@
+ {
+     y += cv_oy;
+     if ((uint32_t)x < cv_w && y >= cv_y0 && y < cv_y1)
+-        cv_px[(uint32_t)y * cv_w + (uint32_t)x] = swap16(c);
++        cv_px[((uint32_t)y - cv_row_base) * cv_w + (uint32_t)x] = swap16(c);
+ }
+ 
+ static void cv_rect(int32_t x, int32_t y, int32_t w, int32_t h, uint16_t c)
+@@ -195,7 +227,7 @@
+         y1 = cv_y1;
+     for (; y < y1; y++)
+         for (i = x; i < x1; i++)
+-            cv_px[(uint32_t)y * cv_w + (uint32_t)i] = sc;
++            cv_px[((uint32_t)y - cv_row_base) * cv_w + (uint32_t)i] = sc;
+ }
+ 
+ #if defined(__clang__) && !defined(X0X_HOST)
+@@ -208,7 +240,7 @@
+     y += cv_oy;
+     if ((uint32_t)x >= cv_w || y < cv_y0 || y >= cv_y1 || !a)
+         return;
+-    q = &cv_px[(uint32_t)y * cv_w + (uint32_t)x];
++    q = &cv_px[((uint32_t)y - cv_row_base) * cv_w + (uint32_t)x];
+     if (a >= 16u) {
+         *q = swap16(c);
+         return;
+@@ -380,13 +412,13 @@
+                 if (!a || px < clip_left || px >= clip_right || (uint32_t)px >= cv_w || py < cv_y0 || py >= cv_y1)
+                     continue;
+                 if (a == 15u) {
+-                    cv_px[(uint32_t)py * cv_w + (uint32_t)px] = sc;
++                    cv_px[((uint32_t)py - cv_row_base) * cv_w + (uint32_t)px] = sc;
+                 } else {
+-                    uint32_t bg = swap16(cv_px[(uint32_t)py * cv_w + (uint32_t)px]);
++                    uint32_t bg = swap16(cv_px[((uint32_t)py - cv_row_base) * cv_w + (uint32_t)px]);
+                     uint32_t br = bg >> 11, bgg = (bg >> 5) & 63u, bb = bg & 31u;
+                     uint32_t nr = cv_div15(r * a + br * (15u - a)), ng = cv_div15(g * a + bgg * (15u - a)),
+                              nb = cv_div15(b * a + bb * (15u - a));
+-                    cv_px[(uint32_t)py * cv_w + (uint32_t)px] = swap16((nr << 11) | (ng << 5) | nb);
++                    cv_px[((uint32_t)py - cv_row_base) * cv_w + (uint32_t)px] = swap16((nr << 11) | (ng << 5) | nb);
+                 }
+             }
+         x += font_advance(f,gi);
+@@ -429,6 +461,15 @@
+     int custom = pay && pay[0] == BOOT_KIND_CUSTOM;
+     int picture = custom && (pay[1] & BOOT_F_PIC);
+     boot_lines(pay,title,subtitle);
++#if X0X_UI_SMALL_CANVAS
++    for (int band=0; band<3; ++band) {
++        cv_begin(240,80,C_BLACK);
++        if (picture) for (unsigned y=band?(unsigned)band*80u-20u:0u; y<BOOT_PIC_H && y+20u<(unsigned)(band+1)*80u; ++y)
++            for (unsigned x=0; x<BOOT_PIC_W; ++x)
++                if (boot_pix(pay+BOOT_PAY_FIXED,x,y)) cv_pset((int)x,(int)y+20-band*80,C_HI);
++        cv_blit(0,(uint32_t)band*80u);
++    }
++#else
+     for (int band=0; band<2; ++band) {
+         cv_begin(240,120,C_BLACK);
+         if (picture) for (unsigned y=0; y<BOOT_PIC_H; ++y)
+@@ -436,6 +477,7 @@
+                 if (boot_pix(pay+BOOT_PAY_FIXED,x,y)) cv_pset((int)x,(int)y+20-band*120,C_HI);
+         cv_blit(0,(uint32_t)band*120u);
+     }
++#endif
+     /* B supports lowercase; M deliberately contains capitals/numbers only. */
+     draw_text_box(0,picture?137:96,240,&FONT_B,title,C_HI,1);
+     draw_text_box(0,picture?164:134,240,&FONT_S,subtitle,C_GRAY,1);
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -5276,7 +5276,7 @@
+ /* gfx.c sizes the one screen strip (CV_ROWS) to this main area. The unity
+  * build sees that macro; a host file that compiles ui.c alone does not. */
+ #ifdef CV_ROWS
+-_Static_assert(2u * BAND_H <= CV_ROWS, "main area taller than the screen strip");
++_Static_assert((X0X_UI_SMALL_CANVAS ? 1u : 2u) * BAND_H <= CV_ROWS, "main area taller than the screen strip");
+ _Static_assert(KNOB_H <= CV_ROWS, "knob row taller than the screen strip");
+ _Static_assert(HDR_H <= CV_ROWS, "header taller than the screen strip");
+ _Static_assert(HDR_H + 2u * BAND_H + KNOB_H == 240u, "the three strips must tile the 240-row panel");
+@@ -5364,7 +5364,13 @@
+ #define MAIN_ROWS (2 * BAND_H)
+ #define KNOB_ROWS KNOB_H
+ #define LCD_TILE_ROWS(n) (((n) + X0X_LCD_TILE_H - 1u) / X0X_LCD_TILE_H)
+-static uint32_t main_tileh[LCD_TILE_ROWS(MAIN_ROWS) * X0X_LCD_TILE_COLS];
++static uint32_t main_tileh[
++#if X0X_UI_SMALL_CANVAS
++    (2u * LCD_TILE_ROWS(BAND_H))
++#else
++    LCD_TILE_ROWS(MAIN_ROWS)
++#endif
++    * X0X_LCD_TILE_COLS];
+ static uint32_t knob_tileh[LCD_TILE_ROWS(KNOB_ROWS) * X0X_LCD_TILE_COLS];
+ static uint32_t header_tileh[LCD_TILE_ROWS(HDR_H) * X0X_LCD_TILE_COLS];
+ static uint32_t header_full_hash, popup_knob_full_hash;
+@@ -5377,10 +5383,31 @@
+     cv_tile_valid[region] = 1u;
+     x0x_lcd_tile_commit(cv_px, rows, hashes, force, cv_lcd_emit, &pos);
+ }
++#if !X0X_UI_SMALL_CANVAS
+ static void cv_commit_rect(int region, uint32_t x, uint32_t y)
+ {
+     cv_commit_rows(region, x, y, MAIN_ROWS, main_tileh);
+ }
++#endif
++#if X0X_UI_SMALL_CANVAS
++/* Separate hash rows per band. All other main owners in this build use the
++ * same partition; whole-main invalidations still force both bands. */
++static void cv_commit_main_band(unsigned band)
++{
++    static uint8_t force;
++    cv_lcd_pos_t pos = {0, MAIN_Y + band * BAND_H};
++    if (!band) {
++        force = !blit_hash[1] || !cv_tile_valid[1];
++        /* Preserve any invalidation issued by live input during either send. */
++        blit_hash[1] = 1u;
++        cv_tile_valid[1] = 1u;
++    }
++    x0x_lcd_tile_commit(cv_px, BAND_H,
++        main_tileh + band * LCD_TILE_ROWS(BAND_H) * X0X_LCD_TILE_COLS,
++        force, cv_lcd_emit, &pos);
++}
++#endif
++
+ static void cv_commit_knobs(int region)
+ {
+     cv_commit_rows(region, 0, KNOB_Y, KNOB_ROWS, knob_tileh);
+@@ -7266,6 +7293,77 @@
+     }
+ }
+ 
++#if X0X_UI_SMALL_CANVAS
++/* Resolve and own just the mutable strings; all other help lines are literals. */
++typedef struct {
++    uint16_t bg, white, gray, part;
++    int8_t route, n;
++    union {
++        struct {
++            const char *title, *lines[HELP_LINES];
++            char copy_part[40], clear_part[32], status[40];
++        } help;
++        char ask[2][sizeof ui.ask_q[0]];
++    } text;
++} cv_modal_scene;
++static void cv_capture_modal(cv_modal_scene *s)
++{
++    s->route = ui.help ? 1 : ui.overlay == O_ASK ? 2 : 0;
++    if (!s->route) return;
++    s->bg = C_BLACK; s->white = C_WHITE; s->gray = C_GRAY;
++    if (s->route == 2) {
++        memcpy(s->text.ask, ui.ask_q, sizeof s->text.ask);
++        return;
++    }
++    int button = ui.help - 1;
++    s->part = part_col();
++    s->text.help.title = btn_label(button);
++    s->n = help_lines(button, s->text.help.lines);
++    if (button == B_SAVE) {
++        /* help_lines supplies these three specific static arrays in SAVE. */
++        memcpy(s->text.help.copy_part, s->text.help.lines[1], sizeof s->text.help.copy_part);
++        memcpy(s->text.help.clear_part, s->text.help.lines[3], sizeof s->text.help.clear_part);
++        memcpy(s->text.help.status, s->text.help.lines[5], sizeof s->text.help.status);
++        s->text.help.lines[1] = s->text.help.copy_part;
++        s->text.help.lines[3] = s->text.help.clear_part;
++        s->text.help.lines[5] = s->text.help.status;
++    }
++}
++static UI_DRAW void draw_ask(int band, const cv_modal_scene *s)
++{
++    uint16_t red = RGB(255, 80, 60);
++    if (band == 0) {
++        frame(6, 10, 228, 62, red);
++        cv_rect(7, 71, 226, 1, s->bg);
++        text_c(120, 24, &FONT_B, s->text.ask[0], s->white);
++        text_c(120, 46, &FONT_S, s->text.ask[1], s->gray);
++    } else {
++        cv_rect(6, 0, 1, 44, red);
++        cv_rect(233, 0, 1, 44, red);
++        cv_rect(7, 44, 226, 1, red);
++        box(22, 10, 92, 24, red);
++        text_c(68, vc(&FONT_B, 10, 24), &FONT_B, UI_CAP_SEL " YES", s->bg);
++        frame(126, 10, 92, 24, s->gray);
++        text_c(172, vc(&FONT_B, 10, 24), &FONT_B, UI_CAP_HOME " NO", s->gray);
++    }
++}
++
++static UI_DRAW void draw_help(int band, const cv_modal_scene *s)
++{
++    int n = s->n, k;
++    uint16_t c = s->part;
++    if (band == 0) {
++        box(6, 4, 228, 24, c);
++        text_c(120, vc(&FONT_B, 4, 24), &FONT_B, s->text.help.title, s->bg);
++    }
++    for (k = 0; k < n; k++) {                            /* evenly spaced; a line across the bands in both */
++        int32_t y = 34 + k * 18 - band * BAND_H;
++        if (y > -18 && y < BAND_H)
++            text_c(120, y, &FONT_XS, s->text.help.lines[k], s->white);
++    }
++}
++
++#else
+ static UI_DRAW void draw_ask(int band)
+ {
+     uint16_t red = RGB(255, 80, 60);
+@@ -7301,6 +7399,8 @@
+     }
+ }
+ 
++#endif
++
+ #ifdef X0X_HOST
+ /* every card, on every kind of screen, fits the screen: 1 = yes (prints the first that does not) */
+ static int help_fits(void)
+@@ -7385,34 +7485,67 @@
+         if (smk_clip_mode_on() && ui.overlay == O_NONE && !ui.help && smk_clip_wait()) {
+             if (!clip_wait_on) {                  /* CLP-80: no Loopy host: the waiting screen, not the grid */
+                 clip_wait_on = 1u;
++#if X0X_UI_SMALL_CANVAS
++                for (unsigned page = 0; page < 2u; ++page) {
++                    cv_window(240, 2 * BAND_H, page * BAND_H, BAND_H, C_BLACK);
++#else
+                 cv_begin(240, 2 * BAND_H, C_BLACK);
+                 cv_band(0, 2 * BAND_H);
++#endif
+                 text_c(120, 34, &FONT_B, "WAITING FOR", C_WHITE);
+                 text_c(120, 56, &FONT_B, "LOOPY PRO", C_WHITE);
+                 text_c(120, 86, &FONT_XS, "USB OR BLUETOOTH", C_GRAY);
++#if X0X_UI_SMALL_CANVAS
++                    cv_commit_main_band(page);
++                }
++#else
+                 cv_commit_rect(1, 0, MAIN_Y);
++#endif
+             }
+             smk_clip_lcd_force();                 /* the grid draws at once when a host comes */
+             return;
+         }
+         clip_wait_on = 0u;
+         if (smk_clip_mode_on() && ui.overlay == O_NONE && !ui.help) {
++#if X0X_UI_SMALL_CANVAS
++            smk_clip_lcd_draw(240u, 2u * BAND_H);
++#else
+             if (smk_clip_lcd_draw(240u, 2u * BAND_H))
+                 cv_commit_rect(1, 0, MAIN_Y);
++#endif
+             return;
+         }
+         if (smk_clip_mode_on())
+             smk_clip_lcd_force();   /* a menu (for example GLO) is on the screen: draw the grid again after it */
+     }
+ #endif
++#if X0X_UI_SMALL_CANVAS
++    cv_modal_scene modal;
++    cv_capture_modal(&modal);
++#else
+     cv_begin(240, 2 * BAND_H, C_BLACK);           /* both bands, then one transfer: no tear between them */
++#endif
+     for (band = 0; band < 2; band++) {
++#if X0X_UI_SMALL_CANVAS
++        cv_window(240, MAIN_ROWS, (uint32_t)band * BAND_H, BAND_H,
++                  modal.route ? modal.bg : C_BLACK);
++#endif
+         cv_band(band * BAND_H, BAND_H);
++#if X0X_UI_SMALL_CANVAS
++        if (modal.route) {
++            if (modal.route == 1) draw_help(band, &modal);
++            else draw_ask(band, &modal);
++            cv_commit_main_band((unsigned)band);
++            continue;
++        }
++        if (ui.overlay == O_LIST)
++#else
+         if (ui.help)
+             draw_help(band);
+         else if (ui.overlay == O_ASK)
+             draw_ask(band);
+         else if (ui.overlay == O_LIST)
++#endif
+             draw_list(band);
+         else if (ui.view == V_HOME)
+             draw_home(band);
+@@ -7441,9 +7574,14 @@
+             !(ui.brk_choice_on && engine_brk_preview_active()) &&
+             !(ui.view == V_PART && (is_drum() || is_303())))
+             draw_readout();
++#if X0X_UI_SMALL_CANVAS
++        cv_commit_main_band((unsigned)band);
++#endif
+     }
++#if !X0X_UI_SMALL_CANVAS
+     cv_band(0, 2 * BAND_H);
+     cv_commit_rect(1, 0, MAIN_Y);
++#endif
+ }
+ 
+ /* -------------------------------------------------------------- knob strip --- */
+--- a/firmware/src/app/main_fm1.c
++++ b/firmware/src/app/main_fm1.c
+@@ -627,6 +627,115 @@
+ {
+     return (uint8_t)(!apc_link_host && !ck_page_on());
+ }
++#if X0X_UI_SMALL_CANVAS
++/* Main-area global logical coordinates; physical store holds one 69-row band. */
++void cv_window(uint32_t w, uint32_t logical_h, uint32_t y0, uint32_t rows, uint16_t bg);
++void cv_commit_main_band(unsigned band);
++#define SMK_CLIP_BAND_ROWS 69u
++typedef struct {
++    uint32_t keys[2];
++    uint8_t pg, value[9];
++    uint16_t black;
++} ck_page_scene;
++static void ck_page_snapshot(ck_page_scene *scene);
++static void ck_page_draw(const ck_page_scene *scene, unsigned band);
++typedef struct {
++    uint8_t cols, rows, origin_col, origin_row, view, has_clips;
++    uint16_t white, black, dim;
++    uint8_t velocity[SMK_APC40_CLIP_COUNT];
++    uint8_t queued[SMK_APC40_CLIP_COUNT / 8];
++    uint8_t view_bits[SMK_APC40_CLIP_COUNT / 8];
++} smk_clip_lcd_scene;
++static void smk_clip_grid_band(const smk_clip_lcd_scene *s, const smk_apc40_lcd_map_t *m, unsigned band)
++{
++    int32_t p = m->pitch, gap = p >= 24 ? 3 : 2;
++    int32_t y0 = (int32_t)(band * SMK_CLIP_BAND_ROWS);
++    for (uint8_t row = 0; row < m->nrows; ++row) {
++        /* Absolute logical y, including cards that cross the physical seam. */
++        int32_t y = m->y0 + (int32_t)smk_apc40_lcd_screen_row(m, (uint8_t)(m->row0 + row)) * p;
++        if (y + p <= y0 || y >= y0 + (int32_t)SMK_CLIP_BAND_ROWS)
++            continue;
++        for (uint8_t col = 0; col < m->ncols; ++col) {
++            int32_t x = m->x0 + (int32_t)col * p, q = p / 4;
++            unsigned n = (m->row0 + row) * SMK_APC40_SOURCE_COLS + m->col0 + col;
++            unsigned bit = 1u << (n & 7u);
++            uint8_t v = s->velocity[n];
++            if (s->view_bits[n >> 3] & bit) cv_rect(x, y, p, p, s->white);
++            cv_rect(x + gap, y + gap, p - 2 * gap, p - 2 * gap, s->black);
++            if (v)
++                cv_rect(x + gap + 1, y + gap + 1, p - 2 * gap - 2, p - 2 * gap - 2, smk_clip_lcd565(v));
++            else
++                cv_rect(x + p / 2 - 2, y + p / 2 - 2, 4, 4, s->dim);
++            if (s->queued[n >> 3] & bit)
++                cv_rect(x + p / 2 - q / 2, y + p / 2 - q / 2, q, q, s->white);
++        }
++    }
++}
++uint8_t smk_clip_lcd_draw(uint32_t w, uint32_t h)
++{
++    static uint32_t last_ms, last_sig;
++    uint32_t now = fm1_ms;
++    if (h != 2u * SMK_CLIP_BAND_ROWS)
++        return 0u;
++    if (ck_page_on()) {
++        if (now - last_ms < SMK_CLIP_LCD_MIN_MS)
++            return 0u;
++        ck_page_scene scene;
++        ck_page_snapshot(&scene);
++        last_ms = now;
++        was_on = 0u;
++        for (unsigned band = 0; band < 2u; ++band) {
++            cv_window(w, h, band * SMK_CLIP_BAND_ROWS, SMK_CLIP_BAND_ROWS, scene.black);
++            ck_page_draw(&scene, band);
++            cv_commit_main_band(band);
++        }
++        return 1u;
++    }
++    if (was_on && now - last_ms < SMK_CLIP_LCD_MIN_MS)
++        return 0u;
++    smk_clip_lcd_scene scene = {.white=C_WHITE,.black=C_BLACK,.dim=C_DIM};
++    /* Capture all IRQ/BLE-mutated fields at once, restoring IRQ before any
++     * signature, layout, rendering, DMA, or existing LCD input service. */
++    uint32_t irq = irq_save();
++    scene.cols = apc_cols;
++    scene.rows = apc_rows;
++    scene.origin_col = apc_origin_col;
++    scene.origin_row = apc_origin_row;
++    scene.view = apc_view;
++    scene.has_clips = apc_view_has_clips;
++    for (unsigned n = 0; n < SMK_APC40_CLIP_COUNT; ++n) {
++        scene.velocity[n] = apc_led_velocity[n];
++        scene.queued[n >> 3] |= (uint8_t)((!!(apc_cell_flags[n] & SMK_APC40_CELL_QUEUED)) << (n & 7u));
++    }
++    irq_restore(irq);
++    for (uint8_t pad = 0; pad < SMK_APC40_PAD_COUNT; ++pad) {
++        uint8_t n = smk_apc40_note_for_pad_view(scene.cols, scene.rows, scene.origin_col,
++                                               scene.origin_row, scene.view, pad);
++        if (n < SMK_APC40_CLIP_COUNT)
++            scene.view_bits[n >> 3] |= (uint8_t)(1u << (n & 7u));
++    }
++    uint32_t sig = 2166136261u;
++    for (unsigned n = 0; n < SMK_APC40_CLIP_COUNT; ++n) {
++        sig = (sig ^ scene.velocity[n]) * 16777619u;
++        sig = (sig ^ ((scene.queued[n >> 3] >> (n & 7u) & 1u) ? SMK_APC40_CELL_QUEUED : 0u)) * 16777619u;
++    }
++    for (unsigned n = 0; n < SMK_APC40_CLIP_COUNT; ++n)
++        sig = (sig ^ (scene.view_bits[n >> 3] >> (n & 7u) & 1u)) * 16777619u;
++    sig = (sig ^ ((uint32_t)scene.cols | (uint32_t)scene.rows << 8 | (uint32_t)scene.origin_col << 16 |
++                  (uint32_t)scene.origin_row << 24)) * 16777619u;
++    sig = (sig ^ scene.has_clips) * 16777619u;
++    if (was_on && sig == last_sig && now - last_ms < 1000u)
++        return 0u;
++    was_on = 1u;
++    last_sig = sig;
++    last_ms = now;
++    const smk_apc40_lcd_map_t m = smk_apc40_lcd_map(scene.cols, scene.rows, scene.origin_col, scene.origin_row,
++                                                    scene.has_clips, (uint16_t)w, (uint16_t)h);
++    for (unsigned band = 0; band < 2u; ++band) {
++        cv_window(w, h, band * SMK_CLIP_BAND_ROWS, SMK_CLIP_BAND_ROWS, scene.black);
++        smk_clip_grid_band(&scene, &m, band);
++        cv_commit_main_band(band);
++#else
+ static void ck_page_draw(void);
+ uint8_t smk_clip_lcd_draw(uint32_t w, uint32_t h)
+ {
+@@ -692,6 +801,7 @@
+                 if (apc_cell_flags[n] & SMK_APC40_CELL_QUEUED)
+                     cv_rect(x + p / 2 - q / 2, y + p / 2 - q / 2, q, q, C_WHITE);
+             }
++#endif
+     }
+     return 1u;
+ }
+@@ -1804,7 +1914,11 @@
+     return x0 + (int32_t)(k / 12u * 7u + CK_WI[k % 12u]) * ww + (int32_t)CK_BLK(k) * (ww - ww * 3 / 10);
+ }
+ /* a keyboard of n keys from key 0 (C), the white keys ww wide and h high, key k in col[k] */
++#if X0X_UI_SMALL_CANVAS
++CK_FN static void ck_kbd(int32_t x0, int32_t y, int32_t ww, int32_t h, uint32_t n, const uint16_t *col, uint16_t black)
++#else
+ CK_FN static void ck_kbd(int32_t x0, int32_t y, int32_t ww, int32_t h, uint32_t n, const uint16_t *col)
++#endif
+ {
+     uint32_t k, pass;
+     for (pass = 0; pass < 2u; pass++)
+@@ -1813,7 +1927,11 @@
+             if (CK_BLK(k) != pass)
+                 continue;
+             if (pass) {
++#if X0X_UI_SMALL_CANVAS
++                cv_rect(x - 1, y, bw + 2, h * 3 / 5 + 1, black);
++#else
+                 cv_rect(x - 1, y, bw + 2, h * 3 / 5 + 1, C_BLACK);
++#endif
+                 cv_rect(x, y, bw, h * 3 / 5, col[k]);
+             } else {
+                 cv_rect(x, y, ww - 1, h, col[k]);
+@@ -1874,7 +1992,11 @@
+     for (i = 0; i < 12u; i++)                               /* one octave: the scale, the notes that sound */
+         col[i] = snd >> i & 1u ? C_AMB : ck_in(m, i) ? (CK_BLK(i) ? RGB(140, 140, 140) : RGB(220, 220, 220))
+                                                     : (CK_BLK(i) ? RGB(30, 30, 30) : RGB(70, 70, 70));
++#if X0X_UI_SMALL_CANVAS
++    ck_kbd(4, 23, 15, 36, 12u, col, C_BLACK);
++#else
+     ck_kbd(4, 23, 15, 36, 12u, col);
++#endif
+     cv_rect(ck_key_x(sp->ck_root, 4, 15) + 2, 23 + (CK_BLK(sp->ck_root) ? 15 : 31), 5, 3, CK_MODE_C[0]);
+     q = put_s(put_s(put_s(t, ck_nm(CK_ROOT_N, sp->ck_root)), " "), ck_nm(CK_SCALE_N, sp->ck_scale));
+     if (sp->ck_snap)
+@@ -1907,6 +2029,42 @@
+     return 1u;
+ }
+ /* The stage settings and a plain keybed. The keybed plays MIDI; its colours do not encode field values. */
++#if X0X_UI_SMALL_CANVAS
++static void ck_page_snapshot(ck_page_scene *scene)
++{
++    /* Only main-loop service mutates these fields. No such service runs
++     * here; all nine field values and the keybed are frozen before SPI. */
++    scene->pg = ck.pg;
++    scene->black = C_BLACK;
++    scene->keys[0] = ck.keys[0];
++    scene->keys[1] = ck.keys[1];
++    unsigned pg = (scene->pg & 3u) - 1u, count = pg == 2u ? 9u : 4u;
++    for (unsigned n = 0; n < count; ++n)
++        scene->value[n] = (uint8_t)ck_get(CK_PAGE_FIELDS[pg][n]);
++}
++static void ck_page_draw(const ck_page_scene *scene, unsigned band)
++{
++    uint32_t pg = (scene->pg & 3u) - 1u;
++    uint16_t c = CK_MODE_C[pg];
++    if (band == 0u) {
++        char t[12];
++        uint32_t count = pg == 2u ? 9u : 4u;
++        for (uint32_t n = 0; n < count; ++n) {
++            uint32_t f = CK_PAGE_FIELDS[pg][n];
++            int32_t fx = 4 + (int32_t)(n / 5u) * 120, fy = 2 + (int32_t)(n % 5u) * 12;
++            const char *nm = ck_nm(CK_FLD_N, f);
++            if (f == (uint32_t)scene->pg >> 4)
++                rbox(fx - 2, fy, 116, 12, 3, dim(c, 4));
++            cv_text(fx, vc(&FONT_T, fy, 12), &FONT_T, nm, C_GRAY);
++            cv_text(fx + 44, vc(&FONT_XS, fy, 12), &FONT_XS, ck_val_txt(f, scene->value[n], t), C_WHITE);
++        }
++    } else {
++        uint16_t col[CK_NKEY];
++        for (uint32_t k = 0; k < CK_NKEY; ++k)
++            col[k] = CK_BIT(scene->keys, k) ? c : CK_BLK(k) ? RGB(25, 25, 25) : RGB(60, 60, 60);
++        ck_kbd(10, 76, 10, 46, CK_NKEY, col, scene->black);
++    }
++#else
+ static void ck_page_draw(void)
+ {
+     CK_BASE;
+@@ -1926,6 +2084,7 @@
+     for (k = 0; k < CK_NKEY; k++)
+         col[k] = CK_BIT(cp->keys, k) ? c : CK_BLK(k) ? RGB(25, 25, 25) : RGB(60, 60, 60);
+     ck_kbd(10, 76, 10, 46, CK_NKEY, col);
++#endif
+ }
+ /* every main loop pass (also between frames, for the arp timing) */
+ CK_FN void smk_ck_poll(void)
+--- a/firmware/src/app/smc_mixer.c
++++ b/firmware/src/app/smc_mixer.c
+@@ -1068,6 +1068,187 @@
+ 
+ /* The encoder and fader use the same bounded native value rendering. Keeping
+  * one outline avoids duplicating formatting and width trimming in every grid. */
++
++#if X0X_UI_SMALL_CANVAS
++typedef struct {
++    float v;
++    uint16_t c, fill;
++    uint8_t x,y,a,b,kind,bipolar,text,font;
++} smc_grid_op;
++typedef struct { unsigned n, nt; uint16_t black; uint8_t bad; } smc_grid_scene;
++enum { SMC_GRID_OPS=217, SMC_GRID_TEXTS=64, SMC_GRID_RASTER=240*BAND_H };
++_Static_assert(sizeof(smc_grid_op)==16, "SMC opcode ABI");
++_Static_assert(2u*SMC_GRID_RASTER+SMC_GRID_OPS*sizeof(smc_grid_op)+32u*SMC_GRID_TEXTS<=sizeof cv_px,"SMC tape in canvas tail");
++static unsigned char *smc_grid_storage(void)
++{
++    return (unsigned char *)(cv_px+SMC_GRID_RASTER);
++}
++static char *smc_grid_string(unsigned id)
++{
++    return (char *)smc_grid_storage()+SMC_GRID_OPS*sizeof(smc_grid_op)+32u*id;
++}
++static void smc_grid_add(smc_grid_scene *s, const smc_grid_op *op)
++{
++    if (s->bad || s->n == SMC_GRID_OPS) { s->bad=1; return; }
++    memcpy(smc_grid_storage()+s->n++*sizeof(*op),op,sizeof(*op));
++}
++static void smc_grid_rect(smc_grid_scene *s,int x,int y,int w,int h,uint16_t c)
++{
++    const smc_grid_op op={.kind=0,.x=x,.y=y,.a=w,.b=h,.c=c};
++    smc_grid_add(s,&op);
++}
++static void smc_grid_arc(smc_grid_scene *s,int x,int y,int r,float v,uint16_t track,uint16_t fill,int bipolar)
++{
++    const smc_grid_op op={.kind=1,.x=x,.y=y,.a=r,.v=v,.c=track,.fill=fill,.bipolar=bipolar};
++    smc_grid_add(s,&op);
++}
++static void smc_grid_icon(smc_grid_scene *s,int x,int y,int symbol,int scale,uint16_t color)
++{
++    const smc_grid_op op={.kind=2,.x=x,.y=y,.a=symbol,.b=scale,.c=color};
++    smc_grid_add(s,&op);
++}
++static void smc_grid_text(smc_grid_scene *s,int x,int y,const felucca_font_t *f,const char *str,uint16_t c)
++{
++    if (s->bad || s->nt == SMC_GRID_TEXTS) { s->bad=1; return; }
++    unsigned n=0;
++    while(n<31u&&str[n]) ++n;
++    if(str[n]) { s->bad=1; return; }
++    memcpy(smc_grid_string(s->nt),str,n+1u);
++    const smc_grid_op op={.kind=3,.x=x,.y=y,.font=f==&FONT_XS,.c=c,.text=s->nt++};
++    smc_grid_add(s,&op);
++}
++static UI_DRAW void smc_ui_strip_value(smc_grid_scene *scene, pref_t r, int x, int y, uint16_t color)
++{
++    char value[32], unit[12];
++    if (r.kind == R_NONE) put_s(value, "--");
++    else pref_value_of(r, pref_get(r), value, unit);
++    char *end = value; while (*end) end++;
++    while (tw(&FONT_T, value) > 27 && end > value) *--end = 0;
++    smc_grid_text(scene, x, y, &FONT_T, value, color);
++}
++
++/* Eight physical strips, left to right: encoder above, fader left of M/S/R.
++ * Keep this geometry even when a target is inactive; position is the user's map. */
++static UI_DRAW void smc_ui_grid(smc_grid_scene *scene)
++{
++    static const uint8_t NOTES[4] = {16, 8, 0, 24};
++    /* Strips 0..4 = part_s (PART_N / BRK); 5..7 = send/master FX. */
++    static const char *const MAIN_FX[3] = {"RVB", "DLY", "FLT"};
++    int kit = smc_drum_mix();
++    int view = smc.locked ? smc.lock_view : smc.view;
++    /* Selection follows SMC, independently of the touched control.
++     * A locked bank can differ: no lane is selected if it is outside this bank.
++     * LOCK in the header describes captured targets, never the title highlight. */
++    int selected = kit >= 0 ? smc.sel[kit] - smc_drum_track(kit, 0) :
++        view == V_FX ? 5 + smc_page_now() :
++        view == V_MIX ? (smc_page_now() == 3 ? 7 : part_position(smc.mixsel)) : part_position(smc.locked ? smc.lock_part : smc.part);
++    for (int n = 0; n < 8; n++) {
++        pref_t f = smc_target(n), k = smc_knob_target(n);
++        char name[24];
++        int x = n * 30, active = smc_ui.kind < 2 && n == smc_ui.strip;
++        uint16_t fc = active && smc_ui.kind == 0 ? C_HI : C_GRAY;
++        uint16_t kc = active && smc_ui.kind == 1 ? C_HI : C_GRAY;
++        if (n) smc_grid_rect(scene, x, 0, 1, 138, C_LINE);
++        if (kit >= 0) {
++            int track = smc_drum_track(kit, n);
++            if (track < 0) put_s(name, "--");
++            else if ((smc.locked ? smc.lock_view : smc.view) == V_SEQ)
++                put_s(name, engine_voice_name(kit ? T_808 : T_909, track));
++            else put_i(name, track + 1);
++        } else put_s(name, n < NPARTS ? part_s(part_at(n)) : MAIN_FX[n - NPARTS]);
++        int page_knobs = kit < 0 && view != V_HOME && !(view == V_MIX && smc_page_now() == 0);
++        if (n == selected) smc_grid_rect(scene, x + 1, 0, 28, 13, UI_N_SELECT);
++        smc_grid_text(scene, x + 15, 1, &FONT_T, name,
++               n == selected ? SOUND_INK : page_knobs ? C_DIM : C_WHITE);
++        const felucca_font_t *label_font = &FONT_T;
++        if (k.kind == R_NONE) put_s(name, "--");
++        else {
++            const char *label = pref_name(k);
++            if (k.kind == R_ENG && k.a == T_MIX && k.c == MX_PAN) label = "PAN";
++            if (k.kind == R_ENG && k.a == T_MIX && k.c == MX_CUT) label = "CUT";
++            if (k.kind == R_ENG && k.a == T_FX && k.c == FX_RV_DECAY) label = "DECAY";
++            if (k.kind == R_ENG && k.a == T_FX && k.c == FX_DL_FDBK) label = "FDBK";
++            if (k.kind == R_ENG && k.a == T_MST && k.c == MST_RESO) label = "RESO";
++            if (k.kind == R_BLEN || k.kind == R_DLEN) label = "LEN";
++            if (k.kind == R_BDIR) label = "DIR";
++            if (k.kind == R_BTRANS) label = "TRNS";
++            if (k.kind == R_FREEPLAY) label = "FREE";
++            if (k.kind == R_BPATSND) label = "SOUND";
++            smc_ui_text(name, label);
++            if (tw(label_font, caps_of(name)) > 27) label_font = &FONT_XS;
++        }
++        smc_grid_text(scene, x + 15, 14, label_font, caps_of(name), k.kind == R_NONE ? C_DIM : kc);
++        /* Same authoritative value/arc renderer as the keyboard knob strip. */
++        if (k.kind != R_NONE) {
++            int bipolar = k.kind == R_BTRANS || is_pan(k) ||
++                (k.kind == R_ENG && k.a == T_MST && k.c == MST_DJF);
++            if (bipolar) smc_grid_rect(scene, x + 14, 25, 2, 3, C_WHITE);
++            smc_grid_arc(scene, x + 15, 36, 8, (float)smc_scaled(k) / 127.0f, C_LINE, kc, bipolar);
++        } else smc_grid_text(scene, x + 15, 30, &FONT_T, "--", C_DIM);
++        smc_ui_strip_value(scene, k, x + 15, 46, k.kind == R_NONE ? C_DIM : kc);
++        smc_grid_rect(scene, x + 3, 64, 2, 51, f.kind == R_NONE ? C_LINE : C_DIM);
++        if (f.kind != R_NONE) {
++            int target = 111 - smc_scaled(f) * 45 / 127;
++            /* Source #688: color the fader's destination travel, without
++             * replacing its physical pickup marker or newer UI materials. */
++            uint16_t travel = kit >= 0 ? PART_COL[kit] :
++                n < NPARTS ? PART_COL[part_at(n)] : C_AMB;
++            smc_grid_rect(scene, x + 3, target, 2, 115 - target, travel);
++            smc_grid_rect(scene, x + 1, target, 6, 4, fc);
++            /* A fine white marker is physical position until pickup is acquired. */
++            if (!(smc.picked & (1u << n)) && seq.metro_view <= 16u)
++                smc_grid_rect(scene, x + 1, 111 - smc.last[n] * 45 / 127, 6, 1, C_WHITE);
++        }
++        int fx_view = kit < 0 && smc.view == V_FX && ui.overlay == O_NONE;
++        for (unsigned row = 0; row < (fx_view ? 4u : 3u); row++) {
++            int y = 62 + row * 12;
++            uint8_t note = (uint8_t)(NOTES[row] + n);
++            int fx_held = fx_view && smc.fx_strip.key_bus[note] < SMCFX_N;
++            uint16_t c = fx_held ? C_HI : fx_view ? C_GRAY :
++                smc_led(note) ? C_HI : f.kind == R_NONE ? C_DIM : C_GRAY;
++            const char *caption = smc_button_caption(note);
++            if (caption[0] == 'X' || caption[0] == '-') c = C_DIM;
++            smc_grid_rect(scene, x + 8, y, 22, 11, C_LINE);
++            int symbol=smc_button_symbol(note,caption);
++            if (symbol) {
++                smc_grid_icon(scene, x+14,y+1,symbol,1,c);
++                if (symbol==UI_G_RECORD || symbol==UI_G_MUTE || symbol==UI_G_SOLO) {
++                    smc_grid_rect(scene, x+26,y+4,3,3,c);
++                    if (!smc_led(note)) smc_grid_rect(scene, x+27,y+5,1,1,C_BLACK);
++                }
++            } else {
++                const felucca_font_t *font = tw(&FONT_T, caption) <= 20 ? &FONT_T : &FONT_XS;
++                const capm_t *cap = caps(font);
++                int text_y = y + 1 + (9 - (cap->bot - cap->top + 1)) / 2 - cap->top;
++                smc_grid_text(scene, x + 18, text_y, font, caption, c);
++            }
++        }
++        smc_ui_strip_value(scene, f, x + 15, 122, fc);
++    }
++}
++
++static void smc_ui_grid_striped(void)
++{
++    smc_grid_scene scene={.black=C_BLACK};
++    lcd_sync();
++    smc_ui_grid(&scene);
++    if(scene.bad) return;
++    for(unsigned band=0;band<2u;++band) {
++        cv_window(240, MAIN_ROWS, band*BAND_H, BAND_H, scene.black);
++        for(unsigned i=0;i<scene.n;++i) {
++            smc_grid_op op;
++            memcpy(&op,smc_grid_storage()+i*sizeof(op),sizeof(op));
++            switch(op.kind) {
++            case 0: cv_rect(op.x,op.y,op.a,op.b,op.c); break;
++            case 1: if (!band) arc(op.x,op.y,op.a,op.v,op.c,op.fill,op.bipolar); break;
++            case 2: ui_pictogram(op.x,op.y,op.a,op.b,op.c); break;
++            case 3: text_c(op.x,op.y,op.font?&FONT_XS:&FONT_T,smc_grid_string(op.text),op.c); break;
++            }
++        }
++        cv_commit_main_band(band);
++    }
++}
++#else
+ static UI_DRAW void smc_ui_strip_value(pref_t r, int x, int y, uint16_t color)
+ {
+     char value[32], unit[12];
+@@ -1178,6 +1359,8 @@
+     }
+ }
+ 
++#endif
++
+ /* Prefer the displayed physical key; after its release, show another held key. */
+ static int smc_fx_header_note(void)
+ {
+@@ -1300,10 +1483,14 @@
+     }
+     dv_header_battery(219,5);
+     cv_commit_header();
++#if X0X_UI_SMALL_CANVAS
++    smc_ui_grid_striped();
++#else
+     cv_begin(240, 2 * BAND_H, C_BLACK);
+     cv_band(0, 2 * BAND_H);
+     smc_ui_grid();
+     cv_commit_rect(1, 0, MAIN_Y);
++#endif
+     cv_begin(240, KNOB_H, C_BLACK);
+     cv_rect(0, 0, 240, 1, C_LINE);
+     if (smc_ui.kind == 2) {
+--- a/tools/build.py
++++ b/tools/build.py
+@@ -556,7 +556,7 @@
+         flags.append(usb_name)  # app only: loader, VID/PID and package identity unchanged
+     if VERSION and os.environ.get("X0X_DEBUG") == "1":
+         raise SystemExit("X0X_DEBUG=1 (register peek / poke over USB) is for development builds only")
+-    for flag in ("X0X_CDC", "X0X_DEBUG", "X0X_DEV_WOBBLE", "X0X_WOBBLE", "X0X_LCD_TRACE"):
++    for flag in ("X0X_CDC", "X0X_DEBUG", "X0X_DEV_WOBBLE", "X0X_WOBBLE", "X0X_LCD_TRACE", "X0X_UI_SMALL_CANVAS"):
+         v = os.environ.get(flag)    # unset: the default in firmware headers / below
+         if v in ("0", "1"):
+             flags.append(f"-D{flag}={v}")
+--- a/tests/host/display_canvas_ab_test.sh
++++ b/tests/host/display_canvas_ab_test.sh
+@@ -0,0 +1,54 @@
++#!/bin/sh
++# SPDX-License-Identifier: GPL-3.0-only
++# Compare the ordinary UI through the same simulator controls on both builds.
++# Clip/SMC snapshots and native audio/input service need separate tests.
++set -eu
++cd "$(dirname "$0")/../.."
++tmp=$(mktemp -d)
++trap 'rm -rf "$tmp"' EXIT HUP INT TERM
++X0X_HOST_OUT="$tmp/base" X0X_HOST_DEFS=-DX0X_UI_SMALL_CANVAS=0 sh host/build_host.sh >/dev/null
++X0X_HOST_OUT="$tmp/trial" X0X_HOST_DEFS=-DX0X_UI_SMALL_CANVAS=1 sh host/build_host.sh >/dev/null
++python3 - "$tmp" <<'PY'
++from pathlib import Path
++import sys
++tmp = Path(sys.argv[1])
++commands = ['wait 100']
++count = 0
++
++def shot(*actions):
++    global count
++    commands.extend((*actions, 'wait 50', f'shot {count:03d}.png'))
++    count += 1
++
++shot()
++for button in ('HOME', 'SEL', 'FX', 'ENV', 'LFO', 'EDIT', 'SEQ', 'ARP', 'GLO', 'HOME'):
++    shot(f'tap {button}')
++    for enc in ('SELECT','ALGO','PRESET','K1','K2','K3','K4'):
++        shot(f'turn {enc} 1 80')
++    for key in (2, 7, 14, 18):
++        shot(f'tapkey {key}')
++shot('tap PLAY')
++for _ in range(16):
++    shot('wait 50')
++shot('tap REC','tapkey 7')
++(tmp / 'routes.txt').write_text('\n'.join(commands) + '\n')
++PY
++mkdir "$tmp/original" "$tmp/compacted"
++X0X_HOST_LOAD=0 "$tmp/base" "$tmp/routes.txt" "$tmp/original" >/dev/null
++X0X_HOST_LOAD=0 "$tmp/trial" "$tmp/routes.txt" "$tmp/compacted" >/dev/null
++python3 - "$tmp" <<'PY'
++import hashlib
++from pathlib import Path
++import sys
++tmp = Path(sys.argv[1])
++a, b = tmp / 'original', tmp / 'compacted'
++frames = sorted(a.glob('*.png'))
++assert len(frames) == len(list(b.glob('*.png'))) == 139
++hashes = set()
++for p in frames:
++    data = p.read_bytes()
++    assert data == (b / p.name).read_bytes(), f'Different pixels: {p.name}'
++    hashes.add(hashlib.sha256(data).digest())
++assert len(hashes) >= 60, 'Insufficient distinct screens'
++print(f'PASS: {len(frames)} display frames byte-identical, {len(hashes)} unique')
++PY

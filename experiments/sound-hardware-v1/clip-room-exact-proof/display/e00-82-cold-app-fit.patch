@@ -1,0 +1,356 @@
+--- a/firmware/src/app/editor.c
++++ b/firmware/src/app/editor.c
+@@ -52,6 +52,12 @@
+ static uint32_t ed_reboot_at;                /* fm1_ms + 1 when a restart was asked for (0: none) */
+ #define ED_READ_MAX 224u                     /* X0X: SMP_READ's bytes a frame (the break page draws the slots) */
+ 
++/* Use one body for cold editor-control operations. */
++#if defined(__clang__)
++#define ED_COLD __attribute__((minsize, noinline))
++#else
++#define ED_COLD
++#endif
+ static uint8_t ed_out[732];                  /* ED_INLOG with 64 entries: 732 B (tests/diag_size_test.py) */
+ static uint32_t ed_n;
+ 
+@@ -69,6 +75,15 @@
+     if (ed_n < sizeof ed_out - 1u)
+         ed_out[ed_n++] = (uint8_t)(v & 0x7Fu);
+ }
++static __attribute__((noinline)) void ed_word(uint32_t v, unsigned digits)
++{
++    while (digits--) {
++        ed_b(v);
++        v >>= 7;
++    }
++}
++#define ed_w21(v) ed_word((v), 3u)
++
+ static void ed_str(const char *s, uint32_t max)
+ {
+     uint32_t i;
+@@ -130,7 +145,7 @@
+     }
+ }
+ /* Offset is 21 bits; count is in byte pairs. Invalid offsets send no reply. */
+-static int ed_read_area(const uint8_t *base, uint32_t size, const uint8_t *a)
++static int ED_COLD ed_read_area(const uint8_t *base, uint32_t size, const uint8_t *a)
+ {
+     uint32_t off = (uint32_t)a[0] | (uint32_t)a[1] << 7 | (uint32_t)a[2] << 14;
+     uint32_t count = a[3] > ED_READ_MAX / 2u ? ED_READ_MAX : a[3] * 2u;
+@@ -218,7 +233,6 @@
+ {
+     return (uint32_t)a[0] | (uint32_t)a[1] << 7 | (uint32_t)a[2] << 14;
+ }
+-static void ed_w21(uint32_t v) { ed_b(v); ed_b(v >> 7); ed_b(v >> 14); }
+ static uint8_t *ed_project_byte(uint32_t off)
+ {
+     return off < PROJECT_FILE_HDR ? &ed_project.header[off] : (uint8_t *)&project_stage + off - PROJECT_FILE_HDR;
+@@ -247,7 +261,7 @@
+ {
+     return rc == 0 ? 0u : rc == UI_PROJECT_BUSY ? 2u : rc == -4 ? 4u : rc == -7 ? 6u : rc == -10 ? 9u : 5u;
+ }
+-static void ed_project_handle(const uint8_t *a, uint32_t na)
++static void ED_COLD ed_project_handle(const uint8_t *a, uint32_t na)
+ {
+     uint32_t op, rc = 0, off = 0, n = 0, i;
+     if (!na)
+@@ -397,7 +411,7 @@
+ }
+ #if SMP_SEC0_BACKUP
+ /* Erase 4 KiB at dst and program from src through ed_smp_buf (backup and restore). */
+-static int ed_smp_copy_4k(uint32_t dst, const uint8_t *src)
++static int ED_COLD ed_smp_copy_4k(uint32_t dst, const uint8_t *src)
+ {
+     uint32_t i;
+     if (ed_silence_erase4k(dst, 0))
+@@ -479,7 +493,7 @@
+     smp_write_next[k] = SMP_USER_DATA;
+     return 0;
+ }
+-static int ed_smp_erase(uint32_t k, uint32_t all)
++static int ED_COLD ed_smp_erase(uint32_t k, uint32_t all)
+ {
+     uint32_t i;
+     int rc = 0;
+@@ -534,7 +548,7 @@
+     ed_smp_clear_backup(k);                           /* sec0-only shadow would lie after this */
+     return 0;
+ }
+-static int ed_smp_end(uint32_t k, const uint8_t *a, uint32_t na)
++static int ED_COLD ed_smp_end(uint32_t k, const uint8_t *a, uint32_t na)
+ {
+     const smp_user_hdr_t *h = smp_hdr(ed_smp_buf);
+     uint32_t n = ed_unpack_exact(a, na, ed_smp_buf, ED_SMP_BUF_SIZE);
+@@ -594,13 +608,8 @@
+ {
+     return (uint32_t)a[0] | (uint32_t)a[1] << 7 | (uint32_t)a[2] << 14 | (uint32_t)a[3] << 21 | (uint32_t)a[4] << 28;
+ }
+-static void ed_w35(uint32_t v)
+-{
+-    uint32_t k;
+-    for (k = 0; k < 5u; k++)
+-        ed_b(v >> (7u * k));
+-}
+-static int ed_debug(uint32_t cmd, const uint8_t *a, uint32_t na)
++#define ed_w35(v) ed_word((v), 5u)
++static int ED_COLD ed_debug(uint32_t cmd, const uint8_t *a, uint32_t na)
+ {
+     uint32_t addr, i;
+ #if X0X_DEBUG > 1                                     /* the clock work's timing loop: level 2 (room) */
+@@ -687,7 +696,7 @@
+         store_stage_unlock();
+     ed_b((uint32_t)rc);
+ }
+-static void ed_boot(uint32_t cmd, const uint8_t *a, uint32_t na)
++static void ED_COLD ed_boot(uint32_t cmd, const uint8_t *a, uint32_t na)
+ {
+     int rc;
+     if (cmd == ED_BOOT_INFO) {
+@@ -803,7 +812,7 @@
+  * rc: 0 ok, 1 format, 2 busy, 3 stale/consumed, 4 changed, 5 exhausted.
+  * Return true only for a consumed, valid COMMIT; caller must also enqueue its
+  * entire ACK successfully before publishing the main-loop request. */
+-static int ed_install_handle(const uint8_t *a, uint32_t na)
++static int ED_COLD ed_install_handle(const uint8_t *a, uint32_t na)
+ {
+     uint32_t op = na ? a[0] : 0, k, ticket = 0, rc = 0, any = 0;
+     int same, start = 0;
+@@ -846,7 +855,7 @@
+     return start;
+ }
+ 
+-static void ed_handle(const uint8_t *f, uint32_t n)
++static void ED_COLD ed_handle(const uint8_t *f, uint32_t n)
+ {
+     uint32_t cmd = f[3], i;
+     const uint8_t *a = f + 4;
+--- a/firmware/src/app/project.c
++++ b/firmware/src/app/project.c
+@@ -393,6 +393,19 @@
+ 
+ /* No frozen snapshot layout is reinterpreted as ordinary motion or endpoints.
+  * Streams 1/2/3 never assigned the upper flags nibble. */
++/* Note-lock identity omits the parameter; held-chord identity includes it. */
++static __attribute__((noinline)) int project_lane_duplicate(const lane_t *lanes, int k, int match_parameter)
++{
++    const lane_t *l = &lanes[k];
++    for (int j = 0; j < k; ++j) {
++        const lane_t *a = &lanes[j];
++        if (a->used && a->t == l->t && a->pat == l->pat && a->part == l->part &&
++            a->v == l->v && (!match_parameter || a->i == l->i))
++            return 1;
++    }
++    return 0;
++}
++
+ static int stream_parts_ok(const pattern_t *pat,const arrange_t *arr,uint32_t format)
+ {
+     int p, b, k;
+@@ -416,17 +429,14 @@
+         if(!l->used)continue;
+         if(l->t==HELD_CHORD_TARGET) {
+             if(format!=PROJ_STREAM_CHORD || !held_chord_lane_valid(l))return 0;
+-            for(int j=0;j<k;j++)if(arr->lane[j].used && arr->lane[j].t==l->t &&
+-                arr->lane[j].pat==l->pat && arr->lane[j].part==l->part &&
+-                arr->lane[j].v==l->v && arr->lane[j].i==l->i)return 0;
++            if (project_lane_duplicate(arr->lane, k, 1)) return 0;
+         }
+         if(l->t==0xfeu)return 0; /* frozen historical contract remains unsupported */
+         if(l->t==0xfdu) {
+ #if X0X_BASS_NOTE_SOUND
+             /* A lock on a step that is no longer a note is kept and never plays. */
+             if((format!=PROJ_STREAM_14 && format!=PROJ_STREAM_CHORD) || engine_bass_note_validate(l))return 0;
+-            for(int j=0;j<k;j++)if(arr->lane[j].used && arr->lane[j].t==l->t &&
+-                arr->lane[j].pat==l->pat && arr->lane[j].part==l->part && arr->lane[j].v==l->v)return 0;
++            if (project_lane_duplicate(arr->lane, k, 0)) return 0;
+ #else
+             return 0;
+ #endif
+@@ -683,16 +693,13 @@
+ #if X0X_BASS_NOTE_SOUND
+         if(l->t==BASS_NOTE_TARGET) {
+             if(engine_bass_note_validate(l))return -1;
+-            for(int j=0;j<k;j++)if(p->arr.lane[j].used && p->arr.lane[j].t==l->t &&
+-                p->arr.lane[j].pat==l->pat && p->arr.lane[j].part==l->part && p->arr.lane[j].v==l->v)return -1;
++            if (project_lane_duplicate(p->arr.lane, k, 0)) return -1;
+             continue;
+         }
+ #endif
+         if(l->t==HELD_CHORD_TARGET) {
+             if(!held_chord_lane_valid(l))return -1;
+-            for(int j=0;j<k;j++)if(p->arr.lane[j].used && p->arr.lane[j].t==l->t &&
+-                p->arr.lane[j].pat==l->pat && p->arr.lane[j].part==l->part &&
+-                p->arr.lane[j].v==l->v && p->arr.lane[j].i==l->i)return -1;
++            if (project_lane_duplicate(p->arr.lane, k, 1)) return -1;
+             continue;
+         }
+         if (l->t == T_PROB) {
+--- a/firmware/src/app/xdata.h
++++ b/firmware/src/app/xdata.h
+@@ -7,7 +7,7 @@
+ #ifndef X0X_XDATA_H
+ #define X0X_XDATA_H
+ #include <stdint.h>
+-#include "../crc32_nibble.h"
++#include "asset_blob.h"
+ 
+ #define XDATA_MAGIC 0x31445858u                 /* "XXD1" */
+ #define XDATA_HDR   16u
+@@ -15,20 +15,9 @@
+ _Static_assert(FL_XDATA_MAGIC == XDATA_MAGIC && FL_XDATA_HDR == XDATA_HDR, "XDATA header: flash map and xdata.h agree");
+ #endif
+ 
+-static uint32_t xdata_rd32(const uint8_t *p)
+-{
+-    return (uint32_t)p[0] | ((uint32_t)p[1] << 8) | ((uint32_t)p[2] << 16) | ((uint32_t)p[3] << 24);
+-}
+-
+ /* 1: the region at p (room bytes) holds exactly the blob of want_len bytes with build id want_id */
+ static uint8_t xdata_valid(const uint8_t *p, uint32_t room, uint32_t want_len, uint32_t want_id)
+ {
+-    uint32_t len;
+-    if (room < XDATA_HDR || xdata_rd32(p) != XDATA_MAGIC)
+-        return 0;
+-    len = xdata_rd32(p + 4);
+-    if (len != want_len || len > room - XDATA_HDR || xdata_rd32(p + 12) != want_id)
+-        return 0;
+-    return x0x_crc32(p + XDATA_HDR, len) == xdata_rd32(p + 8) && xdata_rd32(p + 8) == want_id;
++    return (uint8_t)asset_blob_valid(p, room, XDATA_MAGIC, want_len, want_id);
+ }
+ #endif
+--- a/firmware/src/app/fittab.h
++++ b/firmware/src/app/fittab.h
+@@ -11,7 +11,7 @@
+ #ifndef X0X_FITTAB_H
+ #define X0X_FITTAB_H
+ #include <stdint.h>
+-#include "../crc32_nibble.h"
++#include "asset_blob.h"
+ 
+ #define FITTAB_MAGIC    0x31425446u             /* "FTB1" */
+ #define FITTAB_HDR      16u
+@@ -25,25 +25,12 @@
+ _Static_assert(FITTAB_LEN == FITTAB_BYTES, "FITTAB_LEN is 694 programs x 2 B");
+ #endif
+ 
+-static uint32_t fittab_rd32(const uint8_t *p)
+-{
+-    return (uint32_t)p[0] | ((uint32_t)p[1] << 8) | ((uint32_t)p[2] << 16) | ((uint32_t)p[3] << 24);
+-}
+-
+ /* Pointer to the want_len-byte blob at p + FITTAB_HDR when the header is valid and matches
+  * want_len / want_id; otherwise NULL (absent: erased, damaged, or a different build). The
+  * caller falls back. Read only at program load, never on the audio path. */
+ static const uint8_t *fittab_blob(const uint8_t *p, uint32_t room, uint32_t want_len, uint32_t want_id)
+ {
+-    uint32_t len;
+-    if (p == 0 || room < FITTAB_HDR || fittab_rd32(p) != FITTAB_MAGIC)
+-        return 0;
+-    len = fittab_rd32(p + 4);
+-    if (len != want_len || len > room - FITTAB_HDR || fittab_rd32(p + 12) != want_id)
+-        return 0;
+-    if (x0x_crc32(p + FITTAB_HDR, len) != fittab_rd32(p + 8) || fittab_rd32(p + 8) != want_id)
+-        return 0;
+-    return p + FITTAB_HDR;
++    return asset_blob_valid(p, room, FITTAB_MAGIC, want_len, want_id) ? p + FITTAB_HDR : 0;
+ }
+ 
+ #if defined(FITTAB_LEN) && defined(FL_XIP) && BOARD_SMK37
+--- a/firmware/src/app/boot_screen.h
++++ b/firmware/src/app/boot_screen.h
+@@ -156,6 +156,17 @@
+     return (bits[y * BOOT_PIC_STRIDE + (x >> 3)] >> (7u - (x & 7u))) & 1;
+ }
+ 
++/* Common preflight for mapped and staged readers. */
++static __attribute__((noinline)) uint32_t boot_header_length(const uint8_t *h)
++{
++    if (boot_u32(h) != BOOT_MAGIC || boot_u16(h + 4) != BOOT_VERSION ||
++        boot_u32(h + 24) || boot_u32(h + 28) ||
++        boot_crc(h, 20) != boot_u32(h + 20))
++        return 0;
++    uint32_t len = boot_u32(h + 12);
++    return len >= BOOT_PAY_FIXED && len <= BOOT_REC_MAX ? len : 0u;
++}
++
+ /* 1 valid, 0 not a boot record, -1 the read failed (caller must not erase). */
+ static int boot_copy_state(boot_io_t *io, uint32_t sec, uint32_t *seq_out)
+ {
+@@ -163,14 +174,8 @@
+     uint32_t len, c, off, n;
+     if (io->read(io->ctx, sec, h, BOOT_HDR))
+         return -1;
+-    if (boot_u32(h) != BOOT_MAGIC || boot_u16(h + 4) != BOOT_VERSION)
+-        return 0;
+-    if (boot_u32(h + 24) || boot_u32(h + 28))
+-        return 0;
+-    if (boot_crc(h, 20) != boot_u32(h + 20))
+-        return 0;
+-    len = boot_u32(h + 12);
+-    if (len < BOOT_PAY_FIXED || len > BOOT_REC_MAX)
++    len = boot_header_length(h);
++    if (!len)
+         return 0;
+     c = 0xFFFFFFFFu;
+     for (off = 0; off < len;) {
+@@ -374,14 +379,7 @@
+ static int boot_image_state(const uint8_t *sec, uint32_t *seq_out)
+ {
+     uint32_t len;
+-    if (!sec || boot_u32(sec) != BOOT_MAGIC || boot_u16(sec + 4) != BOOT_VERSION)
+-        return 0;
+-    if (boot_u32(sec + 24) || boot_u32(sec + 28))
+-        return 0;
+-    if (boot_crc(sec, 20) != boot_u32(sec + 20))
+-        return 0;
+-    len = boot_u32(sec + 12);
+-    if (len < BOOT_PAY_FIXED || len > BOOT_REC_MAX)
++    if (!sec || !(len = boot_header_length(sec)))
+         return 0;
+     if (boot_crc(sec + BOOT_PAY_OFF, len) != boot_u32(sec + 16))
+         return 0;
+--- a/tests/host/editor_read_area_test.py
++++ b/tests/host/editor_read_area_test.py
+@@ -30,7 +30,7 @@
+ 
+ 
+ def case(name, following):
+-    start = source.index("    case " + name + ":", source.index("static void ed_handle("))
++    start = source.index("    case " + name + ":", source.index("ed_handle(const uint8_t *f,"))
+     end = source.index(following, start)
+     return source[start:end]
+ 
+@@ -40,6 +40,7 @@
+ #include <stdio.h>
+ #include <string.h>
+ #include <assert.h>
++#define ED_COLD
+ #define ED_READ_MAX 224u
+ #define ED_SMP_READ 16
+ #define ED_CTL_READ 37
+--- /dev/null
++++ b/firmware/src/app/asset_blob.h
+@@ -0,0 +1,22 @@
++/* SPDX-License-Identifier: GPL-3.0-only */
++#ifndef X0X_ASSET_BLOB_H
++#define X0X_ASSET_BLOB_H
++#include <stdint.h>
++#include "../crc32_nibble.h"
++
++static uint32_t asset_rd32(const uint8_t *p)
++{
++    return (uint32_t)p[0] | ((uint32_t)p[1] << 8) | ((uint32_t)p[2] << 16) | ((uint32_t)p[3] << 24);
++}
++
++/* Common 16-byte header: magic, length, CRC and content identity. */
++static __attribute__((noinline)) int asset_blob_valid(const uint8_t *p, uint32_t room,
++                                                     uint32_t magic, uint32_t size, uint32_t id)
++{
++    if (!p || room < 16u || size > room - 16u || asset_rd32(p) != magic ||
++        asset_rd32(p + 4) != size || asset_rd32(p + 12) != id ||
++        asset_rd32(p + 8) != id)
++        return 0;
++    return x0x_crc32(p + 16u, size) == id;
++}
++#endif
