@@ -1,0 +1,173 @@
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -2509,7 +2509,7 @@
+ 
+ /* wait for a stage. Core 1 spins (core 0 never stops). Core 0: 0 = reached, 1 = core 1
+  * will not reach it (it failed, or on the host it runs lazily): run its jobs here. */
+-static int stage_wait(uint32_t s, int core)
++static int stage_wait_raw(uint32_t s, int core)
+ {
+     uint32_t t0;
+     if (eng_stage >= s)
+@@ -2535,6 +2535,20 @@
+     }
+ }
+ 
++/* Timing-only: each core writes only its row until the final join. */
++enum { TR_909, TR_808, TR_A, TR_B, TR_BRK, T_BODY, T_BODYWAIT, T_S1WAIT,
++       T_S2WAIT, T_S3WAIT, T_JOIN, T_POST, T_TAKEOVER, T_N };
++volatile uint32_t bench_barrier[2][T_N];
++static inline void tick_add(int core,int k,uint32_t t)
++{ bench_barrier[core][k] += plat_ticks24() - t; }
++static int stage_wait(uint32_t stage, int core)
++{
++    const uint32_t start = plat_ticks24();
++    int ret = stage_wait_raw(stage, core);
++    tick_add(core, T_S1WAIT + (int)stage - 1, start);
++    return ret;
++}
++
+ /* BD+SD into zeroed buses. Core 1 runs this at the start of the stretch; core 0
+  * only if core 1 did not (it failed, or one core). */
+ static void d808_body_run(void)
+@@ -2552,7 +2566,7 @@
+ }
+ 
+ /* 0 = body visible, 1 = it will not be (caller must not mix mid/metals onto it). */
+-static int body_wait(int core)
++static int body_wait_raw(int core)
+ {
+     uint32_t t0;
+     if (eng_808_body)
+@@ -2583,6 +2597,14 @@
+     }
+ }
+ 
++static int body_wait(int core)
++{
++    const uint32_t start = plat_ticks24();
++    int ret = body_wait_raw(core);
++    tick_add(core, T_BODYWAIT, start);
++    return ret;
++}
++
+ /* S1-A uses its owner arena and L/R only; never the scratch workspace
+  * containing C1's 909 mono. Keep adaptation on C0 and ordered mix later. */
+ static int bass_render_dsp(int bv, unsigned n, float *l, float *r)
+@@ -2790,8 +2812,10 @@
+         if (!core)
+             PROF_ADD(PR_BRK, pk);
+     }
++    uint32_t elapsed=plat_ticks24()-tk;
++    bench_barrier[core][j]+=elapsed;
+     if (active)
+-        job_cost(j, plat_ticks24() - tk - wt, n);
++        job_cost(j, elapsed - wt, n);
+     return 1;
+ }
+ 
+@@ -2801,8 +2825,11 @@
+ {
+     int j;
+     (void)arg;
+-    if (eng_808_split && !eng_808_body)
++    if (eng_808_split && !eng_808_body) {
++        const uint32_t start = plat_ticks24();
+         d808_body_run();
++        tick_add(1,T_BODY,start);
++    }
+     for (j = eng_c1_next; j < JB_N; j++) {
+         if (!(eng_c1_mask & (1u << j)))
+             continue;
+@@ -3014,7 +3041,9 @@
+     uint32_t w0 = plat_ticks24();
+ #endif
+     if(eng_808_reverse) {
++        const uint32_t start = plat_ticks24();
+         d808_body_run();
++        tick_add(0,T_BODY,start);
+         ++bench_808_reverse_spans;
+         bench_808_reverse_frames+=n;
+     }
+@@ -3035,18 +3064,22 @@
+         if (!(eng_c1_mask & (1u << j)))
+             (void)run_job(j, 0);
+     if (eng_c1_mask) {
++        uint32_t start = plat_ticks24();
+         PROF_T(pt);
+         if (!eng_c1_waited) {
+             eng_c1_waited = 1;
+             if (plat_cpu2_wait())
+                 eng_c1_waited = 2;
+         }
++        tick_add(0,T_JOIN,start);
++        bench_barrier[0][T_TAKEOVER] += eng_c1_next != JB_N;
+         c1_take_over(JB_N + 1u);                      /* failed, or the host: the rest here */
+         PROF_ADD(PR_808, pt);                         /* core 0's wait for core 1 (as before) */
+     }
+ #if X0X_DEBUG
+     eng_dbg_wait += plat_ticks24() - w0;              /* now: core 0's whole job span */
+ #endif
++    const uint32_t post = plat_ticks24();
+     brk_midi_drain();
+     for (j = 0; j < NBASS; j++)                       /* the recorder (shared with the sequencer): core 0 */
+         if (bass_render_ok[j]) original_rec_recover_off(j);
+@@ -3110,6 +3143,7 @@
+             }
+             resume_master_meter();
+             eng_master_done = 1;
++            tick_add(0,T_POST,post);
+             return;
+         }
+         while (done < n) {
+@@ -3155,6 +3189,7 @@
+         PROF_ADD(5, pf);
+         bfx_flt_shape(out_l, out_r, (int)n);
+     }
++    tick_add(0,T_POST,post);
+ }
+ 
+ #if X0X_DIAG_STATE_TRACE
+--- a/firmware/src/app/main_fm1.c
++++ b/firmware/src/app/main_fm1.c
+@@ -42,6 +42,9 @@
+ extern uint32_t bench_s1_samples(void);
+ volatile uint32_t bench_s1_held[4]; /* halves, peak ticks, over target, elapsed > 512 frames */
+ static uint32_t bench_s1_ticks;
++extern volatile uint32_t bench_barrier[2][13];
++struct barrier_row { uint32_t frame, ticks, half, counters[2][13]; };
++volatile struct barrier_row bench_barrier_rows[16];
+ static void render_block(int32_t *o)                /* ALNK0: one half, measured */
+ {
+     uint32_t t0 = fm1_ticks(), us, budget = HALF_FRAMES * 1000000u / FS;
+@@ -109,6 +112,8 @@
+     if (p & FM1_AUDIO_HALF) {
+         uint32_t half = fm1_audio_free_half();
+         const uint32_t bench_start=bench_s1_samples();
++        for (unsigned c=0;c<2;c++)
++            for (unsigned i=0;i<13;i++) bench_barrier[c][i]=0;
+         render_block(&abuf[half * HALF_WORDS]);
+         fm1_audio_ack_half();
+         if (fm1_audio_free_half() != half) {
+@@ -118,6 +123,21 @@
+             x0x_dbg.late++;                         /* the DMA moved on while we rendered */
+             audio_xruns++;
+         }
++        int slot = -1;
++        if (bench_start >= 98304u && bench_start < 229376u &&
++            bench_s1_samples()-bench_start == HALF_FRAMES) {
++            unsigned group = (bench_start - 98304u) >> 16;
++            unsigned offset = (bench_start - 98304u) & 65535u;
++            if (bench_s1_ticks > bench_barrier_rows[group].ticks)
++                slot = (int)group;
++            if (slot < 0 && (offset & 16383u) == 0) slot = 2 + (int)(group*4 + (offset>>14));
++            if (slot >= 0) {
++                volatile struct barrier_row *row = &bench_barrier_rows[slot];
++                row->frame = bench_start; row->ticks = bench_s1_ticks; row->half=x0x_dbg.halves;
++                for (unsigned c=0;c<2;c++)
++                    for (unsigned i=0;i<13;i++) row->counters[c][i]=bench_barrier[c][i];
++            }
++        }
+         if (bench_start>=98304u && bench_start<163840u &&
+                 bench_s1_samples()-bench_start==HALF_FRAMES) {
+             const uint32_t ticks=bench_s1_ticks;
