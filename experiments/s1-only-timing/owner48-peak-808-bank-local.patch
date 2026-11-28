@@ -1,0 +1,35 @@
+--- a/firmware/src/dsp/drum808.c
++++ b/firmware/src/dsp/drum808.c
+@@ -951,6 +951,9 @@
+ __attribute__((noinline)) static void bank_block(d8_bank_t *b, float *bus, float *pair, int m, int cb_on)
+ {
+     uint32_t *dt = b->dt;
++    /* No between-frame observer during the owned bank render. Carry the
++     * six phase accumulators locally (independent from tuning/RNG state). */
++    uint32_t ph[6] = {b->ph[0],b->ph[1],b->ph[2],b->ph[3],b->ph[4],b->ph[5]};
+     int i, n;
+     /* Between chunks a step is unchanged unless drum808_trigger retuned
+      * the bank. Drift refresh and wrap still recompute the same step at
+@@ -971,9 +974,9 @@
+                 dt[i] = bank_dt1(b, i);
+         }
+         for (i = 0; i < 6; i++) {
+-            const uint32_t d = dt[i], old = b->ph[i], t = old + d, u = t - BANK_DUTY;
++            const uint32_t d = dt[i], old = ph[i], t = old + d, u = t - BANK_DUTY;
+             float v;
+-            b->ph[i] = t;
++            ph[i] = t;
+             if (D8_UNLIKELY(t < old || (b->pend_wrap & (1u << i)))) {
+                 b->pend_wrap &= (uint8_t)~(1u << i);
+                 b->jm1[i] = 0.0052f * rng_frand2(&b->rng);
+@@ -988,8 +991,9 @@
+         }
+         bus[n] = sum * (1.0f / 21.0f);
+         if (cb_on)
+-            pair[n] = ((b->ph[4] < BANK_DUTY ? 2.5f : -2.5f) + (b->ph[5] < BANK_DUTY ? 2.5f : -2.5f)) * 0.5f;
++            pair[n] = ((ph[4] < BANK_DUTY ? 2.5f : -2.5f) + (ph[5] < BANK_DUTY ? 2.5f : -2.5f)) * 0.5f;
+     }
++    for (i = 0; i < 6; ++i) b->ph[i] = ph[i];
+ }
+ 
+ /* ---- metal envelope ---- */

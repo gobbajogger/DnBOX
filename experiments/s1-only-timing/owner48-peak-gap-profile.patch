@@ -1,0 +1,145 @@
+--- a/firmware/src/app/main_fm1.c
++++ b/firmware/src/app/main_fm1.c
+@@ -42,6 +42,7 @@
+ extern uint32_t bench_s1_samples(void);
+ volatile uint32_t bench_s1_held[4]; /* halves, peak ticks, over target, elapsed > 512 frames */
+ static uint32_t bench_s1_ticks;
++volatile uint32_t bench_gap_active,bench_gap_current[11],bench_gap_rows[3][13];
+ extern volatile uint32_t bench_barrier[2][13];
+ struct barrier_row { uint32_t frame, ticks, half, counters[2][13]; };
+ volatile struct barrier_row bench_barrier_rows[16];
+@@ -49,6 +50,10 @@
+ {
+     uint32_t t0 = fm1_ticks(), us, budget = HALF_FRAMES * 1000000u / FS;
+     x0x_dbg.in_audio = 1;
++    const uint32_t frame=bench_s1_samples();
++    const unsigned row=frame==129024u?0:frame==131072u?1:frame==171520u?2:3;
++    bench_gap_active=row<3;
++    if(bench_gap_active) for(unsigned j=0;j<11;++j) bench_gap_current[j]=0;
+ #if FELUCCA_UAC
+     uac_render_start();
+ #endif
+@@ -58,7 +63,11 @@
+ #if X0X_DIAG_STATE_TRACE
+             engine_diag_render_offset = k;
+ #endif
++            uint32_t t=bench_gap_active?fm1_ticks():0;
+             engine_render(o + 2u * k, REND_FRAMES);
++            if(bench_gap_active) {
++                uint32_t z=fm1_ticks(); bench_gap_current[0]+=z-t; t=z;
++            }
+ #if FELUCCA_UAC
+             uac_tap(o + 2u * k, REND_FRAMES);       /* the USB audio input: the same master output */
+ #endif
+@@ -66,12 +75,19 @@
+ #if FELUCCA_UAC
+             uac_out_mix(o + 2u * k, REND_FRAMES);   /* USB audio from the host, after the tap and MASTER */
+ #endif
++            if(bench_gap_active) bench_gap_current[1]+=fm1_ticks()-t;
+         }
+     }
+ #if X0X_DIAG_STATE_TRACE
+     engine_diag_half(x0x_dbg.halves, x0x_dbg.late);
+ #endif
+     bench_s1_ticks=fm1_ticks()-t0;
++    if(bench_gap_active) {
++        bench_gap_rows[row][0]=frame;
++        bench_gap_rows[row][1]=bench_s1_ticks;
++        for(unsigned j=0;j<11;++j) bench_gap_rows[row][j+2]=bench_gap_current[j];
++        bench_gap_active=0;
++    }
+     us=bench_s1_ticks / FM1_TICKS_PER_US;
+ #if X0X_LCD_TRACE
+     lcd_trace_record(LCD_T_AUDIO, us);
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -3008,8 +3008,13 @@
+ }
+ /* one stretch: the jobs split between the cores by plan_pick (see above), each mixed in the
+  * order one core always used (909, 808, bass A, bass B, break): the same sums either way */
++extern volatile uint32_t bench_gap_active, bench_gap_current[11];
++#define GAP_BEGIN uint32_t gap_start=bench_gap_active?plat_ticks24():0
++#define GAP_TICK(i) do { if(bench_gap_active) { uint32_t z=plat_ticks24(); bench_gap_current[i]+=z-gap_start; gap_start=z; } } while(0)
++
+ __attribute__((noinline)) static void render_sub(float *out_l, float *out_r, uint32_t n, uint32_t offset)
+ {
++    GAP_BEGIN;
+     uint32_t solo = smc_solo_state, m;
+     uint8_t solo_parts = (uint8_t)(solo & 0x1Fu);
+     int j;
+@@ -3025,7 +3030,9 @@
+     eng_c1_waited = 0;
+     bass_render_ok[0] = bass_render_ok[1] = 0;
+     original_rec_cancel_cut();                        /* both basses' recorder state: here, before the jobs */
++    GAP_TICK(8);
+     m = plan_pick(n);
++    GAP_TICK(9);
+     const int reverse_candidate=(bench_loaded_on || (bench_loaded_run &&
+         d8_frame>=163840u && d8_frame<180224u)) && n>=32u &&
+         drum909_active(&d909) && drum808_active(&d808);
+@@ -3055,6 +3062,7 @@
+     eng_dbg_nsub++;
+     uint32_t w0 = plat_ticks24();
+ #endif
++    GAP_TICK(10);
+     if(eng_808_reverse) {
+         const uint32_t start = plat_ticks24();
+         d808_body_run();
+@@ -3282,6 +3290,7 @@
+ 
+ void engine_render(int32_t *out_lr, uint32_t n)
+ {
++    GAP_BEGIN;
+     mot_empty_in_render = 0;
+     static float out_l[256], out_r[256];
+     uint32_t done = 0, i;
+@@ -3335,6 +3344,7 @@
+         PROF_ADD(7, pt);
+     }
+     bench_s1_inputs(n);
++    GAP_TICK(2);
+     while (done < n) {
+         uint32_t k = seq_until_event(&seq, n - done);
+         brk_mute_boundary(); /* also follows song mutes at an in-buffer event */
+@@ -3354,7 +3364,9 @@
+             eng_master_raw_prefix=done-eng_mastered;
+             eng_do_master=1;
+         }
++        GAP_TICK(3);
+         render_sub(out_l + done, out_r + done, k, 0);
++        GAP_TICK(4);
+         d8_frame+=k;
+         if (eng_do_master && eng_master_done)
+             eng_mastered = done + k;
+@@ -3366,6 +3378,7 @@
+             PROF_ADD(7, pt);
+         }
+         done += k;
++        GAP_TICK(3);
+     }
+     mot_empty_in_render = 0;
+     if (mot_playing && !seq.playing) {                   /* stopped: every knob back to its own value */
+@@ -3381,6 +3394,7 @@
+                           (int)(n - eng_mastered), vol);
+         PROF_ADD(6, pt);
+     }
++    GAP_TICK(5);
+     {   /* globals in registers: the stores below cannot reload them per sample */
+         const float lim = out_lim, scale = out_scale;
+         for (i = 0; i < n; i++) {
+@@ -3392,6 +3406,7 @@
+         }
+     }
+     {
++        GAP_TICK(6);
+         uint32_t w = eng_scope_w;
+         for (i = 1; i < n; i += 2u)
+             eng_scope[w++ & (SCOPE_N - 1u)] = (int16_t)((out_l[i] + out_r[i]) * 16383.5f);
+@@ -3403,6 +3418,7 @@
+             eng_peak[p] = (uint16_t)q;
+         part_peak[p] = 0.0f;
+     }
++    GAP_TICK(7);
+ }
+ 
+ /* -------------------------------------------------------------- loops --- */

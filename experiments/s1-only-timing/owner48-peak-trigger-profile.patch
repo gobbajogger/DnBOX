@@ -1,0 +1,37 @@
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -1180,10 +1180,16 @@
+         eng_hit_step[kit][v] = eng_step[TRK_DRUM + kit];
+         eng_hit_ms[kit][v] = plat_ms() | 1u;          /* 0 = never hit */
+     }
++    extern volatile uint32_t bench_gap_active,bench_gap_current[11];
++    const uint32_t trigger_begin=bench_gap_active?plat_ticks24():0;
+     if (kit == 0)
+         drum909_trigger(&d909, v, vel);
+     else                                 /* the 808's unaccented hit sits at D8_VEL_NORMAL, not at our 909 level */
+         drum808_trigger(&d808, v, vel >= 0.999f ? 1.0f : vel * (D8_VEL_NORMAL / (88.0f / 127.0f)));
++    if(bench_gap_active) {
++        bench_gap_current[kit==0?9:10]+=plat_ticks24()-trigger_begin;
++        ++bench_gap_current[8];
++    }
+ }
+ 
+ static void bass_adapt_flags(int p, int acc, int sl)
+@@ -3030,9 +3036,7 @@
+     eng_c1_waited = 0;
+     bass_render_ok[0] = bass_render_ok[1] = 0;
+     original_rec_cancel_cut();                        /* both basses' recorder state: here, before the jobs */
+-    GAP_TICK(8);
+     m = plan_pick(n);
+-    GAP_TICK(9);
+     const int reverse_candidate=(bench_loaded_on || (bench_loaded_run &&
+         d8_frame>=163840u && d8_frame<180224u)) && n>=32u &&
+         drum909_active(&d909) && drum808_active(&d808);
+@@ -3062,7 +3066,6 @@
+     eng_dbg_nsub++;
+     uint32_t w0 = plat_ticks24();
+ #endif
+-    GAP_TICK(10);
+     if(eng_808_reverse) {
+         const uint32_t start = plat_ticks24();
+         d808_body_run();

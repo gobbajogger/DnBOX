@@ -1,0 +1,77 @@
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -1158,12 +1158,25 @@
+ }
+ /* Disposable six-voice loaded replay witnesses, not firmware UI state. */
+ volatile uint32_t bench_loaded_on, bench_loaded_run, bench_loaded_hits[NKIT];
++/* Lab only: preserve the accepted order (especially CH/OH choke) while
++ * letting the kit's usual audio owner initialize these same-sample hits. */
++static float b909_late_vel[NDRUM];
++static uint8_t b909_late_voice[NDRUM],b909_late_count,b909_seq;
++__attribute__((noinline)) static void b909_late_flush(void)
++{
++    unsigned n=b909_late_count;
++    b909_late_count=0;
++    for(unsigned i=0;i<n;++i) drum909_trigger(&d909,b909_late_voice[i],b909_late_vel[i]);
++}
++
+ static void s_drum(void *x, int kit, int v, float vel);
+ static int s_drum_seq(void *x, int kit, int v, float vel)
+ {
+     if (prob_skip(kit, v))
+         return 0;
++    b909_seq=1;
+     s_drum(x, kit, v, vel);
++    b909_seq=0;
+     if (bench_loaded_on && (unsigned)kit<NKIT) ++bench_loaded_hits[kit];
+     return 1;
+ }
+@@ -1180,9 +1193,18 @@
+         eng_hit_step[kit][v] = eng_step[TRK_DRUM + kit];
+         eng_hit_ms[kit][v] = plat_ms() | 1u;          /* 0 = never hit */
+     }
+-    if (kit == 0)
+-        drum909_trigger(&d909, v, vel);
+-    else                                 /* the 808's unaccented hit sits at D8_VEL_NORMAL, not at our 909 level */
++    if (kit == 0) {
++        if(b909_seq && !mot_on && (bench_loaded_on || (bench_loaded_run &&
++           d8_frame>=163840u && d8_frame<180224u))) {
++            if(b909_late_count==NDRUM) b909_late_flush();
++            unsigned i=b909_late_count++;
++            b909_late_voice[i]=(uint8_t)v;
++            b909_late_vel[i]=vel;
++        } else {
++            if(b909_late_count) b909_late_flush();
++            drum909_trigger(&d909,v,vel);
++        }
++    } else                                 /* the 808's unaccented hit sits at D8_VEL_NORMAL, not at our 909 level */
+         drum808_trigger(&d808, v, vel >= 0.999f ? 1.0f : vel * (D8_VEL_NORMAL / (88.0f / 127.0f)));
+ }
+ 
+@@ -2619,6 +2641,7 @@
+     int active = 1;
+     float *left808 = t0 + offset, *right808 = tr + offset;
+     if (j == JB_909) {
++        if(b909_late_count) b909_late_flush();
+         PROF_T(p9);
+         for (i = 0; i < n; i++)
+             dry_l[i] = dry_r[i] = rev[i] = dly[i] = 0.0f;
+@@ -3001,8 +3024,9 @@
+     m = plan_pick(n);
+     const int reverse_candidate=(bench_loaded_on || (bench_loaded_run &&
+         d8_frame>=163840u && d8_frame<180224u)) && n>=32u &&
+-        drum909_active(&d909) && drum808_active(&d808);
++        (b909_late_count || drum909_active(&d909)) && drum808_active(&d808);
+     if(reverse_candidate)m=(1u<<JB_909)|(1u<<JB_808);
++    else if(b909_late_count) { b909_late_flush(); m=plan_pick(n); }
+     eng_808_reverse=(uint8_t)reverse_candidate;
+     const int full808 = m == ((1u<<JB_909)|(1u<<JB_808)|(1u<<JB_B)) &&
+         original_bass[0].kind == ORIGINAL_SOUND_SYNTHONE &&
+@@ -3247,6 +3271,7 @@
+ 
+ void engine_render(int32_t *out_lr, uint32_t n)
+ {
++    if(b909_late_count) b909_late_flush();
+     mot_empty_in_render = 0;
+     static float out_l[256], out_r[256];
+     uint32_t done = 0, i;

@@ -1,0 +1,17 @@
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -2998,11 +2998,12 @@
+     eng_c1_waited = 0;
+     bass_render_ok[0] = bass_render_ok[1] = 0;
+     original_rec_cancel_cut();                        /* both basses' recorder state: here, before the jobs */
+-    m = plan_pick(n);
+     const int reverse_candidate=(bench_loaded_on || (bench_loaded_run &&
+         d8_frame>=163840u && d8_frame<180224u)) && n>=32u &&
+         drum909_active(&d909) && drum808_active(&d808);
+-    if(reverse_candidate)m=(1u<<JB_909)|(1u<<JB_808);
++    /* The fixture overrides this mask anyway. Don't run the normal
++     * adaptive search until normal scheduling is in control again. */
++    m=reverse_candidate ? (1u<<JB_909)|(1u<<JB_808) : plan_pick(n);
+     eng_808_reverse=(uint8_t)reverse_candidate;
+     const int full808 = m == ((1u<<JB_909)|(1u<<JB_808)|(1u<<JB_B)) &&
+         original_bass[0].kind == ORIGINAL_SOUND_SYNTHONE &&

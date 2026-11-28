@@ -1,0 +1,74 @@
+--- a/firmware/src/app/project.c
++++ b/firmware/src/app/project.c
+@@ -423,6 +423,18 @@
+ 
+ /* No frozen snapshot layout is reinterpreted as ordinary motion or endpoints.
+  * Streams 1/2/3 never assigned the upper flags nibble. */
++static __attribute__((noinline)) int project_lane_duplicate(const lane_t *lanes, int k, int match_parameter)
++{
++    const lane_t *l = &lanes[k];
++    for (int j = 0; j < k; ++j) {
++        const lane_t *a = &lanes[j];
++        if (a->used && a->t == l->t && a->pat == l->pat && a->part == l->part &&
++            a->v == l->v && (!match_parameter || a->i == l->i))
++            return 1;
++    }
++    return 0;
++}
++
+ static int stream_parts_ok(const pattern_t *pat,const arrange_t *arr,uint32_t format)
+ {
+     int p, b, k;
+@@ -446,9 +458,7 @@
+         if(!l->used)continue;
+         if(l->t==HELD_CHORD_TARGET) {
+             if(format<PROJ_STREAM_CHORD || !held_chord_lane_valid(l))return 0;
+-            for(int j=0;j<k;j++)if(arr->lane[j].used && arr->lane[j].t==l->t &&
+-                arr->lane[j].pat==l->pat && arr->lane[j].part==l->part &&
+-                arr->lane[j].v==l->v && arr->lane[j].i==l->i)return 0;
++            if (project_lane_duplicate(arr->lane, k, 1)) return 0;
+         }
+         if(motion_parked_bass(l->t) && format!=PROJ_STREAM_BASS_MOTION)return 0;
+         if(l->t==0xfeu)return 0; /* frozen historical contract remains unsupported */
+@@ -456,8 +466,7 @@
+ #if X0X_BASS_NOTE_SOUND
+             /* A lock on a step that is no longer a note is kept and never plays. */
+             if(format<PROJ_STREAM_14 || engine_bass_note_validate(l))return 0;
+-            for(int j=0;j<k;j++)if(arr->lane[j].used && arr->lane[j].t==l->t &&
+-                arr->lane[j].pat==l->pat && arr->lane[j].part==l->part && arr->lane[j].v==l->v)return 0;
++            if (project_lane_duplicate(arr->lane, k, 0)) return 0;
+ #else
+             return 0;
+ #endif
+@@ -741,16 +750,13 @@
+ #if X0X_BASS_NOTE_SOUND
+         if(l->t==BASS_NOTE_TARGET) {
+             if(engine_bass_note_validate(l))return -1;
+-            for(int j=0;j<k;j++)if(p->arr.lane[j].used && p->arr.lane[j].t==l->t &&
+-                p->arr.lane[j].pat==l->pat && p->arr.lane[j].part==l->part && p->arr.lane[j].v==l->v)return -1;
++            if (project_lane_duplicate(p->arr.lane, k, 0)) return -1;
+             continue;
+         }
+ #endif
+         if(l->t==HELD_CHORD_TARGET) {
+             if(!held_chord_lane_valid(l))return -1;
+-            for(int j=0;j<k;j++)if(p->arr.lane[j].used && p->arr.lane[j].t==l->t &&
+-                p->arr.lane[j].pat==l->pat && p->arr.lane[j].part==l->part &&
+-                p->arr.lane[j].v==l->v && p->arr.lane[j].i==l->i)return -1;
++            if (project_lane_duplicate(p->arr.lane, k, 1)) return -1;
+             continue;
+         }
+ #if X0X_BASS_TAGGED_SOUND
+@@ -760,11 +766,7 @@
+                 kind == engine_bass_sound_bank(&p->sound,l->v)) return -1;
+             const x0x_param_t *desc = engine_bass_bank_param(kind,l->i);
+             if (!desc) return -1;
+-            for (int j=0;j<k;j++) {
+-                const lane_t *other=&p->arr.lane[j];
+-                if (other->used && other->t==l->t && other->pat==l->pat &&
+-                    other->part==l->part && other->v==l->v && other->i==l->i) return -1;
+-            }
++            if (project_lane_duplicate(p->arr.lane, k, 1)) return -1;
+             max = desc->max;
+         } else
+ #endif

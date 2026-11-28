@@ -1,0 +1,56 @@
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -916,13 +916,12 @@
+     apply_param(t, v, i, mot_base_snd->v[t][v][i]);
+ }
+ 
+-/* the output's scale: Felucca's -6 dBFS ceiling of the 24-bit codec (2^22), or its full scale (LOUD); the
+- * clamp keeps an over from wrapping (normal: the codec's own full scale, as before) */
+-static volatile float out_scale = 4194303.0f, out_lim = 2.0f;
++/* The master's stereo output is bounded to [-1, 1]. NORMAL uses 2^22
++ * (Felucca's -6 dBFS ceiling), and LOUD uses the codec's full scale. */
++static volatile float out_scale = 4194303.0f;
+ void engine_out_loud(int on)
+ {
+     out_scale = on ? 8388607.0f : 4194303.0f;
+-    out_lim = on ? 1.0f : 2.0f;
+ }
+ 
+ /* USB AUDIO FULL (#12): the render at full level, for the USB tap, and the MASTER knob after it, for
+@@ -3346,21 +3345,22 @@
+                           (int)(n - eng_mastered), vol);
+         PROF_ADD(6, pt);
+     }
+-    {   /* globals in registers: the stores below cannot reload them per sample */
+-        const float lim = out_lim, scale = out_scale;
+-        for (i = 0; i < n; i++) {
+-            float l = out_l[i], r = out_r[i];        /* (out_scale: NORMAL 2^22, Felucca's; LOUD 2^23) */
+-            l = l > lim ? lim : l < -lim ? -lim : l;
+-            r = r > lim ? lim : r < -lim ? -lim : r;
+-            out_lr[2u * i] = (int32_t)(l * scale);
+-            out_lr[2u * i + 1u] = (int32_t)(r * scale);
++    {   /* PCM and scope share the loaded master samples. Publish scope once. */
++        const float scale=out_scale;
++        uint32_t w=eng_scope_w;
++        for(i=0;i+1u<n;i+=2u) {
++            const float l0=out_l[i],r0=out_r[i],l1=out_l[i+1u],r1=out_r[i+1u];
++            out_lr[2u*i]=(int32_t)(l0*scale);
++            out_lr[2u*i+1u]=(int32_t)(r0*scale);
++            out_lr[2u*i+2u]=(int32_t)(l1*scale);
++            out_lr[2u*i+3u]=(int32_t)(r1*scale);
++            eng_scope[w++ & (SCOPE_N-1u)]=(int16_t)((l1+r1)*16383.5f);
++        }
++        if(i<n) {
++            out_lr[2u*i]=(int32_t)(out_l[i]*scale);
++            out_lr[2u*i+1u]=(int32_t)(out_r[i]*scale);
+         }
+-    }
+-    {
+-        uint32_t w = eng_scope_w;
+-        for (i = 1; i < n; i += 2u)
+-            eng_scope[w++ & (SCOPE_N - 1u)] = (int16_t)((out_l[i] + out_r[i]) * 16383.5f);
+-        eng_scope_w = w;
++        eng_scope_w=w;
+     }
+     for (p = 0; p < NPARTS; p++) {                      /* meters: peak hold, ~300 ms decay at the UI */
+         uint32_t q = (uint32_t)(fm_minf(part_peak[p], 1.0f) * 32767.0f);

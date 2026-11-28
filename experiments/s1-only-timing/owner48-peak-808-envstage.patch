@@ -1,0 +1,167 @@
+--- a/firmware/src/dsp/drum808.c
++++ b/firmware/src/dsp/drum808.c
+@@ -1104,11 +1104,12 @@
+ /* One stretch of the cymbal: the same ops as cy_tick, with state and the
+  * constant coefficients in scalars (their address is never taken, so they
+  * do not alias the float output buf). Written back once at the end. */
+-/* The two BQ3/opamp streams depend only on bank input, never on the
+- * cymbal envelopes or suffix. Chunk staging separates their live values
++/* The two BQ3/opamp streams depend only on bank input, and the
++ * envelope work depends only on its own state, never the suffix. Chunk staging separates their live values
+  * from the large suffix's recursive working set. */
+-__attribute__((noinline)) static void cy_opamp_front(d8_cy_t *restrict v,
+-              const float *restrict bus, float *restrict front1, float *restrict front2, int m)
++typedef struct {float b1,b2,g1,g2,g3;} cy_front_frame;
++__attribute__((noinline)) static uint32_t cy_opamp_front(d8_cy_t *restrict v,
++              const float *restrict bus, cy_front_frame *restrict stage, int m)
+ {
+     const float c10 = k_cy_bp1[0], c11 = k_cy_bp1[1];
+     const float c14 = k_cy_bp1[4], c15 = k_cy_bp1[5], c16 = k_cy_bp1[6];
+@@ -1116,9 +1117,14 @@
+     const float c24 = k_cy_bp2[4], c25 = k_cy_bp2[5], c26 = k_cy_bp2[6];
+     float bp1z0 = v->bp1.z[0], bp1z1 = v->bp1.z[1], bp1z2 = v->bp1.z[2];
+     float bp2z0 = v->bp2.z[0], bp2z1 = v->bp2.z[1], bp2z2 = v->bp2.z[2];
++    const float d1 = v->d1, d2 = v->d2, d3 = v->d3, atk_c = v->atk_c;
++    float e1 = v->e1, e2 = v->e2, e3 = v->e3, e1t = v->e1t, e1_base = v->e1_base;
++    int32_t e1_n = v->e1_n;
++    uint8_t e1_ramp = v->e1_ramp;
++    uint32_t env_done=0;
+     for (int i=0;i<m;i++) {
+         const float bus_x=bus[i];
+-        float bx,nx,y,b1,b2;
++        float bx,nx,y,b1,b2,g1,g2,g3;
+         /* Pair equal-magnitude numerator terms: multiplication rounded
+          * once, exact sign flip for the opposite coefficients (incl. zero).
+          * All additions/subtractions below preserve their old grouping. */
+@@ -1136,11 +1142,36 @@
+         bp2z1 = -bx - c25 * y + bp2z2;
+         bp2z2 = -nx - c26 * y;
+         b2 = opamp_clip(y, 14.0f, 1.0f / 14.0f);
+-        front1[i]=b1;
+-        front2[i]=b2;
++        if (D8_UNLIKELY(e1t > 0.0f)) {
++            e1 += (e1t - e1) * atk_c;
++            if (e1 > e1t * 0.99f)
++                e1t = 0.0f;
++        } else {                                      /* linear discharge, as start - n step */
++            if (D8_UNLIKELY(!e1_ramp)) {
++                e1_ramp = 1;
++                e1_base = e1;
++                e1_n = 0;
++            }
++            if (e1 > 0.0f) {
++                e1 = e1_base - (float)(++e1_n) * d1;
++                if (e1 < 0.0f)
++                    e1 = 0.0f;
++            }
++        }
++        e2 *= d2;
++        e3 *= d3;
++        g1 = knee_gate(e1);
++        g2 = knee_gate(e2);
++        g3 = knee_gate(e3);
++        stage[i]=(cy_front_frame){b1,b2,g1,g2,g3};
++        if(e1 < DIODE_VON*0.5f && e2 < DIODE_VON && e3 < DIODE_VON)
++            env_done|=1u<<i;
+     }
+     v->bp1.z[0] = bp1z0; v->bp1.z[1] = bp1z1; v->bp1.z[2] = bp1z2;
+     v->bp2.z[0] = bp2z0; v->bp2.z[1] = bp2z1; v->bp2.z[2] = bp2z2;
++    v->e1=e1;v->e2=e2;v->e3=e3;v->e1t=e1t;v->e1_base=e1_base;
++    v->e1_n=e1_n;v->e1_ramp=e1_ramp;
++    return env_done;
+ }
+ 
+ __attribute__((noinline)) static int cy_run(d8_cy_t *restrict v, float *restrict buf, const float *restrict bus, int m)
+@@ -1155,7 +1186,6 @@
+     const float oh_n0 = v->out_hp.n0, oh_n1 = v->out_hp.n1;
+     const float oh_e1 = v->out_hp.e1, oh_e2 = v->out_hp.e2;
+     const float hpa_a = v->body_hpa.a, crhp_a = v->crash_hp.a, dc_a = v->dc.a;
+-    const float d1 = v->d1, d2 = v->d2, d3 = v->d3, atk_c = v->atk_c;
+     float sus1_z1 = v->sus1.z1, sus1_z2 = v->sus1.z2;
+     float sus2_z1 = v->sus2.z1, sus2_z2 = v->sus2.z2;
+     float br_z1 = v->body_res.z1, br_z2 = v->body_res.z2;
+@@ -1169,40 +1199,21 @@
+     float flp0 = v->floor_lp[0], flp1 = v->floor_lp[1];
+     float clp0 = v->crash_lp[0], clp1 = v->crash_lp[1];
+     float top_lp = v->top_lp;
+-    float e1 = v->e1, e2 = v->e2, e3 = v->e3, e1t = v->e1t, e1_base = v->e1_base;
+-    int32_t e1_n = v->e1_n, quiet = v->quiet;
+-    uint8_t e1_ramp = v->e1_ramp, active = v->active;
++    int32_t quiet=v->quiet;
++    uint8_t active=v->active;
+     int i;
+ 
+     if (!active || m <= 0) return 0;
+     const d8_bq3_t entry_bp1=v->bp1,entry_bp2=v->bp2;
+-    float front1[CHUNK],front2[CHUNK];
+-    cy_opamp_front(v,bus,front1,front2,m);
++    const float save_e1=v->e1,save_e2=v->e2,save_e3=v->e3,save_t=v->e1t,save_base=v->e1_base;
++    const int32_t save_n=v->e1_n;
++    const uint8_t save_ramp=v->e1_ramp;
++    cy_front_frame stage[CHUNK];
++    const uint32_t env_done=cy_opamp_front(v,bus,stage,m);
+     for (i = 0; i < m && active; i++) {
+-        const float b1=front1[i], b2=front2[i];
+-        float g1, g2, g3, sus, body_pre, body_dk, body, top_in, top, c1, y;
++        const float b1=stage[i].b1,b2=stage[i].b2,g1=stage[i].g1,g2=stage[i].g2,g3=stage[i].g3;
++        float sus, body_pre, body_dk, body, top_in, top, c1, y;
+         float bx, yy;
+-        if (D8_UNLIKELY(e1t > 0.0f)) {
+-            e1 += (e1t - e1) * atk_c;
+-            if (e1 > e1t * 0.99f)
+-                e1t = 0.0f;
+-        } else {                                      /* linear discharge, as start - n step */
+-            if (D8_UNLIKELY(!e1_ramp)) {
+-                e1_ramp = 1;
+-                e1_base = e1;
+-                e1_n = 0;
+-            }
+-            if (e1 > 0.0f) {
+-                e1 = e1_base - (float)(++e1_n) * d1;
+-                if (e1 < 0.0f)
+-                    e1 = 0.0f;
+-            }
+-        }
+-        e2 *= d2;
+-        e3 *= d3;
+-        g1 = knee_gate(e1);
+-        g2 = knee_gate(e2);
+-        g3 = knee_gate(e3);
+         /* bp_run sus1 then sus2, as in (1.4f * bp(sus1) + bp(sus2)) * g1 */
+         bx = sus1_b0 * b1;
+         yy = bx + sus1_z1;
+@@ -1259,7 +1270,7 @@
+         y = dc_y;
+         if (y > 3.2e-5f || y < -3.2e-5f)
+             quiet = 0;
+-        else if (++quiet > 400 && e1 < DIODE_VON * 0.5f && e2 < DIODE_VON && e3 < DIODE_VON)
++        else if (++quiet > 400 && (env_done & (1u << i)))
+             active = 0;
+         buf[i] = y;
+     }
+@@ -1267,10 +1278,12 @@
+     if (D8_UNLIKELY(i < m)) {
+         /* The recursive rear retired early. Its current state and emitted
+          * samples are already authoritative. Materialize ONLY their front
+-         * history by replaying six registers from the entry checkpoint. */
++         * and envelope history by replaying from the entry checkpoint. */
+         v->bp1=entry_bp1;
+         v->bp2=entry_bp2;
+-        cy_opamp_front(v, bus, front1, front2, i);
++        v->e1=save_e1; v->e2=save_e2; v->e3=save_e3; v->e1t=save_t; v->e1_base=save_base;
++        v->e1_n=save_n; v->e1_ramp=save_ramp;
++        (void)cy_opamp_front(v,bus,stage,i);
+     }
+     v->sus1.z1 = sus1_z1; v->sus1.z2 = sus1_z2;
+     v->sus2.z1 = sus2_z1; v->sus2.z2 = sus2_z2;
+@@ -1285,9 +1298,7 @@
+     v->floor_lp[0] = flp0; v->floor_lp[1] = flp1;
+     v->crash_lp[0] = clp0; v->crash_lp[1] = clp1;
+     v->top_lp = top_lp;
+-    v->e1 = e1; v->e2 = e2; v->e3 = e3; v->e1t = e1t; v->e1_base = e1_base;
+-    v->e1_n = e1_n; v->quiet = quiet;
+-    v->e1_ramp = e1_ramp; v->active = active;
++    v->quiet=quiet; v->active=active;
+     return i;
+ }
+ 

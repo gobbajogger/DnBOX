@@ -1,0 +1,30 @@
+--- a/firmware/src/dsp/drum909.c
++++ b/firmware/src/dsp/drum909.c
+@@ -1068,6 +1068,11 @@
+     const unsigned runway = incf ? 2u*(unsigned)m + 1u : (unsigned)m;
+     if (m > 0 && inc == 1u && pos < len && len-pos > runway &&
+         dk >= pos && dk <= pos + 2u) {
++        /* The sampled envelope has no mid-loop restart. Keep its
++         * next/current value and phase count local through the strip. */
++        float env=s->out.v, latest=s->out.cur;
++        int32_t left=s->out.left;
++        const float mul=s->out.r, limit=s->out.v1;
+         for (int i = 0; i < m; ++i) {
+             const uint32_t need = pos + 2u;
+             while (dk < need) {
+@@ -1083,8 +1088,14 @@
+             const uint32_t f2 = frac + incf;
+             pos += 1u + (f2 < frac);
+             frac = f2;
+-            bus->y[i] = v * d9_env_tick(&s->out);
++            latest=env;
++            if (left) {
++                if (--left) env*=mul;
++                else env=limit;
++            }
++            bus->y[i] = v * latest;
+         }
++        s->out.v=env; s->out.cur=latest; s->out.left=left;
+     } else {
+         for (int i = 0; i < m; ++i) {
+             float v = 0.0f;

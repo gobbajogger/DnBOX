@@ -1,0 +1,32 @@
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -916,13 +916,12 @@
+     apply_param(t, v, i, mot_base_snd->v[t][v][i]);
+ }
+ 
+-/* the output's scale: Felucca's -6 dBFS ceiling of the 24-bit codec (2^22), or its full scale (LOUD); the
+- * clamp keeps an over from wrapping (normal: the codec's own full scale, as before) */
+-static volatile float out_scale = 4194303.0f, out_lim = 2.0f;
++/* The master's stereo output is bounded to [-1, 1]. NORMAL uses 2^22
++ * (Felucca's -6 dBFS ceiling), and LOUD uses the codec's full scale. */
++static volatile float out_scale = 4194303.0f;
+ void engine_out_loud(int on)
+ {
+     out_scale = on ? 8388607.0f : 4194303.0f;
+-    out_lim = on ? 1.0f : 2.0f;
+ }
+ 
+ /* USB AUDIO FULL (#12): the render at full level, for the USB tap, and the MASTER knob after it, for
+@@ -3347,11 +3346,9 @@
+         PROF_ADD(6, pt);
+     }
+     {   /* globals in registers: the stores below cannot reload them per sample */
+-        const float lim = out_lim, scale = out_scale;
++        const float scale = out_scale;
+         for (i = 0; i < n; i++) {
+             float l = out_l[i], r = out_r[i];        /* (out_scale: NORMAL 2^22, Felucca's; LOUD 2^23) */
+-            l = l > lim ? lim : l < -lim ? -lim : l;
+-            r = r > lim ? lim : r < -lim ? -lim : r;
+             out_lr[2u * i] = (int32_t)(l * scale);
+             out_lr[2u * i + 1u] = (int32_t)(r * scale);
+         }
