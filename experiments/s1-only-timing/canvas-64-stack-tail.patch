@@ -1,0 +1,198 @@
+--- a/firmware/src/gfx.c
++++ b/firmware/src/gfx.c
+@@ -87,12 +87,17 @@
+ #define X0X_UI_SMALL_CANVAS 0
+ #endif
+ #if X0X_UI_SMALL_CANVAS
+-#define CV_ROWS 69u
++#define CV_ROWS 64u
+ #else
+ #define CV_ROWS 138u
+ #endif
+ #define CV_MAX (240u * CV_ROWS)
+-_Static_assert(CV_ROWS >= 69u, "screen strip shorter than the main band");
++_Static_assert(CV_ROWS >= 64u, "screen strip shorter than the footer window");
++#if X0X_UI_SMALL_CANVAS
++/* Five tail rows are alive only inside MAIN foreground paint/commit. */
++enum { CV_LEGACY_MAIN=69u, CV_SPILL_ROWS=CV_LEGACY_MAIN-CV_ROWS };
++static uint16_t *cv_main_tail;
++#endif
+ static uint16_t cv_px[CV_MAX] __attribute__((section(".pool")));
+ static uint32_t cv_w, cv_h;
+ #if X0X_UI_SMALL_CANVAS
+@@ -150,7 +155,11 @@
+ {
+     uint32_t i, n;
+     uint32_t fill = swap16(bg);
+-    if (w * h > CV_MAX) {
++    if (w * h > CV_MAX
++#if X0X_UI_SMALL_CANVAS
++        && !(w==240u && h==CV_LEGACY_MAIN && cv_main_tail)
++#endif
++    ) {
+         ++bench_display_oversize;
+         h = CV_MAX / w;
+     }
+@@ -163,6 +172,12 @@
+     cv_oy = cv_y0 = 0;
+     cv_y1 = (int32_t)h;
+     n = w * h;
++#if X0X_UI_SMALL_CANVAS
++    if(n>CV_MAX) {
++        for(i=0;i<n-CV_MAX;i++)cv_main_tail[i]=(uint16_t)fill;
++        n=CV_MAX;
++    }
++#endif
+     i = 0;
+     if (n && ((uintptr_t)cv_px & 3u))
+         cv_px[i++] = (uint16_t)fill;
+@@ -208,11 +223,19 @@
+         lcd_blit(x, y + r0, cv_w, cv_h - r0, cv_px + r0 * cv_w);
+ }
+ 
++static inline uint16_t *cv_row_ptr(unsigned row)
++{
++    unsigned off=row*cv_w;
++#if X0X_UI_SMALL_CANVAS
++    if(off>=CV_MAX)return cv_main_tail+(off-CV_MAX);
++#endif
++    return cv_px+off;
++}
+ static inline void cv_pset(int32_t x, int32_t y, uint16_t c)
+ {
+     y += cv_oy;
+     if ((uint32_t)x < cv_w && y >= cv_y0 && y < cv_y1)
+-        cv_px[((uint32_t)y - cv_row_base) * cv_w + (uint32_t)x] = swap16(c);
++        cv_row_ptr((uint32_t)y-cv_row_base)[x] = swap16(c);
+ }
+ 
+ static void cv_rect(int32_t x, int32_t y, int32_t w, int32_t h, uint16_t c)
+@@ -228,9 +251,10 @@
+         x1 = (int32_t)cv_w;
+     if (y1 > cv_y1)
+         y1 = cv_y1;
+-    for (; y < y1; y++)
+-        for (i = x; i < x1; i++)
+-            cv_px[((uint32_t)y - cv_row_base) * cv_w + (uint32_t)i] = sc;
++    for (; y < y1; y++) {
++        uint16_t *p=cv_row_ptr((uint32_t)y-cv_row_base);
++        for (i=x;i<x1;i++)p[i]=sc;
++    }
+ }
+ 
+ #if defined(__clang__) && !defined(X0X_HOST)
+@@ -243,7 +267,7 @@
+     y += cv_oy;
+     if ((uint32_t)x >= cv_w || y < cv_y0 || y >= cv_y1 || !a)
+         return;
+-    q = &cv_px[((uint32_t)y - cv_row_base) * cv_w + (uint32_t)x];
++    q = &cv_row_ptr((uint32_t)y-cv_row_base)[x];
+     if (a >= 16u) {
+         *q = swap16(c);
+         return;
+@@ -415,13 +439,13 @@
+                 if (!a || px < clip_left || px >= clip_right || (uint32_t)px >= cv_w || py < cv_y0 || py >= cv_y1)
+                     continue;
+                 if (a == 15u) {
+-                    cv_px[((uint32_t)py - cv_row_base) * cv_w + (uint32_t)px] = sc;
++                    cv_row_ptr((uint32_t)py-cv_row_base)[px] = sc;
+                 } else {
+-                    uint32_t bg = swap16(cv_px[((uint32_t)py - cv_row_base) * cv_w + (uint32_t)px]);
++                    uint32_t bg = swap16(cv_row_ptr((uint32_t)py-cv_row_base)[px]);
+                     uint32_t br = bg >> 11, bgg = (bg >> 5) & 63u, bb = bg & 31u;
+                     uint32_t nr = cv_div15(r * a + br * (15u - a)), ng = cv_div15(g * a + bgg * (15u - a)),
+                              nb = cv_div15(b * a + bb * (15u - a));
+-                    cv_px[((uint32_t)py - cv_row_base) * cv_w + (uint32_t)px] = swap16((nr << 11) | (ng << 5) | nb);
++                    cv_row_ptr((uint32_t)py-cv_row_base)[px] = swap16((nr << 11) | (ng << 5) | nb);
+                 }
+             }
+         x += font_advance(f,gi);
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -5459,7 +5459,11 @@
+ /* gfx.c sizes the one screen strip (CV_ROWS) to this main area. The unity
+  * build sees that macro; a host file that compiles ui.c alone does not. */
+ #ifdef CV_ROWS
+-_Static_assert((X0X_UI_SMALL_CANVAS ? 1u : 2u) * BAND_H <= CV_ROWS, "main area taller than the screen strip");
++#if X0X_UI_SMALL_CANVAS
++_Static_assert(BAND_H == CV_LEGACY_MAIN, "main tail geometry");
++#else
++_Static_assert(2u * BAND_H <= CV_ROWS, "main area taller than canvas");
++#endif
+ #if !X0X_UI_SMALL_CANVAS
+ _Static_assert(KNOB_H <= CV_ROWS, "knob row taller than the screen strip");
+ #endif
+@@ -5591,9 +5595,15 @@
+         blit_hash[1] = 1u;
+         cv_tile_valid[1] = 1u;
+     }
+-    x0x_lcd_tile_commit(cv_px, rows,
+-        main_tileh + (band * LCD_TILE_ROWS(BAND_H) + first / X0X_LCD_TILE_H) * X0X_LCD_TILE_COLS,
+-        force, cv_lcd_emit, &pos);
++    uint32_t *hashes=main_tileh+(band*LCD_TILE_ROWS(BAND_H)+first/X0X_LCD_TILE_H)*X0X_LCD_TILE_COLS;
++    if(rows>CV_ROWS) {
++        /* Commit split at the existing final tile row, preserving wire order.
++         * cv_lcd_emit packs into its own static DMA buffer before input runs. */
++        x0x_lcd_tile_commit(cv_px,CV_ROWS,hashes,force,cv_lcd_emit,&pos);
++        pos.y+=CV_ROWS;
++        x0x_lcd_tile_commit(cv_main_tail,rows-CV_ROWS,hashes+CV_ROWS/X0X_LCD_TILE_H*X0X_LCD_TILE_COLS,
++                            force,cv_lcd_emit,&pos);
++    } else x0x_lcd_tile_commit(cv_px,rows,hashes,force,cv_lcd_emit,&pos);
+ }
+ static void cv_commit_main_band(unsigned band)
+ {
+@@ -8899,7 +8909,11 @@
+ }
+ #endif
+ 
++#if X0X_UI_SMALL_CANVAS
++static UI_DRAW void draw_main_body(void)
++#else
+ static UI_DRAW void draw_main(void)
++#endif
+ {
+ #if X0X_UI_SMALL_CANVAS
+     cv_scene_owns_knob_frame=0;
+@@ -9097,6 +9111,16 @@
+ #endif
+ }
+ 
++#if X0X_UI_SMALL_CANVAS
++static UI_DRAW void draw_main(void)
++{
++    uint16_t tail[240u*CV_SPILL_ROWS];
++    cv_main_tail=tail;
++    draw_main_body();
++    cv_main_tail=0;
++}
++#endif
++
+ /* -------------------------------------------------------------- knob strip --- */
+ static void cell_value(int cx, int y, const char *num, const char *unit, uint16_t c)
+ {
+@@ -11131,10 +11155,13 @@
+  * all subsequent content is the frozen step footer. */
+ static UI_DRAW void legacy_knob_commit(int paint)
+ {
+-    enum { MATRIX_ROWS=69 };
++    enum { MATRIX_ROWS=CV_LEGACY_MAIN };
++    uint16_t tail[240u*CV_SPILL_ROWS];
++    _Static_assert(CV_ROWS==ORDINARY_KNOB_FIRST, "legacy footer spill coordinates");
+     sound_step_scene_t steps;
+     const uint16_t bg=C_BLACK;
+     const uint8_t initial_light=ui_theme_light;
++    cv_main_tail=tail;
+     cv_window(240,KNOB_H,0,MATRIX_ROWS,bg);
+     if(paint) {
+         sound_step_record=&steps;
+@@ -11147,8 +11174,8 @@
+     /* cv_window synchronizes the previous DMA. Its 18-row clear cannot
+      * touch the five staged rows at the end of the previous raster. */
+     cv_window(240,KNOB_H,ORDINARY_KNOB_FIRST,KNOB_H-ORDINARY_KNOB_FIRST,bg);
+-    memcpy(cv_px,cv_px+240u*ORDINARY_KNOB_FIRST,
+-        (MATRIX_ROWS-ORDINARY_KNOB_FIRST)*240u*sizeof(*cv_px));
++    memcpy(cv_px,tail,sizeof tail);
++    cv_main_tail=0;
+     if(paint) {
+         const uint8_t light=ui_theme_light;
+         ui_theme_light=initial_light;

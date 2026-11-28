@@ -1,0 +1,100 @@
+--- a/firmware/src/dsp/s1c/s1c.c
++++ b/firmware/src/dsp/s1c/s1c.c
+@@ -404,15 +404,49 @@
+ #if S1C_KR > 1 || S1C_FAST
+ #define sine_t s1u_sin
+ #endif
++#define S1C_ENVELOPE_SHARE (S1C_KR > 1 && S1C_FAST && S1C_CSM && S1C_NO_SEQ)
++#if S1C_ENVELOPE_SHARE
++/* Both envelopes are a deterministic function of these bits and shared
++ * controls. Compare at render-span ownership boundaries, never per sample.
++ * These structs include three explicitly initialized padding bytes. */
++static int s1c_share_envelopes(const s1c *s)
++{
++    const s1c_voice *v = s->v;
++    if (s->mono_prev || s->t[MONO] != 0.f || v->root < 0 || !v->stage)
++        return 0;
++    for (unsigned j = 1; j < S1C_VOICES; ++j) {
++        const s1c_voice *w = &s->v[j];
++        if (w->root < 0 || !w->stage ||
++            (s1c_fb){.f=v->gate}.u != (s1c_fb){.f=w->gate}.u ||
++            memcmp(&v->ea, &w->ea, sizeof v->ea) ||
++            memcmp(&v->ef, &w->ef, sizeof v->ef))
++            return 0;
++    }
++    return 1;
++}
++#endif
++
+ #if S1C_KR > 1
+ /* Cheap voice: pitch, LFO, key-tracking and filter coefficients at control rate (every S1C_KR
+  * samples), sines from a 256-point table, the filter envelope still per sample in the cutoff. */
+ volatile uint32_t bench_pitch_reused, bench_filter_reused;
+-static float voice_run_kr(s1c *s, s1c_voice *v, const s1c_morph *m, float adec, const float *semi, uint32_t *seen,uint32_t *fseen)
++static float voice_run_kr(s1c *s, s1c_voice *v, const s1c_morph *m, float adec, const float *semi, uint32_t *seen,uint32_t *fseen
++#if S1C_ENVELOPE_SHARE
++                          ,int share
++#endif
++                          )
+ {
+     int mono = P(MONO) > 0.0f, ft = (int)P(FTYPE);
+-    v->amp = env_step(&v->ea, v->gate, P(AA), adec, P(AS), P(AR), s->sr);
+-    v->fenv = env_step(&v->ef, v->gate, P(FA), P(FD), P(FS), P(FR), s->sr);
++#if S1C_ENVELOPE_SHARE
++    if (share && v != s->v) {
++        v->amp = s->v[0].amp;
++        v->fenv = s->v[0].fenv;
++    } else
++#endif
++    {
++        v->amp = env_step(&v->ea, v->gate, P(AA), adec, P(AS), P(AR), s->sr);
++        v->fenv = env_step(&v->ef, v->gate, P(FA), P(FD), P(FS), P(FR), s->sr);
++    }
+     if (--v->kc <= 0) {
+         v->kc = S1C_KR;
+         const uint32_t bit=1u<<(unsigned)(v-s->v);
+@@ -499,8 +533,12 @@
+     }
+     return y + P(FMIX) * (fo - y);
+ }
++#if S1C_ENVELOPE_SHARE
++#define voice_run(s,v) voice_run_kr(s,v,morphs,adec,semis,pitch_seen,filter_seen,share)
++#else
+ #define voice_run(s,v) voice_run_kr(s,v,morphs,adec,semis,pitch_seen,filter_seen)
+ #endif
++#endif
+ /* ---- FX ---- */
+ typedef s1u_cc s1c_cc;
+ #define comp_coef s1u_comp_coef
+@@ -956,6 +994,9 @@
+     if(stable_filter) filter_seen=&filter_mask;
+ #endif
+ #endif
++#if S1C_ENVELOPE_SHARE
++    int share = n && s1c_share_envelopes(s);
++#endif
+     for (f = 0; f < n; f++) {
+ #if S1C_FAST
+         int cu = (f & 3) == 0;
+@@ -978,6 +1019,9 @@
+         if (gh != s->glide_h) { s->glide_h = gh; s->glide_c2 = gh > 0.0f ? powf(0.5f, 1.0f / (s->sr * gh)) : 0.0f; }
+         s->monos = (1.0f - s->glide_c2) * s->monof + s->glide_c2 * s->monos;
+         if (P(MONO) != (float)s->mono_prev) {
++#if S1C_ENVELOPE_SHARE
++            share = 0; /* the voice set changes in this span */
++#endif
+             s->mono_prev = (uint8_t)P(MONO);
+             for (i = 0; i < S1C_VOICES; i++) voice_clear(&s->v[i]);
+             s->nlast = 0; s->prev_held = 0;
+@@ -1278,4 +1322,11 @@
+ #endif
+         outl[f] = L; outr[f] = R;
+     }
++#if S1C_ENVELOPE_SHARE
++    if (share)
++        for (i = 1; i < S1C_VOICES; ++i) {
++            s->v[i].ea = s->v[0].ea;
++            s->v[i].ef = s->v[0].ef;
++        }
++#endif
+ }

@@ -1,0 +1,15 @@
+--- a/firmware/src/app/main_fm1.c
++++ b/firmware/src/app/main_fm1.c
+@@ -2733,6 +2733,12 @@
+     p3 |= (bootguard.failed >= 2u) << 8;            /* two failed boots: safe mode (kept past the .bss clear) */
+     fm1_irq_init();
+     irq_stack_mark();                               /* before any interrupt: PERF's IRQ STACK */
++    /* Diagnostic mark only: never approach active stack frame. */
++    {
++        uintptr_t cap=((uintptr_t)&d - 256u)&~3u;
++        for(volatile uint32_t *w=(void *)_ustack_lo;(uintptr_t)w<cap;++w)
++            *w=0x5553544Bu;
++    }
+     for (d = _bss_start; d < _bss_end; d++)
+         *d = 0;
+ #if DNBOX_LAB_RAM_SPARE

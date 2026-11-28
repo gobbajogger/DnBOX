@@ -1,0 +1,19 @@
+--- a/firmware/src/dsp/s1c/s1c.c
++++ b/firmware/src/dsp/s1c/s1c.c
+@@ -406,6 +406,8 @@
+ #endif
+ #define S1C_ENVELOPE_SHARE (S1C_KR > 1 && S1C_FAST && S1C_CSM && S1C_NO_SEQ)
+ #if S1C_ENVELOPE_SHARE
++extern volatile uint32_t bench_loaded_on;
++volatile uint32_t bench_env_share[4]; /* held shared/fallback frames, release shared/fallback */
+ /* Both envelopes are a deterministic function of these bits and shared
+  * controls. Compare at render-span ownership boundaries, never per sample.
+  * These structs include three explicitly initialized padding bytes. */
+@@ -1323,6 +1325,7 @@
+         outl[f] = L; outr[f] = R;
+     }
+ #if S1C_ENVELOPE_SHARE
++    bench_env_share[(bench_loaded_on ? 0u : 2u) + !share] += n;
+     if (share)
+         for (i = 1; i < S1C_VOICES; ++i) {
+             s->v[i].ea = s->v[0].ea;
