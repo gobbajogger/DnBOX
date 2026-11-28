@@ -1,0 +1,76 @@
+--- a/firmware/src/dsp/s1c/s1c.c
++++ b/firmware/src/dsp/s1c/s1c.c
+@@ -252,12 +252,16 @@
+     if (bl) { float u = t + 1.0f - w; if (u >= 1.0f) u -= 1.0f; y += blep(u, dt) - blep(t, dt); }
+     return y;
+ }
+-static float morph_step(uint32_t *ph, float dt, float pos, int bl, uint32_t step)
++typedef struct { int k; float frac; } s1c_morph;
++static inline s1c_morph morph_params(float pos)
+ {
+-    float t = (float)*ph * (1.0f / Q32);
+     if (pos > 1.0f) pos -= (int)pos;
+     float f = pos * 3.0f; int k = (int)f; if (k > 2) k = 2;
+-    f -= k;
++    return (s1c_morph){k, f - k};
++}
++static float morph_step(uint32_t *ph, float dt, int k, float f, int bl, uint32_t step)
++{
++    float t = (float)*ph * (1.0f / Q32);
+     float y = shape(k, t, dt, bl);
+     if (f > 0.0f) y += f * (shape(k + 1, t, dt, bl) - y);
+     *ph += step;
+@@ -266,7 +270,8 @@
+ static float morph(uint32_t *ph, float hz, float pos, int bl, float sr)
+ {
+     float dt = hz / sr;
+-    return morph_step(ph, dt, pos, bl, ph_inc(dt));
++    s1c_morph m = morph_params(pos);
++    return morph_step(ph, dt, m.k, m.frac, bl, ph_inc(dt));
+ }
+ static float sine_q(uint32_t ph) { return sinf((float)ph * (TWO_PI / Q32)); }
+ 
+@@ -388,10 +393,10 @@
+ #if S1C_KR > 1
+ /* Cheap voice: pitch, LFO, key-tracking and filter coefficients at control rate (every S1C_KR
+  * samples), sines from a 256-point table, the filter envelope still per sample in the cutoff. */
+-static float voice_run_kr(s1c *s, s1c_voice *v)
++static float voice_run_kr(s1c *s, s1c_voice *v, const s1c_morph *m, float adec)
+ {
+     int mono = P(MONO) > 0.0f, ft = (int)P(FTYPE);
+-    v->amp = env_step(&v->ea, v->gate, P(AA), clampf(P(AD) * lfo10(s, P(LDEC)), 0.005f, 2.0f), P(AS), P(AR), s->sr);
++    v->amp = env_step(&v->ea, v->gate, P(AA), adec, P(AS), P(AR), s->sr);
+     v->fenv = env_step(&v->ef, v->gate, P(FA), P(FD), P(FS), P(FR), s->sr);
+     if (--v->kc <= 0) {
+         v->kc = S1C_KR;
+@@ -431,8 +436,8 @@
+         }
+     }
+     int bl = P(BLE) > 0.0f;
+-    float o1 = morph_step(&v->ph[0], v->kdt1, P(I1), bl, v->kstep[0]) * v->vamp * P(VOL1);
+-    float o2 = morph_step(&v->ph[1], v->kdt2, P(I2), bl, v->kstep[1]) * v->vamp * P(VOL2);
++    float o1 = morph_step(&v->ph[0], v->kdt1, m[0].k, m[0].frac, bl, v->kstep[0]) * v->vamp * P(VOL1);
++    float o2 = morph_step(&v->ph[1], v->kdt2, m[1].k, m[1].frac, bl, v->kstep[1]) * v->vamp * P(VOL2);
+     float y = (1.0f - v->kbal) * o1 + v->kbal * o2;
+     float sub = sine_t(v->ph[2]);
+     v->ph[2] += v->kstep[2];
+@@ -458,7 +463,7 @@
+     }
+     return y + P(FMIX) * (fo - y);
+ }
+-#define voice_run voice_run_kr
++#define voice_run(s,v) voice_run_kr(s,v,morphs,adec)
+ #endif
+ /* ---- FX ---- */
+ typedef s1u_cc s1c_cc;
+@@ -931,6 +936,10 @@
+ #if !S1C_NO_SEQ
+         sequencer(s);
+ #endif
++#if S1C_KR > 1
++        const s1c_morph morphs[2] = {morph_params(P(I1)), morph_params(P(I2))};
++        const float adec = clampf(P(AD) * lfo10(s, P(LDEC)), 0.005f, 2.0f);
++#endif
+         float y = 0.0f;
+         if (P(MONO) > 0.0f) { if (s->v[0].root != -1 && s->v[0].stage) y = voice_run(s, &s->v[0]); }
+         else for (i = 0; i < S1C_VOICES; i++) if (s->v[i].root != -1 && s->v[i].stage) y += voice_run(s, &s->v[i]);
