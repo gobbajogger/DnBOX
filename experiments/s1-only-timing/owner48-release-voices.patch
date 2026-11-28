@@ -1,0 +1,19 @@
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -2985,7 +2985,15 @@
+     bass_render_ok[0] = bass_render_ok[1] = 0;
+     original_rec_cancel_cut();                        /* both basses' recorder state: here, before the jobs */
+     m = plan_pick(n);
+-    const int reverse_candidate=bench_loaded_on && n>=32u &&
++    unsigned releasing=0;
++    if(!bench_loaded_on && bench_loaded_run && n>=32u &&
++       original_bass[0].kind==ORIGINAL_SOUND_SYNTHONE &&
++       original_bass[0].status==ORIGINAL_RUNTIME_OK) {
++        const s1c *e=&original_bass[0].dsp.synthone.e;
++        for(unsigned i=0;i<S1C_VOICES;++i)
++            releasing += e->v[i].stage && e->v[i].root!=-1;
++    }
++    const int reverse_candidate=(bench_loaded_on || releasing>=3u) && n>=32u &&
+         drum909_active(&d909) && drum808_active(&d808);
+     if(reverse_candidate)m=(1u<<JB_909)|(1u<<JB_808);
+     eng_808_reverse=(uint8_t)reverse_candidate;

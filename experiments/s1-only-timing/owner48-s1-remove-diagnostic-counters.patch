@@ -1,0 +1,28 @@
+--- a/firmware/src/dsp/s1c/s1c.c
++++ b/firmware/src/dsp/s1c/s1c.c
+@@ -429,7 +429,6 @@
+ #if S1C_KR > 1
+ /* Cheap voice: pitch, LFO, key-tracking and filter coefficients at control rate (every S1C_KR
+  * samples), sines from a 256-point table, the filter envelope still per sample in the cutoff. */
+-volatile uint32_t bench_pitch_reused, bench_filter_reused;
+ static float voice_run_kr(s1c *s, s1c_voice *v, const s1c_morph *m, float adec, const float *semi, uint32_t *seen,uint32_t *fseen
+ #if S1C_ENVELOPE_SHARE
+                           ,const s1c_voice *shared
+@@ -469,7 +468,7 @@
+             float kf = 1.0f - P(KTRK);
+             v->kkey = (1.0f - kf) * kt * kt + kf;
+             if(seen) *seen|=bit;
+-        } else ++bench_pitch_reused;
++        }
+         v->kidx = clampf(P(FMA) * lfo10(s, P(LFM)), 0.0f, 15.0f);
+         v->kbal = clampf(P(BAL) + lfo01(s, P(LMIX)), 0.0f, 1.0f);
+         if(!fseen || !(*fseen & bit)) {
+@@ -489,7 +488,7 @@
+                 v->ka1 = a1; v->ka4 = 2.0f * (cc * cc - 1.0f) * a1; v->ka5 = (1.0f - 1.41421356f * cc + cc * cc) * a1;
+             }
+             if(fseen) *fseen|=bit;
+-        } else ++bench_filter_reused;
++        }
+     }
+     int bl = P(BLE) > 0.0f;
+     float o1 = morph_step(&v->ph[0], v->kdt1, m[0].k, m[0].frac, bl, v->kstep[0]) * v->vamp * P(VOL1);
