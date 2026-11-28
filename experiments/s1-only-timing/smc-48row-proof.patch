@@ -1,0 +1,72 @@
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -5579,20 +5579,25 @@
+ #if X0X_UI_SMALL_CANVAS
+ /* Separate hash rows per band. All other main owners in this build use the
+  * same partition; whole-main invalidations still force both bands. */
+-static void cv_commit_main_band(unsigned band)
++static void cv_commit_main_window(unsigned band, unsigned first, unsigned rows)
+ {
+     static uint8_t force;
+-    cv_lcd_pos_t pos = {0, MAIN_Y + band * BAND_H};
+-    if (!band) {
++    cv_lcd_pos_t pos = {0, MAIN_Y + band * BAND_H + first};
++    if (!band && !first) {
+         force = !blit_hash[1] || !cv_tile_valid[1];
+-        /* Preserve any invalidation issued by live input during either send. */
++        /* Preserve any invalidation issued by live input during any send. */
+         blit_hash[1] = 1u;
+         cv_tile_valid[1] = 1u;
+     }
+-    x0x_lcd_tile_commit(cv_px, BAND_H,
+-        main_tileh + band * LCD_TILE_ROWS(BAND_H) * X0X_LCD_TILE_COLS,
++    x0x_lcd_tile_commit(cv_px, rows,
++        main_tileh + (band * LCD_TILE_ROWS(BAND_H) + first / X0X_LCD_TILE_H) * X0X_LCD_TILE_COLS,
+         force, cv_lcd_emit, &pos);
+ }
++static void cv_commit_main_band(unsigned band)
++{
++    cv_commit_main_window(band, 0, BAND_H);
++}
++
+ #endif
+ 
+ static void cv_commit_knobs(int region)
+--- a/firmware/src/app/smc_mixer.c
++++ b/firmware/src/app/smc_mixer.c
+@@ -1076,7 +1076,8 @@
+     uint8_t x,y,a,b,kind,bipolar,text,font;
+ } smc_grid_op;
+ typedef struct { unsigned n, nt; uint16_t black; uint8_t bad; } smc_grid_scene;
+-enum { SMC_GRID_OPS=217, SMC_GRID_TEXTS=64, SMC_GRID_RASTER=240*BAND_H };
++enum { SMC_GRID_OPS=217, SMC_GRID_TEXTS=64, SMC_GRID_SLICE=48, SMC_GRID_RASTER=240*SMC_GRID_SLICE };
++_Static_assert(SMC_GRID_SLICE % X0X_LCD_TILE_H == 0, "SMC raster seam must preserve dirty-tile coordinates");
+ _Static_assert(sizeof(smc_grid_op)==16, "SMC opcode ABI");
+ _Static_assert(2u*SMC_GRID_RASTER+SMC_GRID_OPS*sizeof(smc_grid_op)+32u*SMC_GRID_TEXTS<=sizeof cv_px,"SMC tape in canvas tail");
+ static unsigned char *smc_grid_storage(void)
+@@ -1233,19 +1234,21 @@
+     lcd_sync();
+     smc_ui_grid(&scene);
+     if(scene.bad) return;
+-    for(unsigned band=0;band<2u;++band) {
+-        cv_window(240, MAIN_ROWS, band*BAND_H, BAND_H, scene.black);
++    for(unsigned band=0;band<2u;++band) for(unsigned off=0;off<BAND_H;off+=SMC_GRID_SLICE) {
++        unsigned rows=BAND_H-off;
++        if(rows>SMC_GRID_SLICE)rows=SMC_GRID_SLICE;
++        cv_window(240, MAIN_ROWS, band*BAND_H+off, rows, scene.black);
+         for(unsigned i=0;i<scene.n;++i) {
+             smc_grid_op op;
+             memcpy(&op,smc_grid_storage()+i*sizeof(op),sizeof(op));
+             switch(op.kind) {
+             case 0: cv_rect(op.x,op.y,op.a,op.b,op.c); break;
+-            case 1: if (!band) arc(op.x,op.y,op.a,op.v,op.c,op.fill,op.bipolar); break;
++            case 1: if (!band && !off) arc(op.x,op.y,op.a,op.v,op.c,op.fill,op.bipolar); break;
+             case 2: ui_pictogram(op.x,op.y,op.a,op.b,op.c); break;
+             case 3: text_c(op.x,op.y,op.font?&FONT_XS:&FONT_T,smc_grid_string(op.text),op.c); break;
+             }
+         }
+-        cv_commit_main_band(band);
++        cv_commit_main_window(band,off,rows);
+     }
+ }
+ #else

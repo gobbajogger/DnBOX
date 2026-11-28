@@ -64,3 +64,10 @@ skipped cycles. Treat this as a small reduction, not a viable fix alone.
 Separate trials of inlining the steady envelope (14,324.54 µs and −256 B
 app margin) or splitting the voice control-rate code (14,380.54 µs and
 +16 B app margin) both remained at 151 XRUNs and are not recommended.
+
+Separate Elite correctness builds add `render-fingerprints.patch`. Their
+160 ordered pre-DMA fingerprints match through the held and release windows,
+including the actual per-kit hit witness. Timings above come only from
+uninstrumented builds. See `smc-48row-proof.md` for the additional lossless
+display candidate. It is not in the timing build and does not yet free
+global canvas RAM.
