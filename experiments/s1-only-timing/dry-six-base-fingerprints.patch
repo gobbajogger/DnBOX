@@ -1,0 +1,37 @@
+--- a/firmware/src/dsp/s1c/s1c.c
++++ b/firmware/src/dsp/s1c/s1c.c
+@@ -859,7 +859,7 @@
+ #define ENV_GET(q, i) s->env[q][i]
+ #endif
+ 
+-void s1c_render(s1c *s, float *outl, float *outr, unsigned n)
++static __attribute__((noinline)) void s1c_render_body(s1c *s, float *outl, float *outr, unsigned n)
+ {
+     unsigned f, i;
+     int mono = s->t[MONO] > 0.0f;
+@@ -1226,3 +1226,25 @@
+         outl[f] = L; outr[f] = R;
+     }
+ }
++
++extern uint32_t bench_s1_samples(void);
++volatile uint32_t six_voice_fingerprints[320];
++volatile uint32_t six_voice_fingerprint_count, six_voice_fingerprint_bad;
++void s1c_render(s1c *s, float *outl, float *outr, unsigned n)
++{
++    uint32_t start=bench_s1_samples();
++    s1c_render_body(s,outl,outr,n);
++    if(start<98304u || start>=180224u) return;
++    unsigned index=(start-98304u)/256;
++    if(n!=256u || (start&255u) || index!=six_voice_fingerprint_count || index>=320u) {
++        ++six_voice_fingerprint_bad;return;
++    }
++    uint32_t h=2166136261u;
++    for(unsigned i=0;i<n;++i) {
++        s1c_fb l={.f=outl[i]}, r={.f=outr[i]};
++        h=(h^l.u)*16777619u;
++        h=(h^r.u)*16777619u;
++    }
++    six_voice_fingerprints[index]=h;
++    ++six_voice_fingerprint_count;
++}

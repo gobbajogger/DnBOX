@@ -1,0 +1,396 @@
+--- a/firmware/src/dsp/s1c/s1c.c
++++ b/firmware/src/dsp/s1c/s1c.c
+@@ -859,7 +859,18 @@
+ #define ENV_GET(q, i) s->env[q][i]
+ #endif
+ 
+-void s1c_render(s1c *s, float *outl, float *outr, unsigned n)
++#include "../../app/plat.h"
++
++_Static_assert(S1C_VOICES==6 && S1C_NO_SEQ && S1C_CSM && S1C_FAST && S1C_KR>1,
++               "this is an isolated fixture, not a configurable renderer");
++extern int bench_six_parallel_idle(void);
++static s1c six_seed X0X_POOL;
++static s1c six_shadow X0X_POOL;
++static float six_voices[3][256] X0X_POOL;
++static float six_vol[256] X0X_POOL;
++volatile uint32_t bench_six_parallel[4]; /* committed, timeout, RNG mismatches, frames */
++
++static __attribute__((noinline)) void six_render_lane(s1c *s, float *outl, float *outr, unsigned n, unsigned lane)
+ {
+     unsigned f, i;
+     int mono = s->t[MONO] > 0.0f;
+@@ -949,280 +960,74 @@
+         const float adec = clampf(P(AD) * lfo10(s, P(LDEC)), 0.005f, 2.0f);
+ #endif
+         float y = 0.0f;
+-        if (P(MONO) > 0.0f) { if (s->v[0].root != -1 && s->v[0].stage) y = voice_run(s, &s->v[0]); }
+-        else for (i = 0; i < S1C_VOICES; i++) if (s->v[i].root != -1 && s->v[i].stage) y += voice_run(s, &s->v[i]);
+-
+-        /* Diagnostic pure tone path: keep voices and filters, skip all downstream FX. */
+-        outl[f]=outr[f]=y * 2.0f * P(MVOL);
+-        continue;
+-        /* bitcrush (sample-and-hold), tremolo */
+-#if S1C_FAST
+-        if ((f & 7) == 0)
+-#endif
+-        {
+-            float bsr = log2f(P(BCSR)) + 4.0f * lfo01(s, P(LBC));
+-            s1u_crush_clock(&s->crush, clampf(exp2f(bsr), 2048.0f, 48000.0f), s->sr);
+-        }
+-        y = s1u_crush_run(&s->crush, y);
+-        y *= lfo10(s, P(LTREM));
+-        /* autopan, equal power */
+-        float L, R;
+-        s1u_autopan(&s->pan_ph, y, P(PANF), P(PANA), s->sr, &L, &R);
+-        /* phaser */
+-        s1u_phaser_run(&s->ph, &L, &R, P(PHMIX), P(PHRATE), P(PHW), P(PHFB), s->sr);
+-#if !S1C_BUSFX
+-        /* ping-pong delay with tracking low-pass on its input */
+-        float dL = L, dR = R;
+-        if (P(FTYPE) == 0.0f) {
+-#if S1C_FAST
+-            if ((f & 7) == 0) {
+-                float pv = clampf(log2f(P(CUT)), 10.0f, 14.4284f);
+-                float pc = 1.0f + (pv - 10.0f) * (1.0f / 4.4284f) * (P(DICT) - 1.0f);
+-                float x = clampf(P(CUT) * pc, 64.0f, 22050.0f) * (2.0f / s->sr);
+-                s->dl_fc = ladder_a(x > 1.0f ? 1.0f : x);     /* the ladder coefficient, not Hz */
+-            }
+-            dL = ladder(s->dlp[0], L, s->dl_fc, 0.0f); dR = ladder(s->dlp[1], R, s->dl_fc, 0.0f);
+-#else
+-            float pv = clampf(log2f(P(CUT)), 10.0f, 14.4284f);
+-            float pc = 1.0f + (pv - 10.0f) * (1.0f / 4.4284f) * (P(DICT) - 1.0f);
+-            float fc = clampf(P(CUT) * pc, 64.0f, 22050.0f);
+-            dL = moog(s->dlp[0], L, fc, 0.0f, s->sr); dR = moog(s->dlp[1], R, fc, 0.0f, s->sr);
+-#endif
+-        }
+-#ifdef S1C_OPT_A
+-#if S1C_EXT
+-        if (s->ddec == 0) dly_partition(s);
+-        if (0) {
+-#else
+-        if (s->ddec == 0) {   /* fit 6T line samples (8-bit) into what the reverb leaves of 158,400 B */
+-#endif
+-#ifndef S1C_DLCAP
+-#define S1C_DLCAP (158400.0f - 2.0f * 28500.0f)
+-#endif
+-            float cap = S1C_DLCAP;
+-            #ifdef S1C_ADPCM
+-            #if S1C_DLMONO     /* no autopan and no phaser: L and R delay inputs are identical, line B == line A */
+-            s->dmono = s->t[PANA] == 0.0f && s->t[PHMIX] == 0.0f;
+-            float need = (s->dmono ? 3.0f : (float)S1C_DLN) * s->t[DLT] * s->sr * s->t[DLON] * s1c_dlbytes[s1c_dlfmt];
+-#else
+-            float need = S1C_DLN * s->t[DLT] * s->sr * s->t[DLON] * s1c_dlbytes[s1c_dlfmt];
+-#endif
+-#else
+-            float need = 6.0f * s->t[DLT] * s->sr * s->t[DLON] * S1C_DLB;
+-#endif
+-            int want = (int)(need / cap) + 1; if (want > 256) want = 256;
+-            s->ddec = want;
+-        }
+-#endif
+-        int dd = s->ddec;
+-#ifndef S1C_DL_FBK
+-#define S1C_DL_FBK 0.0f
+-#endif
+-#ifndef S1C_DL_FBMAX
+-#define S1C_DL_FBMAX 0.97f
+-#endif
+-#ifndef S1C_DL_WET
+-#define S1C_DL_WET 1.0f
+-#endif
+-        /* compact lines lose level per repeat (decimation, interpolation): feedback and wet trim, by ear */
+-        float T = P(DLT) * s->sr / (float)dd, fbk = P(DLFB) * (1.0f + S1C_DL_FBK * (float)(dd > 1)), oL, oRR;
+-        if (fbk > S1C_DL_FBMAX) fbk = S1C_DL_FBMAX;
+-        if (dd > 1) {
+-        /* lines run at sr / S1C_DLY_DEC: box-filtered input, linearly interpolated output */
+-#if S1C_DLAA
+-        if (s->aa_dd != dd) { s->aa_dd = dd; bq_lp(&s->aa, S1C_DLAA * 0.01f * s->sr / (float)dd, s->sr); }
+-        dL = bq_run(&s->aa, s->zaa[0], dL); dR = bq_run(&s->aa, s->zaa[1], dR);
+-#endif
+-        s->da[0] += dL; s->da[1] += dR;
+-#if S1C_HFR
+-        if (s->dd_set != dd) { s->dd_set = dd; bq_hp(&s->hd, S1C_HFR_FC * s->sr / (float)dd, s->sr); s->hd_norm = bq_norm(s, &s->hd);
+-#if S1C_EXT
+-                               s->e_eb = S1C_EXT_EB;
+-#else
+-                               s->e_eb = S1C_HFR_EB;
+-#endif
+-#if defined S1C_ADPCM && !S1C_EXT
+-                               s->e_eb *= s1c_dlfmt == 1 ? 4 : s1c_dlfmt == 2 ? 2 : 1;   /* ~same ring bytes for every format */
+-#endif
+-#if S1C_EXT
+-                               ; }
+-#else
+-                               s->e_len = S1C_DLY_LEN / s->e_eb + 4; }
+-#endif
+-        float hA = bq_run(&s->hd, s->za[0], dL), hB = bq_run(&s->hd, s->za[1], dR);
+-        s->e_acc[0] += hA * hA; s->e_acc[1] += hB * hB;
+-#endif
+-        if (++s->dk >= dd) {
+-            float iL = s->da[0] / (float)dd, iR = s->da[1] / (float)dd;
+-            s->dk = 0; s->da[0] = s->da[1] = 0.0f; s->d0[0] = s->d1[0]; s->d0[1] = s->d1[1];
+-#ifdef S1C_DLCOMP
+-            float lc = 1.5f - 0.5f / (float)dd;
+-            s->d1[0] = dl_tick_c(&s->dl[0], iL, 2.0f * T, fbk, lc);
+-            float r = dl_tick_c(&s->dl[1], iR, 2.0f * T, fbk, 0.0f), f2 = dl_tick_c(&s->dl[2], iR, T, fbk, lc);
+-            s->d1[1] = dl_tick_c(&s->dl[3], r, T, fbk, lc) + f2;
+-#else
+-            s->d1[0] = DL_TICK(&s->dl[0], iL, 2.0f * T, fbk);
+-#if S1C_DLN == 5      /* C_T(R) + C_T(C_2T(R)) == C_T(R + C_2T(R)): one T line instead of two */
+-#if S1C_DLMONO
+-            float r = s->dmono ? s->d1[0] : DL_TICK(&s->dl[1], iR, 2.0f * T, fbk);
+-#else
+-            float r = dl_tick(&s->dl[1], iR, 2.0f * T, fbk);
+-#endif
+-            s->d1[1] = DL_TICK(&s->dl[3], iR + r, T, fbk);
+-#else
+-            float r = dl_tick(&s->dl[1], iR, 2.0f * T, fbk), f2 = dl_tick(&s->dl[2], iR, T, fbk);
+-            s->d1[1] = dl_tick(&s->dl[3], r, T, fbk) + f2;
+-#endif
+-#endif
+-        }
+-        { float u = (float)s->dk / (float)dd;
+-          oL = s->d0[0] + (s->d1[0] - s->d0[0]) * u; oRR = s->d0[1] + (s->d1[1] - s->d0[1]) * u; }
+-#if S1C_DLAA
+-        oL = bq_run(&s->aa, s->zaa[2], oL); oRR = bq_run(&s->aa, s->zaa[3], oRR);
+-#endif
+-#if S1C_HFR
+-        if (s->dk == 0) {    /* one line tick just ran: HF energy through the same comb structure, in energy */
+-            float inv = 1.0f / (float)dd, f2 = fbk * fbk, ein[3];
+-            ein[0] = s->e_acc[0] * inv; ein[1] = s->e_acc[1] * inv; ein[2] = ein[1] + s->e_out[1];
+-            s->e_acc[0] = s->e_acc[1] = 0.0f;
+-            for (int q = 0; q < 3; q++) s->e_bacc[q] += ein[q] + f2 * s->e_out[q];
+-            if (++s->e_bn == s->e_eb) {
+-                for (int q = 0; q < 3; q++) { ENV_PUT(q, s->e_w, s->e_bacc[q] / (float)s->e_eb); s->e_bacc[q] = 0.0f; }
+-                s->e_bn = 0; if (++s->e_w == s->e_len) s->e_w = 0;
+-            }
+-            float now = (float)s->e_w + (float)s->e_bn / (float)s->e_eb - 0.5f, last = (float)s->e_w - 1.0f;
+-            for (int q = 0; q < 3; q++) {
+-                float p = now - (q < 2 ? 2.0f * T : T) / (float)s->e_eb;
+-                if (p > last) p = last;          /* never the block still being filled */
+-                while (p < 0.0f) p += (float)s->e_len;
+-                int i0 = (int)p; float fr = p - (float)i0; int i1 = i0 + 1 == s->e_len ? 0 : i0 + 1;
+-                { float v0 = ENV_GET(q, i0), v1 = ENV_GET(q, i1); s->e_out[q] = v0 + fr * (v1 - v0); }
+-            }
+-        }
+-#if S1C_HFR == 2
+-        /* excitation: the input's own HF now (right spectrum), decorrelated by short allpasses,
+-         * scaled to the delayed HF energy over the input's current HF energy */
+-        {   float hx[2] = {hA, hB};
+-            for (int q = 0; q < 2; q++) {
+-                float e = hx[q] * hx[q], *en = &s->en[q];
+-                *en += (e > *en ? S1C_HFR_ATT : S1C_HFR_REL) * (e - *en);
+-                float v = hx[q];
+-                for (int a = 0; a < 2; a++) {
+-                    static const int16_t al[2][2] = {{23, 41}, {29, 37}};
+-#if S1C_EXT
+-                    static const uint8_t ao[2][2] = {{0, 23}, {64, 93}};
+-                    uint16_t *buf = s->hap + ao[q][a]; int w = s->hapw[q][a];
+-                    float d = h16_get(buf[w]), u = v + 0.6f * d; buf[w] = h16_put(u); v = d - 0.6f * u;
+-#else
+-                    float *buf = s->hap[q][a]; int w = s->hapw[q][a];
+-                    float d = buf[w], u = v + 0.6f * d; buf[w] = u; v = d - 0.6f * u;
+-#endif
+-                    s->hapw[q][a] = w + 1 == al[q][a] ? 0 : w + 1;
++        if (!lane) {
++            if (P(MONO) > 0.0f) { if (s->v[0].root != -1 && s->v[0].stage) y = voice_run(s, &s->v[0]); }
++            else for (i = 0; i < S1C_VOICES; i++) if (s->v[i].root != -1 && s->v[i].stage) y += voice_run(s, &s->v[i]);
++            outl[f]=outr[f]=y * 2.0f * P(MVOL);
++        } else {
++            for(i=0;i<S1C_VOICES;++i) {
++                s1c_voice *v=&s->v[i];
++                if(v->root == -1 || !v->stage) continue;
++                if((i<3u)==(lane==1u)) {
++                    const float value=voice_run(s,v);
++                    if(lane==1u) y+=value;
++                    else six_voices[i-3][f]=value;
++                } else if(P(NOISEV) != 0.0f) {
++                    s->rnd=s->rnd*1664525u+1013904223u;
+                 }
+-                float g;
+-                if ((f & 7) == 0) {
+-                    g = *en > 1e-14f ? sqrtf(s->e_out[q ? 2 : 0] / *en) : 0.0f;
+-                    if (g > S1C_HFR_GMAX) g = S1C_HFR_GMAX;
+-                    s->hg[q] = g;
+-                } else g = s->hg[q];
+-                if (q) oRR += g * v; else oL += g * v;
++            }
++            if(lane==1u) {
++                outl[f]=y;
++                six_vol[f]=P(MVOL);
+             }
+         }
+-#else
+-        oL += sqrtf(s->e_out[0]) * s->hd_norm * bq_run(&s->hd, s->zs[0], hfr_noise(s));
+-        oRR += sqrtf(s->e_out[2]) * s->hd_norm * bq_run(&s->hd, s->zs[1], hfr_noise(s));
+-#endif
+-#endif
+-        } else {
+-        oL = DL_TICK(&s->dl[0], dL, 2.0f * T, fbk);
+-        #if S1C_DLMONO
+-        float oR = s->dmono ? oL : DL_TICK(&s->dl[1], dR, 2.0f * T, fbk);
+-#else
+-        float oR = dl_tick(&s->dl[1], dR, 2.0f * T, fbk);
+-#endif
+-#if S1C_DLN == 5
+-        oRR = DL_TICK(&s->dl[3], dR + oR, T, fbk);
+-#else
+-        float oF = dl_tick(&s->dl[2], dR, T, fbk);
+-        oRR = dl_tick(&s->dl[3], oR, T, fbk) + oF;
+-#endif
+-        }
+-        float dm = P(DLMIX) * P(DLON);
+-        if (dd > 1) { oL *= S1C_DL_WET; oRR *= S1C_DL_WET; }
+-        float mL = (1.0f - dm) * L + dm * oL, mR = (1.0f - dm) * R + dm * oRR;
+-        /* reverb: high-pass, pre-gain, input compressor, network, wet compressor */
+-#if S1C_FAST
+-        const s1c_fb rvhp = {.f = P(RVHP)};
+-        if ((f & 7) == 0 && (f == 0 || rvhp.u != last_rvhp.u)) {
+-            last_rvhp = rvhp;
+-            float cc = tanf(3.14159265f * rvhp.f / s->sr), a1 = 1.0f / (1.0f + 1.41421356f * cc + cc * cc);
+-            s->hpk[0] = a1; s->hpk[1] = 2.0f * (cc * cc - 1.0f) * a1; s->hpk[2] = (1.0f - 1.41421356f * cc + cc * cc) * a1;
+-        }
+-        float hl, hr;
+-        hl = hp2(s->hp_y[0], mL, s->hpk[0] * 2.0f, s->hpk[1], s->hpk[2]); hr = hp2(s->hp_y[1], mR, s->hpk[0] * 2.0f, s->hpk[1], s->hpk[2]);
+-#else
+-        float hl = buthp(s->hp_y[0], mL, P(RVHP), s->sr) * 2.0f, hr = buthp(s->hp_y[1], mR, P(RVHP), s->sr) * 2.0f;
+-#endif
+-#if !S1C_NO_RVCOMP
+-        hl = comp(s->cmp[1][0], hl, &cr) * P(CRG); hr = comp(s->cmp[1][1], hr, &cr) * P(CRG);
+-#endif
+-        float wl, wr;
+-#if S1C_RVB
+-#if S1C_RVB_DEC > 1
+-        s->ra[0] += hl; s->ra[1] += hr;
+-        if (++s->rk >= S1C_RVB_DEC) {
+-            s->rk = 0; s->r0[0] = s->r1[0]; s->r0[1] = s->r1[1];
+-            rvb_compact(s, s->ra[0] * (1.0f / S1C_RVB_DEC), s->ra[1] * (1.0f / S1C_RVB_DEC), &s->r1[0], &s->r1[1]);
+-            s->ra[0] = s->ra[1] = 0.0f;
+-        }
+-        { float u = (float)s->rk * (1.0f / S1C_RVB_DEC);
+-          wl = s->r0[0] + (s->r1[0] - s->r0[0]) * u; wr = s->r0[1] + (s->r1[1] - s->r0[1]) * u; }
+-#else
+-        rvb_compact(s, hl, hr, &wl, &wr);
+-#endif
+-#else
+-        reverb(s, hl, hr, &wl, &wr);
+-#endif
+-#if S1C_HFR && S1C_RVB_DEC > 1 && S1C_HFR_RV
+-        if (s->rvb_fbt != s->t[RVFB] || s->hr_norm == 0.0f) {
+-            float fb = s->t[RVFB]; s->rvb_fbt = fb;
+-            s->rt_a = fb > 0.0f ? powf(fb, 2.0f / (FITV(s)[1] * 0.068390f * s->sr)) : 0.0f;
+-            bq_hp(&s->hr, S1C_HFR_FC * s->sr / (float)S1C_RVB_DEC, s->sr); s->hr_norm = bq_norm(s, &s->hr);
+-        }
+-        { float a = s->rt_a, b = 1.0f - a;
+-          float xl = bq_run(&s->hr, s->zra[0], hl), xr = bq_run(&s->hr, s->zra[1], hr);
+-          float ehf = 0.5f * (xl * xl + xr * xr), ein = 0.5f * (hl * hl + hr * hr) - ehf, eo = 0.5f * (wl * wl + wr * wr);
+-          s->rt_in = a * s->rt_in + b * (ein > 0.0f ? ein : 0.0f); s->rt_out = a * s->rt_out + b * eo; s->rt_hfin = a * s->rt_hfin + b * ehf;
+-          float g = s->rt_in > 1e-20f ? sqrtf(s->rt_out / s->rt_in * s->rt_hfin) * s->hr_norm * S1C_HFR_RG : 0.0f;
+-          wl += g * bq_run(&s->hr, s->zrs[0], hfr_noise(s)); wr += g * bq_run(&s->hr, s->zrs[1], hfr_noise(s)); }
+-#endif
+-#if !S1C_NO_RVCOMP
+-        wl = comp(s->cmp[2][0], wl, &cw) * P(CWG); wr = comp(s->cmp[2][1], wr, &cw) * P(CWG);
+-#endif
+-        float rm = P(RVMIX) * P(RVON) * lfo10(s, P(LRVMIX));
+-        L = ((1.0f - rm) * mL + rm * wl) * 2.0f * P(MVOL);
+-        R = ((1.0f - rm) * mR + rm * wr) * 2.0f * P(MVOL);
+-#else
+-        /* device: delay and reverb are the shared bus; the part glue reads these send levels */
+-        s->send_dly = P(DLMIX) * P(DLON);
+-        s->send_rev = P(RVMIX) * P(RVON) * lfo10(s, P(LRVMIX));
+-        L *= 2.0f * P(MVOL); R *= 2.0f * P(MVOL);
+-#endif
+-        L = comp(s->cmp[0][0], L, &cm) * P(CMG); R = comp(s->cmp[0][1], R, &cm) * P(CMG);
+-        /* widen: the right channel through three allpasses, crossfaded */
+-#if WAP_L0
+-        R = s1u_widen_run(&s->wid, R, P(WIDEN));
+-#else
+-        {
+-#if defined S1C_WIDEN_FLOAT
+-            float wd = s->wbuf[s->wpos]; s->wbuf[s->wpos] = R;
+-#else
+-            float wd = h16_get(s->wbuf[s->wpos]); s->wbuf[s->wpos] = h16_put(R);
+-#endif
+-            if (++s->wpos >= s->wlen) s->wpos = 0;
+-            R += P(WIDEN) * (wd - R);
+-        }
+-#endif
+-        outl[f] = L; outr[f] = R;
+     }
+ }
++
++static void six_worker(uint32_t n) { six_render_lane(&six_shadow,NULL,NULL,n,2u); }
++
++void s1c_render(s1c *s, float *outl, float *outr, unsigned n)
++{
++    /* Only this isolated, fixed six-held-note dry fixture can use the worker.
++     * The shadow can fail without touching the owner's voice or bus state. */
++    if (!bench_six_parallel_idle() || n>256u || n<64u ||
++        P(MONO)!=0.f || s->mono_prev || plat_cpu2_busy()!=0) {
++        six_render_lane(s,outl,outr,n,0u); return;
++    }
++    unsigned active=0, lower=0, upper=0;
++    for(unsigned j=0;j<S1C_VOICES;++j) {
++        const s1c_voice *v=&s->v[j];
++        if(v->root==-1 || v->stage==0 || (v->stage==2 && v->amp<0.01f)) continue;
++        active|=1u<<j;
++        if(j<3u) ++lower; else ++upper;
++    }
++    if(lower+upper<4u || !lower || !upper) {
++        six_render_lane(s,outl,outr,n,0u); return;
++    }
++    memcpy(&six_seed,s,sizeof *s);
++    memcpy(&six_shadow,s,sizeof *s);
++    plat_cpu2_sync();
++    if(!plat_cpu2_run(six_worker,n)) { six_render_lane(s,outl,outr,n,0u); return; }
++    six_render_lane(s,outl,outr,n,1u);
++    if(plat_cpu2_wait()) {
++        /* The HAL has held the failed core. Replay the isolated original state. */
++        ++bench_six_parallel[1];
++        memcpy(s,&six_seed,sizeof *s);
++        six_render_lane(s,outl,outr,n,0u);
++        return;
++    }
++    if(six_shadow.rnd!=s->rnd) {
++        ++bench_six_parallel[2];
++        memcpy(s,&six_seed,sizeof *s);
++        six_render_lane(s,outl,outr,n,0u);
++        return;
++    }
++    for(unsigned j=3;j<6;++j)s->v[j]=six_shadow.v[j];
++    for(unsigned f=0;f<n;++f) {
++        float y=outl[f];
++        for(unsigned j=0;j<3;++j) if(active&(8u<<j)) y+=six_voices[j][f];
++        outl[f]=outr[f]=y*2.f*six_vol[f];
++    }
++    ++bench_six_parallel[0];
++    bench_six_parallel[3]+=n;
++}
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -2872,6 +2872,15 @@
+     return m;
+ }
+ /* before a stretch of n frames: the split to use (sticky; idle jobs stay on core 0) */
++extern volatile uint32_t bench_s1_only[9];
++static int bench_six_active(void)
++{
++    return bench_s1_only[5]==6 && d8_frame>=98304u && d8_frame<262144u;
++}
++int bench_six_parallel_idle(void)
++{
++    return bench_six_active() && !eng_c1_mask;
++}
+ static uint32_t plan_pick(uint32_t n)
+ {
+     uint32_t c[JB_N], act = 0, best = eng_plan, cost, bc, m, nn = n < 64u ? 64u : n, ok = c1_allowed();
+@@ -2975,7 +2984,7 @@
+     eng_c1_waited = 0;
+     bass_render_ok[0] = bass_render_ok[1] = 0;
+     original_rec_cancel_cut();                        /* both basses' recorder state: here, before the jobs */
+-    m = plan_pick(n);
++    m = bench_six_active() ? 0u : plan_pick(n);
+     const int full808 = m == ((1u<<JB_909)|(1u<<JB_808)|(1u<<JB_B)) &&
+         original_bass[0].kind == ORIGINAL_SOUND_SYNTHONE &&
+         original_bass[1].kind == ORIGINAL_SOUND_CHICAGO &&
