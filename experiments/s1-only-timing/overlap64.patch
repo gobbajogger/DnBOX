@@ -1,0 +1,399 @@
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -2863,6 +2863,10 @@
+  * shared and cannot have two simultaneous writers. */
+ static uint32_t c1_allowed(void)
+ {
++    /* Fixed S1-only fixture: no empty peer may reserve the worker. */
++    extern volatile uint32_t bench_s1_only[9];
++    if (bench_s1_only[1]) return 0;
++
+     const unsigned a=original_bass[0].kind,b=original_bass[1].kind;
+     uint32_t m=(1u<<JB_909)|(1u<<JB_808)|(1u<<JB_BRK);
+     if (a==ORIGINAL_SOUND_MIAMI ||
+@@ -3156,6 +3160,11 @@
+ extern volatile uint32_t bench_owner;
+ volatile uint32_t bench_s1_only[9];
+ uint32_t bench_s1_samples(void) { return d8_frame; }
++int bench_s1_worker_allowed(void) {
++    return !eng_c1_mask && !seq.playing && bench_s1_only[1] &&
++        original_bass[0].kind==ORIGINAL_SOUND_SYNTHONE &&
++        original_bass[1].status!=ORIGINAL_RUNTIME_OK;
++}
+ 
+ static void bench_s1_inputs(uint32_t n)
+ {
+--- a/firmware/src/dsp/s1c/s1c.c
++++ b/firmware/src/dsp/s1c/s1c.c
+@@ -843,118 +843,72 @@
+ #define ENV_GET(q, i) s->env[q][i]
+ #endif
+ 
+-void s1c_render(s1c *s, float *outl, float *outr, unsigned n)
++/* Disposable S1-only overlap experiment. No stock scheduler eligibility is changed. */
++#include "../../app/plat.h"
++extern int bench_s1_worker_allowed(void);
++#if !S1C_CSM || !S1C_NO_SEQ || !S1C_FAST || !S1C_EXT || S1C_HFR || S1C_BUSFX
++#error "Overlap proof only covers the active compact FX profile"
++#endif
++enum { TILE=64 };
++struct frame { float input, c_BCSR, c_CUT, c_DLFB, c_DLMIX, c_DLON, c_DLT, c_MVOL, c_PANA, c_PANF, c_PHFB, c_PHMIX, c_PHRATE, c_PHW, c_RVHP, c_RVMIX, c_RVON, c_WIDEN, lfo01_LBC, lfo10_LTREM, lfo10_LRVMIX; unsigned reset_delay; };
++_Static_assert(sizeof(struct frame)==88,"exact frame payload");
++static struct frame s1tape[2][TILE] X0X_POOL;
++struct fx_job {
++    s1c *s;
++    struct frame *tape;
++    float *outl,*outr;
++    const s1c_cc *cm,*cr,*cw;
++    s1c_fb *last;
++    unsigned block,end;
++};
++static struct fx_job job;
++volatile uint32_t bench_s1_fx_jobs, bench_s1_fx_fail;
++__attribute__((noinline)) static void fx_run(unsigned measured)
+ {
+-    unsigned f, i;
+-    int mono = s->t[MONO] > 0.0f;
+-    if (mono) { if (s->v[0].stage == 2 && s->v[0].amp < 0.01f) voice_clear(&s->v[0]); }
+-    else for (i = 0; i < S1C_VOICES; i++) if (s->v[i].stage == 2 && s->v[i].amp < 0.01f) voice_clear(&s->v[i]);
+-    float c2 = s->port_c2, c1 = 1.0f - c2;
+-    param_dirty(s);
+-    s1c_cc cm, cr, cw;   /* compressor parameters are not smoothed: coefficients once per block */
+-    comp_coef(&cm, P(CMR), P(CMT), P(CMA), P(CMREL), s->sr);
+-#if !S1C_BUSFX
+-#if !S1C_NO_RVCOMP
+-    comp_coef(&cr, P(CRR), P(CRT), P(CRA), P(CRREL), s->sr);
+-    comp_coef(&cw, P(CWR), P(CWT), P(CWA), P(CWREL), s->sr);
+-#endif
+-#endif
+-    (void)cr; (void)cw;
+-    const float l1step = P(L1R) / s->sr, l2step = P(L2R) / s->sr;
+-    s1c_fb last_rvhp = {.u = UINT32_MAX};
+-#if S1C_FAST && S1C_CSM && S1C_NO_SEQ
+-    /* Controls are block-owned in this build. If one exact smoothing step is
+-     * a binary32 fixed point, every remaining step would return those bits.
+-     * Moving only the unsettled controls keeps sample order, rounding and
+-     * smoothing time unchanged, including at preset and automation edges. */
+-    uint8_t moving[sizeof s1c_smid];
+-    float input[sizeof s1c_smid];
+-    unsigned nmoving = 0;
+-    for (i = 0; i < sizeof s1c_smid; ++i) {
+-        const float x = c1 * s->t[s1c_smid[i]];
+-        const s1c_fb old = {.f = s->c[i]}, next = {.f = x + c2 * old.f};
+-        if (old.u != next.u) {
+-            moving[nmoving] = (uint8_t)i;
+-            input[nmoving++] = x;
+-        }
+-    }
+-#endif
+-    for (f = 0; f < n; f++) {
+-#if S1C_FAST
+-        int cu = (f & 3) == 0;
+-#if S1C_CSM
+-#if S1C_NO_SEQ
+-        for (i = 0; i < nmoving; ++i) {
+-            const unsigned k = moving[i];
+-            s->c[k] = input[i] + c2 * s->c[k];
+-        }
+-#else
+-        for (i = 0; i < (int)sizeof s1c_smid; i++) s->c[i] = c1 * s->t[s1c_smid[i]] + c2 * s->c[i];
+-#endif
+-#else
+-        for (i = 0; i < s1c_nsm; i++) { unsigned q = s1c_sm[i]; s->c[q] = c1 * s->t[q] + c2 * s->c[q]; }
+-#endif
+-#else
+-        for (i = 0; i < 150; i++) if (smoothed(i)) s->c[i] = c1 * s->t[i] + c2 * s->c[i];
+-#endif
+-        float gh = P(GLIDE);
+-        if (gh != s->glide_h) { s->glide_h = gh; s->glide_c2 = gh > 0.0f ? powf(0.5f, 1.0f / (s->sr * gh)) : 0.0f; }
+-        s->monos = (1.0f - s->glide_c2) * s->monof + s->glide_c2 * s->monos;
+-        if (P(MONO) != (float)s->mono_prev) {
+-            s->mono_prev = (uint8_t)P(MONO);
+-            for (i = 0; i < S1C_VOICES; i++) voice_clear(&s->v[i]);
+-            s->nlast = 0; s->prev_held = 0;
+-#if !S1C_BUSFX
+-#if S1C_EXT
+-            s->ddec = 0;     /* re-partition (clears the lines) */
+-#else
+-            for (i = 0; i < 4; i++) { memset(s->dl[i].buf, 0, sizeof s->dbuf[0]); s->dl[i].prev = 0.0f; }
+-#endif
+-#endif
+-        }
+-        /* LFOs */
+-        float x;
+-        float lc2 = s->lfo_c2;
+-        s1u_lfo_tick(&s->lfo[0], l1step, (int)P(L1I), P(L1A), lc2);
+-        s1u_lfo_tick(&s->lfo[1], l2step, (int)P(L2I), P(L2A), lc2);
+-#if !S1C_NO_SEQ
+-        sequencer(s);
+-#endif
+-        float y = 0.0f;
+-        if (P(MONO) > 0.0f) { if (s->v[0].root != -1 && s->v[0].stage) y = voice_run(s, &s->v[0]); }
+-        else for (i = 0; i < S1C_VOICES; i++) if (s->v[i].root != -1 && s->v[i].stage) y += voice_run(s, &s->v[i]);
+-
++    s1c *s=job.s;
++    float *outl=job.outl,*outr=job.outr;
++    const struct frame *tape=job.tape;
++    const unsigned block=job.block,end=job.end;
++    #define cm (*job.cm)
++    #define cr (*job.cr)
++    #define cw (*job.cw)
++    s1c_fb last_rvhp=*job.last;
++    for (unsigned f=block; f<end; ++f) {
++        const struct frame *row=&tape[f-block];
++        float y=row->input;
++        const int cu=(f & 3)==0;
++        if (row->reset_delay) s->ddec=0;
+         /* bitcrush (sample-and-hold), tremolo */
+ #if S1C_FAST
+         if ((f & 7) == 0)
+ #endif
+         {
+-            float bsr = log2f(P(BCSR)) + 4.0f * lfo01(s, P(LBC));
++            float bsr = log2f(row->c_BCSR) + 4.0f * row->lfo01_LBC;
+             s1u_crush_clock(&s->crush, clampf(exp2f(bsr), 2048.0f, 48000.0f), s->sr);
+         }
+         y = s1u_crush_run(&s->crush, y);
+-        y *= lfo10(s, P(LTREM));
++        y *= row->lfo10_LTREM;
+         /* autopan, equal power */
+         float L, R;
+-        s1u_autopan(&s->pan_ph, y, P(PANF), P(PANA), s->sr, &L, &R);
++        s1u_autopan(&s->pan_ph, y, row->c_PANF, row->c_PANA, s->sr, &L, &R);
+         /* phaser */
+-        s1u_phaser_run(&s->ph, &L, &R, P(PHMIX), P(PHRATE), P(PHW), P(PHFB), s->sr);
++        s1u_phaser_run(&s->ph, &L, &R, row->c_PHMIX, row->c_PHRATE, row->c_PHW, row->c_PHFB, s->sr);
+ #if !S1C_BUSFX
+         /* ping-pong delay with tracking low-pass on its input */
+         float dL = L, dR = R;
+-        if (P(FTYPE) == 0.0f) {
++        if (s->t[FTYPE] == 0.0f) {
+ #if S1C_FAST
+             if ((f & 7) == 0) {
+-                float pv = clampf(log2f(P(CUT)), 10.0f, 14.4284f);
+-                float pc = 1.0f + (pv - 10.0f) * (1.0f / 4.4284f) * (P(DICT) - 1.0f);
+-                float x = clampf(P(CUT) * pc, 64.0f, 22050.0f) * (2.0f / s->sr);
++                float pv = clampf(log2f(row->c_CUT), 10.0f, 14.4284f);
++                float pc = 1.0f + (pv - 10.0f) * (1.0f / 4.4284f) * (s->t[DICT] - 1.0f);
++                float x = clampf(row->c_CUT * pc, 64.0f, 22050.0f) * (2.0f / s->sr);
+                 s->dl_fc = ladder_a(x > 1.0f ? 1.0f : x);     /* the ladder coefficient, not Hz */
+             }
+             dL = ladder(s->dlp[0], L, s->dl_fc, 0.0f); dR = ladder(s->dlp[1], R, s->dl_fc, 0.0f);
+ #else
+-            float pv = clampf(log2f(P(CUT)), 10.0f, 14.4284f);
+-            float pc = 1.0f + (pv - 10.0f) * (1.0f / 4.4284f) * (P(DICT) - 1.0f);
+-            float fc = clampf(P(CUT) * pc, 64.0f, 22050.0f);
++            float pv = clampf(log2f(row->c_CUT), 10.0f, 14.4284f);
++            float pc = 1.0f + (pv - 10.0f) * (1.0f / 4.4284f) * (s->t[DICT] - 1.0f);
++            float fc = clampf(row->c_CUT * pc, 64.0f, 22050.0f);
+             dL = moog(s->dlp[0], L, fc, 0.0f, s->sr); dR = moog(s->dlp[1], R, fc, 0.0f, s->sr);
+ #endif
+         }
+@@ -994,7 +948,7 @@
+ #define S1C_DL_WET 1.0f
+ #endif
+         /* compact lines lose level per repeat (decimation, interpolation): feedback and wet trim, by ear */
+-        float T = P(DLT) * s->sr / (float)dd, fbk = P(DLFB) * (1.0f + S1C_DL_FBK * (float)(dd > 1)), oL, oRR;
++        float T = row->c_DLT * s->sr / (float)dd, fbk = row->c_DLFB * (1.0f + S1C_DL_FBK * (float)(dd > 1)), oL, oRR;
+         if (fbk > S1C_DL_FBMAX) fbk = S1C_DL_FBMAX;
+         if (dd > 1) {
+         /* lines run at sr / S1C_DLY_DEC: box-filtered input, linearly interpolated output */
+@@ -1116,12 +1070,12 @@
+         oRR = dl_tick(&s->dl[3], oR, T, fbk) + oF;
+ #endif
+         }
+-        float dm = P(DLMIX) * P(DLON);
++        float dm = row->c_DLMIX * row->c_DLON;
+         if (dd > 1) { oL *= S1C_DL_WET; oRR *= S1C_DL_WET; }
+         float mL = (1.0f - dm) * L + dm * oL, mR = (1.0f - dm) * R + dm * oRR;
+         /* reverb: high-pass, pre-gain, input compressor, network, wet compressor */
+ #if S1C_FAST
+-        const s1c_fb rvhp = {.f = P(RVHP)};
++        const s1c_fb rvhp = {.f = row->c_RVHP};
+         if ((f & 7) == 0 && (f == 0 || rvhp.u != last_rvhp.u)) {
+             last_rvhp = rvhp;
+             float cc = tanf(3.14159265f * rvhp.f / s->sr), a1 = 1.0f / (1.0f + 1.41421356f * cc + cc * cc);
+@@ -1130,10 +1084,10 @@
+         float hl, hr;
+         hl = hp2(s->hp_y[0], mL, s->hpk[0] * 2.0f, s->hpk[1], s->hpk[2]); hr = hp2(s->hp_y[1], mR, s->hpk[0] * 2.0f, s->hpk[1], s->hpk[2]);
+ #else
+-        float hl = buthp(s->hp_y[0], mL, P(RVHP), s->sr) * 2.0f, hr = buthp(s->hp_y[1], mR, P(RVHP), s->sr) * 2.0f;
++        float hl = buthp(s->hp_y[0], mL, row->c_RVHP, s->sr) * 2.0f, hr = buthp(s->hp_y[1], mR, row->c_RVHP, s->sr) * 2.0f;
+ #endif
+ #if !S1C_NO_RVCOMP
+-        hl = comp(s->cmp[1][0], hl, &cr) * P(CRG); hr = comp(s->cmp[1][1], hr, &cr) * P(CRG);
++        hl = comp(s->cmp[1][0], hl, &cr) * s->t[CRG]; hr = comp(s->cmp[1][1], hr, &cr) * s->t[CRG];
+ #endif
+         float wl, wr;
+ #if S1C_RVB
+@@ -1166,21 +1120,21 @@
+           wl += g * bq_run(&s->hr, s->zrs[0], hfr_noise(s)); wr += g * bq_run(&s->hr, s->zrs[1], hfr_noise(s)); }
+ #endif
+ #if !S1C_NO_RVCOMP
+-        wl = comp(s->cmp[2][0], wl, &cw) * P(CWG); wr = comp(s->cmp[2][1], wr, &cw) * P(CWG);
++        wl = comp(s->cmp[2][0], wl, &cw) * s->t[CWG]; wr = comp(s->cmp[2][1], wr, &cw) * s->t[CWG];
+ #endif
+-        float rm = P(RVMIX) * P(RVON) * lfo10(s, P(LRVMIX));
+-        L = ((1.0f - rm) * mL + rm * wl) * 2.0f * P(MVOL);
+-        R = ((1.0f - rm) * mR + rm * wr) * 2.0f * P(MVOL);
++        float rm = row->c_RVMIX * row->c_RVON * row->lfo10_LRVMIX;
++        L = ((1.0f - rm) * mL + rm * wl) * 2.0f * row->c_MVOL;
++        R = ((1.0f - rm) * mR + rm * wr) * 2.0f * row->c_MVOL;
+ #else
+         /* device: delay and reverb are the shared bus; the part glue reads these send levels */
+-        s->send_dly = P(DLMIX) * P(DLON);
+-        s->send_rev = P(RVMIX) * P(RVON) * lfo10(s, P(LRVMIX));
+-        L *= 2.0f * P(MVOL); R *= 2.0f * P(MVOL);
++        s->send_dly = row->c_DLMIX * row->c_DLON;
++        s->send_rev = row->c_RVMIX * row->c_RVON * row->lfo10_LRVMIX;
++        L *= 2.0f * row->c_MVOL; R *= 2.0f * row->c_MVOL;
+ #endif
+-        L = comp(s->cmp[0][0], L, &cm) * P(CMG); R = comp(s->cmp[0][1], R, &cm) * P(CMG);
++        L = comp(s->cmp[0][0], L, &cm) * s->t[CMG]; R = comp(s->cmp[0][1], R, &cm) * s->t[CMG];
+         /* widen: the right channel through three allpasses, crossfaded */
+ #if WAP_L0
+-        R = s1u_widen_run(&s->wid, R, P(WIDEN));
++        R = s1u_widen_run(&s->wid, R, row->c_WIDEN);
+ #else
+         {
+ #if defined S1C_WIDEN_FLOAT
+@@ -1189,9 +1143,138 @@
+             float wd = h16_get(s->wbuf[s->wpos]); s->wbuf[s->wpos] = h16_put(R);
+ #endif
+             if (++s->wpos >= s->wlen) s->wpos = 0;
+-            R += P(WIDEN) * (wd - R);
++            R += row->c_WIDEN * (wd - R);
+         }
+ #endif
+         outl[f] = L; outr[f] = R;
+     }
++    *job.last=last_rvhp;
++    if(measured)++bench_s1_fx_jobs;
++    #undef cm
++    #undef cr
++    #undef cw
++}
++static void fx_worker(uint32_t x){(void)x;fx_run(1);}
++void s1c_render(s1c *s, float *outl, float *outr, unsigned n)
++{
++    unsigned f, i;
++    int mono = s->t[MONO] > 0.0f;
++    if (mono) { if (s->v[0].stage == 2 && s->v[0].amp < 0.01f) voice_clear(&s->v[0]); }
++    else for (i = 0; i < S1C_VOICES; i++) if (s->v[i].stage == 2 && s->v[i].amp < 0.01f) voice_clear(&s->v[i]);
++    float c2 = s->port_c2, c1 = 1.0f - c2;
++    param_dirty(s);
++    s1c_cc cm, cr, cw;   /* compressor parameters are not smoothed: coefficients once per block */
++    comp_coef(&cm, P(CMR), P(CMT), P(CMA), P(CMREL), s->sr);
++#if !S1C_BUSFX
++#if !S1C_NO_RVCOMP
++    comp_coef(&cr, P(CRR), P(CRT), P(CRA), P(CRREL), s->sr);
++    comp_coef(&cw, P(CWR), P(CWT), P(CWA), P(CWREL), s->sr);
++#endif
++#endif
++    (void)cr; (void)cw;
++    const float l1step = P(L1R) / s->sr, l2step = P(L2R) / s->sr;
++    s1c_fb last_rvhp = {.u = UINT32_MAX};
++#if S1C_FAST && S1C_CSM && S1C_NO_SEQ
++    /* Controls are block-owned in this build. If one exact smoothing step is
++     * a binary32 fixed point, every remaining step would return those bits.
++     * Moving only the unsettled controls keeps sample order, rounding and
++     * smoothing time unchanged, including at preset and automation edges. */
++    uint8_t moving[sizeof s1c_smid];
++    float input[sizeof s1c_smid];
++    unsigned nmoving = 0;
++    for (i = 0; i < sizeof s1c_smid; ++i) {
++        const float x = c1 * s->t[s1c_smid[i]];
++        const s1c_fb old = {.f = s->c[i]}, next = {.f = x + c2 * old.f};
++        if (old.u != next.u) {
++            moving[nmoving] = (uint8_t)i;
++            input[nmoving++] = x;
++        }
++    }
++#endif
++    const int eligible=bench_s1_worker_allowed();
++    int pending=0;
++    for (unsigned block=0;block<n;block+=TILE) {
++        struct frame *tape=s1tape[(block/TILE)&1u];
++        const unsigned end=n-block<TILE?n:block+TILE;
++        for (f=block; f<end; ++f) {
++            unsigned reset_delay=0;
++#if S1C_FAST
++        int cu = (f & 3) == 0;
++#if S1C_CSM
++#if S1C_NO_SEQ
++        for (i = 0; i < nmoving; ++i) {
++            const unsigned k = moving[i];
++            s->c[k] = input[i] + c2 * s->c[k];
++        }
++#else
++        for (i = 0; i < (int)sizeof s1c_smid; i++) s->c[i] = c1 * s->t[s1c_smid[i]] + c2 * s->c[i];
++#endif
++#else
++        for (i = 0; i < s1c_nsm; i++) { unsigned q = s1c_sm[i]; s->c[q] = c1 * s->t[q] + c2 * s->c[q]; }
++#endif
++#else
++        for (i = 0; i < 150; i++) if (smoothed(i)) s->c[i] = c1 * s->t[i] + c2 * s->c[i];
++#endif
++        float gh = P(GLIDE);
++        if (gh != s->glide_h) { s->glide_h = gh; s->glide_c2 = gh > 0.0f ? powf(0.5f, 1.0f / (s->sr * gh)) : 0.0f; }
++        s->monos = (1.0f - s->glide_c2) * s->monof + s->glide_c2 * s->monos;
++        if (P(MONO) != (float)s->mono_prev) {
++            s->mono_prev = (uint8_t)P(MONO);
++            for (i = 0; i < S1C_VOICES; i++) voice_clear(&s->v[i]);
++            s->nlast = 0; s->prev_held = 0;
++#if !S1C_BUSFX
++#if S1C_EXT
++            reset_delay = 1;  /* replay the same reset before this FX frame */
++#else
++            for (i = 0; i < 4; i++) { memset(s->dl[i].buf, 0, sizeof s->dbuf[0]); s->dl[i].prev = 0.0f; }
++#endif
++#endif
++        }
++        /* LFOs */
++        float x;
++        float lc2 = s->lfo_c2;
++        s1u_lfo_tick(&s->lfo[0], l1step, (int)P(L1I), P(L1A), lc2);
++        s1u_lfo_tick(&s->lfo[1], l2step, (int)P(L2I), P(L2A), lc2);
++#if !S1C_NO_SEQ
++        sequencer(s);
++#endif
++        float y = 0.0f;
++        if (P(MONO) > 0.0f) { if (s->v[0].root != -1 && s->v[0].stage) y = voice_run(s, &s->v[0]); }
++        else for (i = 0; i < S1C_VOICES; i++) if (s->v[i].root != -1 && s->v[i].stage) y += voice_run(s, &s->v[i]);
++
++        struct frame *row=&tape[f-block];
++        row->input=y;
++        row->c_BCSR=P(BCSR);
++        row->c_CUT=P(CUT);
++        row->c_DLFB=P(DLFB);
++        row->c_DLMIX=P(DLMIX);
++        row->c_DLON=P(DLON);
++        row->c_DLT=P(DLT);
++        row->c_MVOL=P(MVOL);
++        row->c_PANA=P(PANA);
++        row->c_PANF=P(PANF);
++        row->c_PHFB=P(PHFB);
++        row->c_PHMIX=P(PHMIX);
++        row->c_PHRATE=P(PHRATE);
++        row->c_PHW=P(PHW);
++        row->c_RVHP=P(RVHP);
++        row->c_RVMIX=P(RVMIX);
++        row->c_RVON=P(RVON);
++        row->c_WIDEN=P(WIDEN);
++        row->lfo01_LBC=lfo01(s, P(LBC));
++        row->lfo10_LTREM=lfo10(s, P(LTREM));
++        row->lfo10_LRVMIX=lfo10(s, P(LRVMIX));
++        row->reset_delay=reset_delay;
++        }
++        if (pending && plat_cpu2_wait()) goto fault;
++        job=(struct fx_job){s,tape,outl,outr,&cm,&cr,&cw,&last_rvhp,block,end};
++        plat_cpu2_sync();
++        pending=eligible && plat_cpu2_run(fx_worker,0);
++        if (!pending) fx_run(0);
++    }
++    if (pending && plat_cpu2_wait()) goto fault;
++    return;
++fault:
++    ++bench_s1_fx_fail;
++    memset(outl,0,n*sizeof *outl); memset(outr,0,n*sizeof *outr);
+ }

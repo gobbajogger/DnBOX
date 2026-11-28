@@ -1,0 +1,37 @@
+--- a/firmware/src/dsp/s1c/s1c.c
++++ b/firmware/src/dsp/s1c/s1c.c
+@@ -994,8 +994,11 @@
+ #define S1C_DL_WET 1.0f
+ #endif
+         /* compact lines lose level per repeat (decimation, interpolation): feedback and wet trim, by ear */
+-        float T = P(DLT) * s->sr / (float)dd, fbk = P(DLFB) * (1.0f + S1C_DL_FBK * (float)(dd > 1)), oL, oRR;
++        float oL, oRR;
++#if S1C_HFR
++        float T = P(DLT) * s->sr / (float)dd, fbk = P(DLFB) * (1.0f + S1C_DL_FBK * (float)(dd > 1));
+         if (fbk > S1C_DL_FBMAX) fbk = S1C_DL_FBMAX;
++#endif
+         if (dd > 1) {
+         /* lines run at sr / S1C_DLY_DEC: box-filtered input, linearly interpolated output */
+ #if S1C_DLAA
+@@ -1022,6 +1025,10 @@
+         s->e_acc[0] += hA * hA; s->e_acc[1] += hB * hB;
+ #endif
+         if (++s->dk >= dd) {
++#if !S1C_HFR
++        float T = P(DLT) * s->sr / (float)dd, fbk = P(DLFB) * (1.0f + S1C_DL_FBK * (float)(dd > 1));
++        if (fbk > S1C_DL_FBMAX) fbk = S1C_DL_FBMAX;
++#endif
+             float iL = s->da[0] / (float)dd, iR = s->da[1] / (float)dd;
+             s->dk = 0; s->da[0] = s->da[1] = 0.0f; s->d0[0] = s->d1[0]; s->d0[1] = s->d1[1];
+ #ifdef S1C_DLCOMP
+@@ -1103,6 +1110,10 @@
+ #endif
+ #endif
+         } else {
++#if !S1C_HFR
++        float T = P(DLT) * s->sr / (float)dd, fbk = P(DLFB) * (1.0f + S1C_DL_FBK * (float)(dd > 1));
++        if (fbk > S1C_DL_FBMAX) fbk = S1C_DL_FBMAX;
++#endif
+         oL = DL_TICK(&s->dl[0], dL, 2.0f * T, fbk);
+         #if S1C_DLMONO
+         float oR = s->dmono ? oL : DL_TICK(&s->dl[1], dR, 2.0f * T, fbk);

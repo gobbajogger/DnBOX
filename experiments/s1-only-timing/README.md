@@ -42,3 +42,31 @@ The initial corrected Elite baseline had delay stride 38, peak
 16,791.79 us, 128 held halves over the target and 147 DMA XRUN indications.
 A valid fixture is not a performance pass. Do not use this single
 four-voice test to qualify all programs, the full stress scene or a release.
+
+## Independent experiments (none enabled by default)
+
+- Apply `overlap64.patch` after the workload patch on the candidate only.
+  The 64-frame ping-pong tape lets Core 1 process effects from the prior
+  tile while Core 0 renders voices for the next tile. Only in this
+  disposable workload does the retired peer stop reserving that worker.
+  The implementation does not replay a partially completed job on timeout.
+  Do not use it as a production scheduler: recovery/ownership under fault,
+  other playback workloads and both board variants remain unqualified.
+- Apply `render-fingerprints.patch` to **separate correctness builds** of
+  both arms. Compare the generated words before DMA using
+  `python3 experiments/s1-only-timing/compare-render.py BASE CANDIDATE`.
+  Do not measure timing in the hashing runs. The corrected four-voice
+  reference comparison matched all 160 fingerprints (128 held, 32 release).
+- The independent delay iteration and reverb reader changes live in
+  `delay-tick.patch` and `room-read.patch`. The latter needs
+  `DNBOX_S1_ROOM_REBASE=1` on s1u.c. Test each alone, on the original
+  renderer, before testing combinations. Do not apply the delay iteration
+  patch on top of the overlap patch as-is.
+- `delay-allocation.patch` tests an identical allocation search with
+  `DNBOX_S1_PARTITION_BISECT=1` on s1c.c. It changes only initial
+  allocation effort. It does not change live retime semantics.
+
+With the correctly sized 300 ms delay (stride 38) the original Elite
+peak was 16,791.79 us. The overlap experiment reached 13,308.08 us with
+1,284 bytes of app flash and 15,228 bytes of pool margin. Both still
+recorded 147 DMA XRUN indications. A faster measured peak is not a pass.

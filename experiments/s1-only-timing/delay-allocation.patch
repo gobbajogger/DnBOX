@@ -1,0 +1,35 @@
+--- a/firmware/src/dsp/s1c/s1c.c
++++ b/firmware/src/dsp/s1c/s1c.c
+@@ -798,7 +798,16 @@
+     float Tt = dt * s->sr * s->t[DLON];
+     s->dmono = s->t[PANA] == 0.0f && s->t[PHMIX] == 0.0f;
+     nl = s->dmono ? 2 : 3;
++#if DNBOX_S1_PARTITION_BISECT
++    /* In this range all conversions and byte arithmetic are in bounds.
++     * Nonnegative division, truncation, alignment and sizing are monotone.
++     * 4095 remains the original forced choice even if it would not fit. */
++    int lo = 9, hi = 4095;
++    const int bisect = Tt > 0.0f && Tt <= 0x1p26f;
++    for (dd = 1; dd < 4096; dd = bisect && dd >= 8 ? lo + (hi - lo) / 2 : dd + 1) {
++#else
+     for (dd = 1; dd < 4096; dd++) {
++#endif
+         float T = Tt / (float)dd;
+         int la = ((int)(2.0f * T) + 3 + 15) & ~15, lc = ((int)T + 3 + 15) & ~15;
+ #if S1C_HFR
+@@ -808,6 +817,15 @@
+ #endif
+         int samples = la * (nl - 1) + lc;
+         int bytes = (fmt == 2 ? samples + samples / 16 : 2 * samples) + 3 * el * 2;
++#if DNBOX_S1_PARTITION_BISECT
++        if (bisect && dd >= 9 && lo < hi) {
++            if (bytes <= s->pool_bytes)
++                hi = dd;
++            else
++                lo = dd + 1;
++            continue;
++        }
++#endif
+         if (bytes <= s->pool_bytes || dd == 4095) {
+             uint8_t *p = s->pool; int lens[4] = {la, nl == 3 ? la : 0, 0, lc};
+             memset(s->pool, 0, (size_t)s->pool_bytes);

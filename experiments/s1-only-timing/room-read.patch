@@ -1,0 +1,18 @@
+--- a/firmware/src/dsp/s1c/s1u.c
++++ b/firmware/src/dsp/s1c/s1u.c
+@@ -229,6 +229,15 @@
+     if ((i >> 4) == (w >> 4) && (i & 15) < r->bn[n]) return (float)r->st[n * 16 + (i & 15)] * (1.0f / 2048.0f);
+     int e = r->e[idx >> 4];
+     if (e == -128) return 0.0f;
++#if DNBOX_S1_ROOM_REBASE
++    /* For a normal quotient, scale the rounded 1/127 significand by
++     * the integer exponent. Preserve the generic path at both extremes. */
++    if ((unsigned)(e + 119) <= 239u) {
++        union { float f; uint32_t u; } scale = {1.0f / 127.0f};
++        scale.u += (uint32_t)e << 23;
++        return (float)r->m[idx] * scale.f;
++    }
++#endif
+     return (float)r->m[idx] * (exp2f((float)e) / 127.0f);
+ }
+ static void rb_put(s1u_rvb *r, int n, int w, float x)

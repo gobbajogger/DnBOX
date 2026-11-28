@@ -1,0 +1,29 @@
+--- a/firmware/src/app/main_fm1.c
++++ b/firmware/src/app/main_fm1.c
+@@ -42,6 +42,18 @@
+ extern uint32_t bench_s1_samples(void);
+ volatile uint32_t bench_s1_held[4]; /* halves, peak ticks, over target, elapsed > 512 frames */
+ static uint32_t bench_s1_ticks;
++volatile uint32_t bench_s1_digest[160], bench_s1_digest_count;
++__attribute__((noinline,minsize)) static void bench_s1_output(uint32_t start, const int32_t *words)
++{
++    if (start<98304u || start>=180224u) return;
++    const unsigned i=(start-98304u)/HALF_FRAMES;
++    if (start%HALF_FRAMES || i!=bench_s1_digest_count || i>=160u) return;
++    uint32_t digest=2166136261u;
++    for(unsigned w=0;w<HALF_WORDS;++w) digest=(digest^(uint32_t)words[w])*16777619u;
++    bench_s1_digest[i]=digest;
++    ++bench_s1_digest_count;
++}
++
+ static void render_block(int32_t *o)                /* ALNK0: one half, measured */
+ {
+     uint32_t t0 = fm1_ticks(), us, budget = HALF_FRAMES * 1000000u / FS;
+@@ -110,6 +122,7 @@
+         uint32_t half = fm1_audio_free_half();
+         const uint32_t bench_start=bench_s1_samples();
+         render_block(&abuf[half * HALF_WORDS]);
++        bench_s1_output(bench_start,&abuf[half * HALF_WORDS]);
+         fm1_audio_ack_half();
+         if (fm1_audio_free_half() != half) {
+ #if X0X_DEBUG
