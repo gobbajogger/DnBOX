@@ -1,0 +1,119 @@
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -2967,6 +2967,13 @@
+ }
+ /* one stretch: the jobs split between the cores by plan_pick (see above), each mixed in the
+  * order one core always used (909, 808, bass A, bass B, break): the same sums either way */
++/* Diagnostic: held-window wall ticks, separated where jobs join. */
++volatile uint32_t bench_post_cycles[8];
++static inline void bench_post_log(unsigned slot, uint32_t start)
++{
++    if (bench_loaded_on) bench_post_cycles[slot] += plat_ticks24() - start;
++}
++
+ __attribute__((noinline)) static void render_sub(float *out_l, float *out_r, uint32_t n, uint32_t offset)
+ {
+     uint32_t solo = smc_solo_state, m;
+@@ -3047,6 +3054,7 @@
+ #if X0X_DEBUG
+     eng_dbg_wait += plat_ticks24() - w0;              /* now: core 0's whole job span */
+ #endif
++    uint32_t post = plat_ticks24();
+     brk_midi_drain();
+     for (j = 0; j < NBASS; j++)                       /* the recorder (shared with the sequencer): core 0 */
+         if (bass_render_ok[j]) original_rec_recover_off(j);
+@@ -3071,6 +3079,8 @@
+                                                              (int)prefix,eng_vol,0.f);
+         }
+     }
++    bench_post_log(0,post);
++    post=plat_ticks24();
+     if (eng_do_master && n >= ENG_TAIL_CS) {
+         uint32_t done = 0, waited = 0, first = 1;
+         PROF_T(pf);
+@@ -3110,6 +3120,7 @@
+             }
+             resume_master_meter();
+             eng_master_done = 1;
++            bench_post_log(1,post);
+             return;
+         }
+         while (done < n) {
+@@ -3155,6 +3166,7 @@
+         PROF_ADD(5, pf);
+         bfx_flt_shape(out_l, out_r, (int)n);
+     }
++    bench_post_log(1,post);
+ }
+ 
+ #if X0X_DIAG_STATE_TRACE
+@@ -3232,6 +3244,7 @@
+ 
+ void engine_render(int32_t *out_lr, uint32_t n)
+ {
++    const uint32_t all=plat_ticks24();
+     mot_empty_in_render = 0;
+     static float out_l[256], out_r[256];
+     uint32_t done = 0, i;
+@@ -3285,7 +3298,9 @@
+         PROF_ADD(7, pt);
+     }
+     bench_s1_inputs(n);
++    bench_post_log(2,all);
+     while (done < n) {
++        uint32_t seqbefore = plat_ticks24();
+         uint32_t k = seq_until_event(&seq, n - done);
+         brk_mute_boundary(); /* also follows song mutes at an in-buffer event */
+ #if X0X_ARP_ENGINE
+@@ -3304,7 +3319,9 @@
+             eng_master_raw_prefix=done-eng_mastered;
+             eng_do_master=1;
+         }
++        bench_post_log(3,seqbefore);
+         render_sub(out_l + done, out_r + done, k, 0);
++        uint32_t seqafter=plat_ticks24();
+         d8_frame+=k;
+         if (eng_do_master && eng_master_done)
+             eng_mastered = done + k;
+@@ -3316,6 +3333,7 @@
+             PROF_ADD(7, pt);
+         }
+         done += k;
++        bench_post_log(3,seqafter);
+     }
+     mot_empty_in_render = 0;
+     if (mot_playing && !seq.playing) {                   /* stopped: every knob back to its own value */
+@@ -3325,12 +3343,15 @@
+ #endif
+     }
+     mot_playing = seq.playing;
++    uint32_t tail=plat_ticks24();
+     if (eng_mastered < n) {
+         PROF_T(pt);
+         master_process_st(&mst, out_l + eng_mastered, out_r + eng_mastered,
+                           (int)(n - eng_mastered), vol);
+         PROF_ADD(6, pt);
+     }
++    bench_post_log(4,tail);
++    tail=plat_ticks24();
+     {   /* globals in registers: the stores below cannot reload them per sample */
+         const float lim = out_lim, scale = out_scale;
+         for (i = 0; i < n; i++) {
+@@ -3341,6 +3362,8 @@
+             out_lr[2u * i + 1u] = (int32_t)(r * scale);
+         }
+     }
++    bench_post_log(5,tail);
++    tail=plat_ticks24();
+     {
+         uint32_t w = eng_scope_w;
+         for (i = 1; i < n; i += 2u)
+@@ -3353,6 +3376,8 @@
+             eng_peak[p] = (uint16_t)q;
+         part_peak[p] = 0.0f;
+     }
++    bench_post_log(6,tail);
++    bench_post_log(7,all);
+ }
+ 
+ /* -------------------------------------------------------------- loops --- */
