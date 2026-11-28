@@ -1,0 +1,7 @@
+# e00f689d exact 909 fixed-drive coordinates
+Native diagnostic source base e00f689dcab38f396dc23325e0f8eef515925489, with the staged O3 Synth One, FAST32 Chicago coefficient decoders, and working 112-span split flags (see build-test). Matched Pro arms differ only in the 909 phase-fold patch. Fresh identical NOR/project/Pro controller identity, strict emulator no skipped cycles, six held notes on Synth One B + 808 and 909. Not flashed or released.
+- Exact rounded waveform proof: 75,497,473 reachable binary32 folded phase inputs, both fixed drives, bitwise equality. Whole 909 host test is also identical for all four buses and all 7,648 bytes of internal state across 23,280 blocks each at -O0 and -O2.
+- Link: 6,940 -> 7,132 B app XIP free (+192 B); pool margin 512 B beyond 8,192 reserve unchanged; ordinary RAM unchanged.
+- Native final scheduler 909 estimate: 2,794.79 -> 2,673.21 us/256 (-121.58 us), derived from the live eng_job_cost symbol and 24 MHz timer. This is a scheduler cost estimate, not a direct measured voice event duration.
+- Whole maximum 18,376 -> 18,345 us; latest completed 16,591 -> 16,314 us; unchanged 64 late halves, 63 stale DMA spans / 32,256 repeated frames, no worker give-up. Both show six specific real MIDI held pitches; both preserve controller and NOR state.
+- Different raw hashes include differently timed stale buffers and do not establish native DAC/pre-DMA bit identity. Host exact only; no Pro release pass and no Elite qualification done here.

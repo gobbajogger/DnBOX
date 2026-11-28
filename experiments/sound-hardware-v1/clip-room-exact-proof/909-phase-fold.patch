@@ -9,7 +9,7 @@
 +/* The input is always a triangle in [-1,1]: neither fixed drive reaches
 + * the tanh clamp. Folding exact powers of two into the float coordinate
 + * leaves the same rounded binary32 operations (there is no underflow). */
-+_Static_assert(X0X_TANH_SCALE == 128.0f && X0X_TANH_N > 256, "fixed-drive coordinates");
++_Static_assert((int)X0X_TANH_SCALE == 128 && X0X_TANH_N > 256, "fixed-drive coordinates");
 +D9_INLINE float d9_diode_coord(float a, float norm)
 +{
 +    fm_bits_t u = {.f=a};
