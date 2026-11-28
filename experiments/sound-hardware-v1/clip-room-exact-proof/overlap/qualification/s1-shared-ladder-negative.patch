@@ -1,0 +1,67 @@
+--- a/firmware/src/dsp/s1c/s1c.c
++++ b/firmware/src/dsp/s1c/s1c.c
+@@ -424,6 +424,12 @@
+             v->kkey = (1.0f - kf) * kt * kt + kf;
+         }
+         v->kcut = P(CUT) * lfo10(s, P(LCUT)); v->kem = P(FENV) * lfo10(s, P(LFENV));
++#if DNBOX_S1_LADDER_SHARED
++        if (s->shared_ladder) {
++            v->kA = s->shared_ladder_a;
++            v->kfb = s->shared_ladder_fb;
++        } else {
++#endif
+         float cut = clampf(v->kcut - v->kcut * v->kem * (1.0f - v->fenv), 64.0f, 22050.0f);
+         if (ft == 0) {
+             float x = cut * (2.0f / s->sr); if (x > 1.0f) x = 1.0f;
+@@ -437,6 +443,9 @@
+             float cc = tanf(3.14159265f * cut / s->sr), a1 = 1.0f / (1.0f + 1.41421356f * cc + cc * cc);
+             v->ka1 = a1; v->ka4 = 2.0f * (cc * cc - 1.0f) * a1; v->ka5 = (1.0f - 1.41421356f * cc + cc * cc) * a1;
+         }
++#if DNBOX_S1_LADDER_SHARED
++        }
++#endif
+     }
+     int bl = P(BLE) > 0.0f;
+     float o1 = morph(&v->ph[0], v->kf1, P(I1), bl, s->sr) * v->vamp * P(VOL1);
+@@ -949,6 +958,28 @@
+             moving[moving_n++] = (uint8_t)i;
+     }
+ #endif
++#if DNBOX_S1_LADDER_SHARED
++    s->shared_ladder = 0;
++#if DNBOX_S1_SKIP_FIXED && S1C_FAST && S1C_CSM && S1C_NO_SEQ
++    /* Keep the full path while automation/smoothing changes anything that
++     * affects the ladder. Identical coefficients are safe to share only
++     * with no cutoff envelope or relevant oscillator selectors. */
++    int shared = (int)P(FTYPE) == 0 && P(FENV) == 0.0f &&
++        !(int)P(LCUT) && !(int)P(LRES) && !(int)P(LFENV) && P(CUT) > 0.0f;
++    for (unsigned j=0; shared && j<moving_n; ++j) {
++        unsigned id = s1c_smid[moving[j]];
++        if (id == CUT || id == FENV || id == RES) shared = 0;
++    }
++    if (shared) {
++        float x = clampf(P(CUT), 64.0f, 22050.0f) * (2.0f / s->sr);
++        if (x > 1.0f) x = 1.0f;
++        float res = clampf(P(RES), 0.0f, .98f);
++        s->shared_ladder_a = ladder_a(x);
++        s->shared_ladder_fb = res * (3.98720139f + x * (3.68178143f - x * 3.93633599f));
++        s->shared_ladder = 1;
++    }
++#endif
++#endif
+     s1c_cc cm, cr, cw;   /* compressor parameters are not smoothed: coefficients once per block */
+     comp_coef(&cm, P(CMR), P(CMT), P(CMA), P(CMREL), s->sr);
+ #if !S1C_BUSFX
+--- a/firmware/src/dsp/s1c/s1c.h
++++ b/firmware/src/dsp/s1c/s1c.h
+@@ -197,6 +197,10 @@
+     S1C_SAMPLE rv[S1C_RV_TOTAL];
+ #endif
+ #endif
++#if DNBOX_S1_LADDER_SHARED
++    float shared_ladder_a, shared_ladder_fb;
++    unsigned shared_ladder;
++#endif
+ } s1c;
+ #if DNBOX_S1_WORK_SPLIT && S1C_FAST && S1C_KR > 1 && S1C_CSM && S1C_NO_SEQ
+ #ifndef S1C_SPLIT_SPAN

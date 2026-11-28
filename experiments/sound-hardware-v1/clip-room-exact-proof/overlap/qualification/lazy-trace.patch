@@ -1,0 +1,167 @@
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -2461,6 +2461,8 @@
+ static void c1_take_over(uint32_t s);
+ static void d808_body_run(void);
+ static void core2_fx(uint32_t arg);
++extern volatile uint32_t lazy_now[4][16], lazy_span;
++#define LT(i,x) do { if(lazy_span<4) lazy_now[lazy_span][i]=(x); } while(0)
+ 
+ /* the second core still working: 1, done: 0, it failed: -1 (fm1: plat_fm1.c). One core: done. */
+ __attribute__((weak)) int plat_cpu2_busy(void) { return 0; }
+@@ -2656,6 +2658,7 @@
+         if (!core)
+             PROF_ADD(PR_909, p9);
+         eng_sync();
++        LT(2,plat_ticks24());
+         eng_stage = 1;
+     } else if (j == JB_808) {
+         PROF_T(p8);
+@@ -2693,6 +2696,7 @@
+         if (!core)
+             PROF_ADD(PR_808, p8);
+         eng_sync();
++        LT(3,plat_ticks24());
+         eng_stage = 2;
+     } else if (j == JB_A || j == JB_B) {
+         /* one bass: its own workspace and L/R, so A and B may run at once on the two cores */
+@@ -2765,8 +2769,10 @@
+         if (!bv && !core && eng_c1_mask == ((1u << JB_909) | (1u << JB_808))
+             && eng_stage < 2u && original_runtime_s1_early_ok(&original_bass[1])) {
+             uint32_t t_early = plat_ticks24();
++            LT(4,t_early);
+             eng_early_b = (int8_t)bass_render_job(1, 0, (unsigned)n, eng_bass_buf[2], eng_bass_buf[3]);
+             uint32_t b_cost = plat_ticks24() - t_early;
++            LT(5,t_early+b_cost);
+             /* Exclude early B from A's cost; charge it once when B mixes. */
+             eng_early_b_cost = b_cost;
+             tk += b_cost;
+@@ -2991,6 +2997,7 @@
+     bass_render_ok[0] = bass_render_ok[1] = 0;
+     original_rec_cancel_cut();                        /* both basses' recorder state: here, before the jobs */
+     m = plan_pick(n);
++    LT(0,n); LT(1,plat_ticks24()); LT(15,m);
+     eng_c1_mask = (uint8_t)m;
+     /* 808 stays on core 0 and core 1 has other work: move the BD+SD prefix */
+     eng_808_split = (uint8_t)(!(m & (1u << JB_808)) && m && drum808_active(&d808));
+@@ -3021,6 +3028,7 @@
+ #if X0X_DEBUG
+     eng_dbg_wait += plat_ticks24() - w0;              /* now: core 0's whole job span */
+ #endif
++    LT(14,plat_ticks24());
+     brk_midi_drain();
+     for (j = 0; j < NBASS; j++)                       /* the recorder (shared with the sequencer): core 0 */
+         if (bass_render_ok[j]) original_rec_recover_off(j);
+@@ -3195,6 +3203,7 @@
+          * must be a prefix (the master's state is in sample order). */
+         eng_do_master = (k >= ENG_TAIL_CS && done == eng_mastered);
+         render_sub(out_l + done, out_r + done, k, 0);
++        ++lazy_span;
+         d8_frame+=k;
+         if (eng_do_master && eng_master_done)
+             eng_mastered = done + k;
+--- a/firmware/src/app/main_fm1.c
++++ b/firmware/src/app/main_fm1.c
+@@ -25,6 +25,8 @@
+     uint32_t last_us, cpu_q8, boots, stage;
+     uint32_t crash_seen;                            /* the crash count already reported at a boot */
+ } x0x_dbg __attribute__((section(".noinit")));
++volatile uint32_t lazy_now[4][16], lazy_worst[4][16], lazy_last[4][16];
++volatile uint32_t lazy_span=4, lazy_worst_us, lazy_last_us, lazy_worst_half;
+ static uint8_t safe_mode;
+ #if X0X_DEBUG
+ /* development: the slowest block since boot, taken apart (read over USB: tools/fm1_debug.py) */
+@@ -39,6 +41,8 @@
+ {
+     uint32_t t0 = fm1_ticks(), us, budget = HALF_FRAMES * 1000000u / FS;
+     x0x_dbg.in_audio = 1;
++    lazy_span=0;
++    for(unsigned t=0;t<4;t++) for(unsigned i=0;i<16;i++) lazy_now[t][i]=0;
+ #if FELUCCA_UAC
+     uac_render_start();
+ #endif
+@@ -89,8 +93,13 @@
+     engine_load(us * 100u / budget, HALF_FRAMES);
+     x0x_dbg.halves++;
+     x0x_dbg.last_us = us;
+-    if (us > x0x_dbg.max_us)
+-        x0x_dbg.max_us = us;
++    lazy_last_us=us;
++    for(unsigned t=0;t<4;t++) for(unsigned i=0;i<16;i++) lazy_last[t][i]=lazy_now[t][i];
++    if(us>lazy_worst_us) {
++        lazy_worst_us=us; lazy_worst_half=x0x_dbg.halves;
++        for(unsigned t=0;t<4;t++) for(unsigned i=0;i<16;i++) lazy_worst[t][i]=lazy_now[t][i];
++    }
++    if (us > x0x_dbg.max_us) x0x_dbg.max_us = us;
+     x0x_dbg.in_audio = 0;
+ }
+ 
+--- a/firmware/src/dsp/s1c/s1c.c
++++ b/firmware/src/dsp/s1c/s1c.c
+@@ -867,6 +867,8 @@
+ /* Experimental second-core assist, restricted to stable six-voice spans. */
+ #if DNBOX_S1_WORK_SPLIT && S1C_FAST && S1C_KR > 1 && S1C_CSM && S1C_NO_SEQ
+ #include "../../app/plat.h"
++extern volatile uint32_t lazy_now[4][16], lazy_span;
++#define LAZY_ADD(i,x) do { if(lazy_span<4) lazy_now[lazy_span][i]+=(x); } while(0)
+ static s1c_split *split_area;
+ #if DNBOX_S1_LAZY_PEER
+ static int (*split_claim)(void);
+@@ -909,6 +911,7 @@
+ {
+     (void)unused;
+     s1c_split *w=split_area;
++    const uint32_t work_start=plat_ticks24();
+ #if DNBOX_S1_VOICE_MAJOR
+     for(unsigned f=0;f<w->len;) {
+         unsigned end=f+(f==0?1:8);
+@@ -937,6 +940,7 @@
+         }
+     }
+ #endif
++    LAZY_ADD(10,plat_ticks24()-work_start);
+ }
+ #endif
+ void s1c_render(s1c *s, float *outl, float *outr, unsigned n)
+@@ -989,6 +993,7 @@
+ #if DNBOX_S1_LAZY_PEER
+         if (work && !split_live && f == split_next) {
+             if (split_claim && (n-f<16 || !split_claim())) {
++                LAZY_ADD(6,1);
+                 split_next = n-f<16 ? n : f+8;
+             } else {
+                 split_claim = 0;
+@@ -996,11 +1001,13 @@
+         if (work && !split_live && (f%S1C_SPLIT_SPAN)==0) {
+ #endif
+             split_at=f;
++            if(lazy_span<4 && lazy_now[lazy_span][7]==0) lazy_now[lazy_span][7]=f+1;
+             memcpy(&work->copy,s,sizeof *s);
+             work->len=n-f<S1C_SPLIT_SPAN?n-f:S1C_SPLIT_SPAN;
+             work->ready=split_ready=0;
+             plat_cpu2_sync();
+             split_live=plat_cpu2_run(split_upper,0);
++            if(split_live) { LAZY_ADD(8,1); LAZY_ADD(9,work->len); }
+             if (!split_live) work=0;
+ #if DNBOX_S1_LAZY_PEER
+             split_next = f + (n-f<S1C_SPLIT_SPAN?n-f:S1C_SPLIT_SPAN);
+@@ -1061,7 +1068,9 @@
+                 if (q<split_ready) break;
+                 if (busy<=0) break;
+             }
++            if(started) LAZY_ADD(11,plat_ticks24()-started);
+             if(q>=split_ready) {
++                LAZY_ADD(13,1);
+                 /* Re-run just the private upper voices from the untouched
+                  * original state; earlier consumed terms were equivalent. */
+                 (void)plat_cpu2_wait();
+@@ -1077,7 +1086,9 @@
+                 for(unsigned j=0;j<S1C_SPLIT_UPPER;j++)
+                     if(s->v[DNBOX_S1_SPLIT_START+j].stage) y+=work->term[q][j];
+                 if(q+1==work->len) {
++                    const uint32_t join=plat_ticks24();
+                     int finished=plat_cpu2_wait();
++                    LAZY_ADD(12,plat_ticks24()-join);
+                     if (!finished) memcpy(s->v+DNBOX_S1_SPLIT_START,work->copy.v+DNBOX_S1_SPLIT_START,S1C_SPLIT_UPPER*sizeof *s->v);
+                     else for(unsigned k=0;k<=q;k++) for(unsigned j=DNBOX_S1_SPLIT_START;j<6;j++)
+                         if(s->v[j].stage) (void)voice_run(s,&s->v[j]);

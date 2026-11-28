@@ -1,0 +1,102 @@
+--- a/firmware/src/dsp/drum808.c
++++ b/firmware/src/dsp/drum808.c
+@@ -1101,15 +1101,41 @@
+     return y;
+ }
+ 
++/* Two independent fixed-coefficient front filters and opamps. The narrower
++ * stage keeps the six feedback words live without the body/envelope spills. */
++static __attribute__((noinline)) void cy_opamp_front(d8_cy_t *restrict v,
++    const float *restrict bus, float *restrict first, float *restrict second, int m)
++{
++    const float c10 = k_cy_bp1[0], c11 = k_cy_bp1[1];
++    const float c14 = k_cy_bp1[4], c15 = k_cy_bp1[5], c16 = k_cy_bp1[6];
++    const float c20 = k_cy_bp2[0], c21 = k_cy_bp2[1];
++    const float c24 = k_cy_bp2[4], c25 = k_cy_bp2[5], c26 = k_cy_bp2[6];
++    float bp1z0 = v->bp1.z[0], bp1z1 = v->bp1.z[1], bp1z2 = v->bp1.z[2];
++    float bp2z0 = v->bp2.z[0], bp2z1 = v->bp2.z[1], bp2z2 = v->bp2.z[2];
++    for (int i=0;i<m;i++) {
++        const float x=bus[i];
++        float num0=c10*x, num1=c11*x;
++        float y=num0+bp1z0;
++        bp1z0=num1-c14*y+bp1z1;
++        bp1z1=(-num0)-c15*y+bp1z2;
++        bp1z2=(-num1)-c16*y;
++        first[i]=opamp_clip(y,14.0f,1.0f/14.0f);
++        num0=c20*x; num1=c21*x;
++        y=num0+bp2z0;
++        bp2z0=num1-c24*y+bp2z1;
++        bp2z1=(-num0)-c25*y+bp2z2;
++        bp2z2=(-num1)-c26*y;
++        second[i]=opamp_clip(y,14.0f,1.0f/14.0f);
++    }
++    v->bp1.z[0] = bp1z0; v->bp1.z[1] = bp1z1; v->bp1.z[2] = bp1z2;
++    v->bp2.z[0] = bp2z0; v->bp2.z[1] = bp2z1; v->bp2.z[2] = bp2z2;
++}
++
+ /* One stretch of the cymbal: the same ops as cy_tick, with state and the
+  * constant coefficients in scalars (their address is never taken, so they
+  * do not alias the float output buf). Written back once at the end. */
+ __attribute__((noinline)) static int cy_run(d8_cy_t *restrict v, float *restrict buf, const float *restrict bus, int m)
+ {
+-    const float c10 = k_cy_bp1[0], c11 = k_cy_bp1[1], c12 = k_cy_bp1[2], c13 = k_cy_bp1[3];
+-    const float c14 = k_cy_bp1[4], c15 = k_cy_bp1[5], c16 = k_cy_bp1[6];
+-    const float c20 = k_cy_bp2[0], c21 = k_cy_bp2[1], c22 = k_cy_bp2[2], c23 = k_cy_bp2[3];
+-    const float c24 = k_cy_bp2[4], c25 = k_cy_bp2[5], c26 = k_cy_bp2[6];
+     const float sus1_b0 = v->sus1.b0, sus1_e1 = v->sus1.e1, sus1_e2 = v->sus1.e2;
+     const float sus2_b0 = v->sus2.b0, sus2_e1 = v->sus2.e1, sus2_e2 = v->sus2.e2;
+     const float br_b0 = v->body_res.b0, br_e1 = v->body_res.e1, br_e2 = v->body_res.e2;
+@@ -1121,8 +1147,6 @@
+     const float oh_e1 = v->out_hp.e1, oh_e2 = v->out_hp.e2;
+     const float hpa_a = v->body_hpa.a, crhp_a = v->crash_hp.a, dc_a = v->dc.a;
+     const float d1 = v->d1, d2 = v->d2, d3 = v->d3, atk_c = v->atk_c;
+-    float bp1z0 = v->bp1.z[0], bp1z1 = v->bp1.z[1], bp1z2 = v->bp1.z[2];
+-    float bp2z0 = v->bp2.z[0], bp2z1 = v->bp2.z[1], bp2z2 = v->bp2.z[2];
+     float sus1_z1 = v->sus1.z1, sus1_z2 = v->sus1.z2;
+     float sus2_z1 = v->sus2.z1, sus2_z2 = v->sus2.z2;
+     float br_z1 = v->body_res.z1, br_z2 = v->body_res.z2;
+@@ -1141,22 +1165,14 @@
+     uint8_t e1_ramp = v->e1_ramp, active = v->active;
+     int i;
+ 
++    if (!active || m<=0) return 0;
++    const d8_bq3_t enter1=v->bp1, enter2=v->bp2;
++    float first[CHUNK], second[CHUNK];
++    cy_opamp_front(v,bus,first,second,m);
+     for (i = 0; i < m && active; i++) {
+-        float bus_x = bus[i];
+-        float b1, b2, g1, g2, g3, sus, body_pre, body_dk, body, top_in, top, c1, y;
+-        float bx, yy;
+-        /* bq3 bp1 + opamp: the same ops as bq3_run(&v->bp1, k_cy_bp1, bus) */
+-        y = c10 * bus_x + bp1z0;
+-        bp1z0 = c11 * bus_x - c14 * y + bp1z1;
+-        bp1z1 = c12 * bus_x - c15 * y + bp1z2;
+-        bp1z2 = c13 * bus_x - c16 * y;
+-        b1 = opamp_clip(y, 14.0f, 1.0f / 14.0f);
+-        /* bq3 bp2 */
+-        y = c20 * bus_x + bp2z0;
+-        bp2z0 = c21 * bus_x - c24 * y + bp2z1;
+-        bp2z1 = c22 * bus_x - c25 * y + bp2z2;
+-        bp2z2 = c23 * bus_x - c26 * y;
+-        b2 = opamp_clip(y, 14.0f, 1.0f / 14.0f);
++        const float b1=first[i], b2=second[i];
++        float g1,g2,g3,sus,body_pre,body_dk,body,top_in,top,c1,y;
++        float bx,yy;
+         if (D8_UNLIKELY(e1t > 0.0f)) {
+             e1 += (e1t - e1) * atk_c;
+             if (e1 > e1t * 0.99f)
+@@ -1236,8 +1252,12 @@
+         buf[i] = y;
+     }
+ 
+-    v->bp1.z[0] = bp1z0; v->bp1.z[1] = bp1z1; v->bp1.z[2] = bp1z2;
+-    v->bp2.z[0] = bp2z0; v->bp2.z[1] = bp2z1; v->bp2.z[2] = bp2z2;
++    /* If the rear retired before the end, reconstruct only the six
++     * filter-history words through the consumed prefix. */
++    if (D8_UNLIKELY(i < m)) {
++        v->bp1=enter1; v->bp2=enter2;
++        cy_opamp_front(v,bus,first,second,i);
++    }
+     v->sus1.z1 = sus1_z1; v->sus1.z2 = sus1_z2;
+     v->sus2.z1 = sus2_z1; v->sus2.z2 = sus2_z2;
+     v->body_res.z1 = br_z1; v->body_res.z2 = br_z2;

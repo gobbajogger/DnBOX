@@ -1,0 +1,62 @@
+--- a/firmware/src/dsp/s1c/s1u.c
++++ b/firmware/src/dsp/s1c/s1u.c
+@@ -80,6 +80,18 @@
+     l->o01 = 0.5f * (1.0f + l->sm) * amount; l->o10 = 1.0f - 0.5f * (1.0f - l->sm) * amount;
+ }
+ 
++#if DNBOX_S1_EXACT_LFO_RATE
++void s1u_lfo_tick_step(s1u_lfo *l, float step, int shape, float amount, float c2, float c1)
++{
++    l->ph += step; if (l->ph >= 1.0f) l->ph -= 1.0f;
++    float ph = l->ph;
++    float x = shape == 0 ? s1u_sin((uint32_t)(ph * 4294967296.0f)) :
++              shape == 1 ? (ph > 0.5f ? 1.0f : -1.0f) : shape == 2 ? (ph - 0.5f) * 2.0f : (0.5f - ph) * 2.0f;
++    l->sm = c1 * x + c2 * l->sm;
++    l->o01 = 0.5f * (1.0f + l->sm) * amount; l->o10 = 1.0f - 0.5f * (1.0f - l->sm) * amount;
++}
++#endif
++
+ /* ---- filters ---- */
+ float s1u_ladder_a(float x)
+ {
+--- a/firmware/src/dsp/s1c/s1u.h
++++ b/firmware/src/dsp/s1c/s1u.h
+@@ -15,6 +15,9 @@
+  * o01 = 0..amount (adds), o10 = 1-amount..1 (scales). */
+ typedef struct { float ph, sm, o01, o10; } s1u_lfo;
+ void s1u_lfo_tick(s1u_lfo *l, float rate_hz, int shape, float amount, float smooth_c2, float sr);
++#if DNBOX_S1_EXACT_LFO_RATE
++void s1u_lfo_tick_step(s1u_lfo *,float,int,float,float,float);
++#endif
+ 
+ /* ---- table sine: ph is a 32-bit phase (one turn = 2^32) ---- */
+ float s1u_sin(uint32_t ph);
+--- a/firmware/src/dsp/s1c/s1c.c
++++ b/firmware/src/dsp/s1c/s1c.c
+@@ -974,6 +974,12 @@
+     int split_live=0;
+     if (work && (n<16 || !split_eligible(s,c1,c2))) work=0;
+ #endif
++#if DNBOX_S1_EXACT_LFO_RATE && S1C_CSM && S1C_NO_SEQ
++    /* Rate/shape controls are unsmoothed and stable inside this render span. */
++    const float lfo1step=P(L1R)/s->sr, lfo2step=P(L2R)/s->sr;
++    const int lfo1shape=(int)P(L1I), lfo2shape=(int)P(L2I);
++    const float lfo_c1=1.0f-s->lfo_c2;
++#endif
+     for (f = 0; f < n; f++) {
+ #if DNBOX_S1_WORK_SPLIT && S1C_FAST && S1C_KR > 1 && S1C_CSM && S1C_NO_SEQ
+ #if DNBOX_S1_LAZY_PEER
+@@ -1032,8 +1038,13 @@
+         /* LFOs */
+         float x;
+         float lc2 = s->lfo_c2;
++#if DNBOX_S1_EXACT_LFO_RATE && S1C_CSM && S1C_NO_SEQ
++        s1u_lfo_tick_step(&s->lfo[0],lfo1step,lfo1shape,P(L1A),lc2,lfo_c1);
++        s1u_lfo_tick_step(&s->lfo[1],lfo2step,lfo2shape,P(L2A),lc2,lfo_c1);
++#else
+         s1u_lfo_tick(&s->lfo[0], P(L1R), (int)P(L1I), P(L1A), lc2, s->sr);
+         s1u_lfo_tick(&s->lfo[1], P(L2R), (int)P(L2I), P(L2A), lc2, s->sr);
++#endif
+ #if !S1C_NO_SEQ
+         sequencer(s);
+ #endif

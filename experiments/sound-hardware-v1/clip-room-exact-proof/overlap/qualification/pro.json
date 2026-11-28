@@ -1,0 +1,99 @@
+{
+  "worst": {
+    "span": [
+      {
+        "n": 8,
+        "909_complete": 232.21,
+        "808_complete": 475.54,
+        "B_start": 171.38,
+        "B_end": 687.71,
+        "claim_retries": 0,
+        "first_work_frame": null,
+        "tiles": 0,
+        "worker_frames": 0,
+        "worker_ticks_us": 0.0,
+        "spin_us": 0.0,
+        "join_wait_us": 0.0,
+        "fallbacks": 0,
+        "phase_join": 723.62,
+        "planner_mask": 3
+      },
+      {
+        "n": 248,
+        "909_complete": 2324.42,
+        "808_complete": 4757.38,
+        "B_start": 233.08,
+        "B_end": 6406.58,
+        "claim_retries": 19,
+        "first_work_frame": 152,
+        "tiles": 1,
+        "worker_frames": 96,
+        "worker_ticks_us": 1449.54,
+        "spin_us": 336.88,
+        "join_wait_us": 0.21,
+        "fallbacks": 0,
+        "phase_join": 6564.75,
+        "planner_mask": 3
+      },
+      {
+        "n": 256,
+        "909_complete": 2339.71,
+        "808_complete": 4823.12,
+        "B_start": 229.71,
+        "B_end": 6588.46,
+        "claim_retries": 20,
+        "first_work_frame": 160,
+        "tiles": 1,
+        "worker_frames": 96,
+        "worker_ticks_us": 1446.96,
+        "spin_us": 330.71,
+        "join_wait_us": 0.21,
+        "fallbacks": 0,
+        "phase_join": 6755.33,
+        "planner_mask": 3
+      }
+    ],
+    "us": 16178
+  },
+  "last": {
+    "span": [
+      {
+        "n": 256,
+        "909_complete": 2310.04,
+        "808_complete": 5107.12,
+        "B_start": 249.25,
+        "B_end": 6222.54,
+        "claim_retries": 24,
+        "first_work_frame": 192,
+        "tiles": 1,
+        "worker_frames": 64,
+        "worker_ticks_us": 741.58,
+        "spin_us": 96.04,
+        "join_wait_us": 0.21,
+        "fallbacks": 0,
+        "phase_join": 6393.88,
+        "planner_mask": 3
+      },
+      {
+        "n": 256,
+        "909_complete": 2280.38,
+        "808_complete": 5076.12,
+        "B_start": 238.96,
+        "B_end": 6158.75,
+        "claim_retries": 24,
+        "first_work_frame": 192,
+        "tiles": 1,
+        "worker_frames": 64,
+        "worker_ticks_us": 742.46,
+        "spin_us": 94.62,
+        "join_wait_us": 0.21,
+        "fallbacks": 0,
+        "phase_join": 6329.33,
+        "planner_mask": 3
+      }
+    ],
+    "us": 14085
+  },
+  "worst_idx": 305,
+  "audio_xruns": 50
+}

@@ -1,0 +1,14 @@
+6340 bytes; 192 linked differences all inside relocation spans
+C1 cycles 76479174
+all d9_render cycles 18000939
+tom hot strip cycles 6451499
+C1 misses 48334
+tom aligned misses 1866
+phase 1755336 27.21%
+biquad 1066010 16.52%
+unattributed/inlined 983171 15.24%
+envelope 868810 13.47%
+tanh 637213 9.88%
+shape 489647 7.59%
+noise/DC/other 351288 5.45%
+loop 300024 4.65%

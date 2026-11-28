@@ -1,0 +1,70 @@
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -2572,10 +2572,23 @@
+ /* 127 means B has not rendered. Reset before launching a stretch, used on core 0 only. */
+ static int8_t eng_early_b;
+ static uint32_t eng_early_b_cost;
++#if DNBOX_S1_SINGLE_KIT_OVERLAP
++static int b_can_overlap(void)
++{
++    const unsigned kit_mask = (1u << JB_909) | (1u << JB_808);
++    return eng_c1_mask && !(eng_c1_mask & ~kit_mask) && !eng_808_split &&
++        original_runtime_s1_early_ok(&original_bass[1]);
++}
++#endif
+ #if DNBOX_S1_LAZY_PEER && DNBOX_S1_WORK_SPLIT && X0X_S1C
+ static int bass_b_claim_peer(void)
+ {
+-    if (eng_stage < 2u || eng_c1_next != JB_N || !eng_808_body || plat_cpu2_busy() != 0)
++#if DNBOX_S1_SINGLE_KIT_OVERLAP
++    unsigned published = eng_c1_mask & (1u << JB_808) ? 2u : 1u;
++#else
++    unsigned published = 2u;
++#endif
++    if (eng_stage < published || eng_c1_next != JB_N || !eng_808_body || plat_cpu2_busy() != 0)
+         return 0;
+     if (plat_cpu2_wait() != 0)
+         return 0;
+@@ -2603,8 +2616,12 @@
+         /* A deferred B starts while the drum worker still owns the mailbox.
+          * Arm the later claim only on the map with no split 808 scratch. */
+         int lazy_split = !can_split && !core && bv == 1
++#if DNBOX_S1_SINGLE_KIT_OVERLAP
++            && b_can_overlap();
++#else
+             && eng_c1_mask == ((1u << JB_909) | (1u << JB_808))
+             && original_runtime_s1_early_ok(&original_bass[1]);
++#endif
+         if (lazy_split) {
+             extern void s1c_split_arm(void *, unsigned, int (*)(void));
+             s1c_split_arm(&original_workspace_b.s1_worker, sizeof original_workspace_b.s1_worker, bass_b_claim_peer);
+@@ -2762,8 +2779,12 @@
+          * output preparation, metering, and bus sums in their original order.
+          * Never start an early B that can call back into the sequencer. */
+ #ifndef DNBOX_NO_B_OVERLAP
++#if DNBOX_S1_SINGLE_KIT_OVERLAP
++        if (!bv && !core && eng_early_b == 127 && eng_stage < 2u && b_can_overlap()) {
++#else
+         if (!bv && !core && eng_c1_mask == ((1u << JB_909) | (1u << JB_808))
+             && eng_stage < 2u && original_runtime_s1_early_ok(&original_bass[1])) {
++#endif
+             uint32_t t_early = plat_ticks24();
+             eng_early_b = (int8_t)bass_render_job(1, 0, (unsigned)n, eng_bass_buf[2], eng_bass_buf[3]);
+             uint32_t b_cost = plat_ticks24() - t_early;
+@@ -3005,6 +3026,16 @@
+     eng_dbg_nsub++;
+     uint32_t w0 = plat_ticks24();
+ #endif
++#if DNBOX_S1_SINGLE_KIT_OVERLAP && !defined(DNBOX_NO_B_OVERLAP)
++    /* 909 owns the peer and no 808 prefix can borrow a workspace. The
++     * stock loop would wait immediately in silent 808 commit. Advance
++     * B's private production first, then leave all mixing unchanged. */
++    if (eng_c1_mask == (1u << JB_909) && b_can_overlap()) {
++        uint32_t early_at = plat_ticks24();
++        eng_early_b = (int8_t)bass_render_job(1, 0, n, eng_bass_buf[2], eng_bass_buf[3]);
++        eng_early_b_cost = plat_ticks24() - early_at;
++    }
++#endif
+     for (j = 0; j < JB_N; j++)
+         if (!(eng_c1_mask & (1u << j)))
+             (void)run_job(j, 0);

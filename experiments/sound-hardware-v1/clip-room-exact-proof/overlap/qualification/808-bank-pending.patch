@@ -1,0 +1,28 @@
+--- a/firmware/src/dsp/drum808.c
++++ b/firmware/src/dsp/drum808.c
+@@ -959,7 +959,15 @@
+     int i, n;
+     for (i = 0; i < 6; i++)
+         dt[i] = bank_dt1(b, i);
++    /* Pending wraps are set at initialization before the first render.
++     * All six oscs are visited on the first sample, so none remain on the
++     * other iterations. Keep natural and forced wraps in original index
++     * order (including coincident wraps) for the shared random stream. */
++    unsigned first_pending = b->pend_wrap & 63u;
++    if (m > 0) b->pend_wrap &= (uint8_t)~63u;
+     for (n = 0; n < m; n++) {
++        const unsigned pending = first_pending;
++        first_pending = 0;
+         float sum = 0.0f;
+         if (D8_UNLIKELY(--b->drift_cnt <= 0)) {
+             b->drift_cnt = 256;
+@@ -974,8 +982,7 @@
+             const uint32_t d = dt[i], old = b->ph[i], t = old + d, u = t - BANK_DUTY;
+             float v;
+             b->ph[i] = t;
+-            if (D8_UNLIKELY(t < old || (b->pend_wrap & (1u << i)))) {
+-                b->pend_wrap &= (uint8_t)~(1u << i);
++            if (D8_UNLIKELY(t < old || (pending && (pending & (1u << i))))) {
+                 b->jm1[i] = 0.0052f * rng_frand2(&b->rng);
+                 dt[i] = bank_dt1(b, i);           /* (this sample used the old jm1, as before) */
+             }

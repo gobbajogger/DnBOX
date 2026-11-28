@@ -1,0 +1,135 @@
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -1102,7 +1102,7 @@
+     return name;
+ }
+ static int list_naming;   /* set while a SEL list row is named: full names there */
+-static const char *pref_name(pref_t r)
++static UI_DRAW const char *pref_name(pref_t r)
+ {
+     if(r.kind==R_SECTION)return GLOBAL_SECTIONS[r.a<6?r.a:0];
+     if ((r.kind == R_PARTON || r.kind == R_SPAT) && part_is_303(r.a % NPARTS))
+@@ -1815,7 +1815,7 @@
+ }
+ 
+ /* Pure navigation inputs: emit existing descriptors without keyboard clamping. */
+-static void describe_pages(pages_t *out, page_query_t *query, int view, int p, int mixsel, const uint8_t *selection)
++static UI_DRAW void describe_pages(pages_t *out, page_query_t *query, int view, int p, int mixsel, const uint8_t *selection)
+ {
+     page_emitter_t output = {out, query, GR_NONE};
+     page_emitter_t *emit = &output;
+@@ -2070,7 +2070,7 @@
+ 
+ static int list_skip(int i) { return i < ui.list_n && list_rows[i].kind == R_HDR; }
+ 
+-static void open_list_of_pages(void)
++static UI_DRAW void open_list_of_pages(void)
+ {
+     if (ui.view == V_PART && is_303()) original_list_bank = original_page_bank;
+     int p, k, last = -1, groups = 0;
+@@ -2174,7 +2174,7 @@
+ }
+ 
+ /* ================================================================ questions === */
+-static void ask(int act, int arg, const char *q1, const char *q2)
++static UI_DRAW void ask(int act, int arg, const char *q1, const char *q2)
+ {
+     ui.ask_act = (uint8_t)act;
+     ui.ask_overlay = ui.overlay;
+@@ -2446,13 +2446,13 @@
+ #endif
+ static uint8_t undo_lanes;             /* the last undo / redo touched the knob motion */
+ 
+-static void undo_start(void) {
++static UI_DRAW void undo_start(void) {
+ #if X0X_BASS_TAGGED_SOUND
+     undo_wait=0;
+ #endif
+     undo_init(&undo, (uint8_t *)&proj + UNDO_OFF, undo_shadow, UNDO_BYTES); }
+ 
+-static int undo_commit_stable(void)
++static UI_DRAW int undo_commit_stable(void)
+ {
+ #if X0X_BASS_PRESET_PREVIEW
+     /* Preset application writes a bank and tag from the audio boundary. Keep
+@@ -2475,7 +2475,7 @@
+ }
+ 
+ /* a run of the project changed under the engine: the sound's pots go to the engine again */
+-static void undo_changed(uint32_t off, uint32_t len)
++static UI_DRAW void undo_changed(uint32_t off, uint32_t len)
+ {
+     const uint32_t s0 = __builtin_offsetof(project_t, sound), s1 = s0 + sizeof(proj.sound.v);
+     const uint32_t l0 = __builtin_offsetof(project_t, arr) + __builtin_offsetof(arrange_t, lane);
+@@ -2505,7 +2505,7 @@
+ }
+ 
+ /* what an undo step touched, in words: "909 P3", "SOUND", "SONG", "MOTION" */
+-static void undo_name(uint32_t lo, uint32_t hi, char *t)
++static UI_DRAW void undo_name(uint32_t lo, uint32_t hi, char *t)
+ {
+     const uint32_t p0 = __builtin_offsetof(project_t, pat), a0 = __builtin_offsetof(project_t, arr),
+                    l0 = a0 + __builtin_offsetof(arrange_t, lane);
+@@ -2665,7 +2665,7 @@
+     return rc;
+ }
+ 
+-static void save_project(void)
++static UI_DRAW void save_project(void)
+ {
+ #if BOARD_SMK37
+     extern uint8_t smk_ck_flash_busy(void), smk_clip_mode_on(void);
+@@ -2748,7 +2748,7 @@
+ 
+ /* the test's patterns: 0 the factory loop (909 kick, clap, open hats; 303 A; the break), 1 all five,
+  * 2 everything dense */
+-static void perf_build(void)
++static UI_DRAW void perf_build(void)
+ {
+     /* the tracks in key order (pattern.h): 909 BD SD LT MT HT RS CP CH OH CR RD, 808 ... CB CY OH CH */
+     enum { DR_BD, DR_SD, DR_LT, DR_MT, DR_HT, DR_RS, DR_CP, DR_CH, DR_OH, DR_CR, DR_RD };
+@@ -2788,7 +2788,7 @@
+     }
+ }
+ 
+-static void perf_restore(void)
++static UI_DRAW void perf_restore(void)
+ {
+     int p;
+     record_finish();
+@@ -4411,7 +4411,7 @@
+         ui.list_top = (uint8_t)(ui.list_sel - visible + 1);
+ }
+ 
+-static void list_enter(void)
++static UI_DRAW void list_enter(void)
+ {
+     pref_t r = list_rows[ui.list_sel];
+     if (r.kind == R_SECTION) {global_section(r.a);return;}
+@@ -4434,7 +4434,7 @@
+ static int ui_menu_open(void) { return ui.overlay == O_LIST && !perf_testing(); }
+ /* The hook for submenu rows. Return 1 if row r is a submenu row and the arrow did its job: ">" enters the
+  * submenu, "<" goes back. This lane has no submenu rows. */
+-static int list_sub_arrow(pref_t r, int d)
++static UI_DRAW int list_sub_arrow(pref_t r, int d)
+ {
+     if(r.kind!=R_SECTION)return 0;
+     if(d>0)global_section(r.a);
+@@ -4443,7 +4443,7 @@
+ /* "<" (d = -1) or ">" (d = +1) in a menu: the value of the selected row one step down or up, as ALGORITHM
+  * does (turn_ref). The value stops at its ends. An action row and a section header do nothing. The knob
+  * acceleration does not start: the presses and the repeats are 60 ms or more apart (accel). */
+-static int ui_menu_arrow(int d)
++static UI_DRAW int ui_menu_arrow(int d)
+ {
+ #if BOARD_SMK37
+     smc_ui_cancel();
+@@ -9949,7 +9949,7 @@
+  * for AUTOSAVE_QUIET ms, at most every AUTOSAVE_GAP ms. Stopped only: a flash erase silences the
+  * audio. Only the objects that changed are written (project.c), usually one or two sectors. */
+ #define AUTOSAVE_GAP 20000u
+-static void autosave(void)
++static UI_DRAW void autosave(void)
+ {
+     uint32_t now = plat_ms();
+ #if BOARD_SMK37

@@ -1,0 +1,87 @@
+--- a/firmware/src/dsp/s1c/s1u.c
++++ b/firmware/src/dsp/s1c/s1u.c
+@@ -126,6 +126,31 @@
+     return x * st[3];
+ }
+ 
++#if DNBOX_S1_COMP_PAIR
++/* Each channel retains its scalar recurrence and rounding. Independent
++ * recurrences share one call and the gain-refresh branch. */
++void s1u_comp_pair(float st[2][4],float *l,float *r,const s1u_cc *k,int upd)
++{
++    float *a=st[0], *b=st[1];
++    float xl=*l, xr=*r, al=fabsf(xl), ar=fabsf(xr);
++    float cl=a[0]>al ? k->s4 : k->s3;
++    float cr=b[0]>ar ? k->s4 : k->s3;
++    a[0]=a[0]*cl+(1.f-cl)*al;
++    b[0]=b[0]*cr+(1.f-cr)*ar;
++    if (upd) {
++        for (unsigned ch=0;ch<2;++ch) {
++            float *s=st[ch];
++            float over=s[0]>0.f ? 6.02059991f*log2f(s[0])-k->thr : 0.f;
++            s[2]=over>0.f ? over : 0.f;
++            s[3]=s[1]!=0.f ? exp2f(0.166096405f*s[1]) : 1.f;
++        }
++    }
++    a[1]=k->s1*a[1]+k->s2*a[2];
++    b[1]=k->s1*b[1]+k->s2*b[2];
++    *l=xl*a[3]; *r=xr*b[3];
++}
++#endif
++
+ /* ---- phaser ---- */
+ static float phaser_ch(float r[4][3], float *fb, float in, float lfo, float width, float fbk, float sr)
+ {
+--- a/firmware/src/dsp/s1c/s1u.h
++++ b/firmware/src/dsp/s1c/s1u.h
+@@ -29,6 +29,10 @@
+ void s1u_comp_coef(s1u_cc *k, float ratio, float thr_db, float atk_s, float rel_s, float sr);
+ float s1u_comp(float *st /* [4] */, float x, const s1u_cc *k, int upd);
+ 
++#if DNBOX_S1_COMP_PAIR
++void s1u_comp_pair(float [2][4],float *,float *,const s1u_cc *,int);
++#endif
++
+ /* ---- phaser: four notch allpasses with feedback, notch sweep 100..800 Hz, stereo LFO (sin/cos) ---- */
+ typedef struct { float ph, rec[2][4][3], out[2]; } s1u_phaser;
+ void s1u_phaser_run(s1u_phaser *p, float *l, float *r, float mix, float rate, float width_hz, float feedback, float sr);
+--- a/firmware/src/dsp/s1c/s1c.c
++++ b/firmware/src/dsp/s1c/s1c.c
+@@ -483,8 +483,10 @@
+ #define comp_coef s1u_comp_coef
+ #if S1C_FAST
+ #define comp(st, x, k) s1u_comp(st, x, k, cu)   /* gain law at quarter rate */
++#define comp_pair(st,l,r,k) s1u_comp_pair(st,&(l),&(r),k,cu)
+ #else
+ #define comp(st, x, k) s1u_comp(st, x, k, 1)
++#define comp_pair(st,l,r,k) s1u_comp_pair(st,&(l),&(r),k,1)
+ #endif
+ #if !S1C_BUSFX
+ #ifdef S1C_OPT_A
+@@ -1354,8 +1356,13 @@
+           wl += g * bq_run(&s->hr, s->zrs[0], hfr_noise(s)); wr += g * bq_run(&s->hr, s->zrs[1], hfr_noise(s)); }
+ #endif
+ #if !S1C_NO_RVCOMP
++#if DNBOX_S1_COMP_PAIR
++        comp_pair(s->cmp[2],wl,wr,&cw);
++        wl *= P(CWG); wr *= P(CWG);
++#else
+         wl = comp(s->cmp[2][0], wl, &cw) * P(CWG); wr = comp(s->cmp[2][1], wr, &cw) * P(CWG);
+ #endif
++#endif
+         float rm = P(RVMIX) * P(RVON) * lfo10(s, P(LRVMIX));
+         L = ((1.0f - rm) * mL + rm * wl) * 2.0f * P(MVOL);
+         R = ((1.0f - rm) * mR + rm * wr) * 2.0f * P(MVOL);
+@@ -1365,7 +1372,12 @@
+         s->send_rev = P(RVMIX) * P(RVON) * lfo10(s, P(LRVMIX));
+         L *= 2.0f * P(MVOL); R *= 2.0f * P(MVOL);
+ #endif
++#if DNBOX_S1_COMP_PAIR
++        comp_pair(s->cmp[0],L,R,&cm);
++        L *= P(CMG); R *= P(CMG);
++#else
+         L = comp(s->cmp[0][0], L, &cm) * P(CMG); R = comp(s->cmp[0][1], R, &cm) * P(CMG);
++#endif
+         /* widen: the right channel through three allpasses, crossfaded */
+ #if WAP_L0
+         R = s1u_widen_run(&s->wid, R, P(WIDEN));

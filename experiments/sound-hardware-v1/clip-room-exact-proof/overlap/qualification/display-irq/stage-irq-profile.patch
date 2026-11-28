@@ -1,0 +1,144 @@
+--- a/firmware/hal/fm1_irq.h
++++ b/firmware/hal/fm1_irq.h
+@@ -81,6 +81,12 @@
+     FM1_VEC[n] = (uint32_t)(uintptr_t)h;
+     FM1_ICFG(n) = (FM1_ICFG(n) & ~(0xFu << sh)) | ((((prio & 7u) << 1) | 1u) << sh);
+ }
++#if DNBOX_STAGE_IRQ
++static int fm1_audio_irq_source_enabled(void)
++{
++    return !!(FM1_ICFG(FM1_IRQ_ALNK0)&(1u<<((FM1_IRQ_ALNK0&7)*4)));
++}
++#endif
+ static void fm1_irq_mask(uint32_t n) { FM1_ICFG(n) &= ~(1u << ((n & 7u) * 4u)); }
+ 
+ /* Save/restore only this source's enable bit; preserve priorities, other
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -7486,6 +7486,39 @@
+     if(!o->n)return -1;
+     --o->n;return *o->p++;
+ }
++#if DNBOX_STAGE_IRQ
++/* Profiling only. No pool/canvas growth; this record is read from virtual RAM. */
++struct stage_irq_bucket {
++    uint32_t starts, wall, wall_max, active, active_max, source_masked;
++    uint32_t irq, irq_ticks, irq_max, late, fast_gap_n, fast_gap_max;
++    uint32_t loaded_irq, loaded_late, loaded_ticks, loaded_max;
++};
++struct stage_irq_record {
++    uint32_t magic, last_enter, last_span;
++    volatile uint32_t phase;
++    struct stage_irq_bucket b[3];
++} stage_irq_trace __attribute__((section(".noinit")));
++static unsigned stage_irq_begin(unsigned p)
++{
++    stage_irq_trace.phase=p;
++    struct stage_irq_bucket *b=&stage_irq_trace.b[p];
++    ++b->starts;
++    if (!fm1_audio_irq_source_enabled())++b->source_masked;
++    return fm1_ticks();
++}
++static void stage_irq_end(unsigned p,unsigned t,unsigned before)
++{
++    const unsigned elapsed=fm1_ticks()-t;
++    stage_irq_trace.phase=0;
++    struct stage_irq_bucket *b=&stage_irq_trace.b[p];
++    b->wall+=elapsed;
++    if (elapsed>b->wall_max)b->wall_max=elapsed;
++    const unsigned irq=b->irq_ticks-before;
++    const unsigned active=elapsed>irq?elapsed-irq:0;
++    b->active+=active;
++    if(active>b->active_max)b->active_max=active;
++}
++#endif
+ static UI_DRAW unsigned cv_stage_pack(void)
+ {
+     /* Main-loop only, before any renderer input callback. LZ's dictionary
+@@ -7493,7 +7526,14 @@
+     if(perf_testing())return 0;
+     cv_stage_io io={CV_STAGE_PACKED,CV_STAGE_BYTES};
+     lz_sink_t sink={cv_stage_write,&io};
+-    if(lz_compress((const uint8_t *)cv_px,2*CV_STAGE_PIXELS,&sink))return 0;
++#if DNBOX_STAGE_IRQ
++    const unsigned before=stage_irq_trace.b[1].irq_ticks,t=stage_irq_begin(1);
++#endif
++    const int rc=lz_compress((const uint8_t *)cv_px,2*CV_STAGE_PIXELS,&sink);
++#if DNBOX_STAGE_IRQ
++    stage_irq_end(1,t,before);
++#endif
++    if(rc)return 0;
+     const unsigned len=CV_STAGE_BYTES-io.n;
+ #ifdef X0X_HOST
+     if(len>cv_stage_peak)cv_stage_peak=len;
+@@ -7505,7 +7545,14 @@
+     lcd_sync();
+     cv_stage_io io={CV_STAGE_PACKED,len};
+     lz_src_t src={cv_stage_read,&io};
+-    if(lz_decompress(&src,(uint8_t *)cv_px,2*CV_STAGE_PIXELS))return 0;
++#if DNBOX_STAGE_IRQ
++    const unsigned before=stage_irq_trace.b[2].irq_ticks,t=stage_irq_begin(2);
++#endif
++    const int rc=lz_decompress(&src,(uint8_t *)cv_px,2*CV_STAGE_PIXELS);
++#if DNBOX_STAGE_IRQ
++    stage_irq_end(2,t,before);
++#endif
++    if(rc)return 0;
+     cv_row_base=BAND_H;
+     cv_band(BAND_H,BAND_H);
+     return 1;
+--- a/firmware/src/app/main_fm1.c
++++ b/firmware/src/app/main_fm1.c
+@@ -99,6 +99,19 @@
+     uint8_t p = fm1_audio_pending();
+     fm1_audio_ack_aux(p);
+     if (p & FM1_AUDIO_HALF) {
++#if DNBOX_STAGE_IRQ
++        const unsigned started=fm1_ticks(),phase=stage_irq_trace.phase;
++        struct stage_irq_bucket *b=&stage_irq_trace.b[phase];
++        const unsigned period=HALF_FRAMES * 24000000ull / FS;
++        if (stage_irq_trace.last_enter && stage_irq_trace.last_span < period - 24000u) {
++            const unsigned gap=started-stage_irq_trace.last_enter;
++            ++b->fast_gap_n;
++            if(gap>b->fast_gap_max)b->fast_gap_max=gap;
++        }
++        stage_irq_trace.last_enter=started;
++        ++b->irq;
++        const int loaded=fm1_ms>=4415u;
++#endif
+         uint32_t half = fm1_audio_free_half();
+         render_block(&abuf[half * HALF_WORDS]);
+         fm1_audio_ack_half();
+@@ -108,7 +121,21 @@
+ #endif
+             x0x_dbg.late++;                         /* the DMA moved on while we rendered */
+             audio_xruns++;
++#if DNBOX_STAGE_IRQ
++            ++b->late;
++            b->loaded_late+=(unsigned)loaded;
++#endif
+         }
++#if DNBOX_STAGE_IRQ
++        const unsigned elapsed=fm1_ticks()-started;
++        stage_irq_trace.last_span=elapsed;
++        b->irq_ticks+=elapsed;
++        if(elapsed>b->irq_max)b->irq_max=elapsed;
++        if(loaded) {
++            ++b->loaded_irq;b->loaded_ticks+=elapsed;
++            if(elapsed>b->loaded_max)b->loaded_max=elapsed;
++        }
++#endif
+     }
+ }
+ extern void isr_alnk0(void);
+@@ -118,6 +145,10 @@
+     uint32_t i;
+     for (i = 0; i < 2u * HALF_WORDS; i++)
+         abuf[i] = 0;
++#if DNBOX_STAGE_IRQ
++    __builtin_memset(&stage_irq_trace,0,sizeof stage_irq_trace);
++    stage_irq_trace.magic=0x53544952u;
++#endif
+     fm1_audio_init(abuf, HALF_WORDS, isr_alnk0, 3);
+ }
+ 
