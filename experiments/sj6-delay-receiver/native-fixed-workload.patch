@@ -1,0 +1,120 @@
+diff --git a/firmware/src/app/engine.c b/firmware/src/app/engine.c
+index a8e9c81..ce4664c 100644
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -1842,6 +1842,12 @@ static void original_midi_context(void)
+ }
+ 
+ /* noinline: keeps GM_DRUM lookup out of engine_render when the map is shared with seq */
++/* DISPOSABLE sample-index benchmark, never part of a shipping image. */
++#include "../dsp/s1c/s1c_front.h"
++extern volatile unsigned int lab_delay_probe, lab_s1_probe;
++volatile uint32_t bench_fixed[10];
++enum { FIX_CONFIG=65536u,FIX_ON=98304u,FIX_OFF=163840u,FIX_VOICES=4 };
++static uint32_t fix_sample,fix_active;
+ __attribute__((noinline)) static void midi_in(uint32_t pkt)
+ {
+     uint8_t st = (uint8_t)(pkt >> 8), d1 = (uint8_t)(pkt >> 16) & 0x7F, d2 = (uint8_t)(pkt >> 24) & 0x7F;
+@@ -1959,6 +1965,9 @@ __attribute__((noinline)) static void midi_in(uint32_t pkt)
+                 /* External MIDI recording: accepted physical edges, as the pads do. */
+                 int slide = velocity && live_rec_legato(k, src) && bass_held[k] != d1;
+                 if (original_runtime_key(&original_bass[k], (unsigned)src, d1, velocity) != ORIGINAL_RUNTIME_OK) continue;
++                if (fix_active)
++                    bench_fixed[1]++,bench_fixed[2]=bench_fixed[2]*16777619u ^
++                        (k<<24 | d1<<16 | velocity<<8 | (fix_sample>>8 & 255u));
+                 if (velocity) {
+ #ifdef X0X_HOST
+                     bass_attacked[k] = (uint8_t)!slide;
+@@ -3155,6 +3164,46 @@ __attribute__((noinline, minsize)) void engine_diag_half(uint32_t half, uint32_t
+ }
+ #endif
+ 
++static void fixed_bench_boundary(uint32_t sample)
++{
++    if (sample!=FIX_CONFIG && sample!=FIX_ON && sample!=FIX_OFF) return;
++    original_runtime_part *a=&original_bass[0], *b=&original_bass[1];
++    if (lab_delay_probe!=3 || lab_s1_probe!=2 || seq.playing ||
++            a->kind!=ORIGINAL_SOUND_JUNO || a->status!=ORIGINAL_RUNTIME_OK ||
++            b->kind!=ORIGINAL_SOUND_SYNTHONE || b->status!=ORIGINAL_RUNTIME_OK ||
++            a->dsp.juno.lab_delay.result!=2 || !a->dsp.juno.synth.delay24.enabled ||
++            a->arp.cfg.on || b->arp.cfg.on) { bench_fixed[0]=1; return; }
++    s1c *e=&b->dsp.synthone.e;
++    if (sample==FIX_CONFIG) {
++        if (!s1c_front_set(e,20,0.f) ||
++            !s1c_front_set(e,S1C_P_RVON,1.f) || !s1c_front_set(e,S1C_P_RVMIX,.25f) ||
++            !s1c_front_set(e,S1C_P_DLON,1.f) || !s1c_front_set(e,S1C_P_DLMIX,.30f) ||
++            !s1c_front_set(e,S1C_P_DLT,.30f)) { bench_fixed[0]=2; return; }
++        bench_fixed[3]=sample;
++        return;
++    }
++    if (!bench_fixed[3] || bench_fixed[0] || !e->t[S1C_P_DLON] || !e->t[S1C_P_RVON] ||
++            e->t[S1C_P_DLMIX]==0 || e->t[S1C_P_RVMIX]==0 ||
++            a->dsp.juno.synth.delay24.wet==0.f) { bench_fixed[0]=3; return; }
++    const uint8_t notes[7]={48,48,52,55,59,62,67};
++    const unsigned on=sample==FIX_ON;
++    const unsigned ch_a=seq.ch[TRK_BASS0],ch_b=seq.ch[TRK_BASS0+1];
++    if (ch_a!=1u || ch_b!=2u) { bench_fixed[0]=4;return; }
++    fix_sample=sample;
++    for (unsigned i=0;i<1u+FIX_VOICES;i++) {
++        const unsigned part=i!=0, ch=part?ch_b:ch_a, vel=on? (part?88u:86u):0u;
++        uint32_t count=bench_fixed[1];
++        fix_active=1;
++        midi_in((on?9u:8u)|(((on?0x90u:0x80u)|ch)<<8)|((uint32_t)notes[i]<<16)|(vel<<24));
++        fix_active=0;
++        if (bench_fixed[1]!=count+1u) { bench_fixed[0]=5; return; }
++    }
++    bench_fixed[on?4:5]=sample;
++    unsigned voices=0;
++    for (unsigned i=0;i<S1C_VOICES;i++) voices+=e->v[i].root!=-1 && e->v[i].stage && e->v[i].gate>0.f;
++    bench_fixed[on?6:7]=voices;
++}
++
+ void engine_render(int32_t *out_lr, uint32_t n)
+ {
+     mot_empty_in_render = 0;
+@@ -3213,6 +3262,7 @@ void engine_render(int32_t *out_lr, uint32_t n)
+         PROF_ADD(7, pt);
+     }
+     while (done < n) {
++        fixed_bench_boundary(d8_frame);
+         uint32_t k = seq_until_event(&seq, n - done);
+         brk_mute_boundary(); /* also follows song mutes at an in-buffer event */
+ #if X0X_ARP_ENGINE
+diff --git a/firmware/src/app/main_fm1.c b/firmware/src/app/main_fm1.c
+index 91034d5..14c776f 100644
+--- a/firmware/src/app/main_fm1.c
++++ b/firmware/src/app/main_fm1.c
+@@ -1,3 +1,4 @@
++volatile unsigned int lab_delay_probe, lab_s1_probe;
+ /* SPDX-License-Identifier: GPL-3.0-only
+  * Boot, audio ISR and main loop adapted from Felucca's main.c / audio.c, Copyright (C) 2026
+  * Leo Kuroshita (@kurogedelic), Hugelton Instruments. */
+@@ -2612,6 +2613,28 @@ static void fm1_main(void)
+         }
+ #if X0X_CDC
+         cdc_task();
++#endif
++#if X0X_SJ6_NATIVE_DELAY && X0X_SUPERJ6_FACTORY
++        /* SCRATCH EMULATOR ONLY: never installed or pushed. */
++        {
++            extern volatile uint32_t lab_delay_probe;
++            extern volatile uint32_t lab_s1_probe;
++            if (!ui_project_busy() && fm1_ms >= 1050u && lab_s1_probe == 0u &&
++                engine_bass_select_preset(1,ORIGINAL_SOUND_SYNTHONE,518,&proj.sound) == 0) lab_s1_probe=1;
++            if (lab_s1_probe==1u && !engine_bass_preset_pending(1) &&
++                engine_bass_bank(1)==ORIGINAL_SOUND_SYNTHONE &&
++                engine_bass_preset_index(1)==518) lab_s1_probe=2;
++            if (!ui_project_busy() && fm1_ms >= 1300u && lab_delay_probe == 0u &&
++                engine_bass_select_preset(0,ORIGINAL_SOUND_JUNO,0,&proj.sound) == 0) lab_delay_probe=1;
++            if (lab_delay_probe==1u && !engine_bass_preset_pending(0) &&
++                engine_bass_bank(0)==ORIGINAL_SOUND_JUNO &&
++                engine_superj6_edit(0,ENGINE_SJ6_AMP2_ATTACK,0.f)) lab_delay_probe=2;
++            if (lab_delay_probe==2u) {
++                uint32_t epoch=engine_lab_delay_epoch(0);
++                const uint8_t q[]={3,0,44,100};
++                if(epoch && engine_lab_delay_publish(0,epoch,1,q,4)) lab_delay_probe=3;
++            }
++        }
+ #endif
+         if (!ui_project_busy()) engine_brk_flush(); /* main-loop completion after held notes/free snapshots */
+         if (!ui_project_busy() && seq.ppat[TRK_BRK] != last_pat) { /* the break's new pattern may name other loops */
