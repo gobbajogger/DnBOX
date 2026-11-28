@@ -1,0 +1,21 @@
+--- a/firmware/src/dsp/s1c/s1c.c
++++ b/firmware/src/dsp/s1c/s1c.c
+@@ -837,6 +837,18 @@
+ void s1c_render(s1c *s, float *outl, float *outr, unsigned n)
+ {
+     unsigned f, i;
++    /* Test fixture only. Product e00f689d does not persist these wet edits. */
++    static unsigned wet_test_started;
++    if (!wet_test_started) {
++        unsigned held=0;
++        for (i=0;i<S1C_VOICES;++i) held+=s->v[i].stage==1;
++        if (held==6) {
++            s->t[DLON]=s->t[RVON]=1.0f;
++            s->t[DLMIX]=s->t[RVMIX]=0.5f;
++            s->ddec=0;
++            wet_test_started=1;
++        }
++    }
+     int mono = s->t[MONO] > 0.0f;
+     if (mono) { if (s->v[0].stage == 2 && s->v[0].amp < 0.01f) voice_clear(&s->v[0]); }
+     else for (i = 0; i < S1C_VOICES; i++) if (s->v[i].stage == 2 && s->v[i].amp < 0.01f) voice_clear(&s->v[i]);

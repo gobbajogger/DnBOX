@@ -1,0 +1,145 @@
+diff --git a/firmware/src/dsp/s1c/s1c.c b/firmware/src/dsp/s1c/s1c.c
+index c3cda41..1adb2e4 100644
+--- a/firmware/src/dsp/s1c/s1c.c
++++ b/firmware/src/dsp/s1c/s1c.c
+@@ -386,8 +386,17 @@ static float voice_run(s1c *s, s1c_voice *v)
+ static float voice_run_kr(s1c *s, s1c_voice *v)
+ {
+     int mono = P(MONO) > 0.0f, ft = (int)P(FTYPE);
+-    v->amp = env_step(&v->ea, v->gate, P(AA), clampf(P(AD) * lfo10(s, P(LDEC)), 0.005f, 2.0f), P(AS), P(AR), s->sr);
+-    v->fenv = env_step(&v->ef, v->gate, P(FA), P(FD), P(FS), P(FR), s->sr);
++    /* Stable held decay: the generic ADSRs neither change mode/pole nor
++     * need attack/decay/release settings. The live sustain still applies on
++     * every sample, with the original floating-point recurrence. */
++    if (v->gate == 1.0f && v->ea.prev == 1.0f && v->ef.prev == 1.0f &&
++        v->ea.mode == E_DEC && v->ef.mode == E_DEC) {
++        v->amp = v->ea.y = (1.0f - v->ea.a) * P(AS) + v->ea.a * v->ea.y;
++        v->fenv = v->ef.y = (1.0f - v->ef.a) * P(FS) + v->ef.a * v->ef.y;
++    } else {
++        v->amp = env_step(&v->ea, v->gate, P(AA), clampf(P(AD) * lfo10(s, P(LDEC)), 0.005f, 2.0f), P(AS), P(AR), s->sr);
++        v->fenv = env_step(&v->ef, v->gate, P(FA), P(FD), P(FS), P(FR), s->sr);
++    }
+     if (--v->kc <= 0) {
+         v->kc = S1C_KR;
+         float base = mono ? s->monos : v->freq, half = 0.5f * s->sr;
+@@ -834,6 +843,7 @@ void s1c_attach(s1c *s, void *rvb, uint16_t *wbuf, uint8_t *pool, int pool_bytes
+ #define ENV_GET(q, i) s->env[q][i]
+ #endif
+ 
++#define DNBOX_S1_ROOM_MONO_INPUT 1
+ void s1c_render(s1c *s, float *outl, float *outr, unsigned n)
+ {
+     unsigned f, i;
+@@ -851,6 +861,13 @@ void s1c_render(s1c *s, float *outl, float *outr, unsigned n)
+ #endif
+ #endif
+     (void)cr; (void)cw;
++#if DNBOX_S1_ROOM_MONO_INPUT && !S1C_BUSFX && S1C_FAST
++    int room_twin = !memcmp(s->hp_y[0], s->hp_y[1], sizeof s->hp_y[0])
++#if !S1C_NO_RVCOMP
++        && !memcmp(s->cmp[1][0], s->cmp[1][1], sizeof s->cmp[1][0])
++#endif
++        ;
++#endif
+     for (f = 0; f < n; f++) {
+ #if S1C_FAST
+         int cu = (f & 3) == 0;
+@@ -1091,12 +1108,32 @@ void s1c_render(s1c *s, float *outl, float *outr, unsigned n)
+             s->hpk[0] = a1; s->hpk[1] = 2.0f * (cc * cc - 1.0f) * a1; s->hpk[2] = (1.0f - 1.41421356f * cc + cc * cc) * a1;
+         }
+         float hl, hr;
+-        hl = hp2(s->hp_y[0], mL, s->hpk[0] * 2.0f, s->hpk[1], s->hpk[2]); hr = hp2(s->hp_y[1], mR, s->hpk[0] * 2.0f, s->hpk[1], s->hpk[2]);
++#if DNBOX_S1_ROOM_MONO_INPUT && !S1C_BUSFX
++        union { float f; uint32_t u; } mkL={.f=mL},mkR={.f=mR};
++        if (room_twin && mkL.u != mkR.u) {
++            memcpy(s->hp_y[1],s->hp_y[0],sizeof s->hp_y[0]);
++#if !S1C_NO_RVCOMP
++            memcpy(s->cmp[1][1],s->cmp[1][0],sizeof s->cmp[1][0]);
++#endif
++            room_twin=0;
++        }
++#endif
++        hl = hp2(s->hp_y[0], mL, s->hpk[0] * 2.0f, s->hpk[1], s->hpk[2]);
++#if DNBOX_S1_ROOM_MONO_INPUT && !S1C_BUSFX
++        hr = room_twin ? hl : hp2(s->hp_y[1], mR, s->hpk[0] * 2.0f, s->hpk[1], s->hpk[2]);
++#else
++        hr = hp2(s->hp_y[1], mR, s->hpk[0] * 2.0f, s->hpk[1], s->hpk[2]);
++#endif
+ #else
+         float hl = buthp(s->hp_y[0], mL, P(RVHP), s->sr) * 2.0f, hr = buthp(s->hp_y[1], mR, P(RVHP), s->sr) * 2.0f;
+ #endif
+ #if !S1C_NO_RVCOMP
+-        hl = comp(s->cmp[1][0], hl, &cr) * P(CRG); hr = comp(s->cmp[1][1], hr, &cr) * P(CRG);
++        hl = comp(s->cmp[1][0], hl, &cr) * P(CRG);
++#if DNBOX_S1_ROOM_MONO_INPUT && S1C_FAST
++        hr = room_twin ? hl : comp(s->cmp[1][1], hr, &cr) * P(CRG);
++#else
++        hr = comp(s->cmp[1][1], hr, &cr) * P(CRG);
++#endif
+ #endif
+         float wl, wr;
+ #if S1C_RVB
+@@ -1157,4 +1194,12 @@ void s1c_render(s1c *s, float *outl, float *outr, unsigned n)
+ #endif
+         outl[f] = L; outr[f] = R;
+     }
++#if DNBOX_S1_ROOM_MONO_INPUT && !S1C_BUSFX && S1C_FAST
++    if (room_twin) {
++        memcpy(s->hp_y[1],s->hp_y[0],sizeof s->hp_y[0]);
++#if !S1C_NO_RVCOMP
++        memcpy(s->cmp[1][1],s->cmp[1][0],sizeof s->cmp[1][0]);
++#endif
++    }
++#endif
+ }
+diff --git a/firmware/src/dsp/s1c/s1u.c b/firmware/src/dsp/s1c/s1u.c
+index 5d1cb80..ae46a93 100644
+--- a/firmware/src/dsp/s1c/s1u.c
++++ b/firmware/src/dsp/s1c/s1u.c
+@@ -224,7 +224,12 @@ static float rb_get(const s1u_rvb *r, int n, int i, int w)
+     if ((i >> 4) == (w >> 4) && (i & 15) < r->bn[n]) return (float)r->st[n * 16 + (i & 15)] * (1.0f / 2048.0f);
+     int e = r->e[idx >> 4];
+     if (e == -128) return 0.0f;
+-    return (float)r->m[idx] * (exp2f((float)e) / 127.0f);
++    /* Valid exponents are -11..4 (or initial 0). Moving the exponent
++     * bits of 1/127 rounds identically to dividing 2^e by 127. */
++    s1u_fb scale;
++    scale.f = 1.0f / 127.0f;
++    scale.u += (uint32_t)e << 23;
++    return (float)r->m[idx] * scale.f;
+ }
+ static void rb_put(s1u_rvb *r, int n, int w, float x)
+ {
+@@ -232,13 +237,26 @@ static void rb_put(s1u_rvb *r, int n, int w, float x)
+     float v = x * 2048.0f;
+     st[w & 15] = (int16_t)(v > 32767.0f ? 32767.0f : v < -32768.0f ? -32768.0f : v);
+     if (++r->bn[n] == 16) {
+-        int base = r->off[n] + (w & ~15), i; float pk = 0.0f;
++        int base = r->off[n] + (w & ~15);
++        unsigned peak = 0;
+         r->bn[n] = 0;
+-        for (i = 0; i < 16; i++) { float a = fabsf((float)st[i] * (1.0f / 2048.0f)); if (a > pk) pk = a; }
+-        if (pk > 0.0f) {
+-            float e = __builtin_ceilf(log2f(pk)), sc = exp2f(e) / 127.0f;
+-            for (i = 0; i < 16; i++) r->m[base + i] = (int8_t)__builtin_roundf((float)st[i] * (1.0f / 2048.0f) / sc);
+-            r->e[base >> 4] = (int8_t)e;
++        for (int i = 0; i < 16; i++) {
++            int a = st[i];
++            unsigned mag = (unsigned)(a < 0 ? -a : a);
++            if (mag > peak) peak = mag;
++        }
++        if (peak) {
++            /* Q11 staging. A power-of-two scale gives the original signed
++             * mantissa, with exact round-to-nearest, ties away from zero. */
++            unsigned shift = 31u - (unsigned)__builtin_clz(((peak - 1u) << 1) | 1u);
++            unsigned step = 1u << shift;
++            for (int i = 0; i < 16; i++) {
++                int a = st[i];
++                unsigned mag = (unsigned)(a < 0 ? -a : a);
++                int q = (int)((254u * mag + step) >> (shift + 1u));
++                r->m[base + i] = (int8_t)(a < 0 ? -q : q);
++            }
++            r->e[base >> 4] = (int8_t)((int)shift - 11);
+         } else r->e[base >> 4] = -128;
+     }
+ }

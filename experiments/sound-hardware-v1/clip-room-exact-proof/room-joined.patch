@@ -1,0 +1,51 @@
+diff --git a/firmware/src/dsp/s1c/s1u.c b/firmware/src/dsp/s1c/s1u.c
+index 5d1cb80..ae46a93 100644
+--- a/firmware/src/dsp/s1c/s1u.c
++++ b/firmware/src/dsp/s1c/s1u.c
+@@ -224,7 +224,12 @@ static float rb_get(const s1u_rvb *r, int n, int i, int w)
+     if ((i >> 4) == (w >> 4) && (i & 15) < r->bn[n]) return (float)r->st[n * 16 + (i & 15)] * (1.0f / 2048.0f);
+     int e = r->e[idx >> 4];
+     if (e == -128) return 0.0f;
+-    return (float)r->m[idx] * (exp2f((float)e) / 127.0f);
++    /* Valid exponents are -11..4 (or initial 0). Moving the exponent
++     * bits of 1/127 rounds identically to dividing 2^e by 127. */
++    s1u_fb scale;
++    scale.f = 1.0f / 127.0f;
++    scale.u += (uint32_t)e << 23;
++    return (float)r->m[idx] * scale.f;
+ }
+ static void rb_put(s1u_rvb *r, int n, int w, float x)
+ {
+@@ -232,13 +237,26 @@ static void rb_put(s1u_rvb *r, int n, int w, float x)
+     float v = x * 2048.0f;
+     st[w & 15] = (int16_t)(v > 32767.0f ? 32767.0f : v < -32768.0f ? -32768.0f : v);
+     if (++r->bn[n] == 16) {
+-        int base = r->off[n] + (w & ~15), i; float pk = 0.0f;
++        int base = r->off[n] + (w & ~15);
++        unsigned peak = 0;
+         r->bn[n] = 0;
+-        for (i = 0; i < 16; i++) { float a = fabsf((float)st[i] * (1.0f / 2048.0f)); if (a > pk) pk = a; }
+-        if (pk > 0.0f) {
+-            float e = __builtin_ceilf(log2f(pk)), sc = exp2f(e) / 127.0f;
+-            for (i = 0; i < 16; i++) r->m[base + i] = (int8_t)__builtin_roundf((float)st[i] * (1.0f / 2048.0f) / sc);
+-            r->e[base >> 4] = (int8_t)e;
++        for (int i = 0; i < 16; i++) {
++            int a = st[i];
++            unsigned mag = (unsigned)(a < 0 ? -a : a);
++            if (mag > peak) peak = mag;
++        }
++        if (peak) {
++            /* Q11 staging. A power-of-two scale gives the original signed
++             * mantissa, with exact round-to-nearest, ties away from zero. */
++            unsigned shift = 31u - (unsigned)__builtin_clz(((peak - 1u) << 1) | 1u);
++            unsigned step = 1u << shift;
++            for (int i = 0; i < 16; i++) {
++                int a = st[i];
++                unsigned mag = (unsigned)(a < 0 ? -a : a);
++                int q = (int)((254u * mag + step) >> (shift + 1u));
++                r->m[base + i] = (int8_t)(a < 0 ? -q : q);
++            }
++            r->e[base >> 4] = (int8_t)((int)shift - 11);
+         } else r->e[base >> 4] = -128;
+     }
+ }

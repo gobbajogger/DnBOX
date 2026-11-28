@@ -1,0 +1,38 @@
+--- a/firmware/src/lcd.c
++++ b/firmware/src/lcd.c
+@@ -80,11 +80,14 @@
+     lcd_cmd(0x2C);
+ }
+ 
+-#if BOARD_SMK37
+-static uint16_t lcd_fillbuf[240] SMK_BIG;
+-#else
+-static uint16_t lcd_fillbuf[240];
+-#endif
++#include "app/lcd_tiles.h"
++/* Both foreground writers wait for the previous LCD DMA before filling
++ * this staging buffer. lcd_fill has no foreground callback between writes
++ * and the final transfer; the tile path services input only after launch. */
++static uint16_t cv_lcd_txbuf[X0X_LCD_MAX_DMA_BYTES / 2u];
++#define X0X_LCD_SHARED_STAGING 1
++_Static_assert(sizeof cv_lcd_txbuf >= 240u * sizeof(uint16_t), "LCD fill staging");
++#define lcd_fillbuf cv_lcd_txbuf
+ 
+ static void lcd_fill(uint32_t x, uint32_t y, uint32_t w, uint32_t h, uint16_t c)
+ {
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -5284,9 +5284,12 @@
+ 
+ #include "lcd_tiles.h"
+ /* Dirty-tile DMA uses a dedicated, bounded .bss buffer. Full-row DMA
+- * reads the untouched canvas until lcd_sync. Pool capacity is unchanged (0.0.24.1 has only 136 bytes above its pool gate).
++ * reads the untouched canvas until lcd_sync. Native lcd_fill shares the staging.
+  * 48 x 16 x RGB565 = 1536 bytes, 1.024 ms at the SMK-37's 12 MHz SPI. */
++#ifndef X0X_LCD_SHARED_STAGING
++/* Standalone host panel replaces lcd.c. */
+ static uint16_t cv_lcd_txbuf[X0X_LCD_MAX_DMA_BYTES / 2u];
++#endif
+ static uint32_t blit_hash[4];
+ static uint8_t part_header_snapshot_valid;
+ static uint8_t cv_tile_valid[4];
