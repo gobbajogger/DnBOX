@@ -1,0 +1,46 @@
+--- a/firmware/src/dsp/drum808.c
++++ b/firmware/src/dsp/drum808.c
+@@ -908,8 +908,11 @@
+ {
+     int i;
+     r = r < 0.25f ? 0.25f : (r > 4.0f ? 4.0f : r);
+-    for (i = 0; i < 6; i++)
+-        b->inc[i] = ff_to_u32(ff_mulf(k_bank_inc[i], r));
++    for (i = 0; i < 6; i++) {
++        const uint32_t inc = ff_to_u32(ff_mulf(k_bank_inc[i], r));
++        if (inc != b->inc[i]) b->dt_valid = 0;
++        b->inc[i] = inc;
++    }
+ }
+ 
+ /* the two-sample polyBLEP edge correction, on fixed-point phases */
+@@ -947,10 +950,15 @@
+ }
+ __attribute__((noinline)) static void bank_block(d8_bank_t *b, float *bus, float *pair, int m, int cb_on)
+ {
+-    uint32_t dt[6];
++    uint32_t *dt = b->dt;
+     int i, n;
+-    for (i = 0; i < 6; i++)
+-        dt[i] = bank_dt1(b, i);
++    /* Between chunks a step is unchanged unless drum808_trigger retuned
++     * the bank. Drift refresh and wrap still recompute the same step at
++     * the same sample below. No changes to float grouping or RNG order. */
++    if (!b->dt_valid) {
++        for (i = 0; i < 6; i++) dt[i] = bank_dt1(b, i);
++        b->dt_valid = 1;
++    }
+     for (n = 0; n < m; n++) {
+         float sum = 0.0f;
+         if (D8_UNLIKELY(--b->drift_cnt <= 0)) {
+--- a/firmware/src/dsp/drum808.h
++++ b/firmware/src/dsp/drum808.h
+@@ -124,6 +124,8 @@
+     d8_rng_t rng;
+     int32_t drift_cnt;
+     uint8_t pend_wrap;              /* phases that start at >= 1.0 in 8W8 */
++    uint8_t dt_valid;               /* cleared when tuning changes */
++    uint32_t dt[6];                 /* exact cached phase steps, not project state */
+ } d8_bank_t;
+ 
+ typedef struct { float v, target, up, down; } d8_menv_t;

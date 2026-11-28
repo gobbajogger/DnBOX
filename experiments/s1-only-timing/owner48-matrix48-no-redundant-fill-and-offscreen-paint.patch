@@ -1,0 +1,32 @@
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -7135,6 +7135,10 @@
+     int tail = SM_N >= rows && first + rows > SM_N;
+     if (tail) first = SM_N - rows;
+     uint16_t col=SM_F?(ui_theme_light?RGB(40,104,30):RGB(164,235,141)):matrix_col();
++    /* At 48 rows the only callers are immutable scenes. Each window
++     * starts filled with captured C_BLACK, the same UI_N_BASE as SOUND_BASE.
++     * The 69-row direct draw fallback keeps its original explicit fill. */
++#if !DNBOX_LCD_CANVAS_48
+     if(night) {
+         int h=band==2?KNOB_H:BAND_H;
+ #ifdef DNBOX_LAB_LEGACY_SEMANTIC_RENDER
+@@ -7142,11 +7146,18 @@
+ #endif
+         cv_rect(0,0,240,h,SOUND_BASE);
+     }
++#endif
+     for (row=0;row<rows;row++) {
+         int p=first+row, y=4+row*step-off, active=p==page;
+         uint16_t label=night?(active?SOUND_INK:SOUND_GRAY):(active?C_BLACK:C_GRAY);
+         char t[32];
+         if (p>=SM_N || y+height<=0 || y>=(band==2?KNOB_H:BAND_H)) continue;
++#if DNBOX_LCD_CANVAS_48
++        /* Allow 4 px above and 16 px below the slab for text, shadows and
++         * anti-alias taps. No graphics primitive for a row crosses that
++         * guard. Frozen glide and other readouts were captured already. */
++        if (y+cv_oy+height+16<=cv_y0 || y+cv_oy-4>=cv_y1) continue;
++#endif
+         if (night) sound_slab(3,y,234,height,active);
+         else surface_panel(3,y,234,height,active,active?col:SOUND_FACE,
+                            active?blend(col,C_WHITE,5):SOUND_EDGE,active?dim(col,8):SOUND_SIDE);

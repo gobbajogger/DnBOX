@@ -1,0 +1,20 @@
+--- a/firmware/src/app/lcd_tiles.h
++++ b/firmware/src/app/lcd_tiles.h
+@@ -22,8 +22,15 @@
+     uint32_t hash = 2166136261u;
+     for (uint32_t row = 0; row < h; ++row) {
+         const uint16_t *p = px + (y + row) * stride + x;
+-        for (uint32_t col = 0; col < X0X_LCD_TILE_W; ++col)
+-            hash = (hash ^ p[col]) * 16777619u;
++        _Static_assert(X0X_LCD_TILE_W == 16u, "unrolled tile width changed");
++        /* 16 ordered FNV steps; identical hash and dirty decisions. The
++         * PI32v2 size build otherwise emits a taken branch for each pixel. */
++#define X0X_LCD_FNV_ONE() hash = (hash ^ *p++) * 16777619u
++#define X0X_LCD_FNV_FOUR() X0X_LCD_FNV_ONE(); X0X_LCD_FNV_ONE(); X0X_LCD_FNV_ONE(); X0X_LCD_FNV_ONE()
++        X0X_LCD_FNV_FOUR(); X0X_LCD_FNV_FOUR();
++        X0X_LCD_FNV_FOUR(); X0X_LCD_FNV_FOUR();
++#undef X0X_LCD_FNV_FOUR
++#undef X0X_LCD_FNV_ONE
+     }
+     return hash;
+ }

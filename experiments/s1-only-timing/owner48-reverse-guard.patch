@@ -1,0 +1,13 @@
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -2643,7 +2643,9 @@
+         eng_stage = 1;
+     } else if (j == JB_808) {
+         PROF_T(p8);
+-        d808_was_active = (uint8_t)drum808_active(&d808);
++        /* Reverse already admitted active 808 before launching its prefix.
++         * Do not re-read its partially advanced voice state on this core. */
++        d808_was_active = (uint8_t)(eng_808_reverse || drum808_active(&d808));
+         if (d808_was_active) {                            /* silent, it does nothing (and is not mixed) */
+             if (eng_808_reverse) {
+                 if(body_wait(core))return 0;
