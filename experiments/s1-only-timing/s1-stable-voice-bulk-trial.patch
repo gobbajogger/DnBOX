@@ -1,0 +1,51 @@
+--- a/firmware/src/dsp/s1c/s1c.c
++++ b/firmware/src/dsp/s1c/s1c.c
+@@ -895,6 +895,9 @@
+ #define ENV_GET(q, i) s->env[q][i]
+ #endif
+ 
++#if S1C_KR > 1 && S1C_FAST && S1C_CSM && S1C_NO_SEQ
++volatile uint32_t bench_voice_bulk_frames;
++#endif
+ void s1c_render(s1c *s, float *outl, float *outr, unsigned n)
+ {
+     unsigned f, i;
+@@ -956,6 +959,38 @@
+     if(stable_filter) filter_seen=&filter_mask;
+ #endif
+ #endif
++#if S1C_KR > 1 && S1C_FAST && S1C_CSM && S1C_NO_SEQ
++    /* Stable polyphonic pure-tone path: no shared RNG or modulation
++     * dependencies between voice samples. Keep ordered float additions.
++     * All global control state still advances once per frame as before. */
++    if (n && !nmoving && P(MONO)==0.f && s->mono_prev==0 &&
++        P(NOISEV)==0.f && P(LPITCH)==0.f && P(LDET)==0.f &&
++        P(LCUT)==0.f && P(LRES)==0.f && P(LFENV)==0.f &&
++        P(LFM)==0.f && P(LMIX)==0.f && P(LDEC)==0.f) {
++        bench_voice_bulk_frames+=n;
++        const s1c_morph morphs[2]={morph_params(P(I1)),morph_params(P(I2))};
++        const float adec=clampf(P(AD)*lfo10(s,P(LDEC)),0.005f,2.0f);
++        for(f=0;f<n;++f)outl[f]=0.f;
++        for(i=0;i<S1C_VOICES;++i) {
++            s1c_voice *v=&s->v[i];
++            if(v->root!=-1 && v->stage)
++                for(f=0;f<n;++f)outl[f]+=voice_run(s,v);
++        }
++        float gh=P(GLIDE);
++        if (gh != s->glide_h) {
++            s->glide_h=gh;
++            s->glide_c2=gh>0.f ? powf(0.5f,1.0f/(s->sr*gh)) : 0.f;
++        }
++        for(f=0;f<n;++f) {
++            s->monos=(1.0f-s->glide_c2)*s->monof+s->glide_c2*s->monos;
++            float lc2=s->lfo_c2;
++            s1u_lfo_tick(&s->lfo[0],l1step,(int)P(L1I),P(L1A),lc2);
++            s1u_lfo_tick(&s->lfo[1],l2step,(int)P(L2I),P(L2A),lc2);
++            outl[f]=outr[f]=outl[f]*2.0f*P(MVOL);
++        }
++        return;
++    }
++#endif
+     for (f = 0; f < n; f++) {
+ #if S1C_FAST
+         int cu = (f & 3) == 0;

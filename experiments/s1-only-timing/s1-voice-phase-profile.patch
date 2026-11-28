@@ -1,0 +1,80 @@
+--- a/firmware/src/dsp/s1c/s1c.c
++++ b/firmware/src/dsp/s1c/s1c.c
+@@ -408,12 +408,26 @@
+ /* Cheap voice: pitch, LFO, key-tracking and filter coefficients at control rate (every S1C_KR
+  * samples), sines from a 256-point table, the filter envelope still per sample in the cutoff. */
+ volatile uint32_t bench_pitch_reused, bench_filter_reused;
+-static float voice_run_kr(s1c *s, s1c_voice *v, const s1c_morph *m, float adec, const float *semi, uint32_t *seen,uint32_t *fseen)
++/* Isolated timing fixture: eight in every 32 frames, rotating across
++ * the diagnostic render calls. The profile itself changes timings. */
++extern volatile uint32_t bench_loaded_on;
++extern uint32_t plat_ticks24(void);
++volatile uint32_t bench_voice_cycles[4], bench_voice_count, bench_control_count;
++static inline void bench_vtime(unsigned slot,uint32_t *previous)
++{
++    uint32_t now=plat_ticks24();
++    bench_voice_cycles[slot]+=now-*previous;
++    *previous=now;
++}
++static float voice_run_kr(s1c *s, s1c_voice *v, const s1c_morph *m, float adec, const float *semi, uint32_t *seen,uint32_t *fseen,int profile)
+ {
++    uint32_t ts=profile ? plat_ticks24() : 0;
+     int mono = P(MONO) > 0.0f, ft = (int)P(FTYPE);
+     v->amp = env_step(&v->ea, v->gate, P(AA), adec, P(AS), P(AR), s->sr);
+     v->fenv = env_step(&v->ef, v->gate, P(FA), P(FD), P(FS), P(FR), s->sr);
++    if(profile) { ++bench_voice_count; bench_vtime(0,&ts); }
+     if (--v->kc <= 0) {
++        if(profile) ++bench_control_count;
+         v->kc = S1C_KR;
+         const uint32_t bit=1u<<(unsigned)(v-s->v);
+         if(!seen || !(*seen & bit)) {
+@@ -457,6 +471,7 @@
+             if(fseen) *fseen|=bit;
+         } else ++bench_filter_reused;
+     }
++    if(profile) bench_vtime(1,&ts);
+     int bl = P(BLE) > 0.0f;
+     float o1 = morph_step(&v->ph[0], v->kdt1, m[0].k, m[0].frac, bl, v->kstep[0]) * v->vamp * P(VOL1);
+     float o2 = morph_step(&v->ph[1], v->kdt2, m[1].k, m[1].frac, bl, v->kstep[1]) * v->vamp * P(VOL2);
+@@ -488,6 +503,7 @@
+         s->rnd = s->rnd * 1664525u + 1013904223u;
+         y += ((float)(int32_t)s->rnd * (1.0f / 2147483648.0f)) * v->vamp * P(NOISEV) * lfo10(s, P(LNOISE));
+     }
++    if(profile) bench_vtime(2,&ts);
+     y *= v->amp * v->kkey;
+     float fo;
+     if (ft == 0) fo = ladder(v->lp, y, v->kA, v->kfb);
+@@ -497,9 +513,11 @@
+         fo = t * v->ka1 - v->ka1 * v->bq[1];
+         v->bq[1] = v->bq[0]; v->bq[0] = t;
+     }
+-    return y + P(FMIX) * (fo - y);
++    float out=y + P(FMIX) * (fo - y);
++    if(profile) bench_vtime(3,&ts);
++    return out;
+ }
+-#define voice_run(s,v) voice_run_kr(s,v,morphs,adec,semis,pitch_seen,filter_seen)
++#define voice_run(s,v) voice_run_kr(s,v,morphs,adec,semis,pitch_seen,filter_seen,profile)
+ #endif
+ /* ---- FX ---- */
+ typedef s1u_cc s1c_cc;
+@@ -956,6 +974,11 @@
+     if(stable_filter) filter_seen=&filter_mask;
+ #endif
+ #endif
++#if S1C_KR > 1
++    static unsigned bench_profile_phase;
++    const unsigned profile_phase=bench_profile_phase;
++    bench_profile_phase=(bench_profile_phase+1u)&31u;
++#endif
+     for (f = 0; f < n; f++) {
+ #if S1C_FAST
+         int cu = (f & 3) == 0;
+@@ -998,6 +1021,7 @@
+         sequencer(s);
+ #endif
+ #if S1C_KR > 1
++        const int profile=bench_loaded_on && (((unsigned)f+profile_phase)&31u)<8u;
+         const s1c_morph morphs[2] = {morph_params(P(I1)), morph_params(P(I2))};
+         const float adec = clampf(P(AD) * lfo10(s, P(LDEC)), 0.005f, 2.0f);
+ #endif

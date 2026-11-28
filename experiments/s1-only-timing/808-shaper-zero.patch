@@ -1,0 +1,13 @@
+--- a/firmware/src/dsp/drum808.c
++++ b/firmware/src/dsp/drum808.c
+@@ -231,6 +231,10 @@
+ D8_TICK float shaper(float *st, float gate)
+ {
+     float v;
++    /* Non-triggered pulse tails are explicitly flushed below. No arithmetic
++     * (or clip) is needed after reaching the resulting exact +0 state. */
++    if ((((fm_bits_t){.f=gate}).u | ((fm_bits_t){.f=*st}).u) == 0u)
++        return 0.0f;
+     *st = gate + SH_A * (*st - gate);
+     if (gate == 0.0f && fm_fabsf(*st) < 1e-20f)
+         *st = 0.0f;                               /* 8W8 carries a -400 dB tail here */

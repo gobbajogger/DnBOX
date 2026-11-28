@@ -1,0 +1,86 @@
+--- a/firmware/src/dsp/drum909.c
++++ b/firmware/src/dsp/drum909.c
+@@ -1042,43 +1042,48 @@
+     const float pre = 1.0f + s->drive * 0.5f;
+     const uint8_t *adpcm = s->adpcm;
+     const uint32_t len = s->len;
++    uint32_t dk = s->dk, pos = s->pos, frac = s->frac;
++    int32_t pred = s->pred, idx = s->idx, h0 = s->h0, h1 = s->h1;
++    const uint32_t inc = s->inc, incf = s->incf;
+     /* At the native sample rate, interpolation at fraction zero yields the
+      * exact integer sample. Keep the decoder's ordinary one-sample lookahead,
+      * including the priming nibble on a new hit. Endpoints, non-integral rates
+      * and an unaligned decoder take the general path. */
+-    if (m > 0 && s->inc == 1u && !(s->incf | s->frac) &&
+-        s->pos < len && (unsigned)m < len - s->pos &&
+-        (s->dk == s->pos || s->dk == s->pos + 1u)) {
+-        if (s->dk == s->pos)
+-            s->h1 = ima_decode(adpcm, s->dk++, &s->pred, &s->idx);
++    if (m > 0 && inc == 1u && !(incf | frac) &&
++        pos < len && (unsigned)m < len - pos &&
++        (dk == pos || dk == pos + 1u)) {
++        if (dk == pos)
++            h1 = ima_decode(adpcm, dk++, &pred, &idx);
+         for (int i = 0; i < m; ++i) {
+-            s->h0 = s->h1;
+-            s->h1 = ima_decode(adpcm, s->dk++, &s->pred, &s->idx);
+-            const float v = (float)s->h0 * (1.0f / 32768.0f);
++            h0 = h1;
++            h1 = ima_decode(adpcm, dk++, &pred, &idx);
++            const float v = (float)h0 * (1.0f / 32768.0f);
+             bus->y[i] = v * d9_env_tick(&s->out);
+         }
+-        s->pos += (unsigned)m;
++        pos += (unsigned)m;
+     } else {
+         for (int i = 0; i < m; ++i) {
+             float v = 0.0f;
+-            if (s->pos < len) {
+-                const uint32_t need = s->pos + 2 < len ? s->pos + 2 : len;
+-                while (s->dk < need) {
+-                    s->h0 = s->h1;
+-                    s->h1 = ima_decode(adpcm, s->dk++, &s->pred, &s->idx);
++            if (pos < len) {
++                const uint32_t need = pos + 2 < len ? pos + 2 : len;
++                while (dk < need) {
++                    h0 = h1;
++                    h1 = ima_decode(adpcm, dk++, &pred, &idx);
+                 }
+-                const int last = s->pos + 1 >= len;
+-                const float a = (float)(last ? s->h1 : s->h0) * (1.0f / 32768.0f);
+-                const float b = last ? 0.0f : (float)s->h1 * (1.0f / 32768.0f);
+-                const float fr = (float)s->frac * (1.0f / 4294967296.0f);
++                const int last = pos + 1 >= len;
++                const float a = (float)(last ? h1 : h0) * (1.0f / 32768.0f);
++                const float b = last ? 0.0f : (float)h1 * (1.0f / 32768.0f);
++                const float fr = (float)frac * (1.0f / 4294967296.0f);
+                 v = a + (b - a) * fr;
+-                const uint32_t f2 = s->frac + s->incf;
+-                s->pos += s->inc + (f2 < s->frac);
+-                s->frac = f2;
++                const uint32_t f2 = frac + incf;
++                pos += inc + (f2 < frac);
++                frac = f2;
+             }
+             bus->y[i] = v * d9_env_tick(&s->out);
+         }
+     }
++    s->dk = dk; s->pos = pos; s->frac = frac;
++    s->pred = pred; s->idx = idx; s->h0 = h0; s->h1 = h1;
+     /* Drive reads this voice's decoded output in the original sample order.
+      * Its crush history is disjoint from the decoder and its output envelope. */
+     if (drive) {
+@@ -1128,8 +1133,12 @@
+     }
+     float *const nz = d->nz_buf + d->nz_pos;
+     d->nz_pos += n;
++    /* The stream writer and xorshift state are disjoint. Carry the state
++     * through the loop instead of reloading/storing it for every sample. */
++    uint32_t noise = d->noise;
+     for (int i = 0; i < n; ++i)
+-        nz[i] = d9_noise(&d->noise);
++        nz[i] = d9_noise(&noise);
++    d->noise = noise;
+     return nz;
+ }
+ 

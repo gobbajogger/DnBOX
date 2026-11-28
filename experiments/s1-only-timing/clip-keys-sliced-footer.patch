@@ -1,0 +1,182 @@
+--- a/firmware/src/app/main_fm1.c
++++ b/firmware/src/app/main_fm1.c
+@@ -1949,54 +1949,39 @@
+ /* The KEYS panel (ui.c draw_knobs, clip mode, no menu): the stage chips, one octave with the scale (the root
+  * marked, the notes that sound lit), the scale and chord names, the arp line and its steps. *last: the last
+  * drawing's signature; force: draw anyway. Return 1 when it drew on the canvas. */
+-uint8_t smk_ck_panel(uint32_t *last, uint32_t force)
++typedef struct {
++    settings_t set;
++    ck_chord_input_t chord;
++    uint32_t latched, snd, m, arp, rh, len, pos;
++    uint16_t black, white, gray, line, dim, amb;
++    uint8_t on, fl, pg;
++} ck_panel_scene;
++static void ck_panel_paint(const ck_panel_scene *sc)
+ {
+-    CK_BASE;
+-    CK_SET;
+-    uint8_t out[CK_MAXN];
++    const settings_t *sp=&sc->set;
++    const uint32_t latched=sc->latched,snd=sc->snd,m=sc->m,arp=sc->arp,
++                   rh=sc->rh,len=sc->len,pos=sc->pos;
++    uint32_t i;
+     uint16_t col[12];
+-    char t[64], *q;
+-    ck_chord_input_t chord;
+-    uint32_t latched = ck_chord_state(&chord);
+-    uint32_t k, i, n, snd = 0, sig = 2166136261u, m = ck_mask(sp->ck_scale, sp->ck_root);
+-    uint32_t arp = cp->on & CK_M_ARP, rh = sp->ck_x2 & 15u, len = rh ? (CK_RHY_T[rh] & 15u) + 1u : 8u;
+-    uint32_t pos = arp && cp->nk && cp->step ? (cp->step - 1u) % len + 1u : 0u;
+-    for (k = 0; k < CK_NKEY; k++)
+-        if (CK_BIT(cp->snd, k) || (cp->nk && cp->korder[0] == k)) {
+-            n = ck_key_notes(k, out);
+-            for (i = 0; i < n && !arp; i++)
+-                snd |= 1u << out[i] % 12u;
+-        }
+-    if (cp->arp_note)
+-        snd |= 1u << (cp->arp_note - 1u) % 12u;
+-    for (i = 0; i < 12u; i++)
+-        sig = (sig ^ (&sp->ck_ch)[i]) * 16777619u;
+-    sig = (sig ^ (cp->on | (cp->fl & CK_F_LATCH) << 3 | snd << 4 | (uint32_t)cp->pg << 20)) * 16777619u;
+-    sig = (sig ^ ((uint32_t)chord.pcs | (uint32_t)chord.upper_pcs << 16)) * 16777619u;
+-    sig = (sig ^ (chord.bass | (uint32_t)chord.upper_bass << 8 | latched << 16)) * 16777619u;
+-    sig = (sig ^ pos) * 16777619u;
+-    if (!force && sig == *last)
+-        return 0u;
+-    *last = sig;
+-    cv_begin(240, 82, C_BLACK);
+-    cv_rect(0, 0, 240, 1, C_LINE);
++    char t[64],*q;
++    cv_rect(0, 0, 240, 1, sc->line);
+     for (i = 0; i < 4u; i++) {                              /* SCALE CHORD ARP LATCH */
+-        uint32_t on = i < 3u ? cp->on >> i & 1u : cp->fl & CK_F_LATCH;
+-        uint16_t c = i < 3u ? CK_MODE_C[i] : C_AMB;
++        uint32_t on = i < 3u ? sc->on >> i & 1u : sc->fl & CK_F_LATCH;
++        uint16_t c = i < 3u ? CK_MODE_C[i] : sc->amb;
+         int32_t x = 3 + (int32_t)i * 59;
+         if (on)
+             rbox(x, 4, 55, 13, 4, c);
+         else
+-            rframe(x, 4, 55, 13, 4, dim(c, 7));
+-        text_c(x + 27, vc(&FONT_T, 4, 13), &FONT_T, i < 3u ? ck_nm(CK_MODE_N, i) : "LATCH", on ? C_BLACK : dim(c, 11));
+-        if ((cp->pg & 3u) == i + 1u)                        /* the page on the screen */
+-            cv_rect(x + 8, 18, 39, 2, C_WHITE);
++            rframe(x, 4, 55, 13, 4, blend(sc->black,c,7));
++        text_c(x + 27, vc(&FONT_T, 4, 13), &FONT_T, i < 3u ? ck_nm(CK_MODE_N, i) : "LATCH", on ? sc->black : blend(sc->black,c,11));
++        if ((sc->pg & 3u) == i + 1u)                        /* the page on the screen */
++            cv_rect(x + 8, 18, 39, 2, sc->white);
+     }
+     for (i = 0; i < 12u; i++)                               /* one octave: the scale, the notes that sound */
+-        col[i] = snd >> i & 1u ? C_AMB : ck_in(m, i) ? (CK_BLK(i) ? RGB(140, 140, 140) : RGB(220, 220, 220))
++        col[i] = snd >> i & 1u ? sc->amb : ck_in(m, i) ? (CK_BLK(i) ? RGB(140, 140, 140) : RGB(220, 220, 220))
+                                                     : (CK_BLK(i) ? RGB(30, 30, 30) : RGB(70, 70, 70));
+ #if X0X_UI_SMALL_CANVAS
+-    ck_kbd(4, 23, 15, 36, 12u, col, C_BLACK);
++    ck_kbd(4, 23, 15, 36, 12u, col, sc->black);
+ #else
+     ck_kbd(4, 23, 15, 36, 12u, col);
+ #endif
+@@ -2004,20 +1989,20 @@
+     q = put_s(put_s(put_s(t, ck_nm(CK_ROOT_N, sp->ck_root)), " "), ck_nm(CK_SCALE_N, sp->ck_scale));
+     if (sp->ck_snap)
+         put_s(q, " FILTER");
+-    cv_text(114, vc(&FONT_XS, 22, 12), &FONT_XS, t, cp->on & CK_M_SCALE ? CK_MODE_C[0] : C_DIM);
++    cv_text(114, vc(&FONT_XS, 22, 12), &FONT_XS, t, sc->on & CK_M_SCALE ? CK_MODE_C[0] : sc->dim);
+     {
+         const felucca_font_t *font = &FONT_B;
+-        ck_chord_text(&chord, t);
++        ck_chord_text(&sc->chord, t);
+         if (tw(font, t) > 122)
+             font = &FONT_XS;
+         if (tw(font, t) > 122)
+             font = &FONT_T;
+-        cv_text(114, vc(font, 35, 15), font, t, chord.pcs ? CK_MODE_C[1] : C_DIM);
++        cv_text(114, vc(font, 35, 15), font, t, sc->chord.pcs ? CK_MODE_C[1] : sc->dim);
+     }
+     q = put_s(t, latched ? "LATCH " : "");
+-    if ((cp->on & CK_M_CHORD) && (sp->ck_x2 >> 4))
++    if ((sc->on & CK_M_CHORD) && (sp->ck_x2 >> 4))
+         ck_val_txt(CK_E_STRUM, sp->ck_x2 >> 4, put_s(q, "STRUM "));
+-    cv_text(114, vc(&FONT_T, 51, 10), &FONT_T, t, C_GRAY);
++    cv_text(114, vc(&FONT_T, 51, 10), &FONT_T, t, sc->gray);
+     q = put_s(put_s(put_s(put_s(t, ck_nm(CK_ORD_N, sp->ck_ord)), " "), ck_nm(CK_RATE_N, sp->ck_rate)), " X");
+     q = put_s(put_s(put_i(q, sp->ck_oct + 1), " "), ck_val_txt(CK_E_GATE, sp->ck_gate, t + 52));
+     if (sp->ck_x1 & 7u)
+@@ -2026,9 +2011,59 @@
+         q = put_i(put_s(q, " HUM"), sp->ck_x1 >> 3 & 7u);
+     if (rh)
+         put_s(put_s(q, " "), ck_nm(CK_RHY_N, rh));
+-    cv_text(4, vc(&FONT_XS, 61, 12), &FONT_XS, t, arp ? CK_MODE_C[2] : C_DIM);
++    cv_text(4, vc(&FONT_XS, 61, 12), &FONT_XS, t, arp ? CK_MODE_C[2] : sc->dim);
+     for (i = 0; i < len && arp; i++)                        /* the steps: hits, rests, the step now */
+-        cv_rect(4 + (int32_t)i * 8, 76, 5, 4, i + 1u == pos ? C_WHITE : ck_rhy_hit(rh, i) ? dim(CK_MODE_C[2], 9) : C_LINE);
++        cv_rect(4 + (int32_t)i * 8, 76, 5, 4, i + 1u == pos ? sc->white : ck_rhy_hit(rh, i) ? blend(sc->black,CK_MODE_C[2],9) : sc->line);
++}
++uint8_t smk_ck_panel(uint32_t *last, uint32_t force)
++{
++    CK_BASE;
++    CK_SET;
++    uint8_t out[CK_MAXN];
++    ck_chord_input_t chord;
++    uint32_t latched = ck_chord_state(&chord);
++    uint32_t k, i, n, snd = 0, sig = 2166136261u, m = ck_mask(sp->ck_scale, sp->ck_root);
++    uint32_t arp = cp->on & CK_M_ARP, rh = sp->ck_x2 & 15u, len = rh ? (CK_RHY_T[rh] & 15u) + 1u : 8u;
++    uint32_t pos = arp && cp->nk && cp->step ? (cp->step - 1u) % len + 1u : 0u;
++    for (k = 0; k < CK_NKEY; k++)
++        if (CK_BIT(cp->snd, k) || (cp->nk && cp->korder[0] == k)) {
++            n = ck_key_notes(k, out);
++            for (i = 0; i < n && !arp; i++)
++                snd |= 1u << out[i] % 12u;
++        }
++    if (cp->arp_note)
++        snd |= 1u << (cp->arp_note - 1u) % 12u;
++    for (i = 0; i < 12u; i++)
++        sig = (sig ^ (&sp->ck_ch)[i]) * 16777619u;
++    sig = (sig ^ (cp->on | (cp->fl & CK_F_LATCH) << 3 | snd << 4 | (uint32_t)cp->pg << 20)) * 16777619u;
++    sig = (sig ^ ((uint32_t)chord.pcs | (uint32_t)chord.upper_pcs << 16)) * 16777619u;
++    sig = (sig ^ (chord.bass | (uint32_t)chord.upper_bass << 8 | latched << 16)) * 16777619u;
++    sig = (sig ^ pos) * 16777619u;
++    if (!(force & 1u) && sig == *last)
++        return 0u;
++    *last = sig;
++    /* Capture the painter's inputs before the first SPI operation that may
++     * service keys, switch screens, or change the theme. */
++    const ck_panel_scene scene={
++        .set=*sp,.chord=chord,.latched=latched,.snd=snd,.m=m,.arp=arp,
++        .rh=rh,.len=len,.pos=pos,.black=C_BLACK,.white=C_WHITE,.gray=C_GRAY,
++        .line=C_LINE,.dim=C_DIM,.amb=C_AMB,.on=cp->on,.fl=cp->fl,.pg=cp->pg
++    };
++#if X0X_UI_SMALL_CANVAS
++    if (force & 2u) {
++        /* 63 rows is an exact 3-row full-width DMA boundary. */
++        blit_hash[2]=1u;
++        cv_tile_valid[2]=0;
++        for (unsigned offset=0;offset<82u;offset+=63u) {
++            cv_window(240,82,offset,63,scene.black);
++            ck_panel_paint(&scene);
++            cv_lcd_full(0,KNOB_Y+offset);
++        }
++        return 0u;                         /* LCD already owns this frame */
++    }
++#endif
++    cv_begin(240,82,scene.black);
++    ck_panel_paint(&scene);
+     return 1u;
+ }
+ /* The stage settings and a plain keybed. The keybed plays MIDI; its colours do not encode field values. */
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -11073,8 +11073,12 @@
+         extern uint8_t smk_ck_panel(uint32_t *last, uint32_t force);
+         if (smk_ck_knobs_owned()) {
+             blit_hash[3] = 0;                         /* (the knob strip draws all again after it) */
++#if X0X_UI_SMALL_CANVAS
++            (void)smk_ck_panel(&last_sig, 2u | !blit_hash[2]);
++#else
+             if (smk_ck_panel(&last_sig, !blit_hash[2]))
+                 cv_commit(2, 0, KNOB_Y);
++#endif
+             return;
+         }
+         blit_hash[2] = 0;

@@ -1,0 +1,20 @@
+--- a/firmware/src/dsp/fxbus.c
++++ b/firmware/src/dsp/fxbus.c
+@@ -268,11 +268,12 @@
+         const float x = d9_biquad_tick(&f->rv_hp, in[i]);
+         float acc = 0.0f, acc_r = 0.0f;
+         int32_t wr = 0;
+-        for (int c = 0; c < 4; ++c) {
+-            const float y = rv_comb(f, cb[c], c, x, damp, fb, &wr);
+-            acc += y;
+-            acc_r += (c & 1) ? -y : y;
+-        }
++        const float y0 = rv_comb(f, cb[0], 0, x, damp, fb, &wr);
++        const float y1 = rv_comb(f, cb[1], 1, x, damp, fb, &wr);
++        const float y2 = rv_comb(f, cb[2], 2, x, damp, fb, &wr);
++        const float y3 = rv_comb(f, cb[3], 3, x, damp, fb, &wr);
++        acc = (((acc + y0) + y1) + y2) + y3;
++        acc_r = (((acc_r + y0) + (-y1)) + y2) + (-y3);
+         float y = acc * 0.25f;
+         y = rv_ap(ab0, &f->apos[0], fx_al[0], y);
+         y = rv_ap(ab1, &f->apos[1], fx_al[1], y);
