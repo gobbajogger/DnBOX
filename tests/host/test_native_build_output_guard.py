@@ -30,9 +30,9 @@ class OutputGuardTests(unittest.TestCase):
         pkg.set_board('smk37')
         pkg.SDK = self.root
 
-    def package(self, model='elite'):
+    def package(self, model='elite', **regions):
         content = pkg.ufw(pkg.flash_image(b'\xab' * 2048, pkg.KEY),
-                          b'FAKE OTA PAYLOAD' * 15, guard.PRODUCTS[model])
+                          b'FAKE OTA PAYLOAD' * 15, guard.PRODUCTS[model], **regions)
         path = self.root / 'package.fwsc'
         path.write_bytes(content)
         return path
@@ -58,6 +58,26 @@ class OutputGuardTests(unittest.TestCase):
                 self.assertEqual(got['model'], model)
                 self.assertEqual(got['payloads'], ['flash.bin', 'ota.bin'])
 
+    def factory_region(self):
+        area = bytearray(b'\xff' * pkg.FDATA_SIZE)
+        area[:4] = b'S1PK'
+        struct.pack_into('<HHIII', area, 4, 1, 694, 0, 32, 0)
+        return area
+
+    def test_current_layout_validates_all_five_regions(self):
+        for model in ('elite', 'pro'):
+            with self.subTest(model=model):
+                path = self.package(model, xdata=b'X' * 8192, fittab=b'F' * 4096,
+                                    fdata=self.factory_region())
+                self.assertEqual(guard.check_firmware(path, model)['payloads'],
+                                 ['flash.bin', 'ota.bin', 'xdata.bin', 'fittab.bin', 'fdata.bin'])
+
+    def test_current_layout_rejects_bad_region_data_with_valid_transport_crc(self):
+        area = self.factory_region()
+        area[0] = 0
+        with self.assertRaisesRegex(ValueError, 'invalid fdata.bin'):
+            guard.check_firmware(self.package(fdata=area), 'elite')
+
     def test_wrong_model_fails(self):
         for model, other in [('elite', 'pro'), ('pro', 'elite')]:
             with self.subTest(model=model):
@@ -65,15 +85,15 @@ class OutputGuardTests(unittest.TestCase):
                     guard.check_firmware(self.package(model), other)
 
     def test_corrupt_flash_or_loader_fails_crc(self):
-        for segment in ('flash.bin', 'ota.bin'):
+        for index, segment in enumerate(('flash.bin', 'ota.bin', 'xdata.bin', 'fittab.bin', 'fdata.bin')):
             with self.subTest(segment=segment):
-                path = self.package()
+                path = self.package(xdata=b'X' * 8192, fittab=b'F' * 4096,
+                                    fdata=self.factory_region())
                 blob = bytearray(path.read_bytes())
                 _, logical = add_ctl.logical_of(blob)
                 hdr = bytearray(logical[:64]); pkg.enc(hdr, 0, len(hdr))
                 count = struct.unpack_from('<H', hdr, 8)[0]
                 listing = logical[64:64 + count * 80]
-                index = 0 if segment == 'flash.bin' else 1
                 entry = bytearray(listing[index * 80:(index + 1) * 80]); pkg.enc(entry, 0, 80)
                 off, size = struct.unpack_from('<II', entry, 8)
                 self.assertGreater(size, 0)

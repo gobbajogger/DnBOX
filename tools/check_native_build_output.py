@@ -16,6 +16,10 @@ import zlib
 import add_ctl
 import fm1pkg_make as pkg
 
+REGIONS = {0: (b'flash.bin', None), 100: (b'ota.bin', None),
+           101: (b'xdata.bin', 0x2000), 102: (b'fittab.bin', 0x1000),
+           103: (b'fdata.bin', pkg.FDATA_SIZE)}
+
 PRODUCTS = {'elite': 'SMK-37 Elite_900', 'pro': 'SMK-37 Pro_900'}
 
 
@@ -36,8 +40,12 @@ def check_firmware(path: Path, model: str) -> dict:
     hdr = bytearray(logical[:0x40])
     pkg.enc(hdr, 0, len(hdr))
     count = struct.unpack_from('<H', hdr, 8)[0]
-    if count != 2:
+    if not 2 <= count <= len(REGIONS):
         raise ValueError(f'unexpected package file count {count}')
+    if pkg.crc16(hdr[2:]) != struct.unpack_from('<H', hdr, 0)[0]:
+        raise ValueError('package header CRC mismatch')
+    if struct.unpack_from('<I', hdr, 4)[0] != len(logical):
+        raise ValueError('package length mismatch')
     start, end = 0x40, 0x40 + 0x50 * count
     if end > len(logical):
         raise ValueError('truncated package file descriptors')
@@ -45,21 +53,32 @@ def check_firmware(path: Path, model: str) -> dict:
     if pkg.crc16(entries) != struct.unpack_from('<H', hdr, 2)[0]:
         raise ValueError('package file-list CRC mismatch')
     names = []
+    minimum_offset, previous_kind = 0x400, -1
     for index in range(count):
         entry = bytearray(entries[index * 0x50:(index + 1) * 0x50])
         pkg.enc(entry, 0, 0x50)
         kind, number, checksum, _flags, off, size, _padded = struct.unpack_from('<HHHHIII', entry, 0)
         name = bytes(entry[0x40:0x50]).split(b'\0', 1)[0]
-        expected = (b'flash.bin', b'ota.bin')[index]
-        if name != expected or kind != (0, 100)[index] or number != index:
+        if (kind not in REGIONS or kind <= previous_kind or number != index
+                or (index < 2 and kind != (0, 100)[index])):
             raise ValueError(f'unexpected firmware payload descriptor {index}')
-        if size == 0 or off < 0x400 or off > len(logical) or size > len(logical) - off:
-            raise ValueError(f'payload {expected.decode()} missing or truncated')
-        if pkg.crc16(logical[off:off + size]) != checksum:
-            raise ValueError(f'{expected.decode()} CRC mismatch')
-        names.append(expected.decode())
+        expected, fixed_size = REGIONS[kind]
+        if name != expected:
+            raise ValueError(f'unexpected firmware payload name at {index}')
+        label = expected.decode()
+        if size == 0 or off < minimum_offset or off % 0x100 or off + size > len(logical):
+            raise ValueError(f'payload {label} missing, misplaced or truncated')
+        if fixed_size is not None and size != fixed_size:
+            raise ValueError(f'invalid {label} size')
+        payload = logical[off:off + size]
+        if pkg.crc16(payload) != checksum:
+            raise ValueError(f'{label} CRC mismatch')
+        if kind == 103 and not pkg.valid_fdata(payload):
+            raise ValueError(f'invalid {label} factory pack')
+        minimum_offset, previous_kind = off + size, kind
+        names.append(label)
     return {'model': model, 'product': product, 'bytes': len(raw),
-            'sha256_check': 'package header, flash/app and OTA CRC verified',
+            'sha256_check': 'package header, app and all payload CRCs verified',
             'package_crc32': f'{zlib.crc32(raw):08x}', 'payloads': names}
 
 

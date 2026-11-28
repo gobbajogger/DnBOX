@@ -9,6 +9,7 @@ import subprocess
 import sys
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "tools"))
@@ -54,16 +55,19 @@ class Attribution(unittest.TestCase):
 
     def test_budget_boundaries(self):
         syms, marks = emr.parse_nm(nm([], pool_used=0x54000 - 8192 - 512))
-        for xip_free, ok in [(0, True), (-1, False)]:
-            with self.subTest(xip_free=xip_free):
-                table, totals = emr.report(syms, marks, image_bytes=0x86EE0 - xip_free)
-                text, verdict = emr.render("elite", table, totals)
-                self.assertEqual(verdict, ok)
-                self.assertIn(f"XIP free: {xip_free} B", text)
-                self.assertTrue(text.endswith(("PASS" if ok else "FAIL") + " elite"))
+        for minimum in (0, 1024):
+            for xip_free, ok in [(minimum, True), (minimum - 1, False)]:
+                with (self.subTest(xip_free=xip_free, xip_min=minimum),
+                      patch.object(emr, "XIP_MIN", minimum), patch.object(emr, "POOL_MIN", 512)):
+                    table, totals = emr.report(syms, marks, image_bytes=0x86EE0 - xip_free)
+                    text, verdict = emr.render("elite", table, totals)
+                    self.assertEqual(verdict, ok)
+                    self.assertIn(f"XIP free: {xip_free} B", text)
+                    self.assertTrue(text.endswith(("PASS" if ok else "FAIL") + " elite"))
         syms, marks = emr.parse_nm(nm([], pool_used=0x54000 - 8192 - 511))
         table, totals = emr.report(syms, marks, image_bytes=0)
-        self.assertFalse(emr.render("pro", table, totals)[1])
+        with patch.object(emr, "POOL_MIN", 512):
+            self.assertFalse(emr.render("pro", table, totals)[1])
 
     def test_xdata_region(self):
         # the SMK font region (flash 0xAD000 = XIP 0x020A9000): its own area, never app XIP; over 8 KiB fails
