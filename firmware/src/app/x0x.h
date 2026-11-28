@@ -96,7 +96,7 @@ typedef struct {
     uint8_t usb_full;                    /* 1: USB audio at full level, the MASTER knob for the FM-1's own outputs */
     uint8_t bt;                          /* bit 0: Bluetooth MIDI on (SMK-37; 0 = off, also in older objects);
                                           * bits 1-3: CLOCK SOURCE (PROJ_BT_CLK_IN) */
-    uint8_t ck_ch;                       /* SMK-37 clip mode: the keybed MIDI channel 2-15 (0: an older object) */
+    uint8_t ck_ch;                       /* SMK-37 clip mode: the keybed MIDI channel 1-15 (0: invalid) */
     uint8_t ck_root, ck_scale, ck_snap;  /* clip mode SCALE: root 0-11, scale, 0 NEAR / 1 FILTER (smk_clip_keys.h) */
     uint8_t ck_chord;                    /* clip mode CHORD: type */
     uint8_t ck_ord, ck_rate, ck_oct;     /* clip mode ARP: order, rate, octaves - 1 (0-3) */

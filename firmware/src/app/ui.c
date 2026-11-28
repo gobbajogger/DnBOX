@@ -557,7 +557,7 @@ static const char *const SMC_ROLE_N[] = {"DEVICE", "SMC HOST"};
 static const char *const SMC_MAP_N[] = {"DAW", "USER"};
 static const x0x_param_t SMC_ROLE_P = {"BT ROLE", 1, 0, SMC_ROLE_N};
 static const x0x_param_t SMC_MAP_P = {"SMC PRESET", 1, 0, SMC_MAP_N};
-static const x0x_param_t CKCH_P = {"CLIP KEYS CH", 13, 0, 0};  /* clip mode keybed channel 2-15 (0 = 2) */
+static const x0x_param_t CKCH_P = {"CLIP KEYS CH", 14, 0, 0};  /* clip mode keybed channel 1-15 (0 = 1) */
 static const char *const CLKSRC_N[] = {"AUTO", "INTERNAL", "EXTERNAL"};   /* SEQ_CLK_* order */
 static const x0x_param_t CLKSRC_P = {"CLOCK SOURCE", 2, 0, CLKSRC_N};
 static const char *const BTSTAT_N[] = {"UNAVAILABLE", "OFF", "RESTART", "STARTING", "READY", "CONNECTED",
@@ -792,7 +792,7 @@ static UI_DRAW int pref_get(pref_t r)
     case R_BT: return proj.set.bt & 1u;
     case R_SMC_ROLE: return !!(proj.set.bt & PROJ_BT_SMC_CENTRAL);
     case R_SMC_MAP: return !!(proj.set.bt & PROJ_BT_SMC_USER);
-    case R_CKCH: return proj.set.ck_ch - 2;
+    case R_CKCH: return proj.set.ck_ch - 1;
     case R_CLKSRC: return PROJ_CLK_SRC(proj.set.bt);
     case R_BTSTAT: return plat_ble_state();
     case R_SLEN: return song()->len;
@@ -948,7 +948,13 @@ X0X_COLD static void pref_set_impl(pref_t r, int v, int from_keyboard)
     case R_OUTLOUD: proj.set.out_loud = (uint8_t)v; engine_out_loud(v); break;
     case R_USBFULL: proj.set.usb_full = (uint8_t)v; engine_usb_full(v); break;
     case R_FINETUNE: PROJ_SET_TUNE(&proj.set, v - 64); engine_bass_tune(v - 64); break;
-    case R_CKCH: proj.set.ck_ch = (uint8_t)(v + 2); break;   /* sounding notes end on their own channel */
+    case R_CKCH:
+        if (!v && proj.set.ck_ch != 1) {
+            say("LOOPY PRO: KEYS MAY LAUNCH CLIPS", 0);
+            ui.msg_until += 1400u;
+        }
+        proj.set.ck_ch = (uint8_t)(v + 1);         /* sounding notes end on their own channel */
+        break;
     case R_CLKSRC:                                            /* (ui_frame gives it to the sequencer) */
         proj.set.bt = (uint8_t)((proj.set.bt & ~PROJ_BT_CLK_MASK) | (uint8_t)v << 1 | PROJ_BT_CLK_IN);
         break;
@@ -1530,7 +1536,7 @@ X0X_COLD static void pref_value_of(pref_t r, int v, char *num, char *unit)
     case R_SBAR: put_i(num, v + 1); return;
     case R_SPAT: num[0] = 'P'; put_i(num + 1, v + 1); return;
     case R_MIDICH: if (v) put_i(num, v); else put_s(num, "OFF"); return;
-    case R_CKCH: put_i(num, v + 2); return;
+    case R_CKCH: put_i(num, v + 1); return;
     case R_SREP: num[0] = 'x'; put_i(num + 1, v + 1); return;
     case R_SLEN: put_i(num, v); put_s(unit, "bar"); return;
     default: put_i(num, v); return;
@@ -7232,6 +7238,13 @@ static UI_DRAW void draw_list(int band)
             cv_rect(3, y + 1, 2, 21, ink);
             if (on) ui_pictogram(168, y + 6, UI_G_CHECK, 1, ink);
             ui_state_toggle(190, y + 6, on, on ? ink : C_GRAY);
+        }
+        if (r.kind == R_CKCH && proj.set.ck_ch == 1) {
+            cv_line(200, y + 6, 194, y + 16, C_AMB);
+            cv_line(200, y + 6, 206, y + 16, C_AMB);
+            cv_rect(194, y + 16, 13, 1, C_AMB);
+            cv_rect(200, y + 9, 1, 3, C_AMB);
+            cv_rect(200, y + 13, 1, 1, C_AMB);
         }
         pref_value(r, num, unit);
         if (visible == 9 && r.kind == R_ENG && d && d->names) put_s(num, caps_of(num));

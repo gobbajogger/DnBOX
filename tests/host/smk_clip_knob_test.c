@@ -263,6 +263,34 @@ static void check(const char *what, int ok)
     printf("%s %s\n", ok ? "PASS" : "FAIL", what);
     fails += !ok;
 }
+static unsigned clip_key_packet(const uint32_t *q, unsigned n, unsigned status, unsigned key)
+{
+    unsigned matches = 0;
+    for (unsigned i = 0; i < n; ++i)
+        matches += ((q[i] >> 8) & 0xffffu) == (status | key << 8);
+    return matches;
+}
+static void clip_channel1(void)
+{
+    const unsigned note = 48u;
+    fake_tx_n = ble_tx_n = 0;
+    proj.set.ck_ch = 1u;
+    fm1_in.keys |= 1u;
+    run(20);
+    check("Clip Keys note on channel 1 over USB and Bluetooth",
+          clip_key_packet(fake_tx, fake_tx_n, 0x90u, note) == 1u &&
+          clip_key_packet(ble_tx, ble_tx_n, 0x90u, note) == 1u);
+    fake_tx_n = ble_tx_n = 0;
+    proj.set.ck_ch = 2u;
+    run(20);
+    check("Switching channels releases the held note on channel 1 over both links",
+          clip_key_packet(fake_tx, fake_tx_n, 0x80u, note) == 1u &&
+          clip_key_packet(ble_tx, ble_tx_n, 0x80u, note) == 1u &&
+          !clip_key_packet(fake_tx, fake_tx_n, 0x81u, note) &&
+          !clip_key_packet(ble_tx, ble_tx_n, 0x81u, note));
+    fm1_in.keys &= ~(uint64_t)1u;
+    run(50);
+}
 #define B_SCALE_ROLE B_SEL
 int main(void)
 {
@@ -283,6 +311,7 @@ int main(void)
     run(50);
     colours();
     knob("K2 both links up, clip colours on both: the knobs send", 1);
+    clip_channel1();
     run(5000);
     knob("K2 5 s later: the knobs send", 1);
     usb_intro(0x42u);

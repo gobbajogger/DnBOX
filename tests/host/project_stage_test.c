@@ -256,7 +256,7 @@ static void musical_fixture(void)
 {
     unsigned p;
     proj.set.palette = 4;
-    proj.set.ck_ch = 15;
+    proj.set.ck_ch = 1; /* round-trip the newly allowed value */
     proj.sound.v[T_303][1][0] = 1;
     engine_bass_sound_refresh(&proj.sound, 1); /* changed macro also updates its revision-13 identity */
     for (p = 0; p < NPAT; p++) {
@@ -372,7 +372,7 @@ static void test_semantic_rejection(void)
         BAD8(set.palette, 6), BAD8(set.keyled, 3), BAD8(set.clk_out, 2), BAD8(set.notes_out, 2),
         BAD16(set.bpm_x10, 199), BAD16(set.bpm_x10, 2751), BAD8(set.accent_q7, 128),
         BAD8(set.keysound, 2), BAD8(set.autosave_off, 2), BAD8(set.out_loud, 2), BAD8(set.usb_full, 2),
-        BAD8(set.bt, 0), BAD8(set.bt, 0xC8), BAD8(set.bt, 14), BAD8(set.ck_ch, 1),
+        BAD8(set.bt, 0), BAD8(set.bt, 0xC8), BAD8(set.bt, 14), BAD8(set.ck_ch, 0), BAD8(set.ck_ch, 16),
         BAD8(set.ck_root, 12), BAD8(set.ck_rate, 13), BAD8(set.midi_ch[4], 18),
         BAD8(pat[31].swing, 101), BAD8(pat[31].drum[1].len, 0), BAD8(pat[31].drum[1].len, 65),
         BAD8(pat[31].drum[1].rate, NRATES), BAD8(pat[31].bass[1].len, 0),

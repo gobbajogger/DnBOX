@@ -614,7 +614,7 @@ static int project_validate_for(const project_t *p)
         s->notes_out > 1 || s->bpm_x10 < 200 || s->bpm_x10 > 2750 || s->accent_q7 > 127 ||
         s->keysound > 1 || s->autosave_off > 1 || s->out_loud > 1 || s->usb_full > 1 ||
         (s->bt & 0xC0u) || !(s->bt & PROJ_BT_CLK_IN) || PROJ_CLK_SRC(s->bt) > SEQ_CLK_EXT ||
-        s->ck_ch < 2)
+        !s->ck_ch)
         return -1;
     for (i = 0; i < 12; i++)
         if ((&s->ck_ch)[i] > CK_MAX[i])

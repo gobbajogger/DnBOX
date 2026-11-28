@@ -456,6 +456,7 @@ run sample-header-alignment python3 -B tests/host/sample_header_alignment_test.p
 run editor-diagnostic-count python3 -B tests/host/editor_diagnostic_count_test.py
 run storage-scratch sh tests/host/run_storage_scratch.sh
 run project-stage sh tests/host/run_project_stage.sh
+run ui-clip-channel1 sh tests/host/ui_clip_channel1_test.sh
 run pattern-preset-notelock sh tests/host/pattern_preset_notelock_test.sh build/pattern-preset-notelock
 if [ "$PIL_SKIP" = 1 ]; then not_run project-runtime Pillow; else run project-runtime sh tests/host/project_runtime_test.sh; fi
 if [ "$PIL_SKIP" = 1 ]; then not_run save-note-quiet Pillow; else run save-note-quiet sh tests/host/save_note_quiet_test.sh; fi

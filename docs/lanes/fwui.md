@@ -1,5 +1,11 @@
 # Firmware UI lane
 
+## Clip Keys channel 1 (branch qualification)
+
+GLO > MIDI > CLIP KEYS CH accepts 1–15 and still defaults to 2. Selecting 1 shows a 2.7-second Loopy Pro collision notice; a warning triangle stays beside the value. Channel 16 remains excluded. The project field uses the existing layout; projects saved with channel 1 are not accepted by earlier strict readers, so save with channel 2 before downgrading. APC40 output mappings are unchanged.
+
+The menu and RGB565 warning pixels pass `ui-clip-channel1`. `project-stage` passes 26,884 checks including channel 1 save/load and validation; invalid channels 0 and 16 remain rejected. `smk-clip-knob` observes channel 1 note-on and old-channel note-off after switching over both USB and Bluetooth. `smk-clip-isolation` passes. Elite/Pro linked and packaged with 2,664/2,676 B app flash free and 512 B each above the unchanged pool reserve. This is branch qualification, not physical Loopy, independent merge review, or release qualification.
+
 FWUI [#998](https://github.com/gobbajogger/DnBOX/pull/998) merged at `ca6c5cb443e6696616dd6d1745b2fdce13617532` after independent 10/10 review and both stock builds; [exact proof](https://github.com/gobbajogger/DnBOX/pull/998#issuecomment-7088568528).
 
 ## Keyboard controls after #975
