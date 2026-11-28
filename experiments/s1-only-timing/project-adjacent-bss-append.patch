@@ -1,0 +1,70 @@
+--- a/firmware/app.ld
++++ b/firmware/app.ld
+@@ -49,7 +49,7 @@
+     .data : { . = ALIGN(4); _data_start = .; KEEP(*(.bss.fm1_c1_mb)) *(.data*) *(.sdata*) . = ALIGN(4); _data_end = .; } > RAM AT > XIP
+     _data_load = LOADADDR(.data);
+     .c1stack (NOLOAD) : { *(.bss.c1stack) } > C1STK
+-    .bss (NOLOAD) : { _bss_start = .; *(.bss*) *(.sbss*) *(COMMON) . = ALIGN(4); _bss_end = .; } > RAM
++    .bss (NOLOAD) : { _bss_start = .; *(.bss*) *(.sbss*) *(COMMON) . = ALIGN(4); *(.app_bss_slack*) . = ALIGN(4); _bss_end = .; } > RAM
+     .pool (NOLOAD) : { _pool_start = .; *(.pool*) . = ALIGN(4); _pool_end = .; } > POOL
+     .xpool (NOLOAD) : { _xpool_start = .; *(.xpool*) . = ALIGN(4); _xpool_end = .; } > XPOOL
+     .noinit (NOLOAD) : { *(.noinit*) } > NOINIT
+--- a/firmware/src/dsp/breaks.c
++++ b/firmware/src/dsp/breaks.c
+@@ -202,8 +202,10 @@
+ #endif
+ 
+ #if !defined(X0X_HOST)
+-/* Immutable spare snapshots use pool; native qualification must retain the 8 KiB floor. */
+-static brk_bank_t brk_side[2] X0X_POOL;
++/* Two unchanged spare snapshots. The first uses already-reserved ordinary
++ * app BSS slack; each remains a distinct, non-moving published bank. */
++static brk_bank_t brk_side_bss __attribute__((section(".app_bss_slack")));
++static brk_bank_t brk_side_pool X0X_POOL;
+ #endif
+ 
+ /* Set/drop path only — breaks_bank uses brk_side_slot_c (X0X_COLD) */
+@@ -213,7 +215,7 @@
+     return &b->side[j];
+ #else
+     (void)b;
+-    return &brk_side[j];
++    return j ? &brk_side_pool : &brk_side_bss;
+ #endif
+ }
+ __attribute__((noinline)) static const brk_bank_t *brk_side_slot_c(const breaks_t *b, unsigned j)
+@@ -222,7 +224,7 @@
+     return &b->side[j];
+ #else
+     (void)b;
+-    return &brk_side[j];
++    return j ? &brk_side_pool : &brk_side_bss;
+ #endif
+ }
+ 
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -377,9 +377,9 @@
+ static uint8_t kbd_held_key[NBASS];                  /* physical key + 1; survives octave and part changes */
+ /* Original owners receive each physical key, independently of native voice allocation. */
+ #define UI_BASS_HELD_MAX 37u
+-static uint8_t kbd_arp_key[NBASS][UI_BASS_HELD_MAX] X0X_POOL;     /* physical key + 1 */
+-static uint8_t kbd_arp_note[NBASS][UI_BASS_HELD_MAX] X0X_POOL;
+-static uint8_t kbd_arp_n[NBASS] X0X_POOL;
++static uint8_t kbd_arp_key[NBASS][UI_BASS_HELD_MAX] __attribute__((section(".app_bss_slack")));     /* physical key + 1 */
++static uint8_t kbd_arp_note[NBASS][UI_BASS_HELD_MAX] __attribute__((section(".app_bss_slack")));
++static uint8_t kbd_arp_n[NBASS] __attribute__((section(".app_bss_slack")));
+ static int chi_arp_on_part(int b)
+ {
+     (void)b; return 0; /* native owner receives every key; no external ARP */
+@@ -4935,8 +4935,8 @@
+     uint8_t pitch[37],accent[37],down[37],order[37],n;
+     uint64_t suppressed;
+ } ui_live_keys_t;
+-static ui_live_keys_t live_keys[NBASS] X0X_POOL;
+-static plat_outer_event_t live_outer[32] X0X_POOL;
++static ui_live_keys_t live_keys[NBASS] __attribute__((section(".app_bss_slack")));
++static plat_outer_event_t live_outer[32] __attribute__((section(".app_bss_slack")));
+ static uint32_t live_epoch=1,live_generation,live_context,live_intent_generation[NBASS];
+ static int8_t live_owner=-1,live_octave,live_arp;
+ static uint8_t live_release_only;

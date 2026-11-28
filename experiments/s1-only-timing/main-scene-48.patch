@@ -1,0 +1,222 @@
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -7656,24 +7656,24 @@
+ #endif
+ /* WAVE page: mid-line plot of eng_scope (post-master L+R). Latch ≤10 Hz; skip if shape/write
+  * index unchanged so SPI stays calm (Baud Girl FM-1+VA scope policy). No second audio tap. */
+-static UI_DRAW void draw_master_wave(void)
++static int16_t wave_latched[SCOPE_N];
++static uint8_t wave_flat;
++static void cv_latch_master_wave(void)
+ {
+-    enum { X0=8,W=188,MID=34,AMP=26 };
+-    static int16_t latched[SCOPE_N];
+     static uint32_t last_ms, last_w, last_hash;
+-    static uint8_t have, flat;
++    static uint8_t have;
+     uint32_t now = plat_ms(), w = eng_scope_w, h, base;
+-    int i, x, y0, y1;
++    int i;
+     if (!have || (int32_t)(now - last_ms) >= 100) {
+         base = w;
+         h = 2166136261u;
+         for (i = 0; i < (int)SCOPE_N; i++)
+             h = (h ^ (uint32_t)(uint16_t)eng_scope[(base + (uint32_t)i) & (SCOPE_N - 1u)]) * 16777619u;
+         if (!have || h != last_hash || w != last_w) {
+-            flat = 1;
++            wave_flat = 1;
+             for (i = 0; i < (int)SCOPE_N; i++) {
+-                latched[i] = eng_scope[(base + (uint32_t)i) & (SCOPE_N - 1u)];
+-                if (latched[i]) flat = 0;
++                wave_latched[i] = eng_scope[(base + (uint32_t)i) & (SCOPE_N - 1u)];
++                if (wave_latched[i]) wave_flat = 0;
+             }
+             last_hash = h;
+             last_w = w;
+@@ -7681,30 +7681,44 @@
+         }
+         last_ms = now;
+     }
+-    night_panel(3,1,198,66,0);
+-    cv_rect(X0,MID,W,1,C_LINE);
+-    if (flat) {
++}
++
++static UI_DRAW void cv_paint_master_wave(uint16_t line,uint16_t part,uint16_t face,uint16_t edge,uint16_t side)
++{
++    enum { X0=8,W=188,MID=34,AMP=26 };
++    int x,y0,y1;
++    surface_panel(3,1,198,66,0,face,edge,side);
++    cv_rect(X0,MID,W,1,line);
++    if (wave_flat) {
+         /* Same inclusive horizontal pixels as 187 adjacent one-pixel spans. */
+-        cv_line(X0, MID, X0 + W - 1, MID, part_col());
++        cv_line(X0, MID, X0 + W - 1, MID, part);
+         return;
+     }
+-    y0 = MID - (int)latched[0] * AMP / 32768;
++    y0 = MID - (int)wave_latched[0] * AMP / 32768;
+     if (y0 < 2)
+         y0 = 2;
+     if (y0 > BAND_H - 3)
+         y0 = BAND_H - 3;
+     for (x = 1; x < W; x++) {
+         int si = x * (int)SCOPE_N / W;
+-        y1 = MID - (int)latched[si] * AMP / 32768;
++        y1 = MID - (int)wave_latched[si] * AMP / 32768;
+         if (y1 < 2)
+             y1 = 2;
+         if (y1 > BAND_H - 3)
+             y1 = BAND_H - 3;
+-        cv_line(X0 + x - 1, y0, X0 + x, y1, part_col());
++        cv_line(X0 + x - 1, y0, X0 + x, y1, part);
+         y0 = y1;
+     }
+ }
+ 
++#if !X0X_UI_SMALL_CANVAS
++static UI_DRAW void draw_master_wave(void)
++{
++    cv_latch_master_wave();
++    cv_paint_master_wave(C_LINE,part_col(),SOUND_FACE,SOUND_EDGE,SOUND_SIDE);
++}
++#endif
++
+ #if X0X_UI_SMALL_CANVAS
+ enum { CV_MIX_PARTS, CV_MIX_909, CV_MIX_808, CV_MIX_MASTER, CV_MIX_WAVE };
+ typedef struct {
+@@ -7727,6 +7741,25 @@
+     } body;
+ } cv_mix_scene;
+ 
++enum { CV_MIX_HIST_N = 98 };
++static uint8_t cv_mix_hist[CV_MIX_HIST_N];
++static void cv_latch_mix_master(void)
++{
++    static uint32_t hw, hist_ms;
++    static uint16_t peak_hold;
++    uint32_t now = plat_ms();
++    unsigned pk = 0;
++    for (unsigned p=0;p<NPARTS;p++)
++        if (eng_peak[p]>pk) pk=eng_peak[p];
++    if (pk>peak_hold) peak_hold=(uint16_t)pk;
++    if (!hist_ms || (int32_t)(now-hist_ms)>=20) {
++        cv_mix_hist[hw % CV_MIX_HIST_N]=(uint8_t)(peak_hold*62/32768);
++        ++hw;
++        peak_hold=0;
++        hist_ms=now;
++    }
++}
++
+ static void cv_capture_mix(cv_mix_scene *s)
+ {
+     s->bg=C_BLACK; s->white=C_WHITE; s->gray=C_GRAY; s->dim=C_DIM;
+@@ -7758,6 +7791,8 @@
+     s->route=page==MIX_FIRST_KIT_PAGE+NKIT?CV_MIX_MASTER:page>MIX_FIRST_KIT_PAGE+NKIT?CV_MIX_WAVE:CV_MIX_PARTS;
+     s->body.main.gr=engine_gr_db(); s->body.main.cpu=plat_cpu_pct();
+     s->body.main.guard=(uint8_t)!!engine_guard_active();
++    if (s->route==CV_MIX_MASTER) cv_latch_mix_master();
++    if (s->route==CV_MIX_WAVE) cv_latch_master_wave();
+     if (s->route==CV_MIX_PARTS) {
+         /* part_display/part_s resolve to immutable literals even if engines change. */
+         mix_strip_names(s->body.main.names);
+@@ -7805,34 +7840,11 @@
+     }
+     const int master=s->route==CV_MIX_MASTER,wave=s->route==CV_MIX_WAVE;
+     int p;
+-    /* MASTER and WAVE latches execute only once in the frame, prior to any DMA. */
+-    /* MASTER peak history: fixed 98 columns. A scrolling ring rewrote every column each
+-     * frame, so cv_commit_rect sent nearly the whole main band (~18 ms SPI) — panel tear
+-     * ("broken" hist) and knob-strip lag (draw_knobs waits on that blit). Write-head
+-     * overwrite + wall-clock sample keeps geometry stable and dirties ~one column. */
+-    if (band == 0 && master) {
+-        enum { HIST_N = 98, HIST_MS = 20 };             /* ~2 s window; never shrink width */
+-        static uint8_t hist[HIST_N];
+-        static uint32_t hw, hist_ms;                    /* hw was uint8_t: ring broke every 256 */
+-        static uint16_t peak_hold;
+-        int x, pk = 0;
+-        uint32_t now = plat_ms();
+-        for (p = 0; p < NPARTS; p++)
+-            pk = eng_peak[p] > pk ? eng_peak[p] : pk;
+-        if ((uint16_t)pk > peak_hold)
+-            peak_hold = (uint16_t)pk;
+-        if (!hist_ms || (int32_t)(now - hist_ms) >= HIST_MS) {
+-            hist[hw % (uint32_t)HIST_N] = (uint8_t)(peak_hold * 62 / 32768);
+-            hw++;
+-            peak_hold = 0;
+-            hist_ms = now;                             /* one column per paint when overdue */
+-        }
+-        for (x = 0; x < HIST_N; x++) {
+-            int h = hist[x];
+-            cv_rect(4 + x * 2, 66 - h, 2, h + 1, s->part);
+-        }
++    if (!band && master) for (int x=0;x<CV_MIX_HIST_N;x++) {
++        int h=cv_mix_hist[x];
++        cv_rect(4+x*2,66-h,2,h+1,s->part);
+     }
+-    if (!band && wave) draw_master_wave();
++    if (!band && wave) cv_paint_master_wave(s->line,s->part,s->face,s->edge,s->side);
+     if (!band && !master && !wave) {
+         for (int pos=0;pos<NPARTS;++pos) {
+             p=part_at(pos);
+@@ -8882,14 +8894,22 @@
+ static UI_DRAW void cv_draw_pair(uint16_t bg,const void *scene,
+                                   void (*paint)(int,const void *),const cv_readout_scene *note)
+ {
+-    for(unsigned page=0;page<2u;++page) {
+-        cv_window(240,MAIN_ROWS,page*BAND_H,BAND_H,bg);
++    enum { SLICE = 3u * X0X_LCD_TILE_H };
++    for (unsigned page=0;page<2u;++page) for (unsigned row=0;row<BAND_H;row+=SLICE) {
++        const unsigned rows=BAND_H-row>SLICE ? SLICE : BAND_H-row;
++        cv_window(240,MAIN_ROWS,page*BAND_H+row,rows,bg);
+         cv_band((int)page*BAND_H,BAND_H);
+         paint((int)page,scene);
+-        if(page && note) draw_readout_scene(note);
+-        cv_commit_main_band(page);
++        if (page && note) draw_readout_scene(note);
++        cv_commit_main_window(page,row,rows);
+     }
+ }
++static void cv_paint_modal(int band,const void *scene)
++{
++    const cv_modal_scene *modal=scene;
++    if (modal->route==1) draw_help(band,modal);
++    else draw_ask(band,modal);
++}
+ static UI_DRAW const cv_readout_scene *cv_pair_readout(cv_readout_scene *note,
+                                                          int eligible)
+ {
+@@ -8969,7 +8989,11 @@
+     }
+     cv_modal_scene modal;
+     cv_capture_modal(&modal);
+-    if (!modal.route && ui.overlay == O_LIST) {
++    if (modal.route) {
++        cv_draw_pair(modal.bg,&modal,cv_paint_modal,NULL);
++        return;
++    }
++    if (ui.overlay == O_LIST) {
+         draw_list_once();
+         return;
+     }
+@@ -9032,18 +9056,10 @@
+ #endif
+     for (band = 0; band < 2; band++) {
+ #if X0X_UI_SMALL_CANVAS
+-        cv_window(240, MAIN_ROWS, (uint32_t)band * BAND_H, BAND_H,
+-                  modal.route ? modal.bg : C_BLACK);
++        cv_window(240, MAIN_ROWS, (uint32_t)band * BAND_H, BAND_H, C_BLACK);
+ #endif
+         cv_band(band * BAND_H, BAND_H);
+-#if X0X_UI_SMALL_CANVAS
+-        if (modal.route) {
+-            if (modal.route == 1) draw_help(band, &modal);
+-            else draw_ask(band, &modal);
+-            cv_commit_main_band((unsigned)band);
+-            continue;
+-        }
+-#else
++#if !X0X_UI_SMALL_CANVAS
+         if (ui.help)
+             draw_help(band);
+         else if (ui.overlay == O_ASK)

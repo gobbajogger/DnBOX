@@ -1,0 +1,17 @@
+--- a/firmware/src/app/main_fm1.c
++++ b/firmware/src/app/main_fm1.c
+@@ -2038,11 +2038,11 @@
+     };
+ #if X0X_UI_SMALL_CANVAS
+     if (force & 2u) {
+-        /* 63 rows is an exact 3-row full-width DMA boundary. */
++        /* 48 rows is an exact 3-row full-width DMA boundary. */
+         blit_hash[2]=1u;
+         cv_tile_valid[2]=0;
+-        for (unsigned offset=0;offset<82u;offset+=63u) {
+-            cv_window(240,82,offset,63,scene.black);
++        for (unsigned offset=0;offset<82u;offset+=48u) {
++            cv_window(240,82,offset,48,scene.black);
+             ck_panel_paint(&scene);
+             cv_lcd_full(0,KNOB_Y+offset);
+         }

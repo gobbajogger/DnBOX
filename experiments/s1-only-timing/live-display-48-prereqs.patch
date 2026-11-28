@@ -1,0 +1,78 @@
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -8359,7 +8359,7 @@
+ 
+ /* Lists share the body with the lower controls, except for full PART editors. */
+ #if X0X_UI_SMALL_CANVAS
+-enum { LIST_OP_MAX=166, LIST_TEXT_MAX=54, LIST_TEXT_BYTES=44, LIST_SLICE=3u*X0X_LCD_TILE_H, LIST_RASTER=240*LIST_SLICE };
++enum { LIST_OP_MAX=166, LIST_TEXT_MAX=54, LIST_TEXT_BYTES=44, LIST_SLICE=2u*X0X_LCD_TILE_H, LIST_RASTER=240*LIST_SLICE };
+ enum { LO_RECT, LO_BOX, LO_LINE, LO_PANEL, LO_ICON, LO_TOGGLE, LO_TEXT, LO_CLIP };
+ typedef struct { int16_t x,y,a,b; uint16_t ink,edge; uint8_t kind,z,font,text; } cv_list_op;
+ /* At most nine visible rows plus a row crossing each logical seam.
+@@ -8836,12 +8836,14 @@
+ {
+     /* The first transfer services input and can change the palette. */
+     const uint16_t bg = C_BLACK, fg = C_WHITE, muted = C_GRAY;
+-    for (unsigned page = 0; page < 2u; ++page) {
+-        cv_window(240, MAIN_ROWS, page * BAND_H, BAND_H, bg);
++    for (unsigned page=0;page<2u;++page) for(unsigned off=0;off<BAND_H;off+=48u) {
++        unsigned rows=BAND_H-off;
++        if(rows>48u)rows=48u;
++        cv_window(240,MAIN_ROWS,page*BAND_H+off,rows,bg);
+         text_c(120, 34, &FONT_B, "WAITING FOR", fg);
+         text_c(120, 56, &FONT_B, "LOOPY PRO", fg);
+         text_c(120, 86, &FONT_XS, "USB OR BLUETOOTH", muted);
+-        cv_commit_main_band(page);
++        cv_commit_main_window(page,off,rows);
+     }
+ }
+ #endif
+@@ -8981,7 +8983,7 @@
+         cv_capture_s1_telemetry(&telemetry,(unsigned)bidx());
+         const int force=cv_claim_scene_footer();
+         cv_draw_pair(bg,&telemetry,cv_paint_s1_matrix,NULL);
+-        cv_draw_scene_footer(bg,&telemetry,cv_paint_s1_matrix,force,4u*X0X_LCD_TILE_H);
++        cv_draw_scene_footer(bg,&telemetry,cv_paint_s1_matrix,force,3u*X0X_LCD_TILE_H);
+         return;
+     }
+ #endif
+--- a/firmware/src/app/ui_drum_voice.inc
++++ b/firmware/src/app/ui_drum_voice.inc
+@@ -1166,7 +1166,7 @@
+     if(!dv_capture(&z))return 0;
+     int force=cv_claim_scene_footer();
+     cv_draw_pair(z.ink.bg,&z,dv_paint_frame,0);
+-    cv_draw_scene_footer(z.ink.bg,&z,dv_paint_frame,force,4u*X0X_LCD_TILE_H);
++    cv_draw_scene_footer(z.ink.bg,&z,dv_paint_frame,force,3u*X0X_LCD_TILE_H);
+     return 1;
+ }
+ #endif
+--- a/firmware/src/app/smc_mixer.c
++++ b/firmware/src/app/smc_mixer.c
+@@ -1076,7 +1076,7 @@
+     uint8_t x,y,a,b,kind,bipolar,text,font;
+ } smc_grid_op;
+ typedef struct { unsigned n, nt; uint16_t black; uint8_t bad; } smc_grid_scene;
+-enum { SMC_GRID_OPS=217, SMC_GRID_TEXTS=64, SMC_GRID_SLICE=48, SMC_GRID_RASTER=240*SMC_GRID_SLICE };
++enum { SMC_GRID_OPS=217, SMC_GRID_TEXTS=64, SMC_GRID_SLICE=32, SMC_GRID_RASTER=240*SMC_GRID_SLICE };
+ _Static_assert(SMC_GRID_SLICE % X0X_LCD_TILE_H == 0, "SMC raster seam must preserve dirty-tile coordinates");
+ _Static_assert(sizeof(smc_grid_op)==16, "SMC opcode ABI");
+ _Static_assert(2u*SMC_GRID_RASTER+SMC_GRID_OPS*sizeof(smc_grid_op)+32u*SMC_GRID_TEXTS<=sizeof cv_px,"SMC tape in canvas tail");
+@@ -1243,7 +1243,7 @@
+             memcpy(&op,smc_grid_storage()+i*sizeof(op),sizeof(op));
+             switch(op.kind) {
+             case 0: cv_rect(op.x,op.y,op.a,op.b,op.c); break;
+-            case 1: if (!band && !off) arc(op.x,op.y,op.a,op.v,op.c,op.fill,op.bipolar); break;
++            case 1: if (!band && off<48u) arc(op.x,op.y,op.a,op.v,op.c,op.fill,op.bipolar); break;
+             case 2: ui_pictogram(op.x,op.y,op.a,op.b,op.c); break;
+             case 3: text_c(op.x,op.y,op.font?&FONT_XS:&FONT_T,smc_grid_string(op.text),op.c); break;
+             }
+@@ -1479,7 +1479,7 @@
+ static void smc_footer_commit(const smc_footer *f)
+ {
+ #if X0X_UI_SMALL_CANVAS
+-    enum { SLICE = 64 };
++    enum { SLICE = 48 };
+     _Static_assert(SLICE % X0X_LCD_TILE_H == 0, "SMC footer seam must preserve tile rows");
+     const int force = !blit_hash[3] || !cv_tile_valid[3];
+     blit_hash[3] = 1;

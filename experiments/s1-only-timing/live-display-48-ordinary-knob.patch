@@ -1,0 +1,311 @@
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -10169,6 +10169,20 @@
+     tape_glyph_running = active;
+ }
+ static uint8_t tempo_glyph_view; /* latched once for signature + complete knob strip */
++#if X0X_UI_SMALL_CANVAS
++/* Store only semantic inputs for the portion below row 47. No raster spill. */
++enum { KT_NONE,KT_LINE,KT_TAPE,KT_TIMES,KT_SCALE,KT_COMP };
++typedef struct { uint16_t col; uint8_t type,val,rat,mix,threshold; } knob_tail_glyph;
++static knob_tail_glyph *knob_tail_target;
++static void knob_tail_note(unsigned type,int val,uint16_t col)
++{
++    knob_tail_glyph *const g=knob_tail_target;
++    if (g) { g->type=(uint8_t)type;g->val=(uint8_t)val;g->col=col; }
++}
++#else
++#define knob_tail_note(type,val,col) ((void)0)
++#endif
++
+ static UI_DRAW int perform_glyph(pref_t r,int val,int cx,uint16_t col)
+ {
+     if(r.kind==R_TEMPO) {
+@@ -10190,6 +10204,7 @@
+         cv_line(cx-18,31,cx-9,31,col);cv_line(cx-9,31,cx-6,31+depth,col);
+         cv_line(cx-6,31+depth,cx+15,31,col);cv_rect(cx+15,31,4,1,col);
+         cv_rect(cx-18,48,37,1,C_LINE);
++        knob_tail_note(KT_LINE,0,col);
+     } else return 0;
+     return 1;
+ }
+@@ -10207,32 +10222,45 @@
+  /* Ratio and Blend shape, normalized before Makeup, not measured signal or PUMP. */
+  return input+6.0205999f*fm_log2f(1.0f+(fm_db2lin(-gr)-1.0f)*mix/127.0f);
+ }
+-static UI_DRAW int semantic_amount_glyph(pref_t r,int val,int cx,uint16_t col)
++static UI_DRAW void paint_comp_glyph(int cx,uint16_t col,unsigned ratio,int mix,int threshold)
+ {
+- const x0x_param_t *d=pref_desc(r);int q=d&&d->max?(val*127+d->max/2)/d->max:0,left=cx-18;
+- if(r.kind==R_ENG && r.a==T_MST && r.c==MST_COMP1) {
+ #if X0X_UI_SMALL_CANVAS
+   const float *ratios=x0x_master_ratios;
+ #else
+   static const float ratios[]={1,1.5f,2,3,4,6,8,12,20,1e6f};
+ #endif
+-  int py=48, ratio=engine_master_get(MST_RATIO), mix=engine_master_get(MST_MIX);
+-  float t=-48.0f+48.0f*engine_master_get(MST_THRESH)/127.0f, slope=1.0f-1.0f/ratios[(unsigned)ratio<10u?ratio:0];
++  int left=cx-18,py=48;
++  float t=-48.0f+48.0f*threshold/127.0f, slope=1.0f-1.0f/ratios[ratio<10u?ratio:0];
+   cv_line(left,48,cx+18,28,C_LINE);
+   for(int i=1;i<=36;i++) {
+    float input=-48.0f+48.0f*i/36.0f;
+    int y=48-(int)((comp_glyph_output(input-t,slope,mix,input)+48)*20/48+0.5f);
+-   cv_line(left+i-1,py,left+i,y,col);py=y;
++   if(y+cv_oy>=cv_y0||py+cv_oy>=cv_y0)cv_line(left+i-1,py,left+i,y,col);
++   py=y;
++  }
++}
++
++static UI_DRAW int semantic_amount_glyph(pref_t r,int val,int cx,uint16_t col)
++{
++ const x0x_param_t *d=pref_desc(r);int q=d&&d->max?(val*127+d->max/2)/d->max:0,left=cx-18;
++ if(r.kind==R_ENG && r.a==T_MST && r.c==MST_COMP1) {
++  int ratio=engine_master_get(MST_RATIO), mix=engine_master_get(MST_MIX), threshold=engine_master_get(MST_THRESH);
++#if X0X_UI_SMALL_CANVAS
++  if(knob_tail_target) {
++      knob_tail_note(KT_COMP,0,col);
++      knob_tail_target->rat=ratio;knob_tail_target->mix=mix;knob_tail_target->threshold=threshold;
+   }
++#endif
++  paint_comp_glyph(cx,col,(unsigned)ratio,mix,threshold);
+  } else if(r.kind==R_ENG && r.a==T_FX && r.c==FX_DL_FDBK) {
+   float amp=10,feedback=(pref_get(PR(R_ENG,T_FX,0,FX_DL_TYPE))?1.15f:0.85f)*q/127.0f;
+   for(int j=0;j<4;j++) {int h=(int)(amp+0.5f);if(h)cv_rect(left+3+j*10,47-h,2,h,col);amp*=feedback;}
+-  cv_rect(left,48,37,1,C_LINE);
++  cv_rect(left,48,37,1,C_LINE);knob_tail_note(KT_LINE,0,col);
+  } else if(r.kind==R_SREP) {
+   for(int j=0;j<8;j++)cv_rect(left+j*5,34,3,9,j<=val?col:C_LINE);
+  } else if(r.kind==R_ENG && ((r.a==T_FX && (r.c==FX_RV_LEVEL || r.c==FX_DL_LEVEL)) || (r.a==T_MIX && (r.c==MX_REV || r.c==MX_DLY)) || name_is(d,"Rev") || name_is(d,"Dly"))) {
+   int delay=(r.a==T_FX && r.c==FX_DL_LEVEL)||(r.a==T_MIX && r.c==MX_DLY)||name_is(d,"Dly");
+-  cv_rect(left,48,37,1,C_LINE);
++  cv_rect(left,48,37,1,C_LINE);knob_tail_note(KT_LINE,0,col);
+   if(delay)for(int j=0;j<4;j++){int h=((16-j*3)*q+126)/127;if(h)cv_rect(left+3+j*10,47-h,2,h,col);}
+   else for(int j=0;j<7;j++){int h=((2+j*2)*q+126)/127;if(h)cv_rect(left+j*6,38-h/2,2,h,col);}
+  } else return 0;
+@@ -10269,17 +10297,17 @@
+   static const int gap[13]={2,3,4,4,5,5,6,6,7,8,8,9,10};int g=gap[val<13?val:0];
+   cv_rect(l,48,37,1,C_LINE);cv_rect(l,29,2,18,col);
+   for(int x=l+g;x<=cx+18;x+=g)cv_rect(x,35,1,12,col);
+-  cv_line(l,50,l+g,50,col);
++  cv_line(l,50,l+g,50,col);knob_tail_note(KT_TIMES,g,col);
+  }else if(r.kind==R_ENG&&r.a==T_FX&&r.c==FX_RV_DECAY){
+   float a=18,fb=.2f+.73f*q/127;
+-  cv_rect(l,48,37,1,C_LINE);
++  cv_rect(l,48,37,1,C_LINE);knob_tail_note(KT_LINE,0,col);
+   for(int j=0;j<7;j++){int h=(int)(a+.5f);if(h)cv_rect(l+j*6,47-h,2,h,col);a*=fb;}
+  }else if(r.kind==R_SPAT||r.kind==R_BRKSLOT||r.kind==R_SBAR){
+   if(r.kind==R_BRKSLOT)loop_identity_glyph(engine_brk_nslots(),val,cx,col);
+   else glyph_identity(d->max+1,val,l,col);
+  }else if(r.kind==R_TAPE){
+   if(val<16){cv_line(l,43,l+8,43,col);cv_line(l+8,43,l+8,33,col);cv_line(l+8,33,l+18,33,col);cv_line(l+18,33,l+18,43,col);cv_line(l+18,43,l+28,43,col);cv_line(l+28,43,l+28,33,col);cv_line(l+28,33,l+36,33,col);}
+-  else{for(int s=-1;s<=1;s+=2){int x=cx+s*10;disc((float)x+0.5f,37.5f,7.0f,C_LINE);disc((float)x+0.5f,37.5f,5.0f,SOUND_FACE);cv_rect(x-1,36,3,3,col);static const int8_t dx[16]={0,2,3,4,4,4,3,2,0,-2,-3,-4,-4,-4,-3,-2};static const int8_t dy[16]={-4,-4,-3,-2,0,2,3,4,4,4,3,2,0,-2,-3,-4};cv_line(x,37,x+dx[tape_glyph_phase],37+dy[tape_glyph_phase],col);}cv_rect(l+2,48,33,1,C_LINE);int wear=(val-16)*32/111;cv_rect(l+2,47,1+wear,2,col);}
++  else{for(int s=-1;s<=1;s+=2){int x=cx+s*10;disc((float)x+0.5f,37.5f,7.0f,C_LINE);disc((float)x+0.5f,37.5f,5.0f,SOUND_FACE);cv_rect(x-1,36,3,3,col);static const int8_t dx[16]={0,2,3,4,4,4,3,2,0,-2,-3,-4,-4,-4,-3,-2};static const int8_t dy[16]={-4,-4,-3,-2,0,2,3,4,4,4,3,2,0,-2,-3,-4};cv_line(x,37,x+dx[tape_glyph_phase],37+dy[tape_glyph_phase],col);}cv_rect(l+2,48,33,1,C_LINE);int wear=(val-16)*32/111;cv_rect(l+2,47,1+wear,2,col);knob_tail_note(KT_TAPE,wear,col);}
+  }else if(r.kind==R_ENG&&r.a==T_FX&&r.c==FX_DRIVE){
+   drive_amount_glyph(val,cx,col);
+  }else return 0;return 1;
+@@ -10332,7 +10360,7 @@
+             cv_rect(left+j*6,47-h,3,h,q && j*127/6<=q?col:C_LINE);
+         }
+         int at=left+q*36/127;
+-        cv_rect(left,49,37,1,C_LINE);cv_rect(at,48,1,3,col);
++        cv_rect(left,49,37,1,C_LINE);cv_rect(at,48,1,3,col);knob_tail_note(KT_SCALE,q,col);
+     }
+     return 1;
+ }
+@@ -11088,7 +11116,7 @@
+ #include "ui_break_layout_controls.h"
+ 
+ #if X0X_UI_SMALL_CANVAS
+-enum { ORDINARY_KNOB_FIRST=64 };
++enum { ORDINARY_KNOB_FIRST=48, LEGACY_KNOB_FIRST=64 };
+ _Static_assert(ORDINARY_KNOB_FIRST % X0X_LCD_TILE_H == 0, "keep footer tile seams");
+ typedef struct {
+     uint16_t palette[5], bg;
+@@ -11100,10 +11128,12 @@
+         uint16_t ink;
+         uint8_t painter;
+     } cells[4];
++    knob_tail_glyph glyphs[4];
++    break_control_tail break_cells[4];
+     step_lane_scene_t steps;
+     break_footer_scene_t breaks;
+ } ordinary_knob_scene_t;
+-enum { KV_NONE,KV_ORIGINAL,KV_NORMAL,KV_PUMP };
++enum { KV_NONE,KV_ORIGINAL,KV_NORMAL,KV_PUMP,KV_BIG };
+ 
+ static void ordinary_knob_panel(int mix)
+ {
+@@ -11112,7 +11142,8 @@
+ }
+ static void ordinary_knob_value(int cx,unsigned painter,const char *num,const char *unit,uint16_t ink)
+ {
+-    if(painter==KV_ORIGINAL) original_cell_value(cx,vc(&FONT_B,53,13),num,unit,ink);
++    if(painter==KV_BIG) text_c(cx,vc(&FONT_M,30,34),&FONT_M,num,ink);
++    else if(painter==KV_ORIGINAL) original_cell_value(cx,vc(&FONT_B,53,13),num,unit,ink);
+     else if(painter) cell_value(cx-(painter==KV_PUMP),vc(&FONT_B,53,13),num,unit,ink);
+ }
+ static void ordinary_knob_tiles(unsigned row,unsigned rows,int force)
+@@ -11144,13 +11175,13 @@
+         sound_step_record=0;
+     }
+     const int force=ordinary_knob_claim();
+-    ordinary_knob_tiles(0,ORDINARY_KNOB_FIRST,force);
++    ordinary_knob_tiles(0,LEGACY_KNOB_FIRST,force);
+ 
+     /* cv_window synchronizes the previous DMA. Its 18-row clear cannot
+      * touch the five staged rows at the end of the previous raster. */
+-    cv_window(240,KNOB_H,ORDINARY_KNOB_FIRST,KNOB_H-ORDINARY_KNOB_FIRST,bg);
+-    memcpy(cv_px,cv_px+240u*ORDINARY_KNOB_FIRST,
+-        (MATRIX_ROWS-ORDINARY_KNOB_FIRST)*240u*sizeof(*cv_px));
++    cv_window(240,KNOB_H,LEGACY_KNOB_FIRST,KNOB_H-LEGACY_KNOB_FIRST,bg);
++    memcpy(cv_px,cv_px+240u*LEGACY_KNOB_FIRST,
++        (MATRIX_ROWS-LEGACY_KNOB_FIRST)*240u*sizeof(*cv_px));
+     if(paint) {
+         const uint8_t light=ui_theme_light;
+         ui_theme_light=initial_light;
+@@ -11158,9 +11189,20 @@
+         sound_step_footer_paint(&steps);
+         ui_theme_light=light;
+     }
+-    ordinary_knob_tiles(ORDINARY_KNOB_FIRST,KNOB_H-ORDINARY_KNOB_FIRST,force);
++    ordinary_knob_tiles(LEGACY_KNOB_FIRST,KNOB_H-LEGACY_KNOB_FIRST,force);
+ }
+ 
++static void paint_ordinary_tail(const knob_tail_glyph *g,int cx)
++{
++    int l=cx-18;
++    switch(g->type) {
++    case KT_LINE: cv_rect(l,48,37,1,C_LINE); break;
++    case KT_TAPE: cv_rect(l+2,48,33,1,C_LINE);cv_rect(l+2,47,1+g->val,2,g->col); break;
++    case KT_TIMES: cv_rect(l,48,37,1,C_LINE);cv_line(l,50,l+g->val,50,g->col); break;
++    case KT_SCALE: cv_rect(l,49,37,1,C_LINE);cv_rect(l+g->val*36/127,48,1,3,g->col); break;
++    case KT_COMP: paint_comp_glyph(cx,g->col,g->rat,g->mix,g->threshold); break;
++    }
++}
+ static UI_DRAW void ordinary_knob_commit(const ordinary_knob_scene_t *s)
+ {
+     const int force=ordinary_knob_claim();
+@@ -11179,9 +11221,10 @@
+         else if(!s->mix) draw_footer();
+         for(int i=0;i<4;i++) {
+             const struct ordinary_value *v=&s->cells[i];
++            paint_ordinary_tail(&s->glyphs[i],i*60+30);
+             ordinary_knob_value(i*60+30,v->painter,v->num,v->unit,v->ink);
+         }
+-    }
++    } else break_layout_control_tail(s->break_cells);
+     step_lane_paint(&s->steps);
+     if(s->is_break) break_footer_paint(&s->breaks);
+     memcpy(pal,saved,sizeof saved); ui_theme_light=light;
+@@ -11263,14 +11306,15 @@
+     cv_begin(240, KNOB_H, C_BLACK);
+ #endif
+     if(ui.part==PART_BRK && (ui.view==V_PART || ui.view==V_SEQ) && ui.overlay==O_NONE && !ui.help) {
+-        break_layout_controls();
+ #if X0X_UI_SMALL_CANVAS
++        break_layout_controls(scene.break_cells);
+         scene.is_break=1;
+         if(ui.view==V_SEQ)step_lane_capture(&scene.steps);
+         break_footer_capture(&scene.breaks);
+         break_footer_paint(&scene.breaks);
+         ordinary_knob_commit(&scene);
+ #else
++        break_layout_controls(0);
+         if(ui.view==V_SEQ)draw_step_lane();
+         break_footer_scene_t breaks;
+         break_footer_capture(&breaks);break_footer_paint(&breaks);
+@@ -11318,6 +11362,11 @@
+             else
+                 put_s(v, (((i == 1 ? held_arp.on_mask : held_arp.oct_mask) >> arp_held) & 1u) ? "ON" : "OFF");
+             text_c(cx, vc(&FONT_XS, 13, 10), &FONT_XS, AN[i], C_GRAY);
++#if X0X_UI_SMALL_CANVAS
++            scene.cells[i].painter=KV_BIG;
++            scene.cells[i].ink=C_WHITE;
++            put_s(scene.cells[i].num,v);
++#endif
+             text_c(cx, vc(&FONT_M, 30, 34), &FONT_M, v, C_WHITE);
+         }
+ #if X0X_UI_SMALL_CANVAS
+@@ -11343,6 +11392,11 @@
+             else
+                 put_s(v, (st->flags & (i == 2 ? BS_ACCENT : BS_SLIDE)) ? "ON" : "OFF");
+             text_c(cx, vc(&FONT_XS, 13, 10), &FONT_XS, SN[i], C_GRAY);
++#if X0X_UI_SMALL_CANVAS
++            scene.cells[i].painter=KV_BIG;
++            scene.cells[i].ink=C_WHITE;
++            put_s(scene.cells[i].num,v);
++#endif
+             text_c(cx, vc(&FONT_M, 30, 34), &FONT_M, v, C_WHITE);
+         }
+ #if X0X_UI_SMALL_CANVAS
+@@ -11386,6 +11440,9 @@
+             if (mv >= 0)
+                 val = mv;
+         }
++#if X0X_UI_SMALL_CANVAS
++        knob_tail_target=&scene.glyphs[i];
++#endif
+         if (mix_kit >= 0 && i == 0) {
+             drum_mix_level(r, val);
+         } else if(perform_glyph(r,val,cx,col) || control_glyph(r,val,cx,col)) {
+@@ -11395,6 +11452,9 @@
+             for (k = 0; k < n; k++)
+                 box(cx - w0 / 2 + k * (pw + gap), 33, pw, 9, k == val ? col : C_LINE);
+         }
++#if X0X_UI_SMALL_CANVAS
++        knob_tail_target=0;
++#endif
+         pref_value_of(r,val,num,unit);
+         if(r.kind==R_ENG && r.a==T_MST && r.c==MST_DJF) {
+             uint8_t mode,cut;int res;filter_display(&mode,&cut,&res);
+--- a/firmware/src/app/ui_break_layout_controls.h
++++ b/firmware/src/app/ui_break_layout_controls.h
+@@ -33,9 +33,22 @@
+     }
+     return 1;
+ }
+-static void break_layout_controls(void)
++static const int16_t break_control_centers[4]={32,90,149,207};
++typedef struct {
++    char num[16],unit[8];
++    uint16_t ink;
++    uint8_t on;
++} break_control_tail;
++#if X0X_UI_SMALL_CANVAS
++static void break_layout_control_tail(const break_control_tail *tail)
++{
++    night_panel(3,146-KNOB_Y,234,64,0);
++    for(unsigned i=0;i<4;i++) if(tail[i].on)
++        cell_value(break_control_centers[i],vc(&FONT_B,39,13),tail[i].num,tail[i].unit,tail[i].ink);
++}
++#endif
++static void break_layout_controls(break_control_tail *tail)
+ {
+-    static const int16_t centers[4]={32,90,149,207};
+     int pgi=cur_page();
+     night_panel(3,146-KNOB_Y,234,64,0);
+     for(int i=0;i<4;i++){
+@@ -44,7 +57,7 @@
+ #endif
+         pref_t r=pg.r[pgi][i];const x0x_param_t *d=pref_desc(r);
+         if(!d)continue;
+-        int cx=centers[i],val=pref_get(r),touched=ui.touched==i;
++        int cx=break_control_centers[i],val=pref_get(r),touched=ui.touched==i;
+         char num[16],unit[8];
+         text_c(cx,vc(&FONT_T,0,12),&FONT_T,caps_of(pref_name(r)),touched?C_WHITE:C_GRAY);
+         if(lock_step()>=0){
+@@ -69,7 +82,12 @@
+         }
+         cv_oy=old_oy;
+         pref_value_of(r,val,num,unit);
+-        cell_value(cx,vc(&FONT_B,39,13),num,unit,touched?C_WHITE:C_HI);
++        const uint16_t ink=touched?C_WHITE:C_HI;
++        if(tail) {
++            put_s(tail[i].num,num);put_s(tail[i].unit,unit);
++            tail[i].ink=ink;tail[i].on=1;
++        }
++        cell_value(cx,vc(&FONT_B,39,13),num,unit,ink);
+     }
+     if(ui.view==V_SEQ&&pgi==0){
+         char t[20];

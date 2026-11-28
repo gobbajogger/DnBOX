@@ -1,0 +1,21 @@
+--- a/firmware/src/gfx.c
++++ b/firmware/src/gfx.c
+@@ -465,14 +465,14 @@
+     int picture = custom && (pay[1] & BOOT_F_PIC);
+     boot_lines(pay,title,subtitle);
+ #if X0X_UI_SMALL_CANVAS
+-    /* The same RGB565 image, bounded by four 60-row transfers so the
++    /* The same RGB565 image, bounded by five 48-row transfers so the
+      * boot painter does not require an 80-row canvas. */
+-    for (unsigned row=0;row<240u;row+=60u) {
++    for (unsigned row=0;row<240u;row+=48u) {
+-        cv_begin(240,60,C_BLACK);
++        cv_begin(240,48,C_BLACK);
+-        if (picture) for (unsigned y=row>20u?row-20u:0u; y<BOOT_PIC_H && y+20u<row+60u; ++y)
++        if (picture) for (unsigned y=row>20u?row-20u:0u; y<BOOT_PIC_H && y+20u<row+48u; ++y)
+             for (unsigned x=0; x<BOOT_PIC_W; ++x)
+                 if (boot_pix(pay+BOOT_PAY_FIXED,x,y)) cv_pset((int)x,(int)(y+20u-row),C_HI);
+         cv_blit(0,row);
+     }
+ #else
+     for (int band=0; band<2; ++band) {

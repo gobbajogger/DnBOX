@@ -1,0 +1,77 @@
+--- a/firmware/src/app/main_fm1.c
++++ b/firmware/src/app/main_fm1.c
+@@ -645,14 +645,15 @@
+     return (uint8_t)(!apc_link_host && !ck_page_on());
+ }
+ #if X0X_UI_SMALL_CANVAS
+-/* Main-area global logical coordinates; physical store holds one 69-row band. */
++/* Two logical bands, rasterized in tile-aligned windows. */
+ void cv_window(uint32_t w, uint32_t logical_h, uint32_t y0, uint32_t rows, uint16_t bg);
+-void cv_commit_main_band(unsigned band);
++void cv_commit_main_window(unsigned band,unsigned row,unsigned rows);
+ #define SMK_CLIP_BAND_ROWS 69u
++#define SMK_CLIP_SLICE_ROWS 48u
+ typedef struct {
+     uint32_t keys[2];
+     uint8_t pg, value[9];
+-    uint16_t black;
++    uint16_t black, gray, white;
+ } ck_page_scene;
+ static void ck_page_snapshot(ck_page_scene *scene);
+ static void ck_page_draw(const ck_page_scene *scene, unsigned band);
+@@ -701,10 +702,12 @@
+         ck_page_snapshot(&scene);
+         last_ms = now;
+         was_on = 0u;
+-        for (unsigned band = 0; band < 2u; ++band) {
+-            cv_window(w, h, band * SMK_CLIP_BAND_ROWS, SMK_CLIP_BAND_ROWS, scene.black);
+-            ck_page_draw(&scene, band);
+-            cv_commit_main_band(band);
++        for (unsigned band=0;band<2u;++band) for (unsigned row=0;row<SMK_CLIP_BAND_ROWS;row+=SMK_CLIP_SLICE_ROWS) {
++            unsigned rows=SMK_CLIP_BAND_ROWS-row;
++            if (rows>SMK_CLIP_SLICE_ROWS) rows=SMK_CLIP_SLICE_ROWS;
++            cv_window(w,h,band*SMK_CLIP_BAND_ROWS+row,rows,scene.black);
++            ck_page_draw(&scene,band);
++            cv_commit_main_window(band,row,rows);
+         }
+         return 1u;
+     }
+@@ -748,10 +751,12 @@
+     last_ms = now;
+     const smk_apc40_lcd_map_t m = smk_apc40_lcd_map(scene.cols, scene.rows, scene.origin_col, scene.origin_row,
+                                                     scene.has_clips, (uint16_t)w, (uint16_t)h);
+-    for (unsigned band = 0; band < 2u; ++band) {
+-        cv_window(w, h, band * SMK_CLIP_BAND_ROWS, SMK_CLIP_BAND_ROWS, scene.black);
+-        smk_clip_grid_band(&scene, &m, band);
+-        cv_commit_main_band(band);
++    for (unsigned band=0;band<2u;++band) for (unsigned row=0;row<SMK_CLIP_BAND_ROWS;row+=SMK_CLIP_SLICE_ROWS) {
++        unsigned rows=SMK_CLIP_BAND_ROWS-row;
++        if (rows>SMK_CLIP_SLICE_ROWS) rows=SMK_CLIP_SLICE_ROWS;
++        cv_window(w,h,band*SMK_CLIP_BAND_ROWS+row,rows,scene.black);
++        smk_clip_grid_band(&scene,&m,band);
++        cv_commit_main_window(band,row,rows);
+ #else
+ static void ck_page_draw(void);
+ uint8_t smk_clip_lcd_draw(uint32_t w, uint32_t h)
+@@ -2061,6 +2066,8 @@
+      * here; all nine field values and the keybed are frozen before SPI. */
+     scene->pg = ck.pg;
+     scene->black = C_BLACK;
++    scene->gray = C_GRAY;
++    scene->white = C_WHITE;
+     scene->keys[0] = ck.keys[0];
+     scene->keys[1] = ck.keys[1];
+     unsigned pg = (scene->pg & 3u) - 1u, count = pg == 2u ? 9u : 4u;
+@@ -2079,9 +2086,9 @@
+             int32_t fx = 4 + (int32_t)(n / 5u) * 120, fy = 2 + (int32_t)(n % 5u) * 12;
+             const char *nm = ck_nm(CK_FLD_N, f);
+             if (f == (uint32_t)scene->pg >> 4)
+-                rbox(fx - 2, fy, 116, 12, 3, dim(c, 4));
+-            cv_text(fx, vc(&FONT_T, fy, 12), &FONT_T, nm, C_GRAY);
+-            cv_text(fx + 44, vc(&FONT_XS, fy, 12), &FONT_XS, ck_val_txt(f, scene->value[n], t), C_WHITE);
++                rbox(fx - 2, fy, 116, 12, 3, blend(scene->black,c,4));
++            cv_text(fx, vc(&FONT_T, fy, 12), &FONT_T, nm, scene->gray);
++            cv_text(fx + 44, vc(&FONT_XS, fy, 12), &FONT_XS, ck_val_txt(f, scene->value[n], t), scene->white);
+         }
+     } else {
+         uint16_t col[CK_NKEY];
