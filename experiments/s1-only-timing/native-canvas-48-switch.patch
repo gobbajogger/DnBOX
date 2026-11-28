@@ -1,0 +1,37 @@
+--- a/firmware/src/gfx.c
++++ b/firmware/src/gfx.c
+@@ -86,13 +86,21 @@
+ #ifndef X0X_UI_SMALL_CANVAS
+ #define X0X_UI_SMALL_CANVAS 0
+ #endif
++#ifndef DNBOX_LCD_CANVAS_48
++#define DNBOX_LCD_CANVAS_48 0
++#endif
+ #if X0X_UI_SMALL_CANVAS
++#if DNBOX_LCD_CANVAS_48
++#define CV_ROWS 48u
++#else
+ #define CV_ROWS 69u
++#endif
+ #else
+ #define CV_ROWS 138u
+ #endif
+ #define CV_MAX (240u * CV_ROWS)
+-_Static_assert(CV_ROWS >= 69u, "screen strip shorter than the main band");
++_Static_assert(CV_ROWS >= (DNBOX_LCD_CANVAS_48 ? 48u : 69u),
++               "screen strip shorter than the maximum raster window");
+ static uint16_t cv_px[CV_MAX] __attribute__((section(".pool")));
+ static uint32_t cv_w, cv_h;
+ #if X0X_UI_SMALL_CANVAS
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -5459,7 +5459,8 @@
+ /* gfx.c sizes the one screen strip (CV_ROWS) to this main area. The unity
+  * build sees that macro; a host file that compiles ui.c alone does not. */
+ #ifdef CV_ROWS
+-_Static_assert((X0X_UI_SMALL_CANVAS ? 1u : 2u) * BAND_H <= CV_ROWS, "main area taller than the screen strip");
++_Static_assert((DNBOX_LCD_CANVAS_48 ? 48u : (X0X_UI_SMALL_CANVAS ? BAND_H : 2u*BAND_H)) <= CV_ROWS,
++               "main raster window taller than physical screen strip");
+ #if !X0X_UI_SMALL_CANVAS
+ _Static_assert(KNOB_H <= CV_ROWS, "knob row taller than the screen strip");
+ #endif

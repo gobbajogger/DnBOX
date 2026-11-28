@@ -1,0 +1,54 @@
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -9286,6 +9286,13 @@
+ #else
+     cv_begin(240, 2 * BAND_H, C_BLACK);           /* both bands, then one transfer: no tear between them */
+ #endif
++#if DNBOX_LCD_CANVAS_48
++    /* A legacy owner which cannot yet acquire a coherent snapshot must
++     * leave both regions unmodified. No native 69-row fallback exists
++     * in the 48-row binary. The next UI frame retries after input. */
++    cv_scene_owns_knob_frame=1;
++    (void)band;
++#else
+     for (band = 0; band < 2; band++) {
+ #if X0X_UI_SMALL_CANVAS
+         cv_window(240, MAIN_ROWS, (uint32_t)band * BAND_H, BAND_H, C_BLACK);
+@@ -9347,6 +9354,8 @@
+     cv_band(0, 2 * BAND_H);
+     cv_commit_rect(1, 0, MAIN_Y);
+ #endif
++#endif
++
+ }
+ 
+ /* -------------------------------------------------------------- knob strip --- */
+@@ -11428,6 +11437,7 @@
+ /* Legacy PART matrix cards end by local row 66. Keep their pixels and
+  * the first step-caption pixels through row 68 in the existing strip;
+  * all subsequent content is the frozen step footer. */
++#if !DNBOX_LCD_CANVAS_48
+ static UI_DRAW void legacy_knob_commit(int paint)
+ {
+     enum { MATRIX_ROWS=69 };
+@@ -11458,6 +11468,8 @@
+     ordinary_knob_tiles(LEGACY_KNOB_FIRST,KNOB_H-LEGACY_KNOB_FIRST,force);
+ }
+ 
++#endif
++
+ static void paint_ordinary_tail(const knob_tail_glyph *g,int cx)
+ {
+     int l=cx-18;
+@@ -11544,7 +11556,11 @@
+ #endif
+         /* Continuation of the same 4x4 matrix, not a duplicate knob row. */
+ #if X0X_UI_SMALL_CANVAS
++#if !DNBOX_LCD_CANVAS_48
+         legacy_knob_commit(ui.overlay==O_NONE && !ui.help);
++#endif
++        /* Input during MAIN may have just entered legacy PART. At 48 rows
++         * its footer is always owned by the next coherently captured MAIN. */
+ #else
+         cv_begin(240, KNOB_H, C_BLACK);
+         if (ui.overlay==O_NONE && !ui.help) {

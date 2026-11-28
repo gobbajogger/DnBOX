@@ -1,0 +1,43 @@
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -9113,6 +9113,7 @@
+ }
+ #endif
+ 
++extern volatile uint32_t bench_legacy_matrix[2];
+ static UI_DRAW void draw_main(void)
+ {
+ #if X0X_UI_SMALL_CANVAS
+@@ -9207,6 +9208,7 @@
+     if (!modal.route && ui.overlay == O_NONE && ui.view == V_PART && is_303()) {
+         cv_legacy_render l={0};
+         if(cv_capture_legacy_render(&l,(unsigned)bidx())){
++            ++bench_legacy_matrix[l.bank==ORIGINAL_SOUND_MIAMI];
+             const uint16_t bg=C_BLACK;
+             const int force=cv_claim_scene_footer();
+             cv_draw_pair(bg,&l,cv_paint_legacy_matrix,NULL);
+@@ -12174,6 +12176,7 @@
+     }
+ }
+ 
++volatile uint32_t bench_legacy_matrix[2];
+ UI_DRAW void ui_frame(void)
+ {
+     uint32_t i;
+@@ -12245,6 +12248,16 @@
+         *h = (uint8_t)(*h - (*h >> 3) - (*h ? 1 : 0));
+     }
+ #if BOARD_SMK37
++    {
++        uint32_t tm=plat_ms();
++        if (tm>=1200u && tm<3000u) {
++            unsigned slot=(tm-1200u)/120u;
++            ui.view=V_PART;ui.part=PART_303A+(slot&1u);
++            ui.help=0;ui.overlay=O_NONE;
++            build_pages();
++            ui.page[V_PART][ui.part]=pg.n>0?(slot>>1)%(unsigned)pg.n:0;
++        }
++    }
+     if (smc_ui_active()) {
+         smc_ui_draw();
+         /* Pattern cues use the existing header toast above a retained popup. */

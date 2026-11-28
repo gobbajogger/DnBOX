@@ -1,0 +1,77 @@
+--- a/tools/gen_chicago_fast32.py
++++ b/tools/gen_chicago_fast32.py
+@@ -1,6 +1,7 @@
+ #!/usr/bin/env python3
+ # SPDX-License-Identifier: GPL-3.0-only
+ """Offline Chicago filter table experiments: exact IEEE words, bounded random access."""
++import json
+ import re
+ import struct
+ import sys
+@@ -51,7 +52,7 @@
+                 a[j]=[x-scale*y for x,y in zip(a[j],a[k])]
+     return [row[m:] for row in a]
+ 
+-def encoded_segment(words,nmax,fold_lo=False):
++def encoded_segment(words,nmax,fold_lo=False,hint=None):
+     n=len(words)
+     shift=nmax.bit_length()-1
+     assert nmax==1<<shift
+@@ -112,6 +113,10 @@
+         # polynomial, coefficient, rounding, or residual read work.
+         if len(record)<len(best) and all(new<=old for new,old in zip(cost,stock_cost)):
+             best=record
++    if hint is not None and len(hint) < len(best):
++        hint_cost = code_cost(hint, n)
++        if all(new <= old for new,old in zip(hint_cost, stock_cost)):
++            best=hint
+     return best
+ 
+ def one(data,start,i,seg,fold_lo=False):
+@@ -143,10 +148,29 @@
+     else:val=0
+     return (base+(((v+(1<<(q-1)))>>q) if q else v)+lo+val)&U32
+ 
+-def trial(words,step,fold_lo=False):
++def code_cost(record, entries):
++    degree, width = record[0] >> 5, record[0] & 31
++    if degree > 3 or record[5] > 18:
++        raise ValueError("Invalid FAST32 hint header")
++    p = 6
++    for _ in range(degree + 1):
++        start = p
++        while record[p] & 128:
++            p += 1
++        if p - start > 4 or (p - start == 4 and record[p] > 15):
++            raise ValueError("Invalid FAST32 hint varint")
++        p += 1
++    if len(record) != p + (entries * width + 7) // 8:
++        raise ValueError("Invalid FAST32 hint length")
++    return degree, p - 6, bool(record[5]), width
++
++
++def trial(words,step,fold_lo=False,hints=None):
+     payload=[];offs=[];prev=0
+     for i in range(0,len(words),step):
+-        b=encoded_segment(words[i:i+step],step,fold_lo)
++        hint_hex = hints.get(str(i // step)) if hints else None
++        hint = bytes.fromhex(hint_hex) if hint_hex is not None else None
++        b=encoded_segment(words[i:i+step],step,fold_lo,hint)
+         offs.append(prev)
+         payload.append(b);prev+=len(b)
+     table=struct.pack('<HH',step,len(offs))+struct.pack('<%dH'%len(offs),*offs)+b''.join(payload)
+@@ -160,9 +184,13 @@
+     text=Path(source).read_text()
+     out=Path(dest)
+     out.mkdir(parents=True,exist_ok=True)
++    # Offline minimax hints are data, not a build dependency. They apply
++    # only to folded fixed-128 records. Every used record is decoded below.
++    hints_path = Path(__file__).with_name("chicago_fast32_minimax.json")
++    hints=json.loads(hints_path.read_text()) if fold_lo and hints_path.exists() else {}
+     for name in ('a','e'):
+         _,_,words=input_words(text,name)
+-        data,_,_=trial(words,128,fold_lo)
++        data,_,_=trial(words,128,fold_lo,hints.get(name))
+         (out/f'p_{name}.h').write_text('static const unsigned char p_'+name+'[]={\n'+
+             ''.join(','.join(str(x) for x in data[i:i+32])+',\n' for i in range(0,len(data),32))+'};\n')
+         print(f'Chicago FAST32 {name}: {len(words)} bit-exact coefficients in {len(data)} B')
