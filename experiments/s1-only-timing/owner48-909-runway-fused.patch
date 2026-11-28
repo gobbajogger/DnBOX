@@ -1,0 +1,45 @@
+--- a/firmware/src/dsp/drum909.c
++++ b/firmware/src/dsp/drum909.c
+@@ -1062,22 +1062,29 @@
+     uint32_t dk = s->dk, pos = s->pos, frac = s->frac;
+     int32_t pred = s->pred, idx = s->idx, h0 = s->h0, h1 = s->h1;
+     const uint32_t inc = s->inc, incf = s->incf;
+-    /* At the native sample rate, interpolation at fraction zero yields the
+-     * exact integer sample. Keep the decoder's ordinary one-sample lookahead,
+-     * including the priming nibble on a new hit. Endpoints, non-integral rates
+-     * and an unaligned decoder take the general path. */
+-    if (m > 0 && inc == 1u && !(incf | frac) &&
+-        pos < len && (unsigned)m < len - pos &&
+-        (dk == pos || dk == pos + 1u)) {
+-        if (dk == pos)
+-            h1 = ima_decode(adpcm, dk++, &pred, &idx);
++    /* One interior rate-1 loop for both exact and fractional rates.
++     * A positive fractional rate advances by at most two; the runway
++     * covers the last interpolation read even at that upper bound. */
++    const unsigned runway = incf ? 2u*(unsigned)m + 1u : (unsigned)m;
++    if (m > 0 && inc == 1u && pos < len && len-pos > runway &&
++        dk >= pos && dk <= pos + 2u) {
+         for (int i = 0; i < m; ++i) {
+-            h0 = h1;
+-            h1 = ima_decode(adpcm, dk++, &pred, &idx);
+-            const float v = (float)h0 * (1.0f / 32768.0f);
++            const uint32_t need = pos + 2u;
++            while (dk < need) {
++                h0 = h1;
++                h1 = ima_decode(adpcm, dk++, &pred, &idx);
++            }
++            float v = (float)h0 * (1.0f / 32768.0f);
++            if (frac) {
++                const float b = (float)h1 * (1.0f / 32768.0f);
++                const float fr = (float)frac * (1.0f / 4294967296.0f);
++                v += (b - v) * fr;
++            }
++            const uint32_t f2 = frac + incf;
++            pos += 1u + (f2 < frac);
++            frac = f2;
+             bus->y[i] = v * d9_env_tick(&s->out);
+         }
+-        pos += (unsigned)m;
+     } else {
+         for (int i = 0; i < m; ++i) {
+             float v = 0.0f;

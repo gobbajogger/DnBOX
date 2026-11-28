@@ -1,0 +1,23 @@
+--- a/firmware/src/ota.c
++++ b/firmware/src/ota.c
+@@ -64,14 +64,14 @@
+ static void ota_wr16(uint8_t *p, uint32_t v) { p[0] = (uint8_t)v; p[1] = (uint8_t)(v >> 8); }
+ static void ota_wr32(uint8_t *p, uint32_t v) { ota_wr16(p, v); ota_wr16(p + 2, v >> 16); }
+ 
+-static uint32_t ota_crc16(const uint8_t *p, uint32_t n, uint32_t c)   /* poly 0x1021, init 0 */
++/* CCITT 0x1021, MSB first: fold eight recurrence steps into one byte.
++ * Outline once because the update path uses the same checksum repeatedly. */
++__attribute__((noinline)) static uint32_t ota_crc16(const uint8_t *p, uint32_t n, uint32_t c)
+ {
+-    uint32_t i;
+     while (n--) {
+-        c ^= (uint32_t)*p++ << 8;
+-        for (i = 0; i < 8u; i++)
+-            c = c & 0x8000u ? (c << 1) ^ 0x1021u : c << 1;
+-        c &= 0xFFFFu;
++        uint32_t x = ((c >> 8) ^ *p++) & 0xFFu;
++        x ^= x >> 4;
++        c = ((c << 8) ^ (x << 12) ^ (x << 5) ^ x) & 0xFFFFu;
+     }
+     return c;
+ }

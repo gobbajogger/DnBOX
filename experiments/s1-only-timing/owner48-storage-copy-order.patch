@@ -1,0 +1,86 @@
+--- a/firmware/src/storage.c
++++ b/firmware/src/storage.c
+@@ -166,35 +166,21 @@
+  * is left in st_buf); *h gets its header. */
+ static int st_current(uint32_t obj, st_hdr_t *h)
+ {
+-    st_hdr_t a, b;
+-    int ra = st_head(obj, 0, &a), rb = st_head(obj, 1, &b), rc;
+-    int va = ra == 0, vb = rb == 0;
+-    /* An unread copy may be newer: do not mistake I/O failure for CRC damage
+-     * and silently adopt older settings that a later toggle would overwrite. */
+-    if (ra == -2 || rb == -2) return -2;
+-    if (vb && (!va || b.seq > a.seq)) {
+-        rc = st_body(obj, 1, &b);
+-        if (rc == -2) return rc;
+-        if (rc == 0) {
+-            *h = b;
+-            return 1;
+-        }
+-        vb = 0;
+-    }
+-    if (va) {
+-        rc = st_body(obj, 0, &a);
+-        if (rc == -2) return rc;
+-        if (rc == 0) {
+-            *h = a;
+-            return 0;
+-        }
+-    }
+-    if (vb) {
+-        rc = st_body(obj, 1, &b);
+-        if (rc == -2) return rc;
+-        if (rc == 0) {
+-            *h = b;
+-            return 1;
++    st_hdr_t head[2];
++    int rc[2];
++    rc[0] = st_head(obj, 0, &head[0]);
++    rc[1] = st_head(obj, 1, &head[1]);
++    /* A header read error may hide a newer copy. Never adopt an older one. */
++    if (rc[0] == -2 || rc[1] == -2) return -2;
++    unsigned first = rc[1] == 0 && (rc[0] != 0 || head[1].seq > head[0].seq);
++    for (unsigned i = 0; i < 2; ++i) {
++        unsigned copy = first ^ i;
++        if (rc[copy] != 0) continue;
++        int body = st_body(obj, copy, &head[copy]);
++        if (body == -2) return -2;
++        if (body == 0) {
++            *h = head[copy];
++            return (int)copy;
+         }
+     }
+     return -1;
+@@ -223,22 +209,17 @@
+  * with the highest seq, copy A on a tie. *seq is that copy's seq. */
+ static int st_pick(uint32_t obj, uint32_t *seq)
+ {
+-    st_hdr_t a, b;
+-    int va = st_head(obj, 0, &a) == 0, vb = st_head(obj, 1, &b) == 0;
+-    if (vb && (!va || b.seq > a.seq)) {
+-        if (st_body_ok(obj, 1, &b)) {
+-            *seq = b.seq;
+-            return 1;
++    st_hdr_t head[2];
++    int rc[2];
++    rc[0] = st_head(obj, 0, &head[0]);
++    rc[1] = st_head(obj, 1, &head[1]);
++    unsigned first = rc[1] == 0 && (rc[0] != 0 || head[1].seq > head[0].seq);
++    for (unsigned i = 0; i < 2; ++i) {
++        unsigned copy = first ^ i;
++        if (rc[copy] == 0 && st_body_ok(obj, copy, &head[copy])) {
++            *seq = head[copy].seq;
++            return (int)copy;
+         }
+-        vb = 0;
+-    }
+-    if (va && st_body_ok(obj, 0, &a)) {
+-        *seq = a.seq;
+-        return 0;
+-    }
+-    if (vb && st_body_ok(obj, 1, &b)) {
+-        *seq = b.seq;
+-        return 1;
+     }
+     return -1;
+ }

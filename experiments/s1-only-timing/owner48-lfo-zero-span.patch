@@ -1,0 +1,84 @@
+--- a/firmware/src/dsp/s1c/s1c.c
++++ b/firmware/src/dsp/s1c/s1c.c
+@@ -996,6 +996,26 @@
+ #if S1C_ENVELOPE_SHARE
+     int share = n && s1c_share_envelopes(s);
+ #endif
++#if S1C_FAST && S1C_CSM && S1C_NO_SEQ
++    /* For nonnegative phases and the convex one-pole, the smooth value
++     * stays [-1,1]. Both zero amount outputs are therefore invariant.
++     * Keep ticking waveform phase and filter history every frame. */
++    int idle_lfo = n && P(L1A)==0.0f && P(L2A)==0.0f &&
++        s->lfo_c2>=0.5f && s->lfo_c2<=1.f &&
++        l1step>=0.f && l1step<=0.5f && l2step>=0.f && l2step<=0.5f;
++    for(i=0;idle_lfo && i<2;++i) {
++        const s1u_lfo *l=&s->lfo[i];
++        idle_lfo=l->ph>=0.f && l->ph<1.f && l->sm>=-1.f && l->sm<=1.f;
++    }
++    for(i=0;idle_lfo && i<nmoving;++i) {
++        const unsigned k=s1c_smid[moving[i]];
++        if(k==L1A || k==L2A) idle_lfo=0;
++    }
++    if(idle_lfo) {
++        s->lfo[0].o01=P(L1A); s->lfo[1].o01=P(L2A);
++        s->lfo[0].o10=s->lfo[1].o10=1.f;
++    }
++#endif
+     for (f = 0; f < n; f++) {
+ #if S1C_FAST
+         int cu = (f & 3) == 0;
+@@ -1035,8 +1055,16 @@
+         /* LFOs */
+         float x;
+         float lc2 = s->lfo_c2;
++#if S1C_FAST && S1C_CSM && S1C_NO_SEQ
++        if(idle_lfo) {
++            s1u_lfo_tick_idle(&s->lfo[0],l1step,(int)P(L1I),lc2);
++            s1u_lfo_tick_idle(&s->lfo[1],l2step,(int)P(L2I),lc2);
++        } else
++#endif
++        {
+         s1u_lfo_tick(&s->lfo[0], l1step, (int)P(L1I), P(L1A), lc2);
+         s1u_lfo_tick(&s->lfo[1], l2step, (int)P(L2I), P(L2A), lc2);
++        }
+ #if !S1C_NO_SEQ
+         sequencer(s);
+ #endif
+--- a/firmware/src/dsp/s1c/s1u.c
++++ b/firmware/src/dsp/s1c/s1u.c
+@@ -67,15 +67,24 @@
+ }
+ 
+ /* ---- LFO ---- */
+-void s1u_lfo_tick(s1u_lfo *l, float step, int shape, float amount, float c2)
++static inline void lfo_advance(s1u_lfo *l, float step, int shape, float c2)
+ {
+     l->ph += step; if (l->ph >= 1.0f) l->ph -= 1.0f;
+     float ph = l->ph;
+     float x = shape == 0 ? s1u_sin((uint32_t)(ph * 4294967296.0f)) :
+               shape == 1 ? (ph > 0.5f ? 1.0f : -1.0f) : shape == 2 ? (ph - 0.5f) * 2.0f : (0.5f - ph) * 2.0f;
+     l->sm = (1.0f - c2) * x + c2 * l->sm;
++}
++
++void s1u_lfo_tick(s1u_lfo *l, float step, int shape, float amount, float c2)
++{
++    lfo_advance(l,step,shape,c2);
+     l->o01 = 0.5f * (1.0f + l->sm) * amount; l->o10 = 1.0f - 0.5f * (1.0f - l->sm) * amount;
+ }
++void s1u_lfo_tick_idle(s1u_lfo *l, float step, int shape, float c2)
++{
++    lfo_advance(l,step,shape,c2);
++}
+ 
+ /* ---- filters ---- */
+ float s1u_ladder_a(float x)
+--- a/firmware/src/dsp/s1c/s1u.h
++++ b/firmware/src/dsp/s1c/s1u.h
+@@ -15,6 +15,7 @@
+  * o01 = 0..amount (adds), o10 = 1-amount..1 (scales). */
+ typedef struct { float ph, sm, o01, o10; } s1u_lfo;
+ void s1u_lfo_tick(s1u_lfo *l, float step, int shape, float amount, float smooth_c2);
++void s1u_lfo_tick_idle(s1u_lfo *l, float step, int shape, float smooth_c2);
+ 
+ /* ---- table sine: ph is a 32-bit phase (one turn = 2^32) ---- */
+ float s1u_sin(uint32_t ph);
