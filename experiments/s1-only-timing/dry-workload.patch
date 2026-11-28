@@ -1,0 +1,32 @@
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -3168,15 +3168,10 @@
+     s1c *e=&a->dsp.synthone.e;
+     if(d8_frame==CONFIG){
+         if(original_runtime_retire(b)!=ORIGINAL_RUNTIME_OK ||
+-            !s1c_front_set(e,20,0.f) ||
+-            !s1c_front_set(e,S1C_P_RVON,1.f) || !s1c_front_set(e,S1C_P_RVMIX,.25f) ||
+-            !s1c_front_set(e,S1C_P_DLON,1.f) || !s1c_front_set(e,S1C_P_DLMIX,.30f) ||
+-            !s1c_front_set(e,S1C_P_DLT,.30f)){bench_s1_only[0]=2;return;}
+-        e->ddec=0; /* scratch only: allocate for the wet test while silent */
++            !s1c_front_set(e,20,0.f)){bench_s1_only[0]=2;return;}
+         bench_s1_only[1]=d8_frame;return;
+     }
+-    if(!bench_s1_only[1] || bench_s1_only[0] || b->status==ORIGINAL_RUNTIME_OK ||
+-         !e->t[S1C_P_DLON] || !e->t[S1C_P_RVON] || !e->t[S1C_P_DLMIX] || !e->t[S1C_P_RVMIX]){
++    if(!bench_s1_only[1] || bench_s1_only[0] || b->status==ORIGINAL_RUNTIME_OK){
+          bench_s1_only[0]=3;return;
+     }
+     const unsigned on=d8_frame==ON;
+--- a/firmware/src/dsp/s1c/s1c.c
++++ b/firmware/src/dsp/s1c/s1c.c
+@@ -924,6 +924,9 @@
+         if (P(MONO) > 0.0f) { if (s->v[0].root != -1 && s->v[0].stage) y = voice_run(s, &s->v[0]); }
+         else for (i = 0; i < S1C_VOICES; i++) if (s->v[i].root != -1 && s->v[i].stage) y += voice_run(s, &s->v[i]);
+ 
++        /* Diagnostic pure tone path: keep voices and filters, skip all downstream FX. */
++        outl[f]=outr[f]=y * 2.0f * P(MVOL);
++        continue;
+         /* bitcrush (sample-and-hold), tremolo */
+ #if S1C_FAST
+         if ((f & 7) == 0)

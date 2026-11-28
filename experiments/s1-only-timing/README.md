@@ -70,3 +70,25 @@ With the correctly sized 300 ms delay (stride 38) the original Elite
 peak was 16,791.79 us. The overlap experiment reached 13,308.08 us with
 1,284 bytes of app flash and 15,228 bytes of pool margin. Both still
 recorded 147 DMA XRUN indications. A faster measured peak is not a pass.
+
+## Dry diagnostic
+
+After the workload patch, apply `dry-workload.patch` to bypass all of
+the synth's post-voice effects. This is not simply a zero wet mix; the
+effect code does not advance. The polyphonic oscillators, envelopes and
+per-voice filters still run, with the dry volume applied equally to L/R.
+The firmware's ordinary master path is unchanged.
+
+Optionally apply `dry-optimize.patch` for native optimization of the
+voice compilation unit and exact sine/ladder transformations. To
+exercise six notes instead of four, also apply `dry-six.patch`.
+Run with the same emulator command and capture options, and use
+`dry-readback.py RESULTS [4|6]`.
+
+In the 8-second Elite test, the dry original had 0 XRUN at 11,550.38 us,
+above the project target but inside the raw hardware period. The dry
+optimized four-voice variant had 0 XRUN at 10,398.83 us, all 128 held
+halves below the 10,809 us target. The six-voice optimized variant
+reached 14,400.92 us and 147 XRUNs. This is not a release or a polyphony
+limit: do not discard voices or effects in an installed build based on
+this experiment.
