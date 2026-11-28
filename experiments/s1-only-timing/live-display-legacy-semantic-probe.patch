@@ -1,0 +1,89 @@
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -6862,10 +6862,9 @@
+ static const char *matrix_preset_name(int voice);
+ #endif
+ static void cv_capture_s1_cells(cv_s1_telemetry *s);
+-static void cv_capture_s1_telemetry(cv_s1_telemetry *s,unsigned voice)
++static void cv_capture_matrix_layout(cv_s1_telemetry *s,unsigned voice)
+ {
+     s->voice=voice;
+-    s->ready=engine_s1_matrix_snapshot(voice,&s->value);
+     memcpy(s->palette,pal,sizeof s->palette);
+     s->light=ui_theme_light;
+     s->page=cur_page();s->n=pg.n;s->first=(s->page/4)*4;
+@@ -6888,8 +6887,74 @@
+         if(gate!=G_REST)s->on|=1u<<c;
+         if(gate==G_TIE)s->tie|=1u<<c;
+     }
++}
++
++static void cv_capture_s1_telemetry(cv_s1_telemetry *s,unsigned voice)
++{
++    s->ready=engine_s1_matrix_snapshot(voice,&s->value);
++    cv_capture_matrix_layout(s,voice);
+     cv_capture_s1_cells(s);
+ }
++
++#if DNBOX_LAB_LEGACY_SEMANTIC
++/* Probe: this data has no owner while input runs. Do not arm the S1-only
++ * painter pointer for this legacy snapshot until its direct reads are
++ * replaced. Neither layout extraction nor this struct changes any DSP. */
++typedef struct {
++    cv_s1_telemetry layout;
++    uint8_t sound[32],shown[22],preview[22];
++    uint32_t preview_mask;
++    uint8_t bank,adsr_ok,voice_ok,filter_ok,motion_ok,env_ok;
++    int status,pending,index,edited,env_state,motion_active;
++    unsigned gate,voice_state,voice_held;
++    float adsr[4],env_adsr[4],env_level,amp,mod,feg,depth,phase,mg,current,target;
++} cv_legacy_semantic;
++static int cv_capture_legacy_semantic(cv_legacy_semantic *s,unsigned voice)
++{
++    const int bank=engine_bass_bank(voice);
++    if (bank!=ORIGINAL_SOUND_CHICAGO && bank!=ORIGINAL_SOUND_MIAMI) return 0;
++    s->bank=(uint8_t)bank;
++    cv_capture_matrix_layout(&s->layout,voice);
++    memcpy(s->sound,proj.sound.v[T_303][voice],sizeof s->sound);
++    const unsigned n=original_sound_count((unsigned)bank);
++    const int ls=lock_step();
++    s->preview_mask=0;
++    memset(s->preview,0,sizeof s->preview);
++    for(unsigned id=0;id<n;id++){
++        const pref_t r=PR(R_ENG,T_303,voice,id);
++        const int p=ls>=0?lock_of(r,ls):motion_now(r);
++        s->shown[id]=(uint8_t)(p>=0?p:pref_get(r));
++        if(p>=0){s->preview_mask|=1u<<id;s->preview[id]=(uint8_t)p;}
++    }
++    s->voice_ok=engine_bass_voice_view(voice,&s->amp,&s->mod,&s->voice_state,&s->voice_held);
++    s->adsr_ok=engine_bass_adsr_view(voice,s->adsr,&s->gate);
++    s->env_ok=engine_bass_env_view(voice,s->env_adsr,&s->env_level,&s->env_state);
++    s->filter_ok=engine_bass_filter_view(voice,&s->feg,&s->depth);
++    s->motion_ok=engine_bass_motion_view(voice,&s->phase,&s->mg,&s->current,&s->target,&s->motion_active);
++    s->status=engine_bass_status(voice);
++#if X0X_BASS_PRESET_PREVIEW
++    s->pending=engine_bass_preset_pending(voice);
++    s->index=engine_bass_preset_index(voice);
++    s->edited=engine_bass_preset_edited(voice);
++    put_s(s->layout.preset,preset_shown(matrix_preset_name(voice)));
++#endif
++    return engine_bass_bank(voice)==bank && !memcmp(s->sound,proj.sound.v[T_303][voice],sizeof s->sound);
++}
++
++/* Same decoder as original_text_view/original_wave_view; override the
++ * target with the requested displayed value, just as the old live path. */
++static uint32_t cv_legacy_preview(const cv_legacy_semantic *s,unsigned id,int value,
++                                         uint8_t out[22],int wave)
++{
++    const uint32_t relevant=s->bank==ORIGINAL_SOUND_CHICAGO?
++        (wave?UI_ORIGINAL_CHICAGO_WAVE_MASK:UI_ORIGINAL_CHICAGO_TEXT_MASK):
++        (wave?UI_ORIGINAL_MIAMI_WAVE_MASK:UI_ORIGINAL_MIAMI_TEXT_MASK);
++    uint32_t mask=s->preview_mask&relevant;
++    memcpy(out,s->preview,22);
++    if((relevant&(1u<<id)) && value!=s->sound[id]){out[id]=(uint8_t)value;mask|=1u<<id;}
++    return mask;
++}
++#endif
+ #endif
+ typedef struct {
+     uint16_t on,tie,col;
