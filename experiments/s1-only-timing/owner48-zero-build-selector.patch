@@ -1,0 +1,11 @@
+--- a/tools/build.py
++++ b/tools/build.py
+@@ -188,7 +188,7 @@
+ # Per-block dispatch, preset/arp control and views (no per-sample loop): -Oz, like OZ_UNITS.
+ # The per-sample DSP stays in the backends at -O2. Perf lane: +864 B XIP with the arp hooks on;
+ # tests/host/render_timing_regression_test.sh pins the per-block render timing.
+-ORIGINAL_SYNTH_OZ_UNITS = {"original_runtime"}
++ORIGINAL_SYNTH_OZ_UNITS = {"original_runtime", "chicago_selector"}
+ ORIGINAL_SYNTH_FLAGS = ["-fno-fast-math", "-ffp-contract=off", "-DNDEBUG",
+                         "-DORIGINAL_USE_SOFT_FMA", "-DMIAMI_FX_NO_HOST_FENV",
+                         "-DX0X_FAST_FMA"]   # device: mul+add for the soft FMA (docs/perf/engine-load-20261031.md)

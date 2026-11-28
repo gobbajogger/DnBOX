@@ -1,0 +1,76 @@
+--- a/firmware/app.ld
++++ b/firmware/app.ld
+@@ -32,7 +32,7 @@
+ }
+ SECTIONS
+ {
+-    .text : { KEEP(*(.text.crt0)) *(.text*) *(.rodata*) . = ALIGN(4); _etext = .; } > XIP
++    .text : { KEEP(*(.text.crt0)) *(.text.audio.c1.*) *(.text*) *(.rodata*) . = ALIGN(4); _etext = .; } > XIP
+     /* 1 KiB at the start of RAM that nothing uses: the Bluetooth start checks whether the radio writes
+      * there (src/ble.c ble_sink_*). The RAM code starts after it. */
+     .ram_sink (NOLOAD) : { _ram_sink = .; . += 0x400; _ram_sink_end = .; } > RAMTEXT
+--- a/firmware/src/dsp/drum808.c
++++ b/firmware/src/dsp/drum808.c
+@@ -826,7 +826,7 @@
+ }
+ 
+ /* One stretch of the clap: the same ops as cp_tick, state in scalars. */
+-__attribute__((noinline)) static int cp_run(d8_cp_t *restrict v, float *restrict buf, int m)
++__attribute__((section(".text.audio.c1.cp_run"))) __attribute__((noinline)) static int cp_run(d8_cp_t *restrict v, float *restrict buf, int m)
+ {
+     const float bp_b0 = v->bp.b0, bp_e1 = v->bp.e1, bp_e2 = v->bp.e2;
+     const float hp_n0 = v->hp.n0, hp_n1 = v->hp.n1;
+@@ -980,7 +980,7 @@
+     return 1;
+ }
+ 
+-__attribute__((noinline)) static void bank_block(d8_bank_t *b, float *bus, float *pair, int m, int cb_on)
++__attribute__((section(".text.audio.c1.bank_block"))) __attribute__((noinline)) static void bank_block(d8_bank_t *b, float *bus, float *pair, int m, int cb_on)
+ {
+     uint32_t *dt = b->dt;
+     int i, n;
+@@ -1143,7 +1143,7 @@
+ /* The two BQ3/opamp streams depend only on bank input, never on the
+  * cymbal envelopes or suffix. Chunk staging separates their live values
+  * from the large suffix's recursive working set. */
+-__attribute__((noinline)) static void cy_opamp_front(d8_cy_t *restrict v,
++__attribute__((section(".text.audio.c1.cy_opamp_front"))) __attribute__((noinline)) static void cy_opamp_front(d8_cy_t *restrict v,
+               const float *restrict bus, float *restrict front1, float *restrict front2, int m)
+ {
+     const float c10 = k_cy_bp1[0], c11 = k_cy_bp1[1];
+@@ -1179,7 +1179,7 @@
+     v->bp2.z[0] = bp2z0; v->bp2.z[1] = bp2z1; v->bp2.z[2] = bp2z2;
+ }
+ 
+-__attribute__((noinline)) static int cy_run(d8_cy_t *restrict v, float *restrict buf, const float *restrict bus, int m)
++__attribute__((section(".text.audio.c1.cy_run"))) __attribute__((noinline)) static int cy_run(d8_cy_t *restrict v, float *restrict buf, const float *restrict bus, int m)
+ {
+     const float sus1_b0 = v->sus1.b0, sus1_e1 = v->sus1.e1, sus1_e2 = v->sus1.e2;
+     const float sus2_b0 = v->sus2.b0, sus2_e1 = v->sus2.e1, sus2_e2 = v->sus2.e2;
+@@ -1422,7 +1422,7 @@
+ }
+ 
+ /* One stretch of a hat: the same ops as hat_tick, state in scalars. */
+-__attribute__((noinline)) static int hat_run(d8_hat_t *restrict v, float *restrict buf, const float *restrict bus, int m)
++__attribute__((section(".text.audio.c1.hat_run"))) __attribute__((noinline)) static int hat_run(d8_hat_t *restrict v, float *restrict buf, const float *restrict bus, int m)
+ {
+     const float ska_n0 = v->ska.n0, ska_n1 = v->ska.n1;
+     const float ska_e1 = v->ska.e1, ska_e2 = v->ska.e2;
+@@ -1570,7 +1570,7 @@
+ }
+ 
+ /* One stretch of the cowbell: the same ops as cb_tick, state in scalars. */
+-__attribute__((noinline)) static int cb_run(d8_cb_t *restrict v, float *restrict buf, const float *restrict pair, int m)
++__attribute__((section(".text.audio.c1.cb_run"))) __attribute__((noinline)) static int cb_run(d8_cb_t *restrict v, float *restrict buf, const float *restrict pair, int m)
+ {
+     const float bp_b0 = v->bp.b0, bp_e1 = v->bp.e1, bp_e2 = v->bp.e2;
+     const float bla_a = v->bla.a, blb_a = v->blb.a, hp_a = v->hp.a;
+@@ -2460,7 +2460,7 @@
+                                             D8_CB, D8_CH, D8_OH, D8_CY};
+ static float *d8_dry_r;         /* the render in progress: its right side (0: mono) */
+ 
+-__attribute__((noinline)) static void lane_mix(drum808_t *d, d8_lane_t *l, const float *buf, int m, float *dry, float *rev, float *dly,
++__attribute__((section(".text.audio.c1.lane_mix"))) __attribute__((noinline)) static void lane_mix(drum808_t *d, d8_lane_t *l, const float *buf, int m, float *dry, float *rev, float *dly,
+                      uint16_t audible_tracks)
+ {
+     const int tr = k_lane_track[l - d->lane];

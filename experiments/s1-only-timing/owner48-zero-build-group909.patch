@@ -1,0 +1,49 @@
+--- a/firmware/app.ld
++++ b/firmware/app.ld
+@@ -32,7 +32,7 @@
+ }
+ SECTIONS
+ {
+-    .text : { KEEP(*(.text.crt0)) *(.text*) *(.rodata*) . = ALIGN(4); _etext = .; } > XIP
++    .text : { KEEP(*(.text.crt0)) *(.text.audio.c1.*) *(.text*) *(.rodata*) . = ALIGN(4); _etext = .; } > XIP
+     /* 1 KiB at the start of RAM that nothing uses: the Bluetooth start checks whether the radio writes
+      * there (src/ble.c ble_sink_*). The RAM code starts after it. */
+     .ram_sink (NOLOAD) : { _ram_sink = .; . += 0x400; _ram_sink_end = .; } > RAMTEXT
+--- a/firmware/src/dsp/drum909.c
++++ b/firmware/src/dsp/drum909.c
+@@ -813,7 +813,7 @@
+ /* a voice's block into the buses, after its sample loop: per sample the same products and
+  * sums as one call a sample did (each bus element gets this voice's one addition, the voices
+  * in the same order), the bus tests once a block instead of per sample */
+-__attribute__((noinline)) static void d9_emit_block(const d9_bus_t *b, int m)
++__attribute__((section(".text.audio.c1.d9_emit_block"))) __attribute__((noinline)) static void d9_emit_block(const d9_bus_t *b, int m)
+ {
+ #if DNBOX_LAB_D9_SUFFIX
+     if (b->private_n) { *b->private_n = m; return; }
+@@ -1035,7 +1035,7 @@
+ }
+ 
+ /* Hand clap (er99_clap909_render) */
+-__attribute__((noinline)) static void d9_render_clap(d9_clap_t *v, const float *nz, const d9_bus_t *bus, int n)
++__attribute__((section(".text.audio.c1.d9_render_clap"))) __attribute__((noinline)) static void d9_render_clap(d9_clap_t *v, const float *nz, const d9_bus_t *bus, int n)
+ {
+     static const float amp[4] = { 1.22f, 1.35f, 1.68f, 1.0f };
+     const int m = n < v->mute ? n : v->mute;
+@@ -1158,7 +1158,7 @@
+ 
+ static float *d9_dry_r;         /* the render in progress: its right side (0: mono) */
+ static float d9_pl0[DR_NUM], d9_pr0[DR_NUM];   /* each voice's pan where this block starts */
+-__attribute__((noinline)) static void d9_bus(d9_bus_t *b, drum909_t *d, int voice, float *dry, float *rev, float *dly,
++__attribute__((section(".text.audio.c1.d9_bus"))) __attribute__((noinline)) static void d9_bus(d9_bus_t *b, drum909_t *d, int voice, float *dry, float *rev, float *dly,
+                           uint16_t audible_tracks)
+ {
+     b->dry = audible_tracks & (1u << voice) ? dry : 0;
+@@ -1247,7 +1247,7 @@
+     d9_pkt.ready=1;
+ }
+ #endif
+-static void d9_render(drum909_t *d, float *dry, float *rev, float *dly, int n, uint16_t audible_tracks
++__attribute__((section(".text.audio.c1.d9_render"))) static void d9_render(drum909_t *d, float *dry, float *rev, float *dly, int n, uint16_t audible_tracks
+ #if DNBOX_LAB_D9_SUFFIX
+                        , int try_helper
+ #endif
