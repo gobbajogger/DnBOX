@@ -1,0 +1,58 @@
+--- a/firmware/src/dsp/drum808.c
++++ b/firmware/src/dsp/drum808.c
+@@ -2442,18 +2442,21 @@
+     }
+ }
+ 
+-static void d8_pan_lanes(drum808_t *d, uint32_t lanes, int m)
++/* Collapse the two alternate-sound pairs onto their owning pans and
++ * retain the metal track map. Pans are independent, so order is immaterial. */
++static unsigned d8_pan_tracks(uint32_t lanes)
+ {
+-    uint16_t seen = 0;
+-    int l;
+-    for (l = 0; l < L_NUM; l++) {
+-        int tr;
+-        if (!(lanes & (1u << l)))
+-            continue;
+-        tr = k_lane_track[l];
+-        if (seen & (1u << tr))
+-            continue;
+-        seen |= (uint16_t)(1u << tr);
++    return (lanes & 0x3fu) | ((lanes >> 1) & (1u << D8_RS)) |
++           ((lanes >> 1 | lanes >> 2) & (1u << D8_CP)) |
++           ((lanes >> 2) & (1u << D8_CB)) |
++           ((lanes >> 4) & (1u << D8_CY)) |
++           ((lanes >> 2) & (1u << D8_OH)) | (lanes & (1u << D8_CH));
++}
++
++static void d8_pan_lanes(drum808_t *d, unsigned tracks, int m)
++{
++    for (int tr = 0; tracks; ++tr, tracks >>= 1) {
++        if (!(tracks & 1u)) continue;
+         d->pan_dl[tr] = x0x_glide_block(&d->pan_lc[tr], d->pan_l[tr], m);
+         d->pan_dr[tr] = x0x_glide_block(&d->pan_rc[tr], d->pan_r[tr], m);
+     }
+@@ -2464,11 +2467,12 @@
+ {
+     float buf[CHUNK], bus[CHUNK], pair[CHUNK];
+     int off, l, i;
++    const unsigned tracks = d8_pan_tracks(lanes);
+     for (off = 0; off < n; off += CHUNK) {
+         int m = n - off < CHUNK ? n - off : CHUNK;
+         int cb_on = (lanes & (1u << L_CB)) && lane_on(d, L_CB);
+         if (d8_dry_r)                                 /* only the tracks this call owns (a split: each once) */
+-            d8_pan_lanes(d, lanes, m);
++            d8_pan_lanes(d, tracks, m);
+         /* the shared bank runs only while a metal voice of this call sounds */
+         if ((lanes & D8_LANES_METAL) &&
+             (cb_on || lane_on(d, L_CH) || lane_on(d, L_OH) || lane_on(d, L_CY))) {
+@@ -2555,7 +2559,7 @@
+     for (off = 0, ch = 0; off < n; off += CHUNK, ch++) {
+         int m = n - off < CHUNK ? n - off : CHUNK;
+         int cb_on = lane_on(d, L_CB);
+-        d8_pan_lanes(d, D8_LANES_METAL, m);
++        d8_pan_lanes(d, d8_pan_tracks(D8_LANES_METAL), m);
+         if (cb_on || lane_on(d, L_CH) || lane_on(d, L_OH) || lane_on(d, L_CY))
+             bank_block(&d->bank, bus, pair, m, cb_on);
+         for (l = L_CB; l <= L_CY; l++) {

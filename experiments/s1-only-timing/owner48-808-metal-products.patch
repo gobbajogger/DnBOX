@@ -1,0 +1,164 @@
+--- a/firmware/src/dsp/drum808.c
++++ b/firmware/src/dsp/drum808.c
+@@ -829,7 +829,7 @@
+ __attribute__((noinline)) static int cp_run(d8_cp_t *restrict v, float *restrict buf, int m)
+ {
+     const float bp_b0 = v->bp.b0, bp_e1 = v->bp.e1, bp_e2 = v->bp.e2;
+-    const float hp_n0 = v->hp.n0, hp_n1 = v->hp.n1, hp_n2 = v->hp.n2;
++    const float hp_n0 = v->hp.n0, hp_n1 = v->hp.n1;
+     const float hp_e1 = v->hp.e1, hp_e2 = v->hp.e2;
+     const float tooth_d = v->tooth_d, main_d = v->main_d, floor_d = v->floor_d;
+     const float main_atk = v->main_atk;
+@@ -877,9 +877,10 @@
+         bp_z2 = (-bx - y) - bp_e2 * y;
+         y = y * 0.62f;
+         /* bq_run(&v->hp, y) */
+-        hy = hp_n0 * y + hp_z1;
++        bx = hp_n0 * y;
++        hy = bx + hp_z1;
+         hp_z1 = (hp_n1 * y + (hy + hy + hp_z2)) - hp_e1 * hy;
+-        hp_z2 = (hp_n2 * y - hy) - hp_e2 * hy;
++        hp_z2 = (bx - hy) - hp_e2 * hy;
+         y = hy;
+         if (__builtin_expect(y > drum808_quiet || y < -drum808_quiet, 1)) quiet = 0;
+         else if (++quiet > 400) active = 0;
+@@ -1097,18 +1098,18 @@
+  * do not alias the float output buf). Written back once at the end. */
+ __attribute__((noinline)) static int cy_run(d8_cy_t *restrict v, float *restrict buf, const float *restrict bus, int m)
+ {
+-    const float c10 = k_cy_bp1[0], c11 = k_cy_bp1[1], c12 = k_cy_bp1[2], c13 = k_cy_bp1[3];
++    const float c10 = k_cy_bp1[0], c11 = k_cy_bp1[1];
+     const float c14 = k_cy_bp1[4], c15 = k_cy_bp1[5], c16 = k_cy_bp1[6];
+-    const float c20 = k_cy_bp2[0], c21 = k_cy_bp2[1], c22 = k_cy_bp2[2], c23 = k_cy_bp2[3];
++    const float c20 = k_cy_bp2[0], c21 = k_cy_bp2[1];
+     const float c24 = k_cy_bp2[4], c25 = k_cy_bp2[5], c26 = k_cy_bp2[6];
+     const float sus1_b0 = v->sus1.b0, sus1_e1 = v->sus1.e1, sus1_e2 = v->sus1.e2;
+     const float sus2_b0 = v->sus2.b0, sus2_e1 = v->sus2.e1, sus2_e2 = v->sus2.e2;
+     const float br_b0 = v->body_res.b0, br_e1 = v->body_res.e1, br_e2 = v->body_res.e2;
+-    const float sk_n0 = v->body_sk.n0, sk_n1 = v->body_sk.n1, sk_n2 = v->body_sk.n2;
++    const float sk_n0 = v->body_sk.n0, sk_n1 = v->body_sk.n1;
+     const float sk_e1 = v->body_sk.e1, sk_e2 = v->body_sk.e2;
+-    const float th_n0 = v->top_hp.n0, th_n1 = v->top_hp.n1, th_n2 = v->top_hp.n2;
++    const float th_n0 = v->top_hp.n0, th_n1 = v->top_hp.n1;
+     const float th_e1 = v->top_hp.e1, th_e2 = v->top_hp.e2;
+-    const float oh_n0 = v->out_hp.n0, oh_n1 = v->out_hp.n1, oh_n2 = v->out_hp.n2;
++    const float oh_n0 = v->out_hp.n0, oh_n1 = v->out_hp.n1;
+     const float oh_e1 = v->out_hp.e1, oh_e2 = v->out_hp.e2;
+     const float hpa_a = v->body_hpa.a, crhp_a = v->crash_hp.a, dc_a = v->dc.a;
+     const float d1 = v->d1, d2 = v->d2, d3 = v->d3, atk_c = v->atk_c;
+@@ -1135,18 +1136,23 @@
+     for (i = 0; i < m && active; i++) {
+         float bus_x = bus[i];
+         float b1, b2, g1, g2, g3, sus, body_pre, body_dk, body, top_in, top, c1, y;
+-        float bx, yy;
++        float bx, nx, yy;
++        /* Pair equal-magnitude numerator terms: multiplication rounded
++         * once, exact sign flip for the opposite coefficients (incl. zero).
++         * All additions/subtractions below preserve their old grouping. */
+         /* bq3 bp1 + opamp: the same ops as bq3_run(&v->bp1, k_cy_bp1, bus) */
+-        y = c10 * bus_x + bp1z0;
+-        bp1z0 = c11 * bus_x - c14 * y + bp1z1;
+-        bp1z1 = c12 * bus_x - c15 * y + bp1z2;
+-        bp1z2 = c13 * bus_x - c16 * y;
++        bx = c10 * bus_x; nx = c11 * bus_x;
++        y = bx + bp1z0;
++        bp1z0 = nx - c14 * y + bp1z1;
++        bp1z1 = -bx - c15 * y + bp1z2;
++        bp1z2 = -nx - c16 * y;
+         b1 = opamp_clip(y, 14.0f, 1.0f / 14.0f);
+         /* bq3 bp2 */
+-        y = c20 * bus_x + bp2z0;
+-        bp2z0 = c21 * bus_x - c24 * y + bp2z1;
+-        bp2z1 = c22 * bus_x - c25 * y + bp2z2;
+-        bp2z2 = c23 * bus_x - c26 * y;
++        bx = c20 * bus_x; nx = c21 * bus_x;
++        y = bx + bp2z0;
++        bp2z0 = nx - c24 * y + bp2z1;
++        bp2z1 = -bx - c25 * y + bp2z2;
++        bp2z2 = -nx - c26 * y;
+         b2 = opamp_clip(y, 14.0f, 1.0f / 14.0f);
+         if (D8_UNLIKELY(e1t > 0.0f)) {
+             e1 += (e1t - e1) * atk_c;
+@@ -1180,12 +1186,13 @@
+         sus2_z1 = (yy + yy + sus2_z2) - sus2_e1 * yy;
+         sus2_z2 = (-bx - yy) - sus2_e2 * yy;
+         sus = (sus + yy) * g1;
+-        /* hp1 body_hpa, then bq body_sk */
++        /* hp1 body_hpa, then bq body_sk; fixed HPFs have n2 == n0 */
+         hpa_y = hpa_a * (hpa_y + b2 - hpa_z);
+         hpa_z = b2;
+-        yy = sk_n0 * hpa_y + sk_z1;
++        bx = sk_n0 * hpa_y;
++        yy = bx + sk_z1;
+         sk_z1 = (sk_n1 * hpa_y + (yy + yy + sk_z2)) - sk_e1 * yy;
+-        sk_z2 = (sk_n2 * hpa_y - yy) - sk_e2 * yy;
++        sk_z2 = (bx - yy) - sk_e2 * yy;
+         body_pre = yy;
+         /* bp body_res */
+         bx = br_b0 * body_pre;
+@@ -1199,9 +1206,10 @@
+         flp1 += (flp0 - flp1) * D8_CY_FLOOR_LPC;
+         body = body_dk * g2 + flp1 * (0.065f * g1);
+         /* bq top_hp */
+-        yy = th_n0 * body_pre + th_z1;
++        bx = th_n0 * body_pre;
++        yy = bx + th_z1;
+         th_z1 = (th_n1 * body_pre + (yy + yy + th_z2)) - th_e1 * yy;
+-        th_z2 = (th_n2 * body_pre - yy) - th_e2 * yy;
++        th_z2 = (bx - yy) - th_e2 * yy;
+         top_in = yy;
+         top_lp += (top_in - top_lp) * D8_CY_TOP_LPC;
+         top = top_lp * (g3 + 0.005f * g1);
+@@ -1214,9 +1222,10 @@
+         y = sus * 0.042f + body * 1.00f + top * 0.58f + c1 * (0.016f * g2);
+         /* bq out_hp, then hp1 dc */
+         y = y * 0.74f;
+-        yy = oh_n0 * y + oh_z1;
++        bx = oh_n0 * y;
++        yy = bx + oh_z1;
+         oh_z1 = (oh_n1 * y + (yy + yy + oh_z2)) - oh_e1 * yy;
+-        oh_z2 = (oh_n2 * y - yy) - oh_e2 * yy;
++        oh_z2 = (bx - yy) - oh_e2 * yy;
+         dc_y = dc_a * (dc_y + yy - dc_z);
+         dc_z = yy;
+         y = dc_y;
+@@ -1345,9 +1354,9 @@
+ /* One stretch of a hat: the same ops as hat_tick, state in scalars. */
+ __attribute__((noinline)) static int hat_run(d8_hat_t *restrict v, float *restrict buf, const float *restrict bus, int m)
+ {
+-    const float ska_n0 = v->ska.n0, ska_n1 = v->ska.n1, ska_n2 = v->ska.n2;
++    const float ska_n0 = v->ska.n0, ska_n1 = v->ska.n1;
+     const float ska_e1 = v->ska.e1, ska_e2 = v->ska.e2;
+-    const float skb_n0 = v->skb.n0, skb_n1 = v->skb.n1, skb_n2 = v->skb.n2;
++    const float skb_n0 = v->skb.n0, skb_n1 = v->skb.n1;
+     const float skb_e1 = v->skb.e1, skb_e2 = v->skb.e2;
+     const float dc_a = v->dc.a, lp_c = v->lp_c, out_scale = v->out_scale;
+     const float lin_atk_c = v->lin_atk_c, lin_step = v->lin_step;
+@@ -1367,7 +1376,7 @@
+ 
+     for (i = 0; i < m && active; i++) {
+         float bus_x = bus[i];
+-        float t1 = bus_x - d1, hp, e, sv, yy;
++        float t1 = bus_x - d1, hp, e, sv, yy, bx;
+         d1 = bus_x;
+         hp = (t1 - d2) * 30.0f;
+         d2 = t1;
+@@ -1402,12 +1411,14 @@
+         }
+         hp = hp * knee_gate(e);
+         /* bq ska then skb, as bq_run(&skb, bq_run(&ska, ...)) */
+-        yy = ska_n0 * hp + ska_z1;
++        bx = ska_n0 * hp;
++        yy = bx + ska_z1;
+         ska_z1 = (ska_n1 * hp + (yy + yy + ska_z2)) - ska_e1 * yy;
+-        ska_z2 = (ska_n2 * hp - yy) - ska_e2 * yy;
+-        sv = skb_n0 * yy + skb_z1;
++        ska_z2 = (bx - yy) - ska_e2 * yy;
++        bx = skb_n0 * yy;
++        sv = bx + skb_z1;
+         skb_z1 = (skb_n1 * yy + (sv + sv + skb_z2)) - skb_e1 * sv;
+-        skb_z2 = (skb_n2 * yy - sv) - skb_e2 * sv;
++        skb_z2 = (bx - sv) - skb_e2 * sv;
+         /* unrolled: the same cascade as the np-trip loop, no address taken */
+         lp0 += (sv - lp0) * lp_c; sv = lp0;
+         if (np == 5) {
