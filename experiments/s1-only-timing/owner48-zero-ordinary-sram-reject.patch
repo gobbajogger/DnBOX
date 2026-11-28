@@ -1,0 +1,32 @@
+--- a/firmware/src/dsp/s1c/s1c.c
++++ b/firmware/src/dsp/s1c/s1c.c
+@@ -429,6 +429,18 @@
+ #if S1C_KR > 1
+ /* Cheap voice: pitch, LFO, key-tracking and filter coefficients at control rate (every S1C_KR
+  * samples), sines from a 256-point table, the filter envelope still per sample in the cutoff. */
++/* Timing experiment: let the existing CRT data copy keep this normal
++ * playback function in on-chip SRAM. This is not part of the flash
++ * writer's no-XIP code; its callers and math are unchanged. */
++#ifndef X0X_HOST
++/* Pi32's direct long branch cannot reach s1u_env_step from this SRAM
++ * window. An ordinary indirect call keeps the original callee. */
++static float (*volatile ram_voice_env)(s1u_env *,float,float,float,float,float,float)=s1u_env_step;
++#define RAM_VOICE_ENV ram_voice_env
++__attribute__((noinline,section(".data.s1_voice_hot")))
++#else
++#define RAM_VOICE_ENV env_step
++#endif
+ static float voice_run_kr(s1c *s, s1c_voice *v, const s1c_morph *m, float adec, const float *semi, uint32_t *seen,uint32_t *fseen
+ #if S1C_ENVELOPE_SHARE
+                           ,const s1c_voice *shared
+@@ -443,8 +455,8 @@
+     } else
+ #endif
+     {
+-        v->amp = env_step(&v->ea, v->gate, P(AA), adec, P(AS), P(AR), s->sr);
+-        v->fenv = env_step(&v->ef, v->gate, P(FA), P(FD), P(FS), P(FR), s->sr);
++        v->amp = RAM_VOICE_ENV(&v->ea, v->gate, P(AA), adec, P(AS), P(AR), s->sr);
++        v->fenv = RAM_VOICE_ENV(&v->ef, v->gate, P(FA), P(FD), P(FS), P(FR), s->sr);
+     }
+     if (--v->kc <= 0) {
+         v->kc = S1C_KR;

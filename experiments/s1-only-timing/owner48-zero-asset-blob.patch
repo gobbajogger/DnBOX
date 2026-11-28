@@ -1,0 +1,96 @@
+--- /dev/null
++++ b/firmware/src/app/asset_blob.h
+@@ -0,0 +1,22 @@
++/* SPDX-License-Identifier: GPL-3.0-only */
++#ifndef X0X_ASSET_BLOB_H
++#define X0X_ASSET_BLOB_H
++#include <stdint.h>
++#include "../crc32_nibble.h"
++
++static uint32_t asset_rd32(const uint8_t *p)
++{
++    return (uint32_t)p[0] | ((uint32_t)p[1] << 8) | ((uint32_t)p[2] << 16) | ((uint32_t)p[3] << 24);
++}
++
++/* Four little-endian words: magic, size, CRC32, content identity. */
++static __attribute__((noinline)) int asset_blob_valid(const uint8_t *p, uint32_t room,
++                                                     uint32_t magic, uint32_t size, uint32_t id)
++{
++    if (!p || room < 16u || size > room - 16u || asset_rd32(p) != magic ||
++        asset_rd32(p + 4) != size || asset_rd32(p + 12) != id ||
++        asset_rd32(p + 8) != id)
++        return 0;
++    return x0x_crc32(p + 16u, size) == id;
++}
++#endif
+--- a/firmware/src/app/fittab.h
++++ b/firmware/src/app/fittab.h
+@@ -11,7 +11,7 @@
+ #ifndef X0X_FITTAB_H
+ #define X0X_FITTAB_H
+ #include <stdint.h>
+-#include "../crc32_nibble.h"
++#include "asset_blob.h"
+ 
+ #define FITTAB_MAGIC    0x31425446u             /* "FTB1" */
+ #define FITTAB_HDR      16u
+@@ -25,25 +25,12 @@
+ _Static_assert(FITTAB_LEN == FITTAB_BYTES, "FITTAB_LEN is 694 programs x 2 B");
+ #endif
+ 
+-static uint32_t fittab_rd32(const uint8_t *p)
+-{
+-    return (uint32_t)p[0] | ((uint32_t)p[1] << 8) | ((uint32_t)p[2] << 16) | ((uint32_t)p[3] << 24);
+-}
+-
+ /* Pointer to the want_len-byte blob at p + FITTAB_HDR when the header is valid and matches
+  * want_len / want_id; otherwise NULL (absent: erased, damaged, or a different build). The
+  * caller falls back. Read only at program load, never on the audio path. */
+ static const uint8_t *fittab_blob(const uint8_t *p, uint32_t room, uint32_t want_len, uint32_t want_id)
+ {
+-    uint32_t len;
+-    if (p == 0 || room < FITTAB_HDR || fittab_rd32(p) != FITTAB_MAGIC)
+-        return 0;
+-    len = fittab_rd32(p + 4);
+-    if (len != want_len || len > room - FITTAB_HDR || fittab_rd32(p + 12) != want_id)
+-        return 0;
+-    if (x0x_crc32(p + FITTAB_HDR, len) != fittab_rd32(p + 8) || fittab_rd32(p + 8) != want_id)
+-        return 0;
+-    return p + FITTAB_HDR;
++    return asset_blob_valid(p, room, FITTAB_MAGIC, want_len, want_id) ? p + FITTAB_HDR : 0;
+ }
+ 
+ #if defined(FITTAB_LEN) && defined(FL_XIP) && BOARD_SMK37
+--- a/firmware/src/app/xdata.h
++++ b/firmware/src/app/xdata.h
+@@ -7,7 +7,7 @@
+ #ifndef X0X_XDATA_H
+ #define X0X_XDATA_H
+ #include <stdint.h>
+-#include "../crc32_nibble.h"
++#include "asset_blob.h"
+ 
+ #define XDATA_MAGIC 0x31445858u                 /* "XXD1" */
+ #define XDATA_HDR   16u
+@@ -15,20 +15,9 @@
+ _Static_assert(FL_XDATA_MAGIC == XDATA_MAGIC && FL_XDATA_HDR == XDATA_HDR, "XDATA header: flash map and xdata.h agree");
+ #endif
+ 
+-static uint32_t xdata_rd32(const uint8_t *p)
+-{
+-    return (uint32_t)p[0] | ((uint32_t)p[1] << 8) | ((uint32_t)p[2] << 16) | ((uint32_t)p[3] << 24);
+-}
+-
+ /* 1: the region at p (room bytes) holds exactly the blob of want_len bytes with build id want_id */
+ static uint8_t xdata_valid(const uint8_t *p, uint32_t room, uint32_t want_len, uint32_t want_id)
+ {
+-    uint32_t len;
+-    if (room < XDATA_HDR || xdata_rd32(p) != XDATA_MAGIC)
+-        return 0;
+-    len = xdata_rd32(p + 4);
+-    if (len != want_len || len > room - XDATA_HDR || xdata_rd32(p + 12) != want_id)
+-        return 0;
+-    return x0x_crc32(p + XDATA_HDR, len) == xdata_rd32(p + 8) && xdata_rd32(p + 8) == want_id;
++    return (uint8_t)asset_blob_valid(p, room, XDATA_MAGIC, want_len, want_id);
+ }
+ #endif

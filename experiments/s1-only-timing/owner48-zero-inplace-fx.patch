@@ -1,0 +1,129 @@
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -2311,14 +2311,11 @@
+ volatile uint32_t eng_dbg_wait, eng_dbg_nsub;  /* 24 MHz ticks waiting for core 1, stretches */
+ #endif
+ 
+-/* the mix of one stretch between two events: dry left and right, the reverb and delay sends;
+- * t0..tr the 808's scratch, kbuf the break's */
+-static float dry_l[256], dry_r[256], rev[256], dly[256], t1[256], t2[256], kbuf[256];
+-/* The 808's L/R scratch is the stretch's own out_l/out_r window (saves 2 KiB).
+- * Lifetime: core 2 writes it while core 1 only touches dry_l..kbuf; core 1
+- * reads it after plat_cpu2_wait and before the 303s overwrite that window;
+- * fxbus_process_st then writes the final mix there. A failed core 2 is held. */
+-static float *t0, *tr;
++/* The current output span holds the dry accumulation and then its in-place
++ * stereo FX/master result. The 808 uses disjoint temporary L/R; the spans
++ * and scratch retain their original lifetimes and job-stage ownership. */
++static float *dry_l, *dry_r;
++static float t0[256], tr[256], rev[256], dly[256], t1[256], t2[256], kbuf[256];
+ 
+ /* a glide applied in place to a buffer that started at zero: buf * c is 0 + buf * c exactly, so this
+  * is add_glide(zeros, buf) to the bit (the same steps of c) */
+@@ -2416,8 +2413,8 @@
+ }
+ 
+ /* ---- the two cores' jobs, balanced per stretch ----
+- * Five jobs: the 909 (renders straight into dry_l..dly, the mix's first term), the 808
+- * (its L/R in the stretch's out_l/out_r window, its sends in t1/t2), bass A and bass B
++ * Five jobs: the 909 (writes the dry output span and sends, the mix's first term), the 808
++ * (its L/R in t0/tr scratch, its sends in t1/t2), bass A and bass B
+  * (each its own workspace and L/R in XPOOL) and the break (kbuf). Recorder state shared
+  * with the sequencer stays on core 0 (before and after the jobs).
+  * Each job mixes itself on the core that rendered it, in the one-core order (909, 808,
+@@ -2948,7 +2945,7 @@
+         uint32_t m = n - off;
+         if (m > cs)
+             m = cs;
+-        fxbus_process_st(&fx, dry_l + off, dry_r + off, rev + off, dly + off,
++        fxbus_process_st_inplace(&fx, rev + off, dly + off,
+                          ol + off, orr + off, (int)m);
+         off += m;
+         eng_sync();
+@@ -2987,7 +2984,7 @@
+     int j;
+     if (solo & (0x7FFu << 5)) solo_parts |= 1u << PART_909;
+     if (solo & (0x7FFu << 16)) solo_parts |= 1u << PART_808;
+-    t0 = out_l; tr = out_r;                           /* before the second core reads them */
++    dry_l = out_l; dry_r = out_r;                           /* before the second core reads them */
+     bfx_snapshot();                                   /* before the second core reads the holds */
+     eng_job_arg = (n & 0xFFu) | (uint32_t)smc_audible_drums(solo, PART_808) << 9 | (offset << 20);
+     eng_job_solo = solo_parts;
+@@ -3094,7 +3091,7 @@
+             uint32_t m = n - done;
+             if (m > ENG_TAIL_CS)
+                 m = ENG_TAIL_CS;
+-            fxbus_process_st(&fx, dry_l + done, dry_r + done, rev + done, dly + done,
++            fxbus_process_st_inplace(&fx, rev + done, dly + done,
+                              out_l + done, out_r + done, (int)m);
+             if (first) { PROF_ADD(5, pf); first = 0; }
+             bfx_flt_shape(out_l + done, out_r + done, (int)m);
+@@ -3113,7 +3110,7 @@
+         eng_fx_done = 0;
+         eng_sync();
+         if (!plat_cpu2_run(core2_fx, 0u)) {
+-            fxbus_process_st(&fx, dry_l, dry_r, rev, dly, out_l, out_r, (int)n);
++            fxbus_process_st_inplace(&fx, rev, dly, out_l, out_r, (int)n);
+             PROF_ADD(5, pf);
+             tape_after_fx();
+             bfx_flt_shape(out_l, out_r, (int)n);
+@@ -3138,7 +3135,7 @@
+                     }
+                     ready = eng_fx_done;
+                     if (ready < n) {
+-                        fxbus_process_st(&fx, dry_l + ready, dry_r + ready, rev + ready, dly + ready,
++                        fxbus_process_st_inplace(&fx, rev + ready, dly + ready,
+                                          out_l + ready, out_r + ready, (int)(n - ready));
+                         eng_sync();
+                         eng_fx_done = n;
+@@ -3164,7 +3161,7 @@
+         eng_master_done = 1;
+     } else {
+         PROF_T(pf);
+-        fxbus_process_st(&fx, dry_l, dry_r, rev, dly, out_l, out_r, (int)n);
++        fxbus_process_st_inplace(&fx, rev, dly, out_l, out_r, (int)n);
+         tape_after_fx();
+         PROF_ADD(5, pf);
+         bfx_flt_shape(out_l, out_r, (int)n);
+--- a/firmware/src/dsp/fxbus.c
++++ b/firmware/src/dsp/fxbus.c
+@@ -494,13 +494,11 @@
+ 
+ /* X0X stereo: 9W9's chain on L and R. The distortion runs on each side; the glue compressor reads
+  * the louder side and moves both together, so the image holds */
+-void fxbus_process_st(fxbus_t *f, const float *dry_l, const float *dry_r, const float *rev, const float *dly,
+-                      float *out_l, float *out_r, int n)
++void fxbus_process_st_inplace(fxbus_t *f, const float *rev, const float *dly,
++                              float *out_l, float *out_r, int n)
+ {
+     if (n > 256)
+         n = 256;
+-    __builtin_memcpy(out_l, dry_l, (unsigned)n * sizeof(float));
+-    __builtin_memcpy(out_r, dry_r, (unsigned)n * sizeof(float));
+     fx_reverb(f, rev, out_l, out_r, n);
+     fx_delay(f, dly, out_l, out_r, n);
+     if (f->dist_mode >= 1) {
+@@ -530,3 +528,14 @@
+             out_r[i] *= vol;
+         }
+ }
++
++
++void fxbus_process_st(fxbus_t *f, const float *dry_l, const float *dry_r, const float *rev, const float *dly,
++                      float *out_l, float *out_r, int n)
++{
++    if (n > 256)
++        n = 256;
++    __builtin_memcpy(out_l, dry_l, (unsigned)n * sizeof(float));
++    __builtin_memcpy(out_r, dry_r, (unsigned)n * sizeof(float));
++    fxbus_process_st_inplace(f, rev, dly, out_l, out_r, n);
++}
+--- a/firmware/src/dsp/fxbus.h
++++ b/firmware/src/dsp/fxbus.h
+@@ -79,3 +79,6 @@
+ int fxbus_param_si(int i, int pot, float *val);
+ void fxbus_set(fxbus_t *f, int i, int value);
+ int fxbus_get(const fxbus_t *f, int i);
++
++/* The stereo dry span is already in out_l/out_r; distinct from sends. */
++void fxbus_process_st_inplace(fxbus_t *, const float *, const float *, float *, float *, int);

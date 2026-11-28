@@ -1,0 +1,62 @@
+check_locked_settings: 20 settings ok
+firmware/src/dsp/juno6.c:157:29: warning: suggest braces around initialization of subobject [-Wmissing-braces]
+ juno6_envelope_snapshot v={0};
+                            ^
+                            {}
+1 warning generated.
+firmware/src/dsp/s1c/s1c.c:1101:15: warning: unused variable 'x' [-Wunused-variable]
+        float x;
+              ^
+1 warning generated.
+In file included from firmware/src/x0x.c:218:
+firmware/src/app/ui.c:9206:29: warning: suggest braces around initialization of subobject [-Wmissing-braces]
+        cv_legacy_render l={0};
+                            ^
+                            {}
+In file included from firmware/src/x0x.c:218:
+In file included from firmware/src/app/ui.c:11238:
+firmware/hal/../src/app/ui_drum_voice.inc:743:13: warning: unused variable 'valid' [-Wunused-variable]
+        int valid=absolute<NSTEPS && absolute<len;
+            ^
+firmware/hal/../src/app/ui_drum_voice.inc:767:9: warning: unused variable 'choice' [-Wunused-variable]
+    int choice=DV(z->value[0][2],matrix_value(pg.r[0][2]));
+        ^
+firmware/hal/../src/app/ui_drum_voice.inc:888:14: warning: unused variable 'age' [-Wunused-variable]
+    uint32_t age = 0;
+             ^
+In file included from firmware/src/x0x.c:218:
+firmware/src/app/ui.c:11581:34: warning: suggest braces around initialization of subobject [-Wmissing-braces]
+    ordinary_knob_scene_t scene={0};
+                                 ^
+                                 {}
+5 warnings generated.
+Chicago factory cols: exact aggregate bytes 1961
+Miami N513: 513 exact words, 367 packed bytes
+Chicago FAST32 a: 16385 bit-exact coefficients in 4078 B
+loader: image 9372 B at 0x1c0a800, bss end 0x1c0fac0
+loader: ota.bin 8330 B
+Chicago FAST32 e: 16385 bit-exact coefficients in 14399 B
+font T: BarlowSemiCondensed-SemiBold.ttf 10px h 12, digit adv 5, 1105 B
+font XS: BarlowSemiCondensed-SemiBold.ttf 12px h 15, digit adv 6, 1571 B
+font S: BarlowSemiCondensed-Medium.ttf 15px h 16, digit adv 7, 1981 B
+font B: BarlowSemiCondensed-Bold.ttf 15px h 16, digit adv 8, 2039 B
+font M: BarlowSemiCondensed-SemiBold.ttf 23px h 24, digit adv 12, 2091 B
+font L: BarlowSemiCondensed-Bold.ttf 31px h 32, digit adv 16, 1685 B
+font set barlow: 10691 B (approx)
+gen_drum_samples: 110549 frames (55275 bytes of ADPCM, 221098 as int16) -> x0x_drum_samples.h; tanh 1026 packed 4104->3046 B + 19 pot curves lossless-predictor 9728->1387 B -> x0x_drum_tables.h
+break bank: none (factory loops are an optional install)
+XIP free: 916 B
+pool raw free: 51508 B
+pool reserve: 8192 B
+pool margin: 43316 B
+  ok    .ram_text: 852 insns, no calls
+  ok    app code area 552672 B, 916 B free (Bluetooth block at app.bin 0x86ee0)
+  ok    no soft-double routines (single-precision FPU only)
+  ok    image 551756 B; RAM .data+.bss 95408 B of 98304; pool 292556 B of 344064
+  ok    register access: hal/ only (src/, loader/ clean)
+XDATA: 7698 B of 8192 (flash 0xad000), 494 B spare
+FITTAB: 1404 B of 4096 (flash 0xfe000), 2692 B spare
+FDATA: 61208 B of 61440 (flash 0xe5000), 232 B spare
+app      <scratch>  551756 B
+loader   <scratch>  8330 B
+package  <scratch>  726292 B, identity SMK-37 Elite_900, board smk37

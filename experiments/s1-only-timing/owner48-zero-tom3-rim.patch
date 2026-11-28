@@ -1,0 +1,20 @@
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -2541,7 +2541,7 @@
+     for (i = 0; i < n; i++)
+         left808[i] = right808[i] = t1[i] = t2[i] = 0.0f;
+     drum808_render_st_lanes(&d808, left808, right808, t1, t2, (int)n,
+-                            (uint16_t)(arg >> 9 & 0x7FFu), D8_LANES_BODY | (eng_808_reverse ? 0xcu : 0u));
++                            (uint16_t)(arg >> 9 & 0x7FFu), D8_LANES_BODY | (eng_808_reverse ? 0x7cu : 0u));
+     eng_sync();
+     eng_808_body = 1;
+     eng_sync();
+@@ -2658,7 +2658,7 @@
+             if (eng_808_reverse) {
+                 if(body_wait(core))return 0;
+                 drum808_render_st_lanes(&d808,left808,right808,t1,t2,(int)n,
+-                                       (uint16_t)(arg>>9&0x7ffu),((D8_LANES_MID & ~0xcu) | D8_LANES_METAL));
++                                       (uint16_t)(arg>>9&0x7ffu),((D8_LANES_MID & ~0x7cu) | D8_LANES_METAL));
+                 bfx_shape(PART_808,left808,right808,t1,t2,4,(int)n);
+             } else if (eng_808_split) {
+                 /* If A renders on core 1, its mix must finish before that core

@@ -1,0 +1,63 @@
+--- a/firmware/src/app/project.c
++++ b/firmware/src/app/project.c
+@@ -677,9 +677,9 @@
+     if(bass_status)return bass_status;
+ #endif
+     if (s->magic != PROJ_MAGIC || s->format != PROJ_FORMAT || s->stereo != PROJ_STEREO ||
+-        s->snd_rev != PROJ_SND_REV || s->palette > 5 || s->keyled > 2 || s->clk_out > 1 ||
+-        s->notes_out > 1 || s->bpm_x10 < 200 || s->bpm_x10 > 2750 || s->accent_q7 > 127 ||
+-        s->keysound > 1 || s->autosave_off > 1 || s->out_loud > 1 || s->usb_full > 1 ||
++        s->snd_rev != PROJ_SND_REV || s->palette > 5 || s->keyled > 2 ||
++        (uint32_t)s->bpm_x10 - 200u > 2550u || s->accent_q7 > 127 ||
++        (s->clk_out | s->notes_out | s->keysound | s->autosave_off | s->out_loud | s->usb_full) > 1 ||
+         (s->bt & 0xC0u) || !(s->bt & PROJ_BT_CLK_IN) || PROJ_CLK_SRC(s->bt) > SEQ_CLK_EXT ||
+         s->ck_ch < 2)
+         return -1;
+@@ -710,17 +710,17 @@
+                 return -1;
+         }
+         for (b = 0; b < NKIT; b++)
+-            if (!pat->drum[b].len || pat->drum[b].len > NSTEPS || pat->drum[b].rate >= NRATES)
++            if ((uint32_t)pat->drum[b].len - 1u >= NSTEPS || pat->drum[b].rate >= NRATES)
+                 return -1;
+         for (b = 0; b < NBASS; b++) {
+             const bpart_t *bp = &pat->bass[b];
+             const tb3po_cfg_t *g = &bp->gen;
+-            if (!bp->len || bp->len > NSTEPS || bp->rate >= NRATES || bp->dir >= NDIRS || bp->transpose > 48 ||
+-                g->density > 100 || g->accent > 100 || g->slide > 100 || !g->oct_range || g->oct_range > 3 ||
++            if ((uint32_t)bp->len - 1u >= NSTEPS || bp->rate >= NRATES || bp->dir >= NDIRS || bp->transpose > 48 ||
++                g->density > 100 || g->accent > 100 || g->slide > 100 || (uint32_t)g->oct_range - 1u > 2u ||
+                 g->root > 11 || g->scale >= TB3PO_NSCALES || g->base_oct > 4 || g->mutate_bars > 16)
+                 return -1;
+             for (i = 0; i < NSTEPS; i++)
+-                if (bp->step[i].note > 127 || bp->step[i].velocity > 127 ||
++                if ((bp->step[i].note | bp->step[i].velocity) > 127 ||
+                     bstep_gate(&bp->step[i]) > G_TIE ||
+                     ((bp->step[i].flags >> BS_END_SHIFT) && bstep_gate(&bp->step[i]) == G_REST))
+                     return -1;
+@@ -880,18 +880,18 @@
+ int project_file_validate(const uint8_t *h)
+ {
+     stream_stage_recovered=0; /* explicit validated import only, not loaded fallback */
++    uint32_t rates = get32(h + 16), stream = get32(h + 20), part_mask = get32(h + 28);
+     if (get32(h) != 0x50583058u || get32(h + 4) != 1 || get32(h + 8) != sizeof project_stage ||
+-        !PROJ_FORMAT_OK(get32(h + 16)) ||
+-        !stream_known(get32(h + 20)) ||
+-        get32(h + 24) != PROJ_SND_REV || !PROJ_FILE_OFF_OK(get32(h + 28)))
++        !PROJ_FORMAT_OK(rates) || !stream_known(stream) ||
++        get32(h + 24) != PROJ_SND_REV || !PROJ_FILE_OFF_OK(part_mask))
+         return -1;
+     if (get32(h + 12) != crc32_of((const uint8_t *)&project_stage, sizeof project_stage))
+         return -4;
+-    if(!stream_layout_ok(&project_stage,get32(h+20)))return -9;
+-    stream_13_upgrade(&project_stage, get32(h+20));
+-    part_off_staged = (uint8_t)(get32(h + 28) & PROJ_PART_OFF_ALL);
++    if(!stream_layout_ok(&project_stage,stream))return -9;
++    stream_13_upgrade(&project_stage, stream);
++    part_off_staged = (uint8_t)(part_mask & PROJ_PART_OFF_ALL);
+ #if !X0X_ORIGINAL_SYNTH
+-    migrate_break_counts(&project_stage, get32(h+20));
++    migrate_break_counts(&project_stage, stream);
+ #endif
+     return project_validate_stage();
+ }

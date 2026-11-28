@@ -1,0 +1,69 @@
+--- a/firmware/src/dsp/s1c/s1c.c
++++ b/firmware/src/dsp/s1c/s1c.c
+@@ -1047,6 +1047,20 @@
+         osc_pos1<=1.0f && osc_frac1>0.0f;
+     int tile_live=0;
+ #endif
++#if S1C_FAST && S1C_CSM && S1C_NO_SEQ
++    /* A zero Amount with bounded one-pole history has constant visible
++     * output. Advance its exact phase/history in the shared span kernel. */
++    int lfo_span=n && !nmoving && P(L1A)==0.f && P(L2A)==0.f &&
++        s->lfo_c2>=0.5f && s->lfo_c2<=1.f && l1step>=0.f &&
++        l1step<=0.5f && l2step>=0.f && l2step<=0.5f;
++    for(i=0;lfo_span && i<2;++i)
++        lfo_span=s->lfo[i].ph>=0.f && s->lfo[i].ph<1.f &&
++                 s->lfo[i].sm>=-1.f && s->lfo[i].sm<=1.f;
++    if(lfo_span) {
++        s1u_lfo_tick(&s->lfo[0],l1step,(int)P(L1I),P(L1A),s->lfo_c2,n);
++        s1u_lfo_tick(&s->lfo[1],l2step,(int)P(L2I),P(L2A),s->lfo_c2,n);
++    }
++#endif
+     for (f = 0; f < n; f++) {
+ #if S1C_FAST
+         int cu = (f & 3) == 0;
+@@ -1086,8 +1100,13 @@
+         /* LFOs */
+         float x;
+         float lc2 = s->lfo_c2;
+-        s1u_lfo_tick(&s->lfo[0], l1step, (int)P(L1I), P(L1A), lc2);
+-        s1u_lfo_tick(&s->lfo[1], l2step, (int)P(L2I), P(L2A), lc2);
++#if S1C_FAST && S1C_CSM && S1C_NO_SEQ
++        if(!lfo_span)
++#endif
++        {
++            s1u_lfo_tick(&s->lfo[0],l1step,(int)P(L1I),P(L1A),lc2,1);
++            s1u_lfo_tick(&s->lfo[1],l2step,(int)P(L2I),P(L2A),lc2,1);
++        }
+ #if !S1C_NO_SEQ
+         sequencer(s);
+ #endif
+--- a/firmware/src/dsp/s1c/s1u.c
++++ b/firmware/src/dsp/s1c/s1u.c
+@@ -67,13 +67,15 @@
+ }
+ 
+ /* ---- LFO ---- */
+-void s1u_lfo_tick(s1u_lfo *l, float step, int shape, float amount, float c2)
++void s1u_lfo_tick(s1u_lfo *l, float step, int shape, float amount, float c2, unsigned n)
+ {
++    while(n--) {
+     l->ph += step; if (l->ph >= 1.0f) l->ph -= 1.0f;
+     float ph = l->ph;
+     float x = shape == 0 ? s1u_sin((uint32_t)(ph * 4294967296.0f)) :
+               shape == 1 ? (ph > 0.5f ? 1.0f : -1.0f) : shape == 2 ? (ph - 0.5f) * 2.0f : (0.5f - ph) * 2.0f;
+     l->sm = (1.0f - c2) * x + c2 * l->sm;
++    }
+     l->o01 = 0.5f * (1.0f + l->sm) * amount; l->o10 = 1.0f - 0.5f * (1.0f - l->sm) * amount;
+ }
+ 
+--- a/firmware/src/dsp/s1c/s1u.h
++++ b/firmware/src/dsp/s1c/s1u.h
+@@ -14,7 +14,7 @@
+ /* ---- LFO: sine / square / saw up / saw down, smoothed, unipolar outputs ----
+  * o01 = 0..amount (adds), o10 = 1-amount..1 (scales). */
+ typedef struct { float ph, sm, o01, o10; } s1u_lfo;
+-void s1u_lfo_tick(s1u_lfo *l, float step, int shape, float amount, float smooth_c2);
++void s1u_lfo_tick(s1u_lfo *l, float step, int shape, float amount, float smooth_c2, unsigned n);
+ 
+ /* ---- table sine: ph is a 32-bit phase (one turn = 2^32) ---- */
+ float s1u_sin(uint32_t ph);

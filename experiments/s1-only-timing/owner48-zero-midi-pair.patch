@@ -1,0 +1,94 @@
+--- a/firmware/src/seq/sequencer.h
++++ b/firmware/src/seq/sequencer.h
+@@ -88,6 +88,7 @@
+     void (*step)(void *ctx, int part, int step);                        /* UI playhead (optional) */
+     void *ctx;
+     void (*transport)(void *ctx, int running); /* ordered with following input */
++    void (*drum_pair)(void *ctx,uint8_t ch,uint8_t note,uint8_t velocity);
+ } seq_sink_t;
+ 
+ #define SEQ_EXT_BEATS 8u              /* the tempo of an external clock: the mean over this many beats */
+--- a/firmware/src/seq/sequencer.c
++++ b/firmware/src/seq/sequencer.c
+@@ -199,8 +199,11 @@
+ __attribute__((noinline)) static void drum_midi_hit(seq_t *s, const seq_sink_t *o, int k, int v, uint8_t mv)
+ {
+     if (s->send_notes && s->ch[k] != SEQ_CH_OFF) {
+-        midi(o, (uint8_t)(0x90 | s->ch[k]), GM_DRUM[k][v], mv);
+-        midi_note_off(o, s->ch[k], GM_DRUM[k][v]);
++        if(o->drum_pair) o->drum_pair(o->ctx,s->ch[k],GM_DRUM[k][v],mv);
++        else {
++            midi(o, (uint8_t)(0x90 | s->ch[k]), GM_DRUM[k][v], mv);
++            midi_note_off(o, s->ch[k], GM_DRUM[k][v]);
++        }
+     }
+ }
+ 
+--- a/firmware/src/app/plat.h
++++ b/firmware/src/app/plat.h
+@@ -106,6 +106,7 @@
+ #define PLAT_MIDI_LINK_END(src) ((uint32_t)(src) << 4)   /* CIN 0, no message: the link of input src ended (MID-15, BLE-16) */
+ int plat_midi_pulse(uint8_t channel, uint8_t note, uint8_t velocity); /* CPU0 only: atomic matched pair or drop both */
+ void plat_midi_out(uint32_t pkt);      /* queue one (audio ISR or main loop) */
++void plat_midi_drum_pair(uint8_t channel,uint8_t note,uint8_t velocity);
+ 
+ /* persistent storage (Felucca storage.c objects: A/B sectors, CRC, torn-write safe) */
+ /* Bytes loaded; -1 = confirmed empty, -2 = read failure (retry), -3 = damaged
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -1559,8 +1559,18 @@
+     } else if (restore) engine_set_base(t, v, i);
+ }
+ static void s_transport(void *, int);
++static void s_drum_pair(void *ctx,uint8_t channel,uint8_t note,uint8_t velocity)
++{
++#if X0X_HOST
++    s_midi(ctx,(uint8_t)(0x90u|channel),note,velocity);
++    s_midi(ctx,(uint8_t)(0x80u|channel),note,0u);
++#else
++    (void)ctx;
++    plat_midi_drum_pair(channel,note,velocity);
++#endif
++}
+ static const seq_sink_t SINK = {s_drum_seq, s_bon, s_boff, s_brk, s_brkstop, s_midi, s_step, 0
+-    , s_transport
++    , s_transport, s_drum_pair
+ };
+ 
+ #if BOARD_SMK37
+--- a/firmware/src/app/plat_fm1.c
++++ b/firmware/src/app/plat_fm1.c
+@@ -283,6 +283,33 @@
+     ble_out(pkt);                               /* the same, to a Bluetooth MIDI connection */
+ #endif
+ }
++/* Room-for-two fast path for ordinary sequencer output. Overflow still
++ * takes the existing per-packet priority logic; never use BREAK's
++ * matched-pair-or-drop admission for a sequencer event. */
++void plat_midi_drum_pair(uint8_t channel,uint8_t note,uint8_t velocity)
++{
++#if BOARD_SMK37
++    extern uint8_t smk_clip_mode_on(void);
++    if(smk_clip_mode_on()) return;
++#endif
++    const uint32_t head=((uint32_t)channel<<8)|((uint32_t)note<<16);
++    const uint32_t on=0x9009u|head|((uint32_t)velocity<<24),off=0x8008u|head;
++    const uint32_t irq=fm1_irq_mask_save(FM1_IRQ_TIMER5);
++    int fast=usb.config && mo_w-mo_r<=MQ-2u;
++    if(fast) {
++        uint32_t w=mo_w;
++        midi_out_q[w%MQ]=on;
++        midi_out_q[(w+1u)%MQ]=off;
++        fm1_data_sync();
++        mo_w=w+2u;
++    }
++    fm1_irq_mask_restore(FM1_IRQ_TIMER5,irq);
++    if(!fast) { plat_midi_out(on); plat_midi_out(off); return; }
++#if X0X_BLE
++    ble_out(on);
++    ble_out(off);
++#endif
++}
+ /* A pulse must not use priority replacement: an Off replacing an older CC
+  * could otherwise precede its newly appended On. Reserve two slots or drop both. */
+ int plat_midi_pulse(uint8_t channel, uint8_t note, uint8_t velocity)

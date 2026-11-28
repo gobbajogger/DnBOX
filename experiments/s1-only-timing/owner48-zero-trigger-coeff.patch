@@ -1,0 +1,64 @@
+--- a/firmware/src/dsp/drum808.c
++++ b/firmware/src/dsp/drum808.c
+@@ -525,14 +525,17 @@
+     float r = ratio > 0.05f ? (ratio < 8.0f ? ratio : 8.0f) : 0.05f;
+     float dq = 0.35f + 1.15f * clampf(decay01, 0.0f, 1.0f);
+     float t = clampf(tone01, 0.0f, 1.0f) * (0.5f * FM_PI), dnorm;
+-    bp_set(&v->bt1, SD_F1 * r, SD_Q1 * dq);
+-    bp_set(&v->bt2, SD_F2 * r, SD_Q2 * dq);
+-    v->mix1 = fm_sin_pi(0.5f * FM_PI - t);
+-    v->mix2 = fm_sin_pi(t);
++    if(r!=v->trigger_r || dq!=v->trigger_dq || t!=v->trigger_t) {
++        bp_set(&v->bt1, SD_F1 * r, SD_Q1 * dq);
++        bp_set(&v->bt2, SD_F2 * r, SD_Q2 * dq);
++        v->mix1 = fm_sin_pi(0.5f * FM_PI - t);
++        v->mix2 = fm_sin_pi(t);
++        dnorm = dq / (0.35f + 1.15f * SD_DECAY_DEF);
++        v->noise_decay = d8_exp(-1.0f / (0.075f * dnorm * SR));
++        v->trigger_r=r; v->trigger_dq=dq; v->trigger_t=t;
++    }
+     v->accent_v = clampf(accent_v, 1.0f, 20.0f);
+     v->noise_env = clampf(snappy01, 0.0f, 1.0f) * v->accent_v * 0.25f;
+-    dnorm = dq / (0.35f + 1.15f * SD_DECAY_DEF);
+-    v->noise_decay = d8_exp(-1.0f / (0.075f * dnorm * SR));
+     v->gate = 44;
+     v->active = 1;
+     v->quiet = 0;
+@@ -580,8 +583,15 @@
+ __attribute__((noinline)) static void tom_trigger(d8_tom_t *v, int mode, float hz, float ring_s, float accent_v)
+ {
+     float t, g, c2f;
++    const float f0=hz<20.0f?20.0f:(hz>SR*0.25f?SR*0.25f:hz);
++    if(v->f0!=f0 || v->mode!=(uint8_t)mode || v->fwd==0.f) {
++        c2f = -d8_expm1(-TWO_PI_SR * (f0 * 2.0f));
++        v->skin_lp_c = c2f;
++        v->strike_lp_c = mode == 0 ? D8_TOM_STRIKE_LPC : c2f;
++        v->fwd = mode == 0 ? d8_pow(120.0f / f0, 0.224f) * 9.2f : d8_pow(120.0f / f0, 0.90f) * 6.7f;
++    }
+     v->mode = (uint8_t)mode;
+-    v->f0 = hz < 20.0f ? 20.0f : (hz > SR * 0.25f ? SR * 0.25f : hz);
++    v->f0 = f0;
+     t = ring_s > 0.02f ? ring_s : 0.02f;
+     g = 1.0f - TOM_LN100_Q_PI / (v->f0 * t);
+     if (g < 0.0f) g = 0.0f;
+@@ -591,10 +601,6 @@
+     v->gate = 44;
+     v->pitch_env = 1.0f;
+     v->skin_env = mode == 0 ? 1.0f : 0.0f;
+-    c2f = -d8_expm1(-TWO_PI_SR * (v->f0 * 2.0f));
+-    v->skin_lp_c = c2f;
+-    v->strike_lp_c = mode == 0 ? D8_TOM_STRIKE_LPC : c2f;
+-    v->fwd = mode == 0 ? d8_pow(120.0f / v->f0, 0.224f) * 9.2f : d8_pow(120.0f / v->f0, 0.90f) * 6.7f;
+     v->coef_age = 0;
+     v->active = 1;
+     v->quiet = 0;
+--- a/firmware/src/dsp/drum808.h
++++ b/firmware/src/dsp/drum808.h
+@@ -68,6 +68,7 @@
+ 
+ typedef struct {
+     float mix1, mix2, accent_v, noise_env, noise_decay, shp;
++    float trigger_r, trigger_dq, trigger_t; /* coefficient inputs; audio filter history remains separate */
+     d8_bp_t bt1, bt2;
+     d8_bq_t noise_hp, out_hp;
+     d8_rng_t rng;

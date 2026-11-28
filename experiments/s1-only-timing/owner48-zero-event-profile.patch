@@ -1,0 +1,130 @@
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -1157,18 +1157,25 @@
+ }
+ /* Disposable six-voice loaded replay witnesses, not firmware UI state. */
+ volatile uint32_t bench_loaded_on, bench_loaded_run, bench_loaded_hits[NKIT];
++extern volatile uint32_t bench_evt_on,bench_evt_live[10];
++#define EVT_DECL(v) uint32_t v=bench_evt_on?plat_ticks24():0
++#define EVT_END(k,v) do { if(bench_evt_on) bench_evt_live[(k)]+=plat_ticks24()-(v); } while(0)
++#define EVT_ADV(n) do { EVT_DECL(t_advance); seq_advance(&seq,(n),&SINK); EVT_END(0,t_advance); } while(0)
+ static void s_drum(void *x, int kit, int v, float vel);
+ static int s_drum_seq(void *x, int kit, int v, float vel)
+ {
+-    if (prob_skip(kit, v))
+-        return 0;
++    EVT_DECL(t);
++    if (prob_skip(kit, v)) { EVT_END(1,t); return 0; }
+     s_drum(x, kit, v, vel);
+     if (bench_loaded_on && (unsigned)kit<NKIT) ++bench_loaded_hits[kit];
++    if(bench_evt_on) ++bench_evt_live[9];
++    EVT_END(1,t);
+     return 1;
+ }
+ __attribute__((noinline)) static void s_drum(void *x, int kit, int v, float vel)
+ {
+     (void)x;
++    EVT_DECL(t);
+ 
+     if (v == 0)                          /* BD (both kits' track 1): the master's PUMP key */
+         master_key(&mst, kit, vel);
+@@ -1179,10 +1186,13 @@
+         eng_hit_step[kit][v] = eng_step[TRK_DRUM + kit];
+         eng_hit_ms[kit][v] = plat_ms() | 1u;          /* 0 = never hit */
+     }
++    EVT_END(2,t);
++    EVT_DECL(trigger);
+     if (kit == 0)
+         drum909_trigger(&d909, v, vel);
+     else                                 /* the 808's unaccented hit sits at D8_VEL_NORMAL, not at our 909 level */
+         drum808_trigger(&d808, v, vel >= 0.999f ? 1.0f : vel * (D8_VEL_NORMAL / (88.0f / 127.0f)));
++    EVT_END(kit==0?3:4,trigger);
+ }
+ 
+ static void bass_adapt_flags(int p, int acc, int sl)
+@@ -1384,9 +1394,15 @@
+ static void s_brkstop(void *x) { (void)x; breaks_stop(&brk); brk_midi_discard(); }
+ static void s_midi(void *x, uint8_t st, uint8_t d1, uint8_t d2)
+ {
++    EVT_DECL(t);
+     uint32_t cin = st >= 0xF0 ? 0x0Fu : (uint32_t)(st >> 4);
+     (void)x;
+     plat_midi_out(cin | ((uint32_t)st << 8) | ((uint32_t)d1 << 16) | ((uint32_t)d2 << 24));
++    if(bench_evt_on) {
++        bench_evt_live[7]+=st==0xf8;
++        bench_evt_live[8]+=(st&0xe0)==0x80;
++    }
++    EVT_END(6,t);
+ }
+ /* Accepted hits can originate on CPU1 during its BREAK render job. Append
+  * descriptors only: transport rings belong exclusively to CPU0. CPU0 sequencing
+@@ -1423,11 +1439,13 @@
+ static void s_step(void *x, int t, int p)
+ {
+     (void)x;
++    EVT_DECL(t_step);
+     eng_step[t] = (uint8_t)p;
+     if (mot_on) {
+         if (mot_empty_in_render) motion_step_empty(&mot,t,p);
+         else motion_step(&mot,t,seq.ppat[t],p,seq_next_step(&seq,t,p),seq_part_len(&seq,t));
+     }
++    EVT_END(5,t_step);
+ }
+ 
+ /* --------------------------------------------------------------- motion --- */
+@@ -3286,13 +3304,13 @@
+         /* A final MIDI Stop may have no following MIDI note to consume it.
+          * Complete transport before the independent physical-key FIFO. */
+         if (seq.ext_pending || seq.req_start || seq.req_stop || seq.req_cont)
+-            seq_advance(&seq, 0, &SINK);
++            EVT_ADV(0);
+         live_key_drain();
+ #if X0X_BASS_PRESET_PREVIEW
+         bass_preset_boundary();
+ #endif
+         fxbus_set_bpm(&fx, seq_tempo(&seq));
+-        seq_advance(&seq, 0, &SINK);
++        EVT_ADV(0);
+         brk_midi_drain();
+         if (mot_on && seq.playing && !seq_clock_waiting(&seq))
+             mot_empty_in_render = (uint8_t)!motion_tick(&mot, n);
+@@ -3325,7 +3343,7 @@
+         {
+             PROF_T(pt);
+             original_prepare_all(); /* next actual sequencer stretch, before its events */
+-            seq_advance(&seq, k, &SINK);
++            EVT_ADV(k);
+             brk_midi_drain();
+             PROF_ADD(7, pt);
+         }
+--- a/firmware/src/app/main_fm1.c
++++ b/firmware/src/app/main_fm1.c
+@@ -42,10 +42,15 @@
+ extern uint32_t bench_s1_samples(void);
+ volatile uint32_t bench_s1_held[4]; /* halves, peak ticks, over target, elapsed > 512 frames */
+ static uint32_t bench_s1_ticks;
++volatile uint32_t bench_evt_on,bench_evt_live[10],bench_evt_rows[3][12];
+ static void render_block(int32_t *o)                /* ALNK0: one half, measured */
+ {
+     uint32_t t0 = fm1_ticks(), us, budget = HALF_FRAMES * 1000000u / FS;
+     x0x_dbg.in_audio = 1;
++    const uint32_t f=bench_s1_samples();
++    const unsigned row=f==129024u?0:f==131072u?1:f==171520u?2:3;
++    bench_evt_on=row<3;
++    if(bench_evt_on) for(unsigned i=0;i<10;++i) bench_evt_live[i]=0;
+ #if FELUCCA_UAC
+     uac_render_start();
+ #endif
+@@ -69,6 +74,12 @@
+     engine_diag_half(x0x_dbg.halves, x0x_dbg.late);
+ #endif
+     bench_s1_ticks=fm1_ticks()-t0;
++    if(bench_evt_on) {
++        bench_evt_rows[row][0]=f;
++        bench_evt_rows[row][1]=bench_s1_ticks;
++        for(unsigned i=0;i<10;++i) bench_evt_rows[row][i+2]=bench_evt_live[i];
++        bench_evt_on=0;
++    }
+     us=bench_s1_ticks / FM1_TICKS_PER_US;
+ #if X0X_LCD_TRACE
+     lcd_trace_record(LCD_T_AUDIO, us);

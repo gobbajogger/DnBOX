@@ -1,0 +1,39 @@
+--- a/firmware/src/dsp/s1c/s1c.c
++++ b/firmware/src/dsp/s1c/s1c.c
+@@ -435,6 +435,12 @@
+     float y=t<0.125f?-1.0f:1.0f;
+     return y+f*((2.0f*t-1.0f-0.0f)-y);
+ }
++/* Diagnostic: this producer is a leaf using only owner/scratch RAM.
++ * Enter the existing guard-permitted CRT-copied executable window.
++ * It must never participate in a flash-off operation. */
++#if !defined(X0X_HOST)
++__attribute__((section(".ram_text.s1_osc_tile")))
++#endif
+ static __attribute__((noinline)) void osc4_fill(const s1c *s, float f0, unsigned lane,
+                                                 float *out)
+ {
+@@ -447,6 +453,12 @@
+         }
+     }
+ }
++#if !defined(X0X_HOST)
++static void (*volatile osc4_leaf)(const s1c *,float,unsigned,float *)=osc4_fill;
++#define OSC4_PRODUCE osc4_leaf
++#else
++#define OSC4_PRODUCE osc4_fill
++#endif
+ #endif
+ #if S1C_KR > 1
+ /* Cheap voice: pitch, LFO, key-tracking and filter coefficients at control rate (every S1C_KR
+@@ -1098,8 +1110,8 @@
+ #if S1C_OSC4
+         const unsigned lane=f&3u;
+         if(!lane && tile_ok && pitch_mask==((1u<<S1C_VOICES)-1u)){
+-            osc4_fill(s,osc_frac,0,wave_tile);
+-            osc4_fill(s,osc_frac1,1,wave_tile+4*S1C_VOICES);
++            OSC4_PRODUCE(s,osc_frac,0,wave_tile);
++            OSC4_PRODUCE(s,osc_frac1,1,wave_tile+4*S1C_VOICES);
+             tile_live=1;
+         }
+         const float *wave=tile_live ? wave_tile+lane*S1C_VOICES : NULL;

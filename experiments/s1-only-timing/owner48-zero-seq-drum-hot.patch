@@ -1,0 +1,71 @@
+--- a/firmware/src/seq/sequencer.c
++++ b/firmware/src/seq/sequencer.c
+@@ -196,12 +196,11 @@
+ }
+ 
+ 
+-__attribute__((noinline)) static void drum_midi_hit(seq_t *s, const seq_sink_t *o, int k, int v, uint8_t mv)
++__attribute__((noinline)) static void drum_midi_hit(seq_t *s, const seq_sink_t *o, int k, int v, uint8_t sv, float vel)
+ {
+-    if (s->send_notes && s->ch[k] != SEQ_CH_OFF) {
+-        midi(o, (uint8_t)(0x90 | s->ch[k]), GM_DRUM[k][v], mv);
+-        midi_note_off(o, s->ch[k], GM_DRUM[k][v]);
+-    }
++    const uint8_t mv=sv?sv:(uint8_t)(vel*127.f);
++    midi(o, (uint8_t)(0x90 | s->ch[k]), GM_DRUM[k][v], mv);
++    midi_note_off(o, s->ch[k], GM_DRUM[k][v]);
+ }
+ 
+ __attribute__((noinline)) static void fire_drum(seq_t *s, int k, int p, uint32_t skip, const seq_sink_t *o)
+@@ -212,11 +211,11 @@
+     float accent_vel = (d->accent[w] & bit) ? 1.0f : (float)s->accent_q7 / 127.0f;
+     int v;
+     if (SEQ_PART_OFF(s, k)) return;
+-    for (v = 0; v < NDRUM; v++) {
++    uint32_t mute_bit=1u<<(k*NDRUM);
++    for (v = 0; v < NDRUM; v++,mute_bit<<=1) {
+         uint8_t sv;
+         float vel;
+-        uint8_t mv;
+-        if (!(d->hit[v][w] & bit) || ((s->mute | s->vmute) & (1u << (k * NDRUM + v))))
++        if (!(d->hit[v][w] & bit) || ((s->mute | s->vmute) & mute_bit))
+             continue;
+         /* A T_VEL lane (written by black-key REC) wins; else the shared accent row / accent_q7. */
+         sv = s->drum_vel[k][v];
+@@ -224,18 +223,13 @@
+             if (sv > 127u)
+                 sv = 127u;
+             vel = (float)sv / 127.0f;
+-            mv = sv;
+-        } else {
+-            vel = accent_vel;
+-            mv = (uint8_t)(vel * 127.0f);
+-        }
+-        if (skip >> v & 1u) {                        /* recorded live on this pass: the key sounded it */
+-            drum_midi_hit(s, o, k, v, mv);
+-            continue;
+-        }
+-        if (!o->drum(o->ctx, k, v, vel))
+-            continue;                                /* its chance said no: no MIDI either */
+-        drum_midi_hit(s, o, k, v, mv);
++        } else vel=accent_vel;
++        if (!(skip >> v & 1u) && !o->drum(o->ctx,k,v,vel))
++            continue;  /* chance rejected; skip flags retain live MIDI echo */
++        /* No off-board work when echo is off. In particular do not
++         * multiply and convert the accent velocity for a discarded packet. */
++        if(s->send_notes && s->ch[k]!=SEQ_CH_OFF)
++            drum_midi_hit(s,o,k,v,sv,vel);
+     }
+     /* M6 drum fill (#815 item 6, owner 2026-11-12): while held from the 909's bar,
+      * a 909 snare on every step, rising 50%..100% over the bar. A step the pattern
+@@ -244,8 +238,8 @@
+         !(d->hit[SEQ_FILL_VOICE][w] & bit) && !((s->mute | s->vmute) & (1u << SEQ_FILL_VOICE))) {
+         int len = seq_part_len(s, k);
+         float vel = 0.5f + 0.5f * (float)p / (float)(len > 1 ? len - 1 : 1);
+-        if (o->drum(o->ctx, k, SEQ_FILL_VOICE, vel))
+-            drum_midi_hit(s, o, k, SEQ_FILL_VOICE, (uint8_t)(vel * 127.0f));
++        if (o->drum(o->ctx,k,SEQ_FILL_VOICE,vel) && s->send_notes && s->ch[k]!=SEQ_CH_OFF)
++            drum_midi_hit(s,o,k,SEQ_FILL_VOICE,0,vel);
+     }
+ }
+ 
