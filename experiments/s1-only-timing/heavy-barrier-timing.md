@@ -77,3 +77,19 @@ all-preset parity. Use this pair as a new **dry diagnostic** starting
 point only. Keep release/installer unchanged. Next measurements should
 isolate the new worst held/release per-core times and expensive
 drum/render work rather than repeating the envelope-only trial.
+
+### Where the paired arm spends its time
+
+A separate, instrumented Elite run of the paired arm identified a new
+worst held half at generated frame 134,144: 13,211.50 µs total. Core 0
+now spent 3,125.08 µs on the expanded 808 prefix and 7,467.87 µs in the
+Bass A job excluding the 199.46 µs wait for 808. Core 1 spent 4,981.50 µs
+on 909 and 4,202.38 µs on the remaining 808. Post-join took 1,074.42 µs.
+On the worst early-release half at frame 171,520, Core 1 still ran both
+kits for 13,106.58 µs. The waits fell during sustain; the active work
+on Core 0 plus serial work is now just as important. On release, the
+old route regains control and is still too concentrated on Core 1.
+Next, measure a smaller contiguous drum prefix on held spans and
+a cost-aware release route separately; the rejected blanket release
+extension is not a recommended change. Full fit and dropout metrics
+above use the separate uninstrumented runs.
