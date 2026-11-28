@@ -28,4 +28,9 @@ if __name__=='__main__':
         lo,hi=s['_ustack_lo'],s['_ustack_top']
         assert lo>0 and hi>lo
         depth=next((hi-i for i in range(lo,hi,4) if struct.unpack_from('<I',r,i)[0]!=0x5553544b),0)
+        assert depth and depth < hi-lo, 'stack watermark bottom reached or absent'
         print(f'capacity={hi-lo} observed={depth} untouched={hi-lo-depth}')
+        if 'bench_display_oversize' in s:
+            oversize=struct.unpack_from('<I',r,s['bench_display_oversize'])[0]
+            print(f'canvas oversize={oversize}')
+            assert not oversize

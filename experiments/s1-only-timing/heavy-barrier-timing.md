@@ -65,3 +65,15 @@ above the engineering target, and 111 whole-run dropouts (151 baseline).
 Worst whole-run elapsed remained 15,291 µs. Quality still requires a separate
 fingerprint run. Do not promote based on this report, host performance, or
 the lower count.
+
+Strict Pro: 13,106.67 µs held peak (959.16 µs lower than the preferred
+reference), 86/128 above physical, 128/128 above engineering, 108
+whole-run XRUNs (151 reference) and 15,339 µs whole peak. Both Pro and
+Elite linked with 33,260 B pool margin with the 8,192 B reserve intact,
+and XIP margins of 1,132 and 1,124 B respectively. A separate Elite
+pre-DMA correctness build matched all 160 ordered held and release
+fingerprints. That is evidence for the exact dry fixture, not wet or
+all-preset parity. Use this pair as a new **dry diagnostic** starting
+point only. Keep release/installer unchanged. Next measurements should
+isolate the new worst held/release per-core times and expensive
+drum/render work rather than repeating the envelope-only trial.

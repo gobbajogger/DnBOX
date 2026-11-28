@@ -1,0 +1,97 @@
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -3284,7 +3284,7 @@
+             mot_empty_in_render = (uint8_t)!motion_tick(&mot, n);
+         PROF_ADD(7, pt);
+     }
+-    bench_s1_inputs(n);
++    (void)bench_s1_inputs; /* stop for this bench */
+     while (done < n) {
+         uint32_t k = seq_until_event(&seq, n - done);
+         brk_mute_boundary(); /* also follows song mutes at an in-buffer event */
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -5493,11 +5493,30 @@
+ #if BOARD_SMK37 && !defined(X0X_HOST)
+ void smk_ck_poll(void);                     /* clip keybed's MIDI note/arp service in main_fm1.c */
+ #endif
++/* Timing/stack witness only: inject the standard Save action at a real
++ * LCD input-pump boundary, without external inputs or physical writes. */
++#ifndef BENCH_SAVE_OWNER
++#define BENCH_SAVE_OWNER 2
++#endif
++volatile uint32_t bench_save[10];
++static uint8_t bench_tail_owner;
+ static void cv_lcd_input(void)
+ {
+ #if X0X_LCD_TRACE
+     lcd_trace_dispatch();
+ #endif
++    if (bench_tail_owner==BENCH_SAVE_OWNER && bench_save[0]==1 && cv_main_tail &&
++        !ui_boot_flash_busy()) {
++        bench_save[0]=2;
++        bench_save[1]=bench_tail_owner;
++        bench_save[2]=(uintptr_t)cv_main_tail;
++        bench_save[3]=plat_ms();
++        save_project();
++        bench_save[4]=ui.dirty;
++        bench_save[5]=ui.save_failed;
++        bench_save[6]=save_wait;
++        bench_save[0]=3;
++    }
+     input();                                /* exact normal key/MIDI input path, preserving queue order */
+     division_pad_input();
+ #if BOARD_SMK37 && !defined(X0X_HOST)
+@@ -9116,7 +9135,9 @@
+ {
+     uint16_t tail[240u*CV_SPILL_ROWS];
+     cv_main_tail=tail;
++    bench_tail_owner=1;
+     draw_main_body();
++    bench_tail_owner=0;
+     cv_main_tail=0;
+ }
+ #endif
+@@ -11169,7 +11190,9 @@
+         sound_step_record=0;
+     }
+     const int force=ordinary_knob_claim();
++    bench_tail_owner=2;
+     ordinary_knob_tiles(0,ORDINARY_KNOB_FIRST,force);
++    bench_tail_owner=0;
+ 
+     /* cv_window synchronizes the previous DMA. Its 18-row clear cannot
+      * touch the five staged rows at the end of the previous raster. */
+@@ -11914,6 +11937,21 @@
+     engine_note_lock_refresh();
+     device_bt_save();
+     ui_ease_tick();
++    if (!bench_save[0] && plat_ms() >= 1100u && !ui_boot_flash_busy()) {
++        const unsigned test = 1461u + BENCH_SAVE_OWNER;
++        bench_save[7]=proj.set.bpm_x10;
++        if (proj.set.bpm_x10 == test) {
++            bench_save[0]=4; /* reboot proved real project load */
++        } else {
++            seq.bpm=(float)test * 0.1f;
++            mark_dirty();
++            ui.view=V_PART;
++            ui.part=PART_303A;
++            build_pages();
++            memset(cv_tile_valid,0,sizeof cv_tile_valid);
++            bench_save[0]=1;
++        }
++    }
+     autosave();
+ #if X0X_UI_PERF
+     if (!project_busy)
+--- a/firmware/src/app/main_fm1.c
++++ b/firmware/src/app/main_fm1.c
+@@ -2666,7 +2666,7 @@
+         /* Disposable Synth One-only benchmark. */
+         {
+             extern volatile uint32_t bench_owner;
+-            if (!ui_project_busy() && fm1_ms >= 1050u && bench_owner == 0u &&
++            if (0 && !ui_project_busy() && fm1_ms >= 1050u && bench_owner == 0u &&
+                 engine_bass_select_preset(0,ORIGINAL_SOUND_SYNTHONE,518,&proj.sound)==0) bench_owner=1;
+             if (bench_owner==1u && !engine_bass_preset_pending(0) &&
+                 engine_bass_bank(0)==ORIGINAL_SOUND_SYNTHONE &&
