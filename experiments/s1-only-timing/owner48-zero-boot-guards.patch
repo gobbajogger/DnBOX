@@ -1,0 +1,117 @@
+--- a/firmware/src/app/boot_screen.h
++++ b/firmware/src/app/boot_screen.h
+@@ -105,11 +105,23 @@
+ #define boot_crc_upd x0x_crc32_upd
+ #define boot_crc     x0x_crc32
+ 
++/* Active lines contain printable ASCII; the rest of each fixed field is zero. */
++static __attribute__((noinline)) int boot_line_ok(const uint8_t *line, uint32_t active, uint32_t cap)
++{
++    for (uint32_t i = 0; i < active; ++i)
++        if ((uint32_t)line[i] - 32u > 94u)
++            return 0;
++    for (uint32_t i = active; i < cap; ++i)
++        if (line[i])
++            return 0;
++    return 1;
++}
++
+ /* 1 = the bytes are a whole record the keyboard may store. Anything else
+  * (empty lines, a clipped line, a picture of the wrong size) is refused. */
+ static int boot_payload_ok(const uint8_t *p, uint32_t n)
+ {
+-    uint32_t i, n0, n1, kind, flags, w, h;
++    uint32_t n0, n1, kind, flags, w, h;
+     if (!p || n < BOOT_PAY_FIXED || n > BOOT_REC_MAX)
+         return 0;
+     kind = p[0];
+@@ -121,31 +133,15 @@
+     w = boot_u16(p + 40);
+     h = boot_u16(p + 42);
+     if (kind == BOOT_KIND_FACTORY) {
+-        if (flags || n0 || n1 || w || h || n != BOOT_PAY_FIXED)
++        if ((flags | n0 | n1 | w | h) || n != BOOT_PAY_FIXED)
+             return 0;
+-        for (i = 4; i < 37u; i++)
+-            if (p[i])
+-                return 0;
+-        return 1;
+-    }
+-    if (kind != BOOT_KIND_CUSTOM || (flags & ~BOOT_F_PIC))
+-        return 0;
+-    if (n0 < 1u || n0 > BOOT_LINE0_MAX || n1 < 1u || n1 > BOOT_LINE1_MAX)
++    } else if (kind != BOOT_KIND_CUSTOM || (flags & ~BOOT_F_PIC) ||
++               n0 - 1u >= BOOT_LINE0_MAX || n1 - 1u >= BOOT_LINE1_MAX) {
+         return 0;
+-    for (i = 0; i < BOOT_LINE0_MAX; i++) {
+-        if (i < n0) {
+-            if (p[4u + i] < 32u || p[4u + i] > 126u)
+-                return 0;
+-        } else if (p[4u + i])
+-            return 0;
+-    }
+-    for (i = 0; i < BOOT_LINE1_MAX; i++) {
+-        if (i < n1) {
+-            if (p[16u + i] < 32u || p[16u + i] > 126u)
+-                return 0;
+-        } else if (p[16u + i])
+-            return 0;
+     }
++    if (!boot_line_ok(p + 4, n0, BOOT_LINE0_MAX) ||
++        !boot_line_ok(p + 16, n1, BOOT_LINE1_MAX))
++        return 0;
+     if (flags & BOOT_F_PIC)
+         return w == BOOT_PIC_W && h == BOOT_PIC_H && n == BOOT_PAY_FIXED + BOOT_PIC_BYTES;
+     return !w && !h && n == BOOT_PAY_FIXED;
+@@ -156,6 +152,18 @@
+     return (bits[y * BOOT_PIC_STRIDE + (x >> 3)] >> (7u - (x & 7u))) & 1;
+ }
+ 
++/* Common check for both the staged reader and mapped read-only sectors.
++ * A zero length is never a valid boot record. */
++static __attribute__((noinline)) uint32_t boot_header_length(const uint8_t *h)
++{
++    if (boot_u32(h) != BOOT_MAGIC || boot_u16(h + 4) != BOOT_VERSION ||
++        boot_u32(h + 24) || boot_u32(h + 28) ||
++        boot_crc(h, 20) != boot_u32(h + 20))
++        return 0;
++    uint32_t len = boot_u32(h + 12);
++    return len >= BOOT_PAY_FIXED && len <= BOOT_REC_MAX ? len : 0u;
++}
++
+ /* 1 valid, 0 not a boot record, -1 the read failed (caller must not erase). */
+ static int boot_copy_state(boot_io_t *io, uint32_t sec, uint32_t *seq_out)
+ {
+@@ -163,14 +171,8 @@
+     uint32_t len, c, off, n;
+     if (io->read(io->ctx, sec, h, BOOT_HDR))
+         return -1;
+-    if (boot_u32(h) != BOOT_MAGIC || boot_u16(h + 4) != BOOT_VERSION)
+-        return 0;
+-    if (boot_u32(h + 24) || boot_u32(h + 28))
+-        return 0;
+-    if (boot_crc(h, 20) != boot_u32(h + 20))
+-        return 0;
+-    len = boot_u32(h + 12);
+-    if (len < BOOT_PAY_FIXED || len > BOOT_REC_MAX)
++    len = boot_header_length(h);
++    if (!len)
+         return 0;
+     c = 0xFFFFFFFFu;
+     for (off = 0; off < len;) {
+@@ -374,14 +376,7 @@
+ static int boot_image_state(const uint8_t *sec, uint32_t *seq_out)
+ {
+     uint32_t len;
+-    if (!sec || boot_u32(sec) != BOOT_MAGIC || boot_u16(sec + 4) != BOOT_VERSION)
+-        return 0;
+-    if (boot_u32(sec + 24) || boot_u32(sec + 28))
+-        return 0;
+-    if (boot_crc(sec, 20) != boot_u32(sec + 20))
+-        return 0;
+-    len = boot_u32(sec + 12);
+-    if (len < BOOT_PAY_FIXED || len > BOOT_REC_MAX)
++    if (!sec || !(len = boot_header_length(sec)))
+         return 0;
+     if (boot_crc(sec + BOOT_PAY_OFF, len) != boot_u32(sec + 16))
+         return 0;

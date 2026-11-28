@@ -1,0 +1,23 @@
+--- a/firmware/src/dsp/drum808.c
++++ b/firmware/src/dsp/drum808.c
+@@ -979,12 +979,14 @@
+                 b->jm1[i] = 0.0052f * rng_frand2(&b->rng);
+                 dt[i] = bank_dt1(b, i);           /* (this sample used the old jm1, as before) */
+             }
+-            v = t < BANK_DUTY ? 1.0f : -1.0f;
+-            if (D8_UNLIKELY(t + d - 1u < d + d - 1u))
+-                v += blep_fix(t, d);
+-            if (D8_UNLIKELY(u + d - 1u < d + d - 1u))
+-                v -= blep_fix(u, d);
+-            sum += v * 2.5f;
++            const uint32_t w=t+d-1u, lim=d+d-1u;
++            const int hi=t<BANK_DUTY;
++            if (D8_UNLIKELY(w < lim || w-BANK_DUTY < lim)) {
++                v=hi ? 1.0f : -1.0f;
++                if (w<lim) v+=blep_fix(t,d);
++                if (w-BANK_DUTY<lim) v-=blep_fix(u,d);
++                sum+=v*2.5f;
++            } else sum+=hi ? 2.5f : -2.5f;
+         }
+         bus[n] = sum * (1.0f / 21.0f);
+         if (cb_on)

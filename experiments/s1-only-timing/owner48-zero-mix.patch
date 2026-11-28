@@ -1,0 +1,61 @@
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -2412,6 +2412,35 @@
+     meter(b, m, mix_level[b], n);
+ }
+ 
++/* The kit sends are often off and all four bus gains stationary. In that
++ * case only the meter consumes the unscaled mono result; publish its very
++ * same reduction while scaling the disjoint output buses, not via scratch. */
++__attribute__((noinline)) static int kit909_settled_mix(float *l, float *r,
++                                                        float *rv, float *dl, uint32_t n)
++{
++    const glide_t *gl = mix_glide[PART_909];
++    if (gl[GL_REV].cur != 0.0f || gl[GL_REV].tgt != 0.0f ||
++        gl[GL_DLY].cur != 0.0f || gl[GL_DLY].tgt != 0.0f)
++        return 0;
++    const float a = gl[GL_L].cur, b = gl[GL_R].cur;
++    const float c = gl[GL_VREV].cur, d = gl[GL_VDLY].cur;
++    if (a != gl[GL_L].tgt || b != gl[GL_R].tgt ||
++        c != gl[GL_VREV].tgt || d != gl[GL_VDLY].tgt ||
++        a == 1.0f || b == 1.0f || c == 1.0f || d == 1.0f)
++        return 0;
++    const float g = mix_level[PART_909];
++    float peak = part_peak[PART_909];
++    for (uint32_t i = 0; i < n; ++i) {
++        const float x = l[i], y = r[i];
++        const float p = fm_fabsf((x + y) * 0.5f) * g;
++        if (p > peak) peak = p;
++        l[i] = x * a; r[i] = y * b;
++        rv[i] *= c; dl[i] *= d;
++    }
++    part_peak[PART_909] = peak;
++    return 1;
++}
++
+ /* ---- the two cores' jobs, balanced per stretch ----
+  * Five jobs: the 909 (writes the dry output span and sends, the mix's first term), the 808
+  * (its L/R in t0/tr scratch, its sends in t1/t2), bass A and bass B
+@@ -2639,13 +2668,15 @@
+             drum909_render_st_cleared(&d909, dry_l, dry_r, rev, dly, (int)n, smc_audible_drums(solo, PART_909));
+             mix_targets(PART_909, mix_level[PART_909], solo_parts);
+             bfx_shape(PART_909, dry_l, dry_r, rev, dly, 4, (int)n);
+-            for (i = 0; i < n; i++)                       /* kit send: filtered sides, still centred */
+-                mono[i] = (dry_l[i] + dry_r[i]) * 0.5f;
+-            scale_glide(dry_l, &mix_glide[PART_909][GL_L], n);   /* then the part's PAN over the kit */
+-            scale_glide(dry_r, &mix_glide[PART_909][GL_R], n);
+-            scale_glide(rev, &mix_glide[PART_909][GL_VREV], n);
+-            scale_glide(dly, &mix_glide[PART_909][GL_VDLY], n);
+-            kit_sends(PART_909, mono, n);
++            if (!kit909_settled_mix(dry_l, dry_r, rev, dly, n)) {
++                for (i = 0; i < n; i++)                       /* kit send: filtered sides, still centred */
++                    mono[i] = (dry_l[i] + dry_r[i]) * 0.5f;
++                scale_glide(dry_l, &mix_glide[PART_909][GL_L], n);   /* then the part's PAN over the kit */
++                scale_glide(dry_r, &mix_glide[PART_909][GL_R], n);
++                scale_glide(rev, &mix_glide[PART_909][GL_VREV], n);
++                scale_glide(dly, &mix_glide[PART_909][GL_VDLY], n);
++                kit_sends(PART_909, mono, n);
++            }
+         }
+         if (!core)
+             PROF_ADD(PR_909, p9);

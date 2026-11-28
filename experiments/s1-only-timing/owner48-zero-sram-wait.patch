@@ -1,0 +1,84 @@
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -2507,28 +2507,16 @@
+  * will not reach it (it failed, or on the host it runs lazily): run its jobs here. */
+ static int stage_wait(uint32_t s, int core)
+ {
+-    uint32_t t0;
+     if (eng_stage >= s)
+         return 0;
+-    if (core) {
+ #ifdef X0X_HOST
+-        return 1;                                        /* host: core 0 resumes it in order */
++    if (core) return 1;
+ #else
+-        while (eng_stage < s)
+-            eng_sync();
++    if (plat_cpu2_stage(&eng_stage,s,core))
+         return 0;
+ #endif
+-    }
+-    t0 = plat_ticks24();
+-    for (;;) {
+-        eng_sync();
+-        if (eng_stage >= s)
+-            return 0;
+-        if (plat_cpu2_busy() <= 0 || plat_ticks24() - t0 > 24000u * 24u) {
+-            c1_take_over(s);                             /* failed, or the host: run its jobs here */
+-            return eng_stage >= s ? 0 : 1;
+-        }
+-    }
++    c1_take_over(s);
++    return eng_stage >= s ? 0 : 1;
+ }
+ 
+ /* BD+SD into zeroed buses. Core 1 runs this at the start of the stretch; core 0
+--- a/firmware/src/app/plat.h
++++ b/firmware/src/app/plat.h
+@@ -137,6 +137,7 @@
+ int plat_cpu2_run(void (*fn)(uint32_t), uint32_t arg);   /* ISR: 1 = the second core has it */
+ int plat_cpu2_wait(void);              /* ISR: 0 = done; -1 = it failed (and is off): do the job here */
+ int plat_cpu2_busy(void);              /* ISR, no wait: 1 = still on its job, 0 = done, -1 = it read a wrong job (call plat_cpu2_wait) */
++int  plat_cpu2_stage(const volatile uint32_t *stage, uint32_t target, int worker);
+ void plat_cpu2_sync(void);             /* ISR, either core: a barrier both cores' caches see */
+ int plat_cpu2_gave_up(void);           /* why it is off: 0 no, 1 it read a wrong job (fm1-x0x#10), 2 one did not finish */
+ uint32_t plat_cpu2_bad(void);          /* wrong jobs it saw (0 on a unit that runs both cores) */
+--- a/firmware/src/app/plat_fm1.c
++++ b/firmware/src/app/plat_fm1.c
+@@ -378,6 +378,12 @@
+ int plat_cpu2_wait(void) { return fm1_cpu1_wait(); }
+ int plat_cpu2_busy(void) { return fm1_cpu1_busy(); }
+ void plat_cpu2_sync(void) { fm1_cpu1_sync(); }
++static int (*volatile fm1_stage_poll_leaf)(const volatile uint32_t *,uint32_t,int) = fm1_stage_poll;
++int plat_cpu2_stage(const volatile uint32_t *stage,uint32_t target,int worker)
++{
++    return fm1_stage_poll_leaf(stage,target,worker);
++}
++
+ int plat_cpu2_gave_up(void) { return fm1_c1_gave_up; }
+ uint32_t plat_cpu2_bad(void) { return fm1_c1_mb.bad; }
+ uint32_t plat_xruns(void) { return audio_xruns; }
+--- a/firmware/hal/fm1_cpu1.h
++++ b/firmware/hal/fm1_cpu1.h
+@@ -367,6 +367,21 @@
+     return fm1_c1_mb.done != fm1_c1_mb.job;
+ }
+ 
++/* The ordered wait contains only RAM loads, CSYNC and the original watchdog.
++ * Avoid fetching polling instructions from XIP while the worker renders there. */
++__attribute__((section(".ram_text.eng_stage_wait"),noinline))
++static int fm1_stage_poll(const volatile uint32_t *stage, uint32_t target, int worker)
++{
++    uint32_t t0 = worker ? 0 : FM1_C1_T4;
++    for (;;) {
++        FM1_C1_SYNC();
++        if (*stage >= target) return 1;
++        if (!worker && (fm1_c1_mb.bad || fm1_c1_mb.done == fm1_c1_mb.job ||
++                        FM1_C1_T4 - t0 > 24000u * 24u))
++            return 0;
++    }
++}
++
+ /* Park core 1 before the flash goes off (main loop only, core 0's interrupts still on): 1 = parked,
+  * 0 = nothing to park (no controller), -1 = it did not park in time: core 1 is held from now on
+  * (one core, no Bluetooth). Undo with fm1_cpu1_unpark. */

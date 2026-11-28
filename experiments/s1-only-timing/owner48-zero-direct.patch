@@ -1,0 +1,137 @@
+--- a/firmware/src/dsp/drum909.c
++++ b/firmware/src/dsp/drum909.c
+@@ -820,6 +820,17 @@
+     if (b->dly) { float *dly = b->dly; const float k = b->sdly; for (int i = 0; i < m; ++i) dly[i] += y[i] * k; }
+ }
+ 
++/* A dedicated mono dry output can consume each voice immediately.  The
++ * add is identical to the post-loop dry add, in the same voice order.
++ * Stereo, sends and private stems retain the ordinary emitter. */
++D9_INLINE float *d9_direct_dry(const d9_bus_t *b)
++{
++#if DNBOX_LAB_D9_SUFFIX
++    if (b->private_n) return 0;
++#endif
++    return !b->dry_r && !b->rev && !b->dly ? b->dry : 0;
++}
++
+ /* A filter on the shared noise that a voice stopped running (its envelope had
+  * run out) is brought back to the state 9W9's would have, by running it over
+  * the noise it missed. Both filters forget fast (the click LP's poles are at
+@@ -842,6 +853,8 @@
+ /* Kick (er99_bt_render with the stock sweep, one shell) */
+ static void d9_render_bd(d9_bt_t *v, const float *nz, const d9_bus_t *bus, int n)
+ {
++    float *const direct = d9_direct_dry(bus);
++    float *const dst = direct ? direct : bus->y;
+     const int m = n < v->mute ? n : v->mute;
+     v->mute -= m;
+     d9_env_anchor(&v->amp);
+@@ -874,9 +887,10 @@
+             click += d9_biquad_tick(&v->click_lp, nz[i]);
+             click *= d9_env_tick(&v->click_env) * attack;
+         }
+-        bus->y[i] = (body + click) * v->out_gain;
++        const float out = (body + click) * v->out_gain;
++        dst[i] = direct ? dst[i] + out : out;
+     }
+-    d9_emit_block(bus, m);
++    if (!direct) d9_emit_block(bus, m);
+     if (!(v->impulse > 0 || v->click_env.left))
+         v->click_stale = 1;
+     if (v->click_stale && v->mute == 0) {  /* note over: freeze where 9W9's froze */
+@@ -889,6 +903,8 @@
+  * off (attack 0 at every trigger), so it is not computed: 0 either way. */
+ static void d9_render_sd(d9_bt_t *v, const float *nz, const d9_bus_t *bus, int n)
+ {
++    float *const direct = d9_direct_dry(bus);
++    float *const dst = direct ? direct : bus->y;
+     const int m = n < v->mute ? n : v->mute;
+     v->mute -= m;
+     d9_env_anchor(&v->pitch);
+@@ -921,9 +937,10 @@
+             y += d9_biquad_tick(&v->noise_lpf, d9_biquad_tick(&v->noise_hpf, nz[i])) * env * v->snappy
+                * D9_SNAPPY_MIX;
+         }
+-        bus->y[i] = y * v->out_gain;
++        const float out = y * v->out_gain;
++        dst[i] = direct ? dst[i] + out : out;
+     }
+-    d9_emit_block(bus, m);
++    if (!direct) d9_emit_block(bus, m);
+ }
+ 
+ /* Toms (er99_tom909_render): three VCOs on their own envelopes + stick noise.
+@@ -931,6 +948,8 @@
+  * once their envelopes have run out (-100 dB) they are skipped. */
+ static void d9_render_tom(d9_tom_t *t, const d9_tom_panel_t *p, const float *nz, const d9_bus_t *bus, int n)
+ {
++    float *const direct = d9_direct_dry(bus);
++    float *const dst = direct ? direct : bus->y;
+     const int m = n < t->mute ? n : t->mute;
+     t->mute -= m;
+     d9_env_anchor(&t->pitch);
+@@ -962,9 +981,10 @@
+             stick = d9_biquad_tick(&t->noise_bp, nz[i]) * d9_env_tick(&t->noise_env) * stick_g;
+         float y = d9_shape_v(&p->shape, o + stick, t->crush_st);
+         y = d9_biquad_tick(&t->dc_block, y);
+-        bus->y[i] = y * t->out_gain;
++        const float out = y * t->out_gain;
++        dst[i] = direct ? dst[i] + out : out;
+     }
+-    d9_emit_block(bus, m);
++    if (!direct) d9_emit_block(bus, m);
+     if (!t->noise_env.left)
+         t->stick_stale = 1;
+     if (t->stick_stale && t->mute == 0) {
+@@ -983,6 +1003,8 @@
+ /* Rim shot (er99_rim909_render) */
+ static void d9_render_rim(d9_rim_t *v, const float *nz, const d9_bus_t *bus, int n)
+ {
++    float *const direct = d9_direct_dry(bus);
++    float *const dst = direct ? direct : bus->y;
+     const int m = n < v->mute ? n : v->mute;
+     v->mute -= m;
+     d9_env_anchor(&v->amp);
+@@ -1000,21 +1022,25 @@
+         float y = d9_biquad_tick(&v->bp1, exc) * 60.0f + d9_biquad_tick(&v->bp2, exc) * 32.0f;
+         y = d9_shape_v(&shape, y * a, v->crush_st);
+         y = d9_biquad_tick(&v->hp, y);
+-        bus->y[i] = y * g * accent;
++        const float out = y * g * accent;
++        dst[i] = direct ? dst[i] + out : out;
+     }
+     for (; i < m; ++i) {
+         const float a = d9_env_tick(&v->amp);
+         float y = d9_rim_ring(&v->bp1) * 60.0f + d9_rim_ring(&v->bp2) * 32.0f;
+         y = d9_shape_v(&shape, y * a, v->crush_st);
+         y = d9_biquad_tick(&v->hp, y);
+-        bus->y[i] = y * g * accent;
++        const float out = y * g * accent;
++        dst[i] = direct ? dst[i] + out : out;
+     }
+-    d9_emit_block(bus, m);
++    if (!direct) d9_emit_block(bus, m);
+ }
+ 
+ /* Hand clap (er99_clap909_render) */
+ __attribute__((noinline)) static void d9_render_clap(d9_clap_t *v, const float *nz, const d9_bus_t *bus, int n)
+ {
++    float *const direct = d9_direct_dry(bus);
++    float *const dst = direct ? direct : bus->y;
+     static const float amp[4] = { 1.22f, 1.35f, 1.68f, 1.0f };
+     const int m = n < v->mute ? n : v->mute;
+     v->mute -= m;
+@@ -1042,9 +1068,10 @@
+         float y = d9_biquad_tick(&v->bp, nz[i]) * env;
+         y = d9_shape_v(&shape, y, v->crush_st);
+         y = d9_biquad_tick(&v->hp, y);
+-        bus->y[i] = y * g * accent;
++        const float out = y * g * accent;
++        dst[i] = direct ? dst[i] + out : out;
+     }
+-    d9_emit_block(bus, m);
++    if (!direct) d9_emit_block(bus, m);
+ }
+ 
+ /* Hats, ride, crash (render_sampler) */

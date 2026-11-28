@@ -1,0 +1,44 @@
+--- a/firmware/src/dsp/s1c/s1c.c
++++ b/firmware/src/dsp/s1c/s1c.c
+@@ -462,10 +462,10 @@
+ {
+     int mono = P(MONO) > 0.0f, ft = (int)P(FTYPE);
+ #if S1C_ENVELOPE_SHARE
+-    if (shared) {
+-        v->amp = shared->amp;
+-        v->fenv = shared->fenv;
+-    } else
++    const s1c_voice *e = shared ? shared : v;
++    if (!shared)
++#else
++    const s1c_voice *e = v;
+ #endif
+     {
+         v->amp = env_step(&v->ea, v->gate, P(AA), adec, P(AS), P(AR), s->sr);
+@@ -499,7 +499,7 @@
+         if(!fseen || !(*fseen & bit)) {
+             v->kres = clampf(P(RES) * lfo10(s, P(LRES)), 0.0f, 0.98f);
+             v->kcut = P(CUT) * lfo10(s, P(LCUT)); v->kem = P(FENV) * lfo10(s, P(LFENV));
+-            float cut = clampf(v->kcut - v->kcut * v->kem * (1.0f - v->fenv), 64.0f, 22050.0f);
++            float cut = clampf(v->kcut - v->kcut * v->kem * (1.0f - e->fenv), 64.0f, 22050.0f);
+             if (ft == 0) {
+                 float x = cut * (2.0f / s->sr); if (x > 1.0f) x = 1.0f;
+                 v->kA = ladder_a(x);
+@@ -559,7 +559,7 @@
+         s->rnd = s->rnd * 1664525u + 1013904223u;
+         y += ((float)(int32_t)s->rnd * (1.0f / 2147483648.0f)) * v->vamp * P(NOISEV) * lfo10(s, P(LNOISE));
+     }
+-    y *= v->amp * v->kkey;
++    y *= e->amp * v->kkey;
+     float fo;
+     if (ft == 0) fo = ladder(v->lp, y, v->kA, v->kfb);
+     else if (ft == 2) fo = hp2(v->bq, y, v->ka1, v->ka4, v->ka5);
+@@ -1395,6 +1395,8 @@
+         for (i = 1; i < S1C_VOICES; ++i) {
+             s->v[i].ea = s->v[0].ea;
+             s->v[i].ef = s->v[0].ef;
++            s->v[i].amp = s->v[0].amp;
++            s->v[i].fenv = s->v[0].fenv;
+         }
+ #endif
+ }

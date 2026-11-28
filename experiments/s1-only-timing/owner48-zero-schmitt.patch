@@ -1,0 +1,52 @@
+--- a/firmware/src/dsp/drum808.c
++++ b/firmware/src/dsp/drum808.c
+@@ -948,6 +948,38 @@
+     float p = (float)b->inc[i] * fm1;
+     return b->inc[i] + (uint32_t)(int32_t)(p + (p >= 0.0f ? 0.5f : -0.5f));
+ }
++/* If all six phases start at least five deltas from the next edge,
++ * the next four have no wrap, jitter, or polyBLEP terms. Previously each
++ * of their ordered sums added six exact +/-2.5 terms and multiplied by
++ * 1/21. Their identical result can be evaluated and stored once as a pack.
++ * Distances and phase changes use the original full uint32 representation. */
++static inline int bank_quiet_four(d8_bank_t *b, float *bus, float *pair, int cb_on)
++{
++    if (b->drift_cnt <= 4 || b->pend_wrap) return 0;
++    unsigned signs=0;
++    for (unsigned i=0; i<6; ++i) {
++        const uint32_t t=b->ph[i], d=b->dt[i];
++        const unsigned positive=t<BANK_DUTY;
++        const uint32_t distance=(positive?BANK_DUTY:0u)-t;
++        /* Five steps fit a uint32 at every supported oscillator tuning. */
++        if (distance<5u*d) return 0;
++        signs=(signs<<1)|positive;
++    }
++    unsigned count=0;
++    for (unsigned i=0;i<6;++i) {
++        b->ph[i]+=b->dt[i]<<2;
++        count+=(signs>>i)&1u;
++    }
++    b->drift_cnt-=4;
++    const float sample=((float)((int)(count<<1)-6)*2.5f)*(1.0f/21.0f);
++    bus[0]=bus[1]=bus[2]=bus[3]=sample;
++    if (cb_on) {
++        const float two=((float)((int)((signs&1u)+((signs>>1)&1u))-1))*2.5f;
++        pair[0]=pair[1]=pair[2]=pair[3]=two;
++    }
++    return 1;
++}
++
+ __attribute__((noinline)) static void bank_block(d8_bank_t *b, float *bus, float *pair, int m, int cb_on)
+ {
+     uint32_t *dt = b->dt;
+@@ -960,6 +992,10 @@
+         b->dt_valid = 1;
+     }
+     for (n = 0; n < m; n++) {
++        if (!(n&3) && n+4<=m && bank_quiet_four(b,bus+n,cb_on?pair+n:pair,cb_on)) {
++            n+=3;
++            continue;
++        }
+         float sum = 0.0f;
+         if (D8_UNLIKELY(--b->drift_cnt <= 0)) {
+             b->drift_cnt = 256;

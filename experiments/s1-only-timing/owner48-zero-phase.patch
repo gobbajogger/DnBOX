@@ -1,0 +1,47 @@
+--- a/firmware/src/dsp/s1c/s1c.c
++++ b/firmware/src/dsp/s1c/s1c.c
+@@ -435,16 +435,17 @@
+     float y=t<0.125f?-1.0f:1.0f;
+     return y+f*((2.0f*t-1.0f-0.0f)-y);
+ }
+-static __attribute__((noinline)) void osc4_fill(const s1c *s, float f0, unsigned lane,
++static __attribute__((noinline)) void osc4_fill(s1c *s, float f0, unsigned lane,
+                                                 float *out)
+ {
+     for(unsigned v=0;v<S1C_VOICES;++v) {
+-        const s1c_voice *w=&s->v[v];
++        s1c_voice *w=&s->v[v];
+         uint32_t p=w->ph[lane], ds=w->kstep[lane];
+         for(unsigned k=0;k<4;++k) {
+             out[k*S1C_VOICES+v]=osc4_pulse(p,f0);
+             p+=ds;
+         }
++        w->ph[lane]=p;
+     }
+ }
+ #endif
+@@ -520,7 +521,6 @@
+     float w0,w1;
+     if(wave) {
+         w0=wave[0]; w1=wave[4*S1C_VOICES];
+-        v->ph[0]+=v->kstep[0];v->ph[1]+=v->kstep[1];
+     } else {
+         w0=morph_step(&v->ph[0],v->kdt1,m[0].k,m[0].frac,bl,v->kstep[0]);
+         w1=morph_step(&v->ph[1],v->kdt2,m[1].k,m[1].frac,bl,v->kstep[1]);
+@@ -1097,10 +1097,12 @@
+ #endif
+ #if S1C_OSC4
+         const unsigned lane=f&3u;
+-        if(!lane && tile_ok && pitch_mask==((1u<<S1C_VOICES)-1u)){
+-            osc4_fill(s,osc_frac,0,wave_tile);
+-            osc4_fill(s,osc_frac1,1,wave_tile+4*S1C_VOICES);
+-            tile_live=1;
++        if(!lane){
++            tile_live=tile_ok && (n-f)>=4 && pitch_mask==((1u<<S1C_VOICES)-1u);
++            if(tile_live){
++                osc4_fill(s,osc_frac,0,wave_tile);
++                osc4_fill(s,osc_frac1,1,wave_tile+4*S1C_VOICES);
++            }
+         }
+         const float *wave=tile_live ? wave_tile+lane*S1C_VOICES : NULL;
+ #endif

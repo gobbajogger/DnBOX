@@ -1,0 +1,29 @@
+--- a/firmware/src/dsp/s1c/s1c.c
++++ b/firmware/src/dsp/s1c/s1c.c
+@@ -1046,6 +1046,9 @@
+     const int tile_ok=!nmoving && P(BLE)==0.0f && osc_pos<=1.0f && osc_frac>0.0f &&
+         osc_pos1<=1.0f && osc_frac1>0.0f;
+     int tile_live=0;
++    s1c_morph morphs[2] = {morph_params(P(I1)),morph_params(P(I2))};
++    const int adec_static = !nmoving && (int)P(LDEC)==0;
++    float adec = clampf(P(AD), 0.005f, 2.0f);
+ #endif
+     for (f = 0; f < n; f++) {
+ #if S1C_FAST
+@@ -1092,9 +1095,16 @@
+         sequencer(s);
+ #endif
+ #if S1C_KR > 1
++#if S1C_OSC4
++        if (nmoving) {
++            morphs[0]=morph_params(P(I1)); morphs[1]=morph_params(P(I2));
++        }
++        if (!adec_static) adec=clampf(P(AD)*lfo10(s,P(LDEC)),0.005f,2.0f);
++#else
+         const s1c_morph morphs[2] = {morph_params(P(I1)), morph_params(P(I2))};
+         const float adec = clampf(P(AD) * lfo10(s, P(LDEC)), 0.005f, 2.0f);
+ #endif
++#endif
+ #if S1C_OSC4
+         const unsigned lane=f&3u;
+         if(!lane && tile_ok && pitch_mask==((1u<<S1C_VOICES)-1u)){

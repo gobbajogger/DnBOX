@@ -1,0 +1,57 @@
+--- a/firmware/src/dsp/master.c
++++ b/firmware/src/dsp/master.c
+@@ -367,32 +367,33 @@
+     return 1;
+ }
+ 
++/* The stereo compressor reads only pre-filter input and its own state.
++ * Keeping it in one pass lets the next pass carry only filter/limiter
++ * registers, rather than swapping both latched sets through the stack. */
++static __attribute__((noinline)) float master_comp_st_span(master_t *m, float *xl, float *xr, int n, float grmax)
++{
++    const float det_in = 1.0f - m->a_det, att_in = 1.0f - m->a_att;
++    const float rel_in = 1.0f - m->a_rel, pump_in = 1.0f - m->a_pump;
++    for (int i = 0; i < n; ++i) {
++        float s = xl[i], sr = xr[i], wet;
++        m->ms = fm_flush(m->a_det * m->ms + 0.5f * (det_in * s * s + det_in * sr * sr));
++        comp_tick(m, &grmax, att_in, rel_in, pump_in);
++        wet = s * m->g_lin;
++        xl[i] = s + (wet - s) * m->mix;
++        wet = sr * m->g_lin;
++        xr[i] = sr + (wet - sr) * m->mix;
++    }
++    return grmax;
++}
++
+ float master_process_st_continue(master_t *m, float *xl, float *xr, int n, float volume, float grmax)
+ {
+-    int i, mode = m->pot[MST_MODE], comp_on = m->comp_on, limit = m->pot[MST_LIMIT];
++    int i, mode = m->pot[MST_MODE], limit = m->pot[MST_LIMIT];
+     float k = m->k, vc = m->vol_cur < 0.0f ? volume : m->vol_cur;
+-    float det_in = 0.0f, att_in = 0.0f, rel_in = 0.0f, pump_in = 0.0f;
+-    if (comp_on) {
+-        det_in = 1.0f - m->a_det;
+-        att_in = 1.0f - m->a_att;
+-        rel_in = 1.0f - m->a_rel;
+-        pump_in = 1.0f - m->a_pump;
+-    }
++    if (m->comp_on)
++        grmax = master_comp_st_span(m, xl, xr, n, grmax);
+     for (i = 0; i < n; i++) {
+         float s = xl[i], sr = xr[i];
+-        if (comp_on) {
+-            float wet;
+-            /* the level: mean square over ~8 ms, x2 so a sine reads its peak. Read sample by sample
+-             * (|x|), the reduction chased every cycle of a bass note and grabbed each kick within a
+-             * millisecond: audio-rate gain movement, heard as clicks */
+-            /* both sides' power, each term as master_process forms it, so l == r gives its value */
+-            m->ms = fm_flush(m->a_det * m->ms + 0.5f * (det_in * s * s + det_in * sr * sr));
+-            comp_tick(m, &grmax, att_in, rel_in, pump_in);
+-            wet = s * m->g_lin;
+-            s = s + (wet - s) * m->mix;
+-            wet = sr * m->g_lin;
+-            sr = sr + (wet - sr) * m->mix;
+-        }
+         if (mode) {
+             float g = m->g != m->g_t ? djf_gsmooth(m, k) : m->g, a1 = m->a1;
+             s = djf_tick(s, &m->ic1, &m->ic2, mode, g, a1, k);

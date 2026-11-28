@@ -1,0 +1,17 @@
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -3042,8 +3042,13 @@
+         ++host_full808_a_count;
+ #endif
+     }
++    /* In the existing reverse plan BREAK is private on Core 0.
++     * Render it while the drum worker is running; its mix and MIDI drain
++     * still occur only after the four ordered instrument bus stages. */
++    if (eng_808_reverse)
++        (void)run_job(JB_BRK, 0);
+     for (j = 0; j < JB_N; j++)
+-        if (!(eng_c1_mask & (1u << j)))
++        if (!(eng_c1_mask & (1u << j)) && !(eng_808_reverse && j == JB_BRK))
+             (void)run_job(j, 0);
+     if (eng_c1_mask) {
+         PROF_T(pt);
