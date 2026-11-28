@@ -1,0 +1,59 @@
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -1156,12 +1156,15 @@
+     prob_rng ^= prob_rng << 5;
+     return prob_rng % 100u >= p;
+ }
++/* Disposable six-voice loaded replay witnesses, not firmware UI state. */
++volatile uint32_t bench_loaded_on, bench_loaded_run, bench_loaded_hits[NKIT];
+ static void s_drum(void *x, int kit, int v, float vel);
+ static int s_drum_seq(void *x, int kit, int v, float vel)
+ {
+     if (prob_skip(kit, v))
+         return 0;
+     s_drum(x, kit, v, vel);
++    if (bench_loaded_on && (unsigned)kit<NKIT) ++bench_loaded_hits[kit];
+     return 1;
+ }
+ __attribute__((noinline)) static void s_drum(void *x, int kit, int v, float vel)
+@@ -3162,19 +3165,39 @@
+     enum { CONFIG=65536u, ON=98304u, OFF=163840u };
+     if (d8_frame!=CONFIG && d8_frame!=ON && d8_frame!=OFF) return;
+     original_runtime_part *a=&original_bass[0], *b=&original_bass[1];
+-    if (bench_owner!=2 || n!=256 || seq.playing ||
++    if (bench_owner!=2 || n!=256 || (d8_frame==CONFIG ? seq.playing : !seq.playing) ||
+         a->kind!=ORIGINAL_SOUND_SYNTHONE || a->status!=ORIGINAL_RUNTIME_OK ||
+         a->arp.cfg.on || original_runtime_active(b)) { bench_s1_only[0]=1;return; }
+     s1c *e=&a->dsp.synthone.e;
+     if(d8_frame==CONFIG){
+         if(original_runtime_retire(b)!=ORIGINAL_RUNTIME_OK ||
+             !s1c_front_set(e,20,0.f)){bench_s1_only[0]=2;return;}
++        /* This is an isolated virtual-NOR boot, never a user project. */
++        seq.part_off=(1u << (TRK_BASS0+1)) | (1u << TRK_BRK);
++        seq.mute=seq.vmute=seq.mute_q=seq.vmute_q=0;
++        seq.song_on=0;
++        for (unsigned k=0; k<NKIT; ++k) {
++            dpart_t *d=&seq.pat[seq.ppat[TRK_DRUM+k]].drum[k];
++            d->len=16;
++            d->rate=RATE_16;
++            memset(d->accent,0,sizeof d->accent);
++            for(unsigned v=0;v<NDRUM;++v) {
++                memset(d->hit[v],0,sizeof d->hit[v]);
++                d->hit[v][0]=0xffffu;
++                prob[k][v]=100u;
++            }
++        }
++        memset(seq.pat[seq.ppat[TRK_BASS0]].bass[0].step,0,
++               sizeof seq.pat[seq.ppat[TRK_BASS0]].bass[0].step);
++        seq_start(&seq);
+         bench_s1_only[1]=d8_frame;return;
+     }
+     if(!bench_s1_only[1] || bench_s1_only[0] || b->status==ORIGINAL_RUNTIME_OK){
+          bench_s1_only[0]=3;return;
+     }
+     const unsigned on=d8_frame==ON;
++    bench_loaded_on=on;
++    bench_loaded_run=seq.playing;
+     const uint8_t notes[]={48,52,55,59,62,67};
+     if(seq.ch[TRK_BASS0]!=1u || seq.ch[TRK_BASS0+1]==1u){bench_s1_only[0]=4;return;}
+     for(unsigned i=0;i<sizeof notes;++i){
