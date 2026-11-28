@@ -1,0 +1,47 @@
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -10573,6 +10573,26 @@
+         if (wet) cv_rect(gx,bot-4,wet,3,col);
+     }
+ }
++/* A matrix snapshot can advance this once, then paint all LCD windows with
++ * the same fraction. Keep separate history for each synth part. */
++typedef struct { float from,to; uint8_t seen; } matrix_glide_history;
++static float matrix_glide_advance(matrix_glide_history *h,int known,float current,float target)
++{
++    float f=1.f;
++    if(known) {
++        if(!h->seen || target!=h->to) {
++            h->from=h->seen?current:target;
++            h->to=target;
++            h->seen=1;
++        }
++        if(h->to!=h->from)f=(current-h->from)/(h->to-h->from);
++    }
++    if(f<0.f)f=0.f;
++    if(f>1.f)f=1.f;
++    return f;
++}
++static matrix_glide_history matrix_glide[NBASS];
++
+ static UI_DRAW void orig_strip_glyph(pref_t r,int val,int gx,int gy,uint16_t col)
+ {
+     const x0x_param_t *d=pref_desc(r);
+@@ -10618,14 +10638,10 @@
+     } else if(c==(chi?1:4)) {                    /* GLIDE: sloped pitch line, slope widens */
+         /* Live: a dot rides the slope as the oscillator pitch glides to the new
+          * note (current -> target from the engine); the travelled part is lit. */
+-        static float from[NBASS],to[NBASS]; static uint8_t seen[NBASS];
+         int w=1+(int)(q*18+.5f),x0=gx+(OG_W-1-w)/2,b=r.b<NBASS?r.b:0,on=0;
+-        float ph,bi,cu=0,tg=0,f=1;
+-        if(engine_bass_motion_view(b,&ph,&bi,&cu,&tg,&on)) {
+-            if(!seen[b] || tg!=to[b]) { from[b]=seen[b]?cu:tg; to[b]=tg; seen[b]=1; }
+-            if(to[b]!=from[b]) f=(cu-from[b])/(to[b]-from[b]);
+-        }
+-        if(f<0)f=0; if(f>1)f=1;
++        float ph,bi,cu=0,tg=0;
++        const int known=engine_bass_motion_view(b,&ph,&bi,&cu,&tg,&on);
++        const float f=matrix_glide_advance(&matrix_glide[b],known,cu,tg);
+         int dx=x0+(int)(f*w+.5f),dy=bot-1-(int)(f*(bot-1-top)+.5f);
+         if(f>=1) { cv_line(gx,bot-1,x0,bot-1,col);cv_line(x0,bot-1,x0+w,top,col);cv_line(x0+w,top,right,top,col); }
+         else {
