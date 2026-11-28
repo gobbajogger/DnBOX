@@ -109,7 +109,7 @@ test_class() {
     breaks-page|projects-page|ble-acl-start-flags|ble-hci-completed|ble-acl-zero-credit|ble-zero-conn|ble-link-epoch-reset|smc-reconnect-epoch|smc-boot-saved-roles|smc-ble-payload|ble-central-first-notification|ble-dual-peer|ble-one-peer-command|ble-one-peer-contract|ble-command-credit|ble-controller-heap|ble-ctl-fail-return|ble-disconnect-status|ble-sysex-bounds|ble|ble-package|smk-package|smk-ota-entry*|smk-update-loader|smk-build-package*|\
     smk-clip-ble-clear|smk-clip-ble-notify|installer-ctl|ctl-read-framing|installer-backup-snapshot) TEST_CLASS=S ;;
     composed-features|composed-panic-cutover|panic-clear|panic-order|panic-mutants|live-key-epoch|midi-epoch-step|composed-ui-identity|synthone-slot|juno-slot-integration|held-chord-integration|poly-chord-integration|project-rates-companion|composed-smc-panic) TEST_CLASS=G ;;
-    s1c-slot|s1c-programs|s1c-fx-controls|synth-arp-hooks) TEST_CLASS=G ;;
+    s1c-slot|s1c-programs|s1c-delay-wrap|s1c-fx-controls|synth-arp-hooks) TEST_CLASS=G ;;
     ui-synthone-patch|ui-synthone-frames) TEST_CLASS=G ;;   # SMK host fixtures regenerate build/gen
     rec-live-smk) TEST_CLASS=S ;;   # these read build/gen from host-build (phase 1)
     save-note-quiet|original-release-integration|original-release-ui|freeplay-rate-pads|freeplay-live-keys|synth-bus-mute|storage-warning|freeplay-latency|pads-in-settings|boot-screen|ui-theme) TEST_CLASS=G ;;
@@ -350,6 +350,7 @@ run composed-ui-identity env SMC_UI_TEST_FILE=tests/host/composed_ui_identity_te
 run synthone-slot env SMC_UI_TEST_FILE=tests/host/synthone_slot_test.c SMC_UI_OUT=build/host/synthone-slot sh tests/host/smc_ui_test.sh
 run s1c-slot env X0X_S1C=1 X0X_HOST_DEFS="-DX0X_S1C=1 -DX0X_SYNTHONE_PATCH=1" SMC_UI_TEST_FILE=tests/host/synthone_slot_test.c SMC_UI_OUT=build/host/s1c-slot sh tests/host/smc_ui_test.sh
 run s1c-programs sh tests/host/s1c_programs_test.sh "$OUT/s1c-programs"
+run s1c-delay-wrap sh tests/host/s1c_delay_wrap_test.sh
 run s1c-fx-controls sh tests/host/s1c_fx_controls_test.sh "$OUT/s1c-fx-controls"
 run synth-arp-hooks sh tests/host/synth_arp_hooks_test.sh "$OUT/synth-arp-hooks"
 run synthone-envelope-dnbx python3 -B tests/host/test_synthone_dnbx_envelope.py

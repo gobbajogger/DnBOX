@@ -565,6 +565,10 @@ static float dl_tick_c(s1c_dline *d, float in, float del, float fb, float c)
 static float xl_read(const s1c_dline *d, float del)
 {
     float pos = (float)d->w - del;
+    /* A disabled delay still maintains its 16-sample history behind the live
+     * tap. Fold full wraps exactly before the final fractional interpolation. */
+    if (d->len == 16 && pos < -16.0f && pos >= -0x1p24f)
+        pos += (float)((int)(-pos * (1.0f / 16.0f)) * 16);
     while (pos < 0.0f) pos += (float)d->len;
     int i = (int)pos; float f = pos - (float)i;
     int j = i + 1 == d->len ? 0 : i + 1;
