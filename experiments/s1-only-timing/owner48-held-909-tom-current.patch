@@ -1,0 +1,65 @@
+--- a/firmware/src/dsp/drum909.c
++++ b/firmware/src/dsp/drum909.c
+@@ -926,6 +926,19 @@
+     d9_emit_block(bus, m);
+ }
+ 
++/* During a tom render only the next level and remaining ramp are
++ * recurrent. The last returned level is externally observed at the next
++ * boundary, so defer publishing it while retaining the exact ramp math. */
++D9_INLINE float d9_tom_tick(d9_env_t *e)
++{
++    const float o = e->v;
++    if (e->left) {
++        if (--e->left) e->v *= e->r;
++        else e->v = e->v1;
++    }
++    return o;
++}
++
+ /* Toms (er99_tom909_render): three VCOs on their own envelopes + stick noise.
+  * The two upper partials and the stick are attack features (110 / 70 / 8 ms);
+  * once their envelopes have run out (-100 dB) they are skipped. */
+@@ -943,27 +956,36 @@
+         d9_warm(&t->noise_bp, nz);
+         t->stick_warm = 0;
+     }
++    float pitch=t->pitch.cur, base=t->env[0].cur;
++    float part1=t->env[1].cur, part2=t->env[2].cur, noise=t->noise_env.cur;
+     for (int i = 0; i < m; ++i) {
+-        const float f = d9_env_tick(&t->pitch);
++        const float f = pitch = d9_tom_tick(&t->pitch);
+         float o = 0.0f;
+         t->ph[0] += d9_inc(f);
+-        o += d9_diode20_phase(t->ph[0]) * d9_env_tick(&t->env[0]);
++        base = d9_tom_tick(&t->env[0]);
++        o += d9_diode20_phase(t->ph[0]) * base;
+         if (t->env[1].left) {
+             t->ph[1] += d9_inc(f * 1.50f);
+-            o += d9_diode20_phase(t->ph[1]) * d9_env_tick(&t->env[1]);
++            part1 = d9_tom_tick(&t->env[1]);
++            o += d9_diode20_phase(t->ph[1]) * part1;
+         }
+         if (t->env[2].left) {
+             t->ph[2] += d9_inc(f * 2.75f);
+-            o += d9_diode20_phase(t->ph[2]) * d9_env_tick(&t->env[2]);
++            part2 = d9_tom_tick(&t->env[2]);
++            o += d9_diode20_phase(t->ph[2]) * part2;
+         }
+         o *= 0.55f;
+         float stick = 0.0f;
+-        if (t->noise_env.left)
+-            stick = d9_biquad_tick(&t->noise_bp, nz[i]) * d9_env_tick(&t->noise_env) * stick_g;
++        if (t->noise_env.left) {
++            noise = d9_tom_tick(&t->noise_env);
++            stick = d9_biquad_tick(&t->noise_bp, nz[i]) * noise * stick_g;
++        }
+         float y = d9_shape_v(&p->shape, o + stick, t->crush_st);
+         y = d9_biquad_tick(&t->dc_block, y);
+         bus->y[i] = y * t->out_gain;
+     }
++    t->pitch.cur=pitch; t->env[0].cur=base;
++    t->env[1].cur=part1; t->env[2].cur=part2; t->noise_env.cur=noise;
+     d9_emit_block(bus, m);
+     if (!t->noise_env.left)
+         t->stick_stale = 1;

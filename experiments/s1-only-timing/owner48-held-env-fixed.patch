@@ -1,0 +1,34 @@
+--- a/firmware/src/dsp/s1c/s1c.c
++++ b/firmware/src/dsp/s1c/s1c.c
+@@ -994,7 +994,22 @@
+ #endif
+ #endif
+ #if S1C_ENVELOPE_SHARE
+-    int share = n && s1c_share_envelopes(s);
++    int share = n && s1c_share_envelopes(s), env_frozen=share;
++    for(i=0;env_frozen && i<nmoving;++i) {
++        const unsigned k=s1c_smid[moving[i]];
++        if(k==AS || k==FS) env_frozen=0;
++    }
++    if(env_frozen) {
++        s1c_voice *v=&s->v[0];
++        s1u_env ea=v->ea, ef=v->ef;
++        /* The actual envelope implementation must be at an exact state
++         * fixed point. No gate or sustain input can change in this span.
++         * The time constants affect only transitions, which cannot occur. */
++        const float amp=env_step(&ea,v->gate,P(AA),P(AD),P(AS),P(AR),s->sr);
++        const float fenv=env_step(&ef,v->gate,P(FA),P(FD),P(FS),P(FR),s->sr);
++        env_frozen = !memcmp(&ea,&v->ea,sizeof ea) && !memcmp(&ef,&v->ef,sizeof ef);
++        if(env_frozen) {v->amp=amp; v->fenv=fenv;}
++    }
+ #endif
+     for (f = 0; f < n; f++) {
+ #if S1C_FAST
+@@ -1048,6 +1063,7 @@
+ #if S1C_ENVELOPE_SHARE
+         const s1c_voice *shared = NULL;
+         if (share) {
++            if(env_frozen) shared=&s->v[0];
+             y += voice_run(s, &s->v[0]);    /* identical accumulation, including signed zero */
+             shared = &s->v[0];
+             for (i = 1; i < S1C_VOICES; ++i)

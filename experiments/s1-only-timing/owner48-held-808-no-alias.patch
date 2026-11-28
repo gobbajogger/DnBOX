@@ -1,0 +1,14 @@
+--- a/firmware/src/dsp/drum808.c
++++ b/firmware/src/dsp/drum808.c
+@@ -2369,7 +2369,10 @@
+ 
+ /* Run one voice for up to m samples into buf; stops where 8W8 would stop calling
+  * it (the voice went inactive). Returns the samples written. */
+-static __attribute__((noinline)) int voice_run(drum808_t *d, int l, float *buf, int m, const float *bus, const float *pair)
++/* Every caller passes separate chunk scratch and a kit's owned voice state.
++ * Tell the compiler stores into buf cannot modify this voice's recurrence. */
++static __attribute__((noinline)) int voice_run(drum808_t *restrict d, int l,
++     float *restrict buf, int m, const float *restrict bus, const float *restrict pair)
+ {
+     int i;
+     switch (l) {

@@ -1,0 +1,32 @@
+--- a/firmware/src/dsp/s1c/s1c.c
++++ b/firmware/src/dsp/s1c/s1c.c
+@@ -996,6 +996,14 @@
+ #if S1C_ENVELOPE_SHARE
+     int share = n && s1c_share_envelopes(s);
+ #endif
++#if S1C_KR > 1 && S1C_FAST && S1C_CSM && S1C_NO_SEQ
++    unsigned morph_moves = 0;
++    for (i=0;i<nmoving;++i) {
++        const unsigned k=s1c_smid[moving[i]];
++        morph_moves |= k==I1 ? 1u : k==I2 ? 2u : 0u;
++    }
++    const s1c_morph fixed_morphs[2]={morph_params(P(I1)),morph_params(P(I2))};
++#endif
+     for (f = 0; f < n; f++) {
+ #if S1C_FAST
+         int cu = (f & 3) == 0;
+@@ -1041,7 +1049,14 @@
+         sequencer(s);
+ #endif
+ #if S1C_KR > 1
++#if S1C_FAST && S1C_CSM && S1C_NO_SEQ
++        const s1c_morph morphs[2] = {
++            morph_moves&1u ? morph_params(P(I1)) : fixed_morphs[0],
++            morph_moves&2u ? morph_params(P(I2)) : fixed_morphs[1]
++        };
++#else
+         const s1c_morph morphs[2] = {morph_params(P(I1)), morph_params(P(I2))};
++#endif
+         const float adec = clampf(P(AD) * lfo10(s, P(LDEC)), 0.005f, 2.0f);
+ #endif
+         float y = 0.0f;

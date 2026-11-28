@@ -1,0 +1,22 @@
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -2712,10 +2712,15 @@
+                 uint32_t q = original_quiet_samples[bv];
+                 float g = bass_accent_mk[bv], t = bass_accent_mk_to[bv];
+                 if (g == 1.0f && t == 1.0f) {
+-                    for (i = 0; i < n; ++i) {
+-                        if (fm_fabsf(bb[bv][i]) > 1.0f/65536.0f || fm_fabsf(bb[1-bv][i]) > 1.0f/65536.0f) q = 0;
+-                        else if (q < 512u) ++q;
+-                    }
++                    /* Only the consecutive quiet suffix contributes. A
++                     * nonquiet sample resets the count, including after a
++                     * saturated unchanged/deferred gain span. */
++                    i=n;
++                    while(i && !(fm_fabsf(bb[bv][i-1u]) > 1.0f/65536.0f ||
++                                 fm_fabsf(bb[1-bv][i-1u]) > 1.0f/65536.0f))
++                        --i;
++                    if(i) q=n-i;
++                    else if(q<512u) q=n<512u-q ? q+n : 512u;
+                 } else {
+                     /* Accent make-up (bass_303_accent_makeup), fused into this
+                      * scan: one pass over the part, the same samples. */

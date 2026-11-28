@@ -1,0 +1,56 @@
+--- a/firmware/src/dsp/s1c/s1c.c
++++ b/firmware/src/dsp/s1c/s1c.c
+@@ -354,8 +354,9 @@
+ }
+ 
+ /* ---- one voice sample ---- */
+-static float voice_run(s1c *s, s1c_voice *v)
++static float voice_run(s1c *s, unsigned vi)
+ {
++    s1c_voice *v=&s->v[vi];
+     int mono = P(MONO) > 0.0f;
+     float base = mono ? s->monos : v->freq, half = 0.5f * s->sr;
+     float plfo = 1.0f + lfo01(s, P(LPITCH)) * 0.0594630944f;
+@@ -429,12 +430,13 @@
+ #if S1C_KR > 1
+ /* Cheap voice: pitch, LFO, key-tracking and filter coefficients at control rate (every S1C_KR
+  * samples), sines from a 256-point table, the filter envelope still per sample in the cutoff. */
+-static float voice_run_kr(s1c *s, s1c_voice *v, const s1c_morph *m, float adec, const float *semi, uint32_t *seen,uint32_t *fseen
++static float voice_run_kr(s1c *s, unsigned vi, const s1c_morph *m, float adec, const float *semi, uint32_t *seen,uint32_t *fseen
+ #if S1C_ENVELOPE_SHARE
+                           ,const s1c_voice *shared
+ #endif
+                           )
+ {
++    s1c_voice *v=&s->v[vi];
+     int mono = P(MONO) > 0.0f, ft = (int)P(FTYPE);
+ #if S1C_ENVELOPE_SHARE
+     if (shared) {
+@@ -448,7 +450,7 @@
+     }
+     if (--v->kc <= 0) {
+         v->kc = S1C_KR;
+-        const uint32_t bit=1u<<(unsigned)(v-s->v);
++        const uint32_t bit=1u<<vi;
+         if(!seen || !(*seen & bit)) {
+             float base = mono ? s->monos : v->freq, half = 0.5f * s->sr;
+             float plfo = 1.0f + lfo01(s, P(LPITCH)) * 0.0594630944f, k = P(DETM) * plfo;
+@@ -1048,14 +1050,14 @@
+ #if S1C_ENVELOPE_SHARE
+         const s1c_voice *shared = NULL;
+         if (share) {
+-            y += voice_run(s, &s->v[0]);    /* identical accumulation, including signed zero */
++            y += voice_run(s, 0);    /* identical accumulation, including signed zero */
+             shared = &s->v[0];
+             for (i = 1; i < S1C_VOICES; ++i)
+-                y += voice_run(s, &s->v[i]);
++                y += voice_run(s, i);
+         } else
+ #endif
+-        if (P(MONO) > 0.0f) { if (s->v[0].root != -1 && s->v[0].stage) y = voice_run(s, &s->v[0]); }
+-        else for (i = 0; i < S1C_VOICES; i++) if (s->v[i].root != -1 && s->v[i].stage) y += voice_run(s, &s->v[i]);
++        if (P(MONO) > 0.0f) { if (s->v[0].root != -1 && s->v[0].stage) y = voice_run(s, 0); }
++        else for (i = 0; i < S1C_VOICES; i++) if (s->v[i].root != -1 && s->v[i].stage) y += voice_run(s, i);
+ 
+         /* Diagnostic pure tone path: keep voices and filters, skip all downstream FX. */
+         outl[f]=outr[f]=y * 2.0f * P(MVOL);

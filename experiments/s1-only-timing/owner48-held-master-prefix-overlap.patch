@@ -1,0 +1,56 @@
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -2943,6 +2943,13 @@
+         eng_sync();
+     }
+ }
++static void master_old_prefix(float *l,float *r)
++{
++    const unsigned prefix=eng_master_raw_prefix;
++    if(prefix)
++        eng_master_resume_gr=master_process_st_continue(&mst,l-prefix,r-prefix,
++                                                         (int)prefix,eng_vol,0.f);
++}
+ static void master_st_tail(float *l,float *r,unsigned n)
+ {
+     if (eng_master_raw_prefix)
+@@ -3062,21 +3069,16 @@
+     }
+     bfx_send_shape(0, rev, (int)n);
+     bfx_send_shape(1, dly, (int)n);
+-    if (eng_master_raw_prefix) {
+-        if (bfx_flt_hold || busfx_settling(&bfx_flt_st)) {
+-            eng_master_raw_prefix=0;
+-            eng_do_master=0; /* original deferred operation incl filter stays untouched */
+-        } else {
+-            unsigned prefix=eng_master_raw_prefix;
+-            eng_master_resume_gr=master_process_st_continue(&mst,out_l-prefix,out_r-prefix,
+-                                                             (int)prefix,eng_vol,0.f);
+-        }
++    if (eng_master_raw_prefix && (bfx_flt_hold || busfx_settling(&bfx_flt_st))) {
++        eng_master_raw_prefix=0;
++        eng_do_master=0; /* original deferred operation incl filter stays untouched */
+     }
+     if (eng_do_master && n >= ENG_TAIL_CS) {
+         uint32_t done = 0, waited = 0, first = 1;
+         PROF_T(pf);
+ #ifdef X0X_HOST
+         /* host: the same chunks, in order (core 1 is lazy). Proves the bits. */
++        master_old_prefix(out_l,out_r);
+         while (done < n) {
+             uint32_t m = n - done;
+             if (m > ENG_TAIL_CS)
+@@ -3099,7 +3101,12 @@
+         eng_fx_n = n;
+         eng_fx_done = 0;
+         eng_sync();
+-        if (!plat_cpu2_run(core2_fx, 0u)) {
++        const int dispatched=plat_cpu2_run(core2_fx, 0u);
++        /* Only the old output prefix and master state are touched here.
++         * The worker starts FX for the new, disjoint suffix while this
++         * still precedes every suffix step of the shared master. */
++        master_old_prefix(out_l,out_r);
++        if (!dispatched) {
+             fxbus_process_st(&fx, dry_l, dry_r, rev, dly, out_l, out_r, (int)n);
+             PROF_ADD(5, pf);
+             tape_after_fx();

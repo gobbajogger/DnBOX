@@ -1,0 +1,43 @@
+--- a/firmware/src/dsp/s1c/s1c.c
++++ b/firmware/src/dsp/s1c/s1c.c
+@@ -281,6 +281,14 @@
+     *ph += step;
+     return y;
+ }
++#if DNBOX_S1_PULSE_SAW_PAIR && S1C_KR > 1
++static inline float pulse_saw_value(uint32_t ph, float f)
++{
++    const float t = (float)ph * (1.0f / Q32);
++    const float y = t < 0.125f ? -1.0f : 1.0f;
++    return y + f * ((2.0f * t - 1.0f - 0.0f) - y);
++}
++#endif
+ static float morph(uint32_t *ph, float hz, float pos, int bl, float sr)
+ {
+     float dt = hz / sr;
+@@ -491,8 +499,25 @@
+         }
+     }
+     int bl = P(BLE) > 0.0f;
++#if DNBOX_S1_PULSE_SAW_PAIR
++    float o1, o2;
++    if (!bl && m[0].k == 2 && m[1].k == 2 &&
++        m[0].frac > 0.0f && m[1].frac > 0.0f) {
++        const uint32_t p1 = v->ph[0], p2 = v->ph[1];
++        const float t1 = pulse_saw_value(p1, m[0].frac);
++        const float t2 = pulse_saw_value(p2, m[1].frac);
++        v->ph[0] = p1 + v->kstep[0];
++        v->ph[1] = p2 + v->kstep[1];
++        o1 = t1 * v->vamp * P(VOL1);
++        o2 = t2 * v->vamp * P(VOL2);
++    } else {
++        o1 = morph_step(&v->ph[0], v->kdt1, m[0].k, m[0].frac, bl, v->kstep[0]) * v->vamp * P(VOL1);
++        o2 = morph_step(&v->ph[1], v->kdt2, m[1].k, m[1].frac, bl, v->kstep[1]) * v->vamp * P(VOL2);
++    }
++#else
+     float o1 = morph_step(&v->ph[0], v->kdt1, m[0].k, m[0].frac, bl, v->kstep[0]) * v->vamp * P(VOL1);
+     float o2 = morph_step(&v->ph[1], v->kdt2, m[1].k, m[1].frac, bl, v->kstep[1]) * v->vamp * P(VOL2);
++#endif
+     float y = (1.0f - v->kbal) * o1 + v->kbal * o2;
+     const s1c_fb sub_gain={.f=P(SUBV)};
+     const uint32_t sub_phase=v->ph[2];

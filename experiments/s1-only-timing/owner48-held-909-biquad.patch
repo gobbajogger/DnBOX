@@ -1,0 +1,95 @@
+--- a/firmware/src/dsp/drum909.c
++++ b/firmware/src/dsp/drum909.c
+@@ -839,6 +839,23 @@
+     f->x1=x1;f->x2=x2;f->y1=y1;f->y2=y2;
+ }
+ 
++/* All these low/high passes come from d9_biquad_set with equal b0/b2.
++ * Cache only that already-rounded input product. The original add/sub
++ * order, the independent b1 product and all published histories stay. */
++typedef struct { float p1, p2; } d9_sym_prod;
++D9_INLINE d9_sym_prod d9_sym_init(const d9_biquad_t *f)
++{
++    return (d9_sym_prod){f->b2*f->x1,f->b2*f->x2};
++}
++D9_INLINE float d9_sym_tick(d9_biquad_t *f,d9_sym_prod *p,float in)
++{
++    const float first=f->b0*in;
++    const float y=first+f->b1*f->x1+p->p2-f->a1*f->y1-f->a2*f->y2;
++    p->p2=p->p1;p->p1=first;
++    f->x2=f->x1;f->x1=in;f->y2=f->y1;f->y1=y;
++    return y;
++}
++
+ /* Kick (er99_bt_render with the stock sweep, one shell) */
+ static void d9_render_bd(d9_bt_t *v, const float *nz, const d9_bus_t *bus, int n)
+ {
+@@ -852,6 +869,7 @@
+         v->click_warm = 0;
+     }
+     const uint32_t hold_inc = v->bd_phold > 0 && m > 0 ? d9_inc(v->bd_base + v->bd_df) : 0;
++    d9_sym_prod dc_block_product = d9_sym_init(&v->dc_block);
+     for (int i = 0; i < m; ++i) {
+         uint32_t inc;
+         if (v->bd_phold > 0) { inc = hold_inc; --v->bd_phold; }
+@@ -863,7 +881,7 @@
+         v->ph += inc;
+         float o = d9_diode16(d9_tri(v->ph));
+         o += 0.05f * o * o;
+-        o = d9_biquad_tick(&v->dc_block, o);
++        o = d9_sym_tick(&v->dc_block, &dc_block_product, o);
+         const float body = d9_shape_v(&v->shape, o, v->crush_st) * amp;
+ 
+         /* the beater click; once its 3 ms envelope has run out it sits at -100 dB
+@@ -896,6 +914,8 @@
+     d9_env_anchor(&v->noise_env);
+     const float ratio = v->tune > 1.0f ? v->tune2 / v->tune : 1.0f;
+     const float mix2 = v->osc2_mix, inv_mix = 1.0f / (1.0f + v->osc2_mix);
++    d9_sym_prod noise_hpf_product = d9_sym_init(&v->noise_hpf);
++    d9_sym_prod noise_lpf_product = d9_sym_init(&v->noise_lpf);
+     for (int i = 0; i < m; ++i) {
+         const float f = d9_env_tick(&v->pitch);
+         float amp = d9_env_tick(&v->amp);
+@@ -918,7 +938,7 @@
+                 if (env <= 0.0f)
+                     v->noise_gated = 1;
+             }
+-            y += d9_biquad_tick(&v->noise_lpf, d9_biquad_tick(&v->noise_hpf, nz[i])) * env * v->snappy
++            y += d9_sym_tick(&v->noise_lpf, &noise_lpf_product, d9_sym_tick(&v->noise_hpf, &noise_hpf_product, nz[i])) * env * v->snappy
+                * D9_SNAPPY_MIX;
+         }
+         bus->y[i] = y * v->out_gain;
+@@ -943,6 +963,7 @@
+         d9_warm(&t->noise_bp, nz);
+         t->stick_warm = 0;
+     }
++    d9_sym_prod dc_block_product = d9_sym_init(&t->dc_block);
+     for (int i = 0; i < m; ++i) {
+         const float f = d9_env_tick(&t->pitch);
+         float o = 0.0f;
+@@ -961,7 +982,7 @@
+         if (t->noise_env.left)
+             stick = d9_biquad_tick(&t->noise_bp, nz[i]) * d9_env_tick(&t->noise_env) * stick_g;
+         float y = d9_shape_v(&p->shape, o + stick, t->crush_st);
+-        y = d9_biquad_tick(&t->dc_block, y);
++        y = d9_sym_tick(&t->dc_block, &dc_block_product, y);
+         bus->y[i] = y * t->out_gain;
+     }
+     d9_emit_block(bus, m);
+@@ -1024,6 +1045,7 @@
+     const float burst_samples = v->burst_decay * D9_MS, tail_samples = v->tail_decay * D9_MS;
+     const float spread_samples = v->spread * D9_MS, tail_level = v->tail_level;
+     const d9_shape_t shape = v->shape;
++    d9_sym_prod hp_product = d9_sym_init(&v->hp);
+     for (int i = 0; i < m; ++i) {
+         if (v->pulse_index < 4) {
+             if (v->next_pulse <= 0.0f) {
+@@ -1041,7 +1063,7 @@
+         const float env = d9_env_tick(&v->burst) + d9_env_tick(&v->tail);
+         float y = d9_biquad_tick(&v->bp, nz[i]) * env;
+         y = d9_shape_v(&shape, y, v->crush_st);
+-        y = d9_biquad_tick(&v->hp, y);
++        y = d9_sym_tick(&v->hp, &hp_product, y);
+         bus->y[i] = y * g * accent;
+     }
+     d9_emit_block(bus, m);

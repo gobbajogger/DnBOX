@@ -1,0 +1,41 @@
+--- a/firmware/src/dsp/drum808.c
++++ b/firmware/src/dsp/drum808.c
+@@ -279,6 +279,17 @@
+     return y;
+ }
+ 
++/* Fixed low/high-pass numerators have n2 == n0. Reuse the same
++ * rounded product, preserving every recurrence operation's grouping. */
++static inline __attribute__((always_inline)) float bq_run_sym(d8_bq_t *f, float x)
++{
++    float bx = f->n0 * x;
++    float y = bx + f->z1;
++    f->z1 = (f->n1 * x + (y + y + f->z2)) - f->e1 * y;
++    f->z2 = (bx - y) - f->e2 * y;
++    return y;
++}
++
+ /* SuperCollider HPF / LPF (2nd-order Butterworth, prewarped), coefficients only */
+ __attribute__((noinline)) static void sc_hpf_set(d8_bq_t *f, float hz)
+ {
+@@ -552,9 +563,9 @@
+     v->noise_env *= v->noise_decay;
+     n = rng_frand2(&v->rng);
+     vca = (n > 0.0f ? n : 0.0f) * v->noise_env;
+-    noise = bq_run(&v->noise_hp, vca);
++    noise = bq_run_sym(&v->noise_hp, vca);
+     out = shells * 0.1491f + noise * 1.4908f;
+-    out = bq_run(&v->out_hp, out);
++    out = bq_run_sym(&v->out_hp, out);
+     if (D8_UNLIKELY(!(out > -50.0f && out < 50.0f))) {
+         sd_reset(v);
+         return 0.0f;
+@@ -767,7 +778,7 @@
+         v->pul_wrap = 1;
+     v->pul_ph = nph;
+     sig = bq_run(&v->peak, tri * env + pul * env + rng_frand2(&v->rng) * env * 0.46f);
+-    sig = bq_run(&v->lp, bq_run(&v->hp, sig));
++    sig = bq_run_sym(&v->lp, bq_run_sym(&v->hp, sig));
+     if (v->env.done)
+         QUIET(v, sig, 200);
+     return sig;

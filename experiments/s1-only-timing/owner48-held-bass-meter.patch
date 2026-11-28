@@ -1,0 +1,30 @@
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -2764,6 +2764,19 @@
+             add_glide(dry_r, bb[1-bv], &mix_glide[p][GL_R], n);
+             {
+                 float pk = part_peak[p], g = mix_level[p];
++                if (g >= 0.f && pk >= 0.f) {
++                    /* Nonnegative gains preserve order. NaN inputs never win
++                     * either max; when g==0 neither loop can raise the peak. */
++                    float raw=0.f;
++                    for(i=0;i<n;++i) {
++                        float l=bb[bv][i],r=bb[1-bv][i],a=fm_fabsf(l),b=fm_fabsf(r);
++                        if(a>raw) raw=a;
++                        if(b>raw) raw=b;
++                        bb[bv][i]=.5f*(l+r);
++                    }
++                    const float peak=raw*g;
++                    if(peak>pk) pk=peak;
++                } else {
+                 for (i = 0; i < n; ++i) {
+                     float l = bb[bv][i], r = bb[1-bv][i];
+                     float a = fm_fabsf(l) * g;
+@@ -2772,6 +2785,7 @@
+                     if (a > pk) pk = a;
+                     bb[bv][i] = .5f * (l + r);
+                 }
++                }
+                 part_peak[p] = pk;
+             }
+             add_glide(rev, bb[bv], &mix_glide[p][GL_REV], n);

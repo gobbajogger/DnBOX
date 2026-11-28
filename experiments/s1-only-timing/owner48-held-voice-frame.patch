@@ -1,0 +1,99 @@
+--- a/firmware/src/dsp/s1c/s1c.c
++++ b/firmware/src/dsp/s1c/s1c.c
+@@ -429,13 +429,18 @@
+ #if S1C_KR > 1
+ /* Cheap voice: pitch, LFO, key-tracking and filter coefficients at control rate (every S1C_KR
+  * samples), sines from a 256-point table, the filter envelope still per sample in the cutoff. */
+-static float voice_run_kr(s1c *s, s1c_voice *v, const s1c_morph *m, float adec, const float *semi, uint32_t *seen,uint32_t *fseen
++typedef struct {
++    s1c_morph m[2];
++    float vol1,vol2,subv,subsq,fmv,nv,fmix;
++    int mono,ft,bl;
++} s1c_voice_frame;
++static float voice_run_kr(s1c *s, s1c_voice *v, const s1c_voice_frame *a, float adec, const float *semi, uint32_t *seen,uint32_t *fseen
+ #if S1C_ENVELOPE_SHARE
+                           ,const s1c_voice *shared
+ #endif
+                           )
+ {
+-    int mono = P(MONO) > 0.0f, ft = (int)P(FTYPE);
++    int mono = a->mono, ft = a->ft;
+ #if S1C_ENVELOPE_SHARE
+     if (shared) {
+         v->amp = shared->amp;
+@@ -490,36 +495,36 @@
+             if(fseen) *fseen|=bit;
+         }
+     }
+-    int bl = P(BLE) > 0.0f;
+-    float o1 = morph_step(&v->ph[0], v->kdt1, m[0].k, m[0].frac, bl, v->kstep[0]) * v->vamp * P(VOL1);
+-    float o2 = morph_step(&v->ph[1], v->kdt2, m[1].k, m[1].frac, bl, v->kstep[1]) * v->vamp * P(VOL2);
++    int bl = a->bl;
++    float o1 = morph_step(&v->ph[0], v->kdt1, a->m[0].k, a->m[0].frac, bl, v->kstep[0]) * v->vamp * a->vol1;
++    float o2 = morph_step(&v->ph[1], v->kdt2, a->m[1].k, a->m[1].frac, bl, v->kstep[1]) * v->vamp * a->vol2;
+     float y = (1.0f - v->kbal) * o1 + v->kbal * o2;
+-    const s1c_fb sub_gain={.f=P(SUBV)};
++    const s1c_fb sub_gain={.f=a->subv};
+     const uint32_t sub_phase=v->ph[2];
+     v->ph[2]+=v->kstep[2];
+     if(!sub_gain.u) {
+         /* The quarter-wave sine has a negative sign on the second
+          * half, including -0 at the half-turn. Preserve the original
+          * signed-zero contribution and always advance its phase. */
+-        const uint32_t sign=P(SUBSQ)!=0.f ?
++        const uint32_t sign=a->subsq!=0.f ?
+             ((sub_phase-1u<0x7fffffffu)?0u:0x80000000u) :
+             (sub_phase&0x80000000u);
+         const s1c_fb zero={.u=sign};
+         y+=zero.f;
+     } else {
+         float sub=sine_t(sub_phase);
+-        y += P(SUBSQ) != 0.0f ? (sub>0.f?sub_gain.f:-sub_gain.f)
++        y += a->subsq != 0.0f ? (sub>0.f?sub_gain.f:-sub_gain.f)
+                               : sub*v->vamp*sub_gain.f*3.f;
+     }
+-    if (P(FMV) != 0.0f) {
++    if (a->fmv != 0.0f) {
+         float mod = sine_t(v->mph) * v->kff * v->kidx;
+         v->mph += v->kstep[3];
+-        y += sine_t(v->cph) * v->vamp * P(FMV);
++        y += sine_t(v->cph) * v->vamp * a->fmv;
+         v->cph += ph_inc((v->kff + mod) / s->sr);
+     }
+-    if (P(NOISEV) != 0.0f) {
++    if (a->nv != 0.0f) {
+         s->rnd = s->rnd * 1664525u + 1013904223u;
+-        y += ((float)(int32_t)s->rnd * (1.0f / 2147483648.0f)) * v->vamp * P(NOISEV) * lfo10(s, P(LNOISE));
++        y += ((float)(int32_t)s->rnd * (1.0f / 2147483648.0f)) * v->vamp * a->nv * lfo10(s, P(LNOISE));
+     }
+     y *= v->amp * v->kkey;
+     float fo;
+@@ -530,12 +535,12 @@
+         fo = t * v->ka1 - v->ka1 * v->bq[1];
+         v->bq[1] = v->bq[0]; v->bq[0] = t;
+     }
+-    return y + P(FMIX) * (fo - y);
++    return y + a->fmix * (fo - y);
+ }
+ #if S1C_ENVELOPE_SHARE
+-#define voice_run(s,v) voice_run_kr(s,v,morphs,adec,semis,pitch_seen,filter_seen,shared)
++#define voice_run(s,v) voice_run_kr(s,v,&voice_frame,adec,semis,pitch_seen,filter_seen,shared)
+ #else
+-#define voice_run(s,v) voice_run_kr(s,v,morphs,adec,semis,pitch_seen,filter_seen)
++#define voice_run(s,v) voice_run_kr(s,v,&voice_frame,adec,semis,pitch_seen,filter_seen)
+ #endif
+ #endif
+ /* ---- FX ---- */
+@@ -1041,7 +1046,11 @@
+         sequencer(s);
+ #endif
+ #if S1C_KR > 1
+-        const s1c_morph morphs[2] = {morph_params(P(I1)), morph_params(P(I2))};
++        const s1c_voice_frame voice_frame={
++            {morph_params(P(I1)),morph_params(P(I2))},
++            P(VOL1),P(VOL2),P(SUBV),P(SUBSQ),P(FMV),P(NOISEV),P(FMIX),
++            P(MONO)>0.f,(int)P(FTYPE),P(BLE)>0.f
++        };
+         const float adec = clampf(P(AD) * lfo10(s, P(LDEC)), 0.005f, 2.0f);
+ #endif
+         float y = 0.0f;

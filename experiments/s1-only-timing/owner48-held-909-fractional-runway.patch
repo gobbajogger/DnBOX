@@ -1,0 +1,30 @@
+--- a/firmware/src/dsp/drum909.c
++++ b/firmware/src/dsp/drum909.c
+@@ -1078,6 +1078,27 @@
+             bus->y[i] = v * d9_env_tick(&s->out);
+         }
+         pos += (unsigned)m;
++    } else if (m > 0 && inc == 1u && incf && pos < len &&
++               len - pos > 2u*(unsigned)m + 1u &&
++               dk >= pos && dk <= pos + 2u) {
++        /* With 1 < rate < 2 the previous lookahead misses at most
++         * two nibbles. The conservative end bound keeps all samples
++         * and their lookahead strictly inside the data. */
++        for (int i = 0; i < m; ++i) {
++            const uint32_t need = pos + 2u;
++            while (dk < need) {
++                h0 = h1;
++                h1 = ima_decode(adpcm, dk++, &pred, &idx);
++            }
++            const float a = (float)h0 * (1.0f / 32768.0f);
++            const float b = (float)h1 * (1.0f / 32768.0f);
++            const float fr = (float)frac * (1.0f / 4294967296.0f);
++            const float v = a + (b - a) * fr;
++            const uint32_t f2 = frac + incf;
++            pos += 1u + (f2 < frac);
++            frac = f2;
++            bus->y[i] = v * d9_env_tick(&s->out);
++        }
+     } else {
+         for (int i = 0; i < m; ++i) {
+             float v = 0.0f;

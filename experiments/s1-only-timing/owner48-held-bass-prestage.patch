@@ -1,0 +1,65 @@
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -2596,6 +2596,20 @@
+ }
+ 
+ /* one job, render and mix; core 1: not timed by the cycle counter (core 0's) */
++__attribute__((noinline)) static float bass_prepare_mix(int part,float *mono,const float *left,const float *right,unsigned n)
++{
++    float pk=part_peak[part], g=mix_level[part];
++    for(unsigned i=0;i<n;++i) {
++        const float l=left[i], r=right[i];
++        float a=fm_fabsf(l)*g;
++        if(a>pk) pk=a;
++        a=fm_fabsf(r)*g;
++        if(a>pk) pk=a;
++        mono[i]=.5f*(l+r);
++    }
++    return pk;
++}
++
+ static int run_job(int j, int core)
+ {
+     uint32_t arg = eng_job_arg, n = arg & 0xFFu ? arg & 0xFFu : 256u, i;
+@@ -2748,6 +2762,15 @@
+             }
+             bfx_shape(p, bb[bv], bb[1-bv], 0, 0, 2, (int)n);
+         }
++        float *mono=bb[bv], peak=0.f;
++        /* The stress route runs both bass jobs on Core 0. Its fixture retired B;
++         * borrow its private left buffer until the A send mix has finished.
++         * All joint bus operations still run in the original stage order. */
++        if(status==ORIGINAL_RUNTIME_OK && !core && !bv && eng_808_reverse &&
++           original_bass[1].status!=ORIGINAL_RUNTIME_OK) {
++            mono=eng_bass_buf[2];
++            peak=bass_prepare_mix(p,mono,bb[0],bb[1],n);
++        }
+         w0 = plat_ticks24();
+         if (stage_wait((uint32_t)(2 + bv), core))         /* A mixes after the 808, B after A */
+             return 0;
+@@ -2762,20 +2785,11 @@
+             if (solo_out) for (i = 0; i < GL_N; ++i) mix_glide[p][i].cur = 0.0f;
+             add_glide(dry_l, bb[bv], &mix_glide[p][GL_L], n);
+             add_glide(dry_r, bb[1-bv], &mix_glide[p][GL_R], n);
+-            {
+-                float pk = part_peak[p], g = mix_level[p];
+-                for (i = 0; i < n; ++i) {
+-                    float l = bb[bv][i], r = bb[1-bv][i];
+-                    float a = fm_fabsf(l) * g;
+-                    if (a > pk) pk = a;
+-                    a = fm_fabsf(r) * g;
+-                    if (a > pk) pk = a;
+-                    bb[bv][i] = .5f * (l + r);
+-                }
+-                part_peak[p] = pk;
+-            }
+-            add_glide(rev, bb[bv], &mix_glide[p][GL_REV], n);
+-            add_glide(dly, bb[bv], &mix_glide[p][GL_DLY], n);
++            if(mono==bb[bv])
++                peak=bass_prepare_mix(p,mono,bb[bv],bb[1-bv],n);
++            part_peak[p]=peak;
++            add_glide(rev, mono, &mix_glide[p][GL_REV], n);
++            add_glide(dly, mono, &mix_glide[p][GL_DLY], n);
+         }
+         eng_sync();
+         eng_stage = (uint32_t)(3 + bv);
