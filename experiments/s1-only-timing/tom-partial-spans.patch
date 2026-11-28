@@ -1,0 +1,75 @@
+--- a/firmware/src/dsp/drum909.c
++++ b/firmware/src/dsp/drum909.c
+@@ -909,6 +909,38 @@
+     d9_emit_block(bus, m);
+ }
+ 
++/* Render one partial across its active samples. The pitch copy is cheap
++ * when the sweep is settled and allows phase/envelope to remain local.
++ * Partial stems accumulate in the original order on each sample. */
++__attribute__((noinline)) static void d9_tom_vco(float *restrict y,
++                    d9_env_t *restrict e, uint32_t *restrict p,
++                    d9_env_t *restrict pitch, int m, float ratio)
++{
++    uint32_t ph = *p;
++    float ev=e->v, old=e->cur;
++    int32_t left=e->left;
++    const float mul=e->r, end=e->v1;
++    const int sweeping = pitch->left < m ? pitch->left : m;
++    const uint32_t steady = d9_inc(pitch->v1 * ratio);
++    int i = 0;
++    for (; i < sweeping; ++i) {
++        ph += d9_inc(d9_env_tick(pitch) * ratio);
++        old=ev;
++        if (left) ev=--left ? ev*mul : end;
++        y[i] += d9_diode20(d9_tri(ph))*old;
++    }
++    if (i < m) {
++        pitch->cur = pitch->v;
++        for (;i < m;++i)  {
++            ph += steady;
++            old=ev;
++            if (left) ev=--left ? ev*mul : end;
++            y[i] += d9_diode20(d9_tri(ph))*old;
++        }
++    }
++    *p=ph; e->v=ev; e->cur=old; e->left=left;
++}
++
+ /* Toms (er99_tom909_render): three VCOs on their own envelopes + stick noise.
+  * The two upper partials and the stick are attack features (110 / 70 / 8 ms);
+  * once their envelopes have run out (-100 dB) they are skipped. */
+@@ -926,20 +958,20 @@
+         d9_warm(&t->noise_bp, nz);
+         t->stick_warm = 0;
+     }
+-    for (int i = 0; i < m; ++i) {
+-        const float f = d9_env_tick(&t->pitch);
+-        float o = 0.0f;
+-        t->ph[0] += d9_inc(f);
+-        o += d9_diode20(d9_tri(t->ph[0])) * d9_env_tick(&t->env[0]);
+-        if (t->env[1].left) {
+-            t->ph[1] += d9_inc(f * 1.50f);
+-            o += d9_diode20(d9_tri(t->ph[1])) * d9_env_tick(&t->env[1]);
+-        }
+-        if (t->env[2].left) {
+-            t->ph[2] += d9_inc(f * 2.75f);
+-            o += d9_diode20(d9_tri(t->ph[2])) * d9_env_tick(&t->env[2]);
++    float *const ybuf = bus->y;
++    __builtin_memset(ybuf, 0, (unsigned)m * sizeof *ybuf);
++    const d9_env_t pitch0 = t->pitch;
++    d9_tom_vco(ybuf, &t->env[0], &t->ph[0], &t->pitch, m, 1.f);
++    for (int partial = 1; partial < 3; ++partial) {
++        int active = t->env[partial].left;
++        if (active > 0) {
++            d9_env_t pitch = pitch0;
++            d9_tom_vco(ybuf, &t->env[partial], &t->ph[partial], &pitch,
++                       m < active ? m : active, partial == 1 ? 1.50f : 2.75f);
+         }
+-        o *= 0.55f;
++    }
++    for (int i = 0; i < m; ++i) {
++        const float o = ybuf[i] * 0.55f;
+         float stick = 0.0f;
+         if (t->noise_env.left)
+             stick = d9_biquad_tick(&t->noise_bp, nz[i]) * d9_env_tick(&t->noise_env) * stick_g;
