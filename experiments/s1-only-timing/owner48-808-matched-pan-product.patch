@@ -1,0 +1,29 @@
+--- a/firmware/src/dsp/drum808.c
++++ b/firmware/src/dsp/drum808.c
+@@ -2409,11 +2409,21 @@
+                 /* settled pan: dpl * (float)i is a zero of dpl's sign for every i (dpl * 0.0f), so
+                  * one gain per side gives the same bits as the glide expression below */
+                 const float kl = k * (pl + dpl * 0.0f), kr = k * (pr + dpr * 0.0f);
+-                for (i = 0; i < m; i++) {
+-                    const float b = buf[i];
+-                    dry[i] += b * kl;
+-                    dry_r[i] += b * kr;
+-                }
++                if (((fm_bits_t){.f=kl}).u == ((fm_bits_t){.f=kr}).u) {
++                    /* Center/matched pans have the same product on both
++                     * routes. Compare the gain bits (signed zero included)
++                     * and preserve the separate bus additions and order. */
++                    for (i = 0; i < m; i++) {
++                        const float v = buf[i] * kl;
++                        dry[i] += v;
++                        dry_r[i] += v;
++                    }
++                } else
++                    for (i = 0; i < m; i++) {
++                        const float b = buf[i];
++                        dry[i] += b * kl;
++                        dry_r[i] += b * kr;
++                    }
+             } else
+                 for (i = 0; i < m; i++) {
+                     dry[i] += buf[i] * (k * (pl + dpl * (float)i));
