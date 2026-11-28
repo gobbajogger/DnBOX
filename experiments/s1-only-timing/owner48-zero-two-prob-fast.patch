@@ -1,0 +1,11 @@
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -1160,7 +1160,7 @@
+ static void s_drum(void *x, int kit, int v, float vel);
+ static int s_drum_seq(void *x, int kit, int v, float vel)
+ {
+-    if (prob_skip(kit, v))
++    if (prob[kit][v] != 100u && prob_skip(kit, v))
+         return 0;
+     s_drum(x, kit, v, vel);
+     if (bench_loaded_on && (unsigned)kit<NKIT) ++bench_loaded_hits[kit];

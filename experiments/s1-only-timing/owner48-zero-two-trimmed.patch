@@ -1,0 +1,11 @@
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -3027,8 +3027,6 @@
+ #endif
+     if(eng_808_reverse) {
+         d808_body_run();
+-        ++bench_808_reverse_spans;
+-        bench_808_reverse_frames+=n;
+     }
+     full808_a_ready = 0;
+     if (full808 && eng_c1_mask == ((1u<<JB_909)|(1u<<JB_B))) {

@@ -1,0 +1,26 @@
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -2245,10 +2245,19 @@
+ {
+     uint32_t i;
+     float pk = part_peak[p];
+-    for (i = 0; i < n; i++) {
+-        float a = fm_fabsf(x[i]) * g;
+-        if (a > pk)
+-            pk = a;
++    if (g >= 0.f && pk >= 0.f) {
++        float raw=0.f;
++        for (i=0; i<n; ++i) {
++            float a=fm_fabsf(x[i]);
++            if (a > raw) raw=a;
++        }
++        const float a=raw*g;
++        if (a > pk) pk=a;
++    } else {
++        for (i=0; i<n; ++i) {
++            const float a=fm_fabsf(x[i])*g;
++            if (a > pk) pk=a;
++        }
+     }
+     part_peak[p] = pk;
+ }
