@@ -1,0 +1,97 @@
+/* SPDX-License-Identifier: GPL-3.0-only */
+#include <assert.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
+#include <setjmp.h>
+#include <string.h>
+#include "app/s1c_part.h"
+
+void candidate_s1c_render(s1c *,float *,float *,unsigned);
+static s1_dry_part p, prestate, poststate;
+static _Alignas(16) unsigned char arena[S1C_ARENA_BYTES],pre[S1C_ARENA_BYTES],post[S1C_ARENA_BYTES];
+static float out[4][256];
+
+void candidate_s1c_split_enable(void *,unsigned);
+static _Alignas(16) unsigned char worker[6144];
+static jmp_buf abort_now;
+static int running, bad, ticks, syncs;
+static unsigned accepted, faulted, polls, claims, attempts, denied;
+void candidate_s1c_split_arm(void *, unsigned, int (*)(void));
+static int try_claim(void) {
+    ++polls;
+    ++attempts;
+    if (attempts < 3 || denied) return 0;
+    ++claims;
+    return 1;
+}
+void plat_cpu2_sync(void) {
+    if(running && ++syncs==3 && accepted%5==0) longjmp(abort_now,1);
+}
+uint32_t plat_ticks24(void) {return ++ticks;}
+int plat_cpu2_busy(void) {return bad ? -1:0;}
+int plat_cpu2_wait(void) {return bad ? -1:0;}
+int plat_cpu2_run(void (*fn)(uint32_t),uint32_t arg) {
+    bad=0;
+    ++accepted;
+    if (accepted%17==0) return 0;
+    syncs=0;
+    if(!setjmp(abort_now)) {running=1;fn(arg);} else {faulted++;bad=1;}
+    running=0;
+    return 1;
+}
+
+int main(int argc,char **argv) {
+    assert(argc==2);
+    FILE *f=fopen(argv[1],"rb"); assert(f);
+    assert(!fseek(f,0,SEEK_END));
+    long sz=ftell(f); assert(sz>0 && !fseek(f,0,SEEK_SET));
+    unsigned char *data=malloc((size_t)sz); assert(data);
+    assert(fread(data,1,(size_t)sz,f)==(size_t)sz && !fclose(f));
+    unsigned count=s1_part_set_pack(data,(uint32_t)sz);
+    assert(count==694);
+    unsigned long long frames=0;
+    candidate_s1c_split_enable(worker,sizeof worker);
+    const unsigned sizes[]={1,3,32,41,64,127,249,256,256,256};
+    for(unsigned k=0;k<=count;k++) {
+        memset(arena,0,sizeof arena);
+        s1_part_init(&p);
+        s1_part_bind(&p,arena);
+        assert(s1_part_program(&p,k<count?k:S1_PART_INIT));
+        if(k==count) for(unsigned warm=0;warm<512;warm++) s1c_render(&p.e,out[0],out[1],256);
+        for(unsigned b=0;b<96;b++) {
+            if (b==0 || b==29) for(unsigned j=0;j<6;j++)
+                s1_part_note(&p,44+2*j+(b==29),82+3*j);
+            if(b==48) s1_part_all_off(&p);
+            if(b==63 && (k%5==1)) {
+                s1c_set(&p.e,37,1.0f);
+                s1c_set(&p.e,40,.63f);
+                s1c_set(&p.e,41,1.0f);
+                s1c_set(&p.e,42,.51f);
+            }
+            unsigned n=sizes[(b+k)%10];
+            memcpy(&prestate,&p,sizeof p);memcpy(pre,arena,sizeof arena);
+            s1c_render(&p.e,out[0],out[1],n);
+            memcpy(&poststate,&p,sizeof p);memcpy(post,arena,sizeof arena);
+            memcpy(&p,&prestate,sizeof p);memcpy(arena,pre,sizeof arena);
+            attempts=0;
+            denied=(b%7==0);
+            candidate_s1c_split_arm(worker,sizeof worker,try_claim);
+            candidate_s1c_render(&p.e,out[2],out[3],n);
+            candidate_s1c_split_enable(0,0);
+            s1_dry_part actual = p; for (unsigned i=0;i<S1C_VOICES;i++) { actual.e.v[i].dt1 = actual.e.v[i].dt2 = 0.0f; actual.e.v[i].inc1 = actual.e.v[i].inc2 = actual.e.v[i].inc_sub = actual.e.v[i].inc_fm = 0; }
+            for (unsigned i=0;i<S1C_VOICES;i++) { poststate.e.v[i].dt1 = poststate.e.v[i].dt2 = 0.0f; poststate.e.v[i].inc1 = poststate.e.v[i].inc2 = poststate.e.v[i].inc_sub = poststate.e.v[i].inc_fm = 0; }
+            if(memcmp(&actual,&poststate,sizeof p)||memcmp(arena,post,sizeof arena)||
+               memcmp(out[0],out[2],n*sizeof(float))||memcmp(out[1],out[3],n*sizeof(float))) {
+                fprintf(stderr,"Mismatch: case %u, span %u\n",k,b);return 1;
+            }
+            frames+=n;
+        }
+    }
+    free(data);
+    printf("worker: %u submitted, %u forced after an 8-frame tile\n",accepted,faulted);
+    fflush(stdout);
+    printf("deferred peer: %u polls, %u successful retirements\n",polls,claims);
+    assert(accepted && faulted && polls > claims && claims);
+    printf("PASS %u factory programs plus INIT; %llu exact stereo samples and complete engine/arena state\n",count,frames);
+}

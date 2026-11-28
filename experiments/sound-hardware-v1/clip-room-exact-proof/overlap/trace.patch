@@ -1,0 +1,103 @@
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -2568,6 +2568,8 @@
+     }
+ }
+ 
++extern volatile uint32_t overlap_now[21];
++
+ /* one job, render and mix; core 1: not timed by the cycle counter (core 0's) */
+ /* 127 means B has not rendered. Reset before launching a stretch, used on core 0 only. */
+ static int8_t eng_early_b;
+@@ -2744,6 +2746,8 @@
+             uint32_t b_cost = plat_ticks24() - t_early;
+             /* Exclude early B from A's cost; charge it once when B mixes. */
+             eng_early_b_cost = b_cost;
++            overlap_now[17] += b_cost;
++            overlap_now[18]++;
+             tk += b_cost;
+         }
+ #endif
+@@ -2789,8 +2793,11 @@
+         if (!core)
+             PROF_ADD(PR_BRK, pk);
+     }
++    uint32_t work = plat_ticks24() - tk - wt;
++    overlap_now[core*5+j] += work;
++    overlap_now[10+core] += wt;
+     if (active)
+-        job_cost(j, plat_ticks24() - tk - wt, n);
++        job_cost(j, work, n);
+     return 1;
+ }
+ 
+@@ -2977,6 +2984,8 @@
+     if (m == (1u << JB_B) && original_bass[1].kind == ORIGINAL_SOUND_SYNTHONE) eng_808_split = 0;
+ #endif
+     eng_808_body = (uint8_t)!eng_808_split;
++    uint32_t job_start = plat_ticks24();
++    overlap_now[16] |= 1u << m;
+     eng_sync();
+     if (m && !plat_cpu2_run(core2_jobs, 0u)) {
+         eng_c1_mask = 0;                              /* one core: all of it here */
+@@ -3003,6 +3012,8 @@
+ #if X0X_DEBUG
+     eng_dbg_wait += plat_ticks24() - w0;              /* now: core 0's whole job span */
+ #endif
++    overlap_now[12] += plat_ticks24()-job_start;
++    uint32_t post_start = plat_ticks24();
+     brk_midi_drain();
+     for (j = 0; j < NBASS; j++)                       /* the recorder (shared with the sequencer): core 0 */
+         if (bass_render_ok[j]) original_rec_recover_off(j);
+@@ -3017,6 +3028,7 @@
+     }
+     bfx_send_shape(0, rev, (int)n);
+     bfx_send_shape(1, dly, (int)n);
++    overlap_now[13] += plat_ticks24()-post_start;
+     if (eng_do_master && n >= ENG_TAIL_CS) {
+         uint32_t done = 0, waited = 0, first = 1;
+         PROF_T(pf);
+@@ -3176,7 +3188,10 @@
+         /* any stretch of ENG_TAIL_CS or more: pipeline. Mastered frames
+          * must be a prefix (the master's state is in sample order). */
+         eng_do_master = (k >= ENG_TAIL_CS && done == eng_mastered);
++        uint32_t sub_start = plat_ticks24();
+         render_sub(out_l + done, out_r + done, k, 0);
++        overlap_now[14] += plat_ticks24()-sub_start;
++        ++overlap_now[15];
+         d8_frame+=k;
+         if (eng_do_master && eng_master_done)
+             eng_mastered = done + k;
+--- a/firmware/src/app/main_fm1.c
++++ b/firmware/src/app/main_fm1.c
+@@ -25,6 +25,7 @@
+     uint32_t last_us, cpu_q8, boots, stage;
+     uint32_t crash_seen;                            /* the crash count already reported at a boot */
+ } x0x_dbg __attribute__((section(".noinit")));
++volatile uint32_t overlap_now[21], overlap_worst[23], overlap_last[23];
+ static uint8_t safe_mode;
+ #if X0X_DEBUG
+ /* development: the slowest block since boot, taken apart (read over USB: tools/fm1_debug.py) */
+@@ -39,6 +40,7 @@
+ {
+     uint32_t t0 = fm1_ticks(), us, budget = HALF_FRAMES * 1000000u / FS;
+     x0x_dbg.in_audio = 1;
++    for (unsigned i=0;i<21;i++) overlap_now[i]=0;
+ #if FELUCCA_UAC
+     uac_render_start();
+ #endif
+@@ -89,8 +91,13 @@
+     engine_load(us * 100u / budget, HALF_FRAMES);
+     x0x_dbg.halves++;
+     x0x_dbg.last_us = us;
+-    if (us > x0x_dbg.max_us)
++    for (unsigned i=0;i<21;i++) overlap_last[i]=overlap_now[i];
++    overlap_last[21]=us;
++    overlap_last[22]=x0x_dbg.halves;
++    if (us > x0x_dbg.max_us) {
+         x0x_dbg.max_us = us;
++        for (unsigned i=0;i<23;i++) overlap_worst[i]=overlap_last[i];
++    }
+     x0x_dbg.in_audio = 0;
+ }
+ 

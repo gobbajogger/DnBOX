@@ -1,0 +1,136 @@
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -2569,6 +2569,37 @@
+ }
+ 
+ /* one job, render and mix; core 1: not timed by the cycle counter (core 0's) */
++/* 127 means B has not rendered. Reset before launching a stretch, used on core 0 only. */
++static int8_t eng_early_b;
++static uint32_t eng_early_b_cost;
++static int bass_render_job(int bv, int core, unsigned n, float *bl, float *br)
++{
++        PROF_T(pb);
++        (void)original_runtime_prepare(&original_bass[bv], seq_tempo(&seq));
++        bass_adapt_pre(bv, (unsigned)n);
++#if DNBOX_S1_WORK_SPLIT && X0X_S1C
++        extern void s1c_split_enable(void *, unsigned);
++        int can_split = !core && original_bass[bv].kind==ORIGINAL_SOUND_SYNTHONE &&
++            plat_cpu2_busy()==0;
++        if(can_split && eng_c1_mask) {
++            /* Reuse the peer only after the previous whole job published all
++             * of its work, acknowledged its mailbox, and retired its stages. */
++            can_split=eng_c1_next==JB_N && eng_808_body && plat_cpu2_wait()==0;
++            if(can_split) eng_c1_waited=2;
++        }
++        if(can_split) s1c_split_enable(&original_workspace_b.s1_worker,sizeof original_workspace_b.s1_worker);
++#endif
++        int status = original_runtime_render(&original_bass[bv], bv ? &original_workspace_b : &original_workspace,
++                                             bl, br, n);
++#if DNBOX_S1_WORK_SPLIT && X0X_S1C
++        if(can_split) s1c_split_enable(0,0);
++#endif
++        bass_adapt_post(bv, bl, br, (unsigned)n);
++        if (!core)
++            PROF_ADD(2 + bv, pb);
++    return status;
++}
++
+ static int run_job(int j, int core)
+ {
+     uint32_t arg = eng_job_arg, n = arg & 0xFFu ? arg & 0xFFu : 256u, i;
+@@ -2644,29 +2675,13 @@
+         float *bl = eng_bass_buf[2 * bv], *br = eng_bass_buf[2 * bv + 1];
+         float *bb[NBASS];
+         bb[bv] = bl; bb[1 - bv] = br;                     /* bass B renders right-left, as always */
+-        PROF_T(pb);
+-        (void)original_runtime_prepare(&original_bass[bv], seq_tempo(&seq));
+-        bass_adapt_pre(bv, (unsigned)n);
+-#if DNBOX_S1_WORK_SPLIT && X0X_S1C
+-        extern void s1c_split_enable(void *, unsigned);
+-        int can_split = !core && original_bass[bv].kind==ORIGINAL_SOUND_SYNTHONE &&
+-            plat_cpu2_busy()==0;
+-        if(can_split && eng_c1_mask) {
+-            /* Reuse the peer only after the previous whole job published all
+-             * of its work, acknowledged its mailbox, and retired its stages. */
+-            can_split=eng_c1_next==JB_N && eng_808_body && plat_cpu2_wait()==0;
+-            if(can_split) eng_c1_waited=2;
++        int status;
++        if (bv && !core && eng_early_b != 127) {
++            status = eng_early_b;
++            tk -= eng_early_b_cost;
++        } else {
++            status = bass_render_job(bv, core, (unsigned)n, bl, br);
+         }
+-        if(can_split) s1c_split_enable(&original_workspace_b.s1_worker,sizeof original_workspace_b.s1_worker);
+-#endif
+-        int status = original_runtime_render(&original_bass[bv], bv ? &original_workspace_b : &original_workspace,
+-                                             bb[bv], bb[1-bv], n);
+-#if DNBOX_S1_WORK_SPLIT && X0X_S1C
+-        if(can_split) s1c_split_enable(0,0);
+-#endif
+-        bass_adapt_post(bv, bb[bv], bb[1-bv], (unsigned)n);
+-        if (!core)
+-            PROF_ADD(2 + bv, pb);
+         bass_render_ok[bv] = (uint8_t)(status == ORIGINAL_RUNTIME_OK);   /* recorder: core 0, after */
+         if (status == ORIGINAL_RUNTIME_OK) {
+             /* One coherent request decision per sub-block. Once note ownership is
+@@ -2717,6 +2732,21 @@
+             }
+             bfx_shape(p, bb[bv], bb[1-bv], 0, 0, 2, (int)n);
+         }
++        /* On the both-kits-on-peer map no 808 split can borrow workspace B.
++         * Advance the B renderer only while A is blocked. Keep A and B's
++         * output preparation, metering, and bus sums in their original order.
++         * Never start an early B that can call back into the sequencer. */
++#ifndef DNBOX_NO_B_OVERLAP
++        if (!bv && !core && eng_c1_mask == ((1u << JB_909) | (1u << JB_808))
++            && eng_stage < 2u && original_runtime_s1_early_ok(&original_bass[1])) {
++            uint32_t t_early = plat_ticks24();
++            eng_early_b = (int8_t)bass_render_job(1, 0, (unsigned)n, eng_bass_buf[2], eng_bass_buf[3]);
++            uint32_t b_cost = plat_ticks24() - t_early;
++            /* Exclude early B from A's cost; charge it once when B mixes. */
++            eng_early_b_cost = b_cost;
++            tk += b_cost;
++        }
++#endif
+         w0 = plat_ticks24();
+         if (stage_wait((uint32_t)(2 + bv), core))         /* A mixes after the 808, B after A */
+             return 0;
+@@ -2932,6 +2962,7 @@
+     eng_stage = 0;
+     eng_c1_next = 0;
+     eng_c1_waited = 0;
++    eng_early_b = 127;
+     bass_render_ok[0] = bass_render_ok[1] = 0;
+     original_rec_cancel_cut();                        /* both basses' recorder state: here, before the jobs */
+     m = plan_pick(n);
+--- a/firmware/src/app/original_runtime.c
++++ b/firmware/src/app/original_runtime.c
+@@ -686,6 +686,17 @@
+ }
+ 
+ static int render_backend(original_runtime_part *, original_runtime_workspace *, float *, float *, unsigned);
++int original_runtime_s1_early_ok(const original_runtime_part *p)
++{
++    if (p->kind != ORIGINAL_SOUND_SYNTHONE || p->status != ORIGINAL_RUNTIME_OK || p->stale_timers)
++        return 0;
++#if X0X_ARP_ENGINE
++    if (arp_engaged(p) || p->arp.seq.sequencerLastNotesCount)
++        return 0;
++#endif
++    return 1;
++}
++
+ int original_runtime_render(original_runtime_part *p, original_runtime_workspace *w,
+     float *left, float *right, unsigned frames)
+ {
+--- a/firmware/src/app/original_runtime.h
++++ b/firmware/src/app/original_runtime.h
+@@ -106,6 +106,7 @@
+ void original_runtime_arp_clock(original_runtime_part *, uint64_t pos_q8, uint32_t beat_q8, int start);
+ int original_runtime_arp_view(const original_runtime_part *, unsigned *step, uint32_t *frames);
+ #endif
++int original_runtime_s1_early_ok(const original_runtime_part *p);
+ int original_runtime_render(original_runtime_part *, original_runtime_workspace *,
+     float *left, float *right, unsigned frames);
+ 

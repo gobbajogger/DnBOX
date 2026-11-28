@@ -1,0 +1,86 @@
+--- a/firmware/src/dsp/s1c/s1c.c
++++ b/firmware/src/dsp/s1c/s1c.c
+@@ -257,17 +257,22 @@
+     if (bl) { float u = t + 1.0f - w; if (u >= 1.0f) u -= 1.0f; y += blep(u, dt) - blep(t, dt); }
+     return y;
+ }
+-static float morph(uint32_t *ph, float hz, float pos, int bl, float sr)
++static float morph_dt(uint32_t *ph, float dt, uint32_t inc, float pos, int bl)
+ {
+-    float t = (float)*ph * (1.0f / Q32), dt = hz / sr;
++    float t = (float)*ph * (1.0f / Q32);
+     if (pos > 1.0f) pos -= (int)pos;
+     float f = pos * 3.0f; int k = (int)f; if (k > 2) k = 2;
+     f -= k;
+     float y = shape(k, t, dt, bl);
+     if (f > 0.0f) y += f * (shape(k + 1, t, dt, bl) - y);
+-    *ph += ph_inc_bounded(dt);
++    *ph += inc;
+     return y;
+ }
++static float morph(uint32_t *ph, float hz, float pos, int bl, float sr)
++{
++    float dt = hz / sr;
++    return morph_dt(ph, dt, ph_inc_bounded(dt), pos, bl);
++}
+ static float sine_q(uint32_t ph) { return sinf((float)ph * (TWO_PI / Q32)); }
+ 
+ /* ---- filters ---- */
+@@ -413,6 +418,14 @@
+         v->kf2 = clampf(base * (sem2?exp2f(sem2 / 12.0f):1.0f) * k + det, 0.0f, half);
+         v->kfs = clampf(base * k / (2.0f * (1.0f + P(SUBOCT))), 0.0f, half);
+         v->kff = clampf(base * k, 0.0f, half);
++#if DNBOX_S1_PHASE_CACHE
++        v->dt1 = v->kf1 / s->sr;
++        v->dt2 = v->kf2 / s->sr;
++        v->inc1 = ph_inc_bounded(v->dt1);
++        v->inc2 = ph_inc_bounded(v->dt2);
++        v->inc_sub = ph_inc_bounded(v->kfs / s->sr);
++        v->inc_fm = ph_inc_bounded(v->kff / s->sr);
++#endif
+         v->kidx = clampf(P(FMA) * lfo10(s, P(LFM)), 0.0f, 15.0f);
+         v->kbal = clampf(P(BAL) + lfo01(s, P(LMIX)), 0.0f, 1.0f);
+         v->kres = clampf(P(RES) * lfo10(s, P(LRES)), 0.0f, 0.98f);
+@@ -439,15 +452,28 @@
+         }
+     }
+     int bl = P(BLE) > 0.0f;
++#if DNBOX_S1_PHASE_CACHE
++    float o1 = morph_dt(&v->ph[0], v->dt1, v->inc1, P(I1), bl) * v->vamp * P(VOL1);
++    float o2 = morph_dt(&v->ph[1], v->dt2, v->inc2, P(I2), bl) * v->vamp * P(VOL2);
++#else
+     float o1 = morph(&v->ph[0], v->kf1, P(I1), bl, s->sr) * v->vamp * P(VOL1);
+     float o2 = morph(&v->ph[1], v->kf2, P(I2), bl, s->sr) * v->vamp * P(VOL2);
++#endif
+     float y = (1.0f - v->kbal) * o1 + v->kbal * o2;
+     float sub = sine_t(v->ph[2]);
+-    v->ph[2] += ph_inc_bounded(v->kfs / s->sr);
++    #if DNBOX_S1_PHASE_CACHE
++        v->ph[2] += v->inc_sub;
++#else
++        v->ph[2] += ph_inc_bounded(v->kfs / s->sr);
++#endif
+     y += P(SUBSQ) != 0.0f ? (sub > 0.0f ? P(SUBV) : -P(SUBV)) : sub * v->vamp * P(SUBV) * 3.0f;
+     if (P(FMV) != 0.0f) {
+         float mod = sine_t(v->mph) * v->kff * v->kidx;
++        #if DNBOX_S1_PHASE_CACHE
++        v->mph += v->inc_fm;
++#else
+         v->mph += ph_inc_bounded(v->kff / s->sr);
++#endif
+         y += sine_t(v->cph) * v->vamp * P(FMV);
+         v->cph += ph_inc((v->kff + mod) / s->sr);
+     }
+--- a/firmware/src/dsp/s1c/s1c.h
++++ b/firmware/src/dsp/s1c/s1c.h
+@@ -110,6 +110,10 @@
+ #if S1C_KR > 1
+     int32_t kc;                         /* control-rate countdown */
+     float kf1, kf2, kfs, kff, kidx, kbal, kres, kkey, kA, kfb, ka1, ka4, ka5, kcut, kem;
++#if DNBOX_S1_PHASE_CACHE
++    float dt1, dt2;
++    uint32_t inc1, inc2, inc_sub, inc_fm;
++#endif
+ #endif
+ } s1c_voice;
+ #ifndef S1C_EXT

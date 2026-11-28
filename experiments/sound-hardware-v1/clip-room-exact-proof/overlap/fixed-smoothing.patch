@@ -1,0 +1,35 @@
+--- a/firmware/src/dsp/s1c/s1c.c
++++ b/firmware/src/dsp/s1c/s1c.c
+@@ -926,6 +926,18 @@
+     else for (i = 0; i < S1C_VOICES; i++) if (s->v[i].stage == 2 && s->v[i].amp < 0.01f) voice_clear(&s->v[i]);
+     float c2 = s->port_c2, c1 = 1.0f - c2;
+     param_dirty(s);
++#if DNBOX_S1_SKIP_FIXED && S1C_FAST && S1C_CSM && S1C_NO_SEQ
++    /* Parameters and coefficients do not change within this render call.
++     * Omit only exact binary32 fixed points, including the sign of zero.
++     * Preserve the original expression and the order for every moving slot. */
++    uint8_t moving[sizeof s1c_smid];
++    unsigned moving_n = 0;
++    for (i = 0; i < sizeof s1c_smid; ++i) {
++        float next = c1 * s->t[s1c_smid[i]] + c2 * s->c[i];
++        if (memcmp(&next, &s->c[i], sizeof next) != 0)
++            moving[moving_n++] = (uint8_t)i;
++    }
++#endif
+     s1c_cc cm, cr, cw;   /* compressor parameters are not smoothed: coefficients once per block */
+     comp_coef(&cm, P(CMR), P(CMT), P(CMA), P(CMREL), s->sr);
+ #if !S1C_BUSFX
+@@ -963,7 +975,12 @@
+ 
+ #if S1C_FAST
+         int cu = (f & 3) == 0;
+-#if S1C_CSM
++#if DNBOX_S1_SKIP_FIXED && S1C_CSM && S1C_NO_SEQ
++        for (unsigned k = 0; k < moving_n; ++k) {
++            i = moving[k];
++            s->c[i] = c1 * s->t[s1c_smid[i]] + c2 * s->c[i];
++        }
++#elif S1C_CSM
+         for (i = 0; i < (int)sizeof s1c_smid; i++) s->c[i] = c1 * s->t[s1c_smid[i]] + c2 * s->c[i];
+ #else
+         for (i = 0; i < s1c_nsm; i++) { unsigned q = s1c_sm[i]; s->c[q] = c1 * s->t[q] + c2 * s->c[q]; }

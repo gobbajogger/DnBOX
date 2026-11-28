@@ -1,0 +1,23 @@
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -2872,6 +2872,10 @@
+     uint32_t m = (1u << JB_909) | (1u << JB_808) | (1u << JB_BRK);
+     if (original_bass[0].kind == ORIGINAL_SOUND_MIAMI) m |= 1u << JB_A;
+     if (original_bass[1].kind == ORIGINAL_SOUND_MIAMI) m |= 1u << JB_B;
++#ifdef DNBOX_B_PEER_TRIAL
++    if (drum909_active(&d909) && drum808_active(&d808)
++        && original_runtime_s1_early_ok(&original_bass[1])) m |= 1u << JB_B;
++#endif
+     return m;
+ }
+ /* before a stretch of n frames: the split to use (sticky; idle jobs stay on core 0) */
+@@ -2969,6 +2973,9 @@
+     eng_c1_mask = (uint8_t)m;
+     /* 808 stays on core 0 and core 1 has other work: move the BD+SD prefix */
+     eng_808_split = (uint8_t)(!(m & (1u << JB_808)) && m && drum808_active(&d808));
++#ifdef DNBOX_B_PEER_FULL808
++    if (m == (1u << JB_B) && original_bass[1].kind == ORIGINAL_SOUND_SYNTHONE) eng_808_split = 0;
++#endif
+     eng_808_body = (uint8_t)!eng_808_split;
+     eng_sync();
+     if (m && !plat_cpu2_run(core2_jobs, 0u)) {

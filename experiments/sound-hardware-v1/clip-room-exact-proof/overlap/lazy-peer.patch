@@ -1,0 +1,103 @@
+--- a/firmware/src/dsp/s1c/s1c.c
++++ b/firmware/src/dsp/s1c/s1c.c
+@@ -858,9 +858,20 @@
+ #if DNBOX_S1_WORK_SPLIT && S1C_FAST && S1C_KR > 1 && S1C_CSM && S1C_NO_SEQ
+ #include "../../app/plat.h"
+ static s1c_split *split_area;
++#if DNBOX_S1_LAZY_PEER
++static int (*split_claim)(void);
++void s1c_split_arm(void *area, unsigned bytes, int (*claim)(void))
++{
++    split_area = bytes >= sizeof(s1c_split) ? area : 0;
++    split_claim = claim;
++}
++#endif
+ void s1c_split_enable(void *area, unsigned bytes)
+ {
+     split_area = bytes >= sizeof(s1c_split) ? area : 0;
++#if DNBOX_S1_LAZY_PEER
++    split_claim = 0;
++#endif
+ }
+ static int split_eligible(const s1c *s,float c1,float c2)
+ {
+@@ -957,12 +968,23 @@
+ #if DNBOX_S1_WORK_SPLIT && S1C_FAST && S1C_KR > 1 && S1C_CSM && S1C_NO_SEQ
+     s1c_split *work=split_area;
+     unsigned split_at=0, split_ready=0;
++#if DNBOX_S1_LAZY_PEER
++    unsigned split_next = 0;
++#endif
+     int split_live=0;
+     if (work && (n<16 || !split_eligible(s,c1,c2))) work=0;
+ #endif
+     for (f = 0; f < n; f++) {
+ #if DNBOX_S1_WORK_SPLIT && S1C_FAST && S1C_KR > 1 && S1C_CSM && S1C_NO_SEQ
++#if DNBOX_S1_LAZY_PEER
++        if (work && !split_live && f == split_next) {
++            if (split_claim && (n-f<16 || !split_claim())) {
++                split_next = n-f<16 ? n : f+8;
++            } else {
++                split_claim = 0;
++#else
+         if (work && !split_live && (f%S1C_SPLIT_SPAN)==0) {
++#endif
+             split_at=f;
+             memcpy(&work->copy,s,sizeof *s);
+             work->len=n-f<S1C_SPLIT_SPAN?n-f:S1C_SPLIT_SPAN;
+@@ -970,6 +992,10 @@
+             plat_cpu2_sync();
+             split_live=plat_cpu2_run(split_upper,0);
+             if (!split_live) work=0;
++#if DNBOX_S1_LAZY_PEER
++            split_next = f + (n-f<S1C_SPLIT_SPAN?n-f:S1C_SPLIT_SPAN);
++            }
++#endif
+         }
+ #endif
+ 
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -2572,6 +2572,17 @@
+ /* 127 means B has not rendered. Reset before launching a stretch, used on core 0 only. */
+ static int8_t eng_early_b;
+ static uint32_t eng_early_b_cost;
++#if DNBOX_S1_LAZY_PEER && DNBOX_S1_WORK_SPLIT && X0X_S1C
++static int bass_b_claim_peer(void)
++{
++    if (eng_stage < 2u || eng_c1_next != JB_N || !eng_808_body || plat_cpu2_busy() != 0)
++        return 0;
++    if (plat_cpu2_wait() != 0)
++        return 0;
++    eng_c1_waited = 2;
++    return 1;
++}
++#endif
+ static int bass_render_job(int bv, int core, unsigned n, float *bl, float *br)
+ {
+         PROF_T(pb);
+@@ -2588,10 +2599,24 @@
+             if(can_split) eng_c1_waited=2;
+         }
+         if(can_split) s1c_split_enable(&original_workspace_b.s1_worker,sizeof original_workspace_b.s1_worker);
++#if DNBOX_S1_LAZY_PEER
++        /* A deferred B starts while the drum worker still owns the mailbox.
++         * Arm the later claim only on the map with no split 808 scratch. */
++        int lazy_split = !can_split && !core && bv == 1
++            && eng_c1_mask == ((1u << JB_909) | (1u << JB_808))
++            && original_runtime_s1_early_ok(&original_bass[1]);
++        if (lazy_split) {
++            extern void s1c_split_arm(void *, unsigned, int (*)(void));
++            s1c_split_arm(&original_workspace_b.s1_worker, sizeof original_workspace_b.s1_worker, bass_b_claim_peer);
++        }
++#endif
+ #endif
+         int status = original_runtime_render(&original_bass[bv], bv ? &original_workspace_b : &original_workspace,
+                                              bl, br, n);
+ #if DNBOX_S1_WORK_SPLIT && X0X_S1C
++#if DNBOX_S1_LAZY_PEER
++        if (lazy_split) s1c_split_enable(0,0);
++#endif
+         if(can_split) s1c_split_enable(0,0);
+ #endif
+         bass_adapt_post(bv, bl, br, (unsigned)n);
