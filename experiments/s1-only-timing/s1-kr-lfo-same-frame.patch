@@ -1,0 +1,24 @@
+--- a/firmware/src/dsp/s1c/s1c.c
++++ b/firmware/src/dsp/s1c/s1c.c
+@@ -470,8 +470,19 @@
+             v->kkey = (1.0f - kf) * kt * kt + kf;
+             if(seen) *seen|=bit;
+         } else ++bench_pitch_reused;
+-        v->kidx = clampf(P(FMA) * lfo10(s, P(LFM)), 0.0f, 15.0f);
+-        v->kbal = clampf(P(BAL) + lfo01(s, P(LMIX)), 0.0f, 1.0f);
++#if S1C_ENVELOPE_SHARE
++        /* During this same sample, the leader has already run. It reached
++         * KR only if its control phase was refreshed on this sample. Both
++         * values depend only on the shared LFO/parameter inputs, not voice. */
++        if (shared && shared->kc == S1C_KR) {
++            v->kidx = shared->kidx;
++            v->kbal = shared->kbal;
++        } else
++#endif
++        {
++            v->kidx = clampf(P(FMA) * lfo10(s, P(LFM)), 0.0f, 15.0f);
++            v->kbal = clampf(P(BAL) + lfo01(s, P(LMIX)), 0.0f, 1.0f);
++        }
+         if(!fseen || !(*fseen & bit)) {
+             v->kres = clampf(P(RES) * lfo10(s, P(LRES)), 0.0f, 0.98f);
+             v->kcut = P(CUT) * lfo10(s, P(LCUT)); v->kem = P(FENV) * lfo10(s, P(LFENV));

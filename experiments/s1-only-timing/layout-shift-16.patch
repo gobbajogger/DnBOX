@@ -1,0 +1,5 @@
+--- a/firmware/app.ld
++++ b/firmware/app.ld
+@@ -35 +35 @@
+-    .text : { KEEP(*(.text.crt0)) *(.text*) *(.rodata*) . = ALIGN(4); _etext = .; } > XIP
++    .text : { KEEP(*(.text.crt0)) . += 16; *(.text*) *(.rodata*) . = ALIGN(4); _etext = .; } > XIP
