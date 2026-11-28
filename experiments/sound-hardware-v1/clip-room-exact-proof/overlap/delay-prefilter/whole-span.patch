@@ -1,0 +1,41 @@
+--- a/firmware/src/dsp/s1c/s1c.c
++++ b/firmware/src/dsp/s1c/s1c.c
+@@ -958,6 +958,15 @@
+ #endif
+ #endif
+     (void)cr; (void)cw;
++#if DNBOX_S1_DELAY_PREFILTER_SHARE && !S1C_BUSFX && S1C_FAST
++    /* These zero controls stay zero for the entire render span. No
++     * sequencer-side edits can run here. Both panner endpoints have the
++     * same coefficient at zero depth, and exact zero skips the phaser. */
++    const int delay_twin = S1C_NO_SEQ &&
++        s->t[PANA] == 0.0f && P(PANA) == 0.0f &&
++        s->t[PHMIX] == 0.0f && P(PHMIX) == 0.0f &&
++        !memcmp(s->dlp[0], s->dlp[1], sizeof s->dlp[0]);
++#endif
+ #if DNBOX_S1_ROOM_MONO_INPUT && !S1C_BUSFX && S1C_FAST
+     int room_twin = !memcmp(s->hp_y[0], s->hp_y[1], sizeof s->hp_y[0])
+ #if !S1C_NO_RVCOMP
+@@ -1110,7 +1119,12 @@
+                 float x = clampf(P(CUT) * pc, 64.0f, 22050.0f) * (2.0f / s->sr);
+                 s->dl_fc = ladder_a(x > 1.0f ? 1.0f : x);     /* the ladder coefficient, not Hz */
+             }
++#if DNBOX_S1_DELAY_PREFILTER_SHARE
++            dL = ladder(s->dlp[0], L, s->dl_fc, 0.0f);
++            dR = delay_twin ? dL : ladder(s->dlp[1], R, s->dl_fc, 0.0f);
++#else
+             dL = ladder(s->dlp[0], L, s->dl_fc, 0.0f); dR = ladder(s->dlp[1], R, s->dl_fc, 0.0f);
++#endif
+ #else
+             float pv = clampf(log2f(P(CUT)), 10.0f, 14.4284f);
+             float pc = 1.0f + (pv - 10.0f) * (1.0f / 4.4284f) * (P(DICT) - 1.0f);
+@@ -1372,6 +1386,9 @@
+ #endif
+         outl[f] = L; outr[f] = R;
+     }
++#if DNBOX_S1_DELAY_PREFILTER_SHARE && !S1C_BUSFX && S1C_FAST
++    if (delay_twin) memcpy(s->dlp[1], s->dlp[0], sizeof s->dlp[0]);
++#endif
+ #if DNBOX_S1_ROOM_MONO_INPUT && !S1C_BUSFX && S1C_FAST
+     if (room_twin) {
+         memcpy(s->hp_y[1],s->hp_y[0],sizeof s->hp_y[0]);

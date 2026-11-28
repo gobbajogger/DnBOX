@@ -1,0 +1,58 @@
+--- a/firmware/src/app/main_fm1.c
++++ b/firmware/src/app/main_fm1.c
+@@ -27,6 +27,7 @@
+ } x0x_dbg __attribute__((section(".noinit")));
+ volatile uint32_t lazy_now[4][16], lazy_worst[4][16], lazy_last[4][16];
+ volatile uint32_t lazy_span=4, lazy_worst_us, lazy_last_us, lazy_worst_half;
++volatile uint32_t twin_now[4][2], twin_worst[4][2];
+ static uint8_t safe_mode;
+ #if X0X_DEBUG
+ /* development: the slowest block since boot, taken apart (read over USB: tools/fm1_debug.py) */
+@@ -42,6 +43,7 @@
+     uint32_t t0 = fm1_ticks(), us, budget = HALF_FRAMES * 1000000u / FS;
+     x0x_dbg.in_audio = 1;
+     lazy_span=0;
++    for(unsigned j=0;j<4;++j) for(unsigned k=0;k<2;++k) twin_now[j][k]=0;
+     for(unsigned t=0;t<4;t++) for(unsigned i=0;i<16;i++) lazy_now[t][i]=0;
+ #if FELUCCA_UAC
+     uac_render_start();
+@@ -97,6 +99,7 @@
+     for(unsigned t=0;t<4;t++) for(unsigned i=0;i<16;i++) lazy_last[t][i]=lazy_now[t][i];
+     if(us>lazy_worst_us) {
+         lazy_worst_us=us; lazy_worst_half=x0x_dbg.halves;
++        for(unsigned j=0;j<4;++j) for(unsigned k=0;k<2;++k) twin_worst[j][k]=twin_now[j][k];
+         for(unsigned t=0;t<4;t++) for(unsigned i=0;i<16;i++) lazy_worst[t][i]=lazy_now[t][i];
+     }
+     if (us > x0x_dbg.max_us) x0x_dbg.max_us = us;
+--- a/firmware/src/dsp/s1c/s1c.c
++++ b/firmware/src/dsp/s1c/s1c.c
+@@ -933,8 +933,10 @@
+     LAZY_ADD(10,plat_ticks24()-work_start);
+ }
+ #endif
++extern volatile uint32_t twin_now[4][2];
+ void s1c_render(s1c *s, float *outl, float *outr, unsigned n)
+ {
++    uint32_t twin_observed=0, twin_saved=0;
+     unsigned f, i;
+     /* Test fixture only. Product e00f689d does not persist these wet edits. */
+     static unsigned wet_test_started;
+@@ -1146,6 +1148,7 @@
+             }
+             dL = ladder(s->dlp[0], L, s->dl_fc, 0.0f);
+             dR = delay_twin ? dL : ladder(s->dlp[1], R, s->dl_fc, 0.0f);
++            ++twin_observed; twin_saved += (unsigned)delay_twin;
+ #else
+             dL = ladder(s->dlp[0], L, s->dl_fc, 0.0f); dR = ladder(s->dlp[1], R, s->dl_fc, 0.0f);
+ #endif
+@@ -1412,6 +1415,10 @@
+     }
+ #if DNBOX_S1_DELAY_PREFILTER_SHARE && !S1C_BUSFX && S1C_FAST
+     if (delay_twin) memcpy(s->dlp[1], s->dlp[0], sizeof s->dlp[0]);
++    if (lazy_span<4) {
++        twin_now[lazy_span][0] += twin_observed;
++        twin_now[lazy_span][1] += twin_saved;
++    }
+ #endif
+ #if DNBOX_S1_ROOM_MONO_INPUT && !S1C_BUSFX && S1C_FAST
+     if (room_twin) {
