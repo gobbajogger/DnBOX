@@ -1,0 +1,14 @@
+--- a/firmware/src/dsp/s1c/s1u.c
++++ b/firmware/src/dsp/s1c/s1u.c
+@@ -166,6 +166,11 @@
+ /* ---- auto-pan ---- */
+ void s1u_autopan(float *ph, float y, float rate, float amount, float sr, float *l, float *r)
+ {
++    if (amount == 0.0f) {
++        *ph += rate / sr; if (*ph >= 1.0f) *ph -= 1.0f;
++        *l = y * sin_q[32]; *r = y * sin_q[32];
++        return;
++    }
+     float pan = s1u_sin((uint32_t)(*ph * 4294967296.0f)) * amount;
+     *ph += rate / sr; if (*ph >= 1.0f) *ph -= 1.0f;
+     uint32_t pa = (uint32_t)((1.0f + pan) * 0.125f * 4294967296.0f);   /* angle / 2pi */

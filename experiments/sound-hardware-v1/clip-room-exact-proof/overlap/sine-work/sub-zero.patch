@@ -1,0 +1,31 @@
+--- a/firmware/src/dsp/s1c/s1c.c
++++ b/firmware/src/dsp/s1c/s1c.c
+@@ -442,9 +442,28 @@
+     float o1 = morph(&v->ph[0], v->kf1, P(I1), bl, s->sr) * v->vamp * P(VOL1);
+     float o2 = morph(&v->ph[1], v->kf2, P(I2), bl, s->sr) * v->vamp * P(VOL2);
+     float y = (1.0f - v->kbal) * o1 + v->kbal * o2;
++#if DNBOX_S1_DORMANT_SUB
++    const uint32_t phsub=v->ph[2];
++    v->ph[2] += ph_inc_bounded(v->kfs / s->sr);
++    const s1c_fb sub_vol={.f=P(SUBV)}, velocity={.f=v->vamp};
++    const int square=P(SUBSQ)!=0.f;
++    if (!(sub_vol.u<<1) && (square || (velocity.u&0x7fffffffu)-0x38000000u<=0x07800000u)) {
++        /* Quarter-wave sine follows phase sign, including -0 at half-turn.
++         * Square chooses + only in the open first half. Add the actual
++         * signed zero for either branch, preserving the filter input. */
++        uint32_t sign=square ? (phsub-1u<0x7fffffffu ? 0u : 0x80000000u)
++                             : (phsub^velocity.u);
++        const s1c_fb z={.u=(sign^sub_vol.u)&0x80000000u};
++        y += z.f;
++    } else {
++        float sub=sine_t(phsub);
++        y += square ? (sub>0.f ? sub_vol.f : -sub_vol.f) : sub*v->vamp*sub_vol.f*3.f;
++    }
++#else
+     float sub = sine_t(v->ph[2]);
+     v->ph[2] += ph_inc_bounded(v->kfs / s->sr);
+     y += P(SUBSQ) != 0.0f ? (sub > 0.0f ? P(SUBV) : -P(SUBV)) : sub * v->vamp * P(SUBV) * 3.0f;
++#endif
+     if (P(FMV) != 0.0f) {
+         float mod = sine_t(v->mph) * v->kff * v->kidx;
+         v->mph += ph_inc_bounded(v->kff / s->sr);

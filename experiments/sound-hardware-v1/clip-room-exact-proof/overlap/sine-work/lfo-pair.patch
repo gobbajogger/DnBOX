@@ -1,0 +1,70 @@
+--- a/firmware/src/dsp/s1c/s1u.c
++++ b/firmware/src/dsp/s1c/s1u.c
+@@ -70,6 +70,17 @@
+ }
+ 
+ /* ---- LFO ---- */
++static inline void lfo_levels(s1u_lfo *l, float amount)
++{
++    l->o01 = 0.5f * (1.0f + l->sm) * amount; l->o10 = 1.0f - 0.5f * (1.0f - l->sm) * amount;
++}
++void s1u_lfo_mirror(s1u_lfo *l, const s1u_lfo *leader, float amount)
++{
++    l->ph = leader->ph;
++    l->sm = leader->sm;
++    lfo_levels(l, amount);
++}
++
+ void s1u_lfo_tick(s1u_lfo *l, float rate_hz, int shape, float amount, float c2, float sr)
+ {
+     l->ph += rate_hz / sr; if (l->ph >= 1.0f) l->ph -= 1.0f;
+@@ -77,7 +88,7 @@
+     float x = shape == 0 ? s1u_sin((uint32_t)(ph * 4294967296.0f)) :
+               shape == 1 ? (ph > 0.5f ? 1.0f : -1.0f) : shape == 2 ? (ph - 0.5f) * 2.0f : (0.5f - ph) * 2.0f;
+     l->sm = (1.0f - c2) * x + c2 * l->sm;
+-    l->o01 = 0.5f * (1.0f + l->sm) * amount; l->o10 = 1.0f - 0.5f * (1.0f - l->sm) * amount;
++    lfo_levels(l, amount);
+ }
+ 
+ /* ---- filters ---- */
+--- a/firmware/src/dsp/s1c/s1u.h
++++ b/firmware/src/dsp/s1c/s1u.h
+@@ -14,6 +14,8 @@
+ /* ---- LFO: sine / square / saw up / saw down, smoothed, unipolar outputs ----
+  * o01 = 0..amount (adds), o10 = 1-amount..1 (scales). */
+ typedef struct { float ph, sm, o01, o10; } s1u_lfo;
++/* Only after the caller proved equal incoming phase, smoother, rate and shape. */
++void s1u_lfo_mirror(s1u_lfo *, const s1u_lfo *, float amount);
+ void s1u_lfo_tick(s1u_lfo *l, float rate_hz, int shape, float amount, float smooth_c2, float sr);
+ 
+ /* ---- table sine: ph is a 32-bit phase (one turn = 2^32) ---- */
+--- a/firmware/src/dsp/s1c/s1c.c
++++ b/firmware/src/dsp/s1c/s1c.c
+@@ -974,6 +974,13 @@
+     int split_live=0;
+     if (work && (n<16 || !split_eligible(s,c1,c2))) work=0;
+ #endif
++    /* Shape and rate are unsmoothed, and the command queue owns writes
++     * at span boundaries. Amount stays independent and smoothed. */
++    const float lfo_rate_0=P(L1R), lfo_rate_1=P(L2R);
++    const int lfo_shape_0=(int)P(L1I), lfo_shape_1=(int)P(L2I);
++    const int same_driver=lfo_shape_0==lfo_shape_1 &&
++        !memcmp(&lfo_rate_0,&lfo_rate_1,sizeof(float)) &&
++        !memcmp(&s->lfo[0],&s->lfo[1],2u*sizeof(float));
+     for (f = 0; f < n; f++) {
+ #if DNBOX_S1_WORK_SPLIT && S1C_FAST && S1C_KR > 1 && S1C_CSM && S1C_NO_SEQ
+ #if DNBOX_S1_LAZY_PEER
+@@ -1032,8 +1039,11 @@
+         /* LFOs */
+         float x;
+         float lc2 = s->lfo_c2;
+-        s1u_lfo_tick(&s->lfo[0], P(L1R), (int)P(L1I), P(L1A), lc2, s->sr);
+-        s1u_lfo_tick(&s->lfo[1], P(L2R), (int)P(L2I), P(L2A), lc2, s->sr);
++        s1u_lfo_tick(&s->lfo[0], lfo_rate_0, lfo_shape_0, P(L1A), lc2, s->sr);
++        if (same_driver)
++            s1u_lfo_mirror(&s->lfo[1], &s->lfo[0], P(L2A));
++        else
++            s1u_lfo_tick(&s->lfo[1], lfo_rate_1, lfo_shape_1, P(L2A), lc2, s->sr);
+ #if !S1C_NO_SEQ
+         sequencer(s);
+ #endif
