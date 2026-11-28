@@ -1,0 +1,19 @@
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -2649,9 +2649,14 @@
+         bass_adapt_pre(bv, (unsigned)n);
+ #if DNBOX_S1_WORK_SPLIT && X0X_S1C
+         extern void s1c_split_enable(void *, unsigned);
+-        const int can_split = !core && !eng_c1_mask && bv &&
+-            original_bass[bv].kind==ORIGINAL_SOUND_SYNTHONE &&
++        int can_split = !core && bv && original_bass[bv].kind==ORIGINAL_SOUND_SYNTHONE &&
+             plat_cpu2_busy()==0;
++        if(can_split && eng_c1_mask) {
++            /* Reuse the peer only after the previous whole job published all
++             * of its work, acknowledged its mailbox, and retired its stages. */
++            can_split=eng_c1_next==JB_N && eng_808_body && plat_cpu2_wait()==0;
++            if(can_split) eng_c1_waited=2;
++        }
+         if(can_split) s1c_split_enable(&original_workspace_b,sizeof original_workspace_b);
+ #endif
+         int status = original_runtime_render(&original_bass[bv], bv ? &original_workspace_b : &original_workspace,

@@ -9,4 +9,4 @@ sed 's/const int notes = kit < 0 || kit == 2;/const int notes = 0;/' experiments
 bin=$(mktemp)
 trap 'rm -f -- "$f" "$bin"' EXIT
 cc -std=c11 -O1 -DX0X_HOST -D_POSIX_C_SOURCE=200809L -Ifirmware/src -Ifirmware/src/app -Ifirmware/src/dsp -Ibuild/gen $ORIGINAL_FLAGS "$f" $ORIGINAL_SOURCES -lm -o "$bin"
-case ${SYNTH_OWNER:-A} in A) "$bin" 2 0 -1 "$OUT";; B) "$bin" 0 2 -1 "$OUT";; *) exit 2;; esac
+case ${SYNTH_OWNER:-A} in A) "$bin" 2 0 -1 "$OUT";; B) "$bin" 0 2 "${SYNTH_KIT:--1}" "$OUT";; *) exit 2;; esac

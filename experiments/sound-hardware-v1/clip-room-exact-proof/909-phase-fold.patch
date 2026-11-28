@@ -1,0 +1,65 @@
+--- a/firmware/src/dsp/drum909.c
++++ b/firmware/src/dsp/drum909.c
+@@ -30,8 +30,31 @@
+ 
+ /* 9W9's back-to-back diode rounding at the two fixed drives the circuits use */
+ /* inline with their tanh: they run per sample in the voice loops (no call) */
+-D9_INLINE float d9_diode16(float x) { return d9_tanh_inline(1.6f * x) * D9_INV_TANH_1_6; }
+-D9_INLINE float d9_diode20(float x) { return d9_tanh_inline(2.0f * x) * D9_INV_TANH_2_0; }
++/* The input is always a triangle in [-1,1]: neither fixed drive reaches
++ * the tanh clamp. Folding exact powers of two into the float coordinate
++ * leaves the same rounded binary32 operations (there is no underflow). */
++_Static_assert(X0X_TANH_SCALE == 128.0f && X0X_TANH_N > 256, "fixed-drive coordinates");
++D9_INLINE float d9_diode_coord(float a, float norm)
++{
++    fm_bits_t u = {.f=a};
++    const uint32_t sign = u.u & 0x80000000u;
++    u.u &= 0x7fffffffu;
++    const int32_t i = (int32_t)u.f;
++    const float t0 = x0x_tanh_raw[(unsigned)i], t1 = x0x_tanh_raw[(unsigned)i + 1u];
++    const float fr = u.f - (float)i;
++    fm_bits_t y = {.f = t0 + (t1 - t0) * fr};
++    y.u |= sign;
++    return y.f * norm;
++}
++D9_INLINE float d9_diode16(float x)
++{
++    return d9_diode_coord((1.6f * X0X_TANH_SCALE) * x, D9_INV_TANH_1_6);
++}
++D9_INLINE float d9_diode20_phase(uint32_t ph)
++{
++    const uint32_t fold = ph ^ (uint32_t)((int32_t)ph >> 31);
++    return d9_diode_coord((float)(int32_t)fold * (1.0f / 4194304.0f) - 256.0f, D9_INV_TANH_2_0);
++}
+ /* d9_shape with the diode (every voice's default type) inline, tanh included */
+ D9_INLINE float d9_shape_v(const d9_shape_t *s, float x, float *st)
+ {
+@@ -806,8 +829,8 @@
+ 
+         v->ph += d9_inc(f);
+         v->ph2 += d9_inc(f * ratio);
+-        float o = d9_diode20(d9_tri(v->ph));
+-        o += d9_diode20(d9_tri(v->ph2)) * mix2;
++        float o = d9_diode20_phase(v->ph);
++        o += d9_diode20_phase(v->ph2) * mix2;
+         o *= inv_mix;
+         float y = d9_shape_v(&v->shape, o, v->crush_st) * amp;
+ 
+@@ -850,14 +873,14 @@
+         const float f = d9_env_tick(&t->pitch);
+         float o = 0.0f;
+         t->ph[0] += d9_inc(f);
+-        o += d9_diode20(d9_tri(t->ph[0])) * d9_env_tick(&t->env[0]);
++        o += d9_diode20_phase(t->ph[0]) * d9_env_tick(&t->env[0]);
+         if (t->env[1].left) {
+             t->ph[1] += d9_inc(f * 1.50f);
+-            o += d9_diode20(d9_tri(t->ph[1])) * d9_env_tick(&t->env[1]);
++            o += d9_diode20_phase(t->ph[1]) * d9_env_tick(&t->env[1]);
+         }
+         if (t->env[2].left) {
+             t->ph[2] += d9_inc(f * 2.75f);
+-            o += d9_diode20(d9_tri(t->ph[2])) * d9_env_tick(&t->env[2]);
++            o += d9_diode20_phase(t->ph[2]) * d9_env_tick(&t->env[2]);
+         }
+         o *= 0.55f;
+         float stick = 0.0f;

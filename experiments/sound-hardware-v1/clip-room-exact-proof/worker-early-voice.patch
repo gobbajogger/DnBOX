@@ -1,0 +1,68 @@
+--- a/firmware/src/dsp/s1c/s1c.c
++++ b/firmware/src/dsp/s1c/s1c.c
+@@ -882,7 +882,12 @@
+     if (S1C_VOICES != 6 || s->mono_prev || P(MONO) != 0.0f || P(NOISEV) != 0.0f ||
+         (int)P(LCUT) || (int)P(LRES) || (int)P(LMIX) || (int)P(LDEC) ||
+         (int)P(LFM) || (int)P(LDET) || (int)P(LFENV) || (int)P(LPITCH)) return 0;
+-    for (unsigned j=0;j<S1C_VOICES;j++) if(s->v[j].stage!=1 || s->v[j].root<0) return 0;
++    unsigned active=0;
++    for (unsigned j=0;j<S1C_VOICES;j++) {
++        if(s->v[j].stage==1 && s->v[j].root>=0) ++active;
++        else if(s->v[j].stage || s->v[j].root>=0) return 0;
++    }
++    if(active<3) return 0;
+     for (unsigned j=0;j<sizeof ids;j++) {
+         unsigned id=ids[j];
+         if (smoothed(id)) {
+@@ -902,9 +907,10 @@
+         if(end>w->len) end=w->len;
+         /* Independent voices, no shared RNG in this route. Keep eight
+          * adjacent steps of each voice together for instruction/data locality. */
+-        for(unsigned j=0;j<S1C_SPLIT_UPPER;j++)
+-            for(unsigned k=f;k<end;k++)
+-                w->term[k][j]=voice_run(&w->copy,&w->copy.v[DNBOX_S1_SPLIT_START+j]);
++        for(unsigned j=0;j<S1C_SPLIT_UPPER;j++) {
++            s1c_voice *v=&w->copy.v[DNBOX_S1_SPLIT_START+j];
++            if(v->stage) for(unsigned k=f;k<end;k++) w->term[k][j]=voice_run(&w->copy,v);
++        }
+         f=end;
+         plat_cpu2_sync();
+         w->ready=f;
+@@ -912,7 +918,10 @@
+     }
+ #else
+     for(unsigned f=0;f<w->len;f++) {
+-        for(unsigned j=0;j<S1C_SPLIT_UPPER;j++) w->term[f][j]=voice_run(&w->copy,&w->copy.v[DNBOX_S1_SPLIT_START+j]);
++        for(unsigned j=0;j<S1C_SPLIT_UPPER;j++) {
++            s1c_voice *v=&w->copy.v[DNBOX_S1_SPLIT_START+j];
++            if(v->stage) w->term[f][j]=voice_run(&w->copy,v);
++        }
+         if ((f&7u)==7u || f+1==w->len) {
+             plat_cpu2_sync();
+             w->ready=f+1;
+@@ -1017,19 +1026,21 @@
+                  * original state; earlier consumed terms were equivalent. */
+                 (void)plat_cpu2_wait();
+                 for(unsigned k=0;k<q;k++) for(unsigned j=DNBOX_S1_SPLIT_START;j<6;j++)
+-                    (void)voice_run(s,&s->v[j]);
++                    if(s->v[j].stage) (void)voice_run(s,&s->v[j]);
+                 split_live=0;
+                 work=0;
+             }
+             if(split_live) {
+                 consumed=1;
+-                for(unsigned j=0;j<DNBOX_S1_SPLIT_START;j++) y+=voice_run(s,&s->v[j]);
+-                for(unsigned j=0;j<S1C_SPLIT_UPPER;j++) y+=work->term[q][j];
++                for(unsigned j=0;j<DNBOX_S1_SPLIT_START;j++)
++                    if(s->v[j].stage) y+=voice_run(s,&s->v[j]);
++                for(unsigned j=0;j<S1C_SPLIT_UPPER;j++)
++                    if(s->v[DNBOX_S1_SPLIT_START+j].stage) y+=work->term[q][j];
+                 if(q+1==work->len) {
+                     int finished=plat_cpu2_wait();
+                     if (!finished) memcpy(s->v+DNBOX_S1_SPLIT_START,work->copy.v+DNBOX_S1_SPLIT_START,S1C_SPLIT_UPPER*sizeof *s->v);
+                     else for(unsigned k=0;k<=q;k++) for(unsigned j=DNBOX_S1_SPLIT_START;j<6;j++)
+-                        (void)voice_run(s,&s->v[j]);
++                        if(s->v[j].stage) (void)voice_run(s,&s->v[j]);
+                     split_live=0;
+                     if (finished) work=0;
+                 }

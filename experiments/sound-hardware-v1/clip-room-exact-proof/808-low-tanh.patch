@@ -1,0 +1,24 @@
+--- a/firmware/src/dsp/drum808.c
++++ b/firmware/src/dsp/drum808.c
+@@ -240,7 +240,20 @@
+     return v;
+ }
+ 
+-static inline __attribute__((always_inline)) float opamp_clip(float v, float rail, float irail) { return rail * fm_tanhf(v * irail); }
++static inline __attribute__((always_inline)) float opamp_clip(float v, float rail, float irail)
++{
++    const float x = v * irail, a = fm_fabsf(x);
++    if (a < 0.0004f) return rail * x;
++    /* The first rounded result changed by the omitted monomials is
++     * 0x1.760bd4p-5. Below this conservative bound the last three Horner
++     * pairs are redundant in binary32 (both signs checked exhaustively). */
++    if (a < 0x1.760000p-5f) {
++        const float z = x * x;
++        return rail * (x * (1.0f + z * (-0.333333333f +
++                        z * (0.133333333f + z * -0.0539682540f))));
++    }
++    return rail * fm_tanhf(x);
++}
+ 
+ /* BridgedT::set: constant-peak bandpass, clamps as 8W8 */
+ __attribute__((noinline)) static void bp_set(d8_bp_t *f, float hz, float q)
