@@ -1,0 +1,104 @@
+--- a/host/x0x_host.c
++++ b/host/x0x_host.c
+@@ -68,6 +68,9 @@
+ {
+     uint32_t i, j;
+     blits++;
++#ifdef SMC_TEST_FOOTER_MUTATION
++    test_footer_blit(y);
++#endif
+     blit_px += (uint64_t)w * h;
+     for (j = 0; j < h; j++)
+         for (i = 0; i < w; i++)
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -5494,6 +5494,9 @@
+ #endif
+     input();                                /* exact normal key/MIDI input path, preserving queue order */
+     division_pad_input();
++#ifdef SMC_TEST_FOOTER_MUTATION
++    test_footer_dispatch();
++#endif
+ #if BOARD_SMK37 && !defined(X0X_HOST)
+     smk_ck_poll();                          /* clip-mode notes must not wait for the screen */
+ #endif
+--- /dev/null
++++ b/tests/host/smc_footer_window_test.c
+@@ -0,0 +1,77 @@
++/* SPDX-License-Identifier: GPL-3.0-only */
++/* Inject the same state change from bounded foreground dispatch in both
++ * cold full refresh and warm dirty refresh. Verify the entire RGB565 footer. */
++#define SMC_TEST_FOOTER_MUTATION 1
++#define SMC_UI_MAIN routing_test_main
++static void test_footer_blit(unsigned);
++static void test_footer_dispatch(void);
++#include "smc_ui_test.c"
++
++static int watch_footer, footer_sent, changed;
++static unsigned footer_writes;
++static void test_footer_blit(unsigned y)
++{
++    if (y>=158u) ++footer_writes;
++    if (watch_footer && y >= 158u && !changed) {
++        footer_sent = 1;
++        ++now_ms; /* real CV service dispatch is at most once per ms */
++    }
++}
++static void test_footer_dispatch(void)
++{
++    if (!watch_footer || !footer_sent || changed) return;
++    ++changed;
++    palette_set(5);
++    seq.fill_on=seq.fill_req=0;
++    smc_ui.action=0x5Eu;
++    blit_hash[3]=0;
++    cv_tile_valid[3]=0;
++}
++static void test_prepare_footer(int held_fx)
++{
++    palette_set(0);
++    smc_ui.kind=3;
++    smc_ui.peer=0;
++    smc_ui.action=held_fx ? 11 : SMC_FILL_NOTE;
++    smc_ui.strip=smc_ui.action & 7u;
++    seq.fill_on=seq.fill_req=1;
++    const int bus=smc_fx_bus_now(smc_ui.action);
++    CHECK(bus>=0);
++    if (held_fx) {
++        smc_fx_publish();
++        const int note=smc_ui.action;
++        smc.fx_strip.key_bus[note]=(uint8_t)bus;
++        smc.fx_strip.held_fx[bus][note>>3]=SMCFX_EMPTY;
++        smc.held[note>>3] |= 1u << (note & 7);
++    }
++}
++int main(void)
++{
++    enum {first=158*240, count=82*240};
++    uint16_t want[count], different[count];
++    setup(V_FX, PART_BRK);
++    for(int held_fx=0;held_fx<2;++held_fx) {
++        test_prepare_footer(held_fx); blit_hash[3]=0; smc_ui_draw();
++        memcpy(want,fb+first,sizeof want);
++        shot(held_fx ? "footer-held-FX" : "footer-playing-Fill");
++        footer_writes=0;
++        smc_ui_draw(); smc_ui_draw();
++        CHECK(footer_writes==0);
++        for(int cold=0;cold<2;++cold) {
++            palette_set(5); seq.fill_on=seq.fill_req=0; smc_ui.action=0x5Eu;
++            smc_ui_draw();
++            memcpy(different,fb+first,sizeof different);
++            CHECK(memcmp(want+64*240,different+64*240,18*240*sizeof(uint16_t))!=0);
++            test_prepare_footer(held_fx);
++            if (cold) blit_hash[3]=0;
++            else CHECK(blit_hash[3] && cv_tile_valid[3]);
++            footer_sent=changed=0;
++            watch_footer=1; smc_ui_draw(); watch_footer=0;
++            CHECK(footer_sent && changed==1);
++            CHECK(!memcmp(want,fb+first,sizeof want));
++            CHECK(blit_hash[3]==0 && cv_tile_valid[3]==0);
++        }
++    }
++    puts("Four coherent full-footer scenarios (fill/held FX; cold/dirty), with real input service invalidation: PASS");
++    return 0;
++}

@@ -1,0 +1,1135 @@
+--- a/firmware/src/gfx.c
++++ b/firmware/src/gfx.c
+@@ -87,12 +87,12 @@
+ #define X0X_UI_SMALL_CANVAS 0
+ #endif
+ #if X0X_UI_SMALL_CANVAS
+-#define CV_ROWS 82u
++#define CV_ROWS 69u
+ #else
+ #define CV_ROWS 138u
+ #endif
+ #define CV_MAX (240u * CV_ROWS)
+-_Static_assert(CV_ROWS >= 82u, "screen strip shorter than the knob row");
++_Static_assert(CV_ROWS >= 69u, "screen strip shorter than the main band");
+ static uint16_t cv_px[CV_MAX] __attribute__((section(".pool")));
+ static uint32_t cv_w, cv_h;
+ #if X0X_UI_SMALL_CANVAS
+@@ -145,12 +145,15 @@
+ /* Exact for every RGB565 blend numerator (0..63*15). */
+ static inline uint32_t cv_div15(uint32_t x) { return (x * 0x8889u) >> 19; }
+ 
++volatile uint32_t bench_display_oversize;
+ static void cv_begin(uint32_t w, uint32_t h, uint16_t bg)
+ {
+     uint32_t i, n;
+     uint32_t fill = swap16(bg);
+-    if (w * h > CV_MAX)
++    if (w * h > CV_MAX) {
++        ++bench_display_oversize;
+         h = CV_MAX / w;
++    }
+     lcd_sync();                     /* the last blit may still read cv_px */
+ #if X0X_UI_SMALL_CANVAS
+     cv_row_base = 0;
+@@ -462,12 +465,14 @@
+     int picture = custom && (pay[1] & BOOT_F_PIC);
+     boot_lines(pay,title,subtitle);
+ #if X0X_UI_SMALL_CANVAS
+-    for (int band=0; band<3; ++band) {
+-        cv_begin(240,80,C_BLACK);
+-        if (picture) for (unsigned y=band?(unsigned)band*80u-20u:0u; y<BOOT_PIC_H && y+20u<(unsigned)(band+1)*80u; ++y)
++    /* The same RGB565 image, bounded by four 60-row transfers so the
++     * boot painter does not require an 80-row canvas. */
++    for (unsigned row=0;row<240u;row+=60u) {
++        cv_begin(240,60,C_BLACK);
++        if (picture) for (unsigned y=row>20u?row-20u:0u; y<BOOT_PIC_H && y+20u<row+60u; ++y)
+             for (unsigned x=0; x<BOOT_PIC_W; ++x)
+-                if (boot_pix(pay+BOOT_PAY_FIXED,x,y)) cv_pset((int)x,(int)y+20-band*80,C_HI);
+-        cv_blit(0,(uint32_t)band*80u);
++                if (boot_pix(pay+BOOT_PAY_FIXED,x,y)) cv_pset((int)x,(int)(y+20u-row),C_HI);
++        cv_blit(0,row);
+     }
+ #else
+     for (int band=0; band<2; ++band) {
+--- a/firmware/src/app/main_fm1.c
++++ b/firmware/src/app/main_fm1.c
+@@ -1949,54 +1949,39 @@
+ /* The KEYS panel (ui.c draw_knobs, clip mode, no menu): the stage chips, one octave with the scale (the root
+  * marked, the notes that sound lit), the scale and chord names, the arp line and its steps. *last: the last
+  * drawing's signature; force: draw anyway. Return 1 when it drew on the canvas. */
+-uint8_t smk_ck_panel(uint32_t *last, uint32_t force)
++typedef struct {
++    settings_t set;
++    ck_chord_input_t chord;
++    uint32_t latched, snd, m, arp, rh, len, pos;
++    uint16_t black, white, gray, line, dim, amb;
++    uint8_t on, fl, pg;
++} ck_panel_scene;
++static void ck_panel_paint(const ck_panel_scene *sc)
+ {
+-    CK_BASE;
+-    CK_SET;
+-    uint8_t out[CK_MAXN];
++    const settings_t *sp=&sc->set;
++    const uint32_t latched=sc->latched,snd=sc->snd,m=sc->m,arp=sc->arp,
++                   rh=sc->rh,len=sc->len,pos=sc->pos;
++    uint32_t i;
+     uint16_t col[12];
+-    char t[64], *q;
+-    ck_chord_input_t chord;
+-    uint32_t latched = ck_chord_state(&chord);
+-    uint32_t k, i, n, snd = 0, sig = 2166136261u, m = ck_mask(sp->ck_scale, sp->ck_root);
+-    uint32_t arp = cp->on & CK_M_ARP, rh = sp->ck_x2 & 15u, len = rh ? (CK_RHY_T[rh] & 15u) + 1u : 8u;
+-    uint32_t pos = arp && cp->nk && cp->step ? (cp->step - 1u) % len + 1u : 0u;
+-    for (k = 0; k < CK_NKEY; k++)
+-        if (CK_BIT(cp->snd, k) || (cp->nk && cp->korder[0] == k)) {
+-            n = ck_key_notes(k, out);
+-            for (i = 0; i < n && !arp; i++)
+-                snd |= 1u << out[i] % 12u;
+-        }
+-    if (cp->arp_note)
+-        snd |= 1u << (cp->arp_note - 1u) % 12u;
+-    for (i = 0; i < 12u; i++)
+-        sig = (sig ^ (&sp->ck_ch)[i]) * 16777619u;
+-    sig = (sig ^ (cp->on | (cp->fl & CK_F_LATCH) << 3 | snd << 4 | (uint32_t)cp->pg << 20)) * 16777619u;
+-    sig = (sig ^ ((uint32_t)chord.pcs | (uint32_t)chord.upper_pcs << 16)) * 16777619u;
+-    sig = (sig ^ (chord.bass | (uint32_t)chord.upper_bass << 8 | latched << 16)) * 16777619u;
+-    sig = (sig ^ pos) * 16777619u;
+-    if (!force && sig == *last)
+-        return 0u;
+-    *last = sig;
+-    cv_begin(240, 82, C_BLACK);
+-    cv_rect(0, 0, 240, 1, C_LINE);
++    char t[64],*q;
++    cv_rect(0, 0, 240, 1, sc->line);
+     for (i = 0; i < 4u; i++) {                              /* SCALE CHORD ARP LATCH */
+-        uint32_t on = i < 3u ? cp->on >> i & 1u : cp->fl & CK_F_LATCH;
+-        uint16_t c = i < 3u ? CK_MODE_C[i] : C_AMB;
++        uint32_t on = i < 3u ? sc->on >> i & 1u : sc->fl & CK_F_LATCH;
++        uint16_t c = i < 3u ? CK_MODE_C[i] : sc->amb;
+         int32_t x = 3 + (int32_t)i * 59;
+         if (on)
+             rbox(x, 4, 55, 13, 4, c);
+         else
+-            rframe(x, 4, 55, 13, 4, dim(c, 7));
+-        text_c(x + 27, vc(&FONT_T, 4, 13), &FONT_T, i < 3u ? ck_nm(CK_MODE_N, i) : "LATCH", on ? C_BLACK : dim(c, 11));
+-        if ((cp->pg & 3u) == i + 1u)                        /* the page on the screen */
+-            cv_rect(x + 8, 18, 39, 2, C_WHITE);
++            rframe(x, 4, 55, 13, 4, blend(sc->black,c,7));
++        text_c(x + 27, vc(&FONT_T, 4, 13), &FONT_T, i < 3u ? ck_nm(CK_MODE_N, i) : "LATCH", on ? sc->black : blend(sc->black,c,11));
++        if ((sc->pg & 3u) == i + 1u)                        /* the page on the screen */
++            cv_rect(x + 8, 18, 39, 2, sc->white);
+     }
+     for (i = 0; i < 12u; i++)                               /* one octave: the scale, the notes that sound */
+-        col[i] = snd >> i & 1u ? C_AMB : ck_in(m, i) ? (CK_BLK(i) ? RGB(140, 140, 140) : RGB(220, 220, 220))
++        col[i] = snd >> i & 1u ? sc->amb : ck_in(m, i) ? (CK_BLK(i) ? RGB(140, 140, 140) : RGB(220, 220, 220))
+                                                     : (CK_BLK(i) ? RGB(30, 30, 30) : RGB(70, 70, 70));
+ #if X0X_UI_SMALL_CANVAS
+-    ck_kbd(4, 23, 15, 36, 12u, col, C_BLACK);
++    ck_kbd(4, 23, 15, 36, 12u, col, sc->black);
+ #else
+     ck_kbd(4, 23, 15, 36, 12u, col);
+ #endif
+@@ -2004,20 +1989,20 @@
+     q = put_s(put_s(put_s(t, ck_nm(CK_ROOT_N, sp->ck_root)), " "), ck_nm(CK_SCALE_N, sp->ck_scale));
+     if (sp->ck_snap)
+         put_s(q, " FILTER");
+-    cv_text(114, vc(&FONT_XS, 22, 12), &FONT_XS, t, cp->on & CK_M_SCALE ? CK_MODE_C[0] : C_DIM);
++    cv_text(114, vc(&FONT_XS, 22, 12), &FONT_XS, t, sc->on & CK_M_SCALE ? CK_MODE_C[0] : sc->dim);
+     {
+         const felucca_font_t *font = &FONT_B;
+-        ck_chord_text(&chord, t);
++        ck_chord_text(&sc->chord, t);
+         if (tw(font, t) > 122)
+             font = &FONT_XS;
+         if (tw(font, t) > 122)
+             font = &FONT_T;
+-        cv_text(114, vc(font, 35, 15), font, t, chord.pcs ? CK_MODE_C[1] : C_DIM);
++        cv_text(114, vc(font, 35, 15), font, t, sc->chord.pcs ? CK_MODE_C[1] : sc->dim);
+     }
+     q = put_s(t, latched ? "LATCH " : "");
+-    if ((cp->on & CK_M_CHORD) && (sp->ck_x2 >> 4))
++    if ((sc->on & CK_M_CHORD) && (sp->ck_x2 >> 4))
+         ck_val_txt(CK_E_STRUM, sp->ck_x2 >> 4, put_s(q, "STRUM "));
+-    cv_text(114, vc(&FONT_T, 51, 10), &FONT_T, t, C_GRAY);
++    cv_text(114, vc(&FONT_T, 51, 10), &FONT_T, t, sc->gray);
+     q = put_s(put_s(put_s(put_s(t, ck_nm(CK_ORD_N, sp->ck_ord)), " "), ck_nm(CK_RATE_N, sp->ck_rate)), " X");
+     q = put_s(put_s(put_i(q, sp->ck_oct + 1), " "), ck_val_txt(CK_E_GATE, sp->ck_gate, t + 52));
+     if (sp->ck_x1 & 7u)
+@@ -2026,9 +2011,59 @@
+         q = put_i(put_s(q, " HUM"), sp->ck_x1 >> 3 & 7u);
+     if (rh)
+         put_s(put_s(q, " "), ck_nm(CK_RHY_N, rh));
+-    cv_text(4, vc(&FONT_XS, 61, 12), &FONT_XS, t, arp ? CK_MODE_C[2] : C_DIM);
++    cv_text(4, vc(&FONT_XS, 61, 12), &FONT_XS, t, arp ? CK_MODE_C[2] : sc->dim);
+     for (i = 0; i < len && arp; i++)                        /* the steps: hits, rests, the step now */
+-        cv_rect(4 + (int32_t)i * 8, 76, 5, 4, i + 1u == pos ? C_WHITE : ck_rhy_hit(rh, i) ? dim(CK_MODE_C[2], 9) : C_LINE);
++        cv_rect(4 + (int32_t)i * 8, 76, 5, 4, i + 1u == pos ? sc->white : ck_rhy_hit(rh, i) ? blend(sc->black,CK_MODE_C[2],9) : sc->line);
++}
++uint8_t smk_ck_panel(uint32_t *last, uint32_t force)
++{
++    CK_BASE;
++    CK_SET;
++    uint8_t out[CK_MAXN];
++    ck_chord_input_t chord;
++    uint32_t latched = ck_chord_state(&chord);
++    uint32_t k, i, n, snd = 0, sig = 2166136261u, m = ck_mask(sp->ck_scale, sp->ck_root);
++    uint32_t arp = cp->on & CK_M_ARP, rh = sp->ck_x2 & 15u, len = rh ? (CK_RHY_T[rh] & 15u) + 1u : 8u;
++    uint32_t pos = arp && cp->nk && cp->step ? (cp->step - 1u) % len + 1u : 0u;
++    for (k = 0; k < CK_NKEY; k++)
++        if (CK_BIT(cp->snd, k) || (cp->nk && cp->korder[0] == k)) {
++            n = ck_key_notes(k, out);
++            for (i = 0; i < n && !arp; i++)
++                snd |= 1u << out[i] % 12u;
++        }
++    if (cp->arp_note)
++        snd |= 1u << (cp->arp_note - 1u) % 12u;
++    for (i = 0; i < 12u; i++)
++        sig = (sig ^ (&sp->ck_ch)[i]) * 16777619u;
++    sig = (sig ^ (cp->on | (cp->fl & CK_F_LATCH) << 3 | snd << 4 | (uint32_t)cp->pg << 20)) * 16777619u;
++    sig = (sig ^ ((uint32_t)chord.pcs | (uint32_t)chord.upper_pcs << 16)) * 16777619u;
++    sig = (sig ^ (chord.bass | (uint32_t)chord.upper_bass << 8 | latched << 16)) * 16777619u;
++    sig = (sig ^ pos) * 16777619u;
++    if (!(force & 1u) && sig == *last)
++        return 0u;
++    *last = sig;
++    /* Capture the painter's inputs before the first SPI operation that may
++     * service keys, switch screens, or change the theme. */
++    const ck_panel_scene scene={
++        .set=*sp,.chord=chord,.latched=latched,.snd=snd,.m=m,.arp=arp,
++        .rh=rh,.len=len,.pos=pos,.black=C_BLACK,.white=C_WHITE,.gray=C_GRAY,
++        .line=C_LINE,.dim=C_DIM,.amb=C_AMB,.on=cp->on,.fl=cp->fl,.pg=cp->pg
++    };
++#if X0X_UI_SMALL_CANVAS
++    if (force & 2u) {
++        /* 63 rows is an exact 3-row full-width DMA boundary. */
++        blit_hash[2]=1u;
++        cv_tile_valid[2]=0;
++        for (unsigned offset=0;offset<82u;offset+=63u) {
++            cv_window(240,82,offset,63,scene.black);
++            ck_panel_paint(&scene);
++            cv_lcd_full(0,KNOB_Y+offset);
++        }
++        return 0u;                         /* LCD already owns this frame */
++    }
++#endif
++    cv_begin(240,82,scene.black);
++    ck_panel_paint(&scene);
+     return 1u;
+ }
+ /* The stage settings and a plain keybed. The keybed plays MIDI; its colours do not encode field values. */
+--- a/firmware/src/app/smc_mixer.c
++++ b/firmware/src/app/smc_mixer.c
+@@ -1076,7 +1076,8 @@
+     uint8_t x,y,a,b,kind,bipolar,text,font;
+ } smc_grid_op;
+ typedef struct { unsigned n, nt; uint16_t black; uint8_t bad; } smc_grid_scene;
+-enum { SMC_GRID_OPS=217, SMC_GRID_TEXTS=64, SMC_GRID_RASTER=240*BAND_H };
++enum { SMC_GRID_OPS=217, SMC_GRID_TEXTS=64, SMC_GRID_SLICE=48, SMC_GRID_RASTER=240*SMC_GRID_SLICE };
++_Static_assert(SMC_GRID_SLICE % X0X_LCD_TILE_H == 0, "SMC raster seam must preserve dirty-tile coordinates");
+ _Static_assert(sizeof(smc_grid_op)==16, "SMC opcode ABI");
+ _Static_assert(2u*SMC_GRID_RASTER+SMC_GRID_OPS*sizeof(smc_grid_op)+32u*SMC_GRID_TEXTS<=sizeof cv_px,"SMC tape in canvas tail");
+ static unsigned char *smc_grid_storage(void)
+@@ -1233,19 +1234,21 @@
+     lcd_sync();
+     smc_ui_grid(&scene);
+     if(scene.bad) return;
+-    for(unsigned band=0;band<2u;++band) {
+-        cv_window(240, MAIN_ROWS, band*BAND_H, BAND_H, scene.black);
++    for(unsigned band=0;band<2u;++band) for(unsigned off=0;off<BAND_H;off+=SMC_GRID_SLICE) {
++        unsigned rows=BAND_H-off;
++        if(rows>SMC_GRID_SLICE)rows=SMC_GRID_SLICE;
++        cv_window(240, MAIN_ROWS, band*BAND_H+off, rows, scene.black);
+         for(unsigned i=0;i<scene.n;++i) {
+             smc_grid_op op;
+             memcpy(&op,smc_grid_storage()+i*sizeof(op),sizeof(op));
+             switch(op.kind) {
+             case 0: cv_rect(op.x,op.y,op.a,op.b,op.c); break;
+-            case 1: if (!band) arc(op.x,op.y,op.a,op.v,op.c,op.fill,op.bipolar); break;
++            case 1: if (!band && !off) arc(op.x,op.y,op.a,op.v,op.c,op.fill,op.bipolar); break;
+             case 2: ui_pictogram(op.x,op.y,op.a,op.b,op.c); break;
+             case 3: text_c(op.x,op.y,op.font?&FONT_XS:&FONT_T,smc_grid_string(op.text),op.c); break;
+             }
+         }
+-        cv_commit_main_band(band);
++        cv_commit_main_window(band,off,rows);
+     }
+ }
+ #else
+@@ -1383,46 +1386,135 @@
+     return fx < SMCFX_NFX ? symbols[fx] : UI_G_FX_EMPTY;
+ }
+ 
++/* Captured once before any footer transfer; foreground input may change
++ * theme, buttons, fills or the remote target between the two DMA windows. */
++typedef struct {
++    char name[24], num[32], unit[12];
++    const char *status; /* Static captions only. */
++    int status_symbol, value_symbol, action_state, target_number, held_fx;
++    int fill, fill_req, fill_on, fill_lit;
++    uint8_t fill_under;
++    uint16_t bg, line, white, gray, hi;
++} smc_footer;
++
+ /* #815 item6-after-fill: left, the fill (pattern, roll, play and eight step
+  * bars that light as the bar passes; amber = waiting for the bar); right, the
+  * effect this key no longer throws, greyed, between the arrows. */
+-static void smc_fill_panel(int bus)
++static void smc_fill_panel(const smc_footer *f)
+ {
+     const uint16_t amber=RGB(255,190,77), bright=RGB(145,239,246);
+     const uint16_t green=RGB(152,247,160), dim_ink=RGB(45,70,72);
+-    int on = seq.fill_on && seq.fill_req, len = seq_part_len(&seq, TRK_DRUM);
+-    int lit = on && len > 0 ? (seq.t[TRK_DRUM].pos * 8) / len : -1;
+-    uint8_t under = smcfx_strip_get(&smc.fx_strip, smc.fx_page, bus, smcfx_button(SMC_FILL_NOTE));
++    const int on=f->fill_on, lit=f->fill_lit, req=f->fill_req;
++    const uint8_t under=f->fill_under;
+     cv_rect(5,7,108,67,RGB(14,27,32));
+-    cv_rect(5,7,108,1,seq.fill_req?C_WHITE:dim_ink);
++    cv_rect(5,7,108,1,req?f->white:dim_ink);
+     cv_rect(5,73,108,1,RGB(68,76,64));
+     cv_rect(125,7,110,67,RGB(15,32,37));
+     cv_rect(125,7,110,1,bright);
+     cv_rect(125,73,110,1,dim_ink);
+     ui_pictogram(15,15,UI_G_PATTERN,2,amber);
+-    ui_pictogram(49,14,UI_G_FX_STUTTER,2,seq.fill_req?C_WHITE:C_GRAY);
++    ui_pictogram(49,14,UI_G_FX_STUTTER,2,req?f->white:f->gray);
+     ui_pictogram(84,19,on?UI_G_PLAY:UI_G_HOLD,1,on?green:amber);
+     for(int k=0;k<8;k++) {
+         int h=(k%3==0?12:k%3==1?7:16), x=12+k*12;
+-        uint16_t c=on?(k<=lit?green:dim_ink):(seq.fill_req?amber:dim_ink);
++        uint16_t c=on?(k<=lit?green:dim_ink):(req?amber:dim_ink);
+         cv_rect(x,64-h,7,h,c);
+         cv_rect(x,65,7,2,dim_ink);
+     }
+     ui_pictogram(137,25,UI_G_PREV,2,bright);
+-    ui_pictogram(166,21,under==SMCFX_EMPTY?UI_G_FX_EMPTY:smc_fx_symbol(under),3,C_GRAY);
++    ui_pictogram(166,21,under==SMCFX_EMPTY?UI_G_FX_EMPTY:smc_fx_symbol(under),3,f->gray);
+     ui_pictogram(207,25,UI_G_NEXT,2,bright);
+-    ui_pictogram(175,54,UI_G_HOLD,1,C_GRAY);
++    ui_pictogram(175,54,UI_G_HOLD,1,f->gray);
+     cv_rect(157,65,55,2,dim_ink);
+     cv_rect(173,65,24,2,amber);
+ }
+ 
++static void smc_footer_paint(const smc_footer *f)
++{
++    cv_rect(0, 0, 240, 1, f->line);
++    if (f->fill) { smc_fill_panel(f); return; }
++    if (f->held_fx >= 0) {
++        /* #815 item 6 (approved): one panel; HOLD + effect glyph, FX + < >, the effect name large. */
++        const uint16_t bright=RGB(145,239,246), dim_ink=RGB(45,70,72), amber=RGB(255,190,77);
++        int symbol = f->held_fx == SMCFX_EMPTY ? UI_G_FX_EMPTY : smc_fx_symbol((uint8_t)f->held_fx);
++        cv_rect(5,5,230,72,RGB(13,31,36));
++        cv_rect(5,5,230,1,bright); cv_rect(5,76,230,1,dim_ink);
++        cv_rect(5,5,1,72,dim_ink); cv_rect(234,5,1,72,dim_ink);
++        cv_rect(11,9,51,18,RGB(22,61,64));
++        ui_pictogram(15,10,UI_G_HOLD,1,amber);
++        ui_pictogram(33,10,symbol,1,bright);
++        text_c(146,10,&FONT_B,"FX + < >",f->white);
++        cv_rect(12,30,216,1,dim_ink);
++        ui_pictogram(16,42,UI_G_PREV,2,bright);
++        ui_pictogram(206,42,UI_G_NEXT,2,bright);
++        text_c(120,34,tw(&FONT_M,f->num) > 174 ? &FONT_B : &FONT_M,f->num,f->white);
++        return;
++    }
++    text_c(120, 4, tw(&FONT_S, f->name) > 232 ? &FONT_XS : &FONT_S, caps_of(f->name), f->white);
++    if (f->action_state>=0) {
++        ui_pictogram(96,23,f->value_symbol,2,f->hi);
++        ui_state_toggle(126,28,f->action_state,f->hi);
++    } else { const felucca_font_t *font = &FONT_M;
++      int uw = f->unit[0] ? tw(&FONT_XS, f->unit) + 2 : 0;
++      if (tw(font, f->num) + uw > 228) font = &FONT_B;
++      int gw=f->value_symbol?22:0;
++      int x = 120 - (tw(font, f->num) + uw + gw) / 2;
++      if (f->value_symbol) {ui_pictogram(x,24,f->value_symbol,2,f->hi);x+=gw;}
++      x = cv_text(x, 22, font, f->num, f->hi);
++      if (f->unit[0]) cv_text(x + 2, base_y(font, 22, &FONT_XS), &FONT_XS, f->unit, f->gray);
++    }
++    if (f->status) {
++        int x=120-(12+tw(&FONT_XS,f->status))/2;
++        ui_pictogram(x,49,f->status_symbol,1,f->hi);
++        cv_text(x+12,49,&FONT_XS,f->status,f->hi);
++    } else if (f->status_symbol==UI_G_UP || f->status_symbol==UI_G_DOWN) {
++        ui_pictogram(108,49,f->status_symbol,1,f->hi);
++        ui_pictogram(123,49,UI_G_TARGET,1,f->white);
++    } else if (f->status_symbol) {
++        ui_pictogram(f->target_number?108:116,49,f->status_symbol,1,f->hi);
++        if (f->target_number) {char number[16];put_i(number,f->target_number);cv_text(121,49,&FONT_XS,number,f->hi);}
++    }
++}
++
++static void smc_footer_commit(const smc_footer *f)
++{
++#if X0X_UI_SMALL_CANVAS
++    enum { SLICE = 64 };
++    _Static_assert(SLICE % X0X_LCD_TILE_H == 0, "SMC footer seam must preserve tile rows");
++    const int force = !blit_hash[3] || !cv_tile_valid[3];
++    blit_hash[3] = 1;
++    cv_tile_valid[3] = 1;
++    popup_knob_full_hash = 0; /* Other owners don't inherit a full-canvas hash. */
++    for(unsigned off=0;off<KNOB_H;off+=SLICE) {
++        unsigned rows=KNOB_H-off;
++        if(rows>SLICE)rows=SLICE;
++        cv_window(240, KNOB_H, off, rows, f->bg);
++        smc_footer_paint(f);
++        uint32_t *hashes=knob_tileh+(off/X0X_LCD_TILE_H)*X0X_LCD_TILE_COLS;
++        if (force) {
++            /* Keep contiguous full-row DMA on a cold footer. Arm validity
++             * only once before any callbacks; live invalidations survive. */
++            for (unsigned y=0;y<rows;y+=X0X_LCD_TILE_H) {
++                unsigned h=rows-y < X0X_LCD_TILE_H ? rows-y : X0X_LCD_TILE_H;
++                for (unsigned col=0;col<X0X_LCD_TILE_COLS;++col)
++                    hashes[(y/X0X_LCD_TILE_H)*X0X_LCD_TILE_COLS+col] =
++                        x0x_lcd_tile_hash(cv_px,X0X_LCD_WIDTH,col*X0X_LCD_TILE_W,y,h);
++            }
++            cv_lcd_full(0,KNOB_Y+off);
++        } else {
++            cv_lcd_pos_t pos={0,KNOB_Y+off};
++            x0x_lcd_tile_commit(cv_px, rows, hashes, 0, cv_lcd_emit, &pos);
++        }
++    }
++#else
++    cv_begin(240, KNOB_H, f->bg);
++    smc_footer_paint(f);
++    cv_commit_popup_knobs();
++#endif
++}
+ static void smc_ui_draw_peer(void)
+ {
+-    char name[24], num[32], unit[12], tag[80];
+-    const char *status = 0;
+-    int status_symbol=UI_G_CHECK, value_symbol=UI_G_NONE, action_state=-1, target_number=0;
+-    int held_fx=-1;   /* M6: a held FX key's effect, drawn as the approved #815 item-6 footer */
+-    pref_t r = smc_ui.kind == 1 ? smc_knob_target(smc_ui.strip) : smc_target(smc_ui.strip);
++    char tag[80];
+     int kit = smc_drum_mix();
+     int fx_note = smc_fx_header_note();
+     cv_begin(240, HDR_H, C_BLACK);
+@@ -1491,104 +1583,74 @@
+     smc_ui_grid();
+     cv_commit_rect(1, 0, MAIN_Y);
+ #endif
+-    cv_begin(240, KNOB_H, C_BLACK);
+-    cv_rect(0, 0, 240, 1, C_LINE);
++    /* The header/main transfers serviced input. Resolve all footer targets
++     * from the current state, not from the older header capture. */
++    pref_t r = smc_ui.kind == 1 ? smc_knob_target(smc_ui.strip) : smc_target(smc_ui.strip);
++    kit = smc_drum_mix();
++    smc_footer f = {.status_symbol=UI_G_CHECK, .value_symbol=UI_G_NONE,
++        .action_state=-1, .held_fx=-1, .bg=C_BLACK, .line=C_LINE,
++        .white=C_WHITE, .gray=C_GRAY, .hi=C_HI};
+     if (smc_ui.kind == 2) {
+-        put_s(name, smc_ui.name);
+-        put_s(num, smc_ui.value); unit[0] = 0;
++        put_s(f.name, smc_ui.name);
++        put_s(f.num, smc_ui.value); f.unit[0] = 0;
+     } else if (smc_ui.kind == 3) {
+         int note = smc_ui.action;
+         int bus = smc_fx_bus_now((uint8_t)note);
+         if (bus >= 0 && note == SMC_FILL_NOTE) {
+-            smc_fill_panel(bus);       /* #815 item6-after-fill */
+-            goto commit;
++            const int len=seq_part_len(&seq,TRK_DRUM);
++            f.fill=1;
++            f.fill_req=seq.fill_req;
++            f.fill_on=seq.fill_on && f.fill_req;
++            f.fill_lit=f.fill_on && len>0 ? seq.t[TRK_DRUM].pos * 8 / len : -1;
++            f.fill_under=smcfx_strip_get(&smc.fx_strip,smc.fx_page,bus,smcfx_button(SMC_FILL_NOTE));
++            smc_footer_commit(&f);
++            return;
+         }
+         if (bus >= 0) {
+             smc_fx_publish();
+             int owned = note < 32 && smc.fx_strip.key_bus[note] < SMCFX_N;
+             if (owned) bus = smc.fx_strip.key_bus[note];
+             int page = owned ? smcfx_strip_key_page(&smc.fx_strip, (unsigned)note) : smc.fx_page;
+-            put_s(name, bus < NPARTS ? part_name(bus) : SMCFX_BUS_NAME[bus]);
++            put_s(f.name, bus < NPARTS ? part_name(bus) : SMCFX_BUS_NAME[bus]);
+             uint8_t fx = owned ? smc.fx_strip.held_fx[bus][note >> 3] :
+                 smcfx_strip_get(&smc.fx_strip, page, bus, smcfx_button((uint8_t)note));
+-            if (fx == SMCFX_EMPTY) put_s(num, "--");
+-            else put_s(num, SMCFX_LONG[fx]);
+-            status = SMCFX_PAGE_NAME[page];
+-            status_symbol=(smc.fx_down & (uint8_t)(1u<<bus))?UI_G_HOLD:UI_G_PATTERN;
+-            if (owned && (smc.held[note >> 3] & (1u << (note & 7)))) held_fx = fx;
++            if (fx == SMCFX_EMPTY) put_s(f.num, "--");
++            else put_s(f.num, SMCFX_LONG[fx]);
++            f.status = SMCFX_PAGE_NAME[page];
++            f.status_symbol=(smc.fx_down & (uint8_t)(1u<<bus))?UI_G_HOLD:UI_G_PATTERN;
++            if (owned && (smc.held[note >> 3] & (1u << (note & 7)))) f.held_fx = fx;
+         } else {
+             if (note < 24) {
+                 if (kit < 0 && smc_ui.strip == 7) r = PR(R_ENG, T_FX, 0, FX_VOLUME);
+-                smc_ui_label(r, name);
++                smc_ui_label(r, f.name);
+                 if (note >= 16) {
+-                    char *end = name;
++                    char *end = f.name;
+                     while (*end && *end != ' ') end++;
+                     *end=0; /* The picture carries MUTE; retain its destination name. */
+                 }
+-            } else name[0]=0;
+-            value_symbol=note>=0x5D?(note==0x5F?UI_G_RECORD:seq.playing?UI_G_PLAY:UI_G_STOP):
++            } else f.name[0]=0;
++            f.value_symbol=note>=0x5D?(note==0x5F?UI_G_RECORD:seq.playing?UI_G_PLAY:UI_G_STOP):
+                 note<8?UI_G_RECORD:note<16?UI_G_SOLO:UI_G_MUTE;
+-            action_state=note>=0x5D?(note==0x5F?ui.rec:seq.playing):note<8?ui.rec:smc_led(note);
+-            num[0]=0;
+-            status_symbol=UI_G_NONE; /* Result is shown by the positional toggle. */
++            f.action_state=note>=0x5D?(note==0x5F?ui.rec:seq.playing):note<8?ui.rec:smc_led(note);
++            f.num[0]=0;
++            f.status_symbol=UI_G_NONE; /* Result is shown by the positional toggle. */
+         }
+-        unit[0] = 0;
++        f.unit[0] = 0;
+     } else if (smc_ui.kind == 1 && r.kind == R_NONE) {
+-        smc_ui_label(smc_page_target(smc_ui.strip), name);
+-        target_number=smc_fader_of(smc_page_target(smc_ui.strip));
+-        put_i(num,target_number);
+-        value_symbol=status_symbol=UI_G_FADER;
+-        unit[0] = 0;
++        smc_ui_label(smc_page_target(smc_ui.strip), f.name);
++        f.target_number=smc_fader_of(smc_page_target(smc_ui.strip));
++        put_i(f.num,f.target_number);
++        f.value_symbol=f.status_symbol=UI_G_FADER;
++        f.unit[0] = 0;
+     } else {
+-        smc_ui_label(r, name);
+-        pref_value_of(r, pref_get(r), num, unit);
++        smc_ui_label(r, f.name);
++        pref_value_of(r, pref_get(r), f.num, f.unit);
+         if (smc_ui.kind == 0 && !(smc.picked & (1u << smc_ui.strip)))
+-            status_symbol=smc.last[smc_ui.strip]<smc_scaled(r)?UI_G_UP:UI_G_DOWN;
++            f.status_symbol=smc.last[smc_ui.strip]<smc_scaled(r)?UI_G_UP:UI_G_DOWN;
+     }
+-    if (held_fx >= 0) {
+-        /* #815 item 6 (approved): one panel; HOLD + effect glyph, FX + < >, the effect name large. */
+-        const uint16_t bright=RGB(145,239,246), dim_ink=RGB(45,70,72), amber=RGB(255,190,77);
+-        int symbol = held_fx == SMCFX_EMPTY ? UI_G_FX_EMPTY : smc_fx_symbol((uint8_t)held_fx);
+-        cv_rect(5,5,230,72,RGB(13,31,36));
+-        cv_rect(5,5,230,1,bright); cv_rect(5,76,230,1,dim_ink);
+-        cv_rect(5,5,1,72,dim_ink); cv_rect(234,5,1,72,dim_ink);
+-        cv_rect(11,9,51,18,RGB(22,61,64));
+-        ui_pictogram(15,10,UI_G_HOLD,1,amber);
+-        ui_pictogram(33,10,symbol,1,bright);
+-        text_c(146,10,&FONT_B,"FX + < >",C_WHITE);
+-        cv_rect(12,30,216,1,dim_ink);
+-        ui_pictogram(16,42,UI_G_PREV,2,bright);
+-        ui_pictogram(206,42,UI_G_NEXT,2,bright);
+-        text_c(120,34,tw(&FONT_M,num) > 174 ? &FONT_B : &FONT_M,num,C_WHITE);
+-        goto commit;
+-    }
+-    text_c(120, 4, tw(&FONT_S, name) > 232 ? &FONT_XS : &FONT_S, caps_of(name), C_WHITE);
+-    if (action_state>=0) {
+-        ui_pictogram(96,23,value_symbol,2,C_HI);
+-        ui_state_toggle(126,28,action_state,C_HI);
+-    } else { const felucca_font_t *font = &FONT_M;
+-      int uw = unit[0] ? tw(&FONT_XS, unit) + 2 : 0;
+-      if (tw(font, num) + uw > 228) font = &FONT_B;
+-      int gw=value_symbol?22:0;
+-      int x = 120 - (tw(font, num) + uw + gw) / 2;
+-      if (value_symbol) {ui_pictogram(x,24,value_symbol,2,C_HI);x+=gw;}
+-      x = cv_text(x, 22, font, num, C_HI);
+-      if (unit[0]) cv_text(x + 2, base_y(font, 22, &FONT_XS), &FONT_XS, unit, C_GRAY);
+-    }
+-    if (status) {
+-        int x=120-(12+tw(&FONT_XS,status))/2;
+-        ui_pictogram(x,49,status_symbol,1,C_HI);
+-        cv_text(x+12,49,&FONT_XS,status,C_HI);
+-    } else if (status_symbol==UI_G_UP || status_symbol==UI_G_DOWN) {
+-        ui_pictogram(108,49,status_symbol,1,C_HI);
+-        ui_pictogram(123,49,UI_G_TARGET,1,C_WHITE);
+-    } else if (status_symbol) {
+-        ui_pictogram(target_number?108:116,49,status_symbol,1,C_HI);
+-        if (target_number) {put_i(tag,target_number);cv_text(121,49,&FONT_XS,tag,C_HI);}
+-    }
+-commit:
+-    cv_commit_popup_knobs();
++    smc_footer_commit(&f);
+ }
++
+ /* Page-peek is a distinct presentation mode. Keep the full SMC overlay
+  * for every other view, but let the real page paint its live meters while a
+  * small control-feedback header remains visible during peek. */
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -5460,7 +5460,9 @@
+  * build sees that macro; a host file that compiles ui.c alone does not. */
+ #ifdef CV_ROWS
+ _Static_assert((X0X_UI_SMALL_CANVAS ? 1u : 2u) * BAND_H <= CV_ROWS, "main area taller than the screen strip");
++#if !X0X_UI_SMALL_CANVAS
+ _Static_assert(KNOB_H <= CV_ROWS, "knob row taller than the screen strip");
++#endif
+ _Static_assert(HDR_H <= CV_ROWS, "header taller than the screen strip");
+ _Static_assert(HDR_H + 2u * BAND_H + KNOB_H == 240u, "the three strips must tile the 240-row panel");
+ #endif
+@@ -5579,20 +5581,25 @@
+ #if X0X_UI_SMALL_CANVAS
+ /* Separate hash rows per band. All other main owners in this build use the
+  * same partition; whole-main invalidations still force both bands. */
+-static void cv_commit_main_band(unsigned band)
++static void cv_commit_main_window(unsigned band, unsigned first, unsigned rows)
+ {
+     static uint8_t force;
+-    cv_lcd_pos_t pos = {0, MAIN_Y + band * BAND_H};
+-    if (!band) {
++    cv_lcd_pos_t pos = {0, MAIN_Y + band * BAND_H + first};
++    if (!band && !first) {
+         force = !blit_hash[1] || !cv_tile_valid[1];
+-        /* Preserve any invalidation issued by live input during either send. */
++        /* Preserve any invalidation issued by live input during any send. */
+         blit_hash[1] = 1u;
+         cv_tile_valid[1] = 1u;
+     }
+-    x0x_lcd_tile_commit(cv_px, BAND_H,
+-        main_tileh + band * LCD_TILE_ROWS(BAND_H) * X0X_LCD_TILE_COLS,
++    x0x_lcd_tile_commit(cv_px, rows,
++        main_tileh + (band * LCD_TILE_ROWS(BAND_H) + first / X0X_LCD_TILE_H) * X0X_LCD_TILE_COLS,
+         force, cv_lcd_emit, &pos);
+ }
++static void cv_commit_main_band(unsigned band)
++{
++    cv_commit_main_window(band, 0, BAND_H);
++}
++
+ #endif
+ 
+ static void cv_commit_knobs(int region)
+@@ -6884,41 +6891,58 @@
+     cv_capture_s1_cells(s);
+ }
+ #endif
++typedef struct {
++    uint16_t on,tie,col;
++    int16_t ph,held;
++    uint8_t base,enabled;
++} sound_step_scene_t;
++
++#if X0X_UI_SMALL_CANVAS
++/* Painter-only observer; never live while input service runs. */
++static sound_step_scene_t *sound_step_record;
++#endif
++
++static UI_DRAW void sound_step_footer_paint(const sound_step_scene_t *s)
++{
++    for(int c=0;c<16;c++){
++        int step=s->base+c,x=8+c*14,enabled=c<s->enabled;
++        int gate=(s->on>>c)&1u?((s->tie>>c)&1u?G_TIE:G_NOTE):G_REST;
++        char number[8];put_i(number,step+1);
++        text_c(x+6,224-KNOB_Y,&FONT_T,number,enabled?SOUND_GRAY:SOUND_DIM);
++        cv_rect(x,237-KNOB_Y,12,2,enabled?SOUND_LINE:SOUND_SIDE);
++        if(gate!=G_REST)cv_rect(x,237-KNOB_Y,12,gate==G_TIE?1:2,s->col);
++        if(enabled && step==s->held)cv_rect(x,236-KNOB_Y,12,1,SOUND_INK);
++        if(enabled && step==s->ph)cv_rect(x,239-KNOB_Y,12,1,SOUND_INK);
++    }
++}
++
+ static UI_DRAW void sound_step_footer(void)
+ {
+-    const bpart_t *bp;
+-    int ph,held,base,len;
+-    uint16_t col;
++    sound_step_scene_t v={0};
+ #if X0X_SYNTHONE_PATCH && X0X_UI_SMALL_CANVAS
+     const cv_s1_telemetry *scene=s1_draw_frame;
+     if(scene) {
+-        bp=0;base=scene->base;len=base+scene->enabled;
+-        ph=base+scene->head;held=base+scene->held;
+-        col=PART_COL[PART_303A+scene->voice];
++        v.base=scene->base;v.enabled=scene->enabled;
++        v.ph=scene->base+scene->head;v.held=scene->base+scene->held;
++        v.col=PART_COL[PART_303A+scene->voice];v.on=scene->on;v.tie=scene->tie;
+     }else
+ #endif
+     {
+-        bp=&cur_pat()->bass[bidx()];base=step_of(0);len=bp->len;
+-        ph=seq.playing?eng_step[TRK_BASS0+bidx()]:-1;
+-        held=ui.held_step;col=part_col();
+-    }
+-    for(int c=0;c<16;c++){
+-        int step=base+c,x=8+c*14,enabled=step<len;
+-        int gate=G_REST;
+-        if(enabled){
+-#if X0X_SYNTHONE_PATCH && X0X_UI_SMALL_CANVAS
+-            if(scene)gate=(scene->on>>c)&1u?((scene->tie>>c)&1u?G_TIE:G_NOTE):G_REST;
+-            else
+-#endif
+-            gate=bstep_gate(&bp->step[step]);
++        const bpart_t *bp=&cur_pat()->bass[bidx()];
++        v.base=step_of(0);
++        v.enabled=bp->len>v.base? (bp->len-v.base>16?16:bp->len-v.base):0;
++        v.ph=seq.playing?eng_step[TRK_BASS0+bidx()]:-1;
++        v.held=ui.held_step;v.col=part_col();
++        for(unsigned c=0;c<v.enabled;c++){
++            int gate=bstep_gate(&bp->step[v.base+c]);
++            if(gate!=G_REST)v.on|=1u<<c;
++            if(gate==G_TIE)v.tie|=1u<<c;
+         }
+-        char number[8];put_i(number,step+1);
+-        text_c(x+6,224-KNOB_Y,&FONT_T,number,enabled?SOUND_GRAY:SOUND_DIM);
+-        cv_rect(x,237-KNOB_Y,12,2,enabled?SOUND_LINE:SOUND_SIDE);
+-        if(gate!=G_REST)cv_rect(x,237-KNOB_Y,12,gate==G_TIE?1:2,col);
+-        if(enabled && step==held)cv_rect(x,236-KNOB_Y,12,1,SOUND_INK);
+-        if(enabled && step==ph)cv_rect(x,239-KNOB_Y,12,1,SOUND_INK);
+     }
++#if X0X_UI_SMALL_CANVAS
++    if(sound_step_record)*sound_step_record=v;
++#endif
++    sound_step_footer_paint(&v);
+ }
+ 
+ #if X0X_SYNTHONE_PATCH
+@@ -8335,7 +8359,7 @@
+ 
+ /* Lists share the body with the lower controls, except for full PART editors. */
+ #if X0X_UI_SMALL_CANVAS
+-enum { LIST_OP_MAX=166, LIST_TEXT_MAX=54, LIST_TEXT_BYTES=44, LIST_RASTER=240*BAND_H };
++enum { LIST_OP_MAX=166, LIST_TEXT_MAX=54, LIST_TEXT_BYTES=44, LIST_SLICE=3u*X0X_LCD_TILE_H, LIST_RASTER=240*LIST_SLICE };
+ enum { LO_RECT, LO_BOX, LO_LINE, LO_PANEL, LO_ICON, LO_TOGGLE, LO_TEXT, LO_CLIP };
+ typedef struct { int16_t x,y,a,b; uint16_t ink,edge; uint8_t kind,z,font,text; } cv_list_op;
+ /* At most nine visible rows plus a row crossing each logical seam.
+@@ -8343,7 +8367,7 @@
+  * fit the fixed backing area, even when the part list owns the footer. */
+ typedef struct { unsigned n,cut[2],nt; uint16_t bg; uint8_t failed; } cv_list_scene;
+ static uint8_t cv_scene_owns_knob_frame;
+-_Static_assert(sizeof(cv_list_op)*LIST_OP_MAX+LIST_TEXT_BYTES*LIST_TEXT_MAX+2u*LIST_RASTER<=240u*82u*2u,
++_Static_assert(sizeof(cv_list_op)*LIST_OP_MAX+LIST_TEXT_BYTES*LIST_TEXT_MAX+2u*LIST_RASTER<=sizeof cv_px,
+                "LIST scene exceeds bounded canvas");
+ _Static_assert(PEER_TEXT_CAP<=LIST_TEXT_BYTES, "LIST peer text exceeds tape");
+ static unsigned char *list_tape(void) { return (unsigned char *)(cv_px+LIST_RASTER); }
+@@ -8507,12 +8531,11 @@
+ }
+ 
+ static void cv_draw_scene_footer(uint16_t bg, const void *scene,
+-                                void (*paint)(int,const void *),int force)
++                                void (*paint)(int,const void *),int force,unsigned slice)
+ {
+-    enum { SCENE_KNOB_SPLIT=4u*X0X_LCD_TILE_H };
+-    for (unsigned row=0;row<KNOB_ROWS;row+=SCENE_KNOB_SPLIT) {
++    for (unsigned row=0;row<KNOB_ROWS;row+=slice) {
+         cv_lcd_pos_t pos={0,KNOB_Y+row};
+-        cv_window(240,KNOB_ROWS,row,SCENE_KNOB_SPLIT,bg);
++        cv_window(240,KNOB_ROWS,row,slice,bg);
+         paint(2,scene);
+         x0x_lcd_tile_commit(cv_px,cv_h,
+             knob_tileh+row/X0X_LCD_TILE_H*X0X_LCD_TILE_COLS,
+@@ -8533,13 +8556,15 @@
+     if(s.failed)return;
+ 
+     int force=owns_footer ? cv_claim_scene_footer() : 0;
+-    for(unsigned band=0;band<2;band++){
+-        cv_window(240,MAIN_ROWS,band*BAND_H,BAND_H,s.bg);
++    for(unsigned band=0;band<2;band++) for(unsigned row=0;row<BAND_H;row+=LIST_SLICE){
++        unsigned rows=BAND_H-row;
++        if(rows>LIST_SLICE)rows=LIST_SLICE;
++        cv_window(240,MAIN_ROWS,band*BAND_H+row,rows,s.bg);
+         cv_band(band*BAND_H,BAND_H);
+         draw_list_scene(&s,band);
+-        cv_commit_main_band(band);
++        cv_commit_main_window(band,row,rows);
+     }
+-    if (owns_footer) cv_draw_scene_footer(s.bg,&s,cv_paint_list,force);
++    if (owns_footer) cv_draw_scene_footer(s.bg,&s,cv_paint_list,force,LIST_SLICE);
+ }
+ #else
+ static UI_DRAW void draw_list(int band)
+@@ -8956,7 +8981,7 @@
+         cv_capture_s1_telemetry(&telemetry,(unsigned)bidx());
+         const int force=cv_claim_scene_footer();
+         cv_draw_pair(bg,&telemetry,cv_paint_s1_matrix,NULL);
+-        cv_draw_scene_footer(bg,&telemetry,cv_paint_s1_matrix,force);
++        cv_draw_scene_footer(bg,&telemetry,cv_paint_s1_matrix,force,4u*X0X_LCD_TILE_H);
+         return;
+     }
+ #endif
+@@ -11059,6 +11084,109 @@
+ 
+ #include "ui_chance_probe.h"
+ #include "ui_break_layout_controls.h"
++
++#if X0X_UI_SMALL_CANVAS
++enum { ORDINARY_KNOB_FIRST=64 };
++_Static_assert(ORDINARY_KNOB_FIRST % X0X_LCD_TILE_H == 0, "keep footer tile seams");
++typedef struct {
++    uint16_t palette[5], bg;
++    uint8_t light, mix, is_break;
++    uint16_t label_ink;
++    char mix_label[24];
++    struct ordinary_value {
++        char num[16],unit[8];
++        uint16_t ink;
++        uint8_t painter;
++    } cells[4];
++    step_lane_scene_t steps;
++    break_footer_scene_t breaks;
++} ordinary_knob_scene_t;
++enum { KV_NONE,KV_ORIGINAL,KV_NORMAL,KV_PUMP };
++
++static void ordinary_knob_panel(int mix)
++{
++    if(mix)rbox(3,11,234,71,UI_PANEL_RADIUS,SOUND_FACE);
++    else night_panel(3,0,234,68,0);
++}
++static void ordinary_knob_value(int cx,unsigned painter,const char *num,const char *unit,uint16_t ink)
++{
++    if(painter==KV_ORIGINAL) original_cell_value(cx,vc(&FONT_B,53,13),num,unit,ink);
++    else if(painter) cell_value(cx-(painter==KV_PUMP),vc(&FONT_B,53,13),num,unit,ink);
++}
++static void ordinary_knob_tiles(unsigned row,unsigned rows,int force)
++{
++    cv_lcd_pos_t pos={0,KNOB_Y+row};
++    x0x_lcd_tile_commit(cv_px,rows,knob_tileh+(row/X0X_LCD_TILE_H)*X0X_LCD_TILE_COLS,
++        force,cv_lcd_emit,&pos);
++}
++static int ordinary_knob_claim(void)
++{
++    int force=!blit_hash[3] || !cv_tile_valid[3];
++    blit_hash[3]=cv_tile_valid[3]=1u;
++    return force;
++}
++
++/* Legacy PART matrix cards end by local row 66. Keep their pixels and
++ * the first step-caption pixels through row 68 in the existing strip;
++ * all subsequent content is the frozen step footer. */
++static UI_DRAW void legacy_knob_commit(int paint)
++{
++    enum { MATRIX_ROWS=69 };
++    sound_step_scene_t steps;
++    const uint16_t bg=C_BLACK;
++    const uint8_t initial_light=ui_theme_light;
++    cv_window(240,KNOB_H,0,MATRIX_ROWS,bg);
++    if(paint) {
++        sound_step_record=&steps;
++        draw_part_sound(2);
++        sound_step_record=0;
++    }
++    const int force=ordinary_knob_claim();
++    ordinary_knob_tiles(0,ORDINARY_KNOB_FIRST,force);
++
++    /* cv_window synchronizes the previous DMA. Its 18-row clear cannot
++     * touch the five staged rows at the end of the previous raster. */
++    cv_window(240,KNOB_H,ORDINARY_KNOB_FIRST,KNOB_H-ORDINARY_KNOB_FIRST,bg);
++    memcpy(cv_px,cv_px+240u*ORDINARY_KNOB_FIRST,
++        (MATRIX_ROWS-ORDINARY_KNOB_FIRST)*240u*sizeof(*cv_px));
++    if(paint) {
++        const uint8_t light=ui_theme_light;
++        ui_theme_light=initial_light;
++        cv_y0=MATRIX_ROWS;                  /* staged antialiased pixels already drawn */
++        sound_step_footer_paint(&steps);
++        ui_theme_light=light;
++    }
++    ordinary_knob_tiles(ORDINARY_KNOB_FIRST,KNOB_H-ORDINARY_KNOB_FIRST,force);
++}
++
++static UI_DRAW void ordinary_knob_commit(const ordinary_knob_scene_t *s)
++{
++    const int force=ordinary_knob_claim();
++    ordinary_knob_tiles(0,ORDINARY_KNOB_FIRST,force);
++
++    /* Input ran during the first commit. Install the saved palette only
++     * during this local paint: never expose it to input during DMA. */
++    uint16_t saved[5]; memcpy(saved,pal,sizeof saved);
++    uint8_t light=ui_theme_light;
++    memcpy(pal,s->palette,sizeof saved);ui_theme_light=s->light;
++    cv_window(240,KNOB_H,ORDINARY_KNOB_FIRST,KNOB_H-ORDINARY_KNOB_FIRST,s->bg);
++    if(!s->is_break) {
++        ordinary_knob_panel(s->mix);
++        if(s->mix && s->mix_label[0])
++            text_c(30,vc(&FONT_XS,66,10),&FONT_XS,s->mix_label,s->label_ink);
++        else if(!s->mix) draw_footer();
++        for(int i=0;i<4;i++) {
++            const struct ordinary_value *v=&s->cells[i];
++            ordinary_knob_value(i*60+30,v->painter,v->num,v->unit,v->ink);
++        }
++    }
++    step_lane_paint(&s->steps);
++    if(s->is_break) break_footer_paint(&s->breaks);
++    memcpy(pal,saved,sizeof saved); ui_theme_light=light;
++    ordinary_knob_tiles(ORDINARY_KNOB_FIRST,KNOB_H-ORDINARY_KNOB_FIRST,force);
++}
++#endif
++
+ static UI_DRAW void draw_knobs(void)
+ {
+     static uint32_t last_sig;
+@@ -11073,8 +11201,12 @@
+         extern uint8_t smk_ck_panel(uint32_t *last, uint32_t force);
+         if (smk_ck_knobs_owned()) {
+             blit_hash[3] = 0;                         /* (the knob strip draws all again after it) */
++#if X0X_UI_SMALL_CANVAS
++            (void)smk_ck_panel(&last_sig, 2u | !blit_hash[2]);
++#else
+             if (smk_ck_panel(&last_sig, !blit_hash[2]))
+                 cv_commit(2, 0, KNOB_Y);
++#endif
+             return;
+         }
+         blit_hash[2] = 0;
+@@ -11100,18 +11232,17 @@
+ #endif
+ #endif
+         /* Continuation of the same 4x4 matrix, not a duplicate knob row. */
++#if X0X_UI_SMALL_CANVAS
++        legacy_knob_commit(ui.overlay==O_NONE && !ui.help);
++#else
+         cv_begin(240, KNOB_H, C_BLACK);
+         if (ui.overlay==O_NONE && !ui.help) {
+-#if !X0X_UI_SMALL_CANVAS
+             if (is_drum()) draw_drum_voice(2);
+-            else
+-#endif
+-            draw_part_sound(2);
++            else draw_part_sound(2);
+         }
+-#if !X0X_UI_SMALL_CANVAS
+         else if (ui.overlay == O_LIST && !ui.help) draw_list(2);
+-#endif
+         cv_commit_knobs(3);
++#endif
+         last_sig = 0;
+         return;
+     }
+@@ -11121,18 +11252,40 @@
+     if (sig == last_sig && blit_hash[3])
+         return;
+     last_sig = sig;
++#if X0X_UI_SMALL_CANVAS
++    ordinary_knob_scene_t scene={0};
++    scene.bg=C_BLACK;scene.light=ui_theme_light;
++    memcpy(scene.palette,pal,sizeof scene.palette);
++    cv_window(240,KNOB_H,0,ORDINARY_KNOB_FIRST,scene.bg);
++#else
+     cv_begin(240, KNOB_H, C_BLACK);
++#endif
+     if(ui.part==PART_BRK && (ui.view==V_PART || ui.view==V_SEQ) && ui.overlay==O_NONE && !ui.help) {
+         break_layout_controls();
++#if X0X_UI_SMALL_CANVAS
++        scene.is_break=1;
++        if(ui.view==V_SEQ)step_lane_capture(&scene.steps);
++        break_footer_capture(&scene.breaks);
++        break_footer_paint(&scene.breaks);
++        ordinary_knob_commit(&scene);
++#else
+         if(ui.view==V_SEQ)draw_step_lane();
+-        break_layout_footer();
+-        cv_commit_knobs(3); return;
++        break_footer_scene_t breaks;
++        break_footer_capture(&breaks);break_footer_paint(&breaks);
++        cv_commit_knobs(3);
++#endif
++        return;
+     }
+     /* One shared bounded parameter panel, including its context caption.
+      * Touch/lock/motion remain content states, never separate raised tiles. */
+     int mix_kit=drum_mix_page();
++#if X0X_UI_SMALL_CANVAS
++    scene.mix=mix_kit>=0;
++    ordinary_knob_panel(scene.mix);
++#else
+     if(mix_kit>=0)rbox(3,11,234,71,UI_PANEL_RADIUS,SOUND_FACE);
+     else night_panel(3,0,234,68,0);
++#endif
+     {   /* the rule; at its right end, where you are: the tag, then the page dots */
+         char t[36];                    /* room for "303A P-LOCK STEP 16 · WBL1 (1/2)" */
+         int dots = mix_kit < 0 && pg.n > 1 && ui.view != V_GLO;
+@@ -11165,7 +11318,11 @@
+             text_c(cx, vc(&FONT_XS, 13, 10), &FONT_XS, AN[i], C_GRAY);
+             text_c(cx, vc(&FONT_M, 30, 34), &FONT_M, v, C_WHITE);
+         }
++#if X0X_UI_SMALL_CANVAS
++        ordinary_knob_commit(&scene);
++#else
+         cv_commit_knobs(3);
++#endif
+         return;
+     }
+ #endif
+@@ -11186,8 +11343,13 @@
+             text_c(cx, vc(&FONT_XS, 13, 10), &FONT_XS, SN[i], C_GRAY);
+             text_c(cx, vc(&FONT_M, 30, 34), &FONT_M, v, C_WHITE);
+         }
++#if X0X_UI_SMALL_CANVAS
++        step_lane_capture(&scene.steps);
++        ordinary_knob_commit(&scene);
++#else
+         draw_step_lane();
+         cv_commit_knobs(3);
++#endif
+         return;
+     }
+     uint16_t control_col=mix_kit>=0?DRUM_MIX_ACCENT:part_col();
+@@ -11200,7 +11362,15 @@
+         if (!d)
+             continue;
+         /* Selection is the label/value color; no independent tile or relief. */
+-        text_c(cx, vc(&FONT_XS, mix_kit >= 0 && i == 0 ? 66 : 13, 10), &FONT_XS, caps_of(pref_name(r)), touched ? C_WHITE : C_GRAY);
++        const char *label=caps_of(pref_name(r));
++        uint16_t label_ink=touched ? C_WHITE : C_GRAY;
++#if X0X_UI_SMALL_CANVAS
++        if(scene.mix && i==0) {
++            put_s(scene.mix_label,label);
++            scene.label_ink=label_ink;
++        }
++#endif
++        text_c(cx,vc(&FONT_XS,mix_kit>=0 && i==0?66:13,10),&FONT_XS,label,label_ink);
+         val = pref_get(r);
+         if (lock_step() >= 0) {                        /* a held step: its own value (amber mark: locked) */
+             int lv = lock_of(r, lock_step());
+@@ -11228,6 +11398,16 @@
+             uint8_t mode,cut;int res;filter_display(&mode,&cut,&res);
+             pref_value_of(PR(R_ENG,T_MST,0,MST_MODE),mode,num,unit);
+         }
++#if X0X_UI_SMALL_CANVAS
++        struct ordinary_value *v=&scene.cells[i];
++        v->painter=((r.kind==R_ENG && r.a==T_303) || r.kind==R_BENGINE || r.kind==R_BPRESET || r.kind==R_BSTATUS)
++            ? KV_ORIGINAL : r.kind==R_BDIR ? KV_NONE :
++              r.kind==R_ENG && r.a==T_MST && r.c==MST_PUMP ? KV_PUMP : KV_NORMAL;
++        if(v->painter) {
++            put_s(v->num,num);put_s(v->unit,unit);v->ink=touched?C_WHITE:C_HI;
++            ordinary_knob_value(cx,v->painter,v->num,v->unit,v->ink);
++        }
++#else
+         if ((r.kind == R_ENG && r.a == T_303) || r.kind == R_BENGINE || r.kind == R_BPRESET || r.kind == R_BSTATUS)
+             original_cell_value(cx,vc(&FONT_B,53,13),num,unit,touched ? C_WHITE : C_HI);
+         /* Existing FWD/REV/PING/RND pictures already show the direction.
+@@ -11235,9 +11415,15 @@
+         else if(r.kind!=R_BDIR)
+             cell_value(cx-(r.kind==R_ENG && r.a==T_MST && r.c==MST_PUMP),
+                        vc(&FONT_B,53,13),num,unit,touched?C_WHITE:C_HI);
++#endif
+     }
++#if X0X_UI_SMALL_CANVAS
++    if(ui.view==V_SEQ && ui.overlay==O_NONE && !ui.help)step_lane_capture(&scene.steps);
++    ordinary_knob_commit(&scene);
++#else
+     if(ui.view==V_SEQ && ui.overlay==O_NONE && !ui.help)draw_step_lane();
+     cv_commit_knobs(3);
++#endif
+ }
+ 
+ /* ===================================================================== LEDs === */
+--- a/firmware/src/app/ui_break_layout_main.h
++++ b/firmware/src/app/ui_break_layout_main.h
+@@ -179,19 +179,35 @@
+     if(pg.n>1){q=put_i(t,cur_page()+1);put_i(put_s(q," / "),pg.n);text_r(230,vc(&FONT_T,147-off,10),&FONT_T,t,C_GRAY);}
+ }
+ #endif
+-static void break_layout_footer(void)
++typedef struct {
++    uint16_t locks,steps,ink;
++    uint8_t slice[16], phase, sequence;
++} break_footer_scene_t;
++
++static void break_footer_capture(break_footer_scene_t *s)
+ {
+     const brkpart_t *bp=&cur_pat()->brk;
+-    int ph=seq.playing?eng_step[TRK_BRK]:-1,count=engine_brk_count(0);
+-    uint32_t locks=lock_marks(-1,-1,0);
+-    int sequence=ui.view==V_SEQ;
+-    if(count<1)count=1;
++    int count=engine_brk_count(0);
++    s->phase=seq.playing?eng_step[TRK_BRK]:255;
++    s->locks=(uint16_t)lock_marks(-1,-1,0);
++    s->sequence=ui.view==V_SEQ;
++    s->steps=(uint16_t)bp->steps;
++    s->ink=part_col();
++    if (count<1) count=1;
++    for (int i=0;i<16;i++) {
++        unsigned v=bp->slice[i];
++        s->slice[i]=(uint8_t)(v ? (v-1)%count+1 : 0);
++    }
++}
++static void break_footer_paint(const break_footer_scene_t *s)
++{
++    const int sequence=s->sequence;
+     for(int i=0;i<16;i++){
+-        int x=sequence?64+i*10:9+i*14,on=(bp->steps>>i)&1u;char t[4];
++        int x=sequence?64+i*10:9+i*14,on=(s->steps>>i)&1u;char t[4];
+         put_i(t,i+1);text_c(x+5,vc(&FONT_T,(sequence?211:214)-KNOB_Y,9),&FONT_T,t,C_GRAY);
+-        if(bp->slice[i])put_i(t,(bp->slice[i]-1)%count+1);else put_s(t,"-");
+-        text_c(x+5,vc(&FONT_T,(sequence?219:224)-KNOB_Y,9),&FONT_T,t,bp->slice[i]?(on?C_HI:C_DIM):C_DIM);
+-        if(!sequence)cv_rect(x,234-KNOB_Y,11,4,i==ph?C_WHITE:on?part_col():C_LINE);
+-        if((locks>>i)&1u)cv_rect(x+4,238-KNOB_Y,3,2,C_AMB);
++        if(s->slice[i])put_i(t,s->slice[i]);else put_s(t,"-");
++        text_c(x+5,vc(&FONT_T,(sequence?219:224)-KNOB_Y,9),&FONT_T,t,s->slice[i]?(on?C_HI:C_DIM):C_DIM);
++        if(!sequence)cv_rect(x,234-KNOB_Y,11,4,i==s->phase?C_WHITE:on?s->ink:C_LINE);
++        if((s->locks>>i)&1u)cv_rect(x+4,238-KNOB_Y,3,2,C_AMB);
+     }
+ }
+--- a/firmware/src/app/ui_drum_voice.inc
++++ b/firmware/src/app/ui_drum_voice.inc
+@@ -1166,7 +1166,7 @@
+     if(!dv_capture(&z))return 0;
+     int force=cv_claim_scene_footer();
+     cv_draw_pair(z.ink.bg,&z,dv_paint_frame,0);
+-    cv_draw_scene_footer(z.ink.bg,&z,dv_paint_frame,force);
++    cv_draw_scene_footer(z.ink.bg,&z,dv_paint_frame,force,4u*X0X_LCD_TILE_H);
+     return 1;
+ }
+ #endif
+--- a/firmware/src/app/ui_step_lane.inc
++++ b/firmware/src/app/ui_step_lane.inc
+@@ -151,25 +151,37 @@
+     if(part==PART_BRK)plat_cq_unlock(guard);
+ }
+ 
+-static UI_DRAW void draw_step_lane(void)
++typedef struct {
++    step_lane_snapshot_t snapshot;
++    uint16_t part_ink;
++    uint8_t kind, phase, valid;
++} step_lane_scene_t;
++
++static void step_lane_capture(step_lane_scene_t *scene)
+ {
+ #if X0X_ARP_HOOKS
+-    if(arp_seq_page())return;   /* ARP SEQ: the pattern's lane is not the arp's */
++    if (arp_seq_page()) return;   /* ARP SEQ: the pattern's lane is not the arp's */
+ #endif
++    scene->valid=1;
++    scene->kind=ui_step_lane<UI_LANE_COUNT?ui_step_lane:UI_LANE_VELOCITY;
++    scene->part_ink=part_col();
++    scene->phase=ui.part==PART_BRK && seq.playing ? eng_step[TRK_BRK] : 255;
++    step_lane_snapshot(&scene->snapshot,scene->kind);
++}
++
++static UI_DRAW void step_lane_paint(const step_lane_scene_t *scene)
++{
++    if (!scene->valid) return;
+     static const char *const labels[UI_LANE_COUNT]={"VELOCITY","CHANCE","PITCH","PAN"};
+-    int kind=ui_step_lane<UI_LANE_COUNT?ui_step_lane:UI_LANE_VELOCITY;
+-    step_lane_snapshot_t snapshot;step_lane_snapshot(&snapshot,kind);
++    int kind=scene->kind;
+     cv_rect(0,69,240,13,SOUND_FACE); /* replace only the old footer, preserve four knobs */
+     cv_text(4,69,&FONT_T,labels[kind],SOUND_GRAY);
+     /* BREAK's playback position remains visible even when the step is a rest. */
+-    if(ui.part==PART_BRK && seq.playing) {
+-        unsigned phase=eng_step[TRK_BRK];
+-        if(phase<16)cv_rect(67+phase*10,71,5,1,part_col());
+-    }
++    if (scene->phase<16) cv_rect(67+scene->phase*10,71,5,1,scene->part_ink);
+     for(int c=0;c<16;c++) {
+-        int maximum=snapshot.maximum,value=snapshot.value[c];
++        int maximum=scene->snapshot.maximum,value=scene->snapshot.value[c];
+         int x=69+c*10;
+-        uint16_t ink=(snapshot.notes & (1u<<c))?part_col():SOUND_LINE;
++        uint16_t ink=(scene->snapshot.notes & (1u<<c))?scene->part_ink:SOUND_LINE;
+         cv_rect(x,72,1,8,SOUND_LINE);
+         if(value<0) {cv_rect(x-1,78,3,1,SOUND_GRAY);continue;}
+         if(kind==UI_LANE_CHANCE && value>100) {box(x-2,72,5,7,ink);continue;}
+@@ -178,3 +190,13 @@
+         cv_rect(x-1,79-h,3,h+1,ink);
+     }
+ }
++
++
++#if !X0X_UI_SMALL_CANVAS || defined(X0X_HOST)
++static UI_DRAW void draw_step_lane(void)
++{
++    step_lane_scene_t scene={0};
++    step_lane_capture(&scene);
++    step_lane_paint(&scene);
++}
++#endif

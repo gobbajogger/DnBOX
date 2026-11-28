@@ -1,0 +1,120 @@
+--- a/host/x0x_host.c
++++ b/host/x0x_host.c
+@@ -73,6 +73,9 @@
+         for (i = 0; i < w; i++)
+             if (x + i < 240u && y + j < 240u)
+                 fb[(y + j) * 240u + x + i] = px[j * w + i];
++#ifdef HOST_LCD_ON_BLIT
++    HOST_LCD_ON_BLIT(x,y,w,h);
++#endif
+ }
+ #include "../firmware/src/gfx.c"
+ 
+--- a/tests/host/ui_step_lane_preview_test.c
++++ b/tests/host/ui_step_lane_preview_test.c
+@@ -81,7 +81,15 @@
+     free(before);
+     for(int part=0;part<NPARTS;part++)for(int kind=0;kind<UI_LANE_COUNT;kind++) {
+         setup(V_SEQ,part);ui_step_lane=(uint8_t)kind;
+-        blit_hash[3]=0;draw_knobs();draw_step_lane();cv_commit_knobs(3);
++        blit_hash[3]=0;draw_knobs();draw_step_lane();
++#if X0X_UI_SMALL_CANVAS
++        /* The explicit preview overlay only touches rows 69..81. The
++         * current window already holds rows 64..81 from draw_knobs. */
++        CHECK(cv_row_base==ORDINARY_KNOB_FIRST);
++        ordinary_knob_tiles(ORDINARY_KNOB_FIRST,KNOB_H-ORDINARY_KNOB_FIRST,0);
++#else
++        cv_commit_knobs(3);
++#endif
+         char name[64];snprintf(name,sizeof name,"preview-part%d-lane%d",part,kind);shot(name);
+     }
+     printf("PASS physical SEQ+SCALE(FM-1 SEL) lane cycle, stored adapter and production/preview renders: %u checks; literal touchscreen NOT_RUN\n",checks);
+--- /dev/null
++++ b/tests/host/ui_ordinary_knob_window_test.c
+@@ -0,0 +1,86 @@
++/* SPDX-License-Identifier: GPL-3.0-only */
++#include <stdint.h>
++static void during_blit(uint32_t x,uint32_t y,uint32_t w,uint32_t h);
++#define HOST_LCD_ON_BLIT during_blit
++#define SMC_UI_MAIN unused_smc_main
++#include "smc_ui_test.c"
++
++static unsigned hook, tile, hit, payload;
++static unsigned tile_at;
++static void during_blit(uint32_t x,uint32_t y,uint32_t w,uint32_t h)
++{
++    if (!hook || y<KNOB_Y) return;
++    unsigned row=tile/5,col=tile%5;
++    CHECK(x==col*48 && y==KNOB_Y+row*16 && w==48 && h==(row==5?2u:16u));
++    payload+=w*h;
++    if (tile++ != tile_at) return;
++    /* Simulate foreground changes at this tile's normal input service point. */
++    ++hit;
++    palette_set(5);
++    proj.set.palette=5;
++    ui_step_lane=UI_LANE_CHANCE;
++    if (ui.part==PART_BRK) {
++        brkpart_t *b=&cur_pat()->brk;
++        b->steps^=0xffffu;
++        b->slice[5]=17;
++        eng_step[TRK_BRK]=13;
++    }
++    if (ui.part==PART_303A && ui.view==V_PART) {
++        bpart_t *b=&cur_pat()->bass[0];
++        b->len=3;ui.held_step=-1;ui.spage=0;
++        eng_step[TRK_BASS0]=1;
++    }
++    ui.part=PART_909;
++    ui.touched=1;
++    set_view(V_FX);build_pages();
++    /* As normal route changes do, leave both invalidation flags cleared. */
++    blit_hash[3]=cv_tile_valid[3]=0;
++}
++static void scene(int view,int part,unsigned at)
++{
++    setup(view,part);
++    ui.touched=0;ui_step_lane=UI_LANE_PAN;
++    palette_set(2);proj.set.palette=2;
++    if(part==PART_BRK) {
++        brkpart_t *b=&cur_pat()->brk;
++        b->steps=0x363cu;
++        for (unsigned i=0;i<16;i++) b->slice[i]=(uint8_t)(i%7+1);
++        seq.playing=1;eng_step[TRK_BRK]=5;
++    }
++    if(view==V_MIX) {
++        *page_of(view)=2; build_pages();
++    }
++    if(view==V_SEQ && part==PART_303A) ui.held_step=1;
++    if(view==V_PART && part==PART_303A) {
++        CHECK(engine_bass_bank(0)!=ORIGINAL_SOUND_SYNTHONE);
++        bpart_t *b=&cur_pat()->bass[0];
++        b->len=32;ui.held_step=19;ui.spage=1;
++        seq.playing=1;eng_step[TRK_BASS0]=21;
++        b->step[19].flags=G_NOTE;
++    }
++    blit_hash[3]=0;draw_knobs();
++    memcpy(before_fb,fb,sizeof fb);
++    /* Redraw the same input, once with an interleaved route/palette change. */
++    blit_hash[3]=0;
++    tile_at=at;tile=hit=payload=0;hook=1;
++    draw_knobs();
++    hook=0;
++    CHECK(hit==1 && tile==30 && payload==240u*82u);
++    CHECK(!memcmp(before_fb+240*KNOB_Y,fb+240*KNOB_Y,240*82*2));
++    CHECK(!blit_hash[3] && !cv_tile_valid[3]);
++    draw_knobs();
++    CHECK(changed_rows(KNOB_Y,240,before_fb,fb)>0);
++}
++int main(void)
++{
++    /* Between two upper tiles, directly before and directly after the split,
++     * and on the last lower tile, for scenes with real bottom content. */
++    for(unsigned i=0;i<4;i++) {
++        static const unsigned transfer[]={0,19,20,29};
++        unsigned t=transfer[i];
++        scene(V_SEQ,PART_BRK,t);scene(V_PART,PART_BRK,t);
++        scene(V_SEQ,PART_909,t);scene(V_SEQ,PART_303A,t);scene(V_MIX,PART_808,t);
++        scene(V_PART,PART_303A,t);
++    }
++    printf("Ordinary knob: 24 routes with concurrent palette/route/state mutation, %u checks\n",checks);
++}
