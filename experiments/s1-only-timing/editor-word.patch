@@ -1,0 +1,137 @@
+--- a/firmware/src/app/editor.c
++++ b/firmware/src/app/editor.c
+@@ -78,6 +78,16 @@
+     if (ed_n < sizeof ed_out - 1u)
+         ed_out[ed_n++] = (uint8_t)(v & 0x7Fu);
+ }
++/* Send the same low-first fixed-width digit stream from all reply types.
++ * Keeping this outlined avoids repeating the overflow-clamping put calls. */
++static __attribute__((noinline)) void ed_word(uint32_t v, uint32_t digits)
++{
++    while (digits--) {
++        ed_b(v);
++        v >>= 7;
++    }
++}
++#define ed_w21(v) ed_word((v), 3u)
+ static void ed_str(const char *s, uint32_t max)
+ {
+     uint32_t i;
+@@ -154,9 +164,7 @@
+         return 0;
+     if (count > size - off)
+         count = size - off;
+-    ed_b(off);
+-    ed_b(off >> 7);
+-    ed_b(off >> 14);
++    ed_word(off, 3u);
+     ed_put7(base + off, count);
+     return 1;
+ }
+@@ -242,7 +250,6 @@
+ {
+     return (uint32_t)a[0] | (uint32_t)a[1] << 7 | (uint32_t)a[2] << 14;
+ }
+-static void ed_w21(uint32_t v) { ed_b(v); ed_b(v >> 7); ed_b(v >> 14); }
+ static uint8_t *ed_project_byte(uint32_t off)
+ {
+     return off < PROJECT_FILE_HDR ? &ed_project.header[off] : (uint8_t *)&project_stage + off - PROJECT_FILE_HDR;
+@@ -748,9 +755,7 @@
+         if (n > len - off)
+             n = len - off;
+         ed_b(0);
+-        ed_b(off);
+-        ed_b(off >> 7);
+-        ed_b(off >> 14);
++        ed_word(off, 3u);
+         ed_put7(sec + BOOT_PAY_OFF + off, n);
+         return;
+     }
+@@ -792,9 +797,7 @@
+             off = (uint32_t)a[0] | (uint32_t)a[1] << 7 | (uint32_t)a[2] << 14;
+         n = na >= 3u ? ed_unpack_exact(a + 3, na - 3u, ed_smp_buf, 256u) : 0u;
+         rc = boot_write(&bst, off, n ? ed_smp_buf : 0, n, fm1_ms);
+-        ed_b(off);
+-        ed_b(off >> 7);
+-        ed_b(off >> 14);
++        ed_word(off, 3u);
+         boot_finish(rc);
+         return;
+     }
+@@ -932,8 +935,7 @@
+         uint32_t k;
+         ed_b(gfx_xdata_ok);
+         for (k = 0; k < XDATA_HDR; k++) {
+-            ed_b(h[k]);
+-            ed_b(h[k] >> 7);
++            ed_word(h[k], 2u);
+         }
+         break;
+     }
+@@ -947,8 +949,7 @@
+         uint32_t k;
+         ed_b(blob ? 1 : 0);
+         for (k = 0; k < FITTAB_HDR; k++) {
+-            ed_b(h[k]);
+-            ed_b(h[k] >> 7);
++            ed_word(h[k], 2u);
+         }
+         break;
+     }
+@@ -966,8 +967,7 @@
+ #endif
+         for (k = 0; k < FL_FDATA_HDR; k++) {
+             uint32_t v = FL_FDATA_SIZE ? h[k] : 0xFFu;
+-            ed_b(v);
+-            ed_b(v >> 7);
++            ed_word(v, 2u);
+         }
+         break;
+     }
+@@ -984,11 +984,7 @@
+ #endif
+         ed_b(nw);
+         for (k = 0; k < nw; k++) {
+-            ed_b(w[k]);
+-            ed_b(w[k] >> 7);
+-            ed_b(w[k] >> 14);
+-            ed_b(w[k] >> 21);
+-            ed_b(w[k] >> 28);
++            ed_word(w[k], 5u);
+         }
+         break;
+     }
+@@ -1038,9 +1034,7 @@
+             }
+         }
+         ed_b(a[0]);
+-        ed_b(off);
+-        ed_b(off >> 7);
+-        ed_b(off >> 14);
++        ed_word(off, 3u);
+         ed_b(rc);
+         break;
+     }
+@@ -1107,8 +1101,7 @@
+             v[1] = SMP_USER_SIZE(i) / 0x1000u;
+             v[2] = usr_nz[i] ? (h->data_len + 1023u) / 1024u : 0u;
+             for (j = 0; j < 3u; j++) {
+-                ed_b(v[j]);
+-                ed_b(v[j] >> 7);
++                ed_word(v[j], 2u);
+             }
+         }
+         break;
+@@ -1133,11 +1126,7 @@
+             ed_b(words);
+             for (k = 0; k < words; k++) {
+                 uint32_t v = k < nt ? t[k] : op == 3u ? fm1_t5w.hits : g[k - nt];
+-                ed_b(v);
+-                ed_b(v >> 7);
+-                ed_b(v >> 14);
+-                ed_b(v >> 21);
+-                ed_b(v >> 28);
++                ed_word(v, 5u);
+             }
+             break;
+         }

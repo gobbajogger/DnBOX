@@ -41,3 +41,26 @@ unrealistic zero-cost bus FX/master wouldn't be enough to close the measured
   64 B app XIP recovered on each model (Elite 2,948→3,012 B, Pro 2,956→3,020 B
   on the loaded baseline); no pool delta. Existing boot-screen, FITTAB, and
   XDATA host checks passed. This does not touch the synth or drum audio hot path.
+- `editor-word.patch`: one fixed-width editor reply encoder instead of
+  duplicated emitters, after the CRC change. Combined app XIP saving is
+  176 B per model, Elite 2,948→3,124 B and Pro 2,956→3,132 B; pool
+  margin unchanged. Host checks include 120,000 exact encoded replies
+  (with truncation and UBSan), 37 sample-integrity checks, project and
+  BEGIN-cancel cases, and Editor/OTA routing. No installer or loader settings
+  changed.
+
+## Synth One exact oscillator trial
+
+`osc-unfiltered-path.patch` directly handles the unbandlimited wave pairs
+without re-entering the generic shape helper. Out-of-range indices and
+PolyBLEP paths still use the original code. `check-osc-unfiltered.py` compares
+original and patched `s1c.c`: 8,000,000 exact waveform/phase checks passed.
+
+With BREAK slice compaction and shared CRC (without the editor change),
+the timed Elite build has 2,948 B of app flash and 27,020 B pool margin.
+Same held workload: 14,239.08 µs held peak versus 14,311.96 µs, 15,489 µs
+whole-run peak, still 151 XRUNs and all 128 held blocks over budget. No
+skipped cycles. Treat this as a small reduction, not a viable fix alone.
+Separate trials of inlining the steady envelope (14,324.54 µs and −256 B
+app margin) or splitting the voice control-rate code (14,380.54 µs and
++16 B app margin) both remained at 151 XRUNs and are not recommended.
